@@ -59,7 +59,9 @@ private:
         MyHandler(
             /* [in] */ CallList* host)
             : mHost(host)
-        {}
+        {
+            Handler::constructor();
+        }
 
         TO_STRING_IMPL("CallList::MyHandler")
 

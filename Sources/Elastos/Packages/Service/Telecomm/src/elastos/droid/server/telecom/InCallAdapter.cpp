@@ -28,7 +28,9 @@ namespace Telecom {
 InCallAdapter::InCallAdapterHandler::InCallAdapterHandler(
     /* [in] */ InCallAdapter* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode InCallAdapter::InCallAdapterHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -245,12 +247,12 @@ const Int32 InCallAdapter::MSG_SET_SWITCH_SUBSCRIPTION = 18;
 const Int32 InCallAdapter::MSG_DEFLECT_CALL = 19;
 
 ECode InCallAdapter::constructor(
-    /* [in] */ CallsManager* callsManager,
+    /* [in] */ IInterface* callsManager,
     /* [in] */ ICallIdMapper* callIdMapper)
 {
     mHandler = new InCallAdapterHandler(this);
     ThreadUtil::CheckOnMainThread();
-    mCallsManager = callsManager;
+    mCallsManager = (CallsManager*)IObject::Probe(callsManager);
     mCallIdMapper = callIdMapper;
     return NOERROR;
 }

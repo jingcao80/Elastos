@@ -348,7 +348,7 @@ ECode InCallPresenter::OnCallListChange(
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> object;
         it->GetNext((IInterface**)&object);
-        IInCallStateListener* listener = IInCallStateListener::Probe(it);
+        IInCallStateListener* listener = IInCallStateListener::Probe(object);
         Logger::D("InCallPresenter", "Notify %s of state %d", TO_CSTR(listener), mInCallState);
         listener->OnStateChange(oldState, mInCallState, callList);
     }
@@ -1030,6 +1030,7 @@ void InCallPresenter::ShowInCall(
     /* [in] */ Boolean showDialpad,
     /* [in] */ Boolean newOutgoingCall)
 {
+    Logger::D("InCallPresenter", "ShowInCall showDialpad:%d, newOutgoingCall:%d", showDialpad, newOutgoingCall);
     mContext->StartActivity(GetInCallIntent(showDialpad, newOutgoingCall));
 }
 
@@ -1048,6 +1049,7 @@ AutoPtr<IIntent> InCallPresenter::GetInCallIntent(
     }
 
     intent->PutBooleanExtra(CInCallActivity::NEW_OUTGOING_CALL, newOutgoingCall);
+    Logger::D("InCallPresenter", "GetInCallIntent :%s", TO_CSTR(intent));
     return intent;
 }
 

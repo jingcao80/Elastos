@@ -32,6 +32,7 @@ using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
+using Elastos::Core::IClassLoader;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -63,7 +64,7 @@ StatusBarNotifier::MyNotificationTimer::MyNotificationTimer(
     , mHost(host)
 {
     AutoPtr<IHandlerCallback> cb = (IHandlerCallback*)new MyHandlerCallback(this);
-    CHandler::New(cb, FALSE, (IHandler**)&mHandler);
+    CHandler::New(cb, TRUE, (IHandler**)&mHandler);
 }
 
 StatusBarNotifier::MyNotificationTimer::State StatusBarNotifier::MyNotificationTimer::GetState()
@@ -151,6 +152,7 @@ StatusBarNotifier::StatusBarNotifier(
     AutoPtr<IInterface> service;
     mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&service);
     mNotificationManager = INotificationManager::Probe(service);
+    mNotificationTimer = new MyNotificationTimer(this);
 }
 
 ECode StatusBarNotifier::OnStateChange(
@@ -472,8 +474,9 @@ AutoPtr<IBitmap> StatusBarNotifier::GetLargeIconToDisplay(
         res->GetDimension(Elastos::Droid::R::dimen::notification_large_icon_width, (Float*)&width);
         AutoPtr<IBitmapHelper> helper;
         CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
-        largeIcon = NULL;
-        helper->CreateScaledBitmap(largeIcon, width, height, FALSE, (IBitmap**)&largeIcon);
+        AutoPtr<IBitmap> tmpBM;
+        helper->CreateScaledBitmap(largeIcon, width, height, FALSE, (IBitmap**)&tmpBM);
+        largeIcon = tmpBM;
     }
 
     return largeIcon;
@@ -714,8 +717,11 @@ AutoPtr<IPendingIntent> StatusBarNotifier::CreateNotificationPendingIntent(
     /* [in] */ const String& action)
 {
     AutoPtr<IIntent> intent;
-    assert(0);
-    // CIntent::New(action, NULL, context, ECLSID_CRect, (IIntent**)&intent);
+    AutoPtr<IClassLoader> cl;
+    context->GetClassLoader((IClassLoader**)&cl);
+    AutoPtr<IClassInfo> ci;
+    cl->LoadClass(String("Elastos.Droid.InCallUI.CNotificationBroadcastReceiver"), (IClassInfo**)&ci);
+    CIntent::New(action, NULL, context, ci, (IIntent**)&intent);
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
     AutoPtr<IPendingIntent> broadcast;

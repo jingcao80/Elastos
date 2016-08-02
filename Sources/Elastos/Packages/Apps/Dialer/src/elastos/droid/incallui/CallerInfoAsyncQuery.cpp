@@ -1,5 +1,8 @@
 
 #include "elastos/droid/incallui/CallerInfoAsyncQuery.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -12,7 +15,8 @@ void CallerInfoAsyncQuery::StartQuery(
     /* [in] */ IOnQueryCompleteListener* listener,
     /* [in] */ IInterface* cookie)
 {
-    assert(0);
+    Logger::E("CallerInfoAsyncQuery", "TODO CallerInfoAsyncQuery::StartQuery");
+    //assert(0);
 }
 
 } // namespace InCallUI

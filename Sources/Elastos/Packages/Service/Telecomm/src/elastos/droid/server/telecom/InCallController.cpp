@@ -2,6 +2,7 @@
 #include "elastos/droid/server/telecom/InCallController.h"
 #include "R.h"
 #include "elastos/droid/server/telecom/CallIdMapper.h"
+#include "elastos/droid/server/telecom/CInCallAdapter.h"
 #include "elastos/droid/server/telecom/CallsManager.h"
 #include "elastos/droid/server/telecom/InCallAdapter.h"
 #include "elastos/droid/server/telecom/Log.h"
@@ -188,6 +189,7 @@ ECode InCallController::OnCallAdded(
     Boolean isEmpty;
     mInCallServices->IsEmpty(&isEmpty);
     if (isEmpty) {
+        Log::I("InCallController", "isEmpty onCallAdded: %s", TO_CSTR(call));
         Bind();
     } else {
         Log::I("InCallController", "onCallAdded: %s", TO_CSTR(call));
@@ -463,7 +465,7 @@ ECode InCallController::Bind()
                     AutoPtr<IUserHandle> current;
                     userHandleHelper->GetCURRENT((IUserHandle**)&current);
                     Boolean isBindServiceAsUserOk;
-                    mContext->BindServiceAsUser(intent, inCallServiceConnection,
+                    ECode ec = mContext->BindServiceAsUser(intent, inCallServiceConnection,
                             IContext::BIND_AUTO_CREATE, current, &isBindServiceAsUserOk);
                     if (isBindServiceAsUserOk) {
                         mServiceConnections->Put(componentName, inCallServiceConnection);
@@ -485,8 +487,9 @@ ECode InCallController::OnConnected(
     // try {
     ECode ec;
     do {
-        AutoPtr<InCallAdapter> inCallAdapter = new InCallAdapter();
-        inCallAdapter->constructor(CallsManager::GetInstance(), mCallIdMapper);
+        AutoPtr<IIInCallAdapter> inCallAdapter;
+        CInCallAdapter::New(TO_IINTERFACE(CallsManager::GetInstance()),
+                mCallIdMapper, (IIInCallAdapter**)&inCallAdapter);
         ec = inCallService->SetInCallAdapter(inCallAdapter);
         if (FAILED(ec)) break;
         ec = mInCallServices->Put(componentName, inCallService);
@@ -750,32 +753,30 @@ ECode InCallController::ToParcelableCall(
     ((Call*) call)->GetExtras((IBundle**)&bundle);
     Int32 callSubstate;
     call->GetCallSubstate(&callSubstate);
-    assert(0 && "TODO CParcelableCall");
-    return NOERROR;
-    // return CParcelableCall::New(
-    //         callId,
-    //         state,
-    //         disconnectCause,
-    //         cannedSmsResponses,
-    //         capabilities,
-    //         properties,
-    //         creationTimeMillis,
-    //         connectTimeMillis,
-    //         handle,
-    //         handlePresentation,
-    //         callerDisplayName,
-    //         callerDisplayNamePresentation,
-    //         gatewayInfo,
-    //         phoneAccountHandle,
-    //         includeVideoProvider ? iVideoProvider : NULL,
-    //         parentCallId,
-    //         childCallIds,
-    //         statusHints,
-    //         videoState,
-    //         conferenceableCallIds,
-    //         bundle,
-    //         ((Call*) call)->mIsActiveSub,
-    //         callSubstate, result);
+    return CParcelableCall::New(
+            callId,
+            state,
+            disconnectCause,
+            cannedSmsResponses,
+            capabilities,
+            properties,
+            creationTimeMillis,
+            connectTimeMillis,
+            handle,
+            handlePresentation,
+            callerDisplayName,
+            callerDisplayNamePresentation,
+            gatewayInfo,
+            phoneAccountHandle,
+            includeVideoProvider ? iVideoProvider : NULL,
+            parentCallId,
+            childCallIds,
+            statusHints,
+            videoState,
+            conferenceableCallIds,
+            bundle,
+            ((Call*) call)->mIsActiveSub,
+            callSubstate, result);
 }
 
 ECode InCallController::AddCall(

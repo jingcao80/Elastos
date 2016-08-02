@@ -41,6 +41,7 @@ SOURCES += DtmfLocalTonePlayer.cpp
 SOURCES += ErrorDialogActivity.cpp
 SOURCES += HeadsetMediaButton.cpp
 SOURCES += InCallAdapter.cpp
+SOURCES += CInCallAdapter.cpp
 SOURCES += InCallController.cpp
 SOURCES += InCallToneMonitor.cpp
 SOURCES += InCallTonePlayer.cpp

@@ -85,6 +85,7 @@ module
             [in] IHandler* handler);
 
         interface IIInCallService;
+        interface IBinder;
     }
 
     class CVideoCallListenerBinder {
@@ -232,6 +233,7 @@ module
             [in] IList* cannedSmsResponses,
             [in] Int32 capabilities,
             [in] Int32 properties,
+            [in] Int64 createTimeMillis,
             [in] Int64 connectTimeMillis,
             [in] IUri* handle,
             [in] Int32 handlePresentation,
@@ -245,7 +247,9 @@ module
             [in] IStatusHints* statusHints,
             [in] Int32 videoState,
             [in] IList* conferenceableCallIds,
-            [in] IBundle* extras);
+            [in] IBundle* extras,
+            [in] Boolean isActiveSub,
+            [in] Int32 callSubstate);
 
         interface IParcelableCall;
         interface IParcelable;

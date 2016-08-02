@@ -39,6 +39,9 @@ module
         GetConnectTimeMillis(
             [out] Int64* res);
 
+        GetCreateTimeMillis(
+            [out] Int64* res);
+
         GetHandle(
             [out] IUri** res);
 
@@ -77,6 +80,12 @@ module
 
         GetExtras(
             [out] IBundle** res);
+
+        GetIsActiveSub(
+            [out] Boolean* result);
+
+        GetCallSubstate(
+            [out] Int32* result);
     }
 
     } // namespace Telecom

@@ -368,7 +368,8 @@ ECode CCallCardFragment::AnimatorListener3::OnAnimationStart(
 //==========================================================================
 // CCallCardFragment
 //==========================================================================
-CAR_INTERFACE_IMPL_2(CCallCardFragment, BaseFragment, ICallCardUi, IUi);
+//CAR_INTERFACE_IMPL_2(CCallCardFragment, BaseFragment, ICallCardUi, IUi);
+CAR_INTERFACE_IMPL_2(CCallCardFragment, Fragment, ICallCardUi, IUi);
 
 CAR_OBJECT_IMPL(CCallCardFragment);
 
@@ -387,7 +388,8 @@ CCallCardFragment::CCallCardFragment()
 
 ECode CCallCardFragment::constructor()
 {
-    return NOERROR;
+    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
+    return BaseFragment::constructor();
 }
 
 AutoPtr<IUi> CCallCardFragment::GetUi()

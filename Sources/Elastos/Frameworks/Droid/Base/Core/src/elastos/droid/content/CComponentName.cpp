@@ -58,9 +58,11 @@ ECode CComponentName::constructor(
     pkg->GetPackageName(&mPackage);
     String name;
     cls->GetName(&name);
+    String ns;
+    cls->GetNamespace(&ns);
 
     //TODO?: In java: cls.getName will get the content(package name + '.' + class name), so...
-    mClass = mPackage + String(".") + name;
+    mClass = ns + "." + name;
     return NOERROR;
 }
 

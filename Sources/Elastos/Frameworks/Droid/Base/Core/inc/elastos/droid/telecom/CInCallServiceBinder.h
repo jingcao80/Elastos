@@ -8,6 +8,7 @@
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Internal::Telecom::IIInCallAdapter;
 using Elastos::Droid::Internal::Telecom::IIInCallService;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Core::Object;
 
 namespace Elastos {
@@ -18,6 +19,7 @@ namespace Telecom {
 CarClass(CInCallServiceBinder)
     , public Object
     , public IIInCallService
+    , public IBinder
 {
 public:
     CAR_OBJECT_DECL()
@@ -50,6 +52,7 @@ public:
     CARAPI BringToForeground(
         /* [in] */ Boolean showDialpad);
 
+    TO_STRING_IMPL("CInCallServiceBinder");
 public:
     AutoPtr<IHandler> mHandler;
 };

@@ -10,6 +10,7 @@ using Elastos::Droid::Internal::Os::ISomeArgsHelper;
 using Elastos::Droid::Internal::Os::CSomeArgsHelper;
 using Elastos::Droid::Internal::Telecom::EIID_IIInCallService;
 using Elastos::Droid::Telecom::InCallService;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Core::CString;
 
 namespace Elastos {
@@ -18,7 +19,7 @@ namespace Telecom {
 
 CAR_OBJECT_IMPL(CInCallServiceBinder)
 
-CAR_INTERFACE_IMPL(CInCallServiceBinder, Object, IIInCallService)
+CAR_INTERFACE_IMPL_2(CInCallServiceBinder, Object, IIInCallService, IBinder)
 
 ECode CInCallServiceBinder::constructor(
     /* [in] */ IHandler* handler)

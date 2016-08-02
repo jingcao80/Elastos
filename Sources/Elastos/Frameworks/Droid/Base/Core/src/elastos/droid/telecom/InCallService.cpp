@@ -5,9 +5,11 @@
 #include "elastos/droid/telecom/CInCallAdapter.h"
 #include "elastos/droid/telecom/CPhone.h"
 #include "elastos/droid/telecom/CInCallServiceBinder.h"
+#include "elastos/droid/os/Looper.h"
 
 using Elastos::Droid::Internal::Telecom::IIInCallAdapter;
 using Elastos::Droid::Internal::Telecom::IIInCallService;
+using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Internal::Os::ISomeArgs;
 
 namespace Elastos {
@@ -98,10 +100,12 @@ ECode InCallService::MyHandler::HandleMessage(
 //===============================================================
 // InCallService::
 //===============================================================
-CAR_INTERFACE_IMPL(InCallService, Service, IInCallService)
+CAR_INTERFACE_IMPL(InCallService, Elastos::Droid::App::Service, IInCallService)
 
 InCallService::InCallService()
 {
+    AutoPtr<ILooper> looper = Looper::GetMainLooper();
+    mHandler = new MyHandler(looper, this);
 }
 
 ECode InCallService::OnBind(

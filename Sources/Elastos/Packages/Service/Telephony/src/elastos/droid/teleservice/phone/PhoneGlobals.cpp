@@ -417,10 +417,11 @@ ECode PhoneGlobals::OnCreate()
         helper->GetDefaultPhone((IPhone**)&mPhone);
 
         // Start TelephonyDebugService After the default phone is created.
-        AutoPtr<IIntent> intent;
-        CIntent::New(this, ECLSID_CTelephonyDebugService, (IIntent**)&intent);
-        AutoPtr<IComponentName> name;
-        StartService(intent, (IComponentName**)&name);
+        Logger::E("PhoneGlobals", "TODO TelephonyDebugService not ready.line:%d, func:%s\n", __LINE__, __func__);
+        //AutoPtr<IIntent> intent;
+        //CIntent::New(this, ECLSID_CTelephonyDebugService, (IIntent**)&intent);
+        //AutoPtr<IComponentName> name;
+        //StartService(intent, (IComponentName**)&name);
 
         Boolean res = FALSE;
         //Logger::D(TAG, "TODO Need CallManager::GetInstance");

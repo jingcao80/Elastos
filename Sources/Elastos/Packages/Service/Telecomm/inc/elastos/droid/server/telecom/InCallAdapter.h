@@ -54,7 +54,7 @@ public:
 
     /** Persists the specified parameters. */
     CARAPI constructor(
-        /* [in] */ CallsManager* callsManager,
+        /* [in] */ IInterface* callsManager,//CallsManager
         /* [in] */ ICallIdMapper* callIdMapper);
 
     // @Override

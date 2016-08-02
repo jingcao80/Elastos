@@ -330,7 +330,7 @@ ECode ParcelableConnection::WriteToParcel(
     if (mAddress != NULL) {
         destination->WriteInt32(1);
         //IParcelable::Probe(mAddress)->WriteToParcel(destination);
-        destination->WriteInterfacePtr(mAddress);
+        destination->WriteInterfacePtr(mAddress);//TODO should update
     }
     else {
         destination->WriteInt32(0);

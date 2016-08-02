@@ -40,6 +40,7 @@ public:
         /* [in] */ IList* cannedSmsResponses,
         /* [in] */ Int32 capabilities,
         /* [in] */ Int32 properties,
+        /* [in] */ Int64 createTimeMillis,
         /* [in] */ Int64 connectTimeMillis,
         /* [in] */ IUri* handle,
         /* [in] */ Int32 handlePresentation,
@@ -53,7 +54,11 @@ public:
         /* [in] */ IStatusHints* statusHints,
         /* [in] */ Int32 videoState,
         /* [in] */ IList* conferenceableCallIds,
-        /* [in] */ IBundle* extras);
+        /* [in] */ IBundle* extras,
+        /* [in] */ Boolean isActiveSub,
+        /* [in] */ Int32 callSubstate);
+
+
 
     /** The unique ID of the call. */
     CARAPI GetId(
@@ -83,6 +88,9 @@ public:
     /** Bitmask of properties of the call. */
     CARAPI GetProperties(
         /* [out] */ Int32* result);
+
+    CARAPI GetCreateTimeMillis(
+        /* [out] */ Int64* result);
 
     /** The time that the call switched to the active state. */
     CARAPI GetConnectTimeMillis(
@@ -163,6 +171,12 @@ public:
     CARAPI GetExtras(
         /* [out] */ IBundle** result);
 
+    CARAPI GetIsActiveSub(
+        /* [out] */ Boolean* result);
+
+    CARAPI GetCallSubstate(
+        /* [out] */ Int32* result);
+
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
@@ -180,6 +194,7 @@ private:
     AutoPtr<IList> mCannedSmsResponses;
     Int32 mCapabilities;
     Int32 mProperties;
+    Int64 mCreateTimeMillis;
     Int64 mConnectTimeMillis;
     AutoPtr<IUri> mHandle;
     Int32 mHandlePresentation;
@@ -195,6 +210,8 @@ private:
     Int32 mVideoState;
     AutoPtr<IList> mConferenceableCallIds;
     AutoPtr<IBundle> mExtras;
+    Boolean mIsActiveSub;
+    Int32 mCallSubstate;
 };
 
 } // namespace Telecom

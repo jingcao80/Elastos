@@ -60,7 +60,9 @@ public:
         MyHandler(
             /* [in] */ AccelerometerListener* host)
             : mHost(host)
-        {}
+        {
+            Handler::constructor();
+        }
 
         TO_STRING_IMPL("AccelerometerListener::MyHandler")
 

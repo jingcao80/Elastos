@@ -106,8 +106,7 @@ ECode ProximitySensorManager::TurnOff(
         Log::I("ProximitySensorManager", "Releasing proximity wake lock");
         Int32 flags =
             (screenOnImmediately ? 0 : IPowerManager::RELEASE_FLAG_WAIT_FOR_NO_PROXIMITY);
-        assert(0 && "TODO IPowerManagerWakeLock");
-        // mProximityWakeLock->Release(flags);
+        mProximityWakeLock->ReleaseLock(flags);
     } else {
         Log::I("ProximitySensorManager", "Proximity wake lock already released");
     }

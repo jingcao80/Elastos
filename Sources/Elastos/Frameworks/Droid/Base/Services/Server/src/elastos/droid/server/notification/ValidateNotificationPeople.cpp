@@ -624,6 +624,7 @@ String ValidateNotificationPeople::GetCacheKey(
 AutoPtr< ArrayOf<String> > ValidateNotificationPeople::GetExtraPeople(
     /* [in] */ IBundle* extras)
 {
+    assert(0);
     AutoPtr<IInterface> people;
     extras->Get(INotification::EXTRA_PEOPLE, (IInterface**)&people);
 

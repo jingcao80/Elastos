@@ -2,11 +2,26 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecom/ParcelableCall.h"
 #include "elastos/droid/telecom/CVideoCallImpl.h"
+#include "elastos/droid/telecom/CDisconnectCause.h"
+#include "elastos/droid/telecom/CGatewayInfo.h"
+#include "elastos/droid/telecom/CPhoneAccountHandle.h"
+#include "elastos/droid/telecom/CStatusHints.h"
+#include "elastos/droid/os/CBundle.h"
+#include "elastos/droid/net/CStringUri.h"
+#include "elastos/droid/net/COpaqueUri.h"
+#include "elastos/droid/net/CHierarchicalUri.h"
+#include "elastos/droid/utility/CParcelableList.h"
 
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Net::CStringUri;
+using Elastos::Droid::Net::COpaqueUri;
+using Elastos::Droid::Net::CHierarchicalUri;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -22,10 +37,13 @@ ParcelableCall::ParcelableCall()
     , mState(0)
     , mCapabilities(0)
     , mProperties(0)
+    , mCreateTimeMillis(0)
     , mConnectTimeMillis(0)
     , mHandlePresentation(0)
     , mCallerDisplayNamePresentation(0)
     , mVideoState(0)
+    , mIsActiveSub(FALSE)
+    , mCallSubstate(0)
 {}
 
 ECode ParcelableCall::constructor()
@@ -40,6 +58,7 @@ ECode ParcelableCall::constructor(
     /* [in] */ IList* cannedSmsResponses,
     /* [in] */ Int32 capabilities,
     /* [in] */ Int32 properties,
+    /* [in] */ Int64 createTimeMillis,
     /* [in] */ Int64 connectTimeMillis,
     /* [in] */ IUri* handle,
     /* [in] */ Int32 handlePresentation,
@@ -53,7 +72,9 @@ ECode ParcelableCall::constructor(
     /* [in] */ IStatusHints* statusHints,
     /* [in] */ Int32 videoState,
     /* [in] */ IList* conferenceableCallIds,
-    /* [in] */ IBundle* extras)
+    /* [in] */ IBundle* extras,
+    /* [in] */ Boolean isActiveSub,
+    /* [in] */ Int32 callSubstate)
 {
     mId = id;
     mState = state;
@@ -61,6 +82,7 @@ ECode ParcelableCall::constructor(
     mCannedSmsResponses = cannedSmsResponses;
     mCapabilities = capabilities;
     mProperties = properties;
+    mCreateTimeMillis = createTimeMillis;
     mConnectTimeMillis = connectTimeMillis;
     mHandle = handle;
     mHandlePresentation = handlePresentation;
@@ -77,6 +99,8 @@ ECode ParcelableCall::constructor(
     CCollections::AcquireSingleton((ICollections**)&cls);
     cls->UnmodifiableList(conferenceableCallIds, (IList**)&mConferenceableCallIds);
     mExtras = extras;
+    mIsActiveSub = isActiveSub;
+    mCallSubstate = callSubstate;
     return NOERROR;
 }
 
@@ -135,6 +159,14 @@ ECode ParcelableCall::GetConnectTimeMillis(
 {
     VALIDATE_NOT_NULL(result)
     *result = mConnectTimeMillis;
+    return NOERROR;
+}
+
+ECode ParcelableCall::GetCreateTimeMillis(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mCreateTimeMillis;
     return NOERROR;
 }
 
@@ -254,9 +286,172 @@ ECode ParcelableCall::GetExtras(
     return NOERROR;
 }
 
+ECode ParcelableCall::GetIsActiveSub(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mIsActiveSub;
+    return NOERROR;
+}
+
+ECode ParcelableCall::GetCallSubstate(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mCallSubstate;
+    return NOERROR;
+}
+
 ECode ParcelableCall::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    source->ReadString(&mId);
+    source->ReadInt32(&mState);
+
+    Int32 value;
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mDisconnectCause = NULL;
+        CDisconnectCause::New((IDisconnectCause**)&mDisconnectCause);
+        IParcelable::Probe(mDisconnectCause)->ReadFromParcel(source);
+    }
+    else {
+        mDisconnectCause = NULL;
+    }
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mCannedSmsResponses = NULL;
+        AutoPtr<IList> array;
+        CArrayList::New((IList**)&array);
+        CParcelableList::New(array, (IList**)&mCannedSmsResponses);
+
+        IParcelable::Probe(mCannedSmsResponses)->ReadFromParcel(source);
+    }
+    else {
+        mCannedSmsResponses = NULL;
+    }
+
+    source->ReadInt32(&mCapabilities);
+    source->ReadInt32(&mProperties);
+    source->ReadInt64(&mCreateTimeMillis);
+    source->ReadInt64(&mConnectTimeMillis);
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mHandle = NULL;
+
+        //Int32 id = 0;
+        //source->ReadInt32(&id);
+        //if (id == 1) {
+        //    CStringUri::New((IUri**)&mHandle);
+        //    IParcelable::Probe(mHandle)->ReadFromParcel(source);
+        //}
+        //else if (id == 2) {
+        //    COpaqueUri::New((IUri**)&mHandle);
+        //    IParcelable::Probe(mHandle)->ReadFromParcel(source);
+        //}
+        //else if (id == 3) {
+        //    CHierarchicalUri::New((IUri**)&mHandle);
+        //    IParcelable::Probe(mHandle)->ReadFromParcel(source);
+        //}
+        //else {
+        //    Logger::E("GatewayInfo", "Wrong URI id:%d, only 1, 2, 3 accepted", id);
+        //}
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mHandle = IUri::Probe(obj);
+    }
+    else {
+        mHandle = NULL;
+    }
+
+    source->ReadInt32(&mHandlePresentation);
+    source->ReadString(&mCallerDisplayName);
+    source->ReadInt32(&mCallerDisplayNamePresentation);
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mGatewayInfo = NULL;
+        CGatewayInfo::New((IGatewayInfo**)&mGatewayInfo);
+        IParcelable::Probe(mGatewayInfo)->ReadFromParcel(source);
+    }
+    else {
+        mGatewayInfo = NULL;
+    }
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mAccountHandle = NULL;
+        CPhoneAccountHandle::New((IPhoneAccountHandle**)&mAccountHandle);
+        IParcelable::Probe(mAccountHandle)->ReadFromParcel(source);
+    }
+    else {
+        mAccountHandle = NULL;
+    }
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mVideoCallProvider = IIVideoProvider::Probe(obj);
+    }
+    else {
+        mVideoCallProvider = NULL;
+    }
+
+    mParentCallId = NULL;
+    source->ReadString(&mParentCallId);
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mChildCallIds = NULL;
+        AutoPtr<IList> array;
+        CArrayList::New((IList**)&array);
+        CParcelableList::New(array, (IList**)&mChildCallIds);
+
+        IParcelable::Probe(mChildCallIds)->ReadFromParcel(source);
+    }
+    else {
+        mChildCallIds = NULL;
+    }
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mStatusHints = NULL;
+        CStatusHints::New((IStatusHints**)&mStatusHints);
+        IParcelable::Probe(mStatusHints)->ReadFromParcel(source);
+    }
+    else {
+        mStatusHints = NULL;
+    }
+
+    source->ReadInt32(&mVideoState);
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mConferenceableCallIds = NULL;
+        AutoPtr<IList> array;
+        CArrayList::New((IList**)&array);
+        CParcelableList::New(array, (IList**)&mConferenceableCallIds);
+
+        IParcelable::Probe(mConferenceableCallIds)->ReadFromParcel(source);
+    }
+    else {
+        mConferenceableCallIds = NULL;
+    }
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        CBundle::New((IBundle**)&mExtras);
+        IParcelable::Probe(mExtras)->ReadFromParcel(source);
+    }
+    else {
+        mExtras = NULL;
+    }
+
+    source->ReadBoolean(&mIsActiveSub);
+    source->ReadInt32(&mCallSubstate);
     return NOERROR;
 }
 
@@ -265,25 +460,112 @@ ECode ParcelableCall::WriteToParcel(
 {
     destination->WriteString(mId);
     destination->WriteInt32(mState);
-    IParcelable::Probe(mDisconnectCause)->WriteToParcel(destination);
-    IParcelable::Probe(mCannedSmsResponses)->WriteToParcel(destination);
+
+    if (mDisconnectCause != NULL) {
+        destination->WriteInt32(1);
+        IParcelable::Probe(mDisconnectCause)->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
+    if (mCannedSmsResponses != NULL) {
+        destination->WriteInt32(1);
+
+        AutoPtr<IParcelable> parcelable;
+        CParcelableList::New(mCannedSmsResponses, (IParcelable**)&parcelable);
+        parcelable->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
     destination->WriteInt32(mCapabilities);
     destination->WriteInt32(mProperties);
+    destination->WriteInt64(mCreateTimeMillis);
     destination->WriteInt64(mConnectTimeMillis);
-    IParcelable::Probe(mHandle)->WriteToParcel(destination);
+
+    if (mHandle != NULL) {
+        destination->WriteInt32(1);
+        //IParcelable::Probe(mHandle)->WriteToParcel(destination);
+        destination->WriteInterfacePtr(mHandle);//TODO should update
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
     destination->WriteInt32(mHandlePresentation);
     destination->WriteString(mCallerDisplayName);
     destination->WriteInt32(mCallerDisplayNamePresentation);
-    IParcelable::Probe(mGatewayInfo)->WriteToParcel(destination);
-    IParcelable::Probe(mAccountHandle)->WriteToParcel(destination);
-    // destination->WriteStrongBinder(
-    //         mVideoCallProvider != null ? mVideoCallProvider.asBinder() : null);
+
+    if (mGatewayInfo != NULL) {
+        destination->WriteInt32(1);
+        IParcelable::Probe(mGatewayInfo)->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
+    if (mAccountHandle != NULL) {
+        destination->WriteInt32(1);
+        IParcelable::Probe(mAccountHandle)->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
+    if (NULL != mVideoCallProvider) {
+        destination->WriteInt32(1);
+        destination->WriteInterfacePtr(mVideoCallProvider);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
     destination->WriteString(mParentCallId);
-    IParcelable::Probe(mChildCallIds)->WriteToParcel(destination);
-    IParcelable::Probe(mStatusHints)->WriteToParcel(destination);
+
+    if (mChildCallIds != NULL) {
+        destination->WriteInt32(1);
+
+        AutoPtr<IParcelable> parcelable;
+        CParcelableList::New(mChildCallIds, (IParcelable**)&parcelable);
+        parcelable->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
+    if (mStatusHints != NULL) {
+        destination->WriteInt32(1);
+        IParcelable::Probe(mStatusHints)->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
     destination->WriteInt32(mVideoState);
-    IParcelable::Probe(mConferenceableCallIds)->WriteToParcel(destination);
-    IParcelable::Probe(mExtras)->WriteToParcel(destination);
+
+    if (mConferenceableCallIds != NULL) {
+        destination->WriteInt32(1);
+
+        AutoPtr<IParcelable> parcelable;
+        CParcelableList::New(mConferenceableCallIds, (IParcelable**)&parcelable);
+        parcelable->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
+    if (mExtras != NULL) {
+        destination->WriteInt32(1);
+        IParcelable::Probe(mExtras)->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
+    destination->WriteBoolean(mIsActiveSub);
+    destination->WriteInt32(mCallSubstate);
     return NOERROR;
 }
 
@@ -294,11 +576,11 @@ ECode ParcelableCall::ToString(
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(3);
     AutoPtr<ICharSequence> pId;
     CString::New(mId, (ICharSequence**)&pId);
-    (*arr)[0] = pId;
+    arr->Set(0, pId);
     AutoPtr<ICharSequence> pParentCallId;
     CString::New(mParentCallId, (ICharSequence**)&pParentCallId);
-    (*arr)[1] = pParentCallId;
-    (*arr)[2] = mChildCallIds;
+    arr->Set(1, pParentCallId);
+    arr->Set(2, mChildCallIds);
     *result = StringUtils::Format(String("[%s, parent:%s, children:%s]"), arr);
     return NOERROR;
 }

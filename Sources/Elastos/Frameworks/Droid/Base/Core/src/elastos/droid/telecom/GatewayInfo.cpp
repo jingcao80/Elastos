@@ -2,8 +2,16 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecom/GatewayInfo.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/net/CStringUri.h"
+#include "elastos/droid/net/COpaqueUri.h"
+#include "elastos/droid/net/CHierarchicalUri.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Net::CStringUri;
+using Elastos::Droid::Net::COpaqueUri;
+using Elastos::Droid::Net::CHierarchicalUri;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -67,6 +75,64 @@ ECode GatewayInfo::IsEmpty(
 ECode GatewayInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    source->ReadString(&mGatewayProviderPackageName);
+    Int32 value = 0;
+    source->ReadInt32(&value);
+
+    if (value != 0) {
+        mGatewayAddress = NULL;
+        //Int32 id = 0;
+        //source->ReadInt32(&id);
+        //if (id == 1) {
+        //    CStringUri::New((IUri**)&mGatewayAddress);
+        //    IParcelable::Probe(mGatewayAddress)->ReadFromParcel(source);
+        //}
+        //else if (id == 2) {
+        //    COpaqueUri::New((IUri**)&mGatewayAddress);
+        //    IParcelable::Probe(mGatewayAddress)->ReadFromParcel(source);
+        //}
+        //else if (id == 3) {
+        //    CHierarchicalUri::New((IUri**)&mGatewayAddress);
+        //    IParcelable::Probe(mGatewayAddress)->ReadFromParcel(source);
+        //}
+        //else {
+        //    Logger::E("GatewayInfo", "Wrong URI id:%d, only 1, 2, 3 accepted", id);
+        //}
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mGatewayAddress = IUri::Probe(obj);
+    }
+    else {
+        mGatewayAddress = NULL;
+    }
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        mOriginalAddress = NULL;
+        //Int32 id = 0;
+        //source->ReadInt32(&id);
+        //if (id == 1) {
+        //    CStringUri::New((IUri**)&mOriginalAddress);
+        //    IParcelable::Probe(mOriginalAddress)->ReadFromParcel(source);
+        //}
+        //else if (id == 2) {
+        //    COpaqueUri::New((IUri**)&mOriginalAddress);
+        //    IParcelable::Probe(mOriginalAddress)->ReadFromParcel(source);
+        //}
+        //else if (id == 3) {
+        //    CHierarchicalUri::New((IUri**)&mOriginalAddress);
+        //    IParcelable::Probe(mOriginalAddress)->ReadFromParcel(source);
+        //}
+        //else {
+        //    Logger::E("GatewayInfo", "Wrong URI id:%d, only 1, 2, 3 accepted", id);
+        //}
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mOriginalAddress = IUri::Probe(obj);
+    }
+    else {
+        mOriginalAddress = NULL;
+    }
     return NOERROR;
 }
 
@@ -74,8 +140,23 @@ ECode GatewayInfo::WriteToParcel(
     /* [in] */ IParcel* destination)
 {
     destination->WriteString(mGatewayProviderPackageName);
-    IParcelable::Probe(mGatewayAddress)->WriteToParcel(destination);
-    IParcelable::Probe(mOriginalAddress)->WriteToParcel(destination);
+    if (mGatewayAddress != NULL) {
+        destination->WriteInt32(1);
+        //IParcelable::Probe(mGatewayAddress)->WriteToParcel(destination);
+        destination->WriteInterfacePtr(mGatewayAddress);//TODO should update
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
+    if (mOriginalAddress != NULL) {
+        destination->WriteInt32(1);
+        //IParcelable::Probe(mOriginalAddress)->WriteToParcel(destination);
+        destination->WriteInterfacePtr(mOriginalAddress);//TODO should update
+    }
+    else {
+        destination->WriteInt32(0);
+    }
     return NOERROR;
 }
 

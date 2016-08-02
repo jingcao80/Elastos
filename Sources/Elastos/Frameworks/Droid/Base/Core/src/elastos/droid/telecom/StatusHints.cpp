@@ -1,6 +1,12 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecom/StatusHints.h"
+#include "elastos/droid/content/CComponentName.h"
+#include "elastos/droid/os/CBundle.h"
+
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Core::CString;
 
 namespace Elastos {
 namespace Droid {
@@ -78,20 +84,59 @@ ECode StatusHints::GetExtras(
 ECode StatusHints::WriteToParcel(
     /* [in] */ IParcel* out)
 {
-    IParcelable::Probe(mPackageName)->WriteToParcel(out);
-    IParcelable::Probe(mLabel)->WriteToParcel(out);
+    if (mPackageName != NULL) {
+        out->WriteInt32(1);
+        IParcelable::Probe(mPackageName)->WriteToParcel(out);
+    }
+    else {
+        out->WriteInt32(0);
+    }
+    String str;
+    mLabel->ToString(&str);
+    out->WriteString(str);
     out->WriteInt32(mIconResId);
-    IParcelable::Probe(mExtras)->WriteToParcel(out);
+    if (mExtras != NULL) {
+        out->WriteInt32(1);
+        IParcelable::Probe(mExtras)->WriteToParcel(out);
+    }
+    else {
+        out->WriteInt32(0);
+    }
+
     return NOERROR;
 }
 
 ECode StatusHints::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    IParcelable::Probe(mPackageName)->ReadFromParcel(in);
-    IParcelable::Probe(mLabel)->ReadFromParcel(in);
+    Int32 value;
+    in->ReadInt32(&value);
+    if (value != 0) {
+        mPackageName = NULL;
+        CComponentName::New((IComponentName**)&mPackageName);
+        IParcelable::Probe(mPackageName)->ReadFromParcel(in);
+    }
+    else {
+        mPackageName = NULL;
+    }
+
+    mLabel = NULL;
+    String str;
+    in->ReadString(&str);
+    CString::New(str, (ICharSequence**)&mLabel);
+
     in->ReadInt32(&mIconResId);
-    IParcelable::Probe(mExtras)->ReadFromParcel(in);
+
+    in->ReadInt32(&value);
+    if (value != 0) {
+        mExtras = NULL;
+        CBundle::New((IBundle**)&mExtras);
+        IParcelable::Probe(mExtras)->ReadFromParcel(in);
+    }
+    else {
+        mExtras = NULL;
+    }
+
     return NOERROR;
 }
 

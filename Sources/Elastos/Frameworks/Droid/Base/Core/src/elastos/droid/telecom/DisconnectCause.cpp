@@ -105,6 +105,13 @@ ECode DisconnectCause::GetTone(
 ECode DisconnectCause::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    source->ReadInt32(&mDisconnectCode);
+    mDisconnectLabel = NULL;
+    TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(source, (ICharSequence**)&mDisconnectLabel);
+    mDisconnectDescription = NULL;
+    TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(source, (ICharSequence**)&mDisconnectDescription);
+    source->ReadString(&mDisconnectReason);
+    source->ReadInt32(&mToneToPlay);
     return NOERROR;
 }
 

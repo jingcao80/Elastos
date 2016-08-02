@@ -1592,14 +1592,11 @@ ECode CNotificationBuilder::RestoreFromNotification(
     if (bval) {
         mPeople.Clear();
 
-        AutoPtr<IArrayList> list;
-        extras->GetStringArrayList(INotification::EXTRA_PEOPLE, (IArrayList**)&list);
-        Int32 size = 0;
-        list->GetSize(&size);
+        AutoPtr<ArrayOf<String> > list;
+        extras->GetStringArray(INotification::EXTRA_PEOPLE, (ArrayOf<String>**)&list);
+        Int32 size = list->GetLength();
         for (Int32 i = 0; i < size; ++i) {
-            AutoPtr<IInterface> obj;
-            list->Get(i, (IInterface**)&obj);
-            mPeople.PushBack(Object::ToString(obj));
+            mPeople.PushBack((*list)[i]);
         }
     }
     return NOERROR;
