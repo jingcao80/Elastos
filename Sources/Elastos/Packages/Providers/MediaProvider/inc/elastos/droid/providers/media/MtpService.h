@@ -115,6 +115,8 @@ private:
         friend class MtpService;
 
     public:
+        TO_STRING_IMPL("MtpService::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ MtpService* owner);
 

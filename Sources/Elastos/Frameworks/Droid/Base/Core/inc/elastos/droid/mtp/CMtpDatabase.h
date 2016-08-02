@@ -37,6 +37,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CMtpDatabase::BatteryReceiver")
+
         BatteryReceiver(
             /* [in] */ CMtpDatabase* host);
 

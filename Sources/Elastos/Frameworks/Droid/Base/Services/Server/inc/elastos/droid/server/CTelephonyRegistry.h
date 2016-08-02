@@ -152,6 +152,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CTelephonyRegistry::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ CTelephonyRegistry* host);
 

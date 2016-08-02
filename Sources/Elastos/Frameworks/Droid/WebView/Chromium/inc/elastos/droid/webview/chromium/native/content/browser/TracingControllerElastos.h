@@ -58,6 +58,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("TracingControllerElastos::TracingBroadcastReceiver")
+
         TracingBroadcastReceiver(
           /* [in] */ TracingControllerElastos* owner);
 

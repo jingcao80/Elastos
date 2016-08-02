@@ -35,7 +35,10 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ProxyDataTracker::InnerSub_BroadcastReceiver")
+
         InnerSub_BroadcastReceiver(ProxyDataTracker*);
+
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);

@@ -235,6 +235,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("GpsLocationProvider::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ GpsLocationProvider* host);
 

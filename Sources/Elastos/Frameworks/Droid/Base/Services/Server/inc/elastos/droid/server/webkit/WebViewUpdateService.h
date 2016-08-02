@@ -71,6 +71,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WebViewUpdateService::WebViewUpdatedReceiver")
+
         WebViewUpdatedReceiver(
             /* [in] */ WebViewUpdateService* host);
 

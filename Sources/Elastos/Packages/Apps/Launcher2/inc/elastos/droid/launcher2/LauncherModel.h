@@ -722,6 +722,8 @@ public:
     };
 
 public:
+    TO_STRING_IMPL("LauncherModel")
+
     CAR_INTERFACE_DECL();
 
     LauncherModel();

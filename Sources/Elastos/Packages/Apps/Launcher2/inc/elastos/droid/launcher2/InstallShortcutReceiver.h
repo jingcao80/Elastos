@@ -68,6 +68,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("InstallShortcutReceiver")
+
     CAR_INTERFACE_DECL();
 
     InstallShortcutReceiver();

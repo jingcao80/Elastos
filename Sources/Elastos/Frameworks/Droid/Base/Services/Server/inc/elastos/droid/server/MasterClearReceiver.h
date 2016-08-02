@@ -39,6 +39,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("MasterClearReceiver")
+
     CARAPI constructor();
 
     CARAPI OnReceive(

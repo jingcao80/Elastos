@@ -33,6 +33,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiTrafficPoller::InnerBroadcastReceiver1")
+
         InnerBroadcastReceiver1(
             /* [in] */ WifiTrafficPoller* owner);
 

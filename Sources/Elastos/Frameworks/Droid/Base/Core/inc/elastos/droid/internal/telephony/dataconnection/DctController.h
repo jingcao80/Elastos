@@ -83,6 +83,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DctController::DataStateReceiver")
+
         DataStateReceiver(
             /* [in] */ DctController* host);
 

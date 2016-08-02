@@ -58,6 +58,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CountryDetector::LocationChangedReceiver")
+
         //@Override
         CARAPI OnReceive(
             /* [in] */ IContext* context,

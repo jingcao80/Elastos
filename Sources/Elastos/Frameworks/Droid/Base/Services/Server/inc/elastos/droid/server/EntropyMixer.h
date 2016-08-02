@@ -76,6 +76,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("EntropyMixer::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ EntropyMixer* host);
 

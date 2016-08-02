@@ -21,6 +21,8 @@ private:
     class OpenConditionBroadcastReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("RecoverySystem::OpenConditionBroadcastReceiver")
+
         OpenConditionBroadcastReceiver(
             /* [in] */ IConditionVariable* condition)
         {

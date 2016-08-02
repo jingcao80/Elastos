@@ -35,6 +35,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiEnabler::InitBroadcastReceiver")
+
         InitBroadcastReceiver(
             /* [in] */ WifiEnabler* host);
 

@@ -40,6 +40,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ProfileManagerService::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ ProfileManagerService* host);
 

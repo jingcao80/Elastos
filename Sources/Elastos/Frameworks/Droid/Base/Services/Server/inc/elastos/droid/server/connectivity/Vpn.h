@@ -67,6 +67,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("Vpn::UserIntentReceiver")
+
         UserIntentReceiver(
             /* [in] */ Vpn* host)
         : mHost(host)
@@ -111,6 +113,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("Vpn::LegacyVpnRunnerReceiver")
+
         LegacyVpnRunnerReceiver(
             /* [in] */ Vpn* host,
             /* [in] */ LegacyVpnRunner* runner)

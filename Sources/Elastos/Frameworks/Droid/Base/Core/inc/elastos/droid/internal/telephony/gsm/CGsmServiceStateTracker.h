@@ -55,6 +55,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CGsmServiceStateTracker::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ CGsmServiceStateTracker* host)
             : mHost(host)
@@ -72,6 +74,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CGsmServiceStateTracker::AutoTimeContentObserver")
+
         AutoTimeContentObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ CGsmServiceStateTracker* host)

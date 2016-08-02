@@ -133,6 +133,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DcTrackerBase::SubBroadcastReceiver")
+
         SubBroadcastReceiver(
             /* [in] */ DcTrackerBase* host);
 

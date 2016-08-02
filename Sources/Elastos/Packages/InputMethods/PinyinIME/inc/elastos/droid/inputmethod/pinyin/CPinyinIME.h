@@ -475,6 +475,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CPinyinIME::MyReceiver")
+
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);

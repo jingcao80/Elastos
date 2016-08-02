@@ -299,6 +299,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WallpaperManagerService::SystemRunningBR")
+
         SystemRunningBR(
             /* [in] */ WallpaperManagerService* host);
 

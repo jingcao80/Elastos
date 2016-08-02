@@ -167,6 +167,8 @@ private:
     class MyBroadcastReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CGpsNetInitiatedHandler::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ CGpsNetInitiatedHandler* host);
 

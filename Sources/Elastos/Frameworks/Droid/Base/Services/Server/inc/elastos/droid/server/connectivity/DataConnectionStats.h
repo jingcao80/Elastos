@@ -61,6 +61,7 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("DataConnectionStats")
 
     DataConnectionStats(
         /* [in] */ IContext* context);

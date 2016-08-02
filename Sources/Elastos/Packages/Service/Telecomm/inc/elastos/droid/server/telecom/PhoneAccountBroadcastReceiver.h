@@ -33,6 +33,8 @@ class PhoneAccountBroadcastReceiver
     , public IPhoneAccountBroadcastReceiver
 {
 public:
+    TO_STRING_IMPL("PhoneAccountBroadcastReceiver")
+
     CAR_INTERFACE_DECL()
 
     /**

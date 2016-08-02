@@ -41,6 +41,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DcTesterFailBringUpAll::SubBroadcastReceiver")
+
         SubBroadcastReceiver(
             /* [in] */ DcTesterFailBringUpAll* host);
 

@@ -55,6 +55,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CWifiP2pSettings::InitBroadcastReceiver")
+
         InitBroadcastReceiver(
             /* [in] */ CWifiP2pSettings* host);
 

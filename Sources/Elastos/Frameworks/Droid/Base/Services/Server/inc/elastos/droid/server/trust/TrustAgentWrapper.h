@@ -47,6 +47,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("TrustAgentWrapper::InnerSub_BroadcastReceiver")
+
         InnerSub_BroadcastReceiver(
             /* [in] */ TrustAgentWrapper* host);
 

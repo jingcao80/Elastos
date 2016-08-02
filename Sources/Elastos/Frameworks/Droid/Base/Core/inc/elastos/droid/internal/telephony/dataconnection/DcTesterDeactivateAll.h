@@ -34,6 +34,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DcTesterDeactivateAll::SubBroadcastReceiver")
+
         SubBroadcastReceiver(
             /* [in] */ DcTesterDeactivateAll* host);
 

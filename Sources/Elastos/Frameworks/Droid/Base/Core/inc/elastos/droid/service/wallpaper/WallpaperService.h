@@ -93,6 +93,8 @@ public:
             : public BroadcastReceiver
         {
         public:
+            TO_STRING_IMPL("WallpaperService::MReceiver")
+
             MReceiver(
                 /* [in] */ Engine* host);
 

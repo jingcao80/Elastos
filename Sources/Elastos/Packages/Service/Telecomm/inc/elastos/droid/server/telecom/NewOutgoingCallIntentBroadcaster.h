@@ -49,6 +49,8 @@ public:
         , public INewOutgoingCallIntentBroadcasterNewOutgoingCallBroadcastIntentReceiver
     {
     public:
+        TO_STRING_IMPL("NewOutgoingCallIntentBroadcaster::NewOutgoingCallBroadcastIntentReceiver")
+
         CAR_INTERFACE_DECL()
 
         constructor(

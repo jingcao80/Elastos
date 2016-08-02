@@ -85,6 +85,8 @@ private:
     class ImsIntentReceiver: public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("PhoneBase::ImsIntentReceiver")
+
         ImsIntentReceiver(
             /* [in] */ PhoneBase* host);
 

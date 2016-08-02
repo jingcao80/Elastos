@@ -67,6 +67,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WpsDialog::InitBroadcastReceiver")
+
         InitBroadcastReceiver(
             /* [in] */ WpsDialog* host);
 

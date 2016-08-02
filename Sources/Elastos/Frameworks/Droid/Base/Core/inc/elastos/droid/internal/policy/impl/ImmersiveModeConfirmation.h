@@ -125,6 +125,8 @@ private:
             : public BroadcastReceiver
         {
         public:
+            TO_STRING_IMPL("ImmersiveModeConfirmation::InnerBroadcastReceiver")
+
             InnerBroadcastReceiver(
                 /* [in] */ ClingWindowView* owner);
 

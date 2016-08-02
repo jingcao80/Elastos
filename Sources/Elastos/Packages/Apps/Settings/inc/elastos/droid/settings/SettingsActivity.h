@@ -74,6 +74,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SettingsActivity::BatteryInfoReceiver")
+
         BatteryInfoReceiver(
             /* [in] */ SettingsActivity* host);
 

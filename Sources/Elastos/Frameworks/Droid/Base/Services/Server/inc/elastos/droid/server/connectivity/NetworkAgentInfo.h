@@ -44,6 +44,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("NetworkAgentInfo::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ NetworkAgentInfo* host);
 

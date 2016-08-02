@@ -198,6 +198,8 @@ public:
             : public BroadcastReceiver
         {
         public:
+            TO_STRING_IMPL("RttService::InnerBroadcastReceiver1")
+
             InnerBroadcastReceiver1(
                 /* [in] */ RttServiceImpl* owner);
 

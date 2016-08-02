@@ -260,6 +260,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CBackupManagerService::RunBackupReceiver")
+
         RunBackupReceiver(
             /* [in] */ CBackupManagerService* host);
 
@@ -276,6 +278,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CBackupManagerService::RunInitializeReceiver")
+
         RunInitializeReceiver(
             /* [in] */ CBackupManagerService* host);
 
@@ -918,6 +922,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CBackupManagerService::TrackPackageInstallAndRemoval")
+
         TrackPackageInstallAndRemoval(
             /* [in] */ CBackupManagerService* host);
 

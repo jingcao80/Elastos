@@ -53,6 +53,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AlternateRecentsComponent::RecentAnimationEndedReceiver")
+
         CARAPI constructor(
             /* [in] */ IAlternateRecentsComponent* host);
 

@@ -63,6 +63,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("X509Util::TrustStorageListener")
+
         // @Override
         CARAPI OnReceive(
             /* [in] */ IContext* context,

@@ -35,6 +35,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("RestrictedSettingsFragment::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ RestrictedSettingsFragment* host);
 

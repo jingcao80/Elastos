@@ -1505,14 +1505,14 @@ ECode CConnectivityService::GetActiveNetworkInfo(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     Int32 uid = Binder::GetCallingUid();
     return GetNetworkInfo(mActiveDefaultNetwork, uid, result);
 }
 
 AutoPtr<INetworkInfo> CConnectivityService::GetProvisioningNetworkInfo()
 {
-    if (FAILED(EnforceInternetPermission())) {
+    if (FAILED(EnforceAccessPermission())) {
         return NULL;
     }
 
@@ -1538,7 +1538,7 @@ ECode CConnectivityService::GetProvisioningOrActiveNetworkInfo(
 {
     VALIDATE_NOT_NULL(info)
     *info = NULL;
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
 
     AutoPtr<INetworkInfo> provNi = GetProvisioningNetworkInfo();
     if (provNi == NULL) {
@@ -1558,7 +1558,7 @@ ECode CConnectivityService::GetActiveNetworkInfoUnfiltered(
     VALIDATE_NOT_NULL(info);
     *info = NULL;
 
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     Boolean isValid = FALSE;
     IsNetworkTypeValid(mActiveDefaultNetwork, &isValid);
     if (isValid) {
@@ -1588,7 +1588,7 @@ ECode CConnectivityService::GetNetworkInfo(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     Int32 uid = Binder::GetCallingUid();
     return GetNetworkInfo(networkType, uid, result);
 }
@@ -1620,7 +1620,7 @@ ECode CConnectivityService::GetNetworkInfoForNetwork(
     VALIDATE_NOT_NULL(info)
     *info = NULL;
 
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     if (network == NULL) return NOERROR;
 
     Int32 uid = Binder::GetCallingUid();
@@ -1650,7 +1650,7 @@ ECode CConnectivityService::GetAllNetworkInfo(
     VALIDATE_NOT_NULL(allInfo);
     *allInfo = NULL;
 
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     Int32 uid = Binder::GetCallingUid();
     List< AutoPtr<INetworkInfo> > result;
 
@@ -1680,7 +1680,7 @@ ECode CConnectivityService::GetNetworkForType(
     VALIDATE_NOT_NULL(network)
     *network = NULL;
 
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     Int32 uid = Binder::GetCallingUid();
     if (IsNetworkBlocked(networkType, uid)) {
         return NOERROR;
@@ -1699,7 +1699,7 @@ ECode CConnectivityService::GetAllNetworks(
     /* [out, callee] */ ArrayOf<INetwork*>** networks)
 {
     VALIDATE_NOT_NULL(networks)
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
 
     AutoPtr< ArrayOf<INetwork*> > array;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
@@ -1728,7 +1728,7 @@ ECode CConnectivityService::IsNetworkSupported(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
 
     Boolean isValid = FALSE;
     IsNetworkTypeValid(networkType, &isValid);
@@ -1749,7 +1749,7 @@ ECode CConnectivityService::GetLinkPropertiesForType(
 {
     VALIDATE_NOT_NULL(properties)
     *properties = NULL;
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     Boolean bval;
     IsNetworkTypeValid(networkType, &bval);
     if (bval) {
@@ -1767,7 +1767,7 @@ ECode CConnectivityService::GetLinkProperties(
     VALIDATE_NOT_NULL(properties)
     *properties = NULL;
 
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     AutoPtr<NetworkAgentInfo> nai;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
     {    AutoLock syncLock(syncObj);
@@ -1792,7 +1792,7 @@ ECode CConnectivityService::GetNetworkCapabilities(
 {
     VALIDATE_NOT_NULL(result)
     *result = NULL;
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
 
     AutoPtr<NetworkAgentInfo> nai;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
@@ -1817,7 +1817,7 @@ ECode CConnectivityService::GetAllNetworkState(
     VALIDATE_NOT_NULL(allStates);
     *allStates = NULL;
 
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     Int32 uid = Binder::GetCallingUid();
 
     List<AutoPtr<INetworkState> > result;
@@ -1870,7 +1870,7 @@ ECode CConnectivityService::GetActiveNetworkQuotaInfo(
 {
     VALIDATE_NOT_NULL(info);
     *info = NULL;
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
 
     Int64 token = Binder::ClearCallingIdentity();
     AutoPtr<INetworkState> state = GetNetworkStateUnchecked(mActiveDefaultNetwork);
@@ -1888,7 +1888,7 @@ ECode CConnectivityService::IsActiveNetworkMetered(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
-    FAIL_RETURN(EnforceInternetPermission())
+    FAIL_RETURN(EnforceAccessPermission())
     Int64 token = Binder::ClearCallingIdentity();
     *result = IsNetworkMeteredUnchecked(mActiveDefaultNetwork);
     Binder::RestoreCallingIdentity(token);

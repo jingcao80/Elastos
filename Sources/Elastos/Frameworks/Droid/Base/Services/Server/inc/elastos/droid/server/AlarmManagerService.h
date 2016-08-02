@@ -399,6 +399,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AlarmManagerService::QuickBootReceiver")
+
         QuickBootReceiver(
             /* [in] */ AlarmManagerService* host);
 
@@ -417,6 +419,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AlarmManagerService::ClockReceiver")
+
         ClockReceiver(
             /* [in] */ AlarmManagerService* host);
 
@@ -439,6 +443,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AlarmManagerService::InteractiveStateReceiver")
+
         InteractiveStateReceiver(
             /* [in] */ AlarmManagerService* host);
 
@@ -457,6 +463,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AlarmManagerService::UninstallReceiver")
+
         UninstallReceiver(
             /* [in] */ AlarmManagerService* host);
 

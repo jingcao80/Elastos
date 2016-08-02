@@ -28,6 +28,8 @@ class CallReceiver
     , public ICallReceiver
 {
 public:
+    TO_STRING_IMPL("CallReceiver")
+
     CAR_INTERFACE_DECL()
 
     // @Override

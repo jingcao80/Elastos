@@ -17,6 +17,8 @@ class RemoveReceiver
     : public BroadcastReceiver
 {
 public:
+    TO_STRING_IMPL("RemoveReceiver")
+
     // @Override
     CARAPI OnReceive(
         /* [in] */ IContext* context,

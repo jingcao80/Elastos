@@ -31,6 +31,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("UsbMidiDeviceFactoryElastos::InnerBroadcastReceiver")
+
         InnerBroadcastReceiver(
             /* [in] */ UsbMidiDeviceFactoryElastos* owner);
 

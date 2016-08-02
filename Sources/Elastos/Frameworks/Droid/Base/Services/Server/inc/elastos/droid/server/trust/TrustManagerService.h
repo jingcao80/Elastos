@@ -108,6 +108,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("TrustManagerService::Receiver")
+
         Receiver(
             /* [in] */ TrustManagerService* host);
 

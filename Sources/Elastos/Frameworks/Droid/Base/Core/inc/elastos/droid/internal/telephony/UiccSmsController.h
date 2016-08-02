@@ -43,6 +43,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("UiccSmsController::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ UiccSmsController* host);
 

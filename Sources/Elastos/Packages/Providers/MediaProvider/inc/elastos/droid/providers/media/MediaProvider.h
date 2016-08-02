@@ -130,6 +130,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("MediaProvider::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ MediaProvider* host);
 

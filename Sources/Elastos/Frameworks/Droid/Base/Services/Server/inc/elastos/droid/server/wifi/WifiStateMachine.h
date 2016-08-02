@@ -763,6 +763,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WiFiStateMachine::TetherStateChangedBroadcastReceiver")
+
         TetherStateChangedBroadcastReceiver(
             /* [in] */ WifiStateMachine* host)
             : mHost(host)
@@ -780,6 +782,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WiFiStateMachine::StartScanBroadcastReceiver")
+
         StartScanBroadcastReceiver(
             /* [in] */ WifiStateMachine* host)
             : mHost(host)
@@ -797,6 +801,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WiFiStateMachine::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ WifiStateMachine* host)
             : mHost(host)
@@ -814,6 +820,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WiFiStateMachine::DelayedDriverStopBroadcastReceiver")
+
         DelayedDriverStopBroadcastReceiver(
             /* [in] */ WifiStateMachine* host)
             : mHost(host)

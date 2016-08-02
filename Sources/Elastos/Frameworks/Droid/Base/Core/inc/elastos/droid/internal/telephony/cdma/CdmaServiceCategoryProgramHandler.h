@@ -49,6 +49,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CdmaServiceCategoryProgramHandler::InnerBroadcastReceiver")
+
         InnerBroadcastReceiver(
             /* [in] */ CdmaServiceCategoryProgramHandler* owner);
 

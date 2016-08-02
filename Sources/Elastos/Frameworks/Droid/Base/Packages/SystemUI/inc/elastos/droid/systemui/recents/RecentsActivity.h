@@ -67,6 +67,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("RecentsActivity::ServiceBroadcastReceiver")
+
         CARAPI constructor(
             /* [in] */ IRecentsActivity* host);
 
@@ -82,6 +84,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("RecentsActivity::SystemBroadcastReceiver")
+
         CARAPI constructor(
             /* [in] */ IRecentsActivity* host);
 

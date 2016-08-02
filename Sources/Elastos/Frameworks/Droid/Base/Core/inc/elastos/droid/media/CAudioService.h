@@ -663,6 +663,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CAudioService::AudioServiceBroadcastReceiver")
+
         AudioServiceBroadcastReceiver(
             /* [in] */ CAudioService* host)
                 : mHost(host)

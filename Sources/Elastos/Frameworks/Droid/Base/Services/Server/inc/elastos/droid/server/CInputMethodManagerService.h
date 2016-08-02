@@ -299,13 +299,14 @@ private:
         CARAPI constructor(
             /* [in] */ CInputMethodManagerService* host);
 
+        TO_STRING_IMPL("CInputMethodManagerService::CheckReceiver: ")
+
     protected:
         //@Override
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        TO_STRING_IMPL("CInputMethodManagerService::CheckReceiver: ")
     private:
         CInputMethodManagerService* mHost;
     };

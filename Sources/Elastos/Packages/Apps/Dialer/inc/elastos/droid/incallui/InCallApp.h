@@ -24,6 +24,8 @@ public:
     class NotificationBroadcastReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("InCallApp::NotificationBroadcastReceiver")
+
         // @Override
         CARAPI OnReceive(
             /* [in] */ IContext* context,

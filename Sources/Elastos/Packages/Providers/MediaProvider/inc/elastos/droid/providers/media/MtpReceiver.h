@@ -20,6 +20,8 @@ class MtpReceiver
     , public IMtpReceiver
 {
 public:
+    TO_STRING_IMPL("MtpReceiver")
+
     CAR_INTERFACE_DECL()
 
     CARAPI OnReceive(

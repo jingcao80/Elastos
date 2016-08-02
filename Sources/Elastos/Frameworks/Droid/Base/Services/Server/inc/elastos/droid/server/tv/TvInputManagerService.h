@@ -766,6 +766,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("TvInputManagerService::InnerSub_BroadcastReceiver")
+
         InnerSub_BroadcastReceiver(
             /* [in] */ TvInputManagerService* host);
 

@@ -87,6 +87,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("TextClock::TextClockBroadcastReceiver")
+
         TextClockBroadcastReceiver(
             /* [in] */ TextClock* host);
 

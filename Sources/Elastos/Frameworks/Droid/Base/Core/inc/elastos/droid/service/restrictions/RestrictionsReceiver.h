@@ -74,6 +74,8 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IIntent* intent);
 
+    TO_STRING_IMPL("RestrictionsReceiver")
+
 private:
     const static String TAG;
 };

@@ -34,6 +34,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DcRetryAlarmController::SubBroadcastReceiver")
+
         SubBroadcastReceiver(
             /* [in] */ DcRetryAlarmController* host);
 

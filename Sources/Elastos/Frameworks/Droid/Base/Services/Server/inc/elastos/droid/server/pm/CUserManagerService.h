@@ -78,6 +78,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("CUserManagerService::FinishRemoveUserReceiver")
+
         FinishRemoveUserReceiver(
             /* [in] */ CUserManagerService* host,
             /* [in] */ Int32 userHandle)

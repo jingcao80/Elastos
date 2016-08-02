@@ -27,6 +27,8 @@ class PowerStatusReceiver
     : public BroadcastReceiver
 {
 public:
+    TO_STRING_IMPL("PowerStatusReceiver")
+
     //@Override
     CARAPI OnReceive(
         /* [in] */ IContext* context,

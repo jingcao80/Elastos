@@ -60,6 +60,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AdvancedWifiSettings::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ AdvancedWifiSettings* host);
 

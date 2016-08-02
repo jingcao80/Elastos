@@ -20,6 +20,8 @@ class MediaUpgradeReceiver
     , public IMediaUpgradeReceiver
 {
 public:
+    TO_STRING_IMPL("MediaUpgradeReceiver")
+
     CAR_INTERFACE_DECL()
 
     CARAPI OnReceive(

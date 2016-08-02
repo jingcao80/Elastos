@@ -40,6 +40,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CLockSettingsService::UserAddedBroadcastReceiver")
+
         UserAddedBroadcastReceiver(
             /* [in] */ CLockSettingsService* lss);
 

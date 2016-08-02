@@ -149,6 +149,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiSettings::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ WifiSettings* host);
 

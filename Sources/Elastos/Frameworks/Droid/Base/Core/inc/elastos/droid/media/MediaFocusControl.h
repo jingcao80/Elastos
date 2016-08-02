@@ -129,6 +129,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("MediaFocusControl::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ MediaFocusControl* host)
             : mHost(host)

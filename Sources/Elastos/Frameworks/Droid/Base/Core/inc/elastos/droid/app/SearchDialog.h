@@ -85,6 +85,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SearchDialog::ConfChangeBroadcastReceiver")
+
         ConfChangeBroadcastReceiver(
             /* [in] */ SearchDialog* host);
 

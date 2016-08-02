@@ -69,6 +69,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ServiceWatcher::MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ ServiceWatcher* host);
 

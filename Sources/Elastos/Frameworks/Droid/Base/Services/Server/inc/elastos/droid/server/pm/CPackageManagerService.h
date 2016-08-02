@@ -601,6 +601,8 @@ public:/* package */
         class CopyBroadcastReceiver : public BroadcastReceiver
         {
         public:
+            TO_STRING_IMPL("CPackageManagerService::InstallParams::CopyBroadcastReceiver")
+
             CopyBroadcastReceiver(
                 /* [in] */ CPackageManagerService* host,
                 /* [in] */ Int32 id)

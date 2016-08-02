@@ -25,6 +25,8 @@ class PhoneStateIntentReceiver
     , public IPhoneStateIntentReceiver
 {
 public:
+    TO_STRING_IMPL("PhoneStateIntentReceiver")
+
     CAR_INTERFACE_DECL();
 
     PhoneStateIntentReceiver();

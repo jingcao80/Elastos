@@ -326,6 +326,8 @@ public:
     class ThemeChangeReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CActivityManagerService::ThemeChangeReceiver")
+
         ThemeChangeReceiver(
             /* [in] */ CActivityManagerService* host)
             : mHost(host)
@@ -342,6 +344,8 @@ public:
     class ScreenStatusReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CActivityManagerService::ScreenStatusReceiver")
+
         ScreenStatusReceiver(
             /* [in] */ CActivityManagerService* host)
             : mHost(host)
@@ -960,6 +964,8 @@ private:
     class RestartBroadcastReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CActivityManagerService::RestartBroadcastReceiver")
+
         RestartBroadcastReceiver(
             /* [in] */ CActivityManagerService* host)
             : mHost(host)

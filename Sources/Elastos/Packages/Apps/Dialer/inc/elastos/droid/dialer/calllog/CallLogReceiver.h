@@ -21,6 +21,8 @@ class CallLogReceiver
     : public BroadcastReceiver
 {
 public:
+    TO_STRING_IMPL("CallLogReceiver")
+
     // @Override
     CARAPI OnReceive(
         /* [in] */ IContext* context,

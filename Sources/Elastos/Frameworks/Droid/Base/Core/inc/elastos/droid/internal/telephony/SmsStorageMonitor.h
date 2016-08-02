@@ -29,6 +29,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SmsStorageMonitor::SmsBroadcastReceiver")
+
         SmsBroadcastReceiver(
             /* [in] */ SmsStorageMonitor* host);
 

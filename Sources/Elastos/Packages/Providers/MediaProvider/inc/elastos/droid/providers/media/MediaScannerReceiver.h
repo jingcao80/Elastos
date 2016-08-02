@@ -18,6 +18,8 @@ class MediaScannerReceiver
     , public IMediaScannerReceiver
 {
 public:
+    TO_STRING_IMPL("MediaScannerReceiver")
+
     CAR_INTERFACE_DECL()
 
     //Override

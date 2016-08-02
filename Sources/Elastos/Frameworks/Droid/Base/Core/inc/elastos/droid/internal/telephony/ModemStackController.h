@@ -71,6 +71,8 @@ private:
     class Receiver: public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ModemStackController::Receiver")
+
         Receiver(
             /* [in] */ ModemStackController* host);
 

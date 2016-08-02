@@ -215,7 +215,7 @@ private:
         /* [in] */ IBundle* m);
 
     static const String TAG;
-    static const Boolean DBG = FALSE;
+    static const Boolean DBG/* = FALSE*/;
 
     Int32 mGsmSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
     Int32 mGsmBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5

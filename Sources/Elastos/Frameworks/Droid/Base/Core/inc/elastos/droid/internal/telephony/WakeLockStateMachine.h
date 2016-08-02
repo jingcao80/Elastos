@@ -110,6 +110,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WakeLockStateMachine::Receiver")
+
         Receiver(
             /* [in] */ WakeLockStateMachine* host);
 

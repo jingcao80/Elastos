@@ -198,6 +198,8 @@ public:
     class SmsBroadcastReceiver: public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("InboundSmsHandler::SmsBroadcastReceiver")
+
         SmsBroadcastReceiver(
             /* [in] */ InboundSmsTracker* tracker,
             /* [in] */ InboundSmsHandler* host);

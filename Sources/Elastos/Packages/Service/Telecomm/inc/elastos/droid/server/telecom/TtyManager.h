@@ -29,6 +29,8 @@ public:
         , public ITtyManagerTtyBroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("TtyManager::TtyBroadcastReceiver")
+
         CAR_INTERFACE_DECL()
 
         CARAPI constructor(

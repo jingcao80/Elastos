@@ -54,6 +54,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("UninstallShortcutReceiver")
+
     CAR_INTERFACE_DECL();
 
     UninstallShortcutReceiver();

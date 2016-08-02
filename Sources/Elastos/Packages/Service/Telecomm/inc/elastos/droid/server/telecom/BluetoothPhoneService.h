@@ -216,6 +216,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("BluetoothPhoneService::SubBroadcastReceiver")
+
         SubBroadcastReceiver(
             /* [in] */ BluetoothPhoneService* host);
 

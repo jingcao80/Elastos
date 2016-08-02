@@ -87,6 +87,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ImsPhoneCallTracker::InnerBroadcastReceiver")
+
         InnerBroadcastReceiver(
             /* [in] */ ImsPhoneCallTracker* owner);
 

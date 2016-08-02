@@ -300,8 +300,6 @@ NetworkControllerImpl::NetworkControllerImpl(
     , mDemoQSDataTypeIconId(0)
     , mDemoMobileLevel(0)
 {
-    mHasMobileDataFeature = TRUE;
-    Logger::D(TAG, "TODO : Set mHasMobileDataFeature = TRUE to show the signal image.");
     CArrayList::New((IArrayList**)&mCombinedLabelViews);
     CArrayList::New((IArrayList**)&mMobileLabelViews);
     CArrayList::New((IArrayList**)&mWifiLabelViews);
@@ -315,10 +313,9 @@ NetworkControllerImpl::NetworkControllerImpl(
     context->GetResources((IResources**)&res);
 
     AutoPtr<IInterface> obj;
-    Logger::D(TAG, "TODO: CONNECTIVITY_SERVICE.");
-    // mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    // AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
-    // cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, &mHasMobileDataFeature);
+    mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
+    cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, &mHasMobileDataFeature);
 
     res->GetBoolean(R::bool_::config_showPhoneRSSIForData, &mShowPhoneRSSIForData);
     res->GetBoolean(R::bool_::config_showMin3G, &mShowAtLeastThreeGees);
@@ -346,8 +343,7 @@ NetworkControllerImpl::NetworkControllerImpl(
 
     // wifi
     obj = NULL;
-    Logger::D(TAG, "TODO: WIFI_SERVICE not ready.");
-    // context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
+    context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
     mWifiManager = IWifiManager::Probe(obj);
     AutoPtr<IHandler> handler = new WifiHandler(this);
     CAsyncChannel::New((IAsyncChannel**)&mWifiChannel);
@@ -1244,43 +1240,42 @@ void NetworkControllerImpl::UpdateConnectivity(
         Logger::D(TAG, "updateConnectivity: intent=%p", intent);
     }
 
-    Logger::D(TAG, "TODO [UpdateConnectivity] : CONNECTIVITY_SERVICE.");
-    // AutoPtr<IInterface> obj;
-    // mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    // AutoPtr<IConnectivityManager> connManager = IConnectivityManager::Probe(obj);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IConnectivityManager> connManager = IConnectivityManager::Probe(obj);
 
-    // AutoPtr<INetworkInfo> info;
-    // connManager->GetActiveNetworkInfo((INetworkInfo**)&info);
+    AutoPtr<INetworkInfo> info;
+    connManager->GetActiveNetworkInfo((INetworkInfo**)&info);
 
-    // // Are we connected at all, by any interface?
-    // Boolean tmp = FALSE;
-    // mConnected = info != NULL && (info->IsConnected(&tmp), tmp);
-    // if (mConnected) {
-    //     info->GetType(&mConnectedNetworkType);
-    //     info->GetTypeName(&mConnectedNetworkTypeName);
-    // }
-    // else {
-    //     mConnectedNetworkType = IConnectivityManager::TYPE_NONE;
-    //     mConnectedNetworkTypeName = NULL;
-    // }
+    // Are we connected at all, by any interface?
+    Boolean tmp = FALSE;
+    mConnected = info != NULL && (info->IsConnected(&tmp), tmp);
+    if (mConnected) {
+        info->GetType(&mConnectedNetworkType);
+        info->GetTypeName(&mConnectedNetworkTypeName);
+    }
+    else {
+        mConnectedNetworkType = IConnectivityManager::TYPE_NONE;
+        mConnectedNetworkTypeName = NULL;
+    }
 
-    // Int32 connectionStatus = 0;
-    // intent->GetInt32Extra(IConnectivityManager::EXTRA_INET_CONDITION, 0, &connectionStatus);
+    Int32 connectionStatus = 0;
+    intent->GetInt32Extra(IConnectivityManager::EXTRA_INET_CONDITION, 0, &connectionStatus);
 
-    // if (CHATTY) {
-    //     Logger::D(TAG, "updateConnectivity: networkInfo=%p", info.Get());
-    //     Logger::D(TAG, "updateConnectivity: connectionStatus=%d", connectionStatus);
-    // }
+    if (CHATTY) {
+        Logger::D(TAG, "updateConnectivity: networkInfo=%s", TO_CSTR(info));
+        Logger::D(TAG, "updateConnectivity: connectionStatus=%d", connectionStatus);
+    }
 
-    // mInetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
+    mInetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
 
-    // Int32 type = 0;
-    // if (info != NULL && (info->GetType(&type), type) == IConnectivityManager::TYPE_BLUETOOTH) {
-    //     info->IsConnected(&mBluetoothTethered);
-    // }
-    // else {
-    //     mBluetoothTethered = FALSE;
-    // }
+    Int32 type = 0;
+    if (info != NULL && (info->GetType(&type), type) == IConnectivityManager::TYPE_BLUETOOTH) {
+        info->IsConnected(&mBluetoothTethered);
+    }
+    else {
+        mBluetoothTethered = FALSE;
+    }
 
     // // We want to update all the icons, all at once, for any condition change
     UpdateDataNetType();

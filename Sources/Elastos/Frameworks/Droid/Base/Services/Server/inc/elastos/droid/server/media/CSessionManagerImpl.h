@@ -35,6 +35,8 @@ public:
     class KeyEventDone : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CSessionManagerImpl::KeyEventDone")
+
         KeyEventDone(
             /* [in] */ MediaSessionService* host)
             : mHost(host)

@@ -134,6 +134,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("RequestQueue::InnerSub_BroadcastReceiver")
+
         InnerSub_BroadcastReceiver(
             /* [in] */ RequestQueue* host);
 

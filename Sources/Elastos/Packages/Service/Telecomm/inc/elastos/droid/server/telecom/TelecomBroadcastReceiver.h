@@ -26,6 +26,8 @@ class TelecomBroadcastReceiver
     , public ITelecomBroadcastReceiver
 {
 public:
+    TO_STRING_IMPL("TelecomBroadcastReceiver")
+
     CAR_INTERFACE_DECL()
 
     /** {@inheritDoc} */

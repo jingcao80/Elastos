@@ -110,6 +110,8 @@ protected:
     class ECO_LOCAL SMSDispatcherReceiver : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SMSDispatcher::SMSDispatcherReceiver")
+
         CARAPI constructor(
             /* [in] */ SmsTracker* tracker);
 

@@ -69,6 +69,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DcTracker::SubBroadcastReceiverDefaultDds")
+
         SubBroadcastReceiverDefaultDds(
             /* [in] */ DcTracker* host);
 
@@ -84,6 +86,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DcTracker::SubBroadcastReceiverSubInfo")
+
         SubBroadcastReceiverSubInfo(
             /* [in] */ DcTracker* host);
 
@@ -102,6 +106,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("DcTracker::ApnChangeObserver")
+
         ApnChangeObserver(
             /* [in] */ DcTracker* host);
 
@@ -190,6 +196,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DcTracker::ProvisionNotificationBroadcastReceiver")
+
         ProvisionNotificationBroadcastReceiver(
             /* [in] */ DcTracker* host);
 

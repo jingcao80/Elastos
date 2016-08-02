@@ -58,6 +58,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("BluetoothManager::SubBroadcastReceiver")
+
         SubBroadcastReceiver(
             /* [in] */ BluetoothManager* host);
 

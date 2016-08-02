@@ -77,6 +77,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("MobileDataStateTracker::MobileDataStateReceiver")
+
         MobileDataStateReceiver(
             /* [in] */ MobileDataStateTracker* host);
 

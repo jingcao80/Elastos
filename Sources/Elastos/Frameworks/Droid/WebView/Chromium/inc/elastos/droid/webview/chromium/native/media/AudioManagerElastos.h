@@ -81,6 +81,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AudioManagerElastos::WiredHeadsetBroadcastReceiver")
+
         WiredHeadsetBroadcastReceiver(
             /* [in] */ AudioManagerElastos* owner);
 
@@ -102,6 +104,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AudioManagerElastos::BluetoothHeadsetBroadcastReceiver")
+
         BluetoothHeadsetBroadcastReceiver(
             /* [in] */ AudioManagerElastos* owner);
 
@@ -118,6 +122,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AudioManagerElastos::BluetoothScoIntentBroadcastReceiver")
+
         BluetoothScoIntentBroadcastReceiver(
             /* [in] */ AudioManagerElastos* owner);
 

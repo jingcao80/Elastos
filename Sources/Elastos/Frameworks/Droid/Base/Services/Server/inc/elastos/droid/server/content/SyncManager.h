@@ -99,6 +99,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SyncManager::SyncAlarmIntentReceiver")
+
         SyncAlarmIntentReceiver(
             /* [in] */ SyncManager* host);
 
@@ -449,6 +451,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SyncManager::StorageIntentReceiver")
+
         StorageIntentReceiver(
             /* [in] */ SyncManager* host);
 
@@ -464,6 +468,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SyncManager::BootCompletedReceiver")
+
         BootCompletedReceiver(
             /* [in] */ SyncManager* host);
 
@@ -479,6 +485,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SyncManager::AccountsUpdatedReceiver")
+
         AccountsUpdatedReceiver(
             /* [in] */ SyncManager* host);
 
@@ -494,6 +502,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SyncManager::ConnectivityIntentReceiver")
+
         ConnectivityIntentReceiver(
             /* [in] */ SyncManager* host);
 
@@ -509,6 +519,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SyncManager::ShutdownIntentReceiver")
+
         ShutdownIntentReceiver(
             /* [in] */ SyncManager* host);
 
@@ -524,6 +536,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("SyncManager::UserIntentReceiver")
+
         UserIntentReceiver(
             /* [in] */ SyncManager* host);
 

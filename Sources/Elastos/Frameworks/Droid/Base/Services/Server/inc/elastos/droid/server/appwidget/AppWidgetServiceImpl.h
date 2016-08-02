@@ -81,6 +81,8 @@ public:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AppWidgetServiceImpl::InnerBroadcastReceiver")
+
         InnerBroadcastReceiver();
 
         CARAPI constructor();

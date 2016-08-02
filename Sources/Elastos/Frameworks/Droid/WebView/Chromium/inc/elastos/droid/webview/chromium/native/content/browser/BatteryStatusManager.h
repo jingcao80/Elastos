@@ -36,6 +36,8 @@ private:
     : public BroadcastReceiver
   {
   public:
+    TO_STRING_IMPL("BatteryStatusManager::InnerBroadcastReceiver")
+
     InnerBroadcastReceiver(
       /* [in] */ BatteryStatusManager* owner);
 

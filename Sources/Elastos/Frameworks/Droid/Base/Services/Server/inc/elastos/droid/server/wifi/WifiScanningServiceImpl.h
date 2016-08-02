@@ -380,6 +380,8 @@ public:
             : public BroadcastReceiver
         {
         public:
+            TO_STRING_IMPL("WifiScanningServiceImpl::InnerBroadcastReceiver3")
+
             InnerBroadcastReceiver3(
                 /* [in] */ WifiChangeStateMachine* owner);
 
@@ -529,6 +531,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiScanningServiceImpl::InnerBroadcastReceiver1")
+
         InnerBroadcastReceiver1(
             /* [in] */ WifiScanningServiceImpl* owner);
 

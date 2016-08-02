@@ -128,6 +128,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("NetworkMonitor::CustomIntentReceiver")
+
         CustomIntentReceiver(
             /* [in] */ const String& action,
             /* [in] */ Int32 token,
@@ -180,6 +182,8 @@ private:
             : public BroadcastReceiver
         {
         public:
+            TO_STRING_IMPL("NetworkMonitor::CaptivePortalLoggedInBroadcastReceiver")
+
             CaptivePortalLoggedInBroadcastReceiver(
                 /* [in] */ Int32 token,
                 /* [in] */ NetworkMonitor* host);

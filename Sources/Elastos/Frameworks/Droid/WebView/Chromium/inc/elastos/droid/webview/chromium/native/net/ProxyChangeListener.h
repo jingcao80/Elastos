@@ -53,6 +53,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ProxyChangeListener::ProxyReceiver")
+
         ProxyReceiver(
             /* [in] */ ProxyChangeListener* owner);
 

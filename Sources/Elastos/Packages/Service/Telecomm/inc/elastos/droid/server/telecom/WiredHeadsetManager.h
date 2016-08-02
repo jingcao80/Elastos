@@ -28,6 +28,8 @@ public:
         , public IWiredHeadsetManagerWiredHeadsetBroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WiredHeadsetManager::WiredHeadsetBroadcastReceiver")
+
         CAR_INTERFACE_DECL()
 
         constructor(

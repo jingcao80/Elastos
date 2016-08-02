@@ -45,6 +45,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DateTimeSettingsSetupWizard::InitBroadcastReceiver")
+
         InitBroadcastReceiver(
             /* [in] */ DateTimeSettingsSetupWizard* host);
 

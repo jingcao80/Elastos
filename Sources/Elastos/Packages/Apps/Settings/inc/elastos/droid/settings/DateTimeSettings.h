@@ -38,6 +38,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DateTimeSettings::InitBroadcastReceiver")
+
         InitBroadcastReceiver(
             /* [in] */ DateTimeSettings* host);
 

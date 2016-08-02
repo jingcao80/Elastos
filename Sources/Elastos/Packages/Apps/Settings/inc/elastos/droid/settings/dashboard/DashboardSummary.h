@@ -55,6 +55,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("DashboardSummary::HomePackageReceiver")
+
         HomePackageReceiver(
             /* [in] */ DashboardSummary* host);
 

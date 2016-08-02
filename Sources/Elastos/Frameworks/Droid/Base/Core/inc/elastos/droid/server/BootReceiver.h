@@ -82,6 +82,8 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IIntent* intent);
 
+    TO_STRING_IMPL("BootReceiver")
+
 private:
     CARAPI RemoveOldUpdatePackages(
         /* [in] */ IContext* context);
