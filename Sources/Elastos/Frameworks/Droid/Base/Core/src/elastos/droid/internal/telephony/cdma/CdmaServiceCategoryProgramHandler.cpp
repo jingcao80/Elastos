@@ -1,6 +1,37 @@
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
-
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/internal/telephony/cdma/CCdmaServiceCategoryProgramHandler.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaServiceCategoryProgramHandler.h"
+#include "elastos/droid/internal/telephony/cdma/SmsMessage.h"
+#include "elastos/droid/internal/telephony/cdma/sms/CBearerData.h"
+#include "elastos/droid/internal/telephony/cdma/sms/CdmaSmsAddress.h"
+#include "elastos/droid/Manifest.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/telephony/SubscriptionManager.h"
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Internal::Telephony::Cdma::Sms::CBearerData;
+using Elastos::Droid::Internal::Telephony::Cdma::Sms::CdmaSmsAddress;
+using Elastos::Droid::Internal::Telephony::Cdma::Sms::IBearerData;
+using Elastos::Droid::Internal::Telephony::Cdma::Sms::ISmsEnvelope;
+using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
+using Elastos::Droid::Internal::Utility::IStateMachine;
+using Elastos::Droid::Manifest;
+using Elastos::Droid::Provider::ITelephonySmsIntents;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Droid::Telephony::SubscriptionManager;
+using Elastos::Core::StringUtils;
+using Elastos::IO::CByteArrayOutputStream;
+using Elastos::IO::CDataOutputStream;
+using Elastos::IO::IByteArrayOutputStream;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IDataOutputStream;
+using Elastos::IO::IOutputStream;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -15,8 +46,6 @@ CdmaServiceCategoryProgramHandler::InnerBroadcastReceiver::InnerBroadcastReceive
     /* [in] */ CdmaServiceCategoryProgramHandler* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode CdmaServiceCategoryProgramHandler::InnerBroadcastReceiver::OnReceive(
@@ -25,76 +54,82 @@ ECode CdmaServiceCategoryProgramHandler::InnerBroadcastReceiver::OnReceive(
 {
     VALIDATE_NOT_NULL(context);
     VALIDATE_NOT_NULL(intent);
-    // ==================before translated======================
-    // sendScpResults();
-    // if (DBG) log("mScpResultsReceiver finished");
-    // sendMessage(EVENT_BROADCAST_COMPLETE);
-    assert(0);
+    SendScpResults();
+    if (DBG) mOwner->Log(String("mScpResultsReceiver finished"));
+    mOwner->SendMessage(EVENT_BROADCAST_COMPLETE);
     return NOERROR;
 }
 
 void CdmaServiceCategoryProgramHandler::InnerBroadcastReceiver::SendScpResults()
 {
-    // ==================before translated======================
-    // int resultCode = getResultCode();
-    // if ((resultCode != Activity.RESULT_OK) && (resultCode != Intents.RESULT_SMS_HANDLED)) {
-    //     loge("SCP results error: result code = " + resultCode);
-    //     return;
-    // }
-    // Bundle extras = getResultExtras(false);
-    // if (extras == null) {
-    //     loge("SCP results error: missing extras");
-    //     return;
-    // }
-    // String sender = extras.getString("sender");
-    // if (sender == null) {
-    //     loge("SCP results error: missing sender extra.");
-    //     return;
-    // }
-    // ArrayList<CdmaSmsCbProgramResults> results
-    //         = extras.getParcelableArrayList("results");
-    // if (results == null) {
-    //     loge("SCP results error: missing results extra.");
-    //     return;
-    // }
-    //
-    // BearerData bData = new BearerData();
-    // bData.messageType = BearerData.MESSAGE_TYPE_SUBMIT;
-    // bData.messageId = SmsMessage.getNextMessageId();
-    // bData.serviceCategoryProgramResults = results;
-    // byte[] encodedBearerData = BearerData.encode(bData);
-    //
-    // ByteArrayOutputStream baos = new ByteArrayOutputStream(100);
-    // DataOutputStream dos = new DataOutputStream(baos);
+    Int32 resultCode;
+    GetResultCode(&resultCode);
+    if ((resultCode != IActivity::RESULT_OK) &&
+        (resultCode != ITelephonySmsIntents::RESULT_SMS_HANDLED)) {
+        mOwner->Loge(String("SCP results error: result code = ") + StringUtils::ToString(resultCode));
+        return;
+    }
+    AutoPtr<IBundle> extras;
+    GetResultExtras(FALSE, (IBundle**)&extras);
+    if (extras == NULL) {
+        mOwner->Loge(String("SCP results error: missing extras"));
+        return;
+    }
+    String sender;
+    extras->GetString(String("sender"), &sender);
+    if (sender == NULL) {
+        mOwner->Loge(String("SCP results error: missing sender extra."));
+        return;
+    }
+    AutoPtr<IArrayList> results;
+    extras->GetParcelableArrayList(String("results"), (IArrayList**)&results);
+    if (results == NULL) {
+        mOwner->Loge(String("SCP results error: missing results extra."));
+        return;
+    }
+
+    AutoPtr<CBearerData> bData;
+    CBearerData::NewByFriend((CBearerData**)&bData);
+    bData->messageType = IBearerData::MESSAGE_TYPE_SUBMIT;
+    bData->messageId = SmsMessage::GetNextMessageId();
+    bData->serviceCategoryProgramResults = results;
+    AutoPtr<ArrayOf<Byte> > encodedBearerData = CBearerData::Encode(IBearerData::Probe(bData));
+
+    AutoPtr<IByteArrayOutputStream> baos;
+    CByteArrayOutputStream::New(100, (IByteArrayOutputStream**)&baos);
+    AutoPtr<IDataOutputStream> dos;
+    CDataOutputStream::New(IOutputStream::Probe(baos), (IDataOutputStream**)&dos);
     // try {
-    //     dos.writeInt(SmsEnvelope.TELESERVICE_SCPT);
-    //     dos.writeInt(0); //servicePresent
-    //     dos.writeInt(0); //serviceCategory
-    //     CdmaSmsAddress destAddr = CdmaSmsAddress.parse(
-    //             PhoneNumberUtils.cdmaCheckAndProcessPlusCodeForSms(sender));
-    //     dos.write(destAddr.digitMode);
-    //     dos.write(destAddr.numberMode);
-    //     dos.write(destAddr.ton); // number_type
-    //     dos.write(destAddr.numberPlan);
-    //     dos.write(destAddr.numberOfDigits);
-    //     dos.write(destAddr.origBytes, 0, destAddr.origBytes.length); // digits
-    //     // Subaddress is not supported.
-    //     dos.write(0); //subaddressType
-    //     dos.write(0); //subaddr_odd
-    //     dos.write(0); //subaddr_nbr_of_digits
-    //     dos.write(encodedBearerData.length);
-    //     dos.write(encodedBearerData, 0, encodedBearerData.length);
-    //     // Ignore the RIL response. TODO: implement retry if SMS send fails.
-    //     mCi.sendCdmaSms(baos.toByteArray(), null);
+    dos->WriteInt32(ISmsEnvelope::TELESERVICE_SCPT);
+    dos->WriteInt32(0); //servicePresent
+    dos->WriteInt32(0); //serviceCategory
+    String str;
+    PhoneNumberUtils::CdmaCheckAndProcessPlusCodeForSms(sender, &str);
+    AutoPtr<CdmaSmsAddress> destAddr = CdmaSmsAddress::Parse(str);
+    dos->WriteInt32(destAddr->digitMode);
+    dos->WriteInt32(destAddr->numberMode);
+    dos->WriteInt32(destAddr->ton); // number_type
+    dos->WriteInt32(destAddr->numberPlan);
+    dos->WriteInt32(destAddr->numberOfDigits);
+    dos->WriteBytes(destAddr->origBytes); // digits
+    // Subaddress is not supported.
+    dos->WriteInt32(0); //subaddressType
+    dos->WriteInt32(0); //subaddr_odd
+    dos->WriteInt32(0); //subaddr_nbr_of_digits
+    dos->WriteInt32(encodedBearerData->GetLength());
+    dos->WriteBytes(encodedBearerData);
+    // Ignore the RIL response. TODO: implement retry if SMS send fails.
+    AutoPtr<ArrayOf<Byte> > array;
+    baos->ToByteArray((ArrayOf<Byte>**)&array);
+    mOwner->mCi->SendCdmaSms(array, NULL);
     // } catch (IOException e) {
-    //     loge("exception creating SCP results PDU", e);
+    //     mOwner->Loge("exception creating SCP results PDU", e);
     // } finally {
-    //     try {
-    //         dos.close();
-    //     } catch (IOException ignored) {
-    //     }
+        // try {
+    ICloseable::Probe(dos)->Close();
+        // } catch (IOException ignored) {
+        // }
     // }
-    assert(0);
 }
 
 //=====================================================================
@@ -110,10 +145,9 @@ ECode CdmaServiceCategoryProgramHandler::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* commandsInterface)
 {
-    // ==================before translated======================
-    // super("CdmaServiceCategoryProgramHandler", context, null);
-    // mContext = context;
-    // mCi = commandsInterface;
+    WakeLockStateMachine::constructor(String("CdmaServiceCategoryProgramHandler"), context, NULL);
+    mContext = context;
+    mCi = commandsInterface;
     return NOERROR;
 }
 
@@ -121,14 +155,11 @@ AutoPtr<ICdmaServiceCategoryProgramHandler> CdmaServiceCategoryProgramHandler::M
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* commandsInterface)
 {
-    // ==================before translated======================
-    // CdmaServiceCategoryProgramHandler handler = new CdmaServiceCategoryProgramHandler(
-    //         context, commandsInterface);
-    // handler.start();
-    // return handler;
-    assert(0);
-    AutoPtr<ICdmaServiceCategoryProgramHandler> empty;
-    return empty;
+    AutoPtr<ICdmaServiceCategoryProgramHandler> handler;
+    CCdmaServiceCategoryProgramHandler::New(context, commandsInterface,
+            (ICdmaServiceCategoryProgramHandler**)&handler);
+    IStateMachine::Probe(handler)->Start();
+    return handler;
 }
 
 ECode CdmaServiceCategoryProgramHandler::HandleSmsMessage(
@@ -136,38 +167,44 @@ ECode CdmaServiceCategoryProgramHandler::HandleSmsMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // if (message.obj instanceof SmsMessage) {
-    //     return handleServiceCategoryProgramData((SmsMessage) message.obj);
-    // } else {
-    //     loge("handleMessage got object of type: " + message.obj.getClass().getName());
-    //     return false;
-    // }
-    assert(0);
+
+    AutoPtr<IInterface> obj;
+    message->GetObj((IInterface**)&obj);
+    if (ISmsMessage::Probe(obj) != NULL) {
+        *result = HandleServiceCategoryProgramData(ISmsMessage::Probe(obj));
+    }
+    else {
+        // Loge(String("handleMessage got object of type: ") + message.obj.getClass().getName());
+        *result = FALSE;
+    }
     return NOERROR;
 }
 
 Boolean CdmaServiceCategoryProgramHandler::HandleServiceCategoryProgramData(
     /* [in] */ ISmsMessage* sms)
 {
-    // ==================before translated======================
-    // ArrayList<CdmaSmsCbProgramData> programDataList = sms.getSmsCbProgramData();
-    // if (programDataList == null) {
-    //     loge("handleServiceCategoryProgramData: program data list is null!");
-    //     return false;
-    // }
-    //
-    // Intent intent = new Intent(Intents.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION);
-    // intent.putExtra("sender", sms.getOriginatingAddress());
-    // intent.putParcelableArrayListExtra("program_data", programDataList);
-    // SubscriptionManager.putPhoneIdAndSubIdExtra(intent, mPhone.getPhoneId());
-    // mContext.sendOrderedBroadcast(intent, Manifest.permission.RECEIVE_SMS,
-    //         AppOpsManager.OP_RECEIVE_SMS, mScpResultsReceiver,
-    //         getHandler(), Activity.RESULT_OK, null, null);
-    // return true;
-    assert(0);
-    return FALSE;
+    AutoPtr<IArrayList> programDataList;
+    sms->GetSmsCbProgramData((IArrayList**)&programDataList);
+    if (programDataList == NULL) {
+        Loge(String("handleServiceCategoryProgramData: program data list is NULL!"));
+        return FALSE;
+    }
+
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonySmsIntents::SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION, (IIntent**)&intent);
+    String str;
+    ISmsMessageBase::Probe(sms)->GetOriginatingAddress(&str);
+    intent->PutExtra(String("sender"), str);
+    intent->PutParcelableArrayListExtra(String("program_data"), programDataList);
+    Int32 id;
+    mPhone->GetPhoneId(&id);
+    SubscriptionManager::PutPhoneIdAndSubIdExtra(intent, id);
+    AutoPtr<IHandler> handler;
+    GetHandler((IHandler**)&handler);
+    mContext->SendOrderedBroadcast(intent, Manifest::permission::RECEIVE_SMS,
+            IAppOpsManager::OP_RECEIVE_SMS, mScpResultsReceiver,
+            handler, IActivity::RESULT_OK, String(NULL), NULL);
+    return TRUE;
 }
 
 } // namespace Cdma

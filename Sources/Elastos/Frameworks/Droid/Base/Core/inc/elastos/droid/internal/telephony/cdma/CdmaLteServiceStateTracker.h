@@ -57,6 +57,7 @@ class CdmaLteServiceStateTracker
     : public CdmaServiceStateTracker
     , public ICdmaLteServiceStateTracker
 {
+    friend class CDMALTEPhone;
 public:
     TO_STRING_IMPL("CdmaLteServiceStateTracker")
 

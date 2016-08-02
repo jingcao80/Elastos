@@ -1,6 +1,15 @@
 #include "Elastos.Droid.Internal.h"
 
 #include "elastos/droid/internal/telephony/cdma/RuimPhoneBookInterfaceManager.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -14,21 +23,27 @@ namespace Cdma {
 CAR_INTERFACE_IMPL(RuimPhoneBookInterfaceManager, IccPhoneBookInterfaceManager, IRuimPhoneBookInterfaceManager);
 const String RuimPhoneBookInterfaceManager::LOGTAG("RuimPhoneBookIM");
 
+RuimPhoneBookInterfaceManager::~RuimPhoneBookInterfaceManager()
+{
+    // try {
+    // IccPhoneBookInterfaceManager::Finalize();
+    // } catch (Throwable throwable) {
+    //     Logger::E(LOGTAG, "Error while finalizing:", throwable);
+    // }
+    if(DBG) Logger::D(LOGTAG, "RuimPhoneBookInterfaceManager finalized");
+}
+
 ECode RuimPhoneBookInterfaceManager::constructor(
     /* [in] */ ICDMAPhone* phone)
 {
-    // ==================before translated======================
-    // super(phone);
-    // //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
+    IccPhoneBookInterfaceManager::constructor(IPhoneBase::Probe(phone));
+    //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
     return NOERROR;
 }
 
 ECode RuimPhoneBookInterfaceManager::Dispose()
 {
-    // ==================before translated======================
-    // super.dispose();
-    assert(0);
-    return NOERROR;
+    return IccPhoneBookInterfaceManager::Dispose();
 }
 
 ECode RuimPhoneBookInterfaceManager::GetAdnRecordsSize(
@@ -36,57 +51,43 @@ ECode RuimPhoneBookInterfaceManager::GetAdnRecordsSize(
     /* [out] */ ArrayOf<Int32>** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // if (DBG) logd("getAdnRecordsSize: efid=" + efid);
-    // synchronized(mLock) {
-    //     checkThread();
-    //     mRecordSize = new int[3];
-    //
-    //     //Using mBaseHandler, no difference in EVENT_GET_SIZE_DONE handling
-    //     AtomicBoolean status = new AtomicBoolean(false);
-    //     Message response = mBaseHandler.obtainMessage(EVENT_GET_SIZE_DONE, status);
-    //
-    //     IccFileHandler fh = mPhone.getIccFileHandler();
-    //     //IccFileHandler can be null if there is no icc card present.
-    //     if (fh != null) {
-    //         fh.getEFLinearRecordSize(efid, response);
-    //         waitForResult(status);
-    //     }
-    // }
-    //
-    // return mRecordSize;
-    assert(0);
-    return NOERROR;
-}
 
-void RuimPhoneBookInterfaceManager::Finalize()
-{
-    // ==================before translated======================
-    // try {
-    //     super.finalize();
-    // } catch (Throwable throwable) {
-    //     Rlog.e(LOGTAG, "Error while finalizing:", throwable);
-    // }
-    // if(DBG) Rlog.d(LOGTAG, "RuimPhoneBookInterfaceManager finalized");
-    assert(0);
+    if (DBG) Logd(String("getAdnRecordsSize: efid=") + StringUtils::ToString(efid));
+
+    AutoLock lock(mLock);
+    CheckThread();
+    mRecordSize = ArrayOf<Int32>::Alloc(3);
+
+    //Using mBaseHandler, no difference in EVENT_GET_SIZE_DONE handling
+    AutoPtr<IAtomicBoolean> status;
+    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&status);
+    AutoPtr<IMessage> response;
+    mBaseHandler->ObtainMessage(EVENT_GET_SIZE_DONE, status, (IMessage**)&response);
+
+    AutoPtr<IIccFileHandler> fh;
+    mPhone->GetIccFileHandler((IIccFileHandler**)&fh);
+    //IccFileHandler can be null if there is no icc card present.
+    if (fh != NULL) {
+        fh->GetEFLinearRecordSize(efid, response);
+        WaitForResult(status);
+    }
+
+    *result = mRecordSize;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode RuimPhoneBookInterfaceManager::Logd(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "[RuimPbInterfaceManager] " + msg);
-    assert(0);
+    Logger::D(LOGTAG, "[RuimPbInterfaceManager] %d", msg.string());
     return NOERROR;
 }
 
 ECode RuimPhoneBookInterfaceManager::Loge(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "[RuimPbInterfaceManager] " + msg);
-    assert(0);
+    Logger::E(LOGTAG, "[RuimPbInterfaceManager] %d", msg.string());
     return NOERROR;
 }
 

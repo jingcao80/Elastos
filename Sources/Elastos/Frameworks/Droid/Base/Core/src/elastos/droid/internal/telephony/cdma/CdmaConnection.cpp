@@ -1,6 +1,41 @@
 #include "Elastos.Droid.Internal.h"
-
+#include "elastos/droid/internal/telephony/cdma/CdmaCall.h"
+#include "elastos/droid/internal/telephony/cdma/CdmaCallTracker.h"
+#include "elastos/droid/internal/telephony/cdma/CdmaCallWaitingNotification.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaConnection.h"
+#include "elastos/droid/internal/telephony/cdma/CDMAPhone.h"
+#include "elastos/droid/internal/telephony/DriverCall.h"
+#include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Internal::Telephony::DriverCall;
+using Elastos::Droid::Internal::Telephony::Uicc::AppState;
+using Elastos::Droid::Internal::Telephony::Uicc::APPSTATE_UNKNOWN;
+using Elastos::Droid::Internal::Telephony::Uicc::APPSTATE_READY;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Telephony::IDisconnectCause;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::CSystem;
+using Elastos::Core::ISystem;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -12,29 +47,30 @@ namespace Cdma {
 //                      CdmaConnection::MyHandler
 //=====================================================================
 CdmaConnection::MyHandler::MyHandler(
-    /* [in] */ ILooper* l)
+    /* [in] */ ILooper* l,
+    /* [in] */ CdmaConnection* host)
+    : Handler(l)
+    , mHost(host)
 {
-    // ==================before translated======================
-    // super(l);
 }
 
 ECode CdmaConnection::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     VALIDATE_NOT_NULL(msg);
-    // ==================before translated======================
-    //
-    // switch (msg.what) {
-    //     case EVENT_NEXT_POST_DIAL:
-    //     case EVENT_DTMF_DONE:
-    //     case EVENT_PAUSE_DONE:
-    //         processNextPostDialChar();
-    //         break;
-    //     case EVENT_WAKE_LOCK_TIMEOUT:
-    //         releaseWakeLock();
-    //         break;
-    // }
-    assert(0);
+
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case EVENT_NEXT_POST_DIAL:
+        case EVENT_DTMF_DONE:
+        case EVENT_PAUSE_DONE:
+            mHost->ProcessNextPostDialChar();
+            break;
+        case EVENT_WAKE_LOCK_TIMEOUT:
+            mHost->ReleaseWakeLock();
+            break;
+    }
     return NOERROR;
 }
 
@@ -52,107 +88,128 @@ const Int32 CdmaConnection::PAUSE_DELAY_MILLIS;
 const Boolean CdmaConnection::VDBG = FALSE;
 
 CdmaConnection::CdmaConnection()
+    : mDisconnected(FALSE)
+    , mIndex(0)
+    , mDisconnectTime(0)
+    , mNextPostDialChar(0)
+    , mCause(IDisconnectCause::NOT_DISCONNECTED)
+    , mPostDialState(PostDialState_NOT_STARTED)
+    , mPreciseCause(0)
 {
 }
 
 ECode CdmaConnection::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ IDriverCall* dc,
+    /* [in] */ IDriverCall* _dc,
     /* [in] */ ICdmaCallTracker* ct,
     /* [in] */ Int32 index)
 {
-    // ==================before translated======================
-    // createWakeLock(context);
-    // acquireWakeLock();
-    //
-    // mOwner = ct;
-    // mHandler = new MyHandler(mOwner.getLooper());
-    //
-    // mAddress = dc.number;
-    //
-    // mIsIncoming = dc.isMT;
-    // mCreateTime = System.currentTimeMillis();
-    // mCnapName = dc.name;
-    // mCnapNamePresentation = dc.namePresentation;
-    // mNumberPresentation = dc.numberPresentation;
-    //
-    // mIndex = index;
-    //
-    // mParent = parentFromDCState (dc.state);
-    // mParent.attach(this, dc);
+    CreateWakeLock(context);
+    AcquireWakeLock();
+
+    mOwner = ct;
+    AutoPtr<ILooper> looper;
+    IHandler::Probe(mOwner)->GetLooper((ILooper**)&looper);
+    mHandler = new MyHandler(looper, this);
+
+    AutoPtr<DriverCall> dc = (DriverCall*)_dc;
+    mAddress = dc->mNumber;
+
+    mIsIncoming = dc->mIsMT;
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&mCreateTime);
+    mCnapName = dc->mName;
+    mCnapNamePresentation = dc->mNamePresentation;
+    mNumberPresentation = dc->mNumberPresentation;
+
+    mIndex = index;
+
+    ParentFromDCState(dc->mState, (ICdmaCall**)&mParent);
+    ((CdmaCall*)mParent.Get())->Attach(this, _dc);
     return NOERROR;
 }
 
 ECode CdmaConnection::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ const String& dialString,
+    /* [in] */ const String& _dialString,
     /* [in] */ ICdmaCallTracker* ct,
     /* [in] */ ICdmaCall* parent)
 {
-    // ==================before translated======================
-    // createWakeLock(context);
-    // acquireWakeLock();
-    //
-    // mOwner = ct;
-    // mHandler = new MyHandler(mOwner.getLooper());
-    //
-    // mDialString = dialString;
-    // Rlog.d(LOGTAG, "[CDMAConn] CdmaConnection: dialString=" + dialString);
-    // dialString = formatDialString(dialString);
-    // Rlog.d(LOGTAG, "[CDMAConn] CdmaConnection:formated dialString=" + dialString);
-    //
-    // mAddress = PhoneNumberUtils.extractNetworkPortionAlt(dialString);
-    // mPostDialString = PhoneNumberUtils.extractPostDialPortion(dialString);
-    //
-    // mIndex = -1;
-    //
-    // mIsIncoming = false;
-    // mCnapName = null;
-    // mCnapNamePresentation = PhoneConstants.PRESENTATION_ALLOWED;
-    // mNumberPresentation = PhoneConstants.PRESENTATION_ALLOWED;
-    // mCreateTime = System.currentTimeMillis();
-    //
-    // if (parent != null) {
-    //     mParent = parent;
-    //
-    //     //for the three way call case, not change parent state
-    //     if (parent.mState == CdmaCall.State.ACTIVE) {
-    //         parent.attachFake(this, CdmaCall.State.ACTIVE);
-    //     } else {
-    //         parent.attachFake(this, CdmaCall.State.DIALING);
-    //     }
-    // }
+    String dialString = _dialString;
+
+    CreateWakeLock(context);
+    AcquireWakeLock();
+
+    mOwner = ct;
+    AutoPtr<ILooper> looper;
+    IHandler::Probe(mOwner)->GetLooper((ILooper**)&looper);
+    mHandler = new MyHandler(looper, this);
+
+    mDialString = dialString;
+    Logger::D(LOGTAG, "[CDMAConn] CdmaConnection: dialString=%s", dialString.string());
+    dialString = FormatDialString(dialString);
+    Logger::D(LOGTAG, "[CDMAConn] CdmaConnection:formated dialString=%s", dialString.string());
+
+    PhoneNumberUtils::ExtractNetworkPortionAlt(dialString, &mAddress);
+    PhoneNumberUtils::ExtractPostDialPortion(dialString, &mPostDialString);
+
+    mIndex = -1;
+
+    mIsIncoming = FALSE;
+    mCnapName = NULL;
+    mCnapNamePresentation = IPhoneConstants::PRESENTATION_ALLOWED;
+    mNumberPresentation = IPhoneConstants::PRESENTATION_ALLOWED;
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&mCreateTime);
+
+    if (parent != NULL) {
+        mParent = parent;
+
+        //for the three way call case, not change parent state
+        if (((CdmaCall*)parent)->mState == ICallState_ACTIVE) {
+            ((CdmaCall*)parent)->AttachFake(this, ICallState_ACTIVE);
+        }
+        else {
+            ((CdmaCall*)parent)->AttachFake(this, ICallState_DIALING);
+        }
+    }
     return NOERROR;
 }
 
 ECode CdmaConnection::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ ICdmaCallWaitingNotification* cw,
+    /* [in] */ ICdmaCallWaitingNotification* _cw,
     /* [in] */ ICdmaCallTracker* ct,
     /* [in] */ ICdmaCall* parent)
 {
-    // ==================before translated======================
-    // createWakeLock(context);
-    // acquireWakeLock();
-    //
-    // mOwner = ct;
-    // mHandler = new MyHandler(mOwner.getLooper());
-    // mAddress = cw.number;
-    // mNumberPresentation = cw.numberPresentation;
-    // mCnapName = cw.name;
-    // mCnapNamePresentation = cw.namePresentation;
-    // mIndex = -1;
-    // mIsIncoming = true;
-    // mCreateTime = System.currentTimeMillis();
-    // mConnectTime = 0;
-    // mParent = parent;
-    // parent.attachFake(this, CdmaCall.State.WAITING);
+    CreateWakeLock(context);
+    AcquireWakeLock();
+
+    mOwner = ct;
+    AutoPtr<ILooper> looper;
+    IHandler::Probe(mOwner)->GetLooper((ILooper**)&looper);
+    mHandler = new MyHandler(looper, this);
+
+    AutoPtr<CdmaCallWaitingNotification> cw = (CdmaCallWaitingNotification*)_cw;
+    mAddress = cw->number;
+    mNumberPresentation = cw->numberPresentation;
+    mCnapName = cw->name;
+    mCnapNamePresentation = cw->namePresentation;
+    mIndex = -1;
+    mIsIncoming = TRUE;
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&mCreateTime);
+    mConnectTime = 0;
+    mParent = parent;
+    ((CdmaCall*)parent)->AttachFake(this, ICallState_WAITING);
     return NOERROR;
 }
 
 ECode CdmaConnection::Dispose()
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -160,31 +217,39 @@ Boolean CdmaConnection::EqualsHandlesNulls(
     /* [in] */ IInterface* a,
     /* [in] */ IInterface* b)
 {
-    // ==================before translated======================
-    // return (a == null) ? (b == null) : a.equals (b);
-    assert(0);
-    return FALSE;
+    if (a == NULL) {
+        return (b == NULL);
+    }
+    else {
+        Boolean Boolean;
+        IObject::Probe(a)->Equals(b, &Boolean);
+        return Boolean;
+    }
 }
 
 ECode CdmaConnection::CompareTo(
-    /* [in] */ IDriverCall* c,
+    /* [in] */ IDriverCall* _c,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // On mobile originated (MO) calls, the phone number may have changed
-    // // due to a SIM Toolkit call control modification.
-    // //
-    // // We assume we know when MO calls are created (since we created them)
-    // // and therefore don't need to compare the phone number anyway.
-    // if (! (mIsIncoming || c.isMT)) return true;
+    // On mobile originated (MO) calls, the phone number may have changed
+    // due to a SIM Toolkit call control modification.
     //
-    // // ... but we can compare phone numbers on MT calls, and we have
-    // // no control over when they begin, so we might as well
-    //
-    // String cAddress = PhoneNumberUtils.stringFromStringAndTOA(c.number, c.TOA);
-    // return mIsIncoming == c.isMT && equalsHandlesNulls(mAddress, cAddress);
-    assert(0);
+    // We assume we know when MO calls are created (since we created them)
+    // and therefore don't need to compare the phone number anyway.
+    AutoPtr<DriverCall> c = (DriverCall*)_c;
+    if (! (mIsIncoming || c->mIsMT)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    // ... but we can compare phone numbers on MT calls, and we have
+    // no control over when they begin, so we might as well
+
+    String cAddress;
+    PhoneNumberUtils::StringFromStringAndTOA(c->mNumber, c->mTOA, &cAddress);
+    *result = mIsIncoming == c->mIsMT &&
+            EqualsHandlesNulls(CoreUtils::Convert(mAddress), CoreUtils::Convert(cAddress));
     return NOERROR;
 }
 
@@ -192,10 +257,7 @@ ECode CdmaConnection::GetOrigDialString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mDialString;
-    assert(0);
+    *result = mDialString;
     return NOERROR;
 }
 
@@ -203,10 +265,8 @@ ECode CdmaConnection::GetCall(
     /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mParent;
-    assert(0);
+    *result = ICall::Probe(mParent);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -214,9 +274,7 @@ ECode CdmaConnection::GetDisconnectTime(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mDisconnectTime;
-    assert(0);
+    *result = mDisconnectTime;
     return NOERROR;
 }
 
@@ -224,14 +282,15 @@ ECode CdmaConnection::GetHoldDurationMillis(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (getState() != CdmaCall.State.HOLDING) {
-    //     // If not holding, return 0
-    //     return 0;
-    // } else {
-    //     return SystemClock.elapsedRealtime() - mHoldingStartTime;
-    // }
-    assert(0);
+    ICallState state;
+    GetState(&state);
+    if (state != ICallState_HOLDING) {
+        // If not holding, return 0
+        *result = 0;
+    }
+    else {
+        *result = SystemClock::GetElapsedRealtime() - mHoldingStartTime;
+    }
     return NOERROR;
 }
 
@@ -239,9 +298,7 @@ ECode CdmaConnection::GetDisconnectCause(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCause;
-    assert(0);
+    *result = mCause;
     return NOERROR;
 }
 
@@ -249,37 +306,36 @@ ECode CdmaConnection::GetState(
     /* [out] */ ICallState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mDisconnected) {
-    //     return CdmaCall.State.DISCONNECTED;
-    // } else {
-    //     return super.getState();
-    // }
-    assert(0);
-    return NOERROR;
+    if (mDisconnected) {
+        *result = ICallState_DISCONNECTED;
+        return NOERROR;
+    }
+    else {
+        return Connection::GetState(result);
+    }
 }
 
 ECode CdmaConnection::Hangup()
 {
-    // ==================before translated======================
-    // if (!mDisconnected) {
-    //     mOwner.hangup(this);
-    // } else {
-    //     throw new CallStateException ("disconnected");
-    // }
-    assert(0);
+    if (!mDisconnected) {
+        ((CdmaCallTracker*)mOwner.Get())->Hangup(this);
+    }
+    else {
+        // throw new CallStateException ("disconnected");
+        return E_CALL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode CdmaConnection::Separate()
 {
-    // ==================before translated======================
-    // if (!mDisconnected) {
-    //     mOwner.separate(this);
-    // } else {
-    //     throw new CallStateException ("disconnected");
-    // }
-    assert(0);
+    if (!mDisconnected) {
+        ((CdmaCallTracker*)mOwner.Get())->Separate(this);
+    }
+    else {
+        // throw new CallStateException ("disconnected");
+        return E_CALL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -287,71 +343,59 @@ ECode CdmaConnection::GetPostDialState(
     /* [out] */ IConnectionPostDialState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPostDialState;
-    assert(0);
+    *result = mPostDialState;
     return NOERROR;
 }
 
 ECode CdmaConnection::ProceedAfterWaitChar()
 {
-    // ==================before translated======================
-    // if (mPostDialState != PostDialState.WAIT) {
-    //     Rlog.w(LOGTAG, "CdmaConnection.proceedAfterWaitChar(): Expected "
-    //         + "getPostDialState() to be WAIT but was " + mPostDialState);
-    //     return;
-    // }
-    //
-    // setPostDialState(PostDialState.STARTED);
-    //
-    // processNextPostDialChar();
-    assert(0);
+    if (mPostDialState != PostDialState_WAIT) {
+        Logger::W(LOGTAG, "CdmaConnection.proceedAfterWaitChar(): Expected getPostDialState() to be WAIT but was %d", mPostDialState);
+        return NOERROR;
+    }
+
+    SetPostDialState(PostDialState_STARTED);
+
+    ProcessNextPostDialChar();
     return NOERROR;
 }
 
 ECode CdmaConnection::ProceedAfterWildChar(
     /* [in] */ const String& str)
 {
-    // ==================before translated======================
-    // if (mPostDialState != PostDialState.WILD) {
-    //     Rlog.w(LOGTAG, "CdmaConnection.proceedAfterWaitChar(): Expected "
-    //         + "getPostDialState() to be WILD but was " + mPostDialState);
-    //     return;
-    // }
-    //
-    // setPostDialState(PostDialState.STARTED);
-    //
-    // // make a new postDialString, with the wild char replacement string
-    // // at the beginning, followed by the remaining postDialString.
-    //
-    // StringBuilder buf = new StringBuilder(str);
-    // buf.append(mPostDialString.substring(mNextPostDialChar));
-    // mPostDialString = buf.toString();
-    // mNextPostDialChar = 0;
-    // if (Phone.DEBUG_PHONE) {
-    //     log("proceedAfterWildChar: new postDialString is " +
-    //             mPostDialString);
-    // }
-    //
-    // processNextPostDialChar();
-    assert(0);
+    if (mPostDialState != PostDialState_WILD) {
+        Logger::W(LOGTAG, "CdmaConnection.proceedAfterWaitChar(): Expected getPostDialState() to be WILD but was %d", mPostDialState);
+        return NOERROR;
+    }
+
+    SetPostDialState(PostDialState_STARTED);
+
+    // make a new postDialString, with the wild char replacement string
+    // at the beginning, followed by the remaining postDialString.
+
+    StringBuilder buf(str);
+    buf.Append(mPostDialString.Substring(mNextPostDialChar));
+    buf.ToString(&mPostDialString);
+    mNextPostDialChar = 0;
+    if (IPhone::DEBUG_PHONE) {
+        Log(String("proceedAfterWildChar: new postDialString is ") +
+                mPostDialString);
+    }
+
+    ProcessNextPostDialChar();
     return NOERROR;
 }
 
 ECode CdmaConnection::CancelPostDial()
 {
-    // ==================before translated======================
-    // setPostDialState(PostDialState.CANCELLED);
-    assert(0);
+    SetPostDialState(PostDialState_CANCELLED);
     return NOERROR;
 }
 
 ECode CdmaConnection::OnHangupLocal()
 {
-    // ==================before translated======================
-    // mCause = DisconnectCause.LOCAL;
-    // mPreciseCause = 0;
-    assert(0);
+    mCause = IDisconnectCause::LOCAL;
+    mPreciseCause = 0;
     return NOERROR;
 }
 
@@ -360,84 +404,121 @@ ECode CdmaConnection::DisconnectCauseFromCode(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // /**
-    //  * See 22.001 Annex F.4 for mapping of cause codes
-    //  * to local tones
-    //  */
-    //
-    // switch (causeCode) {
-    //     case CallFailCause.USER_BUSY:
-    //         return DisconnectCause.BUSY;
-    //     case CallFailCause.NO_CIRCUIT_AVAIL:
-    //         return DisconnectCause.CONGESTION;
-    //     case CallFailCause.ACM_LIMIT_EXCEEDED:
-    //         return DisconnectCause.LIMIT_EXCEEDED;
-    //     case CallFailCause.CALL_BARRED:
-    //         return DisconnectCause.CALL_BARRED;
-    //     case CallFailCause.FDN_BLOCKED:
-    //         return DisconnectCause.FDN_BLOCKED;
-    //     case CallFailCause.DIAL_MODIFIED_TO_USSD:
-    //         return DisconnectCause.DIAL_MODIFIED_TO_USSD;
-    //     case CallFailCause.DIAL_MODIFIED_TO_SS:
-    //         return DisconnectCause.DIAL_MODIFIED_TO_SS;
-    //     case CallFailCause.DIAL_MODIFIED_TO_DIAL:
-    //         return DisconnectCause.DIAL_MODIFIED_TO_DIAL;
-    //     case CallFailCause.CDMA_LOCKED_UNTIL_POWER_CYCLE:
-    //         return DisconnectCause.CDMA_LOCKED_UNTIL_POWER_CYCLE;
-    //     case CallFailCause.CDMA_DROP:
-    //         return DisconnectCause.CDMA_DROP;
-    //     case CallFailCause.CDMA_INTERCEPT:
-    //         return DisconnectCause.CDMA_INTERCEPT;
-    //     case CallFailCause.CDMA_REORDER:
-    //         return DisconnectCause.CDMA_REORDER;
-    //     case CallFailCause.CDMA_SO_REJECT:
-    //         return DisconnectCause.CDMA_SO_REJECT;
-    //     case CallFailCause.CDMA_RETRY_ORDER:
-    //         return DisconnectCause.CDMA_RETRY_ORDER;
-    //     case CallFailCause.CDMA_ACCESS_FAILURE:
-    //         return DisconnectCause.CDMA_ACCESS_FAILURE;
-    //     case CallFailCause.CDMA_PREEMPTED:
-    //         return DisconnectCause.CDMA_PREEMPTED;
-    //     case CallFailCause.CDMA_NOT_EMERGENCY:
-    //         return DisconnectCause.CDMA_NOT_EMERGENCY;
-    //     case CallFailCause.CDMA_ACCESS_BLOCKED:
-    //         return DisconnectCause.CDMA_ACCESS_BLOCKED;
-    //     case CallFailCause.ERROR_UNSPECIFIED:
-    //     case CallFailCause.NORMAL_CLEARING:
-    //     default:
-    //         CDMAPhone phone = mOwner.mPhone;
-    //         int serviceState = phone.getServiceState().getState();
-    //         UiccCardApplication app = UiccController
-    //                 .getInstance()
-    //                 .getUiccCardApplication(UiccController.APP_FAM_3GPP2);
-    //         AppState uiccAppState = (app != null) ? app.getState() : AppState.APPSTATE_UNKNOWN;
-    //         if (serviceState == ServiceState.STATE_POWER_OFF) {
-    //             return DisconnectCause.POWER_OFF;
-    //         } else if (serviceState == ServiceState.STATE_OUT_OF_SERVICE
-    //                 || serviceState == ServiceState.STATE_EMERGENCY_ONLY) {
-    //             return DisconnectCause.OUT_OF_SERVICE;
-    //         } else if (phone.mCdmaSubscriptionSource ==
-    //                 CdmaSubscriptionSourceManager.SUBSCRIPTION_FROM_RUIM
-    //                 && uiccAppState != AppState.APPSTATE_READY) {
-    //             return DisconnectCause.ICC_ERROR;
-    //         } else if (causeCode==CallFailCause.NORMAL_CLEARING) {
-    //             return DisconnectCause.NORMAL;
-    //         } else {
-    //             return DisconnectCause.ERROR_UNSPECIFIED;
-    //         }
-    // }
-    assert(0);
+    /**
+     * See 22.001 Annex F.4 for mapping of cause codes
+     * to local tones
+     */
+
+    switch (causeCode) {
+        case ICallFailCause::USER_BUSY:
+            *result = IDisconnectCause::BUSY;
+            return NOERROR;
+        case ICallFailCause::NO_CIRCUIT_AVAIL:
+            *result = IDisconnectCause::CONGESTION;
+            return NOERROR;
+        case ICallFailCause::ACM_LIMIT_EXCEEDED:
+            *result = IDisconnectCause::LIMIT_EXCEEDED;
+            return NOERROR;
+        case ICallFailCause::CALL_BARRED:
+            *result = IDisconnectCause::CALL_BARRED;
+            return NOERROR;
+        case ICallFailCause::FDN_BLOCKED:
+            *result = IDisconnectCause::FDN_BLOCKED;
+            return NOERROR;
+        case ICallFailCause::DIAL_MODIFIED_TO_USSD:
+            *result = IDisconnectCause::DIAL_MODIFIED_TO_USSD;
+            return NOERROR;
+        case ICallFailCause::DIAL_MODIFIED_TO_SS:
+            *result = IDisconnectCause::DIAL_MODIFIED_TO_SS;
+            return NOERROR;
+        case ICallFailCause::DIAL_MODIFIED_TO_DIAL:
+            *result = IDisconnectCause::DIAL_MODIFIED_TO_DIAL;
+            return NOERROR;
+        case ICallFailCause::CDMA_LOCKED_UNTIL_POWER_CYCLE:
+            *result = IDisconnectCause::CDMA_LOCKED_UNTIL_POWER_CYCLE;
+            return NOERROR;
+        case ICallFailCause::CDMA_DROP:
+            *result = IDisconnectCause::CDMA_DROP;
+            return NOERROR;
+        case ICallFailCause::CDMA_INTERCEPT:
+            *result = IDisconnectCause::CDMA_INTERCEPT;
+            return NOERROR;
+        case ICallFailCause::CDMA_REORDER:
+            *result = IDisconnectCause::CDMA_REORDER;
+            return NOERROR;
+        case ICallFailCause::CDMA_SO_REJECT:
+            *result = IDisconnectCause::CDMA_SO_REJECT;
+            return NOERROR;
+        case ICallFailCause::CDMA_RETRY_ORDER:
+            *result = IDisconnectCause::CDMA_RETRY_ORDER;
+            return NOERROR;
+        case ICallFailCause::CDMA_ACCESS_FAILURE:
+            *result = IDisconnectCause::CDMA_ACCESS_FAILURE;
+            return NOERROR;
+        case ICallFailCause::CDMA_PREEMPTED:
+            *result = IDisconnectCause::CDMA_PREEMPTED;
+            return NOERROR;
+        case ICallFailCause::CDMA_NOT_EMERGENCY:
+            *result = IDisconnectCause::CDMA_NOT_EMERGENCY;
+            return NOERROR;
+        case ICallFailCause::CDMA_ACCESS_BLOCKED:
+            *result = IDisconnectCause::CDMA_ACCESS_BLOCKED;
+            return NOERROR;
+        case ICallFailCause::ERROR_UNSPECIFIED:
+        case ICallFailCause::NORMAL_CLEARING:
+        default: {
+            AutoPtr<ICDMAPhone> phone = ((CdmaCallTracker*)mOwner.Get())->mPhone;
+            AutoPtr<IServiceState> ss;
+            IPhone::Probe(phone)->GetServiceState((IServiceState**)&ss);
+            Int32 serviceState;
+            ss->GetState(&serviceState);
+            AutoPtr<IUiccCardApplication> app;
+            UiccController::GetInstance()->GetUiccCardApplication(
+                    IUiccController::APP_FAM_3GPP2, (IUiccCardApplication**)&app);
+            AppState uiccAppState;
+            if (app != NULL) {
+                app->GetState(&uiccAppState);
+            }
+            else {
+                uiccAppState = APPSTATE_UNKNOWN;
+            }
+
+            if (serviceState == IServiceState::STATE_POWER_OFF) {
+                *result = IDisconnectCause::POWER_OFF;
+                return NOERROR;
+            }
+            else if (serviceState == IServiceState::STATE_OUT_OF_SERVICE
+                    || serviceState == IServiceState::STATE_EMERGENCY_ONLY) {
+                *result = IDisconnectCause::OUT_OF_SERVICE;
+            return NOERROR;
+            }
+            else if (((CDMAPhone*)phone.Get())->mCdmaSubscriptionSource ==
+                    ICdmaSubscriptionSourceManager::SUBSCRIPTION_FROM_RUIM
+                    && uiccAppState != APPSTATE_READY) {
+                *result = IDisconnectCause::ICC_ERROR;
+            return NOERROR;
+            }
+            else if (causeCode == ICallFailCause::NORMAL_CLEARING) {
+                *result = IDisconnectCause::NORMAL;
+                return NOERROR;
+            }
+            else {
+                *result = IDisconnectCause::ERROR_UNSPECIFIED;
+                return NOERROR;
+            }
+        }
+    }
     return NOERROR;
 }
 
 ECode CdmaConnection::OnRemoteDisconnect(
     /* [in] */ Int32 causeCode)
 {
-    // ==================before translated======================
-    // this.mPreciseCause = causeCode;
-    // onDisconnect(disconnectCauseFromCode(causeCode));
-    assert(0);
+    mPreciseCause = causeCode;
+    Int32 val;
+    DisconnectCauseFromCode(causeCode, &val);
+    Boolean b;
+    OnDisconnect(val, &b);
     return NOERROR;
 }
 
@@ -446,129 +527,132 @@ ECode CdmaConnection::OnDisconnect(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean changed = false;
-    //
-    // mCause = cause;
-    //
-    // if (!mDisconnected) {
-    //     doDisconnect();
-    //     if (VDBG) Rlog.d(LOGTAG, "onDisconnect: cause=" + cause);
-    //
-    //     mOwner.mPhone.notifyDisconnect(this);
-    //
-    //     if (mParent != null) {
-    //         changed = mParent.connectionDisconnected(this);
-    //     }
-    // }
-    // releaseWakeLock();
-    // return changed;
-    assert(0);
+    Boolean changed = FALSE;
+
+    mCause = cause;
+
+    if (!mDisconnected) {
+        DoDisconnect();
+        if (VDBG) Logger::D(LOGTAG, "onDisconnect: cause=%d", cause);
+
+        ((CDMAPhone*)((CdmaCallTracker*)mOwner.Get())->mPhone.Get())->NotifyDisconnect(this);
+
+        if (mParent != NULL) {
+            ((CdmaCall*)mParent.Get())->ConnectionDisconnected(this, &changed);
+        }
+    }
+    ReleaseWakeLock();
+    *result = changed;
     return NOERROR;
 }
 
 ECode CdmaConnection::OnLocalDisconnect()
 {
-    // ==================before translated======================
-    // if (!mDisconnected) {
-    //     doDisconnect();
-    //     if (VDBG) Rlog.d(LOGTAG, "onLoalDisconnect" );
-    //
-    //     if (mParent != null) {
-    //         mParent.detach(this);
-    //     }
-    // }
-    // releaseWakeLock();
-    assert(0);
+    if (!mDisconnected) {
+        DoDisconnect();
+        if (VDBG) Logger::D(LOGTAG, "onLoalDisconnect" );
+
+        if (mParent != NULL) {
+            ((CdmaCall*)mParent.Get())->Detach(this);
+        }
+    }
+    ReleaseWakeLock();
     return NOERROR;
 }
 
 ECode CdmaConnection::Update(
-    /* [in] */ IDriverCall* dc,
+    /* [in] */ IDriverCall* _dc,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // CdmaCall newParent;
-    // boolean changed = false;
-    // boolean wasConnectingInOrOut = isConnectingInOrOut();
-    // boolean wasHolding = (getState() == CdmaCall.State.HOLDING);
-    //
-    // newParent = parentFromDCState(dc.state);
-    //
-    // if (Phone.DEBUG_PHONE) log("parent= " +mParent +", newParent= " + newParent);
-    //
-    // log(" mNumberConverted " + mNumberConverted);
-    // if (!equalsHandlesNulls(mAddress, dc.number) && (!mNumberConverted
-    //         || !equalsHandlesNulls(mConvertedNumber, dc.number)))  {
-    //     if (Phone.DEBUG_PHONE) log("update: phone # changed!");
-    //     mAddress = dc.number;
-    //     changed = true;
-    // }
-    //
-    // // A null cnapName should be the same as ""
-    // if (TextUtils.isEmpty(dc.name)) {
-    //     if (!TextUtils.isEmpty(mCnapName)) {
-    //         changed = true;
-    //         mCnapName = "";
-    //     }
-    // } else if (!dc.name.equals(mCnapName)) {
-    //     changed = true;
-    //     mCnapName = dc.name;
-    // }
-    //
-    // if (Phone.DEBUG_PHONE) log("--dssds----"+mCnapName);
-    // mCnapNamePresentation = dc.namePresentation;
-    // mNumberPresentation = dc.numberPresentation;
-    //
-    // if (newParent != mParent) {
-    //     if (mParent != null) {
-    //         mParent.detach(this);
-    //     }
-    //     newParent.attach(this, dc);
-    //     mParent = newParent;
-    //     changed = true;
-    // } else {
-    //     boolean parentStateChange;
-    //     parentStateChange = mParent.update (this, dc);
-    //     changed = changed || parentStateChange;
-    // }
-    //
-    // /** Some state-transition events */
-    //
-    // if (Phone.DEBUG_PHONE) log(
-    //         "Update, wasConnectingInOrOut=" + wasConnectingInOrOut +
-    //         ", wasHolding=" + wasHolding +
-    //         ", isConnectingInOrOut=" + isConnectingInOrOut() +
-    //         ", changed=" + changed);
-    //
-    //
-    // if (wasConnectingInOrOut && !isConnectingInOrOut()) {
-    //     onConnectedInOrOut();
-    // }
-    //
-    // if (changed && !wasHolding && (getState() == CdmaCall.State.HOLDING)) {
-    //     // We've transitioned into HOLDING
-    //     onStartedHolding();
-    // }
-    //
-    // return changed;
-    assert(0);
+    AutoPtr<ICdmaCall> newParent;
+    Boolean changed = FALSE;
+    Boolean wasConnectingInOrOut = IsConnectingInOrOut();
+    ICallState state;
+    GetState(&state);
+    Boolean wasHolding = (state == ICallState_HOLDING);
+
+    AutoPtr<DriverCall> dc = (DriverCall*)_dc;
+    ParentFromDCState(dc->mState, (ICdmaCall**)&newParent);
+
+    // if (IPhone::DEBUG_PHONE) Log(String("parent= ") + mParent +", newParent= " + newParent);
+
+    Log(String(" mNumberConverted ") + StringUtils::BooleanToString(mNumberConverted));
+    if (!EqualsHandlesNulls(CoreUtils::Convert(mAddress),
+            CoreUtils::Convert(dc->mNumber))
+            && (!mNumberConverted
+            || !EqualsHandlesNulls(CoreUtils::Convert(mConvertedNumber),
+            CoreUtils::Convert(dc->mNumber))))  {
+        if (IPhone::DEBUG_PHONE) Log(String("update: phone # changed!"));
+        mAddress = dc->mNumber;
+        changed = TRUE;
+    }
+
+    // A NULL cnapName should be the same as ""
+    if (dc->mName.IsEmpty()) {
+        if (!mCnapName.IsEmpty()) {
+            changed = TRUE;
+            mCnapName = String("");
+        }
+    }
+    else if (!dc->mName.Equals(mCnapName)) {
+        changed = TRUE;
+        mCnapName = dc->mName;
+    }
+
+    if (IPhone::DEBUG_PHONE) Log(String("--dssds----") + mCnapName);
+    mCnapNamePresentation = dc->mNamePresentation;
+    mNumberPresentation = dc->mNumberPresentation;
+
+    if (newParent != mParent) {
+        if (mParent != NULL) {
+            ((CdmaCall*)mParent.Get())->Detach(this);
+        }
+        ((CdmaCall*)newParent.Get())->Attach(this, dc);
+        mParent = newParent;
+        changed = TRUE;
+    }
+    else {
+        Boolean parentStateChange;
+        ((CdmaCall*)mParent.Get())->Update(this, dc, &parentStateChange);
+        changed = changed || parentStateChange;
+    }
+
+    /** Some state-transition events */
+
+    Boolean b = IsConnectingInOrOut();
+    if (IPhone::DEBUG_PHONE) Log(
+            String("Update, wasConnectingInOrOut=") +
+            StringUtils::BooleanToString(wasConnectingInOrOut) +
+            ", wasHolding=" + StringUtils::BooleanToString(wasHolding) +
+            ", isConnectingInOrOut=" + StringUtils::BooleanToString(b) +
+            ", changed=" + StringUtils::BooleanToString(changed));
+
+
+    if (wasConnectingInOrOut && !b) {
+        OnConnectedInOrOut();
+    }
+
+    GetState(&state);
+    if (changed && !wasHolding && (state == ICallState_HOLDING)) {
+        // We've transitioned into HOLDING
+        OnStartedHolding();
+    }
+
+    *result = changed;
     return NOERROR;
 }
 
 ECode CdmaConnection::FakeHoldBeforeDial()
 {
-    // ==================before translated======================
-    // if (mParent != null) {
-    //     mParent.detach(this);
-    // }
-    //
-    // mParent = mOwner.mBackgroundCall;
-    // mParent.attachFake(this, CdmaCall.State.HOLDING);
-    //
-    // onStartedHolding();
-    assert(0);
+    if (mParent != NULL) {
+        ((CdmaCall*)mParent.Get())->Detach(this);
+    }
+
+    mParent = ((CdmaCallTracker*)mOwner.Get())->mBackgroundCall;
+    ((CdmaCall*)mParent.Get())->AttachFake(this, ICallState_HOLDING);
+
+    OnStartedHolding();
     return NOERROR;
 }
 
@@ -576,46 +660,49 @@ ECode CdmaConnection::GetCDMAIndex(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mIndex >= 0) {
-    //     return mIndex + 1;
-    // } else {
-    //     throw new CallStateException ("CDMA connection index not assigned");
-    // }
-    assert(0);
+    *result = 0;
+
+    if (mIndex >= 0) {
+        *result = mIndex + 1;
+        return NOERROR;
+    }
+    else {
+        // throw new CallStateException ("CDMA connection index not assigned");
+        return E_CALL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode CdmaConnection::OnConnectedInOrOut()
 {
-    // ==================before translated======================
-    // mConnectTime = System.currentTimeMillis();
-    // mConnectTimeReal = SystemClock.elapsedRealtime();
-    // mDuration = 0;
-    //
-    // // bug #678474: incoming call interpreted as missed call, even though
-    // // it sounds like the user has picked up the call.
-    // if (Phone.DEBUG_PHONE) {
-    //     log("onConnectedInOrOut: connectTime=" + mConnectTime);
-    // }
-    //
-    // if (!mIsIncoming) {
-    //     // outgoing calls only
-    //     processNextPostDialChar();
-    // } else {
-    //     // Only release wake lock for incoming calls, for outgoing calls the wake lock
-    //     // will be released after any pause-dial is completed
-    //     releaseWakeLock();
-    // }
-    assert(0);
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&mConnectTime);
+
+    mConnectTimeReal = SystemClock::GetElapsedRealtime();
+    mDuration = 0;
+
+    // bug #678474: incoming call interpreted as missed call, even though
+    // it sounds like the user has picked up the call.
+    if (IPhone::DEBUG_PHONE) {
+        Log(String("onConnectedInOrOut: connectTime=") + StringUtils::ToString(mConnectTime));
+    }
+
+    if (!mIsIncoming) {
+        // outgoing calls only
+        ProcessNextPostDialChar();
+    }
+    else {
+        // Only release wake lock for incoming calls, for outgoing calls the wake lock
+        // will be released after any pause-dial is completed
+        ReleaseWakeLock();
+    }
     return NOERROR;
 }
 
 ECode CdmaConnection::OnStartedHolding()
 {
-    // ==================before translated======================
-    // mHoldingStartTime = SystemClock.elapsedRealtime();
-    assert(0);
+    mHoldingStartTime = SystemClock::GetElapsedRealtime();
     return NOERROR;
 }
 
@@ -623,28 +710,28 @@ ECode CdmaConnection::GetRemainingPostDialString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // if (mPostDialState == PostDialState.CANCELLED
-    //         || mPostDialState == PostDialState.COMPLETE
-    //         || mPostDialString == null
-    //         || mPostDialString.length() <= mNextPostDialChar) {
-    //     return "";
-    // }
-    //
-    // String subStr = mPostDialString.substring(mNextPostDialChar);
-    // if (subStr != null) {
-    //     int wIndex = subStr.indexOf(PhoneNumberUtils.WAIT);
-    //     int pIndex = subStr.indexOf(PhoneNumberUtils.PAUSE);
-    //
-    //     if (wIndex > 0 && (wIndex < pIndex || pIndex <= 0)) {
-    //         subStr = subStr.substring(0, wIndex);
-    //     } else if (pIndex > 0) {
-    //         subStr = subStr.substring(0, pIndex);
-    //     }
-    // }
-    // return subStr;
-    assert(0);
+
+    if (mPostDialState == PostDialState_CANCELLED
+            || mPostDialState == PostDialState_COMPLETE
+            || mPostDialString.IsNull()
+            || mPostDialString.GetLength() <= mNextPostDialChar) {
+        *result = String("");
+        return NOERROR;
+    }
+
+    String subStr = mPostDialString.Substring(mNextPostDialChar);
+    if (subStr != NULL) {
+        Int32 wIndex = subStr.IndexOf(IPhoneNumberUtils::WAIT);
+        Int32 pIndex = subStr.IndexOf(IPhoneNumberUtils::PAUSE);
+
+        if (wIndex > 0 && (wIndex < pIndex || pIndex <= 0)) {
+            subStr = subStr.Substring(0, wIndex);
+        }
+        else if (pIndex > 0) {
+            subStr = subStr.Substring(0, pIndex);
+        }
+    }
+    *result = subStr;
     return NOERROR;
 }
 
@@ -652,133 +739,133 @@ ECode CdmaConnection::UpdateParent(
     /* [in] */ ICdmaCall* oldParent,
     /* [in] */ ICdmaCall* newParent)
 {
-    // ==================before translated======================
-    // if (newParent != oldParent) {
-    //     if (oldParent != null) {
-    //         oldParent.detach(this);
-    //     }
-    //     newParent.attachFake(this, CdmaCall.State.ACTIVE);
-    //     mParent = newParent;
-    // }
-    assert(0);
+    if (newParent != oldParent) {
+        if (oldParent != NULL) {
+            ((CdmaCall*)oldParent)->Detach(this);
+        }
+        ((CdmaCall*)newParent)->AttachFake(this, ICallState_ACTIVE);
+        mParent = newParent;
+    }
     return NOERROR;
 }
 
 ECode CdmaConnection::ProcessNextPostDialChar()
 {
-    // ==================before translated======================
-    // char c = 0;
-    // Registrant postDialHandler;
-    //
-    // if (mPostDialState == PostDialState.CANCELLED) {
-    //     releaseWakeLock();
-    //     //Rlog.v("CDMA", "##### processNextPostDialChar: postDialState == CANCELLED, bail");
-    //     return;
-    // }
-    //
-    // if (mPostDialString == null ||
-    //         mPostDialString.length() <= mNextPostDialChar) {
-    //     setPostDialState(PostDialState.COMPLETE);
-    //
-    //     // We were holding a wake lock until pause-dial was complete, so give it up now
-    //     releaseWakeLock();
-    //
-    //     // notifyMessage.arg1 is 0 on complete
-    //     c = 0;
-    // } else {
-    //     boolean isValid;
-    //
-    //     setPostDialState(PostDialState.STARTED);
-    //
-    //     c = mPostDialString.charAt(mNextPostDialChar++);
-    //
-    //     isValid = processPostDialChar(c);
-    //
-    //     if (!isValid) {
-    //         // Will call processNextPostDialChar
-    //         mHandler.obtainMessage(EVENT_NEXT_POST_DIAL).sendToTarget();
-    //         // Don't notify application
-    //         Rlog.e("CDMA", "processNextPostDialChar: c=" + c + " isn't valid!");
-    //         return;
-    //     }
-    // }
-    //
-    // postDialHandler = mOwner.mPhone.mPostDialHandler;
-    //
-    // Message notifyMessage;
-    //
-    // if (postDialHandler != null &&
-    //         (notifyMessage = postDialHandler.messageForRegistrant()) != null) {
-    //     // The AsyncResult.result is the Connection object
-    //     PostDialState state = mPostDialState;
-    //     AsyncResult ar = AsyncResult.forMessage(notifyMessage);
-    //     ar.result = this;
-    //     ar.userObj = state;
-    //
-    //     // arg1 is the character that was/is being processed
-    //     notifyMessage.arg1 = c;
-    //
-    //     notifyMessage.sendToTarget();
-    // }
-    assert(0);
+    Char32 c = 0;
+    AutoPtr<IRegistrant> postDialHandler;
+
+    if (mPostDialState == PostDialState_CANCELLED) {
+        ReleaseWakeLock();
+        //Logger::V("CDMA", "##### processNextPostDialChar: postDialState == CANCELLED, bail");
+        return NOERROR;
+    }
+
+    if (mPostDialString.IsNull() ||
+            mPostDialString.GetLength() <= mNextPostDialChar) {
+        SetPostDialState(PostDialState_COMPLETE);
+
+        // We were holding a wake lock until pause-dial was complete, so give it up now
+        ReleaseWakeLock();
+
+        // notifyMessage.arg1 is 0 on complete
+        c = 0;
+    }
+    else {
+        Boolean isValid;
+
+        SetPostDialState(PostDialState_STARTED);
+
+        c = mPostDialString.GetChar(mNextPostDialChar++);
+
+        isValid = ProcessPostDialChar(c);
+
+        if (!isValid) {
+            // Will call processNextPostDialChar
+            AutoPtr<IMessage> msg;
+            mHandler->ObtainMessage(EVENT_NEXT_POST_DIAL, (IMessage**)&msg);
+            msg->SendToTarget();
+            // Don't notify application
+            Logger::E("CDMA", "processNextPostDialChar: c=%d isn't valid!", c);
+            return NOERROR;
+        }
+    }
+
+    postDialHandler = ((CDMAPhone*)((CdmaCallTracker*)mOwner.Get())->mPhone.Get())->mPostDialHandler;
+
+    AutoPtr<IMessage> notifyMessage;
+
+    if (postDialHandler != NULL &&
+            (postDialHandler->MessageForRegistrant((IMessage**)&notifyMessage), notifyMessage) != NULL) {
+        // The AsyncResult.result is the Connection object
+        IConnectionPostDialState state = mPostDialState;
+        AutoPtr<AsyncResult> ar = AsyncResult::ForMessage(notifyMessage);
+        ar->mResult = TO_IINTERFACE(this);
+        ar->mUserObj = CoreUtils::Convert(state);
+
+        // arg1 is the character that was/is being processed
+        notifyMessage->SetArg1(c);
+
+        notifyMessage->SendToTarget();
+    }
     return NOERROR;
 }
 
 String CdmaConnection::FormatDialString(
     /* [in] */ const String& phoneNumber)
 {
-    // ==================before translated======================
-    // /**
-    //  * TODO(cleanup): This function should move to PhoneNumberUtils, and
-    //  * tests should be added.
-    //  */
-    //
-    // if (phoneNumber == null) {
-    //     return null;
-    // }
-    // int length = phoneNumber.length();
-    // StringBuilder ret = new StringBuilder();
-    // char c;
-    // int currIndex = 0;
-    //
-    // while (currIndex < length) {
-    //     c = phoneNumber.charAt(currIndex);
-    //     if (isPause(c) || isWait(c)) {
-    //         if (currIndex < length - 1) {
-    //             // if PW not at the end
-    //             int nextIndex = findNextPCharOrNonPOrNonWCharIndex(phoneNumber, currIndex);
-    //             // If there is non PW char following PW sequence
-    //             if (nextIndex < length) {
-    //                 char pC = findPOrWCharToAppend(phoneNumber, currIndex, nextIndex);
-    //                 ret.append(pC);
-    //                 // If PW char sequence has more than 2 PW characters,
-    //                 // skip to the last PW character since the sequence already be
-    //                 // converted to WAIT character
-    //                 if (nextIndex > (currIndex + 1)) {
-    //                     currIndex = nextIndex - 1;
-    //                 }
-    //             } else if (nextIndex == length) {
-    //                 // It means PW characters at the end, ignore
-    //                 currIndex = length - 1;
-    //             }
-    //         }
-    //     } else {
-    //         ret.append(c);
-    //     }
-    //     currIndex++;
-    // }
-    // return PhoneNumberUtils.cdmaCheckAndProcessPlusCode(ret.toString());
-    assert(0);
-    return String("");
+    /**
+     * TODO(cleanup): This function should move to PhoneNumberUtils, and
+     * tests should be added.
+     */
+
+    if (phoneNumber.IsNull()) {
+        return String(NULL);
+    }
+    Int32 length = phoneNumber.GetLength();
+    StringBuilder ret;
+    Char32 c;
+    Int32 currIndex = 0;
+
+    while (currIndex < length) {
+        c = phoneNumber.GetChar(currIndex);
+        if (IsPause(c) || IsWait(c)) {
+            if (currIndex < length - 1) {
+                // if PW not at the end
+                Int32 nextIndex = FindNextPCharOrNonPOrNonWCharIndex(phoneNumber, currIndex);
+                // If there is non PW char following PW sequence
+                if (nextIndex < length) {
+                    Char32 pC = FindPOrWCharToAppend(phoneNumber, currIndex, nextIndex);
+                    ret.Append((Int32)pC);
+                    // If PW char sequence has more than 2 PW characters,
+                    // skip to the last PW character since the sequence already be
+                    // converted to WAIT character
+                    if (nextIndex > (currIndex + 1)) {
+                        currIndex = nextIndex - 1;
+                    }
+                }
+                else if (nextIndex == length) {
+                    // It means PW characters at the end, ignore
+                    currIndex = length - 1;
+                }
+            }
+        }
+        else {
+            ret.Append((Int32)c);
+        }
+        currIndex++;
+    }
+
+    String str1, str2;
+    ret.ToString(&str1);
+    PhoneNumberUtils::CdmaCheckAndProcessPlusCode(str1, &str2);
+    return str2;
 }
 
 ECode CdmaConnection::GetNumberPresentation(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mNumberPresentation;
-    assert(0);
+    *result = mNumberPresentation;
     return NOERROR;
 }
 
@@ -786,11 +873,8 @@ ECode CdmaConnection::GetUUSInfo(
     /* [out] */ IUUSInfo** result)
 {
     VALIDATE_NOT_NULL(result);
+    // UUS information not supported in CDMA
     *result = NULL;
-    // ==================before translated======================
-    // // UUS information not supported in CDMA
-    // return null;
-    assert(0);
     return NOERROR;
 }
 
@@ -798,9 +882,7 @@ ECode CdmaConnection::GetPreciseDisconnectCause(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPreciseCause;
-    assert(0);
+    *result = mPreciseCause;
     return NOERROR;
 }
 
@@ -809,9 +891,6 @@ ECode CdmaConnection::GetOrigConnection(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    // ==================before translated======================
-    // return null;
-    assert(0);
     return NOERROR;
 }
 
@@ -820,206 +899,203 @@ ECode CdmaConnection::IsMultiparty(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
-    // ==================before translated======================
-    // return false;
-    assert(0);
     return NOERROR;
 }
 
 void CdmaConnection::Finalize()
 {
-    // ==================before translated======================
-    // /**
-    //  * It is understood that This finializer is not guaranteed
-    //  * to be called and the release lock call is here just in
-    //  * case there is some path that doesn't call onDisconnect
-    //  * and or onConnectedInOrOut.
-    //  */
-    // if (mPartialWakeLock.isHeld()) {
-    //     Rlog.e(LOGTAG, "[CdmaConn] UNEXPECTED; mPartialWakeLock is held when finalizing.");
-    // }
-    // releaseWakeLock();
-    assert(0);
+    /**
+     * It is understood that This finializer is not guaranteed
+     * to be called and the release lock call is here just in
+     * case there is some path that doesn't call onDisconnect
+     * and or onConnectedInOrOut.
+     */
+    Boolean b;
+    if (mPartialWakeLock->IsHeld(&b), b) {
+        Logger::E(LOGTAG, "[CdmaConn] UNEXPECTED; mPartialWakeLock is held when finalizing.");
+    }
+    ReleaseWakeLock();
 }
 
 void CdmaConnection::DoDisconnect()
 {
-    // ==================before translated======================
-    // mIndex = -1;
-    // mDisconnectTime = System.currentTimeMillis();
-    // mDuration = SystemClock.elapsedRealtime() - mConnectTimeReal;
-    // mDisconnected = true;
-    // clearPostDialListeners();
-    assert(0);
+    mIndex = -1;
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&mDisconnectTime);
+
+    mDuration = SystemClock::GetElapsedRealtime() - mConnectTimeReal;
+    mDisconnected = TRUE;
+    ClearPostDialListeners();
 }
 
 Boolean CdmaConnection::ProcessPostDialChar(
     /* [in] */ Byte c)
 {
-    // ==================before translated======================
-    // if (PhoneNumberUtils.is12Key(c)) {
-    //     mOwner.mCi.sendDtmf(c, mHandler.obtainMessage(EVENT_DTMF_DONE));
-    // } else if (c == PhoneNumberUtils.PAUSE) {
-    //     setPostDialState(PostDialState.PAUSE);
-    //
-    //     // Upon occurrences of the separator, the UE shall
-    //     // pause again for 2 seconds before sending any
-    //     // further DTMF digits.
-    //     mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_PAUSE_DONE),
-    //                                     PAUSE_DELAY_MILLIS);
-    // } else if (c == PhoneNumberUtils.WAIT) {
-    //     setPostDialState(PostDialState.WAIT);
-    // } else if (c == PhoneNumberUtils.WILD) {
-    //     setPostDialState(PostDialState.WILD);
-    // } else {
-    //     return false;
-    // }
-    //
-    // return true;
-    assert(0);
-    return FALSE;
+    Boolean b;
+    if (PhoneNumberUtils::Is12Key(c, &b), b) {
+        AutoPtr<IMessage> msg;
+        mHandler->ObtainMessage(EVENT_DTMF_DONE, (IMessage**)&msg);
+        ((CdmaCallTracker*)mOwner.Get())->mCi->SendDtmf(c, msg);
+    }
+    else if (c == IPhoneNumberUtils::PAUSE) {
+        SetPostDialState(PostDialState_PAUSE);
+
+        // Upon occurrences of the separator, the UE shall
+        // pause again for 2 seconds before sending any
+        // further DTMF digits.
+        AutoPtr<IMessage> msg;
+        mHandler->ObtainMessage(EVENT_PAUSE_DONE, (IMessage**)&msg);
+        mHandler->SendMessageDelayed(msg, PAUSE_DELAY_MILLIS, &b);
+    }
+    else if (c == IPhoneNumberUtils::WAIT) {
+        SetPostDialState(PostDialState_WAIT);
+    }
+    else if (c == IPhoneNumberUtils::WILD) {
+        SetPostDialState(PostDialState_WILD);
+    }
+    else {
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 Boolean CdmaConnection::IsConnectingInOrOut()
 {
-    // ==================before translated======================
-    // return mParent == null || mParent == mOwner.mRingingCall
-    //     || mParent.mState == CdmaCall.State.DIALING
-    //     || mParent.mState == CdmaCall.State.ALERTING;
-    assert(0);
+    return mParent == NULL || mParent == ((CdmaCallTracker*)mOwner.Get())->mRingingCall
+        || ((CdmaCall*)mParent.Get())->mState == ICallState_DIALING
+        || ((CdmaCall*)mParent.Get())->mState == ICallState_ALERTING;
     return FALSE;
 }
 
-AutoPtr<ICdmaCall> CdmaConnection::ParentFromDCState(
-    /* [in] */  IDriverCallState state)
+ECode CdmaConnection::ParentFromDCState(
+    /* [in] */  IDriverCallState state,
+    /* [out] */ ICdmaCall** result)
 {
-    // ==================before translated======================
-    // switch (state) {
-    //     case ACTIVE:
-    //     case DIALING:
-    //     case ALERTING:
-    //         return mOwner.mForegroundCall;
-    //     //break;
-    //
-    //     case HOLDING:
-    //         return mOwner.mBackgroundCall;
-    //     //break;
-    //
-    //     case INCOMING:
-    //     case WAITING:
-    //         return mOwner.mRingingCall;
-    //     //break;
-    //
-    //     default:
-    //         throw new RuntimeException("illegal call state: " + state);
-    // }
-    assert(0);
-    AutoPtr<ICdmaCall> empty;
-    return empty;
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    switch (state) {
+        case DriverCallState_ACTIVE:
+        case DriverCallState_DIALING:
+        case DriverCallState_ALERTING:
+            *result = ((CdmaCallTracker*)mOwner.Get())->mForegroundCall;
+            return NOERROR;
+        //break;
+
+        case DriverCallState_HOLDING:
+            *result = ((CdmaCallTracker*)mOwner.Get())->mBackgroundCall;
+            return NOERROR;
+        //break;
+
+        case DriverCallState_INCOMING:
+        case DriverCallState_WAITING:
+            *result = ((CdmaCallTracker*)mOwner.Get())->mRingingCall;
+            return NOERROR;
+        //break;
+
+        default:
+            // throw new RuntimeException("illegal call state: " + state);
+            return E_RUNTIME_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 void CdmaConnection::SetPostDialState(
     /* [in] */ IConnectionPostDialState s)
 {
-    // ==================before translated======================
-    // if (s == PostDialState.STARTED ||
-    //         s == PostDialState.PAUSE) {
-    //     synchronized (mPartialWakeLock) {
-    //         if (mPartialWakeLock.isHeld()) {
-    //             mHandler.removeMessages(EVENT_WAKE_LOCK_TIMEOUT);
-    //         } else {
-    //             acquireWakeLock();
-    //         }
-    //         Message msg = mHandler.obtainMessage(EVENT_WAKE_LOCK_TIMEOUT);
-    //         mHandler.sendMessageDelayed(msg, WAKE_LOCK_TIMEOUT_MILLIS);
-    //     }
-    // } else {
-    //     mHandler.removeMessages(EVENT_WAKE_LOCK_TIMEOUT);
-    //     releaseWakeLock();
-    // }
-    // mPostDialState = s;
-    // notifyPostDialListeners();
-    assert(0);
+    if (s == PostDialState_STARTED ||
+            s == PostDialState_PAUSE) {
+        {
+            AutoLock lock(mPartialWakeLock);
+            Boolean b;
+            if (mPartialWakeLock->IsHeld(&b), b) {
+                mHandler->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
+            }
+            else {
+                AcquireWakeLock();
+            }
+            AutoPtr<IMessage> msg;
+            mHandler->ObtainMessage(EVENT_WAKE_LOCK_TIMEOUT, (IMessage**)&msg);
+            mHandler->SendMessageDelayed(msg, WAKE_LOCK_TIMEOUT_MILLIS, &b);
+        }
+    }
+    else {
+        mHandler->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
+        ReleaseWakeLock();
+    }
+    mPostDialState = s;
+    NotifyPostDialListeners();
 }
 
 void CdmaConnection::CreateWakeLock(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-    // mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOGTAG);
-    assert(0);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
+    pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, LOGTAG,
+            (IPowerManagerWakeLock**)&mPartialWakeLock);
 }
 
 void CdmaConnection::AcquireWakeLock()
 {
-    // ==================before translated======================
-    // log("acquireWakeLock");
-    // mPartialWakeLock.acquire();
-    assert(0);
+    Log(String("AcquireWakeLock"));
+    mPartialWakeLock->AcquireLock();
 }
 
 void CdmaConnection::ReleaseWakeLock()
 {
-    // ==================before translated======================
-    // synchronized (mPartialWakeLock) {
-    //     if (mPartialWakeLock.isHeld()) {
-    //         log("releaseWakeLock");
-    //         mPartialWakeLock.release();
-    //     }
-    // }
-    assert(0);
+    AutoLock lock(mPartialWakeLock);
+    Boolean b;
+    if (mPartialWakeLock->IsHeld(&b), b) {
+        Log(String("releaseWakeLock"));
+        mPartialWakeLock->ReleaseLock();
+    }
 }
 
 Boolean CdmaConnection::IsPause(
     /* [in] */ Byte c)
 {
-    // ==================before translated======================
-    // return c == PhoneNumberUtils.PAUSE;
-    assert(0);
-    return FALSE;
+    return c == IPhoneNumberUtils::PAUSE;
 }
 
 Boolean CdmaConnection::IsWait(
     /* [in] */ Byte c)
 {
-    // ==================before translated======================
-    // return c == PhoneNumberUtils.WAIT;
-    assert(0);
-    return FALSE;
+    return c == IPhoneNumberUtils::WAIT;
 }
 
 Int32 CdmaConnection::FindNextPCharOrNonPOrNonWCharIndex(
     /* [in] */ const String& phoneNumber,
     /* [in] */ Int32 currIndex)
 {
-    // ==================before translated======================
-    // boolean wMatched = isWait(phoneNumber.charAt(currIndex));
-    // int index = currIndex + 1;
-    // int length = phoneNumber.length();
-    // while (index < length) {
-    //     char cNext = phoneNumber.charAt(index);
-    //     // if there is any W inside P/W sequence,mark it
-    //     if (isWait(cNext)) {
-    //         wMatched = true;
-    //     }
-    //     // if any characters other than P/W chars after P/W sequence
-    //     // we break out the loop and append the correct
-    //     if (!isWait(cNext) && !isPause(cNext)) {
-    //         break;
-    //     }
-    //     index++;
-    // }
-    //
-    // // It means the PAUSE character(s) is in the middle of dial string
-    // // and it needs to be handled one by one.
-    // if ((index < length) && (index > (currIndex + 1))  &&
-    //     ((wMatched == false) && isPause(phoneNumber.charAt(currIndex)))) {
-    //     return (currIndex + 1);
-    // }
-    // return index;
-    assert(0);
-    return 0;
+    Boolean wMatched = IsWait(phoneNumber.GetChar(currIndex));
+    Int32 index = currIndex + 1;
+    Int32 length = phoneNumber.GetLength();
+
+    while (index < length) {
+        Char32 cNext = phoneNumber.GetChar(index);
+        // if there is any W inside P/W sequence,mark it
+        if (IsWait(cNext)) {
+            wMatched = TRUE;
+        }
+        // if any characters other than P/W chars after P/W sequence
+        // we break out the loop and append the correct
+        if (!IsWait(cNext) && !IsPause(cNext)) {
+            break;
+        }
+        index++;
+    }
+
+    // It means the PAUSE character(s) is in the middle of dial string
+    // and it needs to be handled one by one.
+    if ((index < length) && (index > (currIndex + 1))  &&
+        ((wMatched == FALSE) && IsPause(phoneNumber.GetChar(currIndex)))) {
+        return (currIndex + 1);
+    }
+    return index;
 }
 
 Byte CdmaConnection::FindPOrWCharToAppend(
@@ -1027,33 +1103,28 @@ Byte CdmaConnection::FindPOrWCharToAppend(
     /* [in] */ Int32 currPwIndex,
     /* [in] */ Int32 nextNonPwCharIndex)
 {
-    // ==================before translated======================
-    // char c = phoneNumber.charAt(currPwIndex);
-    // char ret;
-    //
-    // // Append the PW char
-    // ret = (isPause(c)) ? PhoneNumberUtils.PAUSE : PhoneNumberUtils.WAIT;
-    //
-    // // If the nextNonPwCharIndex is greater than currPwIndex + 1,
-    // // it means the PW sequence contains not only P characters.
-    // // Since for the sequence that only contains P character,
-    // // the P character is handled one by one, the nextNonPwCharIndex
-    // // equals to currPwIndex + 1.
-    // // In this case, skip P, append W.
-    // if (nextNonPwCharIndex > (currPwIndex + 1)) {
-    //     ret = PhoneNumberUtils.WAIT;
-    // }
-    // return ret;
-    assert(0);
-    return 0;
+    Char32 c = phoneNumber.GetChar(currPwIndex);
+    Char32 ret;
+
+    // Append the PW char
+    ret = (IsPause(c)) ? IPhoneNumberUtils::PAUSE : IPhoneNumberUtils::WAIT;
+
+    // If the nextNonPwCharIndex is greater than currPwIndex + 1,
+    // it means the PW sequence contains not only P characters.
+    // Since for the sequence that only contains P character,
+    // the P character is handled one by one, the nextNonPwCharIndex
+    // equals to currPwIndex + 1.
+    // In this case, skip P, append W.
+    if (nextNonPwCharIndex > (currPwIndex + 1)) {
+        ret = IPhoneNumberUtils::WAIT;
+    }
+    return ret;
 }
 
 void CdmaConnection::Log(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "[CDMAConn] " + msg);
-    assert(0);
+    Logger::D(LOGTAG, "[CDMAConn] %s", msg.string());
 }
 
 } // namespace Cdma

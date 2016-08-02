@@ -541,7 +541,7 @@ SMSDispatcher::SMSDispatcher()
  * @param phone the Phone to use
  * @param usageMonitor the SmsUsageMonitor to use
  */
-SMSDispatcher::SMSDispatcher(
+SMSDispatcher::constructor(
     /* [in] */ IPhoneBase* phone,
     /* [in] */ ISmsUsageMonitor* usageMonitor,
     /* [in] */ IImsSMSDispatcher* imsSMSDispatcher)

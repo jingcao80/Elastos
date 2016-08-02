@@ -64,18 +64,17 @@ ECode CdmaSubscriptionSourceManager::Dispose(
     /* [in] */ IHandler* h)
 {
     VALIDATE_NOT_NULL(h);
-    // ==================before translated======================
-    // mCdmaSubscriptionSourceChangedRegistrants.remove(h);
-    // synchronized (sReferenceCountMonitor) {
-    //     sReferenceCount--;
-    //     if (sReferenceCount <= 0) {
-    //         mCi.unregisterForCdmaSubscriptionChanged(this);
-    //         mCi.unregisterForOn(this);
-    //         mCi.unregisterForSubscriptionStatusChanged(this);
-    //         sInstance = NULL;
-    //     }
-    // }
-    assert(0);
+
+    mCdmaSubscriptionSourceChangedRegistrants->Remove(h);
+    AutoLock lock(sReferenceCountMonitor);
+    sReferenceCount--;
+    if (sReferenceCount <= 0) {
+        mCi->UnregisterForCdmaSubscriptionChanged(this);
+        mCi->UnregisterForOn(this);
+        mCi->UnregisterForSubscriptionStatusChanged(this);
+        sInstance = NULL;
+    }
+
     return NOERROR;
 }
 

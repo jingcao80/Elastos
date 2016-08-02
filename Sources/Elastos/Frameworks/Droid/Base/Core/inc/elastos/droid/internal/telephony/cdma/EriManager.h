@@ -4,7 +4,6 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
-#include "elastos/droid/internal/telephony/cdma/EriInfo.h"
 
 // import android.content.res.Resources;
 // import android.content.res.XmlResourceParser;
@@ -67,11 +66,12 @@ public:
             /* [in] */ Int32 eriIconMode,
             /* [in] */ const String& eriIconText);
 
-        //        public void setParameters(int eriIconIndex, int eriIconMode, String eriIconText){
-        //            mEriIconIndex = eriIconIndex;
-        //            mEriIconMode = eriIconMode;
-        //            mEriIconText = eriIconText;
-        //        }
+        // public void setParameters(int eriIconIndex, int eriIconMode, String eriIconText){
+        //    mEriIconIndex = eriIconIndex;
+        //    mEriIconMode = eriIconMode;
+        //    mEriIconText = eriIconText;
+        // }
+
         // @Override
         CARAPI ToString(
             /* [out] */ String* result);
@@ -84,6 +84,8 @@ public:
 
 public:
     CAR_INTERFACE_DECL();
+
+    EriManager();
 
     CARAPI constructor(
         /* [in] */ IPhoneBase* phone,
@@ -164,7 +166,7 @@ private:
       * Returns the EriInfo record associated with roamingIndicator
       * or null if the entry is not found
       */
-    CARAPI_(AutoPtr<EriInfo>) GetEriInfo(
+    CARAPI_(AutoPtr<IEriInfo>) GetEriInfo(
         /* [in] */ Int32 roamingIndicator);
 
     CARAPI_(AutoPtr<EriDisplayInformation>) GetEriDisplayInformation(

@@ -2,9 +2,10 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMACALLTRACKER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/RegistrantList.h"
-#include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/internal/telephony/CallTracker.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/RegistrantList.h"
+#include "elastos/droid/os/Runnable.h"
 
 // import android.telephony.DisconnectCause;
 // import android.telephony.PhoneNumberUtils;
@@ -21,13 +22,14 @@
 // import com.android.internal.telephony.TelephonyProperties;
 // import java.util.List;
 
+using Elastos::Droid::Internal::Telephony::IConnection;
+using Elastos::Droid::Internal::Telephony::IDriverCall;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::RegistrantList;
-using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
-using Elastos::Droid::Internal::Telephony::IConnection;
-using Elastos::Droid::Internal::Telephony::IDriverCall;
+using Elastos::Droid::Os::Runnable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IArrayList;
@@ -45,6 +47,22 @@ class CdmaCallTracker
     : public CallTracker
     , public ICdmaCallTracker
 {
+private:
+    class CdmaCallTrackerRunnable
+        : public Runnable
+    {
+    public:
+        CdmaCallTrackerRunnable(
+            /* [in] */ CdmaCallTracker* host)
+            : mHost(host)
+        {}
+
+        CARAPI Run();
+
+    private:
+        CdmaCallTracker* mHost;
+    };
+
 public:
     TO_STRING_IMPL("CdmaCallTracker")
 
@@ -54,6 +72,8 @@ public:
     //***** Events
     //***** Constructors
     CdmaCallTracker();
+
+    ~CdmaCallTracker();
 
     CARAPI constructor(
         /* [in] */ ICDMAPhone* phone);
@@ -186,9 +206,6 @@ public:
         /* [in] */ ArrayOf<String>* args);
 
 protected:
-    // @Override
-    CARAPI_(void) Finalize();
-
     // ***** Overwritten from CallTracker
     // @Override
     CARAPI_(void) HandlePollCalls(

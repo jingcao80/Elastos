@@ -29,6 +29,8 @@ class RuimPhoneBookInterfaceManager
 public:
     CAR_INTERFACE_DECL();
 
+    virtual ~RuimPhoneBookInterfaceManager();
+
     CARAPI constructor(
         /* [in] */ ICDMAPhone* phone);
 
@@ -41,9 +43,6 @@ public:
         /* [out] */ ArrayOf<Int32>** result);
 
 protected:
-    // @Override
-    CARAPI_(void) Finalize();
-
     // @Override
     CARAPI Logd(
         /* [in] */ const String& msg);

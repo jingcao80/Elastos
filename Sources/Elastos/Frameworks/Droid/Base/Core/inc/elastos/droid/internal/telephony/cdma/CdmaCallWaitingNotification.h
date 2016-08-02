@@ -25,6 +25,8 @@ class CdmaCallWaitingNotification
 public:
     CAR_INTERFACE_DECL();
 
+    CdmaCallWaitingNotification();
+
     // @Override
     CARAPI ToString(
         /* [out] */ String* result);

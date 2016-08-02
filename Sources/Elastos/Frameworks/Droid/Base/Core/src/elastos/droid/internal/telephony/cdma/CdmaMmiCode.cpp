@@ -1,10 +1,23 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Internal.h"
-
+#include "elastos/droid/internal/telephony/cdma/CCdmaMmiCode.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaMmiCode.h"
+#include "elastos/droid/internal/telephony/cdma/CDMAPhone.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Regex::IPatternHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::AppState;
+using Elastos::Droid::Internal::Telephony::Uicc::APPSTATE_PUK;
+using Elastos::Droid::R;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Regex::CPatternHelper;
+using Elastos::Utility::Regex::IMatcher;
+using Elastos::Utility::Regex::IMatchResult;
+using Elastos::Utility::Regex::IPatternHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -46,6 +59,7 @@ const Int32 CdmaMmiCode::MATCH_GROUP_PWD_CONFIRM;
 const Int32 CdmaMmiCode::MATCH_GROUP_DIALING_NUMBER;
 
 CdmaMmiCode::CdmaMmiCode()
+    : mState(IMmiCodeState_PENDING)
 {
 }
 
@@ -53,11 +67,14 @@ ECode CdmaMmiCode::constructor(
     /* [in] */ ICDMAPhone* phone,
     /* [in] */ IUiccCardApplication* app)
 {
-    // ==================before translated======================
-    // super(phone.getHandler().getLooper());
-    // mPhone = phone;
-    // mContext = phone.getContext();
-    // mUiccApplication = app;
+    AutoPtr<IHandler> handler;
+    IPhoneBase::Probe(phone)->GetHandler((IHandler**)&handler);
+    AutoPtr<ILooper> looper;
+    handler->GetLooper((ILooper**)&looper);
+    Handler::constructor(looper);
+    mPhone = phone;
+    IPhone::Probe(phone)->GetContext((IContext**)&mContext);
+    mUiccApplication = app;
     return NOERROR;
 }
 
@@ -66,39 +83,34 @@ AutoPtr<ICdmaMmiCode> CdmaMmiCode::NewFromDialString(
     /* [in] */ ICDMAPhone* phone,
     /* [in] */ IUiccCardApplication* app)
 {
-    // ==================before translated======================
-    // Matcher m;
-    // CdmaMmiCode ret = null;
-    //
-    // m = sPatternSuppService.matcher(dialString);
-    //
-    // // Is this formatted like a standard supplementary service code?
-    // if (m.matches()) {
-    //     ret = new CdmaMmiCode(phone,app);
-    //     ret.mPoundString = makeEmptyNull(m.group(MATCH_GROUP_POUND_STRING));
-    //     ret.mAction = makeEmptyNull(m.group(MATCH_GROUP_ACTION));
-    //     ret.mSc = makeEmptyNull(m.group(MATCH_GROUP_SERVICE_CODE));
-    //     ret.mSia = makeEmptyNull(m.group(MATCH_GROUP_SIA));
-    //     ret.mSib = makeEmptyNull(m.group(MATCH_GROUP_SIB));
-    //     ret.mSic = makeEmptyNull(m.group(MATCH_GROUP_SIC));
-    //     ret.mPwd = makeEmptyNull(m.group(MATCH_GROUP_PWD_CONFIRM));
-    //     ret.mDialingNumber = makeEmptyNull(m.group(MATCH_GROUP_DIALING_NUMBER));
-    //
-    // }
-    //
-    // return ret;
-    assert(0);
-    AutoPtr<ICdmaMmiCode> empty;
-    return empty;
+    AutoPtr<IMatcher> m;
+    AutoPtr<CCdmaMmiCode> ret;
+
+    sPatternSuppService->Matcher(dialString, (IMatcher**)&m);
+
+    // Is this formatted like a standard supplementary service code?
+    Boolean b;
+    if (m->Matches(&b), b) {
+        CCdmaMmiCode::NewByFriend(phone, app, (CCdmaMmiCode**)&ret);
+        String str;
+        ret->mPoundString = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_POUND_STRING, &str), str));
+        ret->mAction = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_ACTION, &str), str));
+        ret->mSc = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SERVICE_CODE, &str), str));
+        ret->mSia = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SIA, &str), str));
+        ret->mSib = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SIB, &str), str));
+        ret->mSic = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SIC, &str), str));
+        ret->mPwd = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_PWD_CONFIRM, &str), str));
+        ret->mDialingNumber = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_DIALING_NUMBER, &str), str));
+    }
+
+    return ICdmaMmiCode::Probe(ret);
 }
 
 ECode CdmaMmiCode::GetState(
     /* [out] */ IMmiCodeState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mState;
-    assert(0);
+    *result = mState;
     return NOERROR;
 }
 
@@ -106,10 +118,8 @@ ECode CdmaMmiCode::GetMessage(
     /* [out] */ ICharSequence** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mMessage;
-    assert(0);
+    *result = mMessage;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -117,23 +127,21 @@ ECode CdmaMmiCode::GetPhone(
     /* [out] */ IPhone** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ((Phone) mPhone);
-    assert(0);
+    *result = IPhone::Probe(mPhone);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode CdmaMmiCode::Cancel()
 {
-    // ==================before translated======================
-    // // Complete or failed cannot be cancelled
-    // if (mState == State.COMPLETE || mState == State.FAILED) {
-    //     return;
-    // }
-    //
-    // mState = State.CANCELLED;
-    // mPhone.onMMIDone (this);
-    assert(0);
+    // Complete or failed cannot be cancelled
+    if (mState == IMmiCodeState_COMPLETE || mState == IMmiCodeState_FAILED) {
+        return NOERROR;
+    }
+
+    mState = IMmiCodeState_CANCELLED;
+    ((CDMAPhone*)mPhone.Get())->OnMMIDone (this);
+
     return NOERROR;
 }
 
@@ -142,9 +150,7 @@ ECode CdmaMmiCode::IsCancelable(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
-    // ==================before translated======================
-    // return false;
-    assert(0);
+
     return NOERROR;
 }
 
@@ -152,10 +158,9 @@ ECode CdmaMmiCode::IsPinPukCommand(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSc != null && (mSc.equals(SC_PIN) || mSc.equals(SC_PIN2)
-    //                       || mSc.equals(SC_PUK) || mSc.equals(SC_PUK2));
-    assert(0);
+    *result = !mSc.IsNull() && (mSc.Equals(SC_PIN) || mSc.Equals(SC_PIN2)
+                          || mSc.Equals(SC_PUK) || mSc.Equals(SC_PUK2));
+
     return NOERROR;
 }
 
@@ -163,9 +168,8 @@ ECode CdmaMmiCode::IsRegister(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAction != null && mAction.equals(ACTION_REGISTER);
-    assert(0);
+    *result = mAction != NULL && mAction.Equals(ACTION_REGISTER);
+
     return NOERROR;
 }
 
@@ -173,73 +177,89 @@ ECode CdmaMmiCode::IsUssdRequest(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    Logger::W(LOGTAG, "isUssdRequest is not implemented in CdmaMmiCode");
     *result = FALSE;
-    // ==================before translated======================
-    // Rlog.w(LOGTAG, "isUssdRequest is not implemented in CdmaMmiCode");
-    // return false;
-    assert(0);
+
     return NOERROR;
 }
 
 ECode CdmaMmiCode::ProcessCode()
 {
-    // ==================before translated======================
     // try {
-    //     if (isPinPukCommand()) {
-    //         // TODO: This is the same as the code in GsmMmiCode.java,
-    //         // MmiCode should be an abstract or base class and this and
-    //         // other common variables and code should be promoted.
-    //
-    //         // sia = old PIN or PUK
-    //         // sib = new PIN
-    //         // sic = new PIN
-    //         String oldPinOrPuk = mSia;
-    //         String newPinOrPuk = mSib;
-    //         int pinLen = newPinOrPuk.length();
-    //         if (isRegister()) {
-    //             if (!newPinOrPuk.equals(mSic)) {
-    //                 // password mismatch; return error
-    //                 handlePasswordError(com.android.internal.R.string.mismatchPin);
-    //             } else if (pinLen < 4 || pinLen > 8 ) {
-    //                 // invalid length
-    //                 handlePasswordError(com.android.internal.R.string.invalidPin);
-    //             } else if (mSc.equals(SC_PIN)
-    //                     && mUiccApplication != null
-    //                     && mUiccApplication.getState() == AppState.APPSTATE_PUK) {
-    //                 // Sim is puk-locked
-    //                 handlePasswordError(com.android.internal.R.string.needPuk);
-    //             } else if (mUiccApplication != null) {
-    //                 Rlog.d(LOGTAG, "process mmi service code using UiccApp sc=" + mSc);
-    //
-    //                 // We have an app and the pre-checks are OK
-    //                 if (mSc.equals(SC_PIN)) {
-    //                     mUiccApplication.changeIccLockPassword(oldPinOrPuk, newPinOrPuk,
-    //                             obtainMessage(EVENT_SET_COMPLETE, this));
-    //                 } else if (mSc.equals(SC_PIN2)) {
-    //                     mUiccApplication.changeIccFdnPassword(oldPinOrPuk, newPinOrPuk,
-    //                             obtainMessage(EVENT_SET_COMPLETE, this));
-    //                 } else if (mSc.equals(SC_PUK)) {
-    //                     mUiccApplication.supplyPuk(oldPinOrPuk, newPinOrPuk,
-    //                             obtainMessage(EVENT_SET_COMPLETE, this));
-    //                 } else if (mSc.equals(SC_PUK2)) {
-    //                     mUiccApplication.supplyPuk2(oldPinOrPuk, newPinOrPuk,
-    //                             obtainMessage(EVENT_SET_COMPLETE, this));
-    //                 } else {
-    //                     throw new RuntimeException("Unsupported service code=" + mSc);
-    //                 }
-    //             } else {
-    //                 throw new RuntimeException("No application mUiccApplicaiton is null");
-    //             }
-    //         } else {
-    //             throw new RuntimeException ("Ivalid register/action=" + mAction);
-    //         }
-    //     }
+    Boolean b;
+    if (IsPinPukCommand(&b), b) {
+        // TODO: This is the same as the code in GsmMmiCode.java,
+        // MmiCode should be an abstract or base class and this and
+        // other common variables and code should be promoted.
+
+        // sia = old PIN or PUK
+        // sib = new PIN
+        // sic = new PIN
+        String oldPinOrPuk = mSia;
+        String newPinOrPuk = mSib;
+        Int32 pinLen = newPinOrPuk.GetLength();
+
+        AppState state;
+        if (IsRegister(&b), b) {
+            if (!newPinOrPuk.Equals(mSic)) {
+                // password mismatch; return error
+                HandlePasswordError(R::string::mismatchPin);
+            }
+            else if (pinLen < 4 || pinLen > 8 ) {
+                // invalid length
+                HandlePasswordError(R::string::invalidPin);
+            }
+            else if (mSc.Equals(SC_PIN)
+                    && mUiccApplication != NULL
+                    && (mUiccApplication->GetState(&state), state) == APPSTATE_PUK) {
+                // Sim is puk-locked
+                HandlePasswordError(R::string::needPuk);
+            }
+            else if (mUiccApplication != NULL) {
+                Logger::D(LOGTAG, "process mmi service code using UiccApp sc=%s", mSc.string());
+
+                // We have an app and the pre-checks are OK
+                if (mSc.Equals(SC_PIN)) {
+                    AutoPtr<IMessage> msg;
+                    ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+                    mUiccApplication->ChangeIccLockPassword(oldPinOrPuk, newPinOrPuk, msg);
+                }
+                else if (mSc.Equals(SC_PIN2)) {
+                    AutoPtr<IMessage> msg;
+                    ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+                    mUiccApplication->ChangeIccFdnPassword(oldPinOrPuk, newPinOrPuk, msg);
+                }
+                else if (mSc.Equals(SC_PUK)) {
+                    AutoPtr<IMessage> msg;
+                    ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+                    mUiccApplication->SupplyPuk(oldPinOrPuk, newPinOrPuk, msg);
+                }
+                else if (mSc.Equals(SC_PUK2)) {
+                    AutoPtr<IMessage> msg;
+                    ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+                    mUiccApplication->SupplyPuk2(oldPinOrPuk, newPinOrPuk, msg);
+                }
+                else {
+                    // throw new RuntimeException("Unsupported service code=" + mSc);
+                    return E_RUNTIME_EXCEPTION;
+                }
+            }
+            else {
+                // throw new RuntimeException("No application mUiccApplicaiton is NULL");
+                return E_RUNTIME_EXCEPTION;
+            }
+        }
+        else {
+            // throw new RuntimeException ("Ivalid register/action=" + mAction);
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
     // } catch (RuntimeException exc) {
-    //     mState = State.FAILED;
-    //     mMessage = mContext.getText(com.android.internal.R.string.mmiError);
+    //     mState = IMmiCodeState_FAILED;
+    //     mMessage = mContext.getText(R::string::mmiError);
     //     mPhone.onMMIDone(this);
     // }
-    assert(0);
+
     return NOERROR;
 }
 
@@ -247,128 +267,140 @@ ECode CdmaMmiCode::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     VALIDATE_NOT_NULL(msg);
-    // ==================before translated======================
-    // AsyncResult ar;
-    //
-    // if (msg.what == EVENT_SET_COMPLETE) {
-    //     ar = (AsyncResult) (msg.obj);
-    //     onSetComplete(msg, ar);
-    // } else {
-    //     Rlog.e(LOGTAG, "Unexpected reply");
-    // }
-    assert(0);
+    AutoPtr<AsyncResult> ar;
+
+    Int32 what;
+    msg->GetWhat(&what);
+    if (what == EVENT_SET_COMPLETE) {
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
+        ar = (AsyncResult*)(IObject*)obj.Get();
+        OnSetComplete(msg, ar);
+    }
+    else {
+        Logger::E(LOGTAG, "Unexpected reply");
+    }
+
     return NOERROR;
 }
 
 String CdmaMmiCode::MakeEmptyNull(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // if (s != null && s.length() == 0) return null;
-    //
-    // return s;
-    assert(0);
-    return String("");
+    if (!s.IsNull() && s.GetLength() == 0) return String(NULL);
+
+    return s;
 }
 
 void CdmaMmiCode::HandlePasswordError(
     /* [in] */ Int32 res)
 {
-    // ==================before translated======================
-    // mState = State.FAILED;
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    // sb.append(mContext.getText(res));
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    mState = IMmiCodeState_FAILED;
+    String str;
+    GetScString()->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+    AutoPtr<ICharSequence> cs;
+    mContext->GetText(res, (ICharSequence**)&cs);
+    cs->ToString(&str);
+    sb.Append(str);
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((CDMAPhone*)mPhone.Get())->OnMMIDone(this);
 }
 
 AutoPtr<ICharSequence> CdmaMmiCode::GetScString()
 {
-    // ==================before translated======================
-    // if (mSc != null) {
-    //     if (isPinPukCommand()) {
-    //         return mContext.getText(com.android.internal.R.string.PinMmi);
-    //     }
-    // }
-    //
-    // return "";
-    assert(0);
-    AutoPtr<ICharSequence> empty;
-    return empty;
+    if (!mSc.IsNull()) {
+        Boolean b;
+        if (IsPinPukCommand(&b), b) {
+            AutoPtr<ICharSequence> cs;
+            mContext->GetText(R::string::PinMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+    }
+
+    return CoreUtils::Convert(String(""));
 }
 
 void CdmaMmiCode::OnSetComplete(
     /* [in] */ IMessage* msg,
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    //
-    // if (ar.exception != null) {
-    //     mState = State.FAILED;
-    //     if (ar.exception instanceof CommandException) {
-    //         CommandException.Error err = ((CommandException)(ar.exception)).getCommandError();
-    //         if (err == CommandException.Error.PASSWORD_INCORRECT) {
-    //             if (isPinPukCommand()) {
-    //                 // look specifically for the PUK commands and adjust
-    //                 // the message accordingly.
-    //                 if (mSc.equals(SC_PUK) || mSc.equals(SC_PUK2)) {
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.badPuk));
-    //                 } else {
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.badPin));
-    //                 }
-    //                 // Get the No. of retries remaining to unlock PUK/PUK2
-    //                 int attemptsRemaining = msg.arg1;
-    //                 if (attemptsRemaining <= 0) {
-    //                     Rlog.d(LOGTAG, "onSetComplete: PUK locked,"
-    //                             + " cancel as lock screen will handle this");
-    //                     mState = State.CANCELLED;
-    //                 } else if (attemptsRemaining > 0) {
-    //                     Rlog.d(LOGTAG, "onSetComplete: attemptsRemaining="+attemptsRemaining);
-    //                     sb.append(mContext.getResources().getQuantityString(
-    //                             com.android.internal.R.plurals.pinpuk_attempts,
-    //                             attemptsRemaining, attemptsRemaining));
-    //                 }
-    //             } else {
-    //                 sb.append(mContext.getText(
-    //                         com.android.internal.R.string.passwordIncorrect));
-    //             }
-    //         } else if (err == CommandException.Error.SIM_PUK2) {
-    //             sb.append(mContext.getText(
-    //                     com.android.internal.R.string.badPin));
-    //             sb.append("\n");
-    //             sb.append(mContext.getText(
-    //                     com.android.internal.R.string.needPuk2));
-    //         } else if (err == CommandException.Error.REQUEST_NOT_SUPPORTED) {
-    //             if (mSc.equals(SC_PIN)) {
-    //                 sb.append(mContext.getText(com.android.internal.R.string.enablePin));
-    //             }
-    //         } else {
-    //             sb.append(mContext.getText(
-    //                     com.android.internal.R.string.mmiError));
-    //         }
-    //     } else {
-    //         sb.append(mContext.getText(
-    //                 com.android.internal.R.string.mmiError));
-    //     }
-    // } else if (isRegister()) {
-    //     mState = State.COMPLETE;
-    //     sb.append(mContext.getText(
-    //             com.android.internal.R.string.serviceRegistered));
-    // } else {
-    //     mState = State.FAILED;
-    //     sb.append(mContext.getText(
-    //             com.android.internal.R.string.mmiError));
-    // }
-    //
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    String str;
+    GetScString()->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+
+    AutoPtr<ICharSequence> cs;
+    Boolean b;
+    if (ar->mException != NULL) {
+        mState = IMmiCodeState_FAILED;
+        if (ICommandException::Probe(ar->mException) != NULL) {
+// TODO: Need CommandException.Error
+            // CommandException.Error err = ((CommandException)(ar->mException)).getCommandError();
+            // if (err == CommandException.Error.PASSWORD_INCORRECT) {
+            //     if (IsPinPukCommand(&b), b) {
+            //         // look specifically for the PUK commands and adjust
+            //         // the message accordingly.
+            //         if (mSc.Equals(SC_PUK) || mSc.Equals(SC_PUK2)) {
+            //             sb.Append((mContext->GetText(R::string::badPuk, (ICharSequence**)&cs), cs));
+            //         }
+            //         else {
+            //             sb.Append((mContext->GetText(R::string::badPin, (ICharSequence**)&cs), cs));
+            //         }
+            //         // Get the No. of retries remaining to unlock PUK/PUK2
+            //         Int32 attemptsRemaining;
+            //         msg->GetArg1(&attemptsRemaining);
+            //         if (attemptsRemaining <= 0) {
+            //             Logger::D(LOGTAG, String("onSetComplete: PUK locked,")
+            //                     + " cancel as lock screen will handle this");
+            //             mState = IMmiCodeState_CANCELLED;
+            //         }
+            //         else if (attemptsRemaining > 0) {
+            //             Logger::D(LOGTAG, "onSetComplete: attemptsRemaining=%d", attemptsRemaining);
+            //             AutoPtr<IResources> res;
+            //             mContext->GetResources((IResources**)&res);
+            //             res->GetQuantityString(
+            //                     R::plurals::pinpuk_attempts,
+            //                     attemptsRemaining, attemptsRemaining, &str);
+            //             sb.Append(str);
+            //         }
+            //     }
+            //     else {
+            //         sb.Append((mContext->GetText(R::string::passwordIncorrect, (ICharSequence**)&cs), cs));
+            //     }
+            // }
+            // else if (err == CommandException.Error.SIM_PUK2) {
+            //     sb.Append((mContext->GetText(R::string::badPin, (ICharSequence**)&cs), cs));
+            //     sb.Append("\n");
+            //     sb.Append((mContext->GetText(R::string::needPuk2, (ICharSequence**)&cs), cs));
+            // }
+            // else if (err == CommandException.Error.REQUEST_NOT_SUPPORTED) {
+            //     if (mSc.Equals(SC_PIN)) {
+            //         sb.Append((mContext->GetText(R::string::enablePin, (ICharSequence**)&cs), cs));
+            //     }
+            // }
+            // else {
+            //     sb.Append((mContext->GetText(R::string::mmiError, (ICharSequence**)&cs), cs));
+            // }
+        }
+        else {
+            sb.Append((mContext->GetText(R::string::mmiError, (ICharSequence**)&cs), cs));
+        }
+    }
+    else if (IsRegister(&b), b) {
+        mState = IMmiCodeState_COMPLETE;
+        sb.Append((mContext->GetText(R::string::serviceRegistered, (ICharSequence**)&cs), cs));
+    }
+    else {
+        mState = IMmiCodeState_FAILED;
+        sb.Append((mContext->GetText(R::string::mmiError, (ICharSequence**)&cs), cs));
+    }
+
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((CDMAPhone*)mPhone.Get())->OnMMIDone(this);
 }
 
 } // namespace Cdma
