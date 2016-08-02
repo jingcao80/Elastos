@@ -128,29 +128,94 @@ ECode DialpadFragment::DTMFKeyListener::OnKeyUp(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* ret)
 {
-    assert(0 && "TODO");
+    VALIDATE_NOT_NULL(ret)
+    *ret = FALSE;
+    // if (DBG) log("DTMFKeyListener.onKeyUp, keyCode " + keyCode + ", view " + view);
+
+    FAIL_RETURN(DialerKeyListener::OnKeyUp(view, content, keyCode, event, ret))
+
+    // find the character
+    Char32 c = (Char32)Lookup(event, ISpannable::Probe(content));
+
+    Boolean keyOK = Ok(GetAcceptedChars(), c);
+
+    if (keyOK) {
+        Logger::D("DialpadFragment", "Stopping the tone for '%c'", c);
+        ((DialpadPresenter*)mHost->GetPresenter().Get())->StopDtmf();
+        *ret = TRUE;
+    }
     return NOERROR;
 }
 
 Boolean DialpadFragment::DTMFKeyListener::OnKeyDown(
     /* [in] */ IKeyEvent* event)
 {
-    assert(0 && "TODO");
+    Char32 c = Lookup(event);
+    Logger::D("DialpadFragment", "DTMFKeyListener.onKeyDown: event '%c'", c);
+
+    // if not a long press, and parent onKeyDown accepts the input
+    Int32 count;
+    if ((event->GetRepeatCount(&count), count == 0) && c != 0) {
+        // if the character is a valid dtmf code, start playing the tone and send the
+        // code.
+        if (Ok(GetAcceptedChars(), c)) {
+            Logger::D("DialpadFragment", "DTMFKeyListener reading '%c' from input.", c);
+            ((DialpadPresenter*)mHost->GetPresenter().Get())->ProcessDtmf(c);
+            return TRUE;
+        }
+        else {
+            Logger::D("DialpadFragment", "DTMFKeyListener rejecting '%c' from input.", c);
+        }
+    }
     return FALSE;
 }
 
 Boolean DialpadFragment::DTMFKeyListener::OnKeyUp(
     /* [in] */ IKeyEvent* event)
 {
-    assert(0 && "TODO");
+    if (event == NULL) {
+        //the below piece of code sends stopDTMF event unnecessarily even when a null event
+        //is received, hence commenting it.
+        /*if (DBG) log("Stopping the last played tone.");
+        stopTone();*/
+        return TRUE;
+    }
+
+    Char32 c = Lookup(event);
+    Logger::D("DialpadFragment", "DTMFKeyListener.onKeyUp: event '%c'", c);
+
+    // TODO: stopTone does not take in character input, we may want to
+    // consider checking for this ourselves.
+    if (Ok(GetAcceptedChars(), c)) {
+        Logger::D("DialpadFragment", "Stopping the tone for '%c'", c);
+        ((DialpadPresenter*)mHost->GetPresenter().Get())->StopDtmf();
+        return TRUE;
+    }
     return FALSE;
+}
+
+Char32 DialpadFragment::DTMFKeyListener::Lookup(
+    /* [in] */ IKeyEvent* event)
+{
+    // This code is similar to {@link DialerKeyListener#lookup(KeyEvent, Spannable) lookup}
+    Int32 meta;
+    event->GetMetaState(&meta);
+    Int32 number;
+    event->GetNumber((Char32*)&number);
+
+    if (!((meta & (IKeyEvent::META_ALT_ON | IKeyEvent::META_SHIFT_ON)) == 0) || (number == 0)) {
+        Int32 match;
+        event->GetMatch(GetAcceptedChars(), meta, (Char32*)&match);
+        number = (match != 0) ? match : number;
+    }
+
+    return (Char32)number;
 }
 
 Boolean DialpadFragment::DTMFKeyListener::IsKeyEventAcceptable (
     /* [in] */ IKeyEvent* event)
 {
-    assert(0 && "TODO");
-    return FALSE;
+    return (Ok(GetAcceptedChars(), Lookup(event)));
 }
 
 
