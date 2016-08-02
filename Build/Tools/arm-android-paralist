@@ -400,10 +400,12 @@
 
 # ==== build SettingsProvider ====
   Elastos/Frameworks/Droid/Base/Packages/SettingsProvider Elastos.Droid.SettingsProvider.car
+  Elastos/Frameworks/Droid/Base/Packages/SettingsProvider R.cpp
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider
 
 # ==== build Provider.Media ====
   Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
+  Elastos/Packages/Providers/MediaProvider R.cpp
 > Elastos/Packages/Providers/MediaProvider
 
 # ==== build Provider.Telephony ====
@@ -412,8 +414,9 @@
 > Elastos/Packages/Providers/TelephonyProvider
 
 # ==== build DefContainer ====
-  Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/ Elastos.Droid.DefContainer.car
-> Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/
+  Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService Elastos.Droid.DefContainer.car
+  Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService R.cpp
+> Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService
 
 # ==== build Commands ====
 #> Elastos/Frameworks/Droid/Commands/Monkey Elastos.Droid.Core.eco
@@ -431,8 +434,8 @@
 > Elastos/Frameworks/Droid/Commands/Pm/ecx
 
 # ==== build DCAR ====
-- Elastos/Frameworks/Droid/DCARServer
-- Elastos/Frameworks/Droid/DCARServiceManager
+  Elastos/Frameworks/Droid/DCARServer
+  Elastos/Frameworks/Droid/DCARServiceManager
 
 # ==== buid Framework Test ====
   Elastos/Frameworks/Droid/Base/Test/inc
@@ -455,21 +458,25 @@
 > Elastos/Frameworks/Droid/Base/Test-runner
 
 # ==== Elastos/Packages/InputMethods ====
-> Elastos/Packages/InputMethods/PinyinIME Elastos.Droid.InputMethod.Pinyin.car
+  Elastos/Packages/InputMethods/PinyinIME Elastos.Droid.InputMethod.Pinyin.car
+  Elastos/Packages/InputMethods/PinyinIME R.cpp
 > Elastos/Packages/InputMethods/PinyinIME/src/elastos/droid/inputmethod/pinyin/share
-> Elastos/Packages/InputMethods/PinyinIME
+  Elastos/Packages/InputMethods/PinyinIME
 
 # ==== build Packages/Providers/MediaProvider ====
-> Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
-> Elastos/Packages/Providers/MediaProvider
+  Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
+  Elastos/Packages/Providers/MediaProvider R.cpp
+< Elastos/Packages/Providers/MediaProvider
 
 # ==== build Packages/Providers/DownloadProvider ====
-> Elastos/Packages/Providers/DownloadProvider Elastos.Droid.Providers.Downloads.car
-> Elastos/Packages/Providers/DownloadProvider
+  Elastos/Packages/Providers/DownloadProvider Elastos.Droid.Providers.Downloads.car
+  Elastos/Packages/Providers/DownloadProvider R.cpp
+< Elastos/Packages/Providers/DownloadProvider
 
 # ==== build Packages/Service/Telecomm ====
-> Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
-> Elastos/Packages/Service/Telecomm
+  Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
+  Elastos/Packages/Service/Telecomm R.cpp
+< Elastos/Packages/Service/Telecomm
 
 # ==== build Packages/Service/Telephony ====
   Elastos/Packages/Service/Telephony Elastos.Droid.TeleService.car
@@ -496,6 +503,7 @@
 
 # ==== build Packages/Apps/Launcher2 ====
   Elastos/Packages/Apps/Launcher2 Elastos.Droid.Launcher2.car
+  Elastos/Packages/Apps/Launcher2 R.cpp
 < Elastos/Packages/Apps/Launcher2
 
 # ==== buid Packages/Apps/Arity ====
@@ -537,6 +545,7 @@
 
 # ==== build Packages/Apps/PackageInstaller ====
   Elastos/Packages/Apps/PackageInstaller Elastos.Droid.PackageInstaller.car
+  Elastos/Packages/Apps/PackageInstaller R.cpp
 < Elastos/Packages/Apps/PackageInstaller
 
 # ==== build DevSamples ====
