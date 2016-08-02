@@ -27,6 +27,7 @@ public:
 
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
+
 public:
     AutoPtr< ArrayOf<IFragmentState*> > mActive;
     AutoPtr< ArrayOf<Int32> > mAdded;
