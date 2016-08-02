@@ -491,6 +491,7 @@ ECode CServiceState::GetRadioTechnology(
 {
     VALIDATE_NOT_NULL(radioTechnology);
     GetRilDataRadioTechnology(radioTechnology);
+    return NOERROR;
 }
 
 ECode CServiceState::GetNetworkType(
@@ -629,6 +630,7 @@ ECode CServiceState::IsGsm(
             || radioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_HSPAP
             || radioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_GSM
             || radioTechnology == RIL_RADIO_TECHNOLOGY_TD_SCDMA;
+    return NOERROR;
 }
 
 ECode CServiceState::IsCdma(
@@ -643,6 +645,7 @@ ECode CServiceState::IsCdma(
             || radioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_A
             || radioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_B
             || radioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_EHRPD;
+    return NOERROR;
 }
 
 ECode CServiceState::CopyFrom(
