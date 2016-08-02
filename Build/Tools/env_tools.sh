@@ -242,12 +242,14 @@ function eldrop ()
             MAKE_DIR=1
             set_for_android
             SET_FOR_ANDROID=1
-            while read -u3 LINE;
+            while read -u3 TARGET TARGET_DIR TYPE;
             do
-                if [ "`expr index "$LINE" ";"`" == "0" ]; then
-                    TARGET=${LINE% *}
-                    TARGET_DIR=${LINE#* }
-                    elcopy $XDK_BUILD_PATH/Prebuilt/JavaFramework/$TARGET $TARGET_DIR
+                if [ "`expr index "$TARGET" ";"`" == "0" ]; then
+                    if [ "$TYPE" == "dir" ]; then
+                        elcopy $XDK_BUILD_PATH/Prebuilt/JavaFramework/$TARGET $TARGET_DIR/$TARGET
+                     else
+                        elcopy $XDK_BUILD_PATH/Prebuilt/JavaFramework/$TARGET $TARGET_DIR
+                    fi
                 fi
             done 3<$XDK_TOOLS/eldrop_java.list
             unset ANDROID_AVD_TAG MAKE_DIR SET_FOR_ANDROID ANDROID_AVD
