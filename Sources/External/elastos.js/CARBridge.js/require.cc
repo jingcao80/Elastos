@@ -58,7 +58,7 @@ static Local<Value> _Require(IModuleInfo const *moduleInfo, char const *entryId)
 
     if (hasImportedModule != FALSE) {
         AutoPtr<IModuleInfo const> importedModuleInfo;
-        IModuleInfo *_importedModuleInfo;
+        IModuleInfo const *_importedModuleInfo;
 
         ec = GetImportedModuleInfo(moduleInfo, _ELASTOS String(entryId), &_importedModuleInfo);
         if (FAILED(ec))

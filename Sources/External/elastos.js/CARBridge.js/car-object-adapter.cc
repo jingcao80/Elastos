@@ -69,11 +69,11 @@ CARAPI CARObjectAdapter::New(
 CARObjectAdapter::CARObjectAdapter(IInterfaceInfo const *interfaceInfo, Local<::v8::Object> object):
     _interfaceInfo(interfaceInfo), _object(object)
 {
+#if 0
     ECode ec;
 
     ClassID classId;
 
-#if 0
     IInterface *callbackConnector;
 
 #endif
@@ -128,10 +128,12 @@ CARAPI_(IInterface *) CARObjectAdapter::Probe(REIID riid)
 
 CARAPI CARObjectAdapter::GetInterfaceID(IInterface *object, InterfaceID *interfaceId) noexcept
 {
+    return E_NOT_IMPLEMENTED;
 }
 
 CARAPI CARObjectAdapter::Aggregate(AggregateType type, IInterface *object) noexcept
 {
+    return E_NOT_IMPLEMENTED;
 }
 
 CARAPI CARObjectAdapter::GetDomain(IInterface **object) noexcept
@@ -201,10 +203,10 @@ void CARObjectAdapter::CARInterfaceAdapter::InitializeVTableFrom4To<0>(void) noe
 
 void CARObjectAdapter::CARInterfaceAdapter::Initialize(void) noexcept
 {
-    _vtable[0] = &CARInterfaceAdapter::Probe;
-    _vtable[1] = &CARInterfaceAdapter::AddRef;
-    _vtable[2] = &CARInterfaceAdapter::Release;
-    _vtable[3] = &CARInterfaceAdapter::GetInterfaceID;
+    _vtable[0] = reinterpret_cast<VirtualMethod>(&CARInterfaceAdapter::Probe);
+    _vtable[1] = reinterpret_cast<VirtualMethod>(&CARInterfaceAdapter::AddRef);
+    _vtable[2] = reinterpret_cast<VirtualMethod>(&CARInterfaceAdapter::Release);
+    _vtable[3] = reinterpret_cast<VirtualMethod>(&CARInterfaceAdapter::GetInterfaceID);
 
     InitializeVTableFrom4To<_MAX_NUM_OF_METHODS>();
 }
@@ -288,8 +290,8 @@ CARObjectAdapter::CARInterfaceAdapter::CARInterfaceAdapter(IInterfaceInfo const 
 
     _ELASTOS Int32 nMethods;
 
-    AutoPtr<ArrayOf<IFunctionInfo const *> > methodInfos;
-    ArrayOf<IFunctionInfo const *> *__methodInfos;
+    AutoPtr<ArrayOf<IMethodInfo const *> > methodInfos;
+    ArrayOf<IMethodInfo const *> *__methodInfos;
 
     _vtptr = _vtable;
 
@@ -297,7 +299,7 @@ CARObjectAdapter::CARInterfaceAdapter::CARInterfaceAdapter(IInterfaceInfo const 
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    __methodInfos = ArrayOf<IFunctionInfo const *>::Alloc(nMethods);
+    __methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods);
     if (__methodInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 

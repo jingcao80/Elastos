@@ -32,11 +32,11 @@ esac
 export TOOLCHAIN=$PWD/android-toolchain
 mkdir -p $TOOLCHAIN
 if [ -n "$1" ]; then
-$1/build/tools/make-standalone-toolchain.sh \
-    --toolchain=$TOOLCHAIN_NAME-$CC_VER \
-    --arch=$ARCH \
-    --install-dir=$TOOLCHAIN \
-    --platform=android-9
+    $1/build/tools/make-standalone-toolchain.sh \
+        --toolchain=$TOOLCHAIN_NAME-$CC_VER \
+        --arch=$ARCH \
+        --install-dir=$TOOLCHAIN \
+        --platform=android-9
 fi
 
 export PATH=$TOOLCHAIN/bin:$PATH

@@ -1,4 +1,5 @@
 
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -201,7 +202,7 @@ void CARObject::Off(CARObject *carObject, CARFunctionAdapter *carFunctionAdapter
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    Off(carObject, carFunctionAdapter, ToValue(name), carFunctionAdapter->function());
+    Off(carObject, carFunctionAdapter, ToValue(name).As<::v8::String>(), carFunctionAdapter->function());
 }
 
 void CARObject::Off(Local<Object> object, Local<Number> connectionId)
@@ -346,7 +347,7 @@ NAN_METHOD(CARObject::EnterRegime)
 
         regime = Unwrap<CARObject>(arg0.As<Object>());
 
-        ec = CObject::EnterRegime(thatCARObject->_carObject, regime->_carObject);
+        ec = CObject::EnterRegime(thatCARObject->_carObject, static_cast<IRegime *>(regime->_carObject.Get()));
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
@@ -384,7 +385,7 @@ NAN_METHOD(CARObject::LeaveRegime)
 
         regime = Unwrap<CARObject>(arg0.As<Object>());
 
-        ec = CObject::LeaveRegime(thatCARObject->_carObject, regime->_carObject);
+        ec = CObject::LeaveRegime(thatCARObject->_carObject, static_cast<IRegime *>(regime->_carObject.Get()));
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
@@ -649,16 +650,18 @@ static IFunctionInfo const *_GetMatchingFunctionForCall(
 {
     _ELASTOS String name;
 
-    int priority;
-
     Vector<AutoPtr<IFunctionInfo const>> candidates;
+
+    int priority;
 
     size_t size;
 
+    priority = INT_MAX;
     for (size_t i = 0; i < nFunctionInfos; ++i) {
         IFunctionInfo const *functionInfo;
 
         ECode ec;
+
         _ELASTOS String _name;
 
         _ELASTOS Int32 nParams;
@@ -666,9 +669,9 @@ static IFunctionInfo const *_GetMatchingFunctionForCall(
         AutoPtr<ArrayOf<IParamInfo const *> > paramInfos;
         ArrayOf<IParamInfo const *> *_paramInfos;
 
-        _ELASTOS Int32 j;
-
         int _priority;
+
+        _ELASTOS Int32 j;
 
         functionInfo = functionInfos[i];
 
@@ -714,7 +717,10 @@ static IFunctionInfo const *_GetMatchingFunctionForCall(
             _priority += __priority;
         }
 
-        if (j < nParams || _priority > priority)
+        if (j < nParams)
+            continue;
+
+        if (_priority > priority)
             continue;
 
         if (_priority < priority)
@@ -2603,7 +2609,7 @@ static NAN_GETTER(_GetCallerAllocOutputArgumentOfInterface)
 
             classInfo = _classInfo, _classInfo->Release();
 
-            ec = classInfo->HasInterfaceInfo(interface_->interfaceInfo, &has);
+            ec = classInfo->HasInterfaceInfo(interface_->interfaceInfo.Get(), &has);
             if (FAILED(ec))
                 throw Error(Error::TYPE_ELASTOS, ec, "");
 
@@ -2913,7 +2919,7 @@ NAN_METHOD(CARObject::Attach)
 
         classId->Fill(classInfo->classInfo);
 
-        AttachAspect(arg0, classId->classId);
+        AttachAspect(arg0.As<Object>(), classId->classId);
 
         NAN_METHOD_RETURN_UNDEFINED();
     } catch (Error const &error) {
@@ -2953,7 +2959,7 @@ NAN_METHOD(CARObject::Detach)
 
         classId->Fill(classInfo->classInfo);
 
-        DetachAspect(arg0, classId->classId);
+        DetachAspect(arg0.As<Object>(), classId->classId);
 
         NAN_METHOD_RETURN_UNDEFINED();
     } catch (Error const &error) {
@@ -3008,7 +3014,7 @@ NAN_METHOD(CARObject::Probe)
 }
 
 CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const *> const &constructorInfos,
-        IInterface *regime,
+        IRegime *regime,
         size_t argc, Local<Value> argv[])
 {
     ECode ec;
@@ -3018,7 +3024,7 @@ CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const
     UniquePtr<UniquePtr<struct _Value> []> _argv;
 
     AutoPtr<IConstructorInfo const> constructorInfo;
-    IConstructorInfo *_constructorInfo;
+    IConstructorInfo const *_constructorInfo;
 
     AutoPtr<IArgumentList> argumentList;
     IArgumentList *_argumentList;
@@ -3057,7 +3063,7 @@ struct _ClassInfoInRegime: WeakExternalBase {
     AutoPtr<IClassInfo const> classInfo;
     AutoPtr<ArrayOf<IConstructorInfo const *> const> constructorInfos;
 
-    AutoPtr<IInterface> regime;
+    AutoPtr<IRegime> regime;
 
 private:
     ~_ClassInfoInRegime() = default;
@@ -3127,7 +3133,7 @@ NAN_METHOD(CARObject::InRegime)
 
         classInfoInRegime->classInfo = classInfo->classInfo;
         classInfoInRegime->constructorInfos = classInfo->constructorInfos;
-        classInfoInRegime->regime = regime->_carObject;
+        classInfoInRegime->regime = static_cast<IRegime *>(regime->_carObject.Get());
 
         NAN_METHOD_RETURN_VALUE(
                 GetFunction(
@@ -3165,7 +3171,7 @@ NAN_METHOD(CARObject::InvokeMethod)
         UniquePtr<UniquePtr<struct _Value> []> argv;
 
         AutoPtr<IMethodInfo const> methodInfo;
-        IMethodInfo *_methodInfo;
+        IMethodInfo const *_methodInfo;
 
         AutoPtr<IArgumentList> argumentList;
         IArgumentList *_argumentList;
@@ -3282,7 +3288,7 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo,
         throw Error(Error::NO_MEMORY, "");
 
     _classInfo->classInfo = classInfo;
-    _classInfo->constructorInfos = constructorInfos;
+    _classInfo->constructorInfos = &constructorInfos;
 
     SetTemplate(classTemplate,
             ::Nan::New(".__class__").ToLocalChecked(),
@@ -3749,7 +3755,7 @@ CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const
     UniquePtr<UniquePtr<struct _Value> []> _argv;
 
     AutoPtr<IConstructorInfo const> constructorInfo;
-    IConstructorInfo *_constructorInfo;
+    IConstructorInfo const *_constructorInfo;
 
     AutoPtr<IArgumentList> argumentList;
     IArgumentList *_argumentList;
