@@ -53,6 +53,7 @@ EXPORT_HEADERS += elastos/droid/graphics/CanvasProperty.h
 EXPORT_HEADERS += elastos/droid/graphics/drawable/Drawable.h
 EXPORT_HEADERS += elastos/droid/graphics/drawable/InsetDrawable.h
 EXPORT_HEADERS += elastos/droid/graphics/drawable/ColorDrawable.h
+EXPORT_HEADERS += elastos/droid/graphics/drawable/LayerDrawable.h
 
 EXPORT_HEADERS += elastos/droid/ext/frameworkdef.h
 EXPORT_HEADERS += elastos/droid/ext/frameworkext.h

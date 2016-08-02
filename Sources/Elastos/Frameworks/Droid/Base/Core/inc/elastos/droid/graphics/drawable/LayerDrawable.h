@@ -42,7 +42,7 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-class LayerDrawable
+class ECO_PUBLIC LayerDrawable
     : public Drawable
     , public ILayerDrawable
     , public IDrawableCallback
