@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="title_first_layout_bg">#3b404e</color>
+    <color name="title_second_layout_bg">#ffffff</color>
+    <color name="title_line_bg">#c9cbce</color>
+    <color name="main_layout_bg">#f4f5f8</color>
+    <color name="bottom_layout_bg">#e1e3e6</color>
+    <color name="dialog_title_bg">#f4f4f4</color>
+    <color name="divide_line_bg">#888888</color>
+
+    <color name="title_second_text">#2d3955</color>
+    <color name="text_black">#000000</color>
+    <color name="text_white">#ffffff</color>
+
+</resources>

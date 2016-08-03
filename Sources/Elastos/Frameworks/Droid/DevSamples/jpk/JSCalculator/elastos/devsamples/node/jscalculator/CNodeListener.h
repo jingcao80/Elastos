@@ -221,6 +221,21 @@ public:
         }
     }
 
+    static void RegisterCustomControl(IContext* context, IInterface* control, ICalculatorEditTextListener** listener) {
+        ALOGD("RegisterCustomControl========0========");
+        Boolean result = false;
+        if(JSEvtName::mNodeBridgeListener) {
+            ALOGD("RegisterCustomControl========1========");
+            JSEvtName::mNodeBridgeListener->OnRegistCustomControl(
+                context, control, (Int32)listener, &result);
+            ALOGD("RegisterCustomControl========2========");
+        }
+        else {
+            ALOGD("RegisterCustomControl================mNodeBridgeListener is null================");
+        }
+        ALOGD("RegisterCustomControl========3========");
+    }
+
     static ECode Require(
         /* [in] */ const String& moduleName,
         /* [in] */ const String& className,
@@ -278,9 +293,12 @@ public:
     CARAPI Unlock();
 
     CARAPI SetActivityListener(
-        ///* [in] */ IActivityListener** ppActivityListener,
-        /* [in] */ Int32 ppActivityListener,
+        /* [in] */ Int32 ppActivityListener,    //IActivityListener**
         /* [in] */ IActivityListener* pJsActivityListener);
+
+    CARAPI SetCalculatorEditTextListener(
+        /* [in] */ Int32 ppCalculatorEditTextListener,    //ICalculatorEditTextListener**
+        /* [in] */ ICalculatorEditTextListener* pJsCalculatorEditTextListener);
 
     CARAPI SetNodeBridgeListener(
         /* [in] */ INodeBridgeListener* pNodeBridgeListener);

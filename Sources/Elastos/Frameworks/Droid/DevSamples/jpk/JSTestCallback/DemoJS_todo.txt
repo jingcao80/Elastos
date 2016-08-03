@@ -1,0 +1,120 @@
+========Demo.car====begin====
+
+module
+{
+    //注:　引用系统libcore/droid库时
+    //	可以通过元信息自动获取需引入的libcore/dorid库类
+    //importlib("Elastos.CoreLibrary.eco");
+
+    interface IEventListener {
+        OnEvent(
+            [in] Int32 id);
+    }
+
+    interface IDemo {
+        addEventHandler(
+            [in] IEventListener* listener);
+
+        doTask();
+    }
+
+    class CDemo {
+        interface IDemo;
+    }
+}
+
+========Demo.car====end====
+
+========CDemo.h====begin====
+
+#ifndef __CDEMO_H__
+#define __CDEMO_H__
+
+#include "_CDemo.h"
+
+//在生成_CDemo.h时加入
+//#include <elastos/core/Object.h>
+
+CarClass(CDemo)
+    //在生成_CDemo.h时加入
+    //, public Object
+    //, public IDemo
+{
+public:
+    //注: 可在生成_CDemo.h时加入
+    //CAR_INTERFACE_DECL()
+    //CAR_OBJECT_DECL()
+
+    CARAPI addEventHandler(
+        /* [in] */ IEventListener* listener);
+
+    CARAPI doTask();
+
+private:
+    AutoPtr<IEventListener> m_Listener;
+};
+
+#endif // __CDEMO_H__
+
+/*--------参考_CDemo.h--------
+class _CDemo
+    : public Object
+    , public IDemo
+{
+public:
+    CAR_INTERFACE_DECL()
+    CAR_OBJECT_DECL()
+
+    ...
+}
+----------------*/
+
+========CDemo.h====end====
+
+========CDemo.cpp====begin====
+
+#include "CDemo.h"
+
+//注: 可在生成_CDemo.cpp时加入
+//CAR_INTERFACE_IMPL(CDemo, Object, IDemo)
+//CAR_OBJECT_IMPL(CDemo)
+
+ECode CDemo::addEventHandler(
+    /* [in] */ IEventListener* listener)
+{
+    m_Listener = listener;
+    return NOERROR;
+}
+
+ECode CDemo::doTask()
+{
+    m_Listener->OnEvent(9);
+    return NOERROR;
+}
+
+/*--------参考_CDemo.cpp--------
+#include <new>
+#include "CDemo.h"
+
+#define ECLSID__CDemo ECLSID_CDemo
+
+CAR_INTERFACE_IMPL(_CDemo, Object, IDemo)
+CAR_OBJECT_IMPL(_CDemo)
+
+--------------------*/
+
+========CDemo.cpp====end====
+
+========demo.js====begin====
+
+var module = elastos.require('./Demo.eco');
+var obj = module.createObject('CDemo');
+obj.addEventHandler({
+    OnEvent:function(i) {
+        var s = 'OnEvent, i: ' + JSON.stringify(i);
+        elastos.log(s);
+    },
+});
+obj.doTask();
+
+========demo.js====end====

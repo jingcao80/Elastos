@@ -1,11 +1,9 @@
-
 #ifndef __COBJECTWRAPPER_H__
 #define __COBJECTWRAPPER_H__
 
 #if ENABLE(CAR_BRIDGE)
 
 #include "ext/frameworkdef.h"
-//#include "elastos/droid/ext/frameworkdef.h"
 #include <elastos.h>
 
 namespace JSC {
@@ -48,15 +46,13 @@ public:
         return NOERROR;
     }
 
-    IInterface* getInstance() const { return mInstance; }
+    AutoPtr<IInterface> getInstance() const { return mInstance; }
     void setInstance(IInterface* instance) {
         mInstance = instance;
-        //mInstance->AddRef();
-        //INTERFACE_ADDREF(instance);
         REFCOUNT_ADD(instance);
     }
 
-    IDataTypeInfo* getDataTypeInfo() const { return mDataTypeInfo; }
+    AutoPtr<IDataTypeInfo> getDataTypeInfo() const { return mDataTypeInfo; }
     void setDataTypeInfo(IDataTypeInfo* dataTypeInfo) {
         mDataTypeInfo = dataTypeInfo;
     }

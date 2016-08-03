@@ -1,5 +1,4 @@
 {
-
     "targets": [
         {
             "target_name": "elastos",

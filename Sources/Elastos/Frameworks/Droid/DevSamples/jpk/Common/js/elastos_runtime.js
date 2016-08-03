@@ -256,12 +256,10 @@ function getConstructorProtos(as_EcoName, as_ClassName){
     _getConstructorProtos(oClassInfo);
 }
 
-function _getMethodInfos(as_EcoName, as_ClassName, as_MethodName){
-    var oModuleInfo = _getModuleInfo(as_EcoName);
-    var oClassInfo = oModuleInfo.GetClassInfo(as_ClassName);
-    var aAllMethodInfos = oClassInfo.GetAllMethodInfos();
+function _getMethodInfosByClassInfo(ao_ClassInfo, as_MethodName){
+    var aAllMethodInfos = ao_ClassInfo.GetAllMethodInfos();
     var aMethodInfos;
-    if (arguments.length == 2) {
+    if (arguments.length == 1) {
         aMethodInfos = aAllMethodInfos;
     }
     else {
@@ -276,26 +274,87 @@ function _getMethodInfos(as_EcoName, as_ClassName, as_MethodName){
     }
     return aMethodInfos;
 }
+
+function _getMethodInfos(as_EcoName, as_ClassName, as_MethodName){
+    var oModuleInfo = _getModuleInfo(as_EcoName);
+    var oClassInfo = oModuleInfo.GetClassInfo(as_ClassName);
+
+    return _getMethodInfosByClassInfo(oClassInfo, as_MethodName);
+
+    // var aAllMethodInfos = oClassInfo.GetAllMethodInfos();
+    // var aMethodInfos;
+    // if (arguments.length == 2) {
+    //     aMethodInfos = aAllMethodInfos;
+    // }
+    // else {
+    //     aMethodInfos = [];
+    //     for(var i=0,im=aAllMethodInfos.length;i<im;i++) {
+    //         var oMethodInfo = aAllMethodInfos[i];
+    //         var sMethodName = oMethodInfo.GetName();
+    //         if (sMethodName == as_MethodName) {
+    //             aMethodInfos.push(oMethodInfo);
+    //         }
+    //     }
+    // }
+    // return aMethodInfos;
+}
+
+function __getMethodProtos(ao_MethodInfos){
+    var aProto = [];
+
+    //aProto.push(as_ClassName);
+    //aProto.push("{");
+
+    for (var i=0,im=ao_MethodInfos.length;i<im;i++) {
+        aProto.push("=="+i+"==");
+        var sMethodProto = __getConstructorProto(ao_MethodInfos[i]);
+        aProto.push(sMethodProto);
+    }
+
+    //aProto.push("}");
+
+    return aProto.join("");
+}
+
 function _getMethodProtos(as_EcoName, as_ClassName, as_MethodName){
+    var aMethodInfos = _getMethodInfos(as_EcoName, as_ClassName, as_MethodName);
+
     var aProto = [];
 
     aProto.push(as_ClassName);
     aProto.push("{");
 
-    var aMethodInfos = _getMethodInfos(as_EcoName, as_ClassName, as_MethodName);
-    for (var i=0,im=aMethodInfos.length;i<im;i++) {
-        aProto.push("=="+i+"==");
-        var sMethodProto = __getConstructorProto(aMethodInfos[i]);
-        aProto.push(sMethodProto);
-    }
+    aProto.push(__getMethodProtos(aMethodInfos));
 
     aProto.push("}");
 
     return aProto.join("");
+
+
+    // var aProto = [];
+
+    // aProto.push(as_ClassName);
+    // aProto.push("{");
+
+    // for (var i=0,im=aMethodInfos.length;i<im;i++) {
+    //     aProto.push("=="+i+"==");
+    //     var sMethodProto = __getConstructorProto(aMethodInfos[i]);
+    //     aProto.push(sMethodProto);
+    // }
+
+    // aProto.push("}");
+
+    // return aProto.join("");
 }
 
 CObject.getConstructorProtos = getConstructorProtos;
 CObject.getMethodProtos = _getMethodProtos;
+
+CObject.getObjectMethodProtos = function(ao_Car, as_MethodName) {
+    var oClassInfo = this.getClassInfo(ao_Car);
+    var aMethodInfos = _getMethodInfosByClassInfo(oClassInfo, as_MethodName);
+    return __getMethodProtos(aMethodInfos);
+}
 
 //--------proto info end--------
 

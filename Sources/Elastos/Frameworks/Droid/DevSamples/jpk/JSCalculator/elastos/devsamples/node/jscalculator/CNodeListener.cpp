@@ -155,6 +155,14 @@ ECode JSEvtName::SetActivityListener(
     return NOERROR;
 }
 
+ECode JSEvtName::SetCalculatorEditTextListener(
+    /* [in] */ Int32 ppCalculatorEditTextListener,    //ICalculatorEditTextListener**
+    /* [in] */ ICalculatorEditTextListener* pJsCalculatorEditTextListener)
+{
+    *(ICalculatorEditTextListener**)ppCalculatorEditTextListener = pJsCalculatorEditTextListener;
+    return NOERROR;
+}
+
 ECode JSEvtName::SetNodeBridgeListener(
     /* [in] */ INodeBridgeListener* pNodeBridgeListener)
 {

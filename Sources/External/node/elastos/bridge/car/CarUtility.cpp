@@ -49,36 +49,45 @@ CarDataType CarDataTypeFromClassName(const char* name)
 const char* ClassNameFromCarDataType(CarDataType type)
 {
     switch (type) {
-    case CarDataType_Int16:
+    case CarDataType_Int16: //1
         return "Int16";
-    case CarDataType_Int32:
+    case CarDataType_Int32: //2
         return "Int32";
-    case CarDataType_Int64:
+    case CarDataType_Int64: //3
         return "Int64";
-    case CarDataType_Byte:
+    case CarDataType_Byte:  //4
         return "Byte";
-    case CarDataType_Float:
+    case CarDataType_Float: //5
         return "Float";
-    case CarDataType_Double:
+    case CarDataType_Double:    //6
         return "Double";
-    case CarDataType_Char32:
+    case CarDataType_Char32:    //7
         return "Char32";
-    case CarDataType_String:
+    case CarDataType_String:    //8
         return "String";
-    case CarDataType_Boolean:
+    case CarDataType_Boolean:   //9
         return "Boolean";
-    case CarDataType_EMuid:
+    case CarDataType_EMuid: //10
         return "EMuid";
-    case CarDataType_EGuid:
+    case CarDataType_EGuid: //11
         return "EGuid";
-    case CarDataType_ECode:
+    case CarDataType_ECode: //12
         return "ECode";
-    case CarDataType_Enum:
+    case CarDataType_LocalPtr:  //13
+        return "LocalPtr";
+    case CarDataType_LocalType:  //14
+        return "LocalType";
+    case CarDataType_Enum:  //15
         return "Enum";
-    case CarDataType_ArrayOf:
+    case CarDataType_ArrayOf:   //16
         return "ArrayOf";
-    case CarDataType_Interface:
+    case CarDataType_CppVector:   //17
+        return "CppVector";
+    case CarDataType_Struct:   //18
+        return "Struct";
+    case CarDataType_Interface: //19
         return "Interface";
+
     default:
         break;
     }

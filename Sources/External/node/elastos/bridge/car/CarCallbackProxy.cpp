@@ -125,8 +125,8 @@ static int InitCarCallbackProxyEntry()
 CarCallbackInterfaceProxy::~CarCallbackInterfaceProxy()
 {
     if (mMethodInfos != NULL) {
-        //for (Int32 i = 0; i < mMethodInfos->GetUsed(); i++) {
         for (Int32 i = 0; i < mMethodInfos->GetLength(); i++) {
+            //TODO
             //(*mMethodInfos)[i]->Release();
             //(*mMethodInfos)[i] = NULL;
         }
@@ -172,11 +172,10 @@ ECode CarCallbackInterfaceProxy::ReadParam(
     /* [out] */ CarValue** ppCarArgs,
     /* [in] */ bool* hasOutParams)
 {
+    ALOGD("CarCallbackInterfaceProxy::ReadParam====paramCount:%d====", paramCount);
+
     ArrayOf<IParamInfo*>* paramInfos = ArrayOf<IParamInfo*>::Alloc(paramCount);
     methodInfo->GetAllParamInfos(paramInfos);
-
-    *ppCarArgs = new CarValue[paramCount];
-    CarValue* carArgs = *ppCarArgs;
 
     for (Int32 i = 0; i < paramCount; i++) {
         IParamInfo* paramInfo = (*paramInfos)[i];
@@ -194,16 +193,16 @@ ECode CarCallbackInterfaceProxy::ReadParam(
         CarDataType localPtrElementDataType;
 
         if(paramDataType == CarDataType_ArrayOf) {
-            ICarArrayInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            (*(ICarArrayInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         } else if (paramDataType == CarDataType_CppVector) {
-            ICppVectorInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            (*(ICppVectorInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         } else if (paramDataType == CarDataType_LocalPtr) {
-            ILocalPtrInfo::Probe(paramTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            (*(ILocalPtrInfo **)&paramTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
             if (elementDataType == CarDataType_ArrayOf) {
-                ICarArrayInfo::Probe(elementDataTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&localPtrElementDataTypeInfo);
+                (*(ICarArrayInfo **)&elementDataTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&localPtrElementDataTypeInfo);
                 localPtrElementDataTypeInfo->GetDataType(&localPtrElementDataType);
 
             }
@@ -317,6 +316,7 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                 }
                 case CarDataType_Interface:
                 {
+                    ALOGD("CarCallbackInterfaceProxy::ReadParam====CarDataType_Interface====");
                     IInterface* obj = (IInterface*)*puArgs;
 
                     bool bNotCarCallbackObject = false;
@@ -329,6 +329,7 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                     if (bNotCarCallbackObject) {
                         npArgs[i].type = NPVariantType_Object;
                         npArgs[i].value.objectValue = CarInstanceToNPObject(new CarInstanceV8(new CobjectWrapper(obj, paramTypeInfo), true));
+                        ALOGD("CarCallbackInterfaceProxy::ReadParam====CarInstanceToNPObject finish====");
                     }
                     else {
                         Int32 iii = 1/0;
@@ -809,57 +810,60 @@ ECode CarCallbackInterfaceProxy::ReadParam_bak(
         AutoPtr<IDataTypeInfo> elementDataTypeInfo;
         CarDataType elementDataType;
         if(paramDataType == CarDataType_ArrayOf) {
-            ICarArrayInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            (*(ICarArrayInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         } else if (paramDataType == CarDataType_CppVector) {
-            ICppVectorInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            (*(ICppVectorInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         } else if (paramDataType == CarDataType_LocalPtr) {
-            ILocalPtrInfo::Probe(paramTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            (*(ILocalPtrInfo **)&paramTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         }
 
+        carArgs[i].mTypeInfo = paramTypeInfo;
+
         carArgs[i].mType = paramDataType;
-        carArgs[i].mElementType = elementDataType;
         carArgs[i].mIOAttribute = paramIOAttr;
+
+        carArgs[i].mObjectWrapper = new CobjectWrapper(NULL,paramTypeInfo);
 
         if (paramIOAttr == ParamIOAttribute_In) { // [in]
             switch (paramDataType) {
                 case CarDataType_Int16:
                 {
-                    carArgs[i].mInt16Value = *puArgs;
+                    carArgs[i].value.mInt16Value = *puArgs;
                     puArgs++;
                     break;
                 }
                 case CarDataType_Int32:
                 {
-                    carArgs[i].mInt32Value = *puArgs;
+                    carArgs[i].value.mInt32Value = *puArgs;
                     puArgs++;
                     break;
                 }
                 case CarDataType_Int64:
                 {
                     puArgs = (UInt32*)ROUND8((Int32)puArgs);
-                    carArgs[i].mInt64Value = *puArgs;
+                    carArgs[i].value.mInt64Value = *puArgs;
                     puArgs += 2;
                     break;
                 }
                 case CarDataType_Byte:
                 {
-                    carArgs[i].mByteValue = *puArgs;
+                    carArgs[i].value.mByteValue = *puArgs;
                     puArgs++;
                     break;
                 }
                 case CarDataType_Float:
                 {
-                    carArgs[i].mFloatValue = *(Float*)puArgs;
+                    carArgs[i].value.mFloatValue = *(Float*)puArgs;
                     puArgs++;
                     break;
                 }
                 case CarDataType_Double:
                 {
                     puArgs = (UInt32*)ROUND8((Int32)puArgs);
-                    carArgs[i].mDoubleValue = *puArgs;
+                    carArgs[i].value.mDoubleValue = *puArgs;
                     puArgs += 2;
                     break;
                 }
@@ -881,7 +885,7 @@ ECode CarCallbackInterfaceProxy::ReadParam_bak(
                 //--------to be delete end--------
                 case CarDataType_Char32:
                 {
-                    carArgs[i].mCharValue = *puArgs;
+                    carArgs[i].value.mCharValue = *puArgs;
                     puArgs++;
                     break;
                 }
@@ -896,7 +900,7 @@ ECode CarCallbackInterfaceProxy::ReadParam_bak(
                 }
                 case CarDataType_Boolean:
                 {
-                    carArgs[i].mBooleanValue = *puArgs;
+                    carArgs[i].value.mBooleanValue = *puArgs;
                     puArgs++;
                     break;
                 }
@@ -914,7 +918,7 @@ ECode CarCallbackInterfaceProxy::ReadParam_bak(
                 }
                 case CarDataType_ECode:
                 {
-                    carArgs[i].mECodeValue = *puArgs;
+                    carArgs[i].value.mECodeValue = *puArgs;
                     puArgs++;
                     break;
                 }
@@ -922,7 +926,7 @@ ECode CarCallbackInterfaceProxy::ReadParam_bak(
                 //case CarDataType_LocalType:
                 case CarDataType_Enum:
                 {
-                    carArgs[i].mInt32Value = *puArgs;
+                    carArgs[i].value.mInt32Value = *puArgs;
                     puArgs++;
                     break;
                 }
@@ -946,7 +950,9 @@ ECode CarCallbackInterfaceProxy::ReadParam_bak(
                     //     return ec;
                     // }
                     //carArgs[i].pInterface = (IInterface*)(*puArgs);
-                    carArgs[i].mObjectValue = (IInterface*)(*puArgs);
+                    //carArgs[i].mObjectValue = (IInterface*)(*puArgs);
+                    carArgs[i].mObjectWrapper = new CobjectWrapper((IInterface*)(*puArgs), paramTypeInfo);
+
                     puArgs++;
                     break;
                 }
@@ -1002,9 +1008,11 @@ ECode CarCallbackInterfaceProxy::ProxyEntry(
 
     Elastos::String nameBuf;
     methodInfo->GetName(&nameBuf);
+    ALOGD("CarCallbackInterfaceProxy::ProxyEntry====name:%s====", nameBuf.string());
 
     Int32 paramCount;
     methodInfo->GetParamCount(&paramCount);
+    ALOGD("CarCallbackInterfaceProxy::ProxyEntry====paramCount:%d====", paramCount);
 
     NPVariant* npArgs = new NPVariant[paramCount];
     Int32* outParamPtrs = new Int32[paramCount];
@@ -1090,16 +1098,19 @@ void CarCallbackInterfaceProxy::Callback::Call()
 {
     ALOGD("====CarCallbackInterfaceProxy::Callback::Call======begin======");
 
+    Elastos::String methodName;
+    mMethodInfo->GetName(&methodName);
+    ALOGD("====CarCallbackInterfaceProxy::Callback::Call======name:%s", methodName.string());
+
     Int32 paramCount;
     mMethodInfo->GetParamCount(&paramCount);
 
     if (paramCount != mParamCount) {
-        //LOG_ERROR("CarCallbackInterfaceProxy::Callback::Call paramCount is wrong");
         ALOGD("CarCallbackInterfaceProxy::Callback::Call paramCount is wrong");
         return;
     }
 
-    ALOGD("====CarCallbackInterfaceProxy::Callback::Call============thread id:%x",pthread_self());
+    //ALOGD("====CarCallbackInterfaceProxy::Callback::Call============thread id:%x",pthread_self());
 
     v8::Isolate* isolate = mObject->mIsolate;
     v8::Handle<v8::Context> context = isolate->GetCurrentContext();
@@ -1107,15 +1118,16 @@ void CarCallbackInterfaceProxy::Callback::Call()
 
     NPObject* obj = mObject->mObject;
     if (obj->_class == WebCore::npScriptObjectClass) {
-        Elastos::String methodName;
-        mMethodInfo->GetName(&methodName);
+        //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======npScriptObjectClass======");
 
         NPVariant npvValue;
         _NPN_GetProperty(0, obj, _NPN_GetStringIdentifier((const char*)methodName), &npvValue);
 
         if (npvValue.type == NPVariantType_Object) {
+            //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object======");
             WebCore::V8NPObject* v8NPFuncObject = (WebCore::V8NPObject*)(NPVARIANT_TO_OBJECT(npvValue));
 
+            //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===1===");
             v8::Local<v8::Object> jsObject;
             v8::Local<v8::Function> jsFunc;
             if (v8NPFuncObject->v8Object.IsWeak()) {
@@ -1127,14 +1139,18 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 jsFunc = v8::Local<v8::Function>::Cast(jsObject);
             }
 
+            ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===ConvertParams===");
             v8::Handle<v8::Value>* argv = ConvertParams();
 
+            //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===3===");
             v8::TryCatch try_catch;
             jsFunc->Call(context->Global(), mParamCount, argv);
             if (try_catch.HasCaught()) {
+                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===run js error===");
                 //FatalException(try_catch);
                 ReportException(isolate, &try_catch);
             }
+            //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===5===");
 
             //get out params
             for (Int32 i = 0; i < mParamCount; i++) {
@@ -1391,15 +1407,19 @@ void CarCallbackInterfaceProxy::Callback::Call()
                     }
                 }   //switch (mOutParamTypes[i])
 
-                ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===2===");
+                //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===2===");
             }
 
             delete[] argv;
+        }
+        else {
+            ALOGD("====CarCallbackInterfaceProxy::Callback::Call======not NPVariantType_Object======type:%d", npvValue.type);
         }
     }
     else {
         ALOGD("CarCallbackInterfaceProxy::Callback::Call object is not js object");
     }
+    //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======end======");
 }
 
 v8::Handle<v8::Value>* CarCallbackInterfaceProxy::Callback::ConvertParams()
@@ -1408,6 +1428,7 @@ v8::Handle<v8::Value>* CarCallbackInterfaceProxy::Callback::ConvertParams()
 
     v8::Handle<v8::Value>* params = new v8::Handle<v8::Value>[mParamCount];
     for (Int32 i = 0; i < mParamCount; i++) {
+        ALOGD("CarCallbackInterfaceProxy::Callback::ConvertParams========%d/%d====np type:%d", i, mParamCount, mNPParams[i].type);
         params[i] = WebCore::convertNPVariantToV8Object(&mNPParams[i], NULL);
     }
 

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">JSHTMLViewer</string>
+    <string name="slideshow">slideshow</string>
+
+    <!-- Used to format short video duration in Details dialog. minutes:seconds e.g. 00:30 -->
+    <string name="details_ms">%1$02d:%2$02d</string>
+    <!-- Used to format video duration in Details dialog. hours:minutes:seconds e.g. 0:21:30 -->
+    <string name="details_hms">%1$d:%2$02d:%3$02d</string>
+
+    <!-- Title prompted for user to choose a photo item [CHAR LIMIT=20] -->
+    <string name="select_image">Select photo</string>
+    <!-- Title prompted for user to choose a video item [CHAR LIMIT=20] -->
+    <string name="select_video">Select video</string>
+    <!-- Title prompted for user to choose a media object [CHAR LIMIT=20] -->
+    <string name="select_item">Select item</string>
+    <!-- Title prompted for user to choose an album [CHAR LIMIT=20] -->
+    <string name="select_album">Select album</string>
+    <!-- Title prompted for user to choose a group [CHAR LIMIT=20] -->
+    <string name="select_group">Select group</string>
+
+    <!-- A label shown on the action bar. It indicates that the user is
+         viewing albums stored locally on the device [CHAR LIMIT=20] -->
+    <string name="set_label_local_albums">Local albums</string>
+
+    <!-- Displayed in the title of those albums that are being loaded -->
+    <string name="loading">Loading\u2026</string>
+
+    <!-- Displayed in the title of those pictures that fails to be loaded
+         [CHAR LIMIT=50]-->
+    <string name="fail_to_load">Couldn\'t load</string>
+
+    <!-- Used in a toast message when an image fails to be loaded
+         [CHAR LIMIT=50]-->
+    <string name="fail_to_load_image">Couldn\'t load the image</string>
+
+    <!-- A label shown on the action bar. It indicates that the user is
+         viewing all available albums [CHAR LIMIT=20] -->
+    <string name="set_label_all_albums">All albums</string>
+
+    <!-- The label for the folder contains screenshot images. [CHAR LIMIT=20]-->
+    <string name="folder_screenshot">Screenshot</string>
+
+    <!-- Text indicating the title of a media item in details window [CHAR LIMIT=14] -->
+    <string name="title">Title</string>
+    <!-- Text indicating the description of a media item in details window [CHAR LIMIT=14] -->
+    <string name="description">Description</string>
+    <!-- Text indicating the creation time of a media item in details window [CHAR LIMIT=14] -->
+    <string name="time">Time</string>
+    <!-- Text indicating the location of a media item in details window [CHAR LIMIT=14] -->
+    <string name="location">Location</string>
+    <!-- Text indicating the path of a media item in details window [CHAR LIMIT=14] -->
+    <string name="path">Path</string>
+    <!-- Text indicating the width of a media item in details window [CHAR LIMIT=14] -->
+    <string name="width">Width</string>
+    <!-- Text indicating the height of a media item in details window [CHAR LIMIT=14] -->
+    <string name="height">Height</string>
+    <!-- Text indicating the orientation of a media item in details window [CHAR LIMIT=14] -->
+    <string name="orientation">Orientation</string>
+    <!-- Text indicating the duration of a video item in details window [CHAR LIMIT=14] -->
+    <string name="duration">Duration</string>
+    <!-- Text indicating the mime type of a media item in details window [CHAR LIMIT=14] -->
+    <string name="mimetype">MIME type</string>
+    <!-- Text indicating the file size of a media item in details window [CHAR LIMIT=14] -->
+    <string name="file_size">File size</string>
+    <!-- Text indicating the maker of a media item in details window [CHAR LIMIT=14] -->
+    <string name="maker">Maker</string>
+    <!-- Text indicating the model of a media item in details window [CHAR LIMIT=14] -->
+    <string name="model">Model</string>
+    <!-- Text indicating flash info of a media item in details window [CHAR LIMIT=14] -->
+    <string name="flash">Flash</string>
+    <!-- Text indicating aperture of a media item in details window [CHAR LIMIT=14] -->
+    <string name="aperture">Aperture</string>
+    <!-- Text indicating the focal length of a media item in details window [CHAR LIMIT=14] -->
+    <string name="focal_length">Focal Length</string>
+    <!-- Text indicating the white balance of a media item in details window [CHAR LIMIT=14] -->
+    <string name="white_balance">White balance</string>
+    <!-- Text indicating the exposure time of a media item in details window [CHAR LIMIT=14] -->
+    <string name="exposure_time">Exposure time</string>
+    <!-- Text indicating the ISO speed rating of a media item in details window [CHAR LIMIT=14] -->
+    <string name="iso">ISO</string>
+    <!-- String indicating the time units in seconds. [CHAR LIMIT=8] -->
+    <!-- String indicating the length units in milli-meters. [CHAR LIMIT=8] -->
+    <string name="unit_mm">mm</string>
+    <!-- String indicating how camera shooting feature is used. [CHAR LIMIT=8] -->
+    <string name="manual">Manual</string>
+
+    <!-- String indicating camera flash is fired. [CHAR LIMIT=14] -->
+    <string name="flash_on">Flash fired</string>
+    <!-- String indicating camera flash is not used. [CHAR LIMIT=14] -->
+    <string name="flash_off">No flash</string>
+
+    <string name="details_title">details:</string>
+    <string name="details_delete">delete</string>
+    <string name="empty_album">O images/videos available.</string>
+    <string name="no_external_storage_title">No Storage</string>
+    <string name="no_external_storage">No external storage available</string>
+    <string name="no_such_item">Couldn\'t find item.</string>
+    <string name="set_image">Set picture as</string>
+    <string name="set_wallpaper">Set wallpaper</string>
+    <string name="wallpaper">Setting wallpaper\u2026</string>
+
+    <string name="btn_detail">details</string>
+    <string name="btn_delete">delete</string>
+
+</resources>

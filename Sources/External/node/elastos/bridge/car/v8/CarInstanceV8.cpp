@@ -74,6 +74,10 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
     AutoPtr<IMethodInfo> aMethod;
     aMethod = method->methodInfo();
 
+    Elastos::String temp_name;
+    aMethod->GetName(&temp_name);
+    ALOGD("CarInstanceV8::invokeMethod====name:%s", temp_name.string());
+
     AutoPtr<IArgumentList> argumentList = NULL;
     if (numParams > 0) {
         ec = aMethod->CreateArgumentList((IArgumentList**)&argumentList);
@@ -88,60 +92,83 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
 
         ArrayOf<IParamInfo*>* paramInfos = ArrayOf<IParamInfo*>::Alloc(numParams);
         aMethod->GetAllParamInfos(paramInfos);
+        ALOGD("CarInstanceV8::invokeMethod========1========");
 
         for (Int32 i = 0; i < numParams; ++i) {
-            const char* tmpType = ClassNameFromCarDataType((CarDataType)(args[i].mType));
+            CarDataType _type = 0;
+            //_type = args[i].mType;
+
+            AutoPtr<IDataTypeInfo> dataTypeInfo;
+            if (args[i].mObjectWrapper.Get()) {
+                dataTypeInfo = args[i].mObjectWrapper->getDataTypeInfo();
+                if (dataTypeInfo.Get()) {
+                    dataTypeInfo->GetDataType(&_type);
+                }
+                else {
+                    //TODO:Shoud not reach here: all CObjectWrapper must have typeInfo
+                    _type = CarDataType_Interface;
+                    ALOGD("CarInstanceV8::invokeMethod========dataTypeInfo not exist!");
+                }
+            }
+            else {
+                //TODO:Shoud not reach here: all CObjectWrapper must exist
+                _type = CarDataType_Interface;
+                ALOGD("CarInstanceV8::invokeMethod========mObjectWrapper not exist!");
+            }
+
+            const char* tmpType = ClassNameFromCarDataType((CarDataType)(_type));
+            ALOGD("CarInstanceV8::invokeMethod========%d/%d========type:%d/%s", i, numParams, _type, tmpType);
 
             AutoPtr<IParamInfo> aParameter = (*paramInfos)[i];
             switch (args[i].mIOAttribute) {
                 case ParamIOAttribute_In:
-                    switch (args[i].mType) {
+                    switch (_type) {
                         case CarDataType_Int16:
-                            ec = argumentList->SetInputArgumentOfInt16(i, args[i].mInt16Value);
+                            ec = argumentList->SetInputArgumentOfInt16(i, args[i].value.mInt16Value);
                             break;
                         case CarDataType_Int32:
-                            ec = argumentList->SetInputArgumentOfInt32(i, args[i].mInt32Value);
+                            ec = argumentList->SetInputArgumentOfInt32(i, args[i].value.mInt32Value);
                             break;
                         case CarDataType_Int64:
-                            ec = argumentList->SetInputArgumentOfInt64(i, args[i].mInt64Value);
+                            ec = argumentList->SetInputArgumentOfInt64(i, args[i].value.mInt64Value);
                             break;
                         case CarDataType_Byte:
-                            ec = argumentList->SetInputArgumentOfByte(i, args[i].mByteValue);
+                            ec = argumentList->SetInputArgumentOfByte(i, args[i].value.mByteValue);
                             break;
                         case CarDataType_Char32:
-                            ec = argumentList->SetInputArgumentOfChar(i, args[i].mCharValue);
+                            ec = argumentList->SetInputArgumentOfChar(i, args[i].value.mCharValue);
                             break;
                         case CarDataType_Float:
-                            ec = argumentList->SetInputArgumentOfFloat(i, args[i].mFloatValue);
+                            ec = argumentList->SetInputArgumentOfFloat(i, args[i].value.mFloatValue);
                             break;
                         case CarDataType_Double:
-                            ec = argumentList->SetInputArgumentOfDouble(i, args[i].mDoubleValue);
+                            ec = argumentList->SetInputArgumentOfDouble(i, args[i].value.mDoubleValue);
                             break;
                         case CarDataType_String:
                             ec = argumentList->SetInputArgumentOfString(i, args[i].mStringValue);
                             break;
                         case CarDataType_Boolean:
-                            ec = argumentList->SetInputArgumentOfBoolean(i, args[i].mBooleanValue);
+                            ec = argumentList->SetInputArgumentOfBoolean(i, args[i].value.mBooleanValue);
                             break;
                         case CarDataType_EMuid:
-                            ec = argumentList->SetInputArgumentOfEMuid(i, &args[i].mIid);
+                            ec = argumentList->SetInputArgumentOfEMuid(i, &args[i].value.mIid);
                             break;
                         case CarDataType_EGuid:
-                            ec = argumentList->SetInputArgumentOfEGuid(i, &args[i].mCid);
+                            ec = argumentList->SetInputArgumentOfEGuid(i, &args[i].value.mCid);
                             break;
                         case CarDataType_ECode:
-                            ec = argumentList->SetInputArgumentOfECode(i, args[i].mECodeValue);
+                            ec = argumentList->SetInputArgumentOfECode(i, args[i].value.mECodeValue);
                             break;
                         case CarDataType_Enum:
-                            ec = argumentList->SetInputArgumentOfEnum(i, args[i].mEnumValue);
+                            ec = argumentList->SetInputArgumentOfEnum(i, args[i].value.mEnumValue);
                             break;
                         case CarDataType_ArrayOf:
-                            ec = argumentList->SetInputArgumentOfCarArray(i, args[i].mCarQuintet);
+                            ec = argumentList->SetInputArgumentOfCarArray(i, args[i].value.mCarQuintet);
                             break;
                         case CarDataType_LocalPtr:  //deprecated
                         {
-                            CarValue* pCarValue = (CarValue*)args[i].mLocalPtr;
-                            ec = argumentList->SetInputArgumentOfLocalPtr(i, pCarValue->mCarQuintet ); //normal
+                            CarValue* pCarValue = (CarValue*)args[i].value.mLocalPtr;
+                            ec = argumentList->SetInputArgumentOfLocalPtr(i, pCarValue->value.mCarQuintet ); //normal
                             break;
                         }
                         case CarDataType_Interface:
@@ -157,7 +184,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                         }
                         default:
                         {
-                            ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_In CarDataType_Other:%d",args[i].mType);
+                            ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_In CarDataType_Other:%d",_type);
                             *didRaiseUncaughtException = true;
                             break;
                         }
@@ -165,18 +192,18 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                     break;
 
                 case ParamIOAttribute_CalleeAllocOut:
-                    switch (args[i].mType) {
+                    switch (_type) {
                         case CarDataType_LocalPtr:  //deprecated
                         {
-                            ec = argumentList->SetOutputArgumentOfLocalPtrPtr(i, &args[i].mLocalPtr);
+                            ec = argumentList->SetOutputArgumentOfLocalPtrPtr(i, &args[i].value.mLocalPtr);
                             break;
                         }
                         case CarDataType_ArrayOf:
-                            ec = argumentList->SetOutputArgumentOfCarArrayPtrPtr(i, &args[i].mCarQuintet);
+                            ec = argumentList->SetOutputArgumentOfCarArrayPtrPtr(i, &args[i].value.mCarQuintet);
                             break;
                         default:
                         {
-                            ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_CalleeAllocOut CarDataType_Other:%d", args[i].mType);
+                            ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_CalleeAllocOut CarDataType_Other:%d", _type);
                             *didRaiseUncaughtException = true;
                             break;
                         }
@@ -184,61 +211,67 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                     break;
 
                 case ParamIOAttribute_CallerAllocOut:
-                    switch (args[i].mType) {
+                    switch (_type) {
                         case CarDataType_Int16:
-                            ec = argumentList->SetOutputArgumentOfInt16Ptr(i, &args[i].mInt16Value);
+                            ec = argumentList->SetOutputArgumentOfInt16Ptr(i, &args[i].value.mInt16Value);
                             break;
                         case CarDataType_Int32:
-                            ec = argumentList->SetOutputArgumentOfInt32Ptr(i, &args[i].mInt32Value);
+                            ec = argumentList->SetOutputArgumentOfInt32Ptr(i, &args[i].value.mInt32Value);
                             break;
                         case CarDataType_Int64:
-                            ec = argumentList->SetOutputArgumentOfInt64Ptr(i, &args[i].mInt64Value);
+                            ec = argumentList->SetOutputArgumentOfInt64Ptr(i, &args[i].value.mInt64Value);
                             break;
                         case CarDataType_Byte:
-                            ec = argumentList->SetOutputArgumentOfBytePtr(i, &args[i].mByteValue);
+                            ec = argumentList->SetOutputArgumentOfBytePtr(i, &args[i].value.mByteValue);
                             break;
                         case CarDataType_Char32:
                             //ec = argumentList->SetOutputArgumentOfChar32Ptr(i, &args[i].mCharValue);
-                            ec = argumentList->SetOutputArgumentOfCharPtr(i, &args[i].mCharValue);
+                            ec = argumentList->SetOutputArgumentOfCharPtr(i, &args[i].value.mCharValue);
                             break;
                         case CarDataType_Float:
-                            ec = argumentList->SetOutputArgumentOfFloatPtr(i, &args[i].mFloatValue);
+                            ec = argumentList->SetOutputArgumentOfFloatPtr(i, &args[i].value.mFloatValue);
                             break;
                         case CarDataType_Double:
-                            ec = argumentList->SetOutputArgumentOfDoublePtr(i, &args[i].mDoubleValue);
+                            ec = argumentList->SetOutputArgumentOfDoublePtr(i, &args[i].value.mDoubleValue);
                             break;
                         case CarDataType_String:
                             ec = argumentList->SetOutputArgumentOfStringPtr(i, &args[i].mStringValue);
                             break;
                         case CarDataType_Boolean:
-                            ec = argumentList->SetOutputArgumentOfBooleanPtr(i, &args[i].mBooleanValue);
+                            ec = argumentList->SetOutputArgumentOfBooleanPtr(i, &args[i].value.mBooleanValue);
                             break;
                         case CarDataType_EMuid:
-                            ec = argumentList->SetOutputArgumentOfEMuidPtr(i, &args[i].mIid);
+                            ec = argumentList->SetOutputArgumentOfEMuidPtr(i, &args[i].value.mIid);
                             break;
                         case CarDataType_EGuid:
-                            ec = argumentList->SetOutputArgumentOfEGuidPtr(i, &args[i].mCid);
+                            ec = argumentList->SetOutputArgumentOfEGuidPtr(i, &args[i].value.mCid);
                             break;
                         case CarDataType_ECode:
-                            ec = argumentList->SetOutputArgumentOfECodePtr(i, &args[i].mECodeValue);
+                            ec = argumentList->SetOutputArgumentOfECodePtr(i, &args[i].value.mECodeValue);
                             break;
                         case CarDataType_Enum:
-                            ec = argumentList->SetOutputArgumentOfEnumPtr(i, &args[i].mEnumValue);
+                            ec = argumentList->SetOutputArgumentOfEnumPtr(i, &args[i].value.mEnumValue);
                             break;
                         case CarDataType_ArrayOf:
-                            ec = argumentList->SetOutputArgumentOfCarArrayPtr(i, args[i].mCarQuintet);
+                            ec = argumentList->SetOutputArgumentOfCarArrayPtr(i, args[i].value.mCarQuintet);
                             break;
                         case CarDataType_LocalPtr:  //deprecated
-                            ec = argumentList->SetOutputArgumentOfLocalPtrPtr(i, &args[i].mLocalPtr);
+                            ec = argumentList->SetOutputArgumentOfLocalPtrPtr(i, &args[i].value.mLocalPtr);
                             break;
                         case CarDataType_Interface:
                         {
-                            ec = argumentList->SetOutputArgumentOfObjectPtrPtr(i, (IInterface **)&args[i].mObjectValue);
+                            ec = argumentList->SetOutputArgumentOfObjectPtrPtr(i, (IInterface **)&(args[i].value.mObjectValue));
+                            //TODO:Only one shoud be exist: mObjectValue/mObjectWrapper
+                            //TODO:following is relative to code in CarUtiliyPrivate line 1348
+                            //TODO:that resovle case CarDataType_Interface:
+                            // value.mObjectWrapper->setInstance(value.value.mObjectValue);
+                            //objectValue = args[i].mObjectWrapper->getInstance().Get();
+                            //ec = argumentList->SetOutputArgumentOfObjectPtrPtr(i, (IInterface **)&( args[i].mObjectWrapper->mInstance ));
                             break;
                         }
                         default:
                         {
-                            ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_CallerAllocOut CarDataType_Other:%d",args[i].mType);
+                            ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_CallerAllocOut CarDataType_Other:%d",_type);
                             *didRaiseUncaughtException = true;
                             break;
                         }
@@ -256,14 +289,15 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
             if ( FAILED(ec) || *didRaiseUncaughtException) {
                 Elastos::String nameBuf;
                 aParameter->GetName(&nameBuf);
-                //LOG_ERROR("CarInstanceV8::invokeMethod SetArgument error %s", (const char*)nameBuf);
                 ALOGD("CarInstanceV8::invokeMethod SetArgument error %s", (const char*)nameBuf);
                 return;
             }
 
+            //TODO
             //aParameter->Release();
             //aParameter = NULL;
         }
+        //TODO
         //ArrayOf<IParamInfo*>::Free(paramInfos);
     }
 
@@ -273,6 +307,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
     else {
         ec = aMethod->Invoke(object, argumentList);
         if (FAILED(ec)) {
+            ALOGD("CarInstanceV8::invokeMethod========invoke failed========");
             Elastos::String methodNameBuf;
             aMethod->GetName(&methodNameBuf);
             *didRaiseUncaughtException = true;

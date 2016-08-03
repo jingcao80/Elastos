@@ -28,24 +28,37 @@ struct CarValue
     CarValue()
         : mType(0)
         , mIOAttribute(ParamIOAttribute_In)
-        , mInt16Value(0)
-        , mInt32Value(0)
-        , mInt64Value(0)
-        , mByteValue(0)
-        , mCharValue(0)
-        , mFloatValue(0.0)
-        , mDoubleValue(0.0)
-        , mBooleanValue(FALSE)
-        , mECodeValue(NOERROR)
-        , mEnumValue(0)
-        , mCarQuintet(NULL)
     {
-        mCid.mUunm = mUUnm;
+        value.mCid.mUunm = mUUnm;
     }
 
     ~CarValue()
     {
-        switch (mElementType) {
+        ALOGD("========~CarValue========begin========");
+
+        bool bRet = false;
+        CarDataType elementType;
+        AutoPtr<IDataTypeInfo> elementTypeInfo;
+        switch (mType) {
+            case CarDataType_ArrayOf:
+            {
+                ICarArrayInfo::Probe(mTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
+                elementTypeInfo->GetDataType(&elementType);
+                break;
+            }
+            case CarDataType_LocalPtr:
+            {
+                (*(ILocalPtrInfo **)&mTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementTypeInfo);
+                elementTypeInfo->GetDataType(&elementType);
+                break;
+            }
+            default:
+                bRet = true;
+                break;
+        }
+        if (bRet) return;
+
+        switch (elementType) {
             case CarDataType_Int16:
             case CarDataType_Int32:
             case CarDataType_Int64:
@@ -56,11 +69,11 @@ struct CarValue
             case CarDataType_Boolean:
             case CarDataType_ECode:
             case CarDataType_Enum:
-                _CarQuintet_Release(mCarQuintet);
+                _CarQuintet_Release(value.mCarQuintet);
                 break;
             case CarDataType_String:
             {
-                Elastos::ArrayOf<Elastos::String>* strArray = reinterpret_cast< Elastos::ArrayOf<Elastos::String>* >(mCarQuintet);
+                Elastos::ArrayOf<Elastos::String>* strArray = reinterpret_cast< Elastos::ArrayOf<Elastos::String>* >(value.mCarQuintet);
                 strArray->Release();
                 break;
             }
@@ -75,30 +88,37 @@ struct CarValue
     ParamIOAttribute mIOAttribute;
 
     CarDataType mType;
-    CarDataType mElementType;
-    IInterface* mObjectValue;
+
+    union value {
+        Elastos::Int16 mInt16Value;
+        Elastos::Int32 mInt32Value;
+        Elastos::Int64 mInt64Value;
+        Elastos::Byte mByteValue;
+        Elastos::Char32 mCharValue;
+        Elastos::Float mFloatValue;
+        Elastos::Double mDoubleValue;
+        //Elastos::String mStringValue;
+        Elastos::Boolean mBooleanValue;
+        Elastos::ECode mECodeValue;
+        Elastos::Int32 mEnumValue;
+        Elastos::CarQuintet* mCarQuintet;
+        Elastos::EMuid mIid;
+        Elastos::EGuid mCid;
+
+        //char mUUnm[256];
+        LocalPtr mLocalPtr;
+        IInterface* mObjectValue;
+    } value;
+
+    Elastos::String mStringValue;
+
+    char mUUnm[256];
+
+    Elastos::Boolean mTagSetLocalPtr;   //just for test of TestArgumentList::SetInputArgumentOfLocalPtr
 
     Elastos::AutoPtr<CobjectWrapper> mObjectWrapper;
 
-    Elastos::Int16 mInt16Value;
-    Elastos::Int32 mInt32Value;
-    Elastos::Int64 mInt64Value;
-    Elastos::Byte mByteValue;
-    Elastos::Char32 mCharValue;
-    Elastos::Float mFloatValue;
-    Elastos::Double mDoubleValue;
-    Elastos::String mStringValue;
-    Elastos::Boolean mBooleanValue;
-    Elastos::ECode mECodeValue;
-    Elastos::Int32 mEnumValue;
-    Elastos::CarQuintet* mCarQuintet;
-    Elastos::EMuid mIid;
-    Elastos::EGuid mCid;
-    char mUUnm[256];
-
-    LocalPtr mLocalPtr;
-
-    Elastos::Boolean mTagSetLocalPtr;   //just for test of TestArgumentList::SetInputArgumentOfLocalPtr
+    AutoPtr<IDataTypeInfo> mTypeInfo;
 };
 
 } // namespace Bindings

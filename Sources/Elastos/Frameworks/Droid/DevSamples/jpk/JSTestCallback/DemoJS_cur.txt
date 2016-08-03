@@ -29,7 +29,6 @@ module
 #define __CDEMO_H__
 
 #include "_CDemo.h"
-
 #include <elastos/core/Object.h>
 
 CarClass(CDemo)
@@ -38,7 +37,6 @@ CarClass(CDemo)
 {
 public:
     CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL()
 
     CARAPI addEventHandler(
@@ -59,7 +57,6 @@ private:
 #include "CDemo.h"
 
 CAR_INTERFACE_IMPL(CDemo, Object, IDemo)
-
 CAR_OBJECT_IMPL(CDemo)
 
 ECode CDemo::addEventHandler(
@@ -79,18 +76,14 @@ ECode CDemo::doTask()
 
 ========demo.js====begin====
 
-var eventHandler = (function() {
-    return {
-        OnEvent:function(i) {
-            var s = 'OnEvent, i: ' + JSON.stringify(i);
-            elastos.log(s);
-        },
-    }
-})();
-
 var module = elastos.require('./Demo.eco');
 var obj = module.createObject('CDemo');
-obj.addEventHandler(eventHandler);
+obj.addEventHandler({
+    OnEvent:function(i) {
+        var s = 'OnEvent, i: ' + JSON.stringify(i);
+        elastos.log(s);
+    },
+});
 obj.doTask();
 
 ========demo.js====end====

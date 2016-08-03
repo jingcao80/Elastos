@@ -2,7 +2,6 @@
 #define __CDEMO_H__
 
 #include "_CDemo.h"
-
 #include <elastos/core/Object.h>
 
 CarClass(CDemo)
@@ -11,7 +10,6 @@ CarClass(CDemo)
 {
 public:
     CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL()
 
     CARAPI addEventHandler(

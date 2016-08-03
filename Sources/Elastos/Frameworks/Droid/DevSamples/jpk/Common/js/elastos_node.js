@@ -182,6 +182,49 @@ Application.NodeBridgeListener = {
 
         out_abResult.data = true;
     },
+
+    OnRegistCustomControl : function(aoContext, aoControl, aoListener, out_abResult) {
+        elog("========OnRegistCustomControl====begin====");
+
+        // var sName;
+        // Elastos.CObject.showMethods(aoContext,"GetPackage");
+        // sName = Elastos.CObject.getClassInfo(aoContext).GetName();
+        // elog("========OnRegistCustomControl====1====aoContext:" + sName);
+        // Elastos.CObject.showMethods(aoControl,"GetPackage");
+        // sName = Elastos.CObject.getClassInfo(aoControl).GetName();
+        // elog("========OnRegistCustomControl====2====aoControl:" + sName);
+        // elog("========OnRegistCustomControl====3====Package:" + aoContext.GetPackageName());
+
+        var sPkgName = aoContext.GetPackageName();
+        elog("========OnRegistCustomControl========sPkgName:" + sPkgName);
+        var sClsName = Elastos.CObject.getClassInfo(aoControl).GetName();
+        sClsName = sClsName.slice(-sClsName.length+1);
+        elog("========OnRegistCustomControl========sClsName:" + sClsName);
+
+        var sFileName = sPkgName.split(".").join("/");
+        sFileName = "/data/temp/node/Common/js/" + sFileName + "/" + sClsName + ".js";
+        elog("========OnRegistCustomControl========sFileName:" + sFileName);
+
+        var aPath = sPkgName.split(".");
+        var sPath;
+        var oPath = root;
+        for (var i=0,im=aPath.length; i<im; i++) {
+            sPath = aPath[i];
+            oPath = oPath[sPath] || (oPath[sPath] = {});
+        }
+
+        elog("========OnRegistCustomControl====1====");
+        //var oListener = require(sFileName)(Elastos, oActivity);
+        var oListener = require(sFileName)(Elastos, aoContext);
+        elog("========OnRegistCustomControl====2====");
+        oPath[sClsName] = oListener;
+        elog("========OnRegistCustomControl====3====");
+
+        Elastos.Test.SetCalculatorEditTextListener(aoListener, oListener);
+        elog("========OnRegistCustomControl====4====");
+
+        out_abResult.data = true;
+    },
 };
 
 Application.Ready();

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent" >
+
+    <LinearLayout
+        android:id="@+id/album_cover_layout"
+        android:layout_width="122dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/album_folder"
+        android:clickable="true"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="80dp"
+            android:layout_height="77dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginTop="17dp"
+            android:background="@drawable/folder_bg"
+            android:gravity="center" >
+
+            <ImageView
+                android:id="@+id/album_set_cover"
+                android:layout_width="78dp"
+                android:layout_height="75dp"
+                android:adjustViewBounds="true"
+                android:maxWidth="78dp"
+                android:maxHeight="75dp"
+                android:scaleType="centerCrop" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/album_count"
+            android:layout_width="26dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="80dp"
+            android:gravity="center"
+            android:text="520"
+            android:textColor="@color/text_white"
+            android:textSize="@dimen/button_text_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_below="@+id/album_cover_layout"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <CheckBox
+            android:id="@+id/album_set_check"
+            style="@style/AlbumCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="9dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center|left"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/album_set_desc"
+                android:layout_width="96dp"
+                android:layout_height="match_parent"
+                android:ellipsize="end"
+                android:gravity="left|center_vertical"
+                android:singleLine="true"
+                android:textColor="@color/text_black"
+                android:textSize="@dimen/button_text_size" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

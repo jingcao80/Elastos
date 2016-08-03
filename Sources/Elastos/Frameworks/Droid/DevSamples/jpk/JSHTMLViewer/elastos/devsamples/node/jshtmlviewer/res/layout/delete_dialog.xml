@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="@dimen/dialog_layout_width"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/dialog_info_title"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/dialog_title_bg"
+            android:gravity="left|center_vertical"
+            android:paddingLeft="20dp"
+            android:text="删除"
+            android:textColor="@color/text_black"
+            android:textSize="@dimen/button_text_size"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:src="@color/title_line_bg" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:background="#ffffff"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/delete_tips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="确定要删除选中内容吗？"
+                android:textColor="@color/text_black"
+                android:textSize="@dimen/button_text_size" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:src="@color/title_line_bg" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/dialog_title_bg"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/delete_dialog_btn_cancel"
+                android:layout_width="@dimen/dialog_button_width"
+                android:layout_height="@dimen/dialog_button_height"
+                android:background="#a5a5a5"
+                android:text="取消"
+                android:textColor="@color/text_white"
+                android:textSize="@dimen/button_text_size" />
+
+            <Button
+                android:id="@+id/delete_dialog_btn_ok"
+                android:layout_width="@dimen/dialog_button_width"
+                android:layout_height="@dimen/dialog_button_height"
+                android:layout_marginLeft="50dp"
+                android:background="#2581ff"
+                android:text="确定"
+                android:textColor="@color/text_white"
+                android:textSize="@dimen/button_text_size" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

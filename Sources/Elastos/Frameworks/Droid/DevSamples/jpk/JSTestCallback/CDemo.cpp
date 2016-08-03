@@ -1,7 +1,6 @@
 #include "CDemo.h"
 
 CAR_INTERFACE_IMPL(CDemo, Object, IDemo)
-
 CAR_OBJECT_IMPL(CDemo)
 
 ECode CDemo::addEventHandler(

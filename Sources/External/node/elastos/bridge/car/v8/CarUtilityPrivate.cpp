@@ -67,19 +67,38 @@ WebCore::DOMWindow* getRootObject()
 
 void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 {
-    CarDataType carDataType = result->mType;
+    CarDataType carDataType = 0;
+
+    AutoPtr<IDataTypeInfo> dataTypeInfo;
+    if (result->mObjectWrapper.Get()) {
+        dataTypeInfo = result->mObjectWrapper->getDataTypeInfo();
+        if (dataTypeInfo.Get()) {
+            dataTypeInfo->GetDataType(&carDataType);
+        }
+        else {
+            //TODO:Shoud not reach here: all CObjectWrapper must have typeInfo
+            carDataType = CarDataType_Interface;
+            ALOGD("convertNPVariantToCarValue========dataTypeInfo not exist!");
+        }
+    }
+    else {
+        //TODO:Shoud not reach here: all CObjectWrapper must exist
+        carDataType = CarDataType_Interface;
+        ALOGD("convertNPVariantToCarValue========mObjectWrapper not exist!");
+    }
+
+    //carDataType = result->mType;
     NPVariantType type = value.type;
 
-    const char* tmpType = ClassNameFromCarDataType((CarDataType)(result->mType));
-    const char* tmpSubType = ClassNameFromCarDataType((CarDataType)(result->mElementType));
+    const char* tmpType = ClassNameFromCarDataType((CarDataType)(carDataType));
 
     switch (carDataType) {
         case CarDataType_Int16:
             if (type == NPVariantType_Int32) {
-                result->mInt16Value = (Elastos::Int16)(NPVARIANT_TO_INT32(value));
+                result->value.mInt16Value = (Elastos::Int16)(NPVARIANT_TO_INT32(value));
             }
             else if (type == NPVariantType_Double) {
-                result->mInt16Value = (Elastos::Int16)(NPVARIANT_TO_DOUBLE(value));
+                result->value.mInt16Value = (Elastos::Int16)(NPVARIANT_TO_DOUBLE(value));
             }
             break;
         case CarDataType_Int32:
@@ -102,7 +121,6 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             }
 
             if (result->mTagSetLocalPtr) {
-                CarValue* aCarValue = new CarValue();
                 CarQuintet* carArray;
 
                 NPObject* object = NPVARIANT_IS_OBJECT(value) ? NPVARIANT_TO_OBJECT(value) : 0;
@@ -158,50 +176,50 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 }
 
                 _value = (Int32)carArray;
-                result->mInt32Value = _value;
+                result->value.mInt32Value = _value;
             }
             else {
-                result->mInt32Value = _value;
+                result->value.mInt32Value = _value;
             }
 
             break;
         }
         case CarDataType_Int64:
             if (type == NPVariantType_Int32) {
-                result->mInt64Value = (Elastos::Int64)(NPVARIANT_TO_INT32(value));
+                result->value.mInt64Value = (Elastos::Int64)(NPVARIANT_TO_INT32(value));
             }
             else if (type == NPVariantType_Double) {
-                result->mInt64Value = (Elastos::Int64)(NPVARIANT_TO_DOUBLE(value));
+                result->value.mInt64Value = (Elastos::Int64)(NPVARIANT_TO_DOUBLE(value));
             }
             break;
         case CarDataType_Byte:
             if (type == NPVariantType_Int32) {
-                result->mByteValue = (Elastos::Byte)(NPVARIANT_TO_INT32(value));
+                result->value.mByteValue = (Elastos::Byte)(NPVARIANT_TO_INT32(value));
             }
             else if (type == NPVariantType_Double) {
-                result->mByteValue = (Elastos::Byte)(NPVARIANT_TO_DOUBLE(value));
+                result->value.mByteValue = (Elastos::Byte)(NPVARIANT_TO_DOUBLE(value));
             }
             break;
         case CarDataType_Float:
             if (type == NPVariantType_Int32) {
-                result->mFloatValue = (Elastos::Float)(NPVARIANT_TO_INT32(value));
+                result->value.mFloatValue = (Elastos::Float)(NPVARIANT_TO_INT32(value));
             }
             else if (type == NPVariantType_Double) {
-                result->mFloatValue = (Elastos::Float)(NPVARIANT_TO_DOUBLE(value));
+                result->value.mFloatValue = (Elastos::Float)(NPVARIANT_TO_DOUBLE(value));
             }
             break;
         case CarDataType_Double:
             if (type == NPVariantType_Int32) {
-                result->mDoubleValue = (Elastos::Double)(NPVARIANT_TO_INT32(value));
+                result->value.mDoubleValue = (Elastos::Double)(NPVARIANT_TO_INT32(value));
             }
             else if (type == NPVariantType_Double) {
-                result->mDoubleValue = (Elastos::Double)(NPVARIANT_TO_DOUBLE(value));
+                result->value.mDoubleValue = (Elastos::Double)(NPVARIANT_TO_DOUBLE(value));
             }
             break;
         case CarDataType_Char32:
         {
             NPString src = NPVARIANT_TO_STRING(value);
-            result->mCharValue = Elastos::String(src.UTF8Characters).GetChar(0);
+            result->value.mCharValue = Elastos::String(src.UTF8Characters).GetChar(0);
             break;
         }
         case CarDataType_String:
@@ -238,7 +256,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
         }
         case CarDataType_Boolean:
             if (type == NPVariantType_Bool) {
-                result->mBooleanValue = (Elastos::Boolean)NPVARIANT_TO_BOOLEAN(value);
+                result->value.mBooleanValue = (Elastos::Boolean)NPVARIANT_TO_BOOLEAN(value);
             }
             break;
         case CarDataType_EMuid:
@@ -246,16 +264,16 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             NPObject* object = NPVARIANT_IS_OBJECT(value) ? NPVARIANT_TO_OBJECT(value) : NULL;
             NPVariant npvValue;
             _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(0), &npvValue);
-            result->mIid.mData1 = (Int32)(NPVARIANT_TO_DOUBLE(npvValue));
+            result->value.mIid.mData1 = (Int32)(NPVARIANT_TO_DOUBLE(npvValue));
             _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(1), &npvValue);
-            result->mIid.mData2 = (Int16)(NPVARIANT_TO_DOUBLE(npvValue));
+            result->value.mIid.mData2 = (Int16)(NPVARIANT_TO_DOUBLE(npvValue));
             _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(2), &npvValue);
-            result->mIid.mData3 = (Int16)(NPVARIANT_TO_DOUBLE(npvValue));
+            result->value.mIid.mData3 = (Int16)(NPVARIANT_TO_DOUBLE(npvValue));
             _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(3), &npvValue);
             object = NPVARIANT_IS_OBJECT(value) ? NPVARIANT_TO_OBJECT(npvValue) : NULL;
             for (Int32 i = 0; i < 8; i++) {
                 _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
-                result->mIid.mData4[i] = (Int8)(NPVARIANT_TO_DOUBLE(npvValue));
+                result->value.mIid.mData4[i] = (Int8)(NPVARIANT_TO_DOUBLE(npvValue));
             }
 
             break;
@@ -266,7 +284,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             NPVariant npvValue;
             _NPN_GetProperty(0, objectGuid, _NPN_GetStringIdentifier("mClsid"), &npvValue);
             NPObject* object = NPVARIANT_IS_OBJECT(npvValue) ? NPVARIANT_TO_OBJECT(npvValue) : NULL;
-            EMuid& iid = result->mCid.mClsid;
+            EMuid& iid = result->value.mCid.mClsid;
             _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(0), &npvValue);
             iid.mData1 = (Int32)(NPVARIANT_TO_DOUBLE(npvValue));
             _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(1), &npvValue);
@@ -281,28 +299,28 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             }
             _NPN_GetProperty(0, objectGuid, _NPN_GetStringIdentifier("mUunm"), &npvValue);
             NPString str = NPVARIANT_TO_STRING(npvValue);
-            strcpy(result->mCid.mUunm, str.UTF8Characters);
+            strcpy(result->value.mCid.mUunm, str.UTF8Characters);
             _NPN_GetProperty(0, objectGuid, _NPN_GetStringIdentifier("mCarcode"), &npvValue);
-            result->mCid.mCarcode = (Int32)(NPVARIANT_TO_DOUBLE(npvValue));
+            result->value.mCid.mCarcode = (Int32)(NPVARIANT_TO_DOUBLE(npvValue));
 
             break;
         }
         case CarDataType_ECode:
         {
             if (type == NPVariantType_Int32) {
-                result->mECodeValue = (Elastos::UInt32)(NPVARIANT_TO_INT32(value));
+                result->value.mECodeValue = (Elastos::UInt32)(NPVARIANT_TO_INT32(value));
             }
             else if (type == NPVariantType_Double) {
-                result->mECodeValue = (Elastos::UInt32)(NPVARIANT_TO_DOUBLE(value));
+                result->value.mECodeValue = (Elastos::UInt32)(NPVARIANT_TO_DOUBLE(value));
             }
             break;
         }
         case CarDataType_Enum:
             if (type == NPVariantType_Int32) {
-                result->mEnumValue = (Elastos::Int32)(NPVARIANT_TO_INT32(value));
+                result->value.mEnumValue = (Elastos::Int32)(NPVARIANT_TO_INT32(value));
             }
             else if (type == NPVariantType_Double) {
-                result->mEnumValue = (Elastos::Int32)(NPVARIANT_TO_DOUBLE(value));
+                result->value.mEnumValue = (Elastos::Int32)(NPVARIANT_TO_DOUBLE(value));
             }
             break;
         case CarDataType_ArrayOf:
@@ -343,8 +361,14 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 break;
             }
 
+            CarDataType elementType = 0;
+            AutoPtr<IDataTypeInfo> aElementDataTypeInfo;
+            ICarArrayInfo::Probe(dataTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
+            aElementDataTypeInfo->GetDataType(&elementType);
+
             CarQuintet* carArray = NULL;
-            switch (result->mElementType) {
+            //switch (result->mElementType) {
+            switch (elementType) {
                 case CarDataType_Int16:
                 {
                     carArray = ArrayOf<Int16>::Alloc(length);
@@ -357,8 +381,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Int16>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
 
                     break;
                 }
@@ -374,8 +398,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Int32>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_Int64:
@@ -390,8 +414,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Int64>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_Byte:
@@ -406,8 +430,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Byte>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_Char32:
@@ -423,8 +447,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Char32>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_Float:
@@ -439,8 +463,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Float>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_Double:
@@ -455,8 +479,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Double>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_String:
@@ -471,8 +495,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Elastos::String>* >(carArray)->Set(i, Elastos::String(src.UTF8Characters));
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_Boolean:
@@ -487,8 +511,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Boolean>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_EMuid:
@@ -507,8 +531,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<ECode>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_Enum:
@@ -523,8 +547,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         reinterpret_cast< ArrayOf<Int32>* >(carArray)->Set(i, iVal);
                     }
 
-                    result->mCarQuintet = carArray;
-                    _CarQuintet_AddRef(result->mCarQuintet);
+                    result->value.mCarQuintet = carArray;
+                    _CarQuintet_AddRef(result->value.mCarQuintet);
                     break;
                 }
                 case CarDataType_Interface:
@@ -538,12 +562,22 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 //#endif // PLATFORM(ANDROID)
         case CarDataType_LocalPtr:  //deprecated
         {
-            switch (result->mElementType) {
+            ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr====");
+
+            CarDataType elementType = 0;
+            AutoPtr<IDataTypeInfo> aElementDataTypeInfo;
+            (*(ILocalPtrInfo **)&dataTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
+            aElementDataTypeInfo->GetDataType(&elementType);
+
+            //switch (result->mElementType) {
+            switch (elementType) {
                 case CarDataType_Int16:
                 {
                     CarValue* aCarValue = new CarValue();
-                    aCarValue->mInt16Value = (Elastos::Int16)(NPVARIANT_TO_DOUBLE(value));
-                    result->mLocalPtr = aCarValue;
+                    aCarValue->mTypeInfo = aElementDataTypeInfo;
+                    //aCarValue->mInt16Value = (Elastos::Int16)(NPVARIANT_TO_DOUBLE(value));
+                    aCarValue->value.mInt16Value = (Elastos::Int16)(NPVARIANT_TO_DOUBLE(value));
+                    result->value.mLocalPtr = aCarValue;
                     break;
                 }
                 case CarDataType_Int32:
@@ -559,6 +593,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 */
                 case CarDataType_ArrayOf:
                 {
+                    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====");
                     CarValue* aCarValue = new CarValue();
                     CarQuintet* carArray = NULL;
 
@@ -584,11 +619,24 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 
                     Int32 length = static_cast<Int32>(doubleLength);
 
+                    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====length:%d", length);
+
                     for (Int32 i = 0; i < length; i++) {
                         NPVariant npvValue;
                         _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
                         Int32 iVal = 0;
+
+                        if (NPVARIANT_IS_VOID(npvValue)) {
+                            //TODO:undefined
+                        }
+                        else if (NPVARIANT_IS_NULL(npvValue)) {
+                            //TODO:null
+                        }
+                        else if (NPVARIANT_IS_BOOLEAN(npvValue)) {
+                            //TOBO:boolean
+                        }
                         if (NPVARIANT_IS_INT32(npvValue)) {
+                            //NOT BE USED IN V8
                             if(i == 0)carArray = ArrayOf<Elastos::Int32>::Alloc(length);
                             iVal = NPVARIANT_TO_INT32(npvValue);
                             (*(ArrayOf<Elastos::Int32>**)&carArray)->Set(i,iVal);
@@ -611,12 +659,19 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                             //iVal = static_cast<Int32>(NPVARIANT_TO_DOUBLE(npvValue));
                             (*(ArrayOf<Elastos::String>**)&carArray)->Set(i, *_stringValue);
                         }
+                        else if (NPVARIANT_IS_OBJECT(npvValue)) {
+                            //TODO:
+                        }
+                        else {
+                            //ERROR:
+                        }
                     }
 
                     _CarQuintet_AddRef(carArray);
 
-                    aCarValue->mCarQuintet = carArray;
-                    result->mLocalPtr = aCarValue;
+                    aCarValue->mTypeInfo = aElementDataTypeInfo;
+                    aCarValue->value.mCarQuintet = carArray;
+                    result->value.mLocalPtr = aCarValue;
 
                     break;
                 }
@@ -629,13 +684,14 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 {
                     //now be used when js transfer a js object as a result to pp value by native callback, just transfer the value to native code, no more need to do.
                     CarValue* aCarValue = new CarValue();
-                    aCarValue->mInt32Value = (Elastos::Int32)(NPVARIANT_TO_DOUBLE(value));
-                    result->mLocalPtr = aCarValue;
+                    aCarValue->mTypeInfo = aElementDataTypeInfo;
+                    aCarValue->value.mInt32Value = (Elastos::Int32)(NPVARIANT_TO_DOUBLE(value));
+                    result->value.mLocalPtr = aCarValue;
                     break;
                 }
                 default:
                 {
-                    ALOGD("=================convertNPVariantToCarValue CarDataType_LocalPtr=========other==============ElementType:%d", result->mElementType);
+                    ALOGD("=================convertNPVariantToCarValue CarDataType_LocalPtr=========other==============ElementType:%d", elementType);
                     break;
                 }
             }
@@ -823,47 +879,67 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
 
 void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 {
-    ALOGD("========convertCarValueToNPVariant========1");
+    ALOGD("========convertCarValueToNPVariant========1==");
 
-    const char* tmpType = ClassNameFromCarDataType((CarDataType)(value.mType));
-    const char* tmpSubType = ClassNameFromCarDataType((CarDataType)(value.mElementType));
+    CarDataType carDataType = 0;
+    //carDataType = value.mType;
+
+    AutoPtr<IDataTypeInfo> dataTypeInfo;
+    if (value.mObjectWrapper.Get()) {
+        dataTypeInfo = value.mObjectWrapper->getDataTypeInfo();
+        if (dataTypeInfo.Get()) {
+            dataTypeInfo->GetDataType(&carDataType);
+        }
+        else {
+            //TODO:Shoud not reach here: all CObjectWrapper must have typeInfo
+            carDataType = CarDataType_Interface;
+            ALOGD("convertCarValueToNPVariant========dataTypeInfo not exist!");
+        }
+    }
+    else {
+        //TODO:Shoud not reach here: all CObjectWrapper must exist
+        carDataType = CarDataType_Interface;
+        ALOGD("convertCarValueToNPVariant========mObjectWrapper not exist!");
+    }
+
+    const char* tmpType = ClassNameFromCarDataType((CarDataType)(carDataType));
 
     VOID_TO_NPVARIANT(*result);
 
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
-    switch (value.mType) {
+    switch (carDataType) {
         case CarDataType_Int16:
             result->type = NPVariantType_Int32;
-            result->value.intValue = value.mInt16Value;
+            result->value.intValue = value.value.mInt16Value;
             break;
         case CarDataType_Int32:
             result->type = NPVariantType_Int32;
-            result->value.intValue = value.mInt32Value;
+            result->value.intValue = value.value.mInt32Value;
             break;
         case CarDataType_Int64:
             result->type = NPVariantType_Double;
-            result->value.doubleValue = value.mInt64Value;
+            result->value.doubleValue = value.value.mInt64Value;
             break;
         case CarDataType_Byte:
             result->type = NPVariantType_Int32;
-            result->value.intValue = value.mByteValue;
+            result->value.intValue = value.value.mByteValue;
             break;
         case CarDataType_Char32:
         {
             AutoPtr<ArrayOf<Char32> > charArray = ArrayOf<Char32>::Alloc(1);
-            charArray->Set(0, (Char32)value.mCharValue);
+            charArray->Set(0, (Char32)value.value.mCharValue);
             const char* utf8String = strdup(Elastos::String(*charArray).string());
             STRINGZ_TO_NPVARIANT(utf8String, *result);
             break;
         }
         case CarDataType_Float:
             result->type = NPVariantType_Double;
-            result->value.doubleValue = value.mFloatValue;
+            result->value.doubleValue = value.value.mFloatValue;
             break;
         case CarDataType_Double:
             result->type = NPVariantType_Double;
-            result->value.doubleValue = value.mDoubleValue;
+            result->value.doubleValue = value.value.mDoubleValue;
             break;
         case CarDataType_String:
         {
@@ -879,11 +955,11 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         }
         case CarDataType_Boolean:
             result->type = NPVariantType_Bool;
-            result->value.boolValue = value.mBooleanValue;
+            result->value.boolValue = value.value.mBooleanValue;
             break;
         case CarDataType_EMuid:
         {
-            EMuid& iid = value.mIid;
+            EMuid& iid = value.value.mIid;
             v8::Local<v8::Array> v8Array(v8::Array::New(isolate,4));
             v8Array->Set(0, v8::Number::New(isolate,iid.mData1));
             v8Array->Set(1, v8::Number::New(isolate,iid.mData2));
@@ -906,7 +982,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         }
         case CarDataType_EGuid:
         {
-            EMuid& iid = value.mCid.mClsid;
+            EMuid& iid = value.value.mCid.mClsid;
 
             v8::Local<v8::Array> v8Array(v8::Array::New(isolate,4));
             v8Array->Set(0, v8::Number::New(isolate,iid.mData1));
@@ -920,8 +996,8 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 
             v8::Local<v8::Object> v8Object(v8::Object::New(isolate));
             v8Object->Set(v8::String::NewFromUtf8(isolate,"mClsid"), v8Array);
-            v8Object->Set(v8::String::NewFromUtf8(isolate,"mUunm"), v8::String::NewFromUtf8(isolate,value.mCid.mUunm));
-            v8Object->Set(v8::String::NewFromUtf8(isolate,"mCarcode"), v8::Number::New(isolate,value.mCid.mCarcode));
+            v8Object->Set(v8::String::NewFromUtf8(isolate,"mUunm"), v8::String::NewFromUtf8(isolate,value.value.mCid.mUunm));
+            v8Object->Set(v8::String::NewFromUtf8(isolate,"mCarcode"), v8::Number::New(isolate,value.value.mCid.mCarcode));
 
             WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
             v8NPObject->v8Object.Reset(isolate,v8Object);
@@ -933,18 +1009,24 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         }
         case CarDataType_ECode:
             result->type = NPVariantType_Double;
-            result->value.doubleValue = (UInt32)value.mECodeValue;
+            result->value.doubleValue = (UInt32)value.value.mECodeValue;
             break;
         case CarDataType_Enum:
             result->type = NPVariantType_Double;
-            result->value.doubleValue = value.mEnumValue;
+            result->value.doubleValue = value.value.mEnumValue;
             break;
         case CarDataType_ArrayOf:
         {
-            switch (value.mElementType) {
+
+            CarDataType elementType = 0;
+            AutoPtr<IDataTypeInfo> aElementDataTypeInfo;
+            ICarArrayInfo::Probe(dataTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
+            aElementDataTypeInfo->GetDataType(&elementType);
+
+            switch (elementType) {
                 case CarDataType_Int16:
                 {
-                    ArrayOf<Int16>* pArray = reinterpret_cast< ArrayOf<Int16>* >(value.mCarQuintet);
+                    ArrayOf<Int16>* pArray = reinterpret_cast< ArrayOf<Int16>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -963,7 +1045,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Int32:
                 {
-                    ArrayOf<Int32>* pArray = reinterpret_cast< ArrayOf<Int32>* >(value.mCarQuintet);
+                    ArrayOf<Int32>* pArray = reinterpret_cast< ArrayOf<Int32>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -982,7 +1064,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Int64:
                 {
-                    ArrayOf<Int64>* pArray = reinterpret_cast< ArrayOf<Int64>* >(value.mCarQuintet);
+                    ArrayOf<Int64>* pArray = reinterpret_cast< ArrayOf<Int64>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1001,7 +1083,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Byte:
                 {
-                    ArrayOf<Byte>* pArray = reinterpret_cast< ArrayOf<Byte>* >(value.mCarQuintet);
+                    ArrayOf<Byte>* pArray = reinterpret_cast< ArrayOf<Byte>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1020,7 +1102,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Char32:
                 {
-                    ArrayOf<Char32>* pArray = reinterpret_cast< ArrayOf<Char32>* >(value.mCarQuintet);
+                    ArrayOf<Char32>* pArray = reinterpret_cast< ArrayOf<Char32>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1042,7 +1124,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Float:
                 {
-                    ArrayOf<Float>* pArray = reinterpret_cast< ArrayOf<Float>* >(value.mCarQuintet);
+                    ArrayOf<Float>* pArray = reinterpret_cast< ArrayOf<Float>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1061,7 +1143,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Double:
                 {
-                    ArrayOf<Double>* pArray = reinterpret_cast< ArrayOf<Double>* >(value.mCarQuintet);
+                    ArrayOf<Double>* pArray = reinterpret_cast< ArrayOf<Double>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1080,7 +1162,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_String:
                 {
-                    ArrayOf<Elastos::String>* pArray = reinterpret_cast< ArrayOf<Elastos::String>* >(value.mCarQuintet);
+                    ArrayOf<Elastos::String>* pArray = reinterpret_cast< ArrayOf<Elastos::String>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1100,7 +1182,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Boolean:
                 {
-                    ArrayOf<Boolean>* pArray = reinterpret_cast< ArrayOf<Boolean>* >(value.mCarQuintet);
+                    ArrayOf<Boolean>* pArray = reinterpret_cast< ArrayOf<Boolean>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1125,7 +1207,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 ----------------------------------------------------------------*/
                 case CarDataType_ECode:
                 {
-                    ArrayOf<ECode>* pArray = reinterpret_cast< ArrayOf<ECode>* >(value.mCarQuintet);
+                    ArrayOf<ECode>* pArray = reinterpret_cast< ArrayOf<ECode>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1144,7 +1226,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Enum:
                 {
-                    ArrayOf<Int32>* pArray = reinterpret_cast< ArrayOf<Int32>* >(value.mCarQuintet);
+                    ArrayOf<Int32>* pArray = reinterpret_cast< ArrayOf<Int32>* >(value.value.mCarQuintet);
                     Int32 length = pArray->GetLength();
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
@@ -1163,7 +1245,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                 }
                 case CarDataType_Interface:
                 {
-                    ArrayOf<IInterface*>* pArrayOfPInterface = (ArrayOf<IInterface*>*)value.mCarQuintet;
+                    ArrayOf<IInterface*>* pArrayOfPInterface = (ArrayOf<IInterface*>*)value.value.mCarQuintet;
                     Int32 length = pArrayOfPInterface->GetLength();
 
                     ArrayOf<NPVariant>* pNPVariantArray = ArrayOf<NPVariant>::Alloc(length);
@@ -1175,7 +1257,8 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         NPVariant* tempNPVariant = &(*pNPVariantArray)[i];
 
                         (*pNPVariantArray)[i].type = NPVariantType_Object;
-                        (*pNPVariantArray)[i].value.objectValue = CarInstanceToNPObject(new CarInstanceV8(new CobjectWrapper(tempClassinfo, NULL), true));
+
+                        (*pNPVariantArray)[i].value.objectValue = CarInstanceToNPObject(new CarInstanceV8(new CobjectWrapper(tempClassinfo, aElementDataTypeInfo), true));
 
                         v8::Handle<v8::Value> tempV8Object = WebCore::convertNPVariantToV8Object(tempNPVariant, NULL);
 
@@ -1198,7 +1281,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         }
         case CarDataType_LocalPtr:  //deprecated
         {
-            ArrayOf<Int32>* tempArray2 = reinterpret_cast< ArrayOf<Int32>* >(value.mCarQuintet);
+            ArrayOf<Int32>* tempArray2 = reinterpret_cast< ArrayOf<Int32>* >(value.value.mCarQuintet);
 
             NPObject tempNPObject;
             //TODO:convert ArrayOf into NPObject
@@ -1209,7 +1292,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         case CarDataType_Interface:
         {
             result->type = NPVariantType_Object;
-            value.mObjectWrapper->setInstance(value.mObjectValue);
+            value.mObjectWrapper->setInstance(value.value.mObjectValue);
             result->value.objectValue = CarInstanceToNPObject(new CarInstanceV8(value.mObjectWrapper, true));
             break;
         }

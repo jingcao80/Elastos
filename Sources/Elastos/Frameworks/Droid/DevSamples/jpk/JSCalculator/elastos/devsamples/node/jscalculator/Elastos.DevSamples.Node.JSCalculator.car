@@ -32,6 +32,9 @@ module
     using interface Elastos.Droid.View.IOnPreDrawListener;
     using interface Elastos.Droid.Widget.IEditText;
 
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Core.ICharSequence;
+
     namespace Elastos {
     namespace DevSamples {
     namespace Node {
@@ -85,6 +88,8 @@ module
             [in] IContextMenuInfo* menuInfo);
     }
 
+    interface ICalculatorEditTextListener;
+
     [deprecated]
     interface INodeBridgeListener {
         OnRegistActivity(
@@ -93,6 +98,11 @@ module
             [in] IInterface* activityInstance,
             [in] Int32 activityListener,    //IActivityListener**
             [in] IHandler* activityHandler,
+            [out] Boolean* result);
+        OnRegistCustomControl(
+            [in] IContext* context,
+            [in] IInterface* control,
+            [in] Int32 listener, //ICalculatorEditTextListener**
             [out] Boolean* result);
     }
 
@@ -114,6 +124,10 @@ module
         SetActivityListener(
             [in] Int32 activityListener,    //IActivityListener**
             [in] IActivityListener* jsActivityListener);
+
+        SetCalculatorEditTextListener(
+            [in] Int32 calculatorEditTextListener,    //ICalculatorEditTextListener**
+            [in] ICalculatorEditTextListener* jsCalculatorEditTextListener);
 
         SetNodeBridgeListener(
             [in] INodeBridgeListener* nodeBridgeListener);
@@ -152,6 +166,48 @@ module
         GetVariableTextSize(
             [in] String text,
             [out] Float* result);
+
+        _constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+    }
+
+    [local]
+    interface ICalculatorEditTextListener
+    {
+        OnXXXCreateXXX(   //constructor
+            [in] IInterface* _this,
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        OnTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        OnSaveInstanceState(
+            [out] IParcelable** result);
+
+        SetTextSize(
+            [in] Int32 unit,
+            [in] Float size);
+
+        GetCompoundPaddingTop(
+            [out] Int32* result);
+
+        GetCompoundPaddingBottom(
+            [out] Int32* result);
+
+        OnMeasure(
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
+
+        OnTextChanged(
+            [in] ICharSequence* text,
+            [in] Int32 start,
+            [in] Int32 lengthBefore,
+            [in] Int32 lengthAfter);
     }
 
     class CCalculator {

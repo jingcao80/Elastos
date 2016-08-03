@@ -325,54 +325,76 @@ bool _BeRunOnUiThread(
     return bRunOnUiThread;
 }   //_BeRunOnUiThread
 
+//TODO URGENT : compare the type in deep
 bool _compatible(NPVariantType jt, CarDataType ct)
+//bool _compatible(NPVariant* npv, IParamInfo* paramInfo)
 {
+    //NPVariantType jt = npv->type;
+
     //NPVariantType_Int32 is not used in v8
-    if (jt == NPVariantType_Void || jt == NPVariantType_Null) return true;
+    if (jt == NPVariantType_Void || jt == NPVariantType_Null) {
+        ALOGD("====_compatible====NPVariantType_Void/Null====");
+        return true;
+    }
+
+    // ParamIOAttribute paramIOAttribute;
+    // paramInfo->GetIOAttribute(&paramIOAttribute);
+    // AutoPtr<IDataTypeInfo> dataTypeInfo;
+    // paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
+    // CarDataType dataType;
+    // dataTypeInfo->GetDataType(&dataType);
+    // CarDataType ct = dataType;
 
     bool result = false;
 
     switch (ct) {
-    case CarDataType_Boolean:
-        result = (jt == NPVariantType_Bool);
-        break;
-    case CarDataType_Int16:
-    case CarDataType_Int32:
-    case CarDataType_Int64:
-    case CarDataType_Byte:
-    case CarDataType_Float:
-    case CarDataType_Double:
-    case CarDataType_ECode:
-    case CarDataType_Enum:
-    //case CarDataType_LocalPtr:
-        result = (jt == NPVariantType_Double);
-        break;
-    case CarDataType_Char32:
-    case CarDataType_String:
-        result = (jt == NPVariantType_String);
-        break;
-    case CarDataType_ArrayOf:
-        //TODO:js instance of Array
-    case CarDataType_CppVector:
-        //TODO:js instance of Array
-    case CarDataType_EMuid:
-        //TODO:js object compatible with EMuid
-    case CarDataType_EGuid:
-        //TODO:js object compatible with EGuid
-    case CarDataType_LocalPtr:
-        //TODO:???
-    case CarDataType_LocalType:
-        //TODO:???
-    case CarDataType_Struct:
-        //TODO:js object with compatible properties
-    case CarDataType_Interface:
-        //TODO:js object with compatible car object wrapper
-        result = (jt == NPVariantType_Object);
-        break;
-    default:
-        ALOGD("ConvertCarDataTypeToNPVariantType fail!");
-        break;
-    }
+        case CarDataType_Boolean:
+            result = (jt == NPVariantType_Bool);
+            break;
+        case CarDataType_Int16:
+        case CarDataType_Int32:
+        case CarDataType_Int64:
+        case CarDataType_Byte:
+        case CarDataType_Float:
+        case CarDataType_Double:
+        case CarDataType_ECode:
+        case CarDataType_Enum:
+        //case CarDataType_LocalPtr:
+            result = (jt == NPVariantType_Double);
+            break;
+        case CarDataType_Char32:
+        case CarDataType_String:
+            result = (jt == NPVariantType_String);
+            break;
+        case CarDataType_ArrayOf:
+        {
+            //TODO:js instance of Array
+            ALOGD("====_compatible====CarDataType_ArrayOf====");
+            result = (jt == NPVariantType_Object);
+            break;
+        }
+        case CarDataType_CppVector:
+            //TODO:js instance of Array
+        case CarDataType_EMuid:
+            //TODO:js object compatible with EMuid
+        case CarDataType_EGuid:
+            //TODO:js object compatible with EGuid
+        case CarDataType_LocalPtr:
+            //TODO:???
+        case CarDataType_LocalType:
+            //TODO:???
+        case CarDataType_Struct:
+            //TODO:js object with compatible properties
+        case CarDataType_Interface:
+        {
+            //TODO:js object with compatible car object wrapper
+            result = (jt == NPVariantType_Object);
+            break;
+        }
+        default:
+            ALOGD("ConvertCarDataTypeToNPVariantType fail!");
+            break;
+    }   //switch
 
     return result;
 }
@@ -393,6 +415,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         LOG_ERROR("CarNPObjectInvoke: unable to get method name from NPIdentifier");
         return false;
     }
+
+    ALOGD("CarNPObjectInvoke====method name: %s====",name);
 
     instance->begin();
 
@@ -426,11 +450,14 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     //else if (numMethods > 1) {
     else {
         //overload
+        ALOGD("CarNPObjectInvoke====numMethods: %d====",numMethods);
         for (size_t methodIndex = 0; methodIndex < numMethods; methodIndex++) {
+            ALOGD("CarNPObjectInvoke====numMethods: %d/%d====",methodIndex, numMethods);
             tmpCarMethod = methodList[methodIndex];
             //TODO: shuld compare with only input parameters count.
             //NOTE: different from callback output parms.
             Int32 numParams = tmpCarMethod->numParameters();
+            ALOGD("CarNPObjectInvoke====numParams: %d====",numParams);
             Int32 numIn = 0;
             Int32 numOut = 0;
 
@@ -443,10 +470,13 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
             bool bSameInArg = true;
 
-            for (Int32 i = 0; i < numParams; i++) {
+            Int32 i;
+            for (i = 0; i < numParams; i++) {
+                ALOGD("CarNPObjectInvoke====numParams: %d/%d====",i,numParams);
                 AutoPtr<IParamInfo> paramInfo = (*paramInfos)[i];
                 ParamIOAttribute paramIOAttribute;
                 paramInfo->GetIOAttribute(&paramIOAttribute);
+
                 AutoPtr<IDataTypeInfo> dataTypeInfo;
                 paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
                 CarDataType dataType;
@@ -460,6 +490,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                     }
 
                     if (_compatible(args[numIn - 1].type, dataType)) {
+                    //if (_compatible((NPVariant*)(args + (numIn - 1)*sizeof(NPVariant)), paramInfo)) {
                         //same type
                     }
                     else {
@@ -470,7 +501,11 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                 else {
                     numOut++;
                 }
+            }
 
+            //ALOGD("====CarNPObjectInvoke==== compared num/argCount:%d/%d====",i,argCount);
+            if (numIn < argCount){
+                bSameInArg = false;
             }
 
             if (bSameInArg) {
@@ -582,13 +617,14 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
             aElementDataTypeInfo->GetDataType(&elementDataType);
         }
         else if (dataType == CarDataType_LocalPtr) {
-            ILocalPtrInfo::Probe(aDataTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
+            (*(ILocalPtrInfo **)&aDataTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
             aElementDataTypeInfo->GetDataType(&elementDataType);
         }
 
+        jArgs[i].mTypeInfo = aDataTypeInfo;
+
         jArgs[i].mIOAttribute = paramIOAttribute;
         jArgs[i].mType = dataType;
-        jArgs[i].mElementType = elementDataType;
         jArgs[i].mObjectWrapper = new CobjectWrapper(NULL,aDataTypeInfo);
 
         switch (paramIOAttribute) {
@@ -598,6 +634,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                     LOG_ERROR("CarNPObjectInvoke param IOAtrribute: args num error");
                     instance->end();
                     for (unsigned int j = 0; j < numParams; j++) {
+                        //TODO
                         //(*paramInfos)[j]->Release();
                         //(*paramInfos)[j] = NULL;
                     }
@@ -624,6 +661,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                 break;
         }
 
+        //TODO
         //(*paramInfos)[i]->Release();
         //(*paramInfos)[i] = NULL;
     }
@@ -832,6 +870,7 @@ bool CarNPObjectEnumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count
         AutoPtr<IMethodInfo> methodInfo = (*methodInfos)[i];
         methodInfo->GetName(&nameBuf);
         outList[i] = _NPN_GetStringIdentifier((const char*)nameBuf);
+        //TODO
         //methodInfo->Release();
         //methodInfo = NULL;
     }

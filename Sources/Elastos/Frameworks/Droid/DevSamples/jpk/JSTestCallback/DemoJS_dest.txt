@@ -1,0 +1,74 @@
+========Demo.car====begin====
+
+module
+{
+    interface IEventListener {
+        OnEvent(
+            [in] Int32 id);
+    }
+
+    interface IDemo {
+        addEventHandler(
+            [in] IEventListener* listener);
+
+        doTask();
+    }
+
+    class CDemo {
+        interface IDemo;
+    }
+}
+
+========Demo.car====end====
+
+========CDemo.h====begin====
+
+#ifndef __CDEMO_H__
+#define __CDEMO_H__
+
+CarClass(CDemo){
+public:
+    CARAPI addEventHandler(
+        /* [in] */ IEventListener* listener);
+
+    CARAPI doTask();
+private:
+    AutoPtr<IEventListener> m_Listener;
+};
+
+#endif // __CDEMO_H__
+
+========CDemo.h====end====
+
+========CDemo.cpp====begin====
+
+#include "CDemo.h"
+
+ECode CDemo::addEventHandler(
+    /* [in] */ IEventListener* listener)
+{
+    m_Listener = listener;
+    return NOERROR;
+}
+
+ECode CDemo::doTask()
+{
+    m_Listener->OnEvent(9);
+    return NOERROR;
+}
+
+========CDemo.cpp====end====
+
+========demo.js====begin====
+
+var module = elastos.require('./Demo.eco');
+var obj = module.createObject('CDemo');
+obj.addEventHandler({
+    OnEvent:function(i) {
+        var s = 'OnEvent, i: ' + JSON.stringify(i);
+        elastos.log(s);
+    },
+});
+obj.doTask();
+
+========demo.js====end====
