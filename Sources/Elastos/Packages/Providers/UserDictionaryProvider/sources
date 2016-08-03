@@ -1,0 +1,31 @@
+
+TARGET_NAME = Elastos.Droid.Providers.UserDictionary
+TARGET_TYPE = eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/src
+
+VPATH += $(MAKEDIR)/src/elastos/droid/providers/userdictionary
+
+SOURCES += Elastos.Droid.Providers.UserDictionary.car
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+SOURCES += R.cpp
+#SOURCES += CDictionaryBackupAgent.cpp
+SOURCES += CUserDictionaryProvider.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
+
+APPPACK = 1
+APP_PACKAGE_NAME = Elastos.Droid.Providers.UserDictionary
+RES_NAMESPACE = Elastos.Droid.Providers.UserDictionary
+DIRRESOURCES += $(MAKEDIR)/res;
+APP_DIR_NAME = UserDictionaryProvider

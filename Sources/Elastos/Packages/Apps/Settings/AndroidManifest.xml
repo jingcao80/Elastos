@@ -913,7 +913,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.TrustedCredentialsSettings" />
+                android:value="Elastos.Droid.Settings.CTrustedCredentialsSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/security_settings" />
         </activity>
@@ -955,7 +955,7 @@
                 android:exported="false">
         </activity>
 
-        <activity android:name="CredentialStorage"
+        <activity android:name="CCredentialStorage"
                 android:theme="@style/Transparent"
                 android:launchMode="singleTop"
                 android:configChanges="orientation|keyboardHidden|screenSize">
@@ -977,18 +977,18 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.DeviceAdminSettings" />
+                android:value="Elastos.Droid.Settings.CDeviceAdminSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/security_settings" />
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name="DeviceAdminSettings"
+        <activity-alias android:name="CDeviceAdminSettings"
                 android:label="@string/device_admin_settings_title"
                 android:exported="true"
                 android:targetActivity="CSettings$DeviceAdminSettingsActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.DeviceAdminSettings" />
+                android:value="Elastos.Droid.Settings.CDeviceAdminSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/security_settings" />
         </activity-alias>
@@ -1013,7 +1013,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.UsageAccessSettings" />
+                android:value="Elastos.Droid.Settings.CUsageAccessSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/security_settings" />
         </activity>
@@ -1027,7 +1027,7 @@
             </intent-filter>
         </activity-alias>
 
-        <activity android:name="IccLockSettings"
+        <activity android:name="CIccLockSettings"
                 android:label="@string/sim_lock_settings"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
                 android:process="com.android.phone">
@@ -1703,7 +1703,7 @@
                 <category android:name="android.intent.category.DEFAULT" /> />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.CryptKeeperSettings" />
+                android:value="Elastos.Droid.Settings.CCryptKeeperSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/security_settings" />
         </activity>

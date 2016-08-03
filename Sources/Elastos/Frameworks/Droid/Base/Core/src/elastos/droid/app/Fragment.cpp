@@ -151,7 +151,6 @@ ECode FragmentState::Instantiate(
     VALIDATE_NOT_NULL(fragment);
     *fragment = NULL;
     VALIDATE_NOT_NULL(activity);
-    VALIDATE_NOT_NULL(parent);
 
     if (mInstance != NULL) {
         *fragment = mInstance;
@@ -183,7 +182,7 @@ ECode FragmentState::Instantiate(
     mInstance->SetTag(mTag);
     mInstance->SetRetainInstance(mRetainInstance);
     mInstance->SetDetached(mDetached);
-    // mInstance->SetFragmentManager(act->mFragments);
+    mInstance->SetFragmentManager(act->mFragments);
     if (FragmentManagerImpl::DEBUG) Slogger::V(FragmentManagerImpl::TAG,
             "Instantiated fragment %p", mInstance.Get());
 

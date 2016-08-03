@@ -1,3 +1,4 @@
 
 DIRS += DownloadProvider
 DIRS += MediaProvider
+DIRS += UserDictionaryProvider

@@ -750,6 +750,24 @@ module
         interface IDialogInterfaceOnClickListener;
     }
 
+    class CCryptKeeperSettings {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class COwnerInfoSettings {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
     class CSettings {
         constructor();
 

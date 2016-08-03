@@ -1,0 +1,39 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+//    using interface Elastos.Droid.App.Backup.IBackupAgent;
+//    using interface Elastos.Droid.App.Backup.IBackupAgentHelper;
+//    using interface Elastos.Droid.Content.IContext;
+//    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IContentProvider;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Providers {
+    namespace UserDictionary {
+
+    class CUserDictionaryProvider {
+        constructor();
+
+        interface IContentProvider;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
+
+//    class CDictionaryBackupAgent {
+//        constructor();
+
+//        interface IBackupAgentHelper;
+//        interface IBackupAgent;
+//        interface IContextWrapper;
+//        interface IContext;
+//    }
+
+    } // namespace UserDictionary
+    } // namespace Providers
+    } // namespace Droid
+    } // namespace Elastos
+}

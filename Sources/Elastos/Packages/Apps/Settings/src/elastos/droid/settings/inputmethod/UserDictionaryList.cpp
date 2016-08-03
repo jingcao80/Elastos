@@ -8,6 +8,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "R.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::IActionBar;
 using Elastos::Droid::Content::IIntent;
@@ -31,6 +32,7 @@ using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::CTreeSet;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {

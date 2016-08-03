@@ -54,7 +54,7 @@
 
         <Elastos.Droid.Preference.CPreferenceScreen
             android:key="owner_info_settings"
-            android:fragment="Elastos.Droid.Settings.OwnerInfoSettings"
+            android:fragment="Elastos.Droid.Settings.COwnerInfoSettings"
             android:title="@string/owner_info_settings_title"
             android:summary="@string/owner_info_settings_summary"/>
 

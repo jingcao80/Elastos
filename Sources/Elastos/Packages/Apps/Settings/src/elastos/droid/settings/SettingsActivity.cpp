@@ -162,7 +162,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[36] = "Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary";
     (*args)[37] = "Elastos.Droid.Settings.Accounts.AccountSyncSettings";
     (*args)[38] = "Elastos.Droid.Settings.Accounts.AccountSettings";
-    (*args)[39] = "Elastos.Droid.Settings.CryptKeeperSettings";
+    (*args)[39] = "Elastos.Droid.Settings.CCryptKeeperSettings";
     (*args)[40] = "Elastos.Droid.Settings.DataUsageSummary";
     (*args)[41] = "Elastos.Droid.Settings.DreamSettings";
     (*args)[42] = "Elastos.Droid.Settings.Users.UserSettings";
@@ -437,7 +437,7 @@ ECode SettingsActivity::OnPreferenceStartFragment(
     if (str.Equals("Elastos.Droid.Settings.WallpaperTypeSettings")) {
         titleRes = R::string::wallpaper_settings_fragment_title;
     }
-    else if (str.Equals("Elastos.Droid.Settings.OwnerInfoSettings")
+    else if (str.Equals("Elastos.Droid.Settings.COwnerInfoSettings")
             && UserHandle::GetMyUserId() != IUserHandle::USER_OWNER) {
         AutoPtr<IUserManagerHelper> helper;
         CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&helper);

@@ -450,13 +450,13 @@ public class UserSettings extends SettingsPreferenceFragment
             // Jump to owner info panel
             Bundle extras = new Bundle();
             if (!info->IsRestricted()) {
-                extras->PutBoolean(OwnerInfoSettings.EXTRA_SHOW_NICKNAME, TRUE);
+                extras->PutBoolean(COwnerInfoSettings::EXTRA_SHOW_NICKNAME, TRUE);
             }
             Int32 titleResId = info.id == UserHandle.USER_OWNER ? R::string::owner_info_settings_title
                     : (info->IsRestricted() ? R::string::profile_info_settings_title
                             : R::string::user_info_settings_title);
             ((SettingsActivity) GetActivity()).StartPreferencePanel(
-                    OwnerInfoSettings.class->GetName(),
+                    String("Elastos.Droid.Settings.COwnerInfoSettings"),
                     extras, titleResId, NULL, NULL, 0);
         } else if (mIsOwner) {
             Bundle extras = new Bundle();

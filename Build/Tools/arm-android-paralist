@@ -473,6 +473,10 @@
   Elastos/Packages/Providers/DownloadProvider R.cpp
 < Elastos/Packages/Providers/DownloadProvider
 
+# ==== build Packages/Providers/UserDictionaryProvider ====
+> Elastos/Packages/Providers/UserDictionaryProvider Elastos.Droid.Providers.UserDictionary.car
+> Elastos/Packages/Providers/UserDictionaryProvider
+
 # ==== build Packages/Service/Telecomm ====
   Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
   Elastos/Packages/Service/Telecomm R.cpp

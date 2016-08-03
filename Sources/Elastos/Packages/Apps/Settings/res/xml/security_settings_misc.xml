@@ -27,7 +27,7 @@
 
             <intent android:action="android.intent.action.MAIN"
                     android:targetPackage="Elastos.Droid.Settings"
-                    android:targetClass="Elastos.Droid.Settings.IccLockSettings"/>
+                    android:targetClass="Elastos.Droid.Settings.CIccLockSettings"/>
 
         </Elastos.Droid.Preference.CPreference>
 
@@ -50,7 +50,7 @@
                 android:title="@string/manage_device_admin"
                 android:summary="@string/manage_device_admin_summary"
                 android:persistent="false"
-                android:fragment="Elastos.Droid.Settings.DeviceAdminSettings"/>
+                android:fragment="Elastos.Droid.Settings.CDeviceAdminSettings"/>
 
         <Elastos.Droid.Preference.CSwitchPreference android:key="toggle_install_applications"
                 android:title="@string/install_applications"
@@ -73,7 +73,7 @@
                 android:title="@string/trusted_credentials"
                 android:summary="@string/trusted_credentials_summary"
                 android:persistent="false"
-                android:fragment="Elastos.Droid.Settings.TrustedCredentialsSettings"/>
+                android:fragment="Elastos.Droid.Settings.CTrustedCredentialsSettings"/>
 
         <Elastos.Droid.Preference.CPreference android:key="credentials_install"
                 android:title="@string/credentials_install"
@@ -93,7 +93,7 @@
 
             <intent android:action="com.android.credentials.RESET"
                     android:targetPackage="Elastos.Droid.Settings"
-                    android:targetClass="Elastos.Droid.Settings.CredentialStorage"/>
+                    android:targetClass="Elastos.Droid.Settings.CCredentialStorage"/>
 
         </Elastos.Droid.Preference.CPreference>
 
@@ -107,17 +107,17 @@
                 android:title="@string/manage_trust_agents"
                 android:summary="@string/manage_trust_agents_summary"
                 android:persistent="false"
-                android:fragment="Elastos.Droid.Settings.TrustAgentSettings"/>
+                android:fragment="Elastos.Droid.Settings.CTrustAgentSettings"/>
 
         <Elastos.Droid.Preference.CPreferenceScreen
                 android:key="screen_pinning_settings"
                 android:title="@string/screen_pinning_title"
                 android:summary="@string/switch_off_text"
-                android:fragment="Elastos.Droid.Settings.ScreenPinningSettings"/>
+                android:fragment="Elastos.Droid.Settings.CScreenPinningSettings"/>
 
         <Elastos.Droid.Preference.CPreference android:key="usage_access"
                     android:title="@string/usage_access_title"
-                    android:fragment="Elastos.Droid.Settings.UsageAccessSettings"/>
+                    android:fragment="Elastos.Droid.Settings.CUsageAccessSettings"/>
 
     </Elastos.Droid.Preference.CPreferenceCategory>
 
