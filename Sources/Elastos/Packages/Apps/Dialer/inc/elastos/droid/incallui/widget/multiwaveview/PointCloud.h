@@ -41,6 +41,7 @@ public:
 
     public:
         Float mRadius;
+        Float mWidth;
         Float mAlpha;
     };
 
@@ -77,6 +78,21 @@ public:
         Float mAlpha;
     };
 
+    class Point
+        : public Object
+    {
+    public:
+        Point(
+            /* [in] */ Float x2,
+            /* [in] */ Float y2,
+            /* [in] */ Float r);
+
+    public:
+        Float mX;
+        Float mY;
+        Float mRadius;
+    };
+
 public:
     PointCloud(
         /* [in] */ IDrawable* drawable);
@@ -92,8 +108,27 @@ public:
     CARAPI_(void) SetScale(
         /* [in] */ Float scale);
 
+    CARAPI_(Float) GetScale();
+
+    CARAPI_(Int32) GetAlphaForPoint(
+        /* [in] */ Point* point);
+
     CARAPI Draw(
         /* [in] */ ICanvas* canvas);
+
+private:
+    static CARAPI_(Float) Hypot(
+        /* [in] */ Float x,
+        /* [in] */ Float y);
+
+    static CARAPI_(Float) Max(
+        /* [in] */ Float a,
+        /* [in] */ Float b);
+
+    CARAPI_(Float) Interp(
+        /* [in] */ Float min,
+        /* [in] */ Float max,
+        /* [in] */ Float f);
 
 public:
     AutoPtr<WaveManager> mWaveManager;

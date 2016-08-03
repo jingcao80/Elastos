@@ -319,6 +319,7 @@ module
 //    interface Elastos.Droid.Dialer.ISpecialCharSequenceMgr;
 //    interface Elastos.Droid.DialerBind.IDatabaseHelperManager;
 //    interface Elastos.Droid.DialerBind.IObjectFactory;
+    interface Elastos.Droid.InCallUI.Widget.MultiwaveView.IGlowPadViewOnTriggerListener;
 
 //    namespace Elastos {
 //    namespace Droid {
@@ -1409,6 +1410,23 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IConferenceManagerUi;
         interface IUi;
+    }
+
+    [local]
+    class CGlowPadWrapper {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IGlowPadWrapper;
+        interface IGlowPadViewOnTriggerListener;
+        interface IView;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
     }
 
     class CInCallActivity {

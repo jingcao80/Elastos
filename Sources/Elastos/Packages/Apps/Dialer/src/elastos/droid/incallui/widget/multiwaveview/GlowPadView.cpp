@@ -193,6 +193,8 @@ const Float GlowPadView::TARGET_SCALE_COLLAPSED = 0.8f;
 const Float GlowPadView::RING_SCALE_EXPANDED = 1.0f;
 const Float GlowPadView::RING_SCALE_COLLAPSED = 0.5f;
 
+CAR_INTERFACE_IMPL(GlowPadView, View, IGlowPadView)
+
 GlowPadView::GlowPadView()
     : mFeedbackCount(3)
     , mVibrationDuration(0)

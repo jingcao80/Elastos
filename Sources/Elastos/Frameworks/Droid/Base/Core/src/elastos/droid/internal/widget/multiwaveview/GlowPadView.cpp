@@ -791,7 +791,7 @@ void GlowPadView::HideTargets(
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(12);
         AutoPtr<ICharSequence> pEA;
         CString::New(String("ease"), (ICharSequence**)&pEA);
-        assert(0 && "should use Set")
+        assert(0 && "should use Set");
         (*arr)[0] = pEA;
         (*arr)[1] = (IObject*)interpolator.Get();
 

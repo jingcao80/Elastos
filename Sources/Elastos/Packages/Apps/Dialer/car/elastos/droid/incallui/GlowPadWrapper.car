@@ -7,6 +7,9 @@ module
     namespace Droid {
     namespace InCallUI {
 
+    interface IGlowPadWrapper {
+    }
+
     [local]
     interface IAnswerListener {
         OnAnswer(
