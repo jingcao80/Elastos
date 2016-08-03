@@ -75,8 +75,10 @@ ECode SpamFilter::GetNotificationContent(
         }
     }
     String str1, str2;
-    notificationTitle->ToString(&str1);
-    notificationMessage->ToString(&str2);
+    if (notificationTitle != NULL)
+        notificationTitle->ToString(&str1);
+    if (notificationMessage != NULL)
+        notificationMessage->ToString(&str2);
     *result = str1 + "\n" + str2;
     return NOERROR;
 }

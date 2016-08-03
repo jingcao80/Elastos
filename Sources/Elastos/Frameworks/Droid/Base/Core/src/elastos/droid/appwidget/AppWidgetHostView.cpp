@@ -458,6 +458,8 @@ ECode AppWidgetHostView::UpdateAppWidget(
         }
     }
 
+    // old mRemoteContext can't be destruct before old mView
+    AutoPtr<IContext> oldRemoteContext = mRemoteContext;
     if (remoteViews == NULL) {
         if (mViewMode == VIEW_MODE_DEFAULT) {
             // We've already done this -- nothing to do.

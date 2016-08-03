@@ -28,7 +28,7 @@ namespace Widget {
 const String Chronometer::TAG("Chronometer");
 const Int32 Chronometer::TICK_WHAT;
 
-CAR_INTERFACE_IMPL(Chronometer, Object, IChronometer)
+CAR_INTERFACE_IMPL(Chronometer, TextView, IChronometer)
 
 Chronometer::InnerHandler::InnerHandler(
     /* [in] */ Chronometer* host)

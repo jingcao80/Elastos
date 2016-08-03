@@ -1684,6 +1684,8 @@ module
             [in] Int32 defStyleRes);
 
         interface IChronometer;
+        interface ITextView;
+        interface IView;
         interface IOnPreDrawListener;
         interface IDrawableCallback;
         interface IKeyEventCallback;

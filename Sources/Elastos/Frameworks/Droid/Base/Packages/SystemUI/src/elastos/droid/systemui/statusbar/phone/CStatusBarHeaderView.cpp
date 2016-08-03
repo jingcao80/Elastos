@@ -1,6 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CStatusBarHeaderView.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardStatusView.h"
 #include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
@@ -16,6 +17,7 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::Drawable::IAnimatable;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::SystemUI::FontSizeUtils;
+using Elastos::Droid::SystemUI::Keyguard::CKeyguardStatusView;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IBatteryStateChangeCallback;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_INextAlarmChangeCallback;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IUserInfoControllerOnUserInfoChangedListener;
@@ -856,8 +858,11 @@ ECode CStatusBarHeaderView::OnNextAlarmChanged(
 {
     mNextAlarm = nextAlarm;
     if (nextAlarm != NULL) {
-        assert(0 && "TODO: Need the app Keyguard.");
-        // mAlarmStatus->SetText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
+        AutoPtr<IContext> context;
+        GetContext((IContext**)&context);
+        AutoPtr<ICharSequence> text;
+        CString::New(CKeyguardStatusView::FormatNextAlarm(context, nextAlarm), (ICharSequence**)&text);
+        mAlarmStatus->SetText(text);
     }
     mAlarmShowing = nextAlarm != NULL;
     UpdateEverything();

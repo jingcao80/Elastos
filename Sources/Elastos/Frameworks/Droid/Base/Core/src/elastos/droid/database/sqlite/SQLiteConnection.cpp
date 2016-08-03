@@ -680,7 +680,6 @@ ECode SQLiteConnection::NativePrepareStatement(
         Slogger::E(TAG, info.string());
         ECode ec = throw_sqlite3_exception(connection->db, info.string());
         *result = 0;
-        assert(0);
         return ec;
     }
 
