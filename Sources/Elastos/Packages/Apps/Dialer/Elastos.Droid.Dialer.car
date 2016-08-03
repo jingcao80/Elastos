@@ -108,6 +108,7 @@ module
     merge("car/elastos/droid/incallui/InCallActivity.car");
     merge("car/elastos/droid/incallui/InCallPhoneListener.car");
     merge("car/elastos/droid/incallui/InCallPresenter.car");
+    merge("car/elastos/droid/incallui/InCallVideoCallListenerNotifier.car");
     merge("car/elastos/droid/incallui/Presenter.car");
     merge("car/elastos/droid/incallui/Ui.car");
     merge("car/elastos/droid/incallui/CallerInfoAsyncQuery.car");
@@ -115,6 +116,8 @@ module
     merge("car/elastos/droid/incallui/CallerInfo.car");
     merge("car/elastos/droid/incallui/AccelerometerListener.car");
     merge("car/elastos/droid/incallui/DialpadPresenter.car");
+    merge("car/elastos/droid/incallui/VideoCallFragment.car");
+    merge("car/elastos/droid/incallui/VideoCallPresenter.car");
     merge("car/elastos/droid/incallui/service/PhoneNumberService.car");
     merge("car/elastos/droid/incallui/widget/multiwaveview/GlowPadView.car");
     merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
@@ -1509,6 +1512,16 @@ module
         interface IViewOnKeyListener;
         interface IViewOnHoverListener;
         interface IViewOnClickListener;
+    }
+
+    class CVideoCallFragment {
+        interface IVideoCallFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IVideoCallUi;
+        interface IUi;
     }
 
     } //namespace InCallUI

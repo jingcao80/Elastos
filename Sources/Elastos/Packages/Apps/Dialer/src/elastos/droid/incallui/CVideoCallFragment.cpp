@@ -220,7 +220,7 @@ Boolean CVideoCallFragment::sVideoSurfacesInUse = FALSE;
 AutoPtr<CVideoCallFragment::VideoCallSurface> CVideoCallFragment::sPreviewSurface;
 AutoPtr<CVideoCallFragment::VideoCallSurface> CVideoCallFragment::sDisplaySurface;
 
-CAR_INTERFACE_IMPL_2(CVideoCallFragment, BaseFragment, IUi, IVideoCallUi);
+CAR_INTERFACE_IMPL_3(CVideoCallFragment, BaseFragment, IVideoCallFragment, IVideoCallUi, IUi);
 
 CAR_OBJECT_IMPL(CVideoCallFragment)
 

@@ -22,8 +22,9 @@ namespace InCallUI {
 
 CarClass(CVideoCallFragment)
     , public BaseFragment
-    , public IUi
+    , public IVideoCallFragment
     , public IVideoCallUi
+    , public IUi
 {
 private:
     /**
