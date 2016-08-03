@@ -403,16 +403,6 @@
   Elastos/Frameworks/Droid/Base/Packages/SettingsProvider R.cpp
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider
 
-# ==== build Provider.Media ====
-  Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
-  Elastos/Packages/Providers/MediaProvider R.cpp
-> Elastos/Packages/Providers/MediaProvider
-
-# ==== build Provider.Telephony ====
-  Elastos/Packages/Providers/TelephonyProvider Elastos.Droid.Providers.Telephony.car
-  Elastos/Packages/Providers/TelephonyProvider R.cpp
-> Elastos/Packages/Providers/TelephonyProvider
-
 # ==== build DefContainer ====
   Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService Elastos.Droid.DefContainer.car
   Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService R.cpp
@@ -474,8 +464,14 @@
 < Elastos/Packages/Providers/DownloadProvider
 
 # ==== build Packages/Providers/UserDictionaryProvider ====
-> Elastos/Packages/Providers/UserDictionaryProvider Elastos.Droid.Providers.UserDictionary.car
-> Elastos/Packages/Providers/UserDictionaryProvider
+  Elastos/Packages/Providers/UserDictionaryProvider Elastos.Droid.Providers.UserDictionary.car
+  Elastos/Packages/Providers/UserDictionaryProvider R.cpp
+< Elastos/Packages/Providers/UserDictionaryProvider
+
+# ==== build Packages/Providers/Telephony ====
+  Elastos/Packages/Providers/TelephonyProvider Elastos.Droid.Providers.Telephony.car
+  Elastos/Packages/Providers/TelephonyProvider R.cpp
+< Elastos/Packages/Providers/TelephonyProvider
 
 # ==== build Packages/Service/Telecomm ====
   Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
