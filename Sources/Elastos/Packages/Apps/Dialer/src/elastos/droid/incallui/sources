@@ -5,6 +5,8 @@ INCLUDES += $(MAKEDIR)/../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../
 INCLUDES += ../../../../
 
+VPATH += $(MAKEDIR)/widget/multiwaveview
+
 SOURCES += AnswerPresenter.cpp
 SOURCES += AudioModeProvider.cpp
 SOURCES += BaseFragment.cpp
@@ -41,3 +43,5 @@ SOURCES += CHoverIgnoringLinearLayout.cpp
 SOURCES += CDialpadFragment.cpp
 SOURCES += DialpadPresenter.cpp
 SOURCES += PostCharDialogFragment.cpp
+
+SOURCES += GlowPadView.cpp

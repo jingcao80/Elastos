@@ -116,6 +116,7 @@ module
     merge("car/elastos/droid/incallui/AccelerometerListener.car");
     merge("car/elastos/droid/incallui/DialpadPresenter.car");
     merge("car/elastos/droid/incallui/service/PhoneNumberService.car");
+    merge("car/elastos/droid/incallui/widget/multiwaveview/GlowPadView.car");
     merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadView.car");

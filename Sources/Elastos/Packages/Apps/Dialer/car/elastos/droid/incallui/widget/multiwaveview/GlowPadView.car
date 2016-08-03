@@ -1,0 +1,44 @@
+
+module
+{
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+    namespace Widget {
+    namespace MultiwaveView {
+
+    [local]
+    interface IGlowPadViewOnTriggerListener {
+        const Int32 NO_HANDLE = 0;
+        const Int32 CENTER_HANDLE = 1;
+
+        OnGrabbed(
+            [in] IView* v,
+            [in] Int32 handle);
+
+        OnReleased(
+            [in] IView* v,
+            [in] Int32 handle);
+
+        OnTrigger(
+            [in] IView* v,
+            [in] Int32 target);
+
+        OnGrabbedStateChange(
+            [in] IView* v,
+            [in] Int32 handle);
+
+        OnFinishFinalAnimation();
+    }
+
+    interface IGlowPadView {
+    }
+
+    } // namespace MultiwaveView
+    } // namespace Widget
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,167 +1,85 @@
 
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Provider.h"
-#include "elastos/droid/internal/widget/multiwaveview/GlowPadView.h"
-#include "elastos/droid/internal/widget/multiwaveview/Tweener.h"
-#include "elastos/droid/internal/widget/multiwaveview/CTargetDrawable.h"
-#include "elastos/droid/internal/widget/multiwaveview/CPointCloud.h"
-#include "elastos/droid/internal/widget/multiwaveview/Ease.h"
-#include "elastos/droid/content/pm/CActivityInfo.h"
-#include "elastos/droid/media/CAudioAttributesBuilder.h"
-#include "elastos/droid/provider/Settings.h"
-#include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/utility/CTypedValue.h"
-#include "elastos/droid/utility/CTypedValueHelper.h"
-#include "elastos/droid/view/accessibility/CAccessibilityManagerHelper.h"
-#include "elastos/droid/view/CGravity.h"
-#include "elastos/droid/R.h"
-
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/incallui/widget/multiwaveview/Ease.h"
+#include "elastos/droid/incallui/widget/multiwaveview/GlowPadView.h"
+#include "R.h"
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
-#include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::R;
-using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Dialer::R;
 using Elastos::Droid::Animation::ITimeInterpolator;
-using Elastos::Droid::Content::IContentResolver;
-using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Content::Pm::IActivityInfo;
-using Elastos::Droid::Content::Pm::CActivityInfo;
-using Elastos::Droid::Internal::Widget::Multiwaveview::Tweener;
-using Elastos::Droid::Internal::Widget::Multiwaveview::CTargetDrawable;
-using Elastos::Droid::Internal::Widget::Multiwaveview::CPointCloud;
-using Elastos::Droid::Internal::Widget::Multiwaveview::Ease;
-using Elastos::Droid::Media::IAudioAttributesBuilder;
-using Elastos::Droid::Media::CAudioAttributesBuilder;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Provider::Settings;
-using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::ITypedValueHelper;
 using Elastos::Droid::Utility::CTypedValueHelper;
-using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::CGravity;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
-using Elastos::Droid::View::Accessibility::IAccessibilityManagerHelper;
-using Elastos::Droid::View::Accessibility::CAccessibilityManagerHelper;
-
-using Elastos::Core::CString;
-using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
-using Elastos::Core::IFloat;
-using Elastos::Core::CFloat;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
-using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
-namespace Internal {
+namespace InCallUI {
 namespace Widget {
-namespace Multiwaveview {
-
-String GlowPadView::TAG(String("GlowPadView"));
-Boolean GlowPadView::DEBUG = FALSE;
-
-const Int32 GlowPadView::STATE_IDLE = 0;
-const Int32 GlowPadView::STATE_START = 1;
-const Int32 GlowPadView::STATE_FIRST_TOUCH = 2;
-const Int32 GlowPadView::STATE_TRACKING = 3;
-const Int32 GlowPadView::STATE_SNAP = 4;
-const Int32 GlowPadView::STATE_FINISH = 5;
-
-Float GlowPadView::SNAP_MARGIN_DEFAULT = 20.0f; // distance to ring before we snap to it
-
-Int32 GlowPadView::WAVE_ANIMATION_DURATION = 1000;
-Int32 GlowPadView::RETURN_TO_HOME_DELAY = 1200;
-Int32 GlowPadView::RETURN_TO_HOME_DURATION = 200;
-Int32 GlowPadView::HIDE_ANIMATION_DELAY = 200;
-Int32 GlowPadView::HIDE_ANIMATION_DURATION = 200;
-Int32 GlowPadView::SHOW_ANIMATION_DURATION = 200;
-Int32 GlowPadView::SHOW_ANIMATION_DELAY = 50;
-Int32 GlowPadView::INITIAL_SHOW_HANDLE_DURATION = 200;
-Int32 GlowPadView::REVEAL_GLOW_DELAY = 0;
-Int32 GlowPadView::REVEAL_GLOW_DURATION = 0;
-
-Float GlowPadView::TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED = 1.3f;
-Float GlowPadView::TARGET_SCALE_EXPANDED = 1.0f;
-Float GlowPadView::TARGET_SCALE_COLLAPSED = 0.8f;
-Float GlowPadView::RING_SCALE_EXPANDED = 1.0f;
-Float GlowPadView::RING_SCALE_COLLAPSED = 0.5f;
-
-AutoPtr<IAudioAttributes> GlowPadView::VIBRATION_ATTRIBUTES;
+namespace MultiwaveView {
 
 //=====================================================================
-//               GlowPadView::AnimationBundle::
+//   GlowPadView::AnimationBundle
 //=====================================================================
-
-CAR_INTERFACE_IMPL(GlowPadView::AnimationBundle, ArrayList, IAnimationBundle)
-
-ECode GlowPadView::AnimationBundle::Start()
+void GlowPadView::AnimationBundle::Start()
 {
-    if (mSuspended)
-        return NOERROR; // ignore attempts to start animations
+    if (mSuspended) return; // ignore attempts to start animations
     Int32 count = 0;
     GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> p;
         Get(i, (IInterface**)&p);
-        AutoPtr<ITweener> anim = ITweener::Probe(p);
-        AutoPtr<Tweener> canim = (Tweener*)anim.Get();
-        IAnimator::Probe(canim->mAnimator)->Start();
+        Tweener* anim = (Tweener*)IObject::Probe(p);
+        IAnimator::Probe(anim->mAnimator)->Start();
     }
-    return NOERROR;
 }
 
-ECode GlowPadView::AnimationBundle::Cancel()
+void GlowPadView::AnimationBundle::Cancel()
 {
     Int32 count = 0;
     GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> p;
         Get(i, (IInterface**)&p);
-        AutoPtr<ITweener> anim = ITweener::Probe(p);
-        AutoPtr<Tweener> canim = (Tweener*)anim.Get();
-        IAnimator::Probe(canim->mAnimator)->Cancel();
+        Tweener* anim = (Tweener*)IObject::Probe(p);
+        IAnimator::Probe(anim->mAnimator)->Cancel();
     }
     Clear();
-    return NOERROR;
 }
 
-ECode GlowPadView::AnimationBundle::Stop()
+void GlowPadView::AnimationBundle::Stop()
 {
     Int32 count = 0;
     GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> p;
         Get(i, (IInterface**)&p);
-        AutoPtr<ITweener> anim = ITweener::Probe(p);
-        AutoPtr<Tweener> canim = (Tweener*)anim.Get();
-        IAnimator::Probe(canim->mAnimator)->End();
+        Tweener* anim = (Tweener*)IObject::Probe(p);
+        IAnimator::Probe(anim->mAnimator)->End();
     }
     Clear();
-    return NOERROR;
 }
 
-ECode GlowPadView::AnimationBundle::SetSuspended(
+void GlowPadView::AnimationBundle::SetSuspended(
     /* [in] */ Boolean suspend)
 {
     mSuspended = suspend;
-    return NOERROR;
-}
-
-ECode GlowPadView::AnimationBundle::Get(
-    /* [in] */ Int32 location,
-    /* [out] */ IInterface** object)
-{
-    assert(0 && "TODO");
-    return NOERROR;
 }
 
 ECode GlowPadView::AnimationBundle::ToString(
@@ -176,16 +94,11 @@ ECode GlowPadView::AnimationBundle::ToString(
     return NOERROR;
 }
 
-//=====================================================================
-//               GlowPadView::AnimatorListenerAdapter_1::
-//=====================================================================
 
-GlowPadView::AnimatorListenerAdapter_1::AnimatorListenerAdapter_1(
-    /* [in] */ GlowPadView* host)
-    : mHost(host)
-{}
-
-ECode GlowPadView::AnimatorListenerAdapter_1::OnAnimationEnd(
+//=====================================================================
+//   GlowPadView::ResetListener
+//=====================================================================
+ECode GlowPadView::ResetListener::OnAnimationEnd(
     /* [in] */ IAnimator* animator)
 {
     mHost->SwitchToState(STATE_IDLE, mHost->mWaveCenterX, mHost->mWaveCenterY);
@@ -193,16 +106,11 @@ ECode GlowPadView::AnimatorListenerAdapter_1::OnAnimationEnd(
     return NOERROR;
 }
 
-//=====================================================================
-//               GlowPadView::AnimatorListenerAdapter_2::
-//=====================================================================
 
-GlowPadView::AnimatorListenerAdapter_2::AnimatorListenerAdapter_2(
-    /* [in] */ GlowPadView* host)
-    : mHost(host)
-{}
-
-ECode GlowPadView::AnimatorListenerAdapter_2::OnAnimationEnd(
+//=====================================================================
+//   GlowPadView::ResetListenerWithPing
+//=====================================================================
+ECode GlowPadView::ResetListenerWithPing::OnAnimationEnd(
     /* [in] */ IAnimator* animator)
 {
     mHost->Ping();
@@ -211,32 +119,24 @@ ECode GlowPadView::AnimatorListenerAdapter_2::OnAnimationEnd(
     return NOERROR;
 }
 
-//=====================================================================
-//               GlowPadView::AnimatorUpdateListener_1::
-//=====================================================================
-CAR_INTERFACE_IMPL(GlowPadView::AnimatorUpdateListener_1, Object, IAnimatorUpdateListener)
 
-GlowPadView::AnimatorUpdateListener_1::AnimatorUpdateListener_1(
-    /* [in] */ GlowPadView* host)
-    : mHost(host)
-{}
+//=====================================================================
+//   GlowPadView::UpdateListener
+//=====================================================================
+CAR_INTERFACE_IMPL(GlowPadView::UpdateListener, Object, IAnimatorUpdateListener)
 
-ECode GlowPadView::AnimatorUpdateListener_1::OnAnimationUpdate(
+ECode GlowPadView::UpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     mHost->Invalidate();
     return NOERROR;
 }
 
-//=====================================================================
-//               GlowPadView::AnimatorListenerAdapter_3::
-//=====================================================================
-GlowPadView::AnimatorListenerAdapter_3::AnimatorListenerAdapter_3(
-    /* [in] */ GlowPadView* host)
-    : mHost(host)
-{}
 
-ECode GlowPadView::AnimatorListenerAdapter_3::OnAnimationEnd(
+//=====================================================================
+//   GlowPadView::TargetUpdateListener
+//=====================================================================
+ECode GlowPadView::TargetUpdateListener::OnAnimationEnd(
     /* [in] */ IAnimator* animator)
 {
     if (mHost->mNewTargetResources != 0) {
@@ -248,28 +148,50 @@ ECode GlowPadView::AnimatorListenerAdapter_3::OnAnimationEnd(
     return NOERROR;
 }
 
-//=====================================================================
-//               GlowPadView::AnimatorListenerAdapter_4::
-//=====================================================================
 
-GlowPadView::AnimatorListenerAdapter_4::AnimatorListenerAdapter_4(
-    /* [in] */ GlowPadView* host)
-    : mHost(host)
-{}
-
-ECode GlowPadView::AnimatorListenerAdapter_4::OnAnimationEnd(
+//=====================================================================
+//   GlowPadView::WaveAnimationListener
+//=====================================================================
+ECode GlowPadView::WaveAnimationListener::OnAnimationEnd(
     /* [in] */ IAnimator* animator)
 {
-    AutoPtr<CPointCloud> pc = (CPointCloud*)(mHost->mPointCloud.Get());
-    pc->mWaveManager->SetRadius(0.0f);
-    pc->mWaveManager->SetAlpha(0.0f);
+    mHost->mPointCloud->mWaveManager->SetRadius(0.0f);
+    mHost->mPointCloud->mWaveManager->SetAlpha(0.0f);
     return NOERROR;
 }
 
+
 //=====================================================================
-//               GlowPadView::
+//   GlowPadView
 //=====================================================================
-CAR_INTERFACE_IMPL(GlowPadView, Elastos::Droid::View::View, IGlowPadView)
+const String GlowPadView::TAG("GlowPadView");
+const Boolean GlowPadView::DEBUG = FALSE;
+
+const Int32 GlowPadView::STATE_IDLE = 0;
+const Int32 GlowPadView::STATE_START = 1;
+const Int32 GlowPadView::STATE_FIRST_TOUCH = 2;
+const Int32 GlowPadView::STATE_TRACKING = 3;
+const Int32 GlowPadView::STATE_SNAP = 4;
+const Int32 GlowPadView::STATE_FINISH = 5;
+
+const Float GlowPadView::SNAP_MARGIN_DEFAULT = 20.0f; // distance to ring before we snap to it
+
+const Int32 GlowPadView::WAVE_ANIMATION_DURATION = 1350;
+const Int32 GlowPadView::RETURN_TO_HOME_DELAY = 1200;
+const Int32 GlowPadView::RETURN_TO_HOME_DURATION = 200;
+const Int32 GlowPadView::HIDE_ANIMATION_DELAY = 200;
+const Int32 GlowPadView::HIDE_ANIMATION_DURATION = 200;
+const Int32 GlowPadView::SHOW_ANIMATION_DURATION = 200;
+const Int32 GlowPadView::SHOW_ANIMATION_DELAY = 50;
+const Int32 GlowPadView::INITIAL_SHOW_HANDLE_DURATION = 200;
+const Int32 GlowPadView::REVEAL_GLOW_DELAY = 0;
+const Int32 GlowPadView::REVEAL_GLOW_DURATION = 0;
+
+const Float GlowPadView::TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED = 1.3f;
+const Float GlowPadView::TARGET_SCALE_EXPANDED = 1.0f;
+const Float GlowPadView::TARGET_SCALE_COLLAPSED = 0.8f;
+const Float GlowPadView::RING_SCALE_EXPANDED = 1.0f;
+const Float GlowPadView::RING_SCALE_COLLAPSED = 0.5f;
 
 GlowPadView::GlowPadView()
     : mFeedbackCount(3)
@@ -285,8 +207,6 @@ GlowPadView::GlowPadView()
     , mAllowScaling(FALSE)
     , mOuterRadius(0.0f)
     , mSnapMargin(0.0f)
-    , mFirstItemOffset(0.0f)
-    , mMagneticTargets(FALSE)
     , mDragging(FALSE)
     , mNewTargetResources(0)
     , mTargetResourceId(0)
@@ -305,19 +225,10 @@ GlowPadView::GlowPadView()
     mTargetAnimations = new AnimationBundle();
     mGlowAnimations = new AnimationBundle();
 
-    mResetListener = new AnimatorListenerAdapter_1(this);
-
-    mResetListenerWithPing = new AnimatorListenerAdapter_2(this);
-
-    mUpdateListener = new AnimatorUpdateListener_1(this);
-
-    mTargetUpdateListener = new AnimatorListenerAdapter_3(this);
-
-    AutoPtr<IAudioAttributesBuilder> bld;
-    CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&bld);
-    bld->SetContentType(IAudioAttributes::CONTENT_TYPE_SONIFICATION);
-    bld->SetUsage(IAudioAttributes::USAGE_ASSISTANCE_SONIFICATION);
-    bld->Build((IAudioAttributes**)&VIBRATION_ATTRIBUTES);
+    mResetListener = new ResetListener(this);
+    mResetListenerWithPing = new ResetListenerWithPing(this);
+    mUpdateListener = new UpdateListener(this);
+    mTargetUpdateListener = new TargetUpdateListener(this);
 }
 
 ECode GlowPadView::constructor(
@@ -330,7 +241,7 @@ ECode GlowPadView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    View::constructor(context, attrs);
+    FAIL_RETURN(View::constructor(context, attrs));
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
 
@@ -340,10 +251,6 @@ ECode GlowPadView::constructor(
     a->GetDimension(R::styleable::GlowPadView_innerRadius, mInnerRadius, &mInnerRadius);
     a->GetDimension(R::styleable::GlowPadView_outerRadius, mOuterRadius, &mOuterRadius);
     a->GetDimension(R::styleable::GlowPadView_snapMargin, mSnapMargin, &mSnapMargin);
-    Float fio = 0.0f;
-    a->GetFloat(R::styleable::GlowPadView_firstItemOffset,
-                    (Float) Elastos::Core::Math::ToDegrees(mFirstItemOffset), &fio);
-    mFirstItemOffset = (Float) Elastos::Core::Math::ToRadians(fio);
     a->GetInt32(R::styleable::GlowPadView_vibrationDuration,
             mVibrationDuration, &mVibrationDuration);
     a->GetInt32(R::styleable::GlowPadView_feedbackCount,
@@ -351,14 +258,14 @@ ECode GlowPadView::constructor(
     a->GetBoolean(R::styleable::GlowPadView_allowScaling, FALSE, &mAllowScaling);
     AutoPtr<ITypedValue> handle;
     a->PeekValue(R::styleable::GlowPadView_handleDrawable, (ITypedValue**)&handle);
-    AutoPtr<CTypedValue> chandle = (CTypedValue*)handle.Get();
-    CTargetDrawable::New(res, chandle != NULL ? chandle->mResourceId : 0, (ITargetDrawable**)&mHandleDrawable);
-    mHandleDrawable->SetState(CTargetDrawable::STATE_INACTIVE);
-    CTargetDrawable::New(res,
-            GetResourceId(a, R::styleable::GlowPadView_outerRingDrawable), (ITargetDrawable**)&mOuterRing);
+    Int32 resourceId;
+    if (handle != NULL) handle->GetResourceId(&resourceId);
+    else resourceId = R::drawable::ic_incall_audio_handle;
+    SetHandleDrawable(resourceId);
+    mOuterRing = new TargetDrawable(res,
+            GetResourceId(a, R::styleable::GlowPadView_outerRingDrawable), 1);
 
     a->GetBoolean(R::styleable::GlowPadView_alwaysTrackFinger, FALSE, &mAlwaysTrackFinger);
-    a->GetBoolean(R::styleable::GlowPadView_magneticTargets, mMagneticTargets, &mMagneticTargets);
 
     Int32 pointId = GetResourceId(a, R::styleable::GlowPadView_pointDrawable);
     AutoPtr<IDrawable> pointDrawable;
@@ -366,11 +273,6 @@ ECode GlowPadView::constructor(
         context->GetDrawable(pointId, (IDrawable**)&pointDrawable);
     }
     a->GetDimension(R::styleable::GlowPadView_glowRadius, 0.0f, &mGlowRadius);
-
-    CPointCloud::New(pointDrawable, (IPointCloud**)&mPointCloud);
-    mPointCloud->MakePointCloud(mInnerRadius, mOuterRadius);
-    AutoPtr<CPointCloud> cPC = (CPointCloud*)mPointCloud.Get();
-    cPC->mGlowManager->SetRadius(mGlowRadius);
 
     AutoPtr<ITypedValue> outValue;
     CTypedValue::New((ITypedValue**)&outValue);
@@ -413,13 +315,16 @@ ECode GlowPadView::constructor(
         SetDirectionDescriptionsResourceId(resourceId);
     }
 
-    a->GetInt32(R::styleable::GlowPadView_gravity, IGravity::TOP, &mGravity);
-
+    a->GetInt32(R::styleable::GlowPadView_android_gravity, IGravity::TOP, &mGravity);
     a->Recycle();
 
     SetVibrateEnabled(mVibrationDuration > 0);
 
     AssignDefaultsIfNeeded();
+
+    mPointCloud = new PointCloud(pointDrawable);
+    mPointCloud->MakePointCloud(mInnerRadius, mOuterRadius);
+    mPointCloud->mGlowManager->SetRadius(mGlowRadius);
     return NOERROR;
 }
 
@@ -444,15 +349,14 @@ void GlowPadView::Dump()
     Logger::V(TAG, "WaveCenterY = %d", mWaveCenterY);
 }
 
-ECode GlowPadView::SuspendAnimations()
+void GlowPadView::SuspendAnimations()
 {
     mWaveAnimations->SetSuspended(TRUE);
     mTargetAnimations->SetSuspended(TRUE);
     mGlowAnimations->SetSuspended(TRUE);
-    return NOERROR;
 }
 
-ECode GlowPadView::ResumeAnimations()
+void GlowPadView::ResumeAnimations()
 {
     mWaveAnimations->SetSuspended(FALSE);
     mTargetAnimations->SetSuspended(FALSE);
@@ -460,40 +364,32 @@ ECode GlowPadView::ResumeAnimations()
     mWaveAnimations->Start();
     mTargetAnimations->Start();
     mGlowAnimations->Start();
-    return NOERROR;
 }
 
 Int32 GlowPadView::GetSuggestedMinimumWidth()
 {
     // View should be large enough to contain the background + handle and
     // target drawable on either edge.
-    Int32 w = 0;
-    mOuterRing->GetWidth(&w);
-    return (Int32) (Elastos::Core::Math::Max((Float) w, 2 * mOuterRadius) + mMaxTargetWidth);
+    ;
+    return (Int32) (Elastos::Core::Math::Max((Float)mOuterRing->GetWidth(), 2 * mOuterRadius) + mMaxTargetWidth);
 }
 
 Int32 GlowPadView::GetSuggestedMinimumHeight()
 {
     // View should be large enough to contain the unlock ring + target and
     // target drawable on either edge
-    Int32 h = 0;
-    mOuterRing->GetHeight(&h);
-    return (Int32) (Elastos::Core::Math::Max((Float) h, 2 * mOuterRadius) + mMaxTargetHeight);
+    return (Int32) (Elastos::Core::Math::Max((Float)mOuterRing->GetHeight(), 2 * mOuterRadius) + mMaxTargetHeight);
 }
 
 Int32 GlowPadView::GetScaledSuggestedMinimumWidth()
 {
-    Int32 w = 0;
-    mOuterRing->GetWidth(&w);
-    return (Int32) (mRingScaleFactor * Elastos::Core::Math::Max((Float) w, 2 * mOuterRadius)
+    return (Int32) (mRingScaleFactor * Elastos::Core::Math::Max((Float)mOuterRing->GetWidth(), 2 * mOuterRadius)
             + mMaxTargetWidth);
 }
 
 Int32 GlowPadView::GetScaledSuggestedMinimumHeight()
 {
-    Int32 h = 0;
-    mOuterRing->GetHeight(&h);
-    return (Int32) (mRingScaleFactor * Elastos::Core::Math::Max((Float) h, 2 * mOuterRadius)
+    return (Int32) (mRingScaleFactor * Elastos::Core::Math::Max((Float)mOuterRing->GetHeight(), 2 * mOuterRadius)
             + mMaxTargetHeight);
 }
 
@@ -517,6 +413,26 @@ Int32 GlowPadView::ResolveMeasured(
     return result;
 }
 
+ECode GlowPadView::OnMeasure(
+    /* [in] */ Int32 widthMeasureSpec,
+    /* [in] */ Int32 heightMeasureSpec)
+{
+    Int32 minimumWidth = GetSuggestedMinimumWidth();
+    Int32 minimumHeight = GetSuggestedMinimumHeight();
+    Int32 computedWidth = ResolveMeasured(widthMeasureSpec, minimumWidth);
+    Int32 computedHeight = ResolveMeasured(heightMeasureSpec, minimumHeight);
+
+    mRingScaleFactor = ComputeScaleFactor(minimumWidth, minimumHeight,
+            computedWidth, computedHeight);
+
+    Int32 scaledWidth = GetScaledSuggestedMinimumWidth();
+    Int32 scaledHeight = GetScaledSuggestedMinimumHeight();
+
+    ComputeInsets(computedWidth - scaledWidth, computedHeight - scaledHeight);
+    SetMeasuredDimension(computedWidth, computedHeight);
+    return NOERROR;
+}
+
 void GlowPadView::SwitchToState(
     /* [in] */ Int32 state,
     /* [in] */ Float x,
@@ -527,7 +443,7 @@ void GlowPadView::SwitchToState(
             DeactivateTargets();
             HideGlow(0, 0, 0.0f, NULL);
             StartBackgroundAnimation(0, 0.0f);
-            mHandleDrawable->SetState(CTargetDrawable::STATE_INACTIVE);
+            mHandleDrawable->SetState(TargetDrawable::STATE_INACTIVE);
             mHandleDrawable->SetAlpha(1.0f);
             break;
         }
@@ -541,13 +457,15 @@ void GlowPadView::SwitchToState(
             DeactivateTargets();
             ShowTargets(TRUE);
             StartBackgroundAnimation(INITIAL_SHOW_HANDLE_DURATION, 1.0f);
-            SetGrabbedState(IOnTriggerListener::CENTER_HANDLE);
-            AutoPtr<IAccessibilityManagerHelper> hlp;
-            CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&hlp);
-            AutoPtr<IAccessibilityManager> mg;
-            hlp->GetInstance(mContext, (IAccessibilityManager**)&mg);
-            Boolean bEbl = FALSE;
-            if ((mg->IsEnabled(&bEbl), bEbl)) {
+            SetGrabbedState(IGlowPadViewOnTriggerListener::CENTER_HANDLE);
+
+            AutoPtr<IContext> context;
+            GetContext((IContext**)&context);
+            AutoPtr<IInterface> obj;
+            context->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
+            IAccessibilityManager* accessibilityManager = IAccessibilityManager::Probe(obj);
+            Boolean enabled = FALSE;
+            if (accessibilityManager->IsEnabled(&enabled), enabled) {
                 AnnounceTargets();
             }
             break;
@@ -579,45 +497,20 @@ void GlowPadView::ShowGlow(
     /* [in] */ IAnimatorListener* finishListener)
 {
     mGlowAnimations->Cancel();
-    AutoPtr<CPointCloud> cPC = (CPointCloud*)mPointCloud.Get();
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(10);
-    AutoPtr<ICharSequence> pEA;
-    CString::New(String("ease"), (ICharSequence**)&pEA);
-    assert(0 && "should use Set");
-    (*arr)[0] = pEA;
-    (*arr)[1] = (IObject*)(Ease::Cubic::mEaseIn);
-
-    AutoPtr<ICharSequence> pDl;
-    CString::New(String("delay"), (ICharSequence**)&pDl);
-    (*arr)[2] = pDl;
-
-    AutoPtr<IInteger32> pDly;
-    CInteger32::New(delay, (IInteger32**)&pDly);
-    (*arr)[3] = pDly;
-
-    AutoPtr<ICharSequence> pAl;
-    CString::New(String("alpha"), (ICharSequence**)&pAl);
-    (*arr)[4] = pAl;
-
-    AutoPtr<IFloat> pFA;
-    CFloat::New(finalAlpha, (IFloat**)&pFA);
-    (*arr)[5] = pFA;
-
-    AutoPtr<ICharSequence> pOUp;
-    CString::New(String("onUpdate"), (ICharSequence**)&pOUp);
-    (*arr)[6] = pOUp;
-
-    (*arr)[7] = mUpdateListener;
-
-    AutoPtr<ICharSequence> pComplete;
-    CString::New(String("onComplete"), (ICharSequence**)&pComplete);
-    (*arr)[8] = pComplete;
-
-    (*arr)[9] = finishListener;
-
-    AutoPtr<ITweener> res;
-    Tweener::To(cPC->mGlowManager, duration, arr, (ITweener**)&res);
-    IList::Probe(mGlowAnimations)->Add(res);
+    arr->Set(0, CoreUtils::Convert(String("ease")));
+    arr->Set(1, (ITimeInterpolator*)Ease::Cubic::sEaseIn);
+    arr->Set(2, CoreUtils::Convert(String("delay")));
+    arr->Set(3, CoreUtils::Convert(delay));
+    arr->Set(4, CoreUtils::Convert(String("alpha")));
+    arr->Set(5, CoreUtils::Convert(finalAlpha));
+    arr->Set(6, CoreUtils::Convert(String("onUpdate")));
+    arr->Set(7, mUpdateListener);
+    arr->Set(8, CoreUtils::Convert(String("onComplete")));
+    arr->Set(9, finishListener);
+    AutoPtr<Tweener> res;
+    Tweener::To((IObject*)mPointCloud->mGlowManager, duration, arr, (Tweener**)&res);
+    mGlowAnimations->Add((IObject*)res);
     mGlowAnimations->Start();
 }
 
@@ -628,61 +521,24 @@ void GlowPadView::HideGlow(
     /* [in] */ IAnimatorListener* finishListener)
 {
     mGlowAnimations->Cancel();
-    AutoPtr<CPointCloud> cPC = (CPointCloud*)mPointCloud.Get();
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(14);
-    assert(0 && "should use Set");
-    AutoPtr<ICharSequence> pEA;
-    CString::New(String("ease"), (ICharSequence**)&pEA);
-    (*arr)[0] = pEA;
-    (*arr)[1] = (IObject*)(Ease::Quart::mEaseOut);
-
-    AutoPtr<ICharSequence> pDl;
-    CString::New(String("delay"), (ICharSequence**)&pDl);
-    (*arr)[2] = pDl;
-
-    AutoPtr<IInteger32> pDly;
-    CInteger32::New(delay, (IInteger32**)&pDly);
-    (*arr)[3] = pDly;
-
-    AutoPtr<ICharSequence> pAl;
-    CString::New(String("alpha"), (ICharSequence**)&pAl);
-    (*arr)[4] = pAl;
-
-    AutoPtr<IFloat> pFA;
-    CFloat::New(finalAlpha, (IFloat**)&pFA);
-    (*arr)[5] = pFA;
-
-    AutoPtr<ICharSequence> pX;
-    CString::New(String("x"), (ICharSequence**)&pX);
-    (*arr)[6] = pX;
-
-    AutoPtr<IFloat> pZero;
-    CFloat::New(0.0f, (IFloat**)&pZero);
-    (*arr)[7] = pZero;
-
-    AutoPtr<ICharSequence> pY;
-    CString::New(String("y"), (ICharSequence**)&pY);
-    (*arr)[8] = pY;
-
-    AutoPtr<IFloat> p0;
-    CFloat::New(0.0f, (IFloat**)&p0);
-    (*arr)[9] = p0;
-
-    AutoPtr<ICharSequence> pOUp;
-    CString::New(String("onUpdate"), (ICharSequence**)&pOUp);
-    (*arr)[10] = pOUp;
-
-    (*arr)[11] = mUpdateListener;
-
-    AutoPtr<ICharSequence> pComplete;
-    CString::New(String("onComplete"), (ICharSequence**)&pComplete);
-    (*arr)[12] = pComplete;
-
-    (*arr)[13] = finishListener;
-
-    AutoPtr<ITweener> res;
-    Tweener::To(cPC->mGlowManager, duration, arr, (ITweener**)&res);
-    IList::Probe(mGlowAnimations)->Add(res);
+    arr->Set(0, CoreUtils::Convert(String("ease")));
+    arr->Set(1, (ITimeInterpolator*)Ease::Quart::sEaseOut);
+    arr->Set(2, CoreUtils::Convert(String("delay")));
+    arr->Set(3, CoreUtils::Convert(delay));
+    arr->Set(4, CoreUtils::Convert(String("alpha")));
+    arr->Set(5, CoreUtils::Convert(finalAlpha));
+    arr->Set(6, CoreUtils::Convert(String("x")));
+    arr->Set(7, CoreUtils::Convert(0.0f));
+    arr->Set(8, CoreUtils::Convert(String("y")));
+    arr->Set(9, CoreUtils::Convert(0.0f));
+    arr->Set(10, CoreUtils::Convert(String("onUpdate")));
+    arr->Set(11, mUpdateListener);
+    arr->Set(12, CoreUtils::Convert(String("onComplete")));
+    arr->Set(13, finishListener);
+    AutoPtr<Tweener> res;
+    Tweener::To((IObject*)mPointCloud->mGlowManager, duration, arr, (Tweener**)&res);
+    mGlowAnimations->Add((IObject*)res);
     mGlowAnimations->Start();
 }
 
@@ -693,8 +549,8 @@ void GlowPadView::DeactivateTargets()
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> p;
         mTargetDrawables->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-        target->SetState(CTargetDrawable::STATE_INACTIVE);
+        TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+        target->SetState(TargetDrawable::STATE_INACTIVE);
     }
     mActiveTarget = -1;
 }
@@ -739,7 +595,7 @@ void GlowPadView::DoFinish()
         HideTargets(TRUE, FALSE);
     }
 
-    SetGrabbedState(IOnTriggerListener::NO_HANDLE);
+    SetGrabbedState(IGlowPadViewOnTriggerListener::NO_HANDLE);
 }
 
 void GlowPadView::HighlightSelected(
@@ -748,7 +604,7 @@ void GlowPadView::HighlightSelected(
     // Highlight the given target and fade others
     AutoPtr<IInterface> p;
     mTargetDrawables->Get(activeTarget, (IInterface**)&p);
-    ITargetDrawable::Probe(p)->SetState(CTargetDrawable::STATE_ACTIVE);
+    ((TargetDrawable*)IObject::Probe(p))->SetState(TargetDrawable::STATE_ACTIVE);
     HideUnselected(activeTarget);
 }
 
@@ -761,7 +617,7 @@ void GlowPadView::HideUnselected(
         if (i != active) {
             AutoPtr<IInterface> p;
             mTargetDrawables->Get(i, (IInterface**)&p);
-            ITargetDrawable::Probe(p)->SetAlpha(0.0f);
+            ((TargetDrawable*)IObject::Probe(p))->SetAlpha(0.0f);
         }
     }
 }
@@ -781,61 +637,28 @@ void GlowPadView::HideTargets(
             TARGET_SCALE_EXPANDED : TARGET_SCALE_COLLAPSED;
     Int32 length = 0;
     mTargetDrawables->GetSize(&length);
-    AutoPtr<ITimeInterpolator> interpolator = Ease::Cubic::mEaseOut;
+    AutoPtr<ITimeInterpolator> interpolator = Ease::Cubic::sEaseOut;
     for (Int32 i = 0; i < length; i++) {
         AutoPtr<IInterface> p;
         mTargetDrawables->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-        target->SetState(CTargetDrawable::STATE_INACTIVE);
-
+        TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+        target->SetState(TargetDrawable::STATE_INACTIVE);
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(12);
-        AutoPtr<ICharSequence> pEA;
-        CString::New(String("ease"), (ICharSequence**)&pEA);
-        assert(0 && "should use Set")
-        (*arr)[0] = pEA;
-        (*arr)[1] = (IObject*)interpolator.Get();
-
-        AutoPtr<ICharSequence> pAl;
-        CString::New(String("alpha"), (ICharSequence**)&pAl);
-        (*arr)[2] = pAl;
-
-        AutoPtr<IFloat> pZero;
-        CFloat::New(0.0f, (IFloat**)&pZero);
-        (*arr)[3] = pZero;
-
-        AutoPtr<ICharSequence> pX;
-        CString::New(String("scaleX"), (ICharSequence**)&pX);
-        (*arr)[4] = pX;
-
-        AutoPtr<IFloat> pTS;
-        CFloat::New(targetScale, (IFloat**)&pTS);
-        (*arr)[5] = pTS;
-
-        AutoPtr<ICharSequence> pY;
-        CString::New(String("scaleY"), (ICharSequence**)&pY);
-        (*arr)[6] = pY;
-
-        AutoPtr<IFloat> pTS2;
-        CFloat::New(targetScale, (IFloat**)&pTS2);
-        (*arr)[7] = pTS2;
-
-        AutoPtr<ICharSequence> pDl;
-        CString::New(String("delay"), (ICharSequence**)&pDl);
-        (*arr)[8] = pDl;
-
-        AutoPtr<IInteger32> pDly;
-        CInteger32::New(delay, (IInteger32**)&pDly);
-        (*arr)[9] = pDly;
-
-        AutoPtr<ICharSequence> pOUp;
-        CString::New(String("onUpdate"), (ICharSequence**)&pOUp);
-        (*arr)[10] = pOUp;
-
-        (*arr)[11] = mUpdateListener;
-
-        AutoPtr<ITweener> res;
-        Tweener::To(target, duration, arr, (ITweener**)&res);
-        IList::Probe(mTargetAnimations)->Add(res);
+        arr->Set(0, CoreUtils::Convert(String("ease")));
+        arr->Set(1, interpolator);
+        arr->Set(2, CoreUtils::Convert(String("alpha")));
+        arr->Set(3, CoreUtils::Convert(0.0f));
+        arr->Set(4, CoreUtils::Convert(String("scaleX")));
+        arr->Set(5, CoreUtils::Convert(targetScale));
+        arr->Set(6, CoreUtils::Convert(String("scaleY")));
+        arr->Set(7, CoreUtils::Convert(targetScale));
+        arr->Set(8, CoreUtils::Convert(String("delay")));
+        arr->Set(9, CoreUtils::Convert(delay));
+        arr->Set(10, CoreUtils::Convert(String("onUpdate")));
+        arr->Set(11, mUpdateListener);
+        AutoPtr<Tweener> res;
+        Tweener::To((IObject*)target, duration, arr, (Tweener**)&res);
+        mTargetAnimations->Add((IObject*)res);
     }
 
     Float ringScaleTarget = expanded ?
@@ -843,58 +666,23 @@ void GlowPadView::HideTargets(
     ringScaleTarget *= mRingScaleFactor;
 
     AutoPtr<ArrayOf<IInterface*> > arr2 = ArrayOf<IInterface*>::Alloc(14);
-    AutoPtr<ICharSequence> pEA2;
-    CString::New(String("ease"), (ICharSequence**)&pEA2);
-    (*arr2)[0] = pEA2;
-    (*arr2)[1] = (IObject*)interpolator.Get();
-
-    AutoPtr<ICharSequence> pAl2;
-    CString::New(String("alpha"), (ICharSequence**)&pAl2);
-    (*arr2)[2] = pAl2;
-
-    AutoPtr<IFloat> pZero2;
-    CFloat::New(0.0f, (IFloat**)&pZero2);
-    (*arr2)[3] = pZero2;
-
-    AutoPtr<ICharSequence> pX2;
-    CString::New(String("scaleX"), (ICharSequence**)&pX2);
-    (*arr2)[4] = pX2;
-
-    AutoPtr<IFloat> pST;
-    CFloat::New(ringScaleTarget, (IFloat**)&pST);
-    (*arr2)[5] = pST;
-
-    AutoPtr<ICharSequence> pY2;
-    CString::New(String("scaleY"), (ICharSequence**)&pY2);
-    (*arr2)[6] = pY2;
-
-    AutoPtr<IFloat> pST2;
-    CFloat::New(ringScaleTarget, (IFloat**)&pST2);
-    (*arr2)[7] = pST2;
-
-    AutoPtr<ICharSequence> pDl2;
-    CString::New(String("delay"), (ICharSequence**)&pDl2);
-    (*arr2)[8] = pDl2;
-
-    AutoPtr<IInteger32> pDly2;
-    CInteger32::New(delay, (IInteger32**)&pDly2);
-    (*arr2)[9] = pDly2;
-
-    AutoPtr<ICharSequence> pOUp2;
-    CString::New(String("onUpdate"), (ICharSequence**)&pOUp2);
-    (*arr2)[10] = pOUp2;
-
-    (*arr2)[11] = mUpdateListener;
-
-    AutoPtr<ICharSequence> pCom;
-    CString::New(String("onComplete"), (ICharSequence**)&pCom);
-    (*arr2)[12] = pCom;
-
-    (*arr2)[13] = mTargetUpdateListener;
-
-    AutoPtr<ITweener> res2;
-    Tweener::To(mOuterRing, duration, arr2, (ITweener**)&res2);
-    IList::Probe(mTargetAnimations)->Add(res2);
+    arr2->Set(0, CoreUtils::Convert(String("ease")));
+    arr2->Set(1, interpolator);
+    arr2->Set(2, CoreUtils::Convert(String("alpha")));
+    arr2->Set(3, CoreUtils::Convert(0.0f));
+    arr2->Set(4, CoreUtils::Convert(String("scaleX")));
+    arr2->Set(5, CoreUtils::Convert(ringScaleTarget));
+    arr2->Set(6, CoreUtils::Convert(String("scaleY")));
+    arr2->Set(7, CoreUtils::Convert(ringScaleTarget));
+    arr2->Set(8, CoreUtils::Convert(String("delay")));
+    arr2->Set(9, CoreUtils::Convert(delay));
+    arr2->Set(10, CoreUtils::Convert(String("onUpdate")));
+    arr2->Set(11, mUpdateListener);
+    arr2->Set(12, CoreUtils::Convert(String("onComplete")));
+    arr2->Set(13, mTargetUpdateListener);
+    AutoPtr<Tweener> res2;
+    Tweener::To((IObject*)mOuterRing, duration, arr2, (Tweener**)&res2);
+    mTargetAnimations->Add((IObject*)res2);
 
     mTargetAnimations->Start();
 }
@@ -911,128 +699,53 @@ void GlowPadView::ShowTargets(
     for (Int32 i = 0; i < length; i++) {
         AutoPtr<IInterface> p;
         mTargetDrawables->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-        target->SetState(CTargetDrawable::STATE_INACTIVE);
+        TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+        target->SetState(TargetDrawable::STATE_INACTIVE);
 
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(12);
-        AutoPtr<ICharSequence> pEA;
-        CString::New(String("ease"), (ICharSequence**)&pEA);
-        (*arr)[0] = pEA;
-        (*arr)[1] = (IObject*)(Ease::Cubic::mEaseOut);
-
-        AutoPtr<ICharSequence> pAl;
-        CString::New(String("alpha"), (ICharSequence**)&pAl);
-        (*arr)[2] = pAl;
-
-        AutoPtr<IFloat> pZero;
-        CFloat::New(1.0f, (IFloat**)&pZero);
-        (*arr)[3] = pZero;
-
-        AutoPtr<ICharSequence> pX;
-        CString::New(String("scaleX"), (ICharSequence**)&pX);
-        (*arr)[4] = pX;
-
-        AutoPtr<IFloat> pOne1;
-        CFloat::New(1.0f, (IFloat**)&pOne1);
-        (*arr)[5] = pOne1;
-
-        AutoPtr<ICharSequence> pY;
-        CString::New(String("scaleY"), (ICharSequence**)&pY);
-        (*arr)[6] = pY;
-
-        AutoPtr<IFloat> pOne2;
-        CFloat::New(1.0f, (IFloat**)&pOne2);
-        (*arr)[7] = pOne2;
-
-        AutoPtr<ICharSequence> pDl;
-        CString::New(String("delay"), (ICharSequence**)&pDl);
-        (*arr)[8] = pDl;
-
-        AutoPtr<IInteger32> pDly;
-        CInteger32::New(delay, (IInteger32**)&pDly);
-        (*arr)[9] = pDly;
-
-        AutoPtr<ICharSequence> pOUp;
-        CString::New(String("onUpdate"), (ICharSequence**)&pOUp);
-        (*arr)[10] = pOUp;
-
-        (*arr)[11] = mUpdateListener;
-
-        AutoPtr<ITweener> res;
-        Tweener::To(target, duration, arr, (ITweener**)&res);
-        IList::Probe(mTargetAnimations)->Add(res);
+        arr->Set(0, CoreUtils::Convert(String("ease")));
+        arr->Set(1, (ITimeInterpolator*)Ease::Cubic::sEaseOut);
+        arr->Set(2, CoreUtils::Convert(String("alpha")));
+        arr->Set(3, CoreUtils::Convert(1.0f));
+        arr->Set(4, CoreUtils::Convert(String("scaleX")));
+        arr->Set(5, CoreUtils::Convert(1.0f));
+        arr->Set(6, CoreUtils::Convert(String("scaleY")));
+        arr->Set(7, CoreUtils::Convert(1.0f));
+        arr->Set(8, CoreUtils::Convert(String("delay")));
+        arr->Set(9, CoreUtils::Convert(delay));
+        arr->Set(10, CoreUtils::Convert(String("onUpdate")));
+        arr->Set(11, mUpdateListener);
+        AutoPtr<Tweener> res;
+        Tweener::To((IObject*)target, duration, arr, (Tweener**)&res);
+        mTargetAnimations->Add((IObject*)res);
     }
-
     Float ringScale = mRingScaleFactor * RING_SCALE_EXPANDED;
-
     AutoPtr<ArrayOf<IInterface*> > arr2 = ArrayOf<IInterface*>::Alloc(14);
-    AutoPtr<ICharSequence> pEA2;
-    CString::New(String("ease"), (ICharSequence**)&pEA2);
-    (*arr2)[0] = pEA2;
-    (*arr2)[1] = (IObject*)Ease::Cubic::mEaseOut;
-
-    AutoPtr<ICharSequence> pAl2;
-    CString::New(String("alpha"), (ICharSequence**)&pAl2);
-    (*arr2)[2] = pAl2;
-
-    AutoPtr<IFloat> pZero2;
-    CFloat::New(1.0f, (IFloat**)&pZero2);
-    (*arr2)[3] = pZero2;
-
-    AutoPtr<ICharSequence> pX2;
-    CString::New(String("scaleX"), (ICharSequence**)&pX2);
-    (*arr2)[4] = pX2;
-
-    AutoPtr<IFloat> pST;
-    CFloat::New(ringScale, (IFloat**)&pST);
-    (*arr2)[5] = pST;
-
-    AutoPtr<ICharSequence> pY2;
-    CString::New(String("scaleY"), (ICharSequence**)&pY2);
-    (*arr2)[6] = pY2;
-
-    AutoPtr<IFloat> pST2;
-    CFloat::New(ringScale, (IFloat**)&pST2);
-    (*arr2)[7] = pST2;
-
-    AutoPtr<ICharSequence> pDl2;
-    CString::New(String("delay"), (ICharSequence**)&pDl2);
-    (*arr2)[8] = pDl2;
-
-    AutoPtr<IInteger32> pDly2;
-    CInteger32::New(delay, (IInteger32**)&pDly2);
-    (*arr2)[9] = pDly2;
-
-    AutoPtr<ICharSequence> pOUp2;
-    CString::New(String("onUpdate"), (ICharSequence**)&pOUp2);
-    (*arr2)[10] = pOUp2;
-
-    (*arr2)[11] = mUpdateListener;
-
-    AutoPtr<ICharSequence> pCom;
-    CString::New(String("onComplete"), (ICharSequence**)&pCom);
-    (*arr2)[12] = pCom;
-
-    (*arr2)[13] = mTargetUpdateListener;
-
-    AutoPtr<ITweener> res2;
-    Tweener::To(mOuterRing, duration, arr2, (ITweener**)&res2);
-    IList::Probe(mTargetAnimations)->Add(res2);
+    arr2->Set(0, CoreUtils::Convert(String("ease")));
+    arr2->Set(1, (ITimeInterpolator*)Ease::Cubic::sEaseOut);
+    arr2->Set(2, CoreUtils::Convert(String("alpha")));
+    arr2->Set(3, CoreUtils::Convert(1.0f));
+    arr2->Set(4, CoreUtils::Convert(String("scaleX")));
+    arr2->Set(5, CoreUtils::Convert(ringScale));
+    arr2->Set(6, CoreUtils::Convert(String("scaleY")));
+    arr2->Set(7, CoreUtils::Convert(ringScale));
+    arr2->Set(8, CoreUtils::Convert(String("delay")));
+    arr2->Set(9, CoreUtils::Convert(delay));
+    arr2->Set(10, CoreUtils::Convert(String("onUpdate")));
+    arr2->Set(11, mUpdateListener);
+    arr2->Set(12, CoreUtils::Convert(String("onComplete")));
+    arr2->Set(13, mTargetUpdateListener);
+    AutoPtr<Tweener> res2;
+    Tweener::To((IObject*)mOuterRing, duration, arr2, (Tweener**)&res2);
+    mTargetAnimations->Add((IObject*)res2);
 
     mTargetAnimations->Start();
 }
 
 void GlowPadView::Vibrate()
 {
-    AutoPtr<IContentResolver> cr;
-    mContext->GetContentResolver((IContentResolver**)&cr);
-    Int32 val = 0;
-    Settings::System::GetInt32ForUser(
-            cr, ISettingsSystem::HAPTIC_FEEDBACK_ENABLED, 1,
-            IUserHandle::USER_CURRENT, &val);
-    Boolean hapticEnabled = val != 0;
-    if (mVibrator != NULL && hapticEnabled) {
-        mVibrator->Vibrate(mVibrationDuration, VIBRATION_ATTRIBUTES);
+    if (mVibrator != NULL) {
+        mVibrator->Vibrate(mVibrationDuration);
     }
 }
 
@@ -1052,10 +765,9 @@ AutoPtr<IArrayList> GlowPadView::LoadDrawableArray(
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<ITypedValue> value;
         array->PeekValue(i, (ITypedValue**)&value);
-        AutoPtr<ITargetDrawable> target;
         Int32 resId = 0;
-        CTargetDrawable::New(res, value != NULL ? (value->GetResourceId(&resId), resId) : 0, (ITargetDrawable**)&target);
-        drawables->Add(target);
+        AutoPtr<TargetDrawable> target = new TargetDrawable(res, value != NULL ? (value->GetResourceId(&resId), resId) : 0, 3);
+        drawables->Add((IObject*)target);
     }
     array->Recycle();
     return drawables;
@@ -1068,21 +780,16 @@ void GlowPadView::InternalSetTargetResources(
     mTargetDrawables = targets;
     mTargetResourceId = resourceId;
 
-    Int32 maxWidth = 0;
-    mHandleDrawable->GetWidth(&maxWidth);
-    Int32 maxHeight = 0;
-    mHandleDrawable->GetHeight(&maxHeight);
+    Int32 maxWidth = mHandleDrawable->GetWidth();
+    Int32 maxHeight = mHandleDrawable->GetHeight();
     Int32 count = 0;
     targets->GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> p;
         targets->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-        Int32 w = 0, h = 0;
-        target->GetWidth(&w);
-        target->GetHeight(&h);
-        maxWidth = Elastos::Core::Math::Max(maxWidth, w);
-        maxHeight = Elastos::Core::Math::Max(maxHeight, h);
+        TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+        maxWidth = Elastos::Core::Math::Max(maxWidth, target->GetWidth());
+        maxHeight = Elastos::Core::Math::Max(maxHeight, target->GetHeight());
     }
     if (mMaxTargetWidth != maxWidth || mMaxTargetHeight != maxHeight) {
         mMaxTargetWidth = maxWidth;
@@ -1095,7 +802,7 @@ void GlowPadView::InternalSetTargetResources(
     }
 }
 
-ECode GlowPadView::SetTargetResources(
+void GlowPadView::SetTargetResources(
     /* [in] */ Int32 resourceId)
 {
     if (mAnimatingTargets) {
@@ -1105,54 +812,51 @@ ECode GlowPadView::SetTargetResources(
     else {
         InternalSetTargetResources(resourceId);
     }
-    return NOERROR;
 }
 
-ECode GlowPadView::GetTargetResourceId(
-    /* [out] */ Int32* result)
+Int32 GlowPadView::GetTargetResourceId()
 {
-    VALIDATE_NOT_NULL(result)
-    *result = mTargetResourceId;
-    return NOERROR;
+    return mTargetResourceId;
 }
 
-ECode GlowPadView::SetTargetDescriptionsResourceId(
+void GlowPadView::SetHandleDrawable(
+    /* [in] */ Int32 resourceId)
+{
+    AutoPtr<IResources> res;
+    GetResources((IResources**)&res);
+    mHandleDrawable = new TargetDrawable(res, resourceId, 2);
+    mHandleDrawable->SetState(TargetDrawable::STATE_INACTIVE);
+}
+
+void GlowPadView::SetTargetDescriptionsResourceId(
     /* [in] */ Int32 resourceId)
 {
     mTargetDescriptionsResourceId = resourceId;
     if (mTargetDescriptions != NULL) {
         mTargetDescriptions->Clear();
     }
-    return NOERROR;
 }
 
-ECode GlowPadView::GetTargetDescriptionsResourceId(
-    /* [out] */ Int32* result)
+Int32 GlowPadView::GetTargetDescriptionsResourceId()
 {
-    VALIDATE_NOT_NULL(result)
-    *result = mTargetDescriptionsResourceId;
-    return NOERROR;
+    return mTargetDescriptionsResourceId;
 }
 
-ECode GlowPadView::SetDirectionDescriptionsResourceId(
+void GlowPadView::SetDirectionDescriptionsResourceId(
     /* [in] */ Int32 resourceId)
 {
     mDirectionDescriptionsResourceId = resourceId;
     if (mDirectionDescriptions != NULL) {
         mDirectionDescriptions->Clear();
     }
-    return NOERROR;
 }
 
-ECode GlowPadView::GetDirectionDescriptionsResourceId(
-    /* [out] */ Int32* result)
+Int32 GlowPadView::GetDirectionDescriptionsResourceId()
 {
-    VALIDATE_NOT_NULL(result)
-    *result = mDirectionDescriptionsResourceId;
-    return NOERROR;
+    return mDirectionDescriptionsResourceId;
 }
 
-ECode GlowPadView::SetVibrateEnabled(
+void GlowPadView::SetVibrateEnabled(
     /* [in] */ Boolean enabled)
 {
     if (enabled && mVibrator == NULL) {
@@ -1165,27 +869,27 @@ ECode GlowPadView::SetVibrateEnabled(
     else {
         mVibrator = NULL;
     }
-    return NOERROR;
 }
 
-ECode GlowPadView::Ping()
+void GlowPadView::Ping()
 {
     if (mFeedbackCount > 0) {
         Boolean doWaveAnimation = TRUE;
-        AutoPtr<IAnimationBundle> waveAnimations = mWaveAnimations;
+        AutoPtr<AnimationBundle> waveAnimations = mWaveAnimations;
 
         // Don't do a wave if there's already one in progress
         Int32 s = 0;
-        IList::Probe(waveAnimations)->GetSize(&s);
-        AutoPtr<IInterface> p;
-        IList::Probe(waveAnimations)->Get(0, (IInterface**)&p);
-        AutoPtr<Tweener> realNode = (Tweener*)ITweener::Probe(p);
-        Boolean bIsRn = FALSE;
-        if (s > 0 && (IAnimator::Probe(realNode->mAnimator)->IsRunning(&bIsRn), bIsRn)) {
-            Int64 t = 0;
-            IValueAnimator::Probe(realNode->mAnimator)->GetCurrentPlayTime(&t);
-            if (t < WAVE_ANIMATION_DURATION/2) {
-                doWaveAnimation = FALSE;
+        if (waveAnimations->GetSize(&s), s > 0) {
+            AutoPtr<IInterface> p;
+            waveAnimations->Get(0, (IInterface**)&p);
+            Tweener* realNode = (Tweener*)IObject::Probe(p);
+            Boolean running;
+            if (IAnimator::Probe(realNode->mAnimator)->IsRunning(&running), running) {
+                Int64 t = 0;
+                IValueAnimator::Probe(realNode->mAnimator)->GetCurrentPlayTime(&t);
+                if (t < WAVE_ANIMATION_DURATION / 2) {
+                    doWaveAnimation = FALSE;
+                }
             }
         }
 
@@ -1193,68 +897,37 @@ ECode GlowPadView::Ping()
             StartWaveAnimation();
         }
     }
-    return NOERROR;
 }
 
 void GlowPadView::StopAndHideWaveAnimation()
 {
     mWaveAnimations->Cancel();
-    AutoPtr<PointCloud> pc = (PointCloud*)mPointCloud.Get();
-    pc->mWaveManager->SetAlpha(0.0f);
+    mPointCloud->mWaveManager->SetAlpha(0.0f);
 }
 
 void GlowPadView::StartWaveAnimation()
 {
     mWaveAnimations->Cancel();
-    AutoPtr<PointCloud> pc = (PointCloud*)mPointCloud.Get();
-    pc->mWaveManager->SetAlpha(1.0f);
-    Int32 w = 0;
-    mHandleDrawable->GetWidth(&w);
-    pc->mWaveManager->SetRadius(w/2.0f);
-
+    mPointCloud->mWaveManager->SetAlpha(1.0f);
+    mPointCloud->mWaveManager->SetRadius(mHandleDrawable->GetWidth() / 2.0f);
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(10);
-    AutoPtr<ICharSequence> pEA;
-    CString::New(String("ease"), (ICharSequence**)&pEA);
-    (*arr)[0] = pEA;
-    (*arr)[1] = (IObject*)Ease::Quad::mEaseOut;
-
-    AutoPtr<ICharSequence> pDl;
-    CString::New(String("delay"), (ICharSequence**)&pDl);
-    (*arr)[2] = pDl;
-
-    AutoPtr<IFloat> pZero;
-    CFloat::New(1.0f, (IFloat**)&pZero);
-    (*arr)[3] = pZero;
-
-    AutoPtr<ICharSequence> pRd;
-    CString::New(String("radius"), (ICharSequence**)&pRd);
-    (*arr)[4] = pRd;
-
-    AutoPtr<IFloat> pOR;
-    CFloat::New(2.0f * mOuterRadius, (IFloat**)&pOR);
-    (*arr)[5] = pOR;
-
-    AutoPtr<ICharSequence> pOUp;
-    CString::New(String("onUpdate"), (ICharSequence**)&pOUp);
-    (*arr)[6] = pOUp;
-
-    (*arr)[7] = mUpdateListener;
-
-    AutoPtr<ICharSequence> pCom;
-    CString::New(String("onComplete"), (ICharSequence**)&pCom);
-    (*arr)[8] = pCom;
-
-    AutoPtr<AnimatorListenerAdapter_4> p = new AnimatorListenerAdapter_4(this);
-    (*arr)[9] = IAnimatorListener::Probe(p);
-
-    AutoPtr<ITweener> res;
-    Tweener::To(pc->mWaveManager, WAVE_ANIMATION_DURATION, arr, (ITweener**)&res);
-    IList::Probe(mWaveAnimations)->Add(res);
-
+    arr->Set(0, CoreUtils::Convert(String("ease")));
+    arr->Set(1, (ITimeInterpolator*)Ease::Quad::sEaseOut);
+    arr->Set(2, CoreUtils::Convert(String("delay")));
+    arr->Set(3, CoreUtils::Convert(0));
+    arr->Set(4, CoreUtils::Convert(String("radius")));
+    arr->Set(5, CoreUtils::Convert(2.0f * mOuterRadius));
+    arr->Set(6, CoreUtils::Convert(String("onUpdate")));
+    arr->Set(7, mUpdateListener);
+    arr->Set(8, CoreUtils::Convert(String("onComplete")));
+    arr->Set(9, (IAnimatorListener*)new WaveAnimationListener(this));
+    AutoPtr<Tweener> res;
+    Tweener::To((IObject*)mPointCloud->mWaveManager, WAVE_ANIMATION_DURATION, arr, (Tweener**)&res);
+    mWaveAnimations->Add((IObject*)res);
     mWaveAnimations->Start();
 }
 
-ECode GlowPadView::Reset(
+void GlowPadView::Reset(
     /* [in] */ Boolean animate)
 {
     mGlowAnimations->Stop();
@@ -1264,7 +937,6 @@ ECode GlowPadView::Reset(
     HideTargets(animate, FALSE);
     HideGlow(0, 0, 0.0f, NULL);
     Tweener::Reset();
-    return NOERROR;
 }
 
 void GlowPadView::StartBackgroundAnimation(
@@ -1274,34 +946,19 @@ void GlowPadView::StartBackgroundAnimation(
     AutoPtr<IDrawable> background;
     GetBackground((IDrawable**)&background);
     if (mAlwaysTrackFinger && background != NULL) {
-        AutoPtr<Tweener> ba = (Tweener*)mBackgroundAnimator.Get();
         if (mBackgroundAnimator != NULL) {
-            IAnimator::Probe(ba->mAnimator)->Cancel();
+            IAnimator::Probe(mBackgroundAnimator->mAnimator)->Cancel();
         }
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(6);
-        AutoPtr<ICharSequence> pEA;
-        CString::New(String("ease"), (ICharSequence**)&pEA);
-        (*arr)[0] = pEA;
-        (*arr)[1] = (IObject*)Ease::Cubic::mEaseIn;
-
-        AutoPtr<ICharSequence> pAl;
-        CString::New(String("alpha"), (ICharSequence**)&pAl);
-        (*arr)[2] = pAl;
-
-        AutoPtr<IInteger32> pInt;
-        CInteger32::New((Int32)(255.0f * alpha), (IInteger32**)&pInt);
-        (*arr)[3] = pInt;
-
-        AutoPtr<ICharSequence> pDl;
-        CString::New(String("delay"), (ICharSequence**)&pDl);
-        (*arr)[4] = pDl;
-
-        AutoPtr<IInteger32> pInt2;
-        CInteger32::New(SHOW_ANIMATION_DELAY, (IInteger32**)&pInt2);
-        (*arr)[5] = pInt2;
-
-        Tweener::To(background, duration, arr, (ITweener**)&mBackgroundAnimator);
-        IAnimator::Probe(ba->mAnimator)->Start();
+        arr->Set(0, CoreUtils::Convert(String("ease")));
+        arr->Set(1, (ITimeInterpolator*)Ease::Cubic::sEaseIn);
+        arr->Set(2, CoreUtils::Convert(String("alpha")));
+        arr->Set(3, CoreUtils::Convert((Int32)(255.0f * alpha)));
+        arr->Set(4, CoreUtils::Convert(String("delay")));
+        arr->Set(5, CoreUtils::Convert(SHOW_ANIMATION_DELAY));
+        mBackgroundAnimator = NULL;
+        Tweener::To(background, duration, arr, (Tweener**)&mBackgroundAnimator);
+        IAnimator::Probe(mBackgroundAnimator->mAnimator)->Start();
     }
 }
 
@@ -1358,16 +1015,12 @@ void GlowPadView::UpdateGlowPosition(
     /* [in] */ Float x,
     /* [in] */ Float y)
 {
-    Float oX = 0.0f, oY = 0.0f;
-    mOuterRing->GetX(&oX);
-    mOuterRing->GetY(&oY);
-    Float dx = x - oX;
-    Float dy = y - oY;
+    Float dx = x - mOuterRing->GetX();
+    Float dy = y - mOuterRing->GetY();
     dx *= 1.0f / mRingScaleFactor;
     dy *= 1.0f / mRingScaleFactor;
-    AutoPtr<PointCloud> pc = (PointCloud*)mPointCloud.Get();
-    pc->mGlowManager->SetX(oX + dx);
-    pc->mGlowManager->SetY(oY + dy);
+    mPointCloud->mGlowManager->SetX(mOuterRing->GetX() + dx);
+    mPointCloud->mGlowManager->SetY(mOuterRing->GetY() + dy);
 }
 
 void GlowPadView::HandleDown(
@@ -1414,8 +1067,12 @@ void GlowPadView::HandleCancel(
         Logger::V(TAG, "** Handle CANCEL");
     }
 
-    // Drop the active target if canceled.
-    mActiveTarget = -1;
+    // We should drop the active target here but it interferes with
+    // moving off the screen in the direction of the navigation bar. At some point we may
+    // want to revisit how we handle this. For now we'll allow a canceled event to
+    // activate the current target.
+
+    // mActiveTarget = -1; // Drop the active target if canceled.
 
     Int32 actionIndex = 0;
     event->FindPointerIndex(mPointerId, &actionIndex);
@@ -1437,7 +1094,6 @@ void GlowPadView::HandleMove(
     targets->GetSize(&ntargets);
     Float x = 0.0f;
     Float y = 0.0f;
-    Float activeAngle = 0.0f;
     Int32 actionIndex = 0;
     event->FindPointerIndex(mPointerId, &actionIndex);
 
@@ -1446,13 +1102,15 @@ void GlowPadView::HandleMove(
     }
 
     for (Int32 k = 0; k < historySize + 1; k++) {
-        Float hX = 0.0f, hY = 0.0f, x = 0.0f, y = 0.0f;
-        event->GetHistoricalX(actionIndex, k, &hX);
-        event->GetX(actionIndex, &x);
-        event->GetHistoricalY(actionIndex, k, &hY);
-        event->GetY(actionIndex, &y);
-        Float eventX = k < historySize ? hX : x;
-        Float eventY = k < historySize ? hY : y;
+        Float eventX, eventY;
+        if (k < historySize) {
+            event->GetHistoricalX(actionIndex, k, &eventX);
+        }
+        else event->GetX(actionIndex, &eventX);
+        if (k < historySize) {
+            event->GetHistoricalY(actionIndex, k, &eventY);
+        }
+        else event->GetY(actionIndex, &eventY);
         // tx and ty are relative to wave center
         Float tx = eventX - mWaveCenterX;
         Float ty = eventY - mWaveCenterY;
@@ -1474,22 +1132,17 @@ void GlowPadView::HandleMove(
             for (Int32 i = 0; i < ntargets; i++) {
                 AutoPtr<IInterface> p;
                 targets->Get(i, (IInterface**)&p);
-                AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
+                TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
 
-                Double targetMinRad = mFirstItemOffset + (i - 0.5) * 2 * Elastos::Core::Math::PI / ntargets;
-                Double targetMaxRad = mFirstItemOffset + (i + 0.5) * 2 * Elastos::Core::Math::PI / ntargets;
-                Boolean bEnbl = FALSE;
-                target->IsEnabled(&bEnbl);
-                if (bEnbl) {
+                Double targetMinRad = (i - 0.5) * 2 * Elastos::Core::Math::PI / ntargets;
+                Double targetMaxRad = (i + 0.5) * 2 * Elastos::Core::Math::PI / ntargets;
+                if (target->IsEnabled()) {
                     Boolean angleMatches =
                         (angleRad > targetMinRad && angleRad <= targetMaxRad) ||
                         (angleRad + 2 * Elastos::Core::Math::PI > targetMinRad &&
-                         angleRad + 2 * Elastos::Core::Math::PI <= targetMaxRad) ||
-                        (angleRad - 2 * Elastos::Core::Math::PI > targetMinRad &&
-                         angleRad - 2 * Elastos::Core::Math::PI <= targetMaxRad);
+                         angleRad + 2 * Elastos::Core::Math::PI <= targetMaxRad);
                     if (angleMatches && (Dist2(tx, ty) > snapDistance2)) {
                         activeTarget = i;
-                        activeAngle = (Float) -angleRad;
                     }
                 }
             }
@@ -1516,40 +1169,25 @@ void GlowPadView::HandleMove(
         if (mActiveTarget != -1) {
             AutoPtr<IInterface> p;
             targets->Get(mActiveTarget, (IInterface**)&p);
-            AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-            Boolean bHasSt = FALSE;
-            target->HasState(CTargetDrawable::STATE_FOCUSED, &bHasSt);
-            if (bHasSt) {
-                target->SetState(CTargetDrawable::STATE_INACTIVE);
-            }
-            if (mMagneticTargets) {
-                UpdateTargetPosition(mActiveTarget, mWaveCenterX, mWaveCenterY);
-            }
+            TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+            target->SetState(TargetDrawable::STATE_INACTIVE);
         }
         // Focus the new target
         if (activeTarget != -1) {
             AutoPtr<IInterface> p;
             targets->Get(activeTarget, (IInterface**)&p);
-            AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-            Boolean bHasSt = FALSE;
-            target->HasState(CTargetDrawable::STATE_FOCUSED, &bHasSt);
-            if (bHasSt) {
-                target->SetState(CTargetDrawable::STATE_FOCUSED);
-            }
-            if (mMagneticTargets) {
-                UpdateTargetPosition(activeTarget, mWaveCenterX, mWaveCenterY, activeAngle);
-            }
-            AutoPtr<IAccessibilityManagerHelper> hlp;
-            CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&hlp);
-            AutoPtr<IAccessibilityManager> mg;
-            hlp->GetInstance(mContext, (IAccessibilityManager**)&mg);
-            Boolean b = FALSE;
-            mg->IsEnabled(&b);
-            if (b) {
+            TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+            target->SetState(TargetDrawable::STATE_FOCUSED);
+
+            AutoPtr<IContext> context;
+            GetContext((IContext**)&context);
+            AutoPtr<IInterface> obj;
+            context->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
+            IAccessibilityManager* accessibilityManager = IAccessibilityManager::Probe(obj);
+            Boolean enabled = FALSE;
+            if (accessibilityManager->IsEnabled(&enabled), enabled) {
                 String targetContentDescription = GetTargetDescription(activeTarget);
-                AutoPtr<ICharSequence> tCD;
-                CString::New(targetContentDescription, (ICharSequence**)&tCD);
-                AnnounceForAccessibility(tCD);
+                AnnounceForAccessibility(CoreUtils::Convert(targetContentDescription));
             }
         }
     }
@@ -1561,13 +1199,14 @@ ECode GlowPadView::OnHoverEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IAccessibilityManagerHelper> hlp;
-    CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&hlp);
-    AutoPtr<IAccessibilityManager> mg;
-    hlp->GetInstance(mContext, (IAccessibilityManager**)&mg);
-    Boolean b = FALSE;
-    mg->IsTouchExplorationEnabled(&b);
-    if (b) {
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
+    IAccessibilityManager* accessibilityManager = IAccessibilityManager::Probe(obj);
+    Boolean enabled = FALSE;
+    accessibilityManager->IsTouchExplorationEnabled(&enabled);
+    if (enabled) {
         Int32 action = 0;
         event->GetAction(&action);
         switch (action) {
@@ -1593,16 +1232,16 @@ void GlowPadView::SetGrabbedState(
     /* [in] */ Int32 newState)
 {
     if (newState != mGrabbedState) {
-        if (newState != IOnTriggerListener::NO_HANDLE) {
+        if (newState != IGlowPadViewOnTriggerListener::NO_HANDLE) {
             Vibrate();
         }
         mGrabbedState = newState;
         if (mOnTriggerListener != NULL) {
-            if (newState == IOnTriggerListener::NO_HANDLE) {
-                mOnTriggerListener->OnReleased(this, IOnTriggerListener::CENTER_HANDLE);
+            if (newState == IGlowPadViewOnTriggerListener::NO_HANDLE) {
+                mOnTriggerListener->OnReleased(this, IGlowPadViewOnTriggerListener::CENTER_HANDLE);
             }
             else {
-                mOnTriggerListener->OnGrabbed(this, IOnTriggerListener::CENTER_HANDLE);
+                mOnTriggerListener->OnGrabbed(this, IGlowPadViewOnTriggerListener::CENTER_HANDLE);
             }
             mOnTriggerListener->OnGrabbedStateChange(this, newState);
         }
@@ -1630,10 +1269,7 @@ Boolean GlowPadView::TrySwitchToFirstTouchState(
 void GlowPadView::AssignDefaultsIfNeeded()
 {
     if (mOuterRadius == 0.0f) {
-        Int32 w = 0, h = 0;
-        mOuterRing->GetWidth(&w);
-        mOuterRing->GetHeight(&h);
-        mOuterRadius = Elastos::Core::Math::Max(w, h)/2.0f;
+        mOuterRadius = Elastos::Core::Math::Max(mOuterRing->GetWidth(), mOuterRing->GetHeight()) / 2.0f;
     }
     if (mSnapMargin == 0.0f) {
         AutoPtr<IContext> cxt;
@@ -1648,9 +1284,7 @@ void GlowPadView::AssignDefaultsIfNeeded()
                 SNAP_MARGIN_DEFAULT, dm, &mSnapMargin);
     }
     if (mInnerRadius == 0.0f) {
-        Int32 w = 0;
-        mHandleDrawable->GetWidth(&w);
-        mInnerRadius = w / 10.0f;
+        mInnerRadius = mHandleDrawable->GetWidth() / 10.0f;
     }
 }
 
@@ -1741,38 +1375,14 @@ Float GlowPadView::ComputeScaleFactor(
     return Elastos::Core::Math::Min(scaleX, scaleY);
 }
 
-ECode GlowPadView::OnMeasure(
-    /* [in] */ Int32 widthMeasureSpec,
-    /* [in] */ Int32 heightMeasureSpec)
-{
-    Int32 minimumWidth = GetSuggestedMinimumWidth();
-    Int32 minimumHeight = GetSuggestedMinimumHeight();
-    Int32 computedWidth = ResolveMeasured(widthMeasureSpec, minimumWidth);
-    Int32 computedHeight = ResolveMeasured(heightMeasureSpec, minimumHeight);
-
-    mRingScaleFactor = ComputeScaleFactor(minimumWidth, minimumHeight,
-            computedWidth, computedHeight);
-
-    Int32 scaledWidth = GetScaledSuggestedMinimumWidth();
-    Int32 scaledHeight = GetScaledSuggestedMinimumHeight();
-
-    ComputeInsets(computedWidth - scaledWidth, computedHeight - scaledHeight);
-    SetMeasuredDimension(computedWidth, computedHeight);
-    return NOERROR;
-}
-
 Float GlowPadView::GetRingWidth()
 {
-    Int32 w = 0;
-    mOuterRing->GetWidth(&w);
-    return mRingScaleFactor * Elastos::Core::Math::Max((Float) w, 2 * mOuterRadius);
+    return mRingScaleFactor * Elastos::Core::Math::Max((Float) mOuterRing->GetWidth(), 2 * mOuterRadius);
 }
 
 Float GlowPadView::GetRingHeight()
 {
-    Int32 h = 0;
-    mOuterRing->GetHeight(&h);
-    return mRingScaleFactor * Elastos::Core::Math::Max((Float) h, 2 * mOuterRadius);
+    return mRingScaleFactor * Elastos::Core::Math::Max((Float) mOuterRing->GetHeight(), 2 * mOuterRadius);
 }
 
 ECode GlowPadView::OnLayout(
@@ -1782,15 +1392,16 @@ ECode GlowPadView::OnLayout(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
-    View::OnLayout(changed, left, top, right, bottom);
+    FAIL_RETURN(View::OnLayout(changed, left, top, right, bottom));
 
     // Target placement width/height. This puts the targets on the greater of the ring
     // width or the specified outer radius.
     Float placementWidth = GetRingWidth();
     Float placementHeight = GetRingHeight();
-
-    Float newWaveCenterX = mHorizontalInset + (mMaxTargetWidth + placementWidth) / 2;
-    Float newWaveCenterY = mVerticalInset + (mMaxTargetHeight + placementHeight) / 2;
+    Float newWaveCenterX = mHorizontalInset
+            + (mMaxTargetWidth + placementWidth) / 2;
+    Float newWaveCenterY = mVerticalInset
+            + (mMaxTargetHeight + placementHeight) / 2;
 
     if (mInitialLayout) {
         StopAndHideWaveAnimation();
@@ -1819,70 +1430,25 @@ ECode GlowPadView::OnLayout(
     return NOERROR;
 }
 
-void GlowPadView::UpdateTargetPosition(
-    /* [in] */ Int32 i,
+void GlowPadView::UpdateTargetPositions(
     /* [in] */ Float centerX,
     /* [in] */ Float centerY)
 {
-    Float angle = GetAngle(GetSliceAngle(), i);
-    UpdateTargetPosition(i, centerX, centerY, angle);
-}
-
-void GlowPadView::UpdateTargetPosition(
-    /* [in] */ Int32 i,
-    /* [in] */ Float centerX,
-    /* [in] */ Float centerY,
-    /* [in] */ Float angle)
-{
-    Float placementRadiusX = GetRingWidth() / 2;
-    Float placementRadiusY = GetRingHeight() / 2;
-    if (i >= 0) {
-        AutoPtr<IArrayList> targets = mTargetDrawables;
-        AutoPtr<IInterface> p;
-        targets->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> targetIcon = ITargetDrawable::Probe(p);
+    // Reposition the target drawables if the view changed.
+    AutoPtr<IArrayList> targets = mTargetDrawables;
+    Int32 size;
+    targets->GetSize(&size);
+    Float alpha = (Float) (-2.0f * Elastos::Core::Math::PI / size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        targets->Get(i, (IInterface**)&obj);
+        TargetDrawable* targetIcon = (TargetDrawable*)IObject::Probe(obj);
+        Float angle = alpha * i;
         targetIcon->SetPositionX(centerX);
         targetIcon->SetPositionY(centerY);
-        targetIcon->SetX(placementRadiusX * (Float) Elastos::Core::Math::Cos(angle));
-        targetIcon->SetY(placementRadiusY * (Float) Elastos::Core::Math::Sin(angle));
+        targetIcon->SetX(GetRingWidth() / 2 * (Float) Elastos::Core::Math::Cos(angle));
+        targetIcon->SetY(GetRingHeight() / 2 * (Float) Elastos::Core::Math::Sin(angle));
     }
-}
-
-void GlowPadView::UpdateTargetPositions(
-    /* [in] */ Float centerX,
-    /* [in] */ Float centerY)
-{
-    UpdateTargetPositions(centerX, centerY, FALSE);
-}
-
-void GlowPadView::UpdateTargetPositions(
-    /* [in] */ Float centerX,
-    /* [in] */ Float centerY,
-    /* [in] */ Boolean skipActive)
-{
-    Int32 size = 0;
-    mTargetDrawables->GetSize(&size);
-    Float alpha = GetSliceAngle();
-    // Reposition the target drawables if the view changed.
-    for (Int32 i = 0; i < size; i++) {
-        if (!skipActive || i != mActiveTarget) {
-            UpdateTargetPosition(i, centerX, centerY, GetAngle(alpha, i));
-        }
-    }
-}
-
-Float GlowPadView::GetAngle(
-    /* [in] */ Float alpha,
-    /* [in] */ Int32 i)
-{
-    return mFirstItemOffset + alpha * i;
-}
-
-Float GlowPadView::GetSliceAngle()
-{
-    Int32 s = 0;
-    mTargetDrawables->GetSize(&s);
-    return (Float) (-2.0f * Elastos::Core::Math::PI / s);
 }
 
 void GlowPadView::UpdatePointCloudPosition(
@@ -1902,7 +1468,7 @@ void GlowPadView::OnDraw(
     for (Int32 i = 0; i < ntargets; i++) {
         AutoPtr<IInterface> p;
         mTargetDrawables->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
+        TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
         if (target != NULL) {
             target->Draw(canvas);
         }
@@ -1910,11 +1476,10 @@ void GlowPadView::OnDraw(
     mHandleDrawable->Draw(canvas);
 }
 
-ECode GlowPadView::SetOnTriggerListener(
-    /* [in] */ IOnTriggerListener* listener)
+void GlowPadView::SetOnTriggerListener(
+    /* [in] */ IGlowPadViewOnTriggerListener* listener)
 {
     mOnTriggerListener = listener;
-    return NOERROR;
 }
 
 Float GlowPadView::Square(
@@ -1933,13 +1498,14 @@ Float GlowPadView::Dist2(
 Float GlowPadView::GetScaledGlowRadiusSquared()
 {
     Float scaledTapRadius = 0.0f;
-    AutoPtr<IAccessibilityManagerHelper> hlp;
-    CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&hlp);
-    AutoPtr<IAccessibilityManager> mg;
-    hlp->GetInstance(mContext, (IAccessibilityManager**)&mg);
-    Boolean b = FALSE;
-    mg->IsEnabled(&b);
-    if (b) {
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
+    IAccessibilityManager* accessibilityManager = IAccessibilityManager::Probe(obj);
+    Boolean enabled = FALSE;
+    accessibilityManager->IsEnabled(&enabled);
+    if (enabled) {
         scaledTapRadius = TAP_RADIUS_SCALE_ACCESSIBILITY_ENABLED * mGlowRadius;
     }
     else {
@@ -1958,65 +1524,57 @@ void GlowPadView::AnnounceTargets()
         String directionDescription = GetDirectionDescription(i);
         if (!TextUtils::IsEmpty(targetDescription)
                 && !TextUtils::IsEmpty(directionDescription)) {
-            AutoPtr<ICharSequence> cs;
-            CString::New(targetDescription, (ICharSequence**)&cs);
-            AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
-            (*arr)[0] = cs;
-            String text = StringUtils::Format(directionDescription, arr);
+            String text;
+            text.AppendFormat(directionDescription.string(), targetDescription.string());
             utterance.Append(text);
         }
     }
     if (utterance.GetLength() > 0) {
-        String str = utterance.ToString();
-        AutoPtr<ICharSequence> cs;
-        CString::New(str, (ICharSequence**)&cs);
-        AnnounceForAccessibility(cs);
+        AnnounceForAccessibility(CoreUtils::Convert(utterance.ToString()));
     }
 }
 
 String GlowPadView::GetTargetDescription(
     /* [in] */ Int32 index)
 {
-    Boolean bEmp = FALSE;
-    if (mTargetDescriptions == NULL || (mTargetDescriptions->IsEmpty(&bEmp), bEmp)) {
+    Boolean empty = FALSE;
+    if (mTargetDescriptions == NULL || (mTargetDescriptions->IsEmpty(&empty), empty)) {
         mTargetDescriptions = LoadDescriptions(mTargetDescriptionsResourceId);
         Int32 s1 = 0, s2 = 0;
         mTargetDrawables->GetSize(&s1);
         mTargetDescriptions->GetSize(&s2);
         if (s1 != s2) {
-            if (DEBUG) Logger::V(TAG, "The number of target drawables must be"
+            Logger::V(TAG, "The number of target drawables must be"
                         " equal to the number of target descriptions.");
             return String(NULL);
         }
     }
     AutoPtr<IInterface> p;
     mTargetDescriptions->Get(index, (IInterface**)&p);
-    AutoPtr<ICharSequence> cs = ICharSequence::Probe(p);
     String str;
-    cs->ToString(&str);
+    ICharSequence::Probe(p)->ToString(&str);
     return str;
 }
 
 String GlowPadView::GetDirectionDescription(
     /* [in] */ Int32 index)
 {
-    Boolean bEmp = FALSE;
-    if (mDirectionDescriptions == NULL || (mDirectionDescriptions->IsEmpty(&bEmp), bEmp)) {
+    Boolean empty = FALSE;
+    if (mDirectionDescriptions == NULL || (mDirectionDescriptions->IsEmpty(&empty), empty)) {
         mDirectionDescriptions = LoadDescriptions(mDirectionDescriptionsResourceId);
         Int32 s1 = 0, s2 = 0;
         mTargetDrawables->GetSize(&s1);
         mDirectionDescriptions->GetSize(&s2);
         if (s1 != s2) {
-            if (DEBUG) Logger::V(TAG, "The number of target drawables must be"
+            Logger::V(TAG, "The number of target drawables must be"
                         " equal to the number of direction descriptions.");
             return String(NULL);
         }
     }
     AutoPtr<IInterface> p;
     mDirectionDescriptions->Get(index, (IInterface**)&p);
-    AutoPtr<ICharSequence> cs = ICharSequence::Probe(p);
     String str;
-    cs->ToString(&str);
+    ICharSequence::Probe(p)->ToString(&str);
     return str;
 }
 
@@ -2036,28 +1594,22 @@ AutoPtr<IArrayList> GlowPadView::LoadDescriptions(
     for (Int32 i = 0; i < count; i++) {
         String contentDescription;
         array->GetString(i, &contentDescription);
-        AutoPtr<ICharSequence> cs;
-        CString::New(contentDescription, (ICharSequence**)&cs);
-        targetContentDescriptions->Add(cs);
+        targetContentDescriptions->Add(CoreUtils::Convert(contentDescription));
     }
     array->Recycle();
     return targetContentDescriptions;
 }
 
-ECode GlowPadView::GetResourceIdForTarget(
-    /* [in] */ Int32 index,
-    /* [out] */ Int32* result)
+Int32 GlowPadView::GetResourceIdForTarget(
+    /* [in] */ Int32 index)
 {
-    VALIDATE_NOT_NULL(result)
     AutoPtr<IInterface> p;
     mTargetDrawables->Get(index, (IInterface**)&p);
-    AutoPtr<ITargetDrawable> drawable = ITargetDrawable::Probe(p);
-    Int32 id = 0;
-    *result = drawable == NULL ? 0 : (drawable->GetResourceId(&id), id);
-    return NOERROR;
+    TargetDrawable* drawable = (TargetDrawable*)IObject::Probe(p);
+    return drawable == NULL ? 0 : drawable->GetResourceId();
 }
 
-ECode GlowPadView::SetEnableTarget(
+void GlowPadView::SetEnableTarget(
     /* [in] */ Int32 resourceId,
     /* [in] */ Boolean enabled)
 {
@@ -2066,37 +1618,28 @@ ECode GlowPadView::SetEnableTarget(
     for (Int32 i = 0; i < s; i++) {
         AutoPtr<IInterface> p;
         mTargetDrawables->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-        Int32 id = 0;
-        target->GetResourceId(&id);
-        if (id == resourceId) {
+        TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+        if (target->GetResourceId() == resourceId) {
             target->SetEnabled(enabled);
             break; // should never be more than one match
         }
     }
-    return NOERROR;
 }
 
-ECode GlowPadView::GetTargetPosition(
-    /* [in] */ Int32 resourceId,
-    /* [out] */ Int32* result)
+Int32 GlowPadView::GetTargetPosition(
+    /* [in] */ Int32 resourceId)
 {
-    VALIDATE_NOT_NULL(result)
     Int32 s = 0;
     mTargetDrawables->GetSize(&s);
     for (Int32 i = 0; i < s; i++) {
         AutoPtr<IInterface> p;
         mTargetDrawables->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-        Int32 id = 0;
-        target->GetResourceId(&id);
-        if (id == resourceId) {
-            *result = i; // should never be more than one match
-            return NOERROR;
+        TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+        if (target->GetResourceId() == resourceId) {
+            return i; // should never be more than one match
         }
     }
-    *result = -1;
-    return NOERROR;
+    return -1;
 }
 
 Boolean GlowPadView::ReplaceTargetDrawables(
@@ -2115,10 +1658,8 @@ Boolean GlowPadView::ReplaceTargetDrawables(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> p;
         mTargetDrawables->Get(i, (IInterface**)&p);
-        AutoPtr<ITargetDrawable> target = ITargetDrawable::Probe(p);
-        Int32 id = 0;
-        target->GetResourceId(&id);
-        if (target != NULL && id == existingResourceId) {
+        TargetDrawable* target = (TargetDrawable*)IObject::Probe(p);
+        if (target != NULL && (target->GetResourceId() == existingResourceId)) {
             target->SetDrawable(res, newResourceId);
             result = TRUE;
         }
@@ -2131,13 +1672,11 @@ Boolean GlowPadView::ReplaceTargetDrawables(
     return result;
 }
 
-ECode GlowPadView::ReplaceTargetDrawablesIfPresent(
+Boolean GlowPadView::ReplaceTargetDrawablesIfPresent(
     /* [in] */ IComponentName* component,
     /* [in] */ const String& name,
-    /* [in] */ Int32 existingResId,
-    /* [out] */ Boolean* result)
+    /* [in] */ Int32 existingResId)
 {
-    VALIDATE_NOT_NULL(result)
     if (existingResId == 0) {
         return FALSE;
     }
@@ -2145,14 +1684,16 @@ ECode GlowPadView::ReplaceTargetDrawablesIfPresent(
     Boolean replaced = FALSE;
     if (component != NULL) {
         // try {
+        AutoPtr<IContext> context;
+        GetContext((IContext**)&context);
         AutoPtr<IPackageManager> packageManager;
-        mContext->GetPackageManager((IPackageManager**)&packageManager);
+        context->GetPackageManager((IPackageManager**)&packageManager);
         // Look for the search icon specified in the activity meta-data
         AutoPtr<IActivityInfo> ainfo;
         packageManager->GetActivityInfo(
                 component, IPackageManager::GET_META_DATA, (IActivityInfo**)&ainfo);
-        AutoPtr<CActivityInfo> cinfo = (CActivityInfo*)ainfo.Get();
-        AutoPtr<IBundle> metaData = cinfo->mMetaData;
+        AutoPtr<IBundle> metaData;
+        IPackageItemInfo::Probe(ainfo)->GetMetaData((IBundle**)&metaData);
         if (metaData != NULL) {
             Int32 iconResId = 0;
             metaData->GetInt32(name, &iconResId);
@@ -2172,15 +1713,17 @@ ECode GlowPadView::ReplaceTargetDrawablesIfPresent(
     }
     if (!replaced) {
         // Restore the original drawable
+        AutoPtr<IContext> context;
+        GetContext((IContext**)&context);
         AutoPtr<IResources> res;
-        mContext->GetResources((IResources**)&res);
+        context->GetResources((IResources**)&res);
         ReplaceTargetDrawables(res, existingResId, existingResId);
     }
     return replaced;
 }
 
-} // namespace Multiwaveview
+} // namespace MultiwaveView
 } // namespace Widget
-} // namespace Internal
+} // namespace InCallUI
 } // namespace Droid
 } // namespace Elastos
