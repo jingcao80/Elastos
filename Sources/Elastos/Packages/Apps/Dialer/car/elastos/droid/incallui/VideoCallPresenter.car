@@ -1,0 +1,46 @@
+
+module
+{
+    using interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * Defines the VideoCallUI interactions.
+     * @Involve
+     * interface IUi
+     */
+    interface IVideoCallUi {
+
+        ShowVideoUi(
+            [in] Boolean show);
+
+        IsDisplayVideoSurfaceCreated(
+            [out] Boolean* result);
+
+        IsPreviewVideoSurfaceCreated(
+            [out] Boolean* result);
+
+        GetDisplayVideoSurface(
+            [out] ISurface** surface);
+
+        GetPreviewVideoSurface(
+            [out] ISurface** surface);
+
+        SetPreviewSize(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        CleanupSurfaces();
+
+        IsActivityRestart(
+            [out] Boolean* result);
+
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

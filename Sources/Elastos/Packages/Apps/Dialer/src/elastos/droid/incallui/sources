@@ -43,5 +43,7 @@ SOURCES += CHoverIgnoringLinearLayout.cpp
 SOURCES += CDialpadFragment.cpp
 SOURCES += DialpadPresenter.cpp
 SOURCES += PostCharDialogFragment.cpp
-
 SOURCES += GlowPadView.cpp
+SOURCES += VideoCallPresenter.cpp
+SOURCES += InCallVideoCallListenerNotifier.cpp
+SOURCES += CVideoCallFragment.cpp

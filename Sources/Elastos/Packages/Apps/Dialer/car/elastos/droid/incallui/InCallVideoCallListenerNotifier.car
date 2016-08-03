@@ -1,0 +1,104 @@
+
+module
+{
+    interface Elastos.Droid.InCallUI.ICall;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * Listener interface for any class that wants to be notified of upgrade to video and downgrade
+     * to audio session modification requests.
+     */
+    interface ISessionModificationListener {
+        /**
+         * Called when a peer request is received to upgrade an audio-only call to a video call.
+         *
+         * @param call The call the request was received for.
+         */
+        OnUpgradeToVideoRequest(
+            [in] ICall* call);
+
+        /**
+         * Called when a request to a peer to upgrade an audio-only call to a video call is
+         * successful.
+         *
+         * @param call The call the request was successful for.
+         */
+        OnUpgradeToVideoSuccess(
+            [in] ICall* call);
+
+        /**
+         * Called when a request to a peer to upgrade an audio-only call to a video call is
+         * NOT successful. This can be if the peer chooses rejects the the video call, or if the
+         * peer does not support video calling, or if there is some error in sending the request.
+         *
+         * @param call The call the request was successful for.
+         */
+        OnUpgradeToVideoFail(
+            [in] ICall* call);
+
+        /**
+         * Called when a call has been downgraded to audio-only.
+         *
+         * @param call The call which was downgraded to audio-only.
+         */
+        OnDowngradeToAudio(
+            [in] ICall* call);
+    }
+
+    /**
+     * Listener interface for any class that wants to be notified of video events, including pause
+     * and un-pause of peer video.
+     */
+    interface IVideoEventListener
+    {
+        /**
+         * Called when the peer pauses or un-pauses video transmission.
+         *
+         * @param call   The call which paused or un-paused video transmission.
+         * @param paused {@code True} when the video transmission is paused, {@code false}
+         *               otherwise.
+         */
+        OnPeerPauseStateChanged(
+            [in] ICall* call,
+            [in] Boolean paused);
+    }
+
+    /**
+     * Listener interface for any class that wants to be notified of changes to the video surfaces.
+     */
+    interface ISurfaceChangeListener
+    {
+        /**
+         * Called when the peer video feed changes dimensions. This can occur when the peer rotates
+         * their device, changing the aspect ratio of the video signal.
+         *
+         * @param call The call which experienced a peer video
+         * @param width
+         * @param height
+         */
+        OnUpdatePeerDimensions(
+            [in] ICall* call,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        /**
+         * Called when the local camera changes dimensions.  This occurs when a change in camera
+         * occurs.
+         *
+         * @param call The call which experienced the camera dimension change.
+         * @param width The new camera video width.
+         * @param height The new camera video height.
+         */
+        OnCameraDimensionsChange(
+            [in] ICall* call,
+            [in] Int32 width,
+            [in] Int32 height);
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

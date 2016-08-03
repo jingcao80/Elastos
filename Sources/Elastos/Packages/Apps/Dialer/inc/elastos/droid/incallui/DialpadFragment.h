@@ -277,6 +277,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Core::IInteger32)
-
 #endif // __ELASTOS_DROID_INCALLUI_DIALPADFRAGMENT_H__
