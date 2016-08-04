@@ -27,7 +27,7 @@ CarClass(CSmsMessage)
 {
 public:
     class SubmitPdu
-        : public Object // TODO: SmsMessageBase::SubmitPduBase
+        : public SmsMessageBase::SubmitPduBase
         , public ISmsMessageSubmitPdu
     {
     public:

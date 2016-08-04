@@ -75,7 +75,7 @@ class SmsMessage
 
 public:
     class SubmitPdu
-        : public Object //TOOD SmsMessageBase::SubmitPduBase
+        : public SmsMessageBase::SubmitPduBase
         , public ISmsMessageSubmitPdu
     {
     public:

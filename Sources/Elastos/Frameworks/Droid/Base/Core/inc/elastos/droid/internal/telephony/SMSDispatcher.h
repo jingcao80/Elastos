@@ -61,24 +61,44 @@ protected:
 
         CARAPI_(Boolean) IsMultipart();
 
-        CARAPI_(void) WriteSentMessage(IContext* context);
+        CARAPI_(void) WriteSentMessage(
+            /* [in] */ IContext* context);
 
-        CARAPI UpdateSentMessageStatus(IContext* context, Int32 status);
+        CARAPI UpdateSentMessageStatus(
+            /* [in] */ IContext* context,
+            /* [in] */ Int32 status);
 
-        CARAPI OnFailed(IContext* context, Int32 error, Int32 errorCode);
+        CARAPI OnFailed(
+            /* [in] */ IContext* context,
+            /* [in] */ Int32 error,
+            /* [in] */ Int32 errorCode);
 
     private:
-        CARAPI_(void) UpdateMessageErrorCode(IContext* context, Int32 errorCode);
+        CARAPI_(void) UpdateMessageErrorCode(
+            /* [in] */ IContext* context,
+            /* [in] */ Int32 errorCode);
 
-        CARAPI_(void) SetMessageFinalState(IContext* context, Int32 messageType);
+        CARAPI_(void) SetMessageFinalState(
+            /* [in] */ IContext* context,
+            /* [in] */ Int32 messageType);
 
-        CARAPI OnSent(IContext* context);
+        CARAPI OnSent(
+            /* [in] */ IContext* context);
 
     private:
-        CARAPI constructor(IHashMap* data, IPendingIntent* sentIntent,
-            IPendingIntent* deliveryIntent, IPackageInfo* appInfo, String destAddr, String format,
-            IAtomicInteger32* unsentPartCount, IAtomicBoolean* anyPartFailed, IUri* messageUri,
-            ISmsHeader* smsHeader, Boolean isExpectMore, Int32 validityPeriod);
+        CARAPI constructor(
+            /* [in] */ IHashMap* data,
+            /* [in] */ IPendingIntent* sentIntent,
+            /* [in] */ IPendingIntent* deliveryIntent,
+            /* [in] */ IPackageInfo* appInfo,
+            /* [in] */ const String& destAddr,
+            /* [in] */ const String& format,
+            /* [in] */ IAtomicInteger32* unsentPartCount,
+            /* [in] */ IAtomicBoolean* anyPartFailed,
+            /* [in] */ IUri* messageUri,
+            /* [in] */ ISmsHeader* smsHeader,
+            /* [in] */ Boolean isExpectMore,
+            /* [in] */ Int32 validityPeriod);
 
     public:
         // fields need to be public for derived SmsDispatchers
@@ -100,6 +120,7 @@ protected:
         AutoPtr<ISmsHeader> mSmsHeader;
 
         AutoPtr<IUri> mMessageUri; // IUri* of persisted message if we wrote one
+
     private:
         Int64 mTimestamp;
         // Reference to states of a multipart message that this part belongs to
@@ -146,17 +167,26 @@ private:
         , public ICompoundButtonOnCheckedChangeListener
     {
     public :
-        CARAPI constructor(SmsTracker* tracker, ITextView* textView);
+        CARAPI constructor(
+            /* [in] */ SmsTracker* tracker,
+            /* [in] */ ITextView* textView);
 
-        CARAPI_(void) SetPositiveButton(IButton* button);
+        CARAPI_(void) SetPositiveButton(
+            /* [in] */ IButton* button);
 
-        CARAPI_(void) SetNegativeButton(IButton* button);
+        CARAPI_(void) SetNegativeButton(
+            /* [in] */ IButton* button);
 
-        CARAPI OnClick(IDialogInterface* dialog, Int32 which);
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
 
-        CARAPI OnCancel(IDialogInterface* dialog);
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* dialog);
 
-        CARAPI OnCheckedChanged(ICompoundButton* buttonView, Boolean isChecked);
+        CARAPI OnCheckedChanged(
+            /* [in] */ ICompoundButton* buttonView,
+            /* [in] */ Boolean isChecked);
 
     private:
         AutoPtr<SmsTracker> mTracker;
@@ -204,8 +234,8 @@ public:
      *
      * @param tracker holds the SMS message to send
      */
-     CARAPI SendRetrySms(
-         /* [in] */ SmsTracker* tracker);
+    CARAPI SendRetrySms(
+        /* [in] */ SmsTracker* tracker);
 
     CARAPI IsIms(
         /* [out] */ Boolean* result);
@@ -216,46 +246,8 @@ public:
     CARAPI HandleMessage(
         /* [in] */ IMessage* msg);
 
-protected:
-    static Int32 GetNextConcatenatedRef();
-
-    constructor(
-        /* [in] */ IPhoneBase* phone,
-        /* [in] */ ISmsUsageMonitor* usageMonitor,
-        /* [in] */ IImsSMSDispatcher* imsSMSDispatcher);
-
-    void UpdatePhoneObject(
+    virtual CARAPI_(void) UpdatePhoneObject(
         /* [in] */ IPhoneBase* phone);
-
-    /**
-     * The format of the message PDU in the associated broadcast intent.
-     * This will be either "3gpp" for GSM/UMTS/LTE messages in 3GPP format
-     * or "3gpp2" for CDMA/LTE messages in 3GPP2 format.
-     *
-     * Note: All applications which handle incoming SMS messages by processing the
-     * SMS_RECEIVED_ACTION broadcast intent MUST pass the "format" extra from the intent
-     * into the new methods in {@link android.telephony.SmsMessage} which take an
-     * extra format parameter. This is required in order to correctly decode the PDU on
-     * devices which require support for both 3GPP and 3GPP2 formats at the same time,
-     * such as CDMA/LTE devices and GSM/CDMA world phones.
-     *
-     * @return the format of the message PDU
-     */
-    virtual ECode GetFormat(
-        /* [out] */ String* result) = 0;
-
-    void HandleStatusReport(
-        /* [in] */ IInterface* o);
-
-    void HandleSendComplete(
-        /* [in] */ AsyncResult ar);
-
-    static void HandleNotInService(
-        /* [in] */ Int32 ss,
-        /* [in] */ IPendingIntent* sentIntent);
-
-    static Int32 GetNotInServiceError(
-        /* [in] */ Int32 ss);
 
     /**
      * Send a data based SMS to a specific application port.
@@ -284,8 +276,34 @@ protected:
      *  broadcast when the message is delivered to the recipient.  The
      *  raw pdu of the status report is in the extended Data ("pdu").
      */
-    virtual CARAPI SendData(const String& destAddr, const String& scAddr, Int32 destPort, Int32 origPort,
-            ArrayOf<Byte>* data, IPendingIntent* sentIntent, IPendingIntent* deliveryIntent) = 0;
+    virtual CARAPI SendData(
+        /* [in] */ const String& destAddr,
+        /* [in] */ const String& scAddr,
+        /* [in] */ Int32 destPort,
+        /* [in] */ Int32 origPort,
+        /* [in] */ ArrayOf<Byte>* data,
+        /* [in] */ IPendingIntent* sentIntent,
+        /* [in] */ IPendingIntent* deliveryIntent) = 0;
+
+    virtual void SendMultipartText(
+        /* [in] */ const String& destAddr,
+        /* [in] */ const String& scAddr,
+        /* [in] */ IArrayList* parts,
+        /* [in] */ IArrayList* sentIntents,
+        /* [in] */ IArrayList* deliveryIntents,
+        /* [in] */ IUri* messageUri,
+        /* [in] */ const String& callingPkg,
+        /* [in] */ Int32 priority,
+        /* [in] */ Boolean isExpectMore,
+        /* [in] */ Int32 validityPeriod);
+
+    /**
+     * Send the SMS via the PSTN network.
+     *
+     * @param tracker holds the Sms tracker ready to be sent
+     */
+    virtual void SendSmsByPstn(
+        /* [in] */ SmsTracker* tracker) = 0;
 
     /**
      * Send a text based SMS.
@@ -329,9 +347,63 @@ protected:
      *  Validity Period(Maximum) -> 635040 Mins(i.e.63 weeks).
      *  Any Other values included Negative considered as Invalid Validity Period of the message.
      */
-    virtual CARAPI SendText(const String& destAddr, const String& scAddr, const String& text,
-            IPendingIntent* sentIntent, IPendingIntent* deliveryIntent, IUri* messageUri,
-            const String& callingPkg, Int32 priority, Boolean isExpectMore, Int32 validityPeriod) = 0;
+    virtual CARAPI SendText(
+        /* [in] */ const String& destAddr,
+        /* [in] */ const String& scAddr,
+        /* [in] */ const String& text,
+        /* [in] */ IPendingIntent* sentIntent,
+        /* [in] */ IPendingIntent* deliveryIntent,
+        /* [in] */ IUri* messageUri,
+        /* [in] */ const String& callingPkg,
+        /* [in] */ Int32 priority,
+        /* [in] */ Boolean isExpectMore,
+        /* [in] */ Int32 validityPeriod) = 0;
+
+    /**
+     * The format of the message PDU in the associated broadcast intent.
+     * This will be either "3gpp" for GSM/UMTS/LTE messages in 3GPP format
+     * or "3gpp2" for CDMA/LTE messages in 3GPP2 format.
+     *
+     * Note: All applications which handle incoming SMS messages by processing the
+     * SMS_RECEIVED_ACTION broadcast intent MUST pass the "format" extra from the intent
+     * into the new methods in {@link android.telephony.SmsMessage} which take an
+     * extra format parameter. This is required in order to correctly decode the PDU on
+     * devices which require support for both 3GPP and 3GPP2 formats at the same time,
+     * such as CDMA/LTE devices and GSM/CDMA world phones.
+     *
+     * @return the format of the message PDU
+     */
+    virtual CARAPI GetFormat(
+        /* [out] */ String* result) = 0;
+
+    /**
+     * Send the message along to the radio.
+     *
+     * @param tracker holds the SMS message to send
+     */
+    virtual void SendSms(
+        /* [in] */ SmsTracker* tracker) = 0;
+
+protected:
+    static Int32 GetNextConcatenatedRef();
+
+    CARAPI constructor(
+        /* [in] */ IPhoneBase* phone,
+        /* [in] */ ISmsUsageMonitor* usageMonitor,
+        /* [in] */ IImsSMSDispatcher* imsSMSDispatcher);
+
+    virtual CARAPI HandleStatusReport(
+        /* [in] */ IInterface* o);
+
+    virtual CARAPI_(void) HandleSendComplete(
+        /* [in] */ AsyncResult ar);
+
+    static void HandleNotInService(
+        /* [in] */ Int32 ss,
+        /* [in] */ IPendingIntent* sentIntent);
+
+    static Int32 GetNotInServiceError(
+        /* [in] */ Int32 ss);
 
     /**
      * Inject an SMS PDU into the android platform.
@@ -343,7 +415,10 @@ protected:
      *  android telephony layer. This intent is broadcasted at
      *  the same time an SMS received from radio is responded back.
      */
-    virtual CARAPI InjectSmsPdu(ArrayOf<Byte>* pdu, const String& format, IPendingIntent* receivedIntent) = 0;
+    virtual CARAPI InjectSmsPdu(
+        /* [in] */ ArrayOf<Byte>* pdu,
+        /* [in] */ const String& format,
+        /* [in] */ IPendingIntent* receivedIntent) = 0;
 
     /**
      * Calculate the number of septets needed to encode the message.
@@ -365,47 +440,37 @@ protected:
      * @param success True if and only if the message was sent successfully. if its value is
      *  FALSE, this message should be resent via PSTN.
      */
-    virtual void UpdateSmsSendStatus(Int32 messageRef, Boolean success) = 0;
-
-    void SendMultipartText(const String& destAddr, const String& scAddr,
-        IArrayList* parts, IArrayList* sentIntents,
-        IArrayList* deliveryIntents, IUri* messageUri, const String& callingPkg,
-        Int32 priority, Boolean isExpectMore, Int32 validityPeriod);
-
-    void SendPseudoMultipartText(const String& destAddr, const String& scAddr,
-        IArrayList* parts, IArrayList* sentIntents,
-        IArrayList* deliveryIntents,
-        IUri* messageUri, const String& callingPkg,
-        Int32 priority, Boolean isExpectMore, Int32 validityPeriod);
+    virtual void UpdateSmsSendStatus(
+        /* [in] */ Int32 messageRef,
+        /* [in] */ Boolean success) = 0;
 
     /**
      * Create a new SubmitPdu and send it.
      */
-    virtual CARAPI SendNewSubmitPdu(const String& destinationAddress, const String& scAddress,
-            const String& message, ISmsHeader* smsHeader, Int32 encoding,
-            IPendingIntent* sentIntent, IPendingIntent* deliveryIntent, Boolean lastPart, Int32 priority,
-            Boolean isExpectMore, Int32 validityPeriod, IAtomicInteger32* unsentPartCount,
-            IAtomicBoolean* anyPartFailed, IUri* messageUri) = 0;
+    virtual CARAPI SendNewSubmitPdu(
+        /* [in] */ const String& destinationAddress,
+        /* [in] */ const String& scAddress,
+        /* [in] */ const String& message,
+        /* [in] */ ISmsHeader* smsHeader,
+        /* [in] */ Int32 encoding,
+        /* [in] */ IPendingIntent* sentIntent,
+        /* [in] */ IPendingIntent* deliveryIntent,
+        /* [in] */ Boolean lastPart,
+        /* [in] */ Int32 priority,
+        /* [in] */ Boolean isExpectMore,
+        /* [in] */ Int32 validityPeriod,
+        /* [in] */ IAtomicInteger32* unsentPartCount,
+        /* [in] */ IAtomicBoolean* anyPartFailed,
+        /* [in] */ IUri* messageUri) = 0;
 
-    void SendRawPdu(SmsTracker* tracker);
+    virtual CARAPI_(void) SendRawPdu(
+        /* [in] */ SmsTracker* tracker);
 
-    void HandleReachSentLimit(SmsTracker* tracker);
+    virtual CARAPI_(void) HandleReachSentLimit(
+        /* [in] */ SmsTracker* tracker);
 
-    void HandleConfirmShortCode(Boolean isPremium, SmsTracker* tracker);
-
-    /**
-     * Send the message along to the radio.
-     *
-     * @param tracker holds the SMS message to send
-     */
-    virtual void SendSms(SmsTracker* tracker) = 0;
-
-    /**
-     * Send the SMS via the PSTN network.
-     *
-     * @param tracker holds the Sms tracker ready to be sent
-     */
-    virtual void SendSmsByPstn(SmsTracker* tracker) = 0;
+    virtual CARAPI_(void) HandleConfirmShortCode(
+        /* [in] */ Boolean isPremium, SmsTracker* tracker);
 
 //    AutoPtr<SmsTracker> GetSmsTracker(IHashMap* data, IPendingIntent* sentIntent,
 //        IPendingIntent* deliveryIntent, String format, IAtomicInteger32* unsentPartCount,
@@ -425,54 +490,83 @@ protected:
 //    AutoPtr<IHashMap> GetSmsTrackerMap(String destAddr, String scAddr,
 //        Int32 destPort, Int32 origPort, Byte[] data, SmsMessageBase.SubmitPduBase pdu);
 
-    AutoPtr<IUri> WriteOutboxMessage(Int64 subId, const String& address, const String& text,
-        Boolean requireDeliveryReport, const String& creator);
+    virtual CARAPI_(AutoPtr<IUri>) WriteOutboxMessage(
+        /* [in] */ Int64 subId,
+        /* [in] */ const String& address,
+        /* [in] */ const String& text,
+        /* [in] */ Boolean requireDeliveryReport,
+        /* [in] */ const String& creator);
 
-    void MoveToOutbox(Int64 subId, IUri* messageUri, const String& creator);
+    virtual CARAPI_(void) MoveToOutbox(
+        /* [in] */ Int64 subId,
+        /* [in] */ IUri* messageUri,
+        /* [in] */ const String& creator);
 
-    String GetCarrierAppPackageName(IIntent* intent);
+    virtual CARAPI_(String) GetCarrierAppPackageName(
+        /* [in] */ IIntent* intent);
 
-    Int64 GetSubId();
+    virtual CARAPI_(Int64) GetSubId();
 
 private:
+    CARAPI_(void) SendPseudoMultipartText(
+        /* [in] */ const String& destAddr,
+        /* [in] */ const String& scAddr,
+        /* [in] */ IArrayList* parts,
+        /* [in] */ IArrayList* sentIntents,
+        /* [in] */ IArrayList* deliveryIntents,
+        /* [in] */ IUri* messageUri,
+        /* [in] */ const String& callingPkg,
+        /* [in] */ Int32 priority,
+        /* [in] */ Boolean isExpectMore,
+        /* [in] */ Int32 validityPeriod);
+
     static CARAPI_(Int32) InitConcatenatedRef();
 
-    static Boolean IsSystemUid(
+    static CARAPI_(Boolean) IsSystemUid(
         /* [in] */ IContext* context,
         /* [in] */ const String& pkgName);
 
-    Boolean CheckDestination(SmsTracker* tracker);
+    CARAPI_(Boolean) CheckDestination(
+        /* [in] */ SmsTracker* tracker);
 
-    Boolean DenyIfQueueLimitReached(SmsTracker* tracker);
+    CARAPI_(Boolean) DenyIfQueueLimitReached(
+        /* [in] */ SmsTracker* tracker);
 
-    AutoPtr<ICharSequence> GetAppLabel(const String& appPackage);
+    CARAPI_(AutoPtr<ICharSequence>) GetAppLabel(
+        /* [in] */ const String& appPackage);
 
-    String ResolvePackageName(SmsTracker* tracker);
+    CARAPI_(String) ResolvePackageName(
+        /* [in] */ SmsTracker* tracker);
 
     /**
      * Send the multi-part SMS based on multipart Sms tracker
      *
      * @param tracker holds the multipart Sms tracker ready to be sent
      */
-    void SendMultipartSms(SmsTracker* tracker);
+    CARAPI_(void) SendMultipartSms(
+        /* [in] */ SmsTracker* tracker);
 
-    String GetMultipartMessageText(IArrayList* parts);
+    CARAPI_(String) GetMultipartMessageText(
+        /* [in] */ IArrayList* parts);
+public:
+    /** Outgoing messages being handled by the carrier app. */
+    AutoPtr<IList> mSendPendingList;
 
 protected:
     /** SMS send complete. */
-    static const Int32 EVENT_SEND_SMS_COMPLETE;
+    static const Int32 EVENT_SEND_SMS_COMPLETE = 2;
 
     /** Handle status report from {@code CdmaInboundSmsHandler}. */
-    static const Int32 EVENT_HANDLE_STATUS_REPORT;
+    static const Int32 EVENT_HANDLE_STATUS_REPORT = 10;
 
     /** Radio is ON */
-    static const Int32 EVENT_RADIO_ON;
+    static const Int32 EVENT_RADIO_ON = 11;
 
     /** IMS registration/SMS format changed */
-    static const Int32 EVENT_IMS_STATE_CHANGED;
+    static const Int32 EVENT_IMS_STATE_CHANGED = 12;
 
     /** Callback from RIL_REQUEST_IMS_REGISTRATION_STATE */
-    static const Int32 EVENT_IMS_STATE_DONE;
+    static const Int32 EVENT_IMS_STATE_DONE = 13;
 
     // other
     static const Int32 EVENT_NEW_ICC_SMS = 14;
@@ -499,10 +593,7 @@ protected:
      *       will be dropped.
      */
     /** Sent messages awaiting a delivery status report. */
-    AutoPtr<IArrayList> deliveryPendingList;
-
-    /** Outgoing messages being handled by the carrier app. */
-    AutoPtr<IList> sendPendingList;
+    AutoPtr<IArrayList> mDeliveryPendingList;
 
 private:
     static const String TAG;    // accessed from inner class
@@ -519,22 +610,22 @@ private:
     AutoPtr<SettingsObserver> mSettingsObserver;
 
     /** Retry sending a previously failed SMS message */
-    static const Int32 EVENT_SEND_RETRY;
+    static const Int32 EVENT_SEND_RETRY = 3;
 
     /** Confirmation required for sending a large number of messages. */
-    static const Int32 EVENT_SEND_LIMIT_REACHED_CONFIRMATION;
+    static const Int32 EVENT_SEND_LIMIT_REACHED_CONFIRMATION = 4;
 
     /** Send the user confirmed SMS */
-    static const Int32 EVENT_SEND_CONFIRMED_SMS;  // accessed from inner class
+    static const Int32 EVENT_SEND_CONFIRMED_SMS = 5;  // accessed from inner class
 
     /** Don't send SMS (user did not confirm). */
-    static const Int32 EVENT_STOP_SENDING;        // accessed from inner class
+    static const Int32 EVENT_STOP_SENDING = 7;        // accessed from inner class
 
     /** Confirmation required for third-party apps sending to an SMS short code. */
-    static const Int32 EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE;
+    static const Int32 EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE = 8;
 
     /** Confirmation required for third-party apps sending to an SMS short code. */
-    static const Int32 EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE;
+    static const Int32 EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE = 9;
 
     /** Maximum number of times to retry sending a failed SMS. */
     static const Int32 MAX_SEND_RETRIES;

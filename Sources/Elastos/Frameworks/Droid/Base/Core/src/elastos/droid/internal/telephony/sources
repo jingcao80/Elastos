@@ -51,6 +51,7 @@ SOURCES += IccPhoneBookInterfaceManager.cpp
 SOURCES += IccPhoneBookInterfaceManagerProxy.cpp
 SOURCES += HbpcdUtils.cpp
 SOURCES += IccProvider.cpp
+SOURCES += ImsSMSDispatcher.cpp
 SOURCES += IntRangeManager.cpp
 SOURCES += IccSmsInterfaceManager.cpp
 SOURCES += IccUtils.cpp

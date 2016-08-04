@@ -274,6 +274,8 @@ module
     //interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaSmsAddress;
     //interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaSmsAddressHelper;
     //interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaSmsSubaddress;
+    interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaInboundSmsHandler;
+    interface Elastos.Droid.Internal.Telephony.Gsm.IGsmInboundSmsHandler;
     interface Elastos.Droid.Internal.Telephony.Uicc.IIccFileHandler;
     interface Elastos.Droid.Internal.Telephony.Uicc.IAdnRecord;
     interface Elastos.Droid.Internal.Telephony.Uicc.IAdnRecordCache;
@@ -379,7 +381,12 @@ module
             interface ISmsAddress;
         }
 
+        [local]
         class CSmsBroadcastUndelivered {
+            constructor(
+                [in] IContext* context,
+                [in] IGsmInboundSmsHandler* gsmInboundSmsHandler,
+                [in] ICdmaInboundSmsHandler* cdmaInboundSmsHandler);
 
             interface IRunnable;
         }

@@ -1,16 +1,31 @@
 
 #include "elastos/droid/internal/telephony/SmsMessageBase.h"
+#include <elastos/utility/Arrays.h>
 
 using Elastos::Droid::Internal::Telephony::ISmsConstants;
 using Elastos::Droid::Internal::Telephony::ISmsHeader;
-using Elastos::Utility::IArrayList;
-
 using Elastos::Droid::Provider::ITelephony;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Telephony {
+
+SmsMessageBase::SubmitPduBase::~SubmitPduBase()
+{}
+
+ECode SmsMessageBase::SubmitPduBase::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = String("SubmitPdu: encodedScAddress = ")
+            + Arrays::ToString(mEncodedScAddress)
+            + ", encodedMessage = "
+            + Arrays::ToString(mEncodedMessage);
+    return NOERROR;
+}
 
 /**
  * Base class declaring the specific methods and members for SmsMessage.

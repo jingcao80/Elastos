@@ -17,6 +17,22 @@ class SmsMessageBase
     , public ISmsMessageBase
 {
 public:
+    // TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.
+    class SubmitPduBase: public Object
+    {
+    public:
+        virtual ~SubmitPduBase() = 0;
+
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* result);
+
+    public:
+        AutoPtr<ArrayOf<Byte> > mEncodedScAddress; // Null if not applicable.
+        AutoPtr<ArrayOf<Byte> > mEncodedMessage;
+    };
+
+public:
     CAR_INTERFACE_DECL()
 
     SmsMessageBase();

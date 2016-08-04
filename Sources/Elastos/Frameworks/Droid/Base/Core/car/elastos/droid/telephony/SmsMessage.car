@@ -89,8 +89,8 @@ module
         GetMessageBody(
             [out] String* result);
 
-        // GetMessageClass(
-        //     [out] MessageClass* result);
+        GetMessageClass(
+            [out] SmsMessageMessageClass* result);
 
         GetDisplayMessageBody(
             [out] String* result);

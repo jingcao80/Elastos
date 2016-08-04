@@ -138,10 +138,19 @@ SMSDispatcher::SmsTracker::SmsTracker()
     system->GetCurrentTimeMillis(&mTimestamp);
 }
 
-ECode SMSDispatcher::SmsTracker::constructor(IHashMap* data, IPendingIntent* sentIntent,
-        IPendingIntent* deliveryIntent, IPackageInfo* appInfo, String destAddr, String format,
-        IAtomicInteger32* unsentPartCount, IAtomicBoolean* anyPartFailed, IUri* messageUri,
-        ISmsHeader* smsHeader, Boolean isExpectMore, Int32 validityPeriod)
+ECode SMSDispatcher::SmsTracker::constructor(
+    /* [in] */ IHashMap* data,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent,
+    /* [in] */ IPackageInfo* appInfo,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& format,
+    /* [in] */ IAtomicInteger32* unsentPartCount,
+    /* [in] */ IAtomicBoolean* anyPartFailed,
+    /* [in] */ IUri* messageUri,
+    /* [in] */ ISmsHeader* smsHeader,
+    /* [in] */ Boolean isExpectMore,
+    /* [in] */ Int32 validityPeriod)
 {
     mData = data;
     mSentIntent = sentIntent;
@@ -451,38 +460,38 @@ const Int32 SMSDispatcher::PREMIUM_RULE_USE_NETWORK = 2;
 const Int32 SMSDispatcher::PREMIUM_RULE_USE_BOTH = 3;
 
 /** SMS send complete. */
-const Int32 SMSDispatcher::EVENT_SEND_SMS_COMPLETE = 2;
+const Int32 SMSDispatcher::EVENT_SEND_SMS_COMPLETE;
 
 /** Retry sending a previously failed SMS message */
-const Int32 SMSDispatcher::EVENT_SEND_RETRY = 3;
+const Int32 SMSDispatcher::EVENT_SEND_RETRY;
 
 
 /** Confirmation required for sending a large number of messages. */
-const Int32 SMSDispatcher::EVENT_SEND_LIMIT_REACHED_CONFIRMATION = 4;
+const Int32 SMSDispatcher::EVENT_SEND_LIMIT_REACHED_CONFIRMATION;
 
 /** Send the user confirmed SMS */
-const Int32 SMSDispatcher::EVENT_SEND_CONFIRMED_SMS = 5;  // accessed from inner class
+const Int32 SMSDispatcher::EVENT_SEND_CONFIRMED_SMS;  // accessed from inner class
 
 /** Don't send SMS (user did not confirm). */
-const Int32 SMSDispatcher::EVENT_STOP_SENDING = 7;        // accessed from inner class
+const Int32 SMSDispatcher::EVENT_STOP_SENDING;        // accessed from inner class
 
 /** Confirmation required for third-party apps sending to an SMS short code. */
-const Int32 SMSDispatcher::EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE = 8;
+const Int32 SMSDispatcher::EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE;
 
 /** Confirmation required for third-party apps sending to an SMS short code. */
-const Int32 SMSDispatcher::EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE = 9;
+const Int32 SMSDispatcher::EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE;
 
 /** Handle status report from {@code CdmaInboundSmsHandler}. */
-const Int32 SMSDispatcher::EVENT_HANDLE_STATUS_REPORT = 10;
+const Int32 SMSDispatcher::EVENT_HANDLE_STATUS_REPORT;
 
 /** Radio is ON */
-const Int32 SMSDispatcher::EVENT_RADIO_ON = 11;
+const Int32 SMSDispatcher::EVENT_RADIO_ON;
 
 /** IMS registration/SMS format changed */
-const Int32 SMSDispatcher::EVENT_IMS_STATE_CHANGED = 12;
+const Int32 SMSDispatcher::EVENT_IMS_STATE_CHANGED;
 
 /** Callback from RIL_REQUEST_IMS_REGISTRATION_STATE */
-const Int32 SMSDispatcher::EVENT_IMS_STATE_DONE = 13;
+const Int32 SMSDispatcher::EVENT_IMS_STATE_DONE;
 
 // other
 const Int32 SMSDispatcher::EVENT_NEW_ICC_SMS; // = 14;
@@ -590,11 +599,12 @@ ECode SMSDispatcher::Dispose()
  * from {@link com.android.internal.telephony.cdma.CdmaInboundSmsHandler}.
  * @param o the SmsMessage containing the status report
  */
-void SMSDispatcher::HandleStatusReport(
+ECode SMSDispatcher::HandleStatusReport(
     /* [in] */ IInterface* o)
 {
     assert(0 && "TODO");
 //    Rlog->D(TAG, "HandleStatusReport() called with no subclass.");
+    return NOERROR;
 }
 
 /**

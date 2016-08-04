@@ -77,15 +77,15 @@ ECode CdmaSMSDispatcher::HandleCdmaStatusReport(
 {
     VALIDATE_NOT_NULL(sms);
     Int32 count;
-    deliveryPendingList->GetSize(&count);
+    mDeliveryPendingList->GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
-         deliveryPendingList->Get(i, (IInterface**)&obj);
+        mDeliveryPendingList->Get(i, (IInterface**)&obj);
         AutoPtr<SmsTracker> tracker = (SmsTracker*)(IObject*)obj.Get();
 
         if (tracker->mMessageRef == ((SmsMessage*)sms)->mMessageRef) {
             // Found it.  Remove from list and broadcast.
-            deliveryPendingList->Remove(i);
+            mDeliveryPendingList->Remove(i);
             // Update the message status (COMPLETE)
             tracker->UpdateSentMessageStatus(mContext, ITelephonyTextBasedSmsColumns::STATUS_COMPLETE);
 
