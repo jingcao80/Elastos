@@ -1,0 +1,55 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+    namespace Widget {
+    namespace MultiwaveView {
+
+    interface IWaveManager {
+        SetRadius(
+            [in] Float r);
+
+        GetRadius(
+            [out] Float* r);
+
+        SetAlpha(
+            [in] Float a);
+
+        GetAlpha(
+            [out] Float* a);
+    }
+
+    interface IGlowManager {
+        SetX(
+            [in] Float x1);
+
+        GetX(
+            [out] Float* x1);
+
+        SetY(
+            [in] Float y1);
+
+        GetY(
+            [out] Float* y1);
+
+        SetAlpha(
+            [in] Float a);
+
+        GetAlpha(
+            [out] Float* a);
+
+        SetRadius(
+            [in] Float r);
+
+        GetRadius(
+            [out] Float* r);
+    }
+
+    } // namespace MultiwaveView
+    } // namespace Widget
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

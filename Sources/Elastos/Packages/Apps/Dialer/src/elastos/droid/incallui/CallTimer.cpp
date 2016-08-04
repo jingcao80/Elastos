@@ -3,8 +3,6 @@
 #include "elastos/droid/os/SystemClock.h"
 #include "Elastos.Droid.Internal.h"
 
-using Elastos::Droid::Internal::Utility::IPreconditions;
-using Elastos::Droid::Internal::Utility::CPreconditions;
 using Elastos::Droid::Os::SystemClock;
 
 namespace Elastos {
@@ -30,9 +28,9 @@ CallTimer::CallTimer(
     , mInterval(0)
     , mRunning(FALSE)
 {
-    AutoPtr<IPreconditions> preconditions;
-    CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
-    if (FAILED(preconditions->CheckNotNull(callback))) assert(0);
+    Handler::constructor(FALSE);
+
+    assert(callback != NULL);
 
     mCallback = callback;
     mInternalCallback = (IRunnable*)new CallTimerCallback(this);

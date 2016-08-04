@@ -563,16 +563,17 @@ ECode CGSMPhone::AcceptCall(
     /* [in] */ Int32 videoState)
 {
     AutoPtr<IImsPhone> imsPhone = mImsPhone;
-    AutoPtr<ICall> c;
-    IPhone::Probe(imsPhone)->GetRingingCall((ICall**)&c);
-    AutoPtr<IImsPhoneCall> call = IImsPhoneCall::Probe(c);
-    Boolean b;
-    if ( imsPhone != NULL && (ICall::Probe(call)->IsRinging(&b), b) ) {
-        IPhone::Probe(imsPhone)->AcceptCall(videoState);
+    if (imsPhone != NULL) {
+        AutoPtr<ICall> call;
+        IPhone::Probe(imsPhone)->GetRingingCall((ICall**)&call);
+        Boolean ringing;
+        if (call->IsRinging(&ringing), ringing) {
+            IPhone::Probe(imsPhone)->AcceptCall(videoState);
+            return NOERROR;
+        }
     }
-    else {
-        ((CGsmCallTracker*)mCT.Get())->AcceptCall();
-    }
+
+    ((CGsmCallTracker*)mCT.Get())->AcceptCall();
     return NOERROR;
 }
 
@@ -580,16 +581,16 @@ ECode CGSMPhone::DeflectCall(
     /* [in] */ const String& number)
 {
     AutoPtr<IImsPhone> imsPhone = mImsPhone;
-    AutoPtr<ICall> c;
-    IPhone::Probe(imsPhone)->GetRingingCall((ICall**)&c);
-    AutoPtr<IImsPhoneCall> call = IImsPhoneCall::Probe(c);
-    Boolean b;
-    if ( imsPhone != NULL && (ICall::Probe(call)->IsRinging(&b), b) ) {
-        IPhone::Probe(imsPhone)->DeflectCall(number);
-    }
-    else {
+    if (imsPhone == NULL) {
         // throw new CallStateException("Deflect call NOT supported in GSM!");
         return E_CALL_STATE_EXCEPTION;
+    }
+
+    AutoPtr<ICall> call;
+    IPhone::Probe(imsPhone)->GetRingingCall((ICall**)&call);
+    Boolean ringing;
+    if (call->IsRinging(&ringing), ringing) {
+        IPhone::Probe(imsPhone)->DeflectCall(number);
     }
     return NOERROR;
 }

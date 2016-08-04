@@ -367,16 +367,16 @@ ECode InCallPresenter::OnIncomingCall(
     InCallState newState = StartOrFinishUi(InCallState_INCOMING);
     InCallState oldState = mInCallState;
 
-    Logger::I("InCallPresenter", "Phone switching state: %s -> %s", oldState, newState);
+    Logger::I("InCallPresenter", "Phone switching state: %d -> %d", oldState, newState);
     mInCallState = newState;
 
     AutoPtr<IIterator> it;
-    mListeners->GetIterator((IIterator**)&it);
+    mIncomingCallListeners->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> object;
         it->GetNext((IInterface**)&object);
-        IIncomingCallListener* listener = IIncomingCallListener::Probe(it);
+        IIncomingCallListener* listener = IIncomingCallListener::Probe(object);
         listener->OnIncomingCall(oldState, mInCallState, call);
     }
     return NOERROR;

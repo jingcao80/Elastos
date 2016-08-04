@@ -53,3 +53,6 @@ SOURCES += GlowPadView.cpp
 SOURCES += PointCloud.cpp
 SOURCES += TargetDrawable.cpp
 SOURCES += Tweener.cpp
+SOURCES += CGlowManager.cpp
+SOURCES += CWaveManager.cpp
+SOURCES += CTargetDrawable.cpp

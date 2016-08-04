@@ -168,6 +168,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    DialpadFragment();
+
     // @Override
     CARAPI OnClick(
         /* [in] */ IView* v);

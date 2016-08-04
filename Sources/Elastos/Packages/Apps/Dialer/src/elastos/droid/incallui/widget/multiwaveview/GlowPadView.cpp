@@ -37,6 +37,11 @@ namespace MultiwaveView {
 //=====================================================================
 //   GlowPadView::AnimationBundle
 //=====================================================================
+GlowPadView::AnimationBundle::AnimationBundle()
+{
+    ArrayList::constructor();
+}
+
 void GlowPadView::AnimationBundle::Start()
 {
     if (mSuspended) return; // ignore attempts to start animations
@@ -264,8 +269,8 @@ ECode GlowPadView::constructor(
     if (handle != NULL) handle->GetResourceId(&resourceId);
     else resourceId = R::drawable::ic_incall_audio_handle;
     SetHandleDrawable(resourceId);
-    mOuterRing = new TargetDrawable(res,
-            GetResourceId(a, R::styleable::GlowPadView_outerRingDrawable), 1);
+    CTargetDrawable::NewByFriend(res,
+            GetResourceId(a, R::styleable::GlowPadView_outerRingDrawable), 1, (CTargetDrawable**)&mOuterRing);
 
     a->GetBoolean(R::styleable::GlowPadView_alwaysTrackFinger, FALSE, &mAlwaysTrackFinger);
 
@@ -768,8 +773,9 @@ AutoPtr<IArrayList> GlowPadView::LoadDrawableArray(
         AutoPtr<ITypedValue> value;
         array->PeekValue(i, (ITypedValue**)&value);
         Int32 resId = 0;
-        AutoPtr<TargetDrawable> target = new TargetDrawable(res, value != NULL ? (value->GetResourceId(&resId), resId) : 0, 3);
-        drawables->Add((IObject*)target);
+        AutoPtr<ITargetDrawable> target;
+        CTargetDrawable::New(res, value != NULL ? (value->GetResourceId(&resId), resId) : 0, 3, (ITargetDrawable**)&target);
+        drawables->Add(target);
     }
     array->Recycle();
     return drawables;
@@ -826,7 +832,8 @@ void GlowPadView::SetHandleDrawable(
 {
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
-    mHandleDrawable = new TargetDrawable(res, resourceId, 2);
+    mHandleDrawable = NULL;
+    CTargetDrawable::NewByFriend(res, resourceId, 1, (CTargetDrawable**)&mHandleDrawable);
     mHandleDrawable->SetState(TargetDrawable::STATE_INACTIVE);
 }
 

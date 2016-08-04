@@ -108,7 +108,8 @@ ECode CConferenceManagerFragment::OnCreateView(
         mConferenceCallList->Set(i, IViewGroup::Probe(v));
     }
 
-    assert(0 && "TODO");
+    // TODO:
+    // assert(0 && "TODO");
     // mContactPhotoManager =
     //         ContactPhotoManager.getInstance(getActivity().getApplicationContext());
 

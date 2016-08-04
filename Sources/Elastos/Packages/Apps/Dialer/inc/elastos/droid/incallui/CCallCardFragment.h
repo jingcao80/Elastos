@@ -270,7 +270,7 @@ private:
 
     private:
         AutoPtr<IViewGroup> mParent;
-        IViewTreeObserver* mObserver;
+        AutoPtr<IViewTreeObserver> mObserver;
         CCallCardFragment* mHost;
     };
 

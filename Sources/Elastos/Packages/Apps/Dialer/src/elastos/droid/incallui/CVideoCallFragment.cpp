@@ -230,7 +230,9 @@ CVideoCallFragment::CVideoCallFragment()
     , mIsLandscape(FALSE)
     , mWidth(DIMENSIONS_NOT_SET)
     , mHeight(DIMENSIONS_NOT_SET)
-{}
+{
+    BaseFragment::constructor();
+}
 
 ECode CVideoCallFragment::OnCreate(
     /* [in] */ IBundle* savedInstanceState)

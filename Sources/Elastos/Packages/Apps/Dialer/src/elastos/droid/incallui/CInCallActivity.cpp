@@ -259,7 +259,7 @@ ECode CInCallActivity::OnPause()
 ECode CInCallActivity::OnStop()
 {
     Logger::D("CInCallActivity", "onStop()...");
-    return CInCallActivity::OnStop();
+    return Activity::OnStop();
 }
 
 ECode CInCallActivity::OnDestroy()
@@ -268,7 +268,7 @@ ECode CInCallActivity::OnDestroy()
 
     InCallPresenter::GetInstance()->SetActivity(NULL);
 
-    return CInCallActivity::OnDestroy();
+    return Activity::OnDestroy();
 }
 
 Boolean CInCallActivity::IsForegroundActivity()
@@ -287,7 +287,7 @@ ECode CInCallActivity::Finish()
 
     // skip finish if we are still showing a dialog.
     if (!HasPendingErrorDialog() && !mAnswerFragment->HasPendingDialogs()) {
-        return CInCallActivity::Finish();
+        return Activity::Finish();
     }
     return NOERROR;
 }
@@ -553,8 +553,9 @@ void CInCallActivity::InternalResolveIntent(
                 CBundle::New((IBundle**)&extras);
             }
 
-            AutoPtr<IPoint> touchPoint;
-            assert(0 && "TODO");
+            // TODO
+            // assert(0 && "TODO");
+            // AutoPtr<IPoint> touchPoint;
             // if (TouchPointManager.getInstance().hasValidPoint()) {
             //     // Use the most immediate touch point in the InCallUi if available
             //     touchPoint = TouchPointManager.getInstance().getPoint();
@@ -565,7 +566,7 @@ void CInCallActivity::InternalResolveIntent(
             //         touchPoint = (Point) extras.getParcelable(TouchPointManager.TOUCH_POINT);
             //     }
             // }
-            mCallCardFragment->AnimateForNewOutgoingCall(touchPoint);
+            // mCallCardFragment->AnimateForNewOutgoingCall(touchPoint);
 
             /*
              * If both a phone account handle and a list of phone accounts to choose from are

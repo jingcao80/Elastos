@@ -25,19 +25,24 @@ class PointCloud
 public:
     class WaveManager
         : public Object
+        , public IWaveManager
     {
     public:
         WaveManager();
 
-        CARAPI_(void) SetRadius(
+        CAR_INTERFACE_DECL()
+
+        CARAPI SetRadius(
             /* [in] */ Float r);
 
-        CARAPI_(Float) GetRadius();
+        CARAPI GetRadius(
+            /* [out] */ Float* r);
 
-        CARAPI_(void) SetAlpha(
+        CARAPI SetAlpha(
             /* [in] */ Float a);
 
-        CARAPI_(Float) GetAlpha();
+        CARAPI GetAlpha(
+            /* [out] */ Float* a);
 
     public:
         Float mRadius;
@@ -47,29 +52,36 @@ public:
 
     class GlowManager
         : public Object
+        , public IGlowManager
     {
     public:
         GlowManager();
 
-        CARAPI_(void) SetX(
+        CAR_INTERFACE_DECL()
+
+        CARAPI SetX(
             /* [in] */ Float x1);
 
-        CARAPI_(Float) GetX();
+        CARAPI GetX(
+            /* [out] */ Float* x1);
 
-        CARAPI_(void) SetY(
+        CARAPI SetY(
             /* [in] */ Float y1);
 
-        CARAPI_(Float) GetY();
+        CARAPI GetY(
+            /* [out] */ Float* y1);
 
-        CARAPI_(void) SetAlpha(
+        CARAPI SetAlpha(
             /* [in] */ Float a);
 
-        CARAPI_(Float) GetAlpha();
+        CARAPI GetAlpha(
+            /* [out] */ Float* a);
 
-        CARAPI_(void) SetRadius(
+        CARAPI SetRadius(
             /* [in] */ Float r);
 
-        CARAPI_(Float) GetRadius();
+        CARAPI GetRadius(
+            /* [out] */ Float* r);
 
     public:
         Float mX;

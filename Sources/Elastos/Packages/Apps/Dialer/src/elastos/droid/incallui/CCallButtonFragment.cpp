@@ -101,7 +101,7 @@ CCallButtonFragment::CCallButtonFragment()
 
 ECode CCallButtonFragment::constructor()
 {
-    return NOERROR;
+    return BaseFragment::constructor();
 }
 
 AutoPtr<IPresenter> CCallButtonFragment::CreatePresenter()

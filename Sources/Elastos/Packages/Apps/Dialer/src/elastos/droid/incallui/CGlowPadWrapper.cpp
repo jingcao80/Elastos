@@ -41,7 +41,7 @@ const Int32 CGlowPadWrapper::PING_MESSAGE_WHAT;
 const Boolean CGlowPadWrapper::ENABLE_PING_AUTO_REPEAT;
 const Int64 CGlowPadWrapper::PING_REPEAT_DELAY_MS;
 
-CAR_INTERFACE_IMPL(CGlowPadWrapper, GlowPadView, IGlowPadViewOnTriggerListener)
+CAR_INTERFACE_IMPL_2(CGlowPadWrapper, GlowPadView, IGlowPadWrapper, IGlowPadViewOnTriggerListener)
 
 CAR_OBJECT_IMPL(CGlowPadWrapper)
 

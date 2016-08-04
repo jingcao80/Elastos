@@ -169,7 +169,7 @@ void ProximitySensor::UpdateProximitySensorMode()
     CAudioStateHelper::AcquireSingleton((IAudioStateHelper**)&helper);
     String str;
     helper->AudioRouteToString(audioMode, &str);
-    Logger::I(TAG, "%s keybrd:%d dpad:%d offhook:%d hor:%d ui:%d aud:",
+    Logger::I(TAG, "%s keybrd:%d dpad:%d offhook:%d hor:%d ui:%d aud:%s",
             TO_CSTR(this), mIsHardKeyboardOpen, mDialpadVisible, mIsPhoneOffhook, horizontal, mUiShowing, str.string());
 
     if (mIsPhoneOffhook && !screenOnImmediately) {

@@ -276,6 +276,11 @@ CAR_INTERFACE_IMPL_6(DialpadFragment, BaseFragment
         , IViewOnHoverListener
         , IViewOnClickListener)
 
+DialpadFragment::DialpadFragment()
+{
+    BaseFragment::constructor();
+}
+
 ECode DialpadFragment::OnClick(
     /* [in] */ IView* v)
 {

@@ -47,6 +47,8 @@ using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Droid::Telecom::IPhoneCapabilities;
 using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IVideoProfileVideoStateHelper;
+using Elastos::Droid::Telecom::CVideoProfileVideoStateHelper;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
@@ -876,16 +878,16 @@ ECode CallsManager::AnswerCall(
         // We do not update the UI until we get confirmation of the answer() through
         // {@link #markCallAsActive}.
         ((Call*) call)->Answer(videoState);
+        Boolean isVideo;
         Boolean isPluggedIn;
-        mWiredHeadsetManager->IsPluggedIn(&isPluggedIn);
         Boolean isBluetoothDeviceAvailable;
-        mCallAudioManager->IsBluetoothDeviceAvailable(&isBluetoothDeviceAvailable);
-        assert(0 && "IVideoProfileVideoStateHelper");
-        // if (VideoProfile::VideoState::IsVideo(videoState) &&
-        //     !isPluggedIn &&
-        //     !isBluetoothDeviceAvailable) {
-        //     call->SetStartWithSpeakerphoneOn(TRUE);
-        // }
+        AutoPtr<IVideoProfileVideoStateHelper> helper;
+        CVideoProfileVideoStateHelper::AcquireSingleton((IVideoProfileVideoStateHelper**)&helper);
+        if ((helper->IsVideo(videoState, &isVideo), isVideo) &&
+            (mWiredHeadsetManager->IsPluggedIn(&isPluggedIn), !isPluggedIn) &&
+            (mCallAudioManager->IsBluetoothDeviceAvailable(&isBluetoothDeviceAvailable), !isBluetoothDeviceAvailable)) {
+            call->SetStartWithSpeakerphoneOn(TRUE);
+        }
     }
     return NOERROR;
 }

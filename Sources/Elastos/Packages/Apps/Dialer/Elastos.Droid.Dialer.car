@@ -120,6 +120,8 @@ module
     merge("car/elastos/droid/incallui/VideoCallPresenter.car");
     merge("car/elastos/droid/incallui/service/PhoneNumberService.car");
     merge("car/elastos/droid/incallui/widget/multiwaveview/GlowPadView.car");
+    merge("car/elastos/droid/incallui/widget/multiwaveview/PointCloud.car");
+    merge("car/elastos/droid/incallui/widget/multiwaveview/TargetDrawable.car");
     merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadView.car");
@@ -149,7 +151,7 @@ module
 //    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
 //    using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
 //    using interface Elastos.Droid.Content.ILoader;
-//    using interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Droid.Content.Res.IResources;
 //    using interface Elastos.Droid.Database.IContentObserver;
 //    using interface Elastos.Droid.Database.Sqlite.ISQLiteOpenHelper;
 //    using interface Elastos.Droid.Net.IUri;
@@ -1523,6 +1525,32 @@ module
         interface IVideoCallUi;
         interface IUi;
     }
+
+    namespace Widget {
+    namespace MultiwaveView {
+
+    class CWaveManager {
+        interface IWaveManager;
+    }
+
+    class CGlowManager {
+        interface IGlowManager;
+    }
+
+    class CTargetDrawable {
+        constructor(
+            [in] IResources* res,
+            [in] Int32 resId,
+            [in] Int32 count);
+
+        constructor(
+            [in] ITargetDrawable* other);
+
+        interface ITargetDrawable;
+    }
+
+    } // namespace MultiwaveView
+    } // namespace Widget
 
     } //namespace InCallUI
     } //namespace Droid

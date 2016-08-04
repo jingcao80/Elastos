@@ -387,7 +387,6 @@ CCallCardFragment::CCallCardFragment()
 
 ECode CCallCardFragment::constructor()
 {
-    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
     return BaseFragment::constructor();
 }
 

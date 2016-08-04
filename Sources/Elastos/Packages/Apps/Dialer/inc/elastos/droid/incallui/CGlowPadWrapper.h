@@ -18,6 +18,7 @@ namespace InCallUI {
 
 CarClass(CGlowPadWrapper)
     , public GlowPadView
+    , public IGlowPadWrapper
     , public IGlowPadViewOnTriggerListener
 {
 private:

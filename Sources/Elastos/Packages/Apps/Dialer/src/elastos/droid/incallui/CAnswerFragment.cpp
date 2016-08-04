@@ -77,10 +77,9 @@ CAR_INTERFACE_IMPL(CAnswerFragment::DialogCancelListener, Object, IDialogInterfa
 ECode CAnswerFragment::DialogCancelListener::OnCancel(
     /* [in] */ IDialogInterface* dialog)
 {
-    assert(0 && "TODO");
-    // if (mGlowpad != null) {
-    //     mGlowpad.startPing();
-    // }
+    if (mHost->mGlowpad != NULL) {
+        mHost->mGlowpad->StartPing();
+    }
     mHost->DismissCannedResponsePopup();
     AnswerPresenter* present = (AnswerPresenter*)mHost->GetPresenter().Get();
     present->OnDismissDialog();
@@ -202,19 +201,18 @@ ECode CAnswerFragment::OnCreateView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    // TODO:
-    // assert(0 && "TODO");
-    // mGlowpad = (GlowPadWrapper) inflater.inflate(R.layout.answer_fragment,
-    //         container, false);
+
+    AutoPtr<IView> v;
+    inflater->Inflate(Elastos::Droid::Dialer::R::layout::answer_fragment, container, FALSE, (IView**)&v);
+    mGlowpad = (CGlowPadWrapper*)IGlowPadWrapper::Probe(v);
 
     Logger::D("CAnswerFragment", "Creating view for answer fragment %s", TO_CSTR(this));
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     Logger::D("CAnswerFragment", "Created from activity %s", TO_CSTR(activity));
-    // mGlowpad.setAnswerListener(this);
+    mGlowpad->SetAnswerListener(this);
 
-    // *view = mGlowpad;
-    *view = NULL;
+    *view = v;
     REFCOUNT_ADD(*view);
     return NOERROR;
 }
@@ -222,11 +220,10 @@ ECode CAnswerFragment::OnCreateView(
 ECode CAnswerFragment::OnDestroyView()
 {
     Logger::D("CAnswerFragment", "onDestroyView");
-    assert(0 && "TODO");
-    // if (mGlowpad != null) {
-    //     mGlowpad.stopPing();
-    //     mGlowpad = null;
-    // }
+    if (mGlowpad != NULL) {
+        mGlowpad->StopPing();
+        mGlowpad = NULL;
+    }
     BaseFragment::OnDestroyView();
     return NOERROR;
 }
@@ -239,13 +236,12 @@ ECode CAnswerFragment::ShowAnswerUi(
     v->SetVisibility(show ? IView::VISIBLE : IView::GONE);
 
     Logger::D("CAnswerFragment", "Show answer UI: %d", show);
-    assert(0 && "TODO");
-    // if (show) {
-    //     mGlowpad.startPing();
-    // }
-    // else {
-    //     mGlowpad.stopPing();
-    // }
+    if (show) {
+        mGlowpad->StartPing();
+    }
+    else {
+        mGlowpad->StopPing();
+    }
     return NOERROR;
 }
 
@@ -303,14 +299,13 @@ ECode CAnswerFragment::ShowTargets(
             break;
     }
 
-    assert(0 && "TODO");
-    // if (targetResourceId != mGlowpad.getTargetResourceId()) {
-    //     mGlowpad.setTargetResources(targetResourceId);
-    //     mGlowpad.setTargetDescriptionsResourceId(targetDescriptionsResourceId);
-    //     mGlowpad.setDirectionDescriptionsResourceId(directionDescriptionsResourceId);
-    //     mGlowpad.setHandleDrawable(handleDrawableResourceId);
-    //     mGlowpad.reset(false);
-    // }
+    if (targetResourceId != mGlowpad->GetTargetResourceId()) {
+        mGlowpad->SetTargetResources(targetResourceId);
+        mGlowpad->SetTargetDescriptionsResourceId(targetDescriptionsResourceId);
+        mGlowpad->SetDirectionDescriptionsResourceId(directionDescriptionsResourceId);
+        mGlowpad->SetHandleDrawable(handleDrawableResourceId);
+        mGlowpad->Reset(FALSE);
+    }
     return NOERROR;
 }
 

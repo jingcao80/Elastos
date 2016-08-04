@@ -20,8 +20,13 @@ namespace MultiwaveView {
 
 class TargetDrawable
     : public Object
+    , public ITargetDrawable
 {
 public:
+    CAR_INTERFACE_DECL();
+
+    TargetDrawable();
+
     /**
      * This is changed from the framework version to pass in the number of drawables in the
      * container. The framework version relies on private api's to get the count from
@@ -31,13 +36,13 @@ public:
      * @param resId
      * @param count The number of drawables in the resource.
      */
-    TargetDrawable(
+    CARAPI constructor(
         /* [in] */ IResources* res,
         /* [in] */ Int32 resId,
         /* [in] */ Int32 count);
 
-    TargetDrawable(
-        /* [in] */ TargetDrawable* other);
+    CARAPI constructor(
+        /* [in] */ ITargetDrawable* other);
 
     CARAPI_(void) SetDrawable(
         /* [in] */ IResources* res,
@@ -67,13 +72,13 @@ public:
     CARAPI_(void) SetY(
         /* [in] */ Float y);
 
-    CARAPI_(void) SetScaleX(
+    CARAPI SetScaleX(
         /* [in] */ Float x);
 
-    CARAPI_(void) SetScaleY(
+    CARAPI SetScaleY(
         /* [in] */ Float y);
 
-    CARAPI_(void) SetAlpha(
+    CARAPI SetAlpha(
         /* [in] */ Float alpha);
 
     CARAPI_(Float) GetX();

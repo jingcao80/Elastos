@@ -62,9 +62,9 @@ ECode InCallAdapter::InCallAdapterHandler::HandleMessage(
         // try {
         ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         Boolean rejectWithMessage = args->mArgi1 == 1;
-        String textMessage;
-        IObject::Probe(args->mArg2)->ToString(&textMessage);
         if (call != NULL) {
+            String textMessage;
+            if (args->mArg2 != NULL) IObject::Probe(args->mArg2)->ToString(&textMessage);
             mHost->mCallsManager->RejectCall(call, rejectWithMessage, textMessage);
         } else {
             Log::W("InCallAdapter", "setRingback, unknown call id: %s", TO_CSTR(args->mArg1));

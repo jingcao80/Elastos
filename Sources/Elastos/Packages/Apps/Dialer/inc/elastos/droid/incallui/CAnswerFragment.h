@@ -9,6 +9,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "_Elastos_Droid_InCallUI_CAnswerFragment.h"
 #include "elastos/droid/incallui/BaseFragment.h"
+#include "elastos/droid/incallui/CGlowPadWrapper.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IAlertDialog;
@@ -271,7 +272,7 @@ private:
 
     AutoPtr<IList> mSmsResponses;
 
-//    AutoPtr<GlowPadWrapper> mGlowpad;
+    AutoPtr<CGlowPadWrapper> mGlowpad;
 };
 
 } // namespace InCallUI

@@ -2,6 +2,8 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/incallui/widget/multiwaveview/PointCloud.h"
+#include "elastos/droid/incallui/widget/multiwaveview/CGlowManager.h"
+#include "elastos/droid/incallui/widget/multiwaveview/CWaveManager.h"
 #include "elastos/droid/utility/FloatMath.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -22,38 +24,50 @@ namespace MultiwaveView {
 //=====================================================================
 //               PointCloud::WaveManager
 //=====================================================================
+CAR_INTERFACE_IMPL(PointCloud::WaveManager, Object, IWaveManager)
+
 PointCloud::WaveManager::WaveManager()
     : mRadius(50.0f)
     , mWidth(200.0f)
     , mAlpha(0.0f)
 {}
 
-void PointCloud::WaveManager::SetRadius(
+ECode PointCloud::WaveManager::SetRadius(
     /* [in] */ Float r)
 {
     mRadius = r;
+    return NOERROR;
 }
 
-Float PointCloud::WaveManager::GetRadius()
+ECode PointCloud::WaveManager::GetRadius(
+    /* [out] */ Float* r)
 {
-    return mRadius;
+    VALIDATE_NOT_NULL(r);
+    *r = mRadius;
+    return NOERROR;
 }
 
-void PointCloud::WaveManager::SetAlpha(
+ECode PointCloud::WaveManager::SetAlpha(
     /* [in] */ Float a)
 {
     mAlpha = a;
+    return NOERROR;
 }
 
-Float PointCloud::WaveManager::GetAlpha()
+ECode PointCloud::WaveManager::GetAlpha(
+    /* [out] */ Float* a)
 {
-    return mAlpha;
+    VALIDATE_NOT_NULL(a);
+    *a = mAlpha;
+    return NOERROR;
 }
 
 
 //=====================================================================
 //               PointCloud::GlowManager
 //=====================================================================
+CAR_INTERFACE_IMPL(PointCloud::GlowManager, Object, IGlowManager)
+
 PointCloud::GlowManager::GlowManager()
     : mX(0.0f)
     , mY(0.0f)
@@ -61,48 +75,64 @@ PointCloud::GlowManager::GlowManager()
     , mAlpha(0.0f)
 {}
 
-void PointCloud::GlowManager::SetX(
+ECode PointCloud::GlowManager::SetX(
     /* [in] */ Float x1)
 {
     mX = x1;
+    return NOERROR;
 }
 
-Float PointCloud::GlowManager::GetX()
+ECode PointCloud::GlowManager::GetX(
+    /* [out] */ Float* x1)
 {
-    return mX;
+    VALIDATE_NOT_NULL(x1);
+    *x1 = mX;
+    return NOERROR;
 }
 
-void PointCloud::GlowManager::SetY(
+ECode PointCloud::GlowManager::SetY(
     /* [in] */ Float y1)
 {
     mY = y1;
+    return NOERROR;
 }
 
-Float PointCloud::GlowManager::GetY()
+ECode PointCloud::GlowManager::GetY(
+    /* [out] */ Float* y1)
 {
-    return mY;
+    VALIDATE_NOT_NULL(y1);
+    *y1 = mY;
+    return NOERROR;
 }
 
-void PointCloud::GlowManager::SetAlpha(
+ECode PointCloud::GlowManager::SetAlpha(
     /* [in] */ Float a)
 {
     mAlpha = a;
+    return NOERROR;
 }
 
-Float PointCloud::GlowManager::GetAlpha()
+ECode PointCloud::GlowManager::GetAlpha(
+    /* [out] */ Float* a)
 {
-    return mAlpha;
+    VALIDATE_NOT_NULL(a);
+    *a = mAlpha;
+    return NOERROR;
 }
 
-void PointCloud::GlowManager::SetRadius(
+ECode PointCloud::GlowManager::SetRadius(
     /* [in] */ Float r)
 {
     mRadius = r;
+    return NOERROR;
 }
 
-Float PointCloud::GlowManager::GetRadius()
+ECode PointCloud::GlowManager::GetRadius(
+    /* [out] */ Float* r)
 {
-    return mRadius;
+    VALIDATE_NOT_NULL(r);
+    *r = mRadius;
+    return NOERROR;
 }
 
 
@@ -137,8 +167,12 @@ PointCloud::PointCloud(
 {
     CArrayList::New((IArrayList**)&mPointCloud);
 
-    mWaveManager = new WaveManager();
-    mGlowManager = new GlowManager();
+    AutoPtr<CWaveManager> wm;
+    CWaveManager::NewByFriend((CWaveManager**)&wm);
+    mWaveManager = (WaveManager*)wm.Get();
+    AutoPtr<CGlowManager> gm;
+    CGlowManager::NewByFriend((CGlowManager**)&gm);
+    mGlowManager = (GlowManager*)gm.Get();
 
     CPaint::New((IPaint**)&mPaint);
     mPaint->SetFilterBitmap(TRUE);

@@ -46,37 +46,37 @@ AutoPtr<ArrayOf<Int32> > TargetDrawable::STATE_ACTIVE = Init_STATE_ACTIVE();
 AutoPtr<ArrayOf<Int32> > TargetDrawable::STATE_INACTIVE = Init_STATE_INACTIVE();
 AutoPtr<ArrayOf<Int32> > TargetDrawable::STATE_FOCUSED = Init_STATE_FOCUSED();
 
-TargetDrawable::TargetDrawable(
+CAR_INTERFACE_IMPL(TargetDrawable, Object, ITargetDrawable);
+
+TargetDrawable::TargetDrawable()
+    : mTranslationX(0.0f)
+    , mTranslationY(0.0f)
+    , mPositionX(0.0f)
+    , mPositionY(0.0f)
+    , mScaleX(1.0f)
+    , mScaleY(1.0f)
+    , mAlpha(1.0f)
+    , mEnabled(TRUE)
+    , mResourceId(0)
+    , mNumDrawables(1)
+{}
+
+ECode TargetDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ Int32 resId,
     /* [in] */ Int32 count)
-    : mTranslationX(0.0f)
-    , mTranslationY(0.0f)
-    , mPositionX(0.0f)
-    , mPositionY(0.0f)
-    , mScaleX(1.0f)
-    , mScaleY(1.0f)
-    , mAlpha(1.0f)
-    , mEnabled(TRUE)
-    , mResourceId(resId)
-    , mNumDrawables(count)
 {
+    mResourceId = resId;
+    mNumDrawables = count;
     SetDrawable(res, resId);
+    return NOERROR;
 }
 
-TargetDrawable::TargetDrawable(
-    /* [in] */ TargetDrawable* other)
-    : mTranslationX(0.0f)
-    , mTranslationY(0.0f)
-    , mPositionX(0.0f)
-    , mPositionY(0.0f)
-    , mScaleX(1.0f)
-    , mScaleY(1.0f)
-    , mAlpha(1.0f)
-    , mEnabled(TRUE)
-    , mResourceId(other->mResourceId)
-    , mNumDrawables(1)
+ECode TargetDrawable::constructor(
+    /* [in] */ ITargetDrawable* _other)
 {
+    TargetDrawable* other = (TargetDrawable*)_other;
+    mResourceId = other->mResourceId;
     // Mutate the drawable so we can animate shared drawable properties.
     if (other->mDrawable != NULL) {
         other->mDrawable->Mutate();
@@ -84,6 +84,7 @@ TargetDrawable::TargetDrawable(
     }
     ResizeDrawables();
     SetState(STATE_INACTIVE);
+    return NOERROR;
 }
 
 void TargetDrawable::SetDrawable(
@@ -190,22 +191,25 @@ void TargetDrawable::SetY(
     mTranslationY = y;
 }
 
-void TargetDrawable::SetScaleX(
+ECode TargetDrawable::SetScaleX(
     /* [in] */ Float x)
 {
     mScaleX = x;
+    return NOERROR;
 }
 
-void TargetDrawable::SetScaleY(
+ECode TargetDrawable::SetScaleY(
     /* [in] */ Float y)
 {
     mScaleY = y;
+    return NOERROR;
 }
 
-void TargetDrawable::SetAlpha(
+ECode TargetDrawable::SetAlpha(
     /* [in] */ Float alpha)
 {
     mAlpha = alpha;
+    return NOERROR;
 }
 
 Float TargetDrawable::GetX()

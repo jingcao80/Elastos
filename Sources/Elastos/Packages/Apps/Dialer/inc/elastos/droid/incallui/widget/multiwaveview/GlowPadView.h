@@ -7,7 +7,7 @@
 #include "Elastos.Droid.View.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/incallui/widget/multiwaveview/PointCloud.h"
-#include "elastos/droid/incallui/widget/multiwaveview/TargetDrawable.h"
+#include "elastos/droid/incallui/widget/multiwaveview/CTargetDrawable.h"
 #include "elastos/droid/incallui/widget/multiwaveview/Tweener.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/view/View.h>
@@ -47,6 +47,8 @@ private:
         : public ArrayList
     {
     public:
+        AnimationBundle();
+
         CARAPI_(void) Start();
 
         CARAPI_(void) Cancel();
@@ -497,8 +499,8 @@ private:
     AutoPtr<IArrayList> mTargetDescriptions;
     AutoPtr<IArrayList> mDirectionDescriptions;
     AutoPtr<IGlowPadViewOnTriggerListener> mOnTriggerListener;
-    AutoPtr<TargetDrawable> mHandleDrawable;
-    AutoPtr<TargetDrawable> mOuterRing;
+    AutoPtr<CTargetDrawable> mHandleDrawable;
+    AutoPtr<CTargetDrawable> mOuterRing;
     AutoPtr<IVibrator> mVibrator;
 
     Int32 mFeedbackCount;
