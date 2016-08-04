@@ -38,6 +38,7 @@ namespace MultiwaveView {
 //   GlowPadView::AnimationBundle
 //=====================================================================
 GlowPadView::AnimationBundle::AnimationBundle()
+    : mSuspended(FALSE)
 {
     ArrayList::constructor();
 }
@@ -295,6 +296,7 @@ ECode GlowPadView::constructor(
     Int32 tSize = 0;
     if (mTargetDrawables == NULL || (mTargetDrawables->GetSize(&tSize), tSize) == 0) {
         // throw new IllegalStateException("Must specify at least one target drawable");
+        Logger::E(TAG, "Must specify at least one target drawable");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -305,6 +307,7 @@ ECode GlowPadView::constructor(
         outValue->GetResourceId(&resourceId);
         if (resourceId == 0) {
             // throw new IllegalStateException("Must specify target descriptions");
+            Logger::E(TAG, "Must specify target descriptions");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         SetTargetDescriptionsResourceId(resourceId);
@@ -317,6 +320,7 @@ ECode GlowPadView::constructor(
         outValue->GetResourceId(&resourceId);
         if (resourceId == 0) {
             // throw new IllegalStateException("Must specify direction descriptions");
+            Logger::E(TAG, "Must specify direction descriptions");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         SetDirectionDescriptionsResourceId(resourceId);
