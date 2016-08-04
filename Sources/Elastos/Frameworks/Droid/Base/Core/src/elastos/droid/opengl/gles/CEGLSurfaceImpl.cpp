@@ -61,6 +61,7 @@ ECode CEGLSurfaceImpl::Equals(
     /* [in] */ IInterface *o,
     /* [out] */ Boolean *equals)
 {
+    VALIDATE_NOT_NULL(equals)
     if (Probe(EIID_IInterface) == o) return TRUE;
     if (o == NULL || IEGLSurface::Probe(o) == NULL) return FALSE;
 
@@ -73,6 +74,7 @@ ECode CEGLSurfaceImpl::Equals(
 ECode CEGLSurfaceImpl::GetHashCode(
     /* [out] */ Int32 *hashCode)
 {
+    VALIDATE_NOT_NULL(hashCode)
     *hashCode = mEGLSurface;
     return NOERROR;
 }

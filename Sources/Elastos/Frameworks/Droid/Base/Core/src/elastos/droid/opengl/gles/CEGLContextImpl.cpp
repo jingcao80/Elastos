@@ -6,6 +6,7 @@
 using Elastos::Droid::Opengl::Gles::CEGLImpl;
 using Elastosx::Microedition::Khronos::Opengles::IGL10;
 using Elastosx::Microedition::Khronos::Opengles::IGL11;
+using Elastosx::Microedition::Khronos::Egl::EIID_IEGLContext;
 
 namespace Elastos {
 namespace Droid {
@@ -111,7 +112,7 @@ ECode CEGLContextImpl::constructor(
     return NOERROR;
 }
 
-Int32 CEGLContextImpl::GetEGLContext()
+Int64 CEGLContextImpl::GetEGLContext()
 {
     return mEGLContext;
 }

@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/CImageWallpaper.h"
 #include "R.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.RenderScript.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -28,7 +29,13 @@ using Elastos::Droid::Opengl::IGLES20;
 using Elastos::Droid::Opengl::CGLES20;
 using Elastos::Droid::Opengl::IGLUtils;
 using Elastos::Droid::Opengl::CGLUtils;
+using Elastos::Droid::Opengl::Gles::CEGL10Helper;
+using Elastos::Droid::Opengl::Gles::CEGLContextHelper;
+using Elastos::Droid::RenderScript::IMatrix4f;
+using Elastos::Droid::RenderScript::CMatrix4f;
 using Elastosx::Microedition::Khronos::Egl::IEGL;
+using Elastosx::Microedition::Khronos::Egl::IEGL10Helper;
+using Elastosx::Microedition::Khronos::Egl::IEGLContextHelper;
 using Elastos::Core::CString;
 using Elastos::IO::ByteOrder;
 using Elastos::IO::IBuffer;
@@ -44,7 +51,7 @@ namespace Droid {
 namespace SystemUI {
 
 static const String TAG("CImageWallpaper");
-const String CImageWallpaper::GL_LOG_TAG("ImageWallpaperGL");
+const String CImageWallpaper::GL_LOG_TAG("CImageWallpaperGL");
 const Boolean CImageWallpaper::DEBUG = FALSE;
 const String CImageWallpaper::PROPERTY_KERNEL_QEMU("ro.kernel.qemu");
 const Boolean CImageWallpaper::FIXED_SIZED_SURFACE = TRUE;
@@ -598,10 +605,10 @@ Boolean CImageWallpaper::DrawableEngine::DrawWallpaperWithOpenGL(
 
     AutoPtr<IRect> frame;
     sh->GetSurfaceFrame((IRect**)&frame);
-    // AutoPtr<IMatrix4f> ortho;
-    // CMatrix4f::New((IMatrix4f**)&ortho);
+    AutoPtr<IMatrix4f> ortho;
+    CMatrix4f::New((IMatrix4f**)&ortho);
     frame->GetWidth(&tw); frame->GetHeight(&th);
-    // ortho->LoadOrtho(0.0f, tw, th, 0.0f, -1.0f, 1.0f);
+    ortho->LoadOrtho(0.0f, tw, th, 0.0f, -1.0f, 1.0f);
 
     AutoPtr<IFloatBuffer> triangleVertices = CreateMesh(left, top, right, bottom);
 
@@ -626,7 +633,7 @@ Boolean CImageWallpaper::DrawableEngine::DrawWallpaperWithOpenGL(
     gles20->GlEnableVertexAttribArray(attribTexCoords);
     gles20->GlUniform1i(uniformTexture, 0);
     AutoPtr<ArrayOf<Float> > oa;
-    // ortho->GetArray((ArrayOf<Float>**)&oa);
+    ortho->GetArray((ArrayOf<Float>**)&oa);
     gles20->GlUniformMatrix4fv(uniformProjection, 1, FALSE, oa, 0);
 
     CheckGlError();
@@ -653,7 +660,6 @@ Boolean CImageWallpaper::DrawableEngine::DrawWallpaperWithOpenGL(
     CheckEglError();
 
     FinishGL();
-
     return status;
 }
 
@@ -842,8 +848,15 @@ void CImageWallpaper::DrawableEngine::CheckGlError()
 
 void CImageWallpaper::DrawableEngine::FinishGL()
 {
+    AutoPtr<IEGL10Helper> helper;
+    CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
+    AutoPtr<IEGLSurface> EGL_NO_SURFACE;
+    helper->GetNoSurface((IEGLSurface**)&EGL_NO_SURFACE);
+    AutoPtr<IEGLContext> EGL_NO_CONTEXT;
+    helper->GetNoContext((IEGLContext**)&EGL_NO_CONTEXT);
+
     Boolean bval;
-    mEgl->EglMakeCurrent(mEglDisplay, NULL, NULL, NULL, &bval);
+    mEgl->EglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT, &bval);
     mEgl->EglDestroySurface(mEglDisplay, mEglSurface, &bval);
     mEgl->EglDestroyContext(mEglDisplay, mEglContext, &bval);
     mEgl->EglTerminate(mEglDisplay, &bval);
@@ -860,14 +873,26 @@ Boolean CImageWallpaper::DrawableEngine::InitGL(
     String str;
     Boolean bval;
 
-    // AutoPtr<IEGLContextHelper> ch;
-    // CEGLContextHelper::AcquireSingleton((IEGLContextHelper**)&ch);
+    AutoPtr<IEGLContextHelper> ch;
+    CEGLContextHelper::AcquireSingleton((IEGLContextHelper**)&ch);
     AutoPtr<IEGL> egl;
-    // ch->GetEGL((IEGL**)&egl);
+    ch->GetEGL((IEGL**)&egl);
     mEgl = IEGL10::Probe(egl);
+    assert(mEgl != NULL);
 
-    mEgl->EglGetDisplay(IEGL14::_EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEglDisplay);
-    if (mEglDisplay == NULL) {
+    AutoPtr<IEGL10Helper> helper;
+    CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
+    AutoPtr<IEGLDisplay> EGL_NO_DISPLAY;
+    helper->GetNoDisplay((IEGLDisplay**)&EGL_NO_DISPLAY);
+    AutoPtr<IEGLSurface> EGL_NO_SURFACE;
+    helper->GetNoSurface((IEGLSurface**)&EGL_NO_SURFACE);
+    AutoPtr<IInterface> EGL_DEFAULT_DISPLAY;
+    helper->GetDefaultDisplay((IInterface**)&EGL_DEFAULT_DISPLAY);
+    AutoPtr<IEGLContext> EGL_NO_CONTEXT;
+    helper->GetNoContext((IEGLContext**)&EGL_NO_CONTEXT);
+
+    mEgl->EglGetDisplay(EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEglDisplay);
+    if (mEglDisplay == NULL || mEglDisplay == EGL_NO_DISPLAY) {
         mEgl->EglGetError(&error);
         glutils->GetEGLErrorString(error, &str);
         Logger::W(GL_LOG_TAG, "eglGetDisplay failed  %s", str.string());
@@ -890,7 +915,7 @@ Boolean CImageWallpaper::DrawableEngine::InitGL(
     }
 
     mEglContext = CreateContext(mEgl, mEglDisplay, mEglConfig);
-    if (mEglContext == NULL) {
+    if (mEglContext == NULL || mEglContext == EGL_NO_CONTEXT) {
         mEgl->EglGetError(&error);
         glutils->GetEGLErrorString(error, &str);
         Logger::W(GL_LOG_TAG, "createContext failed  %s", str.string());
@@ -911,7 +936,7 @@ Boolean CImageWallpaper::DrawableEngine::InitGL(
     surfaceHolder->GetSurfaceFrame((IRect**)&frame);
     gles20->GlGetIntegerv(IGLES20::_GL_MAX_TEXTURE_SIZE, maxSize, 0);
 
-    mEgl->EglMakeCurrent(mEglDisplay, NULL, NULL, NULL, &bval);
+    mEgl->EglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT, &bval);
     mEgl->EglDestroySurface(mEglDisplay, tmpSurface, &bval);
 
     Int32 fw, fh;
@@ -926,7 +951,7 @@ Boolean CImageWallpaper::DrawableEngine::InitGL(
     }
 
     mEgl->EglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, NULL, (IEGLSurface**)&mEglSurface);
-    if (mEglSurface == NULL || mEglSurface == NULL) {
+    if (mEglSurface == NULL || mEglSurface == EGL_NO_SURFACE) {
         mEgl->EglGetError(&error);
         glutils->GetEGLErrorString(error, &str);
         if (error == IEGL14::EGL_BAD_NATIVE_WINDOW || error == IEGL14::EGL_BAD_ALLOC) {
@@ -953,12 +978,20 @@ AutoPtr<IEGLContext> CImageWallpaper::DrawableEngine::CreateContext(
     /* [in] */ IEGLDisplay* eglDisplay,
     /* [in] */ IEGLConfig* eglConfig)
 {
+    AutoPtr<IEGL10Helper> helper;
+    CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
+    AutoPtr<IEGLContext> EGL_NO_CONTEXT;
+    helper->GetNoContext((IEGLContext**)&EGL_NO_CONTEXT);
+
     AutoPtr<ArrayOf<Int32> > attrib_list = ArrayOf<Int32>::Alloc(3);
     attrib_list->Set(0, IEGL14::EGL_CONTEXT_CLIENT_VERSION);
     attrib_list->Set(1, 2);
     attrib_list->Set(2, IEGL14::EGL_NONE);
     AutoPtr<IEGLContext> ctx;
-    egl->EglCreateContext(eglDisplay, eglConfig, NULL, attrib_list, (IEGLContext**)&ctx);
+    ECode ec = egl->EglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, attrib_list, (IEGLContext**)&ctx);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "EglCreateContext failed, ec=%08x", ec);
+    }
     return ctx;
 }
 
@@ -983,6 +1016,7 @@ AutoPtr<IEGLConfig> CImageWallpaper::DrawableEngine::ChooseEglConfig()
     else if ((*configsCount)[0] > 0) {
         return (*configs)[0];
     }
+    Logger::I(TAG, " >>> No configs");
     return NULL;
 }
 
@@ -997,7 +1031,7 @@ AutoPtr<ArrayOf<Int32> > CImageWallpaper::DrawableEngine::GetConfig()
     cfg->Set(10, IEGL14::EGL_DEPTH_SIZE);   cfg->Set(11, 0);
     cfg->Set(12, IEGL14::EGL_STENCIL_SIZE);   cfg->Set(13, 0);
     cfg->Set(14, IEGL14::EGL_CONFIG_CAVEAT);   cfg->Set(15, IEGL14::EGL_NONE);
-    cfg->Set(16, IEGL14::EGL_RED_SIZE);
+    cfg->Set(16, IEGL14::EGL_NONE);
     return cfg;
 }
 

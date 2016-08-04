@@ -1,25 +1,36 @@
 
 module
 {
+    //merge("renderscript/BaseObj.car");
+    //merge("renderscript/Allocation.car");
+    //merge("renderscript/RenderScript.car");
+    //merge("renderscript/Element.car");
+    merge("renderscript/Matrix4f.car");
 
-    merge("renderscript/BaseObj.car");
-    merge("renderscript/Allocation.car");
-    merge("renderscript/RenderScript.car");
-    merge("renderscript/Element.car");
 
     namespace Elastos {
     namespace Droid {
     namespace RenderScript {
 
-    singleton class CRenderScriptHelper {
-        interface IRenderScriptHelper;
-    }
+    //singleton class CRenderScriptHelper {
+    //    interface IRenderScriptHelper;
+    //}
 
-    class CElementBuilder {
+    //class CElementBuilder {
+    //    constructor(
+    //        [in] IRenderScript* rs);
+    //
+    //    interface IElementBuilder;
+    //}
+
+    [deprecated]
+    class CMatrix4f {
+        constructor();
+
         constructor(
-            [in] IRenderScript* rs);
+            [in] ArrayOf<Float>* dataArray);
 
-        interface IElementBuilder;
+        interface IMatrix4f;
     }
 
     } // RenderScript

@@ -45,6 +45,7 @@ DIRS += utility
 DIRS += webkit
 DIRS += widget
 DIRS += wifi
+DIRS += renderscript
 
 #DIRS += privacy
 #DIRS += googleremote

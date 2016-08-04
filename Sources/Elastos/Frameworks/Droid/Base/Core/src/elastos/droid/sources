@@ -73,6 +73,7 @@ ELASTOS_LIBS += view/view.lib
 ELASTOS_LIBS += webkit/webkit.lib
 ELASTOS_LIBS += widget/widget.lib
 ELASTOS_LIBS += wifi/wifi.lib
+ELASTOS_LIBS += renderscript/renderscript.lib
 
 #ELASTOS_LIBS += wifidisplay/wifidisplay.lib
 #ELASTOS_LIBS += statusbar/statusbar.lib

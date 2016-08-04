@@ -22,3 +22,4 @@ SOURCES += CEGLSurfaceImpl.cpp
 SOURCES += CGLImpl.cpp
 SOURCES += CEGL10Helper.cpp
 SOURCES += CEGLImpl.cpp
+SOURCES += CEGLContextHelper.cpp

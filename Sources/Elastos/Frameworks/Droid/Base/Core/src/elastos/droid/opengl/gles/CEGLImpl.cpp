@@ -7,7 +7,7 @@
 #include "elastos/droid/opengl/gles/CEGLConfigImpl.h"
 #include "elastos/droid/opengl/gles/CEGL10Helper.h"
 
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <opengl/EGL/egl_display.h>
 #include <EGL/egl.h>
@@ -34,11 +34,14 @@ using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::ISurfaceView;
 using Elastos::Droid::View::ISurfaceHolder;
 using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
 namespace Gles {
+
+static const String TAG("CEGLImpl");
 
 static const Int32 gNull_attrib_base[] = {EGL_NONE};
 
@@ -114,12 +117,13 @@ ECode CEGLImpl::EglChooseConfig(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     if (display == NULL
         || !validAttribList(attrib_list)
         || (configs != NULL && configs->GetLength() < config_size)
         || (num_config != NULL && num_config->GetLength() < 1)) {
-        *result = FALSE;
+        Logger::E(TAG, "EglChooseConfig invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -138,10 +142,10 @@ ECode CEGLImpl::EglChooseConfig(
         (*num_config)[0] = num;
     }
 
-    if (success && configs!=NULL) {
-        for (Int32 i=0 ; i<num ; i++) {
+    if (success && configs != NULL) {
+        for (Int32 i = 0 ; i < num ; i++) {
             AutoPtr<XIEGLConfig> obj;
-            CEGLConfigImpl::New((Int64)nativeConfigs[i], (XIEGLConfig**)&obj);
+            CEGLConfigImpl::New(reinterpret_cast<Int64>(nativeConfigs[i]), (XIEGLConfig**)&obj);
             configs->Set(i, obj);
         }
     }
@@ -159,6 +163,7 @@ ECode CEGLImpl::EglCopyBuffers(
 
     if (display == NULL || surface == NULL || native_pixmap == NULL) {
         *result = FALSE;
+        Logger::E(TAG, "EglCopyBuffers invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     // TODO: Implement this
@@ -178,6 +183,7 @@ ECode CEGLImpl::EglCreateContext(
     if (display == NULL || config == NULL || share_context == NULL
         || !validAttribList(attrib_list)) {
         *context = NULL;
+        Logger::E(TAG, "EglCreateContext invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -185,18 +191,14 @@ ECode CEGLImpl::EglCreateContext(
     EGLContext shr = getContext(share_context);
     Int32* base = beginNativeAttribList(attrib_list);
     EGLContext ctx = eglCreateContext(dpy, cnf, shr, base);
-    Int64 eglContextId = (Int64)ctx;
+    Int64 eglContextId = reinterpret_cast<Int64>(ctx);
     if (eglContextId == 0) {
         AutoPtr<IEGL10Helper> helper;
         CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
-        AutoPtr<XIEGLContext> noContext;
-        helper->GetNoContext((XIEGLContext**)&noContext);
-        *context = noContext;
-        REFCOUNT_ADD(*context);
-        return NOERROR;
+        return helper->GetNoContext(context);
     }
-    CEGLContextImpl::New(eglContextId, context);
-    return NOERROR;
+
+    return CEGLContextImpl::New(eglContextId, context);
 }
 
 ECode CEGLImpl::EglCreatePbufferSurface(
@@ -210,24 +212,20 @@ ECode CEGLImpl::EglCreatePbufferSurface(
     if (display == NULL || config == NULL
         || !validAttribList(attrib_list)) {
         *surface = NULL;
+        Logger::E(TAG, "EglCreatePbufferSurface invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
     EGLConfig  cnf = getConfig(config);
     Int32* base = beginNativeAttribList(attrib_list);
     EGLSurface sur = eglCreatePbufferSurface(dpy, cnf, base);
-    Int64 eglSurfaceId =(Int64)sur;
+    Int64 eglSurfaceId = reinterpret_cast<Int64>(sur);
     if (eglSurfaceId == 0) {
         AutoPtr<IEGL10Helper> helper;
         CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
-        AutoPtr<XIEGLSurface> noSurface;
-        helper->GetNoSurface((XIEGLSurface**)&noSurface);
-        *surface = noSurface;
-        REFCOUNT_ADD(*surface);
-        return NOERROR;
+        return helper->GetNoSurface(surface);
     }
-    CEGLSurfaceImpl::New(eglSurfaceId, surface);
-    return NOERROR;
+    return CEGLSurfaceImpl::New(eglSurfaceId, surface);
 }
 
 ECode CEGLImpl::EglCreatePixmapSurface(
@@ -244,6 +242,7 @@ ECode CEGLImpl::EglCreatePixmapSurface(
     if (display == NULL || config == NULL || native_pixmap == NULL
         || !validAttribList(attrib_list)) {
         *surface = NULL;
+        Logger::E(TAG, "EglCreatePixmapSurface invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -259,7 +258,7 @@ ECode CEGLImpl::EglCreatePixmapSurface(
     }
     SkPixelRef* ref = nativeBitmap ? nativeBitmap->pixelRef() : 0;
     if (ref == NULL) {
-        SLOGGERE("CEGLImpl", "Bitmap has no PixelRef")
+        Logger::E("CEGLImpl", "Bitmap has no PixelRef");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -278,8 +277,8 @@ ECode CEGLImpl::EglCreatePixmapSurface(
     EGLSurface sur = eglCreatePixmapSurface(dpy, cnf, &pixmap, base);
 
     if (sur != EGL_NO_SURFACE) {
-        out_sur->mEGLSurface = (Int64)sur;
-        out_sur->mNativePixelRef = (Int64)ref;
+        out_sur->mEGLSurface = reinterpret_cast<Int64>(sur);
+        out_sur->mNativePixelRef = reinterpret_cast<Int64>(ref);
     } else {
         ref->unlockPixels();
         SkSafeUnref(ref);
@@ -288,11 +287,7 @@ ECode CEGLImpl::EglCreatePixmapSurface(
     if (out_sur->mEGLSurface == 0) {
         AutoPtr<IEGL10Helper> helper;
         CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
-        AutoPtr<XIEGLSurface> noSurface;
-        helper->GetNoSurface((XIEGLSurface**)&noSurface);
-        *surface = noSurface;
-        REFCOUNT_ADD(*surface);
-        return NOERROR;
+        return helper->GetNoSurface(surface);
     }
     *surface = out_sur;
     REFCOUNT_ADD(*surface)
@@ -328,21 +323,16 @@ ECode CEGLImpl::EglCreateWindowSurface(
         FAIL_RETURN(_eglCreateWindowSurfaceTexture(display, config,
                 native_window, attrib_list, &eglSurfaceId));
     } else {
-        SLOGGERE("CEGLImpl", String("eglCreateWindowSurface() can only be called with an instance of ") +
-            "Surface, SurfaceView, SurfaceHolder or SurfaceTexture at the moment.")
+        Logger::E("CEGLImpl", "eglCreateWindowSurface() can only be called with an instance of "
+            "Surface, SurfaceView, SurfaceHolder or SurfaceTexture at the moment.");
     }
 
     if (eglSurfaceId == 0) {
         AutoPtr<IEGL10Helper> helper;
         CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
-        AutoPtr<XIEGLSurface> noSurface;
-        helper->GetNoSurface((XIEGLSurface**)&noSurface);
-        *surface = noSurface;
-        REFCOUNT_ADD(*surface);
-        return NOERROR;
+        return helper->GetNoSurface(surface);
     }
-    CEGLSurfaceImpl::New(eglSurfaceId, surface);
-    return NOERROR;
+    return CEGLSurfaceImpl::New(eglSurfaceId, surface);
 }
 
 ECode CEGLImpl::EglDestroyContext(
@@ -354,6 +344,7 @@ ECode CEGLImpl::EglDestroyContext(
 
     if (display == NULL || context == NULL) {
         *result = FALSE;
+        Logger::E(TAG, "EglDestroyContext invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -371,6 +362,7 @@ ECode CEGLImpl::EglDestroySurface(
 
     if (display == NULL || surface == NULL) {
         *result = FALSE;
+        Logger::E(TAG, "EglDestroySurface invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -399,6 +391,7 @@ ECode CEGLImpl::EglGetConfigAttrib(
     if (display == NULL || config == NULL
         || (value == NULL || value->GetLength() < 1)) {
         *result = FALSE;
+        Logger::E(TAG, "EglGetConfigAttrib invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -425,6 +418,7 @@ ECode CEGLImpl::EglGetConfigs(
     if (display == NULL || (configs != NULL && configs->GetLength() < config_size)
         || (num_config != NULL && num_config->GetLength() < 1)) {
         *result = FALSE;
+        Logger::E(TAG, "EglGetConfigs invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -458,17 +452,13 @@ ECode CEGLImpl::EglGetCurrentContext(
     if (value == 0) {
         AutoPtr<IEGL10Helper> helper;
         CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
-        AutoPtr<XIEGLContext> noContext;
-        helper->GetNoContext((XIEGLContext**)&noContext);
-        *context = noContext;
-        REFCOUNT_ADD(*context);
-        return NOERROR;
+        return helper->GetNoContext(context);
     }
     if (mContext->mEGLContext != value) {
         mContext = NULL;
-        CEGLContextImpl::New(value, (XIEGLContext**)&mContext);
+        CEGLContextImpl::NewByFriend(value, (CEGLContextImpl**)&mContext);
     }
-    *context = mContext;
+    *context = (XIEGLContext*)mContext.Get();
     REFCOUNT_ADD(*context);
     return NOERROR;
 }
@@ -482,17 +472,13 @@ ECode CEGLImpl::EglGetCurrentDisplay(
     if (value == 0) {
         AutoPtr<IEGL10Helper> helper;
         CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
-        AutoPtr<XIEGLDisplay> noDisplay;
-        helper->GetNoDisplay((XIEGLDisplay**)&noDisplay);
-        *display = noDisplay;
-        REFCOUNT_ADD(*display);
-        return NOERROR;
+        return helper->GetNoDisplay(display);
     }
     if (mDisplay->mEGLDisplay != value){
         mDisplay = NULL;
-        CEGLDisplayImpl::New(value, (XIEGLDisplay**)&mDisplay);
+        CEGLDisplayImpl::NewByFriend(value, (CEGLDisplayImpl**)&mDisplay);
     }
-    *display = mDisplay;
+    *display = (XIEGLDisplay*)mDisplay.Get();
     REFCOUNT_ADD(*display);
     return NOERROR;
 }
@@ -521,9 +507,9 @@ ECode CEGLImpl::EglGetCurrentSurface(
     }
     if (mSurface->mEGLSurface != value){
         mSurface = NULL;
-        CEGLSurfaceImpl::New(value, (XIEGLSurface**)&mSurface);
+        CEGLSurfaceImpl::NewByFriend(value, (CEGLSurfaceImpl**)&mSurface);
     }
-    *surface = mSurface;
+    *surface = (XIEGLSurface*)mSurface.Get();
     REFCOUNT_ADD(*surface);
     return NOERROR;
 }
@@ -534,21 +520,17 @@ ECode CEGLImpl::EglGetDisplay(
 {
     VALIDATE_NOT_NULL(display)
 
-    Int64 value = (Int64)eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    Int64 value = reinterpret_cast<Int64>(eglGetDisplay(EGL_DEFAULT_DISPLAY));
     if (value == 0) {
         AutoPtr<IEGL10Helper> helper;
         CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
-        AutoPtr<XIEGLDisplay> noDisplay;
-        helper->GetNoDisplay((XIEGLDisplay**)&noDisplay);
-        *display = noDisplay;
-        REFCOUNT_ADD(*display);
-        return NOERROR;
+        return helper->GetNoDisplay(display);
     }
     if (mDisplay->mEGLDisplay != value) {
         mDisplay = NULL;
-        CEGLDisplayImpl::New(value, (XIEGLDisplay**)&mDisplay);
+        CEGLDisplayImpl::NewByFriend(value, (CEGLDisplayImpl**)&mDisplay);
     }
-    *display = mDisplay;
+    *display = (XIEGLDisplay*)mDisplay.Get();
     REFCOUNT_ADD(*display);
     return NOERROR;
 }
@@ -573,6 +555,7 @@ ECode CEGLImpl::EglInitialize(
     if (display == NULL || (major_minor != NULL &&
             major_minor->GetLength() < 2)) {
         *result = FALSE;
+        Logger::E(TAG, "EglInitialize invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -602,6 +585,7 @@ ECode CEGLImpl::EglMakeCurrent(
 
     if (display == NULL || draw == NULL || read == NULL || context == NULL) {
         *result = FALSE;
+        Logger::E(TAG, "EglMakeCurrent invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -624,6 +608,7 @@ ECode CEGLImpl::EglQueryContext(
     if (display == NULL || context == NULL || value == NULL
         || value->GetLength() < 1) {
         *result = FALSE;
+        Logger::E(TAG, "EglQueryContext invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -667,6 +652,7 @@ ECode CEGLImpl::EglQuerySurface(
     if (display == NULL || surface == NULL || value == NULL
         || value->GetLength() < 1) {
         *result = FALSE;
+        Logger::E(TAG, "EglQuerySurface invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -757,7 +743,7 @@ android::sp<ANativeWindow> CEGLImpl::SurfaceGetNativeWindow(
 {
     ISurface* surface = ISurface::Probe(surfaceObj);
     if (surface == NULL) {
-        SLOGGERE("CEGLImpl", "CEGLImpl::SurfaceGetNativeWindow")
+        Logger::E("CEGLImpl", "CEGLImpl::SurfaceGetNativeWindow");
         return NULL;
     }
     android::sp<android::Surface> sur;
@@ -781,28 +767,29 @@ ECode CEGLImpl::_eglCreateWindowSurface(
     if (display == NULL || config == NULL
         || !validAttribList(attrib_list)) {
         *rst = 0;
+        Logger::E(TAG, "_eglCreateWindowSurface invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
     EGLContext cnf = getConfig(config);
     android::sp<ANativeWindow> window;
     if (native_window == NULL) {
-        SLOGGERE("CEGLImpl", "_eglCreateWindowSurface native_window == NULL");
+        Logger::E("CEGLImpl", "_eglCreateWindowSurface native_window == NULL");
 not_valid_surface:
-        SLOGGERE("CEGLImpl", "Make sure the SurfaceView or associated SurfaceHolder has a valid Surface")
+        Logger::E("CEGLImpl", "Make sure the SurfaceView or associated SurfaceHolder has a valid Surface");
         *rst = 0;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     window = SurfaceGetNativeWindow(native_window);
     if (window == NULL) {
-        SLOGGERE("CEGLImpl", "_eglCreateWindowSurface window == NULL");
+        Logger::E("CEGLImpl", "_eglCreateWindowSurface window == NULL");
         goto not_valid_surface;
     }
 
     Int32* base = beginNativeAttribList(attrib_list);
     EGLSurface sur = eglCreateWindowSurface(dpy, cnf, window.get(), base);
-    *rst = (Int64)sur;
+    *rst = reinterpret_cast<Int64>(sur);
     return NOERROR;
 }
 
@@ -819,6 +806,7 @@ ECode CEGLImpl::_eglCreateWindowSurfaceTexture(
     if (display == NULL || config == NULL
         || !validAttribList(attrib_list)) {
         *rst = 0;
+        Logger::E(TAG, "_eglCreateWindowSurfaceTexture invalid argument.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLDisplay dpy = getDisplay(display);
@@ -826,7 +814,7 @@ ECode CEGLImpl::_eglCreateWindowSurfaceTexture(
     android::sp<ANativeWindow> window;
     if (native_window == 0) {
 not_valid_surface:
-        SLOGGERE("CEGLImpl", "Make sure the SurfaceTexture is valid")
+        Logger::E("CEGLImpl", "Make sure the SurfaceTexture is valid");
         *rst = 0;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -841,7 +829,7 @@ not_valid_surface:
 
     Int32* base = beginNativeAttribList(attrib_list);
     EGLSurface sur = eglCreateWindowSurface(dpy, cnf, window.get(), base);
-    *rst = (Int64)sur;
+    *rst = reinterpret_cast<Int64>(sur);
     return NOERROR;
 }
 

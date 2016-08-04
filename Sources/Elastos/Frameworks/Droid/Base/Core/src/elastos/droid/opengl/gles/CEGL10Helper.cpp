@@ -11,32 +11,31 @@ namespace Droid {
 namespace Opengl {
 namespace Gles {
 
-static AutoPtr<CEGLDisplayImpl> InitDisplay()
+static AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLDisplay> InitDisplay()
 {
-    AutoPtr<CEGLDisplayImpl> display;
-    CEGLDisplayImpl::NewByFriend(0, (CEGLDisplayImpl**)&display);
-    return display;
+    AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLDisplay> obj;
+    CEGLDisplayImpl::New(0, (Elastosx::Microedition::Khronos::Egl::IEGLDisplay**)&obj);
+    return obj;
 }
 
-static AutoPtr<CEGLContextImpl> InitContext()
+static AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLContext> InitContext()
 {
-    AutoPtr<CEGLContextImpl> display;
-    CEGLContextImpl::NewByFriend(0, (CEGLContextImpl**)&display);
-    return display;
+    AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLContext> obj;
+    CEGLContextImpl::New(0, (Elastosx::Microedition::Khronos::Egl::IEGLContext**)&obj);
+    return obj;
 }
 
-static AutoPtr<CEGLSurfaceImpl> InitSurface()
+static AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLSurface> InitSurface()
 {
-    AutoPtr<CEGLSurfaceImpl> display;
-    CEGLSurfaceImpl::NewByFriend(0, (CEGLSurfaceImpl**)&display);
-    return display;
+    AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLSurface> obj;
+    CEGLSurfaceImpl::New(0, (Elastosx::Microedition::Khronos::Egl::IEGLSurface**)&obj);
+    return obj;
 }
-
 
 AutoPtr<IInterface> CEGL10Helper::sDefaultDisplay = NULL;
-AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLDisplay> CEGL10Helper::sNoDisplay = InitDisplay().Get();
-AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLContext> CEGL10Helper::sNoContext = InitContext().Get();
-AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLSurface> CEGL10Helper::sNoSurface = InitSurface().Get();
+AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLDisplay> CEGL10Helper::sNoDisplay = InitDisplay();
+AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLContext> CEGL10Helper::sNoContext = InitContext();
+AutoPtr<Elastosx::Microedition::Khronos::Egl::IEGLSurface> CEGL10Helper::sNoSurface = InitSurface();
 
 CAR_INTERFACE_IMPL(CEGL10Helper, Singleton, IEGL10Helper)
 CAR_SINGLETON_IMPL(CEGL10Helper)

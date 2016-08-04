@@ -50,6 +50,7 @@ module
     interface Elastosx.Microedition.Khronos.Egl.IEGL10Helper;
     interface Elastosx.Microedition.Khronos.Egl.IEGLConfig;
     interface Elastosx.Microedition.Khronos.Egl.IEGLContext;
+    interface Elastosx.Microedition.Khronos.Egl.IEGLContextHelper;
     interface Elastosx.Microedition.Khronos.Egl.IEGLDisplay;
     interface Elastosx.Microedition.Khronos.Egl.IEGLSurface;
     interface Elastosx.Microedition.Khronos.Opengles.IGL;
@@ -201,30 +202,30 @@ module
         constructor(
             [in] Int64 cfg);
 
-        interface IEGLConfig;
+        interface Elastosx.Microedition.Khronos.Egl.IEGLConfig;
     }
 
     class CEGLContextImpl {
         constructor(
-            [in] Int32 ctx);
+            [in] Int64 ctx);
 
-        interface IEGLContext;
+        interface Elastosx.Microedition.Khronos.Egl.IEGLContext;
     }
 
     class CEGLDisplayImpl {
         constructor(
-            [in] Int32 dpy);
+            [in] Int64 dpy);
 
-        interface IEGLDisplay;
+        interface Elastosx.Microedition.Khronos.Egl.IEGLDisplay;
     }
 
     class CEGLSurfaceImpl {
         constructor();
 
         constructor(
-            [in] Int32 surface);
+            [in] Int64 surface);
 
-        interface IEGLSurface;
+        interface Elastosx.Microedition.Khronos.Egl.IEGLSurface;
     }
 
     class CEGLImpl {
@@ -249,6 +250,10 @@ module
         interface IEGL10Helper;
     }
 
+    singleton class CEGLContextHelper {
+        interface IEGLContextHelper;
+    }
+    
     } // namespace Gles
     } // namespace Opengl
     } // namespace Droid

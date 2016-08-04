@@ -448,8 +448,7 @@ ECode PhoneAccountRegistrar::SubPhoneAccountXmlSerialization::ReadFromXml(
             // Check the system settings to see if it also should handle "tel" calls.
             AutoPtr<IComponentName> componentName;
             accountHandle->GetComponentName((IComponentName**)&componentName);
-            Boolean isEquals;
-            IObject::Probe(componentName)->Equals(sipComponentName, &isEquals);
+            Boolean isEquals = Object::Equals(componentName, sipComponentName);
             if (isEquals) {
                 Boolean useSipForPstn;
                 UseSipForPstnCalls(context, &useSipForPstn);

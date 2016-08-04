@@ -2,13 +2,12 @@
 #define __ELASTOS_DROID_OPENGL_GLES_CEGLCONTEXIMPL_H__
 
 #include "_Elastos_Droid_Opengl_Gles_CEGLContextImpl.h"
-#include "Elastos.Droid.Opengl.h"
-
 #include <elastos/core/Object.h>
 
-using Elastos::Core::Object;
+using Elastosx::Microedition::Khronos::Egl::IEGLContext;
 using Elastosx::Microedition::Khronos::Egl::IEGL;
 using Elastosx::Microedition::Khronos::Opengles::IGL;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -39,7 +38,7 @@ public:
     CARAPI constructor(
         /* [in] */ Int64 ctx);
 
-    CARAPI_(Int32) GetEGLContext();
+    CARAPI_(Int64) GetEGLContext();
 
 protected:
     Int64 mEGLContext;

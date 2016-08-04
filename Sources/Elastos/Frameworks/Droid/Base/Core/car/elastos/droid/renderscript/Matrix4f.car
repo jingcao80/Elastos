@@ -1,0 +1,44 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace RenderScript {
+
+    /**
+     * Class for exposing the native RenderScript rs_matrix4x4 type back to the Android system.
+     *
+     **/
+    interface IMatrix4f {
+        /**
+        * Set current values to be an orthographic projection matrix
+        *
+        * @param l location of the left vertical clipping plane
+        * @param r location of the right vertical clipping plane
+        * @param b location of the bottom horizontal clipping plane
+        * @param t location of the top horizontal clipping plane
+        * @param n location of the near clipping plane
+        * @param f location of the far clipping plane
+        */
+        LoadOrtho(
+            [in] Float l, 
+            [in] Float r, 
+            [in] Float b, 
+            [in] Float t, 
+            [in] Float n, 
+            [in] Float f);
+
+        /**
+        * Return a reference to the internal array representing matrix
+        * values. Modifying this array will also change the matrix
+        *
+        * @return internal array representing the matrix
+        */
+        GetArray(
+            [out, callee] ArrayOf<Float>* result);
+    }
+
+    } // namespace RenderScript
+    } // namepsace Droid
+    } // namespace Elastos
+}
