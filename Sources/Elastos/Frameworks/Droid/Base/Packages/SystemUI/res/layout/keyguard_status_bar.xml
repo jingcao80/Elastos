@@ -64,8 +64,7 @@
             android:importantForAccessibility="noHideDescendants"/>
     </LinearLayout>
 
-<!-- TODO Not implement the app keyguard
-    <com.android.keyguard.CarrierText
+    <Elastos.Droid.SystemUI.Keyguard.CCarrierText
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
         android:layout_height="@dimen/status_bar_header_height_keyguard"
@@ -76,6 +75,5 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="#ffffff"
         android:singleLine="true" />
- -->
 
 </Elastos.Droid.SystemUI.StatusBar.Phone.CKeyguardStatusBarView>

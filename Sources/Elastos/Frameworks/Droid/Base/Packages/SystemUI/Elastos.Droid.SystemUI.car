@@ -45,10 +45,10 @@ module
     merge("car/elastos/droid/keyguard/KeyguardViewBase.car");
     merge("car/elastos/droid/keyguard/KeyguardViewMediator.car");
     merge("car/elastos/droid/keyguard/ViewMediatorCallback.car");
+    merge("car/elastos/droid/keyguard/CarrierText.car");
 
     //merge("car/elastos/droid/keyguard/BiometricSensorUnloc.car");
     //merge("car/elastos/droid/keyguard/CameraWidgetFrame.car");
-    //merge("car/elastos/droid/keyguard/CarrierText.car");
     //merge("car/elastos/droid/keyguard/ChallengeLayout.car");
     //merge("car/elastos/droid/keyguard/EmergencyButton.car");
     //merge("car/elastos/droid/keyguard/EmergencyCarrierArea.car");
@@ -853,7 +853,8 @@ module
             interface IBinder;
         }
 
-        /*class CCarrierText {
+        [local]
+        class CCarrierText {
             constructor(
                 [in] IContext* ctx);
 
@@ -868,7 +869,7 @@ module
             interface IDrawableCallback;
             interface IKeyEventCallback;
             interface IAccessibilityEventSource;
-        }*/
+        }
 
     } // namespace Keyguard
 

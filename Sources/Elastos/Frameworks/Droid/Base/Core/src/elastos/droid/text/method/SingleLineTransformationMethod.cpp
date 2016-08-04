@@ -1,3 +1,4 @@
+#include "elastos/droid/text/method/SingleLineTransformationMethod.h"
 #include "elastos/droid/text/method/CSingleLineTransformationMethod.h"
 #include "elastos/droid/ext/frameworkext.h"
 
@@ -24,22 +25,20 @@ static AutoPtr<ArrayOf<Char32> > InitReplacement()
     return ch;
 }
 
-AutoPtr<ArrayOf<Char32> > CSingleLineTransformationMethod::ORIGINAL = InitOriginal();
-AutoPtr<ArrayOf<Char32> > CSingleLineTransformationMethod::REPLACEMENT = InitReplacement();
+AutoPtr<ArrayOf<Char32> > SingleLineTransformationMethod::ORIGINAL = InitOriginal();
+AutoPtr<ArrayOf<Char32> > SingleLineTransformationMethod::REPLACEMENT = InitReplacement();
 
-AutoPtr<ISingleLineTransformationMethod> CSingleLineTransformationMethod::sInstance;
+AutoPtr<ISingleLineTransformationMethod> SingleLineTransformationMethod::sInstance;
 
-CAR_INTERFACE_IMPL(CSingleLineTransformationMethod, ReplacementTransformationMethod, \
+CAR_INTERFACE_IMPL(SingleLineTransformationMethod, ReplacementTransformationMethod, \
     ISingleLineTransformationMethod)
 
-CAR_OBJECT_IMPL(CSingleLineTransformationMethod)
-
-ECode CSingleLineTransformationMethod::constructor()
+ECode SingleLineTransformationMethod::constructor()
 {
     return NOERROR;
 }
 
-ECode CSingleLineTransformationMethod::GetInstance(
+ECode SingleLineTransformationMethod::GetInstance(
     /* [out] */ ISingleLineTransformationMethod** ret)
 {
     VALIDATE_NOT_NULL(ret)
@@ -52,12 +51,12 @@ ECode CSingleLineTransformationMethod::GetInstance(
     return NOERROR;
 }
 
-AutoPtr<ArrayOf<Char32> > CSingleLineTransformationMethod::GetOriginal()
+AutoPtr<ArrayOf<Char32> > SingleLineTransformationMethod::GetOriginal()
 {
     return ORIGINAL;
 }
 
-AutoPtr< ArrayOf<Char32> > CSingleLineTransformationMethod::GetReplacement()
+AutoPtr< ArrayOf<Char32> > SingleLineTransformationMethod::GetReplacement()
 {
     return REPLACEMENT;
 }

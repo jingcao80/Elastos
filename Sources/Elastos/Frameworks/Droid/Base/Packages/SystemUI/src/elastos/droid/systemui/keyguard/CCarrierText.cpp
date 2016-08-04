@@ -1,11 +1,39 @@
 
 #include "elastos/droid/systemui/keyguard/CCarrierText.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "../R.h"
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Internal.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERSO_LOCKED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_ABSENT;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_NOT_READY;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PUK_REQUIRED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERM_DISABLED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_UNKNOWN;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_None;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::IResourcesTheme;
+using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+//======================================================================
+// CCarrierText::MyKeyguardUpdateMonitorCallback
+//======================================================================
 ECode CCarrierText::MyKeyguardUpdateMonitorCallback::OnRefreshCarrierInfo(
     /* [in] */ ICharSequence* plmn,
     /* [in] */ ICharSequence* spn)
@@ -25,15 +53,22 @@ ECode CCarrierText::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
 ECode CCarrierText::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOff(
     /* [in] */ Int32 why)
 {
-    return SetSelected(FALSE);
+    return mHost->SetSelected(FALSE);
 }
 
 ECode CCarrierText::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOn()
 {
-    return SetSelected(TRUE);
+    return mHost->SetSelected(TRUE);
 }
 
-CCarrierText::CarrierTextTransformationMethod::CarrierTextTransformationMethod(
+//======================================================================
+// CCarrierText::CarrierTextTransformationMethod
+//======================================================================
+CCarrierText::CarrierTextTransformationMethod::CarrierTextTransformationMethod()
+    : mAllCaps(FALSE)
+{}
+
+ECode CCarrierText::CarrierTextTransformationMethod::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Boolean allCaps)
 {
@@ -43,6 +78,7 @@ CCarrierText::CarrierTextTransformationMethod::CarrierTextTransformationMethod(
     resources->GetConfiguration((IConfiguration**)&configuration);
     configuration->GetLocale((ILocale**)&mLocale);
     mAllCaps = allCaps;
+    return SingleLineTransformationMethod::constructor();
 }
 
 ECode CCarrierText::CarrierTextTransformationMethod::GetTransformation(
@@ -52,19 +88,23 @@ ECode CCarrierText::CarrierTextTransformationMethod::GetTransformation(
 {
     VALIDATE_NOT_NULL(formation);
 
-    source = SingleLineTransformationMethod::GetTransformation(source, view);
+    AutoPtr<ICharSequence> src;
+    SingleLineTransformationMethod::GetTransformation(source, view, (ICharSequence**)&src);
 
-    if (mAllCaps && source != NULL) {
+    if (mAllCaps && src != NULL) {
         String str;
-        source->ToString(&str);
-        source = CoreUtils::Convert(str.ToUpperCase(/*mLocale*/));
+        src->ToString(&str);
+        src = CoreUtils::Convert(str.ToUpperCase(/*mLocale*/));
     }
 
-    *formation = source;
+    *formation = src;
     REFCOUNT_ADD(*formation);
     return NOERROR;
 }
 
+//======================================================================
+// CCarrierText
+//======================================================================
 AutoPtr<ICharSequence> CCarrierText::mSeparator;
 
 CAR_OBJECT_IMPL(CCarrierText)
@@ -73,7 +113,6 @@ CAR_INTERFACE_IMPL(CCarrierText, TextView, ICarrierText)
 
 CCarrierText::CCarrierText()
 {
-    mCallback = new MyKeyguardUpdateMonitorCallback(this);
 }
 
 ECode CCarrierText::constructor(
@@ -88,19 +127,23 @@ ECode CCarrierText::constructor(
 {
     TextView::constructor(context, attrs);
 
+    mCallback = new MyKeyguardUpdateMonitorCallback(this);
+
     CLockPatternUtils::New(mContext, (ILockPatternUtils**)&mLockPatternUtils);
     Boolean useAllCaps;
     AutoPtr<IResourcesTheme> theme;
     context->GetTheme((IResourcesTheme**)&theme);
     AutoPtr<ITypedArray> a;
-    theme->ObtainStyledAttributes(attrs, R::styleable::CarrierText, 0, 0, (ITypedArray**)&a);
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::CarrierText);
+    theme->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
     //try {
     a->GetBoolean(R::styleable::CarrierText_allCaps, FALSE, &useAllCaps);
     //} finally {
     a->Recycle();
     //}
-    AutoPtr<ITransformationMethod> method = new CarrierTextTransformationMethod(mContext, useAllCaps);
-    return SetTransformationMethod(method);
+    AutoPtr<CarrierTextTransformationMethod> method = new CarrierTextTransformationMethod();
+    method->constructor(mContext, useAllCaps);
+    return SetTransformationMethod(method.Get());
 }
 
 ECode CCarrierText::UpdateCarrierText(
@@ -108,7 +151,7 @@ ECode CCarrierText::UpdateCarrierText(
     /* [in] */ ICharSequence* plmn,
     /* [in] */ ICharSequence* spn)
 {
-    setText(getCarrierTextForSimState(simState, plmn, spn));
+    return SetText(GetCarrierTextForSimState(simState, plmn, spn));
 }
 
 ECode CCarrierText::OnFinishInflate()
@@ -117,9 +160,11 @@ ECode CCarrierText::OnFinishInflate()
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    resources->GetString(R::string::kg_text_message_separator, &mSeparator);
+    String str;
+    resources->GetString(R::string::kg_text_message_separator, &str);
+    mSeparator = CoreUtils::Convert(str);
 
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Boolean screenOn;
     monitor->IsScreenOn(&screenOn);
     return SetSelected(screenOn); // Allow marquee to work.
@@ -128,14 +173,14 @@ ECode CCarrierText::OnFinishInflate()
 ECode CCarrierText::OnAttachedToWindow()
 {
     TextView::OnAttachedToWindow();
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     return monitor->RegisterCallback(mCallback);
 }
 
 ECode CCarrierText::OnDetachedFromWindow()
 {
     TextView::OnDetachedFromWindow();
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     return monitor->RemoveCallback(mCallback);
 }
 
@@ -145,7 +190,7 @@ AutoPtr<ICharSequence> CCarrierText::GetCarrierTextForSimState(
     /* [in] */ ICharSequence* spn)
 {
     AutoPtr<ICharSequence> carrierText;
-    StatusMode status = GetStatusForIccState(simState);
+    CCarrierText::StatusMode status = GetStatusForIccState(simState);
     switch (status) {
         case Normal:
             carrierText = Concatenate(plmn, spn);
@@ -225,16 +270,15 @@ AutoPtr<ICharSequence> CCarrierText::MakeCarrierStringOnEmergencyCapable(
     return simMessage;
 }
 
-StatusMode CCarrierText::GetStatusForIccState(
+CCarrierText::StatusMode CCarrierText::GetStatusForIccState(
     /* [in] */ IccCardConstantsState simState)
 {
     // Since reading the SIM may take a while, we assume it is present until told otherwise.
-    assert(0);
-    // if (simState == null) {
-    //     return StatusMode.Normal;
-    // }
+    if (simState == IccCardConstantsState_None) {
+        return Normal;
+    }
 
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Boolean res;
     monitor->IsDeviceProvisioned(&res);
     Boolean missingAndNotProvisioned =
@@ -242,23 +286,23 @@ StatusMode CCarrierText::GetStatusForIccState(
             simState == IccCardConstantsState_PERM_DISABLED);
 
     // Assume we're NETWORK_LOCKED if not provisioned
-    simState = missingAndNotProvisioned ? IccCardConstantsState_NETWORK_LOCKED : simState;
+    simState = missingAndNotProvisioned ? IccCardConstantsState_PERSO_LOCKED : simState;
     switch (simState) {
-        case ABSENT:
+        case IccCardConstantsState_ABSENT:
             return SimMissing;
-        case NETWORK_LOCKED:
+        case IccCardConstantsState_PERSO_LOCKED:
             return SimMissingLocked;
-        case NOT_READY:
+        case IccCardConstantsState_NOT_READY:
             return SimNotReady;
-        case PIN_REQUIRED:
+        case IccCardConstantsState_PIN_REQUIRED:
             return SimLocked;
-        case PUK_REQUIRED:
+        case IccCardConstantsState_PUK_REQUIRED:
             return SimPukLocked;
-        case READY:
+        case IccCardConstantsState_READY:
             return Normal;
-        case PERM_DISABLED:
+        case IccCardConstantsState_PERM_DISABLED:
             return SimPermDisabled;
-        case UNKNOWN:
+        case IccCardConstantsState_UNKNOWN:
             return SimMissing;
     }
     return SimMissing;
@@ -271,7 +315,7 @@ AutoPtr<ICharSequence> CCarrierText::Concatenate(
     Boolean plmnValid = !TextUtils::IsEmpty(plmn);
     Boolean spnValid = !TextUtils::IsEmpty(spn);
     if (plmnValid && spnValid) {
-        if (plmn.Equals(spn)) {
+        if (Object::Equals(plmn, spn)) {
             return plmn;
         }
         else {
@@ -290,7 +334,7 @@ AutoPtr<ICharSequence> CCarrierText::Concatenate(
         return spn;
     }
     else {
-        AutoPtr<ICharSequence> tmp = CoreUtils::Convert(String(""));
+        AutoPtr<ICharSequence> tmp = CoreUtils::Convert("");
         return tmp;
     }
 }

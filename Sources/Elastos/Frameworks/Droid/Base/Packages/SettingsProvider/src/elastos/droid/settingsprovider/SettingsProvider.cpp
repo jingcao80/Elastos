@@ -936,9 +936,10 @@ void SettingsProvider::FullyPopulateCache(
     AutoPtr< ArrayOf<String> > args = ArrayOf<String>::Alloc(2);
     (*args)[0] = ISettingsNameValueTable::NAME;
     (*args)[1] = ISettingsNameValueTable::VALUE;
+    String nullStr;
     AutoPtr<ICursor> c;
-    db->Query(table, args, String(NULL), NULL, String(NULL), String(NULL), String(NULL),
-            String("") + StringUtils::ToString(MAX_CACHE_ENTRIES + 1), (ICursor**)&c);
+    db->Query(table, args, nullStr, NULL, nullStr, nullStr, nullStr,
+        StringUtils::ToString(MAX_CACHE_ENTRIES + 1)/* limit */, (ICursor**)&c);
     // try {
     {
         AutoLock syncLock(cache);
@@ -1259,7 +1260,7 @@ ECode SettingsProvider::Call(
 
     // Put methods - new value is in the args bundle under the key named by
     // the Settings.NameValueTable.VALUE static.
-    String newValue(NULL);
+    String newValue;
     if (args) {
         args->GetString(ISettingsNameValueTable::VALUE, &newValue);
     }
@@ -1271,14 +1272,9 @@ ECode SettingsProvider::Call(
     Int32 result;
     context->CheckCallingOrSelfPermission(Elastos::Droid::Manifest::permission::WRITE_SETTINGS, &result);
     if (result != IPackageManager::PERMISSION_GRANTED) {
-        String str("");
-        str.AppendFormat("Permission denial: writing to settings requires %1$s",
-                Elastos::Droid::Manifest::permission::WRITE_SETTINGS.string());
-        Logger::E(TAG, "%s", str.string());
+        Logger::E(TAG, "Permission denial: writing to settings requires %1$s",
+            Elastos::Droid::Manifest::permission::WRITE_SETTINGS.string());
         return E_SECURITY_EXCEPTION;
-        // throw new SecurityException(
-        //         String.format("Permission denial: writing to settings requires %1$s",
-        //                       android.Manifest.permission.WRITE_SETTINGS));
     }
 
     // Also need to take care of app op.
@@ -1296,14 +1292,12 @@ ECode SettingsProvider::Call(
     ECode ec;
     AutoPtr<IContentValues> values;
     CContentValues::New((IContentValues**)&values);
-    values->Put(ISettingsNameValueTable::NAME,
-            CoreUtils::Convert(request));
-    values->Put(ISettingsNameValueTable::VALUE,
-            CoreUtils::Convert(newValue));
+    values->Put(ISettingsNameValueTable::NAME, CoreUtils::Convert(request));
+    values->Put(ISettingsNameValueTable::VALUE, CoreUtils::Convert(newValue));
     if (ISettings::CALL_METHOD_PUT_SYSTEM.Equals(method)) {
         if (LOCAL_LOGV) {
             Logger::V(TAG, "call_put(system:%s=%s) for %d", request.string(),
-                    newValue.string(), callingUser);
+                newValue.string(), callingUser);
         }
 
         // Extra check for USER_OWNER to optimize for the 99%
@@ -1469,17 +1463,18 @@ AutoPtr<IBundle> SettingsProvider::LookupValue(
     AutoPtr<ISQLiteDatabase> db;
     ASSERT_SUCCEEDED(dbHelper->GetReadableDatabase((ISQLiteDatabase**)&db))
     AutoPtr<ICursor> cursor;
+    String nullStr;
     // try {
     AutoPtr< ArrayOf<String> > args = ArrayOf<String>::Alloc(1);
     (*args)[0] = key;
     ECode ec = db->Query(table, COLUMN_VALUE, String("name=?"), args,
-            String(NULL), String(NULL), String(NULL), String(NULL), (ICursor**)&cursor);
+        nullStr, nullStr, nullStr, nullStr, (ICursor**)&cursor);
     if (FAILED(ec)) {
         Logger::W(TAG, "settings lookup error");
         if (cursor != NULL) ICloseable::Probe(cursor)->Close();
         return NULL;
     }
-    Int32 count;
+    Int32 count = 0;
     if (cursor != NULL && (cursor->GetCount(&count), count == 1)) {
         Boolean result;
         cursor->MoveToFirst(&result);
@@ -1489,12 +1484,7 @@ AutoPtr<IBundle> SettingsProvider::LookupValue(
         if (cursor != NULL) ICloseable::Probe(cursor)->Close();
         return cache->PutIfAbsent(key, value);
     }
-    // } catch (SQLiteException e) {
-    //     Log.w(TAG, "settings lookup error", e);
-    //     return null;
-    // } finally {
-    //     if (cursor != null) cursor.close();
-    // }
+
     cache->PutIfAbsent(key, String(NULL));
     if (cursor != NULL) ICloseable::Probe(cursor)->Close();
     return NULL_SETTING;

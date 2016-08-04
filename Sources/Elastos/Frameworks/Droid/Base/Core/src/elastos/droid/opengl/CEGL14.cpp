@@ -1071,7 +1071,7 @@ ECode CEGL14::EglDestroyContext(
     }
     EGLContext ctx_native = (EGLContext) FromEGLHandle(IEGLObjectHandle::Probe(ctx));
     if (!ctx_native) {
-        LOGD("EglDestroyContext: ctx_native == null")
+        // LOGD("EglDestroyContext: ctx_native == null")
         returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1102,17 +1102,17 @@ ECode CEGL14::EglMakeCurrent(
     }
     EGLSurface draw_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(draw));
     if (!draw_native) {
-        LOGD("EglMakeCurrent: draw_native == null")
+        // LOGD("EglMakeCurrent: draw_native == null")
         returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface read_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(read));
     if (!read_native) {
-        LOGD("EglMakeCurrent: read_native == null")
+        // LOGD("EglMakeCurrent: read_native == null")
         returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLContext ctx_native = (EGLContext) FromEGLHandle(IEGLObjectHandle::Probe(ctx));
     if (!ctx_native) {
-        LOGD("EglMakeCurrent: ctx_native == null")
+        // LOGD("EglMakeCurrent: ctx_native == null")
         returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1323,7 +1323,7 @@ Int64 CEGL14::FromEGLHandle(
     /* [in] */ IEGLObjectHandle* obj)
 {
     if (obj == NULL) {
-        LOGD("FromEGLHandle: Object is set to null.")
+        // LOGD("FromEGLHandle: Object is set to null.")
         //return E_ILLEGAL_ARGUMENT_EXCEPTION;
         return 0;//NULL;
     }
