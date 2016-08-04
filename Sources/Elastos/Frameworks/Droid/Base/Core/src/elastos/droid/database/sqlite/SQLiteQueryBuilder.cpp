@@ -429,18 +429,20 @@ ECode SQLiteQueryBuilder::ComputeProjection(
     /* [out] */ ArrayOf<String>** projectionOut)
 {
     VALIDATE_NOT_NULL(projectionOut)
+    *projectionOut = NULL;
 
     if (projectionIn != NULL && projectionIn->GetLength() > 0) {
         if (mProjectionMap != NULL) {
-            AutoPtr< ArrayOf<String> > projection = ArrayOf<String>::Alloc(projectionIn->GetLength());
             Int32 length = projectionIn->GetLength();
+            AutoPtr< ArrayOf<String> > projection = ArrayOf<String>::Alloc(length);
+
             for (Int32 i = 0; i < length; i++) {
                 String userColumn = (*projectionIn)[i];
-                String column;
                 AutoPtr<ICharSequence> columnObj;
-                CString::New(column, (ICharSequence**)&columnObj);
+                CString::New(userColumn, (ICharSequence**)&columnObj);
                 AutoPtr<IInterface> value;
                 mProjectionMap->Get(columnObj, (IInterface**)&value);
+                String column;
                 ICharSequence::Probe(value)->ToString(&column);
 
                 if (!column.IsNull()) {
@@ -472,36 +474,34 @@ ECode SQLiteQueryBuilder::ComputeProjection(
     }
     else if (mProjectionMap != NULL) {
         // Return all columns in projection map.
-        AutoPtr<ISet> keys;
-        mProjectionMap->GetKeySet((ISet**)&keys);
+        AutoPtr<ISet> entrySet;
+        mProjectionMap->GetEntrySet((ISet**)&entrySet);
         Int32 size;
-        mProjectionMap->GetSize(&size);
+        entrySet->GetSize(&size);
         AutoPtr< ArrayOf<String> > projection = ArrayOf<String>::Alloc(size);
+        AutoPtr<IIterator> entryIter;
+        entrySet->GetIterator((IIterator**)&entryIter);
         Int32 i = 0;
 
-        AutoPtr<IIterator> it;
-        keys->GetIterator((IIterator**)&it);
         Boolean hasNext = FALSE;
-        String name;
-        while ((it->HasNext(&hasNext), hasNext)) {
+        while ((entryIter->HasNext(&hasNext), hasNext)) {
             AutoPtr<IInterface> outface;
-            it->GetNext((IInterface**)&outface);
+            entryIter->GetNext((IInterface**)&outface);
             AutoPtr<IMapEntry> entry = IMapEntry::Probe(outface);
+
+            // Don't include the _count column when people ask for no projection.
             AutoPtr<IInterface> obj;
             entry->GetKey((IInterface**)&obj);
             assert(ICharSequence::Probe(obj) != NULL);
-            ICharSequence::Probe(obj)->ToString(&name);
-
-            String key = name;
+            String key;
+            ICharSequence::Probe(obj)->ToString(&key);
             if (key.Equals(IBaseColumns::COUNT)) {
                 continue;
             }
-            AutoPtr<ICharSequence> keyObj;
-            CString::New(key, (ICharSequence**)&keyObj);
-            AutoPtr<IInterface> cs;
-            mProjectionMap->Get(keyObj, (IInterface**)&cs);
+            obj = NULL;
+            entry->GetValue((IInterface**)&obj);
             String value;
-            ICharSequence::Probe(cs)->ToString(&value);
+            ICharSequence::Probe(obj)->ToString(&value);
             (*projection)[i++] = value;
         }
 
@@ -509,7 +509,6 @@ ECode SQLiteQueryBuilder::ComputeProjection(
         REFCOUNT_ADD(*projectionOut)
         return NOERROR;
     }
-    *projectionOut = NULL;
     return NOERROR;
 }
 
