@@ -420,7 +420,7 @@ public:
 
     protected:
         Int32 mType;
-        TimeBase* mTimeBase;
+        AutoPtr<TimeBase> mTimeBase;
 
         Int32 mCount;
         Int32 mLoadedCount;

@@ -8,6 +8,7 @@ module
     namespace Telephony {
 
     enum IccCardConstantsState {
+        IccCardConstantsState_None = -1,
         IccCardConstantsState_UNKNOWN,
         IccCardConstantsState_ABSENT,
         IccCardConstantsState_PIN_REQUIRED,

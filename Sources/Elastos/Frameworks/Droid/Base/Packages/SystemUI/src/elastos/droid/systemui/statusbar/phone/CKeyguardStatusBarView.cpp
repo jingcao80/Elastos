@@ -151,8 +151,7 @@ ECode CKeyguardStatusBarView::OnFinishInflate()
     mBatteryLevel = ITextView::Probe(view);
 
     view = NULL;
-    Logger::D("CKeyguardStatusBarView", "TODO : Not Implement com.android.keyguard.CarrierText");
-    // FindViewById(R::id::keyguard_carrier_text, (IView**)&view);
+    FindViewById(R::id::keyguard_carrier_text, (IView**)&view);
     mCarrierLabel = ITextView::Probe(view);
     LoadDimens();
 

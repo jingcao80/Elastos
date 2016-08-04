@@ -17,7 +17,6 @@ CTelephonyDebugService::CTelephonyDebugService()
 {
     Logger::D(TAG, "TelephonyDebugService()");
 
-    assert(0);
     //mDebugService = new DebugService();
 }
 
@@ -41,7 +40,6 @@ ECode CTelephonyDebugService::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0);
     //mDebugService->Dump(fd, pw, args);
     return NOERROR;
 }

@@ -10,6 +10,7 @@ SOURCES = keyguard.cpp
 SOURCES += MultiUserAvatarCache.cpp
 SOURCES += CAlphaOptimizedLinearLayout.cpp
 SOURCES += CAlphaOptimizedImageButton.cpp
+SOURCES += CCarrierText.cpp
 SOURCES += KeyguardActivityLauncher.cpp
 SOURCES += KeyguardUpdateMonitor.cpp
 SOURCES += KeyguardUpdateMonitorCallback.cpp

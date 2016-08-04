@@ -267,7 +267,11 @@ ECode Settings::NameValueCache::GetStringForUser(
         String package;
         cr->GetPackageName(&package);
         AutoPtr<IBundle> b;
-        if (SUCCEEDED(cp->Call(package, mCallGetCommand, name, args, (IBundle**)&b)) && b != NULL) {
+        ec = cp->Call(package, mCallGetCommand, name, args, (IBundle**)&b);
+        if (SUCCEEDED(ec) && b != NULL) {
+            Int32 size;
+            IBaseBundle::Probe(b)->GetSize(&size);
+
             String _value;
             IBaseBundle::Probe(b)->GetPairValue(&_value);
             // Don't update our cache for reads of other users' data
@@ -296,8 +300,9 @@ ECode Settings::NameValueCache::GetStringForUser(
 
     String package;
     cr->GetPackageName(&package);
-    if (FAILED(cp->Query(package, mUri, SELECT_VALUE,
-        NAME_EQ_PLACEHOLDER, selectionArgs, String(NULL), NULL, (ICursor**)&c))) {
+    ec = cp->Query(package, mUri, SELECT_VALUE,
+        NAME_EQ_PLACEHOLDER, selectionArgs, String(NULL), NULL, (ICursor**)&c);
+    if (FAILED(ec)) {
         Slogger::W(TAG, "Can't get key %s from %s", name.string(), TO_CSTR(mUri));
         if (c != NULL) {
             ICloseable::Probe(c)->Close();
@@ -324,20 +329,14 @@ ECode Settings::NameValueCache::GetStringForUser(
     if (LOCAL_LOGV) {
         String segment;
         mUri->GetLastPathSegment(&segment);
-        Slogger::V(TAG, "cache miss [%s]: %s = %s", segment.string(), name.string(),
-            (_value.IsNull()? "(null)" : _value.string()));
+        Slogger::V(TAG, "cache miss [%s]: %s = %s", segment.string(), name.string(), _value.string());
     }
     if (c != NULL) {
         ICloseable::Probe(c)->Close();
     }
+
     *value = _value;
     return NOERROR;
-    // } catch (RemoteException e) {
-    //     Log.w(TAG, "Can't get key " + name + " from " + mUri, e);
-    //     return null;  // Return null, but don't cache it.
-    // } finally {
-    //     if (c != null) c.close();
-    // }
 }
 
 //================================================================================

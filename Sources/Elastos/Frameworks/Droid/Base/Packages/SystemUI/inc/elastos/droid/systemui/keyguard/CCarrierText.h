@@ -4,8 +4,15 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CCarrierText.h"
 #include <elastos/droid/widget/TextView.h>
+#include <Elastos.Droid.Internal.h>
+#include <elastos/droid/text/method/SingleLineTransformationMethod.h>
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState;
+using Elastos::Droid::Text::Method::SingleLineTransformationMethod;
 using Elastos::Droid::Widget::TextView;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -69,7 +76,9 @@ private:
     public:
         TO_STRING_IMPL("CCarrierText::MyKeyguardUpdateMonitorCallback")
 
-        CarrierTextTransformationMethod(
+        CarrierTextTransformationMethod();
+
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ Boolean allCaps);
 

@@ -240,7 +240,8 @@ void NotificationPlayer::StartSound(
     //-----------------------------------
     // This is were we deviate from the AsyncPlayer implementation and create the
     // MediaPlayer in a new thread with which we're synchronized
-    {    AutoLock syncLock(mCompletionHandlingLock);
+    {
+        AutoLock syncLock(mCompletionHandlingLock);
         // if another sound was already playing, it doesn't matter we won't get notified
         // of the completion, since only the completion notification of the last sound
         // matters
@@ -253,7 +254,8 @@ void NotificationPlayer::StartSound(
             mLooper->Quit();
         }
         mCompletionThread = new CreationAndCompletionThread(cmd, this);
-        {    AutoLock syncLock(mCompletionThread);
+        {
+            AutoLock syncLock(mCompletionThread);
             mCompletionThread->Start();
             mCompletionThread->Wait();
         }
@@ -273,7 +275,8 @@ void NotificationPlayer::StartSound(
 ECode NotificationPlayer::OnCompletion(
     /* [in] */ IMediaPlayer* mp)
 {
-    {    AutoLock syncLock(mQueueAudioFocusLock);
+    {
+        AutoLock syncLock(mQueueAudioFocusLock);
         if (mAudioManagerWithAudioFocus != NULL) {
             if (mDebug) Logger::D(mTag, "onCompletion() abandonning AudioFocus");
             Int32 aaf;
@@ -285,7 +288,8 @@ ECode NotificationPlayer::OnCompletion(
         }
     }
     // if there are no more sounds to play, end the Looper to listen for media completion
-    {    AutoLock syncLock(mCmdQueue);
+    {
+        AutoLock syncLock(mCmdQueue);
         Int32 size;
         mCmdQueue->GetSize(&size);
         if (size == 0) {
@@ -318,7 +322,8 @@ ECode NotificationPlayer::Play(
     AutoPtr<IAudioAttributes> aa;
     aab->Build((IAudioAttributes**)&aa);
     cmd->mAttributes = aa;
-    {    AutoLock syncLock(mCmdQueue);
+    {
+        AutoLock syncLock(mCmdQueue);
         EnqueueLocked(cmd);
         mState = PLAY;
     }
@@ -338,7 +343,8 @@ ECode NotificationPlayer::Play(
     cmd->mUri = uri;
     cmd->mLooping = looping;
     cmd->mAttributes = attributes;
-    {    AutoLock syncLock(mCmdQueue);
+    {
+        AutoLock syncLock(mCmdQueue);
         EnqueueLocked(cmd);
         mState = PLAY;
     }
@@ -347,7 +353,8 @@ ECode NotificationPlayer::Play(
 
 ECode NotificationPlayer::Stop()
 {
-    {    AutoLock syncLock(mCmdQueue);
+    {
+        AutoLock syncLock(mCmdQueue);
         // This check allows stop to be called multiple times without starting
         // a thread that ends up doing nothing.
         if (mState != STOP) {
@@ -391,7 +398,7 @@ ECode NotificationPlayer::SetUsesWakeLock(
 
 void NotificationPlayer::AcquireWakeLock()
 {
-if (mWakeLock != NULL) {
+    if (mWakeLock != NULL) {
         mWakeLock->AcquireLock();
     }
 }

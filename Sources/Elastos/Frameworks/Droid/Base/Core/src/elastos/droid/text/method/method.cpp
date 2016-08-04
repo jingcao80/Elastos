@@ -12,6 +12,7 @@
 #include "elastos/droid/text/method/CArrowKeyMovementMethod.h"
 #include "elastos/droid/text/method/CHideReturnsTransformationMethod.h"
 #include "elastos/droid/text/method/CScrollingMovementMethod.h"
+#include "elastos/droid/text/method/CSingleLineTransformationMethod.h"
 #include "elastos/droid/text/method/CLinkMovementMethod.h"
 #include "elastos/droid/text/method/CWordIterator.h"
 #include "elastos/droid/text/method/CCharacterPickerDialog.h"
@@ -36,6 +37,7 @@ CAR_OBJECT_IMPL(CArrowKeyMovementMethod)
 CAR_OBJECT_IMPL(CHideReturnsTransformationMethod)
 CAR_OBJECT_IMPL(CLinkMovementMethod)
 CAR_OBJECT_IMPL(CScrollingMovementMethod)
+CAR_OBJECT_IMPL(CSingleLineTransformationMethod)
 CAR_OBJECT_IMPL(CWordIterator)
 CAR_OBJECT_IMPL(CCharacterPickerDialog)
 

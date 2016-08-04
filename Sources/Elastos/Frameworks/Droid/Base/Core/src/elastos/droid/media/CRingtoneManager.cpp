@@ -370,12 +370,12 @@ ECode CRingtoneManager::GetActualDefaultRingtoneUri(
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
     String uriString;
-    FAIL_RETURN(Settings::System::GetString(contentResolver, setting, &uriString))
+    Settings::System::GetString(contentResolver, setting, &uriString);
 
-    AutoPtr<IUriHelper> uriHelper;
-    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
     AutoPtr<IUri> uri;
     if (uriString != NULL) {
+        AutoPtr<IUriHelper> uriHelper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
         uriHelper->Parse(uriString, (IUri**)&uri);
     }
 
@@ -845,11 +845,14 @@ String CRingtoneManager::GetSettingForType(
 {
     if ((type & TYPE_RINGTONE) != 0) {
         return ISettingsSystem::RINGTONE;
-    } else if ((type & TYPE_NOTIFICATION) != 0) {
+    }
+    else if ((type & TYPE_NOTIFICATION) != 0) {
         return ISettingsSystem::NOTIFICATION_SOUND;
-    } else if ((type & TYPE_ALARM) != 0) {
+    }
+    else if ((type & TYPE_ALARM) != 0) {
         return ISettingsSystem::ALARM_ALERT;
-    } else {
+    }
+    else {
         return String(NULL);
     }
 }

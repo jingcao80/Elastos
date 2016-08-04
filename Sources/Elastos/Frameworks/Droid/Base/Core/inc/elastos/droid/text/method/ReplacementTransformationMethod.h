@@ -21,15 +21,13 @@ namespace Method {
  * array to be replaced by the corresponding characters in the
  * {@link #getReplacement} array.
  */
-//public abstract
-class ReplacementTransformationMethod
+class ECO_PUBLIC ReplacementTransformationMethod
     : public Object
     , public IReplacementTransformationMethod
     , public ITransformationMethod
 {
 private:
-    //static
-    class ReplacementCharSequence
+    class ECO_LOCAL ReplacementCharSequence
         : public Object
         , public ICharSequence
         , public IGetChars
@@ -73,7 +71,7 @@ private:
     };
 
     //static
-    class SpannedReplacementCharSequence
+    class ECO_LOCAL SpannedReplacementCharSequence
         : public ReplacementCharSequence
         , public ISpanned
     {
