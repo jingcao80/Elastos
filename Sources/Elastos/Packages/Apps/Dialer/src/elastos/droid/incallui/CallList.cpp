@@ -1,14 +1,14 @@
 
+#include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "elastos/droid/incallui/CallList.h"
 #include "elastos/droid/incallui/Call.h"
 #include <elastos/utility/logging/Logger.h>
-#include "Elastos.Droid.Internal.h"
 
 using Elastos::Droid::InCallUI::EIID_ICallList;
 using Elastos::Droid::InCallUI::EIID_IInCallPhoneListener;
-using Elastos::Droid::Internal::Utility::IPreconditions;
-using Elastos::Droid::Internal::Utility::CPreconditions;
 using Elastos::Droid::Telecom::CDisconnectCause;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Concurrent::CCopyOnWriteArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -48,7 +48,7 @@ ECode CallList::PhoneListener::OnCallRemoved(
         if (mHost->UpdateCallInMap(call)) {
             Logger::W("CallList", "Removing call not previously disconnected %s", call->GetId().string());
         }
-        return mHost->UpdateCallTextMap(call, NULL);
+        mHost->UpdateCallTextMap(call, NULL);
     }
     return NOERROR;
 }
@@ -68,7 +68,7 @@ ECode CallList::MyHandler::HandleMessage(
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             Logger::D("CallList", "EVENT_DISCONNECTED_TIMEOUT %s", TO_CSTR(obj));
-            mHost->FinishDisconnectedCall((Call*)(ICall*)obj.Get());
+            mHost->FinishDisconnectedCall((Call*)ICall::Probe(obj));
             break;
         }
         default:
@@ -88,11 +88,7 @@ const Int32 CallList::DISCONNECTED_CALL_MEDIUM_TIMEOUT_MS;
 const Int32 CallList::DISCONNECTED_CALL_LONG_TIMEOUT_MS;
 const Int32 CallList::EVENT_DISCONNECTED_TIMEOUT;
 
-AutoPtr<CallList> CallList::InitInstance()
-{
-    return new CallList();
-}
-AutoPtr<CallList> CallList::sInstance = CallList::InitInstance();
+AutoPtr<CallList> CallList::sInstance = new CallList();
 
 CallList::CallList()
 {
@@ -111,7 +107,8 @@ ECode CallList::SetPhone(
     /* [in] */ IPhone* phone)
 {
     mPhone = phone;
-    return mPhone->AddListener(mPhoneListener);
+    mPhone->AddListener(mPhoneListener);
+    return NOERROR;
 }
 
 ECode CallList::ClearPhone()
@@ -140,7 +137,7 @@ ECode CallList::OnIncoming(
     if (UpdateCallInMap(call)) {
         Logger::I("CallList", "onIncoming - %s", TO_CSTR(call));
     }
-    FAIL_RETURN(UpdateCallTextMap(call, textMessages))
+    UpdateCallTextMap(call, textMessages);
 
     Set<AutoPtr<ICallListListener> >::Iterator it = mListeners.Begin();
     for (; it != mListeners.End(); ++it) {
@@ -159,14 +156,21 @@ void CallList::OnUpdate(
 void CallList::NotifyCallUpdateListeners(
     /* [in] */ Call* call)
 {
-    HashMap<String, AutoPtr<List<AutoPtr<ICallUpdateListener> > > >::Iterator it
+    HashMap<String, AutoPtr<IList> >::Iterator it
             = mCallUpdateListenerMap.Find(call->GetId());
-    AutoPtr<List<AutoPtr<ICallUpdateListener> > > listeners;
+    AutoPtr<IList> listeners;
     if (it != mCallUpdateListenerMap.End()) {
         listeners = it->mSecond;
-        List<AutoPtr<ICallUpdateListener> >::Iterator listenerIt = listeners->Begin();
-        for (; listenerIt != listeners->End(); ++listenerIt) {
-            (*listenerIt)->OnCallChanged((ICall*)call);
+    }
+    if (listeners != NULL) {
+        AutoPtr<IIterator> iter;
+        listeners->GetIterator((IIterator**)&iter);
+        Boolean hasNext;
+        while (iter->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            iter->GetNext((IInterface**)&obj);
+            ICallUpdateListener* listener = ICallUpdateListener::Probe(obj);
+            listener->OnCallChanged((ICall*)call);
         }
     }
 }
@@ -175,28 +179,30 @@ void CallList::AddCallUpdateListener(
     /* [in] */ const String& callId,
     /* [in] */ ICallUpdateListener* listener)
 {
-    HashMap<String, AutoPtr<List<AutoPtr<ICallUpdateListener> > > >::Iterator it
+    HashMap<String, AutoPtr<IList> >::Iterator it
             = mCallUpdateListenerMap.Find(callId);
-    AutoPtr<List<AutoPtr<ICallUpdateListener> > > listeners;
-    if (it == mCallUpdateListenerMap.End()) {
-        listeners = new List<AutoPtr<ICallUpdateListener> >();
-        mCallUpdateListenerMap[callId] = listeners;
-    }
-    else {
+    AutoPtr<IList> listeners;
+    if (it != mCallUpdateListenerMap.End()) {
         listeners = it->mSecond;
     }
-    listeners->PushBack(listener);
+    if (listeners == NULL) {
+        CCopyOnWriteArrayList::New((IList**)&listeners);
+        mCallUpdateListenerMap[callId] = listeners;
+    }
+    listeners->Add(listener);
 }
 
 void CallList::RemoveCallUpdateListener(
     /* [in] */ const String& callId,
     /* [in] */ ICallUpdateListener* listener)
 {
-    HashMap<String, AutoPtr<List<AutoPtr<ICallUpdateListener> > > >::Iterator it
+    HashMap<String, AutoPtr<IList> >::Iterator it
             = mCallUpdateListenerMap.Find(callId);
-    AutoPtr<List<AutoPtr<ICallUpdateListener> > > listeners;
+    AutoPtr<IList> listeners;
     if (it != mCallUpdateListenerMap.End()) {
         listeners = it->mSecond;
+    }
+    if (listeners != NULL) {
         listeners->Remove(listener);
     }
 }
@@ -204,14 +210,13 @@ void CallList::RemoveCallUpdateListener(
 ECode CallList::AddListener(
     /* [in] */ ICallListListener* listener)
 {
-    AutoPtr<IPreconditions> preconditions;
-    CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
-    FAIL_RETURN(preconditions->CheckNotNull(listener))
+    assert(listener != NULL);
 
     mListeners.Insert(listener);
 
     // Let the listener know about the active calls immediately.
-    return listener->OnCallListChange((ICallList*)this);
+    listener->OnCallListChange((ICallList*)this);
+    return NOERROR;
 }
 
 void CallList::RemoveListener(
@@ -429,7 +434,7 @@ ECode CallList::OnUpdateCall(
     if (UpdateCallInMap(call)) {
         Logger::I("CallList", "onUpdate - %s", TO_CSTR(call));
     }
-    FAIL_RETURN(UpdateCallTextMap(call, call->GetCannedSmsResponses()))
+    UpdateCallTextMap(call, call->GetCannedSmsResponses());
     NotifyCallUpdateListeners(call);
     return NOERROR;
 }
@@ -454,11 +459,7 @@ void CallList::NotifyListenersOfDisconnect(
 Boolean CallList::UpdateCallInMap(
     /* [in] */ Call* call)
 {
-    AutoPtr<IPreconditions> preconditions;
-    CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
-    if (FAILED(preconditions->CheckNotNull((ICall*)call))) {
-        return FALSE;
-    }
+    assert(call != NULL);
 
     Boolean updated = FALSE;
 
@@ -501,11 +502,7 @@ Boolean CallList::UpdateCallInMap(
 Int32 CallList::GetDelayForDisconnect(
     /* [in] */ Call* call)
 {
-    AutoPtr<IPreconditions> preconditions;
-    CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
-    if (FAILED(preconditions->CheckState(call->GetState() == Call::State::DISCONNECTED))) {
-        return 0;
-    }
+    assert(call->GetState() == Call::State::DISCONNECTED);
 
     Int32 cause;
     call->GetDisconnectCause()->GetCode(&cause);
@@ -531,13 +528,11 @@ Int32 CallList::GetDelayForDisconnect(
     return delay;
 }
 
-ECode CallList::UpdateCallTextMap(
+void CallList::UpdateCallTextMap(
     /* [in] */ Call* call,
     /* [in] */ IList* textResponses)
 {
-    AutoPtr<IPreconditions> preconditions;
-    CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
-    FAIL_RETURN(preconditions->CheckNotNull((ICall*)call));
+    assert(call != NULL);
 
     if (!IsCallDead(call)) {
         if (textResponses != NULL) {
@@ -547,7 +542,6 @@ ECode CallList::UpdateCallTextMap(
     else if (mCallById.Find(call->GetId()) != mCallById.End()) {
         mCallTextReponsesMap.Erase(call->GetId());
     }
-    return NOERROR;
 }
 
 Boolean CallList::IsCallDead(

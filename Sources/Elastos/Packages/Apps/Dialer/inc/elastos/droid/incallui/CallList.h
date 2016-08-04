@@ -223,8 +223,6 @@ private:
      */
     CallList();
 
-    static CARAPI_(AutoPtr<CallList>) InitInstance();
-
     /**
      * Processes an update for a single call.
      *
@@ -252,7 +250,7 @@ private:
     CARAPI_(Int32) GetDelayForDisconnect(
         /* [in] */ Call* call);
 
-    CARAPI UpdateCallTextMap(
+    CARAPI_(void) UpdateCallTextMap(
         /* [in] */ Call* call,
         /* [in] */ IList* textResponses);
 
@@ -283,7 +281,7 @@ private:
      * access the map so make only a single shard
      */
     Set<AutoPtr<ICallListListener> > mListeners;
-    HashMap<String, AutoPtr<List<AutoPtr<ICallUpdateListener> > > > mCallUpdateListenerMap;
+    HashMap<String, AutoPtr<IList> > mCallUpdateListenerMap;
 
     AutoPtr<IPhone> mPhone;
 

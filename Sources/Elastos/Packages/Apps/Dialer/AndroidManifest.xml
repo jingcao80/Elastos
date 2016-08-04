@@ -275,7 +275,7 @@
         </activity>
 
         <!-- BroadcastReceiver for receiving Intents from Notification mechanism. -->
-        <receiver android:name="Elastos.Droid.InCallUI.CInCallApp$NotificationBroadcastReceiver"
+        <receiver android:name="Elastos.Droid.InCallUI.CNotificationBroadcastReceiver"
                   android:exported="false"
                   android:process="Elastos.Droid.InCallUI">
             <intent-filter>
