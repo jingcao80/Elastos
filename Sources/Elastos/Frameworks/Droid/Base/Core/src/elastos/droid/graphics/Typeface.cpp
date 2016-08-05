@@ -645,6 +645,7 @@ void Typeface::Init()
         AutoPtr<ITypeface> newFace = base;
         Int32 weight = alias->mWeight;
         if (weight != 400) {
+            newFace = NULL;
             CTypeface::New(NativeCreateWeightAlias(((Typeface*)base.Get())->mNativeInstance, weight), (ITypeface**)&newFace);
         }
         sSystemFontMap[alias->mName] = newFace;

@@ -355,8 +355,9 @@ AutoPtr<IBitmap> IccUtils::ParseToRGB(
     Int32 height = (*data)[valueIndex++] & 0xFF;
     Int32 bits = (*data)[valueIndex++] & 0xFF;
     Int32 colorNumber = (*data)[valueIndex++] & 0xFF;
-    Int32 clutOffset = (((*data)[valueIndex++] & 0xFF) << 8)
-            | ((*data)[valueIndex++] & 0xFF);
+    Byte b1 = (*data)[valueIndex++];
+    Byte b2 = (*data)[valueIndex++];
+    Int32 clutOffset = (((b1) & 0xFF) << 8) | ((b2) & 0xFF);
 
     AutoPtr<ArrayOf<Int32> > colorIndexArray = GetCLUT(data, clutOffset, colorNumber);
     if (TRUE == transparency) {
@@ -454,10 +455,13 @@ AutoPtr<ArrayOf<Int32> > IccUtils::GetCLUT(
     Int32 colorIndex = 0;
     Int32 alpha = 0xff << 24;
     do {
+        Byte b1 = (*rawData)[valueIndex++];
+        Byte b2 = (*rawData)[valueIndex++];
+        Byte b3 = (*rawData)[valueIndex++];
         (*result)[colorIndex++] = alpha
-                | (((*rawData)[valueIndex++] & 0xFF) << 16)
-                | (((*rawData)[valueIndex++] & 0xFF) << 8)
-                | (((*rawData)[valueIndex++] & 0xFF));
+                | ((b1 & 0xFF) << 16)
+                | ((b2 & 0xFF) << 8)
+                | ((b3 & 0xFF));
     } while (valueIndex < endIndex);
     return result;
 }

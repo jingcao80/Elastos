@@ -8,10 +8,6 @@ module
     namespace Telephony {
 
     interface ISmsHeader {
-    }
-
-    [deprecated]
-    interface ISmsHeaderHelper {
         /** SMS user data header information element identifiers.
          * (see TS 23.040 9.2.3.24)
          */
@@ -49,6 +45,10 @@ module
 
         const Int32 PORT_WAP_PUSH = 2948;
         const Int32 PORT_WAP_WSP  = 9200;
+    }
+
+    [deprecated]
+    interface ISmsHeaderHelper {
 
         /**
          * Create structured SmsHeader object from serialized byte array representation.

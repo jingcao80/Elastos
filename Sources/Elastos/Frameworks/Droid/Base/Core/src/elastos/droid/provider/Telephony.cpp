@@ -5,8 +5,8 @@
 #include "elastos/droid/provider/Telephony.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/telephony/SubscriptionManager.h"
-//TODO #include "elastos/droid/telephony/SmsMessage.h"
-//TODO #include "elastos/droid/internal/telephony/SmsApplication.h"
+#include "elastos/droid/telephony/SmsMessage.h"
+#include "elastos/droid/internal/telephony/CSmsApplication.h"
 #include "elastos/droid/utility/Patterns.h"
 #include "elastos/core/CoreUtils.h"
 #include "elastos/core/Character.h"
@@ -26,7 +26,7 @@ using Elastos::Droid::Net::IUriBuilder;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Telephony::ISmsMessage;
-//TODO using Elastos::Droid::Telephony::SmsMessage;
+using Elastos::Droid::Telephony::SmsMessage;
 using Elastos::Droid::Telephony::SubscriptionManager;
 using Elastos::Droid::Text::TextUtils;
 //using Elastos::Droid::Telephony::IRlog;
@@ -36,6 +36,7 @@ using Elastos::Droid::Utility::Patterns;
 
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::ISmsApplication;
+using Elastos::Droid::Internal::Telephony::CSmsApplication;
 
 using Elastos::Core::CoreUtils;
 using Elastos::Core::Character;
@@ -74,7 +75,7 @@ static AutoPtr<IUri> InitURI(const String& str)
     helper->Parse(str, (IUri**)&uri);
     return uri;
 }
-AutoPtr<IUri> Telephony::Sms::CONTENT_URI = InitURI(String("content://sms"));
+INIT_PROI_7 AutoPtr<IUri> Telephony::Sms::CONTENT_URI = InitURI(String("content://sms"));
 
 
 ECode Telephony::Sms::GetDefaultSmsPackage(
@@ -84,7 +85,9 @@ ECode Telephony::Sms::GetDefaultSmsPackage(
     VALIDATE_NOT_NULL(smsPackage);
     *smsPackage = NULL;
     AutoPtr<IComponentName> component;
-    //TODO SmsApplication::GetDefaultSmsApplication(context, FALSE, (IComponentName**)&component);
+    AutoPtr<ISmsApplication> smsApp;
+    CSmsApplication::AcquireSingleton((ISmsApplication**)&smsApp);
+    smsApp->GetDefaultSmsApplication(context, FALSE, (IComponentName**)&component);
     if (component != NULL) {
         component->GetPackageName(smsPackage);
     }
@@ -479,7 +482,7 @@ ECode Telephony::Sms::Intents::GetMessagesFromIntent(
         AutoPtr<ArrayOf<Byte> > pdu;
         assert(0);
         //TODO pdu = (Byte[]) messages[i];
-        AutoPtr<ISmsMessage> smsMessage;//TODO = SmsMessage::CreateFromPdu(pdu, format);
+        AutoPtr<ISmsMessage> smsMessage = SmsMessage::CreateFromPdu(pdu, format);
         msgs->Set(i, smsMessage);
         smsMessage->SetSubId(subId);
     }
@@ -503,7 +506,7 @@ ECode Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
 
     for (Int32 i = 0; i < pduCount; i++) {
         AutoPtr<ArrayOf<Byte> > pdu = (*pdus)[i];
-        AutoPtr<ISmsMessage> smsMessage;//TODO = SmsMessage::CreateFromPdu(pdu, format);
+        AutoPtr<ISmsMessage> smsMessage = SmsMessage::CreateFromPdu(pdu, format);
         msgs->Set(i, smsMessage);;
         // If the originating address is NULL on our message
         // then the format for SmsMessage createFromPdu is likely
@@ -517,7 +520,7 @@ ECode Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
         String oriAddress;
         smsMessage->GetOriginatingAddress(&oriAddress);
         if (oriAddress.IsNull()) {
-            //TODO smsMessage = SmsMessage::CreateFromPdu(pdu);
+            smsMessage = SmsMessage::CreateFromPdu(pdu);
             msgs->Set(i, smsMessage);
         }
         String originatingAddress;
@@ -770,9 +773,10 @@ ECode Telephony::Threads::GetOrCreateThreadId(
     for (Int32 i = 0; i < array->GetLength(); ++i) {
         String recipient;
         ICharSequence::Probe((*array)[i])->ToString(&recipient);
-        if (FALSE/*TODO Mms::IsEmailAddress(recipient)*/) {
+        Boolean isEmailAddr = FALSE;
+        if (Mms::IsEmailAddress(recipient, &isEmailAddr), isEmailAddr) {
             String newRecipient;
-            //TODO Mms::ExtractAddrSpec(recipient, &newRecipient);
+            Mms::ExtractAddrSpec(recipient, &newRecipient);
             recipient = newRecipient;
         }
 

@@ -73,6 +73,7 @@ ZygoteConnection::Arguments::Arguments(
     , mEffectiveCapabilities(0)
     , mSeInfoSpecified(FALSE)
     , mAbiListQuery(FALSE)
+    , mRefreshTheme(FALSE)
 {
     ASSERT_SUCCEEDED(ParseArgs(args));
 }

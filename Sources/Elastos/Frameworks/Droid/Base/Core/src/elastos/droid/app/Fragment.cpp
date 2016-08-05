@@ -13,8 +13,6 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Logger.h>
-using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Build;
@@ -848,14 +846,11 @@ ECode Fragment::Instantiate(
     }
 
     AutoPtr<IInterface> obj;
-    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
     ECode ec = clazz->CreateObject((IInterface**)&obj);
-    Logger::E("leliang", "line:%d, func:%s, ec:0x%x\n", __LINE__, __func__, ec);
 
     FAIL_RETURN(ec);
     //FAIL_RETURN(clazz->CreateObject((IInterface**)&obj));
     AutoPtr<IFragment> f = IFragment::Probe(obj);
-    Logger::E("leliang", "line:%d, func:%s, obj:%p, f:%p\n", __LINE__, __func__, obj.Get(), f.Get());
     if (args != NULL) {
         AutoPtr<IClassLoader> cl = Object::GetClassLoader(f.Get());
         args->SetClassLoader(cl);

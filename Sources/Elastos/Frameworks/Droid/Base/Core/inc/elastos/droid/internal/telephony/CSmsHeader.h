@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CSMSHEADER_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CSMSHEADER_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "_Elastos_Droid_Internal_Telephony_CSmsHeader.h"
 #include "elastos/droid/internal/telephony/SmsHeader.h"
 

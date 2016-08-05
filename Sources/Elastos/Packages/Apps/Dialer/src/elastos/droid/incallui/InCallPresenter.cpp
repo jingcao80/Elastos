@@ -1030,7 +1030,6 @@ void InCallPresenter::ShowInCall(
     /* [in] */ Boolean showDialpad,
     /* [in] */ Boolean newOutgoingCall)
 {
-    Logger::D("InCallPresenter", "ShowInCall showDialpad:%d, newOutgoingCall:%d", showDialpad, newOutgoingCall);
     mContext->StartActivity(GetInCallIntent(showDialpad, newOutgoingCall));
 }
 
@@ -1049,7 +1048,7 @@ AutoPtr<IIntent> InCallPresenter::GetInCallIntent(
     }
 
     intent->PutBooleanExtra(CInCallActivity::NEW_OUTGOING_CALL, newOutgoingCall);
-    Logger::D("InCallPresenter", "GetInCallIntent :%s", TO_CSTR(intent));
+    //Logger::D("InCallPresenter", "GetInCallIntent :%s, showDialpad:%d, newOutgoingCall:%d", TO_CSTR(intent), showDialpad, newOutgoingCall);
     return intent;
 }
 

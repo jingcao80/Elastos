@@ -2,16 +2,16 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecom/GatewayInfo.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/net/CStringUri.h"
-#include "elastos/droid/net/COpaqueUri.h"
-#include "elastos/droid/net/CHierarchicalUri.h"
-#include <elastos/utility/logging/Logger.h>
+//#include "elastos/droid/net/CStringUri.h"
+//#include "elastos/droid/net/COpaqueUri.h"
+//#include "elastos/droid/net/CHierarchicalUri.h"
+//#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Net::CStringUri;
-using Elastos::Droid::Net::COpaqueUri;
-using Elastos::Droid::Net::CHierarchicalUri;
+//using Elastos::Droid::Net::CStringUri;
+//using Elastos::Droid::Net::COpaqueUri;
+//using Elastos::Droid::Net::CHierarchicalUri;
 using Elastos::Droid::Text::TextUtils;
-using Elastos::Utility::Logging::Logger;
+//using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {

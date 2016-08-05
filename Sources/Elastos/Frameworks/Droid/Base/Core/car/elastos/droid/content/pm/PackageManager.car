@@ -4052,6 +4052,13 @@ module
             [in] ArrayOf<IComponentName*>* set,
             [in] IComponentName* activity);
 
+        ReplacePreferredActivityAsUser(
+            [in] IIntentFilter* filter,
+            [in] Int32 match,
+            [in] ArrayOf<IComponentName*>* set,
+            [in] IComponentName* activity,
+            [in] Int32 userId);
+
         /**
          * Remove all preferred activity mappings, previously added with
          * #addPreferredActivity, from the

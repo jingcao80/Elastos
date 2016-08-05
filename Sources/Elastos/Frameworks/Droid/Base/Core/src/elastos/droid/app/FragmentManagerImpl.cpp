@@ -138,7 +138,7 @@ ECode AnimatorListenerEx::OnAnimationEnd(
 // FragmentManagerImpl
 //=======================================================================
 
-Boolean FragmentManagerImpl::DEBUG = TRUE;
+Boolean FragmentManagerImpl::DEBUG = FALSE;
 const String FragmentManagerImpl::TAG("FragmentManagerImpl");
 
 CAR_INTERFACE_IMPL_3(FragmentManagerImpl, FragmentManager, IFragmentManagerImpl, ILayoutInflaterFactory, ILayoutInflaterFactory2)

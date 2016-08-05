@@ -2,6 +2,7 @@
 #include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
 #include "elastos/droid/internal/telephony/CSyntheticSmsMessage.h"
 #include "elastos/droid/internal/telephony/UiccSmsController.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/CHandler.h"
@@ -162,6 +163,7 @@ ECode UiccSmsController::constructor(
     }
 
     CreateWakelock();
+    return NOERROR;
 }
 
 void UiccSmsController::CreateWakelock()

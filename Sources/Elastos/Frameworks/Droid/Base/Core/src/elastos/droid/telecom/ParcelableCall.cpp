@@ -7,15 +7,15 @@
 #include "elastos/droid/telecom/CPhoneAccountHandle.h"
 #include "elastos/droid/telecom/CStatusHints.h"
 #include "elastos/droid/os/CBundle.h"
-#include "elastos/droid/net/CStringUri.h"
-#include "elastos/droid/net/COpaqueUri.h"
-#include "elastos/droid/net/CHierarchicalUri.h"
+//#include "elastos/droid/net/CStringUri.h"
+//#include "elastos/droid/net/COpaqueUri.h"
+//#include "elastos/droid/net/CHierarchicalUri.h"
 #include "elastos/droid/utility/CParcelableList.h"
 
 using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Net::CStringUri;
-using Elastos::Droid::Net::COpaqueUri;
-using Elastos::Droid::Net::CHierarchicalUri;
+//using Elastos::Droid::Net::CStringUri;
+//using Elastos::Droid::Net::COpaqueUri;
+//using Elastos::Droid::Net::CHierarchicalUri;
 using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;

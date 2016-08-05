@@ -655,8 +655,9 @@ void CSmsApplication::SetDefaultApplicationInternal(
     AutoPtr<IPackageManager> packageManager;
     context->GetPackageManager((IPackageManager**)&packageManager);
     AutoPtr<ICollection> applications;
-    assert(0 && "TODO");
-    // GetApplicationCollection(context, (ICollection**)&applications);
+    AutoPtr<ISmsApplication> smsApp;
+    CSmsApplication::AcquireSingleton((ISmsApplication**)&smsApp);
+    smsApp->GetApplicationCollection(context, (ICollection**)&applications);
     AutoPtr<SmsApplicationData> applicationData = GetApplicationForPackage(applications, packageName);
     if (applicationData != NULL) {
         // Ignore OP_WRITE_SMS for the previously configured default SMS app.
@@ -816,10 +817,9 @@ void CSmsApplication::ReplacePreferredActivity(
     intentFilter->AddAction(IIntent::ACTION_SENDTO);
     intentFilter->AddCategory(IIntent::CATEGORY_DEFAULT);
     intentFilter->AddDataScheme(scheme);
-    assert(0 && "TODO add method to car");
-    // packageManager->ReplacePreferredActivityAsUser(intentFilter,
-    //         IIntentFilter::MATCH_CATEGORY_SCHEME + IIntentFilter::MATCH_ADJUSTMENT_NORMAL,
-    //         set, componentName, userId);
+    packageManager->ReplacePreferredActivityAsUser(intentFilter,
+             IIntentFilter::MATCH_CATEGORY_SCHEME + IIntentFilter::MATCH_ADJUSTMENT_NORMAL,
+             set, componentName, userId);
 }
 
 ECode CSmsApplication::GetSmsApplicationData(

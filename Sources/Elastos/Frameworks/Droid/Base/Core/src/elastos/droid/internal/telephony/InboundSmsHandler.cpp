@@ -1,7 +1,13 @@
 
 #include "elastos/droid/internal/telephony/InboundSmsHandler.h"
 #include "elastos/droid/internal/telephony/InboundSmsTracker.h"
+#include "elastos/droid/internal/telephony/CWapPushOverSms.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/SmsHeader.h"
 #include "elastos/droid/internal/telephony/utility/BlacklistUtils.h"
+#include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/internal/telephony/CSmsApplication.h"
+#include "elastos/droid/provider/CTelephonySmsIntents.h"
 #include "elastos/droid/internal/utility/HexDump.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/content/CContentUris.h"
@@ -28,6 +34,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include "elastos/core/CoreUtils.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -41,6 +48,7 @@ using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
+using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Internal::Telephony::Utility::BlacklistUtils;
 using Elastos::Droid::Internal::Telephony::Utility::IBlacklistUtils;
 using Elastos::Droid::Internal::Utility::HexDump;
@@ -57,6 +65,7 @@ using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Preference::PreferenceManager;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ITelephonySmsIntents;
+using Elastos::Droid::Provider::CTelephonySmsIntents;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::Telephony;
 using Elastos::Droid::Provider::ITelephonyTextBasedSmsColumns;
@@ -75,6 +84,7 @@ using Elastos::IO::CByteArrayOutputStream;
 using Elastos::IO::IByteArrayOutputStream;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::ICloseable;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollections;
@@ -112,8 +122,7 @@ const Boolean InboundSmsHandler::VDBG = FALSE;
 AutoPtr<ArrayOf<String> > InboundSmsHandler::PDU_PROJECTION = InitStatic(String("PDU_PROJECTION"));
 AutoPtr<ArrayOf<String> > InboundSmsHandler::PDU_SEQUENCE_PORT_PROJECTION = InitStatic(String("PDU_SEQUENCE_PORT_PROJECTION"));
 const Int32 InboundSmsHandler::WAKELOCK_TIMEOUT = 3000;
-// TODO:
-AutoPtr<IUri> InboundSmsHandler::sRawUri; // = InitRawUri();
+AutoPtr<IUri> InboundSmsHandler::sRawUri = InitRawUri();
 
 InboundSmsHandler::DefaultState::DefaultState(
     /* [in] */ InboundSmsHandler* host)
@@ -433,8 +442,8 @@ ECode InboundSmsHandler::SmsBroadcastReceiver::OnReceive(
             if (resultExtras != NULL && (resultExtras->ContainsKey(String("pdus"), &tmp), tmp)) {
                 AutoPtr<IInterface> obj;
                 resultExtras->Get(String("pdus"), (IInterface**)&obj);
-                assert(0 && "TODO");
-                // intent->PutExtra(String("pdus"), (Byte[][]) resultExtras->Get("pdus"));
+                assert(0);
+                //TODO intent->PutExtra(String("pdus"), obj);
             }
             if (intent->HasExtra(String("destport"), &tmp), tmp) {
                 Int32 destPort = 0;
@@ -539,8 +548,7 @@ InboundSmsHandler::InboundSmsHandler(
     mPhone = phone;
     mCellBroadcastHandler = cellBroadcastHandler;
     context->GetContentResolver((IContentResolver**)&mResolver);
-    assert(0 && "TODO");
-    // mWapPush = new WapPushOverSms(context);
+    CWapPushOverSms::New(context, (IWapPushOverSms**)&mWapPush);
 
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
@@ -595,8 +603,7 @@ ECode InboundSmsHandler::UpdatePhoneObject(
 // @Override
 void InboundSmsHandler::OnQuitting()
 {
-    assert(0 && "TODO");
-    // mWapPush->Dispose();
+    ((CWapPushOverSms*)mWapPush.Get())->Dispose();
 
     Boolean tmp = FALSE;
     while (mWakeLock->IsHeld(&tmp), tmp) {
@@ -737,9 +744,9 @@ void InboundSmsHandler::OnUpdatePhoneObject(
     /* [in] */ IPhoneBase* phone)
 {
     mPhone = phone;
-    assert(0 && "TODO");
-    // mStorageMonitor = mPhone.mSmsStorageMonitor;
-    // Log(String("onUpdatePhoneObject: phone=") + mPhone.getClass().getSimpleName());
+    mStorageMonitor = ((PhoneBase*)mPhone.Get())->mSmsStorageMonitor;
+    Logger::D("InboundSmsHandler", "TODO InboundSmsHandler::OnUpdatePhoneObject");
+    //TODO  Log(String("onUpdatePhoneObject: phone=") + mPhone.getClass().getSimpleName());
 }
 
 /**
@@ -799,33 +806,42 @@ Int32 InboundSmsHandler::DispatchNormalMessage(
         return blacklistResult;
     }
 
-    AutoPtr<ISmsHeader> smsHeader;
-    sms->GetUserDataHeader((ISmsHeader**)&smsHeader);
+    AutoPtr<ISmsHeader> ismsHeader;
+    sms->GetUserDataHeader((ISmsHeader**)&ismsHeader);
+    SmsHeader* smsHeader = (SmsHeader*)(IObject::Probe(ismsHeader));
     AutoPtr<InboundSmsTracker> tracker;
 
-    assert(0 && "TODO");
-    // if ((smsHeader == NULL) || (smsHeader->mConcatRef == NULL)) {
-    //     // Message is not concatenated.
-    //     Int32 destPort = -1;
-    //     if (smsHeader != NULL && smsHeader->mPortAddrs != NULL) {
-    //         // The message was sent to a port.
-    //         destPort = smsHeader->mPortAddrs->mDestPort;
-    //         if (DBG) Log("destination port: " + destPort);
-    //     }
+    if ((smsHeader == NULL) || (smsHeader->concatRef == NULL)) {
+        // Message is not concatenated.
+        Int32 destPort = -1;
+        if (smsHeader != NULL && smsHeader->portAddrs != NULL) {
+            // The message was sent to a port.
+            destPort = smsHeader->portAddrs->destPort;
+            if (DBG) Log(String("destination port: ") + StringUtils::ToString(destPort));
+        }
 
-    //     tracker = new InboundSmsTracker(sms.getPdu(), sms.getTimestampMillis(), destPort,
-    //             is3gpp2(), FALSE);
-    // }
-    // else {
-    //     // Create a tracker for this message segment.
-    //     SmsHeader.ConcatRef concatRef = smsHeader->mConcatRef;
-    //     SmsHeader.PortAddrs portAddrs = smsHeader->mPortAddrs;
-    //     Int32 destPort = (portAddrs != NULL ? portAddrs.destPort : -1);
+        AutoPtr<ArrayOf<Byte> > pdu;
+        sms->GetPdu((ArrayOf<Byte>**)&pdu);
+        Int64 tsm;
+        sms->GetTimestampMillis(&tsm);
+        tracker = new InboundSmsTracker(pdu, tsm, destPort, Is3gpp2(), FALSE);
+    }
+    else {
+        // Create a tracker for this message segment.
+        AutoPtr<SmsHeader::ConcatRef> concatRef = smsHeader->concatRef;
+        AutoPtr<SmsHeader::PortAddrs> portAddrs = smsHeader->portAddrs;
+        Int32 destPort = (portAddrs != NULL ? portAddrs->destPort : -1);
 
-    //     tracker = new InboundSmsTracker(sms.getPdu(), sms.getTimestampMillis(), destPort,
-    //             is3gpp2(), sms.getOriginatingAddress(), concatRef.refNumber,
-    //             concatRef.seqNumber, concatRef.msgCount, FALSE);
-    // }
+        AutoPtr<ArrayOf<Byte> > pdu;
+        sms->GetPdu((ArrayOf<Byte>**)&pdu);
+        Int64 tsm;
+        sms->GetTimestampMillis(&tsm);
+        String oriAddress;
+        sms->GetOriginatingAddress(&oriAddress);
+        tracker = new InboundSmsTracker(pdu, tsm, destPort,
+                Is3gpp2(), oriAddress, concatRef->refNumber,
+                concatRef->seqNumber, concatRef->msgCount, FALSE);
+    }
 
     if (VDBG) Log(String("created tracker: ") + TO_CSTR(tracker));
     return AddTrackerToRawTableAndSendMessage(tracker);
@@ -971,7 +987,7 @@ Boolean InboundSmsHandler::ProcessMessagePart(
 
     AutoPtr<IBroadcastReceiver> resultReceiver = new SmsBroadcastReceiver(tracker, this);
 
-    if (destPort == ISmsHeaderHelper::PORT_WAP_PUSH) {
+    if (destPort == ISmsHeader::PORT_WAP_PUSH) {
         // Build up the data stream
         AutoPtr<IByteArrayOutputStream> output;
         CByteArrayOutputStream::New((IByteArrayOutputStream**)&output);
@@ -1015,8 +1031,17 @@ Boolean InboundSmsHandler::ProcessMessagePart(
     Boolean tmp = FALSE;
     if (collections->Disjoint(ICollection::Probe(regAddresses), ICollection::Probe(allAddresses), &tmp), !tmp) {
         CIntent::New(ITelephonySmsIntents::PROTECTED_SMS_RECEIVED_ACTION, (IIntent**)&intent);
-        assert(0 && "TODO");
-        // intent->PutByteArrayExtra(String("pdus"), pdus);
+        //TODO is this right??
+        Int32 arrayLen = pdus->GetLength();
+        AutoPtr<IArrayOf> iao;
+        CArrayOf::New(EIID_IInterface, arrayLen, (IArrayOf**)&iao);
+        for (Int32 i = 0; i < arrayLen; i++) {
+            AutoPtr<ArrayOf<Byte> > aob = (*pdus)[i];
+            AutoPtr<IArrayOf> iaob = CoreUtils::ConvertByteArray(aob);
+            iao->Set(i, TO_IINTERFACE(iaob));
+        }
+        assert(0);
+        //TODO intent->PutExtra(String("pdus"), iao);
         intent->PutExtra(String("format"), tracker->GetFormat());
         DispatchIntent(intent, Manifest::permission::RECEIVE_PROTECTED_SMS,
                 IAppOpsManager::OP_RECEIVE_SMS, resultReceiver, UserHandle::OWNER);
@@ -1026,8 +1051,7 @@ Boolean InboundSmsHandler::ProcessMessagePart(
     CIntent::New(ITelephonySmsIntents::SMS_FILTER_ACTION, (IIntent**)&intent);
     AutoPtr<IList> carrierPackages; // List<<String>
     AutoPtr<IUiccCard> card;
-    assert(0 && "TODO");
-    // card = UiccController.getInstance().getUiccCard();
+    UiccController::GetInstance()->GetUiccCard((IUiccCard**)&card);
     if (card != NULL) {
         AutoPtr<IPackageManager> pm;
         mContext->GetPackageManager((IPackageManager**)&pm);
@@ -1047,8 +1071,17 @@ Boolean InboundSmsHandler::ProcessMessagePart(
         SetAndDirectIntent(intent, destPort);
     }
 
-    assert(0 && "TODO");
-    // intent->PutExtra(String("pdus"), pdus);
+    //TODO is this right??
+    Int32 arrayLen = pdus->GetLength();
+    AutoPtr<IArrayOf> iao;
+    CArrayOf::New(EIID_IInterface, arrayLen, (IArrayOf**)&iao);
+    for (Int32 i = 0; i < arrayLen; i++) {
+        AutoPtr<ArrayOf<Byte> > aob = (*pdus)[i];
+        AutoPtr<IArrayOf> iaob = CoreUtils::ConvertByteArray(aob);
+        iao->Set(i, TO_IINTERFACE(iaob));
+    }
+    assert(0);
+    //TODO intent->PutExtra(String("pdus"), iao);
     intent->PutExtra(String("format"), tracker->GetFormat());
     DispatchIntent(intent, Manifest::permission::RECEIVE_SMS,
             IAppOpsManager::OP_RECEIVE_SMS, resultReceiver, UserHandle::OWNER);
@@ -1156,8 +1189,9 @@ void InboundSmsHandler::SetAndDirectIntent(
         // then sent it to all broadcast receivers.
         // We are deliberately delivering to the primary user's default SMS App.
         AutoPtr<IComponentName> componentName;
-        assert(0 && "TODO");
-        // componentName = SmsApplication::GetDefaultSmsApplication(mContext, TRUE);
+        AutoPtr<ISmsApplication> smsApp;
+        CSmsApplication::AcquireSingleton((ISmsApplication**)&smsApp);
+        smsApp->GetDefaultSmsApplication(mContext, TRUE, (IComponentName**)&componentName);
         if (componentName != NULL) {
             // Deliver SMS message only to this receiver.
             intent->SetComponent(componentName);
@@ -1389,8 +1423,9 @@ AutoPtr<IUri> InboundSmsHandler::WriteInboxMessage(
     /* [in] */ IIntent* intent)
 {
     AutoPtr<ArrayOf<ISmsMessage*> > messages;
-    assert(0 && "TODO");
-    // messages = Telephony.Sms.ITelephonySmsIntents::GetMessagesFromIntent(intent);
+    AutoPtr<ITelephonySmsIntents> tsi;
+    CTelephonySmsIntents::AcquireSingleton((ITelephonySmsIntents**)&tsi);
+    tsi->GetMessagesFromIntent(intent, (ArrayOf<ISmsMessage*>**)&messages);
     if (messages == NULL || messages->GetLength() < 1) {
         Loge(String("Failed to parse SMS pdu"));
         return NULL;
