@@ -3,7 +3,7 @@
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/internal/telephony/cdma/CCdmaServiceCategoryProgramHandler.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaServiceCategoryProgramHandler.h"
-#include "elastos/droid/internal/telephony/cdma/SmsMessage.h"
+#include "elastos/droid/internal/telephony/cdma/CDMASmsMessage.h"
 #include "elastos/droid/internal/telephony/cdma/sms/CBearerData.h"
 #include "elastos/droid/internal/telephony/cdma/sms/CdmaSmsAddress.h"
 #include "elastos/droid/Manifest.h"
@@ -91,7 +91,7 @@ void CdmaServiceCategoryProgramHandler::InnerBroadcastReceiver::SendScpResults()
     AutoPtr<CBearerData> bData;
     CBearerData::NewByFriend((CBearerData**)&bData);
     bData->messageType = IBearerData::MESSAGE_TYPE_SUBMIT;
-    bData->messageId = SmsMessage::GetNextMessageId();
+    bData->messageId = CDMASmsMessage::GetNextMessageId();
     bData->serviceCategoryProgramResults = results;
     AutoPtr<ArrayOf<Byte> > encodedBearerData = CBearerData::Encode(IBearerData::Probe(bData));
 

@@ -19,7 +19,7 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Internal::Telephony::IISms;
 using Elastos::Droid::Internal::Telephony::IPhone;
-
+using Elastos::Core::IArrayOf;
 using Elastos::Core::Object;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
@@ -331,8 +331,8 @@ public:
     CARAPI Log(
         /* [in] */ String msg);
 
-    // void DispatchPdus(
-    //     /* [in] */ Byte[][] pdus);
+    void DispatchPdus(
+        /* [in] */ IArrayList* pdus);
 
     CARAPI_(void) Dispatch(
         /* [in] */ IIntent* intent,

@@ -1,10 +1,37 @@
 
 #include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
-#include "elastos/droid/utility/CArrayMap.h"
+#include "Elastos.Droid.Provider.h"
+#include "elastos/droid/app/CActivityThread.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/telephony/SmsManager.h"
+#include "elastos/droid/telephony/SmsMessage.h"
+#include "elastos/droid/telephony/SubscriptionManager.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/utility/CArrayMap.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/Arrays.h>
 
+using Elastos::Droid::App::CActivityThread;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Internal::Telephony::IIMms;
+using Elastos::Droid::Internal::Telephony::ISmsConstants;
+using Elastos::Droid::Internal::Telephony::ISmsRawData;
+using Elastos::Droid::Internal::Telephony::IUiccSmsController;
+using Elastos::Droid::Internal::Telephony::Uicc::IIccConstants;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Provider::ITelephonyMmsIntents;
+using Elastos::Droid::Telephony::SmsMessage;
+using Elastos::Droid::Telephony::SubscriptionManager;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CArrayMap;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -33,24 +60,28 @@ ECode SmsManager::SendTextMessage(
     /* [in] */ IPendingIntent* sentIntent,
     /* [in] */ IPendingIntent* deliveryIntent)
 {
-    // ==================before translated======================
-    // if (TextUtils.isEmpty(destinationAddress)) {
-    //     throw new IllegalArgumentException("Invalid destinationAddress");
-    // }
-    //
-    // if (TextUtils.isEmpty(text)) {
-    //     throw new IllegalArgumentException("Invalid message body");
-    // }
-    //
+    if (TextUtils::IsEmpty(destinationAddress)) {
+        // throw new IllegalArgumentException("Invalid destinationAddress");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if (TextUtils::IsEmpty(text)) {
+        // throw new IllegalArgumentException("Invalid message body");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     // try {
-    //     ISms iccISms = getISmsServiceOrThrow();
-    //     // use sub based apis
-    //     iccISms.sendTextForSubscriber(getSubId(), ActivityThread.currentPackageName(),
-    //             destinationAddress, scAddress, text, sentIntent, deliveryIntent);
+    AutoPtr<IISms> iccISms;
+    GetISmsServiceOrThrow((IISms**)&iccISms);
+    // use sub based apis
+    Int64 sid;
+    GetSubId(&sid);
+    String pkgName = CActivityThread::GetCurrentPackageName();
+    iccISms->SendTextForSubscriber(sid, pkgName,
+            destinationAddress, scAddress, text, sentIntent, deliveryIntent);
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -64,26 +95,30 @@ ECode SmsManager::SendTextMessage(
     /* [in] */ Boolean isExpectMore,
     /* [in] */ Int32 validityPeriod)
 {
-    // ==================before translated======================
-    // if (TextUtils.isEmpty(destinationAddress)) {
-    //     throw new IllegalArgumentException("Invalid destinationAddress");
-    // }
-    //
-    // if (TextUtils.isEmpty(text)) {
-    //     throw new IllegalArgumentException("Invalid message body");
-    // }
-    //
+    if (TextUtils::IsEmpty(destinationAddress)) {
+        // throw new IllegalArgumentException("Invalid destinationAddress");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if (TextUtils::IsEmpty(text)) {
+        // throw new IllegalArgumentException("Invalid message body");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     // try {
-    //      ISms iccISms = getISmsServiceOrThrow();
-    //     if (iccISms != null) {
-    //         iccISms.sendTextWithOptionsUsingSubscriber(getSubId(),
-    //                 ActivityThread.currentPackageName(), destinationAddress, scAddress, text,
-    //                 sentIntent, deliveryIntent, priority, isExpectMore, validityPeriod);
-    //     }
+    AutoPtr<IISms> iccISms;
+    GetISmsServiceOrThrow((IISms**)&iccISms);
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        IUiccSmsController::Probe(iccISms)->SendTextWithOptionsUsingSubscriber(
+                sid, pkgName, destinationAddress, scAddress, text,
+                sentIntent, deliveryIntent, priority, isExpectMore, validityPeriod);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -92,21 +127,24 @@ ECode SmsManager::InjectSmsPdu(
     /* [in] */ const String& format,
     /* [in] */ IPendingIntent* receivedIntent)
 {
-    // ==================before translated======================
-    // if (!format.equals(SmsMessage.FORMAT_3GPP) && !format.equals(SmsMessage.FORMAT_3GPP2)) {
-    //     // Format must be either 3gpp or 3gpp2.
-    //     throw new IllegalArgumentException(
-    //             "Invalid pdu format. format must be either 3gpp or 3gpp2");
-    // }
+    if (!format.Equals(ISmsMessage::FORMAT_3GPP) && !format.Equals(ISmsMessage::FORMAT_3GPP2)) {
+        // Format must be either 3gpp or 3gpp2.
+        // throw new IllegalArgumentException(
+        //         "Invalid pdu format. format must be either 3gpp or 3gpp2");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
-    //     if (iccISms != null) {
-    //         iccISms.injectSmsPduForSubscriber(getSubId(), pdu, format, receivedIntent);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("isms"));
+    AutoPtr<IISms> iccISms = IISms::Probe(obj);
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        IUiccSmsController::Probe(iccISms)->InjectSmsPduForSubscriber(
+                sid, pdu, format, receivedIntent);
+    }
     // } catch (RemoteException ex) {
     //   // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -114,16 +152,15 @@ ECode SmsManager::UpdateSmsSendStatus(
     /* [in] */ Int32 messageRef,
     /* [in] */ Boolean success)
 {
-    // ==================before translated======================
     // try {
-    //     ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
-    //     if (iccISms != null) {
-    //         iccISms.updateSmsSendStatus(messageRef, success);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("isms"));
+    AutoPtr<IISms> iccISms = IISms::Probe(obj);
+    if (iccISms != NULL) {
+        iccISms->UpdateSmsSendStatus(messageRef, success);
+    }
     // } catch (RemoteException ex) {
     //   // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -132,12 +169,12 @@ ECode SmsManager::DivideMessage(
     /* [out] */ IArrayList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (null == text) {
-    //     throw new IllegalArgumentException("text is null");
-    // }
-    // return SmsMessage.fragmentText(text);
-    assert(0);
+    if (NULL == text) {
+        // throw new IllegalArgumentException("text is NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    *result = SmsMessage::FragmentText(text);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -148,38 +185,49 @@ ECode SmsManager::SendMultipartTextMessage(
     /* [in] */ IArrayList* sentIntents,
     /* [in] */ IArrayList* deliveryIntents)
 {
-    // ==================before translated======================
-    // if (TextUtils.isEmpty(destinationAddress)) {
-    //     throw new IllegalArgumentException("Invalid destinationAddress");
-    // }
-    // if (parts == null || parts.size() < 1) {
-    //     throw new IllegalArgumentException("Invalid message body");
-    // }
-    //
-    // if (parts.size() > 1) {
-    //     try {
-    //         ISms iccISms = getISmsServiceOrThrow();
-    //
-    //         iccISms.sendMultipartTextForSubscriber(getSubId(),
-    //                 ActivityThread.currentPackageName(), destinationAddress, scAddress, parts,
-    //
-    //                 sentIntents, deliveryIntents);
-    //     } catch (RemoteException ex) {
-    //         // ignore it
-    //     }
-    // } else {
-    //     PendingIntent sentIntent = null;
-    //     PendingIntent deliveryIntent = null;
-    //     if (sentIntents != null && sentIntents.size() > 0) {
-    //         sentIntent = sentIntents.get(0);
-    //     }
-    //     if (deliveryIntents != null && deliveryIntents.size() > 0) {
-    //         deliveryIntent = deliveryIntents.get(0);
-    //     }
-    //     sendTextMessage(destinationAddress, scAddress, parts.get(0),
-    //             sentIntent, deliveryIntent);
-    // }
-    assert(0);
+    if (TextUtils::IsEmpty(destinationAddress)) {
+        // throw new IllegalArgumentException("Invalid destinationAddress");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    Int32 size;
+    if (parts == NULL || (parts->GetSize(&size), size) < 1) {
+        // throw new IllegalArgumentException("Invalid message body");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if ((parts->GetSize(&size), size) > 1) {
+        // try {
+        AutoPtr<IISms> iccISms;
+        GetISmsServiceOrThrow((IISms**)&iccISms);
+
+        Int64 sid;
+        GetSubId(&sid);
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        iccISms->SendMultipartTextForSubscriber(sid,
+                pkgName, destinationAddress, scAddress, IList::Probe(parts),
+                IList::Probe(sentIntents), IList::Probe(deliveryIntents));
+        // } catch (RemoteException ex) {
+        //     // ignore it
+        // }
+    }
+    else {
+        AutoPtr<IPendingIntent> sentIntent;
+        AutoPtr<IPendingIntent> deliveryIntent;
+        AutoPtr<IInterface> obj;
+        if (sentIntents != NULL && (sentIntents->GetSize(&size), size) > 0) {
+            sentIntents->Get(0, (IInterface**)&obj);
+            sentIntent = IPendingIntent::Probe(obj);
+        }
+        if (deliveryIntents != NULL && (deliveryIntents->GetSize(&size), size) > 0) {
+            deliveryIntents->Get(0, (IInterface**)&obj);
+            deliveryIntent = IPendingIntent::Probe(obj);
+        }
+        parts->Get(0, (IInterface**)&obj);
+        String str;
+        ICharSequence::Probe(obj)->ToString(&str);
+        SendTextMessage(destinationAddress, scAddress, str,
+                sentIntent, deliveryIntent);
+    }
     return NOERROR;
 }
 
@@ -193,39 +241,53 @@ ECode SmsManager::SendMultipartTextMessage(
     /* [in] */ Boolean isExpectMore,
     /* [in] */ Int32 validityPeriod)
 {
-    // ==================before translated======================
-    // if (TextUtils.isEmpty(destinationAddress)) {
-    //     throw new IllegalArgumentException("Invalid destinationAddress");
-    // }
-    // if (parts == null || parts.size() < 1) {
-    //     throw new IllegalArgumentException("Invalid message body");
-    // }
-    //
-    // if (parts.size() > 1) {
-    //     try {
-    //          ISms iccISms = getISmsServiceOrThrow();
-    //         if (iccISms != null) {
-    //             iccISms.sendMultipartTextWithOptionsUsingSubscriber(getSubId(),
-    //                     ActivityThread.currentPackageName(), destinationAddress, scAddress,
-    //                     parts, sentIntents, deliveryIntents, priority, isExpectMore,
-    //                     validityPeriod);
-    //         }
-    //     } catch (RemoteException ex) {
-    //         // ignore it
-    //     }
-    // } else {
-    //     PendingIntent sentIntent = null;
-    //     PendingIntent deliveryIntent = null;
-    //     if (sentIntents != null && sentIntents.size() > 0) {
-    //         sentIntent = sentIntents.get(0);
-    //     }
-    //     if (deliveryIntents != null && deliveryIntents.size() > 0) {
-    //         deliveryIntent = deliveryIntents.get(0);
-    //     }
-    //     sendTextMessage(destinationAddress, scAddress, parts.get(0),
-    //             sentIntent, deliveryIntent, priority, isExpectMore, validityPeriod);
-    // }
-    assert(0);
+    if (TextUtils::IsEmpty(destinationAddress)) {
+        // throw new IllegalArgumentException("Invalid destinationAddress");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    Int32 size;
+    if (parts == NULL || (parts->GetSize(&size), size) < 1) {
+        // throw new IllegalArgumentException("Invalid message body");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if ((parts->GetSize(&size), size) > 1) {
+        // try {
+        AutoPtr<IISms> iccISms;
+        GetISmsServiceOrThrow((IISms**)&iccISms);
+        if (iccISms != NULL) {
+            Int64 sid;
+            GetSubId(&sid);
+            String pkgName = CActivityThread::GetCurrentPackageName();
+            IUiccSmsController::Probe(iccISms)->SendMultipartTextWithOptionsUsingSubscriber(
+                    sid, pkgName, destinationAddress, scAddress,
+                    IList::Probe(parts), IList::Probe(sentIntents),
+                    IList::Probe(deliveryIntents), priority, isExpectMore,
+                    validityPeriod);
+        }
+        // } catch (RemoteException ex) {
+        //     // ignore it
+        // }
+    }
+    else {
+        AutoPtr<IPendingIntent> sentIntent;
+        AutoPtr<IPendingIntent> deliveryIntent;
+        AutoPtr<IInterface> obj;
+        if (sentIntents != NULL && (sentIntents->GetSize(&size), size) > 0) {
+            sentIntents->Get(0, (IInterface**)&obj);
+            sentIntent = IPendingIntent::Probe(obj);
+        }
+        if (deliveryIntents != NULL && (deliveryIntents->GetSize(&size), size) > 0) {
+            deliveryIntents->Get(0, (IInterface**)&obj);
+            deliveryIntent = IPendingIntent::Probe(obj);
+        }
+
+        parts->Get(0, (IInterface**)&obj);
+        String str;
+        ICharSequence::Probe(obj)->ToString(&str);
+        SendTextMessage(destinationAddress, scAddress, str,
+                sentIntent, deliveryIntent, priority, isExpectMore, validityPeriod);
+    }
     return NOERROR;
 }
 
@@ -237,24 +299,28 @@ ECode SmsManager::SendDataMessage(
     /* [in] */ IPendingIntent* sentIntent,
     /* [in] */ IPendingIntent* deliveryIntent)
 {
-    // ==================before translated======================
-    // if (TextUtils.isEmpty(destinationAddress)) {
-    //     throw new IllegalArgumentException("Invalid destinationAddress");
-    // }
-    //
-    // if (data == null || data.length == 0) {
-    //     throw new IllegalArgumentException("Invalid message data");
-    // }
-    //
+    if (TextUtils::IsEmpty(destinationAddress)) {
+        // throw new IllegalArgumentException("Invalid destinationAddress");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if (data == NULL || data->GetLength() == 0) {
+        // throw new IllegalArgumentException("Invalid message data");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     // try {
-    //     ISms iccISms = getISmsServiceOrThrow();
-    //     iccISms.sendDataForSubscriber(getSubId(), ActivityThread.currentPackageName(),
-    //             destinationAddress, scAddress, destinationPort & 0xFFFF,
-    //             data, sentIntent, deliveryIntent);
+    AutoPtr<IISms> iccISms;
+    GetISmsServiceOrThrow((IISms**)&iccISms);
+    Int64 sid;
+    GetSubId(&sid);
+    String pkgName = CActivityThread::GetCurrentPackageName();
+    iccISms->SendDataForSubscriber(sid, pkgName,
+            destinationAddress, scAddress, destinationPort & 0xFFFF,
+            data, sentIntent, deliveryIntent);
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -267,67 +333,61 @@ ECode SmsManager::SendDataMessage(
     /* [in] */ IPendingIntent* sentIntent,
     /* [in] */ IPendingIntent* deliveryIntent)
 {
-    // ==================before translated======================
-    // if (TextUtils.isEmpty(destinationAddress)) {
-    //     throw new IllegalArgumentException("Invalid destinationAddress");
-    // }
-    //
-    // if (data == null || data.length == 0) {
-    //     throw new IllegalArgumentException("Invalid message data");
-    // }
+    if (TextUtils::IsEmpty(destinationAddress)) {
+        // throw new IllegalArgumentException("Invalid destinationAddress");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if (data == NULL || data->GetLength() == 0) {
+        // throw new IllegalArgumentException("Invalid message data");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
-    //     if (iccISms != null) {
-    //         iccISms.sendDataWithOrigPortUsingSubscriber(getSubId(),
-    //                 ActivityThread.currentPackageName(),
-    //                 destinationAddress, scAddress, destinationPort & 0xFFFF,
-    //                 originatorPort & 0xFFFF, data, sentIntent, deliveryIntent);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("isms"));
+    AutoPtr<IISms> iccISms = IISms::Probe(obj);
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        IUiccSmsController::Probe(iccISms)->SendDataWithOrigPortUsingSubscriber(
+                sid, pkgName,
+                destinationAddress, scAddress, destinationPort & 0xFFFF,
+                originatorPort & 0xFFFF, data, sentIntent, deliveryIntent);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
 AutoPtr<ISmsManager> SmsManager::GetDefault()
 {
-    // ==================before translated======================
-    // return sInstance;
-    assert(0);
-    AutoPtr<ISmsManager> empty;
-    return empty;
+    return sInstance;
 }
 
 AutoPtr<ISmsManager> SmsManager::GetSmsManagerForSubscriber(
     /* [in] */ Int64 subId)
 {
-    // ==================before translated======================
-    // // TODO(shri): Add javadoc link once SubscriptionManager is made public api
-    // synchronized(sLockObject) {
-    //     SmsManager smsManager = sSubInstances.get(subId);
-    //     if (smsManager == null) {
-    //         smsManager = new SmsManager(subId);
-    //         sSubInstances.put(subId, smsManager);
-    //     }
-    //     return smsManager;
-    // }
-    assert(0);
-    AutoPtr<ISmsManager> empty;
-    return empty;
+    // TODO(shri): Add javadoc link once SubscriptionManager is made public api
+    AutoLock lock(sLockObject);
+    AutoPtr<IInterface> obj;
+    sSubInstances->Get(CoreUtils::Convert(subId), (IInterface**)&obj);
+    AutoPtr<ISmsManager> smsManager = ISmsManager::Probe(obj);
+    if (smsManager == NULL) {
+        smsManager = new SmsManager(subId);
+        sSubInstances->Put(CoreUtils::Convert(subId), smsManager);
+    }
+    return smsManager;
 }
 
 ECode SmsManager::GetSubId(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // TODO(shri): Add javadoc link once SubscriptionManager is made public api
-    // if (mSubId == DEFAULT_SUB_ID) {
-    //     return getDefaultSmsSubId();
-    // }
-    // return mSubId;
-    assert(0);
+    // TODO(shri): Add javadoc link once SubscriptionManager is made public api
+    if (mSubId == DEFAULT_SUB_ID) {
+        *result = GetDefaultSmsSubId();
+    }
     return NOERROR;
 }
 
@@ -338,24 +398,25 @@ ECode SmsManager::CopyMessageToIcc(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean success = false;
-    //
-    // if (null == pdu) {
-    //     throw new IllegalArgumentException("pdu is NULL");
-    // }
+    *result = FALSE;
+
+    if (NULL == pdu) {
+        // throw new IllegalArgumentException("pdu is NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         success = iccISms.copyMessageToIccEfForSubscriber(getSubId(),
-    //                 ActivityThread.currentPackageName(), status, pdu, smsc);
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+    Int64 sid;
+    GetSubId(&sid);
+    String pkgName = CActivityThread::GetCurrentPackageName();
+    iccISms->CopyMessageToIccEfForSubscriber(sid,
+            pkgName, status, pdu, smsc, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    //
-    // return success;
-    assert(0);
+
     return NOERROR;
 }
 
@@ -364,23 +425,23 @@ ECode SmsManager::DeleteMessageFromIcc(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean success = false;
-    // byte[] pdu = new byte[IccConstants.SMS_RECORD_LENGTH-1];
-    // Arrays.fill(pdu, (byte)0xff);
-    //
+    *result = FALSE;
+    AutoPtr<ArrayOf<Byte> > pdu = ArrayOf<Byte>::Alloc(IIccConstants::SMS_RECORD_LENGTH - 1);
+    Arrays::Fill(pdu, (Byte)0xff);
+
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         success = iccISms.updateMessageOnIccEfForSubscriber(getSubId(),
-    //                 ActivityThread.currentPackageName(),messageIndex, STATUS_ON_ICC_FREE, pdu);
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        iccISms->UpdateMessageOnIccEfForSubscriber(sid,
+                pkgName, messageIndex, STATUS_ON_ICC_FREE, pdu, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    //
-    // return success;
-    assert(0);
+
     return NOERROR;
 }
 
@@ -391,21 +452,21 @@ ECode SmsManager::UpdateMessageOnIcc(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean success = false;
-    //
+    *result = FALSE;
+
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         success = iccISms.updateMessageOnIccEfForSubscriber(getSubId(),
-    //                 ActivityThread.currentPackageName(), messageIndex, newStatus, pdu);
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        iccISms->UpdateMessageOnIccEfForSubscriber(sid,
+                pkgName, messageIndex, newStatus, pdu, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    //
-    // return success;
-    assert(0);
+
     return NOERROR;
 }
 
@@ -413,21 +474,23 @@ ECode SmsManager::GetAllMessagesFromIcc(
     /* [out] */ IArrayList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // List<SmsRawData> records = null;
-    //
+    AutoPtr<IList> records;
+
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         records = iccISms.getAllMessagesFromIccEfForSubscriber(getSubId(),
-    //                 ActivityThread.currentPackageName());
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        iccISms->GetAllMessagesFromIccEfForSubscriber(sid,
+                pkgName, (IList**)&records);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    //
-    // return createMessageListFromRawRecords(records);
-    assert(0);
+
+    *result = CreateMessageListFromRawRecords(records);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -436,20 +499,19 @@ ECode SmsManager::EnableCellBroadcast(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean success = false;
-    //
+    *result = FALSE;
+
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         success = iccISms.enableCellBroadcastForSubscriber(getSubId(), messageIdentifier);
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        iccISms->EnableCellBroadcastForSubscriber(sid, messageIdentifier, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    //
-    // return success;
-    assert(0);
+
     return NOERROR;
 }
 
@@ -458,20 +520,19 @@ ECode SmsManager::DisableCellBroadcast(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean success = false;
-    //
+    *result = FALSE;
+
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         success = iccISms.disableCellBroadcastForSubscriber(getSubId(), messageIdentifier);
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        iccISms->DisableCellBroadcastForSubscriber(sid, messageIdentifier, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    //
-    // return success;
-    assert(0);
+
     return NOERROR;
 }
 
@@ -481,24 +542,24 @@ ECode SmsManager::EnableCellBroadcastRange(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean success = false;
-    //
-    // if (endMessageId < startMessageId) {
-    //     throw new IllegalArgumentException("endMessageId < startMessageId");
-    // }
+    *result = FALSE;
+
+    if (endMessageId < startMessageId) {
+        // throw new IllegalArgumentException("endMessageId < startMessageId");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         success = iccISms.enableCellBroadcastRangeForSubscriber(getSubId(),
-    //                 startMessageId, endMessageId);
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        iccISms->EnableCellBroadcastRangeForSubscriber(sid,
+                startMessageId, endMessageId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    //
-    // return success;
-    assert(0);
+
     return NOERROR;
 }
 
@@ -508,24 +569,24 @@ ECode SmsManager::DisableCellBroadcastRange(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean success = false;
-    //
-    // if (endMessageId < startMessageId) {
-    //     throw new IllegalArgumentException("endMessageId < startMessageId");
-    // }
+    *result = FALSE;
+
+    if (endMessageId < startMessageId) {
+        // throw new IllegalArgumentException("endMessageId < startMessageId");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         success = iccISms.disableCellBroadcastRangeForSubscriber(getSubId(),
-    //                 startMessageId, endMessageId);
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        iccISms->DisableCellBroadcastRangeForSubscriber(sid,
+                startMessageId, endMessageId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    //
-    // return success;
-    assert(0);
+
     return NOERROR;
 }
 
@@ -533,18 +594,17 @@ ECode SmsManager::IsImsSmsSupported(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean boSupported = false;
+    *result = FALSE;
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         boSupported = iccISms.isImsSmsSupportedForSubscriber(getSubId());
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        iccISms->IsImsSmsSupportedForSubscriber(sid, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return boSupported;
-    assert(0);
     return NOERROR;
 }
 
@@ -552,45 +612,43 @@ ECode SmsManager::GetImsSmsFormat(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String format = com.android.internal.telephony.SmsConstants.FORMAT_UNKNOWN;
+    *result = ISmsConstants::FORMAT_UNKNOWN;
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         format = iccISms.getImsSmsFormatForSubscriber(getSubId());
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        iccISms->GetImsSmsFormatForSubscriber(sid, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return format;
-    assert(0);
     return NOERROR;
 }
 
 Int64 SmsManager::GetDefaultSmsSubId()
 {
-    // ==================before translated======================
-    // return SubscriptionManager.getDefaultSmsSubId();
-    assert(0);
-    return 0;
+    Int64 val;
+    SubscriptionManager::GetDefaultSmsSubId(&val);
+    return val;
 }
 
 ECode SmsManager::GetSmsCapacityOnIcc(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int ret = -1;
+    *result = -1;
+
     // try {
-    //     ISms iccISms = getISmsService();
-    //     if (iccISms != null) {
-    //         ret = iccISms.getSmsCapacityOnIccForSubscriber(getSubId());
-    //     }
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        IUiccSmsController::Probe(iccISms)->GetSmsCapacityOnIccForSubscriber(sid, result);
+    }
     // } catch (RemoteException ex) {
     //     //ignore it
     // }
-    // return ret;
-    assert(0);
     return NOERROR;
 }
 
@@ -601,26 +659,29 @@ ECode SmsManager::SendMultimediaMessage(
     /* [in] */ IBundle* configOverrides,
     /* [in] */ IPendingIntent* sentIntent)
 {
-    // ==================before translated======================
-    // if (contentUri == null) {
-    //     throw new IllegalArgumentException("Uri contentUri null");
-    // }
+    if (contentUri == NULL) {
+        // throw new IllegalArgumentException("Uri contentUri NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     final IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms == null) {
-    //         return;
-    //     }
-    //     context.grantUriPermission(PHONE_PACKAGE_NAME, contentUri,
-    //             Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    //     grantCarrierPackageUriPermission(context, contentUri,
-    //             Telephony.Mms.Intents.MMS_SEND_ACTION, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    //
-    //     iMms.sendMessage(getSubId(), ActivityThread.currentPackageName(), contentUri,
-    //             locationUrl, configOverrides, sentIntent);
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms == NULL) {
+        return NOERROR;
+    }
+    context->GrantUriPermission(PHONE_PACKAGE_NAME, contentUri,
+            IIntent::FLAG_GRANT_READ_URI_PERMISSION);
+    GrantCarrierPackageUriPermission(context, contentUri,
+            ITelephonyMmsIntents::MMS_SEND_ACTION, IIntent::FLAG_GRANT_READ_URI_PERMISSION);
+
+    Int64 sid;
+    GetSubId(&sid);
+    String pkgName = CActivityThread::GetCurrentPackageName();
+    iMms->SendMessage(sid, pkgName, contentUri,
+            locationUrl, configOverrides, sentIntent);
     // } catch (RemoteException e) {
     //     // Ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -631,31 +692,36 @@ ECode SmsManager::DownloadMultimediaMessage(
     /* [in] */ IBundle* configOverrides,
     /* [in] */ IPendingIntent* downloadedIntent)
 {
-    // ==================before translated======================
-    // if (TextUtils.isEmpty(locationUrl)) {
-    //     throw new IllegalArgumentException("Empty MMS location URL");
-    // }
-    // if (contentUri == null) {
-    //     throw new IllegalArgumentException("Uri contentUri null");
-    // }
+    if (TextUtils::IsEmpty(locationUrl)) {
+        // throw new IllegalArgumentException("Empty MMS location URL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (contentUri == NULL) {
+        // throw new IllegalArgumentException("Uri contentUri NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     // try {
-    //     final IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms == null) {
-    //         return;
-    //     }
-    //     context.grantUriPermission(PHONE_PACKAGE_NAME, contentUri,
-    //             Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-    //
-    //     grantCarrierPackageUriPermission(context, contentUri,
-    //             Telephony.Mms.Intents.MMS_DOWNLOAD_ACTION,
-    //             Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-    //
-    //     iMms.downloadMessage(getSubId(), ActivityThread.currentPackageName(), locationUrl,
-    //             contentUri, configOverrides, downloadedIntent);
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms == NULL) {
+        return NOERROR;
+    }
+    context->GrantUriPermission(PHONE_PACKAGE_NAME, contentUri,
+            IIntent::FLAG_GRANT_WRITE_URI_PERMISSION);
+
+    GrantCarrierPackageUriPermission(context, contentUri,
+            ITelephonyMmsIntents::MMS_DOWNLOAD_ACTION,
+            IIntent::FLAG_GRANT_WRITE_URI_PERMISSION);
+
+    Int64 sid;
+    GetSubId(&sid);
+    String pkgName = CActivityThread::GetCurrentPackageName();
+    iMms->DownloadMessage(sid, pkgName, locationUrl,
+            contentUri, configOverrides, downloadedIntent);
     // } catch (RemoteException e) {
     //     // Ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -666,20 +732,20 @@ ECode SmsManager::UpdateMmsSendStatus(
     /* [in] */ Int32 status,
     /* [in] */ IUri* contentUri)
 {
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms == null) {
-    //         return;
-    //     }
-    //     iMms.updateMmsSendStatus(messageRef, pdu, status);
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms == NULL) {
+        return NOERROR;
+    }
+    iMms->UpdateMmsSendStatus(messageRef, pdu, status);
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // if (contentUri != null) {
-    //     context.revokeUriPermission(contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    // }
-    assert(0);
+
+    if (contentUri != NULL) {
+        context->RevokeUriPermission(contentUri, IIntent::FLAG_GRANT_READ_URI_PERMISSION);
+    }
     return NOERROR;
 }
 
@@ -689,20 +755,20 @@ ECode SmsManager::UpdateMmsDownloadStatus(
     /* [in] */ Int32 status,
     /* [in] */ IUri* contentUri)
 {
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms == null) {
-    //         return;
-    //     }
-    //     iMms.updateMmsDownloadStatus(messageRef, status);
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms == NULL) {
+        return NOERROR;
+    }
+    iMms->UpdateMmsDownloadStatus(messageRef, status);
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // if (contentUri != null) {
-    //     context.revokeUriPermission(contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-    // }
-    assert(0);
+
+    if (contentUri != NULL) {
+        context->RevokeUriPermission(contentUri, IIntent::FLAG_GRANT_WRITE_URI_PERMISSION);
+    }
     return NOERROR;
 }
 
@@ -716,18 +782,18 @@ ECode SmsManager::ImportTextMessage(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.importTextMessage(ActivityThread.currentPackageName(),
-    //                 address, type, text, timestampMillis, seen, read);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        return iMms->ImportTextMessage(pkgName,
+                address, type, text, timestampMillis, seen, read, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -740,21 +806,24 @@ ECode SmsManager::ImportMultimediaMessage(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (contentUri == null) {
-    //     throw new IllegalArgumentException("Uri contentUri null");
-    // }
+    *result = NULL;
+    if (contentUri == NULL) {
+        // throw new IllegalArgumentException("Uri contentUri NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.importMultimediaMessage(ActivityThread.currentPackageName(),
-    //                 contentUri, messageId, timestampSecs, seen, read);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        return iMms->ImportMultimediaMessage(pkgName,
+                contentUri, messageId, timestampSecs, seen, read, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -763,20 +832,23 @@ ECode SmsManager::DeleteStoredMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (messageUri == null) {
-    //     throw new IllegalArgumentException("Empty message URI");
-    // }
+    *result = FALSE;
+
+    if (messageUri == NULL) {
+        // throw new IllegalArgumentException("Empty message URI");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.deleteStoredMessage(ActivityThread.currentPackageName(), messageUri);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        return iMms->DeleteStoredMessage(pkgName, messageUri, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return false;
-    assert(0);
     return NOERROR;
 }
 
@@ -785,18 +857,18 @@ ECode SmsManager::DeleteStoredConversation(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.deleteStoredConversation(
-    //                 ActivityThread.currentPackageName(), conversationId);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+    String pkgName = CActivityThread::GetCurrentPackageName();
+        return iMms->DeleteStoredConversation(
+                pkgName, conversationId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -806,21 +878,23 @@ ECode SmsManager::UpdateStoredMessageStatus(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (messageUri == null) {
-    //     throw new IllegalArgumentException("Empty message URI");
-    // }
+    if (messageUri == NULL) {
+        // throw new IllegalArgumentException("Empty message URI");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.updateStoredMessageStatus(ActivityThread.currentPackageName(),
-    //                 messageUri, statusValues);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        return iMms->UpdateStoredMessageStatus(pkgName,
+                messageUri, statusValues, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -830,18 +904,18 @@ ECode SmsManager::ArchiveStoredConversation(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.archiveStoredConversation(ActivityThread.currentPackageName(),
-    //                 conversationId, archived);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+        if (iMms != NULL) {
+            String pkgName = CActivityThread::GetCurrentPackageName();
+            return iMms->ArchiveStoredConversation(pkgName,
+                    conversationId, archived, result);
+        }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -851,17 +925,17 @@ ECode SmsManager::AddTextMessageDraft(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.addTextMessageDraft(ActivityThread.currentPackageName(), address, text);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        return iMms->AddTextMessageDraft(pkgName, address, text, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -870,21 +944,25 @@ ECode SmsManager::AddMultimediaMessageDraft(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (contentUri == null) {
-    //     throw new IllegalArgumentException("Uri contentUri null");
-    // }
+    *result = NULL;
+
+    if (contentUri == NULL) {
+        // throw new IllegalArgumentException("Uri contentUri NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.addMultimediaMessageDraft(ActivityThread.currentPackageName(),
-    //                 contentUri);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        return iMms->AddMultimediaMessageDraft(pkgName,
+                contentUri, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -894,18 +972,21 @@ ECode SmsManager::SendStoredTextMessage(
     /* [in] */ IPendingIntent* sentIntent,
     /* [in] */ IPendingIntent* deliveryIntent)
 {
-    // ==================before translated======================
-    // if (messageUri == null) {
-    //     throw new IllegalArgumentException("Empty message URI");
-    // }
+    if (messageUri == NULL) {
+        // throw new IllegalArgumentException("Empty message URI");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     ISms iccISms = getISmsServiceOrThrow();
-    //     iccISms.sendStoredText(getSubId(), ActivityThread.currentPackageName(), messageUri,
-    //             scAddress, sentIntent, deliveryIntent);
+    AutoPtr<IISms> iccISms;
+    GetISmsServiceOrThrow((IISms**)&iccISms);
+    Int64 sid;
+    GetSubId(&sid);
+    String pkgName = CActivityThread::GetCurrentPackageName();
+    iccISms->SendStoredText(sid, pkgName, messageUri,
+            scAddress, sentIntent, deliveryIntent);
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -915,18 +996,21 @@ ECode SmsManager::SendStoredMultipartTextMessage(
     /* [in] */ IArrayList* sentIntents,
     /* [in] */ IArrayList* deliveryIntents)
 {
-    // ==================before translated======================
-    // if (messageUri == null) {
-    //     throw new IllegalArgumentException("Empty message URI");
-    // }
+    if (messageUri == NULL) {
+        // throw new IllegalArgumentException("Empty message URI");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     ISms iccISms = getISmsServiceOrThrow();
-    //     iccISms.sendStoredMultipartText(getSubId(), ActivityThread.currentPackageName(), messageUri,
-    //             scAddress, sentIntents, deliveryIntents);
+    AutoPtr<IISms> iccISms;
+    GetISmsServiceOrThrow((IISms**)&iccISms);
+    Int64 sid;
+    GetSubId(&sid);
+    String pkgName = CActivityThread::GetCurrentPackageName();
+    iccISms->SendStoredMultipartText(sid, pkgName, messageUri,
+            scAddress, IList::Probe(sentIntents), IList::Probe(deliveryIntents));
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -935,36 +1019,39 @@ ECode SmsManager::SendStoredMultimediaMessage(
     /* [in] */ IBundle* configOverrides,
     /* [in] */ IPendingIntent* sentIntent)
 {
-    // ==================before translated======================
-    // if (messageUri == null) {
-    //     throw new IllegalArgumentException("Empty message URI");
-    // }
+    if (messageUri == NULL) {
+        // throw new IllegalArgumentException("Empty message URI");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         iMms.sendStoredMessage(getSubId(), ActivityThread.currentPackageName(), messageUri,
-    //                 configOverrides, sentIntent);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        iMms->SendStoredMessage(sid, pkgName, messageUri,
+                configOverrides, sentIntent);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode SmsManager::SetAutoPersisting(
     /* [in] */ Boolean enabled)
 {
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         iMms.setAutoPersisting(ActivityThread.currentPackageName(), enabled);
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        String pkgName = CActivityThread::GetCurrentPackageName();
+        iMms->SetAutoPersisting(pkgName, enabled);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -972,17 +1059,16 @@ ECode SmsManager::GetAutoPersisting(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.getAutoPersisting();
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        return iMms->GetAutoPersisting(result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -990,72 +1076,76 @@ ECode SmsManager::GetCarrierConfigValues(
     /* [out] */ IBundle** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
     // try {
-    //     IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-    //     if (iMms != null) {
-    //         return iMms.getCarrierConfigValues(getSubId());
-    //     }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("imms"));
+    AutoPtr<IIMms> iMms = IIMms::Probe(obj);
+    if (iMms != NULL) {
+        Int64 sid;
+        GetSubId(&sid);
+        return iMms->GetCarrierConfigValues(sid, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
 SmsManager::SmsManager(
     /* [in] */ Int64 subId)
 {
-    // ==================before translated======================
-    // mSubId = subId;
+    mSubId = subId;
 }
 
-AutoPtr<IISms> SmsManager::GetISmsServiceOrThrow()
+ECode SmsManager::GetISmsServiceOrThrow(
+    /* [out] */ IISms** result)
 {
-    // ==================before translated======================
-    // ISms iccISms = getISmsService();
-    // if (iccISms == null) {
-    //     throw new UnsupportedOperationException("Sms is not supported");
-    // }
-    // return iccISms;
-    assert(0);
-    AutoPtr<IISms> empty;
-    return empty;
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+    AutoPtr<IISms> iccISms = GetISmsService();
+    if (iccISms == NULL) {
+        // throw new UnsupportedOperationException("Sms is not supported");
+        return E_UNSUPPORTED_OPERATION_EXCEPTION;
+    }
+    *result = iccISms;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 AutoPtr<IISms> SmsManager::GetISmsService()
 {
-    // ==================before translated======================
-    // return ISms.Stub.asInterface(ServiceManager.getService("isms"));
-    assert(0);
-    AutoPtr<IISms> empty;
-    return empty;
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("isms"));
+    return IISms::Probe(obj);
 }
 
 AutoPtr<IArrayList> SmsManager::CreateMessageListFromRawRecords(
     /* [in] */ IList* records)
 {
-    // ==================before translated======================
-    // ArrayList<SmsMessage> messages = new ArrayList<SmsMessage>();
-    // if (records != null) {
-    //     int count = records.size();
-    //     for (int i = 0; i < count; i++) {
-    //         SmsRawData data = records.get(i);
-    //         // List contains all records, including "free" records (null)
-    //         if (data != null) {
-    //             SmsMessage sms = SmsMessage.createFromEfRecord(i+1, data.getBytes(),
-    //                     getSubId());
-    //             if (sms != null) {
-    //                 messages.add(sms);
-    //             }
-    //         }
-    //     }
-    // }
-    // return messages;
-    assert(0);
-    AutoPtr<IArrayList> empty;
-    return empty;
+    AutoPtr<IArrayList> messages;
+    CArrayList::New((IArrayList**)&messages);
+
+    if (records != NULL) {
+        Int32 count;
+        records->GetSize(&count);
+        for (Int32 i = 0; i < count; i++) {
+            AutoPtr<IInterface> obj;
+            records->Get(i, (IInterface**)&obj);
+            AutoPtr<ISmsRawData> data = ISmsRawData::Probe(obj);
+            // List contains all records, including "free" records (NULL)
+            if (data != NULL) {
+                Int64 sid;
+                GetSubId(&sid);
+                AutoPtr<ArrayOf<Byte> > bytes;
+                data->GetBytes((ArrayOf<Byte>**)&bytes);
+                AutoPtr<ISmsMessage> sms = SmsMessage::CreateFromEfRecord(
+                        i + 1, bytes, sid);
+                if (sms != NULL) {
+                    messages->Add(sms);
+                }
+            }
+        }
+    }
+    return messages;
 }
 
 void SmsManager::GrantCarrierPackageUriPermission(
@@ -1064,16 +1154,22 @@ void SmsManager::GrantCarrierPackageUriPermission(
     /* [in] */ const String& action,
     /* [in] */ Int32 permission)
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(action);
-    // TelephonyManager telephonyManager =
-    //     (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-    // List<String> carrierPackages = telephonyManager.getCarrierPackageNamesForIntent(
-    //         intent);
-    // if (carrierPackages != null && carrierPackages.size() == 1) {
-    //     context.grantUriPermission(carrierPackages.get(0), contentUri, permission);
-    // }
-    assert(0);
+    AutoPtr<IIntent> intent;
+    CIntent::New(action, (IIntent**)&intent);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
+    AutoPtr<ITelephonyManager> telephonyManager = ITelephonyManager::Probe(obj);
+    AutoPtr<IList> carrierPackages;
+    telephonyManager->GetCarrierPackageNamesForIntent(intent, (IList**)&carrierPackages);
+
+    Int32 size;
+    if (carrierPackages != NULL && (carrierPackages->GetSize(&size), size) == 1) {
+        AutoPtr<IInterface> obj;
+        carrierPackages->Get(0, (IInterface**)&obj);
+        String str;
+        ICharSequence::Probe(obj)->ToString(&str);
+        context->GrantUriPermission(str, contentUri, permission);
+    }
 }
 
 } // namespace Telephony

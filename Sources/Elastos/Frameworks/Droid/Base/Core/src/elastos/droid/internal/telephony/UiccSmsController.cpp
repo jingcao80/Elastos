@@ -1,4 +1,6 @@
-
+#include "elastos/droid/internal/telephony/CSmsApplication.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
+#include "elastos/droid/internal/telephony/CSyntheticSmsMessage.h"
 #include "elastos/droid/internal/telephony/UiccSmsController.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/os/CServiceManager.h"
@@ -23,6 +25,8 @@ using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::IBinderHelper;
 using Elastos::Droid::Os::CBinderHelper;
+using Elastos::Droid::Provider::ITelephonySmsIntents;
+using Elastos::Droid::Telephony::ISmsMessage;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::CSubscriptionManager;
 using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
@@ -169,31 +173,36 @@ void UiccSmsController::CreateWakelock()
     mWakeLock->SetReferenceCounted(TRUE);
 }
 
-// private void DispatchPdus(Byte[][] pdus)
-// {
-//     Intent intent = new Intent(Intents.SMS_DELIVER_ACTION);
-//     // Direct the intent to only the default SMS app. if we can't find a default SMS app
-//     // then send it to all broadcast receivers.
-//     ComponentName componentName = SmsApplication->GetDefaultSmsApplication(mContext, TRUE);
-//     if (componentName == NULL)
-//         return;
+void UiccSmsController::DispatchPdus(
+    /* [in] */ IArrayList* pdus)
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonySmsIntents::SMS_DELIVER_ACTION, (IIntent**)&intent);
+    // Direct the intent to only the default SMS app. if we can't find a default SMS app
+    // then send it to all broadcast receivers.
+    AutoPtr<ISmsApplication> application;
+    CSmsApplication::AcquireSingleton((ISmsApplication**)&application);
+    AutoPtr<IComponentName> componentName;
+    application->GetDefaultSmsApplication(mContext, TRUE, (IComponentName**)&componentName);
+    if (componentName == NULL)
+        return;
 
-//     if (Rlog->IsLoggable("SMS", Log.VERBOSE)) {
-//         Log("dispatchPdu pdus: " + pdus +
-//                 "\n componentName=" + componentName +
-//                 "\n format=" + SmsMessage.FORMAT_SYNTHETIC);
-//     }
+    // if (Logger::IsLoggable("SMS", Logger::VERBOSE)) {
+    //     Log("dispatchPdu pdus: " + pdus +
+    //             "\n componentName=" + componentName +
+    //             "\n format=" + SmsMessage.FORMAT_SYNTHETIC);
+    // }
 
-//     // Deliver SMS message only to this receiver
-//     intent->SetComponent(componentName);
-//     intent->PutExtra("pdus", pdus);
-//     intent->PutExtra("format", SmsMessage.FORMAT_SYNTHETIC);
-//     Dispatch(intent, Manifest::permission::RECEIVE_SMS);
+    // Deliver SMS message only to this receiver
+    intent->SetComponent(componentName);
+    intent->PutParcelableArrayListExtra(String("pdus"), pdus);
+    intent->PutExtra(String("format"), ISmsMessage::FORMAT_SYNTHETIC);
+    Dispatch(intent, Manifest::permission::RECEIVE_SMS);
 
-//     intent->SetAction(Intents.SMS_RECEIVED_ACTION);
-//     intent->SetComponent(NULL);
-//     Dispatch(intent, Manifest::permission::RECEIVE_SMS);
-// }
+    intent->SetAction(ITelephonySmsIntents::SMS_RECEIVED_ACTION);
+    intent->SetComponent(NULL);
+    Dispatch(intent, Manifest::permission::RECEIVE_SMS);
+}
 
 void UiccSmsController::Dispatch(
     /* [in] */ IIntent* intent,
@@ -781,18 +790,28 @@ ECode UiccSmsController::SynthesizeMessages(
             Manifest::permission::BROADCAST_SMS, String(""));
     Int32 size = 0;
     messages->GetSize(&size);
-    assert(0 && "TODO");
-    // Byte[][] pdus = new Byte[size][];
-    // for (Int32 i = 0; i < size; i++) {
-    //     AutoPtr<IInterface> p;
-    //     messages->Get(i, (IInterface**)&p);
-    //     AutoPtr<ISyntheticSmsMessage> message;
-    //     CSyntheticSmsMessage::New(originatingAddress,
-    //             scAddress, p, timestampMillis,
-    //             (ISyntheticSmsMessage**)&message);
-    //     ISmsMessageBase::Probe(message)->GetPdu((ArrayOf<Byte>**)&((*pdus)[i]));
-    // }
-    // DispatchPdus(pdus);
+    AutoPtr<IArrayList> pdus;
+    CArrayList::New(size, (IArrayList**)&pdus);
+
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> p;
+        messages->Get(i, (IInterface**)&p);
+        String str;
+        ICharSequence::Probe(p)->ToString(&str);
+        AutoPtr<ISyntheticSmsMessage> message;
+        CSyntheticSmsMessage::New(originatingAddress,
+                scAddress, str, timestampMillis,
+                (ISyntheticSmsMessage**)&message);
+        AutoPtr<ArrayOf<Byte> > array;
+        ISmsMessageBase::Probe(message)->GetPdu((ArrayOf<Byte>**)&array);
+        AutoPtr<IArrayOf> iArray;
+        CArrayOf::New(Elastos::Core::EIID_IByte, array->GetLength(), (IArrayOf**)&iArray);
+        for (Int32 j = 0; j < array->GetLength(); j++) {
+            iArray->Set(j, CoreUtils::Convert((*array)[j]));
+        }
+        pdus->Set(i, iArray);
+    }
+    DispatchPdus(pdus);
     return NOERROR;
 }
 
@@ -800,8 +819,7 @@ AutoPtr<IIccSmsInterfaceManager> UiccSmsController::GetIccSmsInterfaceManager(
     /* [in] */ Int64 subId)
 {
     AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
     AutoPtr<ISubscriptionController> sc;
     hlp->GetInstance((ISubscriptionController**)&sc);
     Int32 phoneId = 0;
@@ -835,8 +853,7 @@ AutoPtr<IIccSmsInterfaceManager> UiccSmsController::GetIccSmsInterfaceManager(
 Int64 UiccSmsController::GetDefaultSmsSubId()
 {
     AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
     AutoPtr<ISubscriptionController> sc;
     hlp->GetInstance((ISubscriptionController**)&sc);
     Int64 res = 0;

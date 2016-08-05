@@ -613,9 +613,6 @@ module
                 [in] Int32 urgency,
                 [in] Int32 certainty);
 
-            //constructor(
-            //    [in] IParcel* parcel);
-
             interface ISmsCbCmasInfo;
             interface IParcelable;
         }
@@ -629,9 +626,6 @@ module
                 [in] Boolean emergencyUserAlert,
                 [in] Boolean activatePopup,
                 [in] ArrayOf<Byte>* warningSecurityInformation);
-
-            constructor(
-                [in] IParcel* parcel);
 
             interface ISmsCbEtwsInfo;
             interface IParcelable;
@@ -647,9 +641,6 @@ module
                 [in] String plmn,
                 [in] Int32 lac,
                 [in] Int32 cid);
-
-            constructor(
-                [in] IParcel* parcel);
 
             interface ISmsCbLocation;
             interface IParcelable;
@@ -669,9 +660,6 @@ module
                 [in] Int32 priority,
                 [in] ISmsCbEtwsInfo* etwsWarningInfo,
                 [in] ISmsCbCmasInfo* cmasWarningInfo);
-
-            constructor(
-                [in] IParcel* parcel);
 
             interface ISmsCbMessage;
             interface IParcelable;

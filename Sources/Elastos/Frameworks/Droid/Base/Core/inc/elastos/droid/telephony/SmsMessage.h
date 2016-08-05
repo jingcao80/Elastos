@@ -5,25 +5,9 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package android.telephony;
-// import android.os.Parcel;
-// import android.telephony.Rlog;
-// import android.content.res.Resources;
-// import android.telephony.SubscriptionManager;
-// import android.text.TextUtils;
-// import com.android.internal.telephony.GsmAlphabet;
-// import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
-// import com.android.internal.telephony.SmsConstants;
-// import com.android.internal.telephony.SmsMessageBase;
-// import com.android.internal.telephony.SmsMessageBase.SubmitPduBase;
-// import com.android.internal.telephony.Sms7BitEncodingTranslator;
-// import java.lang.Math;
-// import java.util.ArrayList;
-// import java.util.Arrays;
-// import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
-
-//TODO using Elastos::Droid::Internal::Telephony::ISmsMessageBaseSubmitPduBase;
+using Elastos::Droid::Internal::Telephony::ISmsMessageBaseSubmitPduBase;
 using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
+using Elastos::Droid::Internal::Telephony::MessageClass;
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {
@@ -43,6 +27,7 @@ public:
         : public ISmsMessageSubmitPdu
         , public Object
     {
+        friend class SmsMessage;
     public:
         CAR_INTERFACE_DECL();
 
@@ -55,7 +40,7 @@ public:
           * @hide
           */
         SubmitPdu(
-            /* [in] */ IInterface/*TODO ISmsMessageBaseSubmitPduBase*/* spb);
+            /* [in] */ ISmsMessageBaseSubmitPduBase* spb);
 
     public:
         AutoPtr<ArrayOf<Byte> > encodedScAddress;
@@ -349,7 +334,7 @@ public:
       * Returns the class of this message.
       */
     virtual CARAPI GetMessageClass(
-        /* [out] */ Int32/*TODO MessageClass*/* result);
+        /* [out] */ MessageClass* result);
 
     /**
       * Returns the message body, or email message body if this message was from
@@ -464,7 +449,8 @@ public:
       * @deprecated Use getStatusOnIcc instead.
       */
     // @Deprecated
-    virtual CARAPI_(Int32) GetStatusOnSim();
+    virtual CARAPI GetStatusOnSim(
+        /* [out] */ Int32* result);
 
     /**
       * Returns the status of the message on the ICC (read, unread, sent, unsent).
@@ -486,7 +472,8 @@ public:
       * @deprecated Use getIndexOnIcc instead.
       */
     // @Deprecated
-    virtual CARAPI_(Int32) GetIndexOnSim();
+    virtual CARAPI GetIndexOnSim(
+        /* [out] */ Int32* result);
 
     /**
       * Returns the record index of the message on the ICC (1-based index).

@@ -1,7 +1,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/content/res/CResources.h"
-#include "elastos/droid/internal/telephony/cdma/SmsMessage.h"
+#include "elastos/droid/internal/telephony/cdma/CDMASmsMessage.h"
 #include "elastos/droid/internal/telephony/cdma/sms/BearerData.h"
 #include "elastos/droid/internal/telephony/cdma/sms/CBearerData.h"
 #include "elastos/droid/internal/telephony/cdma/sms/CCdmaSmsAddress.h"
@@ -75,43 +75,43 @@ namespace Telephony {
 namespace Cdma {
 
 //=====================================================================
-//                              SmsMessage::SubmitPdu
+//                              CDMASmsMessage::SubmitPdu
 //=====================================================================
-CAR_INTERFACE_IMPL(SmsMessage::SubmitPdu, /*TODO SmsMessageBase::SubmitPduBase*/Object, ISmsMessageSubmitPdu);
+CAR_INTERFACE_IMPL(CDMASmsMessage::SubmitPdu, /*TODO SmsMessageBase::SubmitPduBase*/Object, ISmsMessageSubmitPdu);
 
 //=====================================================================
-//                              SmsMessage
+//                              CDMASmsMessage
 //=====================================================================
-CAR_INTERFACE_IMPL(SmsMessage, SmsMessageBase, ISmsMessage);
+CAR_INTERFACE_IMPL(CDMASmsMessage, SmsMessageBase, ISmsMessage);
 
-const String SmsMessage::LOGTAG("SmsMessage");
-const String SmsMessage::LOGGABLE_TAG("CDMA:SMS");
-const Boolean SmsMessage::VDBG = FALSE;
-const Byte SmsMessage::TELESERVICE_IDENTIFIER = 0x00;
-const Byte SmsMessage::SERVICE_CATEGORY = 0x01;
-const Byte SmsMessage::ORIGINATING_ADDRESS = 0x02;
-const Byte SmsMessage::ORIGINATING_SUB_ADDRESS = 0x03;
-const Byte SmsMessage::DESTINATION_ADDRESS = 0x04;
-const Byte SmsMessage::DESTINATION_SUB_ADDRESS = 0x05;
-const Byte SmsMessage::BEARER_REPLY_OPTION = 0x06;
-const Byte SmsMessage::CAUSE_CODES = 0x07;
-const Byte SmsMessage::BEARER_DATA = 0x08;
-const Int32 SmsMessage::RETURN_NO_ACK;
-const Int32 SmsMessage::RETURN_ACK;
-const Int32 SmsMessage::PRIORITY_NORMAL;
-const Int32 SmsMessage::PRIORITY_INTERACTIVE;
-const Int32 SmsMessage::PRIORITY_URGENT;
-const Int32 SmsMessage::PRIORITY_EMERGENCY;
+const String CDMASmsMessage::LOGTAG("CDMASmsMessage");
+const String CDMASmsMessage::LOGGABLE_TAG("CDMA:SMS");
+const Boolean CDMASmsMessage::VDBG = FALSE;
+const Byte CDMASmsMessage::TELESERVICE_IDENTIFIER = 0x00;
+const Byte CDMASmsMessage::SERVICE_CATEGORY = 0x01;
+const Byte CDMASmsMessage::ORIGINATING_ADDRESS = 0x02;
+const Byte CDMASmsMessage::ORIGINATING_SUB_ADDRESS = 0x03;
+const Byte CDMASmsMessage::DESTINATION_ADDRESS = 0x04;
+const Byte CDMASmsMessage::DESTINATION_SUB_ADDRESS = 0x05;
+const Byte CDMASmsMessage::BEARER_REPLY_OPTION = 0x06;
+const Byte CDMASmsMessage::CAUSE_CODES = 0x07;
+const Byte CDMASmsMessage::BEARER_DATA = 0x08;
+const Int32 CDMASmsMessage::RETURN_NO_ACK;
+const Int32 CDMASmsMessage::RETURN_ACK;
+const Int32 CDMASmsMessage::PRIORITY_NORMAL;
+const Int32 CDMASmsMessage::PRIORITY_INTERACTIVE;
+const Int32 CDMASmsMessage::PRIORITY_URGENT;
+const Int32 CDMASmsMessage::PRIORITY_EMERGENCY;
 
-SmsMessage::SmsMessage()
+CDMASmsMessage::CDMASmsMessage()
     : status(0)
 {
 }
 
-AutoPtr<ISmsMessage> SmsMessage::CreateFromPdu(
+AutoPtr<ISmsMessage> CDMASmsMessage::CreateFromPdu(
     /* [in] */ ArrayOf<Byte>* pdu)
 {
-    AutoPtr<SmsMessage> msg = new SmsMessage();
+    AutoPtr<CDMASmsMessage> msg = new CDMASmsMessage();
 
     // try {
     msg->ParsePdu(pdu);
@@ -125,11 +125,11 @@ AutoPtr<ISmsMessage> SmsMessage::CreateFromPdu(
     // }
 }
 
-AutoPtr<ISmsMessage> SmsMessage::NewFromParcel(
+AutoPtr<ISmsMessage> CDMASmsMessage::NewFromParcel(
     /* [in] */ IParcel* p)
 {
     // Note: Parcel.readByte actually reads one Int and masks to byte
-    AutoPtr<SmsMessage> msg = new SmsMessage();
+    AutoPtr<CDMASmsMessage> msg = new CDMASmsMessage();
 
     AutoPtr<CSmsEnvelope> env;
     CSmsEnvelope::NewByFriend((CSmsEnvelope**)&env);
@@ -233,12 +233,12 @@ AutoPtr<ISmsMessage> SmsMessage::NewFromParcel(
     return ISmsMessage::Probe(msg);
 }
 
-AutoPtr<ISmsMessage> SmsMessage::CreateFromEfRecord(
+AutoPtr<ISmsMessage> CDMASmsMessage::CreateFromEfRecord(
     /* [in] */ Int32 index,
     /* [in] */ ArrayOf<Byte>* data)
 {
     // try {
-    AutoPtr<SmsMessage> msg = new SmsMessage();
+    AutoPtr<CDMASmsMessage> msg = new CDMASmsMessage();
 
     msg->mIndexOnIcc = index;
 
@@ -271,14 +271,14 @@ AutoPtr<ISmsMessage> SmsMessage::CreateFromEfRecord(
     // }
 }
 
-Int32 SmsMessage::GetTPLayerLengthForPDU(
+Int32 CDMASmsMessage::GetTPLayerLengthForPDU(
     /* [in] */ const String& pdu)
 {
     Logger::W(LOGTAG, "getTPLayerLengthForPDU: is not supported in CDMA mode.");
     return 0;
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::GetSubmitPdu(
     /* [in] */ const String& scAddr,
     /* [in] */ const String& destAddr,
     /* [in] */ const String& message,
@@ -288,7 +288,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return GetSubmitPdu(scAddr, destAddr, message, statusReportRequested, smsHeader, -1);
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::GetSubmitPdu(
     /* [in] */ const String& scAddr,
     /* [in] */ const String& destAddr,
     /* [in] */ const String& message,
@@ -313,7 +313,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return PrivateGetSubmitPdu(destAddr, statusReportRequested, IUserData::Probe(uData), priority);
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::GetSubmitPdu(
     /* [in] */ const String& scAddr,
     /* [in] */ const String& destAddr,
     /* [in] */ Int32 destPort,
@@ -323,7 +323,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return GetSubmitPdu(scAddr, destAddr, destPort, 0, data, statusReportRequested);
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::GetSubmitPdu(
     /* [in] */ const String& scAddr,
     /* [in] */ const String& destAddr,
     /* [in] */ Int32 destPort,
@@ -359,7 +359,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return PrivateGetSubmitPdu(destAddr, statusReportRequested, uData);
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::GetSubmitPdu(
     /* [in] */ const String& destAddr,
     /* [in] */ IUserData* userData,
     /* [in] */ Boolean statusReportRequested)
@@ -367,7 +367,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return PrivateGetSubmitPdu(destAddr, statusReportRequested, userData);
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::GetSubmitPdu(
     /* [in] */ const String& destAddr,
     /* [in] */ IUserData* userData,
     /* [in] */ Boolean statusReportRequested,
@@ -376,7 +376,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return PrivateGetSubmitPdu(destAddr, statusReportRequested, userData, priority);
 }
 
-ECode SmsMessage::GetProtocolIdentifier(
+ECode CDMASmsMessage::GetProtocolIdentifier(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -386,7 +386,7 @@ ECode SmsMessage::GetProtocolIdentifier(
     return NOERROR;
 }
 
-ECode SmsMessage::IsReplace(
+ECode CDMASmsMessage::IsReplace(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -395,7 +395,7 @@ ECode SmsMessage::IsReplace(
     return NOERROR;
 }
 
-ECode SmsMessage::IsCphsMwiMessage(
+ECode CDMASmsMessage::IsCphsMwiMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -404,7 +404,7 @@ ECode SmsMessage::IsCphsMwiMessage(
     return NOERROR;
 }
 
-ECode SmsMessage::IsMWIClearMessage(
+ECode CDMASmsMessage::IsMWIClearMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -412,7 +412,7 @@ ECode SmsMessage::IsMWIClearMessage(
     return NOERROR;
 }
 
-ECode SmsMessage::IsMWISetMessage(
+ECode CDMASmsMessage::IsMWISetMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -421,7 +421,7 @@ ECode SmsMessage::IsMWISetMessage(
     return NOERROR;
 }
 
-ECode SmsMessage::IsMwiDontStore(
+ECode CDMASmsMessage::IsMwiDontStore(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -431,7 +431,7 @@ ECode SmsMessage::IsMwiDontStore(
     return NOERROR;
 }
 
-ECode SmsMessage::GetStatus(
+ECode CDMASmsMessage::GetStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -439,7 +439,7 @@ ECode SmsMessage::GetStatus(
     return NOERROR;
 }
 
-ECode SmsMessage::IsStatusReportMessage(
+ECode CDMASmsMessage::IsStatusReportMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -448,7 +448,7 @@ ECode SmsMessage::IsStatusReportMessage(
     return NOERROR;
 }
 
-ECode SmsMessage::IsReplyPathPresent(
+ECode CDMASmsMessage::IsReplyPathPresent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -457,7 +457,7 @@ ECode SmsMessage::IsReplyPathPresent(
     return NOERROR;
 }
 
-AutoPtr<IGsmAlphabetTextEncodingDetails> SmsMessage::CalculateLength(
+AutoPtr<IGsmAlphabetTextEncodingDetails> CDMASmsMessage::CalculateLength(
     /* [in] */ ICharSequence* messageBody,
     /* [in] */ Boolean use7bitOnly)
 {
@@ -481,7 +481,7 @@ AutoPtr<IGsmAlphabetTextEncodingDetails> SmsMessage::CalculateLength(
     return details;
 }
 
-ECode SmsMessage::GetTeleService(
+ECode CDMASmsMessage::GetTeleService(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -489,7 +489,7 @@ ECode SmsMessage::GetTeleService(
     return NOERROR;
 }
 
-ECode SmsMessage::GetMessageType(
+ECode CDMASmsMessage::GetMessageType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -503,7 +503,7 @@ ECode SmsMessage::GetMessageType(
     return NOERROR;
 }
 
-ECode SmsMessage::ParseBroadcastSms(
+ECode CDMASmsMessage::ParseBroadcastSms(
     /* [out] */ ISmsCbMessage** result)
 {
     VALIDATE_NOT_NULL(result);
@@ -535,7 +535,7 @@ ECode SmsMessage::ParseBroadcastSms(
             bd->priority, NULL, bd->cmasWarningInfo, result);
 }
 
-ECode SmsMessage::GetMessageClass(
+ECode CDMASmsMessage::GetMessageClass(
     /* [out] */ MessageClass* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -550,7 +550,7 @@ ECode SmsMessage::GetMessageClass(
 }
 
 // synchronized
-Int32 SmsMessage::GetNextMessageId()
+Int32 CDMASmsMessage::GetNextMessageId()
 {
     // Testing and dialog with partners has indicated that
     // msgId==0 is (sometimes?) treated specially by lower levels.
@@ -570,7 +570,7 @@ Int32 SmsMessage::GetNextMessageId()
     return msgId;
 }
 
-ECode SmsMessage::GetNumOfVoicemails(
+ECode CDMASmsMessage::GetNumOfVoicemails(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -578,7 +578,7 @@ ECode SmsMessage::GetNumOfVoicemails(
     return NOERROR;
 }
 
-ECode SmsMessage::GetIncomingSmsFingerprint(
+ECode CDMASmsMessage::GetIncomingSmsFingerprint(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
@@ -598,7 +598,7 @@ ECode SmsMessage::GetIncomingSmsFingerprint(
     return output->ToByteArray(result);
 }
 
-ECode SmsMessage::GetSmsCbProgramData(
+ECode CDMASmsMessage::GetSmsCbProgramData(
     /* [out] */ IArrayList** result)
 {
     VALIDATE_NOT_NULL(result);
@@ -607,7 +607,7 @@ ECode SmsMessage::GetSmsCbProgramData(
     return NOERROR;
 }
 
-ECode SmsMessage::ParseSms()
+ECode CDMASmsMessage::ParseSms()
 {
     // Message Waiting Info Record defined in 3GPP2 C.S-0005, 3.7.5.6
     // It contains only an 8-bit number with the number of messages waiting
@@ -696,7 +696,7 @@ ECode SmsMessage::ParseSms()
     return NOERROR;
 }
 
-Boolean SmsMessage::ProcessCdmaCTWdpHeader(
+Boolean CDMASmsMessage::ProcessCdmaCTWdpHeader(
     /* [in] */ ISmsMessage* sms)
 {
     Int32 subparamId = 0;
@@ -722,7 +722,7 @@ Boolean SmsMessage::ProcessCdmaCTWdpHeader(
         return FALSE;
     }
 
-    AutoPtr<SmsMessage> sm = (SmsMessage*)sms;
+    AutoPtr<CDMASmsMessage> sm = (CDMASmsMessage*)sms;
     AutoPtr<BearerData> bd = (BearerData*)bd.Get();
     inStream->Read(4, &bd->messageType);
     Int32 val;
@@ -761,7 +761,7 @@ Boolean SmsMessage::ProcessCdmaCTWdpHeader(
     return decodeSuccess;
 }
 
-ECode SmsMessage::ParsePdu(
+ECode CDMASmsMessage::ParsePdu(
     /* [in] */ ArrayOf<Byte>* pdu)
 {
     AutoPtr<IByteArrayInputStream> bais;
@@ -841,7 +841,7 @@ ECode SmsMessage::ParsePdu(
     return NOERROR;
 }
 
-void SmsMessage::ParsePduFromEfRecord(
+void CDMASmsMessage::ParsePduFromEfRecord(
     /* [in] */ ArrayOf<Byte>* pdu)
 {
     AutoPtr<IByteArrayInputStream> bais;
@@ -1022,7 +1022,7 @@ void SmsMessage::ParsePduFromEfRecord(
     ParseSms();
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::PrivateGetSubmitPdu(
+AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::PrivateGetSubmitPdu(
     /* [in] */ const String& destAddrStr,
     /* [in] */ Boolean statusReportRequested,
     /* [in] */ IUserData* userData)
@@ -1030,7 +1030,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::PrivateGetSubmitPdu(
     return PrivateGetSubmitPdu(destAddrStr, statusReportRequested, userData, -1);
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::PrivateGetSubmitPdu(
+AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::PrivateGetSubmitPdu(
     /* [in] */ const String& destAddrStr,
     /* [in] */ Boolean statusReportRequested,
     /* [in] */ IUserData* userData,
@@ -1143,7 +1143,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::PrivateGetSubmitPdu(
     return NULL;
 }
 
-void SmsMessage::CreatePdu()
+void CDMASmsMessage::CreatePdu()
 {
     AutoPtr<CSmsEnvelope> env = (CSmsEnvelope*)mEnvelope.Get();
     AutoPtr<CCdmaSmsAddress> addr = (CCdmaSmsAddress*)env->origAddress.Get();
@@ -1190,7 +1190,7 @@ void SmsMessage::CreatePdu()
     // }
 }
 
-Byte SmsMessage::ConvertDtmfToAscii(
+Byte CDMASmsMessage::ConvertDtmfToAscii(
     /* [in] */ Byte dtmfDigit)
 {
     Byte asciiDigit;

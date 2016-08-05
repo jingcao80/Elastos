@@ -21,27 +21,6 @@ class SmsCbCmasInfo
     , public ISmsCbCmasInfo
     , public IParcelable
 {
-//private:
-    //class InnerParcelableCreator
-    //    : public Object
-    //    , public Parcelable::Creator<SmsCbCmasInfo>
-    //{
-    //public:
-    //    InnerParcelableCreator(
-    //        /* [in] */ SmsCbCmasInfo* owner);
-
-    //    // @Override
-    //    CARAPI_(AutoPtr<SmsCbCmasInfo>) CreateFromParcel(
-    //        /* [in] */ IParcel* in);
-
-    //    // @Override
-    //    CARAPI_(AutoPtr< ArrayOf< AutoPtr<SmsCbCmasInfo> > >) NewArray(
-    //        /* [in] */ Int32 size);
-
-    //private:
-    //    SmsCbCmasInfo* mOwner;
-    //};
-
 public:
     CAR_INTERFACE_DECL();
 
@@ -56,11 +35,8 @@ public:
         /* [in] */ Int32 urgency,
         /* [in] */ Int32 certainty);
 
-    /** Create a new SmsCbCmasInfo object from a Parcel. */
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
-
     CARAPI constructor();
+
     /**
       * Flatten this object into a Parcel.
       *
@@ -119,13 +95,6 @@ public:
     // @Override
     CARAPI ToString(
         /* [out] */ String* str);
-
-    /**
-      * Describe the kinds of special objects contained in the marshalled representation.
-      * @return a bitmask indicating this Parcelable contains no special objects
-      */
-    // @Override
-    //CARAPI_(Int32) DescribeContents();
 
 private:
     /** CMAS message class. */

@@ -9,41 +9,6 @@
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include <elastos/core/Thread.h>
 
-// import android.content.Intent;
-// import android.content.IntentFilter;
-// import android.content.SharedPreferences;
-// import android.os.Registrant;
-// import android.os.RemoteException;
-// import android.os.SystemProperties;
-// import android.provider.Settings;
-// import android.preference.PreferenceManager;
-// import android.telecom.ConferenceParticipant;
-// import android.telecom.VideoProfile;
-// import android.telephony.DisconnectCause;
-// import android.telephony.PhoneNumberUtils;
-// import android.telephony.Rlog;
-// import android.telephony.ServiceState;
-// import com.android.ims.ImsCallProfile;
-// import com.android.ims.ImsConfig;
-// import com.android.ims.ImsConnectionStateListener;
-// import com.android.ims.ImsException;
-// import com.android.ims.ImsManager;
-// import com.android.ims.ImsServiceClass;
-// import com.android.ims.internal.CallGroup;
-// import com.android.ims.internal.IImsVideoCallProvider;
-// import com.android.ims.internal.ImsCallSession;
-// import com.android.ims.internal.ImsVideoCallProviderWrapper;
-// import com.android.internal.telephony.Call;
-// import com.android.internal.telephony.CallStateException;
-// import com.android.internal.telephony.CallTracker;
-// import com.android.internal.telephony.CommandException;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.Phone;
-// import com.android.internal.telephony.PhoneBase;
-// import com.android.internal.telephony.PhoneConstants;
-// import com.android.internal.telephony.TelephonyProperties;
-// import com.android.internal.telephony.gsm.SuppServiceNotification;
-
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;

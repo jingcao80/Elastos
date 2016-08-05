@@ -4,8 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.telephony.Rlog;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::IPhoneNotifier;
 using Elastos::Droid::Internal::Telephony::IPhone;

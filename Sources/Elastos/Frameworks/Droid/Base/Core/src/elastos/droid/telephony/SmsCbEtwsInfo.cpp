@@ -1,40 +1,18 @@
-
+#include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/telephony/SmsCbEtwsInfo.h"
+#include "elastos/droid/text/format/CTime.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
+
+using Elastos::Droid::Internal::Telephony::IccUtils;
+using Elastos::Droid::Text::Format::CTime;
+using Elastos::Droid::Text::Format::ITime;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
-
-////=====================================================================
-////                     SmsCbEtwsInfo::InnerCreator
-////=====================================================================
-//SmsCbEtwsInfo::InnerCreator::InnerCreator(
-//    /* [in] */ SmsCbEtwsInfo* owner)
-//    : mOwner(owner)
-//{
-//    // ==================before translated======================
-//    // mOwner = owner;
-//}
-//
-//AutoPtr<SmsCbEtwsInfo> SmsCbEtwsInfo::InnerCreator::CreateFromParcel(
-//    /* [in] */ IParcel* in)
-//{
-//    // ==================before translated======================
-//    // return new SmsCbEtwsInfo(in);
-//    assert(0);
-//    AutoPtr<SmsCbEtwsInfo> empty;
-//    return empty;
-//}
-//
-//AutoPtr< ArrayOf< AutoPtr<SmsCbEtwsInfo> > > SmsCbEtwsInfo::InnerCreator::NewArray(
-//    /* [in] */ Int32 size)
-//{
-//    // ==================before translated======================
-//    // return new SmsCbEtwsInfo[size];
-//    assert(0);
-//    AutoPtr< ArrayOf< AutoPtr<SmsCbEtwsInfo> > > empty;
-//    return empty;
-//}
 
 //=====================================================================
 //                            SmsCbEtwsInfo
@@ -42,6 +20,9 @@ namespace Telephony {
 CAR_INTERFACE_IMPL_2(SmsCbEtwsInfo, Object, ISmsCbEtwsInfo, IParcelable);
 
 SmsCbEtwsInfo::SmsCbEtwsInfo()
+    : mWarningType(0)
+    , mEmergencyUserAlert(FALSE)
+    , mActivatePopup(FALSE)
 {
 }
 
@@ -51,22 +32,10 @@ ECode SmsCbEtwsInfo::constructor(
     /* [in] */ Boolean activatePopup,
     /* [in] */ ArrayOf<Byte>* warningSecurityInformation)
 {
-    // ==================before translated======================
-    // mWarningType = warningType;
-    // mEmergencyUserAlert = emergencyUserAlert;
-    // mActivatePopup = activatePopup;
-    // mWarningSecurityInformation = warningSecurityInformation;
-    return NOERROR;
-}
-
-ECode SmsCbEtwsInfo::constructor(
-    /* [in] */ IParcel* in)
-{
-    // ==================before translated======================
-    // mWarningType = in.readInt();
-    // mEmergencyUserAlert = (in.readInt() != 0);
-    // mActivatePopup = (in.readInt() != 0);
-    // mWarningSecurityInformation = in.createByteArray();
+    mWarningType = warningType;
+    mEmergencyUserAlert = emergencyUserAlert;
+    mActivatePopup = activatePopup;
+    mWarningSecurityInformation = warningSecurityInformation;
     return NOERROR;
 }
 
@@ -79,19 +48,21 @@ ECode SmsCbEtwsInfo::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     VALIDATE_NOT_NULL(dest);
-    // ==================before translated======================
-    // dest.writeInt(mWarningType);
-    // dest.writeInt(mEmergencyUserAlert ? 1 : 0);
-    // dest.writeInt(mActivatePopup ? 1 : 0);
-    // dest.writeByteArray(mWarningSecurityInformation);
-    assert(0);
+    dest->WriteInt32(mWarningType);
+    dest->WriteInt32(mEmergencyUserAlert ? 1 : 0);
+    dest->WriteInt32(mActivatePopup ? 1 : 0);
+    dest->WriteArrayOf((Handle32)mWarningSecurityInformation.Get());
     return NOERROR;
 }
 
 ECode SmsCbEtwsInfo::ReadFromParcel(
       /* [in] */ IParcel* source)
 {
-    assert(0);
+    source->ReadInt32(&mWarningType);
+    Int32 val;
+    mEmergencyUserAlert = (source->ReadInt32(&val), val) == 1 ? TRUE : FALSE;
+    mActivatePopup = (source->ReadInt32(&val), val) == 1 ? TRUE : FALSE;
+    source->ReadArrayOf((Handle32*)(&mWarningSecurityInformation));
     return NOERROR;
 }
 
@@ -99,9 +70,7 @@ ECode SmsCbEtwsInfo::GetWarningType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mWarningType;
-    assert(0);
+    *result = mWarningType;
     return NOERROR;
 }
 
@@ -109,9 +78,7 @@ ECode SmsCbEtwsInfo::IsEmergencyUserAlert(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mEmergencyUserAlert;
-    assert(0);
+    *result = mEmergencyUserAlert;
     return NOERROR;
 }
 
@@ -119,9 +86,7 @@ ECode SmsCbEtwsInfo::IsPopupAlert(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mActivatePopup;
-    assert(0);
+    *result = mActivatePopup;
     return NOERROR;
 }
 
@@ -129,43 +94,45 @@ ECode SmsCbEtwsInfo::GetPrimaryNotificationTimestamp(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mWarningSecurityInformation == null || mWarningSecurityInformation.length < 7) {
-    //     return 0;
-    // }
-    //
-    // int year = IccUtils.gsmBcdByteToInt(mWarningSecurityInformation[0]);
-    // int month = IccUtils.gsmBcdByteToInt(mWarningSecurityInformation[1]);
-    // int day = IccUtils.gsmBcdByteToInt(mWarningSecurityInformation[2]);
-    // int hour = IccUtils.gsmBcdByteToInt(mWarningSecurityInformation[3]);
-    // int minute = IccUtils.gsmBcdByteToInt(mWarningSecurityInformation[4]);
-    // int second = IccUtils.gsmBcdByteToInt(mWarningSecurityInformation[5]);
-    //
-    // // For the timezone, the most significant bit of the
-    // // least significant nibble is the sign byte
-    // // (meaning the max range of this field is 79 quarter-hours,
-    // // which is more than enough)
-    //
-    // byte tzByte = mWarningSecurityInformation[6];
-    //
-    // // Mask out sign bit.
-    // int timezoneOffset = IccUtils.gsmBcdByteToInt((byte) (tzByte & (~0x08)));
-    //
-    // timezoneOffset = ((tzByte & 0x08) == 0) ? timezoneOffset : -timezoneOffset;
-    //
-    // Time time = new Time(Time.TIMEZONE_UTC);
-    //
-    // // We only need to support years above 2000.
-    // time.year = year + 2000;
-    // time.month = month - 1;
-    // time.monthDay = day;
-    // time.hour = hour;
-    // time.minute = minute;
-    // time.second = second;
-    //
-    // // Timezone offset is in quarter hours.
-    // return time.toMillis(true) - timezoneOffset * 15 * 60 * 1000;
-    assert(0);
+    if (mWarningSecurityInformation == NULL || mWarningSecurityInformation->GetLength() < 7) {
+        *result = 0;
+        return NOERROR;
+    }
+
+    Int32 year = IccUtils::GsmBcdByteToInt((*mWarningSecurityInformation)[0]);
+    Int32 month = IccUtils::GsmBcdByteToInt((*mWarningSecurityInformation)[1]);
+    Int32 day = IccUtils::GsmBcdByteToInt((*mWarningSecurityInformation)[2]);
+    Int32 hour = IccUtils::GsmBcdByteToInt((*mWarningSecurityInformation)[3]);
+    Int32 minute = IccUtils::GsmBcdByteToInt((*mWarningSecurityInformation)[4]);
+    Int32 second = IccUtils::GsmBcdByteToInt((*mWarningSecurityInformation)[5]);
+
+    // For the timezone, the most significant bit of the
+    // least significant nibble is the sign byte
+    // (meaning the max range of this field is 79 quarter-hours,
+    // which is more than enough)
+
+    Byte tzByte = (*mWarningSecurityInformation)[6];
+
+    // Mask out sign bit.
+    Int32 timezoneOffset = IccUtils::GsmBcdByteToInt((Byte) (tzByte & (~0x08)));
+
+    timezoneOffset = ((tzByte & 0x08) == 0) ? timezoneOffset : -timezoneOffset;
+
+    AutoPtr<CTime> time;
+    CTime::NewByFriend(ITime::TIMEZONE_UTC, (CTime**)&time);
+
+    // We only need to support years above 2000.
+    time->mYear = year + 2000;
+    time->mMonth = month - 1;
+    time->mMonthDay = day;
+    time->mHour = hour;
+    time->mMinute = minute;
+    time->mSecond = second;
+
+    // Timezone offset is in quarter hours.
+    Int64 val;
+    time->ToMillis(TRUE, &val);
+    *result = val - timezoneOffset * 15 * 60 * 1000;
     return NOERROR;
 }
 
@@ -173,33 +140,24 @@ ECode SmsCbEtwsInfo::GetPrimaryNotificationSignature(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mWarningSecurityInformation == null || mWarningSecurityInformation.length < 50) {
-    //     return null;
-    // }
-    // return Arrays.copyOfRange(mWarningSecurityInformation, 7, 50);
-    assert(0);
+    if (mWarningSecurityInformation == NULL || mWarningSecurityInformation->GetLength() < 50) {
+        *result = NULL;
+        return NOERROR;
+    }
+    Arrays::CopyOfRange(mWarningSecurityInformation, 7, 50, result);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode SmsCbEtwsInfo::ToString(
-    /* [out] */ String* str)
+    /* [out] */ String* result)
 {
-    VALIDATE_NOT_NULL(str);
-    // ==================before translated======================
-    // return "SmsCbEtwsInfo{warningType=" + mWarningType + ", emergencyUserAlert="
-    //         + mEmergencyUserAlert + ", activatePopup=" + mActivatePopup + '}';
-    assert(0);
+    VALIDATE_NOT_NULL(result);
+    *result = String("SmsCbEtwsInfo{warningType=") + StringUtils::ToString(mWarningType)
+            + ", emergencyUserAlert=" + StringUtils::BooleanToString(mEmergencyUserAlert)
+            + ", activatePopup=" + StringUtils::BooleanToString(mActivatePopup) + '}';
     return NOERROR;
 }
-
-//Int32 SmsCbEtwsInfo::DescribeContents()
-//{
-//    // ==================before translated======================
-//    // return 0;
-//    assert(0);
-//    return 0;
-//}
 
 } // namespace Telephony
 } // namespace Droid

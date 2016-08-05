@@ -5,10 +5,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.text.format.Time;
-// import com.android.internal.telephony.uicc.IccUtils;
-// import java.util.Arrays;
-
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
@@ -24,27 +20,6 @@ class SmsCbEtwsInfo
     , public ISmsCbEtwsInfo
     , public IParcelable
 {
-//private:
-//    class InnerCreator
-//        : public Object
-//        , public Creator<SmsCbEtwsInfo>
-//    {
-//    public:
-//        InnerCreator(
-//            /* [in] */ SmsCbEtwsInfo* owner);
-//
-//        // @Override
-//        CARAPI_(AutoPtr<SmsCbEtwsInfo>) CreateFromParcel(
-//            /* [in] */ IParcel* in);
-//
-//        // @Override
-//        CARAPI_(AutoPtr< ArrayOf< AutoPtr<SmsCbEtwsInfo> > >) NewArray(
-//            /* [in] */ Int32 size);
-//
-//    private:
-//        SmsCbEtwsInfo* mOwner;
-//    };
-//
 public:
     CAR_INTERFACE_DECL();
 
@@ -56,10 +31,6 @@ public:
         /* [in] */ Boolean emergencyUserAlert,
         /* [in] */ Boolean activatePopup,
         /* [in] */ ArrayOf<Byte>* warningSecurityInformation);
-
-    /** Create a new SmsCbEtwsInfo object from a Parcel. */
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
 
     CARAPI constructor();
     /**
@@ -115,13 +86,6 @@ public:
     // @Override
     CARAPI ToString(
         /* [out] */ String* str);
-
-    /**
-      * Describe the kinds of special objects contained in the marshalled representation.
-      * @return a bitmask indicating this Parcelable contains no special objects
-      */
-    // @Override
-    //CARAPI_(Int32) DescribeContents();
 
 private:
     /** One of the ETWS warning type constants defined in this class. */

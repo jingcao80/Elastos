@@ -5,17 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package android.telephony;
 using Elastos::Droid::Content::IContentValues;
-// import android.content.Context;
-// import android.database.Cursor;
-// import android.os.Parcel;
-// import android.os.Parcelable;
-// import android.provider.Telephony;
-// import android.telephony.SubscriptionManager;
-// import android.text.format.DateUtils;
-
-//using Elastos::Droid::Os::IParcel;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Content::IContext;
 
@@ -41,27 +31,6 @@ class CellBroadcastMessage
     , public ICellBroadcastMessage
     , public IParcelable
 {
-//private:
-//    class InnerParcelableCreator
-//        : public Object
-//        , public Parcelable::Creator<CellBroadcastMessage>
-//    {
-//    public:
-//        InnerParcelableCreator(
-//            /* [in] */ CellBroadcastMessage* owner);
-//
-//        // @Override
-//        CARAPI_(AutoPtr<CellBroadcastMessage>) CreateFromParcel(
-//            /* [in] */ IParcel* in);
-//
-//        // @Override
-//        CARAPI_(AutoPtr< ArrayOf< AutoPtr<CellBroadcastMessage> > >) NewArray(
-//            /* [in] */ Int32 size);
-//
-//    private:
-//        CellBroadcastMessage* mOwner;
-//    };
-
 public:
     CAR_INTERFACE_DECL();
 
@@ -86,10 +55,6 @@ public:
       */
     CARAPI GetSubId(
         /* [out] */ Int64* result);
-
-    ///** Parcelable: no special flags. */
-    //// @Override
-    //CARAPI_(Int32) DescribeContents();
 
     // @Override
     CARAPI WriteToParcel(
@@ -236,13 +201,9 @@ private:
         /* [in] */ Int64 deliveryTime,
         /* [in] */ Boolean isRead);
 
-    CellBroadcastMessage(
-        /* [in] */ IParcel* in);
-
 public:
     /** Identifier for getExtra() when adding this object to an Intent. */
     static const String SMS_CB_MESSAGE_EXTRA;
-    //static const AutoPtr<IParcelable> AutoPtr< ::Creator<CellBroadcastMessage> > CREATOR;
 
 private:
     /** SmsCbMessage. */

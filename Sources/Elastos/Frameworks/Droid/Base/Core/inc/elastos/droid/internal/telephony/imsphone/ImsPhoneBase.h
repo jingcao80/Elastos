@@ -6,22 +6,6 @@
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
 
-// import android.os.AsyncResult;
-// import android.os.Registrant;
-// import android.os.SystemProperties;
-// import android.telephony.CellInfo;
-// import android.telephony.Rlog;
-// import com.android.internal.telephony.Call;
-// import com.android.internal.telephony.CallStateException;
-// import com.android.internal.telephony.dataconnection.DataConnection;
-// import com.android.internal.telephony.cdma.CDMAPhone;
-// import com.android.internal.telephony.gsm.GSMPhone;
-// import com.android.internal.telephony.CallManager;
-// import com.android.internal.telephony.MmiCode;
-// import com.android.internal.telephony.Phone;
-// import com.android.internal.telephony.TelephonyProperties;
-// import java.util.ArrayList;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
 using Elastos::Droid::Internal::Telephony::IPhoneNotifier;

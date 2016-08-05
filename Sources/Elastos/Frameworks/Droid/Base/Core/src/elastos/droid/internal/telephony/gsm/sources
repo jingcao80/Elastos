@@ -26,6 +26,7 @@ SOURCES += CSimPhoneBookInterfaceManager.cpp
 SOURCES += CSimTlv.cpp
 SOURCES += CSmsBroadcastConfigInfo.cpp
 SOURCES += CSmsCbHeader.cpp
+SOURCES += SmsMessage.cpp
 SOURCES += CSmsMessage.cpp
 SOURCES += CSmsMessageHelper.cpp
 SOURCES += CSsData.cpp

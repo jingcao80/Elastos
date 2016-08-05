@@ -1,5 +1,5 @@
-#ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_SMSMESSAGE_H__
-#define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_SMSMESSAGE_H__
+#ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMASMSMESSAGE_H__
+#define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMASMSMESSAGE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
@@ -66,7 +66,7 @@ namespace Cdma {
   * A Short Message Service message.
   *
   */
-class SmsMessage
+class CDMASmsMessage
     : public SmsMessageBase
     , public ISmsMessage
 {
@@ -85,7 +85,7 @@ public:
 public:
     CAR_INTERFACE_DECL();
 
-    SmsMessage();
+    CDMASmsMessage();
 
     /**
       * Create an SmsMessage from a raw PDU.
@@ -501,5 +501,5 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_SMSMESSAGE_H__
+#endif // __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMASMSMESSAGE_H__
 

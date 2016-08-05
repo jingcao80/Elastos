@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CCDMASMSMESSAGESUBMITPDU_H__
 
 #include "_Elastos_Droid_Internal_Telephony_Cdma_CCdmaSmsMessageSubmitPdu.h"
-#include "elastos/droid/internal/telephony/cdma/SmsMessage.h"
+#include "elastos/droid/internal/telephony/cdma/CDMASmsMessage.h"
 
 namespace Elastos {
 namespace Droid {
@@ -11,7 +11,7 @@ namespace Telephony {
 namespace Cdma {
 
 CarClass(CCdmaSmsMessageSubmitPdu)
-    , public SmsMessage::SubmitPdu
+    , public CDMASmsMessage::SubmitPdu
 {
 public:
     CAR_OBJECT_DECL()

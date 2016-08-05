@@ -1,5 +1,5 @@
 #include "elastos/droid/internal/telephony/cdma/CCdmaSmsMessageHelper.h"
-#include "elastos/droid/internal/telephony/cdma/SmsMessage.h"
+#include "elastos/droid/internal/telephony/cdma/CDMASmsMessage.h"
 
 namespace Elastos {
 namespace Droid {
@@ -16,7 +16,7 @@ ECode CCdmaSmsMessageHelper::CreateFromPdu(
     /* [out] */ ISmsMessage** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ISmsMessage> sm = SmsMessage::CreateFromPdu(pdu);
+    AutoPtr<ISmsMessage> sm = CDMASmsMessage::CreateFromPdu(pdu);
     *result = sm;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -27,7 +27,7 @@ ECode CCdmaSmsMessageHelper::NewFromParcel(
     /* [out] */ ISmsMessage** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ISmsMessage> sm = SmsMessage::NewFromParcel(p);
+    AutoPtr<ISmsMessage> sm = CDMASmsMessage::NewFromParcel(p);
     *result = sm;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -39,7 +39,7 @@ ECode CCdmaSmsMessageHelper::CreateFromEfRecord(
     /* [out] */ ISmsMessage** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ISmsMessage> sm = SmsMessage::CreateFromEfRecord(index, data);
+    AutoPtr<ISmsMessage> sm = CDMASmsMessage::CreateFromEfRecord(index, data);
     *result = sm;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -50,7 +50,7 @@ ECode CCdmaSmsMessageHelper::GetTPLayerLengthForPDU(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = SmsMessage::GetTPLayerLengthForPDU(pdu);
+    *result = CDMASmsMessage::GetTPLayerLengthForPDU(pdu);
     return NOERROR;
 }
 
@@ -63,7 +63,7 @@ ECode CCdmaSmsMessageHelper::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<SmsMessage::SubmitPdu> sp = SmsMessage::GetSubmitPdu(scAddr, destAddr, message, statusReportRequested, smsHeader);
+    AutoPtr<CDMASmsMessage::SubmitPdu> sp = CDMASmsMessage::GetSubmitPdu(scAddr, destAddr, message, statusReportRequested, smsHeader);
     *result = sp;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -79,7 +79,7 @@ ECode CCdmaSmsMessageHelper::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<SmsMessage::SubmitPdu> sp = SmsMessage::GetSubmitPdu(scAddr, destAddr, message, statusReportRequested, smsHeader, priority);
+    AutoPtr<CDMASmsMessage::SubmitPdu> sp = CDMASmsMessage::GetSubmitPdu(scAddr, destAddr, message, statusReportRequested, smsHeader, priority);
     *result = sp;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -94,7 +94,7 @@ ECode CCdmaSmsMessageHelper::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<SmsMessage::SubmitPdu> sp = SmsMessage::GetSubmitPdu(scAddr, destAddr, destPort, data, statusReportRequested);
+    AutoPtr<CDMASmsMessage::SubmitPdu> sp = CDMASmsMessage::GetSubmitPdu(scAddr, destAddr, destPort, data, statusReportRequested);
     *result = sp;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -110,7 +110,7 @@ ECode CCdmaSmsMessageHelper::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<SmsMessage::SubmitPdu> sp = SmsMessage::GetSubmitPdu(scAddr, destAddr, destPort, origPort, data, statusReportRequested);
+    AutoPtr<CDMASmsMessage::SubmitPdu> sp = CDMASmsMessage::GetSubmitPdu(scAddr, destAddr, destPort, origPort, data, statusReportRequested);
     *result = sp;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -123,7 +123,7 @@ ECode CCdmaSmsMessageHelper::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<SmsMessage::SubmitPdu> sp = SmsMessage::GetSubmitPdu(destAddr, userData, statusReportRequested);
+    AutoPtr<CDMASmsMessage::SubmitPdu> sp = CDMASmsMessage::GetSubmitPdu(destAddr, userData, statusReportRequested);
     *result = sp;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -137,7 +137,7 @@ ECode CCdmaSmsMessageHelper::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<SmsMessage::SubmitPdu> sp = SmsMessage::GetSubmitPdu(destAddr, userData, statusReportRequested, priority);
+    AutoPtr<CDMASmsMessage::SubmitPdu> sp = CDMASmsMessage::GetSubmitPdu(destAddr, userData, statusReportRequested, priority);
     *result = sp;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -149,7 +149,7 @@ ECode CCdmaSmsMessageHelper::CalculateLength(
     /* [out] */ IGsmAlphabetTextEncodingDetails** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IGsmAlphabetTextEncodingDetails> gated = SmsMessage::CalculateLength(messageBody, use7bitOnly);
+    AutoPtr<IGsmAlphabetTextEncodingDetails> gated = CDMASmsMessage::CalculateLength(messageBody, use7bitOnly);
     *result = gated;
     REFCOUNT_ADD(*result);
     return NOERROR;

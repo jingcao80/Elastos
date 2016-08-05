@@ -13,10 +13,7 @@
 //TODO using Elastos::Droid::Telephony::Gsm::MessageClass;
 using Elastos::Droid::Telephony::Gsm::ISubmitPdu;
 using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
-//TODO using Elastos::Droid::Internal::Telephony::ISmsMessageBaseSubmitPduBase;
-// import java.util.Arrays;
-// import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
-
+using Elastos::Droid::Internal::Telephony::ISmsMessageBaseSubmitPduBase;
 //using Com.android.internal.telephony.SmsMessageBase;
 
 namespace Elastos {
@@ -40,6 +37,8 @@ public:
         : public Object
         , public ISubmitPdu
     {
+        friend class GSMSmsMessage;
+
     public:
         CAR_INTERFACE_DECL();
 
@@ -61,8 +60,9 @@ public:
           * {@hide}
           */
         // @Deprecated
-        //TODO SubmitPdu(
-        //    /* [in] */ ISmsMessageBaseSubmitPduBase* spb);
+        SubmitPdu(
+           /* [in] */ ISmsMessageBaseSubmitPduBase* spb);
+
     public:
         /** @deprecated Use android.telephony.SmsMessage. */
         // @Deprecated
@@ -459,13 +459,13 @@ public:
     // @Deprecated
     CARAPI IsReplyPathPresent(
         /* [out] */ Boolean* isReplyPathPresent);
+
 public:
     // @Deprecated public
     AutoPtr<ISmsMessageBase> mWrappedSmsMessage;
 
 private:
-
-    GSMSmsMessage(
+    constructor(
         /* [in] */ ISmsMessageBase* smb);
 
     /** This method returns the reference to a specific

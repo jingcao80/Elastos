@@ -7,24 +7,6 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/internal/telephony/Connection.h"
 
-// import android.os.AsyncResult;
-// import android.os.Bundle;
-// import android.os.PowerManager;
-// import android.os.Registrant;
-// import android.os.SystemClock;
-// import android.telecom.Log;
-// import android.telephony.DisconnectCause;
-// import android.telephony.PhoneNumberUtils;
-// import android.telephony.Rlog;
-// import com.android.ims.ImsException;
-// import com.android.internal.telephony.CallStateException;
-// import com.android.internal.telephony.Connection;
-// import com.android.internal.telephony.Phone;
-// import com.android.internal.telephony.PhoneConstants;
-// import com.android.internal.telephony.TelephonyProperties;
-// import com.android.internal.telephony.UUSInfo;
-// import com.android.ims.ImsCallProfile;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::IHandler;
