@@ -2353,7 +2353,7 @@ ECode CApplicationThreadNative::UpdateTimePrefs(
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, "UpdateTimePrefs", "Fail FindClass: IApplicationThread", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "updateTimePrefs", "(I)V");
+    jmethodID m = env->GetMethodID(c, "updateTimePrefs", "(Z)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: updateTimePrefs", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jboolean)is24Hour);

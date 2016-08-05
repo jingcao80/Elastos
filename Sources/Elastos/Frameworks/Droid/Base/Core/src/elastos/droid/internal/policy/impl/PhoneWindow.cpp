@@ -1230,7 +1230,7 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateColorViews(
         lp->GetBottomMargin(&bottom);
         if (right != consumedRight || bottom != consumedBottom) {
             lp->SetRightMargin(consumedRight);
-            lp->SetBottomMargin(consumedRight);
+            lp->SetBottomMargin(consumedBottom);
             contentRootView->SetLayoutParams(vglParams);
 
             if (insets == NULL) {
