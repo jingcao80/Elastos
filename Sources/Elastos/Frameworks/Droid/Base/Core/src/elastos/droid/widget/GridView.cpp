@@ -622,7 +622,7 @@ Int32 GridView::GetNumColumns()
     return mNumColumns;
 }
 
-CARAPI GridView::GetNumColumns(
+ECode GridView::GetNumColumns(
     /* [out] */ Int32* columns)
 {
     VALIDATE_NOT_NULL(columns)
@@ -630,7 +630,7 @@ CARAPI GridView::GetNumColumns(
     return NOERROR;
 }
 
-CARAPI GridView::OnInitializeAccessibilityEvent(
+ECode GridView::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     AbsListView::OnInitializeAccessibilityEvent(event);
@@ -640,7 +640,7 @@ CARAPI GridView::OnInitializeAccessibilityEvent(
     return NOERROR;
 }
 
-CARAPI GridView::OnInitializeAccessibilityNodeInfo(
+ECode GridView::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     AbsListView::OnInitializeAccessibilityNodeInfo(info);

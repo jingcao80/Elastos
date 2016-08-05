@@ -768,6 +768,8 @@ private:
         friend class AccessibilityManagerService;
         friend class UserStateDeathRecipient;
     public:
+        TO_STRING_IMPL("AccessibilityManagerService::UserState")
+
         UserState(
             /* [in] */ Int32 userId,
             /* [in] */ AccessibilityManagerService* host);

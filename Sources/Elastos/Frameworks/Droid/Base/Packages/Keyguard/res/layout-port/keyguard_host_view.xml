@@ -19,7 +19,7 @@
 
 <!-- This is the host view that generally contains two sub views: the widget view
     and the security view. -->
-<com.android.keyguard.KeyguardHostView
+<Elastos.Droid.SystemUI.Keyguard.CKeyguardHostView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_host_view"
@@ -28,7 +28,7 @@
     android:gravity="center_horizontal"
     android:orientation="vertical">
 
-    <com.android.keyguard.SlidingChallengeLayout
+    <Elastos.Droid.SystemUI.Keyguard.CSlidingChallengeLayout
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -61,7 +61,7 @@
               androidprv:layout_childType="scrim"
               android:background="#99000000" />
 
-        <com.android.keyguard.KeyguardSecurityContainer
+        <Elastos.Droid.SystemUI.Keyguard.CKeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -71,7 +71,7 @@
             androidprv:layout_childType="challenge"
             android:padding="0dp"
             android:gravity="bottom|center_horizontal">
-            <com.android.keyguard.KeyguardSecurityViewFlipper
+            <Elastos.Droid.SystemUI.Keyguard.CKeyguardSecurityViewFlipper
                 android:id="@+id/view_flipper"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -79,8 +79,8 @@
                 android:clipToPadding="false"
                 android:paddingTop="@dimen/keyguard_security_view_margin"
                 android:gravity="center">
-            </com.android.keyguard.KeyguardSecurityViewFlipper>
-        </com.android.keyguard.KeyguardSecurityContainer>
+            </Elastos.Droid.SystemUI.Keyguard.CKeyguardSecurityViewFlipper>
+        </Elastos.Droid.SystemUI.Keyguard.CKeyguardSecurityContainer>
 
         <ImageButton
               android:layout_width="match_parent"
@@ -92,6 +92,6 @@
               android:scaleType="center"
               android:contentDescription="@string/keyguard_accessibility_expand_lock_area" />
 
-    </com.android.keyguard.SlidingChallengeLayout>
-</com.android.keyguard.KeyguardHostView>
+    </Elastos.Droid.SystemUI.Keyguard.CSlidingChallengeLayout>
+</Elastos.Droid.SystemUI.Keyguard.CKeyguardHostView>
 

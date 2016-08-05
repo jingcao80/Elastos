@@ -2588,9 +2588,10 @@ ECode View::OnPopulateAccessibilityEvent(
     return NOERROR;
 }
 
-void View::OnPopulateAccessibilityEventInternal(
+ECode View::OnPopulateAccessibilityEventInternal(
     /* [in] */ IAccessibilityEvent* event)
 {
+    return NOERROR;
 }
 
 ECode View::OnInitializeAccessibilityEvent(
@@ -2607,7 +2608,7 @@ ECode View::OnInitializeAccessibilityEvent(
     return NOERROR;
 }
 
-void View::OnInitializeAccessibilityEventInternal(
+ECode View::OnInitializeAccessibilityEventInternal(
     /* [in] */ IAccessibilityEvent* event)
 {
     IAccessibilityRecord* record = IAccessibilityRecord::Probe(event);
@@ -2671,6 +2672,7 @@ void View::OnInitializeAccessibilityEventInternal(
             }
         } break;
     }
+    return NOERROR;
 }
 
 ECode View::CreateAccessibilityNodeInfo(
@@ -2771,7 +2773,7 @@ ECode View::GetBoundsOnScreen(
     return NOERROR;
 }
 
-void View::OnInitializeAccessibilityNodeInfoInternal(
+ECode View::OnInitializeAccessibilityNodeInfoInternal(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     AutoPtr<IRect> bounds = mAttachInfo->mTmpInvalRect;
@@ -2906,6 +2908,7 @@ void View::OnInitializeAccessibilityNodeInfoInternal(
                 | IAccessibilityNodeInfo::MOVEMENT_GRANULARITY_PARAGRAPH);
         }
     }
+    return NOERROR;
 }
 
 AutoPtr<IView> View::FindLabelForView(

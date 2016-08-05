@@ -1465,7 +1465,8 @@ ECode CInputManagerService::UnregisterInputChannel(
 void CInputManagerService::SetInputFilter(
     /* [in] */ IIInputFilter* filter)
 {
-    {    AutoLock syncLock(mInputFilterLock);
+    {
+        AutoLock syncLock(mInputFilterLock);
         if (mInputFilterHost != NULL) {
             ((ChainedInputFilterHost*)mInputFilterHost.Get())->DisconnectLocked();
             mInputFilterChain->Remove((IIInputFilterHost*)mInputFilterHost.Get());
@@ -1495,7 +1496,8 @@ void CInputManagerService::SetInputFilter(
 void CInputManagerService::RegisterSecondaryInputFilter(
     /* [in] */ IIInputFilter* filter)
 {
-    {    AutoLock syncLock(mInputFilterLock);
+    {
+        AutoLock syncLock(mInputFilterLock);
         AutoPtr<IIInputFilterHost> host;
         CChainedInputFilterHost::New(filter, NULL, this, (IIInputFilterHost**)&host);
         Boolean isEmpty;
@@ -1519,7 +1521,8 @@ void CInputManagerService::RegisterSecondaryInputFilter(
 void CInputManagerService::UnregisterSecondaryInputFilter(
     /* [in] */ IIInputFilter* filter)
 {
-    {    AutoLock syncLock(mInputFilterLock);
+    {
+        AutoLock syncLock(mInputFilterLock);
         Int32 index = FindInputFilterIndexLocked(filter);
         if (index >= 0) {
             AutoPtr<IInterface> ift;
@@ -2780,7 +2783,8 @@ Boolean CInputManagerService::CheckCallingPermission(
 // @Override
 ECode CInputManagerService::Monitor()
 {
-    {    AutoLock syncLock(mInputFilterLock);
+    {
+        AutoLock syncLock(mInputFilterLock);
         ;
     }
     NativeMonitor();
@@ -2871,7 +2875,8 @@ Boolean CInputManagerService::FilterInputEvent(
 {
     AutoPtr<IIInputFilterHost> head;
 
-    {    AutoLock syncLock(mInputFilterLock);
+    {
+        AutoLock syncLock(mInputFilterLock);
         Boolean isEmpty;
         if (mInputFilterChain->IsEmpty(&isEmpty), !isEmpty) {
             AutoPtr<IInterface> ift;

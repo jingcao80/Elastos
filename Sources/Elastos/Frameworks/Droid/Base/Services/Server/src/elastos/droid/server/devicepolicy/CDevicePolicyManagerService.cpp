@@ -35,7 +35,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
-#include <elastos/core/StringBuffer.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Thread.h>
 
@@ -153,7 +153,7 @@ using Elastos::Core::IBoolean;
 using Elastos::Core::IInteger32;
 using Elastos::Core::ISystem;
 using Elastos::Core::Math;
-using Elastos::Core::StringBuffer;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::Thread;
 using Elastos::IO::CByteArrayInputStream;
@@ -292,7 +292,7 @@ ECode CDevicePolicyManagerService::DevicePolicyReceiver::OnReceive(
     intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, id, &userHandle);
 
     if (action.Equals(IIntent::ACTION_BOOT_COMPLETED) || action.Equals(ACTION_EXPIRED_PASSWORD_NOTIFICATION)) {
-        StringBuffer buf;
+        StringBuilder buf;
         buf += "Sending password expiration notifications for action ";
         buf += action;
         buf += " for user ";
@@ -2784,7 +2784,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
             // helper->ComputePasswordQuality(password, &realQuality);
 
             if (realQuality < quality && quality != IDevicePolicyManager::PASSWORD_QUALITY_COMPLEX) {
-                StringBuffer buf;
+                StringBuilder buf;
                 buf += "resetPassword: password quality 0x";
                 buf += StringUtils::ToString(quality, 16);
                 buf += " does not meet required quality 0x";
@@ -2800,7 +2800,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
         Int32 length;
         GetPasswordMinimumLength(NULL, userHandle, &length);
         if ((Int32)password.GetLength() < length) {
-            StringBuffer buf;
+            StringBuilder buf;
             buf += "resetPassword: password length ";
             buf += password.GetLength();
             buf += " does not meet required length ";
@@ -2836,7 +2836,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
             Int32 neededLetters;
             GetPasswordMinimumLetters(NULL, userHandle, &neededLetters);
             if(letters < neededLetters) {
-                StringBuffer buf;
+                StringBuilder buf;
                 buf += "resetPassword: number of letters ";
                 buf += letters;
                 buf += " does not meet required number of letters ";
@@ -2848,7 +2848,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
             Int32 neededNumbers;
             GetPasswordMinimumNumeric(NULL, userHandle, &neededNumbers);
             if (numbers < neededNumbers) {
-                StringBuffer buf;
+                StringBuilder buf;
                 buf += "resetPassword: number of numerical digits ";
                 buf += numbers;
                 buf += " does not meet required number of numerical digits ";
@@ -2860,7 +2860,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
             Int32 neededLowerCase;
             GetPasswordMinimumLowerCase(NULL, userHandle, &neededLowerCase);
             if (lowercase < neededLowerCase) {
-                StringBuffer buf;
+                StringBuilder buf;
                 buf += "resetPassword: number of lowercase letters ";
                 buf += lowercase;
                 buf += " does not meet required number of lowercase letters ";
@@ -2872,7 +2872,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
             Int32 neededUpperCase;
             GetPasswordMinimumUpperCase(NULL, userHandle, &neededUpperCase);
             if (uppercase < neededUpperCase) {
-                StringBuffer buf;
+                StringBuilder buf;
                 buf += "resetPassword: number of uppercase letters ";
                 buf += uppercase;
                 buf += " does not meet required number of uppercase letters ";
@@ -2884,7 +2884,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
             Int32 neededSymbols;
             GetPasswordMinimumSymbols(NULL, userHandle, &neededSymbols);
             if (symbols < neededSymbols) {
-                StringBuffer buf;
+                StringBuilder buf;
                 buf += "resetPassword: number of special symbols ";
                 buf += symbols;
                 buf += " does not meet required number of special symbols ";
@@ -2896,7 +2896,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
             Int32 neededNonLetter;
             GetPasswordMinimumNonLetter(NULL, userHandle, &neededNonLetter);
             if (nonletter < neededNonLetter) {
-                StringBuffer buf;
+                StringBuilder buf;
                 buf += "resetPassword: number of non-letter characters ";
                 buf += nonletter;
                 buf += " does not meet required number of non-letter characters ";
@@ -3150,7 +3150,7 @@ ECode CDevicePolicyManagerService::SetGlobalProxy(
         handleHelper->GetCallingUserId(&callingUserId);
 
         if (callingUserId != IUserHandle::USER_OWNER) {
-            StringBuffer buf;
+            StringBuilder buf;
             buf += "Only the owner is allowed to set the global proxy. User ";
             buf += userHandle;
             buf += " is not permitted.";
@@ -3273,7 +3273,7 @@ ECode CDevicePolicyManagerService::SetStorageEncryption(
 
         // Only owner can set storage encryption
         if (userHandle != IUserHandle::USER_OWNER || callingUserId != IUserHandle::USER_OWNER) {
-            StringBuffer buf;
+            StringBuilder buf;
             buf += "Only owner is allowed to set storage encryption. User ";
             buf += callingUserId;
             buf += " is not permitted.";
@@ -4489,7 +4489,7 @@ ECode CDevicePolicyManagerService::FindAdmin(
     // ec = CDeviceAdminInfo::New(mContext, resolveInfo, adminInfo);
 
     if (FAILED(ec)) {
-        StringBuffer buf;
+        StringBuilder buf;
         buf += "Bad device admin requested for user=";
         buf += userHandle;
         Slogger::I(TAG, buf.ToString());
@@ -4858,7 +4858,7 @@ void CDevicePolicyManagerService::RemoveUserData(
 
         String path;
         policyFile->GetAbsolutePath(&path);
-        StringBuffer buf;
+        StringBuilder buf;
         buf += "Removed device policy file ";
         buf += path;
         Slogger::I(TAG, buf.ToString());
@@ -4961,7 +4961,7 @@ ECode CDevicePolicyManagerService::LoadSettingsLocked(
             }
 
             if (DBG && (UserHandle::GetUserId(uid) != userHandle)) {
-                StringBuffer buf;
+                StringBuilder buf;
                 buf += "findAdmin returned an incorrect uid ";
                 buf += uid;
                 buf += " for user ";
@@ -4977,7 +4977,7 @@ ECode CDevicePolicyManagerService::LoadSettingsLocked(
                 Int32 uid;
                 appInfo->GetUid(&uid);
                 if (DBG && (UserHandle::GetUserId(uid) != userHandle)) {
-                    StringBuffer buf;
+                    StringBuilder buf;
                     buf += "findAdmin returned an incorrect uid ";
                     buf += uid;
                     buf += " for user ";
@@ -5034,7 +5034,7 @@ ECode CDevicePolicyManagerService::LoadSettingsLocked(
             policy->mLockTaskPackages->Add(StringUtils::ParseCharSequence(attrValue));
             XmlUtils::SkipCurrentTag(parser);
         } else {
-            StringBuffer buf;
+            StringBuilder buf;
             buf += "Unknown tag: ";
             buf += tag;
             Slogger::W(TAG, buf.ToString());
@@ -5060,7 +5060,7 @@ ECode CDevicePolicyManagerService::LoadSettingsLocked(
     Int32 quality;
     utils->GetActivePasswordQuality(&quality);
     if (quality < policy->mActivePasswordQuality) {
-        StringBuffer buf;
+        StringBuilder buf;
         buf += "Active password quality 0x";
         buf += StringUtils::ToString(policy->mActivePasswordQuality, 16);
         buf += " does not match actual quality 0x";
@@ -5359,7 +5359,7 @@ void CDevicePolicyManagerService::SyncDeviceCapabilitiesLocked(
         Int64 token = Binder::ClearCallingIdentity();
 
         String value = cameraDisabled ? String("1") : String("0");
-        StringBuffer buf;
+        StringBuilder buf;
         buf += "Change in camera state [";
         buf += SYSTEM_PROP_DISABLE_CAMERA;
         buf += "] = ";
@@ -5873,7 +5873,7 @@ void CDevicePolicyManagerService::HandlePackagesChanged(
     Boolean removed = FALSE;
 
     if (DBG) {
-        StringBuffer buf;
+        StringBuilder buf;
         buf += "Handling package changes for user ";
         buf += userHandle;
         Slogger::W(TAG, buf.ToString());
@@ -5933,7 +5933,7 @@ void CDevicePolicyManagerService::ValidatePasswordOwnerLocked(
         }
     }
     if (!haveOwner) {
-        StringBuffer buf;
+        StringBuilder buf;
         buf += "Previous password owner ";
         buf += policy->mPasswordOwner;
         buf += " no longer active; disabling";
@@ -6887,12 +6887,8 @@ AutoPtr<IAccessibilityManager> CDevicePolicyManagerService::GetAccessibilityMana
     // Not using AccessibilityManager.getInstance because that guesses
     // at the user you require based on callingUid and caches for a given
     // process.
-    AutoPtr<IBinder> iBinder = IBinder::Probe(ServiceManager::GetService(IContext::ACCESSIBILITY_SERVICE));
-    AutoPtr<IIAccessibilityManager> service;
-    if (iBinder == NULL)
-        service = NULL;
-    else
-        service = IIAccessibilityManager::Probe(iBinder);
+    AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::ACCESSIBILITY_SERVICE);
+    AutoPtr<IIAccessibilityManager> service = IIAccessibilityManager::Probe(obj);
     AutoPtr<IAccessibilityManager> rev;
     CAccessibilityManager::New(mContext, service, userId, (IAccessibilityManager**)&rev);
     return rev;

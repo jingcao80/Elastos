@@ -4,6 +4,7 @@
 #include "elastos/droid/server/input/InputApplicationHandle.h"
 #include "elastos/droid/server/input/NativeInputApplicationHandle.h"
 #include "elastos/droid/server/input/NativeInputWindowHandle.h"
+#include "elastos/droid/server/power/PowerManagerService.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Graphics::IBitmap;
@@ -20,6 +21,7 @@ using Elastos::Droid::View::CInputDevice;
 using Elastos::Droid::View::CPointerIconHelper;
 using Elastos::Droid::View::IPointerIconHelper;
 using Elastos::Droid::Hardware::Input::CInputDeviceIdentifier;
+using Elastos::Droid::Server::Power::PowerManagerService;
 
 namespace Elastos {
 namespace Droid {
@@ -968,8 +970,7 @@ void NativeInputManager::pokeUserActivity(
     /* [in] */ nsecs_t eventTime,
     /* [in] */ int32_t eventType)
 {
-    // assert(0 && "TODO");
-    // android_server_PowerManagerService_userActivity(eventTime, eventType);
+    PowerManagerService::UserActivity(eventTime, eventType);
 }
 
 bool NativeInputManager::checkInjectEventsPermissionNonReentrant(

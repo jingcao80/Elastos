@@ -93,6 +93,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("AccessibilityInputFilter")
+
     AccessibilityInputFilter();
 
     ~AccessibilityInputFilter();
@@ -131,15 +133,6 @@ public:
 
     // @Override
     CARAPI OnDestroy();
-
-    CARAPI ToString(
-        /* [out] */ String* info)
-    {
-        VALIDATE_NOT_NULL(info);
-        *info = "AccessibilityInputFilter:: ";
-        info->AppendFormat("%p", this);
-        return NOERROR;
-    }
 
 protected:
     CARAPI SetEnabledFeatures(

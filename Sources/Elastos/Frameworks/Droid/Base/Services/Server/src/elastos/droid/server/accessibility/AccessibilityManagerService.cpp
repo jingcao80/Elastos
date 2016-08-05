@@ -387,7 +387,8 @@ ECode AccessibilityManagerService::Service::GetServiceInfo(
 {
     VALIDATE_NOT_NULL(serviceInfo);
 
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         *serviceInfo = mAccessibilityServiceInfo;
         REFCOUNT_ADD(*serviceInfo);
         return NOERROR;
@@ -406,7 +407,8 @@ ECode AccessibilityManagerService::Service::SetServiceInfo(
 {
     Int32 identity = Binder::ClearCallingIdentity();
     // try {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // If the XML manifest had data to configure the service its info
         // should be already set. In such a case update only the dynamically
         // configurable properties.
@@ -432,7 +434,8 @@ ECode AccessibilityManagerService::Service::OnServiceConnected(
     /* [in] */ IComponentName* componentName,
     /* [in] */ IBinder* service)
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         mService = service;
         mServiceInterface = IIAccessibilityServiceClient::Probe(service);
         AutoPtr<UserState> userState = mHost->GetUserStateLocked(mUserId);
@@ -472,7 +475,8 @@ ECode AccessibilityManagerService::Service::GetWindows(
     *windows = NULL;
 
     mHost->EnsureWindowsAvailableTimed();
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its perent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -518,7 +522,8 @@ ECode AccessibilityManagerService::Service::GetWindow(
     *window = NULL;
 
     mHost->EnsureWindowsAvailableTimed();
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -565,7 +570,8 @@ ECode AccessibilityManagerService::Service::FindAccessibilityNodeInfosByViewId(
     Int32 resolvedWindowId;
     AutoPtr<IIAccessibilityInteractionConnection> connection;
     AutoPtr<IRegion> partialInteractiveRegion = mHost->mTempRegion;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -641,7 +647,8 @@ ECode AccessibilityManagerService::Service::FindAccessibilityNodeInfosByText(
     Int32 resolvedWindowId;
     AutoPtr<IIAccessibilityInteractionConnection> connection;
     AutoPtr<IRegion> partialInteractiveRegion = mHost->mTempRegion;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -715,7 +722,8 @@ ECode AccessibilityManagerService::Service::FindAccessibilityNodeInfoByAccessibi
     Int32 resolvedWindowId;
     AutoPtr<IIAccessibilityInteractionConnection> connection;
     AutoPtr<IRegion> partialInteractiveRegion = mHost->mTempRegion;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -788,7 +796,8 @@ ECode AccessibilityManagerService::Service::FindFocus(
     Int32 resolvedWindowId;
     AutoPtr<IIAccessibilityInteractionConnection> connection;
     AutoPtr<IRegion> partialInteractiveRegion = mHost->mTempRegion;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -863,7 +872,8 @@ ECode AccessibilityManagerService::Service::FocusSearch(
     Int32 resolvedWindowId;
     AutoPtr<IIAccessibilityInteractionConnection> connection;
     AutoPtr<IRegion> partialInteractiveRegion = mHost->mTempRegion;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -936,7 +946,8 @@ ECode AccessibilityManagerService::Service::PerformAccessibilityAction(
 
     Int32 resolvedWindowId;
     AutoPtr<IIAccessibilityInteractionConnection> connection;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -994,7 +1005,8 @@ ECode AccessibilityManagerService::Service::PerformGlobalAction(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         Int32 resolvedUserId;
         mHost->mSecurityPolicy->ResolveCallingUserIdEnforcingPermissionsLocked(
                 IUserHandle::USER_CURRENT, &resolvedUserId);
@@ -1052,7 +1064,8 @@ ECode AccessibilityManagerService::Service::ComputeClickPointInScreen(
     Int32 resolvedWindowId;
     AutoPtr<IIAccessibilityInteractionConnection> connection;
     AutoPtr<IRegion> partialInteractiveRegion = mHost->mTempRegion;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -1119,7 +1132,8 @@ ECode AccessibilityManagerService::Service::Dump(
 {
     mHost->mSecurityPolicy->EnforceCallingPermission(
             Elastos::Droid::Manifest::permission::DUMP, FUNCTION_DUMP);
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         AutoPtr<IPackageManager> pk;
         mHost->mContext->GetPackageManager((IPackageManager**)&pk);
         AutoPtr<IResolveInfo> info;
@@ -1198,7 +1212,8 @@ Boolean AccessibilityManagerService::Service::IsConnectedLocked()
 
 ECode AccessibilityManagerService::Service::ProxyDied()
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // It is possible that this service's package was force stopped during
         // whose handling the death recipient is unlinked and still get a call
         // on binderDied since the call was made before we unlink but was
@@ -1230,7 +1245,8 @@ ECode AccessibilityManagerService::Service::ProxyDied()
 void AccessibilityManagerService::Service::NotifyAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         Int32 eventType;
         event->GetEventType(&eventType);
         // Make a copy since during dispatch it is possible the event to
@@ -1265,7 +1281,8 @@ void AccessibilityManagerService::Service::NotifyAccessibilityEventInternal(
     AutoPtr<IIAccessibilityServiceClient> listener;
     AutoPtr<IAccessibilityEvent> event;
 
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         listener = mServiceInterface;
 
         // If the service died/was disabled while the message for dispatching
@@ -1353,7 +1370,8 @@ void AccessibilityManagerService::Service::NotifyGestureInternal(
     /* [in] */ Int32 gestureId)
 {
     AutoPtr<IIAccessibilityServiceClient> listener;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         listener = mServiceInterface;
     }
 
@@ -1382,7 +1400,8 @@ void AccessibilityManagerService::Service::NotifyKeyEventInternal(
 void AccessibilityManagerService::Service::NotifyClearAccessibilityCacheInternal()
 {
     AutoPtr<IIAccessibilityServiceClient> listener;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         listener = mServiceInterface;
     }
     if (listener != NULL) {
@@ -1559,7 +1578,8 @@ AccessibilityManagerService::WindowsForAccessibilityCallback::~WindowsForAccessi
 ECode AccessibilityManagerService::WindowsForAccessibilityCallback::OnWindowsForAccessibilityChanged(
     /* [in] */ IList* windows)
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // Populate the windows to report.
         AutoPtr<IList> reportedWindows;
         CArrayList::New((IList**)&reportedWindows);
@@ -1939,7 +1959,8 @@ void AccessibilityManagerService::SecurityPolicy::UpdateActiveAndAccessibilityFo
             // what the focused window is to update the active one.
             // The active window also determined events from which
             // windows are delivered.
-            {    AutoLock syncLock(mHost->mLock);
+            {
+        AutoLock syncLock(mHost->mLock);
                 if (mHost->mWindowsForAccessibilityCallback == NULL) {
                     mFocusedWindowId = GetFocusedWindowId();
                     if (windowId == mFocusedWindowId) {
@@ -1953,7 +1974,8 @@ void AccessibilityManagerService::SecurityPolicy::UpdateActiveAndAccessibilityFo
         case IAccessibilityEvent::TYPE_VIEW_HOVER_ENTER: {
             // Do not allow delayed hover events to confuse us
             // which the active window is.
-            {    AutoLock syncLock(mHost->mLock);
+            {
+        AutoLock syncLock(mHost->mLock);
                 if (mTouchInteractionInProgress && mActiveWindowId != windowId) {
                     SetActiveWindowLocked(windowId);
                 }
@@ -1962,7 +1984,8 @@ void AccessibilityManagerService::SecurityPolicy::UpdateActiveAndAccessibilityFo
         }
 
         case IAccessibilityEvent::TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
-            {    AutoLock syncLock(mHost->mLock);
+            {
+        AutoLock syncLock(mHost->mLock);
                 if (mAccessibilityFocusedWindowId != windowId) {
                     AutoPtr<IMessage> message;
                     mHost->mMainHandler->ObtainMessage(
@@ -1978,7 +2001,8 @@ void AccessibilityManagerService::SecurityPolicy::UpdateActiveAndAccessibilityFo
         }
 
         case IAccessibilityEvent::TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
-            {    AutoLock syncLock(mHost->mLock);
+            {
+        AutoLock syncLock(mHost->mLock);
                 if (mAccessibilityFocusNodeId == nodeId) {
                     mAccessibilityFocusNodeId = IAccessibilityNodeInfo::UNDEFINED_ITEM_ID;
                 }
@@ -1994,14 +2018,16 @@ void AccessibilityManagerService::SecurityPolicy::UpdateActiveAndAccessibilityFo
 
 void AccessibilityManagerService::SecurityPolicy::OnTouchInteractionStart()
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         mTouchInteractionInProgress = TRUE;
     }
 }
 
 void AccessibilityManagerService::SecurityPolicy::OnTouchInteractionEnd()
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         mTouchInteractionInProgress = FALSE;
         // We want to set the active window to be current immediately
         // after the user has stopped touching the screen since if the
@@ -2286,7 +2312,8 @@ Int32 AccessibilityManagerService::SecurityPolicy::GetFocusedWindowId()
     Int32 retval = 0;
     AutoPtr<IBinder> token;
     ASSERT_SUCCEEDED(mHost->mWindowManagerService->GetFocusedWindowToken((IBinder**)&token));
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         retval = mHost->FindWindowIdLocked(token);
     }
     return retval;
@@ -2377,7 +2404,8 @@ ECode AccessibilityManagerService::KeyEventDispatcher::NotifyKeyEvent(
 {
     AutoPtr<PendingEvent> pendingEvent;
 
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         pendingEvent = AddPendingEventLocked(event, policyFlags);
     }
 
@@ -2408,7 +2436,8 @@ void AccessibilityManagerService::KeyEventDispatcher::SetOnKeyEventResult(
     /* [in] */ Boolean handled,
     /* [in] */ Int32 sequence)
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         AutoPtr<PendingEvent> pendingEvent = RemovePendingEventLocked(sequence);
         if (pendingEvent != NULL) {
             mOwner->mInvocationHandler->RemoveMessages(
@@ -2422,7 +2451,8 @@ void AccessibilityManagerService::KeyEventDispatcher::SetOnKeyEventResult(
 
 void AccessibilityManagerService::KeyEventDispatcher::Flush()
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         CancelAllPendingEventsLocked();
         if (mSentEventsVerifier != NULL) {
             mSentEventsVerifier->Reset();
@@ -2602,7 +2632,8 @@ ECode AccessibilityManagerService::AccessibilityConnectionWrapper::UnlinkToDeath
 ECode AccessibilityManagerService::AccessibilityConnectionWrapper::ProxyDied()
 {
     UnlinkToDeath();
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         mHost->RemoveAccessibilityInteractionConnectionLocked(mWindowId, mUserId);
     }
 
@@ -2636,7 +2667,8 @@ ECode AccessibilityManagerService::MainHandler::HandleMessage(
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             AutoPtr<IAccessibilityEvent> event = IAccessibilityEvent::Probe(obj);
-            {    AutoLock syncLock(mHost->mLock);
+            {
+        AutoLock syncLock(mHost->mLock);
                 if (mHost->mHasInputFilter && mHost->mInputFilter != NULL) {
                     mHost->mInputFilter->NotifyAccessibilityEvent(event);
                 }
@@ -2650,7 +2682,8 @@ ECode AccessibilityManagerService::MainHandler::HandleMessage(
             msg->GetObj((IInterface**)&obj);
             AutoPtr<IKeyEvent> event = IKeyEvent::Probe(obj);
             Int32 policyFlags = arg1;
-            {    AutoLock syncLock(mHost->mLock);
+            {
+        AutoLock syncLock(mHost->mLock);
                 if (mHost->mHasInputFilter && mHost->mInputFilter != NULL) {
                     mHost->mInputFilter->SendInputEvent(IInputEvent::Probe(event),
                             policyFlags);
@@ -2698,7 +2731,8 @@ ECode AccessibilityManagerService::MainHandler::HandleMessage(
         case MSG_CLEAR_ACCESSIBILITY_FOCUS: {
             Int32 windowId = arg1;
             AutoPtr<InteractionBridge> bridge;
-            {    AutoLock syncLock(mHost->mLock);
+            {
+        AutoLock syncLock(mHost->mLock);
                 bridge = mHost->GetInteractionBridgeLocked();
             }
             bridge->ClearAccessibilityFocusNotLocked(windowId);
@@ -2711,7 +2745,8 @@ ECode AccessibilityManagerService::MainHandler::HandleMessage(
 
 void AccessibilityManagerService::MainHandler::AnnounceNewUserIfNeeded()
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         AutoPtr<UserState> userState = mHost->GetCurrentUserStateLocked();
         if (userState->mIsAccessibilityEnabled) {
             AutoPtr<IInterface> obj;
@@ -2743,7 +2778,8 @@ void AccessibilityManagerService::MainHandler::SendStateToClientsForUser(
     /* [in] */ Int32 userId)
 {
     AutoPtr<UserState> userState;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         userState = mHost->GetUserStateLocked(userId);
     }
 
@@ -2831,7 +2867,8 @@ Boolean AccessibilityManagerService::InteractionBridge::GetAccessibilityFocusCli
         res = FALSE;
     }
 
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         Int32 wId;
         focus->GetWindowId(&wId);
         Int64 nId;
@@ -2885,7 +2922,8 @@ Boolean AccessibilityManagerService::InteractionBridge::GetAccessibilityFocusCli
 AutoPtr<IAccessibilityNodeInfo> AccessibilityManagerService::InteractionBridge::GetAccessibilityFocusNotLocked()
 {
     Int32 focusedWindowId;
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         focusedWindowId = mHost->mSecurityPolicy->mAccessibilityFocusedWindowId;
         if (focusedWindowId == SecurityPolicy::INVALID_WINDOW_ID) {
             return NULL;
@@ -3120,7 +3158,8 @@ ECode AccessibilityManagerService::AccessibilityContentObserver::OnChange(
     /* [in] */ Boolean selfChange,
     /* [in] */ IUri* uri)
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // Profiles share the accessibility state of the parent. Therefore,
         // we are checking for changes only the parent settings.
         AutoPtr<UserState> userState = mHost->GetCurrentUserStateLocked();
@@ -3198,7 +3237,8 @@ AccessibilityManagerService::MyPackageMonitor::~MyPackageMonitor()
 
 ECode AccessibilityManagerService::MyPackageMonitor::OnSomePackagesChanged()
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         // Only the profile parent can install accessibility services.
         // Therefore we ignore packages from linked profiles.
         Int32 userId;
@@ -3229,7 +3269,8 @@ ECode AccessibilityManagerService::MyPackageMonitor::OnPackageRemoved(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 uid)
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         Int32 userId;
         GetChangingUserId(&userId);
         // Only the profile parent can install accessibility services.
@@ -3283,7 +3324,8 @@ ECode AccessibilityManagerService::MyPackageMonitor::OnHandleForceStop(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         Int32 userId;
         GetChangingUserId(&userId);
         // Only the profile parent can install accessibility services.
@@ -3525,7 +3567,8 @@ ECode AccessibilityManagerService::AddClient(
 {
     VALIDATE_NOT_NULL(result);
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -3569,7 +3612,8 @@ ECode AccessibilityManagerService::SendAccessibilityEvent(
 {
     VALIDATE_NOT_NULL(result);
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution..
@@ -3625,7 +3669,8 @@ ECode AccessibilityManagerService::GetInstalledAccessibilityServiceList(
 {
     VALIDATE_NOT_NULL(result);
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -3660,7 +3705,8 @@ ECode AccessibilityManagerService::GetEnabledAccessibilityServiceList(
 
     AutoPtr<IList> result;
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -3707,7 +3753,8 @@ ECode AccessibilityManagerService::Interrupt(
 {
     // CopyOnWriteArrayList<Service> services;
     AutoPtr<ICopyOnWriteArrayList> services;
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -3752,7 +3799,8 @@ ECode AccessibilityManagerService::AddAccessibilityInteractionConnection(
     VALIDATE_NOT_NULL(result);
     assert(connection != NULL);
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -3795,7 +3843,8 @@ ECode AccessibilityManagerService::AddAccessibilityInteractionConnection(
 ECode AccessibilityManagerService::RemoveAccessibilityInteractionConnection(
     /* [in] */ IIWindow* window)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -3872,14 +3921,13 @@ ECode AccessibilityManagerService::RegisterUiTestAutomationService(
 
     accessibilityServiceInfo->SetComponentName(sFakeAccessibilityServiceComponentName);
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<UserState> userState = GetCurrentUserStateLocked();
 
         if (userState->mUiAutomationService != NULL) {
             Slogger::E(TAG, "UiAutomationService %p already registered!", serviceClient);
             return E_ILLEGAL_STATE_EXCEPTION;
-            // throw new IllegalStateException("UiAutomationService " + serviceClient
-            //         + "already registered!");
         }
 
         // try {
@@ -3889,11 +3937,6 @@ ECode AccessibilityManagerService::RegisterUiTestAutomationService(
             Slogger::E(TAG, "Couldn't register for the death of a 0X%08x UiTestAutomationService!", ec);
             return ec;
         }
-        // } catch (RemoteException re) {
-        //     Slog.e(TAG, "Couldn't register for the death of a"
-        //             + " UiTestAutomationService!", re);
-        //     return;
-        // }
 
         userState->mUiAutomationServiceOwner = owner;
         userState->mUiAutomationServiceClient = serviceClient;
@@ -3918,7 +3961,8 @@ ECode AccessibilityManagerService::RegisterUiTestAutomationService(
 ECode AccessibilityManagerService::UnregisterUiTestAutomationService(
     /* [in] */ IIAccessibilityServiceClient* serviceClient)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<UserState> userState = GetCurrentUserStateLocked();
         // Automation service is not bound, so pretend it died to perform clean up.
         if (userState->mUiAutomationService != NULL
@@ -3952,7 +3996,8 @@ ECode AccessibilityManagerService::TemporaryEnableAccessibilityStateUntilKeyguar
         return NOERROR;
     }
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // Set the temporary state.
         AutoPtr<UserState> userState = GetCurrentUserStateLocked();
 
@@ -3987,7 +4032,8 @@ ECode AccessibilityManagerService::GetWindowToken(
     mSecurityPolicy->EnforceCallingPermission(
             Elastos::Droid::Manifest::permission::RETRIEVE_WINDOW_TOKEN,
             GET_WINDOW_TOKEN);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // We treat calls from a profile as if made by its parent as profiles
         // share the accessibility state of the parent. The call below
         // performs the current profile parent resolution.
@@ -4023,7 +4069,8 @@ Boolean AccessibilityManagerService::OnGesture(
     /* [in] */ Int32 gestureId)
 {
     Boolean res;
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         Boolean handled = NotifyGestureLocked(gestureId, FALSE);
         if (!handled) {
             handled = NotifyGestureLocked(gestureId, TRUE);
@@ -4038,7 +4085,8 @@ Boolean AccessibilityManagerService::NotifyKeyEvent(
     /* [in] */ Int32 policyFlags)
 {
     Boolean res;
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IKeyEventHelper> helper;
         CKeyEventHelper::AcquireSingleton((IKeyEventHelper**)&helper);
         AutoPtr<IKeyEvent> localClone;
@@ -4064,7 +4112,8 @@ Boolean AccessibilityManagerService::GetActiveWindowBounds(
     // TODO: This should be refactored to work with accessibility
     // focus in multiple windows.
     AutoPtr<IBinder> token;
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         Int32 windowId = mSecurityPolicy->mActiveWindowId;
         AutoPtr<IInterface> obj;
         mGlobalWindowTokens->Get(windowId, (IInterface**)&obj);
@@ -4086,7 +4135,8 @@ Boolean AccessibilityManagerService::GetActiveWindowBounds(
 Boolean AccessibilityManagerService::AccessibilityFocusOnlyInActiveWindow()
 {
     Boolean res;
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         res = mWindowsForAccessibilityCallback == NULL;
     }
     return res;
@@ -4115,7 +4165,8 @@ void AccessibilityManagerService::OnMagnificationStateChanged()
 void AccessibilityManagerService::SwitchUser(
     /* [in] */ Int32 userId)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         if (mCurrentUserId == userId && mInitialized) {
             return ;
         }
@@ -4175,7 +4226,8 @@ void AccessibilityManagerService::SwitchUser(
 void AccessibilityManagerService::RemoveUser(
     /* [in] */ Int32 userId)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mUserStates->Remove(userId);
     }
 }
@@ -4658,7 +4710,8 @@ void AccessibilityManagerService::UpdateInputFilter(
     Boolean setInputFilter = FALSE;
     AutoPtr<AccessibilityInputFilter> inputFilter;
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         Int32 flags = 0;
         if (userState->mIsDisplayMagnificationEnabled) {
             flags |= AccessibilityInputFilter::FLAG_FEATURE_SCREEN_MAGNIFIER;
@@ -4701,7 +4754,8 @@ void AccessibilityManagerService::UpdateInputFilter(
 void AccessibilityManagerService::ShowEnableTouchExplorationDialog(
     /* [in] */ Service* service)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IPackageManager> packageManager;
         mContext->GetPackageManager((IPackageManager**)&packageManager);
         AutoPtr<ICharSequence> csq;
@@ -4877,11 +4931,12 @@ void AccessibilityManagerService::UpdateLegacyCapabilitiesLocked(
 void AccessibilityManagerService::UpdateFilterKeyEventsLocked(
     /* [in] */ UserState* userState)
 {
+    IList* list = IList::Probe(userState->mBoundServices);
     Int32 serviceCount;
-    IList::Probe(userState->mBoundServices)->GetSize(&serviceCount);
+    list->GetSize(&serviceCount);
     for (Int32 i = 0; i < serviceCount; i++) {
         AutoPtr<IInterface> obj;
-        IList::Probe(userState->mBoundServices)->Get(i, (IInterface**)&obj);
+        list->Get(i, (IInterface**)&obj);
         AutoPtr<Service> service = (Service*)IIAccessibilityServiceConnection::Probe(obj);
         Int32 cap;
         if (service->mRequestFilterKeyEvents
@@ -5199,7 +5254,8 @@ ECode AccessibilityManagerService::Dump(
 {
     mSecurityPolicy->EnforceCallingPermission(
             Elastos::Droid::Manifest::permission::DUMP, FUNCTION_DUMP);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         pw->Println(String("ACCESSIBILITY MANAGER (dumpsys accessibility)"));
         pw->Println();
         Int32 userCount;
@@ -5315,35 +5371,34 @@ Int32 AccessibilityManagerService::FindWindowIdLocked(
 
 void AccessibilityManagerService::EnsureWindowsAvailableTimed()
 {
-    {    AutoLock syncLock(mLock);
-        if (mSecurityPolicy->mWindows != NULL) {
-            return;
-        }
-        // If we have no registered callback, update the state we
-        // we may have to register one but it didn't happen yet.
-        if (mWindowsForAccessibilityCallback == NULL) {
-            AutoPtr<UserState> userState = GetCurrentUserStateLocked();
-            OnUserStateChangedLocked(userState);
-        }
-        // We have no windows but do not care about them, done.
-        if (mWindowsForAccessibilityCallback == NULL) {
-            return;
-        }
+    AutoLock syncLock(mLock);
+    if (mSecurityPolicy->mWindows != NULL) {
+        return;
+    }
+    // If we have no registered callback, update the state we
+    // we may have to register one but it didn't happen yet.
+    if (mWindowsForAccessibilityCallback == NULL) {
+        AutoPtr<UserState> userState = GetCurrentUserStateLocked();
+        OnUserStateChangedLocked(userState);
+    }
+    // We have no windows but do not care about them, done.
+    if (mWindowsForAccessibilityCallback == NULL) {
+        return;
+    }
 
-        // Wait for the windows with a timeout.
-        Int64 startMillis = SystemClock::GetUptimeMillis();
-        while (mSecurityPolicy->mWindows == NULL) {
-            Int64 elapsedMillis = SystemClock::GetUptimeMillis() - startMillis;
-            Int64 remainMillis = WAIT_WINDOWS_TIMEOUT_MILLIS - elapsedMillis;
-            if (remainMillis <= 0) {
-                return;
-            }
-            // try {
-            mLock.Wait(remainMillis);
-            // } catch (InterruptedException ie) {
-            //     /* ignore */
-            // }
+    // Wait for the windows with a timeout.
+    Int64 startMillis = SystemClock::GetUptimeMillis();
+    while (mSecurityPolicy->mWindows == NULL) {
+        Int64 elapsedMillis = SystemClock::GetUptimeMillis() - startMillis;
+        Int64 remainMillis = WAIT_WINDOWS_TIMEOUT_MILLIS - elapsedMillis;
+        if (remainMillis <= 0) {
+            return;
         }
+        // try {
+        mLock.Wait(remainMillis);
+        // } catch (InterruptedException ie) {
+        //     /* ignore */
+        // }
     }
 }
 

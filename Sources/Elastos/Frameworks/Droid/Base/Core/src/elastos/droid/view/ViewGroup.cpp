@@ -3735,7 +3735,7 @@ Boolean ViewGroup::DispatchPopulateAccessibilityEventInternal(
 }
 
 //@Override
-void ViewGroup::OnInitializeAccessibilityNodeInfoInternal(
+ECode ViewGroup::OnInitializeAccessibilityNodeInfoInternal(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
     View::OnInitializeAccessibilityNodeInfoInternal(info);
@@ -3757,16 +3757,17 @@ void ViewGroup::OnInitializeAccessibilityNodeInfoInternal(
         }
         childrenForAccessibility->Clear();
     }
+    return NOERROR;
 }
 
 //@Override
-void ViewGroup::OnInitializeAccessibilityEventInternal(
+ECode ViewGroup::OnInitializeAccessibilityEventInternal(
     /* [in] */ IAccessibilityEvent* event)
 {
     View::OnInitializeAccessibilityEventInternal(event);
     AutoPtr<ICharSequence> seq;
     CString::New(String("ViewGroup"), (ICharSequence**)&seq);
-    IAccessibilityRecord::Probe(event)->SetClassName(seq);
+    return IAccessibilityRecord::Probe(event)->SetClassName(seq);
 }
 
 //@Override

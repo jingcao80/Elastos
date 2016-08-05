@@ -1166,7 +1166,7 @@ ECode BaseStatusBar::Start()
     mContext->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
     mAccessibilityManager = IAccessibilityManager::Probe(obj);
 
-    obj = ServiceManager::CheckService(IDreamService::DREAM_SERVICE);
+    obj = ServiceManager::GetService(IDreamService::DREAM_SERVICE);
     mDreamManager = IIDreamManager::Probe(obj);
 
     obj = NULL;

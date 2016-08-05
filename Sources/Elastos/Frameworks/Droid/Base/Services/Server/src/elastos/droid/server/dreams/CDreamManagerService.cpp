@@ -21,8 +21,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.IO.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
@@ -40,7 +38,7 @@ using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::IDisplay;
-using Elastos::Droid::View::IDisplayHelper;
+// using Elastos::Droid::View::IDisplayHelper;
 // using Elastos::Droid::View::CDisplayHelper;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
@@ -60,6 +58,7 @@ using Elastos::Droid::Service::Dreams::EIID_IIDreamManager;
 using Elastos::Droid::Service::Dreams::EIID_IDreamManagerInternal;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Slogger;
 
@@ -447,12 +446,12 @@ ECode CDreamManagerService::DumpInternal(
     pw->Print(String("mCurrentDreamIsWaking="));
     pw->Println(mCurrentDreamIsWaking);
 
-    AutoPtr<IDisplayHelper> dsHelper;
-    // CDisplayHelper::AcquireSingleton((IDisplayHelper**)&dsHelper);
-    String stateStr;
-    dsHelper->StateToString(mCurrentDreamDozeScreenState, &stateStr);
-    pw->Print(String("mCurrentDreamDozeScreenState="));
-    pw->Println(stateStr);
+    // AutoPtr<IDisplayHelper> dsHelper;
+    // // CDisplayHelper::AcquireSingleton((IDisplayHelper**)&dsHelper);
+    // String stateStr;
+    // dsHelper->StateToString(mCurrentDreamDozeScreenState, &stateStr);
+    // pw->Print(String("mCurrentDreamDozeScreenState="));
+    // pw->Println(stateStr);
 
     pw->Print(String("mCurrentDreamDozeScreenBrightness="));
     pw->Println(mCurrentDreamDozeScreenBrightness);
@@ -474,15 +473,14 @@ ECode CDreamManagerService::DumpInternal(
 
 Boolean CDreamManagerService::IsDreamingInternal()
 {
-    Boolean bval = FALSE;
-    {    AutoLock syncLock(mLock);
-        bval = mCurrentDreamToken != NULL && !mCurrentDreamIsTest
-            && !mCurrentDreamIsWaking;
-    }
+    AutoLock syncLock(mLock);
+    Boolean bval = mCurrentDreamToken != NULL
+        && !mCurrentDreamIsTest && !mCurrentDreamIsWaking;
     return bval;
 }
 
-ECode CDreamManagerService::RequestDreamInternal() {
+ECode CDreamManagerService::RequestDreamInternal()
+{
     // Ask the power manager to nap.  It will eventually call back into
     // startDream() if/when it is appropriate to start dreaming.
     // Because napping could cause the screen to turn off immediately if the dream
@@ -518,10 +516,9 @@ ECode CDreamManagerService::FinishSelfInternal(
     // If the dream is ending on its own for other reasons and no wake
     // locks are held and the user activity timeout has expired then the
     // device may simply go to sleep.
-    {    AutoLock syncLock(mLock);
-        if (mCurrentDreamToken.Get() == token) {
-            return StopDreamLocked(immediate);
-        }
+    AutoLock syncLock(mLock);
+    if (mCurrentDreamToken.Get() == token) {
+        return StopDreamLocked(immediate);
     }
     return NOERROR;
 }
@@ -530,10 +527,8 @@ ECode CDreamManagerService::TestDreamInternal(
     /* [in] */ IComponentName* dream,
     /* [in] */ Int32 userId)
 {
-    {    AutoLock syncLock(mLock);
-        return StartDreamLocked(dream, TRUE /*isTest*/, FALSE /*canDoze*/, userId);
-    }
-    return NOERROR;
+    AutoLock syncLock(mLock);
+    return StartDreamLocked(dream, TRUE /*isTest*/, FALSE /*canDoze*/, userId);
 }
 
 ECode CDreamManagerService::StartDreamInternal(
@@ -546,9 +541,8 @@ ECode CDreamManagerService::StartDreamInternal(
 
     AutoPtr<IComponentName> dream = ChooseDreamForUser(doze, userId);
     if (dream != NULL) {
-        {    AutoLock syncLock(mLock);
-            StartDreamLocked(dream, FALSE /*isTest*/, doze, userId);
-        }
+        AutoLock syncLock(mLock);
+        StartDreamLocked(dream, FALSE /*isTest*/, doze, userId);
     }
     return NOERROR;
 }
@@ -556,10 +550,8 @@ ECode CDreamManagerService::StartDreamInternal(
 ECode CDreamManagerService::StopDreamInternal(
     /* [in] */ Boolean immediate)
 {
-    {    AutoLock syncLock(mLock);
-        return StopDreamLocked(immediate);
-    }
-    return NOERROR;
+    AutoLock syncLock(mLock);
+    return StopDreamLocked(immediate);
 }
 
 ECode CDreamManagerService::StartDozingInternal(
@@ -572,15 +564,14 @@ ECode CDreamManagerService::StartDozingInternal(
             TO_CSTR(token),  screenState, screenBrightness);
     }
 
-    {    AutoLock syncLock(mLock);
-        if (mCurrentDreamToken.Get() == token && mCurrentDreamCanDoze) {
-            mCurrentDreamDozeScreenState = screenState;
-            mCurrentDreamDozeScreenBrightness = screenBrightness;
-            mPowerManagerInternal->SetDozeOverrideFromDreamManager(screenState, screenBrightness);
-            if (!mCurrentDreamIsDozing) {
-                mCurrentDreamIsDozing = TRUE;
-                mDozeWakeLock->AcquireLock();
-            }
+    AutoLock syncLock(mLock);
+    if (mCurrentDreamToken.Get() == token && mCurrentDreamCanDoze) {
+        mCurrentDreamDozeScreenState = screenState;
+        mCurrentDreamDozeScreenBrightness = screenBrightness;
+        mPowerManagerInternal->SetDozeOverrideFromDreamManager(screenState, screenBrightness);
+        if (!mCurrentDreamIsDozing) {
+            mCurrentDreamIsDozing = TRUE;
+            mDozeWakeLock->AcquireLock();
         }
     }
     return NOERROR;
@@ -590,17 +581,15 @@ ECode CDreamManagerService::StopDozingInternal(
     /* [in] */ IBinder* token)
 {
     if (DEBUG) {
-        Slogger::D(TAG, "Dream requested to stop dozing: %s",
-            TO_CSTR(token));
+        Slogger::D(TAG, "Dream requested to stop dozing: %s", TO_CSTR(token));
     }
 
-    {    AutoLock syncLock(mLock);
-        if (mCurrentDreamToken.Get() == token && mCurrentDreamIsDozing) {
-            mCurrentDreamIsDozing = FALSE;
-            mDozeWakeLock->ReleaseLock();
-            return mPowerManagerInternal->SetDozeOverrideFromDreamManager(
-                IDisplay::STATE_UNKNOWN, IPowerManager::BRIGHTNESS_DEFAULT);
-        }
+    AutoLock syncLock(mLock);
+    if (mCurrentDreamToken.Get() == token && mCurrentDreamIsDozing) {
+        mCurrentDreamIsDozing = FALSE;
+        mDozeWakeLock->ReleaseLock();
+        return mPowerManagerInternal->SetDozeOverrideFromDreamManager(
+            IDisplay::STATE_UNKNOWN, IPowerManager::BRIGHTNESS_DEFAULT);
     }
     return NOERROR;
 }
@@ -660,7 +649,6 @@ AutoPtr< ArrayOf<IComponentName*> > CDreamManagerService::GetDreamComponentsForU
     // first, ensure components point to valid services
     List<IComponentName*> validComponents;// = new ArrayList<ComponentName>();
     if (components != NULL) {
-
         for (Int32 i = 0; i < components->GetLength(); ++i) {
             AutoPtr<IComponentName> component = (*components)[i];
             if (ValidateDream(component)) {
@@ -677,7 +665,8 @@ AutoPtr< ArrayOf<IComponentName*> > CDreamManagerService::GetDreamComponentsForU
             validComponents.PushBack(defaultDream);
         }
     }
-    AutoPtr<ArrayOf<IComponentName*> > validComponentsArray = ArrayOf<IComponentName*>::Alloc(validComponents.GetSize());
+    AutoPtr<ArrayOf<IComponentName*> > validComponentsArray;
+    validComponentsArray = ArrayOf<IComponentName*>::Alloc(validComponents.GetSize());
     List<IComponentName*>::Iterator it;
     Int32 index = 0;
     for (it = validComponents.Begin(); it != validComponents.End(); ++it) {

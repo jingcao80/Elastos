@@ -1624,13 +1624,13 @@ public:
     /**
      * @see View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
      */
-    CARAPI_(void) OnInitializeAccessibilityNodeInfo(
+    CARAPI OnInitializeAccessibilityNodeInfo(
         /* [in] */ IAccessibilityNodeInfo* info);
 
     /**
      * @see View#onInitializeAccessibilityEvent(AccessibilityEvent)
      */
-    CARAPI_(void) OnInitializeAccessibilityEvent(
+    CARAPI OnInitializeAccessibilityEvent(
         /* [in] */ IAccessibilityEvent* event);
 
     /**

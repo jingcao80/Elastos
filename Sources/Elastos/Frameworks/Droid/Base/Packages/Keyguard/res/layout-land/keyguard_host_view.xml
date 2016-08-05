@@ -19,7 +19,7 @@
 
 <!-- This is the host view that generally contains two sub views: the widget view
     and the security view. -->
-<com.android.keyguard.KeyguardHostView
+<Elastos.Droid.SystemUI.Keyguard.CKeyguardHostView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_host_view"
@@ -27,7 +27,7 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
-    <com.android.keyguard.MultiPaneChallengeLayout
+    <Elastos.Droid.SystemUI.Keyguard.CMultiPaneChallengeLayout
         android:id="@+id/multi_pane_challenge"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -56,7 +56,7 @@
               androidprv:layout_childType="scrim"
               android:background="#99000000" />
 
-        <com.android.keyguard.KeyguardSecurityContainer
+        <Elastos.Droid.SystemUI.Keyguard.CKeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
             android:clipToPadding="false"
             androidprv:layout_childType="challenge"
             androidprv:layout_centerWithinArea="0.55">
-            <com.android.keyguard.KeyguardSecurityViewFlipper
+            <Elastos.Droid.SystemUI.Keyguard.CKeyguardSecurityViewFlipper
                 android:id="@+id/view_flipper"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -75,9 +75,9 @@
                 android:paddingRight="@dimen/keyguard_security_view_margin"
                 android:paddingBottom="@dimen/keyguard_security_view_margin"
                 android:gravity="center">
-            </com.android.keyguard.KeyguardSecurityViewFlipper>
-        </com.android.keyguard.KeyguardSecurityContainer>
+            </Elastos.Droid.SystemUI.Keyguard.CKeyguardSecurityViewFlipper>
+        </Elastos.Droid.SystemUI.Keyguard.CKeyguardSecurityContainer>
 
-    </com.android.keyguard.MultiPaneChallengeLayout>
-</com.android.keyguard.KeyguardHostView>
+    </Elastos.Droid.SystemUI.Keyguard.CMultiPaneChallengeLayout>
+</Elastos.Droid.SystemUI.Keyguard.CKeyguardHostView>
 

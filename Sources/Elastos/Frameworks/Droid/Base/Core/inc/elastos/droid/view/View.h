@@ -5161,7 +5161,7 @@ protected:
      *
      * Note: Called from the default {@link AccessibilityDelegate}.
      */
-    virtual CARAPI_(void) OnPopulateAccessibilityEventInternal(
+    virtual CARAPI OnPopulateAccessibilityEventInternal(
         /* [in] */ IAccessibilityEvent* event);
 
     /**
@@ -5169,7 +5169,7 @@ protected:
      *
      * Note: Called from the default {@link AccessibilityDelegate}.
      */
-    virtual CARAPI_(void) OnInitializeAccessibilityEventInternal(
+    virtual CARAPI OnInitializeAccessibilityEventInternal(
         /* [in] */ IAccessibilityEvent* event);
 
     /**
@@ -5185,7 +5185,7 @@ protected:
      *
      * Note: Called from the default {@link AccessibilityDelegate}.
      */
-    virtual CARAPI_(void) OnInitializeAccessibilityNodeInfoInternal(
+    virtual CARAPI OnInitializeAccessibilityNodeInfoInternal(
         /* [in] */ IAccessibilityNodeInfo* info);
 
     /**

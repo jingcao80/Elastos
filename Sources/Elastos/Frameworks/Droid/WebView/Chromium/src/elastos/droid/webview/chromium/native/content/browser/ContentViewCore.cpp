@@ -3776,17 +3776,17 @@ AutoPtr<IAccessibilityNodeProvider> ContentViewCore::GetAccessibilityNodeProvide
 /**
  * @see View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
  */
-void ContentViewCore::OnInitializeAccessibilityNodeInfo(
+ECode ContentViewCore::OnInitializeAccessibilityNodeInfo(
     /* [in] */  IAccessibilityNodeInfo* info)
 {
     // Note: this is only used by the script-injecting accessibility code.
-    mAccessibilityInjector->OnInitializeAccessibilityNodeInfo(info);
+    return mAccessibilityInjector->OnInitializeAccessibilityNodeInfo(info);
 }
 
 /**
  * @see View#onInitializeAccessibilityEvent(AccessibilityEvent)
  */
-void ContentViewCore::OnInitializeAccessibilityEvent(
+ECode ContentViewCore::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     // Note: this is only used by the script-injecting accessibility code.
@@ -3811,6 +3811,7 @@ void ContentViewCore::OnInitializeAccessibilityEvent(
         record->SetMaxScrollX(maxScrollXPix);
         record->SetMaxScrollY(maxScrollYPix);
     }
+    return NOERROR;
 }
 
 /**

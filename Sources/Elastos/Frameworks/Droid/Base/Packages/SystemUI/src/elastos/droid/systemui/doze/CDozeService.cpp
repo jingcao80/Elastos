@@ -79,6 +79,7 @@ ECode CDozeService::DozeBroadcastReceiver::OnReceive(
 }
 
 CAR_INTERFACE_IMPL(CDozeService::DozeHostCallback, Object, IDozeHostCallback)
+
 CDozeService::DozeHostCallback::DozeHostCallback(
     /* [in] */ CDozeService* host)
     : mHost(host)
@@ -121,6 +122,7 @@ ECode CDozeService::DozeHostCallback::OnPowerSaveChanged(
 }
 
 CAR_INTERFACE_IMPL(CDozeService::TriggerSensor, Object, ITriggerEventListener)
+
 CDozeService::TriggerSensor::TriggerSensor(
     /* [in] */ Int32 type,
     /* [in] */ Boolean configured,
@@ -242,7 +244,9 @@ const Int32 CDozeService::ProximityCheck::RESULT_UNKNOWN = 0;
 const Int32 CDozeService::ProximityCheck::RESULT_NEAR = 1;
 const Int32 CDozeService::ProximityCheck::RESULT_FAR = 2;
 const Int32 CDozeService::ProximityCheck::TIMEOUT_DELAY_MS = 500;
+
 CAR_INTERFACE_IMPL_2(CDozeService::ProximityCheck, Object, ISensorEventListener, IRunnable);
+
 CDozeService::ProximityCheck::ProximityCheck(
     /* [in] */ CDozeService* host)
     : mHost(host)
@@ -390,7 +394,9 @@ ECode CDozeService::DSRunnable::Run()
 
 
 CAR_OBJECT_IMPL(CDozeService)
+
 CAR_INTERFACE_IMPL(CDozeService, DreamService, IDozeService)
+
 CDozeService::CDozeService()
     : mDreaming(FALSE)
     , mPulsing(FALSE)
@@ -402,7 +408,14 @@ CDozeService::CDozeService()
     , mNotificationPulseTime(0)
     , mScheduleResetsRemaining(0)
 {
+}
+
+ECode CDozeService::constructor()
+{
+    if (DEBUG) Logger::D(mTag, "new DozeService()");
+    SetDebug(DEBUG);
     Int32 hc = 0;
+
     GetHashCode(&hc);
     String value;
     value.AppendFormat(".%08x", hc);
@@ -412,12 +425,6 @@ CDozeService::CDozeService()
     CHandler::New((IHandler**)&mHandler);
     mBroadcastReceiver = new DozeBroadcastReceiver(this);
     mHostCallback = new DozeHostCallback(this);
-}
-
-ECode CDozeService::constructor()
-{
-    if (DEBUG) Logger::D(mTag, "new DozeService()");
-    SetDebug(DEBUG);
     return NOERROR;
 }
 
@@ -426,7 +433,6 @@ void CDozeService::DumpOnHandler(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0 && "TODO");
     // DreamService::DumpOnHandler(fd, pw, args);
     pw->Print(String("  mDreaming: "));
     pw->Println(mDreaming);

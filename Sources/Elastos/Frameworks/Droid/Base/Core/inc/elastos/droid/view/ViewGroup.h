@@ -1869,10 +1869,10 @@ protected:
     CARAPI_(Boolean) DispatchPopulateAccessibilityEventInternal(
         /* [in] */ IAccessibilityEvent* event);
 
-    CARAPI_(void) OnInitializeAccessibilityNodeInfoInternal(
+    CARAPI OnInitializeAccessibilityNodeInfoInternal(
         /* [in] */ IAccessibilityNodeInfo* info);
 
-    CARAPI_(void) OnInitializeAccessibilityEventInternal(
+    CARAPI OnInitializeAccessibilityEventInternal(
         /* [in] */ IAccessibilityEvent* event);
 
     /**

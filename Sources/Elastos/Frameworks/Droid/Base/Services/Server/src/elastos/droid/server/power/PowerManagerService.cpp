@@ -667,7 +667,6 @@ ECode PowerManagerService::BinderService::GoToSleep(
     if (eventTime > SystemClock::GetUptimeMillis()) {
         Slogger::E(TAG, "event time must not be in the future");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("event time must not be in the future");
     }
 
     FAIL_RETURN(mHost->mContext->EnforceCallingOrSelfPermission(
@@ -1510,14 +1509,35 @@ ECode PowerManagerService::MyDisplayPowerCallbacks::ReleaseSuspendBlocker()
     return mHost->mDisplaySuspendBlocker->ReleaseBlocker();
 }
 
+static String StateToString(
+    /* [in] */ Int32 state)
+{
+    switch (state) {
+        case IDisplay::STATE_UNKNOWN:
+            return String("UNKNOWN");
+        case IDisplay::STATE_OFF:
+            return String("OFF");
+        case IDisplay::STATE_ON:
+            return String("ON");
+        case IDisplay::STATE_DOZE:
+            return String("DOZE");
+        case IDisplay::STATE_DOZE_SUSPEND:
+            return String("DOZE_SUSPEND");
+        default:
+            return StringUtils::ToString(state);
+    }
+}
+
 ECode PowerManagerService::MyDisplayPowerCallbacks::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
 
-    {    AutoLock syncLock(this);
-        assert(0 && "TODO");
-        *str = "state="; /* + Display::StateToString(mDisplayState)*/;
+    {
+        AutoLock syncLock(this);
+        StringBuilder sb("state=");
+        sb += StateToString(mDisplayState);
+        *str = sb.ToString();
         return NOERROR;
     }
     return NOERROR;
@@ -1685,7 +1705,8 @@ ECode PowerManagerService::constructor(
     mSensorManager->GetDefaultSensor(ISensor::TYPE_PROXIMITY, (ISensor**)&mProximitySensor);
     mPerformanceManager = new PerformanceManager(context);
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mWakeLockSuspendBlocker = CreateSuspendBlockerLocked(String("PowerManagerService.WakeLocks"));
         mDisplaySuspendBlocker = CreateSuspendBlockerLocked(String("PowerManagerService.Display"));
         mDisplaySuspendBlocker->AcquireBlocker();
@@ -1723,7 +1744,8 @@ ECode PowerManagerService::OnStart()
 ECode PowerManagerService::OnBootPhase(
     /* [in] */ Int32 phase)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         if (phase == ISystemService::PHASE_BOOT_COMPLETED) {
             const Int64 now = SystemClock::GetUptimeMillis();
             mBootCompleted = TRUE;
@@ -2139,7 +2161,8 @@ ECode PowerManagerService::AcquireWakeLockInternal(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 pid)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInteger32> integer;
         CInteger32::New(uid, (IInteger32**)&integer);
         Boolean contains;
@@ -2224,7 +2247,8 @@ void PowerManagerService::ReleaseWakeLockInternal(
     /* [in] */ IBinder* lock,
     /* [in] */ Int32 flags)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         Int32 index = FindWakeLockIndexLocked(lock);
         if (index < 0) {
             if (DEBUG_SPEW) {
@@ -2495,10 +2519,9 @@ void PowerManagerService::UserActivityInternal(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 uid)
 {
-    {    AutoLock syncLock(mLock);
-        if (UserActivityNoUpdateLocked(eventTime, event, flags, uid)) {
-            UpdatePowerStateLocked();
-        }
+    AutoLock syncLock(mLock);
+    if (UserActivityNoUpdateLocked(eventTime, event, flags, uid)) {
+        UpdatePowerStateLocked();
     }
 }
 
@@ -2564,7 +2587,8 @@ void PowerManagerService::WakeUpInternal(
     /* [in] */ Int64 eventTime,
     /* [in] */ Int32 uid)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         if (WakeUpNoUpdateLocked(eventTime, uid)) {
             UpdatePowerStateLocked();
         }
@@ -2633,7 +2657,8 @@ void PowerManagerService::GoToSleepInternal(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 uid)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         if (GoToSleepNoUpdateLocked(eventTime, reason, flags, uid)) {
             UpdatePowerStateLocked();
         }
@@ -3063,10 +3088,9 @@ void PowerManagerService::UpdateUserActivitySummaryLocked(
 
             mUserActivitySummary = 0;
             if (mWakefulness == WAKEFULNESS_AWAKE && mLastUserActivityTime >= mLastWakeTime) {
-                nextTimeout = mLastUserActivityTime
-                        + screenOffTimeout - screenDimDuration;
+                nextTimeout = mLastUserActivityTime + screenOffTimeout - screenDimDuration;
                 if (DEBUG) {
-                    Slogger::E(TAG, "line:%d, func:%s, mLastUserActivityTime:%lld, screenOffTimeout:%d, screenDimDuration:%d,nextTimeout:%lld\n"
+                    Slogger::D(TAG, "line:%d, func:%s, mLastUserActivityTime:%lld, screenOffTimeout:%d, screenDimDuration:%d,nextTimeout:%lld\n"
                         ,__LINE__, __func__, mLastUserActivityTime, screenOffTimeout, screenDimDuration, nextTimeout);
                 }
                 if (now < nextTimeout) {
@@ -3121,7 +3145,7 @@ void PowerManagerService::UpdateUserActivitySummaryLocked(
                 }
             }
             if (DEBUG) {
-                Slogger::E(TAG, "line:%d, func:%s, mUserActivitySummary:%d, sleepTimeout:%d\n",
+                Slogger::D(TAG, "line:%d, func:%s, mUserActivitySummary:%d, sleepTimeout:%d\n",
                     __LINE__, __func__, mUserActivitySummary, sleepTimeout);
             }
             if (mUserActivitySummary == 0) {
@@ -3290,7 +3314,8 @@ void PowerManagerService::HandleSandman()
     // Handle preconditions.
     Boolean startDreaming;
     Int32 wakefulness;
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mSandmanScheduled = FALSE;
         wakefulness = mWakefulness;
         if (mSandmanSummoned && mDisplayReady) {
@@ -3638,57 +3663,53 @@ void PowerManagerService::SetHalInteractiveModeLocked(
 
 Boolean PowerManagerService::IsInteractiveInternal()
 {
-    {    AutoLock syncLock(mLock);
-        return mInteractive;
-    }
-    return FALSE;
+    AutoLock syncLock(mLock);
+    return mInteractive;
 }
 
 Boolean PowerManagerService::IsLowPowerModeInternal()
 {
-    {    AutoLock syncLock(mLock);
-        return mLowPowerModeEnabled;
-    }
-    return FALSE;
+    AutoLock syncLock(mLock);
+    return mLowPowerModeEnabled;
 }
 
 Boolean PowerManagerService::SetLowPowerModeInternal(
     /* [in] */ Boolean mode)
 {
-    {    AutoLock syncLock(mLock);
-        if (DEBUG) {
-            Slogger::D(TAG, "setLowPowerModeInternal %d mIsPowered=%d", mode, mIsPowered);
-        }
-
-        if (mIsPowered) {
-            return FALSE;
-        }
-        AutoPtr<IContentResolver> resolver;
-        mContext->GetContentResolver((IContentResolver**)&resolver);
-        AutoPtr<ISettingsGlobal> settingsGlobal;
-        CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
-        Boolean res;
-        settingsGlobal->PutInt32(resolver,
-                ISettingsGlobal::LOW_POWER_MODE, mode ? 1 : 0, &res);
-        mLowPowerModeSetting = mode;
-
-        if (mAutoLowPowerModeConfigured && mBatteryLevelLow) {
-            if (mode && mAutoLowPowerModeSnoozing) {
-                if (DEBUG_SPEW) {
-                    Slogger::D(TAG, "setLowPowerModeInternal: clearing low power mode snooze");
-                }
-                mAutoLowPowerModeSnoozing = FALSE;
-            }
-            else if (!mode && !mAutoLowPowerModeSnoozing) {
-                if (DEBUG_SPEW) {
-                    Slogger::D(TAG, "setLowPowerModeInternal: snoozing low power mode");
-                }
-                mAutoLowPowerModeSnoozing = TRUE;
-            }
-        }
-
-        UpdateLowPowerModeLocked();
+    AutoLock syncLock(mLock);
+    if (DEBUG) {
+        Slogger::D(TAG, "setLowPowerModeInternal %d mIsPowered=%d", mode, mIsPowered);
     }
+
+    if (mIsPowered) {
+        return FALSE;
+    }
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    AutoPtr<ISettingsGlobal> settingsGlobal;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
+    Boolean res;
+    settingsGlobal->PutInt32(resolver,
+            ISettingsGlobal::LOW_POWER_MODE, mode ? 1 : 0, &res);
+    mLowPowerModeSetting = mode;
+
+    if (mAutoLowPowerModeConfigured && mBatteryLevelLow) {
+        if (mode && mAutoLowPowerModeSnoozing) {
+            if (DEBUG_SPEW) {
+                Slogger::D(TAG, "setLowPowerModeInternal: clearing low power mode snooze");
+            }
+            mAutoLowPowerModeSnoozing = FALSE;
+        }
+        else if (!mode && !mAutoLowPowerModeSnoozing) {
+            if (DEBUG_SPEW) {
+                Slogger::D(TAG, "setLowPowerModeInternal: snoozing low power mode");
+            }
+            mAutoLowPowerModeSnoozing = TRUE;
+        }
+    }
+
+    UpdateLowPowerModeLocked();
+
     return TRUE;
 }
 
@@ -3725,13 +3746,12 @@ ECode PowerManagerService::ShutdownOrRebootInternal(
 
     // PowerManager.reboot() is documented not to return so just wait for the inevitable.
     if (wait) {
-        {    AutoLock syncLock(runnable);
-            while (TRUE) {
-                // try {
-                runnable->Wait();
-                // } catch (InterruptedException e) {
-                // }
-            }
+        AutoLock syncLock(runnable);
+        while (TRUE) {
+            // try {
+            runnable->Wait();
+            // } catch (InterruptedException e) {
+            // }
         }
     }
     return NOERROR;
@@ -3765,12 +3785,10 @@ void PowerManagerService::SetStayOnSettingInternal(
 void PowerManagerService::SetMaximumScreenOffTimeoutFromDeviceAdminInternal(
     /* [in] */ Int32 timeMs)
 {
-    {
-        AutoLock syncLock(mLock);
-        mMaximumScreenOffTimeoutFromDeviceAdmin = timeMs;
-        mDirty |= DIRTY_SETTINGS;
-        UpdatePowerStateLocked();
-    }
+    AutoLock syncLock(mLock);
+    mMaximumScreenOffTimeoutFromDeviceAdmin = timeMs;
+    mDirty |= DIRTY_SETTINGS;
+    UpdatePowerStateLocked();
 }
 
 Boolean PowerManagerService::IsMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()
@@ -4170,8 +4188,7 @@ void PowerManagerService::NativeInit()
         sPowerModule->init(sPowerModule);
     }
     else {
-        ALOGE("Couldn't load %s module (%s)", POWER_HARDWARE_MODULE_ID,
-                StringUtils::ToString(-err).string());
+        ALOGE("Couldn't load %s module (%s)", POWER_HARDWARE_MODULE_ID, strerror(-err));
     }
 
     // Initialize

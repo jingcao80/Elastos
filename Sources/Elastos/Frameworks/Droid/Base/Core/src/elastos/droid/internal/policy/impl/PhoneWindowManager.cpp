@@ -3998,7 +3998,7 @@ void PhoneWindowManager::AwakenDreams()
 
 AutoPtr<IIDreamManager> PhoneWindowManager::GetDreamManager()
 {
-    AutoPtr<IInterface> tmpObj = ServiceManager::CheckService(IDreamService::DREAM_SERVICE);
+    AutoPtr<IInterface> tmpObj = ServiceManager::GetService(IDreamService::DREAM_SERVICE);
     AutoPtr<IIDreamManager> dreamManager = IIDreamManager::Probe(tmpObj.Get());
     return dreamManager;
 }
@@ -7059,9 +7059,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
         }
         Int64 eventTime;
         IInputEvent::Probe(event)->GetEventTime(&eventTime);
-        if (mPowerManager) {
-            mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
-        }
+        mPowerManager->GoToSleep(eventTime, IPowerManager::GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
         isWakeKey = FALSE;
         break;
     }

@@ -35,6 +35,8 @@
 #include "elastos/droid/server/webkit/WebViewUpdateService.h"
 #include "elastos/droid/server/wm/InputMonitor.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/dreams/CDreamManagerService.h"
+
 
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.App.h>
@@ -117,6 +119,7 @@ using Elastos::Droid::Server::Twilight::CTwilightService;
 using Elastos::Droid::Server::Webkit::WebViewUpdateService;
 using Elastos::Droid::Server::Wm::InputMonitor;
 using Elastos::Droid::Server::DevicePolicy::CDevicePolicyManagerService;
+using Elastos::Droid::Server::Dreams::CDreamManagerService;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -647,7 +650,7 @@ ECode SystemServer::StartOtherServices()
     // Bring up services needed for UI.
     if (mFactoryTestMode != FactoryTest::FACTORY_TEST_LOW_LEVEL) {
         //if (!disableNonCoreServices) { // TODO: View depends on these; mock them?
-        if (true) {
+        if (TRUE) {
             Slogger::I(TAG, "Input Method Service");
             ec = CInputMethodManagerService::NewByFriend(context, IIWindowManager::Probe(wm),
                 (CInputMethodManagerService**)&imm);
@@ -1059,10 +1062,14 @@ ECode SystemServer::StartOtherServices()
     //         }
     //     }
 
-    //     if (!disableNonCoreServices) {
-    //         // Dreams (interactive idle-time views, a/k/a screen savers, and doze mode)
-    //         mSystemServiceManager->StartService(DreamManagerService.class);
-    //     }
+        if (!disableNonCoreServices) {
+            // Dreams (interactive idle-time views, a/k/a screen savers, and doze mode)
+            systemService = NULL;
+            ec = CDreamManagerService::New(context, (ISystemService**)&systemService);
+            if (FAILED(ec)) ReportWtf("create DreamManager Service ready", ec);
+            ec = mSystemServiceManager->StartService(systemService);
+            if (FAILED(ec)) ReportWtf("making DreamManager Service ready", ec);
+        }
 
         if (!disableNonCoreServices && !disableAtlas) {
             Slogger::I(TAG, "Assets Atlas Service");

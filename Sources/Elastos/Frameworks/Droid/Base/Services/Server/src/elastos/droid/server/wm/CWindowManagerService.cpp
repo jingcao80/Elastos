@@ -254,7 +254,8 @@ CAR_INTERFACE_IMPL(CWindowManagerService::MyLowPowerModeListener, Object, ILowPo
 ECode CWindowManagerService::MyLowPowerModeListener::OnLowPowerModeChanged(
     /* [in] */ Boolean enabled)
 {
-    {    AutoLock syncLock(mHost->mWindowMapLock);
+    {
+        AutoLock syncLock(mHost->mWindowMapLock);
         if (mHost->mAnimationsDisabled != enabled) {
             mHost->mAnimationsDisabled = enabled;
             mHost->DispatchNewAnimatorScaleLocked(NULL);
@@ -538,7 +539,8 @@ ECode CWindowManagerService::LocalService::RequestTraversalFromDisplayManager()
 ECode CWindowManagerService::LocalService::SetMagnificationSpec(
     /* [in] */ IMagnificationSpec* spec)
 {
-    {    AutoLock syncLock(mHost->mWindowMapLock);
+    {
+        AutoLock syncLock(mHost->mWindowMapLock);
         if (mHost->mAccessibilityController != NULL) {
             mHost->mAccessibilityController->SetMagnificationSpecLocked(spec);
         }
@@ -560,7 +562,8 @@ ECode CWindowManagerService::LocalService::GetCompatibleMagnificationSpecForWind
     VALIDATE_NOT_NULL(_spec)
     *_spec = NULL;
 
-    {    AutoLock syncLock(mHost->mWindowMapLock);
+    {
+        AutoLock syncLock(mHost->mWindowMapLock);
         AutoPtr<WindowState> windowState;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it = mHost->mWindowMap.Find(windowToken);
         if (it != mHost->mWindowMap.End() && it->mSecond != NULL) {
@@ -602,7 +605,8 @@ ECode CWindowManagerService::LocalService::GetCompatibleMagnificationSpecForWind
 ECode CWindowManagerService::LocalService::SetMagnificationCallbacks(
     /* [in] */ IMagnificationCallbacks* callbacks)
 {
-    {    AutoLock syncLock(mHost->mWindowMapLock);
+    {
+        AutoLock syncLock(mHost->mWindowMapLock);
         if (mHost->mAccessibilityController == NULL) {
             mHost->mAccessibilityController = new AccessibilityController(mHost);
         }
@@ -617,7 +621,8 @@ ECode CWindowManagerService::LocalService::SetMagnificationCallbacks(
 ECode CWindowManagerService::LocalService::SetWindowsForAccessibilityCallback(
     /* [in] */ IWindowsForAccessibilityCallback* callback)
 {
-    {    AutoLock syncLock(mHost->mWindowMapLock);
+    {
+        AutoLock syncLock(mHost->mWindowMapLock);
         if (mHost->mAccessibilityController == NULL) {
             mHost->mAccessibilityController = new AccessibilityController(mHost);
         }
@@ -642,7 +647,8 @@ ECode CWindowManagerService::LocalService::GetFocusedWindowToken(
     VALIDATE_NOT_NULL(binder)
     *binder = NULL;
 
-    {    AutoLock syncLock(mHost->mWindowMapLock);
+    {
+        AutoLock syncLock(mHost->mWindowMapLock);
         AutoPtr<WindowState> windowState = mHost->GetFocusedWindowLocked();
         if (windowState != NULL) {
             *binder = IBinder::Probe(windowState->mClient);
@@ -669,7 +675,8 @@ ECode CWindowManagerService::LocalService::GetWindowFrame(
     /* [in] */ IBinder* token,
     /* [in] */ IRect* outBounds)
 {
-    {    AutoLock syncLock(mHost->mWindowMapLock);
+    {
+        AutoLock syncLock(mHost->mWindowMapLock);
         AutoPtr<WindowState> windowState;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it = mHost->mWindowMap.Find(token);
         if (it != mHost->mWindowMap.End() && it->mSecond != NULL) {

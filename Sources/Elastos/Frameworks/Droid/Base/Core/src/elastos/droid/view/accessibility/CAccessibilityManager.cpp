@@ -135,7 +135,8 @@ ECode CAccessibilityManager::GetInstance(
     VALIDATE_NOT_NULL(manager);
     *manager = NULL;
 
-    {    AutoLock syncLock(sInstanceSync);
+    {
+        AutoLock syncLock(sInstanceSync);
         if (sInstance == NULL) {
             Int32 userId;
             Int32 result1, result2;
@@ -151,8 +152,8 @@ ECode CAccessibilityManager::GetInstance(
             else {
                 userId = UserHandle::GetMyUserId();
             }
-            AutoPtr<IInterface> iBinder = ServiceManager::GetService(IContext::ACCESSIBILITY_SERVICE);
-            AutoPtr<IIAccessibilityManager> service = IIAccessibilityManager::Probe(iBinder);
+            AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::ACCESSIBILITY_SERVICE);
+            AutoPtr<IIAccessibilityManager> service = IIAccessibilityManager::Probe(obj);
             CAccessibilityManager::New(context, service, userId, (IAccessibilityManager**)&sInstance);
         }
     }
