@@ -45,16 +45,30 @@ module
     merge("car/elastos/droid/keyguard/KeyguardViewBase.car");
     merge("car/elastos/droid/keyguard/KeyguardViewMediator.car");
     merge("car/elastos/droid/keyguard/ViewMediatorCallback.car");
+    merge("car/elastos/droid/keyguard/SecurityMessageDisplay.car");
+    merge("car/elastos/droid/keyguard/KeyguardFaceUnlockView.car");
+    merge("car/elastos/droid/keyguard/KeyguardWidgetFrame.car");
+    merge("car/elastos/droid/keyguard/PagedView.car");
+    merge("car/elastos/droid/keyguard/MultiPaneChallengeLayout.car");
+    merge("car/elastos/droid/keyguard/SlidingChallengeLayout.car");
+    merge("car/elastos/droid/keyguard/KeyguardMultiUserSelectorView.car");
+    merge("car/elastos/droid/keyguard/KeyguardViewStateManager.car");
+    merge("car/elastos/droid/keyguard/KeyguardWidgetPager.car");
+    merge("car/elastos/droid/keyguard/KeyguardTransportControlView.car");
+    merge("car/elastos/droid/keyguard/KeyguardConstants.car");
+    merge("car/elastos/droid/keyguard/BiometricSensorUnlock.car");
+    merge("car/elastos/droid/keyguard/CameraWidgetFrame.car");
     merge("car/elastos/droid/keyguard/CarrierText.car");
-
-    //merge("car/elastos/droid/keyguard/BiometricSensorUnloc.car");
-    //merge("car/elastos/droid/keyguard/CameraWidgetFrame.car");
-    //merge("car/elastos/droid/keyguard/ChallengeLayout.car");
-    //merge("car/elastos/droid/keyguard/EmergencyButton.car");
-    //merge("car/elastos/droid/keyguard/EmergencyCarrierArea.car");
-    //merge("car/elastos/droid/keyguard/KeyguardGlowStripView.car");
-    //
-    //
+    merge("car/elastos/droid/keyguard/ChallengeLayout.car");
+    merge("car/elastos/droid/keyguard/EmergencyButton.car");
+    merge("car/elastos/droid/keyguard/EmergencyCarrierArea.car");
+    merge("car/elastos/droid/keyguard/KeyguardGlowStripView.car");
+    merge("car/elastos/droid/keyguard/KeyguardLinearLayout.car");
+    merge("car/elastos/droid/keyguard/KeyguardMessageArea.car");
+    merge("car/elastos/droid/keyguard/KeyguardMultiUserAvatar.car");
+    merge("car/elastos/droid/keyguard/KeyguardCircleFramedDrawable.car");
+    merge("car/elastos/droid/keyguard/PasswordTextView.car");
+    merge("car/elastos/droid/keyguard/KeyguardStatusView.car");
 
     //usb
     merge("car/elastos/droid/usb/StorageNotification.car");
@@ -299,15 +313,19 @@ module
     using interface Elastos.Droid.Internal.App.IAlertActivity;
     using interface Elastos.Droid.Internal.App.IResolverActivity;
     using interface Elastos.Droid.Internal.Policy.IIKeyguardService;
+    using interface Elastos.Droid.Internal.Policy.IIFaceLockCallback;
     using interface Elastos.Droid.Internal.StatusBar.IIStatusBar;
     using interface Elastos.Droid.Internal.StatusBar.IStatusBarIconList;
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IHandler;
+    using interface Elastos.Droid.Os.IHandlerCallback;
     using interface Elastos.Droid.Service.Dreams.IDreamService;
     using interface Elastos.Droid.Service.Notification.IIConditionListener;
     using interface Elastos.Droid.Service.Notification.INotificationListenerService;
     using interface Elastos.Droid.Service.Wallpaper.IWallpaperService;
+    using interface Elastos.Droid.Text.ITextWatcher;
     using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IRotationWatcher;
     using interface Elastos.Droid.View.IViewOnLayoutChangeListener;
     using interface Elastos.Droid.View.IViewOutlineProvider;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
@@ -327,8 +345,11 @@ module
     using interface Elastos.Droid.View.IViewStubOnInflateListener;
     using interface Elastos.Droid.View.IWindowCallback;
     using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnKeyListener;
+    using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.Animation.IInterpolator;
+    using interface Elastos.Droid.Widget.IButton;
     using interface Elastos.Droid.Widget.IBaseAdapter;
     using interface Elastos.Droid.Widget.IAbsSeekBar;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
@@ -347,6 +368,7 @@ module
     using interface Elastos.Droid.Widget.IViewAnimator;
     using interface Elastos.Droid.Widget.IViewSwitcher;
     using interface Elastos.Droid.Widget.IViewFlipper;
+    using interface Elastos.Droid.Widget.IOnEditorActionListener;
     using interface Elastos.Droid.Widget.IFrameLayoutLayoutParams;
     using interface Elastos.Core.ICharSequence;
 
@@ -813,6 +835,7 @@ module
             interface IDrawableCallback;
             interface IKeyEventCallback;
             interface IAccessibilityEventSource;
+            interface IKeyguardStatusView;
         }
 
         [local]
@@ -829,7 +852,7 @@ module
             interface IAccessibilityEventSource;
         }
 
-        /*[local]
+        [local]
         class CAlphaOptimizedRelativeLayout {
             constructor(
                 [in] IContext* ctx,
@@ -843,7 +866,7 @@ module
             interface IDrawableCallback;
             interface IKeyEventCallback;
             interface IAccessibilityEventSource;
-        }*/
+        }
 
         class CIKeyguardService {
             constructor(
@@ -869,6 +892,553 @@ module
             interface IDrawableCallback;
             interface IKeyEventCallback;
             interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CEmergencyButton {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IButton;
+            interface IEmergencyButton;
+            interface ITextView;
+            interface IView;
+            interface IOnPreDrawListener;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CEmergencyCarrierArea {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IEmergencyCarrierArea;
+        }
+
+        class CFaceUnlockFaceLockCallback {
+            constructor(
+                [in] IHandlerCallback* face);
+
+            interface IIFaceLockCallback;
+            interface IBinder;
+        }
+
+        [local]
+        class CKeyguardAccountView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IKeyguardSecurityView;
+            interface IViewOnClickListener;
+            interface ITextWatcher;
+        }
+
+        [local]
+        class CKeyguardFaceUnlockView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IKeyguardSecurityView;
+        }
+
+        class CKeyguardFaceUnlockViewRotationWatcher {
+            constructor(
+                [in] IKeyguardFaceUnlockView* host);
+
+            interface IBinder;
+            interface IRotationWatcher;
+        }
+
+        [local]
+        class CKeyguardGlowStripView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IKeyguardGlowStripView;
+        }
+
+        [local]
+        class CKeyguardHostView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IKeyguardViewBase;
+            interface IKeyguardSecurityContainerSecurityCallback;
+            interface IKeyguardHostView;
+        }
+
+        [local]
+        class CKeyguardWidgetFrame {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IKeyguardWidgetFrame;
+        }
+
+        [local]
+        class CKeyguardLinearLayout {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+        }
+
+        [local]
+        class CKeyguardMessageArea {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface ITextView;
+            interface IView;
+            interface IOnPreDrawListener;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IKeyguardMessageArea;
+        }
+
+        [local]
+        class CKeyguardMultiUserAvatar {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IKeyguardMultiUserAvatar;
+        }
+
+        [local]
+        class CKeyguardMultiUserSelectorView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IKeyguardMultiUserSelectorView;
+            interface IViewOnClickListener;
+        }
+
+        [local]
+        class CKeyguardPINView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IKeyguardSecurityView;
+            interface IViewOnKeyListener;
+        }
+
+        [local]
+        class CKeyguardPasswordView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IKeyguardSecurityView;
+            interface ITextWatcher;
+            interface IOnEditorActionListener;
+        }
+
+        [local]
+        class CKeyguardPatternView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IKeyguardSecurityView;
+            interface IAppearAnimationCreator;
+        }
+
+        [local]
+        class CKeyguardSimPinView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IKeyguardSecurityView;
+            interface IViewOnKeyListener;
+        }
+
+        [local]
+        class CKeyguardSimPukView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+            interface ILinearLayout;
+            interface IKeyguardSecurityView;
+            interface IViewOnKeyListener;
+        }
+
+        [local]
+        class CKeyguardTransportControlView {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IKeyguardTransportControlView;
+        }
+
+        [local]
+        class CKeyguardWidgetPager {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IView;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IPagedView;
+            interface IViewGroupOnHierarchyChangeListener;
+            interface IKeyguardWidgetPager;
+            interface IPagedViewPageSwitchListener;
+            interface IViewOnLongClickListener;
+            interface IChallengeLayoutOnBouncerStateChangedListener;
+        }
+
+        [local]
+        class CKeyguardWidgetCarousel {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IView;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IPagedView;
+            interface IViewGroupOnHierarchyChangeListener;
+            interface IKeyguardWidgetPager;
+            interface IPagedViewPageSwitchListener;
+            interface IViewOnLongClickListener;
+            interface IChallengeLayoutOnBouncerStateChangedListener;
+        }
+
+        [local]
+        class CMultiPaneChallengeLayout {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IView;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IChallengeLayout;
+            interface IMultiPaneChallengeLayout;
+        }
+
+        [local]
+        class CNumPadKey {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IView;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+        }
+
+        [local]
+        class CPasswordTextView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyleAttr,
+                [in] Int32 defStyleRes);
+
+            interface IView;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CSlidingChallengeLayout {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IView;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IChallengeLayout;
+            interface ISlidingChallengeLayout;
         }
 
     } // namespace Keyguard
@@ -3045,11 +3615,11 @@ module
                 [in] IContext* ctx);
 
             constructor(
-                [in] IContext* ctx, 
+                [in] IContext* ctx,
                 [in] IAttributeSet* attrs);
 
             constructor(
-                [in] IContext* ctx, 
+                [in] IContext* ctx,
                 [in] IAttributeSet* attrs,
                 [in] Int32 defStyleAttr);
 

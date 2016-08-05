@@ -4,8 +4,25 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardMultiUserSelectorView.h"
 #include <elastos/droid/widget/FrameLayout.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Core::Object;
+using Elastos::Core::IComparator;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -14,6 +31,7 @@ namespace Keyguard {
 
 CarClass(CKeyguardMultiUserSelectorView)
     , public FrameLayout
+    , public IKeyguardMultiUserSelectorView
     , public IViewOnClickListener
 {
 private:
@@ -24,12 +42,12 @@ private:
         TO_STRING_IMPL("CKeyguardMultiUserSelectorView::MyRunnable")
 
         MyRunnable(
-            /* [in] */ CKeyguardMultiUserSelectorView* host);
+            /* [in] */ CKeyguardMultiUserSelectorView* host)
             : mHost(host)
         {}
 
         //@Override
-        CARPAI Run();
+        CARAPI Run();
 
     private:
         CKeyguardMultiUserSelectorView* mHost;
@@ -49,7 +67,7 @@ private:
         {}
 
         //@Override
-        CARPAI Run();
+        CARAPI Run();
 
     private:
         CKeyguardMultiUserSelectorView* mHost;
@@ -74,6 +92,8 @@ private:
 
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CKeyguardMultiUserSelectorView();
 

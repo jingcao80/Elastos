@@ -3,9 +3,12 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CFACEUNLOCKFACELOCKCALLBACK_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CFaceUnlockFaceLockCallback.h"
-#include <elastos/droid/widget/ImageButton.h>
+#include "elastos/droid/systemui/keyguard/FaceUnlock.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
 
-using Elastos::Droid::Widget::ImageButton;
+using Elastos::Droid::Internal::Policy::IIFaceLockCallback;
+using Elastos::Droid::Os::IHandlerCallback;
 
 namespace Elastos {
 namespace Droid {
@@ -14,7 +17,7 @@ namespace Keyguard {
 
 CarClass(CFaceUnlockFaceLockCallback)
     , public Object
-    , public IIFaceLockCallbac
+    , public IIFaceLockCallback
     , public IBinder
 {
 public:
@@ -46,6 +49,9 @@ public:
      */
     CARAPI PokeWakelock(
         /* [in] */ Int32 millis);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     AutoPtr<FaceUnlock> mFace;

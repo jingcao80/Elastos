@@ -1,0 +1,67 @@
+
+module
+{
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Core.ICharSequence;
+
+    interface IKeyguardWidgetPager;
+    interface IChallengeLayout;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    [local]
+    interface IKeyguardViewStateManager {
+        SetPagedView(
+            [in] IKeyguardWidgetPager* pagedView);
+
+        SetChallengeLayout(
+            [in] IChallengeLayout* layout);
+
+        IsChallengeShowing(
+            [out] Boolean* result);
+
+        IsChallengeOverlapping(
+            [out] Boolean* result);
+
+        SetSecurityViewContainer(
+            [in] IKeyguardSecurityView* container);
+
+        ShowBouncer(
+            [in]  Boolean show);
+
+        IsBouncing(
+            [out] Boolean* result);
+
+        FadeOutSecurity(
+            [in] Int32 duration);
+
+        FadeInSecurity(
+            [in] Int32 duration);
+
+        OnPageBeginMoving();
+
+        OnPageEndMoving();
+
+        OnPageSwitching(
+            [in] IView* newPage,
+            [in] Int32 newPageIndex);
+
+        OnPageSwitched(
+            [in] IView* newPage,
+            [in] Int32 newPageIndex);
+
+        OnPageBeginWarp();
+
+        OnPageEndWarp();
+
+        ShowUsabilityHints();
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

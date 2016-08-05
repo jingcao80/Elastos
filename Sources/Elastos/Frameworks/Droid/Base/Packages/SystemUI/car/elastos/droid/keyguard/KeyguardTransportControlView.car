@@ -1,0 +1,58 @@
+
+module
+{
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Media.IRemoteControllerMetadataEditor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface IKeyguardTransportControlViewSavedState {
+    }
+
+    interface IKeyguardTransportControlView {
+        SetSeekBarsEnabled(
+            [in] Boolean enabled);
+
+        SetTransportControlCallback(
+            [in] IKeyguardHostViewTransportControlCallback* transportControlCallback);
+
+        SetBadgeIcon(
+            [in] IDrawable* bmp);
+
+        ClearMetadata();
+
+        UpdateMetadata(
+            [in] IRemoteControllerMetadataEditor* data);
+
+        UpdateSeekDisplay();
+
+        TryToggleSeekBar(
+            [out] Boolean* result);
+
+        ResetToMetadata();
+
+        DelayResetToMetadata();
+
+        CancelResetToMetadata();
+
+        SetSeekBarDuration(
+            [in] Int64 duration);
+
+        ScrubTo(
+            [in] Int32 progress);
+
+        UpdateSeekBars(
+            [out] Boolean* result);
+
+        ProvidesClock(
+            [out] Boolean* result);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

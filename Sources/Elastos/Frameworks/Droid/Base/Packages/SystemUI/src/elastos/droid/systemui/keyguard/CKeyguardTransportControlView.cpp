@@ -1,16 +1,75 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardTransportControlView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/text/format/DateFormat.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Transition.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/Math.h>
+#include "R.h"
+
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Graphics::IXfermode;
+using Elastos::Droid::Graphics::IColorFilter;
+using Elastos::Droid::Graphics::IColorMatrix;
+using Elastos::Droid::Graphics::CColorMatrix;
+using Elastos::Droid::Graphics::IPorterDuffXfermode;
+using Elastos::Droid::Graphics::CPorterDuffXfermode;
+using Elastos::Droid::Graphics::PorterDuffMode_SCREEN;
+using Elastos::Droid::Graphics::IColorMatrixColorFilter;
+using Elastos::Droid::Graphics::CColorMatrixColorFilter;
+using Elastos::Droid::Media::CMetadata;
+using Elastos::Droid::Media::CRemoteController;
+using Elastos::Droid::Media::CAudioManager;
+using Elastos::Droid::Media::IMediaMetadataEditor;
+using Elastos::Droid::Media::IRemoteControlClient;
+using Elastos::Droid::Media::IMediaMetadataRetriever;
+using Elastos::Droid::Media::EIID_IRemoteControllerOnClientUpdateListener;
+using Elastos::Droid::Transition::IFade;
+using Elastos::Droid::Transition::CFade;
+using Elastos::Droid::Transition::IFadeHelper;
+using Elastos::Droid::Transition::CFadeHelper;
+using Elastos::Droid::Transition::ITransition;
+using Elastos::Droid::Transition::IChangeText;
+using Elastos::Droid::Transition::CChangeText;
+using Elastos::Droid::Transition::CTransitionSet;
+using Elastos::Droid::Transition::IChangeBounds;
+using Elastos::Droid::Transition::CChangeBounds;
+using Elastos::Droid::Transition::ITransitionManagerHelper;
+using Elastos::Droid::Transition::CTransitionManagerHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::Format::DateFormat;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::CKeyEvent;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::Widget::IProgressBar;
+using Elastos::Droid::Widget::EIID_ISeekBarOnSeekBarChangeListener;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::Math;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::CDate;
+using Elastos::Utility::ITimeZone;
+using Elastos::Utility::ITimeZoneHelper;
+using Elastos::Utility::CTimeZoneHelper;
+using Elastos::Text::CSimpleDateFormat;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+CAR_INTERFACE_IMPL(CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener,
+        Object, IRemoteControllerOnClientUpdateListener)
+
 ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientChange(
     /* [in] */ Boolean clearing)
 {
     if (clearing) {
-        ClearMetadata();
+        mHost->ClearMetadata();
     }
     return NOERROR;
 }
@@ -18,7 +77,8 @@ ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::O
 ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientPlaybackStateUpdate(
     /* [in] */ Int32 state)
 {
-    return UpdatePlayPauseState(state);
+    mHost->UpdatePlayPauseState(state);
+    return NOERROR;
 }
 
 ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientPlaybackStateUpdate(
@@ -27,19 +87,20 @@ ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::O
     /* [in] */ Int64 currentPosMs,
     /* [in] */ Float speed)
 {
-    UpdatePlayPauseState(state);
+    mHost->UpdatePlayPauseState(state);
     if (DEBUG) Logger::D(TAG, "onClientPlaybackStateUpdate(state=%d, stateChangeTimeMs=%lld, currentPosMs=%lld, "
             "speed=%f)", state, stateChangeTimeMs, currentPosMs, speed);
 
-    RemoveCallbacks(mUpdateSeekBars);
+    Boolean res;
+    mHost->RemoveCallbacks(mHost->mUpdateSeekBars, &res);
     // Since the music client may be responding to historical events that cause the
     // playback state to change dramatically, wait until things become quiescent before
     // resuming automatic scrub position update.
     Int32 visibility;
-    mTransientSeek->GetVisibility(&visibility);
+    mHost->mTransientSeek->GetVisibility(&visibility);
     if (visibility == IView::VISIBLE
-            && PlaybackPositionShouldMove(mCurrentPlayState)) {
-        PostDelayed(mUpdateSeekBars, QUIESCENT_PLAYBACK_FACTOR);
+            && PlaybackPositionShouldMove(mHost->mCurrentPlayState)) {
+        mHost->PostDelayed(mHost->mUpdateSeekBars, QUIESCENT_PLAYBACK_FACTOR, &res);
     }
     return NOERROR;
 }
@@ -47,7 +108,8 @@ ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::O
 ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientTransportControlUpdate(
     /* [in] */ Int32 transportControlFlags)
 {
-    return mHost->UpdateTransportControls(transportControlFlags);
+    mHost->UpdateTransportControls(transportControlFlags);
+    return NOERROR;
 }
 
 ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientMetadataUpdate(
@@ -56,12 +118,37 @@ ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::O
     return mHost->UpdateMetadata(metadataEditor);
 }
 
+ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientFolderInfoBrowsedPlayer(
+    /* [in] */ const String& stringUri)
+{
+    return NOERROR;
+}
+
+ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientUpdateNowPlayingEntries(
+    /* [in] */ ArrayOf<Int64>* playList)
+{
+    return NOERROR;
+}
+
+ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientNowPlayingContentChange()
+{
+    return NOERROR;
+}
+
+ECode CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener::OnClientPlayItemResponse(
+    /* [in] */ Boolean success)
+{
+    return NOERROR;
+}
+
 ECode CKeyguardTransportControlView::UpdateSeekBarRunnable::Run()
 {
-    Boolean seekAble = UpdateOnce();
+    Boolean seekAble;
+    UpdateOnce(&seekAble);
     if (seekAble) {
-        RemoveCallbacks(this);
-        PostDelayed(this, 1000);
+        Boolean res;
+        mHost->RemoveCallbacks(this, &res);
+        mHost->PostDelayed(this, 1000, &res);
     }
     return NOERROR;
 }
@@ -71,7 +158,7 @@ ECode CKeyguardTransportControlView::UpdateSeekBarRunnable::UpdateOnce(
 {
     VALIDATE_NOT_NULL(result)
 
-    return UpdateSeekBars(result);
+    return mHost->UpdateSeekBars(result);
 }
 
 ECode CKeyguardTransportControlView::MyRunnable::Run()
@@ -79,31 +166,33 @@ ECode CKeyguardTransportControlView::MyRunnable::Run()
     return mHost->ResetToMetadata();
 }
 
-CAR_INTERFACE_IMPL(CKeyguardTransportControlView::MyViewOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(CKeyguardTransportControlView::MyViewOnClickListener,
+        Object, IViewOnClickListener)
 
 ECode CKeyguardTransportControlView::MyViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     Int32 keyCode = -1;
-    if (TO_IINTERFACE(v) == TO_IINTERFACE(mBtnPrev)) {
+    if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mBtnPrev)) {
         keyCode = IKeyEvent::KEYCODE_MEDIA_PREVIOUS;
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mBtnNext)) {
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mBtnNext)) {
         keyCode = IKeyEvent::KEYCODE_MEDIA_NEXT;
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mBtnPlay)) {
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mBtnPlay)) {
         keyCode = IKeyEvent::KEYCODE_MEDIA_PLAY_PAUSE;
     }
     if (keyCode != -1) {
-        SendMediaButtonClick(keyCode);
-        DelayResetToMetadata(); // if the scrub bar is showing, keep showing it.
+        mHost->SendMediaButtonClick(keyCode);
+        mHost->DelayResetToMetadata(); // if the scrub bar is showing, keep showing it.
     }
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardTransportControlView::MyViewOnLongClickListener, Object, IViewOnLongClickListener)
+CAR_INTERFACE_IMPL(CKeyguardTransportControlView::MyViewOnLongClickListener,
+        Object, IViewOnLongClickListener)
 
-CARAPI MyViewOnLongClickListener::OnLongClick(
+CARAPI CKeyguardTransportControlView::MyViewOnLongClickListener::OnLongClick(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
@@ -118,18 +207,19 @@ CARAPI MyViewOnLongClickListener::OnLongClick(
 
 ECode CKeyguardTransportControlView::FutureSeekRunnable::Run()
 {
-    mHost->ScrubTo(mHost->mProgress);
-    mHost->mPending = FALSE;
+    mHost->ScrubTo(mProgress);
+    mPending = FALSE;
     return NOERROR;
 }
 
 ECode CKeyguardTransportControlView::FutureSeekRunnable::SetProgress(
     /* [in] */  Int32 progress)
 {
-    mHost->mProgress = progress;
-    if (!mHost->mPending) {
-        mHost->mPending = TRUE;
-        PostDelayed(this, 30);
+    mProgress = progress;
+    if (!mPending) {
+        mPending = TRUE;
+        Boolean res;
+        mHost->PostDelayed(this, 30, &res);
     }
     return NOERROR;
 }
@@ -143,10 +233,14 @@ ECode CKeyguardTransportControlView::MySeekBarOnSeekBarChangeListener::OnProgres
     /* [in] */ Boolean fromUser)
 {
     if (fromUser) {
-        mHost->mFutureSeekRunnable->SetProgress(progress);
+        ((FutureSeekRunnable*)(mHost->mFutureSeekRunnable).Get())->SetProgress(
+                progress);
         mHost->DelayResetToMetadata();
         mHost->mTempDate->SetTime(progress);
-        mHost->mTransientSeekTimeElapsed->SetText(mFormat.format(mTempDate));
+        String str;
+        mHost->mFormat->Format(mHost->mTempDate, &str);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+        mHost->mTransientSeekTimeElapsed->SetText(cchar);
     }
     else {
         mHost->UpdateSeekDisplay();
@@ -158,7 +252,8 @@ ECode CKeyguardTransportControlView::MySeekBarOnSeekBarChangeListener::OnStartTr
     /* [in] */ ISeekBar* seekBar)
 {
     mHost->DelayResetToMetadata();
-    mHost->RemoveCallbacks(mUpdateSeekBars); // don't update during user interaction
+    Boolean res;
+    mHost->RemoveCallbacks(mHost->mUpdateSeekBars, &res); // don't update during user interaction
     return NOERROR;
 }
 
@@ -171,12 +266,14 @@ ECode CKeyguardTransportControlView::MySeekBarOnSeekBarChangeListener::OnStopTra
 ECode CKeyguardTransportControlView::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOff(
     /* [in] */ Int32 why)
 {
-    return mHost->SetEnableMarquee(FALSE);
+    mHost->SetEnableMarquee(FALSE);
+    return NOERROR;
 }
 
 ECode CKeyguardTransportControlView::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOn()
 {
-    return mHost->SetEnableMarquee(TRUE);
+    mHost->SetEnableMarquee(TRUE);
+    return NOERROR;
 }
 
 ECode CKeyguardTransportControlView::Metadata::Clear()
@@ -189,48 +286,55 @@ ECode CKeyguardTransportControlView::Metadata::Clear()
     return NOERROR;
 }
 
-ECode CKeyguardTransportControlView::Metadata::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
+// ECode CKeyguardTransportControlView::Metadata::ToString(
+//     /* [out] */ String* str)
+// {
+//     VALIDATE_NOT_NULL(str);
 
-    StringBuilder sb;
-    sb += "Metadata[artist=";
-    sb += mArtist;
-    sb += " trackTitle=";
-    sb += mTrackTitle;
-    sb += " albumTitle=";
-    sb += mAlbumTitle;
-    sb += " duration=";
-    sb += mDuration;
-    sb += "]";
+//     StringBuilder sb;
+//     sb += "Metadata[artist=";
+//     sb += mArtist;
+//     sb += " trackTitle=";
+//     sb += mTrackTitle;
+//     sb += " albumTitle=";
+//     sb += mAlbumTitle;
+//     sb += " duration=";
+//     sb += mDuration;
+//     sb += "]";
 
-    return sb.ToString(str);
-}
+//     return sb.ToString(str);
+// }
+
+CAR_INTERFACE_IMPL(CKeyguardTransportControlView::SavedState,
+        View::BaseSavedState, IKeyguardTransportControlViewSavedState)
 
 ECode CKeyguardTransportControlView::SavedState::constructor(
     /* [in] */ IParcelable* superState)
 {
-    return View::BaseSavedState::constructor(superState)
+    return View::BaseSavedState::constructor(superState);
 }
 
 ECode CKeyguardTransportControlView::SavedState::WriteToParcel(
     /* [in] */ IParcel* out,
     /* [in] */ Int32 flags)
 {
-    View::BaseSavedState::WriteToParcel(out, flags);
-    out->WriteInt32(clientPresent ? 1 : 0);
-    out->WriteString(artist);
-    out->WriteString(trackTitle);
-    out->WriteString(albumTitle);
-    out->WriteInt64(duration);
-    return bitmap->WriteToParcel(out, flags);
+    assert(0);
+    //View::BaseSavedState::WriteToParcel(out, flags);
+    out->WriteInt32(mClientPresent ? 1 : 0);
+    out->WriteString(mArtist);
+    out->WriteString(mTrackTitle);
+    out->WriteString(mAlbumTitle);
+    out->WriteInt64(mDuration);
+    assert(0);
+    //return IParcelable::Probe(mBitmap)->WriteToParcel(out, flags);
+    return NOERROR;
 }
 
 ECode CKeyguardTransportControlView::SavedState::constructor(
     /* [in] */ IParcel* in)
 {
-    View::BaseSavedState::constructor(in);
+    assert(0);
+    //View::BaseSavedState::constructor(in);
 
     Int32 num;
     in->ReadInt32(&num);
@@ -256,6 +360,9 @@ const Boolean CKeyguardTransportControlView::ANIMATE_TRANSITIONS = TRUE;
 const Int32 CKeyguardTransportControlView::TRANSITION_DURATION = 200;
 
 CAR_OBJECT_IMPL(CKeyguardTransportControlView)
+
+CAR_INTERFACE_IMPL(CKeyguardTransportControlView,
+        Elastos::Droid::Widget::FrameLayout, IKeyguardTransportControlView)
 
 CKeyguardTransportControlView::CKeyguardTransportControlView()
     : mTransportControlFlags(0)
@@ -308,10 +415,11 @@ ECode CKeyguardTransportControlView::constructor(
 {
     FrameLayout::constructor(context, attrs);
 
-    if (DEBUG) Logger::V(TAG, "Create TCV %s", TO_CSRE(this));
+    //if (DEBUG) Logger::V(TAG, "Create TCV %s", TO_CSTR(this));
     CAudioManager::New(mContext, (IAudioManager**)&mAudioManager);
     mCurrentPlayState = IRemoteControlClient::PLAYSTATE_NONE; // until we get a callback
-    CRemoteController::New(context, mRCClientUpdateListener, (IRemoteController**)&mRemoteController);
+    CRemoteController::New(context, mRCClientUpdateListener,
+            (IRemoteController**)&mRemoteController);
 
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
@@ -322,8 +430,9 @@ ECode CKeyguardTransportControlView::constructor(
     dm->GetWidthPixels(&width);
     Int32 height;
     dm->GetHeightPixels(&height);
-    Int32 dim = Math::Max(width, height);
-    mRemoteController->SetArtworkConfiguration(TRUE, dim, dim);
+    Int32 dim = Elastos::Core::Math::Max(width, height);
+    Boolean res;
+    mRemoteController->SetArtworkConfiguration(TRUE, dim, dim, &res);
 
     AutoPtr<IChangeText> tc;
     CChangeText::New((IChangeText**)&tc);
@@ -333,20 +442,26 @@ ECode CKeyguardTransportControlView::constructor(
 
     AutoPtr<IChangeBounds> bounds;
     CChangeBounds::New((IChangeBounds**)&bounds);
-    inner->AddTransition(tc);
-    inner->AddTransition(bounds);
+    inner->AddTransition(ITransition::Probe(tc));
+    inner->AddTransition(ITransition::Probe(bounds));
 
     AutoPtr<ITransitionSet> tg;
     CTransitionSet::New((ITransitionSet**)&tg);
+    AutoPtr<IFadeHelper> helper;
+    CFadeHelper::AcquireSingleton((IFadeHelper**)&helper);
+    Int32 _out;
+    helper->GetOUT(&_out);
     AutoPtr<IFade> fo;
-    CFade::New(IFade::OUT, (IFade**)&fo);
-    tg->AddTransition(fo);
-    tg->AddTransition(inner);
+    CFade::New(_out, (IFade**)&fo);
+    tg->AddTransition(ITransition::Probe(fo));
+    tg->AddTransition(ITransition::Probe(inner));
+    Int32 _in;
+    helper->GetIN(&_in);
     AutoPtr<IFade> fi;
-    CFade::New(IFade::IN, (IFade**)&fi);
-    tg->AddTransition(fi);
+    CFade::New(_in, (IFade**)&fi);
+    tg->AddTransition(ITransition::Probe(fi));
     tg->SetOrdering(ITransitionSet::ORDERING_SEQUENTIAL);
-    tg->SetDuration(TRANSITION_DURATION);
+    ITransition::Probe(tg)->SetDuration(TRANSITION_DURATION);
     mMetadataChangeTransition = tg;
     return NOERROR;
 }
@@ -369,7 +484,7 @@ ECode CKeyguardTransportControlView::SetSeekBarsEnabled(
     mTransientSeek->GetVisibility(&visibility);
     if (visibility == VISIBLE && !enabled) {
         mTransientSeek->SetVisibility(INVISIBLE);
-        mMetadataContainer->SetVisibility(VISIBLE);
+        IView::Probe(mMetadataContainer)->SetVisibility(VISIBLE);
         CancelResetToMetadata();
     }
     return NOERROR;
@@ -386,8 +501,8 @@ void CKeyguardTransportControlView::SetEnableMarquee(
     /* [in] */ Boolean enabled)
 {
     if (DEBUG) Logger::V(TAG, (enabled ? String("Enable") : String("Disable")) + String(" transport text marquee"));
-    if (mTrackTitle != NULL) mTrackTitle->SetSelected(enabled);
-    if (mTrackArtistAlbum != NULL) mTrackTitle->SetSelected(enabled);
+    if (mTrackTitle != NULL) IView::Probe(mTrackTitle)->SetSelected(enabled);
+    if (mTrackArtistAlbum != NULL) IView::Probe(mTrackTitle)->SetSelected(enabled);
 }
 
 ECode CKeyguardTransportControlView::OnFinishInflate()
@@ -447,14 +562,14 @@ ECode CKeyguardTransportControlView::OnFinishInflate()
     //     view.setOnClickListener(mTransportCommandListener);
     //     view.setOnLongClickListener(mTransportShowSeekBarListener);
     // }
-    mBtnPrev->SetOnClickListener(mTransportCommandListener);
-    mBtnPrev->SetOnLongClickListener(mTransportShowSeekBarListener);
+    IView::Probe(mBtnPrev)->SetOnClickListener(mTransportCommandListener);
+    IView::Probe(mBtnPrev)->SetOnLongClickListener(mTransportShowSeekBarListener);
 
-    mBtnPlay->SetOnClickListener(mTransportCommandListener);
-    mBtnPlay->SetOnLongClickListener(mTransportShowSeekBarListener);
+    IView::Probe(mBtnPlay)->SetOnClickListener(mTransportCommandListener);
+    IView::Probe(mBtnPlay)->SetOnLongClickListener(mTransportShowSeekBarListener);
 
-    mBtnNext->SetOnClickListener(mTransportCommandListener);
-    mBtnNext->SetOnLongClickListener(mTransportShowSeekBarListener);
+    IView::Probe(mBtnNext)->SetOnClickListener(mTransportCommandListener);
+    IView::Probe(mBtnNext)->SetOnLongClickListener(mTransportShowSeekBarListener);
 
     Boolean screenOn;
     KeyguardUpdateMonitor::GetInstance(mContext)->IsScreenOn(&screenOn);
@@ -471,9 +586,10 @@ ECode CKeyguardTransportControlView::OnAttachedToWindow()
         UpdateMetadata(mPopulateMetadataWhenAttached);
         mPopulateMetadataWhenAttached = NULL;
     }
-    if (DEBUG) Logger::V(TAG, "Registering TCV %s", TO_CSTR(this));
+    //if (DEBUG) Logger::V(TAG, "Registering TCV %s", TO_CSTR(this));
     mMetadata->Clear();
-    mAudioManager->RegisterRemoteController(mRemoteController);
+    Boolean res;
+    mAudioManager->RegisterRemoteController(mRemoteController, &res);
     return KeyguardUpdateMonitor::GetInstance(mContext)->RegisterCallback(mUpdateMonitor);
 }
 
@@ -483,7 +599,7 @@ ECode CKeyguardTransportControlView::OnConfigurationChanged(
     FrameLayout::OnConfigurationChanged(newConfig);
 
     AutoPtr<IContext> context;
-    GetContext((IContext**)context);
+    GetContext((IContext**)&context);
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> dm;
@@ -493,19 +609,21 @@ ECode CKeyguardTransportControlView::OnConfigurationChanged(
     dm->GetWidthPixels(&width);
     Int32 height;
     dm->GetHeightPixels(&height);
-    Int32 dim = Math::Max(width, height);
-    return mRemoteController->SetArtworkConfiguration(TRUE, dim, dim);
+    Int32 dim = Elastos::Core::Math::Max(width, height);
+    Boolean res;
+    return mRemoteController->SetArtworkConfiguration(TRUE, dim, dim, &res);
 }
 
 ECode CKeyguardTransportControlView::OnDetachedFromWindow()
 {
     if (DEBUG) Logger::V(TAG, "onDetachFromWindow()");
     FrameLayout::OnDetachedFromWindow();
-    if (DEBUG) Logger::V(TAG, "Unregistering TCV %s", TO_CSTR(this));
+    //if (DEBUG) Logger::V(TAG, "Unregistering TCV %s", TO_CSTR(this));
     mAudioManager->UnregisterRemoteController(mRemoteController);
     KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mUpdateMonitor);
     mMetadata->Clear();
-    return RemoveCallbacks(mUpdateSeekBars);
+    Boolean res;
+    return RemoveCallbacks(mUpdateSeekBars, &res);
 }
 
 ECode CKeyguardTransportControlView::OnSaveInstanceState(
@@ -514,7 +632,8 @@ ECode CKeyguardTransportControlView::OnSaveInstanceState(
     VALIDATE_NOT_NULL(p)
 
     AutoPtr<IParcelable> _p = FrameLayout::OnSaveInstanceState();
-    AutoPtr<SavedState> ss = new SavedState(_p);
+    AutoPtr<SavedState> ss = new SavedState();
+    ss->constructor(_p);
     ss->mArtist = mMetadata->mArtist;
     ss->mTrackTitle = mMetadata->mTrackTitle;
     ss->mAlbumTitle = mMetadata->mAlbumTitle;
@@ -528,18 +647,20 @@ ECode CKeyguardTransportControlView::OnSaveInstanceState(
 ECode CKeyguardTransportControlView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    if (ISavedState::Probe(state) == NULL) {
+    if (IKeyguardTransportControlViewSavedState::Probe(state) == NULL) {
         FrameLayout::OnRestoreInstanceState(state);
         return NOERROR;
     }
-    AutoPtr<SavedState> ss = (SavedState*)ISavedState::Probe(state);
-    FrameLayout::OnRestoreInstanceState(ss.getSuperState());
+    AutoPtr<SavedState> ss = (SavedState*)IKeyguardTransportControlViewSavedState::Probe(state);
+    assert(0);
+    //FrameLayout::OnRestoreInstanceState(ss.getSuperState());
     mMetadata->mArtist = ss->mArtist;
     mMetadata->mTrackTitle = ss->mTrackTitle;
     mMetadata->mAlbumTitle = ss->mAlbumTitle;
     mMetadata->mDuration = ss->mDuration;
     mMetadata->mBitmap = ss->mBitmap;
-    return PopulateMetadata();
+    PopulateMetadata();
+    return NOERROR;
 }
 
 ECode CKeyguardTransportControlView::SetBadgeIcon(
@@ -553,10 +674,10 @@ ECode CKeyguardTransportControlView::SetBadgeIcon(
 
     AutoPtr<IColorMatrixColorFilter> filter;
     CColorMatrixColorFilter::New(cm, (IColorMatrixColorFilter**)&filter);
-    mBadge->SetColorFilter(filter);
+    mBadge->SetColorFilter(IColorFilter::Probe(filter));
     AutoPtr<IPorterDuffXfermode> mode;
     CPorterDuffXfermode::New(PorterDuffMode_SCREEN, (IPorterDuffXfermode**)&mode);
-    mBadge->SetXfermode(mode);
+    mBadge->SetXfermode(IXfermode::Probe(mode));
     return mBadge->SetImageAlpha(0xef);
 }
 
@@ -564,18 +685,30 @@ ECode CKeyguardTransportControlView::ClearMetadata()
 {
     mPopulateMetadataWhenAttached = NULL;
     mMetadata->Clear();
-    return PopulateMetadata();
+    PopulateMetadata();
+    return NOERROR;
 }
 
 ECode CKeyguardTransportControlView::UpdateMetadata(
     /* [in] */ IRemoteControllerMetadataEditor* data)
 {
-    if (IsAttachedToWindow()) {
-        data->GetString(IMediaMetadataRetriever::METADATA_KEY_ALBUMARTIST,mMetadata->mArtist, &(mMetadata->mArtist));
-        data->GetString(IMediaMetadataRetriever::METADATA_KEY_TITLE, mMetadata->mTrackTitle, &(mMetadata->mTrackTitle));
-        data->GetString(IMediaMetadataRetriever::METADATA_KEY_ALBUM, mMetadata->mAlbumTitle, &(mMetadata->mAlbumTitle));
-        data->GetInt64(IMediaMetadataRetriever::METADATA_KEY_DURATION, -1, &(mMetadata->mDuration));
-        data->GetBitmap(MediaMetadataEditor.BITMAP_KEY_ARTWORK, mMetadata->mBitmap, (IBitmap**)&(mMetadata->mBitmap));
+    Boolean res;
+    if (IsAttachedToWindow(&res), res) {
+        IMediaMetadataEditor::Probe(data)->GetString(
+                IMediaMetadataRetriever::METADATA_KEY_ALBUMARTIST,
+                mMetadata->mArtist, &(mMetadata->mArtist));
+        IMediaMetadataEditor::Probe(data)->GetString(
+                IMediaMetadataRetriever::METADATA_KEY_TITLE,
+                mMetadata->mTrackTitle, &(mMetadata->mTrackTitle));
+        IMediaMetadataEditor::Probe(data)->GetString(
+                IMediaMetadataRetriever::METADATA_KEY_ALBUM,
+                mMetadata->mAlbumTitle, &(mMetadata->mAlbumTitle));
+        IMediaMetadataEditor::Probe(data)->GetInt64(
+                IMediaMetadataRetriever::METADATA_KEY_DURATION,
+                -1, &(mMetadata->mDuration));
+        IMediaMetadataEditor::Probe(data)->GetBitmap(
+                IMediaMetadataEditor::BITMAP_KEY_ARTWORK,
+                mMetadata->mBitmap, (IBitmap**)&(mMetadata->mBitmap));
         PopulateMetadata();
     }
     else {
@@ -587,8 +720,13 @@ ECode CKeyguardTransportControlView::UpdateMetadata(
 void CKeyguardTransportControlView::PopulateMetadata()
 {
     Int32 visibility;
-    if (ANIMATE_TRANSITIONS && IsLaidOut() && (mMetadataContainer->GetVisibility(&visibility), visibility) == VISIBLE) {
-        TransitionManager::BeginDelayedTransition(mMetadataContainer, mMetadataChangeTransition);
+    Boolean res;
+    if (ANIMATE_TRANSITIONS && (IsLaidOut(&res), res) &&
+            (IView::Probe(mMetadataContainer)->GetVisibility(&visibility), visibility) == VISIBLE) {
+        AutoPtr<ITransitionManagerHelper> helper;
+        CTransitionManagerHelper::AcquireSingleton((ITransitionManagerHelper**)&helper);
+        helper->BeginDelayedTransition(mMetadataContainer,
+                ITransition::Probe(mMetadataChangeTransition));
     }
 
     String remoteClientPackage;
@@ -601,12 +739,18 @@ void CKeyguardTransportControlView::PopulateMetadata()
     context->GetPackageManager((IPackageManager**)&pm);
     ECode ec = pm->GetApplicationIcon(remoteClientPackage, (IDrawable**)&badgeIcon);
     //} catch (PackageManager.NameNotFoundException e) {
-    if (ec == (ECode)NameNotFoundException) {
+    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         Logger::E(TAG, "Couldn't get remote control client package icon %d", ec);
     }
     SetBadgeIcon(badgeIcon);
-    mTrackTitle->SetText(!TextUtils::IsEmpty(mMetadata->mTrackTitle)
-            ? mMetadata->mTrackTitle : NULL);
+    AutoPtr<ICharSequence> cchar;
+    if (!TextUtils::IsEmpty(mMetadata->mTrackTitle)) {
+        cchar = CoreUtils::Convert(mMetadata->mTrackTitle);
+    }
+    else {
+        cchar = CoreUtils::Convert(String(NULL));
+    }
+    mTrackTitle->SetText(cchar);
 
     StringBuilder sb;
     if (!TextUtils::IsEmpty(mMetadata->mArtist)) {
@@ -623,9 +767,15 @@ void CKeyguardTransportControlView::PopulateMetadata()
     }
 
     String trackArtistAlbum;
-    sb->ToString(&trackArtistAlbum);
-    mTrackArtistAlbum->SetText(!TextUtils::IsEmpty(trackArtistAlbum) ?
-            trackArtistAlbum : NULL);
+    sb.ToString(&trackArtistAlbum);
+    AutoPtr<ICharSequence> cchar2;
+    if (!TextUtils::IsEmpty(trackArtistAlbum)) {
+        cchar2 = CoreUtils::Convert(trackArtistAlbum);
+    }
+    else {
+        cchar2 = CoreUtils::Convert(String(NULL));
+    }
+    mTrackArtistAlbum->SetText(cchar2);
 
     if (mMetadata->mDuration >= 0) {
         SetSeekBarsEnabled(TRUE);
@@ -663,13 +813,16 @@ void CKeyguardTransportControlView::PopulateMetadata()
         SetSeekBarsEnabled(FALSE);
     }
 
-    AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
-    KeyguardUpdateMonitor::GetInstance(context)->DispatchSetBackground(mMetadata->mBitmap);
+    AutoPtr<IContext> context2;
+    GetContext((IContext**)&context2);
+    KeyguardUpdateMonitor::GetInstance(context2)->DispatchSetBackground(mMetadata->mBitmap);
     Int32 flags = mTransportControlFlags;
-    SetVisibilityBasedOnFlag(mBtnPrev, flags, IRemoteControlClient::FLAG_KEY_MEDIA_PREVIOUS);
-    SetVisibilityBasedOnFlag(mBtnNext, flags, IRemoteControlClient::FLAG_KEY_MEDIA_NEXT);
-    SetVisibilityBasedOnFlag(mBtnPlay, flags,
+    SetVisibilityBasedOnFlag(IView::Probe(mBtnPrev),
+            flags, IRemoteControlClient::FLAG_KEY_MEDIA_PREVIOUS);
+    SetVisibilityBasedOnFlag(IView::Probe(mBtnNext),
+            flags, IRemoteControlClient::FLAG_KEY_MEDIA_NEXT);
+    SetVisibilityBasedOnFlag(IView::Probe(mBtnPlay),
+            flags,
             IRemoteControlClient::FLAG_KEY_MEDIA_PLAY
             | IRemoteControlClient::FLAG_KEY_MEDIA_PAUSE
             | IRemoteControlClient::FLAG_KEY_MEDIA_PLAY_PAUSE
@@ -684,9 +837,13 @@ ECode CKeyguardTransportControlView::UpdateSeekDisplay()
         Int64 position;
         mRemoteController->GetEstimatedMediaPosition(&position);
         mTempDate->SetTime(position);
-        mTransientSeekTimeElapsed->SetText(mFormat.format(mTempDate));
+
+        String str;
+        mFormat->Format(mTempDate, &str);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+        mTransientSeekTimeElapsed->SetText(cchar);
         mTempDate->SetTime(mMetadata->mDuration);
-        mTransientSeekTimeTotal->SetText(mFormat.format(mTempDate));
+        mTransientSeekTimeTotal->SetText(cchar);
 
         if (DEBUG) Logger::D(TAG, "updateSeekDisplay timeElapsed=%s duration=%d",
                 TO_CSTR(mTempDate), mMetadata->mDuration);
@@ -700,26 +857,30 @@ ECode CKeyguardTransportControlView::TryToggleSeekBar(
     VALIDATE_NOT_NULL(result)
 
     if (ANIMATE_TRANSITIONS) {
-        TransitionManager::BeginDelayedTransition(mInfoContainer);
+        AutoPtr<ITransitionManagerHelper> helper;
+        CTransitionManagerHelper::AcquireSingleton((ITransitionManagerHelper**)&helper);
+        helper->BeginDelayedTransition(mInfoContainer);
     }
 
     Int32 visibility;
     mTransientSeek->GetVisibility(&visibility);
     if (visibility == VISIBLE) {
         mTransientSeek->SetVisibility(INVISIBLE);
-        mMetadataContainer->SetVisibility(VISIBLE);
+        IView::Probe(mMetadataContainer)->SetVisibility(VISIBLE);
         CancelResetToMetadata();
-        RemoveCallbacks(mUpdateSeekBars); // don't update if scrubber isn't visible
+        Boolean res;
+        RemoveCallbacks(mUpdateSeekBars, &res); // don't update if scrubber isn't visible
     }
     else {
         mTransientSeek->SetVisibility(VISIBLE);
-        mMetadataContainer->SetVisibility(INVISIBLE);
+        IView::Probe(mMetadataContainer)->SetVisibility(INVISIBLE);
         DelayResetToMetadata();
         if (PlaybackPositionShouldMove(mCurrentPlayState)) {
             mUpdateSeekBars->Run();
         }
         else {
-            mUpdateSeekBars->UpdateOnce();
+            assert(0);
+            //mUpdateSeekBars->UpdateOnce();
         }
     }
     mTransportControlCallback->UserActivity();
@@ -730,13 +891,15 @@ ECode CKeyguardTransportControlView::TryToggleSeekBar(
 ECode CKeyguardTransportControlView::ResetToMetadata()
 {
     if (ANIMATE_TRANSITIONS) {
-        TransitionManager::BeginDelayedTransition(mInfoContainer);
+        AutoPtr<ITransitionManagerHelper> helper;
+        CTransitionManagerHelper::AcquireSingleton((ITransitionManagerHelper**)&helper);
+        helper->BeginDelayedTransition(mInfoContainer);
     }
     Int32 visibility;
     mTransientSeek->GetVisibility(&visibility);
     if (visibility == VISIBLE) {
         mTransientSeek->SetVisibility(INVISIBLE);
-        mMetadataContainer->SetVisibility(VISIBLE);
+        IView::Probe(mMetadataContainer)->SetVisibility(VISIBLE);
     }
     // TODO Also hide ratings, if applicable
     return NOERROR;
@@ -744,25 +907,28 @@ ECode CKeyguardTransportControlView::ResetToMetadata()
 
 ECode CKeyguardTransportControlView::DelayResetToMetadata()
 {
-    RemoveCallbacks(mResetToMetadata);
-    return PostDelayed(mResetToMetadata, RESET_TO_METADATA_DELAY);
+    Boolean res;
+    RemoveCallbacks(mResetToMetadata, &res);
+    return PostDelayed(mResetToMetadata, RESET_TO_METADATA_DELAY, &res);
 }
 
 ECode CKeyguardTransportControlView::CancelResetToMetadata()
 {
-    return RemoveCallbacks(mResetToMetadata);
+    Boolean res;
+    return RemoveCallbacks(mResetToMetadata, &res);
 }
 
 ECode CKeyguardTransportControlView::SetSeekBarDuration(
     /* [in] */ Int64 duration)
 {
-    return mTransientSeekBar->SetMax((Int32)duration);
+    return IProgressBar::Probe(mTransientSeekBar)->SetMax((Int32)duration);
 }
 
 ECode CKeyguardTransportControlView::ScrubTo(
     /* [in] */ Int32 progress)
 {
-    mRemoteController->SeekTo(progress);
+    Boolean res;
+    mRemoteController->SeekTo(progress, &res);
     return mTransportControlCallback->UserActivity();
 }
 
@@ -822,7 +988,8 @@ void CKeyguardTransportControlView::UpdatePlayPauseState(
     GetResources((IResources**)&resources);
     String str;
     resources->GetString(imageDescId, &str);
-    mBtnPlay->SetContentDescription(str);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+    IView::Probe(mBtnPlay)->SetContentDescription(cchar);
     mCurrentPlayState = state;
 }
 
@@ -831,12 +998,12 @@ ECode CKeyguardTransportControlView::UpdateSeekBars(
 {
     VALIDATE_NOT_NULL(result)
 
-    Int64 position;
-    mRemoteController->GetEstimatedMediaPosition(&position);
-    Int32 position = (Int32)position;
+    Int64 _position;
+    mRemoteController->GetEstimatedMediaPosition(&_position);
+    Int32 position = (Int32)_position;
     if (DEBUG) Logger::V(TAG, "Estimated time:%d", position);
     if (position >= 0) {
-        mTransientSeekBar->SetProgress(position);
+        IProgressBar::Probe(mTransientSeekBar)->SetProgress(position);
         *result = TRUE;
         return NOERROR;
     }
@@ -854,11 +1021,12 @@ void CKeyguardTransportControlView::SendMediaButtonClick(
     // on the buttons, but in the near term this will interfere with the long press behavior.
     AutoPtr<IKeyEvent> event1;
     CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&event1);
-    mRemoteController->SendMediaKeyEvent(event1);
+    Boolean res;
+    mRemoteController->SendMediaKeyEvent(event1, &res);
 
     AutoPtr<IKeyEvent> event2;
     CKeyEvent::New(IKeyEvent::ACTION_UP, keyCode, (IKeyEvent**)&event2);
-    mRemoteController->SendMediaKeyEvent(event2);
+    mRemoteController->SendMediaKeyEvent(event2, &res);
 
     mTransportControlCallback->UserActivity();
 }

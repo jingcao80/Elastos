@@ -3,9 +3,29 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CPASSWORDTEXTVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CPasswordTextView.h"
-#include <elastos/droid/widget/View.h>
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include <elastos/droid/view/View.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
-using Elastos::Droid::Widget::View;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::IPaint;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::View::View;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IStack;
 
 namespace Elastos {
 namespace Droid {
@@ -17,7 +37,7 @@ namespace Keyguard {
  * changed
  */
 CarClass(CPasswordTextView)
-    , public View
+    , public Elastos::Droid::View::View
 {
 private:
     class CharState
@@ -25,7 +45,7 @@ private:
     {
     private:
         class MyAnimatorListenerAdapter
-            : public Object
+            : public AnimatorListenerAdapter
         {
         public:
             TO_STRING_IMPL("CPasswordTextView::CharState::MyAnimatorListenerAdapter")
@@ -57,7 +77,7 @@ private:
         };
 
         class MyAnimatorListenerAdapter2
-            : public Object
+            : public AnimatorListenerAdapter
         {
         public:
             TO_STRING_IMPL("CPasswordTextView::CharState::MyAnimatorListenerAdapter2")
@@ -76,7 +96,7 @@ private:
         };
 
         class MyAnimatorListenerAdapter3
-            : public Object
+            : public AnimatorListenerAdapter
         {
         public:
             TO_STRING_IMPL("CPasswordTextView::CharState::MyAnimatorListenerAdapter3")
@@ -95,7 +115,7 @@ private:
         };
 
         class MyAnimatorListenerAdapter4
-            : public Object
+            : public AnimatorListenerAdapter
         {
         public:
             TO_STRING_IMPL("CPasswordTextView::CharState::MyAnimatorListenerAdapter4")
@@ -114,7 +134,7 @@ private:
         };
 
         class MyAnimatorListenerAdapter5
-            : public Object
+            : public AnimatorListenerAdapter
         {
         public:
             TO_STRING_IMPL("CPasswordTextView::CharState::MyAnimatorListenerAdapter5")
@@ -144,7 +164,7 @@ private:
             MyAnimatorUpdateListener(
                 /* [in] */ CharState* inHost,
                 /* [in] */ CPasswordTextView* outHost)
-                , mInHost(inHost)
+                : mInHost(inHost)
                 , mOutHost(outHost)
             {}
 
@@ -155,7 +175,7 @@ private:
         private:
             CharState* mInHost;
             CPasswordTextView* mOutHost;
-        }
+        };
 
         class MyAnimatorUpdateListener2
             : public Object
@@ -169,7 +189,7 @@ private:
             MyAnimatorUpdateListener2(
                 /* [in] */ CharState* inHost,
                 /* [in] */ CPasswordTextView* outHost)
-                , mInHost(inHost)
+                : mInHost(inHost)
                 , mOutHost(outHost)
             {}
 
@@ -180,7 +200,7 @@ private:
         private:
             CharState* mInHost;
             CPasswordTextView* mOutHost;
-        }
+        };
 
         class MyAnimatorUpdateListener3
             : public Object
@@ -194,7 +214,7 @@ private:
             MyAnimatorUpdateListener3(
                 /* [in] */ CharState* inHost,
                 /* [in] */ CPasswordTextView* outHost)
-                , mInHost(inHost)
+                : mInHost(inHost)
                 , mOutHost(outHost)
             {}
 
@@ -205,7 +225,7 @@ private:
         private:
             CharState* mInHost;
             CPasswordTextView* mOutHost;
-        }
+        };
 
         class MyAnimatorUpdateListener4
             : public Object
@@ -219,7 +239,7 @@ private:
             MyAnimatorUpdateListener4(
                 /* [in] */ CharState* inHost,
                 /* [in] */ CPasswordTextView* outHost)
-                , mInHost(inHost)
+                : mInHost(inHost)
                 , mOutHost(outHost)
             {}
 
@@ -230,17 +250,17 @@ private:
         private:
             CharState* mInHost;
             CPasswordTextView* mOutHost;
-        }
+        };
 
         class MyRunnable
-            : public Object
+            : public Runnable
         {
         public:
             TO_STRING_IMPL("CPasswordTextView::CharState::MyRunnable")
 
             MyRunnable(
                 /* [in] */ CharState* host)
-                , mHost(host)
+                : mHost(host)
             {}
 
             //@Override
@@ -248,7 +268,7 @@ private:
 
         private:
             CharState* mHost;
-        }
+        };
 
     public:
         TO_STRING_IMPL("CPasswordTextView::CharState")
@@ -280,6 +300,7 @@ private:
             /* [out] */ Float* result);
 
     private:
+        friend class CPasswordTextView;
         /**
          * Posts a runnable which ensures that the text will be replaced by a dot after {@link
          * com.android.keyguard.PasswordTextView#TEXT_VISIBILITY_DURATION}.

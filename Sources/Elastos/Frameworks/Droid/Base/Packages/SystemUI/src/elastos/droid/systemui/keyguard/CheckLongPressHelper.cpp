@@ -1,9 +1,14 @@
 
 #include "elastos/droid/systemui/keyguard/CheckLongPressHelper.h"
-#include "Elastos.Droid.View.h"
+#include <elastos/core/Math.h>
+#include "Elastos.Droid.Content.h"
 
-using Elastos::Droid::View::Animation::IAnimationUtils;
-using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Core::Math;
 
 namespace Elastos {
 namespace Droid {
@@ -18,9 +23,9 @@ ECode CheckLongPressHelper::CheckForLongPress::Run()
     if ((parent != NULL) && (mHost->mView->HasWindowFocus(&res), res)
             && !mHost->mHasPerformedLongPress) {
 
-        if (mView->PerformLongClick(&res), res) {
-            mView->SetPressed(FALSE);
-            mHasPerformedLongPress = TRUE;
+        if (mHost->mView->PerformLongClick(&res), res) {
+            mHost->mView->SetPressed(FALSE);
+            mHost->mHasPerformedLongPress = TRUE;
         }
     }
     return NOERROR;
@@ -52,7 +57,7 @@ ECode CheckLongPressHelper::PostCheckForLongPress(
     mHasPerformedLongPress = FALSE;
 
     if (mPendingCheckForLongPress == NULL) {
-        mPendingCheckForLongPress = new CheckForLongPress();
+        mPendingCheckForLongPress = new CheckForLongPress(this);
     }
     Boolean res;
     return mView->PostDelayed(IRunnable::Probe(mPendingCheckForLongPress), mLongPressTimeout, &res);
@@ -65,8 +70,8 @@ ECode CheckLongPressHelper::OnMove(
     ev->GetX(&x);
     Float y;
     ev->GetY(&y);
-    Boolean xMoved = Math::Abs(mDownX - x) > mScaledTouchSlop;
-    Boolean yMoved = Math::Abs(mDownY - y) > mScaledTouchSlop;
+    Boolean xMoved = Elastos::Core::Math::Abs(mDownX - x) > mScaledTouchSlop;
+    Boolean yMoved = Elastos::Core::Math::Abs(mDownY - y) > mScaledTouchSlop;
 
     if (xMoved || yMoved) {
         CancelLongPress();
@@ -78,9 +83,12 @@ ECode CheckLongPressHelper::CancelLongPress()
 {
     mHasPerformedLongPress = FALSE;
     if (mPendingCheckForLongPress != NULL) {
-        mView->RemoveCallbacks(mPendingCheckForLongPress);
+        Boolean res;
+        mView->RemoveCallbacks(
+                IRunnable::Probe(mPendingCheckForLongPress), &res);
         mPendingCheckForLongPress = NULL;
     }
+    return NOERROR;
 }
 
 ECode CheckLongPressHelper::HasPerformedLongPress(

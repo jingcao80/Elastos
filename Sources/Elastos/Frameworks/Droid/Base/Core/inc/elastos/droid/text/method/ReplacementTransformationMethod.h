@@ -21,6 +21,7 @@ namespace Method {
  * array to be replaced by the corresponding characters in the
  * {@link #getReplacement} array.
  */
+//public abstract
 class ECO_PUBLIC ReplacementTransformationMethod
     : public Object
     , public IReplacementTransformationMethod

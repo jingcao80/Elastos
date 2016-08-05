@@ -1,8 +1,8 @@
 
 module
 {
-    using interface Elastos.Core.ICharSequence;
     using interface Elastos.Droid.Internal.Telephony.IccCardConstantsState;
+    using interface Elastos.Core.ICharSequence;
 
     namespace Elastos {
     namespace Droid {

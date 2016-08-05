@@ -5,11 +5,24 @@
 #include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/systemui/keyguard/BiometricSensorUnlock.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Internal::Policy::IIFaceLockInterface;
+using Elastos::Droid::Internal::Policy::IIFaceLockCallback;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IHandlerCallback;
+using Elastos::Droid::View::IView;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -17,7 +30,8 @@ namespace SystemUI {
 namespace Keyguard {
 
 class FaceUnlock
-    : public BiometricSensorUnlock
+    : public Object
+    , public IBiometricSensorUnlock
     , public IHandlerCallback
 {
 private:
@@ -28,8 +42,10 @@ private:
     public:
         TO_STRING_IMPL("FaceUnlock::MyServiceConnection")
 
+        CAR_INTERFACE_DECL()
+
         MyServiceConnection(
-            /* [in] */ MyServiceConnection* host)
+            /* [in] */ FaceUnlock* host)
             : mHost(host)
         {}
 
@@ -47,7 +63,7 @@ private:
             /* [in] */ IComponentName* className);
 
     private:
-        MyServiceConnection* mHost;
+        FaceUnlock* mHost;
     };
 
 public:
@@ -169,6 +185,8 @@ public:
     AutoPtr<IKeyguardSecurityCallback> mKeyguardScreenCallback;
 
 private:
+    friend class CFaceUnlockFaceLockCallback;
+
     static const Boolean DEBUG;
     static const String TAG;
     static const String FACE_LOCK_PACKAGE;
@@ -201,7 +219,7 @@ private:
     /**
      * Implements service connection methods.
      */
-     ServiceConnection mConnection;
+    AutoPtr<IServiceConnection> mConnection;
 
     /**
      * Implements the AIDL biometric unlock service callback interface.

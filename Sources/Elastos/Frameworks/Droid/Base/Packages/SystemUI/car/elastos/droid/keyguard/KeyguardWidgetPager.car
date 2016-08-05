@@ -1,11 +1,16 @@
 
 module
 {
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.Internal.Widget.ILockPatternUtils;
+
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
     namespace Keyguard {
 
+    [local]
     interface IKeyguardWidgetPagerCallbacks {
         UserActivity();
 
@@ -21,10 +26,133 @@ module
         OnRemoveViewAnimationCompleted();
     }
 
+    [local]
     interface IKeyguardWidgetPager {
         // Related to the fading in / out background outlines
         const Int32 CHILDREN_OUTLINE_FADE_OUT_DURATION = 375;
         const Int32 CHILDREN_OUTLINE_FADE_IN_DURATION = 100;
+
+        SetViewStateManager(
+            [in] IKeyguardViewStateManager* viewStateManager);
+
+        SetLockPatternUtils(
+            [in] ILockPatternUtils* l);
+
+        ShowPagingFeedback();
+
+        GetUserActivityTimeout(
+            [out] Int64* timetout);
+
+        SetCallbacks(
+            [in] IKeyguardWidgetPagerCallbacks* _callbacks);
+
+        AddWidget(
+            [in] IView* widget);
+
+        OnRemoveView(
+            [in] IView* v,
+            [in] Boolean deletePermanently);
+
+        OnAddView(
+            [in] IView* v,
+            [in] Int32 index);
+
+        /*
+         * We wrap widgets in a special frame which handles drawing the over scroll foreground.
+         */
+        AddWidget(
+            [in] IView* widget,
+            [in] Int32 pageIndex);
+
+        GetWidgetPageAt(
+            [in] Int32 index,
+            [out] IKeyguardWidgetFrame** frame);
+
+        BackgroundAlphaInterpolator(
+            [in] Float r,
+            [out] Float* result);
+
+        GetAlphaForPage(
+            [in] Int32 screenCenter,
+            [in] Int32 index,
+            [in] Boolean showSidePages,
+            [out] Float* result);
+
+        GetOutlineAlphaForPage(
+            [in] Int32 screenCenter,
+            [in] Int32 index,
+            [in] Boolean showSidePages,
+            [out] Float* result);
+
+        IsWidgetPage(
+            [in] Int32 pageIndex,
+            [out] Boolean* result);
+
+        ShowOutlinesAndSidePages();
+
+        HideOutlinesAndSidePages();
+
+        UpdateChildrenContentAlpha(
+            [in] Float sidePageAlpha);
+
+        ShowInitialPageHints();
+
+        AnimateOutlinesAndSidePages(
+            [in] Boolean show);
+
+        SetWidgetToResetOnPageFadeOut(
+            [in] Int32 widget);
+
+        GetWidgetToResetOnPageFadeOut(
+            [out] Int32* result);
+
+        AnimateOutlinesAndSidePages(
+            [in] Boolean show,
+            [in] Int32 duration);
+
+        RemoveWidget(
+            [in] IView* view);
+
+        GetWidgetPageIndex(
+            [in] IView* view,
+            [out] Int32* index);
+
+        SetBouncerAnimationDuration(
+            [in] Int32 duration);
+
+        // Zoom in after the bouncer is dismissed
+        ZoomInFromBouncer();
+
+        // Zoom out after the bouncer is initiated
+        ZoomOutToBouncer();
+
+        SetAddWidgetEnabled(
+            [in] Boolean enabled);
+
+        IsAddPage(
+            [in] Int32 pageIndex,
+            [out] Boolean* result);
+
+        IsCameraPage(
+            [in] Int32 pageIndex,
+            [out] Boolean* result);
+
+        HandleExternalCameraEvent(
+            [in] IMotionEvent* event);
+
+        OnUnhandledTap(
+            [in] IMotionEvent* ev);
+
+        EnablePageContentLayers();
+
+        DisablePageContentLayers();
+
+        IsOverScrollChild(
+            [in] Int32 index,
+            [in] Float scrollProgress,
+            [out] Boolean* result);
+
+        ReorderStarting();
     }
 
     } // namespace Keyguard

@@ -1,5 +1,5 @@
 #include "elastos/droid/text/method/CSingleLineTransformationMethodHelper.h"
-#include "elastos/droid/text/method/CSingleLineTransformationMethod.h"
+#include "elastos/droid/text/method/SingleLineTransformationMethod.h"
 #include "elastos/droid/ext/frameworkext.h"
 
 namespace Elastos {
@@ -14,7 +14,7 @@ CAR_INTERFACE_IMPL(CSingleLineTransformationMethodHelper, Singleton, ISingleLine
 ECode CSingleLineTransformationMethodHelper::GetInstance(
     /* [out] */ ISingleLineTransformationMethod** ret)
 {
-    return CSingleLineTransformationMethod::GetInstance(ret);
+    return SingleLineTransformationMethod::GetInstance(ret);
 }
 
 } // namespace Method

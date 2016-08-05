@@ -1,6 +1,18 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardAbsKeyInputView.h"
-#include "Elastos.Droid.View.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardMessageArea.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/systemui/keyguard/KeyguardSecurityViewHelper.h"
+#include "elastos/droid/os/SystemClock.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::View::IHapticFeedbackConstants;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IInteger32;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -11,13 +23,19 @@ ECode KeyguardAbsKeyInputView::MyCountDownTimer::OnTick(
     /* [in] */ Int64 millisUntilFinished)
 {
     Int32 secondsRemaining = (Int32) (millisUntilFinished / 1000);
-    return mSecurityMessageDisplay->SetMessage(R::string::kg_too_many_failed_attempts_countdown,
-            TRUE, secondsRemaining);
+
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+    AutoPtr<IInteger32> obj = CoreUtils::Convert(secondsRemaining);
+    array->Set(0, TO_IINTERFACE(obj));
+    return mHost->mSecurityMessageDisplay->SetMessage(
+            R::string::kg_too_many_failed_attempts_countdown,
+            TRUE, array);
 }
 
 ECode KeyguardAbsKeyInputView::MyCountDownTimer::OnFinish()
 {
-    mSecurityMessageDisplay->SetMessage(String(""), FALSE);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String(""));
+    mHost->mSecurityMessageDisplay->SetMessage(cchar, FALSE);
     return mHost->ResetState();
 }
 
@@ -91,7 +109,11 @@ ECode KeyguardAbsKeyInputView::ShouldLockout(
 ECode KeyguardAbsKeyInputView::OnFinishInflate()
 {
     CLockPatternUtils::New(mContext, (ILockPatternUtils**)&mLockPatternUtils);
-    mSecurityMessageDisplay = new KeyguardMessageArea::Helper(this);
+
+    AutoPtr<CKeyguardMessageArea::Helper> helper =
+            new CKeyguardMessageArea::Helper();
+    helper->constructor(this);
+    mSecurityMessageDisplay = ISecurityMessageDisplay::Probe(helper);
     FindViewById(R::id::keyguard_selector_fade_container, (IView**)&mEcaView);
     AutoPtr<IView> bouncerFrameView;
     FindViewById(R::id::keyguard_bouncer_frame, (IView**)&bouncerFrameView);
@@ -124,7 +146,8 @@ ECode KeyguardAbsKeyInputView::VerifyPasswordAndUnlock()
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
             mCallback->ReportUnlockAttempt(FALSE);
-            AutoPtr<KeyguardUpdateMonitor> monitor = new KeyguardUpdateMonitor::GetInstance(mContext);
+            AutoPtr<IKeyguardUpdateMonitor> monitor =
+                    KeyguardUpdateMonitor::GetInstance(mContext);
             Int32 attempts;
             monitor->GetFailedUnlockAttempts(&attempts);
             if (0 == (attempts % ILockPatternUtils::FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
@@ -146,7 +169,8 @@ ECode KeyguardAbsKeyInputView::HandleAttemptLockout(
 {
     SetPasswordEntryEnabled(FALSE);
     Int64 elapsedRealtime = SystemClock::GetElapsedRealtime();
-    AutoPtr<MyCountDownTimer> timer = new MyCountDownTimer(this);
+    AutoPtr<MyCountDownTimer> timer = new MyCountDownTimer(
+            elapsedRealtimeDeadline - elapsedRealtime, 1000, this);
     return timer->Start();
 }
 
@@ -195,9 +219,10 @@ ECode KeyguardAbsKeyInputView::GetCallback(
 ECode KeyguardAbsKeyInputView::DoHapticKeyClick()
 {
     if (mEnableHaptics) {
+        Boolean res;
         PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY,
                 IHapticFeedbackConstants::FLAG_IGNORE_VIEW_SETTING
-                | IHapticFeedbackConstants::FLAG_IGNORE_GLOBAL_SETTING);
+                | IHapticFeedbackConstants::FLAG_IGNORE_GLOBAL_SETTING, &res);
     }
     return NOERROR;
 }
@@ -205,13 +230,15 @@ ECode KeyguardAbsKeyInputView::DoHapticKeyClick()
 ECode KeyguardAbsKeyInputView::ShowBouncer(
     /* [in] */ Int32 duration)
 {
-    return KeyguardSecurityViewHelper::ShowBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    return KeyguardSecurityViewHelper::ShowBouncer(mSecurityMessageDisplay,
+            mEcaView, mBouncerFrame, duration);
 }
 
 ECode KeyguardAbsKeyInputView::HideBouncer(
     /* [in] */ Int32 duration)
 {
-    KeyguardSecurityViewHelper::HideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    return KeyguardSecurityViewHelper::HideBouncer(mSecurityMessageDisplay,
+            mEcaView, mBouncerFrame, duration);
 }
 
 ECode KeyguardAbsKeyInputView::StartDisappearAnimation(

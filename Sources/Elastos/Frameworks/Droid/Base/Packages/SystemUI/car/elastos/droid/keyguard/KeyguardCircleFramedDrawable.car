@@ -1,0 +1,35 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface IKeyguardCircleFramedDrawable {
+        Reset();
+
+        SetScale(
+            [in] Float scale);
+
+        GetScale(
+            [out] Float* scale);
+
+        SetPressed(
+            [in] Boolean pressed);
+
+        VerifyParams(
+            [in] Float iconSize,
+            [in] Int32 frameColor,
+            [in] Float stroke,
+            [in] Int32 frameShadowColor,
+            [in] Float shadowRadius,
+            [in] Int32 highlightColor,
+            [out] Boolean* result);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

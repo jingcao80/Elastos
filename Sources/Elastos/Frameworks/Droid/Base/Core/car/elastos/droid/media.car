@@ -946,6 +946,20 @@ module
         interface IMediaRouterCallback;
     }
 
+    [local]
+    class CRemoteController {
+        constructor(
+            [in] IContext* ctx,
+            [in] IRemoteControllerOnClientUpdateListener* updateListener);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IRemoteControllerOnClientUpdateListener* updateListener,
+            [in] ILooper* looper);
+
+        interface IRemoteController;
+    }
+
     [deprecated, local]
     class CSubtitleController {
 

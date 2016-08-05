@@ -3,9 +3,38 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDPATTERNVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardPatternView.h"
+#include "elastos/droid/systemui/keyguard/AppearAnimationUtils.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include <elastos/droid/widget/LinearLayout.h>
+#include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/os/CountDownTimer.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.View.h"
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Internal::Widget::ILockPatternView;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Internal::Widget::IOnPatternListener;
+using Elastos::Droid::Internal::Widget::ILockPatternViewCellState;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::ICountDownTimer;
+using Elastos::Droid::Os::CountDownTimer;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -20,10 +49,12 @@ CarClass(CKeyguardPatternView)
 private:
     class UnlockPatternListener
         : public Object
-        , public ILockPatternViewOnPatternListener
+        , public IOnPatternListener
     {
     public:
         TO_STRING_IMPL("CKeyguardPatternView::UnlockPatternListener")
+
+        CAR_INTERFACE_DECL()
 
         UnlockPatternListener(
             /* [in] */ CKeyguardPatternView* host)
@@ -106,6 +137,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CKeyguardPatternView::MyAnimatorUpdateListener")
+
+        CAR_INTERFACE_DECL()
 
         MyAnimatorUpdateListener(
             /* [in] */ CKeyguardPatternView* host,
@@ -207,7 +240,7 @@ public:
 
     //@Override
     CARAPI CreateAnimation(
-        /* [in] */ ILockPatternViewCellState* animatedCell,
+        /* [in] */ IInterface* animatedCell,
         /* [in] */ Int64 delay,
         /* [in] */ Int64 duration,
         /* [in] */ Float startTranslationY,
@@ -245,9 +278,9 @@ private:
     static const Int32 MIN_PATTERN_BEFORE_POKE_WAKELOCK;
 
     AutoPtr<IKeyguardUpdateMonitor> mKeyguardUpdateMonitor;
-    AutoPtr<IAppearAnimationUtils> mAppearAnimationUtils;
+    AutoPtr<AppearAnimationUtils> mAppearAnimationUtils;
 
-    AutoPtr<ICountDownTimer> mCountdownTimer = null;
+    AutoPtr<ICountDownTimer> mCountdownTimer;
     AutoPtr<ILockPatternUtils> mLockPatternUtils;
     AutoPtr<ILockPatternView> mLockPatternView;
     AutoPtr<IKeyguardSecurityCallback> mCallback;
@@ -277,7 +310,6 @@ private:
         ForgotLockPattern,
         VerifyUnlocked
     };
-
 };
 
 } // namespace Keyguard

@@ -14,9 +14,12 @@ namespace Keyguard {
 
 CarClass(CKeyguardLinearLayout)
     , public LinearLayout
+    , public IKeyguardLinearLayout
 {
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CKeyguardLinearLayout();
 

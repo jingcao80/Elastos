@@ -1,5 +1,20 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardFaceUnlockView.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardMessageArea.h"
+#include "elastos/droid/systemui/keyguard/FaceUnlock.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/systemui/keyguard/KeyguardSecurityViewHelper.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardFaceUnlockViewRotationWatcher.h"
+#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telephony.h"
+#include "R.h"
+
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -11,8 +26,8 @@ ECode CKeyguardFaceUnlockView::MyKeyguardUpdateMonitorCallback::OnPhoneStateChan
 {
     if (DEBUG) Logger::D(TAG, "onPhoneStateChanged(%d)", phoneState);
     if (phoneState == ITelephonyManager::CALL_STATE_RINGING) {
-        if (mBiometricUnlock != NULL) {
-            mBiometricUnlock->stopAndShowBackup();
+        if (mHost->mBiometricUnlock != NULL) {
+            mHost->mBiometricUnlock->StopAndShowBackup();
         }
     }
     return NOERROR;
@@ -22,8 +37,9 @@ ECode CKeyguardFaceUnlockView::MyKeyguardUpdateMonitorCallback::OnUserSwitching(
     /* [in] */ Int32 userId)
 {
     if (DEBUG) Logger::D(TAG, "onUserSwitched(%d)", userId);
-    if (mBiometricUnlock != NULL) {
-        mBiometricUnlock->Stop();
+    if (mHost->mBiometricUnlock != NULL) {
+        Boolean res;
+        mHost->mBiometricUnlock->Stop(&res);
     }
     // No longer required; static value set by KeyguardViewMediator
     // mLockPatternUtils.setCurrentUser(userId);
@@ -34,8 +50,8 @@ ECode CKeyguardFaceUnlockView::MyKeyguardUpdateMonitorCallback::OnUserSwitchComp
     /* [in] */ Int32 userId)
 {
     if (DEBUG) Logger::D(TAG, "onUserSwitchComplete(%d)", userId);
-    if (mBiometricUnlock != NULL) {
-        MaybeStartBiometricUnlock();
+    if (mHost->mBiometricUnlock != NULL) {
+        mHost->MaybeStartBiometricUnlock();
     }
     return NOERROR;
 }
@@ -44,7 +60,7 @@ ECode CKeyguardFaceUnlockView::MyKeyguardUpdateMonitorCallback::OnKeyguardVisibi
     /* [in] */ Boolean showing)
 {
     if (DEBUG) Logger::D(TAG, "onKeyguardVisibilityChanged(%d)", showing);
-    HandleBouncerUserVisibilityChanged();
+    mHost->HandleBouncerUserVisibilityChanged();
     return NOERROR;
 }
 
@@ -52,14 +68,14 @@ ECode CKeyguardFaceUnlockView::MyKeyguardUpdateMonitorCallback::OnKeyguardBounce
     /* [in] */ Boolean bouncer)
 {
     if (DEBUG) Logger::D(TAG, "onKeyguardBouncerChanged(%d)", bouncer);
-    HandleBouncerUserVisibilityChanged();
+    mHost->HandleBouncerUserVisibilityChanged();
     return NOERROR;
 }
 
 ECode CKeyguardFaceUnlockView::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOn()
 {
     if (DEBUG) Logger::D(TAG, "onScreenTurnedOn()");
-    HandleBouncerUserVisibilityChanged();
+    mHost->HandleBouncerUserVisibilityChanged();
     return NOERROR;
 }
 
@@ -67,14 +83,15 @@ ECode CKeyguardFaceUnlockView::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOf
     /* [in] */ Int32 why)
 {
     if (DEBUG) Logger::D(TAG, "onScreenTurnedOff()");
-    HandleBouncerUserVisibilityChanged();
+    mHost->HandleBouncerUserVisibilityChanged();
     return NOERROR;
 }
 
 ECode CKeyguardFaceUnlockView::MyKeyguardUpdateMonitorCallback::OnEmergencyCallAction()
 {
-    if (mBiometricUnlock != NULL) {
-        mBiometricUnlock->Stop();
+    if (mHost->mBiometricUnlock != NULL) {
+        Boolean res;
+        mHost->mBiometricUnlock->Stop(&res);
     }
     return NOERROR;
 }
@@ -92,7 +109,8 @@ const Boolean CKeyguardFaceUnlockView::DEBUG = IKeyguardConstants::DEBUG;
 
 CAR_OBJECT_IMPL(CKeyguardFaceUnlockView)
 
-CAR_INTERFACE_IMPL(CKeyguardFaceUnlockView, LinearLayout, IKeyguardSecurityView)
+CAR_INTERFACE_IMPL_2(CKeyguardFaceUnlockView, LinearLayout, IKeyguardSecurityView,
+        IKeyguardFaceUnlockView)
 
 CKeyguardFaceUnlockView::CKeyguardFaceUnlockView()
     : mIsBouncerVisibleToUser(FALSE)
@@ -103,11 +121,12 @@ CKeyguardFaceUnlockView::CKeyguardFaceUnlockView()
     CServiceManager::AcquireSingleton((IServiceManager**)&helper);
     AutoPtr<IInterface> obj;
     helper->GetService(String("window"), (IInterface**)&obj);
-    AutoPtr<IIWindowManager> mWindowManager = IIWindowManager::Probe(obj);
+    mWindowManager = IIWindowManager::Probe(obj);
 
-    AutoPtr<IIRotationWatcher> mRotationWatcher = new IRotationWatcher.Stub();
+    CKeyguardFaceUnlockViewRotationWatcher::New(this,
+            (IRotationWatcher**)&mRotationWatcher);
 
-    KeyguardUpdateMonitorCallback mUpdateCallback = new MyKeyguardUpdateMonitorCallback(this);
+    mUpdateCallback = new MyKeyguardUpdateMonitorCallback(this);
 }
 
 ECode CKeyguardFaceUnlockView::constructor(
@@ -129,7 +148,10 @@ ECode CKeyguardFaceUnlockView::OnFinishInflate()
 
     InitializeBiometricUnlockView();
 
-    mSecurityMessageDisplay = new KeyguardMessageArea::Helper(this);
+    AutoPtr<CKeyguardMessageArea::Helper> tmp =
+            new CKeyguardMessageArea::Helper();
+    tmp->constructor((IView*)this);
+    mSecurityMessageDisplay = ISecurityMessageDisplay::Probe(tmp);
     FindViewById(R::id::keyguard_selector_fade_container, (IView**)&mEcaView);
     AutoPtr<IView> bouncerFrameView;
     FindViewById(R::id::keyguard_bouncer_frame, (IView**)&bouncerFrameView);
@@ -163,18 +185,20 @@ ECode CKeyguardFaceUnlockView::OnDetachedFromWindow()
 {
     if (DEBUG) Logger::D(TAG, "onDetachedFromWindow()");
     if (mBiometricUnlock != NULL) {
-        mBiometricUnlock->Stop();
+        Boolean res;
+        mBiometricUnlock->Stop(&res);
     }
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    monitor->RemoveCallback(mUpdateCallback);
+    KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mUpdateCallback);
     if (mWatchingRotation) {
-        //try {
+        //try
         ECode ec = NOERROR;
-        FAIL_GOTO(ec = mWindowManager->RemoveRotationWatcher(mRotationWatcher), ERROR)
-        mWatchingRotation = FALSE;
+        {
+            FAIL_GOTO(ec = mWindowManager->RemoveRotationWatcher(mRotationWatcher), ERROR)
+            mWatchingRotation = FALSE;
+        }
         //} catch (RemoteException e) {
 ERROR:
-        if (ec == (ECode)RemoteException)
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
             Logger::E(TAG, "Remote exception when removing rotation watcher");
         }
     }
@@ -185,18 +209,20 @@ ECode CKeyguardFaceUnlockView::OnPause()
 {
     if (DEBUG) Logger::D(TAG, "onPause()");
     if (mBiometricUnlock != NULL) {
-        mBiometricUnlock->Stop();
+        Boolean res;
+        mBiometricUnlock->Stop(&res);
     }
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    monitor->RemoveCallback(mUpdateCallback);
+    KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mUpdateCallback);
     if (mWatchingRotation) {
-        //try {
+        //try
         ECode ec = NOERROR;
-        FAIL_GOTO(ec = mWindowManager->RemoveRotationWatcher(mRotationWatcher), ERROR)
-        mWatchingRotation = FALSE;
+        {
+            FAIL_GOTO(ec = mWindowManager->RemoveRotationWatcher(mRotationWatcher), ERROR)
+            mWatchingRotation = FALSE;
+        }
         //} catch (RemoteException e) {
 ERROR:
-        if (ec == (ECode)RemoteException) {
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
             Logger::E(TAG, "Remote exception when removing rotation watcher");
         }
     }
@@ -211,19 +237,20 @@ ECode CKeyguardFaceUnlockView::OnResume(
         AutoLock syncLock(mIsBouncerVisibleToUserLock);
         mIsBouncerVisibleToUser = IsBouncerVisibleToUser();
     }
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    monitor->RegisterCallback(mUpdateCallback);
+    KeyguardUpdateMonitor::GetInstance(mContext)->RegisterCallback(mUpdateCallback);
 
     // Registers a callback which handles stopping the biometric unlock and restarting it in
     // the new position for a 180 degree rotation change.
     if (!mWatchingRotation) {
-        //try {
+        //try
         ECode ec = NOERROR;
-        FAIL_GOTO(ec = mLastRotation = mWindowManager.watchRotation(mRotationWatcher), ERROR)
-        mWatchingRotation = TRUE;
+        {
+            FAIL_GOTO(ec = mWindowManager->WatchRotation(mRotationWatcher, &mLastRotation), ERROR)
+            mWatchingRotation = TRUE;
+        }
         //} catch (RemoteException e) {
 ERROR:
-        if (ec == (ECode)RemoteException) {
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
             Logger::E(TAG, "Remote exception when adding rotation watcher");
         }
     }
@@ -271,7 +298,7 @@ void CKeyguardFaceUnlockView::InitializeBiometricUnlockView()
         FindViewById(R::id::face_unlock_cancel_button, (IView**)&view);
         mCancelButton = IImageButton::Probe(view);
         AutoPtr<IViewOnClickListener> lis = new MyOnClickListener(this);
-        mCancelButton->SetOnClickListener(lis);
+        IView::Probe(mCancelButton)->SetOnClickListener(lis);
     }
     else {
         Logger::W(TAG, "Couldn't find biometric unlock view");
@@ -282,10 +309,10 @@ void CKeyguardFaceUnlockView::MaybeStartBiometricUnlock()
 {
     if (DEBUG) Logger::D(TAG, "maybeStartBiometricUnlock()");
     if (mBiometricUnlock != NULL) {
-        AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+        Int32 attempts;
+        KeyguardUpdateMonitor::GetInstance(mContext)->GetFailedUnlockAttempts(&attempts);
         Boolean backupIsTimedOut = (
-                monitor.getFailedUnlockAttempts() >=
-                ILockPatternUtils::FAILED_ATTEMPTS_BEFORE_TIMEOUT);
+                attempts >= ILockPatternUtils::FAILED_ATTEMPTS_BEFORE_TIMEOUT);
 
         Boolean isBouncerVisibleToUser;
         {
@@ -296,7 +323,8 @@ void CKeyguardFaceUnlockView::MaybeStartBiometricUnlock()
         // Don't start it if the bouncer is not showing, but keep this view up because we want
         // it here and ready for when the bouncer does show.
         if (!isBouncerVisibleToUser) {
-            mBiometricUnlock->Stop(); // It shouldn't be running but calling this can't hurt.
+            Boolean res;
+            mBiometricUnlock->Stop(&res); // It shouldn't be running but calling this can't hurt.
             return;
         }
 
@@ -308,13 +336,14 @@ void CKeyguardFaceUnlockView::MaybeStartBiometricUnlock()
         // However, for a 180 degree rotation, no configuration change is triggered, so only
         // the logic here is capable of suppressing Face Unlock.
         Int32 state;
-        monitor->GetPhoneState(&state);
+        KeyguardUpdateMonitor::GetInstance(mContext)->GetPhoneState(&state);
         Boolean res1, res2;
         if (state == ITelephonyManager::CALL_STATE_IDLE
-                && (monitor->IsAlternateUnlockEnabled(&res1), res1)
-                && (monitor->GetMaxBiometricUnlockAttemptsReached(&res2), !res2)
+                && (KeyguardUpdateMonitor::GetInstance(mContext)->IsAlternateUnlockEnabled(&res1), res1)
+                && (KeyguardUpdateMonitor::GetInstance(mContext)->GetMaxBiometricUnlockAttemptsReached(&res2), !res2)
                 && !backupIsTimedOut) {
-            mBiometricUnlock->Start();
+            Boolean res;
+            mBiometricUnlock->Start(&res);
         }
         else {
             mBiometricUnlock->StopAndShowBackup();
@@ -324,11 +353,10 @@ void CKeyguardFaceUnlockView::MaybeStartBiometricUnlock()
 
 Boolean CKeyguardFaceUnlockView::IsBouncerVisibleToUser()
 {
-    AutoPtr<KeyguardUpdateMonitor> updateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Boolean res1, res2, res3;
-    return (updateMonitor->IsKeyguardBouncer(&res1), res1) &&
-            (updateMonitor->IsKeyguardVisible(&res2), res2) &&
-            (updateMonitor->IsScreenOn(&res3), res3);
+    return (KeyguardUpdateMonitor::GetInstance(mContext)->IsKeyguardBouncer(&res1), res1) &&
+            (KeyguardUpdateMonitor::GetInstance(mContext)->IsKeyguardVisible(&res2), res2) &&
+            (KeyguardUpdateMonitor::GetInstance(mContext)->IsScreenOn(&res3), res3);
 }
 
 void CKeyguardFaceUnlockView::HandleBouncerUserVisibilityChanged()
@@ -342,7 +370,8 @@ void CKeyguardFaceUnlockView::HandleBouncerUserVisibilityChanged()
 
     if (mBiometricUnlock != NULL) {
         if (wasBouncerVisibleToUser && !mIsBouncerVisibleToUser) {
-            mBiometricUnlock->Stop();
+            Boolean res;
+            mBiometricUnlock->Stop(&res);
         }
         else if (!wasBouncerVisibleToUser && mIsBouncerVisibleToUser) {
             MaybeStartBiometricUnlock();
@@ -358,13 +387,15 @@ ECode CKeyguardFaceUnlockView::ShowUsabilityHint()
 ECode CKeyguardFaceUnlockView::ShowBouncer(
     /* [in] */ Int32 duration)
 {
-    return KeyguardSecurityViewHelper::ShowBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    return KeyguardSecurityViewHelper::ShowBouncer(mSecurityMessageDisplay,
+            mEcaView, mBouncerFrame, duration);
 }
 
 ECode CKeyguardFaceUnlockView::HideBouncer(
     /* [in] */ Int32 duration)
 {
-    return KeyguardSecurityViewHelper::HideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    return KeyguardSecurityViewHelper::HideBouncer(mSecurityMessageDisplay,
+            mEcaView, mBouncerFrame, duration);
 }
 
 ECode CKeyguardFaceUnlockView::StartAppearAnimation()

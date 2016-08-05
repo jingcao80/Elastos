@@ -123,6 +123,8 @@ void CKeyguardStatusView::Patterns::Update(
 
 CAR_OBJECT_IMPL(CKeyguardStatusView)
 
+CAR_INTERFACE_IMPL(CKeyguardStatusView, GridLayout, IKeyguardStatusView)
+
 ECode CKeyguardStatusView::constructor(
     /* [in] */ IContext* context)
 {

@@ -3,14 +3,17 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDCIRCLEFRAMEDDRAWABLE_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "elastos/droid/graphics/drawable/Drawable.h"
+#include "Elastos.Droid.Graphics.h"
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Graphics::IPath;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IPaint;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::IRectF;
+using Elastos::Droid::Graphics::IColorFilter;
+using Elastos::Droid::Graphics::Drawable::Drawable;
 
 namespace Elastos {
 namespace Droid {
@@ -19,9 +22,12 @@ namespace Keyguard {
 
 class KeyguardCircleFramedDrawable
     : public Drawable
+    , public IKeyguardCircleFramedDrawable
 {
 public:
     TO_STRING_IMPL("KeyguardCircleFramedDrawable")
+
+    CAR_INTERFACE_DECL()
 
     KeyguardCircleFramedDrawable(
         /* [in] */ IBitmap* bitmap,

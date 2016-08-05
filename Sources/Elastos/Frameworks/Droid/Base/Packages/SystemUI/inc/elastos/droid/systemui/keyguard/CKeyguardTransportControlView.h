@@ -1,11 +1,44 @@
 
-#ifndef __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CALPHAOPTIMIZEDLINEARLAYOUT_H__
-#define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CALPHAOPTIMIZEDLINEARLAYOUT_H__
+#ifndef __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDTRANSPORTCONTROLVIEW_H__
+#define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDTRANSPORTCONTROLVIEW_H__
 
-#include "_Elastos_Droid_SystemUI_Keyguard_CAlphaOptimizedLinearLayout.h"
+#include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardTransportControlView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
+#include "elastos/droid/view/View.h"
 #include <elastos/droid/widget/FrameLayout.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Transition.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <Elastos.CoreLibrary.Text.h>
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Media::IMetadata;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::IRemoteController;
+using Elastos::Droid::Media::IRemoteControllerMetadataEditor;
+using Elastos::Droid::Media::IRemoteControllerOnClientUpdateListener;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Transition::ITransitionSet;
+using Elastos::Droid::View::View;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::Widget::ISeekBar;
 using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::ISeekBarOnSeekBarChangeListener;
+using Elastos::Text::IDateFormat;
+using Elastos::Utility::IDate;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
 
 /**
  * This is the widget responsible for showing music controls in keyguard.
@@ -16,7 +49,8 @@ namespace SystemUI {
 namespace Keyguard {
 
 CarClass(CKeyguardTransportControlView)
-    , public FrameLayout
+    , public Elastos::Droid::Widget::FrameLayout
+    , public IKeyguardTransportControlView
 {
 private:
     class MyRemoteControllerOnClientUpdateListener
@@ -25,6 +59,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CKeyguardTransportControlView::MyRemoteControllerOnClientUpdateListener")
+
+        CAR_INTERFACE_DECL()
 
         MyRemoteControllerOnClientUpdateListener(
             /* [in] */ CKeyguardTransportControlView* host)
@@ -52,6 +88,29 @@ private:
         //@Override
         CARAPI OnClientMetadataUpdate(
             /* [in] */ IRemoteControllerMetadataEditor* metadataEditor);
+
+        /**
+         * @hide
+         */
+        CARAPI OnClientFolderInfoBrowsedPlayer(
+            /* [in] */ const String& stringUri);
+
+        /**
+         * @hide
+         */
+        CARAPI OnClientUpdateNowPlayingEntries(
+            /* [in] */ ArrayOf<Int64>* playList);
+
+        /**
+         * @hide
+         */
+        CARAPI OnClientNowPlayingContentChange();
+
+        /**
+         * @hide
+         */
+        CARAPI OnClientPlayItemResponse(
+            /* [in] */ Boolean success);
 
     private:
         CKeyguardTransportControlView* mHost;
@@ -156,9 +215,10 @@ private:
             /* [in] */  Int32 progress);
 
     private:
+        CKeyguardTransportControlView* mHost;
         Int32 mProgress;
         Boolean mPending;
-    };  ISeekBarOnSeekBarChangeListener
+    };
 
     class MySeekBarOnSeekBarChangeListener
         : public Object
@@ -220,23 +280,26 @@ private:
 
         CARAPI Clear();
 
-        CARAPI ToString(
-            /* [out] */ String* str);
+        // CARAPI ToString(
+        //     /* [out] */ String* str);
 
     private:
+        friend class CKeyguardTransportControlView;
         String mArtist;
         String mTrackTitle;
         String mAlbumTitle;
-        Bitmap mBitmap;
+        AutoPtr<IBitmap> mBitmap;
         Int64 mDuration;
     };
 
     class SavedState
         : public View::BaseSavedState
-        , public ISavedState
+        , public IKeyguardTransportControlViewSavedState
     {
     public:
         TO_STRING_IMPL("CKeyguardTransportControlView::SavedState")
+
+        CAR_INTERFACE_DECL()
 
         SavedState()
             : mClientPresent(FALSE)
@@ -271,6 +334,7 @@ private:
             /* [in] */ IParcel* in);
 
     private:
+        friend class CKeyguardTransportControlView;
         Boolean mClientPresent;
         String mArtist;
         String mTrackTitle;
@@ -281,6 +345,8 @@ private:
 
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CKeyguardTransportControlView();
 
@@ -398,7 +464,7 @@ private:
     AutoPtr<IImageView> mBtnPrev;
     AutoPtr<IImageView> mBtnPlay;
     AutoPtr<IImageView> mBtnNext;
-    AutoPtr<IMetadata> mMetadata;
+    AutoPtr<Metadata> mMetadata;
     Int32 mTransportControlFlags;
     Int32 mCurrentPlayState;
     AutoPtr<IAudioManager> mAudioManager;
@@ -422,7 +488,7 @@ private:
 
     AutoPtr<IRunnable> mResetToMetadata;
 
-    AutoPtr<IViewOnClickListener> mTransportCommandListene;
+    AutoPtr<IViewOnClickListener> mTransportCommandListener;
 
     AutoPtr<IViewOnLongClickListener> mTransportShowSeekBarListener;
 
@@ -444,4 +510,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CALPHAOPTIMIZEDLINEARLAYOUT_H__
+#endif // __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDTRANSPORTCONTROLVIEW_H__

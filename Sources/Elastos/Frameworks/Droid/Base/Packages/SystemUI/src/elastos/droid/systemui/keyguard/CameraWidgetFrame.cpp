@@ -1,6 +1,38 @@
 
 #include "elastos/droid/systemui/keyguard/CameraWidgetFrame.h"
-#include "Elastos.Droid.View.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/systemui/keyguard/KeyguardActivityLauncher.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include "R.h"
+
+using Elastos::Droid::Graphics::IColor;
+using Elastos::Droid::Graphics::CColor;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CPoint;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::View::CView;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::IViewManager;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Droid::View::CWindowManagerLayoutParams;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::CImageView;
+using Elastos::Droid::Widget::ImageViewScaleType_CENTER;
+using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
+using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::Math;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -20,9 +52,10 @@ ECode CameraWidgetFrame::FixedSizeFrameLayout::OnMeasure(
     /* [in] */ Int32 heightMeasureSpec)
 {
     MeasureChildren(
-            MeasureSpec::MakeMeasureSpec(width, IMeasureSpec::EXACTLY),
-            MeasureSpec::MakeMeasureSpec(height, IMeasureSpec::EXACTLY));
-    return SetMeasuredDimension(width, height);
+            MeasureSpec::MakeMeasureSpec(mWidth, MeasureSpec::EXACTLY),
+            MeasureSpec::MakeMeasureSpec(mHeight, MeasureSpec::EXACTLY));
+    SetMeasuredDimension(mWidth, mHeight);
+    return NOERROR;
 }
 
 ECode CameraWidgetFrame::MyRunnable::Run()
@@ -37,20 +70,23 @@ ECode CameraWidgetFrame::MyRunnable2::Run()
         return NOERROR;
     }
     AutoPtr<IHandler> worker;
-    GetWorkerHandler((IHandler**)&worker);
+    mHost->GetWorkerHandler((IHandler**)&worker);
     if (worker == NULL) {
         worker = mHost->mHandler;
     }
-    mHost->mLaunchCameraStart = SystemClock::uptimeMillis();
+    mHost->mLaunchCameraStart = SystemClock::GetUptimeMillis();
     if (DEBUG) {
         Logger::D(TAG, "Launching camera at %d", mHost->mLaunchCameraStart);
     }
-    return mHost->mActivityLauncher->LaunchCamera(worker, mSecureCameraActivityStartedRunnable);
+    return mHost->mActivityLauncher->LaunchCamera(worker,
+            mHost->mSecureCameraActivityStartedRunnable);
 }
 
 ECode CameraWidgetFrame::MyRunnable3::Run()
 {
-    return mHost->mHandler->Post(mTransitionToCameraEndAction);
+    Boolean res;
+    return mHost->mHandler->Post(
+            mHost->mTransitionToCameraEndAction, &res);
 }
 
 ECode CameraWidgetFrame::MyRunnable4::Run()
@@ -83,12 +119,13 @@ ECode CameraWidgetFrame::MyKeyguardUpdateMonitorCallback::OnKeyguardVisibilityCh
 }
 
 const String CameraWidgetFrame::TAG("CameraWidgetFrame");// = CameraWidgetFrame.class.getSimpleName();
-const Boolean CameraWidgetFrame::DEBUG = KeyguardConstants::DEBUG;
+const Boolean CameraWidgetFrame::DEBUG = IKeyguardConstants::DEBUG;
 const Int32 CameraWidgetFrame::WIDGET_ANIMATION_DURATION = 250; // ms
 const Int32 CameraWidgetFrame::WIDGET_WAIT_DURATION = 400; // ms
 const Int32 CameraWidgetFrame::RECOVERY_DELAY = 1000; // ms
 
-CAR_INTERFACE_IMPL(CameraWidgetFrame, KeyguardWidgetFrame, IViewOnClickListener)
+CAR_INTERFACE_IMPL_2(CameraWidgetFrame, KeyguardWidgetFrame, ICameraWidgetFrame,
+        IViewOnClickListener)
 
 CameraWidgetFrame::CameraWidgetFrame()
     : mLaunchCameraStart(0)
@@ -98,7 +135,7 @@ CameraWidgetFrame::CameraWidgetFrame()
     , mUseFastTransition(FALSE)
 {
     CHandler::New((IHandler**)&mHandler);
-    CPoint::New((Point**)&mRenderedSize);
+    CPoint::New((IPoint**)&mRenderedSize);
 
     mTmpLoc = ArrayOf<Int32>::Alloc(2);
 
@@ -116,8 +153,8 @@ CameraWidgetFrame::CameraWidgetFrame()
 ECode CameraWidgetFrame::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICameraWidgetFrameCallbacks* callbacks,
-    /* [in] */ KeyguardActivityLauncher* activityLauncher,
-    /* [in] */ CameraWidgetInfo* widgetInfo,
+    /* [in] */ IKeyguardActivityLauncher* activityLauncher,
+    /* [in] */ IKeyguardActivityLauncherCameraWidgetInfo* widgetInfo,
     /* [in] */ IView* previewWidget)
 {
     KeyguardWidgetFrame::constructor(context);
@@ -129,8 +166,7 @@ ECode CameraWidgetFrame::constructor(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
     mWindowManager = IWindowManager::Probe(obj);
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(context);
-    monitor->RegisterCallback(mCallback);
+    KeyguardUpdateMonitor::GetInstance(context)->RegisterCallback(mCallback);
 
     mPreview = new FixedSizeFrameLayout(context);
     mPreview->AddView(previewWidget);
@@ -144,9 +180,10 @@ ECode CameraWidgetFrame::constructor(
 
     String str;
     context->GetString(R::string::keyguard_accessibility_camera, &str);
-    SetContentDescription(str);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+    SetContentDescription(cchar);
     if (DEBUG) {
-        Logger::D(TAG, "new CameraWidgetFrame instance %d", InstanceId());
+        Logger::D(TAG, "new CameraWidgetFrame instance %s", InstanceId().string());
     }
     return NOERROR;
 }
@@ -154,13 +191,13 @@ ECode CameraWidgetFrame::constructor(
 AutoPtr<CameraWidgetFrame> CameraWidgetFrame::Create(
     /* [in] */ IContext* context,
     /* [in] */ ICameraWidgetFrameCallbacks* callbacks,
-    /* [in] */ KeyguardActivityLauncher* launcher)
+    /* [in] */ IKeyguardActivityLauncher* launcher)
 {
     if (context == NULL || callbacks == NULL || launcher == NULL)
         return NULL;
 
-    AutoPtr<CameraWidgetInfo> widgetInfo;
-    launcher->GetCameraWidgetInfo((CameraWidgetInfo**)&widgetInfo);
+    AutoPtr<IKeyguardActivityLauncherCameraWidgetInfo> widgetInfo;
+    launcher->GetCameraWidgetInfo((IKeyguardActivityLauncherCameraWidgetInfo**)&widgetInfo);
     if (widgetInfo == NULL) {
         return NULL;
     }
@@ -176,35 +213,45 @@ AutoPtr<CameraWidgetFrame> CameraWidgetFrame::Create(
 
 AutoPtr<IView> CameraWidgetFrame::GetPreviewWidget(
     /* [in] */ IContext* context,
-    /* [in] */ CameraWidgetInfo* widgetInfo)
+    /* [in] */ IKeyguardActivityLauncherCameraWidgetInfo* widgetInfo)
 {
-    return widgetInfo->mLayoutId > 0 ?
+    KeyguardActivityLauncher::CameraWidgetInfo* _widgetInfo =
+            (KeyguardActivityLauncher::CameraWidgetInfo*)widgetInfo;
+    return _widgetInfo->mLayoutId > 0 ?
             InflateWidgetView(context, widgetInfo) :
             InflateGenericWidgetView(context);
 }
 
 AutoPtr<IView> CameraWidgetFrame::InflateWidgetView(
     /* [in] */ IContext* context,
-    /* [in] */ CameraWidgetInfo* widgetInfo)
+    /* [in] */ IKeyguardActivityLauncherCameraWidgetInfo* widgetInfo)
 {
-    if (DEBUG) Logger::D(TAG, "inflateWidgetView: %s" + (widgetInfo->mContextPackage).string());
+    KeyguardActivityLauncher::CameraWidgetInfo* _widgetInfo =
+            (KeyguardActivityLauncher::CameraWidgetInfo*)widgetInfo;
+    if (DEBUG) {
+        Logger::D(TAG, "inflateWidgetView: %s", (_widgetInfo->mContextPackage).string());
+    }
     AutoPtr<IView> widgetView;
     //AutoPtr<IException> exception;
-    //try {
     ECode ec = NOERROR;
-    AutoPtr<IContext> cameraContext;
-    FAIL_GOTO(ec = context->CreatePackageContext(widgetInfo->mContextPackage,
-            IContext::CONTEXT_RESTRICTED, (IContext**)&cameraContext), ERROR)
-    AutoPtr<IInterface> obj;
-    FAIL_GOTO(ec = cameraContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj), ERROR)
-    AutoPtr<ILayoutInflater> cameraInflater = ILayoutInflater::Probe(obj);
-    FAIL_GOTO(ec = cameraInflater->CloneInContext(cameraContext, (ILayoutInflater**)&cameraInflater), ERROR)
-    FAIL_GOTO(ec = cameraInflater->Inflate(widgetInfo->mLayoutId, NULL, FALSE, (IView**)&widgetView), ERROR)
+    //try
+    {
+        AutoPtr<IContext> cameraContext;
+        FAIL_GOTO(ec = context->CreatePackageContext(_widgetInfo->mContextPackage,
+                IContext::CONTEXT_RESTRICTED, (IContext**)&cameraContext), ERROR)
+        AutoPtr<IInterface> obj;
+        FAIL_GOTO(ec = cameraContext->GetSystemService(
+                IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj), ERROR)
+        AutoPtr<ILayoutInflater> cameraInflater = ILayoutInflater::Probe(obj);
+        FAIL_GOTO(ec = cameraInflater->CloneInContext(cameraContext,
+                (ILayoutInflater**)&cameraInflater), ERROR)
+        FAIL_GOTO(ec = cameraInflater->Inflate(_widgetInfo->mLayoutId, NULL,
+                FALSE, (IView**)&widgetView), ERROR)
     // } catch (NameNotFoundException e) {
     //     exception = e;
     // } catch (RuntimeException e) {
     //     exception = e;
-    // }
+    }
 ERROR:
     if (ec != NOERROR) {
         Logger::W(TAG, "Error creating camera widget view %d", ec);
@@ -219,15 +266,20 @@ AutoPtr<IView> CameraWidgetFrame::InflateGenericWidgetView(
     AutoPtr<IImageView> iv;
     CImageView::New(context, (IImageView**)&iv);
     iv->SetImageResource(R::drawable::ic_lockscreen_camera);
-    iv->SetScaleType(ScaleType.CENTER);
-    iv->SetBackgroundColor(Color.argb(127, 0, 0, 0));
+    iv->SetScaleType(ImageViewScaleType_CENTER);
+    AutoPtr<IColor> helper;
+    CColor::AcquireSingleton((IColor**)&helper);
+    Int32 argb;
+    helper->Argb(127, 0, 0, 0, &argb);
+    IView::Probe(iv)->SetBackgroundColor(argb);
     AutoPtr<IView> tmp = IView::Probe(iv);
     return tmp;
 }
 
 void CameraWidgetFrame::Render()
 {
-    AutoPtr<IView> root = GetRootView();
+    AutoPtr<IView> root;
+    GetRootView((IView**)&root);
 
     Int32 _width;
     root->GetWidth(&_width);
@@ -278,7 +330,7 @@ void CameraWidgetFrame::Render()
 
     Float pvScaleX = (Float) thisWidth / width;
     Float pvScaleY = (Float) thisHeight / height;
-    Float pvScale = Math::Min(pvScaleX, pvScaleY);
+    Float pvScale = Elastos::Core::Math::Min(pvScaleX, pvScaleY);
 
     Int32 pvWidth = (Int32) (pvScale * width);
     Int32 pvHeight = (Int32) (pvScale * height);
@@ -319,31 +371,32 @@ void CameraWidgetFrame::TransitionToCamera()
     mPreview->GetLocationInWindow(mTmpLoc);
     Int32 height;
     mPreview->GetHeight(&height);
-    Int32 y;
+    Float y;
     mPreview->GetScaleY(&y);
     Float pvHeight = height * y;
-    Float pvCenter = (*mTmpLoc)[1] + pvHeight / 2f;
+    Float pvCenter = (*mTmpLoc)[1] + pvHeight / 2.0f;
 
-    AutoPtr<IView> _root = GetRootView();
+    AutoPtr<IView> _root;
+    GetRootView((IView**)&_root);
     AutoPtr<IViewGroup> root = IViewGroup::Probe(_root);
 
     if (DEBUG) {
         StringBuilder sb;
         sb += "root = ";
         Int32 left;
-        root->GetLeft(&left);
+        IView::Probe(root)->GetLeft(&left);
         sb += left;
         sb += ",";
         Int32 top;
-        root->GetTop(&top);
+        IView::Probe(root)->GetTop(&top);
         sb += top;
         sb += " ";
         Int32 width;
-        root->GetWidth(&width);
+        IView::Probe(root)->GetWidth(&width);
         sb += width;
         sb += "x";
         Int32 height;
-        root->GetHeight(&height);
+        IView::Probe(root)->GetHeight(&height);
         sb += height;
         Logger::D(TAG, sb.ToString());
     }
@@ -353,20 +406,21 @@ void CameraWidgetFrame::TransitionToCamera()
         mFullscreenPreview->SetClickable(FALSE);
 
         Int32 width;
-        root->GetWidth(&width);
+        IView::Probe(root)->GetWidth(&width);
         Int32 height;
-        root->GetHeight(&height);
+        IView::Probe(root)->GetHeight(&height);
         AutoPtr<IFrameLayoutLayoutParams> params;
-        CFrameLayoutLayoutParams::New(width - navWidth, height- navHeight, (IFrameLayoutLayoutParams**)&params);
-        root->AddView(mFullscreenPreview, params);
+        CFrameLayoutLayoutParams::New(width - navWidth, height- navHeight,
+                (IFrameLayoutLayoutParams**)&params);
+        root->AddView(mFullscreenPreview, IViewGroupLayoutParams::Probe(params));
     }
 
     Int32 rheight;
-    root->GetHeight(&rheight);
+    IView::Probe(root)->GetHeight(&rheight);
     Float fsHeight = rheight - navHeight;
 
     Int32 rtop;
-    root->GetTop(&rtop);
+    IView::Probe(root)->GetTop(&rtop);
     Float fsCenter = rtop + fsHeight / 2;
 
     Float fsScaleY;
@@ -382,12 +436,12 @@ void CameraWidgetFrame::TransitionToCamera()
 
     AutoPtr<IViewPropertyAnimator> animator;
     mFullscreenPreview->Animate((IViewPropertyAnimator**)&animator);
-    animator->ScaleX(1)
-    animator->ScaleY(1)
-    animator->TranslationX(0)
-    animator->TranslationY(0)
-    animator->SetDuration(WIDGET_ANIMATION_DURATION)
-    animator->WithEndAction(mPostTransitionToCameraEndAction)
+    animator->ScaleX(1);
+    animator->ScaleY(1);
+    animator->TranslationX(0);
+    animator->TranslationY(0);
+    animator->SetDuration(WIDGET_ANIMATION_DURATION);
+    animator->WithEndAction(mPostTransitionToCameraEndAction);
     animator->Start();
 
     if (navHeight > 0 || navWidth > 0) {
@@ -398,18 +452,18 @@ void CameraWidgetFrame::TransitionToCamera()
 
             AutoPtr<IFrameLayoutLayoutParams> params;
             CFrameLayoutLayoutParams::New(
-                    atBottom ? IFrameLayoutLayoutParams::MATCH_PARENT
+                    atBottom ? IViewGroupLayoutParams::MATCH_PARENT
                              : navWidth,
                     atBottom ? navHeight
-                             : IFrameLayoutLayoutParams::MATCH_PARENT,
+                             : IViewGroupLayoutParams::MATCH_PARENT,
                     atBottom ? IGravity::BOTTOM | IGravity::FILL_HORIZONTAL
-                             : IGravity::RIGHT | IGravity::FILL_VERTICAL
+                             : IGravity::RIGHT | IGravity::FILL_VERTICAL,
                     (IFrameLayoutLayoutParams**)&params);
-            root->AddView(mFakeNavBar, params);
+            root->AddView(mFakeNavBar, IViewGroupLayoutParams::Probe(params));
             mFakeNavBar->SetPivotY(navHeight);
             mFakeNavBar->SetPivotX(navWidth);
         }
-        mFakeNavBar->SetAlpha(0f);
+        mFakeNavBar->SetAlpha(0.0f);
         if (atBottom) {
             mFakeNavBar->SetScaleY(0.5f);
         }
@@ -420,10 +474,10 @@ void CameraWidgetFrame::TransitionToCamera()
 
         AutoPtr<IViewPropertyAnimator> animator;
         mFakeNavBar->Animate((IViewPropertyAnimator**)&animator);
-        animator->Alpha(1f)
-        animator->ScaleY(1f)
-        animator->ScaleY(1f)
-        animator->SetDuration(WIDGET_ANIMATION_DURATION)
+        animator->Alpha(1.0f);
+        animator->ScaleY(1.0f);
+        animator->ScaleY(1.0f);
+        animator->SetDuration(WIDGET_ANIMATION_DURATION);
         animator->Start();
     }
     mCallbacks->OnLaunchingCamera();
@@ -431,7 +485,7 @@ void CameraWidgetFrame::TransitionToCamera()
 
 void CameraWidgetFrame::Recover()
 {
-    if (DEBUG) Logger::D(TAG, "recovering at %d" + SystemClock::uptimeMillis());
+    if (DEBUG) Logger::D(TAG, "recovering at %lld", SystemClock::GetUptimeMillis());
     mCallbacks->OnCameraLaunchedUnsuccessfully();
     Reset();
 }
@@ -460,14 +514,13 @@ ECode CameraWidgetFrame::OnDetachedFromWindow()
     if (DEBUG) {
         StringBuilder sb;
         sb += "onDetachedFromWindow: instance ";
-        sb += instanceId();
+        sb += InstanceId();
         sb += " at ";
-        sb += SystemClock::uptimeMillis()
+        sb += SystemClock::GetUptimeMillis();
         Logger::D(TAG, sb.ToString());
     }
     KeyguardWidgetFrame::OnDetachedFromWindow();
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    monitor->RemoveCallback(mCallback);
+    KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mCallback);
     CancelTransitionToCamera();
     return mHandler->RemoveCallbacks(mRecoverRunnable);
 }
@@ -499,7 +552,7 @@ ECode CameraWidgetFrame::OnUserInteraction(
     Int32 height;
     GetHeight(&height);
     Int32 rawBottom = (*mTmpLoc)[1] + height;
-    Int32 y;
+    Float y;
     if ((event->GetRawY(&y), y) > rawBottom) {
         if (DEBUG) Logger::D(TAG, "onUserInteraction eaten: below widget");
         *result = TRUE;
@@ -517,12 +570,11 @@ ECode CameraWidgetFrame::OnUserInteraction(
     return NOERROR;
 }
 
-ECode CameraWidgetFrame::OnFocusLost()
+void CameraWidgetFrame::OnFocusLost()
 {
-    if (DEBUG) Logger::D(TAG, "onFocusLost at %d", SystemClock::uptimeMillis());
+    if (DEBUG) Logger::D(TAG, "onFocusLost at %lld", SystemClock::GetUptimeMillis());
     CancelTransitionToCamera();
     KeyguardWidgetFrame::OnFocusLost();
-    return NOERROR;
 }
 
 ECode CameraWidgetFrame::OnScreenTurnedOff()
@@ -534,15 +586,18 @@ ECode CameraWidgetFrame::OnScreenTurnedOff()
 
 void CameraWidgetFrame::RescheduleTransitionToCamera()
 {
-    if (DEBUG) Logger::D(TAG, "rescheduleTransitionToCamera at %d", SystemClock::UptimeMillis());
+    if (DEBUG) Logger::D(TAG, "rescheduleTransitionToCamera at %lld",
+            SystemClock::GetUptimeMillis());
     mHandler->RemoveCallbacks(mTransitionToCameraRunnable);
     Int64 duration = mUseFastTransition ? 0 : WIDGET_WAIT_DURATION;
-    mHandler->PostDelayed(mTransitionToCameraRunnable, duration);
+    Boolean res;
+    mHandler->PostDelayed(mTransitionToCameraRunnable, duration, &res);
 }
 
 void CameraWidgetFrame::CancelTransitionToCamera()
 {
-    if (DEBUG) Logger::D(TAG, "cancelTransitionToCamera at %d". SystemClock::UptimeMillis());
+    if (DEBUG) Logger::D(TAG, "cancelTransitionToCamera at %lld",
+            SystemClock::GetUptimeMillis());
     mHandler->RemoveCallbacks(mTransitionToCameraRunnable);
 }
 
@@ -554,7 +609,7 @@ void CameraWidgetFrame::OnCameraLaunched()
 
 void CameraWidgetFrame::Reset()
 {
-    if (DEBUG) Logger::D(TAG, "reset at %d", SystemClock::UptimeMillis());
+    if (DEBUG) Logger::D(TAG, "reset at %lld", SystemClock::GetUptimeMillis());
     mLaunchCameraStart = 0;
     mTransitioning = FALSE;
     mDown = FALSE;
@@ -588,10 +643,10 @@ ECode CameraWidgetFrame::OnSizeChanged(
     }
     if ((w != oldw && oldw > 0) || (h != oldh && oldh > 0)) {
         // we can't trust the old geometry anymore; force a re-render
-        mRenderedSize->SetY(-1);
-        mRenderedSize->SetX(-1);
+        mRenderedSize->Set(-1, -1);
     }
-    mHandler->Post(mRenderRunnable);
+    Boolean res;
+    mHandler->Post(mRenderRunnable, &res);
     KeyguardWidgetFrame::OnSizeChanged(w, h, oldw, oldh);
     return NOERROR;
 }
@@ -601,7 +656,8 @@ ECode CameraWidgetFrame::OnBouncerShowing(
 {
     if (showing) {
         mTransitioning = FALSE;
-        mHandler->Post(mRecoverRunnable);
+        Boolean res;
+        mHandler->Post(mRecoverRunnable, &res);
     }
     return NOERROR;
 }
@@ -617,17 +673,21 @@ void CameraWidgetFrame::EnableWindowExitAnimation(
 
     AutoPtr<IWindowManagerLayoutParams> wlp = IWindowManagerLayoutParams::Probe(lp);
     Int32 newWindowAnimations = isEnabled ? R::style::Animation_LockScreen : 0;
-    if (newWindowAnimations != wlp->mWindowAnimations) {
+
+    Int32 animations;
+    wlp->GetWindowAnimations(&animations);
+    if (newWindowAnimations != animations) {
         if (DEBUG) {
             StringBuilder sb;
             sb += "setting windowAnimations to: ";
             sb += newWindowAnimations;
             sb += " at ";
-            sb += SystemClock::UptimeMillis();
+            sb += SystemClock::GetUptimeMillis();
             Logger::D(TAG, sb.ToString());
         }
-        wlp->mWindowAnimations = newWindowAnimations;
-        mWindowManager->UpdateViewLayout(root, wlp);
+        wlp->SetWindowAnimations(newWindowAnimations);
+        IViewManager::Probe(mWindowManager)->UpdateViewLayout(root,
+                IViewGroupLayoutParams::Probe(wlp));
     }
 }
 
@@ -639,14 +699,14 @@ void CameraWidgetFrame::OnKeyguardVisibilityChanged(
         sb += "onKeyguardVisibilityChanged ";
         sb += showing;
         sb += " at ";
-        sb += SystemClock::UptimeMillis();
+        sb += SystemClock::GetUptimeMillis();
         Logger::D(TAG, sb.ToString());
     }
     if (mTransitioning && !showing) {
         mTransitioning = FALSE;
         mHandler->RemoveCallbacks(mRecoverRunnable);
         if (mLaunchCameraStart > 0) {
-            Int64 launchTime = SystemClock::UptimeMillis() - mLaunchCameraStart;
+            Int64 launchTime = SystemClock::GetUptimeMillis() - mLaunchCameraStart;
             if (DEBUG) Logger::D(TAG, "Camera took %dms to launch", launchTime);
             mLaunchCameraStart = 0;
             OnCameraLaunched();
@@ -656,14 +716,16 @@ void CameraWidgetFrame::OnKeyguardVisibilityChanged(
 
 void CameraWidgetFrame::OnSecureCameraActivityStarted()
 {
-    if (DEBUG) Logger::D(TAG, "onSecureCameraActivityStarted at %d", SystemClock::UptimeMillis());
-    mHandler->PostDelayed(mRecoverRunnable, RECOVERY_DELAY);
+    if (DEBUG) Logger::D(TAG, "onSecureCameraActivityStarted at %lld",
+            SystemClock::GetUptimeMillis());
+    Boolean res;
+    mHandler->PostDelayed(mRecoverRunnable, RECOVERY_DELAY, &res);
 }
 
 String CameraWidgetFrame::InstanceId()
 {
     Int32 code;
-    HashCode(&code);
+    GetHashCode(&code);
     return StringUtils::ToHexString(code);
 }
 

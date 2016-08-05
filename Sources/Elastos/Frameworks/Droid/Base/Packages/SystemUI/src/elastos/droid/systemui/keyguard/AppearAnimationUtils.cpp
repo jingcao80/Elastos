@@ -1,9 +1,18 @@
 
 #include "elastos/droid/systemui/keyguard/AppearAnimationUtils.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/Math.h>
+#include "R.h"
 
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::Animation::IAnimationUtils;
 using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Core::Math;
 
 namespace Elastos {
 namespace Droid {
@@ -57,14 +66,14 @@ ECode AppearAnimationUtils::constructor(
 }
 
 ECode AppearAnimationUtils::StartAppearAnimation(
-    /* [in] */ ArrayOf<ArrayOf<IView*>* >* objects,
+    /* [in] */ ArrayOf<ArrayOf<IInterface*>* >* objects,
     /* [in] */ IRunnable* finishListener)
 {
     return StartAppearAnimation(objects, finishListener, (IAppearAnimationCreator*)this);
 }
 
 ECode AppearAnimationUtils::StartAppearAnimation(
-    /* [in] */ ArrayOf<IView*>* objects,
+    /* [in] */ ArrayOf<IInterface*>* objects,
     /* [in] */ IRunnable* finishListener)
 {
     return StartAppearAnimation(objects, finishListener, (IAppearAnimationCreator*)this);
@@ -77,6 +86,7 @@ ECode AppearAnimationUtils::StartAppearAnimation(
 {
     AutoPtr<AppearAnimationProperties> properties = GetDelays(objects);
     StartAnimations(properties, objects, finishListener, creator);
+    return NOERROR;
 }
 
 ECode AppearAnimationUtils::StartAppearAnimation(
@@ -86,6 +96,7 @@ ECode AppearAnimationUtils::StartAppearAnimation(
 {
     AutoPtr<AppearAnimationProperties> properties = GetDelays(objects);
     StartAnimations(properties, objects, finishListener, creator);
+    return NOERROR;
 }
 
 void AppearAnimationUtils::StartAnimations(
@@ -100,7 +111,7 @@ void AppearAnimationUtils::StartAnimations(
     }
     for (Int32 row = 0; row < properties->mDelays->GetLength(); row++) {
         AutoPtr<ArrayOf<Int64> > columns = (*(properties->mDelays))[row];
-        Int54 delay = (*columns)[0];
+        Int32 delay = (*columns)[0];
         AutoPtr<IRunnable> endRunnable;
         if (properties->mMaxDelayRowIndex == row && properties->mMaxDelayColIndex == 0) {
             endRunnable = finishListener;
@@ -128,20 +139,20 @@ void AppearAnimationUtils::StartAnimations(
             if (properties->mMaxDelayRowIndex == row && properties->mMaxDelayColIndex == col) {
                 endRunnable = finishListener;
             }
-            AutoPtr<ArrayOf<IInterface> > _object = (*objects)[row];
+            AutoPtr<ArrayOf<IInterface*> > _object = (*objects)[row];
             creator->CreateAnimation((*_object)[col], delay, mDuration,
                     mStartTranslation, mInterpolator, endRunnable);
         }
     }
 }
 
-AutoPtr<AppearAnimationProperties> AppearAnimationUtils::GetDelays(
+AutoPtr<AppearAnimationUtils::AppearAnimationProperties> AppearAnimationUtils::GetDelays(
     /* [in] */ ArrayOf<IInterface*>* items)
 {
     Int64 maxDelay = -1;
     mProperties->mMaxDelayColIndex = -1;
     mProperties->mMaxDelayRowIndex = -1;
-    mProperties->mDdelays = ArrayOf<ArrayOf<Int64>* >::Alloc(items->GetLength());
+    mProperties->mDelays = ArrayOf<ArrayOf<Int64>* >::Alloc(items->GetLength());
     for (Int32 row = 0; row < items->GetLength(); row++) {
         AutoPtr<ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(1);
         Int64 delay = CalculateDelay(row, 0);
@@ -156,16 +167,16 @@ AutoPtr<AppearAnimationProperties> AppearAnimationUtils::GetDelays(
     return mProperties;
 }
 
-AutoPtr<AppearAnimationProperties> AppearAnimationUtils::GetDelays(
+AutoPtr<AppearAnimationUtils::AppearAnimationProperties> AppearAnimationUtils::GetDelays(
     /* [in] */ ArrayOf<ArrayOf<IInterface*>* >* items)
 {
     Int64 maxDelay = -1;
     mProperties->mMaxDelayColIndex = -1;
     mProperties->mMaxDelayRowIndex = -1;
-    mProperties->mDdelays = ArrayOf<ArrayOf<Int64>* >::Alloc(items->GetLength());
+    mProperties->mDelays = ArrayOf<ArrayOf<Int64>* >::Alloc(items->GetLength());
     for (Int32 row = 0; row < items->GetLength(); row++) {
         AutoPtr<ArrayOf<IInterface*> > columns = (*items)[row];
-        AutoPtr<ArrayOf<Int64> > array = ArrayOf<IInterface*>::Alloc(columns->GetLength());
+        AutoPtr<ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(columns->GetLength());
         mProperties->mDelays->Set(row, array);
 
         for (Int32 col = 0; col < columns->GetLength(); col++) {
@@ -186,7 +197,7 @@ Int64 AppearAnimationUtils::CalculateDelay(
     /* [in] */ Int32 row,
     /* [in] */ Int32 col)
 {
-    return (Int64) ((row * 40 + col * (Math::Pow(row, 0.4) + 0.4) * 20) * mDelayScale);
+    return (Int64) ((row * 40 + col * (Elastos::Core::Math::Pow(row, 0.4) + 0.4) * 20) * mDelayScale);
 }
 
 ECode AppearAnimationUtils::GetInterpolator(
@@ -218,14 +229,14 @@ ECode AppearAnimationUtils::CreateAnimation(
 {
     IView* view = IView::Probe(obj);
     if (view != NULL) {
-        view->SetAlpha(0f);
+        view->SetAlpha(0.0f);
         view->SetTranslationY(startTranslationY);
 
         AutoPtr<IViewPropertyAnimator> animator;
         view->Animate((IViewPropertyAnimator**)&animator);
-        animator->Alpha(1f);
+        animator->Alpha(1.0f);
         animator->TranslationY(0);
-        animator->SetInterpolator(interpolator);
+        animator->SetInterpolator(ITimeInterpolator::Probe(interpolator));
         animator->SetDuration(duration);
         animator->SetStartDelay(delay);
 

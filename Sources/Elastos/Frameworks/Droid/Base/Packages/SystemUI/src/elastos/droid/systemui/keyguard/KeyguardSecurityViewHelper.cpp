@@ -2,6 +2,11 @@
 #include "elastos/droid/systemui/keyguard/KeyguardSecurityViewHelper.h"
 #include "Elastos.Droid.View.h"
 
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
@@ -12,7 +17,7 @@ ECode KeyguardSecurityViewHelper::MyAnimatorListenerAdapter::OnAnimationCancel(
 {
     // Fail safe and show the emergency button in onAnimationEnd()
     mCanceled = TRUE;
-    return mEcaView->SetAlpha(1f);
+    return mEcaView->SetAlpha(1.0f);
 }
 
 ECode KeyguardSecurityViewHelper::MyAnimatorListenerAdapter::OnAnimationEnd(
@@ -34,8 +39,13 @@ ECode KeyguardSecurityViewHelper::ShowBouncer(
         if (duration > 0) {
             AutoPtr<IObjectAnimatorHelper> helper;
             CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-            AutoPtr<IAnimator> anim;
-            helper->OfFloat(ecaView, String("alpha"), 0f, (IAnimator**)&anim);
+
+            AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+            (*array)[0] = 0.0f;
+            AutoPtr<IObjectAnimator> oa;
+            helper->OfFloat(ecaView, String("alpha"), array,
+                    (IObjectAnimator**)&oa);
+            AutoPtr<IAnimator> anim = IAnimator::Probe(oa);
             anim->SetDuration(duration);
 
             AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter(ecaView);
@@ -43,7 +53,7 @@ ECode KeyguardSecurityViewHelper::ShowBouncer(
             anim->Start();
         }
         else {
-            ecaView->SetAlpha(0f);
+            ecaView->SetAlpha(0.0f);
             ecaView->SetVisibility(IView::INVISIBLE);
         }
     }
@@ -51,8 +61,13 @@ ECode KeyguardSecurityViewHelper::ShowBouncer(
         if (duration > 0) {
             AutoPtr<IObjectAnimatorHelper> helper;
             CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-            AutoPtr<IAnimator> anim;
-            helper->OfInt32(bouncerFrame, String("alpha"), 0, 255, (IAnimator**)&anim);
+            AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);
+            (*array)[0] = 0;
+            (*array)[1] = 255;
+            AutoPtr<IObjectAnimator> oa;
+            helper->OfInt32(bouncerFrame, String("alpha"), array,
+                    (IObjectAnimator**)&oa);
+            AutoPtr<IAnimator> anim = IAnimator::Probe(oa);
             anim->SetDuration(duration);
             anim->Start();
         }
@@ -77,21 +92,31 @@ ECode KeyguardSecurityViewHelper::HideBouncer(
         if (duration > 0) {
             AutoPtr<IObjectAnimatorHelper> helper;
             CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-            AutoPtr<IAnimator> anim;
-            helper->OfFloat(ecaView, String("alpha"), 1f, (IAnimator**)&anim);
+
+            AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+            (*array)[0] = 1.0f;
+            AutoPtr<IObjectAnimator> oa;
+            helper->OfFloat(ecaView, String("alpha"), array,
+                    (IObjectAnimator**)&oa);
+            AutoPtr<IAnimator> anim = IAnimator::Probe(oa);
             anim->SetDuration(duration);
             anim->Start();
         }
         else {
-            ecaView->SetAlpha(1f);
+            ecaView->SetAlpha(1.0f);
         }
     }
     if (bouncerFrame != NULL) {
         if (duration > 0) {
             AutoPtr<IObjectAnimatorHelper> helper;
             CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-            AutoPtr<IAnimator> anim;
-            helper->OfInt32(bouncerFrame, String("alpha"), 255, 0, (IAnimator**)&anim);
+            AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);
+            (*array)[0] = 255;
+            (*array)[1] = 0;
+            AutoPtr<IObjectAnimator> oa;
+            helper->OfInt32(bouncerFrame, String("alpha"), array,
+                    (IObjectAnimator**)&oa);
+            AutoPtr<IAnimator> anim = IAnimator::Probe(oa);
             anim->SetDuration(duration);
             anim->Start();
         }

@@ -3,9 +3,26 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDMULTIUSERAVATAR_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardMultiUserAvatar.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include <elastos/droid/widget/FrameLayout.h>
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -31,12 +48,16 @@ private:
             /* [in] */ Float finalAlpha,
             /* [in] */ Float finalScale,
             /* [in] */ Float initAlpha,
-            /* [in] */ Float initScale)
+            /* [in] */ Float initScale,
+            /* [in] */ Int32 initTextAlpha,
+            /* [in] */ Int32 finalTextAlpha)
             : mHost(host)
             , mFinalAlpha(finalAlpha)
             , mFinalScale(finalScale)
             , mInitAlpha(initAlpha)
             , mInitScale(initScale)
+            , mInitTextAlpha(initTextAlpha)
+            , mFinalTextAlpha(finalTextAlpha)
         {}
 
         //@Override
@@ -49,6 +70,8 @@ private:
         Float mFinalScale;
         Float mInitAlpha;
         Float mInitScale;
+        Int32 mInitTextAlpha;
+        Int32 mFinalTextAlpha;
     };
 
     class MyAnimatorListenerAdapter
@@ -70,6 +93,8 @@ private:
 
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CKeyguardMultiUserAvatar();
 
@@ -135,18 +160,18 @@ private:
     static const Float INACTIVE_TEXT_ALPHA;
     static const Int32 SWITCH_ANIMATION_DURATION;
 
-    const Float mActiveAlpha;
-    const Float mActiveScale;
-    const Float mActiveTextAlpha;
-    const Float mInactiveAlpha;
-    const Float mInactiveTextAlpha;
-    const Float mShadowRadius;
-    const Float mStroke;
-    const Float mIconSize;
-    const Int32 mFrameColor;
-    const Int32 mFrameShadowColor;
-    const Int32 mTextColor;
-    const Int32 mHighlightColor;
+    Float mActiveAlpha;
+    Float mActiveScale;
+    Float mActiveTextAlpha;
+    Float mInactiveAlpha;
+    Float mInactiveTextAlpha;
+    Float mShadowRadius;
+    Float mStroke;
+    Float mIconSize;
+    Int32 mFrameColor;
+    Int32 mFrameShadowColor;
+    Int32 mTextColor;
+    Int32 mHighlightColor;
 
     Boolean mTouched;
 

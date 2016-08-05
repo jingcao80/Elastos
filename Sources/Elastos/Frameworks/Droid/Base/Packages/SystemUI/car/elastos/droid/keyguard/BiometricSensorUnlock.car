@@ -8,6 +8,7 @@ module
     namespace SystemUI {
     namespace Keyguard {
 
+    [local]
     interface IBiometricSensorUnlock {
         /**
          * Initializes the view provided for the biometric unlock UI to work within.  The provided area

@@ -180,6 +180,10 @@ module
         interface IFade;
     }
 
+    singleton class CFadeHelper {
+        interface IFadeHelper;
+    }
+
     [local]
     class CPatternPathMotion {
 
@@ -259,6 +263,10 @@ module
         constructor();
 
         interface ITransitionManager;
+    }
+
+    singleton class CTransitionManagerHelper {
+        interface ITransitionManagerHelper;
     }
 
     [local]

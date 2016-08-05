@@ -1,6 +1,11 @@
 
 module
 {
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.View.IView;
+
+    interface IChallengeLayoutOnBouncerStateChangedListener;
+
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
@@ -57,6 +62,7 @@ module
            [in] Int32 challengeTop);
     }
 
+    [local]
     interface ISlidingChallengeLayout {
         const Int32 SCROLL_STATE_IDLE = 0;
         const Int32 SCROLL_STATE_DRAGGING = 1;
@@ -65,6 +71,78 @@ module
 
         const Int32 CHALLENGE_FADE_OUT_DURATION = 100;
         const Int32 CHALLENGE_FADE_IN_DURATION = 160;
+
+        SetEnableChallengeDragging(
+            [in] Boolean enabled);
+
+        SetInsets(
+            [in] IRect* insets);
+
+        SetHandleAlpha(
+            [in] Float alpha);
+
+        SetChallengeInteractive(
+            [in] Boolean interactive);
+
+        AnimateHandle(
+            [in] Boolean visible);
+
+        SetOnChallengeScrolledListener(
+            [in] ISlidingChallengeLayoutOnChallengeScrolledListener* listener);
+
+        SetOnBouncerStateChangedListener(
+            [in] IChallengeLayoutOnBouncerStateChangedListener* listener);
+
+        // We want the duration of the page snap animation to be influenced by the distance that
+        // the screen has to travel, however, we don't want this duration to be effected in a
+        // purely linear fashion. Instead, we use this method to moderate the effect that the distance
+        // of travel has on the overall snap duration.
+        DistanceInfluenceForSnapDuration(
+            [in] Float f,
+            [out] Float* value);
+
+        SetScrollState(
+            [in] Int32 state);
+
+        CompleteChallengeScroll();
+
+        SetScrimView(
+            [in] IView* scrim);
+
+        /**
+         * Animate the bottom edge of the challenge view to the given position.
+         *
+         * @param y desired final position for the bottom edge of the challenge view in px
+         * @param velocity velocity in
+         */
+        AnimateChallengeTo(
+            [in] Int32 y,
+            [in] Int32 velocity);
+
+        /**
+         * @return true if the challenge is at all visible.
+         */
+        IsChallengeShowing(
+            [out] Boolean* result);
+
+        ComputeScroll();
+
+        FadeInChallenge();
+
+        FadeOutChallenge();
+
+        FadeChallenge(
+            [in] Boolean show);
+
+        GetMaxChallengeTop(
+            [out] Int32* top);
+
+        /**
+         * Show or hide the challenge view, animating it if necessary.
+         * @param show true to show, false to hide
+         */
+        ShowChallenge(
+            [in] Boolean show);
     }
 
     } // namespace Keyguard

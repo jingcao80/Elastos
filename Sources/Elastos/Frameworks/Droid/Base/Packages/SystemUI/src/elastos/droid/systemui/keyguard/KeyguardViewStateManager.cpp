@@ -1,6 +1,10 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardViewStateManager.h"
-#include "Elastos.Droid.View.h"
+#include "elastos/droid/os/Looper.h"
+
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::View::IViewPropertyAnimator;
 
 namespace Elastos {
 namespace Droid {
@@ -33,7 +37,7 @@ ECode KeyguardViewStateManager::MyRunnable::Run()
 
 ECode KeyguardViewStateManager::MyRunnable2::Run()
 {
-    return mKeyguardSecurityContainer->ShowUsabilityHint();
+    return mHost->mKeyguardSecurityContainer->ShowUsabilityHint();
 }
 
 const String KeyguardViewStateManager::TAG("KeyguardViewStateManager");
@@ -42,7 +46,8 @@ const Int32 KeyguardViewStateManager::SCREEN_ON_HINT_DURATION = 1000;
 const Int32 KeyguardViewStateManager::SCREEN_ON_RING_HINT_DELAY = 300;
 const Boolean KeyguardViewStateManager::SHOW_INITIAL_PAGE_HINTS = FALSE;
 
-CAR_INTERFACE_IMPL_2(KeyguardViewStateManager, Object, ISlidingChallengeLayoutOnChallengeScrolledListener,
+CAR_INTERFACE_IMPL_3(KeyguardViewStateManager, Object, IKeyguardViewStateManager,
+        ISlidingChallengeLayoutOnChallengeScrolledListener,
         IChallengeLayoutOnBouncerStateChangedListener)
 
 KeyguardViewStateManager::KeyguardViewStateManager()
@@ -92,10 +97,10 @@ void KeyguardViewStateManager::UpdateEdgeSwiping()
     if (mChallengeLayout != NULL && mKeyguardWidgetPager != NULL) {
         Boolean res;
         if (mChallengeLayout->IsChallengeOverlapping(&res), res) {
-            mKeyguardWidgetPager->SetOnlyAllowEdgeSwipes(TRUE);
+            IPagedView::Probe(mKeyguardWidgetPager)->SetOnlyAllowEdgeSwipes(TRUE);
         }
         else {
-            mKeyguardWidgetPager->SetOnlyAllowEdgeSwipes(FALSE);
+            IPagedView::Probe(mKeyguardWidgetPager)->SetOnlyAllowEdgeSwipes(FALSE);
         }
     }
 }
@@ -150,7 +155,7 @@ ECode KeyguardViewStateManager::FadeOutSecurity(
 {
     AutoPtr<IViewPropertyAnimator> res;
     IView::Probe(mKeyguardSecurityContainer)->Animate((IViewPropertyAnimator**)&res);
-    res->Alpha(0f);
+    res->Alpha(0.0f);
     res->SetDuration(duration);
     return res->SetListener(mPauseListener);
 }
@@ -160,7 +165,7 @@ ECode KeyguardViewStateManager::FadeInSecurity(
 {
     AutoPtr<IViewPropertyAnimator> res;
     IView::Probe(mKeyguardSecurityContainer)->Animate((IViewPropertyAnimator**)&res);
-    res->Alpha(1f);
+    res->Alpha(1.0f);
     res->SetDuration(duration);
     return res->SetListener(mResumeListener);
 }
@@ -172,13 +177,14 @@ ECode KeyguardViewStateManager::OnPageBeginMoving()
             ISlidingChallengeLayout::Probe(mChallengeLayout) != NULL) {
         AutoPtr<ISlidingChallengeLayout> scl = ISlidingChallengeLayout::Probe(mChallengeLayout);
         scl->FadeOutChallenge();
-        mKeyguardWidgetPager->GetCurrentPage(&mPageIndexOnPageBeginMoving);
+        IPagedView::Probe(mKeyguardWidgetPager)->GetCurrentPage(
+                &mPageIndexOnPageBeginMoving);
     }
     // We use mAppWidgetToShow to show a particular widget after you add it--
     // once the user swipes a page we clear that behavior
     if (mKeyguardHostView != NULL) {
         mKeyguardHostView->ClearAppWidgetToShow();
-        mKeyguardHostView->SetOnDismissAction(NULL);
+        IKeyguardViewBase::Probe(mKeyguardHostView)->SetOnDismissAction(NULL);
     }
     if (mHideHintsRunnable != NULL) {
         mMainQueue->RemoveCallbacks(mHideHintsRunnable);
@@ -203,22 +209,22 @@ ECode KeyguardViewStateManager::OnPageSwitching(
         if (isCameraPage) {
             AutoPtr<ICameraWidgetFrame> camera = ICameraWidgetFrame::Probe(newPage);
             Boolean res;
-            mKeyguardWidgetPager->IsWarping(&res);
+            IPagedView::Probe(mKeyguardWidgetPager)->IsWarping(&res);
             camera->SetUseFastTransition(res);
         }
         AutoPtr<ISlidingChallengeLayout> scl = ISlidingChallengeLayout::Probe(mChallengeLayout);
         scl->SetChallengeInteractive(!isCameraPage);
         Int32 currentFlags;
-        mKeyguardWidgetPager->GetSystemUiVisibility(&currentFlags);
+        IView::Probe(mKeyguardWidgetPager)->GetSystemUiVisibility(&currentFlags);
         Int32 newFlags = isCameraPage ? (currentFlags | IView::STATUS_BAR_DISABLE_SEARCH)
                 : (currentFlags & ~IView::STATUS_BAR_DISABLE_SEARCH);
-        mKeyguardWidgetPager->SetSystemUiVisibility(newFlags);
+        IView::Probe(mKeyguardWidgetPager)->SetSystemUiVisibility(newFlags);
     }
 
     // If the page we're settling to is the same as we started on, and the action of
     // moving the page hid the security, we restore it immediately.
     Int32 page;
-    mKeyguardWidgetPager->GetNextPage(&page);
+    IPagedView::Probe(mKeyguardWidgetPager)->GetNextPage(&page);
     if (mPageIndexOnPageBeginMoving == page &&
             ISlidingChallengeLayout::Probe(mChallengeLayout) != NULL) {
         AutoPtr<ISlidingChallengeLayout> scl = ISlidingChallengeLayout::Probe(mChallengeLayout);
@@ -268,20 +274,20 @@ ECode KeyguardViewStateManager::OnPageBeginWarp()
 {
     FadeOutSecurity(ISlidingChallengeLayout::CHALLENGE_FADE_OUT_DURATION);
     Int32 index;
-    mKeyguardWidgetPager->GetPageWarpIndex(&index);
+    IPagedView::Probe(mKeyguardWidgetPager)->GetPageWarpIndex(&index);
     AutoPtr<IView> frame;
-    mKeyguardWidgetPager->GetPageAt(index, (IView**)&frame);
-    return IKeyguardWidgetFrame::Probe(frame)->ShowFrame(this);
+    IPagedView::Probe(mKeyguardWidgetPager)->GetPageAt(index, (IView**)&frame);
+    return IKeyguardWidgetFrame::Probe(frame)->ShowFrame(TO_IINTERFACE(this));
 }
 
 ECode KeyguardViewStateManager::OnPageEndWarp()
 {
     FadeInSecurity(ISlidingChallengeLayout::CHALLENGE_FADE_IN_DURATION);
     Int32 index;
-    mKeyguardWidgetPager->GetPageWarpIndex(&index);
+    IPagedView::Probe(mKeyguardWidgetPager)->GetPageWarpIndex(&index);
     AutoPtr<IView> frame;
-    mKeyguardWidgetPager->GetPageAt(index, (IView**)&frame);
-    return IKeyguardWidgetFrame::Probe(frame)->HideFrame(this);
+    IPagedView::Probe(mKeyguardWidgetPager)->GetPageAt(index, (IView**)&frame);
+    return IKeyguardWidgetFrame::Probe(frame)->HideFrame(TO_IINTERFACE(this));
 }
 
 Int32 KeyguardViewStateManager::GetChallengeTopRelativeToFrame(
@@ -290,7 +296,7 @@ Int32 KeyguardViewStateManager::GetChallengeTopRelativeToFrame(
 {
     (*mTmpPoint)[0] = 0;
     (*mTmpPoint)[1] = top;
-    MapPoint(IView::Probe(mChallengeLayout), frame, mTmpPoint);
+    MapPoint(IView::Probe(mChallengeLayout), IView::Probe(frame), mTmpPoint);
     return (*mTmpPoint)[1];
 }
 
@@ -316,7 +322,7 @@ void KeyguardViewStateManager::UserActivity()
 {
     if (mKeyguardHostView != NULL) {
         mKeyguardHostView->OnUserActivityTimeoutChanged();
-        mKeyguardHostView->UserActivity();
+        IKeyguardSecurityContainerSecurityCallback::Probe(mKeyguardHostView)->UserActivity();
     }
 }
 
@@ -335,7 +341,7 @@ ECode KeyguardViewStateManager::OnScrollStateChanged(
 
         if (!challengeOverlapping) {
             Boolean res;
-            if (mKeyguardWidgetPager->IsPageMoving(&res), !res) {
+            if (IPagedView::Probe(mKeyguardWidgetPager)->IsPageMoving(&res), !res) {
                 frame->ResetSize();
                 UserActivity();
             }
@@ -352,12 +358,13 @@ ECode KeyguardViewStateManager::OnScrollStateChanged(
             frame->SetFrameHeight(height);
         }
         if (scrollState != ISlidingChallengeLayout::SCROLL_STATE_FADING) {
-            frame->HideFrame(this);
+            frame->HideFrame(TO_IINTERFACE(this));
         }
         UpdateEdgeSwiping();
 
         if (mChallengeLayout->IsChallengeShowing(&res), res) {
-            mKeyguardSecurityContainer->OnResume(KeyguardSecurityView.VIEW_REVEALED);
+            mKeyguardSecurityContainer->OnResume(
+                    IKeyguardSecurityView::VIEW_REVEALED);
         }
         else {
             mKeyguardSecurityContainer->OnPause();
@@ -368,7 +375,7 @@ ECode KeyguardViewStateManager::OnScrollStateChanged(
         // Whether dragging or settling, if the last state was idle, we use this signal
         // to update the current page who will receive events from the sliding challenge.
         // We resize the frame as appropriate.
-        mKeyguardWidgetPager->GetNextPage(&mPageListeningToSlider);
+        IPagedView::Probe(mKeyguardWidgetPager)->GetNextPage(&mPageListeningToSlider);
         AutoPtr<IKeyguardWidgetFrame> frame;
         mKeyguardWidgetPager->GetWidgetPageAt(mPageListeningToSlider, (IKeyguardWidgetFrame**)&frame);
         if (frame == NULL) return NOERROR;
@@ -377,21 +384,21 @@ ECode KeyguardViewStateManager::OnScrollStateChanged(
         Boolean res;
         if (mChallengeLayout->IsBouncing(&res), !res) {
             if (scrollState != ISlidingChallengeLayout::SCROLL_STATE_FADING) {
-                frame->ShowFrame(this);
+                frame->ShowFrame(TO_IINTERFACE(this));
             }
 
             // As soon as the security begins sliding, the widget becomes small (if it wasn't
             // small to begin with).
             if (frame->IsSmall(&res), !res) {
                 // We need to fetch the final page, in case the pages are in motion.
-                mKeyguardWidgetPager->GetNextPage(&mPageListeningToSlider);
+                IPagedView::Probe(mKeyguardWidgetPager)->GetNextPage(&mPageListeningToSlider);
                 frame->ShrinkWidget(FALSE);
             }
         }
         else {
             if (frame->IsSmall(&res), !res) {
                 // We need to fetch the final page, in case the pages are in motion.
-                mKeyguardWidgetPager->GetNextPage(&mPageListeningToSlider);
+                IPagedView::Probe(mKeyguardWidgetPager)->GetNextPage(&mPageListeningToSlider);
             }
         }
 
@@ -404,7 +411,7 @@ ECode KeyguardViewStateManager::OnScrollStateChanged(
 
 ECode KeyguardViewStateManager::OnScrollPositionChanged(
     /* [in] */ Float scrollPosition,
-    /* [in] */ Int challengeTop)
+    /* [in] */ Int32 challengeTop)
 {
     mChallengeTop = challengeTop;
     AutoPtr<IKeyguardWidgetFrame> frame;
@@ -418,13 +425,15 @@ ECode KeyguardViewStateManager::OnScrollPositionChanged(
 ECode KeyguardViewStateManager::ShowUsabilityHints()
 {
     AutoPtr<IRunnable> r = new MyRunnable2(this);
-    mMainQueue->PostDelayed(r , SCREEN_ON_RING_HINT_DELAY);
+    Boolean res;
+    mMainQueue->PostDelayed(r , SCREEN_ON_RING_HINT_DELAY, &res);
 
     if (SHOW_INITIAL_PAGE_HINTS) {
         mKeyguardWidgetPager->ShowInitialPageHints();
     }
     if (mHideHintsRunnable != NULL) {
-        mMainQueue->PostDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
+        mMainQueue->PostDelayed(mHideHintsRunnable,
+                SCREEN_ON_HINT_DURATION, &res);
     }
     return NOERROR;
 }
@@ -438,7 +447,7 @@ ECode KeyguardViewStateManager::OnBouncerStateChanged(
     else {
         mKeyguardWidgetPager->ZoomInFromBouncer();
         if (mKeyguardHostView != NULL) {
-            mKeyguardHostView->SetOnDismissAction(NULL);
+            IKeyguardViewBase::Probe(mKeyguardHostView)->SetOnDismissAction(NULL);
         }
     }
     return NOERROR;

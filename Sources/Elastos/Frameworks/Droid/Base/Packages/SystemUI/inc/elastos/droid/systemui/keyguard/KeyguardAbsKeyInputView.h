@@ -4,13 +4,25 @@
 
 #include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/widget/LinearLayout.h"
+#include "elastos/droid/os/CountDownTimer.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::CountDownTimer;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -29,9 +41,13 @@ private:
         TO_STRING_IMPL("KeyguardAbsKeyInputView::MyCountDownTimer")
 
         MyCountDownTimer(
+            /* [in] */ Int64 millisInFuture,
+            /* [in] */ Int64 countDownInterval,
             /* [in] */ KeyguardAbsKeyInputView* host)
             : mHost(host)
-        {}
+        {
+            CountDownTimer::constructor(millisInFuture, countDownInterval);
+        }
 
         //@Override
         CARAPI OnTick(

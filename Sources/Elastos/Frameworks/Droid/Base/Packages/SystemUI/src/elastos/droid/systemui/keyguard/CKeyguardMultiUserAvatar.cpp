@@ -1,5 +1,29 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardMultiUserAvatar.h"
+#include "elastos/droid/systemui/keyguard/MultiUserAvatarCache.h"
+#include "elastos/droid/systemui/keyguard/KeyguardCircleFramedDrawable.h"
+#include "elastos/droid/view/LayoutInflater.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include "elastos/droid/R.h"
+#include "R.h"
+
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Animation::IValueAnimatorHelper;
+using Elastos::Droid::Animation::CValueAnimatorHelper;
+using Elastos::Droid::Graphics::IColor;
+using Elastos::Droid::Graphics::CColor;
+using Elastos::Droid::Graphics::IBitmapFactory;
+using Elastos::Droid::Graphics::CBitmapFactory;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -15,15 +39,15 @@ ECode CKeyguardMultiUserAvatar::MyAnimatorUpdateListener::OnAnimationUpdate(
     animation->GetAnimatedFraction(&r);
     Float scale = (1 - r) * mInitScale + r * mFinalScale;
     Float alpha = (1 - r) * mInitAlpha + r * mFinalAlpha;
-    Int32 textAlpha = (Int32) ((1 - r) * initTextAlpha + r * finalTextAlpha);
+    Int32 textAlpha = (Int32) ((1 - r) * mInitTextAlpha + r * mFinalTextAlpha);
     mHost->mFramed->SetScale(scale);
     mHost->mUserImage->SetAlpha(alpha);
     AutoPtr<IColor> helper;
     CColor::AcquireSingleton((IColor**)&helper);
     Int32 argb;
-    helper->Argb(textAlpha, 255, 255, 255, &argb)
+    helper->Argb(textAlpha, 255, 255, 255, &argb);
     mHost->mUserName->SetTextColor(argb);
-    return mHost->mUserImage->Invalidate();
+    return IView::Probe(mHost->mUserImage)->Invalidate();
 }
 
 ECode CKeyguardMultiUserAvatar::MyAnimatorListenerAdapter::OnAnimationEnd(
@@ -41,11 +65,13 @@ const Boolean CKeyguardMultiUserAvatar::DEBUG = IKeyguardConstants::DEBUG;
 const Float CKeyguardMultiUserAvatar::ACTIVE_ALPHA = 1.0f;
 const Float CKeyguardMultiUserAvatar::INACTIVE_ALPHA = 1.0f;
 const Float CKeyguardMultiUserAvatar::ACTIVE_SCALE = 1.5f;
-const Float CKeyguardMultiUserAvatar::ACTIVE_TEXT_ALPHA = 0f;
+const Float CKeyguardMultiUserAvatar::ACTIVE_TEXT_ALPHA = 0.0f;
 const Float CKeyguardMultiUserAvatar::INACTIVE_TEXT_ALPHA = 0.5f;
 const Int32 CKeyguardMultiUserAvatar::SWITCH_ANIMATION_DURATION = 150;
 
 CAR_OBJECT_IMPL(CKeyguardMultiUserAvatar)
+
+CAR_INTERFACE_IMPL(CKeyguardMultiUserAvatar, FrameLayout, IKeyguardMultiUserAvatar)
 
 CKeyguardMultiUserAvatar::CKeyguardMultiUserAvatar()
     : mActiveAlpha(0.0f)
@@ -73,12 +99,10 @@ AutoPtr<IKeyguardMultiUserAvatar> CKeyguardMultiUserAvatar::FromXml(
     /* [in] */ IKeyguardMultiUserSelectorView* userSelector,
     /* [in] */ IUserInfo* info)
 {
-    AutoPtr<ILayoutInflaterHelper> helper;
-    CLayoutInflaterHelper::AcquireSingleton((ILayoutInflaterHelper**)&helper);
     AutoPtr<ILayoutInflater> flater;
-    helper->From(context, (ILayoutInflater**)&flater);
+    LayoutInflater::From(context, (ILayoutInflater**)&flater);
     AutoPtr<IView> view;
-    flater->Inflate(resId, userSelector, FALSE, (IView**)&view);
+    flater->Inflate(resId, IViewGroup::Probe(userSelector), FALSE, (IView**)&view);
     AutoPtr<IKeyguardMultiUserAvatar> icon = IKeyguardMultiUserAvatar::Probe(view);
     icon->Init(info, userSelector);
     return icon;
@@ -182,16 +206,17 @@ ECode CKeyguardMultiUserAvatar::Init(
 
         mFramed = new KeyguardCircleFramedDrawable(icon, (Int32)mIconSize, mFrameColor, mStroke,
                 mFrameShadowColor, mShadowRadius, mHighlightColor);
-        MultiUserAvatarCache::GetInstance()->Put(id, mFramed);
+        MultiUserAvatarCache::GetInstance()->Put(id, IDrawable::Probe(mFramed));
     }
 
     mFramed->Reset();
 
-    mUserImage->SetImageDrawable(mFramed);
+    mUserImage->SetImageDrawable(IDrawable::Probe(mFramed));
     String name;
     mUserInfo->GetName(&name);
-    mUserName->SetText(name);
-    SetOnClickListener(mUserSelector);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(name);
+    mUserName->SetText(cchar);
+    SetOnClickListener(IViewOnClickListener::Probe(mUserSelector));
     mInit = FALSE;
     return NOERROR;
 }
@@ -210,15 +235,29 @@ ECode CKeyguardMultiUserAvatar::SetActive(
             AutoPtr<IKeyguardLinearLayout> parent = IKeyguardLinearLayout::Probe(res);
             parent->SetTopChild(this);
             // TODO: Create an appropriate asset when string changes are possible.
+            AutoPtr<ICharSequence> cchar;
+            mUserName->GetText((ICharSequence**)&cchar);
             String text;
-            mUserName->GetText(&text);
+            cchar->ToString(&text);
+
+            AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+            AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(String(""));
+            array->Set(0, TO_IINTERFACE(cchar2));
             String str;
-            mContext->GetString(R::string::user_switched, String(""), &str);
-            SetContentDescription(text + String(". ") + str);
+            mContext->GetString(R::string::user_switched, array, &str);
+
+            StringBuilder sb;
+            sb += text;
+            sb += ". ";
+            sb += str;
+            String tmp;
+            sb.ToString(&tmp);
+            AutoPtr<ICharSequence> cchar3 = CoreUtils::Convert(tmp);
+            SetContentDescription(cchar3);
         }
         else {
-            String text;
-            mUserName->GetText(&text);
+            AutoPtr<ICharSequence> text;
+            mUserName->GetText((ICharSequence**)&text);
             SetContentDescription(text);
         }
     }
@@ -233,7 +272,7 @@ ECode CKeyguardMultiUserAvatar::UpdateVisualsForActive(
 {
     Float finalAlpha = active ? mActiveAlpha : mInactiveAlpha;
     Float initAlpha = active ? mInactiveAlpha : mActiveAlpha;
-    Float finalScale = active ? 1f : 1f / mActiveScale;
+    Float finalScale = active ? 1.0f : 1.0f / mActiveScale;
     Float initScale;
     mFramed->GetScale(&initScale);
     Int32 finalTextAlpha = active ? (Int32) (mActiveTextAlpha * 255) :
@@ -246,16 +285,20 @@ ECode CKeyguardMultiUserAvatar::UpdateVisualsForActive(
     if (animate && mTouched) {
         AutoPtr<IValueAnimatorHelper> helper;
         CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+        (*array)[0] = 0.0f;
+        (*array)[1] = 1.0f;
         AutoPtr<IValueAnimator> va;
-        helper->OfFloat(0f, 1f, (IValueAnimator**)&va);
+        helper->OfFloat(array, (IValueAnimator**)&va);
 
         AutoPtr<IAnimatorUpdateListener> lis = new MyAnimatorUpdateListener(this,
-                finalAlpha, finalScale, initAlpha, initScale);
+                finalAlpha, finalScale, initAlpha, initScale, initTextAlpha,
+                finalTextAlpha);
         va->AddUpdateListener(lis);
         AutoPtr<IAnimatorListener> lis2 = new MyAnimatorListenerAdapter(onComplete);
-        va->AddListener(lis2);
-        va->SetDuration(duration);
-        va->Start();
+        IAnimator::Probe(va)->AddListener(lis2);
+        IAnimator::Probe(va)->SetDuration(duration);
+        IAnimator::Probe(va)->Start();
     }
     else {
         mFramed->SetScale(finalScale);
@@ -263,10 +306,11 @@ ECode CKeyguardMultiUserAvatar::UpdateVisualsForActive(
         AutoPtr<IColor> helper;
         CColor::AcquireSingleton((IColor**)&helper);
         Int32 argb;
-        helper->Argb(finalTextAlpha, 255, 255, 255, &argb)
+        helper->Argb(finalTextAlpha, 255, 255, 255, &argb);
         mUserName->SetTextColor(argb);
         if (onComplete != NULL) {
-            Post(onComplete);
+            Boolean res;
+            Post(onComplete, &res);
         }
     }
 
@@ -281,10 +325,11 @@ ECode CKeyguardMultiUserAvatar::SetPressed(
         return NOERROR;
     }
 
-    if (mPressLock || !pressed || IsClickable()) {
+    Boolean res;
+    if (mPressLock || !pressed || (IsClickable(&res), res)) {
         FrameLayout::SetPressed(pressed);
         mFramed->SetPressed(pressed);
-        mUserImage->Invalidate();
+        IView::Probe(mUserImage)->Invalidate();
     }
     return NOERROR;
 }

@@ -1,11 +1,43 @@
 
 module
 {
+    using interface Elastos.Droid.Animation.IAnimator;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+
     namespace Elastos {
     namespace Droid {
     namespace Transition {
 
+    [local]
     interface IFade {
+        OnAppear(
+            [in] IViewGroup* sceneRoot,
+            [in] IView* view,
+            [in] ITransitionValues* startValues,
+            [in] ITransitionValues* endValues,
+            [out] IAnimator** result);
+
+        OnDisappear(
+            [in] IViewGroup* sceneRoot,
+            [in] IView* view,
+            [in] ITransitionValues* startValues,
+            [in] ITransitionValues* endValues,
+            [out] IAnimator** result);
+
+        Clone(
+            [out] IInterface** obj);
+
+        CloneImpl(
+            [in] IFade* obj);
+    }
+
+    interface IFadeHelper {
+        GetIN(
+            [out] Int32* _in);
+
+        GetOUT(
+            [out] Int32* _out);
     }
 
     } // Transition

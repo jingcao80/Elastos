@@ -151,7 +151,8 @@ const Int32 PagedView::FLING_THRESHOLD_VELOCITY;
 const Int32 PagedView::MIN_SNAP_VELOCITY;
 const Int32 PagedView::MIN_FLING_VELOCITY;
 
-CAR_INTERFACE_IMPL(PagedView, ViewGroup, IPagedView)
+CAR_INTERFACE_IMPL_2(PagedView, ViewGroup, IPagedView,
+        IViewGroupOnHierarchyChangeListener)
 
 PagedView::PagedView()
     : mFlingThresholdVelocity(0)

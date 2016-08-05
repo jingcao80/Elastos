@@ -3,9 +3,19 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDSIMPUKVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardSimPukView.h"
-#include <elastos/droid/widget/ImageButton.h>
+#include "elastos/droid/systemui/keyguard/KeyguardPinBasedInputView.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.App.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/Thread.h>
 
-using Elastos::Droid::Widget::ImageButton;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Object;
+using Elastos::Core::Thread;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -39,45 +49,7 @@ private:
         const Int32 DONE;
 
     private:
-        Int32 mState = ENTER_PUK;
-        CKeyguardSimPukView* mHost;
-    };
-
-    class MyRunnable
-        : public Runnable
-    {
-    public:
-        TO_STRING_IMPL("CKeyguardSimPukView::MyRunnable")
-
-        MyRunnable(
-            /* [in] */ CKeyguardSimPukView* host,
-            /* [in] */ Int32 result1,
-            /* [in] */ Int32 result2)
-            : mHost(host)
-            , mResult1(result1)
-            , mResult2(result2)
-
-        CARAPI Run();
-
-    private:
-        CKeyguardSimPukView* mHost;
-        Int32 mResult1;
-        Int32 mResult2;
-    };
-
-    class MyRunnable2
-        : public Runnable
-    {
-    public:
-        TO_STRING_IMPL("CKeyguardSimPukView::MyRunnable2")
-
-        MyRunnable2(
-            /* [in] */ CKeyguardSimPukView* host)
-            : mHost(host)
-
-        CARAPI Run();
-
-    private:
+        Int32 mState;
         CKeyguardSimPukView* mHost;
     };
 
@@ -111,6 +83,46 @@ private:
     class CheckSimPuk
         : public Thread
     {
+    private:
+        class MyRunnable
+            : public Runnable
+        {
+        public:
+            TO_STRING_IMPL("CKeyguardSimPukView::CheckSimPuk::MyRunnable")
+
+            MyRunnable(
+                /* [in] */ CheckSimPuk* host,
+                /* [in] */ Int32 result1,
+                /* [in] */ Int32 result2)
+                : mHost(host)
+                , mResult1(result1)
+                , mResult2(result2)
+            {}
+
+            CARAPI Run();
+
+        private:
+            CheckSimPuk* mHost;
+            Int32 mResult1;
+            Int32 mResult2;
+        };
+
+        class MyRunnable2
+            : public Runnable
+        {
+        public:
+            TO_STRING_IMPL("CKeyguardSimPukView::CheckSimPuk::MyRunnable2")
+
+            MyRunnable2(
+                /* [in] */ CheckSimPuk* host)
+                : mHost(host)
+            {}
+
+            CARAPI Run();
+
+        private:
+            CheckSimPuk* mHost;
+        };
     public:
         TO_STRING_IMPL("CKeyguardSimPukView::CheckSimPuk")
 
@@ -131,9 +143,11 @@ private:
             /* [in] */ Int32 result,
             /* [in] */ Int32 attemptsRemaining) = 0;
 
-    private:
+    protected:
         CKeyguardSimPukView* mHost;
-        String mPin, mPuk;
+
+    private:
+        String mPuk, mPin;
     };
 
     class MyCheckSimPuk
@@ -142,10 +156,17 @@ private:
     public:
         TO_STRING_IMPL("CKeyguardSimPukView::MyCheckSimPuk")
 
+        MyCheckSimPuk(
+            /* [in] */ CKeyguardSimPukView* host,
+            /* [in] */ const String& puk,
+            /* [in] */ const String& pin)
+            : CheckSimPuk(host, puk, pin)
+        {}
+
         CARAPI OnSimLockChangedResponse(
             /* [in] */ Int32 result,
             /* [in] */ Int32 attemptsRemaining);
-    }
+    };
 
 public:
     CAR_OBJECT_DECL()
@@ -213,11 +234,10 @@ public:
     static const String TAG;
 
 private:
-    static const String LOG_TAG;
     static const Boolean DEBUG;
 
     AutoPtr<IProgressDialog> mSimUnlockProgressDialog;
-    AutoPtr<ICheckSimPuk> mCheckSimPukThread;
+    AutoPtr<CheckSimPuk> mCheckSimPukThread;
     String mPukText;
     String mPinText;
     AutoPtr<StateMachine> mStateMachine;

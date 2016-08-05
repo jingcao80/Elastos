@@ -30,6 +30,7 @@
 #include "elastos/droid/media/CRouteCategory.h"
 #include "elastos/droid/media/CMediaRouterSimpleCallback.h"
 #include "elastos/droid/media/CMediaRouterUserRouteInfo.h"
+#include "elastos/droid/media/CRemoteController.h"
 
 namespace Elastos {
 namespace Droid {
@@ -67,6 +68,7 @@ CAR_OBJECT_IMPL(CMediaRouterSimpleCallback)
 CAR_OBJECT_IMPL(CPlayerRecordRccPlaybackState)
 CAR_OBJECT_IMPL(CPlayerRecordRemotePlaybackState)
 CAR_OBJECT_IMPL(CPlayerRecord)
+CAR_OBJECT_IMPL(CRemoteController)
 
 } // namespace Media
 } // namepsace Droid

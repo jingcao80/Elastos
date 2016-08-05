@@ -2,6 +2,8 @@
 #include "elastos/droid/systemui/keyguard/LiftToActivateListener.h"
 #include "Elastos.Droid.View.h"
 
+using Elastos::Droid::View::EIID_IViewOnHoverListener;
+
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
@@ -59,7 +61,8 @@ ECode LiftToActivateListener::OnHover(
                         && (y > (v->GetPaddingTop(&top), top))
                         && (x < (v->GetWidth(&width), width) - (v->GetPaddingRight(&right), right))
                         && (y < (v->GetHeight(&height), height) - (v->GetPaddingBottom(&bottom), bottom))) {
-                    v->PerformClick();
+                    Boolean res;
+                    v->PerformClick(&res);
                 }
                 v->SetClickable(mCachedClickableState);
                 break;
@@ -68,7 +71,8 @@ ECode LiftToActivateListener::OnHover(
     }
 
     // Pass the event to View.onHoverEvent() to handle accessibility.
-    v->OnHoverEvent(event);
+    Boolean res;
+    v->OnHoverEvent(event, &res);
 
     // Consume the event so it doesn't fall through to other views.
     *result = TRUE;

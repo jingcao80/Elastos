@@ -3,9 +3,23 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CMULTIPANECHALLENGELAYOUT_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CMultiPaneChallengeLayout.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include <elastos/droid/view/ViewGroup.h>
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Utility::IDisplayMetrics;
 
 namespace Elastos {
 namespace Droid {
@@ -114,7 +128,7 @@ private:
         {}
 
         //@Override
-        CARAPI onAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -171,7 +185,7 @@ public:
 
     //@Override
     CARAPI SetOnBouncerStateChangedListener(
-        /* [in] */ IOnBouncerStateChangedListener* listener);
+        /* [in] */ IChallengeLayoutOnBouncerStateChangedListener* listener);
 
     //@Override
     CARAPI RequestChildFocus(
@@ -238,7 +252,7 @@ private:
     AutoPtr<IKeyguardSecurityContainer> mChallengeView;
     AutoPtr<IView> mUserSwitcherView;
     AutoPtr<IView> mScrimView;
-    AutoPtr<IOnBouncerStateChangedListener> mBouncerListener;
+    AutoPtr<IChallengeLayoutOnBouncerStateChangedListener> mBouncerListener;
 
     AutoPtr<IRect> mTempRect;
     AutoPtr<IRect> mZeroPadding;

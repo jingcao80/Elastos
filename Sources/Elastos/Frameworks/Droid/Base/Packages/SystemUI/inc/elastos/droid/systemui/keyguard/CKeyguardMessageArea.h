@@ -3,9 +3,28 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDMESSAGEAREA_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardMessageArea.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include <elastos/droid/widget/TextView.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
+#include "R.h"
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::TextView;
+using Elastos::Core::Object;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -17,6 +36,7 @@ namespace Keyguard {
  */
 CarClass(CKeyguardMessageArea)
     , public TextView
+    , public IKeyguardMessageArea
 {
 public:
     class Helper
@@ -142,6 +162,8 @@ private:
 public:
     CAR_OBJECT_DECL()
 
+    CAR_INTERFACE_DECL()
+
     CKeyguardMessageArea();
 
     CARAPI constructor(
@@ -183,7 +205,7 @@ protected:
 
 private:
     /** Handler token posted with accessibility announcement runnables. */
-    static const Object ANNOUNCE_TOKEN;
+    static const AutoPtr<IInterface> ANNOUNCE_TOKEN;
 
     /**
      * Delay before speaking an accessibility announcement. Used to prevent

@@ -3,6 +3,14 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDWIDGETCAROUSEL_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardWidgetCarousel.h"
+#include "elastos/droid/systemui/keyguard/KeyguardWidgetPager.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Animation::IAnimatorSet;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -117,6 +125,10 @@ private:
     CARAPI_(void) UpdatePageAlphaValues(
         /* [in] */ Int32 screenCenter);
 
+    CARAPI_(void) GetTransformForPage(
+        /* [in] */ Int32 screenCenter,
+        /* [in] */ Int32 index,
+        /* [in] */ ArrayOf<Float>* transform);
 
 protected:
     AutoPtr<IAnimatorSet> mChildrenTransformsAnimator;

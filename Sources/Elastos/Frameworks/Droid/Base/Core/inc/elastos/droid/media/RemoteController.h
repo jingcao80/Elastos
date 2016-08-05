@@ -267,7 +267,7 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI EditMetadata(
-        /* [out] */ IMediaMetadataEditor** result);
+        /* [out] */ IRemoteControllerMetadataEditor** result);
 
     CARAPI StartListeningToSessions();
 

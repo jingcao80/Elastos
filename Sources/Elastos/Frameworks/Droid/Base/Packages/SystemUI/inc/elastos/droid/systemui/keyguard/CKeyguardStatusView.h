@@ -21,6 +21,7 @@ namespace Keyguard {
 
 CarClass(CKeyguardStatusView)
     , public GridLayout
+    , public IKeyguardStatusView
 {
 private:
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
@@ -64,6 +65,8 @@ private:
 
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context);

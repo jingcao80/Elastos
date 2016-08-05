@@ -3,14 +3,16 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDSECURITYVIEWHELPER_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Graphics.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::View::IView;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {

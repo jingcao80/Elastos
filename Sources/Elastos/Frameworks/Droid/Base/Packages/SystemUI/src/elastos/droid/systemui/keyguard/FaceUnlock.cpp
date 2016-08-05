@@ -1,11 +1,29 @@
 
 #include "elastos/droid/systemui/keyguard/FaceUnlock.h"
+#include "elastos/droid/systemui/keyguard/CFaceUnlockFaceLockCallback.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/os/Looper.h"
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/core/AutoLock.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::App::Admin::IDevicePolicyManager;
+using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Os::EIID_IHandlerCallback;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
+
+CAR_INTERFACE_IMPL(FaceUnlock::MyServiceConnection, Object, IServiceConnection)
 
 ECode FaceUnlock::MyServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* className,
@@ -13,21 +31,23 @@ ECode FaceUnlock::MyServiceConnection::OnServiceConnected(
 {
     Logger::D(TAG, "Connected to Face Unlock service");
     mHost->mService = IIFaceLockInterface::Probe(iservice);
-    return mHost->mHandler->SendEmptyMessage(MSG_SERVICE_CONNECTED);
+    Boolean res;
+    return mHost->mHandler->SendEmptyMessage(mHost->MSG_SERVICE_CONNECTED, &res);
 }
 
 ECode FaceUnlock::MyServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* className)
 {
     Logger::E(TAG, "Unexpected disconnect from Face Unlock service");
-    return mHost->mHandler->SendEmptyMessage(MSG_SERVICE_DISCONNECTED);
+    Boolean res;
+    return mHost->mHandler->SendEmptyMessage(mHost->MSG_SERVICE_DISCONNECTED, &res);
 }
 
-const Boolean FaceUnlock::DEBUG = KeyguardConstants::DEBUG;
+const Boolean FaceUnlock::DEBUG = IKeyguardConstants::DEBUG;
 const String FaceUnlock::TAG("FULLockscreen");
 const String FaceUnlock::FACE_LOCK_PACKAGE("com.android.facelock");
 
-CAR_INTERFACE_IMPL(FaceUnlock, BiometricSensorUnlock, IHandlerCallback)
+CAR_INTERFACE_IMPL_2(FaceUnlock, Object, IBiometricSensorUnlock, IHandlerCallback)
 
 FaceUnlock::FaceUnlock(
     /* [in] */ IContext* context)
@@ -44,10 +64,10 @@ FaceUnlock::FaceUnlock(
 {
     mConnection = new MyServiceConnection(this);
 
-    CFaceUnlockFaceLockCallback::New((IIFaceLockCallback**)&mFaceUnlockCallback);
+    CFaceUnlockFaceLockCallback::New(this, (IIFaceLockCallback**)&mFaceUnlockCallback);
 
     CLockPatternUtils::New(context, (ILockPatternUtils**)&mLockPatternUtils);
-    CHandler::New(this, (IHandler**)&mHandler);
+    CHandler::New(this, FALSE, (IHandler**)&mHandler);
 }
 
 ECode FaceUnlock::SetKeyguardCallback(
@@ -77,7 +97,8 @@ ECode FaceUnlock::IsRunning(
 ECode FaceUnlock::StopAndShowBackup()
 {
     if (DEBUG) Logger::D(TAG, "stopAndShowBackup()");
-    return mHandler->SendEmptyMessage(MSG_CANCEL);
+    Boolean res;
+    return mHandler->SendEmptyMessage(MSG_CANCEL, &res);
 }
 
 ECode FaceUnlock::Start(
@@ -89,8 +110,7 @@ ECode FaceUnlock::Start(
 
     AutoPtr<ILooper> lopper;
     mHandler->GetLooper((ILooper**)&lopper);
-    AutoPtr<ILooper> mlopper;
-    Looper::MyLooper((ILooper**)&mlopper)
+    AutoPtr<ILooper> mlopper = Looper::GetMyLooper();
     if (lopper != mlopper) {
         Logger::E(TAG, "start() called off of the UI thread");
     }
@@ -100,8 +120,9 @@ ECode FaceUnlock::Start(
     }
 
     if (!mBoundToService) {
-        Logger::D(TAG, "Binding to Face Unlock service for user="
-                + mLockPatternUtils.getCurrentUser());
+        Int32 user;
+        mLockPatternUtils->GetCurrentUser(&user);
+        Logger::D(TAG, "Binding to Face Unlock service for user=%d", user);
         assert(0);
         // mContext->BindServiceAsUser(
         //         new Intent(IFaceLockInterface.class.getName()).setPackage(FACE_LOCK_PACKAGE),
@@ -128,8 +149,7 @@ ECode FaceUnlock::Stop(
 
     AutoPtr<ILooper> lopper;
     mHandler->GetLooper((ILooper**)&lopper);
-    AutoPtr<ILooper> mlopper;
-    Looper::MyLooper((ILooper**)&mlopper)
+    AutoPtr<ILooper> mlopper = Looper::GetMyLooper();
     if (lopper != mlopper) {
         Logger::E(TAG, "stop() called from non-UI thread");
     }
@@ -196,30 +216,39 @@ ECode FaceUnlock::HandleMessage(
 
     Int32 what;
     msg->GetWhat(&what);
-    switch (what) {
-        case MSG_SERVICE_CONNECTED:
-            HandleServiceConnected();
-            break;
-        case MSG_SERVICE_DISCONNECTED:
-            HandleServiceDisconnected();
-            break;
-        case MSG_UNLOCK:
-            HandleUnlock(msg.arg1);
-            break;
-        case MSG_CANCEL:
-            HandleCancel();
-            break;
-        case MSG_REPORT_FAILED_ATTEMPT:
-            HandleReportFailedAttempt();
-            break;
-        case MSG_POKE_WAKELOCK:
-            HandlePokeWakelock(msg.arg1);
-            break;
-        default:
-            Logger::E(TAG, "Unhandled message");
-            *result = FALSE;
-            return NOERROR;
-    }
+    assert(0);
+    // switch (what) {
+    //     case MSG_SERVICE_CONNECTED:
+    //         HandleServiceConnected();
+    //         break;
+    //     case MSG_SERVICE_DISCONNECTED:
+    //         HandleServiceDisconnected();
+    //         break;
+    //     case MSG_UNLOCK:
+    //     {
+    //         Int32 arg1;
+    //         msg->GetArg1(&arg1);
+    //         HandleUnlock(arg1);
+    //         break;
+    //     }
+    //     case MSG_CANCEL:
+    //         HandleCancel();
+    //         break;
+    //     case MSG_REPORT_FAILED_ATTEMPT:
+    //         HandleReportFailedAttempt();
+    //         break;
+    //     case MSG_POKE_WAKELOCK:
+    //     {
+    //         Int32 arg1;
+    //         msg->GetArg1(&arg1);
+    //         HandlePokeWakelock(arg1);
+    //         break;
+    //     }
+    //     default:
+    //         Logger::E(TAG, "Unhandled message");
+    //         *result = FALSE;
+    //         return NOERROR;
+    // }
     *result = TRUE;
     return NOERROR;
 }
@@ -241,8 +270,8 @@ ECode FaceUnlock::HandleServiceConnected()
     //try {
     ECode ec = mService->RegisterCallback(mFaceUnlockCallback);
     //} catch (RemoteException e) {
-    if (ec == (ECode)RemoteException) {
-        Logger::E(TAG, "Caught exception connecting to Face Unlock: " + e.toString());
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        Logger::E(TAG, "Caught exception connecting to Face Unlock: %d", ec);
         mService = NULL;
         mBoundToService = FALSE;
         mIsRunning = FALSE;
@@ -258,13 +287,13 @@ ECode FaceUnlock::HandleServiceConnected()
             // is restarted.
             mKeyguardScreenCallback->UserActivity();
 
-            AutoPtr<ArrayOf<Int32> > position = ArrayOf<Int32>::Allco(2);
-            mFaceUnlockView->GetLocationInWindow((ArrayOf<Int32>**)&position);
+            AutoPtr<ArrayOf<Int32> > position = ArrayOf<Int32>::Alloc(2);
+            mFaceUnlockView->GetLocationInWindow(position);
             Int32 width;
             mFaceUnlockView->GetWidth(&width);
             Int32 height;
             mFaceUnlockView->GetHeight(&height);
-            StartUi(windowToken, (*position)[0], (*position)[1], width), height);
+            StartUi(windowToken, (*position)[0], (*position)[1], width, height);
         }
         else {
             Logger::E(TAG, "windowToken is null in handleServiceConnected()");
@@ -292,7 +321,8 @@ ECode FaceUnlock::HandleUnlock(
     /* [in] */ Int32 authenticatedUserId)
 {
     if (DEBUG) Logger::D(TAG, "handleUnlock()");
-    Stop();
+    Boolean res;
+    Stop(&res);
     Int32 currentUserId;
     mLockPatternUtils->GetCurrentUser(&currentUserId);
     if (authenticatedUserId == currentUserId) {
@@ -312,11 +342,11 @@ ECode FaceUnlock::HandleCancel()
     if (DEBUG) Logger::D(TAG, "handleCancel()");
     // We are going to the backup method, so we don't want to see Face Unlock again until the
     // next time the user visits keyguard.
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    monitor->SetAlternateUnlockEnabled(FALSE);
+    KeyguardUpdateMonitor::GetInstance(mContext)->SetAlternateUnlockEnabled(FALSE);
 
     mKeyguardScreenCallback->ShowBackupSecurity();
-    Stop();
+    Boolean res;
+    Stop(&res);
     return mKeyguardScreenCallback->UserActivity();
 }
 
@@ -325,8 +355,7 @@ ECode FaceUnlock::HandleReportFailedAttempt()
     if (DEBUG) Logger::D(TAG, "handleReportFailedAttempt()");
     // We are going to the backup method, so we don't want to see Face Unlock again until the
     // next time the user visits keyguard.
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    monitor->SetAlternateUnlockEnabled(FALSE);
+    KeyguardUpdateMonitor::GetInstance(mContext)->SetAlternateUnlockEnabled(FALSE);
 
     return mKeyguardScreenCallback->ReportUnlockAttempt(FALSE);
 }
@@ -361,8 +390,8 @@ void FaceUnlock::StartUi(
             mLockPatternUtils->IsBiometricWeakLivelinessEnabled(&res);
             ECode ec = mService->StartUi(windowToken, x, y, w, h, res);
             //} catch (RemoteException e) {
-            if (ec == (ECode)RemoteException) {
-                Logger::E(TAG, "Caught exception starting Face Unlock: " + e.toString());
+            if (ec == (ECode)E_REMOTE_EXCEPTION) {
+                Logger::E(TAG, "Caught exception starting Face Unlock: %d", ec);
                 return;
             }
             mServiceRunning = TRUE;
@@ -386,8 +415,8 @@ void FaceUnlock::StopUi()
             //try {
             ECode ec = mService->StopUi();
             //} catch (RemoteException e) {
-            if (ec == (ECode)RemoteException) {
-                Logger::E(TAG, "Caught exception stopping Face Unlock: " + e.toString());
+            if (ec == (ECode)E_REMOTE_EXCEPTION) {
+                Logger::E(TAG, "Caught exception stopping Face Unlock: %d", ec);
             }
             mServiceRunning = FALSE;
         }

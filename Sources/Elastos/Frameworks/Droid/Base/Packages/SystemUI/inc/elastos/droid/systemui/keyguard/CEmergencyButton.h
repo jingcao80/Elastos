@@ -3,9 +3,24 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CEMERGENCYBUTTON_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CEmergencyButton.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 #include <elastos/droid/widget/Button.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::Button;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {

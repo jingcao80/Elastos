@@ -1,30 +1,81 @@
 
-#include "elastos/droid/systemui/keyguard/CKeyguardWidgetPager.h"
+#include "elastos/droid/systemui/keyguard/KeyguardWidgetPager.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardWidgetFrame.h"
+#include "elastos/droid/systemui/keyguard/KeyguardWidgetFrame.h"
+#include "elastos/droid/text/format/DateFormat.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Text.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include <Elastos.CoreLibrary.Text.h>
+#include "R.h"
+
+using Elastos::Droid::AppWidget::IAppWidgetManager;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::Animation::IAnimatorSet;
+using Elastos::Droid::Animation::CAnimatorSet;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::IPropertyValuesHolder;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
+using Elastos::Droid::Animation::IPropertyValuesHolderHelper;
+using Elastos::Droid::Animation::CPropertyValuesHolderHelper;
+using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Text::Format::DateFormat;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::CViewGroupLayoutParams;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::View::Accessibility::IAccessibilityManager;
+using Elastos::Droid::View::Accessibility::IAccessibilityManagerHelper;
+using Elastos::Droid::View::Accessibility::CAccessibilityManagerHelper;
+using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
+using Elastos::Droid::View::Accessibility::IAccessibilityEventHelper;
+using Elastos::Droid::View::Accessibility::CAccessibilityEventHelper;
+using Elastos::Droid::View::Animation::IDecelerateInterpolator;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
+using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IThread;
+using Elastos::Core::Math;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::ITimeZone;
+using Elastos::Utility::ITimeZoneHelper;
+using Elastos::Utility::CTimeZoneHelper;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-ECode CKeyguardWidgetPager::MyRunnable::Run()
+ECode KeyguardWidgetPager::MyRunnable::Run()
 {
-    return mHost->mLockPatternUtils->RemoveAppWidget(mAppWidgetId);
+    Boolean res;
+    return mHost->mLockPatternUtils->RemoveAppWidget(mAppWidgetId, &res);
 }
 
-ECode CKeyguardWidgetPager::MyRunnable2::Run()
+ECode KeyguardWidgetPager::MyRunnable2::Run()
 {
-    return->mLockPatternUtils->AddAppWidget(mAppWidgetId, mIndex - mPagesRange);
+    Boolean res;
+    return mHost->mLockPatternUtils->AddAppWidget(mAppWidgetId,
+            mIndex - mPagesRange, &res);
 }
 
-CAR_INTERFACE_IMPL(CKeyguardWidgetPager::ZInterpolator, Object, ITimeInterpolator)
+CAR_INTERFACE_IMPL(KeyguardWidgetPager::ZInterpolator,
+        Object, ITimeInterpolator)
 
-CKeyguardWidgetPager::ZInterpolator::ZInterpolator(
+KeyguardWidgetPager::ZInterpolator::ZInterpolator(
     /* [in] */ Float foc)
 {
     mFocalLength = foc;
 }
 
-ECode CKeyguardWidgetPager::ZInterpolator::GetInterpolation(
+ECode KeyguardWidgetPager::ZInterpolator::GetInterpolation(
     /* [in] */ Float input,
     /* [out] */ Float* polation)
 {
@@ -34,7 +85,7 @@ ECode CKeyguardWidgetPager::ZInterpolator::GetInterpolation(
             (1.0f - mFocalLength / (mFocalLength + 1.0f));
 }
 
-ECode CKeyguardWidgetPager::ZInterpolator::HasNativeInterpolator(
+ECode KeyguardWidgetPager::ZInterpolator::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
@@ -43,7 +94,7 @@ ECode CKeyguardWidgetPager::ZInterpolator::HasNativeInterpolator(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::MyAnimatorListenerAdapter::OnAnimationStart(
+ECode KeyguardWidgetPager::MyAnimatorListenerAdapter::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
     if (mShow) {
@@ -52,15 +103,15 @@ ECode CKeyguardWidgetPager::MyAnimatorListenerAdapter::OnAnimationStart(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::MyAnimatorListenerAdapter::OnAnimationEnd(
+ECode KeyguardWidgetPager::MyAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    if (!show) {
+    if (!mShow) {
         mHost->DisablePageContentLayers();
         AutoPtr<IKeyguardWidgetFrame> frame;
         mHost->GetWidgetPageAt(mHost->mWidgetToResetAfterFadeOut, (IKeyguardWidgetFrame**)&frame);
         AutoPtr<IKeyguardWidgetFrame> currentPage;
-        getWidgetPageAt(mHost->mCurrentPage, (IKeyguardWidgetFrame**)&currentPage);
+        mHost->GetWidgetPageAt(mHost->mCurrentPage, (IKeyguardWidgetFrame**)&currentPage);
         Boolean res;
         if (frame != NULL && !(TO_IINTERFACE(frame) == TO_IINTERFACE(currentPage) &&
                 (mHost->mViewStateManager->IsChallengeOverlapping(&res), res))) {
@@ -69,25 +120,25 @@ ECode CKeyguardWidgetPager::MyAnimatorListenerAdapter::OnAnimationEnd(
         mHost->mWidgetToResetAfterFadeOut = -1;
         mHost->mShowingInitialHints = FALSE;
     }
-    return mHost->UpdateWidgetFramesImportantForAccessibility();
+    mHost->UpdateWidgetFramesImportantForAccessibility();
+    return NOERROR;
 }
 
-Float CKeyguardWidgetPager::OVERSCROLL_MAX_ROTATION = 30;
+Float KeyguardWidgetPager::OVERSCROLL_MAX_ROTATION = 30;
 
-Float CKeyguardWidgetPager::CAMERA_DISTANCE = 10000;
-const Boolean CKeyguardWidgetPager::PERFORM_OVERSCROLL_ROTATION = TRUE;
-const Int32 CKeyguardWidgetPager::FLAG_HAS_LOCAL_HOUR = 0x1;
-const Int32 CKeyguardWidgetPager::FLAG_HAS_LOCAL_MINUTE = 0x2;
+Float KeyguardWidgetPager::CAMERA_DISTANCE = 10000;
+const Boolean KeyguardWidgetPager::PERFORM_OVERSCROLL_ROTATION = TRUE;
+const Int32 KeyguardWidgetPager::FLAG_HAS_LOCAL_HOUR = 0x1;
+const Int32 KeyguardWidgetPager::FLAG_HAS_LOCAL_MINUTE = 0x2;
 
-const Int64 CKeyguardWidgetPager::CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
-const String CKeyguardWidgetPager::TAG("KeyguardWidgetPager");
+const Int64 KeyguardWidgetPager::CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
+const String KeyguardWidgetPager::TAG("KeyguardWidgetPager");
 
-CAR_OBJECT_IMPL(CKeyguardWidgetPager)
+CAR_INTERFACE_IMPL_4(KeyguardWidgetPager, PagedView, IKeyguardWidgetPager,
+        IPagedViewPageSwitchListener, IViewOnLongClickListener,
+        IChallengeLayoutOnBouncerStateChangedListener)
 
-CAR_INTERFACE_IMPL_4(CKeyguardWidgetPager, PagedView, IKeyguardWidgetPager, IPagedViewPageSwitchListener
-        , IOnLongClickListener, IChallengeLayoutOnBouncerStateChangedListener)
-
-CKeyguardWidgetPager::CKeyguardWidgetPager()
+KeyguardWidgetPager::KeyguardWidgetPager()
     : mShowHintsAfterLayout(FALSE)
     , mScreenCenter(0)
     , mShowingInitialHints(FALSE)
@@ -104,20 +155,20 @@ CKeyguardWidgetPager::CKeyguardWidgetPager()
     mZInterpolator = new ZInterpolator(0.5f);
 }
 
-ECode CKeyguardWidgetPager::constructor(
+ECode KeyguardWidgetPager::constructor(
     /* [in] */ IContext* context)
 {
     return constructor(NULL, NULL, 0);
 }
 
-ECode CKeyguardWidgetPager::constructor(
+ECode KeyguardWidgetPager::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
     return constructor(context, attrs, 0);
 }
 
-ECode CKeyguardWidgetPager::constructor(
+ECode KeyguardWidgetPager::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
@@ -132,36 +183,37 @@ ECode CKeyguardWidgetPager::constructor(
     SetPageSwitchListener(this);
 
     CHandlerThread::New(String("KeyguardWidgetPager Worker"), (IHandlerThread**)&mBackgroundWorkerThread);
-    mBackgroundWorkerThread->Start();
+    IThread::Probe(mBackgroundWorkerThread)->Start();
     AutoPtr<ILooper> looper;
     mBackgroundWorkerThread->GetLooper((ILooper**)&looper);
     CHandler::New(looper, (IHandler**)&mBackgroundWorkerHandler);
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnDetachedFromWindow()
+ECode KeyguardWidgetPager::OnDetachedFromWindow()
 {
-    PagedView>>OnDetachedFromWindow();
+    PagedView::OnDetachedFromWindow();
 
     // Clean up the worker thread
-    return mBackgroundWorkerThread->Quit();
+    Boolean res;
+    return mBackgroundWorkerThread->Quit(&res);
 }
 
-ECode CKeyguardWidgetPager::SetViewStateManager(
+ECode KeyguardWidgetPager::SetViewStateManager(
     /* [in] */ IKeyguardViewStateManager* viewStateManager)
 {
     mViewStateManager = viewStateManager;
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::SetLockPatternUtils(
+ECode KeyguardWidgetPager::SetLockPatternUtils(
     /* [in] */ ILockPatternUtils* l)
 {
     mLockPatternUtils = l;
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnPageSwitching(
+ECode KeyguardWidgetPager::OnPageSwitching(
     /* [in] */ IView* newPage,
     /* [in] */ Int32 newPageIndex)
 {
@@ -171,7 +223,7 @@ ECode CKeyguardWidgetPager::OnPageSwitching(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnPageSwitched(
+ECode KeyguardWidgetPager::OnPageSwitched(
     /* [in] */ IView* newPage,
     /* [in] */ Int32 newPageIndex)
 {
@@ -191,11 +243,13 @@ ECode CKeyguardWidgetPager::OnPageSwitched(
     }
 
     // Disable the status bar clock if we're showing the default status widget
+    Int32 visibility;
+    GetSystemUiVisibility(&visibility);
     if (showingClock) {
-        SetSystemUiVisibility(GetSystemUiVisibility() | IView::STATUS_BAR_DISABLE_CLOCK);
+        SetSystemUiVisibility(visibility | IView::STATUS_BAR_DISABLE_CLOCK);
     }
     else {
-        SetSystemUiVisibility(GetSystemUiVisibility() & ~IView::STATUS_BAR_DISABLE_CLOCK);
+        SetSystemUiVisibility(visibility & ~IView::STATUS_BAR_DISABLE_CLOCK);
     }
 
     // Extend the display timeout if the user switches pages
@@ -212,18 +266,24 @@ ECode CKeyguardWidgetPager::OnPageSwitched(
         GetWidgetPageAt(newPageIndex, (IKeyguardWidgetFrame**)&newWidgetPage);
         if (newWidgetPage != NULL) {
             newWidgetPage->OnActive(TRUE);
-            newWidgetPage->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
-            newWidgetPage->RequestAccessibilityFocus();
+            IView::Probe(newWidgetPage)->SetImportantForAccessibility(
+                    IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
+            Boolean res;
+            IView::Probe(newWidgetPage)->RequestAccessibilityFocus(&res);
         }
+        AutoPtr<IAccessibilityManagerHelper> helper;
+        CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&helper);
+        AutoPtr<IAccessibilityManager> manager;
+        helper->GetInstance(mContext, (IAccessibilityManager**)&manager);
         Boolean res;
-        if (mParent != NULL && (AccessibilityManager::GetInstance(mContext)->IsEnabled(&res), res)) {
+        if (mParent != NULL && (manager->IsEnabled(&res), res)) {
             AutoPtr<IAccessibilityEventHelper> helper;
             CAccessibilityEventHelper::AcquireSingleton((IAccessibilityEventHelper**)&helper);
             AutoPtr<IAccessibilityEvent> event;
             helper->Obtain(IAccessibilityEvent::TYPE_VIEW_SCROLLED, (IAccessibilityEvent**)&event);
             OnInitializeAccessibilityEvent(event);
             OnPopulateAccessibilityEvent(event);
-            mParent->RequestSendAccessibilityEvent(this, event);
+            mParent->RequestSendAccessibilityEvent(this, event, &res);
         }
     }
     if (mViewStateManager != NULL) {
@@ -232,13 +292,13 @@ ECode CKeyguardWidgetPager::OnPageSwitched(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::SnPageBeginWarp()
+ECode KeyguardWidgetPager::SnPageBeginWarp()
 {
     ShowOutlinesAndSidePages();
     return mViewStateManager->OnPageBeginWarp();
 }
 
-ECode CKeyguardWidgetPager::SnPageEndWarp()
+ECode KeyguardWidgetPager::SnPageEndWarp()
 {
     // if we're moving to the warp page, then immediately hide the other widgets.
     Int32 index;
@@ -250,7 +310,7 @@ ECode CKeyguardWidgetPager::SnPageEndWarp()
     return mViewStateManager->OnPageEndWarp();
 }
 
-ECode CKeyguardWidgetPager::SendAccessibilityEvent(
+ECode KeyguardWidgetPager::SendAccessibilityEvent(
     /* [in] */ Int32  eventType)
 {
     Boolean res;
@@ -260,7 +320,7 @@ ECode CKeyguardWidgetPager::SendAccessibilityEvent(
     return NOERROR;
 }
 
-void CKeyguardWidgetPager::UpdateWidgetFramesImportantForAccessibility()
+void KeyguardWidgetPager::UpdateWidgetFramesImportantForAccessibility()
 {
     Int32 pageCount;
     GetPageCount(&pageCount);
@@ -271,19 +331,22 @@ void CKeyguardWidgetPager::UpdateWidgetFramesImportantForAccessibility()
     }
 }
 
-void CKeyguardWidgetPager::UpdateWidgetFrameImportantForAccessibility(
+void KeyguardWidgetPager::UpdateWidgetFrameImportantForAccessibility(
     /* [in] */ IKeyguardWidgetFrame* frame)
 {
-    Int32 _alpha;
+    Float _alpha;
     frame->GetContentAlpha(&_alpha);
     if (_alpha <= 0) {
-        frame->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_NO);
-    } else {
-        frame->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
+        IView::Probe(frame)->SetImportantForAccessibility(
+                IView::IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+    else {
+        IView::Probe(frame)->SetImportantForAccessibility(
+                IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 }
 
-void CKeyguardWidgetPager::UserActivity()
+void KeyguardWidgetPager::UserActivity()
 {
     if (mCallbacks != NULL) {
         mCallbacks->OnUserActivityTimeoutChanged();
@@ -291,7 +354,7 @@ void CKeyguardWidgetPager::UserActivity()
     }
 }
 
-ECode CKeyguardWidgetPager::OnTouchEvent(
+ECode KeyguardWidgetPager::OnTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
@@ -302,7 +365,7 @@ ECode CKeyguardWidgetPager::OnTouchEvent(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnInterceptTouchEvent(
+ECode KeyguardWidgetPager::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
@@ -313,7 +376,7 @@ ECode CKeyguardWidgetPager::OnInterceptTouchEvent(
     return NOERROR;
 }
 
-Boolean CKeyguardWidgetPager::CaptureUserInteraction(
+Boolean KeyguardWidgetPager::CaptureUserInteraction(
     /* [in] */ IMotionEvent* ev)
 {
     Int32 page;
@@ -324,13 +387,13 @@ Boolean CKeyguardWidgetPager::CaptureUserInteraction(
     return currentWidgetPage != NULL && (currentWidgetPage->OnUserInteraction(ev, &res), res);
 }
 
-ECode CKeyguardWidgetPager::ShowPagingFeedback()
+ECode KeyguardWidgetPager::ShowPagingFeedback()
 {
     // Nothing yet.
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::GetUserActivityTimeout(
+ECode KeyguardWidgetPager::GetUserActivityTimeout(
     /* [out] */ Int64* timetout)
 {
     VALIDATE_NOT_NULL(timetout)
@@ -351,20 +414,20 @@ ECode CKeyguardWidgetPager::GetUserActivityTimeout(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::SetCallbacks(
-    /* [in] */ IKeyguardWidgetPageCallbacks* callbacks)
+ECode KeyguardWidgetPager::SetCallbacks(
+    /* [in] */ IKeyguardWidgetPagerCallbacks* callbacks)
 {
     mCallbacks = callbacks;
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::AddWidget(
+ECode KeyguardWidgetPager::AddWidget(
     /* [in] */ IView* widget)
 {
     return AddWidget(widget, -1);
 }
 
-ECode CKeyguardWidgetPager::OnRemoveView(
+ECode KeyguardWidgetPager::OnRemoveView(
     /* [in] */ IView* v,
     /* [in] */ Boolean deletePermanently)
 {
@@ -374,10 +437,11 @@ ECode CKeyguardWidgetPager::OnRemoveView(
         mCallbacks->OnRemoveView(v, deletePermanently);
     }
     AutoPtr<IRunnable> r = new MyRunnable(this, appWidgetId);
-    return mBackgroundWorkerHandler->Post(r);
+    Boolean res;
+    return mBackgroundWorkerHandler->Post(r, &res);
 }
 
-ECode CKeyguardWidgetPager::OnRemoveViewAnimationCompleted()
+ECode KeyguardWidgetPager::OnRemoveViewAnimationCompleted()
 {
     if (mCallbacks != NULL) {
         mCallbacks->OnRemoveViewAnimationCompleted();
@@ -385,13 +449,13 @@ ECode CKeyguardWidgetPager::OnRemoveViewAnimationCompleted()
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnAddView(
+ECode KeyguardWidgetPager::OnAddView(
     /* [in] */ IView* v,
     /* [in] */ Int32 index)
 {
     Int32 appWidgetId;
     IKeyguardWidgetFrame::Probe(v)->GetContentAppWidgetId(&appWidgetId);
-    AutoPtr<ArrarOf<Int32> > pagesRange = ArrarOf<Int32>::Alloc(mTempVisiblePagesRange->GetLength());
+    AutoPtr<ArrayOf<Int32> > pagesRange = ArrayOf<Int32>::Alloc(mTempVisiblePagesRange->GetLength());
     GetVisiblePages(pagesRange);
     BoundByReorderablePages(TRUE, pagesRange);
     if (mCallbacks != NULL) {
@@ -400,28 +464,29 @@ ECode CKeyguardWidgetPager::OnAddView(
     // Subtract from the index to take into account pages before the reorderable
     // pages (e.g. the "add widget" page)
     AutoPtr<IRunnable> r = new MyRunnable2(this, appWidgetId, index, (*pagesRange)[0]);
-    return mBackgroundWorkerHandler->Post(r);
+    Boolean res;
+    return mBackgroundWorkerHandler->Post(r, &res);
 }
 
-ECode CKeyguardWidgetPager::AddWidget(
+ECode KeyguardWidgetPager::AddWidget(
     /* [in] */ IView* widget,
     /* [in] */ Int32 pageIndex)
 {
     AutoPtr<IKeyguardWidgetFrame> frame;
     // All views contained herein should be wrapped in a KeyguardWidgetFrame
-    if (IKeyguardWidgetFrame::Proeb(widget) == NULL) {
+    if (IKeyguardWidgetFrame::Probe(widget) == NULL) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         CKeyguardWidgetFrame::New(context, (IKeyguardWidgetFrame**)&frame);
         AutoPtr<IFrameLayoutLayoutParams> lp;
-        CFrameLayoutLayoutParams::New(IFrameLayoutLayoutParams::MATCH_PARENT,
-                IFrameLayoutLayoutParams::MATCH_PARENT, (IFrameLayoutLayoutParams**)&lp);
+        CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
+                IViewGroupLayoutParams::MATCH_PARENT, (IFrameLayoutLayoutParams**)&lp);
         lp->SetGravity(IGravity::TOP);
 
         // The framework adds a default padding to AppWidgetHostView. We don't need this padding
         // for the Keyguard, so we override it to be 0.
         widget->SetPadding(0,  0, 0, 0);
-        frame->AddView(widget, lp);
+        IViewGroup::Probe(frame)->AddView(widget, IViewGroupLayoutParams::Probe(lp));
 
         // We set whether or not this widget supports vertical resizing.
         if (IAppWidgetHostView::Probe(widget) != NULL) {
@@ -431,7 +496,7 @@ ECode CKeyguardWidgetPager::AddWidget(
 
             Int32 mode;
             info->GetResizeMode(&mode);
-            if (mode & IAppWidgetProviderInfo::RESIZE_VERTICAL) != 0) {
+            if ((mode & IAppWidgetProviderInfo::RESIZE_VERTICAL) != 0) {
                 frame->SetWidgetLockedSmall(FALSE);
             }
             else {
@@ -451,14 +516,14 @@ ECode CKeyguardWidgetPager::AddWidget(
     CViewGroupLayoutParams::New(
             IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::MATCH_PARENT,
             (IViewGroupLayoutParams**)&pageLp);
-    frame->SetOnLongClickListener(this);
+    IView::Probe(frame)->SetOnLongClickListener(this);
     frame->SetWorkerHandler(mBackgroundWorkerHandler);
 
     if (pageIndex == -1) {
-        AddView(frame, pageLp);
+        AddView(IView::Probe(frame), pageLp);
     }
     else {
-        AddView(frame, pageIndex, pageLp);
+        AddView(IView::Probe(frame), pageIndex, pageLp);
     }
 
     // Update the frame content description.
@@ -471,17 +536,21 @@ ECode CKeyguardWidgetPager::AddWidget(
     }
     if (content != NULL) {
         AutoPtr<ICharSequence> cchar;
-        content->GetContentDescription((ICharSequence**)&cchar)
+        content->GetContentDescription((ICharSequence**)&cchar);
+        AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+        array->Set(0, TO_IINTERFACE(cchar));
         String contentDescription;
         mContext->GetString(
             R::string::keyguard_accessibility_widget,
-            cchar, &contentDescription);
-        frame->SetContentDescription(contentDescription);
+            array, &contentDescription);
+        AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(contentDescription);
+        IView::Probe(frame)->SetContentDescription(cchar2);
     }
-    return UpdateWidgetFrameImportantForAccessibility(frame);
+    UpdateWidgetFrameImportantForAccessibility(frame);
+    return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::AddView(
+ECode KeyguardWidgetPager::AddView(
     /* [in] */ IView* child,
     /* [in] */ Int32 index)
 {
@@ -489,7 +558,7 @@ ECode CKeyguardWidgetPager::AddView(
     return PagedView::AddView(child, index);
 }
 
-ECode CKeyguardWidgetPager::AddView(
+ECode KeyguardWidgetPager::AddView(
     /* [in] */ IView* child,
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
@@ -498,7 +567,7 @@ ECode CKeyguardWidgetPager::AddView(
     return PagedView::AddView(child, width, height);
 }
 
-ECode CKeyguardWidgetPager::AddView(
+ECode KeyguardWidgetPager::AddView(
     /* [in] */ IView* child,
     /* [in] */ IViewGroupLayoutParams* params)
 {
@@ -506,7 +575,7 @@ ECode CKeyguardWidgetPager::AddView(
     return PagedView::AddView(child, params);
 }
 
-ECode CKeyguardWidgetPager::AddView(
+ECode KeyguardWidgetPager::AddView(
     /* [in] */ IView* child,
     /* [in] */ Int32 index,
     /* [in] */ IViewGroupLayoutParams* params)
@@ -515,18 +584,18 @@ ECode CKeyguardWidgetPager::AddView(
     return PagedView::AddView(child, index, params);
 }
 
-ECode CKeyguardWidgetPager::EnforceKeyguardWidgetFrame(
+ECode KeyguardWidgetPager::EnforceKeyguardWidgetFrame(
     /* [in] */ IView* child)
 {
     if (IKeyguardWidgetFrame::Probe(child) == NULL) {
         // throw new IllegalArgumentException(
         //         "KeyguardWidgetPager children must be KeyguardWidgetFrames");
-        return IllegalArgumentException;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::GetWidgetPageAt(
+ECode KeyguardWidgetPager::GetWidgetPageAt(
     /* [in] */ Int32 index,
     /* [out] */ IKeyguardWidgetFrame** frame)
 {
@@ -540,25 +609,26 @@ ECode CKeyguardWidgetPager::GetWidgetPageAt(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnUnhandledTap(
+ECode KeyguardWidgetPager::OnUnhandledTap(
     /* [in] */ IMotionEvent* ev)
 {
     return ShowPagingFeedback();
 }
 
-ECode CKeyguardWidgetPager::OnPageBeginMoving()
+ECode KeyguardWidgetPager::OnPageBeginMoving()
 {
     if (mViewStateManager != NULL) {
         mViewStateManager->OnPageBeginMoving();
     }
-    if (!IsReordering(FALSE)) {
+    Boolean res;
+    if (IsReordering(FALSE, &res), !res) {
         ShowOutlinesAndSidePages();
     }
     UserActivity();
-    return NOERROR
+    return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnPageEndMoving()
+ECode KeyguardWidgetPager::OnPageEndMoving()
 {
     if (mViewStateManager != NULL) {
         mViewStateManager->OnPageEndMoving();
@@ -566,13 +636,14 @@ ECode CKeyguardWidgetPager::OnPageEndMoving()
 
     // In the reordering case, the pages will be faded appropriately on completion
     // of the zoom in animation.
-    if (!IsReordering(FALSE)) {
+    Boolean res;
+    if (IsReordering(FALSE, &res), !res) {
         HideOutlinesAndSidePages();
     }
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::EnablePageContentLayers()
+ECode KeyguardWidgetPager::EnablePageContentLayers()
 {
     Int32 children;
     GetChildCount(&children);
@@ -584,7 +655,7 @@ ECode CKeyguardWidgetPager::EnablePageContentLayers()
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::DisablePageContentLayers()
+ECode KeyguardWidgetPager::DisablePageContentLayers()
 {
     Int32 children;
     GetChildCount(&children);
@@ -596,29 +667,29 @@ ECode CKeyguardWidgetPager::DisablePageContentLayers()
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OverScroll(
+ECode KeyguardWidgetPager::OverScroll(
     /* [in] */ Float amount)
 {
     return AcceleratedOverScroll(amount);
 }
 
-ECode CKeyguardWidgetPager::BackgroundAlphaInterpolator(
+ECode KeyguardWidgetPager::BackgroundAlphaInterpolator(
     /* [in] */ Float r,
     /* [out] */ Float* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = Math::Min(1f, r);
+    *result = Elastos::Core::Math::Min(1.0f, r);
     return NOERROR;
 }
 
-void CKeyguardWidgetPager::UpdatePageAlphaValues(
+void KeyguardWidgetPager::UpdatePageAlphaValues(
     /* [in] */ Int32 screenCenter)
 {
     return;
 }
 
-ECode CKeyguardWidgetPager::GetAlphaForPage(
+ECode KeyguardWidgetPager::GetAlphaForPage(
     /* [in] */ Int32 screenCenter,
     /* [in] */ Int32 index,
     /* [in] */ Boolean showSidePages,
@@ -630,7 +701,7 @@ ECode CKeyguardWidgetPager::GetAlphaForPage(
     if (IsWarping(&res), res) {
         Int32 _index;
         GetPageWarpIndex(&_index);
-        *result = index == _index() ? 1.0f : 0.0f;
+        *result = index == _index ? 1.0f : 0.0f;
         return NOERROR;
     }
     if (showSidePages) {
@@ -638,12 +709,12 @@ ECode CKeyguardWidgetPager::GetAlphaForPage(
         return NOERROR;
     }
     else {
-        *result = index == mCurrentPage ? 1.0f : 0f;
+        *result = index == mCurrentPage ? 1.0f : 0.0f;
         return NOERROR;
     }
 }
 
-ECode CKeyguardWidgetPager::GetOutlineAlphaForPage(
+ECode KeyguardWidgetPager::GetOutlineAlphaForPage(
     /* [in] */ Int32 screenCenter,
     /* [in] */ Int32 index,
     /* [in] */ Boolean showSidePages,
@@ -654,7 +725,7 @@ ECode CKeyguardWidgetPager::GetOutlineAlphaForPage(
     if (showSidePages) {
         Float _result;
         GetAlphaForPage(screenCenter, index, showSidePages, &_result);
-        *result = _result * IKeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER;
+        *result = _result * KeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER;
         return NOERROR;
     }
     else {
@@ -663,7 +734,7 @@ ECode CKeyguardWidgetPager::GetOutlineAlphaForPage(
     }
 }
 
-ECode CKeyguardWidgetPager::IsOverScrollChild(
+ECode KeyguardWidgetPager::IsOverScrollChild(
     /* [in] */ Int32 index,
     /* [in] */ Float scrollProgress,
     /* [out] */ Boolean* result)
@@ -677,7 +748,7 @@ ECode CKeyguardWidgetPager::IsOverScrollChild(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::ScreenScrolled(
+ECode KeyguardWidgetPager::ScreenScrolled(
     /* [in] */ Int32 screenCenter)
 {
     mScreenCenter = screenCenter;
@@ -691,9 +762,9 @@ ECode CKeyguardWidgetPager::ScreenScrolled(
         if (TO_IINTERFACE(v) == TO_IINTERFACE(mDragView)) continue;
         if (v != NULL) {
             Float scrollProgress;
-            GetScrollProgress(screenCenter, v, i, &scrollProgress);
+            GetScrollProgress(screenCenter, IView::Probe(v), i, &scrollProgress);
 
-            v->SetCameraDistance(mDensity * CAMERA_DISTANCE);
+            IView::Probe(v)->SetCameraDistance(mDensity * CAMERA_DISTANCE);
 
             Boolean res;
             IsOverScrollChild(i, scrollProgress, &res);
@@ -704,33 +775,35 @@ ECode CKeyguardWidgetPager::ScreenScrolled(
                 Int32 height;
                 IView::Probe(v)->GetMeasuredHeight(&height);
                 Float pivotY = height / 2;
-                v->SetPivotX(pivotX);
-                v->SetPivotY(pivotY);
-                v->SetRotationY(- OVERSCROLL_MAX_ROTATION * scrollProgress);
-                v->SetOverScrollAmount(Math::Abs(scrollProgress), scrollProgress < 0);
+                IView::Probe(v)->SetPivotX(pivotX);
+                IView::Probe(v)->SetPivotY(pivotY);
+                IView::Probe(v)->SetRotationY(- OVERSCROLL_MAX_ROTATION * scrollProgress);
+                v->SetOverScrollAmount(Elastos::Core::Math::Abs(scrollProgress),
+                        scrollProgress < 0);
             }
             else {
-                v->SetRotationY(0.0f);
+                IView::Probe(v)->SetRotationY(0.0f);
                 v->SetOverScrollAmount(0, FALSE);
             }
 
             Float alpha;
-            v->GetAlpha(&alpha);
+            IView::Probe(v)->GetAlpha(&alpha);
             // If the view has 0 alpha, we set it to be invisible so as to prevent
             // it from accepting touches
             Int32 visibility;
             if (alpha == 0) {
-                v->SetVisibility(INVISIBLE);
+                IView::Probe(v)->SetVisibility(INVISIBLE);
             }
-            else if ((v->GetVisibility(&visibility), visibility) != VISIBLE) {
-                v->SetVisibility(VISIBLE);
+            else if ((IView::Probe(v)->GetVisibility(&visibility), visibility)
+                    != VISIBLE) {
+                IView::Probe(v)->SetVisibility(VISIBLE);
             }
         }
     }
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::IsWidgetPage(
+ECode KeyguardWidgetPager::IsWidgetPage(
     /* [in] */ Int32 pageIndex,
     /* [out] */ Boolean* result)
 {
@@ -743,7 +816,7 @@ ECode CKeyguardWidgetPager::IsWidgetPage(
     }
     AutoPtr<IView> v;
     GetChildAt(pageIndex, (IView**)&v);
-    if (v != NULL && IKeyguardWidgetFrame::Probe(v) ! = NULL) {
+    if (v != NULL && IKeyguardWidgetFrame::Probe(v) != NULL) {
         AutoPtr<IKeyguardWidgetFrame> kwf = IKeyguardWidgetFrame::Probe(v);
         Int32 id;
         kwf->GetContentAppWidgetId(&id);
@@ -754,7 +827,7 @@ ECode CKeyguardWidgetPager::IsWidgetPage(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::BoundByReorderablePages(
+ECode KeyguardWidgetPager::BoundByReorderablePages(
     /* [in] */ Boolean isReordering,
     /* [in] */ ArrayOf<Int32>* range)
 {
@@ -771,35 +844,35 @@ ECode CKeyguardWidgetPager::BoundByReorderablePages(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::ReorderStarting()
+ECode KeyguardWidgetPager::ReorderStarting()
 {
     return ShowOutlinesAndSidePages();
 }
 
-ECode CKeyguardWidgetPager::OnStartReordering()
+ECode KeyguardWidgetPager::OnStartReordering()
 {
     PagedView::OnStartReordering();
     EnablePageContentLayers();
     return ReorderStarting();
 }
 
-ECode CKeyguardWidgetPager::OnEndReordering()
+ECode KeyguardWidgetPager::OnEndReordering()
 {
     PagedView::OnEndReordering();
     return HideOutlinesAndSidePages();
 }
 
-ECode CKeyguardWidgetPager::ShowOutlinesAndSidePages()
+ECode KeyguardWidgetPager::ShowOutlinesAndSidePages()
 {
     return AnimateOutlinesAndSidePages(TRUE);
 }
 
-ECode CKeyguardWidgetPager::HideOutlinesAndSidePages()
+ECode KeyguardWidgetPager::HideOutlinesAndSidePages()
 {
     return AnimateOutlinesAndSidePages(FALSE);
 }
 
-ECode CKeyguardWidgetPager::UpdateChildrenContentAlpha(
+ECode KeyguardWidgetPager::UpdateChildrenContentAlpha(
     /* [in] */ Float sidePageAlpha)
 {
     Int32 count;
@@ -819,28 +892,29 @@ ECode CKeyguardWidgetPager::UpdateChildrenContentAlpha(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::ShowInitialPageHints()
+ECode KeyguardWidgetPager::ShowInitialPageHints()
 {
     mShowingInitialHints = TRUE;
-    return UpdateChildrenContentAlpha(IKeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER);
+    return UpdateChildrenContentAlpha(KeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER);
 }
 
-ECode CKeyguardWidgetPager::SetCurrentPage(
+ECode KeyguardWidgetPager::SetCurrentPage(
     /* [in] */ Int32 currentPage)
 {
     PagedView::SetCurrentPage(currentPage);
     UpdateChildrenContentAlpha(0.0f);
-    return UpdateWidgetFramesImportantForAccessibility();
+    UpdateWidgetFramesImportantForAccessibility();
+    return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnAttachedToWindow()
+ECode KeyguardWidgetPager::OnAttachedToWindow()
 {
     PagedView::OnAttachedToWindow();
     mHasMeasure = FALSE;
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::OnMeasure(
+ECode KeyguardWidgetPager::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -887,20 +961,20 @@ ECode CKeyguardWidgetPager::OnMeasure(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::AnimateOutlinesAndSidePages(
+ECode KeyguardWidgetPager::AnimateOutlinesAndSidePages(
     /* [in] */ Boolean show)
 {
     return AnimateOutlinesAndSidePages(show, -1);
 }
 
-ECode CKeyguardWidgetPager::SetWidgetToResetOnPageFadeOut(
+ECode KeyguardWidgetPager::SetWidgetToResetOnPageFadeOut(
     /* [in] */ Int32 widget)
 {
     mWidgetToResetAfterFadeOut = widget;
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::GetWidgetToResetOnPageFadeOut(
+ECode KeyguardWidgetPager::GetWidgetToResetOnPageFadeOut(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -909,12 +983,12 @@ ECode CKeyguardWidgetPager::GetWidgetToResetOnPageFadeOut(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::AnimateOutlinesAndSidePages(
+ECode KeyguardWidgetPager::AnimateOutlinesAndSidePages(
     /* [in] */ Boolean show,
     /* [in] */ Int32 duration)
 {
     if (mChildrenOutlineFadeAnimation != NULL) {
-        mChildrenOutlineFadeAnimation->Cancel();
+        IAnimator::Probe(mChildrenOutlineFadeAnimation)->Cancel();
         mChildrenOutlineFadeAnimation = NULL;
     }
     Int32 count;
@@ -946,31 +1020,36 @@ ECode CKeyguardWidgetPager::AnimateOutlinesAndSidePages(
 
         AutoPtr<IPropertyValuesHolderHelper> helper;
         CPropertyValuesHolderHelper::AcquireSingleton((IPropertyValuesHolderHelper**)&helper);
-        helper->OfFloat(String("contentAlpha"), finalContentAlpha, (IPropertyValuesHolder**)&alpha);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = finalContentAlpha;
+        helper->OfFloat(String("contentAlpha"), array, (IPropertyValuesHolder**)&alpha);
 
         AutoPtr<IObjectAnimatorHelper> helper2;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper2);
+        AutoPtr<ArrayOf<IPropertyValuesHolder*> > array2 =
+                ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+        array2->Set(0, alpha);
         AutoPtr<IObjectAnimator> a;
-        helper2->OfPropertyValuesHolder(child, alpha, (IObjectAnimator**)&a);
+        helper2->OfPropertyValuesHolder(child, array2, (IObjectAnimator**)&a);
         anims->Add(TO_IINTERFACE(a));
 
         Float finalOutlineAlpha = 0.0f;
         if (show) {
-            GetOutlineAlphaForPage(mScreenCenter, i, TRUE, &finalOutlineAlpha)
+            GetOutlineAlphaForPage(mScreenCenter, i, TRUE, &finalOutlineAlpha);
         }
-        child->FadeFrame(this, show, finalOutlineAlpha, duration);
+        child->FadeFrame(TO_IINTERFACE(this), show, finalOutlineAlpha, duration);
     }
 
     CAnimatorSet::New((IAnimatorSet**)&mChildrenOutlineFadeAnimation);
-    mChildrenOutlineFadeAnimation->PlayTogether(anims);
+    mChildrenOutlineFadeAnimation->PlayTogether(ICollection::Probe(anims));
 
-    mChildrenOutlineFadeAnimation->SetDuration(duration);
+    IAnimator::Probe(mChildrenOutlineFadeAnimation)->SetDuration(duration);
     AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter(this, show);
-    mChildrenOutlineFadeAnimation->AddListener(lis);
-    return mChildrenOutlineFadeAnimation->Start();
+    IAnimator::Probe(mChildrenOutlineFadeAnimation)->AddListener(lis);
+    return IAnimator::Probe(mChildrenOutlineFadeAnimation)->Start();
 }
 
-ECode CKeyguardWidgetPager::OnLongClick(
+ECode KeyguardWidgetPager::OnLongClick(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
@@ -990,7 +1069,7 @@ ECode CKeyguardWidgetPager::OnLongClick(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::RemoveWidget(
+ECode KeyguardWidgetPager::RemoveWidget(
     /* [in] */ IView* view)
 {
     if (IKeyguardWidgetFrame::Probe(view) != NULL) {
@@ -1005,17 +1084,17 @@ ECode CKeyguardWidgetPager::RemoveWidget(
             AutoPtr<IView> view;
             GetChildAt(pos, (IView**)&view);
             AutoPtr<IKeyguardWidgetFrame> frame = IKeyguardWidgetFrame::Probe(view);
-            frame->RemoveView(view);
-            RemoveView(frame);
+            IViewGroup::Probe(frame)->RemoveView(view);
+            RemoveView(IView::Probe(frame));
         }
         else {
-            Slogger::W(TAG, "removeWidget() can't find: %s", TO_CSTR(view));
+            Logger::W(TAG, "removeWidget() can't find: %s", TO_CSTR(view));
         }
     }
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::GetWidgetPageIndex(
+ECode KeyguardWidgetPager::GetWidgetPageIndex(
     /* [in] */ IView* view,
     /* [out] */ Int32* index)
 {
@@ -1028,12 +1107,12 @@ ECode CKeyguardWidgetPager::GetWidgetPageIndex(
         // View was wrapped by a KeyguardWidgetFrame by KeyguardWidgetPager#addWidget()
         AutoPtr<IViewParent> p;
         view->GetParent((IViewParent**)&p);
-        return IndexOfChild(IKeyguardWidgetFrame::Probe(p), index);
+        return IndexOfChild(IView::Probe(p), index);
     }
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::SetPageHoveringOverDeleteDropTarget(
+ECode KeyguardWidgetPager::SetPageHoveringOverDeleteDropTarget(
     /* [in] */ Int32 viewIndex,
     /* [in] */ Boolean isHovering)
 {
@@ -1042,7 +1121,7 @@ ECode CKeyguardWidgetPager::SetPageHoveringOverDeleteDropTarget(
     return child->SetIsHoveringOverDeleteDropTarget(isHovering);
 }
 
-ECode CKeyguardWidgetPager::OnBouncerStateChanged(
+ECode KeyguardWidgetPager::OnBouncerStateChanged(
     /* [in] */ Boolean bouncerActive)
 {
     if (bouncerActive) {
@@ -1054,18 +1133,19 @@ ECode CKeyguardWidgetPager::OnBouncerStateChanged(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::SetBouncerAnimationDuration(
+ECode KeyguardWidgetPager::SetBouncerAnimationDuration(
     /* [in] */ Int32 duration)
 {
     mBouncerZoomInOutDuration = duration;
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::ZoomInFromBouncer()
+ECode KeyguardWidgetPager::ZoomInFromBouncer()
 {
     Boolean res;
-    if (mZoomInOutAnim != NULL && (mZoomInOutAnim->IsRunning(&res), res)) {
-        mZoomInOutAnim->Cancel();
+    if (mZoomInOutAnim != NULL && (IAnimator::Probe(mZoomInOutAnim)->IsRunning(&res),
+            res)) {
+        IAnimator::Probe(mZoomInOutAnim)->Cancel();
     }
     Int32 page;
     GetCurrentPage(&page);
@@ -1078,17 +1158,25 @@ ECode CKeyguardWidgetPager::ZoomInFromBouncer()
 
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 1.0f;
         AutoPtr<IObjectAnimator> animator1;
-        helper->OfFloat(currentPage, String("scaleX"), 1.0f, (IObjectAnimator**)&animator1);
+        helper->OfFloat(currentPage, String("scaleX"), array, (IObjectAnimator**)&animator1);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+        (*array2)[0] = 1.0f;
         AutoPtr<IObjectAnimator> animator2;
-        helper->OfFloat(currentPage , String("scaleY"), 1.0f, (IObjectAnimator**)&animator2);
+        helper->OfFloat(currentPage , String("scaleY"), array2, (IObjectAnimator**)&animator2);
 
-        mZoomInOutAnim->PlayTogether(animator1, animator2);
-        mZoomInOutAnim->SetDuration(mBouncerZoomInOutDuration);
+        AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+        array3->Set(0, IAnimator::Probe(animator1));
+        array3->Set(1, IAnimator::Probe(animator2));
+        mZoomInOutAnim->PlayTogether(array3);
+        IAnimator::Probe(mZoomInOutAnim)->SetDuration(mBouncerZoomInOutDuration);
         AutoPtr<IDecelerateInterpolator> interpolator;
         CDecelerateInterpolator::New(1.5f, (IDecelerateInterpolator**)&interpolator);
-        mZoomInOutAnim->SetInterpolator(interpolator);
-        mZoomInOutAnim->Start();
+        IAnimator::Probe(mZoomInOutAnim)->SetInterpolator(
+                ITimeInterpolator::Probe(interpolator));
+        IAnimator::Probe(mZoomInOutAnim)->Start();
     }
     if (IKeyguardWidgetFrame::Probe(currentPage) != NULL) {
         IKeyguardWidgetFrame::Probe(currentPage)->OnBouncerShowing(FALSE);
@@ -1096,17 +1184,18 @@ ECode CKeyguardWidgetPager::ZoomInFromBouncer()
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::ZoomOutToBouncer()
+ECode KeyguardWidgetPager::ZoomOutToBouncer()
 {
     Boolean res;
-    if (mZoomInOutAnim != NULL && (mZoomInOutAnim->IsRunning(&res), res)) {
-        mZoomInOutAnim->Cancel();
+    if (mZoomInOutAnim != NULL && (IAnimator::Probe(mZoomInOutAnim)->IsRunning(&res),
+            res)) {
+        IAnimator::Probe(mZoomInOutAnim)->Cancel();
     }
     Int32 curPage;
     GetCurrentPage(&curPage);
     AutoPtr<IView> currentPage;
     GetPageAt(curPage, (IView**)&currentPage);
-    if (ShouldSetTopAlignedPivotForWidget(curPage)) {
+    if (ShouldSetTopAlignedPivotForWidget(curPage, &res), res) {
         currentPage->SetPivotY(0);
         // Note: we are working around the issue that setting the x-pivot to the same value as it
         //       was does not actually work.
@@ -1118,23 +1207,31 @@ ECode CKeyguardWidgetPager::ZoomOutToBouncer()
 
     Float x, y;
     if (!((currentPage->GetScaleX(&x), x) < 1.0f || (currentPage->GetScaleY(&y), y) < 1.0f)) {
-        mZoomInOutAnim = new CAnimatorSet::New((IAnimatorSet**)&mZoomInOutAnim);
+        CAnimatorSet::New((IAnimatorSet**)&mZoomInOutAnim);
 
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = BOUNCER_SCALE_FACTOR;
         AutoPtr<IObjectAnimator> animator1;
-        helper->OfFloat(currentPage, String("scaleX"), BOUNCER_SCALE_FACTOR,
+        helper->OfFloat(currentPage, String("scaleX"), array,
                 (IObjectAnimator**)&animator1);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+        (*array2)[0] = BOUNCER_SCALE_FACTOR;
         AutoPtr<IObjectAnimator> animator2;
-        helper->OfFloat(currentPage , String("scaleY"), BOUNCER_SCALE_FACTOR,
+        helper->OfFloat(currentPage , String("scaleY"), array2,
                 (IObjectAnimator**)&animator2);
 
-        mZoomInOutAnim->PlayTogether(animator1, animator2);
-        mZoomInOutAnim->SetDuration(mBouncerZoomInOutDuration);
+        AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+        array3->Set(0, IAnimator::Probe(animator1));
+        array3->Set(1, IAnimator::Probe(animator2));
+        mZoomInOutAnim->PlayTogether(array3);
+        IAnimator::Probe(mZoomInOutAnim)->SetDuration(mBouncerZoomInOutDuration);
         AutoPtr<IDecelerateInterpolator> interpolator;
         CDecelerateInterpolator::New(1.5f, (IDecelerateInterpolator**)&interpolator);
-        mZoomInOutAnim->SetInterpolator(interpolator);
-        mZoomInOutAnim->Start();
+        IAnimator::Probe(mZoomInOutAnim)->SetInterpolator(
+                ITimeInterpolator::Probe(interpolator));
+        IAnimator::Probe(mZoomInOutAnim)->Start();
     }
     if (IKeyguardWidgetFrame::Probe(currentPage) != NULL) {
         IKeyguardWidgetFrame::Probe(currentPage)->OnBouncerShowing(TRUE);
@@ -1142,7 +1239,7 @@ ECode CKeyguardWidgetPager::ZoomOutToBouncer()
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::SetAddWidgetEnabled(
+ECode KeyguardWidgetPager::SetAddWidgetEnabled(
     /* [in] */ Boolean enabled)
 {
     if (mAddWidgetView != NULL && enabled) {
@@ -1165,7 +1262,7 @@ ECode CKeyguardWidgetPager::SetAddWidgetEnabled(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::IsAddPage(
+ECode KeyguardWidgetPager::IsAddPage(
     /* [in] */ Int32 pageIndex,
     /* [out] */ Boolean* result)
 {
@@ -1178,7 +1275,7 @@ ECode CKeyguardWidgetPager::IsAddPage(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::IsCameraPage(
+ECode KeyguardWidgetPager::IsCameraPage(
     /* [in] */ Int32 pageIndex,
     /* [out] */ Boolean* result)
 {
@@ -1190,19 +1287,19 @@ ECode CKeyguardWidgetPager::IsCameraPage(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetPager::ShouldSetTopAlignedPivotForWidget(
+ECode KeyguardWidgetPager::ShouldSetTopAlignedPivotForWidget(
     /* [in] */ Int32 childIndex,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    Boolean res;
-    *result = !IsCameraPage(childIndex) &&
-            (PagedView::ShouldSetTopAlignedPivotForWidget(childIndex, &res), res);
+    Boolean res1, res2;
+    *result = (IsCameraPage(childIndex, &res1), !res1) &&
+            (PagedView::ShouldSetTopAlignedPivotForWidget(childIndex, &res2), res2);
     return NOERROR;
 }
 
-Int32 CKeyguardWidgetPager::FindClockInHierarchy(
+Int32 KeyguardWidgetPager::FindClockInHierarchy(
     /* [in] */ IView* view)
 {
     if (ITextClock::Probe(view) != NULL) {
@@ -1225,7 +1322,7 @@ Int32 CKeyguardWidgetPager::FindClockInHierarchy(
     }
 }
 
-Int32 CKeyguardWidgetPager::GetClockFlags(
+Int32 KeyguardWidgetPager::GetClockFlags(
     /* [in] */ ITextClock* clock)
 {
     Int32 flags = 0;
@@ -1233,14 +1330,14 @@ Int32 CKeyguardWidgetPager::GetClockFlags(
     String timeZone;
     clock->GetTimeZone(&timeZone);
     if (timeZone != NULL) {
-
         AutoPtr<ITimeZoneHelper> helper;
         CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&helper);
         AutoPtr<ITimeZone> defaultzone;
         helper->GetDefault((ITimeZone**)&defaultzone);
         AutoPtr<ITimeZone> timezone;
-        helper->GetTimeZone((ITimeZone**)&timezone);
-        if(!IObject::Probe(defaultzone)->Equals(timezone)) {
+        helper->GetTimeZone(timeZone, (ITimeZone**)&timezone);
+        Boolean res;
+        if(IObject::Probe(defaultzone)->Equals(timezone, &res), !res) {
             // Ignore clocks showing another timezone
             return 0;
         }
@@ -1251,32 +1348,31 @@ Int32 CKeyguardWidgetPager::GetClockFlags(
     Char32 hour;
     Boolean res;
     if (clock->Is24HourModeEnabled(&res),res) {
-        hour = IDateFormat::HOUR_OF_DAY;
+        hour = Elastos::Droid::Text::Format::IDateFormat::HOUR_OF_DAY;
     }
     else {
-        hour = IDateFormat::HOUR;
+        hour = Elastos::Droid::Text::Format::IDateFormat::HOUR;
     }
 
-    AutoPtr<IDateFormatHelper> helper;
-    CDateFormatHelper::AcquireSingleton((IDateFormatHelper**)&helper);
-    if (helper->HasDesignator(format, hour, &res), res) {
+    if (DateFormat::HasDesignator(format, hour)) {
         flags |= FLAG_HAS_LOCAL_HOUR;
     }
-    if (helper->HasDesignator(format, IDateFormat::MINUTE, &res), res) {
+    if (DateFormat::HasDesignator(format,
+            Elastos::Droid::Text::Format::IDateFormat::MINUTE)) {
         flags |= FLAG_HAS_LOCAL_MINUTE;
     }
 
     return flags;
 }
 
-ECode CKeyguardWidgetPager::HandleExternalCameraEvent(
+ECode KeyguardWidgetPager::HandleExternalCameraEvent(
     /* [in] */ IMotionEvent* event)
 {
     BeginCameraEvent();
-    Int cameraPage;
+    Int32 cameraPage;
     GetPageCount(&cameraPage);
     cameraPage = cameraPage - 1;
-    Boolean endWarp = FALSE;
+    //Boolean endWarp = FALSE;
 
     Boolean res;
     if ((IsCameraPage(cameraPage, &res), res) || mCameraEventInProgress) {
@@ -1294,7 +1390,7 @@ ECode CKeyguardWidgetPager::HandleExternalCameraEvent(
                 mCameraEventInProgress = FALSE;
                 break;
         }
-        DispatchTouchEvent(event);
+        DispatchTouchEvent(event, &res);
     }
     return EndCameraEvent();
 }

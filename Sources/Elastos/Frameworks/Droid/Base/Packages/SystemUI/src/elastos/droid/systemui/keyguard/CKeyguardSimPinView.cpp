@@ -1,5 +1,24 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardSimPinView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Internal::Telephony::IITelephony;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -8,7 +27,7 @@ namespace Keyguard {
 
 ECode CKeyguardSimPinView::CheckSimPin::MyRunnable::Run()
 {
-    return mHost->OnSimCheckResponse((*result)[0], (*result)[1]);
+    return mHost->OnSimCheckResponse((*mResult)[0], (*mResult)[1]);
 }
 
 ECode CKeyguardSimPinView::CheckSimPin::MyRunnable2::Run()
@@ -20,27 +39,31 @@ ECode CKeyguardSimPinView::CheckSimPin::Run()
 {
     //try {
     Logger::V(TAG, "call supplyPinReportResult()");
-    AutoPtr<IInterface> obj = ServiceManager::CheckService(String("phone"));
+    AutoPtr<IServiceManager> helper;
+    CServiceManager::AcquireSingleton((IServiceManager**)&helper);
+    AutoPtr<IInterface> obj;
+    helper->CheckService(String("phone"), (IInterface**)&obj);
     AutoPtr<ArrayOf<Int32> > result;
     IITelephony::Probe(obj)->SupplyPinReportResult(mPin, (ArrayOf<Int32>**)&result);
     Logger::V(TAG, "supplyPinReportResult returned: %d %d", (*result)[0], (*result)[1]);
 
-    AutoPtr<IRunnable> r = new CKeyguardSimPinView::CheckSimPin::MyRunnable(this);
-    ECode ec = Post(r);
+    AutoPtr<IRunnable> r = new CKeyguardSimPinView::CheckSimPin::MyRunnable(this, result);
+    Boolean res;
+    ECode ec = mHost->Post(r, &res);
     //} catch (RemoteException e) {
-ERROR:
-    if (ec == (ECode)RemoteException) {
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         Logger::E(TAG, "RemoteException for supplyPinReportResult: %d", ec);
         AutoPtr<IRunnable> r = new CKeyguardSimPinView::CheckSimPin::MyRunnable2(this);
-        Post(r);
+        Boolean res;
+        mHost->Post(r, &res);
     }
     return NOERROR;
 }
 
-ECode CKeyguardSimPinView::MyRunnable::Run()
+ECode CKeyguardSimPinView::MyCheckSimPin::MyRunnable2::Run()
 {
     if (mHost->mSimUnlockProgressDialog != NULL) {
-        mHost->mSimUnlockProgressDialog->Hide();
+        IDialog::Probe(mHost->mSimUnlockProgressDialog)->Hide();
     }
     if (mResult == IPhoneConstants::PIN_RESULT_SUCCESS) {
         AutoPtr<IContext> context;
@@ -58,7 +81,8 @@ ECode CKeyguardSimPinView::MyRunnable::Run()
             else {
                 // show message
                 String str = mHost->GetPinPasswordErrorMessage(mAttemptsRemaining);
-                mHost->mSecurityMessageDisplay->SetMessage(str, TRUE);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+                mHost->mSecurityMessageDisplay->SetMessage(cchar, TRUE);
             }
         }
         else {
@@ -68,11 +92,12 @@ ECode CKeyguardSimPinView::MyRunnable::Run()
             mHost->GetContext((IContext**)&context);
             String str;
             context->GetString(R::string::kg_password_pin_failed, &str);
-            mHost->mSecurityMessageDisplay->SetMessage(str, TRUE);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+            mHost->mSecurityMessageDisplay->SetMessage(cchar, TRUE);
         }
         if (DEBUG) Logger::D(LOG_TAG, "verifyPasswordAndUnlock "
-                + " CheckSimPin.onSimCheckResponse: " + mResult
-                + " attemptsRemaining=" + mAttemptsRemaining);
+                " CheckSimPin.onSimCheckResponse: %d attemptsRemaining=%d",
+                mResult, mAttemptsRemaining);
         mHost->ResetPasswordText(TRUE /* animate */);
     }
     mHost->mCallback->UserActivity();
@@ -84,14 +109,14 @@ ECode CKeyguardSimPinView::MyCheckSimPin::OnSimCheckResponse(
     /* [in] */ Int32 result,
     /* [in] */ Int32 attemptsRemaining)
 {
-    AutoPtr<IRunnable> r = new MyRunnable(mHost, result, attemptsRemaining);
-    return Post(r);
+    AutoPtr<IRunnable> r = new MyRunnable2(mHost, result, attemptsRemaining);
+    Boolean res;
+    return mHost->Post(r, &res);
 }
 
-static const String CKeyguardSimPinView::TAG("KeyguardSimPinView");
+const String CKeyguardSimPinView::TAG("KeyguardSimPinView");
 
-static const String CKeyguardSimPinView::LOG_TAG("KeyguardSimPinView");
-static const Boolean CKeyguardSimPinView::DEBUG = IKeyguardConstants::DEBUG;
+const Boolean CKeyguardSimPinView::DEBUG = IKeyguardConstants::DEBUG;
 
 CAR_OBJECT_IMPL(CKeyguardSimPinView)
 
@@ -106,6 +131,13 @@ ECode CKeyguardSimPinView::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     return KeyguardPinBasedInputView::constructor(context, attrs);
+}
+
+ECode CKeyguardSimPinView::ResetState()
+{
+    KeyguardPinBasedInputView::ResetState();
+    return mSecurityMessageDisplay->SetMessage(
+            R::string::kg_sim_pin_instructions, TRUE);
 }
 
 String CKeyguardSimPinView::GetPinPasswordErrorMessage(
@@ -123,8 +155,11 @@ String CKeyguardSimPinView::GetPinPasswordErrorMessage(
         GetContext((IContext**)&context);
         AutoPtr<IResources> resources;
         context->GetResources((IResources**)&resources);
-        resources->GetQuantityString(R::plurals::kg_password_wrong_pin_code, attemptsRemaining,
-                attemptsRemaining, &displayMessage);
+        AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+        AutoPtr<IInteger32> obj = CoreUtils::Convert(attemptsRemaining);
+        array->Set(0, TO_IINTERFACE(obj));
+        resources->GetQuantityString(R::plurals::kg_password_wrong_pin_code,
+            attemptsRemaining, array, &displayMessage);
     }
     else {
         AutoPtr<IContext> context;
@@ -176,7 +211,7 @@ ECode CKeyguardSimPinView::OnPause()
 {
     // dismiss the dialog.
     if (mSimUnlockProgressDialog != NULL) {
-        mSimUnlockProgressDialog->Dismiss();
+        IDialogInterface::Probe(mSimUnlockProgressDialog)->Dismiss();
         mSimUnlockProgressDialog = NULL;
     }
     return NOERROR;
@@ -188,14 +223,15 @@ AutoPtr<IDialog> CKeyguardSimPinView::GetSimUnlockProgressDialog()
         CProgressDialog::New(mContext, (IProgressDialog**)&mSimUnlockProgressDialog);
         String str;
         mContext->GetString(R::string::kg_sim_unlock_progress_dialog_message, &str);
-        mSimUnlockProgressDialog->SetMessage(str);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+        IAlertDialog::Probe(mSimUnlockProgressDialog)->SetMessage(cchar);
         mSimUnlockProgressDialog->SetIndeterminate(TRUE);
-        mSimUnlockProgressDialog->SetCancelable(FALSE);
+        IDialog::Probe(mSimUnlockProgressDialog)->SetCancelable(FALSE);
         AutoPtr<IWindow> window;
-        mSimUnlockProgressDialog->GetWindow((IWindow**)&window);
+        IDialog::Probe(mSimUnlockProgressDialog)->GetWindow((IWindow**)&window);
         window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
     }
-    return mSimUnlockProgressDialog;
+    return IDialog::Probe(mSimUnlockProgressDialog);
 }
 
 AutoPtr<IDialog> CKeyguardSimPinView::GetSimRemainingAttemptsDialog(
@@ -205,18 +241,20 @@ AutoPtr<IDialog> CKeyguardSimPinView::GetSimRemainingAttemptsDialog(
     if (mRemainingAttemptsDialog == NULL) {
         AutoPtr<IAlertDialogBuilder> builder;
         CAlertDialogBuilder::New(mContext, (IAlertDialogBuilder**)&builder);
-        builder->SetMessage(msg);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(msg);
+        builder->SetMessage(cchar);
         builder->SetCancelable(FALSE);
         builder->SetNeutralButton(R::string::ok, NULL);
         builder->Create((IAlertDialog**)&mRemainingAttemptsDialog);
         AutoPtr<IWindow> window;
-        mRemainingAttemptsDialog->GetWindow((IWindow**)&window);
+        IDialog::Probe(mRemainingAttemptsDialog)->GetWindow((IWindow**)&window);
         window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
     }
     else {
-        mRemainingAttemptsDialog->SetMessage(msg);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(msg);
+        mRemainingAttemptsDialog->SetMessage(cchar);
     }
-    return mRemainingAttemptsDialog;
+    return IDialog::Probe(mRemainingAttemptsDialog);
 }
 
 ECode CKeyguardSimPinView::VerifyPasswordAndUnlock()
@@ -238,7 +276,7 @@ ECode CKeyguardSimPinView::VerifyPasswordAndUnlock()
     if (mCheckSimPinThread == NULL) {
         String text;
         mPasswordEntry->GetText(&text);
-        mCheckSimPinThread = new MyCheckSimPin(text);
+        mCheckSimPinThread = new MyCheckSimPin(text, this);
         mCheckSimPinThread->Start();
     }
     return NOERROR;

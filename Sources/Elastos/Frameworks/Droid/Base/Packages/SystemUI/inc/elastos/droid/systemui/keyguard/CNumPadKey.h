@@ -4,8 +4,15 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CNumPadKey.h"
 #include <elastos/droid/view/ViewGroup.h>
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
 
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::ITextView;
 
 namespace Elastos {
 namespace Droid {
@@ -22,6 +29,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CNumPadKey::MyViewOnClickListener")
+
+        CAR_INTERFACE_DECL()
 
         MyViewOnClickListener(
             /* [in] */ CNumPadKey* host)

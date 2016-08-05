@@ -1,5 +1,39 @@
 
-#include "elastos/droidsystemui/keyguard/CPasswordTextView::.h"
+#include "elastos/droid/systemui/keyguard/CPasswordTextView.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/Math.h>
+#include <elastos/core/StringUtils.h>
+#include "elastos/droid/R.h"
+#include "R.h"
+
+using Elastos::Droid::Animation::IAnimatorSet;
+using Elastos::Droid::Animation::CAnimatorSet;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::IValueAnimatorHelper;
+using Elastos::Droid::Animation::CValueAnimatorHelper;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::ITypeface;
+using Elastos::Droid::Graphics::ITypefaceHelper;
+using Elastos::Droid::Graphics::CTypefaceHelper;
+using Elastos::Droid::Graphics::PaintAlign_CENTER;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::View::Animation::IAnimationUtils;
+using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Core::IFloat;
+using Elastos::Core::Math;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CStack;
 
 namespace Elastos {
 namespace Droid {
@@ -19,8 +53,8 @@ ECode CPasswordTextView::CharState::MyAnimatorListenerAdapter::OnAnimationEnd(
     if (!mCancelled) {
         mOutHost->mTextChars->Remove(TO_IINTERFACE(mInHost));
         mOutHost->mCharPool->Push(TO_IINTERFACE(mInHost));
-        Reset();
-        CancelAnimator(textTranslateAnimator);
+        mInHost->Reset();
+        mInHost->CancelAnimator(IAnimator::Probe(mInHost->mTextTranslateAnimator));
         mInHost->mTextTranslateAnimator = NULL;
     }
     return NOERROR;
@@ -36,28 +70,28 @@ ECode CPasswordTextView::CharState::MyAnimatorListenerAdapter::OnAnimationStart(
 ECode CPasswordTextView::CharState::MyAnimatorListenerAdapter2::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mDotAnimator = NULL;
+    mHost->mDotAnimator = NULL;
     return NOERROR;
 }
 
 ECode CPasswordTextView::CharState::MyAnimatorListenerAdapter3::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mTextAnimator = NULL;
+    mHost->mTextAnimator = NULL;
     return NOERROR;
 }
 
 ECode CPasswordTextView::CharState::MyAnimatorListenerAdapter4::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mTextTranslateAnimator = NULL;
+    mHost->mTextTranslateAnimator = NULL;
     return NOERROR;
 }
 
 ECode CPasswordTextView::CharState::MyAnimatorListenerAdapter5::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mWidthAnimator = NULL;
+    mHost->mWidthAnimator = NULL;
     return NOERROR;
 }
 
@@ -68,7 +102,7 @@ ECode CPasswordTextView::CharState::MyAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> value;
-    animation->GetAnimatedValue(&value);
+    animation->GetAnimatedValue((IInterface**)&value);
     AutoPtr<IFloat> f = IFloat::Probe(value);
     f->GetValue(&(mInHost->mCurrentDotSizeFactor));
     return mOutHost->Invalidate();
@@ -81,7 +115,7 @@ ECode CPasswordTextView::CharState::MyAnimatorUpdateListener2::OnAnimationUpdate
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> value;
-    animation->GetAnimatedValue(&value);
+    animation->GetAnimatedValue((IInterface**)&value);
     AutoPtr<IFloat> f = IFloat::Probe(value);
     f->GetValue(&(mInHost->mCurrentTextSizeFactor));
     return mOutHost->Invalidate();
@@ -94,7 +128,7 @@ ECode CPasswordTextView::CharState::MyAnimatorUpdateListener3::OnAnimationUpdate
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> value;
-    animation->GetAnimatedValue(&value);
+    animation->GetAnimatedValue((IInterface**)&value);
     AutoPtr<IFloat> f = IFloat::Probe(value);
     f->GetValue(&(mInHost->mCurrentTextTranslationY));
     return mOutHost->Invalidate();
@@ -107,7 +141,7 @@ ECode CPasswordTextView::CharState::MyAnimatorUpdateListener4::OnAnimationUpdate
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> value;
-    animation->GetAnimatedValue(&value);
+    animation->GetAnimatedValue((IInterface**)&value);
     AutoPtr<IFloat> f = IFloat::Probe(value);
     f->GetValue(&(mInHost->mCurrentWidthFactor));
     return mOutHost->Invalidate();
@@ -134,10 +168,10 @@ CPasswordTextView::CharState::CharState(
     , mHost(host)
 {
     mRemoveEndListener = new MyAnimatorListenerAdapter(this, mHost);
-    mDotFinishListener = new MyAnimatorListenerAdapter(this);
-    mTextFinishListener = new MyAnimatorListenerAdapter(this);
-    mTextTranslateFinishListener = new MyAnimatorListenerAdapter(this);
-    mWidthFinishListener = new MyAnimatorListenerAdapter(this);
+    mDotFinishListener = new MyAnimatorListenerAdapter2(this);
+    mTextFinishListener = new MyAnimatorListenerAdapter3(this);
+    mTextTranslateFinishListener = new MyAnimatorListenerAdapter4(this);
+    mWidthFinishListener = new MyAnimatorListenerAdapter5(this);
 
     mDotSizeUpdater = new MyAnimatorUpdateListener(this, mHost);
     mTextSizeUpdater = new MyAnimatorUpdateListener2(this, mHost);
@@ -153,12 +187,12 @@ ECode CPasswordTextView::CharState::Reset()
     mCurrentTextSizeFactor = 0.0f;
     mCurrentDotSizeFactor = 0.0f;
     mCurrentWidthFactor = 0.0f;
-    CancelAnimator(textAnimator);
-    mTextAnimator = null;
-    CancelAnimator(dotAnimator);
-    mDotAnimator = null;
-    CancelAnimator(widthAnimator);
-    mWidthAnimator = null;
+    CancelAnimator(IAnimator::Probe(mTextAnimator));
+    mTextAnimator = NULL;
+    CancelAnimator(mDotAnimator);
+    mDotAnimator = NULL;
+    CancelAnimator(IAnimator::Probe(mWidthAnimator));
+    mWidthAnimator = NULL;
     mCurrentTextTranslationY = 1.0f;
     RemoveDotSwapCallbacks();
     return NOERROR;
@@ -172,15 +206,15 @@ ECode CPasswordTextView::CharState::StartRemoveAnimation(
             || (mDotAnimator != NULL && mDotAnimationIsGrowing);
     Boolean textNeedsAnimation = (mCurrentTextSizeFactor > 0.0f && mTextAnimator == NULL)
             || (mTextAnimator != NULL && mTextAnimationIsGrowing);
-    Boolean widthNeedsAnimation = (mCurrentWidthFactor > 0.0f && widthAnimator == NULL)
+    Boolean widthNeedsAnimation = (mCurrentWidthFactor > 0.0f && mWidthAnimator == NULL)
             || (mWidthAnimator != NULL && mWidthAnimationIsGrowing);
-    if (mDotNeedsAnimation) {
+    if (dotNeedsAnimation) {
         StartDotDisappearAnimation(startDelay);
     }
-    if (mTextNeedsAnimation) {
+    if (textNeedsAnimation) {
         StartTextDisappearAnimation(startDelay);
     }
-    if (mWidthNeedsAnimation) {
+    if (widthNeedsAnimation) {
         StartWidthDisappearAnimation(widthDelay);
     }
     return NOERROR;
@@ -188,21 +222,21 @@ ECode CPasswordTextView::CharState::StartRemoveAnimation(
 
 ECode CPasswordTextView::CharState::StartAppearAnimation()
 {
-    Boolean dotNeedsAnimation = !mShowPassword
+    Boolean dotNeedsAnimation = !mHost->mShowPassword
             && (mDotAnimator == NULL || !mDotAnimationIsGrowing);
-    Boolean textNeedsAnimation = mShowPassword
+    Boolean textNeedsAnimation = mHost->mShowPassword
             && (mTextAnimator == NULL || !mTextAnimationIsGrowing);
     Boolean widthNeedsAnimation = (mWidthAnimator == NULL || !mWidthAnimationIsGrowing);
-    if (mDotNeedsAnimation) {
+    if (dotNeedsAnimation) {
         StartDotAppearAnimation(0);
     }
-    if (mTextNeedsAnimation) {
+    if (textNeedsAnimation) {
         StartTextAppearAnimation();
     }
-    if (mWidthNeedsAnimation) {
+    if (widthNeedsAnimation) {
         StartWidthAppearAnimation();
     }
-    if (mShowPassword) {
+    if (mHost->mShowPassword) {
         PostDotSwap(TEXT_VISIBILITY_DURATION);
     }
     return NOERROR;
@@ -212,13 +246,15 @@ void CPasswordTextView::CharState::PostDotSwap(
     /* [in] */ Int64 delay)
 {
     RemoveDotSwapCallbacks();
-    PostDelayed(dotSwapperRunnable, delay);
+    Boolean res;
+    mHost->PostDelayed(mDotSwapperRunnable, delay, &res);
     mIsDotSwapPending = TRUE;
 }
 
 void CPasswordTextView::CharState::RemoveDotSwapCallbacks()
 {
-    RemoveCallbacks(dotSwapperRunnable);
+    Boolean res;
+    mHost->RemoveCallbacks(mDotSwapperRunnable, &res);
     mIsDotSwapPending = FALSE;
 }
 
@@ -249,33 +285,40 @@ void CPasswordTextView::CharState::PerformSwap()
 void CPasswordTextView::CharState::StartWidthDisappearAnimation(
     /* [in] */ Int64 widthDelay)
 {
-    CancelAnimator(mWidthAnimator);
+    CancelAnimator(IAnimator::Probe(mWidthAnimator));
 
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-    helper->OfFloat(mCurrentWidthFactor, 0.0f, (IValueAnimator**)&mWidthAnimator);
-    mWidthAnimator->AddUpdateListener(widthUpdater);
-    mWidthAnimator->AddListener(widthFinishListener);
-    mWidthAnimator->AddListener(removeEndListener);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = mCurrentWidthFactor;
+    (*array)[1] = 0.0f;
+    helper->OfFloat(array, (IValueAnimator**)&mWidthAnimator);
+    mWidthAnimator->AddUpdateListener(mWidthUpdater);
+    IAnimator::Probe(mWidthAnimator)->AddListener(mWidthFinishListener);
+    IAnimator::Probe(mWidthAnimator)->AddListener(mRemoveEndListener);
     mWidthAnimator->SetDuration((Int64) (DISAPPEAR_DURATION * mCurrentWidthFactor));
-    mWidthAnimator->SetStartDelay(widthDelay);
-    mWidthAnimator->Start();
+    IAnimator::Probe(mWidthAnimator)->SetStartDelay(widthDelay);
+    IAnimator::Probe(mWidthAnimator)->Start();
     mWidthAnimationIsGrowing = FALSE;
 }
 
 void CPasswordTextView::CharState::StartTextDisappearAnimation(
     /* [in] */ Int64 startDelay)
 {
-    CancelAnimator(mTextAnimator);
+    CancelAnimator(IAnimator::Probe(mTextAnimator));
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-    helper->OfFloat(mCurrentTextSizeFactor, 0.0f, (IValueAnimator**)&mTextAnimator);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = mCurrentTextSizeFactor;
+    (*array)[1] = 0.0f;
+    helper->OfFloat(array, (IValueAnimator**)&mTextAnimator);
     mTextAnimator->AddUpdateListener(mTextSizeUpdater);
-    mTextAnimator->AddListener(mTextFinishListener);
-    mTextAnimator->SetInterpolator(mDisappearInterpolator);
+    IAnimator::Probe(mTextAnimator)->AddListener(mTextFinishListener);
+    IAnimator::Probe(mTextAnimator)->SetInterpolator(
+            ITimeInterpolator::Probe(mHost->mDisappearInterpolator));
     mTextAnimator->SetDuration((Int64) (DISAPPEAR_DURATION * mCurrentTextSizeFactor));
-    mTextAnimator->SetStartDelay(startDelay);
-    mTextAnimator->Start();
+    IAnimator::Probe(mTextAnimator)->SetStartDelay(startDelay);
+    IAnimator::Probe(mTextAnimator)->Start();
     mTextAnimationIsGrowing = FALSE;
 }
 
@@ -285,96 +328,124 @@ void CPasswordTextView::CharState::StartDotDisappearAnimation(
     CancelAnimator(mDotAnimator);
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = mCurrentDotSizeFactor;
+    (*array)[1] = 0.0f;
     AutoPtr<IValueAnimator> animator;
-    helper->OfFloat(mCurrentDotSizeFactor, 0.0f, (IValueAnimator**)&animator);
+    helper->OfFloat(array, (IValueAnimator**)&animator);
     animator->AddUpdateListener(mDotSizeUpdater);
-    animator->AddListener(mDotFinishListener);
-    animator->SetInterpolator(mDisappearInterpolator);
-    Int64 duration = (Int64) (DISAPPEAR_DURATION * Math::Min(mCurrentDotSizeFactor, 1.0f));
+    IAnimator::Probe(animator)->AddListener(mDotFinishListener);
+    IAnimator::Probe(animator)->SetInterpolator(
+            ITimeInterpolator::Probe(mHost->mDisappearInterpolator));
+    Int64 duration = (Int64) (DISAPPEAR_DURATION *
+            Elastos::Core::Math::Min(mCurrentDotSizeFactor, 1.0f));
     animator->SetDuration(duration);
-    animator->SetStartDelay(startDelay);
-    animator->Start();
-    mDotAnimator = animator;
+    IAnimator::Probe(animator)->SetStartDelay(startDelay);
+    IAnimator::Probe(animator)->Start();
+    mDotAnimator = IAnimator::Probe(animator);
     mDotAnimationIsGrowing = FALSE;
 }
 
 void CPasswordTextView::CharState::StartWidthAppearAnimation()
 {
-    CancelAnimator(mWidthAnimator);
+    CancelAnimator(IAnimator::Probe(mWidthAnimator));
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-    helper->OfFloat(mCurrentWidthFactor, 1.0f, (IValueAnimator**)&mWidthAnimator);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = mCurrentWidthFactor;
+    (*array)[1] = 1.0f;
+    helper->OfFloat(array, (IValueAnimator**)&mWidthAnimator);
     mWidthAnimator->AddUpdateListener(mWidthUpdater);
-    mWidthAnimator->AddListener(mWidthFinishListener);
+    IAnimator::Probe(mWidthAnimator)->AddListener(mWidthFinishListener);
     mWidthAnimator->SetDuration((Int64) (APPEAR_DURATION * (1.0f - mCurrentWidthFactor)));
-    mWidthAnimator->Start();
+    IAnimator::Probe(mWidthAnimator)->Start();
     mWidthAnimationIsGrowing = TRUE;
 }
 
 void CPasswordTextView::CharState::StartTextAppearAnimation()
 {
-    CancelAnimator(mTextAnimator);
+    CancelAnimator(IAnimator::Probe(mTextAnimator));
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-    helper->OfFloat(mCurrentTextSizeFactor, 1.0f, (IValueAnimator**)&mTextAnimator);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = mCurrentTextSizeFactor;
+    (*array)[1] = 1.0f;
+    helper->OfFloat(array, (IValueAnimator**)&mTextAnimator);
     mTextAnimator->AddUpdateListener(mTextSizeUpdater);
-    mTextAnimator->AddListener(mTextFinishListener);
-    mTextAnimator->SetInterpolator(mAppearInterpolator);
-    mTextAnimator->SetDuration((Int64) (APPEAR_DURATION * (1f - mCurrentTextSizeFactor)));
-    mTextAnimator->Start();
+    IAnimator::Probe(mTextAnimator)->AddListener(mTextFinishListener);
+    IAnimator::Probe(mTextAnimator)->SetInterpolator(
+            ITimeInterpolator::Probe(mHost->mAppearInterpolator));
+    mTextAnimator->SetDuration((Int64) (APPEAR_DURATION * (1.0f - mCurrentTextSizeFactor)));
+    IAnimator::Probe(mTextAnimator)->Start();
     mTextAnimationIsGrowing = TRUE;
 
     // handle translation
     if (mTextTranslateAnimator == NULL) {
-        helper->OfFloat(1.0f, 0.0f, (IValueAnimator**)&mTextTranslateAnimator);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+        (*array)[0] = 1.0f;
+        (*array)[1] = 0.0f;
+        helper->OfFloat(array, (IValueAnimator**)&mTextTranslateAnimator);
         mTextTranslateAnimator->AddUpdateListener(mTextTranslationUpdater);
-        mTextTranslateAnimator->AddListener(mTextTranslateFinishListener);
-        mTextTranslateAnimator->SetInterpolator(mAppearInterpolator);
+        IAnimator::Probe(mTextTranslateAnimator)->AddListener(mTextTranslateFinishListener);
+        IAnimator::Probe(mTextTranslateAnimator)->SetInterpolator(
+                ITimeInterpolator::Probe(mHost->mAppearInterpolator));
         mTextTranslateAnimator->SetDuration(APPEAR_DURATION);
-        mTextTranslateAnimator->Start();
+        IAnimator::Probe(mTextTranslateAnimator)->Start();
     }
 }
 
 void CPasswordTextView::CharState::StartDotAppearAnimation(
     /* [in] */ Int64 delay)
 {
-    CancelAnimator(mDotAnimator);
+    CancelAnimator(IAnimator::Probe(mDotAnimator));
 
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-    if (!mShowPassword) {
+    if (!mHost->mShowPassword) {
         // We perform an overshoot animation
         AutoPtr<IValueAnimator> overShootAnimator;
-        helper->OfFloat(mCurrentDotSizeFactor, DOT_OVERSHOOT_FACTOR,
-                (IValueAnimator**)&overShootAnimator);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+        (*array)[0] = mCurrentDotSizeFactor;
+        (*array)[1] = DOT_OVERSHOOT_FACTOR;
+        helper->OfFloat(array, (IValueAnimator**)&overShootAnimator);
         overShootAnimator->AddUpdateListener(mDotSizeUpdater);
-        overShootAnimator->SetInterpolator(mAppearInterpolator);
+        IAnimator::Probe(overShootAnimator)->SetInterpolator(
+                ITimeInterpolator::Probe(mHost->mAppearInterpolator));
         Int64 overShootDuration = (Int64) (DOT_APPEAR_DURATION_OVERSHOOT
                 * OVERSHOOT_TIME_POSITION);
         overShootAnimator->SetDuration(overShootDuration);
 
         AutoPtr<IValueAnimator> settleBackAnimator;
-        helper->OfFloat(DOT_OVERSHOOT_FACTOR, 1.0f, (IValueAnimator**)&settleBackAnimator);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(2);
+        (*array2)[0] = DOT_OVERSHOOT_FACTOR;
+        (*array2)[1] = 1.0f;
+        helper->OfFloat(array2, (IValueAnimator**)&settleBackAnimator);
         settleBackAnimator->AddUpdateListener(mDotSizeUpdater);
         settleBackAnimator->SetDuration(DOT_APPEAR_DURATION_OVERSHOOT - overShootDuration);
-        settleBackAnimator->AddListener(mDotFinishListener);
+        IAnimator::Probe(settleBackAnimator)->AddListener(mDotFinishListener);
 
         AutoPtr<IAnimatorSet> animatorSet;
         CAnimatorSet::New((IAnimatorSet**)&animatorSet);
-        animatorSet->PlaySequentially(overShootAnimator, settleBackAnimator);
-        animatorSet->SetStartDelay(delay);
-        animatorSet->Start();
-        mDotAnimator = animatorSet;
+        AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+        array3->Set(0, IAnimator::Probe(overShootAnimator));
+        array3->Set(1, IAnimator::Probe(settleBackAnimator));
+        animatorSet->PlaySequentially(array3);
+        IAnimator::Probe(animatorSet)->SetStartDelay(delay);
+        IAnimator::Probe(animatorSet)->Start();
+        mDotAnimator = IAnimator::Probe(animatorSet);
     }
     else {
         AutoPtr<IValueAnimator> growAnimator;
-        helper->OfFloat(mCurrentDotSizeFactor, 1.0f, (IValueAnimator**)&growAnimator);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+        (*array)[0] = mCurrentDotSizeFactor;
+        (*array)[1] = 1.0f;
+        helper->OfFloat(array, (IValueAnimator**)&growAnimator);
         growAnimator->AddUpdateListener(mDotSizeUpdater);
         growAnimator->SetDuration((Int64) (APPEAR_DURATION * (1.0f - mCurrentDotSizeFactor)));
-        growAnimator->AddListener(mDotFinishListener);
-        growAnimator->SetStartDelay(delay);
-        growAnimator->Start();
-        mDotAnimator = growAnimator;
+        IAnimator::Probe(growAnimator)->AddListener(mDotFinishListener);
+        IAnimator::Probe(growAnimator)->SetStartDelay(delay);
+        IAnimator::Probe(growAnimator)->Start();
+        mDotAnimator = IAnimator::Probe(growAnimator);
     }
     mDotAnimationIsGrowing = TRUE;
 }
@@ -403,21 +474,25 @@ ECode CPasswordTextView::CharState::Draw(
     if (textVisible) {
         Float currYPosition = yPosition + charHeight / 2.0f * mCurrentTextSizeFactor
                 + charHeight * mCurrentTextTranslationY * 0.8f;
-        canvas->Save();
+        Int32 tmp;
+        canvas->Save(&tmp);
         Float centerX = currentDrawPosition + charWidth / 2;
         canvas->Translate(centerX, currYPosition);
         canvas->Scale(mCurrentTextSizeFactor, mCurrentTextSizeFactor);
-        canvas->DrawText(StringUtils::ToString(mWhichChar), 0, 0, mDrawPaint);
+        canvas->DrawText(StringUtils::ToString((Int32)mWhichChar),
+                0, 0, mHost->mDrawPaint);
         canvas->Restore();
     }
     if (dotVisible) {
-        canvas->Save();
+        Int32 tmp;
+        canvas->Save(&tmp);
         Float centerX = currentDrawPosition + charWidth / 2;
         canvas->Translate(centerX, yPosition);
-        canvas->DrawCircle(0, 0, mDotSize / 2 * mCurrentDotSizeFactor, mDrawPaint);
+        canvas->DrawCircle(0, 0, mHost->mDotSize / 2 * mCurrentDotSizeFactor,
+                mHost->mDrawPaint);
         canvas->Restore();
     }
-    *result = charWidth + mCharPadding * mCurrentWidthFactor;
+    *result = charWidth + mHost->mCharPadding * mCurrentWidthFactor;
     return NOERROR;
 }
 
@@ -483,15 +558,16 @@ ECode CPasswordTextView::constructor(
 
     SetFocusableInTouchMode(TRUE);
     SetFocusable(TRUE);
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PasswordTextView);
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs, R::styleable::PasswordTextView, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     //try {
     a->GetInt32(R::styleable::PasswordTextView_scaledTextSize, 0, &mTextHeightRaw);
     //} finally {
     a->Recycle();
     //}
     mDrawPaint->SetFlags(IPaint::SUBPIXEL_TEXT_FLAG | IPaint::ANTI_ALIAS_FLAG);
-    mDrawPaint->SetTextAlign(IPaintAlign_CENTER);
+    mDrawPaint->SetTextAlign(PaintAlign_CENTER);
     mDrawPaint->SetColor(0xffffffff);
 
     AutoPtr<ITypefaceHelper> helper;
@@ -500,10 +576,10 @@ ECode CPasswordTextView::constructor(
     helper->Create(String("sans-serif-light"), 0, (ITypeface**)&typeface);
     mDrawPaint->SetTypeface(typeface);
 
-    AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
+    AutoPtr<IContext> _context;
+    GetContext((IContext**)&_context);
     AutoPtr<IResources> resources;
-    context->GetResources((IResources**)&resources);
+    _context->GetResources((IResources**)&resources);
     resources->GetDimensionPixelSize(R::dimen::password_dot_size, &mDotSize);
     resources->GetDimensionPixelSize(R::dimen::password_char_padding, &mCharPadding);
 
@@ -534,18 +610,16 @@ ECode CPasswordTextView::constructor(
 }
 
 void CPasswordTextView::OnDraw(
-    /* [in] */ ICanvas* canvas);
+    /* [in] */ ICanvas* canvas)
 {
-    Float totalDrawingWidth;
-    GetDrawingWidth(&totalDrawingWidth);
+    Float totalDrawingWidth = GetDrawingWidth();
 
     Int32 width;
     GetWidth(&width);
     Float currentDrawPosition = width / 2 - totalDrawingWidth / 2;
     Int32 length;
     mTextChars->GetSize(&length);
-    AutoPtr<IRect> bounds;
-    GetCharBounds((IRect**)&bounds);
+    AutoPtr<IRect> bounds = GetCharBounds();
 
     Int32 bottom;
     bounds->GetBottom(&bottom);
@@ -588,9 +662,9 @@ AutoPtr<IRect> CPasswordTextView::GetCharBounds()
     GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> metrics;
     resources->GetDisplayMetrics((IDisplayMetrics**)&metrics);
-    Int32 density;
+    Float density;
     metrics->GetScaledDensity(&density);
-    float textHeight = mTextHeightRaw * density;
+    Float textHeight = mTextHeightRaw * density;
     mDrawPaint->SetTextSize(textHeight);
     AutoPtr<IRect> bounds;
     CRect::New((IRect**)&bounds);
@@ -683,14 +757,14 @@ ECode CPasswordTextView::GetText(
     return NOERROR;
 }
 
-AutoPtr<CharState> CPasswordTextView::ObtainCharState(
+AutoPtr<CPasswordTextView::CharState> CPasswordTextView::ObtainCharState(
     /* [in] */ Char32 c)
 {
     AutoPtr<CharState> charState;
 
     Boolean res;
     if(mCharPool->IsEmpty(&res), res) {
-        charState = new CharState();
+        charState = new CharState(this);
     }
     else {
         AutoPtr<IInterface> outface;
@@ -724,9 +798,9 @@ ECode CPasswordTextView::Reset(
                 delayIndex = (length - 1) - (distToMiddle - 1) * 2;
             }
             Int64 startDelay = delayIndex * delayPerElement;
-            startDelay = Math::Min(startDelay, RESET_MAX_DELAY);
+            startDelay = Elastos::Core::Math::Min(startDelay, RESET_MAX_DELAY);
             Int64 maxDelay = delayPerElement * (length - 1);
-            maxDelay = Math::Min(maxDelay, RESET_MAX_DELAY) + DISAPPEAR_DURATION;
+            maxDelay = Elastos::Core::Math::Min(maxDelay, RESET_MAX_DELAY) + DISAPPEAR_DURATION;
             charState->StartRemoveAnimation(startDelay, maxDelay);
             charState->RemoveDotSwapCallbacks();
         }

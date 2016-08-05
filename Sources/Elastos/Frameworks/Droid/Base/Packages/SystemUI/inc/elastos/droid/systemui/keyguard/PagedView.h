@@ -3,14 +3,43 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_PAGEDVIEW_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "elastos/droid/view/View.h"
+#include "elastos/droid/view/ViewGroup.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.Widget.h"
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IAnimatorSet;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Graphics::IMatrix;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IPointF;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::View;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IVelocityTracker;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
+using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
+using Elastos::Droid::Widget::IScroller;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -39,7 +68,7 @@ public:
             /* [in] */ IParcelable* superState);
 
         //@Override
-        CARPAI WriteToParcel(
+        CARAPI WriteToParcel(
             /* [in] */ IParcel* out,
             /* [in] */ Int32 flags);
 
@@ -71,15 +100,15 @@ private:
 
         MyRunnable(
             /* [in] */ PagedView* host,
-            /* [in] */ pageUnderPointIndex,
-            /* [in] */ dragViewIndex)
+            /* [in] */ Int32 pageUnderPointIndex,
+            /* [in] */ Int32 dragViewIndex)
             : mHost(host)
             , mPageUnderPointIndex(pageUnderPointIndex)
             , mDragViewIndex(dragViewIndex)
         {}
 
         //@Override
-        CARPAI Run();
+        CARAPI Run();
 
     private:
         PagedView* mHost;
@@ -88,7 +117,7 @@ private:
     };
 
     class ScrollInterpolator
-        : public Objects
+        : public Object
         , public IInterpolator
         , public ITimeInterpolator
     {
@@ -97,11 +126,11 @@ private:
 
         CAR_INTERFACE_DECL()
 
-        CARPAI GetInterpolation(
+        CARAPI GetInterpolation(
             /* [in] */ Float input,
             /* [out] */ Float* output);
 
-        CARPAI HasNativeInterpolator(
+        CARAPI HasNativeInterpolator(
             /* [out] */ Boolean* res);
     };
 
@@ -117,7 +146,7 @@ private:
         {}
 
         //@Override
-        CARPAI Run();
+        CARAPI Run();
 
     private:
         PagedView* mHost;
@@ -136,16 +165,16 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationCancel(
+        CARAPI OnAnimationCancel(
             /* [in] */ IAnimator* animation);
 
         //@Override
-        CARPAI OnAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
-        Boolean mCancelled;
         PagedView* mHost;
+        Boolean mCancelled;
     };
 
     class MyAnimatorListenerAdapter2
@@ -160,7 +189,7 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -183,7 +212,7 @@ private:
             {}
 
             //@Override
-            CARPAI OnAnimationStart(
+            CARAPI OnAnimationStart(
                 /* [in] */ IAnimator* animation);
 
         private:
@@ -199,7 +228,7 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationStart(
+        CARAPI OnAnimationStart(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -218,7 +247,7 @@ private:
         {}
 
         //@Override
-        CARPAI Run();
+        CARAPI Run();
 
     private:
         PagedView* mHost;
@@ -238,7 +267,7 @@ private:
         {}
 
         //@Override
-        CARPAI Run();
+        CARAPI Run();
 
     private:
         PagedView* mHost;
@@ -261,7 +290,7 @@ private:
             {}
 
             //@Override
-            CARPAI OnAnimationEnd(
+            CARAPI OnAnimationEnd(
                 /* [in] */ IAnimator* animation);
 
         private:
@@ -279,15 +308,15 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationStart(
+        CARAPI OnAnimationStart(
             /* [in] */ IAnimator* animation);
 
         //@Override
-        CARPAI OnAnimationCancel(
+        CARAPI OnAnimationCancel(
             /* [in] */ IAnimator* animation);
 
         //@Override
-        CARPAI OnAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -311,7 +340,7 @@ private:
 
         FlingAlongVectorAnimatorUpdateListener();
 
-        CARPAI constructor(
+        CARAPI constructor(
             /* [in] */ IView* dragView,
             /* [in] */ IPointF* vel,
             /* [in] */ IRect* from,
@@ -319,7 +348,7 @@ private:
             /* [in] */ Float friction);
 
         //@Override
-        CARPAI OnAnimationUpdate(
+        CARAPI OnAnimationUpdate(
             /* [in] */ IValueAnimator* animation);
 
     private:
@@ -339,15 +368,18 @@ private:
         TO_STRING_IMPL("PagedView::MyRunnable5")
 
         MyRunnable5(
-            /* [in] */ PagedView* host)
+            /* [in] */ PagedView* host,
+            /* [in] */ IView* dragView)
             : mHost(host)
+            , mDragView(dragView)
         {}
 
         //@Override
-        CARPAI Run();
+        CARAPI Run();
 
     private:
         PagedView* mHost;
+        AutoPtr<IView> mDragView;
     };
 
     class MyAnimatorListenerAdapter7
@@ -366,7 +398,7 @@ private:
             {}
 
             //@Override
-            CARPAI Run();
+            CARAPI Run();
 
         private:
             PagedView* mHost;
@@ -380,7 +412,7 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -388,7 +420,7 @@ private:
     };
 
     class MyTimeInterpolator
-        : public Objects
+        : public Object
         , public ITimeInterpolator
     {
     public:
@@ -397,20 +429,23 @@ private:
         CAR_INTERFACE_DECL()
 
         MyTimeInterpolator(
+            /* [in] */ PagedView* host,
             /* [in] */ Int64 startTime)
-            : mCount(-1)
+            : mHost(host)
+            , mCount(-1)
             , mStartTime(startTime)
             , mOffset(0.0f)
         {}
 
-        CARPAI GetInterpolation(
+        CARAPI GetInterpolation(
             /* [in] */ Float input,
             /* [out] */ Float* output);
 
-        CARPAI HasNativeInterpolator(
+        CARAPI HasNativeInterpolator(
             /* [out] */ Boolean* res);
 
     private:
+        PagedView* mHost;
         Int32 mCount;
         Int64 mStartTime;
         Float mOffset;
@@ -428,7 +463,7 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -447,7 +482,7 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -466,11 +501,11 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
         //@Override
-        CARPAI OnAnimationCancel(
+        CARAPI OnAnimationCancel(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -489,11 +524,11 @@ private:
         {}
 
         //@Override
-        CARPAI OnAnimationEnd(
+        CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
         //@Override
-        CARPAI OnAnimationCancel(
+        CARAPI OnAnimationCancel(
             /* [in] */ IAnimator* animation);
 
     private:
@@ -507,60 +542,60 @@ public:
 
     PagedView();
 
-    CARPAI constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    CARPAI constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    CARPAI constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);
 
-    CARPAI SetDeleteDropTarget(
+    CARAPI SetDeleteDropTarget(
         /* [in] */IView* v);
 
     // Convenience methods to map points from self to parent and vice versa
-    CARPAI MapPointFromViewToParent(
+    CARAPI MapPointFromViewToParent(
         /* [in] */ IView* v,
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [out, callee] */ ArrayOf<Float>** array);
 
-    CARPAI MapPointFromParentToView(
+    CARAPI MapPointFromParentToView(
         /* [in] */ IView* v,
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [out, callee] */ ArrayOf<Float>** array);
 
-    CARPAI UpdateDragViewTranslationDuringDrag();
+    CARAPI UpdateDragViewTranslationDuringDrag();
 
-    CARPAI SetMinScale(
+    CARAPI SetMinScale(
         /* [in] */ Float f);
 
     //@Override
-    CARPAI SetScaleX(
+    CARAPI SetScaleX(
         /* [in] */ Float scaleX);
 
     // Convenience methods to get the actual width/height of the PagedView (since it is measured
     // to be larger to account for the minimum possible scale)
-    CARPAI GetViewportWidth(
+    CARAPI GetViewportWidth(
         /* [out] */ Int32* width);
 
-    CARPAI GetViewportHeight(
+    CARAPI GetViewportHeight(
         /* [out] */ Int32* height);
 
     // Convenience methods to get the offset ASSUMING that we are centering the pages in the
     // PagedView both horizontally and vertically
-    CARPAI GetViewportOffsetX(
+    CARAPI GetViewportOffsetX(
         /* [out] */ Int32* x);
 
-    CARPAI GetViewportOffsetY(
+    CARAPI GetViewportOffsetY(
         /* [out] */ Int32* y);
 
-    CARPAI SetPageSwitchListener(
+    CARAPI SetPageSwitchListener(
         /* [in] */ IPagedViewPageSwitchListener* pageSwitchListener);
 
     /**
@@ -568,26 +603,26 @@ public:
      *
      * @return The index of the currently displayed page.
      */
-    CARPAI GetCurrentPage(
+    CARAPI GetCurrentPage(
         /* [out] */ Int32* page);
 
-    CARPAI GetNextPage(
+    CARAPI GetNextPage(
         /* [out] */ Int32* page);
 
-    CARPAI GetPageCount(
+    CARAPI GetPageCount(
         /* [out] */ Int32* count);
 
-    CARPAI GetPageAt(
+    CARAPI GetPageAt(
         /* [in] */ Int32 index,
         /* [out] */ IView** view);
 
     /**
      * Sets the current page.
      */
-    CARPAI SetCurrentPage(
+    CARAPI SetCurrentPage(
         /* [in] */ Int32 currentPage);
 
-    CARPAI SetOnlyAllowEdgeSwipes(
+    CARAPI SetOnlyAllowEdgeSwipes(
         /* [in] */ Boolean enable);
 
      /**
@@ -596,54 +631,54 @@ public:
      * @param l The listener used to respond to long clicks.
      */
     //@Override
-    CARPAI SetOnLongClickListener(
+    CARAPI SetOnLongClickListener(
         /* [in] */ IViewOnLongClickListener* l);
 
     //@Override
-    CARPAI ScrollBy(
+    CARAPI ScrollBy(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
     //@Override
-    CARPAI ScrollTo(
+    CARAPI ScrollTo(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
     //@Override
-    CARPAI ComputeScroll();
+    CARAPI ComputeScroll();
 
-    CARPAI SetPageSpacing(
+    CARAPI SetPageSpacing(
         /* [in] */ Int32 pageSpacing);
 
     //@Override
-    CARPAI OnChildViewAdded(
+    CARAPI OnChildViewAdded(
         /* [in] */ IView* parent,
         /* [in] */ IView* child);
 
     //@Override
-    CARPAI OnChildViewRemoved(
+    CARAPI OnChildViewRemoved(
         /* [in] */ IView* parent,
         /* [in] */ IView* child);
 
-    CARPAI BoundByReorderablePages(
+    CARAPI BoundByReorderablePages(
         /* [in] */ Boolean isReordering,
         /* [in] */ ArrayOf<Int32>* range);
 
     //@Override
-    CARPAI RequestChildRectangleOnScreen(
+    CARAPI RequestChildRectangleOnScreen(
         /* [in] */ IView* child,
         /* [in] */ IRect* rectangle,
         /* [in] */ Boolean immediate,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARPAI DispatchUnhandledMove(
+    CARAPI DispatchUnhandledMove(
         /* [in] */ IView* focused,
         /* [in] */ Int32 direction,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARPAI AddFocusables(
+    CARAPI AddFocusables(
         /* [in] */ IArrayList* views,
         /* [in] */ Int32 direction,
         /* [in] */ Int32 focusableMode);
@@ -656,137 +691,137 @@ public:
      * end up calling requestFocus, which pulls it on page.
      */
     //@Override
-    CARPAI FocusableViewAvailable(
+    CARAPI FocusableViewAvailable(
         /* [in] */ IView* focused);
 
     //@Override
-    CARPAI OnInterceptTouchEvent(
+    CARAPI OnInterceptTouchEvent(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
-    CARPAI OnTouchStateChanged(
+    CARAPI OnTouchStateChanged(
         /* [in] */ Int32 newTouchState);
 
     //@Override
-    CARPAI OnTouchEvent(
+    CARAPI OnTouchEvent(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
     //public abstract void onFlingToDelete(View v);
-    virtual CARPAI OnRemoveView(
+    virtual CARAPI OnRemoveView(
         /* [in] */ IView* v,
         /* [in] */ Boolean deletePermanently) = 0;
 
-    virtual CARPAI OnRemoveViewAnimationCompleted() = 0;
+    virtual CARAPI OnRemoveViewAnimationCompleted() = 0;
 
-    virtual CARPAI OnAddView(
+    virtual CARAPI OnAddView(
         /* [in] */ IView* v,
         /* [in] */ Int32 index) = 0;
 
     //@Override
-    CARPAI OnGenericMotionEvent(
+    CARAPI OnGenericMotionEvent(
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARPAI RequestChildFocus(
+    CARAPI RequestChildFocus(
         /* [in] */ IView* child,
         /* [in] */ IView* focused);
 
-    CARPAI GetPageNearestToPoint(
+    CARAPI GetPageNearestToPoint(
         /* [in] */ Float x,
         /* [out] */ Int32* page);
 
-    CARPAI GetPageNearestToCenterOfScreen(
+    CARAPI GetPageNearestToCenterOfScreen(
         /* [out] */ Int32* page);
 
     // We want the duration of the page snap animation to be influenced by the distance that
     // the screen has to travel, however, we don't want this duration to be effected in a
     // purely linear fashion. Instead, we use this method to moderate the effect that the distance
     // of travel has on the overall snap duration.
-    CARPAI DistanceInfluenceForSnapDuration(
+    CARAPI DistanceInfluenceForSnapDuration(
         /* [in] */ Float f,
         /* [out] */ Float* duration);
 
-    CARPAI ScrollLeft();
+    CARAPI ScrollLeft();
 
-    CARPAI ScrollRight();
+    CARAPI ScrollRight();
 
-    CARPAI GetPageForView(
+    CARAPI GetPageForView(
         /* [in] */ IView* v,
         /* [out] */ Int32* page);
 
     // Animate the drag view back to the original position
-    CARPAI AnimateDragViewToOriginalPosition();
+    CARAPI AnimateDragViewToOriginalPosition();
 
-    CARPAI StartReordering(
+    CARAPI StartReordering(
         /* [out] */ Boolean* result);
 
-    CARPAI IsReordering(
+    CARAPI IsReordering(
         /* [in] */ Boolean testTouchState,
         /* [out] */ Boolean* result);
 
-    CARPAI EndReordering();
+    CARAPI EndReordering();
 
-    CARPAI OnFlingToDelete(
+    CARAPI OnFlingToDelete(
         /* [in] */ IPointF* vel);
 
     /* Accessibility */
     //@Override
-    CARPAI OnInitializeAccessibilityNodeInfo(
+    CARAPI OnInitializeAccessibilityNodeInfo(
         /* [in] */ IAccessibilityNodeInfo* info);
 
     //@Override
-    CARPAI OnInitializeAccessibilityEvent(
+    CARAPI OnInitializeAccessibilityEvent(
         /* [in] */ IAccessibilityEvent* event);
 
     //@Override
-    CARPAI PerformAccessibilityAction(
+    CARAPI PerformAccessibilityAction(
         /* [in] */ Int32 action,
         /* [in] */ IBundle* arguments,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARPAI OnHoverEvent(
+    CARAPI OnHoverEvent(
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
 
-    CARPAI BeginCameraEvent();
+    CARAPI BeginCameraEvent();
 
-    CARPAI EndCameraEvent();
+    CARAPI EndCameraEvent();
 
     /**
      * Swaps the position of the views by setting the left and right edges appropriately.
      */
-    CARPAI SwapPages(
+    CARAPI SwapPages(
         /* [in] */ Int32 indexA,
         /* [in] */ Int32 indexB);
 
-    CARPAI StartPageWarp(
+    CARAPI StartPageWarp(
         /* [in] */ Int32 pageIndex);
 
-    CARPAI StopPageWarp();
+    CARAPI StopPageWarp();
 
-    CARPAI OnPageBeginWarp();
+    CARAPI OnPageBeginWarp();
 
-    CARPAI OnPageEndWarp();
+    CARAPI OnPageEndWarp();
 
 protected:
     /**
      * Initializes various states for this workspace.
      */
-    CARPAI Init();
+    CARAPI Init();
 
     /**
      * Called by subclasses to mark that data is ready, and that we can begin loading and laying
      * out pages.
      */
-    CARPAI SetDataIsReady();
+    CARAPI SetDataIsReady();
 
-    CARPAI IsDataReady(
+    CARAPI IsDataReady(
         /* [out] */ Boolean* result);
 
-    CARPAI IndexToPage(
+    CARAPI IndexToPage(
         /* [in] */ Int32 index,
         /* [out] */ Int32* page);
 
@@ -795,78 +830,78 @@ protected:
      * in CustomizePagedView to allow tabs to share the same PagedView while resetting the scroll of
      * the previous tab page.
      */
-    CARPAI UpdateCurrentPageScroll();
+    CARAPI UpdateCurrentPageScroll();
 
-    CARPAI NotifyPageSwitching(
+    CARAPI NotifyPageSwitching(
         /* [in] */ Int32 whichPage);
 
-    CARPAI NotifyPageSwitched();
+    CARAPI NotifyPageSwitched();
 
-    CARPAI PageBeginMoving();
+    CARAPI PageBeginMoving();
 
-    CARPAI PageEndMoving();
+    CARAPI PageEndMoving();
 
-    CARPAI IsPageMoving(
+    CARAPI IsPageMoving(
         /* [out] */ Boolean* result);
 
     // a method that subclasses can override to add behavior
-    CARPAI OnPageBeginMoving();
+    CARAPI OnPageBeginMoving();
 
     // a method that subclasses can override to add behavior
-    CARPAI OnPageEndMoving();
+    CARAPI OnPageEndMoving();
 
     // we moved this functionality to a helper function so SmoothPagedView can reuse it
-    CARPAI ComputeScrollHelper(
+    CARAPI ComputeScrollHelper(
         /* [out] */ Boolean* result);
 
-    CARPAI ShouldSetTopAlignedPivotForWidget(
+    CARAPI ShouldSetTopAlignedPivotForWidget(
         /* [in] */ Int32 childIndex,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARPAI OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
     //@Override
-    CARPAI OnLayout(
+    CARAPI OnLayout(
         /* [in] */ Boolean changed,
         /* [in] */ Int32 left,
         /* [in] */ Int32 top,
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
-    CARPAI ScreenScrolled(
+    CARAPI ScreenScrolled(
         /* [in] */ Int32 screenCenter);
 
-    CARPAI InvalidateCachedOffsets();
+    CARAPI InvalidateCachedOffsets();
 
-    CARPAI GetChildOffset(
+    CARAPI GetChildOffset(
         /* [in] */ Int32 index,
         /* [out] */ Int32* offset);
 
-    CARPAI GetRelativeChildOffset(
+    CARAPI GetRelativeChildOffset(
         /* [in] */ Int32 index,
         /* [out] */ Int32* outoffset);
 
-    CARPAI GetScaledMeasuredWidth(
+    CARAPI GetScaledMeasuredWidth(
         /* [in] */ IView* child,
         /* [out] */ Int32* outwidth);
 
     // TODO: Fix this
-    CARPAI GetVisiblePages(
+    CARAPI GetVisiblePages(
         /* [in] */ ArrayOf<Int32>* range);
 
-    CARPAI ShouldDrawChild(
+    CARAPI ShouldDrawChild(
         /* [in] */ IView* child,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARPAI DispatchDraw(
+    CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     //@Override
-    CARPAI OnRequestFocusInDescendants(
+    CARAPI OnRequestFocusInDescendants(
         /* [in] */ Int32 direction,
         /* [in] */ IRect* previouslyFocusedRect,
         /* [out] */ Boolean* result);
@@ -874,7 +909,7 @@ protected:
     /**
      * Return true if a tap at (x, y) should trigger a flip to the previous page.
      */
-    CARPAI HitsPreviousPage(
+    CARAPI HitsPreviousPage(
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [out] */ Boolean* result);
@@ -882,7 +917,7 @@ protected:
     /**
      * Return true if a tap at (x, y) should trigger a flip to the next page.
      */
-    CARPAI HitsNextPage(
+    CARAPI HitsNextPage(
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [out] */ Boolean* result);
@@ -891,208 +926,208 @@ protected:
      * Determines if we should change the touch state to start scrolling after the
      * user moves their touch point too far.
      */
-    CARPAI DetermineScrollingStart(
+    CARAPI DetermineScrollingStart(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
-    CARPAI GetMaxScrollProgress(
+    CARAPI GetMaxScrollProgress(
         /* [out] */ Float* progress);
 
-    CARPAI GetBoundedScrollProgress(
+    CARAPI GetBoundedScrollProgress(
         /* [in] */ Int32 screenCenter,
         /* [in] */ IView* v,
         /* [in] */ Int32 page,
         /* [out] */ Float* progress);
 
-    CARPAI GetScrollProgress(
+    CARAPI GetScrollProgress(
         /* [in] */ Int32 screenCenter,
         /* [in] */ IView* v,
         /* [in] */ Int32 page,
         /* [out] */ Float* progress);
 
-    CARPAI AcceleratedOverScroll(
+    CARAPI AcceleratedOverScroll(
         /* [in] */ Float amount);
 
-    CARPAI DampedOverScroll(
+    CARAPI DampedOverScroll(
         /* [in] */ Float amount);
 
-    CARPAI OverScroll(
+    CARAPI OverScroll(
         /* [in] */ Float amount);
 
-    CARPAI MaxOverScroll(
+    CARAPI MaxOverScroll(
         /* [out] */ Float* scroll);
 
-    CARPAI OnUnhandledTap(
+    CARAPI OnUnhandledTap(
         /* [in] */ IMotionEvent* ev);
 
-    CARPAI GetChildIndexForRelativeOffset(
+    CARAPI GetChildIndexForRelativeOffset(
         /* [in] */ Int32 relativeOffset,
         /* [out] */ Int32* offset);
 
-    CARPAI GetChildWidth(
+    CARAPI GetChildWidth(
         /* [in] */ Int32 index,
         /* [out] */ Int32* width);
 
-    CARPAI SnapToDestination();
+    CARAPI SnapToDestination();
 
-    CARPAI SnapToPageWithVelocity(
+    CARAPI SnapToPageWithVelocity(
         /* [in] */ Int32 whichPage,
         /* [in] */ Int32 velocity);
 
-    CARPAI SnapToPage(
+    CARAPI SnapToPage(
         /* [in] */ Int32 whichPage);
 
-    CARPAI SnapToPageImmediately(
+    CARAPI SnapToPageImmediately(
         /* [in] */ Int32 whichPage);
 
-    CARPAI SnapToPage(
+    CARAPI SnapToPage(
         /* [in] */ Int32 whichPage,
         /* [in] */ Int32 duration);
 
-    CARPAI SnapToPage(
+    CARAPI SnapToPage(
         /* [in] */ Int32 whichPage,
         /* [in] */ Int32 duration,
         /* [in] */ Boolean immediate);
 
-    CARPAI SnapToPage(
+    CARAPI SnapToPage(
         /* [in] */ Int32 whichPage,
         /* [in] */ Int32 delta,
         /* [in] */ Int32 duration);
 
-    CARPAI SnapToPage(
+    CARAPI SnapToPage(
         /* [in] */ Int32 whichPage,
         /* [in] */ Int32 delta,
         /* [in] */ Int32 duration,
         /* [in] */ Boolean immediate);
 
-    CARPAI IsWarping(
+    CARAPI IsWarping(
         /* [out] */ Boolean* result);
 
-    CARPAI GetScrollingIndicator(
+    CARAPI GetScrollingIndicator(
         /* [out] */ IView** view);
 
-    CARPAI IsScrollingIndicatorEnabled(
+    CARAPI IsScrollingIndicatorEnabled(
         /* [out] */ Boolean* result);
 
-    CARPAI FlashScrollingIndicator(
+    CARAPI FlashScrollingIndicator(
         /* [in] */ Boolean animated);
 
-    CARPAI ShowScrollingIndicator(
+    CARAPI ShowScrollingIndicator(
         /* [in] */ Boolean immediately);
 
-    CARPAI CancelScrollingIndicatorAnimations();
+    CARAPI CancelScrollingIndicatorAnimations();
 
-    CARPAI HideScrollingIndicator(
+    CARAPI HideScrollingIndicator(
         /* [in] */ Boolean immediately);
 
     /**
      * To be overridden by subclasses to determine whether the scroll indicator should stretch to
      * fill its space on the track or not.
      */
-    CARPAI HasElasticScrollIndicator(
+    CARAPI HasElasticScrollIndicator(
         /* [out] */ Boolean* result);
 
     // "Zooms out" the PagedView to reveal more side pages
-    CARPAI ZoomOut(
+    CARAPI ZoomOut(
         /* [out] */ Boolean* result);
 
-    CARPAI OnStartReordering();
+    CARAPI OnStartReordering();
 
-    CARPAI OnEndReordering();
+    CARAPI OnEndReordering();
 
     // "Zooms in" the PagedView to highlight the current page
-    CARPAI ZoomIn(
+    CARAPI ZoomIn(
         /* [in] */ IRunnable* onCompleteRunnable,
         /* [out] */ Boolean* result);
 
-    CARPAI SetPageHoveringOverDeleteDropTarget(
+    CARAPI SetPageHoveringOverDeleteDropTarget(
         /* [in] */ Int32 viewIndex,
         /* [in] */ Boolean isHovering);
 
-    CARPAI GetPageWarpIndex(
+    CARAPI GetPageWarpIndex(
         /* [out] */ Int32* index);
 
 private:
-    CARPAI_(void) DispatchOnPageBeginWarp();
+    CARAPI_(void) DispatchOnPageBeginWarp();
 
-    CARPAI_(void) DispatchOnPageEndWarp();
+    CARAPI_(void) DispatchOnPageEndWarp();
 
     /** Returns whether x and y originated within the buffered viewport */
-    CARPAI_(Boolean) IsTouchPointInViewportWithBuffer(
+    CARAPI_(Boolean) IsTouchPointInViewportWithBuffer(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
      /** Returns whether x and y originated within the current page view bounds */
-    CARPAI_(Boolean) IsTouchPointInCurrentPage(
+    CARAPI_(Boolean) IsTouchPointInCurrentPage(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
-    CARPAI_(void) SetTouchState(
+    CARAPI_(void) SetTouchState(
         /* [in] */ Int32 touchState);
 
     /**
      * Save the state when we get {@link MotionEvent#ACTION_DOWN}
      * @param ev
      */
-    CARPAI_(void) SaveDownState(
+    CARAPI_(void) SaveDownState(
         /* [in] */ IMotionEvent* ev);
 
-    CARPAI_(Boolean) IsHorizontalCameraScroll(
+    CARAPI_(Boolean) IsHorizontalCameraScroll(
         /* [in] */ IMotionEvent* ev);
 
-    CARPAI_(void) StartScrolling(
+    CARAPI_(void) StartScrolling(
         /* [in] */ IMotionEvent* ev);
 
     // This curve determines how the effect of scrolling over the limits of the page dimishes
     // as the user pulls further and further from the bounds
-    CARPAI_(Float) OverScrollInfluenceCurve(
+    CARAPI_(Float) OverScrollInfluenceCurve(
         /* [in] */ Float f);
 
-    CARPAI_(void) ResetTouchState();
+    CARAPI_(void) ResetTouchState();
 
-    CARPAI_(void) AcquireVelocityTrackerAndAddMovement(
+    CARAPI_(void) AcquireVelocityTrackerAndAddMovement(
         /* [in] */ IMotionEvent* ev);
 
-    CARPAI_(void) ReleaseVelocityTracker();
+    CARAPI_(void) ReleaseVelocityTracker();
 
-    CARPAI_(void) OnSecondaryPointerUp(
+    CARAPI_(void) OnSecondaryPointerUp(
         /* [in] */ IMotionEvent* ev);
 
-    CARPAI_(Int32) GetPageSnapDuration();
+    CARAPI_(Int32) GetPageSnapDuration();
 
-    CARPAI_(void) UpdateScrollingIndicator();
+    CARAPI_(void) UpdateScrollingIndicator();
 
-    CARPAI_(void) UpdateScrollingIndicatorPosition();
+    CARAPI_(void) UpdateScrollingIndicatorPosition();
 
-    CARPAI_(void) OnPostReorderingAnimationCompleted();
+    CARAPI_(void) OnPostReorderingAnimationCompleted();
 
     /*
      * Flinging to delete - IN PROGRESS
      */
-    CARPAI_(AutoPtr<IPointF>) IsFlingingToDelete();
+    CARAPI_(AutoPtr<IPointF>) IsFlingingToDelete();
 
-    CARPAI_(AutoPtr<IRunnable>) CreatePostDeleteAnimationRunnable(
+    CARAPI_(AutoPtr<IRunnable>) CreatePostDeleteAnimationRunnable(
         /* [in] */ IView* dragView);
 
     /* Drag to delete */
-    CARPAI_(Boolean) IsHoveringOverDeleteDropTarget(
+    CARAPI_(Boolean) IsHoveringOverDeleteDropTarget(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
-    CARPAI_(void) OnDropToDelete();
+    CARAPI_(void) OnDropToDelete();
 
-    CARPAI_(void) CancelWarpAnimation(
+    CARAPI_(void) CancelWarpAnimation(
         /* [in] */ const String& msg,
         /* [in] */ Boolean abortAnimation);
 
-    CARPAI_(Boolean) IsAnimatingWarpPage();
+    CARAPI_(Boolean) IsAnimatingWarpPage();
 
-    CARPAI_(void) AnimateWarpPageOnScreen(
+    CARAPI_(void) AnimateWarpPageOnScreen(
         /* [in] */ const String& reason);
 
-    CARPAI_(Int32) GetCurrentWarpOffset();
+    CARAPI_(Int32) GetCurrentWarpOffset();
 
-    CARPAI_(void) AnimateWarpPageOffScreen(
+    CARAPI_(void) AnimateWarpPageOffScreen(
         /* [in] */ const String& reason,
         /* [in] */ Boolean animate);
 
@@ -1162,7 +1197,7 @@ protected:
 
     Int32 mActivePointerId;
 
-    AutoPtr<IArrayList>> mDirtyPageContent;
+    AutoPtr<IArrayList> mDirtyPageContent;
 
     // If true, syncPages and syncPageItems will be called to refresh pages
     Boolean mContentIsRefreshable;

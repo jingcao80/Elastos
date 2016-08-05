@@ -15,7 +15,7 @@ namespace Text {
  * Abstract class for filtering login-related text (user names and passwords)
  *
  */
-class LoginFilter
+class ECO_PUBLIC LoginFilter
     : public Object
     , public ILoginFilter
     , public IInputFilter
@@ -93,7 +93,7 @@ private:
  * [a-zA-Z0-9.].
  *
  */
-class UsernameFilterGMail
+class ECO_PUBLIC UsernameFilterGMail
     : public LoginFilter
     , public IUsernameFilterGMail
 {
@@ -111,7 +111,7 @@ public:
  * It is slightly less restrictive than the above filter in that it allows [a-zA-Z0-9._-+].
  *
  */
-class UsernameFilterGeneric
+class ECO_PUBLIC UsernameFilterGeneric
     : public LoginFilter
     , public IUsernameFilterGeneric
 {
@@ -132,7 +132,7 @@ private:
  * the Latin-1 (ISO8859-1) char set.
  *
  */
-class PasswordFilterGMail
+class ECO_PUBLIC PasswordFilterGMail
     : public LoginFilter
     , public IPasswordFilterGMail
 {

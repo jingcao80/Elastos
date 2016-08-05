@@ -1,5 +1,9 @@
 
 #include "elastos/droid/systemui/keyguard/CEmergencyCarrierArea.h"
+#include "R.h"
+
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
 
 namespace Elastos {
 namespace Droid {
@@ -16,7 +20,7 @@ CEmergencyCarrierArea::MyOnClickListener::OnTouch(
     VALIDATE_NOT_NULL(result)
 
     Int32 visible;
-    mHost->mCarrierText->GetVisibility(&visible);
+    IView::Probe(mHost->mCarrierText)->GetVisibility(&visible);
     if (visible != IView::VISIBLE)  {
         *result = FALSE;
         return NOERROR;
@@ -64,7 +68,7 @@ ECode CEmergencyCarrierArea::constructor(
 ECode CEmergencyCarrierArea::SetCarrierTextVisible(
     /* [in] */ Boolean visible)
 {
-    return mCarrierText->SetVisibility(visible ? IView::VISIBLE : IView::GONE);
+    return IView::Probe(mCarrierText)->SetVisibility(visible ? IView::VISIBLE : IView::GONE);
 }
 
 ECode CEmergencyCarrierArea::OnFinishInflate()
@@ -81,7 +85,7 @@ ECode CEmergencyCarrierArea::OnFinishInflate()
     // The emergency button overlaps the carrier text, only noticeable when highlighted.
     // So temporarily hide the carrier text while the emergency button is pressed.
     AutoPtr<IViewOnTouchListener> lis = new MyOnClickListener(this);
-    return mEmergencyButton->SetOnTouchListener(lis);
+    return IView::Probe(mEmergencyButton)->SetOnTouchListener(lis);
 }
 
 } // namespace Keyguard

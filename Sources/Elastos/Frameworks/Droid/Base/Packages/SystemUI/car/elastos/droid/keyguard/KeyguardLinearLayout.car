@@ -1,0 +1,21 @@
+
+module
+{
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    [local]
+    interface IKeyguardLinearLayout {
+        SetTopChild(
+            [in] IView* child);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

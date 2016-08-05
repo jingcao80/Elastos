@@ -1,5 +1,26 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardSimPukView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::Internal::Telephony::IITelephony;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -59,21 +80,24 @@ ECode CKeyguardSimPukView::StateMachine::Next()
 
 ECode CKeyguardSimPukView::StateMachine::Reset()
 {
-    mHost->mPinText("");
-    mHost->mPukText("");
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String(""));
+    cchar->ToString(&(mHost->mPinText));
+    cchar->ToString(&(mHost->mPukText));
     mState = ENTER_PUK;
-    mHost->mSecurityMessageDisplay->SetMessage(R::string::kg_puk_enter_puk_hint, TRUE);
-    return mHost->mPasswordEntry->RequestFocus();
+    mHost->mSecurityMessageDisplay->SetMessage(
+            R::string::kg_puk_enter_puk_hint, TRUE);
+    Boolean res;
+    return IView::Probe(mHost->mPasswordEntry)->RequestFocus(&res);
 }
 
-ECode CKeyguardSimPukView::MyRunnable::Run()
+ECode CKeyguardSimPukView::CheckSimPuk::MyRunnable::Run()
 {
     return mHost->OnSimLockChangedResponse(mResult1, mResult2);
 }
 
-ECode CKeyguardSimPukView::MyRunnable2::Run()
+ECode CKeyguardSimPukView::CheckSimPuk::MyRunnable2::Run()
 {
-    return mHost->onSimLockChangedResponse(IPhoneConstants::PIN_GENERAL_FAILURE, -1);
+    return mHost->OnSimLockChangedResponse(IPhoneConstants::PIN_GENERAL_FAILURE, -1);
 }
 
 
@@ -82,18 +106,23 @@ ECode CKeyguardSimPukView::CheckSimPuk::Run()
     //try {
     Logger::V(TAG, "call supplyPukReportResult()");
 
-    AutoPtr<IInterface> obj = ServiceManager::CheckService(String("phone"));
+    AutoPtr<IServiceManager> helper;
+    CServiceManager::AcquireSingleton((IServiceManager**)&helper);
+    AutoPtr<IInterface> obj;
+    helper->CheckService(String("phone"), (IInterface**)&obj);
     AutoPtr<IITelephony> t = IITelephony::Probe(obj);
     AutoPtr<ArrayOf<Int32> > result;
     t->SupplyPukReportResult(mPuk, mPin, (ArrayOf<Int32>**)&result);
     Logger::V(TAG, "supplyPukReportResult returned: %d %d", (*result)[0], (*result)[1]);
-    AutoPtr<IRunnable> r = new MyRunnable(mHost, (*result)[0], (*result)[1])
-    ECode ec = Post(r);
+    AutoPtr<IRunnable> r = new MyRunnable(this, (*result)[0], (*result)[1]);
+    Boolean res;
+    ECode ec = mHost->Post(r, &res);
     //} catch (RemoteException e) {
-    if (ec == (ECode)RemoteException) {
-        Logger::E(TAG, "RemoteException for supplyPukReportResult:", e);
-        AutoPtr<IRunnable> r = new MyRunnable2(mHost);
-        Post(r);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        Logger::E(TAG, "RemoteException for supplyPukReportResult:%d", ec);
+        AutoPtr<IRunnable> r = new MyRunnable2(this);
+        Boolean res;
+        mHost->Post(r, &res);
     }
     return NOERROR;
 }
@@ -101,11 +130,11 @@ ECode CKeyguardSimPukView::CheckSimPuk::Run()
 ECode CKeyguardSimPukView::MyRunnable3::Run()
 {
     if (mHost->mSimUnlockProgressDialog != NULL) {
-        mHost->mSimUnlockProgressDialog->Hide();
+        IDialog::Probe(mHost->mSimUnlockProgressDialog)->Hide();
     }
     if (mResult == IPhoneConstants::PIN_RESULT_SUCCESS) {
         AutoPtr<IContext> context;
-        GetContext((IContext**)&context);
+        mHost->GetContext((IContext**)&context);
         KeyguardUpdateMonitor::GetInstance(context)->ReportSimUnlocked();
         mHost->mCallback->Dismiss(TRUE);
     }
@@ -117,17 +146,20 @@ ECode CKeyguardSimPukView::MyRunnable3::Run()
             }
             else {
                 // show message
-                mHost->mSecurityMessageDisplay->SetMessage(
-                        mHost->GetPukPasswordErrorMessage(mAttemptsRemaining), TRUE);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
+                        mHost->GetPukPasswordErrorMessage(mAttemptsRemaining));
+                mHost->mSecurityMessageDisplay->SetMessage(cchar, TRUE);
             }
         }
         else {
             AutoPtr<IContext> context;
-            GetContext((IContext**)&context);
-            context->GetString(R::string::kg_password_puk_failed, (IContext**)&context);
-            mHost->mSecurityMessageDisplay->SetMessage(context, TRUE);
+            mHost->GetContext((IContext**)&context);
+            String str;
+            context->GetString(R::string::kg_password_puk_failed, &str);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+            mHost->mSecurityMessageDisplay->SetMessage(cchar, TRUE);
         }
-        if (DEBUG) Logger::D(LOG_TAG, "verifyPasswordAndUnlock UpdateSim.onSimCheckResponse: attemptsRemaining=%d",
+        if (DEBUG) Logger::D(TAG, "verifyPasswordAndUnlock UpdateSim.onSimCheckResponse: attemptsRemaining=%d",
                 mAttemptsRemaining);
         mHost->mStateMachine->Reset();
     }
@@ -140,12 +172,12 @@ ECode CKeyguardSimPukView::MyCheckSimPuk::OnSimLockChangedResponse(
     /* [in] */ Int32 attemptsRemaining)
 {
     AutoPtr<IRunnable> r = new MyRunnable3(mHost, result, attemptsRemaining);
-    return Post(r);
+    Boolean res;
+    return mHost->Post(r, &res);
 }
 
 const String CKeyguardSimPukView::TAG("KeyguardSimPukView");
 
-const String CKeyguardSimPukView::LOG_TAG("KeyguardSimPukView");
 const Boolean CKeyguardSimPukView::DEBUG = IKeyguardConstants::DEBUG;
 
 CAR_OBJECT_IMPL(CKeyguardSimPukView)
@@ -154,7 +186,7 @@ CKeyguardSimPukView::CKeyguardSimPukView()
     : mPukText(NULL)
     , mPinText(NULL)
 {
-    mStateMachine = new StateMachine();
+    mStateMachine = new StateMachine(this);
 }
 
 String CKeyguardSimPukView::GetPukPasswordErrorMessage(
@@ -171,17 +203,20 @@ String CKeyguardSimPukView::GetPukPasswordErrorMessage(
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         AutoPtr<IResources> resources;
-        context->GetResources(&resources);
-        resources->GetQuantityString(R::plurals::kg_password_wrong_puk_code, attemptsRemaining,
-                        attemptsRemaining, &displayMessage);
+        context->GetResources((IResources**)&resources);
+        AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+        AutoPtr<IInteger32> obj = CoreUtils::Convert(attemptsRemaining);
+        array->Set(0, obj);
+        resources->GetQuantityString(R::plurals::kg_password_wrong_puk_code,
+            attemptsRemaining, array, &displayMessage);
     }
     else {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         context->GetString(R::string::kg_password_puk_failed, &displayMessage);
     }
-    if (DEBUG) Logger::D(LOG_TAG, "getPukPasswordErrorMessage: attemptsRemaining=%d displayMessage=%d",
-            attemptsRemaining, displayMessage);
+    if (DEBUG) Logger::D(TAG, "getPukPasswordErrorMessage: attemptsRemaining=%d displayMessage=%s",
+            attemptsRemaining, displayMessage.string());
     return displayMessage;
 }
 
@@ -220,9 +255,8 @@ ECode CKeyguardSimPukView::GetPasswordTextViewId(
 {
     VALIDATE_NOT_NULL(id)
 
-    *result = R::id::pukEntry;
+    *id = R::id::pukEntry;
     return NOERROR;
-}
 }
 
 ECode CKeyguardSimPukView::OnFinishInflate()
@@ -245,7 +279,7 @@ ECode CKeyguardSimPukView::OnPause()
 {
     // dismiss the dialog.
     if (mSimUnlockProgressDialog != NULL) {
-        mSimUnlockProgressDialog->Dismiss();
+        IDialogInterface::Probe(mSimUnlockProgressDialog)->Dismiss();
         mSimUnlockProgressDialog = NULL;
     }
     return NOERROR;
@@ -254,40 +288,43 @@ ECode CKeyguardSimPukView::OnPause()
 AutoPtr<IDialog> CKeyguardSimPukView::GetSimUnlockProgressDialog()
 {
     if (mSimUnlockProgressDialog == NULL) {
-        CProgressDialog::New(mContext, (IProgressDialog)&mSimUnlockProgressDialog);
+        CProgressDialog::New(mContext, (IProgressDialog**)&mSimUnlockProgressDialog);
         String massage;
         mContext->GetString(R::string::kg_sim_unlock_progress_dialog_message, &massage);
-        mSimUnlockProgressDialog->SetMessage(massage);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(massage);
+        IAlertDialog::Probe(mSimUnlockProgressDialog)->SetMessage(cchar);
         mSimUnlockProgressDialog->SetIndeterminate(TRUE);
-        mSimUnlockProgressDialog->SetCancelable(FALSE);
+        IDialog::Probe(mSimUnlockProgressDialog)->SetCancelable(FALSE);
         if (IActivity::Probe(mContext) == NULL) {
             AutoPtr<IWindow> window;
-            mSimUnlockProgressDialog->GetWindow((IWindow**)&window);
+            IDialog::Probe(mSimUnlockProgressDialog)->GetWindow((IWindow**)&window);
             window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
         }
     }
-    return mSimUnlockProgressDialog;
+    return IDialog::Probe(mSimUnlockProgressDialog);
 }
 
 AutoPtr<IDialog> CKeyguardSimPukView::GetPukRemainingAttemptsDialog(
     /* [in] */ Int32 remaining)
 {
-    String msg = getPukPasswordErrorMessage(remaining);
+    String msg = GetPukPasswordErrorMessage(remaining);
     if (mRemainingAttemptsDialog == NULL) {
         AutoPtr<IAlertDialogBuilder> builder;
         CAlertDialogBuilder::New(mContext, (IAlertDialogBuilder**)&builder);
-        builder->SetMessage(msg);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(msg);
+        builder->SetMessage(cchar);
         builder->SetCancelable(FALSE);
         builder->SetNeutralButton(R::string::ok, NULL);
         builder->Create((IAlertDialog**)&mRemainingAttemptsDialog);
         AutoPtr<IWindow> window;
-        mRemainingAttemptsDialog->GetWindow((IWindow**)&window);
+        IDialog::Probe(mRemainingAttemptsDialog)->GetWindow((IWindow**)&window);
         window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
     }
     else {
-        mRemainingAttemptsDialog->SetMessage(msg);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(msg);
+        IAlertDialog::Probe(mRemainingAttemptsDialog)->SetMessage(cchar);
     }
-    return mRemainingAttemptsDialog;
+    return IDialog::Probe(mRemainingAttemptsDialog);
 }
 
 Boolean CKeyguardSimPukView::CheckPuk()
@@ -296,7 +333,7 @@ Boolean CKeyguardSimPukView::CheckPuk()
     String text;
     mPasswordEntry->GetText(&text);
     if (text.GetLength() == 8) {
-        mPukText = mPasswordEntry->GetText(&mPukText);
+        mPasswordEntry->GetText(&mPukText);
         return TRUE;
     }
     return FALSE;
@@ -322,7 +359,7 @@ ECode CKeyguardSimPukView::ConfirmPin(
 
     String text;
     mPasswordEntry->GetText(&text);
-    *result = mPinText.equals(text);
+    *result = mPinText.Equals(text);
     return NOERROR;
 }
 
@@ -353,7 +390,7 @@ ECode CKeyguardSimPukView::StartDisappearAnimation(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = NULL;
+    *result = FALSE;
     return NOERROR;
 }
 

@@ -1,5 +1,14 @@
 
 #include "elastos/droid/systemui/keyguard/CEmergencyButton.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/os/SystemClock.h"
+
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
 
 namespace Elastos {
 namespace Droid {
@@ -9,9 +18,8 @@ namespace Keyguard {
 ECode CEmergencyButton::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
     /* [in] */ IccCardConstantsState simState)
 {
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Int32 phoneState;
-    monitor->GetPhoneState(&phoneState);
+    KeyguardUpdateMonitor::GetInstance(mHost->mContext)->GetPhoneState(&phoneState);
     mHost->UpdateEmergencyCallButton(simState, phoneState);
     return NOERROR;
 }
@@ -19,9 +27,8 @@ ECode CEmergencyButton::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
 ECode CEmergencyButton::MyKeyguardUpdateMonitorCallback::OnPhoneStateChanged(
     /* [in] */ Int32 phoneState)
 {
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     IccCardConstantsState simState;
-    monitor->GetSimState(&simState);
+    KeyguardUpdateMonitor::GetInstance(mHost->mContext)->GetSimState(&simState);
     mHost->UpdateEmergencyCallButton(simState, phoneState);
     return NOERROR;
 }
@@ -63,18 +70,14 @@ ECode CEmergencyButton::OnAttachedToWindow()
 {
     Button::OnAttachedToWindow();
 
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    monitor->RegisterCallback(mInfoCallback);
-    return NOERROR;
+    return KeyguardUpdateMonitor::GetInstance(mContext)->RegisterCallback(mInfoCallback);
 }
 
 ECode CEmergencyButton::OnDetachedFromWindow()
 {
     Button::OnDetachedFromWindow();
 
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    KmContext->RemoveCallback(mInfoCallback);
-    return NOERROR;
+    return KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mInfoCallback);
 }
 
 ECode CEmergencyButton::OnFinishInflate()
@@ -85,10 +88,10 @@ ECode CEmergencyButton::OnFinishInflate()
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
     mPowerManager = IPowerManager::Probe(obj);
-    AutoPtr<IViewOnClickListener> lis new MyOnClickListener(this);
+    AutoPtr<IViewOnClickListener> lis = new MyOnClickListener(this);
     SetOnClickListener(lis);
 
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Int32 phoneState;
     monitor->GetPhoneState(&phoneState);
     IccCardConstantsState simState;
@@ -101,7 +104,7 @@ ECode CEmergencyButton::TakeEmergencyCallAction()
 {
     // TODO: implement a shorter timeout once new PowerManager API is ready.
     // should be the equivalent to the old userActivity(EMERGENCY_CALL_TIMEOUT)
-    mPowerManager->UserActivity(SystemClock::UptimeMillis(), TRUE);
+    mPowerManager->UserActivity(SystemClock::GetUptimeMillis(), TRUE);
 
     Boolean res;
     if (mLockPatternUtils->IsInCall(&res), res) {
@@ -109,7 +112,7 @@ ECode CEmergencyButton::TakeEmergencyCallAction()
     }
     else {
         const Boolean bypassHandler = TRUE;
-        AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+        AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
         monitor->ReportEmergencyCallAction(bypassHandler);
         AutoPtr<IIntent> intent;
         CIntent::New(ACTION_EMERGENCY_DIAL, (IIntent**)&intent);
@@ -120,7 +123,8 @@ ECode CEmergencyButton::TakeEmergencyCallAction()
         GetContext((IContext**)&context);
         Int32 user;
         mLockPatternUtils->GetCurrentUser(&user);
-        AutoPtr<IUserHandle> handle = new UserHandle(user));
+        AutoPtr<IUserHandle> handle;
+        CUserHandle::New(user, (IUserHandle**)&handle);
         context->StartActivityAsUser(intent, handle);
     }
     return NOERROR;
@@ -137,7 +141,7 @@ void CEmergencyButton::UpdateEmergencyCallButton(
         enabled = TRUE; // always show "return to call" if phone is off-hook
     }
     else if (mLockPatternUtils->IsEmergencyCallCapable(&res), res) {
-        AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+        AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
         Boolean simLocked;
         monitor->IsSimLocked(&simLocked);
         if (simLocked) {

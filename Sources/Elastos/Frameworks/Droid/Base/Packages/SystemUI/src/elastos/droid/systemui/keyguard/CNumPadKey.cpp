@@ -1,10 +1,31 @@
 
 #include "elastos/droid/systemui/keyguard/CNumPadKey.h"
+#include "elastos/droid/systemui/keyguard/LiftToActivateListener.h"
+#include "elastos/droid/systemui/keyguard/ObscureSpeechDelegate.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/Character.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IAccessibilityDelegate;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::IHapticFeedbackConstants;
+using Elastos::Core::Character;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
+
+CAR_INTERFACE_IMPL(CNumPadKey::MyViewOnClickListener, Object, IViewOnClickListener)
 
 ECode CNumPadKey::MyViewOnClickListener::OnClick(
     /* [in] */ IView* thisView)
@@ -19,8 +40,9 @@ ECode CNumPadKey::MyViewOnClickListener::OnClick(
         }
     }
     Boolean res;
-    if (mHost->mTextView != NULL && (mHost->mTextView->IsEnabled(&res), res)) {
-        mHost->mTextView->Append(Character.forDigit(mDigit, 10));
+    if (mHost->mTextView != NULL &&
+            (IView::Probe(mHost->mTextView)->IsEnabled(&res), res)) {
+        mHost->mTextView->Append(Character::ForDigit(mHost->mDigit, 10));
     }
     mHost->UserActivity();
     return mHost->DoHapticKeyClick();
@@ -64,8 +86,9 @@ ECode CNumPadKey::constructor(
     ViewGroup::constructor(context, attrs, defStyle);
 
     SetFocusable(TRUE);
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::NumPadKey);
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs, R::styleable::NumPadKey, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
     //try {
     FAIL_GOTO(a->GetInt32(R::styleable::NumPadKey_digit, mDigit, &mDigit), FINALLY)
@@ -96,13 +119,14 @@ FINALLY:
     AutoPtr<IInterface> obj2;
     context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj2);
     AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj2);
-    inflater->Inflate(R::layout::keyguard_num_pad_key, this, TRUE);
+    AutoPtr<IView> tmp;
+    inflater->Inflate(R::layout::keyguard_num_pad_key, this, TRUE, (IView**)&tmp);
 
     AutoPtr<IView> view;
     FindViewById(R::id::digit_text, (IView**)&view);
     mDigitText = ITextView::Probe(view);
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(StringUtils::ToString(mDigit));
-    mDigitText.setText(cchar);
+    mDigitText->SetText(cchar);
 
     AutoPtr<IView> view2;
     FindViewById(R::id::klondike_text, (IView**)&view2);
@@ -121,7 +145,8 @@ FINALLY:
     mKlondikeText->GetText((ICharSequence**)&text2);
     String str2;
     text2->ToString(&str2);
-    return SetContentDescription(str + str2);
+    AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(str + str2);
+    return SetContentDescription(cchar2);
 }
 
 ECode CNumPadKey::OnDetachedFromWindow()
@@ -158,8 +183,9 @@ void CNumPadKey::UpdateText()
             if (len > 0) {
                 AutoPtr<ICharSequence> cchar = CoreUtils::Convert(klondike);
                 mKlondikeText->SetText(cchar);
-            } else {
-                mKlondikeText->SetVisibility(IView::INVISIBLE);
+            }
+            else {
+                IView::Probe(mKlondikeText)->SetVisibility(IView::INVISIBLE);
             }
         }
     }
@@ -170,7 +196,8 @@ ECode CNumPadKey::OnMeasure(
     /* [in] */ Int32 heightMeasureSpec)
 {
     ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
-    return MeasureChildren(widthMeasureSpec, heightMeasureSpec);
+    MeasureChildren(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode CNumPadKey::OnLayout(
@@ -181,9 +208,9 @@ ECode CNumPadKey::OnLayout(
     /* [in] */ Int32 b)
 {
     Int32 digitHeight;
-    mDigitText->GetMeasuredHeight(&digitHeight);
+    IView::Probe(mDigitText)->GetMeasuredHeight(&digitHeight);
     Int32 klondikeHeight;
-    mKlondikeText->GetMeasuredHeight(&klondikeHeight);
+    IView::Probe(mKlondikeText)->GetMeasuredHeight(&klondikeHeight);
     Int32 totalHeight = digitHeight + klondikeHeight;
 
     Int32 h;
@@ -194,17 +221,17 @@ ECode CNumPadKey::OnLayout(
     Int32 centerX = w / 2;
 
     Int32 dmw;
-    mDigitText->GetMeasuredWidth(&dmw)
+    IView::Probe(mDigitText)->GetMeasuredWidth(&dmw);
     Int32 left = centerX - dmw / 2;
     Int32 bottom = top + digitHeight;
-    mDigitText->Layout(left, top, left + dmw, bottom);
+    IView::Probe(mDigitText)->Layout(left, top, left + dmw, bottom);
     top = (Int32)(bottom - klondikeHeight * 0.35f);
     bottom = top + klondikeHeight;
 
     Int32 kmw;
-    mKlondikeText->GetMeasuredWidth(&kmw);
+    IView::Probe(mKlondikeText)->GetMeasuredWidth(&kmw);
     left = centerX - kmw / 2;
-    return mKlondikeText->Layout(left, top, left + kmw, bottom);
+    return IView::Probe(mKlondikeText)->Layout(left, top, left + kmw, bottom);
 }
 
 ECode CNumPadKey::HasOverlappingRendering(
@@ -219,9 +246,10 @@ ECode CNumPadKey::HasOverlappingRendering(
 ECode CNumPadKey::DoHapticKeyClick()
 {
     if (mEnableHaptics) {
-        PerformHapticFeedback(IHapticFeedbackConstants::resultVIRTUAL_KEY,
-                IHapticFeedbackConstants::resultFLAG_IGNORE_VIEW_SETTING
-                | IHapticFeedbackConstants::resultFLAG_IGNORE_GLOBAL_SETTING);
+        Boolean res;
+        PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY,
+                IHapticFeedbackConstants::FLAG_IGNORE_VIEW_SETTING
+                | IHapticFeedbackConstants::FLAG_IGNORE_GLOBAL_SETTING, &res);
     }
     return NOERROR;
 }

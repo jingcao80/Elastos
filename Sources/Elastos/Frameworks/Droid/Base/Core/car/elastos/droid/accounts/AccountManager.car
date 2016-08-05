@@ -235,6 +235,12 @@ module
             [in] String packageName,
             [out, callee] ArrayOf<IAccount*>* accs);
 
+        /** @hide Same as {@link #getAccountsByType(String)} but for a specific user. */
+        GetAccountsByTypeAsUser(
+            [in] String type,
+            [in] IUserHandle* userHandle,
+            [out, callee] ArrayOf<IAccount*>* accs);
+
         /**
          * Lists all accounts of a particular type.  The account type is a
          * string token corresponding to the authenticator and useful domain
@@ -992,6 +998,20 @@ module
             [in] IActivity* activity,
             [in] IAccountManagerCallback* accountManagerCb,
             [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
+
+        /**
+         * @hide
+         * Same as {@link #confirmCredentials(Account, Bundle, Activity, AccountManagerCallback, Handler)}
+         * but for the specified user.
+         */
+        ConfirmCredentialsAsUser(
+            [in] IAccount* account,
+            [in] IBundle* options,
+            [in] IActivity* activity,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [in] IUserHandle* userHandle,
             [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**

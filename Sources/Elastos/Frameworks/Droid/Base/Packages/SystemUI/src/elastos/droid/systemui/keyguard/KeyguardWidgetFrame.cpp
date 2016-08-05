@@ -1,15 +1,46 @@
 
-#include "elastos/droid/systemui/keyguard/CKeyguardWidgetFrame.h"
+#include "elastos/droid/systemui/keyguard/KeyguardWidgetFrame.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Math.h>
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IPropertyValuesHolder;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::IPropertyValuesHolderHelper;
+using Elastos::Droid::Animation::CPropertyValuesHolderHelper;
+using Elastos::Droid::AppWidget::IAppWidgetManager;
+using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::Graphics::IShader;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::IXfermode;
+using Elastos::Droid::Graphics::ILinearGradient;
+using Elastos::Droid::Graphics::CLinearGradient;
+using Elastos::Droid::Graphics::ShaderTileMode_CLAMP;
+using Elastos::Droid::Graphics::PorterDuffMode_ADD;
+using Elastos::Droid::Graphics::IPorterDuffXfermode;
+using Elastos::Droid::Graphics::CPorterDuffXfermode;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
+using Elastos::Core::Math;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-ECode CKeyguardWidgetFrame::MyKeyguardUpdateMonitorCallback::OnBootCompleted()
+ECode KeyguardWidgetFrame::MyKeyguardUpdateMonitorCallback::OnBootCompleted()
 {
     if (mHost->mPerformAppWidgetSizeUpdateOnBootComplete) {
-        PerformAppWidgetSizeCallbacksIfNecessary();
+        mHost->PerformAppWidgetSizeCallbacksIfNecessary();
         mHost->mPerformAppWidgetSizeUpdateOnBootComplete = FALSE;
     }
     return NOERROR;
@@ -22,17 +53,17 @@ static AutoPtr<IPorterDuffXfermode> initAddBlendMode()
     return mode;
 }
 
-AutoPtr<IPorterDuffXfermode> CKeyguardWidgetFrame::sAddBlendMode = initAddBlendMode();
+AutoPtr<IPorterDuffXfermode> KeyguardWidgetFrame::sAddBlendMode = initAddBlendMode();
 
-const Float CKeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER = 0.6f;
-const Int32 CKeyguardWidgetFrame::HOVER_OVER_DELETE_DROP_TARGET_OVERLAY_COLOR = 0x99FF0000;
+const Float KeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER = 0.6f;
+const Int32 KeyguardWidgetFrame::HOVER_OVER_DELETE_DROP_TARGET_OVERLAY_COLOR = 0x99FF0000;
 
 // Temporarily disable this for the time being until we know why the gfx is messing up
-const Boolean CKeyguardWidgetFrame::ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY = TRUE;
+const Boolean KeyguardWidgetFrame::ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY = TRUE;
 
-CAR_OBJECT_IMPL(CKeyguardWidgetFrame)
+CAR_INTERFACE_IMPL(KeyguardWidgetFrame, FrameLayout, IKeyguardWidgetFrame)
 
-CKeyguardWidgetFrame::CKeyguardWidgetFrame()
+KeyguardWidgetFrame::KeyguardWidgetFrame()
     : mGradientColor(0)
     , mLeftToRight(TRUE)
     , mOverScrollAmount(0.0f)
@@ -52,20 +83,20 @@ CKeyguardWidgetFrame::CKeyguardWidgetFrame()
 {
 }
 
-ECode CKeyguardWidgetFrame::constructor(
+ECode KeyguardWidgetFrame::constructor(
     /* [in] */ IContext* context)
 {
     return constructor(context, NULL, 0);
 }
 
-ECode CKeyguardWidgetFrame::constructor(
+ECode KeyguardWidgetFrame::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
     return constructor(context, attrs, 0);
 }
 
-ECode CKeyguardWidgetFrame::constructor(
+ECode KeyguardWidgetFrame::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
@@ -98,23 +129,23 @@ ECode CKeyguardWidgetFrame::constructor(
     res->GetDimensionPixelSize(R::dimen::kg_small_widget_height, &mSmallWidgetHeight);
     res->GetDrawable(R::drawable::kg_widget_bg_padded, (IDrawable**)&mBackgroundDrawable);
     res->GetColor(R::color::kg_widget_pager_gradient, &mGradientColor);
-    return mGradientPaint->SetXfermode(sAddBlendMode);
+    return mGradientPaint->SetXfermode(IXfermode::Probe(sAddBlendMode));
 }
 
-ECode CKeyguardWidgetFrame::OnDetachedFromWindow()
+ECode KeyguardWidgetFrame::OnDetachedFromWindow()
 {
     FrameLayout::OnDetachedFromWindow();
     CancelLongPress();
     return KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mUpdateMonitorCallbacks);
 }
 
-ECode CKeyguardWidgetFrame::OnAttachedToWindow()
+ECode KeyguardWidgetFrame::OnAttachedToWindow()
 {
     FrameLayout::OnAttachedToWindow();
     return KeyguardUpdateMonitor::GetInstance(mContext)->RegisterCallback(mUpdateMonitorCallbacks);
 }
 
-ECode CKeyguardWidgetFrame::SetIsHoveringOverDeleteDropTarget(
+ECode KeyguardWidgetFrame::SetIsHoveringOverDeleteDropTarget(
     /* [in] */ Boolean isHovering)
 {
     if (ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY) {
@@ -128,16 +159,19 @@ ECode CKeyguardWidgetFrame::SetIsHoveringOverDeleteDropTarget(
             context->GetResources((IResources**)&resources);
             AutoPtr<ICharSequence> cchar;
             GetContentDescription((ICharSequence**)&cchar);
+            AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+            array->Set(0, TO_IINTERFACE(cchar));
             String text;
-            resources->GetString(resId, cchar, &text);
-            AnnounceForAccessibility(text);
+            resources->GetString(resId, array, &text);
+            AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(text);
+            AnnounceForAccessibility(cchar2);
             Invalidate();
         }
     }
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::OnInterceptTouchEvent(
+ECode KeyguardWidgetFrame::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
@@ -166,7 +200,7 @@ ECode CKeyguardWidgetFrame::OnInterceptTouchEvent(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::OnTouchEvent(
+ECode KeyguardWidgetFrame::OnTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
@@ -193,7 +227,7 @@ ECode CKeyguardWidgetFrame::OnTouchEvent(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::RequestDisallowInterceptTouchEvent(
+ECode KeyguardWidgetFrame::RequestDisallowInterceptTouchEvent(
     /* [in] */ Boolean disallowIntercept)
 {
     FrameLayout::RequestDisallowInterceptTouchEvent(disallowIntercept);
@@ -201,21 +235,21 @@ ECode CKeyguardWidgetFrame::RequestDisallowInterceptTouchEvent(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::CancelLongPress()
+ECode KeyguardWidgetFrame::CancelLongPress()
 {
     FrameLayout::CancelLongPress();
     return mLongPressHelper->CancelLongPress();
 }
 
-void CKeyguardWidgetFrame::DrawGradientOverlay(
+void KeyguardWidgetFrame::DrawGradientOverlay(
     /* [in] */ ICanvas* c)
 {
-    mGradientPaint->SetShader(mForegroundGradient);
+    mGradientPaint->SetShader(IShader::Probe(mForegroundGradient));
     mGradientPaint->SetAlpha(mForegroundAlpha);
     c->DrawRect(mForegroundRect, mGradientPaint);
 }
 
-void CKeyguardWidgetFrame::DrawHoveringOverDeleteOverlay(
+void KeyguardWidgetFrame::DrawHoveringOverDeleteOverlay(
     /* [in] */ ICanvas* c)
 {
     if (mIsHoveringOverDeleteDropTarget) {
@@ -223,7 +257,7 @@ void CKeyguardWidgetFrame::DrawHoveringOverDeleteOverlay(
     }
 }
 
-ECode CKeyguardWidgetFrame::DrawBg(
+ECode KeyguardWidgetFrame::DrawBg(
     /* [in] */ ICanvas* canvas)
 {
     if (mBackgroundAlpha > 0.0f) {
@@ -236,11 +270,12 @@ ECode CKeyguardWidgetFrame::DrawBg(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::DispatchDraw(
+ECode KeyguardWidgetFrame::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     if (ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY) {
-        canvas->Save();
+        Int32 res;
+        canvas->Save(&res);
     }
     DrawBg(canvas);
     FrameLayout::DispatchDraw(canvas);
@@ -252,7 +287,7 @@ ECode CKeyguardWidgetFrame::DispatchDraw(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::EnableHardwareLayersForContent()
+ECode KeyguardWidgetFrame::EnableHardwareLayersForContent()
 {
     AutoPtr<IView> widget;
     GetContent((IView**)&widget);
@@ -264,17 +299,17 @@ ECode CKeyguardWidgetFrame::EnableHardwareLayersForContent()
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::DisableHardwareLayersForContent()
+ECode KeyguardWidgetFrame::DisableHardwareLayersForContent()
 {
     AutoPtr<IView> widget;
     GetContent((IView**)&widget);
     if (widget != NULL) {
-        widget->SetLayerType(LAYER_TYPE_NONE, null);
+        widget->SetLayerType(LAYER_TYPE_NONE, NULL);
     }
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::GetContent(
+ECode KeyguardWidgetFrame::GetContent(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
@@ -282,7 +317,7 @@ ECode CKeyguardWidgetFrame::GetContent(
     return GetChildAt(0, view);
 }
 
-ECode CKeyguardWidgetFrame::GetContentAppWidgetId(
+ECode KeyguardWidgetFrame::GetContentAppWidgetId(
     /* [out] */ Int32* id)
 {
     VALIDATE_NOT_NULL(id)
@@ -302,7 +337,7 @@ ECode CKeyguardWidgetFrame::GetContentAppWidgetId(
     }
 }
 
-ECode CKeyguardWidgetFrame::GetBackgroundAlpha(
+ECode KeyguardWidgetFrame::GetBackgroundAlpha(
     /* [out] */ Float* res)
 {
     VALIDATE_NOT_NULL(res)
@@ -311,7 +346,7 @@ ECode CKeyguardWidgetFrame::GetBackgroundAlpha(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::SetBackgroundAlphaMultiplier(
+ECode KeyguardWidgetFrame::SetBackgroundAlphaMultiplier(
     /* [in] */ Float multiplier)
 {
     if (mBackgroundAlphaMultiplier != multiplier) {
@@ -321,7 +356,7 @@ ECode CKeyguardWidgetFrame::SetBackgroundAlphaMultiplier(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::GetBackgroundAlphaMultiplier(
+ECode KeyguardWidgetFrame::GetBackgroundAlphaMultiplier(
     /* [out] */ Float* res)
 {
     VALIDATE_NOT_NULL(res)
@@ -330,7 +365,7 @@ ECode CKeyguardWidgetFrame::GetBackgroundAlphaMultiplier(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::SetBackgroundAlpha(
+ECode KeyguardWidgetFrame::SetBackgroundAlpha(
     /* [in] */ Float alpha)
 {
     if (mBackgroundAlpha !=  alpha) {
@@ -340,7 +375,7 @@ ECode CKeyguardWidgetFrame::SetBackgroundAlpha(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::GetContentAlpha(
+ECode KeyguardWidgetFrame::GetContentAlpha(
     /* [out] */ Float* res)
 {
     VALIDATE_NOT_NULL(res)
@@ -349,7 +384,7 @@ ECode CKeyguardWidgetFrame::GetContentAlpha(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::SetContentAlpha(
+ECode KeyguardWidgetFrame::SetContentAlpha(
     /* [in] */ Float alpha)
 {
     mContentAlpha = alpha;
@@ -361,7 +396,7 @@ ECode CKeyguardWidgetFrame::SetContentAlpha(
     return NOERROR;
 }
 
-void CKeyguardWidgetFrame::SetWidgetHeight(
+void KeyguardWidgetFrame::SetWidgetHeight(
     /* [in] */ Int32 height)
 {
     Boolean needLayout = FALSE;
@@ -370,12 +405,11 @@ void CKeyguardWidgetFrame::SetWidgetHeight(
     if (widget != NULL) {
         AutoPtr<IViewGroupLayoutParams> p;
         widget->GetLayoutParams((IViewGroupLayoutParams**)&p);
-        AutoPtr<IFrameLayoutLayoutParams> lp = IFrameLayoutLayoutParams::Probe(p);
-        Int32 h;
-        lp->GetHeight(&h);
-        if (h != height) {
+        AutoPtr<FrameLayout::LayoutParams> lp =
+                (FrameLayout::LayoutParams*)IFrameLayoutLayoutParams::Probe(p);
+        if (lp->mHeight != height) {
             needLayout = TRUE;
-            lp->SetHeight(height);
+            lp->mHeight = height;
         }
     }
     if (needLayout) {
@@ -383,7 +417,7 @@ void CKeyguardWidgetFrame::SetWidgetHeight(
     }
 }
 
-ECode CKeyguardWidgetFrame::SetMaxChallengeTop(
+ECode KeyguardWidgetFrame::SetMaxChallengeTop(
     /* [in] */ Int32 top)
 {
     Boolean dirty = mMaxChallengeTop != top;
@@ -407,7 +441,7 @@ ECode CKeyguardWidgetFrame::SetMaxChallengeTop(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::IsSmall(
+ECode KeyguardWidgetFrame::IsSmall(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -416,7 +450,7 @@ ECode CKeyguardWidgetFrame::IsSmall(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::AdjustFrame(
+ECode KeyguardWidgetFrame::AdjustFrame(
     /* [in] */ Int32 challengeTop)
 {
     Int32 b;
@@ -425,7 +459,7 @@ ECode CKeyguardWidgetFrame::AdjustFrame(
     return SetFrameHeight(frameHeight);
 }
 
-ECode CKeyguardWidgetFrame::ShrinkWidget(
+ECode KeyguardWidgetFrame::ShrinkWidget(
     /* [in] */ Boolean alsoShrinkFrame)
 {
     mIsSmall = TRUE;
@@ -437,7 +471,7 @@ ECode CKeyguardWidgetFrame::ShrinkWidget(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::GetSmallFrameHeight(
+ECode KeyguardWidgetFrame::GetSmallFrameHeight(
     /* [out] */ Int32* height)
 {
     VALIDATE_NOT_NULL(height)
@@ -446,7 +480,7 @@ ECode CKeyguardWidgetFrame::GetSmallFrameHeight(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::SetWidgetLockedSmall(
+ECode KeyguardWidgetFrame::SetWidgetLockedSmall(
     /* [in] */ Boolean locked)
 {
     if (locked) {
@@ -456,18 +490,18 @@ ECode CKeyguardWidgetFrame::SetWidgetLockedSmall(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::ResetSize()
+ECode KeyguardWidgetFrame::ResetSize()
 {
     mIsSmall = FALSE;
     if (!mWidgetLockedSmall) {
-        SetWidgetHeight(LayoutParams.MATCH_PARENT);
+        SetWidgetHeight(IViewGroupLayoutParams::MATCH_PARENT);
     }
     Int32 height;
     GetMeasuredHeight(&height);
     return SetFrameHeight(height);
 }
 
-ECode CKeyguardWidgetFrame::SetFrameHeight(
+ECode KeyguardWidgetFrame::SetFrameHeight(
     /* [in] */ Int32 height)
 {
     mFrameHeight = height;
@@ -475,30 +509,30 @@ ECode CKeyguardWidgetFrame::SetFrameHeight(
     GetMeasuredWidth(&w);
     Int32 h;
     GetMeasuredHeight(&h);
-    mBackgroundRect->Set(0, 0, w, Math::Min(mFrameHeight, h));
+    mBackgroundRect->Set(0, 0, w, Elastos::Core::Math::Min(mFrameHeight, h));
     mForegroundRect->Set(mFrameStrokeAdjustment, mFrameStrokeAdjustment, w -
-            mFrameStrokeAdjustment, Math::Min(h, mFrameHeight) -
+            mFrameStrokeAdjustment, Elastos::Core::Math::Min(h, mFrameHeight) -
             mFrameStrokeAdjustment);
     UpdateGradient();
     Invalidate();
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::HideFrame(
+ECode KeyguardWidgetFrame::HideFrame(
     /* [in] */ IInterface* caller)
 {
     return FadeFrame(caller, FALSE, 0.0f,
             IKeyguardWidgetPager::CHILDREN_OUTLINE_FADE_OUT_DURATION);
 }
 
-ECode CKeyguardWidgetFrame::ShowFrame(
+ECode KeyguardWidgetFrame::ShowFrame(
     /* [in] */ IInterface* caller)
 {
     return FadeFrame(caller, TRUE, OUTLINE_ALPHA_MULTIPLIER,
             IKeyguardWidgetPager::CHILDREN_OUTLINE_FADE_IN_DURATION);
 }
 
-ECode CKeyguardWidgetFrame::FadeFrame(
+ECode KeyguardWidgetFrame::FadeFrame(
     /* [in] */ IInterface* caller,
     /* [in] */ Boolean takeControl,
     /* [in] */ Float alpha,
@@ -508,8 +542,8 @@ ECode CKeyguardWidgetFrame::FadeFrame(
         mBgAlphaController = caller;
     }
 
-    if (mBgAlphaController != caller && mBgAlphaController != NULL) {
-        return;
+    if (TO_IINTERFACE(mBgAlphaController) != TO_IINTERFACE(caller) && mBgAlphaController != NULL) {
+        return NOERROR;
     }
 
     if (mFrameFade != NULL) {
@@ -518,29 +552,36 @@ ECode CKeyguardWidgetFrame::FadeFrame(
     }
     AutoPtr<IPropertyValuesHolderHelper> helper;
     CPropertyValuesHolderHelper::AcquireSingleton((IPropertyValuesHolderHelper**)&helper);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+    (*array)[0] = alpha;
     AutoPtr<IPropertyValuesHolder> bgAlpha;
-    helper->OfFloat(String("backgroundAlpha"), alpha, (IPropertyValuesHolder**)&bgAlpha);
+    helper->OfFloat(String("backgroundAlpha"), array, (IPropertyValuesHolder**)&bgAlpha);
 
     AutoPtr<IObjectAnimatorHelper> helper2;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper2);
-    helper2->OfPropertyValuesHolder(this, bgAlpha, (IAnimator**)&mFrameFade);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > array2 =
+            ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    array2->Set(0, bgAlpha);
+    AutoPtr<IObjectAnimator> oa;
+    helper2->OfPropertyValuesHolder(TO_IINTERFACE(this), array2, (IObjectAnimator**)&oa);
+    mFrameFade = IAnimator::Probe(oa);
     mFrameFade->SetDuration(duration);
     return mFrameFade->Start();
 }
 
-void CKeyguardWidgetFrame::UpdateGradient()
+void KeyguardWidgetFrame::UpdateGradient()
 {
     Int32 width;
     mForegroundRect->GetWidth(&width);
     Float x0 = mLeftToRight ? 0 : width;
     Float x1 = mLeftToRight ? width: 0;
-    CLinearGradient::New(x0, 0f, x1, 0f,
+    CLinearGradient::New(x0, 0.0f, x1, 0.0f,
             mGradientColor, 0, ShaderTileMode_CLAMP, (ILinearGradient**)&mLeftToRightGradient);
-    CLinearGradient::New(x1, 0f, x0, 0f,
+    CLinearGradient::New(x1, 0.0f, x0, 0.0f,
             mGradientColor, 0, ShaderTileMode_CLAMP, (ILinearGradient**)&mRightToLeftGradient);
 }
 
-ECode CKeyguardWidgetFrame::OnSizeChanged(
+ECode KeyguardWidgetFrame::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -555,16 +596,16 @@ ECode CKeyguardWidgetFrame::OnSizeChanged(
     // mFrameStrokeAdjustment is a cludge to prevent the overlay from drawing outside the
     // rounded rect background.
     mForegroundRect->Set(mFrameStrokeAdjustment, mFrameStrokeAdjustment,
-            w - mFrameStrokeAdjustment, Math::Min(h, mFrameHeight) - mFrameStrokeAdjustment);
+            w - mFrameStrokeAdjustment, Elastos::Core::Math::Min(h, mFrameHeight) - mFrameStrokeAdjustment);
 
     Int32 width;
     GetMeasuredWidth(&width);
-    mBackgroundRect->Set(0, 0, width, Math::Min(h, mFrameHeight));
+    mBackgroundRect->Set(0, 0, width, Elastos::Core::Math::Min(h, mFrameHeight));
     UpdateGradient();
     return Invalidate();
 }
 
-ECode CKeyguardWidgetFrame::OnMeasure(
+ECode KeyguardWidgetFrame::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -573,9 +614,9 @@ ECode CKeyguardWidgetFrame::OnMeasure(
     return NOERROR;
 }
 
-void CKeyguardWidgetFrame::PerformAppWidgetSizeCallbacksIfNecessary()
+void KeyguardWidgetFrame::PerformAppWidgetSizeCallbacksIfNecessary()
 {
-    AutoPtr<IView> content
+    AutoPtr<IView> content;
     GetContent((IView**)&content);
     if (IAppWidgetHostView::Probe(content) == NULL) return;
 
@@ -596,42 +637,42 @@ void CKeyguardWidgetFrame::PerformAppWidgetSizeCallbacksIfNecessary()
     Float density;
     metrics->GetDensity(&density);
 
-    Int32 width;
-    content->GetMeasuredWidth(&width);
-    Int32 height;
-    content->GetMeasuredHeight(&height);
-    Int32 width = (Int32) (width / density);
-    Int32 height = (Int32) (height / density);
-    awhv->UpdateAppWidgetSize(null, width, height, width, height, TRUE);
+    Int32 _width;
+    content->GetMeasuredWidth(&_width);
+    Int32 _height;
+    content->GetMeasuredHeight(&_height);
+    Int32 width = (Int32) (_width / density);
+    Int32 height = (Int32) (_height / density);
+    awhv->UpdateAppWidgetSize(NULL, width, height, width, height, TRUE);
 }
 
-ECode CKeyguardWidgetFrame::SetOverScrollAmount(
+ECode KeyguardWidgetFrame::SetOverScrollAmount(
     /* [in] */ Float r,
     /* [in] */ Boolean left)
 {
     if (mOverScrollAmount !=  r) {
         mOverScrollAmount = r;
         mForegroundGradient = left ? mLeftToRightGradient : mRightToLeftGradient;
-        mForegroundAlpha = (Int32) Math::Round((0.5f * r * 255));
+        mForegroundAlpha = (Int32) Elastos::Core::Math::Round((0.5f * r * 255));
 
         // We bump up the alpha of the outline to hide the fact that the overlay is drawing
         // over the rounded part of the frame.
-        Float bgAlpha = Math::Min(OUTLINE_ALPHA_MULTIPLIER + r * (1 - OUTLINE_ALPHA_MULTIPLIER),
-                1f);
+        Float bgAlpha = Elastos::Core::Math::Min(OUTLINE_ALPHA_MULTIPLIER + r * (1 - OUTLINE_ALPHA_MULTIPLIER),
+                1.0f);
         SetBackgroundAlpha(bgAlpha);
         Invalidate();
     }
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::OnActive(
+ECode KeyguardWidgetFrame::OnActive(
     /* [in] */ Boolean isActive)
 {
     // hook for subclasses
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::OnUserInteraction(
+ECode KeyguardWidgetFrame::OnUserInteraction(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
@@ -642,21 +683,21 @@ ECode CKeyguardWidgetFrame::OnUserInteraction(
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::OnBouncerShowing(
+ECode KeyguardWidgetFrame::OnBouncerShowing(
     /* [in] */ Boolean showing)
 {
     // hook for subclasses
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::SetWorkerHandler(
+ECode KeyguardWidgetFrame::SetWorkerHandler(
     /* [in] */ IHandler* workerHandler)
 {
     mWorkerHandler = workerHandler;
     return NOERROR;
 }
 
-ECode CKeyguardWidgetFrame::GetWorkerHandler(
+ECode KeyguardWidgetFrame::GetWorkerHandler(
     /* [out] */ IHandler** handler)
 {
     VALIDATE_NOT_NULL(handler)

@@ -1,20 +1,42 @@
 
 #include "elastos/droid/systemui/keyguard/CSlidingChallengeLayout.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include "R.h"
+
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Utility::EIID_IProperty;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::Animation::EIID_IInterpolator;
+using Elastos::Droid::View::Accessibility::IAccessibilityManager;
+using Elastos::Droid::View::Accessibility::IAccessibilityManagerHelper;
+using Elastos::Droid::View::Accessibility::CAccessibilityManagerHelper;
+using Elastos::Droid::Widget::CScroller;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::Math;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-CAR_INTERFACE_IMPL(CSlidingChallengeLayout::MyProperty, Object, IProperty)
-
-ECode CSlidingChallengeLayout::MyProperty::Set(
+ECode CSlidingChallengeLayout::MyProperty::SetValue(
     /* [in] */ IInterface* obj,
-    /* [in] */ IInterface* value)
+    /* [in] */ Float value)
 {
-    AutoPtr<SlidingChallengeLayout> view = (SlidingChallengeLayout*)ISlidingChallengeLayout::Probe(obj);
-    AutoPtr<IFloat> obj = IFloat::Probe(value);
-    obj->GetValue(&(view->mHandleAlpha));
+    AutoPtr<CSlidingChallengeLayout> view =
+            (CSlidingChallengeLayout*)ISlidingChallengeLayout::Probe(obj);
+    view->mHandleAlpha = value;
     return view->Invalidate();
 }
 
@@ -24,9 +46,10 @@ ECode CSlidingChallengeLayout::MyProperty::Get(
 {
     VALIDATE_NOT_NULL(rst)
 
-    AutoPtr<SlidingChallengeLayout> view = (SlidingChallengeLayout*)ISlidingChallengeLayout::Probe(obj);
-    AutoPtr<IFloat> obj = CoreUtils::Convert(view->mHandleAlpha);
-    *rst = TO_IINTERFACE(obj);
+    AutoPtr<CSlidingChallengeLayout> view =
+            (CSlidingChallengeLayout*)ISlidingChallengeLayout::Probe(obj);
+    AutoPtr<IFloat> _obj = CoreUtils::Convert(view->mHandleAlpha);
+    *rst = TO_IINTERFACE(_obj);
     REFCOUNT_ADD(*rst)
     return NOERROR;
 }
@@ -81,11 +104,17 @@ ECode CSlidingChallengeLayout::MyRunnable::Run()
     return mHost->CompleteChallengeScroll();
 }
 
+CAR_INTERFACE_IMPL(CSlidingChallengeLayout::MyOnClickListener,
+        Object, IViewOnClickListener)
+
 ECode CSlidingChallengeLayout::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     return mHost->HideBouncer();
 }
+
+CAR_INTERFACE_IMPL(CSlidingChallengeLayout::MyOnClickListener2,
+        Object, IViewOnClickListener)
 
 ECode CSlidingChallengeLayout::MyOnClickListener2::OnClick(
     /* [in] */ IView* v)
@@ -112,63 +141,68 @@ ECode CSlidingChallengeLayout::MyAnimatorListenerAdapter2::OnAnimationEnd(
 ECode CSlidingChallengeLayout::MyAnimatorListenerAdapter3::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
-    return mHost->OnFadeStart(show);
+    mHost->OnFadeStart(mShow);
+    return NOERROR;
 }
 
 ECode CSlidingChallengeLayout::MyAnimatorListenerAdapter3::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    return mHost->OnFadeEnd(show);
+    mHost->OnFadeEnd(mShow);
+    return NOERROR;
 }
 
-SlidingChallengeLayoutLayoutParams::SlidingChallengeLayoutLayoutParams()
+CAR_INTERFACE_IMPL(CSlidingChallengeLayout::SlidingChallengeLayoutLayoutParams,
+        ViewGroup::MarginLayoutParams, ISlidingChallengeLayoutLayoutParams)
+
+CSlidingChallengeLayout::SlidingChallengeLayoutLayoutParams::SlidingChallengeLayoutLayoutParams()
     : mChildType(CHILD_TYPE_NONE)
     , mMaxHeight(0)
 {
 }
 
-ECode SlidingChallengeLayoutLayoutParams::constructor()
+ECode CSlidingChallengeLayout::SlidingChallengeLayoutLayoutParams::constructor()
 {
     return constructor(MATCH_PARENT, WRAP_CONTENT);
 }
 
-ECode SlidingChallengeLayoutLayoutParams::constructor(
+ECode CSlidingChallengeLayout::SlidingChallengeLayoutLayoutParams::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    return ViewGroup::constructor(width, height);
+    return ViewGroup::MarginLayoutParams::constructor(width, height);
 }
 
-ECode SlidingChallengeLayoutLayoutParams::constructor(
+ECode CSlidingChallengeLayout::SlidingChallengeLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
-    return ViewGroup::constructor(source);
+    return ViewGroup::MarginLayoutParams::constructor(source);
 }
 
-ECode SlidingChallengeLayoutLayoutParams::constructor(
+ECode CSlidingChallengeLayout::SlidingChallengeLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupMarginLayoutParams* source)
 {
-    return ViewGroup::constructor(source);
+    return ViewGroup::MarginLayoutParams::constructor(source);
 }
 
-ECode SlidingChallengeLayoutLayoutParams::constructor(
+ECode CSlidingChallengeLayout::SlidingChallengeLayoutLayoutParams::constructor(
     /* [in] */ ISlidingChallengeLayoutLayoutParams* source)
 {
-    ViewGroup::constructor(IViewGroupLayoutParams::Proeb(source));
+    ViewGroup::MarginLayoutParams::constructor(IViewGroupLayoutParams::Probe(source));
 
-    childType = (SlidingChallengeLayoutLayoutParams*)source->mCchildType;
+    mChildType = ((SlidingChallengeLayoutLayoutParams*)source)->mChildType;
     return NOERROR;
 }
 
-ECode SlidingChallengeLayoutLayoutParams::constructor(
+ECode CSlidingChallengeLayout::SlidingChallengeLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
-    return ViewGroup::constructor(c, attrs);
+    ViewGroup::MarginLayoutParams::constructor(c, attrs);
 
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::SlidingChallengeLayout_Layout);
     AutoPtr<ITypedArray> a;
-    c->ObtainStyledAttributes(attrs,
-            R::styleable::SlidingChallengeLayout_Layout, (ITypedArray**)&a);
+    c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     a->GetInt32(R::styleable::SlidingChallengeLayout_Layout_layout_childType,
             CHILD_TYPE_NONE, &mChildType);
     a->GetDimensionPixelSize(
@@ -193,7 +227,7 @@ const Int32 CSlidingChallengeLayout::MAX_SETTLE_DURATION = 600; // ms
 
 const Int32 CSlidingChallengeLayout::INVALID_POINTER = -1;
 
-AutoPtr<IProperty> CSlidingChallengeLayout::HANDLE_ALPHA = new MyProperty();
+AutoPtr<IProperty> CSlidingChallengeLayout::HANDLE_ALPHA = new MyProperty(String("handleAlpha"));
 
 AutoPtr<IInterpolator> CSlidingChallengeLayout::sMotionInterpolator = new MyInterpolator();
 
@@ -230,7 +264,7 @@ CSlidingChallengeLayout::CSlidingChallengeLayout()
     , mTouchSlopSquare(0)
     , mHandleAlpha(0.0f)
     , mFrameAlpha(0.0f)
-    , mFrameAnimationTarget(Float.MIN_VALUE)
+    , mFrameAnimationTarget(Elastos::Core::Math::FLOAT_MIN_VALUE)
     , mHasGlowpad(FALSE)
     , mChallengeInteractiveExternal(TRUE)
     , mChallengeInteractiveInternal(TRUE)
@@ -265,7 +299,7 @@ ECode CSlidingChallengeLayout::constructor(
 {
     ViewGroup::constructor(context, attrs, defStyle);
 
-    mScroller = new Scroller(context, sMotionInterpolator);
+    CScroller::New(context, sMotionInterpolator, (IScroller**)&mScroller);
 
     AutoPtr<IViewConfigurationHelper> helper;
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
@@ -335,7 +369,7 @@ ECode CSlidingChallengeLayout::AnimateHandle(
     /* [in] */ Boolean visible)
 {
     if (mHandleAnimation != NULL) {
-        mHandleAnimation->Cancel();
+        IAnimator::Probe(mHandleAnimation)->Cancel();
         mHandleAnimation = NULL;
     }
     Float targetAlpha = visible ? 1.0f : 0.0f;
@@ -343,11 +377,14 @@ ECode CSlidingChallengeLayout::AnimateHandle(
         return NOERROR;
     }
     AutoPtr<IObjectAnimatorHelper> helper;
-    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)*helper);
-    helper->OfFloat(this, HANDLE_ALPHA, targetAlpha, (IObjectAnimator**)&mHandleAnimation);
-    mHandleAnimation->SetInterpolator(sHandleFadeInterpolator);
-    mHandleAnimation->SetDuration(HANDLE_ANIMATE_DURATION);
-    return mHandleAnimation->Start();
+    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+    (*array)[0] = targetAlpha;
+    helper->OfFloat(TO_IINTERFACE(this), HANDLE_ALPHA, array, (IObjectAnimator**)&mHandleAnimation);
+    IAnimator::Probe(mHandleAnimation)->SetInterpolator(
+            ITimeInterpolator::Probe(sHandleFadeInterpolator));
+    IAnimator::Probe(mHandleAnimation)->SetDuration(HANDLE_ANIMATE_DURATION);
+    return IAnimator::Probe(mHandleAnimation)->Start();
 }
 
 void CSlidingChallengeLayout::SendInitialListenerUpdates()
@@ -355,7 +392,7 @@ void CSlidingChallengeLayout::SendInitialListenerUpdates()
     if (mScrollListener != NULL) {
         Int32 challengeTop = 0;
         if (mChallengeView != NULL) {
-            mChallengeView->GetTop(&challengeTop);
+            IView::Probe(mChallengeView)->GetTop(&challengeTop);
         }
         mScrollListener->OnScrollPositionChanged(mChallengeOffset, challengeTop);
         mScrollListener->OnScrollStateChanged(mScrollState);
@@ -391,7 +428,8 @@ ECode CSlidingChallengeLayout::OnDetachedFromWindow()
 {
     ViewGroup::OnDetachedFromWindow();
 
-    RemoveCallbacks(mEndScrollRunnable);
+    Boolean res;
+    RemoveCallbacks(mEndScrollRunnable, &res);
     mHasLayout = FALSE;
     return NOERROR;
 }
@@ -415,8 +453,8 @@ ECode CSlidingChallengeLayout::DistanceInfluenceForSnapDuration(
     VALIDATE_NOT_NULL(value)
 
     f -= 0.5f; // center the values about 0.
-    f *= 0.3f * Math::PI / 2.0f;
-    *value = (Float)Math::Sin(f);
+    f *= 0.3f * Elastos::Core::Math::PI / 2.0f;
+    *value = (Float)Elastos::Core::Math::Sin(f);
     return NOERROR;
 }
 
@@ -440,7 +478,7 @@ ECode CSlidingChallengeLayout::CompleteChallengeScroll()
     mChallengeOffset = mChallengeShowing ? 1.f : 0.f;
     SetScrollState(SCROLL_STATE_IDLE);
     mChallengeInteractiveInternal = TRUE;
-    return mChallengeView->SetLayerType(LAYER_TYPE_NONE, NULL);
+    return IView::Probe(mChallengeView)->SetLayerType(LAYER_TYPE_NONE, NULL);
 }
 
 ECode CSlidingChallengeLayout::SetScrimView(
@@ -472,7 +510,7 @@ ECode CSlidingChallengeLayout::AnimateChallengeTo(
     mChallengeInteractiveInternal = FALSE;
     EnableHardwareLayerForChallengeView();
     Int32 sy;
-    mChallengeView->GetBottom(&sy);
+    IView::Probe(mChallengeView)->GetBottom(&sy);
     Int32 dy = y - sy;
     if (dy == 0) {
         CompleteChallengeScroll();
@@ -482,22 +520,24 @@ ECode CSlidingChallengeLayout::AnimateChallengeTo(
     SetScrollState(SCROLL_STATE_SETTLING);
 
     Int32 childHeight;
-    mChallengeView->GetHeight(&childHeight);
+    IView::Probe(mChallengeView)->GetHeight(&childHeight);
     Int32 halfHeight = childHeight / 2;
-    Float distanceRatio = Math::Min(1f, 1.0f * Math::Abs(dy) / childHeight);
-    Float distance = halfHeight + halfHeight *
-            DistanceInfluenceForSnapDuration(distanceRatio);
+    Float distanceRatio = Elastos::Core::Math::Min(1.0f, 1.0f * Elastos::Core::Math::Abs(dy) / childHeight);
+
+    Float tmp;
+    DistanceInfluenceForSnapDuration(distanceRatio, &tmp);
+    Float distance = halfHeight + halfHeight * tmp;
 
     Int32 duration = 0;
-    velocity = Math::Abs(velocity);
+    velocity = Elastos::Core::Math::Abs(velocity);
     if (velocity > 0) {
-        duration = 4 * Math::Round(1000 * Math::Abs(distance / velocity));
+        duration = 4 * Elastos::Core::Math::Round(1000 * Elastos::Core::Math::Abs(distance / velocity));
     }
     else {
-        Float childDelta = (Float) Math::Abs(dy) / childHeight;
+        Float childDelta = (Float) Elastos::Core::Math::Abs(dy) / childHeight;
         duration = (Int32)((childDelta + 1) * 100);
     }
-    duration = Math::Min(duration, MAX_SETTLE_DURATION);
+    duration = Elastos::Core::Math::Min(duration, MAX_SETTLE_DURATION);
 
     mScroller->StartScroll(0, sy, 0, dy, duration);
     return PostInvalidateOnAnimation();
@@ -518,26 +558,35 @@ void CSlidingChallengeLayout::SetChallengeShowing(
         return;
     }
 
+    AutoPtr<IAccessibilityManagerHelper> helper;
+    CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&helper);
     if (mChallengeShowing) {
         mExpandChallengeView->SetVisibility(IView::INVISIBLE);
-        mChallengeView->SetVisibility(IView::VISIBLE);
+        IView::Probe(mChallengeView)->SetVisibility(IView::VISIBLE);
         Boolean res;
-        if (AccessibilityManager::GetInstance(mContext)->IsEnabled(&res), res) {
-            mChallengeView->RequestAccessibilityFocus();
+        AutoPtr<IAccessibilityManager> manager;
+        helper->GetInstance(mContext, (IAccessibilityManager**)&manager);
+        if (manager->IsEnabled(&res), res) {
+            Boolean res;
+            IView::Probe(mChallengeView)->RequestAccessibilityFocus(&res);
             String expanded;
             mContext->GetString(R::string::keyguard_accessibility_unlock_area_expanded, &expanded);
-            mChallengeView->AnnounceForAccessibility(expanded);
+            AutoPtr<ICharSequence> ccahr = CoreUtils::Convert(expanded);
+            IView::Probe(mChallengeView)->AnnounceForAccessibility(ccahr);
         }
     }
     else {
         mExpandChallengeView->SetVisibility(IView::VISIBLE);
-        mChallengeView->SetVisibility(IView::INVISIBLE);
+        IView::Probe(mChallengeView)->SetVisibility(IView::INVISIBLE);
         Boolean res;
-        if (AccessibilityManager::GetInstance(mContext)->IsEnabled(&res), res) {
-            mExpandChallengeView->RequestAccessibilityFocus();
+        AutoPtr<IAccessibilityManager> manager;
+        helper->GetInstance(mContext, (IAccessibilityManager**)&manager);
+        if (manager->IsEnabled(&res), res) {
+            mExpandChallengeView->RequestAccessibilityFocus(&res);
             String collapsed;
             mContext->GetString(R::string::keyguard_accessibility_unlock_area_collapsed, &collapsed);
-            mChallengeView->AnnounceForAccessibility(collapsed);
+            AutoPtr<ICharSequence> ccahr = CoreUtils::Convert(collapsed);
+            IView::Probe(mChallengeView)->AnnounceForAccessibility(ccahr);
         }
     }
 }
@@ -590,8 +639,11 @@ ECode CSlidingChallengeLayout::ShowBouncer()
     if (mScrimView != NULL) {
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        AutoPtr<IAnimator> anim;
-        helper->OfFloat(mScrimView, String("alpha"), 1.0f, (IAnimator**)&anim);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 1.0f;
+        AutoPtr<IObjectAnimator> oa;
+        helper->OfFloat(mScrimView, String("alpha"), array, (IObjectAnimator**)&oa);
+        AutoPtr<IAnimator> anim = IAnimator::Probe(oa);
         anim->SetDuration(HANDLE_ANIMATE_DURATION);
         AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter(this);
         anim->AddListener(lis);
@@ -619,8 +671,11 @@ ECode CSlidingChallengeLayout::HideBouncer()
     if (mScrimView != NULL) {
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        AutoPtr<IAnimator> anim;
-        helper->OfFloat(mScrimView, Srting("alpha"), 0.0f, (IAnimator**)&anim);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 0.0f;
+        AutoPtr<IObjectAnimator> oa;
+        helper->OfFloat(mScrimView, String("alpha"), array, (IObjectAnimator**)&oa);
+        AutoPtr<IAnimator> anim = IAnimator::Probe(oa);
         anim->SetDuration(HANDLE_ANIMATE_DURATION);
         AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter2(this);
         anim->AddListener(lis);
@@ -831,8 +886,8 @@ ECode CSlidingChallengeLayout::OnTouchEvent(
                 }
                 Float y;
                 ev->GetY(index, &y);
-                Float pos = Math::Min(y - mGestureStartY,
-                        GetLayoutBottom() - mChallengeBottomBound);
+                Float pos = Elastos::Core::Math::Min(y - mGestureStartY,
+                        (Float)(GetLayoutBottom() - mChallengeBottomBound));
 
                 MoveChallengeTo(mGestureStartChallengeBottom + (Int32)pos);
             }
@@ -898,26 +953,30 @@ Boolean CSlidingChallengeLayout::IsEdgeSwipeBeginEvent(
 
 Int32 CSlidingChallengeLayout::GetDragHandleSizeAbove()
 {
-    return IsChallengeShowing() ? mDragHandleOpenAbove : mDragHandleClosedAbove;
+    Boolean res;
+    IsChallengeShowing(&res);
+    return res ? mDragHandleOpenAbove : mDragHandleClosedAbove;
 }
 
 Int32 CSlidingChallengeLayout::GetDragHandleSizeBelow()
 {
-    return IsChallengeShowing() ? mDragHandleOpenBelow : mDragHandleClosedBelow;
+    Boolean res;
+    IsChallengeShowing(&res);
+    return res ? mDragHandleOpenBelow : mDragHandleClosedBelow;
 }
 
 Boolean CSlidingChallengeLayout::IsInChallengeView(
     /* [in] */ Float x,
     /* [in] */ Float y)
 {
-    return IsPointInView(x, y, mChallengeView);
+    return IsPointInView(x, y, IView::Probe(mChallengeView));
 }
 
 Boolean CSlidingChallengeLayout::IsInDragHandle(
     /* [in] */ Float x,
     /* [in] */ Float y)
 {
-    return IsPointInView(x, y, mExpandChallengeView);
+    return IsPointInView(x, y, IView::Probe(mExpandChallengeView));
 }
 
 Boolean CSlidingChallengeLayout::IsPointInView(
@@ -945,16 +1004,14 @@ Boolean CSlidingChallengeLayout::CrossedDragHandle(
     /* [in] */ Float initialY)
 {
     Int32 challengeTop;
-    mChallengeView->GetTop(&challengeTop);
+    IView::Probe(mChallengeView)->GetTop(&challengeTop);
 
     Int32 width;
     GetWidth(&width);
     Boolean horizOk = x >= 0 && x < width;
 
-    Int32 above;
-    GetDragHandleSizeAbove(&above);
-    Int32 below;
-    GetDragHandleSizeBelow(&below);
+    Int32 above = GetDragHandleSizeAbove();
+    Int32 below = GetDragHandleSizeBelow();
     Boolean vertOk;
     if (mChallengeShowing) {
         vertOk = initialY < (challengeTop - above) &&
@@ -975,16 +1032,16 @@ Int32 CSlidingChallengeLayout::MakeChildMeasureSpec(
     Int32 size;
     switch (childDimen) {
         case IViewGroupLayoutParams::WRAP_CONTENT:
-            mode = IMeasureSpec::AT_MOST;
+            mode = MeasureSpec::AT_MOST;
             size = maxSize;
             break;
         case IViewGroupLayoutParams::MATCH_PARENT:
-            mode = IMeasureSpec::EXACTLY;
+            mode = MeasureSpec::EXACTLY;
             size = maxSize;
             break;
         default:
-            mode = IMeasureSpec::EXACTLY;
-            size = Math::Min(maxSize, childDimen);
+            mode = MeasureSpec::EXACTLY;
+            size = Elastos::Core::Math::Min(maxSize, childDimen);
             break;
     }
     return MeasureSpec::MakeMeasureSpec(size, mode);
@@ -994,22 +1051,27 @@ ECode CSlidingChallengeLayout::OnMeasure(
     /* [in] */ Int32 widthSpec,
     /* [in] */ Int32 heightSpec)
 {
-    if (MeasureSpec::GetMode(widthSpec) != IMeasureSpec::EXACTLY ||
-            MeasureSpec::GetMode(heightSpec) != IMeasureSpec::EXACTLY) {
+    if (MeasureSpec::GetMode(widthSpec) != MeasureSpec::EXACTLY ||
+            MeasureSpec::GetMode(heightSpec) != MeasureSpec::EXACTLY) {
         // throw new IllegalArgumentException(
         //         "SlidingChallengeLayout must be measured with an exact size");
-        return IllegalArgumentException;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int32 width = MeasureSpec::GetSize(widthSpec);
     Int32 height = MeasureSpec::GetSize(heightSpec);
     SetMeasuredDimension(width, height);
 
-    Int32 insetHeight = height - mInsets.top - mInsets.bottom;
-    Int32 insetHeightSpec = MeasureSpec::MakeMeasureSpec(insetHeight, IMeasureSpec::EXACTLY);
+    Int32 itop;
+    mInsets->GetTop(&itop);
+    Int32 ibottom;
+    mInsets->GetBottom(&ibottom);
+    Int32 insetHeight = height - itop - ibottom;
+    Int32 insetHeightSpec = MeasureSpec::MakeMeasureSpec(insetHeight,
+            MeasureSpec::EXACTLY);
 
     // Find one and only one challenge view.
-    AutoPtr<IView> oldChallengeView = mChallengeView;
-    AutoPtr<IView> oldExpandChallengeView = mChallengeView;
+    AutoPtr<IView> oldChallengeView = IView::Probe(mChallengeView);
+    AutoPtr<IView> oldExpandChallengeView = IView::Probe(mChallengeView);
     mChallengeView = NULL;
     mExpandChallengeView = NULL;
     Int32 count;
@@ -1023,22 +1085,23 @@ ECode CSlidingChallengeLayout::OnMeasure(
 
         AutoPtr<IViewGroupLayoutParams> p;
         child->GetLayoutParams((IViewGroupLayoutParams**)&p);
-        AutoPtr<CSlidingChallengeLayout::LayoutParams> lp =
-                (CSlidingChallengeLayout::LayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
-        if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_CHALLENGE) {
+        AutoPtr<SlidingChallengeLayoutLayoutParams> lp =
+                (SlidingChallengeLayoutLayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
+        if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_CHALLENGE) {
             if (mChallengeView != NULL) {
                 // throw new IllegalStateException(
                 //         "There may only be one child with layout_isChallenge=\"true\"");
-                return IllegalArgumentException;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             if (IKeyguardSecurityContainer::Probe(child) == NULL) {
                         // throw new IllegalArgumentException(
                         //         "Challenge must be a KeyguardSecurityContainer");
-                return IllegalArgumentException;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             mChallengeView = IKeyguardSecurityContainer::Probe(child);
-            if (mChallengeView != oldChallengeView) {
-                mChallengeView->SetVisibility(mChallengeShowing ? VISIBLE : INVISIBLE);
+            if (TO_IINTERFACE(mChallengeView) != TO_IINTERFACE(oldChallengeView)) {
+                IView::Probe(mChallengeView)->SetVisibility(
+                        mChallengeShowing ? VISIBLE : INVISIBLE);
             }
             // We're going to play silly games with the frame's background drawable later.
             if (!mHasLayout) {
@@ -1050,12 +1113,12 @@ ECode CSlidingChallengeLayout::OnMeasure(
                 lp->mLeftMargin = lp->mRightMargin;
             }
         }
-        else if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_EXPAND_CHALLENGE_HANDLE) {
+        else if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_EXPAND_CHALLENGE_HANDLE) {
             if (mExpandChallengeView != NULL) {
                 // throw new IllegalStateException(
                 //         "There may only be one child with layout_childType"
                 //         + "=\"expandChallengeHandle\"");
-                return IllegalArgumentException;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             mExpandChallengeView = child;
             if (mExpandChallengeView != oldExpandChallengeView) {
@@ -1063,10 +1126,10 @@ ECode CSlidingChallengeLayout::OnMeasure(
                 mExpandChallengeView->SetOnClickListener(mExpandChallengeClickListener);
             }
         }
-        else if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_SCRIM) {
+        else if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_SCRIM) {
             SetScrimView(child);
         }
-        else if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_WIDGETS) {
+        else if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_WIDGETS) {
             mWidgetsView = child;
         }
     }
@@ -1076,7 +1139,7 @@ ECode CSlidingChallengeLayout::OnMeasure(
     // having been measured.
     Int32 visibility;
     if (mChallengeView != NULL &&
-            (mChallengeView->GetVisibility(&visibility), visibility) != IView::GONE) {
+            (IView::Probe(mChallengeView)->GetVisibility(&visibility), visibility) != IView::GONE) {
         // This one's a little funny. If the IME is present - reported in the form
         // of insets on the root view - we only give the challenge the space it would
         // have had if the IME wasn't there in order to keep the rest of the layout stable.
@@ -1089,8 +1152,8 @@ ECode CSlidingChallengeLayout::OnMeasure(
         if (root != NULL) {
             AutoPtr<IViewGroupLayoutParams> p;
             IView::Probe(mChallengeView)->GetLayoutParams((IViewGroupLayoutParams**)&p);
-            AutoPtr<CSlidingChallengeLayout::LayoutParams> lp =
-                (CSlidingChallengeLayout::LayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
+            AutoPtr<SlidingChallengeLayoutLayoutParams> lp =
+                (SlidingChallengeLayoutLayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
 
             Int32 heightP;
             mDisplayMetrics->GetHeightPixels(&heightP);
@@ -1106,7 +1169,8 @@ ECode CSlidingChallengeLayout::OnMeasure(
                 challengeHeightSpec = MakeChildMeasureSpec(maxChallengeHeight, lp->mHeight);
             }
         }
-        MeasureChildWithMargins(mChallengeView, widthSpec, 0, challengeHeightSpec, 0);
+        MeasureChildWithMargins(IView::Probe(mChallengeView), widthSpec, 0,
+                challengeHeightSpec, 0);
     }
 
     // Measure the rest of the children
@@ -1119,7 +1183,7 @@ ECode CSlidingChallengeLayout::OnMeasure(
             continue;
         }
         // Don't measure the challenge view twice!
-        if (child == mChallengeView) continue;
+        if (TO_IINTERFACE(child) == TO_IINTERFACE(mChallengeView)) continue;
 
         // Measure children. Widget frame measures special, so that we can ignore
         // insets for the IME.
@@ -1127,13 +1191,13 @@ ECode CSlidingChallengeLayout::OnMeasure(
 
         AutoPtr<IViewGroupLayoutParams> p;
         child->GetLayoutParams((IViewGroupLayoutParams**)&p);
-        AutoPtr<CSlidingChallengeLayout::LayoutParams> lp =
-            (CSlidingChallengeLayout::LayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
+        AutoPtr<SlidingChallengeLayoutLayoutParams> lp =
+            (SlidingChallengeLayoutLayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
 
-        if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_WIDGETS) {
+        if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_WIDGETS) {
             AutoPtr<IView> root;
             GetRootView((IView**)&root);
-            if (root != null) {
+            if (root != NULL) {
                 // This calculation is super dodgy and relies on several assumptions.
                 // Specifically that the root of the window will be padded in for insets
                 // and that the window is LAYOUT_IN_SCREEN.
@@ -1145,16 +1209,16 @@ ECode CSlidingChallengeLayout::OnMeasure(
                 Int32 ptop;
                 root->GetPaddingTop(&ptop);
                 Int32 top;
-                mInsets->GetTop();
+                mInsets->GetTop(&top);
                 Int32 windowHeight = heightP - ptop - top;
 
                 parentWidthSpec = MeasureSpec::MakeMeasureSpec(
-                        windowWidth, IMeasureSpec::EXACTLY);
+                        windowWidth, MeasureSpec::EXACTLY);
                 parentHeightSpec = MeasureSpec::MakeMeasureSpec(
-                        windowHeight, IMeasureSpec::EXACTLY);
+                        windowHeight, MeasureSpec::EXACTLY);
             }
         }
-        else if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_SCRIM) {
+        else if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_SCRIM) {
             // Allow scrim views to extend into the insets
             parentWidthSpec = widthSpec;
             parentHeightSpec = heightSpec;
@@ -1182,7 +1246,7 @@ ECode CSlidingChallengeLayout::OnLayout(
     Int32 width = r - l;
     Int32 height = b - t;
 
-    Int32 count
+    Int32 count;
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
@@ -1193,10 +1257,10 @@ ECode CSlidingChallengeLayout::OnLayout(
 
         AutoPtr<IViewGroupLayoutParams> p;
         child->GetLayoutParams((IViewGroupLayoutParams**)&p);
-        AutoPtr<CSlidingChallengeLayout::LayoutParams> lp =
-            (CSlidingChallengeLayout::LayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
+        AutoPtr<SlidingChallengeLayoutLayoutParams> lp =
+            (SlidingChallengeLayoutLayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
 
-        if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_CHALLENGE) {
+        if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_CHALLENGE) {
             // Challenge views pin to the bottom, offset by a portion of their height,
             // and center horizontally.
             Int32 center = (paddingLeft + width - paddingRight) / 2;
@@ -1206,7 +1270,7 @@ ECode CSlidingChallengeLayout::OnLayout(
             child->GetMeasuredHeight(&childHeight);
             Int32 left = center - childWidth / 2;
             Int32 _bottom;
-            mInsets->Getbottom(&_bottom);
+            mInsets->GetBottom(&_bottom);
             Int32 layoutBottom = height - paddingBottom - lp->mBottomMargin - _bottom;
             // We use the top of the challenge view to position the handle, so
             // we never want less than the handle size showing at the bottom.
@@ -1215,7 +1279,7 @@ ECode CSlidingChallengeLayout::OnLayout(
             child->SetAlpha(GetChallengeAlpha());
             child->Layout(left, bottom - childHeight, left + childWidth, bottom);
         }
-        else if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_EXPAND_CHALLENGE_HANDLE) {
+        else if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_EXPAND_CHALLENGE_HANDLE) {
             Int32 center = (paddingLeft + width - paddingRight) / 2;
 
             Int32 width;
@@ -1223,7 +1287,7 @@ ECode CSlidingChallengeLayout::OnLayout(
             Int32 left = center - width / 2;
             Int32 right = left + width;
             Int32 _bottom;
-            mInsets->Getbottom(&_bottom);
+            mInsets->GetBottom(&_bottom);
             Int32 bottom = height - paddingBottom - lp->mBottomMargin - _bottom;
 
             Int32 _height;
@@ -1231,7 +1295,7 @@ ECode CSlidingChallengeLayout::OnLayout(
             Int32 top = bottom - _height;
             child->Layout(left, top, right, bottom);
         }
-        else if (lp->mChildType == IViewGroupLayoutParams::CHILD_TYPE_SCRIM) {
+        else if (lp->mChildType == ISlidingChallengeLayoutLayoutParams::CHILD_TYPE_SCRIM) {
             // Scrim views use the entire area, including padding & insets
             Int32 width;
             GetMeasuredWidth(&width);
@@ -1271,11 +1335,9 @@ ECode CSlidingChallengeLayout::Draw(
         // show the isInDragHandle() rect
 
         Int32 top;
-        mChallengeView->GetTop(&top);
-        Int32 above;
-        GetDragHandleSizeAbove(&above);
-        Int32 below;
-        GetDragHandleSizeBelow(&below);
+        IView::Probe(mChallengeView)->GetTop(&top);
+        Int32 above = GetDragHandleSizeAbove();
+        Int32 below = GetDragHandleSizeBelow();
         Int32 width;
         GetWidth(&width);
         c->DrawRect(mDragHandleEdgeSlop,
@@ -1295,12 +1357,15 @@ ECode CSlidingChallengeLayout::OnRequestFocusInDescendants(
     VALIDATE_NOT_NULL(result)
 
     // Focus security fileds before widgets.
+    Boolean res;
     if (mChallengeView != NULL &&
-            mChallengeView->RequestFocus(direction, previouslyFocusedRect)) {
+            (IView::Probe(mChallengeView)->RequestFocus(direction,
+            previouslyFocusedRect, &res), res)) {
         *result = TRUE;
         return NOERROR;
     }
-    return ViewGroup::OnRequestFocusInDescendants(direction, previouslyFocusedRect, result);
+    *result = ViewGroup::OnRequestFocusInDescendants(direction, previouslyFocusedRect);
+    return NOERROR;
 }
 
 ECode CSlidingChallengeLayout::ComputeScroll()
@@ -1315,13 +1380,13 @@ ECode CSlidingChallengeLayout::ComputeScroll()
             return mScroller->AbortAnimation();
         }
 
-        mScroller->ComputeScrollOffset();
+        mScroller->ComputeScrollOffset(&res);
         Int32 y;
         mScroller->GetCurrY(&y);
         MoveChallengeTo(y);
 
         if (mScroller->IsFinished(&res), res) {
-            Post(mEndScrollRunnable);
+            Post(mEndScrollRunnable, &res);
         }
     }
     return NOERROR;
@@ -1335,7 +1400,7 @@ void CSlidingChallengeLayout::CancelTransitionsInProgress()
         CompleteChallengeScroll();
     }
     if (mFader != NULL) {
-        mFader->Cancel();
+        IAnimator::Probe(mFader)->Cancel();
     }
 }
 
@@ -1354,17 +1419,19 @@ ECode CSlidingChallengeLayout::FadeChallenge(
 {
     if (mChallengeView != NULL) {
 
-        cancelTransitionsInProgress();
-        float alpha = show ? 1.0f : 0.0f;
+        CancelTransitionsInProgress();
+        Float alpha = show ? 1.0f : 0.0f;
         Int32 duration = show ? CHALLENGE_FADE_IN_DURATION : CHALLENGE_FADE_OUT_DURATION;
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        helper->OfFloat(mChallengeView, String("alpha"), alpha, (IObjectAnimator**)&mFader);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = alpha;
+        helper->OfFloat(mChallengeView, String("alpha"), array, (IObjectAnimator**)&mFader);
 
-        AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter3(this);
-        mFader->AddListener(lis);
-        mFader->SetDuration(duration);
-        mFader->Start();
+        AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter3(this, show);
+        IAnimator::Probe(mFader)->AddListener(lis);
+        IAnimator::Probe(mFader)->SetDuration(duration);
+        IAnimator::Probe(mFader)->Start();
     }
     return NOERROR;
 }
@@ -1372,19 +1439,16 @@ ECode CSlidingChallengeLayout::FadeChallenge(
 Int32 CSlidingChallengeLayout::GetMaxChallengeBottom()
 {
     if (mChallengeView == NULL) return 0;
-    Int32 layoutBottom;
-    GetLayoutBottom(&layoutBottom);
+    Int32 layoutBottom = GetLayoutBottom();
     Int32 challengeHeight;
-    mChallengeView->GetMeasuredHeight(&challengeHeight);
+    IView::Probe(mChallengeView)->GetMeasuredHeight(&challengeHeight);
 
     return (layoutBottom + challengeHeight - mChallengeBottomBound);
 }
 
 Int32 CSlidingChallengeLayout::GetMinChallengeBottom()
 {
-    Int32 bottom;
-    GetLayoutBottom(&bottom);
-    return bottom;
+    return GetLayoutBottom();
 }
 
 void CSlidingChallengeLayout::OnFadeStart(
@@ -1394,8 +1458,7 @@ void CSlidingChallengeLayout::OnFadeStart(
     EnableHardwareLayerForChallengeView();
 
     if (show) {
-        Int32 bottom;
-        GetMinChallengeBottom(&bottom);
+        Int32 bottom = GetMinChallengeBottom();
         MoveChallengeTo(bottom);
     }
 
@@ -1405,8 +1468,8 @@ void CSlidingChallengeLayout::OnFadeStart(
 void CSlidingChallengeLayout::EnableHardwareLayerForChallengeView()
 {
     Boolean res;
-    if (mChallengeView->IsHardwareAccelerated(&res), res) {
-        mChallengeView->SetLayerType(LAYER_TYPE_HARDWARE, NULL);
+    if (IView::Probe(mChallengeView)->IsHardwareAccelerated(&res), res) {
+        IView::Probe(mChallengeView)->SetLayerType(LAYER_TYPE_HARDWARE, NULL);
     }
 }
 
@@ -1417,12 +1480,11 @@ void CSlidingChallengeLayout::OnFadeEnd(
     SetChallengeShowing(show);
 
     if (!show) {
-        Int32 bottom;
-        GetMaxChallengeBottom(&bottom);
+        Int32 bottom = GetMaxChallengeBottom();
         MoveChallengeTo(bottom);
     }
 
-    mChallengeView->SetLayerType(LAYER_TYPE_NONE, NULL);
+    IView::Probe(mChallengeView)->SetLayerType(LAYER_TYPE_NONE, NULL);
     mFader = NULL;
     SetScrollState(SCROLL_STATE_IDLE);
 }
@@ -1434,10 +1496,9 @@ ECode CSlidingChallengeLayout::GetMaxChallengeTop(
 
     if (mChallengeView == NULL) return 0;
 
-    Int32 layoutBottom;
-    GetLayoutBottom(&layoutBottom);
+    Int32 layoutBottom = GetLayoutBottom();
     Int32 challengeHeight;
-    mChallengeView->GetMeasuredHeight(&challengeHeight);
+    IView::Probe(mChallengeView)->GetMeasuredHeight(&challengeHeight);
     Int32 _top;
     mInsets->GetTop(&_top);
     *top = layoutBottom - challengeHeight - _top;
@@ -1451,16 +1512,14 @@ Boolean CSlidingChallengeLayout::MoveChallengeTo(
         return FALSE;
     }
 
-    Int32 layoutBottom;
-    GetLayoutBottom(&layoutBottom);
+    Int32 layoutBottom = GetLayoutBottom();
     Int32 challengeHeight;
-    mChallengeView->GetHeight(&challengeHeight);
+    IView::Probe(mChallengeView)->GetHeight(&challengeHeight);
 
-    Int32 minbottom;
-    GetMinChallengeBottom(&mbottom);
-    Int32 maxbottom;
-    GetMaxChallengeBottom(&maxbottom);
-    bottom = Math::Max(mbottom, Math::Min(bottom, maxbottom));
+    Int32 minbottom = GetMinChallengeBottom();
+    Int32 maxbottom = GetMaxChallengeBottom();
+    bottom = Elastos::Core::Math::Max(minbottom,
+            Elastos::Core::Math::Min(bottom, maxbottom));
 
     Float offset = 1.f - (Float) (bottom - layoutBottom) /
             (challengeHeight - mChallengeBottomBound);
@@ -1470,22 +1529,22 @@ Boolean CSlidingChallengeLayout::MoveChallengeTo(
     }
 
     Int32 left;
-    mChallengeView->GetLeft(&left);
+    IView::Probe(mChallengeView)->GetLeft(&left);
     Int32 height;
-    mChallengeView->GetHeight(&height);
+    IView::Probe(mChallengeView)->GetHeight(&height);
     Int32 right;
-    mChallengeView->GetRight(&right);
-    mChallengeView->Layout(left,
+    IView::Probe(mChallengeView)->GetRight(&right);
+    IView::Probe(mChallengeView)->Layout(left,
             bottom - height, right, bottom);
 
-    mChallengeView->SetAlpha(GetChallengeAlpha());
+    IView::Probe(mChallengeView)->SetAlpha(GetChallengeAlpha());
     if (mScrollListener != NULL) {
         Int32 top;
-        mChallengeView->GetTop(&top);
+        IView::Probe(mChallengeView)->GetTop(&top);
         mScrollListener->OnScrollPositionChanged(offset, top);
     }
     PostInvalidateOnAnimation();
-    return true;
+    return TRUE;
 }
 
 Int32 CSlidingChallengeLayout::GetLayoutBottom()
@@ -1494,8 +1553,8 @@ Int32 CSlidingChallengeLayout::GetLayoutBottom()
     if (mChallengeView != NULL) {
         AutoPtr<IViewGroupLayoutParams> p;
         IView::Probe(mChallengeView)->GetLayoutParams((IViewGroupLayoutParams**)&p);
-        AutoPtr<CSlidingChallengeLayout::LayoutParams> lp =
-            (CSlidingChallengeLayout::LayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
+        AutoPtr<SlidingChallengeLayoutLayoutParams> lp =
+            (SlidingChallengeLayoutLayoutParams*)ISlidingChallengeLayoutLayoutParams::Probe(p);
 
         bottomMargin = lp->mBottomMargin;
     }
@@ -1515,7 +1574,7 @@ Int32 CSlidingChallengeLayout::GetChallengeBottom()
     if (mChallengeView == NULL) return 0;
 
     Int32 bottom;
-    mChallengeView->GetBottom(&bottom);
+    IView::Probe(mChallengeView)->GetBottom(&bottom);
     return bottom;
 }
 
@@ -1535,7 +1594,7 @@ void CSlidingChallengeLayout::ShowChallenge(
     /* [in] */ Int32 velocity)
 {
     Boolean show = FALSE;
-    if (Math::Abs(velocity) > mMinVelocity) {
+    if (Elastos::Core::Math::Abs(velocity) > mMinVelocity) {
         show = velocity < 0;
     }
     else {
@@ -1555,11 +1614,10 @@ void CSlidingChallengeLayout::ShowChallenge(
 
     if (mHasLayout) {
         mChallengeShowingTargetState = show;
-        Int32 layoutBottom;
-        GetLayoutBottom(&layoutBottom);
+        Int32 layoutBottom = GetLayoutBottom();
 
         Int32 height;
-        mChallengeView->GetHeight(&height);
+        IView::Probe(mChallengeView)->GetHeight(&height);
         AnimateChallengeTo(show ? layoutBottom :
                 layoutBottom + height - mChallengeBottomBound, velocity);
     }
@@ -1574,7 +1632,7 @@ ECode CSlidingChallengeLayout::GenerateLayoutParams(
     AutoPtr<IContext> context;
     AutoPtr<SlidingChallengeLayoutLayoutParams> params =
             new SlidingChallengeLayoutLayoutParams();
-    params->constructor(context, attrs)
+    params->constructor(context, attrs);
     *p = IViewGroupLayoutParams::Probe(params);
     REFCOUNT_ADD(*p)
     return NOERROR;
@@ -1598,7 +1656,7 @@ ECode CSlidingChallengeLayout::GenerateLayoutParams(
         if(IViewGroupMarginLayoutParams::Probe(p) != NULL) {
             AutoPtr<SlidingChallengeLayoutLayoutParams> _params =
                     new SlidingChallengeLayoutLayoutParams();
-            _params->constructor(IViewGroupMarginLayoutParams::Probe(p))
+            _params->constructor(IViewGroupMarginLayoutParams::Probe(p));
             *params = IViewGroupLayoutParams::Probe(_params);
             REFCOUNT_ADD(*params);
             return NOERROR;
@@ -1622,8 +1680,8 @@ ECode CSlidingChallengeLayout::GenerateDefaultLayoutParams(
     AutoPtr<SlidingChallengeLayoutLayoutParams> _params =
             new SlidingChallengeLayoutLayoutParams();
     _params->constructor();
-    *params = IViewGroupLayoutParams::Probe(_params);
-    REFCOUNT_ADD(*params);
+    *p = IViewGroupLayoutParams::Probe(_params);
+    REFCOUNT_ADD(*p);
     return NOERROR;
 }
 
@@ -1633,7 +1691,7 @@ ECode CSlidingChallengeLayout::CheckLayoutParams(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = ISlidingChallengeLayoutLayoutParams::Probe(p);
+    *result = ISlidingChallengeLayoutLayoutParams::Probe(p) != NULL;
     return NOERROR;
 }
 

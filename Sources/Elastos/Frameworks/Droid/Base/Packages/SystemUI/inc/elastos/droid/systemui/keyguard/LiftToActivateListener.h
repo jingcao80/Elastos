@@ -3,6 +3,16 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_LIFETOACTIVITELISTENER_H__
 
 #include "_Elastos.Droid.SystemUI.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewOnHoverListener;
+using Elastos::Droid::View::Accessibility::IAccessibilityManager;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {

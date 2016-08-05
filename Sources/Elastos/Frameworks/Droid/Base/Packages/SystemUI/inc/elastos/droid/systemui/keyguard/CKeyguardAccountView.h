@@ -4,8 +4,39 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardAccountView.h"
 #include "elastos/droid/widget/LinearLayout.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Accounts.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Accounts::IAccount;
+using Elastos::Droid::Accounts::IAccountManagerFuture;
+using Elastos::Droid::Accounts::IAccountManagerCallback;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Text::ITextWatcher;
+using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::IButton;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -49,6 +80,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CKeyguardAccountView::MyAccountManagerCallback")
+
+        CAR_INTERFACE_DECL()
 
         MyAccountManagerCallback(
             /* [in] */ CKeyguardAccountView* host)
@@ -195,7 +228,7 @@ private:
      * find a single best match.
      */
     CARAPI_(AutoPtr<IAccount>) FindIntendedAccount(
-        /* [in] */ coonst String& username);
+        /* [in] */ const String& username);
 
     CARAPI_(void) AsyncCheckPassword();
 

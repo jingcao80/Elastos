@@ -1,11 +1,34 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardCircleFramedDrawable.h"
-#include "Elastos.Droid.View.h"
+#include <elastos/core/Math.h>
+
+using Elastos::Droid::Graphics::IColor;
+using Elastos::Droid::Graphics::CColor;
+using Elastos::Droid::Graphics::CPath;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CRectF;
+using Elastos::Droid::Graphics::IXfermode;
+using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Droid::Graphics::IPorterDuffXfermode;
+using Elastos::Droid::Graphics::CPorterDuffXfermode;
+using Elastos::Droid::Graphics::IBitmapHelper;
+using Elastos::Droid::Graphics::CBitmapHelper;
+using Elastos::Droid::Graphics::PaintStyle_FILL;
+using Elastos::Droid::Graphics::PaintStyle_STROKE;
+using Elastos::Droid::Graphics::PorterDuffMode_CLEAR;
+using Elastos::Droid::Graphics::PorterDuffMode_SRC_ATOP;
+using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
+using Elastos::Core::Math;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
+
+CAR_INTERFACE_IMPL(KeyguardCircleFramedDrawable, Drawable,
+        IKeyguardCircleFramedDrawable)
 
 KeyguardCircleFramedDrawable::KeyguardCircleFramedDrawable(
     /* [in] */ IBitmap* bitmap,
@@ -34,18 +57,18 @@ KeyguardCircleFramedDrawable::KeyguardCircleFramedDrawable(
     bitmap->GetWidth(&width);
     Int32 height;
     bitmap->GetHeight(&height);
-    Int32 square = Math::Min(width, height);
+    Int32 square = Elastos::Core::Math::Min(width, height);
 
     AutoPtr<IRect> cropRect;
     CRect::New((width - square) / 2, (height - square) / 2, square, square, (IRect**)&cropRect);
     AutoPtr<IRectF> circleRect;
-    CRectF::New(0f, 0f, mSize, mSize, (IRectF**)&circleRect);
-    circleRect->Inset(mStrokeWidth / 2f, mStrokeWidth / 2f);
+    CRectF::New(0.0f, 0.0f, mSize, mSize, (IRectF**)&circleRect);
+    circleRect->Inset(mStrokeWidth / 2.0f, mStrokeWidth / 2.0f);
     circleRect->Inset(mShadowRadius, mShadowRadius);
 
     AutoPtr<IPath> fillPath;
     CPath::New((IPath**)&fillPath);
-    fillPath->AddArc(circleRect, 0f, 360f);
+    fillPath->AddArc(circleRect, 0.0f, 360.0f);
 
     canvas->DrawColor(0, PorterDuffMode_CLEAR);
 
@@ -58,24 +81,24 @@ KeyguardCircleFramedDrawable::KeyguardCircleFramedDrawable(
 
     // mask in the icon where the bitmap is opaque
     AutoPtr<IPorterDuffXfermode> mode;
-    CPorterDuffXfermode::New((IPorterDuffXfermode**)&mode);
-    mPaint->SetXfermode(mode);
+    CPorterDuffXfermode::New(PorterDuffMode_SRC_ATOP, (IPorterDuffXfermode**)&mode);
+    mPaint->SetXfermode(IXfermode::Probe(mode));
     canvas->DrawBitmap(bitmap, cropRect, circleRect, mPaint);
 
     // prepare paint for frame drawing
     mPaint->SetXfermode(NULL);
 
-    mScale = 1f;
+    mScale = 1.0f;
 
     CRect::New(0, 0, mSize, mSize, (IRect**)&mSrcRect);
-    CRectF::New(0, 0, mSize, mSize, (IRectF)&mDstRect);
-    CRectF::New(mDstRect, (IRectF)&mFrameRect);
+    CRectF::New(0, 0, mSize, mSize, (IRectF**)&mDstRect);
+    CRectF::New(mDstRect, (IRectF**)&mFrameRect);
     CPath::New((IPath**)&mFramePath);
 }
 
 ECode KeyguardCircleFramedDrawable::Reset()
 {
-    mScale = 1f;
+    mScale = 1.0f;
     mPressed = FALSE;
     return NOERROR;
 }
@@ -88,19 +111,19 @@ ECode KeyguardCircleFramedDrawable::Draw(
     canvas->GetWidth(&width);
     Int32 height;
     canvas->GetHeight(&height);
-    Float outside = Math::Min(width, height);
+    Float outside = Elastos::Core::Math::Min(width, height);
     Float inside = mScale * outside;
-    Float pad = (outside - inside) / 2f;
+    Float pad = (outside - inside) / 2.0f;
 
     mDstRect->Set(pad, pad, outside - pad, outside - pad);
     canvas->DrawBitmap(mBitmap, mSrcRect, mDstRect, NULL);
 
     mFrameRect->Set(mDstRect);
-    mFrameRect->Inset(mStrokeWidth / 2f, mStrokeWidth / 2f);
+    mFrameRect->Inset(mStrokeWidth / 2.0f, mStrokeWidth / 2.0f);
     mFrameRect->Inset(mShadowRadius, mShadowRadius);
 
     mFramePath->Reset();
-    mFramePath->AddArc(mFrameRect, 0f, 360f);
+    mFramePath->AddArc(mFrameRect, 0.0f, 360.0f);
 
     // white frame
     if (mPressed) {
@@ -114,14 +137,14 @@ ECode KeyguardCircleFramedDrawable::Draw(
         Int32 blue;
         helper->Blue(mHighlightColor, &blue);
         Int32 argb;
-        helper->Argb((Int32) (0.33f * 255), red, green, blue, &argb)
+        helper->Argb((Int32) (0.33f * 255), red, green, blue, &argb);
         mPaint->SetColor(argb);
         canvas->DrawPath(mFramePath, mPaint);
     }
     mPaint->SetStrokeWidth(mStrokeWidth);
     mPaint->SetStyle(PaintStyle_STROKE);
     mPaint->SetColor(mPressed ? mHighlightColor : mFrameColor);
-    mPaint->SetShadowLayer(mShadowRadius, 0f, 0f, mFrameShadowColor);
+    mPaint->SetShadowLayer(mShadowRadius, 0.0f, 0.0f, mFrameShadowColor);
     return canvas->DrawPath(mFramePath, mPaint);
 }
 

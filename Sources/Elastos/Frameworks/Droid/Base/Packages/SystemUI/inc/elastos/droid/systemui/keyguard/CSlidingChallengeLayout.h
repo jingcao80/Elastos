@@ -3,9 +3,38 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CSLIDINGCHALLENGELAYOUT_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CSlidingChallengeLayout.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "elastos/droid/utility/FloatProperty.h"
 #include <elastos/droid/view/ViewGroup.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IVelocityTracker;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::Utility::IProperty;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Utility::FloatProperty;
+using Elastos::Droid::Widget::IScroller;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -23,18 +52,20 @@ CarClass(CSlidingChallengeLayout)
 {
 private:
     class MyProperty
-        : public Object
-        , public IProperty
+        : public FloatProperty
     {
     public:
         TO_STRING_IMPL("CSlidingChallengeLayout::MyProperty")
 
-        CAR_INTERFACE_DECL()
+        MyProperty(
+            /* [in] */ const String& name)
+            : FloatProperty(name)
+        {}
 
         //@Override
-        CARAPI Set(
+        CARAPI SetValue(
             /* [in] */ IInterface* obj,
-            /* [in] */ IInterface* value);
+            /* [in] */ Float value);
 
         //@Override
         CARAPI Get(
@@ -184,8 +215,10 @@ private:
         TO_STRING_IMPL("CSlidingChallengeLayout::MyAnimatorListenerAdapter3")
 
         MyAnimatorListenerAdapter3(
-            /* [in] */ CSlidingChallengeLayout* host)
+            /* [in] */ CSlidingChallengeLayout* host,
+            /* [in] */ Boolean show)
             : mHost(host)
+            , mShow(show)
         {}
 
         //@Override
@@ -198,6 +231,7 @@ private:
 
     private:
         CSlidingChallengeLayout* mHost;
+        Boolean mShow;
     };
 
     class SlidingChallengeLayoutLayoutParams
@@ -231,7 +265,7 @@ private:
             /* [in] */ IAttributeSet* attrs);
 
     public:
-        Int32 mChildType = CHILD_TYPE_NONE;
+        Int32 mChildType;
         Int32 mMaxHeight;
     };
 

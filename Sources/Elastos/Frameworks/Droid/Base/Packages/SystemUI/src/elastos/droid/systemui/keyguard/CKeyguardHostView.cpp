@@ -1,5 +1,43 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardHostView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardViewStateManager.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/systemui/keyguard/CameraWidgetFrame.h"
+#include "elastos/droid/view/LayoutInflater.h"
+#include "elastos/droid/os/Looper.h"
+#include "Elastos.Droid.Provider.h"
+#include "R.h"
+
+using Elastos::Droid::App::IActivityOptions;
+using Elastos::Droid::App::IActivityOptionsHelper;
+using Elastos::Droid::App::CActivityOptionsHelper;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::AppWidget::CAppWidgetHost;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::AppWidget::IAppWidgetManagerHelper;
+using Elastos::Droid::AppWidget::CAppWidgetManagerHelper;
+using Elastos::Droid::Content::IIntentSender;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Internal::Widget::ILockPatternUtilsHelper;
+using Elastos::Droid::Internal::Widget::CLockPatternUtilsHelper;
+using Elastos::Droid::Media::IRemoteControlClient;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::Widget::EIID_IRemoteViewsOnClickHandler;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -8,37 +46,41 @@ namespace Keyguard {
 
 ECode CKeyguardHostView::MyRunnable::Run()
 {
-    return mHost->UpdateAndAddWidgets();
+    mHost->UpdateAndAddWidgets();
+    return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardHostView::MyOnDismissAction, Object, IKeyguardHostViewOnDismissAction)
+CAR_INTERFACE_IMPL(CKeyguardHostView::MyOnDismissAction, Object,
+        IKeyguardHostViewOnDismissAction)
 
 ECode CKeyguardHostView::MyOnDismissAction::OnDismiss(
     /* [out] */ Boolean* succeed)
 {
     VALIDATE_NOT_NULL(succeed)
 
-    //try {
-    // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
-    AutoPtr<IContext> context;
-    FAIL_GOTO(mView->GetContext((IContext**)&context), EXIT)
+    //try
+    {
+        // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+        AutoPtr<IContext> context;
+        FAIL_GOTO(mView->GetContext((IContext**)&context), EXIT)
 
-    Int32 width;
-    FAIL_GOTO(mView->GetMeasuredWidth(&width), EXIT)
-    Int32 height;
-    FAIL_GOTO(mView->GetMeasuredHeight(&height), EXIT)
-    AutoPtr<IActivityOptionsHelper> helper;
-    CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&helper);
-    AutoPtr<IActivityOptions> opts;
-    FAIL_GOTO(helper->MakeScaleUpAnimation(mView, 0, 0, width, height, (IActivityOptions**)&opts), EXIT)
+        Int32 width;
+        FAIL_GOTO(mView->GetMeasuredWidth(&width), EXIT)
+        Int32 height;
+        FAIL_GOTO(mView->GetMeasuredHeight(&height), EXIT)
+        AutoPtr<IActivityOptionsHelper> helper;
+        CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&helper);
+        AutoPtr<IActivityOptions> opts;
+        FAIL_GOTO(helper->MakeScaleUpAnimation(mView, 0, 0, width, height, (IActivityOptions**)&opts), EXIT)
 
-    AutoPtr<IIntentSender> intentSender;
-    FAIL_GOTO(mPendingIntent->GetIntentSender((IIntentSender**)&intentSender), EXIT)
-    AutoPtr<IBundle> b;
-    FAIL_GOTO(opts->ToBundle((IBundle**)&b), EXIT)
-    FAIL_GOTO(context->StartIntentSender(intentSender, mFillInIntent,
-            IIntent::FLAG_ACTIVITY_NEW_TASK,
-            IIntent::FLAG_ACTIVITY_NEW_TASK, 0, b), EXIT)
+        AutoPtr<IIntentSender> intentSender;
+        FAIL_GOTO(mPendingIntent->GetIntentSender((IIntentSender**)&intentSender), EXIT)
+        AutoPtr<IBundle> b;
+        FAIL_GOTO(opts->ToBundle((IBundle**)&b), EXIT)
+        FAIL_GOTO(context->StartIntentSender(intentSender, mFillInIntent,
+                IIntent::FLAG_ACTIVITY_NEW_TASK,
+                IIntent::FLAG_ACTIVITY_NEW_TASK, 0, b), EXIT)
+    }
     // } catch (IntentSender.SendIntentException e) {
     //     android.util.Log.e(TAG, "Cannot send pending intent: ", e);
     // } catch (Exception e) {
@@ -50,14 +92,11 @@ EXIT:
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardHostView::MyOnClickHandler, Object, IRemoteViewsOnClickHandler)
-
 CKeyguardHostView::MyOnClickHandler::MyOnClickHandler(
-    /* [in] */ CKeyguardHostView* host,
-    /* [in] */ IKeyguardHostView* hostView)
+    /* [in] */ CKeyguardHostView* host)
     : mHost(host)
 {
-    IWeakReferenceSource::Probe(hostView)->GetWeakReference((IWeakReference**)&mKeyguardHostView);
+    IWeakReferenceSource::Probe((IKeyguardHostView*)host)->GetWeakReference((IWeakReference**)&mKeyguardHostView);
 }
 
 ECode CKeyguardHostView::MyOnClickHandler::OnClickHandler(
@@ -68,7 +107,7 @@ ECode CKeyguardHostView::MyOnClickHandler::OnClickHandler(
 {
     AutoPtr<IInterface> obj;
     mKeyguardHostView->Resolve(EIID_IInterface, (IInterface**)&obj);
-    AutoPtr<IKeyguardHostView> hostView = IViewGroup::Probe(obj);
+    AutoPtr<CKeyguardHostView> hostView = (CKeyguardHostView*)IKeyguardHostView::Probe(obj);
     if (hostView == NULL) {
         *succeed = FALSE;
         return NOERROR;
@@ -76,19 +115,20 @@ ECode CKeyguardHostView::MyOnClickHandler::OnClickHandler(
     Boolean res;
     if (pendingIntent->IsActivity(&res), res) {
         AutoPtr<IKeyguardHostViewOnDismissAction> action = new MyOnDismissAction(view, pendingIntent, fillInIntent);
-        hostView->SetOnDismissAction(action);
+        IKeyguardViewBase::Probe(hostView)->SetOnDismissAction(action);
 
         if (hostView->mViewStateManager->IsChallengeShowing(&res), res) {
             hostView->mViewStateManager->ShowBouncer(TRUE);
         }
         else {
-            hostView->Dismiss();
+            IKeyguardViewBase::Probe(hostView)->Dismiss(&res);
         }
         *succeed = TRUE;
         return NOERROR;
     }
     else {
-        return super.onClickHandler(view, pendingIntent, fillInIntent);
+        return RemoteViews::RemoteViewsOnClickHandler::OnClickHandler(view,
+                pendingIntent, fillInIntent, &res);
     }
     return NOERROR;
 }
@@ -99,7 +139,8 @@ ECode CKeyguardHostView::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     // Pass in an invalid widget id... the picker will allocate an ID for us
-    AutoPtr<IKeyguardActivityLauncher> launcher = GetActivityLauncher();
+    AutoPtr<IKeyguardActivityLauncher> launcher;
+    mHost->GetActivityLauncher((IKeyguardActivityLauncher**)&launcher);
     return launcher->LaunchWidgetPicker(IAppWidgetManager::INVALID_APPWIDGET_ID);
 }
 
@@ -109,6 +150,9 @@ ECode CKeyguardHostView::MyControlCallback::UserActivity()
 {
     return mHost->mViewMediatorCallback->UserActivity();
 }
+
+CAR_INTERFACE_IMPL(CKeyguardHostView::SavedState, View::BaseSavedState,
+        IKeyguardHostViewSavedState)
 
 CKeyguardHostView::SavedState::SavedState()
     : mTransportState(0)
@@ -124,30 +168,37 @@ ECode CKeyguardHostView::SavedState::constructor(
 }
 
 ECode CKeyguardHostView::SavedState::WriteToParcel(
-    /* [in] */ IParcel* out,
+    /* [in] */ IParcel* _out,
     /* [in] */ Int32 flags)
 {
-    BaseSavedState::WriteToParcel(out, flags);
-    out->WriteInt32(mTransportState);
-    out->WriteInt32(mAppWidgetToShow);
-    return out->WriteParcelable(insets, 0);
+    assert(0);
+    //BaseSavedState::WriteToParcel(out, flags);
+    _out->WriteInt32(mTransportState);
+    _out->WriteInt32(mAppWidgetToShow);
+    assert(0);
+    return NOERROR;
+    //return _out->WriteParcelable(insets, 0);
 }
 
 ECode CKeyguardHostView::SavedState::constructor(
     /* [in] */ IParcel* in)
 {
-    return BaseSavedState::constructor(in);
+    assert(0);
+    //BaseSavedState::constructor(in);
     in->ReadInt32(&mTransportState);
     in->ReadInt32(&mAppWidgetToShow);
-    return in->ReadParcelable(NULL, mInsets);
+    assert(0);
+    //return in->ReadParcelable(NULL, mInsets);
+    return NOERROR;
 }
 
 ECode CKeyguardHostView::MyRunnable2::Run()
 {
-    return mHost->mAppWidgetContainer->SetCurrentPage(mPageToShow);
+    return IPagedView::Probe(mHost->mAppWidgetContainer)->SetCurrentPage(mPageToShow);
 }
 
-CAR_INTERFACE_IMPL(CKeyguardHostView::MyUserSwitcherCallback, Object, IKeyguardHostViewUserSwitcherCallback)
+CAR_INTERFACE_IMPL(CKeyguardHostView::MyUserSwitcherCallback, Object,
+        IKeyguardHostViewUserSwitcherCallback)
 
 ECode CKeyguardHostView::MyUserSwitcherCallback::HideSecurityView(
    /* [in] */ Int32 duration)
@@ -164,7 +215,7 @@ ECode CKeyguardHostView::MyUserSwitcherCallback::ShowSecurityView()
 {
     AutoPtr<IKeyguardSecurityContainer> container;
     mHost->GetSecurityContainer((IKeyguardSecurityContainer**)&container);
-    return container->SetAlpha(1.0f);
+    return IView::Probe(container)->SetAlpha(1.0f);
 }
 
 ECode CKeyguardHostView::MyUserSwitcherCallback::ShowUnlockHint()
@@ -173,7 +224,7 @@ ECode CKeyguardHostView::MyUserSwitcherCallback::ShowUnlockHint()
     mHost->GetSecurityContainer((IKeyguardSecurityContainer**)&container);
 
     if (container != NULL) {
-        container->ShowUsabilityHint();
+        IKeyguardSecurityView::Probe(container)->ShowUsabilityHint();
     }
     return NOERROR;
 }
@@ -186,28 +237,29 @@ ECode CKeyguardHostView::MyUserSwitcherCallback::UserActivity()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardHostView::MyUserSwitcherCallback, Object, IKeyguardHostViewUserSwitcherCallback)
+CAR_INTERFACE_IMPL(CKeyguardHostView::MyKeyguardWidgetPagerCallbacks, Object,
+        IKeyguardWidgetPagerCallbacks)
 
-ECode CKeyguardHostView::MyUserSwitcherCallback::UserActivity()
+ECode CKeyguardHostView::MyKeyguardWidgetPagerCallbacks::UserActivity()
 {
     return mHost->UserActivity();
 }
 
-ECode CKeyguardHostView::MyUserSwitcherCallback::OnUserActivityTimeoutChanged()
+ECode CKeyguardHostView::MyKeyguardWidgetPagerCallbacks::OnUserActivityTimeoutChanged()
 {
     return mHost->OnUserActivityTimeoutChanged();
 }
 
-ECode CKeyguardHostView::MyUserSwitcherCallback::OnAddView(
+ECode CKeyguardHostView::MyKeyguardWidgetPagerCallbacks::OnAddView(
     /* [in] */ IView* v)
 {
     if (!mHost->ShouldEnableAddWidget()) {
-        mHost->mAppWidgetContainer->SetAddWidgetEnabled(false);
+        mHost->mAppWidgetContainer->SetAddWidgetEnabled(FALSE);
     }
     return NOERROR;
 }
 
-ECode CKeyguardHostView::MyUserSwitcherCallback::OnRemoveView(
+ECode CKeyguardHostView::MyKeyguardWidgetPagerCallbacks::OnRemoveView(
     /* [in] */ IView* v,
     /* [in] */ Boolean deletePermanently)
 {
@@ -222,7 +274,7 @@ ECode CKeyguardHostView::MyUserSwitcherCallback::OnRemoveView(
     return NOERROR;
 }
 
-ECode CKeyguardHostView::MyUserSwitcherCallback::OnRemoveViewAnimationCompleted()
+ECode CKeyguardHostView::MyKeyguardWidgetPagerCallbacks::OnRemoveViewAnimationCompleted()
 {
     if (mHost->ShouldEnableAddWidget()) {
         mHost->mAppWidgetContainer->SetAddWidgetEnabled(TRUE);
@@ -234,42 +286,44 @@ CAR_INTERFACE_IMPL(CKeyguardHostView::MyCameraWidgetFrameCallbacks, Object, ICam
 
 ECode CKeyguardHostView::MyCameraWidgetFrameCallbacks::OnLaunchingCamera()
 {
-    return mHost->SetSliderHandleAlpha(0);
+    SetSliderHandleAlpha(0.0f);
+    return NOERROR;
 }
 
 ECode CKeyguardHostView::MyCameraWidgetFrameCallbacks::OnCameraLaunchedSuccessfully()
 {
     Int32 page;
-    mAppWidgetContainer->GetCurrentPage(&page);
+    IPagedView::Probe(mHost->mAppWidgetContainer)->GetCurrentPage(&page);
     Boolean res;
-    if (mAppWidgetContainer->IsCameraPage(page, &res), res) {
-        mAppWidgetContainer->ScrollLeft();
+    if (mHost->mAppWidgetContainer->IsCameraPage(page, &res), res) {
+        IPagedView::Probe(mHost->mAppWidgetContainer)->ScrollLeft();
     }
-    mHost->SetSliderHandleAlpha(1);
-    mShowSecurityWhenReturn = TRUE;
+    SetSliderHandleAlpha(1.0f);
+    mHost->mShowSecurityWhenReturn = TRUE;
     return NOERROR;
 }
 
 ECode CKeyguardHostView::MyCameraWidgetFrameCallbacks::OnCameraLaunchedUnsuccessfully()
 {
-    return mHost->SetSliderHandleAlpha(1);
+    SetSliderHandleAlpha(1.0);
+    return NOERROR;
 }
 
 void CKeyguardHostView::MyCameraWidgetFrameCallbacks::SetSliderHandleAlpha(
     /* [in] */ Float alpha)
 {
     AutoPtr<IView> view;
-    FindViewById(R::id::sliding_layout, (IView**)&view);
+    mHost->FindViewById(R::id::sliding_layout, (IView**)&view);
     AutoPtr<ISlidingChallengeLayout> slider = ISlidingChallengeLayout::Probe(view);
     if (slider != NULL) {
         slider->SetHandleAlpha(alpha);
     }
-    return NOERROR;
 }
 
 ECode CKeyguardHostView::MyRunnable3::Run()
 {
-    return mHost->ShowAppropriateWidgetPage();
+    mHost->ShowAppropriateWidgetPage();
+    return NOERROR;
 }
 
 ECode CKeyguardHostView::MyKeyguardUpdateMonitorCallback::OnBootCompleted()
@@ -284,8 +338,8 @@ ECode CKeyguardHostView::MyKeyguardUpdateMonitorCallback::OnBootCompleted()
 ECode CKeyguardHostView::MyKeyguardUpdateMonitorCallback::OnUserSwitchComplete(
     /* [in] */ Int32 userId)
 {
-    if (mKeyguardMultiUserSelectorView != NULL) {
-        mKeyguardMultiUserSelectorView->FinalizeActiveUserView(TRUE);
+    if (mHost->mKeyguardMultiUserSelectorView != NULL) {
+        mHost->mKeyguardMultiUserSelectorView->FinalizeActiveUserView(TRUE);
     }
     return NOERROR;
 }
@@ -299,7 +353,7 @@ const Int32 CKeyguardHostView::TRANSPORT_VISIBLE = 2;
 
 const Int32 CKeyguardHostView::APPWIDGET_HOST_ID = 0x4B455947;
 
-const String CKeyguardHostView::TAG = "KeyguardHostView";
+const String CKeyguardHostView::TAG("KeyguardHostView");
 
 CAR_OBJECT_IMPL(CKeyguardHostView)
 
@@ -326,7 +380,7 @@ CKeyguardHostView::CKeyguardHostView()
 
     mUpdateMonitorCallbacks = new MyKeyguardUpdateMonitorCallback(this);
 
-    mWidgetCallbacks = new MyUserSwitcherCallback(this);
+    mWidgetCallbacks = new MyKeyguardWidgetPagerCallbacks(this);
 
     mCameraWidgetCallbacks = new MyCameraWidgetFrameCallbacks(this);
 
@@ -376,20 +430,23 @@ ECode CKeyguardHostView::constructor(
     CUserHandle::New(mUserId, (IUserHandle**)&handle);
     ec = mContext->CreatePackageContextAsUser(packageName, 0, handle, (IContext**)&userContext);
     //} catch (NameNotFoundException e) {
-    if (ec == (ECode)NameNotFoundException) {
+    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         //e.printStackTrace();
         // This should never happen, but it's better to have no widgets than to crash.
         userContext = context;
-    //}
+    }
 
     CAppWidgetHost::New(userContext, APPWIDGET_HOST_ID, mOnClickHandler,
-            Looper::myLooper(), (IAppWidgetHost**)&mAppWidgetHost);
+            Looper::GetMyLooper(), (IAppWidgetHost**)&mAppWidgetHost);
 
     AutoPtr<IAppWidgetManagerHelper> helper2;
     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper2);
     helper2->GetInstance(userContext, (IAppWidgetManager**)&mAppWidgetManager);
 
-    mViewStateManager = new KeyguardViewStateManager(this);
+    AutoPtr<KeyguardViewStateManager> manager =
+            new KeyguardViewStateManager();
+    manager->constructor((IKeyguardHostView*)this);
+    mViewStateManager = IKeyguardViewStateManager::Probe(manager);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
@@ -417,12 +474,16 @@ ECode CKeyguardHostView::constructor(
 
 void CKeyguardHostView::GetInitialTransportState()
 {
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    AutoPtr<KeyguardUpdateMonitor::DisplayClientState> dcs = monitor->GetCachedDisplayClientState();
-    mTransportState = (dcs->mClearing ? TRANSPORT_GONE :
-        (IsMusicPlaying(dcs->mPlaybackState) ? TRANSPORT_VISIBLE : TRANSPORT_INVISIBLE));
+    AutoPtr<IKeyguardUpdateMonitorDisplayClientState> dcs;
+    KeyguardUpdateMonitor::GetInstance(mContext)->GetCachedDisplayClientState(
+            (IKeyguardUpdateMonitorDisplayClientState**)&dcs);
+    AutoPtr<KeyguardUpdateMonitor::DisplayClientState> _dcs =
+            (KeyguardUpdateMonitor::DisplayClientState*)dcs.Get();
+    mTransportState = (_dcs->mClearing ? TRANSPORT_GONE :
+        (IsMusicPlaying(_dcs->mPlaybackState) ? TRANSPORT_VISIBLE : TRANSPORT_INVISIBLE));
 
-    if (DEBUGXPORT) Logger::V(TAG, "Initial transport state: %d, pbstate= %d", mTransportState, dcs->mPlaybackState);
+    if (DEBUGXPORT) Logger::V(TAG, "Initial transport state: %d, pbstate= %d",
+            mTransportState, _dcs->mPlaybackState);
 }
 
 void CKeyguardHostView::CleanupAppWidgetIds()
@@ -448,11 +509,11 @@ void CKeyguardHostView::CleanupAppWidgetIds()
     }
 }
 
-Boolean CKeyguardHostView::contains(
+Boolean CKeyguardHostView::Contains(
     /* [in] */ ArrayOf<Int32>* array,
     /* [in] */ Int32 target)
 {
-    for (Int32 i = 0; i < array.GetLength(); i++) {
+    for (Int32 i = 0; i < array->GetLength(); i++) {
         Int32 value = (*array)[i];
 
         if (value == target) {
@@ -488,14 +549,18 @@ ECode CKeyguardHostView::OnTouchEvent(
     Boolean result;
     KeyguardViewBase::OnTouchEvent(ev, &result);
     mTempRect->Set(0, 0, 0, 0);
-    OffsetRectIntoDescendantCoords(GetSecurityContainer(), mTempRect);
+    AutoPtr<IKeyguardSecurityContainer> container;
+    GetSecurityContainer((IKeyguardSecurityContainer**)&container);
+    OffsetRectIntoDescendantCoords(IView::Probe(container), mTempRect);
 
     Int32 left;
     mTempRect->GetLeft(&left);
     Int32 top;
     mTempRect->GetTop(&top);
     ev->OffsetLocation(left, top);
-    result = GetSecurityContainer()->DispatchTouchEvent(ev) || result;
+    Boolean tmp;
+    IView::Probe(container)->DispatchTouchEvent(ev, &tmp);
+    result = tmp || result;
     ev->OffsetLocation(-left, -top);
     *res = result;
     return NOERROR;
@@ -506,7 +571,7 @@ Int32 CKeyguardHostView::GetWidgetPosition(
 {
     AutoPtr<IKeyguardWidgetPager> appWidgetContainer = mAppWidgetContainer;
     Int32 children;
-    appWidgetContainer->GetChildCount(&children);
+    IViewGroup::Probe(appWidgetContainer)->GetChildCount(&children);
     for (Int32 i = 0; i < children; i++) {
         AutoPtr<IKeyguardWidgetFrame> frame;
         appWidgetContainer->GetWidgetPageAt(i, (IKeyguardWidgetFrame**)&frame);
@@ -536,35 +601,45 @@ ECode CKeyguardHostView::OnFinishInflate()
     AutoPtr<IView> view;
     FindViewById(R::id::app_widget_container, (IView**)&view);
     mAppWidgetContainer = IKeyguardWidgetPager::Probe(view);
-    mAppWidgetContainer->SetVisibility(VISIBLE);
+    IView::Probe(mAppWidgetContainer)->SetVisibility(VISIBLE);
     mAppWidgetContainer->SetCallbacks(mWidgetCallbacks);
-    mAppWidgetContainer->SetDeleteDropTarget(deleteDropTarget);
-    mAppWidgetContainer->SetMinScale(0.5f);
+    IPagedView::Probe(mAppWidgetContainer)->SetDeleteDropTarget(deleteDropTarget);
+    IPagedView::Probe(mAppWidgetContainer)->SetMinScale(0.5f);
 
     AutoPtr<IView> view2;
     FindViewById(R::id::sliding_layout, (IView**)&view2);
     mSlidingChallengeLayout = ISlidingChallengeLayout::Probe(view2);
     if (mSlidingChallengeLayout != NULL) {
-        mSlidingChallengeLayout->SetOnChallengeScrolledListener(mViewStateManager);
+        mSlidingChallengeLayout->SetOnChallengeScrolledListener(
+                ISlidingChallengeLayoutOnChallengeScrolledListener::Probe(mViewStateManager));
     }
     mAppWidgetContainer->SetViewStateManager(mViewStateManager);
     mAppWidgetContainer->SetLockPatternUtils(mLockPatternUtils);
 
     AutoPtr<IView> view3;
-    findViewById(R::id::multi_pane_challenge, (IView**)&view3);
+    FindViewById(R::id::multi_pane_challenge, (IView**)&view3);
     mMultiPaneChallengeLayout = IMultiPaneChallengeLayout::Probe(view3);
-    AutoPtr<IChallengeLayout> challenge = mSlidingChallengeLayout != NULL ? mSlidingChallengeLayout :
-            mMultiPaneChallengeLayout;
-    challenge->SetOnBouncerStateChangedListener(mViewStateManager);
-    mAppWidgetContainer->SetBouncerAnimationDuration(challenge.getBouncerAnimationDuration());
+    AutoPtr<IChallengeLayout> challenge;
+    if (mSlidingChallengeLayout != NULL) {
+        challenge = IChallengeLayout::Probe(mSlidingChallengeLayout);
+    }
+    else {
+        challenge = IChallengeLayout::Probe(mMultiPaneChallengeLayout);
+    }
+    challenge->SetOnBouncerStateChangedListener(
+            IChallengeLayoutOnBouncerStateChangedListener::Probe(mViewStateManager));
+    Int32 duration;
+    IChallengeLayout::Probe(challenge)->GetBouncerAnimationDuration(&duration);
+    mAppWidgetContainer->SetBouncerAnimationDuration(duration);
     mViewStateManager->SetPagedView(mAppWidgetContainer);
     mViewStateManager->SetChallengeLayout(challenge);
 
-    mViewStateManager->SetSecurityViewContainer(GetSecurityContainer());
+    AutoPtr<IKeyguardSecurityContainer> container;
+    GetSecurityContainer((IKeyguardSecurityContainer**)&container);
+    mViewStateManager->SetSecurityViewContainer(IKeyguardSecurityView::Probe(container));
 
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Boolean res;
-    if (monitor->HasBootCompleted(&res), res) {
+    if (KeyguardUpdateMonitor::GetInstance(mContext)->HasBootCompleted(&res), res) {
         UpdateAndAddWidgets();
     }
     else {
@@ -573,8 +648,10 @@ ECode CKeyguardHostView::OnFinishInflate()
         mPostBootCompletedRunnable = new MyRunnable(this);
     }
 
-    GetSecurityContainer()->UpdateSecurityViews(mViewStateManager->IsBouncing(&res), res);
-    return EnableUserSelectorIfNecessary();
+    mViewStateManager->IsBouncing(&res);
+    container->UpdateSecurityViews(res);
+    EnableUserSelectorIfNecessary();
+    return NOERROR;
 }
 
 void CKeyguardHostView::UpdateAndAddWidgets()
@@ -623,23 +700,25 @@ ECode CKeyguardHostView::Dismiss(
         // Enter full screen mode if we're in SIM or Account screen
         AutoPtr<IKeyguardSecurityContainer> container;
         GetSecurityContainer((IKeyguardSecurityContainer**)&container);
-        KeyguardSecurityModel::SecurityMode securityMode;
+        SecurityMode securityMode;
         container->GetSecurityMode(&securityMode);
 
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         Boolean isFullScreen;
         resources->GetBoolean(R::bool_::kg_sim_puk_account_full_screen, &isFullScreen);
-        Boolean isSimOrAccount = securityMode == KeyguardSecurityModel::SimPin
-                || securityMode == KeyguardSecurityModel::SimPuk
-                || securityMode == KeyguardSecurityModel::Account;
-        mAppWidgetContainer->SetVisibility(
+        Boolean isSimOrAccount = securityMode == SecurityMode_SimPin
+                || securityMode == SecurityMode_SimPuk
+                || securityMode == SecurityMode_Account;
+        IView::Probe(mAppWidgetContainer)->SetVisibility(
                 isSimOrAccount && isFullScreen ? IView::GONE : IView::VISIBLE);
 
         // Don't show camera or search in navbar when SIM or Account screen is showing
+        Int32 visibility;
+        GetSystemUiVisibility(&visibility);
         SetSystemUiVisibility(isSimOrAccount ?
-                (GetSystemUiVisibility() | IView::STATUS_BAR_DISABLE_SEARCH)
-                : (GetSystemUiVisibility() & ~IView::STATUS_BAR_DISABLE_SEARCH));
+                (visibility | IView::STATUS_BAR_DISABLE_SEARCH)
+                : (visibility & ~IView::STATUS_BAR_DISABLE_SEARCH));
 
         if (mSlidingChallengeLayout != NULL) {
             mSlidingChallengeLayout->SetChallengeInteractive(!isFullScreen);
@@ -689,30 +768,29 @@ ECode CKeyguardHostView::SetLockPatternUtils(
     AutoPtr<IKeyguardSecurityContainer> container;
     GetSecurityContainer((IKeyguardSecurityContainer**)&container);
     Boolean res;
-    return container->UpdateSecurityViews(mViewStateManager->IsBouncing(&res), res);
+    mViewStateManager->IsBouncing(&res);
+    return container->UpdateSecurityViews(res);
 }
 
 ECode CKeyguardHostView::OnAttachedToWindow()
 {
     KeyguardViewBase::OnAttachedToWindow();
     mAppWidgetHost->StartListening();
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    return monitor->RegisterCallback(mUpdateMonitorCallbacks);
+    return KeyguardUpdateMonitor::GetInstance(mContext)->RegisterCallback(mUpdateMonitorCallbacks);
 }
 
 ECode CKeyguardHostView::OnDetachedFromWindow()
 {
     KeyguardViewBase::OnDetachedFromWindow();
     mAppWidgetHost->StopListening();
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    return monitor->RemoveCallback(mUpdateMonitorCallbacks);
+    return KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mUpdateMonitorCallbacks);
 }
 
 ECode CKeyguardHostView::AddWidget(
     /* [in] */ IAppWidgetHostView* view,
     /* [in] */ int pageIndex)
 {
-    return mAppWidgetContainer->AddWidget(view, pageIndex);
+    return mAppWidgetContainer->AddWidget(IView::Probe(view), pageIndex);
 }
 
 ECode CKeyguardHostView::OnUserSwitching(
@@ -767,9 +845,8 @@ ECode CKeyguardHostView::OnPause()
     // We use mAppWidgetToShow to show a particular widget after you add it-- once the screen
     // turns off we reset that behavior
     ClearAppWidgetToShow();
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor.getInstance(mContext);
     Boolean res;
-    if (monitor->HasBootCompleted(&res), res) {
+    if (KeyguardUpdateMonitor::GetInstance(mContext)->HasBootCompleted(&res), res) {
         CheckAppWidgetConsistency();
     }
     AutoPtr<ICameraWidgetFrame> cameraPage = FindCameraPage();
@@ -802,7 +879,8 @@ Boolean CKeyguardHostView::AddWidget(
         if (updateDbIfFailed) {
             Logger::W(TAG, "*** AppWidgetInfo for app widget id %d  was null for user %d, deleting", appId, mUserId);
             mAppWidgetHost->DeleteAppWidgetId(appId);
-            mLockPatternUtils->RemoveAppWidget(appId);
+            Boolean res;
+            mLockPatternUtils->RemoveAppWidget(appId, &res);
         }
         return FALSE;
     }
@@ -811,7 +889,7 @@ Boolean CKeyguardHostView::AddWidget(
 Int32 CKeyguardHostView::NumWidgets()
 {
     Int32 childCount;
-    mAppWidgetContainer->GetChildCount(&childCount);
+    IViewGroup::Probe(mAppWidgetContainer)->GetChildCount(&childCount);
     Int32 widgetCount = 0;
     for (Int32 i = 0; i < childCount; i++) {
         Boolean res;
@@ -845,15 +923,17 @@ void CKeyguardHostView::AddDefaultWidgets()
     Boolean res;
     resources->GetBoolean(R::bool_::kg_enable_camera_default_widget, &res);
     if (!mSafeModeEnabled && !CameraDisabledByDpm() && mUserSetupCompleted && res) {
-        AutoPtr<IKeyguardActivityLauncher> launcher = GetActivityLauncher();
-        AutoPtr<IView> cameraWidget = CameraWidgetFrame::Create(mContext, mCameraWidgetCallbacks, launcher);
+        AutoPtr<IKeyguardActivityLauncher> launcher;
+        GetActivityLauncher((IKeyguardActivityLauncher**)&launcher);
+        AutoPtr<IView> cameraWidget = CameraWidgetFrame::Create(mContext,
+                mCameraWidgetCallbacks, launcher);
         if (cameraWidget != NULL) {
             mAppWidgetContainer->AddWidget(cameraWidget);
         }
     }
 }
 
-AutoPtr<KeyguardTransportControlView> CKeyguardHostView::GetOrCreateTransportControl()
+AutoPtr<IKeyguardTransportControlView> CKeyguardHostView::GetOrCreateTransportControl()
 {
     if (mTransportControl == NULL) {
         AutoPtr<ILayoutInflater> inflater;
@@ -872,9 +952,10 @@ AutoPtr<KeyguardTransportControlView> CKeyguardHostView::GetOrCreateTransportCon
 Int32 CKeyguardHostView::GetInsertPageIndex()
 {
     AutoPtr<IView> addWidget;
-    mAppWidgetContainer->FindViewById(R::id::keyguard_add_widget, (IView**)&addWidget);
+    IView::Probe(mAppWidgetContainer)->FindViewById(R::id::keyguard_add_widget,
+            (IView**)&addWidget);
     Int32 insertionIndex;
-    mAppWidgetContainer->IndexOfChild(addWidget, &insertionIndex);
+    IViewGroup::Probe(mAppWidgetContainer)->IndexOfChild(addWidget, &insertionIndex);
     if (insertionIndex < 0) {
         insertionIndex = 0; // no add widget page found
     }
@@ -943,9 +1024,9 @@ Int32 CKeyguardHostView::AllocateIdForDefaultAppWidget()
     mAppWidgetHost->AllocateAppWidgetId(&appWidgetId);
 
     //try {
-    if((ECode)IllegalArgumentException == mAppWidgetManager->BindAppWidgetId(appWidgetId, defaultAppWidget)) {
+    if((ECode)E_ILLEGAL_ARGUMENT_EXCEPTION == mAppWidgetManager->BindAppWidgetId(appWidgetId, defaultAppWidget)) {
     //} catch (IllegalArgumentException e) {
-        Logger::E(TAG, "Error when trying to bind default AppWidget: %d", IllegalArgumentException);
+        Logger::E(TAG, "Error when trying to bind default AppWidget: %d", E_ILLEGAL_ARGUMENT_EXCEPTION);
         mAppWidgetHost->DeleteAppWidgetId(appWidgetId);
         appWidgetId = IAppWidgetManager::INVALID_APPWIDGET_ID;
     }
@@ -955,7 +1036,7 @@ Int32 CKeyguardHostView::AllocateIdForDefaultAppWidget()
 ECode CKeyguardHostView::CheckAppWidgetConsistency()
 {
     Int32 childCount;
-    mAppWidgetContainer->GetChildCount(&childCount);
+    IViewGroup::Probe(mAppWidgetContainer)->GetChildCount(&childCount);
     Boolean widgetPageExists = FALSE;
     for (Int32 i = 0; i < childCount; i++) {
         Boolean res;
@@ -1007,10 +1088,13 @@ ECode CKeyguardHostView::CheckAppWidgetConsistency()
 
         // trigger DB updates only if user-added widgets are enabled
         if (!mSafeModeEnabled && userAddedWidgetsEnabled) {
-            mAppWidgetContainer->OnAddView(
-                    mAppWidgetContainer->GetChildAt(insertPageIndex), insertPageIndex);
+            AutoPtr<IView> view;
+            IViewGroup::Probe(mAppWidgetContainer)->GetChildAt(insertPageIndex,
+                    (IView**)&view);
+            mAppWidgetContainer->OnAddView(view, insertPageIndex);
         }
     }
+    return NOERROR;
 }
 
 ECode CKeyguardHostView::OnSaveInstanceState(
@@ -1021,11 +1105,13 @@ ECode CKeyguardHostView::OnSaveInstanceState(
     if (DEBUG) Logger::D(TAG, "onSaveInstanceState, tstate= %d", mTransportState);
     AutoPtr<IParcelable> superState;
     KeyguardViewBase::OnSaveInstanceState();
-    AutoPtr<MySavedState> ss = new SavedState(superState);
+    AutoPtr<SavedState> ss = new SavedState();
+    ss->constructor(superState);
     // If the transport is showing, force it to show it on restore.
     Int32 index;
     Boolean showing = mTransportControl != NULL
-            && (mAppWidgetContainer->GetWidgetPageIndex(mTransportControl, &index), index) >= 0;
+            && (mAppWidgetContainer->GetWidgetPageIndex(IView::Probe(mTransportControl),
+            &index), index) >= 0;
     ss->mTransportState = showing ? TRANSPORT_VISIBLE : mTransportState;
     ss->mAppWidgetToShow = mAppWidgetToShow;
     ss->mInsets->Set(mInsets);
@@ -1037,12 +1123,14 @@ ECode CKeyguardHostView::OnSaveInstanceState(
 ECode CKeyguardHostView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
-    if (!(state instanceof SavedState)) {
+    if (IKeyguardHostViewSavedState::Probe(state) == NULL) {
         KeyguardViewBase::OnRestoreInstanceState(state);
         return NOERROR;
     }
-    AutoPtr<SavedState> ss = (SavedState*)ISavedState::Probe(state);
-    KeyguardViewBase::OnRestoreInstanceState(ss.getSuperState());
+    AutoPtr<SavedState> ss = (SavedState*)IKeyguardHostViewSavedState::Probe(state);
+    AutoPtr<IParcelable> p;
+    ss->GetSuperState((IParcelable**)&p);
+    KeyguardViewBase::OnRestoreInstanceState(p);
     mTransportState = ss->mTransportState;
     mAppWidgetToShow = ss->mAppWidgetToShow;
     SetInsets(ss->mInsets);
@@ -1096,26 +1184,27 @@ void CKeyguardHostView::ShowAppropriateWidgetPage()
     Boolean transportAdded = EnsureTransportPresentOrRemoved(state);
     Int32 pageToShow = GetAppropriateWidgetPage(state);
     if (!transportAdded) {
-        mAppWidgetContainer->SetCurrentPage(pageToShow);
+        IPagedView::Probe(mAppWidgetContainer)->SetCurrentPage(pageToShow);
     }
     else if (state == TRANSPORT_VISIBLE) {
         // If the transport was just added, we need to wait for layout to happen before
         // we can set the current page.
         AutoPtr<IRunnable> r = new MyRunnable2(this, pageToShow);
-        Post(r);
+        Boolean res;
+        Post(r, &res);
     }
 }
 
 Boolean CKeyguardHostView::EnsureTransportPresentOrRemoved(
     /* [in] */ Int32 state)
 {
-    Boolean showing = GetWidgetPosition(R.id.keyguard_transport_control) != -1;
+    Boolean showing = GetWidgetPosition(R::id::keyguard_transport_control) != -1;
     Boolean visible = state == TRANSPORT_VISIBLE;
     Boolean shouldBeVisible = state == TRANSPORT_INVISIBLE && IsMusicPlaying(state);
     if (!showing && (visible || shouldBeVisible)) {
         // insert to left of camera if it exists, otherwise after right-most widget
         Int32 count;
-        mAppWidgetContainer->GetChildCount(&count);
+        IViewGroup::Probe(mAppWidgetContainer)->GetChildCount(&count);
         Int32 lastWidget = count - 1;
         Int32 position = 0; // handle no widget case
         if (lastWidget >= 0) {
@@ -1124,17 +1213,18 @@ Boolean CKeyguardHostView::EnsureTransportPresentOrRemoved(
                     lastWidget : lastWidget + 1;
         }
         if (DEBUGXPORT) Logger::V(TAG, "add transport at %d", position);
-        mAppWidgetContainer->AddWidget(GetOrCreateTransportControl(), position);
+        AutoPtr<IKeyguardTransportControlView> cv = GetOrCreateTransportControl();
+        mAppWidgetContainer->AddWidget(IView::Probe(cv), position);
         return TRUE;
     }
     else if (showing && state == TRANSPORT_GONE) {
         if (DEBUGXPORT) Logger::V(TAG, "remove transport");
-        mAppWidgetContainer->RemoveWidget(GetOrCreateTransportControl());
+        AutoPtr<IKeyguardTransportControlView> cv = GetOrCreateTransportControl();
+        mAppWidgetContainer->RemoveWidget(IView::Probe(cv));
         mTransportControl = NULL;
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(context);
-        monitor->DispatchSetBackground(NULL);
+        KeyguardUpdateMonitor::GetInstance(context)->DispatchSetBackground(NULL);
     }
     return FALSE;
 }
@@ -1142,11 +1232,13 @@ Boolean CKeyguardHostView::EnsureTransportPresentOrRemoved(
 AutoPtr<ICameraWidgetFrame> CKeyguardHostView::FindCameraPage()
 {
     Int32 count;
-    mAppWidgetContainer->GetChildCount(&count);
+    IViewGroup::Probe(mAppWidgetContainer)->GetChildCount(&count);
     for (Int32 i = count - 1; i >= 0; i--) {
         Boolean res;
         if (mAppWidgetContainer->IsCameraPage(i, &res), res) {
-            AutoPtr<ICameraWidgetFrame> tmp = ICameraWidgetFrame::Probe(mAppWidgetContainer->GetChildAt(i));
+            AutoPtr<IView> view;
+            IViewGroup::Probe(mAppWidgetContainer)->GetChildAt(i, (IView**)&view);
+            AutoPtr<ICameraWidgetFrame> tmp = ICameraWidgetFrame::Probe(view);
             return tmp;
         }
     }
@@ -1169,10 +1261,13 @@ Int32 CKeyguardHostView::GetAppropriateWidgetPage(
     // assumes at least one widget (besides camera + add)
     if (mAppWidgetToShow != IAppWidgetManager::INVALID_APPWIDGET_ID) {
         Int32 childCount;
-        mAppWidgetContainer->GetChildCount(&childCount);
+        IViewGroup::Probe(mAppWidgetContainer)->GetChildCount(&childCount);
         for (Int32 i = 0; i < childCount; i++) {
-            if (mAppWidgetContainer.getWidgetPageAt(i).getContentAppWidgetId()
-                    == mAppWidgetToShow) {
+            AutoPtr<IKeyguardWidgetFrame> frame;
+            mAppWidgetContainer->GetWidgetPageAt(i, (IKeyguardWidgetFrame**)&frame);
+            Int32 id;
+            frame->GetContentAppWidgetId(&id);
+            if (id == mAppWidgetToShow) {
                 return i;
             }
         }
@@ -1181,12 +1276,15 @@ Int32 CKeyguardHostView::GetAppropriateWidgetPage(
     // if music playing, show transport
     if (musicTransportState == TRANSPORT_VISIBLE) {
         if (DEBUG) Logger::D(TAG, "Music playing, show transport");
-        return mAppWidgetContainer.getWidgetPageIndex(getOrCreateTransportControl());
+        AutoPtr<IKeyguardTransportControlView> cv = GetOrCreateTransportControl();
+        Int32 index;
+        mAppWidgetContainer->GetWidgetPageIndex(IView::Probe(cv), &index);
+        return index;
     }
 
     // else show the right-most widget (except for camera)
     Int32 count;
-    mAppWidgetContainer->GetChildCount(&count);
+    IViewGroup::Probe(mAppWidgetContainer)->GetChildCount(&count);
     Int32 rightMost = count - 1;
     Boolean res;
     if (mAppWidgetContainer->IsCameraPage(rightMost, &res), res) {
@@ -1199,8 +1297,8 @@ Int32 CKeyguardHostView::GetAppropriateWidgetPage(
 void CKeyguardHostView::EnableUserSelectorIfNecessary()
 {
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::USER_SERVICE, &obj);
-    AutoPtr<IUserManager> um = IUserManager::Proeb(obj);
+    mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IUserManager> um = IUserManager::Probe(obj);
     if (um == NULL) {
         // Throwable t = new Throwable();
         // t.fillInStackTrace();
@@ -1223,10 +1321,10 @@ void CKeyguardHostView::EnableUserSelectorIfNecessary()
 
     if (IKeyguardMultiUserSelectorView::Probe(multiUserView) != NULL) {
         mKeyguardMultiUserSelectorView = IKeyguardMultiUserSelectorView::Probe(multiUserView);
-        mKeyguardMultiUserSelectorView->SetVisibility(IView::VISIBLE);
+        IView::Probe(mKeyguardMultiUserSelectorView)->SetVisibility(IView::VISIBLE);
         AutoPtr<IList> users;
         um->GetUsers(TRUE, (IList**)&users);
-        mKeyguardMultiUserSelectorView->AddUsers(users);
+        mKeyguardMultiUserSelectorView->AddUsers(ICollection::Probe(users));
         AutoPtr<IKeyguardHostViewUserSwitcherCallback> callback = new MyUserSwitcherCallback(this);
         mKeyguardMultiUserSelectorView->SetCallback(callback);
     }
@@ -1247,15 +1345,15 @@ ECode CKeyguardHostView::CleanUp()
     // Make sure we let go of all widgets and their package contexts promptly. If we don't do
     // this, and the associated application is uninstalled, it can cause a soft reboot.
     Int32 count;
-    mAppWidgetContainer->GetChildCount(&count);
+    IViewGroup::Probe(mAppWidgetContainer)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IKeyguardWidgetFrame> frame;
         mAppWidgetContainer->GetWidgetPageAt(i, (IKeyguardWidgetFrame**)&frame);
-        frame->RemoveAllViews();
+        IViewGroup::Probe(frame)->RemoveAllViews();
     }
     AutoPtr<IKeyguardSecurityContainer> container;
     GetSecurityContainer((IKeyguardSecurityContainer**)&container);
-    container->OnPause(); // clean up any actions in progress
+    return IKeyguardSecurityView::Probe(container)->OnPause(); // clean up any actions in progress
 }
 
 ECode CKeyguardHostView::GoToWidget(

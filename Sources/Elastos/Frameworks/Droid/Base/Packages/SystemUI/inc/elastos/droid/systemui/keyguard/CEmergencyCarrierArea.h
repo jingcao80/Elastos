@@ -3,6 +3,18 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CEMERGENCYCARRIERAREA_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CEmergencyCarrierArea.h"
+#include "elastos/droid/systemui/keyguard/AlphaOptimizedLinearLayout.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -19,10 +31,12 @@ private:
         , public IViewOnTouchListener
     {
     public:
-        TO_STRING_IMPL("CEmergencyButton::MyOnClickListener")
+        TO_STRING_IMPL("CEmergencyCarrierArea::MyOnClickListener")
+
+        CAR_INTERFACE_DECL()
 
         MyOnClickListener(
-            /* [in] */ CEmergencyButton* host)
+            /* [in] */ CEmergencyCarrierArea* host)
             : mHost(host)
         {}
 
@@ -32,7 +46,7 @@ private:
             /* [out] */ Boolean* result);
 
     private:
-        CEmergencyButton* mHost;
+        CEmergencyCarrierArea* mHost;
     };
 
 public:

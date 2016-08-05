@@ -1,6 +1,7 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardActivityLauncher.h"
 #include "elastos/droid/systemui/keyguard/AppearAnimationUtils.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.AppWidget.h"
@@ -284,10 +285,7 @@ ECode KeyguardActivityLauncher::LaunchCamera(
     // after showing lockscreen camera (bug 11063890).
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IKeyguardUpdateMonitor> updateMonitor;
-    Logger::E(TAG, " >> TODO KeyguardUpdateMonitor");
-    // = KeyguardUpdateMonitor::GetInstance(context);
-    updateMonitor->SetAlternateUnlockEnabled(FALSE);
+    KeyguardUpdateMonitor::GetInstance(context)->SetAlternateUnlockEnabled(FALSE);
 
     if (MustLaunchSecurely()) {
         // Launch the secure version of the camera
@@ -315,22 +313,20 @@ Boolean KeyguardActivityLauncher::MustLaunchSecurely()
     GetLockPatternUtils((ILockPatternUtils**)&lockPatternUtils);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IKeyguardUpdateMonitor> updateMonitor;
-    Logger::E(TAG, " >> TODO KeyguardUpdateMonitor");
-    // = KeyguardUpdateMonitor::GetInstance(context);
     Int32 currentUser;
     lockPatternUtils->GetCurrentUser(&currentUser);
     Boolean bval1, bval2;
     lockPatternUtils->IsSecure(&bval1);
-    return bval1 && (updateMonitor->GetUserHasTrust(currentUser, &bval2), !bval2);
+    return bval1 && (KeyguardUpdateMonitor::GetInstance(context)->GetUserHasTrust(
+            currentUser, &bval2), !bval2);
 }
 
 ECode KeyguardActivityLauncher::LaunchWidgetPicker(
     /* [in] */ Int32 appWidgetId)
 {
     AutoPtr<IIntent> pickIntent;
-    assert(0 && "TODO");
-    // CIntent::New(IAppWidgetManager::ACTION_KEYGUARD_APPWIDGET_PICK, (IIntent**)&pickIntent);
+    CIntent::New(IAppWidgetManager::ACTION_KEYGUARD_APPWIDGET_PICK,
+            (IIntent**)&pickIntent);
 
     pickIntent->PutExtra(IAppWidgetManager::EXTRA_APPWIDGET_ID, appWidgetId);
     pickIntent->PutExtra(IAppWidgetManager::EXTRA_CUSTOM_SORT, FALSE);

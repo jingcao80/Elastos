@@ -1,5 +1,17 @@
 
 #include "elastos/droid/systemui/keyguard/CMultiPaneChallengeLayout.h"
+#include <elastos/core/Math.h>
+#include "R.h"
+
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::CGravity;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Core::Math;
 
 namespace Elastos {
 namespace Droid {
@@ -30,9 +42,10 @@ ECode CMultiPaneChallengeLayout::MultiPaneChallengeLayoutLayoutParams::construct
 {
     ViewGroup::MarginLayoutParams::constructor(c, attrs);
 
+    AutoPtr<ArrayOf<Int32> > attrIds =
+            TO_ATTRS_ARRAYOF(R::styleable::MultiPaneChallengeLayout_Layout);
     AutoPtr<ITypedArray> a;
-    c->ObtainStyledAttributes(attrs,
-            R::styleable::MultiPaneChallengeLayout_Layout, (ITypedArray**)&a);
+    c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
     a->GetFloat(
             R::styleable::MultiPaneChallengeLayout_Layout_layout_centerWithinArea, 0, &mCenterWithinArea);
@@ -48,7 +61,7 @@ ECode CMultiPaneChallengeLayout::MultiPaneChallengeLayoutLayoutParams::construct
     // Default gravity settings based on type and parent orientation
     if (mGravity == IGravity::NO_GRAVITY) {
         if (((CMultiPaneChallengeLayout*)parent)->mOrientation == HORIZONTAL) {
-            switch (childType) {
+            switch (mChildType) {
                 case CHILD_TYPE_WIDGET:
                     mGravity = IGravity::LEFT | IGravity::CENTER_VERTICAL;
                     break;
@@ -60,7 +73,7 @@ ECode CMultiPaneChallengeLayout::MultiPaneChallengeLayoutLayoutParams::construct
                     break;
             }
         } else {
-            switch (childType) {
+            switch (mChildType) {
                 case CHILD_TYPE_WIDGET:
                     mGravity = IGravity::TOP | IGravity::CENTER_HORIZONTAL;
                     break;
@@ -101,7 +114,8 @@ ECode CMultiPaneChallengeLayout::MultiPaneChallengeLayoutLayoutParams::construct
 {
     constructor(IViewGroupMarginLayoutParams::Probe(source));
 
-    MultiPaneChallengeLayout::LayoutParams* _source = (MultiPaneChallengeLayout::LayoutParams*)source;
+    MultiPaneChallengeLayoutLayoutParams* _source =
+            (MultiPaneChallengeLayoutLayoutParams*)source;
     mCenterWithinArea = _source->mCenterWithinArea;
     mChildType = _source->mChildType;
     mGravity = _source->mGravity;
@@ -168,9 +182,11 @@ ECode CMultiPaneChallengeLayout::constructor(
 {
     ViewGroup::constructor(context, attrs, defStyleAttr);
 
+    AutoPtr<ArrayOf<Int32> > attrIds =
+            TO_ATTRS_ARRAYOF(R::styleable::MultiPaneChallengeLayout);
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs,
-            R::styleable::MultiPaneChallengeLayout, defStyleAttr, 0, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, 0,
+            (ITypedArray**)&a);
     a->GetInt32(R::styleable::MultiPaneChallengeLayout_android_orientation,
             HORIZONTAL, &mOrientation);
     a->Recycle();
@@ -186,7 +202,7 @@ ECode CMultiPaneChallengeLayout::constructor(
 ECode CMultiPaneChallengeLayout::SetInsets(
     /* [in] */ IRect* insets)
 {
-    mInsets->Set(insets);
+    return mInsets->Set(insets);
 }
 
 ECode CMultiPaneChallengeLayout::IsChallengeShowing(
@@ -233,8 +249,11 @@ ECode CMultiPaneChallengeLayout::ShowBouncer()
 
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        AutoPtr<IAnimator> anim;
-        helper->OfFloat(mScrimView, String("alpha"), 1.0f, (IAnimator**)&anim);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 1.0f;
+        AutoPtr<IObjectAnimator> oa;
+        helper->OfFloat(mScrimView, String("alpha"), array, (IObjectAnimator**)&oa);
+        AutoPtr<IAnimator> anim = IAnimator::Probe(oa);
         anim->SetDuration(ANIMATE_BOUNCE_DURATION);
 
         AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter(this);
@@ -258,8 +277,11 @@ ECode CMultiPaneChallengeLayout::HideBouncer()
 
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        AutoPtr<IAnimator> anim;
-        helper->OfFloat(mScrimView, String("alpha"), 0.0f, (IAnimator**)&anim);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 0.0f;
+        AutoPtr<IObjectAnimator> oa;
+        helper->OfFloat(mScrimView, String("alpha"), array, (IObjectAnimator**)&oa);
+        AutoPtr<IAnimator> anim = IAnimator::Probe(oa);
         anim->SetDuration(ANIMATE_BOUNCE_DURATION);
 
         AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter2(this);
@@ -282,7 +304,7 @@ ECode CMultiPaneChallengeLayout::IsBouncing(
 }
 
 ECode CMultiPaneChallengeLayout::SetOnBouncerStateChangedListener(
-    /* [in] */ IOnBouncerStateChangedListener* listener)
+    /* [in] */ IChallengeLayoutOnBouncerStateChangedListener* listener)
 {
     mBouncerListener = listener;
     return NOERROR;
@@ -292,7 +314,7 @@ ECode CMultiPaneChallengeLayout::RequestChildFocus(
     /* [in] */ IView* child,
     /* [in] */ IView* focused)
 {
-    if (mIsBouncing && child != mChallengeView) {
+    if (mIsBouncing && TO_IINTERFACE(child) != TO_IINTERFACE(mChallengeView)) {
         // Clear out of the bouncer if the user tries to move focus outside of
         // the security challenge view.
         HideBouncer();
@@ -336,7 +358,7 @@ Int32 CMultiPaneChallengeLayout::GetVirtualHeight(
         mInsets->GetTop(&t);
         virtualHeight = h - ptop - t;
     }
-    MultiPaneChallengeLayout::LayoutParams* _lp = (MultiPaneChallengeLayout::LayoutParams*)lp;
+    MultiPaneChallengeLayoutLayoutParams* _lp = (MultiPaneChallengeLayoutLayoutParams*)lp;
     if (_lp->mChildType == IMultiPaneChallengeLayoutLayoutParams::CHILD_TYPE_USER_SWITCHER) {
         // Always measure the user switcher as if there were no IME insets
         // on the window.
@@ -345,24 +367,22 @@ Int32 CMultiPaneChallengeLayout::GetVirtualHeight(
     else if (_lp->mChildType == IMultiPaneChallengeLayoutLayoutParams::CHILD_TYPE_PAGE_DELETE_DROP_TARGET) {
         return height;
     }
-    return Math::Min(virtualHeight - heightUsed, height);
+    return Elastos::Core::Math::Min(virtualHeight - heightUsed, height);
 }
 
 ECode CMultiPaneChallengeLayout::OnMeasure(
     /* [in] */ Int32 widthSpec,
     /* [in] */ Int32 heightSpec)
 {
-    if (MeasureSpec::GetMode(widthSpec) != IMeasureSpec::EXACTLY ||
-            MeasureSpec::GetMode(heightSpec) != IMeasureSpec::EXACTLY) {
+    if (MeasureSpec::GetMode(widthSpec) != MeasureSpec::EXACTLY ||
+            MeasureSpec::GetMode(heightSpec) != MeasureSpec::EXACTLY) {
         // throw new IllegalArgumentException(
         //         "MultiPaneChallengeLayout must be measured with an exact size");
-        return IllegalArgumentException;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    Int32 width;
-    MeasureSpec::GetSize(widthSpec, &width);
-    Int32 height;
-    MeasureSpec::GetSize(heightSpec, &height);
+    Int32 width = MeasureSpec::GetSize(widthSpec);
+    Int32 height = MeasureSpec::GetSize(heightSpec);
     SetMeasuredDimension(width, height);
 
     Int32 top;
@@ -371,8 +391,8 @@ ECode CMultiPaneChallengeLayout::OnMeasure(
     mInsets->GetBottom(&bottom);
     Int32 insetHeight = height - top - bottom;
 
-    Int32 insetHeightSpec;
-    MeasureSpec::MakeMeasureSpec(insetHeight, IMeasureSpec::EXACTLY, &insetHeightSpec);
+    Int32 insetHeightSpec = MeasureSpec::MakeMeasureSpec(insetHeight,
+            MeasureSpec::EXACTLY);
 
     Int32 widthUsed = 0;
     Int32 heightUsed = 0;
@@ -389,26 +409,26 @@ ECode CMultiPaneChallengeLayout::OnMeasure(
 
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<MultiPaneChallengeLayout::LayoutParams> lp =
-                IMultiPaneChallengeLayoutLayoutParams::Probe(params);
+        AutoPtr<MultiPaneChallengeLayoutLayoutParams> lp =
+                (MultiPaneChallengeLayoutLayoutParams*)IMultiPaneChallengeLayoutLayoutParams::Probe(params);
         if (lp->mChildType == IMultiPaneChallengeLayoutLayoutParams::CHILD_TYPE_CHALLENGE) {
             if (mChallengeView != NULL) {
                 // throw new IllegalStateException(
                 //         "There may only be one child of type challenge");
-                return IllegalStateException;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             if (IKeyguardSecurityContainer::Probe(child) == NULL) {
                 // throw new IllegalArgumentException(
                 //         "Challenge must be a KeyguardSecurityContainer");
-                return IllegalStateException;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
-            mChallengeView = (KeyguardSecurityContainer) child;
+            mChallengeView = IKeyguardSecurityContainer::Probe(child);
         }
         else if (lp->mChildType == IMultiPaneChallengeLayoutLayoutParams::CHILD_TYPE_USER_SWITCHER) {
             if (mUserSwitcherView != NULL) {
                 // throw new IllegalStateException(
                 //         "There may only be one child of type userSwitcher");
-                return IllegalStateException;
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             mUserSwitcherView = child;
 
@@ -419,12 +439,14 @@ ECode CMultiPaneChallengeLayout::OnMeasure(
             Int32 adjustedWidthSpec = widthSpec;
             Int32 adjustedHeightSpec = insetHeightSpec;
             if (lp->mMaxWidth >= 0) {
-                MeasureSpec::MakeMeasureSpec(
-                        Math::Min(lp->mMaxWidth, width), IMeasureSpec::EXACTLY, &adjustedWidthSpec);
+                adjustedWidthSpec = MeasureSpec::MakeMeasureSpec(
+                        Elastos::Core::Math::Min(lp->mMaxWidth, width),
+                        MeasureSpec::EXACTLY);
             }
             if (lp->mMaxHeight >= 0) {
-                MeasureSpec::MakeMeasureSpec(
-                        Math::Min(lp->mMaxHeight, insetHeight), IMeasureSpec::EXACTLY, &adjustedHeightSpec);
+                adjustedHeightSpec = MeasureSpec::MakeMeasureSpec(
+                        Elastos::Core::Math::Min(lp->mMaxHeight, insetHeight),
+                        MeasureSpec::EXACTLY);
             }
             // measureChildWithMargins will resolve layout direction for the LayoutParams
             MeasureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
@@ -458,8 +480,8 @@ ECode CMultiPaneChallengeLayout::OnMeasure(
 
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<MultiPaneChallengeLayout::LayoutParams> lp =
-                IMultiPaneChallengeLayoutLayoutParams::Probe(params);
+        AutoPtr<MultiPaneChallengeLayoutLayoutParams> lp =
+                (MultiPaneChallengeLayoutLayoutParams*)IMultiPaneChallengeLayoutLayoutParams::Probe(params);
         Int32 visibility;
         if (lp->mChildType == IMultiPaneChallengeLayoutLayoutParams::CHILD_TYPE_USER_SWITCHER ||
                 lp->mChildType == IMultiPaneChallengeLayoutLayoutParams::CHILD_TYPE_SCRIM ||
@@ -474,35 +496,36 @@ ECode CMultiPaneChallengeLayout::OnMeasure(
         Int32 adjustedHeightSpec;
         if (lp->mCenterWithinArea > 0) {
             if (mOrientation == HORIZONTAL) {
-                MeasureSpec::MakeMeasureSpec(
+                adjustedWidthSpec = MeasureSpec::MakeMeasureSpec(
                         (Int32) ((width - widthUsed) * lp->mCenterWithinArea + 0.5f),
-                        IMeasureSpec::EXACTLY, &adjustedWidthSpec);
-                MeasureSpec::MakeMeasureSpec(
-                        virtualHeight, IMeasureSpec::EXACTLY, &adjustedHeightSpec);
+                        MeasureSpec::EXACTLY);
+                adjustedHeightSpec = MeasureSpec::MakeMeasureSpec(
+                        virtualHeight,
+                        MeasureSpec::EXACTLY);
             }
             else {
-                MeasureSpec::MakeMeasureSpec(
-                        width - widthUsed, IMeasureSpec::EXACTLY, &adjustedWidthSpec);
-                MeasureSpec::MakeMeasureSpec(
+                adjustedWidthSpec = MeasureSpec::MakeMeasureSpec(
+                        width - widthUsed, MeasureSpec::EXACTLY);
+                adjustedHeightSpec = MeasureSpec::MakeMeasureSpec(
                         (Int32) (virtualHeight * lp->mCenterWithinArea + 0.5f),
-                        IMeasureSpec::EXACTLY, &adjustedHeightSpec);
+                        MeasureSpec::EXACTLY);
             }
         }
         else {
-            MeasureSpec::MakeMeasureSpec(
-                    width - widthUsed, IMeasureSpec::EXACTLY, &adjustedWidthSpec);
-            MeasureSpec::MakeMeasureSpec(
-                    virtualHeight, IMeasureSpec::EXACTLY, &adjustedHeightSpec);
+            adjustedWidthSpec = MeasureSpec::MakeMeasureSpec(
+                    width - widthUsed, MeasureSpec::EXACTLY);
+            adjustedHeightSpec = MeasureSpec::MakeMeasureSpec(
+                    virtualHeight, MeasureSpec::EXACTLY);
         }
         if (lp->mMaxWidth >= 0) {
-            MeasureSpec::MakeMeasureSpec(
-                    Math::Min(lp->mMaxWidth, MeasureSpec::GetSize(adjustedWidthSpec)),
-                    IMeasureSpec::EXACTLY, &adjustedWidthSpec);
+            adjustedWidthSpec = MeasureSpec::MakeMeasureSpec(
+                    Elastos::Core::Math::Min(lp->mMaxWidth, MeasureSpec::GetSize(adjustedWidthSpec)),
+                    MeasureSpec::EXACTLY);
         }
         if (lp->mMaxHeight >= 0) {
-            MeasureSpec::MakeMeasureSpec(
-                    Math::Min(lp->mMaxHeight, MeasureSpec::GetSize(adjustedHeightSpec)),
-                    IMeasureSpec::EXACTLY, &adjustedHeightSpec);
+            adjustedHeightSpec = MeasureSpec::MakeMeasureSpec(
+                    Elastos::Core::Math::Min(lp->mMaxHeight, MeasureSpec::GetSize(adjustedHeightSpec)),
+                    MeasureSpec::EXACTLY);
         }
 
         MeasureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
@@ -556,8 +579,8 @@ ECode CMultiPaneChallengeLayout::OnLayout(
 
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<MultiPaneChallengeLayout::LayoutParams> lp =
-                IMultiPaneChallengeLayoutLayoutParams::Probe(params);
+        AutoPtr<MultiPaneChallengeLayoutLayoutParams> lp =
+                (MultiPaneChallengeLayoutLayoutParams*)IMultiPaneChallengeLayoutLayoutParams::Probe(params);
 
         // We did the user switcher above if we have one.
         Int32 visibility;
@@ -588,8 +611,8 @@ void CMultiPaneChallengeLayout::LayoutWithGravity(
 {
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    AutoPtr<MultiPaneChallengeLayout::LayoutParams> lp =
-            IMultiPaneChallengeLayoutLayoutParams::Probe(params);
+    AutoPtr<MultiPaneChallengeLayoutLayoutParams> lp =
+            (MultiPaneChallengeLayoutLayoutParams*)IMultiPaneChallengeLayoutLayoutParams::Probe(params);
 
     Int32 t;
     padding->GetTop(&t);
@@ -751,8 +774,8 @@ ECode CMultiPaneChallengeLayout::GenerateLayoutParams(
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
 
-    AutoPtr<MultiPaneChallengeLayout::LayoutParams> _p =
-            new MultiPaneChallengeLayout::LayoutParams();
+    AutoPtr<MultiPaneChallengeLayoutLayoutParams> _p =
+            new MultiPaneChallengeLayoutLayoutParams();
     _p->constructor(context, attrs, this);
     *p = IViewGroupLayoutParams::Probe(_p);
     REFCOUNT_ADD(*p)
@@ -766,8 +789,8 @@ ECode CMultiPaneChallengeLayout::GenerateLayoutParams(
     VALIDATE_NOT_NULL(outp)
 
     if(IMultiPaneChallengeLayoutLayoutParams::Probe(p) != NULL) {
-        AutoPtr<MultiPaneChallengeLayout::LayoutParams> _p =
-            new MultiPaneChallengeLayout::LayoutParams();
+        AutoPtr<MultiPaneChallengeLayoutLayoutParams> _p =
+            new MultiPaneChallengeLayoutLayoutParams();
         _p->constructor(IMultiPaneChallengeLayoutLayoutParams::Probe(p));
         *outp = IViewGroupLayoutParams::Probe(_p);
         REFCOUNT_ADD(*outp)
@@ -775,17 +798,16 @@ ECode CMultiPaneChallengeLayout::GenerateLayoutParams(
     }
     else {
         if(IViewGroupMarginLayoutParams::Probe(p) != NULL) {
-            AutoPtr<MultiPaneChallengeLayout::LayoutParams> _p =
-                new MultiPaneChallengeLayout::LayoutParams();
+            AutoPtr<MultiPaneChallengeLayoutLayoutParams> _p =
+                new MultiPaneChallengeLayoutLayoutParams();
             _p->constructor(IViewGroupMarginLayoutParams::Probe(p));
             *outp = IViewGroupLayoutParams::Probe(_p);
             REFCOUNT_ADD(*outp)
             return NOERROR;
         }
         else {
-            new LayoutParams(p);
-            AutoPtr<MultiPaneChallengeLayout::LayoutParams> _p =
-                new MultiPaneChallengeLayout::LayoutParams();
+            AutoPtr<MultiPaneChallengeLayoutLayoutParams> _p =
+                new MultiPaneChallengeLayoutLayoutParams();
             _p->constructor(p);
             *outp = IViewGroupLayoutParams::Probe(_p);
             REFCOUNT_ADD(*outp)
@@ -800,8 +822,8 @@ ECode CMultiPaneChallengeLayout::GenerateDefaultLayoutParams(
 {
     VALIDATE_NOT_NULL(outp)
 
-    AutoPtr<MultiPaneChallengeLayout::LayoutParams> _p =
-            new MultiPaneChallengeLayout::LayoutParams();
+    AutoPtr<MultiPaneChallengeLayoutLayoutParams> _p =
+            new MultiPaneChallengeLayoutLayoutParams();
     _p->constructor();
     *outp = IViewGroupLayoutParams::Probe(_p);
     REFCOUNT_ADD(*outp)

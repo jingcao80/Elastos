@@ -3,14 +3,21 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDPINBASEDINPUTVIEW_H__
 
 #include "_Elastos.Droid.SystemUI.h"
+#include "elastos/droid/systemui/keyguard/KeyguardAbsKeyInputView.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IViewOnKeyListener;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -30,12 +37,12 @@ private:
         , public IViewOnClickListener
     {
     public:
-        TO_STRING_IMPL("CEmergencyButton::MyOnClickListener")
+        TO_STRING_IMPL("KeyguardPinBasedInputView::MyOnClickListener")
 
         CAR_INTERFACE_DECL()
 
         MyOnClickListener(
-            /* [in] */ CEmergencyButton* host)
+            /* [in] */ KeyguardPinBasedInputView* host)
             : mHost(host)
         {}
 
@@ -43,7 +50,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        CEmergencyButton* mHost;
+        KeyguardPinBasedInputView* mHost;
     };
 
     class MyOnClickListener2
@@ -51,12 +58,12 @@ private:
         , public IViewOnClickListener
     {
     public:
-        TO_STRING_IMPL("CEmergencyButton::MyOnClickListener2")
+        TO_STRING_IMPL("KeyguardPinBasedInputView::MyOnClickListener2")
 
         CAR_INTERFACE_DECL()
 
         MyOnClickListener2(
-            /* [in] */ CEmergencyButton* host)
+            /* [in] */ KeyguardPinBasedInputView* host)
             : mHost(host)
         {}
 
@@ -64,7 +71,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        CEmergencyButton* mHost;
+        KeyguardPinBasedInputView* mHost;
     };
 
     class MyOnClickListener3
@@ -72,12 +79,12 @@ private:
         , public IViewOnClickListener
     {
     public:
-        TO_STRING_IMPL("CEmergencyButton::MyOnClickListener3")
+        TO_STRING_IMPL("KeyguardPinBasedInputView::MyOnClickListener3")
 
         CAR_INTERFACE_DECL()
 
         MyOnClickListener3(
-            /* [in] */ CEmergencyButton* host)
+            /* [in] */ KeyguardPinBasedInputView* host)
             : mHost(host)
         {}
 
@@ -85,7 +92,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        CEmergencyButton* mHost;
+        KeyguardPinBasedInputView* mHost;
     };
 
     class MyViewOnLongClickListener
@@ -93,10 +100,12 @@ private:
         , public IViewOnLongClickListener
     {
     public:
-        TO_STRING_IMPL("CEmergencyButton::MyViewOnLongClickListener")
+        TO_STRING_IMPL("KeyguardPinBasedInputView::MyViewOnLongClickListener")
+
+        CAR_INTERFACE_DECL()
 
         MyViewOnLongClickListener(
-            /* [in] */ CEmergencyButton* host)
+            /* [in] */ KeyguardPinBasedInputView* host)
             : mHost(host)
         {}
 
@@ -105,7 +114,7 @@ private:
             /* [out] */ Boolean* result);
 
     private:
-        CEmergencyButton* mHost;
+        KeyguardPinBasedInputView* mHost;
     };
 
 public:

@@ -3,15 +3,24 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CAMERAWIDGETFRAME_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/systemui/keyguard/KeyguardWidgetFrame.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::IPoint;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IWindowManager;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::Widget::FrameLayout;
 
 namespace Elastos {
 namespace Droid {
@@ -20,6 +29,7 @@ namespace Keyguard {
 
 class CameraWidgetFrame
     : public KeyguardWidgetFrame
+    , public ICameraWidgetFrame
     , public IViewOnClickListener
 {
 private:
@@ -178,7 +188,7 @@ public:
     static CARAPI_(AutoPtr<CameraWidgetFrame>) Create(
         /* [in] */ IContext* context,
         /* [in] */ ICameraWidgetFrameCallbacks* callbacks,
-        /* [in] */ KeyguardActivityLauncher* launcher);
+        /* [in] */ IKeyguardActivityLauncher* launcher);
 
     //@Override
     CARAPI SetOnLongClickListener(
@@ -214,7 +224,7 @@ protected:
     CARAPI OnDetachedFromWindow();
 
     //@Override
-    CARAPI OnFocusLost();
+     CARAPI_(void) OnFocusLost();
 
     //@Override
     CARAPI OnSizeChanged(
@@ -229,17 +239,17 @@ private:
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICameraWidgetFrameCallbacks* callbacks,
-        /* [in] */ KeyguardActivityLauncher* activityLauncher,
-        /* [in] */ CameraWidgetInfo* widgetInfo,
+        /* [in] */ IKeyguardActivityLauncher* activityLauncher,
+        /* [in] */ IKeyguardActivityLauncherCameraWidgetInfo* widgetInfo,
         /* [in] */ IView* previewWidget);
 
     static CARAPI_(AutoPtr<IView>) GetPreviewWidget(
         /* [in] */ IContext* context,
-        /* [in] */ CameraWidgetInfo* widgetInfo);
+        /* [in] */ IKeyguardActivityLauncherCameraWidgetInfo* widgetInfo);
 
     static CARAPI_(AutoPtr<IView>) InflateWidgetView(
         /* [in] */ IContext* context,
-        /* [in] */ CameraWidgetInfo* widgetInfo);
+        /* [in] */ IKeyguardActivityLauncherCameraWidgetInfo* widgetInfo);
 
     static CARAPI_(AutoPtr<IView>) InflateGenericWidgetView(
         /* [in] */ IContext* context);
@@ -276,9 +286,9 @@ private:
     static const Int32 RECOVERY_DELAY; // ms
 
     AutoPtr<IHandler> mHandler;
-    AutoPtr<KeyguardActivityLauncher> mActivityLauncher;
+    AutoPtr<IKeyguardActivityLauncher> mActivityLauncher;
     AutoPtr<ICameraWidgetFrameCallbacks> mCallbacks;
-    AutoPtr<CameraWidgetInfo> mWidgetInfo;
+    AutoPtr<IKeyguardActivityLauncherCameraWidgetInfo> mWidgetInfo;
     AutoPtr<IWindowManager> mWindowManager;
     AutoPtr<IPoint> mRenderedSize;
     AutoPtr<ArrayOf<Int32> > mTmpLoc;

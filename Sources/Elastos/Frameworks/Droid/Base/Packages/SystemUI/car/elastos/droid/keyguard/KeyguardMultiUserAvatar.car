@@ -1,0 +1,43 @@
+
+module
+{
+    using interface Elastos.Droid.Content.Pm.IUserInfo;
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface IKeyguardMultiUserAvatar {
+        Init(
+            [in] IUserInfo* user,
+            [in] IKeyguardMultiUserSelectorView* userSelector);
+
+        SetActive(
+            [in] Boolean active,
+            [in] Boolean animate,
+            [in] IRunnable* onComplete);
+
+        UpdateVisualsForActive(
+            [in] Boolean active,
+            [in] Boolean animate,
+            [in] Int32 duration,
+            [in] IRunnable* onComplete);
+
+        LockPressed(
+            [in] Boolean pressed);
+
+        GetUserInfo(
+            [out] IUserInfo** info);
+
+        RewriteIconPath(
+            [in] String path,
+            [out] String* str);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

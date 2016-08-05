@@ -1,30 +1,25 @@
 
 #include "elastos/droid/systemui/keyguard/CCarrierText.h"
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
-#include "../R.h"
-#include <Elastos.Droid.Content.h>
-#include <Elastos.Droid.Internal.h>
-#include <elastos/droid/text/TextUtils.h>
-#include <elastos/core/CoreUtils.h>
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
 
+using Elastos::Droid::Content::Res::IResourcesTheme;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_None;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERSO_LOCKED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_ABSENT;
-using Elastos::Droid::Internal::Telephony::IccCardConstantsState_NOT_READY;
-using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
-using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PUK_REQUIRED;
-using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERM_DISABLED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_NOT_READY;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_UNKNOWN;
-using Elastos::Droid::Internal::Telephony::IccCardConstantsState_None;
-using Elastos::Droid::Internal::Widget::CLockPatternUtils;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Content::Res::IResourcesTheme;
-using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PUK_REQUIRED;
 using Elastos::Droid::Text::TextUtils;
-using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -89,7 +84,8 @@ ECode CCarrierText::CarrierTextTransformationMethod::GetTransformation(
     VALIDATE_NOT_NULL(formation);
 
     AutoPtr<ICharSequence> src;
-    SingleLineTransformationMethod::GetTransformation(source, view, (ICharSequence**)&src);
+    SingleLineTransformationMethod::GetTransformation(source, view,
+            (ICharSequence**)&src);
 
     if (mAllCaps && src != NULL) {
         String str;
@@ -133,8 +129,9 @@ ECode CCarrierText::constructor(
     Boolean useAllCaps;
     AutoPtr<IResourcesTheme> theme;
     context->GetTheme((IResourcesTheme**)&theme);
-    AutoPtr<ITypedArray> a;
+
     AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::CarrierText);
+    AutoPtr<ITypedArray> a;
     theme->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
     //try {
     a->GetBoolean(R::styleable::CarrierText_allCaps, FALSE, &useAllCaps);
@@ -346,7 +343,7 @@ AutoPtr<ICharSequence> CCarrierText::GetCarrierHelpTextForSimState(
 {
     Int32 carrierHelpTextId = 0;
     StatusMode status = GetStatusForIccState(simState);
-    switch (status) {
+    switch ((Int32)status) {
         case NetworkLocked:
             carrierHelpTextId = R::string::keyguard_instructions_when_pattern_disabled;
             break;

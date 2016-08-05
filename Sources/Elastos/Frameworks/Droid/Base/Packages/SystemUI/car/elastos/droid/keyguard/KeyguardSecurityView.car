@@ -3,7 +3,7 @@ module
 {
     using interface Elastos.Droid.Internal.Widget.ILockPatternUtils;
     using interface Elastos.Core.IRunnable;
-    
+
     interface Elastos.Droid.SystemUI.Keyguard.IKeyguardSecurityCallback;
 
     namespace Elastos {

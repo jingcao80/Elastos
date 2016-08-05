@@ -1,11 +1,18 @@
 
 module
 {
+    using interface Elastos.Droid.Graphics.IPointF;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IMotionEvent;
+
+    using interface Elastos.Core.IRunnable;
+
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
     namespace Keyguard {
 
+    [local]
     interface IPagedViewPageSwitchListener {
         OnPageSwitching(
             [in] IView* newPage,
@@ -16,8 +23,372 @@ module
             [in] Int32 newPageIndex);
     }
 
+    [local, deprecated]
     interface IPagedView {
         const Int32 AUTOMATIC_PAGE_SPACING = -1;
+
+        SetDeleteDropTarget(
+            [in] IView* v);
+
+        // Convenience methods to map points from self to parent and vice versa
+        MapPointFromViewToParent(
+            [in] IView* v,
+            [in] Float x,
+            [in] Float y,
+            [out, callee] ArrayOf<Float>* array);
+
+        MapPointFromParentToView(
+            [in] IView* v,
+            [in] Float x,
+            [in] Float y,
+            [out, callee] ArrayOf<Float>* array);
+
+        UpdateDragViewTranslationDuringDrag();
+
+        SetMinScale(
+            [in] Float f);
+
+        // Convenience methods to get the actual width/height of the PagedView (since it is measured
+        // to be larger to account for the minimum possible scale)
+        GetViewportWidth(
+            [out] Int32* width);
+
+        GetViewportHeight(
+            [out] Int32* height);
+
+        // Convenience methods to get the offset ASSUMING that we are centering the pages in the
+        // PagedView both horizontally and vertically
+        GetViewportOffsetX(
+            [out] Int32* x);
+
+        GetViewportOffsetY(
+            [out] Int32* y);
+
+        SetPageSwitchListener(
+            [in] IPagedViewPageSwitchListener* pageSwitchListener);
+
+        /**
+         * Returns the index of the currently displayed page.
+         *
+         * @return The index of the currently displayed page.
+         */
+        GetCurrentPage(
+            [out] Int32* page);
+
+        GetNextPage(
+            [out] Int32* page);
+
+        GetPageCount(
+            [out] Int32* count);
+
+        GetPageAt(
+            [in] Int32 index,
+            [out] IView** view);
+
+        /**
+         * Sets the current page.
+         */
+        SetCurrentPage(
+            [in] Int32 currentPage);
+
+        SetOnlyAllowEdgeSwipes(
+            [in] Boolean _enable);
+
+        SetPageSpacing(
+            [in] Int32 pageSpacing);
+
+        BoundByReorderablePages(
+            [in] Boolean isReordering,
+            [in] ArrayOf<Int32>* range);
+
+        OnTouchStateChanged(
+            [in] Int32 newTouchState);
+
+        //public abstract void onFlingToDelete(View v);
+        OnRemoveView(
+            [in] IView* v,
+            [in] Boolean deletePermanently);
+
+        OnRemoveViewAnimationCompleted();
+
+        OnAddView(
+            [in] IView* v,
+            [in] Int32 index);
+
+        GetPageNearestToPoint(
+            [in] Float x,
+            [out] Int32* page);
+
+        GetPageNearestToCenterOfScreen(
+            [out] Int32* page);
+
+        // We want the duration of the page snap animation to be influenced by the distance that
+        // the screen has to travel, however, we don't want this duration to be effected in a
+        // purely linear fashion. Instead, we use this method to moderate the effect that the distance
+        // of travel has on the overall snap duration.
+        DistanceInfluenceForSnapDuration(
+            [in] Float f,
+            [out] Float* duration);
+
+        ScrollLeft();
+
+        ScrollRight();
+
+        GetPageForView(
+            [in] IView* v,
+            [out] Int32* page);
+
+        // Animate the drag view back to the original position
+        AnimateDragViewToOriginalPosition();
+
+        StartReordering(
+            [out] Boolean* result);
+
+        IsReordering(
+            [in] Boolean testTouchState,
+            [out] Boolean* result);
+
+        EndReordering();
+
+        OnFlingToDelete(
+            [in] IPointF* vel);
+
+        BeginCameraEvent();
+
+        EndCameraEvent();
+
+        /**
+         * Swaps the position of the views by setting the left and right edges appropriately.
+         */
+        SwapPages(
+            [in] Int32 indexA,
+            [in] Int32 indexB);
+
+        StartPageWarp(
+            [in] Int32 pageIndex);
+
+        StopPageWarp();
+
+        OnPageBeginWarp();
+
+        OnPageEndWarp();
+
+        /**
+         * Initializes various states for this workspace.
+         */
+        Init();
+
+        /**
+         * Called by subclasses to mark that data is ready, and that we can begin loading and laying
+         * out pages.
+         */
+        SetDataIsReady();
+
+        IsDataReady(
+            [out] Boolean* result);
+
+        IndexToPage(
+            [in] Int32 index,
+            [out] Int32* page);
+
+        /**
+         * Updates the scroll of the current page immediately to its final scroll position.  We use this
+         * in CustomizePagedView to allow tabs to share the same PagedView while resetting the scroll of
+         * the previous tab page.
+         */
+        UpdateCurrentPageScroll();
+
+        NotifyPageSwitching(
+            [in] Int32 whichPage);
+
+        NotifyPageSwitched();
+
+        PageBeginMoving();
+
+        PageEndMoving();
+
+        IsPageMoving(
+            [out] Boolean* result);
+
+        // a method that subclasses can override to add behavior
+        OnPageBeginMoving();
+
+        // a method that subclasses can override to add behavior
+        OnPageEndMoving();
+
+        // we moved this functionality to a helper function so SmoothPagedView can reuse it
+        ComputeScrollHelper(
+            [out] Boolean* result);
+
+        ShouldSetTopAlignedPivotForWidget(
+            [in] Int32 childIndex,
+            [out] Boolean* result);
+
+        ScreenScrolled(
+            [in] Int32 screenCenter);
+
+        InvalidateCachedOffsets();
+
+        GetChildOffset(
+            [in] Int32 index,
+            [out] Int32* offset);
+
+        GetRelativeChildOffset(
+            [in] Int32 index,
+            [out] Int32* outoffset);
+
+        GetScaledMeasuredWidth(
+            [in] IView* child,
+            [out] Int32* outwidth);
+
+        // TODO: Fix this
+        GetVisiblePages(
+            [in] ArrayOf<Int32>* range);
+
+        ShouldDrawChild(
+            [in] IView* child,
+            [out] Boolean* result);
+
+        /**
+         * Return true if a tap at (x, y) should trigger a flip to the previous page.
+         */
+        HitsPreviousPage(
+            [in] Float x,
+            [in] Float y,
+            [out] Boolean* result);
+
+        /**
+         * Return true if a tap at (x, y) should trigger a flip to the next page.
+         */
+        HitsNextPage(
+            [in] Float x,
+            [in] Float y,
+            [out] Boolean* result);
+
+        /*
+         * Determines if we should change the touch state to start scrolling after the
+         * user moves their touch point too far.
+         */
+        DetermineScrollingStart(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        GetMaxScrollProgress(
+            [out] Float* progress);
+
+        GetBoundedScrollProgress(
+            [in] Int32 screenCenter,
+            [in] IView* v,
+            [in] Int32 page,
+            [out] Float* progress);
+
+        GetScrollProgress(
+            [in] Int32 screenCenter,
+            [in] IView* v,
+            [in] Int32 page,
+            [out] Float* progress);
+
+        AcceleratedOverScroll(
+            [in] Float amount);
+
+        DampedOverScroll(
+            [in] Float amount);
+
+        OverScroll(
+            [in] Float amount);
+
+        MaxOverScroll(
+            [out] Float* scroll);
+
+        OnUnhandledTap(
+            [in] IMotionEvent* ev);
+
+        GetChildIndexForRelativeOffset(
+            [in] Int32 relativeOffset,
+            [out] Int32* offset);
+
+        GetChildWidth(
+            [in] Int32 index,
+            [out] Int32* width);
+
+        SnapToDestination();
+
+        SnapToPageWithVelocity(
+            [in] Int32 whichPage,
+            [in] Int32 velocity);
+
+        SnapToPage(
+            [in] Int32 whichPage);
+
+        SnapToPageImmediately(
+            [in] Int32 whichPage);
+
+        SnapToPage(
+            [in] Int32 whichPage,
+            [in] Int32 duration);
+
+        SnapToPage(
+            [in] Int32 whichPage,
+            [in] Int32 duration,
+            [in] Boolean immediate);
+
+        SnapToPage(
+            [in] Int32 whichPage,
+            [in] Int32 delta,
+            [in] Int32 duration);
+
+        SnapToPage(
+            [in] Int32 whichPage,
+            [in] Int32 delta,
+            [in] Int32 duration,
+            [in] Boolean immediate);
+
+        IsWarping(
+            [out] Boolean* result);
+
+        GetScrollingIndicator(
+            [out] IView** view);
+
+        IsScrollingIndicatorEnabled(
+            [out] Boolean* result);
+
+        FlashScrollingIndicator(
+            [in] Boolean animated);
+
+        ShowScrollingIndicator(
+            [in] Boolean immediately);
+
+        CancelScrollingIndicatorAnimations();
+
+        HideScrollingIndicator(
+            [in] Boolean immediately);
+
+        /**
+         * To be overridden by subclasses to determine whether the scroll indicator should stretch to
+         * fill its space on the track or not.
+         */
+        HasElasticScrollIndicator(
+            [out] Boolean* result);
+
+        // "Zooms out" the PagedView to reveal more side pages
+        ZoomOut(
+            [out] Boolean* result);
+
+        OnStartReordering();
+
+        OnEndReordering();
+
+        // "Zooms in" the PagedView to highlight the current page
+        ZoomIn(
+            [in] IRunnable* onCompleteRunnable,
+            [out] Boolean* result);
+
+        SetPageHoveringOverDeleteDropTarget(
+            [in] Int32 viewIndex,
+            [in] Boolean isHovering);
+
+        GetPageWarpIndex(
+            [out] Int32* index);
     }
 
     } // namespace Keyguard

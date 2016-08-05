@@ -41,7 +41,6 @@ CAR_OBJECT_IMPL(CSingleLineTransformationMethod)
 CAR_OBJECT_IMPL(CWordIterator)
 CAR_OBJECT_IMPL(CCharacterPickerDialog)
 
-
 } // namespace Method
 } // namespace Text
 } // namepsace Droid

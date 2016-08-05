@@ -140,6 +140,15 @@ module
          */
         SetTimeZone(
             [in] String timeZone);
+
+        /**
+         * Returns the current format string. Always valid after constructor has
+         * finished, and will never be {@code null}.
+         *
+         * @hide
+         */
+        GetFormat(
+            [out] ICharSequence** format);
     }
 
     } // namespace Widget

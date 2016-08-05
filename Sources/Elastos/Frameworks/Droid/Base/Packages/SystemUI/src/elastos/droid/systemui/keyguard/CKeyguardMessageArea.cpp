@@ -1,5 +1,21 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardMessageArea.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/Looper.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -13,10 +29,10 @@ ECode CKeyguardMessageArea::Helper::constructor(
 {
     AutoPtr<IView> view;
     v->FindViewById(R::id::keyguard_message_area, (IView**)&view);
-    mMessageArea = IKeyguardMessageArea::Probe(view);
+    mMessageArea = (CKeyguardMessageArea*)IKeyguardMessageArea::Probe(view);
     if (mMessageArea == NULL) {
         //throw new RuntimeException("Can't find keyguard_message_area in " + v.getClass());
-        return RuntimeException;
+        return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
 }
@@ -41,7 +57,7 @@ ECode CKeyguardMessageArea::Helper::SetMessage(
         mMessageArea->GetContext((IContext**)&context);
         AutoPtr<IResources> resources;
         context->GetResources((IResources**)&resources);
-        resources->GetText(resId, &(mMessageArea->mMessage));
+        resources->GetText(resId, (ICharSequence**)&(mMessageArea->mMessage));
         mMessageArea->SecurityMessageChanged();
     }
     return NOERROR;
@@ -55,7 +71,9 @@ ECode CKeyguardMessageArea::Helper::SetMessage(
     if (resId != 0 && important) {
         AutoPtr<IContext> context;
         mMessageArea->GetContext((IContext**)&context);
-        context->GetString(resId, formatArgs, &(mMessageArea->mMessage));
+        String str;
+        context->GetString(resId, formatArgs, &str);
+        mMessageArea->mMessage = CoreUtils::Convert(str);
         mMessageArea->SecurityMessageChanged();
     }
     return NOERROR;
@@ -86,9 +104,9 @@ ECode CKeyguardMessageArea::Helper::SetTimeout(
 
 ECode CKeyguardMessageArea::MyRunnable::Run()
 {
-    mMessage = NULL;
-    mShowingMessage = FALSE;
-    if (mShowingBouncer) {
+    mHost->mMessage = NULL;
+    mHost->mShowingMessage = FALSE;
+    if (mHost->mShowingBouncer) {
         mHost->HideMessage(FADE_DURATION, TRUE);
     }
     else {
@@ -108,7 +126,7 @@ CKeyguardMessageArea::AnnounceRunnable::AnnounceRunnable(
 ECode CKeyguardMessageArea::AnnounceRunnable::Run()
 {
     AutoPtr<IInterface> obj;
-    mKeyguardHostView->Resolve(EIID_IInterface, (IInterface**)&obj);
+    mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     AutoPtr<IView> host = IView::Probe(obj);
     if (host != NULL) {
         host->AnnounceForAccessibility(mTextToAnnounce);
@@ -130,12 +148,12 @@ ECode CKeyguardMessageArea::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOn()
 ECode CKeyguardMessageArea::MyAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    return mHost-Update();
+    return mHost->Update();
 }
 
 const Int32 CKeyguardMessageArea::FADE_DURATION = 750;
 
-const Object CKeyguardMessageArea::ANNOUNCE_TOKEN;
+const AutoPtr<IInterface> CKeyguardMessageArea::ANNOUNCE_TOKEN;
 
 const Int64 CKeyguardMessageArea::ANNOUNCEMENT_DELAY = 250;
 
@@ -144,6 +162,8 @@ const Int32 CKeyguardMessageArea::SECURITY_MESSAGE_DURATION = 5000;
 const String CKeyguardMessageArea::TAG("KeyguardMessageArea");
 
 CAR_OBJECT_IMPL(CKeyguardMessageArea)
+
+CAR_INTERFACE_IMPL(CKeyguardMessageArea, TextView, IKeyguardMessageArea)
 
 CKeyguardMessageArea::CKeyguardMessageArea()
     : mShowingBouncer(FALSE)
@@ -171,42 +191,46 @@ ECode CKeyguardMessageArea::constructor(
     CLockPatternUtils::New(context, (ILockPatternUtils**)&mLockPatternUtils);
 
     // Registering this callback immediately updates the battery state, among other things.
-    AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
-    mUpdateMonitor = KeyguardUpdateMonitor::GetInstance(context);
+    AutoPtr<IContext> _context;
+    GetContext((IContext**)&_context);
+    mUpdateMonitor = KeyguardUpdateMonitor::GetInstance(_context);
     mUpdateMonitor->RegisterCallback(mInfoCallback);
-    AutoPtr<ILooper> looper = Looper::myLooper();
+    AutoPtr<ILooper> looper = Looper::GetMyLooper();
     CHandler::New(looper, (IHandler**)&mHandler);
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    resources->GetString(R::string::kg_text_message_separator, &mSeparator);
+    String str;
+    resources->GetString(R::string::kg_text_message_separator, &str);
+    mSeparator = CoreUtils::Convert(str);
 
     return Update();
 }
 
 ECode CKeyguardMessageArea::OnFinishInflate()
 {
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Boolean screenOn;
-    monitor->IsScreenOn(&screenOn);
+    KeyguardUpdateMonitor::GetInstance(mContext)->IsScreenOn(&screenOn);
     return SetSelected(screenOn); // This is required to ensure marquee works
 }
 
 ECode CKeyguardMessageArea::SecurityMessageChanged()
 {
-    SetAlpha(1f);
+    SetAlpha(1.0f);
     mShowingMessage = TRUE;
     Update();
     mHandler->RemoveCallbacks(mClearMessageRunnable);
+    Boolean res;
     if (mTimeout > 0) {
-        mHandler->PostDelayed(mClearMessageRunnable, mTimeout);
+        mHandler->PostDelayed(mClearMessageRunnable, mTimeout, &res);
     }
     mHandler->RemoveCallbacksAndMessages(ANNOUNCE_TOKEN);
     AutoPtr<ICharSequence> text;
     GetText((ICharSequence**)&text);
     AutoPtr<IRunnable> r = new AnnounceRunnable(this, text);
-    return mHandler->PostAtTime(r, ANNOUNCE_TOKEN, (SystemClock::UptimeMillis() + ANNOUNCEMENT_DELAY));
+
+    return mHandler->PostAtTime(r, ANNOUNCE_TOKEN,
+           (SystemClock::GetUptimeMillis() + ANNOUNCEMENT_DELAY), &res);
 }
 
 ECode CKeyguardMessageArea::Update()
@@ -237,17 +261,21 @@ void CKeyguardMessageArea::HideMessage(
     if (duration > 0) {
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        AutoPtr<IAnimator> anim;
-        helper->OfFloat(this, String("alpha"), 0f, (IAnimator**)&anim);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 0.0f;
+        AutoPtr<IObjectAnimator> tmp;
+        helper->OfFloat(TO_IINTERFACE(this), String("alpha"), array,
+                (IObjectAnimator**)&tmp);
+        AutoPtr<IAnimator> anim = IAnimator::Probe(tmp);
         anim->SetDuration(duration);
         if (thenUpdate) {
-            AutoPtr<IAnimatorListener> lis = MyAnimatorListenerAdapter(this);
+            AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter(this);
             anim->AddListener(lis);
         }
         anim->Start();
     }
     else {
-        SetAlpha(0f);
+        SetAlpha(0.0f);
         if (thenUpdate) {
             Update();
         }
@@ -260,13 +288,17 @@ void CKeyguardMessageArea::ShowMessage(
     if (duration > 0) {
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        AutoPtr<IAnimator> anim;
-        helper->OfFloat(this, String("alpha"), 1f, (IAnimator**)&anim);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 1.0f;
+        AutoPtr<IObjectAnimator> tmp;
+        helper->OfFloat(TO_IINTERFACE(this), String("alpha"), array,
+                (IObjectAnimator**)&tmp);
+        AutoPtr<IAnimator> anim = IAnimator::Probe(tmp);
         anim->SetDuration(duration);
         anim->Start();
     }
     else {
-        SetAlpha(1f);
+        SetAlpha(1.0f);
     }
 }
 

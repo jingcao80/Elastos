@@ -1,0 +1,31 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface IKeyguardMultiUserSelectorView {
+        SetCallback(
+            [in] IKeyguardHostViewUserSwitcherCallback* _callback);
+
+        AddUsers(
+            [in] ICollection* userList);
+
+        FinalizeActiveUserView(
+            [in] Boolean animate);
+
+        FinalizeActiveUserNow(
+            [in] Boolean animate);
+
+        OnFinishInflate();
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

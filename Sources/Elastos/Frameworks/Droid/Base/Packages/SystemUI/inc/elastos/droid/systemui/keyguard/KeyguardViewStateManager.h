@@ -3,14 +3,23 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDVIEWSTATEMANAGER_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "elastos/droid/widget/LinearLayout.h"
-#include "Elastos.Droid.App.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Widget::LinearLayout;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::View::IView;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -19,6 +28,7 @@ namespace Keyguard {
 
 class KeyguardViewStateManager
     : public Object
+    , public IKeyguardViewStateManager
     , public ISlidingChallengeLayoutOnChallengeScrolledListener
     , public IChallengeLayoutOnBouncerStateChangedListener
 {
@@ -60,7 +70,7 @@ private:
     };
 
     class MyRunnable
-        : Runnable
+        : public Runnable
     {
     public:
         TO_STRING_IMPL("KeyguardViewStateManager::MyRunnable")
@@ -78,7 +88,7 @@ private:
     };
 
     class MyRunnable2
-        : Runnable
+        : public Runnable
     {
     public:
         TO_STRING_IMPL("KeyguardViewStateManager::MyRunnable2")

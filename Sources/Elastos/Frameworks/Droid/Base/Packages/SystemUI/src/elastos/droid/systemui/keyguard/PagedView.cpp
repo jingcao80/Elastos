@@ -1,6 +1,51 @@
 
 #include "elastos/droid/systemui/keyguard/PagedView.h"
-#include "Elastos.Droid.View.h"
+#include <elastos/core/Math.h>
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::CValueAnimator;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
+using Elastos::Droid::Animation::CAnimatorSet;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Graphics::CMatrix;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::CPointF;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IInputEvent;
+using Elastos::Droid::View::IInputDevice;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::View::Animation::CLinearInterpolator;
+using Elastos::Droid::View::Animation::CAccelerateInterpolator;
+using Elastos::Droid::View::Animation::EIID_IInterpolator;
+using Elastos::Droid::View::Animation::IAnimationUtils;
+using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::View::Animation::IDecelerateInterpolator;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::View::Accessibility::IAccessibilityManager;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::View::Accessibility::IAccessibilityManagerHelper;
+using Elastos::Droid::View::Accessibility::CAccessibilityManagerHelper;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Widget::CScroller;
+using Elastos::Core::Math;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -22,14 +67,16 @@ ECode PagedView::SavedState::WriteToParcel(
     /* [in] */ IParcel* out,
     /* [in] */ Int32 flags)
 {
-    View::BaseSavedState::WriteToParcel(out, flags);
+    assert(0);
+    //View::BaseSavedState::WriteToParcel(out, flags);
     return out->WriteInt32(mCurrentPage);
 }
 
 ECode PagedView::SavedState::constructor(
     /* [in] */ IParcel* in)
 {
-    View::BaseSavedState::constructor(in);
+    assert(0);
+    //View::BaseSavedState::constructor(in);
     in->ReadInt32(&mCurrentPage);
 }
 
@@ -44,7 +91,7 @@ ECode PagedView::MyRunnable::Run()
     mHost->mDownScrollX = coffset - rcoffset;
 
     // Setup the scroll to the correct page before we swap the views
-    SnapToPage(mPageUnderPointIndex);
+    mHost->SnapToPage(mPageUnderPointIndex);
 
     // For each of the pages between the paged view and the drag view,
     // animate them from the previous position to the new position in
@@ -56,16 +103,16 @@ ECode PagedView::MyRunnable::Run()
             mDragViewIndex - 1 : mPageUnderPointIndex;
     for (Int32 i = lowerIndex; i <= upperIndex; ++i) {
         AutoPtr<IView> v;
-        GetChildAt(i, (IView**)&v);
+        mHost->GetChildAt(i, (IView**)&v);
         // dragViewIndex < pageUnderPointIndex, so after we remove the
         // drag view all subsequent views to pageUnderPointIndex will
         // shift down.
         Int32 offsetX;
-        GetViewportOffsetX(&offsetX);
+        mHost->GetViewportOffsetX(&offsetX);
         Int32 coffset;
-        GetChildOffset(i, &coffset);
+        mHost->GetChildOffset(i, &coffset);
         Int32 oldX = offsetX + coffset;
-        GetChildOffset(i + shiftDelta, &coffset);
+        mHost->GetChildOffset(i + shiftDelta, &coffset);
         Int32 newX = offsetX + coffset;
 
         // Animate the view translation from its old position to its new
@@ -74,27 +121,32 @@ ECode PagedView::MyRunnable::Run()
         v->GetTag((IInterface**)&obj);
         AutoPtr<IAnimatorSet> anim = IAnimatorSet::Probe(obj);
         if (anim != NULL) {
-            anim->Cancel();
+            IAnimator::Probe(anim)->Cancel();
         }
 
         v->SetTranslationX(oldX - newX);
         CAnimatorSet::New((IAnimatorSet**)&anim);
-        anim->SetDuration(REORDERING_REORDER_REPOSITION_DURATION);
+        IAnimator::Probe(anim)->SetDuration(
+                mHost->REORDERING_REORDER_REPOSITION_DURATION);
 
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 0.0f;
         AutoPtr<IObjectAnimator> animator;
-        helper->OfFloat(v, String("translationX"), 0.0f, (IObjectAnimator**)&animator)
-        anim->PlayTogether(animator);
-        anim->Start();
+        helper->OfFloat(v, String("translationX"), array, (IObjectAnimator**)&animator);
+        AutoPtr<ArrayOf<IAnimator*> > array2 = ArrayOf<IAnimator*>::Alloc(1);
+        array2->Set(0, IAnimator::Probe(animator));
+        anim->PlayTogether(array2);
+        IAnimator::Probe(anim)->Start();
         v->SetTag(TO_IINTERFACE(anim));
     }
 
-    RemoveView(mDragView);
-    OnRemoveView(mDragView, FALSE);
-    AddView(mDragView, mPageUnderPointIndex);
-    OnAddView(mDragView, mPageUnderPointIndex);
-    mSidePageHoverIndex = -1;
+    mHost->RemoveView(mHost->mDragView);
+    mHost->OnRemoveView(mHost->mDragView, FALSE);
+    mHost->AddView(mHost->mDragView, mPageUnderPointIndex);
+    mHost->OnAddView(mHost->mDragView, mPageUnderPointIndex);
+    mHost->mSidePageHoverIndex = -1;
     return NOERROR;
 }
 
@@ -145,7 +197,8 @@ ECode PagedView::MyAnimatorListenerAdapter::OnAnimationEnd(
 ECode PagedView::MyAnimatorListenerAdapter2::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    return mHost->OnPostReorderingAnimationCompleted();
+    mHost->OnPostReorderingAnimationCompleted();
+    return NOERROR;
 }
 
 ECode PagedView::MyAnimatorListenerAdapter3::MyAnimatorListenerAdapter4::OnAnimationStart(
@@ -163,7 +216,7 @@ ECode PagedView::MyAnimatorListenerAdapter3::OnAnimationStart(
         AutoPtr<IViewPropertyAnimator> animator;
         mHost->mDeleteDropTarget->Animate((IViewPropertyAnimator**)&animator);
         animator->Alpha(1.0f);
-        animator->SetDuration(REORDERING_DELETE_DROP_TARGET_FADE_DURATION);
+        animator->SetDuration(mHost->REORDERING_DELETE_DROP_TARGET_FADE_DURATION);
         AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter4(mHost);
         animator->SetListener(lis);
     }
@@ -177,7 +230,8 @@ ECode PagedView::MyRunnable3::Run()
 
 ECode PagedView::MyRunnable4::Run()
 {
-    return mHost->ZoomIn(mOnCompleteRunnable);
+    Boolean res;
+    return mHost->ZoomIn(mOnCompleteRunnable, &res);
 }
 
 ECode PagedView::MyAnimatorListenerAdapter5::MyAnimatorListenerAdapter6::OnAnimationEnd(
@@ -194,7 +248,7 @@ ECode PagedView::MyAnimatorListenerAdapter5::OnAnimationStart(
         AutoPtr<IViewPropertyAnimator> animator;
         mHost->mDeleteDropTarget->Animate((IViewPropertyAnimator**)&animator);
         animator->Alpha(0.0f);
-        animator->SetDuration(REORDERING_DELETE_DROP_TARGET_FADE_DURATION);
+        animator->SetDuration(mHost->REORDERING_DELETE_DROP_TARGET_FADE_DURATION);
         AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter6(mHost);
         animator->SetListener(lis);
     }
@@ -205,6 +259,7 @@ ECode PagedView::MyAnimatorListenerAdapter5::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     mHost->mDragView = NULL;
+    return NOERROR;
 }
 
 ECode PagedView::MyAnimatorListenerAdapter5::OnAnimationEnd(
@@ -240,7 +295,7 @@ ECode PagedView::FlingAlongVectorAnimatorUpdateListener::constructor(
     mPrevTime = startTime;
 
     AutoPtr<IResources> resources;
-    mDragView->GetResources(&resources);
+    mDragView->GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> displayMetrics;
     resources->GetDisplayMetrics((IDisplayMetrics**)&displayMetrics);
     Float density;
@@ -267,13 +322,13 @@ ECode PagedView::FlingAlongVectorAnimatorUpdateListener::OnAnimationUpdate(
     mVelocity->GetX(&x);
     Int32 left;
     mFrom->GetLeft(&left);
-    mFrom->SetLeft(left + (x * (curTime - mPrevTime) / 1000f));
+    mFrom->SetLeft(left + (x * (curTime - mPrevTime) / 1000.0f));
 
     Float y;
     mVelocity->GetY(&y);
     Int32 top;
     mFrom->GetTop(&top);
-    mFrom->SetTop(top + (y * (curTime - mPrevTime) / 1000f));
+    mFrom->SetTop(top + (y * (curTime - mPrevTime) / 1000.0f));
 
     mFrom->GetLeft(&left);
     mDragView->SetTranslationX(left);
@@ -295,35 +350,37 @@ ECode PagedView::FlingAlongVectorAnimatorUpdateListener::OnAnimationUpdate(
 ECode PagedView::MyRunnable5::Run()
 {
     Int32 dragViewIndex;
-    IndexOfChild(dragView, &dragViewIndex);
+    mHost->IndexOfChild(mDragView, &dragViewIndex);
 
     // For each of the pages around the drag view, animate them from the previous
     // position to the new position in the layout (as a result of the drag view moving
     // in the layout)
     // NOTE: We can make an assumption here because we have side-bound pages that we
     //       will always have pages to animate in from the left
-    GetVisiblePages(mTempVisiblePagesRange);
-    BoundByReorderablePages(TRUE, mTempVisiblePagesRange);
-    Boolean isLastWidgetPage = ((*mTempVisiblePagesRange)[0] == (*mTempVisiblePagesRange)[1]);
+    mHost->GetVisiblePages(mHost->mTempVisiblePagesRange);
+    mHost->BoundByReorderablePages(TRUE, mHost->mTempVisiblePagesRange);
+    Boolean isLastWidgetPage = ((*(mHost->mTempVisiblePagesRange))[0]
+            == (*(mHost->mTempVisiblePagesRange))[1]);
     Boolean slideFromLeft = (isLastWidgetPage ||
-            dragViewIndex > (*mTempVisiblePagesRange)[0]);
+            dragViewIndex > (*(mHost->mTempVisiblePagesRange))[0]);
 
     // Setup the scroll to the correct page before we swap the views
     if (slideFromLeft) {
-        SnapToPageImmediately(dragViewIndex - 1);
+        mHost->SnapToPageImmediately(dragViewIndex - 1);
     }
 
-    Int32 firstIndex = (isLastWidgetPage ? 0 : (*mTempVisiblePagesRange)[0]);
+    Int32 firstIndex = (isLastWidgetPage ? 0 : (*(mHost->mTempVisiblePagesRange))[0]);
     Int32 count;
-    GetPageCount(&count);
-    Int32 lastIndex = Math::Min((*mTempVisiblePagesRange)[1], count - 1);
+    mHost->GetPageCount(&count);
+    Int32 lastIndex = Elastos::Core::Math::Min((*(mHost->mTempVisiblePagesRange))[1],
+            count - 1);
     Int32 lowerIndex = (slideFromLeft ? firstIndex : dragViewIndex + 1 );
     Int32 upperIndex = (slideFromLeft ? dragViewIndex - 1 : lastIndex);
-    AytoPtr<IArrayList> animations;
+    AutoPtr<IArrayList> animations;
     CArrayList::New((IArrayList**)&animations);
     for (Int32 i = lowerIndex; i <= upperIndex; ++i) {
         AutoPtr<IView> v;
-        GetChildAt(i, (IView**)&v);
+        mHost->GetChildAt(i, (IView**)&v);
         // dragViewIndex < pageUnderPointIndex, so after we remove the
         // drag view all subsequent views to pageUnderPointIndex will
         // shift down.
@@ -331,29 +388,29 @@ ECode PagedView::MyRunnable5::Run()
         Int32 newX = 0;
         if (slideFromLeft) {
             Int32 ox;
-            GetViewportOffsetX(&ox);
+            mHost->GetViewportOffsetX(&ox);
             if (i == 0) {
                 // Simulate the page being offscreen with the page spacing
                 Int32 co;
-                GetChildOffset(i, &co);
+                mHost->GetChildOffset(i, &co);
                 Int32 cw;
-                GetChildWidth(i, &cw);
-                oldX = ox + co - cw - mPageSpacing;
+                mHost->GetChildWidth(i, &cw);
+                oldX = ox + co - cw - mHost->mPageSpacing;
             }
             else {
                 Int32 co;
-                GetChildOffset(i - 1, &co);
+                mHost->GetChildOffset(i - 1, &co);
                 oldX = ox + co;
             }
             Int32 co;
-            GetChildOffset(i, &co);
+            mHost->GetChildOffset(i, &co);
             newX = ox + co;
         }
         else {
             Int32 co;
-            GetChildOffset(i, &co);
+            mHost->GetChildOffset(i, &co);
             Int32 co2;
-            GetChildOffset(i - 1, &co2);
+            mHost->GetChildOffset(i - 1, &co2);
             oldX = co - co2;
             newX = 0;
         }
@@ -364,56 +421,68 @@ ECode PagedView::MyRunnable5::Run()
         v->GetTag((IInterface**)&obj);
         AutoPtr<IAnimatorSet> anim = IAnimatorSet::Probe(obj);
         if (anim != NULL) {
-            anim->Cancel();
+            IAnimator::Probe(anim)->Cancel();
         }
 
         // Note: Hacky, but we want to skip any optimizations to not draw completely
         // hidden views
         Float alpha;
         v->GetAlpha(&alpha);
-        v->SetAlpha(Math::Max(alpha, 0.01f));
+        v->SetAlpha(Elastos::Core::Math::Max(alpha, 0.01f));
         v->SetTranslationX(oldX - newX);
         CAnimatorSet::New((IAnimatorSet**)&anim);
 
-        AutoPtr<IObjectAnimatorHleper> helper;
-        CObjectAnimatorHleper::AcquireSingleton((IObjectAnimatorHleper**)&helper);
+        AutoPtr<IObjectAnimatorHelper> helper;
+        CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 0.0f;
         AutoPtr<IObjectAnimator> animatorx;
-        helper->OfFloat(v, String("translationX"), 0.0f, (IObjectAnimator**)&animatorx);
+        helper->OfFloat(v, String("translationX"), array, (IObjectAnimator**)&animatorx);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+        (*array2)[0] = 1.0f;
         AutoPtr<IObjectAnimator> animatory;
-        helper->OfFloat(v, String("alpha"), 1.0f, (IObjectAnimator**)&animatory);
-        anim->PlayTogether(animatorx,animatory);
+        helper->OfFloat(v, String("alpha"), array2, (IObjectAnimator**)&animatory);
+        AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+        array3->Set(0, IAnimator::Probe(animatorx));
+        array3->Set(1, IAnimator::Probe(animatory));
+        anim->PlayTogether(array3);
         animations->Add(anim);
         v->SetTag(anim);
     }
 
     AutoPtr<IAnimatorSet> slideAnimations;
     CAnimatorSet::New((IAnimatorSet**)&slideAnimations);
-    slideAnimations->PlayTogether(animations);
-    slideAnimations->SetDuration(DELETE_SLIDE_IN_SIDE_PAGE_DURATION);
-    AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter7(this);
-    slideAnimations->AddListener(lis);
-    slideAnimations->Start();
+    slideAnimations->PlayTogether(ICollection::Probe(animations));
+    IAnimator::Probe(slideAnimations)->SetDuration(
+            mHost->DELETE_SLIDE_IN_SIDE_PAGE_DURATION);
+    AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter7(mHost);
+    IAnimator::Probe(slideAnimations)->AddListener(lis);
+    IAnimator::Probe(slideAnimations)->Start();
 
-    RemoveView(dragView);
-    return OnRemoveView(dragView, TRUE);
+    mHost->RemoveView(mDragView);
+    return mHost->OnRemoveView(mDragView, TRUE);
 }
 
 ECode PagedView::MyAnimatorListenerAdapter7::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     AutoPtr<IRunnable> onCompleteRunnable = new MyRunnable6(mHost);
-    return ZoomIn(onCompleteRunnable);
+    Boolean res;
+    return mHost->ZoomIn(onCompleteRunnable, &res);
 }
 
 ECode PagedView::MyAnimatorListenerAdapter7::MyRunnable6::Run()
 {
-    mDeferringForDelete = FALSE;
-    OnEndReordering();
-    return OnRemoveViewAnimationCompleted();
+    mHost->mDeferringForDelete = FALSE;
+    mHost->OnEndReordering();
+    return mHost->OnRemoveViewAnimationCompleted();
 }
 
+CAR_INTERFACE_IMPL(PagedView::MyTimeInterpolator,
+        Object, ITimeInterpolator)
+
 ECode PagedView::MyTimeInterpolator::GetInterpolation(
-    /* [in] */ Float input,
+    /* [in] */ Float t,
     /* [out] */ Float* output)
 {
     VALIDATE_NOT_NULL(output)
@@ -426,11 +495,11 @@ ECode PagedView::MyTimeInterpolator::GetInterpolation(
         CAnimationUtils::AcquireSingleton((IAnimationUtils**)&helper);
         Int64 timeMillis;
         helper->CurrentAnimationTimeMillis(&timeMillis);
-        mOffset = Math::Min(0.5f, (Float)(timeMillis -
-                mStartTime) / FLING_TO_DELETE_FADE_OUT_DURATION);
+        mOffset = Elastos::Core::Math::Min(0.5f, (Float)(timeMillis -
+                mStartTime) / mHost->FLING_TO_DELETE_FADE_OUT_DURATION);
         mCount++;
     }
-    *output = Math::Min(1f, mOffset + t);
+    *output = Elastos::Core::Math::Min(1.0f, mOffset + t);
     return NOERROR;
 }
 
@@ -458,9 +527,10 @@ ECode PagedView::MyAnimatorListenerAdapter9::OnAnimationEnd(
 ECode PagedView::MyAnimatorListenerAdapter10::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mWarpAnimation = NULL;
-    if (mTouchState != TOUCH_STATE_SCROLLING && mTouchState != TOUCH_STATE_READY) {
-        AnimateWarpPageOffScreen("onScreen end", true);
+    mHost->mWarpAnimation = NULL;
+    if (mHost->mTouchState != TOUCH_STATE_SCROLLING &&
+            mHost->mTouchState != TOUCH_STATE_READY) {
+        mHost->AnimateWarpPageOffScreen(String("onScreen end"), TRUE);
     }
     return NOERROR;
 }
@@ -469,28 +539,28 @@ ECode PagedView::MyAnimatorListenerAdapter10::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     AnimatorListenerAdapter::OnAnimationCancel(animation);
-    mWarpAnimation = NULL;
+    mHost->mWarpAnimation = NULL;
     return NOERROR;
 }
 
 ECode PagedView::MyAnimatorListenerAdapter11::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mWarpAnimation = NULL;
-    mWarpPageExposed = FALSE;
+    mHost->mWarpAnimation = NULL;
+    mHost->mWarpPageExposed = FALSE;
     Int32 index;
-    GetPageWarpIndex(&index);
+    mHost->GetPageWarpIndex(&index);
     AutoPtr<IView> view;
-    GetPageAt(index, (IView**)&view);
+    mHost->GetPageAt(index, (IView**)&view);
     AutoPtr<IKeyguardWidgetFrame> v = IKeyguardWidgetFrame::Probe(view);
-    return v->SetTranslationX(0.0f);
+    return IView::Probe(v)->SetTranslationX(0.0f);
 }
 
 ECode PagedView::MyAnimatorListenerAdapter11::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     AnimatorListenerAdapter::OnAnimationCancel(animation);
-    mWarpAnimation = NULL;
+    mHost->mWarpAnimation = NULL;
     return NOERROR;
 }
 
@@ -500,15 +570,15 @@ const Int32 PagedView::PAGE_SNAP_ANIMATION_DURATION = 750;
 const Int32 PagedView::SLOW_PAGE_SNAP_ANIMATION_DURATION = 950;
 const Float PagedView::NANOTIME_DIV = 1000000000.0f;
 
-Int32 PagedView::TOUCH_STATE_REST = 0;
-Int32 PagedView::TOUCH_STATE_SCROLLING = 1;
-Int32 PagedView::TOUCH_STATE_PREV_PAGE = 2;
-Int32 PagedView::TOUCH_STATE_NEXT_PAGE = 3;
-Int32 PagedView::TOUCH_STATE_REORDERING = 4;
-Int32 PagedView::TOUCH_STATE_READY = 5; // when finger is down
+const Int32 PagedView::TOUCH_STATE_REST = 0;
+const Int32 PagedView::TOUCH_STATE_SCROLLING = 1;
+const Int32 PagedView::TOUCH_STATE_PREV_PAGE = 2;
+const Int32 PagedView::TOUCH_STATE_NEXT_PAGE = 3;
+const Int32 PagedView::TOUCH_STATE_REORDERING = 4;
+const Int32 PagedView::TOUCH_STATE_READY = 5; // when finger is down
 
-Float PagedView::ALPHA_QUANTIZE_LEVEL = 0.0001f;
-Float PagedView::TOUCH_SLOP_SCALE = 1.0f;
+const Float PagedView::ALPHA_QUANTIZE_LEVEL = 0.0001f;
+const Float PagedView::TOUCH_SLOP_SCALE = 1.0f;
 
 const Int32 PagedView::INVALID_POINTER = -1;
 
@@ -608,7 +678,7 @@ PagedView::PagedView()
     , mEdgeSwipeRegionSize(0)
     , FLING_TO_DELETE_FADE_OUT_DURATION(350)
     , FLING_TO_DELETE_FRICTION(0.035f)
-    , FLING_TO_DELETE_MAX_FLING_DEGREES(65f)
+    , FLING_TO_DELETE_MAX_FLING_DEGREES(65.0f)
     , mDeferringForDelete(FALSE)
     , DELETE_SLIDE_IN_SIDE_PAGE_DURATION(250)
     , DRAG_TO_DELETE_FADE_OUT_DURATION(350)
@@ -658,9 +728,9 @@ ECode PagedView::constructor(
 {
     ViewGroup::constructor(context, attrs, defStyle);
 
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PagedView);
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs,
-            R::styleable::PagedView, defStyle, 0, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
 
     Int32 size;
     a->GetDimensionPixelSize(R::styleable::PagedView_pageSpacing, 0, &size);
@@ -695,7 +765,7 @@ ECode PagedView::Init()
     AutoPtr<IViewConfigurationHelper> helper;
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> configuration;
-    IViewConfigurationHelper->Get(context, (IViewConfiguration**)&configuration);
+    helper->Get(context, (IViewConfiguration**)&configuration);
     configuration->GetScaledTouchSlop(&mTouchSlop);
     configuration->GetScaledPagingTouchSlop(&mPagingTouchSlop);
     configuration->GetScaledMaximumFlingVelocity(&mMaximumVelocity);
@@ -769,7 +839,8 @@ ECode PagedView::MapPointFromParentToView(
 
     AutoPtr<IMatrix> matrix;
     v->GetMatrix((IMatrix**)&matrix);
-    matrix->Invert(mTmpInvMatrix);
+    Boolean res;
+    matrix->Invert(mTmpInvMatrix, &res);
     mTmpInvMatrix->MapPoints(mTmpPoint);
 
     *array = mTmpPoint;
@@ -861,7 +932,7 @@ ECode PagedView::SetPageSwitchListener(
     mPageSwitchListener = pageSwitchListener;
     if (mPageSwitchListener != NULL) {
         AutoPtr<IView> view;
-        GetPageAt(mCurrentPage, &view);
+        GetPageAt(mCurrentPage, (IView**)&view);
         mPageSwitchListener->OnPageSwitched(view, mCurrentPage);
     }
     return NOERROR;
@@ -914,7 +985,7 @@ ECode PagedView::GetPageAt(
 {
     VALIDATE_NOT_NULL(view)
 
-    return GetChildAt(index, &view);
+    return GetChildAt(index, view);
 }
 
 ECode PagedView::IndexToPage(
@@ -956,9 +1027,9 @@ ECode PagedView::SetCurrentPage(
     }
 
     mForceScreenScrolled = TRUE;
-    Int32 count;
     GetPageCount(&count);
-    mCurrentPage = Math::Max(0, Math::Min(currentPage, count - 1));
+    mCurrentPage = Elastos::Core::Math::Max(0,
+            Elastos::Core::Math::Min(currentPage, count - 1));
     UpdateCurrentPageScroll();
     UpdateScrollingIndicator();
     NotifyPageSwitched();
@@ -1136,7 +1207,7 @@ ECode PagedView::ComputeScrollHelper(
         // Don't bother scrolling if the page does not need to be moved
         Int32 sx,cx,sy,cy;
         if ((GetScrollX(&sx), sx) != (mScroller->GetCurrX(&cx), cx)
-            || (getScrollY(&sy), sy) != (mScroller->GetCurrY(&cy), cy)
+            || (GetScrollY(&sy), sy) != (mScroller->GetCurrY(&cy), cy)
             || mOverScrollX != (mScroller->GetCurrX(&cx), cx)) {
 
             ScrollTo((mScroller->GetCurrX(&cx), cx), (mScroller->GetCurrY(&cy), cy));
@@ -1148,7 +1219,8 @@ ECode PagedView::ComputeScrollHelper(
     else if (mNextPage != INVALID_PAGE) {
         Int32 count;
         GetPageCount(&count);
-        mCurrentPage = Math::Max(0, Math::Min(mNextPage, count - 1));
+        mCurrentPage = Elastos::Core::Math::Max(0,
+                Elastos::Core::Math::Min(mNextPage, count - 1));
         mNextPage = INVALID_PAGE;
         NotifyPageSwitched();
 
@@ -1168,7 +1240,8 @@ ECode PagedView::ComputeScrollHelper(
 
 ECode PagedView::ComputeScroll()
 {
-    return ComputeScrollHelper();
+    Boolean res;
+    return ComputeScrollHelper(&res);
 }
 
 ECode PagedView::ShouldSetTopAlignedPivotForWidget(
@@ -1211,14 +1284,14 @@ ECode PagedView::OnMeasure(
     dm->GetWidthPixels(&wp);
     Int32 hp;
     dm->GetHeightPixels(&hp);
-    Int32 maxSize = Math::Max(wp, hp);
+    Int32 maxSize = Elastos::Core::Math::Max(wp, hp);
     Int32 parentWidthSize = (Int32) (1.5f * maxSize);
     Int32 parentHeightSize = maxSize;
     Int32 scaledWidthSize = (Int32) (parentWidthSize / mMinScale);
     Int32 scaledHeightSize = (Int32) (parentHeightSize / mMinScale);
     mViewport->Set(0, 0, widthSize, heightSize);
 
-    if (widthMode == IMeasureSpec::UNSPECIFIED || heightMode == IMeasureSpec::UNSPECIFIED) {
+    if (widthMode == MeasureSpec::UNSPECIFIED || heightMode == MeasureSpec::UNSPECIFIED) {
         return ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
@@ -1260,22 +1333,22 @@ ECode PagedView::OnMeasure(
 
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<ViewGroup::LayoutParams> lp = (ViewGroup::LayoutParams*)params;
+        AutoPtr<ViewGroup::LayoutParams> lp = (ViewGroup::LayoutParams*)params.Get();
 
         Int32 childWidthMode;
         if (lp->mWidth == IViewGroupLayoutParams::WRAP_CONTENT) {
-            childWidthMode = IMeasureSpec::AT_MOST;
+            childWidthMode = MeasureSpec::AT_MOST;
         }
         else {
-            childWidthMode = IMeasureSpec::EXACTLY;
+            childWidthMode = MeasureSpec::EXACTLY;
         }
 
         Int32 childHeightMode;
         if (lp->mHeight == IViewGroupLayoutParams::WRAP_CONTENT) {
-            childHeightMode = IMeasureSpec::AT_MOST;
+            childHeightMode = MeasureSpec::AT_MOST;
         }
         else {
-            childHeightMode = IMeasureSpec::EXACTLY;
+            childHeightMode = MeasureSpec::EXACTLY;
         }
 
         Int32 childWidthMeasureSpec =
@@ -1314,7 +1387,7 @@ ECode PagedView::OnMeasure(
             GetChildAt(0, (IView**)&view);
             Int32 width;
             view->GetMeasuredWidth(&width);
-            Int32 spacing = Math::Max(offset, widthSize - offset - width);
+            Int32 spacing = Elastos::Core::Math::Max(offset, widthSize - offset - width);
             SetPageSpacing(spacing);
         }
     }
@@ -1610,7 +1683,7 @@ ECode PagedView::ShouldDrawChild(
 {
     VALIDATE_NOT_NULL(result)
 
-    Int32 alpha;
+    Float alpha;
     child->GetAlpha(&alpha);
     *result = alpha > 0;
     return NOERROR;
@@ -1636,7 +1709,7 @@ ECode PagedView::DispatchDraw(
 
     // Find out which screens are visible; as an optimization we only call draw on them
     Int32 pageCount;
-    GetChildCount();
+    GetChildCount(&pageCount);
     if (pageCount > 0) {
         GetVisiblePages(mTempVisiblePagesRange);
         Int32 leftScreen = (*mTempVisiblePagesRange)[0];
@@ -1645,7 +1718,8 @@ ECode PagedView::DispatchDraw(
             Int64 drawingTime;
             GetDrawingTime(&drawingTime);
             // Clip to the bounds
-            canvas->Save();
+            Int32 tmp;
+            canvas->Save(&tmp);
 
             Int32 sx;
             GetScrollX(&sx);
@@ -1659,8 +1733,9 @@ ECode PagedView::DispatchDraw(
             GetBottom(&bottom);
             Int32 top;
             GetTop(&top);
+            Boolean res;
             canvas->ClipRect(sx, sy, sx + right - left,
-                    sy + bottom - top);
+                    sy + bottom - top, &res);
 
             // Draw all the children, leaving the drag view for last
             for (Int32 i = pageCount - 1; i >= 0; i--) {
@@ -1759,7 +1834,7 @@ ECode PagedView::DispatchUnhandledMove(
             return NOERROR;
         }
     }
-    return ViewGroup::DispatchUnhandledMove(focused, direction, &result);
+    return ViewGroup::DispatchUnhandledMove(focused, direction, result);
 }
 
 ECode PagedView::AddFocusables(
@@ -1904,7 +1979,7 @@ ECode PagedView::OnInterceptTouchEvent(
     VALIDATE_NOT_NULL(result)
 
     if (DISABLE_TOUCH_INTERACTION) {
-        *result = FALSE
+        *result = FALSE;
         return NOERROR;
     }
 
@@ -1971,7 +2046,7 @@ ECode PagedView::OnInterceptTouchEvent(
             mScroller->GetFinalX(&finalX);
             Int32 currX;
             mScroller->GetCurrX(&currX);
-            Int32 xDist = Math::Abs(finalX - currX);
+            Int32 xDist = Elastos::Core::Math::Abs(finalX - currX);
             Boolean res;
             mScroller->IsFinished(&res);
             Boolean finishedScrolling = (res || xDist < mTouchSlop);
@@ -1980,8 +2055,8 @@ ECode PagedView::OnInterceptTouchEvent(
                 mScroller->AbortAnimation();
             }
             else {
-                if (mIsCameraEvent || (IsTouchPointInViewportWithBuffer(
-                        (Int32)mDownMotionX, (Int32)mDownMotionY, &res), res)) {
+                if (mIsCameraEvent || IsTouchPointInViewportWithBuffer(
+                        (Int32)mDownMotionX, (Int32)mDownMotionY)) {
                     SetTouchState(TOUCH_STATE_SCROLLING);
                 }
                 else {
@@ -2019,8 +2094,7 @@ ECode PagedView::OnInterceptTouchEvent(
         {
             ResetTouchState();
             // Just intercept the touch event on up if we tap outside the strict viewport
-            Boolean res;
-            if (IsTouchPointInCurrentPage((Int32)mLastMotionX, (Int32)mLastMotionY, &res), !res) {
+            if (!IsTouchPointInCurrentPage((Int32)mLastMotionX, (Int32)mLastMotionY)) {
                 *result = TRUE;
                 return NOERROR;
             }
@@ -2067,7 +2141,9 @@ void PagedView::SaveDownState(
     mDownMotionX = mLastMotionX;
     ev->GetY(&mLastMotionY);
     mDownMotionY = mLastMotionY;
-    GetScrollX(&mDownScrollX);
+    Int32 tmp;
+    GetScrollX(&tmp);
+    mDownScrollX = tmp;
 
     AutoPtr<ArrayOf<Float> > p;
     MapPointFromViewToParent(this, mLastMotionX, mLastMotionY, (ArrayOf<Float>**)&p);
@@ -2103,9 +2179,9 @@ Boolean PagedView::IsHorizontalCameraScroll(
 
     Float x;
     ev->GetX(pointerIndex, &x);
-    Int32 xDiff = (Int32)Math::Abs(x - mDownMotionX);
+    Int32 xDiff = (Int32)Elastos::Core::Math::Abs(x - mDownMotionX);
 
-    Int32 touchSlop = Math::Round(TOUCH_SLOP_SCALE * mTouchSlop);
+    Int32 touchSlop = Elastos::Core::Math::Round(TOUCH_SLOP_SCALE * mTouchSlop);
     Boolean xPaged = xDiff > mPagingTouchSlop;
     Boolean xMoved = xDiff > touchSlop;
 
@@ -2120,7 +2196,7 @@ ECode PagedView::DetermineScrollingStart(
 
     // Disallow scrolling if we don't have a valid pointer index
     Int32 pointerIndex;
-    ev->FindPointerIndex(mActivePointerId);
+    ev->FindPointerIndex(mActivePointerId, &pointerIndex);
     if (pointerIndex == -1) {
         *result = FALSE;
         return NOERROR;
@@ -2131,8 +2207,7 @@ ECode PagedView::DetermineScrollingStart(
     ev->GetX(pointerIndex, &x);
     Float y;
     ev->GetY(pointerIndex, &y);
-    Boolean res;
-    if (IsTouchPointInViewportWithBuffer((Int32)x, (Int32)y, &res), !res) {
+    if (!IsTouchPointInViewportWithBuffer((Int32)x, (Int32)y)) {
         *result = FALSE;
         return NOERROR;
     }
@@ -2144,9 +2219,9 @@ ECode PagedView::DetermineScrollingStart(
         return NOERROR;
     }
 
-    Int32 xDiff = (Int32)Math::Abs(x - mLastMotionX);
+    Int32 xDiff = (Int32)Elastos::Core::Math::Abs(x - mLastMotionX);
 
-    Int32 touchSlop = Math::Round(TOUCH_SLOP_SCALE * mTouchSlop);
+    Int32 touchSlop = Elastos::Core::Math::Round(TOUCH_SLOP_SCALE * mTouchSlop);
     Boolean xPaged = xDiff > mPagingTouchSlop;
     Boolean xMoved = xDiff > touchSlop;
 
@@ -2165,7 +2240,7 @@ void PagedView::StartScrolling(
     Float x;
     ev->GetX(pointerIndex, &x);
     SetTouchState(TOUCH_STATE_SCROLLING);
-    mTotalMotionX += Math::Abs(mLastMotionX - x);
+    mTotalMotionX += Elastos::Core::Math::Abs(mLastMotionX - x);
     mLastMotionX = x;
     mLastMotionXRemainder = 0;
 
@@ -2204,8 +2279,8 @@ ECode PagedView::GetBoundedScrollProgress(
     GetViewportWidth(&width);
     Int32 halfScreenSize = width / 2;
 
-    screenCenter = Math->Min(mScrollX + halfScreenSize, screenCenter);
-    screenCenter = Math->Max(halfScreenSize,  screenCenter);
+    screenCenter = Elastos::Core::Math::Min(mScrollX + halfScreenSize, screenCenter);
+    screenCenter = Elastos::Core::Math::Max(halfScreenSize,  screenCenter);
 
     return GetScrollProgress(screenCenter, v, page, progress);
 }
@@ -2234,10 +2309,10 @@ ECode PagedView::GetScrollProgress(
             rcoffset + halfScreenSize);
 
     Float scrollProgress = delta / (totalDistance * 1.0f);
-    Int32 progress;
+    Float progress;
     GetMaxScrollProgress(&progress);
-    scrollProgress = Math::Min(scrollProgress, progress);
-    scrollProgress = Math::Max(scrollProgress, - progress);
+    scrollProgress = Elastos::Core::Math::Min(scrollProgress, progress);
+    scrollProgress = Elastos::Core::Math::Max(scrollProgress, - progress);
     *outprogress = scrollProgress;
     return NOERROR;
 }
@@ -2262,11 +2337,11 @@ ECode PagedView::AcceleratedOverScroll(
     if (f == 0) return NOERROR;
 
     // Clamp this factor, f, to -1 < f < 1
-    if (Math::Abs(f) >= 1) {
-        f /= Math::Abs(f);
+    if (Elastos::Core::Math::Abs(f) >= 1) {
+        f /= Elastos::Core::Math::Abs(f);
     }
 
-    Int32 overScrollAmount = (Int32)Math::Round(f * screenSize);
+    Int32 overScrollAmount = (Int32)Elastos::Core::Math::Round(f * screenSize);
     if (amount < 0) {
         mOverScrollX = overScrollAmount;
         Int32 y;
@@ -2291,14 +2366,15 @@ ECode PagedView::DampedOverScroll(
     Float f = (amount / screenSize);
 
     if (f == 0) return NOERROR;
-    f = f / (Math::Abs(f)) * (OverScrollInfluenceCurve(Math::Abs(f)));
+    f = f / (Elastos::Core::Math::Abs(f)) * (OverScrollInfluenceCurve(
+            Elastos::Core::Math::Abs(f)));
 
     // Clamp this factor, f, to -1 < f < 1
-    if (Math::Abs(f) >= 1) {
-        f /= Math::Abs(f);
+    if (Elastos::Core::Math::Abs(f) >= 1) {
+        f /= Elastos::Core::Math::Abs(f);
     }
 
-    Int32 overScrollAmount = (Int32)Math::Round(OVERSCROLL_DAMP_FACTOR * f * screenSize);
+    Int32 overScrollAmount = (Int32)Elastos::Core::Math::Round(OVERSCROLL_DAMP_FACTOR * f * screenSize);
     if (amount < 0) {
         mOverScrollX = overScrollAmount;
         Int32 y;
@@ -2314,7 +2390,7 @@ ECode PagedView::DampedOverScroll(
 }
 
 ECode PagedView::OverScroll(
-    /* [in] */ Floa amount)
+    /* [in] */ Float amount)
 {
     return DampedOverScroll(amount);
 }
@@ -2327,7 +2403,8 @@ ECode PagedView::MaxOverScroll(
     // Using the formula in overScroll, assuming that f = 1.0 (which it should generally not
     // exceed). Used to find out how much extra wallpaper we need for the over scroll effect
     Float f = 1.0f;
-    f = f / (Math::Abs(f)) * (OverScrollInfluenceCurve(Math::Abs(f)));
+    f = f / (Elastos::Core::Math::Abs(f)) * (OverScrollInfluenceCurve(
+            Elastos::Core::Math::Abs(f)));
     *scroll = OVERSCROLL_DAMP_FACTOR * f;
     return NOERROR;
 }
@@ -2339,7 +2416,7 @@ ECode PagedView::OnTouchEvent(
     VALIDATE_NOT_NULL(result)
 
     if (DISABLE_TOUCH_INTERACTION) {
-        *result = FALSE
+        *result = FALSE;
         return NOERROR;
     }
 
@@ -2351,8 +2428,7 @@ ECode PagedView::OnTouchEvent(
     AcquireVelocityTrackerAndAddMovement(ev);
 
     Int32 action;
-    ev->GetAction();
-
+    ev->GetAction(&action);
     switch (action & IMotionEvent::ACTION_MASK) {
     case IMotionEvent::ACTION_DOWN:
     {
@@ -2398,28 +2474,27 @@ ECode PagedView::OnTouchEvent(
             ev->GetX(pointerIndex, &x);
             Float deltaX = mLastMotionX + mLastMotionXRemainder - x;
 
-            mTotalMotionX += Math::Abs(deltaX);
+            mTotalMotionX += Elastos::Core::Math::Abs(deltaX);
 
             // Only scroll and update mLastMotionX if we have moved some discrete amount.  We
             // keep the remainder because we are actually testing if we've moved from the last
             // scrolled position (which is discrete).
-            if (Math::Abs(deltaX) >= 1.0f) {
+            if (Elastos::Core::Math::Abs(deltaX) >= 1.0f) {
                 mTouchX += deltaX;
                 AutoPtr<ISystem> helper;
                 CSystem::AcquireSingleton((ISystem**)&helper);
                 Int64 time;
                 helper->GetNanoTime(&time);
                 mSmoothingTime = time / NANOTIME_DIV;
-                Boolean res;
                 if (IsWarping(&res), res) {
                     Int32 index;
                     GetPageWarpIndex(&index);
                     AutoPtr<IView> view;
                     GetPageAt(index, (IView**)&view);
                     AutoPtr<IKeyguardWidgetFrame> v = IKeyguardWidgetFrame::Probe(view);
-                    Int32 x;
-                    v->GetTranslationX(&x);
-                    v->SetTranslationX(x - deltaX);
+                    Float x;
+                    IView::Probe(v)->GetTranslationX(&x);
+                    IView::Probe(v)->SetTranslationX(x - deltaX);
                 }
                 else if (!mDeferScrollUpdate) {
                     ScrollBy((Int32)deltaX, 0);
@@ -2457,19 +2532,18 @@ ECode PagedView::OnTouchEvent(
             Int32 vleft;
             mViewport->GetLeft(&vleft);
             AutoPtr<ArrayOf<Float> > leftBuffer;
-            mapPointFromViewToParent(this, vleft, 0, (ArrayOf<Float>**)&leftBuffer);
+            MapPointFromViewToParent(this, vleft, 0, (ArrayOf<Float>**)&leftBuffer);
             Int32 leftBufferEdge = (Int32)((*leftBuffer)[0] + bufferSize);
 
             Int32 vright;
             mViewport->GetRight(&vright);
             AutoPtr<ArrayOf<Float> > rightBuffer;
-            mapPointFromViewToParent(this, vright, 0, (ArrayOf<Float>**)&rightBuffer);
+            MapPointFromViewToParent(this, vright, 0, (ArrayOf<Float>**)&rightBuffer);
             Int32 rightBufferEdge = (Int32)((*rightBuffer)[0] - bufferSize);
 
             // Change the drag view if we are hovering over the drop target
-            Boolean isHoveringOverDelete;
-            IsHoveringOverDeleteDropTarget(
-                    (Int32)mParentDownMotionX, (Int32)mParentDownMotionY, &isHoveringOverDelete);
+            Boolean isHoveringOverDelete = IsHoveringOverDeleteDropTarget(
+                    (Int32)mParentDownMotionX, (Int32)mParentDownMotionY);
             SetPageHoveringOverDeleteDropTarget(dragViewIndex, isHoveringOverDelete);
 
             if (DEBUG) Logger::D(TAG, "leftBufferEdge: %d", leftBufferEdge);
@@ -2497,7 +2571,6 @@ ECode PagedView::OnTouchEvent(
                 GetPageCount(&pcount);
                 (*mTempVisiblePagesRange)[1] = pcount - 1;
                 BoundByReorderablePages(TRUE, mTempVisiblePagesRange);
-                Boolean res;
                 if ((*mTempVisiblePagesRange)[0] <= pageUnderPointIndex &&
                         pageUnderPointIndex <= (*mTempVisiblePagesRange)[1] &&
                         pageUnderPointIndex != mSidePageHoverIndex &&
@@ -2505,18 +2578,19 @@ ECode PagedView::OnTouchEvent(
                     mSidePageHoverIndex = pageUnderPointIndex;
                     mSidePageHoverRunnable = new MyRunnable(this,
                             pageUnderPointIndex, dragViewIndex);
-                    PostDelayed(mSidePageHoverRunnable, REORDERING_SIDE_PAGE_HOVER_TIMEOUT);
+                    PostDelayed(mSidePageHoverRunnable,
+                            REORDERING_SIDE_PAGE_HOVER_TIMEOUT, &res);
                 }
             }
             else {
-                RemoveCallbacks(mSidePageHoverRunnable);
+                RemoveCallbacks(mSidePageHoverRunnable, &res);
                 mSidePageHoverIndex = -1;
             }
         }
         else if (DetermineScrollingStart(ev, &res), res) {
             StartScrolling(ev);
         }
-        else if (IsHorizontalCameraScroll(ev, &res), res) {
+        else if (IsHorizontalCameraScroll(ev)) {
             StartScrolling(ev);
             // we need to cancel the camera animation
             Int32 index;
@@ -2526,7 +2600,7 @@ ECode PagedView::OnTouchEvent(
             AutoPtr<IKeyguardWidgetFrame> v = IKeyguardWidgetFrame::Probe(view);
 
             AutoPtr<IViewPropertyAnimator> animator;
-            v->Animate((IViewPropertyAnimator**)&animator);
+            IView::Probe(v)->Animate((IViewPropertyAnimator**)&animator);
             animator->Cancel();
         }
         break;
@@ -2555,20 +2629,21 @@ ECode PagedView::OnTouchEvent(
             GetPageAt(mCurrentPage, (IView**)&view);
             Int32 pageWidth;
             GetScaledMeasuredWidth(view, &pageWidth);
-            Boolean isSignificantMove = Math::Abs(deltaX) > pageWidth *
+            Boolean isSignificantMove = Elastos::Core::Math::Abs(deltaX) > pageWidth *
                     SIGNIFICANT_MOVE_THRESHOLD;
 
-            mTotalMotionX += Math::Abs(mLastMotionX + mLastMotionXRemainder - x);
+            mTotalMotionX += Elastos::Core::Math::Abs(mLastMotionX + mLastMotionXRemainder - x);
 
             Boolean isFling = mTotalMotionX > MIN_LENGTH_FOR_FLING &&
-                    Math::Abs(velocityX) > mFlingThresholdVelocity;
+                    Elastos::Core::Math::Abs(velocityX) > mFlingThresholdVelocity;
 
             // In the case that the page is moved far to one direction and then is flung
             // in the opposite direction, we use a threshold to determine whether we should
             // just return to the starting page, or if we should skip one further.
             Boolean returnToOriginalPage = FALSE;
-            if (Math::Abs(deltaX) > pageWidth * RETURN_TO_ORIGINAL_PAGE_THRESHOLD &&
-                    Math::Signum(velocityX) != Math::Signum(deltaX) && isFling) {
+            if (Elastos::Core::Math::Abs(deltaX) > pageWidth * RETURN_TO_ORIGINAL_PAGE_THRESHOLD &&
+                    Elastos::Core::Math::Signum(velocityX) !=
+                    Elastos::Core::Math::Signum(deltaX) && isFling) {
                 returnToOriginalPage = TRUE;
             }
 
@@ -2610,7 +2685,7 @@ ECode PagedView::OnTouchEvent(
             // at this point we have not moved beyond the touch slop
             // (otherwise mTouchState would be TOUCH_STATE_SCROLLING), so
             // we can just page
-            Int32 nextPage = Math::Max(0, mCurrentPage - 1);
+            Int32 nextPage = Elastos::Core::Math::Max(0, mCurrentPage - 1);
             if (nextPage != mCurrentPage) {
                 SnapToPage(nextPage);
             }
@@ -2624,7 +2699,7 @@ ECode PagedView::OnTouchEvent(
             // we can just page
             Int32 count;
             GetChildCount(&count);
-            Int32 nextPage = Math::Min(count - 1, mCurrentPage + 1);
+            Int32 nextPage = Elastos::Core::Math::Min(count - 1, mCurrentPage + 1);
             if (nextPage != mCurrentPage) {
                 SnapToPage(nextPage);
             }
@@ -2635,7 +2710,7 @@ ECode PagedView::OnTouchEvent(
         else if (mTouchState == TOUCH_STATE_REORDERING) {
             // Update the last motion position
             ev->GetX(&mLastMotionX);
-            ev->GetY(*mLastMotionY);
+            ev->GetY(&mLastMotionY);
 
             // Update the parent down so that our zoom animations take this new movement into
             // account
@@ -2647,30 +2722,28 @@ ECode PagedView::OnTouchEvent(
             Boolean handledFling = FALSE;
             if (!DISABLE_FLING_TO_DELETE) {
                 // Check the velocity and see if we are flinging-to-delete
-                AutoPtr<IPointF> flingToDeleteVector;
-                IsFlingingToDelete((IPointF**)&flingToDeleteVector);
+                AutoPtr<IPointF> flingToDeleteVector = IsFlingingToDelete();
                 if (flingToDeleteVector != NULL) {
                     OnFlingToDelete(flingToDeleteVector);
                     handledFling = TRUE;
                 }
             }
-            Boolean res;
-            if (!handledFling && (IsHoveringOverDeleteDropTarget((Int32)mParentDownMotionX,
-                    (Int32)mParentDownMotionY, &res), res)) {
+            if (!handledFling && IsHoveringOverDeleteDropTarget((Int32)mParentDownMotionX,
+                    (Int32)mParentDownMotionY)) {
                 OnDropToDelete();
             }
         }
         else {
             if (DEBUG_WARP) Logger::V(TAG, "calling onUnhandledTap()");
-            Boolean res;
-            if (mWarpPageExposed && (IsAnimatingWarpPage(&res), !res)) {
+            if (mWarpPageExposed && !IsAnimatingWarpPage()) {
                 AnimateWarpPageOffScreen(String("unhandled tap"), TRUE);
             }
             OnUnhandledTap(ev);
         }
 
         // Remove the callback to wait for the side page hover timeout
-        RemoveCallbacks(mSidePageHoverRunnable);
+        Boolean res;
+        RemoveCallbacks(mSidePageHoverRunnable, &res);
         // End any intermediate reordering states
         ResetTouchState();
         break;
@@ -2872,7 +2945,7 @@ ECode PagedView::GetPageNearestToPoint(
         view->GetRight(&right);
         Int32 scrollX;
         GetScrollX(&scrollX);
-        if (x < view->GetRight() - scrollX) {
+        if (x < right - scrollX) {
             *page = index;
             return NOERROR;
         }
@@ -2880,7 +2953,7 @@ ECode PagedView::GetPageNearestToPoint(
             index++;
         }
     }
-    *page = Math::Min(index, count - 1);
+    *page = Elastos::Core::Math::Min(index, count - 1);
     return NOERROR;
 }
 
@@ -2889,7 +2962,7 @@ ECode PagedView::GetPageNearestToCenterOfScreen(
 {
     VALIDATE_NOT_NULL(page)
 
-    Int32 minDistanceFromScreenCenter = Integer.MAX_VALUE;
+    Int32 minDistanceFromScreenCenter = Elastos::Core::Math::INT32_MAX_VALUE;
     Int32 minDistanceFromScreenCenterIndex = -1;
 
     Int32 vOffsetX;
@@ -2913,7 +2986,7 @@ ECode PagedView::GetPageNearestToCenterOfScreen(
         Int32 cOffset;
         GetChildOffset(i, &cOffset);
         Int32 childCenter = vOffsetX + cOffset + halfChildWidth;
-        Int32 distanceFromScreenCenter = Math::Abs(childCenter - screenCenter);
+        Int32 distanceFromScreenCenter = Elastos::Core::Math::Abs(childCenter - screenCenter);
         if (distanceFromScreenCenter < minDistanceFromScreenCenter) {
             minDistanceFromScreenCenter = distanceFromScreenCenter;
             minDistanceFromScreenCenterIndex = i;
@@ -2931,8 +3004,7 @@ ECode PagedView::SnapToDestination()
     if (IsWarping(&res), res) {
         CancelWarpAnimation(String("snapToDestination"), mCurrentPage != newPage);
     }
-    Int32 duration;
-    GetPageSnapDuration(&duration);
+    Int32 duration = GetPageSnapDuration();
     return SnapToPage(newPage, duration);
 }
 
@@ -2950,8 +3022,8 @@ ECode PagedView::DistanceInfluenceForSnapDuration(
     VALIDATE_NOT_NULL(duration)
 
     f -= 0.5f; // center the values about 0.
-    f *= 0.3f * Math::PI / 2.0f;
-    *duration = (Float)Math::Sin(f);
+    f *= 0.3f * Elastos::Core::Math::PI / 2.0f;
+    *duration = (Float)Elastos::Core::Math::Sin(f);
     return NOERROR;
 }
 
@@ -2961,7 +3033,8 @@ ECode PagedView::SnapToPageWithVelocity(
 {
     Int32 count;
     GetChildCount(&count);
-    whichPage = Math::Max(0, Math::Min(whichPage, count - 1));
+    whichPage = Elastos::Core::Math::Max(0,
+            Elastos::Core::Math::Min(whichPage, count - 1));
     Int32 width;
     GetViewportWidth(&width);
     Int32 halfScreenSize = width / 2;
@@ -2993,11 +3066,10 @@ ECode PagedView::SnapToPageWithVelocity(
     Int32 delta = newX - mUnboundedScrollX;
     Int32 duration = 0;
 
-    if (Math::Abs(velocity) < mMinFlingVelocity) {
+    if (Elastos::Core::Math::Abs(velocity) < mMinFlingVelocity) {
         // If the velocity is low enough, then treat this more as an automatic page advance
         // as opposed to an apparent physical response to flinging
-        Int32 duration;
-        GetPageSnapDuration(&duration);
+        Int32 duration = GetPageSnapDuration();
         SnapToPage(whichPage, duration);
         return NOERROR;
     }
@@ -3006,18 +3078,20 @@ ECode PagedView::SnapToPageWithVelocity(
     // snap duration. This is a function of the actual distance that needs to be traveled;
     // we keep this value close to half screen size in order to reduce the variance in snap
     // duration as a function of the distance the page needs to travel.
-    Float distanceRatio = Math::Min(1.0f, 1.0f * Math::Abs(delta) / (2 * halfScreenSize));
+    Float distanceRatio = Elastos::Core::Math::Min(1.0f, 1.0f *
+            Elastos::Core::Math::Abs(delta) / (2 * halfScreenSize));
     Float _duration;
     DistanceInfluenceForSnapDuration(distanceRatio, &_duration);
-    Float distance = halfScreenSize + halfScreenSize * _duration);
+    Float distance = halfScreenSize + halfScreenSize * _duration;
 
-    velocity = Math::Abs(velocity);
-    velocity = Math::Max(mMinSnapVelocity, velocity);
+    velocity = Elastos::Core::Math::Abs(velocity);
+    velocity = Elastos::Core::Math::Max(mMinSnapVelocity, velocity);
 
     // we want the page's snap velocity to approximately match the velocity at which the
     // user flings, so we scale the duration by a value near to the derivative of the scroll
     // interpolator at zero, ie. 5. We use 4 to make it a little slower.
-    duration = 4 * Math::Round(1000 * Math::Abs(distance / velocity));
+    duration = 4 * Elastos::Core::Math::Round(1000 *
+            Elastos::Core::Math::Abs(distance / velocity));
 
     return SnapToPage(whichPage, delta, duration);
 }
@@ -3025,16 +3099,14 @@ ECode PagedView::SnapToPageWithVelocity(
 ECode PagedView::SnapToPage(
     /* [in] */ Int32 whichPage)
 {
-    Int32 duration;
-    GetPageSnapDuration(&duration);
+    Int32 duration = GetPageSnapDuration();
     return SnapToPage(whichPage, duration);
 }
 
 ECode PagedView::SnapToPageImmediately(
     /* [in] */ Int32 whichPage)
 {
-    Int32 duration;
-    GetPageSnapDuration(&duration);
+    Int32 duration = GetPageSnapDuration();
     return SnapToPage(whichPage, duration, TRUE);
 }
 
@@ -3052,7 +3124,8 @@ ECode PagedView::SnapToPage(
 {
     Int32 count;
     GetPageCount(&count);
-    whichPage = Math::Max(0, Math::Min(whichPage, count - 1));
+    whichPage = Elastos::Core::Math::Max(0,
+            Elastos::Core::Math::Min(whichPage, count - 1));
 
     if (DEBUG) {
         Int32 offset;
@@ -3121,7 +3194,7 @@ ECode PagedView::SnapToPage(
         duration = 0;
     }
     else if (duration == 0) {
-        duration = Math::Abs(delta);
+        duration = Elastos::Core::Math::Abs(delta);
     }
 
 
@@ -3199,7 +3272,7 @@ ECode PagedView::GetPageForView(
     return NOERROR;
 }
 
-Ecode PagedView::GetScrollingIndicator(
+ECode PagedView::GetScrollingIndicator(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
@@ -3208,7 +3281,7 @@ Ecode PagedView::GetScrollingIndicator(
     return NOERROR;
 }
 
-Ecode PagedView::IsScrollingIndicatorEnabled(
+ECode PagedView::IsScrollingIndicatorEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -3217,15 +3290,17 @@ Ecode PagedView::IsScrollingIndicatorEnabled(
     return NOERROR;
 }
 
-Ecode PagedView::FlashScrollingIndicator(
+ECode PagedView::FlashScrollingIndicator(
     /* [in] */ Boolean animated)
 {
-    RemoveCallbacks(mHideScrollingIndicatorRunnable);
+    Boolean res;
+    RemoveCallbacks(mHideScrollingIndicatorRunnable, &res);
     ShowScrollingIndicator(!animated);
-    return PostDelayed(mHideScrollingIndicatorRunnable, sScrollIndicatorFlashDuration);
+    return PostDelayed(mHideScrollingIndicatorRunnable,
+            sScrollIndicatorFlashDuration, &res);
 }
 
-Ecode PagedView::ShowScrollingIndicator(
+ECode PagedView::ShowScrollingIndicator(
     /* [in] */ Boolean immediately)
 {
     mShouldShowScrollIndicator = TRUE;
@@ -3238,7 +3313,8 @@ Ecode PagedView::ShowScrollingIndicator(
     if (IsScrollingIndicatorEnabled(&res), !res) return NOERROR;
 
     mShouldShowScrollIndicator = FALSE;
-    GetScrollingIndicator();
+    AutoPtr<IView> tmp;
+    GetScrollingIndicator((IView**)&tmp);
     if (mScrollIndicator != NULL) {
         // Fade the indicator in
         UpdateScrollingIndicatorPosition();
@@ -3248,12 +3324,14 @@ Ecode PagedView::ShowScrollingIndicator(
             mScrollIndicator->SetAlpha(1.0f);
         }
         else {
-            AutoPtr<IObjectAnimatorHleper> helper;
-            CObjectAnimatorHleper::AcquireSingleton((IObjectAnimatorHleper**)&helper);
-            helper->OfFloat(mScrollIndicator, String("alpha"), 1.0f,
+            AutoPtr<IObjectAnimatorHelper> helper;
+            CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+            AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+            (*array)[0] = 1.0f;
+            helper->OfFloat(mScrollIndicator, String("alpha"), array,
                     (IObjectAnimator**)&mScrollIndicatorAnimator);
             mScrollIndicatorAnimator->SetDuration(sScrollIndicatorFadeInDuration);
-            mScrollIndicatorAnimator->Start();
+            IAnimator::Probe(mScrollIndicatorAnimator)->Start();
         }
     }
     return NOERROR;
@@ -3262,7 +3340,7 @@ Ecode PagedView::ShowScrollingIndicator(
 ECode PagedView::CancelScrollingIndicatorAnimations()
 {
     if (mScrollIndicatorAnimator != NULL) {
-        mScrollIndicatorAnimator->Cancel();
+        IAnimator::Probe(mScrollIndicatorAnimator)->Cancel();
     }
     return NOERROR;
 }
@@ -3276,7 +3354,8 @@ ECode PagedView::HideScrollingIndicator(
     Boolean res;
     if (IsScrollingIndicatorEnabled(&res), !res) return NOERROR;
 
-    GetScrollingIndicator();
+    AutoPtr<IView> tmp;
+    GetScrollingIndicator((IView**)&tmp);
     if (mScrollIndicator != NULL) {
         // Fade the indicator out
         UpdateScrollingIndicatorPosition();
@@ -3286,15 +3365,18 @@ ECode PagedView::HideScrollingIndicator(
             mScrollIndicator->SetAlpha(0.0f);
         }
         else {
-            AutoPtr<IObjectAnimatorHleper> helper;
-            CObjectAnimatorHleper::AcquireSingleton((IObjectAnimatorHleper**)&helper);
-            helper->OfFloat(mScrollIndicator, String("alpha"), 0.0f, (IObjectAnimator**)&mScrollIndicatorAnimator);
+            AutoPtr<IObjectAnimatorHelper> helper;
+            CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+            AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+            (*array)[0] = 0.0f;
+            helper->OfFloat(mScrollIndicator, String("alpha"), array, (IObjectAnimator**)&mScrollIndicatorAnimator);
             mScrollIndicatorAnimator->SetDuration(sScrollIndicatorFadeOutDuration);
             AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter(this);
-            mScrollIndicatorAnimator->AddListener(lis);
-            mScrollIndicatorAnimator->Start();
+            IAnimator::Probe(mScrollIndicatorAnimator)->AddListener(lis);
+            IAnimator::Probe(mScrollIndicatorAnimator)->Start();
         }
     }
+    return NOERROR;
 }
 
 ECode PagedView::HasElasticScrollIndicator(
@@ -3314,7 +3396,8 @@ void PagedView::UpdateScrollingIndicator()
     Boolean res;
     if (IsScrollingIndicatorEnabled(&res), !res) return;
 
-    GetScrollingIndicator();
+    AutoPtr<IView> tmp;
+    GetScrollingIndicator((IView**)&tmp);
     if (mScrollIndicator != NULL) {
         UpdateScrollingIndicatorPosition();
     }
@@ -3332,7 +3415,7 @@ void PagedView::UpdateScrollingIndicatorPosition()
     GetChildCount(&numPages);
     Int32 pageWidth;
     GetViewportWidth(&pageWidth);
-    Int32 lastChildIndex = Math::Max(0, numPages - 1);
+    Int32 lastChildIndex = Elastos::Core::Math::Max(0, numPages - 1);
 
     Int32 cOffset;
     GetChildOffset(lastChildIndex, &cOffset);
@@ -3351,11 +3434,11 @@ void PagedView::UpdateScrollingIndicatorPosition()
 
     Int32 scrollX;
     GetScrollX(&scrollX);
-    Float offset = Math::Max(0f, Math::Min(1.0f, (Float)scrollX / maxScrollX));
+    Float offset = Elastos::Core::Math::Max(0.0f,
+            Elastos::Core::Math::Min(1.0f, (Float)scrollX / maxScrollX));
     Int32 indicatorSpace = trackWidth / numPages;
     Int32 indicatorPos = (Int32) (offset * (trackWidth - indicatorSpace)) + mScrollIndicatorPaddingLeft;
 
-    Boolean res;
     if (HasElasticScrollIndicator(&res), res) {
         Int32 _mwidth;
         mScrollIndicator->GetMeasuredWidth(&_mwidth);
@@ -3377,19 +3460,27 @@ ECode PagedView::AnimateDragViewToOriginalPosition()
 {
     if (mDragView != NULL) {
         AutoPtr<IAnimatorSet> anim;
-        CAnimatorSet::New(&anim);
-        anim->SetDuration(REORDERING_DROP_REPOSITION_DURATION);
+        CAnimatorSet::New((IAnimatorSet**)&anim);
+        IAnimator::Probe(anim)->SetDuration(REORDERING_DROP_REPOSITION_DURATION);
 
-        AutoPtr<IObjectAnimatorHleper> helper;
-        CObjectAnimatorHleper::AcquireSingleton((IObjectAnimatorHleper**)&helper);
+        AutoPtr<IObjectAnimatorHelper> helper;
+        CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 0.0f;
         AutoPtr<IObjectAnimator> animatorx;
-        helper->OfFloat(mDragView, String("translationX"), 0.0f, (IObjectAnimator**)&animatorx);
+        helper->OfFloat(mDragView, String("translationX"), array, (IObjectAnimator**)&animatorx);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+        (*array2)[0] = 0.0f;
         AutoPtr<IObjectAnimator> animatory;
-        helper->OfFloat(mDragView, String("translationY"), 0.0f, (IObjectAnimator**)&animatory);
-        anim->PlayTogether(animatorx, animatory);
+        helper->OfFloat(mDragView, String("translationY"), array2, (IObjectAnimator**)&animatory);
+
+        AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+        array3->Set(0, IAnimator::Probe(animatorx));
+        array3->Set(1, IAnimator::Probe(animatory));
+        anim->PlayTogether(array3);
         AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter2(this);
-        anim->AddListener(lis);
-        anim->Start();
+        IAnimator::Probe(anim)->AddListener(lis);
+        IAnimator::Probe(anim)->Start();
     }
     return NOERROR;
 }
@@ -3400,25 +3491,33 @@ ECode PagedView::ZoomOut(
     VALIDATE_NOT_NULL(result)
 
     Boolean res;
-    if (mZoomInOutAnim != NULL && (mZoomInOutAnim->IsRunning(&res), res)) {
-        mZoomInOutAnim->Cancel();
+    if (mZoomInOutAnim != NULL && (IAnimator::Probe(mZoomInOutAnim)->IsRunning(&res), res)) {
+        IAnimator::Probe(mZoomInOutAnim)->Cancel();
     }
 
     Float x, y;
     if (!((GetScaleX(&x), x) < 1.0f || (GetScaleY(&y), x) < 1.0f)) {
         CAnimatorSet::New((IAnimatorSet**)&mZoomInOutAnim);
-        mZoomInOutAnim->SetDuration(REORDERING_ZOOM_IN_OUT_DURATION);
+        IAnimator::Probe(mZoomInOutAnim)->SetDuration(REORDERING_ZOOM_IN_OUT_DURATION);
 
-        AutoPtr<IObjectAnimatorHleper> helper;
-        CObjectAnimatorHleper::AcquireSingleton((IObjectAnimatorHleper**)&helper);
+        AutoPtr<IObjectAnimatorHelper> helper;
+        CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = mMinScale;
         AutoPtr<IObjectAnimator> animatorx;
-        helper->OfFloat(this, String("scaleX"), mMinScale, (IObjectAnimator**)&animatorx);
+        helper->OfFloat(TO_IINTERFACE(this), String("scaleX"), array, (IObjectAnimator**)&animatorx);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+        (*array2)[0] = mMinScale;
         AutoPtr<IObjectAnimator> animatory;
-        helper->OfFloat(this, String("scaleY"), mMinScale, (IObjectAnimator**)&animatory);
-        mZoomInOutAnim->PlayTogether(animatorx, animatory);
+        helper->OfFloat(TO_IINTERFACE(this), String("scaleY"), array2, (IObjectAnimator**)&animatory);
+
+        AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+        array3->Set(0, IAnimator::Probe(animatorx));
+        array3->Set(1, IAnimator::Probe(animatory));
+        mZoomInOutAnim->PlayTogether(array3);
         AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter3(this);
-        mZoomInOutAnim->AddListener(lis);
-        mZoomInOutAnim->Start();
+        IAnimator::Probe(mZoomInOutAnim)->AddListener(lis);
+        IAnimator::Probe(mZoomInOutAnim)->Start();
         *result= TRUE;
         return NOERROR;
     }
@@ -3428,12 +3527,17 @@ ECode PagedView::ZoomOut(
 
 ECode PagedView::OnStartReordering()
 {
+    AutoPtr<IAccessibilityManagerHelper> helper;
+    CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&helper);
+    AutoPtr<IAccessibilityManager> manager;
+    helper->GetInstance(mContext, (IAccessibilityManager**)&manager);
     Boolean res;
-    if (AccessibilityManager::GetInstance(mContext)->IsEnabled(&res), res) {
+    if (manager->IsEnabled(&res), res) {
         String str;
         mContext->GetString(
                 R::string::keyguard_accessibility_widget_reorder_start, &str);
-        AnnounceForAccessibility(str);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+        AnnounceForAccessibility(cchar);
     }
 
     // Set the touch state to reordering (allows snapping to pages, dragging a child, etc.)
@@ -3471,17 +3575,23 @@ void PagedView::OnPostReorderingAnimationCompleted()
 
 ECode PagedView::OnEndReordering()
 {
+    AutoPtr<IAccessibilityManagerHelper> helper;
+    CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&helper);
+    AutoPtr<IAccessibilityManager> manager;
+    helper->GetInstance(mContext, (IAccessibilityManager**)&manager);
     Boolean res;
-    if (AccessibilityManager::GetInstance(mContext)->IsEnabled(&res), res) {
+    if (manager->IsEnabled(&res), res) {
         if (mDeleteString != NULL) {
-            AnnounceForAccessibility(mDeleteString);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(mDeleteString);
+            AnnounceForAccessibility(cchar);
             mDeleteString = NULL;
         }
         else {
             String str;
             mContext->GetString(
                     R::string::keyguard_accessibility_widget_reorder_end, &str);
-            AnnounceForAccessibility();
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+            AnnounceForAccessibility(cchar);
         }
     }
     mIsReordering = FALSE;
@@ -3581,8 +3691,8 @@ ECode PagedView::ZoomIn(
     VALIDATE_NOT_NULL(result)
 
     Boolean res;
-    if (mZoomInOutAnim != NULL && (mZoomInOutAnim->IsRunning(&res), res)) {
-        mZoomInOutAnim->Cancel();
+    if (mZoomInOutAnim != NULL && (IAnimator::Probe(mZoomInOutAnim)->IsRunning(&res), res)) {
+        IAnimator::Probe(mZoomInOutAnim)->Cancel();
     }
 
     Float x;
@@ -3591,18 +3701,27 @@ ECode PagedView::ZoomIn(
     GetScaleY(&y);
     if (x < 1.0f || y < 1.0f) {
         CAnimatorSet::New((IAnimatorSet**)&mZoomInOutAnim);
-        mZoomInOutAnim->SetDuration(REORDERING_ZOOM_IN_OUT_DURATION);
+        IAnimator::Probe(mZoomInOutAnim)->SetDuration(REORDERING_ZOOM_IN_OUT_DURATION);
 
-        AutoPtr<IObjectAnimatorHleper> helper;
-        CObjectAnimatorHleper::AcquireSingleton((IObjectAnimatorHleper**)&helper);
+        AutoPtr<IObjectAnimatorHelper> helper;
+        CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 1.0f;
         AutoPtr<IObjectAnimator> animatorx;
-        helper->OfFloat(this, String("scaleX"), 1.0f, (IObjectAnimator**)&animatorx);
+        helper->OfFloat(TO_IINTERFACE(this), String("scaleX"), array, (IObjectAnimator**)&animatorx);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+        (*array2)[0] = 1.0f;
         AutoPtr<IObjectAnimator> animatory;
-        helper->OfFloat(this, String("scaleY"), 1.0f, (IObjectAnimator**)&animatory);
-        mZoomInOutAnim->PlayTogether(animatorx, animatory);
-        AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter5(mHost);
-        mZoomInOutAnim->AddListener(lis);
-        mZoomInOutAnim->Start();
+        helper->OfFloat(TO_IINTERFACE(this), String("scaleY"), array2, (IObjectAnimator**)&animatory);
+
+        AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+        array3->Set(0, IAnimator::Probe(animatorx));
+        array3->Set(1, IAnimator::Probe(animatory));
+        mZoomInOutAnim->PlayTogether(array3);
+        AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter5(this,
+                onCompleteRunnable);
+        IAnimator::Probe(mZoomInOutAnim)->AddListener(lis);
+        IAnimator::Probe(mZoomInOutAnim)->Start();
         *result = TRUE;
         return NOERROR;
     }
@@ -3627,34 +3746,33 @@ AutoPtr<IPointF> PagedView::IsFlingingToDelete()
     config->GetScaledMaximumFlingVelocity(&maximumFlingVelocity);
     mVelocityTracker->ComputeCurrentVelocity(1000, maximumFlingVelocity);
 
-    Int32 yVelocity;
+    Float yVelocity;
     mVelocityTracker->GetYVelocity(&yVelocity);
     if (yVelocity < mFlingToDeleteThresholdVelocity) {
         // Do a quick dot product test to ensure that we are flinging upwards
-        Int32 xVelocity;
+        Float xVelocity;
         mVelocityTracker->GetXVelocity(&xVelocity);
-        Int32 yVelocity;
         mVelocityTracker->GetYVelocity(&yVelocity);
         AutoPtr<IPointF> vel;
         CPointF::New(xVelocity, yVelocity, (IPointF**)&vel);
 
         AutoPtr<IPointF> upVec;
         CPointF::New(0.0f, -1.0f, (IPointF**)&upVec);
-        Int32 vx;
+        Float vx;
         vel->GetX(&vx);
-        Int32 ux;
+        Float ux;
         upVec->GetX(&ux);
-        Int32 vy;
+        Float vy;
         vel->GetY(&vy);
-        Int32 uy;
+        Float uy;
         upVec->GetY(&uy);
-        Int32 vlength;
-        vel->GetLength(&vlength);
-        Int32 ulength;
-        upVec->GetLength(&ulength);
-        Float theta = (Float) Math::Acos(((vx * ux) + (vy * uy)) /
+        Float vlength;
+        vel->Length(&vlength);
+        Float ulength;
+        upVec->Length(&ulength);
+        Float theta = (Float) Elastos::Core::Math::Acos(((vx * ux) + (vy * uy)) /
                 (vlength * ulength));
-        if (theta <= Math::ToRadians(FLING_TO_DELETE_MAX_FLING_DEGREES)) {
+        if (theta <= Elastos::Core::Math::ToRadians(FLING_TO_DELETE_MAX_FLING_DEGREES)) {
             return vel;
         }
     }
@@ -3664,7 +3782,7 @@ AutoPtr<IPointF> PagedView::IsFlingingToDelete()
 AutoPtr<IRunnable> PagedView::CreatePostDeleteAnimationRunnable(
     /* [in] */ IView* dragView)
 {
-    AutoPtr<IRunnable> r = new MyRunnable5(this);
+    AutoPtr<IRunnable> r = new MyRunnable5(this, dragView);
     return r;
 }
 
@@ -3681,7 +3799,7 @@ ECode PagedView::OnFlingToDelete(
     // to account for the time that has elapsed since the fling finished.  And since
     // we don't have a startDelay, we will always get call to update when we call
     // start() (which we want to ignore).
-    AutoPtr<ITimeInterpolator> tInterpolator = new MyTimeInterpolator(this);
+    AutoPtr<ITimeInterpolator> tInterpolator = new MyTimeInterpolator(this, startTime);
 
     AutoPtr<IRect> from;
     CRect::New((IRect**)&from);
@@ -3699,26 +3817,33 @@ ECode PagedView::OnFlingToDelete(
     AutoPtr<IAnimatorUpdateListener> updateCb = IAnimatorUpdateListener::Probe(tmp);
 
     AutoPtr<IContext> context;
-    GetContext(&context);
+    GetContext((IContext**)&context);
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> cchar;
     mDragView->GetContentDescription((ICharSequence**)&cchar);
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+    array->Set(0, TO_IINTERFACE(cchar));
     resources->GetString(R::string::keyguard_accessibility_widget_deleted,
-            cchar, &mDeleteString);
+            array, &mDeleteString);
     AutoPtr<IRunnable> onAnimationEndRunnable = CreatePostDeleteAnimationRunnable(dragView);
 
     // Create and start the animation
     AutoPtr<IValueAnimator> mDropAnim;
     CValueAnimator::New((IValueAnimator**)&mDropAnim);
-    mDropAnim->SetInterpolator(tInterpolator);
+    IAnimator::Probe(mDropAnim)->SetInterpolator(tInterpolator);
     mDropAnim->SetDuration(FLING_TO_DELETE_FADE_OUT_DURATION);
-    mDropAnim->SetFloatValues(0.0f, 1.0f);
+
+    AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(2);
+    (*array2)[0] = 0.0f;
+    (*array2)[1] = 1.0f;
+    mDropAnim->SetFloatValues(array2);
     mDropAnim->AddUpdateListener(updateCb);
     AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter8(onAnimationEndRunnable);
-    mDropAnim->AddListener(lis);
-    mDropAnim->Start();
+    IAnimator::Probe(mDropAnim)->AddListener(lis);
+    IAnimator::Probe(mDropAnim)->Start();
     mDeferringForDelete = TRUE;
+    return NOERROR;
 }
 
 Boolean PagedView::IsHoveringOverDeleteDropTarget(
@@ -3730,16 +3855,16 @@ Boolean PagedView::IsHoveringOverDeleteDropTarget(
         AutoPtr<IViewParent> p;
         mDeleteDropTarget->GetParent((IViewParent**)&p);
         AutoPtr<IView> parent = IView::Probe(p);
+        Boolean res;
         if (parent != NULL) {
-            parent->GetGlobalVisibleRect(mAltTmpRect);
+            parent->GetGlobalVisibleRect(mAltTmpRect, &res);
         }
-        mDeleteDropTarget->GetGlobalVisibleRect(mTmpRect);
+        mDeleteDropTarget->GetGlobalVisibleRect(mTmpRect, &res);
         Int32 left;
         mAltTmpRect->GetLeft(&left);
         Int32 top;
         mAltTmpRect->GetTop(&top);
         mTmpRect->Offset(-left, -top);
-        Boolean res;
         mTmpRect->Contains(x, y, &res);
         return NOERROR;
     }
@@ -3767,46 +3892,60 @@ void PagedView::OnDropToDelete()
     CAnimatorSet::New((IAnimatorSet**)&motionAnim);
 
     AutoPtr<ITimeInterpolator> polator;
-    CDecelerateInterpolator::New(2, (ITimeInterpolator**)polator);
+    CDecelerateInterpolator::New(2, (ITimeInterpolator**)&polator);
     IAnimator::Probe(motionAnim)->SetInterpolator(polator);
 
-    AutoPtr<IObjectAnimatorHleper> helper;
-    CObjectAnimatorHleper::AcquireSingleton((IObjectAnimatorHleper**)&helper);
+    AutoPtr<IObjectAnimatorHelper> helper;
+    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+    (*array)[0] = toScale;
     AutoPtr<IObjectAnimator> animatorx;
-    helper->OfFloat(dragView, String("scaleX"), toScale, (IObjectAnimator**)&animatorx);
+    helper->OfFloat(dragView, String("scaleX"), array, (IObjectAnimator**)&animatorx);
+    AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+    (*array2)[0] = toScale;
     AutoPtr<IObjectAnimator> animatory;
-    helper->OfFloat(dragView, String("scaleY"), toScale, (IObjectAnimator**)&animatory);
-    motionAnim->PlayTogether(animatorx, animatory);
+    helper->OfFloat(dragView, String("scaleY"), array2, (IObjectAnimator**)&animatory);
+
+    AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+    array3->Set(0, IAnimator::Probe(animatorx));
+    array3->Set(1, IAnimator::Probe(animatory));
+    motionAnim->PlayTogether(array3);
     animations->Add(motionAnim);
 
     AutoPtr<IAnimatorSet> alphaAnim;
     CAnimatorSet::New((IAnimatorSet**)&alphaAnim);
     AutoPtr<ITimeInterpolator> polator2;
-    CLinearInterpolator::New((ITimeInterpolator**)polator2);
+    CLinearInterpolator::New((ITimeInterpolator**)&polator2);
     IAnimator::Probe(alphaAnim)->SetInterpolator(polator2);
 
+    AutoPtr<ArrayOf<Float> > array4 = ArrayOf<Float>::Alloc(1);
+    (*array4)[0] = toAlpha;
     AutoPtr<IObjectAnimator> animatorz;
-    helper->OfFloat(dragView, String("alpha"), toAlpha, (IObjectAnimator**)&animatorz);
-    alphaAnim->PlayTogether(animatorz);
+    helper->OfFloat(dragView, String("alpha"), array4, (IObjectAnimator**)&animatorz);
+    AutoPtr<ArrayOf<IAnimator*> > array5 = ArrayOf<IAnimator*>::Alloc(1);
+    array5->Set(0, IAnimator::Probe(animatorz));
+    alphaAnim->PlayTogether(array5);
     animations->Add(alphaAnim);
 
     AutoPtr<IContext> context;
-    getContext((IContext**)&context);
+    GetContext((IContext**)&context);
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> cchar;
     mDragView->GetContentDescription((ICharSequence**)&cchar);
+    AutoPtr<ArrayOf<IInterface*> > array6 = ArrayOf<IInterface*>::Alloc(1);
+    array6->Set(0, TO_IINTERFACE(cchar));
     resources->GetString(R::string::keyguard_accessibility_widget_deleted,
-            cchar, &mDeleteString);
+            array6, &mDeleteString);
     AutoPtr<IRunnable> onAnimationEndRunnable = CreatePostDeleteAnimationRunnable(dragView);
 
     AutoPtr<IAnimatorSet> anim;
     CAnimatorSet::New((IAnimatorSet**)&anim);
-    anim->PlayTogether(animations);
-    anim->SetDuration(DRAG_TO_DELETE_FADE_OUT_DURATION);
+    anim->PlayTogether(ICollection::Probe(animations));
+    IAnimator::Probe(anim)->SetDuration(DRAG_TO_DELETE_FADE_OUT_DURATION);
     AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter9(onAnimationEndRunnable);
-    anim->AddListener(lis);
-    anim->Start();
+    IAnimator::Probe(anim)->AddListener(lis);
+    IAnimator::Probe(anim)->Start();
 
     mDeferringForDelete = TRUE;
 }
@@ -3834,14 +3973,15 @@ ECode PagedView::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     ViewGroup::OnInitializeAccessibilityEvent(event);
-    event->SetScrollable(TRUE);
+    IAccessibilityRecord::Probe(event)->SetScrollable(TRUE);
     Int32 type;
     event->GetEventType(&type);
     if (type == IAccessibilityEvent::TYPE_VIEW_SCROLLED) {
-        event->SetFromIndex(mCurrentPage);
-        event->SetToIndex(mCurrentPage);
+        IAccessibilityRecord::Probe(event)->SetFromIndex(mCurrentPage);
+        IAccessibilityRecord::Probe(event)->SetToIndex(mCurrentPage);
         Int32 count;
-        event->SetItemCount(&count);
+        GetChildCount(&count);
+        IAccessibilityRecord::Probe(event)->SetItemCount(count);
     }
     return NOERROR;
 }
@@ -3921,13 +4061,13 @@ void PagedView::CancelWarpAnimation(
         GetPageAt(index, (IView**)&view);
         AutoPtr<IKeyguardWidgetFrame> v = IKeyguardWidgetFrame::Probe(view);
         AutoPtr<IViewPropertyAnimator> animator;
-        v->Animate((IViewPropertyAnimator**)&animator);
+        IView::Probe(v)->Animate((IViewPropertyAnimator**)&animator);
         animator->Cancel();
         // Make the scroll amount match the current warp position.
         Float x;
-        v->GetTranslationX(&x);
-        ScrollBy(Math::Round(-x), 0);
-        v->SetTranslationX(0);
+        IView::Probe(v)->GetTranslationX(&x);
+        ScrollBy(Elastos::Core::Math::Round(-x), 0);
+        IView::Probe(v)->SetTranslationX(0);
     }
     else {
         AnimateWarpPageOffScreen(String("canceled"), TRUE);
@@ -3955,15 +4095,14 @@ void PagedView::AnimateWarpPageOnScreen(
 
         if (DEBUG_WARP) {
             Float x;
-            v->GetTranslationX(&x);
+            IView::Probe(v)->GetTranslationX(&x);
             Logger::V(TAG, "moving page on screen: Tx= %f", x);
         }
         AutoPtr<ITimeInterpolator> interp;
-        CDecelerateInterpolator::new(1.5f, (ITimeInterpolator**)&interp);
-        Int32 totalOffset;
-        GetCurrentWarpOffset(&totalOffset);
-        v->SetTranslationX(totalOffset);
-        v->Animate((IViewPropertyAnimator**)&mWarpAnimation);
+        CDecelerateInterpolator::New(1.5f, (ITimeInterpolator**)&interp);
+        Int32 totalOffset = GetCurrentWarpOffset();
+        IView::Probe(v)->SetTranslationX(totalOffset);
+        IView::Probe(v)->Animate((IViewPropertyAnimator**)&mWarpAnimation);
         mWarpAnimation->TranslationX(mWarpPeekAmount+totalOffset);
         mWarpAnimation->SetInterpolator(interp);
         mWarpAnimation->SetDuration(WARP_PEEK_ANIMATION_DURATION);
@@ -3996,7 +4135,7 @@ void PagedView::AnimateWarpPageOffScreen(
     /* [in] */ const String& reason,
     /* [in] */ Boolean animate)
 {
-    if (DEBUG_WARP) Logger.v(TAG, "animateWarpPageOffScreen(%s anim:%d)",
+    if (DEBUG_WARP) Logger::V(TAG, "animateWarpPageOffScreen(%s anim:%d)",
             reason.string(), animate);
     if (mWarpPageExposed) {
         DispatchOnPageEndWarp();
@@ -4008,15 +4147,14 @@ void PagedView::AnimateWarpPageOffScreen(
         AutoPtr<IKeyguardWidgetFrame> v = IKeyguardWidgetFrame::Probe(view);
         if (DEBUG_WARP) {
             Float x;
-            v->GetTranslationX(&x);
+            IView::Probe(v)->GetTranslationX(&x);
             Logger::V(TAG, "moving page off screen: Tx=%f", x);
         }
         AutoPtr<ITimeInterpolator> interp;
         CAccelerateInterpolator::New(1.5f, (ITimeInterpolator**)&interp);
-        Int32 totalOffset;
-        GetCurrentWarpOffset(&totalOffset);
+        Int32 totalOffset = GetCurrentWarpOffset();
         AutoPtr<IViewPropertyAnimator> animator;
-        v->Animate((IViewPropertyAnimator**)&animator);
+        IView::Probe(v)->Animate((IViewPropertyAnimator**)&animator);
         animator->TranslationX(totalOffset);
         animator->SetInterpolator(interp);
         animator->SetDuration(animate ? WARP_PEEK_ANIMATION_DURATION : 0);

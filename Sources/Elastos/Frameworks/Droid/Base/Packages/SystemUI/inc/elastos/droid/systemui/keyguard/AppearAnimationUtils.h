@@ -54,11 +54,11 @@ public:
         /* [in] */ IInterpolator* interpolator);
 
     CARAPI StartAppearAnimation(
-        /* [in] */ ArrayOf<ArrayOf<IView*>* >* objects,
+        /* [in] */ ArrayOf<ArrayOf<IInterface*>* >* objects,
         /* [in] */ IRunnable* finishListener);
 
     CARAPI StartAppearAnimation(
-        /* [in] */ ArrayOf<IView*>* objects,
+        /* [in] */ ArrayOf<IInterface*>* objects,
         /* [in] */ IRunnable* finishListener);
 
     CARAPI StartAppearAnimation(
@@ -114,10 +114,10 @@ public:
 
 private:
     AutoPtr<IInterpolator> mInterpolator;
-    const Float mStartTranslation;
+    Float mStartTranslation;
     AutoPtr<AppearAnimationProperties> mProperties;
-    const Float mDelayScale;
-    const Int64 mDuration;
+    Float mDelayScale;
+    Int64 mDuration;
 };
 
 } // namespace Keyguard

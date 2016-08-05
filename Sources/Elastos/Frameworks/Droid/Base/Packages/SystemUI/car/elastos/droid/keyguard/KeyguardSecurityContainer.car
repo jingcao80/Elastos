@@ -34,11 +34,18 @@ module
         SetSecurityCallback(
             [in] IKeyguardSecurityContainerSecurityCallback* cb);
 
+        OnAttachedToWindow();
+
+        OnDetachedFromWindow();
+
         StartAppearAnimation();
 
         StartDisappearAnimation(
             [in] IRunnable* onFinishRunnable,
             [out] Boolean* result);
+
+        UpdateSecurityViews(
+            [in] Boolean isBouncing);
 
         AnnounceCurrentSecurityMethod();
 

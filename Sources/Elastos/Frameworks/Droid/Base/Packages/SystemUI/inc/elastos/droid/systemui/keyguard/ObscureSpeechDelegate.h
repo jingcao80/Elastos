@@ -3,6 +3,17 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_OBSCURESPEECHDELEGATE_H__
 
 #include "_Elastos.Droid.SystemUI.h"
+#include "elastos/droid/view/View.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::View::View;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
+using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +26,7 @@ namespace Keyguard {
  * through headphones.
  */
 class ObscureSpeechDelegate
-    : public AccessibilityDelegate
+    : public Elastos::Droid::View::View::AccessibilityDelegate
 {
 public:
     TO_STRING_IMPL("ObscureSpeechDelegate")
@@ -43,6 +54,7 @@ private:
     CARAPI_(Boolean) ShouldObscureSpeech();
 
 private:
+    friend class CNumPadKey;
     /** Whether any client has announced the "headset" notification. */
     static Boolean sAnnouncedHeadset;
 

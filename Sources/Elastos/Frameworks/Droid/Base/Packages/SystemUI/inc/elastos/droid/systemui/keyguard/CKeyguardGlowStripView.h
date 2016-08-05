@@ -4,8 +4,25 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardGlowStripView.h"
 #include <elastos/droid/widget/LinearLayout.h>
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -62,6 +79,8 @@ private:
 
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CKeyguardGlowStripView();
 

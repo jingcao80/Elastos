@@ -4,8 +4,26 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardFaceUnlockView.h"
 #include "elastos/droid/widget/LinearLayout.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IIWindowManager;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IRotationWatcher;
+using Elastos::Droid::Widget::IImageButton;
 using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -15,6 +33,7 @@ namespace Keyguard {
 CarClass(CKeyguardFaceUnlockView)
     , public LinearLayout
     , public IKeyguardSecurityView
+    , public IKeyguardFaceUnlockView
 {
 private:
     class MyKeyguardUpdateMonitorCallback
@@ -69,6 +88,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CKeyguardFaceUnlockView::MyOnClickListener")
+
+        CAR_INTERFACE_DECL()
 
         MyOnClickListener(
             /* [in] */ CKeyguardFaceUnlockView* host)
@@ -177,6 +198,7 @@ private:
     CARAPI_(void) HandleBouncerUserVisibilityChanged();
 
 private:
+    friend class CKeyguardFaceUnlockViewRotationWatcher;
     static const String TAG;
     static const Boolean DEBUG;
     AutoPtr<IKeyguardSecurityCallback> mKeyguardSecurityCallback;
@@ -195,7 +217,7 @@ private:
     Boolean mWatchingRotation;
     AutoPtr<IIWindowManager> mWindowManager;
 
-    AutoPtr<IIRotationWatcher> mRotationWatcher;
+    AutoPtr<IRotationWatcher> mRotationWatcher;
 
     AutoPtr<IKeyguardUpdateMonitorCallback> mUpdateCallback;
 };

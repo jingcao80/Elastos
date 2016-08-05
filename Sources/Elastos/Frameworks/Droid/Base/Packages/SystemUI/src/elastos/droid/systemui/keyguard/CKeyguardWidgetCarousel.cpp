@@ -1,5 +1,26 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardWidgetCarousel.h"
+#include "elastos/droid/systemui/keyguard/KeyguardWidgetFrame.h"
+#include <elastos/core/Math.h>
+#include "R.h"
+
+using Elastos::Droid::Animation::IPropertyValuesHolder;
+using Elastos::Droid::Animation::CAnimatorSet;
+using Elastos::Droid::Animation::IAnimatorSet;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::IPropertyValuesHolderHelper;
+using Elastos::Droid::Animation::CPropertyValuesHolderHelper;
+using Elastos::Droid::View::Animation::EIID_IInterpolator;
+using Elastos::Droid::View::Animation::CAccelerateInterpolator;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Core::Math;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -12,7 +33,7 @@ CAR_INTERFACE_IMPL_2(CKeyguardWidgetCarousel::MyInterpolator, Object, IInterpola
 CKeyguardWidgetCarousel::MyInterpolator::MyInterpolator()
     : mFactor(2.5f)
 {
-    mInternal = new CDecelerateInterpolator::New(1.5f, (IInterpolator**)&mInternal);
+    CDecelerateInterpolator::New(1.5f, (IInterpolator**)&mInternal);
 }
 
 ECode CKeyguardWidgetCarousel::MyInterpolator::GetInterpolation(
@@ -21,7 +42,8 @@ ECode CKeyguardWidgetCarousel::MyInterpolator::GetInterpolation(
 {
     VALIDATE_NOT_NULL(output)
 
-    return mInternal->GetInterpolation(Math::Min(mFactor * input, 1.0f), output);
+    return ITimeInterpolator::Probe(mInternal)->GetInterpolation(
+            Elastos::Core::Math::Min(mFactor * input, 1.0f), output);
 }
 
 ECode CKeyguardWidgetCarousel::MyInterpolator::HasNativeInterpolator(
@@ -49,8 +71,8 @@ ECode CKeyguardWidgetCarousel::MyInterpolator2::GetInterpolation(
     VALIDATE_NOT_NULL(output)
 
     input -= (1 - 1 / mFactor);
-    input = mFactor * Math::Max(input, 0f);
-    return mInternal->GetInterpolation(input, output);
+    input = mFactor * Elastos::Core::Math::Max(input, 0.0f);
+    return ITimeInterpolator::Probe(mInternal)->GetInterpolation(input, output);
 }
 
 ECode CKeyguardWidgetCarousel::MyInterpolator2::HasNativeInterpolator(
@@ -62,8 +84,8 @@ ECode CKeyguardWidgetCarousel::MyInterpolator2::HasNativeInterpolator(
     return NOERROR;
 }
 
-static Float CKeyguardWidgetCarousel::MAX_SCROLL_PROGRESS = 1.3f;
-static Float CKeyguardWidgetCarousel::CAMERA_DISTANCE = 10000;
+Float CKeyguardWidgetCarousel::MAX_SCROLL_PROGRESS = 1.3f;
+Float CKeyguardWidgetCarousel::CAMERA_DISTANCE = 10000;
 
 CAR_OBJECT_IMPL(CKeyguardWidgetCarousel)
 
@@ -97,8 +119,11 @@ ECode CKeyguardWidgetCarousel::constructor(
 {
     KeyguardWidgetPager::constructor(context, attrs, defStyle);
     AutoPtr<IResources> resources;
-    context->GetResources((IResources**)&resources)
-    return resources->GetInteger(R::integer::kg_carousel_angle, &mAdjacentPagesAngle);
+    context->GetResources((IResources**)&resources);
+    Int32 tmp;
+    resources->GetInteger(R::integer::kg_carousel_angle, &tmp);
+    mAdjacentPagesAngle = tmp;
+    return NOERROR;
 }
 
 ECode CKeyguardWidgetCarousel::GetMaxScrollProgress(
@@ -139,12 +164,13 @@ ECode CKeyguardWidgetCarousel::GetAlphaForPage(
     }
     else if ((showSidePages && inVisibleRange) || index == _page) {
         GetBoundedScrollProgress(screenCenter, child, index, &scrollProgress);
-        Float alpha = 1.0f - 1.0f * Math::Abs(scrollProgress / MAX_SCROLL_PROGRESS);
+        Float alpha = 1.0f - 1.0f *
+                Elastos::Core::Math::Abs(scrollProgress / MAX_SCROLL_PROGRESS);
         *page = alpha;
         return NOERROR;
     }
     else {
-        *page = 0f;
+        *page = 0.0f;
         return NOERROR;
     }
 }
@@ -161,10 +187,11 @@ ECode CKeyguardWidgetCarousel::GetOutlineAlphaForPage(
     GetNextPage(&_page);
     Boolean inVisibleRange = index >= _page - 1 && index <= _page + 1;
     if (inVisibleRange) {
-        return KeyguardWidgetPager::GetOutlineAlphaForPage(screenCenter, index, showSidePages, page);
+        return KeyguardWidgetPager::GetOutlineAlphaForPage(screenCenter,
+                index, showSidePages, page);
     }
     else {
-        *page = 0f;
+        *page = 0.0f;
         return NOERROR;
     }
 }
@@ -173,7 +200,7 @@ void CKeyguardWidgetCarousel::UpdatePageAlphaValues(
     /* [in] */ Int32 screenCenter)
 {
     if (mChildrenOutlineFadeAnimation != NULL) {
-        mChildrenOutlineFadeAnimation->Cancel();
+        IAnimator::Probe(mChildrenOutlineFadeAnimation)->Cancel();
         mChildrenOutlineFadeAnimation = NULL;
     }
     Boolean res;
@@ -208,12 +235,12 @@ ECode CKeyguardWidgetCarousel::ShowInitialPageHints()
         AutoPtr<IKeyguardWidgetFrame> child;
         GetWidgetPageAt(i, (IKeyguardWidgetFrame**)&child);
         if (inVisibleRange) {
-            child->SetBackgroundAlpha(IKeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER);
-            child->SetContentAlpha(1f);
+            child->SetBackgroundAlpha(KeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER);
+            child->SetContentAlpha(1.0f);
         }
         else {
-            child->SetBackgroundAlpha(0f);
-            child->SetContentAlpha(0f);
+            child->SetBackgroundAlpha(0.0f);
+            child->SetContentAlpha(0.0f);
         }
     }
     return NOERROR;
@@ -233,40 +260,41 @@ ECode CKeyguardWidgetCarousel::ScreenScrolled(
         AutoPtr<IKeyguardWidgetFrame> v;
         GetWidgetPageAt(i, (IKeyguardWidgetFrame**)&v);
         Float scrollProgress;
-        GetScrollProgress(screenCenter, v, i, &scrollProgress);
+        GetScrollProgress(screenCenter, IView::Probe(v), i, &scrollProgress);
         Float boundedProgress;
-        GetBoundedScrollProgress(screenCenter, v, i, &boundedProgress);
+        GetBoundedScrollProgress(screenCenter, IView::Probe(v), i, &boundedProgress);
         if (TO_IINTERFACE(v) == TO_IINTERFACE(mDragView) || v == NULL) continue;
-        v->SetCameraDistance(CAMERA_DISTANCE);
+        IView::Probe(v)->SetCameraDistance(CAMERA_DISTANCE);
 
         Boolean res;
         if (IsOverScrollChild(i, scrollProgress, &res), res) {
-            v->SetRotationY(- OVERSCROLL_MAX_ROTATION * scrollProgress);
-            v->SetOverScrollAmount(Math::Abs(scrollProgress), scrollProgress < 0);
+            IView::Probe(v)->SetRotationY(- OVERSCROLL_MAX_ROTATION * scrollProgress);
+            v->SetOverScrollAmount(
+                    Elastos::Core::Math::Abs(scrollProgress), scrollProgress < 0);
         }
         else {
             Int32 width;
-            v->GetMeasuredWidth(&width);
-            Float pivotX = (width / 2f) + boundedProgress * (width / 2f);
+            IView::Probe(v)->GetMeasuredWidth(&width);
+            Float pivotX = (width / 2.0f) + boundedProgress * (width / 2.0f);
             Int32 height;
-            v->GetMeasuredHeight(&height);
+            IView::Probe(v)->GetMeasuredHeight(&height);
             Float pivotY = height / 2;
             Float rotationY = - mAdjacentPagesAngle * boundedProgress;
-            v->SetPivotX(pivotX);
-            v->SetPivotY(pivotY);
-            v->SetRotationY(rotationY);
+            IView::Probe(v)->SetPivotX(pivotX);
+            IView::Probe(v)->SetPivotY(pivotY);
+            IView::Probe(v)->SetRotationY(rotationY);
             v->SetOverScrollAmount(0.0f, FALSE);
         }
         Float alpha;
-        v->GetAlpha(&alpha);
+        IView::Probe(v)->GetAlpha(&alpha);
         // If the view has 0 alpha, we set it to be invisible so as to prevent
         // it from accepting touches
         Int32 visiable;
         if (alpha == 0) {
-            v->SetVisibility(INVISIBLE);
+            IView::Probe(v)->SetVisibility(INVISIBLE);
         }
-        else if ((v->GetVisibility(&visiable), visiable) != VISIBLE) {
-            v->SetVisibility(VISIBLE);
+        else if ((IView::Probe(v)->GetVisibility(&visiable), visiable) != VISIBLE) {
+            IView::Probe(v)->SetVisibility(VISIBLE);
         }
     }
     return NOERROR;
@@ -275,7 +303,7 @@ ECode CKeyguardWidgetCarousel::ScreenScrolled(
 ECode CKeyguardWidgetCarousel::AnimatePagesToNeutral()
 {
     if (mChildrenTransformsAnimator != NULL) {
-        mChildrenTransformsAnimator->Cancel();
+        IAnimator::Probe(mChildrenTransformsAnimator)->Cancel();
         mChildrenTransformsAnimator = NULL;
     }
 
@@ -292,37 +320,72 @@ ECode CKeyguardWidgetCarousel::AnimatePagesToNeutral()
         GetWidgetPageAt(i, (IKeyguardWidgetFrame**)&child);
         Boolean inVisibleRange = (i >= mCurrentPage - 1 && i <= mCurrentPage + 1);
         if (!inVisibleRange) {
-            child->SetRotationY(0.0f);
+            IView::Probe(child)->SetRotationY(0.0f);
         }
         AutoPtr<IPropertyValuesHolderHelper> helper;
         CPropertyValuesHolderHelper::AcquireSingleton((IPropertyValuesHolderHelper**)&helper);
-        helper->OfFloat(String("contentAlpha"), 1.0f, &alpha);
-        helper->OfFloat(String("backgroundAlpha"),IKeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER, &outlineAlpha);
-        helper->OfFloat(String("rotationY"), 0.0f, &rotationY);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = 1.0f;
+        helper->OfFloat(String("contentAlpha"), array, (IPropertyValuesHolder**)&alpha);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+        (*array2)[0] = KeyguardWidgetFrame::OUTLINE_ALPHA_MULTIPLIER;
+        helper->OfFloat(String("backgroundAlpha"), array2, (IPropertyValuesHolder**)&outlineAlpha);
+        AutoPtr<ArrayOf<Float> > array3 = ArrayOf<Float>::Alloc(1);
+        (*array3)[0] = 0.0f;
+        helper->OfFloat(String("rotationY"), array3, (IPropertyValuesHolder**)&rotationY);
 
         AutoPtr<IObjectAnimatorHelper> helper2;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper2);
+        AutoPtr<ArrayOf<IPropertyValuesHolder*> > array4 =
+                ArrayOf<IPropertyValuesHolder*>::Alloc(3);
+        array4->Set(0, alpha);
+        array4->Set(1, outlineAlpha);
+        array4->Set(2, rotationY);
         AutoPtr<IObjectAnimator> a;
-        helper2->OfPropertyValuesHolder(child, alpha, outlineAlpha, rotationY, (IObjectAnimator**)&a);
-        child->SetVisibility(VISIBLE);
+        helper2->OfPropertyValuesHolder(child, array4, (IObjectAnimator**)&a);
+        IView::Probe(child)->SetVisibility(VISIBLE);
         if (!inVisibleRange) {
-            a->SetInterpolator(mSlowFadeInterpolator);
+            IAnimator::Probe(a)->SetInterpolator(
+                    ITimeInterpolator::Probe(mSlowFadeInterpolator));
         }
         anims->Add(a);
     }
 
     Int32 duration = REORDERING_ZOOM_IN_OUT_DURATION;
     CAnimatorSet::New((IAnimatorSet**)&mChildrenTransformsAnimator);
-    mChildrenTransformsAnimator->PlayTogether(anims);
+    mChildrenTransformsAnimator->PlayTogether(ICollection::Probe(anims));
 
-    mChildrenTransformsAnimator->SetDuration(duration);
-    return mChildrenTransformsAnimator->Start();
+    IAnimator::Probe(mChildrenTransformsAnimator)->SetDuration(duration);
+    return IAnimator::Probe(mChildrenTransformsAnimator)->Start();
 }
+
+void CKeyguardWidgetCarousel::GetTransformForPage(
+    /* [in] */ Int32 screenCenter,
+    /* [in] */ Int32 index,
+    /* [in] */ ArrayOf<Float>* transform)
+{
+    AutoPtr<IView> child;
+    GetChildAt(index, (IView**)&child);
+    Float boundedProgress;
+    GetBoundedScrollProgress(screenCenter, child, index, &boundedProgress);
+    Float rotationY = - mAdjacentPagesAngle * boundedProgress;
+    Int32 width;
+    child->GetMeasuredWidth(&width);
+    Float pivotX = (width / 2.0f) + boundedProgress * (width / 2.0f);
+    Int32 height;
+    child->GetMeasuredHeight(&height);
+    Float pivotY = height / 2;
+
+    (*transform)[0] = pivotX;
+    (*transform)[1] = pivotY;
+    (*transform)[2] = rotationY;
+}
+
 
 ECode CKeyguardWidgetCarousel::AnimatePagesToCarousel()
 {
     if (mChildrenTransformsAnimator != NULL) {
-        mChildrenTransformsAnimator->Cancel();
+        IAnimator::Probe(mChildrenTransformsAnimator)->Cancel();
         mChildrenTransformsAnimator = NULL;
     }
 
@@ -349,39 +412,61 @@ ECode CKeyguardWidgetCarousel::AnimatePagesToCarousel()
 
         AutoPtr<IPropertyValuesHolderHelper> helper;
         CPropertyValuesHolderHelper::AcquireSingleton((IPropertyValuesHolderHelper**)&helper);
-        helper->OfFloat(String("contentAlpha"), finalAlpha, &alpha);
-        helper->OfFloat(String("backgroundAlpha"), finalOutlineAlpha, &outlineAlpha);
-        helper->OfFloat(String("pivotX"), (*mTmpTransform)[0], &pivotX);
-        helper->OfFloat(String("pivotY"), (*mTmpTransform)[1], &pivotY);
-        helper->OfFloat(String("rotationY"), (*mTmpTransform)[2], &rotationY);
+        AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
+        (*array)[0] = finalAlpha;
+        helper->OfFloat(String("contentAlpha"), array, (IPropertyValuesHolder**)&alpha);
+        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
+        (*array2)[0] = finalOutlineAlpha;
+        helper->OfFloat(String("backgroundAlpha"), array2, (IPropertyValuesHolder**)&outlineAlpha);
+        AutoPtr<ArrayOf<Float> > array3 = ArrayOf<Float>::Alloc(1);
+        (*array3)[0] = (*mTmpTransform)[0];
+        helper->OfFloat(String("pivotX"), array3, (IPropertyValuesHolder**)&pivotX);
+        AutoPtr<ArrayOf<Float> > array4 = ArrayOf<Float>::Alloc(1);
+        (*array4)[0] = (*mTmpTransform)[1];
+        helper->OfFloat(String("pivotY"), array4, (IPropertyValuesHolder**)&pivotY);
+        AutoPtr<ArrayOf<Float> > array5 = ArrayOf<Float>::Alloc(1);
+        (*array5)[0] = (*mTmpTransform)[2];
+        helper->OfFloat(String("rotationY"), array5, (IPropertyValuesHolder**)&rotationY);
 
         AutoPtr<IObjectAnimatorHelper> helper2;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper2);
         AutoPtr<IObjectAnimator> a;
         if (inVisibleRange) {
             // for the central pages we animate into a rotated state
-            helper2->OfPropertyValuesHolder(child, alpha, outlineAlpha,
-                    pivotX, pivotY, rotationY, (IObjectAnimator**)&a);
+            AutoPtr<ArrayOf<IPropertyValuesHolder*> > array6 =
+                    ArrayOf<IPropertyValuesHolder*>::Alloc(5);
+            array6->Set(0, alpha);
+            array6->Set(1, outlineAlpha);
+            array6->Set(2, pivotX);
+            array6->Set(3, pivotY);
+            array6->Set(4, rotationY);
+            helper2->OfPropertyValuesHolder(child, array6, (IObjectAnimator**)&a);
         }
         else {
-            helper2->OfPropertyValuesHolder(child, alpha, outlineAlpha, (IObjectAnimator**)&a);
-            a->SetInterpolator(mFastFadeInterpolator);
+            AutoPtr<ArrayOf<IPropertyValuesHolder*> > array7 =
+                    ArrayOf<IPropertyValuesHolder*>::Alloc(2);
+            array7->Set(0, alpha);
+            array7->Set(1, outlineAlpha);
+            helper2->OfPropertyValuesHolder(child, array7, (IObjectAnimator**)&a);
+            IAnimator::Probe(a)->SetInterpolator(
+                    ITimeInterpolator::Probe(mFastFadeInterpolator));
         }
         anims->Add(a);
     }
 
     Int32 duration = REORDERING_ZOOM_IN_OUT_DURATION;
     CAnimatorSet::New((IAnimatorSet**)&mChildrenTransformsAnimator);
-    mChildrenTransformsAnimator->PlayTogether(anims);
+    mChildrenTransformsAnimator->PlayTogether(ICollection::Probe(anims));
 
-    mChildrenTransformsAnimator->SetDuration(duration);
-    return mChildrenTransformsAnimator->Start();
+    IAnimator::Probe(mChildrenTransformsAnimator)->SetDuration(duration);
+    return IAnimator::Probe(mChildrenTransformsAnimator)->Start();
 }
 
 ECode CKeyguardWidgetCarousel::ReorderStarting()
 {
     mViewStateManager->FadeOutSecurity(REORDERING_ZOOM_IN_OUT_DURATION);
     AnimatePagesToNeutral();
+    return NOERROR;
 }
 
 ECode CKeyguardWidgetCarousel::ZoomIn(

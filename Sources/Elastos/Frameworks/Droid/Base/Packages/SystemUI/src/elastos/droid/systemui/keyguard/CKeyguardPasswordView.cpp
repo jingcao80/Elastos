@@ -1,5 +1,30 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardPasswordView.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Os.h"
+#include <elastos/core/CoreUtils.h>
+#include "elastos/droid/R.h"
+#include "R.h"
+
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::View::IKeyEventHelper;
+using Elastos::Droid::View::CKeyEventHelper;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::Animation::IAnimationUtils;
+using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::View::InputMethod::IInputMethodInfo;
+using Elastos::Droid::View::InputMethod::IInputMethodSubtype;
+using Elastos::Droid::Text::IInputType;
+using Elastos::Droid::Text::EIID_ITextWatcher;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Method::ITextKeyListener;
+using Elastos::Droid::Text::Method::ITextKeyListenerHelper;
+using Elastos::Droid::Text::Method::CTextKeyListenerHelper;
+using Elastos::Droid::Widget::EIID_IOnEditorActionListener;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -8,9 +33,11 @@ namespace Keyguard {
 
 ECode CKeyguardPasswordView::MyRunnable::Run()
 {
-    mHost->mPasswordEntry->RequestFocus();
-    if (mReason != IKeyguardSecurityView::SCREEN_ON || mShowImeAtScreenOn) {
-        mHost->mImm->ShowSoftInput(mPasswordEntry, IInputMethodManager::SHOW_IMPLICIT);
+    Boolean res;
+    IView::Probe(mHost->mPasswordEntry)->RequestFocus(&res);
+    if (mReason != IKeyguardSecurityView::SCREEN_ON || mHost->mShowImeAtScreenOn) {
+        mHost->mImm->ShowSoftInput(IView::Probe(mHost->mPasswordEntry),
+                IInputMethodManager::SHOW_IMPLICIT, &res);
     }
     return NOERROR;
 }
@@ -46,13 +73,14 @@ ECode CKeyguardPasswordView::MyTextWatcher::BeforeTextChanged(
 ECode CKeyguardPasswordView::MyTextWatcher::AfterTextChanged(
     /* [in] */ IEditable* s)
 {
-    if (mHost->mCallback != null) {
+    if (mHost->mCallback != NULL) {
         mHost->mCallback->UserActivity();
     }
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CKeyguardPasswordView::MyOnClickListener2, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(CKeyguardPasswordView::MyOnClickListener2,
+        Object, IViewOnClickListener)
 
 ECode CKeyguardPasswordView::MyOnClickListener2::OnClick(
     /* [in] */ IView* v)
@@ -63,7 +91,7 @@ ECode CKeyguardPasswordView::MyOnClickListener2::OnClick(
 
 CAR_OBJECT_IMPL(CKeyguardPasswordView)
 
-CAR_INTERFACE_IMPL_3(CKeyguardPasswordView, KeyguardAbsKeyInputView, IKeyguardSecurityView,
+CAR_INTERFACE_IMPL_2(CKeyguardPasswordView, KeyguardAbsKeyInputView,
         IOnEditorActionListener, ITextWatcher)
 
 CKeyguardPasswordView::CKeyguardPasswordView()
@@ -101,8 +129,9 @@ ECode CKeyguardPasswordView::constructor(
 
 ECode CKeyguardPasswordView::ResetState()
 {
-    mSecurityMessageDisplay->SetMessage(R::string::kg_password_instructions, FALSE);
-    return mPasswordEntry->SetEnabled(TRUE);
+    mSecurityMessageDisplay->SetMessage(R::string::kg_password_instructions,
+            FALSE);
+    return IView::Probe(mPasswordEntry)->SetEnabled(TRUE);
 }
 
 ECode CKeyguardPasswordView::GetPasswordTextViewId(
@@ -130,7 +159,8 @@ ECode CKeyguardPasswordView::OnResume(
 
     // Wait a bit to focus the field so the focusable flag on the window is already set then.
     AutoPtr<IRunnable> r = new MyRunnable(this, reason);
-    return Post(r);
+    Boolean res;
+    return Post(r, &res);
 }
 
 ECode CKeyguardPasswordView::OnPause()
@@ -139,13 +169,15 @@ ECode CKeyguardPasswordView::OnPause()
 
     AutoPtr<IBinder> res;
     GetWindowToken((IBinder**)&res);
-    return mImm->HideSoftInputFromWindow(res, 0);
+    Boolean tmp;
+    return mImm->HideSoftInputFromWindow(res, 0, &tmp);
 }
 
 ECode CKeyguardPasswordView::Reset()
 {
     KeyguardAbsKeyInputView::Reset();
-    return mPasswordEntry->RequestFocus();
+    Boolean res;
+    return IView::Probe(mPasswordEntry)->RequestFocus(&res);
 }
 
 ECode CKeyguardPasswordView::OnFinishInflate()
@@ -168,10 +200,10 @@ ECode CKeyguardPasswordView::OnFinishInflate()
     mPasswordEntry = ITextView::Probe(view);
 
     AutoPtr<ITextKeyListenerHelper> helper;
-    CTextKeyListenerHelpe::AcquireSingleton((ITextKeyListenerHelper**)&helper);
+    CTextKeyListenerHelper::AcquireSingleton((ITextKeyListenerHelper**)&helper);
     AutoPtr<ITextKeyListener> ret;
     helper->GetInstance((ITextKeyListener**)&ret);
-    mPasswordEntry->SetKeyListener(ret);
+    mPasswordEntry->SetKeyListener(IKeyListener::Probe(ret));
     mPasswordEntry->SetInputType(IInputType::TYPE_CLASS_TEXT
             | IInputType::TYPE_TEXT_VARIATION_PASSWORD);
     mPasswordEntry->SetOnEditorActionListener(this);
@@ -179,15 +211,16 @@ ECode CKeyguardPasswordView::OnFinishInflate()
 
     // Poke the wakelock any time the text is selected or modified
     AutoPtr<IViewOnClickListener> lis = new MyOnClickListener(this);
-    mPasswordEntry->SetOnClickListener(lis);
+    IView::Probe(mPasswordEntry)->SetOnClickListener(lis);
 
     // Set selected property on so the view can send accessibility events.
-    mPasswordEntry->SetSelected(TRUE);
+    IView::Probe(mPasswordEntry)->SetSelected(TRUE);
 
     AutoPtr<ITextWatcher> watcher = new MyTextWatcher(this);
     mPasswordEntry->AddTextChangedListener(watcher);
 
-    mPasswordEntry->RequestFocus();
+    Boolean res;
+    IView::Probe(mPasswordEntry)->RequestFocus(&res);
 
     // If there's more than one IME, enable the IME switcher button
     AutoPtr<IView> switchImeButton;
@@ -203,11 +236,12 @@ ECode CKeyguardPasswordView::OnFinishInflate()
     // still centered.
     if (!imeOrDeleteButtonVisible) {
         AutoPtr<IViewGroupLayoutParams> params;
-        mPasswordEntry->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        if (IMarginLayoutParams::Probe(params) != NULL) {
-            AutoPtr<IMarginLayoutParams> mlp = IMarginLayoutParams::Probe(params);
+        IView::Probe(mPasswordEntry)->GetLayoutParams((IViewGroupLayoutParams**)&params);
+        if (IViewGroupMarginLayoutParams::Probe(params) != NULL) {
+            AutoPtr<IViewGroupMarginLayoutParams> mlp =
+                    IViewGroupMarginLayoutParams::Probe(params);
             mlp->SetMarginStart(0);
-            mPasswordEntry->SetLayoutParams(params);
+            IView::Probe(mPasswordEntry)->SetLayoutParams(params);
         }
     }
     return NOERROR;
@@ -221,13 +255,15 @@ ECode CKeyguardPasswordView::OnRequestFocusInDescendants(
     VALIDATE_NOT_NULL(result)
 
     // send focus to the password field
-    return mPasswordEntry->RequestFocus(direction, previouslyFocusedRect, result);
+    return IView::Probe(mPasswordEntry)->RequestFocus(direction,
+            previouslyFocusedRect, result);
 }
 
 ECode CKeyguardPasswordView::ResetPasswordText(
     /* [in] */ Boolean animate)
 {
-    return mPasswordEntry->SetText(String(""));
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String(""));
+    return mPasswordEntry->SetText(cchar);
 }
 
 ECode CKeyguardPasswordView::GetPasswordText(
@@ -243,7 +279,7 @@ ECode CKeyguardPasswordView::GetPasswordText(
 ECode CKeyguardPasswordView::SetPasswordEntryEnabled(
     /* [in] */ Boolean enabled)
 {
-    return mPasswordEntry->SetEnabled(enabled);
+    return IView::Probe(mPasswordEntry)->SetEnabled(enabled);
 }
 
 Boolean CKeyguardPasswordView::HasMultipleEnabledIMEsOrSubtypes(
@@ -251,7 +287,7 @@ Boolean CKeyguardPasswordView::HasMultipleEnabledIMEsOrSubtypes(
     /* [in] */ Boolean shouldIncludeAuxiliarySubtypes)
 {
     AutoPtr<IList> enabledImis;
-    imm->GetEnabledInputMethodList(&enabledImis);
+    imm->GetEnabledInputMethodList((IList**)&enabledImis);
 
     // Number of the filtered IMEs
     Int32 filteredImisCount = 0;
@@ -299,7 +335,7 @@ Boolean CKeyguardPasswordView::HasMultipleEnabledIMEsOrSubtypes(
     }
 
     AutoPtr<IList> list;
-    imm->GetEnabledInputMethodSubtypeList(imi, TRUE, (IList**)&list);
+    imm->GetEnabledInputMethodSubtypeList(NULL, FALSE, (IList**)&list);
     return filteredImisCount > 1
     // imm.getEnabledInputMethodSubtypeList(null, false) will return the current IME's enabled
     // input method subtype (The current IME should be LatinIME.)
@@ -322,15 +358,15 @@ ECode CKeyguardPasswordView::GetWrongPasswordStringId(
 
 ECode CKeyguardPasswordView::StartAppearAnimation()
 {
-    SetAlpha(0f);
-    SetTranslationY(0f);
+    SetAlpha(0.0f);
+    SetTranslationY(0.0f);
 
     AutoPtr<IViewPropertyAnimator> animator;
     Animate((IViewPropertyAnimator**)&animator);
     animator->Alpha(1);
     animator->WithLayer();
     animator->SetDuration(300);
-    return animator->SetInterpolator(mLinearOutSlowInInterpolator);
+    return animator->SetInterpolator(ITimeInterpolator::Probe(mLinearOutSlowInInterpolator));
 }
 
 ECode CKeyguardPasswordView::StartDisappearAnimation(
@@ -341,9 +377,9 @@ ECode CKeyguardPasswordView::StartDisappearAnimation(
 
     AutoPtr<IViewPropertyAnimator> animator;
     Animate((IViewPropertyAnimator**)&animator);
-    animator->Alpha(0f);
+    animator->Alpha(0.0f);
     animator->TranslationY(mDisappearYTranslation);
-    animator->SetInterpolator(mFastOutLinearInInterpolator);
+    animator->SetInterpolator(ITimeInterpolator::Probe(mFastOutLinearInInterpolator));
     animator->SetDuration(100);
     animator->WithEndAction(finishRunnable);
     *result = TRUE;

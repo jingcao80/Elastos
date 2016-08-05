@@ -1,5 +1,18 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardMultiUserSelectorView.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardMultiUserAvatar.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "Elastos.Droid.App.h"
+#include "R.h"
+
+using Elastos::Droid::App::IIActivityManager;
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Core::EIID_IComparator;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -20,9 +33,10 @@ ECode CKeyguardMultiUserSelectorView::MyRunnable2::Run()
     mAvatar->GetUserInfo((IUserInfo**)&info);
     Int32 id;
     info->GetId(&id);
-    ECode ec = manager->SwitchUser(id);
+    Boolean res;
+    ECode ec = manager->SwitchUser(id, &res);
     //} catch (RemoteException re) {
-    if (ec == (ECode)RemoteException) {
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         Logger::E(TAG, "Couldn't switch user %d", ec);
     }
     //}
@@ -32,16 +46,16 @@ ECode CKeyguardMultiUserSelectorView::MyRunnable2::Run()
 CAR_INTERFACE_IMPL(CKeyguardMultiUserSelectorView::TaskComparator, Object, IComparator)
 
 ECode CKeyguardMultiUserSelectorView::TaskComparator::Compare(
-    /* [in] */ IInterface* _task,
-    /* [in] */ IInterface* _task2,
+    /* [in] */ IInterface* lhs,
+    /* [in] */ IInterface* rhs,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
 
     Int32 namuber1;
-    IUserInfo::Probe(lhs)->GetserialNumber(&namuber1);
+    IUserInfo::Probe(lhs)->GetSerialNumber(&namuber1);
     Int32 namuber2;
-    IUserInfo::Probe(rhs)->GetserialNumber(&namuber2);
+    IUserInfo::Probe(rhs)->GetSerialNumber(&namuber2);
 
     *result = (namuber1 - namuber2);
     return NOERROR;
@@ -53,7 +67,8 @@ const Int32 CKeyguardMultiUserSelectorView::FADE_OUT_ANIMATION_DURATION = 100;
 
 CAR_OBJECT_IMPL(CKeyguardMultiUserSelectorView)
 
-CAR_INTERFACE_IMPL(CKeyguardMultiUserSelectorView, FrameLayout, IViewOnClickListener)
+CAR_INTERFACE_IMPL_2(CKeyguardMultiUserSelectorView, FrameLayout,
+        IKeyguardMultiUserSelectorView, IViewOnClickListener)
 
 CKeyguardMultiUserSelectorView::CKeyguardMultiUserSelectorView()
 {
@@ -106,7 +121,7 @@ ECode CKeyguardMultiUserSelectorView::AddUsers(
     AutoPtr<IIActivityManager> manager = ActivityManagerNative::GetDefault();
     ECode ec = manager->GetCurrentUser((IUserInfo**)&activeUser);
     //} catch (RemoteException re) {
-    if (ec == (ECode)RemoteException) {
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         activeUser = NULL;
     }
 
@@ -114,7 +129,7 @@ ECode CKeyguardMultiUserSelectorView::AddUsers(
     CArrayList::New(userList, (IArrayList**)&users);
     AutoPtr<ICollections> helper;
     CCollections::AcquireSingleton((ICollections**)&helper);
-    helper->Sort(users, mOrderAddedComparator);
+    helper->Sort(IList::Probe(users), mOrderAddedComparator);
 
     Int32 size;
     users->GetSize(&size);
@@ -125,7 +140,7 @@ ECode CKeyguardMultiUserSelectorView::AddUsers(
 
         Boolean res;
         if (user->SupportsSwitchTo(&res), res) {
-            AutoPtr<KeyguardMultiUserAvatar> uv = CreateAndAddUser(user);
+            AutoPtr<IKeyguardMultiUserAvatar> uv = CreateAndAddUser(user);
             Int32 id1;
             user->GetId(&id1);
             Int32 id2;
@@ -148,7 +163,8 @@ ECode CKeyguardMultiUserSelectorView::FinalizeActiveUserView(
         GetHandler((IHandler**)&handler);
 
         AutoPtr<IRunnable> r = new MyRunnable(this);
-        handler->PostDelayed(r, 500);
+        Boolean res;
+        handler->PostDelayed(r, 500, &res);
     }
     else {
         FinalizeActiveUserNow(animate);
@@ -168,7 +184,7 @@ AutoPtr<IKeyguardMultiUserAvatar> CKeyguardMultiUserSelectorView::CreateAndAddUs
 {
     AutoPtr<IKeyguardMultiUserAvatar> uv = CKeyguardMultiUserAvatar::FromXml(
             R::layout::keyguard_multi_user_avatar, mContext, this, user);
-    mUsersGrid->AddView(uv);
+    mUsersGrid->AddView(IView::Probe(uv));
     return uv;
 }
 
@@ -207,7 +223,7 @@ ECode CKeyguardMultiUserSelectorView::OnClick(
 
     AutoPtr<IKeyguardMultiUserAvatar> avatar = IKeyguardMultiUserAvatar::Probe(v);
     Boolean res;
-    avatar->IsClickable(&res);
+    IView::Probe(avatar)->IsClickable(&res);
     if (res) { // catch race conditions
         if (mActiveUserAvatar == avatar) {
             // If they click the currently active user, show the unlock hint

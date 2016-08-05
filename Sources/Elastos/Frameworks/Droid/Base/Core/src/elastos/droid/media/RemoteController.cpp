@@ -865,7 +865,7 @@ ECode RemoteController::SetSynchronizationMode(
 }
 
 ECode RemoteController::EditMetadata(
-    /* [out] */ IMediaMetadataEditor** result)
+    /* [out] */ IRemoteControllerMetadataEditor** result)
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<MetadataEditor> editor = new MetadataEditor(this);
@@ -876,7 +876,7 @@ ECode RemoteController::EditMetadata(
     editor->mMetadataChanged = TRUE;
     editor->mArtworkChanged = TRUE;
     editor->mEditableKeys = 0;
-    *result = editor;
+    *result = IRemoteControllerMetadataEditor::Probe(editor);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

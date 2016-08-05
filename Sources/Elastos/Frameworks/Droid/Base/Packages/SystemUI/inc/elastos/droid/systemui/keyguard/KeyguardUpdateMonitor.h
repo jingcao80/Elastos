@@ -250,6 +250,8 @@ private:
         KeyguardUpdateMonitor* mHost;
     };
 
+    friend class CKeyguardHostView;
+
     class DisplayClientState
         : public Object
         , public IKeyguardUpdateMonitorDisplayClientState

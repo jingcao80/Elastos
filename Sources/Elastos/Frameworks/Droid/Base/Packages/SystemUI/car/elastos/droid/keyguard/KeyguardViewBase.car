@@ -52,8 +52,6 @@ module
         HandleBackKey(
             [out] Boolean* value);
 
-        UserActivity();
-
         /**
          * Called when the Keyguard is not actively shown anymore on the screen.
          */

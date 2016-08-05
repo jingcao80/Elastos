@@ -1,6 +1,9 @@
 
 module
 {
+    interface Elastos.Droid.Graphics.IRect;
+    interface Elastos.Droid.View.IView;
+
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
@@ -15,10 +18,17 @@ module
         const Int32 CHILD_TYPE_PAGE_DELETE_DROP_TARGET = 7;
     }
 
+    [local]
     interface IMultiPaneChallengeLayout {
-        const Int32 HORIZONTAL = ILinearLayout::HORIZONTAL;
-        const Int32 VERTICAL = ILinearLayout::VERTICAL;
+        const Int32 HORIZONTAL = 0;//ILinearLayout::HORIZONTAL;
+        const Int32 VERTICAL = 1;//ILinearLayout::VERTICAL;
         const Int32 ANIMATE_BOUNCE_DURATION = 350;
+
+        SetInsets(
+            [in] IRect* insets);
+
+        SetScrimView(
+            [in] IView* scrim);
     }
 
     } // namespace Keyguard

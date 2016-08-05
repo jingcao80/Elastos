@@ -1,6 +1,15 @@
 
 #include "elastos/droid/systemui/keyguard/ObscureSpeechDelegate.h"
-#include "Elastos.Droid.View.h"
+#include <elastos/core/CoreUtils.h>
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "R.h"
+
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -26,16 +35,17 @@ ECode ObscureSpeechDelegate::SendAccessibilityEvent(
 
     // Play the "headset required" announcement the first time the user
     // places accessibility focus on a key.
-    Boolean res;
     if ((eventType == IAccessibilityEvent::TYPE_VIEW_ACCESSIBILITY_FOCUSED)
-            && !sAnnouncedHeadset && (ShouldObscureSpeech(&res), res)) {
+            && !sAnnouncedHeadset && ShouldObscureSpeech()) {
         sAnnouncedHeadset = TRUE;
 
         AutoPtr<IContext> context;
         host->GetContext((IContext**)&context);
         String passwords;
-        context->GetString(R::string::keyboard_headset_required_to_hear_password, &passwords);
-        host->AnnounceForAccessibility(passwords);
+        assert(0);
+        //context->GetString(R::string::keyboard_headset_required_to_hear_password, &passwords);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(passwords);
+        host->AnnounceForAccessibility(cchar);
     }
     return NOERROR;
 }
@@ -48,9 +58,8 @@ ECode ObscureSpeechDelegate::OnPopulateAccessibilityEvent(
 
     Int32 type;
     event->GetEventType(&type);
-    Boolean res;
     if ((type != IAccessibilityEvent::TYPE_ANNOUNCEMENT)
-            && (ShouldObscureSpeech(&res), res)) {
+            && ShouldObscureSpeech()) {
         AutoPtr<IList> list;
         IAccessibilityRecord::Probe(event)->GetText((IList**)&list);
         list->Clear();
@@ -58,9 +67,12 @@ ECode ObscureSpeechDelegate::OnPopulateAccessibilityEvent(
         AutoPtr<IContext> context;
         host->GetContext((IContext**)&context);
         String headset;
-        context->GetString(R::string::keyboard_password_character_no_headset, &headset);
-        event->SetContentDescription(headset);
+        assert(0);
+        //context->GetString(R::string::keyboard_password_character_no_headset, &headset);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(headset);
+        IAccessibilityRecord::Probe(event)->SetContentDescription(cchar);
     }
+    return NOERROR;
 }
 
 ECode ObscureSpeechDelegate::OnInitializeAccessibilityNodeInfo(
@@ -69,14 +81,15 @@ ECode ObscureSpeechDelegate::OnInitializeAccessibilityNodeInfo(
 {
     AccessibilityDelegate::OnInitializeAccessibilityNodeInfo(host, info);
 
-    Boolean res;
-    if (ShouldObscureSpeech(&res), res) {
+    if (ShouldObscureSpeech()) {
         AutoPtr<IContext> ctx;
         host->GetContext((IContext**)&ctx);
         info->SetText(NULL);
         String headset;
-        ctx->GetString(R::string::keyboard_password_character_no_headset, &headset);
-        info->SetContentDescription(headset);
+        assert(0);
+        //ctx->GetString(R::string::keyboard_password_character_no_headset, &headset);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(headset);
+        info->SetContentDescription(cchar);
     }
     return NOERROR;
 }

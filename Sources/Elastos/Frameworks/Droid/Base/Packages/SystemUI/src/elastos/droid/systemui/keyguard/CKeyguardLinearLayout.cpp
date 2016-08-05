@@ -8,6 +8,8 @@ namespace Keyguard {
 
 CAR_OBJECT_IMPL(CKeyguardLinearLayout)
 
+CAR_INTERFACE_IMPL(CKeyguardLinearLayout, LinearLayout, IKeyguardLinearLayout)
+
 CKeyguardLinearLayout::CKeyguardLinearLayout()
     : mTopChild(0)
 {

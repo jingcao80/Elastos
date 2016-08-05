@@ -3,6 +3,29 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDPASSWORDVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardPasswordView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardAbsKeyInputView.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::Text::ITextWatcher;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::View::InputMethod::IInputMethodManager;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IOnEditorActionListener;
+using Elastos::Core::Object;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +38,6 @@ namespace Keyguard {
  */
 CarClass(CKeyguardPasswordView)
     , public KeyguardAbsKeyInputView
-    , public IKeyguardSecurityView
     , public IOnEditorActionListener
     , public ITextWatcher
 {
@@ -48,6 +70,8 @@ private:
     public:
         TO_STRING_IMPL("CKeyguardPasswordView::MyOnClickListener")
 
+        CAR_INTERFACE_DECL()
+
         MyOnClickListener(
             /* [in] */ CKeyguardPasswordView* host)
             : mHost(host)
@@ -66,6 +90,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CKeyguardPasswordView::MyTextWatcher")
+
+        CAR_INTERFACE_DECL()
 
         MyTextWatcher(
             /* [in] */ CKeyguardPasswordView* host)
@@ -98,6 +124,8 @@ private:
     public:
         TO_STRING_IMPL("CKeyguardPasswordView::MyOnClickListener2")
 
+        CAR_INTERFACE_DECL()
+
         MyOnClickListener2(
             /* [in] */ CKeyguardPasswordView* host)
             : mHost(host)
@@ -112,6 +140,8 @@ private:
 
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CKeyguardPasswordView();
 

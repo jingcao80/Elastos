@@ -6,6 +6,9 @@ module
     namespace SystemUI {
     namespace Keyguard {
 
+    interface IKeyguardHostViewSavedState {
+    }
+
     interface IKeyguardHostViewUserSwitcherCallback {
         HideSecurityView(
            [in] Int32 duration);
@@ -36,10 +39,12 @@ module
     interface IKeyguardHostView {
         ClearAppWidgetToShow();
 
-        checkAppWidgetConsistency();
+        CheckAppWidgetConsistency();
 
         GoToWidget(
             [in] Int32 appWidgetId);
+
+        OnUserActivityTimeoutChanged();
 
     }
 

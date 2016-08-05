@@ -4,6 +4,7 @@ module
     enum Elastos.Droid.Graphics.PorterDuffMode;
     interface Elastos.Droid.Graphics.IBitmap;
     interface Elastos.Droid.Graphics.IMatrix;
+    interface Elastos.Droid.Graphics.IXfermode;
     interface Elastos.Droid.Graphics.IColorFilter;
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
     interface Elastos.Droid.Content.Res.IColorStateList;
@@ -414,6 +415,12 @@ module
             [in] PorterDuffMode mode);
 
         ClearColorFilter();
+
+        /**
+         * @hide Candidate for future API inclusion
+         */
+        SetXfermode(
+            [in] IXfermode* mode);
 
         /**
          * Returns the active color filter for this ImageView.

@@ -3,6 +3,39 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDHOSTVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardHostView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardViewBase.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
+#include "elastos/droid/widget/RemoteViews.h"
+#include "elastos/droid/view/View.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::Admin::IDevicePolicyManager;
+using Elastos::Droid::AppWidget::IAppWidgetHost;
+using Elastos::Droid::AppWidget::IAppWidgetManager;
+using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::View::View;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Widget::RemoteViews;
+using Elastos::Droid::Widget::IRemoteViewsOnClickHandler;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -39,6 +72,8 @@ private:
     public:
         TO_STRING_IMPL("CKeyguardHostView::MyOnDismissAction")
 
+        CAR_INTERFACE_DECL()
+
         MyOnDismissAction(
             /* [in] */ IView* view,
             /* [in] */ IPendingIntent* pendingIntent,
@@ -54,19 +89,17 @@ private:
     private:
         AutoPtr<IView> mView;
         AutoPtr<IPendingIntent> mPendingIntent;
-        AutoPtr<IIntent> mFillInIntent
+        AutoPtr<IIntent> mFillInIntent;
     };
 
     class MyOnClickHandler
-        : public Object
-        , public IRemoteViewsOnClickHandler
+        : public RemoteViews::RemoteViewsOnClickHandler
     {
     public:
         TO_STRING_IMPL("CKeyguardHostView::MyOnClickHandler")
 
         MyOnClickHandler(
-            /* [in] */ CKeyguardHostView* host,
-            /* [in] */ IKeyguardHostView* hostView);
+            /* [in] */ CKeyguardHostView* host);
 
         CARAPI OnClickHandler(
             /* [in] */ IView* view,
@@ -91,6 +124,8 @@ private:
     public:
         TO_STRING_IMPL("CKeyguardHostView::MyOnClickListener")
 
+        CAR_INTERFACE_DECL()
+
         MyOnClickListener(
             /* [in] */ CKeyguardHostView* host)
             : mHost(host)
@@ -110,6 +145,8 @@ private:
     public:
         TO_STRING_IMPL("CKeyguardHostView::MyOnClickListener")
 
+        CAR_INTERFACE_DECL()
+
         MyControlCallback(
             /* [in] */ CKeyguardHostView* host)
             : mHost(host)
@@ -123,9 +160,12 @@ private:
 
     class SavedState
         : public View::BaseSavedState
+        , public IKeyguardHostViewSavedState
     {
     public:
         TO_STRING_IMPL("CKeyguardHostView::SavedState")
+
+        CAR_INTERFACE_DECL()
 
         SavedState();
 
@@ -146,16 +186,16 @@ private:
         Int32 mAppWidgetToShow;
         AutoPtr<IRect> mInsets;
 
-        public static final Parcelable.Creator<SavedState> CREATOR
-                = new Parcelable.Creator<SavedState>() {
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
+        // public static final Parcelable.Creator<SavedState> CREATOR
+        //         = new Parcelable.Creator<SavedState>() {
+        //     public SavedState createFromParcel(Parcel in) {
+        //         return new SavedState(in);
+        //     }
 
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
+        //     public SavedState[] newArray(int size) {
+        //         return new SavedState[size];
+        //     }
+        // };
     };
 
     class MyRunnable2
@@ -295,7 +335,7 @@ private:
         TO_STRING_IMPL("CKeyguardHostView::MyKeyguardUpdateMonitorCallback")
 
         MyKeyguardUpdateMonitorCallback(
-            /* [in] */ MyKeyguardUpdateMonitorCallback* host)
+            /* [in] */ CKeyguardHostView* host)
             : mHost(host)
         {}
 
@@ -308,7 +348,7 @@ private:
 
     private:
         CKeyguardHostView* mHost;
-    }
+    };
 
 public:
     CAR_OBJECT_DECL()
@@ -418,7 +458,7 @@ private:
 
     CARAPI_(void) CleanupAppWidgetIds();
 
-    static CARAPI_(Boolean) contains(
+    static CARAPI_(Boolean) Contains(
         /* [in] */ ArrayOf<Int32>* array,
         /* [in] */ Int32 target);
 
@@ -454,7 +494,7 @@ private:
      * Create KeyguardTransportControlView on demand.
      * @return
      */
-    CARAPI_(AutoPtr<KeyguardTransportControlView>) GetOrCreateTransportControl();
+    CARAPI_(AutoPtr<IKeyguardTransportControlView>) GetOrCreateTransportControl();
 
     CARAPI_(Int32) GetInsertPageIndex();
 
@@ -550,7 +590,7 @@ private:
 
     AutoPtr<IRect> mInsets;
 
-    AutoPtr<IMyOnClickHandler> mOnClickHandler;
+    AutoPtr<IRemoteViewsOnClickHandler> mOnClickHandler;
 
     AutoPtr<IRunnable> mPostBootCompletedRunnable;
 

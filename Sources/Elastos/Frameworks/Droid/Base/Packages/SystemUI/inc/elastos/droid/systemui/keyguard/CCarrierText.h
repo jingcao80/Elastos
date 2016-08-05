@@ -3,16 +3,23 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CCARRIERTEXT_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CCarrierText.h"
-#include <elastos/droid/widget/TextView.h>
-#include <Elastos.Droid.Internal.h>
-#include <elastos/droid/text/method/SingleLineTransformationMethod.h>
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
+#include "elastos/droid/text/method/SingleLineTransformationMethod.h"
+#include <elastos/droid/widget/TextView.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
 
-using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Text::Method::SingleLineTransformationMethod;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Widget::TextView;
 using Elastos::Core::ICharSequence;
+using Elastos::Utility::ILocale;
 
 namespace Elastos {
 namespace Droid {
@@ -74,7 +81,7 @@ private:
         : public SingleLineTransformationMethod
     {
     public:
-        TO_STRING_IMPL("CCarrierText::MyKeyguardUpdateMonitorCallback")
+        TO_STRING_IMPL("CCarrierText::CarrierTextTransformationMethod")
 
         CarrierTextTransformationMethod();
 

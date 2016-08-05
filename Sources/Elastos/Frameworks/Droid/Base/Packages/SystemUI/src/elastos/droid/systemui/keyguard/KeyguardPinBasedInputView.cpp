@@ -1,13 +1,21 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardPinBasedInputView.h"
-#include "Elastos.Droid.View.h"
+#include "elastos/droid/systemui/keyguard/LiftToActivateListener.h"
+#include "R.h"
+
+using Elastos::Droid::View::IKeyEventHelper;
+using Elastos::Droid::View::CKeyEventHelper;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnKeyListener;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyOnClickListener,
+        Object, IViewOnClickListener)
 
 ECode KeyguardPinBasedInputView::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
@@ -15,32 +23,35 @@ ECode KeyguardPinBasedInputView::MyOnClickListener::OnClick(
     return mHost->mCallback->UserActivity();
 }
 
-CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyOnClickListener2, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyOnClickListener2,
+        Object, IViewOnClickListener)
 
 ECode KeyguardPinBasedInputView::MyOnClickListener2::OnClick(
     /* [in] */ IView* v)
 {
-    DoHapticKeyClick();
+    mHost->DoHapticKeyClick();
     Boolean res;
-    if (mHost->mPasswordEntry->IsEnabled(&res), res) {
+    if (IView::Probe(mHost->mPasswordEntry)->IsEnabled(&res), res) {
         mHost->VerifyPasswordAndUnlock();
     }
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyOnClickListener3, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyOnClickListener3,
+        Object, IViewOnClickListener)
 
 ECode KeyguardPinBasedInputView::MyOnClickListener3::OnClick(
     /* [in] */ IView* v)
 {
     Boolean res;
-    if (mHost->mPasswordEntry->IsEnabled(&res), res) {
+    if (IView::Probe(mHost->mPasswordEntry)->IsEnabled(&res), res) {
         mHost->mPasswordEntry->DeleteLastChar();
     }
     return mHost->DoHapticKeyClick();
 }
 
-CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyViewOnLongClickListener, Object, IViewOnLongClickListener)
+CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyViewOnLongClickListener,
+        Object, IViewOnLongClickListener)
 
 ECode KeyguardPinBasedInputView::MyViewOnLongClickListener::OnLongClick(
     /* [in] */ IView* v,
@@ -50,15 +61,16 @@ ECode KeyguardPinBasedInputView::MyViewOnLongClickListener::OnLongClick(
 
     // check for time-based lockouts
     Boolean res;
-    if (mPasswordEntry->IsEnabled(&res), res) {
-        ResetPasswordText(TRUE /* animate */);
+    if (IView::Probe(mHost->mPasswordEntry)->IsEnabled(&res), res) {
+        mHost->ResetPasswordText(TRUE /* animate */);
     }
-    DoHapticKeyClick();
+    mHost->DoHapticKeyClick();
     *result = TRUE;
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(KeyguardPinBasedInputView, KeyguardAbsKeyInputView, IViewOnKeyListener)
+CAR_INTERFACE_IMPL(KeyguardPinBasedInputView, KeyguardAbsKeyInputView,
+        IViewOnKeyListener)
 
 ECode KeyguardPinBasedInputView::constructor(
     /* [in] */ IContext* context)
@@ -75,7 +87,8 @@ ECode KeyguardPinBasedInputView::constructor(
 
 ECode KeyguardPinBasedInputView::Reset()
 {
-    mPasswordEntry->RequestFocus();
+    Boolean res;
+    IView::Probe(mPasswordEntry)->RequestFocus(&res);
     return KeyguardAbsKeyInputView::Reset();
 }
 
@@ -87,18 +100,18 @@ ECode KeyguardPinBasedInputView::OnRequestFocusInDescendants(
     VALIDATE_NOT_NULL(result);
 
     // send focus to the password field
-    return mPasswordEntry->RequestFocus(direction, previouslyFocusedRect, result);
+    return IView::Probe(mPasswordEntry)->RequestFocus(direction, previouslyFocusedRect, result);
 }
 
 ECode KeyguardPinBasedInputView::ResetState()
 {
-    return mPasswordEntry->SetEnabled(TRUE);
+    return IView::Probe(mPasswordEntry)->SetEnabled(TRUE);
 }
 
 ECode KeyguardPinBasedInputView::SetPasswordEntryEnabled(
     /* [in] */ Boolean enabled)
 {
-    return mPasswordEntry->SetEnabled(enabled);
+    return IView::Probe(mPasswordEntry)->SetEnabled(enabled);
 }
 
 ECode KeyguardPinBasedInputView::OnKeyDown(
@@ -127,13 +140,14 @@ ECode KeyguardPinBasedInputView::OnKeyDown(
         *result = TRUE;
         return NOERROR;
     }
-    return KeyguardAbsKeyInputView::OnKeyDown(keyCode, event);
+    return KeyguardAbsKeyInputView::OnKeyDown(keyCode, event, &res);
 }
 
 void KeyguardPinBasedInputView::PerformClick(
     /* [in] */ IView* view)
 {
-    view->PerformClick();
+    Boolean res;
+    view->PerformClick(&res);
 }
 
 void KeyguardPinBasedInputView::PerformNumberClick(
@@ -192,14 +206,14 @@ ECode KeyguardPinBasedInputView::OnFinishInflate()
     AutoPtr<IView> view;
     FindViewById(id, (IView**)&view);
     mPasswordEntry = IPasswordTextView::Probe(view);
-    mPasswordEntry->SetOnKeyListener(this);
+    IView::Probe(mPasswordEntry)->SetOnKeyListener(this);
 
     // Set selected property on so the view can send accessibility events.
-    mPasswordEntry->SetSelected(TRUE);
+    IView::Probe(mPasswordEntry)->SetSelected(TRUE);
 
     // Poke the wakelock any time the text is selected or modified
     AutoPtr<IViewOnClickListener> lis = new MyOnClickListener(this);
-    mPasswordEntry->SetOnClickListener(lis);
+    IView::Probe(mPasswordEntry)->SetOnClickListener(lis);
 
     FindViewById(R::id::key_enter, (IView**)&mOkButton);
     if (mOkButton != NULL) {
@@ -207,7 +221,9 @@ ECode KeyguardPinBasedInputView::OnFinishInflate()
         mOkButton->SetOnClickListener(lis2);
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        mOkButton->SetOnHoverListener(new LiftToActivateListener(context));
+        AutoPtr<LiftToActivateListener> lis = new LiftToActivateListener();
+        lis->constructor(context);
+        mOkButton->SetOnHoverListener(IViewOnHoverListener::Probe(lis));
     }
 
     FindViewById(R::id::delete_button, (IView**)&mDeleteButton);
@@ -228,7 +244,8 @@ ECode KeyguardPinBasedInputView::OnFinishInflate()
     FindViewById(R::id::key8, (IView**)&mButton8);
     FindViewById(R::id::key9, (IView**)&mButton9);
 
-    mPasswordEntry->RequestFocus();
+    Boolean res;
+    IView::Probe(mPasswordEntry)->RequestFocus(&res);
     return KeyguardAbsKeyInputView::OnFinishInflate();
 }
 
@@ -243,7 +260,8 @@ ECode KeyguardPinBasedInputView::OnKey(
     Int32 action;
     event->GetAction(&action);
     if (action == IKeyEvent::ACTION_DOWN) {
-        OnKeyDown(keyCode, event);
+        Boolean res;
+        OnKeyDown(keyCode, event, &res);
         *result = TRUE;
         return NOERROR;
     }

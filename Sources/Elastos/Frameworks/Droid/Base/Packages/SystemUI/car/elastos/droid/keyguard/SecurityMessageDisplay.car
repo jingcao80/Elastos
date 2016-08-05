@@ -1,11 +1,14 @@
 
 module
 {
+    using interface Elastos.Core.ICharSequence;
+
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
     namespace Keyguard {
 
+    [deprecated]
     interface ISecurityMessageDisplay {
         SetMessage(
             [in] ICharSequence* msg,

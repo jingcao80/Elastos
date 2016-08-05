@@ -1,26 +1,25 @@
 
-#include "elastos/droid/systemui/keyguard/CAlphaOptimizedLinearLayout.h"
+#include "elastos/droid/systemui/keyguard/AlphaOptimizedLinearLayout.h"
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-CAR_OBJECT_IMPL(CAlphaOptimizedLinearLayout)
-ECode CAlphaOptimizedLinearLayout::constructor(
+ECode AlphaOptimizedLinearLayout::constructor(
     /* [in] */ IContext* context)
 {
     return LinearLayout::constructor(context);
 }
 
-ECode CAlphaOptimizedLinearLayout::constructor(
+ECode AlphaOptimizedLinearLayout::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
     return LinearLayout::constructor(context, attrs);
 }
 
-ECode CAlphaOptimizedLinearLayout::constructor(
+ECode AlphaOptimizedLinearLayout::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr)
@@ -28,7 +27,7 @@ ECode CAlphaOptimizedLinearLayout::constructor(
     return LinearLayout::constructor(context, attrs, defStyleAttr);
 }
 
-ECode CAlphaOptimizedLinearLayout::constructor(
+ECode AlphaOptimizedLinearLayout::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr,
@@ -37,7 +36,7 @@ ECode CAlphaOptimizedLinearLayout::constructor(
     return LinearLayout::constructor(context, attrs, defStyleAttr, defStyleRes);
 }
 
-ECode CAlphaOptimizedLinearLayout::HasOverlappingRendering(
+ECode AlphaOptimizedLinearLayout::HasOverlappingRendering(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);

@@ -1,5 +1,30 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardAccountView.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardMessageArea.h"
+#include "elastos/droid/text/LoginFilter.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Accounts::IAccountManagerHelper;
+using Elastos::Droid::Accounts::CAccountManagerHelper;
+using Elastos::Droid::Accounts::IAccountManager;
+using Elastos::Droid::Accounts::EIID_IAccountManagerCallback;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Text::EIID_ITextWatcher;
+using Elastos::Droid::Text::IInputFilter;
+using Elastos::Droid::Text::UsernameFilterGeneric;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -10,9 +35,9 @@ ECode CKeyguardAccountView::MyRunnable::Run()
 {
     if (mSuccess) {
         // clear out forgotten password
-        mLockPatternUtils->SetPermanentlyLocked(FALSE);
-        mLockPatternUtils->SetLockPatternEnabled(FALSE);
-        mLockPatternUtils->SaveLockPattern(NULL);
+        mHost->mLockPatternUtils->SetPermanentlyLocked(FALSE);
+        mHost->mLockPatternUtils->SetLockPatternEnabled(FALSE);
+        mHost->mLockPatternUtils->SaveLockPattern(NULL);
 
         // launch the 'choose lock pattern' activity so
         // the user can pick a new one if they want to
@@ -20,17 +45,22 @@ ECode CKeyguardAccountView::MyRunnable::Run()
         CIntent::New((IIntent**)&intent);
         intent->SetClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-        mContext->StartActivityAsUser(intent,
-                new UserHandle(mLockPatternUtils.getCurrentUser()));
-        mCallback->ReportUnlockAttempt(TRUE);
+
+        Int32 user;
+        mHost->mLockPatternUtils->GetCurrentUser(&user);
+        AutoPtr<IUserHandle> handle;
+        CUserHandle::New(user, (IUserHandle**)&handle);
+        mHost->mContext->StartActivityAsUser(intent, handle);
+        mHost->mCallback->ReportUnlockAttempt(TRUE);
 
         // dismiss keyguard
-        mCallback->Dismiss(TRUE);
+        mHost->mCallback->Dismiss(TRUE);
     }
     else {
-        mSecurityMessageDisplay->SetMessage(R::string::kg_login_invalid_input, TRUE);
-        mPassword->SetText("");
-        mCallback->ReportUnlockAttempt(FALSE);
+        mHost->mSecurityMessageDisplay->SetMessage(R::string::kg_login_invalid_input, TRUE);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String(""));
+        ITextView::Probe(mHost->mPassword)->SetText(cchar);
+        mHost->mCallback->ReportUnlockAttempt(FALSE);
     }
     return NOERROR;
 }
@@ -47,29 +77,34 @@ CAR_INTERFACE_IMPL(CKeyguardAccountView::MyAccountManagerCallback, Object, IAcco
 ECode CKeyguardAccountView::MyAccountManagerCallback::Run(
     /* [in] */ IAccountManagerFuture* future)
 {
-    //try {
+    //try
     ECode ec = NOERROR;
-    FAIL_GOTO(ec = mCallback->UserActivity(), ERROR)
-    AutoPtr<IBundle> result;
-    FAIL_GOTO(ec = future->GetResult((IBundle**)&result), ERROR)
-    Boolean verified;
-    FAIL_GOTO(ec = result->GetBoolean(IAccountManager::KEY_BOOLEAN_RESULT, &verified), ERROR)
-    FAIL_GOTO(ec = PostOnCheckPasswordResult(verified), ERROR)
+    {
+        FAIL_GOTO(ec = mHost->mCallback->UserActivity(), ERROR)
+        AutoPtr<IInterface> obj;
+        FAIL_GOTO(ec = future->GetResult((IInterface**)&obj), ERROR)
+        AutoPtr<IBundle> result = IBundle::Probe(obj);
+        Boolean verified;
+        FAIL_GOTO(ec = result->GetBoolean(IAccountManager::KEY_BOOLEAN_RESULT, &verified), ERROR)
+        mHost->PostOnCheckPasswordResult(verified);
+    }
     //} catch (OperationCanceledException e) {
-    if (ec == (ECode)OperationCanceledException) {
-        PostOnCheckPasswordResult(FALSE);
+ERROR:
+    if (ec == (ECode)E_OPERATION_CANCELED_EXCEPTION) {
+        mHost->PostOnCheckPasswordResult(FALSE);
     }
     //} catch (IOException e) {
-    if (ec == (ECode)IOException) {
-        PostOnCheckPasswordResult(FALSE);
+    if (ec == (ECode)E_IO_EXCEPTION) {
+        mHost->PostOnCheckPasswordResult(FALSE);
     }
     //} catch (AuthenticatorException e) {
-    if (ec == (ECode)AuthenticatorException) {
-        PostOnCheckPasswordResult(FALSE);
+    if (ec == (ECode)E_AUTHENTICATOR_EXCEPTION) {
+        mHost->PostOnCheckPasswordResult(FALSE);
     }
     //} finally {
     AutoPtr<IRunnable> r = new MyRunnable2(mHost);
-    return mLogin->Post(r);
+    Boolean res;
+    return IView::Probe(mHost->mLogin)->Post(r, &res);
     //}
 }
 
@@ -106,10 +141,9 @@ ECode CKeyguardAccountView::constructor(
 {
     LinearLayout::constructor(context, attrs, defStyle);
 
-    AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
-    CLockPatternUtils::New(context, (ILockPatternUtils**)&mLockPatternUtils);
-    return NOERROR;
+    AutoPtr<IContext> _context;
+    GetContext((IContext**)&_context);
+    return CLockPatternUtils::New(_context, (ILockPatternUtils**)&mLockPatternUtils);
 }
 
 ECode CKeyguardAccountView::OnFinishInflate()
@@ -121,22 +155,25 @@ ECode CKeyguardAccountView::OnFinishInflate()
     mLogin = IEditText::Probe(view);
 
     AutoPtr<ArrayOf<IInputFilter*> > array = ArrayOf<IInputFilter*>::Alloc(0);
-    AutoPtr<IInputFilter> filter = LoginFilter::UsernameFilterGeneric();
+    AutoPtr<IInputFilter> filter = new UsernameFilterGeneric();
     array->Set(0, filter);
-    mLogin->SetFilters(array);
-    mLogin->AddTextChangedListener(this);
+    ITextView::Probe(mLogin)->SetFilters(array);
+    ITextView::Probe(mLogin)->AddTextChangedListener(this);
 
     AutoPtr<IView> view2;
     FindViewById(R::id::password, (IView**)&view2);
     mPassword = IEditText::Probe(view2);
-    mPassword->AddTextChangedListener(this);
+    ITextView::Probe(mPassword)->AddTextChangedListener(this);
 
     AutoPtr<IView> view3;
     FindViewById(R::id::ok, (IView**)&view3);
     mOk = IButton::Probe(view3);
-    mOk->SetOnClickListener(this);
+    IView::Probe(mOk)->SetOnClickListener(this);
 
-    mSecurityMessageDisplay = new KeyguardMessageArea::Helper(this);
+    AutoPtr<CKeyguardMessageArea::Helper> tmp =
+            new CKeyguardMessageArea::Helper();
+    tmp->constructor((IView*)this);
+    mSecurityMessageDisplay = ISecurityMessageDisplay::Probe(tmp);
     Reset();
     return NOERROR;
 }
@@ -145,6 +182,7 @@ ECode CKeyguardAccountView::SetKeyguardCallback(
     /* [in] */ IKeyguardSecurityCallback* callback)
 {
     mCallback = callback;
+    return NOERROR;
 }
 
 ECode CKeyguardAccountView::SetLockPatternUtils(
@@ -185,7 +223,7 @@ ECode CKeyguardAccountView::OnTextChanged(
     /* [in] */ Int32 before,
     /* [in] */ Int32 count)
 {
-    if (mCallback != null) {
+    if (mCallback != NULL) {
         mCallback->UserActivity();
     }
     return NOERROR;
@@ -199,7 +237,7 @@ ECode CKeyguardAccountView::OnRequestFocusInDescendants(
     VALIDATE_NOT_NULL(result)
 
     // send focus to the login field
-    return mLogin->RequestFocus(direction, previouslyFocusedRect, &result);
+    return IView::Probe(mLogin)->RequestFocus(direction, previouslyFocusedRect, result);
 }
 
 ECode CKeyguardAccountView::NeedsInput(
@@ -214,20 +252,22 @@ ECode CKeyguardAccountView::NeedsInput(
 ECode CKeyguardAccountView::Reset()
 {
     // start fresh
-    mLogin->SetText("");
-    mPassword->SetText("");
-    mLogin->RequestFocus();
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String(""));
+
+    ITextView::Probe(mLogin)->SetText(cchar);
+    ITextView::Probe(mPassword)->SetText(cchar);
+    Boolean res;
+    IView::Probe(mLogin)->RequestFocus(&res);
     Boolean permLocked;
     mLockPatternUtils->IsPermanentlyLocked(&permLocked);
-    mSecurityMessageDisplay->SetMessage(permLocked ? R::string::kg_login_too_many_attempts :
+    return mSecurityMessageDisplay->SetMessage(permLocked ? R::string::kg_login_too_many_attempts :
         R::string::kg_login_instructions, permLocked ? TRUE : FALSE);
-    return NOERROR;
 }
 
 ECode CKeyguardAccountView::CleanUp()
 {
     if (mCheckingDialog != NULL) {
-        mCheckingDialog->Hide();
+        IDialog::Probe(mCheckingDialog)->Hide();
     }
     mCallback = NULL;
     mLockPatternUtils = NULL;
@@ -238,7 +278,7 @@ ECode CKeyguardAccountView::OnClick(
     /* [in] */ IView* v)
 {
     mCallback->UserActivity();
-    if (v == mOk) {
+    if (TO_IINTERFACE(v) == TO_IINTERFACE(mOk)) {
         AsyncCheckPassword();
     }
     return NOERROR;
@@ -249,7 +289,8 @@ void CKeyguardAccountView::PostOnCheckPasswordResult(
 {
     // ensure this runs on UI thread
     AutoPtr<IRunnable> r = new MyRunnable(this, success);
-    mLogin->Post(r);
+    Boolean res;
+    IView::Probe(mLogin)->Post(r, &res);
 }
 
 ECode CKeyguardAccountView::DispatchKeyEvent(
@@ -279,7 +320,7 @@ ECode CKeyguardAccountView::DispatchKeyEvent(
 }
 
 AutoPtr<IAccount> CKeyguardAccountView::FindIntendedAccount(
-    /* [in] */ coonst String& username)
+    /* [in] */ const String& username)
 {
     Int32 user;
     mLockPatternUtils->GetCurrentUser(&user);
@@ -290,7 +331,8 @@ AutoPtr<IAccount> CKeyguardAccountView::FindIntendedAccount(
     AutoPtr<IAccountManager> accountManager;
     helper->Get(mContext, (IAccountManager**)&accountManager);
     AutoPtr<ArrayOf<IAccount*> > accounts;
-    accountManager->GetAccountsByTypeAsUser(String("com.google"), handle, (ArrayOf<IAccount*>**)&accounts);
+    accountManager->GetAccountsByTypeAsUser(String("com.google"),
+            handle, (ArrayOf<IAccount*>**)&accounts);
 
     // Try to figure out which account they meant if they
     // typed only the username (and not the domain), or got
@@ -299,7 +341,7 @@ AutoPtr<IAccount> CKeyguardAccountView::FindIntendedAccount(
     AutoPtr<IAccount> bestAccount;
     Int32 bestScore = 0;
 
-    for (Int32 i = 0; i < accounts.GetLength(); i+=) {
+    for (Int32 i = 0; i < accounts->GetLength(); i++) {
         AutoPtr<IAccount> a = (*accounts)[i];
 
         Int32 score = 0;
@@ -340,12 +382,12 @@ void CKeyguardAccountView::AsyncCheckPassword()
     mCallback->UserActivity();
 
     AutoPtr<ICharSequence> loginText;
-    mLogin->GetText((ICharSequence**)&loginText);
+    ITextView::Probe(mLogin)->GetText((ICharSequence**)&loginText);
     String login;
     loginText->ToString(&login);
 
     AutoPtr<ICharSequence> passwordText;
-    mPassword->GetText((ICharSequence**)&passwordText);
+    ITextView::Probe(mPassword)->GetText((ICharSequence**)&passwordText);
     String password;
     passwordText->ToString(&password);
 
@@ -371,8 +413,9 @@ void CKeyguardAccountView::AsyncCheckPassword()
     AutoPtr<IAccountManager> accountManager;
     helper->Get(mContext, (IAccountManager**)&accountManager);
 
+    AutoPtr<IAccountManagerFuture> tmp;
     accountManager->ConfirmCredentialsAsUser(account, options, NULL /* activity */,
-            callback, NULL /* handler */, handle);
+           callback, NULL /* handler */, handle, (IAccountManagerFuture**)&tmp);
 }
 
 AutoPtr<IDialog> CKeyguardAccountView::GetProgressDialog()
@@ -382,14 +425,15 @@ AutoPtr<IDialog> CKeyguardAccountView::GetProgressDialog()
 
         String str;
         mContext->GetString(R::string::kg_login_checking_password, &str);
-        mCheckingDialog->SetMessage(str);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+        IAlertDialog::Probe(mCheckingDialog)->SetMessage(cchar);
         mCheckingDialog->SetIndeterminate(TRUE);
-        mCheckingDialog->SetCancelable(FASLE);
+        IDialog::Probe(mCheckingDialog)->SetCancelable(FALSE);
         AutoPtr<IWindow> window;
         IDialog::Probe(mCheckingDialog)->GetWindow((IWindow**)&window);
         window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
     }
-    return mCheckingDialog;
+    return IDialog::Probe(mCheckingDialog);
 }
 
 ECode CKeyguardAccountView::OnPause()
