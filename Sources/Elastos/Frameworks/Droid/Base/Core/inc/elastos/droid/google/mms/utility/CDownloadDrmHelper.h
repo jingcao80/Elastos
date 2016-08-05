@@ -38,7 +38,6 @@ public:
         /* [in] */ const String& path,
         /* [in] */ const String& containingMime,
         /* [out] */ String* result);
-
 };
 
 } // namespace Utility

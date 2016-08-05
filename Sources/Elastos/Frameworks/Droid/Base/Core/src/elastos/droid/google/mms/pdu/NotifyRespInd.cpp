@@ -21,20 +21,18 @@ ECode NotifyRespInd::constructor(
     /* [in] */ ArrayOf<Byte>* transactionId,
     /* [in] */ Int32 status)
 {
-    // ==================before translated======================
-    // super();
-    // setMessageType(PduHeaders.MESSAGE_TYPE_NOTIFYRESP_IND);
-    // setMmsVersion(mmsVersion);
-    // setTransactionId(transactionId);
-    // setStatus(status);
+    GenericPdu::constructor();
+    SetMessageType(IPduHeaders::MESSAGE_TYPE_NOTIFYRESP_IND);
+    SetMmsVersion(mmsVersion);
+    SetTransactionId(transactionId);
+    SetStatus(status);
     return NOERROR;
 }
 
 ECode NotifyRespInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
-    // ==================before translated======================
-    // super(headers);
+    GenericPdu::constructor(headers);
     return NOERROR;
 }
 
@@ -42,58 +40,40 @@ ECode NotifyRespInd::GetReportAllowed(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.REPORT_ALLOWED);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::REPORT_ALLOWED, result);
 }
 
 ECode NotifyRespInd::SetReportAllowed(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.REPORT_ALLOWED);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::REPORT_ALLOWED);
 }
 
 ECode NotifyRespInd::SetStatus(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.STATUS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::STATUS);
 }
 
 ECode NotifyRespInd::GetStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.STATUS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::STATUS, result);
 }
 
 ECode NotifyRespInd::GetTransactionId(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.TRANSACTION_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::TRANSACTION_ID, result);
 }
 
 ECode NotifyRespInd::SetTransactionId(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.TRANSACTION_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetTextString(value, IPduHeaders::TRANSACTION_ID);
 }
 
 } // namespace Pdu

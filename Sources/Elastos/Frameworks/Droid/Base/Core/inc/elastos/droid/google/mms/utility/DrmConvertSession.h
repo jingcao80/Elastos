@@ -4,15 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.content.Context;
-// import android.drm.DrmConvertedStatus;
-// import android.drm.DrmManagerClient;
-// import android.util.Log;
-// import android.provider.Downloads;
-// import java.io.FileNotFoundException;
-// import java.io.IOException;
-// import java.io.RandomAccessFile;
-
 using Elastos::Droid::Content::IContext;
 //TODO using Elastos::Droid::Drm::IDrmManagerClient;
 

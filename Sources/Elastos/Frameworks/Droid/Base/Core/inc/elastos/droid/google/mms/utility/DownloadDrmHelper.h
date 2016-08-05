@@ -4,9 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.drm.DrmManagerClient;
-// import android.util.Log;
-
 using Elastos::Droid::Content::IContext;
 
 namespace Elastos {
@@ -59,13 +56,6 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ const String& path,
         /* [in] */ const String& containingMime);
-
-//public:
-//    /** The MIME type of special DRM files */
-//    static const String MIMETYPE_DRM_MESSAGE;
-//    /** The extensions of special DRM files */
-//    static const String EXTENSION_DRM_MESSAGE;
-//    static const String EXTENSION_INTERNAL_FWDL;
 
 private:
     static const String TAG;

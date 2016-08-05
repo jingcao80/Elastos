@@ -1,6 +1,25 @@
 #include "Elastos.Droid.Google.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduComposer.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/google/mms/pdu/CEncodedStringValueHelper.h"
+
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
+
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Text::TextUtils;
+
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IInteger32;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IOutputStream;
+using Elastos::IO::CByteArrayOutputStream;
+using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace Droid {
@@ -11,81 +30,89 @@ namespace Pdu {
 //=====================================================================
 //                     PduComposer::PositionMarker
 //=====================================================================
+PduComposer::PositionMarker::PositionMarker(
+    /* [in] */ PduComposer* host)
+    : mHost(host)
+{
+}
+
 ECode PduComposer::PositionMarker::GetLength(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // If these assert fails, likely that you are finding the
-    // // size of buffer that is deep in BufferStack you can only
-    // // find the length of the buffer that is on top
-    // if (currentStackSize != mStack.stackSize) {
-    //     throw new RuntimeException("BUG: Invalid call to getLength()");
-    // }
-    //
-    // return mPosition - c_pos;
-    assert(0);
+    // If these assert fails, likely that you are finding the
+    // size of buffer that is deep in BufferStack you can only
+    // find the length of the buffer that is on top
+    if (mCurrentStackSize != mHost->mStack->mStackSize) {
+        // throw new RuntimeException("BUG: Invalid call to getLength()");
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    *result = mHost->mPosition - mC_pos;
     return NOERROR;
 }
 
 //=====================================================================
 //                       PduComposer::BufferStack
 //=====================================================================
+PduComposer::BufferStack::BufferStack(
+    /* [in] */ PduComposer* host)
+    : mHost(host)
+{
+}
+
 ECode PduComposer::BufferStack::Newbuf()
 {
-    // ==================before translated======================
-    // // You can't create a new buff when toCopy != null
-    // // That is after calling pop() and before calling copy()
-    // // If you do, it is a bug
-    // if (toCopy != null) {
-    //     throw new RuntimeException("BUG: Invalid newbuf() before copy()");
-    // }
-    //
-    // LengthRecordNode temp = new LengthRecordNode();
-    //
-    // temp.currentMessage = mMessage;
-    // temp.currentPosition = mPosition;
-    //
-    // temp.next = stack;
-    // stack = temp;
-    //
-    // stackSize = stackSize + 1;
-    //
-    // mMessage = new ByteArrayOutputStream();
-    // mPosition = 0;
-    assert(0);
+    // You can't create a new buff when toCopy != null
+    // That is after calling pop() and before calling copy()
+    // If you do, it is a bug
+    if (mToCopy != NULL) {
+        // throw new RuntimeException("BUG: Invalid newbuf() before copy()");
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    AutoPtr<LengthRecordNode> temp = new LengthRecordNode();
+
+    temp->mCurrentMessage = mHost->mMessage;
+    temp->mCurrentPosition = mHost->mPosition;
+
+    temp->mNext = mStack;
+    mStack = temp;
+
+    mStackSize = mStackSize + 1;
+
+    CByteArrayOutputStream::New((IByteArrayOutputStream**)&(mHost->mMessage));
+    mHost->mPosition = 0;
     return NOERROR;
 }
 
 ECode PduComposer::BufferStack::Pop()
 {
-    // ==================before translated======================
-    // ByteArrayOutputStream currentMessage = mMessage;
-    // int currentPosition = mPosition;
-    //
-    // mMessage = stack.currentMessage;
-    // mPosition = stack.currentPosition;
-    //
-    // toCopy = stack;
-    // // Re using the top element of the stack to avoid memory allocation
-    //
-    // stack = stack.next;
-    // stackSize = stackSize - 1;
-    //
-    // toCopy.currentMessage = currentMessage;
-    // toCopy.currentPosition = currentPosition;
-    assert(0);
+    AutoPtr<IByteArrayOutputStream> currentMessage = mHost->mMessage;
+    Int32 currentPosition = mHost->mPosition;
+
+    mHost->mMessage = mStack->mCurrentMessage;
+    mHost->mPosition = mStack->mCurrentPosition;
+
+    mToCopy = mStack;
+    // Re using the top element of the stack to avoid memory allocation
+
+    mStack = mStack->mNext;
+    mStackSize = mStackSize - 1;
+
+    mToCopy->mCurrentMessage = currentMessage;
+    mToCopy->mCurrentPosition = currentPosition;
     return NOERROR;
 }
 
 ECode PduComposer::BufferStack::Copy()
 {
-    // ==================before translated======================
-    // arraycopy(toCopy.currentMessage.toByteArray(), 0,
-    //         toCopy.currentPosition);
-    //
-    // toCopy = null;
-    assert(0);
+    AutoPtr<ArrayOf<Byte> > arr;
+    mToCopy->mCurrentMessage->ToByteArray((ArrayOf<Byte>**)&arr);
+    mHost->Arraycopy(arr, 0,
+            mToCopy->mCurrentPosition);
+
+    mToCopy = NULL;
     return NOERROR;
 }
 
@@ -93,14 +120,13 @@ ECode PduComposer::BufferStack::Mark(
     /* [out] */ PositionMarker** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // PositionMarker m = new PositionMarker();
-    //
-    // m.c_pos = mPosition;
-    // m.currentStackSize = stackSize;
-    //
-    // return m;
-    assert(0);
+    AutoPtr<PositionMarker> m = new PositionMarker(mHost);
+
+    m->mC_pos = mHost->mPosition;
+    m->mCurrentStackSize = mStackSize;
+
+    *result = m;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -143,13 +169,12 @@ ECode PduComposer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IGenericPdu* pdu)
 {
-    // ==================before translated======================
-    // mPdu = pdu;
-    // mResolver = context.getContentResolver();
-    // mPduHeader = pdu.getPduHeaders();
-    // mStack = new BufferStack();
-    // mMessage = new ByteArrayOutputStream();
-    // mPosition = 0;
+    mPdu = pdu;
+    context->GetContentResolver((IContentResolver**)&mResolver);
+    pdu->GetPduHeaders((IPduHeaders**)&mPduHeader);
+    mStack = new BufferStack(this);
+    CByteArrayOutputStream::New((IByteArrayOutputStream**)&mMessage);
+    mPosition = 0;
     return NOERROR;
 }
 
@@ -157,40 +182,44 @@ ECode PduComposer::Make(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // Get Message-type.
-    // int type = mPdu.getMessageType();
-    //
-    // /* make the message */
-    // switch (type) {
-    //     case PduHeaders.MESSAGE_TYPE_SEND_REQ:
-    //     case PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF:
-    //         if (makeSendRetrievePdu(type) != PDU_COMPOSE_SUCCESS) {
-    //             return null;
-    //         }
-    //         break;
-    //     case PduHeaders.MESSAGE_TYPE_NOTIFYRESP_IND:
-    //         if (makeNotifyResp() != PDU_COMPOSE_SUCCESS) {
-    //             return null;
-    //         }
-    //         break;
-    //     case PduHeaders.MESSAGE_TYPE_ACKNOWLEDGE_IND:
-    //         if (makeAckInd() != PDU_COMPOSE_SUCCESS) {
-    //             return null;
-    //         }
-    //         break;
-    //     case PduHeaders.MESSAGE_TYPE_READ_REC_IND:
-    //         if (makeReadRecInd() != PDU_COMPOSE_SUCCESS) {
-    //             return null;
-    //         }
-    //         break;
-    //     default:
-    //         return null;
-    // }
-    //
-    // return mMessage.toByteArray();
-    assert(0);
-    return NOERROR;
+    // Get Message-type.
+    Int32 type = 0;
+    mPdu->GetMessageType(&type);
+
+    /* make the message */
+    switch (type) {
+        case IPduHeaders::MESSAGE_TYPE_SEND_REQ:
+        case IPduHeaders::MESSAGE_TYPE_RETRIEVE_CONF:
+            if (MakeSendRetrievePdu(type) != PDU_COMPOSE_SUCCESS) {
+                *result = NULL;
+                return NOERROR;
+            }
+            break;
+        case IPduHeaders::MESSAGE_TYPE_NOTIFYRESP_IND:
+            if (MakeNotifyResp() != PDU_COMPOSE_SUCCESS) {
+                *result = NULL;
+                return NOERROR;
+            }
+            break;
+        case IPduHeaders::MESSAGE_TYPE_ACKNOWLEDGE_IND:
+            if (MakeAckInd() != PDU_COMPOSE_SUCCESS) {
+                *result = NULL;
+                return NOERROR;
+            }
+            break;
+        case IPduHeaders::MESSAGE_TYPE_READ_REC_IND:
+            if (MakeReadRecInd() != PDU_COMPOSE_SUCCESS) {
+                *result = NULL;
+                return NOERROR;
+            }
+            break;
+        default: {
+            *result = NULL;
+            return NOERROR;
+        }
+    }
+
+    return mMessage->ToByteArray(result);
 }
 
 void PduComposer::Arraycopy(
@@ -198,910 +227,940 @@ void PduComposer::Arraycopy(
     /* [in] */ Int32 pos,
     /* [in] */ Int32 length)
 {
-    // ==================before translated======================
-    // mMessage.write(buf, pos, length);
-    // mPosition = mPosition + length;
-    assert(0);
+    IOutputStream::Probe(mMessage)->Write(buf, pos, length);
+    mPosition = mPosition + length;
 }
 
 void PduComposer::Append(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mMessage.write(value);
-    // mPosition ++;
-    assert(0);
+    IOutputStream::Probe(mMessage)->Write(value);
+    mPosition++;
 }
 
 void PduComposer::AppendShortInteger(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * Short-integer = OCTET
-    //  * ; Integers in range 0-127 shall be encoded as a one octet value
-    //  * ; with the most significant bit set to one (1xxx xxxx) and with
-    //  * ; the value in the remaining least significant bits.
-    //  * In our implementation, only low 7 bits are stored and otherwise
-    //  * bits are ignored.
-    //  */
-    // append((value | 0x80) & 0xff);
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * Short-integer = OCTET
+     * ; Integers in range 0-127 shall be encoded as a one octet value
+     * ; with the most significant bit set to one (1xxx xxxx) and with
+     * ; the value in the remaining least significant bits.
+     * In our implementation, only low 7 bits are stored and otherwise
+     * bits are ignored.
+     */
+    Append((value | 0x80) & 0xff);
 }
 
 void PduComposer::AppendOctet(
     /* [in] */ Int32 number)
 {
-    // ==================before translated======================
-    // append(number);
-    assert(0);
+    Append(number);
 }
 
 void PduComposer::AppendShortLength(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * Short-length = <Any octet 0-30>
-    //  */
-    // append(value);
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * Short-length = <Any octet 0-30>
+     */
+    Append(value);
 }
 
 void PduComposer::AppendLongInteger(
     /* [in] */ Int64 longInt)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * Long-integer = Short-length Multi-octet-integer
-    //  * ; The Short-length indicates the length of the Multi-octet-integer
-    //  * Multi-octet-integer = 1*30 OCTET
-    //  * ; The content octets shall be an unsigned integer value with the
-    //  * ; most significant octet encoded first (big-endian representation).
-    //  * ; The minimum number of octets must be used to encode the value.
-    //  */
-    // int size;
-    // long temp = longInt;
-    //
-    // // Count the length of the long integer.
-    // for(size = 0; (temp != 0) && (size < LONG_INTEGER_LENGTH_MAX); size++) {
-    //     temp = (temp >>> 8);
-    // }
-    //
-    // // Set Length.
-    // appendShortLength(size);
-    //
-    // // Count and set the long integer.
-    // int i;
-    // int shift = (size -1) * 8;
-    //
-    // for (i = 0; i < size; i++) {
-    //     append((int)((longInt >>> shift) & 0xff));
-    //     shift = shift - 8;
-    // }
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * Long-integer = Short-length Multi-octet-integer
+     * ; The Short-length indicates the length of the Multi-octet-integer
+     * Multi-octet-integer = 1*30 OCTET
+     * ; The content octets shall be an unsigned integer value with the
+     * ; most significant octet encoded first (big-endian representation).
+     * ; The minimum number of octets must be used to encode the value.
+     */
+    Int32 size = 0;
+    Int64 temp = longInt;
+
+    // Count the length of the long integer.
+    for (size = 0; (temp != 0) && (size < LONG_INTEGER_LENGTH_MAX); size++) {
+        temp = (temp >> 8);
+    }
+
+    // Set Length.
+    AppendShortLength(size);
+
+    // Count and set the long integer.
+    Int32 i = 0;
+    Int32 shift = (size -1) * 8;
+
+    for (i = 0; i < size; i++) {
+        Append((Int32)((longInt >> shift) & 0xff));
+        shift = shift - 8;
+    }
 }
 
 void PduComposer::AppendTextString(
     /* [in] */ ArrayOf<Byte>* text)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * Text-string = [Quote] *TEXT End-of-string
-    //  * ; If the first character in the TEXT is in the range of 128-255,
-    //  * ; a Quote character must precede it. Otherwise the Quote character
-    //  * ;must be omitted. The Quote is not part of the contents.
-    //  */
-    // if (((text[0])&0xff) > TEXT_MAX) { // No need to check for <= 255
-    //     append(TEXT_MAX);
-    // }
-    //
-    // arraycopy(text, 0, text.length);
-    // append(0);
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * Text-string = [Quote] *TEXT End-of-string
+     * ; If the first character in the TEXT is in the range of 128-255,
+     * ; a Quote character must precede it. Otherwise the Quote character
+     * ;must be omitted. The Quote is not part of the contents.
+     */
+    if ((((*text)[0]) & 0xff) > TEXT_MAX) { // No need to check for <= 255
+        Append(TEXT_MAX);
+    }
+
+    Arraycopy(text, 0, text->GetLength());
+    Append(0);
 }
 
 void PduComposer::AppendTextString(
     /* [in] */ const String& str)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * Text-string = [Quote] *TEXT End-of-string
-    //  * ; If the first character in the TEXT is in the range of 128-255,
-    //  * ; a Quote character must precede it. Otherwise the Quote character
-    //  * ;must be omitted. The Quote is not part of the contents.
-    //  */
-    // appendTextString(str.getBytes());
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * Text-string = [Quote] *TEXT End-of-string
+     * ; If the first character in the TEXT is in the range of 128-255,
+     * ; a Quote character must precede it. Otherwise the Quote character
+     * ;must be omitted. The Quote is not part of the contents.
+     */
+    AppendTextString(str.GetBytes());
 }
 
 void PduComposer::AppendEncodedString(
     /* [in] */ IEncodedStringValue* enStr)
 {
-    // ==================before translated======================
-    // /*
-    //  * From OMA-TS-MMS-ENC-V1_3-20050927-C:
-    //  * Encoded-string-value = Text-string | Value-length Char-set Text-string
-    //  */
-    // assert(enStr != null);
-    //
-    // int charset = enStr.getCharacterSet();
-    // byte[] textString = enStr.getTextString();
-    // if (null == textString) {
-    //     return;
-    // }
-    //
-    // /*
-    //  * In the implementation of EncodedStringValue, the charset field will
-    //  * never be 0. It will always be composed as
-    //  * Encoded-string-value = Value-length Char-set Text-string
-    //  */
-    // mStack.newbuf();
-    // PositionMarker start = mStack.mark();
-    //
-    // appendShortInteger(charset);
-    // appendTextString(textString);
-    //
-    // int len = start.getLength();
-    // mStack.pop();
-    // appendValueLength(len);
-    // mStack.copy();
-    assert(0);
+    /*
+     * From OMA-TS-MMS-ENC-V1_3-20050927-C:
+     * Encoded-string-value = Text-string | Value-length Char-set Text-string
+     */
+    assert(enStr != NULL);
+
+    Int32 charset = 0;
+    enStr->GetCharacterSet(&charset);
+    AutoPtr<ArrayOf<Byte> > textString;
+    enStr->GetTextString((ArrayOf<Byte>**)&textString);
+    if (NULL == textString) {
+        return;
+    }
+
+    /*
+     * In the implementation of EncodedStringValue, the charset field will
+     * never be 0. It will always be composed as
+     * Encoded-string-value = Value-length Char-set Text-string
+     */
+    mStack->Newbuf();
+    AutoPtr<PositionMarker> start;
+    mStack->Mark((PositionMarker**)&start);
+
+    AppendShortInteger(charset);
+    AppendTextString(textString);
+
+    Int32 len = 0;
+    start->GetLength(&len);
+    mStack->Pop();
+    AppendValueLength(len);
+    mStack->Copy();
 }
 
 void PduComposer::AppendUintvarInteger(
     /* [in] */ Int64 value)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * To encode a large unsigned integer, split it into 7-bit fragments
-    //  * and place them in the payloads of multiple octets. The most significant
-    //  * bits are placed in the first octets with the least significant bits
-    //  * ending up in the last octet. All octets MUST set the Continue bit to 1
-    //  * except the last octet, which MUST set the Continue bit to 0.
-    //  */
-    // int i;
-    // long max = SHORT_INTEGER_MAX;
-    //
-    // for (i = 0; i < 5; i++) {
-    //     if (value < max) {
-    //         break;
-    //     }
-    //
-    //     max = (max << 7) | 0x7fl;
-    // }
-    //
-    // while(i > 0) {
-    //     long temp = value >>> (i * 7);
-    //     temp = temp & 0x7f;
-    //
-    //     append((int)((temp | 0x80) & 0xff));
-    //
-    //     i--;
-    // }
-    //
-    // append((int)(value & 0x7f));
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * To encode a large unsigned integer, split it into 7-bit fragments
+     * and place them in the payloads of multiple octets. The most significant
+     * bits are placed in the first octets with the least significant bits
+     * ending up in the last octet. All octets MUST set the Continue bit to 1
+     * except the last octet, which MUST set the Continue bit to 0.
+     */
+    Int32 i = 0;
+    Int64 max = SHORT_INTEGER_MAX;
+
+    for (i = 0; i < 5; i++) {
+        if (value < max) {
+            break;
+        }
+
+        max = (max << 7) | 0x7fl;
+    }
+
+    while (i > 0) {
+        Int64 temp = value >> (i * 7);
+        temp = temp & 0x7f;
+
+        Append((Int32)((temp | 0x80) & 0xff));
+
+        i--;
+    }
+
+    Append((Int32)(value & 0x7f));
 }
 
 void PduComposer::AppendDateValue(
     /* [in] */ Int64 date)
 {
-    // ==================before translated======================
-    // /*
-    //  * From OMA-TS-MMS-ENC-V1_3-20050927-C:
-    //  * Date-value = Long-integer
-    //  */
-    // appendLongInteger(date);
-    assert(0);
+    /*
+     * From OMA-TS-MMS-ENC-V1_3-20050927-C:
+     * Date-value = Long-integer
+     */
+    AppendLongInteger(date);
 }
 
 void PduComposer::AppendValueLength(
     /* [in] */ Int64 value)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * Value-length = Short-length | (Length-quote Length)
-    //  * ; Value length is used to indicate the length of the value to follow
-    //  * Short-length = <Any octet 0-30>
-    //  * Length-quote = <Octet 31>
-    //  * Length = Uintvar-integer
-    //  */
-    // if (value < LENGTH_QUOTE) {
-    //     appendShortLength((int) value);
-    //     return;
-    // }
-    //
-    // append(LENGTH_QUOTE);
-    // appendUintvarInteger(value);
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * Value-length = Short-length | (Length-quote Length)
+     * ; Value length is used to indicate the length of the value to follow
+     * Short-length = <Any octet 0-30>
+     * Length-quote = <Octet 31>
+     * Length = Uintvar-integer
+     */
+    if (value < LENGTH_QUOTE) {
+        AppendShortLength((Int32) value);
+        return;
+    }
+
+    Append(LENGTH_QUOTE);
+    AppendUintvarInteger(value);
 }
 
 void PduComposer::AppendQuotedString(
     /* [in] */ ArrayOf<Byte>* text)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * Quoted-string = <Octet 34> *TEXT End-of-string
-    //  * ;The TEXT encodes an RFC2616 Quoted-string with the enclosing
-    //  * ;quotation-marks <"> removed.
-    //  */
-    // append(QUOTED_STRING_FLAG);
-    // arraycopy(text, 0, text.length);
-    // append(END_STRING_FLAG);
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * Quoted-string = <Octet 34> *TEXT End-of-string
+     * ;The TEXT encodes an RFC2616 Quoted-string with the enclosing
+     * ;quotation-marks <"> removed.
+     */
+    Append(QUOTED_STRING_FLAG);
+    Arraycopy(text, 0, text->GetLength());
+    Append(END_STRING_FLAG);
 }
 
 void PduComposer::AppendQuotedString(
     /* [in] */ const String& str)
 {
-    // ==================before translated======================
-    // /*
-    //  * From WAP-230-WSP-20010705-a:
-    //  * Quoted-string = <Octet 34> *TEXT End-of-string
-    //  * ;The TEXT encodes an RFC2616 Quoted-string with the enclosing
-    //  * ;quotation-marks <"> removed.
-    //  */
-    // appendQuotedString(str.getBytes());
-    assert(0);
+    /*
+     * From WAP-230-WSP-20010705-a:
+     * Quoted-string = <Octet 34> *TEXT End-of-string
+     * ;The TEXT encodes an RFC2616 Quoted-string with the enclosing
+     * ;quotation-marks <"> removed.
+     */
+    AppendQuotedString(str.GetBytes());
 }
 
 Int32 PduComposer::CheckAddressType(
     /* [in] */ const String& address)
 {
-    // ==================before translated======================
-    // /**
-    //  * From OMA-TS-MMS-ENC-V1_3-20050927-C.pdf, section 8.
-    //  * address = ( e-mail / device-address / alphanum-shortcode / num-shortcode)
-    //  * e-mail = mailbox; to the definition of mailbox as described in
-    //  * section 3.4 of [RFC2822], but excluding the
-    //  * obsolete definitions as indicated by the "obs-" prefix.
-    //  * device-address = ( global-phone-number "/TYPE=PLMN" )
-    //  * / ( ipv4 "/TYPE=IPv4" ) / ( ipv6 "/TYPE=IPv6" )
-    //  * / ( escaped-value "/TYPE=" address-type )
-    //  *
-    //  * global-phone-number = ["+"] 1*( DIGIT / written-sep )
-    //  * written-sep =("-"/".")
-    //  *
-    //  * ipv4 = 1*3DIGIT 3( "." 1*3DIGIT ) ; IPv4 address value
-    //  *
-    //  * ipv6 = 4HEXDIG 7( ":" 4HEXDIG ) ; IPv6 address per RFC 2373
-    //  */
-    //
-    // if (null == address) {
-    //     return PDU_UNKNOWN_ADDRESS_TYPE;
-    // }
-    //
-    // if (address.matches(REGEXP_IPV4_ADDRESS_TYPE)) {
-    //     // Ipv4 address.
-    //     return PDU_IPV4_ADDRESS_TYPE;
-    // }else if (address.matches(REGEXP_PHONE_NUMBER_ADDRESS_TYPE)) {
-    //     // Phone number.
-    //     return PDU_PHONE_NUMBER_ADDRESS_TYPE;
-    // } else if (address.matches(REGEXP_EMAIL_ADDRESS_TYPE)) {
-    //     // Email address.
-    //     return PDU_EMAIL_ADDRESS_TYPE;
-    // } else if (address.matches(REGEXP_IPV6_ADDRESS_TYPE)) {
-    //     // Ipv6 address.
-    //     return PDU_IPV6_ADDRESS_TYPE;
-    // } else {
-    //     // Unknown address.
-    //     return PDU_UNKNOWN_ADDRESS_TYPE;
-    // }
-    assert(0);
-    return 0;
+    /**
+     * From OMA-TS-MMS-ENC-V1_3-20050927-C.pdf, section 8.
+     * address = ( e-mail / device-address / alphanum-shortcode / num-shortcode)
+     * e-mail = mailbox; to the definition of mailbox as described in
+     * section 3.4 of [RFC2822], but excluding the
+     * obsolete definitions as indicated by the "obs-" prefix.
+     * device-address = ( global-phone-number "/TYPE=PLMN" )
+     * / ( ipv4 "/TYPE=IPv4" ) / ( ipv6 "/TYPE=IPv6" )
+     * / ( escaped-value "/TYPE=" address-type )
+     *
+     * global-phone-number = ["+"] 1*( DIGIT / written-sep )
+     * written-sep =("-"/".")
+     *
+     * ipv4 = 1*3DIGIT 3( "." 1*3DIGIT ) ; IPv4 address value
+     *
+     * ipv6 = 4HEXDIG 7( ":" 4HEXDIG ) ; IPv6 address per RFC 2373
+     */
+
+    if (address.IsNull()) {
+        return PDU_UNKNOWN_ADDRESS_TYPE;
+    }
+
+    Boolean b = FALSE;
+    if ((StringUtils::Matches(address, REGEXP_IPV4_ADDRESS_TYPE, &b), b)) {
+        // Ipv4 address.
+        return PDU_IPV4_ADDRESS_TYPE;
+    }
+    else if ((StringUtils::Matches(address, REGEXP_PHONE_NUMBER_ADDRESS_TYPE, &b), b)) {
+        // Phone number.
+        return PDU_PHONE_NUMBER_ADDRESS_TYPE;
+    }
+    else if ((StringUtils::Matches(address, REGEXP_EMAIL_ADDRESS_TYPE, &b), b)) {
+        // Email address.
+        return PDU_EMAIL_ADDRESS_TYPE;
+    }
+    else if ((StringUtils::Matches(address, REGEXP_IPV6_ADDRESS_TYPE, &b), b)) {
+        // Ipv6 address.
+        return PDU_IPV6_ADDRESS_TYPE;
+    }
+    else {
+        // Unknown address.
+        return PDU_UNKNOWN_ADDRESS_TYPE;
+    }
 }
 
 AutoPtr<IEncodedStringValue> PduComposer::AppendAddressType(
     /* [in] */ IEncodedStringValue* address)
 {
-    // ==================before translated======================
-    // EncodedStringValue temp = null;
-    //
+    AutoPtr<IEncodedStringValue> temp;
+
     // try {
-    //     int addressType = checkAddressType(address.getString());
-    //     temp = EncodedStringValue.copy(address);
-    //     if (PDU_PHONE_NUMBER_ADDRESS_TYPE == addressType) {
-    //         // Phone number.
-    //         temp.appendTextString(STRING_PHONE_NUMBER_ADDRESS_TYPE.getBytes());
-    //     } else if (PDU_IPV4_ADDRESS_TYPE == addressType) {
-    //         // Ipv4 address.
-    //         temp.appendTextString(STRING_IPV4_ADDRESS_TYPE.getBytes());
-    //     } else if (PDU_IPV6_ADDRESS_TYPE == addressType) {
-    //         // Ipv6 address.
-    //         temp.appendTextString(STRING_IPV6_ADDRESS_TYPE.getBytes());
-    //     }
+    String str;
+    address->GetString(&str);
+    Int32 addressType = CheckAddressType(str);
+    AutoPtr<IEncodedStringValueHelper> hlp;
+    CEncodedStringValueHelper::AcquireSingleton((IEncodedStringValueHelper**)&hlp);
+    hlp->Copy(address, (IEncodedStringValue**)&temp);
+    if (PDU_PHONE_NUMBER_ADDRESS_TYPE == addressType) {
+        // Phone number.
+        temp->AppendTextString(STRING_PHONE_NUMBER_ADDRESS_TYPE.GetBytes());
+    }
+    else if (PDU_IPV4_ADDRESS_TYPE == addressType) {
+        // Ipv4 address.
+        temp->AppendTextString(STRING_IPV4_ADDRESS_TYPE.GetBytes());
+    }
+    else if (PDU_IPV6_ADDRESS_TYPE == addressType) {
+        // Ipv6 address.
+        temp->AppendTextString(STRING_IPV6_ADDRESS_TYPE.GetBytes());
+    }
     // } catch (NullPointerException e) {
-    //     return null;
+    //     return NULL;
     // }
-    //
-    // return temp;
-    assert(0);
-    AutoPtr<IEncodedStringValue> empty;
-    return empty;
+
+    return temp;
 }
 
 Int32 PduComposer::AppendHeader(
     /* [in] */ Int32 field)
 {
-    // ==================before translated======================
-    // switch (field) {
-    //     case PduHeaders.MMS_VERSION:
-    //         appendOctet(field);
-    //
-    //         int version = mPduHeader.getOctet(field);
-    //         if (0 == version) {
-    //             appendShortInteger(PduHeaders.CURRENT_MMS_VERSION);
-    //         } else {
-    //             appendShortInteger(version);
-    //         }
-    //
-    //         break;
-    //
-    //     case PduHeaders.MESSAGE_ID:
-    //     case PduHeaders.TRANSACTION_ID:
-    //         byte[] textString = mPduHeader.getTextString(field);
-    //         if (null == textString) {
-    //             return PDU_COMPOSE_FIELD_NOT_SET;
-    //         }
-    //
-    //         appendOctet(field);
-    //         appendTextString(textString);
-    //         break;
-    //
-    //     case PduHeaders.TO:
-    //     case PduHeaders.BCC:
-    //     case PduHeaders.CC:
-    //         EncodedStringValue[] addr = mPduHeader.getEncodedStringValues(field);
-    //
-    //         if (null == addr) {
-    //             return PDU_COMPOSE_FIELD_NOT_SET;
-    //         }
-    //
-    //         EncodedStringValue temp;
-    //         for (int i = 0; i < addr.length; i++) {
-    //             temp = appendAddressType(addr[i]);
-    //             if (temp == null) {
-    //                 return PDU_COMPOSE_CONTENT_ERROR;
-    //             }
-    //
-    //             appendOctet(field);
-    //             appendEncodedString(temp);
-    //         }
-    //         break;
-    //
-    //     case PduHeaders.FROM:
-    //         // Value-length (Address-present-token Encoded-string-value | Insert-address-token)
-    //         appendOctet(field);
-    //
-    //         EncodedStringValue from = mPduHeader.getEncodedStringValue(field);
-    //         if ((from == null)
-    //                 || TextUtils.isEmpty(from.getString())
-    //                 || new String(from.getTextString()).equals(
-    //                         PduHeaders.FROM_INSERT_ADDRESS_TOKEN_STR)) {
-    //             // Length of from = 1
-    //             append(1);
-    //             // Insert-address-token = <Octet 129>
-    //             append(PduHeaders.FROM_INSERT_ADDRESS_TOKEN);
-    //         } else {
-    //             mStack.newbuf();
-    //             PositionMarker fstart = mStack.mark();
-    //
-    //             // Address-present-token = <Octet 128>
-    //             append(PduHeaders.FROM_ADDRESS_PRESENT_TOKEN);
-    //
-    //             temp = appendAddressType(from);
-    //             if (temp == null) {
-    //                 return PDU_COMPOSE_CONTENT_ERROR;
-    //             }
-    //
-    //             appendEncodedString(temp);
-    //
-    //             int flen = fstart.getLength();
-    //             mStack.pop();
-    //             appendValueLength(flen);
-    //             mStack.copy();
-    //         }
-    //         break;
-    //
-    //     case PduHeaders.READ_STATUS:
-    //     case PduHeaders.STATUS:
-    //     case PduHeaders.REPORT_ALLOWED:
-    //     case PduHeaders.PRIORITY:
-    //     case PduHeaders.DELIVERY_REPORT:
-    //     case PduHeaders.READ_REPORT:
-    //     case PduHeaders.RETRIEVE_STATUS:
-    //         int octet = mPduHeader.getOctet(field);
-    //         if (0 == octet) {
-    //             return PDU_COMPOSE_FIELD_NOT_SET;
-    //         }
-    //
-    //         appendOctet(field);
-    //         appendOctet(octet);
-    //         break;
-    //
-    //     case PduHeaders.DATE:
-    //         long date = mPduHeader.getLongInteger(field);
-    //         if (-1 == date) {
-    //             return PDU_COMPOSE_FIELD_NOT_SET;
-    //         }
-    //
-    //         appendOctet(field);
-    //         appendDateValue(date);
-    //         break;
-    //
-    //     case PduHeaders.SUBJECT:
-    //     case PduHeaders.RETRIEVE_TEXT:
-    //         EncodedStringValue enString =
-    //             mPduHeader.getEncodedStringValue(field);
-    //         if (null == enString) {
-    //             return PDU_COMPOSE_FIELD_NOT_SET;
-    //         }
-    //
-    //         appendOctet(field);
-    //         appendEncodedString(enString);
-    //         break;
-    //
-    //     case PduHeaders.MESSAGE_CLASS:
-    //         byte[] messageClass = mPduHeader.getTextString(field);
-    //         if (null == messageClass) {
-    //             return PDU_COMPOSE_FIELD_NOT_SET;
-    //         }
-    //
-    //         appendOctet(field);
-    //         if (Arrays.equals(messageClass,
-    //                 PduHeaders.MESSAGE_CLASS_ADVERTISEMENT_STR.getBytes())) {
-    //             appendOctet(PduHeaders.MESSAGE_CLASS_ADVERTISEMENT);
-    //         } else if (Arrays.equals(messageClass,
-    //                 PduHeaders.MESSAGE_CLASS_AUTO_STR.getBytes())) {
-    //             appendOctet(PduHeaders.MESSAGE_CLASS_AUTO);
-    //         } else if (Arrays.equals(messageClass,
-    //                 PduHeaders.MESSAGE_CLASS_PERSONAL_STR.getBytes())) {
-    //             appendOctet(PduHeaders.MESSAGE_CLASS_PERSONAL);
-    //         } else if (Arrays.equals(messageClass,
-    //                 PduHeaders.MESSAGE_CLASS_INFORMATIONAL_STR.getBytes())) {
-    //             appendOctet(PduHeaders.MESSAGE_CLASS_INFORMATIONAL);
-    //         } else {
-    //             appendTextString(messageClass);
-    //         }
-    //         break;
-    //
-    //     case PduHeaders.EXPIRY:
-    //         long expiry = mPduHeader.getLongInteger(field);
-    //         if (-1 == expiry) {
-    //             return PDU_COMPOSE_FIELD_NOT_SET;
-    //         }
-    //
-    //         appendOctet(field);
-    //
-    //         mStack.newbuf();
-    //         PositionMarker expiryStart = mStack.mark();
-    //
-    //         append(PduHeaders.VALUE_RELATIVE_TOKEN);
-    //         appendLongInteger(expiry);
-    //
-    //         int expiryLength = expiryStart.getLength();
-    //         mStack.pop();
-    //         appendValueLength(expiryLength);
-    //         mStack.copy();
-    //         break;
-    //
-    //     default:
-    //         return PDU_COMPOSE_FIELD_NOT_SUPPORTED;
-    // }
-    //
-    // return PDU_COMPOSE_SUCCESS;
-    assert(0);
-    return 0;
+    switch (field) {
+        case IPduHeaders::MMS_VERSION: {
+            AppendOctet(field);
+
+            Int32 version = 0;
+            mPduHeader->GetOctet(field, &version);
+            if (0 == version) {
+                AppendShortInteger(IPduHeaders::CURRENT_MMS_VERSION);
+            }
+            else {
+                AppendShortInteger(version);
+            }
+
+            break;
+        }
+        case IPduHeaders::MESSAGE_ID:
+        case IPduHeaders::TRANSACTION_ID: {
+            AutoPtr<ArrayOf<Byte> > textString;
+            mPduHeader->GetTextString(field, (ArrayOf<Byte>**)&textString);
+            if (NULL == textString) {
+                return PDU_COMPOSE_FIELD_NOT_SET;
+            }
+
+            AppendOctet(field);
+            AppendTextString(textString);
+            break;
+        }
+
+        case IPduHeaders::TO:
+        case IPduHeaders::BCC:
+        case IPduHeaders::CC: {
+            AutoPtr<ArrayOf<IEncodedStringValue*> > addr;
+            mPduHeader->GetEncodedStringValues(field, (ArrayOf<IEncodedStringValue*>**)&addr);
+
+            if (NULL == addr) {
+                return PDU_COMPOSE_FIELD_NOT_SET;
+            }
+
+            AutoPtr<IEncodedStringValue> temp;
+            for (Int32 i = 0; i < addr->GetLength(); i++) {
+                temp = AppendAddressType((*addr)[i]);
+                if (temp == NULL) {
+                    return PDU_COMPOSE_CONTENT_ERROR;
+                }
+
+                AppendOctet(field);
+                AppendEncodedString(temp);
+            }
+            break;
+        }
+
+        case IPduHeaders::FROM: {
+            // Value-length (Address-present-token Encoded-string-value | Insert-address-token)
+            AppendOctet(field);
+
+            AutoPtr<IEncodedStringValue> from;
+            mPduHeader->GetEncodedStringValue(field, (IEncodedStringValue**)&from);
+            String str;
+            AutoPtr<ArrayOf<Byte> > arr;
+            if ((from == NULL)
+                    || TextUtils::IsEmpty((from->GetString(&str), str))
+                    || String(*(from->GetTextString((ArrayOf<Byte>**)&arr), arr)).Equals(
+                            IPduHeaders::FROM_INSERT_ADDRESS_TOKEN_STR)) {
+                // Length of from = 1
+                Append(1);
+                // Insert-address-token = <Octet 129>
+                Append(IPduHeaders::FROM_INSERT_ADDRESS_TOKEN);
+            }
+            else {
+                mStack->Newbuf();
+                AutoPtr<PositionMarker> fstart;
+                mStack->Mark((PositionMarker**)&fstart);
+
+                // Address-present-token = <Octet 128>
+                Append(IPduHeaders::FROM_ADDRESS_PRESENT_TOKEN);
+
+                AutoPtr<IEncodedStringValue> temp = AppendAddressType(from);
+                if (temp == NULL) {
+                    return PDU_COMPOSE_CONTENT_ERROR;
+                }
+
+                AppendEncodedString(temp);
+
+                Int32 flen = 0;
+                fstart->GetLength(&flen);
+                mStack->Pop();
+                AppendValueLength(flen);
+                mStack->Copy();
+            }
+            break;
+        }
+
+        case IPduHeaders::READ_STATUS:
+        case IPduHeaders::STATUS:
+        case IPduHeaders::REPORT_ALLOWED:
+        case IPduHeaders::PRIORITY:
+        case IPduHeaders::DELIVERY_REPORT:
+        case IPduHeaders::READ_REPORT:
+        case IPduHeaders::RETRIEVE_STATUS: {
+            Int32 octet = 0;
+            mPduHeader->GetOctet(field, &octet);
+            if (0 == octet) {
+                return PDU_COMPOSE_FIELD_NOT_SET;
+            }
+
+            AppendOctet(field);
+            AppendOctet(octet);
+            break;
+        }
+
+        case IPduHeaders::DATE: {
+            Int64 date = 0;
+            mPduHeader->GetLongInteger(field, &date);
+            if (-1 == date) {
+                return PDU_COMPOSE_FIELD_NOT_SET;
+            }
+
+            AppendOctet(field);
+            AppendDateValue(date);
+            break;
+        }
+
+        case IPduHeaders::SUBJECT:
+        case IPduHeaders::RETRIEVE_TEXT: {
+            AutoPtr<IEncodedStringValue> enString;
+            mPduHeader->GetEncodedStringValue(field, (IEncodedStringValue**)&enString);
+            if (NULL == enString) {
+                return PDU_COMPOSE_FIELD_NOT_SET;
+            }
+
+            AppendOctet(field);
+            AppendEncodedString(enString);
+            break;
+        }
+
+        case IPduHeaders::MESSAGE_CLASS: {
+            AutoPtr<ArrayOf<Byte> > messageClass;
+            mPduHeader->GetTextString(field, (ArrayOf<Byte>**)&messageClass);
+            if (NULL == messageClass) {
+                return PDU_COMPOSE_FIELD_NOT_SET;
+            }
+
+            AppendOctet(field);
+            if (Arrays::Equals(messageClass,
+                    IPduHeaders::MESSAGE_CLASS_ADVERTISEMENT_STR.GetBytes())) {
+                AppendOctet(IPduHeaders::MESSAGE_CLASS_ADVERTISEMENT);
+            }
+            else if (Arrays::Equals(messageClass,
+                    IPduHeaders::MESSAGE_CLASS_AUTO_STR.GetBytes())) {
+                AppendOctet(IPduHeaders::MESSAGE_CLASS_AUTO);
+            }
+            else if (Arrays::Equals(messageClass,
+                    IPduHeaders::MESSAGE_CLASS_PERSONAL_STR.GetBytes())) {
+                AppendOctet(IPduHeaders::MESSAGE_CLASS_PERSONAL);
+            }
+            else if (Arrays::Equals(messageClass,
+                    IPduHeaders::MESSAGE_CLASS_INFORMATIONAL_STR.GetBytes())) {
+                AppendOctet(IPduHeaders::MESSAGE_CLASS_INFORMATIONAL);
+            }
+            else {
+                AppendTextString(messageClass);
+            }
+            break;
+        }
+
+        case IPduHeaders::EXPIRY: {
+            Int64 expiry = 0;
+            mPduHeader->GetLongInteger(field, &expiry);
+            if (-1 == expiry) {
+                return PDU_COMPOSE_FIELD_NOT_SET;
+            }
+
+            AppendOctet(field);
+
+            mStack->Newbuf();
+            AutoPtr<PositionMarker> expiryStart;
+            mStack->Mark((PositionMarker**)&expiryStart);
+
+            Append(IPduHeaders::VALUE_RELATIVE_TOKEN);
+            AppendLongInteger(expiry);
+
+            Int32 expiryLength = 0;
+            expiryStart->GetLength(&expiryLength);
+            mStack->Pop();
+            AppendValueLength(expiryLength);
+            mStack->Copy();
+            break;
+        }
+
+        default:
+            return PDU_COMPOSE_FIELD_NOT_SUPPORTED;
+    }
+
+    return PDU_COMPOSE_SUCCESS;
 }
 
 Int32 PduComposer::MakeReadRecInd()
 {
-    // ==================before translated======================
-    // if (mMessage == null) {
-    //     mMessage = new ByteArrayOutputStream();
-    //     mPosition = 0;
-    // }
-    //
-    // // X-Mms-Message-Type
-    // appendOctet(PduHeaders.MESSAGE_TYPE);
-    // appendOctet(PduHeaders.MESSAGE_TYPE_READ_REC_IND);
-    //
-    // // X-Mms-MMS-Version
-    // if (appendHeader(PduHeaders.MMS_VERSION) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // Message-ID
-    // if (appendHeader(PduHeaders.MESSAGE_ID) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // To
-    // if (appendHeader(PduHeaders.TO) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // From
-    // if (appendHeader(PduHeaders.FROM) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // Date Optional
-    // appendHeader(PduHeaders.DATE);
-    //
-    // // X-Mms-Read-Status
-    // if (appendHeader(PduHeaders.READ_STATUS) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // X-Mms-Applic-ID Optional(not support)
-    // // X-Mms-Reply-Applic-ID Optional(not support)
-    // // X-Mms-Aux-Applic-Info Optional(not support)
-    //
-    // return PDU_COMPOSE_SUCCESS;
-    assert(0);
-    return 0;
+    if (mMessage == NULL) {
+        CByteArrayOutputStream::New((IByteArrayOutputStream**)&mMessage);
+        mPosition = 0;
+    }
+
+    // X-Mms-Message-Type
+    AppendOctet(IPduHeaders::MESSAGE_TYPE);
+    AppendOctet(IPduHeaders::MESSAGE_TYPE_READ_REC_IND);
+
+    // X-Mms-MMS-Version
+    if (AppendHeader(IPduHeaders::MMS_VERSION) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // Message-ID
+    if (AppendHeader(IPduHeaders::MESSAGE_ID) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // To
+    if (AppendHeader(IPduHeaders::TO) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // From
+    if (AppendHeader(IPduHeaders::FROM) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // Date Optional
+    AppendHeader(IPduHeaders::DATE);
+
+    // X-Mms-Read-Status
+    if (AppendHeader(IPduHeaders::READ_STATUS) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // X-Mms-Applic-ID Optional(not support)
+    // X-Mms-Reply-Applic-ID Optional(not support)
+    // X-Mms-Aux-Applic-Info Optional(not support)
+
+    return PDU_COMPOSE_SUCCESS;
 }
 
 Int32 PduComposer::MakeNotifyResp()
 {
-    // ==================before translated======================
-    // if (mMessage == null) {
-    //     mMessage = new ByteArrayOutputStream();
-    //     mPosition = 0;
-    // }
-    //
-    // //    X-Mms-Message-Type
-    // appendOctet(PduHeaders.MESSAGE_TYPE);
-    // appendOctet(PduHeaders.MESSAGE_TYPE_NOTIFYRESP_IND);
-    //
-    // // X-Mms-Transaction-ID
-    // if (appendHeader(PduHeaders.TRANSACTION_ID) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // X-Mms-MMS-Version
-    // if (appendHeader(PduHeaders.MMS_VERSION) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // //  X-Mms-Status
-    // if (appendHeader(PduHeaders.STATUS) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // X-Mms-Report-Allowed Optional (not support)
-    // return PDU_COMPOSE_SUCCESS;
-    assert(0);
-    return 0;
+    if (mMessage == NULL) {
+        CByteArrayOutputStream::New((IByteArrayOutputStream**)&mMessage);
+        mPosition = 0;
+    }
+
+    //    X-Mms-Message-Type
+    AppendOctet(IPduHeaders::MESSAGE_TYPE);
+    AppendOctet(IPduHeaders::MESSAGE_TYPE_NOTIFYRESP_IND);
+
+    // X-Mms-Transaction-ID
+    if (AppendHeader(IPduHeaders::TRANSACTION_ID) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // X-Mms-MMS-Version
+    if (AppendHeader(IPduHeaders::MMS_VERSION) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    //  X-Mms-Status
+    if (AppendHeader(IPduHeaders::STATUS) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // X-Mms-Report-Allowed Optional (not support)
+    return PDU_COMPOSE_SUCCESS;
 }
 
 Int32 PduComposer::MakeAckInd()
 {
-    // ==================before translated======================
-    // if (mMessage == null) {
-    //     mMessage = new ByteArrayOutputStream();
-    //     mPosition = 0;
-    // }
-    //
-    // //    X-Mms-Message-Type
-    // appendOctet(PduHeaders.MESSAGE_TYPE);
-    // appendOctet(PduHeaders.MESSAGE_TYPE_ACKNOWLEDGE_IND);
-    //
-    // // X-Mms-Transaction-ID
-    // if (appendHeader(PduHeaders.TRANSACTION_ID) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // //     X-Mms-MMS-Version
-    // if (appendHeader(PduHeaders.MMS_VERSION) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // X-Mms-Report-Allowed Optional
-    // appendHeader(PduHeaders.REPORT_ALLOWED);
-    //
-    // return PDU_COMPOSE_SUCCESS;
-    assert(0);
-    return 0;
+    if (mMessage == NULL) {
+        CByteArrayOutputStream::New((IByteArrayOutputStream**)&mMessage);
+        mPosition = 0;
+    }
+
+    //    X-Mms-Message-Type
+    AppendOctet(IPduHeaders::MESSAGE_TYPE);
+    AppendOctet(IPduHeaders::MESSAGE_TYPE_ACKNOWLEDGE_IND);
+
+    // X-Mms-Transaction-ID
+    if (AppendHeader(IPduHeaders::TRANSACTION_ID) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    //     X-Mms-MMS-Version
+    if (AppendHeader(IPduHeaders::MMS_VERSION) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // X-Mms-Report-Allowed Optional
+    AppendHeader(IPduHeaders::REPORT_ALLOWED);
+
+    return PDU_COMPOSE_SUCCESS;
 }
 
 Int32 PduComposer::MakeSendRetrievePdu(
     /* [in] */ Int32 type)
 {
-    // ==================before translated======================
-    // if (mMessage == null) {
-    //     mMessage = new ByteArrayOutputStream();
-    //     mPosition = 0;
-    // }
-    //
-    // // X-Mms-Message-Type
-    // appendOctet(PduHeaders.MESSAGE_TYPE);
-    // appendOctet(type);
-    //
-    // // X-Mms-Transaction-ID
-    // appendOctet(PduHeaders.TRANSACTION_ID);
-    //
-    // byte[] trid = mPduHeader.getTextString(PduHeaders.TRANSACTION_ID);
-    // if (trid == null) {
-    //     // Transaction-ID should be set(by Transaction) before make().
-    //     throw new IllegalArgumentException("Transaction-ID is null.");
-    // }
-    // appendTextString(trid);
-    //
-    // //  X-Mms-MMS-Version
-    // if (appendHeader(PduHeaders.MMS_VERSION) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // Date Date-value Optional.
-    // appendHeader(PduHeaders.DATE);
-    //
-    // // From
-    // if (appendHeader(PduHeaders.FROM) != PDU_COMPOSE_SUCCESS) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // boolean recipient = false;
-    //
-    // // To
-    // if (appendHeader(PduHeaders.TO) != PDU_COMPOSE_CONTENT_ERROR) {
-    //     recipient = true;
-    // }
-    //
-    // // Cc
-    // if (appendHeader(PduHeaders.CC) != PDU_COMPOSE_CONTENT_ERROR) {
-    //     recipient = true;
-    // }
-    //
-    // // Bcc
-    // if (appendHeader(PduHeaders.BCC) != PDU_COMPOSE_CONTENT_ERROR) {
-    //     recipient = true;
-    // }
-    //
-    // // Need at least one of "cc", "bcc" and "to".
-    // if (false == recipient) {
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // // Subject Optional
-    // appendHeader(PduHeaders.SUBJECT);
-    //
-    // // X-Mms-Message-Class Optional
-    // // Message-class-value = Class-identifier | Token-text
-    // appendHeader(PduHeaders.MESSAGE_CLASS);
-    //
-    // // X-Mms-Expiry Optional
-    // appendHeader(PduHeaders.EXPIRY);
-    //
-    // // X-Mms-Priority Optional
-    // appendHeader(PduHeaders.PRIORITY);
-    //
-    // // X-Mms-Delivery-Report Optional
-    // appendHeader(PduHeaders.DELIVERY_REPORT);
-    //
-    // // X-Mms-Read-Report Optional
-    // appendHeader(PduHeaders.READ_REPORT);
-    //
-    // if (type == PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF) {
-    //     // X-Mms-Retrieve-Status Optional
-    //     appendHeader(PduHeaders.RETRIEVE_STATUS);
-    //     // X-Mms-Retrieve-Text Optional
-    //     appendHeader(PduHeaders.RETRIEVE_TEXT);
-    // }
-    //
-    // //    Content-Type
-    // appendOctet(PduHeaders.CONTENT_TYPE);
-    //
-    // //  Message body
-    // return makeMessageBody(type);
-    assert(0);
-    return 0;
+    if (mMessage == NULL) {
+        CByteArrayOutputStream::New((IByteArrayOutputStream**)&mMessage);
+        mPosition = 0;
+    }
+
+    // X-Mms-Message-Type
+    AppendOctet(IPduHeaders::MESSAGE_TYPE);
+    AppendOctet(type);
+
+    // X-Mms-Transaction-ID
+    AppendOctet(IPduHeaders::TRANSACTION_ID);
+
+    AutoPtr<ArrayOf<Byte> > trid;
+    mPduHeader->GetTextString(IPduHeaders::TRANSACTION_ID, (ArrayOf<Byte>**)&trid);
+    if (trid == NULL) {
+        // Transaction-ID should be set(by Transaction) before make().
+        // throw new IllegalArgumentException("Transaction-ID is NULL.");
+        return -1;
+    }
+    AppendTextString(trid);
+
+    //  X-Mms-MMS-Version
+    if (AppendHeader(IPduHeaders::MMS_VERSION) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // Date Date-value Optional.
+    AppendHeader(IPduHeaders::DATE);
+
+    // From
+    if (AppendHeader(IPduHeaders::FROM) != PDU_COMPOSE_SUCCESS) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    Boolean recipient = FALSE;
+
+    // To
+    if (AppendHeader(IPduHeaders::TO) != PDU_COMPOSE_CONTENT_ERROR) {
+        recipient = true;
+    }
+
+    // Cc
+    if (AppendHeader(IPduHeaders::CC) != PDU_COMPOSE_CONTENT_ERROR) {
+        recipient = true;
+    }
+
+    // Bcc
+    if (AppendHeader(IPduHeaders::BCC) != PDU_COMPOSE_CONTENT_ERROR) {
+        recipient = true;
+    }
+
+    // Need at least one of "cc", "bcc" and "to".
+    if (FALSE == recipient) {
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    // Subject Optional
+    AppendHeader(IPduHeaders::SUBJECT);
+
+    // X-Mms-Message-Class Optional
+    // Message-class-value = Class-identifier | Token-text
+    AppendHeader(IPduHeaders::MESSAGE_CLASS);
+
+    // X-Mms-Expiry Optional
+    AppendHeader(IPduHeaders::EXPIRY);
+
+    // X-Mms-Priority Optional
+    AppendHeader(IPduHeaders::PRIORITY);
+
+    // X-Mms-Delivery-Report Optional
+    AppendHeader(IPduHeaders::DELIVERY_REPORT);
+
+    // X-Mms-Read-Report Optional
+    AppendHeader(IPduHeaders::READ_REPORT);
+
+    if (type == IPduHeaders::MESSAGE_TYPE_RETRIEVE_CONF) {
+        // X-Mms-Retrieve-Status Optional
+        AppendHeader(IPduHeaders::RETRIEVE_STATUS);
+        // X-Mms-Retrieve-Text Optional
+        AppendHeader(IPduHeaders::RETRIEVE_TEXT);
+    }
+
+    //    Content-Type
+    AppendOctet(IPduHeaders::CONTENT_TYPE);
+
+    //  Message body
+    return MakeMessageBody(type);
 }
 
 Int32 PduComposer::MakeMessageBody(
     /* [in] */ Int32 type)
 {
-    // ==================before translated======================
-    // // 1. add body informations
-    // mStack.newbuf();  // Switching buffer because we need to
-    //
-    // PositionMarker ctStart = mStack.mark();
-    //
-    // // This contentTypeIdentifier should be used for type of attachment...
-    // String contentType = new String(mPduHeader.getTextString(PduHeaders.CONTENT_TYPE));
-    // Integer contentTypeIdentifier = mContentTypeMap.get(contentType);
-    // if (contentTypeIdentifier == null) {
-    //     // content type is mandatory
-    //     return PDU_COMPOSE_CONTENT_ERROR;
-    // }
-    //
-    // appendShortInteger(contentTypeIdentifier.intValue());
-    //
-    // // content-type parameter: start
-    // PduBody body;
-    // if (type == PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF) {
-    //     body = ((RetrieveConf) mPdu).getBody();
-    // } else {
-    //     body = ((SendReq) mPdu).getBody();
-    // }
-    // if (null == body || body.getPartsNum() == 0) {
-    //     // empty message
-    //     appendUintvarInteger(0);
-    //     mStack.pop();
-    //     mStack.copy();
-    //     return PDU_COMPOSE_SUCCESS;
-    // }
-    //
-    // PduPart part;
+    // 1. add body informations
+    mStack->Newbuf();  // Switching buffer because we need to
+
+    AutoPtr<PositionMarker> ctStart;
+    mStack->Mark((PositionMarker**)&ctStart);
+
+    // This contentTypeIdentifier should be used for type of attachment...
+    AutoPtr<ArrayOf<Byte> > arr;
+    mPduHeader->GetTextString(IPduHeaders::CONTENT_TYPE, (ArrayOf<Byte>**)&arr);
+    String contentType(*arr);
+    AutoPtr<IInterface> _contentTypeIdentifier;
+    mContentTypeMap->Get(CoreUtils::Convert(contentType), (IInterface**)&_contentTypeIdentifier);
+    AutoPtr<IInteger32> contentTypeIdentifier = IInteger32::Probe(_contentTypeIdentifier);
+    if (contentTypeIdentifier == NULL) {
+        // content type is mandatory
+        return PDU_COMPOSE_CONTENT_ERROR;
+    }
+
+    Int32 value = 0;
+    contentTypeIdentifier->GetValue(&value);
+    AppendShortInteger(value);
+
+    // content-type parameter: start
+    AutoPtr<IPduBody> body;
+    if (type == IPduHeaders::MESSAGE_TYPE_RETRIEVE_CONF) {
+        // IRetrieveConf::Probe(mPdu)->GetBody((IPduBody**)&body);
+        IMultimediaMessagePdu::Probe(mPdu)->GetBody((IPduBody**)&body);
+    }
+    else {
+        // ISendReq::Probe(mPdu)->GetBody((IPduBody**)&body);
+        IMultimediaMessagePdu::Probe(mPdu)->GetBody((IPduBody**)&body);
+    }
+    Int32 num = 0;
+    if (NULL == body || (body->GetPartsNum(&num), num) == 0) {
+        // empty message
+        AppendUintvarInteger(0);
+        mStack->Pop();
+        mStack->Copy();
+        return PDU_COMPOSE_SUCCESS;
+    }
+
+    AutoPtr<IPduPart> part;
     // try {
-    //     part = body.getPart(0);
-    //
-    //     byte[] start = part.getContentId();
-    //     if (start != null) {
-    //         appendOctet(PduPart.P_DEP_START);
-    //         if (('<' == start[0]) && ('>' == start[start.length - 1])) {
-    //             appendTextString(start);
-    //         } else {
-    //             appendTextString("<" + new String(start) + ">");
-    //         }
-    //     }
-    //
-    //     // content-type parameter: type
-    //     appendOctet(PduPart.P_CT_MR_TYPE);
-    //     appendTextString(part.getContentType());
+        body->GetPart(0, (IPduPart**)&part);
+
+        AutoPtr<ArrayOf<Byte> > start;
+        part->GetContentId((ArrayOf<Byte>**)&start);
+        if (start != NULL) {
+            AppendOctet(IPduPart::P_DEP_START);
+            if (('<' == (*start)[0]) && ('>' == (*start)[start->GetLength() - 1])) {
+                AppendTextString(start);
+            }
+            else {
+                AppendTextString(String("<") + String(*start) + String(">"));
+            }
+        }
+
+        // content-type parameter: type
+        AppendOctet(IPduPart::P_CT_MR_TYPE);
+        AutoPtr<ArrayOf<Byte> > arrByte;
+        part->GetContentType((ArrayOf<Byte>**)&arrByte);
+        AppendTextString(arrByte);
     // }
     // catch (ArrayIndexOutOfBoundsException e){
     //     e.printStackTrace();
     // }
-    //
-    // int ctLength = ctStart.getLength();
-    // mStack.pop();
-    // appendValueLength(ctLength);
-    // mStack.copy();
-    //
-    // // 3. add content
-    // int partNum = body.getPartsNum();
-    // appendUintvarInteger(partNum);
-    // for (int i = 0; i < partNum; i++) {
-    //     part = body.getPart(i);
-    //     mStack.newbuf();  // Leaving space for header lengh and data length
-    //     PositionMarker attachment = mStack.mark();
-    //
-    //     mStack.newbuf();  // Leaving space for Content-Type length
-    //     PositionMarker contentTypeBegin = mStack.mark();
-    //
-    //     byte[] partContentType = part.getContentType();
-    //
-    //     if (partContentType == null) {
-    //         // content type is mandatory
-    //         return PDU_COMPOSE_CONTENT_ERROR;
-    //     }
-    //
-    //     // content-type value
-    //     Integer partContentTypeIdentifier =
-    //         mContentTypeMap.get(new String(partContentType));
-    //     if (partContentTypeIdentifier == null) {
-    //         appendTextString(partContentType);
-    //     } else {
-    //         appendShortInteger(partContentTypeIdentifier.intValue());
-    //     }
-    //
-    //     /* Content-type parameter : name.
-    //      * The value of name, filename, content-location is the same.
-    //      * Just one of them is enough for this PDU.
-    //      */
-    //     byte[] name = part.getName();
-    //
-    //     if (null == name) {
-    //         name = part.getFilename();
-    //
-    //         if (null == name) {
-    //             name = part.getContentLocation();
-    //
-    //             if (null == name) {
-    //                 name = part.getContentId();
-    //
-    //                 if (null == name) {
-    //                     // At lease one of name, filename, Content-location, Content id
-    //                     // should be available.
-    //                     return PDU_COMPOSE_CONTENT_ERROR;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     appendOctet(PduPart.P_DEP_NAME);
-    //     appendTextString(name);
-    //
-    //     // content-type parameter : charset
-    //     int charset = part.getCharset();
-    //     if (charset != 0) {
-    //         appendOctet(PduPart.P_CHARSET);
-    //         appendShortInteger(charset);
-    //     }
-    //
-    //     int contentTypeLength = contentTypeBegin.getLength();
-    //     mStack.pop();
-    //     appendValueLength(contentTypeLength);
-    //     mStack.copy();
-    //
-    //     // content id
-    //     byte[] contentId = part.getContentId();
-    //
-    //     if (null != contentId) {
-    //         appendOctet(PduPart.P_CONTENT_ID);
-    //         if (('<' == contentId[0]) && ('>' == contentId[contentId.length - 1])) {
-    //             appendQuotedString(contentId);
-    //         } else {
-    //             appendQuotedString("<" + new String(contentId) + ">");
-    //         }
-    //     }
-    //
-    //     // content-location
-    //     byte[] contentLocation = part.getContentLocation();
-    //     if (null != contentLocation) {
-    //     	appendOctet(PduPart.P_CONTENT_LOCATION);
-    //     	appendTextString(contentLocation);
-    //     }
-    //
-    //     // content
-    //     int headerLength = attachment.getLength();
-    //
-    //     int dataLength = 0; // Just for safety...
-    //     byte[] partData = part.getData();
-    //
-    //     if (partData != null) {
-    //         arraycopy(partData, 0, partData.length);
-    //         dataLength = partData.length;
-    //     } else {
-    //         InputStream cr = null;
-    //         try {
-    //             byte[] buffer = new byte[PDU_COMPOSER_BLOCK_SIZE];
-    //             cr = mResolver.openInputStream(part.getDataUri());
-    //             int len = 0;
-    //             while ((len = cr.read(buffer)) != -1) {
-    //                 mMessage.write(buffer, 0, len);
-    //                 mPosition += len;
-    //                 dataLength += len;
-    //             }
-    //         } catch (FileNotFoundException e) {
-    //             return PDU_COMPOSE_CONTENT_ERROR;
-    //         } catch (IOException e) {
-    //             return PDU_COMPOSE_CONTENT_ERROR;
-    //         } catch (RuntimeException e) {
-    //             return PDU_COMPOSE_CONTENT_ERROR;
-    //         } finally {
-    //             if (cr != null) {
-    //                 try {
-    //                     cr.close();
-    //                 } catch (IOException e) {
-    //                 }
-    //             }
-    //         }
-    //     }
-    //
-    //     if (dataLength != (attachment.getLength() - headerLength)) {
-    //         throw new RuntimeException("BUG: Length sanity check failed");
-    //     }
-    //
-    //     mStack.pop();
-    //     appendUintvarInteger(headerLength);
-    //     appendUintvarInteger(dataLength);
-    //     mStack.copy();
-    // }
-    //
-    // return PDU_COMPOSE_SUCCESS;
-    assert(0);
-    return 0;
+
+    Int32 ctLength = 0;
+    ctStart->GetLength(&ctLength);
+    mStack->Pop();
+    AppendValueLength(ctLength);
+    mStack->Copy();
+
+    // 3. add content
+    Int32 partNum = 0;
+    body->GetPartsNum(&partNum);
+    AppendUintvarInteger(partNum);
+    for (Int32 i = 0; i < partNum; i++) {
+        body->GetPart(i, (IPduPart**)&part);
+        mStack->Newbuf();  // Leaving space for header lengh and data length
+        AutoPtr<PositionMarker> attachment;
+        mStack->Mark((PositionMarker**)&attachment);
+
+        mStack->Newbuf();  // Leaving space for Content-Type length
+        AutoPtr<PositionMarker> contentTypeBegin;
+        mStack->Mark((PositionMarker**)&contentTypeBegin);
+
+        AutoPtr<ArrayOf<Byte> > partContentType;
+        part->GetContentType((ArrayOf<Byte>**)&partContentType);
+
+        if (partContentType == NULL) {
+            // content type is mandatory
+            return PDU_COMPOSE_CONTENT_ERROR;
+        }
+
+        // content-type value
+        AutoPtr<IInterface> _partContentTypeIdentifier;
+        mContentTypeMap->Get(CoreUtils::Convert(String(*partContentType)), (IInterface**)&_partContentTypeIdentifier);
+        AutoPtr<IInteger32> partContentTypeIdentifier = IInteger32::Probe(_partContentTypeIdentifier);
+        if (partContentTypeIdentifier == NULL) {
+            AppendTextString(partContentType);
+        }
+        else {
+            Int32 value = 0;
+            partContentTypeIdentifier->GetValue(&value);
+            AppendShortInteger(value);
+        }
+
+        /* Content-type parameter : name.
+         * The value of name, filename, content-location is the same.
+         * Just one of them is enough for this PDU.
+         */
+        AutoPtr<ArrayOf<Byte> > name;
+        part->GetName((ArrayOf<Byte>**)&name);
+
+        if (NULL == name) {
+            part->GetFilename((ArrayOf<Byte>**)&name);
+
+            if (NULL == name) {
+                part->GetContentLocation((ArrayOf<Byte>**)&name);
+
+                if (NULL == name) {
+                    part->GetContentId((ArrayOf<Byte>**)&name);
+
+                    if (NULL == name) {
+                        // At lease one of name, filename, Content-location, Content id
+                        // should be available.
+                        return PDU_COMPOSE_CONTENT_ERROR;
+                    }
+                }
+            }
+        }
+        AppendOctet(IPduPart::P_DEP_NAME);
+        AppendTextString(name);
+
+        // content-type parameter : charset
+        Int32 charset = 0;
+        part->GetCharset(&charset);
+        if (charset != 0) {
+            AppendOctet(IPduPart::P_CHARSET);
+            AppendShortInteger(charset);
+        }
+
+        Int32 contentTypeLength = 0;
+        contentTypeBegin->GetLength(&contentTypeLength);
+        mStack->Pop();
+        AppendValueLength(contentTypeLength);
+        mStack->Copy();
+
+        // content id
+        AutoPtr<ArrayOf<Byte> > contentId;
+        part->GetContentId((ArrayOf<Byte>**)&contentId);
+
+        if (NULL != contentId) {
+            AppendOctet(IPduPart::P_CONTENT_ID);
+            if (('<' == (*contentId)[0]) && ('>' == (*contentId)[contentId->GetLength() - 1])) {
+                AppendQuotedString(contentId);
+            }
+            else {
+                AppendQuotedString(String("<") + String(*contentId) + String(">"));
+            }
+        }
+
+        // content-location
+        AutoPtr<ArrayOf<Byte> > contentLocation;
+        part->GetContentLocation((ArrayOf<Byte>**)&contentLocation);
+        if (NULL != contentLocation) {
+        	AppendOctet(IPduPart::P_CONTENT_LOCATION);
+        	AppendTextString(contentLocation);
+        }
+
+        // content
+        Int32 headerLength = 0;
+        attachment->GetLength(&headerLength);
+
+        Int32 dataLength = 0; // Just for safety...
+        AutoPtr<ArrayOf<Byte> > partData;
+        part->GetData((ArrayOf<Byte>**)&partData);
+
+        if (partData != NULL) {
+            Arraycopy(partData, 0, partData->GetLength());
+            dataLength = partData->GetLength();
+        }
+        else {
+            AutoPtr<IInputStream> cr;
+            // try {
+                AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(PDU_COMPOSER_BLOCK_SIZE);
+                AutoPtr<IUri> dataUri;
+                part->GetDataUri((IUri**)&dataUri);
+                mResolver->OpenInputStream(dataUri, (IInputStream**)&cr);
+                Int32 len = 0;
+                while ((cr->Read(buffer, &len), len) != -1) {
+                    IOutputStream::Probe(mMessage)->Write(buffer, 0, len);
+                    mPosition += len;
+                    dataLength += len;
+                }
+            // } catch (FileNotFoundException e) {
+            //     return PDU_COMPOSE_CONTENT_ERROR;
+            // } catch (IOException e) {
+            //     return PDU_COMPOSE_CONTENT_ERROR;
+            // } catch (RuntimeException e) {
+            //     return PDU_COMPOSE_CONTENT_ERROR;
+            // } finally {
+                if (cr != NULL) {
+                    // try {
+                    cr->Close();
+                    // } catch (IOException e) {
+                    // }
+                }
+            // }
+        }
+
+        Int32 attachmentLength = 0;
+        attachment->GetLength(&attachmentLength);
+        if (dataLength != (attachmentLength - headerLength)) {
+            // throw new RuntimeException("BUG: Length sanity check failed");
+            return -1;
+        }
+
+        mStack->Pop();
+        AppendUintvarInteger(headerLength);
+        AppendUintvarInteger(dataLength);
+        mStack->Copy();
+    }
+
+    return PDU_COMPOSE_SUCCESS;
 }
 
 } // namespace Pdu

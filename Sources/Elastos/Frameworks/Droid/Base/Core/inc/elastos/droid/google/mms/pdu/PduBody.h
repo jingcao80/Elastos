@@ -5,10 +5,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package com.google.android.mms.pdu;
-// import java.util.HashMap;
-// import java.util.Map;
-// import java.util.Vector;
 using Elastos::Utility::IVector;
 using Elastos::Utility::IMap;
 

@@ -3,9 +3,6 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 
-// package com.google.android.mms.pdu;
-// import java.io.ByteArrayOutputStream;
-
 namespace Elastos {
 namespace Droid {
 namespace Google {

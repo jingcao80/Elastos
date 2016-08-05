@@ -4,12 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package com.google.android.mms.pdu;
-// import android.util.Log;
-// import java.io.ByteArrayOutputStream;
-// import java.io.IOException;
-// import java.io.UnsupportedEncodingException;
-// import java.util.ArrayList;
 using Elastos::Core::ICloneable;
 
 namespace Elastos {

@@ -6,15 +6,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.content.ContentResolver;
-// import android.util.Log;
-// import android.text.TextUtils;
-// import java.io.FileNotFoundException;
-// import java.io.IOException;
-// import java.io.InputStream;
-// import java.util.Arrays;
-// import java.util.HashMap;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::IO::IByteArrayOutputStream;
@@ -38,9 +29,9 @@ private:
         : public Object
     {
     public:
-        AutoPtr<IByteArrayOutputStream> currentMessage;
-        Int32 currentPosition;
-        AutoPtr<LengthRecordNode> next;
+        AutoPtr<IByteArrayOutputStream> mCurrentMessage;
+        Int32 mCurrentPosition;
+        AutoPtr<LengthRecordNode> mNext;
     };
 
     /**
@@ -50,14 +41,18 @@ private:
         : public Object
     {
     public:
+        PositionMarker(
+            /* [in] */ PduComposer* host);
+
         // Current stack size
         virtual CARAPI GetLength(
             /* [out] */ Int32* result);
 
-    private:
-        Int32 c_pos;
+    public:
+        Int32 mC_pos;
         // Current position
-        Int32 currentStackSize;
+        Int32 mCurrentStackSize;
+        PduComposer* mHost;
     };
 
     /**
@@ -69,6 +64,9 @@ private:
         : public Object
     {
     public:
+        BufferStack(
+            /* [in] */ PduComposer* host);
+
         /**
           *  Create a new message buffer and push it into the stack.
           */
@@ -91,11 +89,10 @@ private:
             /* [out] */ PositionMarker** result);
 
     public:
-        Int32 stackSize;
-
-    private:
-        AutoPtr<LengthRecordNode> stack;
-        AutoPtr<LengthRecordNode> toCopy;
+        Int32 mStackSize;
+        AutoPtr<LengthRecordNode> mStack;
+        AutoPtr<LengthRecordNode> mToCopy;
+        PduComposer* mHost;
     };
 
 public:

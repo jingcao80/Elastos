@@ -1,7 +1,21 @@
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Google.h"
 #include "elastos/droid/google/mms/pdu/EncodedStringValue.h"
+#include "elastos/droid/google/mms/pdu/CCharacterSetsHelper.h"
+#include "elastos/droid/google/mms/pdu/CEncodedStringValue.h"
+
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::EIID_ICloneable;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::IO::IOutputStream;
+using Elastos::IO::IByteArrayOutputStream;
+using Elastos::IO::CByteArrayOutputStream;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -26,33 +40,31 @@ ECode EncodedStringValue::constructor(
     /* [in] */ Int32 charset,
     /* [in] */ ArrayOf<Byte>* data)
 {
-    // ==================before translated======================
-    // // TODO: CharSet needs to be validated against MIBEnum.
-    // if(null == data) {
-    //     throw new NullPointerException("EncodedStringValue: Text-string is null.");
-    // }
-    //
-    // mCharacterSet = charset;
-    // mData = new byte[data.length];
+    // TODO: CharSet needs to be validated against MIBEnum.
+    if (NULL == data) {
+        // throw new NullPointerException("EncodedStringValue: Text-string is null.");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    mCharacterSet = charset;
+    mData = ArrayOf<Byte>::Alloc(data->GetLength());
     // System.arraycopy(data, 0, mData, 0, data.length);
+    mData->Copy(0, data, 0, data->GetLength());
     return NOERROR;
 }
 
 ECode EncodedStringValue::constructor(
     /* [in] */ ArrayOf<Byte>* data)
 {
-    // ==================before translated======================
-    // this(CharacterSets.DEFAULT_CHARSET, data);
-    return NOERROR;
+    return constructor(ICharacterSets::DEFAULT_CHARSET, data);
 }
 
 ECode EncodedStringValue::constructor(
     /* [in] */ const String& data)
 {
-    // ==================before translated======================
     // try {
-    //     mData = data.getBytes(CharacterSets.DEFAULT_CHARSET_NAME);
-    //     mCharacterSet = CharacterSets.DEFAULT_CHARSET;
+        mData = data.GetBytes(); // ICharacterSets::DEFAULT_CHARSET_NAME
+        mCharacterSet = ICharacterSets::DEFAULT_CHARSET;
     // } catch (UnsupportedEncodingException e) {
     //     Log.e(TAG, "Default encoding must be supported.", e);
     // }
@@ -63,32 +75,27 @@ ECode EncodedStringValue::GetCharacterSet(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCharacterSet;
-    assert(0);
+    *result = mCharacterSet;
     return NOERROR;
 }
 
 ECode EncodedStringValue::SetCharacterSet(
     /* [in] */ Int32 charset)
 {
-    // ==================before translated======================
-    // // TODO: CharSet needs to be validated against MIBEnum.
-    // mCharacterSet = charset;
-    assert(0);
+    // TODO: CharSet needs to be validated against MIBEnum.
+    mCharacterSet = charset;
     return NOERROR;
 }
 
 ECode EncodedStringValue::GetTextString(
     /* [out] */ ArrayOf<Byte>** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // byte[] byteArray = new byte[mData.length];
-    //
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<ArrayOf<Byte> > byteArray = ArrayOf<Byte>::Alloc(mData->GetLength());
+
     // System.arraycopy(mData, 0, byteArray, 0, mData.length);
-    // return byteArray;
-    assert(0);
+    byteArray->Copy(0, mData, 0, mData->GetLength());
+    *result = byteArray;
     return NOERROR;
 }
 
@@ -96,14 +103,14 @@ ECode EncodedStringValue::SetTextString(
     /* [in] */ ArrayOf<Byte>* textString)
 {
     VALIDATE_NOT_NULL(textString);
-    // ==================before translated======================
-    // if(null == textString) {
-    //     throw new NullPointerException("EncodedStringValue: Text-string is null.");
-    // }
-    //
-    // mData = new byte[textString.length];
+    if (NULL == textString) {
+        // throw new NullPointerException("EncodedStringValue: Text-string is null.");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    mData = ArrayOf<Byte>::Alloc(textString->GetLength());
     // System.arraycopy(textString, 0, mData, 0, textString.length);
-    assert(0);
+    mData->Copy(0, textString, 0, textString->GetLength());
     return NOERROR;
 }
 
@@ -111,25 +118,27 @@ ECode EncodedStringValue::GetString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (CharacterSets.ANY_CHARSET == mCharacterSet) {
-    //     return new String(mData); // system default encoding.
-    // } else {
-    //     try {
-    //         String name = CharacterSets.getMimeName(mCharacterSet);
-    //         return new String(mData, name);
-    //     } catch (UnsupportedEncodingException e) {
-    //     	if (LOCAL_LOGV) {
-    //     		Log.v(TAG, e.getMessage(), e);
-    //     	}
-    //     	try {
-    //             return new String(mData, CharacterSets.MIMENAME_ISO_8859_1);
-    //         } catch (UnsupportedEncodingException _) {
-    //             return new String(mData); // system default encoding.
-    //         }
-    //     }
-    // }
-    assert(0);
+    if (ICharacterSets::ANY_CHARSET == mCharacterSet) {
+        *result = String(*mData); // system default encoding.
+    }
+    else {
+        // try {
+        AutoPtr<ICharacterSetsHelper> hlp;
+        CCharacterSetsHelper::AcquireSingleton((ICharacterSetsHelper**)&hlp);
+        String name;
+        hlp->GetMimeName(mCharacterSet, &name);
+        *result = String(*mData); //name
+        // } catch (UnsupportedEncodingException e) {
+        // 	if (LOCAL_LOGV) {
+        // 		Log.v(TAG, e.getMessage(), e);
+        // 	}
+        // 	try {
+        //         return new String(mData, CharacterSets.MIMENAME_ISO_8859_1);
+        //     } catch (UnsupportedEncodingException _) {
+        //         return new String(mData); // system default encoding.
+        //     }
+        // }
+    }
     return NOERROR;
 }
 
@@ -137,28 +146,30 @@ ECode EncodedStringValue::AppendTextString(
     /* [in] */ ArrayOf<Byte>* textString)
 {
     VALIDATE_NOT_NULL(textString);
-    // ==================before translated======================
-    // if(null == textString) {
-    //     throw new NullPointerException("Text-string is null.");
-    // }
-    //
-    // if(null == mData) {
-    //     mData = new byte[textString.length];
-    //     System.arraycopy(textString, 0, mData, 0, textString.length);
-    // } else {
-    //     ByteArrayOutputStream newTextString = new ByteArrayOutputStream();
-    //     try {
-    //         newTextString.write(mData);
-    //         newTextString.write(textString);
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //         throw new NullPointerException(
-    //                 "appendTextString: failed when write a new Text-string");
-    //     }
-    //
-    //     mData = newTextString.toByteArray();
-    // }
-    assert(0);
+    if (NULL == textString) {
+        // throw new NullPointerException("Text-string is null.");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    if (NULL == mData) {
+        mData = ArrayOf<Byte>::Alloc(textString->GetLength());
+        // System.arraycopy(textString, 0, mData, 0, textString.length);
+        mData->Copy(0, textString, 0, textString->GetLength());
+    }
+    else {
+        AutoPtr<IByteArrayOutputStream> newTextString;
+        CByteArrayOutputStream::New((IByteArrayOutputStream**)&newTextString);
+        // try {
+            IOutputStream::Probe(newTextString)->Write(mData);
+            IOutputStream::Probe(newTextString)->Write(textString);
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        //     throw new NullPointerException(
+        //             "appendTextString: failed when write a new Text-string");
+        // }
+
+        newTextString->ToByteArray((ArrayOf<Byte>**)&mData);
+    }
     return NOERROR;
 }
 
@@ -166,117 +177,121 @@ ECode EncodedStringValue::Clone(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
     // super.clone();
-    // int len = mData.length;
-    // byte[] dstBytes = new byte[len];
+    Int32 len = mData->GetLength();
+    AutoPtr<ArrayOf<Byte> > dstBytes = ArrayOf<Byte>::Alloc(len);
     // System.arraycopy(mData, 0, dstBytes, 0, len);
-    //
+    dstBytes->Copy(0, mData, 0, len);
+
     // try {
-    //     return new EncodedStringValue(mCharacterSet, dstBytes);
+    AutoPtr<IEncodedStringValue> res;
+    CEncodedStringValue::New(mCharacterSet, dstBytes, (IEncodedStringValue**)&res);
+    *result = IEncodedStringValue::Probe(res);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
     // } catch (Exception e) {
     //     Log.e(TAG, "failed to clone an EncodedStringValue: " + this);
     //     e.printStackTrace();
     //     throw new CloneNotSupportedException(e.getMessage());
     // }
-    assert(0);
-    return NOERROR;
+    // return NOERROR;
 }
 
 ECode EncodedStringValue::Split(
     /* [in] */ const String& pattern,
     /* [out] */ ArrayOf<IEncodedStringValue*>** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String[] temp = getString().split(pattern);
-    // EncodedStringValue[] ret = new EncodedStringValue[temp.length];
-    // for (int i = 0; i < ret.length; ++i) {
-    //     try {
-    //         ret[i] = new EncodedStringValue(mCharacterSet,
-    //                 temp[i].getBytes());
-    //     } catch (NullPointerException _) {
-    //         // Can't arrive here
-    //         return null;
-    //     }
-    // }
-    // return ret;
-    assert(0);
+    VALIDATE_NOT_NULL(result)
+    String res;
+    GetString(&res);
+    AutoPtr<ArrayOf<String> > temp;
+    StringUtils::Split(res, pattern, (ArrayOf<String>**)&temp);
+    AutoPtr<ArrayOf<IEncodedStringValue*> > ret = ArrayOf<IEncodedStringValue*>::Alloc(temp->GetLength());
+    for (Int32 i = 0; i < ret->GetLength(); ++i) {
+        // try {
+        CEncodedStringValue::New(mCharacterSet,
+                ((*temp)[i]).GetBytes(), (IEncodedStringValue**)&((*ret)[i]));
+        // } catch (NullPointerException _) {
+        //     // Can't arrive here
+        //     return null;
+        // }
+    }
+    *result = ret;
     return NOERROR;
 }
 
 AutoPtr<ArrayOf<IEncodedStringValue*> > EncodedStringValue::Extract(
     /* [in] */ const String& src)
 {
-    // ==================before translated======================
-    // String[] values = src.split(";");
-    //
-    // ArrayList<EncodedStringValue> list = new ArrayList<EncodedStringValue>();
-    // for (int i = 0; i < values.length; i++) {
-    //     if (values[i].length() > 0) {
-    //         list.add(new EncodedStringValue(values[i]));
-    //     }
-    // }
-    //
-    // int len = list.size();
-    // if (len > 0) {
-    //     return list.toArray(new EncodedStringValue[len]);
-    // } else {
-    //     return null;
-    // }
-    assert(0);
-    AutoPtr< ArrayOf<IEncodedStringValue*> > empty;
-    return empty;
+    AutoPtr<ArrayOf<String> > values;
+    StringUtils::Split(src, String(";"), (ArrayOf<String>**)&values);
+
+    AutoPtr<IArrayList> list;
+    CArrayList::New((IArrayList**)&list);
+    for (Int32 i = 0; i < values->GetLength(); i++) {
+        if ((*values)[i].GetLength() > 0) {
+            AutoPtr<IEncodedStringValue> p;
+            CEncodedStringValue::New((*values)[i], (IEncodedStringValue**)&p);
+            list->Add(p);
+        }
+    }
+
+    Int32 len = 0;
+    list->GetSize(&len);
+    if (len > 0) {
+        AutoPtr<ArrayOf<IEncodedStringValue*> > arr = ArrayOf<IEncodedStringValue*>::Alloc(len);
+        AutoPtr<ArrayOf<IInterface*> > res;
+        list->ToArray((ArrayOf<IInterface*>*)arr.Get(), (ArrayOf<IInterface*>**)&res);
+        return (ArrayOf<IEncodedStringValue*>*)res.Get();
+    }
+    else {
+        return NULL;
+    }
 }
 
 String EncodedStringValue::Concat(
     /* [in] */ ArrayOf<IEncodedStringValue*>* addr)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder();
-    // int maxIndex = addr.length - 1;
-    // for (int i = 0; i <= maxIndex; i++) {
-    //     sb.append(addr[i].getString());
-    //     if (i < maxIndex) {
-    //         sb.append(";");
-    //     }
-    // }
-    //
-    // return sb.toString();
-    assert(0);
-    return String("");
+    StringBuilder sb;
+    Int32 maxIndex = addr->GetLength() - 1;
+    for (Int32 i = 0; i <= maxIndex; i++) {
+        String str;
+        (*addr)[i]->GetString(&str);
+        sb.Append(str);
+        if (i < maxIndex) {
+            sb.Append(String(";"));
+        }
+    }
+
+    return sb.ToString();
 }
 
 AutoPtr<IEncodedStringValue> EncodedStringValue::Copy(
     /* [in] */ IEncodedStringValue* value)
 {
-    // ==================before translated======================
-    // if (value == null) {
-    //     return null;
-    // }
-    //
-    // return new EncodedStringValue(value.mCharacterSet, value.mData);
-    assert(0);
-    AutoPtr<IEncodedStringValue> empty;
-    return empty;
+    if (value == NULL) {
+        return NULL;
+    }
+
+    AutoPtr<IEncodedStringValue> res;
+    CEncodedStringValue::New(((EncodedStringValue*)value)->mCharacterSet,
+                            ((EncodedStringValue*)value)->mData,
+                            (IEncodedStringValue**)&res);
+    return res;
 }
 
 AutoPtr<ArrayOf<IEncodedStringValue*> > EncodedStringValue::EncodeStrings(
     /* [in] */ ArrayOf<String>* array)
 {
-    // ==================before translated======================
-    // int count = array.length;
-    // if (count > 0) {
-    //     EncodedStringValue[] encodedArray = new EncodedStringValue[count];
-    //     for (int i = 0; i < count; i++) {
-    //         encodedArray[i] = new EncodedStringValue(array[i]);
-    //     }
-    //     return encodedArray;
-    // }
-    // return null;
-    assert(0);
-    AutoPtr< ArrayOf<IEncodedStringValue*> > empty;
-    return empty;
+    Int32 count = array->GetLength();
+    if (count > 0) {
+        AutoPtr<ArrayOf<IEncodedStringValue*> > encodedArray = ArrayOf<IEncodedStringValue*>::Alloc(count);
+        for (Int32 i = 0; i < count; i++) {
+            CEncodedStringValue::New((*array)[i], (IEncodedStringValue**)&((*encodedArray)[i]));
+        }
+        return encodedArray;
+    }
+    return NULL;
 }
 
 } // namespace Pdu

@@ -20,20 +20,18 @@ ECode AcknowledgeInd::constructor(
     /* [in] */ Int32 mmsVersion,
     /* [in] */ ArrayOf<Byte>* transactionId)
 {
-    // ==================before translated======================
-    // super();
-    //
-    // setMessageType(PduHeaders.MESSAGE_TYPE_ACKNOWLEDGE_IND);
-    // setMmsVersion(mmsVersion);
-    // setTransactionId(transactionId);
+    GenericPdu::constructor();
+
+    SetMessageType(IPduHeaders::MESSAGE_TYPE_ACKNOWLEDGE_IND);
+    SetMmsVersion(mmsVersion);
+    SetTransactionId(transactionId);
     return NOERROR;
 }
 
 ECode AcknowledgeInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
-    // ==================before translated======================
-    // super(headers);
+    GenericPdu::constructor(headers);
     return NOERROR;
 }
 
@@ -41,39 +39,27 @@ ECode AcknowledgeInd::GetReportAllowed(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.REPORT_ALLOWED);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::REPORT_ALLOWED, result);
 }
 
 ECode AcknowledgeInd::SetReportAllowed(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.REPORT_ALLOWED);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::REPORT_ALLOWED);
 }
 
 ECode AcknowledgeInd::GetTransactionId(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.TRANSACTION_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::TRANSACTION_ID, result);
 }
 
 ECode AcknowledgeInd::SetTransactionId(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.TRANSACTION_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetTextString(value, IPduHeaders::TRANSACTION_ID);
 }
 
 } // namespace Pdu

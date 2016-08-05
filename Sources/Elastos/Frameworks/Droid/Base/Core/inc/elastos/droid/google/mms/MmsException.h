@@ -4,8 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package com.google.android.mms;
-
 namespace Elastos {
 namespace Droid {
 namespace Google {

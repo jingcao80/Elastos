@@ -4,15 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/google/mms/utility/AbstractCache.h"
 
-// package com.google.android.mms.util;
-// import android.content.ContentUris;
-// import android.content.UriMatcher;
-// import android.net.Uri;
-// import android.provider.Telephony.Mms;
-// import android.util.Log;
-// import java.util.HashMap;
-// import java.util.HashSet;
-
 using Elastos::Droid::Content::IUriMatcher;
 using Elastos::Droid::Net::IUri;
 using Elastos::Utility::IHashMap;

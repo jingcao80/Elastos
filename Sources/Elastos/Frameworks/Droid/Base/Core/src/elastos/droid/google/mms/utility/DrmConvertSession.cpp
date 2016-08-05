@@ -18,131 +18,87 @@ AutoPtr<IDrmConvertSession> DrmConvertSession::Open(
     /* [in] */ IContext* context,
     /* [in] */ const String& mimeType)
 {
-    // ==================before translated======================
-    // DrmManagerClient drmClient = null;
-    // int convertSessionId = -1;
-    // if (context != null && mimeType != null && !mimeType.equals("")) {
-    //     try {
-    //         drmClient = new DrmManagerClient(context);
-    //         try {
-    //             convertSessionId = drmClient.openConvertSession(mimeType);
-    //         } catch (IllegalArgumentException e) {
-    //             Log.w(TAG, "Conversion of Mimetype: " + mimeType
-    //                     + " is not supported.", e);
-    //         } catch (IllegalStateException e) {
-    //             Log.w(TAG, "Could not access Open DrmFramework.", e);
-    //         }
-    //     } catch (IllegalArgumentException e) {
-    //         Log.w(TAG,
-    //                 "DrmManagerClient instance could not be created, context is Illegal.");
-    //     } catch (IllegalStateException e) {
-    //         Log.w(TAG, "DrmManagerClient didn't initialize properly.");
-    //     }
+    assert(0 && "TODO");
+    // AutoPtr<IDrmManagerClient> drmClient;
+    // Int32 convertSessionId = -1;
+    // if (context != NULL && !mimeType.IsNull() && !mimeType.Equals("")) {
+    //     drmClient = new DrmManagerClient(context);
+    //     convertSessionId = drmClient.openConvertSession(mimeType);
+
     // }
-    //
-    // if (drmClient == null || convertSessionId < 0) {
-    //     return null;
-    // } else {
-    //     return new DrmConvertSession(drmClient, convertSessionId);
+
+    // if (drmClient == NULL || convertSessionId < 0) {
+    //     return NULL;
     // }
-    assert(0);
-    AutoPtr<DrmConvertSession> empty;
-    return empty;
+    // else {
+    //     AutoPtr<DrmConvertSession> result = new DrmConvertSession(drmClient, convertSessionId);
+    //     return result;
+    // }
+    return NULL;
 }
 
 ECode DrmConvertSession::Convert(
     /* [in] */ ArrayOf<Byte>* inBuffer,
     /* [in] */ Int32 size,
-    /* [out] */ ArrayOf<Byte>** result)
+    /* [out] */ ArrayOf<Byte>** res)
 {
     VALIDATE_NOT_NULL(inBuffer);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // byte[] result = null;
-    // if (inBuffer != null) {
-    //     DrmConvertedStatus convertedStatus = null;
-    //     try {
-    //         if (size != inBuffer.length) {
-    //             byte[] buf = new byte[size];
-    //             System.arraycopy(inBuffer, 0, buf, 0, size);
-    //             convertedStatus = mDrmClient.convertData(mConvertSessionId, buf);
-    //         } else {
-    //             convertedStatus = mDrmClient.convertData(mConvertSessionId, inBuffer);
-    //         }
-    //
-    //         if (convertedStatus != null &&
-    //                 convertedStatus.statusCode == DrmConvertedStatus.STATUS_OK &&
-    //                 convertedStatus.convertedData != null) {
-    //             result = convertedStatus.convertedData;
-    //         }
-    //     } catch (IllegalArgumentException e) {
-    //         Log.w(TAG, "Buffer with data to convert is illegal. Convertsession: "
-    //                 + mConvertSessionId, e);
-    //     } catch (IllegalStateException e) {
-    //         Log.w(TAG, "Could not convert data. Convertsession: " +
-    //                 mConvertSessionId, e);
-    //     }
-    // } else {
-    //     throw new IllegalArgumentException("Parameter inBuffer is null");
-    // }
-    // return result;
-    assert(0);
+    VALIDATE_NOT_NULL(res);
+    AutoPtr<ArrayOf<Byte> > result;
+    if (inBuffer != NULL) {
+        assert(0 && "TODO");
+        // AutoPtr<IDrmConvertedStatus> convertedStatus;
+        // if (size != inBuffer->GetLength()) {
+        //     AutoPtr<ArrayOf<Byte> > buf = ArrayOf<Byte>::Alloc(size);
+        //     // System.arraycopy(inBuffer, 0, buf, 0, size);
+        //     buf->Copy(0, inBuffer, 0, size);
+        //     mDrmClient->ConvertData(mConvertSessionId, buf, (IDrmConvertedStatus**)&convertedStatus);
+        // }
+        // else {
+        //     mDrmClient->ConvertData(mConvertSessionId, inBuffer,(IDrmConvertedStatus**)&convertedStatus);
+        // }
+
+        // if (convertedStatus != NULL &&
+        //         convertedStatus->mStatusCode == IDrmConvertedStatus::STATUS_OK &&
+        //         convertedStatus->mConvertedData != NULL) {
+        //     result = convertedStatus->mConvertedData;
+        // }
+    }
+    else {
+        // throw new IllegalArgumentException("Parameter inBuffer is NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    *res = result;
     return NOERROR;
 }
 
 ECode DrmConvertSession::Close(
     /* [in] */ const String& filename,
-    /* [out] */ Int32* result)
+    /* [out] */ Int32* res)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // DrmConvertedStatus convertedStatus = null;
-    // int result = Downloads.Impl.STATUS_UNKNOWN_ERROR;
-    // if (mDrmClient != null && mConvertSessionId >= 0) {
-    //     try {
-    //         convertedStatus = mDrmClient.closeConvertSession(mConvertSessionId);
-    //         if (convertedStatus == null ||
-    //                 convertedStatus.statusCode != DrmConvertedStatus.STATUS_OK ||
-    //                 convertedStatus.convertedData == null) {
-    //             result = Downloads.Impl.STATUS_NOT_ACCEPTABLE;
-    //         } else {
-    //             RandomAccessFile rndAccessFile = null;
-    //             try {
-    //                 rndAccessFile = new RandomAccessFile(filename, "rw");
-    //                 rndAccessFile.seek(convertedStatus.offset);
-    //                 rndAccessFile.write(convertedStatus.convertedData);
-    //                 result = Downloads.Impl.STATUS_SUCCESS;
-    //             } catch (FileNotFoundException e) {
-    //                 result = Downloads.Impl.STATUS_FILE_ERROR;
-    //                 Log.w(TAG, "File: " + filename + " could not be found.", e);
-    //             } catch (IOException e) {
-    //                 result = Downloads.Impl.STATUS_FILE_ERROR;
-    //                 Log.w(TAG, "Could not access File: " + filename + " .", e);
-    //             } catch (IllegalArgumentException e) {
-    //                 result = Downloads.Impl.STATUS_FILE_ERROR;
-    //                 Log.w(TAG, "Could not open file in mode: rw", e);
-    //             } catch (SecurityException e) {
-    //                 Log.w(TAG, "Access to File: " + filename +
-    //                         " was denied denied by SecurityManager.", e);
-    //             } finally {
-    //                 if (rndAccessFile != null) {
-    //                     try {
-    //                         rndAccessFile.close();
-    //                     } catch (IOException e) {
-    //                         result = Downloads.Impl.STATUS_FILE_ERROR;
-    //                         Log.w(TAG, "Failed to close File:" + filename
-    //                                 + ".", e);
-    //                     }
-    //                 }
-    //             }
+    VALIDATE_NOT_NULL(res);
+    assert(0 && "TODO");
+    // AutoPtr<IDrmConvertedStatus> convertedStatus;
+    // Int32 result = IDownloadsImpl::STATUS_UNKNOWN_ERROR;
+    // if (mDrmClient != NULL && mConvertSessionId >= 0) {
+    //     mDrmClient->CloseConvertSession(mConvertSessionId, (IDrmConvertedStatus**)&convertedStatus);
+    //     if (convertedStatus == NULL ||
+    //             convertedStatus->mStatusCode != IDrmConvertedStatus::STATUS_OK ||
+    //             convertedStatus->mConvertedData == NULL) {
+    //         result = IDownloadsImpl::STATUS_NOT_ACCEPTABLE;
+    //     }
+    //     else {
+    //         AutoPtr<IRandomAccessFile> rndAccessFile;
+    //         CRandomAccessFile::New(filename, "rw", (IRandomAccessFile**)&rndAccessFile);
+    //         rndAccessFile->Seek(convertedStatus->mOffset);
+    //         rndAccessFile->Write(convertedStatus->mConvertedData);
+    //         result = IDownloadsImpl::STATUS_SUCCESS;
+    //         if (rndAccessFile != NULL) {
+    //             rndAccessFile->Close();
     //         }
-    //     } catch (IllegalStateException e) {
-    //         Log.w(TAG, "Could not close convertsession. Convertsession: " +
-    //                 mConvertSessionId, e);
     //     }
     // }
-    // return result;
-    assert(0);
+    // *res = result;
     return NOERROR;
 }
 
@@ -150,9 +106,8 @@ DrmConvertSession::DrmConvertSession(
     /* [in] */ IInterface/*TODO IDrmManagerClient*/* drmClient,
     /* [in] */ Int32 convertSessionId)
 {
-    // ==================before translated======================
-    // mDrmClient = drmClient;
-    // mConvertSessionId = convertSessionId;
+    mDrmClient = drmClient;
+    mConvertSessionId = convertSessionId;
 }
 
 } // namespace Utility

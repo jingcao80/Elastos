@@ -4,7 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.util.Log;
 using Elastos::Utility::IHashMap;
 
 namespace Elastos {
@@ -22,8 +21,8 @@ private:
         : public Object
     {
     public:
-        Int32 hit;
-        AutoPtr<IInterface> value;
+        Int32 mHit;
+        AutoPtr<IInterface> mValue;
     };
 
 public:

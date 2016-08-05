@@ -4,8 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package com.google.android.mms.pdu;
-
 namespace Elastos {
 namespace Droid {
 namespace Google {
@@ -66,7 +64,7 @@ public:
 
 private:
     // Create arrays to hold the base64 characters
-    static AutoPtr<ArrayOf<Byte> > base64Alphabet;
+    static AutoPtr<ArrayOf<Byte> > mBase64Alphabet;
 };
 
 } // namespace Pdu

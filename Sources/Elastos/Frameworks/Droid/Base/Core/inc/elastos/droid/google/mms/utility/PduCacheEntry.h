@@ -4,9 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package com.google.android.mms.util;
-// import com.google.android.mms.pdu.GenericPdu;
-
 using Elastos::Droid::Google::Mms::Pdu::IGenericPdu;
 
 namespace Elastos {

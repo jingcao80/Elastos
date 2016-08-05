@@ -13,15 +13,12 @@ const Int64 InvalidHeaderValueException::serialVersionUID;
 
 InvalidHeaderValueException::InvalidHeaderValueException()
 {
-    // ==================before translated======================
-    // super();
 }
 
 InvalidHeaderValueException::InvalidHeaderValueException(
     /* [in] */ const String& message)
+    : MmsException(message)
 {
-    // ==================before translated======================
-    // super(message);
 }
 
 } // namespace Mms

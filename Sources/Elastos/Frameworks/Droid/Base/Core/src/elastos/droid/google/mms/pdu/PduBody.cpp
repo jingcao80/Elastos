@@ -1,5 +1,14 @@
+
+#include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Google.h"
 #include "elastos/droid/google/mms/pdu/PduBody.h"
+
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::CVector;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -14,13 +23,12 @@ CAR_INTERFACE_IMPL(PduBody, Object, IPduBody);
 
 PduBody::PduBody()
 {
-    // ==================before translated======================
-    // mParts = new Vector<PduPart>();
-    //
-    // mPartMapByContentId = new HashMap<String, PduPart>();
-    // mPartMapByContentLocation  = new HashMap<String, PduPart>();
-    // mPartMapByName = new HashMap<String, PduPart>();
-    // mPartMapByFileName = new HashMap<String, PduPart>();
+    CVector::New((IVector**)&mParts);
+
+    CHashMap::New((IHashMap**)&mPartMapByContentId);
+    CHashMap::New((IHashMap**)&mPartMapByContentLocation);
+    CHashMap::New((IHashMap**)&mPartMapByName);
+    CHashMap::New((IHashMap**)&mPartMapByFileName);
 }
 
 ECode PduBody::AddPart(
@@ -28,15 +36,13 @@ ECode PduBody::AddPart(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if(null == part) {
-    //     throw new NullPointerException();
-    // }
-    //
-    // putPartToMaps(part);
-    // return mParts.add(part);
-    assert(0);
-    return NOERROR;
+    if (NULL == part) {
+        // throw new NullPointerException();
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    PutPartToMaps(part);
+    return mParts->Add(part, result);
 }
 
 ECode PduBody::AddPart(
@@ -44,14 +50,13 @@ ECode PduBody::AddPart(
     /* [in] */ IPduPart* part)
 {
     VALIDATE_NOT_NULL(part);
-    // ==================before translated======================
-    // if(null == part) {
-    //     throw new NullPointerException();
-    // }
-    //
-    // putPartToMaps(part);
-    // mParts.add(index, part);
-    assert(0);
+    if (NULL == part) {
+        // throw new NullPointerException();
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    PutPartToMaps(part);
+    mParts->Add(index, part);
     return NOERROR;
 }
 
@@ -60,17 +65,16 @@ ECode PduBody::RemovePart(
     /* [out] */ IPduPart** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mParts.remove(index);
-    assert(0);
+    AutoPtr<IInterface> p;
+    mParts->Remove(index, (IInterface**)&p);
+    *result = IPduPart::Probe(p);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode PduBody::RemoveAll()
 {
-    // ==================before translated======================
-    // mParts.clear();
-    assert(0);
+    mParts->Clear();
     return NOERROR;
 }
 
@@ -79,9 +83,10 @@ ECode PduBody::GetPart(
     /* [out] */ IPduPart** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mParts.get(index);
-    assert(0);
+    AutoPtr<IInterface> p;
+    mParts->Get(index, (IInterface**)&p);
+    *result = IPduPart::Probe(p);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -91,20 +96,14 @@ ECode PduBody::GetPartIndex(
 {
     VALIDATE_NOT_NULL(part);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mParts.indexOf(part);
-    assert(0);
-    return NOERROR;
+    return mParts->IndexOf(part, result);
 }
 
 ECode PduBody::GetPartsNum(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mParts.size();
-    assert(0);
-    return NOERROR;
+    return mParts->GetSize(result);
 }
 
 ECode PduBody::GetPartByContentId(
@@ -112,9 +111,10 @@ ECode PduBody::GetPartByContentId(
     /* [out] */ IPduPart** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPartMapByContentId.get(cid);
-    assert(0);
+    AutoPtr<IInterface> p;
+    mPartMapByContentId->Get(CoreUtils::Convert(cid), (IInterface**)&p);
+    *result = IPduPart::Probe(p);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -123,9 +123,10 @@ ECode PduBody::GetPartByContentLocation(
     /* [out] */ IPduPart** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPartMapByContentLocation.get(contentLocation);
-    assert(0);
+    AutoPtr<IInterface> p;
+    mPartMapByContentLocation->Get(CoreUtils::Convert(contentLocation), (IInterface**)&p);
+    *result = IPduPart::Probe(p);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -134,9 +135,10 @@ ECode PduBody::GetPartByName(
     /* [out] */ IPduPart** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPartMapByName.get(name);
-    assert(0);
+    AutoPtr<IInterface> p;
+    mPartMapByContentId->Get(CoreUtils::Convert(name), (IInterface**)&p);
+    *result = IPduPart::Probe(p);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -145,43 +147,46 @@ ECode PduBody::GetPartByFileName(
     /* [out] */ IPduPart** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPartMapByFileName.get(filename);
-    assert(0);
+    AutoPtr<IInterface> p;
+    mPartMapByFileName->Get(CoreUtils::Convert(filename), (IInterface**)&p);
+    *result = IPduPart::Probe(p);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 void PduBody::PutPartToMaps(
     /* [in] */ IPduPart* part)
 {
-    // ==================before translated======================
-    // // Put part to mPartMapByContentId.
-    // byte[] contentId = part.getContentId();
-    // if(null != contentId) {
-    //     mPartMapByContentId.put(new String(contentId), part);
-    // }
-    //
-    // // Put part to mPartMapByContentLocation.
-    // byte[] contentLocation = part.getContentLocation();
-    // if(null != contentLocation) {
-    //     String clc = new String(contentLocation);
-    //     mPartMapByContentLocation.put(clc, part);
-    // }
-    //
-    // // Put part to mPartMapByName.
-    // byte[] name = part.getName();
-    // if(null != name) {
-    //     String clc = new String(name);
-    //     mPartMapByName.put(clc, part);
-    // }
-    //
-    // // Put part to mPartMapByFileName.
-    // byte[] fileName = part.getFilename();
-    // if(null != fileName) {
-    //     String clc = new String(fileName);
-    //     mPartMapByFileName.put(clc, part);
-    // }
-    assert(0);
+    // Put part to mPartMapByContentId.
+    AutoPtr<ArrayOf<Byte> > contentId;
+    part->GetContentId((ArrayOf<Byte>**)&contentId);
+    if (NULL != contentId) {
+        mPartMapByContentId->Put(CoreUtils::Convert(String(*contentId)), part);
+    }
+
+    // Put part to mPartMapByContentLocation.
+    AutoPtr<ArrayOf<Byte> > contentLocation;
+    part->GetContentLocation((ArrayOf<Byte>**)&contentLocation);
+    if (NULL != contentLocation) {
+        String clc(*contentLocation);
+        mPartMapByContentLocation->Put(CoreUtils::Convert(clc), part);
+    }
+
+    // Put part to mPartMapByName.
+    AutoPtr<ArrayOf<Byte> > name;
+    part->GetName((ArrayOf<Byte>**)&name);
+    if (NULL != name) {
+        String clc(*name);
+        mPartMapByName->Put(CoreUtils::Convert(clc), part);
+    }
+
+    // Put part to mPartMapByFileName.
+    AutoPtr<ArrayOf<Byte> > fileName;
+    part->GetFilename((ArrayOf<Byte>**)&fileName);
+    if (NULL != fileName) {
+        String clc(*fileName);
+        mPartMapByFileName->Put(CoreUtils::Convert(clc), part);
+    }
 }
 
 } // namespace Pdu

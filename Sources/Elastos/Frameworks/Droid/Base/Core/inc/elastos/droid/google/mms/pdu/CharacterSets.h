@@ -4,9 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package com.google.android.mms.pdu;
-// import java.io.UnsupportedEncodingException;
-// import java.util.HashMap;
 using Elastos::Utility::IHashMap;
 
 namespace Elastos {

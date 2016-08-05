@@ -5,51 +5,6 @@
 #include "elastos/core/Object.h"
 #include "elastos/core/Math.h"
 
-// package com.google.android.mms.pdu;
-// import com.google.android.mms.ContentType;
-// import com.google.android.mms.InvalidHeaderValueException;
-// import com.google.android.mms.MmsException;
-// import com.google.android.mms.util.DownloadDrmHelper;
-// import com.google.android.mms.util.DrmConvertSession;
-// import com.google.android.mms.util.PduCache;
-// import com.google.android.mms.util.PduCacheEntry;
-// import com.google.android.mms.util.SqliteWrapper;
-// import android.content.ContentResolver;
-// import android.content.ContentUris;
-// import android.content.ContentValues;
-// import android.content.Context;
-// import android.database.Cursor;
-// import android.database.DatabaseUtils;
-// import android.database.sqlite.SQLiteException;
-// import android.drm.DrmManagerClient;
-// import android.net.Uri;
-// import android.provider.MediaStore;
-// import android.provider.Telephony;
-// import android.provider.Telephony.Mms;
-// import android.provider.Telephony.MmsSms;
-// import android.provider.Telephony.Threads;
-// import android.provider.Telephony.Mms.Addr;
-// import android.provider.Telephony.Mms.Part;
-// import android.provider.Telephony.MmsSms.PendingMessages;
-// import android.telephony.PhoneNumberUtils;
-// import android.telephony.TelephonyManager;
-// import android.text.TextUtils;
-// import android.util.Log;
-// import java.io.ByteArrayOutputStream;
-// import java.io.File;
-// import java.io.FileNotFoundException;
-// import java.io.IOException;
-// import java.io.InputStream;
-// import java.io.OutputStream;
-// import java.io.UnsupportedEncodingException;
-// import java.util.ArrayList;
-// import java.util.HashMap;
-// import java.util.HashSet;
-// import java.util.Map;
-// import java.util.Set;
-// import java.util.Map.Entry;
-// import com.google.android.mms.pdu.EncodedStringValue;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ICursor;
@@ -179,7 +134,7 @@ public:
     /**
       * Unpack a given String into a byte[].
       */
-    static CARAPI_(AutoPtr< ArrayOf<Byte> >) GetBytes(
+    static CARAPI_(AutoPtr<ArrayOf<Byte> >) GetBytes(
         /* [in] */ const String& data);
 
     /**
@@ -198,11 +153,11 @@ private:
     PduPersister(
         /* [in] */ IContext* context);
 
-    static CARAPI_(AutoPtr< ArrayOf<Int32> >) MiddleInitAddressFields();
+    static CARAPI_(AutoPtr<ArrayOf<Int32> >) MiddleInitAddressFields();
 
-    static CARAPI_(AutoPtr< ArrayOf<String> >) MiddleInitPduProjection();
+    static CARAPI_(AutoPtr<ArrayOf<String> >) MiddleInitPduProjection();
 
-    static CARAPI_(AutoPtr< ArrayOf<String> >) MiddleInitPartProjection();
+    static CARAPI_(AutoPtr<ArrayOf<String> >) MiddleInitPartProjection();
 
     CARAPI_(void) SetEncodedStringValueToHeaders(
         /* [in] */ ICursor* c,
@@ -232,11 +187,11 @@ private:
         /* [in] */ ICursor* c,
         /* [in] */ Int32 columnIndex);
 
-    CARAPI_(AutoPtr< ArrayOf<Byte> >) GetByteArrayFromPartColumn(
+    CARAPI_(AutoPtr<ArrayOf<Byte> >) GetByteArrayFromPartColumn(
         /* [in] */ ICursor* c,
         /* [in] */ Int32 columnIndex);
 
-    CARAPI_(AutoPtr< ArrayOf<IPduPart*> >) LoadParts(
+    CARAPI_(AutoPtr<ArrayOf<IPduPart*> >) LoadParts(
         /* [in] */ Int64 msgId);
 
     CARAPI_(void) LoadAddress(
@@ -320,8 +275,9 @@ private:
     static const Int64 DUMMY_THREAD_ID = 0x7FFFFFFFFFFFFFFFLL;//TODO Elastos::Core::Math::INT64_MAX_VALUE;
     static AutoPtr<IPduPersister> sPersister;
     static const AutoPtr<IPduCache> PDU_CACHE_INSTANCE;
-    static AutoPtr< ArrayOf<Int32> > ADDRESS_FIELDS;
-    static AutoPtr< ArrayOf<String> > PDU_PROJECTION;
+    Object cache_lock;
+    static AutoPtr<ArrayOf<Int32> > ADDRESS_FIELDS;
+    static AutoPtr<ArrayOf<String> > PDU_PROJECTION;
     static const Int32 PDU_COLUMN_ID = 0;
     static const Int32 PDU_COLUMN_MESSAGE_BOX = 1;
     static const Int32 PDU_COLUMN_THREAD_ID = 2;

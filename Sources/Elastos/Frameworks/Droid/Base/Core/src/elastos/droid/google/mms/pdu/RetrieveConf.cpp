@@ -1,6 +1,12 @@
 #include "Elastos.Droid.Google.h"
 #include "elastos/droid/google/mms/pdu/RetrieveConf.h"
 
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+
 namespace Elastos {
 namespace Droid {
 namespace Google {
@@ -18,19 +24,17 @@ RetrieveConf::RetrieveConf()
 
 ECode RetrieveConf::constructor()
 {
-    // ==================before translated======================
-    // super();
-    // setMessageType(PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF);
-    // setTransactionId(generateTransactionId());
+    MultimediaMessagePdu::constructor();
+    SetMessageType(IPduHeaders::MESSAGE_TYPE_RETRIEVE_CONF);
+    SetTransactionId(GenerateTransactionId());
     return NOERROR;
 }
 
 ECode RetrieveConf::constructor(
     /* [in] */ IPduHeaders* headers)
 {
-    // ==================before translated======================
-    // super(headers);
-    // setTransactionId(generateTransactionId());
+    MultimediaMessagePdu::constructor(headers);
+    SetTransactionId(GenerateTransactionId());
     return NOERROR;
 }
 
@@ -38,9 +42,8 @@ ECode RetrieveConf::constructor(
     /* [in] */ IPduHeaders* headers,
     /* [in] */ IPduBody* body)
 {
-    // ==================before translated======================
-    // super(headers, body);
-    // setTransactionId(generateTransactionId());
+    MultimediaMessagePdu::constructor(headers, body);
+    SetTransactionId(GenerateTransactionId());
     return NOERROR;
 }
 
@@ -48,19 +51,14 @@ ECode RetrieveConf::GetCc(
     /* [out] */ ArrayOf<IEncodedStringValue*>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValues(PduHeaders.CC);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValues(IPduHeaders::CC, result);
 }
 
 ECode RetrieveConf::AddCc(
     /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.appendEncodedStringValue(value, PduHeaders.CC);
-    assert(0);
+    mPduHeaders->AppendEncodedStringValue(value, IPduHeaders::CC);
     return NOERROR;
 }
 
@@ -68,19 +66,14 @@ ECode RetrieveConf::GetContentType(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.CONTENT_TYPE);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::CONTENT_TYPE, result);
 }
 
 ECode RetrieveConf::SetContentType(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.CONTENT_TYPE);
-    assert(0);
+    mPduHeaders->SetTextString(value, IPduHeaders::CONTENT_TYPE);
     return NOERROR;
 }
 
@@ -88,18 +81,13 @@ ECode RetrieveConf::GetDeliveryReport(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.DELIVERY_REPORT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::DELIVERY_REPORT, result);
 }
 
 ECode RetrieveConf::SetDeliveryReport(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.DELIVERY_REPORT);
-    assert(0);
+    mPduHeaders->SetOctet(value, IPduHeaders::DELIVERY_REPORT);
     return NOERROR;
 }
 
@@ -107,19 +95,14 @@ ECode RetrieveConf::GetFrom(
     /* [out] */ IEncodedStringValue** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValue(PduHeaders.FROM);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValue(IPduHeaders::FROM, result);
 }
 
 ECode RetrieveConf::SetFrom(
     /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setEncodedStringValue(value, PduHeaders.FROM);
-    assert(0);
+    mPduHeaders->SetEncodedStringValue(value, IPduHeaders::FROM);
     return NOERROR;
 }
 
@@ -127,19 +110,14 @@ ECode RetrieveConf::GetMessageClass(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.MESSAGE_CLASS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::MESSAGE_CLASS, result);
 }
 
 ECode RetrieveConf::SetMessageClass(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.MESSAGE_CLASS);
-    assert(0);
+    mPduHeaders->SetTextString(value, IPduHeaders::MESSAGE_CLASS);
     return NOERROR;
 }
 
@@ -147,19 +125,14 @@ ECode RetrieveConf::GetMessageId(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.MESSAGE_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::MESSAGE_ID, result);
 }
 
 ECode RetrieveConf::SetMessageId(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.MESSAGE_ID);
-    assert(0);
+    mPduHeaders->SetTextString(value, IPduHeaders::MESSAGE_ID);
     return NOERROR;
 }
 
@@ -167,18 +140,13 @@ ECode RetrieveConf::GetReadReport(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.READ_REPORT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::READ_REPORT, result);
 }
 
 ECode RetrieveConf::SetReadReport(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.READ_REPORT);
-    assert(0);
+    mPduHeaders->SetOctet(value, IPduHeaders::READ_REPORT);
     return NOERROR;
 }
 
@@ -186,18 +154,13 @@ ECode RetrieveConf::GetRetrieveStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.RETRIEVE_STATUS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::RETRIEVE_STATUS, result);
 }
 
 ECode RetrieveConf::SetRetrieveStatus(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.RETRIEVE_STATUS);
-    assert(0);
+    mPduHeaders->SetOctet(value, IPduHeaders::RETRIEVE_STATUS);
     return NOERROR;
 }
 
@@ -205,19 +168,14 @@ ECode RetrieveConf::GetRetrieveText(
     /* [out] */ IEncodedStringValue** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValue(PduHeaders.RETRIEVE_TEXT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValue(IPduHeaders::RETRIEVE_TEXT, result);
 }
 
 ECode RetrieveConf::SetRetrieveText(
     /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setEncodedStringValue(value, PduHeaders.RETRIEVE_TEXT);
-    assert(0);
+    mPduHeaders->SetEncodedStringValue(value, IPduHeaders::RETRIEVE_TEXT);
     return NOERROR;
 }
 
@@ -225,30 +183,25 @@ ECode RetrieveConf::GetTransactionId(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.TRANSACTION_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::TRANSACTION_ID, result);
 }
 
 ECode RetrieveConf::SetTransactionId(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.TRANSACTION_ID);
-    assert(0);
+    mPduHeaders->SetTextString(value, IPduHeaders::TRANSACTION_ID);
     return NOERROR;
 }
 
 AutoPtr<ArrayOf<Byte> > RetrieveConf::GenerateTransactionId()
 {
-    // ==================before translated======================
-    // String transactionId = "T" + Long.toHexString(System.currentTimeMillis());
-    // return transactionId.getBytes();
-    assert(0);
-    AutoPtr<ArrayOf<Byte> > empty;
-    return empty;
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 mills = 0;
+    sys->GetCurrentTimeMillis(&mills);
+    String transactionId(String("T") + StringUtils::ToHexString(mills));
+    return transactionId.GetBytes();
 }
 
 } // namespace Pdu

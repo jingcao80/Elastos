@@ -1,7 +1,10 @@
 #include "Elastos.Droid.Google.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/ContentType.h"
+#include <elastos/core/CoreUtils.h>
 
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ICloneable;
 using Elastos::Utility::CArrayList;
 
 namespace Elastos {
@@ -78,129 +81,92 @@ AutoPtr<IArrayList> ContentType::sSupportedVideoTypes = InitArrayList();
 Boolean ContentType::IsSupportedType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return (null != contentType) && sSupportedContentTypes.contains(contentType);
-    assert(0);
-    return FALSE;
+    Boolean bContain = FALSE;
+    return (!contentType.IsNull()) && (sSupportedContentTypes->Contains(CoreUtils::Convert(contentType), &bContain), bContain);
 }
 
 Boolean ContentType::IsSupportedImageType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return isImageType(contentType) && isSupportedType(contentType);
-    assert(0);
-    return FALSE;
+    return IsImageType(contentType) && IsSupportedType(contentType);
 }
 
 Boolean ContentType::IsSupportedAudioType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return isAudioType(contentType) && isSupportedType(contentType);
-    assert(0);
-    return FALSE;
+    return IsAudioType(contentType) && IsSupportedType(contentType);
 }
 
 Boolean ContentType::IsSupportedVideoType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return isVideoType(contentType) && isSupportedType(contentType);
-    assert(0);
-    return FALSE;
+    return IsVideoType(contentType) && IsSupportedType(contentType);
 }
 
 Boolean ContentType::IsTextType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return (null != contentType) && contentType.startsWith("text/");
-    assert(0);
-    return FALSE;
+    return (!contentType.IsNull()) && contentType.StartWith("text/");
 }
 
 Boolean ContentType::IsImageType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return (null != contentType) && contentType.startsWith("image/");
-    assert(0);
-    return FALSE;
+    return (!contentType.IsNull()) && contentType.StartWith("image/");
 }
 
 Boolean ContentType::IsAudioType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return (null != contentType) && contentType.startsWith("audio/");
-    assert(0);
-    return FALSE;
+    return (!contentType.IsNull()) && contentType.StartWith("audio/");
 }
 
 Boolean ContentType::IsVideoType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return (null != contentType) && contentType.startsWith("video/");
-    assert(0);
-    return FALSE;
+    return (!contentType.IsNull()) && contentType.StartWith("video/");
 }
 
 Boolean ContentType::IsDrmType(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return (null != contentType)
-    //         && (contentType.equals(APP_DRM_CONTENT)
-    //                 || contentType.equals(APP_DRM_MESSAGE));
-    assert(0);
-    return FALSE;
+    return (!contentType.IsNull())
+            && (contentType.Equals(APP_DRM_CONTENT)
+                    || contentType.Equals(APP_DRM_MESSAGE));
 }
 
 Boolean ContentType::IsUnspecified(
     /* [in] */ const String& contentType)
 {
-    // ==================before translated======================
-    // return (null != contentType) && contentType.endsWith("*");
-    assert(0);
-    return FALSE;
+    return (!contentType.IsNull()) && contentType.EndWith("*");
 }
 
 AutoPtr<IArrayList> ContentType::GetImageTypes()
 {
-    // ==================before translated======================
-    // return (ArrayList<String>) sSupportedImageTypes.clone();
-    assert(0);
-    AutoPtr<IArrayList> empty;
-    return empty;
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(sSupportedImageTypes)->Clone((IInterface**)&p);
+    return IArrayList::Probe(p);
 }
 
 AutoPtr<IArrayList> ContentType::GetAudioTypes()
 {
-    // ==================before translated======================
-    // return (ArrayList<String>) sSupportedAudioTypes.clone();
-    assert(0);
-    AutoPtr< IArrayList> empty;
-    return empty;
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(sSupportedAudioTypes)->Clone((IInterface**)&p);
+    return IArrayList::Probe(p);
 }
 
 AutoPtr<IArrayList> ContentType::GetVideoTypes()
 {
-    // ==================before translated======================
-    // return (ArrayList<String>) sSupportedVideoTypes.clone();
-    assert(0);
-    AutoPtr< IArrayList> empty;
-    return empty;
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(sSupportedVideoTypes)->Clone((IInterface**)&p);
+    return IArrayList::Probe(p);
 }
 
 AutoPtr<IArrayList> ContentType::GetSupportedTypes()
 {
-    // ==================before translated======================
-    // return (ArrayList<String>) sSupportedContentTypes.clone();
-    assert(0);
-    AutoPtr< IArrayList> empty;
-    return empty;
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(sSupportedContentTypes)->Clone((IInterface**)&p);
+    return IArrayList::Probe(p);
 }
 
 ContentType::ContentType()

@@ -10,59 +10,48 @@ namespace Utility {
 //=====================================================================
 //                          DownloadDrmHelper
 //=====================================================================
-//const String DownloadDrmHelper::MIMETYPE_DRM_MESSAGE("application/vnd.oma.drm.message");
-//const String DownloadDrmHelper::EXTENSION_DRM_MESSAGE(".dm");
-//const String DownloadDrmHelper::EXTENSION_INTERNAL_FWDL(".fl");
 const String DownloadDrmHelper::TAG("DownloadDrmHelper");
 
 Boolean DownloadDrmHelper::IsDrmMimeType(
     /* [in] */ IContext* context,
     /* [in] */ const String& mimetype)
 {
-    // ==================before translated======================
-    // boolean result = false;
-    // if (context != null) {
-    //     try {
-    //         DrmManagerClient drmClient = new DrmManagerClient(context);
-    //         if (drmClient != null && mimetype != null && mimetype.length() > 0) {
-    //             result = drmClient.canHandle("", mimetype);
-    //         }
-    //     } catch (IllegalArgumentException e) {
-    //         Log.w(TAG,
-    //                 "DrmManagerClient instance could not be created, context is Illegal.");
-    //     } catch (IllegalStateException e) {
-    //         Log.w(TAG, "DrmManagerClient didn't initialize properly.");
-    //     }
-    // }
-    // return result;
-    assert(0);
-    return FALSE;
+    Boolean result = FALSE;
+    if (context != NULL) {
+        // try {
+            assert(0 && "TODO");
+            // DrmManagerClient drmClient = new DrmManagerClient(context);
+            // if (drmClient != NULL && !mimetype.IsNull() && mimetype.GetLength() > 0) {
+            //     result = drmClient->CanHandle(String(""), mimetype);
+            // }
+        // } catch (IllegalArgumentException e) {
+        //     Log.w(TAG,
+        //             "DrmManagerClient instance could not be created, context is Illegal.");
+        // } catch (IllegalStateException e) {
+        //     Log.w(TAG, "DrmManagerClient didn't initialize properly.");
+        // }
+    }
+    return result;
 }
 
 Boolean DownloadDrmHelper::IsDrmConvertNeeded(
     /* [in] */ const String& mimetype)
 {
-    // ==================before translated======================
-    // return MIMETYPE_DRM_MESSAGE.equals(mimetype);
-    assert(0);
-    return FALSE;
+    return IDownloadDrmHelper::MIMETYPE_DRM_MESSAGE.Equals(mimetype);
 }
 
 String DownloadDrmHelper::ModifyDrmFwLockFileExtension(
     /* [in] */ const String& filename)
 {
-    // ==================before translated======================
-    // if (filename != null) {
-    //     int extensionIndex;
-    //     extensionIndex = filename.lastIndexOf(".");
-    //     if (extensionIndex != -1) {
-    //         filename = filename.substring(0, extensionIndex);
-    //     }
-    //     filename = filename.concat(EXTENSION_INTERNAL_FWDL);
-    // }
-    // return filename;
-    assert(0);
-    return String("");
+    if (!filename.IsNull()) {
+        Int32 extensionIndex = 0;
+        extensionIndex = filename.LastIndexOf(".");
+        if (extensionIndex != -1) {
+            filename = filename.Substring(0, extensionIndex);
+        }
+        filename = filename.Concat(EXTENSION_INTERNAL_FWDL);
+    }
+    return filename;
 }
 
 String DownloadDrmHelper::GetOriginalMimeType(
@@ -70,22 +59,19 @@ String DownloadDrmHelper::GetOriginalMimeType(
     /* [in] */ const String& path,
     /* [in] */ const String& containingMime)
 {
-    // ==================before translated======================
-    // String result = containingMime;
-    // DrmManagerClient drmClient = new DrmManagerClient(context);
+    String result(containingMime);
+    AutoPtr<IDrmManagerClient> drmClient = new DrmManagerClient(context);
     // try {
-    //     if (drmClient.canHandle(path, null)) {
-    //         result = drmClient.getOriginalMimeType(path);
-    //     }
+        if (drmClient->CanHandle(path, NULL)) {
+            drmClient->GetOriginalMimeType(path, &result);
+        }
     // } catch (IllegalArgumentException ex) {
     //     Log.w(TAG,
-    //             "Can't get original mime type since path is null or empty string.");
+    //             "Can't get original mime type since path is NULL or empty string.");
     // } catch (IllegalStateException ex) {
     //     Log.w(TAG, "DrmManagerClient didn't initialize properly.");
     // }
-    // return result;
-    assert(0);
-    return String("");
+    return result;
 }
 
 } // namespace Utility

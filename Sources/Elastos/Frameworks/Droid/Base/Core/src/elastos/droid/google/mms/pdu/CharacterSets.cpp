@@ -1,6 +1,10 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/CharacterSets.h"
 
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Core::CoreUtils;
+
 namespace Elastos {
 namespace Droid {
 namespace Google {
@@ -44,95 +48,90 @@ const String CharacterSets::MIMENAME_BIG5("big5");
 const String CharacterSets::MIMENAME_UCS2("iso-10646-ucs-2");
 const String CharacterSets::MIMENAME_UTF_16("utf-16");
 const String CharacterSets::DEFAULT_CHARSET_NAME(MIMENAME_UTF_8);
-// AutoPtr<ArrayOf<Int32> > CharacterSets::MIBENUM_NUMBERS = CharacterSets::MiddleInitMibenumNumbers();
-// AutoPtr<ArrayOf<String> > CharacterSets::MIME_NAMES = CharacterSets::MiddleInitMimeNames();
+AutoPtr<ArrayOf<Int32> > CharacterSets::MIBENUM_NUMBERS = CharacterSets::MiddleInitMibenumNumbers();
+AutoPtr<ArrayOf<String> > CharacterSets::MIME_NAMES = CharacterSets::MiddleInitMimeNames();
 AutoPtr<IHashMap> CharacterSets::MIBENUM_TO_NAME_MAP;
 AutoPtr<IHashMap> CharacterSets::NAME_TO_MIBENUM_MAP;
 
 String CharacterSets::GetMimeName(
     /* [in] */ Int32 mibEnumValue)
 {
-    // ==================before translated======================
-    // String name = MIBENUM_TO_NAME_MAP.get(mibEnumValue);
-    // if (name == null) {
-    //     throw new UnsupportedEncodingException();
-    // }
-    // return name;
-    assert(0);
-    return String("");
+    AutoPtr<IInterface> p;
+    MIBENUM_TO_NAME_MAP->Get(CoreUtils::Convert(mibEnumValue), (IInterface**)&p);
+    String name;
+    ICharSequence::Probe(p)->ToString(&name);
+    if (name.IsNull()) {
+        // throw new UnsupportedEncodingException();
+        return String(NULL);
+    }
+    return name;
 }
 
 Int32 CharacterSets::GetMibEnumValue(
     /* [in] */ const String& mimeName)
 {
-    // ==================before translated======================
-    // if(null == mimeName) {
-    //     return -1;
-    // }
-    //
-    // Integer mibEnumValue = NAME_TO_MIBENUM_MAP.get(mimeName);
-    // if (mibEnumValue == null) {
-    //     throw new UnsupportedEncodingException();
-    // }
-    // return mibEnumValue;
-    assert(0);
-    return 0;
+    if (mimeName.IsNull()) {
+        return -1;
+    }
+
+    AutoPtr<IInterface> p;
+    NAME_TO_MIBENUM_MAP->Get(CoreUtils::Convert(mimeName), (IInterface**)&p);
+    AutoPtr<IInteger32> mibEnumValue = IInteger32::Probe(p);
+    if (mibEnumValue == NULL) {
+        // throw new UnsupportedEncodingException();
+        return -1;
+    }
+    Int32 res = 0;
+    mibEnumValue->GetValue(&res);
+    return res;
 }
 
 CharacterSets::CharacterSets()
 {
 }
 
-AutoPtr< ArrayOf<Int32> > CharacterSets::MiddleInitMibenumNumbers()
+AutoPtr<ArrayOf<Int32> > CharacterSets::MiddleInitMibenumNumbers()
 {
-    // ==================before translated======================
-    // ->WWZ_SIGN: ARRAY_INIT_START {
-    // ANY_CHARSET,
-    //          US_ASCII,
-    //          ISO_8859_1,
-    //          ISO_8859_2,
-    //          ISO_8859_3,
-    //          ISO_8859_4,
-    //          ISO_8859_5,
-    //          ISO_8859_6,
-    //          ISO_8859_7,
-    //          ISO_8859_8,
-    //          ISO_8859_9,
-    //          SHIFT_JIS,
-    //          UTF_8,
-    //          BIG5,
-    //          UCS2,
-    //          UTF_16,
-    // ->WWZ_SIGN: ARRAY_INIT_END }
-    assert(0);
-    AutoPtr< ArrayOf<Int32> > empty;
-    return empty;
+    AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(16);
+    (*result)[0] = ANY_CHARSET;
+    (*result)[1] = US_ASCII;
+    (*result)[2] = ISO_8859_1;
+    (*result)[3] = ISO_8859_2;
+    (*result)[4] = ISO_8859_3;
+    (*result)[5] = ISO_8859_4;
+    (*result)[6] = ISO_8859_5;
+    (*result)[7] = ISO_8859_6;
+    (*result)[8] = ISO_8859_7;
+    (*result)[9] = ISO_8859_8;
+    (*result)[10] = ISO_8859_9;
+    (*result)[11] = SHIFT_JIS;
+    (*result)[12] = UTF_8;
+    (*result)[13] = BIG5;
+    (*result)[14] = UCS2;
+    (*result)[15] = UTF_16;
+    return result;
 }
 
-AutoPtr< ArrayOf<String> > CharacterSets::MiddleInitMimeNames()
+AutoPtr<ArrayOf<String> > CharacterSets::MiddleInitMimeNames()
 {
-    // ==================before translated======================
-    // ->WWZ_SIGN: ARRAY_INIT_START {
-    // MIMENAME_ANY_CHARSET,
-    //          MIMENAME_US_ASCII,
-    //          MIMENAME_ISO_8859_1,
-    //          MIMENAME_ISO_8859_2,
-    //          MIMENAME_ISO_8859_3,
-    //          MIMENAME_ISO_8859_4,
-    //          MIMENAME_ISO_8859_5,
-    //          MIMENAME_ISO_8859_6,
-    //          MIMENAME_ISO_8859_7,
-    //          MIMENAME_ISO_8859_8,
-    //          MIMENAME_ISO_8859_9,
-    //          MIMENAME_SHIFT_JIS,
-    //          MIMENAME_UTF_8,
-    //          MIMENAME_BIG5,
-    //          MIMENAME_UCS2,
-    //          MIMENAME_UTF_16,
-    // ->WWZ_SIGN: ARRAY_INIT_END }
-    assert(0);
-    AutoPtr< ArrayOf<String> > empty;
-    return empty;
+    AutoPtr<ArrayOf<String> > result = ArrayOf<String>::Alloc(16);
+    (*result)[0] = MIMENAME_ANY_CHARSET;
+    (*result)[1] = MIMENAME_US_ASCII;
+    (*result)[2] = MIMENAME_ISO_8859_1;
+    (*result)[3] = MIMENAME_ISO_8859_2;
+    (*result)[4] = MIMENAME_ISO_8859_3;
+    (*result)[5] = MIMENAME_ISO_8859_4;
+    (*result)[6] = MIMENAME_ISO_8859_5;
+    (*result)[7] = MIMENAME_ISO_8859_6;
+    (*result)[8] = MIMENAME_ISO_8859_7;
+    (*result)[9] = MIMENAME_ISO_8859_8;
+    (*result)[10] = MIMENAME_ISO_8859_9;
+    (*result)[11] = MIMENAME_SHIFT_JIS;
+    (*result)[12] = MIMENAME_UTF_8;
+    (*result)[13] = MIMENAME_BIG5;
+    (*result)[14] = MIMENAME_UCS2;
+    (*result)[15] = MIMENAME_UTF_16;
+    return result;
 }
 
 } // namespace Pdu

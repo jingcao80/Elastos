@@ -1,5 +1,6 @@
 #include "Elastos.Droid.Google.h"
 #include "elastos/droid/google/mms/pdu/GenericPdu.h"
+#include "elastos/droid/google/mms/pdu/PduHeaders.h"
 
 namespace Elastos {
 namespace Droid {
@@ -19,16 +20,14 @@ GenericPdu::GenericPdu()
 
 ECode GenericPdu::constructor()
 {
-    // ==================before translated======================
-    // mPduHeaders = new PduHeaders();
+    mPduHeaders = new PduHeaders();
     return NOERROR;
 }
 
 ECode GenericPdu::constructor(
     /* [in] */ IPduHeaders* headers)
 {
-    // ==================before translated======================
-    // mPduHeaders = headers;
+    mPduHeaders = headers;
     return NOERROR;
 }
 
@@ -36,9 +35,8 @@ ECode GenericPdu::GetPduHeaders(
     /* [out] */ IPduHeaders** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders;
-    assert(0);
+    *result = mPduHeaders;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -46,58 +44,40 @@ ECode GenericPdu::GetMessageType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.MESSAGE_TYPE);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::MESSAGE_TYPE, result);
 }
 
 ECode GenericPdu::SetMessageType(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.MESSAGE_TYPE);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::MESSAGE_TYPE);
 }
 
 ECode GenericPdu::GetMmsVersion(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.MMS_VERSION);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::MMS_VERSION, result);
 }
 
 ECode GenericPdu::SetMmsVersion(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.MMS_VERSION);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::MMS_VERSION);
 }
 
 ECode GenericPdu::GetFrom(
     /* [out] */ IEncodedStringValue** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValue(PduHeaders.FROM);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValue(IPduHeaders::FROM, result);
 }
 
 ECode GenericPdu::SetFrom(
     /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setEncodedStringValue(value, PduHeaders.FROM);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetEncodedStringValue(value, IPduHeaders::FROM);
 }
 
 } // namespace Pdu

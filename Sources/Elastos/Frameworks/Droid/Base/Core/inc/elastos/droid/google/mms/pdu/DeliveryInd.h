@@ -5,9 +5,6 @@
 #include "elastos/droid/google/mms/pdu/GenericPdu.h"
 #include "elastos/droid/ext/frameworkext.h"
 
-// package com.google.android.mms.pdu;
-// import com.google.android.mms.InvalidHeaderValueException;
-
 namespace Elastos {
 namespace Droid {
 namespace Google {

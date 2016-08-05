@@ -19,26 +19,22 @@ MultimediaMessagePdu::MultimediaMessagePdu()
 
 ECode MultimediaMessagePdu::constructor()
 {
-    // ==================before translated======================
-    // super();
-    return NOERROR;
+    return GenericPdu::constructor();
 }
 
 ECode MultimediaMessagePdu::constructor(
     /* [in] */ IPduHeaders* header,
     /* [in] */ IPduBody* body)
 {
-    // ==================before translated======================
-    // super(header);
-    // mMessageBody = body;
+    GenericPdu::constructor(header);
+    mMessageBody = body;
     return NOERROR;
 }
 
 ECode MultimediaMessagePdu::constructor(
     /* [in] */ IPduHeaders* headers)
 {
-    // ==================before translated======================
-    // super(headers);
+    GenericPdu::constructor(headers);
     return NOERROR;
 }
 
@@ -46,9 +42,8 @@ ECode MultimediaMessagePdu::GetBody(
     /* [out] */ IPduBody** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMessageBody;
-    assert(0);
+    *result = mMessageBody;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -56,9 +51,7 @@ ECode MultimediaMessagePdu::SetBody(
     /* [in] */ IPduBody* body)
 {
     VALIDATE_NOT_NULL(body);
-    // ==================before translated======================
-    // mMessageBody = body;
-    assert(0);
+    mMessageBody = body;
     return NOERROR;
 }
 
@@ -66,78 +59,54 @@ ECode MultimediaMessagePdu::GetSubject(
     /* [out] */ IEncodedStringValue** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValue(PduHeaders.SUBJECT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValue(IPduHeaders::SUBJECT, result);
 }
 
 ECode MultimediaMessagePdu::SetSubject(
     /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setEncodedStringValue(value, PduHeaders.SUBJECT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetEncodedStringValue(value, IPduHeaders::SUBJECT);
 }
 
 ECode MultimediaMessagePdu::GetTo(
     /* [out] */ ArrayOf<IEncodedStringValue*>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValues(PduHeaders.TO);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValues(IPduHeaders::TO, result);
 }
 
 ECode MultimediaMessagePdu::AddTo(
     /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.appendEncodedStringValue(value, PduHeaders.TO);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->AppendEncodedStringValue(value, IPduHeaders::TO);
 }
 
 ECode MultimediaMessagePdu::GetPriority(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.PRIORITY);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::PRIORITY, result);
 }
 
 ECode MultimediaMessagePdu::SetPriority(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.PRIORITY);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::PRIORITY);
 }
 
 ECode MultimediaMessagePdu::GetDate(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getLongInteger(PduHeaders.DATE);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetLongInteger(IPduHeaders::DATE, result);
 }
 
 ECode MultimediaMessagePdu::SetDate(
     /* [in] */ Int64 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setLongInteger(value, PduHeaders.DATE);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetLongInteger(value, IPduHeaders::DATE);
 }
 
 } // namespace Pdu

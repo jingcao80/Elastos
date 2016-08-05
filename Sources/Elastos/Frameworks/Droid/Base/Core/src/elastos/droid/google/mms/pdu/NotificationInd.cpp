@@ -19,17 +19,15 @@ NotificationInd::NotificationInd()
 
 ECode NotificationInd::constructor()
 {
-    // ==================before translated======================
-    // super();
-    // setMessageType(PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND);
+    GenericPdu::constructor();
+    SetMessageType(IPduHeaders::MESSAGE_TYPE_NOTIFICATION_IND);
     return NOERROR;
 }
 
 ECode NotificationInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
-    // ==================before translated======================
-    // super(headers);
+    GenericPdu::constructor(headers);
     return NOERROR;
 }
 
@@ -37,57 +35,40 @@ ECode NotificationInd::GetContentClass(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.CONTENT_CLASS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::CONTENT_CLASS, result);
 }
 
 ECode NotificationInd::SetContentClass(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.CONTENT_CLASS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::CONTENT_CLASS);
 }
 
 ECode NotificationInd::GetContentLocation(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.CONTENT_LOCATION);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::CONTENT_LOCATION, result);
 }
 
 ECode NotificationInd::SetContentLocation(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.CONTENT_LOCATION);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetTextString(value, IPduHeaders::CONTENT_LOCATION);
 }
 
 ECode NotificationInd::GetExpiry(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getLongInteger(PduHeaders.EXPIRY);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetLongInteger(IPduHeaders::EXPIRY, result);
 }
 
 ECode NotificationInd::SetExpiry(
     /* [in] */ Int64 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setLongInteger(value, PduHeaders.EXPIRY);
-    assert(0);
+    mPduHeaders->SetLongInteger(value, IPduHeaders::EXPIRY);
     return NOERROR;
 }
 
@@ -95,58 +76,41 @@ ECode NotificationInd::GetFrom(
     /* [out] */ IEncodedStringValue** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValue(PduHeaders.FROM);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValue(IPduHeaders::FROM, result);
 }
 
 ECode NotificationInd::SetFrom(
     /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setEncodedStringValue(value, PduHeaders.FROM);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetEncodedStringValue(value, IPduHeaders::FROM);
 }
 
 ECode NotificationInd::GetMessageClass(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.MESSAGE_CLASS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::MESSAGE_CLASS, result);
 }
 
 ECode NotificationInd::SetMessageClass(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.MESSAGE_CLASS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetTextString(value, IPduHeaders::MESSAGE_CLASS);
 }
 
 ECode NotificationInd::GetMessageSize(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getLongInteger(PduHeaders.MESSAGE_SIZE);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetLongInteger(IPduHeaders::MESSAGE_SIZE, result);
 }
 
 ECode NotificationInd::SetMessageSize(
     /* [in] */ Int64 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setLongInteger(value, PduHeaders.MESSAGE_SIZE);
-    assert(0);
+    mPduHeaders->SetLongInteger(value, IPduHeaders::MESSAGE_SIZE);
     return NOERROR;
 }
 
@@ -154,59 +118,41 @@ ECode NotificationInd::GetSubject(
     /* [out] */ IEncodedStringValue** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValue(PduHeaders.SUBJECT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValue(IPduHeaders::SUBJECT, result);
 }
 
 ECode NotificationInd::SetSubject(
     /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setEncodedStringValue(value, PduHeaders.SUBJECT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetEncodedStringValue(value, IPduHeaders::SUBJECT);
 }
 
 ECode NotificationInd::GetTransactionId(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.TRANSACTION_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::TRANSACTION_ID, result);
 }
 
 ECode NotificationInd::SetTransactionId(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.TRANSACTION_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetTextString(value, IPduHeaders::TRANSACTION_ID);
 }
 
 ECode NotificationInd::GetDeliveryReport(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.DELIVERY_REPORT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::DELIVERY_REPORT, result);
 }
 
 ECode NotificationInd::SetDeliveryReport(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.DELIVERY_REPORT);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::DELIVERY_REPORT);
 }
 
 } // namespace Pdu

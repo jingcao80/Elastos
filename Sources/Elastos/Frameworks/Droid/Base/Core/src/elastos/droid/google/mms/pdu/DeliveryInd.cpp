@@ -18,17 +18,15 @@ DeliveryInd::DeliveryInd()
 
 ECode DeliveryInd::constructor()
 {
-    // ==================before translated======================
-    // super();
-    // setMessageType(PduHeaders.MESSAGE_TYPE_DELIVERY_IND);
+    GenericPdu::constructor();
+    SetMessageType(IPduHeaders::MESSAGE_TYPE_DELIVERY_IND);
     return NOERROR;
 }
 
 ECode DeliveryInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
-    // ==================before translated======================
-    // super(headers);
+    GenericPdu::constructor(headers);
     return NOERROR;
 }
 
@@ -36,78 +34,54 @@ ECode DeliveryInd::GetDate(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getLongInteger(PduHeaders.DATE);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetLongInteger(IPduHeaders::DATE, result);
 }
 
 ECode DeliveryInd::SetDate(
     /* [in] */ Int64 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setLongInteger(value, PduHeaders.DATE);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetLongInteger(value, IPduHeaders::DATE);
 }
 
 ECode DeliveryInd::GetMessageId(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.MESSAGE_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::MESSAGE_ID, result);
 }
 
 ECode DeliveryInd::SetMessageId(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.MESSAGE_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetTextString(value, IPduHeaders::MESSAGE_ID);
 }
 
 ECode DeliveryInd::GetStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.STATUS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::STATUS, result);
 }
 
 ECode DeliveryInd::SetStatus(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.STATUS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetOctet(value, IPduHeaders::STATUS);
 }
 
 ECode DeliveryInd::GetTo(
     /* [out] */ ArrayOf<IEncodedStringValue*>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getEncodedStringValues(PduHeaders.TO);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetEncodedStringValues(IPduHeaders::TO, result);
 }
 
 ECode DeliveryInd::SetTo(
     /* [in] */ ArrayOf<IEncodedStringValue*>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setEncodedStringValues(value, PduHeaders.TO);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->SetEncodedStringValues(value, IPduHeaders::TO);
 }
 
 } // namespace Pdu

@@ -19,17 +19,15 @@ SendConf::SendConf()
 
 ECode SendConf::constructor()
 {
-    // ==================before translated======================
-    // super();
-    // setMessageType(PduHeaders.MESSAGE_TYPE_SEND_CONF);
+    GenericPdu::constructor();
+    SetMessageType(IPduHeaders::MESSAGE_TYPE_SEND_CONF);
     return NOERROR;
 }
 
 ECode SendConf::constructor(
     /* [in] */ IPduHeaders* headers)
 {
-    // ==================before translated======================
-    // super(headers);
+    GenericPdu::constructor(headers);
     return NOERROR;
 }
 
@@ -37,19 +35,14 @@ ECode SendConf::GetMessageId(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.MESSAGE_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::MESSAGE_ID, result);
 }
 
 ECode SendConf::SetMessageId(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.MESSAGE_ID);
-    assert(0);
+    mPduHeaders->SetTextString(value, IPduHeaders::MESSAGE_ID);
     return NOERROR;
 }
 
@@ -57,18 +50,13 @@ ECode SendConf::GetResponseStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getOctet(PduHeaders.RESPONSE_STATUS);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetOctet(IPduHeaders::RESPONSE_STATUS, result);
 }
 
 ECode SendConf::SetResponseStatus(
     /* [in] */ Int32 value)
 {
-    // ==================before translated======================
-    // mPduHeaders.setOctet(value, PduHeaders.RESPONSE_STATUS);
-    assert(0);
+    mPduHeaders->SetOctet(value, IPduHeaders::RESPONSE_STATUS);
     return NOERROR;
 }
 
@@ -76,19 +64,14 @@ ECode SendConf::GetTransactionId(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPduHeaders.getTextString(PduHeaders.TRANSACTION_ID);
-    assert(0);
-    return NOERROR;
+    return mPduHeaders->GetTextString(IPduHeaders::TRANSACTION_ID, result);
 }
 
 ECode SendConf::SetTransactionId(
     /* [in] */ ArrayOf<Byte>* value)
 {
     VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // mPduHeaders.setTextString(value, PduHeaders.TRANSACTION_ID);
-    assert(0);
+    mPduHeaders->SetTextString(value, IPduHeaders::TRANSACTION_ID);
     return NOERROR;
 }
 

@@ -7,6 +7,7 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    [deprecated]
     interface IPduHeaders {
         /**
          * All pdu header fields.
@@ -304,6 +305,133 @@ module {
         const Int32 STORE_STATUS_ERROR_PERMANENT_MMBOX_FULL             = 0xE4;
         const Int32 STORE_STATUS_ERROR_END                              = 0xFF;
 
+        /**
+          * Get octet value by header field.
+          *
+          * @param field the field
+          * @return the octet value of the pdu header
+          *          with specified header field. Return 0 if
+          *          the value is not set.
+          */
+        GetOctet(
+            [in] Int32 field,
+            [out] Int32* result);
+
+        /**
+          * Set octet value to pdu header by header field.
+          *
+          * @param value the value
+          * @param field the field
+          * @throws InvalidHeaderValueException if the value is invalid.
+          */
+        SetOctet(
+            [in] Int32 value,
+            [in] Int32 field);
+
+        /**
+          * Get TextString value by header field.
+          *
+          * @param field the field
+          * @return the TextString value of the pdu header
+          *          with specified header field
+          */
+        GetTextString(
+            [in] Int32 field,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+          * Set TextString value to pdu header by header field.
+          *
+          * @param value the value
+          * @param field the field
+          * @return the TextString value of the pdu header
+          *          with specified header field
+          * @throws NullPointerException if the value is null.
+          */
+        SetTextString(
+            [in] ArrayOf<Byte>* value,
+            [in] Int32 field);
+
+        /**
+          * Get EncodedStringValue value by header field.
+          *
+          * @param field the field
+          * @return the EncodedStringValue value of the pdu header
+          *          with specified header field
+          */
+        GetEncodedStringValue(
+            [in] Int32 field,
+            [out] IEncodedStringValue** result);
+
+        /**
+          * Get TO, CC or BCC header value.
+          *
+          * @param field the field
+          * @return the EncodeStringValue array of the pdu header
+          *          with specified header field
+          */
+        GetEncodedStringValues(
+            [in] Int32 field,
+            [out, callee] ArrayOf<IEncodedStringValue*>* result);
+
+        /**
+          * Set EncodedStringValue value to pdu header by header field.
+          *
+          * @param value the value
+          * @param field the field
+          * @return the EncodedStringValue value of the pdu header
+          *          with specified header field
+          * @throws NullPointerException if the value is null.
+          */
+        SetEncodedStringValue(
+            [in] IEncodedStringValue* value,
+            [in] Int32 field);
+
+        /**
+          * Set TO, CC or BCC header value.
+          *
+          * @param value the value
+          * @param field the field
+          * @return the EncodedStringValue value array of the pdu header
+          *          with specified header field
+          * @throws NullPointerException if the value is null.
+          */
+        SetEncodedStringValues(
+            [in] ArrayOf<IEncodedStringValue*>* value,
+            [in] Int32 field);
+
+        /**
+          * Append one EncodedStringValue to another.
+          *
+          * @param value the EncodedStringValue to append
+          * @param field the field
+          * @throws NullPointerException if the value is null.
+          */
+        AppendEncodedStringValue(
+            [in] IEncodedStringValue* value,
+            [in] Int32 field);
+
+        /**
+          * Get LongInteger value by header field.
+          *
+          * @param field the field
+          * @return the LongInteger value of the pdu header
+          *          with specified header field. if return -1, the
+          *          field is not existed in pdu header.
+          */
+        GetLongInteger(
+            [in] Int32 field,
+            [out] Int64* result);
+
+        /**
+          * Set LongInteger value to pdu header by header field.
+          *
+          * @param value the value
+          * @param field the field
+          */
+        SetLongInteger(
+            [in] Int64 value,
+            [in] Int32 field);
     }
 
     }//Pdu

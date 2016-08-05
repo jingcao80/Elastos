@@ -21,10 +21,9 @@ ECode PduCacheEntry::constructor(
     /* [in] */ Int32 msgBox,
     /* [in] */ Int64 threadId)
 {
-    // ==================before translated======================
-    // mPdu = pdu;
-    // mMessageBox = msgBox;
-    // mThreadId = threadId;
+    mPdu = pdu;
+    mMessageBox = msgBox;
+    mThreadId = threadId;
     return NOERROR;
 }
 
@@ -32,9 +31,8 @@ ECode PduCacheEntry::GetPdu(
     /* [out] */ IGenericPdu** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPdu;
-    assert(0);
+    *result = mPdu;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -42,9 +40,7 @@ ECode PduCacheEntry::GetMessageBox(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMessageBox;
-    assert(0);
+    *result = mMessageBox;
     return NOERROR;
 }
 
@@ -52,9 +48,7 @@ ECode PduCacheEntry::GetThreadId(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mThreadId;
-    assert(0);
+    *result = mThreadId;
     return NOERROR;
 }
 
