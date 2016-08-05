@@ -142,7 +142,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[16] = "Elastos.Droid.Settings.HomeSettings";
     (*args)[17] = "Elastos.Droid.Settings.DisplaySettings";
     (*args)[18] = "Elastos.Droid.Settings.DeviceInfoSettings";
-    (*args)[19] = "Elastos.Droid.Settings.Applications.ManageApplications";
+    (*args)[19] = "Elastos.Droid.Settings.Applications.CManageApplications";
     (*args)[20] = "Elastos.Droid.Settings.Applications.ProcessStatsUi";
     (*args)[21] = "Elastos.Droid.Settings.Notification.NotificationStation";
     (*args)[22] = "Elastos.Droid.Settings.Location.LocationSettings";
@@ -1033,11 +1033,11 @@ String SettingsActivity::GetStartingFragmentClass(
     thisKlass->GetNamespace(&klassNamespace);
     if (intentClass.Equals(klassNamespace + "." + klassName)) return String(NULL);
 
-    if (intentClass.Equals("Elastos.Droid.Settings.ManageApplications")
+    if (intentClass.Equals("Elastos.Droid.Settings.CManageApplications")
             || intentClass.Equals("Elastos.Droid.Settings.RunningServices")
             || intentClass.Equals("Elastos.Droid.Settings.Applications.StorageUse")) {
         // Old names of manage apps.
-        intentClass = "Elastos.Droid.Settings.Applications.ManageApplications";
+        intentClass = "Elastos.Droid.Settings.Applications.CManageApplications";
     }
 
     return intentClass;

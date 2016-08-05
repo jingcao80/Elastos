@@ -1,0 +1,46 @@
+module
+{
+    using interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    using interface Elastos.Utility.IArrayList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Applications {
+
+    interface IApplicationsState {
+    }
+
+    interface IApplicationsStateCallbacks {
+        OnRunningStateChanged(
+            [in] Boolean running);
+
+        OnPackageListChanged();
+
+        OnRebuildComplete(
+            [in] IArrayList* apps); // ArrayList<ApplicationsStateAppEntry>
+
+        OnPackageIconChanged();
+
+        OnPackageSizeChanged(
+            [in] String packageName);
+
+        OnAllSizesComputed();
+    }
+
+    interface IApplicationsStateAppFilter {
+        Init();
+
+        FilterApp(
+            [in] IApplicationInfo* info,
+            [out] Boolean* result);
+    }
+
+    interface IApplicationsStateAppEntry {
+    }
+
+    } // namespace Applications
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -129,7 +129,7 @@ public:
      */
     static CARAPI Compile(
         /* [in] */ const String& pattern,
-        /* [in] */ IPattern** obj);
+        /* [out] */ IPattern** obj);
 
     /**
      * Tests whether the given {@code regularExpression} matches the given {@code input}.

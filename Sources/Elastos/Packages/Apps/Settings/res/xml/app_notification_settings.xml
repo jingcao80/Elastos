@@ -14,12 +14,12 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/app_notifications_title"
         android:key="app_notification_settings">
 
     <!-- Block -->
-    <SwitchPreference
+    <Elastos.Droid.Preference.CSwitchPreference
             android:key="block"
             android:title="@string/app_notification_block_title"
             android:summary="@string/app_notification_block_summary"
@@ -27,7 +27,7 @@
             android:persistent="false" />
 
     <!-- Priority -->
-    <SwitchPreference
+    <Elastos.Droid.Preference.CSwitchPreference
             android:key="priority"
             android:title="@string/app_notification_priority_title"
             android:summary="@string/app_notification_priority_summary"
@@ -35,10 +35,10 @@
             android:persistent="false" />
 
     <!-- Sensitive -->
-    <SwitchPreference
+    <Elastos.Droid.Preference.CSwitchPreference
             android:key="sensitive"
             android:title="@string/app_notification_sensitive_title"
             android:summary="@string/app_notification_sensitive_summary"
             android:persistent="false" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

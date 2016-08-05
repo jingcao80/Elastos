@@ -716,24 +716,24 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.applications.ManageApplications" />
+                android:value="Elastos.Droid.Settings.Applications.CManageApplications" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/application_settings" />
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".Applications.ManageApplications"
+        <activity-alias android:name=".Applications.CManageApplications"
                 android:label="@string/applications_settings"
                 android:exported="true"
                 android:targetActivity="CSettings$ManageApplicationsActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.applications.ManageApplications" />
+                android:value="Elastos.Droid.Settings.Applications.CManageApplications" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/application_settings" />
         </activity-alias>
 
         <!-- Keep compatibility with old shortcuts. Pre-gingerbread. -->
-        <activity-alias android:name=".ManageApplications"
+        <activity-alias android:name=".CManageApplications"
                   android:label="@string/manageapplications_settings_title"
                   android:exported="true"
                   android:targetActivity="CSettings$ManageApplicationsActivity">
@@ -746,7 +746,7 @@
                 android:exported="true"
                 android:targetActivity="CSettings$ManageApplicationsActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.applications.ManageApplications" />
+                android:value="Elastos.Droid.Settings.Applications.CManageApplications" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/application_settings" />
         </activity-alias>
@@ -758,7 +758,7 @@
                 android:exported="true"
                 android:targetActivity="CSettings$ManageApplicationsActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.applications.ManageApplications" />
+                android:value="Elastos.Droid.Settings.Applications.CManageApplications" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/application_settings" />
         </activity-alias>
@@ -797,7 +797,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.applications.ManageApplications" />
+                android:value="Elastos.Droid.Settings.Applications.CManageApplications" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/application_settings" />
         </activity>
@@ -815,7 +815,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.applications.ManageApplications" />
+                android:value="Elastos.Droid.Settings.Applications.CManageApplications" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/application_settings" />
         </activity>

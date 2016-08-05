@@ -120,7 +120,7 @@
         <dashboard-tile
                 android:id="@+id/application_settings"
                 android:title="@string/applications_settings"
-                android:fragment="Elastos.Droid.Settings.Applications.ManageApplications"
+                android:fragment="Elastos.Droid.Settings.Applications.CManageApplications"
                 android:icon="@drawable/ic_settings_applications"
                 />
 

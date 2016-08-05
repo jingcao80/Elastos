@@ -1,0 +1,11 @@
+TARGET_NAME = applications
+TARGET_TYPE = lib
+
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../
+
+SOURCES += ApplicationsState.cpp
+SOURCES += InterestingConfigChanges.cpp
+#SOURCES += ManageApplications.cpp
+SOURCES += applications.cpp

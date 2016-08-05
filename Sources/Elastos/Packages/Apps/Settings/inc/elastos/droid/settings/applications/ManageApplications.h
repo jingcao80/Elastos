@@ -1,20 +1,8 @@
-/*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_APPLICATIONS_MANAGEAPPLICATIONS_H__
+#define __ELASTOS_DROID_SETTINGS_APPLICATIONS_MANAGEAPPLICATIONS_H__
 
-package com.android.settings.applications;
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/settings/applications/InterestingConfigChanges.h"
 
 using static android::Net::NetworkPolicyManager::IPOLICY_NONE;
 using static android::Net::NetworkPolicyManager::IPOLICY_REJECT_METERED_BACKGROUND;
@@ -58,7 +46,7 @@ using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::Animation::IAnimationUtils;
 using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::IAdapterView;
-using Elastos::Droid::Widget::AdapterView::IOnItemClickListener;
+using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::AdapterView::IOnItemSelectedListener;
 using Elastos::Droid::Widget::IBaseAdapter;
 using Elastos::Droid::Widget::IFilter;
@@ -81,16 +69,23 @@ using Elastos::Utility::IArrayList;
 using Elastos::Utility::IComparator;
 using Elastos::Utility::IList;
 
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Applications {
+
 final class CanBeOnSdCardChecker {
     final IPackageManager mPm;
     Int32 mInstallLocation;
 
-    CanBeOnSdCardChecker() {
+    CanBeOnSdCardChecker()
+    {
         mPm = IPackageManager.Stub->AsInterface(
                 ServiceManager->GetService("package"));
     }
 
-    void Init() {
+    void Init()
+    {
         try {
             mInstallLocation = mPm->GetInstallLocation();
         } catch (RemoteException e) {
@@ -99,16 +94,20 @@ final class CanBeOnSdCardChecker {
         }
     }
 
-    Boolean Check(ApplicationInfo info) {
+    Boolean Check(
+        /* [in] */ IApplicationInfo* info)
+    {
         Boolean canBe = FALSE;
         if ((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
             canBe = TRUE;
-        } else {
+        }
+        else {
             if ((info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 if (info.installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL ||
                         info.installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
                     canBe = TRUE;
-                } else if (info.installLocation
+                }
+                else if (info.installLocation
                         == PackageInfo.INSTALL_LOCATION_UNSPECIFIED) {
                     if (mInstallLocation == PackageHelper.APP_INSTALL_EXTERNAL) {
                         // For apps with no preference and the default value set
@@ -120,12 +119,16 @@ final class CanBeOnSdCardChecker {
         }
         return canBe;
     }
-}
+};
 
 interface AppClickListener {
-    void OnItemClick(ManageApplications.TabInfo tab, AdapterView<?> parent,
-            View view, Int32 position, Int64 id);
-}
+    void OnItemClick(
+        /* [in] */ IManageApplicationsTabInfo* tab,
+        /* [in] */ IAdapterView* parent,
+        /* [in] */ IView* view,
+        /* [in] */ Int32 position,
+        /* [in] */ Int64 id);
+};
 
 /**
  * Activity to pick an application that will be used to display installation information and
@@ -211,12 +214,15 @@ public class ManageApplications extends Fragment implements
         private Int64 mLastUsedStorage, mLastAppStorage, mLastFreeStorage;
 
         final Runnable mRunningProcessesAvail = new Runnable() {
-            CARAPI Run() {
+            CARAPI Run()
+            {
                 HandleRunningProcessesAvail();
             }
         };
 
-        public TabInfo(ManageApplications owner, ApplicationsState apps,
+        public TabInfo(
+            /* [in] */ ManageApplications* owner,
+            /* [in] */ ApplicationsState apps,
                 CharSequence label, Int32 listType, AppClickListener clickListener,
                 Bundle savedInstanceState) {
             mOwner = owner;
@@ -235,12 +241,14 @@ public class ManageApplications extends Fragment implements
             mSavedInstanceState = savedInstanceState;
         }
 
-        CARAPI SetContainerService(IMediaContainerService containerService) {
+        CARAPI SetContainerService(IMediaContainerService containerService)
+        {
             mContainerService = containerService;
             UpdateStorageUsage();
         }
 
-        public View Build(LayoutInflater inflater, ViewGroup contentParent, View contentChild) {
+        public View Build(LayoutInflater inflater, ViewGroup contentParent, View contentChild)
+        {
             if (mRootView != NULL) {
                 return mRootView;
             }
@@ -283,7 +291,8 @@ public class ManageApplications extends Fragment implements
                 if (mFilter == FILTER_APPS_SDCARD) {
                     //mStorageChartLabel->SetText(mOwner->GetActivity()->GetText(
                     //        R::string::sd_card_storage));
-                } else {
+                }
+                else {
                     //mStorageChartLabel->SetText(mOwner->GetActivity()->GetText(
                     //        R::string::internal_storage));
                 }
@@ -298,7 +307,8 @@ public class ManageApplications extends Fragment implements
             return mRootView;
         }
 
-        CARAPI DetachView() {
+        CARAPI DetachView()
+        {
             if (mRootView != NULL) {
                 ViewGroup group = (ViewGroup)mRootView->GetParent();
                 if (group != NULL) {
@@ -307,7 +317,8 @@ public class ManageApplications extends Fragment implements
             }
         }
 
-        CARAPI Resume(Int32 sortOrder) {
+        CARAPI Resume(Int32 sortOrder)
+        {
             if (mApplications != NULL) {
                 mApplications->Resume(sortOrder);
             }
@@ -316,13 +327,15 @@ public class ManageApplications extends Fragment implements
                 if (haveData) {
                     mRunningProcessesView->SetVisibility(View.VISIBLE);
                     mLoadingContainer->SetVisibility(View.INVISIBLE);
-                } else {
+                }
+                else {
                     mLoadingContainer->SetVisibility(View.VISIBLE);
                 }
             }
         }
 
-        CARAPI Pause() {
+        CARAPI Pause()
+        {
             if (mApplications != NULL) {
                 mApplications->Pause();
             }
@@ -331,13 +344,15 @@ public class ManageApplications extends Fragment implements
             }
         }
 
-        CARAPI Release() {
+        CARAPI Release()
+        {
             if (mApplications != NULL) {
                 mApplications->Release();
             }
         }
 
-        void UpdateStorageUsage() {
+        void UpdateStorageUsage()
+        {
             // Make sure a callback didn't come at an inopportune time.
             if (mOwner->GetActivity() == NULL) return;
             // Doesn't make sense for stuff that is not an app list.
@@ -367,7 +382,8 @@ public class ManageApplications extends Fragment implements
                                 + ae.externalCacheSize;
                     }
                 }
-            } else {
+            }
+            else {
                 if (mContainerService != NULL) {
                     try {
                         final Int64[] stats = mContainerService->GetFileSystemStats(
@@ -396,7 +412,8 @@ public class ManageApplications extends Fragment implements
             ApplyCurrentStorage();
         }
 
-        void ApplyCurrentStorage() {
+        void ApplyCurrentStorage()
+        {
             // If view hierarchy is not yet created, no views to update.
             if (mRootView == NULL) {
                 return;
@@ -421,7 +438,8 @@ public class ManageApplications extends Fragment implements
                     mFreeStorageText->SetText(mOwner->GetActivity()->GetResources().GetString(
                             R::string::service_background_processes, sizeStr));
                 }
-            } else {
+            }
+            else {
                 mColorBar->SetRatios(0, 0, 0);
                 if (mLastUsedStorage != -1) {
                     mLastUsedStorage = -1;
@@ -436,11 +454,13 @@ public class ManageApplications extends Fragment implements
         }
 
         //@Override
-        CARAPI OnItemClick(AdapterView<?> parent, View view, Int32 position, Int64 id) {
+        CARAPI OnItemClick(AdapterView<?> parent, View view, Int32 position, Int64 id)
+        {
             mClickListener->OnItemClick(this, parent, view, position, id);
         }
 
-        void HandleRunningProcessesAvail() {
+        void HandleRunningProcessesAvail()
+        {
             mLoadingContainer->StartAnimation(AnimationUtils->LoadAnimation(
                     mOwner->GetActivity(), android.R.anim.fade_out));
             mRunningProcessesView->StartAnimation(AnimationUtils->LoadAnimation(
@@ -491,12 +511,14 @@ public class ManageApplications extends Fragment implements
         Int32 mCurPos = 0;
 
         //@Override
-        public Int32 GetCount() {
+        public Int32 GetCount()
+        {
             return mNumTabs;
         }
 
         //@Override
-        public Object InstantiateItem(ViewGroup container, Int32 position) {
+        public Object InstantiateItem(ViewGroup container, Int32 position)
+        {
             TabInfo tab = mTabs->Get(position);
             View root = tab->Build(mInflater, mContentContainer, mRootView);
             container->AddView(root);
@@ -505,37 +527,44 @@ public class ManageApplications extends Fragment implements
         }
 
         //@Override
-        CARAPI DestroyItem(ViewGroup container, Int32 position, Object object) {
+        CARAPI DestroyItem(ViewGroup container, Int32 position, Object object)
+        {
             container->RemoveView((View)object);
         }
 
         //@Override
-        public Boolean IsViewFromObject(View view, Object object) {
+        public Boolean IsViewFromObject(View view, Object object)
+        {
             return view == object;
         }
 
         //@Override
-        public Int32 GetItemPosition(Object object) {
+        public Int32 GetItemPosition(Object object)
+        {
             return super->GetItemPosition(object);
             //return ((TabInfo)((View)object).GetTag(R.id.name)).mListType;
         }
 
         //@Override
-        public CharSequence GetPageTitle(Int32 position) {
+        public CharSequence GetPageTitle(Int32 position)
+        {
             return mTabs->Get(position).mLabel;
         }
 
         //@Override
-        CARAPI OnPageScrolled(Int32 position, Float positionOffset, Int32 positionOffsetPixels) {
+        CARAPI OnPageScrolled(Int32 position, Float positionOffset, Int32 positionOffsetPixels)
+        {
         }
 
         //@Override
-        CARAPI OnPageSelected(Int32 position) {
+        CARAPI OnPageSelected(Int32 position)
+        {
             mCurPos = position;
         }
 
         //@Override
-        CARAPI OnPageScrollStateChanged(Int32 state) {
+        CARAPI OnPageScrollStateChanged(Int32 state)
+        {
             if (state == ViewPager.SCROLL_STATE_IDLE) {
                 UpdateCurrentTab(mCurPos);
             }
@@ -569,7 +598,8 @@ public class ManageApplications extends Fragment implements
 
         private Filter mFilter = new Filter() {
             //@Override
-            protected FilterResults PerformFiltering(CharSequence constraint) {
+            protected FilterResults PerformFiltering(CharSequence constraint)
+            {
                 ArrayList<ApplicationsState.AppEntry> entries
                         = ApplyPrefixFilter(constraint, mBaseEntries);
                 FilterResults fr = new FilterResults();
@@ -579,7 +609,8 @@ public class ManageApplications extends Fragment implements
             }
 
             //@Override
-            protected void PublishResults(CharSequence constraint, FilterResults results) {
+            protected void PublishResults(CharSequence constraint, FilterResults results)
+            {
                 mCurFilterPrefix = constraint;
                 mEntries = (ArrayList<ApplicationsState.AppEntry>)results.values;
                 NotifyDataSetChanged();
@@ -587,7 +618,8 @@ public class ManageApplications extends Fragment implements
             }
         };
 
-        public ApplicationsAdapter(ApplicationsState state, TabInfo tab, Int32 filterMode) {
+        public ApplicationsAdapter(ApplicationsState state, TabInfo tab, Int32 filterMode)
+        {
             mState = state;
             mSession = state->NewSession(this);
             mTab = tab;
@@ -595,30 +627,35 @@ public class ManageApplications extends Fragment implements
             mFilterMode = filterMode;
         }
 
-        CARAPI Resume(Int32 sort) {
+        CARAPI Resume(Int32 sort)
+        {
             if (DEBUG) Logger::I(TAG, "Resume!  mResumed=" + mResumed);
             if (!mResumed) {
                 mResumed = TRUE;
                 mSession->Resume();
                 mLastSortMode = sort;
                 Rebuild(TRUE);
-            } else {
+            }
+            else {
                 Rebuild(sort);
             }
         }
 
-        CARAPI Pause() {
+        CARAPI Pause()
+        {
             if (mResumed) {
                 mResumed = FALSE;
                 mSession->Pause();
             }
         }
 
-        CARAPI Release() {
-            mSession->Release();
+        CARAPI Release()
+        {
+            mSession->ReleaseItem();
         }
 
-        CARAPI Rebuild(Int32 sort) {
+        CARAPI Rebuild(Int32 sort)
+        {
             if (sort == mLastSortMode) {
                 return;
             }
@@ -626,14 +663,16 @@ public class ManageApplications extends Fragment implements
             Rebuild(TRUE);
         }
 
-        CARAPI Rebuild(Boolean eraseold) {
+        CARAPI Rebuild(Boolean eraseold)
+        {
             if (DEBUG) Logger::I(TAG, "Rebuilding app list...");
             ApplicationsState.AppFilter filterObj;
             Comparator<AppEntry> comparatorObj;
             Boolean emulated = Environment->IsExternalStorageEmulated();
             if (emulated) {
                 mWhichSize = SIZE_TOTAL;
-            } else {
+            }
+            else {
                 mWhichSize = SIZE_INTERNAL;
             }
             switch (mFilterMode) {
@@ -680,7 +719,8 @@ public class ManageApplications extends Fragment implements
             mBaseEntries = entries;
             if (mBaseEntries != NULL) {
                 mEntries = ApplyPrefixFilter(mCurFilterPrefix, mBaseEntries);
-            } else {
+            }
+            else {
                 mEntries = NULL;
             }
             NotifyDataSetChanged();
@@ -690,17 +730,20 @@ public class ManageApplications extends Fragment implements
                 mWaitingForData = TRUE;
                 mTab.mListContainer->SetVisibility(View.INVISIBLE);
                 mTab.mLoadingContainer->SetVisibility(View.VISIBLE);
-            } else {
+            }
+            else {
                 mTab.mListContainer->SetVisibility(View.VISIBLE);
                 mTab.mLoadingContainer->SetVisibility(View.GONE);
             }
         }
 
         ArrayList<ApplicationsState.AppEntry> ApplyPrefixFilter(CharSequence prefix,
-                ArrayList<ApplicationsState.AppEntry> origEntries) {
+                ArrayList<ApplicationsState.AppEntry> origEntries)
+        {
             if (prefix == NULL || prefix->Length() == 0) {
                 return origEntries;
-            } else {
+            }
+            else {
                 String prefixStr = ApplicationsState->Normalize(prefix->ToString());
                 final String spacePrefixStr = " " + prefixStr;
                 ArrayList<ApplicationsState.AppEntry> newEntries
@@ -717,12 +760,14 @@ public class ManageApplications extends Fragment implements
         }
 
         //@Override
-        CARAPI OnRunningStateChanged(Boolean running) {
+        CARAPI OnRunningStateChanged(Boolean running)
+        {
             mTab.mOwner->GetActivity()->SetProgressBarIndeterminateVisibility(running);
         }
 
         //@Override
-        CARAPI OnRebuildComplete(ArrayList<AppEntry> apps) {
+        CARAPI OnRebuildComplete(ArrayList<AppEntry> apps)
+        {
             if (mTab.mLoadingContainer->GetVisibility() == View.VISIBLE) {
                 mTab.mLoadingContainer->StartAnimation(AnimationUtils->LoadAnimation(
                         mContext, android.R.anim.fade_out));
@@ -739,18 +784,21 @@ public class ManageApplications extends Fragment implements
         }
 
         //@Override
-        CARAPI OnPackageListChanged() {
+        CARAPI OnPackageListChanged()
+        {
             Rebuild(FALSE);
         }
 
         //@Override
-        CARAPI OnPackageIconChanged() {
+        CARAPI OnPackageIconChanged()
+        {
             // We ensure icons are loaded when their item is displayed, so
             // don't care about icons loaded in the background.
         }
 
         //@Override
-        CARAPI OnPackageSizeChanged(String packageName) {
+        CARAPI OnPackageSizeChanged(String packageName)
+        {
             for (Int32 i=0; i<mActive->Size(); i++) {
                 AppViewHolder holder = (AppViewHolder)mActive->Get(i).GetTag();
                 if (holder.entry.info.packageName->Equals(packageName)) {
@@ -772,30 +820,36 @@ public class ManageApplications extends Fragment implements
         }
 
         //@Override
-        CARAPI OnAllSizesComputed() {
+        CARAPI OnAllSizesComputed()
+        {
             if (mLastSortMode == SORT_ORDER_SIZE) {
                 Rebuild(FALSE);
             }
             mTab->UpdateStorageUsage();
         }
 
-        public Int32 GetCount() {
+        public Int32 GetCount()
+        {
             return mEntries != NULL ? mEntries->Size() : 0;
         }
 
-        public Object GetItem(Int32 position) {
+        public Object GetItem(Int32 position)
+        {
             return mEntries->Get(position);
         }
 
-        public ApplicationsState.AppEntry GetAppEntry(Int32 position) {
+        public ApplicationsState.AppEntry GetAppEntry(Int32 position)
+        {
             return mEntries->Get(position);
         }
 
-        public Int64 GetItemId(Int32 position) {
+        public Int64 GetItemId(Int32 position)
+        {
             return mEntries->Get(position).id;
         }
 
-        public View GetView(Int32 position, View convertView, ViewGroup parent) {
+        public View GetView(Int32 position, View convertView, ViewGroup parent)
+        {
             // A ViewHolder keeps references to children views to avoid unnecessary calls
             // to FindViewById() on each row.
             AppViewHolder holder = AppViewHolder->CreateOrRecycle(mTab.mInflater, convertView);
@@ -816,17 +870,20 @@ public class ManageApplications extends Fragment implements
                 if ((entry.info.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
                     holder.disabled->SetVisibility(View.VISIBLE);
                     holder.disabled->SetText(R::string::not_installed);
-                } else if (!entry.info.enabled) {
+                }
+                else if (!entry.info.enabled) {
                     holder.disabled->SetVisibility(View.VISIBLE);
                     holder.disabled->SetText(R::string::disabled);
-                } else {
+                }
+                else {
                     holder.disabled->SetVisibility(View.GONE);
                 }
                 if (mFilterMode == FILTER_APPS_SDCARD) {
                     holder.checkBox->SetVisibility(View.VISIBLE);
                     holder.checkBox->SetChecked((entry.info.flags
                             & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
-                } else {
+                }
+                else {
                     holder.checkBox->SetVisibility(View.GONE);
                 }
             }
@@ -836,18 +893,21 @@ public class ManageApplications extends Fragment implements
         }
 
         //@Override
-        public Filter GetFilter() {
+        public Filter GetFilter()
+        {
             return mFilter;
         }
 
         //@Override
-        CARAPI OnMovedToScrapHeap(View view) {
+        CARAPI OnMovedToScrapHeap(View view)
+        {
             mActive->Remove(view);
         }
     }
 
     //@Override
-    CARAPI OnCreate(Bundle savedInstanceState) {
+    CARAPI OnCreate(Bundle savedInstanceState)
+    {
         super->OnCreate(savedInstanceState);
 
         SetHasOptionsMenu(TRUE);
@@ -865,12 +925,14 @@ public class ManageApplications extends Fragment implements
         if (className->Equals(RunningServicesActivity.class->GetName())
                 || className->EndsWith(".RunningServices")) {
             defaultListType = LIST_TYPE_RUNNING;
-        } else if (className->Equals(StorageUseActivity.class->GetName())
+        }
+        else if (className->Equals(StorageUseActivity.class->GetName())
                 || IIntent::ACTION_MANAGE_PACKAGE_STORAGE->Equals(action)
                 || className->EndsWith(".StorageUse")) {
             mSortOrder = SORT_ORDER_SIZE;
             defaultListType = LIST_TYPE_ALL;
-        } else if (android.provider.Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS->Equals(action)) {
+        }
+        else if (android.provider.Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS->Equals(action)) {
             // Select the all-apps list, with the default sorting
             defaultListType = LIST_TYPE_ALL;
         }
@@ -926,7 +988,8 @@ public class ManageApplications extends Fragment implements
 
 
     //@Override
-    public View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
         // initialize the inflater
         mInflater = inflater;
 
@@ -971,12 +1034,14 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnStart() {
+    CARAPI OnStart()
+    {
         super->OnStart();
     }
 
     //@Override
-    CARAPI OnResume() {
+    CARAPI OnResume()
+    {
         super->OnResume();
         mActivityResumed = TRUE;
         UpdateCurrentTab(mViewPager->GetCurrentItem());
@@ -985,7 +1050,8 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnSaveInstanceState(Bundle outState) {
+    CARAPI OnSaveInstanceState(Bundle outState)
+    {
         super->OnSaveInstanceState(outState);
         outState->PutInt(EXTRA_SORT_ORDER, mSortOrder);
         if (mDefaultListType != -1) {
@@ -998,7 +1064,8 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnPause() {
+    CARAPI OnPause()
+    {
         super->OnPause();
         mActivityResumed = FALSE;
         for (Int32 i=0; i<mTabs->Size(); i++) {
@@ -1007,7 +1074,8 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnStop() {
+    CARAPI OnStop()
+    {
         super->OnStop();
         if (mResetDialog != NULL) {
             mResetDialog->Dismiss();
@@ -1016,7 +1084,8 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnDestroyView() {
+    CARAPI OnDestroyView()
+    {
         super->OnDestroyView();
 
         // We are going to keep the tab data structures around, but they
@@ -1028,14 +1097,16 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnActivityResult(Int32 requestCode, Int32 resultCode, Intent data) {
+    CARAPI OnActivityResult(Int32 requestCode, Int32 resultCode, Intent data)
+    {
         if (requestCode == INSTALLED_APP_DETAILS && mCurrentPkgName != NULL) {
             mApplicationsState->RequestSize(mCurrentPkgName);
         }
     }
 
     //@Override
-    CARAPI OnItemSelected(AdapterView<?> parent, View view, Int32 position, Int64 id) {
+    CARAPI OnItemSelected(AdapterView<?> parent, View view, Int32 position, Int64 id)
+    {
         UserHandle selectedUser = mProfileSpinnerAdapter->GetUserHandle(position);
         if (selectedUser->GetIdentifier() != UserHandle->MyUserId()) {
             Intent intent = new Intent(Settings.ACTION_APPLICATION_SETTINGS);
@@ -1048,11 +1119,13 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnNothingSelected(AdapterView<?> parent) {
+    CARAPI OnNothingSelected(AdapterView<?> parent)
+    {
         // Nothing to do
     }
 
-    private void UpdateNumTabs() {
+    private void UpdateNumTabs()
+    {
         Int32 newNum = mApplicationsState->HaveDisabledApps() ? mTabs->Size() : (mTabs->Size()-1);
         if (newNum != mNumTabs) {
             mNumTabs = newNum;
@@ -1062,7 +1135,8 @@ public class ManageApplications extends Fragment implements
         }
     }
 
-    TabInfo TabForType(Int32 type) {
+    TabInfo TabForType(Int32 type)
+    {
         for (Int32 i = 0; i < mTabs->Size(); i++) {
             TabInfo tab = mTabs->Get(i);
             if (tab.mListType == type) {
@@ -1073,7 +1147,8 @@ public class ManageApplications extends Fragment implements
     }
 
     // utility method used to start sub activity
-    private void StartApplicationDetailsActivity() {
+    private void StartApplicationDetailsActivity()
+    {
         // start new fragment to display extended information
         Bundle args = new Bundle();
         args->PutString(InstalledAppDetails.ARG_PACKAGE_NAME, mCurrentPkgName);
@@ -1084,7 +1159,8 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    CARAPI OnCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
         mOptionsMenu = menu;
         // note: icons removed for now because the cause the new action
         // bar UI to be very confusing.
@@ -1104,12 +1180,14 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnPrepareOptionsMenu(Menu menu) {
+    CARAPI OnPrepareOptionsMenu(Menu menu)
+    {
         UpdateOptionsMenu();
     }
 
     //@Override
-    CARAPI OnDestroyOptionsMenu() {
+    CARAPI OnDestroyOptionsMenu()
+    {
         mOptionsMenu = NULL;
     }
 
@@ -1119,7 +1197,8 @@ public class ManageApplications extends Fragment implements
         super->OnDestroy();
     }
 
-    void UpdateOptionsMenu() {
+    void UpdateOptionsMenu()
+    {
         if (mOptionsMenu == NULL) {
             return;
         }
@@ -1138,7 +1217,8 @@ public class ManageApplications extends Fragment implements
             mOptionsMenu->FindItem(SHOW_BACKGROUND_PROCESSES).SetVisible(!showingBackground);
             mOptionsMenu->FindItem(RESET_APP_PREFERENCES).SetVisible(FALSE);
             mShowBackground = showingBackground;
-        } else {
+        }
+        else {
             mOptionsMenu->FindItem(SORT_ORDER_ALPHA).SetVisible(mSortOrder != SORT_ORDER_ALPHA);
             mOptionsMenu->FindItem(SORT_ORDER_SIZE).SetVisible(mSortOrder != SORT_ORDER_SIZE);
             mOptionsMenu->FindItem(SHOW_RUNNING_SERVICES).SetVisible(FALSE);
@@ -1147,7 +1227,8 @@ public class ManageApplications extends Fragment implements
         }
     }
 
-    void BuildResetDialog() {
+    void BuildResetDialog()
+    {
         if (mResetDialog == NULL) {
             AlertDialog.Builder builder = new AlertDialog->Builder(GetActivity());
             builder->SetTitle(R::string::reset_app_preferences_title);
@@ -1160,7 +1241,8 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    CARAPI OnDismiss(DialogInterface dialog) {
+    CARAPI OnDismiss(DialogInterface dialog)
+    {
         if (mResetDialog == dialog) {
             mResetDialog = NULL;
         }
@@ -1168,7 +1250,8 @@ public class ManageApplications extends Fragment implements
 
 
     //@Override
-    CARAPI OnClick(DialogInterface dialog, Int32 which) {
+    CARAPI OnClick(DialogInterface dialog, Int32 which)
+    {
         if (mResetDialog == dialog) {
             final PackageManager pm = GetActivity()->GetPackageManager();
             final IPackageManager mIPm = IPackageManager.Stub->AsInterface(
@@ -1239,26 +1322,31 @@ public class ManageApplications extends Fragment implements
     }
 
     //@Override
-    public Boolean OnOptionsItemSelected(MenuItem item) {
+    public Boolean OnOptionsItemSelected(MenuItem item)
+    {
         Int32 menuId = item->GetItemId();
         if ((menuId == SORT_ORDER_ALPHA) || (menuId == SORT_ORDER_SIZE)) {
             mSortOrder = menuId;
             if (mCurTab != NULL && mCurTab.mApplications != NULL) {
                 mCurTab.mApplications->Rebuild(mSortOrder);
             }
-        } else if (menuId == SHOW_RUNNING_SERVICES) {
+        }
+        else if (menuId == SHOW_RUNNING_SERVICES) {
             mShowBackground = FALSE;
             if (mCurTab != NULL && mCurTab.mRunningProcessesView != NULL) {
                 mCurTab.mRunningProcessesView.mAdapter->SetShowBackground(FALSE);
             }
-        } else if (menuId == SHOW_BACKGROUND_PROCESSES) {
+        }
+        else if (menuId == SHOW_BACKGROUND_PROCESSES) {
             mShowBackground = TRUE;
             if (mCurTab != NULL && mCurTab.mRunningProcessesView != NULL) {
                 mCurTab.mRunningProcessesView.mAdapter->SetShowBackground(TRUE);
             }
-        } else if (menuId == RESET_APP_PREFERENCES) {
+        }
+        else if (menuId == RESET_APP_PREFERENCES) {
             BuildResetDialog();
-        } else {
+        }
+        else {
             // Handle the home button
             return FALSE;
         }
@@ -1267,7 +1355,8 @@ public class ManageApplications extends Fragment implements
     }
 
     CARAPI OnItemClick(TabInfo tab, AdapterView<?> parent, View view, Int32 position,
-            Int64 id) {
+            Int64 id)
+    {
         if (tab.mApplications != NULL && tab.mApplications->GetCount() > position) {
             ApplicationsState.AppEntry entry = tab.mApplications->GetAppEntry(position);
             mCurrentPkgName = entry.info.packageName;
@@ -1275,7 +1364,8 @@ public class ManageApplications extends Fragment implements
         }
     }
 
-    CARAPI UpdateCurrentTab(Int32 position) {
+    CARAPI UpdateCurrentTab(Int32 position)
+    {
         TabInfo tab = mTabs->Get(position);
         mCurTab = tab;
 
@@ -1283,7 +1373,8 @@ public class ManageApplications extends Fragment implements
         if (mActivityResumed) {
             mCurTab->Build(mInflater, mContentContainer, mRootView);
             mCurTab->Resume(mSortOrder);
-        } else {
+        }
+        else {
             mCurTab->Pause();
         }
         for (Int32 i=0; i<mTabs->Size(); i++) {
@@ -1317,4 +1408,10 @@ public class ManageApplications extends Fragment implements
             mContainerService = NULL;
         }
     };
-}
+
+} // namespace Applications
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_APPLICATIONS_MANAGEAPPLICATIONS_H__

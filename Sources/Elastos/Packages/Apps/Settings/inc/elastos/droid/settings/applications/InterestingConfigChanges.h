@@ -1,23 +1,36 @@
+#ifndef __ELASTOS_DROID_SETTINGS_APPLICATIONS_INTERESTINGCONFIGCHANGES_H__
+#define __ELASTOS_DROID_SETTINGS_APPLICATIONS_INTERESTINGCONFIGCHANGES_H__
 
+#include <elastos/core/Object.h>
 
-package com.android.settings.applications;
-
-using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Core::Object;
 
-class InterestingConfigChanges {
-    final Configuration mLastConfiguration = new Configuration();
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Applications {
+
+class InterestingConfigChanges
+    : public Object
+{
+public:
+    InterestingConfigChanges();
+
+    ~InterestingConfigChanges();
+
+    CARAPI_(Boolean) ApplyNewConfig(
+        /* [in] */ IResources* res);
+
+protected:
+    AutoPtr<IConfiguration> mLastConfiguration;
     Int32 mLastDensity;
+};
 
-    Boolean ApplyNewConfig(Resources res) {
-        Int32 configChanges = mLastConfiguration->UpdateFrom(res->GetConfiguration());
-        Boolean densityChanged = mLastDensity != res->GetDisplayMetrics().densityDpi;
-        if (densityChanged || (configChanges&(ActivityInfo.CONFIG_LOCALE
-                |ActivityInfo.CONFIG_UI_MODE|ActivityInfo.CONFIG_SCREEN_LAYOUT)) != 0) {
-            mLastDensity = res->GetDisplayMetrics().densityDpi;
-            return TRUE;
-        }
-        return FALSE;
-    }
-}
+} // namespace Applications
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_APPLICATIONS_INTERESTINGCONFIGCHANGES_H__
