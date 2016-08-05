@@ -2,7 +2,7 @@
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaSMSDispatcher.h"
-#include "elastos/droid/internal/telephony/cdma/SmsMessage.h"
+#include "elastos/droid/internal/telephony/cdma/CDMASmsMessage.h"
 #include "elastos/droid/internal/telephony/cdma/sms/CUserData.h"
 #include "elastos/droid/internal/telephony/CSmsApplication.h"
 #include "elastos/droid/Manifest.h"
@@ -83,7 +83,7 @@ ECode CdmaSMSDispatcher::HandleCdmaStatusReport(
         mDeliveryPendingList->Get(i, (IInterface**)&obj);
         AutoPtr<SmsTracker> tracker = (SmsTracker*)(IObject*)obj.Get();
 
-        if (tracker->mMessageRef == ((SmsMessage*)sms)->mMessageRef) {
+        if (tracker->mMessageRef == ((CDMASmsMessage*)sms)->mMessageRef) {
             // Found it.  Remove from list and broadcast.
             mDeliveryPendingList->Remove(i);
             // Update the message status (COMPLETE)
@@ -137,7 +137,7 @@ ECode CdmaSMSDispatcher::SendData(
     /* [in] */ IPendingIntent* sentIntent,
     /* [in] */ IPendingIntent* deliveryIntent)
 {
-    AutoPtr<ISmsMessageSubmitPdu> pdu = SmsMessage::GetSubmitPdu(
+    AutoPtr<ISmsMessageSubmitPdu> pdu = CDMASmsMessage::GetSubmitPdu(
             scAddr, destAddr, destPort, origPort, data, (deliveryIntent != NULL));
     AutoPtr<IHashMap> map;
 // TODO: Need SMSDispatcher::GetSmsTrackerMap
@@ -163,7 +163,7 @@ ECode CdmaSMSDispatcher::SendText(
     /* [in] */ Boolean isExpectMore,
     /* [in] */ Int32 validityPeriod)
 {
-    AutoPtr<ISmsMessageSubmitPdu> pdu = SmsMessage::GetSubmitPdu(
+    AutoPtr<ISmsMessageSubmitPdu> pdu = CDMASmsMessage::GetSubmitPdu(
             scAddr, destAddr, text, (deliveryIntent != NULL), NULL, priority);
     if (pdu != NULL) {
         if (messageUri == NULL) {
@@ -215,7 +215,7 @@ ECode CdmaSMSDispatcher::CalculateLength(
     /* [out] */ IGsmAlphabetTextEncodingDetails** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = SmsMessage::CalculateLength(messageBody, use7bitOnly);
+    *result = CDMASmsMessage::CalculateLength(messageBody, use7bitOnly);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -262,7 +262,7 @@ ECode CdmaSMSDispatcher::SendNewSubmitPdu(
      * last message fragment, this will result in only one
      * callback to the sender when that last fragment delivery
      * has been acknowledged. */
-    AutoPtr<ISmsMessageSubmitPdu> submitPdu = SmsMessage::GetSubmitPdu(destinationAddress,
+    AutoPtr<ISmsMessageSubmitPdu> submitPdu = CDMASmsMessage::GetSubmitPdu(destinationAddress,
             uData, (deliveryIntent != NULL) && lastPart, priority);
 
     AutoPtr<IHashMap> map;

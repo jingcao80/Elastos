@@ -22,27 +22,6 @@ class SmsCbLocation
     , public ISmsCbLocation
     , public IParcelable
 {
-//private:
-//    class InnerParcelableCreator
-//        : public Object
-//        , public Parcelable::Creator<SmsCbLocation>
-//    {
-//    public:
-//        InnerParcelableCreator(
-//            /* [in] */ SmsCbLocation* owner);
-//
-//        // @Override
-//        CARAPI_(AutoPtr<SmsCbLocation>) CreateFromParcel(
-//            /* [in] */ IParcel* in);
-//
-//        // @Override
-//        CARAPI_(AutoPtr< ArrayOf< AutoPtr<SmsCbLocation> > >) NewArray(
-//            /* [in] */ Int32 size);
-//
-//    private:
-//        SmsCbLocation* mOwner;
-//    };
-
 public:
     CAR_INTERFACE_DECL();
 
@@ -67,12 +46,6 @@ public:
         /* [in] */ const String& plmn,
         /* [in] */ Int32 lac,
         /* [in] */ Int32 cid);
-
-    /**
-      * Initialize the object from a Parcel.
-      */
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
 
     CARAPI constructor();
 
@@ -146,13 +119,6 @@ public:
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
-
-    /**
-      * Describe the kinds of special objects contained in the marshalled representation.
-      * @return a bitmask indicating this Parcelable contains no special objects
-      */
-    // @Override
-    //CARAPI_(Int32) DescribeContents();
 
 private:
     /** The PLMN. Note that this field may be an empty string, but isn't allowed to be null. */

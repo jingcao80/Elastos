@@ -9,13 +9,13 @@
 #include "elastos/droid/internal/telephony/CWspTypeDecoder.h"
 #include "elastos/droid/internal/telephony/InboundSmsTracker.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
-#include "elastos/droid/internal/telephony/cdma/SmsMessage.h"
+#include "elastos/droid/internal/telephony/cdma/CDMASmsMessage.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 
 using Elastos::Droid::App::IActivity;
-using Elastos::Droid::Internal::Telephony::Cdma::SmsMessage;
+using Elastos::Droid::Internal::Telephony::Cdma::CDMASmsMessage;
 using Elastos::Droid::Internal::Telephony::Cdma::Sms::ISmsEnvelope;
 using Elastos::Droid::Internal::Telephony::InboundSmsTracker;
 using Elastos::Droid::Internal::Telephony::PhoneBase;
@@ -70,7 +70,7 @@ Int32 CdmaInboundSmsHandler::DispatchMessageRadioSpecific(
         return IActivity::RESULT_OK;
     }
 
-    AutoPtr<SmsMessage> sms = (SmsMessage*)smsb;
+    AutoPtr<CDMASmsMessage> sms = (CDMASmsMessage*)smsb;
     Int32 type;
     sms->GetMessageType(&type);
     Boolean isBroadcastType = (ISmsEnvelope::MESSAGE_TYPE_BROADCAST == type);
@@ -234,7 +234,7 @@ void CdmaInboundSmsHandler::HandleVoicemailTeleservice(
     /* [in] */ ISmsMessage* sms)
 {
     Int32 voicemailCount;
-    ((SmsMessage*)sms)->GetNumOfVoicemails(&voicemailCount);
+    ((CDMASmsMessage*)sms)->GetNumOfVoicemails(&voicemailCount);
     if (DBG) Log(String("Voicemail count=") + StringUtils::ToString(voicemailCount));
 
     IPhone::Probe(mPhone)->SetVoiceMessageWaiting(1, voicemailCount);

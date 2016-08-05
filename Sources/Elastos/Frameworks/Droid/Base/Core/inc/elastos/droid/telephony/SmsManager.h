@@ -5,30 +5,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package android.telephony;
-// import android.app.ActivityThread;
-// import android.app.PendingIntent;
-// import android.content.ContentValues;
-// import android.content.Context;
-// import android.content.Intent;
-// import android.net.Uri;
-// import android.os.Bundle;
-// import android.os.RemoteException;
-// import android.os.ServiceManager;
-// import android.provider.Telephony;
-// import android.telephony.SubscriptionManager;
-// import android.text.TextUtils;
-// import android.util.ArrayMap;
-// import android.util.Log;
-// import com.android.internal.telephony.ISms;
-// import com.android.internal.telephony.SmsRawData;
-// import com.android.internal.telephony.IMms;
-// import com.android.internal.telephony.uicc.IccConstants;
-// import java.util.ArrayList;
-// import java.util.Arrays;
-// import java.util.List;
-// import java.util.Map;
-
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IUri;
@@ -994,7 +970,8 @@ private:
       * Returns the ISms service, or throws an UnsupportedOperationException if
       * the service does not exist.
       */
-    static CARAPI_(AutoPtr<IISms>) GetISmsServiceOrThrow();
+    static CARAPI GetISmsServiceOrThrow(
+      /* [out] */ IISms** result);
 
     static CARAPI_(AutoPtr<IISms>) GetISmsService();
 

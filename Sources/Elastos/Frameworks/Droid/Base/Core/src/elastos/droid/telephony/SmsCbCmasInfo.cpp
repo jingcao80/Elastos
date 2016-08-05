@@ -1,40 +1,12 @@
 
 #include "elastos/droid/telephony/SmsCbCmasInfo.h"
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
-
-////=====================================================================
-////                SmsCbCmasInfo::InnerParcelableCreator
-////=====================================================================
-//SmsCbCmasInfo::InnerParcelableCreator::InnerParcelableCreator(
-//    /* [in] */ SmsCbCmasInfo* owner)
-//    : mOwner(owner)
-//{
-//    // ==================before translated======================
-//    // mOwner = owner;
-//}
-//
-//AutoPtr<SmsCbCmasInfo> SmsCbCmasInfo::InnerParcelableCreator::CreateFromParcel(
-//    /* [in] */ IParcel* in)
-//{
-//    // ==================before translated======================
-//    // return new SmsCbCmasInfo(in);
-//    assert(0);
-//    AutoPtr<SmsCbCmasInfo> empty;
-//    return empty;
-//}
-//
-//AutoPtr< ArrayOf< AutoPtr<SmsCbCmasInfo> > > SmsCbCmasInfo::InnerParcelableCreator::NewArray(
-//    /* [in] */ Int32 size)
-//{
-//    // ==================before translated======================
-//    // return new SmsCbCmasInfo[size];
-//    assert(0);
-//    AutoPtr< ArrayOf< AutoPtr<SmsCbCmasInfo> > > empty;
-//    return empty;
-//}
 
 //=====================================================================
 //                            SmsCbCmasInfo
@@ -42,6 +14,12 @@ namespace Telephony {
 CAR_INTERFACE_IMPL_2(SmsCbCmasInfo, Object, ISmsCbCmasInfo, IParcelable);
 
 SmsCbCmasInfo::SmsCbCmasInfo()
+    : mMessageClass(0)
+    , mCategory(0)
+    , mResponseType(0)
+    , mSeverity(0)
+    , mUrgency(0)
+    , mCertainty(0)
 {
 }
 
@@ -53,26 +31,12 @@ ECode SmsCbCmasInfo::constructor(
     /* [in] */ Int32 urgency,
     /* [in] */ Int32 certainty)
 {
-    // ==================before translated======================
-    // mMessageClass = messageClass;
-    // mCategory = category;
-    // mResponseType = responseType;
-    // mSeverity = severity;
-    // mUrgency = urgency;
-    // mCertainty = certainty;
-    return NOERROR;
-}
-
-ECode SmsCbCmasInfo::constructor(
-    /* [in] */ IParcel* in)
-{
-    // ==================before translated======================
-    // mMessageClass = in.readInt();
-    // mCategory = in.readInt();
-    // mResponseType = in.readInt();
-    // mSeverity = in.readInt();
-    // mUrgency = in.readInt();
-    // mCertainty = in.readInt();
+    mMessageClass = messageClass;
+    mCategory = category;
+    mResponseType = responseType;
+    mSeverity = severity;
+    mUrgency = urgency;
+    mCertainty = certainty;
     return NOERROR;
 }
 
@@ -85,21 +49,24 @@ ECode SmsCbCmasInfo::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     VALIDATE_NOT_NULL(dest);
-    // ==================before translated======================
-    // dest.writeInt(mMessageClass);
-    // dest.writeInt(mCategory);
-    // dest.writeInt(mResponseType);
-    // dest.writeInt(mSeverity);
-    // dest.writeInt(mUrgency);
-    // dest.writeInt(mCertainty);
-    assert(0);
+    dest->WriteInt32(mMessageClass);
+    dest->WriteInt32(mCategory);
+    dest->WriteInt32(mResponseType);
+    dest->WriteInt32(mSeverity);
+    dest->WriteInt32(mUrgency);
+    dest->WriteInt32(mCertainty);
     return NOERROR;
 }
 
 ECode SmsCbCmasInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0);
+    source->ReadInt32(&mMessageClass);
+    source->ReadInt32(&mCategory);
+    source->ReadInt32(&mResponseType);
+    source->ReadInt32(&mSeverity);
+    source->ReadInt32(&mUrgency);
+    source->ReadInt32(&mCertainty);
     return NOERROR;
 }
 
@@ -108,9 +75,7 @@ ECode SmsCbCmasInfo::GetMessageClass(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMessageClass;
-    assert(0);
+    *result = mMessageClass;
     return NOERROR;
 }
 
@@ -118,9 +83,7 @@ ECode SmsCbCmasInfo::GetCategory(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCategory;
-    assert(0);
+    *result = mCategory;
     return NOERROR;
 }
 
@@ -128,9 +91,7 @@ ECode SmsCbCmasInfo::GetResponseType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mResponseType;
-    assert(0);
+    *result = mResponseType;
     return NOERROR;
 }
 
@@ -138,9 +99,7 @@ ECode SmsCbCmasInfo::GetSeverity(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSeverity;
-    assert(0);
+    *result = mSeverity;
     return NOERROR;
 }
 
@@ -148,9 +107,7 @@ ECode SmsCbCmasInfo::GetUrgency(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mUrgency;
-    assert(0);
+    *result = mUrgency;
     return NOERROR;
 }
 
@@ -158,30 +115,22 @@ ECode SmsCbCmasInfo::GetCertainty(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCertainty;
-    assert(0);
+    *result = mCertainty;
     return NOERROR;
 }
 
 ECode SmsCbCmasInfo::ToString(
-    /* [out] */ String* str)
+    /* [out] */ String* result)
 {
-    // ==================before translated======================
-    // return "SmsCbCmasInfo{messageClass=" + mMessageClass + ", category=" + mCategory
-    //         + ", responseType=" + mResponseType + ", severity=" + mSeverity
-    //         + ", urgency=" + mUrgency + ", certainty=" + mCertainty + '}';
-    assert(0);
+    VALIDATE_NOT_NULL(result)
+    *result = String("SmsCbCmasInfo{messageClass=") + StringUtils::ToString(mMessageClass)
+            + ", category=" + StringUtils::ToString(mCategory)
+            + ", responseType=" + StringUtils::ToString(mResponseType)
+            + ", severity=" + StringUtils::ToString(mSeverity)
+            + ", urgency=" + StringUtils::ToString(mUrgency)
+            + ", certainty=" + StringUtils::ToString(mCertainty) + '}';
     return NOERROR;
 }
-
-//Int32 SmsCbCmasInfo::DescribeContents()
-//{
-//    // ==================before translated======================
-//    // return 0;
-//    assert(0);
-//    return 0;
-//}
 
 } // namespace Telephony
 } // namespace Droid

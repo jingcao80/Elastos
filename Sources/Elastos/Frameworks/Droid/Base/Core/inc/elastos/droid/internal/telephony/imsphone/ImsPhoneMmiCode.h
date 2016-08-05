@@ -6,31 +6,6 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/AsyncResult.h"
 
-// import android.content.res.Resources;
-// import android.os.Bundle;
-// import android.telephony.PhoneNumberUtils;
-// import android.text.SpannableStringBuilder;
-// import android.text.TextUtils;
-// import android.telephony.Rlog;
-// import com.android.ims.ImsException;
-// import com.android.ims.ImsReasonInfo;
-// import com.android.ims.ImsSsInfo;
-// import com.android.ims.ImsUtInterface;
-// import com.android.internal.telephony.CommandException;
-// import com.android.internal.telephony.CallStateException;
-// import com.android.internal.telephony.CommandsInterface;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_NONE;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_VOICE;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_DATA;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_FAX;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_SMS;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_DATA_SYNC;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_DATA_ASYNC;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_PACKET;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_PAD;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_MAX;
-// import java.util.regex.Matcher;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::IMmiCodeState;
 using Elastos::Droid::Internal::Telephony::IPhone;

@@ -4,7 +4,7 @@
 #include "elastos/droid/internal/telephony/SmsMessageBase.h"
 #include "elastos/droid/internal/telephony/cdma/CCdmaSMSDispatcher.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaInboundSmsHandler.h"
-#include "elastos/droid/internal/telephony/cdma/SmsMessage.h"
+#include "elastos/droid/internal/telephony/cdma/CDMASmsMessage.h"
 #include "elastos/droid/internal/telephony/gsm/CGsmSMSDispatcher.h"
 #include "elastos/droid/internal/telephony/gsm/CSmsMessage.h"
 #include "elastos/droid/internal/telephony/gsm/GsmInboundSmsHandler.h"
@@ -482,7 +482,7 @@ ECode ImsSMSDispatcher::SendRetrySms(
 
         if (IsCdmaFormat(newFormat)) {
             Logger::D(TAG, "old format (gsm) ==> new format (cdma)");
-            pdu = Elastos::Droid::Internal::Telephony::Cdma::SmsMessage::GetSubmitPdu(
+            pdu = Elastos::Droid::Internal::Telephony::Cdma::CDMASmsMessage::GetSubmitPdu(
                     scAddr, destAddr, text, (tracker->mDeliveryIntent != NULL), NULL);
             Boolean tmp = FALSE;
             ShouldSendSmsOverIms(&tmp);
@@ -518,7 +518,7 @@ ECode ImsSMSDispatcher::SendRetrySms(
 
         if (IsCdmaFormat(newFormat)) {
             Logger::D(TAG, "old format (gsm) ==> new format (cdma)");
-            pdu = Elastos::Droid::Internal::Telephony::Cdma::SmsMessage::GetSubmitPdu(
+            pdu = Elastos::Droid::Internal::Telephony::Cdma::CDMASmsMessage::GetSubmitPdu(
                         scAddr, destAddr, intValue, data,
                         (tracker->mDeliveryIntent != NULL));
             Boolean tmp = FALSE;

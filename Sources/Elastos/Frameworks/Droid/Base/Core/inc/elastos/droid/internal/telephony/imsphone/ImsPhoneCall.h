@@ -5,15 +5,6 @@
 #include "elastos/core/Object.h"
 #include "elastos/droid/internal/telephony/Call.h"
 
-// import android.telephony.Rlog;
-// import android.telephony.DisconnectCause;
-// import com.android.internal.annotations.VisibleForTesting;
-// import com.android.internal.telephony.Call;
-// import com.android.internal.telephony.CallStateException;
-// import com.android.ims.ImsCallProfile;
-// import com.android.ims.ImsException;
-// import com.android.ims.ImsStreamMediaProfile;
-
 //TODO using Elastos::Droid::Ims::IImsCall;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::IConnection;

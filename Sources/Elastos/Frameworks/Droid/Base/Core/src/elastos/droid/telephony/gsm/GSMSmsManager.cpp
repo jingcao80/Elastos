@@ -1,5 +1,8 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/telephony/gsm/GSMSmsManager.h"
+#include "elastos/droid/telephony/SmsManager.h"
+
+using Elastos::Droid::Telephony::SmsManager;
 
 namespace Elastos {
 namespace Droid {
@@ -11,22 +14,19 @@ namespace Gsm {
 //=====================================================================
 AutoPtr<GSMSmsManager> GSMSmsManager::sInstance;
 
+CAR_INTERFACE_IMPL(GSMSmsManager, Object, ISmsManager)
+
 AutoPtr<GSMSmsManager> GSMSmsManager::GetDefault()
 {
-    // ==================before translated======================
-    // if (sInstance == null) {
-    //     sInstance = new GSMSmsManager();
-    // }
-    // return sInstance;
-    assert(0);
-    AutoPtr<GSMSmsManager> empty;
-    return empty;
+    if (sInstance == NULL) {
+        sInstance = new GSMSmsManager();
+    }
+    return sInstance;
 }
 
 GSMSmsManager::GSMSmsManager()
 {
-    // ==================before translated======================
-    // mSmsMgrProxy = android.telephony.GSMSmsManager.getDefault();
+    mSmsMgrProxy = SmsManager::GetDefault();
 }
 
 ECode GSMSmsManager::SendTextMessage(
@@ -36,11 +36,8 @@ ECode GSMSmsManager::SendTextMessage(
     /* [in] */ IPendingIntent* sentIntent,
     /* [in] */ IPendingIntent* deliveryIntent)
 {
-    // ==================before translated======================
-    // mSmsMgrProxy.sendTextMessage(destinationAddress, scAddress, text,
-    //         sentIntent, deliveryIntent);
-    assert(0);
-    return NOERROR;
+    return mSmsMgrProxy->SendTextMessage(destinationAddress, scAddress, text,
+            sentIntent, deliveryIntent);
 }
 
 ECode GSMSmsManager::DivideMessage(
@@ -48,11 +45,7 @@ ECode GSMSmsManager::DivideMessage(
     /* [out] */ IArrayList** result)//String
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mSmsMgrProxy.divideMessage(text);
-    assert(0);
-    return NOERROR;
+    return mSmsMgrProxy->DivideMessage(text, result);
 }
 
 ECode GSMSmsManager::SendMultipartTextMessage(
@@ -62,11 +55,8 @@ ECode GSMSmsManager::SendMultipartTextMessage(
     /* [in] */ IArrayList* sentIntents,//IPendingIntent
     /* [in] */ IArrayList* deliveryIntents)//IPendingIntent
 {
-    // ==================before translated======================
-    // mSmsMgrProxy.sendMultipartTextMessage(destinationAddress, scAddress, parts,
-    //         sentIntents, deliveryIntents);
-    assert(0);
-    return NOERROR;
+    return mSmsMgrProxy->SendMultipartTextMessage(
+            destinationAddress, scAddress, parts, sentIntents, deliveryIntents);
 }
 
 ECode GSMSmsManager::SendDataMessage(
@@ -77,11 +67,8 @@ ECode GSMSmsManager::SendDataMessage(
     /* [in] */ IPendingIntent* sentIntent,
     /* [in] */ IPendingIntent* deliveryIntent)
 {
-    // ==================before translated======================
-    // mSmsMgrProxy.sendDataMessage(destinationAddress, scAddress, destinationPort,
-    //         data, sentIntent, deliveryIntent);
-    assert(0);
-    return NOERROR;
+    return mSmsMgrProxy->SendDataMessage(destinationAddress,
+            scAddress, destinationPort, data, sentIntent, deliveryIntent);
 }
 
 ECode GSMSmsManager::CopyMessageToSim(
@@ -91,11 +78,7 @@ ECode GSMSmsManager::CopyMessageToSim(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mSmsMgrProxy.copyMessageToIcc(smsc, pdu, status);
-    assert(0);
-    return NOERROR;
+    return mSmsMgrProxy->CopyMessageToIcc(smsc, pdu, status, result);
 }
 
 ECode GSMSmsManager::DeleteMessageFromSim(
@@ -103,11 +86,7 @@ ECode GSMSmsManager::DeleteMessageFromSim(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mSmsMgrProxy.deleteMessageFromIcc(messageIndex);
-    assert(0);
-    return NOERROR;
+    return mSmsMgrProxy->DeleteMessageFromIcc(messageIndex, result);
 }
 
 ECode GSMSmsManager::UpdateMessageOnSim(
@@ -117,22 +96,15 @@ ECode GSMSmsManager::UpdateMessageOnSim(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mSmsMgrProxy.updateMessageOnIcc(messageIndex, newStatus, pdu);
-    assert(0);
-    return NOERROR;
+    return mSmsMgrProxy->UpdateMessageOnIcc(
+            messageIndex, newStatus, pdu, result);
 }
 
 ECode GSMSmsManager::GetAllMessagesFromSim(
     /* [out] */ IArrayList** result)//SmsMessage
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return android.telephony.SmsManager.getDefault().getAllMessagesFromIcc();
-    assert(0);
-    return NOERROR;
+    return SmsManager::GetDefault()->GetAllMessagesFromIcc(result);
 }
 
 } // namespace Gsm

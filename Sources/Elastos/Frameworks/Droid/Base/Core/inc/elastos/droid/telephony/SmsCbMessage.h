@@ -56,27 +56,6 @@ class SmsCbMessage
     , public ISmsCbMessage
     , public IParcelable
 {
-//private:
-//    class InnerParcelableCreator
-//        : public Object
-//        , public Parcelable::Creator<SmsCbMessage>
-//    {
-//    public:
-//        InnerParcelableCreator(
-//            /* [in] */ SmsCbMessage* owner);
-//
-//        // @Override
-//        CARAPI_(AutoPtr<SmsCbMessage>) CreateFromParcel(
-//            /* [in] */ IParcel* in);
-//
-//        // @Override
-//        CARAPI_(AutoPtr< ArrayOf< AutoPtr<SmsCbMessage> > >) NewArray(
-//            /* [in] */ Int32 size);
-//
-//    private:
-//        SmsCbMessage* mOwner;
-//    };
-//
 public:
     CAR_INTERFACE_DECL();
 
@@ -103,16 +82,8 @@ public:
 
     CARAPI constructor();
 
-    /**
-      * Flatten this object into a Parcel.
-      *
-      * @param dest  The Parcel in which the object should be written.
-      * @param flags Additional flags about how the object should be written (ignored).
-      */
-    // @Override
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
-
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
@@ -239,13 +210,6 @@ public:
     // @Override
     CARAPI ToString(
         /* [out] */ String* str);
-
-    /**
-      * Describe the kinds of special objects contained in the marshalled representation.
-      * @return a bitmask indicating this Parcelable contains no special objects
-      */
-    // @Override
-    //CARAPI_(Int32) DescribeContents();
 
 protected:
     static const String LOGTAG;

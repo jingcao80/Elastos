@@ -1,40 +1,12 @@
 
 #include "elastos/droid/telephony/SmsCbMessage.h"
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
-
-////=====================================================================
-////                 SmsCbMessage::InnerParcelableCreator
-////=====================================================================
-//SmsCbMessage::InnerParcelableCreator::InnerParcelableCreator(
-//    /* [in] */ SmsCbMessage* owner)
-//    : mOwner(owner)
-//{
-//    // ==================before translated======================
-//    // mOwner = owner;
-//}
-//
-//AutoPtr<SmsCbMessage> SmsCbMessage::InnerParcelableCreator::CreateFromParcel(
-//    /* [in] */ IParcel* in)
-//{
-//    // ==================before translated======================
-//    // return new SmsCbMessage(in);
-//    assert(0);
-//    AutoPtr<SmsCbMessage> empty;
-//    return empty;
-//}
-//
-//AutoPtr< ArrayOf< AutoPtr<SmsCbMessage> > > SmsCbMessage::InnerParcelableCreator::NewArray(
-//    /* [in] */ Int32 size)
-//{
-//    // ==================before translated======================
-//    // return new SmsCbMessage[size];
-//    assert(0);
-//    AutoPtr< ArrayOf< AutoPtr<SmsCbMessage> > > empty;
-//    return empty;
-//}
 
 //=====================================================================
 //                             SmsCbMessage
@@ -44,6 +16,11 @@ CAR_INTERFACE_IMPL_2(SmsCbMessage, Object, ISmsCbMessage, IParcelable);
 const String SmsCbMessage::LOGTAG("SMSCB");
 
 SmsCbMessage::SmsCbMessage()
+    : mMessageFormat(0)
+    , mGeographicalScope(0)
+    , mSerialNumber(0)
+    , mServiceCategory(0)
+    , mPriority(0)
 {
 }
 
@@ -59,50 +36,16 @@ ECode SmsCbMessage::constructor(
     /* [in] */ ISmsCbEtwsInfo* etwsWarningInfo,
     /* [in] */ ISmsCbCmasInfo* cmasWarningInfo)
 {
-    // ==================before translated======================
-    // mMessageFormat = messageFormat;
-    // mGeographicalScope = geographicalScope;
-    // mSerialNumber = serialNumber;
-    // mLocation = location;
-    // mServiceCategory = serviceCategory;
-    // mLanguage = language;
-    // mBody = body;
-    // mPriority = priority;
-    // mEtwsWarningInfo = etwsWarningInfo;
-    // mCmasWarningInfo = cmasWarningInfo;
-    return NOERROR;
-}
-
-ECode SmsCbMessage::constructor(
-    /* [in] */ IParcel* in)
-{
-    // ==================before translated======================
-    // mMessageFormat = in.readInt();
-    // mGeographicalScope = in.readInt();
-    // mSerialNumber = in.readInt();
-    // mLocation = new SmsCbLocation(in);
-    // mServiceCategory = in.readInt();
-    // mLanguage = in.readString();
-    // mBody = in.readString();
-    // mPriority = in.readInt();
-    // int type = in.readInt();
-    // switch (type) {
-    //     case 'E':
-    //         // unparcel ETWS warning information
-    //         mEtwsWarningInfo = new SmsCbEtwsInfo(in);
-    //         mCmasWarningInfo = null;
-    //         break;
-    //
-    //     case 'C':
-    //         // unparcel CMAS warning information
-    //         mEtwsWarningInfo = null;
-    //         mCmasWarningInfo = new SmsCbCmasInfo(in);
-    //         break;
-    //
-    //     default:
-    //         mEtwsWarningInfo = null;
-    //         mCmasWarningInfo = null;
-    // }
+    mMessageFormat = messageFormat;
+    mGeographicalScope = geographicalScope;
+    mSerialNumber = serialNumber;
+    mLocation = location;
+    mServiceCategory = serviceCategory;
+    mLanguage = language;
+    mBody = body;
+    mPriority = priority;
+    mEtwsWarningInfo = etwsWarningInfo;
+    mCmasWarningInfo = cmasWarningInfo;
     return NOERROR;
 }
 
@@ -115,35 +58,42 @@ ECode SmsCbMessage::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     VALIDATE_NOT_NULL(dest);
-    // ==================before translated======================
-    // dest.writeInt(mMessageFormat);
-    // dest.writeInt(mGeographicalScope);
-    // dest.writeInt(mSerialNumber);
-    // mLocation.writeToParcel(dest, flags);
-    // dest.writeInt(mServiceCategory);
-    // dest.writeString(mLanguage);
-    // dest.writeString(mBody);
-    // dest.writeInt(mPriority);
-    // if (mEtwsWarningInfo != null) {
-    //     // parcel ETWS warning information
-    //     dest.writeInt('E');
-    //     mEtwsWarningInfo.writeToParcel(dest, flags);
-    // } else if (mCmasWarningInfo != null) {
-    //     // parcel CMAS warning information
-    //     dest.writeInt('C');
-    //     mCmasWarningInfo.writeToParcel(dest, flags);
-    // } else {
-    //     // no ETWS or CMAS warning information
-    //     dest.writeInt('0');
-    // }
-    assert(0);
+    dest->WriteInt32(mMessageFormat);
+    dest->WriteInt32(mGeographicalScope);
+    dest->WriteInt32(mSerialNumber);
+    dest->WriteInterfacePtr(mLocation);
+    dest->WriteInt32(mServiceCategory);
+    dest->WriteString(mLanguage);
+    dest->WriteString(mBody);
+    dest->WriteInt32(mPriority);
+    dest->WriteInterfacePtr(mEtwsWarningInfo);
+    dest->WriteInterfacePtr(mCmasWarningInfo);
     return NOERROR;
 }
 
 ECode SmsCbMessage::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0);
+    source->ReadInt32(&mMessageFormat);
+    source->ReadInt32(&mGeographicalScope);
+    source->ReadInt32(&mSerialNumber);
+
+    AutoPtr<IInterface> obj;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mLocation = ISmsCbLocation::Probe(obj);
+
+    source->ReadInt32(&mServiceCategory);
+    source->ReadString(&mLanguage);
+    source->ReadString(&mBody);
+    source->ReadInt32(&mPriority);
+
+    obj = NULL;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mEtwsWarningInfo = ISmsCbEtwsInfo::Probe(obj);
+
+    obj = NULL;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mCmasWarningInfo = ISmsCbCmasInfo::Probe(obj);
     return NOERROR;
 }
 
@@ -151,9 +101,7 @@ ECode SmsCbMessage::GetGeographicalScope(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mGeographicalScope;
-    assert(0);
+    *result = mGeographicalScope;
     return NOERROR;
 }
 
@@ -161,9 +109,7 @@ ECode SmsCbMessage::GetSerialNumber(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSerialNumber;
-    assert(0);
+    *result = mSerialNumber;
     return NOERROR;
 }
 
@@ -171,9 +117,8 @@ ECode SmsCbMessage::GetLocation(
     /* [out] */ ISmsCbLocation** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mLocation;
-    assert(0);
+    *result = mLocation;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -181,9 +126,7 @@ ECode SmsCbMessage::GetServiceCategory(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mServiceCategory;
-    assert(0);
+    *result = mServiceCategory;
     return NOERROR;
 }
 
@@ -191,9 +134,7 @@ ECode SmsCbMessage::GetLanguageCode(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mLanguage;
-    assert(0);
+    *result = mLanguage;
     return NOERROR;
 }
 
@@ -201,9 +142,7 @@ ECode SmsCbMessage::GetMessageBody(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mBody;
-    assert(0);
+    *result = mBody;
     return NOERROR;
 }
 
@@ -211,9 +150,7 @@ ECode SmsCbMessage::GetMessageFormat(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMessageFormat;
-    assert(0);
+    *result = mMessageFormat;
     return NOERROR;
 }
 
@@ -221,9 +158,7 @@ ECode SmsCbMessage::GetMessagePriority(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPriority;
-    assert(0);
+    *result = mPriority;
     return NOERROR;
 }
 
@@ -231,9 +166,8 @@ ECode SmsCbMessage::GetEtwsWarningInfo(
     /* [out] */ ISmsCbEtwsInfo** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mEtwsWarningInfo;
-    assert(0);
+    *result = mEtwsWarningInfo;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -241,9 +175,8 @@ ECode SmsCbMessage::GetCmasWarningInfo(
     /* [out] */ ISmsCbCmasInfo** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCmasWarningInfo;
-    assert(0);
+    *result = mCmasWarningInfo;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -251,9 +184,7 @@ ECode SmsCbMessage::IsEmergencyMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPriority == MESSAGE_PRIORITY_EMERGENCY;
-    assert(0);
+    *result = mPriority == MESSAGE_PRIORITY_EMERGENCY;
     return NOERROR;
 }
 
@@ -261,9 +192,7 @@ ECode SmsCbMessage::IsEtwsMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mEtwsWarningInfo != null;
-    assert(0);
+    *result = mEtwsWarningInfo != NULL;
     return NOERROR;
 }
 
@@ -271,33 +200,27 @@ ECode SmsCbMessage::IsCmasMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCmasWarningInfo != null;
-    assert(0);
+    *result = mCmasWarningInfo != NULL;
     return NOERROR;
 }
 
 ECode SmsCbMessage::ToString(
-    /* [out] */ String* str)
+    /* [out] */ String* result)
 {
-    // ==================before translated======================
-    // return "SmsCbMessage{geographicalScope=" + mGeographicalScope + ", serialNumber="
-    //         + mSerialNumber + ", location=" + mLocation + ", serviceCategory="
-    //         + mServiceCategory + ", language=" + mLanguage + ", body=" + mBody
-    //         + ", priority=" + mPriority
-    //         + (mEtwsWarningInfo != null ? (", " + mEtwsWarningInfo.toString()) : "")
-    //         + (mCmasWarningInfo != null ? (", " + mCmasWarningInfo.toString()) : "") + '}';
-    assert(0);
+    *result = String("SmsCbMessage{geographicalScope=")
+            + StringUtils::ToString(mGeographicalScope)
+            + ", serialNumber=" + StringUtils::ToString(mSerialNumber)
+            + ", location=" + TO_CSTR(mLocation)
+            + ", serviceCategory=" + StringUtils::ToString(mServiceCategory)
+            + ", language=" + mLanguage + ", body=" + mBody
+            + ", priority=" + StringUtils::ToString(mPriority)
+            + (mEtwsWarningInfo != NULL ?
+            (String(", ") + Object::ToString(mEtwsWarningInfo)) : "")
+            + (mCmasWarningInfo != NULL ?
+            (String(", ") + Object::ToString(mCmasWarningInfo)) : "")
+            + '}';
     return NOERROR;
 }
-
-//Int32 SmsCbMessage::DescribeContents()
-//{
-//    // ==================before translated======================
-//    // return 0;
-//    assert(0);
-//    return 0;
-//}
 
 } // namespace Telephony
 } // namespace Droid
