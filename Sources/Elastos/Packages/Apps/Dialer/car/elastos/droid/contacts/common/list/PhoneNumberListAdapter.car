@@ -1,0 +1,67 @@
+
+module
+{
+
+    using interface Elastos.Droid.Database.ICursor;
+    using interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.Droid.Contacts.Common.List.IIndexerListAdapter
+     * interface Elastos.Droid.Contacts.Common.List.IContactEntryListAdapter
+     * interface Elastos.Droid.Widget.ISectionIndexer
+     * interface Elastos.Droid.common.Widget.ICompositeCursorAdapter
+     * interface Elastos.Droid.Widget.IBaseAdapter
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     */
+    interface IPhoneNumberListAdapter {
+
+        GetPhoneNumber(
+            [in] Int32 position,
+            [out] String* phoneNumber);
+
+        /**
+         * Builds a {@link Data#CONTENT_URI} for the given cursor position.
+         *
+         * @return Uri for the data. may be null if the cursor is not ready.
+         */
+        GetDataUri(
+            [in] Int32 position,
+            [out] IUri* url);
+
+        GetDataUri(
+            [in] Int32 partitionIndex,
+            [in] ICursor* cursor,
+            [out] IUri* url);
+
+        SetPhotoPosition(
+            [in] PhotoPosition photoPosition);
+
+        GetPhotoPosition(
+            [out] PhotoPosition* photoPosition);
+
+        SetUseCallableUri(
+            [in] Boolean useCallableUri);
+
+        UsesCallableUri(
+            [out] Boolean* useCallableUri);
+
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}
+
