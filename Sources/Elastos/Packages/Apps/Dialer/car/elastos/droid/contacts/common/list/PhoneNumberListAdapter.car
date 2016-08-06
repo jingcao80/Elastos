@@ -36,12 +36,12 @@ module
          */
         GetDataUri(
             [in] Int32 position,
-            [out] IUri* url);
+            [out] IUri** url);
 
         GetDataUri(
             [in] Int32 partitionIndex,
             [in] ICursor* cursor,
-            [out] IUri* url);
+            [out] IUri** url);
 
         SetPhotoPosition(
             [in] PhotoPosition photoPosition);
