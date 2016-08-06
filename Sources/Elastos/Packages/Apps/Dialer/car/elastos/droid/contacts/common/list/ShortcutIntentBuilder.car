@@ -1,0 +1,34 @@
+module
+{
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * Listener interface.
+     */
+    interface IOnShortcutIntentCreatedListener {
+        /**
+         * Callback for shortcut intent creation.
+         *
+         * @param uri the original URI for which the shortcut intent has been
+         *            created.
+         * @param shortcutIntent resulting shortcut intent.
+         */
+        OnShortcutIntentCreated(
+            [in] IUri* uri,
+            [in] IIntent* shortcutIntent);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}

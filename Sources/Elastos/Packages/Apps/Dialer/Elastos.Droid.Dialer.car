@@ -9,6 +9,10 @@ module
     merge("car/elastos/droid/contacts/common/list/ContactEntryListFragment.car");
     merge("car/elastos/droid/contacts/common/list/DirectoryPartition.car");
     merge("car/elastos/droid/contacts/common/list/ContactListFilter.car");
+    merge("car/elastos/droid/contacts/common/list/ShortcutIntentBuilder.car");
+    merge("car/elastos/droid/contacts/common/list/ContactListItemView.car");
+    merge("car/elastos/droid/contacts/common/list/ContactListFilterController.car");
+    merge("car/elastos/droid/contacts/common/list/PhoneNumberListAdapter.car");
     merge("car/elastos/droid/contacts/common/widget/FloatingActionButtonController.car");
     merge("car/elastos/droid/dialer/activity/TransactionSafeActivity.car");
 //    merge("car/elastos/droid/dialer/calllog/CallDetailHistoryAdapter.car");

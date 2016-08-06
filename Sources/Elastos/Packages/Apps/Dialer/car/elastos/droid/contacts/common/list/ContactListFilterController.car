@@ -1,0 +1,63 @@
+module
+{
+    interface Elastos.Droid.Contacts.Common.List.IContactListFilter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    interface IContactListFilterListener {
+
+        OnContactListFilterChanged();
+
+    }
+
+    /**
+     * Manages {@link ContactListFilter}. All methods must be called from UI thread.
+     */
+    interface IContactListFilterController {
+
+        AddListener(
+            [in] IContactListFilterListener* listener);
+
+        RemoveListener(
+            [in] IContactListFilterListener* listener);
+
+        /**
+         * Return the currently-active filter.
+         */
+        GetFilter(
+            [out] IContactListFilter** filter);
+
+        /**
+         * @param filter the filter
+         * @param persistent True when the given filter should be saved soon. False when the filter
+         * should not be saved. The latter case may happen when some Intent requires a certain type of
+         * UI (e.g. single contact) temporarily.
+         */
+        SetContactListFilter(
+            [in] IContactListFilter* filter,
+            [in] Boolean persistent);
+
+        SelectCustomFilter();
+
+        /**
+         * Checks if the current filter is valid and reset the filter if not. It may happen when
+         * an account is removed while the filter points to the account with
+         * {@link ContactListFilter#FILTER_TYPE_ACCOUNT} type, for example. It may also happen if
+         * the current filter is {@link ContactListFilter#FILTER_TYPE_SINGLE_CONTACT}, in
+         * which case, we should switch to the last saved filter in {@link SharedPreferences}.
+         */
+        CheckFilterValidity(
+            [in] Boolean notifyListeners);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}
