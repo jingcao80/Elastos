@@ -440,10 +440,9 @@ ECode InboundSmsHandler::SmsBroadcastReceiver::OnReceive(
             AutoPtr<IBundle> resultExtras;
             GetResultExtras(FALSE, (IBundle**)&resultExtras);
             if (resultExtras != NULL && (resultExtras->ContainsKey(String("pdus"), &tmp), tmp)) {
-                AutoPtr<IInterface> obj;
-                resultExtras->Get(String("pdus"), (IInterface**)&obj);
-                assert(0);
-                //TODO intent->PutExtra(String("pdus"), obj);
+                AutoPtr<ArrayOf<Byte> > arrayBytes;
+                resultExtras->GetByteArray(String("pdus"), (ArrayOf<Byte>**)&arrayBytes);
+                intent->PutByteArrayExtra(String("pdus"), arrayBytes);
             }
             if (intent->HasExtra(String("destport"), &tmp), tmp) {
                 Int32 destPort = 0;
@@ -1031,17 +1030,43 @@ Boolean InboundSmsHandler::ProcessMessagePart(
     Boolean tmp = FALSE;
     if (collections->Disjoint(ICollection::Probe(regAddresses), ICollection::Probe(allAddresses), &tmp), !tmp) {
         CIntent::New(ITelephonySmsIntents::PROTECTED_SMS_RECEIVED_ACTION, (IIntent**)&intent);
-        //TODO is this right??
+        //NOTE: here we will convert the 2-D arrayof to 1-D arrayof
+        //      every SMS will not more than 140 bytes,
+        //      so Byte type will be ok for the length of the SMS
+        //      below show how the convert work
+        //      a 2-D arrayof have 3 element:
+        //         XXXXXXXX|YYYYYYYYYYYY|ZZZZZZ
+        //      convert to 1-D arrayof
+        //         3 8 XXXXXXXX 12 YYYYYYYYYYYY 6 ZZZZZZ
+        //      3 parts: the 1st part have 8 bytes, 2nd have 12 bytes, 3rd have 6 bytes
         Int32 arrayLen = pdus->GetLength();
-        AutoPtr<IArrayOf> iao;
-        CArrayOf::New(EIID_IInterface, arrayLen, (IArrayOf**)&iao);
+        Int32 allByteLen = 0;
+        for (Int32 i = 0; i < arrayLen; i++) {
+            AutoPtr<ArrayOf<Byte> > ab = (*pdus)[i];
+            Int32 len = ab->GetLength();
+            allByteLen += len;
+            //TODO debug log should remove
+            Logger::E("leliang:InboundSmsHandler", "index: %d, len:%d", i, len);
+            for (Int32 j = 0; j < len; ++j) {
+                Logger::E("leliang:InboundSmsHandler", "    %d value: 0x%x", j, (*ab)[j]);
+            }
+        }
+        AutoPtr<ArrayOf<Byte> > arrayBytes = ArrayOf<Byte>::Alloc(1 + arrayLen + allByteLen);
+        Int32 pos = 0;
+        arrayBytes->Set(pos++, (Byte)arrayLen);
         for (Int32 i = 0; i < arrayLen; i++) {
             AutoPtr<ArrayOf<Byte> > aob = (*pdus)[i];
-            AutoPtr<IArrayOf> iaob = CoreUtils::ConvertByteArray(aob);
-            iao->Set(i, TO_IINTERFACE(iaob));
+            Int32 len = aob->GetLength();
+            if (len > 160) {
+                Logger::E("InboundSmsHandler", "wrong length of the SMS, should never be over 160");
+                assert(0);
+            }
+            arrayBytes->Set(pos++, (Byte)len);
+            memcpy(arrayBytes->GetPayload() + pos, aob->GetPayload(), len);
+            pos += len;
         }
-        assert(0);
-        //TODO intent->PutExtra(String("pdus"), iao);
+        intent->PutByteArrayExtra(String("pdus"), arrayBytes);// GetByteArrayExtra
+
         intent->PutExtra(String("format"), tracker->GetFormat());
         DispatchIntent(intent, Manifest::permission::RECEIVE_PROTECTED_SMS,
                 IAppOpsManager::OP_RECEIVE_SMS, resultReceiver, UserHandle::OWNER);
@@ -1071,17 +1096,43 @@ Boolean InboundSmsHandler::ProcessMessagePart(
         SetAndDirectIntent(intent, destPort);
     }
 
-    //TODO is this right??
+    //NOTE: here we will convert the 2-D arrayof to 1-D arrayof
+    //      every SMS will not more than 140 bytes,
+    //      so Byte type will be ok for the length of the SMS
+    //      below show how the convert work
+    //      a 2-D arrayof have 3 element:
+    //         XXXXXXXX|YYYYYYYYYYYY|ZZZZZZ
+    //      convert to 1-D arrayof
+    //         3 8 XXXXXXXX 12 YYYYYYYYYYYY 6 ZZZZZZ
+    //      3 part: the 1st part have 8 bytes, 2nd have 12 bytes, 3rd have 6 bytes
     Int32 arrayLen = pdus->GetLength();
-    AutoPtr<IArrayOf> iao;
-    CArrayOf::New(EIID_IInterface, arrayLen, (IArrayOf**)&iao);
+    Int32 allByteLen = 0;
+    for (Int32 i = 0; i < arrayLen; i++) {
+        AutoPtr<ArrayOf<Byte> > ab = (*pdus)[i];
+        Int32 len = ab->GetLength();
+        allByteLen += len;
+        //TODO debug log should remove
+        Logger::E("leliang:InboundSmsHandler", "index: %d, len:%d", i, len);
+        for (Int32 j = 0; j < len; ++j) {
+            Logger::E("leliang:InboundSmsHandler", "    %d value: 0x%x", j, (*ab)[j]);
+        }
+    }
+    AutoPtr<ArrayOf<Byte> > arrayBytes = ArrayOf<Byte>::Alloc(1 + arrayLen + allByteLen);
+    Int32 pos = 0;
+    arrayBytes->Set(pos++, (Byte)arrayLen);
     for (Int32 i = 0; i < arrayLen; i++) {
         AutoPtr<ArrayOf<Byte> > aob = (*pdus)[i];
-        AutoPtr<IArrayOf> iaob = CoreUtils::ConvertByteArray(aob);
-        iao->Set(i, TO_IINTERFACE(iaob));
+        Int32 len = aob->GetLength();
+        if (len > 160) {
+            Logger::E("InboundSmsHandler", "wrong length of the SMS, should never be over 160");
+            assert(0);
+        }
+        arrayBytes->Set(pos++, (Byte)len);
+        memcpy(arrayBytes->GetPayload() + pos, aob->GetPayload(), len);
+        pos += len;
     }
-    assert(0);
-    //TODO intent->PutExtra(String("pdus"), iao);
+    intent->PutByteArrayExtra(String("pdus"), arrayBytes);// GetByteArrayExtra
+
     intent->PutExtra(String("format"), tracker->GetFormat());
     DispatchIntent(intent, Manifest::permission::RECEIVE_SMS,
             IAppOpsManager::OP_RECEIVE_SMS, resultReceiver, UserHandle::OWNER);

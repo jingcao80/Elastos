@@ -459,11 +459,12 @@ ECode Telephony::Sms::Intents::GetMessagesFromIntent(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
     //Object[] messages = (Object[]) intent->GetSerializableExtra("pdus");
-    AutoPtr<ISerializable> serializable;
-    intent->GetSerializableExtra(String("pdus"), (ISerializable**)&serializable);
-    AutoPtr<ArrayOf<IObject*> > messages;
-    assert(0);
-    //TODO message = serializable;
+    //NOTE: see InboundSmsHandler.cpp for more info
+    AutoPtr<ArrayOf<Byte> > arrayBytes;
+    intent->GetByteArrayExtra(String("pdus"), (ArrayOf<Byte>**)&arrayBytes);
+    //AutoPtr<ArrayOf<IObject*> > messages;
+    //assert(0);
+    //message = serializable;
 
     String format;
     intent->GetStringExtra(String("format"), &format);
@@ -474,14 +475,22 @@ ECode Telephony::Sms::Intents::GetMessagesFromIntent(
 
     Logger::V(TAG, " getMessagesFromIntent sub_id : %ld", subId);
 
-    Int32 pduCount = messages->GetLength();
+    Int32 pos = 0;
+    Int32 pduCount = (*arrayBytes)[pos++];
     AutoPtr<ArrayOf<ISmsMessage*> > msgs = ArrayOf<ISmsMessage*>::Alloc(pduCount);
 
     for (Int32 i = 0; i < pduCount; i++) {
         //Byte[] pdu = (Byte[]) messages[i];
-        AutoPtr<ArrayOf<Byte> > pdu;
-        assert(0);
-        //TODO pdu = (Byte[]) messages[i];
+        Int32 len = (*arrayBytes)[pos++];
+        AutoPtr<ArrayOf<Byte> > pdu = ArrayOf<Byte>::Alloc(len);
+        memcpy(pdu->GetPayload(), arrayBytes->GetPayload() + pos, len);
+        pos += len;
+        //TODO debug log should remove
+        Logger::E("leliang:Telephony", "index: %d, len:%d", i, len);
+        for (Int32 j = 0; j < len; ++j) {
+                Logger::E("leliang:Telephony", "    %d value: 0x%x", j, (*pdu)[j]);
+        }
+
         AutoPtr<ISmsMessage> smsMessage = SmsMessage::CreateFromPdu(pdu, format);
         msgs->Set(i, smsMessage);
         smsMessage->SetSubId(subId);

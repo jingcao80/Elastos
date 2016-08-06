@@ -332,7 +332,7 @@ public:
         /* [in] */ String msg);
 
     void DispatchPdus(
-        /* [in] */ IArrayList* pdus);
+        /* [in] */ ArrayOf<ArrayOf<Byte>* >* pdus);
 
     CARAPI_(void) Dispatch(
         /* [in] */ IIntent* intent,

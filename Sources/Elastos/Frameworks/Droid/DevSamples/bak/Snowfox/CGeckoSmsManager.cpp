@@ -504,7 +504,7 @@ ECode CGeckoSmsManager::OnRecieve(
 
         assert(0 && "TODO");
         AutoPtr<ArrayOf<ArrayOf<Byte>*> > pdus;
-        bundle->Get(String("pdus"), (IInterface**)&pdus);
+        bundle->Get(String("pdus"), (IInterface**)&pdus);//TODO check which kind of type stored for pdus
 
         for (Int32 i = 0; i < pdus->GetLength(); ++i) {
             /*AutoPtr<ISmsMessage> msg;

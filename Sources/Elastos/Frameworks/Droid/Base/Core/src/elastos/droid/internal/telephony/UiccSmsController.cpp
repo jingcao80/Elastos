@@ -176,7 +176,7 @@ void UiccSmsController::CreateWakelock()
 }
 
 void UiccSmsController::DispatchPdus(
-    /* [in] */ IArrayList* pdus)
+    /* [in] */ ArrayOf<ArrayOf<Byte>* >* pdus)
 {
     AutoPtr<IIntent> intent;
     CIntent::New(ITelephonySmsIntents::SMS_DELIVER_ACTION, (IIntent**)&intent);
@@ -197,7 +197,44 @@ void UiccSmsController::DispatchPdus(
 
     // Deliver SMS message only to this receiver
     intent->SetComponent(componentName);
-    intent->PutParcelableArrayListExtra(String("pdus"), pdus);
+    //intent->PutParcelableArrayListExtra(String("pdus"), pdus);
+    //NOTE: here we will convert the 2-D arrayof to 1-D arrayof
+    //      every SMS will not more than 140 bytes,
+    //      so Byte type will be ok for the length of the SMS
+    //      below show how the convert work
+    //      a 2-D arrayof have 3 element:
+    //         XXXXXXXX|YYYYYYYYYYYY|ZZZZZZ
+    //      convert to 1-D arrayof
+    //         3 8 XXXXXXXX 12 YYYYYYYYYYYY 6 ZZZZZZ
+    //      3 parts: the 1st part have 8 bytes, 2nd have 12 bytes, 3rd have 6 bytes
+    Int32 arrayLen = pdus->GetLength();
+    Int32 allByteLen = 0;
+    for (Int32 i = 0; i < arrayLen; i++) {
+        AutoPtr<ArrayOf<Byte> > ab = (*pdus)[i];
+        Int32 len = ab->GetLength();
+        allByteLen += len;
+        //TODO debug log should remove
+        Logger::E("leliang:UiccSmsController", "index: %d, len:%d", i, len);
+        for (Int32 j = 0; j < len; ++j) {
+            Logger::E("leliang:UiccSmsController", "    %d value: 0x%x", j, (*ab)[j]);
+        }
+    }
+    AutoPtr<ArrayOf<Byte> > arrayBytes = ArrayOf<Byte>::Alloc(1 + arrayLen + allByteLen);
+    Int32 pos = 0;
+    arrayBytes->Set(pos++, (Byte)arrayLen);
+    for (Int32 i = 0; i < arrayLen; i++) {
+        AutoPtr<ArrayOf<Byte> > aob = (*pdus)[i];
+        Int32 len = aob->GetLength();
+        if (len > 160) {
+            Logger::E("UiccSmsController", "wrong length of the SMS, should never be over 160");
+            assert(0);
+        }
+        arrayBytes->Set(pos++, (Byte)len);
+        memcpy(arrayBytes->GetPayload() + pos, aob->GetPayload(), len);
+        pos += len;
+    }
+    intent->PutByteArrayExtra(String("pdus"), arrayBytes);// GetByteArrayExtra
+
     intent->PutExtra(String("format"), ISmsMessage::FORMAT_SYNTHETIC);
     Dispatch(intent, Manifest::permission::RECEIVE_SMS);
 
@@ -792,8 +829,7 @@ ECode UiccSmsController::SynthesizeMessages(
             Manifest::permission::BROADCAST_SMS, String(""));
     Int32 size = 0;
     messages->GetSize(&size);
-    AutoPtr<IArrayList> pdus;
-    CArrayList::New(size, (IArrayList**)&pdus);
+    AutoPtr<ArrayOf<ArrayOf<Byte>* > > pdus = ArrayOf<ArrayOf<Byte>* >::Alloc(size);
 
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> p;
@@ -806,12 +842,7 @@ ECode UiccSmsController::SynthesizeMessages(
                 (ISyntheticSmsMessage**)&message);
         AutoPtr<ArrayOf<Byte> > array;
         ISmsMessageBase::Probe(message)->GetPdu((ArrayOf<Byte>**)&array);
-        AutoPtr<IArrayOf> iArray;
-        CArrayOf::New(Elastos::Core::EIID_IByte, array->GetLength(), (IArrayOf**)&iArray);
-        for (Int32 j = 0; j < array->GetLength(); j++) {
-            iArray->Set(j, CoreUtils::Convert((*array)[j]));
-        }
-        pdus->Set(i, iArray);
+        pdus->Set(i, array);
     }
     DispatchPdus(pdus);
     return NOERROR;
