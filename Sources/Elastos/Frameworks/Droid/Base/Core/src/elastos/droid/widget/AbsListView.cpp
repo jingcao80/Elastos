@@ -797,7 +797,6 @@ AutoPtr<IView> AbsListView::RecycleBin::GetActiveView(
         activeViews->Set(index, NULL);
         return match;
     }
-
     return NULL;
 }
 

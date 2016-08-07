@@ -751,7 +751,7 @@ ECode ListView::FillGap(
     GetChildCount(&count);
     if (down) {
         Int32 paddingTop = 0;
-        if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
+        if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
             GetListPaddingTop(&paddingTop);
         }
         Int32 startOffSet;
@@ -771,7 +771,7 @@ ECode ListView::FillGap(
     }
     else {
         Int32 paddingBottom = 0;
-        if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
+        if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
             GetListPaddingBottom(&paddingBottom);
         }
         Int32 startOffSet;
@@ -799,17 +799,19 @@ AutoPtr<IView> ListView::FillDown(
     /* [in] */ Int32 nextTop)
 {
     AutoPtr<IView> selectedView;
-    Int32 end = mBottom - mTop;
 
+    Int32 end = mBottom - mTop;
     Int32 leftTmp = 0, bottomTmp = 0;
     mListPadding->GetLeft(&leftTmp);
     mListPadding->GetBottom(&bottomTmp);
-    if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
+    if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
         end -= bottomTmp;
     }
-    while(nextTop < end && pos < mItemCount) {
+    while (nextTop < end && pos < mItemCount) {
+        // is this the selected item?
         Boolean selected = pos == mSelectedPosition;
         AutoPtr<IView> child = MakeAndAddView(pos , nextTop, TRUE, leftTmp, selected);
+
         child->GetBottom(&nextTop);
         nextTop += mDividerHeight;
         if (selected) {
@@ -817,6 +819,7 @@ AutoPtr<IView> ListView::FillDown(
         }
         pos++;
     }
+
     Int32 childCount;
     GetChildCount(&childCount);
     SetVisibleRangeHint(mFirstPosition, mFirstPosition + childCount - 1);
@@ -827,18 +830,18 @@ AutoPtr<IView> ListView::FillUp(
     /* [in] */ Int32 pos,
     /* [in] */ Int32 nextBottom)
 {
-    AutoPtr<IView> selectedView = NULL;
+    AutoPtr<IView> selectedView ;
 
     Int32 end = 0;
-
     Int32 leftTmp = 0, topTmp = 0;
     mListPadding->GetLeft(&leftTmp);
     mListPadding->GetTop(&topTmp);
-    if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
+    if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
         end = topTmp;
     }
 
-    while(nextBottom > end && pos >= 0) {
+    while (nextBottom > end && pos >= 0) {
+        // is this the selected item?
         Boolean selected = pos == mSelectedPosition;
         AutoPtr<IView> child = MakeAndAddView(pos , nextBottom, FALSE, leftTmp, selected);
         child->GetTop(&nextBottom);
@@ -848,6 +851,7 @@ AutoPtr<IView> ListView::FillUp(
         }
         pos--;
     }
+
     mFirstPosition = pos + 1;
     Int32 childCount;
     GetChildCount(&childCount);
@@ -1849,15 +1853,25 @@ AutoPtr<IView> ListView::MakeAndAddView(
     /* [in] */ Boolean selected)
 {
     AutoPtr<IView> child;
+
     if (!mDataChanged) {
+        // Try to use an existing view for this position
         child = mRecycler->GetActiveView(position);
         if (child != NULL) {
+            // Found it -- we're using an existing child
+            // This just needs to be positioned
             SetupChild(child, position, y, flow, childrenLeft, selected, TRUE);
+
             return child;
         }
     }
+
+    // Make a new view for this position, or convert an unused view if possible
     child = ObtainView(position, mIsScrap);
+
+    // This needs to be positioned and measured
     SetupChild(child, position, y, flow, childrenLeft, selected, (*mIsScrap)[0]);
+
     return child;
 }
 
