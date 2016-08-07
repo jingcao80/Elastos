@@ -1926,11 +1926,6 @@ void ListView::SetupChild(
         child->SetPressed(isPressed);
     }
 
-    AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
-    AutoPtr<IApplicationInfo> info;
-    context->GetApplicationInfo((IApplicationInfo**)&info);
-    AutoPtr<CApplicationInfo> cInfo = (CApplicationInfo*)info.Get();
     if (mChoiceMode == IAbsListView::CHOICE_MODE_NONE && mCheckStates != NULL) {
         AutoPtr<ICheckable> checkable = ICheckable::Probe(child);
         if (checkable != NULL) {
@@ -1938,10 +1933,17 @@ void ListView::SetupChild(
             mCheckStates->Get(position, &value);
             checkable->SetChecked(value);
         }
-        else if (cInfo->mTargetSdkVersion >= Build::VERSION_CODES::HONEYCOMB) {
-            Boolean value;
-            mCheckStates->Get(position, &value);
-            child->SetActivated(value);
+        else {
+            AutoPtr<IContext> context;
+            GetContext((IContext**)&context);
+            AutoPtr<IApplicationInfo> info;
+            context->GetApplicationInfo((IApplicationInfo**)&info);
+            AutoPtr<CApplicationInfo> cInfo = (CApplicationInfo*)info.Get();
+            if (cInfo->mTargetSdkVersion >= Build::VERSION_CODES::HONEYCOMB) {
+                Boolean value;
+                mCheckStates->Get(position, &value);
+                child->SetActivated(value);
+            }
         }
     }
 
@@ -1986,13 +1988,16 @@ void ListView::SetupChild(
         child->SetDrawingCacheEnabled(TRUE);
     }
 
-    AutoPtr<IViewGroupLayoutParams> layoutParams;
-    child->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
-    AutoPtr<CAbsListViewLayoutParams> params =
-        (CAbsListViewLayoutParams*)IAbsListViewLayoutParams::Probe(layoutParams);
-    if (recycled && params->mScrappedFromPosition != position) {
-        child->JumpDrawablesToCurrentState();
+    if (recycled) {
+        AutoPtr<IViewGroupLayoutParams> layoutParams;
+        child->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
+        AutoPtr<CAbsListViewLayoutParams> params =
+            (CAbsListViewLayoutParams*)IAbsListViewLayoutParams::Probe(layoutParams);
+        if (params->mScrappedFromPosition != position) {
+            child->JumpDrawablesToCurrentState();
+        }
     }
+
     // Trace.traceEnd(Trace.TRACE_TAG_VIEW);
 }
 
