@@ -190,6 +190,7 @@ module
             [out] IParcelable** result);
 
         SetTextSize(
+            [in] IInterface* _this,
             [in] Int32 unit,
             [in] Float size);
 
