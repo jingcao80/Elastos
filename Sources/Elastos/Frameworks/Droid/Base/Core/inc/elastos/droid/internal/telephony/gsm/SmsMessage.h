@@ -525,7 +525,7 @@ public:
     static const String TAG; // = "SmsMessage";
 
 private:
-    static const Boolean VDBG = FALSE;
+    static const Boolean VDBG;// = FALSE;
 
     MessageClass mMessageClass;
 

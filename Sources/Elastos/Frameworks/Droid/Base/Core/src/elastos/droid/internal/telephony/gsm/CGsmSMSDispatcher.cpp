@@ -3,12 +3,11 @@
 #include "elastos/droid/internal/telephony/gsm/CSmsMessage.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/internal/telephony/SmsHeader.h"
-// TODO: Need SmsApplication
-// #include "elastos/droid/internal/telephony/SmsApplication.h"
+#include "elastos/droid/internal/telephony/CSmsApplication.h"
 #include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/internal/telephony/uicc/SIMRecords.h"
+#include "elastos/droid/provider/Telephony.h"
 #include "elastos/droid/Manifest.h"
-// TODO:
-// using Elastos::Droid::Provider::Telephony::Sms::IIntents;
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -18,15 +17,15 @@ using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Internal::Telephony::IccUtils;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::SmsHeader;
-// TODO: Need SmsApplication
-// using Elastos::Droid::Internal::Telephony::SmsApplication;
+using Elastos::Droid::Internal::Telephony::CSmsApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::ISIMRecords;
+using Elastos::Droid::Internal::Telephony::Uicc::SIMRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Internal::Utility::IStateMachine;
 using Elastos::Droid::Manifest;
-// TODO:
-// using Elastos::Droid::Provider::Telephony;
+using Elastos::Droid::Provider::Telephony;
+//using Elastos::Droid::Provider::Telephony::Sms::IIntents;
 using Elastos::Droid::Provider::ITelephonyTextBasedSmsColumns;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Core::CoreUtils;
@@ -67,8 +66,7 @@ ECode CGsmSMSDispatcher::constructor(
     /* [in] */ IImsSMSDispatcher* imsSMSDispatcher,
     /* [in] */ IGsmInboundSmsHandler* gsmInboundSmsHandler)
 {
-// TODO: Need SMSDispatcher::constructor
-    // SMSDispatcher::constructor(phone, usageMonitor, imsSMSDispatcher);
+    SMSDispatcher::constructor(phone, usageMonitor, imsSMSDispatcher);
     mCi->SetOnSmsStatus(this, EVENT_NEW_SMS_STATUS_REPORT, NULL);
     mCi->SetOnSmsOnSim(this, EVENT_SMS_ON_ICC, NULL);
     mGsmInboundSmsHandler = gsmInboundSmsHandler;
@@ -121,8 +119,9 @@ ECode CGsmSMSDispatcher::HandleMessage(
         mIccRecords->Get((IInterface**)&obj);
         AutoPtr<IIccRecords> rec = IIccRecords::Probe(obj);
         if (rec != NULL) {
-// TODO: Need ISIMRecords::HandleSmsOnIcc
-            // ISIMRecords::Probe(rec)->HandleSmsOnIcc((AsyncResult*)(IObject*)obj.Get());
+            ISIMRecords* isimrecords = ISIMRecords::Probe(rec);
+            SIMRecords* simrecords = (SIMRecords*)(isimrecords);
+            simrecords->HandleSmsOnIcc((AsyncResult*)(IObject*)obj.Get());
         }
         break;
     }
@@ -154,6 +153,7 @@ ECode CGsmSMSDispatcher::SendData(
             (ISmsMessageSubmitPdu**)&pdu);
     if (pdu != NULL) {
         AutoPtr<IHashMap> map;
+        assert(0);
 // TODO: Need SMSDispatcher::GetSmsTrackerMap
         // map = GetSmsTrackerMap(destAddr, scAddr, destPort, origPort, data, pdu);
         AutoPtr<SmsTracker> tracker;
@@ -184,8 +184,8 @@ ECode CGsmSMSDispatcher::SendText(
             (ISmsMessageSubmitPdu**)&pdu);
     if (pdu != NULL) {
         if (messageUri == NULL) {
-            Boolean b;
 // TODO: Need SmsApplication
+            // Boolean b;
             // AutoPtr<ISmsApplication> helper;
             // SmsApplication::AcquireSingleton((ISmsApplication**)&helper);
             // if (helper->ShouldWriteMessageForPackage(callingPkg, mContext, &b), b) {

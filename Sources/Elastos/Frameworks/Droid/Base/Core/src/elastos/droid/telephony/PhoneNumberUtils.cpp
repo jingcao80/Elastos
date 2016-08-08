@@ -908,6 +908,7 @@ ECode PhoneNumberUtils::CalledPartyBCDToString(
         //   *21#+
         //   **21#+
         String retString = ret->ToString();
+        //Logger::E("leliang", "line:%d, func:%s, retString:%s\n", __LINE__, __func__, retString.string());
         AutoPtr<IPatternHelper> helper;
         CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
         AutoPtr<IPattern> p;
@@ -945,7 +946,7 @@ ECode PhoneNumberUtils::CalledPartyBCDToString(
         } else {
             p = NULL;
             m = NULL;
-            helper->Compile(String("(^[#*])(.*)([#*])(.*)"), (IPattern**&)p);
+            helper->Compile(String("(^[#*])(.*)([#*])(.*)"), (IPattern**)&p);
             p->Matcher(retString, (IMatcher**)&m);
             if (m->Matches(&tempRes), tempRes){
                 // Starts with [#*] and only one other [#*]

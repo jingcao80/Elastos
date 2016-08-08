@@ -789,8 +789,7 @@ Boolean SmsMessage::IsNoEmsSupportConfigListExisted()
 
             if ((listArray != NULL) && (listArray->GetLength() > 0)) {
                 Int32 len = listArray->GetLength();
-// TODO:
-                // mNoEmsSupportConfigList = ArrayOf<NoEmsSupportConfig*>::Alloc(len);
+                mNoEmsSupportConfigList = ArrayOf<NoEmsSupportConfig*>::Alloc(len);
 
                 for (Int32 i = 0; i < listArray->GetLength(); i++) {
                     AutoPtr<ArrayOf<String> > array;

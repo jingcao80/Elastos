@@ -48,7 +48,6 @@ public:
         AutoPtr<ArrayOf<Byte> > encodedMessage;
     };
 
-private:
     class NoEmsSupportConfig
         : public Object
     {
@@ -599,6 +598,8 @@ private:
 } // namespace Telephony
 } // namespace Droid
 } // namespace Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Telephony::SmsMessage::NoEmsSupportConfig, IInterface)
 
 #endif // __ELASTOS_DROID_TELEPHONY_SMSMESSAGE_H__
 

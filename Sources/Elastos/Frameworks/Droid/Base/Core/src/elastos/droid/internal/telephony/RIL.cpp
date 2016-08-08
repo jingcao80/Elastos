@@ -8,6 +8,7 @@
 #include "elastos/droid/internal/telephony/CallForwardInfo.h"
 #include "elastos/droid/internal/telephony/CSmsResponse.h"
 #include "elastos/droid/internal/telephony/CTelephonyDevControllerHelper.h"
+#include "elastos/droid/telephony/CSmsMessageHelper.h"
 #include "elastos/droid/telephony/CSignalStrength.h"
 #include "elastos/droid/internal/telephony/CallForwardInfo.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
@@ -86,6 +87,7 @@ using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ICellInfo;
 using Elastos::Droid::Telephony::INeighboringCellInfo;
 using Elastos::Droid::Telephony::CSignalStrength;
+using Elastos::Droid::Telephony::CSmsMessageHelper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CBase64;
 using Elastos::Droid::Utility::CSparseArray;
@@ -1336,7 +1338,7 @@ ECode RIL::Dial(
     /* [in] */ IUUSInfo* uusInfo,
     /* [in] */ IMessage* result)
 {
-    Logger::E("leliang", "line:%d, func:%s, address:%s, uusInfo:%p\n", __LINE__, __func__, address.string(), uusInfo);
+    //Logger::E("leliang", "line:%d, func:%s, address:%s, uusInfo:%p\n", __LINE__, __func__, address.string(), uusInfo);
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
                                 IRILConstants::RIL_REQUEST_DIAL,
                                 result);
@@ -1827,7 +1829,7 @@ ECode RIL::SendDtmf(
         RiljLog(str);
     }
 
-    char carray[] = {c};
+    char carray[] = {(char)c};
     String str(carray);
     rr->mParcel->WriteString(str);
 
@@ -1850,7 +1852,7 @@ ECode RIL::StartDtmf(
         RiljLog(str);
     }
 
-    char carray[] = {c};
+    char carray[] = {(char)c};
     String str(carray);
     rr->mParcel->WriteString(str);
 
@@ -4031,7 +4033,7 @@ String RIL::RetToString(
     StringBuilder sb;
     String s;
     Int32 length = 0;
-    Logger::E(RILJ_LOG_TAG, "TODO RIL::RetToString, line:%d", __LINE__);
+    Logger::E(RILJ_LOG_TAG, "TODO RIL::RetToString, line:%d, length:%d", __LINE__, length);
     //assert(0 && "TODO");
     // if (ret instanceof Int32[]){
     //     AutoPtr<ArrayOf<Int32> > intArray = (Int32[]) ret;
@@ -4107,7 +4109,7 @@ void RIL::ProcessUnsolicited(
     p->ReadInt32(&response);
 
     Logger::E("leliang", "line:%d, func:%s, response:%d\n", __LINE__, __func__, response);
-    // try {
+    // try
     switch(response) {
         /*
         cat libs/telephony/ril_unsol_commands.h \
@@ -4162,6 +4164,7 @@ void RIL::ProcessUnsolicited(
         default:
             // throw new RuntimeException("Unrecognized unsol response: " + response);
             Logger::E("RILJ", "Unrecognized unsol response:%d", response);
+            assert(0);
         break; // (implied)
     }
     // } catch (Throwable tr) {
@@ -4209,18 +4212,22 @@ void RIL::ProcessUnsolicited(
             AutoPtr<ArrayOf<String> > a = ArrayOf<String>::Alloc(2);
 
             AutoPtr<ICharSequence> pRet = ICharSequence::Probe(ret);
-            pRet->ToString(&((*a)[1]));
-
+            String value;
+            pRet->ToString(&value);
+            a->Set(1, value);
+            Logger::E("leliang", "line:%d, func:%s, value:%s\n", __LINE__, __func__, value.string());
             AutoPtr<ISmsMessage> sms;
-
             AutoPtr<ISmsMessageHelper> hlp;
+
             Logger::E("RILJ", "TODO ProcessUnsolicited RIL_UNSOL_RESPONSE_NEW_SMS is not ready!");
-            //TODO CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
-            //TODO hlp->NewFromCMT(a, (ISmsMessage**)&sms);
-            //TODO if (mGsmSmsRegistrant != NULL) {
-            //TODO     AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
-            //TODO     mGsmSmsRegistrant->NotifyRegistrant(arSms);
-            //TODO }
+            Logger::E("leliang", "TODO ProcessUnsolicited RIL_UNSOL_RESPONSE_NEW_SMS is not ready!");
+            //leliang TODO
+            //CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
+            //hlp->NewFromCMT(a, (ISmsMessage**)&sms);
+            //if (mGsmSmsRegistrant != NULL) {
+            //    AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
+            //    mGsmSmsRegistrant->NotifyRegistrant(arSms);
+            //}
         break;
         }
         case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT: {
@@ -4723,7 +4730,7 @@ Boolean RIL::IsQcUnsolOemHookResp(
 void RIL::ProcessUnsolOemhookResponse(
     /* [in] */ IByteBuffer* oemHookResponse)
 {
-    Int32 responseId = 0, responseSize = 0, responseVoiceId = 0;
+    Int32 responseId = 0, responseSize = 0; //responseVoiceId = 0;
 
     oemHookResponse->GetInt32(&responseId);
     // Rlog.d(RILJ_LOG_TAG, "Response ID in RIL_UNSOL_OEM_HOOK_RAW is " + responseId);
@@ -4935,7 +4942,7 @@ AutoPtr<IInterface> RIL::ResponseString(
 AutoPtr<IInterface> RIL::ResponseStrings(
     /* [in] */ RILParcel* p)
 {
-    Int32 num;
+    //Int32 num;
     AutoPtr<ArrayOf<String> > response;
 
     //now read string error
@@ -4957,7 +4964,7 @@ AutoPtr<IInterface> RIL::ResponseStrings(
 AutoPtr<IInterface> RIL::ResponseRaw(
     /* [in] */ RILParcel* p)
 {
-    Int32 num;
+    //Int32 num;
     AutoPtr<ArrayOf<Byte> > response;
 
     p->CreateByteArray((ArrayOf<Byte>**)&response);
@@ -5585,7 +5592,7 @@ AutoPtr<IInterface> RIL::ResponseGmsBroadcastConfig(
         p->ReadInt32(&iSel);
         Boolean selected = (iSel == 1);
 
-        assert(0 && "TODO");
+        assert(0 && "TODO" && selected);
         // info = new SmsBroadcastConfigInfo(fromId, toId, fromScheme,
         //         toScheme, selected);
         response->Add(info);
@@ -5761,7 +5768,7 @@ void RIL::NotifyRegistrantsCdmaInfoRec(
     /* [in] */ ICdmaInformationRecords* infoRec)
 {
     Int32 response = IRILConstants::RIL_UNSOL_CDMA_INFO_REC;
-    assert(0 && "TODO");
+    assert(0 && "TODO" && response);
     // if (ICdmaInformationRecordsCdmaDisplayInfoRec::Probe(infoRec->mRecord) != NULL) {
     //     if (mDisplayInfoRegistrants != NULL) {
     //         if (RILJ_LOGD) UnsljLogRet(response, infoRec->mRecord);

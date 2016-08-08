@@ -1,10 +1,13 @@
 
 #include "elastos/droid/internal/telephony/SmsMessageBase.h"
+#include "elastos/droid/provider/Telephony.h"
 #include <elastos/utility/Arrays.h>
+#include "elastos/core/StringUtils.h"
 
 using Elastos::Droid::Internal::Telephony::ISmsConstants;
 using Elastos::Droid::Internal::Telephony::ISmsHeader;
 using Elastos::Droid::Provider::ITelephony;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::IArrayList;
 
@@ -38,23 +41,6 @@ SmsMessageBase::SmsMessageBase()
     , mIndexOnIcc(-1)
 {
 }
-
-//TODO
-// TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.
-//public static abstract class SubmitPduBase  {
-//    public Byte[] encodedScAddress; // Null if not applicable.
-//    public Byte[] encodedMessage;
-//
-//    //@Override
-//    CARAPI ToString(
-//    /* [out] */ String* str)
-//{
-//    return "SubmitPdu: encodedScAddress = "
-//            + Arrays->ToString(encodedScAddress)
-//            + ", encodedMessage = "
-//            + Arrays->ToString(encodedMessage);
-//    }
-//}
 
 ECode SmsMessageBase::GetServiceCenterAddress(
     /* [out] */ String* result)
@@ -197,28 +183,28 @@ ECode SmsMessageBase::GetIndexOnIcc(
 
 void SmsMessageBase::ParseMessageBody()
 {
-    assert(0 && "TODO");
-//    // originatingAddress could be NULL if this message is from a status
-//    // report.
-//    if (mOriginatingAddress != NULL && mOriginatingAddress->CouldBeEmailGateway()) {
-//        ExtractEmailAddressFromMessageBody();
-//    }
+    // originatingAddress could be NULL if this message is from a status
+    // report.
+    Boolean res;
+    if (mOriginatingAddress != NULL && (mOriginatingAddress->CouldBeEmailGateway(&res), res)) {
+        ExtractEmailAddressFromMessageBody();
+    }
 }
 
 void SmsMessageBase::ExtractEmailAddressFromMessageBody()
 {
-    assert(0 && "TODO");
-//    /* Some carriers may use " /" delimiter as below
-//     *
-//     * 1. [x@y][ ]/[subject][ ]/[body]
-//     * -or-
-//     * 2. [x@y][ ]/[body]
-//     */
-//     String[] parts = mMessageBody->Split("( /)|( )", 2);
-//     if (parts.length < 2) return;
-//     mEmailFrom = parts[0];
-//     mEmailBody = parts[1];
-//     mIsEmail = Telephony.Mms->IsEmailAddress(mEmailFrom);
+    /* Some carriers may use " /" delimiter as below
+     *
+     * 1. [x@y][ ]/[subject][ ]/[body]
+     * -or-
+     * 2. [x@y][ ]/[body]
+     */
+     AutoPtr<ArrayOf<String> > parts;
+     StringUtils::Split(mMessageBody, String("( /)|( )"), 2, (ArrayOf<String>**)&parts);
+     if (parts->GetLength() < 2) return;
+     mEmailFrom = (*parts)[0];
+     mEmailBody = (*parts)[1];
+     Elastos::Droid::Provider::Telephony::Mms::IsEmailAddress(mEmailFrom, &mIsEmail);
 }
 
 ECode SmsMessageBase::GetRecipientAddress(

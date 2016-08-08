@@ -45,7 +45,7 @@ namespace Telephony {
 namespace Gsm {
 
 const String SmsMessage::TAG("SmsMessage");
-const Boolean SmsMessage::VDBG;
+const Boolean SmsMessage::VDBG = TRUE;
 const Int32 SmsMessage::VALIDITY_PERIOD_FORMAT_NONE;
 const Int32 SmsMessage::VALIDITY_PERIOD_FORMAT_ENHANCED;
 const Int32 SmsMessage::VALIDITY_PERIOD_FORMAT_RELATIVE;
@@ -93,6 +93,7 @@ ECode SmsMessage::PduParser::GetSCAddress(
     }
 
     mCur += len;
+    //Logger::E("leliang", "line:%d, func:%s, sc addr:%s\n", __LINE__, __func__, ret.string());
 
     *result = ret;
     return NOERROR;
@@ -675,7 +676,7 @@ ECode SmsMessage::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     return GetSubmitPdu(scAddress, destinationAddress, message,
-            statusReportRequested, NULL, result);
+            statusReportRequested, (ArrayOf<Byte>*)NULL, result);
 }
 
 ECode SmsMessage::GetSubmitPdu(
@@ -1167,8 +1168,9 @@ void SmsMessage::ParseSmsDeliver(
     mOriginatingAddress = ISmsAddress::Probe(addr);
 
     if (mOriginatingAddress != NULL) {
-        // if (VDBG) Logger::V(TAG, "SMS originating address: "
-        //         + mOriginatingAddress.address);
+        String addressStr;
+        mOriginatingAddress->GetAddressString(&addressStr);
+        if (VDBG) Logger::V(TAG, "SMS originating address:%s ", addressStr.string());
     }
 
     // TP-Protocol-Identifier (TP-PID)
@@ -1180,8 +1182,7 @@ void SmsMessage::ParseSmsDeliver(
     p->GetByte(&mDataCodingScheme);
 
     if (VDBG) {
-        // Logger::V(TAG, "SMS TP-PID:" + mProtocolIdentifier
-        //         + " data coding scheme: " + mDataCodingScheme);
+        Logger::V(TAG, "SMS TP-PID:%d, data coding scheme: %d", mProtocolIdentifier, mDataCodingScheme);
     }
 
     p->GetSCTimestampMillis(&mScTimeMillis);
@@ -1385,69 +1386,72 @@ void SmsMessage::ParseUserData(
      *                   = 0x80 (voice mail; store sms)
      * msg_count = 0x00 ..0xFF
      */
-// TODO: Need SmsHeader
-    // Int32 size;
-    // mUserDataHeader->mSpecialSmsMsgList->GetSize(&size);
-    // if (hasUserDataHeader && (size != 0)) {
-    //    for (SmsHeader->SpecialSmsMsg msg : mUserDataHeader->mSpecialSmsMsgList) {
-    //        Int32 msgInd = msg->msgIndType & 0xff;
-    //        /*
-    //         * TS 23.040 V6.8.1 Sec 9.2.3.24.2
-    //         * bits 1 0 : basic message indication type
-    //         * bits 4 3 2 : extended message indication type
-    //         * bits 6 5 : Profile id bit 7 storage type
-    //         */
-    //        if ((msgInd == 0) || (msgInd == 0x80)) {
-    //            mIsMwi = TRUE;
-    //            if (msgInd == 0x80) {
-    //                /* Store message because TP_UDH indicates so*/
-    //                mMwiDontStore = FALSE;
-    //            }
-    //            else if (mMwiDontStore == FALSE) {
-    //                /* Storage bit is not set by TP_UDH
-    //                 * Check for conflict
-    //                 * between message storage bit in TP_UDH
-    //                 * & DCS. The message shall be stored if either of
-    //                 * the one indicates so.
-    //                 * TS 23.040 V6.8.1 Sec 9.2.3.24.2
-    //                 */
-    //                if (!((((mDataCodingScheme & 0xF0) == 0xD0)
-    //                       || ((mDataCodingScheme & 0xF0) == 0xE0))
-    //                       && ((mDataCodingScheme & 0x03) == 0x00))) {
-    //                    /* Even DCS did not have voice mail with Storage bit
-    //                     * 3GPP TS 23.038 V7.0.0 section 4
-    //                     * So clear this flag*/
-    //                    mMwiDontStore = TRUE;
-    //                }
-    //            }
+     AutoPtr<IArrayList> specialSmsMsgList = ((SmsHeader*)(mUserDataHeader.Get()))->specialSmsMsgList;
+     Int32 size;
+     specialSmsMsgList->GetSize(&size);
+     if (hasUserDataHeader && (size != 0)) {
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            specialSmsMsgList->Get(i, (IInterface**)&obj);
+            AutoPtr<SmsHeader::SpecialSmsMsg> msg = (SmsHeader::SpecialSmsMsg*)(IObject::Probe(obj));
+            Int32 msgInd = msg->msgIndType & 0xff;
+            /*
+             * TS 23.040 V6.8.1 Sec 9.2.3.24.2
+             * bits 1 0 : basic message indication type
+             * bits 4 3 2 : extended message indication type
+             * bits 6 5 : Profile id bit 7 storage type
+             */
+            if ((msgInd == 0) || (msgInd == 0x80)) {
+                mIsMwi = TRUE;
+                if (msgInd == 0x80) {
+                    /* Store message because TP_UDH indicates so*/
+                    mMwiDontStore = FALSE;
+                }
+                else if (mMwiDontStore == FALSE) {
+                    /* Storage bit is not set by TP_UDH
+                     * Check for conflict
+                     * between message storage bit in TP_UDH
+                     * & DCS. The message shall be stored if either of
+                     * the one indicates so.
+                     * TS 23.040 V6.8.1 Sec 9.2.3.24.2
+                     */
+                    if (!((((mDataCodingScheme & 0xF0) == 0xD0)
+                           || ((mDataCodingScheme & 0xF0) == 0xE0))
+                           && ((mDataCodingScheme & 0x03) == 0x00))) {
+                        /* Even DCS did not have voice mail with Storage bit
+                         * 3GPP TS 23.038 V7.0.0 section 4
+                         * So clear this flag*/
+                        mMwiDontStore = TRUE;
+                    }
+                }
 
-    //            mVoiceMailCount = msg->msgCount & 0xff;
+                mVoiceMailCount = msg->msgCount & 0xff;
 
-    //            /*
-    //             * In the event of a conflict between message count setting
-    //             * and DCS then the Message Count in the TP-UDH shall
-    //             * override the indication in the TP-DCS. Set voice mail
-    //             * notification based on count in TP-UDH
-    //             */
-    //            if (mVoiceMailCount > 0)
-    //                mMwiSense = TRUE;
-    //            else
-    //                mMwiSense = FALSE;
+                /*
+                 * In the event of a conflict between message count setting
+                 * and DCS then the Message Count in the TP-UDH shall
+                 * override the indication in the TP-DCS. Set voice mail
+                 * notification based on count in TP-UDH
+                 */
+                if (mVoiceMailCount > 0)
+                    mMwiSense = TRUE;
+                else
+                    mMwiSense = FALSE;
 
-    //            Logger::W(TAG, "MWI in TP-UDH for Vmail. Msg Ind = %d Dont store = %d Vmail count = %d"
-    //                    , msgInd, mMwiDontStore, mVoiceMailCount);
+                Logger::W(TAG, "MWI in TP-UDH for Vmail. Msg Ind = %d Dont store = %d Vmail count = %d"
+                        , msgInd, mMwiDontStore, mVoiceMailCount);
 
-    //            /*
-    //             * There can be only one IE for each type of message
-    //             * indication in TP_UDH. In the event they are duplicated
-    //             * last occurence will be used. Hence the for loop
-    //             */
-    //        }
-    //        else {
-    //            Logger::W(TAG, "TP_UDH fax/email/extended msg/multisubscriber profile. Msg Ind = %d", msgInd);
-    //        }
-    //    } // end of for
-    //} // end of if UDH
+                /*
+                 * There can be only one IE for each type of message
+                 * indication in TP_UDH. In the event they are duplicated
+                 * last occurence will be used. Hence the for loop
+                 */
+            }
+            else {
+                Logger::W(TAG, "TP_UDH fax/email/extended msg/multisubscriber profile. Msg Ind = %d", msgInd);
+            }
+        } // end of for
+    } // end of if UDH
 
     switch (encodingType) {
     case ISmsConstants::ENCODING_UNKNOWN:
@@ -1467,13 +1471,13 @@ void SmsMessage::ParseUserData(
         }
         break;
     }
-    case ISmsConstants::ENCODING_7BIT:
-// TODO: Need SmsHeader
-        // p->GetUserDataGSM7Bit(count,
-        //         hasUserDataHeader ? mUserDataHeader->mLanguageTable : 0,
-        //         hasUserDataHeader ? mUserDataHeader->mLanguageShiftTable : 0, &mMessageBody);
+    case ISmsConstants::ENCODING_7BIT: {
+        SmsHeader* smsHeader = ((SmsHeader*)(mUserDataHeader.Get()));
+        p->GetUserDataGSM7Bit(count,
+                hasUserDataHeader ? smsHeader->languageTable : 0,
+                hasUserDataHeader ? smsHeader->languageShiftTable : 0, &mMessageBody);
         break;
-
+    }
     case ISmsConstants::ENCODING_16BIT:
         p->GetUserDataUCS2(count, &mMessageBody);
         break;
