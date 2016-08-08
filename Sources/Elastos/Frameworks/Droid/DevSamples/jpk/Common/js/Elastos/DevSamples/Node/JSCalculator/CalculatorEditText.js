@@ -142,9 +142,6 @@ module.exports = function(aoElastos, aoActivity){
 //var s = CObject.getObjectMethodProtos(context, "ObtainStyledAttributes");
 //elog("====proto:" + s);
 
-//CObject.showMethods(attrs);
-
-    // class CXmlPullAttributes {
     //     constructor(
     //         [in] IXmlPullParser* ps);
 
@@ -164,42 +161,48 @@ module.exports = function(aoElastos, aoActivity){
             var a = context.ObtainStyledAttributes(
                     attrs, R.styleable.CalculatorEditText, defStyle, 0);
             elog(FullClassName + "========OnCreate begin====2====");
+
+CObject.showMethods(a);
+
+    // class CXmlPullAttributes {
+
 //         mMaximumTextSize = a.getDimension(
 //                 R.styleable.CalculatorEditText_maxTextSize, getTextSize());
-            this.mMaximumTextSize = a.getDimension(
-                    R.styleable.CalculatorEditText_maxTextSize, this.getTextSize());
+            this.mMaximumTextSize = a.GetDimension(
+                    R.styleable.CalculatorEditText_maxTextSize, _this.GetTextSize());
             elog(FullClassName + "========OnCreate begin====3====");
 //         mMinimumTextSize = a.getDimension(
 //                 R.styleable.CalculatorEditText_minTextSize, getTextSize());
-            this.mMinimumTextSize = a.getDimension(
-                    R.styleable.CalculatorEditText_minTextSize, this.getTextSize());
+            this.mMinimumTextSize = a.GetDimension(
+                    R.styleable.CalculatorEditText_minTextSize, _this.GetTextSize());
             elog(FullClassName + "========OnCreate begin====4====");
 //         mStepTextSize = a.getDimension(R.styleable.CalculatorEditText_stepTextSize,
 //                 (mMaximumTextSize - mMinimumTextSize) / 3);
-            this.mStepTextSize = a.getDimension(R.styleable.CalculatorEditText_stepTextSize,
+            this.mStepTextSize = a.GetDimension(R.styleable.CalculatorEditText_stepTextSize,
                     (this.mMaximumTextSize - this.mMinimumTextSize) / 3);
             elog(FullClassName + "========OnCreate begin====5====");
 
 //         a.recycle();
-            a.recycle();
+            a.Recycle();
             elog(FullClassName + "========OnCreate begin====6====");
 
 //         setCustomSelectionActionModeCallback(NO_SELECTION_ACTION_MODE_CALLBACK);
-            this.setCustomSelectionActionModeCallback(JSClass.NO_SELECTION_ACTION_MODE_CALLBACK);
+            _this.SetCustomSelectionActionModeCallback(JSClass.NO_SELECTION_ACTION_MODE_CALLBACK);
             elog(FullClassName + "========OnCreate begin====7====");
 //         if (isFocusable()) {
-            if (this.isFocusable()) {
+            if (_this.IsFocusable()) {
 //             setMovementMethod(ScrollingMovementMethod.getInstance());
             elog(FullClassName + "========OnCreate begin====8====");
-                this.setMovementMethod(ScrollingMovementMethod.getInstance());
+                _this.SetMovementMethod(ScrollingMovementMethod.GetInstance());
             elog(FullClassName + "========OnCreate begin====9====");
 //         }
             }
 //         setTextSize(TypedValue.COMPLEX_UNIT_PX, mMaximumTextSize);
-            this.setTextSize(TypedValue.COMPLEX_UNIT_PX, mMaximumTextSize);
+            var TypedValue__COMPLEX_UNIT_PX = 0; //TODO
+            _this.SetTextSize(TypedValue__COMPLEX_UNIT_PX, this.mMaximumTextSize);
             elog(FullClassName + "========OnCreate begin====10====");
 //         setMinHeight(getLineHeight() + getCompoundPaddingBottom() + getCompoundPaddingTop());
-            this.setMinHeight(this.getLineHeight() + this.getCompoundPaddingBottom() + this.getCompoundPaddingTop());
+            _this.SetMinHeight(_this.GetLineHeight() + _this.GetCompoundPaddingBottom() + _this.GetCompoundPaddingTop());
             elog(FullClassName + "========OnCreate begin====11====");
 //     }
         }
@@ -266,29 +269,34 @@ module.exports = function(aoElastos, aoActivity){
 //             this.setTextSize(TypedValue.COMPLEX_UNIT_PX, getVariableTextSize(text.toString()));
 // //     }
 
-// //     @Override
-// //     public void setTextSize(int unit, float size) {
-//         _pt.setTextSize = function(unit, size) {
-// //         final float oldTextSize = getTextSize();
-//             var oldTextSize = this.getTextSize();
-// //         super.setTextSize(unit, size);
-//             _super.setTextSize(unit, size);
+//     @Override
+//     public void setTextSize(int unit, float size) {
+        _pt.SetTextSize = function(_this, unit, size) {
+            elog("====SetTextSize====0====");
+//         final float oldTextSize = getTextSize();
+            var oldTextSize = _this.GetTextSize();
+            elog("====SetTextSize====1====");
+//         super.setTextSize(unit, size);
+            elog("====SetTextSize====2====");
+            _super.SetTextSize(unit, size);
 
-// //         if (mOnTextSizeChangeListener != null && getTextSize() != oldTextSize) {
-//             if (this.mOnTextSizeChangeListener != null && this.getTextSize() != oldTextSize) {
-// //             mOnTextSizeChangeListener.onTextSizeChanged(this, oldTextSize);
-//                 this.mOnTextSizeChangeListener.onTextSizeChanged(this, oldTextSize);
-// //         }
-//             }
-// //     }
+            elog("====SetTextSize====3====");
+//         if (mOnTextSizeChangeListener != null && getTextSize() != oldTextSize) {
+            if (this.mOnTextSizeChangeListener != null && _this.GetTextSize() != oldTextSize) {
+//             mOnTextSizeChangeListener.onTextSizeChanged(this, oldTextSize);
+                this.mOnTextSizeChangeListener.onTextSizeChanged(this, oldTextSize);
 //         }
+            }
+            elog("====SetTextSize====4====");
+//     }
+        }
 
-// //     public void setOnTextSizeChangeListener(OnTextSizeChangeListener listener) {
-//         _pt.setOnTextSizeChangeListener = function(listener) {
-// //         mOnTextSizeChangeListener = listener;
-//             this.mOnTextSizeChangeListener = listener;
-// //     }
-//         }
+//     public void setOnTextSizeChangeListener(OnTextSizeChangeListener listener) {
+        _pt.SetOnTextSizeChangeListener = function(listener) {
+//         mOnTextSizeChangeListener = listener;
+            this.mOnTextSizeChangeListener = listener;
+//     }
+        }
 
 // //     public float getVariableTextSize(String text) {
 //         _pt.getVariableTextSize = function(text) {

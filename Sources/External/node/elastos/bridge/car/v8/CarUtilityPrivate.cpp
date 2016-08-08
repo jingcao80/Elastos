@@ -121,6 +121,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             }
 
             if (result->mTagSetLocalPtr) {
+                ALOGD("convertNPVariantToCarValue========mTagSetLocalPtr====begin====");
+
                 CarQuintet* carArray;
 
                 NPObject* object = NPVARIANT_IS_OBJECT(value) ? NPVARIANT_TO_OBJECT(value) : 0;
@@ -176,11 +178,9 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 }
 
                 _value = (Int32)carArray;
-                result->value.mInt32Value = _value;
             }
-            else {
-                result->value.mInt32Value = _value;
-            }
+
+            result->value.mInt32Value = _value;
 
             break;
         }
@@ -581,6 +581,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                     break;
                 }
                 case CarDataType_Int32:
+                    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_Int32>====");
                 /*
                 //to be used after, as a test, all the Int32 input now is Arrayof, and should translate to Array according to the element type of input js array.
                 {
@@ -594,6 +595,23 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 case CarDataType_ArrayOf:
                 {
                     ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====");
+
+                    CarDataType localPtrElementDataType = 0;
+                    AutoPtr<IDataTypeInfo> aLocalPtrElementDataTypeInfo;
+                    AutoPtr<ICarArrayInfo> aCarArrayInfo = ICarArrayInfo::Probe(aElementDataTypeInfo);
+                    if (aCarArrayInfo.Get()) {
+                        aCarArrayInfo->GetElementTypeInfo((IDataTypeInfo**)&aLocalPtrElementDataTypeInfo);
+                        aLocalPtrElementDataTypeInfo->GetDataType(&localPtrElementDataType);
+                    }
+                    else {
+                        //TODO:just for test, to be finished
+                        ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====element type not found, default is INT32 for LocalPtr test flag!");
+
+                        localPtrElementDataType = CarDataType_Int32;
+                    }
+
+                    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====type:%d", localPtrElementDataType);
+
                     CarValue* aCarValue = new CarValue();
                     CarQuintet* carArray = NULL;
 
@@ -621,6 +639,83 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 
                     ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====length:%d", length);
 
+                    if (localPtrElementDataType <= 0) {
+                        ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====Error: LocalPtrElementDataType");
+                        return;
+                    }
+
+                    switch (localPtrElementDataType) {
+                        case CarDataType_Int16:
+                            carArray = ArrayOf<Elastos::Int16>::Alloc(length);
+                            break;
+                        case CarDataType_Int32:
+                            carArray = ArrayOf<Elastos::Int32>::Alloc(length);
+                            break;
+                        case CarDataType_Int64:
+                            carArray = ArrayOf<Elastos::Int64>::Alloc(length);
+                            break;
+                        case CarDataType_Byte:
+                            carArray = ArrayOf<Elastos::Byte>::Alloc(length);
+                            break;
+                        case CarDataType_Float:
+                            carArray = ArrayOf<Elastos::Float>::Alloc(length);
+                            break;
+                        case CarDataType_Double:
+                            carArray = ArrayOf<Elastos::Double>::Alloc(length);
+                            break;
+                        case CarDataType_Char32:
+                            carArray = ArrayOf<Elastos::Char32>::Alloc(length);
+                            break;
+                        case CarDataType_String:
+                            carArray = ArrayOf<Elastos::String>::Alloc(length);
+                        case CarDataType_Boolean:
+                            carArray = ArrayOf<Elastos::Boolean>::Alloc(length);
+                            break;
+                        case CarDataType_EMuid:
+                            carArray = ArrayOf<Elastos::EMuid>::Alloc(length);
+                            break;
+                        case CarDataType_EGuid:
+                            carArray = ArrayOf<Elastos::EGuid>::Alloc(length);
+                            break;
+                        case CarDataType_ECode:
+                            carArray = ArrayOf<Elastos::ECode>::Alloc(length);
+                            break;
+                        case CarDataType_LocalPtr:
+                            carArray = ArrayOf<LocalPtr>::Alloc(length);
+                            break;
+                        case CarDataType_LocalType:
+                            //TODO
+                            //carArray = ArrayOf<LocalType>::Alloc(length);
+                            break;
+                        case CarDataType_Enum:
+                            //TODO
+                            //carArray = ArrayOf<Elastos::Enum>::Alloc(length);
+                            break;
+                        case CarDataType_ArrayOf:
+                            //TODO
+                            //carArray = ArrayOf<Elastos::ArrayOf>::Alloc(length);
+                            break;
+                        case CarDataType_CppVector:
+                            //TODO
+                            //carArray = ArrayOf<Elastos::CppVector>::Alloc(length);
+                            break;
+                        case CarDataType_Struct:
+                            //TODO
+                            //carArray = ArrayOf<Struct>::Alloc(length);
+                            break;
+                        case CarDataType_Interface:
+                            carArray = ArrayOf< AutoPtr<IInterface> >::Alloc(length);
+                            break;
+                        default:
+                            ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====error: other type:%d", localPtrElementDataType);
+                            break;
+                    }
+
+                    //if (length == 0) {
+                    //    carArray = ArrayOf<Elastos::Int32>::Alloc(length);
+                    //    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====create LocalPtr<ArrayOf<CarDataType>>");
+                    //}
+
                     for (Int32 i = 0; i < length; i++) {
                         NPVariant npvValue;
                         _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
@@ -637,17 +732,17 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         }
                         if (NPVARIANT_IS_INT32(npvValue)) {
                             //NOT BE USED IN V8
-                            if(i == 0)carArray = ArrayOf<Elastos::Int32>::Alloc(length);
+                            //if(i == 0)carArray = ArrayOf<Elastos::Int32>::Alloc(length);
                             iVal = NPVARIANT_TO_INT32(npvValue);
                             (*(ArrayOf<Elastos::Int32>**)&carArray)->Set(i,iVal);
                         }
                         else if (NPVARIANT_IS_DOUBLE(npvValue)) {
-                            if(i == 0)carArray = ArrayOf<Elastos::Int32>::Alloc(length);
+                            //if(i == 0)carArray = ArrayOf<Elastos::Int32>::Alloc(length);
                             iVal = (Int32)NPVARIANT_TO_DOUBLE(npvValue);
                             (*(ArrayOf<Elastos::Int32>**)&carArray)->Set(i,iVal);
                         }
                         else if (NPVARIANT_IS_STRING(npvValue)) {
-                            if(i == 0)carArray = ArrayOf<Elastos::String>::Alloc(length);
+                            //if(i == 0)carArray = ArrayOf<Elastos::String>::Alloc(length);
                             NPString src = NPVARIANT_TO_STRING(npvValue);
                             Elastos::String* _stringValue;
                             _stringValue = new Elastos::String(src.UTF8Characters);
@@ -704,6 +799,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 case NPVariantType_Void:    //js undefined
                 case NPVariantType_Null:    //js null
                     result->mObjectWrapper = NULL;
+                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:null/undefined js type to car interface");
                     break;
                 case NPVariantType_Bool:
                     //Illegal parameter

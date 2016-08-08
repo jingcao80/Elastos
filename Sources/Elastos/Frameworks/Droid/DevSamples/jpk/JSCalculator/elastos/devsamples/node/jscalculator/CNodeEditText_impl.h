@@ -468,7 +468,19 @@ ECode JSActName::SetTextSize(
     /* [in] */ Float size)
 {
     ALOGD("CCalculatorEditText::SetTextSize========begin========");
-    return NOERROR;
+    //return NOERROR;
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ALOGD("CCalculatorEditText::SetTextSize========js begin========");
+        ec = mListener->SetTextSize(_this, unit, size);
+        ALOGD("CCalculatorEditText::SetTextSize========js end========");
+    }
+
+    return ec;
 
     // Float oldTextSize;
     // GetTextSize(&oldTextSize);
