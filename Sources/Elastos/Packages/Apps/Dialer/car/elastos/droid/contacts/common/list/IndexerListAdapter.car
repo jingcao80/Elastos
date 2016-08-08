@@ -1,0 +1,83 @@
+
+module
+{
+
+    using interface Elastos.Droid.Widget.ISectionIndexer;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * An item view is displayed differently depending on whether it is placed
+     * at the beginning, middle or end of a section. It also needs to know the
+     * section header when it is at the beginning of a section. This object
+     * captures all this configuration.
+     */
+    interface IIndexerListAdapterPlacement {
+
+        Invalidate();
+
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Contacts.Common.List.IPinnedHeaderListAdapter
+     */
+    interface IIndexerListAdapter {
+
+        IsSectionHeaderDisplayEnabled(
+            [out] Boolean* result);
+
+        SetSectionHeaderDisplayEnabled(
+            [in] Boolean flag);
+
+        GetIndexedPartition(
+            [out] Boolean* result);
+
+        SetIndexedPartition(
+            [in] Int32 partition);
+
+        GetIndexer(
+            [out] ISectionIndexer** indexer);
+
+        SetIndexer(
+            [in] ISectionIndexer* indexer);
+
+        GetSections(
+            [out, callee] ArrayOf<IInterface*>* sections);
+
+        /**
+         * @return relative position of the section in the indexed partition
+         */
+        GetPositionForSection(
+            [in] Int32 sectionIndex,
+            [out] Int32* result);
+
+        /**
+         * @param position relative position in the indexed partition
+         */
+        GetSectionForPosition(
+            [in] Int32 position,
+            [out] Int32* result);
+
+        /**
+         * Computes the item's placement within its section and populates the {@code placement}
+         * object accordingly.  Please note that the returned object is volatile and should be
+         * copied if the result needs to be used later.
+         */
+        GetItemPlacementInSection(
+            [in] Int32 position,
+            [out] IIndexerListAdapterPlacement** placement);
+
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}

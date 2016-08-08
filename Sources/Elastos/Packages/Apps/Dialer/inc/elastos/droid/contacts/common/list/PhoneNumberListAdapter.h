@@ -1,10 +1,11 @@
 
-#ifndef __ELASTOS_APPS_CONTACTS_COMMON_LIST_PHONENUMBERLISTADAPTER_H__
-#define __ELASTOS_APPS_CONTACTS_COMMON_LIST_PHONENUMBERLISTADAPTER_H__
+#ifndef __ELASTOS_DROID_CONTACTS_COMMON_LIST_PHONENUMBERLISTADAPTER_H__
+#define __ELASTOS_DROID_CONTACTS_COMMON_LIST_PHONENUMBERLISTADAPTER_H__
 
 #include "elastos/droid/contacts/common/list/ContactEntryListAdapter.h"
 
 using Elastos::Droid::Content::ICursorLoader;
+using Elastos::Droid::Net::IUriBuilder;
 
 namespace Elastos{
 namespace Droid{
@@ -61,10 +62,10 @@ public:
         /* [out] */ IUri* uri);
 
     CARAPI SetPhotoPosition(
-        /* [in] */ IContactListItemView::PhotoPosition photoPosition);
+        /* [in] */ PhotoPosition photoPosition);
 
     CARAPI GetPhotoPosition(
-        /* [out] */ IContactListItemView::PhotoPosition* photoPosition);
+        /* [out] */ PhotoPosition* photoPosition);
 
     CARAPI SetUseCallableUri(
         /* [in] */ Boolean useCallableUri);
@@ -98,7 +99,7 @@ protected:
         /* [in] */ IContext* context,
         /* [in] */ Int32 partition,
         /* [in] */ ICursor* cursor,
-        /* [in] */ Int position,
+        /* [in] */ Int32 position,
         /* [in] */ IViewGroup* parent);
 
     CARAPI_(void) SetHighlight(
@@ -160,6 +161,8 @@ private:
 
 private:
     static const String TAG; // = PhoneNumberListAdapter.class.getSimpleName();
+    static const String IGNORE_NUMBER_TOO_LONG_CLAUSE;// =
+            // "length(" + Phone.NUMBER + ") < 1000";
 
     // A list of extended directories to add to the directories from the database
     AutoPtr<IList> mExtendedDirectories;
@@ -169,13 +172,10 @@ private:
     // exist, this will be Long.MAX_VALUE
     Int64 mFirstExtendedDirectoryId; // = Long.MAX_VALUE;
 
-    static const String IGNORE_NUMBER_TOO_LONG_CLAUSE;// =
-            // "length(" + Phone.NUMBER + ") < 1000";
-
     AutoPtr<ICharSequence> mUnknownNameText;
     String mCountryIso;
 
-    IContactListItemView::PhotoPosition mPhotoPosition;
+    PhotoPosition mPhotoPosition;
 
     Boolean mUseCallableUri;
 };
@@ -183,7 +183,7 @@ private:
 } // List
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
 
-#endif //__ELASTOS_APPS_CONTACTS_COMMON_LIST_PHONENUMBERLISTADAPTER_H__
+#endif //__ELASTOS_DROID_CONTACTS_COMMON_LIST_PHONENUMBERLISTADAPTER_H__

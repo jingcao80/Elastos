@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_CONTACTS_COMMON_LIST_PHONENUMBERPICKERFRAGMENT_H__
 #define __ELASTOS_DROID_CONTACTS_COMMON_LIST_PHONENUMBERPICKERFRAGMENT_H__
 
-#include "elastos/droid/contacts/common/ContactEntryListFragment.h"
+#include "elastos/droid/contacts/common/list/ContactEntryListFragment.h"
 
 using Elastos::Droid::Content::ILoader;
 using Elastos::Droid::Net::IUri;
@@ -93,7 +93,7 @@ public:
     CARAPI_(void) PickPhoneNumber(
         /* [in] */ IUri* uri);
 
-    CARAPI_(void) OnShortcutIntentCreated(
+    CARAPI OnShortcutIntentCreated(
         /* [in] */ IUri* uri,
         /* [in] */ IIntent* shortcutIntent);
 
@@ -128,7 +128,7 @@ protected:
         /* [in] */ Boolean flag);
 
     // @Override
-    CARAPI OnItemClick(
+    CARAPI_(void) OnItemClick(
         /* [in] */ Int32 position,
         /* [in] */ Int64 id);
 
@@ -163,7 +163,7 @@ protected:
         /* [in] */ IUri* uri);
 
 private:
-    CARAPI_(void) UpdateFilterHeaderView();g1
+    CARAPI_(void) UpdateFilterHeaderView();
 
 private:
     static const String TAG;

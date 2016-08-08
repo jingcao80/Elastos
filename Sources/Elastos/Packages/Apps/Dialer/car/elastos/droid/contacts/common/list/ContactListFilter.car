@@ -2,6 +2,7 @@
 module
 {
 
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.Net.IUriBuilder;
 
     namespace Elastos{
@@ -11,6 +12,7 @@ module
     namespace List {
 
     interface IContactListFilter {
+
         const Int32 FILTER_TYPE_DEFAULT = -1;
         const Int32 FILTER_TYPE_ALL_ACCOUNTS = -2;
         const Int32 FILTER_TYPE_CUSTOM = -3;
@@ -43,6 +45,37 @@ module
 
         ToDebugString(
             [out] String* debugStr);
+
+        GetFilterType(
+            [out] Int32* filterType);
+
+        SetFilterType(
+            [in] Int32 filterType);
+
+        GetAccountType(
+            [out] String* accountType);
+
+        SetAccountType(
+            [in] String accountType);
+
+        GetAccountName(
+            [out] String* accountName);
+
+        SetAccountName(
+            [in] String accountName);
+
+        GetDataSet(
+            [out] String* dataSet);
+
+        SetDataSet(
+            [in] String dataSet);
+
+        GetIcon(
+            [out] IDrawable** icon);
+
+        SetIcon(
+            [in] IDrawable* icon);
+
     }
 
     } // List

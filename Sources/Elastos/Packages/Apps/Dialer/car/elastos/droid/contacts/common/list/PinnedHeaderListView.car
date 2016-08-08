@@ -1,0 +1,87 @@
+
+module
+{
+
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IAdapterView
+     * extends Elastos.Droid.Widget.IAbsListView
+     * extends Elastos.Droid.Widget.IListView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IOnGlobalLayoutListener
+     * interface Elastos.Droid.View.IOnTouchModeChangeListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.View.IAdapterViewOnItemClickListener
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.Widget.IFilterListener
+     * interface Elastos.Droid.Widget.IOnDateChangedListener
+     * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface Elastos.Apps.Contacts.Common.List.IAutoScrollListView
+     */
+    interface IPinnedHeaderListView {
+    }
+
+    /**
+     * Adapter interface.  The list adapter must implement this interface.
+     */
+    [local]
+    interface IPinnedHeaderAdapter {
+        /**
+         * Returns the overall number of pinned headers, visible or not.
+         */
+        GetPinnedHeaderCount(
+            [out] Int32* count);
+
+        /**
+         * Creates or updates the pinned header view.
+         */
+        GetPinnedHeaderView(
+            [in] Int32 viewIndex,
+            [in] IView* convertView,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        /**
+         * Configures the pinned headers to match the visible list items. The
+         * adapter should call {@link PinnedHeaderListView#setHeaderPinnedAtTop},
+         * {@link PinnedHeaderListView#setHeaderPinnedAtBottom},
+         * {@link PinnedHeaderListView#setFadingHeader} or
+         * {@link PinnedHeaderListView#setHeaderInvisible}, for each header that
+         * needs to change its position or visibility.
+         */
+        ConfigurePinnedHeaders(
+            [in] IPinnedHeaderListView* listView);
+
+        /**
+         * Returns the list position to scroll to if the pinned header is touched.
+         * Return -1 if the list does not need to be scrolled.
+         */
+        GetScrollPositionForHeader(
+            [in] Int32 viewIndex,
+            [out] Int32* position);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}
