@@ -2,16 +2,12 @@
 #ifndef __ELASTOS_DROID_WIDGET_STACKVIEW_H__
 #define __ELASTOS_DROID_WIDGET_STACKVIEW_H__
 
-#include <R.h>
-#include "elastos/droid/ext/frameworkext.h"
-#include <widget/AdapterViewAnimator.h>
-
-
-
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/VelocityTracker.h"
+#include "elastos/droid/widget/AdapterViewAnimator.h"
 #include "elastos/droid/widget/FrameLayout.h"
+#include "elastos/droid/R.h"
 
-using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IKeyEventCallback;
@@ -23,25 +19,71 @@ using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Graphics::IBlurMaskFilter;
-using Elastos::Droid::Widget::IImageView;
 
 namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-extern "C" const InterfaceID EIID_StackFrame;
-
-class StackView : public AdapterViewAnimator
+class StackView
+    : public AdapterViewAnimator
+    , public IStackView
 {
-private:
-
-    class _StackFrame
-        : public FrameLayout
-        , public ElRefBase
+public:
+    class LayoutParams
+        : public ViewGroup::LayoutParams
+        , public IStackViewLayoutParams
     {
     public:
-        _StackFrame(
+        LayoutParams();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IView* view);
+
+        CARAPI constructor(
+            /* [in] */ IContext* context,
+            /* [in] */ IAttributeSet* attrs);
+
+        CARAPI_(void) InvalidateGlobalRegion(
+            /* [in] */ IView* v,
+            /* [in] */ IRect* r);
+
+        CARAPI_(AutoPtr<IRect>) GetInvalidateRect();
+
+        CARAPI_(void) ResetInvalidateRect();
+
+        CARAPI SetVerticalOffset(
+            /* [in] */ Int32 newVerticalOffset);
+
+        CARAPI SetHorizontalOffset(
+            /* [in] */ Int32 newHorizontalOffset);
+
+        CARAPI SetOffsets(
+            /* [in] */ Int32 newHorizontalOffset,
+            /* [in] */ Int32 newVerticalOffset);
+
+    public:
+        Int32 mHorizontalOffset;
+        Int32 mVerticalOffset;
+        AutoPtr<IView> mView;
+
+    private:
+        AutoPtr<IRect> mParentRect;
+        AutoPtr<IRect> mInvalidateRect;
+        AutoPtr<IRectF> mInvalidateRectf;
+        AutoPtr<IRect> mGlobalInvalidateRect;
+    };
+
+    class StackFrame
+        : public FrameLayout
+        , public IStackFrame
+    {
+    public:
+        CARAPI constructor(
             /* [in] */ IContext* context);
+
+        CAR_INTERFACE_DECL()
 
         CARAPI_(void) SetTransformAnimator(
             /* [in] */ IObjectAnimator* oa);
@@ -58,46 +100,8 @@ private:
         AutoPtr<IObjectAnimator> mSliderAnimator;
     };
 
-    class StackFrame
-        : public _StackFrame
-        , public IFrameLayout
-        , public IViewParent
-        , public IViewManager
-        , public IDrawableCallback
-        , public IKeyEventCallback
-        , public IAccessibilityEventSource
-        , public IWeakReferenceSource
-    {
-    public:
-        StackFrame(
-            /* [in] */ IContext* context);
-
-        IVIEW_METHODS_DECL()
-        IVIEWGROUP_METHODS_DECL()
-        IVIEWPARENT_METHODS_DECL()
-        IVIEWMANAGER_METHODS_DECL()
-        IDRAWABLECALLBACK_METHODS_DECL()
-        IKEYEVENTCALLBACK_METHODS_DECL()
-        IACCESSIBILITYEVENTSOURCE_METHODS_DECL()
-        IFRAMELAYOUT_METHODS_DECL()
-
-        CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
-
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
-
-        CARAPI GetWeakReference(
-            /* [out] */ IWeakReference** weakReference);
-    };
-
-    class HolographicHelper
-        : public ElRefBase
+private:
+    class HolographicHelper : public Object
     {
     public:
         HolographicHelper(
@@ -139,27 +143,9 @@ private:
         static const Int32 CLICK_FEEDBACK = 1;
     };
 
-    class StackSlider
-        : public ElRefBase
-        , public IInterface
+    class StackSlider : public Object
     {
     public:
-        AutoPtr<IView> mView;
-        Float mYProgress;
-        Float mXProgress;
-
-        Int32 mMode;
-
-        static const Int32 NORMAL_MODE = 0;
-        static const Int32 BEGINNING_OF_STACK_MODE = 1;
-        static const Int32 END_OF_STACK_MODE = 2;
-
-    private:
-        StackView* mHost;
-
-    public:
-        CAR_INTERFACE_DECL()
-
         StackSlider(
             /* [in] */ StackView* host);
 
@@ -207,6 +193,20 @@ private:
         CARAPI_(Float) GetDuration(
             /* [in] */ Boolean invert,
             /* [in] */ Float r);
+
+    public:
+        AutoPtr<IView> mView;
+        Float mYProgress;
+        Float mXProgress;
+
+        Int32 mMode;
+
+        static const Int32 NORMAL_MODE = 0;
+        static const Int32 BEGINNING_OF_STACK_MODE = 1;
+        static const Int32 END_OF_STACK_MODE = 2;
+
+    private:
+        StackView* mHost;
     };
 
     class PostRun
@@ -222,12 +222,16 @@ private:
         AutoPtr<IView> mView;
     };
 
-
 public:
-    StackView(
+    StackView();
+
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs = NULL,
-        /* [in] */ Int32 defStyle = R::attr::stackViewStyle);
+        /* [in] */ Int32 defStyleAttr = R::attr::stackViewStyle,
+        /* [in] */ Int32 defStyleRes = 0);
 
     CARAPI ShowNext();
 
@@ -253,56 +257,59 @@ public:
     CARAPI OnInitializeAccessibilityNodeInfo(
         /* [in] */ IAccessibilityNodeInfo* info);
 
-    CARAPI_(Boolean) PerformAccessibilityAction(
+    CARAPI PerformAccessibilityAction(
         /* [in] */ Int32 action,
-        /* [in] */ IBundle* arguments);
+        /* [in] */ IBundle* arguments,
+        /* [out] */ Boolean* res);
 
 protected:
-    StackView();
-
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs = NULL,
-        /* [in] */ Int32 defStyle = R::attr::stackViewStyle);
-
-    CARAPI_(void) TransformViewForTransition(
+    virtual CARAPI_(void) TransformViewForTransition(
         /* [in] */ Int32 fromIndex,
         /* [in] */ Int32 toIndex,
         /* [in] */ IView* view,
         /* [in] */ Boolean animate);
 
+    //@Override
     CARAPI_(void) ShowOnly(
         /* [in] */ Int32 childIndex,
         /* [in] */ Boolean animate);
 
-    CARAPI_(void) UpdateClickFeedback();
+    virtual CARAPI_(void) UpdateClickFeedback();
 
+    //@Override
     CARAPI_(void) ShowTapFeedback(
         /* [in] */ IView* child);
 
+    //@Override
     CARAPI_(void) HideTapFeedback(
         /* [in] */ IView* child);
 
-    CARAPI_(void) OnLayout(
+    //@Override
+    CARAPI OnLayout(
         /* [in] */ Boolean changed,
         /* [in] */ Int32 left,
         /* [in] */ Int32 top,
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
+    //@Override
     CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
+    //@Override
     CARAPI_(AutoPtr<IFrameLayout>) GetFrameForChild();
 
+    //@Override
     CARAPI_(void) ApplyTransformForChildAtIndex(
         /* [in] */ IView* child,
         /* [in] */ Int32 relativeIndex);
 
+    //@Override
     CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
+    //@Override
     CARAPI_(AutoPtr<IViewGroupLayoutParams>) CreateOrReuseLayoutParams(
         /* [in] */ IView* v);
 

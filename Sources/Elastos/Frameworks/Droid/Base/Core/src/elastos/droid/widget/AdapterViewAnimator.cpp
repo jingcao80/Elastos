@@ -216,7 +216,7 @@ ECode AdapterViewAnimator::AdapterViewAnimatorSavedState::ToString(
 //=====================================================================
 //                      AdapterViewAnimator
 //=====================================================================
-CAR_INTERFACE_IMPL(AdapterViewAnimator, AdapterView, IAdapterViewAnimator)
+CAR_INTERFACE_IMPL_3(AdapterViewAnimator, AdapterView, IAdapterViewAnimator, IRemoteAdapterConnectionCallback, IAdvanceable)
 
 AdapterViewAnimator::AdapterViewAnimator()
     : mWhichChild(0)
@@ -271,10 +271,10 @@ ECode AdapterViewAnimator::constructor(
     Int32 resource = 0;
     a->GetResourceId(R::styleable::AdapterViewAnimator_inAnimation, 0, &resource);
     if (resource > 0) {
-        SetOutAnimation(context, resource);
+        SetInAnimation(context, resource);
     }
     else {
-        SetOutAnimation(GetDefaultOutAnimation());
+        SetInAnimation(GetDefaultOutAnimation());
     }
 
     Boolean flag = FALSE;
@@ -494,7 +494,7 @@ ECode AdapterViewAnimator::SetOutAnimation(
 {
     AutoPtr<IAnimator> anim;
     AnimatorInflater::LoadAnimator(context, resourceID, (IAnimator**)&anim);
-    SetInAnimation(IObjectAnimator::Probe(anim));
+    SetOutAnimation(IObjectAnimator::Probe(anim));
     return NOERROR;
 }
 
@@ -556,6 +556,8 @@ ECode AdapterViewAnimator::SetRemoteViewsAdapter(
     /* [in] */ IIntent* intent)
 {
     VALIDATE_NOT_NULL(intent);
+    // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
+    // service handling the specified intent.
     if (mRemoteViewsAdapter) {
         AutoPtr<IIntentFilterComparison> fcNew, fcOld;
         CIntentFilterComparison::New(intent, (IIntentFilterComparison**)&fcNew);
@@ -569,11 +571,10 @@ ECode AdapterViewAnimator::SetRemoteViewsAdapter(
         }
     }
     mDeferNotifyDataSetChanged = FALSE;
-    assert(0 && "TODO");
+    // Otherwise, create a new RemoteViewsAdapter for binding
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    CRemoteViewsAdapter::New(context, intent, IRemoteAdapterConnectionCallback::Probe(this),
-        (IRemoteViewsAdapter**)&mRemoteViewsAdapter);
+    CRemoteViewsAdapter::New(context, intent, this, (IRemoteViewsAdapter**)&mRemoteViewsAdapter);
     Boolean ready = FALSE;
     mRemoteViewsAdapter->IsDataReady(&ready);
     if (ready) {
@@ -704,7 +705,7 @@ void AdapterViewAnimator::ConfigureViewAnimator(
 
 void AdapterViewAnimator::TransformViewForTransition(
     /* [in] */ Int32 fromIndex,
-    /* [in] */ Int64 toIndex,
+    /* [in] */ Int32 toIndex,
     /* [in] */ IView* v,
     /* [in] */ Boolean animate)
 {
@@ -854,6 +855,7 @@ void AdapterViewAnimator::ShowOnly(
     /* [in] */ Int32 childIndex,
     /* [in] */ Boolean animate)
 {
+    animate = FALSE;
     if (!mAdapter) return;
     Int32 adapterCount = 0;
     GetCount(&adapterCount);
@@ -861,8 +863,9 @@ void AdapterViewAnimator::ShowOnly(
     // is right?
     List<Int32>::Iterator it = mPreviousViews.Begin();
     for (; it != mPreviousViews.End(); it++) {
-        AutoPtr<IView> viewToRemove = mViewsMap.Find(*it)->mSecond->mView;
-        mViewsMap.Erase(mViewsMap.Find(*it)->mFirst);
+        HashMap<Int32, AutoPtr<ViewAndMetaData> >::Iterator find = mViewsMap.Find(*it);
+        AutoPtr<IView> viewToRemove = find->mSecond->mView;
+        mViewsMap.Erase(find);
         viewToRemove->ClearAnimation();
         AutoPtr<IViewGroup> vg = IViewGroup::Probe(viewToRemove);
         if (vg) {
@@ -876,7 +879,6 @@ void AdapterViewAnimator::ShowOnly(
     Int32 newWindowEndUnbounded = newWindowStartUnbounded + GetNumActiveViews() - 1;
     Int32 newWindowStart = Elastos::Core::Math::Max(0, newWindowStartUnbounded);
     Int32 newWindowEnd = Elastos::Core::Math::Min(adapterCount - 1, newWindowEndUnbounded);
-
     if (mLoopViews) {
         newWindowStart = newWindowStartUnbounded;
         newWindowEnd = newWindowEndUnbounded;
@@ -892,19 +894,20 @@ void AdapterViewAnimator::ShowOnly(
 
     HashMap< Int32, AutoPtr<ViewAndMetaData> >::Iterator iter = mViewsMap.Begin();
     for (; iter != mViewsMap.End(); iter++) {
+        Int32 index = iter->mFirst;
         Boolean remove = FALSE;
-        if (!wrap && (iter->mFirst < rangeStart || iter->mFirst > rangeEnd)) {
+        if (!wrap && (index < rangeStart || index > rangeEnd)) {
             remove = TRUE;
         }
-        else if (wrap && (iter->mFirst > rangeEnd && iter->mFirst < rangeStart)) {
+        else if (wrap && (index > rangeEnd && index < rangeStart)) {
             remove = TRUE;
         }
 
         if (remove) {
-            AutoPtr<IView> previousView = mViewsMap.Find(iter->mFirst)->mSecond->mView;
-            Int32 oldRelativeIndex = mViewsMap.Find(iter->mFirst)->mSecond->mRelativeIndex;
+            AutoPtr<IView> previousView = iter->mSecond->mView;
+            Int32 oldRelativeIndex = iter->mSecond->mRelativeIndex;
 
-            mPreviousViews.Insert(iter->mFirst);
+            mPreviousViews.PushBack(index);
             TransformViewForTransition(oldRelativeIndex, -1, previousView, animate);
         }
     }
@@ -914,30 +917,31 @@ void AdapterViewAnimator::ShowOnly(
         for (Int32 i = newWindowStart; i <= newWindowEnd; i++) {
             Int32 index = Modulo(i, GetWindowSize());
             Int32 oldRelativeIndex = -1;
-            if (mViewsMap.Find(index) != mViewsMap.End()) {
-                oldRelativeIndex = mViewsMap.Find(index)->mSecond->mRelativeIndex;
+            AutoPtr<ViewAndMetaData> value = mViewsMap[index];
+            if (value != NULL) {
+                oldRelativeIndex = value->mRelativeIndex;
             }
 
             Int32 newRelativeIndex = i - newWindowStartUnbounded;
 
-            Boolean res = FALSE;
+            Boolean contains = FALSE;
             for (List<Int32>::Iterator it = mPreviousViews.Begin(); it != mPreviousViews.End(); it++) {
                 if (*it == index) {
-                    res = TRUE;
+                    contains = TRUE;
                 }
             }
-            Boolean inOldRange = mViewsMap.Find(index) != mViewsMap.End() && res;
+            Boolean inOldRange = value != NULL && !contains;
 
             if (inOldRange) {
-                AutoPtr<IView> view = mViewsMap.Find(index)->mSecond->mView;
-                mViewsMap.Find(index)->mSecond->mRelativeIndex = newRelativeIndex;
+                AutoPtr<IView> view = value->mView;
+                value->mRelativeIndex = newRelativeIndex;
                 ApplyTransformForChildAtIndex(view, newRelativeIndex);
                 TransformViewForTransition(oldRelativeIndex, newRelativeIndex, view, animate);
             }
             else {
                 Int32 adapterPosition = Modulo(i, adapterCount);
                 AutoPtr<IView> newView;
-                mAdapter->GetView(adapterPosition, NULL, IViewGroup::Probe(this), (IView**)&newView);
+                mAdapter->GetView(adapterPosition, NULL, this, (IView**)&newView);
                 Int64 itemId = 0;
                 mAdapter->GetItemId(adapterPosition, &itemId);
 
@@ -948,16 +952,16 @@ void AdapterViewAnimator::ShowOnly(
                     viewGroupTmp->AddView(newView);
                 }
 
-                AutoPtr<ViewAndMetaData> source = new ViewAndMetaData(IView::Probe(fl), newRelativeIndex, adapterPosition, itemId);
-                mViewsMap.Insert(HashMap<Int32, AutoPtr<ViewAndMetaData> >::ValueType(index, source));
-
                 IView* viewTmp = IView::Probe(fl);
+                value = new ViewAndMetaData(viewTmp, newRelativeIndex, adapterPosition, itemId);
+                mViewsMap[index] = value;
+
                 AddChild(viewTmp);
                 ApplyTransformForChildAtIndex(viewTmp, newRelativeIndex);
-                TransformViewForTransition(-1, newRelativeIndex, IView::Probe(fl), animate);
+                TransformViewForTransition(-1, newRelativeIndex, viewTmp, animate);
             }
 
-            mViewsMap.Find(index)->mSecond->mView->BringToFront();
+            value->mView->BringToFront();
         }
         mCurrentWindowStart = newWindowStart;
         mCurrentWindowEnd = newWindowEnd;
@@ -1084,7 +1088,6 @@ void AdapterViewAnimator::SetDisplayedChild(
     /* [in] */ Int32 whichChild,
     /* [in] */ Boolean animate)
 {
-    assert(0);
     if (mAdapter) {
         mWhichChild = whichChild;
         if (whichChild >= GetWindowSize()) {

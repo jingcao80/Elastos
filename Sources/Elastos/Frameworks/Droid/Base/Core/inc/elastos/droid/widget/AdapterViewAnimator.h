@@ -24,6 +24,8 @@ namespace Widget {
 class AdapterViewAnimator
     : public AdapterView
     , public IAdapterViewAnimator
+    , public IRemoteAdapterConnectionCallback
+    , public IAdvanceable
 {
 public:
     class ViewAndMetaData
@@ -273,7 +275,7 @@ public:
 
     virtual CARAPI_(void) TransformViewForTransition(
         /* [in] */ Int32 fromIndex,
-        /* [in] */ Int64 toIndex,
+        /* [in] */ Int32 toIndex,
         /* [in] */ IView* v,
         /* [in] */ Boolean animate);
 

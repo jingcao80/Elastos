@@ -104,6 +104,7 @@ SOURCES += SlidingDrawer.cpp
 SOURCES += Space.cpp
 SOURCES += SpellChecker.cpp
 SOURCES += Spinner.cpp
+SOURCES += StackView.cpp
 SOURCES += Switch.cpp
 SOURCES += TabHost.cpp
 SOURCES += TableLayout.cpp

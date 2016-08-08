@@ -5697,7 +5697,7 @@ Boolean AppWidgetServiceImpl::UpdateProvidersForPackageLocked(
                         RegisterForBroadcastsLocked(provider, appWidgetIds);
                         for (Int32 j = 0; j < M; ++j) {
                             AutoPtr<IInterface> interfaceTmp;
-                            provider->mWidgets->Get(i, (IInterface**)&interfaceTmp);
+                            provider->mWidgets->Get(j, (IInterface**)&interfaceTmp);
                             IObject* objTmp = IObject::Probe(interfaceTmp);
                             Widget* widget = (Widget*)objTmp;
                             widget->mViews = NULL;

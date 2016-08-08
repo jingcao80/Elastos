@@ -9,7 +9,6 @@
 #include "elastos/droid/widget/CActionMenuView.h"
 #include "elastos/droid/widget/CActionMenuViewLayoutParams.h"
 #include "elastos/droid/widget/CActivityChooserView.h"
-#include "elastos/droid/widget/CAdapterViewAnimator.h"
 #include "elastos/droid/widget/CAdapterViewAnimatorSavedState.h"
 #include "elastos/droid/widget/CAdapterViewFlipper.h"
 #include "elastos/droid/widget/CAlphabetIndexer.h"
@@ -104,8 +103,9 @@
 #include "elastos/droid/widget/CSpinner.h"
 #include "elastos/droid/widget/CSpinnerSavedState.h"
 #include "elastos/droid/widget/CSwitch.h"
-//#include "elastos/droid/widget/CStackView.h"
-//#include "elastos/droid/widget/CStackViewLayoutParams.h"
+#include "elastos/droid/widget/CStackView.h"
+#include "elastos/droid/widget/CStackViewLayoutParams.h"
+#include "elastos/droid/widget/CStackViewStackFrame.h"
 #include "elastos/droid/widget/CTableLayout.h"
 #include "elastos/droid/widget/CTableLayoutLayoutParams.h"
 #include "elastos/droid/widget/CTableRow.h"
@@ -138,7 +138,6 @@
 #include "elastos/droid/widget/CZoomButtonsController.h"
 #include "elastos/droid/widget/CZoomControls.h"
 
-
 namespace Elastos {
 namespace Droid {
 namespace Widget {
@@ -153,7 +152,6 @@ CAR_OBJECT_IMPL(CActionMenuPresenterSavedState)
 CAR_OBJECT_IMPL(CActionMenuView)
 CAR_OBJECT_IMPL(CActionMenuViewLayoutParams)
 CAR_OBJECT_IMPL(CActivityChooserView)
-CAR_OBJECT_IMPL(CAdapterViewAnimator)
 CAR_OBJECT_IMPL(CAdapterViewAnimatorSavedState)
 CAR_OBJECT_IMPL(CAdapterViewFlipper)
 CAR_OBJECT_IMPL(CAlphabetIndexer)
@@ -248,8 +246,9 @@ CAR_OBJECT_IMPL(CSpellChecker)
 CAR_OBJECT_IMPL(CSpinner)
 CAR_OBJECT_IMPL(CSpinnerSavedState)
 CAR_OBJECT_IMPL(CSwitch)
-// CAR_OBJECT_IMPL(CStackView)
-// CAR_OBJECT_IMPL(CStackViewLayoutParams)
+CAR_OBJECT_IMPL(CStackView)
+CAR_OBJECT_IMPL(CStackViewLayoutParams)
+CAR_OBJECT_IMPL(CStackViewStackFrame)
 CAR_OBJECT_IMPL(CTabHost)
 CAR_OBJECT_IMPL(CTableLayout)
 CAR_OBJECT_IMPL(CTableLayoutLayoutParams)

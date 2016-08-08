@@ -2255,7 +2255,8 @@ ECode RemoteViews::FillInIntentClickListener::FillInIntentClickListener::OnClick
     AutoPtr<IViewParent> pa;
     v->GetParent((IViewParent**)&pa);
     AutoPtr<IView> parent = IView::Probe(pa);
-    while (parent != NULL && IAppWidgetHostView::Probe(parent) == NULL) {
+    while (parent != NULL && IAdapterView::Probe(parent) == NULL
+        && IAppWidgetHostView::Probe(parent) == NULL) {
         pa = NULL;
         parent->GetParent((IViewParent**)&pa);
         parent = IView::Probe(pa);

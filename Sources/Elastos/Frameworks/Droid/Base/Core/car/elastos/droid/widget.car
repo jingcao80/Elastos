@@ -2913,29 +2913,6 @@ module
         interface IAccessibilityEventSource;
     }
 
-    [local]
-    class CAdapterViewAnimator {
-        constructor(
-            [in] IContext* ctx);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs,
-            [in] Int32 defStyleAttr);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs,
-            [in] Int32 defStyleAttr,
-            [in] Int32 defStyleRes);
-
-        interface IAdapterViewAnimator;
-    }
-
     class CAdapterViewAnimatorSavedState {
         constructor(
             [in] IParcelable* superState,
@@ -2949,43 +2926,68 @@ module
         interface IParcelable;
     }
 
-   //  [local]
-   //  class CStackView {
-   //      constructor(
-   //          [in] IContext* ctx);
+    [local]
+    class CStackView {
+        constructor(
+            [in] IContext* ctx);
 
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
 
-   //      interface IAdapterViewAnimator;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //      interface IAdvanceable;
-   //      interface IRemoteAdapterConnectionCallback;
-   //  }
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
 
-   //  [local]
-   //  class CStackViewLayoutParams {
-   //      constructor(
-   //          [in] IStackView* sv,
-   //          [in] IView* view);
+        interface IStackView;
+        interface IAdapterViewAnimator;
+        interface IAdapterView;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IAdvanceable;
+        interface IRemoteAdapterConnectionCallback;
+    }
 
-   //      constructor(
-   //          [in] IStackView* sv,
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
+    [local]
+    class CStackViewLayoutParams {
+        constructor(
+            [in] IView* view);
 
-   //      interface IStackViewLayoutParams;
-   //  }
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IStackViewLayoutParams;
+        interface IViewGroupLayoutParams;
+    }
+
+    [local]
+    class CStackViewStackFrame {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IStackFrame;
+        interface IFrameLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
     [local, deprecated]
     class CSimpleExpandableListAdapter {
