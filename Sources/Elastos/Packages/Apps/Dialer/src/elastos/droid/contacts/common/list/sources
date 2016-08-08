@@ -8,3 +8,5 @@ INCLUDES += ../../../../../../
 SOURCES += ContactEntryListFragment.cpp
 SOURCES += DirectoryListLoader.cpp
 SOURCES += PhoneNumberPickerFragment.cpp
+SOURCES += IndexerListAdapter.cpp
+SOURCES += PinnedHeaderListAdapter.cpp

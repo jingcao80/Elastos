@@ -4,7 +4,6 @@
 
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.View.h"
-#include "elastos/droid/contacts/common/list/ContactListFilter.h"
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IFragment;
@@ -35,7 +34,7 @@ public:
      */
     static CARAPI_(Boolean) UpdateAccountFilterTitleForPeople(
         /* [in] */ IView* filterContainer,
-        /* [in] */ ContactListFilter* filter,
+        /* [in] */ IContactListFilter* filter,
         /* [in] */ Boolean showTitleForAllAccounts);
 
     /**
@@ -44,7 +43,7 @@ public:
      */
     static CARAPI_(Boolean) UpdateAccountFilterTitleForPhone(
         /* [in] */ IView* filterContainer,
-        /* [in] */ ContactListFilter* filter,
+        /* [in] */ IContactListFilter* filter,
         /* [in] */ Boolean showTitleForAllAccounts);
 
     /**
@@ -58,7 +57,7 @@ public:
     static CARAPI_(void) StartAccountFilterActivityForResult(
         /* [in] */ IActivity* activity,
         /* [in] */ Int32 requestCode,
-        /* [in] */ ContactListFilter* currentFilter);
+        /* [in] */ IContactListFilter* currentFilter);
 
     /**
      * Very similar to
@@ -68,7 +67,7 @@ public:
     static CARAPI_(void) StartAccountFilterActivityForResult(
         /* [in] */ IFragment* fragment,
         /* [in] */ Int32 requestCode,
-        /* [in] */ ContactListFilter* currentFilter);
+        /* [in] */ IContactListFilter* currentFilter);
 
     /**
      * Useful method to handle onActivityResult() for

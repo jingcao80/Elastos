@@ -1,0 +1,175 @@
+
+module
+{
+
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Database.ICursor;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Common {
+    namespace Widget {
+
+    interface ICompositeCursorAdapterPartition {
+
+        /**
+         * True if the directory should be shown even if no contacts are found.
+         */
+        GetShowIfEmpty(
+            [out] Boolean* result);
+
+        GetHasHeader(
+            [out] Boolean* result);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IBaseAdapter
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     */
+    [local]
+    interface ICompositeCursorAdapter {
+
+        GetContext(
+            [out] IContext** context);
+
+        /**
+         * Registers a partition. The cursor for that partition can be set later.
+         * Partitions should be added in the order they are supposed to appear in the
+         * list.
+         */
+        AddPartition(
+            [in] Boolean showIfEmpty,
+            [in] Boolean hasHeader);
+
+        AddPartition(
+            [in] ICompositeCursorAdapterPartition* partition);
+
+        AddPartition(
+            [in] Int32 location,
+            [in] ICompositeCursorAdapterPartition* partition);
+
+        RemovePartition(
+            [in] Int32 partitionIndex);
+
+        /**
+         * Removes cursors for all partitions.
+         */
+        // TODO: Is this really what this is supposed to do? Just remove the cursors? Not close them?
+        // Not remove the partitions themselves? Isn't this leaking?
+        ClearPartitions();
+
+        /**
+         * Closes all cursors and removes all partitions.
+         */
+        Close();
+
+        SetHasHeader(
+            [in] Int32 partitionIndex,
+            [in] Boolean flag);
+
+        SetShowIfEmpty(
+            [in] Int32 partitionIndex,
+            [in] Boolean flag);
+
+        GetPartition(
+            [in] Int32 partitionIndex,
+            [out] ICompositeCursorAdapterPartition** partition);
+
+        GetPartitionCount(
+            [out] Int32* count);
+
+        /**
+         * Returns true if the specified partition was configured to have a header.
+         */
+        HasHeader(
+            [in] Int32 partition,
+            [out] Boolean* hasHeader);
+
+        /**
+         * Returns the total number of list items in all partitions.
+         */
+        GetCount(
+            [out] Int32* count);
+
+        /**
+         * Returns the cursor for the given partition
+         */
+        GetCursor(
+            [in] Int32 partition,
+            [out] ICursor** cursor);
+
+        /**
+         * Changes the cursor for an individual partition.
+         */
+        ChangeCursor(
+            [in] Int32 partition,
+            [in] ICursor* cursor);
+
+        /**
+         * Returns true if the specified partition has no cursor or an empty cursor.
+         */
+        IsPartitionEmpty(
+            [in] Int32 partition,
+            [out] Boolean* isEmpty);
+
+        /**
+         * Given a list position, returns the index of the corresponding partition.
+         */
+        GetPartitionForPosition(
+            [in] Int32 position,
+            [out] Int32* partition);
+
+        /**
+         * Given a list position, return the offset of the corresponding item in its
+         * partition.  The header, if any, will have offset -1.
+         */
+        GetOffsetInPartition(
+            [in] Int32 position,
+            [out] Int32* offset);
+
+        /**
+         * Returns the first list position for the specified partition.
+         */
+        GetPositionForPartition(
+            [in] Int32 partition,
+            [out] Int32* position);
+
+        /**
+         * Returns the overall number of item view types across all partitions. An
+         * implementation of this method needs to ensure that the returned count is
+         * consistent with the values returned by {@link #getItemViewType(int,int)}.
+         */
+        GetItemViewTypeCount(
+            [out] Int32* count);
+
+        /**
+         * Returns a pre-positioned cursor for the specified list position.
+         */
+        GetItem(
+            [in] Int32 position,
+            [out] IInterface** item);
+
+        /**
+         * Enable or disable data change notifications.  It may be a good idea to
+         * disable notifications before making changes to several partitions at once.
+         */
+        SetNotificationsEnabled(
+            [in] Boolean flag);
+
+    }
+
+    } // Widget
+    } // Common
+    } // Droid
+    } // Elastos
+
+}

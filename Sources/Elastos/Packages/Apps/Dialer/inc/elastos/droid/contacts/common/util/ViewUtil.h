@@ -71,4 +71,4 @@ private:
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_CONTACTS_COMMON_UTIL_VIEWUTIL_H__
+#endif //__ELASTOS_DROID_CONTACTS_COMMON_UTIL_VIEWUTIL_H__

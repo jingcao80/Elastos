@@ -42,7 +42,7 @@ ECode PhoneNumberPickerFragment::FilterHeaderClickListener::OnClick(
 //=================================================================
 
 const String PhoneNumberPickerFragment::TAG("PhoneNumberPickerFragment");
-const Int32 REQUEST_CODE_ACCOUNT_FILTER;
+const Int32 PhoneNumberPickerFragment::REQUEST_CODE_ACCOUNT_FILTER;
 const String KEY_SHORTCUT_ACTION("shortcutAction");
 const String KEY_FILTER("filter");
 

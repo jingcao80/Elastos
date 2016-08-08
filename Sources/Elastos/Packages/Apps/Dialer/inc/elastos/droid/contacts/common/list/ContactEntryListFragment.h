@@ -79,6 +79,8 @@ private:
             : mHost(host)
         {}
 
+        TO_STRING_IMPL("ContactEntryListFragment::DelayedDirectorySearchHandler")
+
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
