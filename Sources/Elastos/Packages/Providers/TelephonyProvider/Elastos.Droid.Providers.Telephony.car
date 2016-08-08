@@ -2,6 +2,10 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
+    merge("car/elastos/droid/providers/telephony/MmsSmsProvider.car");
+    merge("car/elastos/droid/providers/telephony/MmsProvider.car");
+
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IContentProvider;
@@ -11,13 +15,33 @@ module
     namespace Providers {
     namespace Telephony {
 
-    class CTelephonyProvider {
-        constructor();
+        class CTelephonyProvider {
+            constructor();
 
-        interface IContentProvider;
-        interface IComponentCallbacks;
-        interface IComponentCallbacks2;
-    }
+            interface IContentProvider;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+        }
+
+        class CSmsProvider {
+            constructor();
+
+            interface IContentProvider;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+        }
+
+        class CLowStorageMonitor {
+            interface IBroadcastReceiver;
+        }
+
+        class CMmsProvider {
+            constructor();
+
+            interface IContentProvider;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+        }
 
     } // namespace Telephony
     } // namespace Providers

@@ -133,10 +133,11 @@ EXPORT_HEADERS += elastos/droid/os/SELinux.h
 EXPORT_HEADERS += elastos/droid/os/ResultReceiver.h
 EXPORT_HEADERS += elastos/droid/os/CountDownTimer.h
 
+EXPORT_HEADERS += elastos/droid/provider/DocumentsProvider.h
 EXPORT_HEADERS += elastos/droid/provider/Settings.h
 EXPORT_HEADERS += elastos/droid/provider/SearchIndexableData.h
 EXPORT_HEADERS += elastos/droid/provider/SearchIndexablesProvider.h
-EXPORT_HEADERS += elastos/droid/provider/DocumentsProvider.h
+EXPORT_HEADERS += elastos/droid/provider/Telephony.h
 
 EXPORT_HEADERS += elastos/droid/preference/CheckBoxPreference.h
 EXPORT_HEADERS += elastos/droid/preference/DialogPreference.h
@@ -157,6 +158,7 @@ EXPORT_HEADERS += elastos/droid/service/notification/ConditionProviderService.h
 EXPORT_HEADERS += elastos/droid/service/notification/NotificationListenerService.h
 
 EXPORT_HEADERS += elastos/droid/telephony/PhoneStateListener.h
+EXPORT_HEADERS += elastos/droid/telephony/SmsManager.h
 EXPORT_HEADERS += elastos/droid/text/format/DateUtils.h
 EXPORT_HEADERS += elastos/droid/text/method/MetaKeyKeyListener.h
 EXPORT_HEADERS += elastos/droid/text/method/BaseKeyListener.h

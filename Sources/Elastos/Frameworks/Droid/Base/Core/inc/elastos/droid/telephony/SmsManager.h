@@ -32,7 +32,7 @@ namespace Telephony {
   * <p>For information about how to behave as the default SMS app on Android 4.4 (API level 19)
   * and higher, see {@link android.provider.Telephony}.
   */
-class SmsManager
+class ECO_PUBLIC SmsManager
     : public Object
     , public ISmsManager
 {

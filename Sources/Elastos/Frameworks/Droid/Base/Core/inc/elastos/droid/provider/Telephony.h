@@ -84,7 +84,7 @@ namespace Provider {
  * >Getting Your SMS Apps Ready for KitKat</a>.</p>
  *
  */
-class Telephony
+class ECO_PUBLIC Telephony
     : public Object
     , public ITelephony
 {
@@ -92,7 +92,7 @@ public:
     /**
      * Contains all text-based SMS messages.
      */
-    class Sms
+    class ECO_PUBLIC Sms
         //: public Singleton
         //, public ITelephonySms
         //, public IBaseColumns
@@ -102,7 +102,7 @@ public:
         /**
          * Contains all text-based SMS messages in the SMS app inbox.
          */
-        class Inbox
+        class ECO_PUBLIC Inbox
             //: public Singleton
             //, public ITelephonySmsInbox
             //, public IBaseColumns
@@ -173,7 +173,7 @@ public:
         /**
          * Contains all sent text-based SMS messages in the SMS app.
          */
-        class Sent
+        class ECO_PUBLIC Sent
             //: public Singleton
             //, public ITelephonySmsSent
             //, public IBaseColumns
@@ -238,7 +238,7 @@ public:
         /**
          * Contains all sent text-based SMS messages in the SMS app.
          */
-        class Draft
+        class ECO_PUBLIC Draft
             //: public Singleton
             //, public ITelephonySmsDraft
             //, public IBaseColumns
@@ -297,7 +297,7 @@ public:
         /**
          * Contains all pending outgoing text-based SMS messages.
          */
-        class Outbox
+        class ECO_PUBLIC Outbox
             //: public Singleton
             //, public ITelephonySmsOutbox
             //, public IBaseColumns
@@ -368,7 +368,7 @@ public:
         /**
          * Contains all sent text-based SMS messages in the SMS app.
          */
-        class Conversations
+        class ECO_PUBLIC Conversations
             //: public Object
             //, public ITelephonySmsConversations
             //, public IBaseColumns
@@ -395,7 +395,7 @@ public:
         /**
          * Contains constants for SMS related Intents that are broadcast.
          */
-        class Intents
+        class ECO_PUBLIC Intents
             //: public Singleton
             //, public ITelephonySmsIntents
         {
@@ -643,7 +643,7 @@ public:
     /**
      * Helper functions for the "threads" table used by MMS and SMS.
      */
-    class Threads
+    class ECO_PUBLIC Threads
         //: public Object
         //, public ITelephonyThreads
         //, public ITelephonyThreadsColumns
@@ -711,7 +711,7 @@ public:
     /**
      * Contains all MMS messages.
      */
-    class Mms
+    class ECO_PUBLIC Mms
         //: public Object
         //, public ITelephonyMms
         //, public ITelephonyBaseMmsColumns
@@ -720,7 +720,7 @@ public:
         /**
          * Contains all MMS messages in the MMS app inbox.
          */
-        class Inbox
+        class ECO_PUBLIC Inbox
             //: public Object
             //, public ITelephonyMmsInbox
             //, public ITelephonyBaseMmsColumns
@@ -747,7 +747,7 @@ public:
         /**
          * Contains all MMS messages in the MMS app sent folder.
          */
-        class Sent
+        class ECO_PUBLIC Sent
             //: public Object
             //, public ITelephonyMmsSent
             //, public ITelephonyBaseMmsColumns
@@ -775,7 +775,7 @@ public:
         /**
          * Contains all MMS messages in the MMS app drafts folder.
          */
-        class Draft
+        class ECO_PUBLIC Draft
             //: public Object
             //, public ITelephonyMmsDraft
             //, public ITelephonyBaseMmsColumns
@@ -801,7 +801,7 @@ public:
         /**
          * Contains all MMS messages in the MMS app outbox.
          */
-        class Outbox
+        class ECO_PUBLIC Outbox
             //: public Object
             //, public ITelephonyMmsOutbox
             //, public ITelephonyBaseMmsColumns
@@ -827,7 +827,7 @@ public:
         /**
          * Contains address information for an MMS message.
          */
-        class Addr
+        class ECO_PUBLIC Addr
             //: public Object
             //, public ITelephonyMmsAddr
             //, public IBaseColumns
@@ -847,7 +847,7 @@ public:
         /**
          * Contains message parts.
          */
-        class Part
+        class ECO_PUBLIC Part
             //: public Object
             //, public ITelephonyMmsPart
             //, public IBaseColumns
@@ -868,7 +868,7 @@ public:
         /**
          * Message send rate table.
          */
-        class Rate
+        class ECO_PUBLIC Rate
             //: public Object
             //, public ITelephonyMmsRate
         {
@@ -893,7 +893,7 @@ public:
         /**
          * Intents class.
          */
-        class Intents
+        class ECO_PUBLIC Intents
             //: public Object
             //, public ITelephonyMmsIntents
         {
@@ -1003,7 +1003,7 @@ public:
     /**
      * Contains all MMS and SMS messages.
      */
-    class MmsSms
+    class ECO_PUBLIC MmsSms
         //: public Object
         //, public ITelephonyMmsSms
         //, public IBaseColumns
@@ -1012,7 +1012,7 @@ public:
         /**
          * Contains pending messages info.
          */
-        class PendingMessages
+        class ECO_PUBLIC PendingMessages
             //: public Object
             //, public ITelephonyMmsSmsPendingMessages
             //, public IBaseColumns
@@ -1037,7 +1037,7 @@ public:
          * Words table used by provider for full-text searches.
          * @hide
          */
-        class WordsTable
+        class ECO_PUBLIC WordsTable
             //: public Object
             //, public ITelephonyMmsSmsWordsTable
         {
@@ -1106,7 +1106,7 @@ public:
     /**
      * Carriers class contains information about APNs, including MMSC information.
      */
-    class Carriers
+    class ECO_PUBLIC Carriers
         //: public Object
         //, public ITelephonyCarriers
         //, public IBaseColumns
@@ -1133,7 +1133,7 @@ public:
      * Contains received SMS cell broadcast messages.
      * @hide
      */
-    class CellBroadcasts
+    class ECO_PUBLIC CellBroadcasts
         //: public Object
         //, public ITelephonyCellBroadcasts
         //, public IBaseColumns
@@ -1187,7 +1187,7 @@ public:
      * for phone and/or message purposes.
      * @hide
      */
-    class Blacklist
+    class ECO_PUBLIC Blacklist
         //: public Object
         //, public ITelephonyBlacklist
         //, public IBaseColumns

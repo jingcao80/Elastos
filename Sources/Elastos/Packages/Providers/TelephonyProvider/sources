@@ -16,6 +16,10 @@ SOURCES += Elastos.Droid.Core.cpp
 
 SOURCES += R.cpp
 SOURCES += CTelephonyProvider.cpp
+SOURCES += CSmsProvider.cpp
+SOURCES += CLowStorageMonitor.cpp
+SOURCES += MmsSmsDatabaseHelper.cpp
+SOURCES += CMmsProvider.cpp
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
