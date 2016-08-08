@@ -356,7 +356,7 @@ build_cpp() {
         if [[ -z "$res_namespace" ]]; then
             extra_res_dir="-S $i"
         else
-            extra_res_dir="-S $i $extra_res_dir"
+            extra_res_dir="$extra_res_dir -S $i"
         fi
     done
     set -o errtrace
