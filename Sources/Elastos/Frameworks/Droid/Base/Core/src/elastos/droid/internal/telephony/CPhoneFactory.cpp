@@ -918,6 +918,7 @@ ECode CPhoneFactory::MakeImsPhone(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IImsPhone> ip = ImsPhoneFactory::MakePhone(sContext, phoneNotifier, defaultPhone);
     *result = ip;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

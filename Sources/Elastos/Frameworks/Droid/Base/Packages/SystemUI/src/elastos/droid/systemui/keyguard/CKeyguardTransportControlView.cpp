@@ -369,25 +369,6 @@ CKeyguardTransportControlView::CKeyguardTransportControlView()
     , mCurrentPlayState(0)
     , mSeekEnabled(FALSE)
 {
-    CMetadata::New((IMetadata**)&mMetadata);
-
-    CDate::New((IDate**)&mTempDate);
-
-    mRCClientUpdateListener = new MyRemoteControllerOnClientUpdateListener(this);
-
-    mUpdateSeekBars = new UpdateSeekBarRunnable(this);
-
-    mResetToMetadata = new MyRunnable(this);
-
-    mTransportCommandListener = new MyViewOnClickListener(this);
-
-    mTransportShowSeekBarListener = new MyViewOnLongClickListener(this);
-
-    mFutureSeekRunnable = new FutureSeekRunnable(this);
-
-    mOnSeekBarChangeListener = new MySeekBarOnSeekBarChangeListener(this);
-
-    mUpdateMonitor = new MyKeyguardUpdateMonitorCallback(this);
 }
 
 Boolean CKeyguardTransportControlView::PlaybackPositionShouldMove(
@@ -414,6 +395,21 @@ ECode CKeyguardTransportControlView::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     FrameLayout::constructor(context, attrs);
+
+    AutoPtr<IMetadata> md;
+    CMetadata::New((IMetadata**)&md);
+    mMetadata = (Metadata*)md.Get();
+
+    CDate::New((IDate**)&mTempDate);
+
+    mRCClientUpdateListener = new MyRemoteControllerOnClientUpdateListener(this);
+    mUpdateSeekBars = new UpdateSeekBarRunnable(this);
+    mResetToMetadata = new MyRunnable(this);
+    mTransportCommandListener = new MyViewOnClickListener(this);
+    mTransportShowSeekBarListener = new MyViewOnLongClickListener(this);
+    mFutureSeekRunnable = new FutureSeekRunnable(this);
+    mOnSeekBarChangeListener = new MySeekBarOnSeekBarChangeListener(this);
+    mUpdateMonitor = new MyKeyguardUpdateMonitorCallback(this);
 
     //if (DEBUG) Logger::V(TAG, "Create TCV %s", TO_CSTR(this));
     CAudioManager::New(mContext, (IAudioManager**)&mAudioManager);

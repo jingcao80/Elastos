@@ -981,17 +981,20 @@ ECode CdmaConnection::ParentFromDCState(
         case DriverCallState_DIALING:
         case DriverCallState_ALERTING:
             *result = ((CdmaCallTracker*)mOwner.Get())->mForegroundCall;
+            REFCOUNT_ADD(*result)
             return NOERROR;
         //break;
 
         case DriverCallState_HOLDING:
             *result = ((CdmaCallTracker*)mOwner.Get())->mBackgroundCall;
+            REFCOUNT_ADD(*result)
             return NOERROR;
         //break;
 
         case DriverCallState_INCOMING:
         case DriverCallState_WAITING:
             *result = ((CdmaCallTracker*)mOwner.Get())->mRingingCall;
+            REFCOUNT_ADD(*result)
             return NOERROR;
         //break;
 

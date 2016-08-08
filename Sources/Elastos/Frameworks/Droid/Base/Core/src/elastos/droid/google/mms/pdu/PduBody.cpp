@@ -25,10 +25,10 @@ PduBody::PduBody()
 {
     CVector::New((IVector**)&mParts);
 
-    CHashMap::New((IHashMap**)&mPartMapByContentId);
-    CHashMap::New((IHashMap**)&mPartMapByContentLocation);
-    CHashMap::New((IHashMap**)&mPartMapByName);
-    CHashMap::New((IHashMap**)&mPartMapByFileName);
+    CHashMap::New((IMap**)&mPartMapByContentId);
+    CHashMap::New((IMap**)&mPartMapByContentLocation);
+    CHashMap::New((IMap**)&mPartMapByName);
+    CHashMap::New((IMap**)&mPartMapByFileName);
 }
 
 ECode PduBody::AddPart(

@@ -49,7 +49,7 @@ public:
     static const Int32 SIZE = 3;
 
 private:
-     AutoPtr<IHashMap/*<String,String[]*/> mCarrierVmMap;
+     AutoPtr<IHashMap> mCarrierVmMap;
 };
 
 } // namespace Uicc

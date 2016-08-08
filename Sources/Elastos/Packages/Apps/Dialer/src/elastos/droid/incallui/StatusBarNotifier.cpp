@@ -468,10 +468,11 @@ AutoPtr<IBitmap> StatusBarNotifier::GetLargeIconToDisplay(
     if (largeIcon != NULL) {
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
-        Int32 height;
-        res->GetDimension(Elastos::Droid::R::dimen::notification_large_icon_height, (Float*)&height);
-        Int32 width;
-        res->GetDimension(Elastos::Droid::R::dimen::notification_large_icon_width, (Float*)&width);
+        Float fh, fw;
+        res->GetDimension(Elastos::Droid::R::dimen::notification_large_icon_height, &fw);
+        res->GetDimension(Elastos::Droid::R::dimen::notification_large_icon_width, &fh);
+        Int32 width = (Int32)fw;
+        Int32 height = (Int32)fh;
         AutoPtr<IBitmapHelper> helper;
         CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
         AutoPtr<IBitmap> tmpBM;

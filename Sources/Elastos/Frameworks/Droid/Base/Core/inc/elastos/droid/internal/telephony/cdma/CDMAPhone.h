@@ -75,6 +75,7 @@ using Elastos::Droid::Telephony::ICellLocation;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Os::RegistrantList;
+using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IBundle;
@@ -908,7 +909,7 @@ public:
     AutoPtr<IPhoneSubInfo> mSubInfo;
     AutoPtr<IEriManager> mEriManager;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
-    AutoPtr<Registrant> mPostDialHandler;
+    AutoPtr<IRegistrant> mPostDialHandler;
 
 protected:
     // mEcmExitRespRegistrant is informed after the phone has been exited
@@ -932,7 +933,7 @@ private:
     AutoPtr<RegistrantList> mEriFileLoadedRegistrants;
     // mEcmTimerResetRegistrants are informed after Ecm timer is canceled or re-started
     AutoPtr<RegistrantList> mEcmTimerResetRegistrants;
-    AutoPtr<Registrant> mEcmExitRespRegistrant;
+    AutoPtr<IRegistrant> mEcmExitRespRegistrant;
     String mEsn;
     String mMeid;
     // A runnable which is used to automatically exit from Ecm after a period of time.

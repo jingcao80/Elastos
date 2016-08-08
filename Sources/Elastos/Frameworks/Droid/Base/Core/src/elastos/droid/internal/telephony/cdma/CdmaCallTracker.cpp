@@ -239,7 +239,8 @@ ECode CdmaCallTracker::Dial(
     ICallState foregroundCallState;
     ICall::Probe(mForegroundCall)->GetState(&foregroundCallState);
     if (foregroundCallState == ICallState_ACTIVE) {
-        *result = DialThreeWay(dialString);
+        AutoPtr<IConnection> conn = DialThreeWay(dialString);
+        *result = conn;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
@@ -912,7 +913,7 @@ void CdmaCallTracker::HandlePollCalls(
     else if (IsCommandExceptionRadioNotAvailable(ar->mException)) {
         // just a dummy empty ArrayList to cause the loop
         // to hang up all the calls
-        CArrayList::New((IArrayList**)&polledCalls);
+        CArrayList::New((IList**)&polledCalls);
     }
     else {
         // Radio probably wasn't ready--try again in a bit

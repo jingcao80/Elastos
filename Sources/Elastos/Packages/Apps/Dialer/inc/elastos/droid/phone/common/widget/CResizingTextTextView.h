@@ -20,6 +20,8 @@ CarClass(CResizingTextTextView)
     , public TextView
 {
 public:
+    CAR_OBJECT_DECL()
+
     CResizingTextTextView();
 
     CARAPI constructor(

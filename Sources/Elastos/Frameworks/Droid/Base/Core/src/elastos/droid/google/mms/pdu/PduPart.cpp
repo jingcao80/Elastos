@@ -28,7 +28,7 @@ AutoPtr<ArrayOf<Byte> > PduPart::DISPOSITION_INLINE = String("inline").GetBytes(
 
 PduPart::PduPart()
 {
-    CHashMap::New((IHashMap**)&mPartHeader);
+    CHashMap::New((IMap**)&mPartHeader);
 }
 
 ECode PduPart::SetData(

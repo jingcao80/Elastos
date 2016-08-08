@@ -200,16 +200,16 @@ Char32 DialpadFragment::DTMFKeyListener::Lookup(
     // This code is similar to {@link DialerKeyListener#lookup(KeyEvent, Spannable) lookup}
     Int32 meta;
     event->GetMetaState(&meta);
-    Int32 number;
-    event->GetNumber((Char32*)&number);
+    Char32 number;
+    event->GetNumber(&number);
 
     if (!((meta & (IKeyEvent::META_ALT_ON | IKeyEvent::META_SHIFT_ON)) == 0) || (number == 0)) {
-        Int32 match;
-        event->GetMatch(GetAcceptedChars(), meta, (Char32*)&match);
+        Char32 match;
+        event->GetMatch(GetAcceptedChars(), meta, &match);
         number = (match != 0) ? match : number;
     }
 
-    return (Char32)number;
+    return number;
 }
 
 Boolean DialpadFragment::DTMFKeyListener::IsKeyEventAcceptable (

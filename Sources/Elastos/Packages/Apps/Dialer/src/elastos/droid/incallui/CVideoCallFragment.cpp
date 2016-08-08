@@ -408,7 +408,11 @@ ECode CVideoCallFragment::GetDisplayVideoSurface(
     /* [out] */ ISurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
-    *surface = sDisplaySurface == NULL ? NULL : sDisplaySurface->GetSurface();
+    AutoPtr<ISurface> s;
+    if (sDisplaySurface != NULL) {
+        s = sDisplaySurface->GetSurface();
+    }
+    *surface = s;
     REFCOUNT_ADD(*surface)
     return NOERROR;
 }
@@ -417,7 +421,11 @@ ECode CVideoCallFragment::GetPreviewVideoSurface(
     /* [out] */ ISurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
-    *surface = sPreviewSurface == NULL ? NULL : sPreviewSurface->GetSurface();
+    AutoPtr<ISurface> s;
+    if (sPreviewSurface != NULL) {
+        s = sPreviewSurface->GetSurface();
+    }
+    *surface = s;
     REFCOUNT_ADD(*surface)
     return NOERROR;
 }

@@ -15,7 +15,8 @@ ECode CTransitionManagerHelper::GetDefaultTransition(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = CTransitionManager::GetDefaultTransition();
+    AutoPtr<ITransition> t = CTransitionManager::GetDefaultTransition();
+    *result = t;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

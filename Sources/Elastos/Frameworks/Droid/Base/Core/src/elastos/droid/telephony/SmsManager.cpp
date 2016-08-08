@@ -173,7 +173,8 @@ ECode SmsManager::DivideMessage(
         // throw new IllegalArgumentException("text is NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    *result = SmsMessage::FragmentText(text);
+    AutoPtr<IArrayList> list = SmsMessage::FragmentText(text);
+    *result = list;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -489,7 +490,8 @@ ECode SmsManager::GetAllMessagesFromIcc(
     //     // ignore it
     // }
 
-    *result = CreateMessageListFromRawRecords(records);
+    AutoPtr<IArrayList> list = CreateMessageListFromRawRecords(records);
+    *result = list;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

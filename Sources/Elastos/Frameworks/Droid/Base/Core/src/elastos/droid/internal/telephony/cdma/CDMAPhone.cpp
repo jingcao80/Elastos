@@ -482,7 +482,8 @@ ECode CDMAPhone::Dial(
     }
 
     if (DBG) Logger::D(LOGTAG, "Trying (non-IMS) CS call");
-    *result = DialInternal(dialString, NULL, videoState);
+    AutoPtr<IConnection> con = DialInternal(dialString, NULL, videoState);
+    *result = con;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

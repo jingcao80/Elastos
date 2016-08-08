@@ -3328,8 +3328,9 @@ ECode PagedView::ShowScrollingIndicator(
             CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
             AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
             (*array)[0] = 1.0f;
-            helper->OfFloat(mScrollIndicator, String("alpha"), array,
-                    (IObjectAnimator**)&mScrollIndicatorAnimator);
+            AutoPtr<IObjectAnimator> oa;
+            helper->OfFloat(mScrollIndicator, String("alpha"), array, (IObjectAnimator**)&oa);
+            mScrollIndicatorAnimator = IValueAnimator::Probe(oa);
             mScrollIndicatorAnimator->SetDuration(sScrollIndicatorFadeInDuration);
             IAnimator::Probe(mScrollIndicatorAnimator)->Start();
         }

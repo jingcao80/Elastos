@@ -630,7 +630,7 @@ ECode CAppSecurityPermissions::GetPermissionsView(
     }
 
     *view = permsView;
-    permsView->AddRef();
+    REFCOUNT_ADD(*view)
     return NOERROR;
 }
 

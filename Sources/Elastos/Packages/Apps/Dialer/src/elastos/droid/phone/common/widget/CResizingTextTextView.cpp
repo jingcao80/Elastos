@@ -11,6 +11,8 @@ namespace Phone {
 namespace Common {
 namespace Widget {
 
+CAR_OBJECT_IMPL(CResizingTextTextView)
+
 CResizingTextTextView::CResizingTextTextView()
     : mOriginalTextSize(0)
     , mMinTextSize(0)

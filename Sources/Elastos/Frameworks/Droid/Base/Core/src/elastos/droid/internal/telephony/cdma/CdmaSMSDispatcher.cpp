@@ -215,7 +215,8 @@ ECode CdmaSMSDispatcher::CalculateLength(
     /* [out] */ IGsmAlphabetTextEncodingDetails** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = CDMASmsMessage::CalculateLength(messageBody, use7bitOnly);
+    AutoPtr<IGsmAlphabetTextEncodingDetails> gsm = CDMASmsMessage::CalculateLength(messageBody, use7bitOnly);
+    *result = gsm;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
