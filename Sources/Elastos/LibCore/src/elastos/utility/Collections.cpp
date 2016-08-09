@@ -4443,41 +4443,44 @@ ECode Collections::BinarySearch(
     if (list == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
+    ICollection* collection = ICollection::Probe(list);
+
     Boolean b;
-    if (((ICollection::Probe(list))->IsEmpty(&b), b)) {
+    if ((collection->IsEmpty(&b), b)) {
         *index = -1;
         return NOERROR;
     }
 
     if (IRandomAccess::Probe(list) == NULL) {
-        AutoPtr<IListIterator> it;
-        list->GetListIterator((IListIterator**)&it);
+        AutoPtr<IListIterator> lit;
+        list->GetListIterator((IListIterator**)&lit);
+        IIterator* it = IIterator::Probe(lit);
         Boolean b;
-        while (((IIterator::Probe(it))->HasNext(&b), b)) {
+        while ((it->HasNext(&b), b)) {
             Int32 result;
             AutoPtr<IInterface> o;
-            (IIterator::Probe(it))->GetNext((IInterface**)&o);
+            it->GetNext((IInterface**)&o);
             AutoPtr<IComparable> com = IComparable::Probe(o);
             com->CompareTo(object, &result);
             result = -result;
             if (result <= 0) {
                 if (result == 0) {
-                    return it->GetPreviousIndex(index);
+                    return lit->GetPreviousIndex(index);
                 }
                 Int32 preIndex;
-                it->GetPreviousIndex(&preIndex);
+                lit->GetPreviousIndex(&preIndex);
                 *index = -preIndex - 1;
                 return NOERROR;
             }
         }
         Int32 num;
-        (ICollection::Probe(list))->GetSize(&num);
+        collection->GetSize(&num);
         *index = -num - 1;
         return NOERROR;
     }
 
     Int32 low = 0, mid, high, result = -1;
-    (ICollection::Probe(list))->GetSize(&mid);
+    collection->GetSize(&mid);
     high = mid - 1;
     while (low <= high) {
         mid = (UInt32(low + high)) >> 1;
@@ -4512,34 +4515,37 @@ ECode Collections::BinarySearch(
     if (comparator == NULL) {
         return BinarySearch(list, object, index);
     }
+
+    ICollection* collection = ICollection::Probe(list);
     if (IRandomAccess::Probe(list) == NULL) {
-        AutoPtr<IListIterator> it;
-        list->GetListIterator((IListIterator**)&it);
+        AutoPtr<IListIterator> lit;
+        list->GetListIterator((IListIterator**)&lit);
+        IIterator* it = IIterator::Probe(lit);
         Boolean b;
-        while (((IIterator::Probe(it))->HasNext(&b), b)) {
+        while ((it->HasNext(&b), b)) {
             Int32 result;
             AutoPtr<IInterface> o;
-            (IIterator::Probe(it))->GetNext((IInterface**)&o);
+            it->GetNext((IInterface**)&o);
             comparator->Compare(o, object, &result);
             result = -result;
             if (result <= 0) {
                 if (result == 0) {
-                    return it->GetPreviousIndex(index);
+                    return lit->GetPreviousIndex(index);
                 }
                 Int32 preIndex;
-                it->GetPreviousIndex(&preIndex);
+                lit->GetPreviousIndex(&preIndex);
                 *index = -preIndex - 1;
                 return NOERROR;
             }
         }
         Int32 size;
-        (ICollection::Probe(list))->GetSize(&size);
+        collection->GetSize(&size);
         *index = -size - 1;
         return NOERROR;
     }
 
     Int32 low = 0, mid, high, result = -1;
-    (ICollection::Probe(list))->GetSize(&mid);
+    collection->GetSize(&mid);
     high = mid - 1;
     while (low <= high) {
         mid = (UInt32(low + high)) >> 1;
@@ -4610,16 +4616,17 @@ ECode Collections::Fill(
     /* [in] */ IList* list,
     /* [in] */ IInterface* object)
 {
-    AutoPtr<IListIterator> it;
+    AutoPtr<IListIterator> lit;
     if (list == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    list->GetListIterator((IListIterator**)&it);
+    list->GetListIterator((IListIterator**)&lit);
+    IIterator* it = IIterator::Probe(lit);
     Boolean b;
-    while (((IIterator::Probe(it))->HasNext(&b), b)) {
+    while (it->HasNext(&b), b) {
         AutoPtr<IInterface> o;
-        (IIterator::Probe(it))->GetNext((IInterface**)&o);
-        it->Set(object);
+        it->GetNext((IInterface**)&o);
+        lit->Set(object);
     }
     return NOERROR;
 }
@@ -4766,11 +4773,12 @@ ECode Collections::Reverse(
     (ICollection::Probe(list))->GetSize(&size);
     AutoPtr<IListIterator> front;
     list->GetListIterator((IListIterator**)&front);
+    IIterator* frontIt = IIterator::Probe(front);
     AutoPtr<IListIterator> back;
     list->GetListIterator(size, (IListIterator**)&back);
     for (Int32 i = 0; i < size / 2; i++) {
         AutoPtr<IInterface> frontNext;
-        (IIterator::Probe(front))->GetNext((IInterface**)&frontNext);
+        frontIt->GetNext((IInterface**)&frontNext);
         AutoPtr<IInterface> backPrev;
         back->GetPrevious((IInterface**)&backPrev);
         front->Set(backPrev);
@@ -4850,13 +4858,14 @@ ECode Collections::Shuffle(
         }
 
         Int32 i = 0;
-        AutoPtr<IListIterator> it;
-        objectList->GetListIterator((IListIterator**)&it);
+        AutoPtr<IListIterator> lit;
+        objectList->GetListIterator((IListIterator**)&lit);
+        IIterator* it = IIterator::Probe(lit);
         Boolean b;
-        while (((IIterator::Probe(it))->HasNext(&b), b)) {
+        while ((it->HasNext(&b), b)) {
             AutoPtr<IInterface> o;
-            (IIterator::Probe(it))->GetNext((IInterface**)&o);
-            it->Set((*array)[i++]);
+            it->GetNext((IInterface**)&o);
+            lit->Set((*array)[i++]);
         }
     }
     return NOERROR;
@@ -4906,13 +4915,14 @@ ECode Collections::Sort(
     (ICollection::Probe(list))->ToArray((ArrayOf<IInterface*>**)&array);
     Arrays::Sort(array.Get());
     Int32 i = 0;
-    AutoPtr<IListIterator> it;
-    list->GetListIterator((IListIterator**)&it);
+    AutoPtr<IListIterator> lit;
+    list->GetListIterator((IListIterator**)&lit);
+    IIterator* it = IIterator::Probe(lit);
     Boolean b;
-    while (((IIterator::Probe(it))->HasNext(&b), b)) {
+    while ((it->HasNext(&b), b)) {
         AutoPtr<IInterface> o;
-        (IIterator::Probe(it))->GetNext((IInterface**)&o);
-        it->Set((*array)[i++]);
+        it->GetNext((IInterface**)&o);
+        lit->Set((*array)[i++]);
     }
     return NOERROR;
 }
@@ -4930,14 +4940,15 @@ ECode Collections::Sort(
     AutoPtr<ArrayOf<IInterface*> > array;
     (ICollection::Probe(list))->ToArray(arr, (ArrayOf<IInterface*>**)&array);
     Arrays::Sort(array, comparator);
-    AutoPtr<IListIterator> it;
-    list->GetListIterator((IListIterator**)&it);
+    AutoPtr<IListIterator> lit;
+    list->GetListIterator((IListIterator**)&lit);
+    IIterator* it = IIterator::Probe(lit);
     Boolean b;
     Int32 i = 0;
-    while (((IIterator::Probe(it))->HasNext(&b), b)) {
+    while ((it->HasNext(&b), b)) {
         AutoPtr<IInterface> o;
-        (IIterator::Probe(it))->GetNext((IInterface**)&o);
-        it->Set((*array)[i++]);
+        it->GetNext((IInterface**)&o);
+        lit->Set((*array)[i++]);
     }
     return NOERROR;
 }
@@ -5084,25 +5095,27 @@ ECode Collections::IndexOfSubList(
     while (index < size && (size - index >= sublistSize)) {
         AutoPtr<IListIterator> listIt;
         list->GetListIterator(index, (IListIterator**)&listIt);
+        IIterator* lit = IIterator::Probe(listIt);
 
         AutoPtr<IInterface> o;
-        (IIterator::Probe(listIt))->GetNext((IInterface**)&o);
+        lit->GetNext((IInterface**)&o);
         if ((firstObj == NULL) ? o == NULL : Object::Equals(firstObj, o)) {
 
             // iterate through the elements in sublist to see
             // if they are included in the same order in the list
             AutoPtr<IListIterator> sublistIt;
             sublist->GetListIterator(1, (IListIterator**)&sublistIt);
+            IIterator* subLit = IIterator::Probe(sublistIt);
             Boolean difFound = FALSE, subHasNext, listHasNext;
-            while (((IIterator::Probe(sublistIt))->HasNext(&subHasNext), subHasNext)) {
+            while ((subLit->HasNext(&subHasNext), subHasNext)) {
                 AutoPtr<IInterface> element;
-                (IIterator::Probe(sublistIt))->GetNext((IInterface**)&element);
-                if (!((IIterator::Probe(listIt))->HasNext(&listHasNext), listHasNext)) {
+                subLit->GetNext((IInterface**)&element);
+                if (!(lit->HasNext(&listHasNext), listHasNext)) {
                     *result = -1;
                     return NOERROR;
                 }
                 AutoPtr<IInterface> o;
-                (IIterator::Probe(listIt))->GetNext((IInterface**)&o);
+                lit->GetNext((IInterface**)&o);
                 if ((element == NULL) ? o != NULL : !Object::Equals(element, o)) {
                     difFound = TRUE;
                     break;

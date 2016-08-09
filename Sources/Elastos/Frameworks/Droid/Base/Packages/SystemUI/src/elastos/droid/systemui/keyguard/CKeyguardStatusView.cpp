@@ -288,10 +288,6 @@ void CKeyguardStatusView::UpdateOwnerInfo()
 {
     if (mOwnerInfo == NULL) return;
     String ownerInfo = GetOwnerInfo();
-    if (ownerInfo.IsNull()) {
-        Logger::D(DTAG, "TODO [UpdateOwnerInfo] : ======delete======== Use the temporary name.");
-        ownerInfo = String("User");
-    }
     if (!TextUtils::IsEmpty(ownerInfo)) {
         IView::Probe(mOwnerInfo)->SetVisibility(IView::VISIBLE);
         AutoPtr<ICharSequence> cs;

@@ -282,9 +282,8 @@ ECode WallpaperManagerService::WallpaperConnection::OnServiceDisconnected(
         mEngine = NULL;
         AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
         if ((_mWallpaper->mConnection).Get() == this) {
-            String str;
-            IObject::Probe(_mWallpaper->mWallpaperComponent)->ToString(&str);
-            Slogger::W(WallpaperManagerService::TAG, "Wallpaper service gone: %s", str.string());
+            Slogger::W(WallpaperManagerService::TAG, "Wallpaper service gone: %s",
+                TO_CSTR(_mWallpaper->mWallpaperComponent));
             if (!_mWallpaper->mWallpaperUpdating
                     && _mWallpaper->mUserId == mHost->mCurrentUserId) {
                 // There is a race condition which causes
@@ -392,11 +391,10 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageUpdateFinished(
         AutoPtr<IInterface> obj;
         mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
         AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
-        if (wallpaper != NULL) {
+        if (wallpaper != NULL && wallpaper->mWallpaperComponent != NULL) {
             String pn;
             wallpaper->mWallpaperComponent->GetPackageName(&pn);
-            if (wallpaper->mWallpaperComponent != NULL
-                    && pn.Equals(packageName)) {
+            if (pn.Equals(packageName)) {
                 wallpaper->mWallpaperUpdating = FALSE;
                 AutoPtr<IComponentName> comp = wallpaper->mWallpaperComponent;
                 mHost->ClearWallpaperComponentLocked(wallpaper);
@@ -426,9 +424,11 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageModified(
         AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
         if (wallpaper != NULL) {
             String pn;
-            wallpaper->mWallpaperComponent->GetPackageName(&pn);
-            if (wallpaper->mWallpaperComponent == NULL
-                    || !pn.Equals(packageName)) {
+            if (wallpaper->mWallpaperComponent != NULL) {
+                wallpaper->mWallpaperComponent->GetPackageName(&pn);
+            }
+
+            if (wallpaper->mWallpaperComponent == NULL || !pn.Equals(packageName)) {
                 return E_NULL_POINTER_EXCEPTION;
             }
             Boolean result;
@@ -451,11 +451,10 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageUpdateStarted(
         AutoPtr<IInterface> obj;
         mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
         AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
-        if (wallpaper != NULL) {
+        if (wallpaper != NULL && wallpaper->mWallpaperComponent != NULL) {
             String pn;
             wallpaper->mWallpaperComponent->GetPackageName(&pn);
-            if (wallpaper->mWallpaperComponent != NULL
-                    && pn.Equals(packageName)) {
+            if (pn.Equals(packageName)) {
                 wallpaper->mWallpaperUpdating = TRUE;
             }
         }
@@ -529,9 +528,8 @@ ECode WallpaperManagerService::MyPackageMonitor::DoPackagesChangedLocked(
             || change == IPackageMonitor::PACKAGE_TEMPORARY_CHANGE) {
             changed = TRUE;
             if (doit) {
-                String str;
-                IObject::Probe(_wallpaper->mWallpaperComponent)->ToString(&str);
-                Slogger::W(WallpaperManagerService::TAG, "Wallpaper uninstalled, removing: %s", str.string());
+                Slogger::W(WallpaperManagerService::TAG, "Wallpaper uninstalled, removing: %s",
+                    TO_CSTR(_wallpaper->mWallpaperComponent));
                 mHost->ClearWallpaperLocked(FALSE, _wallpaper->mUserId, NULL);
             }
         }
@@ -558,9 +556,8 @@ ECode WallpaperManagerService::MyPackageMonitor::DoPackagesChangedLocked(
             AutoPtr<IServiceInfo> info;
             ECode ec = pm->GetServiceInfo(_wallpaper->mWallpaperComponent, 0, (IServiceInfo**)&info);
             if (FAILED(ec)) {
-                String str;
-                IObject::Probe(_wallpaper->mWallpaperComponent)->ToString(&str);
-                Slogger::W(WallpaperManagerService::TAG, "Wallpaper component gone, removing: %s", str.string());
+                Slogger::W(WallpaperManagerService::TAG, "Wallpaper component gone, removing: %s",
+                    TO_CSTR(_wallpaper->mWallpaperComponent));
                 mHost->ClearWallpaperLocked(FALSE, _wallpaper->mUserId, NULL);
                 return E_NAME_NOT_FOUND_EXCEPTION;
             }
@@ -1574,7 +1571,9 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
     if (!force) {
         if (wallpaper->mConnection != NULL) {
             Boolean isEquals = FALSE;
-            IObject::Probe(wallpaper->mWallpaperComponent)->Equals(IInterface::Probe(componentName), &isEquals);
+            if (wallpaper->mWallpaperComponent != NULL) {
+                isEquals = Object::Equals(wallpaper->mWallpaperComponent, componentName);
+            }
             if (wallpaper->mWallpaperComponent == NULL) {
                 if (componentName == NULL) {
                     if (DEBUG) Slogger::V(TAG, "bindWallpaperComponentLocked: still using default");
@@ -1944,6 +1943,7 @@ ECode WallpaperManagerService::SaveSettingsLocked(
 {
     AutoPtr<IJournaledFile> journal = MakeJournaledFile(wallpaper->mUserId);
     AutoPtr<IFileOutputStream> stream;
+    String nullStr;
     // try {
     AutoPtr<IFile> f;
     journal->ChooseForWrite((IFile**)&f);
@@ -1951,37 +1951,36 @@ ECode WallpaperManagerService::SaveSettingsLocked(
     AutoPtr<IXmlSerializer> out;
     CFastXmlSerializer::New((IXmlSerializer**)&out);
     out->SetOutput(IOutputStream::Probe(stream), String("utf-8"));
-    out->StartDocument(String(NULL), TRUE);
+    out->StartDocument(nullStr, TRUE);
 
-    out->WriteStartTag(String(NULL), String("wp"));
-    out->WriteAttribute(String(NULL), String("width"), StringUtils::ToString(wallpaper->mWidth));
-    out->WriteAttribute(String(NULL), String("height"), StringUtils::ToString(wallpaper->mHeight));
+    out->WriteStartTag(nullStr, String("wp"));
+    out->WriteAttribute(nullStr, String("width"), StringUtils::ToString(wallpaper->mWidth));
+    out->WriteAttribute(nullStr, String("height"), StringUtils::ToString(wallpaper->mHeight));
     Int32 left, top, right, bottom;
-    wallpaper->mPadding->GetLeft(&left);
-    wallpaper->mPadding->GetTop(&top);
-    wallpaper->mPadding->GetRight(&right);
-    wallpaper->mPadding->GetBottom(&bottom);
+    wallpaper->mPadding->Get(&left, &top, &right, &bottom);
     if (left != 0) {
-        out->WriteAttribute(String(NULL), String("paddingLeft"), StringUtils::ToString(left));
+        out->WriteAttribute(nullStr, String("paddingLeft"), StringUtils::ToString(left));
     }
     if (top != 0) {
-        out->WriteAttribute(String(NULL), String("paddingTop"), StringUtils::ToString(top));
+        out->WriteAttribute(nullStr, String("paddingTop"), StringUtils::ToString(top));
     }
     if (right != 0) {
-        out->WriteAttribute(String(NULL), String("paddingRight"), StringUtils::ToString(right));
+        out->WriteAttribute(nullStr, String("paddingRight"), StringUtils::ToString(right));
     }
     if (bottom != 0) {
-        out->WriteAttribute(String(NULL), String("paddingBottom"), StringUtils::ToString(bottom));
+        out->WriteAttribute(nullStr, String("paddingBottom"), StringUtils::ToString(bottom));
     }
-    out->WriteAttribute(String(NULL), String("name"), wallpaper->mName);
-    Boolean isEquals;
-    IObject::Probe(wallpaper->mWallpaperComponent)->Equals(IInterface::Probe(mImageWallpaper), &isEquals);
+    out->WriteAttribute(nullStr, String("name"), wallpaper->mName);
+    Boolean isEquals = FALSE;
+    if (wallpaper->mWallpaperComponent != NULL) {
+        isEquals = Object::Equals(wallpaper->mWallpaperComponent, mImageWallpaper);
+    }
     if (wallpaper->mWallpaperComponent != NULL && !isEquals) {
         String flattern;
         wallpaper->mWallpaperComponent->FlattenToShortString(&flattern);
-        out->WriteAttribute(String(NULL), String("component"), flattern);
+        out->WriteAttribute(nullStr, String("component"), flattern);
     }
-    out->WriteEndTag(String(NULL), String("wp"));
+    out->WriteEndTag(nullStr, String("wp"));
 
     out->EndDocument();
     ICloseable::Probe(stream)->Close();
@@ -2004,6 +2003,7 @@ void WallpaperManagerService::SaveSettingsLocked(
 {
     AutoPtr<IJournaledFile> journal = MakeJournaledFile(KEYGUARD_WALLPAPER_INFO, wallpaper->mUserId);
     AutoPtr<IFileOutputStream> stream;
+    String nullStr;
     // try {
     AutoPtr<IFile> file;
     journal->ChooseForWrite((IFile**)&file);
@@ -2011,13 +2011,13 @@ void WallpaperManagerService::SaveSettingsLocked(
     AutoPtr<IXmlSerializer> out;
     CFastXmlSerializer::New((IXmlSerializer**)&out);
     out->SetOutput(IOutputStream::Probe(stream), String("utf-8"));
-    out->StartDocument(String(NULL), TRUE);
+    out->StartDocument(nullStr, TRUE);
 
-    out->WriteStartTag(String(NULL), String("kwp"));
-    out->WriteAttribute(String(NULL), String("width"), StringUtils::ToString(wallpaper->mWidth));
-    out->WriteAttribute(String(NULL), String("height"), StringUtils::ToString(wallpaper->mHeight));
-    out->WriteAttribute(String(NULL), String("name"), wallpaper->mName);
-    out->WriteEndTag(String(NULL), String("kwp"));
+    out->WriteStartTag(nullStr, String("kwp"));
+    out->WriteAttribute(nullStr, String("width"), StringUtils::ToString(wallpaper->mWidth));
+    out->WriteAttribute(nullStr, String("height"), StringUtils::ToString(wallpaper->mHeight));
+    out->WriteAttribute(nullStr, String("name"), wallpaper->mName);
+    out->WriteEndTag(nullStr, String("kwp"));
 
     out->EndDocument();
     ICloseable::Probe(stream)->Close();

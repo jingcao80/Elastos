@@ -22,6 +22,329 @@ $   END DO ;; all classes
 #define c_p${MacroRewrite(name)}Uunm ${uunm}
 #endif // __UUNM_${MacroRewrite(name)}_DEFINED__
 
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <clstype.h>
+
+#define MUL_LOADFACTOR(n) (((n) * 3) >> 2) //n * 0.75
+
+class HashTable
+{
+public:
+    HashTable(
+        /* [in] */ Int32 initialCapacity = 11,
+        /* [in] */ Float loadFactor = 0.75f);
+
+    ~HashTable();
+
+    inline Int32 Size();
+
+    inline Boolean IsEmpty();
+
+    IInterface* Get(REMuid key);
+
+    IInterface* operator[](REMuid key);
+
+    Boolean Put(REMuid key, IInterface* value);
+
+    Boolean Remove(REMuid key);
+
+    Boolean Contains(REMuid key);
+
+    void Clear();
+
+private:
+    struct HashEntry
+    {
+        Int32 mHash;
+        IInterface* mValue;
+        HashEntry* mNext;
+        EMuid mKey;
+    };
+
+    Boolean Rehash();
+
+    UInt32 Hash(REMuid key);
+
+    Boolean keycmp(HashEntry* e, REMuid key);
+
+private:
+    struct HashEntry** mTable;
+    Int32 mCapacity;
+    Int32 mCount;
+    Int32 mThreshold;
+    Float mLoadFactor;
+    Int32 mModCount;
+};
+
+HashTable::HashTable(
+    /* [in] */ Int32 initialCapacity,
+    /* [in] */ Float loadFactor)
+    : mTable(NULL)
+    , mCapacity(0)
+    , mCount(0)
+    , mThreshold(0)
+    , mLoadFactor(0)
+    , mModCount(0)
+{
+    if (initialCapacity <= 0) {
+        initialCapacity = 10;
+    }
+
+#ifndef _arm
+    if (loadFactor <= 0) {
+        loadFactor = 0.75f;
+    }
+#endif
+
+    mCapacity = initialCapacity;
+    mLoadFactor = loadFactor;
+#ifndef _arm
+    mThreshold = (Int32)(initialCapacity * loadFactor);
+#else
+    mThreshold = MUL_LOADFACTOR(initialCapacity);
+#endif
+}
+
+HashTable::~HashTable()
+{
+    if (mTable) {
+        Clear();
+        free(mTable);
+    }
+}
+
+Boolean HashTable::keycmp(
+    /* [in] */ HashEntry* e,
+    /* [in] */ REMuid key)
+{
+    Int32 ret = memcmp(&e->mKey, &key, sizeof(EMuid));
+    if (!ret) {
+        return TRUE;
+    }
+    else {
+        return FALSE;
+    }
+}
+
+Int32 HashTable::Size()
+{
+    return mCount;
+}
+
+Boolean HashTable::IsEmpty()
+{
+    return mCount == 0;
+}
+
+IInterface* HashTable::Get(
+    /* [in] */ REMuid key)
+{
+    if (!mTable) {
+        return NULL;
+    }
+
+    Int32 hash = Hash(key);
+    Int32 index = (hash & 0x7FFFFFFF) % mCapacity;
+    for (struct HashEntry *e = mTable[index]; e != NULL ; e = e->mNext) {
+        if ((e->mHash == hash) && keycmp(e, key)) {
+            return e->mValue;
+        }
+    }
+
+    return NULL;
+}
+
+IInterface* HashTable::operator[](
+    /* [in] */ REMuid key)
+{
+    return Get(key);
+}
+
+Boolean HashTable::Rehash()
+{
+    Int32 oldCapacity = mCapacity;
+    struct HashEntry** oldTable = mTable;
+
+    Int32 newCapacity = oldCapacity * 2 + 1;
+    struct HashEntry** newTable = (struct HashEntry **)malloc(
+            sizeof(struct HashEntry **) * newCapacity);
+    if (!newTable) {
+        return FALSE;
+    }
+
+    memset(newTable, 0, sizeof(struct HashEntry **) * newCapacity);
+
+    mModCount++;
+#ifndef _arm
+    mThreshold = (Int32)(newCapacity * mLoadFactor);
+#else
+    mThreshold = MUL_LOADFACTOR(newCapacity);
+#endif
+    mCapacity = newCapacity;
+    mTable = newTable;
+
+    for (Int32 i = oldCapacity ; i--> 0 ;) {
+        for (struct HashEntry* p = oldTable[i]; p != NULL ;) {
+            struct HashEntry* e = p;
+            p = p->mNext;
+
+            Int32 index = (e->mHash & 0x7FFFFFFF) % newCapacity;
+            e->mNext = newTable[index];
+            newTable[index] = e;
+        }
+    }
+
+    free(oldTable);
+
+    return TRUE;
+}
+
+Boolean HashTable::Put(
+    /* [in] */ REMuid key,
+    /* [in] */ IInterface* value)
+{
+    assert(value && "Can not put NULL value to Hashtable!");
+
+    if (!value) {
+        return FALSE;
+    }
+
+    if (!mTable) {
+        mTable = (struct HashEntry **)malloc(sizeof(struct HashEntry **) * mCapacity);
+
+        if (!mTable) {
+            return FALSE;
+        }
+
+        memset(mTable, 0, sizeof(struct HashEntry **) * mCapacity);
+    }
+
+    // Makes sure the key is not already in the hashtable.
+    Int32 hash = Hash(key);
+    Int32 index = (hash & 0x7FFFFFFF) % mCapacity;
+    struct HashEntry *e;
+    for (e = mTable[index] ; e != NULL ; e = e->mNext) {
+        if ((e->mHash == hash) && keycmp(e, key)) {
+            e->mValue = value;
+            return TRUE;
+        }
+    }
+
+    mModCount++;
+    if (mCount >= mThreshold) {
+        // Rehash the table if the threshold is exceeded
+        if (!Rehash()) {
+            return FALSE;
+        }
+
+        index = (hash & 0x7FFFFFFF) % mCapacity;
+    }
+
+    // Creates the new entry.
+    Int32 size = sizeof(EMuid);
+
+    e = (struct HashEntry *)malloc(sizeof(struct HashEntry) + size);
+    if (!e) {
+        return FALSE;
+    }
+
+    e->mHash = hash;
+    e->mNext = mTable[index];
+    e->mValue = value;
+    e->mKey = key;
+
+    mTable[index] = e;
+    mCount++;
+
+    return TRUE;
+}
+
+Boolean HashTable::Remove(
+    /* [in] */ REMuid key)
+{
+    if (!mTable) {
+        return FALSE;
+    }
+
+    Int32 hash = Hash(key);
+    Int32 index = (hash & 0x7FFFFFFF) % mCapacity;
+    for (struct HashEntry* e = mTable[index], *prev = NULL ; e != NULL ;
+        prev = e, e = e->mNext) {
+        if ((e->mHash == hash) && keycmp(e, key)) {
+            mModCount++;
+            if (prev != NULL) {
+                prev->mNext = e->mNext;
+            }
+            else {
+                mTable[index] = e->mNext;
+            }
+
+            mCount--;
+
+            free(e);
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+Boolean HashTable::Contains(
+    /* [in] */ REMuid key)
+{
+    if (!mTable) {
+        return FALSE;
+    }
+
+    Int32 hash = Hash(key);
+    Int32 index = (hash & 0x7FFFFFFF) % mCapacity;
+    for (struct HashEntry* e = mTable[index] ; e != NULL ; e = e->mNext) {
+        if ((e->mHash == hash) && keycmp(e, key)) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+void HashTable::Clear()
+{
+    if (!mTable) {
+        return;
+    }
+
+    mModCount++;
+
+    for (Int32 index = mCapacity;--index >= 0;) {
+        for (struct HashEntry* e = mTable[index]; e != NULL;) {
+            struct HashEntry* p = e;
+            e = e->mNext;
+            free(p);
+        }
+
+        mTable[index] = NULL;
+    }
+
+    mCount = 0;
+}
+
+UInt32 HashTable::Hash(
+    /* [in] */ REMuid key)
+{
+    UInt32 value = 0;
+    unsigned long* lvalue = (unsigned long *)&key;
+    Int32 len = sizeof(EMuid) / sizeof(unsigned long);
+    Int32 i = 0;
+
+    for (i = 0; i < len; i++) {
+        value = value ^ ((value << 5) + (value >> 3) + lvalue[i]);
+    }
+
+    return value;
+}
+
 $   WITH all classes DO
 ${ClassNamespaceBegin(class)}$^
 extern const _ELASTOS ClassID ECLSID_${name} = {
@@ -59,16 +382,30 @@ $   END IF
 $END DO
 extern CIClassInfo *g_${MacroRewrite(name)}_classInfo;
 
+static HashTable sClassObjectHashTable;
+
 EXTERN_C ECO_PUBLIC CARAPI DllGetClassObject(
     REMuid clsid, _ELASTOS REIID riid, IInterface **ppObj)
 {
+    Boolean contains = sClassObjectHashTable.Contains(clsid);
+    if (contains) {
+        IInterface* obj = sClassObjectHashTable[clsid];
+        assert(obj);
+        *ppObj = obj->Probe(riid);
+        (*ppObj)->AddRef();
+        return NOERROR;
+    }
+
     ECode ec = NOERROR;
 $WITH all classes DO
 $IF attrib is not "private" and class.type is not "clsobj"
     if (${namespace}ECLSID_${name} == clsid) {
 $       IF class.type is not "sink"
         *ppObj = _g_${class.fullname}_ClsObj.Probe(riid);
-        if (*ppObj) (*ppObj)->AddRef();
+        if (*ppObj) {
+            (*ppObj)->AddRef();
+            sClassObjectHashTable.Put(clsid, *ppObj);
+        }
         else ec = E_NO_INTERFACE;
         return ec;
 $       ELSE ;;class.type is not "sink"
