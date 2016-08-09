@@ -185,29 +185,25 @@ ECode TextUtils::GetChars(
     /* [in] */ Int32 destoff)
 {
     VALIDATE_NOT_NULL(s)
-    String str;
-    if (IStringBuffer::Probe(s)) {
-        IStringBuffer* sb = IStringBuffer::Probe(s);
-        sb->GetChars(start, end, dest, destoff);
-        str = Object::ToString(sb);
-    }
-    else if (IStringBuilder::Probe(s)) {
-        IStringBuilder* sb = IStringBuilder::Probe(s);
-        sb->GetChars(start, end, dest, destoff);
-        str = Object::ToString(sb);
 
+    IGetChars* gc;
+    IStringBuilder* sbld;
+    IStringBuffer* sbuf = IStringBuffer::Probe(s);
+    if (sbuf) {
+        sbuf->GetChars(start, end, dest, destoff);
     }
-    else if (IGetChars::Probe(s)) {
-        IGetChars* sb = IGetChars::Probe(s);
-        sb->GetChars(start, end, dest, destoff);
-        str = Object::ToString(sb);
-
+    else if (sbld = IStringBuilder::Probe(s), sbld) {
+        sbld->GetChars(start, end, dest, destoff);
+    }
+    else if (gc = IGetChars::Probe(s), gc) {
+        gc->GetChars(start, end, dest, destoff);
     }
     else {
-        Char32 ch;
-        for (Int32 i = start; i < end; i++) {
-            s->GetCharAt(i, &ch);
-            (*dest)[destoff++] = ch;
+        String str;
+        s->ToString(&str);
+        AutoPtr< ArrayOf<Char32> > chars = str.GetChars(start, end);
+        for (Int32 i = 0; i < chars->GetLength(); i++) {
+            (*dest)[destoff++] = (*chars)[i];
         }
     }
     return NOERROR;

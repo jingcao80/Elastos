@@ -4237,19 +4237,19 @@ ECode View::SetHasTransientState(
             mTransientStateCount - 1;
     if (mTransientStateCount < 0) {
         mTransientStateCount = 0;
-        // Log.e(TAG, "hasTransientState decremented below 0: " +
-        //         "unmatched pair of setHasTransientState calls");
-    } else if ((hasTransientState && mTransientStateCount == 1) ||
-            (!hasTransientState && mTransientStateCount == 0)) {
+        Logger::E(TAG, "hasTransientState decremented below 0: "
+            "unmatched pair of setHasTransientState calls");
+    }
+    else if ((hasTransientState && mTransientStateCount == 1) ||
+        (!hasTransientState && mTransientStateCount == 0)) {
         // update flag if we've just incremented up from 0 or decremented down to 0
         mPrivateFlags2 = (mPrivateFlags2 & ~PFLAG2_HAS_TRANSIENT_STATE) |
-                (hasTransientState ? PFLAG2_HAS_TRANSIENT_STATE : 0);
+            (hasTransientState ? PFLAG2_HAS_TRANSIENT_STATE : 0);
         if (mParent != NULL) {
-            mParent->ChildHasTransientStateChanged(this, hasTransientState);
-            // } catch (AbstractMethodError e) {
-            //     Log.e(TAG, mParent.getClass().getSimpleName() +
-            //             " does not fully implement ViewParent", e);
-            // }
+            ECode ec = mParent->ChildHasTransientStateChanged(this, hasTransientState);
+            if (FAILED(ec)) {
+                Logger::E(TAG, "%s does not fully implement ViewParent", TO_CSTR(mParent));
+            }
         }
     }
 

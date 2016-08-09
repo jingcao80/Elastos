@@ -1263,6 +1263,10 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
             AutoPtr<IInterface> obj;
             results->Get(i, (IInterface**)&obj);
             IScanResult* result = IScanResult::Probe(obj);
+            if (result == NULL) {
+                assert(obj == NULL);
+                continue;
+            }
 
             // Ignore hidden and ad-hoc networks.
             String SSID;
