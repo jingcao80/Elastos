@@ -49,11 +49,19 @@ Int32 GsmAlphabet::sHighestEnabledSingleShiftCode;
 static AutoPtr< ArrayOf<String> > InitsLanguageTables()
 {
     AutoPtr< ArrayOf<String> > languageTables = ArrayOf<String>::Alloc(LANGUAGEtABLE_LEN);
-    (*languageTables)[0] = /* 6.2.1.1 GSM 7 bit Default Alphabet Extension Table
-         0123456789A.....BCDEF0123456789ABCDEF0123456789ABCDEF.0123456789ABCDEF0123456789ABCDEF */
-        String("          \u000c         ^                   {}     \\            [~] |               ")
-            // 0123456789ABCDEF012345.....6789ABCDEF0123456789ABCDEF
-            + String("                     \u20ac                          ");
+    //TODO now only test the 0 part
+    (*languageTables)[0] =
+        /* 3GPP TS 23.038 V9.1.1 section 6.2.1 - GSM 7 bit Default Alphabet
+            01.....23.....4.....5.....6.....7.....8.....9.....A.B.....C.....D.E.....F.....0.....1 */
+    String("@\u00a3$\u00a5\u00e8\u00e9\u00f9\u00ec\u00f2\u00c7\n\u00d8\u00f8\r\u00c5\u00e5\u0394_")
+            // 2.....3.....4.....5.....6.....7.....8.....9.....A.....B.....C.....D.....E.....
+     + String("\u03a6\u0393\u039b\u03a9\u03a0\u03a8\u03a3\u0398\u039e\uffff\u00c6\u00e6\u00df")
+            // F.....012.34.....56789ABCDEF0123456789ABCDEF0.....123456789ABCDEF0123456789A
+     + String("\u00c9 !\"#\u00a4%&'()*+,-./0123456789:;<=>?\u00a1ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+            // B.....C.....D.....E.....F.....0.....123456789ABCDEF0123456789AB.....C.....D.....
+     + String("\u00c4\u00d6\u00d1\u00dc\u00a7\u00bfabcdefghijklmnopqrstuvwxyz\u00e4\u00f6\u00f1")
+            // E.....F.....
+     + String("\u00fc\u00e0");
 
     /* A.2.1 Turkish National Language Single Shift Table
      0123456789A.....BCDEF0123456789ABCDEF0123456789ABCDEF.0123456789ABCDEF01234567.....8 */
@@ -652,6 +660,7 @@ ECode GsmAlphabet::Gsm7BitPackedToString(
     VALIDATE_NOT_NULL(res);
     StringBuilder ret;
 
+    //Logger::E("leliang", "line:%d, func:%s, offset:%d, lengthSeptets:%d, languageTable:%d\n", __LINE__, __func__, offset, lengthSeptets, languageTable);
     if (languageTable < 0 || languageTable > sLanguageTables->GetLength()) {
         Logger::W(TAG, "unknown language table %d, using default", languageTable);
         languageTable = 0;
@@ -693,6 +702,7 @@ ECode GsmAlphabet::Gsm7BitPackedToString(
         }
 
         if (prevCharWasEscape) {
+            //Logger::E("leliang", "line:%d, func:%s, 0x%x\n", __LINE__, __func__, gsmVal);
             if (gsmVal == IGsmAlphabet::GSM_EXTENDED_ESCAPE) {
                 ret.AppendChar(' ');    // display ' ' for reserved double escape sequence
             } else {
@@ -707,7 +717,9 @@ ECode GsmAlphabet::Gsm7BitPackedToString(
         } else if (gsmVal == IGsmAlphabet::GSM_EXTENDED_ESCAPE) {
             prevCharWasEscape = TRUE;
         } else {
-            ret.AppendChar(languageTableToChar.GetChar(gsmVal));
+            Logger::E("GsmAlphabet", "TODO line:%d, func:%s, 0x%x, %c\n", __LINE__, __func__, gsmVal, (char)gsmVal);
+            //ret.AppendChar(languageTableToChar.GetChar(gsmVal));
+            ret.AppendChar(gsmVal);
         }
     }
     /*} catch (RuntimeException ex) {

@@ -2,11 +2,13 @@
 #include "elastos/droid/internal/telephony/SmsMessageBase.h"
 #include "elastos/droid/provider/Telephony.h"
 #include <elastos/utility/Arrays.h>
+#include "elastos/core/StringBuilder.h"
 #include "elastos/core/StringUtils.h"
 
 using Elastos::Droid::Internal::Telephony::ISmsConstants;
 using Elastos::Droid::Internal::Telephony::ISmsHeader;
 using Elastos::Droid::Provider::ITelephony;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::IArrayList;
@@ -218,6 +220,33 @@ ECode SmsMessageBase::GetRecipientAddress(
     }
 
     return mRecipientAddress->GetAddressString(result);
+}
+
+ECode SmsMessageBase::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    StringBuilder sb;
+    sb.Append(String("SMSC address:"));
+    sb.Append(mScAddress);
+    if (mOriginatingAddress != NULL) {
+        String oa;
+        sb.Append(String(";sender address:"));
+        IObject::Probe(mOriginatingAddress)->ToString(&oa);
+        sb.Append(oa);
+    }
+    if (mRecipientAddress != NULL) {
+        String ra;
+        IObject::Probe(mRecipientAddress)->ToString(&ra);
+        sb.Append(String(";receiver address:"));
+        sb.Append(ra);
+    }
+    sb.Append(String(";MessageBode:"));
+    sb.Append(mMessageBody);
+    *result = sb.ToString();
+
+    return NOERROR;
 }
 
 } // namespace Telephony

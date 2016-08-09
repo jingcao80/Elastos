@@ -18,6 +18,8 @@ namespace Telephony {
 class ImsSMSDispatcher: public SMSDispatcher
 {
 public:
+    TO_STRING_IMPL("ImsSMSDispatcher");
+
     ImsSMSDispatcher(
         /* [in] */ IPhoneBase* phone,
         /* [in] */ SmsStorageMonitor* storageMonitor,
@@ -131,9 +133,9 @@ protected:
 
     // @Override
     CARAPI SendNewSubmitPdu(
-        /* [in] */ String destinationAddress,
-        /* [in] */ String scAddress,
-        /* [in] */ String message,
+        /* [in] */ const String& destinationAddress,
+        /* [in] */ const String& scAddress,
+        /* [in] */ const String& message,
         /* [in] */ ISmsHeader* smsHeader,
         /* [in] */ Int32 format,
         /* [in] */ IPendingIntent* sentIntent,

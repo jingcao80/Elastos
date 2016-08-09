@@ -3,6 +3,8 @@
 #include "elastos/droid/internal/telephony/cdma/CdmaSmsBroadcastConfigInfo.h"
 #include "elastos/droid/telephony/SmsMessage.h"
 #include "elastos/droid/telephony/SmsManager.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/ImsSMSDispatcher.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
@@ -216,9 +218,10 @@ IccSmsInterfaceManager::IccSmsInterfaceManager(
     obj = NULL;
     mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
     mUserManager = IUserManager::Probe(obj);
+
     Logger::E("IccSmsInterfaceManager", "TODO  ImsSMSDispatcher is not ready!");
-    // mDispatcher = new ImsSMSDispatcher(phone,
-    //         phone.mSmsStorageMonitor, phone.mSmsUsageMonitor);
+    //PhoneBase* pb = (PhoneBase*)phone;
+    //mDispatcher = new ImsSMSDispatcher(phone, pb->mSmsStorageMonitor, pb->mSmsUsageMonitor);
 }
 
 void IccSmsInterfaceManager::MarkMessagesAsRead(

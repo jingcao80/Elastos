@@ -160,6 +160,9 @@ public:
     CARAPI GetRecipientAddress(
         /* [out] */ String* result);
 
+    CARAPI ToString(
+        /* [out] */ String* result);
+
 protected:
     void ParseMessageBody();
     void ExtractEmailAddressFromMessageBody();

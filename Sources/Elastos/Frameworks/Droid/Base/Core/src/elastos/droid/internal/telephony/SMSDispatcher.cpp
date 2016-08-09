@@ -2,6 +2,7 @@
 #include "elastos/droid/internal/telephony/SMSDispatcher.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/HashMap.h>
+#include "Elastos.CoreLibrary.Utility.Concurrent.h"
 
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -48,7 +49,10 @@ using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 
+using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::ICollections;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::CArrayList;
 //using Elastos::Utility::IArrays;
 using Elastos::Utility::IRandom;
 
@@ -536,13 +540,17 @@ Int32 SMSDispatcher::GetNextConcatenatedRef()
 
 SMSDispatcher::SMSDispatcher()
 {
-    assert(0 && "TODO");
-//     mPremiumSmsRule = new AtomicInteger(PREMIUM_RULE_USE_SIM);
-
+    CAtomicInteger32::New((IAtomicInteger32**)&mPremiumSmsRule);
     mSmsCapable = TRUE;
 
-//    deliveryPendingList = new ArrayList<SmsTracker>();
-//    sendPendingList = Collections->SynchronizedList(new ArrayList<SmsTracker>());
+    //mDeliveryPendingList = new ArrayList<SmsTracker>();
+    CArrayList::New((IArrayList**)&mDeliveryPendingList);
+    AutoPtr<ICollections> collections;
+    CCollections::AcquireSingleton((ICollections**)&collections);
+    //mSendPendingList = Collections->SynchronizedList(new ArrayList<SmsTracker>());
+    AutoPtr<IList> list;
+    CArrayList::New((IList**)&list);
+    collections->SynchronizedList(list, (IList**)&mSendPendingList);
 }
 
 /**

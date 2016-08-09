@@ -46,6 +46,14 @@ ECode SmsAddress::CouldBeEmailGateway(
     return NOERROR;
 }
 
+ECode SmsAddress::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = String("SmsAddress:") +  address;
+    return NOERROR;
+}
+
 } // namespace Telephony
 } // namespace Internal
 } // namespace Droid

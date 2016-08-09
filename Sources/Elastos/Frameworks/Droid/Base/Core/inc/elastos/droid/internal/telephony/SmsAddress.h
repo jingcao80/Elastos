@@ -40,6 +40,8 @@ public:
     CARAPI CouldBeEmailGateway(
         /* [out] */ Boolean* result);
 
+    CARAPI ToString(
+        /* [out] */ String* result);
 public:
     //TODO
     Int32 ton;

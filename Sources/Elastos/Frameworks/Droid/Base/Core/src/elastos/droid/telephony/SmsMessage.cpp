@@ -809,6 +809,12 @@ Boolean SmsMessage::IsNoEmsSupportConfigListExisted()
     return FALSE;
 }
 
+ECode SmsMessage::ToString(
+    /* [out] */ String* result)
+{
+    return IObject::Probe(mWrappedSmsMessage)->ToString(result);
+}
+
 } // namespace Telephony
 } // namespace Droid
 } // namespace Elastos

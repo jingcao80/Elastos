@@ -534,6 +534,9 @@ public:
     virtual CARAPI GetRecipientAddress(
         /* [out] */ String* result);
 
+    CARAPI ToString(
+        /* [out] */ String* result);
+
 private:
     SmsMessage(
         /* [in] */ ISmsMessageBase* smb);
