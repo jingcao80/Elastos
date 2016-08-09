@@ -36,6 +36,72 @@ module
      * interface Elastos.Apps.Contacts.Common.List.IAutoScrollListView
      */
     interface IPinnedHeaderListView {
+
+        SetScrollToSectionOnHeaderTouch(
+            [in] Boolean value);
+
+        GetPinnedHeaderHeight(
+            [in] Int32 viewIndex,
+            [out] Int32* height);
+
+        /**
+         * Set header to be pinned at the top.
+         *
+         * @param viewIndex index of the header view
+         * @param y is position of the header in pixels.
+         * @param animate true if the transition to the new coordinate should be animated
+         */
+        SetHeaderPinnedAtTop(
+            [in] Int32 viewIndex,
+            [in] Int32 y,
+            [in] Boolean animate);
+
+        /**
+         * Set header to be pinned at the bottom.
+         *
+         * @param viewIndex index of the header view
+         * @param y is position of the header in pixels.
+         * @param animate true if the transition to the new coordinate should be animated
+         */
+        SetHeaderPinnedAtBottom(
+            [in] Int32 viewIndex,
+            [in] Int32 y,
+            [in] Boolean animate);
+
+        /**
+         * Set header to be pinned at the top of the first visible item.
+         *
+         * @param viewIndex index of the header view
+         * @param position is position of the header in pixels.
+         */
+        SetFadingHeader(
+            [in] Int32 viewIndex,
+            [in] Int32 position,
+            [in] Boolean fade);
+
+        /**
+         * Makes header invisible.
+         *
+         * @param viewIndex index of the header view
+         * @param animate true if the transition to the new coordinate should be animated
+         */
+        SetHeaderInvisible(
+            [in] Int32 viewIndex,
+            [in] Boolean animate);
+
+        /**
+         * Returns the sum of heights of headers pinned to the top.
+         */
+        GetTotalTopPinnedHeaderHeight(
+            [out] Int32* height);
+
+        /**
+         * Returns the list item position at the specified y coordinate.
+         */
+        GetPositionAt(
+            [in] Int32 y,
+            [out] Int32* result);
+
     }
 
     /**

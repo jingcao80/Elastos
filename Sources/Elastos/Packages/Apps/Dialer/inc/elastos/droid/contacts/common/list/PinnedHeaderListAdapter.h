@@ -2,7 +2,10 @@
 #ifndef __ELASTOS_DROID_CONTACTS_COMMON_LIST_PINNEDHEADERLISTADAPTER_H__
 #define __ELASTOS_DROID_CONTACTS_COMMON_LIST_PINNEDHEADERLISTADAPTER_H__
 
+#include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/common/widget/CompositeCursorAdapter.h"
+
+using Elastos::Droid::Common::Widget::CompositeCursorAdapter;
 
 namespace Elastos{
 namespace Droid{
