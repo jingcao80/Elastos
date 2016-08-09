@@ -31,14 +31,6 @@ module
          */
         const Boolean LOCAL_INVISIBLE_DIRECTORY_ENABLED = FALSE;
 
-        SetFragmentRootView(
-            [in] IView* fragmentRootView);
-
-        SetDefaultFilterHeaderText(
-            [in] Int32 resourceId);
-
-        AddPartitions();
-
         /**
          * Remove all directories after the default directory. This is typically used when contacts
          * list screens are asked to exit the search mode and thus need to remove all remote directory
@@ -144,9 +136,6 @@ module
 
         SetAdjustSelectionBoundsEnabled(
             [in] Boolean enabled);
-
-        SetQuickCallButtonEnabled(
-            [in] Boolean quickCallButtonEnabled);
 
         ShouldIncludeProfile(
             [out] Boolean* includeProfile);

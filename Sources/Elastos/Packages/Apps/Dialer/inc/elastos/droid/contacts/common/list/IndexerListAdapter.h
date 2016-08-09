@@ -69,7 +69,7 @@ public:
         /* [in] */ Boolean flag);
 
     CARAPI GetIndexedPartition(
-        /* [out] */ Boolean* result);
+        /* [out] */ Int32* result);
 
     CARAPI SetIndexedPartition(
         /* [in] */ Int32 partition);

@@ -10,3 +10,5 @@ SOURCES += DirectoryListLoader.cpp
 SOURCES += PhoneNumberPickerFragment.cpp
 SOURCES += IndexerListAdapter.cpp
 SOURCES += PinnedHeaderListAdapter.cpp
+SOURCES += ContactEntryListAdapter.cpp
+SOURCES += DirectoryPartition.cpp

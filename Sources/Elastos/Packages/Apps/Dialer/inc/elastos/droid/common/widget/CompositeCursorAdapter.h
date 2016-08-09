@@ -40,6 +40,8 @@ public:
             , mCount(0)
         {}
 
+        virtual ~Partition() {}
+
         CAR_INTERFACE_DECL()
 
         /**

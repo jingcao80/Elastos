@@ -35,7 +35,7 @@ module
             [in] Boolean flag);
 
         GetIndexedPartition(
-            [out] Boolean* result);
+            [out] Int32* result);
 
         SetIndexedPartition(
             [in] Int32 partition);
