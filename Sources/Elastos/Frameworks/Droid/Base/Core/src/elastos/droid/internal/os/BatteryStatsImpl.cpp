@@ -9217,7 +9217,7 @@ AutoPtr<BatteryStatsImpl::Uid> BatteryStatsImpl::GetUidStatsLocked(
         mUidStats->Put(uid, (IObject*)u);
     }
     else {
-        u = (Uid*)(IObject*)value.Get();
+        u = (Uid*)IObject::Probe(value);
     }
     return u;
 }
