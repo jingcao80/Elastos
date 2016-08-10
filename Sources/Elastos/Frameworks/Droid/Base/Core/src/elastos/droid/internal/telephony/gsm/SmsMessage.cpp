@@ -16,6 +16,7 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include <Elastos.CoreLibrary.Libcore.h>
 
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResources;
@@ -37,6 +38,8 @@ using Elastos::Core::StringUtils;
 using Elastos::IO::CByteArrayOutputStream;
 using Elastos::IO::IOutputStream;
 using Elastos::Utility::Logging::Logger;
+using Libcore::ICU::IICUUtil;
+using Libcore::ICU::CICUUtil;
 
 namespace Elastos {
 namespace Droid {
@@ -180,7 +183,9 @@ ECode SmsMessage::PduParser::ConstructUserData(
     /* [in] */ Boolean dataInSeptets,
     /* [out] */ Int32* result)
 {
-    //Logger::E("SmsMessage::PduParser", "line:%d, func:%s, mCur:%d, hasUserDataHeader:%d, dataInSeptets:%d\n", __LINE__, __func__, mCur, hasUserDataHeader, dataInSeptets);
+    if (VDBG)
+    Logger::E("SmsMessage::PduParser", "ConstructUserData mCur:%d, hasUserDataHeader:%d, dataInSeptets:%d\n",
+            mCur, hasUserDataHeader, dataInSeptets);
     VALIDATE_NOT_NULL(result)
     Int32 offset = mCur;
     Int32 userDataLength = (*mPdu)[offset++] & 0xff;
@@ -288,10 +293,32 @@ ECode SmsMessage::PduParser::GetUserDataUCS2(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    String ret;
 
+    //because in Elastos the String is encode in UTF-8,
+    //the value receive is in UTF-16, so we should do the convert first.
+
+    if (byteCount % 2 != 0) {
+        Logger::E("SmsMessage::PduParser", "GetUserDataUCS2 the bytecount should be even");
+        assert(0);
+    }
+    Int32 offset = mCur;
+    Int32 utf16len = byteCount/2;
+    AutoPtr<ArrayOf<UInt16> > utf16Array = ArrayOf<UInt16>::Alloc(utf16len);
+    for (Int32 i = 0; i < utf16len; ++i) {
+        //because the byte order is big endian.
+        //so byte0 is the high byte, byte1 is the low byte
+        Byte byte0 = (*mPdu)[offset++];
+        Byte byte1 = (*mPdu)[offset++];
+        UInt16 value = byte0 << 8 | byte1;
+        utf16Array->Set(i, value);
+        //Logger::E("leliang", "line:%d, func:%s, byte0:0x%x, byte1:0x%x, values:0x%x\n", __LINE__, __func__, byte0, byte1, value);
+    }
+    AutoPtr<IICUUtil> icuUtil;
+    CICUUtil::AcquireSingleton((IICUUtil**)&icuUtil);
+    String ret;
+    icuUtil->UTF16ByteArrayToString(utf16Array, 0, utf16len, &ret);
     // try {
-    *result = String(*mPdu, mCur, byteCount); // new String(mPdu, mCur, byteCount, "utf-16");
+    *result = ret; // new String(mPdu, mCur, byteCount, "utf-16");
     // } catch (UnsupportedEncodingException ex) {
     //     ret = "";
     //     Logger::E(TAG, "implausible UnsupportedEncodingException", ex);

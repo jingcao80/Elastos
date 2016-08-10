@@ -189,6 +189,24 @@ module
         */
         GetDefaultLocale(
             [out] String* defaultLocale);
+
+        /**
+          * convert the byte array encoded in UTF16 to UTF8 byte array
+          */
+        UTF16ByteArrayToUTF8ByteArray(
+            [in] ArrayOf<UInt16>* utf16Array,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out, callee] ArrayOf<Byte>* utf8Array);
+
+        /**
+          * convert the byte array encoded in UTF16 to String(UTF8)
+          */
+        UTF16ByteArrayToString(
+            [in] ArrayOf<UInt16>* utf16Array,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [out] String* result);
     }
 
     } // IO

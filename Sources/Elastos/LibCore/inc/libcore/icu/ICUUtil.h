@@ -191,6 +191,18 @@ public:
     static CARAPI GetDefaultLocale(
         /* [out] */ String* defaultLocale);
 
+    static CARAPI UTF16ByteArrayToUTF8ByteArray(
+        /* [in] */ ArrayOf<UInt16>* utf16Array,
+        /* [in] */ Int32 offset,
+        /* [in] */ Int32 length,
+        /* [out] */ ArrayOf<Byte>** utf8Array);
+
+    static CARAPI UTF16ByteArrayToString(
+        /* [in] */ ArrayOf<UInt16>* utf16Array,
+        /* [in] */ Int32 offset,
+        /* [in] */ Int32 length,
+        /* [out] */ String* result);
+
 private:
     static CARAPI_(String) ToLowerCase(
         /* [in] */ const String& s,

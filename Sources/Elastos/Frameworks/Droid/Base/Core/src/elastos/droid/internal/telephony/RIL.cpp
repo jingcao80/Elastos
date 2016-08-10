@@ -4215,19 +4215,21 @@ void RIL::ProcessUnsolicited(
             String value;
             pRet->ToString(&value);
             a->Set(1, value);
-            Logger::E("leliang", "line:%d, func:%s, value:%s\n", __LINE__, __func__, value.string());
             AutoPtr<ISmsMessage> sms;
             AutoPtr<ISmsMessageHelper> hlp;
 
-            Logger::E("RILJ", "TODO ProcessUnsolicited RIL_UNSOL_RESPONSE_NEW_SMS is not ready!");
             Logger::E("leliang", "TODO ProcessUnsolicited RIL_UNSOL_RESPONSE_NEW_SMS is not ready!");
-            //leliang TODO
-            //CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
-            //hlp->NewFromCMT(a, (ISmsMessage**)&sms);
-            //if (mGsmSmsRegistrant != NULL) {
-            //    AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
-            //    mGsmSmsRegistrant->NotifyRegistrant(arSms);
-            //}
+
+            CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
+            hlp->NewFromCMT(a, (ISmsMessage**)&sms);
+
+            Logger::E("leliang", "received sms: %s", TO_CSTR(sms));
+            if (mGsmSmsRegistrant != NULL) {
+                Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
+                //TODO
+                //AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
+                //mGsmSmsRegistrant->NotifyRegistrant(arSms);
+            }
         break;
         }
         case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT: {

@@ -269,6 +269,7 @@ ECode GSMSmsMessage::GetMessageBody(
 ECode GSMSmsMessage::GetMessageClass(
     /* [out] */ Int32/*TODO MessageClass*/* result)
 {
+    assert(0);
     VALIDATE_NOT_NULL(result);
     *result  = 0;//TODO MessageClass::MessageClass_UNKNOWN;
     // Int32 index = mWrappedSmsMessage.getMessageClass().ordinal();

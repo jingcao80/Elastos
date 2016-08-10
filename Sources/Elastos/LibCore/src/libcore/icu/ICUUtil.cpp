@@ -1579,5 +1579,36 @@ ECode ICUUtil::GetDefaultLocale(
     return NOERROR;
 }
 
+ECode ICUUtil::UTF16ByteArrayToUTF8ByteArray(
+    /* [in] */ ArrayOf<UInt16>* utf16Array,
+    /* [in] */ Int32 offset,
+    /* [in] */ Int32 length,
+    /* [out] */ ArrayOf<Byte>** utf8Array)
+{
+    VALIDATE_NOT_NULL(utf8Array);
+    UnicodeString us(utf16Array->GetPayload() + offset, length);
+    String str("");
+    ElStringByteSink sink(&str);
+    us.toUTF8(sink);
+    *utf8Array = str.GetBytes();
+    REFCOUNT_ADD(*utf8Array);
+    return NOERROR;
+}
+
+ECode ICUUtil::UTF16ByteArrayToString(
+    /* [in] */ ArrayOf<UInt16>* utf16Array,
+    /* [in] */ Int32 offset,
+    /* [in] */ Int32 length,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    UnicodeString us(utf16Array->GetPayload() + offset, length);
+    String str("");
+    ElStringByteSink sink(&str);
+    us.toUTF8(sink);
+    *result = str;
+    return NOERROR;
+}
+
 } // namespace ICU
 } // namespace Libcore

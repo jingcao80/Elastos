@@ -344,5 +344,23 @@ ECode CICUUtil::LocalesFromStrings(
     return ICUUtil::LocalesFromStrings(*localeNames, locales);
 }
 
+ECode CICUUtil::UTF16ByteArrayToUTF8ByteArray(
+    /* [in] */ ArrayOf<UInt16>* utf16Array,
+    /* [in] */ Int32 offset,
+    /* [in] */ Int32 length,
+    /* [out, callee] */ ArrayOf<Byte>** utf8Array)
+{
+    return ICUUtil::UTF16ByteArrayToUTF8ByteArray(utf16Array, offset, length, utf8Array);
+}
+
+ECode CICUUtil::UTF16ByteArrayToString(
+    /* [in] */ ArrayOf<UInt16>* utf16Array,
+    /* [in] */ Int32 offset,
+    /* [in] */ Int32 length,
+    /* [out] */ String* result)
+{
+    return ICUUtil::UTF16ByteArrayToString(utf16Array, offset, length, result);
+}
+
 } // namespace ICU
 } // namespace Libcore

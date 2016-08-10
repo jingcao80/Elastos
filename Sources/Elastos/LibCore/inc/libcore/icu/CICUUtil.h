@@ -164,6 +164,18 @@ public:
     CARAPI GetDefaultLocale(
         /* [out] */ String* defaultLocale);
 
+    CARAPI UTF16ByteArrayToUTF8ByteArray(
+        /* [in] */ ArrayOf<UInt16>* utf16Array,
+        /* [in] */ Int32 offset,
+        /* [in] */ Int32 length,
+        /* [out, callee] */ ArrayOf<Byte>** utf8Array);
+
+    CARAPI UTF16ByteArrayToString(
+        /* [in] */ ArrayOf<UInt16>* utf16Array,
+        /* [in] */ Int32 offset,
+        /* [in] */ Int32 length,
+        /* [out] */ String* result);
+
 };
 
 } // namespace ICU
