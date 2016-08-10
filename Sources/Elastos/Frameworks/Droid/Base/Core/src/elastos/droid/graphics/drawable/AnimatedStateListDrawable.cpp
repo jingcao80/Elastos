@@ -119,6 +119,8 @@ AnimatedStateListDrawable::AnimatedStateListState::AnimatedStateListState(
         AutoPtr<IInterface> obj;
         orig->mTransitions->Clone((IInterface**)&obj);
         mTransitions = (Int64SparseInt64Array*)IObject::Probe(obj);
+        obj = NULL;
+        ICloneable::Probe(orig->mStateIds)->Clone((IInterface**)&obj);
         mStateIds = ISparseInt32Array::Probe(obj);
     }
     else {
