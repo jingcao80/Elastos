@@ -6,6 +6,7 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/server/CMountService.h"
+#include "elastos/droid/server/CLocationManagerService.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/server/display/CDisplayManagerService.h"
 #include "elastos/droid/server/input/CInputManagerService.h"
@@ -66,7 +67,7 @@ private:
         AutoPtr<CNetworkScoreService> mNetworkScoreF;
         AutoPtr<CWallpaperManagerService> mWallpaperF;
         AutoPtr<CInputMethodManagerService> mImmF;
-        // AutoPtr<CLocationManagerService> mLocationF;
+        AutoPtr<CLocationManagerService> mLocationF;
         // AutoPtr<CCountryDetectorService> mCountryDetectorF;
         // AutoPtr<CNetworkTimeUpdateService> mNetworkTimeUpdaterF;
         // AutoPtr<CCommonTimeManagementService> mCommonTimeMgmtServiceF;

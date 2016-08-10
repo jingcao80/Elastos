@@ -245,7 +245,7 @@ private:
             /* [in] */ IIntent* intent);
 
     private:
-        GpsLocationProvider* mHost;
+        AutoPtr<GpsLocationProvider> mHost;
     };
 
 public:
@@ -390,7 +390,10 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    GpsLocationProvider();
+    GpsLocationProvider(
+        /* [in] */ IContext* context,
+        /* [in] */ IILocationManager* ilocationManager,
+        /* [in] */ ILooper* looper);
 
     CARAPI GetGpsStatusProvider(
         /* [out] */ IIGpsStatusProvider** gsp);
@@ -405,11 +408,6 @@ public:
         /* [out] */ GpsNavigationMessageProvider** gnmp);
 
     static CARAPI_(Boolean) IsSupported();
-
-    GpsLocationProvider(
-        /* [in] */ IContext* context,
-        /* [in] */ IILocationManager* ilocationManager,
-        /* [in] */ ILooper* looper);
 
     /**
      * Returns the name of this provider.
@@ -488,91 +486,7 @@ public:
         /* [in] */ IPrintWriter* pw,
         /* [in] */ ArrayOf<String>* args);
 
-private:
-    CARAPI_(void) CheckSmsSuplInit(
-        /* [in] */ IIntent* intent);
-
-    CARAPI_(void) CheckWapSuplInit(
-        /* [in] */ IIntent* intent);
-
-    CARAPI_(void) UpdateLowPowerMode();
-
-    CARAPI_(void) ReloadGpsProperties(
-        /* [in] */ IContext* context,
-        /* [in] */ IProperties* properties);
-
-    CARAPI_(void) LoadPropertiesFromResource(
-        /* [in] */ IContext* context,
-        /* [in] */ IProperties* properties);
-
-    CARAPI_(Boolean) LoadPropertiesFromFile(
-        /* [in] */ const String& filename,
-        /* [in] */ IProperties* properties);
-
-    CARAPI_(void) ListenForBroadcasts();
-
-    CARAPI_(void) HandleUpdateNetworkState(
-        /* [in] */ Int32 state,
-        /* [in] */ INetworkInfo* info);
-
-    CARAPI_(void) HandleInjectNtpTime();
-
-    CARAPI_(void) HandleDownloadXtraData();
-
-    CARAPI_(void) HandleUpdateLocation(
-        /* [in] */ ILocation* location);
-
-    CARAPI_(void) SetSuplHostPort(
-        /* [in] */ const String& hostString,
-        /* [in] */ const String& portString);
-
-    /**
-     * Checks what SUPL mode to use, according to the AGPS mode as well as the
-     * allowed mode from properties.
-     *
-     * @param properties GPS properties
-     * @param agpsEnabled whether AGPS is enabled by settings value
-     * @param singleShot whether "singleshot" is needed
-     * @return SUPL mode (MSA vs MSB vs STANDALONE)
-     */
-    CARAPI_(Int32) GetSuplMode(
-        /* [in] */ IProperties* properties,
-        /* [in] */ Boolean agpsEnabled,
-        /* [in] */ Boolean singleShot);
-
-    CARAPI_(void) HandleEnable();
-
-    CARAPI_(void) HandleDisable();
-
-    CARAPI_(void) UpdateStatus(
-        /* [in] */ Int32 status,
-        /* [in] */ Int32 svCount);
-
-    CARAPI_(void) HandleSetRequest(
-        /* [in] */ IProviderRequest* request,
-        /* [in] */ IWorkSource* source);
-
-    // Called when the requirements for GPS may have changed
-    CARAPI_(void) UpdateRequirements();
-
-    CARAPI_(void) UpdateClientUids(
-        /* [in] */ IWorkSource* source);
-
-    CARAPI_(Boolean) DeleteAidingData(
-        /* [in] */ IBundle* extras);
-
-    CARAPI_(void) StartNavigating(
-        /* [in] */ Boolean singleShot);
-
-    CARAPI_(void) StopNavigating();
-
-    CARAPI_(void) Hibernate();
-
-    CARAPI_(Boolean) HasCapability(
-        /* [in] */ Int32 capability);
-
-
-    /**
+     /**
      * called from native code to update our position.
      */
     CARAPI_(void) ReportLocation(
@@ -727,9 +641,92 @@ private:
     /**
      * Called from native code to request reference location info
      */
-
-    CARAPI_(void) requestRefLocation(
+    CARAPI_(void) RequestRefLocation(
         /* [in] */ Int32 flags);
+
+private:
+    CARAPI_(void) CheckSmsSuplInit(
+        /* [in] */ IIntent* intent);
+
+    CARAPI_(void) CheckWapSuplInit(
+        /* [in] */ IIntent* intent);
+
+    CARAPI_(void) UpdateLowPowerMode();
+
+    CARAPI_(void) ReloadGpsProperties(
+        /* [in] */ IContext* context,
+        /* [in] */ IProperties* properties);
+
+    CARAPI_(void) LoadPropertiesFromResource(
+        /* [in] */ IContext* context,
+        /* [in] */ IProperties* properties);
+
+    CARAPI_(Boolean) LoadPropertiesFromFile(
+        /* [in] */ const String& filename,
+        /* [in] */ IProperties* properties);
+
+    CARAPI_(void) ListenForBroadcasts();
+
+    CARAPI_(void) HandleUpdateNetworkState(
+        /* [in] */ Int32 state,
+        /* [in] */ INetworkInfo* info);
+
+    CARAPI_(void) HandleInjectNtpTime();
+
+    CARAPI_(void) HandleDownloadXtraData();
+
+    CARAPI_(void) HandleUpdateLocation(
+        /* [in] */ ILocation* location);
+
+    CARAPI_(void) SetSuplHostPort(
+        /* [in] */ const String& hostString,
+        /* [in] */ const String& portString);
+
+    /**
+     * Checks what SUPL mode to use, according to the AGPS mode as well as the
+     * allowed mode from properties.
+     *
+     * @param properties GPS properties
+     * @param agpsEnabled whether AGPS is enabled by settings value
+     * @param singleShot whether "singleshot" is needed
+     * @return SUPL mode (MSA vs MSB vs STANDALONE)
+     */
+    CARAPI_(Int32) GetSuplMode(
+        /* [in] */ IProperties* properties,
+        /* [in] */ Boolean agpsEnabled,
+        /* [in] */ Boolean singleShot);
+
+    CARAPI_(void) HandleEnable();
+
+    CARAPI_(void) HandleDisable();
+
+    CARAPI_(void) UpdateStatus(
+        /* [in] */ Int32 status,
+        /* [in] */ Int32 svCount);
+
+    CARAPI_(void) HandleSetRequest(
+        /* [in] */ IProviderRequest* request,
+        /* [in] */ IWorkSource* source);
+
+    // Called when the requirements for GPS may have changed
+    CARAPI_(void) UpdateRequirements();
+
+    CARAPI_(void) UpdateClientUids(
+        /* [in] */ IWorkSource* source);
+
+    CARAPI_(Boolean) DeleteAidingData(
+        /* [in] */ IBundle* extras);
+
+    CARAPI_(void) StartNavigating(
+        /* [in] */ Boolean singleShot);
+
+    CARAPI_(void) StopNavigating();
+
+    CARAPI_(void) Hibernate();
+
+    CARAPI_(Boolean) HasCapability(
+        /* [in] */ Int32 capability);
+
 
     CARAPI_(void) SendMessage(
         /* [in] */ Int32 message,
@@ -747,8 +744,7 @@ private:
 
     CARAPI_(void) SetRouting();
 
-    // native methods
-    // static CARAPI_(Boolean) Class_init_native();
+    static CARAPI_(Boolean) Native_Class_init();
     static CARAPI_(Boolean) Native_is_supported();
 
     CARAPI_(Boolean) Native_init();
@@ -871,31 +867,31 @@ private:
 
     const static AutoPtr<IProviderProperties> PROPERTIES;
 
-    // these need to match GpsPositionMode enum in gps.h
-    const static Int32 GPS_POSITION_MODE_STANDALONE = 0;
-    const static Int32 GPS_POSITION_MODE_MS_BASED = 1;
-    const static Int32 GPS_POSITION_MODE_MS_ASSISTED = 2;
+    // // these need to match GpsPositionMode enum in gps.h
+    // const static Int32 GPS_POSITION_MODE_STANDALONE = 0;
+    // const static Int32 GPS_POSITION_MODE_MS_BASED = 1;
+    // const static Int32 GPS_POSITION_MODE_MS_ASSISTED = 2;
 
-    // these need to match GpsPositionRecurrence enum in gps.h
-    const static Int32 GPS_POSITION_RECURRENCE_PERIODIC = 0;
-    const static Int32 GPS_POSITION_RECURRENCE_SINGLE = 1;
+    // // these need to match GpsPositionRecurrence enum in gps.h
+    // const static Int32 GPS_POSITION_RECURRENCE_PERIODIC = 0;
+    // const static Int32 GPS_POSITION_RECURRENCE_SINGLE = 1;
 
-    // these need to match GpsStatusValue defines in gps.h
-    const static Int32 GPS_STATUS_NONE = 0;
-    const static Int32 GPS_STATUS_SESSION_BEGIN = 1;
-    const static Int32 GPS_STATUS_SESSION_END = 2;
-    const static Int32 GPS_STATUS_ENGINE_ON = 3;
-    const static Int32 GPS_STATUS_ENGINE_OFF = 4;
+    // // these need to match GpsStatusValue defines in gps.h
+    // const static Int32 GPS_STATUS_NONE = 0;
+    // const static Int32 GPS_STATUS_SESSION_BEGIN = 1;
+    // const static Int32 GPS_STATUS_SESSION_END = 2;
+    // const static Int32 GPS_STATUS_ENGINE_ON = 3;
+    // const static Int32 GPS_STATUS_ENGINE_OFF = 4;
 
-    // these need to match GpsApgsStatusValue defines in gps.h
-    /** AGPS status event values. */
-    const static Int32 GPS_REQUEST_AGPS_DATA_CONN = 1;
-    const static Int32 GPS_RELEASE_AGPS_DATA_CONN = 2;
-    const static Int32 GPS_AGPS_DATA_CONNECTED = 3;
-    const static Int32 GPS_AGPS_DATA_CONN_DONE = 4;
-    const static Int32 GPS_AGPS_DATA_CONN_FAILED = 5;
+    // // these need to match GpsApgsStatusValue defines in gps.h
+    // /** AGPS status event values. */
+    // const static Int32 GPS_REQUEST_AGPS_DATA_CONN = 1;
+    // const static Int32 GPS_RELEASE_AGPS_DATA_CONN = 2;
+    // const static Int32 GPS_AGPS_DATA_CONNECTED = 3;
+    // const static Int32 GPS_AGPS_DATA_CONN_DONE = 4;
+    // const static Int32 GPS_AGPS_DATA_CONN_FAILED = 5;
 
-    // these need to match GpsLocationFlags enum in gps.h
+    // // these need to match GpsLocationFlags enum in gps.h
     const static Int32 LOCATION_INVALID = 0;
     const static Int32 LOCATION_HAS_LAT_LONG = 1;
     const static Int32 LOCATION_HAS_ALTITUDE = 2;
@@ -903,50 +899,50 @@ private:
     const static Int32 LOCATION_HAS_BEARING = 8;
     const static Int32 LOCATION_HAS_ACCURACY = 16;
 
-    // IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
-    static const Int32 GPS_DELETE_EPHEMERIS = 0x00000001;
-    static const Int32 GPS_DELETE_ALMANAC = 0x00000002;
-    static const Int32 GPS_DELETE_POSITION = 0x00000004;
-    static const Int32 GPS_DELETE_TIME = 0x00000008;
-    static const Int32 GPS_DELETE_IONO = 0x00000010;
-    static const Int32 GPS_DELETE_UTC = 0x00000020;
-    static const Int32 GPS_DELETE_HEALTH = 0x00000040;
-    static const Int32 GPS_DELETE_SVDIR = 0x00000080;
-    static const Int32 GPS_DELETE_SVSTEER = 0x00000100;
-    static const Int32 GPS_DELETE_SADATA = 0x00000200;
-    static const Int32 GPS_DELETE_RTI = 0x00000400;
-    static const Int32 GPS_DELETE_CELLDB_INFO = 0x00000800;
-    static const Int32 GPS_DELETE_ALMANAC_CORR = 0x00001000;
-    static const Int32 GPS_DELETE_FREQ_BIAS_EST = 0x00002000;
-    static const Int32 GLO_DELETE_EPHEMERIS = 0x00004000;
-    static const Int32 GLO_DELETE_ALMANAC = 0x00008000;
-    static const Int32 GLO_DELETE_SVDIR = 0x00010000;
-    static const Int32 GLO_DELETE_SVSTEER = 0x00020000;
-    static const Int32 GLO_DELETE_ALMANAC_CORR = 0x00040000;
-    static const Int32 GPS_DELETE_TIME_GPS = 0x00080000;
-    static const Int32 GLO_DELETE_TIME = 0x00100000;
-    static const Int32 BDS_DELETE_SVDIR =  0X00200000;
-    static const Int32 BDS_DELETE_SVSTEER = 0X00400000;
-    static const Int32 BDS_DELETE_TIME = 0X00800000;
-    static const Int32 BDS_DELETE_ALMANAC_CORR = 0X01000000;
-    static const Int32 BDS_DELETE_EPHEMERIS = 0X02000000;
-    static const Int32 BDS_DELETE_ALMANAC = 0X04000000;
-    static const Int32 GPS_DELETE_ALL = 0xFFFFFFFF;
+    // // IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
+    // static const Int32 GPS_DELETE_EPHEMERIS = 0x00000001;
+    // static const Int32 GPS_DELETE_ALMANAC = 0x00000002;
+    // static const Int32 GPS_DELETE_POSITION = 0x00000004;
+    // static const Int32 GPS_DELETE_TIME = 0x00000008;
+    // static const Int32 GPS_DELETE_IONO = 0x00000010;
+    // static const Int32 GPS_DELETE_UTC = 0x00000020;
+    // static const Int32 GPS_DELETE_HEALTH = 0x00000040;
+    // static const Int32 GPS_DELETE_SVDIR = 0x00000080;
+    // static const Int32 GPS_DELETE_SVSTEER = 0x00000100;
+    // static const Int32 GPS_DELETE_SADATA = 0x00000200;
+    // static const Int32 GPS_DELETE_RTI = 0x00000400;
+    // static const Int32 GPS_DELETE_CELLDB_INFO = 0x00000800;
+    // static const Int32 GPS_DELETE_ALMANAC_CORR = 0x00001000;
+    // static const Int32 GPS_DELETE_FREQ_BIAS_EST = 0x00002000;
+    // static const Int32 GLO_DELETE_EPHEMERIS = 0x00004000;
+    // static const Int32 GLO_DELETE_ALMANAC = 0x00008000;
+    // static const Int32 GLO_DELETE_SVDIR = 0x00010000;
+    // static const Int32 GLO_DELETE_SVSTEER = 0x00020000;
+    // static const Int32 GLO_DELETE_ALMANAC_CORR = 0x00040000;
+    // static const Int32 GPS_DELETE_TIME_GPS = 0x00080000;
+    // static const Int32 GLO_DELETE_TIME = 0x00100000;
+    // static const Int32 BDS_DELETE_SVDIR =  0X00200000;
+    // static const Int32 BDS_DELETE_SVSTEER = 0X00400000;
+    // static const Int32 BDS_DELETE_TIME = 0X00800000;
+    // static const Int32 BDS_DELETE_ALMANAC_CORR = 0X01000000;
+    // static const Int32 BDS_DELETE_EPHEMERIS = 0X02000000;
+    // static const Int32 BDS_DELETE_ALMANAC = 0X04000000;
+    // static const Int32 GPS_DELETE_ALL = 0xFFFFFFFF;
 
-    // The GPS_CAPABILITY_* flags must match the values in gps.h
-    const static Int32 GPS_CAPABILITY_SCHEDULING = 0x0000001;
-    const static Int32 GPS_CAPABILITY_MSB = 0x0000002;
-    const static Int32 GPS_CAPABILITY_MSA = 0x0000004;
-    const static Int32 GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
-    const static Int32 GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
+    // // The GPS_CAPABILITY_* flags must match the values in gps.h
+    // const static Int32 GPS_CAPABILITY_SCHEDULING = 0x0000001;
+    // const static Int32 GPS_CAPABILITY_MSB = 0x0000002;
+    // const static Int32 GPS_CAPABILITY_MSA = 0x0000004;
+    // const static Int32 GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
+    // const static Int32 GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
 
     // The AGPS SUPL mode
     const static Int32 AGPS_SUPL_MODE_MSA = 0x02;
     const static Int32 AGPS_SUPL_MODE_MSB = 0x01;
 
-    // these need to match AGpsType enum in gps.h
-    const static Int32 AGPS_TYPE_SUPL = 1;
-    const static Int32 AGPS_TYPE_C2K = 2;
+    // // these need to match AGpsType enum in gps.h
+    // const static Int32 AGPS_TYPE_SUPL = 1;
+    // const static Int32 AGPS_TYPE_C2K = 2;
 
     // these must match the definitions in gps.h
     const static Int32 APN_INVALID = 0;
@@ -972,38 +968,38 @@ private:
     const static Int32 INJECT_NTP_TIME_FINISHED = 10;
     const static Int32 DOWNLOAD_XTRA_DATA_FINISHED = 11;
 
-    // Request setid
-    const static Int32 AGPS_RIL_REQUEST_SETID_IMSI = 1;
-    const static Int32 AGPS_RIL_REQUEST_SETID_MSISDN = 2;
+    // // Request setid
+    // const static Int32 AGPS_RIL_REQUEST_SETID_IMSI = 1;
+    // const static Int32 AGPS_RIL_REQUEST_SETID_MSISDN = 2;
 
-    // Request ref location
-    const static Int32 AGPS_RIL_REQUEST_REFLOC_CELLID = 1;
-    const static Int32 AGPS_RIL_REQUEST_REFLOC_MAC = 2;
+    // // Request ref location
+    // const static Int32 AGPS_RIL_REQUEST_REFLOC_CELLID = 1;
+    // const static Int32 AGPS_RIL_REQUEST_REFLOC_MAC = 2;
 
-    // ref. location info
-    const static Int32 AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
-    const static Int32 AGPS_REF_LOCATION_TYPE_UMTS_CELLID = 2;
-    const static Int32 AGPS_REG_LOCATION_TYPE_MAC        = 3;
+    // // ref. location info
+    // const static Int32 AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
+    // const static Int32 AGPS_REF_LOCATION_TYPE_UMTS_CELLID = 2;
+    // const static Int32 AGPS_REG_LOCATION_TYPE_MAC        = 3;
 
-    // set id info
-    const static Int32 AGPS_SETID_TYPE_NONE = 0;
-    const static Int32 AGPS_SETID_TYPE_IMSI = 1;
-    const static Int32 AGPS_SETID_TYPE_MSISDN = 2;
+    // // set id info
+    // const static Int32 AGPS_SETID_TYPE_NONE = 0;
+    // const static Int32 AGPS_SETID_TYPE_IMSI = 1;
+    // const static Int32 AGPS_SETID_TYPE_MSISDN = 2;
 
     const static String PROPERTIES_FILE_PREFIX;
     const static String PROPERTIES_FILE_SUFFIX;
     const static String DEFAULT_PROPERTIES_FILE;
 
-    const static Int32 GPS_GEOFENCE_UNAVAILABLE = 1<<0L;
-    const static Int32 GPS_GEOFENCE_AVAILABLE = 1<<1L;
+    // const static Int32 GPS_GEOFENCE_UNAVAILABLE = 1<<0L;
+    // const static Int32 GPS_GEOFENCE_AVAILABLE = 1<<1L;
 
     // GPS Geofence errors. Should match gps.h constants.
-    const static Int32 GPS_GEOFENCE_OPERATION_SUCCESS = 0;
-    const static Int32 GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES = 100;
-    const static Int32 GPS_GEOFENCE_ERROR_ID_EXISTS  = -101;
-    const static Int32 GPS_GEOFENCE_ERROR_ID_UNKNOWN = -102;
-    const static Int32 GPS_GEOFENCE_ERROR_INVALID_TRANSITION = -103;
-    const static Int32 GPS_GEOFENCE_ERROR_GENERIC = -149;
+    // const static Int32 GPS_GEOFENCE_OPERATION_SUCCESS = 0;
+    // const static Int32 GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES = 100;
+    // const static Int32 GPS_GEOFENCE_ERROR_ID_EXISTS  = -101;
+    // const static Int32 GPS_GEOFENCE_ERROR_ID_UNKNOWN = -102;
+    // const static Int32 GPS_GEOFENCE_ERROR_INVALID_TRANSITION = -103;
+    // const static Int32 GPS_GEOFENCE_ERROR_GENERIC = -149;
 
     // TCP/IP constants.
     // Valid TCP/UDP port range is (0, 65535].
@@ -1182,6 +1178,8 @@ private:
     // static Boolean class_init_native_value;
 
     AutoPtr<ContentObserver> mDefaultApnObserver;
+
+    static Boolean class_init_Native_value;
 };
 
 } // namespace Location

@@ -44,6 +44,7 @@ using Elastos::Droid::Server::Location::LocationBlacklist;
 using Elastos::Droid::Server::Location::GpsMeasurementsProvider;
 using Elastos::Droid::Server::Location::LocationRequestStatistics;
 using Elastos::Droid::Server::Location::GpsNavigationMessageProvider;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Utility::IHashMap;
@@ -57,6 +58,7 @@ namespace Server {
 CarClass(CLocationManagerService)
     , public Object
     , public IILocationManager
+    , public IBinder
 {
     class Receiver;
     class UpdateRecord;
@@ -496,6 +498,9 @@ public:
     void UpdateUserProfiles(
         /* [in] */ Int32 currentUserId);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     CARAPI EnsureFallbackFusedProviderPresentLocked(
         /* [in] */ IArrayList* pkgs);
@@ -830,7 +835,7 @@ private:
     Int32 mCurrentUserId;
     AutoPtr<ArrayOf<Int32> > mCurrentUserProfiles;
 
-    // AutoPtr<IPackageMonitor> mPackageMonitor;
+    AutoPtr<IPackageMonitor> mPackageMonitor;
 };
 
 } // namespace Server

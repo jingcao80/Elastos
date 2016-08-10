@@ -17,3 +17,4 @@ SOURCES += GeofenceHardware.cpp
 SOURCES += ActivityRecognitionHardware.cpp
 SOURCES += GeofenceHardwareImpl.cpp
 SOURCES += location.cpp
+SOURCES += CActivityRecognitionHardwareHelper.cpp

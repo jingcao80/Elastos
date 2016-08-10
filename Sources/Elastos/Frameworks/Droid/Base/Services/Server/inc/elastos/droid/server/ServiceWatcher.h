@@ -20,6 +20,7 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IPackageInfo;
 using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Pm::IPackageInfo;
+using Elastos::Utility::IHashSet;
 using Elastos::Utility::Etl::List;
 using Elastos::Core::IRunnable;
 
@@ -86,13 +87,13 @@ public:
 
     CAR_INTERFACE_DECL()
 
-    static CARAPI_(List<HashSet<AutoPtr<ISignature> > >) GetSignatureSets(
+    static CARAPI_(AutoPtr<List<AutoPtr<IHashSet> > >) GetSignatureSets(
         /* [in] */ IContext* context,
         /* [in] */ List<String>* initialPackageNames);
 
     static CARAPI_(Boolean) IsSignatureMatch(
         /* [in] */ ArrayOf<ISignature*>* signatures,
-        /* [in] */ const List<HashSet<AutoPtr<ISignature> > >& sigSets);
+        /* [in] */ List<AutoPtr<IHashSet> >* sigSets);
 
     ServiceWatcher(
         /* [in] */ IContext* context,
@@ -146,7 +147,7 @@ private:
     String mTag;
     AutoPtr<IContext> mContext;
     AutoPtr<IPackageManager> mPm;
-    List<HashSet<AutoPtr<ISignature> > > mSignatureSets;
+    AutoPtr<List<AutoPtr<IHashSet> > > mSignatureSets;
     String mAction;
 
     /**

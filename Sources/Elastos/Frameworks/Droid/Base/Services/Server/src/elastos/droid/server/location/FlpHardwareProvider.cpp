@@ -6,14 +6,16 @@
 #include "elastos/droid/server/location/CFusedGeofenceHardwareService.h"
 #include "elastos/droid/server/location/CFusedLocationHardwareService.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/Thread.h>
 #include <elastos/utility/logging/Logger.h>
+#include "hardware/fused_location.h"
+#include "hardware_legacy/power.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Location::EIID_IIFusedLocationHardware;
 using Elastos::Droid::Hardware::Location::IGeofenceHardware;
 using Elastos::Droid::Hardware::Location::IGeofenceHardwareImpl;
 using Elastos::Droid::Hardware::Location::GeofenceHardwareImpl;
+using Elastos::Droid::Location::CLocation;
 using Elastos::Droid::Location::CLocationRequestHelper;
 using Elastos::Droid::Location::EIID_IIFusedGeofenceHardware;
 using Elastos::Droid::Location::EIID_ILocationListener;
@@ -25,7 +27,7 @@ using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Server::Location::CFusedGeofenceHardwareService;
 using Elastos::Droid::Server::Location::CFusedLocationHardwareService;
-using Elastos::Core::AutoLock;
+using Elastos::Core::Thread;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -262,16 +264,18 @@ FlpHardwareProvider::StaticInitializer::StaticInitializer()
 //====================================
 
 const String FlpHardwareProvider::TAG("FlpHardwareProvider");
-const Int32 FlpHardwareProvider::FLP_RESULT_SUCCESS = 0;
-const Int32 FlpHardwareProvider::FLP_RESULT_ERROR = -1;
-const Int32 FlpHardwareProvider::FLP_RESULT_INSUFFICIENT_MEMORY = -2;
-const Int32 FlpHardwareProvider::FLP_RESULT_TOO_MANY_GEOFENCES = -3;
-const Int32 FlpHardwareProvider::FLP_RESULT_ID_EXISTS = -4;
-const Int32 FlpHardwareProvider::FLP_RESULT_ID_UNKNOWN = -5;
-const Int32 FlpHardwareProvider::FLP_RESULT_INVALID_GEOFENCE_TRANSITION = -6;
-const Int32 FlpHardwareProvider::FLP_GEOFENCE_MONITOR_STATUS_UNAVAILABLE = 1<<0;
-const Int32 FlpHardwareProvider::FLP_GEOFENCE_MONITOR_STATUS_AVAILABLE = 1<<1;
+// const Int32 FlpHardwareProvider::FLP_RESULT_SUCCESS = 0;
+// const Int32 FlpHardwareProvider::FLP_RESULT_ERROR = -1;
+// const Int32 FlpHardwareProvider::FLP_RESULT_INSUFFICIENT_MEMORY = -2;
+// const Int32 FlpHardwareProvider::FLP_RESULT_TOO_MANY_GEOFENCES = -3;
+// const Int32 FlpHardwareProvider::FLP_RESULT_ID_EXISTS = -4;
+// const Int32 FlpHardwareProvider::FLP_RESULT_ID_UNKNOWN = -5;
+// const Int32 FlpHardwareProvider::FLP_RESULT_INVALID_GEOFENCE_TRANSITION = -6;
+// const Int32 FlpHardwareProvider::FLP_GEOFENCE_MONITOR_STATUS_UNAVAILABLE = 1<<0;
+// const Int32 FlpHardwareProvider::FLP_GEOFENCE_MONITOR_STATUS_AVAILABLE = 1<<1;
 const FlpHardwareProvider::StaticInitializer FlpHardwareProvider::sInitializer;
+
+AutoPtr<FlpHardwareProvider> FlpHardwareProvider::sSingletonInstance;
 
 CAR_INTERFACE_IMPL(FlpHardwareProvider, Object, IFlpHardwareProvider)
 
@@ -380,7 +384,7 @@ void FlpHardwareProvider::OnGeofenceMonitorStatus(
 {
     // allow the location to be optional in this event
     AutoPtr<ILocation> updatedLocation;
-    if(location != NULL) {
+    if (location != NULL) {
         updatedLocation = UpdateLocationInformation(location);
     }
 
@@ -501,36 +505,107 @@ AutoPtr<ILocation> FlpHardwareProvider::UpdateLocationInformation(
     return location;
 }
 
-Boolean FlpHardwareProvider::NativeClassInit()
-{
-    // TODO:
-/*
-    sFlpInterface = NULL;
+#define WAKE_LOCK_NAME  "FLP"
 
-    // get references to the Java provider methods
-    sOnLocationReport = env->GetMethodID(
-        clazz,
-        "onLocationReport",
-        "([Landroid/location/Location;)V");
-    sOnDataReport = env->GetMethodID(
-        clazz,
-        "onDataReport",
-        "(Ljava/lang/String;)V"
-        );
-    sOnGeofenceTransition = env->GetMethodID(
-        clazz,
-        "onGeofenceTransition",
-        "(ILandroid/location/Location;IJI)V"
-        );
-    sOnGeofenceMonitorStatus = env->GetMethodID(
-        clazz,
-        "onGeofenceMonitorStatus",
-        "(IILandroid/location/Location;)V"
-        );
-    sOnGeofenceAdd = env->GetMethodID(clazz, "onGeofenceAdd", "(II)V");
-    sOnGeofenceRemove = env->GetMethodID(clazz, "onGeofenceRemove", "(II)V");
-    sOnGeofencePause = env->GetMethodID(clazz, "onGeofencePause", "(II)V");
-    sOnGeofenceResume = env->GetMethodID(clazz, "onGeofenceResume", "(II)V");
+static AutoPtr<FlpHardwareProvider> sCallbacksObj;
+static AutoPtr<IThread> sCallbackThread;
+static hw_device_t* sHardwareDevice = NULL;
+static const FlpLocationInterface* sFlpInterface = NULL;
+static const FlpDiagnosticInterface* sFlpDiagnosticInterface = NULL;
+static const FlpGeofencingInterface* sFlpGeofencingInterface = NULL;
+static const FlpDeviceContextInterface* sFlpDeviceContextInterface = NULL;
+
+static inline ECode ThrowOnError(
+    /* [in] */ int resultCode,
+    /* [in] */ const char* methodName)
+{
+    if (resultCode == FLP_RESULT_SUCCESS) {
+        return NOERROR;
+    }
+
+    ALOGE("Error %d in '%s'", resultCode, methodName);
+    // TODO: this layer needs to be refactored to return error codes to Java
+    // raising a FatalError is harsh, and because FLP Hardware Provider is loaded inside the system
+    // service, it can cause the device to reboot, or remain in a reboot loop
+    // a simple exception is still dumped to logcat, but it is handled more gracefully
+    assert(0);
+    return E_RUNTIME_EXCEPTION;
+}
+
+
+static bool IsValidCallbackThread()
+{
+    // JNIEnv* env = AndroidRuntime::getJNIEnv();
+    AutoPtr<IThread> curr = Thread::GetCurrentThread();
+    if (sCallbackThread == NULL || sCallbackThread != curr) {
+        ALOGE("CallbackThread check fail: curr=%p, expected=%p", curr.Get(), sCallbackThread.Get());
+        return false;
+    }
+
+    return true;
+}
+
+static int SetThreadEvent(
+    /* [in] */ ThreadEvent event)
+{
+    // JavaVM* javaVm = AndroidRuntime::getJavaVM();
+
+    switch(event) {
+        case ASSOCIATE_JVM:
+        {
+            if (sCallbackThread != NULL) {
+                ALOGE("Attempted to associate callback in '%s'. Callback already associated.", __FUNCTION__);
+                return FLP_RESULT_ERROR;
+            }
+
+            // JavaVMAttachArgs args = {
+            //     JNI_VERSION_1_6,
+            //     "FLP Service Callback Thread",
+            //     /* group */ NULL
+            // };
+
+            // jint attachResult = javaVm->AttachCurrentThread(&sCallbackThread, &args);
+            // if (attachResult != 0) {
+            //     ALOGE("Callback thread attachment error: %d", attachResult);
+            //     return FLP_RESULT_ERROR;
+            // }
+            ECode ec = Thread::Attach(String(""), (IThread**)&sCallbackThread);
+            if (FAILED(ec)) {
+                ALOGE("Callback thread attachment error: 0x%x", ec);
+                return FLP_RESULT_ERROR;
+            }
+
+            ALOGV("Callback thread attached: %p", sCallbackThread.Get());
+            break;
+        }
+        case DISASSOCIATE_JVM:
+        {
+            if (!IsValidCallbackThread()) {
+                ALOGE("Attempted to dissasociate an unnownk callback thread : '%s'.", __FUNCTION__);
+                return FLP_RESULT_ERROR;
+            }
+
+            // if (javaVm->DetachCurrentThread() != 0) {
+            //     return FLP_RESULT_ERROR;
+            // }
+            if (FAILED(sCallbackThread->Detach())) {
+                return FLP_RESULT_ERROR;
+            }
+
+            sCallbackThread = NULL;
+            break;
+        }
+        default:
+            ALOGE("Invalid ThreadEvent request %d", event);
+            return FLP_RESULT_ERROR;
+      }
+
+    return FLP_RESULT_SUCCESS;
+}
+
+void FlpHardwareProvider::NativeClassInit()
+{
+    sFlpInterface = NULL;
 
     // open the hardware module
     const hw_module_t* module = NULL;
@@ -563,264 +638,501 @@ Boolean FlpHardwareProvider::NativeClassInit()
         sFlpDeviceContextInterface = reinterpret_cast<const FlpDeviceContextInterface*>(
             sFlpInterface->get_extension(FLP_DEVICE_CONTEXT_INTERFACE));
     }
-*/
-    return TRUE;
+
 }
 
 Boolean FlpHardwareProvider::NativeIsSupported()
 {
-    #if 0
     if (sFlpInterface == NULL) {
         return FALSE;
     }
-    #endif
+
     return TRUE;
 }
 
-void FlpHardwareProvider::NativeInit()
+/*
+ * Helper function to unwrap a java object back into a FlpLocation structure.
+ */
+static void TranslateFromObject(
+    /* [in] */ ILocation* locationObject,
+    /* [in] */ FlpLocation& location)
 {
-    assert(0);
-    #if 0
-    // if(sCallbacksObj == NULL) {
-    //     sCallbacksObj = env->NewGlobalRef(obj);
-    // }
+    location.size = sizeof(FlpLocation);
+    location.flags = 0;
 
-    // initialize the Flp interfaces
-    if(sFlpInterface == NULL || sFlpInterface->init(&sFlpCallbacks) != 0) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    locationObject->GetLatitude(&location.latitude);
+    locationObject->GetLatitude(&location.latitude);
+    locationObject->GetLongitude(&location.longitude);
+    locationObject->GetTime(&location.timestamp);
+    location.flags |= FLP_LOCATION_HAS_LAT_LONG;
+
+    Boolean hasAltitude;
+    locationObject->HasAltitude(&hasAltitude);
+    if (hasAltitude) {
+        locationObject->GetAltitude(&location.altitude);
+        location.flags |= FLP_LOCATION_HAS_ALTITUDE;
     }
 
-    if(sFlpDiagnosticInterface != NULL) {
+    Boolean hasSpeed;
+    locationObject->HasSpeed(&hasSpeed);
+    if (hasSpeed) {
+        locationObject->GetSpeed(&location.speed);
+        location.flags |= FLP_LOCATION_HAS_SPEED;
+    }
+
+    Boolean hasBearing;
+    locationObject->HasBearing(&hasBearing);
+    if (hasBearing) {
+        locationObject->GetBearing(&location.bearing);
+        location.flags |= FLP_LOCATION_HAS_BEARING;
+    }
+
+    Boolean hasAccuracy;
+    locationObject->HasAccuracy(&hasAccuracy);
+    if (hasAccuracy) {
+        locationObject->GetAccuracy(&location.accuracy);
+        location.flags |= FLP_LOCATION_HAS_ACCURACY;
+    }
+
+    // TODO: wire sources_used if Location class exposes them
+}
+
+/*
+ * Helper function to unwrap FlpBatchOptions from the Java Runtime calls.
+ */
+static void TranslateFromObject(
+    /* [in] */ IFusedBatchOptions* batchOptionsObject,
+    /* [in] */ FlpBatchOptions& batchOptions)
+{
+    batchOptionsObject->GetMaxPowerAllocationInMW(&batchOptions.max_power_allocation_mW);
+    batchOptionsObject->GetPeriodInNS(&batchOptions.period_ns);
+    batchOptionsObject->GetSourcesToUse((Int32*)&batchOptions.sources_to_use);
+    batchOptionsObject->GetFlags((Int32*)&batchOptions.flags);
+}
+
+/*
+ * Helper function to unwrap Geofence structures from the Java Runtime calls.
+ */
+static void TranslateGeofenceFromGeofenceHardwareRequestParcelable(
+    /* [in] */ IGeofenceHardwareRequestParcelable* geofenceRequestObject,
+    /* [in] */ Geofence& geofence)
+{
+    geofenceRequestObject->GetId(&geofence.geofence_id);
+
+    // this works because GeofenceHardwareRequest.java and fused_location.h have
+    // the same notion of geofence types
+    Int32 itype;
+    geofenceRequestObject->GetType(&itype);
+    GeofenceType type = (GeofenceType)itype;
+    if(type != TYPE_CIRCLE) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
+    }
+    geofence.data->type = type;
+    GeofenceCircle& circle = geofence.data->geofence.circle;
+    geofenceRequestObject->GetLatitude(&circle.latitude);
+    geofenceRequestObject->GetLongitude(&circle.longitude);
+    geofenceRequestObject->GetRadius(&circle.radius_m);
+
+    GeofenceOptions* options = geofence.options;
+    geofenceRequestObject->GetMonitorTransitions(&options->monitor_transitions);
+    geofenceRequestObject->GetUnknownTimer(&options->unknown_timer_ms);
+    geofenceRequestObject->GetNotificationResponsiveness(&options->notification_responsivenes_ms);
+    geofenceRequestObject->GetLastTransition(&options->last_transition);
+    geofenceRequestObject->GetSourceTechnologies((Int32*)&options->sources_to_use);
+}
+
+/*
+ * Helper function to transform FlpLocation into a java object.
+ */
+static AutoPtr<ILocation> TranslateToObject(
+    /* [in] */ const FlpLocation* location)
+{
+    AutoPtr<ILocation> locationObject;
+    CLocation::New(String(NULL), (ILocation**)&locationObject);
+
+    Int32 flags = location->flags;
+
+    // set the valid information in the object
+    if (flags & FLP_LOCATION_HAS_LAT_LONG) {
+        locationObject->SetLatitude(location->latitude);
+        locationObject->SetLongitude(location->longitude);
+        locationObject->SetTime(location->timestamp);
+    }
+
+    if (flags & FLP_LOCATION_HAS_ALTITUDE) {
+        locationObject->SetAltitude(location->altitude);
+    }
+
+    if (flags & FLP_LOCATION_HAS_SPEED) {
+        locationObject->SetSpeed(location->speed);
+    }
+
+    if (flags & FLP_LOCATION_HAS_BEARING) {
+        locationObject->SetBearing(location->bearing);
+    }
+
+    if (flags & FLP_LOCATION_HAS_ACCURACY) {
+        locationObject->SetAccuracy(location->accuracy);
+    }
+
+    // TODO: wire FlpLocation::sources_used when needed
+    return locationObject;
+}
+
+/*
+ * Helper function to serialize FlpLocation structures.
+ */
+static AutoPtr<ArrayOf<ILocation*> > TranslateToObjectArray(
+    /* [in] */ int32_t locationsCount,
+    /* [in] */ FlpLocation** locations)
+{
+    AutoPtr<ArrayOf<ILocation*> > array = ArrayOf<ILocation*>::Alloc(locationsCount);
+    for (int i = 0; i < locationsCount; ++i) {
+        array->Set(i, TranslateToObject(locations[i]));
+    }
+
+    return array;
+}
+
+static void LocationCallback(
+    /* [in] */ int32_t locationsCount,
+    /* [in] */ FlpLocation** locations)
+{
+    if (!IsValidCallbackThread()) {
+        return;
+    }
+
+    if (locationsCount == 0 || locations == NULL) {
+        ALOGE("Invalid LocationCallback. Count: %d, Locations: %p", locationsCount, locations);
+        return;
+    }
+
+    AutoPtr<ArrayOf<ILocation*> > locationsArray = TranslateToObjectArray(locationsCount, locations);
+    sCallbacksObj->OnLocationReport(locationsArray);
+}
+
+static void AcquireWakelock()
+{
+    acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_NAME);
+}
+
+static void ReleaseWakelock()
+{
+    release_wake_lock(WAKE_LOCK_NAME);
+}
+
+FlpCallbacks sFlpCallbacks = {
+  sizeof(FlpCallbacks),
+  LocationCallback,
+  AcquireWakelock,
+  ReleaseWakelock,
+  SetThreadEvent
+};
+
+static void ReportData(
+    /* [in] */ char* data,
+    /* [in] */ int length)
+{
+    if (length == 0 || data == NULL) {
+        ALOGE("Invalid ReportData callback. Length: %d, Data: %p", length, data);
+        return;
+    }
+
+    sCallbacksObj->OnDataReport(String(data, length));
+}
+
+FlpDiagnosticCallbacks sFlpDiagnosticCallbacks = {
+  sizeof(FlpDiagnosticCallbacks),
+  SetThreadEvent,
+  ReportData
+};
+
+static void GeofenceTransitionCallback(
+    /* [in] */ int32_t geofenceId,
+    /* [in] */ FlpLocation* location,
+    /* [in] */ int32_t transition,
+    /* [in] */ FlpUtcTime timestamp,
+    /* [in] */ uint32_t sourcesUsed)
+{
+    if (!IsValidCallbackThread()) {
+        return;
+    }
+
+    if (location == NULL) {
+        ALOGE("GeofenceTransition received with invalid location: %p", location);
+        return;
+    }
+
+    AutoPtr<ILocation> locationObject = TranslateToObject(location);
+
+    sCallbacksObj->OnGeofenceTransition(geofenceId, locationObject, transition, timestamp, sourcesUsed);
+}
+
+static void GeofenceMonitorStatusCallback(
+    /* [in] */ int32_t status,
+    /* [in] */ uint32_t source,
+    /* [in] */ FlpLocation* lastLocation)
+{
+    if (!IsValidCallbackThread()) {
+        return;
+    }
+
+    AutoPtr<ILocation> locationObject;
+    if (lastLocation != NULL) {
+        locationObject = TranslateToObject(lastLocation);
+    }
+    sCallbacksObj->OnGeofenceMonitorStatus(status, source, locationObject);
+}
+
+static void GeofenceAddCallback(
+    /* [in] */ int32_t geofenceId,
+    /* [in] */ int32_t result)
+{
+    if (!IsValidCallbackThread()) {
+        return;
+    }
+
+    sCallbacksObj->OnGeofenceAdd(geofenceId, result);
+}
+
+static void GeofenceRemoveCallback(
+    /* [in] */ int32_t geofenceId,
+    /* [in] */ int32_t result)
+{
+    if (!IsValidCallbackThread()) {
+        return;
+    }
+
+    sCallbacksObj->OnGeofenceRemove(geofenceId, result);
+}
+
+static void GeofencePauseCallback(
+    /* [in] */ int32_t geofenceId,
+    /* [in] */ int32_t result)
+{
+    if (!IsValidCallbackThread()) {
+        return;
+    }
+
+    sCallbacksObj->OnGeofencePause(geofenceId, result);
+}
+
+static void GeofenceResumeCallback(
+    /* [in] */ int32_t geofenceId,
+    /* [in] */ int32_t result)
+{
+    if (!IsValidCallbackThread()) {
+        return;
+    }
+
+    sCallbacksObj->OnGeofenceResume(geofenceId, result);
+}
+
+FlpGeofenceCallbacks sFlpGeofenceCallbacks = {
+  sizeof(FlpGeofenceCallbacks),
+  GeofenceTransitionCallback,
+  GeofenceMonitorStatusCallback,
+  GeofenceAddCallback,
+  GeofenceRemoveCallback,
+  GeofencePauseCallback,
+  GeofenceResumeCallback,
+  SetThreadEvent
+};
+
+void FlpHardwareProvider::NativeInit()
+{
+    if (sCallbacksObj == NULL) {
+        sCallbacksObj = this;
+    }
+
+    // initialize the Flp interfaces
+    if (sFlpInterface == NULL || sFlpInterface->init(&sFlpCallbacks) != 0) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
+    }
+
+    if (sFlpDiagnosticInterface != NULL) {
         sFlpDiagnosticInterface->init(&sFlpDiagnosticCallbacks);
     }
 
-    if(sFlpGeofencingInterface != NULL) {
+    if (sFlpGeofencingInterface != NULL) {
         sFlpGeofencingInterface->init(&sFlpGeofenceCallbacks);
     }
 
     // TODO: inject any device context if when needed
-    #endif
 }
 
 Int32 FlpHardwareProvider::NativeGetBatchSize()
 {
-    #if 0
-    if(sFlpInterface == NULL) {
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
-        assert(0);
+    if (sFlpInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
         return 0;
     }
 
     return sFlpInterface->get_batch_size();
-    #endif
-    return 0;
 }
 
 void FlpHardwareProvider::NativeStartBatching(
     /* [in] */ Int32 requestId,
     /* [in] */ IFusedBatchOptions* options)
 {
-    #if 0
-    if(sFlpInterface == NULL || options == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpInterface == NULL || options == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
-    int result = sFlpInterface->start_batching(requestId, &options);
-    assert(0);
-    // ThrowOnError(env, result, __FUNCTION__);
-    #endif
+    FlpBatchOptions nativeOptions;
+    TranslateFromObject(options, nativeOptions);
+    int result = sFlpInterface->start_batching(requestId, &nativeOptions);
+    ThrowOnError(result, __FUNCTION__);
 }
 
 void FlpHardwareProvider::NativeUpdateBatchingOptions(
     /* [in] */ Int32 requestId,
     /* [in] */ IFusedBatchOptions* optionsObject)
 {
-    #if 0
-    if(sFlpInterface == NULL || optionsObject == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpInterface == NULL || optionsObject == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
-    int result = sFlpInterface->update_batching_options(id, &optionsObject);
-    assert(0);
-    // ThrowOnError(env, result, __FUNCTION__);
-    #endif
+    FlpBatchOptions options;
+    TranslateFromObject(optionsObject, options);
+    int result = sFlpInterface->update_batching_options(requestId, &options);
+    ThrowOnError(result, __FUNCTION__);
 }
 
 void FlpHardwareProvider::NativeStopBatching(
     /* [in] */ Int32 id)
 {
-    #if 0
-    if(sFlpInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     sFlpInterface->stop_batching(id);
-    #endif
 }
 
 void FlpHardwareProvider::NativeRequestBatchedLocation(
     /* [in] */ Int32 lastNLocations)
 {
-    #if 0
-    if(sFlpInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     sFlpInterface->get_batched_location(lastNLocations);
-    #endif
 }
 
 void FlpHardwareProvider::NativeInjectLocation(
-    /* [in] */ ILocation* location)
+    /* [in] */ ILocation* locationObject)
 {
-    #if 0
-    if(location == NULL) {
-        Logger::E(TAG, "Invalid location for injection: %p", location);
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (locationObject == NULL) {
+        Logger::E(TAG, "Invalid location for injection: %p", locationObject);
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
-    if(sFlpInterface == NULL) {
+    if (sFlpInterface == NULL) {
         // there is no listener, bail
         return;
     }
 
+    FlpLocation location;
+    TranslateFromObject(locationObject, location);
     int result = sFlpInterface->inject_location(&location);
     if (result != FLP_RESULT_SUCCESS) {
         // do not throw but log, this operation should be fire and forget
         ALOGE("Error %d in '%s'", result, __FUNCTION__);
     }
-    #endif
 }
 
 void FlpHardwareProvider::NativeCleanup()
 {
-    #if 0
-    if(sFlpInterface == NULL) {
-        ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     sFlpInterface->cleanup();
 
-    assert(0);
-    // if(sCallbacksObj != NULL) {
-    //     env->DeleteGlobalRef(sCallbacksObj);
-    //     sCallbacksObj = NULL;
-    // }
+    if (sCallbacksObj != NULL) {
+        sCallbacksObj = NULL;
+    }
 
     sFlpInterface = NULL;
     sFlpDiagnosticInterface = NULL;
     sFlpDeviceContextInterface = NULL;
     sFlpGeofencingInterface = NULL;
 
-    assert(0);
-    // if(sHardwareDevice != NULL) {
-    //     sHardwareDevice->close(sHardwareDevice);
-    //     sHardwareDevice = NULL;
-    // }
-    #endif
+    if (sHardwareDevice != NULL) {
+        sHardwareDevice->close(sHardwareDevice);
+        sHardwareDevice = NULL;
+    }
 }
 
 Boolean FlpHardwareProvider::NativeIsDiagnosticSupported()
 {
-    #if 0
     return sFlpDiagnosticInterface != NULL;
-    #endif
-    return FALSE;
 }
 
 void FlpHardwareProvider::NativeInjectDiagnosticData(
     /* [in] */ const String& data)
 {
-    #if 0
-    if(data == NULL) {
+    if (data == NULL) {
         Logger::E("Invalid diagnostic data for injection: %s", data.string());
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
-    if(sFlpDiagnosticInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpDiagnosticInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     int length = data.GetLength();
-    int result = sFlpDiagnosticInterface->inject_data((char*) data, length);
-    assert(0);
-    // ThrowOnError(env, result, __FUNCTION__);
-    #endif
+    int result = sFlpDiagnosticInterface->inject_data((char*)data.string(), length);
+    ThrowOnError(result, __FUNCTION__);
 }
 
 Boolean FlpHardwareProvider::NativeIsDeviceContextSupported()
 {
-    #if 0
     return sFlpDeviceContextInterface != NULL;
-    #endif
-    return FALSE;
 }
 
 void FlpHardwareProvider::NativeInjectDeviceContext(
     /* [in] */ Int32 deviceEnabledContext)
 {
-    #if 0
-    if(sFlpDeviceContextInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpDeviceContextInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     int result = sFlpDeviceContextInterface->inject_device_context(deviceEnabledContext);
-    assert(0);
-    // ThrowOnError(env, result, __FUNCTION__);
-    #endif
+    ThrowOnError(result, __FUNCTION__);
 }
 
 Boolean FlpHardwareProvider::NativeIsGeofencingSupported()
 {
-    #if 0
     return sFlpGeofencingInterface != NULL;
-    #endif
-    return FALSE;
 }
 
 void FlpHardwareProvider::NativeAddGeofences(
         /* [in] */ ArrayOf<IGeofenceHardwareRequestParcelable*>* geofenceRequestsArray)
 {
-    #if 0
-    if(geofenceRequestsArray == NULL) {
+    if (geofenceRequestsArray == NULL) {
         Logger::E(TAG, "Invalid Geofences to add: %p", geofenceRequestsArray);
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     if (sFlpGeofencingInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     Int32 geofenceRequestsCount = geofenceRequestsArray->GetLength();
-    if(geofenceRequestsCount == 0) {
+    if (geofenceRequestsCount == 0) {
         return;
     }
 
     Geofence* geofences = new Geofence[geofenceRequestsCount];
     if (geofences == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_INSUFFICIENT_MEMORY, __FUNCTION__);
+        ThrowOnError(FLP_RESULT_INSUFFICIENT_MEMORY, __FUNCTION__);
     }
 
     for (int i = 0; i < geofenceRequestsCount; ++i) {
         geofences[i].data = new GeofenceData();
         geofences[i].options = new GeofenceOptions();
-        assert(0);
-        // jobject geofenceObject = env->GetObjectArrayElement(geofenceRequestsArray, i);
-
-        // TranslateGeofenceFromGeofenceHardwareRequestParcelable(env, geofenceObject, geofences[i]);
-        // env->DeleteLocalRef(geofenceObject);
+        TranslateGeofenceFromGeofenceHardwareRequestParcelable((*geofenceRequestsArray)[i], geofences[i]);
     }
 
     sFlpGeofencingInterface->add_geofences(geofenceRequestsCount, &geofences);
@@ -831,34 +1143,27 @@ void FlpHardwareProvider::NativeAddGeofences(
         }
         delete[] geofences;
     }
-    #endif
 }
 
 void FlpHardwareProvider::NativePauseGeofence(
     /* [in] */ Int32 geofenceId)
 {
-    #if 0
-    if(sFlpGeofencingInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpGeofencingInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     sFlpGeofencingInterface->pause_geofence(geofenceId);
-    #endif
 }
 
 void FlpHardwareProvider::NativeResumeGeofence(
     /* [in] */ Int32 geofenceId,
     /* [in] */ Int32 monitorTransitions)
 {
-    #if 0
-    if(sFlpGeofencingInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpGeofencingInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     sFlpGeofencingInterface->resume_geofence(geofenceId, monitorTransitions);
-    #endif
 }
 
 void FlpHardwareProvider::NativeModifyGeofenceOption(
@@ -869,10 +1174,8 @@ void FlpHardwareProvider::NativeModifyGeofenceOption(
     /* [in] */ Int32 unknownTimer,
     /* [in] */ Int32 sourcesToUse)
 {
-    #if 0
-    if(sFlpGeofencingInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpGeofencingInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
     GeofenceOptions options = {
@@ -883,31 +1186,20 @@ void FlpHardwareProvider::NativeModifyGeofenceOption(
         (uint32_t)sourcesToUse};
 
     sFlpGeofencingInterface->modify_geofence_option(geofenceId, &options);
-    #endif
 }
 
 void FlpHardwareProvider::NativeRemoveGeofences(
     /* [in] */ ArrayOf<Int32>* geofenceIdsArray)
 {
-    #if 0
-    if(sFlpGeofencingInterface == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (sFlpGeofencingInterface == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
-    Int32 geofenceIdsCount = geofenceIdsArray->GetLength();
-    AutoPtr<ArrayOf<Int32> > geofenceIds = ArrayOf<Int32>::Alloc(geofenceIdsCount);
-    for (Int32 i = 0; i < geofenceIds->GetLength(); i++) {
-        (*geofenceIds)[i] = (*geofenceIdsArray)[i];
-    }
-    if(geofenceIds == NULL) {
-        assert(0);
-        // ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+    if (geofenceIdsArray == NULL) {
+        ThrowOnError(FLP_RESULT_ERROR, __FUNCTION__);
     }
 
-    sFlpGeofencingInterface->remove_geofences(geofenceIdsCount, geofenceIds);
-    // env->ReleaseIntArrayElements(geofenceIdsArray, geofenceIds, 0 /*mode*/);
-    #endif
+    sFlpGeofencingInterface->remove_geofences(geofenceIdsArray->GetLength(), geofenceIdsArray->GetPayload());
 }
 
 } // namespace Location

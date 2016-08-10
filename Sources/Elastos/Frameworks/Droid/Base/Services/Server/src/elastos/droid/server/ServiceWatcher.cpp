@@ -15,6 +15,7 @@ using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Utility::CHashSet;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::IList;
@@ -132,26 +133,31 @@ ECode ServiceWatcher::MyBroadcastReceiver::OnReceive(
 
 CAR_INTERFACE_IMPL(ServiceWatcher, Object, IServiceConnection)
 
-List<HashSet<AutoPtr<ISignature> > > ServiceWatcher::GetSignatureSets(
+AutoPtr<List<AutoPtr<IHashSet> > > ServiceWatcher::GetSignatureSets(
     /* [in] */ IContext* context,
     /* [in] */ List<String>* initialPackageNames)
 {
     AutoPtr<IPackageManager> pm;
     context->GetPackageManager((IPackageManager**)&pm);
-    List<HashSet<AutoPtr<ISignature> > > sigSets;
+    AutoPtr<List<AutoPtr<IHashSet> > > sigSets = new List<AutoPtr<IHashSet> >;
 
     List<String>::Iterator it = initialPackageNames->Begin();
     for (; it != initialPackageNames->End(); it++) {
         String pkg = *it;
-        HashSet<AutoPtr<ISignature> > set;
+        AutoPtr<IHashSet> set;
+        CHashSet::New((IHashSet**)&set);
         AutoPtr<IPackageInfo> packageInfo;
-        pm->GetPackageInfo(pkg, IPackageManager::GET_SIGNATURES, (IPackageInfo**)&packageInfo);
-        AutoPtr<ArrayOf<ISignature*> > sigs;
-        packageInfo->GetSignatures((ArrayOf<ISignature*>**)&sigs);
-        for(Int32 i = 0; i < sigs->GetLength(); i++) {
-            set.Insert((*sigs)[i]);
+        if (SUCCEEDED(pm->GetPackageInfo(pkg, IPackageManager::GET_SIGNATURES, (IPackageInfo**)&packageInfo))) {
+            AutoPtr<ArrayOf<ISignature*> > sigs;
+            packageInfo->GetSignatures((ArrayOf<ISignature*>**)&sigs);
+            for(Int32 i = 0; i < sigs->GetLength(); i++) {
+                set->Add((*sigs)[i]);
+            }
+            sigSets->PushBack(set);
         }
-        sigSets.PushBack(set);
+        else {
+            Logger::W("ServiceWatcher", "%s not found", pkg.string());
+        }
     }
     return sigSets;
 }
@@ -362,35 +368,25 @@ void ServiceWatcher::BindToPackageLocked(
 
 Boolean ServiceWatcher::IsSignatureMatch(
     /* [in] */ ArrayOf<ISignature*>* signatures,
-    /* [in] */ const List<HashSet<AutoPtr<ISignature> > >& sigSets)
+    /* [in] */ List<AutoPtr<IHashSet> >* sigSets)
 {
     if (signatures == NULL) return FALSE;
 
     // build hashset of input to test against
-    HashSet<AutoPtr<ISignature> > inputSet;
+    AutoPtr<IHashSet> inputSet;
+    CHashSet::New((IHashSet**)&inputSet);
     for (Int32 i = 0; i < signatures->GetLength(); i++) {
-        inputSet.Insert((*signatures)[i]);
+        inputSet->Add((*signatures)[i]);
     }
 
     // test input against each of the signature sets
-    List<HashSet<AutoPtr<ISignature> > >::ConstIterator it = sigSets.Begin();
-    for (; it != sigSets.End(); it++) {
-        Boolean hasFind = FALSE;
-        HashSet<AutoPtr<ISignature> > set = *it;
-        HashSet<AutoPtr<ISignature> >::Iterator outIterator = set.Begin();
-        for(; outIterator != set.End(); ++outIterator) {
-            hasFind= FALSE;
-            HashSet<AutoPtr<ISignature> >::Iterator innerIterator = inputSet.Begin();
-            for(; innerIterator != inputSet.End(); ++innerIterator) {
-                Boolean equals = Object::Equals(*outIterator, *innerIterator);
-                if(equals) {
-                    hasFind = TRUE;
-                    break;
-                }
-            }
-            if(!hasFind) break;
-        }
-        if(hasFind) return TRUE;
+    List<AutoPtr<IHashSet> >::ConstIterator it = sigSets->Begin();
+    for (; it != sigSets->End(); it++) {
+        AutoPtr<IHashSet> referenceSet = *it;
+        Boolean equals = FALSE;
+        referenceSet->Equals(inputSet, &equals);
+        if (equals)
+            return TRUE;
     }
     return FALSE;
 }

@@ -1481,6 +1481,11 @@ module
             interface IIActivityRecognitionHardware;
             interface IBinder;
         }
+
+        singleton class CActivityRecognitionHardwareHelper {
+            interface IActivityRecognitionHardwareHelper;
+        }
+
     } // namespace Location
 
     namespace Display {

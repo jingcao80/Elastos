@@ -633,7 +633,7 @@ ECode CTelephonyManager::GetSimOperator(
 {
     VALIDATE_NOT_NULL(res)
     Int64 subId = GetDefaultSubscription();
-    Logger::D(TAG, "getSimOperator(): default subId=%ld", subId);
+    Logger::D(TAG, "getSimOperator(): default subId=%lld", subId);
     return GetSimOperator(subId, res);
 }
 
@@ -645,7 +645,7 @@ ECode CTelephonyManager::GetSimOperator(
     String oper;
     GetTelephonyProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_NUMERIC,
             subId, String(""), &oper);
-    Logger::D(TAG, "getSimOperator: subId=%ld operator=%s", subId, oper.string());
+    Logger::D(TAG, "getSimOperator: subId=%lld operator=%s", subId, oper.string());
     *res = oper;
     return NOERROR;
 }

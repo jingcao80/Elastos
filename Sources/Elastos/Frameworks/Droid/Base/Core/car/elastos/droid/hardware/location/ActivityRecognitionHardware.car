@@ -1,6 +1,8 @@
 
 module
 {
+    interface Elastos.Droid.Content.IContext;
+
     namespace Elastos {
     namespace Droid {
     namespace Hardware {
@@ -15,6 +17,16 @@ module
      * interface IIActivityRecognitionHardware;
      */
     interface IActivityRecognitionHardware {
+    }
+
+    [local]
+    interface IActivityRecognitionHardwareHelper {
+        GetInstance(
+            [in] IContext* context,
+            [out] IActivityRecognitionHardware** instance);
+
+        IsSupported(
+            [out] Boolean* result);
     }
 
     } // namespace Location

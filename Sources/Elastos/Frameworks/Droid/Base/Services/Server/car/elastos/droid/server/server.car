@@ -452,6 +452,7 @@ module
            [in] IContext* ctx);
 
        interface IILocationManager;
+       interface IBinder;
     }
 
     [local]

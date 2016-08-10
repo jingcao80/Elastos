@@ -216,10 +216,7 @@ public:
     CARAPI GetGeofenceHardware(
         /* [out] */ IIFusedGeofenceHardware** gh);
 
-private:
-    FlpHardwareProvider(
-        /* [in] */ IContext* context);
-
+public:
     /**
      * Private callback functions used by FLP HAL.
      */
@@ -260,9 +257,12 @@ private:
         /* [in] */ Int32 geofenceId,
         /* [in] */ Int32 result);
 
-//TODO native
+private:
+    FlpHardwareProvider(
+        /* [in] */ IContext* context);
+
     // Core members
-    static CARAPI_(Boolean) NativeClassInit();
+    static CARAPI_(void) NativeClassInit();
     static CARAPI_(Boolean) NativeIsSupported();
 
     // FlpLocationInterface members
@@ -331,17 +331,17 @@ private:
     // private final Object mLocationSinkLock = new Object();
 
     // FlpHal result codes, they must be equal to the ones in fused_location.h
-    const static Int32 FLP_RESULT_SUCCESS;
-    const static Int32 FLP_RESULT_ERROR;
-    const static Int32 FLP_RESULT_INSUFFICIENT_MEMORY;
-    const static Int32 FLP_RESULT_TOO_MANY_GEOFENCES;
-    const static Int32 FLP_RESULT_ID_EXISTS;
-    const static Int32 FLP_RESULT_ID_UNKNOWN;
-    const static Int32 FLP_RESULT_INVALID_GEOFENCE_TRANSITION;
+    // const static Int32 FLP_RESULT_SUCCESS;
+    // const static Int32 FLP_RESULT_ERROR;
+    // const static Int32 FLP_RESULT_INSUFFICIENT_MEMORY;
+    // const static Int32 FLP_RESULT_TOO_MANY_GEOFENCES;
+    // const static Int32 FLP_RESULT_ID_EXISTS;
+    // const static Int32 FLP_RESULT_ID_UNKNOWN;
+    // const static Int32 FLP_RESULT_INVALID_GEOFENCE_TRANSITION;
 
     // FlpHal monitor status codes, they must be equal to the ones in fused_location.h
-    const static Int32 FLP_GEOFENCE_MONITOR_STATUS_UNAVAILABLE;
-    const static Int32 FLP_GEOFENCE_MONITOR_STATUS_AVAILABLE;
+    // const static Int32 FLP_GEOFENCE_MONITOR_STATUS_UNAVAILABLE;
+    // const static Int32 FLP_GEOFENCE_MONITOR_STATUS_AVAILABLE;
 
     AutoPtr<IIFusedLocationHardware> mLocationHardware;
     AutoPtr<IIFusedGeofenceHardware> mGeofenceHardwareService;

@@ -3,7 +3,6 @@
 #include "Elastos.Droid.Telephony.h"
 #include "Elastos.CoreLibrary.Libcore.h"
 #include "Elastos.CoreLibrary.Net.h"
-#include "elastos/droid/app/AppOpsManager.h"
 #include "elastos/droid/hardware/location/GeofenceHardwareImpl.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/os/Binder.h"
@@ -21,10 +20,19 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include <hardware/hardware.h>
+#include <hardware/gps.h>
+#include <hardware_legacy/power.h>
+#include <utils/AndroidThreads.h>
+#include <utils/misc.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+#include <linux/in.h>
+#include <linux/in6.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
-using Elastos::Droid::App::AppOpsManager;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::App::CAppOpsManagerHelper;
+using Elastos::Droid::App::IAppOpsManagerHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::Content::CIntent;
@@ -52,6 +60,16 @@ using Elastos::Droid::Location::ILocationManager;
 using Elastos::Droid::Location::ILocationProvider;
 using Elastos::Droid::Location::ILocationRequest;
 using Elastos::Droid::Location::ILocationRequestHelper;
+using Elastos::Droid::Location::CGpsClock;
+using Elastos::Droid::Location::IGpsClock;
+using Elastos::Droid::Location::CGpsMeasurement;
+using Elastos::Droid::Location::IGpsMeasurement;
+using Elastos::Droid::Location::CGpsMeasurementsEvent;
+using Elastos::Droid::Location::IGpsMeasurementsEvent;
+using Elastos::Droid::Location::CGpsNavigationMessage;
+using Elastos::Droid::Location::IGpsNavigationMessage;
+using Elastos::Droid::Location::CGpsNavigationMessageEvent;
+using Elastos::Droid::Location::IGpsNavigationMessageEvent;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::INetworkInfo;
 using Elastos::Droid::Net::IUri;
@@ -707,29 +725,29 @@ const Boolean GpsLocationProvider::DEBUG = Logger::IsLoggable(TAG, Logger::___DE
 const Boolean GpsLocationProvider::VERBOSE = Logger::IsLoggable(TAG, Logger::VERBOSE);
 const AutoPtr<IProviderProperties> GpsLocationProvider::PROPERTIES = InitPROPERTIES();
 
-// these need to match GpsPositionMode enum in gps.h
-const Int32 GpsLocationProvider::GPS_POSITION_MODE_STANDALONE;
-const Int32 GpsLocationProvider::GPS_POSITION_MODE_MS_BASED;
-const Int32 GpsLocationProvider::GPS_POSITION_MODE_MS_ASSISTED;
+// // these need to match GpsPositionMode enum in gps.h
+// const Int32 GpsLocationProvider::GPS_POSITION_MODE_STANDALONE;
+// const Int32 GpsLocationProvider::GPS_POSITION_MODE_MS_BASED;
+// const Int32 GpsLocationProvider::GPS_POSITION_MODE_MS_ASSISTED;
 
-// these need to match GpsPositionRecurrence enum in gps.h
-const Int32 GpsLocationProvider::GPS_POSITION_RECURRENCE_PERIODIC;
-const Int32 GpsLocationProvider::GPS_POSITION_RECURRENCE_SINGLE;
+// // these need to match GpsPositionRecurrence enum in gps.h
+// const Int32 GpsLocationProvider::GPS_POSITION_RECURRENCE_PERIODIC;
+// const Int32 GpsLocationProvider::GPS_POSITION_RECURRENCE_SINGLE;
 
-// these need to match GpsStatusValue defines in gps.h
-const Int32 GpsLocationProvider::GPS_STATUS_NONE;
-const Int32 GpsLocationProvider::GPS_STATUS_SESSION_BEGIN;
-const Int32 GpsLocationProvider::GPS_STATUS_SESSION_END;
-const Int32 GpsLocationProvider::GPS_STATUS_ENGINE_ON;
-const Int32 GpsLocationProvider::GPS_STATUS_ENGINE_OFF;
+// // these need to match GpsStatusValue defines in gps.h
+// const Int32 GpsLocationProvider::GPS_STATUS_NONE;
+// const Int32 GpsLocationProvider::GPS_STATUS_SESSION_BEGIN;
+// const Int32 GpsLocationProvider::GPS_STATUS_SESSION_END;
+// const Int32 GpsLocationProvider::GPS_STATUS_ENGINE_ON;
+// const Int32 GpsLocationProvider::GPS_STATUS_ENGINE_OFF;
 
-// these need to match GpsApgsStatusValue defines in gps.h
-/** AGPS status event values. */
-const Int32 GpsLocationProvider::GPS_REQUEST_AGPS_DATA_CONN;
-const Int32 GpsLocationProvider::GPS_RELEASE_AGPS_DATA_CONN;
-const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONNECTED;
-const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONN_DONE;
-const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONN_FAILED;
+// // these need to match GpsApgsStatusValue defines in gps.h
+// /** AGPS status event values. */
+// const Int32 GpsLocationProvider::GPS_REQUEST_AGPS_DATA_CONN;
+// const Int32 GpsLocationProvider::GPS_RELEASE_AGPS_DATA_CONN;
+// const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONNECTED;
+// const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONN_DONE;
+// const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONN_FAILED;
 
 // these need to match GpsLocationFlags enum in gps.h
 const Int32 GpsLocationProvider::LOCATION_INVALID;
@@ -739,50 +757,50 @@ const Int32 GpsLocationProvider::LOCATION_HAS_SPEED;
 const Int32 GpsLocationProvider::LOCATION_HAS_BEARING;
 const Int32 GpsLocationProvider::LOCATION_HAS_ACCURACY;
 
-// IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
-const Int32 GpsLocationProvider::GPS_DELETE_EPHEMERIS;
-const Int32 GpsLocationProvider::GPS_DELETE_ALMANAC;
-const Int32 GpsLocationProvider::GPS_DELETE_POSITION;
-const Int32 GpsLocationProvider::GPS_DELETE_TIME;
-const Int32 GpsLocationProvider::GPS_DELETE_IONO;
-const Int32 GpsLocationProvider::GPS_DELETE_UTC;
-const Int32 GpsLocationProvider::GPS_DELETE_HEALTH;
-const Int32 GpsLocationProvider::GPS_DELETE_SVDIR;
-const Int32 GpsLocationProvider::GPS_DELETE_SVSTEER;
-const Int32 GpsLocationProvider::GPS_DELETE_SADATA;
-const Int32 GpsLocationProvider::GPS_DELETE_RTI;
-const Int32 GpsLocationProvider::GPS_DELETE_CELLDB_INFO;
-const Int32 GpsLocationProvider::GPS_DELETE_ALMANAC_CORR;
-const Int32 GpsLocationProvider::GPS_DELETE_FREQ_BIAS_EST;
-const Int32 GpsLocationProvider::GLO_DELETE_EPHEMERIS;
-const Int32 GpsLocationProvider::GLO_DELETE_ALMANAC;
-const Int32 GpsLocationProvider::GLO_DELETE_SVDIR;
-const Int32 GpsLocationProvider::GLO_DELETE_SVSTEER;
-const Int32 GpsLocationProvider::GLO_DELETE_ALMANAC_CORR;
-const Int32 GpsLocationProvider::GPS_DELETE_TIME_GPS;
-const Int32 GpsLocationProvider::GLO_DELETE_TIME;
-const Int32 GpsLocationProvider::BDS_DELETE_SVDIR;
-const Int32 GpsLocationProvider::BDS_DELETE_SVSTEER;
-const Int32 GpsLocationProvider::BDS_DELETE_TIME;
-const Int32 GpsLocationProvider::BDS_DELETE_ALMANAC_CORR;
-const Int32 GpsLocationProvider::BDS_DELETE_EPHEMERIS;
-const Int32 GpsLocationProvider::BDS_DELETE_ALMANAC;
-const Int32 GpsLocationProvider::GPS_DELETE_ALL;
+// // IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
+// const Int32 GpsLocationProvider::GPS_DELETE_EPHEMERIS;
+// const Int32 GpsLocationProvider::GPS_DELETE_ALMANAC;
+// const Int32 GpsLocationProvider::GPS_DELETE_POSITION;
+// const Int32 GpsLocationProvider::GPS_DELETE_TIME;
+// const Int32 GpsLocationProvider::GPS_DELETE_IONO;
+// const Int32 GpsLocationProvider::GPS_DELETE_UTC;
+// const Int32 GpsLocationProvider::GPS_DELETE_HEALTH;
+// const Int32 GpsLocationProvider::GPS_DELETE_SVDIR;
+// const Int32 GpsLocationProvider::GPS_DELETE_SVSTEER;
+// const Int32 GpsLocationProvider::GPS_DELETE_SADATA;
+// const Int32 GpsLocationProvider::GPS_DELETE_RTI;
+// const Int32 GpsLocationProvider::GPS_DELETE_CELLDB_INFO;
+// const Int32 GpsLocationProvider::GPS_DELETE_ALMANAC_CORR;
+// const Int32 GpsLocationProvider::GPS_DELETE_FREQ_BIAS_EST;
+// const Int32 GpsLocationProvider::GLO_DELETE_EPHEMERIS;
+// const Int32 GpsLocationProvider::GLO_DELETE_ALMANAC;
+// const Int32 GpsLocationProvider::GLO_DELETE_SVDIR;
+// const Int32 GpsLocationProvider::GLO_DELETE_SVSTEER;
+// const Int32 GpsLocationProvider::GLO_DELETE_ALMANAC_CORR;
+// const Int32 GpsLocationProvider::GPS_DELETE_TIME_GPS;
+// const Int32 GpsLocationProvider::GLO_DELETE_TIME;
+// const Int32 GpsLocationProvider::BDS_DELETE_SVDIR;
+// const Int32 GpsLocationProvider::BDS_DELETE_SVSTEER;
+// const Int32 GpsLocationProvider::BDS_DELETE_TIME;
+// const Int32 GpsLocationProvider::BDS_DELETE_ALMANAC_CORR;
+// const Int32 GpsLocationProvider::BDS_DELETE_EPHEMERIS;
+// const Int32 GpsLocationProvider::BDS_DELETE_ALMANAC;
+// const Int32 GpsLocationProvider::GPS_DELETE_ALL;
 
-// The GPS_CAPABILITY_* flags must match the values in gps.h
-const Int32 GpsLocationProvider::GPS_CAPABILITY_SCHEDULING;
-const Int32 GpsLocationProvider::GPS_CAPABILITY_MSB;
-const Int32 GpsLocationProvider::GPS_CAPABILITY_MSA;
-const Int32 GpsLocationProvider::GPS_CAPABILITY_SINGLE_SHOT;
-const Int32 GpsLocationProvider::GPS_CAPABILITY_ON_DEMAND_TIME;
+// // The GPS_CAPABILITY_* flags must match the values in gps.h
+// const Int32 GpsLocationProvider::GPS_CAPABILITY_SCHEDULING;
+// const Int32 GpsLocationProvider::GPS_CAPABILITY_MSB;
+// const Int32 GpsLocationProvider::GPS_CAPABILITY_MSA;
+// const Int32 GpsLocationProvider::GPS_CAPABILITY_SINGLE_SHOT;
+// const Int32 GpsLocationProvider::GPS_CAPABILITY_ON_DEMAND_TIME;
 
 // The AGPS SUPL mode
 const Int32 GpsLocationProvider::AGPS_SUPL_MODE_MSA;
 const Int32 GpsLocationProvider::AGPS_SUPL_MODE_MSB;
 
-// these need to match AGpsType enum in gps.h
-const Int32 GpsLocationProvider::AGPS_TYPE_SUPL;
-const Int32 GpsLocationProvider::AGPS_TYPE_C2K;
+// // these need to match AGpsType enum in gps.h
+// const Int32 GpsLocationProvider::AGPS_TYPE_SUPL;
+// const Int32 GpsLocationProvider::AGPS_TYPE_C2K;
 
 // these must match the definitions in gps.h
 const Int32 GpsLocationProvider::APN_INVALID;
@@ -809,37 +827,37 @@ const Int32 GpsLocationProvider::INJECT_NTP_TIME_FINISHED;
 const Int32 GpsLocationProvider::DOWNLOAD_XTRA_DATA_FINISHED;
 
 // Request setid
-const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_SETID_IMSI;
-const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_SETID_MSISDN;
+// const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_SETID_IMSI;
+// const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_SETID_MSISDN;
 
 // Request ref location
-const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_REFLOC_CELLID;
-const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_REFLOC_MAC;
+// const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_REFLOC_CELLID;
+// const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_REFLOC_MAC;
 
-// ref. location info
-const Int32 GpsLocationProvider::AGPS_REF_LOCATION_TYPE_GSM_CELLID;
-const Int32 GpsLocationProvider::AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
-const Int32 GpsLocationProvider::AGPS_REG_LOCATION_TYPE_MAC       ;
+// // ref. location info
+// const Int32 GpsLocationProvider::AGPS_REF_LOCATION_TYPE_GSM_CELLID;
+// const Int32 GpsLocationProvider::AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
+// const Int32 GpsLocationProvider::AGPS_REG_LOCATION_TYPE_MAC       ;
 
-// set id info
-const Int32 GpsLocationProvider::AGPS_SETID_TYPE_NONE;
-const Int32 GpsLocationProvider::AGPS_SETID_TYPE_IMSI;
-const Int32 GpsLocationProvider::AGPS_SETID_TYPE_MSISDN;
+// // set id info
+// const Int32 GpsLocationProvider::AGPS_SETID_TYPE_NONE;
+// const Int32 GpsLocationProvider::AGPS_SETID_TYPE_IMSI;
+// const Int32 GpsLocationProvider::AGPS_SETID_TYPE_MSISDN;
 
 const String GpsLocationProvider::PROPERTIES_FILE_PREFIX("/etc/gps");
 const String GpsLocationProvider::PROPERTIES_FILE_SUFFIX(".conf");
 const String GpsLocationProvider::DEFAULT_PROPERTIES_FILE = PROPERTIES_FILE_PREFIX + PROPERTIES_FILE_SUFFIX;
 
-const Int32 GpsLocationProvider::GPS_GEOFENCE_UNAVAILABLE;
-const Int32 GpsLocationProvider::GPS_GEOFENCE_AVAILABLE;
+// const Int32 GpsLocationProvider::GPS_GEOFENCE_UNAVAILABLE;
+// const Int32 GpsLocationProvider::GPS_GEOFENCE_AVAILABLE;
 
-// GPS Geofence errors. Should match gps.h constants.
-const Int32 GpsLocationProvider::GPS_GEOFENCE_OPERATION_SUCCESS;
-const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES;
-const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_ID_EXISTS;
-const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_ID_UNKNOWN;
-const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_INVALID_TRANSITION;
-const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_GENERIC;
+// // GPS Geofence errors. Should match gps.h constants.
+// const Int32 GpsLocationProvider::GPS_GEOFENCE_OPERATION_SUCCESS;
+// const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES;
+// const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_ID_EXISTS;
+// const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_ID_UNKNOWN;
+// const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_INVALID_TRANSITION;
+// const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_GENERIC;
 
 // TCP/IP constants.
 // Valid TCP/UDP port range is (0, 65535].
@@ -867,11 +885,14 @@ const Int32 GpsLocationProvider::EPHEMERIS_MASK;
 const Int32 GpsLocationProvider::ALMANAC_MASK;
 const Int32 GpsLocationProvider::USED_FOR_FIX_MASK;
 
-// Boolean GpsLocationProvider::class_init_Native_value = GpsLocationProvider::Class_init_Native();
+Boolean GpsLocationProvider::class_init_Native_value = GpsLocationProvider::Native_Class_init();
 
 CAR_INTERFACE_IMPL(GpsLocationProvider, Object, ILocationProviderInterface)
 
-GpsLocationProvider::GpsLocationProvider()
+GpsLocationProvider::GpsLocationProvider(
+    /* [in] */ IContext* context,
+    /* [in] */ IILocationManager* ilocationManager,
+    /* [in] */ ILooper* looper)
     : mLocationFlags(LOCATION_INVALID)
     , mStatus(ILocationProvider::TEMPORARILY_UNAVAILABLE)
     , mStatusUpdateTime(SystemClock::GetElapsedRealtime())
@@ -895,6 +916,8 @@ GpsLocationProvider::GpsLocationProvider()
     , mSuplServerPort(TCP_MIN_PORT)
     , mC2KServerPort(0)
     , mSuplEsEnabled(FALSE)
+    , mContext(context)
+    , mILocationManager(ilocationManager)
     , mApnIpType(0)
     , mAGpsDataConnectionState(0)
     , mSvCount(0)
@@ -923,15 +946,7 @@ GpsLocationProvider::GpsLocationProvider()
     mSvMasks = ArrayOf<Int32>::Alloc(3);
     mNmeaBuffer = ArrayOf<Byte>::Alloc(120);
     mDefaultApnObserver = new DefaultApnObserver(this);
-}
 
-GpsLocationProvider::GpsLocationProvider(
-    /* [in] */ IContext* context,
-    /* [in] */ IILocationManager* ilocationManager,
-    /* [in] */ ILooper* looper)
-    : mContext(context)
-    , mILocationManager(ilocationManager)
-{
     AutoPtr<INtpTrustedTimeHelper> ntth;
     CNtpTrustedTimeHelper::AcquireSingleton((INtpTrustedTimeHelper**)&ntth);
     ntth->GetInstance(context, (INtpTrustedTime**)&mNtpTime);
@@ -1654,6 +1669,8 @@ void GpsLocationProvider::UpdateClientUids(
     AutoPtr<IWorkSource> newWork = (*changes)[0];
     AutoPtr<IWorkSource> goneWork = (*changes)[1];
 
+    AutoPtr<IAppOpsManagerHelper> appOpsManagerHelper;
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&appOpsManagerHelper);
     // Update sources that were not previously tracked.
     if (newWork != NULL) {
         Int32 lastuid = -1;
@@ -1663,7 +1680,7 @@ void GpsLocationProvider::UpdateClientUids(
             Int32 uid;
             newWork->Get(i, &uid);
             AutoPtr<IBinder> binder;
-            ECode ec = AppOpsManager::GetToken(mAppOpsService, (IBinder**)&binder);
+            ECode ec = appOpsManagerHelper->GetToken(mAppOpsService, (IBinder**)&binder);
             if (FAILED(ec)) {
                 Logger::W(TAG, "RemoteException%08x", ec);
                 // return E_REMOTE_EXCEPTION;
@@ -1671,7 +1688,7 @@ void GpsLocationProvider::UpdateClientUids(
             String name;
             newWork->GetName(i, &name);
             Int32 ii;
-            mAppOpsService->StartOperation(binder, AppOpsManager::OP_GPS, uid, name, &ii);
+            mAppOpsService->StartOperation(binder, IAppOpsManager::OP_GPS, uid, name, &ii);
             if (uid != lastuid) {
                 lastuid = uid;
                 mBatteryStats->NoteStartGps(uid);
@@ -1688,14 +1705,14 @@ void GpsLocationProvider::UpdateClientUids(
             Int32 uid;
             goneWork->Get(i, &uid);
             AutoPtr<IBinder> binder;
-            ECode ec = AppOpsManager::GetToken(mAppOpsService, (IBinder**)&binder);
+            ECode ec = appOpsManagerHelper->GetToken(mAppOpsService, (IBinder**)&binder);
             if (FAILED(ec)) {
                 Logger::W(TAG, "RemoteException%08x", ec);
                 // return E_REMOTE_EXCEPTION;
             }
             String name;
             goneWork->GetName(i, &name);
-            mAppOpsService->FinishOperation(binder, AppOpsManager::OP_GPS, uid, name);
+            mAppOpsService->FinishOperation(binder, IAppOpsManager::OP_GPS, uid, name);
             if (uid != lastuid) {
                 lastuid = uid;
                 mBatteryStats->NoteStopGps(uid);
@@ -1741,7 +1758,8 @@ Boolean GpsLocationProvider::DeleteAidingData(
 
     if (extras == NULL) {
         flags = GPS_DELETE_ALL;
-    } else {
+    }
+    else {
         flags = 0;
         Boolean v;
         if (extras->GetBoolean(String("ephemeris"), &v),v) flags |= GPS_DELETE_EPHEMERIS;
@@ -2246,14 +2264,14 @@ void GpsLocationProvider::ReportGeofenceTransition(
             bearing,
             accuracy,
             timestamp);
-//TODO export FusedBatchOptions
-    // mGeofenceHardwareImpl->ReportGeofenceTransition(
-    //         geofenceId,
-    //         location,
-    //         transition,
-    //         transitionTimestamp,
-    //         IGeofenceHardware::MONITORING_TYPE_GPS_HARDWARE,
-    //         FusedBatchOptions::SourceTechnologies::GNSS);
+    Int32 GNSS = 1 << 0;
+    mGeofenceHardwareImpl->ReportGeofenceTransition(
+            geofenceId,
+            location,
+            transition,
+            transitionTimestamp,
+            IGeofenceHardware::MONITORING_TYPE_GPS_HARDWARE,
+            /*FusedBatchOptions::SourceTechnologies::*/GNSS);
 }
 
 void GpsLocationProvider::ReportGeofenceStatus(
@@ -2283,12 +2301,13 @@ void GpsLocationProvider::ReportGeofenceStatus(
     if(status == GPS_GEOFENCE_AVAILABLE) {
         monitorStatus = IGeofenceHardware::MONITOR_CURRENTLY_AVAILABLE;
     }
-//TODO export FusedBatchOptions
-    // mGeofenceHardwareImpl->ReportGeofenceMonitorStatus(
-    //         IGeofenceHardware::MONITORING_TYPE_GPS_HARDWARE,
-    //         monitorStatus,
-    //         location,
-    //         FusedBatchOptions::SourceTechnologies::GNSS);
+
+    Int32 GNSS = 1 << 0;
+    mGeofenceHardwareImpl->ReportGeofenceMonitorStatus(
+            IGeofenceHardware::MONITORING_TYPE_GPS_HARDWARE,
+            monitorStatus,
+            location,
+            /*FusedBatchOptions::SourceTechnologies::*/GNSS);
 }
 
 void GpsLocationProvider::ReportGeofenceAddStatus(
@@ -2363,9 +2382,9 @@ ECode GpsLocationProvider::ReportNiNotification(
     CGpsNiNotification::New((IGpsNiNotification**)&notification);
     notification->SetNotificationId(notificationId);
     notification->SetNiType(niType);
-    notification->SetNeedNotify((notifyFlags & IGpsNetInitiatedHandler::GPS_NI_NEED_NOTIFY) != 0);
-    notification->SetNeedVerify((notifyFlags & IGpsNetInitiatedHandler::GPS_NI_NEED_VERIFY) != 0);
-    notification->SetPrivacyOverride((notifyFlags & IGpsNetInitiatedHandler::GPS_NI_PRIVACY_OVERRIDE) != 0);
+    notification->SetNeedNotify((notifyFlags & GPS_NI_NEED_NOTIFY) != 0);
+    notification->SetNeedVerify((notifyFlags & GPS_NI_NEED_VERIFY) != 0);
+    notification->SetPrivacyOverride((notifyFlags & GPS_NI_PRIVACY_OVERRIDE) != 0);
     notification->SetTimeOut(timeout);
     notification->SetDefaultResponse(defaultResponse);
     notification->SetRequestorId(requestorId);
@@ -2450,7 +2469,7 @@ void GpsLocationProvider::RequestUtcTime()
     SendMessage(INJECT_NTP_TIME, 0, NULL);
 }
 
-void GpsLocationProvider::requestRefLocation(
+void GpsLocationProvider::RequestRefLocation(
     /* [in] */ Int32 flags)
 {
     AutoPtr<IInterface> obj;
@@ -2530,7 +2549,8 @@ String GpsLocationProvider::GetDefaultApn()
             Carriers.DEFAULT_SORT_ORDER);
     if (cursor != null && cursor.moveToFirst()) {
         return cursor.getString(0);
-    } else {
+    }
+    else {
         Log.e(TAG, "No APN found to select.");
     }
     // } catch (Exception e) {
@@ -2574,7 +2594,8 @@ Int32 GpsLocationProvider::GetApnIpType(
 
     if (null != cursor && cursor.moveToFirst()) {
         return translateToApnIpType(cursor.getString(0), apn);
-    } else {
+    }
+    else {
         Log.e(TAG, "No entry found in query for APN: " + apn);
     }
     // } catch (Exception e) {
@@ -2660,23 +2681,425 @@ ECode GpsLocationProvider::Dump(
     return NOERROR;
 }
 
-// Boolean GpsLocationProvider::Class_init_Native()
-// {
-//     return FALSE;
-// }
+static AutoPtr<GpsLocationProvider> mCallbacksObj;
+static const GpsInterface* sGpsInterface = NULL;
+static const GpsXtraInterface* sGpsXtraInterface = NULL;
+static const AGpsInterface* sAGpsInterface = NULL;
+static const GpsNiInterface* sGpsNiInterface = NULL;
+static const GpsDebugInterface* sGpsDebugInterface = NULL;
+static const AGpsRilInterface* sAGpsRilInterface = NULL;
+static const GpsGeofencingInterface* sGpsGeofencingInterface = NULL;
+static const GpsMeasurementInterface* sGpsMeasurementInterface = NULL;
+static const GpsNavigationMessageInterface* sGpsNavigationMessageInterface = NULL;
+static const GnssConfigurationInterface* sGnssConfigurationInterface = NULL;
+
+// temporary storage for GPS callbacks
+static GpsSvStatus  sGpsSvStatus;
+static const char* sNmeaString;
+static int sNmeaStringLength;
+
+#define WAKE_LOCK_NAME  "GPS"
+
+static void location_callback(GpsLocation* location)
+{
+    mCallbacksObj->ReportLocation(location->flags,
+            (Double)location->latitude, (Double)location->longitude,
+            (Double)location->altitude,
+            (Float)location->speed, (Float)location->bearing,
+            (Float)location->accuracy, (Int64)location->timestamp);
+}
+
+static void status_callback(GpsStatus* status)
+{
+    mCallbacksObj->ReportStatus(status->status);
+}
+
+static void sv_status_callback(GpsSvStatus* sv_status)
+{
+    memcpy(&sGpsSvStatus, sv_status, sizeof(sGpsSvStatus));
+    mCallbacksObj->ReportSvStatus();
+}
+
+static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
+{
+    // The Java code will call back to read these values
+    // We do this to avoid creating unnecessary String objects
+    sNmeaString = nmea;
+    sNmeaStringLength = length;
+    mCallbacksObj->ReportNmea(timestamp);
+}
+
+static void set_capabilities_callback(uint32_t capabilities)
+{
+    ALOGD("set_capabilities_callback: %du\n", capabilities);
+    mCallbacksObj->SetEngineCapabilities(capabilities);
+}
+
+static void acquire_wakelock_callback()
+{
+    acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_NAME);
+}
+
+static void release_wakelock_callback()
+{
+    release_wake_lock(WAKE_LOCK_NAME);
+}
+
+static void request_utc_time_callback()
+{
+    mCallbacksObj->RequestUtcTime();
+}
+
+static pthread_t create_thread_callback(const char* name, void (*start)(void *), void* arg)
+{
+    // return (pthread_t)AndroidRuntime::createJavaThread(name, start, arg);
+    android_thread_id_t threadId = 0;
+    androidCreateRawThreadEtc((android_thread_func_t)start, arg, name,
+        ANDROID_PRIORITY_DEFAULT, 0, &threadId);
+    return (pthread_t)threadId;
+}
+
+GpsCallbacks sGpsCallbacks = {
+    sizeof(GpsCallbacks),
+    location_callback,
+    status_callback,
+    sv_status_callback,
+    nmea_callback,
+    set_capabilities_callback,
+    acquire_wakelock_callback,
+    release_wakelock_callback,
+    create_thread_callback,
+    request_utc_time_callback,
+};
+
+static void xtra_download_request_callback()
+{
+    mCallbacksObj->XtraDownloadRequest();
+}
+
+GpsXtraCallbacks sGpsXtraCallbacks = {
+    xtra_download_request_callback,
+    create_thread_callback,
+};
+
+static AutoPtr<ArrayOf<Byte> > convert_to_ipv4(uint32_t ip, bool net_order)
+{
+    if (INADDR_NONE == ip) {
+        return NULL;
+    }
+
+    AutoPtr<ArrayOf<Byte> > byteArray = ArrayOf<Byte>::Alloc(4);
+    if (byteArray == NULL) {
+        ALOGE("Unable to allocate byte array for IPv4 address");
+        return NULL;
+    }
+
+    Byte ipv4[4];
+    if (net_order) {
+        ALOGV("Converting IPv4 address(net_order) %x", ip);
+        memcpy(ipv4, &ip, sizeof(ipv4));
+    }
+    else {
+        ALOGV("Converting IPv4 address(host_order) %x", ip);
+        //endianess transparent conversion from int to char[]
+        ipv4[0] = (Byte) (ip & 0xFF);
+        ipv4[1] = (Byte)((ip>>8) & 0xFF);
+        ipv4[2] = (Byte)((ip>>16) & 0xFF);
+        ipv4[3] = (Byte) (ip>>24);
+    }
+
+    byteArray->Copy(ipv4, 4);
+    return byteArray;
+}
+
+static void agps_status_callback(AGpsStatus* agps_status)
+{
+    AutoPtr<ArrayOf<Byte> > byteArray;
+    bool isSupported = false;
+
+    size_t status_size = agps_status->size;
+    if (status_size == sizeof(AGpsStatus_v3)) {
+      ALOGV("AGpsStatus is V3: %d", status_size);
+      switch (agps_status->addr.ss_family)
+      {
+      case AF_INET:
+          {
+            struct sockaddr_in *in = (struct sockaddr_in*)&(agps_status->addr);
+            uint32_t *pAddr = (uint32_t*)&(in->sin_addr);
+            byteArray = convert_to_ipv4(*pAddr, true /* net_order */);
+            if (byteArray != NULL) {
+                isSupported = true;
+            }
+            IF_ALOGD() {
+                // log the IP for reference in case there is a bogus value pushed by HAL
+                char str[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, &(in->sin_addr), str, INET_ADDRSTRLEN);
+                ALOGD("AGPS IP is v4: %s", str);
+            }
+          }
+          break;
+      case AF_INET6:
+          {
+            struct sockaddr_in6 *in6 = (struct sockaddr_in6*)&(agps_status->addr);
+            byteArray = ArrayOf<Byte>::Alloc(16);
+            if (byteArray != NULL) {
+                byteArray->Copy((const Byte*)&(in6->sin6_addr), 16);
+                isSupported = true;
+            }
+            else {
+                ALOGE("Unable to allocate byte array for IPv6 address.");
+            }
+            IF_ALOGD() {
+                // log the IP for reference in case there is a bogus value pushed by HAL
+                char str[INET6_ADDRSTRLEN];
+                inet_ntop(AF_INET6, &(in6->sin6_addr), str, INET6_ADDRSTRLEN);
+                ALOGD("AGPS IP is v6: %s", str);
+            }
+          }
+          break;
+      default:
+          ALOGE("Invalid ss_family found: %d", agps_status->addr.ss_family);
+          break;
+      }
+    }
+    else if (status_size >= sizeof(AGpsStatus_v2)) {
+      ALOGV("AGpsStatus is V2+: %d", status_size);
+      // for back-compatibility reasons we check in v2 that the data structure size is greater or
+      // equal to the declared size in gps.h
+      uint32_t ipaddr = agps_status->ipaddr;
+      ALOGV("AGPS IP is v4: %x", ipaddr);
+      byteArray = convert_to_ipv4(ipaddr, false /* net_order */);
+      if (ipaddr == INADDR_NONE || byteArray != NULL) {
+          isSupported = true;
+      }
+    }
+    else if (status_size >= sizeof(AGpsStatus_v1)) {
+        ALOGV("AGpsStatus is V1+: %d", status_size);
+        // because we have to check for >= with regards to v2, we also need to relax the check here
+        // and only make sure that the size is at least what we expect
+        isSupported = true;
+    }
+    else {
+        ALOGE("Invalid size of AGpsStatus found: %d.", status_size);
+    }
+
+    if (isSupported) {
+        Int32 byteArrayLength = byteArray != NULL ? byteArray->GetLength() : 0;
+        ALOGV("Passing AGPS IP addr: size %d", byteArrayLength);
+        mCallbacksObj->ReportAGpsStatus(agps_status->type,
+                            agps_status->status, byteArray);
+
+    }
+    else {
+        ALOGD("Skipping calling method_reportAGpsStatus.");
+    }
+}
+
+AGpsCallbacks sAGpsCallbacks = {
+    agps_status_callback,
+    create_thread_callback,
+};
+
+static void gps_ni_notify_callback(GpsNiNotification *notification)
+{
+    ALOGD("gps_ni_notify_callback\n");
+    String requestor_id(notification->requestor_id);
+    String text(notification->text);
+    String extras(notification->extras);
+
+    if (requestor_id && text && extras) {
+        mCallbacksObj->ReportNiNotification(
+            notification->notification_id, notification->ni_type,
+            notification->notify_flags, notification->timeout,
+            notification->default_response, requestor_id, text,
+            notification->requestor_id_encoding,
+            notification->text_encoding, extras);
+    }
+    else {
+        ALOGE("out of memory in gps_ni_notify_callback\n");
+    }
+}
+
+GpsNiCallbacks sGpsNiCallbacks = {
+    gps_ni_notify_callback,
+    create_thread_callback,
+};
+
+static void agps_request_set_id(uint32_t flags)
+{
+    mCallbacksObj->RequestSetID(flags);
+}
+
+static void agps_request_ref_location(uint32_t flags)
+{
+    mCallbacksObj->RequestRefLocation(flags);
+}
+
+AGpsRilCallbacks sAGpsRilCallbacks = {
+    agps_request_set_id,
+    agps_request_ref_location,
+    create_thread_callback,
+};
+
+static void gps_geofence_transition_callback(int32_t geofence_id,  GpsLocation* location,
+        int32_t transition, GpsUtcTime timestamp)
+{
+
+    mCallbacksObj->ReportGeofenceTransition(geofence_id,
+            location->flags, (Double)location->latitude, (Double)location->longitude,
+            (Double)location->altitude,
+            (Float)location->speed, (Float)location->bearing,
+            (Float)location->accuracy, (Int64)location->timestamp,
+            transition, timestamp);
+};
+
+static void gps_geofence_status_callback(int32_t status, GpsLocation* location)
+{
+    Int32 flags = 0;
+    Double latitude = 0;
+    Double longitude = 0;
+    Double altitude = 0;
+    Float speed = 0;
+    Float bearing = 0;
+    Float accuracy = 0;
+    Int64 timestamp = 0;
+    if (location != NULL) {
+        flags = location->flags;
+        latitude = location->latitude;
+        longitude = location->longitude;
+        altitude = location->altitude;
+        speed = location->speed;
+        bearing = location->bearing;
+        accuracy = location->accuracy;
+        timestamp = location->timestamp;
+    }
+
+    mCallbacksObj->ReportGeofenceStatus(status,
+            flags, latitude, longitude, altitude, speed, bearing, accuracy, timestamp);
+};
+
+static void gps_geofence_add_callback(int32_t geofence_id, int32_t status)
+{
+    if (status != GPS_GEOFENCE_OPERATION_SUCCESS) {
+        ALOGE("Error in geofence_add_callback: %d\n", status);
+    }
+    mCallbacksObj->ReportGeofenceAddStatus(geofence_id, status);
+};
+
+static void gps_geofence_remove_callback(int32_t geofence_id, int32_t status)
+{
+    if (status != GPS_GEOFENCE_OPERATION_SUCCESS) {
+        ALOGE("Error in geofence_remove_callback: %d\n", status);
+    }
+    mCallbacksObj->ReportGeofenceRemoveStatus(geofence_id, status);
+};
+
+static void gps_geofence_resume_callback(int32_t geofence_id, int32_t status)
+{
+    if (status != GPS_GEOFENCE_OPERATION_SUCCESS) {
+        ALOGE("Error in geofence_resume_callback: %d\n", status);
+    }
+    mCallbacksObj->ReportGeofenceResumeStatus(geofence_id, status);
+};
+
+static void gps_geofence_pause_callback(int32_t geofence_id, int32_t status)
+{
+    if (status != GPS_GEOFENCE_OPERATION_SUCCESS) {
+        ALOGE("Error in geofence_pause_callback: %d\n", status);
+    }
+    mCallbacksObj->ReportGeofencePauseStatus(geofence_id, status);
+};
+
+GpsGeofenceCallbacks sGpsGeofenceCallbacks = {
+    gps_geofence_transition_callback,
+    gps_geofence_status_callback,
+    gps_geofence_add_callback,
+    gps_geofence_remove_callback,
+    gps_geofence_pause_callback,
+    gps_geofence_resume_callback,
+    create_thread_callback,
+};
+
+Boolean GpsLocationProvider::Native_Class_init()
+{
+    int err;
+    hw_module_t* module;
+
+    err = hw_get_module(GPS_HARDWARE_MODULE_ID, (hw_module_t const**)&module);
+    if (err == 0) {
+        hw_device_t* device;
+        err = module->methods->open(module, GPS_HARDWARE_MODULE_ID, &device);
+        if (err == 0) {
+            gps_device_t* gps_device = (gps_device_t *)device;
+            sGpsInterface = gps_device->get_gps_interface(gps_device);
+        }
+    }
+    if (sGpsInterface) {
+        sGpsXtraInterface =
+            (const GpsXtraInterface*)sGpsInterface->get_extension(GPS_XTRA_INTERFACE);
+        sAGpsInterface =
+            (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
+        sGpsNiInterface =
+            (const GpsNiInterface*)sGpsInterface->get_extension(GPS_NI_INTERFACE);
+        sGpsDebugInterface =
+            (const GpsDebugInterface*)sGpsInterface->get_extension(GPS_DEBUG_INTERFACE);
+        sAGpsRilInterface =
+            (const AGpsRilInterface*)sGpsInterface->get_extension(AGPS_RIL_INTERFACE);
+        sGpsGeofencingInterface =
+            (const GpsGeofencingInterface*)sGpsInterface->get_extension(GPS_GEOFENCING_INTERFACE);
+        sGpsMeasurementInterface =
+            (const GpsMeasurementInterface*)sGpsInterface->get_extension(GPS_MEASUREMENT_INTERFACE);
+        sGpsNavigationMessageInterface =
+            (const GpsNavigationMessageInterface*)sGpsInterface->get_extension(
+                    GPS_NAVIGATION_MESSAGE_INTERFACE);
+        sGnssConfigurationInterface =
+            (const GnssConfigurationInterface*)sGpsInterface->get_extension(
+                    GNSS_CONFIGURATION_INTERFACE);
+    }
+    return TRUE;
+}
 
 Boolean GpsLocationProvider::Native_is_supported()
 {
-    return FALSE;
+    if (sGpsInterface != NULL) {
+        return TRUE;
+    }
+    else {
+        return FALSE;
+    }
 }
 
 Boolean GpsLocationProvider::Native_init()
 {
-    return FALSE;
+    // this must be set before calling into the HAL library
+    if (!mCallbacksObj) {
+        mCallbacksObj = this;
+    }
+
+    // fail if the main interface fails to initialize
+    if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
+        return FALSE;
+
+    // if XTRA initialization fails we will disable it by sGpsXtraInterface to NULL,
+    // but continue to allow the rest of the GPS interface to work.
+    if (sGpsXtraInterface && sGpsXtraInterface->init(&sGpsXtraCallbacks) != 0)
+        sGpsXtraInterface = NULL;
+    if (sAGpsInterface)
+        sAGpsInterface->init(&sAGpsCallbacks);
+    if (sGpsNiInterface)
+        sGpsNiInterface->init(&sGpsNiCallbacks);
+    if (sAGpsRilInterface)
+        sAGpsRilInterface->init(&sAGpsRilCallbacks);
+    if (sGpsGeofencingInterface)
+        sGpsGeofencingInterface->init(&sGpsGeofenceCallbacks);
+
+    return TRUE;
 }
 
 void GpsLocationProvider::Native_cleanup()
 {
+    if (sGpsInterface)
+        sGpsInterface->cleanup();
 }
 
 Boolean GpsLocationProvider::Native_set_position_mode(
@@ -2686,110 +3109,75 @@ Boolean GpsLocationProvider::Native_set_position_mode(
     /* [in] */ Int32 preferred_accuracy,
     /* [in] */ Int32 preferred_time)
 {
-    return FALSE;
+    if (sGpsInterface) {
+        if (sGpsInterface->set_position_mode(mode, recurrence, min_interval, preferred_accuracy,
+                preferred_time) == 0) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+    }
+    else
+        return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_start()
 {
-    return FALSE;
+    if (sGpsInterface) {
+        if (sGpsInterface->start() == 0) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+    }
+    else
+        return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_stop()
 {
-    return FALSE;
+    if (sGpsInterface) {
+        if (sGpsInterface->stop() == 0) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+    }
+    else
+        return FALSE;
 }
 
 void GpsLocationProvider::Native_delete_aiding_data(
     /* [in] */ Int32 flags)
-{}
+{
+    if (sGpsInterface)
+        sGpsInterface->delete_aiding_data(flags);
+}
 
 Int32 GpsLocationProvider::Native_read_sv_status(
-    /* [in] */ ArrayOf<Int32>* svs,
+    /* [in] */ ArrayOf<Int32>* prns,
     /* [in] */ ArrayOf<Float>* snrs,
-    /* [in] */ ArrayOf<Float>* elevations,
-    /* [in] */ ArrayOf<Float>* azimuths,
-    /* [in] */ ArrayOf<Int32>* masks)
+    /* [in] */ ArrayOf<Float>* elev,
+    /* [in] */ ArrayOf<Float>* azim,
+    /* [in] */ ArrayOf<Int32>* mask)
 {
-    return 0;
-}
+    // this should only be called from within a call to reportSvStatus
 
-Int32 GpsLocationProvider::Native_read_nmea(
-    /* [in] */ ArrayOf<Byte>* buffer,
-    /* [in] */ Int32 bufferSize)
-{
-    return 0;
-}
+    int num_svs = sGpsSvStatus.num_svs;
+    for (int i = 0; i < num_svs; i++) {
+        (*prns)[i] = sGpsSvStatus.sv_list[i].prn;
+        (*snrs)[i] = sGpsSvStatus.sv_list[i].snr;
+        (*elev)[i] = sGpsSvStatus.sv_list[i].elevation;
+        (*azim)[i] = sGpsSvStatus.sv_list[i].azimuth;
+    }
+    (*mask)[0] = sGpsSvStatus.ephemeris_mask;
+    (*mask)[1] = sGpsSvStatus.almanac_mask;
+    (*mask)[2] = sGpsSvStatus.used_in_fix_mask;
 
-void GpsLocationProvider::Native_inject_location(
-    /* [in] */ Double latitude,
-    /* [in] */ Double longitude,
-    /* [in] */ Float accuracy)
-{
-
-}
-
-void GpsLocationProvider::Native_inject_time(
-    /* [in] */ Int64 time,
-    /* [in] */ Int64 timeReference,
-    /* [in] */ Int32 uncertainty)
-{
-}
-
-Boolean GpsLocationProvider::Native_supports_xtra()
-{
-    return FALSE;
-}
-
-void GpsLocationProvider::Native_inject_xtra_data(
-    /* [in] */ ArrayOf<Byte>* data,
-    /* [in] */ Int32 length)
-{
-
-}
-
-String GpsLocationProvider::Native_get_internal_state()
-{
-    return String(NULL);
-}
-
-// AGPS Support
-void GpsLocationProvider::Native_agps_data_conn_open(
-    /* [in] */ const String& apn,
-    /* [in] */ Int32 apnIpType)
-{
-
-}
-
-void GpsLocationProvider::Native_agps_data_conn_closed()
-{
-
-}
-
-void GpsLocationProvider::Native_agps_data_conn_failed()
-{
-
-}
-
-void GpsLocationProvider::Native_agps_ni_message(
-    /* [in] */ ArrayOf<Byte>* msg,
-    /* [in] */ Int32 length)
-{
-
-}
-
-void GpsLocationProvider::Native_set_agps_server(
-    /* [in] */ Int32 type,
-    /* [in] */ const String& hostname,
-    /* [in] */ Int32 port)
-{
-
-}
-
-void GpsLocationProvider::Native_send_ni_response(
-    /* [in] */ Int32 notificationId,
-    /* [in] */ Int32 userResponse)
-{
-
+    return num_svs;
 }
 
 void GpsLocationProvider::Native_agps_set_ref_location_cellid(
@@ -2799,14 +3187,194 @@ void GpsLocationProvider::Native_agps_set_ref_location_cellid(
     /* [in] */ Int32 lac,
     /* [in] */ Int32 cid)
 {
+    AGpsRefLocation location;
 
+    if (!sAGpsRilInterface) {
+        ALOGE("no AGPS RIL interface in agps_set_reference_location_cellid");
+        return;
+    }
+
+    switch(type) {
+        case AGPS_REF_LOCATION_TYPE_GSM_CELLID:
+        case AGPS_REF_LOCATION_TYPE_UMTS_CELLID:
+            location.type = type;
+            location.u.cellID.mcc = mcc;
+            location.u.cellID.mnc = mnc;
+            location.u.cellID.lac = lac;
+            location.u.cellID.cid = cid;
+            break;
+        default:
+            ALOGE("Neither a GSM nor a UMTS cellid (%s:%d).",__FUNCTION__,__LINE__);
+            return;
+            break;
+    }
+    sAGpsRilInterface->set_ref_location(&location, sizeof(location));
+}
+
+void GpsLocationProvider::Native_agps_ni_message(
+    /* [in] */ ArrayOf<Byte>* msg,
+    /* [in] */ Int32 size)
+{
+    size_t sz;
+
+    if (!sAGpsRilInterface) {
+        ALOGE("no AGPS RIL interface in send_ni_message");
+        return;
+    }
+    if (size < 0)
+        return;
+    sz = (size_t)size;
+    sAGpsRilInterface->ni_message((uint8_t *)msg->GetPayload(), sz);
 }
 
 void GpsLocationProvider::Native_agps_set_id(
     /* [in] */ Int32 type,
     /* [in] */ const String& setid)
 {
+    if (!sAGpsRilInterface) {
+        ALOGE("no AGPS RIL interface in agps_set_id");
+        return;
+    }
 
+    sAGpsRilInterface->set_set_id(type, setid.string());
+}
+
+Int32 GpsLocationProvider::Native_read_nmea(
+    /* [in] */ ArrayOf<Byte>* buffer,
+    /* [in] */ Int32 bufferSize)
+{
+    // this should only be called from within a call to reportNmea
+    int length = sNmeaStringLength;
+    if (length > bufferSize)
+        length = bufferSize;
+    memcpy(buffer->GetPayload(), sNmeaString, length);
+    return length;
+}
+
+void GpsLocationProvider::Native_inject_time(
+    /* [in] */ Int64 time,
+    /* [in] */ Int64 timeReference,
+    /* [in] */ Int32 uncertainty)
+{
+    if (sGpsInterface)
+        sGpsInterface->inject_time(time, timeReference, uncertainty);
+}
+
+void GpsLocationProvider::Native_inject_location(
+    /* [in] */ Double latitude,
+    /* [in] */ Double longitude,
+    /* [in] */ Float accuracy)
+{
+    if (sGpsInterface)
+        sGpsInterface->inject_location(latitude, longitude, accuracy);
+}
+
+Boolean GpsLocationProvider::Native_supports_xtra()
+{
+    if (sGpsXtraInterface != NULL) {
+        return TRUE;
+    }
+    else {
+        return FALSE;
+    }
+}
+
+void GpsLocationProvider::Native_inject_xtra_data(
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ Int32 length)
+{
+    if (!sGpsXtraInterface) {
+        ALOGE("no XTRA interface in inject_xtra_data");
+        return;
+    }
+
+    sGpsXtraInterface->inject_xtra_data((char *)data->GetPayload(), length);
+}
+
+// AGPS Support
+void GpsLocationProvider::Native_agps_data_conn_open(
+    /* [in] */ const String& apn,
+    /* [in] */ Int32 apnIpType)
+{
+    if (!sAGpsInterface) {
+        ALOGE("no AGPS interface in agps_data_conn_open");
+        return;
+    }
+    if (apn == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        ALOGE("Native_agps_data_conn_open apn is NULL!");
+        return;
+    }
+
+    const char *apnStr = apn.string();
+
+    size_t interface_size = sAGpsInterface->size;
+    if (interface_size == sizeof(AGpsInterface_v2)) {
+        sAGpsInterface->data_conn_open_with_apn_ip_type(apnStr, apnIpType);
+    }
+    else if (interface_size == sizeof(AGpsInterface_v1)) {
+        sAGpsInterface->data_conn_open(apnStr);
+    }
+    else {
+        ALOGE("Invalid size of AGpsInterface found: %d.", interface_size);
+    }
+}
+
+void GpsLocationProvider::Native_agps_data_conn_closed()
+{
+    if (!sAGpsInterface) {
+        ALOGE("no AGPS interface in agps_data_conn_closed");
+        return;
+    }
+    sAGpsInterface->data_conn_closed();
+}
+
+void GpsLocationProvider::Native_agps_data_conn_failed()
+{
+    if (!sAGpsInterface) {
+        ALOGE("no AGPS interface in agps_data_conn_failed");
+        return;
+    }
+    sAGpsInterface->data_conn_failed();
+}
+
+void GpsLocationProvider::Native_set_agps_server(
+    /* [in] */ Int32 type,
+    /* [in] */ const String& hostname,
+    /* [in] */ Int32 port)
+{
+    if (!sAGpsInterface) {
+        ALOGE("no AGPS interface in set_agps_server");
+        return;
+    }
+    const char *c_hostname = hostname.string();
+    sAGpsInterface->set_server(type, c_hostname, port);
+}
+
+void GpsLocationProvider::Native_send_ni_response(
+    /* [in] */ Int32 notificationId,
+    /* [in] */ Int32 userResponse)
+{
+    if (!sGpsNiInterface) {
+        ALOGE("no NI interface in send_ni_response");
+        return;
+    }
+
+    sGpsNiInterface->respond(notificationId, userResponse);
+}
+
+String GpsLocationProvider::Native_get_internal_state()
+{
+    String result ;
+    if (sGpsDebugInterface) {
+        const size_t maxLength = 2047;
+        char buffer[maxLength+1];
+        size_t length = sGpsDebugInterface->get_internal_state(buffer, maxLength);
+        if (length > maxLength) length = maxLength;
+        buffer[length] = 0;
+        result = String(buffer);
+    }
+    return result;
 }
 
 void GpsLocationProvider::Native_update_network_state(
@@ -2815,13 +3383,31 @@ void GpsLocationProvider::Native_update_network_state(
     /* [in] */ Boolean roaming,
     /* [in] */ Boolean available,
     /* [in] */ const String& extraInfo,
-    /* [in] */ const String& defaultAPN)
+    /* [in] */ const String& apn)
 {
+    if (sAGpsRilInterface && sAGpsRilInterface->update_network_state) {
+        if (extraInfo) {
+            const char *extraInfoStr =extraInfo.string();
+            sAGpsRilInterface->update_network_state(connected, type, roaming, extraInfoStr);
+        }
+        else {
+            sAGpsRilInterface->update_network_state(connected, type, roaming, NULL);
+        }
 
+        // update_network_availability callback was not included in original AGpsRilInterface
+        if (sAGpsRilInterface->size >= sizeof(AGpsRilInterface)
+                && sAGpsRilInterface->update_network_availability) {
+            const char *c_apn = apn.string();
+            sAGpsRilInterface->update_network_availability(available, c_apn);
+        }
+    }
 }
 
 Boolean GpsLocationProvider::Native_is_geofence_supported()
 {
+    if (sGpsGeofencingInterface != NULL) {
+        return TRUE;
+    }
     return FALSE;
 }
 
@@ -2835,12 +3421,28 @@ Boolean GpsLocationProvider::Native_add_geofence(
     /* [in] */ Int32 notificationResponsivenes,
     /* [in] */ Int32 unknownTimer)
 {
+    if (sGpsGeofencingInterface != NULL) {
+        sGpsGeofencingInterface->add_geofence_area(geofenceId, latitude, longitude,
+                radius, lastTransition, monitorTransitions, notificationResponsivenes,
+                unknownTimer);
+        return TRUE;
+    }
+    else {
+        ALOGE("Geofence interface not available");
+    }
     return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_remove_geofence(
     /* [in] */ Int32 geofenceId)
 {
+    if (sGpsGeofencingInterface != NULL) {
+        sGpsGeofencingInterface->remove_geofence_area(geofenceId);
+        return TRUE;
+    }
+    else {
+        ALOGE("Geofence interface not available");
+    }
     return FALSE;
 }
 
@@ -2848,48 +3450,335 @@ Boolean GpsLocationProvider::Native_resume_geofence(
     /* [in] */ Int32 geofenceId,
     /* [in] */ Int32 transitions)
 {
+    if (sGpsGeofencingInterface != NULL) {
+        sGpsGeofencingInterface->resume_geofence(geofenceId, transitions);
+        return TRUE;
+    }
+    else {
+        ALOGE("Geofence interface not available");
+    }
     return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_pause_geofence(
     /* [in] */ Int32 geofenceId)
 {
+    if (sGpsGeofencingInterface != NULL) {
+        sGpsGeofencingInterface->pause_geofence(geofenceId);
+        return TRUE;
+    }
+    else {
+        ALOGE("Geofence interface not available");
+    }
     return FALSE;
 }
 
+static AutoPtr<IGpsClock> translate_gps_clock(GpsClock* clock)
+{
+    AutoPtr<IGpsClock> gpsClockObject;
+    CGpsClock::New((IGpsClock**)&gpsClockObject);
+    GpsClockFlags flags = clock->flags;
+
+    if (flags & GPS_CLOCK_HAS_LEAP_SECOND) {
+        gpsClockObject->SetLeapSecond(clock->leap_second);
+    }
+
+    gpsClockObject->SetType(clock->type);
+    gpsClockObject->SetTimeInNs(clock->time_ns);
+
+    if (flags & GPS_CLOCK_HAS_TIME_UNCERTAINTY) {
+        gpsClockObject->SetTimeUncertaintyInNs(clock->time_uncertainty_ns);
+    }
+
+    if (flags & GPS_CLOCK_HAS_FULL_BIAS) {
+        gpsClockObject->SetFullBiasInNs(clock->full_bias_ns);
+    }
+
+    if (flags & GPS_CLOCK_HAS_BIAS) {
+        gpsClockObject->SetBiasInNs(clock->bias_ns);
+    }
+
+    if (flags & GPS_CLOCK_HAS_BIAS_UNCERTAINTY) {
+        gpsClockObject->SetBiasUncertaintyInNs(clock->bias_uncertainty_ns);
+    }
+
+    if (flags & GPS_CLOCK_HAS_DRIFT) {
+        gpsClockObject->SetDriftInNsPerSec(clock->drift_nsps);
+    }
+
+    if (flags & GPS_CLOCK_HAS_DRIFT_UNCERTAINTY) {
+        gpsClockObject->SetDriftUncertaintyInNsPerSec(clock->drift_uncertainty_nsps);
+    }
+
+    return gpsClockObject;
+}
+
+static AutoPtr<IGpsMeasurement> translate_gps_measurement(GpsMeasurement* measurement)
+{
+    AutoPtr<IGpsMeasurement> gpsMeasurementObject;
+    CGpsMeasurement::New((IGpsMeasurement**)&gpsMeasurementObject);
+
+    GpsMeasurementFlags flags = measurement->flags;
+
+    gpsMeasurementObject->SetPrn(measurement->prn);
+    gpsMeasurementObject->SetTimeOffsetInNs(measurement->time_offset_ns);
+    gpsMeasurementObject->SetState(measurement->state);
+    gpsMeasurementObject->SetReceivedGpsTowInNs(measurement->received_gps_tow_ns);
+    gpsMeasurementObject->SetReceivedGpsTowUncertaintyInNs(measurement->received_gps_tow_uncertainty_ns);
+    gpsMeasurementObject->SetCn0InDbHz(measurement->c_n0_dbhz);
+    gpsMeasurementObject->SetPseudorangeRateInMetersPerSec(measurement->pseudorange_rate_mps);
+    gpsMeasurementObject->SetPseudorangeRateUncertaintyInMetersPerSec(measurement->pseudorange_rate_uncertainty_mps);
+    gpsMeasurementObject->SetAccumulatedDeltaRangeState(measurement->accumulated_delta_range_state);
+    gpsMeasurementObject->SetAccumulatedDeltaRangeInMeters(measurement->accumulated_delta_range_m);
+    gpsMeasurementObject->SetAccumulatedDeltaRangeUncertaintyInMeters(measurement->accumulated_delta_range_uncertainty_m);
+
+    if (flags & GPS_MEASUREMENT_HAS_PSEUDORANGE) {
+        gpsMeasurementObject->SetPseudorangeInMeters(measurement->pseudorange_m);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_PSEUDORANGE_UNCERTAINTY) {
+        gpsMeasurementObject->SetPseudorangeUncertaintyInMeters(measurement->pseudorange_uncertainty_m);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_CODE_PHASE) {
+        gpsMeasurementObject->SetCodePhaseInChips(measurement->code_phase_chips);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_CODE_PHASE_UNCERTAINTY) {
+        gpsMeasurementObject->SetCodePhaseUncertaintyInChips(measurement->code_phase_uncertainty_chips);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_CARRIER_FREQUENCY) {
+        gpsMeasurementObject->SetCarrierFrequencyInHz(measurement->carrier_frequency_hz);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_CARRIER_CYCLES) {
+        gpsMeasurementObject->SetCarrierCycles(measurement->carrier_cycles);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_CARRIER_PHASE) {
+        gpsMeasurementObject->SetCarrierPhase(measurement->carrier_phase);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY) {
+        gpsMeasurementObject->SetCarrierPhaseUncertainty(measurement->carrier_phase_uncertainty);
+    }
+
+    gpsMeasurementObject->SetLossOfLock(measurement->loss_of_lock);
+
+    if (flags & GPS_MEASUREMENT_HAS_BIT_NUMBER) {
+        gpsMeasurementObject->SetBitNumber(measurement->bit_number);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_TIME_FROM_LAST_BIT) {
+        gpsMeasurementObject->SetTimeFromLastBitInMs(measurement->time_from_last_bit_ms);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_DOPPLER_SHIFT) {
+        gpsMeasurementObject->SetDopplerShiftInHz(measurement->doppler_shift_hz);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_DOPPLER_SHIFT_UNCERTAINTY) {
+        gpsMeasurementObject->SetDopplerShiftUncertaintyInHz(measurement->doppler_shift_uncertainty_hz);
+    }
+
+    gpsMeasurementObject->SetMultipathIndicator(measurement->multipath_indicator);
+
+    if (flags & GPS_MEASUREMENT_HAS_SNR) {
+        gpsMeasurementObject->SetSnrInDb(measurement->snr_db);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_ELEVATION) {
+        gpsMeasurementObject->SetElevationInDeg(measurement->elevation_deg);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_ELEVATION_UNCERTAINTY) {
+        gpsMeasurementObject->SetElevationUncertaintyInDeg(measurement->elevation_uncertainty_deg);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_AZIMUTH) {
+        gpsMeasurementObject->SetAzimuthInDeg(measurement->azimuth_deg);
+    }
+
+    if (flags & GPS_MEASUREMENT_HAS_AZIMUTH_UNCERTAINTY) {
+        gpsMeasurementObject->SetAzimuthUncertaintyInDeg(measurement->azimuth_uncertainty_deg);
+    }
+
+    gpsMeasurementObject->SetUsedInFix((flags & GPS_MEASUREMENT_HAS_USED_IN_FIX) && measurement->used_in_fix);
+
+    return gpsMeasurementObject;
+}
+
+static AutoPtr<ArrayOf<IGpsMeasurement*> > translate_gps_measurements(GpsData* data)
+{
+    size_t measurementCount = data->measurement_count;
+    if (measurementCount == 0) {
+        return NULL;
+    }
+
+    AutoPtr<ArrayOf<IGpsMeasurement*> > gpsMeasurementArray = ArrayOf<IGpsMeasurement*>::Alloc(measurementCount);
+
+    GpsMeasurement* gpsMeasurements = data->measurements;
+    for (uint16_t i = 0; i < measurementCount; ++i) {
+        AutoPtr<IGpsMeasurement> gpsMeasurement = translate_gps_measurement(&gpsMeasurements[i]);
+        gpsMeasurementArray->Set(i, gpsMeasurement);
+    }
+
+    return gpsMeasurementArray;
+}
+
+static void measurement_callback(GpsData* data)
+{
+    if (data == NULL) {
+        ALOGE("Invalid data provided to gps_measurement_callback");
+        return;
+    }
+
+    if (data->size == sizeof(GpsData)) {
+        AutoPtr<IGpsClock> gpsClock = translate_gps_clock(&data->clock);
+        AutoPtr<ArrayOf<IGpsMeasurement*> > measurementArray = translate_gps_measurements(data);
+
+        AutoPtr<IGpsMeasurementsEvent> gpsMeasurementsEvent;
+        CGpsMeasurementsEvent::New(gpsClock, measurementArray, (IGpsMeasurementsEvent**)&gpsMeasurementsEvent);
+        mCallbacksObj->ReportMeasurementData(gpsMeasurementsEvent);
+    }
+    else {
+        ALOGE("Invalid GpsData size found in gps_measurement_callback, size=%d", data->size);
+    }
+}
+
+GpsMeasurementCallbacks sGpsMeasurementCallbacks = {
+    sizeof(GpsMeasurementCallbacks),
+    measurement_callback,
+};
+
 Boolean GpsLocationProvider::Native_is_measurement_supported()
 {
+    if (sGpsMeasurementInterface != NULL) {
+        return TRUE;
+    }
     return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_start_measurement_collection()
 {
-    return FALSE;
+    if (sGpsMeasurementInterface == NULL) {
+        ALOGE("Measurement interface is not available.");
+        return FALSE;
+    }
+
+    int result = sGpsMeasurementInterface->init(&sGpsMeasurementCallbacks);
+    if (result != GPS_GEOFENCE_OPERATION_SUCCESS) {
+        ALOGE("An error has been found on GpsMeasurementInterface::init, status=%d", result);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 Boolean GpsLocationProvider::Native_stop_measurement_collection()
 {
-    return FALSE;
+    if (sGpsMeasurementInterface == NULL) {
+        ALOGE("Measurement interface not available");
+        return FALSE;
+    }
+
+    sGpsMeasurementInterface->close();
+    return TRUE;
 }
+
+static AutoPtr<IGpsNavigationMessage> translate_gps_navigation_message(GpsNavigationMessage* message)
+{
+    size_t dataLength = message->data_length;
+    uint8_t* data = message->data;
+    if (dataLength == 0 || data == NULL) {
+        ALOGE("Invalid Navigation Message found: data=%p, length=%d", data, dataLength);
+        return NULL;
+    }
+
+    AutoPtr<IGpsNavigationMessage> navigationMessageObject;
+    CGpsNavigationMessage::New((IGpsNavigationMessage**)&navigationMessageObject);
+    navigationMessageObject->SetType(message->type);
+    navigationMessageObject->SetPrn(message->prn);
+    navigationMessageObject->SetMessageId(message->message_id);
+    navigationMessageObject->SetSubmessageId(message->submessage_id);
+
+    AutoPtr<ArrayOf<Byte> > dataArray = ArrayOf<Byte>::Alloc((Byte*)data, dataLength);
+    navigationMessageObject->SetData(dataArray);
+
+    return navigationMessageObject;
+}
+
+static void navigation_message_callback(GpsNavigationMessage* message)
+{
+    if (message == NULL) {
+        ALOGE("Invalid Navigation Message provided to callback");
+        return;
+    }
+
+    if (message->size == sizeof(GpsNavigationMessage)) {
+        AutoPtr<IGpsNavigationMessage> navigationMessage = translate_gps_navigation_message(message);
+
+        AutoPtr<IGpsNavigationMessageEvent> navigationMessageEvent;
+        CGpsNavigationMessageEvent::New(navigationMessage, (IGpsNavigationMessageEvent**)&navigationMessageEvent);
+        mCallbacksObj->ReportNavigationMessage(navigationMessageEvent);
+    }
+    else {
+        ALOGE("Invalid GpsNavigationMessage size found: %d", message->size);
+    }
+}
+
+GpsNavigationMessageCallbacks sGpsNavigationMessageCallbacks = {
+    sizeof(GpsNavigationMessageCallbacks),
+    navigation_message_callback,
+};
 
 Boolean GpsLocationProvider::Native_is_navigation_message_supported()
 {
+    if (sGpsNavigationMessageInterface != NULL) {
+        return TRUE;
+    }
     return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_start_navigation_message_collection()
 {
-    return FALSE;
+    if (sGpsNavigationMessageInterface == NULL) {
+        ALOGE("Navigation Message interface is not available.");
+        return FALSE;
+    }
+
+    int result = sGpsNavigationMessageInterface->init(&sGpsNavigationMessageCallbacks);
+    if (result != GPS_NAVIGATION_MESSAGE_OPERATION_SUCCESS) {
+        ALOGE("An error has been found in %s: %d", __FUNCTION__, result);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 Boolean GpsLocationProvider::Native_stop_navigation_message_collection()
 {
-    return FALSE;
+    if (sGpsNavigationMessageInterface == NULL) {
+        ALOGE("Navigation Message interface is not available.");
+        return FALSE;
+    }
+
+    sGpsNavigationMessageInterface->close();
+    return TRUE;
 }
 
 void GpsLocationProvider::Native_configuration_update(
     /* [in] */ const String& configData)
 {
+    if (!sGnssConfigurationInterface) {
+        ALOGE("no GPS configuration interface in configuraiton_update");
+        return;
+    }
+    const char *data = configData.string();
+    ALOGD("GPS configuration:\n %s", data);
+    sGnssConfigurationInterface->configuration_update(
+            data, configData.GetLength());
 }
 
 } // namespace Location

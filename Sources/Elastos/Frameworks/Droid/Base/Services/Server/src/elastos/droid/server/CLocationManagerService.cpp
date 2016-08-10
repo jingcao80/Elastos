@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/server/CLocationManagerService.h"
+#include "elastos/droid/server/ServiceWatcher.h"
 #include "elastos/droid/server/location/GpsLocationProvider.h"
 #include "elastos/droid/server/location/PassiveProvider.h"
 #include "elastos/droid/server/location/FusedProxy.h"
@@ -8,17 +9,12 @@
 #include "elastos/droid/server/location/GeofenceProxy.h"
 #include "elastos/droid/server/location/ActivityRecognitionProxy.h"
 #include "elastos/droid/server/location/MockProvider.h"
-//#include "elastos/droid/server/location/GeoFencerProxy.h"
-//#include "elastos/droid/server/location/LocationProviderInterface.h"
-//#include "elastos/droid/internal/location/CProviderRequest.h"
+#include "elastos/droid/server/location/GeoFencerProxy.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Looper.h"
-//#include "elastos/droid/os/CWorkSource.h"
-//#include "elastos/droid/provider/CSettingsSecure.h"
-//#include "ServiceWatcher.h"
 #include "elastos/droid/hardware/location/ActivityRecognitionHardware.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
@@ -31,8 +27,6 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::EIID_IAppOpsManagerOnOpChangedInternalListener;
 using Elastos::Droid::App::EIID_IPendingIntentOnFinished;
 using Elastos::Droid::App::IAppOpsManagerOnOpChangedListener;
@@ -46,7 +40,9 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Hardware::Location::IActivityRecognitionHardware;
 using Elastos::Droid::Hardware::Location::ActivityRecognitionHardware;
-//using Elastos::Droid::Internal::Location::CProviderRequest;
+using Elastos::Droid::Hardware::Location::CActivityRecognitionHardwareHelper;
+using Elastos::Droid::Hardware::Location::IActivityRecognitionHardwareHelper;
+using Elastos::Droid::Internal::Location::CProviderRequest;
 using Elastos::Droid::Internal::Os::IBackgroundThreadHelper;
 using Elastos::Droid::Internal::Os::CBackgroundThreadHelper;
 using Elastos::Droid::Internal::Os::IBackgroundThread;
@@ -55,7 +51,7 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::Binder;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IUserHandle;
@@ -70,7 +66,7 @@ using Elastos::Droid::Location::EIID_IILocationManager;
 using Elastos::Droid::Location::IGeoFenceParams;
 using Elastos::Droid::Location::CGeoFenceParams;
 using Elastos::Droid::Location::ILocationProvider;
-//using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Server::Location::LocationProviderProxy;
@@ -81,7 +77,7 @@ using Elastos::Droid::Server::Location::FlpHardwareProvider;
 using Elastos::Droid::Server::Location::GeofenceProxy;
 using Elastos::Droid::Server::Location::ActivityRecognitionProxy;
 using Elastos::Droid::Server::Location::MockProvider;
-//using Elastos::Droid::Server::Location::GeoFencerProxy;
+using Elastos::Droid::Server::Location::GeoFencerProxy;
 using Elastos::Droid::R;
 using Elastos::Core::Math;
 using Elastos::Core::ISystem;
@@ -418,6 +414,7 @@ CLocationManagerService::Receiver::Receiver(
     , mPendingIntent(intent)
     , mPendingBroadcasts(0)
 {
+    CHashMap::New((IHashMap**)&mUpdateRecords);
     if (listener != NULL) {
         mKey = listener;
     }
@@ -503,17 +500,20 @@ void CLocationManagerService::Receiver::UpdateMonitoring(
             AutoPtr<UpdateRecord> updateRecord = (UpdateRecord*)IObject::Probe(p);
             if (mHost->IsAllowedByCurrentUserSettingsLocked(updateRecord->mProvider)) {
                 requestingLocation = TRUE;
-                assert(0 && "TODO");
-                // LocationProviderInterface locationProvider
-                //         = mProvidersByName.get(updateRecord->mProvider);
-                // AutoPtr<IProviderProperties> properties = locationProvider != NULL
-                //         ? locationProvider->GetProperties() : NULL;
-                // if (properties != NULL
-                //         && properties->mPowerRequirement == ICriteria::POWER_HIGH
-                //         && updateRecord->mRequest->GetInterval() < HIGH_POWER_INTERVAL_MS) {
-                //     requestingHighPowerLocation = TRUE;
-                //     break;
-                // }
+                AutoPtr<IInterface> value;
+                mHost->mProvidersByName->Get(CoreUtils::Convert(updateRecord->mProvider), (IInterface**)&value);
+                AutoPtr<ILocationProviderInterface> locationProvider = ILocationProviderInterface::Probe(value);
+                AutoPtr<IProviderProperties> properties;
+                if (locationProvider != NULL)
+                    locationProvider->GetProperties((IProviderProperties**)&properties);
+                Int32 powerRequirement = 0;
+                Int64 interval = 0;
+                if (properties != NULL && (properties->GetPowerRequirement(&powerRequirement),
+                    powerRequirement == ICriteria::Criteria_POWER_HIGH) &&
+                    (updateRecord->mRequest->GetInterval(&interval), interval < HIGH_POWER_INTERVAL_MS)) {
+                    requestingHighPowerLocation = TRUE;
+                    break;
+                }
             }
         }
     }
@@ -796,7 +796,7 @@ void CLocationManagerService::Receiver::ClearPendingBroadcastsLocked()
 //=================================================================
 CAR_OBJECT_IMPL(CLocationManagerService)
 
-CAR_INTERFACE_IMPL(CLocationManagerService, Object, IILocationManager)
+CAR_INTERFACE_IMPL_2(CLocationManagerService, Object, IILocationManager, IBinder)
 
 CLocationManagerService::CLocationManagerService()
     : mLocationFudger(NULL)
@@ -805,7 +805,7 @@ CLocationManagerService::CLocationManagerService()
     , mBlacklist(NULL)
     , mCurrentUserId(IUserHandle::USER_OWNER)
 {
-    // mPackageMonitor = new LocationPackageMonitor(this);
+    mPackageMonitor = new LocationPackageMonitor(this);
     CHashSet::New((ISet**)&mEnabledProviders);
     CHashSet::New((ISet**)&mDisabledProviders);
     CHashMap::New((IHashMap**)&mMockProviders);
@@ -893,7 +893,7 @@ ECode CLocationManagerService::SystemRunning()
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ISettingsSecure> sSecure;
-    //CSettingsSecure::AcquireSingleton((ISettingsSecure**)&sSecure);
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&sSecure);
     AutoPtr<IUri> uri;
     sSecure->GetUriFor(ISettingsSecure::LOCATION_PROVIDERS_ALLOWED, (IUri**)&uri);
     AutoPtr<MyContentObserver> co = new MyContentObserver(this);
@@ -903,7 +903,7 @@ ECode CLocationManagerService::SystemRunning()
             co, IUserHandle::USER_ALL);
     AutoPtr<ILooper> lp;
     mLocationHandler->GetLooper((ILooper**)&lp);
-    // mPackageMonitor->Register(mContext, lp, TRUE);
+    mPackageMonitor->Register(mContext, lp, TRUE);
 
     // listen for user change
     AutoPtr<IIntentFilter> intentFilter;
@@ -916,9 +916,10 @@ ECode CLocationManagerService::SystemRunning()
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
     AutoPtr<IUserHandle> h;
     hlp->GetALL((IUserHandle**)&h);
+    AutoPtr<MyBroadcastReceiver> receiver = new MyBroadcastReceiver(this);
     AutoPtr<IIntent> res;
-    mContext->RegisterReceiverAsUser(new MyBroadcastReceiver(this),
-        h, intentFilter, String(NULL), mLocationHandler, (IIntent**)&res);
+    mContext->RegisterReceiverAsUser(receiver, h, intentFilter, String(NULL),
+        mLocationHandler, (IIntent**)&res);
     return NOERROR;
 }
 
@@ -961,12 +962,19 @@ ECode CLocationManagerService::EnsureFallbackFusedProviderPresentLocked(
     ASSERT_SUCCEEDED(mContext->GetPackageManager((IPackageManager**)&pm));
     String systemPackageName;
     mContext->GetPackageName(&systemPackageName);
-    assert(0 && "TODO");
-    AutoPtr<IArrayList> sigSets;// = ServiceWatcher::GetSignatureSets(mContext, pkgs);
+    Int32 size = 0;
+    pkgs->GetSize(&size);
+    List<String> pkgList;
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> item;
+        pkgs->Get(i, (IInterface**)&item);
+        pkgList.PushBack(TO_STR(item));
+    }
+    AutoPtr<List<AutoPtr<IHashSet> > > sigSets = ServiceWatcher::GetSignatureSets(mContext, &pkgList);
 
     AutoPtr<IList> rInfos;
     AutoPtr<IIntent> intent;
-    CIntent::New(String(FUSED_LOCATION_SERVICE_ACTION), (IIntent**)&intent);
+    CIntent::New(FUSED_LOCATION_SERVICE_ACTION, (IIntent**)&intent);
     pm->QueryIntentServicesAsUser(intent, IPackageManager::GET_META_DATA,
             mCurrentUserId, (IList**)&rInfos);
     AutoPtr<IIterator> it;
@@ -992,14 +1000,13 @@ ECode CLocationManagerService::EnsureFallbackFusedProviderPresentLocked(
             continue;
         }
 
-        // TODO: Ignore signature check
-        // AutoPtr<ArrayOf<ISignature*> > signatures;
-        // pInfo->GetSignatures((ArrayOf<ISignature*>**)&signatures);
-        // if (!ServiceWatcher::IsSignatureMatch(signatures, sigSets)) {
-        //     // Log.w(TAG, packageName + " resolves service " + FUSED_LOCATION_SERVICE_ACTION +
-        //     //         ", but has wrong signature, ignoring");
-        //     continue;
-        // }
+        AutoPtr<ArrayOf<ISignature*> > signatures;
+        pInfo->GetSignatures((ArrayOf<ISignature*>**)&signatures);
+        if (!ServiceWatcher::IsSignatureMatch(signatures, sigSets)) {
+            Logger::W(TAG, "%s resolves service %s, but has wrong signature, ignoring",
+                packageName.string(), FUSED_LOCATION_SERVICE_ACTION.string());
+            continue;
+        }
 
         // Get the version info
         AutoPtr<IBundle> metaData;
@@ -1170,7 +1177,7 @@ void CLocationManagerService::LoadProvidersLocked()
         AutoPtr<IResolveInfo> ri;
         mPackageManager->ResolveService(intent, 0, (IResolveInfo**)&ri);
         if (ri != NULL) {
-            //mGeoFencer = GeoFencerProxy::GetGeoFencerProxy(mContext, mGeoFencerPackageName);
+            mGeoFencer = GeoFencerProxy::GetGeoFencerProxy(mContext, mGeoFencerPackageName);
             mGeoFencerEnabled = TRUE;
         }
     }
@@ -1230,10 +1237,13 @@ void CLocationManagerService::LoadProvidersLocked()
     }
 
     // bind to the hardware activity recognition if supported
+    AutoPtr<IActivityRecognitionHardwareHelper> arhHelper;
+    CActivityRecognitionHardwareHelper::AcquireSingleton((IActivityRecognitionHardwareHelper**)&arhHelper);
     Boolean bSup = FALSE;
-    if ((ActivityRecognitionHardware::IsSupported(&bSup), bSup)) {
+    arhHelper->IsSupported(&bSup);
+    if (bSup) {
         AutoPtr<IActivityRecognitionHardware> arh;
-        ActivityRecognitionHardware::GetInstance(mContext, (IActivityRecognitionHardware**)&arh);
+        arhHelper->GetInstance(mContext, (IActivityRecognitionHardware**)&arh);
         AutoPtr<ActivityRecognitionProxy> proxy = ActivityRecognitionProxy::CreateAndBind(
                 mContext,
                 mLocationHandler,
@@ -1364,7 +1374,7 @@ Boolean CLocationManagerService::IsAllowedByCurrentUserSettingsLocked(
 
     Boolean rst;
     AutoPtr<ISettingsSecure> settingsSecure;
-    //CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     settingsSecure->IsLocationProviderEnabled(resolver, provider, &rst);
     return rst;
 }
@@ -1858,8 +1868,7 @@ void CLocationManagerService::ApplyRequirementsLocked(
     AutoPtr<IWorkSource> worksource;
     CWorkSource::New((IWorkSource**)&worksource);
     AutoPtr<IProviderRequest> providerRequest;
-    assert(0 && "TODO");
-    // CProviderRequest::New((IProviderRequest**)&providerRequest);
+    CProviderRequest::New((IProviderRequest**)&providerRequest);
 
     if (records != NULL) {
         AutoPtr<IIterator> it;
@@ -1953,8 +1962,7 @@ AutoPtr<CLocationManagerService::Receiver> CLocationManagerService::GetReceiverL
     /* [in] */ IWorkSource* workSource,
     /* [in] */ Boolean hideFromAppOps)
 {
-    assert(0 && "TODO");
-    AutoPtr<IBinder> binder;// = listener.asBinder();
+    AutoPtr<IBinder> binder = IBinder::Probe(listener);
     AutoPtr<IInterface> _receiver;
     mReceivers->Get(binder, (IInterface**)&_receiver);
     AutoPtr<Receiver> receiver = (Receiver*)IProxyDeathRecipient::Probe(_receiver);
@@ -3293,7 +3301,7 @@ ECode CLocationManagerService::CheckMockPermissionsSafe()
     mContext->GetContentResolver((IContentResolver**)&cr);
     Int32 mockLocation = 0;
     AutoPtr<ISettingsSecure> settingsSecure;
-    //CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     settingsSecure->GetInt32(cr, ISettingsSecure::ALLOW_MOCK_LOCATION, 0, &mockLocation);
     Boolean allowMocks = mockLocation == 1;
     if (!allowMocks) {
@@ -3616,6 +3624,12 @@ void CLocationManagerService::Dump(
     //         provider.dump(fd, pw, args);
     //     }
     // }
+}
+
+ECode CLocationManagerService::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
 }
 
 } // Server

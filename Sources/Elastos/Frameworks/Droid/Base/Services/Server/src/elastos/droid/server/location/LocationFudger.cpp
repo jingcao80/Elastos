@@ -9,8 +9,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Location::CLocation;
 using Elastos::Droid::Net::IUri;
@@ -21,7 +19,7 @@ using Elastos::Core::AutoLock;
 using Elastos::Core::Math;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
-using Elastos::Utility::IRandom;
+using Elastos::Utility::CRandom;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -79,6 +77,8 @@ LocationFudger::LocationFudger(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler)
 {
+    Logger::E(TAG, "TODO: CSecureRandom is not implemented!");
+    CRandom::New((IRandom**)&mRandom);
     mContext = context;
     AutoPtr<SettingsObserver> so = new SettingsObserver(handler, this);
     mSettingsObserver = (IContentObserver*)so.Get();
@@ -91,7 +91,8 @@ LocationFudger::LocationFudger(
     cr->RegisterContentObserver(uri.Get(), FALSE, mSettingsObserver);
 
     Float accuracy = LoadCoarseAccuracy();
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         SetAccuracyInMetersLocked(accuracy);
         mOffsetLatitudeMeters = NextOffsetLocked();
         mOffsetLongitudeMeters = NextOffsetLocked();
@@ -241,7 +242,7 @@ void LocationFudger::UpdateRandomOffsetLocked()
 Double LocationFudger::NextOffsetLocked()
 {
     Double value;
-    IRandom::Probe(mRandom)->NextGaussian(&value);
+    mRandom->NextGaussian(&value);
     return value * mStandardDeviationInMeters;
 }
 

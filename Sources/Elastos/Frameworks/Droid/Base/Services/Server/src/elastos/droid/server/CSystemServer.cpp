@@ -505,7 +505,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<IINotificationManager> notification;
     AutoPtr<CInputMethodManagerService> imm;
     AutoPtr<CWallpaperManagerService> wallpaper;
-    // AutoPtr<CLocationManagerService> location;
+    AutoPtr<CLocationManagerService> location;
     // AutoPtr<CCountryDetectorService> countryDetector;
     AutoPtr<CTextServicesManagerService> tsms;
     AutoPtr<CLockSettingsService> lockSettings;
@@ -876,23 +876,22 @@ ECode SystemServer::StartOtherServices()
 
     //     mSystemServiceManager->StartService(DeviceStorageMonitorService.class);
 
-    //     if (!disableLocation) {
-    //         try {
-    //             Slogger::I(TAG, "Location Manager");
-    //             location = new LocationManagerService(context);
-    //             ServiceManager::AddService(IContext::LOCATION_SERVICE, location);
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting Location Manager", ec);
-    //         }
+        if (!disableLocation) {
+            Slogger::I(TAG, "Location Manager");
+            if (FAILED(CLocationManagerService::NewByFriend(context, (CLocationManagerService**)&location))) {
+                ReportWtf("starting Location Manager 0x%08x", ec);
+            }
+            else
+                ServiceManager::AddService(IContext::LOCATION_SERVICE, (IBinder*)location);
 
-    //         try {
-    //             Slogger::I(TAG, "Country Detector");
-    //             countryDetector = new CountryDetectorService(context);
-    //             ServiceManager::AddService(IContext::COUNTRY_DETECTOR, countryDetector);
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting Country Detector", ec);
-    //         }
-    //     }
+            // try {
+            //     Slogger::I(TAG, "Country Detector");
+            //     countryDetector = new CountryDetectorService(context);
+            //     ServiceManager::AddService(IContext::COUNTRY_DETECTOR, countryDetector);
+            // } catch (Throwable e) {
+            //     ReportWtf("starting Country Detector", ec);
+            // }
+        }
 
         // if (!disableNonCoreServices) {
         //     // try {
@@ -1309,7 +1308,7 @@ ECode SystemServer::StartOtherServices()
     bundle->mNetworkScoreF = networkScore;
     bundle->mWallpaperF = wallpaper;
     bundle->mImmF = imm;
-    // bundle->mLocationF = location;
+    bundle->mLocationF = location;
     // bundle->mCountryDetectorF = countryDetector;
     // bundle->mNetworkTimeUpdaterF = networkTimeUpdater;
     // bundle->mCommonTimeMgmtServiceF = commonTimeMgmtService;
@@ -1437,10 +1436,10 @@ ECode SystemServer::SystemReadyRunnable::Run()
         if (FAILED(ec)) mHost->ReportWtf("Notifying InputMethodService running", ec);
     }
 
-    // if (mServiceBundle->mLocationF != NULL) {
-    //     ec = mServiceBundle->mLocationF->SystemRunning();
-    //     if (FAILED(ec)) mHost->ReportWtf("Notifying Location Service running", ec);
-    // }
+    if (mServiceBundle->mLocationF != NULL) {
+        ec = mServiceBundle->mLocationF->SystemRunning();
+        if (FAILED(ec)) mHost->ReportWtf("Notifying Location Service running", ec);
+    }
 
     // if (mServiceBundle->mCountryDetectorF != NULL) {
     //     ec = mServiceBundle->mCountryDetectorF->SystemRunning();

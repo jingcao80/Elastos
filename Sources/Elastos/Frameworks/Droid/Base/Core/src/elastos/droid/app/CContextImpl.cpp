@@ -61,6 +61,7 @@
 #include "elastos/droid/content/res/CThemeManager.h"
 #include "elastos/droid/content/pm/CLauncherApps.h"
 #include "elastos/droid/internal/policy/CPolicyManager.h"
+#include "elastos/droid/location/CLocationManager.h"
 #include "elastos/droid/net/CConnectivityManager.h"
 #include "elastos/droid/net/CNetworkPolicyManager.h"
 #include "elastos/droid/net/CNetworkScoreManager.h"
@@ -162,6 +163,8 @@ using Elastos::Droid::Internal::Policy::IPolicyManager;
 using Elastos::Droid::Internal::Policy::CPolicyManager;
 // using Elastos::Droid::Internal::Os::IDropBoxManagerService;
 // using Elastos::Droid::Internal::Os::EIID_IDropBoxManagerService;
+using Elastos::Droid::Location::CLocationManager;
+using Elastos::Droid::Location::ILocationManager;
 using Elastos::Droid::Location::IILocationManager;
 using Elastos::Droid::Location::EIID_IILocationManager;
 using Elastos::Droid::Media::IAudioManager;
@@ -2540,14 +2543,12 @@ ECode CContextImpl::GetSystemService(
         return NOERROR;
     }
     else if (IContext::LOCATION_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        // assert(0 && "TODO");
-        // AutoPtr<IInterface> service = ServiceManager::GetService(IContext::LOCATION_SERVICE);
-        // AutoPtr<IILocationManager> mgr = IILocationManager::Probe(service);
-        // AutoPtr<ILocationManager> lm;
-        // CLocationManager::New(this, mgr, (ILocationManager**)&lm);
-        // *object = lm.Get();
-        // REFCOUNT_ADD(*object);
+        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::LOCATION_SERVICE);
+        AutoPtr<IILocationManager> mgr = IILocationManager::Probe(service);
+        AutoPtr<ILocationManager> lm;
+        CLocationManager::New(this, mgr, (ILocationManager**)&lm);
+        *object = lm.Get();
+        REFCOUNT_ADD(*object);
         return NOERROR;
     }
     else if (IContext::NETWORK_POLICY_SERVICE.Equals(name)) {
