@@ -96,7 +96,7 @@ static void ThreadAndroidPolicyMakeKey()
 }
 
 const String CStrictMode::TAG("StrictMode");
-const Boolean CStrictMode::LOG_V = Logger::IsLoggable(TAG, Logger::VERBOSE);
+const Boolean CStrictMode::LOG_V = FALSE;
 const Boolean CStrictMode::IS_USER_BUILD = Build::TYPE.Equals("user");
 const Boolean CStrictMode::IS_ENG_BUILD = Build::TYPE.Equals("eng");
 const Int64 CStrictMode::MIN_LOG_INTERVAL_MS = 1000;
