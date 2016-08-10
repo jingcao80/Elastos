@@ -312,6 +312,7 @@ ECode CSipEditor::OnCreate(
 
     assert(0);
     //LoadPreferencesFromProfile(p);
+    return NOERROR;
 }
 
 ECode CSipEditor::OnPause()

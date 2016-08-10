@@ -16,41 +16,41 @@ namespace Core {
 AutoPtr<IByte> CoreUtils::ConvertByte(
     /* [in] */ Byte value)
 {
-    AutoPtr<CByte> obj;
-    CByte::NewByFriend(value, (CByte**)&obj);
-    return (IByte*)obj.Get();
+    AutoPtr<IByte> obj;
+    CByte::New(value, (IByte**)&obj);
+    return obj;
 }
 
 AutoPtr<IChar32> CoreUtils::ConvertChar32(
     /* [in] */ Char32 value)
 {
-    AutoPtr<CChar32> obj;
-    CChar32::NewByFriend(value, (CChar32**)&obj);
-    return (IChar32*)obj.Get();
+    AutoPtr<IChar32> obj;
+    CChar32::New(value, (IChar32**)&obj);
+    return obj;
 }
 
 AutoPtr<IBoolean> CoreUtils::Convert(
     /* [in] */ Boolean value)
 {
-    AutoPtr<CBoolean> obj;
-    CBoolean::NewByFriend(value, (CBoolean**)&obj);
-    return (IBoolean*)obj.Get();
+    AutoPtr<IBoolean> obj;
+    CBoolean::New(value, (IBoolean**)&obj);
+    return obj;
 }
 
 AutoPtr<IInteger16> CoreUtils::Convert(
     /* [in] */ Int16 value)
 {
-    AutoPtr<CInteger16> obj;
-    CInteger16::NewByFriend(value, (CInteger16**)&obj);
-    return (IInteger16*)obj.Get();
+    AutoPtr<IInteger16> obj;
+    CInteger16::New(value, (IInteger16**)&obj);
+    return obj;
 }
 
 AutoPtr<IInteger32> CoreUtils::Convert(
     /* [in] */ Int32 value)
 {
-    AutoPtr<CInteger32> obj;
-    CInteger32::NewByFriend(value, (CInteger32**)&obj);
-    return (IInteger32*)obj.Get();
+    AutoPtr<IInteger32> obj;
+    CInteger32::New(value, (IInteger32**)&obj);
+    return obj;
 }
 
 Int32 CoreUtils::Unbox(
@@ -65,33 +65,33 @@ Int32 CoreUtils::Unbox(
 AutoPtr<IInteger64> CoreUtils::Convert(
     /* [in] */ Int64 value)
 {
-    AutoPtr<CInteger64> obj;
-    CInteger64::NewByFriend(value, (CInteger64**)&obj);
-    return (IInteger64*)obj.Get();
+    AutoPtr<IInteger64> obj;
+    CInteger64::New(value, (IInteger64**)&obj);
+    return obj;
 }
 
 AutoPtr<IFloat> CoreUtils::Convert(
     /* [in] */ Float value)
 {
-    AutoPtr<CFloat> obj;
-    CFloat::NewByFriend(value, (CFloat**)&obj);
-    return (IFloat*)obj.Get();
+    AutoPtr<IFloat> obj;
+    CFloat::New(value, (IFloat**)&obj);
+    return obj;
 }
 
 AutoPtr<IDouble> CoreUtils::Convert(
     /* [in] */ Double value)
 {
-    AutoPtr<CDouble> obj;
-    CDouble::NewByFriend(value, (CDouble**)&obj);
-    return (IDouble*)obj.Get();
+    AutoPtr<IDouble> obj;
+    CDouble::New(value, (IDouble**)&obj);
+    return obj;
 }
 
 AutoPtr<ICharSequence> CoreUtils::Convert(
     /* [in] */ const String & value)
 {
-    AutoPtr<CString> obj;
-    CString::NewByFriend(value, (CString**)&obj);
-    return (ICharSequence*)obj.Get();
+    AutoPtr<ICharSequence> obj;
+    CString::New(value, (ICharSequence**)&obj);
+    return obj;
 }
 
 String CoreUtils::Unbox(
@@ -112,9 +112,9 @@ String CoreUtils::Unbox(
 AutoPtr<ICharSequence> CoreUtils::Convert(
     /* [in] */ const char* str)
 {
-    AutoPtr<CString> obj;
-    CString::NewByFriend(String(str), (CString**)&obj);
-    return (ICharSequence*)obj.Get();
+    AutoPtr<ICharSequence> obj;
+    CString::New(String(str), (ICharSequence**)&obj);
+    return obj;
 }
 
 AutoPtr<IArrayOf> CoreUtils::ConvertByteArray(

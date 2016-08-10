@@ -195,6 +195,7 @@ EXPORT_HEADERS += elastos/droid/utility/Int32Property.h
 EXPORT_HEADERS += elastos/droid/utility/FloatProperty.h
 EXPORT_HEADERS += elastos/droid/utility/Pools.h
 EXPORT_HEADERS += elastos/droid/utility/SparseArray.h
+EXPORT_HEADERS += elastos/droid/utility/Int64SparseInt64Array.h
 
 EXPORT_HEADERS += elastos/droid/view/AbsSavedState.h
 EXPORT_HEADERS += elastos/droid/view/View.h

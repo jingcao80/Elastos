@@ -282,7 +282,8 @@ public:
 
     Iterator Begin()
     {
-        for (SizeType n = 0; n < mBuckets.GetSize(); ++n) {
+        SizeType size = mBuckets.GetSize();
+        for (SizeType n = 0; n < size; ++n) {
             if (mBuckets[n]) return Iterator(mBuckets[n], this);
         }
 
@@ -293,7 +294,8 @@ public:
 
     ConstIterator Begin() const
     {
-        for (SizeType n = 0; n < mBuckets.GetSize(); ++n) {
+        SizeType size = mBuckets.GetSize();
+        for (SizeType n = 0; n < size; ++n) {
             if (mBuckets[n]) return ConstIterator(mBuckets[n], this);
         }
 
@@ -501,7 +503,9 @@ HashTableIterator<Val,Key,HF,ExK,EqK,All>::operator++()
     mCurrent = mCurrent->mNext;
     if (!mCurrent) {
         SizeType bucket = mHashtable->GetBktNum(old->mVal);
-        while (!mCurrent && ++bucket < mHashtable->mBuckets.GetSize()) {
+
+        SizeType size = mHashtable->mBuckets.GetSize();
+        while (!mCurrent && ++bucket < size) {
             mCurrent = mHashtable->mBuckets[bucket];
         }
     }
@@ -527,7 +531,8 @@ HashTableConstIterator<Val,Key,HF,ExK,EqK,All>::operator++()
     mCurrent = mCurrent->mNext;
     if (!mCurrent) {
         SizeType bucket = mHashtable->GetBktNum(old->mVal);
-        while (!mCurrent && ++bucket < mHashtable->mBuckets.GetSize()) {
+        SizeType size = mHashtable->mBuckets.GetSize();
+        while (!mCurrent && ++bucket < size) {
             mCurrent = mHashtable->mBuckets[bucket];
         }
     }
@@ -549,9 +554,10 @@ Boolean operator==(const HashTable<Val,Key,HF,Ex,Eq,All>& ht1,
                    const HashTable<Val,Key,HF,Ex,Eq,All>& ht2)
 {
     typedef typename HashTable<Val,Key,HF,Ex,Eq,All>::Node Node;
-    if (ht1.mBuckets.GetSize() != ht2.mBuckets.GetSize()) return FALSE;
+    size_t size = ht1.mBuckets.GetSize();
+    if (size != ht2.mBuckets.GetSize()) return FALSE;
 
-    for (size_t n = 0; n < ht1.mBuckets.GetSize(); ++n) {
+    for (size_t n = 0; n < size; ++n) {
         Node* cur1 = ht1.mBuckets[n];
         Node* cur2 = ht2.mBuckets[n];
         for ( ; cur1 && cur2 && cur1->mVal == cur2->mVal;
@@ -657,7 +663,8 @@ HashTable<Val,Key,HF,Ex,Eq,All>::GetEqualRange(const KeyType& key)
                     return Pii(Iterator(first, this), Iterator(cur, this));
                 }
             }
-            for (SizeType m = n + 1; m < mBuckets.GetSize(); ++m) {
+            SizeType size = mBuckets.GetSize();
+            for (SizeType m = n + 1; m < size; ++m) {
                 if (mBuckets[m]) {
                     return Pii(Iterator(first, this), Iterator(mBuckets[m], this));
                 }
@@ -686,7 +693,8 @@ HashTable<Val,Key,HF,Ex,Eq,All>::GetEqualRange(const KeyType& key) const
                             ConstIterator(cur, this));
                 }
             }
-            for (SizeType m = n + 1; m < mBuckets.GetSize(); ++m) {
+            SizeType size = mBuckets.GetSize();
+            for (SizeType m = n + 1; m < size; ++m) {
                 if (mBuckets[m]) {
                     return Pii(ConstIterator(first, this),
                             ConstIterator(mBuckets[m], this));
@@ -821,7 +829,8 @@ void HashTable<Val,Key,HF,Ex,Eq,All>::Resize(SizeType num_elements_hint)
                 mBuckets.Swap(tmp);
             }
             catch(...) {
-                for (SizeType bucket = 0; bucket < tmp.GetSize(); ++bucket) {
+                SizeType tmpN = tmp.GetSize();
+                for (SizeType bucket = 0; bucket < tmpN; ++bucket) {
                     while (tmp[bucket]) {
                         Node* next = tmp[bucket]->mNext;
                         DeleteNode(tmp[bucket]);
@@ -869,7 +878,11 @@ void HashTable<Val,Key,HF,Ex,Eq,All>::EraseBucket(const SizeType n, Node* last)
 template <class Val, class Key, class HF, class Ex, class Eq, class All>
 void HashTable<Val,Key,HF,Ex,Eq,All>::Clear()
 {
-    for (SizeType i = 0; i < mBuckets.GetSize(); ++i) {
+    if (mNumElements == 0)
+        return;
+
+    SizeType size = mBuckets.GetSize();
+    for (SizeType i = 0; i < size; ++i) {
         Node* cur = mBuckets[i];
         while (cur != 0) {
             Node* next = cur->mNext;
@@ -885,11 +898,12 @@ void HashTable<Val,Key,HF,Ex,Eq,All>::Clear()
 template <class Val, class Key, class HF, class Ex, class Eq, class All>
 void HashTable<Val,Key,HF,Ex,Eq,All>::CopyFrom(const HashTable& ht)
 {
+    SizeType size = ht.mBuckets.GetSize();
     mBuckets.Clear();
-    mBuckets.Reserve(ht.mBuckets.GetSize());
-    mBuckets.Insert(mBuckets.End(), ht.mBuckets.GetSize(), (Node*) 0);
+    mBuckets.Reserve(size);
+    mBuckets.Insert(mBuckets.End(), size, (Node*) 0);
     try {
-        for (SizeType i = 0; i < ht.mBuckets.GetSize(); ++i) {
+        for (SizeType i = 0; i < size; ++i) {
             const Node* cur = ht.mBuckets[i];
             if (cur) {
                 Node* localCopy = NewNode(cur->mVal);

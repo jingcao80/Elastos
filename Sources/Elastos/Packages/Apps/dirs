@@ -4,3 +4,4 @@ DIRS += Calculator
 DIRS += Launcher2
 DIRS += PackageInstaller
 DIRS += Settings
+DIRS += Dialer

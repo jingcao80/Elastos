@@ -7,6 +7,7 @@
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/utility/FloatProperty.h>
 #include <elastos/droid/utility/Pools.h>
+#include <elastos/droid/utility/Int64SparseInt64Array.h>
 #include <elastos/droid/view/AbsSavedState.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashMap.h>
@@ -49,6 +50,7 @@ using Elastos::Droid::View::IKeyEventCallback;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::Pools;
+using Elastos::Droid::Utility::Int64SparseInt64Array;
 using Elastos::Droid::Internal::Utility::IPredicate;
 using Elastos::Droid::Widget::IScrollBarDrawable;
 using Elastos::Droid::Utility::IProperty;
@@ -6269,7 +6271,7 @@ private:
      */
     Boolean mRightPaddingDefined;
 
-    HashMap<Int64, Int64> mMeasureCache;
+    AutoPtr<Int64SparseInt64Array> mMeasureCache;
     AutoPtr<TintInfo> mBackgroundTint;
     AutoPtr<IRenderNode> mBackgroundRenderNode;
     String mTransitionName;
