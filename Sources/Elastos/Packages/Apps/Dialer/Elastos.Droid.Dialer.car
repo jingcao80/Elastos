@@ -18,6 +18,7 @@ module
     merge("car/elastos/droid/contacts/common/list/PinnedHeaderListView.car");
     merge("car/elastos/droid/contacts/common/list/PinnedHeaderListAdapter.car");
     merge("car/elastos/droid/contacts/common/list/IndexerListAdapter.car");
+    merge("car/elastos/droid/contacts/common/list/DefaultContactListAdapter.car");
     merge("car/elastos/droid/contacts/common/widget/FloatingActionButtonController.car");
     merge("car/elastos/droid/dialer/activity/TransactionSafeActivity.car");
 //    merge("car/elastos/droid/dialer/calllog/CallDetailHistoryAdapter.car");
