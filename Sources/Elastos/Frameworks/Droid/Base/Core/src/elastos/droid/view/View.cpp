@@ -15867,7 +15867,9 @@ ECode View::IsInLayout(
  */
 ECode View::RequestLayout()
 {
-    mMeasureCache.Clear();
+    if (mMeasureCache != NULL) {
+        mMeasureCache->Clear();
+    }
 
     if (mAttachInfo != NULL && mAttachInfo->mViewRequestingLayout == NULL) {
         // Only trigger request-during-layout logic if this is the view requesting it,
@@ -15908,7 +15910,7 @@ ECode View::RequestLayout()
  */
 ECode View::ForceLayout()
 {
-    mMeasureCache.Clear();
+    if (mMeasureCache != NULL) mMeasureCache->Clear();
 
     mPrivateFlags |= PFLAG_FORCE_LAYOUT;
     mPrivateFlags |= PFLAG_INVALIDATED;
@@ -15952,6 +15954,7 @@ ECode View::Measure(
 
     // Suppress sign extension for the low bytes
     Int64 key = ((Int64) widthMeasureSpec << 32) | ((Int64) heightMeasureSpec & 0xffffffffLL);
+    if (mMeasureCache == NULL) mMeasureCache = new Int64SparseInt64Array(2);
 
     if ((mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ||
             widthMeasureSpec != mOldWidthMeasureSpec ||
@@ -15962,13 +15965,14 @@ ECode View::Measure(
         Boolean resolveRtlPropertiesIfNeeded;
         ResolveRtlPropertiesIfNeeded(&resolveRtlPropertiesIfNeeded);
 
-        HashMap<Int64, Int64>::Iterator it = mMeasureCache.Find(key);
-        if (it == mMeasureCache.End() || sIgnoreMeasureCache) {
+        Int32 cacheIndex = (mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ? -1 :
+                mMeasureCache->IndexOfKey(key);
+        if (cacheIndex < 0 || sIgnoreMeasureCache) {
             OnMeasure(widthMeasureSpec, heightMeasureSpec);
             mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
         }
         else {
-            Int64 value = it->mSecond;
+            Int64 value = mMeasureCache->ValueAt(cacheIndex);
             // Casting a long to int drops the high 32 bits, no mask needed
             SetMeasuredDimensionRaw((Int32) (value >> 32), (Int32) value);
             mPrivateFlags3 |= PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
@@ -15988,8 +15992,7 @@ ECode View::Measure(
     mOldHeightMeasureSpec = heightMeasureSpec;
 
     Int64 valueHeight = ((Int64)mMeasuredWidth) << 32 | ((Int64)mMeasuredHeight & 0xffffffffLL);
-    mMeasureCache.Insert(HashMap<Int64, Int64>::ValueType(key, valueHeight)); // suppress sign extension
-
+    mMeasureCache->Put(key, valueHeight); // suppress sign extension
     return NOERROR;
 }
 

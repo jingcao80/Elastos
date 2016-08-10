@@ -618,13 +618,13 @@ AutoPtr<ICharSequence> TextUtils::StringOrSpannedString(
         return source;
     }
     else if (ISpanned::Probe(source)) {
-        AutoPtr<ISpannedString> ss;
-        CSpannedString::New(source, (ISpannedString**)&ss);
-        AutoPtr<ICharSequence> result = ICharSequence::Probe(ss.Get());
-        return result;
+        AutoPtr<ICharSequence> ss;
+        CSpannedString::New(source, (ICharSequence**)&ss);
+        return ss;
     }
 
-    String str = Object::ToString(source);
+    String str;
+    source->ToString(&str);
     return CoreUtils::Convert(str);
 }
 

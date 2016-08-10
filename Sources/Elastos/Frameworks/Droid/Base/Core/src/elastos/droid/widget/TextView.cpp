@@ -549,9 +549,7 @@ ECode CharWrapper::ToString(
     *str = NULL;
 
     if (mChars != NULL) {
-        StringBuilder sb;
-        sb.Append(*mChars, mStart, mLength);
-        *str = sb.ToString();
+        *str = String(*mChars, mStart, mLength);
     }
 
     return NOERROR;
@@ -571,9 +569,8 @@ ECode CharWrapper::SubSequence(
     }
 
     if (mChars != NULL) {
-        StringBuilder sb;
-        sb.Append(*mChars, mStart + start, end - start);
-        AutoPtr<ICharSequence> seq = sb.ToCharSequence();
+        String str(*mChars, mStart + start, end - start);
+        AutoPtr<ICharSequence> seq = CoreUtils::Convert(str);
         *csq = seq;
         REFCOUNT_ADD(*csq);
         return NOERROR;

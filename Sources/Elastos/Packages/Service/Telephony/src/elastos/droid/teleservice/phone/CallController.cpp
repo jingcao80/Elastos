@@ -582,6 +582,7 @@ ERROR:
     //         return Constants_SUCCESS;  // Try to continue anyway...
     //     }
     // }
+    return NOERROR;
 }
 
 ECode CallController::CheckIfOkToInitiateOutgoingCall(
