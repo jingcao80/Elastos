@@ -10,7 +10,7 @@ namespace Droid {
 namespace Widget {
 
 CarClass(CCursorAdapterDataSetObserver)
-    , public CursorAdapter::DataSetObserver
+    , public CursorAdapter::MyDataSetObserver
 {
 public:
     CAR_OBJECT_DECL()

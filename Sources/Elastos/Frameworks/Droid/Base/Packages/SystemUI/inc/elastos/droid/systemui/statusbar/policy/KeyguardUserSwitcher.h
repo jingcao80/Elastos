@@ -73,6 +73,8 @@ public:
         // @Override
         CARAPI OnChanged();
 
+        TO_STRING_IMPL("KeyguardUserSwitcher::_DataSetObserver")
+
     private:
         KeyguardUserSwitcher* mHost;
     };

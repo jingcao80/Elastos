@@ -6,7 +6,9 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/widget/ExpandableListPosition.h"
+#include "elastos/droid/database/DataSetObserver.h"
 
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
@@ -127,12 +129,9 @@ public:
 
 protected:
     class MyDataSetObserver
-        : public Object
-        , public IDataSetObserver
+        : public DataSetObserver
     {
     public:
-        CAR_INTERFACE_DECL()
-
         MyDataSetObserver(
             /* [in] */ ExpandableListConnector* owner);
 
@@ -141,6 +140,8 @@ protected:
 
         // @Override
         CARAPI OnInvalidated();
+
+        TO_STRING_IMPL("ExpandableListConnector::MyDataSetObserver")
 
     private:
         ExpandableListConnector* mOwner;

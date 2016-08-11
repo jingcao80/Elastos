@@ -7,10 +7,12 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/database/DataSetObserver.h"
 
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Os::IHandler;
@@ -50,14 +52,11 @@ public:
         AutoPtr<IWeakReference> mWeakHost;
     };
 
-    class DataSetObserver
-        : public Object
-        , public IDataSetObserver
+    class MyDataSetObserver
+        : public DataSetObserver
     {
     public:
-        CAR_INTERFACE_DECL()
-
-        DataSetObserver();
+        MyDataSetObserver();
 
         CARAPI constructor(
             /* [in] */ ICursorAdapter* host);

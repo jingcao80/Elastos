@@ -25,7 +25,6 @@ using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::ITimeInterpolator;
-using Elastos::Droid::Database::EIID_IDataSetObserver;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Internal::Widget::CAbsListViewAutoScroller;
 using Elastos::Droid::Os::CHandler;
@@ -651,8 +650,6 @@ ECode ListPopupWindow::InnerInt32Property::Get(
 //=====================================================================
 //                ListPopupWindow::PopupDataSetObserver
 //=====================================================================
-CAR_INTERFACE_IMPL(ListPopupWindow::PopupDataSetObserver, Object, IDataSetObserver)
-
 ListPopupWindow::PopupDataSetObserver::PopupDataSetObserver(
     /* [in] */ ListPopupWindow* owner)
     : mOwner(owner)

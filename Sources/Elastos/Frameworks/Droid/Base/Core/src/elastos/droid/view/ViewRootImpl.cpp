@@ -693,7 +693,7 @@ void ViewRootImpl::InvalidateOnAnimationRunnable::PostIfNeededLocked()
     if (!mPosted) {
         AutoPtr<IInterface> obj;
         mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
-        if (mPosted == FALSE && obj != NULL) {
+        if (obj != NULL) {
             ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
             viewRoot->mChoreographer->PostCallback(
                 IChoreographer::CALLBACK_ANIMATION, this, NULL);
@@ -2058,8 +2058,7 @@ ECode ViewRootImpl::InvalidateChildInParent(
     IRect* localDirty = mDirty;
     localDirty->IsEmpty(&isEmpty);
     Boolean contains;
-    localDirty->Contains(dirty, &contains);
-    if (!isEmpty && !contains) {
+    if (!isEmpty && (localDirty->Contains(dirty, &contains), !contains)) {
         mAttachInfo->mSetIgnoreDirtyState = TRUE;
         mAttachInfo->mIgnoreDirtyState = TRUE;
     }
@@ -2530,8 +2529,8 @@ void ViewRootImpl::PerformTraversals()
     }
     else {
         mWinFrame->GetWidth(&desiredWindowWidth);
-        mWinFrame->GetHeight(&desiredWindowHeight);
-        if (desiredWindowWidth != mWidth || desiredWindowHeight != mHeight) {
+        if (desiredWindowWidth != mWidth
+            || (mWinFrame->GetHeight(&desiredWindowHeight), desiredWindowHeight) != mHeight) {
             if (DEBUG_ORIENTATION) {
                 Logger::V(TAG, "View %s resized to %s", TO_CSTR(host), TO_CSTR(mWinFrame));
             }
@@ -3172,8 +3171,7 @@ void ViewRootImpl::PerformTraversals()
         mAttachInfo->mHasNonEmptyGivenInternalInsets = !insetsIsEmpty;
 
         // Tell the window manager.
-        Boolean equal = Object::Equals(mLastGivenInsets, insets);
-        if (insetsPending || !equal) {
+        if (insetsPending || !Object::Equals(mLastGivenInsets, insets)) {
             ((ViewTreeObserver::InternalInsetsInfo*)mLastGivenInsets.Get())->Set(insets);
 
             // Translate insets to screen coordinates if needed.
@@ -3490,30 +3488,25 @@ AutoPtr<IArrayList> ViewRootImpl::GetValidLayoutRequesters(
     for (Int32 i = 0; i < numViewsRequestingLayout; ++i) {
         AutoPtr<IInterface> temp;
         layoutRequesters->Get(i, (IInterface**)&temp);
-        AutoPtr<IView> view = IView::Probe(temp);
-        if (view != NULL && VIEW_PROBE(view)->mAttachInfo != NULL && VIEW_PROBE(view)->mParent != NULL &&
-                (secondLayoutRequests || (VIEW_PROBE(view)->mPrivateFlags & View::PFLAG_FORCE_LAYOUT) ==
+        View* view = VIEW_PROBE(temp);
+        if (view != NULL && view->mAttachInfo != NULL && view->mParent != NULL &&
+                (secondLayoutRequests || (view->mPrivateFlags & View::PFLAG_FORCE_LAYOUT) ==
                         View::PFLAG_FORCE_LAYOUT)) {
             Boolean gone = FALSE;
-            AutoPtr<IView> parent = view;
+            AutoPtr<View> parent = view;
             // Only trigger new requests for views in a non-GONE hierarchy
             while (parent != NULL) {
-                if ((VIEW_PROBE(view)->mViewFlags & View::VISIBILITY_MASK) == IView::GONE) {
+                if ((parent->mViewFlags & View::VISIBILITY_MASK) == IView::GONE) {
                     gone = TRUE;
                     break;
                 }
-                if (IView::Probe(VIEW_PROBE(parent)->mParent)) {
-                    parent = IView::Probe(VIEW_PROBE(parent)->mParent);
-                }
-                else {
-                    parent = NULL;
-                }
+                parent = VIEW_PROBE(parent->mParent);
             }
             if (!gone) {
                 if (validLayoutRequesters == NULL) {
                     CArrayList::New((IArrayList**)&validLayoutRequesters);
                 }
-                validLayoutRequesters->Add(view);
+                validLayoutRequesters->Add(temp);
             }
         }
     }
@@ -3522,16 +3515,11 @@ AutoPtr<IArrayList> ViewRootImpl::GetValidLayoutRequesters(
         for (Int32 i = 0; i < numViewsRequestingLayout; ++i) {
             AutoPtr<IInterface> temp;
             layoutRequesters->Get(i, (IInterface**)&temp);
-            AutoPtr<IView> view = IView::Probe(temp);
+            View* view = VIEW_PROBE(temp);
             while (view != NULL &&
-                    (VIEW_PROBE(view)->mPrivateFlags & View::PFLAG_FORCE_LAYOUT) != 0) {
-                VIEW_PROBE(view)->mPrivateFlags &= ~View::PFLAG_FORCE_LAYOUT;
-                if (IView::Probe(VIEW_PROBE(view)->mParent)) {
-                    view = IView::Probe(VIEW_PROBE(view)->mParent);
-                }
-                else {
-                    view = NULL;
-                }
+                    (view->mPrivateFlags & View::PFLAG_FORCE_LAYOUT) != 0) {
+                view->mPrivateFlags &= ~View::PFLAG_FORCE_LAYOUT;
+                view = VIEW_PROBE(view->mParent);
             }
         }
     }
@@ -4683,8 +4671,8 @@ AutoPtr<IViewGroup> ViewRootImpl::FindAncestorToTakeFocusInTouchMode(
     while (vgParent) {
         view = IView::Probe(vgParent);
         vgParent->GetDescendantFocusability(&focusability);
-        view->IsFocusableInTouchMode(&bval);
-        if (focusability == ViewGroup::FOCUS_AFTER_DESCENDANTS && bval) {
+        if (focusability == ViewGroup::FOCUS_AFTER_DESCENDANTS
+            && (view->IsFocusableInTouchMode(&bval), bval)) {
             return vgParent;
         }
 
@@ -7154,15 +7142,12 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
 
     // If the Control modifier is held, try to interpret the key as a shortcut.
     Boolean isCtrlPressed;
-    event->IsCtrlPressed(&isCtrlPressed);
     Int32 repeatCount, keyCode;
-    event->GetRepeatCount(&repeatCount);
     event->GetKeyCode(&keyCode);
-    Boolean isModifierKey = CKeyEvent::IsModifierKey(keyCode);
     if (action == IKeyEvent::ACTION_DOWN
-            && isCtrlPressed
-            && repeatCount == 0
-            && !isModifierKey) {
+            && (event->IsCtrlPressed(&isCtrlPressed), isCtrlPressed)
+            && (event->GetRepeatCount(&repeatCount), repeatCount == 0)
+            && !CKeyEvent::IsModifierKey(keyCode)) {
         Boolean tempEvent;
         mHost->mView->DispatchKeyShortcutEvent(event, &tempEvent);
         if (tempEvent) {
@@ -7186,7 +7171,7 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
     // Handle automatic focus changes.
     if (action == IKeyEvent::ACTION_DOWN) {
         int direction = 0, eventCode;
-        switch (event->GetKeyCode(&eventCode), eventCode) {
+        switch (keyCode) {
             case IKeyEvent::KEYCODE_DPAD_LEFT: {
                 Boolean hasNoModifiers;
                 event->HasNoModifiers(&hasNoModifiers);
@@ -7765,9 +7750,8 @@ ECode ViewRootImpl::SyntheticTouchNavigationHandler::Process(
             // In order to support an input device, we must know certain
             // characteristics about it, such as its size and resolution.
             AutoPtr<IMotionRange> xRange, yRange;
-            device->GetMotionRange(IMotionEvent::AXIS_X, (IMotionRange**)&xRange);
-            device->GetMotionRange(IMotionEvent::AXIS_Y, (IMotionRange**)&yRange);
-            if (xRange != NULL && yRange != NULL) {
+            if ((device->GetMotionRange(IMotionEvent::AXIS_X, (IMotionRange**)&xRange), xRange != NULL)
+                && (device->GetMotionRange(IMotionEvent::AXIS_Y, (IMotionRange**)&yRange), yRange != NULL)) {
                 mCurrentDeviceSupported = TRUE;
 
                 // Infer the resolution if it not actually known.
@@ -7884,8 +7868,7 @@ ECode ViewRootImpl::SyntheticTouchNavigationHandler::Cancel(
     IInputEvent* ie = IInputEvent::Probe(event);
     Int32 id, source;
     ie->GetDeviceId(&id);
-    ie->GetSource(&source);
-    if (mCurrentDeviceId == id && mCurrentSource == source) {
+    if (mCurrentDeviceId == id && mCurrentSource == (ie->GetSource(&source), source)) {
         Int64 time = 0;
         ie->GetEventTime(&time);
         FinishKeys(time);
@@ -8205,8 +8188,7 @@ Boolean ViewRootImpl::QueuedInputEvent::ShouldSkipIme()
     }
     Boolean res = IMotionEvent::Probe(mEvent) ? TRUE : FALSE;
     Boolean source;
-    mEvent->IsFromSource(IInputDevice::SOURCE_CLASS_POINTER, &source);
-    return res && source;
+    return res && (mEvent->IsFromSource(IInputDevice::SOURCE_CLASS_POINTER, &source), source);
 }
 
 Boolean ViewRootImpl::QueuedInputEvent::ShouldSendToSynthesizer()

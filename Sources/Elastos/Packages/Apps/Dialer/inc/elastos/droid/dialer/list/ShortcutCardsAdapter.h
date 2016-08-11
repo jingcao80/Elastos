@@ -134,6 +134,8 @@ private:
         // @Override
         CARAPI OnChanged();
 
+        TO_STRING_IMPL("ShortcutCardsAdapter::CustomDataSetObserver")
+
     private:
         ShortcutCardsAdapter* mHost;
     };

@@ -6,7 +6,9 @@
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/view/ViewGroup.h"
+#include "elastos/droid/database/DataSetObserver.h"
 
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::View::IContextMenuInfo;
 using Elastos::Droid::View::IView;
@@ -63,12 +65,9 @@ public:
     };
 
     class AdapterDataSetObserver
-        : public Object
-        , public IDataSetObserver
+        : public DataSetObserver
     {
     public:
-        CAR_INTERFACE_DECL()
-
         AdapterDataSetObserver(
             /* [in] */ AdapterView* host);
 
@@ -77,6 +76,8 @@ public:
         CARAPI OnInvalidated();
 
         CARAPI ClearSavedState();
+
+        TO_STRING_IMPL("AdapterView::AdapterDataSetObserver")
 
     private:
         AutoPtr<IParcelable> mInstanceState;

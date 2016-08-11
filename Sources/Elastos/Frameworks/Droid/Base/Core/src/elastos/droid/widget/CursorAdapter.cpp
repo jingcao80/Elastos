@@ -402,13 +402,11 @@ ECode CursorAdapter::ChangeObserver::OnChange(
 //===============================================================================
 // CursorAdapter::ChangeObserver
 //===============================================================================
-CAR_INTERFACE_IMPL(CursorAdapter::DataSetObserver, Object, IDataSetObserver)
-
-CursorAdapter::DataSetObserver::DataSetObserver()
+CursorAdapter::MyDataSetObserver::MyDataSetObserver()
 {
 }
 
-ECode CursorAdapter::DataSetObserver::constructor(
+ECode CursorAdapter::MyDataSetObserver::constructor(
     /* [in] */ ICursorAdapter* host)
 {
     IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(host);
@@ -416,7 +414,7 @@ ECode CursorAdapter::DataSetObserver::constructor(
     return NOERROR;
 }
 
-ECode CursorAdapter::DataSetObserver::OnChanged()
+ECode CursorAdapter::MyDataSetObserver::OnChanged()
 {
     AutoPtr<ICursorAdapter> hostObj;
     mWeakHost->Resolve(EIID_ICursorAdapter, (IInterface**)&hostObj);
@@ -429,7 +427,7 @@ ECode CursorAdapter::DataSetObserver::OnChanged()
     return host->NotifyDataSetChanged();
 }
 
-ECode CursorAdapter::DataSetObserver::OnInvalidated()
+ECode CursorAdapter::MyDataSetObserver::OnInvalidated()
 {
     AutoPtr<ICursorAdapter> hostObj;
     mWeakHost->Resolve(EIID_ICursorAdapter, (IInterface**)&hostObj);

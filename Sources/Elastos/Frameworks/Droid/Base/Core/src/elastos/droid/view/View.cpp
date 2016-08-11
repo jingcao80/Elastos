@@ -702,10 +702,9 @@ ECode View::MeasureSpec::GetDescription(
 
 ECode View::CheckForLongPress::Run()
 {
-    Logger::I(TAG, "%s >>> CheckForLongPress", TO_CSTR(mView));
     Boolean isPressed;
-    mView->IsPressed(&isPressed);
-    if (isPressed && (mView->mParent != NULL)
+    if ((mView->mParent != NULL)
+        && (mView->IsPressed(&isPressed), isPressed)
         && mOriginalWindowAttachCount == mView->mWindowAttachCount) {
             Boolean performLongClick;
             if (mView->PerformLongClick(&performLongClick), performLongClick) {
@@ -2291,8 +2290,7 @@ ECode View::ClearFocusInternal(
         RefreshDrawableState();
 
         Boolean res;
-        RootViewRequestFocus(&res);
-        if (propagate && (!refocus || !res)) {
+        if (propagate && (!refocus || (RootViewRequestFocus(&res), !res))) {
             NotifyGlobalFocusCleared(this);
         }
     }
@@ -2473,23 +2471,22 @@ ECode View::SendAccessibilityEvent(
 ECode View::AnnounceForAccessibility(
     /* [in] */ ICharSequence* text)
 {
-        AutoPtr<IAccessibilityManager> manger;
-        CAccessibilityManager::GetInstance(mContext, (IAccessibilityManager**)&manger);
-        Boolean bval;
-        manger->IsEnabled(&bval);
-        if (bval && mParent != NULL) {
-            AutoPtr<IAccessibilityEvent> event;
-            CAccessibilityEvent::Obtain(IAccessibilityEvent::TYPE_ANNOUNCEMENT,
-                (IAccessibilityEvent**)&event);
-            OnInitializeAccessibilityEvent(event);
-            IAccessibilityRecord* record = IAccessibilityRecord::Probe(event);
-            AutoPtr<IList> container;
-            record->GetText((IList**)&container);
-            container->Add(text);
-            record->SetContentDescription(NULL);
-            Boolean result;
-            mParent->RequestSendAccessibilityEvent(this, event, &result);
-        }
+    AutoPtr<IAccessibilityManager> manger;
+    CAccessibilityManager::GetInstance(mContext, (IAccessibilityManager**)&manger);
+    Boolean bval;
+    if (mParent != NULL && (manger->IsEnabled(&bval), bval)) {
+        AutoPtr<IAccessibilityEvent> event;
+        CAccessibilityEvent::Obtain(IAccessibilityEvent::TYPE_ANNOUNCEMENT,
+            (IAccessibilityEvent**)&event);
+        OnInitializeAccessibilityEvent(event);
+        IAccessibilityRecord* record = IAccessibilityRecord::Probe(event);
+        AutoPtr<IList> container;
+        record->GetText((IList**)&container);
+        container->Add(text);
+        record->SetContentDescription(NULL);
+        Boolean result;
+        mParent->RequestSendAccessibilityEvent(this, event, &result);
+    }
 
     return NOERROR;
 }
@@ -2879,13 +2876,11 @@ ECode View::OnInitializeAccessibilityNodeInfoInternal(
     }
     Boolean isClickable, isEnabled;
     IsClickable(&isClickable);
-    IsEnabled(&isEnabled);
-    if (isClickable && isEnabled) {
+    if (isClickable && (IsEnabled(&isEnabled), isEnabled)) {
         info->AddAction(IAccessibilityNodeInfo::ACTION_CLICK);
     }
     IsLongClickable(&isClickable);
-    IsEnabled(&isEnabled);
-    if (isClickable && isEnabled) {
+    if (isClickable && (IsEnabled(&isEnabled), isEnabled)) {
         info->AddAction(IAccessibilityNodeInfo::ACTION_LONG_CLICK);
     }
 
@@ -2939,17 +2934,16 @@ Boolean View::IsVisibleToUser(
         }
         // An invisible predecessor or one with alpha zero means
         // that this view is not visible to the user.
+        Float alpha, transitionAlpha;
+        Int32 visibility;
         AutoPtr<IView> current = (IView*)this;
         while (current != NULL) {
             View* view = (View*)current.Get();
             // We have attach info so this view is attached and there is no
             // need to check whether we reach to ViewRootImpl on the way up.
-            Float alpha, transitionAlpha;
-            view->GetAlpha(&alpha);
-            view->GetTransitionAlpha(&transitionAlpha);
-            Int32 visibility;
-            view->GetVisibility(&visibility);
-            if (alpha <= 0 || transitionAlpha <= 0 || visibility != IView::VISIBLE) {
+            if ((view->GetAlpha(&alpha), alpha) <= 0
+                || (view->GetTransitionAlpha(&transitionAlpha), transitionAlpha) <= 0
+                || (view->GetVisibility(&visibility), visibility != IView::VISIBLE)) {
                 return FALSE;
             }
 
@@ -3056,8 +3050,7 @@ ECode View::ComputeClickPointInScreenForAccessibility(
     OffsetRects(intersections, dx, dy);
 
     Boolean isEmpty;
-    intersections->IsEmpty(&isEmpty);
-    if (isEmpty && interactiveRegion) {
+    if (interactiveRegion && (intersections->IsEmpty(&isEmpty), isEmpty)) {
         Float x, y;
         bounds->GetCenterX(&x);
         bounds->GetCenterY(&y);
@@ -3069,10 +3062,7 @@ ECode View::ComputeClickPointInScreenForAccessibility(
         AutoPtr<IRegion> region;
         CRegion::New((IRegion**)&region);
         Float left, top, right, bottom;
-        bounds->GetLeft(&left);
-        bounds->GetTop(&top);
-        bounds->GetRight(&right);
-        bounds->GetBottom(&bottom);
+        bounds->Get(&left, &top, &right, &bottom);
         Boolean isSet;
         region->Set(left, top, right, bottom, &isSet);
 
@@ -3085,10 +3075,7 @@ ECode View::ComputeClickPointInScreenForAccessibility(
             AutoPtr<IRectF> intersection = IRectF::Probe(temp);
 
             Float rleft, rtop, rright, rbottom;
-            intersection->GetLeft(&rleft);
-            intersection->GetTop(&rtop);
-            intersection->GetRight(&rright);
-            intersection->GetBottom(&rbottom);
+            intersection->Get(&rleft, &rtop, &rright, &rbottom);
             region->Op(rleft, rtop, rright, rbottom, Elastos::Droid::Graphics::RegionOp_DIFFERENCE, &isSet);
         }
 
@@ -3161,8 +3148,7 @@ void View::OffsetRects(
     for (Int32 i = 0; i < rectCount; i++) {
         AutoPtr<IInterface> temp;
         rects->Get(i, (IInterface**)&temp);
-        AutoPtr<IRectF> intersection = IRectF::Probe(temp);
-        intersection->Offset(offsetX, offsetY);
+        IRectF::Probe(temp)->Offset(offsetX, offsetY);
     }
 }
 
@@ -3189,12 +3175,7 @@ ECode View::GetAccessibilityNodeProvider(
     *res = NULL;
 
     if (mAccessibilityDelegate != NULL) {
-        AutoPtr<IAccessibilityNodeProvider> anp;
-        mAccessibilityDelegate->GetAccessibilityNodeProvider(
-            this, (IAccessibilityNodeProvider**)&anp);
-        *res = anp;
-        REFCOUNT_ADD(*res)
-        return NOERROR;
+        return mAccessibilityDelegate->GetAccessibilityNodeProvider(this, res);
     }
     return NOERROR;
 }
@@ -3267,8 +3248,9 @@ ECode View::SetContentDescription(
     Int32 len = 0;
     Boolean nonEmptyDesc = contentDescription != NULL && (contentDescription->GetLength(&len), len) > 0;
     Int32 importantForAccessibility;
-    GetImportantForAccessibility(&importantForAccessibility);
-    if (nonEmptyDesc && importantForAccessibility == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+    if (nonEmptyDesc
+        && (GetImportantForAccessibility(&importantForAccessibility), importantForAccessibility)
+            == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
         SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
         NotifySubtreeAccessibilityStateChangedIfNeeded();
     }
@@ -4055,10 +4037,8 @@ ECode View::SetFocusable(
     if (!focusable) {
         SetFlags(0, FOCUSABLE_IN_TOUCH_MODE);
     }
-    Int32 flags = NOT_FOCUSABLE;
-    if (focusable) flags = FOCUSABLE;
-    SetFlags(flags, FOCUSABLE_MASK);
 
+    SetFlags(focusable ? FOCUSABLE : NOT_FOCUSABLE, FOCUSABLE_MASK);
     return NOERROR;
 }
 
@@ -4827,10 +4807,9 @@ ECode View::AddFocusables(
         return NOERROR;
     }
     Boolean isInTouchMode, isFocusableInTouchMode;
-    IsInTouchMode(&isInTouchMode);
-    IsFocusableInTouchMode(&isFocusableInTouchMode);
-    if ((focusableMode & IView::FOCUSABLES_TOUCH_MODE) == IView::FOCUSABLES_TOUCH_MODE &&
-            isInTouchMode && !isFocusableInTouchMode) {
+    if ((focusableMode & IView::FOCUSABLES_TOUCH_MODE) == IView::FOCUSABLES_TOUCH_MODE
+        && (IsInTouchMode(&isInTouchMode), isInTouchMode)
+        && (IsFocusableInTouchMode(&isFocusableInTouchMode), !isFocusableInTouchMode)) {
         return NOERROR;
     }
 
@@ -5232,12 +5211,11 @@ ECode View::SetImportantForAccessibility(
         Boolean maySkipNotify = oldMode == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO
                 || mode == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO;
         Boolean res;
-        IncludeForAccessibility(&res);
-        Boolean oldIncludeForAccessibility = maySkipNotify && res;
+        Boolean oldIncludeForAccessibility = maySkipNotify && (IncludeForAccessibility(&res), res);
         mPrivateFlags2 &= ~PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK;
         mPrivateFlags2 |= (mode << PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT)
                 & PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK;
-        if (!maySkipNotify || oldIncludeForAccessibility != res) {
+        if (!maySkipNotify || oldIncludeForAccessibility != (IncludeForAccessibility(&res), res)) {
             NotifySubtreeAccessibilityStateChangedIfNeeded();
         }
         else {
@@ -5297,27 +5275,26 @@ ECode View::IsImportantForAccessibility(
     }
 
     // Check parent mode to ensure we're not hidden.
-    AutoPtr<IViewParent> parent = mParent;
-    while (IView::Probe(parent)) {
+    AutoPtr<IView> vp = IView::Probe(mParent);
+    while (vp) {
         Int32 res;
-        IView::Probe(parent)->GetImportantForAccessibility(&res);
+        vp->GetImportantForAccessibility(&res);
         if (res == IView::IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS) {
             *isImportant = FALSE;
             return NOERROR;
         }
         AutoPtr<IViewParent> temp;
-        parent->GetParent((IViewParent**)&temp);
-        parent = temp;
+        vp->GetParent((IViewParent**)&temp);
+        vp = IView::Probe(temp);
     }
     Boolean isActionable;
-    IsActionableForAccessibility(&isActionable);
     AutoPtr<IAccessibilityNodeProvider> provider;
-    GetAccessibilityNodeProvider((IAccessibilityNodeProvider**)&provider);
     Int32 region;
-    GetAccessibilityLiveRegion(&region);
-    *isImportant = mode == (IView::IMPORTANT_FOR_ACCESSIBILITY_YES || isActionable
-                || HasListenersForAccessibility() || provider != NULL
-                || region != IView::ACCESSIBILITY_LIVE_REGION_NONE);
+    *isImportant = (mode == IView::IMPORTANT_FOR_ACCESSIBILITY_YES)
+        || (IsActionableForAccessibility(&isActionable), isActionable)
+        || HasListenersForAccessibility()
+        || (GetAccessibilityNodeProvider((IAccessibilityNodeProvider**)&provider), provider != NULL)
+        || (GetAccessibilityLiveRegion(&region), region != IView::ACCESSIBILITY_LIVE_REGION_NONE);
     return NOERROR;
 }
 
@@ -5356,14 +5333,13 @@ ECode View::IncludeForAccessibility(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = FALSE;
     if (mAttachInfo != NULL) {
         Boolean isImportant;
-        IsImportantForAccessibility(&isImportant);
         *res = (mAttachInfo->mAccessibilityFetchFlags
-            & IAccessibilityNodeInfo::FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0 || isImportant;
-        return NOERROR;
+                & IAccessibilityNodeInfo::FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
+            || (IsImportantForAccessibility(&isImportant), isImportant);
     }
-    *res = FALSE;
     return NOERROR;
 }
 
@@ -5372,10 +5348,9 @@ ECode View::IsActionableForAccessibility(
 {
     VALIDATE_NOT_NULL(res)
     Boolean isClickable, isLongClickable, isFocusable;
-    IsClickable(&isClickable);
-    IsLongClickable(&isLongClickable);
-    IsFocusable(&isFocusable);
-    *res = (isClickable || isLongClickable || isFocusable);
+    *res = (IsClickable(&isClickable), isClickable)
+        || (IsLongClickable(&isLongClickable), isLongClickable)
+        || (IsFocusable(&isFocusable), isFocusable);
     return NOERROR;
 }
 
@@ -5575,8 +5550,8 @@ Boolean View::PerformAccessibilityActionInternal(
             // Only cursor position can be specified (selection length == 0)
             Int32 tempStart, tempEnd;
             GetAccessibilitySelectionStart(&tempStart);
-            GetAccessibilitySelectionEnd(&tempEnd);
-            if ((tempStart != start || tempEnd != end) && (start == end)) {
+            if ((tempStart != start || (GetAccessibilitySelectionEnd(&tempEnd), tempEnd) != end)
+                && (start == end)) {
                 SetAccessibilitySelection(start, end);
                 NotifyViewAccessibilityStateChangedIfNeeded(
                         IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
@@ -5628,8 +5603,7 @@ Boolean View::TraverseAtGranularity(
     Int32 segmentEnd = (*range)[1];
     Int32 selectionStart, selectionEnd;
     Boolean extendable;
-    IsAccessibilitySelectionExtendable(&extendable);
-    if (extendSelection && extendable) {
+    if (extendSelection && (IsAccessibilitySelectionExtendable(&extendable), extendable)) {
         GetAccessibilitySelectionStart(&selectionStart);
         if (selectionStart == IView::ACCESSIBILITY_CURSOR_POSITION_UNDEFINED) {
             selectionStart = forward ? segmentStart : segmentEnd;
@@ -5695,8 +5669,7 @@ ECode View::SetAccessibilitySelection(
     AutoPtr<ICharSequence> csq;
     GetIterableTextForAccessibility((ICharSequence**)&csq);
     Int32 len;
-    csq->GetLength(&len);
-    if (start >= 0 && start == end && end <= len) {
+    if (start >= 0 && start == end && end <= (csq->GetLength(&len), len)) {
         mAccessibilityCursorPosition = start;
     }
     else {
@@ -5824,9 +5797,9 @@ Boolean View::HasAncestorThatBlocksDescendantFocus()
         Int32 focusability;
         vgAncestor->GetDescendantFocusability(&focusability);
         Boolean res;
-        vgAncestor->ShouldBlockFocusForTouchscreen(&res);
         if (focusability == IViewGroup::FOCUS_BLOCK_DESCENDANTS
-                || (!focusableInTouchMode && res)) {
+                || (!focusableInTouchMode
+                        && (vgAncestor->ShouldBlockFocusForTouchscreen(&res), res))) {
             return TRUE;
         }
         else {
@@ -7005,10 +6978,9 @@ ECode View::OnTouchEvent(
                         // take focus if we don't have it already and we should in
                         // touch mode.
                         Boolean focusTaken = FALSE, isFocusable, isFocusableInTouchMode, isFocused, bval;
-                        IsFocusable(&isFocusable);
-                        IsFocusableInTouchMode(&isFocusableInTouchMode);
-                        IsFocused(&isFocused);
-                        if (isFocusable && isFocusableInTouchMode && !isFocused) {
+                        if ((IsFocusable(&isFocusable), isFocusable)
+                            && (IsFocusableInTouchMode(&isFocusableInTouchMode), isFocusableInTouchMode)
+                            && (IsFocused(&isFocused), !isFocused)) {
                             RequestFocus(&focusTaken);
                         }
 
@@ -7134,9 +7106,10 @@ ECode View::IsInScrollingContainer(
     VALIDATE_NOT_NULL(res)
     AutoPtr<IViewParent> p;
     GetParent((IViewParent**)&p);
-    while (p != NULL && IViewGroup::Probe(p) != NULL) {
+    IViewGroup* vg = IViewGroup::Probe(p);
+    while (vg != NULL) {
         Boolean should = FALSE;
-        IViewGroup::Probe(p)->ShouldDelayChildPressedState(&should);
+        vg->ShouldDelayChildPressedState(&should);
         if (should) {
             *res = TRUE;
             return NOERROR;
@@ -7144,6 +7117,7 @@ ECode View::IsInScrollingContainer(
         AutoPtr<IViewParent> temp;
         p->GetParent((IViewParent**)&temp);
         p = temp;
+        vg = IViewGroup::Probe(p);
     }
 
     *res = FALSE;
@@ -7270,10 +7244,9 @@ ECode View::RequestUnbufferedDispatch(
     Int32 action;
     event->GetAction(&action);
     Boolean res;
-    event->IsTouchEvent(&res);
     if (mAttachInfo == NULL
             || (action != IMotionEvent::ACTION_DOWN && action != IMotionEvent::ACTION_MOVE)
-            || !res) {
+            || (event->IsTouchEvent(&res), !res)) {
         return NOERROR;
     }
     mAttachInfo->mUnbufferedDispatchRequested = TRUE;
@@ -7290,13 +7263,6 @@ void View::SetFlags(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 mask)
 {
-    AutoPtr<IAccessibilityManager> manager;
-    CAccessibilityManager::GetInstance(mContext, (IAccessibilityManager**)&manager);
-    Boolean accessibilityEnabled, accessibility;
-    manager->IsEnabled(&accessibilityEnabled);
-    IncludeForAccessibility(&accessibility);
-    Boolean oldIncludeForAccessibility = accessibilityEnabled && accessibility;
-
     Int32 old = mViewFlags;
     mViewFlags = (mViewFlags & ~mask) | (flags & mask);
 
@@ -7304,6 +7270,13 @@ void View::SetFlags(
     if (changed == 0) {
         return;
     }
+
+    AutoPtr<IAccessibilityManager> manager;
+    CAccessibilityManager::GetInstance(mContext, (IAccessibilityManager**)&manager);
+    Boolean accessibilityEnabled, accessibility;
+    manager->IsEnabled(&accessibilityEnabled);
+    Boolean oldIncludeForAccessibility = accessibilityEnabled
+        && (IncludeForAccessibility(&accessibility), accessibility);
 
     Int32 privateFlags = mPrivateFlags;
 
@@ -7944,8 +7917,7 @@ ECode View::SetPivotX(
     Boolean set;
     mRenderNode->IsPivotExplicitlySet(&set);
     Float temp;
-    GetPivotX(&temp);
-    if (!set || pivotX != temp) {
+    if (!set || pivotX != (GetPivotX(&temp), temp)) {
         InvalidateViewProperty(TRUE, FALSE);
         Boolean res;
         mRenderNode->SetPivotX(pivotX, &res);
@@ -7971,8 +7943,7 @@ ECode View::SetPivotY(
     Boolean set;
     mRenderNode->IsPivotExplicitlySet(&set);
     Float temp;
-    GetPivotY(&temp);
-    if (!set || pivotY != temp) {
+    if (!set || pivotY != (GetPivotY(&temp), temp)) {
         InvalidateViewProperty(TRUE, FALSE);
         Boolean res;
         mRenderNode->SetPivotY(pivotY, &res);
@@ -9250,8 +9221,8 @@ Boolean View::AwakenScrollBars(
     }
     Boolean isHorizontalScrollBarEnabled, isVerticalScrollBarEnabled;
     IsHorizontalScrollBarEnabled(&isHorizontalScrollBarEnabled);
-    IsVerticalScrollBarEnabled(&isVerticalScrollBarEnabled);
-    if (isHorizontalScrollBarEnabled || isVerticalScrollBarEnabled) {
+    if (isHorizontalScrollBarEnabled
+        || (IsVerticalScrollBarEnabled(&isVerticalScrollBarEnabled), isVerticalScrollBarEnabled)) {
 
         if (invalidate) {
             // Invalidate to show the scrollbars
@@ -9463,8 +9434,9 @@ void View::InvalidateViewProperty(
 {
     Boolean isHardwareAccelerated, isValid;
     IsHardwareAccelerated(&isHardwareAccelerated);
-    mRenderNode->IsValid(&isValid);
-    if (!isHardwareAccelerated || !isValid || (mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
+    if (!isHardwareAccelerated
+        || (mRenderNode->IsValid(&isValid), !isValid)
+        || (mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
         if (invalidateParent) {
             InvalidateParentCaches();
         }
@@ -11620,8 +11592,7 @@ ECode View::BuildLayer()
     }
     Int32 width, height;
     GetWidth(&width);
-    GetHeight(&height);
-    if (width == 0 || height == 0) {
+    if (width == 0 || (GetHeight(&height), height == 0)) {
         return NOERROR;
     }
 
@@ -12023,8 +11994,7 @@ ECode View::BuildDrawingCache(
 
         Int32 drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
         Boolean isOpaque;
-        IsOpaque(&isOpaque);
-        Boolean opaque = drawingCacheBackgroundColor != 0 || isOpaque;
+        Boolean opaque = drawingCacheBackgroundColor != 0 || (IsOpaque(&isOpaque), isOpaque);
         Boolean use32BitCache = attachInfo != NULL && attachInfo->mUse32BitDrawingCache;
 
         const Int64 projectedBitmapSize = width * height * (opaque && !use32BitCache ? 2 : 4);
@@ -13283,8 +13253,7 @@ void View::DrawAccessibilityFocus(
     CAccessibilityManager::GetInstance(mContext, (IAccessibilityManager**)&manager);
     Boolean isEnabled, isTouchExplorationEnabled;
     manager->IsEnabled(&isEnabled);
-    manager->IsTouchExplorationEnabled(&isTouchExplorationEnabled);
-    if (!isEnabled || !isTouchExplorationEnabled) {
+    if (!isEnabled || (manager->IsTouchExplorationEnabled(&isTouchExplorationEnabled), !isTouchExplorationEnabled)) {
         return;
     }
     AutoPtr<IDrawable> drawable;
@@ -14352,10 +14321,9 @@ ECode View::SetBackgroundDrawable(
         else {
             Int32 bWidth, dWidth, bHeight, dHeight;
             mBackground->GetMinimumHeight(&bHeight);
-            mBackground->GetMinimumWidth(&bWidth);
             background->GetMinimumHeight(&dHeight);
-            background->GetMinimumWidth(&dWidth);
-            if (bHeight != dHeight || bWidth != dWidth) {
+            if (bHeight != dHeight
+                || (mBackground->GetMinimumWidth(&bWidth), bWidth) != (background->GetMinimumWidth(&dWidth), dWidth)) {
                 requestLayout = TRUE;
             }
         }
@@ -14529,7 +14497,7 @@ ECode View::GetBackgroundTintMode(
 ECode View::ApplyBackgroundTint()
 {
     if (mBackground != NULL && mBackgroundTint != NULL) {
-        AutoPtr<TintInfo> tintInfo = mBackgroundTint;
+        TintInfo* tintInfo = mBackgroundTint;
         if (tintInfo->mHasTintList || tintInfo->mHasTintMode) {
             mBackground->Mutate();
 
@@ -16488,9 +16456,8 @@ ECode View::PerformHapticFeedback(
 
     //noinspection SimplifiableIfStatement
     Boolean isHapticFeedbackEnabled;
-    IsHapticFeedbackEnabled(&isHapticFeedbackEnabled);
     if ((flags & IHapticFeedbackConstants::FLAG_IGNORE_VIEW_SETTING) == 0
-            && !isHapticFeedbackEnabled) {
+            && (IsHapticFeedbackEnabled(&isHapticFeedbackEnabled), !isHapticFeedbackEnabled)) {
         *res = FALSE;
         return NOERROR;
     }
@@ -17180,8 +17147,7 @@ ECode View::DispatchNestedScroll(
 {
     VALIDATE_NOT_NULL(res)
     Boolean isNestedScrollingEnabled;
-    IsNestedScrollingEnabled(&isNestedScrollingEnabled);
-    if (isNestedScrollingEnabled && mNestedScrollingParent) {
+    if (mNestedScrollingParent && (IsNestedScrollingEnabled(&isNestedScrollingEnabled), isNestedScrollingEnabled)) {
         if (dxConsumed != 0 || dyConsumed != 0 || dxUnconsumed != 0 || dyUnconsumed != 0) {
             Int32 startX = 0;
             Int32 startY = 0;
@@ -17239,8 +17205,7 @@ ECode View::DispatchNestedPreScroll(
 {
     VALIDATE_NOT_NULL(res)
     Boolean isNestedScrollingEnabled;
-    IsNestedScrollingEnabled(&isNestedScrollingEnabled);
-    if (isNestedScrollingEnabled && mNestedScrollingParent != NULL) {
+    if (mNestedScrollingParent != NULL && (IsNestedScrollingEnabled(&isNestedScrollingEnabled), isNestedScrollingEnabled)) {
         if (dx != 0 || dy != 0) {
             Int32 startX = 0;
             Int32 startY = 0;
@@ -17302,8 +17267,7 @@ ECode View::DispatchNestedFling(
 {
     VALIDATE_NOT_NULL(res)
     Boolean isNestedScrollingEnabled;
-    IsNestedScrollingEnabled(&isNestedScrollingEnabled);
-    if (isNestedScrollingEnabled && mNestedScrollingParent != NULL) {
+    if (mNestedScrollingParent != NULL && (IsNestedScrollingEnabled(&isNestedScrollingEnabled), isNestedScrollingEnabled)) {
         return mNestedScrollingParent->OnNestedFling(this, velocityX, velocityY, consumed, res);
     }
     *res = FALSE;
@@ -17347,8 +17311,7 @@ ECode View::DispatchNestedPreFling(
 {
     VALIDATE_NOT_NULL(res)
     Boolean isNestedScrollingEnabled;
-    IsNestedScrollingEnabled(&isNestedScrollingEnabled);
-    if (isNestedScrollingEnabled && mNestedScrollingParent != NULL) {
+    if (mNestedScrollingParent != NULL && (IsNestedScrollingEnabled(&isNestedScrollingEnabled), isNestedScrollingEnabled)) {
         return mNestedScrollingParent->OnNestedPreFling(this, velocityX, velocityY, res);
     }
     *res = FALSE;

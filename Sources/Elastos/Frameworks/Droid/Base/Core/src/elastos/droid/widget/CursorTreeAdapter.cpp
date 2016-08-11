@@ -489,7 +489,6 @@ ECode CursorTreeAdapter::MyCursorHelper::MyContentObserver::OnChange(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CursorTreeAdapter::MyCursorHelper::MyDataSetObserver, Object, IDataSetObserver)
 ECode CursorTreeAdapter::MyCursorHelper::MyDataSetObserver::OnChanged()
 {
     mOwner->mDataValid = TRUE;

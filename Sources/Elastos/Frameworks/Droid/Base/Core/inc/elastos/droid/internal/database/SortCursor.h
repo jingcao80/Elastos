@@ -4,12 +4,14 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/database/AbstractCursor.h"
+#include "elastos/droid/database/DataSetObserver.h"
 
+using Elastos::Droid::Database::DataSetObserver;
+using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Database::AbstractCursor;
 using Elastos::Droid::Database::IAbstractCursor;
 using Elastos::Droid::Database::ICrossProcessCursor;
 using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::IO::ICloseable;
 
 namespace Elastos {
@@ -22,15 +24,12 @@ class SortCursor
     , public ISortCursor
 {
 private:
-    class DataSetObserver
-        : public Object
-        , public IDataSetObserver
+    class MyDataSetObserver
+        : public DataSetObserver
     {
     public:
-        DataSetObserver(
+        MyDataSetObserver(
             /* [in] */ SortCursor* owner);
-
-        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI OnChanged();

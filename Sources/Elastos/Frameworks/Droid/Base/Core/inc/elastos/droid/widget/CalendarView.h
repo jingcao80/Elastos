@@ -403,6 +403,8 @@ private:
 
             CARAPI OnInvalidated();
 
+            TO_STRING_IMPL("CalendarView::_DataSetObserver")
+
         public:
             LegacyCalendarViewDelegate* mHost;
         };

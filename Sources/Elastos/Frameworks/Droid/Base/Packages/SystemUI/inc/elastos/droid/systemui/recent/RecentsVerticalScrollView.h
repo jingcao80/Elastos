@@ -13,9 +13,11 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/systemui/recent/FadedEdgeDrawHelper.h"
 #include "elastos/droid/widget/ScrollView.h"
+#include "elastos/droid/database/DataSetObserver.h"
 
 using Elastos::Droid::Animation::ILayoutTransition;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::SystemUI::ISwipeHelper;
@@ -157,14 +159,14 @@ private:
 
 
     class AdapterDataSetObserver
-        : public Object
-        , public IDataSetObserver
+        : public DataSetObserver
     {
     public:
+
+        TO_STRING_IMPL("RecentsVerticalScrollView::AdapterDataSetObserver")
+
         AdapterDataSetObserver(
            /* [in] */  RecentsVerticalScrollView* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnChanged();
 

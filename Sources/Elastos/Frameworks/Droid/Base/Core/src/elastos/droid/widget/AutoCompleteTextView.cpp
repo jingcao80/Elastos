@@ -120,8 +120,6 @@ ECode AutoCompleteTextView::PopupDataSetObserverOnchangedRunnable::Run()
    return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(AutoCompleteTextView::PopupDataSetObserver, Object, IDataSetObserver)
-
 AutoCompleteTextView::PopupDataSetObserver::PopupDataSetObserver(
     /* [in] */ AutoCompleteTextView* host)
 {

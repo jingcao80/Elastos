@@ -66,6 +66,7 @@ private:
         // @Override
         CARAPI OnInvalidated();
 
+        TO_STRING_IMPL("ActivityChooserView::InnerNotifyDataSetObserver")
     private:
         ActivityChooserView* mOwner;
     };
@@ -140,6 +141,8 @@ private:
 
         // just override pure function for compiling
         CARAPI OnInvalidated();
+
+        TO_STRING_IMPL("ActivityChooserView::InnerUpdateDataSetObserver")
 
     private:
         ActivityChooserView* mOwner;

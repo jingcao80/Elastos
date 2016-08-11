@@ -95,8 +95,6 @@ ECode AdapterView::AdapterContextMenuInfo::SetId(
 //==============================================================================
 //              AdapterView::AdapterDataSetObserver
 //==============================================================================
-CAR_INTERFACE_IMPL(AdapterView::AdapterDataSetObserver, Object, IDataSetObserver);
-
 AdapterView::AdapterDataSetObserver::AdapterDataSetObserver(
     /* [in] */ AdapterView* host)
     : mHost(host)
@@ -110,7 +108,7 @@ ECode AdapterView::AdapterDataSetObserver::OnChanged()
     mHost->mOldItemCount = mHost->mItemCount;
 
     AutoPtr<IAdapter> adapter;
-    ((IAdapterView*)(mHost->Probe(EIID_IAdapterView)))->GetAdapter((IAdapter**)&adapter);
+    mHost->GetAdapter((IAdapter**)&adapter);
     assert(adapter.Get());
     adapter->GetCount(&mHost->mItemCount);
 
@@ -138,7 +136,7 @@ ECode AdapterView::AdapterDataSetObserver::OnInvalidated()
 {
     mHost->mDataChanged = TRUE;
     AutoPtr<IAdapter> adapter;
-    ((IAdapterView*)(mHost->Probe(EIID_IAdapterView)))->GetAdapter((IAdapter**)&adapter);
+    mHost->GetAdapter((IAdapter**)&adapter);
     assert(adapter.Get());
     Boolean hasStableIds;
     adapter->HasStableIds(&hasStableIds);
@@ -187,7 +185,7 @@ ECode AdapterView::SelectionNotifier::Run()
         // was posted and now. We need to wait until the AdapterView
         // has been synched to the new data.
         AutoPtr<IAdapter> adapter;
-        ((IAdapterView*)(mHost->Probe(EIID_IAdapterView)))->GetAdapter((IAdapter**)&adapter);
+        mHost->GetAdapter((IAdapter**)&adapter);
         if (adapter != NULL) {
             AutoPtr<IRunnable> r = this;
             Boolean resTmp;
@@ -782,12 +780,13 @@ ECode AdapterView::CheckFocus()
     // details
     ViewGroup::SetFocusableInTouchMode(focusable && mDesiredFocusableInTouchModeState);
     ViewGroup::SetFocusable(focusable && mDesiredFocusableState);
+
     if (mEmptyView != NULL) {
-        Boolean isEmpty = TRUE;
+        empty = TRUE;
         if (adapter != NULL) {
-            adapter->IsEmpty(&isEmpty);
+            adapter->IsEmpty(&empty);
         }
-        UpdateEmptyStatus(isEmpty);
+        UpdateEmptyStatus(empty);
     }
     return NOERROR;
 }

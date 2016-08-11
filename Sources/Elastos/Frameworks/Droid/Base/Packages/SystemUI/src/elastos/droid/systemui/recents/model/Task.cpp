@@ -178,6 +178,11 @@ Task::Task(
     mColorPrimary = hasAffiliationGroupColor ? taskAffiliationColor : colorPrimary;
     mUseLightOnPrimaryColor = Utilities::ComputeContrastBetweenColors(
         mColorPrimary, IColor::WHITE) > 3.0f;
+
+    Logger::I("Task", "Create Task: taskAffiliationColor: %08x, colorPrimary: %08x, mColorPrimary: %08x, "
+        "mUseLightOnPrimaryColor: %08x, isInAffiliationGroup: %d, hasAffiliationGroupColor: %d",
+        taskAffiliationColor, colorPrimary, mColorPrimary, mUseLightOnPrimaryColor,
+        isInAffiliationGroup, hasAffiliationGroupColor);
 }
 
 /** Copies the other task. */

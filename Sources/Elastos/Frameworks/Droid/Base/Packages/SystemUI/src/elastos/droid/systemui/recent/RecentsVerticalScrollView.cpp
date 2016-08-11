@@ -171,8 +171,6 @@ ECode RecentsVerticalScrollView::SizeChangedRunnable::Run()
 // RecentsVerticalScrollView::AdapterDataSetObserver
 //=================================================================================
 
-CAR_INTERFACE_IMPL(RecentsVerticalScrollView::AdapterDataSetObserver, Object, IDataSetObserver)
-
 RecentsVerticalScrollView::AdapterDataSetObserver::AdapterDataSetObserver(
    /* [in] */  RecentsVerticalScrollView* host)
     : mHost(host)

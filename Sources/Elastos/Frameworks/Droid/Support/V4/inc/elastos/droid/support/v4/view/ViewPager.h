@@ -319,6 +319,8 @@ private:
         // @Override
         CARAPI OnInvalidated();
 
+        TO_STRING_IMPL("ViewPager::PagerObserver")
+
     private:
         ViewPager* mHost;
     };

@@ -3,6 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/database/AbstractCursor.h"
+#include "elastos/droid/database/DataSetObserver.h"
 #include <elastos/core/Object.h>
 
 
@@ -21,14 +22,11 @@ class MergeCursor
 {
 private:
     class MyDataSetObserver
-        : public Object
-        , public IDataSetObserver
+        : public DataSetObserver
     {
     public:
         MyDataSetObserver(
             /* [in] */ MergeCursor* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnChanged();
 
