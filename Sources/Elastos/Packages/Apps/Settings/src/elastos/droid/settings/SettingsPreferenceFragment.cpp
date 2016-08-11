@@ -412,7 +412,7 @@ ECode SettingsPreferenceFragment::UnregisterObserverIfNeeded()
 ECode SettingsPreferenceFragment::HighlightPreferenceIfNeeded()
 {
     Boolean res;
-    if ((IsAdded(&res), res) && !mPreferenceHighlighted &&!TextUtils::IsEmpty(mPreferenceKey)) {
+    if ((IsAdded(&res), res) && !mPreferenceHighlighted && !TextUtils::IsEmpty(mPreferenceKey)) {
         HighlightPreference(mPreferenceKey);
     }
     return NOERROR;
@@ -453,8 +453,6 @@ Int32 SettingsPreferenceFragment::CanUseListViewForHighLighting(
 void SettingsPreferenceFragment::HighlightPreference(
     /* [in] */ const String& key)
 {
-    AutoPtr<IDrawable> highlight = GetHighlightDrawable();
-
     const Int32 position = CanUseListViewForHighLighting(key);
     if (position >= 0) {
         mPreferenceHighlighted = TRUE;
@@ -465,6 +463,7 @@ void SettingsPreferenceFragment::HighlightPreference(
         IAdapterView::Probe(listView)->GetAdapter((IAdapter**)&adap);
         IPreferenceGroupAdapter* adapter = IPreferenceGroupAdapter::Probe(adap);
 
+        AutoPtr<IDrawable> highlight = GetHighlightDrawable();
         adapter->SetHighlightedDrawable(highlight);
         adapter->SetHighlighted(position);
 
@@ -479,13 +478,14 @@ Int32 SettingsPreferenceFragment::FindListPositionFromKey(
     /* [in] */ IListAdapter* adapter,
     /* [in] */ const String& key)
 {
+    IAdapter* ad = IAdapter::Probe(adapter);
     Int32 count;
-    IAdapter::Probe(adapter)->GetCount(&count);
+    ad->GetCount(&count);
     for (Int32 n = 0; n < count; n++) {
         AutoPtr<IInterface> item;
-        IAdapter::Probe(adapter)->GetItem(n, (IInterface**)&item);
-        if (IPreference::Probe(item) != NULL) {
-            IPreference* preference = IPreference::Probe(item);
+        ad->GetItem(n, (IInterface**)&item);
+        IPreference* preference = IPreference::Probe(item);
+        if (preference != NULL) {
             String preferenceKey;
             preference->GetKey(&preferenceKey);
             if (!preferenceKey.IsNull() && preferenceKey.Equals(key)) {

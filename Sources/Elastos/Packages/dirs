@@ -2,3 +2,4 @@
 DIRS += Apps
 DIRS += Providers
 DIRS += Service
+DIRS += InputMethods/PinyinIME

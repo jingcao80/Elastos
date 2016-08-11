@@ -10,15 +10,13 @@ namespace Droid {
 namespace Internal {
 namespace Database {
 
-SortCursor::DataSetObserver::DataSetObserver(
+SortCursor::MyDataSetObserver::MyDataSetObserver(
     /* [in] */ SortCursor* owner)
     : mOwner(owner)
 {
 }
 
-CAR_INTERFACE_IMPL(SortCursor::DataSetObserver, Object, IDataSetObserver)
-
-SortCursor::DataSetObserver::OnChanged()
+SortCursor::MyDataSetObserver::OnChanged()
 {
     // Reset our position so the optimizations in move-related code
     // don't screw us over
@@ -26,7 +24,7 @@ SortCursor::DataSetObserver::OnChanged()
     return NOERROR;
 }
 
-SortCursor::DataSetObserver::OnInvalidated()
+SortCursor::MyDataSetObserver::OnInvalidated()
 {
     mOwner->mPos = -1;
     return NOERROR;
@@ -42,7 +40,7 @@ SortCursor::SortCursor()
 {
     mRowNumCache = ArrayOf<Int32>::Alloc(ROWCACHESIZE);
     mCursorCache = ArrayOf<Int32>::Alloc(ROWCACHESIZE);
-    mObserver = new DataSetObserver(this);
+    mObserver = new MyDataSetObserver(this);
 }
 
 ECode SortCursor::constructor(

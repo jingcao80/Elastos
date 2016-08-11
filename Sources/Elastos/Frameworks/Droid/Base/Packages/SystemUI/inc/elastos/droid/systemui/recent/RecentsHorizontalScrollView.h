@@ -14,9 +14,11 @@
 #include "elastos/droid/systemui/recent/FadedEdgeDrawHelper.h"
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/widget/HorizontalScrollView.h"
+#include "elastos/droid/database/DataSetObserver.h"
 
 using Elastos::Droid::Animation::ILayoutTransition;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::SystemUI::ISwipeHelper;
@@ -45,7 +47,6 @@ namespace Recent {
 
 class RecentsHorizontalScrollView
     : public HorizontalScrollView
-    , public IHorizontalScrollView
     , public ISwipeHelperCallback
     , public IRecentsScrollView
 {
@@ -173,15 +174,14 @@ private:
     };
 
     class AdapterDataSetObserver
-        : public Object
-        , public IDataSetObserver
+        : public DataSetObserver
     {
     public:
+        TO_STRING_IMPL("RecentsHorizontalScrollView::AdapterDataSetObserver")
+
         AdapterDataSetObserver(
            /* [in] */  RecentsHorizontalScrollView* host) : mHost(host)
         {}
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnChanged();
 

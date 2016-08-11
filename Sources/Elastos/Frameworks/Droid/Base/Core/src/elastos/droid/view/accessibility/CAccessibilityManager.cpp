@@ -175,7 +175,8 @@ ECode CAccessibilityManager::IsEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IIAccessibilityManager> service = GetServiceLocked();
         if (service == NULL) {
             *result = FALSE;

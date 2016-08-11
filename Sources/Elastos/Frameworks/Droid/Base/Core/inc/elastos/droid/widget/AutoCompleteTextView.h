@@ -5,9 +5,10 @@
 #include "elastos/droid/widget/EditText.h"
 #include "elastos/droid/widget/ListView.h"
 #include "elastos/droid/os/Runnable.h"
-
+#include "elastos/droid/database/DataSetObserver.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Core::Object;
 
@@ -113,12 +114,9 @@ private:
     };
 
     class PopupDataSetObserver
-            : public Object
-            , public IDataSetObserver
+        : public DataSetObserver
     {
     public:
-        CAR_INTERFACE_DECL()
-
         PopupDataSetObserver(
             /* [in] */ AutoCompleteTextView* host);
 
@@ -131,8 +129,8 @@ private:
     };
 
     class PopupWindowOnDismissListener
-            : public IPopupWindowOnDismissListener
-            , public Object
+        : public Object
+        , public IPopupWindowOnDismissListener
     {
     public:
         CAR_INTERFACE_DECL()

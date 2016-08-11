@@ -188,8 +188,6 @@ AutoPtr<IArrayList> ExpandableListConnector::PositionMetadata::InitSPool()
 //=====================================================================
 //              ExpandableListConnector::MyDataSetObserver
 //=====================================================================
-CAR_INTERFACE_IMPL(ExpandableListConnector::MyDataSetObserver, Object, IDataSetObserver)
-
 ExpandableListConnector::MyDataSetObserver::MyDataSetObserver(
     /* [in] */ ExpandableListConnector* owner)
     : mOwner(owner)

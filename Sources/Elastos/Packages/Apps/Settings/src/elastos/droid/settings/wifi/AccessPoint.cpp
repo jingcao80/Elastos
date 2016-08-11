@@ -13,6 +13,11 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include "elastos/droid/os/SystemClock.h"
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
+using Elastos::Droid::Os::SystemClock;
+
 using Elastos::Droid::Content::Res::IResourcesTheme;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::Drawable::IStateListDrawable;

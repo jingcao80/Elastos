@@ -10,8 +10,6 @@ MergeCursor::MyDataSetObserver::MyDataSetObserver(
     : mHost(host)
 {}
 
-CAR_INTERFACE_IMPL(MergeCursor::MyDataSetObserver, Object, IDataSetObserver)
-
 ECode MergeCursor::MyDataSetObserver::OnChanged()
 {
     mHost->mPos = -1;

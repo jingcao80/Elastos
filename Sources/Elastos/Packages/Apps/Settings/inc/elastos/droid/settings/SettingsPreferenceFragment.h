@@ -106,6 +106,8 @@ private:
         //@Override
         CARAPI OnInvalidated();
 
+        TO_STRING_IMPL("SettingsPreferenceFragment::InitDataSetObserver")
+
     private:
         SettingsPreferenceFragment* mHost;
     };

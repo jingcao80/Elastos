@@ -4,12 +4,14 @@
 
 #include "elastos/droid/widget/BaseExpandableListAdapter.h"
 #include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/database/DataSetObserver.h"
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IView;
@@ -348,11 +350,10 @@ protected:
         };
 
         class MyDataSetObserver
-            : public Object
-            , public IDataSetObserver
+            : public DataSetObserver
         {
         public:
-            CAR_INTERFACE_DECL()
+            TO_STRING_IMPL("CursorTreeAdapter::MyCursorHelper::MyDataSetObserver")
 
             MyDataSetObserver(
                 /* [in] */ MyCursorHelper* owner);

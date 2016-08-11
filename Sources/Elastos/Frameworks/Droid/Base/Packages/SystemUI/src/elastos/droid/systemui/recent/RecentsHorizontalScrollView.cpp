@@ -5,7 +5,6 @@
 #include "elastos/droid/utility/FloatMath.h"
 #include <elastos/core/Math.h>
 
-using Elastos::Droid::Database::EIID_IDataSetObserver;
 using Elastos::Droid::SystemUI::CSwipeHelper;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::FloatMath;
@@ -134,7 +133,6 @@ ECode RecentsHorizontalScrollView::SizeChangedRunnable::Run()
 //============================================================================================
 // RecentsHorizontalScrollView::AdapterDataSetObserver
 //============================================================================================
-CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::AdapterDataSetObserver, Object, IDataSetObserver)
 
 ECode RecentsHorizontalScrollView::AdapterDataSetObserver::OnChanged()
 {

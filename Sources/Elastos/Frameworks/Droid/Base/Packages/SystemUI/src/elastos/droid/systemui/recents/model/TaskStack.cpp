@@ -563,6 +563,8 @@ void TaskStack::CreateAffiliatedGroupings(
                 AutoPtr<Task> t = tasksMap[taskKey];
                 t->mColorPrimary = Utilities::GetColorWithOverlay(
                     affiliationColor, IColor::WHITE, alpha);
+                Logger::I("TaskStack", "CreateAffiliatedGroupings: mColorPrimary: %08x, task: %s",
+                    t->mColorPrimary, TO_CSTR(t));
                 alpha -= alphaStep;
             }
         }

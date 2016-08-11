@@ -11,11 +11,13 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/utility/Int32Property.h"
 #include "elastos/droid/widget/ListView.h"
+#include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/core/Object.h"
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::IRect;
@@ -349,11 +351,10 @@ private:
     };
 
     class ECO_LOCAL PopupDataSetObserver
-        : public Object
-        , public IDataSetObserver
+        : public DataSetObserver
     {
     public:
-        CAR_INTERFACE_DECL()
+        TO_STRING_IMPL("ListPopupWindow::PopupDataSetObserver")
 
         PopupDataSetObserver(
             /* [in] */ ListPopupWindow* owner);
