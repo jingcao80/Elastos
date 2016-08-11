@@ -94,9 +94,10 @@ protected:
         /* [in] */ const String& format,
         /* [in] */ IPendingIntent* receivedIntent);
 
-    CARAPI_(AutoPtr<IGsmAlphabetTextEncodingDetails>) CalculateLength(
+    CARAPI CalculateLength(
         /* [in] */ ICharSequence* messageBody,
-        /* [in] */ Boolean use7bitOnly);
+        /* [in] */ Boolean use7bitOnly,
+        /* [out] */ IGsmAlphabetTextEncodingDetails** result);
 
     CARAPI SendNewSubmitPdu(
         /* [in] */ const String& destinationAddress,

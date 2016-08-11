@@ -3,8 +3,8 @@ module
 {
     interface Elastos.Droid.Os.IMessage;
     interface Elastos.Droid.Os.IHandler;
-    // interface Elastos.Droid.Internal.Telephony.Gsm.ISmsBroadcastConfigInfo;
-    // interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaSmsBroadcastConfigInfo;
+    interface Elastos.Droid.Internal.Telephony.Gsm.ISmsBroadcastConfigInfo;
+    interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaSmsBroadcastConfigInfo;
     // interface Elastos.Droid.Internal.Telephony.DataConnection.IDataProfile;
 
     namespace Elastos {
@@ -26,7 +26,7 @@ module
         // }
     }
 
-    [deprecated]
+    [deprecated, local]
     interface ICommandsInterface {
 
         //***** Constants
@@ -1944,9 +1944,9 @@ module
          *
          * @param response Callback message is empty on completion
          */
-        // SetGsmBroadcastConfig(
-        //     [in] ArrayOf<ISmsBroadcastConfigInfo*>* config,
-        //     [in] IMessage* response);
+        SetGsmBroadcastConfig(
+            [in] ArrayOf<ISmsBroadcastConfigInfo*>* config,
+            [in] IMessage* response);
 
         /**
          * Query the current configuration of cell broadcast SMS of GSM.
@@ -2125,9 +2125,9 @@ module
          * @param response
          *            Callback message is empty on completion
          */
-        // SetCdmaBroadcastConfig(
-        //     [in] ArrayOf<ICdmaSmsBroadcastConfigInfo*>* configs,
-        //     [in] IMessage* response);
+        SetCdmaBroadcastConfig(
+            [in] ArrayOf<ICdmaSmsBroadcastConfigInfo*>* configs,
+            [in] IMessage* response);
 
         /**
          * Query the current configuration of cdma cell broadcast SMS.

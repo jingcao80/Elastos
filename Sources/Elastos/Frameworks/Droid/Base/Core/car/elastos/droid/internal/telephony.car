@@ -445,6 +445,11 @@ module
             interface ISmsUsageMonitor;
         }
 
+        singleton class CSmsUsageMonitorHelper {
+
+            interface ISmsUsageMonitorHelper;
+        }
+
         [local, deprecated]
         class CSubInfoRecordUpdater {
             constructor(
@@ -2052,6 +2057,7 @@ module
             interface ISuppServiceNotification;
         }
 
+        [local]
         class CUsimDataDownloadHandler {
             constructor();
 

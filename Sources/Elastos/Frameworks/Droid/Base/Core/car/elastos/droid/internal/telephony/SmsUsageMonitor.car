@@ -7,10 +7,6 @@ module {
     namespace Telephony {
 
     interface ISmsUsageMonitor {
-        MergeShortCodeCategories(
-            [in] Int32 type1,
-            [in] Int32 type2,
-            [out] Int32* result);
 
         /** Premium SMS permission for a new package (ask user when first premium SMS sent). */
         const Int32 PREMIUM_SMS_PERMISSION_UNKNOWN = 0;
@@ -52,6 +48,13 @@ module {
             [in] String packageName,
             [in] Int32 permission);
 
+    }
+
+    interface ISmsUsageMonitorHelper {
+        MergeShortCodeCategories(
+            [in] Int32 type1,
+            [in] Int32 type2,
+            [out] Int32* result);
     }
 
     }//Telephony

@@ -16,6 +16,8 @@ CarClass(CSmsResponse)
     , public Object
     , public ISmsResponse
 {
+    friend class SMSDispatcher;
+
 public:
     CAR_INTERFACE_DECL()
 

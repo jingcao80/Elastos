@@ -37,6 +37,7 @@ SOURCES += CSmsHeaderHelper.cpp
 SOURCES += SmsMessageBase.cpp
 SOURCES += SmsStorageMonitor.cpp
 SOURCES += SmsUsageMonitor.cpp
+SOURCES += CSmsUsageMonitorHelper.cpp
 SOURCES += SubInfoRecordUpdater.cpp
 SOURCES += CSubInfoRecordUpdaterHelper.cpp
 SOURCES += Subscription.cpp

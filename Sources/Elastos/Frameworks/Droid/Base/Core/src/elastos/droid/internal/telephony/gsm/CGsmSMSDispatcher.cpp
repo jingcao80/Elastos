@@ -153,12 +153,12 @@ ECode CGsmSMSDispatcher::SendData(
             (ISmsMessageSubmitPdu**)&pdu);
     if (pdu != NULL) {
         AutoPtr<IHashMap> map;
-        assert(0);
-// TODO: Need SMSDispatcher::GetSmsTrackerMap
-        // map = GetSmsTrackerMap(destAddr, scAddr, destPort, origPort, data, pdu);
+        map = GetSmsTrackerMap(destAddr, scAddr, destPort, origPort, data,
+                (SmsMessageBase::SubmitPduBase*)pdu.Get());
         AutoPtr<SmsTracker> tracker;
-// TODO: Need SMSDispatcher::GetSmsTracker
-        // tracker = GetSmsTracker(map, sentIntent, deliveryIntent, GetFormat(), NULL /*messageUri*/, FALSE);
+        String str;
+        GetFormat(&str);
+        tracker = GetSmsTracker(map, sentIntent, deliveryIntent, str, NULL /*messageUri*/, FALSE);
         SendRawPdu(tracker);
     }
     else {
@@ -184,28 +184,28 @@ ECode CGsmSMSDispatcher::SendText(
             (ISmsMessageSubmitPdu**)&pdu);
     if (pdu != NULL) {
         if (messageUri == NULL) {
-// TODO: Need SmsApplication
-            // Boolean b;
-            // AutoPtr<ISmsApplication> helper;
-            // SmsApplication::AcquireSingleton((ISmsApplication**)&helper);
-            // if (helper->ShouldWriteMessageForPackage(callingPkg, mContext, &b), b) {
-            //     messageUri = WriteOutboxMessage(
-            //             GetSubId(),
-            //             destAddr,
-            //             text,
-            //             deliveryIntent != NULL,
-            //             callingPkg);
-            // }
+            Boolean b;
+            AutoPtr<ISmsApplication> helper;
+            CSmsApplication::AcquireSingleton((ISmsApplication**)&helper);
+            if (helper->ShouldWriteMessageForPackage(callingPkg, mContext, &b), b) {
+                messageUri = WriteOutboxMessage(
+                        GetSubId(),
+                        destAddr,
+                        text,
+                        deliveryIntent != NULL,
+                        callingPkg);
+            }
         }
         else {
             MoveToOutbox(GetSubId(), messageUri, callingPkg);
         }
         AutoPtr<IHashMap> map;
-// TODO: Need SMSDispatcher::GetSmsTrackerMap
-        // map = GetSmsTrackerMap(destAddr, scAddr, text, pdu);
+        map = GetSmsTrackerMap(destAddr, scAddr, text,
+                (SmsMessageBase::SubmitPduBase*)pdu.Get());
         AutoPtr<SmsTracker> tracker;
-// TODO: Need SMSDispatcher::GetSmsTracker
-        // tracker = GetSmsTracker(map, sentIntent, deliveryIntent, GetFormat(), messageUri, isExpectMore, validityPeriod);
+        String str;
+        GetFormat(&str);
+        tracker = GetSmsTracker(map, sentIntent, deliveryIntent, str, messageUri, isExpectMore, validityPeriod);
         SendRawPdu(tracker);
     }
     else {
@@ -223,13 +223,12 @@ ECode CGsmSMSDispatcher::InjectSmsPdu(
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 
-AutoPtr<IGsmAlphabetTextEncodingDetails> CGsmSMSDispatcher::CalculateLength(
+ECode CGsmSMSDispatcher::CalculateLength(
     /* [in] */ ICharSequence* messageBody,
-    /* [in] */ Boolean use7bitOnly)
+    /* [in] */ Boolean use7bitOnly,
+    /* [out] */ IGsmAlphabetTextEncodingDetails** result)
 {
-// TODO: Need SmsMessage::CalculateLength
-    // return CSmsMessage::CalculateLength(messageBody, use7bitOnly);
-    return NULL;
+    return CSmsMessage::CalculateLength(messageBody, use7bitOnly, result);
 }
 
 ECode CGsmSMSDispatcher::SendNewSubmitPdu(
@@ -259,13 +258,14 @@ ECode CGsmSMSDispatcher::SendNewSubmitPdu(
 
     if (pdu != NULL) {
         AutoPtr<IHashMap> map;
-// TODO: Need SMSDispatcher::GetSmsTrackerMap
-        // map = GetSmsTrackerMap(destinationAddress, scAddress, message, pdu);
+        map = GetSmsTrackerMap(destinationAddress, scAddress, message,
+                (SmsMessageBase::SubmitPduBase*)pdu.Get());
         AutoPtr<SmsTracker> tracker;
-// TODO: Need SMSDispatcher::GetSmsTracker
-        // tracker = GetSmsTracker(map, sentIntent, deliveryIntent, GetFormat(), unsentPartCount,
-        //         anyPartFailed, messageUri, smsHeader, (!lastPart || isExpectMore), validityPeriod);
-        // SendRawPdu(tracker);
+        String str;
+        GetFormat(&str);
+        tracker = GetSmsTracker(map, sentIntent, deliveryIntent, str, unsentPartCount,
+                anyPartFailed, messageUri, smsHeader, (!lastPart || isExpectMore), validityPeriod);
+        SendRawPdu(tracker);
     }
     else {
         Logger::E(TAG, "GsmSMSDispatcher.sendNewSubmitPdu(): getSubmitPdu() returned NULL");
@@ -324,8 +324,7 @@ void CGsmSMSDispatcher::SendSms(
     //         + " SS=" + mPhone.getServiceState().getState());
 
     // Send SMS via the carrier app.
-    AutoPtr<SMSDispatcherReceiver> resultReceiver = new SMSDispatcherReceiver();
-    resultReceiver->constructor(tracker);
+    AutoPtr<SMSDispatcherReceiver> resultReceiver = new SMSDispatcherReceiver(tracker, this);
 
     AutoPtr<IIntent> intent;
     CIntent::New(String("android.provider.Telephony.SMS_SEND")/*IIntents::SMS_SEND_ACTION*/, (IIntent**)&intent);
@@ -365,8 +364,7 @@ void CGsmSMSDispatcher::SendSmsByPstn(
     // if sms over IMS is not supported on data and voice is not available...
     Boolean b;
     if ((IsIms(&b), b) && ss != IServiceState::STATE_IN_SERVICE) {
-// TODO: Need SmsTracker::OnFailed
-        // tracker->OnFailed(mContext, GetNotInServiceError(ss), 0/*errorCode*/);
+        tracker->OnFailed(mContext, GetNotInServiceError(ss), 0/*errorCode*/);
         return;
     }
 
@@ -462,37 +460,38 @@ void CGsmSMSDispatcher::HandleStatusReport(
     CSmsMessage::NewFromCDS(pduString, (ISmsMessage**)&sms);
 
     if (sms != NULL) {
-// TODO:
-        // Int32 tpStatus;
-        // sms->GetStatus(&tpStatus);
-        // Int32 messageRef = sms->mMessageRef;
+        Int32 tpStatus;
+        ((SmsMessage*)sms.Get())->GetStatus(&tpStatus);
+        Int32 messageRef = ((SmsMessage*)sms.Get())->mMessageRef;
 
-        // Int32 size;
-        // deliveryPendingList->GetSize(&size);
-        // for (Int32 i = 0, count = size; i < count; i++) {
-        //     AutoPtr<IInterface> obj;
-        //     deliveryPendingList->Get(i, (IInterface**)&obj);
-        //     AutoPtr<SmsTracker> tracker = (SmsTracker*)(IObject*)obj.Get();
-        //     if (tracker->mMessageRef == messageRef) {
-        //         // Found it.  Remove from list and broadcast.
-        //         if(tpStatus >= ITelephonyTextBasedSmsColumns::STATUS_FAILED || tpStatus < ITelephonyTextBasedSmsColumns::STATUS_PENDING ) {
-        //            deliveryPendingList->Remove(i);
-        //            // Update the message status (COMPLETE or FAILED)
-        //            tracker->UpdateSentMessageStatus(mContext, tpStatus);
-        //         }
-        //         AutoPtr<IPendingIntent> intent = tracker->mDeliveryIntent;
-        //         AutoPtr<IIntent> fillIn;
-        //         CIntent::New((IIntent**)&fillIn);
-        //         fillIn->PutExtra(String("pdu"), IccUtils::HexStringToBytes(pduString));
-        //         fillIn->PutExtra(String("format"), GetFormat());
-        //         // try {
-        //         intent->Send(mContext, IActivity::RESULT_OK, fillIn);
-        //         // } catch (CanceledException ex) {}
+        Int32 size;
+        mDeliveryPendingList->GetSize(&size);
+        for (Int32 i = 0, count = size; i < count; i++) {
+            AutoPtr<IInterface> obj;
+            mDeliveryPendingList->Get(i, (IInterface**)&obj);
+            AutoPtr<SmsTracker> tracker = (SmsTracker*)(IObject*)obj.Get();
+            if (tracker->mMessageRef == messageRef) {
+                // Found it.  Remove from list and broadcast.
+                if(tpStatus >= ITelephonyTextBasedSmsColumns::STATUS_FAILED || tpStatus < ITelephonyTextBasedSmsColumns::STATUS_PENDING ) {
+                   mDeliveryPendingList->Remove(i);
+                   // Update the message status (COMPLETE or FAILED)
+                   tracker->UpdateSentMessageStatus(mContext, tpStatus);
+                }
+                AutoPtr<IPendingIntent> intent = tracker->mDeliveryIntent;
+                AutoPtr<IIntent> fillIn;
+                CIntent::New((IIntent**)&fillIn);
+                fillIn->PutByteArrayExtra(String("pdu"), IccUtils::HexStringToBytes(pduString));
+                String str;
+                GetFormat(&str);
+                fillIn->PutExtra(String("format"), str);
+                // try {
+                intent->Send(mContext, IActivity::RESULT_OK, fillIn);
+                // } catch (CanceledException ex) {}
 
-        //         // Only expect to see one tracker matching this messageref
-        //         break;
-        //     }
-        // }
+                // Only expect to see one tracker matching this messageref
+                break;
+            }
+        }
     }
     mCi->AcknowledgeLastIncomingGsmSms(true, 1/*IIntents::RESULT_SMS_HANDLED*/, NULL);
 }

@@ -1,10 +1,15 @@
 
 #include "elastos/droid/internal/telephony/IccSmsInterfaceManager.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaSmsBroadcastConfigInfo.h"
+#include "elastos/droid/internal/telephony/gsm/CSmsBroadcastConfigInfo.h"
 #include "elastos/droid/telephony/SmsMessage.h"
 #include "elastos/droid/telephony/SmsManager.h"
+#include "elastos/droid/internal/telephony/CSmsNumberUtils.h"
+#include "elastos/droid/internal/telephony/CSmsRawData.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/internal/telephony/ImsSMSDispatcher.h"
+#include "elastos/droid/internal/telephony/uicc/UiccController.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
@@ -21,11 +26,14 @@
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Internal::Telephony::Cdma::CdmaSmsBroadcastConfigInfo;
+using Elastos::Droid::Internal::Telephony::Gsm::CSmsBroadcastConfigInfo;
+using Elastos::Droid::Internal::Telephony::Gsm::ISmsBroadcastConfigInfo;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccConstants;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::Binder;
@@ -138,9 +146,10 @@ void IccSmsInterfaceManager::CellBroadcastRangeManager::AddRange(
     /* [in] */ Int32 endId,
     /* [in] */ Boolean selected)
 {
-    assert(0 && "TODO");
-    // mConfigList->Add(new SmsBroadcastConfigInfo(startId, endId,
-    //             SMS_CB_CODE_SCHEME_MIN, SMS_CB_CODE_SCHEME_MAX, selected));
+    AutoPtr<ISmsBroadcastConfigInfo> info;
+    CSmsBroadcastConfigInfo::New(startId, endId, SMS_CB_CODE_SCHEME_MIN,
+            SMS_CB_CODE_SCHEME_MAX, selected, (ISmsBroadcastConfigInfo**)&info);
+    mConfigList->Add(info);
 }
 
 Boolean IccSmsInterfaceManager::CellBroadcastRangeManager::FinishUpdate()
@@ -157,7 +166,14 @@ Boolean IccSmsInterfaceManager::CellBroadcastRangeManager::FinishUpdate()
     // SmsBroadcastConfigInfo[] configs =
     //         mConfigList.toArray(new SmsBroadcastConfigInfo[mConfigList.size()]);
     mConfigList->ToArray(tmpConfigs, (ArrayOf<IInterface*>**)&configs);
-    return mHost->SetCellBroadcastConfig(configs);
+
+    AutoPtr<ArrayOf<ISmsBroadcastConfigInfo*> > array =
+        ArrayOf<ISmsBroadcastConfigInfo*>::Alloc(size);
+
+    for (Int32 i = 0; i < size; i++) {
+        array->Set(i, ISmsBroadcastConfigInfo::Probe((*configs)[i]));
+    }
+    return mHost->SetCellBroadcastConfig(array);
 }
 
 IccSmsInterfaceManager::CdmaBroadcastRangeManager::CdmaBroadcastRangeManager(
@@ -196,7 +212,14 @@ Boolean IccSmsInterfaceManager::CdmaBroadcastRangeManager::FinishUpdate()
     // CdmaSmsBroadcastConfigInfo[] configs =
     //         mConfigList.toArray(new CdmaSmsBroadcastConfigInfo[mConfigList.size()]);
     mConfigList->ToArray(tmpConfigs, (ArrayOf<IInterface*>**)&configs);
-    return mHost->SetCdmaBroadcastConfig(configs);
+
+    AutoPtr<ArrayOf<ICdmaSmsBroadcastConfigInfo*> > array =
+        ArrayOf<ICdmaSmsBroadcastConfigInfo*>::Alloc(size);
+
+    for (Int32 i = 0; i < size; i++) {
+        array->Set(i, ICdmaSmsBroadcastConfigInfo::Probe((*configs)[i]));
+    }
+    return mHost->SetCdmaBroadcastConfig(array);
 }
 
 
@@ -292,8 +315,7 @@ void IccSmsInterfaceManager::UpdatePhoneObject(
     /* [in] */ IPhoneBase* phone)
 {
     mPhone = phone;
-    assert(0 && "TODO");
-    // mDispatcher->UpdatePhoneObject(phone);
+    ((SMSDispatcher*)mDispatcher.Get())->UpdatePhoneObject(phone);
 }
 
 void IccSmsInterfaceManager::EnforceReceiveAndSend(
@@ -325,7 +347,6 @@ ECode IccSmsInterfaceManager::UpdateMessageOnIccEf(
 {
     VALIDATE_NOT_NULL(result);
     if (DBG) {
-        assert(0 && "TODO");
         // Log(String("updateMessageOnIccEf: index=") + StringUtils::ToString(index) +
         //     " status=" + StringUtils::ToString(status) + " ==> " +
         //     "("+ Arrays.toString(pdu) + ")");
@@ -350,12 +371,10 @@ ECode IccSmsInterfaceManager::UpdateMessageOnIccEf(
             // Will eventually fail if icc card is not present.
             IPhone::Probe(mPhone)->GetPhoneType(&v);
             if (IPhoneConstants::PHONE_TYPE_GSM == v) {
-                assert(0 && "TODO");
-                // ((PhoneBase*)mPhone.Get())->mCi->DeleteSmsOnSim(index, response);
+                ((PhoneBase*)mPhone.Get())->mCi->DeleteSmsOnSim(index, response);
             }
             else {
-                assert(0 && "TODO");
-                // ((PhoneBase*)mPhone.Get())->mCi->DeleteSmsOnRuim(index, response);
+                ((PhoneBase*)mPhone.Get())->mCi->DeleteSmsOnRuim(index, response);
             }
         }
         else {
@@ -399,7 +418,6 @@ ECode IccSmsInterfaceManager::CopyMessageToIccEf(
     VALIDATE_NOT_NULL(result);
     //NOTE smsc not used in RUIM
     if (DBG) {
-        assert(0 && "TODO");
         // Log("copyMessageToIccEf: status=" + status + " ==> " +
         //     "pdu=("+ Arrays.toString(pdu) +
         //     "), smsc=(" + Arrays.toString(smsc) +")");
@@ -421,14 +439,12 @@ ECode IccSmsInterfaceManager::CopyMessageToIccEf(
         //RIL_REQUEST_WRITE_SMS_TO_SIM vs RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM
         IPhone::Probe(mPhone)->GetPhoneType(&v);
         if (IPhoneConstants::PHONE_TYPE_GSM == v) {
-            assert(0 && "TODO");
-            // ((PhoneBase*)mPhone.Get())->mCi->WriteSmsToSim(status, IccUtils::BytesToHexString(smsc),
-            //         IccUtils::BytesToHexString(pdu), response);
+            ((PhoneBase*)mPhone.Get())->mCi->WriteSmsToSim(status, IccUtils::BytesToHexString(smsc),
+                    IccUtils::BytesToHexString(pdu), response);
         }
         else {
-            assert(0 && "TODO");
-            // ((PhoneBase*)mPhone.Get())->mCi->WriteSmsToRuim(status, IccUtils::BytesToHexString(pdu),
-            //         response);
+            ((PhoneBase*)mPhone.Get())->mCi->WriteSmsToRuim(status, IccUtils::BytesToHexString(pdu),
+                    response);
         }
 
         if (FAILED(mLock.Wait())) {
@@ -531,7 +547,6 @@ ECode IccSmsInterfaceManager::SendData(
             Manifest::permission::SEND_SMS,
             String("Sending SMS message"));
     if (Logger::IsLoggable("SMS", Logger::VERBOSE)) {
-        assert(0 && "TODO");
         // Log("sendData: destAddr=" + destAddr + " scAddr=" + scAddr + " destPort=" +
         //     destPort + " data='"+ HexDump.toHexString(data)  + "' sentIntent=" +
         //     sentIntent + " deliveryIntent=" + deliveryIntent);
@@ -542,8 +557,7 @@ ECode IccSmsInterfaceManager::SendData(
         return NOERROR;
     }
     String _destAddr = FilterDestAddress(destAddr);
-    assert(0 && "TODO");
-    // mDispatcher->SendData(_destAddr, scAddr, destPort, 0, data, sentIntent, deliveryIntent);
+    ((SMSDispatcher*)mDispatcher.Get())->SendData(_destAddr, scAddr, destPort, 0, data, sentIntent, deliveryIntent);
     return NOERROR;
 }
 
@@ -589,7 +603,6 @@ ECode IccSmsInterfaceManager::SendDataWithOrigPort(
             Manifest::permission::SEND_SMS,
             String("Sending SMS message"));
     if (Logger::IsLoggable("SMS", Logger::VERBOSE)) {
-        assert(0 && "TODO");
         // Log("sendDataWithOrigPort: destAddr=" + destAddr + " scAddr=" + scAddr
         //     + " destPort=" +destPort + "origPort=" + origPort
         //     + " data='"+ HexDump.toHexString(data) +
@@ -602,9 +615,8 @@ ECode IccSmsInterfaceManager::SendDataWithOrigPort(
         return NOERROR;
     }
     String _destAddr = FilterDestAddress(destAddr);
-    assert(0 && "TODO");
-    // mDispatcher->SendData(_destAddr, scAddr, destPort, origPort,
-    //         data, sentIntent, deliveryIntent);
+    ((SMSDispatcher*)mDispatcher.Get())->SendData(_destAddr, scAddr, destPort, origPort,
+            data, sentIntent, deliveryIntent);
     return NOERROR;
 }
 
@@ -674,9 +686,8 @@ ECode IccSmsInterfaceManager::SendText(
         return NOERROR;
     }
     String _destAddr = FilterDestAddress(destAddr);
-    assert(0 && "TODO");
-    // mDispatcher->SendText(_destAddr, scAddr, text, sentIntent, deliveryIntent,
-    //         NULL/*messageUri*/, _callingPackage, -1, FALSE, -1);
+    ((SMSDispatcher*)mDispatcher.Get())->SendText(_destAddr, scAddr, text, sentIntent, deliveryIntent,
+            NULL/*messageUri*/, _callingPackage, -1, FALSE, -1);
     return NOERROR;
 }
 
@@ -748,10 +759,9 @@ ECode IccSmsInterfaceManager::SendTextWithOptions(
     if (v != IAppOpsManager::MODE_ALLOWED) {
         return NOERROR;
     }
-    assert(0 && "TODO");
-    // mDispatcher->SendText(destAddr, scAddr, text, sentIntent, deliveryIntent,
-    //         NULL/*messageUri*/, callingPackage, priority,
-    //         isExpectMore, validityPeriod);
+    ((SMSDispatcher*)mDispatcher.Get())->SendText(destAddr, scAddr, text, sentIntent, deliveryIntent,
+            NULL/*messageUri*/, callingPackage, priority,
+            isExpectMore, validityPeriod);
     return NOERROR;
 }
 
@@ -776,8 +786,7 @@ ECode IccSmsInterfaceManager::InjectSmsPdu(
             "\n format=" + format +
             "\n receivedIntent=" + TO_CSTR(receivedIntent));
     }
-    assert(0 && "TODO");
-    // mDispatcher->InjectSmsPdu(pdu, format, receivedIntent);
+    ((SMSDispatcher*)mDispatcher.Get())->InjectSmsPdu(pdu, format, receivedIntent);
     return NOERROR;
 }
 
@@ -796,8 +805,7 @@ ECode IccSmsInterfaceManager::UpdateSmsSendStatus(
     /* [in] */ Boolean success)
 {
     EnforceCarrierPrivilege();
-    assert(0 && "TODO");
-    // mDispatcher->UpdateSmsSendStatus(messageRef, success);
+    ((SMSDispatcher*)mDispatcher.Get())->UpdateSmsSendStatus(messageRef, success);
     return NOERROR;
 }
 
@@ -910,18 +918,16 @@ ECode IccSmsInterfaceManager::SendMultipartText(
                 singleDeliveryIntent = IPendingIntent::Probe(oo);
             }
 
-            assert(0 && "TODO");
-            // mDispatcher->SendText(destAddr, scAddr, singlePart,
-            //         singleSentIntent, singleDeliveryIntent,
-            //         NULL/*messageUri*/, _callingPackage, -1, FALSE, -1);
+            ((SMSDispatcher*)mDispatcher.Get())->SendText(destAddr, scAddr, singlePart,
+                    singleSentIntent, singleDeliveryIntent,
+                    NULL/*messageUri*/, _callingPackage, -1, FALSE, -1);
         }
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    // mDispatcher->SendMultipartText(destAddr, scAddr, IArrayList::Probe(parts),
-    //         IArrayList::Probe(sentIntents), IArrayList::Probe(deliveryIntents),
-    //         NULL/*messageUri*/, _callingPackage, -1, FALSE, -1);
+    ((SMSDispatcher*)mDispatcher.Get())->SendMultipartText(destAddr, scAddr, IArrayList::Probe(parts),
+            IArrayList::Probe(sentIntents), IArrayList::Probe(deliveryIntents),
+            NULL/*messageUri*/, _callingPackage, -1, FALSE, -1);
     return NOERROR;
 }
 
@@ -1003,13 +1009,12 @@ ECode IccSmsInterfaceManager::SendMultipartTextWithOptions(
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    // mDispatcher->SendMultipartText(destAddr,
-    //                               scAddr,
-    //                               IArrayList::Probe(parts),
-    //                               IArrayList::Probe(sentIntents),
-    //                               IArrayList::Probe(deliveryIntents),
-    //                               NULL, callingPackage, priority, isExpectMore, validityPeriod);
+    ((SMSDispatcher*)mDispatcher.Get())->SendMultipartText(destAddr,
+            scAddr,
+            IArrayList::Probe(parts),
+            IArrayList::Probe(sentIntents),
+            IArrayList::Probe(deliveryIntents),
+            NULL, callingPackage, priority, isExpectMore, validityPeriod);
     return NOERROR;
 }
 
@@ -1057,8 +1062,18 @@ AutoPtr<IArrayList> IccSmsInterfaceManager::BuildValidRawData(
             ret->Add(NULL);
         }
         else {
-            assert(0 && "TODO");
-            // ret->Add(new SmsRawData(messages.get(i)));
+            Int32 size;
+            ba->GetLength(&size);
+            AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+            for (Int32 j = 0; j < size; j++) {
+                obj = NULL;
+                ba->Get(j, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&b);
+                (*data)[j] = b;
+            }
+            AutoPtr<ISmsRawData> srData;
+            CSmsRawData::New(data, (ISmsRawData**)&srData);
+            ret->Add(srData);
         }
     }
 
@@ -1319,7 +1334,7 @@ ECode IccSmsInterfaceManager::DisableCdmaBroadcastRange(
 }
 
 Boolean IccSmsInterfaceManager::SetCellBroadcastConfig(
-    /* [in] */ ArrayOf</*SmsBroadcastConfigInfo*/IInterface*>* configs)
+    /* [in] */ ArrayOf<ISmsBroadcastConfigInfo*>* configs)
 {
     if (DBG) {
         Log(String("Calling setGsmBroadcastConfig with ")
@@ -1332,8 +1347,7 @@ Boolean IccSmsInterfaceManager::SetCellBroadcastConfig(
         mHandler->ObtainMessage(EVENT_SET_BROADCAST_CONFIG_DONE, (IMessage**)&response);
 
         mSuccess = FALSE;
-        assert(0 && "TODO");
-        // ((PhoneBase*)mPhone.Get())->mCi->SetGsmBroadcastConfig(configs, response);
+        ((PhoneBase*)mPhone.Get())->mCi->SetGsmBroadcastConfig(configs, response);
 
         if (FAILED(mLock.Wait())) {
             Log(String("interrupted while trying to set cell broadcast config"));
@@ -1356,8 +1370,7 @@ Boolean IccSmsInterfaceManager::SetCellBroadcastActivation(
         mHandler->ObtainMessage(EVENT_SET_BROADCAST_ACTIVATION_DONE, (IMessage**)&response);
 
         mSuccess = FALSE;
-        assert(0 && "TODO");
-        // ((PhoneBase*)mPhone.Get())->mCi->SetGsmBroadcastActivation(activate, response);
+        ((PhoneBase*)mPhone.Get())->mCi->SetGsmBroadcastActivation(activate, response);
 
         if (FAILED(mLock.Wait())) {
             Log(String("interrupted while trying to set cell broadcast activation"));
@@ -1368,7 +1381,7 @@ Boolean IccSmsInterfaceManager::SetCellBroadcastActivation(
 }
 
 Boolean IccSmsInterfaceManager::SetCdmaBroadcastConfig(
-    /* [in] */ ArrayOf<IInterface*>/*CdmaSmsBroadcastConfigInfo[]*/* configs)
+    /* [in] */ ArrayOf<ICdmaSmsBroadcastConfigInfo*>* configs)
 {
     if (DBG) {
         Log(String("Calling setCdmaBroadcastConfig with ")
@@ -1381,8 +1394,7 @@ Boolean IccSmsInterfaceManager::SetCdmaBroadcastConfig(
         mHandler->ObtainMessage(EVENT_SET_BROADCAST_CONFIG_DONE, (IMessage**)&response);
 
         mSuccess = FALSE;
-        assert(0 && "TODO");
-        // ((PhoneBase*)mPhone.Get())->mCi->SetCdmaBroadcastConfig(configs, response);
+        ((PhoneBase*)mPhone.Get())->mCi->SetCdmaBroadcastConfig(configs, response);
 
         if (FAILED(mLock.Wait())) {
             Log(String("interrupted while trying to set cdma broadcast config"));
@@ -1406,8 +1418,7 @@ Boolean IccSmsInterfaceManager::SetCdmaBroadcastActivation(
         mHandler->ObtainMessage(EVENT_SET_BROADCAST_ACTIVATION_DONE, (IMessage**)&response);
 
         mSuccess = FALSE;
-        assert(0 && "TODO");
-        // ((PhoneBase*)mPhone.Get())->mCi->SetCdmaBroadcastActivation(activate, response);
+        ((PhoneBase*)mPhone.Get())->mCi->SetCdmaBroadcastActivation(activate, response);
 
         if (FAILED(mLock.Wait())) {
             Log(String("interrupted while trying to set cdma broadcast activation"));
@@ -1470,9 +1481,8 @@ ECode IccSmsInterfaceManager::SendStoredText(
         return NOERROR;
     }
     (*textAndAddress)[1] = FilterDestAddress((*textAndAddress)[1]);
-    assert(0 && "TODO");
-    //  ->SendText((*textAndAddress)[1], scAddress, (*textAndAddress)[0],
-    //         sentIntent, deliveryIntent, messageUri, callingPkg, -1, FALSE, -1);
+    ((SMSDispatcher*)mDispatcher.Get())->SendText((*textAndAddress)[1], scAddress, (*textAndAddress)[0],
+            sentIntent, deliveryIntent, messageUri, callingPkg, -1, FALSE, -1);
     return NOERROR;
 }
 
@@ -1547,24 +1557,22 @@ ECode IccSmsInterfaceManager::SendStoredMultipartText(
                 singleDeliveryIntent = IPendingIntent::Probe(oo);
             }
 
-            assert(0 && "TODO");
-            // mDispatcher->SendText((*textAndAddress)[1], scAddress, singlePart,
-            //         singleSentIntent, singleDeliveryIntent, messageUri, callingPkg,
-            //         -1, FALSE, -1);
+            ((SMSDispatcher*)mDispatcher.Get())->SendText((*textAndAddress)[1], scAddress, singlePart,
+                    singleSentIntent, singleDeliveryIntent, messageUri, callingPkg,
+                    -1, FALSE, -1);
         }
         return NOERROR;
     }
 
     (*textAndAddress)[1] = FilterDestAddress((*textAndAddress)[1]);
-    assert(0 && "TODO");
-    // mDispatcher->SendMultipartText(
-    //         (*textAndAddress)[1], // destAddress
-    //         scAddress,
-    //         parts,
-    //         IArrayList::Probe(sentIntents),
-    //         IArrayList::Probe(deliveryIntents),
-    //         messageUri,
-    //         callingPkg, -1, FALSE, -1);
+    ((SMSDispatcher*)mDispatcher.Get())->SendMultipartText(
+            (*textAndAddress)[1], // destAddress
+            scAddress,
+            parts,
+            IArrayList::Probe(sentIntents),
+            IArrayList::Probe(deliveryIntents),
+            messageUri,
+            callingPkg, -1, FALSE, -1);
     return NOERROR;
 }
 
@@ -1696,8 +1704,7 @@ void IccSmsInterfaceManager::ReturnUnspecifiedFailure(
 
 ECode IccSmsInterfaceManager::EnforceCarrierPrivilege()
 {
-    assert(0 && "TODO");
-    AutoPtr<IUiccController> controller/* = UiccController.getInstance()*/;
+    AutoPtr<IUiccController> controller = UiccController::GetInstance();
     AutoPtr<IUiccCard> uc;
     if (controller == NULL || (controller->GetUiccCard((IUiccCard**)&uc), uc) == NULL) {
         // throw new SecurityException("No Carrier Privilege: No UICC");
@@ -1719,9 +1726,10 @@ String IccSmsInterfaceManager::FilterDestAddress(
     /* [in] */ const String& destAddr)
 {
     String result;
-    assert(0 && "TODO");
-    // result = SmsNumberUtils::FilterDestAddr(mPhone, destAddr);
-    return result != NULL ? result : destAddr;
+    AutoPtr<ISmsNumberUtils> utils;
+    CSmsNumberUtils::AcquireSingleton((ISmsNumberUtils**)&utils);
+    utils->FilterDestAddr(mPhone, destAddr, &result);
+    return (!result.IsNull()) ? result : destAddr;
 }
 
 ECode IccSmsInterfaceManager::GetSmsCapacityOnIcc(
@@ -1751,25 +1759,28 @@ ECode IccSmsInterfaceManager::IsShortSMSCode(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<ITelephonyManager> telephonyManager;
-    assert(0 && "TODO");
-    // Int32 smsCategory = SmsUsageMonitor::CATEGORY_NOT_SHORT_CODE;
+    Int32 smsCategory = SmsUsageMonitor::CATEGORY_NOT_SHORT_CODE;
 
-    // telephonyManager =(TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
+    telephonyManager = ITelephonyManager::Probe(obj);
 
-    // String countryIso = telephonyManager.getSimCountryIso();
-    // if (countryIso == NULL || countryIso.length() != 2) {
-    //     countryIso = telephonyManager.getNetworkCountryIso();
-    // }
+    String countryIso;
+    telephonyManager->GetSimCountryIso(&countryIso);
+    if (countryIso.IsNull() || countryIso.GetLength() != 2) {
+        telephonyManager->GetNetworkCountryIso(&countryIso);
+    }
 
-    // smsCategory = SmsUsageMonitor.mergeShortCodeCategories(smsCategory,
-    //         mPhone.mSmsUsageMonitor.checkDestination(destAddr, countryIso));
+    Int32 val;
+    ((PhoneBase*)mPhone.Get())->mSmsUsageMonitor->CheckDestination(destAddr, countryIso, &val);
+    SmsUsageMonitor::MergeShortCodeCategories(smsCategory, val, &smsCategory);
 
-    // if (smsCategory == SmsUsageMonitor.CATEGORY_NOT_SHORT_CODE
-    //         || smsCategory == SmsUsageMonitor.CATEGORY_FREE_SHORT_CODE
-    //         || smsCategory == SmsUsageMonitor.CATEGORY_STANDARD_SHORT_CODE) {
-    //     *result = FALSE;    // not a premium short code
-    //     return NOERROR;
-    // }
+    if (smsCategory == SmsUsageMonitor::CATEGORY_NOT_SHORT_CODE
+            || smsCategory == SmsUsageMonitor::CATEGORY_FREE_SHORT_CODE
+            || smsCategory == SmsUsageMonitor::CATEGORY_STANDARD_SHORT_CODE) {
+        *result = FALSE;    // not a premium short code
+        return NOERROR;
+    }
 
     *result = TRUE;
     return NOERROR;

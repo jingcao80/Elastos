@@ -5,12 +5,16 @@
 #include "_Elastos.Droid.Internal.h"
 #include <elastos/core/Object.h>
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/internal/telephony/SmsMessageBase.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Text.h"
 #include "elastos/droid/utility/CAtomicFile.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 
@@ -27,7 +31,6 @@ using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IPackageInfo;
 using Elastos::Droid::Database::ContentObserver;
-//using Elastos::Droid::Internal::Telephony::GsmAlphabet::ITextEncodingDetails;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::Handler;
@@ -53,9 +56,12 @@ class SMSDispatcher
     : public Handler
     , public ISMSDispatcher
 {
+    friend class IccSmsInterfaceManager;
+
 protected:
     class SmsTracker : public Object
     {
+        friend class SMSDispatcher;
     public:
         SmsTracker();
 
@@ -86,7 +92,7 @@ protected:
             /* [in] */ IContext* context);
 
     private:
-        CARAPI constructor(
+        SmsTracker(
             /* [in] */ IHashMap* data,
             /* [in] */ IPendingIntent* sentIntent,
             /* [in] */ IPendingIntent* deliveryIntent,
@@ -107,7 +113,7 @@ protected:
         Int32 mImsRetry; // nonzero indicates initial message was sent over Ims
         Int32 mMessageRef;
         Boolean mExpectMore;
-        Int32 mvalidityPeriod;
+        Int32 mValidityPeriod;
 
         String mFormat;
 
@@ -133,8 +139,9 @@ protected:
     public:
         TO_STRING_IMPL("SMSDispatcher::SMSDispatcherReceiver")
 
-        CARAPI constructor(
-            /* [in] */ SmsTracker* tracker);
+        SMSDispatcherReceiver(
+            /* [in] */ SmsTracker* tracker,
+            /* [in] */ SMSDispatcher* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
@@ -142,6 +149,7 @@ protected:
 
     private:
         AutoPtr<SmsTracker> mTracker;
+        SMSDispatcher* mHost;
     };
 
 private:
@@ -162,14 +170,18 @@ private:
     };
 
     class ConfirmDialogListener
-        : public IDialogInterfaceOnClickListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
         , public IDialogInterfaceOnCancelListener
         , public ICompoundButtonOnCheckedChangeListener
     {
     public :
-        CARAPI constructor(
+        CAR_INTERFACE_DECL()
+
+        ConfirmDialogListener(
             /* [in] */ SmsTracker* tracker,
-            /* [in] */ ITextView* textView);
+            /* [in] */ ITextView* textView,
+            /* [in] */ SMSDispatcher* host);
 
         CARAPI_(void) SetPositiveButton(
             /* [in] */ IButton* button);
@@ -194,6 +206,7 @@ private:
         AutoPtr<IButton> mNegativeButton;
         Boolean mRememberChoice;    // default is unchecked
         AutoPtr<ITextView> mRememberUndoInstruction;
+        SMSDispatcher* mHost;
     };
 
 public:
@@ -396,7 +409,7 @@ protected:
         /* [in] */ IInterface* o);
 
     virtual CARAPI_(void) HandleSendComplete(
-        /* [in] */ AsyncResult ar);
+        /* [in] */ AsyncResult* ar);
 
     static void HandleNotInService(
         /* [in] */ Int32 ss,
@@ -427,9 +440,10 @@ protected:
      * @param use7bitOnly Ignore (but still count) illegal characters if TRUE
      * @return TextEncodingDetails
      */
-     //TODO
-//    virtual AutoPtr<ITextEncodingDetails> CalculateLength(ICharSequence* messageBody,
-//            Boolean use7bitOnly) = 0;
+    virtual CARAPI CalculateLength(
+        /* [in] */ ICharSequence* messageBody,
+        /* [in] */ Boolean use7bitOnly,
+        /* [out] */ IGsmAlphabetTextEncodingDetails** result) = 0;
 
     /**
      * Update the status of a Pending (send-by-IP) SMS message and resend by PSTN if necessary.
@@ -472,23 +486,48 @@ protected:
     virtual CARAPI_(void) HandleConfirmShortCode(
         /* [in] */ Boolean isPremium, SmsTracker* tracker);
 
-//    AutoPtr<SmsTracker> GetSmsTracker(IHashMap* data, IPendingIntent* sentIntent,
-//        IPendingIntent* deliveryIntent, String format, IAtomicInteger32* unsentPartCount,
-//        IAtomicBoolean* anyPartFailed, IUri* messageUri, ISmsHeader* smsHeader,
-//        Boolean isExpectMore, Int32 validityPeriod);
-//
-//    AutoPtr<SmsTracker> GetSmsTracker(IHashMap* data, IPendingIntent* sentIntent,
-//        IPendingIntent* deliveryIntent, String format, IUri* messageUri, Boolean isExpectMore);
-//
-//    AutoPtr<SmsTracker> GetSmsTracker(IHashMap* data, IPendingIntent* sentIntent,
-//        IPendingIntent* deliveryIntent, String format, IUri* messageUri, Boolean isExpectMore,
-//        Int32 validityPeriod);
+    virtual CARAPI_(AutoPtr<SmsTracker>) GetSmsTracker(
+        /* [in] */ IHashMap* data,
+        /* [in] */ IPendingIntent* sentIntent,
+        /* [in] */ IPendingIntent* deliveryIntent,
+        /* [in] */ const String& format,
+        /* [in] */ IAtomicInteger32* unsentPartCount,
+        /* [in] */ IAtomicBoolean* anyPartFailed,
+        /* [in] */ IUri* messageUri,
+        /* [in] */ ISmsHeader* smsHeader,
+        /* [in] */ Boolean isExpectMore,
+        /* [in] */ Int32 validityPeriod);
 
-//    AutoPtr<IHashMap> GetSmsTrackerMap(String destAddr, String scAddr,
-//        String text, SmsMessageBase::SubmitPduBase* pdu)
+    virtual CARAPI_(AutoPtr<SmsTracker>) GetSmsTracker(
+        /* [in] */ IHashMap* data,
+        /* [in] */ IPendingIntent* sentIntent,
+        /* [in] */ IPendingIntent* deliveryIntent,
+        /* [in] */ const String& format,
+        /* [in] */ IUri* messageUri,
+        /* [in] */ Boolean isExpectMore);
 
-//    AutoPtr<IHashMap> GetSmsTrackerMap(String destAddr, String scAddr,
-//        Int32 destPort, Int32 origPort, Byte[] data, SmsMessageBase.SubmitPduBase pdu);
+    virtual CARAPI_(AutoPtr<SmsTracker>) GetSmsTracker(
+        /* [in] */ IHashMap* data,
+        /* [in] */ IPendingIntent* sentIntent,
+        /* [in] */ IPendingIntent* deliveryIntent,
+        /* [in] */ const String& format,
+        /* [in] */ IUri* messageUri,
+        /* [in] */ Boolean isExpectMore,
+        /* [in] */ Int32 validityPeriod);
+
+    virtual CARAPI_(AutoPtr<IHashMap>) GetSmsTrackerMap(
+        /* [in] */ const String& destAddr,
+        /* [in] */ const String& scAddr,
+        /* [in] */ const String& text,
+        /* [in] */ SmsMessageBase::SubmitPduBase* pdu);
+
+    virtual CARAPI_(AutoPtr<IHashMap>) GetSmsTrackerMap(
+        /* [in] */ const String& destAddr,
+        /* [in] */ const String& scAddr,
+        /* [in] */ Int32 destPort,
+        /* [in] */ Int32 origPort,
+        /* [in] */ ArrayOf<Byte>* data,
+        /* [in] */ SmsMessageBase::SubmitPduBase* pdu);
 
     virtual CARAPI_(AutoPtr<IUri>) WriteOutboxMessage(
         /* [in] */ Int64 subId,

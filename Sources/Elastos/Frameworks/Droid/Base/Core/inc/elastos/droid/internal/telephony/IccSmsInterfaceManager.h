@@ -12,6 +12,8 @@ using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSmsBroadcastConfigInfo;
+using Elastos::Droid::Internal::Telephony::Gsm::ISmsBroadcastConfigInfo;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Net::IUri;
@@ -556,13 +558,13 @@ protected:
 
 private:
     CARAPI_(Boolean) SetCellBroadcastConfig(
-        /* [in] */ ArrayOf</*SmsBroadcastConfigInfo*/IInterface*>* configs);
+        /* [in] */ ArrayOf<ISmsBroadcastConfigInfo*>* configs);
 
     CARAPI_(Boolean) SetCellBroadcastActivation(
         /* [in] */ Boolean activate);
 
     CARAPI_(Boolean) SetCdmaBroadcastConfig(
-        /* [in] */ ArrayOf<IInterface*>/*CdmaSmsBroadcastConfigInfo[]*/* configs);
+        /* [in] */ ArrayOf<ICdmaSmsBroadcastConfigInfo*>* configs);
 
     CARAPI_(Boolean) SetCdmaBroadcastActivation(
         /* [in] */ Boolean activate);

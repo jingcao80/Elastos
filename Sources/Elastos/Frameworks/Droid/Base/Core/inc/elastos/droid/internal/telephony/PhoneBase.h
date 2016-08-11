@@ -61,6 +61,7 @@ class PhoneBase
     , public IPhone
     , public IPhoneBase
 {
+    friend class SMSDispatcher;
 protected:
     /**
      * Small container class used to hold information relevant to

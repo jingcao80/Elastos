@@ -313,8 +313,7 @@ void CdmaSMSDispatcher::SendSms(
     //         + " SS=" + mPhone.getServiceState().getState());
 
     // Send SMS via the carrier app.
-    AutoPtr<SMSDispatcherReceiver> resultReceiver = new SMSDispatcherReceiver();
-    resultReceiver->constructor(tracker);
+    AutoPtr<SMSDispatcherReceiver> resultReceiver = new SMSDispatcherReceiver(tracker, this);
 
     // Direct the intent to only the default carrier app.
     AutoPtr<IIntent> intent;

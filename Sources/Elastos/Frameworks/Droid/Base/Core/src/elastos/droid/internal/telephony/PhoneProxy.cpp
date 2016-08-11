@@ -1,10 +1,13 @@
 
 #include "elastos/droid/internal/telephony/PhoneProxy.h"
-#include "elastos/droid/internal/telephony/IccPhoneBookInterfaceManagerProxy.h"
+#include "elastos/droid/internal/telephony/cdma/CDMALTEPhone.h"
+#include "elastos/droid/internal/telephony/CCallManagerHelper.h"
+#include "elastos/droid/internal/telephony/CPhoneFactory.h"
 #include "elastos/droid/internal/telephony/CPhoneSubInfoProxy.h"
-#include "elastos/droid/internal/telephony/uicc/CIccCardProxy.h"
-#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/IccPhoneBookInterfaceManagerProxy.h"
 #include "elastos/droid/internal/telephony/IccSmsInterfaceManager.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/uicc/CIccCardProxy.h"
 #include "elastos/droid/telephony/CSubscriptionManager.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/content/CIntent.h"
@@ -30,6 +33,7 @@ using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Internal::Telephony::IccPhoneBookInterfaceManagerProxy;
 using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
 using Elastos::Droid::Internal::Telephony::Gsm::IGSMPhone;
+using Elastos::Droid::Internal::Telephony::Cdma::CDMALTEPhone;
 using Elastos::Droid::Internal::Telephony::Cdma::ICDMALTEPhone;
 using Elastos::Droid::Internal::Telephony::Uicc::CIccCardProxy;
 using Elastos::Droid::R;
@@ -368,8 +372,7 @@ void PhoneProxy::DeleteAndCreatePhone(
     Logd(str);
 
     AutoPtr<IPhoneFactory> pf;
-    assert(0 && "TODO");
-    // CPhoneFactory::AcquireSingleton((IPhoneFactory**)&pf);
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&pf);
     if (bCdma) {
         pf->GetCdmaPhone(mPhoneId, (IPhone**)&mActivePhone);
     }
@@ -382,8 +385,7 @@ void PhoneProxy::DeleteAndCreatePhone(
     }
 
     AutoPtr<ICallManagerHelper> cmhlp;
-    assert(0 && "TODO");
-    // CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmhlp);
+    CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmhlp);
     if (mActivePhone != NULL) {
         AutoPtr<ICallManager> cm;
         cmhlp->GetInstance((ICallManager**)&cm);
@@ -404,8 +406,7 @@ void PhoneProxy::DeleteAndCreatePhone(
         // Potential GC issues: however, callers may have references to old
         // phone on which they perform hierarchical funcs: phone->GetA()->GetB()
         // HENCE: do not delete references.
-        assert(0 && "TODO");
-        //oldPhone->RemoveReferences();
+        oldPhone->RemoveReferences();
     }
     oldPhone = NULL;
 }
@@ -1849,15 +1850,11 @@ ECode PhoneProxy::UpdateCurrentCarrierInProvider(
     VALIDATE_NOT_NULL(result)
     if (ICDMALTEPhone::Probe(mActivePhone) != NULL) {
         AutoPtr<ICDMALTEPhone> pPhone = ICDMALTEPhone::Probe(mActivePhone);
-        assert(0 && "TODO");
-        // return pPhone->UpdateCurrentCarrierInProvider(result);
-        return NOERROR;
+        return ((CDMALTEPhone*)pPhone.Get())->UpdateCurrentCarrierInProvider(result);
     }
     else if (IGSMPhone::Probe(mActivePhone) != NULL) {
         AutoPtr<IGSMPhone> pPhone = IGSMPhone::Probe(mActivePhone);
-        assert(0 && "TODO");
-        // return pPhone->UpdateCurrentCarrierInProvider(result);
-        return NOERROR;
+        return pPhone->UpdateCurrentCarrierInProvider(result);
     }
     else {
         Loge(String("Phone object is not MultiSim. This should not hit!!!!"));

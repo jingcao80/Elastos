@@ -144,7 +144,7 @@ public:
         /* [in] */ const String& packageName,
         /* [in] */ Int32 permission);
 
-    CARAPI MergeShortCodeCategories(
+    static CARAPI MergeShortCodeCategories(
         /* [in] */ Int32 type1,
         /* [in] */ Int32 type2,
         /* [in] */ Int32* result);
@@ -198,19 +198,7 @@ private:
     void Log(
         /* [in] */ const String& msg);
 
-private:
-    static const String TAG;
-    static const Boolean DBG;
-    static const Boolean VDBG;
-
-    static const String SHORT_CODE_PATH;
-
-    /** Default checking period for SMS sent without user permission. */
-    static const Int32 DEFAULT_SMS_CHECK_PERIOD;
-
-    /** Default number of SMS sent in checking period without user permission. */
-    static const Int32 DEFAULT_SMS_MAX_COUNT;
-
+public:
     /** Return value from {@link #checkDestination} for regular phone numbers. */
     static const Int32 CATEGORY_NOT_SHORT_CODE;
 
@@ -225,6 +213,19 @@ private:
 
     /** Return value from {@link #checkDestination} for premium short codes. */
     static const Int32 CATEGORY_PREMIUM_SHORT_CODE;
+
+private:
+    static const String TAG;
+    static const Boolean DBG;
+    static const Boolean VDBG;
+
+    static const String SHORT_CODE_PATH;
+
+    /** Default checking period for SMS sent without user permission. */
+    static const Int32 DEFAULT_SMS_CHECK_PERIOD;
+
+    /** Default number of SMS sent in checking period without user permission. */
+    static const Int32 DEFAULT_SMS_MAX_COUNT;
 
     Int32 mCheckPeriod;
     Int32 mMaxAllowed;

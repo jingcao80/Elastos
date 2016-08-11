@@ -24,6 +24,8 @@ class SmsMessage
     : public SmsMessageBase
     , public ISmsMessage
 {
+    friend class CGsmSMSDispatcher;
+
 public:
     class SubmitPdu
         : public SmsMessageBase::SubmitPduBase
