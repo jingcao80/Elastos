@@ -11,3 +11,4 @@ SOURCES += ViewUtil.cpp
 SOURCES += ContactListViewUtils.cpp
 SOURCES += SchedulingUtils.cpp
 SOURCES += TelephonyManagerUtils.cpp
+SOURCES += SearchUtil.cpp

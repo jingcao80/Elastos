@@ -22,7 +22,7 @@ public:
      *
      * @return null means don't show the status icon.
      */
-    static CARAPI_(String) GetPresenceIcon (
+    static CARAPI_(String) GetPresenceIcon(
         /* [in] */ IContext* context,
         /* [in] */ Int32 presence);
 

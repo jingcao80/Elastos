@@ -12,3 +12,4 @@ SOURCES += IndexerListAdapter.cpp
 SOURCES += PinnedHeaderListAdapter.cpp
 SOURCES += ContactEntryListAdapter.cpp
 SOURCES += DirectoryPartition.cpp
+SOURCES += PhoneNumberListAdapter.cpp

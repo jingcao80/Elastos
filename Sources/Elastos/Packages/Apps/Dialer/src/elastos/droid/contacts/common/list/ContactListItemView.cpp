@@ -1,5 +1,6 @@
 
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/contacts/common/ContactPresenceIconUtil.h"
 #include "elastos/droid/contacts/common/ContactStatusUtil.h"
 #include "elastos/droid/contacts/common/list/ContactListItemView.h"
@@ -33,6 +34,7 @@ using Elastos::Droid::Widget::ImageViewScaleType_FIT_CENTER;
 using Elastos::Droid::Widget::EIID_ISelectionBoundsAdjuster;
 using Elastos::Droid::Widget::CTextView;
 using Elastos::Droid::Widget::CImageView;
+using Elastos::Droid::Widget::ImageViewScaleType_CENTER;
 using Elastos::Core::CString;
 using Elastos::Core::Character;
 using Elastos::Core::StringBuilder;
@@ -1505,34 +1507,93 @@ AutoPtr<ArrayOf<String> > ContactListItemView::Split(
     }
     return tokens;
 }
-// begin from this
+
 void ContactListItemView::ShowData(
     /* [in] */ ICursor* cursor,
-    /* [in] */ Int32 dataColumnIndex);
+    /* [in] */ Int32 dataColumnIndex)
+{
+    cursor->CopyStringToBuffer(dataColumnIndex, mDataBuffer);
+    AutoPtr<ArrayOf<Char32> > data;
+    mDataBuffer->GetData((ArrayOf<Char32>**)&data);
+    Int32 sizeCopied;
+    mDataBuffer->GetSizeCopied(&sizeCopied);
+    SetData(data, sizeCopied);
+}
 
 void ContactListItemView::SetActivatedStateSupported(
-    /* [in] */ Boolean flag);
+    /* [in] */ Boolean flag)
+{
+    mActivatedStateSupported = flag;
+}
 
 void ContactListItemView::SetAdjustSelectionBoundsEnabled(
-    /* [in] */ Boolean enabled);
+    /* [in] */ Boolean enabled)
+{
+    mAdjustSelectionBoundsEnabled = enabled;
+}
 
-ECode ContactListItemView::RequestLayout();
+ECode ContactListItemView::RequestLayout()
+{
+    // We will assume that once measured this will not need to resize
+    // itself, so there is no need to pass the layout request to the parent
+    // view (ListView).
+    return ForceLayout();
+}
 
-void ContactListItemView::SetPhotoPosition(PhotoPosition photoPosition);
+void ContactListItemView::SetPhotoPosition(
+    /* [in] */ PhotoPosition photoPosition)
+{
+    mPhotoPosition = photoPosition;
+}
 
-PhotoPosition ContactListItemView::GetPhotoPosition();
+PhotoPosition ContactListItemView::GetPhotoPosition()
+{
+    return mPhotoPosition;
+}
 
 void ContactListItemView::SetDrawableResource(
     /* [in] */ Int32 backgroundId,
-    /* [in] */ Int32 drawableId);
+    /* [in] */ Int32 drawableId)
+{
+    AutoPtr<IImageView> photo = GetPhotoView();
+    photo->SetScaleType(ImageViewScaleType_CENTER);
+    IView::Probe(photo)->SetBackgroundResource(backgroundId);
+    photo->SetImageResource(drawableId);
+}
 
 ECode ContactListItemView::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* res);
+    /* [out] */ Boolean* res)
+{
+    valiVALIDATE_NOT_NULL(res)
+    Float x;
+    event->GetX(&x);
+    Float y;
+    event->GetY(&y);
+    // If the touch event's coordinates are not within the view's header, then delegate
+    // to super.onTouchEvent so that regular view behavior is preserved. Otherwise, consume
+    // and ignore the touch event.
+    Boolean contains;
+    if ((mBoundsWithoutHeader->Contains((Int32)x, (Int32)y, &contains), contains)
+            || !PointIsInView(x, y)) {
+        return ViewGroup::OnTouchEvent(event, res);
+    }
+    else {
+        *res = TRUE;
+        return NOERROR;
+    }
+}
 
 Boolean ContactListItemView::PointIsInView(
     /* [in] */ Float localX,
-    /* [in] */ Float localY);
+    /* [in] */ Float localY)
+{
+    Int32 bottom, top;
+    GetBottom(&bottom);
+    GetTop(&top);
+    return localX >= mLeftOffset && localX < mRightOffset
+                && localY >= 0 && localY < (bottom - top);
+}
 
 } // List
 } // Common

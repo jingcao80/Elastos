@@ -23,7 +23,7 @@ public:
      *
      * @return null means don't show the status icon.
      */
-    static CARAPI_(AutoPtr<IDrawable>) GetPresenceIcon (
+    static CARAPI_(AutoPtr<IDrawable>) GetPresenceIcon(
         /* [in] */ IContext* context,
         /* [in] */ Int32 status);
 };

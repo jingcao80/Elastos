@@ -6,6 +6,7 @@
 
 using Elastos::Droid::Content::ICursorLoader;
 using Elastos::Droid::Net::IUriBuilder;
+using Elastos::Utility::IList;
 
 namespace Elastos{
 namespace Droid{
@@ -26,6 +27,24 @@ class PhoneNumberListAdapter
     , public IPhoneNumberListAdapter
 {
 public:
+    class PhoneQuery
+    {
+    public:
+        static const AutoPtr<ArrayOf<String> > PROJECTION_PRIMARY;
+        static const AutoPtr<ArrayOf<String> > PROJECTION_ALTERNATIVE;
+
+        static const Int32 PHONE_ID                = 0;
+        static const Int32 PHONE_TYPE              = 1;
+        static const Int32 PHONE_LABEL             = 2;
+        static const Int32 PHONE_NUMBER            = 3;
+        static const Int32 CONTACT_ID              = 4;
+        static const Int32 LOOKUP_KEY              = 5;
+        static const Int32 PHOTO_ID                = 6;
+        static const Int32 DISPLAY_NAME            = 7;
+        static const Int32 PHOTO_URI               = 8;
+    };
+
+public:
     CAR_INTERFACE_DECL()
 
     PhoneNumberListAdapter();
@@ -45,7 +64,7 @@ public:
 
     CARAPI GetPhoneNumber(
         /* [in] */ Int32 position,
-        /* [out] */ String* displayName);
+        /* [out] */ String* displayNumber);
 
     /**
      * Builds a {@link Data#CONTENT_URI} for the given cursor position.
@@ -54,12 +73,12 @@ public:
      */
     CARAPI GetDataUri(
         /* [in] */ Int32 position,
-        /* [out] */ IUri* uri);
+        /* [out] */ IUri** uri);
 
     CARAPI GetDataUri(
         /* [in] */ Int32 partitionIndex,
         /* [in] */ ICursor* cursor,
-        /* [out] */ IUri* uri);
+        /* [out] */ IUri** uri);
 
     CARAPI SetPhotoPosition(
         /* [in] */ PhotoPosition photoPosition);
@@ -160,9 +179,8 @@ private:
         /* [in] */ IContactListFilter* filter);
 
 private:
-    static const String TAG; // = PhoneNumberListAdapter.class.getSimpleName();
-    static const String IGNORE_NUMBER_TOO_LONG_CLAUSE;// =
-            // "length(" + Phone.NUMBER + ") < 1000";
+    static const String TAG;
+    static const String IGNORE_NUMBER_TOO_LONG_CLAUSE;
 
     // A list of extended directories to add to the directories from the database
     AutoPtr<IList> mExtendedDirectories;
@@ -170,7 +188,7 @@ private:
     // Extended directories will have ID's that are higher than any of the id's from the database.
     // Thi sis so that we can identify them and set them up properly. If no extended directories
     // exist, this will be Long.MAX_VALUE
-    Int64 mFirstExtendedDirectoryId; // = Long.MAX_VALUE;
+    Int64 mFirstExtendedDirectoryId;
 
     AutoPtr<ICharSequence> mUnknownNameText;
     String mCountryIso;

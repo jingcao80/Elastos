@@ -3,10 +3,13 @@ TARGET_NAME= common
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += ../../../../../
 
 SOURCES += CallUtil.cpp
 SOURCES += GeoUtil.cpp
+SOURCES += ContactStatusUtil.cpp
+SOURCES += ContactPresenceIconUtil.cpp
 
 ELASTOS_LIBS += interactions/interactions.lib
 ELASTOS_LIBS += util/util.lib

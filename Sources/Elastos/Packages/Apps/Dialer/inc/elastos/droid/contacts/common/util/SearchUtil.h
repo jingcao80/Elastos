@@ -6,11 +6,6 @@
 
 using Elastos::Core::Object;
 
-using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Widget::IListView;
-using Elastos::Droid::View::IView;
-
 namespace Elastos {
 namespace Droid {
 namespace Contacts {
@@ -33,7 +28,7 @@ public:
             /* [out] */ String* str);
 
     public:
-        Int32 mStartIndex = -1;
+        Int32 mStartIndex;
         String mLine;
     };
 
@@ -47,7 +42,7 @@ public:
      * @return A MatchedLine object containing the matching line and the startIndex of the substring
      * match within that line.
      */
-    static CARAPI_(AutoPtr<MatchedLine> FindMatchingLine(
+    static CARAPI_(AutoPtr<MatchedLine>) FindMatchingLine(
         /* [in] */ const String& contents,
         /* [in] */ const String& substring);
 
