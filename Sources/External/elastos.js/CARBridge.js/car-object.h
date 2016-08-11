@@ -1,8 +1,13 @@
 #ifndef __CAR_BRIDGE_CAR_OBJECT_H
 # define __CAR_BRIDGE_CAR_OBJECT_H
 
-# include <stddef.h>
-# include <stdint.h>
+# include <cstddef>
+# include <cstdint>
+
+# include <functional>
+# include <map>
+# include <memory>
+# include <set>
 
 # include <node.h>
 
@@ -15,10 +20,6 @@
 # include "nan-ext.h"
 
 # include "car-function-adapter.h"
-# include "function.h"
-# include "map.h"
-# include "set.h"
-# include "unique-ptr.h"
 
 
 
@@ -46,7 +47,7 @@ public:
 
 private:
     template<class T>
-    struct Less: BinaryFunction<CopyablePersistent<T>, CopyablePersistent<T>, Boolean> {
+    struct Less: ::std::binary_function<CopyablePersistent<T>, CopyablePersistent<T>, bool> {
         bool operator()(CopyablePersistent<T> const &x, CopyablePersistent<T> const &y) const
         {
             ::v8::internal::Object **_x;
@@ -64,8 +65,10 @@ private:
         }
     };
 
-    typedef Map<CopyablePersistent<::v8::Function>, UniquePtr<CARFunctionAdapter>, Less<::v8::Function>> MF2CARFA;
-    typedef Map<CopyablePersistent<::v8::String>, MF2CARFA, Less<::v8::String>> MS2MF2CARFA;
+    typedef ::std::map<CopyablePersistent<::v8::Function>,
+            ::std::unique_ptr<CARFunctionAdapter>,
+            Less<::v8::Function>> MF2CARFA;
+    typedef ::std::map<CopyablePersistent<::v8::String>, MF2CARFA, Less<::v8::String>> MS2MF2CARFA;
 
     typedef CARObject *(*Constructor)(size_t argc, ::v8::Local<::v8::Value> argv[], ::v8::Local<::v8::Value> data);
 
@@ -77,7 +80,7 @@ private:
 
     MS2MF2CARFA _mapNameToMapListenerToCARFunctionAdapter;
 
-    Set<uintptr_t> _connectionIds;
+    ::std::set<uintptr_t> _connectionIds;
 
     static NAN_METHOD(On);
 

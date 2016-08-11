@@ -1,6 +1,9 @@
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
+
+#include <map>
+#include <string>
 
 #include <node.h>
 
@@ -15,10 +18,10 @@
 #include "car-data-type.h"
 #include "error.h"
 #include "js-2-car.h"
-#include "map.h"
-#include "string.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -30,7 +33,7 @@ _ELASTOS_NAMESPACE_USING
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
-static Map<AutoPtr<IFunctionInfo const>, CopyablePersistent<Object>> _mapFunctionInfoToCARFunction;
+static map<AutoPtr<IFunctionInfo const>, CopyablePersistent<Object>> _mapFunctionInfoToCARFunction;
 
 static Local<Object> _CARFunction(IFunctionInfo const *functionInfo, char const *what)
 {
@@ -228,7 +231,7 @@ static Local<Object> _CARFunction(size_t nFunctionInfos, IFunctionInfo const *fu
 
     DefineOwnProperty(functionCandidates,
             New("$what").ToLocalChecked(),
-            New(String(what) + "+").ToLocalChecked(),
+            New(string(what) + "+").ToLocalChecked(),
             static_cast<enum PropertyAttribute>(ReadOnly | DontDelete | DontEnum));
 
     DefineOwnProperty(functionCandidates,

@@ -1,4 +1,8 @@
 
+#include <map>
+#include <memory>
+#include <new>
+
 #include <node.h>
 
 #include <nan.h>
@@ -11,12 +15,11 @@
 
 #include "car-module.h"
 #include "error.h"
-#include "map.h"
-#include "new.h"
-#include "unique-ptr.h"
 #include "weak-external-base.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -70,15 +73,13 @@ done:
     }
 }
 
-static Map<AutoPtr<IModuleInfo const>, CopyablePersistent<ObjectTemplate>> _mapModuleInfoToCARImportedModule;
+static map<AutoPtr<IModuleInfo const>, CopyablePersistent<ObjectTemplate>> _mapModuleInfoToCARImportedModule;
 
 Local<ObjectTemplate> CARImportedModuleTemplate(IModuleInfo const *moduleInfo)
 {
     ::Nan::EscapableHandleScope scope;
 
     Local<FunctionTemplate> importedModuleClassTemplate;
-
-    UniquePtr<struct _ModuleInfo, &_ModuleInfo::Delete<struct _ModuleInfo>> _moduleInfo;
 
     Local<ObjectTemplate> importedModuleTemplate;
 
@@ -90,7 +91,7 @@ Local<ObjectTemplate> CARImportedModuleTemplate(IModuleInfo const *moduleInfo)
 
     importedModuleClassTemplate = New<FunctionTemplate>();
 
-    _moduleInfo = new(NO_THROW) struct _ModuleInfo;
+    unique_ptr<struct _ModuleInfo, _ModuleInfo::Deleter> _moduleInfo(new(nothrow) struct _ModuleInfo);
     if (_moduleInfo == nullptr)
         throw Error(Error::NO_MEMORY, "");
 
@@ -99,7 +100,7 @@ Local<ObjectTemplate> CARImportedModuleTemplate(IModuleInfo const *moduleInfo)
     SetPrototypeTemplate(importedModuleClassTemplate,
             New(".__module__").ToLocalChecked(),
             _moduleInfo->self(),
-            static_cast<enum PropertyAttribute>(ReadOnly | DontDelete | DontEnum));
+            static_cast<enum PropertyAttribute>(ReadOnly | DontDelete | DontEnum)), _moduleInfo.release();
 
     SetPrototypeMethod(importedModuleClassTemplate,
             "$unfold",
@@ -111,8 +112,6 @@ Local<ObjectTemplate> CARImportedModuleTemplate(IModuleInfo const *moduleInfo)
     _importedModuleTemplate.Reset(importedModuleTemplate);
 
     escapedImportedModuleTemplate = scope.Escape(importedModuleTemplate);
-
-    _moduleInfo.Release();
 
     return escapedImportedModuleTemplate;
 }

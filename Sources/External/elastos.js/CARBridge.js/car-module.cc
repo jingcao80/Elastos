@@ -1,5 +1,7 @@
 
-#include <stdio.h>
+#include <cstdio>
+
+#include <map>
 
 #include <node.h>
 
@@ -20,9 +22,10 @@
 #include "car-type-alias.h"
 #include "error.h"
 #include "js-2-car.h"
-#include "map.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -34,7 +37,7 @@ _ELASTOS_NAMESPACE_USING
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
-static Map<AutoPtr<IModuleInfo const>, CopyablePersistent<ObjectTemplate>> _mapModuleInfoToCARModule;
+static map<AutoPtr<IModuleInfo const>, CopyablePersistent<ObjectTemplate>> _mapModuleInfoToCARModule;
 
 Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
 {

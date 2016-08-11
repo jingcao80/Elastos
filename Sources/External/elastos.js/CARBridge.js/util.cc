@@ -1,4 +1,11 @@
 
+#include <cstddef>
+
+#include <memory>
+#include <new>
+#include <string>
+#include <unordered_map>
+
 #include <node.h>
 
 #include <nan.h>
@@ -11,13 +18,11 @@
 
 #include "error.h"
 #include "js-2-car.h"
-#include "map.h"
-#include "new.h"
-#include "pair.h"
-#include "unique-ptr.h"
 #include "weak-external-base.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -30,7 +35,35 @@ _ELASTOS_NAMESPACE_USING
 CAR_BRIDGE_NAMESPACE_BEGIN
 
 struct _Aspects: WeakExternalBase {
-    Map<ClassID const *, AutoPtr<IAspect>> mapIdToAspect;
+    struct Hash: __hash_base<size_t, ClassID> {
+        size_t operator()(ClassID const &id) const
+        {
+            size_t value;
+
+            value = hash<UInt32>()(id.mClsid.mData1);
+
+            value <<= 1;
+            value ^= hash<UInt16>()(id.mClsid.mData2);
+
+            value <<= 1;
+            value ^= hash<UInt16>()(id.mClsid.mData3);
+
+            for (size_t i = 0; i < 8; ++i) {
+                value <<= 1;
+                value ^= hash<UInt8>()(id.mClsid.mData4[i]);
+            }
+
+            value <<= 1;
+            value ^= hash<string>()(id.mUunm);
+
+            value <<= 1;
+            value ^= hash<UInt32>()(id.mCarcode);
+
+            return value;
+        }
+    };
+
+    unordered_map<ClassID, AutoPtr<IAspect>, Hash> mapIdToAspect;
 
 private:
     ~_Aspects() = default;
@@ -56,7 +89,7 @@ IInterface *Probe(Local<Object> object, EIID const &iid)
             (struct _Aspects *)
             Get(object, New(".__attachedAspects__").ToLocalChecked()).ToLocalChecked().As<External>()->Value();
 
-        for (auto it = aspects->mapIdToAspect.Begin(), end = aspects->mapIdToAspect.End(); it != end; ++it) {
+        for (auto it = aspects->mapIdToAspect.begin(), end = aspects->mapIdToAspect.end(); it != end; ++it) {
             IInterface *interface_;
 
             interface_ = it->second->Probe(iid);
@@ -101,9 +134,7 @@ void AttachAspect(Local<Object> object, ClassID const &aspectId)
         struct _Aspects *aspects;
 
         if (!Has(object, New(".__attachedAspects__").ToLocalChecked()).FromJust()) {
-            UniquePtr<struct _Aspects, &_Aspects::Delete<struct _Aspects>> _aspects;
-
-            _aspects = new(NO_THROW) struct _Aspects;
+            unique_ptr<struct _Aspects, _Aspects::Deleter> _aspects(new(nothrow) struct _Aspects);
             if (_aspects == nullptr)
                 throw Error(Error::NO_MEMORY, "");
 
@@ -112,13 +143,13 @@ void AttachAspect(Local<Object> object, ClassID const &aspectId)
                     _aspects->self(),
                     static_cast<enum PropertyAttribute>(ReadOnly | DontDelete | DontEnum));
 
-            aspects = _aspects.Release();
+            aspects = _aspects.release();
         } else
             aspects =
                 (struct _Aspects *)
                 Get(object, New(".__attachedAspects__").ToLocalChecked()).ToLocalChecked().As<External>()->Value();
 
-        aspects->mapIdToAspect[&aspectId] = aspect;
+        aspects->mapIdToAspect[aspectId] = aspect;
     }
 }
 
@@ -153,7 +184,7 @@ void DetachAspect(Local<Object> object, ClassID const &aspectId)
             (struct _Aspects *)
             Get(object, New(".__attachedAspects__").ToLocalChecked()).ToLocalChecked().As<External>()->Value();
 
-        aspects->mapIdToAspect.Erase(&aspectId);
+        aspects->mapIdToAspect.erase(aspectId);
     }
 }
 

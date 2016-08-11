@@ -28,7 +28,6 @@
         "error.cc",
         "js-2-car.cc",
         "libc-ext.cc",
-        "new.cc",
         "parse-uri.cc",
         "require.cc",
         "this.cc",

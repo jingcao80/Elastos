@@ -1,8 +1,8 @@
 #ifndef __CAR_BRIDGE_REQUIRE_H
 # define __CAR_BRIDGE_REQUIRE_H
 
-# include <stddef.h>
-# include <stdint.h>
+# include <cstddef>
+# include <cstdint>
 
 # include <node.h>
 

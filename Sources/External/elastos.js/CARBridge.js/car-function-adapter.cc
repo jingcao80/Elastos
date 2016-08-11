@@ -1,6 +1,9 @@
 
-#include <stdarg.h>
-#include <stddef.h>
+#include <cstdarg>
+#include <cstddef>
+
+#include <memory>
+#include <new>
 
 #include <node.h>
 
@@ -19,10 +22,10 @@
 #include "car-arguments.h"
 #include "error.h"
 #include "js-2-car.h"
-#include "new.h"
-#include "unique-ptr.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -523,22 +526,18 @@ static Local<Value> _CalleeAllocOutputArgumentOfCARArray(ICarArrayInfo const *ca
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CalleeAllocCARArray, &CalleeAllocCARArray::Delete<struct CalleeAllocCARArray>> carArray;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
-
-    carArray = CalleeAllocCARArray_(carArrayInfo, carQuintet);
-
-    escapedArgument = scope.Escape(
-            _CalleeAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(carArrayInfo),
-                _GetCalleeAllocOutputArgumentOfCARArray,
-                _SetCalleeAllocOutputArgumentOfCARArray,
-                carArray->self())
+    unique_ptr<struct CalleeAllocCARArray, CalleeAllocCARArray::Deleter> carArray(
+            CalleeAllocCARArray_(carArrayInfo, carQuintet)
             );
 
-    carArray.Release();
+    argument = _CalleeAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(carArrayInfo),
+            _GetCalleeAllocOutputArgumentOfCARArray,
+            _SetCalleeAllocOutputArgumentOfCARArray,
+            carArray->self()), carArray.release();
 
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -569,19 +568,17 @@ static NAN_SETTER(_SetCalleeAllocOutputArgumentOfStruct)
 
             MemorySize size;
 
-            UniquePtr<void> _struct;
-
             ec = struct_->structInfo->GetSize(&size);
             if (FAILED(ec))
                 throw Error(Error::TYPE_ELASTOS, ec, "");
 
-            _struct = operator new(size, NO_THROW);
+            unique_ptr<void> _struct(operator new(size, nothrow));
             if (_struct == nullptr)
                 throw Error(Error::NO_MEMORY, "");
 
-            ToStruct(struct_->structInfo, _struct, value);
+            ToStruct(struct_->structInfo, _struct.get(), value);
 
-            *struct_->struct_ = _struct;
+            *struct_->struct_ = _struct.release();
         }
 
         struct_->value.Reset(value);
@@ -600,22 +597,16 @@ static Local<Value> _CalleeAllocOutputArgumentOfStruct(IStructInfo const *struct
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CalleeAllocStruct, &CalleeAllocStruct::Delete<struct CalleeAllocStruct>> _struct;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CalleeAllocStruct, CalleeAllocStruct::Deleter> _struct(CalleeAllocStruct_(structInfo, struct_));
 
-    _struct = CalleeAllocStruct_(structInfo, struct_);
+    argument = _CalleeAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(structInfo),
+            _GetCalleeAllocOutputArgumentOfStruct,
+            _SetCalleeAllocOutputArgumentOfStruct,
+            _struct->self()), _struct.release();
 
-    escapedArgument = scope.Escape(
-            _CalleeAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(structInfo),
-                _GetCalleeAllocOutputArgumentOfStruct,
-                _SetCalleeAllocOutputArgumentOfStruct,
-                _struct->self())
-            );
-
-    _struct.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -739,22 +730,16 @@ static Local<Value> _CallerAllocOutputArgumentOfInt16(Int16 *i16)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocInt16, &CallerAllocInt16::Delete<struct CallerAllocInt16>> _i16;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocInt16, CallerAllocInt16::Deleter> _i16(CallerAllocInt16_(i16));
 
-    _i16 = CallerAllocInt16_(i16);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("Int16"),
+            _GetCallerAllocOutputArgumentOfInt16,
+            _SetCallerAllocOutputArgumentOfInt16,
+            _i16->self()), _i16.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("Int16"),
-                _GetCallerAllocOutputArgumentOfInt16,
-                _SetCallerAllocOutputArgumentOfInt16,
-                _i16->self())
-            );
-
-    _i16.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -820,22 +805,16 @@ static Local<Value> _CallerAllocOutputArgumentOfInt32(_ELASTOS Int32 *i32)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocInt32, &CallerAllocInt32::Delete<struct CallerAllocInt32>> _i32;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocInt32, CallerAllocInt32::Deleter> _i32(CallerAllocInt32_(i32));
 
-    _i32 = CallerAllocInt32_(i32);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("Int32"),
+            _GetCallerAllocOutputArgumentOfInt32,
+            _SetCallerAllocOutputArgumentOfInt32,
+            _i32->self()), _i32.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("Int32"),
-                _GetCallerAllocOutputArgumentOfInt32,
-                _SetCallerAllocOutputArgumentOfInt32,
-                _i32->self())
-            );
-
-    _i32.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -901,22 +880,16 @@ static Local<Value> _CallerAllocOutputArgumentOfInt64(Int64 *i64)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocInt64, &CallerAllocInt64::Delete<struct CallerAllocInt64>> _i64;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocInt64, CallerAllocInt64::Deleter> _i64(CallerAllocInt64_(i64));
 
-    _i64 = CallerAllocInt64_(i64);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("Int64"),
+            _GetCallerAllocOutputArgumentOfInt64,
+            _SetCallerAllocOutputArgumentOfInt64,
+            _i64->self()), _i64.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("Int64"),
-                _GetCallerAllocOutputArgumentOfInt64,
-                _SetCallerAllocOutputArgumentOfInt64,
-                _i64->self())
-            );
-
-    _i64.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -982,22 +955,16 @@ static Local<Value> _CallerAllocOutputArgumentOfByte(Byte *byte)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocByte, &CallerAllocByte::Delete<struct CallerAllocByte>> _byte;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocByte, CallerAllocByte::Deleter> _byte(CallerAllocByte_(byte));
 
-    _byte = CallerAllocByte_(byte);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("Byte"),
+            _GetCallerAllocOutputArgumentOfByte,
+            _SetCallerAllocOutputArgumentOfByte,
+            _byte->self()), _byte.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("Byte"),
-                _GetCallerAllocOutputArgumentOfByte,
-                _SetCallerAllocOutputArgumentOfByte,
-                _byte->self())
-            );
-
-    _byte.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1063,22 +1030,16 @@ static Local<Value> _CallerAllocOutputArgumentOfFloat(Float *f)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocFloat, &CallerAllocFloat::Delete<struct CallerAllocFloat>> _f;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocFloat, CallerAllocFloat::Deleter> _f(CallerAllocFloat_(f));
 
-    _f = CallerAllocFloat_(f);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("Float"),
+            _GetCallerAllocOutputArgumentOfFloat,
+            _SetCallerAllocOutputArgumentOfFloat,
+            _f->self()), _f.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("Float"),
-                _GetCallerAllocOutputArgumentOfFloat,
-                _SetCallerAllocOutputArgumentOfFloat,
-                _f->self())
-            );
-
-    _f.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1144,22 +1105,16 @@ static Local<Value> _CallerAllocOutputArgumentOfDouble(Double *d)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocDouble, &CallerAllocDouble::Delete<struct CallerAllocDouble>> _d;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocDouble, CallerAllocDouble::Deleter> _d(CallerAllocDouble_(d));
 
-    _d = CallerAllocDouble_(d);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("Double"),
+            _GetCallerAllocOutputArgumentOfDouble,
+            _SetCallerAllocOutputArgumentOfDouble,
+            _d->self()), _d.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("Double"),
-                _GetCallerAllocOutputArgumentOfDouble,
-                _SetCallerAllocOutputArgumentOfDouble,
-                _d->self())
-            );
-
-    _d.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1225,22 +1180,16 @@ static Local<Value> _CallerAllocOutputArgumentOfChar32(Char32 *c32)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocChar32, &CallerAllocChar32::Delete<struct CallerAllocChar32>> _c32;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocChar32, CallerAllocChar32::Deleter> _c32(CallerAllocChar32_(c32));
 
-    _c32 = CallerAllocChar32_(c32);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("Char32"),
+            _GetCallerAllocOutputArgumentOfChar32,
+            _SetCallerAllocOutputArgumentOfChar32,
+            _c32->self()), _c32.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("Char32"),
-                _GetCallerAllocOutputArgumentOfChar32,
-                _SetCallerAllocOutputArgumentOfChar32,
-                _c32->self())
-            );
-
-    _c32.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1306,22 +1255,16 @@ static Local<Value> _CallerAllocOutputArgumentOfString(_ELASTOS String *s)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocString, &CallerAllocString::Delete<struct CallerAllocString>> _s;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocString, CallerAllocString::Deleter> _s(CallerAllocString_(s));
 
-    _s = CallerAllocString_(s);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("String"),
+            _GetCallerAllocOutputArgumentOfString,
+            _SetCallerAllocOutputArgumentOfString,
+            _s->self()), _s.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("String"),
-                _GetCallerAllocOutputArgumentOfString,
-                _SetCallerAllocOutputArgumentOfString,
-                _s->self())
-            );
-
-    _s.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1387,22 +1330,16 @@ static Local<Value> _CallerAllocOutputArgumentOfBoolean(_ELASTOS Boolean *b)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocBoolean, &CallerAllocBoolean::Delete<struct CallerAllocBoolean>> _b;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocBoolean, CallerAllocBoolean::Deleter> _b(CallerAllocBoolean_(b));
 
-    _b = CallerAllocBoolean_(b);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("Boolean"),
+            _GetCallerAllocOutputArgumentOfBoolean,
+            _SetCallerAllocOutputArgumentOfBoolean,
+            _b->self()), _b.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("Boolean"),
-                _GetCallerAllocOutputArgumentOfBoolean,
-                _SetCallerAllocOutputArgumentOfBoolean,
-                _b->self())
-            );
-
-    _b.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1468,22 +1405,16 @@ static Local<Value> _CallerAllocOutputArgumentOfEMuid(EMuid *id)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocEMuid, &CallerAllocEMuid::Delete<struct CallerAllocEMuid>> _id;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocEMuid, CallerAllocEMuid::Deleter> _id(CallerAllocEMuid_(id));
 
-    _id = CallerAllocEMuid_(id);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("EMuid"),
+            _GetCallerAllocOutputArgumentOfEMuid,
+            _SetCallerAllocOutputArgumentOfEMuid,
+            _id->self()), _id.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("EMuid"),
-                _GetCallerAllocOutputArgumentOfEMuid,
-                _SetCallerAllocOutputArgumentOfEMuid,
-                _id->self())
-            );
-
-    _id.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1549,22 +1480,16 @@ static Local<Value> _CallerAllocOutputArgumentOfEGuid(EGuid *id)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocEGuid, &CallerAllocEGuid::Delete<struct CallerAllocEGuid>> _id;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocEGuid, CallerAllocEGuid::Deleter> _id(CallerAllocEGuid_(id));
 
-    _id = CallerAllocEGuid_(id);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("EGuid"),
+            _GetCallerAllocOutputArgumentOfEGuid,
+            _SetCallerAllocOutputArgumentOfEGuid,
+            _id->self()), _id.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("EGuid"),
-                _GetCallerAllocOutputArgumentOfEGuid,
-                _SetCallerAllocOutputArgumentOfEGuid,
-                _id->self())
-            );
-
-    _id.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1630,22 +1555,16 @@ static Local<Value> _CallerAllocOutputArgumentOfECode(ECode *ecode)
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocECode, &CallerAllocECode::Delete<struct CallerAllocECode>> _ecode;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocECode, CallerAllocECode::Deleter> _ecode(CallerAllocECode_(ecode));
 
-    _ecode = CallerAllocECode_(ecode);
+    argument = _CallerAllocOutputArgumentOf(_ELASTOS String("ECode"),
+            _GetCallerAllocOutputArgumentOfECode,
+            _SetCallerAllocOutputArgumentOfECode,
+            _ecode->self()), _ecode.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(_ELASTOS String("ECode"),
-                _GetCallerAllocOutputArgumentOfECode,
-                _SetCallerAllocOutputArgumentOfECode,
-                _ecode->self())
-            );
-
-    _ecode.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1711,22 +1630,16 @@ static Local<Value> _CallerAllocOutputArgumentOfLocalPtr(ILocalPtrInfo const *lo
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocLocalPtr, &CallerAllocLocalPtr::Delete<struct CallerAllocLocalPtr>> _localPtr;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocLocalPtr, CallerAllocLocalPtr::Deleter> _localPtr(CallerAllocLocalPtr_(localPtr));
 
-    _localPtr = CallerAllocLocalPtr_(localPtr);
+    argument = _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(localPtrInfo),
+            _GetCallerAllocOutputArgumentOfLocalPtr,
+            _SetCallerAllocOutputArgumentOfLocalPtr,
+            _localPtr->self()), _localPtr.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(localPtrInfo),
-                _GetCallerAllocOutputArgumentOfLocalPtr,
-                _SetCallerAllocOutputArgumentOfLocalPtr,
-                _localPtr->self())
-            );
-
-    _localPtr.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1794,23 +1707,18 @@ static Local<Value> _CallerAllocOutputArgumentOfLocalType(IDataTypeInfo const *d
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocLocalType, &CallerAllocLocalType::Delete<struct CallerAllocLocalType>>
-        _localTypeObject;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
-
-    _localTypeObject = CallerAllocLocalType_(dataTypeInfo, localTypeObject);
-
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(dataTypeInfo,
-                _GetCallerAllocOutputArgumentOfLocalType,
-                _SetCallerAllocOutputArgumentOfLocalType,
-                _localTypeObject->self())
+    unique_ptr<struct CallerAllocLocalType, CallerAllocLocalType::Deleter> _localTypeObject(
+            CallerAllocLocalType_(dataTypeInfo, localTypeObject)
             );
 
-    _localTypeObject.Release();
+    argument = _CallerAllocOutputArgumentOf(dataTypeInfo,
+            _GetCallerAllocOutputArgumentOfLocalType,
+            _SetCallerAllocOutputArgumentOfLocalType,
+            _localTypeObject->self()), _localTypeObject.release();
 
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1878,22 +1786,16 @@ static Local<Value> _CallerAllocOutputArgumentOfEnum(IEnumInfo const *enumInfo, 
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocEnum, &CallerAllocEnum::Delete<struct CallerAllocEnum>> _enum;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
+    unique_ptr<struct CallerAllocEnum, CallerAllocEnum::Deleter> _enum(CallerAllocEnum_(enum_));
 
-    _enum = CallerAllocEnum_(enum_);
+    argument = _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(enumInfo),
+            _GetCallerAllocOutputArgumentOfEnum,
+            _SetCallerAllocOutputArgumentOfEnum,
+            _enum->self()), _enum.release();
 
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(enumInfo),
-                _GetCallerAllocOutputArgumentOfEnum,
-                _SetCallerAllocOutputArgumentOfEnum,
-                _enum->self())
-            );
-
-    _enum.Release();
-
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -1989,9 +1891,7 @@ static Local<Value> _CallerAllocOutputArgumentOfCARArray(ICarArrayInfo const *ca
     AutoPtr<IVariableOfCarArray> variableOfCARArray;
     IVariableOfCarArray *_variableOfCARArray;
 
-    UniquePtr<struct CallerAllocCARArray, &CallerAllocCARArray::Delete<struct CallerAllocCARArray>> carArray;
-
-    Local<Value> escapedArgument;
+    Local<Value> argument;
 
     ec = carArrayInfo->CreateVariableBox(carQuintet, &_variableOfCARArray);
     if (FAILED(ec))
@@ -1999,18 +1899,16 @@ static Local<Value> _CallerAllocOutputArgumentOfCARArray(ICarArrayInfo const *ca
 
     variableOfCARArray = _variableOfCARArray, _variableOfCARArray->Release();
 
-    carArray = CallerAllocCARArray_(carArrayInfo, variableOfCARArray);
-
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(carArrayInfo),
-                _GetCallerAllocOutputArgumentOfCARArray,
-                _SetCallerAllocOutputArgumentOfCARArray,
-                carArray->self())
+    unique_ptr<struct CallerAllocCARArray, CallerAllocCARArray::Deleter> carArray(
+            CallerAllocCARArray_(carArrayInfo, variableOfCARArray)
             );
 
-    carArray.Release();
+    argument = _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(carArrayInfo),
+            _GetCallerAllocOutputArgumentOfCARArray,
+            _SetCallerAllocOutputArgumentOfCARArray,
+            carArray->self()), carArray.release();
 
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -2106,9 +2004,7 @@ static Local<Value> _CallerAllocOutputArgumentOfStruct(IStructInfo const *struct
     AutoPtr<IVariableOfStruct> variableOfStruct;
     IVariableOfStruct *_variableOfStruct;
 
-    UniquePtr<struct CallerAllocStruct, &CallerAllocStruct::Delete<struct CallerAllocStruct>> _struct;
-
-    Local<Value> escapedArgument;
+    Local<Value> argument;
 
     ec = structInfo->CreateVariableBox(struct_, &_variableOfStruct);
     if (FAILED(ec))
@@ -2116,18 +2012,16 @@ static Local<Value> _CallerAllocOutputArgumentOfStruct(IStructInfo const *struct
 
     variableOfStruct = _variableOfStruct, _variableOfStruct->Release();
 
-    _struct = CallerAllocStruct_(structInfo, variableOfStruct);
-
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(structInfo),
-                _GetCallerAllocOutputArgumentOfStruct,
-                _SetCallerAllocOutputArgumentOfStruct,
-                _struct->self())
+    unique_ptr<struct CallerAllocStruct, CallerAllocStruct::Deleter> _struct(
+            CallerAllocStruct_(structInfo, variableOfStruct)
             );
 
-    _struct.Release();
+    argument = _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(structInfo),
+            _GetCallerAllocOutputArgumentOfStruct,
+            _SetCallerAllocOutputArgumentOfStruct,
+            _struct->self()), _struct.release();
 
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -2194,22 +2088,18 @@ static Local<Value> _CallerAllocOutputArgumentOfInterface(IInterfaceInfo const *
 {
     ::Nan::EscapableHandleScope scope;
 
-    UniquePtr<struct CallerAllocInterface, &CallerAllocInterface::Delete<struct CallerAllocInterface>> _interface;
+    Local<Value> argument;
 
-    Local<Value> escapedArgument;
-
-    _interface = CallerAllocInterface_(interfaceInfo, interface_);
-
-    escapedArgument = scope.Escape(
-            _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(interfaceInfo),
-                _GetCallerAllocOutputArgumentOfInterface,
-                _SetCallerAllocOutputArgumentOfInterface,
-                _interface->self())
+    unique_ptr<struct CallerAllocInterface, CallerAllocInterface::Deleter> _interface(
+            CallerAllocInterface_(interfaceInfo, interface_)
             );
 
-    _interface.Release();
+    argument = _CallerAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(interfaceInfo),
+            _GetCallerAllocOutputArgumentOfInterface,
+            _SetCallerAllocOutputArgumentOfInterface,
+            _interface->self()), _interface.release();
 
-    return escapedArgument;
+    return scope.Escape(argument);
 }
 
 template<class T>
@@ -2367,12 +2257,18 @@ static void _SetArgumentOf(IParamInfo const *paramInfo, size_t argc, Local<Value
         _SetCallerAllocOutputArgumentOf(dataTypeInfo, argc, argv, index, ap);
 }
 
-static void _SetArgumentOf(IParamInfo const *paramInfo, size_t argc, Local<Value> argv[], size_t index, va_list ap)
+void CARFunctionAdapter::SetArgumentOf(IParamInfo const *paramInfo,
+        size_t argc, Local<Value> argv[],
+        size_t index,
+        va_list ap)
 {
     _SetArgumentOf<va_list>(paramInfo, argc, argv, index, ap);
 }
 
-static void _SetArgumentOf(IParamInfo const *paramInfo, size_t argc, Local<Value> argv[], size_t index, void *ap)
+void CARFunctionAdapter::SetArgumentOf(IParamInfo const *paramInfo,
+        size_t argc, Local<Value> argv[],
+        size_t index,
+        void *ap)
 {
     _SetArgumentOf<void *>(paramInfo, argc, argv, index, ap);
 }
@@ -2434,7 +2330,6 @@ ECode CARFunctionAdapter::Call(Local<Function> function, Local<Value> receiver,
         ArrayOf<IParamInfo const *> *_paramInfos;
 
         size_t argc;
-        UniquePtr<Local<Value> []> argv;
 
         ec = functionInfo->GetParamCount(&nParams);
         if (FAILED(ec))
@@ -2451,14 +2346,14 @@ ECode CARFunctionAdapter::Call(Local<Function> function, Local<Value> receiver,
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
         argc = nParams;
-        argv = new(NO_THROW) Local<Value>[argc];
+        unique_ptr<Local<Value> []> argv(new(nothrow) Local<Value>[argc]);
         if (argv == nullptr)
             throw Error(Error::NO_MEMORY, "");
 
         for (size_t i = 0; i < argc; ++i)
-            _SetArgumentOf((*paramInfos)[i], argc, argv, i, ap);
+            SetArgumentOf((*paramInfos)[i], argc, argv.get(), i, ap);
 
-        _CallFunction(function, receiver, argc, argv);
+        _CallFunction(function, receiver, argc, argv.get());
     } catch (Error const &error) {
         return ToECode(error);
     } catch (...) {
@@ -2506,22 +2401,6 @@ ECode CARFunctionAdapter::operator()(void) noexcept
     return Call();
 }
 
-template<class T>
-ECode CARFunctionAdapter::operator()(T firstArgument, ...) noexcept
-{
-    va_list ap;
-
-    ECode ec;
-
-    va_start(ap, firstArgument);
-
-    ec = Call(firstArgument, ap);
-
-    va_end(ap);
-
-    return ec;
-}
-
 Local<Value> CARFunctionAdapter::CallFunction(size_t argc, Local<Value> argv[])
 {
     ::Nan::EscapableHandleScope scope;
@@ -2556,67 +2435,22 @@ ECode CARFunctionAdapter::Call(void) noexcept
     return NO_ERROR;
 }
 
-template<class T>
-ECode CARFunctionAdapter::Call(T firstArgument, ...) noexcept
-{
-    va_list ap;
-
-    ECode ec;
-
-    va_start(ap, firstArgument);
-
-    ec = Call(firstArgument, ap);
-
-    va_end(ap);
-
-    return ec;
-}
-
-template<class T>
-ECode CARFunctionAdapter::Call(T firstArgument, va_list ap) noexcept
-{
-    try {
-        ::Nan::HandleScope scope;
-
-        size_t argc;
-        UniquePtr<Local<Value> []> argv;
-
-        argc = _paramInfos->GetLength();
-        argv = new(NO_THROW) Local<Value>[argc];
-        if (argv == nullptr)
-            throw Error(Error::NO_MEMORY, "");
-
-        _SetArgumentOf((*_paramInfos)[0], argc, argv, 0, &firstArgument);
-        for (size_t i = 1; i < argc; ++i)
-            _SetArgumentOf((*_paramInfos)[i], argc, argv, i, ap);
-
-        CallFunction(argc, argv);
-    } catch (Error const &error) {
-        return ToECode(error);
-    } catch (...) {
-        return E_FAILED;
-    }
-
-    return NO_ERROR;
-}
-
 ECode CARFunctionAdapter::Call(va_list ap) noexcept
 {
     try {
         ::Nan::HandleScope scope;
 
         size_t argc;
-        UniquePtr<Local<Value> []> argv;
 
         argc = _paramInfos->GetLength();
-        argv = new(NO_THROW) Local<Value>[argc];
+        unique_ptr<Local<Value> []> argv(new(nothrow) Local<Value>[argc]);
         if (argv == nullptr)
             throw Error(Error::NO_MEMORY, "");
 
         for (size_t i = 0; i < argc; ++i)
-            _SetArgumentOf((*_paramInfos)[i], argc, argv, i, ap);
+            SetArgumentOf((*_paramInfos)[i], argc, argv.get(), i, ap);
 
-        CallFunction(argc, argv);
+        CallFunction(argc, argv.get());
     } catch (Error const &error) {
         return ToECode(error);
     } catch (...) {

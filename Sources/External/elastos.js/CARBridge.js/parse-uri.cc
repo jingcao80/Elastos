@@ -1,7 +1,10 @@
 
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+
+#include <memory>
+#include <vector>
 
 #include "macros.h"
 
@@ -10,10 +13,10 @@
 #include "parse-uri.h"
 
 #include "error.h"
-#include "unique-ptr.h"
-#include "vector.h"
 
 
+
+using namespace std;
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
@@ -24,7 +27,7 @@ static char const *_Trim(char const *s)
 
 ParseURI::ParseURI(char const *uri)
 {
-    _buf = strdup(uri);
+    _buf = unique_ptr<char>(strdup(uri));
     if (_buf == nullptr)
         throw Error(Error::NO_MEMORY, "");
 
@@ -62,12 +65,12 @@ uint32_t ParseURI::revision() const noexcept
 
 size_t ParseURI::nEntryIds() const noexcept
 {
-    return _entryIds.Size();
+    return _entryIds.size();
 }
 
 char const * const *ParseURI::entryIds() const noexcept
 {
-    return _entryIds.Data();
+    return _entryIds.data();
 }
 
 CAR_BRIDGE_NAMESPACE_END

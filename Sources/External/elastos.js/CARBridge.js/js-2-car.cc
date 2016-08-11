@@ -1,8 +1,8 @@
 
-#include <math.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 
 #include <node.h>
 
@@ -48,6 +48,8 @@ bool IsInt16(Local<Value> value)
 
 bool CanBeUsedAsInt16(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<::v8::Int32> i32;
 
     int _priority;
@@ -94,6 +96,8 @@ bool IsInt32(Local<Value> value)
 
 bool CanBeUsedAsInt32(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<::v8::Int32> i32;
 
     int _priority;
@@ -149,6 +153,8 @@ bool IsInt64(Local<Value> value)
 
 bool CanBeUsedAsInt64(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<Number> number;
 
     int _priority;
@@ -200,6 +206,8 @@ bool IsByte(Local<Value> value)
 
 bool CanBeUsedAsByte(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<Uint32> ui32;
 
     int _priority;
@@ -246,6 +254,8 @@ bool IsFloat(Local<Value> value)
 
 bool CanBeUsedAsFloat(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<Number> number;
 
     int _priority;
@@ -290,6 +300,8 @@ bool IsDouble(Local<Value> value)
 
 bool CanBeUsedAsDouble(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<Number> number;
 
     int _priority;
@@ -337,6 +349,8 @@ bool IsChar32(Local<Value> value)
 
 bool CanBeUsedAsChar32(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<::v8::String> string;
 
     int _priority;
@@ -377,6 +391,26 @@ bool IsString(Local<Value> value)
 
 bool CanBeUsedAsString(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
+    Local<::v8::String> string;
+
+    int _priority;
+
+    if (!To<::v8::String>(value).ToLocal(&string))
+        return false;
+
+    if (value->IsString())
+        _priority = 0;
+    else if (value->IsStringObject())
+        _priority = 1;
+    else
+        _priority = 2;
+
+    if (priority != nullptr)
+        *priority = _priority;
+
+    return true;
 }
 
 void ToString(_ELASTOS String &s, Local<Value> value)
@@ -396,6 +430,26 @@ bool IsBoolean(Local<Value> value)
 
 bool CanBeUsedAsBoolean(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
+    Local<::v8::Boolean> boolean;
+
+    int _priority;
+
+    if (!To<::v8::Boolean>(value).ToLocal(&boolean))
+        return false;
+
+    if (value->IsBoolean())
+        _priority = 0;
+    else if (value->IsBooleanObject())
+        _priority = 1;
+    else
+        _priority = 2;
+
+    if (priority != nullptr)
+        *priority = _priority;
+
+    return true;
 }
 
 _ELASTOS Boolean ToBoolean(Local<Value> value)
@@ -481,6 +535,27 @@ bool IsEMuid(Local<Value> value)
 
 bool CanBeUsedAsEMuid(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
+    Local<::v8::Object> object;
+
+    int _priority;
+
+    if (!To<::v8::Object>(value).ToLocal(&object))
+        return false;
+
+    if (!IsEMuid(object))
+        return false;
+
+    if (value->IsObject())
+        _priority = 0;
+    else
+        _priority = 1;
+
+    if (priority != nullptr)
+        *priority = _priority;
+
+    return true;
 }
 
 void ToEMuid(EMuid *id, Local<Value> value)
@@ -566,6 +641,27 @@ bool IsEGuid(Local<Value> value)
 
 bool CanBeUsedAsEGuid(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
+    Local<::v8::Object> object;
+
+    int _priority;
+
+    if (!To<::v8::Object>(value).ToLocal(&object))
+        return false;
+
+    if (!IsEGuid(object))
+        return false;
+
+    if (value->IsObject())
+        _priority = 0;
+    else
+        _priority = 1;
+
+    if (priority != nullptr)
+        *priority = _priority;
+
+    return true;
 }
 
 void ToEGuid(EGuid *id, Local<Value> value)
@@ -607,6 +703,8 @@ bool IsECode(Local<Value> value)
 
 bool CanBeUsedAsECode(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<::v8::Int32> i32;
 
     int _priority;
@@ -680,6 +778,7 @@ bool IsLocalType(IDataTypeInfo const *dataTypeInfo, Local<Value> value)
 
 bool CanBeUsedAsLocalType(IDataTypeInfo const *dataTypeInfo, Local<Value> value, int *priority)
 {
+    return false;
 }
 
 void ToLocalType(IDataTypeInfo const *dataTypeInfo, void *localTypeObject, Local<Value> value)
@@ -699,6 +798,8 @@ bool IsEnum(Local<Value> value)
 
 bool CanBeUsedAsEnum(Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<::v8::Int32> i32;
 
     int _priority;
@@ -770,6 +871,8 @@ bool IsCARArray(ICarArrayInfo const *carArrayInfo, Local<Value> value)
 
 bool CanBeUsedAsCARArray(ICarArrayInfo const *carArrayInfo, Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<::v8::Object> object;
 
     int _priority;
@@ -1682,6 +1785,8 @@ bool IsCPPVector(ICppVectorInfo const *cppVectorInfo, Local<Value> value)
 
 bool CanBeUsedAsCPPVector(ICppVectorInfo const *cppVectorInfo, Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<::v8::Object> object;
 
     int _priority;
@@ -2079,6 +2184,8 @@ bool IsStruct(IStructInfo const *structInfo, Local<Value> value)
 
 bool CanBeUsedAsStruct(IStructInfo const *structInfo, Local<Value> value, int *priority)
 {
+    ::Nan::HandleScope scope;
+
     Local<::v8::Object> object;
 
     int _priority;

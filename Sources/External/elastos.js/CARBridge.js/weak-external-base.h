@@ -13,10 +13,16 @@ CAR_BRIDGE_NAMESPACE_BEGIN
 
 class WeakExternalBase {
 public:
-    template<class WeakExternal>
-    static void Delete(WeakExternal *weakExternal)
+    struct Deleter {
+        void operator()(WeakExternalBase const *weakExternal) const
+        {
+            delete weakExternal;
+        }
+    };
+
+    static void Delete(WeakExternalBase const *weakExternal)
     {
-        delete static_cast<WeakExternalBase *>(weakExternal);
+        delete weakExternal;
     }
 
     WeakExternalBase(void)
@@ -27,7 +33,7 @@ public:
         _self.SetWeak(this, &WeakCallback, ::Nan::WeakCallbackType::kParameter);
     }
 
-    void Delete(void)
+    void Delete(void) const
     {
         delete this;
     }

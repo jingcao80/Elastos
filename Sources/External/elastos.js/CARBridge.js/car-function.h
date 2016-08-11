@@ -1,7 +1,7 @@
 #ifndef __CAR_BRIDGE_CAR_FUNCTION_H
 # define __CAR_BRIDGE_CAR_FUNCTION_H
 
-# include <stddef.h>
+# include <cstddef>
 
 # include <node.h>
 

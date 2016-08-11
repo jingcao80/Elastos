@@ -1,6 +1,9 @@
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
+
+#include <map>
+#include <vector>
 
 #include <node.h>
 
@@ -17,11 +20,10 @@
 #include "car-function.h"
 #include "error.h"
 #include "js-2-car.h"
-#include "map.h"
-#include "pair.h"
-#include "vector.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -33,7 +35,7 @@ _ELASTOS_NAMESPACE_USING
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
-static Map<AutoPtr<IDataTypeInfo const>, CopyablePersistent<Object>> _mapIntrinsicTypeInfoToCARIntrinsicType;
+static map<AutoPtr<IDataTypeInfo const>, CopyablePersistent<Object>> _mapIntrinsicTypeInfoToCARIntrinsicType;
 
 static Local<Object> _CARIntrinsicType(IDataTypeInfo const *intrinsicTypeInfo)
 {
@@ -97,7 +99,7 @@ static Local<Object> _CARIntrinsicType(IDataTypeInfo const *intrinsicTypeInfo)
 
 Local<Object> CARDataType(IDataTypeInfo const *dataTypeInfo);
 
-static Map<AutoPtr<ILocalPtrInfo const>, CopyablePersistent<Object>> _mapLocalPtrInfoToCARLocalPtr;
+static map<AutoPtr<ILocalPtrInfo const>, CopyablePersistent<Object>> _mapLocalPtrInfoToCARLocalPtr;
 
 Local<Object> CARLocalPtr(ILocalPtrInfo const *localPtrInfo)
 {
@@ -159,7 +161,7 @@ Local<Object> CARLocalPtr(ILocalPtrInfo const *localPtrInfo)
     return scope.Escape(localPtr);
 }
 
-static Map<AutoPtr<IDataTypeInfo const>, CopyablePersistent<Object>> _mapLocalTypeInfoToCARLocalType;
+static map<AutoPtr<IDataTypeInfo const>, CopyablePersistent<Object>> _mapLocalTypeInfoToCARLocalType;
 
 Local<Object> CARLocalType(IDataTypeInfo const *localTypeInfo)
 {
@@ -196,7 +198,7 @@ Local<Object> CARLocalType(IDataTypeInfo const *localTypeInfo)
     return scope.Escape(localTypeObject);
 }
 
-static Map<AutoPtr<IEnumInfo const>, CopyablePersistent<Object>> _mapEnumInfoToCAREnum;
+static map<AutoPtr<IEnumInfo const>, CopyablePersistent<Object>> _mapEnumInfoToCAREnum;
 
 Local<Object> CAREnum(IEnumInfo const *enumInfo)
 {
@@ -339,7 +341,7 @@ Local<Object> _Array(ArrayInfo const *arrayInfo)
     return scope.Escape(array);
 }
 
-static Map<AutoPtr<ICarArrayInfo const>, CopyablePersistent<Object>> _mapCARArrayInfoToCARArray;
+static map<AutoPtr<ICarArrayInfo const>, CopyablePersistent<Object>> _mapCARArrayInfoToCARArray;
 
 Local<Object> CARArray(ICarArrayInfo const *carArrayInfo)
 {
@@ -356,7 +358,7 @@ Local<Object> CARArray(ICarArrayInfo const *carArrayInfo)
     return carArray;
 }
 
-static Map<AutoPtr<ICppVectorInfo const>, CopyablePersistent<Object>> _mapCPPVectorInfoToCARCPPVector;
+static map<AutoPtr<ICppVectorInfo const>, CopyablePersistent<Object>> _mapCPPVectorInfoToCARCPPVector;
 
 Local<Object> CARCPPVector(ICppVectorInfo const *cppVectorInfo)
 {
@@ -388,7 +390,7 @@ Local<Object> CARCPPVector(ICppVectorInfo const *cppVectorInfo)
     return scope.Escape(cppVector);
 }
 
-static Map<AutoPtr<IStructInfo const>, CopyablePersistent<Object>> _mapStructInfoToCARStruct;
+static map<AutoPtr<IStructInfo const>, CopyablePersistent<Object>> _mapStructInfoToCARStruct;
 
 Local<Object> CARStruct(IStructInfo const *structInfo)
 {
@@ -516,7 +518,7 @@ static Local<Object> _CARInterface(IInterfaceInfo const *interfaceInfo, char con
     AutoPtr<ArrayOf<IFunctionInfo const *> > methodInfos;
     ArrayOf<IFunctionInfo const *> *_methodInfos;
 
-    Map<_ELASTOS String, Vector<IFunctionInfo const *>> mapNameToMethodInfos;
+    map<_ELASTOS String, vector<IFunctionInfo const *>> mapNameToMethodInfos;
 
     interface_ = New<Object>();
 
@@ -606,15 +608,15 @@ static Local<Object> _CARInterface(IInterfaceInfo const *interfaceInfo, char con
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
-        mapNameToMethodInfos[methodName].PushBack(methodInfo);
+        mapNameToMethodInfos[methodName].push_back(methodInfo);
     }
 
-    for (auto it = mapNameToMethodInfos.Begin(), end = mapNameToMethodInfos.End(); it != end; ++it) {
+    for (auto it = mapNameToMethodInfos.begin(), end = mapNameToMethodInfos.end(); it != end; ++it) {
         ::Nan::HandleScope scope;
 
         DefineOwnProperty(interface_,
                 ToValue(it->first).As<::v8::String>(),
-                (*newMethod)(it->second.GetSize(), &it->second[0]),
+                (*newMethod)(it->second.size(), &it->second[0]),
                 static_cast<enum PropertyAttribute>(ReadOnly | DontDelete));
     }
 
@@ -626,7 +628,7 @@ inline Local<Object> _CARMethod(size_t nMethodInfos, IFunctionInfo const *method
     return CARMethod(nMethodInfos, reinterpret_cast<IMethodInfo const **>(methodInfos));
 }
 
-static Map<AutoPtr<IInterfaceInfo const>, CopyablePersistent<Object>> _mapInterfaceInfoToCARInterface;
+static map<AutoPtr<IInterfaceInfo const>, CopyablePersistent<Object>> _mapInterfaceInfoToCARInterface;
 
 Local<Object> CARInterface(IInterfaceInfo const *interfaceInfo)
 {
@@ -650,7 +652,7 @@ inline Local<Object> _CARCallbackMethod(size_t nCallbackMethodInfos, IFunctionIn
 }
 
 static
-Map<AutoPtr<ICallbackInterfaceInfo const>, CopyablePersistent<Object>>
+map<AutoPtr<ICallbackInterfaceInfo const>, CopyablePersistent<Object>>
 _mapCallbackInterfaceInfoToCARCallbackInterface;
 
 Local<Object> CARCallbackInterface(ICallbackInterfaceInfo const *callbackInterfaceInfo)

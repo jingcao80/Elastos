@@ -1,8 +1,10 @@
 #ifndef __CAR_BRIDGE_CAR_OBJECT_ADAPTER_H
 # define __CAR_BRIDGE_CAR_OBJECT_ADAPTER_H
 
-# include <stdarg.h>
-# include <stddef.h>
+# include <cstdarg>
+# include <cstddef>
+
+# include <memory>
 
 # include <node.h>
 
@@ -14,7 +16,6 @@
 # include "macros.h"
 
 # include "car-function-adapter.h"
-# include "unique-ptr.h"
 
 
 
@@ -113,7 +114,7 @@ private:
 
     ::Nan::Persistent<::v8::Object> _object;
 
-    UniquePtr<CARInterfaceAdapter> _carInterfaceAdapter;
+    ::std::unique_ptr<CARInterfaceAdapter> _carInterfaceAdapter;
 
     _ELASTOS AutoPtr<ICallbackConnector> _callbackConnector;
 

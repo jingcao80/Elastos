@@ -11,7 +11,7 @@
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
-NAN_INLINE ::Nan::Maybe<bool> DefineOwnProperty(::v8::Local<::v8::Object> object,
+inline ::Nan::Maybe<bool> DefineOwnProperty(::v8::Local<::v8::Object> object,
         ::v8::Local<::v8::String> name,
         ::v8::Local<::v8::Value> value,
         ::v8::PropertyAttribute attributes)
@@ -20,14 +20,14 @@ NAN_INLINE ::Nan::Maybe<bool> DefineOwnProperty(::v8::Local<::v8::Object> object
 }
 
 template<class T>
-NAN_INLINE void SetMethod(::v8::Local<T> receiver,
+inline void SetMethod(::v8::Local<T> receiver,
         char const *name,
         ::Nan::FunctionCallback callback, ::v8::Local<::v8::Value> data, ::v8::Local<::v8::Signature> signature,
         ::v8::PropertyAttribute attributes)
 {}
 
 template<>
-NAN_INLINE void SetMethod<::v8::Template>(::v8::Local<::v8::Template> template_,
+inline void SetMethod<::v8::Template>(::v8::Local<::v8::Template> template_,
         char const *name,
         ::Nan::FunctionCallback callback, ::v8::Local<::v8::Value> data, ::v8::Local<::v8::Signature> signature,
         ::v8::PropertyAttribute attributes)
@@ -42,7 +42,7 @@ NAN_INLINE void SetMethod<::v8::Template>(::v8::Local<::v8::Template> template_,
 }
 
 template<>
-NAN_INLINE void SetMethod<::v8::Object>(::v8::Local<::v8::Object> object,
+inline void SetMethod<::v8::Object>(::v8::Local<::v8::Object> object,
         char const *name,
         ::Nan::FunctionCallback callback, ::v8::Local<::v8::Value> data, ::v8::Local<::v8::Signature> signature,
         ::v8::PropertyAttribute attributes)
@@ -59,7 +59,7 @@ NAN_INLINE void SetMethod<::v8::Object>(::v8::Local<::v8::Object> object,
 }
 
 template<class T>
-NAN_INLINE void SetMethod(::v8::Local<T> receiver,
+inline void SetMethod(::v8::Local<T> receiver,
         char const *name,
         ::Nan::FunctionCallback callback, ::v8::Local<::v8::Value> data,
         ::v8::PropertyAttribute attributes)
@@ -68,7 +68,7 @@ NAN_INLINE void SetMethod(::v8::Local<T> receiver,
 }
 
 template<class T>
-NAN_INLINE void SetMethod(::v8::Local<T> receiver,
+inline void SetMethod(::v8::Local<T> receiver,
         char const *name,
         ::Nan::FunctionCallback callback,
         ::v8::PropertyAttribute attributes)
@@ -76,7 +76,7 @@ NAN_INLINE void SetMethod(::v8::Local<T> receiver,
     SetMethod(receiver, name, callback, ::v8::Local<::v8::Value>(), ::v8::Local<::v8::Signature>(), attributes);
 }
 
-NAN_INLINE void SetPrototypeMethod(::v8::Local<::v8::FunctionTemplate> functionTemplate,
+inline void SetPrototypeMethod(::v8::Local<::v8::FunctionTemplate> functionTemplate,
         char const *name,
         ::Nan::FunctionCallback callback, ::v8::Local<::v8::Value> data,
         ::v8::PropertyAttribute attributes)
@@ -87,7 +87,7 @@ NAN_INLINE void SetPrototypeMethod(::v8::Local<::v8::FunctionTemplate> functionT
             attributes);
 }
 
-NAN_INLINE void SetPrototypeMethod(::v8::Local<::v8::FunctionTemplate> functionTemplate,
+inline void SetPrototypeMethod(::v8::Local<::v8::FunctionTemplate> functionTemplate,
         char const *name,
         ::Nan::FunctionCallback callback,
         ::v8::PropertyAttribute attributes)
@@ -95,9 +95,7 @@ NAN_INLINE void SetPrototypeMethod(::v8::Local<::v8::FunctionTemplate> functionT
     SetPrototypeMethod(functionTemplate, name, callback, ::v8::Local<::v8::Value>(), attributes);
 }
 
-NAN_INLINE void Export(::Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target,
-        char const *name,
-        ::v8::Local<::v8::Value> value)
+inline void Export(::Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target, char const *name, ::v8::Local<::v8::Value> value)
 {
     ::Nan::Set(target, ::Nan::New<::v8::String>(name).ToLocalChecked(), value);
 }

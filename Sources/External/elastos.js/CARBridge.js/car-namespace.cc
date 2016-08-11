@@ -1,7 +1,14 @@
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+
+#include <map>
+#include <memory>
+#include <new>
+#include <set>
+#include <string>
+#include <utility>
 
 #include <node.h>
 
@@ -18,15 +25,10 @@
 #include "car-data-type.h"
 #include "car-object.h"
 #include "error.h"
-#include "map.h"
-#include "multimap.h"
-#include "new.h"
-#include "pair.h"
-#include "set.h"
-#include "string.h"
-#include "unique-ptr.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -38,49 +40,49 @@ _ELASTOS_NAMESPACE_USING
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
-class _String: public String {
+class _string: public string {
 public:
-    _String(void) noexcept
+    _string(void) noexcept
     {}
 
-    _String(char const *s): String(s)
+    _string(char const *s): string(s)
     {}
 
-    _String &operator=(char const *s)
+    _string &operator=(char const *s)
     {
-        *static_cast<String *>(this) = s;
+        *static_cast<string *>(this) = s;
 
         return *this;
     }
 
-    bool operator==(_String const &string) const noexcept
+    bool operator==(_string const &string_) const noexcept
     {
-        return !Compare(string);
+        return !compare(string_);
     }
 
-    bool operator!=(_String const &string) const noexcept
+    bool operator!=(_string const &string_) const noexcept
     {
-        return !!Compare(string);
+        return !!compare(string_);
     }
 
-    bool operator<(_String const &string) const noexcept
+    bool operator<(_string const &string_) const noexcept
     {
-        return Compare(string) < 0;
+        return compare(string_) < 0;
     }
 
-    bool operator<=(_String const &string) const noexcept
+    bool operator<=(_string const &string_) const noexcept
     {
-        return Compare(string) <= 0;
+        return compare(string_) <= 0;
     }
 
-    bool operator>=(_String const &string) const noexcept
+    bool operator>=(_string const &string_) const noexcept
     {
-        return Compare(string) >= 0;
+        return compare(string_) >= 0;
     }
 
-    bool operator>(_String const &string) const noexcept
+    bool operator>(_string const &string_) const noexcept
     {
-        return Compare(string) > 0;
+        return compare(string_) > 0;
     }
 
 private:
@@ -93,9 +95,9 @@ private:
         return 0;
     }
 
-    int Compare(_String const &string) const noexcept
+    int compare(_string const &string_) const noexcept
     {
-        return strcmp(static_cast<char const *>(*this), static_cast<char const *>(string));
+        return strcmp(this->data(), string_.data());
     }
 };
 
@@ -112,7 +114,7 @@ struct _NamespacedEntryInfo {
     AutoPtr<IInterface const> info;
 };
 
-typedef Multimap<_String, struct _NamespacedEntryInfo> _MS2NEI;
+typedef multimap<_string, struct _NamespacedEntryInfo> _MS2NEI;
 
 static Local<ObjectTemplate> _CARNamespaceTemplate(
         _MS2NEI const *mapFullNameToNamespacedEntryInfo, char const *namespace_)
@@ -121,15 +123,15 @@ static Local<ObjectTemplate> _CARNamespaceTemplate(
 
     size_t offset;
 
-    Pair<_MS2NEI::ConstIterator, _MS2NEI::ConstIterator> range;
+    pair<_MS2NEI::const_iterator, _MS2NEI::const_iterator> range;
 
-    Set<String> namespaces;
+    set<string> namespaces;
 
     namespaceTemplate = New<ObjectTemplate>();
 
     offset = strlen(namespace_) + 1;
 
-    range = mapFullNameToNamespacedEntryInfo->EqualRange(namespace_);
+    range = mapFullNameToNamespacedEntryInfo->equal_range(namespace_);
 
     for (auto it = range.first; it != range.second; ++it) {
         ::Nan::HandleScope scope;
@@ -140,7 +142,7 @@ static Local<ObjectTemplate> _CARNamespaceTemplate(
 
         char const *delimiter;
 
-        fullName = it->first;
+        fullName = it->first.data();
 
         relativeName = fullName + offset;
 
@@ -180,7 +182,7 @@ static Local<ObjectTemplate> _CARNamespaceTemplate(
             if (_namespace == nullptr)
                 throw Error(Error::NO_MEMORY, "");
 
-            if (namespaces.Count(_namespace) > 0)
+            if (namespaces.count(_namespace) > 0)
                 continue;
 
             SetTemplate(namespaceTemplate,
@@ -188,7 +190,7 @@ static Local<ObjectTemplate> _CARNamespaceTemplate(
                     _CARNamespaceTemplate(mapFullNameToNamespacedEntryInfo, _namespace),
                     static_cast<enum PropertyAttribute>(ReadOnly | DontDelete));
 
-            namespaces.Insert(_namespace);
+            namespaces.insert(_namespace);
 
             delete [] _namespace;
         }
@@ -246,23 +248,21 @@ static void _AddNamespacedEntryInfos(_MS2NEI *mapFullNameToNamespacedEntryInfo,
 
         fullName = namespace_ + "." + name;
 
-        mapFullNameToNamespacedEntryInfo->Insert(
-                Pair<_String, struct _NamespacedEntryInfo>((char const *)fullName,
+        mapFullNameToNamespacedEntryInfo->insert(
+                pair<_string, struct _NamespacedEntryInfo>((char const *)fullName,
                     {_GetNamespacedEntryType<NamespacedEntryInfo>::VALUE, namespacedEntryInfo})
                 );
     }
 }
 
-typedef Map<_ELASTOS String, CopyablePersistent<ObjectTemplate>> _MS2OT;
+typedef map<_ELASTOS String, CopyablePersistent<ObjectTemplate>> _MS2OT;
 
-static Map<AutoPtr<IModuleInfo const>, _MS2OT> _mapModuleInfoToMapNamespaceToCARNamespace;
+static map<AutoPtr<IModuleInfo const>, _MS2OT> _mapModuleInfoToMapNamespaceToCARNamespace;
 
-static Map<AutoPtr<IModuleInfo const>, UniquePtr<_MS2NEI const>> _mapModuleInfoToMapFullNameToNamespacedEntryInfo;
+static map<AutoPtr<IModuleInfo const>, unique_ptr<_MS2NEI const>> _mapModuleInfoToMapFullNameToNamespacedEntryInfo;
 
 Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char const *namespace_)
 {
-    UniquePtr<_MS2NEI> mapFullNameToNamespacedEntryInfo;
-
     ECode ec;
 
     _ELASTOS Int32 nEnums;
@@ -279,10 +279,10 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
     if (!__namespace.IsEmpty())
         return New(__namespace);
 
-    if (_mapModuleInfoToMapFullNameToNamespacedEntryInfo.Count(moduleInfo) > 0)
-        return _CARNamespaceTemplate(_mapModuleInfoToMapFullNameToNamespacedEntryInfo[moduleInfo], namespace_);
+    if (_mapModuleInfoToMapFullNameToNamespacedEntryInfo.count(moduleInfo) > 0)
+        return _CARNamespaceTemplate(_mapModuleInfoToMapFullNameToNamespacedEntryInfo[moduleInfo].get(), namespace_);
 
-    mapFullNameToNamespacedEntryInfo = new(NO_THROW) _MS2NEI();
+    unique_ptr<_MS2NEI> mapFullNameToNamespacedEntryInfo(new(nothrow) _MS2NEI());
     if (mapFullNameToNamespacedEntryInfo == nullptr)
         throw Error(Error::NO_MEMORY, "");
 
@@ -304,7 +304,7 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
-        _AddNamespacedEntryInfos(mapFullNameToNamespacedEntryInfo, *enumInfos);
+        _AddNamespacedEntryInfos(mapFullNameToNamespacedEntryInfo.get(), *enumInfos);
     }
 
     ec = moduleInfo->GetInterfaceCount(&nInterfaces);
@@ -325,7 +325,7 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
-        _AddNamespacedEntryInfos(mapFullNameToNamespacedEntryInfo, *interfaceInfos);
+        _AddNamespacedEntryInfos(mapFullNameToNamespacedEntryInfo.get(), *interfaceInfos);
     }
 
     ec = moduleInfo->GetClassCount(&nClasses);
@@ -346,14 +346,14 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
-        _AddNamespacedEntryInfos(mapFullNameToNamespacedEntryInfo, *classInfos);
+        _AddNamespacedEntryInfos(mapFullNameToNamespacedEntryInfo.get(), *classInfos);
     }
 
     auto &_mapFullNameToNamespacedEntryInfo = _mapModuleInfoToMapFullNameToNamespacedEntryInfo[moduleInfo];
 
-    _mapFullNameToNamespacedEntryInfo = mapFullNameToNamespacedEntryInfo.Release();
+    _mapFullNameToNamespacedEntryInfo = move(mapFullNameToNamespacedEntryInfo);
 
-    _namespace = _CARNamespaceTemplate(_mapFullNameToNamespacedEntryInfo, namespace_);
+    _namespace = _CARNamespaceTemplate(_mapFullNameToNamespacedEntryInfo.get(), namespace_);
 
     __namespace.Reset(_namespace);
 

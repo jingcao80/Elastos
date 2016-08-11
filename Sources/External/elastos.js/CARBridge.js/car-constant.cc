@@ -1,4 +1,6 @@
 
+#include <map>
+
 #include <node.h>
 
 #include <nan.h>
@@ -10,9 +12,10 @@
 #include "nan-ext.h"
 
 #include "car-constantoid.h"
-#include "map.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -24,7 +27,7 @@ _ELASTOS_NAMESPACE_USING
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
-static Map<AutoPtr<IConstantInfo const>, CopyablePersistent<NumberObject>> _mapConstantInfoToCARConstant;
+static map<AutoPtr<IConstantInfo const>, CopyablePersistent<NumberObject>> _mapConstantInfoToCARConstant;
 
 Local<NumberObject> CARConstant(IConstantInfo const *constantInfo)
 {

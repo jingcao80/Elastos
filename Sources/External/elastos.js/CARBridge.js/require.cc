@@ -1,7 +1,7 @@
 
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 
 #include <node.h>
 

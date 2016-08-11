@@ -1,12 +1,14 @@
 
-#include <stddef.h>
-#include <string.h>
+#include <cstddef>
+#include <cstring>
+
+#include <new>
 
 #include "macros.h"
 
-#include "new.h"
 
 
+using namespace std;
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
@@ -14,7 +16,7 @@ char *strdup(char const *s) noexcept
 {
     char *_s;
 
-    _s = new(NO_THROW) char[strlen(s) + 1];
+    _s = new(nothrow) char[strlen(s) + 1];
     if (_s == nullptr)
         return nullptr;
 
@@ -33,7 +35,7 @@ char *strndup(char const *s, size_t n) noexcept
 
     n = n > len ? len : n;
 
-    _s = new(NO_THROW) char[n + 1];
+    _s = new(nothrow) char[n + 1];
     if (_s == nullptr)
         return nullptr;
 

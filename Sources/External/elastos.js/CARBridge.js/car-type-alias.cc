@@ -1,4 +1,6 @@
 
+#include <map>
+
 #include <node.h>
 
 #include <nan.h>
@@ -12,9 +14,10 @@
 #include "car-data-type.h"
 #include "error.h"
 #include "js-2-car.h"
-#include "map.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -26,7 +29,7 @@ _ELASTOS_NAMESPACE_USING
 
 CAR_BRIDGE_NAMESPACE_BEGIN
 
-static Map<AutoPtr<ITypeAliasInfo const>, CopyablePersistent<Object>> _mapTypeAliasInfoToCARTypeAlias;
+static map<AutoPtr<ITypeAliasInfo const>, CopyablePersistent<Object>> _mapTypeAliasInfoToCARTypeAlias;
 
 Local<Object> CARTypeAlias(ITypeAliasInfo const *typeAliasInfo)
 {

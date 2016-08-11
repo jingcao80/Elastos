@@ -1,7 +1,7 @@
 #ifndef __CAR_BRIDGE_ERROR_H
 # define __CAR_BRIDGE_ERROR_H
 
-# include <stdarg.h>
+# include <cstdarg>
 
 # include <node.h>
 

@@ -1,6 +1,9 @@
 
-#include <stdarg.h>
-#include <stddef.h>
+#include <cstdarg>
+#include <cstddef>
+
+#include <memory>
+#include <new>
 
 #include <node.h>
 
@@ -19,10 +22,10 @@
 #include "car-function-adapter.h"
 #include "error.h"
 #include "js-2-car.h"
-#include "new.h"
-#include "unique-ptr.h"
 
 
+
+using namespace std;
 
 using namespace node;
 
@@ -53,7 +56,7 @@ CARAPI CARObjectAdapter::New(
     CARObjectAdapter *_carObjectAdapter;
 
     try {
-        _carObjectAdapter = new(NO_THROW) CARObjectAdapter(interfaceInfo, object);
+        _carObjectAdapter = new(nothrow) CARObjectAdapter(interfaceInfo, object);
     } catch (ECode ec) {
         return ec;
     }
@@ -77,7 +80,7 @@ CARObjectAdapter::CARObjectAdapter(IInterfaceInfo const *interfaceInfo, Local<::
     IInterface *callbackConnector;
 
 #endif
-    _carInterfaceAdapter = new CARInterfaceAdapter(interfaceInfo, this);
+    _carInterfaceAdapter = unique_ptr<CARInterfaceAdapter>(new CARInterfaceAdapter(interfaceInfo, this));
     if (_carInterfaceAdapter == nullptr)
         throw Error(Error::NO_MEMORY, "");
 #if 0
@@ -128,7 +131,20 @@ CARAPI_(IInterface *) CARObjectAdapter::Probe(REIID riid)
 
 CARAPI CARObjectAdapter::GetInterfaceID(IInterface *object, InterfaceID *interfaceId) noexcept
 {
-    return E_NOT_IMPLEMENTED;
+    if (object == 0)
+        return E_INVALID_ARGUMENT;
+
+    if (interfaceId == 0)
+        return E_INVALID_ARGUMENT;
+
+    if (object == static_cast<IObject *>(this))
+        *interfaceId = EIID_CARObjectAdapter;
+    else if (object == static_cast<IInterface *>(_callbackConnector))
+        *interfaceId = EIID_CALLBACK_CONNECTOR;
+    else
+        return E_INVALID_ARGUMENT;
+
+    return NO_ERROR;
 }
 
 CARAPI CARObjectAdapter::Aggregate(AggregateType type, IInterface *object) noexcept

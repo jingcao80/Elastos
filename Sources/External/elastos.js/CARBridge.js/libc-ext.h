@@ -1,7 +1,7 @@
 #ifndef __CAR_BRIDGE_LIBC_EXT_H
 # define __CAR_BRIDGE_LIBC_EXT_H
 
-# include <stddef.h>
+# include <cstddef>
 
 # include "macros.h"
 

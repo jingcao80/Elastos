@@ -1,8 +1,8 @@
 #ifndef __CAR_BRIDGE_CAR_FUNCTION_ADAPTER_H
 # define __CAR_BRIDGE_CAR_FUNCTION_ADAPTER_H
 
-# include <stdarg.h>
-# include <stddef.h>
+# include <cstdarg>
+# include <cstddef>
 
 # include <node.h>
 
@@ -67,6 +67,16 @@ private:
 
     ::Nan::Persistent<::v8::Value> _receiver;
 
+    static void SetArgumentOf(IParamInfo const *paramInfo,
+            size_t argc, ::v8::Local<::v8::Value> argv[],
+            size_t index,
+            va_list ap);
+
+    static void SetArgumentOf(IParamInfo const *paramInfo,
+            size_t argc, ::v8::Local<::v8::Value> argv[],
+            size_t index,
+            void *ap);
+
     CARFunctionAdapter(CARFunctionAdapter const &carFunctionAdapter) = delete;
 
     CARFunctionAdapter(CARFunctionAdapter &&carFunctionAdapter) = delete;
@@ -79,5 +89,7 @@ private:
 };
 
 CAR_BRIDGE_NAMESPACE_END
+
+# include "car-function-adapter-cc.h"
 
 #endif

@@ -1,13 +1,13 @@
 #ifndef __CAR_BRIDGE_PARSE_URI_H
 # define __CAR_BRIDGE_PARSE_URI_H
 
-# include <stddef.h>
-# include <stdint.h>
+# include <cstddef>
+# include <cstdint>
+
+# include <memory>
+# include <vector>
 
 # include "macros.h"
-
-# include "unique-ptr.h"
-# include "vector.h"
 
 
 
@@ -34,7 +34,7 @@ public:
     char const * const *entryIds() const noexcept;
 
 private:
-    UniquePtr<char> _buf;
+    ::std::unique_ptr<char> _buf;
 
     char const *_ecoPath;
 
@@ -42,7 +42,7 @@ private:
 
     uint32_t _major, _minor, _build, _revision;
 
-    Vector<char const *> _entryIds;
+    ::std::vector<char const *> _entryIds;
 
     ParseURI(ParseURI const &parseURI) = delete;
 
