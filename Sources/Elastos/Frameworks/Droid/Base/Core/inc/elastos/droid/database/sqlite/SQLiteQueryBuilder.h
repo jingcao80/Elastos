@@ -12,6 +12,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IStringBuilder;
 using Elastos::Utility::IMap;
+using Elastos::Utility::ISet;
 using Elastos::Utility::Regex::IPattern;
 
 namespace Elastos {
@@ -387,7 +388,7 @@ public:
     virtual CARAPI BuildUnionSubQuery(
         /* [in] */ const String& typeDiscriminatorColumn,
         /* [in] */ const ArrayOf<String>& unionColumns,
-        /* [in] */ IMap* columnsPresentInTable,
+        /* [in] */ ISet* columnsPresentInTable,
         /* [in] */ Int32 computedColumnsOffset,
         /* [in] */ const String& typeDiscriminatorValue,
         /* [in] */ const String& selection,
@@ -406,7 +407,7 @@ public:
     virtual CARAPI BuildUnionSubQuery(
         /* [in] */ const String& typeDiscriminatorColumn,
         /* [in] */ const ArrayOf<String>& unionColumns,
-        /* [in] */ IMap* columnsPresentInTable,
+        /* [in] */ ISet* columnsPresentInTable,
         /* [in] */ Int32 computedColumnsOffset,
         /* [in] */ const String& typeDiscriminatorValue,
         /* [in] */ const String& selection,

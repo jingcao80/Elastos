@@ -38,6 +38,16 @@ module
         class CMmsProvider {
             constructor();
 
+            interface IMmsProvider;
+            interface IContentProvider;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+        }
+
+        class CMmsSmsProvider {
+            constructor();
+
+            interface IMmsSmsProvider;
             interface IContentProvider;
             interface IComponentCallbacks;
             interface IComponentCallbacks2;

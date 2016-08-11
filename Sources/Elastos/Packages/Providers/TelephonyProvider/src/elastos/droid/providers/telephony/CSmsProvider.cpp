@@ -227,12 +227,14 @@ Boolean CSmsProvider::Init()
 ECode CSmsProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
+    Logger::D(TAG, "CSmsProvider : OnCreate+");
     VALIDATE_NOT_NULL(result);
     SetAppOps(IAppOpsManager::OP_READ_SMS, IAppOpsManager::OP_WRITE_SMS);
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     mOpenHelper = MmsSmsDatabaseHelper::GetInstance(ctx);
     *result = TRUE;
+    Logger::D(TAG, "CSmsProvider : OnCreate-");
     return NOERROR;
 }
 

@@ -3,6 +3,7 @@ module
     using interface Elastos.Core.IStringBuilder;
     using interface Elastos.Core.ICharSequence;
     using interface Elastos.Utility.IMap;
+    using interface Elastos.Utility.ISet;
 
     interface Elastos.Droid.Os.ICancellationSignal;
     interface Elastos.Droid.Database.Sqlite.ISQLiteDatabaseCursorFactory;
@@ -348,7 +349,7 @@ module
         BuildUnionSubQuery(
             [in] String typeDiscriminatorColumn,
             [in] ArrayOf<String> unionColumns,
-            [in] IMap* columnsPresentInTable,
+            [in] ISet* columnsPresentInTable,
             [in] Int32 computedColumnsOffset,
             [in] String typeDiscriminatorValue,
             [in] String selection,
@@ -367,7 +368,7 @@ module
         BuildUnionSubQuery(
             [in] String typeDiscriminatorColumn,
             [in] ArrayOf<String> unionColumns,
-            [in] IMap* columnsPresentInTable,
+            [in] ISet* columnsPresentInTable,
             [in] Int32 computedColumnsOffset,
             [in] String typeDiscriminatorValue,
             [in] String selection,

@@ -347,7 +347,7 @@ ECode SQLiteQueryBuilder::BuildQuery(
 ECode SQLiteQueryBuilder::BuildUnionSubQuery(
     /* [in] */ const String& typeDiscriminatorColumn,
     /* [in] */ const ArrayOf<String>& unionColumns,
-    /* [in] */ IMap* columnsPresentInTable,
+    /* [in] */ ISet* columnsPresentInTable,
     /* [in] */ Int32 computedColumnsOffset,
     /* [in] */ const String& typeDiscriminatorValue,
     /* [in] */ const String& selection,
@@ -371,7 +371,7 @@ ECode SQLiteQueryBuilder::BuildUnionSubQuery(
                     + typeDiscriminatorColumn;
         }
         else if (i <= computedColumnsOffset
-                || (columnsPresentInTable->ContainsKey(charObj, &isContain), isContain)) {
+                || (columnsPresentInTable->Contains(charObj, &isContain), isContain)) {
             (*projectionIn)[i] = unionColumn;
         }
         else {
@@ -385,7 +385,7 @@ ECode SQLiteQueryBuilder::BuildUnionSubQuery(
 ECode SQLiteQueryBuilder::BuildUnionSubQuery(
     /* [in] */ const String& typeDiscriminatorColumn,
     /* [in] */ const ArrayOf<String>& unionColumns,
-    /* [in] */ IMap* columnsPresentInTable,
+    /* [in] */ ISet* columnsPresentInTable,
     /* [in] */ Int32 computedColumnsOffset,
     /* [in] */ const String& typeDiscriminatorValue,
     /* [in] */ const String& selection,

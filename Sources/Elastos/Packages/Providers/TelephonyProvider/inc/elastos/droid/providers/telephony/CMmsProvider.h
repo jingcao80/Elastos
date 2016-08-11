@@ -12,8 +12,6 @@ using Elastos::Droid::Content::IUriMatcher;
 using Elastos::Droid::Database::Sqlite::ISQLiteDatabase;
 using Elastos::Droid::Database::Sqlite::ISQLiteQueryBuilder;
 using Elastos::Droid::Database::Sqlite::SQLiteOpenHelper;
-using Elastos::Droid::Telephony::ISmsMessage;
-using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -78,6 +76,13 @@ public:
         /* [in] */ const String& mode,
         /* [out] */ IParcelFileDescriptor** result) /*throws FileNotFoundException*/;
 
+    static CARAPI_(Int32) DeleteMessages(
+        /* [in] */ IContext* context,
+        /* [in] */ ISQLiteDatabase* db,
+        /* [in] */ const String& selection,
+        /* [in] */ ArrayOf<String>* selectionArgs,
+        /* [in] */ IUri* uri);
+
 private:
     CARAPI_(void) ConstructQueryForBox(
         /* [in] */ ISQLiteQueryBuilder* qb,
@@ -86,13 +91,6 @@ private:
     CARAPI GetMessageBoxByMatch(
         /* [in] */ Int32 match,
         /* [out] */ Int32* result);
-
-    static CARAPI_(Int32) DeleteMessages(
-        /* [in] */ IContext* context,
-        /* [in] */ ISQLiteDatabase* db,
-        /* [in] */ const String& selection,
-        /* [in] */ ArrayOf<String>* selectionArgs,
-        /* [in] */ IUri* uri);
 
     static CARAPI_(Int32) DeleteParts(
         /* [in] */ ISQLiteDatabase* db,
