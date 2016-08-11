@@ -243,8 +243,8 @@ IccSmsInterfaceManager::IccSmsInterfaceManager(
     mUserManager = IUserManager::Probe(obj);
 
     Logger::E("IccSmsInterfaceManager", "TODO  ImsSMSDispatcher is not ready!");
-    //PhoneBase* pb = (PhoneBase*)phone;
-    //mDispatcher = new ImsSMSDispatcher(phone, pb->mSmsStorageMonitor, pb->mSmsUsageMonitor);
+    PhoneBase* pb = (PhoneBase*)phone;
+    mDispatcher = new ImsSMSDispatcher(phone, pb->mSmsStorageMonitor, pb->mSmsUsageMonitor);
 }
 
 void IccSmsInterfaceManager::MarkMessagesAsRead(

@@ -674,6 +674,7 @@ SMSDispatcher::SMSDispatcher()
     , mPendingTrackerCount(0)
     , mSmsPseudoMultipart(FALSE)
 {
+    Handler::constructor();
     CAtomicInteger32::New(PREMIUM_RULE_USE_SIM, (IAtomicInteger32**)&mPremiumSmsRule);
 
     CArrayList::New((IArrayList**)&mDeliveryPendingList);

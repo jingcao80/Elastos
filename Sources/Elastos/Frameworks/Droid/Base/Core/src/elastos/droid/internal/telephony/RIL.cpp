@@ -4218,17 +4218,14 @@ void RIL::ProcessUnsolicited(
             AutoPtr<ISmsMessage> sms;
             AutoPtr<ISmsMessageHelper> hlp;
 
-            Logger::E("leliang", "TODO ProcessUnsolicited RIL_UNSOL_RESPONSE_NEW_SMS is not ready!");
-
             CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
             hlp->NewFromCMT(a, (ISmsMessage**)&sms);
 
-            Logger::E("leliang", "received sms: %s", TO_CSTR(sms));
+            //Logger::E("leliang", "received sms: %s", TO_CSTR(sms));
             if (mGsmSmsRegistrant != NULL) {
-                Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
-                //TODO
-                //AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
-                //mGsmSmsRegistrant->NotifyRegistrant(arSms);
+                //Logger::E("leliang", "line:%d, func:%s, sms:%p\n", __LINE__, __func__, sms.Get());
+                AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
+                mGsmSmsRegistrant->NotifyRegistrant(arSms);
             }
         break;
         }

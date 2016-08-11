@@ -28,8 +28,6 @@ CarClass(CSmsBroadcastUndelivered)
 public:
     CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL()
-
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IGsmInboundSmsHandler* gsmInboundSmsHandler,
@@ -51,6 +49,11 @@ private:
         CARAPI Equals(
             /* [in] */ IInterface* entry,
             /* [out] */ Boolean* result);
+    public:
+        String mAddress;
+        Int32 mReferenceNumber;
+        Int32 mMessageCount;
+
     };
     /**
      * Scan the raw table for complete SMS messages to broadcast, and old PDUs to delete.

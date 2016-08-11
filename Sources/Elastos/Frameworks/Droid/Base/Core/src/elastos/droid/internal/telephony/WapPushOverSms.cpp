@@ -99,16 +99,19 @@ ECode WapPushOverSms::OnServiceDisconnected(
 ECode WapPushOverSms::constructor(
     /* [in] */ IContext* context)
 {
+    Logger::E("WapPushOverSms", "TODO WAPPushManage not ready line:%d, func:%s\n", __LINE__, __func__);
+    return E_UNSUPPORTED_OPERATION_EXCEPTION;
     mContext = context;
     AutoPtr<IIntent> intent;
-    // CIntent::New(IWapPushManager.class->GetName(), (IIntent**)&intent);
-    AutoPtr<IPackageManager> pm;
-    context->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IComponentName> comp;
-    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
-    intent->SetComponent(comp);
     Boolean bBindService = FALSE;
-    context->BindService(intent, this, IContext::BIND_AUTO_CREATE, &bBindService);
+    //TODO depends on base/packages/WAPPushManage
+    //CIntent::New(IWapPushManager.class->GetName(), (IIntent**)&intent);
+    //AutoPtr<IPackageManager> pm;
+    //context->GetPackageManager((IPackageManager**)&pm);
+    //intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    //intent->SetComponent(comp);
+    //context->BindService(intent, this, IContext::BIND_AUTO_CREATE, &bBindService);
     if (comp == NULL || !bBindService) {
         // Rlog::E(TAG, "BindService() for wappush manager failed");
     }
