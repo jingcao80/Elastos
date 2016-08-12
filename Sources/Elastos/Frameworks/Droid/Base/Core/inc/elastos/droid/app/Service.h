@@ -72,11 +72,6 @@ public:
     CARAPI GetClassName(
         /* [out] */ String* className);
 
-    virtual CARAPI OnApplyThemeResource(
-        /* [in] */ IResourcesTheme* theme,
-        /* [in] */ Int32 resid,
-        /* [in] */ Boolean first);
-
     /** Return the application that owns this service. */
     CARAPI GetApplication(
         /* [out] */ IApplication** application);

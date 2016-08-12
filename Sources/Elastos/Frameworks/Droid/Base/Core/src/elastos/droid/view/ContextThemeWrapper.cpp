@@ -113,15 +113,6 @@ ECode ContextThemeWrapper::GetTheme(
     *theme = mTheme;
     REFCOUNT_ADD(*theme);
     return NOERROR;
-    // if (mTheme != null) {
-    //     return mTheme;
-    // }
-
-    // mThemeResource = Resources.selectDefaultTheme(mThemeResource,
-    //         getApplicationInfo().targetSdkVersion);
-    // initializeTheme();
-
-    // return mTheme;
 }
 
 ECode ContextThemeWrapper::GetSystemService(

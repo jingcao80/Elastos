@@ -325,6 +325,10 @@ ECode CActivityManagerRecentTaskInfo::ToString(
         sb += ", ";
         sb += TO_CSTR(mDescription);
     }
+    sb += ", mAffiliatedTaskId: ";
+    sb += mAffiliatedTaskId;
+    sb += ", affiliatedTaskColor: ";
+    sb += StringUtils::ToHexString(mAffiliatedTaskColor);
     sb += "}";
     *str = sb.ToString();
     return NOERROR;

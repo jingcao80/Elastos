@@ -64,14 +64,6 @@ ECode Service::GetApplication(
     return NOERROR;
 }
 
-ECode Service::OnApplyThemeResource(
-    /* [in] */ IResourcesTheme* theme,
-    /* [in] */ Int32 resid,
-    /* [in] */ Boolean first)
-{
-    return theme->ApplyStyle(resid, TRUE);
-}
-
 ECode Service::OnCreate()
 {
     return NOERROR;

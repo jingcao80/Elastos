@@ -61,7 +61,7 @@ protected:
     CARAPI AttachBaseContext(
         /* [in] */ IContext* base);
 
-    CARAPI OnApplyThemeResource(
+    virtual CARAPI OnApplyThemeResource(
         /* [in] */ IResourcesTheme* theme,
         /* [in] */ Int32 resid,
         /* [in] */ Boolean first);
