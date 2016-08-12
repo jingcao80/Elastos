@@ -210,22 +210,22 @@ ECode CWifiConfiguration::constructor(
         mAllowedKeyManagement = IBitSet::Probe(obj);
 
         obj = NULL;
-        source->GetAllowedKeyManagement((IBitSet**)&allowedProtocols);
+        source->GetAllowedProtocols((IBitSet**)&allowedProtocols);
         ICloneable::Probe(allowedProtocols)->Clone((IInterface**)&obj);
         mAllowedProtocols = IBitSet::Probe(obj);
 
         obj = NULL;
-        source->GetAllowedKeyManagement((IBitSet**)&allowedAuthAlgorithms);
+        source->GetAllowedAuthAlgorithms((IBitSet**)&allowedAuthAlgorithms);
         ICloneable::Probe(allowedAuthAlgorithms)->Clone((IInterface**)&obj);
         mAllowedAuthAlgorithms = IBitSet::Probe(obj);
 
         obj = NULL;
-        source->GetAllowedKeyManagement((IBitSet**)&allowedPairwiseCiphers);
+        source->GetAllowedPairwiseCiphers((IBitSet**)&allowedPairwiseCiphers);
         ICloneable::Probe(allowedPairwiseCiphers)->Clone((IInterface**)&obj);
         mAllowedPairwiseCiphers = IBitSet::Probe(obj);
 
         obj = NULL;
-        source->GetAllowedKeyManagement((IBitSet**)&allowedGroupCiphers);
+        source->GetAllowedGroupCiphers((IBitSet**)&allowedGroupCiphers);
         ICloneable::Probe(allowedGroupCiphers)->Clone((IInterface**)&obj);
         mAllowedGroupCiphers = IBitSet::Probe(obj);
 
@@ -373,6 +373,11 @@ ECode CWifiConfiguration::ToString(
     if (mDidSelfAdd || mSelfAdded || mNoInternetAccess) {
         sbuf.Append("\n");
     }
+
+    AutoPtr<IWifiConfigurationKeyMgmt> keyMgmt;
+    CWifiConfigurationKeyMgmt::AcquireSingleton((IWifiConfigurationKeyMgmt**)&keyMgmt);
+    AutoPtr< ArrayOf<String> > strings;
+    keyMgmt->GetStrings((ArrayOf<String>**)&strings);
     sbuf.Append(" KeyMgmt:");
     Int32 size;
     mAllowedKeyManagement->GetSize(&size);
@@ -381,10 +386,6 @@ ECode CWifiConfiguration::ToString(
         mAllowedKeyManagement->Get(k, &bFlag);
         if (bFlag) {
             sbuf.Append(" ");
-            AutoPtr<IWifiConfigurationKeyMgmt> keyMgmt;
-            CWifiConfigurationKeyMgmt::AcquireSingleton((IWifiConfigurationKeyMgmt**)&keyMgmt);
-            AutoPtr< ArrayOf<String> > strings;
-            keyMgmt->GetStrings((ArrayOf<String>**)&strings);
             if (k < strings->GetLength()) {
                 sbuf.Append((*strings)[k]);
             }
@@ -394,7 +395,7 @@ ECode CWifiConfiguration::ToString(
         }
     }
 
-    sbuf.Append(" Protocols:");
+    sbuf.Append("\n Protocols:");
     mAllowedProtocols->GetSize(&size);
     for (Int32 p = 0; p < size; p++) {
         Boolean bFlag;

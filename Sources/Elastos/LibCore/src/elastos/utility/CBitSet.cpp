@@ -80,13 +80,11 @@ ECode CBitSet::Clone(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object)
-    AutoPtr<CBitSet> clone;
-    CBitSet::NewByFriend((CBitSet**)&clone);
-    clone->mBits = mBits->Clone();
-    clone->ShrinkSize();
-    *object = (IBitSet*)clone;
-    REFCOUNT_ADD(*object);
-
+    AutoPtr< ArrayOf<Int64> > cloneBits = mBits->Clone();
+    AutoPtr<IBitSet> bs;
+    CBitSet::New(cloneBits, (IBitSet**)&bs);
+    *object = bs.Get();
+    REFCOUNT_ADD(*object)
     return NOERROR;
 }
 
