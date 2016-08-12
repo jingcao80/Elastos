@@ -891,7 +891,7 @@ AutoPtr<ViewGroup::ChildListForAccessibility> ViewGroup::ChildListForAccessibili
     /* [in] */ IViewGroup* parent,
     /* [in] */ Boolean sort)
 {
-    AutoPtr<ChildListForAccessibility> list = sPool->AcquireItem();;
+    AutoPtr<ChildListForAccessibility> list = sPool->AcquireItem();
     if (sPool == NULL) {
         list = new ChildListForAccessibility();
     }

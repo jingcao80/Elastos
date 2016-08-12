@@ -26,6 +26,7 @@ using Elastos::Droid::Graphics::IRect;
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IStrictModeSpan;
+using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::ITextWatcher;
 using Elastos::Droid::Text::IEditable;
@@ -2342,6 +2343,8 @@ private:
 
     CARAPI_(void) FinishGlows();
 
+    static AutoPtr<IStrictMode> GetStrictMode();
+
 protected:
     /**
      * Indicates that we are not in the middle of a touch gesture
@@ -2697,6 +2700,8 @@ protected:
     AutoPtr<IRunnable> mPositionScrollAfterLayout;
 
 private:
+    static AutoPtr<IStrictMode> sStrictMode;
+
     /**
      * The remote adapter containing the data to be displayed by this view to be set
      */

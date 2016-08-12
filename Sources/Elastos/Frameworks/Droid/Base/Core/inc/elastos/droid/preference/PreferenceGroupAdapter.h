@@ -20,6 +20,7 @@ using Elastos::Droid::Widget::BaseAdapter;
 using Elastos::Droid::Widget::IBaseAdapter;
 using Elastos::Core::IComparable;
 using Elastos::Utility::IList;
+using Elastos::Utility::ICollections;
 
 namespace Elastos {
 namespace Droid {
@@ -165,8 +166,12 @@ private:
     CARAPI_(void) AddPreferenceClassName(
         /* [in] */ IPreference* preference);
 
+    static AutoPtr<ICollections> GetCollections();
+
 private:
     const static String TAG;
+
+    static AutoPtr<ICollections> sCollections;
 
     /**
      * The group that we are providing data from.

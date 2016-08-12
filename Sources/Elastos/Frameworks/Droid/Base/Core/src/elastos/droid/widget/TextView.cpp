@@ -21,7 +21,7 @@
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/os/SystemClock.h"
-#include "elastos/droid/provider/CSettingsSecure.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/text/Layout.h"
 #include "elastos/droid/text/CDynamicLayout.h"
 #include "elastos/droid/text/CStaticLayout.h"
@@ -33,12 +33,13 @@
 #include "elastos/droid/text/CSpannableString.h"
 #include "elastos/droid/text/CSpannableStringBuilder.h"
 #include "elastos/droid/text/TextDirectionHeuristics.h"
-#include "elastos/droid/text/method/MetaKeyKeyListener.h"
 #include "elastos/droid/text/CBoringLayoutMetrics.h"
 #include "elastos/droid/text/CEditableFactory.h"
 #include "elastos/droid/text/CSpannableFactory.h"
 #include "elastos/droid/text/CLengthFilter.h"
 #include "elastos/droid/text/utility/Linkify.h"
+#include "elastos/droid/text/method/MetaKeyKeyListener.h"
+#include "elastos/droid/text/method/DateKeyListener.h"
 #include "elastos/droid/text/method/DigitsKeyListener.h"
 #include "elastos/droid/text/method/CDialerKeyListener.h"
 #include "elastos/droid/text/method/TextKeyListener.h"
@@ -97,8 +98,8 @@ using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IBaseBundle;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsSecure;
-using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Layout;
 using Elastos::Droid::Text::ILengthFilter;
@@ -157,8 +158,7 @@ using Elastos::Droid::Text::Method::IAllCapsTransformationMethod;
 using Elastos::Droid::Text::Method::ITransformationMethod2;
 using Elastos::Droid::Text::Method::LinkMovementMethod;
 using Elastos::Droid::Text::Method::DigitsKeyListener;
-using Elastos::Droid::Text::Method::IDateKeyListenerHelper;
-using Elastos::Droid::Text::Method::CDateKeyListenerHelper;
+using Elastos::Droid::Text::Method::DateKeyListener;
 using Elastos::Droid::Text::Method::TimeKeyListener;
 using Elastos::Droid::Text::Method::ITimeKeyListener;
 using Elastos::Droid::Text::Method::DateTimeKeyListener;
@@ -5026,10 +5026,7 @@ void TextView::SetInputType(
     else if (cls == IInputType::TYPE_CLASS_DATETIME) {
         Int32 flag = type & IInputType::TYPE_MASK_VARIATION;
         if (flag == IInputType::TYPE_DATETIME_VARIATION_DATE) {
-            AutoPtr<IDateKeyListenerHelper> helper;
-            CDateKeyListenerHelper::AcquireSingleton((IDateKeyListenerHelper**)&helper);
-            AutoPtr<IDateKeyListener> dkl;
-            helper->GetInstance((IDateKeyListener**)&dkl);
+            AutoPtr<IDateKeyListener> dkl = DateKeyListener::GetInstance();
             input = IKeyListener::Probe(dkl);
         }
         else if (flag == IInputType::TYPE_DATETIME_VARIATION_TIME) {
@@ -9853,11 +9850,9 @@ Boolean TextView::ShouldSpeakPasswordsForAccessibility()
     mContext->GetContentResolver((IContentResolver**)&cr);
 
     Int32 pwd = 0;
-    AutoPtr<ISettingsSecure> ss;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&ss);
     AutoPtr<IContentResolver> res;
     mContext->GetContentResolver((IContentResolver**)&res);
-    ss->GetInt32(res, ISettingsSecure::ACCESSIBILITY_SPEAK_PASSWORD, 0, &pwd);
+    Settings::Secure::GetInt32(res, ISettingsSecure::ACCESSIBILITY_SPEAK_PASSWORD, 0, &pwd);
     return pwd == 1;
 }
 

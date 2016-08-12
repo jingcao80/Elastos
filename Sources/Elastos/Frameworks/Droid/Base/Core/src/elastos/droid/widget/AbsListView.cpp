@@ -41,7 +41,6 @@ using Elastos::Droid::Graphics::Drawable::EIID_ITransitionDrawable;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::Graphics::CRect;
-using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Text::EIID_ITextWatcher;
@@ -2043,9 +2042,7 @@ void AbsListView::FlingRunnable::Start(
     }
 
     if (mHost->mFlingStrictSpan == NULL) {
-        AutoPtr<IStrictMode> helper;
-        CStrictMode::AcquireSingleton((IStrictMode**)&helper);
-        helper->EnterCriticalSpan(String("AbsListView-fling"),
+        AbsListView::GetStrictMode()->EnterCriticalSpan(String("AbsListView-fling"),
                 (IStrictModeSpan**)&mHost->mFlingStrictSpan);
     }
 }
@@ -2691,6 +2688,16 @@ ECode AbsListView::TouchModeResetRunnable::Run()
 
 CAR_INTERFACE_IMPL_6(AbsListView, AdapterView, IAbsListView, ITextWatcher, IOnGlobalLayoutListener,
         IFilterListener, IOnTouchModeChangeListener, IRemoteAdapterConnectionCallback);
+
+AutoPtr<IStrictMode> AbsListView::sStrictMode;
+
+AutoPtr<IStrictMode> AbsListView::GetStrictMode()
+{
+    if (sStrictMode == NULL) {
+        CStrictMode::AcquireSingleton((IStrictMode**)&sStrictMode);
+    }
+    return sStrictMode;
+}
 
 AbsListView::AbsListView()
     : mChoiceMode(IAbsListView::CHOICE_MODE_NONE)
@@ -5478,9 +5485,7 @@ void AbsListView::ScrollIfNeeded(
 
         if (mScrollStrictSpan == NULL) {
             // If it's non-null, we're already in a scroll.
-            AutoPtr<IStrictMode> helper;
-            CStrictMode::AcquireSingleton((IStrictMode**)&helper);
-            helper->EnterCriticalSpan(String("AbsListView-scroll"),
+            GetStrictMode()->EnterCriticalSpan(String("AbsListView-scroll"),
                     (IStrictModeSpan**)&mScrollStrictSpan);
         }
 

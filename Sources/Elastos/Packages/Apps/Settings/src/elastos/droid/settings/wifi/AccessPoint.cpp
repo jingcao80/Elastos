@@ -13,11 +13,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include "elastos/droid/os/SystemClock.h"
-#include <elastos/utility/logging/Logger.h>
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Os::SystemClock;
-
 using Elastos::Droid::Content::Res::IResourcesTheme;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::Drawable::IStateListDrawable;
@@ -40,7 +35,6 @@ using Elastos::Droid::Net::NetworkInfoDetailedState_NONE;
 using Elastos::Droid::Wifi::IWifiConfigurationStatus;
 using Elastos::Droid::Wifi::IWifiConfigurationKeyMgmt;
 using Elastos::Droid::Wifi::CWifiManagerHelper;
-using Elastos::Droid::Wifi::IWifiManagerHelper;
 using Elastos::Droid::Wifi::CWifiConfiguration;
 using Elastos::Droid::Wifi::CWifiConfigurationHelper;
 using Elastos::Droid::Wifi::IWifiConfigurationHelper;
@@ -96,7 +90,17 @@ const Int32 AccessPoint::VISIBILITY_MAX_AGE_IN_MILLI = 1000000;
 const Int32 AccessPoint::VISIBILITY_OUTDATED_AGE_IN_MILLI = 20000;
 const Int32 AccessPoint::SECOND_TO_MILLI = 1000;
 
+AutoPtr<IWifiManagerHelper> AccessPoint::sWifiMgrHelper;
+
 CAR_INTERFACE_IMPL(AccessPoint, Preference, IAccessPoint);
+
+AutoPtr<IWifiManagerHelper> AccessPoint::GetWifiManagerHelper()
+{
+    if (sWifiMgrHelper == NULL) {
+        CWifiManagerHelper::AcquireSingleton((IWifiManagerHelper**)&sWifiMgrHelper);
+    }
+    return sWifiMgrHelper;
+}
 
 AccessPoint::AccessPoint()
     : mSecurity(0)
@@ -318,6 +322,7 @@ ECode AccessPoint::OnBindView(
     /* [in] */ IView* view)
 {
     Preference::OnBindView(view);
+
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     UpdateIcon(GetLevel(), context);
@@ -419,10 +424,8 @@ ECode AccessPoint::CompareTo(
     }
 
     // Sort by signal strength.
-    AutoPtr<IWifiManagerHelper> helper;
-    CWifiManagerHelper::AcquireSingleton((IWifiManagerHelper**)&helper);
     Int32 difference;
-    helper->CompareSignalLevel(other->mRssi, mRssi, &difference);
+    GetWifiManagerHelper()->CompareSignalLevel(other->mRssi, mRssi, &difference);
     if (difference != 0) {
         *result = difference;
         return NOERROR;
@@ -490,10 +493,8 @@ Boolean AccessPoint::Update(
     if (mSsid.Equals(SSID) && mSecurity == GetSecurity(result)) {
         Int32 level;
         result->GetLevel(&level);
-        AutoPtr<IWifiManagerHelper> helper;
-        CWifiManagerHelper::AcquireSingleton((IWifiManagerHelper**)&helper);
         Int32 difference;
-        helper->CompareSignalLevel(level, mRssi, &difference);
+        GetWifiManagerHelper()->CompareSignalLevel(level, mRssi, &difference);
         if (difference > 0) {
             Int32 oldLevel = GetLevel();
             result->GetLevel(&mRssi);
@@ -543,10 +544,9 @@ Int32 AccessPoint::GetLevel()
     if (mRssi == Elastos::Core::Math::INT32_MAX_VALUE) {
         return -1;
     }
-    AutoPtr<IWifiManagerHelper> helper;
-    CWifiManagerHelper::AcquireSingleton((IWifiManagerHelper**)&helper);
+
     Int32 level;
-    helper->CalculateSignalLevel(mRssi, 4, &level);
+    GetWifiManagerHelper()->CalculateSignalLevel(mRssi, 4, &level);
     return level;
 }
 

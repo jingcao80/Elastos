@@ -8,7 +8,7 @@
 #include "elastos/droid/app/FragmentManagerImpl.h"
 #include "elastos/droid/app/CApplication.h"
 #include "elastos/droid/app/CPendingIntent.h"
-#include "elastos/droid/app/CTaskStackBuilderHelper.h"
+#include "elastos/droid/app/CTaskStackBuilder.h"
 #include "elastos/droid/app/CActivityNonConfigurationInstances.h"
 #include "elastos/droid/app/CActivityManagerTaskDescription.h"
 #include "elastos/droid/app/CActivityManager.h"
@@ -25,13 +25,12 @@
 #include "elastos/droid/text/Selection.h"
 #include "elastos/droid/text/CSpannableStringBuilder.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/text/method/CTextKeyListenerHelper.h"
+#include "elastos/droid/text/method/TextKeyListener.h"
 #include "elastos/droid/content/CIntent.h"
-#include "elastos/droid/content/CIntentHelper.h"
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/content/res/CConfiguration.h"
-#include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/net/Uri.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/internal/app/CWindowDecorActionBar.h"
 #include "elastos/droid/internal/app/CToolbarActionBar.h"
@@ -51,8 +50,7 @@
 #include <Elastos.CoreLibrary.IO.h>
 
 using Elastos::Droid::R;
-using Elastos::Droid::Net::IUriHelper;
-using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::Looper;
@@ -63,8 +61,6 @@ using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::CIntent;
-using Elastos::Droid::Content::IIntentHelper;
-using Elastos::Droid::Content::CIntentHelper;
 using Elastos::Droid::Content::IIIntentSender;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::IContentResolver;
@@ -83,8 +79,7 @@ using Elastos::Droid::Text::CSpannableStringBuilder;
 using Elastos::Droid::Text::Selection;
 using Elastos::Droid::Text::ISpannable;
 using Elastos::Droid::Text::IEditable;
-using Elastos::Droid::Text::Method::ITextKeyListenerHelper;
-using Elastos::Droid::Text::Method::CTextKeyListenerHelper;
+using Elastos::Droid::Text::Method::TextKeyListener;
 using Elastos::Droid::Text::Method::IKeyListener;
 using Elastos::Droid::Text::Method::EIID_IKeyListener;
 using Elastos::Droid::Text::Method::ITextKeyListener;
@@ -1390,10 +1385,8 @@ ECode Activity::OnKeyDown(
             handled = FALSE;
         }
         else {
-            AutoPtr<ITextKeyListenerHelper> listenerHelper;
-            CTextKeyListenerHelper::AcquireSingleton((ITextKeyListenerHelper**)&listenerHelper);
             AutoPtr<ITextKeyListener> listener;
-            listenerHelper->GetInstance((ITextKeyListener**)&listener);
+            TextKeyListener::GetInstance((ITextKeyListener**)&listener);
             IKeyListener* listenerK = IKeyListener::Probe(listener);
             FAIL_RETURN(listenerK->OnKeyDown(NULL, IEditable::Probe(mDefaultKeySsb), keyCode, event, &handled));
             Int32 length = 0;
@@ -1409,9 +1402,7 @@ ECode Activity::OnKeyDown(
                     StringBuilder sb("tel:");
                     sb += str;
                     AutoPtr<IUri> uri;
-                    AutoPtr<IUriHelper> helper;
-                    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-                    FAIL_RETURN(helper->Parse(sb.ToString(), (IUri**)&uri));
+                    FAIL_RETURN(Uri::Parse(sb.ToString(), (IUri**)&uri));
 
                     AutoPtr<IIntent> intent;
                     CIntent::New(IIntent::ACTION_DIAL, uri, (IIntent**)&intent);
@@ -2023,10 +2014,7 @@ ECode Activity::OnNavigateUp(
             // the current activity and call it a day.
             Finish();
         } else if (recreate) {
-            AutoPtr<ITaskStackBuilderHelper> taskBHelper;
-            CTaskStackBuilderHelper::AcquireSingleton((ITaskStackBuilderHelper**)&taskBHelper);
-            AutoPtr<ITaskStackBuilder> b;
-            taskBHelper->Create(this, (ITaskStackBuilder**)&b);
+            AutoPtr<ITaskStackBuilder> b = CTaskStackBuilder::Create(this);
             OnCreateNavigateUpTaskStack(b);
             OnPrepareNavigateUpTaskStack(b);
             b->StartActivities();
@@ -3971,9 +3959,7 @@ ECode Activity::GetParentActivityIntent(
 
     AutoPtr<IIntent> parentIntent;
     if (parentActivity.IsNull()) {
-        AutoPtr<IIntentHelper> helper;
-        CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
-        FAIL_RETURN(helper->MakeMainActivity(target, (IIntent**)&parentIntent));
+        parentIntent = CIntent::MakeMainActivity(target);
     }
     else {
         AutoPtr<IIntent> obj;

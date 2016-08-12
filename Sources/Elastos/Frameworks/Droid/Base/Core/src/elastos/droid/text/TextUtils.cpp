@@ -36,7 +36,6 @@
 #include "elastos/droid/text/style/CLocaleSpan.h"
 #include "elastos/droid/text/style/CTtsSpan.h"
 #include "elastos/droid/content/res/CResources.h"
-#include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include <elastos/core/Character.h>
@@ -54,8 +53,6 @@ using Elastos::Droid::R;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::CResources;
-using Elastos::Droid::Content::Res::IResourcesHelper;
-using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Os::SystemProperties;
@@ -1310,10 +1307,7 @@ AutoPtr<ICharSequence> TextUtils::Ellipsize(
     /* [in] */ Boolean preserveLength,
     /* [in] */ ITextUtilsEllipsizeCallback* callback)
 {
-    AutoPtr<IResourcesHelper> helper;
-    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&helper);
-    AutoPtr<IResources> resources;
-    helper->GetSystem((IResources**)&resources);
+    AutoPtr<IResources> resources = CResources::GetSystem();
 
     String ellipsis;
     if (where == TextUtilsTruncateAt_END_SMALL)  {

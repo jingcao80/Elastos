@@ -34,6 +34,8 @@ public:
     static CARAPI GetCHARACTERS(
         /* [out] */ ArrayOf<Char32>** array);
 
+    static AutoPtr<IDateKeyListener> GetInstance();
+
     //override
     CARAPI OnKeyUp(
         /* [in] */ IView* view,
@@ -59,6 +61,7 @@ public:
      * @see #getAcceptedChars
      */
     static const AutoPtr<ArrayOf<Char32> > CHARACTERS;// = new Char32[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '/', '-', '.' };
+    static AutoPtr<IDateKeyListener> sInstance;
 };
 
 
