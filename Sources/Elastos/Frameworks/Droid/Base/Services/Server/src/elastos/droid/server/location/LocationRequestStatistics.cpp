@@ -12,6 +12,7 @@ using Elastos::Core::Math;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -95,7 +96,7 @@ void LocationRequestStatistics::PackageStatistics::StartRequesting(
 void LocationRequestStatistics::PackageStatistics::StopRequesting() {
     if (mNumActiveRequests <= 0) {
         // Shouldn't be a possible code path
-        Logger::E(TAG, "Reference counting corrupted in usage statistics.");
+        Logger::E(TAG, "Reference counting corrupted in usage mStatistics.");
         return;
     }
 
@@ -192,7 +193,9 @@ ECode LocationRequestStatistics::PackageStatistics::ToString(
 const String LocationRequestStatistics::TAG("LocationStats");
 
 LocationRequestStatistics::LocationRequestStatistics()
-{}
+{
+    CHashMap::New((IHashMap**)&mStatistics);
+}
 
 ECode LocationRequestStatistics::StartRequesting(
     /* [in] */ const String& packageName,
@@ -201,11 +204,11 @@ ECode LocationRequestStatistics::StartRequesting(
 {
     AutoPtr<PackageProviderKey> key = new PackageProviderKey(packageName, providerName);
     AutoPtr<IInterface> obj;
-    statistics->Get((IObject*)key.Get(), (IInterface**)&obj);
+    mStatistics->Get((IObject*)key.Get(), (IInterface**)&obj);
     AutoPtr<PackageStatistics> stats = (PackageStatistics*)(IObject::Probe(obj));
     if (stats == NULL) {
         stats = new PackageStatistics();
-        statistics->Put((IObject*)key.Get(), (IObject*)stats.Get());
+        mStatistics->Put((IObject*)key.Get(), (IObject*)stats.Get());
     }
     stats->StartRequesting(intervalMs);
     return NOERROR;
@@ -217,14 +220,14 @@ ECode LocationRequestStatistics::StopRequesting(
 {
     AutoPtr<PackageProviderKey> key = new PackageProviderKey(packageName, providerName);
     AutoPtr<IInterface> obj;
-    statistics->Get((IObject*)key.Get(), (IInterface**)&obj);
+    mStatistics->Get((IObject*)key.Get(), (IInterface**)&obj);
     AutoPtr<PackageStatistics> stats = (PackageStatistics*)(IObject::Probe(obj));
     if (stats != NULL) {
         stats->StopRequesting();
     }
     else {
         // This shouldn't be a possible code path.
-        Logger::E(TAG, "Couldn't find package statistics when removing location request.");
+        Logger::E(TAG, "Couldn't find package mStatistics when removing location request.");
     }
     return NOERROR;
 }
