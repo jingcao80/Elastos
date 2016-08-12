@@ -1,4 +1,5 @@
 #include "elastos/droid/text/method/DateKeyListener.h"
+#include "elastos/droid/text/method/CDateKeyListener.h"
 
 namespace Elastos {
 namespace Droid {
@@ -17,6 +18,9 @@ static AutoPtr<ArrayOf<Char32> > InitCHARACTERS()
 
 const AutoPtr<ArrayOf<Char32> > DateKeyListener::CHARACTERS = InitCHARACTERS();
 
+
+AutoPtr<IDateKeyListener> DateKeyListener::sInstance;
+
 CAR_INTERFACE_IMPL(DateKeyListener, NumberKeyListener, IDateKeyListener)
 
 DateKeyListener::DateKeyListener()
@@ -28,6 +32,14 @@ DateKeyListener::~DateKeyListener()
 ECode DateKeyListener::constructor()
 {
     return NOERROR;
+}
+
+AutoPtr<IDateKeyListener> DateKeyListener::GetInstance()
+{
+    if (sInstance == NULL) {
+        CDateKeyListener::New((IDateKeyListener**)&sInstance);
+    }
+    return sInstance;
 }
 
 ECode DateKeyListener::GetInputType(

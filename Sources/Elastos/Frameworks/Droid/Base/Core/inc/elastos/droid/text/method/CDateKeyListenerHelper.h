@@ -29,10 +29,6 @@ public:
 
     CARAPI GetInstance(
         /* [out] */ IDateKeyListener** ret);
-
-private:
-    static AutoPtr<IDateKeyListener> sInstance;
-
 };
 
 } // namespace Method

@@ -9,7 +9,7 @@
 #include "elastos/droid/text/MeasuredText.h"
 #include "elastos/droid/text/AndroidBidi.h"
 #include "elastos/droid/text/method/MetaKeyKeyListener.h"
-#include "elastos/droid/emoji/CEmojiFactoryHelper.h"
+#include "elastos/droid/emoji/EmojiFactory.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/internal/utility/GrowingArrayUtils.h"
@@ -17,8 +17,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Emoji::IEmojiFactoryHelper;
-using Elastos::Droid::Emoji::CEmojiFactoryHelper;
+using Elastos::Droid::Emoji::EmojiFactory;
 using Elastos::Droid::Graphics::CRect;
 //using Elastos::Droid::Graphics::PathDirection;
 using Elastos::Droid::Graphics::PathDirection_CW;
@@ -373,25 +372,19 @@ static AutoPtr<ILayoutDirections> InitDIRS_ALL_RIGHT_TO_LEFT()
 
 static AutoPtr<IEmojiFactory> InitEMOJI()
 {
-    AutoPtr<IEmojiFactoryHelper> efh;
-    CEmojiFactoryHelper::AcquireSingleton((IEmojiFactoryHelper**)&efh);
     AutoPtr<IEmojiFactory> ef;
-    // TODO:
-    // efh->NewAvailableInstance((IEmojiFactory**)&ef);
-    // if (ef != NULL) {
-    //     ef->GetMinimumAndroidPua(&(Layout::MIN_EMOJI));
-    //     ef->GetMaximumAndroidPua(&(Layout::MAX_EMOJI));
-    // }
-    // else {
-    //     Layout::MIN_EMOJI = -1;
-    //     Layout::MAX_EMOJI = -1;
-    // }
-
+    EmojiFactory::NewAvailableInstance((IEmojiFactory**)&ef);
+    if (ef != NULL) {
+        ef->GetMinimumAndroidPua(&(Layout::MIN_EMOJI));
+        ef->GetMaximumAndroidPua(&(Layout::MAX_EMOJI));
+    }
+    else {
+        Layout::MIN_EMOJI = -1;
+        Layout::MAX_EMOJI = -1;
+    }
     return ef;
 }
 
-
-// AutoPtr< ArrayOf<IParagraphStyle*> > Layout::NO_PARA_SPANS = ArrayOf<IParagraphStyle*>::Alloc(0);
 AutoPtr< ArrayOf<IInterface*> > Layout::NO_PARA_SPANS = ArrayOf<IInterface*>::Alloc(0);
 AutoPtr<IEmojiFactory> Layout::EMOJI_FACTORY = InitEMOJI();
 AutoPtr<IRect> Layout::sTempRect = InitsTempRect();

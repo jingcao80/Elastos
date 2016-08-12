@@ -11,8 +11,6 @@ CAR_SINGLETON_IMPL(CDateKeyListenerHelper)
 
 CAR_INTERFACE_IMPL(CDateKeyListenerHelper, Singleton, IDateKeyListenerHelper)
 
-AutoPtr<IDateKeyListener> CDateKeyListenerHelper::sInstance;
-
 ECode CDateKeyListenerHelper::GetCHARACTERS(
     /* [out, callee] */ ArrayOf<Char32>** ret)
 {
@@ -22,11 +20,9 @@ ECode CDateKeyListenerHelper::GetCHARACTERS(
 ECode CDateKeyListenerHelper::GetInstance(
     /* [out] */ IDateKeyListener** ret)
 {
-    if (sInstance == NULL) {
-        CDateKeyListener::New((IDateKeyListener**)&sInstance);
-    }
-
-    *ret = sInstance;
+    VALIDATE_NOT_NULL(ret)
+    AutoPtr<IDateKeyListener> l = DateKeyListener::GetInstance();
+    *ret = l;
     REFCOUNT_ADD(*ret)
     return NOERROR;
 }

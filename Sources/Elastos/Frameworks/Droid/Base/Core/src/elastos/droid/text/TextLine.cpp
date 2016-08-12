@@ -8,8 +8,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
+#include <Elastos.Droid.Emoji.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Graphics::CRectF;
@@ -208,12 +208,13 @@ void TextLine::Draw(
                 if (codept >= 0xd800 && codept < 0xdc00 && j + 1 < runLimit) {
                     assert(0 && "TODO");
 //                    codept = Character::CodePointAt(mChars, j);
-/*                    if (codept >= Layout::MIN_EMOJI && codept <= Layout::MAX_EMOJI) {
-                        bm = Layout::EMOJI_FACTORY->GetBitmapFromAndroidPua(codept);
-                    } else if (codept > 0xffff) {
+                    if (codept >= Layout::MIN_EMOJI && codept <= Layout::MAX_EMOJI) {
+                        Layout::EMOJI_FACTORY->GetBitmapFromAndroidPua(codept, (IBitmap**)&bm);
+                    }
+                    else if (codept > 0xffff) {
                         ++j;
                         continue;
-                    }*/
+                    }
                 }
             }
 
@@ -298,7 +299,7 @@ Float TextLine::Measure(
                     assert(0 && "TODO");
                     // codept = Character::CodePointAt(chars, j);
                     if (codept >= Layout::MIN_EMOJI && codept <= Layout::MAX_EMOJI) {
-                        // bm = Layout::EMOJI_FACTORY->GetBitmapFromAndroidPua(codept);
+                        Layout::EMOJI_FACTORY->GetBitmapFromAndroidPua(codept, (IBitmap**)&bm);
                     }
                     else if (codept > 0xffff) {
                         ++j;

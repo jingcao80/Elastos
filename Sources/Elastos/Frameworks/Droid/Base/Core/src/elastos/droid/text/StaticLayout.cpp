@@ -1,6 +1,7 @@
 
 #include <Elastos.CoreLibrary.Text.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Emoji.h>
 #include "elastos/droid/text/StaticLayout.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/TextDirectionHeuristics.h"
@@ -18,6 +19,7 @@
 #include "utils/misc.h"
 #include "utils/Log.h"
 
+using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::CPaintFontMetricsInt;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Internal::Utility::GrowingArrayUtils;
@@ -448,35 +450,36 @@ ECode StaticLayout::Generate(
                 else if (c >= CHAR_FIRST_HIGH_SURROGATE && c <= CHAR_LAST_LOW_SURROGATE
                         && j + 1 < spanEnd) {
                     assert(0 && "TODO");
+                    Int32 emoji = 0;
 //                    Int32 emoji = Character.codePointAt(chs, j - paraStart);
-//
-//                    if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
-//                        AutoPtr<IBitmap> bm = EMOJI_FACTORY->GetBitmapFromAndroidPua(emoji);
-//
-//                        if (bm != NULL) {
-//                            AutoPtr<IPaint> whichPaint;
-//
-//                            if (spanned == NULL) {
-//                                whichPaint = paint;
-//                            } else {
-//                                whichPaint = mWorkPaint;
-//                            }
-//
-//                            Int32 width, height, ascent;
-//                            bm->GetWidth(&width);
-//                            whichPaint->Ascent(&ascent);
-//                            bm->GetHeight(&height);
-//                            Float wid = width * -ascent / height;
-//
-//                            w += wid;
-//                            hasTabOrEmoji = TRUE;
-//                            j++;
-//                        } else {
-//                            w += widths[j - paraStart];
-//                        }
-//                    } else {
-//                        w += widths[j - paraStart];
-//                    }
+                    if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
+                        AutoPtr<IBitmap> bm;
+                        EMOJI_FACTORY->GetBitmapFromAndroidPua(emoji, (IBitmap**)&bm);
+                        if (bm != NULL) {
+                            AutoPtr<IPaint> whichPaint;
+                            if (spanned == NULL) {
+                                whichPaint = p;
+                            } else {
+                                whichPaint = IPaint::Probe(mWorkPaint);
+                            }
+
+                            Int32 width, height;
+                            bm->GetWidth(&width);
+                            bm->GetHeight(&height);
+                            Float ascent;
+                            whichPaint->Ascent(&ascent);
+                            Float wid = width * -ascent / height;
+
+                            w += wid;
+                            hasTabOrEmoji = TRUE;
+                            j++;
+                        } else {
+                            w += (*widths)[j - paraStart];
+                        }
+
+                    } else {
+                        w += (*widths)[j - paraStart];
+                    }
                 } else {
                     w += (*widths)[j - paraStart];
                 }

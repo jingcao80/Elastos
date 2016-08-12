@@ -25,7 +25,6 @@ using Elastos::Core::Math;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::IArrayList;
-using Elastos::Utility::ICollections;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -264,14 +263,21 @@ AutoPtr<IPreferenceLayout> PreferenceGroupAdapter::CreatePreferenceLayout(
     return pl;
 }
 
+AutoPtr<ICollections> PreferenceGroupAdapter::sCollections;
+AutoPtr<ICollections> PreferenceGroupAdapter::GetCollections()
+{
+    if (sCollections == NULL) {
+        CCollections::AcquireSingleton((ICollections**)&sCollections);
+    }
+    return sCollections;
+}
+
 void PreferenceGroupAdapter::AddPreferenceClassName(
     /* [in] */ IPreference* preference)
 {
     AutoPtr<IPreferenceLayout> pl = CreatePreferenceLayout(preference, NULL);
-    AutoPtr<ICollections> collections;
-    CCollections::AcquireSingleton((ICollections**)&collections);
     Int32 insertPos;
-    collections->BinarySearch(mPreferenceLayouts, pl, &insertPos);
+    GetCollections()->BinarySearch(mPreferenceLayouts, pl, &insertPos);
 
     // Only insert if it doesn't exist (when it is negative).
     if (insertPos < 0) {
@@ -350,10 +356,8 @@ ECode PreferenceGroupAdapter::GetView(
 
     // If it's not one of the cached ones, set the convertView to null so that
     // the layout gets re-created by the Preference.
-    AutoPtr<ICollections> collections;
-    CCollections::AcquireSingleton((ICollections**)&collections);
     Int32 index, type, viewType;
-    if ((collections->BinarySearch(mPreferenceLayouts, mTempPreferenceLayout, &index), index < 0) ||
+    if ((GetCollections()->BinarySearch(mPreferenceLayouts, mTempPreferenceLayout, &index), index < 0) ||
         (GetItemViewType(position, &type),  GetHighlightItemViewType(&viewType), type == viewType)) {
         convertView = NULL;
     }
@@ -454,10 +458,8 @@ ECode PreferenceGroupAdapter::GetItemViewType(
 
     mTempPreferenceLayout = CreatePreferenceLayout(preference, mTempPreferenceLayout);
 
-    AutoPtr<ICollections> collections;
-    CCollections::AcquireSingleton((ICollections**)&collections);
     Int32 viewType;
-    collections->BinarySearch(mPreferenceLayouts, mTempPreferenceLayout, &viewType);
+    GetCollections()->BinarySearch(mPreferenceLayouts, mTempPreferenceLayout, &viewType);
     if (viewType < 0) {
         // This is a class that was seen after we returned the count, so
         // don't recycle it.

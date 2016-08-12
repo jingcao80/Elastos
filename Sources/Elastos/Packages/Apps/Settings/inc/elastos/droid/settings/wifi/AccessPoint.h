@@ -15,6 +15,7 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::Wifi::IScanResult;
 using Elastos::Droid::Wifi::IWifiConfiguration;
 using Elastos::Droid::Wifi::IWifiInfo;
+using Elastos::Droid::Wifi::IWifiManagerHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -140,6 +141,8 @@ private:
      */
     CARAPI_(void) Refresh();
 
+    static AutoPtr<IWifiManagerHelper> GetWifiManagerHelper();
+
 public:
     static const String TAG;
 
@@ -199,6 +202,8 @@ private:
     static const AutoPtr< ArrayOf<Int32> > STATE_NONE;
 
     static AutoPtr< ArrayOf<Int32> > wifi_signal_attributes;
+
+    static AutoPtr<IWifiManagerHelper> sWifiMgrHelper;
 
     AutoPtr<IWifiConfiguration> mConfig;
 
