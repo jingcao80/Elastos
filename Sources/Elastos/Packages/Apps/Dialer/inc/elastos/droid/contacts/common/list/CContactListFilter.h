@@ -11,6 +11,7 @@
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Net::IUriBuilder;
+using Elastos::Core::IComparable;
 using Elastos::Core::Object;
 
 namespace Elastos {

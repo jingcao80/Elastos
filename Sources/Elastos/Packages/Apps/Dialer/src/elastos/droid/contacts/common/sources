@@ -12,5 +12,6 @@ SOURCES += ContactStatusUtil.cpp
 SOURCES += ContactPresenceIconUtil.cpp
 
 ELASTOS_LIBS += interactions/interactions.lib
+#ELASTOS_LIBS += list/list.lib
 ELASTOS_LIBS += util/util.lib
 ELASTOS_LIBS += widget/widget.lib

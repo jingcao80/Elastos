@@ -1718,31 +1718,31 @@ module
     } //namespace Droid
     } //namespace Elastos
 
-    namespace Elastos {
-    namespace Droid {
-    namespace Contacts {
-    namespace Common {
-    namespace List {
-
-    class CContactListFilter {
-        constructor();
-
-        constructor(
-            [in] Int32 filterType,
-            [in] String accountType,
-            [in] String accountName,
-            [in] String dataSet,
-            [in] IDrawable* icon);
-
-        interface IContactListFilter;
-        interface IComparable;
-        interface IParcelable;
-    }
-
-    } // List
-    } // Common
-    } // Contacts
-    } // Droid
-    } // Elastos
+//    namespace Elastos {
+//    namespace Droid {
+//    namespace Contacts {
+//    namespace Common {
+//    namespace List {
+//
+//    class CContactListFilter {
+//        constructor();
+//
+//        constructor(
+//            [in] Int32 filterType,
+//            [in] String accountType,
+//            [in] String accountName,
+//            [in] String dataSet,
+//            [in] IDrawable* icon);
+//
+//        interface IContactListFilter;
+//        interface IComparable;
+//        interface IParcelable;
+//    }
+//
+//    } // List
+//    } // Common
+//    } // Contacts
+//    } // Droid
+//    } // Elastos
 
 }
