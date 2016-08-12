@@ -1211,6 +1211,7 @@ ECode WifiServiceImpl::ReportActivityInfo(
 ECode WifiServiceImpl::GetConfiguredNetworks(
     /* [out] */ IList** result)
 {
+    VALIDATE_NOT_NULL(result)
     EnforceAccessPermission();
     if (mWifiStateMachineChannel != NULL) {
         AutoPtr<IBinderHelper> binderHelper;

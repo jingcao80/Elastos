@@ -1214,8 +1214,8 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
     /* [in] */ IWifiInfo* lastInfo,
     /* [in] */ NetworkInfoDetailedState lastState)
 {
-    AutoPtr<IArrayList> accessPoints;
-    CArrayList::New((IArrayList**)&accessPoints);
+    AutoPtr<IList> accessPoints;
+    CArrayList::New((IList**)&accessPoints);
     /** Lookup table to more quickly update AccessPoints by only considering objects with the
      * correct SSID.  Maps SSID -> List of AccessPoints with the given SSID.  */
     AutoPtr<Multimap> apMap = new Multimap();
@@ -1263,17 +1263,14 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
             AutoPtr<IInterface> obj;
             results->Get(i, (IInterface**)&obj);
             IScanResult* result = IScanResult::Probe(obj);
-            if (result == NULL) {
-                assert(obj == NULL);
-                continue;
-            }
+            assert(result != NULL);
 
             // Ignore hidden and ad-hoc networks.
             String SSID;
             result->GetSSID(&SSID);
             String capabilities;
-            if (SSID.IsNull() || SSID.GetLength() == 0 ||
-                    (result->GetCapabilities(&capabilities), capabilities).Contains("[IBSS]")) {
+            if (SSID.IsNullOrEmpty() ||
+                (result->GetCapabilities(&capabilities), capabilities).Contains("[IBSS]")) {
                 continue;
             }
 
@@ -1302,8 +1299,8 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
     // Pre-sort accessPoints to speed preference insertion
     AutoPtr<ICollections> coll;
     CCollections::AcquireSingleton((ICollections**)&coll);
-    coll->Sort(IList::Probe(accessPoints));
-    return IList::Probe(accessPoints);
+    coll->Sort(accessPoints);
+    return accessPoints;
 }
 
 void WifiSettings::HandleEvent(

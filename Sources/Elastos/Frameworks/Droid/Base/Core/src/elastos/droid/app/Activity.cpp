@@ -3408,7 +3408,6 @@ ECode Activity::SetTaskDescription(
         taskDescription->GetLabel(&label);
         Int32 color;
         taskDescription->GetPrimaryColor(&color);
-        Logger::I(TAG, " >> SetTaskDescription: iconFilename:%s, color: %08x", iconFilename.string(), color);
         CActivityManagerTaskDescription::New(label, icon, color, (IActivityManagerTaskDescription**)&td);
     } else {
         td = taskDescription;
