@@ -229,12 +229,12 @@ module
     using interface Elastos.Droid.Widget.ITextView;
 //    using interface Elastos.Droid.Widget.IFilterListener;
 //    using interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback;
-//    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
 
     using interface Elastos.Droid.Support.V4.View.IViewPagerOnPageChangeListener;
 
-//    using interface Elastos.Core.IComparable;
+    using interface Elastos.Core.IComparable;
 //    using interface Elastos.Core.ICharSequence;
 
     using interface Elastos.Droid.Contacts.Common.List.IOnPhoneNumberPickerActionListener;
@@ -1717,5 +1717,32 @@ module
     } //namespace Support
     } //namespace Droid
     } //namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    class CContactListFilter {
+        constructor();
+
+        constructor(
+            [in] Int32 filterType,
+            [in] String accountType,
+            [in] String accountName,
+            [in] String dataSet,
+            [in] IDrawable* icon);
+
+        interface IContactListFilter;
+        interface IComparable;
+        interface IParcelable;
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
 
 }

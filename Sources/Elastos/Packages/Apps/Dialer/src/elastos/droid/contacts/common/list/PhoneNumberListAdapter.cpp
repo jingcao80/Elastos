@@ -1,7 +1,10 @@
 
 #include "Elastos.Droid.Provider.h"
+// #include "elastos/droid/contacts/common/ContactPhotoManager.h"
 #include "elastos/droid/contacts/common/list/PhoneNumberListAdapter.h"
 #include "elastos/droid/contacts/common/list/ContactListItemView.h"
+#include "elastos/droid/contacts/common/list/DirectoryPartition.h"
+#include "elastos/droid/contacts/common/list/Constants.h"
 #include "elastos/droid/contacts/common/extensions/ExtensionsFactory.h"
 #include "elastos/droid/contacts/common/preference/ContactsPreferences.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -15,6 +18,7 @@
 
 using Elastos::Droid::Contacts::IContentUris;
 using Elastos::Droid::Contacts::CContentUris;
+// using Elastos::Droid::Contacts::Common::ContactPhotoManager;
 using Elastos::Droid::Contacts::Common::Extensions::ExtensionsFactory;
 using Elastos::Droid::Contacts::Common::List::EIID_IPhoneNumberListAdapter;
 using Elastos::Droid::Net::IUriHelper;
@@ -34,6 +38,8 @@ using Elastos::Droid::Provider::IContactsContractDirectory;
 using Elastos::Droid::Provider::IContactsContractContactCounts;
 using Elastos::Droid::Provider::IContactsContractData;
 using Elastos::Droid::Provider::CContactsContractData;
+using Elastos::Droid::Provider::IContactsContractContacts;
+using Elastos::Droid::Provider::CContactsContractContacts;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
@@ -324,24 +330,24 @@ ECode PhoneNumberListAdapter::GetContactDisplayName(
     /* [in] */ Int32 position,
     /* [out] */ String* displayName)
 {
-    valiVALIDATE_NOT_NULL(displayName)
+    VALIDATE_NOT_NULL(displayName)
     AutoPtr<IInterface> item;
     GetItem(position, (IInterface**)&item);
     AutoPtr<ICursor> cursor = ICursor::Probe(item);
-    return cursor->GetString(DISPLAY_NAME, displayName);
+    return cursor->GetString(PhoneQuery::DISPLAY_NAME, displayName);
 }
 
 ECode PhoneNumberListAdapter::GetPhoneNumber(
     /* [in] */ Int32 position,
     /* [out] */ String* displayNumber)
 {
-    valiVALIDATE_NOT_NULL(displayNumber)
+    VALIDATE_NOT_NULL(displayNumber)
     *displayNumber = String(NULL);
     AutoPtr<IInterface> temp;
     GetItem(position, (IInterface**)&temp);
     AutoPtr<ICursor> item = ICursor::Probe(item);
     if (item != NULL) {
-        return item->GetString(PHONE_NUMBER, displayNumber);
+        return item->GetString(PhoneQuery::PHONE_NUMBER, displayNumber);
     }
     return NOERROR;
 }
@@ -350,7 +356,7 @@ ECode PhoneNumberListAdapter::GetDataUri(
     /* [in] */ Int32 position,
     /* [out] */ IUri** uri)
 {
-    valiVALIDATE_NOT_NULL(uri)
+    VALIDATE_NOT_NULL(uri)
     *uri = NULL;
     Int32 partitionIndex;
     GetPartitionForPosition(position, &partitionIndex);
@@ -368,7 +374,7 @@ ECode PhoneNumberListAdapter::GetDataUri(
     /* [in] */ ICursor* cursor,
     /* [out] */ IUri** uri)
 {
-    valiVALIDATE_NOT_NULL(uri)
+    VALIDATE_NOT_NULL(uri)
     *uri = NULL;
 
     AutoPtr<ICompositeCursorAdapterPartition> temp;
@@ -377,7 +383,7 @@ ECode PhoneNumberListAdapter::GetDataUri(
     Int64 directoryId = ((DirectoryPartition*)partition.Get())->GetDirectoryId();
     if (!IsRemoteDirectory(directoryId)) {
         Int64 phoneId;
-        cursor->GetInt64(PHONE_ID, &phoneId);
+        cursor->GetInt64(PhoneQuery::PHONE_ID, &phoneId);
         AutoPtr<IContentUris> uris;
         CContentUris::AcquireSingleton((IContentUris**)&uris);
         AutoPtr<IContactsContractData> data;
@@ -432,7 +438,7 @@ Int32 PhoneNumberListAdapter::GetResultCount(
     Boolean next;
     while(cursor->MoveToNext(&next), next) {
         Int64 contactId;
-        cursor->GetInt64(CONTACT_ID, &contactId);
+        cursor->GetInt64(PhoneQuery::CONTACT_ID, &contactId);
         if (contactId != curContactId) {
             curContactId = contactId;
             ++numContacts;
@@ -462,12 +468,12 @@ void PhoneNumberListAdapter::BindView(
     Boolean isFirstEntry = TRUE;
     Boolean showBottomDivider = TRUE;
     Int64 currentContactId;
-    cursor->GetInt64(CONTACT_ID, &currentContactId);
+    cursor->GetInt64(PhoneQuery::CONTACT_ID, &currentContactId);
     Boolean isBeforeFirst;
     if ((cursor->MoveToPrevious(&result), result)
             && (cursor->IsBeforeFirst(&isBeforeFirst), !isBeforeFirst)) {
         Int64 previousContactId;
-        cursor->GetInt64(CONTACT_ID, &previousContactId);
+        cursor->GetInt64(PhoneQuery::CONTACT_ID, &previousContactId);
         if (currentContactId == previousContactId) {
             isFirstEntry = FALSE;
         }
@@ -476,7 +482,7 @@ void PhoneNumberListAdapter::BindView(
     Boolean isAfterLast;
     if ((cursor->MoveToNext(&result), result) && (cursor->IsAfterLast(&isAfterLast), !isAfterLast)) {
         Int64 nextContactId;
-        cursor->GetInt64(CONTACT_ID, &nextContactId);
+        cursor->GetInt64(PhoneQuery::CONTACT_ID, &nextContactId);
         if (currentContactId == nextContactId) {
             // The following entry should be in the same group, which means we don't want a
             // divider between them.
@@ -487,15 +493,15 @@ void PhoneNumberListAdapter::BindView(
     }
     cursor->MoveToPosition(position, &result);
 
-    BindViewId((IContactListItemView*)view, cursor, PHONE_ID);
+    BindViewId((IContactListItemView*)view, cursor, PhoneQuery::PHONE_ID);
 
     BindSectionHeaderAndDivider((IContactListItemView*)view, position);
     if (isFirstEntry) {
         BindName((IContactListItemView*)view, cursor);
         Boolean enabled;
         if (IsQuickContactEnabled(&enabled), enabled) {
-            BindQuickContact((IContactListItemView*)view, partition, cursor, PHOTO_ID,
-                    PHOTO_URI, CONTACT_ID, LOOKUP_KEY, DISPLAY_NAME);
+            BindQuickContact((IContactListItemView*)view, partition, cursor, PhoneQuery::PHOTO_ID,
+                    PhoneQuery::PHOTO_URI, PhoneQuery::CONTACT_ID, PhoneQuery::LOOKUP_KEY, PhoneQuery::DISPLAY_NAME);
         }
         else {
             Boolean displayPhotos;
@@ -519,44 +525,245 @@ void PhoneNumberListAdapter::BindView(
 void PhoneNumberListAdapter::BindPhoneNumber(
     /* [in] */ IContactListItemView* view,
     /* [in] */ ICursor* cursor,
-    /* [in] */ Boolean displayNumber);
+    /* [in] */ Boolean displayNumber)
+{
+    AutoPtr<ICharSequence> label;
+    Boolean isNull;
+    if (displayNumber && (cursor->IsNull(PhoneQuery::PHONE_TYPE, &isNull), !isNull)) {
+        Int32 type;
+        cursor->GetInt32(PhoneQuery::PHONE_TYPE, &type);
+        String customLabel;
+        cursor->GetString(PhoneQuery::PHONE_LABEL, &customLabel);
+
+        // TODO cache
+        AutoPtr<IContext> context;
+        GetContext((IContext**)&context);
+        AutoPtr<IResources> res;
+        context->GetResources((IResources**)&res);
+        AutoPtr<IContactsContractCommonDataKindsPhone> phone;
+        CContactsContractCommonDataKindsPhone::AcquireSingleton((IContactsContractCommonDataKindsPhone**)&phone);
+        phont->GetTypeLabel(res, type, customLabel, &label);
+    }
+    view->SetLabel(label);
+    String text;
+    if (displayNumber) {
+        cursor->GetString(PhoneQuery::PHONE_NUMBER, &text);
+    }
+    else {
+        // Display phone label. If that's null, display geocoded location for the number
+        String phoneLabel;
+        cursor->GetString(PhoneQuery::PHONE_LABEL, &phoneLabel);
+        if (!phoneLabel.IsNull()) {
+            text = phoneLabel;
+        }
+        else {
+            String phoneNumber;
+            cursor->GetString(PhoneQuery::PHONE_NUMBER, &phoneNumber);
+            text = GeoUtil::GetGeocodedLocationFor(mContext, phoneNumber);
+        }
+    }
+    view->SetPhoneNumber(text, mCountryIso);
+}
 
 void PhoneNumberListAdapter::BindSectionHeaderAndDivider(
     /* [in] */ IContactListItemView* view,
-    /* [in] */ Int32 position);
+    /* [in] */ Int32 position)
+{
+    Boolean enabled;
+    if (IsSectionHeaderDisplayEnabled(&enabled), enabled) {
+        AutoPtr<IIndexerListAdapterPlacement> temp;
+        GetItemPlacementInSection((IIndexerListAdapterPlacement**)&temp);
+        AutoPtr<Placement> placement = (Placement*)temp.Get();
+        view->SetSectionHeader(placement->mFirstInSection ? placement->mSectionHeader : String(NULL));
+    }
+    else {
+        view->SetSectionHeader(String(NULL));
+    }
+}
 
 void PhoneNumberListAdapter::BindName(
     /* [in] */ IContactListItemView* view,
-    /* [in] */ ICursor* cursor);
+    /* [in] */ ICursor* cursor)
+{
+    Int32 order;
+    GetContactNameDisplayOrder(&order);
+    view->ShowDisplayName(cursor, PhoneQuery::DISPLAY_NAME, order);
+    // Note: we don't show phonetic names any more (see issue 5265330)
+}
 
 void PhoneNumberListAdapter::UnbindName(
-    /* [in] */ IContactListItemView* view);
+    /* [in] */ IContactListItemView* view)
+{
+    view->HideDisplayName();
+}
 
 void PhoneNumberListAdapter::BindPhoto(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* _view,
     /* [in] */ Int32 partitionIndex,
-    /* [in] */ ICursor* cursor);
+    /* [in] */ ICursor* cursor)
+{
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
+    Boolean supported;
+    if (IsPhotoSupported(partitionIndex, &supported), !supported) {
+        view->RemovePhotoView();
+        return;
+    }
+
+    Int64 photoId = 0;
+    Boolean isNull;
+    if (cursor->IsNull(PhoneQuery::PHOTO_ID, &isNull), !isNull) {
+        cursor->GetInt64(PhoneQuery::PHOTO_ID, &photoId);
+    }
+
+    if (photoId != 0) {
+        AutoPtr<IImageView> photoView = view->GetPhotoView();
+        Boolean result;
+        GetCircularPhotos(&result);
+        GetPhotoLoader()->LoadThumbnail(photoView, photoId, FALSE, result, NULL);
+    }
+    else {
+        String photoUriString;
+        cursor->GetString(PhoneQuery::PHOTO_URI, &photoUriString);
+        AutoPtr<IUri> photoUri;
+        if (!photoUriString.IsNull()) {
+            AutoPtr<IUriHelper> helper;
+            CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+            helper->Parse(photoUriString, (IUri**)&photoUri);
+        }
+
+        AutoPtr<IContactPhotoManagerDefaultImageRequest> request;
+        if (photoUri == NULL) {
+            String displayName;
+            cursor->GetString(PhoneQuery::DISPLAY_NAME, &displayName);
+            String lookupKey;
+            cursor->GetString(PhoneQuery::LOOKUP_KEY, &lookupKey);
+            Boolean result;
+            GetCircularPhotos(&result);
+            assert(0);
+            // request = new ContactPhotoManager::DefaultImageRequest(displayName, lookupKey, result);
+        }
+        AutoPtr<IImageView> photoView = view->GetPhotoView();
+        Boolean result;
+        GetCircularPhotos(&result);
+        GetPhotoLoader()->LoadDirectoryPhoto(photoView, photoUri, FALSE, result, request);
+    }
+}
 
 ECode PhoneNumberListAdapter::SetPhotoPosition(
-    /* [in] */ PhotoPosition photoPosition);
+    /* [in] */ PhotoPosition photoPosition)
+{
+    mPhotoPosition = photoPosition;
+    return NOERROR;
+}
 
 ECode PhoneNumberListAdapter::GetPhotoPosition(
-    /* [out] */ PhotoPosition* photoPosition);
+    /* [out] */ PhotoPosition* photoPosition)
+{
+    VALIDATE_NOT_NULL(photoPosition)
+    *photoPosition = mPhotoPosition;
+    return NOERROR;
+}
 
 ECode PhoneNumberListAdapter::SetUseCallableUri(
-    /* [in] */ Boolean useCallableUri);
+    /* [in] */ Boolean useCallableUri)
+{
+    mUseCallableUri = useCallableUri;
+    return NOERROR;
+}
 
 ECode PhoneNumberListAdapter::UsesCallableUri(
-    /* [out] */ Boolean* useCallableUri);
+    /* [out] */ Boolean* useCallableUri)
+{
+    VALIDATE_NOT_NULL(useCallableUri)
+    *useCallableUri = mUseCallableUri;
+    return NOERROR;
+}
 
 ECode PhoneNumberListAdapter::ChangeDirectories(
-    /* [in] */ ICursor* cursor);
+    /* [in] */ ICursor* cursor)
+{
+    FAIL_RETURN(ContactEntryListAdapter::ChangeDirectories(cursor))
+    Int32 searchMode;
+    if (GetDirectorySearchMode(&searchMode), searchMode == DirectoryListLoader::SEARCH_MODE_NONE) {
+        return NOERROR;
+    }
+    Int32 numExtendedDirectories;
+    mExtendedDirectories->GetSize(&numExtendedDirectories);
+    Int32 pCount;
+    GetPartitionCount(&pCount);
+    Int32 count;
+    cursor->GetCount(&count);
+    if (pCount == count + numExtendedDirectories) {
+        // already added all directories;
+        return NOERROR;
+    }
+    //
+    mFirstExtendedDirectoryId = Elastos::Core::Math::INT64_MAX_VALUE;
+    if (numExtendedDirectories > 0) {
+        // The Directory.LOCAL_INVISIBLE is not in the cursor but we can't reuse it's
+        // "special" ID.
+        Int64 maxId = IContactsContractDirectory::LOCAL_INVISIBLE;
+        Int32 insertIndex = 0;
+        for (Int32 i = 0, n = pCount; i < n; i++) {
+            AutoPtr<ICompositeCursorAdapterPartition> temp;
+            GetPartition(i, (ICompositeCursorAdapterPartition**)&temp);
+            AutoPtr<DirectoryPartition> partition = (DirectoryPartition*)temp.Get();
+            Int64 id = partition->GetDirectoryId();
+            if (id > maxId) {
+                maxId = id;
+            }
+            if (!IsRemoteDirectory(id)) {
+                // assuming remote directories come after local, we will end up with the index
+                // where we should insert extended directories. This also works if there are no
+                // remote directories at all.
+                insertIndex = i + 1;
+            }
+        }
+        // Extended directories ID's cannot collide with base directories
+        mFirstExtendedDirectoryId = maxId + 1;
+        for (Int32 i = 0; i < numExtendedDirectories; i++) {
+            Int64 id = mFirstExtendedDirectoryId + i;
+            AutoPtr<IInterface> value;
+            mExtendedDirectories->Get(i, (IInterface**)&value);
+            AutoPtr<DirectoryPartition> directory = (DirectoryPartition*)IDirectoryPartition::Probe(value);
+            if (GetPartitionByDirectoryId(id) == -1) {
+                AddPartition(insertIndex, ICompositeCursorAdapterPartition::Probe(directory));
+                directory->SetDirectoryId(id);
+            }
+        }
+    }
+    return NOERROR;
+}
 
 AutoPtr<IUri> PhoneNumberListAdapter::GetContactUri(
     /* [in] */ Int32 partitionIndex,
     /* [in] */ ICursor* cursor,
     /* [in] */ Int32 contactIdColumn,
-    /* [in] */ Int32 lookUpKeyColumn);
+    /* [in] */ Int32 lookUpKeyColumn)
+{
+    AutoPtr<ICompositeCursorAdapterPartition> temp;
+    GetPartition(partitionIndex, (ICompositeCursorAdapterPartition**)&temp);
+    AutoPtr<DirectoryPartition> directory = (DirectoryPartition*)temp.Get();
+    Int64 directoryId = directory->GetDirectoryId();
+    if (!IsExtendedDirectory(directoryId)) {
+        return ContactEntryListAdapter::GetContactUri(partitionIndex, cursor, contactIdColumn, lookUpKeyColumn);
+    }
+    AutoPtr<IContactsContractContacts> contacts;
+    CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&contacts);
+    AutoPtr<IUri> lookupUri;
+    contacts->GetCONTENT_LOOKUP_URI((IUri**)&lookupUri);
+    AutoPtr<IUriBuilder> builder;
+    lookupUri->BuildUpon((IUriBuilder**)&builder);
+    builder->AppendPath(Constants::LOOKUP_URI_ENCODED);
+    builder->AppendQueryParameter(IContactsContractDirectory::DISPLAY_NAME, directory->GetLabel());
+    builder->AppendQueryParameter(IContactsContract::DIRECTORY_PARAM_KEY, StringUtils::ToString(directoryId));
+    String str;
+    cursor->GetString(lookUpKeyColumn, *str);
+    builder->EncodedFragment(str);
+    AutoPtr<IUri> uri;
+    builder->Build((IUri**)&uri);
+    return uri;
+}
 
 } // List
 } // Common

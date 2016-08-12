@@ -76,10 +76,11 @@ ECode ContactEntryListAdapter::constructor(
     return NOERROR;
 }
 
-void ContactEntryListAdapter::SetFragmentRootView(
+ECode ContactEntryListAdapter::SetFragmentRootView(
     /* [in] */ IView* fragmentRootView)
 {
     mFragmentRootView = fragmentRootView;
+    return NOERROR;
 }
 
 void ContactEntryListAdapter::SetDefaultFilterHeaderText(

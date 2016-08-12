@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTENTRYLISTFRAGMENT_H__
 #define __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTENTRYLISTFRAGMENT_H__
 
-// #include "elastos/droid/contacts/common/list/ContactsPreferences.h"
+#include "elastos/droid/contacts/common/preference/ContactsPreferences.h"
 // #include "elastos/droid/contacts/common/list/ContactPhotoManager.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
@@ -13,7 +13,8 @@
 using Elastos::Droid::App::ILoaderManager;
 using Elastos::Droid::App::ILoaderManagerLoaderCallbacks;
 using Elastos::Droid::App::IActivity;
-// using Elastos::Droid::Contacts::Common::Preference::IContactsPreferencesChangeListener;
+using Elastos::Droid::Contacts::Common::Preference::ContactsPreferences;
+using Elastos::Droid::Contacts::Common::Preference::IContactsPreferencesChangeListener;
 using Elastos::Droid::Content::ICursorLoader;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::ILoader;
@@ -89,23 +90,23 @@ private:
         ContactEntryListFragment* mHost;
     };
 
-    // class PreferencesChangeListener
-    //     : public Object
-    //     , public IContactsPreferencesChangeListener
-    // {
-    // public:
-    //     PreferencesChangeListener(
-    //         /* [in] */ ContactEntryListFragment* host)
-    //         : mHost(host)
-    //     {}
+    class PreferencesChangeListener
+        : public Object
+        , public IContactsPreferencesChangeListener
+    {
+    public:
+        PreferencesChangeListener(
+            /* [in] */ ContactEntryListFragment* host)
+            : mHost(host)
+        {}
 
-    //     CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL()
 
-    //     CARAPI OnChange();
+        CARAPI OnChange();
 
-    // private:
-    //     ContactEntryListFragment* mHost;
-    // };
+    private:
+        ContactEntryListFragment* mHost;
+    };
 
 public:
     ContactEntryListFragment();
@@ -484,7 +485,7 @@ private:
     Int32 mDirectoryResultLimit;
 
     // AutoPtr<ContactPhotoManager> mPhotoManager;
-    // AutoPtr<ContactsPreferences> mContactsPrefs;
+    AutoPtr<ContactsPreferences> mContactsPrefs;
 
     Boolean mForceLoad;
 
@@ -507,7 +508,7 @@ private:
     AutoPtr<IHandler> mDelayedDirectorySearchHandler;
     Int32 mDefaultVerticalScrollbarPosition;
 
-    // AutoPtr<IContactsPreferencesChangeListener> mPreferencesChangeListener;
+    AutoPtr<IContactsPreferencesChangeListener> mPreferencesChangeListener;
 
     friend class SIMStateReceiver;
     friend class DelayedDirectorySearchHandler;

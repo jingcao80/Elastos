@@ -1,6 +1,6 @@
 
 #include "elastos/droid/contacts/common/list/ContactEntryListFragment.h"
-// #include "elastos/droid/contacts/common/list/DirectoryPartition.h"
+#include "elastos/droid/contacts/common/list/DirectoryPartition.h"
 #include "elastos/droid/contacts/common/list/DirectoryListLoader.h"
 #include "elastos/droid/contacts/common/util/ContactListViewUtils.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -12,7 +12,7 @@
 using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
 using Elastos::Droid::Contacts::Common::List::EIID_IContactEntryListFragment;
 using Elastos::Droid::Contacts::Common::Util::ContactListViewUtils;
-// using Elastos::Droid::Contacts::Common::Preference::EIID_IContactsPreferencesChangeListener;
+using Elastos::Droid::Contacts::Common::Preference::EIID_IContactsPreferencesChangeListener;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::CCursorLoader;
@@ -74,19 +74,19 @@ ContactEntryListFragment::DelayedDirectorySearchHandler::HandleMessage(
 }
 
 
-//=================================================================
+// =================================================================
 // ContactEntryListFragment::PreferencesChangeListener
-//=================================================================
+// =================================================================
 
-// CAR_INTERFACE_IMPL(PreferencesChangeListener, Object, IContactsPreferencesChangeListener)
+CAR_INTERFACE_IMPL(ContactEntryListFragment::PreferencesChangeListener, Object, IContactsPreferencesChangeListener)
 
-// ECode PreferencesChangeListener::OnChange()
-// {
-//     if(mHost->LoadPreferences()) {
-//         mHost->ReloadData();
-//     }
-//     return NOERROR;
-// }
+ECode ContactEntryListFragment::PreferencesChangeListener::OnChange()
+{
+    if(mHost->LoadPreferences()) {
+        mHost->ReloadData();
+    }
+    return NOERROR;
+}
 
 
 //=================================================================
@@ -452,8 +452,7 @@ void ContactEntryListFragment::LoadDirectoryPartition(
 {
     AutoPtr<IBundle> args;
     CBundle::New((IBundle**)&args);
-    Int64 directoryId;
-    partition->GetDirectoryId(&directoryId);
+    Int64 directoryId = ((DirectoryPartition*)partition)->GetDirectoryId();
     args->PutInt64(DIRECTORY_ID_ARG_KEY, directoryId);
     AutoPtr<ILoaderManager> lm;
     GetLoaderManager((ILoaderManager**)&lm);
@@ -1048,16 +1047,13 @@ void ContactEntryListFragment::ConfigureAdapter()
 
     mAdapter->SetQuickContactEnabled(mQuickContactEnabled);
     mAdapter->SetAdjustSelectionBoundsEnabled(mAdjustSelectionBoundsEnabled);
-    mAdapter->SetQuickCallButtonEnabled(mQuickCallButtonEnabled);
     mAdapter->SetIncludeProfile(mIncludeProfile);
     mAdapter->SetQueryString(mQueryString);
     mAdapter->SetDirectorySearchMode(mDirectorySearchMode);
-    // TODO: adapter has no function SetPinnedPartitionHeadersEnabled;
-    // mAdapter->SetPinnedPartitionHeadersEnabled(FALSE);
+    IPinnedHeaderListAdapter::Probe(mAdapter)->SetPinnedPartitionHeadersEnabled(FALSE);
     mAdapter->SetContactNameDisplayOrder(mDisplayOrder);
     mAdapter->SetSortOrder(mSortOrder);
-    // TODO: adapter has no function SetSectionHeaderDisplayEnabled;
-    // mAdapter->SetSectionHeaderDisplayEnabled(mSectionHeaderDisplayEnabled);
+    IIndexerListAdapter::Probe(mAdapter)->SetSectionHeaderDisplayEnabled(mSectionHeaderDisplayEnabled);
     mAdapter->SetSelectionVisible(mSelectionVisible);
     mAdapter->SetDirectoryResultLimit(mDirectoryResultLimit);
     mAdapter->SetDarkTheme(mDarkTheme);

@@ -235,7 +235,7 @@ protected:
      * @param fragmentRootView Root view of the fragment. This is used to restrict the scope of
      * image loading requests that get cancelled on cursor changes.
      */
-    CARAPI_(void) SetFragmentRootView(
+    CARAPI SetFragmentRootView(
         /* [in] */ IView* fragmentRootView);
 
     CARAPI_(void) SetDefaultFilterHeaderText(

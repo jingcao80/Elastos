@@ -13,3 +13,5 @@ SOURCES += PinnedHeaderListAdapter.cpp
 SOURCES += ContactEntryListAdapter.cpp
 SOURCES += DirectoryPartition.cpp
 SOURCES += PhoneNumberListAdapter.cpp
+SOURCES += Constants.cpp
+SOURCES += CContactListFilter.cpp
