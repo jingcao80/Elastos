@@ -327,9 +327,11 @@ ECode LocationRequest::ReadFromParcel(
     in->ReadFloat(&mSmallestDisplacement);
     in->ReadBoolean(&mHideFromAppOps);
     in->ReadString(&mProvider);
-    assert(0);
-    // WorkSource workSource = in.readParcelable(null);
-    // if (workSource != null) request.setWorkSource(workSource);
+    AutoPtr<IInterface> obj;
+    in->ReadInterfacePtr((Handle32*)&obj);
+    AutoPtr<IWorkSource> workSource = IWorkSource::Probe(obj);
+    if (workSource != NULL)
+        SetWorkSource(workSource);
     return NOERROR;
 }
 
@@ -346,8 +348,7 @@ ECode LocationRequest::WriteToParcel(
     parcel->WriteFloat(mSmallestDisplacement);
     parcel->WriteInt32(mHideFromAppOps ? 1 : 0);
     parcel->WriteString(mProvider);
-    assert(0);
-    // parcel.writeParcelable(mWorkSource, 0);
+    parcel->WriteInterfacePtr(mWorkSource);
     return NOERROR;
 }
 

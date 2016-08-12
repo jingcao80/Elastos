@@ -20,7 +20,6 @@ module
      *
      * @hide
      */
-    [local,deprecated]
     interface IILocationManager {
         RequestLocationUpdates(
             [in] ILocationRequest* request,

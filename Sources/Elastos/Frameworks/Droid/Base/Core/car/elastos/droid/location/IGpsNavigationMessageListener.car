@@ -8,7 +8,7 @@ module
     /**
      * {@hide}
      */
-    [oneway, local]
+    [oneway]
     interface IIGpsNavigationMessageListener {
         OnGpsNavigationMessageReceived(
             [in] IGpsNavigationMessageEvent* event);

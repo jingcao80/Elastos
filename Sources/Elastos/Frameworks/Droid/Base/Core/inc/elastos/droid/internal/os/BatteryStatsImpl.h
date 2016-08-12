@@ -2981,20 +2981,20 @@ private:
     // elapsed time by the number of active timers to arrive at that timer's share of the time.
     // In order to do this, we must refresh each timer whenever the number of active timers
     // changes.
-    List<AutoPtr<StopwatchTimer> > mPartialTimers;
-    List<AutoPtr<StopwatchTimer> > mFullTimers;
-    List<AutoPtr<StopwatchTimer> > mWindowTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mPartialTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mFullTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mWindowTimers;
     HashMap<Int32, AutoPtr< List<AutoPtr<StopwatchTimer> > > > mSensorTimers;
-    List<AutoPtr<StopwatchTimer> > mWifiRunningTimers;
-    List<AutoPtr<StopwatchTimer> > mFullWifiLockTimers;
-    List<AutoPtr<StopwatchTimer> > mWifiMulticastTimers;
-    List<AutoPtr<StopwatchTimer> > mWifiScanTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mWifiRunningTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mFullWifiLockTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mWifiMulticastTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mWifiScanTimers;
     HashMap<Int32, AutoPtr<List<AutoPtr<StopwatchTimer> > > > mWifiBatchedScanTimers;
-    List<AutoPtr<StopwatchTimer> > mAudioTurnedOnTimers;
-    List<AutoPtr<StopwatchTimer> > mVideoTurnedOnTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mAudioTurnedOnTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mVideoTurnedOnTimers;
 
     // Last partial timers we use for distributing CPU usage.
-    List<AutoPtr<StopwatchTimer> > mLastPartialTimers;
+    AutoPtr<List<AutoPtr<StopwatchTimer> > > mLastPartialTimers;
 
     // These are the objects that will want to do something when the device
     // is unplugged from power.

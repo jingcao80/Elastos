@@ -506,7 +506,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<CInputMethodManagerService> imm;
     AutoPtr<CWallpaperManagerService> wallpaper;
     AutoPtr<CLocationManagerService> location;
-    // AutoPtr<CCountryDetectorService> countryDetector;
+    AutoPtr<CCountryDetectorService> countryDetector;
     AutoPtr<CTextServicesManagerService> tsms;
     AutoPtr<CLockSettingsService> lockSettings;
     AutoPtr<IIAssetAtlas> atlas;
@@ -884,13 +884,12 @@ ECode SystemServer::StartOtherServices()
             else
                 ServiceManager::AddService(IContext::LOCATION_SERVICE, (IBinder*)location);
 
-            // try {
-            //     Slogger::I(TAG, "Country Detector");
-            //     countryDetector = new CountryDetectorService(context);
-            //     ServiceManager::AddService(IContext::COUNTRY_DETECTOR, countryDetector);
-            // } catch (Throwable e) {
-            //     ReportWtf("starting Country Detector", ec);
-            // }
+            Slogger::I(TAG, "Country Detector");
+            if (FAILED(CCountryDetectorService::NewByFriend(context, (CCountryDetectorService**)&countryDetector))) {
+                ReportWtf("starting Country Detector 0x%08x", ec);
+            }
+            else
+                ServiceManager::AddService(IContext::COUNTRY_DETECTOR, (IBinder*)countryDetector);
         }
 
         // if (!disableNonCoreServices) {
@@ -1309,7 +1308,7 @@ ECode SystemServer::StartOtherServices()
     bundle->mWallpaperF = wallpaper;
     bundle->mImmF = imm;
     bundle->mLocationF = location;
-    // bundle->mCountryDetectorF = countryDetector;
+    bundle->mCountryDetectorF = countryDetector;
     // bundle->mNetworkTimeUpdaterF = networkTimeUpdater;
     // bundle->mCommonTimeMgmtServiceF = commonTimeMgmtService;
     bundle->mTextServiceManagerServiceF = tsms;
@@ -1441,10 +1440,10 @@ ECode SystemServer::SystemReadyRunnable::Run()
         if (FAILED(ec)) mHost->ReportWtf("Notifying Location Service running", ec);
     }
 
-    // if (mServiceBundle->mCountryDetectorF != NULL) {
-    //     ec = mServiceBundle->mCountryDetectorF->SystemRunning();
-    //     if (FAILED(ec)) mHost->ReportWtf("Notifying CountryDetectorService running", ec);
-    // }
+    if (mServiceBundle->mCountryDetectorF != NULL) {
+        ec = mServiceBundle->mCountryDetectorF->SystemRunning();
+        if (FAILED(ec)) mHost->ReportWtf("Notifying CountryDetectorService running", ec);
+    }
 
     // if (mServiceBundle->mNetworkTimeUpdaterF != NULL) {
     //     ec = mServiceBundle->mNetworkTimeUpdaterF->SystemRunning();

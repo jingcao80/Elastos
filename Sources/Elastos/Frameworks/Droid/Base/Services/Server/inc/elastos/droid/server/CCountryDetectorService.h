@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_SERVER_CCOUNTRYDETECTORSERVICE_H__
 
 #include "_Elastos_Droid_Server_CCountryDetectorService.h"
-// #include "elastos/droid/server/location/ComprehensiveCountryDetector.h"
+#include "elastos/droid/server/location/ComprehensiveCountryDetector.h"
 #include "elastos/droid/ext/frameworkext.h"
 #define HASH_FOR_OS
 #include "elastos/droid/ext/frameworkhash.h"
@@ -19,7 +19,7 @@ using Elastos::Droid::Location::IICountryDetector;
 using Elastos::Droid::Location::ICountryListener;
 using Elastos::Droid::Location::IICountryListener;
 using Elastos::Droid::Location::ICountry;
-//using Elastos::Droid::Server::Location::ComprehensiveCountryDetector;
+using Elastos::Droid::Server::Location::ComprehensiveCountryDetector;
 using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
@@ -181,7 +181,7 @@ private:
     Object mReceiverslock;
 
     AutoPtr<IContext> mContext;
-    // AutoPtr<ComprehensiveCountryDetector> mCountryDetector;
+    AutoPtr<ComprehensiveCountryDetector> mCountryDetector;
     Boolean mSystemReady;
     AutoPtr<IHandler> mHandler;
     AutoPtr<ICountryListener> mLocationBasedDetectorListener;

@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_Server_CSystemServer.h"
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include "elastos/droid/server/CCountryDetectorService.h"
 #include "elastos/droid/server/CMountService.h"
 #include "elastos/droid/server/CLocationManagerService.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
@@ -68,7 +69,7 @@ private:
         AutoPtr<CWallpaperManagerService> mWallpaperF;
         AutoPtr<CInputMethodManagerService> mImmF;
         AutoPtr<CLocationManagerService> mLocationF;
-        // AutoPtr<CCountryDetectorService> mCountryDetectorF;
+        AutoPtr<CCountryDetectorService> mCountryDetectorF;
         // AutoPtr<CNetworkTimeUpdateService> mNetworkTimeUpdaterF;
         // AutoPtr<CCommonTimeManagementService> mCommonTimeMgmtServiceF;
         AutoPtr<CTextServicesManagerService> mTextServiceManagerServiceF;

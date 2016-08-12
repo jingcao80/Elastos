@@ -14,14 +14,13 @@ module
     /**
      * @Involve interface IParcelable
      */
-    [local, deprecated]
+    [local, parcelable]
     interface IGpsNavigationMessageEvent {
         // @NonNull
         GetNavigationMessage(
             [out] IGpsNavigationMessage** result);
     }
 
-    [local, deprecated]
     interface IGpsNavigationMessageEventListener {
         OnGpsNavigationMessageReceived(
             [in] IGpsNavigationMessageEvent* event);

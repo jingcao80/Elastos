@@ -38,8 +38,7 @@ ECode CCountryDetectorService::CountryDetectedRunnable::Run()
 
 ECode CCountryDetectorService::SetCountryListenerRunnable::Run()
 {
-    assert(0 && "TODO");
-    // TODO mHost->mCountryDetector->SetCountryListener(mListener);
+    mHost->mCountryDetector->SetCountryListener(mListener);
     return NOERROR;
 }
 
@@ -108,9 +107,7 @@ ECode CCountryDetectorService::DetectCountry(
         return NOERROR;   // server not yet active
     }
 
-    assert(0 && "TODO");
-    // return mCountryDetector->DetectCountry();
-    return NOERROR;
+    return mCountryDetector->DetectCountry(country);
 }
 
 ECode CCountryDetectorService::AddCountryListener(
@@ -197,8 +194,7 @@ ECode CCountryDetectorService::SystemRunning()
 
 ECode CCountryDetectorService::Initialize()
 {
-    assert(0 && "TODO");
-    // mCountryDetector = new ComprehensiveCountryDetector(mContext);
+    mCountryDetector = new ComprehensiveCountryDetector(mContext);
     mLocationBasedDetectorListener = new LocationBasedDetectorListener(this);
     return NOERROR;
 }
@@ -263,7 +259,7 @@ ECode CCountryDetectorService::IsSystemReady(
 ECode CCountryDetectorService::ToString(
         /* [out] */ String* str)
 {
-    return E_NOT_IMPLEMENTED;
+    return Object::ToString(str);
 }
 
 }
