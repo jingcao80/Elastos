@@ -23,8 +23,11 @@ namespace Telephony {
  */
 class InboundSmsTracker
     : public Object
+    , public IInboundSmsTracker
 {
 public:
+    CAR_INTERFACE_DECL();
+
     /**
      * Create a tracker for a single-part SMS.
      * @param pdu the message PDU

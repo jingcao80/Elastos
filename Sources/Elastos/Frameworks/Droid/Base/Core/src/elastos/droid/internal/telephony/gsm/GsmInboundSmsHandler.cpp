@@ -140,7 +140,7 @@ Int32 GsmInboundSmsHandler::DispatchMessageRadioSpecific(
 
     MessageClass cls;
     ISmsMessageBase::Probe(sms)->GetMessageClass(&cls);
-    if ((mStorageMonitor->IsStorageAvailable(&b), b) &&
+    if (!(mStorageMonitor->IsStorageAvailable(&b), b) &&
             cls != MessageClass_CLASS_0) {
         // It's a storable message and there's no storage available.  Bail.
         // (See TS 23.038 for a description of class 0 messages.)

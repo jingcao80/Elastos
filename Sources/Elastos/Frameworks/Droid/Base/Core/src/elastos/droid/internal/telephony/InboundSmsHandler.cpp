@@ -118,7 +118,7 @@ const Int32 InboundSmsHandler::EVENT_RELEASE_WAKELOCK = 5;
 const Int32 InboundSmsHandler::EVENT_START_ACCEPTING_SMS = 6;
 /** Update phone object */
 const Int32 InboundSmsHandler::EVENT_UPDATE_PHONE_OBJECT = 7;
-const Boolean InboundSmsHandler::VDBG = FALSE;
+const Boolean InboundSmsHandler::VDBG = TRUE;
 AutoPtr<ArrayOf<String> > InboundSmsHandler::PDU_PROJECTION = InitStatic(String("PDU_PROJECTION"));
 AutoPtr<ArrayOf<String> > InboundSmsHandler::PDU_SEQUENCE_PORT_PROJECTION = InitStatic(String("PDU_SEQUENCE_PORT_PROJECTION"));
 const Int32 InboundSmsHandler::WAKELOCK_TIMEOUT = 3000;
@@ -317,7 +317,7 @@ ECode InboundSmsHandler::DeliveringState::ProcessMessage(
     Int32 what = 0;
     msg->GetWhat(&what);
 
-    mHost->Log(String("DeliveringState.processMessage:") + StringUtils::ToString(what));
+    mHost->Log(String("DeliveringState.processMessage, what:") + StringUtils::ToString(what));
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
     switch (what) {
@@ -431,6 +431,9 @@ ECode InboundSmsHandler::SmsBroadcastReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
+    if (DBG) {
+        mHost->Log(String("SmsBroadcastReceiver::OnReceive action:") + action);
+    }
     if (action.Equals(ITelephonySmsIntents::SMS_FILTER_ACTION)) {
         Int32 rc = 0;
         GetResultCode(&rc);
@@ -663,7 +666,7 @@ void InboundSmsHandler::HandleNewSms(
     // RESULT_OK means that the SMS will be acknowledged by special handling,
     // e.g. for SMS-PP data download. Any other result, we should ack here.
     if (result != IActivity::RESULT_OK) {
-        Boolean handled = (result == ITelephonySmsIntents::RESULT_SMS_HANDLED);
+        Boolean handled = (result == ITelephonySmsIntents::RESULT_SMS_HANDLED); // 1
         NotifyAndAcknowledgeLastIncomingSms(handled, result, blacklistMatchType, sms, NULL);
     }
 }
@@ -1046,7 +1049,7 @@ Boolean InboundSmsHandler::ProcessMessagePart(
             Int32 len = ab->GetLength();
             allByteLen += len;
             //TODO debug log should remove
-            Logger::E("leliang:InboundSmsHandler", "index: %d, len:%d", i, len);
+            Logger::E("leliang:InboundSmsHandler", "index: %d, len:%d, line:%d", i, len, __LINE__);
             for (Int32 j = 0; j < len; ++j) {
                 Logger::E("leliang:InboundSmsHandler", "    %d value: 0x%x", j, (*ab)[j]);
             }
@@ -1112,7 +1115,7 @@ Boolean InboundSmsHandler::ProcessMessagePart(
         Int32 len = ab->GetLength();
         allByteLen += len;
         //TODO debug log should remove
-        Logger::E("leliang:InboundSmsHandler", "index: %d, len:%d", i, len);
+        Logger::E("leliang:InboundSmsHandler", "index: %d, len:%d, line:%d", i, len, __LINE__);
         for (Int32 j = 0; j < len; ++j) {
             Logger::E("leliang:InboundSmsHandler", "    %d value: 0x%x", j, (*ab)[j]);
         }

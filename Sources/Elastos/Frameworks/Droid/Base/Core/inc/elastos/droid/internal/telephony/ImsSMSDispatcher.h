@@ -15,9 +15,13 @@ namespace Droid {
 namespace Internal {
 namespace Telephony {
 
-class ImsSMSDispatcher: public SMSDispatcher
+class ImsSMSDispatcher
+    : public SMSDispatcher
+    , public IImsSMSDispatcher
 {
 public:
+    CAR_INTERFACE_DECL();
+
     TO_STRING_IMPL("ImsSMSDispatcher");
 
     ImsSMSDispatcher(
@@ -127,9 +131,10 @@ protected:
         /* [out] */ String* result);
 
     // @Override
-    CARAPI_(AutoPtr<IGsmAlphabetTextEncodingDetails>) CalculateLength(
+    CARAPI CalculateLength(
         /* [in] */ ICharSequence* messageBody,
-        /* [in] */ Boolean use7bitOnly);
+        /* [in] */ Boolean use7bitOnly,
+        /* [out] */ IGsmAlphabetTextEncodingDetails** result);
 
     // @Override
     CARAPI SendNewSubmitPdu(

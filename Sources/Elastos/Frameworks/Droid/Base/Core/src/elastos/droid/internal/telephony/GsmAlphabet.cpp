@@ -49,19 +49,77 @@ Int32 GsmAlphabet::sHighestEnabledSingleShiftCode;
 static AutoPtr< ArrayOf<String> > InitsLanguageTables()
 {
     AutoPtr< ArrayOf<String> > languageTables = ArrayOf<String>::Alloc(LANGUAGEtABLE_LEN);
-    //TODO now only test the 0 part
-    (*languageTables)[0] =
+    //TODO now only 0 index is ok
         /* 3GPP TS 23.038 V9.1.1 section 6.2.1 - GSM 7 bit Default Alphabet
             01.....23.....4.....5.....6.....7.....8.....9.....A.B.....C.....D.E.....F.....0.....1 */
-    String("@\u00a3$\u00a5\u00e8\u00e9\u00f9\u00ec\u00f2\u00c7\n\u00d8\u00f8\r\u00c5\u00e5\u0394_")
-            // 2.....3.....4.....5.....6.....7.....8.....9.....A.....B.....C.....D.....E.....
-     + String("\u03a6\u0393\u039b\u03a9\u03a0\u03a8\u03a3\u0398\u039e\uffff\u00c6\u00e6\u00df")
-            // F.....012.34.....56789ABCDEF0123456789ABCDEF0.....123456789ABCDEF0123456789A
-     + String("\u00c9 !\"#\u00a4%&'()*+,-./0123456789:;<=>?\u00a1ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-            // B.....C.....D.....E.....F.....0.....123456789ABCDEF0123456789AB.....C.....D.....
-     + String("\u00c4\u00d6\u00d1\u00dc\u00a7\u00bfabcdefghijklmnopqrstuvwxyz\u00e4\u00f6\u00f1")
-            // E.....F.....
-     + String("\u00fc\u00e0");
+        //because in Elastos, String use the UTF8 codec, so the below should update
+    //String("@\u00a3$\u00a5\u00e8\u00e9\u00f9\u00ec\u00f2\u00c7\n\u00d8\u00f8\r\u00c5\u00e5\u0394_")
+    //        // 2.....3.....4.....5.....6.....7.....8.....9.....A.....B.....C.....D.....E.....
+    // + String("\u03a6\u0393\u039b\u03a9\u03a0\u03a8\u03a3\u0398\u039e\uffff\u00c6\u00e6\u00df")
+    //        // F.....012.34.....56789ABCDEF0123456789ABCDEF0.....123456789ABCDEF0123456789A
+    // + String("\u00c9 !\"#\u00a4%&'()*+,-./0123456789:;<=>?\u00a1ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    //        // B.....C.....D.....E.....F.....0.....123456789ABCDEF0123456789AB.....C.....D.....
+    // + String("\u00c4\u00d6\u00d1\u00dc\u00a7\u00bfabcdefghijklmnopqrstuvwxyz\u00e4\u00f6\u00f1")
+    //        // E.....F.....
+    // + String("\u00fc\u00e0");
+    // how to transfer the UTF-16 codec to UTF-8 codec:
+    // smsDefault7bit is a java string in UTF-16 codec,
+    // byte[] u8bytearrayForsmsDefault7bit = smsDefault7bit.getBytes("utf-8");
+    // use the u8bytearrayForsmsDefault7bit to build the UTF-8 String.
+    // you can use the below java code to generate the code you need.
+    /*
+       String smsDefault7bit = "@\u00a3$\u00a5\u00e8\u00e9\u00f9\u00ec\u00f2\u00c7\n\u00d8\u00f8\r\u00c5\u00e5\u0394_"
+                    // 2.....3.....4.....5.....6.....7.....8.....9.....A.....B.....C.....D.....E.....
+                    + "\u03a6\u0393\u039b\u03a9\u03a0\u03a8\u03a3\u0398\u039e\uffff\u00c6\u00e6\u00df"
+                    // F.....012.34.....56789ABCDEF0123456789ABCDEF0.....123456789ABCDEF0123456789A
+                    + "\u00c9 !\"#\u00a4%&'()*+,-./0123456789:;<=>?\u00a1ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    // B.....C.....D.....E.....F.....0.....123456789ABCDEF0123456789AB.....C.....D.....
+                    + "\u00c4\u00d6\u00d1\u00dc\u00a7\u00bfabcdefghijklmnopqrstuvwxyz\u00e4\u00f6\u00f1"
+                    // E.....F.....
+                    + "\u00fc\u00e0";
+       System.out.println("//==============================");
+       byte[] u8bytearrayForsmsDefault7bit;
+       try {
+           u8bytearrayForsmsDefault7bit = smsDefault7bit.getBytes("utf-8");
+           System.out.printf("unsigned char rawArray[] = {");
+           for (int i = 0; i < u8bytearrayForsmsDefault7bit.length; ++i) {
+               if (i % 10 == 0) {
+                   System.out.printf("\n    ");
+               }
+               System.out.printf("0x%02x, ", u8bytearrayForsmsDefault7bit[i]);
+           }
+           System.out.println("\n};");
+           System.out.println("AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(sizeof(rawArray));");
+           System.out.println("memcpy(array->GetPayload(), rawArray, sizeof(rawArray));");
+           System.out.println("String str(*array);");
+       } catch (UnsupportedEncodingException e) {
+           e.printStackTrace();
+       }
+       */
+    unsigned char rawArray[] = {
+        0x40, 0xc2, 0xa3, 0x24, 0xc2, 0xa5, 0xc3, 0xa8, 0xc3, 0xa9,
+        0xc3, 0xb9, 0xc3, 0xac, 0xc3, 0xb2, 0xc3, 0x87, 0x0a, 0xc3,
+        0x98, 0xc3, 0xb8, 0x0d, 0xc3, 0x85, 0xc3, 0xa5, 0xce, 0x94,
+        0x5f, 0xce, 0xa6, 0xce, 0x93, 0xce, 0x9b, 0xce, 0xa9, 0xce,
+        0xa0, 0xce, 0xa8, 0xce, 0xa3, 0xce, 0x98, 0xce, 0x9e, 0xef,
+        0xbf, 0xbf, 0xc3, 0x86, 0xc3, 0xa6, 0xc3, 0x9f, 0xc3, 0x89,
+        0x20, 0x21, 0x22, 0x23, 0xc2, 0xa4, 0x25, 0x26, 0x27, 0x28,
+        0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x30, 0x31, 0x32,
+        0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c,
+        0x3d, 0x3e, 0x3f, 0xc2, 0xa1, 0x41, 0x42, 0x43, 0x44, 0x45,
+        0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f,
+        0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59,
+        0x5a, 0xc3, 0x84, 0xc3, 0x96, 0xc3, 0x91, 0xc3, 0x9c, 0xc2,
+        0xa7, 0xc2, 0xbf, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67,
+        0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71,
+        0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0xc3,
+        0xa4, 0xc3, 0xb6, 0xc3, 0xb1, 0xc3, 0xbc, 0xc3, 0xa0,
+    };
+    AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(sizeof(rawArray));
+    memcpy(array->GetPayload(), rawArray, sizeof(rawArray));
+    String str(*array);
+    (*languageTables)[0] = str;
+
 
     /* A.2.1 Turkish National Language Single Shift Table
      0123456789A.....BCDEF0123456789ABCDEF0123456789ABCDEF.0123456789ABCDEF01234567.....8 */
@@ -718,8 +776,7 @@ ECode GsmAlphabet::Gsm7BitPackedToString(
             prevCharWasEscape = TRUE;
         } else {
             Logger::E("GsmAlphabet", "TODO line:%d, func:%s, 0x%x, %c\n", __LINE__, __func__, gsmVal, (char)gsmVal);
-            //ret.AppendChar(languageTableToChar.GetChar(gsmVal));
-            ret.AppendChar(gsmVal);
+            ret.AppendChar(languageTableToChar.GetChar(gsmVal));
         }
     }
     /*} catch (RuntimeException ex) {

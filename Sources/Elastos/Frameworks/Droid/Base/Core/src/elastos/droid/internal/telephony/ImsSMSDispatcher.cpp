@@ -40,6 +40,8 @@ namespace Droid {
 namespace Internal {
 namespace Telephony {
 
+CAR_INTERFACE_IMPL(ImsSMSDispatcher, SMSDispatcher, IImsSMSDispatcher);
+
 const String ImsSMSDispatcher::TAG("RIL_ImsSms");
 ImsSMSDispatcher::ImsSMSDispatcher(
     /* [in] */ IPhoneBase* phone,
@@ -54,8 +56,9 @@ ImsSMSDispatcher::ImsSMSDispatcher(
 
     // Create dispatchers, inbound SMS handlers and
     // broadcast undelivered messages in raw table.
+    //TODO attention the circular reference here
     CCdmaSMSDispatcher::New(phone, (ISmsUsageMonitor*)usageMonitor
-            , (IImsSMSDispatcher*)this, (ISMSDispatcher**)&mCdmaDispatcher);
+            , IImsSMSDispatcher::Probe(this), (ISMSDispatcher**)&mCdmaDispatcher);
     AutoPtr<IContext> ctx;
     IPhone::Probe(phone)->GetContext((IContext**)&ctx);
     GsmInboundSmsHandler::MakeInboundSmsHandler(ctx,
@@ -63,7 +66,7 @@ ImsSMSDispatcher::ImsSMSDispatcher(
     mCdmaInboundSmsHandler = CdmaInboundSmsHandler::MakeInboundSmsHandler(ctx,
             storageMonitor, phone, ICdmaSMSDispatcher::Probe(mCdmaDispatcher));
     CGsmSMSDispatcher::New(phone, (ISmsUsageMonitor*)usageMonitor
-            , (IImsSMSDispatcher*)this, mGsmInboundSmsHandler
+            , IImsSMSDispatcher::Probe(this), mGsmInboundSmsHandler
                 , (ISMSDispatcher**)&mGsmDispatcher);
     AutoPtr<IThread> broadcastThread;
     AutoPtr<IRunnable> run;
@@ -559,12 +562,15 @@ ECode ImsSMSDispatcher::GetFormat(
 }
 
 // @Override
-AutoPtr<IGsmAlphabetTextEncodingDetails> ImsSMSDispatcher::CalculateLength(
+ECode ImsSMSDispatcher::CalculateLength(
     /* [in] */ ICharSequence* messageBody,
-    /* [in] */ Boolean use7bitOnly)
+    /* [in] */ Boolean use7bitOnly,
+    /* [out] */ IGsmAlphabetTextEncodingDetails** result)
 {
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
     Logger::E(TAG, "Error! Not implemented for IMS.");
-    return NULL;
+    return NOERROR;
 }
 
 // @Override

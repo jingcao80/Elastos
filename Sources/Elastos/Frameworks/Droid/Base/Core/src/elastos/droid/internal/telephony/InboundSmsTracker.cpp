@@ -25,6 +25,9 @@ const Int32 InboundSmsTracker::DEST_PORT_FLAG_3GPP = (1 << 17);
 const Int32 InboundSmsTracker::DEST_PORT_FLAG_3GPP2 = (1 << 18);
 const Int32 InboundSmsTracker::DEST_PORT_FLAG_3GPP2_WAP_PDU = (1 << 19);
 const Int32 InboundSmsTracker::DEST_PORT_MASK = 0xffff;
+
+CAR_INTERFACE_IMPL(InboundSmsTracker, Object, IInboundSmsTracker);
+
 InboundSmsTracker::InboundSmsTracker(
     /* [in] */ ArrayOf<Byte>* pdu,
     /* [in] */ Int64 timestamp,
