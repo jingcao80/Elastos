@@ -87,7 +87,7 @@ static Local<Object> _CARFunction(IFunctionInfo const *functionInfo, char const 
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams);
+    _paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams), _paramInfos->AddRef();
     if (_paramInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 

@@ -95,7 +95,7 @@ Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
         AutoPtr<ArrayOf<IModuleInfo const *> > importedModuleInfos;
         ArrayOf<IModuleInfo const *> *_importedModuleInfos;
 
-        _importedModuleInfos = ArrayOf<IModuleInfo const *>::Alloc(nImportedModules);
+        _importedModuleInfos = ArrayOf<IModuleInfo const *>::Alloc(nImportedModules), _importedModuleInfos->AddRef();
         if (_importedModuleInfos == 0)
             throw Error(Error::NO_MEMORY, "");
 
@@ -135,7 +135,7 @@ Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
 
         Local<Object> constants;
 
-        _constantInfos = ArrayOf<IConstantInfo const *>::Alloc(nConstants);
+        _constantInfos = ArrayOf<IConstantInfo const *>::Alloc(nConstants), _constantInfos->AddRef();
         if (_constantInfos == 0)
             throw Error(Error::NO_MEMORY, "");
 
@@ -180,7 +180,7 @@ Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
         AutoPtr<ArrayOf<IStructInfo const *> > structInfos;
         ArrayOf<IStructInfo const *> *_structInfos;
 
-        _structInfos = ArrayOf<IStructInfo const *>::Alloc(nStructs);
+        _structInfos = ArrayOf<IStructInfo const *>::Alloc(nStructs), _structInfos->AddRef();
         if (_structInfos == 0)
             throw Error(Error::NO_MEMORY, "");
 
@@ -218,7 +218,7 @@ Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
         AutoPtr<ArrayOf<ITypeAliasInfo const *> > typeAliasInfos;
         ArrayOf<ITypeAliasInfo const *> *_typeAliasInfos;
 
-        _typeAliasInfos = ArrayOf<ITypeAliasInfo const *>::Alloc(nTypeAliases);
+        _typeAliasInfos = ArrayOf<ITypeAliasInfo const *>::Alloc(nTypeAliases), _typeAliasInfos->AddRef();
         if (_typeAliasInfos == 0)
             throw Error(Error::NO_MEMORY, "");
 

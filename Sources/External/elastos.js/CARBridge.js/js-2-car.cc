@@ -2140,7 +2140,7 @@ bool IsStruct(IStructInfo const *structInfo, Local<Value> value)
     if (GetOwnPropertyNames(object).ToLocalChecked()->Length() != (uint32_t)nFields)
         return false;
 
-    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields);
+    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields), _fieldInfos->AddRef();
     if (_fieldInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 
@@ -2222,7 +2222,7 @@ void ToStruct(IStructInfo const *structInfo, IStructSetter *structSetter, Local<
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields);
+    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields), _fieldInfos->AddRef();
     if (_fieldInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 
@@ -2468,7 +2468,7 @@ Local<Value> ToValue(IStructInfo const *structInfo, IStructGetter const *structG
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields);
+    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields), _fieldInfos->AddRef();
     if (_fieldInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 
@@ -2825,7 +2825,7 @@ bool CanBeUsedAsInterface(IInterfaceInfo const *interfaceInfo, Local<Value> valu
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods);
+    _methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods), _methodInfos->AddRef();
     if (_methodInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 

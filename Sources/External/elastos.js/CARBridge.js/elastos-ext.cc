@@ -353,7 +353,7 @@ ECode GetImportedModuleInfo(IModuleInfo const *moduleInfo,
     if (FAILED(ec))
         return ec;
 
-    importedModuleInfos = ArrayOf<IModuleInfo const *>::Alloc(nImportedModules);
+    importedModuleInfos = ArrayOf<IModuleInfo const *>::Alloc(nImportedModules), importedModuleInfos->AddRef();
     if (importedModuleInfos == 0)
         return E_OUT_OF_MEMORY;
 

@@ -294,7 +294,7 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
         AutoPtr<ArrayOf<IEnumInfo const *> > enumInfos;
         ArrayOf<IEnumInfo const *> *_enumInfos;
 
-        _enumInfos = ArrayOf<IEnumInfo const *>::Alloc(nEnums);
+        _enumInfos = ArrayOf<IEnumInfo const *>::Alloc(nEnums), _enumInfos->AddRef();
         if (_enumInfos == 0)
             throw Error(Error::NO_MEMORY, "");
 
@@ -315,7 +315,7 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
         AutoPtr<ArrayOf<IInterfaceInfo const *> > interfaceInfos;
         ArrayOf<IInterfaceInfo const *> *_interfaceInfos;
 
-        _interfaceInfos = ArrayOf<IInterfaceInfo const *>::Alloc(nInterfaces);
+        _interfaceInfos = ArrayOf<IInterfaceInfo const *>::Alloc(nInterfaces), _interfaceInfos->AddRef();
         if (_interfaceInfos == 0)
             throw Error(Error::NO_MEMORY, "");
 
@@ -336,7 +336,7 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
         AutoPtr<ArrayOf<IClassInfo const *> > classInfos;
         ArrayOf<IClassInfo const *> *_classInfos;
 
-        _classInfos = ArrayOf<IClassInfo const *>::Alloc(nClasses);
+        _classInfos = ArrayOf<IClassInfo const *>::Alloc(nClasses), _classInfos->AddRef();
         if (_classInfos == 0)
             throw Error(Error::NO_MEMORY, "");
 

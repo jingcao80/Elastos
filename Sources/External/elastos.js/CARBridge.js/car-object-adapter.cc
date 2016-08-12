@@ -315,7 +315,7 @@ CARObjectAdapter::CARInterfaceAdapter::CARInterfaceAdapter(IInterfaceInfo const 
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    __methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods);
+    __methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods), __methodInfos->AddRef();
     if (__methodInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 

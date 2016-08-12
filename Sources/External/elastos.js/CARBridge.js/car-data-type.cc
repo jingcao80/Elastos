@@ -254,7 +254,7 @@ Local<Object> CAREnum(IEnumInfo const *enumInfo)
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _itemInfos = ArrayOf<IEnumItemInfo const *>::Alloc(nItems);
+    _itemInfos = ArrayOf<IEnumItemInfo const *>::Alloc(nItems), _itemInfos->AddRef();
     if (_itemInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 
@@ -431,7 +431,7 @@ Local<Object> CARStruct(IStructInfo const *structInfo)
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFieldInfos);
+    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFieldInfos), _fieldInfos->AddRef();
     if (_fieldInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 
@@ -587,7 +587,7 @@ static Local<Object> _CARInterface(IInterfaceInfo const *interfaceInfo, char con
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _methodInfos = ArrayOf<IFunctionInfo const *>::Alloc(nMethods);
+    _methodInfos = ArrayOf<IFunctionInfo const *>::Alloc(nMethods), _methodInfos->AddRef();
     if (_methodInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 

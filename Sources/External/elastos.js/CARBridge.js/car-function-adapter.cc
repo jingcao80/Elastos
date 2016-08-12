@@ -2335,7 +2335,7 @@ ECode CARFunctionAdapter::Call(Local<Function> function, Local<Value> receiver,
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
-        _paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams);
+        _paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams), _paramInfos->AddRef();
         if (_paramInfos == 0)
             throw Error(Error::NO_MEMORY, "");
 
@@ -2378,7 +2378,7 @@ CARFunctionAdapter::CARFunctionAdapter(IFunctionInfo const *functionInfo,
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    __paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams);
+    __paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams), __paramInfos->AddRef();
     if (__paramInfos == 0)
         throw Error(Error::NO_MEMORY, "");
 
