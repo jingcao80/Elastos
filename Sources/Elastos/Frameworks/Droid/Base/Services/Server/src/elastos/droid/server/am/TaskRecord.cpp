@@ -1236,10 +1236,9 @@ ECode TaskRecord::RestoreFromXml(
                 ai->GetUid(&effectiveUid);
             }
         }
-        String str;
-        IObject::Probe(checkIntent)->ToString(&str);
+
         Slogger::W(TAG, "Updating task #%d for %s: effectiveUid=%d",
-            taskId, str.string(), effectiveUid);
+            taskId, TO_CSTR(checkIntent), effectiveUid);
     }
 
     AutoPtr<TaskRecord> task = new TaskRecord();

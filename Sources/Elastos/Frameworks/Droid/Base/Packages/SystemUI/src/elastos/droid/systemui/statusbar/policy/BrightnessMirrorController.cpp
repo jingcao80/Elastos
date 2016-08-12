@@ -57,6 +57,7 @@ ECode BrightnessMirrorController::constructor(
 
     statusbar->FindViewById(R::id::brightness_mirror, (IView**)&mBrightnessMirror);
     statusbar->FindViewById(R::id::panel_holder, (IView**)&mPanelHolder);
+    return NOERROR;
 }
 
 ECode BrightnessMirrorController::ShowMirror()

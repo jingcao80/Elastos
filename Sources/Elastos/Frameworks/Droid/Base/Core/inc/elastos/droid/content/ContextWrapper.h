@@ -551,7 +551,7 @@ protected:
      *
      * @param base The new base context for this wrapper.
      */
-    CARAPI AttachBaseContext(
+    virtual CARAPI AttachBaseContext(
         /* [in] */ IContext* base);
 
 protected:
