@@ -148,7 +148,7 @@ private:
     const static String TAG;
 
 public:
-    const AutoPtr<IHashMap> statistics;
+    AutoPtr<IHashMap> mStatistics;
 
 };
 

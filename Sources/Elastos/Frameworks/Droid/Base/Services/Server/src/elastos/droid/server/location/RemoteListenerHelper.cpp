@@ -14,6 +14,7 @@ using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
@@ -155,6 +156,7 @@ ECode RemoteListenerHelper::RemoveListener(
 RemoteListenerHelper::RemoteListenerHelper(
     /* [in] */ const String& name)
 {
+    CHashMap::New((IHashMap**)&mListenerMap);
     AutoPtr<IPreconditions> preconditions;
     CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
     AutoPtr<ICharSequence> cs;

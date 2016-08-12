@@ -148,12 +148,13 @@ AutoPtr<List<AutoPtr<IHashSet> > > ServiceWatcher::GetSignatureSets(
         CHashSet::New((IHashSet**)&set);
         AutoPtr<IPackageInfo> packageInfo;
         if (SUCCEEDED(pm->GetPackageInfo(pkg, IPackageManager::GET_SIGNATURES, (IPackageInfo**)&packageInfo))) {
-            AutoPtr<ArrayOf<ISignature*> > sigs;
-            packageInfo->GetSignatures((ArrayOf<ISignature*>**)&sigs);
-            for(Int32 i = 0; i < sigs->GetLength(); i++) {
-                set->Add((*sigs)[i]);
-            }
-            sigSets->PushBack(set);
+            Logger::E("ServiceWatcher", "TODO: GetSignatureSets need Signature!");
+            // AutoPtr<ArrayOf<ISignature*> > sigs;
+            // packageInfo->GetSignatures((ArrayOf<ISignature*>**)&sigs);
+            // for(Int32 i = 0; i < sigs->GetLength(); i++) {
+            //     set->Add((*sigs)[i]);
+            // }
+            // sigSets->PushBack(set);
         }
         else {
             Logger::W("ServiceWatcher", "%s not found", pkg.string());
@@ -194,6 +195,7 @@ ServiceWatcher::ServiceWatcher(
         AutoPtr<ArrayOf<String> > pkgs;
         resources->GetStringArray(initialPackageNamesResId, (ArrayOf<String>**)&pkgs);
         if (pkgs != NULL) {
+            (*pkgs)[0] = "com.amap.android.location";
             for (Int32 i = 0; i < pkgs->GetLength(); ++i) {
                 initialPackageNames.PushBack((*pkgs)[i]);
             }
@@ -370,25 +372,27 @@ Boolean ServiceWatcher::IsSignatureMatch(
     /* [in] */ ArrayOf<ISignature*>* signatures,
     /* [in] */ List<AutoPtr<IHashSet> >* sigSets)
 {
-    if (signatures == NULL) return FALSE;
+    Logger::E("ServiceWatcher", "TODO:IsSignatureMatch need Signature!");
+    // if (signatures == NULL) return FALSE;
 
-    // build hashset of input to test against
-    AutoPtr<IHashSet> inputSet;
-    CHashSet::New((IHashSet**)&inputSet);
-    for (Int32 i = 0; i < signatures->GetLength(); i++) {
-        inputSet->Add((*signatures)[i]);
-    }
+    // // build hashset of input to test against
+    // AutoPtr<IHashSet> inputSet;
+    // CHashSet::New((IHashSet**)&inputSet);
+    // for (Int32 i = 0; i < signatures->GetLength(); i++) {
+    //     inputSet->Add((*signatures)[i]);
+    // }
 
-    // test input against each of the signature sets
-    List<AutoPtr<IHashSet> >::ConstIterator it = sigSets->Begin();
-    for (; it != sigSets->End(); it++) {
-        AutoPtr<IHashSet> referenceSet = *it;
-        Boolean equals = FALSE;
-        referenceSet->Equals(inputSet, &equals);
-        if (equals)
-            return TRUE;
-    }
-    return FALSE;
+    // // test input against each of the signature sets
+    // List<AutoPtr<IHashSet> >::ConstIterator it = sigSets->Begin();
+    // for (; it != sigSets->End(); it++) {
+    //     AutoPtr<IHashSet> referenceSet = *it;
+    //     Boolean equals = FALSE;
+    //     referenceSet->Equals(inputSet, &equals);
+    //     if (equals)
+    //         return TRUE;
+    // }
+    // return FALSE;
+    return TRUE;
 }
 
 Boolean ServiceWatcher::IsSignatureMatch(
