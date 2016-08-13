@@ -753,7 +753,9 @@ ECode CSmsProvider::Insert(
     VALIDATE_NOT_NULL(result);
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    InsertInner(url, initialValues);
+    AutoPtr<IUri> newUri = InsertInner(url, initialValues);
+    *result = newUri;
+    REFCOUNT_ADD(*result);
     // } finally {
     Binder::RestoreCallingIdentity(token);
     // }

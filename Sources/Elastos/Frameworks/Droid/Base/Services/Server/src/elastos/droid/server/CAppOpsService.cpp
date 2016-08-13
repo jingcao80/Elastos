@@ -204,10 +204,42 @@ CAppOpsService::Op::Op(
     , mTime(0)
     , mRejectTime(0)
     , mNesting(0)
+    , mNoteOpCount(0)
+    , mStartOpCount(0)
 {
     mDialogReqQueue = new PermissionDialogReqQueue();
     CArrayList::New((IArrayList**)&mClientTokens);
 }
+
+ECode CAppOpsService::Op::ToString(
+    /* [out] */ String *result)
+{
+    VALIDATE_NOT_NULL(result);
+    StringBuilder sb;
+    sb.Append("mUid:");
+    sb.Append(mUid);
+    sb.Append(";mPackageName:");
+    sb.Append(mPackageName);
+    sb.Append(";mOp:");
+    sb.Append(mOp);
+    sb.Append(";mMode:");
+    sb.Append(mMode);
+    sb.Append(";mDuration:");
+    sb.Append(mDuration);
+    sb.Append(";mTime:");
+    sb.Append(mTime);
+    sb.Append(";mRejectTime:");
+    sb.Append(mRejectTime);
+    sb.Append(";mNesting:");
+    sb.Append(mNesting);
+    sb.Append(";mNoteOpCount:");
+    sb.Append(mNoteOpCount);
+    sb.Append(";mStartOpCount:");
+    sb.Append(mStartOpCount);
+    *result = sb.ToString();
+    return NOERROR;
+}
+
 
 //================================================================================
 // CAppOpsService::Ops
@@ -230,6 +262,16 @@ ECode CAppOpsService::Ops::constructor(
     mIsPrivileged = _isPrivileged;
     return NOERROR;
 }
+
+//ECode CAppOpsService::Ops::Put(
+//    /* [in] */ Int32 key,
+//    /* [in] */ IInterface* value)
+//{
+//    if (mPackageName.Equals(String("Elastos.Droid.TeleService")) && key == 15) {
+//        Logger::E("leliang", "line:%d, func:%s, value:%s\n", __LINE__, __func__, TO_CSTR(value));
+//    }
+//    return SparseArray::Put(key, value);
+//}
 
 //================================================================================
 // CAppOpsService::Callback

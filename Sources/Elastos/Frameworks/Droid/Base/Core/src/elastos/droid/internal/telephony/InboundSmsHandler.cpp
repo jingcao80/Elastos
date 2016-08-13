@@ -1364,14 +1364,16 @@ Int32 InboundSmsHandler::AddTrackerToRawTable(
     if (VDBG) Log(String("adding content values to raw table: ") + TO_CSTR(values));
     AutoPtr<IUri> newUri;
     mResolver->Insert(sRawUri, values, (IUri**)&newUri);
-    if (DBG) Log(String("URI of new row -> ") + TO_CSTR(newUri));
+    if (DBG) Log(String("URI of new row -> "));
+    if (DBG) Logger::D("InboundSmsHandler", "newUri:%s", TO_CSTR(newUri));
 
     // try {
     AutoPtr<IContentUris> cUris;
     CContentUris::AcquireSingleton((IContentUris**)&cUris);
     Int64 rowId = 0;
     if (FAILED(cUris->ParseId(newUri, &rowId))) {
-        Loge(String("error parsing URI for new row: ") + TO_CSTR(newUri));
+        Loge(String("error parsing URI for new row: "));
+        Logger::D("InboundSmsHandler", " newUri :%s", TO_CSTR(newUri));
         return ITelephonySmsIntents::RESULT_SMS_GENERIC_ERROR;
     }
     if (tracker->GetMessageCount() == 1) {

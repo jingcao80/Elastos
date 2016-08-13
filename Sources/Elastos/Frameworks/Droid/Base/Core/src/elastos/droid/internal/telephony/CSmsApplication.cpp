@@ -158,7 +158,7 @@ CAR_SINGLETON_IMPL(CSmsApplication)
 CAR_INTERFACE_IMPL(CSmsApplication, Singleton, ISmsApplication)
 
 const String CSmsApplication::LOGTAG("CSmsApplication");
-const String CSmsApplication::PHONE_PACKAGE_NAME("com.android.phone");
+const String CSmsApplication::PHONE_PACKAGE_NAME("Elastos.Droid.TeleService");
 const String CSmsApplication::BLUETOOTH_PACKAGE_NAME("com.android.bluetooth");
 const String CSmsApplication::MMS_SERVICE_PACKAGE_NAME("com.android.mms.service");
 const String CSmsApplication::SCHEME_SMS("sms");

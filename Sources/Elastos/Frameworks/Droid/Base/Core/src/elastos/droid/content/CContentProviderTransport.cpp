@@ -643,7 +643,10 @@ ECode CContentProviderTransport::EnforceWritePermission(
 
     AutoPtr<IContentProvider> contentProvider;
     mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
-    if (contentProvider == NULL)  return NOERROR;
+    if (contentProvider == NULL) {
+        Logger::D("CContentProviderTransport", "EnforceWritePermission contentProvider is NULL");
+        return NOERROR;
+    }
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
 
