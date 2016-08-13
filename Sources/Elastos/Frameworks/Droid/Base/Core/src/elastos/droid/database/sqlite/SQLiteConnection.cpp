@@ -2069,7 +2069,7 @@ ECode SQLiteConnection::AcquirePreparedStatement(
     Int64 statementPtr;
     ECode ec = NativePrepareStatement(mConnectionPtr, sql, &statementPtr);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "AcquirePreparedStatement %s faield.", sql.string());
+        Slogger::E(TAG, "AcquirePreparedStatement %s failed.", sql.string());
         return ec;
     }
     //try {

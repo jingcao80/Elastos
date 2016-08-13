@@ -282,7 +282,9 @@ ECode SQLiteSession::Prepare(
     //try {
     ec = mConnection->Prepare(sql, outStatementInfo); // might throw
     if (FAILED(ec)) {
+        ReleaseConnection();
         Slogger::E("SQLiteSession", "Failed to Prepare %s", sql.string());
+        return ec;
     }
 
     //} finally {

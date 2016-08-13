@@ -727,13 +727,12 @@ String DatabaseUtils::ConcatenateWhere(
     /* [in] */ const String& a,
     /* [in] */ const String& b)
 {
-    assert(0 && "TODO TextUtils::IsEmpty");
-    // if (TextUtils::IsEmpty(a)) {
-    //     return b;
-    // }
-    // if (TextUtils::IsEmpty(b)) {
-    //     return a;
-    // }
+    if (TextUtils::IsEmpty(a)) {
+        return b;
+    }
+    if (TextUtils::IsEmpty(b)) {
+        return a;
+    }
 
     StringBuilder sb("(");
     sb += a;
@@ -1315,8 +1314,7 @@ void DatabaseUtils::CreateDbFromSqlStatements(
     ASSERT_SUCCEEDED(StringUtils::Split(sqlStatements, String(";\n"), (ArrayOf<String>**)&statements))
     for (Int32 i = 0; i < statements->GetLength(); i++) {
         String statement = (*statements)[i];
-        assert(0 && "TODO TextUtils::IsEmpty");
-        //if (TextUtils::IsEmpty(statement)) continue;
+        if (TextUtils::IsEmpty(statement)) continue;
         db->ExecSQL(statement);
     }
 

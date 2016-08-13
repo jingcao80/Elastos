@@ -179,6 +179,7 @@ ECode SQLiteCursor::GetColumnIndex(
     // Create mColumnNameMap on demand
     if (mColumnNameMap == NULL) {
         AutoPtr< ArrayOf<String> > columns = mColumns;
+        assert(columns != NULL);
         Int32 columnCount = columns->GetLength();
         AutoPtr< HashMap<String, Int32> > map = new HashMap<String, Int32>(columnCount);
         for (Int32 i = 0; i < columnCount; i++) {

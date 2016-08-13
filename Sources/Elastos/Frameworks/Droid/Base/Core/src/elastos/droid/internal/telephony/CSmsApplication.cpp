@@ -675,8 +675,7 @@ void CSmsApplication::SetDefaultApplicationInternal(
                 appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid, oldPackageName, IAppOpsManager::MODE_IGNORED);
             }
             else {// Catch (NameNotFoundException e) {
-                assert(0 && "TODO");
-                // Rlog->W(LOGTAG, "Old SMS package not found: " + oldPackageName);
+                Logger::W(LOGTAG, "Old SMS package not found: %s", oldPackageName.string());
             }
         }
 
@@ -711,8 +710,7 @@ void CSmsApplication::SetDefaultApplicationInternal(
         }
         else {//Catch (NameNotFoundException e) {
             // No phone app on this Device (unexpected, even for non-phone devices)
-            assert(0 && "TODO");
-            // Rlog::E(LOGTAG, "Phone package not found: " + PHONE_PACKAGE_NAME);
+            Logger::E(LOGTAG, "Phone package not found: %s", PHONE_PACKAGE_NAME.string());
         }
 
         // BT needs to always have this permission to write to the sms database
@@ -727,8 +725,7 @@ void CSmsApplication::SetDefaultApplicationInternal(
         }
         else {//Catch (NameNotFoundException e) {
             // No BT app on this device
-            assert(0 && "TODO");
-            // Rlog->E(LOGTAG, "Bluetooth package not found: " + BLUETOOTH_PACKAGE_NAME);
+            Logger::E(LOGTAG, "Bluetooth package not found: %s", BLUETOOTH_PACKAGE_NAME.string());
         }
 
         // MmsService needs to always have this permission to write to the sms database
@@ -743,8 +740,7 @@ void CSmsApplication::SetDefaultApplicationInternal(
         }
         else {//Catch (NameNotFoundException e) {
             // No phone app on this Device (unexpected, even for non-phone devices)
-            assert(0 && "TODO");
-            // Rlog->E(LOGTAG, "MmsService package not found: " + MMS_SERVICE_PACKAGE_NAME);
+            Logger::E(LOGTAG, "MmsService package not found: %s", MMS_SERVICE_PACKAGE_NAME.string());
         }
     }
 }
