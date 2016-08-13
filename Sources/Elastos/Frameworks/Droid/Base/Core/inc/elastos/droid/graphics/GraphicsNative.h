@@ -251,6 +251,12 @@ public:
         /* [in] */ INinePatchInsetStruct* ninePatchInsets,
         /* [in] */ Int32 density);
 
+    static CARAPI_(AutoPtr<IBitmap>) CreateBitmap(
+        /* [in] */ SkBitmap* bitmap,
+        /* [in] */ Int32 bitmapCreateFlags,
+        /* [in] */ ArrayOf<Byte>* ninePatchChunk,
+        /* [in] */ Int32 density = -1);
+
     static CARAPI CreateBitmapRegionDecoder(
         /* [in] */ SkBitmapRegionDecoder* bitmap,
         /* [out] */ IBitmapRegionDecoder** decoder);

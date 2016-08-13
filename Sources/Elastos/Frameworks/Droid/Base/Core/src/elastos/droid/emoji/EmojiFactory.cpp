@@ -1,16 +1,22 @@
 #include "elastos/droid/emoji/EmojiFactory.h"
+#include "elastos/droid/graphics/GraphicsNative.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <emoji/EmojiFactory.h>
 
-// #include <dlfcn.h>
+#include <dlfcn.h>
 // #include <utils/Log.h>
 // #include <utils/String8.h>
 // #include <utils/String16.h>
-//#include "SkTypes.h"
-//#include "SkImageDecoder.h"
+#include <skia/core/SkTypes.h>
+#include <skia/core/SkImageDecoder.h>
 
-using Elastos::Droid::Graphics::CBitmap;
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
+using Elastos::Droid::Graphics::GraphicsNative;
+using Elastos::Droid::Graphics::EIID_IBitmap;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
+// using Elastos::Core::IInteger32;
+// using Elastos::Core::CInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -31,7 +37,7 @@ Boolean EmojiFactory::CustomLinkedHashMap::RemoveEldestEntry(
 {
     Int32 size;
     GetSize(&size);
-    return size > mHost->sCacheSize;
+    return size > mHost->mCacheSize;
 }
 
 
@@ -41,7 +47,7 @@ Boolean EmojiFactory::CustomLinkedHashMap::RemoveEldestEntry(
 CAR_INTERFACE_IMPL(EmojiFactory, Object, IEmojiFactory);
 
 EmojiFactory::EmojiFactory()
-    : sCacheSize(100)
+    : mCacheSize(100)
     , mNativeEmojiFactory(0)
 {}
 
@@ -56,7 +62,7 @@ ECode  EmojiFactory::constructor(
 {
     mNativeEmojiFactory = nativeEmojiFactory;
     mName = name;
-    mCache = new CustomLinkedHashMap();
+    mCache = new CustomLinkedHashMap(this);
     return NOERROR;
 }
 
@@ -74,203 +80,113 @@ ECode EmojiFactory::GetBitmapFromAndroidPua(
 {
     VALIDATE_NOT_NULL(bitmap);
 
-    AutoPtr<IInteger32> I32;
-    CInteger32::New(pua, (IInteger32**)&I32);
+    AutoLock lock(this);
+
     AutoPtr<IInterface> cache;
-    mCache->Get(I32, (IInterface**)&cache);
-    IBitmap* bm = IBitmap::Probe(cache);
-
-    if (bm == NULL) {
-        AutoPtr<IBitmap> ret;
-        ret = NativeGetBitmapFromAndroidPua(mNativeEmojiFactory, pua);
-        mCache->Put(I32, ret.Get());
+    mCache->Get(CoreUtils::Convert(pua), (IInterface**)&cache);
+    if (IWeakReference::Probe(cache) == NULL) {
+        AutoPtr<IBitmap> ret = NativeGetBitmapFromAndroidPua(mNativeEmojiFactory, pua);
+        // There is no need to cache returned null, since in most cases it means there
+        // is no map from the AndroidPua to a specific image. In other words, it usually does
+        // not include the cost of creating Bitmap object.
+        if (ret != NULL) {
+            AutoPtr<IWeakReference> wr;
+            IWeakReferenceSource::Probe(ret)->GetWeakReference((IWeakReference**)&wr);
+            mCache->Put(CoreUtils::Convert(pua), wr);
+        }
+        *bitmap = ret;
+        REFCOUNT_ADD(*bitmap);
+        return NOERROR;
     }
-
-    *retBitmap = bm;
-    REFCOUNT_ADD(*retBitmap);
-    return NOERROR;
+    else {
+        AutoPtr<IBitmap> tmp;
+        IWeakReference::Probe(cache)->Resolve(EIID_IBitmap, (IInterface**)&tmp);
+        if (tmp == NULL) {
+            AutoPtr<IBitmap> ret = NativeGetBitmapFromAndroidPua(mNativeEmojiFactory, pua);
+            AutoPtr<IWeakReference> wr;
+            IWeakReferenceSource::Probe(ret)->GetWeakReference((IWeakReference**)&wr);
+            mCache->Put(CoreUtils::Convert(pua), wr);
+            *bitmap = ret;
+            REFCOUNT_ADD(*bitmap);
+            return NOERROR;
+        }
+        else {
+            *bitmap = tmp;
+            REFCOUNT_ADD(*bitmap);
+            return NOERROR;
+        }
+    }
 }
-
-
-
-
-
-
-
-
-//For navtive used class
-class EmojiFactoryCaller
-{
-public:
-    EmojiFactoryCaller() {}
-    virtual ~EmojiFactoryCaller();
-
-    Boolean Init();
-
-    EmojiFactory* TryCallGetImplementation(const char* name);
-    EmojiFactory* TryCallGetAvailableImplementation();
-
-private:
-    EmojiFactory* (*m_get_implementation)(const char*);
-    EmojiFactory* (*m_get_available_implementation)();
-
-    void *m_handle;
-};
-
-//EmojiFactoryCaller function
-Boolean EmojiFactoryCaller::Init()
-{
-/*
-    const char* error_msg = NULL;
-    m_handle = dlopen("libemoji.so", RTLD_LAZY | RTLD_LOCAL);
-
-    if (m_handle == NULL) {
-        error_msg = "Failed to load libemoji.so";
-        goto FAIL;
-    }
-
-    m_get_implementation =
-        reinterpret_cast<EmojiFactory *(*)(const char*)>(dlsym(m_handle, "GetImplementation"));
-    if (m_get_implementation == NULL) {
-        error_msg = "Failed to get symbol of GetImplementation";
-        goto FAIL;
-    }
-
-    m_get_available_implementation =
-        reinterpret_cast<EmojiFactory *(*)()>(dlsym(m_handle,"GetAvailableImplementation"));
-    if (m_get_available_implementation == NULL) {
-        error_msg = "Failed to get symbol of GetAvailableImplementation";
-        goto FAIL;
-    }
-*/
-    return true;
-/*
-FAIL:
-    const char* error_str = dlerror();
-    if (error_str == NULL) {
-        error_str = "unknown reason";
-    }
-
-    ALOGE("%s: %s", error_msg, error_str);
-    if (m_handle != NULL) {
-        dlclose(m_handle);
-        m_handle = NULL;
-    }
-    return false;
-*/
-}
-
-EmojiFactoryCaller::~EmojiFactoryCaller()
-{
-/*
-    if (m_handle) {
-        dlclose(m_handle);
-    }
-*/
-}
-
-EmojiFactory *EmojiFactoryCaller::TryCallGetImplementation(const char* name)
-{
-    if (NULL == m_handle) {
-        return NULL;
-    }
-    return m_get_implementation(name);
-}
-
-EmojiFactory *EmojiFactoryCaller::TryCallGetAvailableImplementation()
-{
-    if (NULL == m_handle) {
-        return NULL;
-    }
-    return m_get_available_implementation();
-}
-
-static EmojiFactoryCaller* gCaller;
-static pthread_once_t g_once = PTHREAD_ONCE_INIT;
-
-void EmojiFactory::InitializeCaller()
-{
-    gCaller = new EmojiFactoryCaller();
-    lib_emoji_factory_is_ready = gCaller->Init();
-}
-
-
-/*
- * class EmojiFactory
- */
-Boolean EmojiFactory::lib_emoji_factory_is_ready = FALSE;
-
-
-
-
-
-
 
 ECode EmojiFactory::GetBitmapFromVendorSpecificSjis(
     /* [in] */ Char32 sjis,
-    /* [out] */ IBitmap** retBitmap)
+    /* [out] */ IBitmap** bitmap)
 {
-    Int32 RetValue;
+    VALIDATE_NOT_NULL(bitmap);
 
-    GetAndroidPuaFromVendorSpecificSjis(sjis, &RetValue);
-    return GetBitmapFromAndroidPua(RetValue, retBitmap);
+    AutoLock lock(this);
+
+    Int32 vsp;
+    GetAndroidPuaFromVendorSpecificSjis(sjis, &vsp);
+    return GetBitmapFromAndroidPua(vsp, bitmap);
 }
 
 ECode EmojiFactory::GetBitmapFromVendorSpecificPua(
     /* [in] */ Int32 vsp,
-    /* [out] */ IBitmap** retBitmap)
+    /* [out] */ IBitmap** bitmap)
 {
-    Int32 RetValue;
+    VALIDATE_NOT_NULL(bitmap);
 
-    GetAndroidPuaFromVendorSpecificPua(vsp, &RetValue);
-    return GetBitmapFromAndroidPua(RetValue, retBitmap);
+    AutoLock lock(this);
+
+    Int32 pua;
+    GetAndroidPuaFromVendorSpecificPua(vsp, &pua);
+    return GetBitmapFromAndroidPua(pua, bitmap);
 }
 
 ECode EmojiFactory::GetAndroidPuaFromVendorSpecificSjis(
     /* [in] */ Char32 sjis,
-    /* [out] */ Int32* RetValue)
+    /* [out] */ Int32* pua)
 {
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NativeGetAndroidPuaFromVendorSpecificSjis(mNativeEmojiFactory, sjis);
+    VALIDATE_NOT_NULL(pua);
+    *pua = NativeGetAndroidPuaFromVendorSpecificSjis(mNativeEmojiFactory, sjis);
     return NOERROR;
 }
 
 ECode EmojiFactory::GetVendorSpecificSjisFromAndroidPua(
     /* [in] */ Int32 pua,
-    /* [out] */ Int32* RetValue)
+    /* [out] */ Int32* vsp)
 {
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NativeGetVendorSpecificSjisFromAndroidPua(mNativeEmojiFactory, pua);
+    VALIDATE_NOT_NULL(vsp);
+    *vsp = NativeGetVendorSpecificSjisFromAndroidPua(mNativeEmojiFactory, pua);
     return NOERROR;
 }
 
 ECode EmojiFactory::GetAndroidPuaFromVendorSpecificPua(
     /* [in] */ Int32 vsp,
-    /* [out] */ Int32* RetValue)
+    /* [out] */ Int32* pua)
 {
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NativeGetAndroidPuaFromVendorSpecificPua(mNativeEmojiFactory, vsp);
+    VALIDATE_NOT_NULL(pua);
+    *pua = NativeGetAndroidPuaFromVendorSpecificPua(mNativeEmojiFactory, vsp);
     return NOERROR;
 }
 
 ECode EmojiFactory::GetAndroidPuaFromVendorSpecificPua(
     /* [in] */ const String& vspString,
-    /* [out] */ String* RetValue)
+    /* [out] */ String* puaString)
 {
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NULL;
+    VALIDATE_NOT_NULL(puaString);
 
     if (vspString.IsNull()) {
-        return E_NULL_POINTER_EXCEPTION;
+        *puaString = NULL;
+        return NOERROR;
     }
-
     Int32 minVsp = NativeGetMinimumVendorSpecificPua(mNativeEmojiFactory);
     Int32 maxVsp = NativeGetMaximumVendorSpecificPua(mNativeEmojiFactory);
-
     Int32 len = vspString.GetLength();
-    AutoPtr<ArrayOf<Char32> > codePoints = ArrayOf<Char32>::Alloc(len);
-    Int32 new_len = 0;
+    AutoPtr< ArrayOf<Char32> > codePoints = ArrayOf<Char32>::Alloc(len);
 
+    Int32 new_len = 0;
     for (Int32 i = 0; i < len; i++, new_len++) {
         Int32 codePoint = (Int32)vspString.GetChar(i);
         if (minVsp <= codePoint && codePoint <= maxVsp) {
@@ -283,35 +199,34 @@ ECode EmojiFactory::GetAndroidPuaFromVendorSpecificPua(
         }
         (*codePoints)[new_len] = codePoint;
     }
-
-    *RetValue = String((const ArrayOf<Char32>&)codePoints, 0, new_len);
+    *puaString = String(*codePoints, 0, new_len);
     return NOERROR;
 }
 
 ECode EmojiFactory::GetVendorSpecificPuaFromAndroidPua(
     /* [in] */ Int32 pua,
-    /* [out] */ Int32* RetValue)
+    /* [out] */ Int32* vsp)
 {
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NativeGetVendorSpecificPuaFromAndroidPua(mNativeEmojiFactory, pua);
+    VALIDATE_NOT_NULL(vsp);
+    *vsp = NativeGetVendorSpecificPuaFromAndroidPua(mNativeEmojiFactory, pua);
     return NOERROR;
 }
 
 ECode EmojiFactory::GetVendorSpecificPuaFromAndroidPua(
     /* [in] */ const String& puaString,
-    /* [out] */ String* RetValue)
+    /* [out] */ String* vspString)
 {
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NULL;
+    VALIDATE_NOT_NULL(vspString);
 
-    if (puaString == NULL) {
-        return E_NULL_POINTER_EXCEPTION;
+    if (puaString.IsNull()) {
+        *vspString = NULL;
+        return NOERROR;
     }
-
     Int32 minVsp = NativeGetMinimumAndroidPua(mNativeEmojiFactory);
     Int32 maxVsp = NativeGetMaximumAndroidPua(mNativeEmojiFactory);
     Int32 len = puaString.GetLength();
-    AutoPtr<ArrayOf<Char32> > codePoints = ArrayOf<Char32>::Alloc(len);
+    AutoPtr< ArrayOf<Char32> > codePoints = ArrayOf<Char32>::Alloc(len);
+
     Int32 new_len = 0;
     for (Int32 i = 0; i < len; i++, new_len++) {
         Int32 codePoint = (Int32)puaString.GetChar(i);
@@ -325,8 +240,96 @@ ECode EmojiFactory::GetVendorSpecificPuaFromAndroidPua(
         }
         (*codePoints)[new_len] = codePoint;
     }
-    *RetValue= String((const ArrayOf<Char32>&)codePoints, 0, new_len);
+    *vspString= String(*codePoints, 0, new_len);
     return NOERROR;
+}
+
+class EmojiFactoryCaller
+{
+public:
+    EmojiFactoryCaller() {}
+    virtual ~EmojiFactoryCaller();
+    Boolean Init();
+    android::EmojiFactory* TryCallGetImplementation(const char* name);
+    android::EmojiFactory* TryCallGetAvailableImplementation();
+
+private:
+    void *m_handle;
+    android::EmojiFactory* (*m_get_implementation)(const char*);
+    android::EmojiFactory* (*m_get_available_implementation)();
+};
+
+Boolean EmojiFactoryCaller::Init()
+{
+    const char* error_msg = NULL;
+    m_handle = dlopen("libemoji.so", RTLD_LAZY | RTLD_LOCAL);
+
+    if (m_handle == NULL) {
+        error_msg = "Failed to load libemoji.so";
+        goto FAIL;
+    }
+
+    m_get_implementation =
+        reinterpret_cast<android::EmojiFactory *(*)(const char*)>(dlsym(m_handle, "GetImplementation"));
+    if (m_get_implementation == NULL) {
+        error_msg = "Failed to get symbol of GetImplementation";
+        goto FAIL;
+    }
+
+    m_get_available_implementation =
+        reinterpret_cast<android::EmojiFactory *(*)()>(dlsym(m_handle,"GetAvailableImplementation"));
+    if (m_get_available_implementation == NULL) {
+        error_msg = "Failed to get symbol of GetAvailableImplementation";
+        goto FAIL;
+    }
+
+    return TRUE;
+
+FAIL:
+    const char* error_str = dlerror();
+    if (error_str == NULL) {
+        error_str = "unknown reason";
+    }
+
+    ALOGE("%s: %s", error_msg, error_str);
+    if (m_handle != NULL) {
+        dlclose(m_handle);
+        m_handle = NULL;
+    }
+    return FALSE;
+}
+
+EmojiFactoryCaller::~EmojiFactoryCaller()
+{
+    if (m_handle) {
+        dlclose(m_handle);
+    }
+}
+
+android::EmojiFactory* EmojiFactoryCaller::TryCallGetImplementation(const char* name)
+{
+    if (NULL == m_handle) {
+        return NULL;
+    }
+    return m_get_implementation(name);
+}
+
+android::EmojiFactory* EmojiFactoryCaller::TryCallGetAvailableImplementation()
+{
+    if (NULL == m_handle) {
+        return NULL;
+    }
+    return m_get_available_implementation();
+}
+
+static EmojiFactoryCaller* gCaller;
+static pthread_once_t g_once = PTHREAD_ONCE_INIT;
+static Boolean lib_emoji_factory_is_ready;
+
+static void InitializeCaller()
+{
+    gCaller = new EmojiFactoryCaller();
+    lib_emoji_factory_is_ready = gCaller->Init();
 }
 
 ECode EmojiFactory::NewInstance(
@@ -334,20 +337,26 @@ ECode EmojiFactory::NewInstance(
     /* [out] */ IEmojiFactory** emojiFactory)
 {
     VALIDATE_NOT_NULL(emojiFactory);
-    VALIDATE_NOT_NULL(class_name);
-    *emojiFactory = NULL;
 
+    if (class_name.IsNull()) {
+        *emojiFactory = NULL;
+        return NOERROR;
+    }
     pthread_once(&g_once, InitializeCaller);
     if (!lib_emoji_factory_is_ready) {
-        return E_NULL_POINTER_EXCEPTION;
+        *emojiFactory = NULL;
+        return NOERROR;
     }
 
-    EmojiFactory *factory = gCaller->TryCallGetImplementation(class_name.string());
+    android::EmojiFactory *factory = gCaller->TryCallGetImplementation(class_name.string());
     if (NULL == factory) {
-       return E_NULL_POINTER_EXCEPTION;
+        *emojiFactory = NULL;
+       return NOERROR;
     }
 
-    CEmojiFactory::New(reinterpret_cast<Int64>(factory), class_name, emojiFactory);
+    EmojiFactory* ef = new EmojiFactory();
+    ef->constructor(reinterpret_cast<Int64>(factory), class_name);
+    *emojiFactory = ef;
     REFCOUNT_ADD(*emojiFactory);
     return NOERROR;
 }
@@ -355,203 +364,139 @@ ECode EmojiFactory::NewInstance(
 ECode EmojiFactory::NewAvailableInstance(
     /* [out] */ IEmojiFactory** emojiFactory)
 {
-    *emojiFactory = NULL;
+    VALIDATE_NOT_NULL(emojiFactory);
 
     pthread_once(&g_once, InitializeCaller);
     if (!lib_emoji_factory_is_ready) {
-        return E_NULL_POINTER_EXCEPTION;
+        *emojiFactory = NULL;
+        return NOERROR;
     }
 
-    EmojiFactory *factory = gCaller->TryCallGetAvailableImplementation();
+    android::EmojiFactory *factory = gCaller->TryCallGetAvailableImplementation();
     if (NULL == factory) {
-        return E_NULL_POINTER_EXCEPTION;
+        *emojiFactory = NULL;
+        return NOERROR;
     }
 
-    String tempname;
-    factory->GetName(&tempname);
-    if (NULL == tempname) {
-        return E_NULL_POINTER_EXCEPTION;
+    String class_name(factory->Name());
+    if (class_name.IsNull()) {
+        *emojiFactory = NULL;
+        return NOERROR;
     }
 
-    CEmojiFactory::New(reinterpret_cast<Int64>(factory), tempname, emojiFactory);
+    EmojiFactory* ef = new EmojiFactory();
+    ef->constructor(reinterpret_cast<Int64>(factory), class_name);
+    *emojiFactory = ef;
     REFCOUNT_ADD(*emojiFactory);
     return NOERROR;
 }
 
 ECode EmojiFactory::GetMinimumAndroidPua(
-    /* [out] */ Int32* RetValue )
+    /* [out] */ Int32* pua )
 {
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NativeGetMinimumAndroidPua(mNativeEmojiFactory);
+    VALIDATE_NOT_NULL(pua);
+    *pua = NativeGetMinimumAndroidPua(mNativeEmojiFactory);
     return NOERROR;
 }
 
 ECode EmojiFactory::GetMaximumAndroidPua(
-    /* [out] */ Int32* RetValue)
+    /* [out] */ Int32* pua)
 {
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NativeGetMaximumAndroidPua(mNativeEmojiFactory);
+    VALIDATE_NOT_NULL(pua);
+    *pua = NativeGetMaximumAndroidPua(mNativeEmojiFactory);
     return NOERROR;
-}
-
-
-
-ECode EmojiFactory::GetMaximumVendorSpecificPua(
-    /* [out] */ Int32* RetValue)
-{
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NativeGetMaximumVendorSpecificPua(mNativeEmojiFactory);
-    return NOERROR;
-}
-
-
-ECode EmojiFactory::GetMinimumVendorSpecificPua(
-    /* [out] */ Int32* RetValue)
-{
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = NativeGetMinimumVendorSpecificPua(mNativeEmojiFactory);
-    return NOERROR;
-}
-
-
-
-
-
-Int32 EmojiFactory::NativeGetMinimumAndroidPua(
-    /* [in] */ Int64 nativeEmojiFactory)
-{
-    Int32 i;
-    EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
-
-    factory->GetMinimumAndroidPua(&i);
-    return i;
-}
-
-Int32 EmojiFactory::NativeGetMaximumAndroidPua(
-   /* [in] */ Int64 nativeEmojiFactory)
-{
-    Int32 i;
-
-    EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
-
-    factory->GetMaximumAndroidPua(&i);
-    return i;
-}
-
-char *EmojiFactory::GetImageBinaryFromAndroidPua(int pua, int *size)
-{
-    return NULL;
 }
 
 void EmojiFactory::NativeDestructor(
     /* [in] */ Int64 nativeEmojiFactory)
 {
-    //Don't implement
-    return;
+    /*
+      // Must not delete this object!!
+      EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
+      delete factory;
+    */
 }
 
 AutoPtr<IBitmap> EmojiFactory::NativeGetBitmapFromAndroidPua(
     /* [in] */ Int64 nativeEmojiFactory,
     /* [in] */ Int32 AndroidPua)
 {
-     EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
+     android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
 
      int size;
-
      const char *bytes = factory->GetImageBinaryFromAndroidPua(AndroidPua, &size);
      if (bytes == NULL) {
         return NULL;
      }
 
-     /*
-     SkBitmap *bitmap = new SkBitmap;
-     if (!SkImageDecoder::DecodeMemory(bytes, size, bitmap)) {
+    SkBitmap *bitmap = new SkBitmap;
+    if (!SkImageDecoder::DecodeMemory(bytes, size, bitmap)) {
         ALOGE("SkImageDecoder::DecodeMemory() failed.");
         return NULL;
-     }
+    }
 
-    GraphicsJNI::createBitmap(env, bitmap,
-          GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
-
-     AutoPtr<IBitmap> obj;
-     ECode ec = CBitmap::New(NULL, false, NULL, -1, (IBitmap**)&obj);
-     if (FAILED(ec)) {
-        return NULL;
-     }
-
-     return obj;
-    */
-     return NULL;
+    return GraphicsNative::CreateBitmap(bitmap,
+            GraphicsNative::kBitmapCreateFlag_Premultiplied, NULL);
 }
 
 Int32 EmojiFactory::NativeGetAndroidPuaFromVendorSpecificSjis(
     /* [in] */ Int64 nativeEmojiFactory,
-    /* [in] */ char sjis)
+    /* [in] */ Char32 sjis)
 {
-    Int32 RetValue;
-
-    EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
-    factory->GetAndroidPuaFromVendorSpecificSjis(sjis, &RetValue);
-
-    return RetValue;
+    android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
+    return factory->GetAndroidPuaFromVendorSpecificSjis(sjis);
 }
 
 Int32 EmojiFactory::NativeGetVendorSpecificSjisFromAndroidPua(
     /* [in] */ Int64 nativeEmojiFactory,
     /* [in] */ Int32 pua)
 {
-    Int32 RetValue;
-
-    EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
-    factory->GetVendorSpecificSjisFromAndroidPua(pua, &RetValue);
-
-    return RetValue;
+    android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
+    return factory->GetVendorSpecificSjisFromAndroidPua(pua);
 }
 
 Int32 EmojiFactory::NativeGetAndroidPuaFromVendorSpecificPua(
     /* [in] */ Int64 nativeEmojiFactory,
     /* [in] */ Int32 vsp)
 {
-    Int32 RetValue;
-
-    EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
-    factory->GetAndroidPuaFromVendorSpecificPua(vsp, &RetValue);
-
-    return RetValue;
+    android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
+    return factory->GetAndroidPuaFromVendorSpecificPua(vsp);
 }
 
 Int32 EmojiFactory::NativeGetVendorSpecificPuaFromAndroidPua(
     /* [in] */ Int64 nativeEmojiFactory,
     /* [in] */ Int32 pua)
 {
-    Int32 RetValue;
-
-    EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
-    factory->GetVendorSpecificPuaFromAndroidPua(pua, &RetValue);
-
-    return RetValue;
+    android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
+    return factory->GetVendorSpecificPuaFromAndroidPua(pua);
 }
 
 Int32 EmojiFactory::NativeGetMaximumVendorSpecificPua(
     /* [in] */ Int64 nativeEmojiFactory)
 {
-    Int32 RetValue;
-
-    EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
-    factory->GetMaximumVendorSpecificPua(&RetValue);
-
-    return RetValue;
+    android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
+    return factory->GetMaximumVendorSpecificPua();
 }
 
 Int32 EmojiFactory::NativeGetMinimumVendorSpecificPua(
     /* [in] */ Int64 nativeEmojiFactory)
 {
-    Int32 RetValue;
+    android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
+    return factory->GetMinimumVendorSpecificPua();
+}
 
-    EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
-    factory->GetMinimumVendorSpecificPua(&RetValue);
+Int32 EmojiFactory::NativeGetMinimumAndroidPua(
+    /* [in] */ Int64 nativeEmojiFactory)
+{
+    android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
+    return factory->GetMinimumAndroidPua();
+}
 
-    return RetValue;
+Int32 EmojiFactory::NativeGetMaximumAndroidPua(
+   /* [in] */ Int64 nativeEmojiFactory)
+{
+    android::EmojiFactory *factory = reinterpret_cast<android::EmojiFactory *>(nativeEmojiFactory);
+    return factory->GetMaximumAndroidPua();
 }
 
 } // namespace Emoji

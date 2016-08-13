@@ -365,6 +365,15 @@ AutoPtr<IBitmap> GraphicsNative::CreateBitmap(
     return obj;
 }
 
+AutoPtr<IBitmap> GraphicsNative::CreateBitmap(
+    /* [in] */ SkBitmap* bitmap,
+    /* [in] */ Int32 bitmapCreateFlags,
+    /* [in] */ ArrayOf<Byte>* ninePatchChunk,
+    /* [in] */ Int32 density)
+{
+    return CreateBitmap(bitmap, NULL, bitmapCreateFlags, ninePatchChunk, NULL, density);
+}
+
 ECode GraphicsNative::CreateBitmapRegionDecoder(
     /* [in] */ SkBitmapRegionDecoder* bitmap,
     /* [out] */ IBitmapRegionDecoder** decoder)

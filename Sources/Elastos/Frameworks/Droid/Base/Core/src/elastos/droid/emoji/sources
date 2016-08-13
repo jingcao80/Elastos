@@ -7,7 +7,9 @@ include $(MAKEDIR)/../../../../../../sources.inc
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
+INCLUDES += $(PREBUILD_INC)/bionic
+INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/stlport
 
 SOURCES += EmojiFactory.cpp
-SOURCES += CEmojiFactory.cpp
 SOURCES += CEmojiFactoryHelper.cpp

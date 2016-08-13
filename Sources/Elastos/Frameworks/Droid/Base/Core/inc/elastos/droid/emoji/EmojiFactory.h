@@ -1,21 +1,21 @@
 #ifndef __ELASTOS_DROID_EMOJI_EMOJIFACTORY_H__
 #define __ELASTOS_DROID_EMOJI_EMOJIFACTORY_H__
 
-#include "elastos/droid/ext/frameworkdef.h"
+#include "Elastos.Droid.Emoji.h"
+#include "Elastos.Droid.Graphics.h"
+#include <elastos/core/Object.h>
+#include <elastos/utility/LinkedHashMap.h>
 // #include <Elastos.CoreLibrary.Utility.h>
 // #include "elastos/core/Object.h"
-// #include "elastos/droid/graphics/CBitmap.h"
-// #include "elastos/utility/LinkedHashMap.h"
+//
 // #include <elastos/utility/etl/HashMap.h>
 // #include <elastos/utility/etl/Map.h>
 // #include "_Elastos_Droid_Emoji_CEmojiFactory.h"
 
-// using Elastos::Droid::Emoji::IEmojiFactory;
-// using Elastos::Droid::Graphics::IBitmap;
-// using Elastos::Utility::CHashMap;
-// using Elastos::Utility::IHashMap;
-// using Elastos::Utility::IMapEntry;
-// using Elastos::Utility::LinkedHashMap;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::LinkedHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -196,7 +196,7 @@ private:
 
     static CARAPI_(Int32) NativeGetAndroidPuaFromVendorSpecificSjis(
        /* [in] */ Int64 nativeEmojiFactory,
-       /* [in] */ char sjis);
+       /* [in] */ Char32 sjis);
 
     static CARAPI_(Int32) NativeGetVendorSpecificSjisFromAndroidPua(
        /* [in] */ Int64 nativeEmojiFactory,

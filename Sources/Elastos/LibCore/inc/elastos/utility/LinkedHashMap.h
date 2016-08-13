@@ -441,8 +441,14 @@ public:
         /* [in] */ HashMapEntry* first);
 
 protected:
-    CARAPI_(Boolean) RemoveEldestEntry(
+    virtual CARAPI_(Boolean) RemoveEldestEntry(
         /* [in] */ IMapEntry* eldest);
+
+    CARAPI_(AutoPtr<IIterator>) NewKeyIterator();
+
+    CARAPI_(AutoPtr<IIterator>) NewValueIterator();
+
+    CARAPI_(AutoPtr<IIterator>) NewEntryIterator();
 
 private:
     /**
@@ -452,12 +458,6 @@ private:
      */
     ECO_LOCAL CARAPI_(void) MakeTail(
         /* [in] */ LinkedEntry* e);
-
-    ECO_LOCAL CARAPI_(AutoPtr<IIterator>) NewKeyIterator();
-
-    ECO_LOCAL CARAPI_(AutoPtr<IIterator>) NewValueIterator();
-
-    ECO_LOCAL CARAPI_(AutoPtr<IIterator>) NewEntryIterator();
 
 private:
     /**

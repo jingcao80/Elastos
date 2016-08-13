@@ -373,8 +373,7 @@ static AutoPtr<ILayoutDirections> InitDIRS_ALL_RIGHT_TO_LEFT()
 static AutoPtr<IEmojiFactory> InitEMOJI()
 {
     AutoPtr<IEmojiFactory> ef;
-    // TODO:
-    // EmojiFactory::NewAvailableInstance((IEmojiFactory**)&ef);
+    EmojiFactory::NewAvailableInstance((IEmojiFactory**)&ef);
     if (ef != NULL) {
         ef->GetMinimumAndroidPua(&(Layout::MIN_EMOJI));
         ef->GetMaximumAndroidPua(&(Layout::MAX_EMOJI));

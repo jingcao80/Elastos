@@ -1,4 +1,3 @@
-#include "elastos/droid/emoji/CEmojiFactory.h"
 #include "elastos/droid/emoji/CEmojiFactoryHelper.h"
 #include "elastos/droid/emoji/EmojiFactory.h"
 
