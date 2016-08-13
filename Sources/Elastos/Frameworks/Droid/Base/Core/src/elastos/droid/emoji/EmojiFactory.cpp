@@ -1,24 +1,102 @@
 #include "elastos/droid/emoji/EmojiFactory.h"
 
-#include <dlfcn.h>
-#include <utils/Log.h>
-#include <utils/String8.h>
-#include <utils/String16.h>
+// #include <dlfcn.h>
+// #include <utils/Log.h>
+// #include <utils/String8.h>
+// #include <utils/String16.h>
 //#include "SkTypes.h"
 //#include "SkImageDecoder.h"
-#include "elastos/droid/emoji/CEmojiFactory.h"
 
 using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
-using Elastos::Droid::Emoji::CEmojiFactory;
 
 namespace Elastos {
 namespace Droid {
 namespace Emoji {
 
+//=======================================================
+// mojiFactory::CustomLinkedHashMap
+//=======================================================
+EmojiFactory::CustomLinkedHashMap::CustomLinkedHashMap(
+    /* [in] */ EmojiFactory* host)
+    : mHost(host)
+{
+    LinkedHashMap::constructor(16, 0.75, TRUE);
+}
+
+Boolean EmojiFactory::CustomLinkedHashMap::RemoveEldestEntry(
+    /* [in] */ IMapEntry* eldest)
+{
+    Int32 size;
+    GetSize(&size);
+    return size > mHost->sCacheSize;
+}
+
+
+//=======================================================
+// mojiFactory
+//=======================================================
 CAR_INTERFACE_IMPL(EmojiFactory, Object, IEmojiFactory);
+
+EmojiFactory::EmojiFactory()
+    : sCacheSize(100)
+    , mNativeEmojiFactory(0)
+{}
+
+EmojiFactory::~EmojiFactory()
+{
+    NativeDestructor(mNativeEmojiFactory);
+}
+
+ECode  EmojiFactory::constructor(
+    /* [in] */ Int64 nativeEmojiFactory,
+    /* [in] */ const String& name)
+{
+    mNativeEmojiFactory = nativeEmojiFactory;
+    mName = name;
+    mCache = new CustomLinkedHashMap();
+    return NOERROR;
+}
+
+ECode EmojiFactory::GetName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name);
+    *name = mName;
+    return NOERROR;
+}
+
+ECode EmojiFactory::GetBitmapFromAndroidPua(
+    /* [in] */ Int32 pua,
+    /* [out] */ IBitmap** bitmap)
+{
+    VALIDATE_NOT_NULL(bitmap);
+
+    AutoPtr<IInteger32> I32;
+    CInteger32::New(pua, (IInteger32**)&I32);
+    AutoPtr<IInterface> cache;
+    mCache->Get(I32, (IInterface**)&cache);
+    IBitmap* bm = IBitmap::Probe(cache);
+
+    if (bm == NULL) {
+        AutoPtr<IBitmap> ret;
+        ret = NativeGetBitmapFromAndroidPua(mNativeEmojiFactory, pua);
+        mCache->Put(I32, ret.Get());
+    }
+
+    *retBitmap = bm;
+    REFCOUNT_ADD(*retBitmap);
+    return NOERROR;
+}
+
+
+
+
+
+
+
 
 //For navtive used class
 class EmojiFactoryCaller
@@ -122,36 +200,11 @@ void EmojiFactory::InitializeCaller()
  */
 Boolean EmojiFactory::lib_emoji_factory_is_ready = FALSE;
 
-//For navtive used class
-EmojiFactory::EmojiFactory()
-    : sCacheSize(100)
-{}
 
-EmojiFactory::~EmojiFactory()
-{}
 
-ECode EmojiFactory::GetBitmapFromAndroidPua(
-    /* [in] */ Int32 pua,
-    /* [out] */ IBitmap** retBitmap)
-{
-    VALIDATE_NOT_NULL(retBitmap);
 
-    AutoPtr<IInteger32> I32;
-    CInteger32::New(pua, (IInteger32**)&I32);
-    AutoPtr<IInterface> cache;
-    mCache->Get(I32, (IInterface**)&cache);
-    IBitmap* bm = IBitmap::Probe(cache);
 
-    if (bm == NULL) {
-        AutoPtr<IBitmap> ret;
-        ret = NativeGetBitmapFromAndroidPua(mNativeEmojiFactory, pua);
-        mCache->Put(I32, ret.Get());
-    }
 
-    *retBitmap = bm;
-    REFCOUNT_ADD(*retBitmap);
-    return NOERROR;
-}
 
 ECode EmojiFactory::GetBitmapFromVendorSpecificSjis(
     /* [in] */ Char32 sjis,
@@ -341,13 +394,7 @@ ECode EmojiFactory::GetMaximumAndroidPua(
     return NOERROR;
 }
 
-ECode EmojiFactory::GetName(
-    /* [out] */ String* RetValue)
-{
-    VALIDATE_NOT_NULL(RetValue);
-    *RetValue = mName;
-    return NOERROR;
-}
+
 
 ECode EmojiFactory::GetMaximumVendorSpecificPua(
     /* [out] */ Int32* RetValue)
@@ -366,40 +413,9 @@ ECode EmojiFactory::GetMinimumVendorSpecificPua(
     return NOERROR;
 }
 
-ECode  EmojiFactory::constructor()
-{
-    return NOERROR;
-}
 
-ECode  EmojiFactory::constructor(
-    /* [in] */ Int64 nativeEmojiFactory,
-    /* [in] */ const String& name)
-{
-    mNativeEmojiFactory = nativeEmojiFactory;
-    mName = name;
 
-    CHashMap::New((IHashMap**)&mCache);
 
-    return NOERROR;
-}
-
-EmojiFactory::CustomLinkedHashMap::CustomLinkedHashMap(
-    /* [in] */ EmojiFactory* host)
-    : mHost(host)
-{
-    LinkedHashMap::constructor(16, 0.75, TRUE);
-}
-
-EmojiFactory::CustomLinkedHashMap::~CustomLinkedHashMap()
-{}
-
-Boolean EmojiFactory::CustomLinkedHashMap::RemoveEldestEntry(
-    /* [in] */ IMapEntry* eldest)
-{
-    Int32 size;
-    GetSize(&size);
-    return size > mHost->sCacheSize;
-}
 
 Int32 EmojiFactory::NativeGetMinimumAndroidPua(
     /* [in] */ Int64 nativeEmojiFactory)

@@ -2,20 +2,20 @@
 #define __ELASTOS_DROID_EMOJI_EMOJIFACTORY_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
-#include <Elastos.CoreLibrary.Utility.h>
-#include "elastos/core/Object.h"
-#include "elastos/droid/graphics/CBitmap.h"
-#include "elastos/utility/LinkedHashMap.h"
-#include <elastos/utility/etl/HashMap.h>
-#include <elastos/utility/etl/Map.h>
-#include "_Elastos_Droid_Emoji_CEmojiFactory.h"
+// #include <Elastos.CoreLibrary.Utility.h>
+// #include "elastos/core/Object.h"
+// #include "elastos/droid/graphics/CBitmap.h"
+// #include "elastos/utility/LinkedHashMap.h"
+// #include <elastos/utility/etl/HashMap.h>
+// #include <elastos/utility/etl/Map.h>
+// #include "_Elastos_Droid_Emoji_CEmojiFactory.h"
 
-using Elastos::Droid::Emoji::IEmojiFactory;
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Utility::CHashMap;
-using Elastos::Utility::IHashMap;
-using Elastos::Utility::IMapEntry;
-using Elastos::Utility::LinkedHashMap;
+// using Elastos::Droid::Emoji::IEmojiFactory;
+// using Elastos::Droid::Graphics::IBitmap;
+// using Elastos::Utility::CHashMap;
+// using Elastos::Utility::IHashMap;
+// using Elastos::Utility::IMapEntry;
+// using Elastos::Utility::LinkedHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -39,8 +39,6 @@ private:
         CustomLinkedHashMap(
             /* [in] */ EmojiFactory* host);
 
-        virtual ~CustomLinkedHashMap();
-
     protected:
         CARAPI_(Boolean) RemoveEldestEntry(
             /* [in] */ IMapEntry* eldest);
@@ -56,11 +54,12 @@ public:
 
     virtual ~EmojiFactory();
 
-    constructor();
-
-    constructor(
+    CARAPI constructor(
         /* [in] */ Int64 nativeEmojiFactory,
         /* [in] */ const String& name);
+
+    CARAPI GetName(
+        /* [out] */ String* name);
 
     /**
      * Returns Bitmap object corresponding to the AndroidPua.
@@ -75,7 +74,7 @@ public:
      */
     CARAPI GetBitmapFromAndroidPua(
         /* [in] */ Int32 pua,
-        /* [out] */ IBitmap** RetBitmap);
+        /* [out] */ IBitmap** bitmap);
 
    /**
     * Returns Bitmap object corresponding to the vendor specified sjis.
@@ -88,7 +87,7 @@ public:
     */
     CARAPI GetBitmapFromVendorSpecificSjis(
         /* [in] */ Char32 sjis,
-        /* [out] */ IBitmap** RetBitmap);
+        /* [out] */ IBitmap** bitmap);
 
    /**
     * Returns Bitmap object corresponding to the vendor specific Unicode.
@@ -101,7 +100,7 @@ public:
     */
     CARAPI GetBitmapFromVendorSpecificPua(
         /* [in] */ Int32 vsp,
-        /* [out] */ IBitmap** RetBitmap);
+        /* [out] */ IBitmap** bitmap);
 
    /**
     * Returns Unicode PUA for Android corresponding to the vendor specific sjis.
@@ -111,7 +110,7 @@ public:
     */
     CARAPI GetAndroidPuaFromVendorSpecificSjis(
         /* [in] */ Char32 sjis,
-        /* [out] */ Int32* RetValue);
+        /* [out] */ Int32* pua);
 
    /**
     * Returns vendor specific sjis corresponding to the Unicode AndroidPua.
@@ -121,7 +120,7 @@ public:
     */
     CARAPI GetVendorSpecificSjisFromAndroidPua(
         /* [in] */ Int32 pua,
-        /* [out] */ Int32* RetValue);
+        /* [out] */ Int32* sjis);
 
    /**
     * Returns Unicode PUA for Android corresponding to the vendor specific Unicode.
@@ -132,11 +131,11 @@ public:
     */
     CARAPI GetAndroidPuaFromVendorSpecificPua(
         /* [in] */ Int32 vsp,
-        /* [out] */ Int32* RetValue);
+        /* [out] */ Int32* pua);
 
     CARAPI GetAndroidPuaFromVendorSpecificPua(
         /* [in] */ const String& vspString,
-        /* [out] */ String* RetValue);
+        /* [out] */ String* pua);
 
     /**
      * Returns vendor specific Unicode corresponding to the Unicode AndroidPua.
@@ -146,42 +145,11 @@ public:
      */
     CARAPI GetVendorSpecificPuaFromAndroidPua(
         /* [in] */ Int32 pua,
-        /* [out] */ Int32* RetValue);
+        /* [out] */ Int32* vsp);
 
     CARAPI GetVendorSpecificPuaFromAndroidPua(
         /* [in] */ const String& puaString,
-        /* [out] */ String* RetValue);
-
-    /**
-     * Returns the lowest code point corresponding to an Android
-     * emoji character.
-     */
-    CARAPI GetMinimumAndroidPua(
-        /* [out] */ Int32* RetValue);
-
-    /**
-     * Returns the highest code point corresponding to an Android
-     * emoji character.
-     */
-    CARAPI GetMaximumAndroidPua(
-        /* [out] */ Int32* RetValue);
-
-    CARAPI GetName(
-        /* [out] */ String* RetValue);
-
-    //the following 2 functions doesn't defined in car file
-
-    /**
-     * Returns maximum Vendor-Specific PUA. This is the last valid value.
-     */
-    CARAPI GetMaximumVendorSpecificPua(
-        /* [out] */ Int32* RetValue);
-
-    /**
-     * Returns minimum Vendor-Specific PUA.
-     */
-    CARAPI GetMinimumVendorSpecificPua(
-        /* [out] */ Int32* RetValue);
+        /* [out] */ String* vspString);
 
     /**
      * Constructs an instance of EmojiFactory corresponding to the name.
@@ -204,63 +172,73 @@ public:
     static CARAPI NewAvailableInstance(
         /* [out] */ IEmojiFactory** EmojiFactory);
 
+    /**
+     * Returns the lowest code point corresponding to an Android
+     * emoji character.
+     */
+    CARAPI GetMinimumAndroidPua(
+        /* [out] */ Int32* pua);
+
+    /**
+     * Returns the highest code point corresponding to an Android
+     * emoji character.
+     */
+    CARAPI GetMaximumAndroidPua(
+        /* [out] */ Int32* RetValue);
+
 private:
-
-    Int32 sCacheSize;
-    Int64 mNativeEmojiFactory;
-    static Boolean lib_emoji_factory_is_ready;
-    String mName;
-
-    AutoPtr<IHashMap> mCache;
-
     CARAPI_(void) NativeDestructor(
         /* [in] */ Int64 nativeEmojiFactory);
 
-    static void InitializeCaller();
-
-    static Int32 NativeGetMinimumAndroidPua(
-        /* [in] */ Int64 nativeEmojiFactory);
-
-    static Int32 NativeGetMaximumAndroidPua(
-       /* [in] */ Int64 nativeEmojiFactory);
-
-    static AutoPtr<IBitmap> NativeGetBitmapFromAndroidPua(
+    static CARAPI_(AutoPtr<IBitmap>) NativeGetBitmapFromAndroidPua(
        /* [in] */ Int64 nativeEmojiFactory,
        /* [in] */ Int32 AndroidPua);
 
-    static Int32 NativeGetAndroidPuaFromVendorSpecificSjis(
+    static CARAPI_(Int32) NativeGetAndroidPuaFromVendorSpecificSjis(
        /* [in] */ Int64 nativeEmojiFactory,
        /* [in] */ char sjis);
 
-    static  Int32 NativeGetVendorSpecificSjisFromAndroidPua(
+    static CARAPI_(Int32) NativeGetVendorSpecificSjisFromAndroidPua(
        /* [in] */ Int64 nativeEmojiFactory,
        /* [in] */ Int32 pua);
 
-    static Int32 NativeGetAndroidPuaFromVendorSpecificPua(
+    static CARAPI_(Int32) NativeGetAndroidPuaFromVendorSpecificPua(
        /* [in] */ Int64 nativeEmojiFactory,
        /* [in] */ Int32 vsp);
 
-    static Int32 NativeGetVendorSpecificPuaFromAndroidPua(
+    static CARAPI_(Int32) NativeGetVendorSpecificPuaFromAndroidPua(
        /* [in] */ Int64 nativeEmojiFactory,
        /* [in] */ Int32 pua);
 
-    static Int32 NativeGetMaximumVendorSpecificPua(
+    static CARAPI_(Int32) NativeGetMaximumVendorSpecificPua(
        /* [in] */ Int64 nativeEmojiFactory);
 
-    static Int32 NativeGetMinimumVendorSpecificPua(
+    static CARAPI_(Int32) NativeGetMinimumVendorSpecificPua(
        /* [in] */ Int64 nativeEmojiFactory);
 
+    static CARAPI_(Int32) NativeGetMaximumAndroidPua(
+       /* [in] */ Int64 nativeEmojiFactory);
 
-     /*
-      // Returns binary image data corresponding to "pua". The size of binary is
-      // stored to "size". Returns NULL if there's no mapping from the "pua" to a
-      // specific image. Currently, image format is all (animated) gif.
-      //
-      // TODO(dmiyakawa): there should be a way to tell users the format of the
-      // binary.
-      virtual const char *GetImageBinaryFromAndroidPua(int pua, int *size) = 0;
-    */
-    static char *GetImageBinaryFromAndroidPua(Int32 pua, Int32 *size);
+    static CARAPI_(Int32) NativeGetMinimumAndroidPua(
+        /* [in] */ Int64 nativeEmojiFactory);
+
+//     /*
+//      // Returns binary image data corresponding to "pua". The size of binary is
+//      // stored to "size". Returns NULL if there's no mapping from the "pua" to a
+//      // specific image. Currently, image format is all (animated) gif.
+//      //
+//      // TODO(dmiyakawa): there should be a way to tell users the format of the
+//      // binary.
+//      virtual const char *GetImageBinaryFromAndroidPua(int pua, int *size) = 0;
+//    */
+//    static char *GetImageBinaryFromAndroidPua(Int32 pua, Int32 *size);
+
+private:
+    Int32 mCacheSize;
+    Int64 mNativeEmojiFactory;
+    String mName;
+    // Cache.
+    AutoPtr<IHashMap> mCache;
 };
 
 } // namespace Emoji

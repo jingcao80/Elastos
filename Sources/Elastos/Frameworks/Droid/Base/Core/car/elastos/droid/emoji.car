@@ -10,16 +10,6 @@ module
         interface IEmojiFactoryHelper;
     }
 
-    class CEmojiFactory {
-        constructor();
-
-        constructor(
-            [in] Int64 nativeEmojiFactory,
-            [in] String name);
-
-        interface IEmojiFactory;
-    }
-
     } // namespace Emoji
     } // namespace Droid
     } // namespace Elastos
