@@ -16,3 +16,5 @@ DocumentsUI             /system/app          dir
 DownloadProviderUi      /system/app          dir
 Gallery2                /system/app          dir
 webview                 /system/app          dir
+Mms                     /system/app          dir
+MmsService              /system/app          dir
