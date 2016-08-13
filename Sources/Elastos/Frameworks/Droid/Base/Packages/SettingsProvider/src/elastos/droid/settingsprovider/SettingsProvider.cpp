@@ -760,7 +760,7 @@ ECode SettingsProvider::OnCreate(
     CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&helper);
     helper->Get(context, (IUserManager**)&mUserManager);
     SetAppOps(IAppOpsManager::OP_NONE, IAppOpsManager::OP_WRITE_SETTINGS);
-    EstablishDbTracking(IUserHandle::USER_OWNER);
+    FAIL_RETURN(EstablishDbTracking(IUserHandle::USER_OWNER));
     AutoPtr<IIntentFilter> userFilter;
     CIntentFilter::New((IIntentFilter**)&userFilter);
     userFilter->AddAction(IIntent::ACTION_USER_REMOVED);
@@ -827,7 +827,7 @@ void SettingsProvider::OnProfilesChanged()
     }
 }
 
-void SettingsProvider::EstablishDbTracking(
+ECode SettingsProvider::EstablishDbTracking(
     /* [in] */ Int32 userHandle)
 {
     if (LOCAL_LOGV) {
@@ -865,7 +865,8 @@ void SettingsProvider::EstablishDbTracking(
     // manages concurrency itself, and it's important that we not run the db
     // initialization with any of our own locks held, so we're fine.
     AutoPtr<ISQLiteDatabase> db;
-    dbhelper->GetWritableDatabase((ISQLiteDatabase**)&db);
+    FAIL_RETURN(dbhelper->GetWritableDatabase((ISQLiteDatabase**)&db));
+    assert(db != NULL);
 
     // Watch for external modifications to the database files,
     // keeping our caches in sync.  We synchronize the observer set
@@ -886,6 +887,7 @@ void SettingsProvider::EstablishDbTracking(
     Boolean result;
     EnsureAndroidIdIsSet(userHandle, &result);
     StartAsyncCachePopulation(userHandle);
+    return NOERROR;
 }
 
 void SettingsProvider::StartAsyncCachePopulation(
@@ -1097,7 +1099,11 @@ ECode SettingsProvider::GetOrEstablishDatabase(
     }
 
     if (NULL == dbHelper) {
-        EstablishDbTracking(callingUser);
+        ECode ec = EstablishDbTracking(callingUser);
+        if (FAILED(ec)) {
+            Binder::RestoreCallingIdentity(oldId);
+            return ec;
+        }
         {
         AutoLock syncLock(this);
             AutoPtr<IInterface> obj;

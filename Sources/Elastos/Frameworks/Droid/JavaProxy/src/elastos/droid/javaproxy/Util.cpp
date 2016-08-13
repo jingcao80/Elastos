@@ -76,6 +76,7 @@ using Elastos::Droid::Hardware::Display::IWifiDisplayStatus;
 using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Internal::View::IIInputMethodSession;
 using Elastos::Droid::Internal::Location::CProviderProperties;
+using Elastos::Droid::Os::ECLSID_CUserHandle;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::IInputEvent;
 using Elastos::Droid::View::InputMethod::IInputConnection;
@@ -1764,9 +1765,23 @@ Boolean Util::SetJavaBaseBundle(
                         LOGGERE("ToJavaBundle", "ToJavaParcelable fail!");
                     }
                 }
+                else if (ECLSID_CUserHandle == clsid) {
+                    jobject jparcelable = Util::ToJavaUserHandle(env, IUserHandle::Probe(value));
+                    if (jparcelable != NULL) {
+                        jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
+                        Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putParcelable %d", __LINE__);
+
+                        env->CallVoidMethod(jbundle, m, jKey, jparcelable);
+                        Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putParcelable %d", __LINE__);
+                    }
+                    else {
+                        LOGGERE("ToJavaBundle", "ToJavaParcelable fail!");
+                    }
+                }
                 else {
                     LOGGERE("ToJavaBundle", "ToJavaBundle() Unknown IParcelable type not implemented! key is:%s\n", keyStr.string());
                     DUMP_CLSID(clsid, "ToJavaBundle");
+                    assert(0 && "TODO");
                 }
             }
             else{

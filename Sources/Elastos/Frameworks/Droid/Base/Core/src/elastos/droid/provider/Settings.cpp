@@ -180,7 +180,7 @@ ECode Settings::NameValueCache::PutStringForUser(
     arg->PutInt32(ISettings::CALL_METHOD_USER_KEY, userHandle);
     AutoPtr<IIContentProvider> cp;
     ECode ec = LazyGetProvider(cr, (IIContentProvider**)&cp);
-    if (FAILED(ec)) {
+    if (FAILED(ec) || cp == NULL) {
         Slogger::W(TAG, "Can't set key %s in %s", name.string(), TO_CSTR(mUri));
         return ec == (ECode)E_REMOTE_EXCEPTION ? NOERROR : ec;
     }

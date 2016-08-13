@@ -322,7 +322,7 @@ private:
         /* [in] */ const String& setting,
         /* [in] */ Int32 userId);
 
-    CARAPI_(void) EstablishDbTracking(
+    CARAPI EstablishDbTracking(
         /* [in] */ Int32 userHandle);
 
     CARAPI_(void) StartAsyncCachePopulation(
