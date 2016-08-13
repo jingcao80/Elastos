@@ -203,6 +203,8 @@ CAR_INTERFACE_IMPL(JSActName, EditText, ICalculatorEditText)
 
 JS_CAR_OBJECT_IMPL(JSActName)
 
+CAR_INTERFACE_IMPL(JSActName::SuperObject, Object, ICalculatorEditTextSuperObject)
+
 //----------------------------------------------------------------
 //           JSActName::MyActionModeCallback
 //----------------------------------------------------------------
@@ -289,208 +291,162 @@ ECode JSActName::_constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-    EditText::constructor(context, attrs, defStyle);
-    return NOERROR;
+    return EditText::constructor(context, attrs, defStyle);
 }
-
 ECode JSActName::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-    ALOGD("CCalculatorEditText::constructor========begin====0====");
-
     ECode ec = NOERROR;
 
-    EditText::constructor(context, attrs, defStyle);
-    ALOGD("CCalculatorEditText::constructor========begin====1====");
+    SuperObject* superObject = new SuperObject(this);
+    mSuperObject = (ICalculatorEditTextSuperObject*)superObject->Probe(EIID_ICalculatorEditTextSuperObject);
 
     AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
-    ALOGD("CCalculatorEditText::constructor========begin====2====");
-
     JSEvtName::RegisterCustomControl(context, _this, (ICalculatorEditTextListener**)&mListener);
-    ALOGD("CCalculatorEditText::constructor========begin====3====");
 
     if (mListener) {
-        Int32 cnt = 0;
-        ec = attrs->GetAttributeCount(&cnt);
-        ALOGD("CCalculatorEditText::constructor========begin====0====AttributeCount:%d",cnt);
-        IObject* temp_obj = IObject::Probe(attrs);
-        String temp_name;
-        ec = temp_obj->ToString(&temp_name);
-        ALOGD("CCalculatorEditText::constructor========begin====0====ToString:%s",temp_name.string());
-
-        ALOGD("CCalculatorEditText::constructor========begin====4.1====");
-        ec = mListener->OnXXXCreateXXX(_this, context, attrs, defStyle);
-        ALOGD("CCalculatorEditText::constructor========begin====5====");
+        ec = mListener->OnCreate(_this, context, attrs, defStyle);
     }
     else {
-        ALOGD("CCalculatorEditText::constructor========begin====6====");
+        ec = EditText::constructor(context, attrs, defStyle);
     }
 
-    //return ec;
-    return NOERROR;
-
-    // EditText::constructor(context, attrs, defStyle);
-
-    // AutoPtr<IAttributeSet> attbs = attrs;
-    // AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-    //     const_cast<Int32 *>(R::styleable::CalculatorEditText),
-    //     ArraySize(R::styleable::CalculatorEditText));
-
-    // AutoPtr<ITypedArray> a;
-    // context->ObtainStyledAttributes(attbs.Get(), attrIds.Get(), defStyle, 0, (ITypedArray**)&a);
-
-    // Float textsize;
-    // GetTextSize(&textsize);
-    // a->GetDimension(
-    //         R::styleable::CalculatorEditText_maxTextSize, textsize, &mMaximumTextSize);
-    // a->GetDimension(
-    //         R::styleable::CalculatorEditText_minTextSize, textsize, &mMinimumTextSize);
-    // a->GetDimension(R::styleable::CalculatorEditText_stepTextSize,
-    //         (mMaximumTextSize - mMinimumTextSize) / 3, &mStepTextSize);
-
-    // a->Recycle();
-
-    // SetCustomSelectionActionModeCallback(
-    //     IActionModeCallback::Probe(NO_SELECTION_ACTION_MODE_CALLBACK));
-    // Boolean flag = FALSE;
-    // IsFocusable(&flag);
-    // if (flag) {
-    //     AutoPtr<IScrollingMovementMethodHelper> smm;
-    //     CScrollingMovementMethodHelper::AcquireSingleton((IScrollingMovementMethodHelper**)&smm);
-    //     AutoPtr<IMovementMethod> mmd;
-    //     smm->GetInstance((IMovementMethod**)&mmd);
-    //     SetMovementMethod(mmd.Get());
-    // }
-    // SetTextSize(ITypedValue::COMPLEX_UNIT_PX, mMaximumTextSize);
-    // Int32 cpaddingBottom;
-    // GetCompoundPaddingBottom(&cpaddingBottom);
-    // Int32 cpaddingTop;
-    // GetCompoundPaddingTop(&cpaddingTop);
-    // Int32 lineHeight;
-    // GetLineHeight(&lineHeight);
-
-    // return SetMinHeight(lineHeight + cpaddingBottom + cpaddingTop);
+    return ec;
 }
 
+ECode JSActName::_OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return EditText::OnTouchEvent(event, result);
+}
 ECode JSActName::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
     ALOGD("CCalculatorEditText::OnTouchEvent========begin========");
-    return NOERROR;
 
-    // VALIDATE_NOT_NULL(result);
+    ECode ec = NOERROR;
 
-    // Int32 actionMasked;
-    // event->GetActionMasked(&actionMasked);
-    // if (actionMasked == IMotionEvent::ACTION_UP) {
-    //     // Hack to prevent keyboard and insertion handle from showing.
-    //     CancelLongPress();
-    // }
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
 
-    // return EditText::OnTouchEvent(event, result);
+    if (mListener) {
+        ec = mListener->OnTouchEvent(_this, event, result);
+    }
+    else {
+        ec = EditText::OnTouchEvent(event, result);
+    }
+
+    return ec;
 }
 
+ECode JSActName::_OnMeasure(
+    /* [in] */ Int32 widthMeasureSpec,
+    /* [in] */ Int32 heightMeasureSpec)
+{
+    return EditText::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+}
 ECode JSActName::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     ALOGD("CCalculatorEditText::OnMeasure========begin========");
-    return NOERROR;
 
-    // EditText::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    ECode ec = NOERROR;
 
-    // Int32 paddingLeft;
-    // GetPaddingLeft(&paddingLeft);
-    // Int32 paddingRight;
-    // GetPaddingRight(&paddingRight);
-    // mWidthConstraint =
-    //         View::MeasureSpec::GetSize(widthMeasureSpec) - paddingLeft - paddingRight;
-    // AutoPtr<ICharSequence> cs;
-    // GetText((ICharSequence**)&cs);
-    // String str;
-    // cs->ToString(&str);
-    // Float vol;
-    // GetVariableTextSize(str, &vol);
-    // SetTextSize(ITypedValue::COMPLEX_UNIT_PX, vol);
-    // return NOERROR;
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->OnMeasure(_this, widthMeasureSpec, heightMeasureSpec);
+    }
+    else {
+        ec = EditText::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    return ec;
 }
 
+ECode JSActName::_OnSaveInstanceState(
+    /* [out] */ IParcelable** result)
+{
+    *result = EditText::OnSaveInstanceState();
+    return NOERROR;
+}
 ECode JSActName::OnSaveInstanceState(
-    /* [out] */ IParcelable* result)
+    /* [out] */ IParcelable** result)
 {
     ALOGD("CCalculatorEditText::OnMeasureOnSaveInstanceState========begin========");
-    return NOERROR;
 
-    // VALIDATE_NOT_NULL(result);
-    // AutoPtr<IParcelable> pl = EditText::OnSaveInstanceState();
+    ECode ec = NOERROR;
 
-    // // EditText will freeze any text with a selection regardless of getFreezesText() ->
-    // // return null to prevent any state from being preserved at the instance level.
-    // result = NULL;
-    // return NOERROR;
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->OnSaveInstanceState(_this, result);
+    }
+    else {
+        *result = EditText::OnSaveInstanceState();
+    }
+
+    return ec;
 }
 
+ECode JSActName::_OnTextChanged(
+    /* [in] */ ICharSequence* text,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 lengthBefore,
+    /* [in] */ Int32 lengthAfter)
+{
+    return EditText::OnTextChanged(text, start, lengthBefore, lengthAfter);
+}
 ECode JSActName::OnTextChanged(
     /* [in] */ ICharSequence* text,
     /* [in] */ Int32 start,
     /* [in] */ Int32 lengthBefore,
     /* [in] */ Int32 lengthAfter)
 {
-    String temp;
-    text->ToString(&temp);
-    ALOGD("CCalculatorEditText::OnTextChanged========begin========text:%s", temp.string());
-    return NOERROR;
-
-    // EditText::OnTextChanged(text, start, lengthBefore, lengthAfter);
-
-    // Int32 textLength;
-    // text->GetLength(&textLength);
-    // Int32 istart;
-    // GetSelectionStart(&istart);
-    // Int32 end;
-    // GetSelectionEnd(&end);
-    // if (istart != textLength || end != textLength) {
-    //     // Pin the selection to the end of the current text.
-    //     SetSelection(textLength);
-    // }
-    // String str;
-    // text->ToString(&str);
-    // Float vol;
-    // GetVariableTextSize(str, &vol);
-    // return SetTextSize(ITypedValue::COMPLEX_UNIT_PX, vol);
-}
-
-ECode JSActName::SetTextSize(
-    /* [in] */ Int32 unit,
-    /* [in] */ Float size)
-{
-    ALOGD("CCalculatorEditText::SetTextSize========begin========");
-    //return NOERROR;
+    ALOGD("CCalculatorEditText::OnTextChanged========begin========");
 
     ECode ec = NOERROR;
 
     AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
 
     if (mListener) {
-        ALOGD("CCalculatorEditText::SetTextSize========js begin========");
-        ec = mListener->SetTextSize(_this, unit, size);
-        ALOGD("CCalculatorEditText::SetTextSize========js end========");
+        ec = mListener->OnTextChanged(_this, text, start, lengthBefore, lengthAfter);
+    }
+    else {
+        ec = EditText::OnTextChanged(text, start, lengthBefore, lengthAfter);
     }
 
     return ec;
+}
 
-    // Float oldTextSize;
-    // GetTextSize(&oldTextSize);
-    // EditText::SetTextSize(unit, size);
+ECode JSActName::_SetTextSize(
+    /* [in] */ Int32 unit,
+    /* [in] */ Float size)
+{
+    return EditText::SetTextSize(unit, size);
+}
+ECode JSActName::SetTextSize(
+    /* [in] */ Int32 unit,
+    /* [in] */ Float size)
+{
+    ALOGD("CCalculatorEditText::SetTextSize========begin========");
 
-    // Float fvol;
-    // if (mOnTextSizeChangeListener != NULL && (GetTextSize(&fvol), fvol != oldTextSize)) {
-    //     mOnTextSizeChangeListener->OnTextSizeChanged(this, oldTextSize);
-    // }
-    // return NOERROR;
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->SetTextSize(_this, unit, size);
+    }
+    else {
+        ec = EditText::SetTextSize(unit, size);
+    }
+
+    return ec;
 }
 
 //to be deleted
@@ -547,56 +503,74 @@ ECode JSActName::GetVariableTextSize(
     // return NOERROR;
 }
 
+ECode JSActName::_GetCompoundPaddingTop(
+    /* [out] */ Int32* result)
+{
+    return EditText::GetCompoundPaddingTop(result);
+}
 ECode JSActName::GetCompoundPaddingTop(
     /* [out] */ Int32* result)
 {
     ALOGD("CCalculatorEditText::GetCompoundPaddingTop========begin========");
-    return NOERROR;
 
-    // VALIDATE_NOT_NULL(result);
+    ECode ec = NOERROR;
 
-    // // Measure the top padding from the capital letter height of the text instead of the top,
-    // // but don't remove more than the available top padding otherwise clipping may occur.
-    // AutoPtr<ITextPaint> tp;
-    // GetPaint((ITextPaint**)&tp);
-    // IPaint::Probe(tp)->GetTextBounds(String("H"), 0, 1, mTempRect);
-    // AutoPtr<IPaintFontMetricsInt> fontMetrics;
-    // IPaint::Probe(tp)->GetFontMetricsInt((IPaintFontMetricsInt**)&fontMetrics);
-    // Int32 height;
-    // mTempRect->GetHeight(&height);
-    // Int32 ascent;
-    // fontMetrics->GetAscent(&ascent);
-    // Int32 paddingOffset = -(ascent + height);
-    // Int32 top;
-    // EditText::GetCompoundPaddingTop(&top);
-    // Int32 paddingTop;
-    // GetPaddingTop(&paddingTop);
-    // *result = top - Elastos::Core::Math::Min(paddingTop, paddingOffset);
-    // return NOERROR;
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->GetCompoundPaddingTop(_this, result);
+    }
+    else {
+        ec = EditText::GetCompoundPaddingTop(result);
+    }
+
+    return ec;
 }
 
+ECode JSActName::_GetCompoundPaddingBottom(
+    /* [out] */ Int32* result)
+{
+    return EditText::GetCompoundPaddingBottom(result);
+}
 ECode JSActName::GetCompoundPaddingBottom(
     /* [out] */ Int32* result)
 {
     ALOGD("CCalculatorEditText::GetCompoundPaddingBottom========begin========");
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->GetCompoundPaddingBottom(_this, result);
+    }
+    else {
+        ec = EditText::GetCompoundPaddingBottom(result);
+    }
+
+    return ec;
+}
+
+ECode JSActName::GetSuperObject(
+    /* [out] */ ICalculatorEditTextSuperObject ** ppSuperObject)
+{
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    assert(ppSuperObject != NULL);
+    *ppSuperObject = mSuperObject;
+
+    REFCOUNT_ADD(*ppSuperObject);
     return NOERROR;
+}
 
-    // VALIDATE_NOT_NULL(result);
+ECode JSActName::SuperObject::SetTextSize(
+    /* [in] */ Int32 unit,
+    /* [in] */ Float size)
+{
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
 
-    // // Measure the bottom padding from the baseline of the text instead of the bottom, but don't
-    // // remove more than the available bottom padding otherwise clipping may occur.
-    // AutoPtr<ITextPaint> tp;
-    // GetPaint((ITextPaint**)&tp);
-    // AutoPtr<IPaintFontMetricsInt> fontMetrics;
-    // IPaint::Probe(tp)->GetFontMetricsInt((IPaintFontMetricsInt**)&fontMetrics);
-    // Int32 bottom;
-    // GetPaddingBottom(&bottom);
-    // Int32 descent;
-    // fontMetrics->GetDescent(&descent);
-    // Int32 vbottom;
-    // EditText::GetCompoundPaddingBottom(&vbottom);
-    // *result = vbottom - Elastos::Core::Math::Min(bottom, descent);
-    // return NOERROR;
+    mHost->_SetTextSize(unit, size);
+
+    return NOERROR;
 }
 
 // } // namespace Calculator2

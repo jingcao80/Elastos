@@ -158,6 +158,14 @@ module
     }
 
     [local]
+    interface ICalculatorEditTextSuperObject
+    {
+        SetTextSize(
+            [in] Int32 unit,
+            [in] Float size);
+    }
+
+    [local]
     interface ICalculatorEditText
     {
         SetOnTextSizeChangeListener(
@@ -167,26 +175,58 @@ module
             [in] String text,
             [out] Float* result);
 
+        GetSuperObject(
+            [out] ICalculatorEditTextSuperObject** superObject);
+
         _constructor(
             [in] IContext* context,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
+
+        _OnTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
+
+        _OnSaveInstanceState(
+            [out] IParcelable** result);
+
+        _SetTextSize(
+            [in] Int32 unit,
+            [in] Float size);
+
+        _GetCompoundPaddingTop(
+            [out] Int32* result);
+
+        _GetCompoundPaddingBottom(
+            [out] Int32* result);
+
+        _OnMeasure(
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
+
+        _OnTextChanged(
+            [in] ICharSequence* text,
+            [in] Int32 start,
+            [in] Int32 lengthBefore,
+            [in] Int32 lengthAfter);
     }
 
     [local]
     interface ICalculatorEditTextListener
     {
-        OnXXXCreateXXX(   //constructor
+        OnCreate(   //constructor
             [in] IInterface* _this,
             [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
         OnTouchEvent(
+            [in] IInterface* _this,
             [in] IMotionEvent* event,
             [out] Boolean* result);
 
         OnSaveInstanceState(
+            [in] IInterface* _this,
             [out] IParcelable** result);
 
         SetTextSize(
@@ -195,16 +235,20 @@ module
             [in] Float size);
 
         GetCompoundPaddingTop(
+            [in] IInterface* _this,
             [out] Int32* result);
 
         GetCompoundPaddingBottom(
+            [in] IInterface* _this,
             [out] Int32* result);
 
         OnMeasure(
+            [in] IInterface* _this,
             [in] Int32 widthMeasureSpec,
             [in] Int32 heightMeasureSpec);
 
         OnTextChanged(
+            [in] IInterface* _this,
             [in] ICharSequence* text,
             [in] Int32 start,
             [in] Int32 lengthBefore,
@@ -250,6 +294,7 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
+
         interface ICalculatorEditText;
     }
 

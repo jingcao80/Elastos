@@ -400,7 +400,9 @@ containing a value of this type.
            @see #CalculatorEditText_minTextSize
            @see #CalculatorEditText_stepTextSize
          */
-        CalculatorEditText : [],
+        //CalculatorEditText : [0,0,0],
+        CalculatorEditText : [0x7f010000, 0x7f010001, 0x7f010002],
+
         /**
           <p>This symbol is the offset where the {@link Elastos.DevSamples.Node.JSCalculator.R.attr#maxTextSize}
           attribute's value can be found in the {@link #CalculatorEditText} array.
