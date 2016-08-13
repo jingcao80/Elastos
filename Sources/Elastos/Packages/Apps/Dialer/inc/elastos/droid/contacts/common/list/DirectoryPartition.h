@@ -132,7 +132,7 @@ private:
 } // List
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
 
 #endif //__ELASTOS_DROID_CONTACTS_COMMON_LIST_DIRECTORYPARTITION_H__

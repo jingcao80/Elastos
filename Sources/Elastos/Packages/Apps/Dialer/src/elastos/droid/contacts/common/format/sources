@@ -1,0 +1,9 @@
+TARGET_NAME= format
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../
+INCLUDES += ../../../../../../
+
+SOURCES += FormatUtils.cpp
+SOURCES += TextHighlighter.cpp

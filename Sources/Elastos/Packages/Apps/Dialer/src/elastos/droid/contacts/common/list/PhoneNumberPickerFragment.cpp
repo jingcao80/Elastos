@@ -32,7 +32,8 @@ CAR_INTERFACE_IMPL(PhoneNumberPickerFragment::FilterHeaderClickListener, Object,
 ECode PhoneNumberPickerFragment::FilterHeaderClickListener::OnClick(
     /* [in] */ IView* view)
 {
-    AccountFilterUtil::StartAccountFilterActivityForResult(mHost, REQUEST_CODE_ACCOUNT_FILTER, mFilter);
+    AccountFilterUtil::StartAccountFilterActivityForResult(mHost, REQUEST_CODE_ACCOUNT_FILTER,
+            mHost->mFilter);
     return NOERROR;
 }
 
@@ -90,7 +91,7 @@ ECode PhoneNumberPickerFragment::OnCreateView(
     AutoPtr<IView> paddingView;
     inflater->Inflate(Elastos::Droid::Dialer::R::layout::contact_detail_list_padding, NULL, FALSE);
     AutoPtr<IView> temp;
-    paddingView->FindViewById(Elastos::Droid::Dialer::R::layout::contact_detail_list_padding, (IView**)&temp);
+    paddingView->FindViewById(Elastos::Droid::Dialer::R::id::contact_detail_list_padding, (IView**)&temp);
     mPaddingView = temp;
     AutoPtr<IListView> lv;
     GetListView((IListView**)&lv);
@@ -99,7 +100,7 @@ ECode PhoneNumberPickerFragment::OnCreateView(
     AutoPtr<IView> view;
     GetView((IView**)&view);
     temp = NULL;
-    view->FindViewById(Elastos::Droid::Dialer::R::layout::account_filter_header_container, (IView**)&temp);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::account_filter_header_container, (IView**)&temp);
     mAccountFilterHeader = temp;
     mAccountFilterHeader->SetOnClickListener(mFilterHeaderClickListener);
     UpdateFilterHeaderView();
@@ -113,18 +114,16 @@ Boolean PhoneNumberPickerFragment::GetVisibleScrollbarEnabled()
     return TRUE;
 }
 
-ECode PhoneNumberPickerFragment::SetSearchMode(
+void PhoneNumberPickerFragment::SetSearchMode(
     /* [in] */ Boolean flag)
 {
-    FAIL_RETURN(ContactEntryListFragment::SetSearchMode(flag))
+    ContactEntryListFragment::SetSearchMode(flag);
     UpdateFilterHeaderView();
-    return NOERROR;
 }
 
 void PhoneNumberPickerFragment::UpdateFilterHeaderView()
 {
-    AutoPtr<IContactListFilter> filter;
-    GetFilter((IContactListFilter**)&filter);
+    AutoPtr<IContactListFilter> filter = GetFilter();
     if (mAccountFilterHeader == NULL || filter == NULL) {
         return;
     }
@@ -152,7 +151,7 @@ ECode PhoneNumberPickerFragment::RestoreSavedState(
     }
 
     AutoPtr<IParcelable> parcel;
-    savedState->GetParcelabel(KEY_FILTER, (IParcelable**)&parcel);
+    savedState->GetParcelable(KEY_FILTER, (IParcelable**)&parcel);
     mFilter = IContactListFilter::Probe(parcel);
     savedState->GetString(KEY_SHORTCUT_ACTION, &mShortcutAction);
 }
@@ -161,7 +160,7 @@ ECode PhoneNumberPickerFragment::OnSaveInstanceState(
     /* [in] */ IBundle* outState)
 {
     FAIL_RETURN(ContactEntryListFragment::OnSaveInstanceState(outState))
-    outState->PutParcelable(KEY_FILTER, IParcelable::(mFilter));
+    outState->PutParcelable(KEY_FILTER, IParcelable::Probe(mFilter));
     outState->PutString(KEY_SHORTCUT_ACTION, mShortcutAction);
     return NOERROR;
 }
@@ -188,7 +187,7 @@ void PhoneNumberPickerFragment::SetShortcutAction(
     mShortcutAction = shortcutAction;
 }
 
-ECode PhoneNumberPickerFragment::OnItemClick(
+void PhoneNumberPickerFragment::OnItemClick(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
@@ -237,7 +236,7 @@ AutoPtr<IUri> PhoneNumberPickerFragment::GetPhoneUri(
     return uri;
 }
 
-ECode PhoneNumberPickerFragment::StartLoading()
+void PhoneNumberPickerFragment::StartLoading()
 {
     mLoaderStarted = TRUE;
     return ContactEntryListFragment::StartLoading();
@@ -289,7 +288,7 @@ void PhoneNumberPickerFragment::ConfigureAdapter()
         return;
     }
 
-    Boolean isSearchMode
+    Boolean isSearchMode;
     if ((IsSearchMode(&isSearchMode), !isSearchMode) && mFilter != NULL) {
         adapter->SetFilter(mFilter);
     }
@@ -329,7 +328,7 @@ void PhoneNumberPickerFragment::StartPhoneNumberShortcutIntent(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     AutoPtr<ShortcutIntentBuilder> builder
-            = new ShortcutIntentBuilder(activity, IOnShortcutIntentCreatedListener::Probe(this));
+            = new ShortcutIntentBuilder(IContext::Probe(activity), IOnShortcutIntentCreatedListener::Probe(this));
     builder->CreatePhoneNumberShortcutIntent(uri, mShortcutAction);
 }
 

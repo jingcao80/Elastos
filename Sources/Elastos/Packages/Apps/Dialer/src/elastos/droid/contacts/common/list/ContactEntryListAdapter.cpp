@@ -281,7 +281,7 @@ ECode ContactEntryListAdapter::GetQueryString(
 }
 
 ECode ContactEntryListAdapter::SetQueryString(
-    /* [in] */ String queryString)
+    /* [in] */ const String& queryString)
 {
     mQueryString = queryString;
     if (TextUtils::IsEmpty(queryString)) {

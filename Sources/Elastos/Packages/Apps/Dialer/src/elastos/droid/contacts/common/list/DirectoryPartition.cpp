@@ -161,5 +161,5 @@ void DirectoryPartition::SetDisplayNumber(
 } // List
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos

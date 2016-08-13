@@ -5,7 +5,7 @@
 #include "elastos/droid/contacts/common/list/PinnedHeaderListAdapter.h"
 
 using Elastos::Droid::Widget::ISectionIndexer;
-using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Widget::IAdapterView;
 
 namespace Elastos{
 namespace Droid{
@@ -36,7 +36,7 @@ public:
         Placement()
             : mFirstInSection(FALSE)
             , mLastInSection(FALSE)
-            , mPosition(IListView::INVALID_POSITION)
+            , mPosition(IAdapterView::INVALID_POSITION)
         {}
 
         CAR_INTERFACE_DECL()

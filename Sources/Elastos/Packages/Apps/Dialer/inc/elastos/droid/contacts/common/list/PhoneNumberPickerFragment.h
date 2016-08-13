@@ -124,7 +124,7 @@ protected:
     CARAPI_(Boolean) GetVisibleScrollbarEnabled();
 
     // @Override
-    CARAPI SetSearchMode(
+    CARAPI_(void) SetSearchMode(
         /* [in] */ Boolean flag);
 
     // @Override
@@ -142,7 +142,7 @@ protected:
         /* [in] */ Int32 position);
 
     // @Override
-    CARAPI StartLoading();
+    CARAPI_(void) StartLoading();
 
     // @Override
     CARAPI_(AutoPtr<IContactEntryListAdapter>) CreateListAdapter();
@@ -201,7 +201,7 @@ private:
 } // List
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
 
 #endif //__ELASTOS_DROID_CONTACTS_COMMON_LIST_PHONENUMBERPICKERFRAGMENT_H__

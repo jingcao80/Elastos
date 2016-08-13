@@ -7,8 +7,8 @@
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IFragment;
-using Elastos::Droid::Contact::Common::List::ContactListFilter;
-using Elastos::Droid::Contact::Common::List::IContactListFilterController;
+using Elastos::Droid::Contacts::Common::List::IContactListFilter;
+using Elastos::Droid::Contacts::Common::List::IContactListFilterController;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::View::IView;
 
@@ -84,7 +84,7 @@ public:
 private:
     static CARAPI_(Boolean) UpdateAccountFilterTitle(
         /* [in] */ IView* filterContainer,
-        /* [in] */ ContactListFilter* filter,
+        /* [in] */ IContactListFilter* filter,
         /* [in] */ Boolean showTitleForAllAccounts,
         /* [in] */ Boolean forPhone);
 

@@ -2,12 +2,13 @@
 #ifndef __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTLISTITEMVIEW_H__
 #define __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTLISTITEMVIEW_H__
 
+#include <Elastos.CoreLibrary.Utility.h>
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/contacts/common/format/TextHighlighter.h"
 #include "elastos/droid/view/ViewGroup.h"
 #include <elastos/utility/etl/List.h>
-#include <Elastos.CoreLibrary.Utility.h>
 
+using Elastos::Droid::Contacts::Common::Format::TextHighlighter;
 using Elastos::Droid::Content::Res::IColorStateList;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::ICharArrayBuffer;
@@ -19,8 +20,8 @@ using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::Widget::ISelectionBoundsAdjuster;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IQuickContactBadge;
+using Elastos::Droid::Widget::IImageView;
 using Elastos::Core::ICharSequence;
-using Elastos::Utility::Etl::List;
 using Elastos::Utility::Regex::IPattern;
 
 namespace Elastos {
@@ -426,8 +427,8 @@ private:
      */
     Int32 mDataViewWidthWeight;
 
-    List<AutoPtr<HighlightSequence> > mNameHighlightSequence;
-    List<AutoPtr<HighlightSequence> > mNumberHighlightSequence;
+    Elastos::Utility::Etl::List<AutoPtr<HighlightSequence> > mNameHighlightSequence;
+    Elastos::Utility::Etl::List<AutoPtr<HighlightSequence> > mNumberHighlightSequence;
 
     // Highlighting prefix for names.
     String mHighlightedPrefix;
@@ -514,7 +515,7 @@ private:
 } // List
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
 
 #endif //__ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTLISTITEMVIEW_H__

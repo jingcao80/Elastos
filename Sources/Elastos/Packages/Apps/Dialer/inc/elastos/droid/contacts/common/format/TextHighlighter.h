@@ -2,12 +2,14 @@
 #ifndef __ELASTOS_DROID_CONTACTS_COMMON_FORMAT_TEXTHIGHLIGHTER_H__
 #define __ELASTOS_DROID_CONTACTS_COMMON_FORMAT_TEXTHIGHLIGHTER_H__
 
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.Widget.h"
 #include "_Elastos.Droid.Dialer.h"
 #include <elastos/core/Object.h>
-#include "Elastos.Droid.Text.h"
 
 using Elastos::Droid::Text::ISpannableString;
 using Elastos::Droid::Text::Style::ICharacterStyle;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::Object;
 using Elastos::Core::ICharSequence;
 
@@ -74,7 +76,7 @@ private:
 } // Format
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
 
 #endif //__ELASTOS_DROID_CONTACTS_COMMON_FORMAT_TEXTHIGHLIGHTER_H__

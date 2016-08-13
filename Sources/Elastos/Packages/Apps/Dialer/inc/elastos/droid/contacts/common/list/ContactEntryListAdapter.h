@@ -59,7 +59,7 @@ public:
         /* [out] */ String* queryString);
 
     CARAPI SetQueryString(
-        /* [in] */ String queryString);
+        /* [in] */ const String& queryString);
 
     CARAPI GetUpperCaseQueryString(
         /* [out] */ String* result);

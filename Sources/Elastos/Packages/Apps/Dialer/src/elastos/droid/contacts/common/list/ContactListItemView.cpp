@@ -1598,5 +1598,5 @@ Boolean ContactListItemView::PointIsInView(
 } // List
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
