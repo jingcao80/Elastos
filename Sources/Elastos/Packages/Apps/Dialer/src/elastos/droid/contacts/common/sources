@@ -10,8 +10,12 @@ SOURCES += CallUtil.cpp
 SOURCES += GeoUtil.cpp
 SOURCES += ContactStatusUtil.cpp
 SOURCES += ContactPresenceIconUtil.cpp
+#SOURCES += ContactsUtils.cpp
 
 ELASTOS_LIBS += interactions/interactions.lib
 #ELASTOS_LIBS += list/list.lib
 ELASTOS_LIBS += util/util.lib
 ELASTOS_LIBS += widget/widget.lib
+#ELASTOS_LIBS += preference/preference.lib
+#ELASTOS_LIBS += format/format.lib
+#ELASTOS_LIBS += extensions/extensions.lib

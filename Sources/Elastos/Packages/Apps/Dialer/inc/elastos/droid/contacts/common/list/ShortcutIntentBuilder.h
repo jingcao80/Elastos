@@ -37,6 +37,7 @@ private:
     {
     public:
         LoadingAsyncTask(
+            /* [in] */ ShortcutIntentBuilder* host,
             /* [in] */ IUri* uri);
 
         virtual ~LoadingAsyncTask() {}
@@ -59,6 +60,7 @@ private:
         String mLookupKey;
         AutoPtr<ArrayOf<Byte> > mBitmapData;
         Int64 mPhotoId;
+        ShortcutIntentBuilder* mHost;
     };
 
     class ContactLoadingAsyncTask
@@ -66,6 +68,7 @@ private:
     {
     public:
         ContactLoadingAsyncTask(
+            /* [in] */ ShortcutIntentBuilder* host,
             /* [in] */ IUri* uri);
 
     protected:
@@ -82,6 +85,7 @@ private:
     {
     public:
         PhoneNumberLoadingAsyncTask(
+            /* [in] */ ShortcutIntentBuilder* host,
             /* [in] */ IUri* uri,
             /* [in] */ const String& shortcutAction);
 
@@ -156,29 +160,15 @@ public:
      * ignore Intent.FLAG_ACTIVITY_NO_ANIMATION.
      */
     static const String INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION;
-            // "com.android.launcher.intent.extra.shortcut.INGORE_LAUNCH_ANIMATION";
 
 private:
     static const AutoPtr<ArrayOf<String> > CONTACT_COLUMNS;
-    //  = {
-    //     Contacts.DISPLAY_NAME,
-    //     Contacts.PHOTO_ID,
-    //     Contacts.LOOKUP_KEY
-    // };
 
     static const Int32 CONTACT_DISPLAY_NAME_COLUMN_INDEX = 0;
     static const Int32 CONTACT_PHOTO_ID_COLUMN_INDEX = 1;
     static const Int32 CONTACT_LOOKUP_KEY_COLUMN_INDEX = 2;
 
     static const AutoPtr<ArrayOf<String> > PHONE_COLUMNS;
-    //  = {
-    //     Phone.DISPLAY_NAME,
-    //     Phone.PHOTO_ID,
-    //     Phone.NUMBER,
-    //     Phone.TYPE,
-    //     Phone.LABEL,
-    //     Phone.LOOKUP_KEY
-    // };
 
     static const Int32 PHONE_DISPLAY_NAME_COLUMN_INDEX = 0;
     static const Int32 PHONE_PHOTO_ID_COLUMN_INDEX = 1;
@@ -188,13 +178,10 @@ private:
     static const Int32 PHONE_LOOKUP_KEY_COLUMN_INDEX = 5;
 
     static const AutoPtr<ArrayOf<String> > PHOTO_COLUMNS;
-    //  = {
-    //     Photo.PHOTO,
-    // };
 
     static const Int32 PHOTO_PHOTO_COLUMN_INDEX = 0;
 
-    static const String PHOTO_SELECTION;// = Photo._ID + "=?";
+    static const String PHOTO_SELECTION;
 
     AutoPtr<IOnShortcutIntentCreatedListener> mListener;
     AutoPtr<IContext> mContext;
@@ -202,6 +189,8 @@ private:
     Int32 mIconDensity;
     Int32 mOverlayTextBackgroundColor;
     AutoPtr<IResources> mResources;
+
+    friend class LoadingAsyncTask;
 };
 
 } // List

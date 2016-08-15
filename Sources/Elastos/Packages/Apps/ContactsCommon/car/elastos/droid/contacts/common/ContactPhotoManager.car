@@ -95,6 +95,22 @@ module
             [in] IContactPhotoManagerDefaultImageProvider* defaultProvider);
 
         /**
+         * Calls {@link #loadPhoto(ImageView, Uri, int, boolean, DefaultImageRequest,
+         * DefaultImageProvider)} with {@link #DEFAULT_AVATAR} and {@code null} display names and
+         * lookup keys.
+         *
+         * @param defaultImageRequest {@link DefaultImageRequest} object that specifies how a default
+         * letter tile avatar should be drawn.
+         */
+        LoadPhoto(
+            [in] IImageView* view,
+            [in] IUri* photoUri,
+            [in] Int32 requestedExtent,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);
+
+        /**
          * Calls {@link #loadPhoto(ImageView, Uri, boolean, boolean, DefaultImageRequest,
          * DefaultImageProvider)} with {@link #DEFAULT_AVATAR} and with the assumption, that
          * the image is a thumbnail.

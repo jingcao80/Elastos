@@ -4,6 +4,7 @@ module
 
     merge("car/elastos/droid/common/widget/CompositeCursorAdapter.car");
 
+    merge("car/elastos/droid/contacts/common/ContactsUtils.car");
     merge("car/elastos/droid/contacts/common/ContactPhotoManager.car");
     merge("car/elastos/droid/contacts/common/interactions/TouchPointManager.car");
     merge("car/elastos/droid/contacts/common/list/OnPhoneNumberPickerActionListener.car");
