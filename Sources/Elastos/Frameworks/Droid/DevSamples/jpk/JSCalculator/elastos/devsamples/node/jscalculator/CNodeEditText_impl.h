@@ -298,6 +298,8 @@ ECode JSActName::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
+    ALOGD("CCalculatorEditText::constructor========begin========");
+
     ECode ec = NOERROR;
 
     SuperObject* superObject = new SuperObject(this);
@@ -313,6 +315,7 @@ ECode JSActName::constructor(
         ec = EditText::constructor(context, attrs, defStyle);
     }
 
+    ALOGD("CCalculatorEditText::constructor========end========");
     return ec;
 }
 

@@ -105,14 +105,20 @@ module.exports = function(aoElastos, aoActivity){
         }
 
 //     private final float mMaximumTextSize;
+        var mMaximumTextSize;
 //     private final float mMinimumTextSize;
+        var mMinimumTextSize;
 //     private final float mStepTextSize;
+        var mStepTextSize;
 
 //     // Temporary objects for use in layout methods.
 //     private final Paint mTempPaint = new TextPaint();
+        var mTempPaint = Droid_New("Elastos.Droid.Text.CTextPaint");
 //     private final Rect mTempRect = new Rect();
+        var mTempRect = Droid_New("Elastos.Droid.Graphics.CRect");
 
 //     private int mWidthConstraint = -1;
+        var mWidthConstraint = -1;
 //     private OnTextSizeChangeListener mOnTextSizeChangeListener;
 
 //     public CalculatorEditText(Context context) {
@@ -302,34 +308,36 @@ module.exports = function(aoElastos, aoActivity){
 // //     }
 //         }
 
-// //     @Override
-// //     public int getCompoundPaddingTop() {
-//         _pt.getCompoundPaddingTop = function() {
-// //         // Measure the top padding from the capital letter height of the text instead of the top,
-// //         // but don't remove more than the available top padding otherwise clipping may occur.
-// //         getPaint().getTextBounds("H", 0, 1, mTempRect);
-//             this.getPaint().getTextBounds("H", 0, 1, mTempRect);
+//     @Override
+//     public int getCompoundPaddingTop() {
+        _pt.GetCompoundPaddingTop = function(_this, result) {
+//         // Measure the top padding from the capital letter height of the text instead of the top,
+//         // but don't remove more than the available top padding otherwise clipping may occur.
+//         getPaint().getTextBounds("H", 0, 1, mTempRect);
+            _this.GetPaint().GetTextBounds("H", 0, 1, mTempRect);
 
-// //         final FontMetricsInt fontMetrics = getPaint().getFontMetricsInt();
-//             var fontMetrics = getPaint().getFontMetricsInt();
-// //         final int paddingOffset = -(fontMetrics.ascent + mTempRect.height());
-//             var paddingOffset = -(fontMetrics.ascent + mTempRect.height());
-// //         return super.getCompoundPaddingTop() - Math.min(getPaddingTop(), paddingOffset);
-//             return _super.getCompoundPaddingTop() - Math.min(getPaddingTop(), paddingOffset);
-// //     }
-//         }
+//         final FontMetricsInt fontMetrics = getPaint().getFontMetricsInt();
+            var fontMetrics = _this.GetPaint().GetFontMetricsInt();
+//         final int paddingOffset = -(fontMetrics.ascent + mTempRect.height());
+            var paddingOffset = -(fontMetrics.GetDescent() + mTempRect.GetHeight());
+//         return super.getCompoundPaddingTop() - Math.min(getPaddingTop(), paddingOffset);
+            result.data = _this._GetCompoundPaddingTop() - Math.min(_this.GetPaddingTop(), paddingOffset);
+//     }
+        }
 
-// //     @Override
-// //     public int getCompoundPaddingBottom() {
-//         _pt.getCompoundPaddingBottom = function() {
-// //         // Measure the bottom padding from the baseline of the text instead of the bottom, but don't
-// //         // remove more than the available bottom padding otherwise clipping may occur.
-// //         final FontMetricsInt fontMetrics = getPaint().getFontMetricsInt();
-//             var fontMetrics = getPaint().getFontMetricsInt();
-// //         return super.getCompoundPaddingBottom() - Math.min(getPaddingBottom(), fontMetrics.descent);
-//             return _super.getCompoundPaddingBottom() - Math.min(getPaddingBottom(), fontMetrics.descent);
-// //     }
-//         }
+//     @Override
+//     public int getCompoundPaddingBottom() {
+        _pt.GetCompoundPaddingBottom = function(_this, result) {
+//         // Measure the bottom padding from the baseline of the text instead of the bottom, but don't
+//         // remove more than the available bottom padding otherwise clipping may occur.
+//         final FontMetricsInt fontMetrics = getPaint().getFontMetricsInt();
+            var fontMetrics = _this.GetPaint().GetFontMetricsInt();
+
+//         return super.getCompoundPaddingBottom() - Math.min(getPaddingBottom(), fontMetrics.descent);
+            //return _super.getCompoundPaddingBottom() - Math.min(getPaddingBottom(), fontMetrics.descent);
+            result.data = _this._GetCompoundPaddingBottom() - Math.min(_this.GetPaddingBottom(), fontMetrics.GetDescent());
+//     }
+        }
 
 //     public interface OnTextSizeChangeListener {
 //         void onTextSizeChanged(TextView textView, float oldSize);
@@ -383,6 +391,7 @@ module.exports = function(aoElastos, aoActivity){
 
     var oCallback = {
         OnCreate : function(_this, context, attrs, defStyle) {
+            elog("====OnCreate====begin====");
             oThis.OnCreate(_this, context, attrs, defStyle);
         },
         OnTouchEvent : function(_this, event, result) {
@@ -401,10 +410,10 @@ module.exports = function(aoElastos, aoActivity){
             oThis.GetCompoundPaddingBottom(_this, result);
         },
         OnMeasure : function(_this, widthMeasureSpec, heightMeasureSpec) {
-            oThis.GetCompoundPaddingBottom(_this, widthMeasureSpec, heightMeasureSpec);
+            oThis.OnMeasure(_this, widthMeasureSpec, heightMeasureSpec);
         },
         OnTextChanged : function(_this, text, start, lengthBefore, lengthAfter) {
-            oThis.GetCompoundPaddingBottom(_this, text, start, lengthBefore, lengthAfter);
+            oThis.OnTextChanged(_this, text, start, lengthBefore, lengthAfter);
         },
     }
 

@@ -187,12 +187,28 @@ function __getCarDataTypeString(ao_TypeInfo){
     return a.join("");
 }
 
+function __getPropNameByValue(ao, av){
+    var s = "unknown IO type";
+    for (var p in ao) {
+        if (ao[p] == av) {
+            s = p;
+            break;
+        }
+    }
+    return s;
+}
+
 //return: ParamProto=ParamName[]
 function __getParamProto(ao_ParamInfo){
     var aProto = [];
 
     aProto.push(ao_ParamInfo.GetName());
     aProto.push("[");
+
+
+    var paramIOAttribute = ao_ParamInfo.GetIOAttribute();
+    var sIOAttr = __getPropNameByValue(ParamIOAttribute, paramIOAttribute);
+    aProto.push("/*" + sIOAttr + "*/");
 
     var oTypeInfo = ao_ParamInfo.GetTypeInfo();
     var s = __getCarDataTypeString(oTypeInfo);

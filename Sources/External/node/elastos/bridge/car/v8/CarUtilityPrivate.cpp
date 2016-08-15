@@ -103,15 +103,6 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             break;
         case CarDataType_Int32:
         {
-            // //normal
-            // if (type == NPVariantType_Int32) {
-            //     result->mInt32Value = (Elastos::Int32)(NPVARIANT_TO_INT32(value));
-            // }
-            // else if (type == NPVariantType_Double) {
-            //     result->mInt32Value = (Elastos::Int32)(NPVARIANT_TO_DOUBLE(value));
-            // }
-            // break;
-
             Int32 _value;
             if (type == NPVariantType_Int32) {
                 _value = (Elastos::Int32)(NPVARIANT_TO_INT32(value));
@@ -668,6 +659,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                             break;
                         case CarDataType_String:
                             carArray = ArrayOf<Elastos::String>::Alloc(length);
+                            break;
                         case CarDataType_Boolean:
                             carArray = ArrayOf<Elastos::Boolean>::Alloc(length);
                             break;
@@ -711,56 +703,49 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                             break;
                     }
 
-                    //if (length == 0) {
-                    //    carArray = ArrayOf<Elastos::Int32>::Alloc(length);
-                    //    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====create LocalPtr<ArrayOf<CarDataType>>");
-                    //}
-
                     for (Int32 i = 0; i < length; i++) {
                         NPVariant npvValue;
                         _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
                         Int32 iVal = 0;
 
-                        if (NPVARIANT_IS_VOID(npvValue)) {
-                            //TODO:undefined
-                        }
-                        else if (NPVARIANT_IS_NULL(npvValue)) {
-                            //TODO:null
-                        }
-                        else if (NPVARIANT_IS_BOOLEAN(npvValue)) {
-                            //TOBO:boolean
-                        }
-                        if (NPVARIANT_IS_INT32(npvValue)) {
-                            //NOT BE USED IN V8
-                            //if(i == 0)carArray = ArrayOf<Elastos::Int32>::Alloc(length);
-                            iVal = NPVARIANT_TO_INT32(npvValue);
-                            (*(ArrayOf<Elastos::Int32>**)&carArray)->Set(i,iVal);
-                        }
-                        else if (NPVARIANT_IS_DOUBLE(npvValue)) {
-                            //if(i == 0)carArray = ArrayOf<Elastos::Int32>::Alloc(length);
-                            iVal = (Int32)NPVARIANT_TO_DOUBLE(npvValue);
-                            (*(ArrayOf<Elastos::Int32>**)&carArray)->Set(i,iVal);
-                        }
-                        else if (NPVARIANT_IS_STRING(npvValue)) {
-                            //if(i == 0)carArray = ArrayOf<Elastos::String>::Alloc(length);
-                            NPString src = NPVARIANT_TO_STRING(npvValue);
-                            Elastos::String* _stringValue;
-                            _stringValue = new Elastos::String(src.UTF8Characters);
-
-                            Int32 length = _stringValue->GetLength();
-                            if( !length ) {
-                                *_stringValue = NULL;
+                        switch (npvValue.type) {
+                            case NPVariantType_Double:  //4
+                            {
+                                //iVal = NPVARIANT_TO_INT32(npvValue);
+                                iVal = NPVARIANT_TO_DOUBLE(npvValue);
+                                (*(ArrayOf<Elastos::Int32>**)&carArray)->Set(i,iVal);
+                                break;
                             }
-                            //iVal = static_cast<Int32>(NPVARIANT_TO_DOUBLE(npvValue));
-                            (*(ArrayOf<Elastos::String>**)&carArray)->Set(i, *_stringValue);
-                        }
-                        else if (NPVARIANT_IS_OBJECT(npvValue)) {
-                            //TODO:
-                        }
-                        else {
-                            //ERROR:
-                        }
-                    }
+                            case NPVariantType_String:  //5
+                            {
+                                NPString src = NPVARIANT_TO_STRING(npvValue);
+                                Elastos::String* _stringValue;
+                                _stringValue = new Elastos::String(src.UTF8Characters);
+
+                                Int32 length = _stringValue->GetLength();
+                                if( !length ) {
+                                    *_stringValue = NULL;
+                                }
+                                (*(ArrayOf<Elastos::String>**)&carArray)->Set(i, *_stringValue);
+                                break;
+                            }
+                            case NPVariantType_Void:    //0
+                                //TODO:undefined
+                            case NPVariantType_Null:    //1
+                                //TODO:null
+                            case NPVariantType_Bool:    //2
+                                //TODO:boolean
+                            case NPVariantType_Int32:   //3
+                                //NOT BE USED IN V8
+                            case NPVariantType_Object:  //6
+                                //TODO:object
+                            default:
+                                //error
+                                ALOGD("convertNPVariantToCarValue=====TODO: NPVariantType:%d", npvValue.type);
+                                break;
+                        }   //switch
+
+                    }   //for
 
                     _CarQuintet_AddRef(carArray);
 
@@ -1030,13 +1015,21 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
             break;
         }
         case CarDataType_Float:
+        {
+            Int32 ttt=123456;
+
+            ALOGD("convertCarValueToNPVariant========CarDataType_Float====value:%d====%lf====%x====%x", value.value.mFloatValue, value.value.mFloatValue, value.value.mFloatValue, ttt);
             result->type = NPVariantType_Double;
             result->value.doubleValue = value.value.mFloatValue;
+            ALOGD("convertCarValueToNPVariant========CarDataType_Float====doubleValue:%d====%lf====%x====%x", result->value.doubleValue, result->value.doubleValue, result->value.doubleValue, ttt);
             break;
+        }
         case CarDataType_Double:
+        {
             result->type = NPVariantType_Double;
             result->value.doubleValue = value.value.mDoubleValue;
             break;
+        }
         case CarDataType_String:
         {
             // This entire file will likely be removed usptream soon.
@@ -1113,7 +1106,6 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
             break;
         case CarDataType_ArrayOf:
         {
-
             CarDataType elementType = 0;
             AutoPtr<IDataTypeInfo> aElementDataTypeInfo;
             ICarArrayInfo::Probe(dataTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
