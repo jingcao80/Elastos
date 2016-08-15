@@ -47,6 +47,10 @@ ECode CServiceNative::ToString(
     /* [out] */ String* str)
 {
     // LOGGERD(TAG, "+ CServiceNative::ToString()");
+    if (mJVM == NULL) {
+        return Object::ToString(str);
+    }
+
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 

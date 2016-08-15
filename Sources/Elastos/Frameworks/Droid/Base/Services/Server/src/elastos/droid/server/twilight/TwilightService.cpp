@@ -297,10 +297,9 @@ void TwilightService::LocationHandler::RetrieveLocation()
             mHost->mLocationManager->GetLastKnownLocation(currentStr, (ILocation**)&lastKnownLocation);
             //pick the most recent location
             Int64 elapsedRealtimeNanos, lastElapsedRealtimeNanos;
-            location->GetElapsedRealtimeNanos(&elapsedRealtimeNanos);
-            lastKnownLocation->GetElapsedRealtimeNanos(&lastElapsedRealtimeNanos);
             if (location == NULL || (lastKnownLocation != NULL &&
-                   elapsedRealtimeNanos < lastElapsedRealtimeNanos)) {
+                (location->GetElapsedRealtimeNanos(&elapsedRealtimeNanos), elapsedRealtimeNanos)
+                < (lastKnownLocation->GetElapsedRealtimeNanos(&lastElapsedRealtimeNanos), lastElapsedRealtimeNanos))) {
                 location = lastKnownLocation;
             }
         }

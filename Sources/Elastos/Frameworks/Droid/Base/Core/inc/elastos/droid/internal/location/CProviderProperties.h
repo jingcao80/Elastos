@@ -18,6 +18,7 @@ namespace Location {
 CarClass(CProviderProperties)
     , public Object
     , public IProviderProperties
+    , public IParcelable
 {
 public:
     CProviderProperties();

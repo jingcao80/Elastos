@@ -178,8 +178,7 @@ ECode RemoteListenerHelper::Foreach(
     AutoPtr<IIterator> iter;
     linkedListeners->GetIterator((IIterator**)&iter);
     Boolean hasNext;
-    iter->HasNext(&hasNext);
-    while (hasNext) {
+    while (iter->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> next;
         iter->GetNext((IInterface**)&next);
         AutoPtr<LinkedListener> linkedListener = (LinkedListener*)(IObject::Probe(next));

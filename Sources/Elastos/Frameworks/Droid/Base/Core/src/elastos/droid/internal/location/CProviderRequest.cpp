@@ -17,7 +17,7 @@ namespace Location {
 
 CAR_OBJECT_IMPL(CProviderRequest);
 
-CAR_INTERFACE_IMPL(CProviderRequest, Object, IProviderRequest);
+CAR_INTERFACE_IMPL_2(CProviderRequest, Object, IProviderRequest, IParcelable);
 
 ECode CProviderRequest::constructor()
 {

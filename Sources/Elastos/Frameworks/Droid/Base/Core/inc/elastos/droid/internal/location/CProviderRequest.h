@@ -18,6 +18,7 @@ namespace Location {
 CarClass(CProviderRequest)
     , public Object
     , public IProviderRequest
+    , public IParcelable
 {
 public:
     CAR_OBJECT_DECL()

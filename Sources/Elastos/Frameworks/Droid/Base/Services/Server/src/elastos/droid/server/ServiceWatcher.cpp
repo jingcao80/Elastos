@@ -195,7 +195,6 @@ ServiceWatcher::ServiceWatcher(
         AutoPtr<ArrayOf<String> > pkgs;
         resources->GetStringArray(initialPackageNamesResId, (ArrayOf<String>**)&pkgs);
         if (pkgs != NULL) {
-            (*pkgs)[0] = "com.amap.android.location";
             for (Int32 i = 0; i < pkgs->GetLength(); ++i) {
                 initialPackageNames.PushBack((*pkgs)[i]);
             }
@@ -222,7 +221,7 @@ Boolean ServiceWatcher::Start()
 {
     {
         AutoLock lock(mLock);
-        if (!BindBestPackageLocked(String(NULL))) return FALSE;
+        if (!BindBestPackageLocked(mServicePackageName)) return FALSE;
     }
 
     // listen for user change
@@ -254,8 +253,6 @@ Boolean ServiceWatcher::BindBestPackageLocked(
     if (!justCheckThisPackage.IsNull()) {
         intent->SetPackage(justCheckThisPackage);
     }
-
-
 
     AutoPtr<IIntent> paraIntent;
     CIntent::New(mAction, (IIntent**)&paraIntent);
@@ -310,10 +307,14 @@ Boolean ServiceWatcher::BindBestPackageLocked(
             }
         }
 
-    //    if (DBG) Log.d(mTag, String.format("bindBestPackage for %s : %s found %d, %s", mAction,
-    //            (justCheckThisPackage == null ? "" : "(" + justCheckThisPackage + ") "),
-    //            rInfos.size(),
-    //            (bestPackage == null ? "no new best package" : "new best packge: " + bestPackage)));
+       if (DBG) {
+            Int32 size;
+            rInfos->GetSize(&size);
+            Logger::D(mTag, "bindBestPackage for %s : (%s) found %d, %s", mAction.string(),
+                (justCheckThisPackage == NULL ? "" : justCheckThisPackage.string()),
+                size, (bestPackage == NULL ? "no new best package" :
+                (String("new best packge: ") + bestPackage).string()));
+        }
     }
     else {
         if (DBG) Logger::D(mTag, "Unable to query intent services for action: %s", mAction.string());

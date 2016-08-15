@@ -5,10 +5,12 @@
 ;          SrcFile/Folder [DestFolder]
 ;
 framework.jar           /system/framework
+framework-res.apk       /system/framework
 libandroid_runtime.so   /system/lib
 ../Linux/usr/lib/libelwebviewchromium.so       /system/lib
 bootanimation.zip       /system/media
 DownloadProvider        /system/priv-app     dir
+AMapNetworkLocation     /system/priv-app     dir
 Browser                 /system/app          dir
 Camera2                 /system/app          dir
 DeskClock               /system/app          dir
@@ -18,3 +20,5 @@ Gallery2                /system/app          dir
 webview                 /system/app          dir
 Mms                     /system/app          dir
 MmsService              /system/app          dir
+com.qualcomm.location   /system/app          dir
+com.qualcomm.services.location  /system/app  dir

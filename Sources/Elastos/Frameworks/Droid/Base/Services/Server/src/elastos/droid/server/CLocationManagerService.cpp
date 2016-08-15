@@ -119,8 +119,8 @@ const String CLocationManagerService::ACCESS_LOCATION_EXTRA_COMMANDS =
 const String CLocationManagerService::INSTALL_LOCATION_PROVIDER =
         Manifest::permission::INSTALL_LOCATION_PROVIDER;
 
-const String CLocationManagerService::NETWORK_LOCATION_SERVICE_ACTION("elastos.location.service.v2.NetworkLocationProvider");
-const String CLocationManagerService::FUSED_LOCATION_SERVICE_ACTION("elastos.location.service.FusedLocationProvider");
+const String CLocationManagerService::NETWORK_LOCATION_SERVICE_ACTION("com.android.location.service.v3.NetworkLocationProvider");
+const String CLocationManagerService::FUSED_LOCATION_SERVICE_ACTION("com.android.location.service.FusedLocationProvider");
 
 const Int32 CLocationManagerService::MSG_LOCATION_CHANGED = 1;
 
@@ -835,6 +835,24 @@ ECode CLocationManagerService::constructor(
     mAppOps = IAppOpsManager::Probe(p);
     mGeoFencerEnabled = FALSE;
     if (D) Logger::D(TAG, "Constructed");
+
+    Logger::E(TAG, "TODO: delete the following code when LocationProviderEnabled can be set in settings");
+    {
+        AutoPtr<IContentResolver> resolver;
+        mContext->GetContentResolver((IContentResolver**)&resolver);
+
+        AutoPtr<ISettingsSecure> settingsSecure;
+        CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
+        String provider("gps");
+        Boolean rst = FALSE;
+        settingsSecure->IsLocationProviderEnabled(resolver, provider, &rst);
+        if (!rst)
+            settingsSecure->SetLocationProviderEnabled(resolver, provider, TRUE);
+        provider = "network";
+        settingsSecure->IsLocationProviderEnabled(resolver, provider, &rst);
+        if (!rst)
+            settingsSecure->SetLocationProviderEnabled(resolver, provider, TRUE);
+    }
 
     // most startup is deferred until systemReady()
     return NOERROR;
@@ -1950,7 +1968,7 @@ void CLocationManagerService::ApplyRequirementsLocked(
         }
     }
 
-    // if (D) Log.d(TAG, "provider request: " + provider + " " + providerRequest);
+    if (D) Logger::D(TAG, "provider request: %s %s", provider.string(), TO_CSTR(providerRequest));
     p->SetRequest(providerRequest, worksource);
 }
 
