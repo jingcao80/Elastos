@@ -870,7 +870,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
         ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
-        if (call != NULL ){
+        if (call != NULL) {
             // @SuppressWarnings("unchecked")
             AutoPtr<IList> conferenceableIds = IList::Probe(args->mArg2);
             Int32 conferenceableIdsSize;

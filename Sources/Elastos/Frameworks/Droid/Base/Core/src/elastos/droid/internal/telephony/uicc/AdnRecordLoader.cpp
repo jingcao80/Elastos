@@ -16,6 +16,8 @@ using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::CLooperHelper;
 
+using Elastos::Core::IByte;
+using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
@@ -160,8 +162,15 @@ ECode AdnRecordLoader::HandleMessage(
                     return E_RUNTIME_EXCEPTION;
                 }
 
-                assert(0 && "TODO");
-                AutoPtr<ArrayOf<Int32> > recordSize;// = (int[])ar.result;
+                AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+                Int32 size = 0;
+                pArr->GetSize(&size);
+                AutoPtr<ArrayOf<Int32> > recordSize = ArrayOf<Int32>::Alloc(size);
+                for (Int32 i = 0; i < size; ++i) {
+                    AutoPtr<IInterface> p;
+                    pArr->Get(i, (IInterface**)&p);
+                    IInteger32::Probe(p)->GetValue(&((*recordSize)[i]));
+                }
                 // recordSize is int[3] array
                 // int[0]  is the record length
                 // int[1]  is the total length of the EF file
@@ -209,8 +218,15 @@ ECode AdnRecordLoader::HandleMessage(
             }
             case EVENT_ADN_LOAD_DONE: {
                 ar = (AsyncResult*)(IObject*)(obj.Get());
-                assert(0 && "TODO");
-                // data = (ArrayOf<Byte>*)(ar->mResult);
+                AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+                Int32 size = 0;
+                pArr->GetSize(&size);
+                data = ArrayOf<Byte>::Alloc(size);
+                for (Int32 i = 0; i < size; ++i) {
+                    AutoPtr<IInterface> p;
+                    pArr->Get(i, (IInterface**)&p);
+                    IByte::Probe(p)->GetValue(&((*data)[i]));
+                }
 
                 if (ar->mException != NULL) {
                     // throw new RuntimeException("load failed", ar.exception);
@@ -252,8 +268,15 @@ ECode AdnRecordLoader::HandleMessage(
             }
             case EVENT_EXT_RECORD_LOAD_DONE: {
                 ar = (AsyncResult*)(IObject*)(obj.Get());
-                assert(0 && "TODO");
-                // data = (ArrayOf<Byte>*)(ar->mResult);
+                AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+                Int32 size = 0;
+                pArr->GetSize(&size);
+                data = ArrayOf<Byte>::Alloc(size);
+                for (Int32 i = 0; i < size; ++i) {
+                    AutoPtr<IInterface> p;
+                    pArr->Get(i, (IInterface**)&p);
+                    IByte::Probe(p)->GetValue(&((*data)[i]));
+                }
                 adn = (AdnRecord*)(IObject*)(ar->mUserObj).Get();
 
                 if (ar->mException != NULL) {

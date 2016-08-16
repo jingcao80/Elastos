@@ -295,7 +295,7 @@ ECode CCallCardFragment::ViewTreeGlobalLayoutListener::OnGlobalLayout()
 
     mHost->mAnimatorSet = NULL;
     CAnimatorSet::New((IAnimatorSet**)&mHost->mAnimatorSet);
-    AutoPtr< ArrayOf<IAnimator*> > items = ArrayOf<IAnimator*>::Alloc(2);
+    AutoPtr<ArrayOf<IAnimator*> > items = ArrayOf<IAnimator*>::Alloc(2);
     items->Set(0, revealAnimator);
     items->Set(1, shrinkAnimator);
     mHost->mAnimatorSet->PlaySequentially(items);

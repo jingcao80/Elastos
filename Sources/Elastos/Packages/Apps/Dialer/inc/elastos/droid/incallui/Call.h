@@ -170,6 +170,8 @@ public:
 
     CARAPI_(AutoPtr<IPhoneAccountHandle>) GetAccountHandle();
 
+    CARAPI_(Int64) GetSubId();
+
     CARAPI_(AutoPtr<IInCallServiceVideoCall>) GetVideoCall();
 
     CARAPI_(List<String>&) GetChildCallIds();

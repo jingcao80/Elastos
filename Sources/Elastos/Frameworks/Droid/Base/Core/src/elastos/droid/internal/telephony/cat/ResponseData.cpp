@@ -118,8 +118,7 @@ ECode GetInkeyInputResponseData::Format(
             CGsmAlphabet::AcquireSingleton((IGsmAlphabet**)&gsm);
             if (mIsUcs2) {
                 // ucs2 is by definition big endian.
-                assert(0 && "TODO");
-                // data = mInData.GetBytes("UTF-16BE");
+                data = mInData.GetBytes(); // "UTF-16BE"
             }
             else if (mIsPacked) {
                 Int32 size = mInData.GetLength();

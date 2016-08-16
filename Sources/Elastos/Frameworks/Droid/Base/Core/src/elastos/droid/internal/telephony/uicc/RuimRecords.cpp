@@ -10,6 +10,7 @@
 #include "elastos/droid/internal/telephony/MccTable.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/CSystemProperties.h"
+#include "elastos/droid/os/Build.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/R.h"
 
@@ -27,6 +28,7 @@ using Elastos::Droid::Internal::Telephony::MccTable;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::Build;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::R;
 
@@ -67,8 +69,15 @@ ECode RuimRecords::EfPlLoaded::GetEfName(
 ECode RuimRecords::EfPlLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    // mEFpl = (byte[]) ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    mHost->mEFpl = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*(mHost->mEFpl))[i]));
+    }
     if (DBG) {
         AutoPtr<IIccUtils> iccu;
         CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
@@ -100,8 +109,15 @@ ECode RuimRecords::EfCsimLiLoaded::GetEfName(
 ECode RuimRecords::EfCsimLiLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    // mEFli = (byte[]) ar.result;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    mHost->mEFpl = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*(mHost->mEFli))[i]));
+    }
     // convert csim efli data to iso 639 format
     for (Int32 i = 0; i < mHost->mEFli->GetLength(); i+=2) {
         switch((*(mHost->mEFli))[i+1]) {
@@ -147,8 +163,15 @@ ECode RuimRecords::EfCsimSpnLoaded::GetEfName(
 ECode RuimRecords::EfCsimSpnLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (byte[]) ar.result;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
     if (DBG) {
         AutoPtr<IIccUtils> iccu;
         CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
@@ -259,8 +282,15 @@ ECode RuimRecords::EfCsimMdnLoaded::GetEfName(
 ECode RuimRecords::EfCsimMdnLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
     AutoPtr<IIccUtils> iccu;
     CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
     if (DBG) {
@@ -296,8 +326,15 @@ ECode RuimRecords::EfCsimImsimLoaded::GetEfName(
 ECode RuimRecords::EfCsimImsimLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
 
     AutoPtr<IIccUtils> iccu;
     CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
@@ -384,8 +421,15 @@ ECode RuimRecords::EfCsimCdmaHomeLoaded::OnRecordLoaded(
     while ((it->HasNext(&bHasNext), bHasNext)) {
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
-        assert(0 && "TODO");
-        AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*)p.Get();
+        AutoPtr<IArrayList> pArr = IArrayList::Probe(p);
+        Int32 size = 0;
+        pArr->GetSize(&size);
+        AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> v;
+            pArr->Get(i, (IInterface**)&v);
+            IByte::Probe(v)->GetValue(&((*data)[i]));
+        }
         if (data->GetLength() == 5) {
             Int32 sid = (((*data)[1] & 0xFF) << 8) | ((*data)[0] & 0xFF);
             Int32 nid = (((*data)[3] & 0xFF) << 8) | ((*data)[2] & 0xFF);
@@ -450,8 +494,15 @@ ECode RuimRecords::EfCsimModelLoaded::GetEfName(
 ECode RuimRecords::EfCsimModelLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
     if (DBG) {
         AutoPtr<IIccUtils> iccu;
         CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
@@ -483,8 +534,15 @@ ECode RuimRecords::EfRuimModelLoaded::GetEfName(
 ECode RuimRecords::EfRuimModelLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
     if (DBG) {
         AutoPtr<IIccUtils> iccu;
         CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
@@ -519,8 +577,15 @@ ECode RuimRecords::EfRuimIdLoaded::OnRecordLoaded(
     // The first byte represent the num bytes of valid data for RUIM ID data.
     // It is valid RUIM ID data From the second byte to num+1 byte.
     // And the second byte is the lowest-order byte, the num+1 byte is highest-order
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
     AutoPtr<IIccUtils> iccu;
     CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
     if (DBG) {
@@ -596,8 +661,7 @@ ECode RuimRecords::constructor(
 
     mParentApp->RegisterForReady(this, EVENT_APP_READY, NULL);
     if (DBG) {
-        assert(0 && "TODO");
-        // Log(String("RuimRecords X ctor this=") + this);
+        Log(String("RuimRecords X ctor this=") + TO_CSTR(this));
     }
     return NOERROR;
 }
@@ -626,8 +690,7 @@ ECode RuimRecords::ToString(
 ECode RuimRecords::Dispose()
 {
     if (DBG) {
-        assert(0 && "TODO");
-        // Log(String("Disposing RuimRecords ") + this);
+        Log(String("Disposing RuimRecords ") + TO_CSTR(this));
     }
     //Unregister for all events
     mParentApp->UnregisterForReady(this);
@@ -754,10 +817,9 @@ ECode RuimRecords::HandleMessage(
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
     if (mDestroyed.Get()) {
-        assert(0 && "TODO");
-        // Loge(String("Received message ") + msg +
-        //         String("[") + StringUtils::ToString(what) +
-        //         String("] while being destroyed. Ignoring."));
+        Loge(String("Received message ") + TO_CSTR(msg) +
+                String("[") + StringUtils::ToString(what) +
+                String("] while being destroyed. Ignoring."));
         return NOERROR;
     }
 
@@ -773,8 +835,15 @@ ECode RuimRecords::HandleMessage(
 
         case EVENT_GET_CDMA_SUBSCRIPTION_DONE: {
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            AutoPtr<ArrayOf<String> > localTemp;// = (ArrayOf<String>*)ar->mResult;
+            AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+            Int32 size = 0;
+            pArr->GetSize(&size);
+            AutoPtr<ArrayOf<String> > localTemp = ArrayOf<String>::Alloc(size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> v;
+                pArr->Get(i, (IInterface**)&v);
+                ICharSequence::Probe(v)->ToString(&((*localTemp)[i]));
+            }
             if (ar->mException != NULL) {
                 break;
             }
@@ -791,9 +860,15 @@ ECode RuimRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
-
+            AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+            Int32 size = 0;
+            pArr->GetSize(&size);
+            data = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> v;
+                pArr->Get(i, (IInterface**)&v);
+                IByte::Probe(v)->GetValue(&((*data)[i]));
+            }
             if (ar->mException != NULL) {
                 break;
             }
@@ -839,8 +914,15 @@ ECode RuimRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
             ar = (AsyncResult*)(IObject*)obj.Get();
             if (ar != NULL && ar->mException == NULL) {
-                assert(0 && "TODO");
-                // data = (ArrayOf<Byte>*) ar->mResult;
+                AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+                Int32 size = 0;
+                pArr->GetSize(&size);
+                data = ArrayOf<Byte>::Alloc(size);
+                for (Int32 i = 0; i < size; ++i) {
+                    AutoPtr<IInterface> v;
+                    pArr->Get(i, (IInterface**)&v);
+                    IByte::Probe(v)->GetValue(&((*data)[i]));
+                }
                 AutoPtr<IIccUtils> iccu;
                 CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
                 String str;
@@ -1094,8 +1176,7 @@ ECode RuimRecords::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0 && "TODO");
-    // pw->Println(String("RuimRecords: ") + this);
+    pw->Println(String("RuimRecords: ") + TO_CSTR(this));
     pw->Println(String(" extends:"));
     IccRecords::Dump(fd, pw, args);
     pw->Println(String(" mOtaCommited=") + StringUtils::ToString(mOtaCommited));
@@ -1288,8 +1369,15 @@ void RuimRecords::OnGetCSimEprlDone(
 {
     // C.S0065 section 5.2.57 for EFeprl encoding
     // C.S0016 section 3.5.5 for PRL format.
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*)ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
     if (DBG) {
         AutoPtr<IIccUtils> iccu;
         CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
@@ -1526,15 +1614,13 @@ void RuimRecords::SetModel()
     }
     // EFmodel will be written into UTF-8 characters
     // try {
-        assert(0 && "TODO");
-        // model = Build.MODEL.GetBytes("UTF-8");
-        // manufacturer = Build.MANUFACTURER.GetBytes("UTF-8");
+        model = Build::MODEL.GetBytes(); // "UTF-8";
+        manufacturer = Build::MANUFACTURER.GetBytes(); // "UTF-8";
         AutoPtr<ISystemProperties> sp;
         CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
         String str;
-        assert(0 && "TODO");
-        // sp->Get(String("persist.product.sw.version"), Build::DISPLAY, &str);
-        softwareVersion = str.GetBytes(); // String("UTF-8")
+        sp->Get(String("persist.product.sw.version"), Build::DISPLAY, &str);
+        softwareVersion = str.GetBytes(); // "UTF-8"
     // } catch (UnsupportedEncodingException e) {
     //     loge("BearerData encode failed: " + e);
     // }

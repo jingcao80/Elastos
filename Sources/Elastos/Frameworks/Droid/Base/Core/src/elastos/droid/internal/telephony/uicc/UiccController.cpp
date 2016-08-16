@@ -416,12 +416,11 @@ ECode UiccController::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0 && "TODO");
-    // pw->Println(String("UiccController: ") + this);
-    // pw->Println(String(" mContext=") + mContext);
-    // pw->Println(String(" mInstance=") + mInstance);
-//        pw->Println(" mCi=" + mCi);
-//        pw->Println(" mUiccCard=" + mUiccCard);
+    pw->Println(String("UiccController: ") + TO_CSTR(this));
+    pw->Println(String(" mContext=") + TO_CSTR(mContext));
+    pw->Println(String(" mInstance=") + TO_CSTR(mInstance));
+    // pw->Println(" mCi=" + TO_CSTR(mCi));
+    // pw->Println(" mUiccCard=" + TO_CSTR(mUiccCard));
     pw->Println(String(" mIccChangedRegistrants: size=") +
                 StringUtils::ToString(mIccChangedRegistrants->GetSize()));
     for (Int32 i = 0; i < mIccChangedRegistrants->GetSize(); i++) {

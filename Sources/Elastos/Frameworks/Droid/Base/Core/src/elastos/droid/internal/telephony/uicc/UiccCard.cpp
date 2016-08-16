@@ -110,10 +110,9 @@ ECode UiccCard::InnerHandler::HandleMessage(
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
     if (mOwner->mDestroyed) {
-        assert(0 && "TODO");
-        // mOwner->Loge(String("Received message ") + msg +
-        //     String("[") + StringUtils::ToString(what)
-        //     + String("] while being destroyed. Ignoring."));
+        mOwner->Loge(String("Received message ") + TO_CSTR(msg) +
+            String("[") + StringUtils::ToString(what)
+            + String("] while being destroyed. Ignoring."));
         return NOERROR;
     }
 

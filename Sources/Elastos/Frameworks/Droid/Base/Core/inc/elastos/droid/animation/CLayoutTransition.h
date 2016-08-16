@@ -203,7 +203,8 @@ private:
             /* [in] */ Int32 changeReason,
             /* [in] */ Int64 duration,
             /* [in] */ IView* child,
-            /* [in] */ IViewGroup* parent);
+            /* [in] */ IViewGroup* parent,
+            /* [in] */ IAnimator* anim);
         /**
          * Called when the focus state of a view has changed.
          *

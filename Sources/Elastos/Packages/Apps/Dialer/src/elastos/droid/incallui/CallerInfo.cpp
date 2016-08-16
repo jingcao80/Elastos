@@ -249,9 +249,12 @@ Boolean CallerInfo::IsVoiceMailNumber()
 }
 
 AutoPtr<CallerInfo> CallerInfo::MarkAsEmergency(
-    /* [in] */ IContext* context)
+    /* [in] */ IContext* context,
+    /* [in] */ const String& number)
 {
     context->GetString(Elastos::Droid::Dialer::R::string::emergency_call_dialog_number_for_display, &mPhoneNumber);
+    mPhoneNumber += String(" ");
+    mPhoneNumber += number;
     mPhotoResource = Elastos::Droid::Dialer::R::drawable::img_phone;
     mIsEmergency = TRUE;
     return this;
