@@ -132,10 +132,11 @@ ECode DragView::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ Float initialScale)
-
 {
     View::constructor(IContext::Probe(launcher));
-    launcher->GetDragLayer((IDragLayer**)&mDragLayer);
+    AutoPtr<IDragLayer> dl;
+    launcher->GetDragLayer((IDragLayer**)&dl);
+    mDragLayer = dl.Get();
     mInitialScale = initialScale;
 
     AutoPtr<IResources> res;
@@ -151,7 +152,7 @@ ECode DragView::constructor(
     Int32 _scaleDps;
     res->GetDimensionPixelSize(Elastos::Droid::Launcher2::R::dimen::dragViewScale, &_scaleDps);
     Float scaleDps = _scaleDps;
-    Float scale = (width + scaleDps) / width;
+    Float scale = (width + scaleDps) * 1.0f / width;
 
     // Set the initial scale to avoid any jumps
     SetScaleX(initialScale);
@@ -278,9 +279,8 @@ ECode DragView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Int32 width;
+    Int32 width, height;
     mBitmap->GetWidth(&width);
-    Int32 height;
     mBitmap->GetHeight(&height);
     SetMeasuredDimension(width, height);
     return NOERROR;

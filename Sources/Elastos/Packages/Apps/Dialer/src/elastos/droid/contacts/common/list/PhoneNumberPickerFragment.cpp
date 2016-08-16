@@ -344,7 +344,7 @@ ECode PhoneNumberPickerFragment::OnPickerResult(
     /* [in] */ IIntent* data)
 {
     AutoPtr<IUri> uri;
-    data->GetData((IUri**)&data);
+    data->GetData((IUri**)&uri);
     return mListener->OnPickPhoneNumberAction(uri);
 }
 

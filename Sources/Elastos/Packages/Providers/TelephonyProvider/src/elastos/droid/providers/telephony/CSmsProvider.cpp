@@ -577,7 +577,7 @@ ECode CSmsProvider::GetSingleMessageFromIcc(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    AutoPtr<IArrayList/*<SmsMessage*/> messages;
+    AutoPtr<IArrayList> messages;/*<SmsMessage*/
     Int32 messageIndex = -1;
     // try {
     // StringUtils::ParseInt(messageIndexString);
@@ -626,7 +626,7 @@ ECode CSmsProvider::GetSingleMessageFromIcc(
 AutoPtr<ICursor> CSmsProvider::GetAllMessagesFromIcc(
     /* [in] */ Int32 phoneId)
 {
-    AutoPtr<IArrayList/*<SmsMessage*/> messages;
+    AutoPtr<IArrayList> messages;/*<SmsMessage*/
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     AutoPtr<ArrayOf<Int64> > sub;

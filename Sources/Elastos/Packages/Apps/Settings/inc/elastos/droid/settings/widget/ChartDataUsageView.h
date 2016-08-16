@@ -596,12 +596,12 @@ public class ChartDataUsageView extends ChartView {
         i--; // If input is a power of two, shift its high-order bit right
 
         // "Smear" the high-order bit all the way to the right
-        i |= i >>>  1;
-        i |= i >>>  2;
-        i |= i >>>  4;
-        i |= i >>>  8;
-        i |= i >>> 16;
-        i |= i >>> 32;
+        i |= ((UInt64)i) >>  1;
+        i |= ((UInt64)i) >>  2;
+        i |= ((UInt64)i) >>  4;
+        i |= ((UInt64)i) >>  8;
+        i |= ((UInt64)i) >> 16;
+        i |= ((UInt64)i) >> 32;
 
         i++;
 

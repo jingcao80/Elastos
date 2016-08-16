@@ -287,12 +287,12 @@ public:
     };
 
 private:
-    class AnimatorUpdateListener
+    class DragOutlineAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
-        AnimatorUpdateListener(
+        DragOutlineAnimatorUpdateListener(
             /* [in] */ CellLayout* host,
             /* [in] */ InterruptibleInOutAnimator* anim,
             /* [in] */ Int32 thisIndex);
@@ -305,7 +305,7 @@ private:
 
     private:
         CellLayout* mHost;
-        AutoPtr<InterruptibleInOutAnimator> mAnim;
+        InterruptibleInOutAnimator* mAnim;
         Int32 mThisIndex;
     };
 
@@ -1515,8 +1515,8 @@ public:
     AutoPtr<ArrayOf<Int32> > mPreviousReorderDirection;
 
 private:
-    static const Boolean DESTRUCTIVE_REORDER = FALSE;
-    static const Boolean DEBUG_VISUALIZE_OCCUPIED = FALSE;
+    static const Boolean DESTRUCTIVE_REORDER;
+    static const Boolean DEBUG_VISUALIZE_OCCUPIED;
     static const Float REORDER_HINT_MAGNITUDE = 0.12f;
     static const Int32 REORDER_ANIMATION_DURATION = 150;
     static const Int32 INVALID_DIRECTION = -100;

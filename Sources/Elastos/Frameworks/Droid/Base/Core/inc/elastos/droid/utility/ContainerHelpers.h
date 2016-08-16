@@ -24,7 +24,7 @@ public:
         Int32 hi = size - 1;
 
         while (lo <= hi) {
-            Int32 mid = ((Int64)(lo + hi)) >> 1;
+            Int32 mid = ((UInt32)(lo + hi)) >> 1;
             T midVal = (*array)[mid];
 
             if (midVal < value) {

@@ -134,7 +134,7 @@ ECode CStreamConfigurationDuration::GetHashCode(
 
     assert(0 && "TODO: weit Hardware/Camera2/Utils/HashCodeHelpers");
     // *hashCode = HashCodeHelpers::GetHashCode(mFormat, mWidth, mHeight,
-    //             (Int32) mDurationNs, (Int32)(mDurationNs >>> Integer.SIZE));
+    //             (Int32) mDurationNs, (Int32)((0xFFFFFFFF & mDurationNs) >>> Integer.SIZE));
     return NOERROR;
 }
 

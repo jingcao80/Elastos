@@ -1059,7 +1059,8 @@ ECode Layout::IsLevelBoundary(
         GetParagraphDirection(line, &dir);
         Int32 paraLevel = dir == 1 ? 0 : 1;
         Int32 runIndex = offset == lineStart ? 0 : runs->GetLength() - 2;
-        *result = (((*runs)[runIndex + 1] /*>>>*/>> ILayout::RUN_LEVEL_SHIFT) & ILayout::RUN_LEVEL_MASK) != paraLevel;
+        UInt32 ui = (UInt32)(*runs)[runIndex + 1];
+        *result = ((ui >> ILayout::RUN_LEVEL_SHIFT) & ILayout::RUN_LEVEL_MASK) != paraLevel;
         return NOERROR;
     }
 
@@ -1102,7 +1103,8 @@ ECode Layout::IsRtlCharAt(
         Int32 start = lineStart + ((*runs)[i] & ILayout::RUN_LENGTH_MASK);
         Int32 limit = start + ((*runs)[i+1] & RUN_LENGTH_MASK);
         if (offset >= start && offset < limit) {
-            Int32 level = ((*runs)[i+1] /*>>>*/>> ILayout::RUN_LEVEL_SHIFT) & ILayout::RUN_LEVEL_MASK;
+            UInt32 ui = (UInt32)(*runs)[i + 1];
+            Int32 level = (ui >> ILayout::RUN_LEVEL_SHIFT) & ILayout::RUN_LEVEL_MASK;
             *result = ((level & 1) != 0);
             return NOERROR;
         }
@@ -1137,7 +1139,8 @@ Boolean Layout::PrimaryIsTrailingPrevious(
                 return FALSE;
             }
 
-            levelAt = ((*runs)[i+1] /*>>>*/>> ILayout::RUN_LEVEL_SHIFT) & ILayout::RUN_LEVEL_MASK;
+            UInt32 ui = (UInt32)(*runs)[i + 1];
+            levelAt = (ui >> ILayout::RUN_LEVEL_SHIFT) & ILayout::RUN_LEVEL_MASK;
             break;
         }
     }
@@ -1165,7 +1168,8 @@ Boolean Layout::PrimaryIsTrailingPrevious(
                 limit = lineEnd;
             }
             if (offset >= start && offset < limit) {
-                levelBefore = ((*runs)[i+1] /*>>>*/>> ILayout::RUN_LEVEL_SHIFT) & ILayout::RUN_LEVEL_MASK;
+                UInt32 ui = (UInt32)(*runs)[i + 1];
+                levelBefore = (ui >> ILayout::RUN_LEVEL_SHIFT) & ILayout::RUN_LEVEL_MASK;
                 break;
             }
         }

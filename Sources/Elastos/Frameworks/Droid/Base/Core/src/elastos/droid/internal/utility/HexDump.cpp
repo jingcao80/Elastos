@@ -52,7 +52,7 @@ String HexDump::DumpHexString(
 
         Byte b = (*array)[i];
         result.Append(" ");
-        result.AppendChar(HEX_DIGITS[(b >> 4) & 0x0F]);
+        result.AppendChar(HEX_DIGITS[((0xFF & b) >> 4) & 0x0F]);
         result.AppendChar(HEX_DIGITS[b & 0x0F]);
 
         (*line)[lineIndex++] = b;
@@ -100,7 +100,7 @@ String HexDump::ToHexString(
     Int32 bufIndex = 0;
     for (Int32 i = offset; i < offset + length; i++) {
         Byte b = (*array)[i];
-        (*buf)[bufIndex++] = HEX_DIGITS[(b >> 4) & 0x0F];
+        (*buf)[bufIndex++] = HEX_DIGITS[((0xFF & b) >> 4) & 0x0F];
         (*buf)[bufIndex++] = HEX_DIGITS[b & 0x0F];
     }
 

@@ -177,9 +177,8 @@ ECode MultiTapKeyListener::OnKeyDown(
 
     Int32 flagsT;
     spanned->GetSpanFlags(CTextKeyListener::ACTIVE, &flagsT);
-
-    //Java:    int rec = (content.getSpanFlags(TextKeyListener.ACTIVE) & Spannable.SPAN_USER) >>> Spannable.SPAN_USER_SHIFT;
-    Int32 rec = (flagsT & ISpanned::SPAN_USER)/ ((Int32)(Elastos::Core::Math::Pow(2, ISpanned::SPAN_USER_SHIFT)));
+    flagsT &= ISpanned::SPAN_USER;
+    Int32 rec = ((UInt32)flagsT) >> ISpanned::SPAN_USER_SHIFT;
 
     if (activeStart == selStart && activeEnd == selEnd &&
             selEnd - selStart == 1 &&

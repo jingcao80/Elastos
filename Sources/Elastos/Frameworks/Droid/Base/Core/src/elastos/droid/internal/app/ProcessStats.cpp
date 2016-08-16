@@ -4514,7 +4514,7 @@ Int32 ProcessStats::BinarySearch(
     Int32 hi = size - 1;
 
     while (lo <= hi) {
-        Int32 mid = (UInt32)(lo + hi) >> 1;
+        Int32 mid = ((UInt32)(lo + hi)) >> 1;
         Int32 midVal = (array[mid] >> OFFSET_TYPE_SHIFT) & OFFSET_TYPE_MASK;
 
         if (midVal < value) {

@@ -4,10 +4,10 @@
 #include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/Math.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::IFloat;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {

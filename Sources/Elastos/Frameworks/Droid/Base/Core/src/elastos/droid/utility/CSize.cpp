@@ -86,7 +86,7 @@ ECode CSize::GetHashCode(
     VALIDATE_NOT_NULL(value)
     // assuming most sizes are <2^16, doing a rotate will give us perfect hashing
     *value = mHeight ^ ((mWidth << (Elastos::Core::Math::INT32_SIZE / 2))
-        | (((Int64)mWidth) >> (Elastos::Core::Math::INT32_SIZE / 2)));
+        | (((UInt32)mWidth) >> (Elastos::Core::Math::INT32_SIZE / 2)));
     return NOERROR;
 }
 

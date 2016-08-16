@@ -1478,7 +1478,7 @@ String KeyEvent::MetaStateToString(
     Int32 i = 0;
     while (metaState != 0) {
         Boolean isSet = (metaState & 1) != 0;
-        metaState = (metaState >> 1) & 0x7FFFFFFF; // unsigned shift!
+        metaState = ((UInt32)metaState) >> 1; // unsigned shift!
         if (isSet) {
             String name = META_SYMBOLIC_NAMES[i];
             if (result == NULL) {

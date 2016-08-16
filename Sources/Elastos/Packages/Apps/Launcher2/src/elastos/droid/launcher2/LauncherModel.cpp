@@ -23,8 +23,6 @@
 #include <elastos/utility/Arrays.h>
 #include "R.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ISearchManager;
 using Elastos::Droid::AppWidget::IAppWidgetManager;
 using Elastos::Droid::AppWidget::CAppWidgetManagerHelper;
@@ -57,6 +55,7 @@ using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CEnvironment;
 using Elastos::Droid::Os::IEnvironment;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger64;
@@ -2902,32 +2901,35 @@ ECode LauncherModel::MoveItemInDatabase(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY)
 {
-    StringBuilder sb;
-    sb += "DbDebug    Modify item (";
-    sb += item->mTitle;
-    sb += ") in db, id: ";
-    sb += item->mId;
-    sb += " (";
-    sb += item->mContainer;
-    sb += ", ";
-    sb += item->mScreen;
-    sb += ", ";
-    sb += item->mCellX;
-    sb += ", ";
-    sb += item->mCellY;
-    sb += ") --> ";
-    sb += "(";
-    sb += container;
-    sb += ", ";
-    sb += screen;
-    sb += ", ";
-    sb += cellX;
-    sb += ", ";
-    sb += cellY;
-    sb += ")";
-    AutoPtr<ICharSequence> transaction = CoreUtils::Convert(sb.ToString());
-    Launcher::sDumpLogs->Add(TO_IINTERFACE(transaction));
-    Slogger::D(TAG, sb.ToString());
+    if (DEBUG_LOADERS) {
+        StringBuilder sb;
+        sb += "DbDebug    Modify item (";
+        sb += item->mTitle;
+        sb += ") in db, id: ";
+        sb += item->mId;
+        sb += " (";
+        sb += item->mContainer;
+        sb += ", ";
+        sb += item->mScreen;
+        sb += ", ";
+        sb += item->mCellX;
+        sb += ", ";
+        sb += item->mCellY;
+        sb += ") --> ";
+        sb += "(";
+        sb += container;
+        sb += ", ";
+        sb += screen;
+        sb += ", ";
+        sb += cellX;
+        sb += ", ";
+        sb += cellY;
+        sb += ")";
+        AutoPtr<ICharSequence> transaction = CoreUtils::Convert(sb.ToString());
+        Launcher::sDumpLogs->Add(TO_IINTERFACE(transaction));
+        Slogger::D(TAG, sb.ToString());
+    }
+
     item->mContainer = container;
     item->mCellX = cellX;
     item->mCellY = cellY;
@@ -2964,32 +2966,35 @@ ECode LauncherModel::ModifyItemInDatabase(
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY)
 {
-    StringBuilder sb;
-    sb += "DbDebug    Modify item (";
-    sb += item->mTitle;
-    sb += ") in db, id: ";
-    sb += item->mId;
-    sb += " (";
-    sb += item->mContainer;
-    sb += ", ";
-    sb += item->mScreen;
-    sb += ", ";
-    sb += item->mCellX;
-    sb += ", ";
-    sb += item->mCellY;
-    sb += ") --> ";
-    sb += "(";
-    sb += container;
-    sb += ", ";
-    sb += screen;
-    sb += ", ";
-    sb += cellX;
-    sb += ", ";
-    sb += cellY;
-    sb += ")";
-    AutoPtr<ICharSequence> transaction = CoreUtils::Convert(sb.ToString());
-    Launcher::sDumpLogs->Add(TO_IINTERFACE(transaction));
-    Slogger::D(TAG, sb.ToString());
+    if (DEBUG_LOADERS) {
+        StringBuilder sb;
+        sb += "DbDebug    Modify item (";
+        sb += item->mTitle;
+        sb += ") in db, id: ";
+        sb += item->mId;
+        sb += " (";
+        sb += item->mContainer;
+        sb += ", ";
+        sb += item->mScreen;
+        sb += ", ";
+        sb += item->mCellX;
+        sb += ", ";
+        sb += item->mCellY;
+        sb += ") --> ";
+        sb += "(";
+        sb += container;
+        sb += ", ";
+        sb += screen;
+        sb += ", ";
+        sb += cellX;
+        sb += ", ";
+        sb += cellY;
+        sb += ")";
+        AutoPtr<ICharSequence> transaction = CoreUtils::Convert(sb.ToString());
+        Launcher::sDumpLogs->Add(TO_IINTERFACE(transaction));
+        Slogger::D(TAG, sb.ToString());
+    }
+
     item->mCellX = cellX;
     item->mCellY = cellY;
     item->mSpanX = spanX;

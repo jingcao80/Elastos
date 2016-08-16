@@ -393,7 +393,8 @@ Int32 TextLine::GetOffsetToLeftRightOf(
               runLimit = lineEnd;
           }
           if (cursor < runLimit) {
-            runLevel = ((*runs)[runIndex+1] /*>>>*/>> ILayout::RUN_LEVEL_SHIFT) &
+            UInt32 ui = (UInt32)(*runs)[runIndex+1];
+            runLevel = (ui >> ILayout::RUN_LEVEL_SHIFT) &
                 ILayout::RUN_LEVEL_MASK;
             if (cursor == runStart) {
               // The caret is on a run boundary, see if we should
@@ -410,7 +411,8 @@ Int32 TextLine::GetOffsetToLeftRightOf(
                       prevRunLimit = lineEnd;
                   }
                   if (pos < prevRunLimit) {
-                    prevRunLevel = ((*runs)[prevRunIndex+1] /*>>>*/>> ILayout::RUN_LEVEL_SHIFT)
+                    UInt32 ui = (UInt32)(*runs)[prevRunIndex+1];
+                    prevRunLevel = (ui >> ILayout::RUN_LEVEL_SHIFT)
                         & ILayout::RUN_LEVEL_MASK;
                     if (prevRunLevel < runLevel) {
                       // Start from logically previous character.
@@ -466,7 +468,8 @@ Int32 TextLine::GetOffsetToLeftRightOf(
         if (otherRunLimit > lineEnd) {
             otherRunLimit = lineEnd;
         }
-        Int32 otherRunLevel = ((*runs)[otherRunIndex+1] /*>>>*/>> ILayout::RUN_LEVEL_SHIFT) &
+        UInt32 ui = (UInt32)(*runs)[otherRunIndex+1];
+        Int32 otherRunLevel = (ui >> ILayout::RUN_LEVEL_SHIFT) &
             ILayout::RUN_LEVEL_MASK;
         Boolean otherRunIsRtl = (otherRunLevel & 1) != 0;
 

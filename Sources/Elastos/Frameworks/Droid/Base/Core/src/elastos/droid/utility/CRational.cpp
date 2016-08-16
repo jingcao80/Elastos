@@ -185,7 +185,7 @@ ECode CRational::GetHashCode(
 {
     VALIDATE_NOT_NULL(value)
     // Bias the hash code for the first (2^16) values for both numerator and denominator
-    Int32 numeratorFlipped = mNumerator << 16 | (((Int64)mNumerator) >> 16);
+    Int32 numeratorFlipped = mNumerator << 16 | (((UInt32)mNumerator) >> 16);
     *value = mDenominator ^ numeratorFlipped;
     return NOERROR;
 }

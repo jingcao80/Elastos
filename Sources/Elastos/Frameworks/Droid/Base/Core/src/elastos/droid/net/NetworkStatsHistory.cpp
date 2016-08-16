@@ -222,7 +222,7 @@ ECode NetworkStatsHistoryDataStreamUtils::WriteVarLong(
         }
         else {
             IDataOutput::Probe(out)->WriteByte(((int) value & 0x7F) | 0x80);
-            value >>= 7; //value >>>= 7;
+            value = ((UInt64)value) >> 7;
         }
     }
     return NOERROR;

@@ -3296,7 +3296,7 @@ ECode ListView::IsOpaque(
 ECode ListView::SetCacheColorHint(
     /* [in] */ Int32 color)
 {
-    Boolean opaque = ((color & 0X80000000) | (color >> 24)) == 0XFF;
+    Boolean opaque = (((UInt32)color) >> 24) == 0XFF;
     mIsCacheColorOpaque = opaque;
     if (opaque) {
         if (mDividerPaint == NULL) {

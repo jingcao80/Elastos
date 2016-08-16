@@ -195,6 +195,10 @@ Boolean TaskStackViewTouchHandler::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev)
 {
     AutoPtr<TaskStackView> stackView = GetTaskStackView();
+    if (stackView == NULL) {
+        return FALSE;
+    }
+
     // Return early if we have no children
     Int32 childCount;
     stackView->GetChildCount(&childCount);
@@ -520,8 +524,6 @@ ECode TaskStackViewTouchHandler::OnChildDismissed(
     // Re-enable touch events from this task view
     tv->SetTouchEnabled(TRUE);
     // Remove the task view from the stack
-    GetTaskStackView()->OnTaskViewDismissed(tv);
-
     AutoPtr<TaskStackView> tsv = GetTaskStackView();
     if (tsv != NULL) {
         tsv->OnTaskViewDismissed(tv);

@@ -389,8 +389,8 @@ ECode PhoneNumberListAdapter::GetDataUri(
         AutoPtr<IContactsContractData> data;
         CContactsContractData::AcquireSingleton((IContactsContractData**)&data);
         AutoPtr<IUri> u;
-        data->GetCONTENT_URI((IUri**)&U);
-        return uris->WithAppendedId(U, phoneId, uri);
+        data->GetCONTENT_URI((IUri**)&u);
+        return uris->WithAppendedId(u, phoneId, uri);
     }
     return NOERROR;
 }

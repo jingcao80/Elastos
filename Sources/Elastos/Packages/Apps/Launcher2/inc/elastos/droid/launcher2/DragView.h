@@ -212,7 +212,7 @@ private:
 
     AutoPtr<IPoint> mDragVisualizeOffset;
     AutoPtr<IRect> mDragRegion;
-    AutoPtr<IDragLayer> mDragLayer;
+    IDragLayer* mDragLayer;
     Boolean mHasDrawn;
     Float mCrossFadeProgress;
 

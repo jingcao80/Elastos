@@ -2300,7 +2300,7 @@ String MotionEvent::ButtonStateToString(
     Int32 i = 0;
     while (buttonState != 0) {
         Boolean isSet = (buttonState & 1) != 0;
-        buttonState = (buttonState >> 1) & 0x7FFFFFFF; // unsigned shift!
+        buttonState = ((UInt32)buttonState) >> 1; // unsigned shift!
         if (isSet) {
             String name = BUTTON_SYMBOLIC_NAMES[i];
             if (result == NULL) {

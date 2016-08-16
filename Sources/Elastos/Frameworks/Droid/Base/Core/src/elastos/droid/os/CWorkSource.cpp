@@ -169,11 +169,11 @@ ECode CWorkSource::GetHashCode(
     VALIDATE_NOT_NULL(hash);
     Int32 result = 0;
     for (Int32 i = 0; i < mNum; i++) {
-        result = ((result << 4) | (((Int64)result) >> 28)) ^ (*mUids)[i];
+        result = ((result << 4) | (((UInt32)result) >> 28)) ^ (*mUids)[i];
     }
     if (mNames != NULL) {
         for (Int32 i = 0; i < mNum; i++) {
-            result = ((result << 4) | (((Int64)result) >> 28)) ^ (*mNames)[i].GetHashCode();
+            result = ((result << 4) | (((UInt32)result) >> 28)) ^ (*mNames)[i].GetHashCode();
         }
     }
     *hash = result;

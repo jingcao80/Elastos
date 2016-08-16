@@ -439,7 +439,7 @@ ECode CMmsSmsProvider::Query(
             break;
         }
         case URI_THREAD_ID: {
-            AutoPtr<IList/*<String*/> recipients;
+            AutoPtr<IList> recipients;/*<String*/
             uri->GetQueryParameters(String("recipient"), (IList**)&recipients);
 
             cursor = GetThreadId(recipients);
@@ -712,7 +712,7 @@ Int64 CMmsSmsProvider::GetSingleAddressId(
 AutoPtr<ISet/*<Long*/> CMmsSmsProvider::GetAddressIds(
     /* [in] */ IList/*<String>*/* addresses)
 {
-    AutoPtr<ISet/*<Long*/> result;
+    AutoPtr<ISet> result;/*<Long*/
     Int32 size = 0;
     addresses->GetSize(&size);
     CHashSet::New(size, (ISet**)&result);
@@ -1340,7 +1340,7 @@ String CMmsSmsProvider::BuildMailboxMsgQuery(
     AutoPtr<ArrayOf<String> > innerSmsProjection = MakeSmsProjectionWithNormalizedDate(
             smsColumns, 1);
 
-    AutoPtr<ISet/*<String*/> columnsPresentInTable;
+    AutoPtr<ISet> columnsPresentInTable;/*<String*/
     CHashSet::New(ICollection::Probe(MMS_COLUMNS), (ISet**)&columnsPresentInTable);
     columnsPresentInTable->Add(CoreUtils::Convert(String("pdu._id AS _id")));
     columnsPresentInTable->Add(CoreUtils::Convert(String("pdu.date AS date")));
@@ -1380,7 +1380,7 @@ String CMmsSmsProvider::BuildMailboxMsgQuery(
             columnsPresentInTable, 0, String("mms"), mmsSelection, *selectionArgs,
             String(NULL), String(NULL), &mmsSubQuery);
 
-    AutoPtr<ISet/*<String*/> columnsPresentInSmsTable;
+    AutoPtr<ISet> columnsPresentInSmsTable;/*<String*/
     CHashSet::New(ICollection::Probe(SMS_COLUMNS), (ISet**)&columnsPresentInSmsTable);
     columnsPresentInSmsTable->Add(CoreUtils::Convert(String("sms._id AS _id")));
     columnsPresentInSmsTable->Add(CoreUtils::Convert(String("sms.date AS date")));
@@ -1644,7 +1644,7 @@ AutoPtr<ICursor> CMmsSmsProvider::GetUndeliveredMessages(
     AutoPtr<ArrayOf<String> > innerSmsProjection = MakeProjectionWithDateAndThreadId(
             smsColumns, 1);
 
-    AutoPtr<ISet/*<String*/> columnsPresentInTable;
+    AutoPtr<ISet> columnsPresentInTable;/*<String*/
     CHashSet::New(ICollection::Probe(MMS_COLUMNS), (ISet**)&columnsPresentInTable);
     columnsPresentInTable->Add(CoreUtils::Convert(String("pdu._id")));
     columnsPresentInTable->Add(CoreUtils::Convert(ITelephonyMmsSmsPendingMessages::ERROR_TYPE));
@@ -1755,7 +1755,7 @@ String CMmsSmsProvider::BuildConversationQuery(
     AutoPtr<ArrayOf<String> > innerMmsProjection = MakeProjectionWithNormalizedDate(mmsColumns, 1000);
     AutoPtr<ArrayOf<String> > innerSmsProjection = MakeProjectionWithNormalizedDate(smsColumns, 1);
 
-    AutoPtr<ISet/*<String*/> columnsPresentInTable;
+    AutoPtr<ISet> columnsPresentInTable;/*<String*/
     CHashSet::New(ICollection::Probe(MMS_COLUMNS), (ISet**)&columnsPresentInTable);
     columnsPresentInTable->Add(CoreUtils::Convert(String("pdu._id")));
     columnsPresentInTable->Add(CoreUtils::Convert(ITelephonyMmsSmsPendingMessages::ERROR_TYPE));
@@ -2021,7 +2021,7 @@ void CMmsSmsProvider::InitializeColumnSets()
     Int32 commonColumnCount = MMS_SMS_COLUMNS->GetLength();
     Int32 mmsOnlyColumnCount = MMS_ONLY_COLUMNS->GetLength();
     Int32 smsOnlyColumnCount = SMS_ONLY_COLUMNS->GetLength();
-    AutoPtr<ISet/*<String*/> unionColumns;
+    AutoPtr<ISet> unionColumns;/*<String*/
     CHashSet::New((ISet**)&unionColumns);
 
     for (Int32 i = 0; i < commonColumnCount; i++) {
@@ -2169,7 +2169,7 @@ AutoPtr<ISet/*<Long*/> CMmsSmsProvider::GetAddressIdsByAddressList(
 /* [in] */ ArrayOf<String>* addresses)
 {
     Int32 count = addresses->GetLength();
-    AutoPtr<ISet/*<Long*/> result;
+    AutoPtr<ISet> result;/*<Long*/
     CHashSet::New(count, (ISet**)&result);
 
     for (Int32 i = 0; i < count; i++) {

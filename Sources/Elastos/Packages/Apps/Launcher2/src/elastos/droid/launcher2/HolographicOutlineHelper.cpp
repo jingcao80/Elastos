@@ -184,14 +184,13 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
     // We start by removing most of the alpha channel so as to ignore shadows, and
     // other types of partial transparency when defining the shape of the object
     if (clipAlpha) {
-        Int32 width;
+        Int32 width, height;
         srcDst->GetWidth(&width);
-        Int32 height;
         srcDst->GetHeight(&height);
         AutoPtr<ArrayOf<Int32> > srcBuffer = ArrayOf<Int32>::Alloc(width * height);
         srcDst->GetPixels(srcBuffer, 0, width, 0, 0, width, height);
         for (Int32 i = 0; i < srcBuffer->GetLength(); i++) {
-            const Int32 alpha = (*srcBuffer)[i] >> 24;
+            Int32 alpha = ((UInt32)(*srcBuffer)[i]) >> 24;
             if (alpha < 188) {
                 (*srcBuffer)[i] = 0;
             }

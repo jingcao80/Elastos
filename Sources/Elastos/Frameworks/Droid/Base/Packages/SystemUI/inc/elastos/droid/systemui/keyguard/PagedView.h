@@ -69,12 +69,10 @@ public:
 
         //@Override
         CARAPI WriteToParcel(
-            /* [in] */ IParcel* out,
-            /* [in] */ Int32 flags);
+            /* [in] */ IParcel* out);
 
-    private:
-        CARAPI constructor(
-            /* [in] */ IParcel* in);
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* source);
 
     public:
         Int32 mCurrentPage;

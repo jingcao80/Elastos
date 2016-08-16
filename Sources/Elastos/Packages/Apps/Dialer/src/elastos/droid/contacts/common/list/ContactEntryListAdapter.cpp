@@ -1023,7 +1023,7 @@ void ContactEntryListAdapter::BindQuickContact(
         if (!photoUriString.IsNull()) {
             AutoPtr<IUriHelper> helper;
             CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-            helper->Parse(photoUriString, (IUri**)&photoUriString);
+            helper->Parse(photoUriString, (IUri**)&photoUri);
         }
         AutoPtr<IContactPhotoManagerDefaultImageRequest> request;
         if (photoUri == NULL) {

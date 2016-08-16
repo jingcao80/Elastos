@@ -64,20 +64,17 @@ ECode PagedView::SavedState::constructor(
 }
 
 ECode PagedView::SavedState::WriteToParcel(
-    /* [in] */ IParcel* out,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* out)
 {
-    assert(0);
-    //View::BaseSavedState::WriteToParcel(out, flags);
+    View::BaseSavedState::WriteToParcel(out);
     return out->WriteInt32(mCurrentPage);
 }
 
-ECode PagedView::SavedState::constructor(
-    /* [in] */ IParcel* in)
+ECode PagedView::SavedState::ReadFromParcel(
+    /* [in] */ IParcel* source)
 {
-    assert(0);
-    //View::BaseSavedState::constructor(in);
-    in->ReadInt32(&mCurrentPage);
+    View::BaseSavedState::ReadFromParcel(source);
+    return source->ReadInt32(&mCurrentPage);
 }
 
 ECode PagedView::MyRunnable::Run()
@@ -3370,7 +3367,9 @@ ECode PagedView::HideScrollingIndicator(
             CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
             AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
             (*array)[0] = 0.0f;
-            helper->OfFloat(mScrollIndicator, String("alpha"), array, (IObjectAnimator**)&mScrollIndicatorAnimator);
+            AutoPtr<IObjectAnimator> oa;
+            helper->OfFloat(mScrollIndicator, String("alpha"), array, (IObjectAnimator**)&oa);
+            mScrollIndicatorAnimator = IValueAnimator::Probe(oa);
             mScrollIndicatorAnimator->SetDuration(sScrollIndicatorFadeOutDuration);
             AutoPtr<IAnimatorListener> lis = new MyAnimatorListenerAdapter(this);
             IAnimator::Probe(mScrollIndicatorAnimator)->AddListener(lis);

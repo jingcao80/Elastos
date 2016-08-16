@@ -183,9 +183,11 @@ ECode ContactListItemView::constructor(
     GetResources((IResources**)&res);
     Float size;
     res->GetDimension(Elastos::Droid::Dialer::R::dimen::contact_browser_list_item_text_size, &size);
+    Float textSize;
     a->GetDimension(
             Elastos::Droid::Dialer::R::styleable::ContactListItemView_list_item_name_text_size,
-            (Int32)size, (Float*)&mNameTextViewTextSize);
+            (Int32)size, &textSize);
+    mNameTextViewTextSize = textSize;
 
     Int32 left, top, right, bottom;
     a->GetDimensionPixelOffset(

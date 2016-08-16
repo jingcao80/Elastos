@@ -2932,44 +2932,43 @@ void Workspace::DrawDragView(
 
     Int32 tmp;
     destCanvas->Save(&tmp);
-    if (ITextView::Probe(v) != NULL && pruneToDrawable) {
+
+    ITextView* tv = ITextView::Probe(v);
+    if (tv != NULL && pruneToDrawable) {
         AutoPtr<ArrayOf<IDrawable*> > drawables;
-        ITextView::Probe(v)->GetCompoundDrawables((ArrayOf<IDrawable*>**)&drawables);
+        tv->GetCompoundDrawables((ArrayOf<IDrawable*>**)&drawables);
         AutoPtr<IDrawable> d = (*drawables)[1];
-        Int32 width;
+        Int32 width, height;
         d->GetIntrinsicWidth(&width);
-        Int32 height;
         d->GetIntrinsicHeight(&height);
         clipRect->Set(0, 0, width + padding, height + padding);
         destCanvas->Translate(padding / 2, padding / 2);
         d->Draw(destCanvas);
     }
     else {
-        if (IFolderIcon::Probe(v) != NULL) {
+        IFolderIcon* fi = IFolderIcon::Probe(v);
+        if (fi != NULL) {
             // For FolderIcons the text can bleed into the icon area, and so we need to
             // hide the text completely (which can't be achieved by clipping).
             Boolean res;
-            IFolderIcon::Probe(v)->GetTextVisible(&res);
+            fi->GetTextVisible(&res);
             if (res) {
-                IFolderIcon::Probe(v)->SetTextVisible(FALSE);
+                fi->SetTextVisible(FALSE);
                 textVisible = true;
             }
         }
         else if (IBubbleTextView::Probe(v) != NULL) {
-            AutoPtr<IBubbleTextView> tv = IBubbleTextView::Probe(v);
             Int32 top;
-            ITextView::Probe(tv)->GetExtendedPaddingTop(&top);
+            tv->GetExtendedPaddingTop(&top);
             AutoPtr<ILayout> layout;
-            ITextView::Probe(tv)->GetLayout((ILayout**)&layout);
+            tv->GetLayout((ILayout**)&layout);
             Int32 ltop;
             layout->GetLineTop(0, &ltop);
             clipRect->SetBottom(top - (Int32)IBubbleTextView::PADDING_V + ltop);
         }
-        else if (ITextView::Probe(v) != NULL) {
-            AutoPtr<ITextView> tv = ITextView::Probe(v);
-            Int32 top;
+        else if (tv != NULL) {
+            Int32 top, padding;
             tv->GetExtendedPaddingTop(&top);
-            Int32 padding;
             tv->GetCompoundDrawablePadding(&padding);
             AutoPtr<ILayout> layout;
             tv->GetLayout((ILayout**)&layout);
@@ -2977,9 +2976,9 @@ void Workspace::DrawDragView(
             layout->GetLineTop(0, &ltop);
             clipRect->SetBottom(top - padding + ltop);
         }
-        Int32 x;
+
+        Int32 x, y;
         v->GetScrollX(&x);
-        Int32 y;
         v->GetScrollY(&y);
         destCanvas->Translate(-x + padding / 2, -y + padding / 2);
         Boolean res;
@@ -3002,30 +3001,26 @@ ECode Workspace::CreateDragBitmap(
 {
     VALIDATE_NOT_NULL(map);
 
+    AutoPtr<IBitmapHelper> helper;
+    CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
     AutoPtr<IBitmap> b;
 
-    if (ITextView::Probe(v) != NULL) {
+    ITextView* tv = ITextView::Probe(v);
+    if (tv != NULL) {
         AutoPtr<ArrayOf<IDrawable*> > drawables;
-        ITextView::Probe(v)->GetCompoundDrawables((ArrayOf<IDrawable*>**)&drawables);
-        AutoPtr<IDrawable> d = (*drawables)[1];
+        tv->GetCompoundDrawables((ArrayOf<IDrawable*>**)&drawables);
+        IDrawable* d = (*drawables)[1];
 
-        Int32 width;
+        Int32 width, height;
         d->GetIntrinsicWidth(&width);
-        Int32 height;
         d->GetIntrinsicHeight(&height);
-
-        AutoPtr<IBitmapHelper> helper;
-        CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
         helper->CreateBitmap(width + padding, height + padding,
                 BitmapConfig_ARGB_8888, (IBitmap**)&b);
     }
     else {
-        Int32 width;
+        Int32 width, height;
         v->GetWidth(&width);
-        Int32 height;
         v->GetHeight(&height);
-        AutoPtr<IBitmapHelper> helper;
-        CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
         helper->CreateBitmap(width + padding, height + padding,
                 BitmapConfig_ARGB_8888, (IBitmap**)&b);
     }
@@ -3047,12 +3042,10 @@ AutoPtr<IBitmap> Workspace::CreateDragOutline(
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     Int32 outlineColor;
-    resources->GetColor(Elastos::Droid::R::color::white,
-        &outlineColor);
+    resources->GetColor(Elastos::Droid::R::color::white, &outlineColor);
 
-    Int32 width;
+    Int32 width, height;
     v->GetWidth(&width);
-    Int32 height;
     v->GetHeight(&height);
     AutoPtr<IBitmap> b;
     AutoPtr<IBitmapHelper> helper;
@@ -3087,9 +3080,8 @@ AutoPtr<IBitmap> Workspace::CreateDragOutline(
     helper->CreateBitmap(w, h, BitmapConfig_ARGB_8888, (IBitmap**)&b);
     canvas->SetBitmap(b);
 
-    Int32 width;
+    Int32 width, height;
     orig->GetWidth(&width);
-    Int32 height;
     orig->GetHeight(&height);
     AutoPtr<IRect> src;
     CRect::New(0, 0, width, height, (IRect**)&src);
@@ -3105,8 +3097,8 @@ AutoPtr<IBitmap> Workspace::CreateDragOutline(
     dst->Offset((w - scaledWidth) / 2, (h - scaledHeight) / 2);
 
     canvas->DrawBitmap(orig, src, dst, NULL);
-    mOutlineHelper->ApplyMediumExpensiveOutlineWithBlur(b, canvas, outlineColor, outlineColor,
-            clipAlpha);
+    mOutlineHelper->ApplyMediumExpensiveOutlineWithBlur(
+        b, canvas, outlineColor, outlineColor, clipAlpha);
     canvas->SetBitmap(NULL);
 
     return b;
@@ -3115,7 +3107,6 @@ AutoPtr<IBitmap> Workspace::CreateDragOutline(
 ECode Workspace::StartDrag(
     /* [in] */ ICellLayoutCellInfo* cellInfo)
 {
-    Slogger::I(TAG, " >> StartDrag %s", TO_CSTR(cellInfo));
     AutoPtr<IView> child = ((CellLayout::CellInfo*)cellInfo)->mCell;
 
     // Make sure the drag was started by a long press as opposed to a long click.
@@ -3150,7 +3141,6 @@ ECode Workspace::BeginDragShared(
     /* [in] */ IView* child,
     /* [in] */ IDragSource* source)
 {
-    Slogger::I(TAG, " >> BeginDragShared");
     AutoPtr<IResources> r;
     GetResources((IResources**)&r);
 
@@ -3160,9 +3150,8 @@ ECode Workspace::BeginDragShared(
     AutoPtr<IBitmap> b;
     CreateDragBitmap(child, canvas, IWorkspace::DRAG_BITMAP_PADDING, (IBitmap**)&b);
 
-    Int32 bmpWidth;
+    Int32 bmpWidth, bmpHeight;
     b->GetWidth(&bmpWidth);
-    Int32 bmpHeight;
     b->GetHeight(&bmpHeight);
 
     AutoPtr<IDragLayer> dragLayer;
@@ -3217,7 +3206,6 @@ ECode Workspace::BeginDragShared(
         icon->ClearPressedOrFocusedBackground();
     }
 
-    Slogger::I(TAG, " >> StartDrag");
     AutoPtr<IInterface> tag;
     child->GetTag((IInterface**)&tag);
     mDragController->StartDrag(b, dragLayerX, dragLayerY, source, tag,
@@ -3284,8 +3272,9 @@ ECode Workspace::AcceptDrop(
             return NOERROR;
         }
 
+        AutoPtr<ArrayOf<Float> > temp = mDragViewVisualCenter;
         mDragViewVisualCenter = GetDragViewVisualCenter(_d->mX, _d->mY, _d->mXOffset, _d->mYOffset,
-                _d->mDragView, mDragViewVisualCenter);
+                _d->mDragView, temp);
 
         // We want the point to be mapped to the dragTarget.
         mLauncher->IsHotseatLayout(IView::Probe(dropTargetLayout), &res);
@@ -3609,8 +3598,9 @@ ECode Workspace::OnDrop(
     /* [in] */ IDropTargetDragObject* d)
 {
     DragObject* _d = (DragObject*)d;
+    AutoPtr<ArrayOf<Float> > temp = mDragViewVisualCenter;
     mDragViewVisualCenter = GetDragViewVisualCenter(_d->mX, _d->mY,
-            _d->mXOffset, _d->mYOffset, _d->mDragView, mDragViewVisualCenter);
+            _d->mXOffset, _d->mYOffset, _d->mDragView, temp);
 
     AutoPtr<ICellLayout> dropTargetLayout = mDropToLayout;
 
@@ -4399,13 +4389,11 @@ AutoPtr<ArrayOf<Float> > Workspace::GetDragViewVisualCenter(
     // In order to find the visual center, we shift by half the dragRect
     AutoPtr<IRect> rect;
     dragView->GetDragRegion((IRect**)&rect);
-    Int32 width;
+    Int32 width, height;
     rect->GetWidth(&width);
-    (*res)[0] = left + width / 2;
-    Int32 height;
     rect->GetHeight(&height);
-    (*res)[1] = top + height / 2;
-
+    (*res)[0] = left + width / 2.0;
+    (*res)[1] = top + height / 2.0;
     return res;
 }
 
@@ -4440,8 +4428,9 @@ ECode Workspace::OnDragOver(
         Slogger::E("Workspace", "Improper spans found");
         return E_RUNTIME_EXCEPTION;
     }
+    AutoPtr<ArrayOf<Float> > temp = mDragViewVisualCenter;
     mDragViewVisualCenter = GetDragViewVisualCenter(_d->mX, _d->mY, _d->mXOffset, _d->mYOffset,
-        _d->mDragView, mDragViewVisualCenter);
+        _d->mDragView, temp);
 
     AutoPtr<IView> child = (mDragInfo == NULL) ? NULL : mDragInfo->mCell;
     // Identify whether we have dragged over a side page
@@ -4516,20 +4505,22 @@ ECode Workspace::OnDragOver(
 
         AutoPtr<ItemInfo> info = (ItemInfo*)IItemInfo::Probe(_d->mDragInfo);
 
+        AutoPtr<ArrayOf<Int32> > targetArray;
         FindNearestArea((Int32)(*mDragViewVisualCenter)[0],
                 (Int32)(*mDragViewVisualCenter)[1], item->mSpanX, item->mSpanY,
-                mDragTargetLayout, mTargetCell, (ArrayOf<Int32>**)&mTargetCell);
+                mDragTargetLayout, mTargetCell, (ArrayOf<Int32>**)&targetArray);
+        mTargetCell = targetArray;
 
         SetCurrentDropOverCell((*mTargetCell)[0], (*mTargetCell)[1]);
 
         Float targetCellDistance;
         mDragTargetLayout->GetDistanceFromCell(
-                (*mDragViewVisualCenter)[0], (*mDragViewVisualCenter)[1],
-                mTargetCell, &targetCellDistance);
+            (*mDragViewVisualCenter)[0], (*mDragViewVisualCenter)[1],
+            mTargetCell, &targetCellDistance);
 
         AutoPtr<IView> dragOverView;
         mDragTargetLayout->GetChildAt((*mTargetCell)[0],
-                (*mTargetCell)[1], (IView**)&dragOverView);
+            (*mTargetCell)[1], (IView**)&dragOverView);
 
         ManageFolderFeedback(info, mDragTargetLayout, mTargetCell,
                 targetCellDistance, dragOverView);
@@ -4553,9 +4544,9 @@ ECode Workspace::OnDragOver(
             AutoPtr<IRect> r;
             _d->mDragView->GetDragRegion((IRect**)&r);
             mDragTargetLayout->VisualizeDropLocation(child, mDragOutline,
-                    (Int32)(*mDragViewVisualCenter)[0], (Int32)(*mDragViewVisualCenter)[1],
-                    (*mTargetCell)[0], (*mTargetCell)[1], item->mSpanX, item->mSpanY, FALSE,
-                    p, r);
+                (Int32)(*mDragViewVisualCenter)[0], (Int32)(*mDragViewVisualCenter)[1],
+                (*mTargetCell)[0], (*mTargetCell)[1], item->mSpanX, item->mSpanY, FALSE,
+                p, r);
         }
         else if ((mDragMode == DRAG_MODE_NONE || mDragMode == DRAG_MODE_REORDER)
                 && (mReorderAlarm->AlarmPending(&tmp), !tmp) &&

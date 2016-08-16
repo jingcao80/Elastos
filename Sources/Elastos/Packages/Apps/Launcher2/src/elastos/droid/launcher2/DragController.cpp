@@ -95,28 +95,29 @@ const Float DragController::MAX_FLING_DEGREES = 35.0f;
 CAR_INTERFACE_IMPL(DragController, Object, IDragController);
 
 DragController::DragController()
+    : mFlingToDeleteThresholdVelocity(0)
+    , mDragging(FALSE)
+    , mMotionDownX(0)
+    , mMotionDownY(0)
+    , mScrollZone(0)
+    , mScrollState(SCROLL_OUTSIDE_ZONE)
+    , mLastTouchUpTime(-1)
+    , mDistanceSinceScroll(0)
 {
-    CRect::New((IRect**)&mRectTemp);
-    mCoordinatesTemp = ArrayOf<Int32>::Alloc(2);
-    mDragging = FALSE;
-    mMotionDownX = 0;
-    mMotionDownY = 0;
-    mScrollZone = 0;
-    CArrayList::New((IArrayList**)&mDropTargets);
-    CArrayList::New((IArrayList**)&mListeners);
-    mScrollState = SCROLL_OUTSIDE_ZONE;
-    mScrollRunnable = new ScrollRunnable(this);
-    mLastTouch = ArrayOf<Int32>::Alloc(2);
-    mLastTouchUpTime = -1;
-    mDistanceSinceScroll = 0;
-    mTmpPoint = ArrayOf<Int32>::Alloc(2);
-    CRect::New((IRect**)&mDragLayerRect);
-    mFlingToDeleteThresholdVelocity = 0;
 }
 
 ECode DragController::constructor(
     /* [in] */ ILauncher* launcher)
 {
+    CRect::New((IRect**)&mRectTemp);
+    CRect::New((IRect**)&mDragLayerRect);
+    mCoordinatesTemp = ArrayOf<Int32>::Alloc(2);
+    CArrayList::New((IArrayList**)&mDropTargets);
+    CArrayList::New((IArrayList**)&mListeners);
+    mScrollRunnable = new ScrollRunnable(this);
+    mLastTouch = ArrayOf<Int32>::Alloc(2);
+    mTmpPoint = ArrayOf<Int32>::Alloc(2);
+
     AutoPtr<IResources> r;
     IContext::Probe(launcher)->GetResources((IResources**)&r);
     mLauncher = launcher;
@@ -231,7 +232,7 @@ ECode DragController::StartDrag(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        AutoPtr<IDragControllerDragListener> listener = IDragControllerDragListener::Probe(obj);
+        IDragControllerDragListener* listener = IDragControllerDragListener::Probe(obj);
         listener->OnDragStart(source, dragInfo, dragAction);
     }
 
@@ -255,12 +256,10 @@ ECode DragController::StartDrag(
 
     mVibrator->Vibrate(VIBRATE_DURATION);
 
-    Int32 width;
+    Int32 width, height;
     b->GetWidth(&width);
-    Int32 height;
     b->GetHeight(&height);
-    AutoPtr<DragView> dragView;
-    dragView = new DragView();
+    AutoPtr<DragView> dragView = new DragView();
     dragView->constructor(mLauncher, b, registrationX,
             registrationY, 0, 0, width, height, initialDragViewScale);
     mDragObject->mDragView = dragView;

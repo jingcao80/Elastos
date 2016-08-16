@@ -145,6 +145,13 @@ Boolean Math::Constrain(Float amount, Float low, Float high)
     return amount < low ? low : (amount > high ? high : amount);
 }
 
+Int32 Math::Shr(
+    /* [in] */ Int32 value,
+    /* [in] */ Int32 bitNum)
+{
+    return ((UInt32)value) >> bitNum;
+}
+
 Double Math::Abs(
     /* [in] */ Double d)
 {

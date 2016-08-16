@@ -45,6 +45,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("InterruptibleInOutAnimator")
+
     InterruptibleInOutAnimator(
         /* [in] */ IView* view,
         /* [in] */ Int64 duration,

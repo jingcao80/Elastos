@@ -70,9 +70,11 @@ ECode FixedSizeImageView::SetImageDrawable(
     /* [in] */ IDrawable* drawable)
 {
     AutoPtr<IBitmap> bitmap;
-    Boolean isNullBitmapDrawable = IBitmapDrawable::Probe(drawable) != NULL &&
-        (IBitmapDrawable::Probe(drawable)->GetBitmap((IBitmap**)&bitmap), bitmap == NULL);
-    if (drawable == NULL || isNullBitmapDrawable) {
+    AutoPtr<IBitmapDrawable> bd = IBitmapDrawable::Probe(drawable);
+    if (bd != NULL) {
+        bd->GetBitmap((IBitmap**)&bitmap);
+    }
+    if (drawable == NULL || (bitmap == NULL)) {
         mAllowRelayout = FALSE;
         mAllowInvalidate = FALSE;
     }

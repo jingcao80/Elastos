@@ -286,7 +286,7 @@ ECode MmsSmsDatabaseHelper::RemoveUnferencedCanonicalAddresses(
             else {
                 // Find all the referenced recipient_ids from the threads. recipientIds is
                 // a space-separated list of recipient ids: "1 14 21"
-                AutoPtr<IHashSet/*<Integer*/> recipientIds;
+                AutoPtr<IHashSet> recipientIds;/*<Integer*/
                 CHashSet::New((IHashSet**)&recipientIds);
                 Boolean move = FALSE;
                 while (c->MoveToNext(&move), move) {
@@ -1635,7 +1635,7 @@ void MmsSmsDatabaseHelper::UpgradeDatabaseToVersion46(
             String(NULL),
             String(NULL),
             String(NULL), (ICursor**)&textRows);
-    AutoPtr<IArrayList/*<String*/> filesToDelete;
+    AutoPtr<IArrayList> filesToDelete;/*<String*/
     CArrayList::New((IArrayList**)&filesToDelete);
     do {
         db->BeginTransaction();

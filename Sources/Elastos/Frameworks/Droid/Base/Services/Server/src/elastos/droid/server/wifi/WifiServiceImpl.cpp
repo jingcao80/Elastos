@@ -10,16 +10,18 @@
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Process.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/server/wifi/WifiServiceImpl.h"
 #include "elastos/droid/server/am/BatteryStatsService.h"
 #include "elastos/core/StringUtils.h"
 #include "elastos/core/CoreUtils.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
@@ -29,10 +31,9 @@ using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
+using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::CWorkSource;
-using Elastos::Droid::Os::IBinderHelper;
-using Elastos::Droid::Os::CBinderHelper;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::CMessenger;
@@ -40,8 +41,7 @@ using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Os::IUserManagerHelper;
@@ -356,10 +356,7 @@ ECode WifiServiceImpl::ClientHandler::HandleMessage(
                 if (config != NULL) {
                     Int32 confignwId;
                     config->GetNetworkId(&confignwId);
-                    AutoPtr<IBinderHelper> binderHelper;
-                    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-                    Int32 uid;
-                    binderHelper->GetCallingUid(&uid);
+                    Int32 uid = Binder::GetCallingUid();
                     if (confignwId == IWifiConfiguration::INVALID_NETWORK_ID) {
                         config->SetCreatorUid(uid);
                     } else {
@@ -372,10 +369,7 @@ ECode WifiServiceImpl::ClientHandler::HandleMessage(
             }
             if (what == IWifiManager::CONNECT_NETWORK) {
                 if (config != NULL) {
-                    AutoPtr<IBinderHelper> binderHelper;
-                    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-                    Int32 uid;
-                    binderHelper->GetCallingUid(&uid);
+                    Int32 uid = Binder::GetCallingUid();
                     Int32 confignwId;
                     config->GetNetworkId(&confignwId);
                     if (confignwId == IWifiConfiguration::INVALID_NETWORK_ID) {
@@ -548,12 +542,8 @@ WifiServiceImpl::BatchedScanRequest::BatchedScanRequest(
     : DeathRecipient(owner, 0, String(NULL), binder, NULL)
 {
     settings = settings;
-
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    binderHelper->GetCallingPid(&pid);
+    uid = Binder::GetCallingUid();
+    pid = Binder::GetCallingPid();
     workSource = ws;
 }
 
@@ -731,12 +721,7 @@ WifiServiceImpl::Multicaster::Multicaster(
     /* [in] */ IBinder* binder)
     : DeathRecipient(owner, 0, tag, binder, NULL)
 {
-    // ==================before translated======================
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    mMode = uid;
+    mMode = Binder::GetCallingUid();
 }
 
 ECode WifiServiceImpl::Multicaster::ProxyDied()
@@ -906,10 +891,8 @@ ECode WifiServiceImpl::StartScan(
         // supplied WorkSource to allow future WorkSource combining.
         workSource->ClearNames();
     }
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
+
+    Int32 uid = Binder::GetCallingUid();
     mWifiStateMachine->StartScan(uid, scanRequestCounter++, scanSettings, workSource);
     return NOERROR;
 }
@@ -981,16 +964,10 @@ ECode WifiServiceImpl::GetBatchedScanResults(
         CArrayList::New(result);
         return NOERROR;
     }
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    AutoPtr<IUserHandleHelper> uhHelper;
-    Int32 userId;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-    uhHelper->GetCallingUserId(&userId);
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
+
+    Int32 uid = Binder::GetCallingUid();
+    Int32 userId = UserHandle::GetCallingUserId();
+    Int64 ident = Binder::ClearCallingIdentity();
     //try {
     Int32 noteOp;
     if ((mAppOps->NoteOp(IAppOpsManager::OP_WIFI_SCAN, uid, callingPackage, &noteOp), noteOp)
@@ -1004,7 +981,7 @@ ECode WifiServiceImpl::GetBatchedScanResults(
     }
     mWifiStateMachine->SyncGetBatchedScanResultsList(result);
     //} finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
     return NOERROR;
 }
@@ -1014,12 +991,9 @@ ECode WifiServiceImpl::StopBatchedScan(
 {
     EnforceChangePermission();
     if (mBatchedScanSupported == FALSE) return NOERROR;
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    Int32 pid;
-    binderHelper->GetCallingPid(&pid);
+
+    Int32 uid = Binder::GetCallingUid();
+    Int32 pid = Binder::GetCallingPid();
     StopBatchedScan(settings, uid, pid);
     return NOERROR;
 }
@@ -1032,12 +1006,8 @@ ECode WifiServiceImpl::SetWifiEnabled(
     AutoLock lock(this);
     VALIDATE_NOT_NULL(result);
     EnforceChangePermission();
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    Int32 pid;
-    binderHelper->GetCallingPid(&pid);
+    Int32 uid = Binder::GetCallingUid();
+    Int32 pid = Binder::GetCallingPid();
     Slogger::D(TAG, "setWifiEnabled: %d, pid = %d, uid = %d", enable, pid, uid);
     if (DBG) {
         Slogger::E(TAG, "Invoking mWifiStateMachine.setWifiEnabled\n");
@@ -1048,8 +1018,7 @@ ECode WifiServiceImpl::SetWifiEnabled(
     * only CHANGE_WIFI_STATE is enforced
     */
 
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
+    Int64 ident = Binder::ClearCallingIdentity();
     //try {
     Boolean bTemp;
     if (!(mSettingsStore->HandleWifiToggled(enable, &bTemp), bTemp)) {
@@ -1058,7 +1027,7 @@ ECode WifiServiceImpl::SetWifiEnabled(
         return NOERROR;
     }
     //} finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
 
     if (!mIsControllerStarted) {
@@ -1214,10 +1183,7 @@ ECode WifiServiceImpl::GetConfiguredNetworks(
     VALIDATE_NOT_NULL(result)
     EnforceAccessPermission();
     if (mWifiStateMachineChannel != NULL) {
-        AutoPtr<IBinderHelper> binderHelper;
-        CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-        Int32 uid;
-        binderHelper->GetCallingUid(&uid);
+        Int32 uid = Binder::GetCallingUid();
         return mWifiStateMachine->SyncGetConfiguredNetworks(uid,
                 mWifiStateMachineChannel, result);
     } else {
@@ -1252,10 +1218,7 @@ ECode WifiServiceImpl::AddOrUpdateNetwork(
     Boolean isValid;
     if (config->IsValid(&isValid), isValid) {
         //TODO: pass the Uid the WifiStateMachine as a message parameter
-        AutoPtr<IBinderHelper> binderHelper;
-        CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-        Int32 uid;
-        binderHelper->GetCallingUid(&uid);
+        Int32 uid = Binder::GetCallingUid();
         String SSID;
         config->GetSSID(&SSID);
         Int32 networkId;
@@ -1286,10 +1249,7 @@ ECode WifiServiceImpl::RemoveNetwork(
     VALIDATE_NOT_NULL(result);
     EnforceChangePermission();
 
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
+    Int32 uid = Binder::GetCallingUid();
     if (!IsOwner(uid)) {
         Slogger::E(TAG, "Remove is not authorized for user");
         *result = FALSE;
@@ -1356,32 +1316,25 @@ ECode WifiServiceImpl::GetScanResults(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
     EnforceAccessPermission();
-    AutoPtr<IUserHandleHelper> uhHelper;
-    Int32 userId;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-    uhHelper->GetCallingUserId(&userId);
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
+    Int32 userId = UserHandle::GetCallingUserId();
+    Int32 uid = Binder::GetCallingUid();
+    Int64 ident = Binder::ClearCallingIdentity();
     //try {
     Int32 noteOp;
     if ((mAppOps->NoteOp(IAppOpsManager::OP_WIFI_SCAN, uid, callingPackage, &noteOp), noteOp)
             != IAppOpsManager::MODE_ALLOWED) {
         CParcelableList::New(result);
-        binderHelper->RestoreCallingIdentity(ident);
+        Binder::RestoreCallingIdentity(ident);
         return NOERROR;
     }
     if (!IsCurrentProfile(userId)) {
         CParcelableList::New(result);
-        binderHelper->RestoreCallingIdentity(ident);
+        Binder::RestoreCallingIdentity(ident);
         return NOERROR;
     }
     mWifiStateMachine->SyncGetScanResultsList(result);
     //} finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
     return NOERROR;
 }
@@ -1407,14 +1360,11 @@ ECode WifiServiceImpl::SetCountryCode(
 {
     Slogger::I(TAG, "WifiService trying to set country code to %s with persist set to %d", countryCode.string(), persist);
     EnforceConnectivityInternalPermission();
-    Int64 token;
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    binderHelper->ClearCallingIdentity(&token);
+    Int64 token = Binder::ClearCallingIdentity();
     //try {
     mWifiStateMachine->SetCountryCode(countryCode, persist);
     //} finally {
-    binderHelper->RestoreCallingIdentity(token);
+    Binder::RestoreCallingIdentity(token);
     //}
     return NOERROR;
 }
@@ -1427,14 +1377,11 @@ ECode WifiServiceImpl::SetFrequencyBand(
     Boolean bTemp;
     if (!(IsDualBandSupported(&bTemp), bTemp)) return NOERROR;
     Slogger::I(TAG, "WifiService trying to set frequency band to %d  with persist set to %d", band, persist);
-    Int64 token;
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    binderHelper->ClearCallingIdentity(&token);
+    Int64 token = Binder::ClearCallingIdentity();
     //try {
     mWifiStateMachine->SetFrequencyBand(band, persist);
     //} finally {
-    binderHelper->RestoreCallingIdentity(token);
+    Binder::RestoreCallingIdentity(token);
     //}
     return NOERROR;
 }
@@ -1686,12 +1633,8 @@ ECode WifiServiceImpl::AcquireWifiLock(
         }
     }
 
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    Int32 pid;
-    binderHelper->GetCallingPid(&pid);
+    Int32 uid = Binder::GetCallingUid();
+    Int32 pid = Binder::GetCallingPid();
     if (ws != NULL) {
         EnforceWakeSourcePermission(uid, pid);
     }
@@ -1711,12 +1654,8 @@ ECode WifiServiceImpl::UpdateWifiLockWorkSource(
     /* [in] */ IBinder* lock,
     /* [in] */ IWorkSource* ws)
 {
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    Int32 pid;
-    binderHelper->GetCallingPid(&pid);
+    Int32 uid = Binder::GetCallingUid();
+    Int32 pid = Binder::GetCallingPid();
 
     if (ws != NULL) {
         Int32 size;
@@ -1729,8 +1668,7 @@ ECode WifiServiceImpl::UpdateWifiLockWorkSource(
         EnforceWakeSourcePermission(uid, pid);
     }
 
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
+    Int64 ident = Binder::ClearCallingIdentity();
     //try {
     {    AutoLock syncLock(mLocks);
         Int32 index = mLocks->FindLockByBinder(lock);
@@ -1750,7 +1688,7 @@ ECode WifiServiceImpl::UpdateWifiLockWorkSource(
     }
     //} catch (RemoteException e) {
     //} finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
     return NOERROR;
 }
@@ -1802,17 +1740,14 @@ ECode WifiServiceImpl::AcquireMulticastLock(
         mWifiStateMachine->StopFilteringMulticastV4Packets();
     }
 
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
+
+    Int32 uid = Binder::GetCallingUid();
+    Int64 ident = Binder::ClearCallingIdentity();
     //try {
     mBatteryStats->NoteWifiMulticastEnabled(uid);
     //} catch (RemoteException e) {
     //} finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
     return NOERROR;
 }
@@ -1821,11 +1756,9 @@ ECode WifiServiceImpl::ReleaseMulticastLock()
 {
     EnforceMulticastChangePermission();
 
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int32 uid;
-    binderHelper->GetCallingUid(&uid);
-    {    AutoLock syncLock(mMulticasters);
+    Int32 uid = Binder::GetCallingUid();
+    {
+        AutoLock syncLock(mMulticasters);
         mMulticastDisabled++;
         Int32 size;
         mMulticasters->GetSize(&size);
@@ -2220,14 +2153,8 @@ Boolean WifiServiceImpl::IsCurrentProfile(
 Boolean WifiServiceImpl::IsOwner(
     /* [in] */ Int32 uid)
 {
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
-    AutoPtr<IUserHandleHelper> uhHelper;
-    Int32 userId;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-    uhHelper->GetUserId(uid, &userId);
+    Int64 ident = Binder::ClearCallingIdentity();
+    Int32 userId = UserHandle::GetUserId(uid);
     //try {
     Int32 ownerUser = IUserHandle::USER_OWNER;
     if (userId == ownerUser) {
@@ -2253,7 +2180,7 @@ Boolean WifiServiceImpl::IsOwner(
     }
     //}
     //finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
     return FALSE;
 }
@@ -2317,10 +2244,7 @@ Boolean WifiServiceImpl::AcquireWifiLockLocked(
 
     mLocks->AddLock(wifiLock);
 
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
+    Int64 ident = Binder::ClearCallingIdentity();
     //try {
     NoteAcquireWifiLock(wifiLock);
     switch(wifiLock->mMode) {
@@ -2339,7 +2263,7 @@ Boolean WifiServiceImpl::AcquireWifiLockLocked(
     //} catch (RemoteException e) {
     //    return false;
     //} finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
     return TRUE;
 }
@@ -2355,10 +2279,7 @@ Boolean WifiServiceImpl::ReleaseWifiLockLocked(
 
     hadLock = (wifiLock != NULL);
 
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
+    Int64 ident = Binder::ClearCallingIdentity();
     //try {
     if (hadLock) {
         NoteReleaseWifiLock(wifiLock);
@@ -2377,7 +2298,7 @@ Boolean WifiServiceImpl::ReleaseWifiLockLocked(
     }
     //} catch (RemoteException e) {
     //} finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
 
     return hadLock;
@@ -2399,15 +2320,12 @@ void WifiServiceImpl::RemoveMulticasterLocked(
         mWifiStateMachine->StartFilteringMulticastV4Packets();
     }
 
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int64 ident;
-    binderHelper->ClearCallingIdentity(&ident);
+    Int64 ident = Binder::ClearCallingIdentity();
     //try {
     mBatteryStats->NoteWifiMulticastDisabled(uid);
     //} catch (RemoteException e) {
     //} finally {
-    binderHelper->RestoreCallingIdentity(ident);
+    Binder::RestoreCallingIdentity(ident);
     //}
 }
 

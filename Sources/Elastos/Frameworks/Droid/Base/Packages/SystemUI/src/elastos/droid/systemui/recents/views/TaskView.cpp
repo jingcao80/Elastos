@@ -946,11 +946,6 @@ ECode TaskView::SetDim(
         GetMeasuredWidth(&measuredWidth);
         GetMeasuredHeight(&measuredHeight);
         if (measuredWidth > 0 && measuredHeight > 0) {
-            if (mDimAnimator != NULL) {
-                mDimAnimator->RemoveAllListeners();
-                mDimAnimator->Cancel();
-            }
-
             Int32 inverse = 255 - mDim;
             AutoPtr<IColor> color;
             CColor::AcquireSingleton((IColor**)&color);

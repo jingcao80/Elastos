@@ -573,7 +573,7 @@ Boolean TaskStackView::SynchronizeStackViewsWithModel()
             tasks->Get(i, (IInterface**)&item1);
             mCurrentTaskTransforms->Get(i, (IInterface**)&item2);
             Task* task = (Task*)ITask::Probe(item1);
-            AutoPtr<TaskViewTransform> transform = (TaskViewTransform*)IObject::Probe(item2);
+            TaskViewTransform* transform = (TaskViewTransform*)IObject::Probe(item2);
             AutoPtr<IInterface> _tv;
             mTmpTaskViewMap->Get(item1, (IInterface**)&_tv);
             TaskView* tv = (TaskView*)ITaskView::Probe(_tv);
@@ -1174,6 +1174,8 @@ ECode TaskStackView::OnStackTaskRemoved(
     /* [in] */ ITask* removedTask,
     /* [in] */ ITask* newFrontMostTask)
 {
+    Logger::I(TAG, " >> OnStackTaskRemoved: %s", TO_CSTR(removedTask), TO_CSTR(newFrontMostTask));
+
     TaskStack* stack = (TaskStack*)_stack;
     // Remove the view associated with this task, we can't rely on updateTransforms
     // to work here because the task is no longer in the list
@@ -1456,6 +1458,8 @@ ECode TaskStackView::OnTaskViewClicked(
 ECode TaskStackView::OnTaskViewDismissed(
     /* [in] */ ITaskView* _tv)
 {
+    Logger::I(TAG, " >> OnTaskViewDismissed: %s", TO_CSTR(_tv));
+
     TaskView* tv = (TaskView*)_tv;
     AutoPtr<Task> task = tv->GetTask();
     Int32 taskIndex = mStack->IndexOfTask(task);

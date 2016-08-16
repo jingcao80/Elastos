@@ -362,9 +362,9 @@ ECode CellLayout::CellInfo::ToString(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CellLayout::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
+CAR_INTERFACE_IMPL(CellLayout::DragOutlineAnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
-CellLayout::AnimatorUpdateListener::AnimatorUpdateListener(
+CellLayout::DragOutlineAnimatorUpdateListener::DragOutlineAnimatorUpdateListener(
     /* [in] */ CellLayout* host,
     /* [in] */ InterruptibleInOutAnimator* anim,
     /* [in] */ Int32 thisIndex)
@@ -373,7 +373,7 @@ CellLayout::AnimatorUpdateListener::AnimatorUpdateListener(
     , mThisIndex(thisIndex)
 {}
 
-ECode CellLayout::AnimatorUpdateListener::OnAnimationUpdate(
+ECode CellLayout::DragOutlineAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IBitmap> outline = IBitmap::Probe(mAnim->GetTag());
@@ -396,9 +396,12 @@ ECode CellLayout::AnimatorUpdateListener::OnAnimationUpdate(
     else {
         AutoPtr<IInterface> val;
         animation->GetAnimatedValue((IInterface**)&val);
-        IFloat::Probe(val)->GetValue(&(*mHost->mDragOutlineAlphas)[mThisIndex]);
+        Float alpha;
+        IFloat::Probe(val)->GetValue(&alpha);
+        (*mHost->mDragOutlineAlphas)[mThisIndex] = alpha;
         mHost->Invalidate((*mHost->mDragOutlines)[mThisIndex]);
     }
+
     return NOERROR;
 }
 
@@ -867,8 +870,8 @@ ECode CellLayout::CellAndSpan::ToString(
 
 const String CellLayout::TAG("CellLayout");
 
-const Boolean CellLayout::DESTRUCTIVE_REORDER;
-const Boolean CellLayout::DEBUG_VISUALIZE_OCCUPIED;
+const Boolean CellLayout::DESTRUCTIVE_REORDER = FALSE;
+const Boolean CellLayout::DEBUG_VISUALIZE_OCCUPIED = FALSE;
 const Float CellLayout::REORDER_HINT_MAGNITUDE;
 const Int32 CellLayout::REORDER_ANIMATION_DURATION;
 const Int32 CellLayout::INVALID_DIRECTION;
@@ -1051,13 +1054,13 @@ ECode CellLayout::constructor(
             new InterruptibleInOutAnimator(this, duration, fromAlphaValue, toAlphaValue);
         IAnimator::Probe(anim->GetAnimator())->SetInterpolator(mEaseOutInterpolator);
         Int32 thisIndex = i;
-        AutoPtr<AnimatorUpdateListener> listener = new AnimatorUpdateListener(this, anim, thisIndex);
+        AutoPtr<DragOutlineAnimatorUpdateListener> listener = new DragOutlineAnimatorUpdateListener(this, anim, thisIndex);
         anim->GetAnimator()->AddUpdateListener(listener);
         // The animation holds a reference to the drag outline bitmap as long is it's
         // running. This way the bitmap can be GCed when the animations are complete.
         AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter2(anim);
         IAnimator::Probe(anim->GetAnimator())->AddListener(adapter);
-        (*mDragOutlineAnims)[i] = anim;
+        mDragOutlineAnims->Set(i, anim);
     }
 
     CRect::New((IRect**)&mBackgroundRect);
@@ -1317,11 +1320,11 @@ void CellLayout::OnDraw(
     for (Int32 i = 0; i < mDragOutlines->GetLength(); i++) {
         Float alpha = (*mDragOutlineAlphas)[i];
         if (alpha > 0) {
-            AutoPtr<IRect> r = (*mDragOutlines)[i];
             Float scale;
             GetChildrenScale(&scale);
-            ScaleRectAboutCenter(r, mTemp, scale);
-            AutoPtr<IBitmap> b = IBitmap::Probe((*mDragOutlineAnims)[i]->GetTag());
+            ScaleRectAboutCenter((*mDragOutlines)[i], mTemp, scale);
+            AutoPtr<IInterface> tag = (*mDragOutlineAnims)[i]->GetTag();
+            IBitmap* b = IBitmap::Probe(tag);
             paint->SetAlpha((Int32)(alpha + .5f));
             canvas->DrawBitmap(b, NULL, mTemp, paint);
         }
@@ -2618,9 +2621,9 @@ ECode CellLayout::FindNearestArea(
                 }
             }
             validRegions->Push(currentRect);
-            Double distance = Elastos::Core::Math::Sqrt(Elastos::Core::Math::Pow((*cellXY)[0] - pixelX, 2)
+            Double distance = Elastos::Core::Math::Sqrt(
+                Elastos::Core::Math::Pow((*cellXY)[0] - pixelX, 2)
                     + Elastos::Core::Math::Pow((*cellXY)[1] - pixelY, 2));
-
             Boolean res;
             if ((distance <= bestDistance && !contained) ||
                 (currentRect->Contains(bestRect, &res), res)) {

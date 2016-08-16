@@ -1907,7 +1907,7 @@ ECode CResources::GetIdentifier(
 Boolean CResources::ResourceHasPackage(
     /* [in] */ Int32 resid)
 {
-    return (resid >> 24) != 0;
+    return ((resid & 0xFFFFFFFF) >> 24) != 0;
 }
 
 ECode CResources::GetResourceName(
@@ -2194,7 +2194,7 @@ ECode CResources::LoadDrawable(
 
     if (TRACE_FOR_PRELOAD) {
         // Log only framework resources
-        if (((unsigned Int32)id >> 24) == 0x1) {
+        if (((0xFFFFFFFF & id) >> 24) == 0x1) {
             String name;
             GetResourceName(id, &name);
             Logger::D(TAG, "PreloadDrawable %s", name.string());
@@ -2358,7 +2358,7 @@ ECode CResources::LoadDrawableForCookie(
 
     if (TRACE_FOR_MISS_PRELOAD) {
         // Log only framework resources
-        if ((id >> 24) == 0x1) {
+        if (((0xFFFFFFFF & id) >> 24) == 0x1) {
             String name;
             GetResourceName(id, &name);
             if (!name.IsNull()) {
@@ -2477,7 +2477,7 @@ ECode CResources::LoadColorStateList(
 
     if (TRACE_FOR_PRELOAD) {
         // Log only framework resources
-        if (((unsigned Int32)id >> 24) == 0x1) {
+        if (((0xFFFFFFFF & id) >> 24) == 0x1) {
             String name;
             GetResourceName(id, &name);
             Logger::D("CResources", "PreloadColorStateList %s", name.string());

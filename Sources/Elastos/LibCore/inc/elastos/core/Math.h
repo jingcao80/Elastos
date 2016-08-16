@@ -23,6 +23,11 @@ public:
     static CARAPI_(Boolean) Constrain(Float amount, Float low, Float high);
 
     /*!
+      * @brief simulate >>> in java
+      */
+    static CARAPI_(Int32) Shr(Int32 value, Int32 bitNum);
+
+    /*!
       * @brief Returns the absolute value of the argument.
       *
       * <p>

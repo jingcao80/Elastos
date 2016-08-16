@@ -87,6 +87,7 @@ ECode CSmsBroadcastUndelivered::SmsReferenceKey::Equals(
 
 CAR_INTERFACE_IMPL(CSmsBroadcastUndelivered, Object, IRunnable)
 
+CAR_OBJECT_IMPL(CSmsBroadcastUndelivered)
 
 const String CSmsBroadcastUndelivered::TAG("SmsBroadcastUndelivered");
 const Boolean CSmsBroadcastUndelivered::DBG = TRUE;//TODO   IInboundSmsHandler::DBG;

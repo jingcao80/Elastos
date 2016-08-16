@@ -7,6 +7,8 @@
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/droid/R.h>
 #include "R.h"
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -126,8 +128,7 @@ AutoPtr<RecentsConfiguration> RecentsConfiguration::Reinitialize(
     context->GetResources((IResources**)&res);
     AutoPtr<IConfiguration> config;
     res->GetConfiguration((IConfiguration**)&config);
-    Int32 configHashCode;
-    IObject::Probe(config)->GetHashCode(&configHashCode);
+    Int32 configHashCode = Object::GetHashCode(config);
     if (sPrevConfigurationHashCode != configHashCode) {
         sInstance->Update(context);
         sPrevConfigurationHashCode = configHashCode;
@@ -158,7 +159,7 @@ ECode RecentsConfiguration::Update(
     // Debug mode
     settings->GetBoolean(Constants::Values::App::Key_DebugModeEnabled, FALSE, &mDebugModeEnabled);
     if (mDebugModeEnabled) {
-        assert(0);
+        // assert(0);
         // Console::Enabled = TRUE;
     }
 
