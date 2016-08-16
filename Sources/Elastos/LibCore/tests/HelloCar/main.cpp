@@ -43,6 +43,9 @@
 using Elastos::Core::AutoLock;
 using namespace Elastos;
 
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IThread;
@@ -411,6 +414,40 @@ void testHelloCar()
     printf("CAnimalHelper::CanFly : %s %s!\n\n", name.string(), canFly ? "can fly" : "can not fly");
 }
 
+void testTimeConsuming()
+{
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+
+    Int64 begin, end;
+    system->GetNanoTime(&begin);
+    system->GetNanoTime(&end);
+    Int64 timeConsumingOfGetNanoTime = end - begin;
+
+    AutoPtr<ICharSequence> csq;
+    system->GetNanoTime(&begin);
+    CString::New(String("Hello World!"), (ICharSequence**)&csq);
+    system->GetNanoTime(&end);
+    Int64 timeConsumingOfFirstNewCString = end - begin - timeConsumingOfGetNanoTime;
+
+    csq = NULL;
+    system->GetNanoTime(&begin);
+    CString::New(String("Hello World!"), (ICharSequence**)&csq);
+    system->GetNanoTime(&end);
+    Int64 timeConsumingOfSecondNewCString = end - begin - timeConsumingOfGetNanoTime;
+
+    system->GetNanoTime(&begin);
+    csq->AddRef();
+    system->GetNanoTime(&end);
+    Int64 timeConsumingOfAddRef = end - begin - timeConsumingOfGetNanoTime;
+
+    printf("timeConsumingOfGetNanoTime: %f, timeConsumingOfFirstNewCString: %f, timeConsumingOfSecondNewCString: %f,"
+            "timeConsumingOfAddRef: %f\n",
+            (double)timeConsumingOfGetNanoTime / 1e6, ((double)timeConsumingOfFirstNewCString) / 1e6,
+            ((double)timeConsumingOfSecondNewCString) / 1e6,
+            ((double)timeConsumingOfAddRef) / 1e6);
+}
+
 int main(int argc, char *argv[])
 {
     printf("==================================\n");
@@ -420,7 +457,9 @@ int main(int argc, char *argv[])
     // testHelloCar();
 
     // other tests
-    otherTests();
+    // otherTests();
+
+    testTimeConsuming();
 
     printf("=========== Exit Hello Car ============\n");
     return 0;
