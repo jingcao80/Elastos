@@ -18,7 +18,7 @@ DragObject::DragObject()
     , mYOffset(-1)
     , mDragComplete(FALSE)
     , mCancelled(FALSE)
-    , mDeferDragViewCleanupPostAnimation(FALSE)
+    , mDeferDragViewCleanupPostAnimation(TRUE)
 {
 }
 

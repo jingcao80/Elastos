@@ -15538,7 +15538,7 @@ ECode View::SetTag(
 {
     // If the package id is 0x00 or 0x01, it's either an undefined package
     // or a framework id
-    if (((key & 0x7FFFFFFF) >> 24) < 2) {
+    if ((UInt32)key >> 24) < 2) {
         Logger::E(TAG, "The key must be an application-specific resource id.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -15557,7 +15557,7 @@ ECode View::SetTagInternal(
    /* [in] */ Int32 key,
    /* [in] */ IInterface* tag)
 {
-   if (((key & 0x7FFFFFFF) >> 24) != 0x1) {
+   if ((UInt32)key >> 24) != 0x1) {
         Logger::E(TAG, "The key must be an framework-specific resource id.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
    }
