@@ -103,7 +103,7 @@ private:
         AutoPtr<LauncherAppWidgetInfo> mLauncherAppWidgetInfo;
     };
 
-    class MyTimeInterpolator
+    class FlingToTrashAnimatorInterpolator
         : public Object
         , public ITimeInterpolator
     {
@@ -119,14 +119,14 @@ private:
             /* [out] */ Boolean* res);
     };
 
-    class MyAnimatorUpdateListener
+    class FlingToTrashAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
         CAR_INTERFACE_DECL();
 
-        MyAnimatorUpdateListener(
+        FlingToTrashAnimatorUpdateListener(
             /* [in] */ IDragLayer* dragLayer,
             /* [in] */ ITimeInterpolator* scaleAlphaInterpolator,
             /* [in] */ Float x1,
@@ -151,14 +151,14 @@ private:
         Float mY3;
     };
 
-    class MyTimeInterpolator2
+    class FlingToDeleteAnimatorInterpolator
         : public Object
         , public ITimeInterpolator
     {
     public:
         CAR_INTERFACE_DECL();
 
-        MyTimeInterpolator2(
+        FlingToDeleteAnimatorInterpolator(
             /* [in] */ Int64 startTime,
             /* [in] */ Int32 duration);
 
@@ -200,8 +200,6 @@ public:
     CAR_OBJECT_DECL();
 
     CDeleteDropTarget();
-
-    CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ IContext* context,

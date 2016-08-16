@@ -90,7 +90,7 @@ public:
         /* [out] */ IRect** rect);
 
     //@Override
-    CARAPI GetDropTargetDelegate(
+    virtual CARAPI GetDropTargetDelegate(
         /* [in] */ IDropTargetDragObject* d,
         /* [out] */ IDropTarget** target);
 

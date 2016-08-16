@@ -63,6 +63,8 @@ class DragEnforcer
     , public IDragControllerDragListener
 {
 public:
+    TO_STRING_IMPL("DropTarget::DragEnforcer")
+
     CAR_INTERFACE_DECL();
 
     DragEnforcer();

@@ -55,14 +55,16 @@ public:
         , public IFolderIconFolderRingAnimator
     {
     private:
-        class MyAnimatorUpdateListener
+        class AcceptAnimatorUpdateListener
             : public Object
             , public IAnimatorUpdateListener
         {
         public:
+            TO_STRING_IMPL("FolderIcon::AcceptAnimatorUpdateListener")
+
             CAR_INTERFACE_DECL();
 
-            MyAnimatorUpdateListener(
+            AcceptAnimatorUpdateListener(
                 /* [in] */ FolderIcon::FolderRingAnimator* host,
                 /* [in] */ Int32 previewSize);
 
@@ -74,11 +76,13 @@ public:
             Int32 mPreviewSize;
         };
 
-        class MyAnimatorListenerAdapter
+        class AcceptAnimatorListenerAdapter
             : public AnimatorListenerAdapter
         {
         public:
-            MyAnimatorListenerAdapter(
+            TO_STRING_IMPL("FolderIcon::AcceptAnimatorListenerAdapter")
+
+            AcceptAnimatorListenerAdapter(
                 /* [in] */ FolderIcon::FolderRingAnimator* host);
 
             CARAPI OnAnimationStart(
@@ -88,14 +92,16 @@ public:
             AutoPtr<FolderIcon::FolderRingAnimator> mHost;
         };
 
-        class MyAnimatorUpdateListener2
+        class NeutralAnimatorUpdateListener
             : public Object
             , public IAnimatorUpdateListener
         {
         public:
+            TO_STRING_IMPL("FolderIcon::NeutralAnimatorUpdateListener")
+
             CAR_INTERFACE_DECL();
 
-            MyAnimatorUpdateListener2(
+            NeutralAnimatorUpdateListener(
                 /* [in] */ FolderIcon::FolderRingAnimator* host,
                 /* [in] */ Int32 previewSize);
 
@@ -107,14 +113,16 @@ public:
             Int32 mPreviewSize;
         };
 
-        class MyAnimatorListenerAdapter2
+        class NeutralAnimatorListenerAdapter
             : public AnimatorListenerAdapter
         {
         public:
-            MyAnimatorListenerAdapter2(
+            TO_STRING_IMPL("FolderIcon::NeutralAnimatorListenerAdapter")
+
+            NeutralAnimatorListenerAdapter(
                 /* [in] */ FolderIcon::FolderRingAnimator* host);
 
-            CARAPI onAnimationEnd(
+            CARAPI OnAnimationEnd(
                 /* [in] */ IAnimator* animation);
 
         private:
@@ -258,8 +266,6 @@ public:
     CAR_INTERFACE_DECL();
 
     FolderIcon();
-
-    CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ IContext* context,

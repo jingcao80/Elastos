@@ -39,10 +39,13 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL(FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener, Object,
+//=============================================================
+// FolderIcon::FolderRingAnimator::AcceptAnimatorUpdateListener
+//=============================================================
+CAR_INTERFACE_IMPL(FolderIcon::FolderRingAnimator::AcceptAnimatorUpdateListener, Object,
         IAnimatorUpdateListener);
 
-FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
+FolderIcon::FolderRingAnimator::AcceptAnimatorUpdateListener::AcceptAnimatorUpdateListener(
     /* [in] */ FolderIcon::FolderRingAnimator* host,
     /* [in] */ Int32 previewSize)
     : mHost(host)
@@ -50,7 +53,7 @@ FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener::MyAnimatorUpdateListen
 {
 }
 
-ECode FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener::OnAnimationUpdate(
+ECode FolderIcon::FolderRingAnimator::AcceptAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> value;
@@ -66,13 +69,13 @@ ECode FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener::OnAnimationUpdat
     return NOERROR;
 }
 
-FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
+FolderIcon::FolderRingAnimator::AcceptAnimatorListenerAdapter::AcceptAnimatorListenerAdapter(
     /* [in] */ FolderIcon::FolderRingAnimator* host)
     : mHost(host)
 {
 }
 
-ECode FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter::OnAnimationStart(
+ECode FolderIcon::FolderRingAnimator::AcceptAnimatorListenerAdapter::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
     if (mHost->mFolderIcon != NULL) {
@@ -81,10 +84,13 @@ ECode FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter::OnAnimationStar
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener2, Object,
+//=============================================================
+// FolderIcon::FolderRingAnimator::NeutralAnimatorUpdateListener
+//=============================================================
+CAR_INTERFACE_IMPL(FolderIcon::FolderRingAnimator::NeutralAnimatorUpdateListener, Object,
         IAnimatorUpdateListener);
 
-FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener2::MyAnimatorUpdateListener2(
+FolderIcon::FolderRingAnimator::NeutralAnimatorUpdateListener::NeutralAnimatorUpdateListener(
     /* [in] */ FolderIcon::FolderRingAnimator* host,
     /* [in] */ Int32 previewSize)
     : mHost(host)
@@ -92,7 +98,7 @@ FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener2::MyAnimatorUpdateListe
 {
 }
 
-ECode FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener2::OnAnimationUpdate(
+ECode FolderIcon::FolderRingAnimator::NeutralAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> value;
@@ -109,13 +115,13 @@ ECode FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener2::OnAnimationUpda
     return NOERROR;
 }
 
-FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
+FolderIcon::FolderRingAnimator::NeutralAnimatorListenerAdapter::NeutralAnimatorListenerAdapter(
     /* [in] */ FolderIcon::FolderRingAnimator* host)
     : mHost(host)
 {
 }
 
-ECode FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter2::onAnimationEnd(
+ECode FolderIcon::FolderRingAnimator::NeutralAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (mHost->mCellLayout != NULL) {
@@ -135,6 +141,9 @@ Int32 FolderIcon::FolderRingAnimator::sPreviewPadding = -1;
 CAR_INTERFACE_IMPL(FolderIcon::FolderRingAnimator, Object,
         IFolderIconFolderRingAnimator);
 
+//=============================================================
+// FolderIcon::FolderRingAnimator
+//=============================================================
 FolderIcon::FolderRingAnimator::FolderRingAnimator(
     /* [in] */ ILauncher* launcher,
     /* [in] */ FolderIcon* folderIcon)
@@ -183,10 +192,9 @@ ECode FolderIcon::FolderRingAnimator::AnimateToAcceptState()
     mAcceptAnimator->SetDuration(CONSUMPTION_ANIMATION_DURATION);
 
     Int32 previewSize = sPreviewSize;
-    AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener(this, previewSize);
+    AutoPtr<IAnimatorUpdateListener> listener = new AcceptAnimatorUpdateListener(this, previewSize);
     mAcceptAnimator->AddUpdateListener(listener);
-    AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter(this);
-Slogger::D("FolderIcon", "=======FolderIcon::AnimateToAcceptState listener2=%p",listener2.Get());
+    AutoPtr<IAnimatorListener> listener2 = new AcceptAnimatorListenerAdapter(this);
     IAnimator::Probe(mAcceptAnimator)->AddListener(listener2);
     return IAnimator::Probe(mAcceptAnimator)->Start();
 }
@@ -203,10 +211,9 @@ ECode FolderIcon::FolderRingAnimator::AnimateToNaturalState()
     mNeutralAnimator->SetDuration(CONSUMPTION_ANIMATION_DURATION);
 
     Int32 previewSize = sPreviewSize;
-    AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener2(this, previewSize);
+    AutoPtr<IAnimatorUpdateListener> listener = new NeutralAnimatorUpdateListener(this, previewSize);
     mNeutralAnimator->AddUpdateListener(listener);
-    AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter2(this);
-Slogger::D("FolderIcon", "=======FolderIcon::AnimateToNaturalState listener2=%p",listener2.Get());
+    AutoPtr<IAnimatorListener> listener2 = new NeutralAnimatorListenerAdapter(this);
     IAnimator::Probe(mNeutralAnimator)->AddListener(listener2);
     return IAnimator::Probe(mNeutralAnimator)->Start();
 }
@@ -253,6 +260,9 @@ ECode FolderIcon::FolderRingAnimator::GetInnerRingSize(
     return NOERROR;
 }
 
+//=============================================================
+// FolderIcon::PreviewItemDrawingParams
+//=============================================================
 FolderIcon::PreviewItemDrawingParams::PreviewItemDrawingParams(
     /* [in] */ Float transX,
     /* [in] */ Float transY,
@@ -265,6 +275,9 @@ FolderIcon::PreviewItemDrawingParams::PreviewItemDrawingParams(
 {
 }
 
+//=============================================================
+// FolderIcon::MyRunnable
+//=============================================================
 FolderIcon::MyRunnable::MyRunnable(
     /* [in] */ FolderIcon* host,
     /* [in] */  IShortcutInfo* item)
@@ -280,6 +293,9 @@ ECode FolderIcon::MyRunnable::Run()
     return mHost->Invalidate();
 }
 
+//=============================================================
+// FolderIcon::MyAnimatorUpdateListener3
+//=============================================================
 CAR_INTERFACE_IMPL(FolderIcon::MyAnimatorUpdateListener3, Object, IAnimatorUpdateListener);
 
 FolderIcon::MyAnimatorUpdateListener3::MyAnimatorUpdateListener3(
@@ -342,6 +358,9 @@ ECode FolderIcon::MyAnimatorListenerAdapter3::OnAnimationEnd(
     return NOERROR;
 }
 
+//=============================================================
+// FolderIcon
+//=============================================================
 AutoPtr<IDrawable> FolderIcon::sSharedFolderLeaveBehind;
 
 Boolean FolderIcon::sStaticValuesDirty = TRUE;
@@ -378,15 +397,6 @@ FolderIcon::FolderIcon()
     , mMaxPerspectiveShift(0.0f)
     , mAnimating(FALSE)
 {
-    mParams = new PreviewItemDrawingParams(0, 0, 0, 0);
-    mAnimParams = new PreviewItemDrawingParams(0, 0, 0, 0);
-    AutoPtr<IArrayList> mHiddenItems;
-    CArrayList::New((IArrayList**)&mHiddenItems);
-}
-
-ECode FolderIcon::constructor()
-{
-    return NOERROR;
 }
 
 ECode FolderIcon::constructor(
@@ -408,6 +418,10 @@ ECode FolderIcon::constructor(
 
 void FolderIcon::Init()
 {
+    mParams = new PreviewItemDrawingParams(0, 0, 0, 0);
+    mAnimParams = new PreviewItemDrawingParams(0, 0, 0, 0);
+    AutoPtr<IArrayList> mHiddenItems;
+    CArrayList::New((IArrayList**)&mHiddenItems);
     mLongPressHelper = new CheckLongPressHelper(this);
 }
 

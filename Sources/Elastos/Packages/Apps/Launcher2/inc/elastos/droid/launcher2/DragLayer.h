@@ -97,14 +97,14 @@ public:
     };
 
 private:
-    class MyAnimatorUpdateListener
+    class AnimateViewAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
         CAR_INTERFACE_DECL();
 
-        MyAnimatorUpdateListener(
+        AnimateViewAnimatorUpdateListener(
             /* [in] */ IDragView* view,
             /* [in] */ IInterpolator* alphaInterpolator,
             /* [in] */ IInterpolator* motionInterpolator,
@@ -138,11 +138,11 @@ private:
         AutoPtr<DragLayer> mHost;
     };
 
-    class MyAnimatorListenerAdapter
+    class AnimateViewAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
-        MyAnimatorListenerAdapter(
+        AnimateViewAnimatorListenerAdapter(
             /* [in] */ IRunnable* onCompleteRunnable,
             /* [in] */ Int32 animationEndStyle,
             /* [in] */ DragLayer* host);
@@ -156,14 +156,14 @@ private:
         AutoPtr<DragLayer> mHost;
     };
 
-    class MyAnimatorUpdateListener2
+    class FadeOutAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
         CAR_INTERFACE_DECL();
 
-        MyAnimatorUpdateListener2(
+        FadeOutAnimatorUpdateListener(
             /* [in] */ DragLayer* host);
 
         CARAPI OnAnimationUpdate(
@@ -173,11 +173,11 @@ private:
         AutoPtr<DragLayer> mHost;
     };
 
-    class MyAnimatorListenerAdapter2
+    class FadeOutAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
-        MyAnimatorListenerAdapter2(
+        FadeOutAnimatorListenerAdapter(
             /* [in] */ DragLayer* host);
 
         CARAPI OnAnimationEnd(

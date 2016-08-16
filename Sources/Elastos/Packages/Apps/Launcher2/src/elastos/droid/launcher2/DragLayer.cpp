@@ -111,9 +111,9 @@ ECode DragLayer::DragLayerLayoutParams::GetY(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(DragLayer::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(DragLayer::AnimateViewAnimatorUpdateListener, Object, IAnimatorUpdateListener);
 
-DragLayer::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
+DragLayer::AnimateViewAnimatorUpdateListener::AnimateViewAnimatorUpdateListener(
     /* [in] */ IDragView* view,
     /* [in] */ IInterpolator* alphaInterpolator,
     /* [in] */ IInterpolator* motionInterpolator,
@@ -143,7 +143,7 @@ DragLayer::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
 {
 }
 
-ECode DragLayer::MyAnimatorUpdateListener::OnAnimationUpdate(
+ECode DragLayer::AnimateViewAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> obj;
@@ -151,9 +151,8 @@ ECode DragLayer::MyAnimatorUpdateListener::OnAnimationUpdate(
     AutoPtr<IFloat> fValue = IFloat::Probe(obj);
     Float percent;
     fValue->GetValue(&percent);
-    Int32 width;
+    Int32 width, height;
     IView::Probe(mView)->GetMeasuredWidth(&width);
-    Int32 height;
     IView::Probe(mView)->GetMeasuredHeight(&height);
 
     Float alphaPercent;
@@ -178,38 +177,37 @@ ECode DragLayer::MyAnimatorUpdateListener::OnAnimationUpdate(
     Float scaleY = mFinalScaleY * percent + initialScaleY * (1 - percent);
     Float alpha = mFinalAlpha * alphaPercent + mInitAlpha * (1 - alphaPercent);
 
-    Int32 fromleft;
+    Int32 fromleft, fromtop;
     mFrom->GetLeft(&fromleft);
-    Float fromLeft = fromleft + (initialScaleX - 1.0f) * width / 2;
-    Int32 fromtop;
     mFrom->GetTop(&fromtop);
+    Float fromLeft = fromleft + (initialScaleX - 1.0f) * width / 2;
     Float fromTop = fromtop + (initialScaleY - 1.0f) * height / 2;
 
-    Int32 toleft;
+    Int32 toleft, totop;
     mTo->GetLeft(&toleft);
+    mTo->GetTop(&totop);
     Int32 x = (Int32)(fromLeft + Elastos::Core::Math::Round(((toleft - fromLeft) *
             motionPercent)));
-    Int32 totop;
-    mTo->GetTop(&totop);
     Int32 y = (Int32)(fromTop + Elastos::Core::Math::Round(((totop - fromTop) * motionPercent)));
 
+    IView* dropView = IView::Probe(mHost->mDropView);
     Int32 sx;
-    IView::Probe(mHost->mDropView)->GetScrollX(&sx);
+    dropView->GetScrollX(&sx);
     Int32 sx2;
     Int32 xPos = x - sx + (mHost->mAnchorView != NULL
             ? (mHost->mAnchorViewInitialScrollX - (mHost->mAnchorView->GetScrollX(&sx2), sx2)) : 0);
     Int32 sy;
-    IView::Probe(mHost->mDropView)->GetScrollY(&sy);
+    dropView->GetScrollY(&sy);
     Int32 yPos = y - sy;
 
-    IView::Probe(mHost->mDropView)->SetTranslationX(xPos);
-    IView::Probe(mHost->mDropView)->SetTranslationY(yPos);
-    IView::Probe(mHost->mDropView)->SetScaleX(scaleX);
-    IView::Probe(mHost->mDropView)->SetScaleY(scaleY);
-    return IView::Probe(mHost->mDropView)->SetAlpha(alpha);
+    dropView->SetTranslationX(xPos);
+    dropView->SetTranslationY(yPos);
+    dropView->SetScaleX(scaleX);
+    dropView->SetScaleY(scaleY);
+    return dropView->SetAlpha(alpha);
 }
 
-DragLayer::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
+DragLayer::AnimateViewAnimatorListenerAdapter::AnimateViewAnimatorListenerAdapter(
     /* [in] */ IRunnable* onCompleteRunnable,
     /* [in] */ Int32 animationEndStyle,
     /* [in] */ DragLayer* host)
@@ -219,7 +217,7 @@ DragLayer::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
 {
 }
 
-ECode DragLayer::MyAnimatorListenerAdapter::OnAnimationEnd(
+ECode DragLayer::AnimateViewAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (mOnCompleteRunnable != NULL) {
@@ -238,16 +236,16 @@ ECode DragLayer::MyAnimatorListenerAdapter::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(DragLayer::MyAnimatorUpdateListener2, Object,
+CAR_INTERFACE_IMPL(DragLayer::FadeOutAnimatorUpdateListener, Object,
         IAnimatorUpdateListener);
 
-DragLayer::MyAnimatorUpdateListener2::MyAnimatorUpdateListener2(
+DragLayer::FadeOutAnimatorUpdateListener::FadeOutAnimatorUpdateListener(
     /* [in] */ DragLayer* host)
     : mHost(host)
 {
 }
 
-ECode DragLayer::MyAnimatorUpdateListener2::OnAnimationUpdate(
+ECode DragLayer::FadeOutAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> obj;
@@ -260,19 +258,19 @@ ECode DragLayer::MyAnimatorUpdateListener2::OnAnimationUpdate(
     return IView::Probe(mHost->mDropView)->SetAlpha(alpha);
 }
 
-DragLayer::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
+DragLayer::FadeOutAnimatorListenerAdapter::FadeOutAnimatorListenerAdapter(
     /* [in] */ DragLayer* host)
     : mHost(host)
 {
 }
 
-ECode DragLayer::MyAnimatorListenerAdapter2::OnAnimationEnd(
+ECode DragLayer::FadeOutAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (mHost->mDropView != NULL) {
         mHost->mDragController->OnDeferredEndDrag(mHost->mDropView);
+        mHost->mDropView = NULL;
     }
-    mHost->mDropView = NULL;
     return mHost->Invalidate();
 }
 
@@ -1129,7 +1127,7 @@ ECode DragLayer::AnimateView(
     Float dropViewScale;
     IView::Probe(view)->GetScaleX(&dropViewScale);
 
-    AutoPtr<IAnimatorUpdateListener> updateCb = new MyAnimatorUpdateListener(view,
+    AutoPtr<IAnimatorUpdateListener> updateCb = new AnimateViewAnimatorUpdateListener(view,
             alphaInterpolator, motionInterpolator, initScaleX, initScaleY, dropViewScale,
             finalScaleX, finalScaleY, finalAlpha, initAlpha,
             from, to, this);
@@ -1171,7 +1169,7 @@ ECode DragLayer::AnimateView(
     (*array)[1] = 1.0f;
     mDropAnim->SetFloatValues(array);
     mDropAnim->AddUpdateListener(updateCb);
-    AutoPtr<IAnimatorListener> lisener = new MyAnimatorListenerAdapter(
+    AutoPtr<IAnimatorListener> lisener = new AnimateViewAnimatorListenerAdapter(
             onCompleteRunnable, animationEndStyle, this);
     IAnimator::Probe(mDropAnim)->AddListener(lisener);
     return IAnimator::Probe(mDropAnim)->Start();
@@ -1184,8 +1182,8 @@ ECode DragLayer::ClearAnimatedView()
     }
     if (mDropView != NULL) {
         mDragController->OnDeferredEndDrag(mDropView);
+        mDropView = NULL;
     }
-    mDropView = NULL;
     return Invalidate();
 }
 
@@ -1209,9 +1207,9 @@ void DragLayer::FadeOutDragView()
     (*array)[1] = 1.0f;
     mFadeOutAnim->SetFloatValues(array);
     mFadeOutAnim->RemoveAllUpdateListeners();
-    AutoPtr<IAnimatorUpdateListener> lisener = new MyAnimatorUpdateListener2(this);
+    AutoPtr<IAnimatorUpdateListener> lisener = new FadeOutAnimatorUpdateListener(this);
     mFadeOutAnim->AddUpdateListener(lisener);
-    AutoPtr<IAnimatorListener> adapter = new MyAnimatorListenerAdapter2(this);
+    AutoPtr<IAnimatorListener> adapter = new FadeOutAnimatorListenerAdapter(this);
     IAnimator::Probe(mFadeOutAnim)->AddListener(adapter);
     IAnimator::Probe(mFadeOutAnim)->Start();
 }

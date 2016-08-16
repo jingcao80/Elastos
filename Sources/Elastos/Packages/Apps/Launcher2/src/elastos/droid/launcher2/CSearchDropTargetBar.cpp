@@ -87,7 +87,7 @@ ECode CSearchDropTargetBar::Setup(
 void CSearchDropTargetBar::PrepareStartAnimation(
     /* [in] */ IView* v)
 {
-    // Enable the hw layers before the animation starts (will be disabled in the onAnimationEnd
+    // Enable the hw layers before the animation starts (will be disabled in the OnAnimationEnd
     // callback below)
     v->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
 }

@@ -680,7 +680,7 @@ ECode PropertyValuesHolder::ConvertBack(
         return btc->ConvertBack(value, outValue);
     }
     *outValue = value;
-    REFCOUNT_ADD(*outValue);
+    REFCOUNT_ADD(*outValue)
     return NOERROR;
 }
 

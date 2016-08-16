@@ -160,9 +160,9 @@ ECode CDeleteDropTarget::MyThread::Run()
     return mAppWidgetHost->DeleteAppWidgetId(mLauncherAppWidgetInfo->mAppWidgetId);
 }
 
-CAR_INTERFACE_IMPL(CDeleteDropTarget::MyTimeInterpolator, Object, ITimeInterpolator);
+CAR_INTERFACE_IMPL(CDeleteDropTarget::FlingToTrashAnimatorInterpolator, Object, ITimeInterpolator);
 
-ECode CDeleteDropTarget::MyTimeInterpolator::GetInterpolation(
+ECode CDeleteDropTarget::FlingToTrashAnimatorInterpolator::GetInterpolation(
     /* [in] */ Float t,
     /* [out] */ Float* result)
 {
@@ -172,7 +172,7 @@ ECode CDeleteDropTarget::MyTimeInterpolator::GetInterpolation(
     return NOERROR;
 }
 
-ECode CDeleteDropTarget::MyTimeInterpolator::HasNativeInterpolator(
+ECode CDeleteDropTarget::FlingToTrashAnimatorInterpolator::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
@@ -180,10 +180,10 @@ ECode CDeleteDropTarget::MyTimeInterpolator::HasNativeInterpolator(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CDeleteDropTarget::MyAnimatorUpdateListener,
+CAR_INTERFACE_IMPL(CDeleteDropTarget::FlingToTrashAnimatorUpdateListener,
         Object, IAnimatorUpdateListener);
 
-CDeleteDropTarget::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
+CDeleteDropTarget::FlingToTrashAnimatorUpdateListener::FlingToTrashAnimatorUpdateListener(
     /* [in] */ IDragLayer* dragLayer,
     /* [in] */ ITimeInterpolator* scaleAlphaInterpolator,
     /* [in] */ Float x1,
@@ -197,7 +197,7 @@ CDeleteDropTarget::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
 {
 }
 
-ECode CDeleteDropTarget::MyAnimatorUpdateListener::OnAnimationUpdate(
+ECode CDeleteDropTarget::FlingToTrashAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IView> view;
@@ -216,28 +216,28 @@ ECode CDeleteDropTarget::MyAnimatorUpdateListener::OnAnimationUpdate(
     dragView->GetInitialScale(&initialScale);
     Float finalAlpha = 0.5f;
     Float scale;
-    IView::Probe(dragView)->GetScaleX(&scale);
+    view->GetScaleX(&scale);
     Int32 width;
-    IView::Probe(dragView)->GetMeasuredWidth(&width);
+    view->GetMeasuredWidth(&width);
     Float x1o = ((1.0f - scale) * width) / 2.0f;
     Int32 height;
-    IView::Probe(dragView)->GetMeasuredHeight(&height);
+    view->GetMeasuredHeight(&height);
     Float y1o = ((1.0f - scale) * height) / 2.0f;
     Float x = (1.0f - t) * (1.0f - t) * (mX1 - x1o) + 2 * (1.0f - t) * t * (mX2 - x1o) +
             (t * t) * mX3;
     Float y = (1.0f - t) * (1.0f - t) * (mY1 - y1o) + 2 * (1.0f - t) * t * (mY2 - x1o) +
             (t * t) * mY3;
 
-    IView::Probe(dragView)->SetTranslationX(x);
-    IView::Probe(dragView)->SetTranslationY(y);
-    IView::Probe(dragView)->SetScaleX(initialScale * (1.0f - tp));
-    IView::Probe(dragView)->SetScaleY(initialScale * (1.0f - tp));
-    return IView::Probe(dragView)->SetAlpha(finalAlpha + (1.0f - finalAlpha) * (1.0f - tp));
+    view->SetTranslationX(x);
+    view->SetTranslationY(y);
+    view->SetScaleX(initialScale * (1.0f - tp));
+    view->SetScaleY(initialScale * (1.0f - tp));
+    return view->SetAlpha(finalAlpha + (1.0f - finalAlpha) * (1.0f - tp));
 }
 
-CAR_INTERFACE_IMPL(CDeleteDropTarget::MyTimeInterpolator2, Object, ITimeInterpolator);
+CAR_INTERFACE_IMPL(CDeleteDropTarget::FlingToDeleteAnimatorInterpolator, Object, ITimeInterpolator);
 
-CDeleteDropTarget::MyTimeInterpolator2::MyTimeInterpolator2(
+CDeleteDropTarget::FlingToDeleteAnimatorInterpolator::FlingToDeleteAnimatorInterpolator(
     /* [in] */ Int64 startTime,
     /* [in] */ Int32 duration)
     : mCount(-1)
@@ -247,7 +247,7 @@ CDeleteDropTarget::MyTimeInterpolator2::MyTimeInterpolator2(
 {
 }
 
-ECode CDeleteDropTarget::MyTimeInterpolator2::GetInterpolation(
+ECode CDeleteDropTarget::FlingToDeleteAnimatorInterpolator::GetInterpolation(
     /* [in] */ Float t,
     /* [out] */ Float* result)
 {
@@ -266,7 +266,7 @@ ECode CDeleteDropTarget::MyTimeInterpolator2::GetInterpolation(
     return NOERROR;
 }
 
-ECode CDeleteDropTarget::MyTimeInterpolator2::HasNativeInterpolator(
+ECode CDeleteDropTarget::FlingToDeleteAnimatorInterpolator::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
@@ -310,11 +310,6 @@ CAR_OBJECT_IMPL(CDeleteDropTarget);
 CDeleteDropTarget::CDeleteDropTarget()
     : mFlingDeleteMode(MODE_FLING_DELETE_ALONG_VECTOR)
 {
-}
-
-ECode CDeleteDropTarget::constructor()
-{
-    return NOERROR;
 }
 
 ECode CDeleteDropTarget::constructor(
@@ -689,8 +684,8 @@ AutoPtr<IAnimatorUpdateListener> CDeleteDropTarget::CreateFlingToTrashAnimatorLi
     to->GetTop(&toTop);
     const Float y3 = toTop;
 
-    AutoPtr<ITimeInterpolator> scaleAlphaInterpolator = new MyTimeInterpolator();
-    AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener(
+    AutoPtr<ITimeInterpolator> scaleAlphaInterpolator = new FlingToTrashAnimatorInterpolator();
+    AutoPtr<IAnimatorUpdateListener> listener = new FlingToTrashAnimatorUpdateListener(
             dragLayer, scaleAlphaInterpolator, x1, x2, x3, y1, y2, y3);
     return listener;
 }
@@ -750,7 +745,7 @@ ECode CDeleteDropTarget::OnFlingToDelete(
     // to account for the time that has elapsed since the fling finished.  And since
     // we don't have a startDelay, we will always get call to update when we call
     // start() (which we want to ignore).
-    AutoPtr<ITimeInterpolator> tInterpolator = new MyTimeInterpolator2(startTime, duration);
+    AutoPtr<ITimeInterpolator> tInterpolator = new FlingToDeleteAnimatorInterpolator(startTime, duration);
     AutoPtr<IAnimatorUpdateListener> updateCb;
     if (mFlingDeleteMode == MODE_FLING_DELETE_TO_TRASH) {
         updateCb = CreateFlingToTrashAnimatorListener(dragLayer, _d, vel, config);

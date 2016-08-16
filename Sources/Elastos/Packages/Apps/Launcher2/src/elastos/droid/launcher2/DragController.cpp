@@ -403,6 +403,7 @@ ECode DragController::OnAppsRemoved(
 
 void DragController::EndDrag()
 {
+    Slogger::I(TAG, " >> EndDrag()");
     if (mDragging) {
         mDragging = FALSE;
         ClearScrollRunnable();
@@ -422,7 +423,7 @@ void DragController::EndDrag()
             for (Int32 i = 0; i < size; i++) {
                 AutoPtr<IInterface> obj;
                 mListeners->Get(i, (IInterface**)&obj);
-                AutoPtr<IDragControllerDragListener> listener = IDragControllerDragListener::Probe(obj);
+                IDragControllerDragListener* listener = IDragControllerDragListener::Probe(obj);
                 listener->OnDragEnd();
             }
         }
@@ -442,7 +443,10 @@ ECode DragController::OnDeferredEndDrag(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        AutoPtr<IDragControllerDragListener> listener = IDragControllerDragListener::Probe(obj);
+        Slogger::I(TAG, " >>> TODO OnDeferredEndDrag. luozhaohui");
+        if (IWorkspace::Probe(obj)) continue;
+        if (ISearchDropTargetBar::Probe(obj)) continue;
+        IDragControllerDragListener* listener = IDragControllerDragListener::Probe(obj);
         listener->OnDragEnd();
     }
     return NOERROR;
@@ -831,6 +835,7 @@ void DragController::DropOnFlingToDeleteTarget(
     /* [in] */ Float y,
     /* [in] */ IPointF* vel)
 {
+    Slogger::I(TAG, " >> DropOnFlingToDeleteTarget: (%.2f, %.2f)", x, y);
     AutoPtr<ArrayOf<Int32> > coordinates = mCoordinatesTemp;
 
     mDragObject->mX = (*coordinates)[0];
@@ -864,6 +869,7 @@ void DragController::Drop(
     /* [in] */ Float x,
     /* [in] */ Float y)
 {
+    Slogger::I(TAG, " >> Drop: (%.2f, %.2f)", x, y);
     AutoPtr<ArrayOf<Int32> > coordinates = mCoordinatesTemp;
     AutoPtr<IDropTarget> dropTarget = FindDropTarget((Int32)x, (Int32)y, coordinates);
 

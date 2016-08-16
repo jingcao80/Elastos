@@ -490,6 +490,7 @@ void TaskView::UpdateViewPropertiesToTaskTransform(
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&oaHelper);
         AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(1);
         (*values)[0] = toTransform->mP;
+        Logger::I(TAG, " >>================= mTaskProgressAnimator ============");
         AutoPtr<IObjectAnimator> animator;
         oaHelper->OfFloat(TO_IINTERFACE(this), String("taskProgress"), values,
             (IObjectAnimator**)&animator);
