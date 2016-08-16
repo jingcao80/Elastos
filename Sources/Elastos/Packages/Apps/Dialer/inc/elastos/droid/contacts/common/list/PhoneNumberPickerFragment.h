@@ -93,6 +93,7 @@ public:
     CARAPI_(void) PickPhoneNumber(
         /* [in] */ IUri* uri);
 
+    // @Override
     CARAPI OnShortcutIntentCreated(
         /* [in] */ IUri* uri,
         /* [in] */ IIntent* shortcutIntent);

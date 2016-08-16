@@ -259,12 +259,12 @@ ShortcutIntentBuilder::ShortcutIntentBuilder(
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
     AutoPtr<IActivityManager> am = IActivityManager::Probe(service);
-    mResources->GetDimensionPixelSize(Elastos::Droid::R::dimen::shortcut_icon_size, &mIconSize);
+    mResources->GetDimensionPixelSize(Elastos::Droid::Dialer::R::dimen::shortcut_icon_size, &mIconSize);
     if (mIconSize == 0) {
         am->GetLauncherLargeIconSize(&mIconSize);
     }
     am->GetLauncherLargeIconDensity(&mIconDensity);
-    mResources->GetColor(Elastos::Droid::R::color::shortcut_overlay_text_background, &mOverlayTextBackgroundColor);
+    mResources->GetColor(Elastos::Droid::Dialer::R::color::shortcut_overlay_text_background, &mOverlayTextBackgroundColor);
 }
 
 void ShortcutIntentBuilder::CreateContactShortcutIntent(
@@ -344,7 +344,7 @@ void ShortcutIntentBuilder::CreateContactShortcutIntent(
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
         String missingName;
-        res->GetString(Elastos::Droid::R::string::missing_name, &missingName);
+        res->GetString(Elastos::Droid::Dialer::R::string::missing_name, &missingName);
         intent->PutExtra(IIntent::EXTRA_SHORTCUT_NAME, missingName);
     }
     else {
@@ -374,14 +374,14 @@ void ShortcutIntentBuilder::CreatePhoneNumberShortcutIntent(
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         helper->FormParts(IPhoneAccount::SCHEME_TEL, phoneNumber, String(NULL), (Iuri**)&phoneUri);
         bitmap = GeneratePhoneNumberIcon(drawable, phoneType, phoneLabel,
-                Elastos::Droid::R::drawable::badge_action_call);
+                Elastos::Droid::Dialer::R::drawable::badge_action_call);
     }
     else {
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         helper->FormParts(ContactsUtils::SCHEME_SMSTO, phoneNumber, String(NULL), (Iuri**)&phoneUri);
         bitmap = GeneratePhoneNumberIcon(drawable, phoneType, phoneLabel,
-                Elastos::Droid::R::drawable::badge_action_sms);
+                Elastos::Droid::Dialer::R::drawable::badge_action_sms);
     }
 
     AutoPtr<IIntent> shortcutIntent;
@@ -470,12 +470,12 @@ AutoPtr<IBitmap> ShortcutIntentBuilder::CeneratePhoneNumberIcon(
         AutoPtr<IPaint> textPaint;
         CTextPaint::New(IPaint::ANTI_ALIAS_FLAG | IPaint::DEV_KERN_TEXT_FLAG, (IPaint**)&textPaint);
         Float dimension;
-        r->GetDimension(Elastos::Droid::R::dimen::shortcut_overlay_text_size, &dimension);
+        r->GetDimension(Elastos::Droid::Dialer::R::dimen::shortcut_overlay_text_size, &dimension);
         textPaint->SetTextSize(dimension);
         Int32 color;
-        r->GetColor(Elastos::Droid::R::color::textColorIconOverlay, &color)
+        r->GetColor(Elastos::Droid::Dialer::R::color::textColorIconOverlay, &color)
         textPaint->SetColor(color);
-        r->GetColor(Elastos::Droid::R::color::textColorIconOverlayShadow, &color)
+        r->GetColor(Elastos::Droid::Dialer::R::color::textColorIconOverlayShadow, &color)
         textPaint->SetShadowLayer(4f, 0, 2f, color);
 
         AutoPtr<IPaintFontMetricsInt> fmi;
@@ -487,7 +487,7 @@ AutoPtr<IBitmap> ShortcutIntentBuilder::CeneratePhoneNumberIcon(
         workPaint->SetColor(mOverlayTextBackgroundColor);
         workPaint->SetStyle(PaintStyle_FILL);
         Int32 textPadding;
-        r->GetDimensionPixelOffset(Elastos::Droid::R::dimen::shortcut_overlay_text_background_padding, &textPadding);
+        r->GetDimensionPixelOffset(Elastos::Droid::Dialer::R::dimen::shortcut_overlay_text_background_padding, &textPadding);
         Int32 descent, ascent;
         fmi->GetDescent(&descent);
         fmi->GetAscent(&ascent);

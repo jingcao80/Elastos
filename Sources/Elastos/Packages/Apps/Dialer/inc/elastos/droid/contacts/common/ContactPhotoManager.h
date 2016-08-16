@@ -6,10 +6,12 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Widget.h"
+#include "_Elastos.Droid.Dialer.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IComponentCallbacks2;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Widget::IImageView;
@@ -21,9 +23,9 @@ namespace Contacts {
 namespace Common {
 
 class ContactPhotoManager
-    : Object
-    , IContactPhotoManager
-    , IComponentCallbacks2
+    : public Object
+    , public IContactPhotoManager
+    , public IComponentCallbacks2
 {
 public:
     /**
@@ -32,8 +34,8 @@ public:
      * takes the form of a letter or bitmap drawn on top of a colored tile.
      */
     class DefaultImageRequest
-        : Object
-        , IContactPhotoManagerDefaultImageRequest
+        : public Object
+        , public IContactPhotoManagerDefaultImageRequest
     {
     public:
         DefaultImageRequest();
@@ -59,6 +61,23 @@ public:
 
         CAR_INTERFACE_DECL()
 
+    private:
+        CARAPI_(void) Init(
+            /* [in] */ const String& displayName,
+            /* [in] */ const String& identifier,
+            /* [in] */ Int32 contactType,
+            /* [in] */ Float scale,
+            /* [in] */ Float offset,
+            /* [in] */ Boolean isCircular);
+
+        static CARAPI_(AutoPtr<ContactPhotoManager::DefaultImageRequest>) InitDefaultImageRequest();
+
+        static CARAPI_(AutoPtr<ContactPhotoManager::DefaultImageRequest>) InitDefaultBusinessImageRequest();
+
+        static CARAPI_(AutoPtr<ContactPhotoManager::DefaultImageRequest>) InitCircularDefaultImageRequest();
+
+        static CARAPI_(AutoPtr<ContactPhotoManager::DefaultImageRequest>) InitCircularBusinessImageRequest();
+
     public:
         /**
          * The contact's display name. The display name is used to
@@ -82,13 +101,13 @@ public:
          * {@link #TYPE_PERSON}
          * {@link #TYPE_DEFAULT}
          */
-        Int32 mContactType = TYPE_DEFAULT;
+        Int32 mContactType;
 
         /**
          * The amount to scale the letter or bitmap to, as a ratio of its default size (from a
          * range of 0.0f to 2.0f). The default value is 1.0f.
          */
-        Float mScale = SCALE_DEFAULT;
+        Float mScale;
 
         /**
          * The amount to vertically offset the letter or image to within the tile.
@@ -102,7 +121,7 @@ public:
          * The default is 0.0f, which means the letter is drawn in the exact vertical center of
          * the tile.
          */
-        Float mOffset = OFFSET_DEFAULT;
+        Float mOffset;
 
         /**
          * Whether or not to draw the default image as a circle, instead of as a square/rectangle.
@@ -113,28 +132,25 @@ public:
          * Used to indicate that a drawable that represents a contact without any contact details
          * should be returned.
          */
-        static DefaultImageRequest EMPTY_DEFAULT_IMAGE_REQUEST = new DefaultImageRequest();
+        static AutoPtr<DefaultImageRequest> EMPTY_DEFAULT_IMAGE_REQUEST;
 
         /**
          * Used to indicate that a drawable that represents a business without a business photo
          * should be returned.
          */
-        static DefaultImageRequest EMPTY_DEFAULT_BUSINESS_IMAGE_REQUEST =
-                new DefaultImageRequest(null, null, TYPE_BUSINESS, false);
+        static AutoPtr<DefaultImageRequest> EMPTY_DEFAULT_BUSINESS_IMAGE_REQUEST;
 
         /**
          * Used to indicate that a circular drawable that represents a contact without any contact
          * details should be returned.
          */
-        static DefaultImageRequest EMPTY_CIRCULAR_DEFAULT_IMAGE_REQUEST =
-                new DefaultImageRequest(null, null, true);
+        static AutoPtr<DefaultImageRequest> EMPTY_CIRCULAR_DEFAULT_IMAGE_REQUEST;
 
         /**
          * Used to indicate that a circular drawable that represents a business without a business
          * photo should be returned.
          */
-        static DefaultImageRequest EMPTY_CIRCULAR_BUSINESS_IMAGE_REQUEST =
-                new DefaultImageRequest(null, null, TYPE_BUSINESS, true);
+        static AutoPtr<DefaultImageRequest> EMPTY_CIRCULAR_BUSINESS_IMAGE_REQUEST;
     };
 
 private:
@@ -181,7 +197,7 @@ private:
     };
 
 public:
-    ContactPhotoManager();
+    virtual ~ContactPhotoManager() {}
 
     CAR_INTERFACE_DECL()
 
@@ -296,13 +312,20 @@ protected:
     CARAPI_(Boolean) IsDefaultImageUri(
         /* [in] */ IUri* uri);
 
+private:
+    static CARAPI_(AutoPtr<IContactPhotoManagerDefaultImageProvider>) InitDefaultAvatar();
+
+    static CARAPI_(AutoPtr<IContactPhotoManagerDefaultImageProvider>) InitDefaultBlank();
+
+    static CARAPI_(AutoPtr<IUri>) InitDefaultImageUri();
+
 public:
     static const Boolean IS_CIRCULAR_DEFAULT = FALSE;
-    static const String CONTACT_PHOTO_SERVICE = "contactPhotos";
+    static const String CONTACT_PHOTO_SERVICE;
 
-    static const AutoPtr<IContactPhotoManagerDefaultImageProvider> DEFAULT_AVATAR = new LetterTileDefaultImageProvider();
+    static const AutoPtr<IContactPhotoManagerDefaultImageProvider> DEFAULT_AVATAR;
 
-    static const AutoPtr<IContactPhotoManagerDefaultImageProvider> DEFAULT_BLANK = new BlankDefaultImageProvider();
+    static const AutoPtr<IContactPhotoManagerDefaultImageProvider> DEFAULT_BLANK;
 
 protected:
     static const String TAG;
@@ -311,29 +334,30 @@ protected:
 
 private:
     /** Contact type constants used for default letter images */
-    static const Int32 TYPE_PERSON = LetterTileDrawable.TYPE_PERSON;
-    static const Int32 TYPE_BUSINESS = LetterTileDrawable.TYPE_BUSINESS;
-    static const Int32 TYPE_VOICEMAIL = LetterTileDrawable.TYPE_VOICEMAIL;
-    static const Int32 TYPE_DEFAULT = LetterTileDrawable.TYPE_DEFAULT;
+    static const Int32 TYPE_PERSON;
+    static const Int32 TYPE_BUSINESS;
+    static const Int32 TYPE_VOICEMAIL;
+    static const Int32 TYPE_DEFAULT;
 
     /** Scale and offset default constants used for default letter images */
     static const Float SCALE_DEFAULT = 1.0f;
     static const Float OFFSET_DEFAULT = 0.0f;
 
     /** Uri-related constants used for default letter images */
-    static const String DISPLAY_NAME_PARAM_KEY = "display_name";
-    static const String IDENTIFIER_PARAM_KEY = "identifier";
-    static const String CONTACT_TYPE_PARAM_KEY = "contact_type";
-    static const String SCALE_PARAM_KEY = "scale";
-    static const String OFFSET_PARAM_KEY = "offset";
-    static const String IS_CIRCULAR_PARAM_KEY = "is_circular";
-    static const String DEFAULT_IMAGE_URI_SCHEME = "defaultimage";
-    static const AutoPtr<IUri> DEFAULT_IMAGE_URI = Uri.parse(DEFAULT_IMAGE_URI_SCHEME + "://");
+    static const String DISPLAY_NAME_PARAM_KEY;
+    static const String IDENTIFIER_PARAM_KEY;
+    static const String CONTACT_TYPE_PARAM_KEY;
+    static const String SCALE_PARAM_KEY;
+    static const String OFFSET_PARAM_KEY;
+    static const String IS_CIRCULAR_PARAM_KEY;
+    static const String DEFAULT_IMAGE_URI_SCHEME;
+    static const AutoPtr<IUri> DEFAULT_IMAGE_URI;
 
     // Static field used to cache the default letter avatar drawable that is created
     // using a null {@link DefaultImageRequest}
     static AutoPtr<IDrawable> sDefaultLetterAvatar;
 
+    friend class DefaultImageRequest;
 };
 
 } // namespace Common

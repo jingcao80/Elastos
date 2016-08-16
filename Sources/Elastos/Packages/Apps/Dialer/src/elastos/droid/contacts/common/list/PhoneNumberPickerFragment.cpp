@@ -154,6 +154,7 @@ ECode PhoneNumberPickerFragment::RestoreSavedState(
     savedState->GetParcelable(KEY_FILTER, (IParcelable**)&parcel);
     mFilter = IContactListFilter::Probe(parcel);
     savedState->GetString(KEY_SHORTCUT_ACTION, &mShortcutAction);
+    return NOERROR;
 }
 
 ECode PhoneNumberPickerFragment::OnSaveInstanceState(
@@ -332,11 +333,11 @@ void PhoneNumberPickerFragment::StartPhoneNumberShortcutIntent(
     builder->CreatePhoneNumberShortcutIntent(uri, mShortcutAction);
 }
 
-void PhoneNumberPickerFragment::OnShortcutIntentCreated(
+ECode PhoneNumberPickerFragment::OnShortcutIntentCreated(
     /* [in] */ IUri* uri,
     /* [in] */ IIntent* shortcutIntent)
 {
-    mListener->OnShortcutIntentCreated(shortcutIntent);
+    return mListener->OnShortcutIntentCreated(shortcutIntent);
 }
 
 ECode PhoneNumberPickerFragment::OnPickerResult(
@@ -357,7 +358,7 @@ ECode PhoneNumberPickerFragment::OnActivityResult(
         GetActivity((IActivity**)&activity);
         if (activity != NULL) {
             AccountFilterUtil::HandleAccountFilterResult(
-                    ContactListFilterController::GetInstance(activity), resultCode, data);
+                    ContactListFilterController::GetInstance(IContext::Probe(activity)), resultCode, data);
         }
         else {
             Logger::E(TAG, "getActivity() returns null during Fragment#onActivityResult()");

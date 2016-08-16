@@ -2,15 +2,177 @@
 module
 {
 
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.Widget.IImageView;
+
     namespace Elastos{
     namespace Droid {
     namespace Contacts {
     namespace Common {
 
-    interface IContactPhotoManagerDefaultImageRequest{
+    interface IContactPhotoManagerDefaultImageRequest {
+
     }
 
+    interface IContactPhotoManagerDefaultImageProvider {
+
+        /**
+         * Applies the default avatar to the ImageView. Extent is an indicator for the size (width
+         * or height). If darkTheme is set, the avatar is one that looks better on dark background
+         *
+         * @param defaultImageRequest {@link DefaultImageRequest} object that specifies how a
+         * default letter tile avatar should be drawn.
+         */
+        ApplyDefaultImage(
+            [in] IImageView* view,
+            [in] Int32 extent,
+            [in] Boolean darkTheme,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);
+
+    }
+
+    [local]
     interface IContactPhotoManager {
+
+        /**
+         * Load thumbnail image into the supplied image view. If the photo is already cached,
+         * it is displayed immediately.  Otherwise a request is sent to load the photo
+         * from the database.
+         */
+        // abstract
+        LoadThumbnail(
+            [in] IImageView* view,
+            [in] Int64 photoId,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest,
+            [in] IContactPhotoManagerDefaultImageProvider* defaultProvider);
+
+        /**
+         * Calls {@link #loadThumbnail(ImageView, long, boolean, DefaultImageRequest,
+         * DefaultImageProvider)} using the {@link DefaultImageProvider} {@link #DEFAULT_AVATAR}.
+        */
+        LoadThumbnail(
+            [in] IImageView* view,
+            [in] Int64 photoId,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);
+
+        /**
+         * Load photo into the supplied image view. If the photo is already cached,
+         * it is displayed immediately. Otherwise a request is sent to load the photo
+         * from the location specified by the URI.
+         *
+         * @param view The target view
+         * @param photoUri The uri of the photo to load
+         * @param requestedExtent Specifies an approximate Max(width, height) of the targetView.
+         * This is useful if the source image can be a lot bigger that the target, so that the decoding
+         * is done using efficient sampling. If requestedExtent is specified, no sampling of the image
+         * is performed
+         * @param darkTheme Whether the background is dark. This is used for default avatars
+         * @param defaultImageRequest {@link DefaultImageRequest} object that specifies how a default
+         * letter tile avatar should be drawn.
+         * @param defaultProvider The provider of default avatars (this is used if photoUri doesn't
+         * refer to an existing image)
+         */
+        // abstract
+        LoadPhoto(
+            [in] IImageView* view,
+            [in] IUri* photoUri,
+            [in] Int32 requestedExtent,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest,
+            [in] IContactPhotoManagerDefaultImageProvider* defaultProvider);
+
+        /**
+         * Calls {@link #loadPhoto(ImageView, Uri, int, boolean, DefaultImageRequest,
+         * DefaultImageProvider)} with {@link #DEFAULT_AVATAR} and {@code null} display names and
+         * lookup keys.
+         *
+         * @param defaultImageRequest {@link DefaultImageRequest} object that specifies how a default
+         * letter tile avatar should be drawn.
+         */
+        LoadPhoto(
+            [in] IImageView* view,
+            [in] IUri* photoUri,
+            [in] Int32 requestedExtent,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);
+
+        /**
+         * Calls {@link #loadPhoto(ImageView, Uri, boolean, boolean, DefaultImageRequest,
+         * DefaultImageProvider)} with {@link #DEFAULT_AVATAR} and with the assumption, that
+         * the image is a thumbnail.
+         *
+         * @param defaultImageRequest {@link DefaultImageRequest} object that specifies how a default
+         * letter tile avatar should be drawn.
+         */
+        LoadDirectoryPhoto(
+            [in] IImageView* view,
+            [in] IUri* photoUri,
+            [in] Int32 requestedExtent,
+            [in] Boolean darkTheme,
+            [in] Boolean isCircular,
+            [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);
+
+        /**
+         * Remove photo from the supplied image view. This also cancels current pending load request
+         * inside this photo manager.
+         */
+        // abstract
+        RemovePhoto(
+            [in] IImageView* view);
+
+        /**
+         * Cancels all pending requests to load photos asynchronously.
+         */
+        // abstract
+        CancelPendingRequests(
+            [in] IView* fragmentRootView);
+
+        /**
+         * Temporarily stops loading photos from the database.
+         */
+        // abstract
+        Pause();
+
+        /**
+         * Resumes loading photos from the database.
+         */
+        // abstract
+        Resume();
+
+        /**
+         * Marks all cached photos for reloading.  We can continue using cache but should
+         * also make sure the photos haven't changed in the background and notify the views
+         * if so.
+         */
+        // abstract
+        RefreshCache();
+
+        /**
+         * Stores the given bitmap directly in the LRU bitmap cache.
+         * @param photoUri The URI of the photo (for future requests).
+         * @param bitmap The bitmap.
+         * @param photoBytes The bytes that were parsed to create the bitmap.
+         */
+        // abstract
+        CacheBitmap(
+            [in] IUri* photoUri,
+            [in] IBitmap* bitmap,
+            [in] ArrayOf<Byte> photoBytes);
+
+        /**
+         * Initiates a background process that over time will fill up cache with
+         * preload photos.
+         */
+        // abstract
+        PreloadPhotosInBackground();
     }
 
     } // Common

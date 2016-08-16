@@ -4,6 +4,7 @@
 
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.View.h"
+#include "_Elastos.Droid.Dialer.h"
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IFragment;

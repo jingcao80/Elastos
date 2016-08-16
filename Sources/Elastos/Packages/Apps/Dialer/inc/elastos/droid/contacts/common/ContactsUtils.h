@@ -3,10 +3,12 @@
 #define __ELASTOS_DROID_CONTACTS_COMMON_CONTACTSUTILS_H__
 
 #include "Elastos.Droid.Content.h"
+#include "elastos/droid/contacts/common/model/dataitem/ImDataItem.h"
 #include <elastos/utility/etl/Pair.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Contacts::Common::Model::DataItem::ImDataItem;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Etl::Pair;
 
@@ -71,7 +73,7 @@ public:
      * Returns the proper Intent for an ImDatItem. If available, a secondary intent is stored
      * in the second Pair slot
      */
-    static CARAPI_(AutoPtr<Pair<AutoPtr<IIntent>, AutoPtr<IIntent> > >) BuildImIntent(
+    static AutoPtr<Pair<AutoPtr<IIntent>, AutoPtr<IIntent> > > BuildImIntent(
         /* [in] */ IContext* context,
         /* [in] */ ImDataItem* im);
 

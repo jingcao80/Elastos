@@ -14,5 +14,5 @@ SOURCES += ContactEntryListAdapter.cpp
 SOURCES += DirectoryPartition.cpp
 SOURCES += PhoneNumberListAdapter.cpp
 SOURCES += Constants.cpp
-SOURCES += CContactListFilter.cpp
-SOURCES += ShortcutIntentBuilder.cpp
+#SOURCES += CContactListFilter.cpp
+#SOURCES += ShortcutIntentBuilder.cpp

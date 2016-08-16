@@ -770,7 +770,7 @@ void ContactListItemView::SetIsSectionHeaderEnabled(
 ECode ContactListItemView::GetQuickContact(
     /* [out] */ IQuickContactBadge** badge)
 {
-    valiVALIDATE_NOT_NULL(badge)
+    VALIDATE_NOT_NULL(badge)
     *badge = NULL;
     if (!mQuickContactEnabled) {
         Logger::E("ContactListItemView", "QuickContact is disabled for this view");
@@ -1565,7 +1565,7 @@ ECode ContactListItemView::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* res)
 {
-    valiVALIDATE_NOT_NULL(res)
+    VALIDATE_NOT_NULL(res)
     Float x;
     event->GetX(&x);
     Float y;
