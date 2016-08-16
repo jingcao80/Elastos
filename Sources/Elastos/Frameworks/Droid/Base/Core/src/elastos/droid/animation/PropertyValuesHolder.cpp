@@ -670,15 +670,17 @@ ECode PropertyValuesHolder::ConvertBack(
     /* [out] */ IInterface** outValue)
 {
     VALIDATE_NOT_NULL(outValue);
-    *outValue = NULL;
     if (mConverter != NULL) {
         IBidirectionalTypeConverter* btc = IBidirectionalTypeConverter::Probe(mConverter);
         if (btc == NULL) {
             Logger::E(TAG, "Converter %s must be a BidirectionalTypeConverter", TO_CSTR(mConverter));
+            *outValue = NULL;
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        btc->ConvertBack(value, outValue);
+        return btc->ConvertBack(value, outValue);
     }
+    *outValue = value;
+    REFCOUNT_ADD(*outValue);
     return NOERROR;
 }
 
