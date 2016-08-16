@@ -51,6 +51,90 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
+    CARAPI SetSubId(
+        /* [in] */ Int64 subId);
+
+    CARAPI GetSubId(
+        /* [out] */ Int64* subId);
+
+    CARAPI SetIccId(
+        /* [in] */ const String& iccId);
+
+    CARAPI GetIccId(
+        /* [out] */ String* iccId);
+
+    CARAPI SetSlotId(
+        /* [in] */ Int32 slotId);
+
+    CARAPI GetSlotId(
+        /* [out] */ Int32* slotId);
+
+    CARAPI SetDisplayName(
+        /* [in] */ const String& displayName);
+
+    CARAPI GetDisplayName(
+        /* [out] */ String* displayName);
+
+    CARAPI SetNameSource(
+        /* [in] */ Int32 nameSource);
+
+    CARAPI GetNameSource(
+        /* [out] */ Int32* nameSource);
+
+    CARAPI SetColor(
+        /* [in] */ Int32 color);
+
+    CARAPI GetColor(
+        /* [out] */ Int32* color);
+
+    CARAPI SetNumber(
+        /* [in] */ const String& number);
+
+    CARAPI GetNumber(
+        /* [out] */ String* number);
+
+    CARAPI SetDisplayNumberFormat(
+        /* [in] */ Int32 displayNumberFormat);
+
+    CARAPI GetDisplayNumberFormat(
+        /* [out] */ Int32* displayNumberFormat);
+
+    CARAPI SetDataRoaming(
+        /* [in] */ Int32 dataRoaming);
+
+    CARAPI GetDataRoaming(
+        /* [out] */ Int32* dataRoaming);
+
+    CARAPI SetSimIconRes(
+        /* [in] */ ArrayOf<Int32>* res);
+
+    CARAPI GetSimIconRes(
+        /* [out, callee] */ ArrayOf<Int32>** res);
+
+    CARAPI SetMcc(
+        /* [in] */ Int32 mcc);
+
+    CARAPI GetMcc(
+        /* [out] */ Int32* mcc);
+
+    CARAPI SetMnc(
+        /* [in] */ Int32 mnc);
+
+    CARAPI GetMnc(
+        /* [out] */ Int32* mnc);
+
+    CARAPI SetStatus(
+        /* [in] */ Int32 status);
+
+    CARAPI GetStatus(
+        /* [out] */ Int32* status);
+
+    CARAPI SetNwMode(
+        /* [in] */ Int32 nwMode);
+
+    CARAPI GetNwMode(
+        /* [out] */ Int32* nwMode);
+
 public:
     /**
      * Subscription Identifier, this is a device unique number

@@ -14,8 +14,91 @@ module
      * @Involve
      * interface IParcelable
      */
+    [deprecated]
     interface ISubInfoRecord {
+        SetSubId(
+            [in] Int64 subId);
 
+        GetSubId(
+            [out] Int64* subId);
+
+        SetIccId(
+            [in] String iccId);
+
+        GetIccId(
+            [out] String* iccId);
+
+        SetSlotId(
+            [in] Int32 slotId);
+
+        GetSlotId(
+            [out] Int32* slotId);
+
+        SetDisplayName(
+            [in] String displayName);
+
+        GetDisplayName(
+            [out] String* displayName);
+
+        SetNameSource(
+            [in] Int32 nameSource);
+
+        GetNameSource(
+            [out] Int32* nameSource);
+
+        SetColor(
+            [in] Int32 color);
+
+        GetColor(
+            [out] Int32* color);
+
+        SetNumber(
+            [in] String number);
+
+        GetNumber(
+            [out] String* number);
+
+        SetDisplayNumberFormat(
+            [in] Int32 displayNumberFormat);
+
+        GetDisplayNumberFormat(
+            [out] Int32* displayNumberFormat);
+
+        SetDataRoaming(
+            [in] Int32 dataRoaming);
+
+        GetDataRoaming(
+            [out] Int32* dataRoaming);
+
+        SetSimIconRes(
+            [in] ArrayOf<Int32>* res);
+
+        GetSimIconRes(
+            [out, callee] ArrayOf<Int32>* res);
+
+        SetMcc(
+            [in] Int32 mcc);
+
+        GetMcc(
+            [out] Int32* mcc);
+
+        SetMnc(
+            [in] Int32 mnc);
+
+        GetMnc(
+            [out] Int32* mnc);
+
+        SetStatus(
+            [in] Int32 status);
+
+        GetStatus(
+            [out] Int32* status);
+
+        SetNwMode(
+            [in] Int32 nwMode);
+
+        GetNwMode(
+            [out] Int32* nwMode);
     }
 
     } // namespace Telephony

@@ -143,6 +143,217 @@ ECode CSubInfoRecord::ToString(
     return NOERROR;
 }
 
+ECode CSubInfoRecord::SetSubId(
+    /* [in] */ Int64 subId)
+{
+    mSubId = subId;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetSubId(
+    /* [out] */ Int64* subId)
+{
+    VALIDATE_NOT_NULL(subId);
+    *subId = mSubId;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetIccId(
+    /* [in] */ const String& iccId)
+{
+    mIccId = iccId;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetIccId(
+    /* [out] */ String* iccId)
+{
+    VALIDATE_NOT_NULL(iccId);
+    *iccId = mIccId;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetSlotId(
+    /* [in] */ Int32 slotId)
+{
+    mSlotId = slotId;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetSlotId(
+    /* [out] */ Int32* slotId)
+{
+    VALIDATE_NOT_NULL(slotId);
+    *slotId = mSlotId;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetDisplayName(
+    /* [in] */ const String& displayName)
+{
+    mDisplayName = displayName;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetDisplayName(
+    /* [out] */ String* displayName)
+{
+    VALIDATE_NOT_NULL(displayName);
+    *displayName = mDisplayName;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetNameSource(
+    /* [in] */ Int32 nameSource)
+{
+    mNameSource = nameSource;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetNameSource(
+    /* [out] */ Int32* nameSource)
+{
+    VALIDATE_NOT_NULL(nameSource);
+    *nameSource = mNameSource;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetColor(
+    /* [in] */ Int32 color)
+{
+    mColor = color;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetColor(
+    /* [out] */ Int32* color)
+{
+    VALIDATE_NOT_NULL(color);
+    *color = mColor;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetNumber(
+    /* [in] */ const String& number)
+{
+    mNumber = number;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetNumber(
+    /* [out] */ String* number)
+{
+    VALIDATE_NOT_NULL(number);
+    *number = mNumber;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetDisplayNumberFormat(
+    /* [in] */ Int32 displayNumberFormat)
+{
+    mDisplayNumberFormat = displayNumberFormat;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetDisplayNumberFormat(
+    /* [out] */ Int32* displayNumberFormat)
+{
+    VALIDATE_NOT_NULL(displayNumberFormat);
+    *displayNumberFormat = mDisplayNumberFormat;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetDataRoaming(
+    /* [in] */ Int32 dataRoaming)
+{
+    mDataRoaming = dataRoaming;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetDataRoaming(
+    /* [out] */ Int32* dataRoaming)
+{
+    VALIDATE_NOT_NULL(dataRoaming);
+    *dataRoaming = mDataRoaming;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetSimIconRes(
+    /* [in] */ ArrayOf<Int32>* res)
+{
+    mSimIconRes = res;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetSimIconRes(
+    /* [out, callee] */ ArrayOf<Int32>** res)
+{
+    VALIDATE_NOT_NULL(res);
+    *res = mSimIconRes;
+    REFCOUNT_ADD(*res);
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetMcc(
+    /* [in] */ Int32 mcc)
+{
+    mMcc = mcc;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetMcc(
+    /* [out] */ Int32* mcc)
+{
+    VALIDATE_NOT_NULL(mcc);
+    *mcc = mMcc;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetMnc(
+    /* [in] */ Int32 mnc)
+{
+    mMnc = mnc;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetMnc(
+    /* [out] */ Int32* mnc)
+{
+    VALIDATE_NOT_NULL(mnc);
+    *mnc = mMnc;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetStatus(
+    /* [in] */ Int32 status)
+{
+    mStatus = status;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetStatus(
+    /* [out] */ Int32* status)
+{
+    VALIDATE_NOT_NULL(status);
+    *status = mStatus;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::SetNwMode(
+    /* [in] */ Int32 nwMode)
+{
+    mNwMode = nwMode;
+    return NOERROR;
+}
+
+ECode CSubInfoRecord::GetNwMode(
+    /* [out] */ Int32* nwMode)
+{
+    VALIDATE_NOT_NULL(nwMode);
+    *nwMode = mNwMode;
+    return NOERROR;
+}
+
 } // namespace Telephony
 } // namespace Droid
 } // namespace Elastos
