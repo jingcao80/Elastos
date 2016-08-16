@@ -215,18 +215,16 @@ protected:
         /* [in] */ Int32 b);
 
     // @Override
-    CARAPI GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IViewGroupLayoutParams** outp);
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
     // @Override
     CARAPI GenerateDefaultLayoutParams(
         /* [out] */ IViewGroupLayoutParams** outp);
 
     // @Override
-    CARAPI CheckLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) CheckLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
 private:
     CARAPI_(Int32) GetVirtualHeight(

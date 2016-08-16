@@ -135,18 +135,16 @@ public:
     //@Override
     CARAPI GenerateLayoutParams(
         /* [in] */ IAttributeSet* attrs,
-        /* [out] */ IKeyguardSecurityViewFlipperLayoutParams** params);
+        /* [out] */ IViewGroupLayoutParams** params);
 
 protected:
     //@Override
-    CARAPI CheckLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) CheckLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
     //@Override
-    CARAPI GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IViewGroupLayoutParams** params);
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
     //@Override
     CARAPI OnMeasure(

@@ -6,6 +6,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telecom.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include <elastos/core/Object.h>
 
@@ -16,6 +17,7 @@ using Elastos::Droid::App::Trust::ITrustManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Core::Object;
 using Elastos::Utility::ICollection;
@@ -554,7 +556,7 @@ private:
 
     AutoPtr<IDevicePolicyManager> GetDevicePolicyManager();
 
-    // CARAPI_(AutoPtr<ITelecomManager>) GetTelecommManager();
+    CARAPI_(AutoPtr<ITelecomManager>) GetTelecommManager();
 
 private:
     static const String TAG;

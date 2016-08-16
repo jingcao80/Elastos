@@ -15,7 +15,7 @@
 -->
 
 <!-- This is a view to control music playback in keyguard. -->
-<com.android.keyguard.KeyguardTransportControlView
+<Elastos.Droid.SystemUI.Keyguard.CKeyguardTransportControlView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -148,4 +148,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</com.android.keyguard.KeyguardTransportControlView>
+</Elastos.Droid.SystemUI.Keyguard.CKeyguardTransportControlView>

@@ -439,24 +439,21 @@ protected:
         /* [in] */ Int32 b);
 
     //@Override
-    CARAPI OnRequestFocusInDescendants(
+    CARAPI_(Boolean) OnRequestFocusInDescendants(
         /* [in] */ Int32 direction,
-        /* [in] */ IRect* previouslyFocusedRect,
-        /* [out] */ Boolean* result);
+        /* [in] */ IRect* previouslyFocusedRect);
 
     //@Override
-    CARAPI GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IViewGroupLayoutParams** params);
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
     //@Override
     CARAPI GenerateDefaultLayoutParams(
         /* [out] */ IViewGroupLayoutParams** p);
 
     //@Override
-    CARAPI CheckLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) CheckLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
 private:
     CARAPI_(void) SendInitialListenerUpdates();

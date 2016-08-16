@@ -18,7 +18,7 @@
 -->
 
 <!-- This contains emergency call button and carrier as shared by pin/pattern/password screens -->
-<com.android.keyguard.EmergencyCarrierArea
+<Elastos.Droid.SystemUI.Keyguard.CEmergencyCarrierArea
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -29,7 +29,7 @@
     android:layout_alignParentBottom="true"
     android:clickable="true">
 
-    <com.android.keyguard.CarrierText
+    <Elastos.Droid.SystemUI.Keyguard.CCarrierText
         android:id="@+id/carrier_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
         android:visibility="gone"
         androidprv:allCaps="@bool/kg_use_all_caps" />
 
-    <com.android.keyguard.EmergencyButton
+    <Elastos.Droid.SystemUI.Keyguard.CEmergencyButton
         android:id="@+id/emergency_call_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -55,4 +55,4 @@
         android:drawablePadding="8dip"
         android:textAllCaps="@bool/kg_use_all_caps" />
 
-</com.android.keyguard.EmergencyCarrierArea>
+</Elastos.Droid.SystemUI.Keyguard.CEmergencyCarrierArea>

@@ -1349,23 +1349,18 @@ ECode CSlidingChallengeLayout::Draw(
     return NOERROR;
 }
 
-ECode CSlidingChallengeLayout::OnRequestFocusInDescendants(
+Boolean CSlidingChallengeLayout::OnRequestFocusInDescendants(
     /* [in] */ Int32 direction,
-    /* [in] */ IRect* previouslyFocusedRect,
-    /* [out] */ Boolean* result)
+    /* [in] */ IRect* previouslyFocusedRect)
 {
-    VALIDATE_NOT_NULL(result)
-
     // Focus security fileds before widgets.
     Boolean res;
     if (mChallengeView != NULL &&
             (IView::Probe(mChallengeView)->RequestFocus(direction,
             previouslyFocusedRect, &res), res)) {
-        *result = TRUE;
-        return NOERROR;
+        return TRUE;
     }
-    *result = ViewGroup::OnRequestFocusInDescendants(direction, previouslyFocusedRect);
-    return NOERROR;
+    return ViewGroup::OnRequestFocusInDescendants(direction, previouslyFocusedRect);
 }
 
 ECode CSlidingChallengeLayout::ComputeScroll()
@@ -1638,38 +1633,30 @@ ECode CSlidingChallengeLayout::GenerateLayoutParams(
     return NOERROR;
 }
 
-ECode CSlidingChallengeLayout::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** params)
+AutoPtr<IViewGroupLayoutParams> CSlidingChallengeLayout::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(params)
-
     if(ISlidingChallengeLayoutLayoutParams::Probe(p) != NULL) {
         AutoPtr<SlidingChallengeLayoutLayoutParams> _params =
                 new SlidingChallengeLayoutLayoutParams();
         _params->constructor(ISlidingChallengeLayoutLayoutParams::Probe(p));
-        *params = IViewGroupLayoutParams::Probe(_params);
-        REFCOUNT_ADD(*params);
-        return NOERROR;
+        return IViewGroupLayoutParams::Probe(_params);
     }
     else {
         if(IViewGroupMarginLayoutParams::Probe(p) != NULL) {
             AutoPtr<SlidingChallengeLayoutLayoutParams> _params =
                     new SlidingChallengeLayoutLayoutParams();
             _params->constructor(IViewGroupMarginLayoutParams::Probe(p));
-            *params = IViewGroupLayoutParams::Probe(_params);
-            REFCOUNT_ADD(*params);
-            return NOERROR;
+            return IViewGroupLayoutParams::Probe(_params);
         }
         else {
             AutoPtr<SlidingChallengeLayoutLayoutParams> _params =
                     new SlidingChallengeLayoutLayoutParams();
             _params->constructor(p);
-            *params = IViewGroupLayoutParams::Probe(_params);
-            REFCOUNT_ADD(*params);
-            return NOERROR;
+            return IViewGroupLayoutParams::Probe(_params);
         }
     }
+    return NULL;
 }
 
 ECode CSlidingChallengeLayout::GenerateDefaultLayoutParams(
@@ -1685,14 +1672,10 @@ ECode CSlidingChallengeLayout::GenerateDefaultLayoutParams(
     return NOERROR;
 }
 
-ECode CSlidingChallengeLayout::CheckLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ Boolean* result)
+Boolean CSlidingChallengeLayout::CheckLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(result)
-
-    *result = ISlidingChallengeLayoutLayoutParams::Probe(p) != NULL;
-    return NOERROR;
+    return ISlidingChallengeLayoutLayoutParams::Probe(p) != NULL;
 }
 
 } // namespace Keyguard

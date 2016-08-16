@@ -17,7 +17,8 @@ static const String TAG("KeyguardSecurityViewFlipper");
 //============================================================================================
 // CKeyguardSecurityViewFlipper::LayoutParams
 //============================================================================================
-CAR_INTERFACE_IMPL(CKeyguardSecurityViewFlipper::LayoutParams, FrameLayout::FrameLayoutLayoutParams,
+CAR_INTERFACE_IMPL(CKeyguardSecurityViewFlipper::LayoutParams,
+        FrameLayout::FrameLayoutLayoutParams,
         IKeyguardSecurityViewFlipperLayoutParams)
 
 CKeyguardSecurityViewFlipper::LayoutParams::LayoutParams()
@@ -328,33 +329,31 @@ ECode CKeyguardSecurityViewFlipper::StartDisappearAnimation(
     return NOERROR;
 }
 
-ECode CKeyguardSecurityViewFlipper::CheckLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ Boolean* result)
+Boolean CKeyguardSecurityViewFlipper::CheckLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(result)
-
-    *result = IKeyguardSecurityViewFlipperLayoutParams::Probe(p) != NULL;
-    return NOERROR;
+    return IKeyguardSecurityViewFlipperLayoutParams::Probe(p) != NULL;
 }
 
-ECode CKeyguardSecurityViewFlipper::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** result)
+AutoPtr<IViewGroupLayoutParams> CKeyguardSecurityViewFlipper::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(result)
-
+    AutoPtr<IKeyguardSecurityViewFlipperLayoutParams> tmp;
     IKeyguardSecurityViewFlipperLayoutParams* ksvflp = IKeyguardSecurityViewFlipperLayoutParams::Probe(p);
     if (ksvflp != NULL) {
-        return CKeyguardSecurityViewFlipperLayoutParams::New(ksvflp, result);
+        CKeyguardSecurityViewFlipperLayoutParams::New(ksvflp,
+                (IKeyguardSecurityViewFlipperLayoutParams**)&tmp);
+        return IViewGroupLayoutParams::Probe(tmp);
     }
 
-    return CKeyguardSecurityViewFlipperLayoutParams::New(p, result);
+    CKeyguardSecurityViewFlipperLayoutParams::New(p,
+            (IKeyguardSecurityViewFlipperLayoutParams**)&tmp);
+    return IViewGroupLayoutParams::Probe(tmp);
 }
 
 ECode CKeyguardSecurityViewFlipper::GenerateLayoutParams(
     /* [in] */ IAttributeSet* attrs,
-    /* [out] */ IKeyguardSecurityViewFlipperLayoutParams** result)
+    /* [out] */ IViewGroupLayoutParams** result)
 {
     VALIDATE_NOT_NULL(result)
 
@@ -362,7 +361,7 @@ ECode CKeyguardSecurityViewFlipper::GenerateLayoutParams(
     GetContext((IContext**)&context);
     AutoPtr<IKeyguardSecurityViewFlipperLayoutParams> params;
     CKeyguardSecurityViewFlipperLayoutParams::New(context, attrs, (IKeyguardSecurityViewFlipperLayoutParams**)&params);
-    *result = params;
+    *result = IViewGroupLayoutParams::Probe(params);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -396,7 +395,6 @@ ECode CKeyguardSecurityViewFlipper::OnMeasure(
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
         ksvflp = IKeyguardSecurityViewFlipperLayoutParams::Probe(params);
         LayoutParams* lp = (LayoutParams*)ksvflp;
-
         if (lp->mMaxWidth > 0 && lp->mMaxWidth < maxWidth) {
             maxWidth = lp->mMaxWidth;
         }

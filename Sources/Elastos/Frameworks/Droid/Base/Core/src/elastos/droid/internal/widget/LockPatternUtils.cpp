@@ -1819,24 +1819,22 @@ ECode LockPatternUtils::UpdateEmergencyCallButtonState(
 
 ECode LockPatternUtils::ResumeCall()
 {
-    assert(0 && "TODO");
-    // GetTelecommManager().showInCallScreen(FALSE);
-    return NOERROR;
+    return GetTelecommManager()->ShowInCallScreen(FALSE);
 }
 
 ECode LockPatternUtils::IsInCall(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // *result = GetTelecommManager().isInCall();
-    return NOERROR;
+    return GetTelecommManager()->IsInCall(result);
 }
 
-// AutoPtr<ITelecomManager> LockPatternUtils::GetTelecommManager()
-// {
-//     return (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
-// }
+AutoPtr<ITelecomManager> LockPatternUtils::GetTelecommManager()
+{
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
+    return ITelecomManager::Probe(service);
+}
 
 void LockPatternUtils::FinishBiometricWeak()
 {
