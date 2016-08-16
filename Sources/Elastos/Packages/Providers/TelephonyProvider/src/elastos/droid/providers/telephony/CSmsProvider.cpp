@@ -934,7 +934,7 @@ AutoPtr<IUri> CSmsProvider::InsertInner(
                     }
 
                     Boolean move = FALSE;
-                    if (cursor->MoveToFirst(&move), move) {
+                    if ((cursor != NULL) && (cursor->MoveToFirst(&move), move)) {
                         Int64 id = 0;
                         cursor->GetInt64(PERSON_ID_COLUMN, &id);
                         values->Put(ITelephonyTextBasedSmsColumns::PERSON, id);

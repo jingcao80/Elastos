@@ -1488,25 +1488,101 @@ Boolean Util::SetJavaBaseBundle(
                             Logger::D("ToJavaBundle", "ToJavaBundle() int array set into bundle for key:%s", keyStr.string());
                         }
                         else if (IByte::Probe(firstItem) != NULL){
-                            jbyteArray jarr = env->NewByteArray(size);
-                            CheckErrorAndLog(env, "ToJavaBundle", "NewByteArray failed  %d", __LINE__);
+                            if (keyStr.Equals(String("pdus"))) {
+                                //LOGGERE("Javaproxy-Util", "leliang find pdus in Bundle!value:%p", value.Get());
 
-                            for(Int32 i = 0; i < size; ++i){
+                                //for pdus there is special format. see InboundSmsHandler.cpp for more info
+                                jclass byteArrayClass = env->FindClass("[B");
+                                jobjectArray jpdus;
+                                Int32 jpdusLength = 0;
+                                Int32 i = 0;
                                 AutoPtr<IInterface> elem;
-                                array->Get(i, (IInterface**)&elem);
+                                array->Get(i++, (IInterface**)&elem);//index indicate how many byte[] exist;
                                 if (IByte::Probe(elem) != NULL) {
                                     Byte bv;
                                     IByte::Probe(elem)->GetValue(&bv);
-                                    env->SetByteArrayRegion(jarr, i, 1, (jbyte*)&bv);
-                                    CheckErrorAndLog(env, "Util", "ToJavaBundle, SetByteArrayRegion: failed, %d", __LINE__);
+                                    jpdus = env->NewObjectArray(bv, byteArrayClass, NULL);
+                                    jpdusLength = bv;
+                                    //LOGGERE("Javaproxy-Util", "leliang pdus have %d pdu", bv);
+                                    CheckErrorAndLog(env, "ToJavaBundle", "NewObjectArray failed  %d", __LINE__);
                                 }
-                            }
+                                else {
+                                    LOGGERE("ToJavaBundle", "pdus len is invalid, set to zero!!! line:%d", __LINE__);
+                                    jpdusLength = 0;
+                                    jpdus = env->NewObjectArray(0, byteArrayClass, NULL);
+                                }
+                                for(Int32  arrayIndex = 0; arrayIndex < jpdusLength; ++arrayIndex) {
+                                    Int32 pduLength = 0;
+                                    AutoPtr<IInterface> elem;
+                                    array->Get(i++, (IInterface**)&elem);//the first byte is the len of the pdu
+                                    //because the pdu contains the UTF-8 format string
+                                    //here we have to transfer to Unicode which java used
+                                    if (IByte::Probe(elem) != NULL) {
+                                        Byte bv;
+                                        IByte::Probe(elem)->GetValue(&bv);
+                                        pduLength = bv;
+                                        //LOGGERE("Javaproxy-Util", "leliang the %d pdu have %d byte", arrayIndex, bv);
+                                    }
+                                    else {
+                                        LOGGERE("ToJavaBundle", "pdu len is invalid, set to zero!!! line:%d", __LINE__);
+                                        pduLength = 0;
+                                    }
+                                    AutoPtr<ArrayOf<Byte> > arrayByte = ArrayOf<Byte>::Alloc(pduLength);
+                                    for (Int32 elemIndex = i; elemIndex < i + pduLength; ++elemIndex) {
+                                        AutoPtr<IInterface> elem;
+                                        array->Get(elemIndex, (IInterface**)&elem);
+                                        Byte bv;
+                                        if (IByte::Probe(elem) != NULL) {
+                                            IByte::Probe(elem)->GetValue(&bv);
+                                            arrayByte->Set(elemIndex-i, bv);
+                                        }
+                                        //LOGGERE("Javaproxy-Util", "leliang the %d pdu[%d] is 0x%x", arrayIndex, elemIndex-i, bv);
+                                    }
+                                    //try to get the unicode byteArray from UTF-8 byteArray.
+                                    AutoPtr<ArrayOf<Byte> > unicodeByteArray = arrayByte;
 
-                            jmethodID m = env->GetMethodID(bundleKlass, "putByteArray", "(Ljava/lang/String;[B)V");
-                            Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putByteArray %d", __LINE__);
-                            env->CallVoidMethod(jbundle, m, jKey, jarr);
-                            env->DeleteLocalRef(jarr);
-                            Logger::D("ToJavaBundle", "ToJavaBundle() int array set into bundle for key:%s", keyStr.string());
+                                    Int32 unicodeByteArrayLen = unicodeByteArray->GetLength();
+                                    jbyteArray byteArray = env->NewByteArray(unicodeByteArrayLen);
+                                    Util::CheckErrorAndLog(env, "Javaproxy-Util", "NewByteArray: %d!\n", __LINE__);
+                                    Byte* payload = unicodeByteArray->GetPayload();
+                                    env->SetByteArrayRegion(byteArray, 0, unicodeByteArrayLen, (jbyte *)payload);
+                                    Util::CheckErrorAndLog(env, "Javaproxy-Util", "SetByteArrayRegion: %d!\n", __LINE__);
+                                    env->SetObjectArrayElement(jpdus, arrayIndex, byteArray);
+                                    Util::CheckErrorAndLog(env, "Javaproxy-Util", "SetObjectArrayElement: %d!\n", __LINE__);
+                                    env->DeleteLocalRef(byteArray);
+
+                                    i += pduLength;
+                                }
+
+                                jmethodID m = env->GetMethodID(bundleKlass, "putSerializable", "(Ljava/lang/String;Ljava/io/Serializable;)V");
+                                Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putSerializable %d", __LINE__);
+                                env->CallVoidMethod(jbundle, m, jKey, jpdus);
+
+                                env->DeleteLocalRef(byteArrayClass);
+                                env->DeleteLocalRef(jpdus);
+                                LOGGERE("Javaproxy-Util", "leliang find pdus in Bundle!line:%d", __LINE__);
+                            }
+                            else {
+                                jbyteArray jarr = env->NewByteArray(size);
+                                CheckErrorAndLog(env, "ToJavaBundle", "NewByteArray failed  %d", __LINE__);
+
+                                for(Int32 i = 0; i < size; ++i){
+                                    AutoPtr<IInterface> elem;
+                                    array->Get(i, (IInterface**)&elem);
+                                    if (IByte::Probe(elem) != NULL) {
+                                        Byte bv;
+                                        IByte::Probe(elem)->GetValue(&bv);
+                                        env->SetByteArrayRegion(jarr, i, 1, (jbyte*)&bv);
+                                        CheckErrorAndLog(env, "Util", "ToJavaBundle, SetByteArrayRegion: failed, %d", __LINE__);
+                                    }
+                                }
+
+                                jmethodID m = env->GetMethodID(bundleKlass, "putByteArray", "(Ljava/lang/String;[B)V");
+                                Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putByteArray %d", __LINE__);
+                                env->CallVoidMethod(jbundle, m, jKey, jarr);
+                                env->DeleteLocalRef(jarr);
+                            }
+                            Logger::D("ToJavaBundle", "ToJavaBundle() byte array set into bundle for key:%s", keyStr.string());
                         }
                         else {
                             LOGGERE("ToJavaBundle", "ArrayOf item is not implemented!!!");

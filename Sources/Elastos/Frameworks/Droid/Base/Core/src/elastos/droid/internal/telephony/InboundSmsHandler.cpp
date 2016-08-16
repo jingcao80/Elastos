@@ -1060,8 +1060,9 @@ Boolean InboundSmsHandler::ProcessMessagePart(
         for (Int32 i = 0; i < arrayLen; i++) {
             AutoPtr<ArrayOf<Byte> > aob = (*pdus)[i];
             Int32 len = aob->GetLength();
-            if (len > 160) {
-                Logger::E("InboundSmsHandler", "wrong length of the SMS, should never be over 160");
+            if (len > 164) {
+                // in fact the chinese version is 164 bytes
+                Logger::E("InboundSmsHandler", "wrong length of the SMS, should never be over 164");
                 assert(0);
             }
             arrayBytes->Set(pos++, (Byte)len);
@@ -1115,10 +1116,10 @@ Boolean InboundSmsHandler::ProcessMessagePart(
         Int32 len = ab->GetLength();
         allByteLen += len;
         //TODO debug log should remove
-        Logger::E("leliang:InboundSmsHandler", "index: %d, len:%d, line:%d", i, len, __LINE__);
-        for (Int32 j = 0; j < len; ++j) {
-            Logger::E("leliang:InboundSmsHandler", "    %d value: 0x%x", j, (*ab)[j]);
-        }
+        //Logger::E("leliang:InboundSmsHandler", "index: %d, len:%d, line:%d", i, len, __LINE__);
+        //for (Int32 j = 0; j < len; ++j) {
+        //    Logger::E("leliang:InboundSmsHandler", "    %d value: 0x%x", j, (*ab)[j]);
+        //}
     }
     AutoPtr<ArrayOf<Byte> > arrayBytes = ArrayOf<Byte>::Alloc(1 + arrayLen + allByteLen);
     Int32 pos = 0;
@@ -1126,8 +1127,9 @@ Boolean InboundSmsHandler::ProcessMessagePart(
     for (Int32 i = 0; i < arrayLen; i++) {
         AutoPtr<ArrayOf<Byte> > aob = (*pdus)[i];
         Int32 len = aob->GetLength();
-        if (len > 160) {
-            Logger::E("InboundSmsHandler", "wrong length of the SMS, should never be over 160");
+        if (len > 164) {
+            // in fact the chinese version is 164 bytes
+            Logger::E("InboundSmsHandler", "wrong length of the SMS, should never be over 164");
             assert(0);
         }
         arrayBytes->Set(pos++, (Byte)len);

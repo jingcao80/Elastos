@@ -278,10 +278,6 @@ private:
             /* [in] */ Int32 _uid,
             /* [in] */ Boolean _isPrivileged);
 
-        //CARAPI Put(
-        //    /* [in] */ Int32 key,
-        //    /* [in] */ IInterface* value);
-
     public:
         String mPackageName;
         Int32 mUid;

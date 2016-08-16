@@ -41,6 +41,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_ICloneable;
 using Elastos::Text::INumberFormatHelper;
 using Elastos::Text::CNumberFormatHelper;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -1083,6 +1084,32 @@ ECode CNotification::ToString(
     if (mPublicVersion != NULL) {
         sb += " publicVersion=";
         sb += Object::ToString(mPublicVersion);
+    }
+
+    if (mExtras != NULL) {
+        sb += " mExtras = {";
+        Int32 size;
+        if ((mExtras->GetSize(&size), size) > 0) {
+            AutoPtr<ISet> set;
+            mExtras->GetKeySet((ISet**)&set);
+            AutoPtr<IIterator> iterator;
+            set->GetIterator((IIterator**)&iterator);
+
+            Boolean hasNext;
+            while (iterator->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                iterator->GetNext((IInterface**)&obj);
+                String key;
+                ICharSequence::Probe(obj)->ToString(&key);
+                sb += " ";
+                sb += key;
+                sb += "= xxx;";
+            }
+            sb += "}";
+        }
+        else {
+            sb += " NULL }";
+        }
     }
 
     sb += ("}");

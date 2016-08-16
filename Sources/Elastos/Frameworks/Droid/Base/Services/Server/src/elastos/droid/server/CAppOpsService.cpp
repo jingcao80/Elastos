@@ -263,16 +263,6 @@ ECode CAppOpsService::Ops::constructor(
     return NOERROR;
 }
 
-//ECode CAppOpsService::Ops::Put(
-//    /* [in] */ Int32 key,
-//    /* [in] */ IInterface* value)
-//{
-//    if (mPackageName.Equals(String("Elastos.Droid.TeleService")) && key == 15) {
-//        Logger::E("leliang", "line:%d, func:%s, value:%s\n", __LINE__, __func__, TO_CSTR(value));
-//    }
-//    return SparseArray::Put(key, value);
-//}
-
 //================================================================================
 // CAppOpsService::Callback
 //================================================================================
