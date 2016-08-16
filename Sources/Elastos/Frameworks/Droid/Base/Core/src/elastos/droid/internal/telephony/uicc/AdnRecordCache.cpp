@@ -237,14 +237,11 @@ ECode AdnRecordCache::UpdateAdnBySearch(
         count++;
     }
 
-    assert(0 && "TODO");
-    // Logger::D(String("AdnRecordCache"), String("updateAdnBySearch, update oldADN:")
-    //         + oldAdn.toString() +
-    //         ", newAdn:" + newAdn.toString() + ",index :" + index);
+    Logger::D("AdnRecordCache", "updateAdnBySearch, update oldADN:%p, newAdn:%p,index :%d",
+            oldAdn, newAdn, index);
 
     if (index == -1) {
-        assert(0 && "TODO");
-        // SendErrorResponse(response, String("Adn record don't exist for ") + oldAdn);
+        SendErrorResponse(response, String("Adn record don't exist for ") + TO_CSTR(oldAdn));
         return NOERROR;
     }
 

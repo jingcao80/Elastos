@@ -23,6 +23,7 @@ using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IThread;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -113,20 +114,35 @@ ECode IconLoader::HandleMessage(
     switch (what) {
         case EVENT_READ_EF_IMG_RECOED_DONE: {
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // if (HandleImageDescriptor((ArrayOf<Byte>*) ar->mResult)) {
-            //     ReadIconData();
-            // }
-            // else {
-            //     // throw new Exception("Unable to parse image descriptor");
-            //     return E_ILLEGAL_ARGUMENT_EXCEPTION;
-            // }
+            AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+            Int32 size = 0;
+            pArr->GetSize(&size);
+            AutoPtr<ArrayOf<Byte> > byteArr = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> p;
+                pArr->Get(i, (IInterface**)&p);
+                IByte::Probe(p)->GetValue(&((*byteArr)[i]));
+            }
+            if (HandleImageDescriptor(byteArr)) {
+                ReadIconData();
+            }
+            else {
+                // throw new Exception("Unable to parse image descriptor");
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            }
             break;
         }
         case EVENT_READ_ICON_DONE: {
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            AutoPtr<ArrayOf<Byte> > rawData; // = ((byte[]) ar.result);
+            AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+            Int32 size = 0;
+            pArr->GetSize(&size);
+            AutoPtr<ArrayOf<Byte> > rawData = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> p;
+                pArr->Get(i, (IInterface**)&p);
+                IByte::Probe(p)->GetValue(&((*rawData)[i]));
+            }
             AutoPtr<ImageDescriptor> _mId = (ImageDescriptor*)mId.Get();
             if (_mId->mCodingScheme == ImageDescriptor::CODING_SCHEME_BASIC) {
                 mCurrentIcon = ParseToBnW(rawData, rawData->GetLength());
@@ -145,8 +161,15 @@ ECode IconLoader::HandleMessage(
         }
         case EVENT_READ_CLUT_DONE: {
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            AutoPtr<ArrayOf<Byte> > clut; // = ((byte[]) ar.result);
+            AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+            Int32 size = 0;
+            pArr->GetSize(&size);
+            AutoPtr<ArrayOf<Byte> > clut = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> p;
+                pArr->Get(i, (IInterface**)&p);
+                IByte::Probe(p)->GetValue(&((*clut)[i]));
+            }
             mCurrentIcon = ParseToRGB(mIconData, mIconData->GetLength(),
                     FALSE, clut);
             mIconsCache->Put(CoreUtils::Convert(mRecordNumber), mCurrentIcon);

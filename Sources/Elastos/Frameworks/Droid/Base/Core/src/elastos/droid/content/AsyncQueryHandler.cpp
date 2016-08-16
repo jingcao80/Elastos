@@ -43,7 +43,8 @@ AsyncQueryHandler::WorkerArgs::~WorkerArgs()
 AsyncQueryHandler::WorkerHandler::WorkerHandler(
     /* [in] */ IWeakReference* context)
     : mWeakContext(context)
-{}
+{
+}
 
 AsyncQueryHandler::WorkerHandler::~WorkerHandler()
 {}
@@ -132,7 +133,7 @@ ECode AsyncQueryHandler::WorkerHandler::HandleMessage(
 }
 
 //==============================================================
-// AsyncQueryHandler::WorkerHandler
+// AsyncQueryHandler::
 //==============================================================
 CAR_INTERFACE_IMPL(AsyncQueryHandler, Handler, IAsyncQueryHandler)
 

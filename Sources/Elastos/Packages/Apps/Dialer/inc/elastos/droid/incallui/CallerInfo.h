@@ -84,7 +84,8 @@ public:
     // should be displayed.
     /* package */
     CARAPI_(AutoPtr<CallerInfo>) MarkAsEmergency(
-        /* [in] */ IContext* context);
+        /* [in] */ IContext* context,
+        /* [in] */ const String& number);
 
     /**
      * Mark this CallerInfo as a voicemail call. The voicemail label

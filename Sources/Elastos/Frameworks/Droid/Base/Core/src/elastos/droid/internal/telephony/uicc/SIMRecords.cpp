@@ -191,9 +191,7 @@ const Int32 SIMRecords::EVENT_GET_CFIS_DONE;
 const Int32 SIMRecords::EVENT_GET_CSP_CPHS_DONE;
 const Int32 SIMRecords::EVENT_GET_GID1_DONE;
 const Int32 SIMRecords::EVENT_APP_LOCKED;
-// TODO:
-// AutoPtr<ArrayOf<String> > SIMRecords::MCCMNC_CODES_HAVING_3DIGITS_MNC = SIMRecords::MiddleInitMccmncCodesHaving3digitsMnc();
-AutoPtr<ArrayOf<String> > SIMRecords::MCCMNC_CODES_HAVING_3DIGITS_MNC;
+AutoPtr<ArrayOf<String> > SIMRecords::MCCMNC_CODES_HAVING_3DIGITS_MNC = SIMRecords::MiddleInitMccmncCodesHaving3digitsMnc();
 SIMRecords::SIMRecords()
 {
 }
@@ -462,7 +460,7 @@ ECode SIMRecords::GetVoiceMessageCount(
             // Unknown count = -1
             countVoiceMessages = -1;
         }
-        if(DBG) Log(String(" VoiceMessageCount from SIM MWIS = ") + StringUtils::ToString(countVoiceMessages));
+        if (DBG) Log(String(" VoiceMessageCount from SIM MWIS = ") + StringUtils::ToString(countVoiceMessages));
     }
     else if (mEfCPHS_MWI != NULL) {
         // use voice mail count from CPHS
@@ -476,7 +474,7 @@ ECode SIMRecords::GetVoiceMessageCount(
         else if (indicator == 0x5) {
             countVoiceMessages = 0;
         }
-        if(DBG) Log(String(" VoiceMessageCount from SIM CPHS = ") + StringUtils::ToString(countVoiceMessages));
+        if (DBG) Log(String(" VoiceMessageCount from SIM CPHS = ") + StringUtils::ToString(countVoiceMessages));
     }
     *result = countVoiceMessages;
     return NOERROR;
@@ -1324,7 +1322,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_SET_CPHS_MAILBOX_DONE: {
             isRecordLoadResponse = FALSE;
             ar = (AsyncResult*)(IObject*)obj.Get();
-            if(ar->mException == NULL) {
+            if (ar->mException == NULL) {
                 mVoiceMailNum = mNewVoiceMailNum;
                 mVoiceMailTag = mNewVoiceMailTag;
             }
@@ -1554,14 +1552,13 @@ ECode SIMRecords::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0 && "TODO");
-    // pw->Println(String("SIMRecords: ") + this);
+    pw->Println(String("SIMRecords: ") + TO_CSTR(this));
     pw->Println(String(" extends:"));
     IccRecords::Dump(fd, pw, args);
-    // pw->Println(String(" mVmConfig=") + mVmConfig);
-    // pw->Println(String(" mSpnOverride=") + mSpnOverride);
+    pw->Println(String(" mVmConfig=") + TO_CSTR(mVmConfig));
+    pw->Println(String(" mSpnOverride=") + TO_CSTR(mSpnOverride));
     pw->Println(String(" mCallForwardingEnabled=") + StringUtils::ToString(mCallForwardingEnabled));
-    // pw->Println(String(" mSpnState=") + mSpnState);
+    pw->Println(String(" mSpnState=") + StringUtils::ToString(mSpnState));
     pw->Println(String(" mCphsInfo=") + Arrays::ToString(mCphsInfo));
     pw->Println(String(" mCspPlmnEnabled=") + StringUtils::ToString(mCspPlmnEnabled));
     pw->Println(String(" mEfMWIS[]=") + Arrays::ToString(mEfMWIS));
@@ -1569,9 +1566,9 @@ ECode SIMRecords::Dump(
     pw->Println(String(" mEfCff[]=") + Arrays::ToString(mEfCff));
     pw->Println(String(" mEfCfis[]=") + Arrays::ToString(mEfCfis));
     pw->Println(String(" mSpnDisplayCondition=") + StringUtils::ToString(mSpnDisplayCondition));
-    // pw->Println(String(" mSpdiNetworks[]=") + mSpdiNetworks);
+    pw->Println(String(" mSpdiNetworks[]=") + TO_CSTR(mSpdiNetworks));
     pw->Println(String(" mPnnHomeName=") + mPnnHomeName);
-    // pw->Println(String(" mUsimServiceTable=") + mUsimServiceTable);
+    pw->Println(String(" mUsimServiceTable=") + TO_CSTR(mUsimServiceTable));
     pw->Println(String(" mGid1=") + mGid1);
     IFlushable::Probe(pw)->Flush();
     return NOERROR;
@@ -1941,29 +1938,52 @@ void SIMRecords::Logv(
 
 AutoPtr<ArrayOf<String> > SIMRecords::MiddleInitMccmncCodesHaving3digitsMnc()
 {
-    // ==================before translated======================
-    // ->WWZ_SIGN: ARRAY_INIT_START {
-    // "302370", "302720", "310260",
-    //          "405025", "405026", "405027", "405028", "405029", "405030", "405031", "405032",
-    //          "405033", "405034", "405035", "405036", "405037", "405038", "405039", "405040",
-    //          "405041", "405042", "405043", "405044", "405045", "405046", "405047", "405750",
-    //          "405751", "405752", "405753", "405754", "405755", "405756", "405799", "405800",
-    //          "405801", "405802", "405803", "405804", "405805", "405806", "405807", "405808",
-    //          "405809", "405810", "405811", "405812", "405813", "405814", "405815", "405816",
-    //          "405817", "405818", "405819", "405820", "405821", "405822", "405823", "405824",
-    //          "405825", "405826", "405827", "405828", "405829", "405830", "405831", "405832",
-    //          "405833", "405834", "405835", "405836", "405837", "405838", "405839", "405840",
-    //          "405841", "405842", "405843", "405844", "405845", "405846", "405847", "405848",
-    //          "405849", "405850", "405851", "405852", "405853", "405875", "405876", "405877",
-    //          "405878", "405879", "405880", "405881", "405882", "405883", "405884", "405885",
-    //          "405886", "405908", "405909", "405910", "405911", "405912", "405913", "405914",
-    //          "405915", "405916", "405917", "405918", "405919", "405920", "405921", "405922",
-    //          "405923", "405924", "405925", "405926", "405927", "405928", "405929", "405930",
-    //          "405931", "405932", "502142", "502143", "502145", "502146", "502147", "502148"
-    // ->WWZ_SIGN: ARRAY_INIT_END }
-    assert(0);
-    AutoPtr<ArrayOf<String> > empty;
-    return empty;
+    AutoPtr<ArrayOf<String> > result = ArrayOf<String>::Alloc(131);
+    (*result)[0] = String("302370"); (*result)[1] = String("302720"); (*result)[2] = String("310260");
+    (*result)[3] = String("405025"); (*result)[4] = String("405026"); (*result)[5] = String("405027");
+    (*result)[6] = String("405028"); (*result)[7] = String("405029"); (*result)[8] = String("405030");
+    (*result)[9] = String("405031"); (*result)[10] = String("405032"); (*result)[11] = String("405033");
+    (*result)[12] = String("405034"); (*result)[13] = String("405035"); (*result)[14] = String("405036");
+    (*result)[15] = String("405037"); (*result)[16] = String("405038"); (*result)[17] = String("405039");
+    (*result)[18] = String("405040"); (*result)[19] = String("405041"); (*result)[20] = String("405042");
+    (*result)[21] = String("405043"); (*result)[22] = String("405044"); (*result)[23] = String("405045");
+    (*result)[24] = String("405046"); (*result)[25] = String("405047"); (*result)[26] = String("405750");
+    (*result)[27] = String("405751"); (*result)[28] = String("405752"); (*result)[29] = String("405753");
+    (*result)[30] = String("405754"); (*result)[31] = String("405755"); (*result)[32] = String("405756");
+    (*result)[33] = String("405799"); (*result)[34] = String("405800"); (*result)[35] = String("405801");
+    (*result)[36] = String("405802"); (*result)[37] = String("405803"); (*result)[38] = String("405804");
+    (*result)[39] = String("405805"); (*result)[40] = String("405806"); (*result)[41] = String("405807");
+    (*result)[42] = String("405808"); (*result)[43] = String("405809"); (*result)[44] = String("405810");
+    (*result)[45] = String("405811"); (*result)[46] = String("405812"); (*result)[47] = String("405813");
+    (*result)[48] = String("405814"); (*result)[49] = String("405815"); (*result)[50] = String("405816");
+    (*result)[51] = String("405817"); (*result)[52] = String("405818"); (*result)[53] = String("405819");
+    (*result)[54] = String("405820"); (*result)[55] = String("405821"); (*result)[56] = String("405822");
+    (*result)[57] = String("405823"); (*result)[58] = String("405824"); (*result)[59] = String("405825");
+    (*result)[60] = String("405826"); (*result)[61] = String("405827"); (*result)[62] = String("405828");
+    (*result)[63] = String("405829"); (*result)[64] = String("405830"); (*result)[65] = String("405831");
+    (*result)[66] = String("405832"); (*result)[67] = String("405833"); (*result)[68] = String("405834");
+    (*result)[69] = String("405835"); (*result)[70] = String("405836"); (*result)[71] = String("405837");
+    (*result)[72] = String("405838"); (*result)[73] = String("405839"); (*result)[74] = String("405840");
+    (*result)[75] = String("405841"); (*result)[76] = String("405842"); (*result)[77] = String("405843");
+    (*result)[78] = String("405844"); (*result)[79] = String("405845"); (*result)[80] = String("405846");
+    (*result)[81] = String("405847"); (*result)[82] = String("405848"); (*result)[83] = String("405849");
+    (*result)[84] = String("405850"); (*result)[85] = String("405851"); (*result)[86] = String("405852");
+    (*result)[87] = String("405853"); (*result)[88] = String("405875"); (*result)[89] = String("405876");
+    (*result)[90] = String("405877"); (*result)[91] = String("405878"); (*result)[92] = String("405879");
+    (*result)[93] = String("405880"); (*result)[94] = String("405881"); (*result)[95] = String("405882");
+    (*result)[96] = String("405883"); (*result)[97] = String("405884"); (*result)[98] = String("405885");
+    (*result)[99] = String("405886"); (*result)[100] = String("405908"); (*result)[101] = String("405909");
+    (*result)[102] = String("405910"); (*result)[103] = String("405911"); (*result)[104] = String("405912");
+    (*result)[105] = String("405913"); (*result)[106] = String("405914"); (*result)[107] = String("405915");
+    (*result)[108] = String("405916"); (*result)[109] = String("405917"); (*result)[110] = String("405918");
+    (*result)[111] = String("405919"); (*result)[112] = String("405920"); (*result)[113] = String("405921");
+    (*result)[114] = String("405922"); (*result)[115] = String("405923"); (*result)[116] = String("405924");
+    (*result)[117] = String("405925"); (*result)[118] = String("405926"); (*result)[119] = String("405927");
+    (*result)[120] = String("405928"); (*result)[121] = String("405929"); (*result)[122] = String("405930");
+    (*result)[123] = String("405931"); (*result)[124] = String("405932"); (*result)[125] = String("502142");
+    (*result)[126] = String("502143"); (*result)[127] = String("502145"); (*result)[128] = String("502146");
+    (*result)[129] = String("502147"); (*result)[130] = String("502148");
+    return result;
 }
 
 Int32 SIMRecords::GetExtFromEf(

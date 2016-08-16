@@ -6,6 +6,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/incallui/CInCallActivity.h"
+#include "elastos/droid/contacts/common/interactions/TouchPointManager.h"
 #include "elastos/droid/incallui/InCallPresenter.h"
 #include "elastos/droid/incallui/PostCharDialogFragment.h"
 #include "elastos/droid/incallui/TelecomAdapter.h"
@@ -26,6 +27,8 @@ using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Contacts::Common::Interactions::TouchPointManager;
+using Elastos::Droid::Contacts::Common::Interactions::ITouchPointManager;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
@@ -553,20 +556,23 @@ void CInCallActivity::InternalResolveIntent(
                 CBundle::New((IBundle**)&extras);
             }
 
-            // TODO
-            // assert(0 && "TODO");
-            // AutoPtr<IPoint> touchPoint;
-            // if (TouchPointManager.getInstance().hasValidPoint()) {
-            //     // Use the most immediate touch point in the InCallUi if available
-            //     touchPoint = TouchPointManager.getInstance().getPoint();
-            // }
-            // else {
-            //     // Otherwise retrieve the touch point from the call intent
-            //     if (call != null) {
-            //         touchPoint = (Point) extras.getParcelable(TouchPointManager.TOUCH_POINT);
-            //     }
-            // }
-            // mCallCardFragment->AnimateForNewOutgoingCall(touchPoint);
+            AutoPtr<IPoint> touchPoint;
+            AutoPtr<ITouchPointManager> manager = TouchPointManager::GetInstance();
+            Boolean bValidPoint = FALSE;
+            manager->HasValidPoint(&bValidPoint);
+            if (bValidPoint) {
+                // Use the most immediate touch point in the InCallUi if available
+                manager->GetPoint((IPoint**)&touchPoint);
+            }
+            else {
+                // Otherwise retrieve the touch point from the call intent
+                if (call != NULL) {
+                    AutoPtr<IParcelable> parcel;
+                    extras->GetParcelable(ITouchPointManager::TOUCH_POINT, (IParcelable**)&parcel);
+                    touchPoint = IPoint::Probe(parcel);
+                }
+            }
+            mCallCardFragment->AnimateForNewOutgoingCall(touchPoint);
 
             /*
              * If both a phone account handle and a list of phone accounts to choose from are

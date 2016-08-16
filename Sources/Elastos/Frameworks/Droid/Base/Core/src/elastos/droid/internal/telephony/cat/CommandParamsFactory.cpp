@@ -22,6 +22,7 @@ using Elastos::Droid::Internal::Telephony::CGsmAlphabet;
 using Elastos::Droid::R;
 
 using Elastos::Core::StringUtils;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -244,9 +245,16 @@ ResultCode CommandParamsFactory::SetIcons(
         mCmdParams->SetIcon(IBitmap::Probe(data), &b);
         break;
     }
-    case LOAD_MULTI_ICONS:
-        assert(0 && "TODO");
-        // icons = (Bitmap[]) data;
+    case LOAD_MULTI_ICONS: {
+        AutoPtr<IArrayList> pArr = IArrayList::Probe(data);
+        Int32 size = 0;
+        pArr->GetSize(&size);
+        icons = ArrayOf<IBitmap*>::Alloc(size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> p;
+            pArr->Get(i, (IInterface**)&p);
+            (*icons)[i] = IBitmap::Probe(p);
+        }
         // set each item icon.
         for (Int32 i = 0; i < icons->GetLength(); i++) {
             AutoPtr<IBitmap> icon = (*icons)[i];
@@ -258,6 +266,7 @@ ResultCode CommandParamsFactory::SetIcons(
             }
         }
         break;
+    }
     }
     return ResultCode_OK;
 }

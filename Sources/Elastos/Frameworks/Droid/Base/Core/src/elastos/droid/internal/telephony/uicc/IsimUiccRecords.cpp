@@ -20,6 +20,7 @@ using Elastos::Droid::Internal::Telephony::Gsm::ISimTlv;
 using Elastos::Droid::Internal::Telephony::Gsm::CSimTlv;
 
 using Elastos::Core::AutoLock;
+using Elastos::Core::IByte;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IFlushable;
 using Elastos::IO::Charset::ICharset;
@@ -55,8 +56,15 @@ ECode IsimUiccRecords::EfIsimImpiLoaded::GetEfName(
 ECode IsimUiccRecords::EfIsimImpiLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*)ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> p;
+        pArr->Get(i, (IInterface**)&p);
+        IByte::Probe(p)->GetValue(&((*data)[i]));
+    }
     mHost->mIsimImpi = mHost->IsimTlvToString(data);
     if (DUMP_RECORDS) mHost->Log(String("EF_IMPI=") + mHost->mIsimImpi);
     return NOERROR;
@@ -98,8 +106,15 @@ ECode IsimUiccRecords::EfIsimImpuLoaded::OnRecordLoaded(
     while ((it->HasNext(&bHasNext), bHasNext)) {
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
-        assert(0 && "TODO");
-        AutoPtr<ArrayOf<Byte> > identity;// = (ArrayOf<Byte>*)p;
+        AutoPtr<IArrayList> pArr = IArrayList::Probe(p);
+        Int32 size = 0;
+        pArr->GetSize(&size);
+        AutoPtr<ArrayOf<Byte> > identity = ArrayOf<Byte>::Alloc(size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> v;
+            pArr->Get(i, (IInterface**)&v);
+            IByte::Probe(v)->GetValue(&((*identity)[i]));
+        }
         String impu = IsimTlvToString(identity);
         if (DUMP_RECORDS) {
             mHost->Log(String("EF_IMPU[") + StringUtils::ToString(i) + String("]=") + impu);
@@ -131,8 +146,15 @@ ECode IsimUiccRecords::EfIsimDomainLoaded::GetEfName(
 ECode IsimUiccRecords::EfIsimDomainLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (byte[]) ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
     mHost->mIsimDomain = IsimTlvToString(data);
     if (DUMP_RECORDS) {
         mHost->Log(String("EF_DOMAIN=") + mHost->mIsimDomain);
@@ -162,8 +184,15 @@ ECode IsimUiccRecords::EfIsimIstLoaded::GetEfName(
 ECode IsimUiccRecords::EfIsimIstLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
+    Int32 size = 0;
+    pArr->GetSize(&size);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> v;
+        pArr->Get(i, (IInterface**)&v);
+        IByte::Probe(v)->GetValue(&((*data)[i]));
+    }
     AutoPtr<IIccUtils> iccu;
     CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
     iccu->BytesToHexString(data, &(mHost->mIsimIst));
@@ -193,8 +222,7 @@ ECode IsimUiccRecords::EfIsimPcscfLoaded::GetEfName(
 ECode IsimUiccRecords::EfIsimPcscfLoaded::OnRecordLoaded(
     /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    AutoPtr<IArrayList> pcscflist;// = IArrayList::Probe(ar->mResult);
+    AutoPtr<IArrayList> pcscflist = IArrayList::Probe(((AsyncResult*)ar)->mResult);
     Int32 size = 0;
     pcscflist->GetSize(&size);
     if (DBG) mHost->Log(String("EF_PCSCF record count: ") + StringUtils::ToString(size));
@@ -206,8 +234,15 @@ ECode IsimUiccRecords::EfIsimPcscfLoaded::OnRecordLoaded(
     while ((it->HasNext(&bHasNext), bHasNext)) {
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
-        assert(0 && "TODO");
-        AutoPtr<ArrayOf<Byte> > identity;// = (ArrayOf<Byte>*)p;
+        AutoPtr<IArrayList> pArr = IArrayList::Probe(p);
+        Int32 size = 0;
+        pArr->GetSize(&size);
+        AutoPtr<ArrayOf<Byte> > identity = ArrayOf<Byte>::Alloc(size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> v;
+            pArr->Get(i, (IInterface**)&v);
+            IByte::Probe(v)->GetValue(&((*identity)[i]));
+        }
         String pcscf = IsimTlvToString(identity);
         if (DUMP_RECORDS) mHost->Log(String("EF_PCSCF[") + StringUtils::ToString(i) + String("]=") + pcscf);
         (*(mHost->mIsimPcscf))[i++] = pcscf;
@@ -249,8 +284,7 @@ ECode IsimUiccRecords::constructor(
 
     mParentApp->RegisterForReady(this, EVENT_APP_READY, NULL);
     if (DBG) {
-        assert(0 && "TODO");
-        // Log(String("IsimUiccRecords X ctor this=") + this);
+        Log(String("IsimUiccRecords X ctor this=") + TO_CSTR(this));
     }
     return NOERROR;
 }
@@ -273,8 +307,7 @@ ECode IsimUiccRecords::ToString(
 
 ECode IsimUiccRecords::Dispose()
 {
-    assert(0 && "TODO");
-    // Log(String("Disposing ") + this);
+    Log(String("Disposing ") + TO_CSTR(this));
     //Unregister for all events
     mParentApp->UnregisterForReady(this);
     ResetRecords();
@@ -294,15 +327,13 @@ ECode IsimUiccRecords::HandleMessage(
     Boolean b = FALSE;
     mDestroyed->Get(&b);
     if (b) {
-        assert(0 && "TODO");
-        // Logger::E(LOGTAG, String("Received message ") + msg +
-        //         String("[") + StringUtils::ToString(what) +
-        //         String("] while being destroyed. Ignoring."));
+        Logger::E(LOGTAG, String("Received message ") + TO_CSTR(msg) +
+                String("[") + StringUtils::ToString(what) +
+                String("] while being destroyed. Ignoring."));
         return NOERROR;
     }
-    assert(0 && "TODO");
-    // Loge(String("IsimUiccRecords: handleMessage ") + msg
-    //     + String("[") + StringUtils::ToString(what) + String("] "));
+    Loge(String("IsimUiccRecords: handleMessage ") + TO_CSTR(msg)
+        + String("[") + StringUtils::ToString(what) + String("] "));
 
     // try {
         switch (what) {
@@ -314,8 +345,7 @@ ECode IsimUiccRecords::HandleMessage(
                 ar = (AsyncResult*)(IObject*)obj.Get();
                 Log(String("EVENT_AKA_AUTHENTICATE_DONE"));
                 if (ar->mException != NULL) {
-                    assert(0 && "TODO");
-                    // Log(String("Exception ISIM AKA: ") + ar->mException);
+                    Log(String("Exception ISIM AKA: ") + TO_CSTR(ar->mException));
                 }
                 else {
                     // try {
@@ -463,8 +493,7 @@ ECode IsimUiccRecords::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0 && "TODO");
-    // pw->Println(String("IsimRecords: ") + this);
+    pw->Println(String("IsimRecords: ") + TO_CSTR(this));
     pw->Println(String(" extends:"));
     IccRecords::Dump(fd, pw, args);
     pw->Println(String(" mIsimImpi=") + mIsimImpi);

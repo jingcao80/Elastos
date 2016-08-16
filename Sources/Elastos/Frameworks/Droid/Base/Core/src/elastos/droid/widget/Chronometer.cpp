@@ -35,6 +35,7 @@ Chronometer::InnerHandler::InnerHandler(
     : mHost(host)
 {
     assert(mHost);
+    Handler::constructor();
 }
 
 ECode Chronometer::InnerHandler::HandleMessage(

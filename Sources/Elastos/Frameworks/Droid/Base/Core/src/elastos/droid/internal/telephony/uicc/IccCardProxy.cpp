@@ -799,19 +799,17 @@ ECode IccCardProxy::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0 && "TODO");
-    // pw->Println(String("IccCardProxy: ") + this);
-    // pw->Println(String(" mContext=") + mContext);
-    // pw->Println(String(" mCi=") + mCi);
+    pw->Println(String("IccCardProxy: ") + TO_CSTR(this));
+    pw->Println(String(" mContext=") + TO_CSTR(mContext));
+    pw->Println(String(" mCi=") + TO_CSTR(mCi));
     pw->Println(String(" mAbsentRegistrants: size=") + StringUtils::ToString(mAbsentRegistrants->GetSize()));
     for (Int32 i = 0; i < mAbsentRegistrants->GetSize(); i++) {
         AutoPtr<IInterface> p = mAbsentRegistrants->Get(i);
         AutoPtr<IRegistrant> reg = IRegistrant::Probe(p);
         AutoPtr<IHandler> hdl;
         reg->GetHandler((IHandler**)&hdl);
-        assert(0 && "TODO");
-        // pw->Println(String("  mAbsentRegistrants[") + StringUtils::ToString(i) + String("]=")
-        //         + hdl);
+        pw->Println(String("  mAbsentRegistrants[") + StringUtils::ToString(i) + String("]=")
+                + TO_CSTR(hdl));
     }
     pw->Println(String(" mPinLockedRegistrants: size=")
                 + StringUtils::ToString(mPinLockedRegistrants->GetSize()));
@@ -820,9 +818,8 @@ ECode IccCardProxy::Dump(
         AutoPtr<IRegistrant> reg = IRegistrant::Probe(p);
         AutoPtr<IHandler> hdl;
         reg->GetHandler((IHandler**)&hdl);
-        assert(0 && "TODO");
-        // pw->Println(String("  mPinLockedRegistrants[") + StringUtils::ToString(i) + String("]=")
-        //         + hdl);
+        pw->Println(String("  mPinLockedRegistrants[") + StringUtils::ToString(i) + String("]=")
+                + TO_CSTR(hdl));
     }
     pw->Println(String(" mPersoLockedRegistrants: size=")
                 + StringUtils::ToString(mPersoLockedRegistrants->GetSize()));
@@ -831,16 +828,15 @@ ECode IccCardProxy::Dump(
         AutoPtr<IRegistrant> reg = IRegistrant::Probe(p);
         AutoPtr<IHandler> hdl;
         reg->GetHandler((IHandler**)&hdl);
-        assert(0 && "TODO");
-        // pw->Println(String("  mPersoLockedRegistrants[") + StringUtils::ToString(i) + String("]=")
-        //         + hdl);
+        pw->Println(String("  mPersoLockedRegistrants[") + StringUtils::ToString(i) + String("]=")
+                + TO_CSTR(hdl));
     }
     pw->Println(String(" mCurrentAppType=") + StringUtils::ToString(mCurrentAppType));
-    // pw->Println(String(" mUiccController=") + mUiccController);
-    // pw->Println(String(" mUiccCard=") + mUiccCard);
-    // pw->Println(String(" mUiccApplication=") + mUiccApplication);
-    // pw->Println(String(" mIccRecords=") + mIccRecords);
-    // pw->Println(String(" mCdmaSSM=") + mCdmaSSM);
+    pw->Println(String(" mUiccController=") + TO_CSTR(mUiccController));
+    pw->Println(String(" mUiccCard=") + TO_CSTR(mUiccCard));
+    pw->Println(String(" mUiccApplication=") + TO_CSTR(mUiccApplication));
+    pw->Println(String(" mIccRecords=") + TO_CSTR(mIccRecords));
+    pw->Println(String(" mCdmaSSM=") + TO_CSTR(mCdmaSSM));
     pw->Println(String(" mRadioOn=") + StringUtils::ToString(mRadioOn));
     pw->Println(String(" mQuietMode=") + StringUtils::ToString(mQuietMode));
     pw->Println(String(" mInitialized=") + StringUtils::ToString(mInitialized));

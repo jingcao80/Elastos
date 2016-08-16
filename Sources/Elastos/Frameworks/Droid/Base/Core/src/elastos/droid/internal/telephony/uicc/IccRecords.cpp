@@ -699,12 +699,11 @@ ECode IccRecords::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0 && "TODO");
-    // pw->Println(String("IccRecords: ") + this);
-    // pw->Println(String(" mDestroyed=") + mDestroyed);
-    // pw->Println(String(" mCi=") + mCi);
-    // pw->Println(String(" mFh=") + mFh);
-    // pw->Println(String(" mParentApp=") + mParentApp);
+    pw->Println(String("IccRecords: ") + TO_CSTR(this));
+    pw->Println(String(" mDestroyed=") + TO_CSTR(mDestroyed));
+    pw->Println(String(" mCi=") + TO_CSTR(mCi));
+    pw->Println(String(" mFh=") + TO_CSTR(mFh));
+    pw->Println(String(" mParentApp=") + TO_CSTR(mParentApp));
     pw->Println(String(" recordsLoadedRegistrants: size=")
                 + StringUtils::ToString(mRecordsLoadedRegistrants->GetSize()));
     for (Int32 i = 0; i < mRecordsLoadedRegistrants->GetSize(); i++) {
@@ -712,9 +711,8 @@ ECode IccRecords::Dump(
         AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
         AutoPtr<IHandler> hdl;
         _p->GetHandler((IHandler**)&hdl);
-        assert(0 && "TODO");
-        // pw->Println(String("  recordsLoadedRegistrants[") + StringUtils::ToString(i) + String("]=")
-        //         + hdl);
+        pw->Println(String("  recordsLoadedRegistrants[") + StringUtils::ToString(i) + String("]=")
+                + TO_CSTR(hdl));
     }
     pw->Println(String(" mImsiReadyRegistrants: size=")
                 + StringUtils::ToString(mImsiReadyRegistrants->GetSize()));
@@ -723,9 +721,8 @@ ECode IccRecords::Dump(
         AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
         AutoPtr<IHandler> hdl;
         _p->GetHandler((IHandler**)&hdl);
-        assert(0 && "TODO");
-        // pw->Println(String("  mImsiReadyRegistrants[") + StringUtils::ToString(i) + String("]=")
-        //         + hdl);
+        pw->Println(String("  mImsiReadyRegistrants[") + StringUtils::ToString(i) + String("]=")
+                + TO_CSTR(hdl));
     }
     pw->Println(String(" mRecordsEventsRegistrants: size=")
                 + StringUtils::ToString(mRecordsEventsRegistrants->GetSize()));
@@ -734,9 +731,8 @@ ECode IccRecords::Dump(
         AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
         AutoPtr<IHandler> hdl;
         _p->GetHandler((IHandler**)&hdl);
-        assert(0 && "TODO");
-        // pw->Println(String("  mRecordsEventsRegistrants[") + StringUtils::ToString(i) + String("]=")
-        //         + hdl);
+        pw->Println(String("  mRecordsEventsRegistrants[") + StringUtils::ToString(i) + String("]=")
+                + TO_CSTR(hdl));
     }
     pw->Println(String(" mNewSmsRegistrants: size=")
                 + StringUtils::ToString(mNewSmsRegistrants->GetSize()));
@@ -745,9 +741,8 @@ ECode IccRecords::Dump(
         AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
         AutoPtr<IHandler> hdl;
         _p->GetHandler((IHandler**)&hdl);
-        assert(0 && "TODO");
-        // pw->Println(String(("  mNewSmsRegistrants[") + StringUtils::ToString(i) + String("]=")
-        //         + hdl);
+        pw->Println(String("  mNewSmsRegistrants[") + StringUtils::ToString(i) + String("]=")
+                + TO_CSTR(hdl));
     }
     pw->Println(String(" mNetworkSelectionModeAutomaticRegistrants: size=")
             + StringUtils::ToString(mNetworkSelectionModeAutomaticRegistrants->GetSize()));
@@ -756,13 +751,12 @@ ECode IccRecords::Dump(
         AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
         AutoPtr<IHandler> hdl;
         _p->GetHandler((IHandler**)&hdl);
-        assert(0 && "TODO");
-        // pw->Println(String("  mNetworkSelectionModeAutomaticRegistrants[")
-        //         + StringUtils::ToString(i) + String("]=") + hdl);
+        pw->Println(String("  mNetworkSelectionModeAutomaticRegistrants[")
+                + StringUtils::ToString(i) + String("]=") + TO_CSTR(hdl));
     }
     pw->Println(String(" mRecordsRequested=") + StringUtils::ToString(mRecordsRequested));
     pw->Println(String(" mRecordsToLoad=") + StringUtils::ToString(mRecordsToLoad));
-    // pw->Println(String(" mRdnCache=") + mAdnCache);
+    pw->Println(String(" mRdnCache=") + TO_CSTR(mAdnCache));
     pw->Println(String(" iccid=") + mIccId);
     pw->Println(String(" mMsisdn=") + mMsisdn);
     pw->Println(String(" mMsisdnTag=") + mMsisdnTag);

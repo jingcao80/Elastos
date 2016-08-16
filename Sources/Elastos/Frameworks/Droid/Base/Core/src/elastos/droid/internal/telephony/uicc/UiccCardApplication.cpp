@@ -686,9 +686,8 @@ ECode UiccCardApplication::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    assert(0 && "TODO");
-    // pw->Println(String("UiccCardApplication: ") + this);
-    // pw->Println(String(" mUiccCard=") + mUiccCard);
+    pw->Println(String("UiccCardApplication: ") + TO_CSTR(this));
+    pw->Println(String(" mUiccCard=") + TO_CSTR(mUiccCard));
     pw->Println(String(" mAppState=") + StringUtils::ToString(mAppState));
     pw->Println(String(" mAppType=") + StringUtils::ToString(mAppType));
     pw->Println(String(" mPersoSubState=") + StringUtils::ToString(mPersoSubState));
@@ -701,9 +700,9 @@ ECode UiccCardApplication::Dump(
     pw->Println(String(" mDesiredFdnEnabled=") + StringUtils::ToString(mDesiredFdnEnabled));
     pw->Println(String(" mIccLockEnabled=") + StringUtils::ToString(mIccLockEnabled));
     pw->Println(String(" mDesiredPinLocked=") + StringUtils::ToString(mDesiredPinLocked));
-    // pw->Println(String(" mCi=") + mCi);
-    // pw->Println(String(" mIccRecords=") + mIccRecords);
-    // pw->Println(String(" mIccFh=") + mIccFh);
+    pw->Println(String(" mCi=") + TO_CSTR(mCi));
+    pw->Println(String(" mIccRecords=") + TO_CSTR(mIccRecords));
+    pw->Println(String(" mIccFh=") + TO_CSTR(mIccFh));
     pw->Println(String(" mDestroyed=") + StringUtils::ToString(mDestroyed));
     pw->Println(String(" mReadyRegistrants: size=") + StringUtils::ToString(mReadyRegistrants->GetSize()));
     for (Int32 i = 0; i < mReadyRegistrants->GetSize(); i++) {

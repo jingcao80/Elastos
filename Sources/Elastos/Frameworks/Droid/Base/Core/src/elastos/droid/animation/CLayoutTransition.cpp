@@ -231,12 +231,14 @@ CLayoutTransition::ViewOnLayoutChangeListener::ViewOnLayoutChangeListener(
     /* [in] */ Int32 changeReason,
     /* [in] */ Int64 duration,
     /* [in] */ IView* child,
-    /* [in] */ IViewGroup* parent)
+    /* [in] */ IViewGroup* parent,
+    /* [in] */ IAnimator* anim)
     : mHost(host)
     , mChangeReason(changeReason)
     , mDuration(duration)
     , mChild(child)
     , mParent(parent)
+    , mAnim(anim)
 {}
 
 ECode CLayoutTransition::ViewOnLayoutChangeListener::OnLayoutChange(
@@ -958,7 +960,7 @@ void CLayoutTransition::SetupChangeAnimation(
 
     // Add a listener to track layout changes on this view. If we don't get a callback,
     // then there's nothing to animate.
-     AutoPtr<IViewOnLayoutChangeListener> listener = new ViewOnLayoutChangeListener(this, changeReason, duration, child, parent);
+    AutoPtr<IViewOnLayoutChangeListener> listener = new ViewOnLayoutChangeListener(this, changeReason, duration, child, parent, anim);
 
     // Remove the animation from the cache when it ends
     adapter = NULL;

@@ -1,4 +1,5 @@
 
+#include "Elastos.Droid.Telephony.h"
 #include <elastos/droid/contacts/common/CallUtil.h>
 #include "elastos/droid/incallui/Call.h"
 #include "elastos/droid/incallui/CallList.h"
@@ -15,6 +16,9 @@ using Elastos::Droid::Telecom::CPhoneCapabilities;
 using Elastos::Droid::Telecom::ICallProperties;
 using Elastos::Droid::Telecom::IVideoProfileVideoStateHelper;
 using Elastos::Droid::Telecom::CVideoProfileVideoStateHelper;
+using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Droid::Telephony::ISubscriptionManager;
+
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Logger;
@@ -452,6 +456,36 @@ AutoPtr<IPhoneAccountHandle> Call::GetAccountHandle()
     AutoPtr<IPhoneAccountHandle> handle;
     details->GetAccountHandle((IPhoneAccountHandle**)&handle);
     return handle;
+}
+
+Int64 Call::GetSubId()
+{
+    AutoPtr<IPhoneAccountHandle> ph = GetAccountHandle();
+    if (ph != NULL) {
+        // try {
+            String id;
+            ph->GetId(&id);
+            if (!id.IsNull()) {
+                Int64 subId = -1;
+                if (FAILED(StringUtils::Parse(id, &subId))) {
+                    Logger::W("Call", "sub Id is not a number");
+                }
+                else {
+                    return subId;
+                }
+            }
+        // } catch (NumberFormatException e) {
+        //     Log.w(this,"sub Id is not a number " + e);
+        // }
+        AutoPtr<ISubscriptionManager> sm;
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+        Int64 result = 0;
+        sm->GetDefaultVoiceSubId(&result);
+        return result;
+    }
+    else {
+        return ISubscriptionManager::INVALID_SUB_ID;
+    }
 }
 
 AutoPtr<IInCallServiceVideoCall> Call::GetVideoCall()
