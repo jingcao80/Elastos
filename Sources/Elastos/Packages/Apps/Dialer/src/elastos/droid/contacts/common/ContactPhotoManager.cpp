@@ -135,25 +135,26 @@ AutoPtr<IDrawable> ContactPhotoManager::LetterTileDefaultImageProvider::GetDefau
     /* [in] */ IResources* resources,
     /* [in] */ DefaultImageRequest* defaultImageRequest)
 {
-    AutoPtr<LetterTileDrawable> drawable = new LetterTileDrawable(resources);
-    if (defaultImageRequest != NULL) {
-        // If the contact identifier is null or empty, fallback to the
-        // displayName. In that case, use {@code null} for the contact's
-        // display name so that a default bitmap will be used instead of a
-        // letter
-        if (TextUtils::IsEmpty(defaultImageRequest->mIdentifier)) {
-            drawable->SetContactDetails(String(NULL), defaultImageRequest->mDisplayName);
-        }
-        else {
-            drawable->SetContactDetails(defaultImageRequest->mDisplayName,
-                    defaultImageRequest->mIdentifier);
-        }
-        drawable->SetContactType(defaultImageRequest->mContactType);
-        drawable->SetScale(defaultImageRequest->mScale);
-        drawable->SetOffset(defaultImageRequest->mOffset);
-        drawable->SetIsCircular(defaultImageRequest->mIsCircular);
-    }
-    return drawable;
+//    AutoPtr<LetterTileDrawable> drawable = new LetterTileDrawable(resources);
+//    if (defaultImageRequest != NULL) {
+//        // If the contact identifier is null or empty, fallback to the
+//        // displayName. In that case, use {@code null} for the contact's
+//        // display name so that a default bitmap will be used instead of a
+//        // letter
+//        if (TextUtils::IsEmpty(defaultImageRequest->mIdentifier)) {
+//            drawable->SetContactDetails(String(NULL), defaultImageRequest->mDisplayName);
+//        }
+//        else {
+//            drawable->SetContactDetails(defaultImageRequest->mDisplayName,
+//                    defaultImageRequest->mIdentifier);
+//        }
+//        drawable->SetContactType(defaultImageRequest->mContactType);
+//        drawable->SetScale(defaultImageRequest->mScale);
+//        drawable->SetOffset(defaultImageRequest->mOffset);
+//        drawable->SetIsCircular(defaultImageRequest->mIsCircular);
+//    }
+//    return drawable;
+    return NULL;
 }
 
 
@@ -210,10 +211,10 @@ const AutoPtr<IContactPhotoManagerDefaultImageProvider> ContactPhotoManager::DEF
 const String ContactPhotoManager::TAG("ContactPhotoManager");
 const Boolean ContactPhotoManager::DEBUG; // Don't submit with true
 const Boolean ContactPhotoManager::DEBUG_SIZES; // Don't submit with true
-const Int32 ContactPhotoManager::TYPE_PERSON = LetterTileDrawable::TYPE_PERSON;
-const Int32 ContactPhotoManager::TYPE_BUSINESS = LetterTileDrawable::TYPE_BUSINESS;
-const Int32 ContactPhotoManager::TYPE_VOICEMAIL = LetterTileDrawable::TYPE_VOICEMAIL;
-const Int32 ContactPhotoManager::TYPE_DEFAULT = LetterTileDrawable::TYPE_DEFAULT;
+const Int32 ContactPhotoManager::TYPE_PERSON = 0; //LetterTileDrawable::TYPE_PERSON;
+const Int32 ContactPhotoManager::TYPE_BUSINESS = 0; //LetterTileDrawable::TYPE_BUSINESS;
+const Int32 ContactPhotoManager::TYPE_VOICEMAIL = 0; //LetterTileDrawable::TYPE_VOICEMAIL;
+const Int32 ContactPhotoManager::TYPE_DEFAULT = 0; //LetterTileDrawable::TYPE_DEFAULT;
 const Float ContactPhotoManager::SCALE_DEFAULT;
 const Float ContactPhotoManager::OFFSET_DEFAULT;
 const String ContactPhotoManager::DISPLAY_NAME_PARAM_KEY("display_name");
