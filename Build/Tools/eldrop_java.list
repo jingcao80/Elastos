@@ -22,3 +22,4 @@ Mms                     /system/app          dir
 MmsService              /system/app          dir
 com.qualcomm.location   /system/app          dir
 com.qualcomm.services.location  /system/app  dir
+com.example.Location    /system/app          dir

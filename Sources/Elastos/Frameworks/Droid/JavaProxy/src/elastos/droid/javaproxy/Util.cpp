@@ -6630,7 +6630,7 @@ jobject Util::ToJavaLinkProperties(
             jclass laddrKlass = env->FindClass("android/net/LinkAddress");
             Util::CheckErrorAndLog(env, "ToJavaLinkProperties", "FindClass: LinkAddress : %d!\n", __LINE__);
 
-            m = env->GetMethodID(laddrKlass, "<init>", "(Ljava/net/InetAddress;III)Z");
+            m = env->GetMethodID(laddrKlass, "<init>", "(Ljava/net/InetAddress;III)V");
             Util::CheckErrorAndLog(env, "ToJavaLinkProperties", "GetMethodID: appInfoKlass : %d!\n", __LINE__);
 
             for (Int32 i = 0; i < count; i++) {
@@ -6653,8 +6653,8 @@ jobject Util::ToJavaLinkProperties(
         Int32 count = 0;
         dnses->GetSize(&count);
         if (count > 0) {
-            jmethodID mAdd = env->GetMethodID(lProtiesKlass, "addDns", "(Ljava/net/InetAddress;)Z");
-            Util::CheckErrorAndLog(env, "ToJavaLinkProperties", "GetMethodID: addDns : %d!\n", __LINE__);
+            jmethodID mAdd = env->GetMethodID(lProtiesKlass, "addDnsServer", "(Ljava/net/InetAddress;)Z");
+            Util::CheckErrorAndLog(env, "ToJavaLinkProperties", "GetMethodID: addDnsServer : %d!\n", __LINE__);
 
             for (Int32 i = 0; i < count; i++) {
                 AutoPtr<IInterface> obj;
@@ -6664,7 +6664,7 @@ jobject Util::ToJavaLinkProperties(
                 jobject jiaddr = Util::ToJavaInetAddress(env, iaddr);
 
                 env->CallBooleanMethod(jproperties, mAdd, jiaddr);
-                Util::CheckErrorAndLog(env, "ToJavaLinkProperties", "CallBooleanMethod: addDns : %d!\n", __LINE__);
+                Util::CheckErrorAndLog(env, "ToJavaLinkProperties", "CallBooleanMethod: addDnsServer : %d!\n", __LINE__);
 
                 env->DeleteLocalRef(jiaddr);
             }
@@ -6837,7 +6837,7 @@ jobject Util::ToJavaLinkAddress(
     jclass laKlass = env->FindClass("android/net/LinkAddress");
     CheckErrorAndLog(env, "ToJavaLinkAddress", "FindClass: LinkAddress : %d!\n", __LINE__);
 
-    jmethodID m = env->GetMethodID(laKlass, "<init>", "(Ljava/net/InetAddress;III)Z");
+    jmethodID m = env->GetMethodID(laKlass, "<init>", "(Ljava/net/InetAddress;III)V");
     CheckErrorAndLog(env, "ToJavaLinkAddress", "GetMethodID: LinkAddress : %d!\n", __LINE__);
 
     AutoPtr<IInetAddress> address;
