@@ -360,14 +360,15 @@ ECode CMmsSmsProvider::Query(
     AutoPtr<ICursor> cursor;
     String selection = _selection;
     Int32 match = 0;
-    switch(URI_MATCHER->Match(uri, &match), match) {
+    URI_MATCHER->Match(uri, &match);
+    switch(match) {
         case URI_COMPLETE_CONVERSATIONS:
             cursor = GetCompleteConversations(projection, selection, sortOrder);
             break;
         case URI_CONVERSATIONS: {
             String simple;
             uri->GetQueryParameter(String("simple"), &simple);
-            if ((simple != NULL) && simple.Equals("TRUE")) {
+            if ((simple != NULL) && simple.Equals("true")) {
                 String threadType;
                 uri->GetQueryParameter(String("thread_type"), &threadType);
                 if (!TextUtils::IsEmpty(threadType)) {
