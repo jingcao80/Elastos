@@ -18,7 +18,7 @@
 -->
 
 <!-- This is the screen that allows the user to unlock by showing their face.  -->
-<com.android.keyguard.KeyguardFaceUnlockView
+<Elastos.Droid.SystemUI.Keyguard.CKeyguardFaceUnlockView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_face_unlock_view"
@@ -75,4 +75,4 @@
         android:orientation="vertical"
         android:layout_gravity="bottom|center_horizontal"
         android:gravity="center_horizontal" />
-</com.android.keyguard.KeyguardFaceUnlockView>
+</Elastos.Droid.SystemUI.Keyguard.CKeyguardFaceUnlockView>

@@ -16,7 +16,7 @@
 ** limitations under the License.
 */
 -->
-<com.android.keyguard.KeyguardAccountView
+<Elastos.Droid.SystemUI.Keyguard.CKeyguardAccountView
     xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_account_view"
@@ -85,4 +85,4 @@
         android:gravity="center_horizontal" />
     -->
 
-</com.android.keyguard.KeyguardAccountView>
+</Elastos.Droid.SystemUI.Keyguard.CKeyguardAccountView>

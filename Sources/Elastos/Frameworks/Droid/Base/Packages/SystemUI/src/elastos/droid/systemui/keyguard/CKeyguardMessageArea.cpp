@@ -235,12 +235,10 @@ ECode CKeyguardMessageArea::SecurityMessageChanged()
 
 ECode CKeyguardMessageArea::Update()
 {
-    assert(0);
     //MutableInt icon = new MutableInt(0);
     AutoPtr<ICharSequence> status;
     GetCurrentMessage((ICharSequence**)&status);
-    assert(0);
-    //SetCompoundDrawablesWithIntrinsicBounds(icon.value, 0, 0, 0);
+    SetCompoundDrawablesWithIntrinsicBounds(0/*icon.value*/, 0, 0, 0);
     return SetText(status);
 }
 

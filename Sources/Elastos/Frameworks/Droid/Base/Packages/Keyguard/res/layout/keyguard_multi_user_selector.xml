@@ -16,7 +16,7 @@
 ** limitations under the License.
 */
 -->
-<com.android.keyguard.KeyguardMultiUserSelectorView
+<Elastos.Droid.SystemUI.Keyguard.CKeyguardMultiUserSelectorView
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     androidprv:layout_childType="userSwitcher"
@@ -28,7 +28,7 @@
     android:contentDescription="@string/keyguard_accessibility_user_selector"
     android:visibility="gone">
 
-    <com.android.keyguard.KeyguardLinearLayout
+    <Elastos.Droid.SystemUI.Keyguard.CKeyguardLinearLayout
         android:id="@+id/keyguard_users_grid"
         android:orientation="horizontal"
         android:layout_width="wrap_content"
@@ -36,4 +36,4 @@
         android:layout_height="@dimen/keyguard_avatar_size"
         android:layout_gravity="center|bottom" />
 
-</com.android.keyguard.KeyguardMultiUserSelectorView>
+</Elastos.Droid.SystemUI.Keyguard.CKeyguardMultiUserSelectorView>

@@ -25,7 +25,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.android.keyguard.KeyguardStatusView
+    <Elastos.Droid.SystemUI.Keyguard.CKeyguardStatusView
         android:id="@+id/clock"
         android:orientation="vertical"
         android:layout_width="wrap_content"
@@ -58,6 +58,6 @@
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/kg_security_lock_normal" />
         </LinearLayout>
-    </com.android.keyguard.KeyguardStatusView>
+    </Elastos.Droid.SystemUI.Keyguard.CKeyguardStatusView>
 
 </FrameLayout>

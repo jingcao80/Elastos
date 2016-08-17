@@ -782,39 +782,30 @@ ECode CMultiPaneChallengeLayout::GenerateLayoutParams(
     return NOERROR;
 }
 
-ECode CMultiPaneChallengeLayout::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** outp)
+AutoPtr<IViewGroupLayoutParams> CMultiPaneChallengeLayout::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(outp)
-
     if(IMultiPaneChallengeLayoutLayoutParams::Probe(p) != NULL) {
         AutoPtr<MultiPaneChallengeLayoutLayoutParams> _p =
             new MultiPaneChallengeLayoutLayoutParams();
         _p->constructor(IMultiPaneChallengeLayoutLayoutParams::Probe(p));
-        *outp = IViewGroupLayoutParams::Probe(_p);
-        REFCOUNT_ADD(*outp)
-        return NOERROR;
+        return IViewGroupLayoutParams::Probe(_p);
     }
     else {
         if(IViewGroupMarginLayoutParams::Probe(p) != NULL) {
             AutoPtr<MultiPaneChallengeLayoutLayoutParams> _p =
                 new MultiPaneChallengeLayoutLayoutParams();
             _p->constructor(IViewGroupMarginLayoutParams::Probe(p));
-            *outp = IViewGroupLayoutParams::Probe(_p);
-            REFCOUNT_ADD(*outp)
-            return NOERROR;
+            return IViewGroupLayoutParams::Probe(_p);
         }
         else {
             AutoPtr<MultiPaneChallengeLayoutLayoutParams> _p =
                 new MultiPaneChallengeLayoutLayoutParams();
             _p->constructor(p);
-            *outp = IViewGroupLayoutParams::Probe(_p);
-            REFCOUNT_ADD(*outp)
-            return NOERROR;
+            return IViewGroupLayoutParams::Probe(_p);
         }
     }
-    return NOERROR;
+    return NULL;
 }
 
 ECode CMultiPaneChallengeLayout::GenerateDefaultLayoutParams(
@@ -830,14 +821,10 @@ ECode CMultiPaneChallengeLayout::GenerateDefaultLayoutParams(
     return NOERROR;
 }
 
-ECode CMultiPaneChallengeLayout::CheckLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ Boolean* result)
+Boolean CMultiPaneChallengeLayout::CheckLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(result)
-
-    *result = IMultiPaneChallengeLayoutLayoutParams::Probe(p) != NULL;
-    return NOERROR;
+    return IMultiPaneChallengeLayoutLayoutParams::Probe(p) != NULL;
 }
 
 } // namespace Keyguard

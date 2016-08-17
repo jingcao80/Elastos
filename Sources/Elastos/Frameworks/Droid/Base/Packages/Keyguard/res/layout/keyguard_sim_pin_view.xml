@@ -17,7 +17,7 @@
 */
 -->
 <!-- This is the SIM PIN view that allows the user to enter a SIM PIN to unlock the device. -->
-<com.android.keyguard.KeyguardSimPinView
+<Elastos.Droid.SystemUI.Keyguard.CKeyguardSimPinView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/res-auto"
         android:id="@+id/keyguard_sim_pin_view"
@@ -53,7 +53,7 @@
                 android:layout_weight="1"
                 android:paddingBottom="16dp"
                 >
-            <com.android.keyguard.PasswordTextView
+            <Elastos.Droid.SystemUI.Keyguard.CPasswordTextView
                     android:id="@+id/simPinEntry"
                     android:layout_width="@dimen/keyguard_security_width"
                     android:layout_height="match_parent"
@@ -92,7 +92,7 @@
                 android:layout_weight="1"
                 android:orientation="horizontal"
                 >
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key1"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -100,7 +100,7 @@
                     androidprv:textView="@+id/simPinEntry"
                     androidprv:digit="1"
                     />
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key2"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -108,7 +108,7 @@
                     androidprv:textView="@+id/simPinEntry"
                     androidprv:digit="2"
                     />
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key3"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -123,7 +123,7 @@
                 android:layout_weight="1"
                 android:orientation="horizontal"
                 >
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key4"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -131,7 +131,7 @@
                     androidprv:textView="@+id/simPinEntry"
                     androidprv:digit="4"
                     />
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key5"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -139,7 +139,7 @@
                     androidprv:textView="@+id/simPinEntry"
                     androidprv:digit="5"
                     />
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key6"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -154,7 +154,7 @@
                 android:orientation="horizontal"
                 android:layout_weight="1"
                 >
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key7"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -162,7 +162,7 @@
                     androidprv:textView="@+id/simPinEntry"
                     androidprv:digit="7"
                     />
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key8"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -170,7 +170,7 @@
                     androidprv:textView="@+id/simPinEntry"
                     androidprv:digit="8"
                     />
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key9"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -190,7 +190,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     />
-            <com.android.keyguard.NumPadKey
+            <Elastos.Droid.SystemUI.Keyguard.CNumPadKey
                     android:id="@+id/key0"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
@@ -219,4 +219,4 @@
              android:layout_gravity="bottom|center_horizontal"
              android:gravity="center_horizontal"/>
 
-</com.android.keyguard.KeyguardSimPinView>
+</Elastos.Droid.SystemUI.Keyguard.CKeyguardSimPinView>
