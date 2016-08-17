@@ -66,8 +66,6 @@ module.exports = function(aoElastos, aoActivity){
     }
     var _pt = JSClass.prototype;
 
-    var _super;
-
 //     private final static ActionMode.Callback NO_SELECTION_ACTION_MODE_CALLBACK =
 //             new ActionMode.Callback() {
         JSClass.NO_SELECTION_ACTION_MODE_CALLBACK = {
@@ -133,10 +131,11 @@ module.exports = function(aoElastos, aoActivity){
         _pt.OnCreate = function(_this, context, attrs, defStyle) {
             elog(FullClassName + "========OnCreate begin========");
 
-            _super = _this.GetSuperObject();
+            //_super = _this.GetSuperObject();
 
 //         super(context, attrs, defStyle);
-            _this._constructor(context, attrs, defStyle);
+            //_this._constructor(context, attrs, defStyle);
+            _super.OnCreate(context, attrs, defStyle);
 
 //         final TypedArray a = context.obtainStyledAttributes(
 //                 attrs, R.styleable.CalculatorEditText, defStyle, 0);
@@ -171,7 +170,7 @@ module.exports = function(aoElastos, aoActivity){
             }
 //         setTextSize(TypedValue.COMPLEX_UNIT_PX, mMaximumTextSize);
             var TypedValue__COMPLEX_UNIT_PX = 0; //TODO
-            _this.SetTextSize(TypedValue__COMPLEX_UNIT_PX, this.mMaximumTextSize);
+            _this.SetTextSize(_this, TypedValue__COMPLEX_UNIT_PX, this.mMaximumTextSize);
 
 //         setMinHeight(getLineHeight() + getCompoundPaddingBottom() + getCompoundPaddingTop());
             _this.SetMinHeight(_this.GetLineHeight() + _this.GetCompoundPaddingBottom() + _this.GetCompoundPaddingTop());
@@ -180,71 +179,94 @@ module.exports = function(aoElastos, aoActivity){
 //     }
         }
 
-// //     @Override
-// //     public boolean onTouchEvent(MotionEvent event) {
-//         _pt.onTouchEvent = function(event) {
-// //         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-//             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-// //             // Hack to prevent keyboard and insertion handle from showing.
-// //             cancelLongPress();
-//                 this.cancelLongPress();
-// //         }
-//             }
-// //         return super.onTouchEvent(event);
-//             return _super.onTouchEvent(event);
-// //     }
+//     @Override
+//     public boolean onTouchEvent(MotionEvent event) {
+        _pt.OnTouchEvent = function(_this, event, result) {
+            elog(FullClassName + "========OnTouchEvent begin========");
+
+//         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+//             // Hack to prevent keyboard and insertion handle from showing.
+//             cancelLongPress();
+                this.cancelLongPress();
 //         }
+            }
+//         return super.onTouchEvent(event);
+            result.data = _super.OnTouchEvent(event);
 
-// //     @Override
-// //     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-//         _pt.onMeasure = function(widthMeasureSpec, heightMeasureSpec) {
-// //         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//             _super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            elog(FullClassName + "========OnTouchEvent end========");
+//     }
+        }
 
-// //         mWidthConstraint =
-// //                 MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
-//             this.mWidthConstraint =
-//                     MeasureSpec.getSize(widthMeasureSpec) - this.getPaddingLeft() - this.getPaddingRight();
-// //         setTextSize(TypedValue.COMPLEX_UNIT_PX, getVariableTextSize(getText().toString()));
-//             this.setTextSize(TypedValue.COMPLEX_UNIT_PX, getVariableTextSize(getText().toString()));
-// //     }
+//     @Override
+//     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        _pt.OnMeasure = function(_this, widthMeasureSpec, heightMeasureSpec) {
+            elog(FullClassName + "========OnMeasure begin========");
+
+//         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            _super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+//         mWidthConstraint =
+//                 MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
+            this.mWidthConstraint =
+                    MeasureSpec.getSize(widthMeasureSpec) - this.getPaddingLeft() - this.getPaddingRight();
+//         setTextSize(TypedValue.COMPLEX_UNIT_PX, getVariableTextSize(getText().toString()));
+            var TypedValue__COMPLEX_UNIT_PX = 0;
+            this.SetTextSize(_this, TypedValue__COMPLEX_UNIT_PX, this.GetVariableTextSize(_this, getText().toString()));
+
+            elog(FullClassName + "========OnMeasure end========");
+//     }
+        }
+
+//     @Override
+//     public Parcelable onSaveInstanceState() {
+        _pt.OnSaveInstanceState = function(_this, result) {
+            elog(FullClassName + "========OnSaveInstanceState begin========");
+
+//         super.onSaveInstanceState();
+            _super.onSaveInstanceState();
+
+//         // EditText will freeze any text with a selection regardless of getFreezesText() ->
+//         // return null to prevent any state from being preserved at the instance level.
+//         return null;
+            result.data = null;
+
+            elog(FullClassName + "========OnSaveInstanceState end========");
+//     }
+        }
+
+//     @Override
+//     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
+        _pt.OnTextChanged = function(_this, text, start, lengthBefore, lengthAfter) {
+            elog(FullClassName + "========OnTextChanged begin========");
+
+//         super.onTextChanged(text, start, lengthBefore, lengthAfter);
+            _super.OnTextChanged(text, start, lengthBefore, lengthAfter);
+
+//         final int textLength = text.length();
+            var textLength = text.GetLength();
+//         if (getSelectionStart() != textLength || getSelectionEnd() != textLength) {
+            if (_this.GetSelectionStart() != textLength || _this.GetSelectionEnd() != textLength) {
+//             // Pin the selection to the end of the current text.
+//             setSelection(textLength);
+                _this.SetSelection(textLength);
 //         }
+            }
+//         setTextSize(TypedValue.COMPLEX_UNIT_PX, getVariableTextSize(text.toString()));
+            //TODO: const value in car interface definition
+            //TODO: Elastos.Droid.Utility.TypedValue(ITypedValue).COMPLEX_UNIT_PXCOMPLEX_UNIT_PX
+            var TypedValue__COMPLEX_UNIT_PX = 0;
+            this.SetTextSize(_this, TypedValue__COMPLEX_UNIT_PX, this.GetVariableTextSize(_this, text.ToString()));
 
-// //     @Override
-// //     public Parcelable onSaveInstanceState() {
-//         _pt.onSaveInstanceState = function() {
-// //         super.onSaveInstanceState();
-//             _super.onSaveInstanceState();
-
-// //         // EditText will freeze any text with a selection regardless of getFreezesText() ->
-// //         // return null to prevent any state from being preserved at the instance level.
-// //         return null;
-//             return null;
-// //     }
-//         }
-
-// //     @Override
-// //     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
-//         _pt.onTextChanged = function(text, start, lengthBefore, lengthAfter) {
-// //         super.onTextChanged(text, start, lengthBefore, lengthAfter);
-//             _super.onTextChanged(text, start, lengthBefore, lengthAfter);
-
-// //         final int textLength = text.length();
-//             var textLength = text.length();
-// //         if (getSelectionStart() != textLength || getSelectionEnd() != textLength) {
-//             if (this.getSelectionStart() != this.textLength || this.getSelectionEnd() != this.textLength) {
-// //             // Pin the selection to the end of the current text.
-// //             setSelection(textLength);
-//                 setSelection(textLength);
-// //         }
-//             }
-// //         setTextSize(TypedValue.COMPLEX_UNIT_PX, getVariableTextSize(text.toString()));
-//             this.setTextSize(TypedValue.COMPLEX_UNIT_PX, getVariableTextSize(text.toString()));
-// //     }
+            elog(FullClassName + "========OnTextChanged end========");
+//     }
+        }
 
 //     @Override
 //     public void setTextSize(int unit, float size) {
         _pt.SetTextSize = function(_this, unit, size) {
+            elog(FullClassName + "========SetTextSize begin========");
+
 //         final float oldTextSize = getTextSize();
             var oldTextSize = _this.GetTextSize();
 
@@ -257,6 +279,7 @@ module.exports = function(aoElastos, aoActivity){
                 this.mOnTextSizeChangeListener.onTextSizeChanged(this, oldTextSize);
 //         }
             }
+            elog(FullClassName + "========SetTextSize end========");
 //     }
         }
 
@@ -267,50 +290,56 @@ module.exports = function(aoElastos, aoActivity){
 //     }
         }
 
-// //     public float getVariableTextSize(String text) {
-//         _pt.getVariableTextSize = function(text) {
-// //         if (mWidthConstraint < 0 || mMaximumTextSize <= mMinimumTextSize) {
-//             if (this.mWidthConstraint < 0 || this.mMaximumTextSize <= this.mMinimumTextSize) {
-// //             // Not measured, bail early.
-// //             return getTextSize();
-//                 return this.getTextSize();
-// //         }
-//             }
+//     public float getVariableTextSize(String text) {
+        _pt.GetVariableTextSize = function(_this, text) {
+            elog(FullClassName + "========GetVariableTextSize begin========");
 
-// //         // Capture current paint state.
-// //         mTempPaint.set(getPaint());
-//             this.mTempPaint.set(getPaint());
-
-// //         // Step through increasing text sizes until the text would no longer fit.
-// //         float lastFitTextSize = mMinimumTextSize;
-//             var lastFitTextSize = mMinimumTextSize;
-// //         while (lastFitTextSize < mMaximumTextSize) {
-//             while (lastFitTextSize < this.mMaximumTextSize) {
-// //             final float nextSize = Math.min(lastFitTextSize + mStepTextSize, mMaximumTextSize);
-//                 var nextSize = Math.min(lastFitTextSize + mStepTextSize, mMaximumTextSize);
-// //             mTempPaint.setTextSize(nextSize);
-//                 this.mTempPaint.setTextSize(nextSize);
-// //             if (mTempPaint.measureText(text) > mWidthConstraint) {
-//                 if (mTempPaint.measureText(text) > mWidthConstraint) {
-// //                 break;
-//                     break;
-// //             } else {
-//                 } else {
-// //                 lastFitTextSize = nextSize;
-//                     lastFitTextSize = nextSize;
-// //             }
-//                 }
-// //         }
-//             }
-
-// //         return lastFitTextSize;
-//             return lastFitTextSize;
-// //     }
+//         if (mWidthConstraint < 0 || mMaximumTextSize <= mMinimumTextSize) {
+            if (this.mWidthConstraint < 0 || this.mMaximumTextSize <= this.mMinimumTextSize) {
+//             // Not measured, bail early.
+//             return getTextSize();
+                return this.GetTextSize();
 //         }
+            }
+
+//         // Capture current paint state.
+//         mTempPaint.set(getPaint());
+            mTempPaint.Set(_this.GetPaint());
+
+//         // Step through increasing text sizes until the text would no longer fit.
+//         float lastFitTextSize = mMinimumTextSize;
+            var lastFitTextSize = this.mMinimumTextSize;
+//         while (lastFitTextSize < mMaximumTextSize) {
+            while (lastFitTextSize < this.mMaximumTextSize) {
+//             final float nextSize = Math.min(lastFitTextSize + mStepTextSize, mMaximumTextSize);
+                var nextSize = Math.min(lastFitTextSize + this.mStepTextSize, this.mMaximumTextSize);
+//             mTempPaint.setTextSize(nextSize);
+                mTempPaint.SetTextSize(nextSize);
+//             if (mTempPaint.measureText(text) > mWidthConstraint) {
+                if (mTempPaint.MeasureText(text) > mWidthConstraint) {
+//                 break;
+                    break;
+//             } else {
+                } else {
+//                 lastFitTextSize = nextSize;
+                    lastFitTextSize = nextSize;
+//             }
+                }
+//         }
+            }
+
+            elog(FullClassName + "========GetVariableTextSize end========");
+
+//         return lastFitTextSize;
+            return lastFitTextSize;
+//     }
+        }
 
 //     @Override
 //     public int getCompoundPaddingTop() {
         _pt.GetCompoundPaddingTop = function(_this, result) {
+            elog(FullClassName + "========GetCompoundPaddingTop begin========");
+
 //         // Measure the top padding from the capital letter height of the text instead of the top,
 //         // but don't remove more than the available top padding otherwise clipping may occur.
 //         getPaint().getTextBounds("H", 0, 1, mTempRect);
@@ -321,13 +350,17 @@ module.exports = function(aoElastos, aoActivity){
 //         final int paddingOffset = -(fontMetrics.ascent + mTempRect.height());
             var paddingOffset = -(fontMetrics.GetDescent() + mTempRect.GetHeight());
 //         return super.getCompoundPaddingTop() - Math.min(getPaddingTop(), paddingOffset);
-            result.data = _this._GetCompoundPaddingTop() - Math.min(_this.GetPaddingTop(), paddingOffset);
+            result.data = _super.GetCompoundPaddingTop() - Math.min(_this.GetPaddingTop(), paddingOffset);
+
+            elog(FullClassName + "========GetCompoundPaddingTop end========");
 //     }
         }
 
 //     @Override
 //     public int getCompoundPaddingBottom() {
         _pt.GetCompoundPaddingBottom = function(_this, result) {
+            elog(FullClassName + "========GetCompoundPaddingBottom begin========");
+
 //         // Measure the bottom padding from the baseline of the text instead of the bottom, but don't
 //         // remove more than the available bottom padding otherwise clipping may occur.
 //         final FontMetricsInt fontMetrics = getPaint().getFontMetricsInt();
@@ -335,7 +368,9 @@ module.exports = function(aoElastos, aoActivity){
 
 //         return super.getCompoundPaddingBottom() - Math.min(getPaddingBottom(), fontMetrics.descent);
             //return _super.getCompoundPaddingBottom() - Math.min(getPaddingBottom(), fontMetrics.descent);
-            result.data = _this._GetCompoundPaddingBottom() - Math.min(_this.GetPaddingBottom(), fontMetrics.GetDescent());
+            result.data = _super.GetCompoundPaddingBottom() - Math.min(_this.GetPaddingBottom(), fontMetrics.GetDescent());
+
+            elog(FullClassName + "========GetCompoundPaddingBottom end========");
 //     }
         }
 
@@ -387,18 +422,50 @@ module.exports = function(aoElastos, aoActivity){
 
 // //--------Listener----default end----
 
-    var oThis = new JSClass(oActivity);
+    //_super = aoCustomControl;
+    //var _super = aoActivity;
+    var Super = function(aoSuper) {
+        this._super = aoSuper;
+    }
+    var _spt = Super.prototype;
+    _spt.OnCreate = function(context, attrs, defStyle){
+        this._super._constructor(context, attrs, defStyle);
+    }
+    _spt.OnTouchEvent = function(event, result) {
+            this._super._OnTouchEvent(event, result);
+    }
+    _spt.OnSaveInstanceState = function(result) {
+            this._super._OnTouchEvent(result);
+    }
+    _spt.SetTextSize = function(unit, size) {
+            this._super._SetTextSize(unit, size);
+    }
+    _spt.GetCompoundPaddingTop = function(result) {
+            this._super._GetCompoundPaddingTop(result);
+    }
+    _spt.GetCompoundPaddingBottom = function(result) {
+            this._super._GetCompoundPaddingBottom(result);
+    }
+    _spt.OnMeasure = function(widthMeasureSpec, heightMeasureSpec) {
+            this._super._OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+    _spt.OnTextChanged = function(text, start, lengthBefore, lengthAfter) {
+            this._super._OnTextChanged(text, start, lengthBefore, lengthAfter);
+    }
+    var _super;
+
+    var oThis = new JSClass(aoActivity);
 
     var oCallback = {
         OnCreate : function(_this, context, attrs, defStyle) {
-            elog("====OnCreate====begin====");
+            _super = new Super(_this);
             oThis.OnCreate(_this, context, attrs, defStyle);
         },
         OnTouchEvent : function(_this, event, result) {
             oThis.OnTouchEvent(_this, event, result);
         },
-        OnTouchEvent : function(_this, result) {
-            oThis.OnTouchEvent(_this, result);
+        OnSaveInstanceState : function(_this, result) {
+            oThis.OnSaveInstanceState(_this, result);
         },
         SetTextSize : function(_this, unit, size) {
             oThis.SetTextSize(_this, unit, size);
