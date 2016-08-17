@@ -1,8 +1,9 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/contacts/common/util/AccountFilterUtil.h"
-#include "elastos/droid/contacts/common/list/CAccountFilterActivity.h"
+// #include "elastos/droid/contacts/common/list/CAccountFilterActivity.h"
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
 
@@ -10,9 +11,9 @@ using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
-using Elastos::Droid::Contacts::Common::List::CAccountFilterActivity;
+// using Elastos::Droid::Contacts::Common::List::CAccountFilterActivity;
 using Elastos::Droid::Contacts::Common::List::IAccountFilterActivity;
-using Elastos::Droid::Contacts::Common::List::ECLSID_CAccountFilterActivity;
+// using Elastos::Droid::Contacts::Common::List::ECLSID_CAccountFilterActivity;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
@@ -136,7 +137,8 @@ void AccountFilterUtil::StartAccountFilterActivityForResult(
     /* [in] */ IContactListFilter* currentFilter)
 {
     AutoPtr<IIntent> intent;
-    CIntent::New(IContext::Probe(activity), ECLSID_CAccountFilterActivity, (IIntent**)&intent);
+    assert(0 && "TODO");
+    // CIntent::New(IContext::Probe(activity), ECLSID_CAccountFilterActivity, (IIntent**)&intent);
     intent->PutExtra(IAccountFilterActivity::KEY_EXTRA_CURRENT_FILTER, IParcelable::Probe(currentFilter));
     activity->StartActivityForResult(intent, requestCode);
 }
@@ -150,7 +152,8 @@ void AccountFilterUtil::StartAccountFilterActivityForResult(
     fragment->GetActivity((IActivity**)&activity);
     if (activity != NULL) {
         AutoPtr<IIntent> intent;
-        CIntent::New(IContext::Probe(activity), ECLSID_CAccountFilterActivity, (IIntent**)&intent);
+        assert(0 && "TODO");
+        // CIntent::New(IContext::Probe(activity), ECLSID_CAccountFilterActivity, (IIntent**)&intent);
         intent->PutExtra(IAccountFilterActivity::KEY_EXTRA_CURRENT_FILTER, IParcelable::Probe(currentFilter));
         fragment->StartActivityForResult(intent, requestCode);
     }
