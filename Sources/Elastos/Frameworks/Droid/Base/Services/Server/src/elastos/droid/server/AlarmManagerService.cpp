@@ -673,12 +673,13 @@ Boolean AlarmManagerService::Batch::Remove(
     Int64 newEnd = Elastos::Core::Math::INT64_MAX_VALUE;
     Int32 N;
     mAlarms->GetSize(&N);
-    for (Int32 i = 0; i < N; i++) {
+    for (Int32 i = 0; i < N;) {
         AutoPtr<IInterface> obj;
         mAlarms->Get(i, (IInterface**)&obj);
         Alarm* alarm = (Alarm*)IObject::Probe(obj);
         if (Object::Equals(alarm->mOperation, operation)) {
             mAlarms->Remove(i);
+            N--;
             didRemove = TRUE;
             if (alarm->mAlarmClock != NULL) {
                 mHost->mNextAlarmClockMayChange = TRUE;
@@ -711,13 +712,14 @@ Boolean AlarmManagerService::Batch::Remove(
     Int32 N;
     mAlarms->GetSize(&N);
     String pkg;
-    for (Int32 i = 0; i < N; i++) {
+    for (Int32 i = 0; i < N;) {
         AutoPtr<IInterface> obj;
         mAlarms->Get(i, (IInterface**)&obj);
         Alarm* alarm = (Alarm*)IObject::Probe(obj);
         alarm->mOperation->GetTargetPackage(&pkg);
         if (pkg.Equals(packageName)) {
             mAlarms->Remove(i);
+            N--;
             didRemove = TRUE;
             if (alarm->mAlarmClock != NULL) {
                 mHost->mNextAlarmClockMayChange = TRUE;
@@ -749,7 +751,7 @@ Boolean AlarmManagerService::Batch::Remove(
     Int64 newEnd = Elastos::Core::Math::INT64_MAX_VALUE;
     Int32 N;
     mAlarms->GetSize(&N);
-    for (Int32 i = 0; i < N; i++) {
+    for (Int32 i = 0; i < N;) {
         AutoPtr<IInterface> obj;
         mAlarms->Get(i, (IInterface**)&obj);
         Alarm* alarm = (Alarm*)IObject::Probe(obj);
@@ -757,6 +759,7 @@ Boolean AlarmManagerService::Batch::Remove(
         alarm->mOperation->GetCreatorUid(&id);
         if (UserHandle::GetUserId(id) == userHandle) {
             mAlarms->Remove(i);
+            N--;
             didRemove = TRUE;
             if (alarm->mAlarmClock != NULL) {
                 mHost->mNextAlarmClockMayChange = TRUE;
