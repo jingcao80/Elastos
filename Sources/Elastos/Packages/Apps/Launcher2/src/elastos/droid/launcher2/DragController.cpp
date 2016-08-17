@@ -403,7 +403,6 @@ ECode DragController::OnAppsRemoved(
 
 void DragController::EndDrag()
 {
-    Slogger::I(TAG, " >> EndDrag()");
     if (mDragging) {
         mDragging = FALSE;
         ClearScrollRunnable();
@@ -443,9 +442,6 @@ ECode DragController::OnDeferredEndDrag(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        Slogger::I(TAG, " >>> TODO OnDeferredEndDrag. luozhaohui");
-        if (IWorkspace::Probe(obj)) continue;
-        if (ISearchDropTargetBar::Probe(obj)) continue;
         IDragControllerDragListener* listener = IDragControllerDragListener::Probe(obj);
         listener->OnDragEnd();
     }
@@ -869,7 +865,6 @@ void DragController::Drop(
     /* [in] */ Float x,
     /* [in] */ Float y)
 {
-    Slogger::I(TAG, " >> Drop: (%.2f, %.2f)", x, y);
     AutoPtr<ArrayOf<Int32> > coordinates = mCoordinatesTemp;
     AutoPtr<IDropTarget> dropTarget = FindDropTarget((Int32)x, (Int32)y, coordinates);
 
