@@ -26,6 +26,7 @@ using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Concurrent::CConcurrentLinkedQueue;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::CTimer;
 using Elastos::Utility::ICollection;
@@ -90,6 +91,7 @@ ComprehensiveCountryDetector::ComprehensiveCountryDetector(
     // mTelephonyManager = ITelephonyManager::Probe(obj);
     AutoPtr<MyCountryListener> cl = new MyCountryListener(this);
     mLocationBasedCountryDetectionListener = (ICountryListener*)cl.Get();
+    CConcurrentLinkedQueue::New((IConcurrentLinkedQueue**)&mDebugLogs);
 }
 
 ECode ComprehensiveCountryDetector::DetectCountry(
@@ -142,8 +144,9 @@ ECode ComprehensiveCountryDetector::AddToLogs(
     // need to add this country as another entry in the logs. Synchronize access to this
     // variable since multiple threads could be calling this method.
     {    AutoLock syncLock(this);
-        Boolean equals;
-        IObject::Probe(mLastCountryAddedToLogs)->Equals(country, &equals);
+        Boolean equals = FALSE;
+        if (mLastCountryAddedToLogs != NULL)
+            IObject::Probe(mLastCountryAddedToLogs)->Equals(country, &equals);
         if (mLastCountryAddedToLogs != NULL && equals) {
             return E_NULL_POINTER_EXCEPTION;
         }
