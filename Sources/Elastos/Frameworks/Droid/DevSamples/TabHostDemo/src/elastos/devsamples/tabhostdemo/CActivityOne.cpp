@@ -7,6 +7,7 @@
 #include <Elastos.Droid.View.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
+// #include <elastos/droid/utility/MemoryDumper.h>
 
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::IContext;
@@ -18,6 +19,7 @@ using Elastos::Droid::Widget::EIID_ITabHostOnTabChangeListener;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::ITabHost;
 using Elastos::Droid::Widget::ITabSpec;
+// using Elastos::Droid::Utility::MemoryDumper;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
 
@@ -43,6 +45,7 @@ ECode CActivityOne::MyListener::OnTabChanged(
     /* [in] */ const String& tabId)
 {
     Logger::I(TAG, "MyListener::OnTabChanged %s", tabId.string());
+    // MemoryDumper::Dump();
     return NOERROR;
 }
 

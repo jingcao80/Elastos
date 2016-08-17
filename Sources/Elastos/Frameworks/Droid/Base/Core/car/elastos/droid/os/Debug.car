@@ -195,8 +195,9 @@ module
             [out] Int64* pss);
 
         GetPss(
-            [in] Int64 pid,
-            [out, callee] ArrayOf<Int64>* outUss);
+            [in] Int32 pid,
+            [out, callee] ArrayOf<Int64>* outUss,
+            [out] Int64* pss);
 
         SetAllocationLimit(
             [in] Int32 limit,

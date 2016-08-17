@@ -3,6 +3,10 @@
 #define __ELASTOS_DROID_OS_CDEBUGMEMORYINFO_H__
 
 #include "_Elastos_Droid_Os_CDebugMemoryInfo.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -13,6 +17,9 @@ namespace Os {
  * process. The returns info broken down by dalvik, native, and other. All results are in kB.
  */
 CarClass(CDebugMemoryInfo)
+    , public Object
+    , public IDebugMemoryInfo
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()
@@ -24,6 +31,12 @@ public:
     ~CDebugMemoryInfo();
 
     CARAPI constructor();
+
+    CARAPI GetTotalUss(
+        /* [out] */ Int32* totalUss);
+
+    CARAPI GetTotalSwappablePss(
+        /* [out] */ Int32* totalUss);
 
     CARAPI GetTotalPss(
         /* [out] */ Int32* totalPss);
@@ -107,7 +120,7 @@ public:
         /* [in] */ IParcel* dest);
 
 private:
-    friend class CDebug;
+    friend class Debug;
 
     CARAPI SetOtherStats(
         /* [in] */ Int32 index,

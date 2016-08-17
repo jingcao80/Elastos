@@ -23,6 +23,20 @@ ECode CDebugMemoryInfo::constructor()
     return NOERROR;
 }
 
+ECode CDebugMemoryInfo::GetTotalUss(
+    /* [out] */ Int32* totalUss)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CDebugMemoryInfo::GetTotalSwappablePss(
+    /* [out] */ Int32* totalUss)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
 ECode CDebugMemoryInfo::GetTotalPss(
     /* [out] */ Int32* totalPss)
 {

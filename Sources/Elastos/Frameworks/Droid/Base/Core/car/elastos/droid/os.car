@@ -659,20 +659,20 @@ module
     //     interface IDropBoxManager;
     // }
 
-    // singleton class CDebug {
-    //     interface IDebug;
-    // }
+    singleton class CDebug {
+        interface IDebug;
+    }
 
-    // class CDebugMemoryInfo {
-    //     constructor();
+    class CDebugMemoryInfo {
+        constructor();
 
-    //     interface IDebugMemoryInfo;
-    //     interface IParcelable;
-    // }
+        interface IDebugMemoryInfo;
+        interface IParcelable;
+    }
 
-    // singleton class CDebugMemoryInfoHelper {
-    //     interface IDebugMemoryInfoHelper;
-    // }
+    singleton class CDebugMemoryInfoHelper {
+        interface IDebugMemoryInfoHelper;
+    }
 
     // [deprecated]
     // class CParcelStringList {

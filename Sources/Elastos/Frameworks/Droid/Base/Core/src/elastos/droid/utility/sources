@@ -26,6 +26,7 @@ SOURCES += Int32Property.cpp
 SOURCES += CJsonWriter.cpp
 SOURCES += CJsonReader.cpp
 
+SOURCES += MemoryDumper.cpp
 SOURCES += MapCollections.cpp
 SOURCES += MathUtils.cpp
 SOURCES += MonthDisplayHelper.cpp

@@ -9,7 +9,7 @@ ADDR2LINE=$PWDAA/addr2line.txt
 FORMATTEREXE=$XDK_ROOT/DevDoc/DbgTools/MemDumpFormatter
 RESULTFILE=$PWDAA/result.txt
 
-DEBUGFILE_ANDROID=/data/debug/1.txt
+DEBUGFILE_ANDROID=/data/debug/memo_dump.txt
 LOGCATFILE_ANDROID=/data/debug/result.txt
 DIFFFILE_ANDROID=/data/debug/diff.txt
 TARGETPID_ANDROID=

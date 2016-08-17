@@ -3174,6 +3174,9 @@ ECode CActivityManagerService::UpdateCpuStats()
 
 ECode CActivityManagerService::UpdateCpuStatsNow()
 {
+    // disable for MemoryLeak detect
+    // return NOERROR;
+
     AutoLock lock(mProcessCpuTracker);
     mProcessCpuMutexFree->Set(FALSE);
     const Int64 now = SystemClock::GetUptimeMillis();

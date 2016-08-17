@@ -7,7 +7,7 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
-CAR_INTERFACE_IMPL(CDebugMemoryInfoHelper, Object, IDebugMemoryInfoHelper)
+CAR_INTERFACE_IMPL(CDebugMemoryInfoHelper, Singleton, IDebugMemoryInfoHelper)
 
 CAR_SINGLETON_IMPL(CDebugMemoryInfoHelper)
 
