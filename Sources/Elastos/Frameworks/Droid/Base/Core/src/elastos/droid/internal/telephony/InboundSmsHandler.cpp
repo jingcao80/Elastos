@@ -1062,8 +1062,8 @@ Boolean InboundSmsHandler::ProcessMessagePart(
             Int32 len = aob->GetLength();
             if (len > 164) {
                 // in fact the chinese version is 164 bytes
-                Logger::E("InboundSmsHandler", "wrong length of the SMS, should never be over 164");
-                assert(0);
+                Logger::E("InboundSmsHandler", "maybe wrong length of the SMS, should never be over 164, len:%d", len);
+                //assert(0);
             }
             arrayBytes->Set(pos++, (Byte)len);
             memcpy(arrayBytes->GetPayload() + pos, aob->GetPayload(), len);
@@ -1129,8 +1129,8 @@ Boolean InboundSmsHandler::ProcessMessagePart(
         Int32 len = aob->GetLength();
         if (len > 164) {
             // in fact the chinese version is 164 bytes
-            Logger::E("InboundSmsHandler", "wrong length of the SMS, should never be over 164");
-            assert(0);
+            Logger::E("InboundSmsHandler", "maybe wrong length of the SMS, should never be over 164, len:%d", len);
+            //assert(0);
         }
         arrayBytes->Set(pos++, (Byte)len);
         memcpy(arrayBytes->GetPayload() + pos, aob->GetPayload(), len);
