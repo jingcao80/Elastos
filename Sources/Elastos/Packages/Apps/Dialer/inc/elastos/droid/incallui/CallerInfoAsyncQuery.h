@@ -44,7 +44,7 @@ private:
     public:
         CookieWrapper()
             : mEvent(0)
-            , mNumber("")
+            , mNumber(NULL)
         {}
 
     public:

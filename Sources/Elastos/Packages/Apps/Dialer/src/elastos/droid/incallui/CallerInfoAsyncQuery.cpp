@@ -141,8 +141,8 @@ ECode CallerInfoAsyncQuery::CallerInfoAsyncQueryHandler::StartQuery(
 {
     if (DBG) {
         // Show stack trace with the arguments.
-        Logger::D(LOGTAG, "InCall: startQuery: url=%p projection=[%s] selection=%s args=[%s]",
-                    uri, Arrays::ToString(projection).string(),
+        Logger::D(LOGTAG, "InCall: startQuery: url=%s projection=[%s] selection=%s args=[%s]",
+                    TO_CSTR(uri), Arrays::ToString(projection).string(),
                     selection.string(), Arrays::ToString(selectionArgs).string());
                 // new RuntimeException("STACKTRACE"));
     }
@@ -226,15 +226,16 @@ ECode CallerInfoAsyncQuery::CallerInfoAsyncQueryHandler::OnQueryComplete(
             }
             else {
                 mCallerInfo = CallerInfo::GetCallerInfo(mQueryContext, mQueryUri, cursor);
-                Logger::D("CallerInfoAsyncQuery::CallerInfoAsyncQueryHandler", "==> Got mCallerInfo: %p", mCallerInfo.Get());
+                Logger::D("CallerInfoAsyncQuery::CallerInfoAsyncQueryHandler", "==> Got mCallerInfo: %s",
+                        TO_CSTR(mCallerInfo));
 
                 AutoPtr<CallerInfo> newCallerInfo = CallerInfo::DoSecondaryLookupIfNecessary(
                         mQueryContext, cw->mNumber, mCallerInfo);
                 if (newCallerInfo != mCallerInfo) {
                     mCallerInfo = newCallerInfo;
                     Logger::D("CallerInfoAsyncQuery::CallerInfoAsyncQueryHandler",
-                            "#####async contact look up with numeric username",
-                            mCallerInfo.Get());
+                            "#####async contact look up with numeric username %s",
+                            TO_CSTR(mCallerInfo));
                 }
 
                 // Final step: look up the geocoded description.
@@ -286,9 +287,9 @@ ECode CallerInfoAsyncQuery::CallerInfoAsyncQueryHandler::OnQueryComplete(
         //notify the listener that the query is complete.
         if (cw->mListener != NULL) {
             Logger::D("CallerInfoAsyncQuery::CallerInfoAsyncQueryHandler",
-                    "notifying listener:  for token: %d %p",
+                    "notifying listener:  for token: %d %s",
                     /*+ cw->mListener->GetClass()->ToString()*/ +
-                    token, mCallerInfo.Get());
+                    token, TO_CSTR(mCallerInfo));
             cw->mListener->OnQueryComplete(token, cw->mCookie, mCallerInfo);
         }
     // } finally {
@@ -317,7 +318,7 @@ AutoPtr<CallerInfoAsyncQuery> CallerInfoAsyncQuery::StartQuery(
 {
     Logger::D(LOGTAG, "##### CallerInfoAsyncQuery startQuery()... #####");
     Logger::D(LOGTAG, "- number: %s", info->mPhoneNumber.string());
-    Logger::D(LOGTAG, "- cookie: %p", cookie);
+    Logger::D(LOGTAG, "- cookie: %s", TO_CSTR(cookie));
 
     // Construct the URI object and query params, and start the query.
 
@@ -408,8 +409,7 @@ String CallerInfoAsyncQuery::SanitizeUriToString(
 {
     if (uri != NULL) {
         String uriString;
-        assert(0 && "TODO");
-        // uri->ToString(&uriString);
+        IObject::Probe(uri)->ToString(&uriString);
         Int32 indexOfLastSlash = uriString.LastIndexOf('/');
         if (indexOfLastSlash > 0) {
             return uriString.Substring(0, indexOfLastSlash) + String("/xxxxxxx");

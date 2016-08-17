@@ -1022,6 +1022,7 @@ AutoPtr<ArrayOf<Byte> > SmsMessage::EncodeUCS2(
 {
     AutoPtr<ArrayOf<Byte> > userData;
     AutoPtr<ArrayOf<Byte> > textPart;
+    assert(0 && "TODO string getbytes UTF-16BE");
     textPart = message.GetBytes();   // message->GetBytes("utf-16be");
 
     if (header != NULL) {

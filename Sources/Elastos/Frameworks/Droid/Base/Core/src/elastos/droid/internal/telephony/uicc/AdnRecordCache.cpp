@@ -237,8 +237,8 @@ ECode AdnRecordCache::UpdateAdnBySearch(
         count++;
     }
 
-    Logger::D("AdnRecordCache", "updateAdnBySearch, update oldADN:%p, newAdn:%p,index :%d",
-            oldAdn, newAdn, index);
+    Logger::D("AdnRecordCache", "updateAdnBySearch, update oldADN:%s, newAdn:%s,index :%d",
+            TO_CSTR(oldAdn), TO_CSTR(newAdn), index);
 
     if (index == -1) {
         SendErrorResponse(response, String("Adn record don't exist for ") + TO_CSTR(oldAdn));
