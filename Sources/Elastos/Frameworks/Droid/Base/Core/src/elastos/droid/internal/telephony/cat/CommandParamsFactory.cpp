@@ -253,7 +253,7 @@ ResultCode CommandParamsFactory::SetIcons(
         for (Int32 i = 0; i < size; ++i) {
             AutoPtr<IInterface> p;
             pArr->Get(i, (IInterface**)&p);
-            (*icons)[i] = IBitmap::Probe(p);
+            icons->Set(i, IBitmap::Probe(p));
         }
         // set each item icon.
         for (Int32 i = 0; i < icons->GetLength(); i++) {
