@@ -11,7 +11,11 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Contacts::Common::List::CAccountFilterActivity;
+using Elastos::Droid::Contacts::Common::List::IAccountFilterActivity;
+using Elastos::Droid::Contacts::Common::List::ECLSID_CAccountFilterActivity;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -64,10 +68,16 @@ Boolean AccountFilterUtil::UpdateAccountFilterTitle(
             else if (filter->GetFilterType(&filterType), filterType == IContactListFilter::FILTER_TYPE_ACCOUNT) {
                 String accountName;
                 filter->GetAccountName(&accountName);
+                AutoPtr<ICharSequence> cs;
+                CString::New(accountName, (ICharSequence**)&cs);
+                AutoPtr<ArrayOf<IInterface*> > atts = ArrayOf<IInterface*>::Alloc(1);
+                atts->Set(0, cs);
                 String text;
                 context->GetString(
-                        Elastos::Droid::Dialer::R::string::listAllContactsInAccount, accountName, &text);
-                headerTextView->SetText(text);
+                        Elastos::Droid::Dialer::R::string::listAllContactsInAccount, atts, &text);
+                AutoPtr<ICharSequence> textCS;
+                CString::New(text, (ICharSequence**)&textCS);
+                headerTextView->SetText(textCS);
                 textWasSet = TRUE;
             }
             else if (filter->GetFilterType(&filterType), filterType == IContactListFilter::FILTER_TYPE_CUSTOM) {
@@ -89,10 +99,16 @@ Boolean AccountFilterUtil::UpdateAccountFilterTitle(
             else if (filter->GetFilterType(&filterType), filterType == IContactListFilter::FILTER_TYPE_ACCOUNT) {
                 String accountName;
                 filter->GetAccountName(&accountName);
+                AutoPtr<ICharSequence> cs;
+                CString::New(accountName, (ICharSequence**)&cs);
+                AutoPtr<ArrayOf<IInterface*> > atts = ArrayOf<IInterface*>::Alloc(1);
+                atts->Set(0, cs);
                 String text;
                 context->GetString(
-                        Elastos::Droid::Dialer::R::string::listAllContactsInAccount, accountName, &text);
-                headerTextView->SetText(text);
+                        Elastos::Droid::Dialer::R::string::listAllContactsInAccount, atts, &text);
+                AutoPtr<ICharSequence> textCS;
+                CString::New(text, (ICharSequence**)&textCS);
+                headerTextView->SetText(textCS);
                 textWasSet = TRUE;
             }
             else if (filter->GetFilterType(&filterType), filterType == IContactListFilter::FILTER_TYPE_CUSTOM) {
@@ -121,7 +137,7 @@ void AccountFilterUtil::StartAccountFilterActivityForResult(
 {
     AutoPtr<IIntent> intent;
     CIntent::New(IContext::Probe(activity), ECLSID_CAccountFilterActivity, (IIntent**)&intent);
-    intent->PutExtra(AccountFilterActivity::KEY_EXTRA_CURRENT_FILTER, currentFilter);
+    intent->PutExtra(IAccountFilterActivity::KEY_EXTRA_CURRENT_FILTER, IParcelable::Probe(currentFilter));
     activity->StartActivityForResult(intent, requestCode);
 }
 
@@ -135,7 +151,7 @@ void AccountFilterUtil::StartAccountFilterActivityForResult(
     if (activity != NULL) {
         AutoPtr<IIntent> intent;
         CIntent::New(IContext::Probe(activity), ECLSID_CAccountFilterActivity, (IIntent**)&intent);
-        intent->PutExtra(CAccountFilterActivity::KEY_EXTRA_CURRENT_FILTER, currentFilter);
+        intent->PutExtra(IAccountFilterActivity::KEY_EXTRA_CURRENT_FILTER, IParcelable::Probe(currentFilter));
         fragment->StartActivityForResult(intent, requestCode);
     }
     else {
@@ -150,8 +166,8 @@ void AccountFilterUtil::HandleAccountFilterResult(
 {
     if (resultCode == IActivity::RESULT_OK) {
         AutoPtr<IParcelable> parcelable;
-        data->GetParcelableExtra(CAccountFilterActivity::KEY_EXTRA_CONTACT_LIST_FILTER, (IParcelable**)&parcelable);
-        AutoPtr<IContactListFilter> filter = IContactListFilter::Probe(parcelable)
+        data->GetParcelableExtra(IAccountFilterActivity::KEY_EXTRA_CONTACT_LIST_FILTER, (IParcelable**)&parcelable);
+        AutoPtr<IContactListFilter> filter = IContactListFilter::Probe(parcelable);
         if (filter == NULL) {
             return;
         }

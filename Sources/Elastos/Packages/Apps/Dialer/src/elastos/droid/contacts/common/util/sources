@@ -12,4 +12,4 @@ SOURCES += ContactListViewUtils.cpp
 SOURCES += SchedulingUtils.cpp
 SOURCES += TelephonyManagerUtils.cpp
 SOURCES += SearchUtil.cpp
-#SOURCES += AccountFilterUtil.cpp
+SOURCES += AccountFilterUtil.cpp

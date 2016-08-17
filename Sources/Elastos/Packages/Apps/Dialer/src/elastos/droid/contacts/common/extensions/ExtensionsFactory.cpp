@@ -23,12 +23,12 @@ AutoPtr<IExtendedPhoneDirectoriesManager> ExtensionsFactory::sExtendedPhoneDirec
 void ExtensionsFactory::Init(
     /* [in] */ IContext* context)
 {
-    if (sProperties != null) {
+    if (sProperties != NULL) {
         return;
     }
     // try {
     AutoPtr<IAssetManager> asset;
-    context->getAssets((IAssetManager**)&asset);
+    context->GetAssets((IAssetManager**)&asset);
     AutoPtr<IInputStream> fileStream;
     if (FAILED(asset->Open(EXTENSIONS_PROPERTIES, (IInputStream**)&fileStream))) {
         Logger::E(TAG, "No custom extensions.");
@@ -41,7 +41,7 @@ void ExtensionsFactory::Init(
     String className;
     sProperties->GetProperty(EXTENDED_PHONE_DIRECTORIES_KEY, &className);
     if (!className.IsNull()) {
-        AutoPtr<IInterface> instance = CreateInstance(className)
+        AutoPtr<IInterface> instance = CreateInstance(className);
         sExtendedPhoneDirectoriesManager = IExtendedPhoneDirectoriesManager::Probe(instance);
     }
     else {

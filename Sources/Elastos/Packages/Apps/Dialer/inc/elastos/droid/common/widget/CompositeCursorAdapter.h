@@ -2,10 +2,11 @@
 #ifndef __ELASTOS_DROID_COMMON_WIDGET_COMPOSITECURSORADAPTER_H__
 #define __ELASTOS_DROID_COMMON_WIDGET_COMPOSITECURSORADAPTER_H__
 
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/widget/BaseAdapter.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ICursor;

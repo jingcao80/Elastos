@@ -1,0 +1,52 @@
+module
+{
+
+    using interface Elastos.Droid.Content.IContext;
+
+    interface Elastos.Droid.Contacts.Common.Model.Account.IAccountTypeWithDataSet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace Model {
+    namespace Account {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Accounts.IAccount;
+     * interface IParcelable;
+     */
+    [local]
+    interface IAccountWithDataSet {
+
+        GetAccountTypeWithDataSet(
+            [out] IAccountTypeWithDataSet** dataSet);
+
+        SetAccountTypeWithDataSet(
+            [in] IAccountTypeWithDataSet* dataSet);
+
+        GetDataSet(
+            [out] String* dataSet);
+
+        SetDataSet(
+            [in] String dataSet);
+
+        /**
+         * Return {@code true} if this account has any contacts in the database.
+         * Touches DB.  Don't use in the UI thread.
+         */
+        HasData(
+            [in] IContext* context,
+            [out] Boolean* hasData);
+
+    }
+
+    } // Account
+    } // Model
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}

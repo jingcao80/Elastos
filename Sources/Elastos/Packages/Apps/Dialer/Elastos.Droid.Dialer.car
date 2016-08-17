@@ -21,6 +21,12 @@ module
     merge("car/elastos/droid/contacts/common/list/IndexerListAdapter.car");
     merge("car/elastos/droid/contacts/common/list/DefaultContactListAdapter.car");
     merge("car/elastos/droid/contacts/common/list/ExtendedPhoneDirectoriesManager.car");
+    merge("car/elastos/droid/contacts/common/list/AccountFilterActivity.car");
+    merge("car/elastos/droid/contacts/common/model/AccountTypeManager.car");
+    merge("car/elastos/droid/contacts/common/model/account/AccountTypeWithDataSet.car");
+    merge("car/elastos/droid/contacts/common/model/account/AccountType.car");
+    merge("car/elastos/droid/contacts/common/model/account/AccountWithDataSet.car");
+    merge("car/elastos/droid/contacts/common/model/dataitem/DataKind.car");
     merge("car/elastos/droid/contacts/common/preference/ContactsPreferences.car");
     merge("car/elastos/droid/contacts/common/widget/FloatingActionButtonController.car");
     merge("car/elastos/droid/dialer/activity/TransactionSafeActivity.car");
@@ -1740,10 +1746,26 @@ module
 //        interface IParcelable;
 //    }
 //
-//    } // List
-//    } // Common
-//    } // Contacts
-//    } // Droid
-//    } // Elastos
+//    [local]
+//    class CAccountFilterActivity {
+//        interface IAccountFilterActivity;
+//        interface IActivity;
+//        interface IContext;
+//        interface IContextThemeWrapper;
+//        interface ILayoutInflaterFactory;
+//        interface ILayoutInflaterFactory2;
+//        interface IWindowCallback;
+//        interface IKeyEventCallback;
+//        interface IViewOnCreateContextMenuListener;
+//        interface IComponentCallbacks;
+//        interface IComponentCallbacks2;
+//        interface IAdapterViewOnItemClickListener;
+//    }
+//
+//    } // namespace List
+//    } // namespace Common
+//    } // namespace Contacts
+//    } // namespace Droid
+//    } // namespace Elastos
 
 }

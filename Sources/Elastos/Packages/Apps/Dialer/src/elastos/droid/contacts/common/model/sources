@@ -1,0 +1,8 @@
+TARGET_NAME= model
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../
+INCLUDES += ../../../../../../
+
+SOURCES += AccountTypeManager.cpp

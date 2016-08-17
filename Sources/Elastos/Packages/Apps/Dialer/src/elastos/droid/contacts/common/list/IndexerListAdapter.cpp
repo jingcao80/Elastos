@@ -1,9 +1,11 @@
 
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/contacts/common/list/IndexerListAdapter.h"
 
 using Elastos::Droid::Contacts::Common::List::EIID_IIndexerListAdapter;
 using Elastos::Droid::Contacts::Common::List::EIID_IIndexerListAdapterPlacement;
 using Elastos::Droid::Widget::EIID_ISectionIndexer;
+using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 
@@ -20,7 +22,7 @@ CAR_INTERFACE_IMPL(IndexerListAdapter::Placement, Object, IIndexerListAdapterPla
 
 ECode IndexerListAdapter::Placement::Invalidate()
 {
-    mPosition = IListView::INVALID_POSITION;
+    mPosition = IAdapterView::INVALID_POSITION;
     return NOERROR;
 }
 

@@ -3,9 +3,11 @@
 #define __ELASTOS_DROID_CONTACTS_COMMON_EXTENSIONS_EXTENSIONSFACTORY_H__
 
 #include "Elastos.Droid.Content.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include "_Elastos.Droid.Dialer.h"
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Contacts::Common::List::IExtendedPhoneDirectoriesManager;
 using Elastos::Utility::IProperties;
 
 namespace Elastos {

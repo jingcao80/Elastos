@@ -1,0 +1,100 @@
+module
+{
+
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IMap;
+
+    interface Elastos.Droid.Contacts.Common.Model.Account.IAccountTypeWithDataSet;
+    interface Elastos.Droid.Contacts.Common.Model.Account.IAccountType;
+    interface Elastos.Droid.Contacts.Common.Model.Account.IAccountWithDataSet;
+    interface Elastos.Droid.Contacts.Common.Model.Dataitem.IDataKind;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace Model {
+
+    interface IAccountTypeManager {
+
+        /**
+         * Returns the list of all accounts (if contactWritableOnly is false) or just the list of
+         * contact writable accounts (if contactWritableOnly is true).
+         */
+        // TODO: Consider splitting this into getContactWritableAccounts() and getAllAccounts()
+        GetAccounts(
+            [in] Boolean contactWritableOnly,
+            [out] IList** accounts);
+
+        /**
+         * Returns the list of accounts that are group writable.
+         */
+        GetGroupWritableAccounts(
+            [out] IList** accounts);
+
+        GetAccountType(
+            [in] IAccountTypeWithDataSet* accountTypeWithDataSet,
+            [out] IAccountType** accountType);
+
+        GetAccountType(
+            [in] String accountType,
+            [in] String dataSet,
+            [out] IAccountType** result);
+
+        GetAccountTypeForAccount(
+            [in] IAccountWithDataSet* account,
+            [out] IAccountType** accountType);
+
+        /**
+         * @return Unmodifiable map from {@link AccountTypeWithDataSet}s to {@link AccountType}s
+         * which support the "invite" feature and have one or more account.
+         *
+         * This is a filtered down and more "usable" list compared to
+         * {@link #getAllInvitableAccountTypes}, where usable is defined as:
+         * (1) making sure that the app that contributed the account type is not disabled
+         * (in order to avoid presenting the user with an option that does nothing), and
+         * (2) that there is at least one raw contact with that account type in the database
+         * (assuming that the user probably doesn't use that account type).
+         *
+         * Warning: Don't use on the UI thread because this can scan the database.
+         */
+        GetUsableInvitableAccountTypes(
+            [out] IMap** accountTypes);
+
+        /**
+         * Find the best {@link DataKind} matching the requested
+         * {@link AccountType#accountType}, {@link AccountType#dataSet}, and {@link DataKind#mimeType}.
+         * If no direct match found, we try searching {@link FallbackAccountType}.
+         */
+        GetKindOrFallback(
+            [in] IAccountType* type,
+            [in] String mimeType,
+            [out] IDataKind** kind);
+
+        /**
+         * Returns all registered {@link AccountType}s, including extension ones.
+         *
+         * @param contactWritableOnly if true, it only returns ones that support writing contacts.
+         */
+        GetAccountTypes(
+            [in] Boolean contactWritableOnly,
+            [out] IList** accoutTypes);
+
+        /**
+         * @param contactWritableOnly if true, it only returns ones that support writing contacts.
+         * @return true when this instance contains the given account.
+         */
+        Contains(
+            [in] IAccountWithDataSet* account,
+            [in] Boolean contactWritableOnly,
+            [out] Boolean* contains);
+
+    }
+
+    } // Model
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}
