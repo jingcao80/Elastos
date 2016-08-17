@@ -21,7 +21,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Internal::Telephony::IIMms;
 using Elastos::Droid::Internal::Telephony::ISmsConstants;
 using Elastos::Droid::Internal::Telephony::ISmsRawData;
-using Elastos::Droid::Internal::Telephony::IUiccSmsController;
+using Elastos::Droid::Internal::Telephony::IISms;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccConstants;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Provider::ITelephonyMmsIntents;
@@ -112,7 +112,7 @@ ECode SmsManager::SendTextMessage(
         Int64 sid;
         GetSubId(&sid);
         String pkgName = CActivityThread::GetCurrentPackageName();
-        IUiccSmsController::Probe(iccISms)->SendTextWithOptionsUsingSubscriber(
+        IISms::Probe(iccISms)->SendTextWithOptionsUsingSubscriber(
                 sid, pkgName, destinationAddress, scAddress, text,
                 sentIntent, deliveryIntent, priority, isExpectMore, validityPeriod);
     }
@@ -139,7 +139,7 @@ ECode SmsManager::InjectSmsPdu(
     if (iccISms != NULL) {
         Int64 sid;
         GetSubId(&sid);
-        IUiccSmsController::Probe(iccISms)->InjectSmsPduForSubscriber(
+        IISms::Probe(iccISms)->InjectSmsPduForSubscriber(
                 sid, pdu, format, receivedIntent);
     }
     // } catch (RemoteException ex) {
@@ -260,7 +260,7 @@ ECode SmsManager::SendMultipartTextMessage(
             Int64 sid;
             GetSubId(&sid);
             String pkgName = CActivityThread::GetCurrentPackageName();
-            IUiccSmsController::Probe(iccISms)->SendMultipartTextWithOptionsUsingSubscriber(
+            IISms::Probe(iccISms)->SendMultipartTextWithOptionsUsingSubscriber(
                     sid, pkgName, destinationAddress, scAddress,
                     IList::Probe(parts), IList::Probe(sentIntents),
                     IList::Probe(deliveryIntents), priority, isExpectMore,
@@ -350,7 +350,7 @@ ECode SmsManager::SendDataMessage(
         Int64 sid;
         GetSubId(&sid);
         String pkgName = CActivityThread::GetCurrentPackageName();
-        IUiccSmsController::Probe(iccISms)->SendDataWithOrigPortUsingSubscriber(
+        IISms::Probe(iccISms)->SendDataWithOrigPortUsingSubscriber(
                 sid, pkgName,
                 destinationAddress, scAddress, destinationPort & 0xFFFF,
                 originatorPort & 0xFFFF, data, sentIntent, deliveryIntent);
@@ -646,7 +646,7 @@ ECode SmsManager::GetSmsCapacityOnIcc(
     if (iccISms != NULL) {
         Int64 sid;
         GetSubId(&sid);
-        IUiccSmsController::Probe(iccISms)->GetSmsCapacityOnIccForSubscriber(sid, result);
+        IISms::Probe(iccISms)->GetSmsCapacityOnIccForSubscriber(sid, result);
     }
     // } catch (RemoteException ex) {
     //     //ignore it
