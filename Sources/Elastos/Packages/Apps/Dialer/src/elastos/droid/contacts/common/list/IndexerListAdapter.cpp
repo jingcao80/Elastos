@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/contacts/common/list/IndexerListAdapter.h"
+#include "elastos/droid/contacts/common/list/CPinnedHeaderListView.h"
 
 using Elastos::Droid::Contacts::Common::List::EIID_IIndexerListAdapter;
 using Elastos::Droid::Contacts::Common::List::EIID_IIndexerListAdapterPlacement;
@@ -178,9 +179,11 @@ ECode IndexerListAdapter::GetPinnedHeaderView(
 }
 
 ECode IndexerListAdapter::ConfigurePinnedHeaders(
-    /* [in] */ IPinnedHeaderListView* listView)
+    /* [in] */ IPinnedHeaderListView* _listView)
 {
-    FAIL_RETURN(PinnedHeaderListAdapter::ConfigurePinnedHeaders(listView))
+    FAIL_RETURN(PinnedHeaderListAdapter::ConfigurePinnedHeaders(_listView))
+
+    AutoPtr<CPinnedHeaderListView> listView = (CPinnedHeaderListView*)_listView;
 
     Boolean enabled;
     if (IsSectionHeaderDisplayEnabled(&enabled), !enabled) {
@@ -198,7 +201,7 @@ ECode IndexerListAdapter::ConfigurePinnedHeaders(
         Int32 height;
         listView->GetTotalTopPinnedHeaderHeight(&height);
         listView->GetPositionAt(height, &listPosition);
-        listView->GetHeaderViewsCount(&count);
+        count = listView->GetHeaderViewsCount();
         Int32 position = listPosition - count;
 
         Int32 section = -1;
@@ -266,7 +269,7 @@ ECode IndexerListAdapter::GetItemPlacementInSection(
         Int32 section;
         GetSectionForPosition(position, &section);
         Int32 pos;
-        if (section != -1 && (GetPositionForSection(section, &pos), pos == position) {
+        if (section != -1 && (GetPositionForSection(section, &pos), pos == position)) {
             mPlacementCache->mFirstInSection = TRUE;
             AutoPtr<ArrayOf<IInterface*> > sections;
             GetSections((ArrayOf<IInterface*>**)&sections);

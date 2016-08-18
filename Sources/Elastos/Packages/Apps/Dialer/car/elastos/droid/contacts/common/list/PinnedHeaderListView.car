@@ -33,7 +33,9 @@ module
      * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      *
-     * interface Elastos.Apps.Contacts.Common.List.IAutoScrollListView
+     * interface Elastos.Droid.Contacts.Common.List.IAutoScrollListView
+     * interface Elastos.Widget.IAbsListViewOnScrollListener
+     * interface Elastos.Widget.IAdapterViewOnItemSelectedListener
      */
     interface IPinnedHeaderListView {
 

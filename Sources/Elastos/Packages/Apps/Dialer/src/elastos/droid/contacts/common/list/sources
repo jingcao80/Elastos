@@ -17,3 +17,7 @@ SOURCES += Constants.cpp
 SOURCES += CContactListFilter.cpp
 SOURCES += ShortcutIntentBuilder.cpp
 SOURCES += CAccountFilterActivity.cpp
+SOURCES += AutoScrollListView.cpp
+SOURCES += CPinnedHeaderListView.cpp
+SOURCES += ContactListPinnedHeaderView.cpp
+SOURCES += ContactsSectionIndexer.cpp

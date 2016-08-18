@@ -1,5 +1,6 @@
 
 #include "elastos/droid/contacts/common/list/PinnedHeaderListAdapter.h"
+#include "elastos/droid/contacts/common/list/CPinnedHeaderListView.h"
 
 using Elastos::Droid::Contacts::Common::List::EIID_IPinnedHeaderListAdapter;
 using Elastos::Droid::Contacts::Common::List::EIID_IPinnedHeaderAdapter;
@@ -16,7 +17,7 @@ CAR_INTERFACE_IMPL_2(PinnedHeaderListAdapter, CompositeCursorAdapter, IPinnedHea
 ECode PinnedHeaderListAdapter::constructor(
     /* [in] */ IContext* context)
 {
-    return CompositeCursorAdapter::constructor(context)
+    return CompositeCursorAdapter::constructor(context);
 }
 
 ECode PinnedHeaderListAdapter::constructor(
@@ -63,7 +64,7 @@ Boolean PinnedHeaderListAdapter::IsPinnedPartitionHeaderVisible(
 }
 
 ECode PinnedHeaderListAdapter::GetPinnedHeaderView(
-    /* [in] */ Int32 viewIndex,
+    /* [in] */ Int32 partition,
     /* [in] */ IView* convertView,
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** _view)
@@ -92,7 +93,7 @@ ECode PinnedHeaderListAdapter::GetPinnedHeaderView(
         GetCursor(partition, (ICursor**)&cursor);
         BindHeaderView(view, partition, cursor);
         Int32 direction;
-        parent->GetLayoutDirection(&direction);
+        IView::Probe(parent)->GetLayoutDirection(&direction);
         view->SetLayoutDirection(direction);
         *_view = view;
         REFCOUNT_ADD(*_view)
@@ -104,8 +105,9 @@ ECode PinnedHeaderListAdapter::GetPinnedHeaderView(
 }
 
 ECode PinnedHeaderListAdapter::ConfigurePinnedHeaders(
-    /* [in] */ IPinnedHeaderListView* listView)
+    /* [in] */ IPinnedHeaderListView* _listView)
 {
+    AutoPtr<CPinnedHeaderListView> listView = (CPinnedHeaderListView*)_listView;
     Boolean enabled;
     if (GetPinnedPartitionHeadersEnabled(&enabled), !enabled) {
         return NOERROR;
@@ -126,8 +128,7 @@ ECode PinnedHeaderListAdapter::ConfigurePinnedHeaders(
         }
     }
 
-    Int32 headerViewsCount;
-    listView->GetHeaderViewsCount(&headerViewsCount);
+    Int32 headerViewsCount = listView->GetHeaderViewsCount();
 
     // Starting at the top, find and pin headers for partitions preceding the visible one(s)
     Int32 maxTopHeader = -1;

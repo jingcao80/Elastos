@@ -1,11 +1,20 @@
 #ifndef __ELASTOS_DROID_CONTACTS_COMMON_LIST_CPINNEDHEADERLISTVIEW_H__
 #define __ELASTOS_DROID_CONTACTS_COMMON_LIST_CPINNEDHEADERLISTVIEW_H__
 
-#include "_Elastos_Apps_Contacts_Common_List_CPinnedHeaderListView.h"
-#include "CAutoScrollListView.h"
+#include "_Elastos_Droid_Contacts_Common_List_CPinnedHeaderListView.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "elastos/droid/contacts/common/list/AutoScrollListView.h"
 
+using Elastos::Droid::Graphics::IRectF;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Widget::IAbsListViewOnScrollListener;
 using Elastos::Droid::Widget::IAdapterViewOnItemSelectedListener;
+using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::IAbsListView;
+using Elastos::Droid::Widget::IAdapterView;
 
 namespace Elastos{
 namespace Droid{
@@ -18,15 +27,27 @@ namespace List {
  * pinned header can be pushed up and dissolved as needed.
  */
 CarClass(CPinnedHeaderListView)
-    , public CAutoScrollListView
+    , public AutoScrollListView
     , public IPinnedHeaderListView
     , public IAbsListViewOnScrollListener
     , public IAdapterViewOnItemSelectedListener
 {
 private:
-    class PinnedHeader
-        : public Object
+    class PinnedHeader : public Object
     {
+    public:
+        PinnedHeader()
+            : mY(0)
+            , mHeight(0)
+            , mAlpha(0)
+            , mState(0)
+            , mAnimating(FALSE)
+            , mTargetVisible(FALSE)
+            , mSourceY(0)
+            , mTargetY(0)
+            , mTargetTime(0)
+        {}
+
     public:
         AutoPtr<IView> mView;
         Boolean mVisible;
@@ -43,13 +64,11 @@ private:
     };
 
 public:
+    CPinnedHeaderListView();
+
     CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
-
-    CPinnedHeaderListView();
-
-    virtual ~CPinnedHeaderListView();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -176,6 +195,7 @@ public:
     CARAPI OnTouchEvent(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* res);
+
 protected:
     //@Override
     CARAPI OnLayout(
@@ -207,27 +227,27 @@ private:
         /* [in] */ Int64 currentTime);
 
 private:
-    static const Int32 MAX_ALPHA; // = 255;
-    static const Int32 TOP; // = 0;
-    static const Int32 BOTTOM; // = 1;
-    static const Int32 FADING; // = 2;
+    static const Int32 MAX_ALPHA = 255;
+    static const Int32 TOP = 0;
+    static const Int32 BOTTOM = 1;
+    static const Int32 FADING = 2;
 
-    static const Int32 DEFAULT_ANIMATION_DURATION; // = 20;
+    static const Int32 DEFAULT_ANIMATION_DURATION = 20;
 
-    static const Int32 DEFAULT_SMOOTH_SCROLL_DURATION; // = 100;
+    static const Int32 DEFAULT_SMOOTH_SCROLL_DURATION = 100;
 
-    PinnedHeaderAdapter mAdapter;
+    AutoPtr<IPinnedHeaderAdapter> mAdapter;
     Int32 mSize;
     AutoPtr<ArrayOf<PinnedHeader*> > mHeaders;
-    AutoPtr<IRectF> mBounds; // = new RectF();
+    AutoPtr<IRectF> mBounds;
     AutoPtr<IAbsListViewOnScrollListener> mOnScrollListener;
     AutoPtr<IAdapterViewOnItemSelectedListener> mOnItemSelectedListener;
     Int32 mScrollState;
 
-    Boolean mScrollToSectionOnHeaderTouch; // = false;
-    Boolean mHeaderTouched; // = false;
+    Boolean mScrollToSectionOnHeaderTouch;
+    Boolean mHeaderTouched;
 
-    Int32 mAnimationDuration; // = DEFAULT_ANIMATION_DURATION;
+    Int32 mAnimationDuration;
     Boolean mAnimating;
     Int64 mAnimationTargetTime;
     Int32 mHeaderPaddingStart;

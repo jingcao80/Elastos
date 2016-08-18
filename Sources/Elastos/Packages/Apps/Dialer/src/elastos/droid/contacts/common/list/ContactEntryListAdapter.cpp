@@ -5,7 +5,7 @@
 #include "elastos/droid/contacts/common/list/DirectoryPartition.h"
 #include "elastos/droid/contacts/common/list/ContactsSectionIndexer.h"
 #include "elastos/droid/contacts/common/list/DirectoryListLoader.h"
-// #include "elastos/droid/contacts/common/list/ContactPhotoManager.h"
+#include "elastos/droid/contacts/common/ContactPhotoManager.h"
 #include "elastos/droid/contacts/common/util/SearchUtil.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/view/LayoutInflater.h"
@@ -18,6 +18,7 @@
 #include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Contacts::Common::ContactPhotoManager;
 using Elastos::Droid::Contacts::Common::List::EIID_IContactEntryListAdapter;
 using Elastos::Droid::Contacts::Common::Util::SearchUtil;
 using Elastos::Droid::Net::IUriHelper;
@@ -1109,11 +1110,10 @@ ECode ContactEntryListAdapter::GetDefaultImageRequestFromCursor(
     cursor->GetString(displayNameColumn, &displayName);
     String lookupKey;
     cursor->GetString(lookupKeyColumn, &lookupKey);
-    assert(0);
-    // AutoPtr<ContactPhotoManager::DefaultImageRequest> request
-    //         = new ContactPhotoManager::DefaultImageRequest(displayName, lookupKey, mCircularPhotos);
-    // *imageRequest = IContactPhotoManagerDefaultImageRequest::Probe(request);
-    // REFCOUNT_ADD(*imageRequest)
+    AutoPtr<ContactPhotoManager::DefaultImageRequest> request
+            = new ContactPhotoManager::DefaultImageRequest(displayName, lookupKey, mCircularPhotos);
+    *imageRequest = IContactPhotoManagerDefaultImageRequest::Probe(request);
+    REFCOUNT_ADD(*imageRequest)
     return NOERROR;
 }
 

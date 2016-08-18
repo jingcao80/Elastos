@@ -50,6 +50,8 @@ public:
 
     private:
         Int32 mPosition;
+
+        friend class IndexerListAdapter;
     };
 
 public:
