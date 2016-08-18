@@ -1207,9 +1207,11 @@ ECode CNotification::CloneInto(
         that->mActions = ArrayOf<INotificationAction*>::Alloc(this->mActions->GetLength());
         for(Int32 i = 0; i < this->mActions->GetLength(); i++) {
             INotificationAction* action = (*this->mActions)[i];
-            AutoPtr<IInterface> copy;
-            ICloneable::Probe(action)->Clone((IInterface**)&copy);
-            that->mActions->Set(i, INotificationAction::Probe(copy));
+            if (action != NULL) {
+                AutoPtr<IInterface> copy;
+                ICloneable::Probe(action)->Clone((IInterface**)&copy);
+                that->mActions->Set(i, INotificationAction::Probe(copy));
+            }
         }
     }
 

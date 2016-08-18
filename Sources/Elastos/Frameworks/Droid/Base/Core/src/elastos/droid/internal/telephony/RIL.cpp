@@ -207,7 +207,7 @@ AutoPtr<RILRequest> RILRequest::Obtain(
     rr->mParcel->WriteInt32(request);
     rr->mParcel->WriteInt32(rr->mSerial);
 
-    Logger::E("leliang", "line:%d, func:%s, request:%d, serial:%d\n", __LINE__, __func__, request, rr->mSerial);
+    //Logger::E("leliang", "line:%d, func:%s, request:%d, serial:%d\n", __LINE__, __func__, request, rr->mSerial);
     return rr;
 }
 
@@ -321,7 +321,7 @@ ECode RIL::RILSender::HandleMessage(
 
     Int32 what = 0;
     msg->GetWhat(&what);
-    Logger::E("leliang", "line:%d, func:%s, what:%d\n", __LINE__, __func__, what);
+    //Logger::E("leliang", "line:%d, func:%s, what:%d\n", __LINE__, __func__, what);
     switch (what) {
         case EVENT_SEND: {
             // try {
@@ -528,7 +528,7 @@ ECode RIL::RILReceiver::Run()
                 p->SetDataPosition(0);
 
                 //Rlog.v(RILJ_LOG_TAG, "Read packet: " + length + " bytes");
-                Logger::V("leliang", "Read packet: %d bytes", length);
+                //Logger::V("leliang", "Read packet: %d bytes", length);
 
                 mHost->ProcessResponse(p);
                 // p->Recycle();
@@ -3673,7 +3673,7 @@ void RIL::Send(
         rr->ReleaseRequest();
         return;
     }
-    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
+    //Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
 
     mSender->ObtainMessage(EVENT_SEND, TO_IINTERFACE(rr), (IMessage**)&msg);
 
@@ -3773,8 +3773,7 @@ AutoPtr<RILRequest> RIL::ProcessSolicited(
 
     Int32 dataAvail = 0;
     p->DataAvail(&dataAvail);
-    Logger::E("leliang", "RIL::ProcessSolicited, request:%d,serial:%d,dataAvail:%d, error:%d",
-            rr->mRequest, serial, dataAvail, error);
+    //Logger::E("leliang", "RIL::ProcessSolicited, request:%d,serial:%d,dataAvail:%d, error:%d", rr->mRequest, serial, dataAvail, error);
     if (error == 0 || dataAvail > 0) {
         // either command succeeds or command fails but with data payload
         // try {
@@ -4108,7 +4107,7 @@ void RIL::ProcessUnsolicited(
 
     p->ReadInt32(&response);
 
-    Logger::E("leliang", "line:%d, func:%s, response:%d\n", __LINE__, __func__, response);
+    //Logger::E("leliang", "line:%d, func:%s, response:%d\n", __LINE__, __func__, response);
     // try
     switch(response) {
         /*
@@ -4832,7 +4831,7 @@ AutoPtr<IInterface> RIL::ResponseInts(
     for (Int32 i = 0 ; i < numInts ; i++) {
         Int32 value;
         p->ReadInt32(&value);
-        Logger::E("leliang", "line:%d, func:%s, index:%d, value:%d\n", __LINE__, __func__, i, value);
+        //Logger::E("leliang", "line:%d, func:%s, index:%d, value:%d\n", __LINE__, __func__, i, value);
         response->Set(i, value);
     }
 
@@ -4932,7 +4931,7 @@ AutoPtr<IInterface> RIL::ResponseString(
 
     p->ReadString(&response);
 
-    Logger::E("leliang", "line:%d, func:%s, response:%s\n", __LINE__, __func__, response.string());
+    //Logger::E("leliang", "line:%d, func:%s, response:%s\n", __LINE__, __func__, response.string());
     AutoPtr<ICharSequence> pResult;
     CString::New(response, (ICharSequence**)&pResult);
     return pResult;
@@ -4949,7 +4948,7 @@ AutoPtr<IInterface> RIL::ResponseStrings(
     for(Int32 i = 0; i < response->GetLength(); ++i) {
         if ((*response)[i] == NULL)
             (*response)[i] = String("");
-        Logger::E("leliang", "RIL::ResponseStrings, %d is %s", i, ((*response)[i]).string());
+        //Logger::E("leliang", "RIL::ResponseStrings, %d is %s", i, ((*response)[i]).string());
     }
     //fake code
     //AutoPtr<ArrayOf<String> > test;
@@ -5072,7 +5071,7 @@ ECode RIL::NeedsOldRilFeature(
 AutoPtr<IInterface> RIL::ResponseIccCardStatus(
     /* [in] */ RILParcel* p)
 {
-    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
+    //Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
     AutoPtr<IccCardApplicationStatus> appStatus;
 
     Boolean oldRil = FALSE;
@@ -5162,7 +5161,7 @@ AutoPtr<IInterface> RIL::ResponseCallList(
         // // str += mTestingEmergencyCall.Get();
         // RiljLog(str);
     }
-    Logger::E("leliang", "line:%d, func:%s, num:%d", __LINE__, __func__, num);
+    //Logger::E("leliang", "line:%d, func:%s, num:%d", __LINE__, __func__, num);
     for (Int32 i = 0; i < num; i++) {
         dc = new DriverCall();
 
@@ -5229,7 +5228,7 @@ AutoPtr<IInterface> RIL::ResponseCallList(
         // dc->mNumber = PhoneNumberUtils::StringFromStringAndTOA(dc->mNumber, dc->mTOA);
 
         response->Add(TO_IINTERFACE(dc));
-        Logger::E("leliang", "line:%d, func:%s, dc_obj:%p\n", __LINE__, __func__, TO_IINTERFACE(dc));
+        //Logger::E("leliang", "line:%d, func:%s, dc_obj:%p\n", __LINE__, __func__, TO_IINTERFACE(dc));
 
         if (dc->mIsVoicePrivacy) {
             mVoicePrivacyOnRegistrants->NotifyRegistrants();
