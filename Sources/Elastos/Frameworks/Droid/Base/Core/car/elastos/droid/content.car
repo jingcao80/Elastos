@@ -171,6 +171,7 @@ module
     interface Elastos.Droid.Content.ILoader;
     interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Content.IIIntentSender;
+    interface Elastos.Droid.Content.IIntentSenderOnFinished;
     interface Elastos.Droid.Content.IComponentName;
     interface Elastos.Droid.Content.IIRestrictionsManager;
     interface Elastos.Droid.Content.Res.IResources;
@@ -752,6 +753,17 @@ module
 
             interface IIntentSender;
             interface IParcelable;
+        }
+
+        [local]
+        class CIntentSenderFinishedDispatcher {
+            constructor(
+                [in] IIntentSender* host,
+                [in] IIntentSenderOnFinished* who,
+                [in] IHandler* handler);
+
+            interface IIntentReceiver;
+            interface IBinder;
         }
 
         singleton class CIntentSenderHelper {

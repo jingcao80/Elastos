@@ -1,10 +1,12 @@
 
-#ifndef __CMEMORYDUMPER_H__
-#define __CMEMORYDUMPER_H__
+#ifndef __ELASTOS_MEMORYDEUMPER_CMEMORYDUMPER_H__
+#define __ELASTOS_MEMORYDEUMPER_CMEMORYDUMPER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Core::Object;
 using Elastos::Utility::Etl::List;
 
 namespace Elastos {
@@ -21,7 +23,9 @@ public:
         /* [in] */ Int32 pid);
 
 private:
-    class MapInfoManager : public ElLightRefBase {
+    class MapInfoManager
+        : public Object
+    {
     public:
         struct MapInfo {
             struct MapInfo* next;
@@ -67,5 +71,5 @@ private:
 }
 }
 
-#endif // __CMEMORYDUMPER_H__
+#endif // __ELASTOS_MEMORYDEUMPER_CMEMORYDUMPER_H__
 

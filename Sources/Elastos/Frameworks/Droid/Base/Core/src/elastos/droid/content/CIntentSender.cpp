@@ -1,14 +1,14 @@
 
 #include "elastos/droid/content/CIntentSender.h"
+#include "elastos/droid/content/CIntentSenderFinishedDispatcher.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CUserHandle.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 #include <Elastos.Droid.App.h>
 
-using Elastos::Core::StringBuilder;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::EIID_IIntentReceiver;
 using Elastos::Droid::Content::EIID_IIIntentSender;
@@ -19,28 +19,51 @@ using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Content {
 
 //============================================================================
+//              CIntentSender::FinishedDispatcher::MyRunnable
+//============================================================================
+CIntentSender::FinishedDispatcher::MyRunnable::MyRunnable(
+    /* [in] */ FinishedDispatcher* host)
+    : mHost(host)
+{
+}
+
+ECode CIntentSender::FinishedDispatcher::MyRunnable::Run()
+{
+    return mHost->Run();
+}
+
+//============================================================================
 //              CIntentSender::FinishedDispatcher
 //============================================================================
-CAR_INTERFACE_IMPL_2(CIntentSender::FinishedDispatcher, Runnable, IIntentReceiver, IBinder)
+CAR_INTERFACE_IMPL_2(CIntentSender::FinishedDispatcher, Object, IIntentReceiver, IBinder)
 
-CIntentSender::FinishedDispatcher::FinishedDispatcher(
-    /* [in] */ CIntentSender* pi,
-    /* [in] */ IIntentSenderOnFinished* who,
-    /* [in] */ IHandler* handler)
-    : mIntentSender(pi)
-    , mWho(who)
-    , mHandler(handler)
-    , mResultCode(0)
+CIntentSender::FinishedDispatcher::FinishedDispatcher()
+    : mResultCode(0)
 {}
 
 CIntentSender::FinishedDispatcher::~FinishedDispatcher()
 {}
+
+ECode CIntentSender::FinishedDispatcher::constructor(
+    /* [in] */ IIntentSender* pi,
+    /* [in] */ IIntentSenderOnFinished* who,
+    /* [in] */ IHandler* handler)
+{
+    mIntentSender = (CIntentSender*)pi;
+    mWho = who;
+    mHandler = handler;
+    return NOERROR;
+}
+
 
 ECode CIntentSender::FinishedDispatcher::PerformReceive(
     /* [in] */ IIntent* intent,
@@ -60,8 +83,9 @@ ECode CIntentSender::FinishedDispatcher::PerformReceive(
         return Run();
     }
     else {
+        AutoPtr<IRunnable> runnable = new MyRunnable(this);
         Boolean result;
-        return mHandler->Post(this, &result);
+        return mHandler->Post(runnable, &result);
     }
 }
 
@@ -74,9 +98,7 @@ ECode CIntentSender::FinishedDispatcher::Run()
 ECode CIntentSender::FinishedDispatcher::ToString(
      /* [out] */ String* description)
 {
-    VALIDATE_NOT_NULL(description);
-    *description = String("CIntentSender::FinishedDispatcher");
-    return NOERROR;
+    return Object::ToString(description);
 }
 
 //============================================================================
@@ -136,18 +158,16 @@ ECode CIntentSender::SendIntent(
         FAIL_RETURN(context->GetContentResolver((IContentResolver**)&resolver));
         FAIL_RETURN(intent->ResolveTypeIfNeeded(resolver, &resolvedType));
     }
-    AutoPtr<FinishedDispatcher> dispatcher;
+    AutoPtr<IIntentReceiver> dispatcher;
     if (NULL != onFinished) {
-        dispatcher = new FinishedDispatcher(this, onFinished, handler);
+        CIntentSenderFinishedDispatcher::New(this, onFinished, handler, (IIntentReceiver**)&dispatcher);
     }
-
-    String targetStr = Object::ToString(mTarget);
 
     Int32 res = 0;
     FAIL_RETURN(mTarget->Send(code, intent, resolvedType, dispatcher, requiredPermission, &res));
 
     if (res < 0) {
-//        throw new SendIntentException();
+        Logger::I("CIntentSender", "SendIntentException: code: %d, intent: %s", code, TO_CSTR(intent));
         return E_SEND_INTENT_EXCEPTION;
     }
 

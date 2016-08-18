@@ -13,11 +13,7 @@ extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
         size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
 extern "C" void free_malloc_leak_info(uint8_t* info);
 
-extern "C" void* dlmalloc(size_t);
-
-extern "C" void  dlfree(void*);
-
-#define MAX_BACKTRACE_DEPTH 20
+#define MAX_BACKTRACE_DEPTH 50
 
 #define NULL_RETURN(x, y) \
     if (x == NULL) { \
@@ -62,6 +58,7 @@ ECode CMemoryDumper::DumpMemory(
         AllocEntry * entries = new AllocEntry[count];
 
         for (size_t i = 0; i < count; i++) {
+            // Each entry should be size_t, size_t, intptr_t[backtraceSize]
             AllocEntry *e = &entries[i];
 
             e->size = *reinterpret_cast<size_t *>(ptr);
@@ -74,11 +71,12 @@ ECode CMemoryDumper::DumpMemory(
             ptr += sizeof(intptr_t) * backtraceSize;
         }
 
+        // Now we need to sort the entries.  They come sorted by size but
+        // not by stack trace which causes problems using diff.
         bool moved;
-        size_t remaining = count;
         do {
             moved = false;
-            for (size_t i = 0; i < (remaining-- - 1); i++) {
+            for (size_t i = 0; i < (count - 1); i++) {
                 AllocEntry *e1 = &entries[i];
                 AllocEntry *e2 = &entries[i+1];
 
@@ -131,10 +129,10 @@ ECode CMemoryDumper::Print(
 {
     List<String>::Iterator it = list->Begin();
     for (Int32 cnt = 0; it != list->End() && cnt < MAX_BACKTRACE_DEPTH; ++it, ++cnt) {
-        unsigned int pc, rpc;
         Slogger::V(TAG, "pc = %s", it->string());
-        StringUtils::ParseInt32(*it, 16, &pc);
         AutoPtr<MapInfoManager> mapInfo = new MapInfoManager(pid);
+        unsigned pc = strtoul((*it).string(), NULL, 16);
+        unsigned rpc;
         const MapInfoManager::MapInfo* mi = mapInfo->Pc2Mapinfo(pc, &rpc);
         Slogger::V(TAG, "\t#%02d  pc %08x  %s", cnt,
             mi ? rpc : pc,
@@ -173,7 +171,7 @@ ECode CMemoryDumper::OutputBackTrace(
     /* [in] */ const String& diffFile,
     /* [in] */ Int32 pid)
 {
-    FILE *fd = fopen((const char*)diffFile, "r");
+    FILE *fd = fopen(diffFile.string(), "r");
     char data[LINE_SIZE_LIMIT];
     if (fd) {
         Int32 i = 0;
@@ -227,7 +225,8 @@ CMemoryDumper::MapInfoManager::~MapInfoManager()
 }
 
 CMemoryDumper::MapInfoManager::MapInfo* CMemoryDumper::MapInfoManager::ParseMapsLine(
-    /* [in] */ char* line) {
+    /* [in] */ char* line)
+{
     Int32 len = strlen(line);
 
     if (len < 1) return 0;
@@ -236,7 +235,7 @@ CMemoryDumper::MapInfoManager::MapInfo* CMemoryDumper::MapInfoManager::ParseMaps
     if (len < 50) return 0;
     if (line[20] != 'x') return 0;
 
-    MapInfo* mi = static_cast<MapInfo*>(dlmalloc(sizeof(MapInfo) + (len - 47)));
+    MapInfo* mi = static_cast<MapInfo*>(malloc(sizeof(MapInfo) + (len - 47)));
     if (mi == 0) return 0;
 
     mi->start = strtoul(line, 0, 16);
@@ -246,7 +245,7 @@ CMemoryDumper::MapInfoManager::MapInfo* CMemoryDumper::MapInfoManager::ParseMaps
      */
     mi->next = 0;
     strcpy(mi->name, line + 49);
-
+    // Slogger::V(TAG, "map %s, address (%08x, %08x)", mi->name, mi->start, mi->end);
     return mi;
 }
 
@@ -275,7 +274,7 @@ void CMemoryDumper::MapInfoManager::DeinitMapInfo()
     while (miList) {
         del = miList;
         miList = miList->next;
-        dlfree(del);
+        free(del);
     }
 }
 

@@ -3,11 +3,13 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_App_CPendingIntentFinishedDispatcher.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/os/Runnable.h"
 
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentReceiver;
 using Elastos::Droid::App::IPendingIntent;
@@ -18,9 +20,24 @@ namespace Droid {
 namespace App {
 
 CarClass(CPendingIntentFinishedDispatcher)
-    , public Runnable
+    , public Object
     , public IIntentReceiver
+    , public IBinder
 {
+private:
+    class MyRunnable
+        : public Runnable
+    {
+    public:
+        MyRunnable(
+            /* [in] */ IWeakReference* host);
+
+        CARAPI Run();
+
+    private:
+        AutoPtr<IWeakReference> mWeakHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

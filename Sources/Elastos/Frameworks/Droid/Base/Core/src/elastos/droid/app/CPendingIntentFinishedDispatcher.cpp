@@ -1,5 +1,4 @@
 
-#include "Elastos.Droid.Os.h"
 #include "elastos/droid/app/CPendingIntentFinishedDispatcher.h"
 #include "unistd.h"
 
@@ -8,9 +7,27 @@ namespace Droid {
 namespace App {
 
 using Elastos::Core::EIID_IRunnable;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Content::EIID_IIntentReceiver;
 
-CAR_INTERFACE_IMPL(CPendingIntentFinishedDispatcher, Runnable, IIntentReceiver)
+CPendingIntentFinishedDispatcher::MyRunnable::MyRunnable(
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
+{}
+
+CPendingIntentFinishedDispatcher::MyRunnable::Run()
+{
+    AutoPtr<IIntentReceiver> rrObj;
+    mWeakHost->Resolve(EIID_IIntentReceiver, (IInterface**)&rrObj);
+    if (rrObj == NULL) {
+        return NOERROR;
+    }
+
+    CPendingIntentFinishedDispatcher* host = (CPendingIntentFinishedDispatcher*)rrObj.Get();
+    return host->Run();
+}
+
+CAR_INTERFACE_IMPL_2(CPendingIntentFinishedDispatcher, Object, IIntentReceiver, IBinder)
 
 CAR_OBJECT_IMPL(CPendingIntentFinishedDispatcher)
 
@@ -31,6 +48,7 @@ ECode CPendingIntentFinishedDispatcher::constructor(
     /* [in] */ IPendingIntentOnFinished* who,
     /* [in] */ IHandler* handler)
 {
+    assert(who != NULL);
     mPendingIntent = pi;
     mWho = who;
     mHandler = handler;
@@ -54,8 +72,12 @@ ECode CPendingIntentFinishedDispatcher::PerformReceive(
     Boolean result;
     if (NULL == mHandler) {
         FAIL_RETURN(Run());
-    } else {
-        mHandler->Post(IRunnable::Probe(this), &result);
+    }
+    else {
+        AutoPtr<IWeakReference> wr;
+        GetWeakReference((IWeakReference**)&wr);
+        AutoPtr<IRunnable> runnable = new MyRunnable(wr);
+        mHandler->Post(runnable, &result);
     }
     return NOERROR;
 }
@@ -68,7 +90,7 @@ ECode CPendingIntentFinishedDispatcher::Run()
 ECode CPendingIntentFinishedDispatcher::ToString(
     /* [out] */ String* str)
 {
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 } // namespace App

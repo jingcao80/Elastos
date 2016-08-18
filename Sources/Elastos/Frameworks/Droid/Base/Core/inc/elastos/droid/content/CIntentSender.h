@@ -28,17 +28,32 @@ CarClass(CIntentSender)
     , public IIntentSender
     , public IParcelable
 {
-private:
+public:
     class FinishedDispatcher
-        : public Runnable
+        : public Object
         , public IIntentReceiver
         , public IBinder
     {
+    private:
+        class MyRunnable
+            : public Runnable {
+        public:
+            MyRunnable(
+                /* [in] */ FinishedDispatcher* host);
+
+            CARAPI Run();
+
+        private:
+            FinishedDispatcher* mHost;
+        };
+
     public:
         CAR_INTERFACE_DECL()
 
-        FinishedDispatcher(
-            /* [in] */ CIntentSender* pi,
+        FinishedDispatcher();
+
+        CARAPI constructor(
+            /* [in] */ IIntentSender* pi,
             /* [in] */ IIntentSenderOnFinished* who,
             /* [in] */ IHandler* handler);
 

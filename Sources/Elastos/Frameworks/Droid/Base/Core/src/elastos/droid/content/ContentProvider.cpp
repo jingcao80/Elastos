@@ -105,7 +105,7 @@ String ContentProvider::GetTlsCallingPackage()
         CString::New(String(""), (ICharSequence**)&callingPackage);
 
         ASSERT_TRUE(pthread_setspecific(mTlsKey, callingPackage.Get()) == 0);
-        callingPackage->AddRef();
+        REFCOUNT_ADD(callingPackage)
     }
     assert(callingPackage.Get() != NULL && "check GetCallingPackage failed!");
     String value;
@@ -119,12 +119,12 @@ void ContentProvider::SetTlsCallingPackage(
     AutoPtr<ICharSequence> callingPackage = (ICharSequence*)pthread_getspecific(mTlsKey);
     if (callingPackage != NULL) {
         REFCOUNT_RELEASE(callingPackage)
+        callingPackage = NULL;
     }
 
-    callingPackage = NULL;
     CString::New(pakcage, (ICharSequence**)&callingPackage);
     ASSERT_TRUE(pthread_setspecific(mTlsKey, callingPackage.Get()) == 0);
-    callingPackage->AddRef();
+    REFCOUNT_ADD(callingPackage)
 }
 
 ContentProvider::ContentProvider()

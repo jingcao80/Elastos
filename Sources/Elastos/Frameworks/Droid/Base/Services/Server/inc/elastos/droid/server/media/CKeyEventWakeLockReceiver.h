@@ -4,6 +4,7 @@
 
 #include "_Elastos_Droid_Server_Media_CKeyEventWakeLockReceiver.h"
 #include "elastos/droid/os/ResultReceiver.h"
+#include "elastos/droid/os/Runnable.h"
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentOnFinished;
@@ -11,6 +12,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::ResultReceiver;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::Runnable;
 
 namespace Elastos {
 namespace Droid {
@@ -22,9 +24,22 @@ class CSessionManagerImpl;
 
 CarClass(CKeyEventWakeLockReceiver)
     , public ResultReceiver
-    , public IRunnable
     , public IPendingIntentOnFinished
 {
+private:
+    class MyRunnable
+        : public Runnable
+    {
+    public:
+        MyRunnable(
+            /* [in] */ IWeakReference* host);
+
+        CARAPI Run();
+
+    private:
+        AutoPtr<IWeakReference> mWeakHost;
+    };
+
 public:
     CKeyEventWakeLockReceiver()
         : mRefCount(0)
@@ -63,6 +78,7 @@ private:
     AutoPtr<IHandler> mHandler;
     Int32 mRefCount;
     Int32 mLastTimeoutId;
+    AutoPtr<IRunnable> mRunnable;
 
     MediaSessionService* mHost;
 

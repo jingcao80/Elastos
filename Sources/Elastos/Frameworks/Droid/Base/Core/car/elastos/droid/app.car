@@ -980,7 +980,7 @@ module
             [in] IHandler* handler);
 
         interface IIntentReceiver;
-        interface IRunnable;
+        interface IBinder;
     }
 
     singleton class CPendingIntentHelper {

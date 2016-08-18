@@ -4,12 +4,14 @@
 #include "elastos/droid/system/OsConstants.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Libcore.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::Debug;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::IO::IFileDescriptor;
 using Elastos::Droid::System::OsConstants;
+using Elastos::Utility::Logging::Logger;
 
 using Libcore::IO::ILibcore;
 using Libcore::IO::CLibcore;
@@ -43,8 +45,12 @@ ECode MemoryDumper::Dump(
     AutoPtr<IIoBridge> ioBridge;
     CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
     AutoPtr<IFileDescriptor> ifd;
-    ioBridge->Open(path, OsConstants::_O_RDWR | OsConstants::_O_CREAT | OsConstants::_O_TRUNC,
+    ECode ec = ioBridge->Open(path, OsConstants::_O_RDWR | OsConstants::_O_CREAT | OsConstants::_O_TRUNC,
         (IFileDescriptor**)&ifd);
+    if (FAILED(ec) || ifd == NULL) {
+        Logger::E("MemoryDumper", "Failed to open %s, ec=%08x", path.string(), ec);
+        return ec;
+    }
     return Debug::DumpHeap(ifd);
 }
 

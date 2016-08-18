@@ -1181,7 +1181,6 @@ module
             [in] Handle64 host);
 
         interface IResultReceiver;
-        interface IRunnable;
         interface IPendingIntentOnFinished;
         interface IParcelable;
     }

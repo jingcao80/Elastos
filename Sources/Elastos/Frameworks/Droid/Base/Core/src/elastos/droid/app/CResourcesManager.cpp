@@ -239,13 +239,13 @@ ECode CResourcesManager::GetTopLevelResources(
     AutoPtr<IThemeConfig> themeConfig = GetThemeConfig();
     AutoPtr<IResourcesKey> key = new ResourcesKey(resDir, displayId,
             overrideConfiguration, scale, isThemeable, themeConfig, token);
-
+    IInterface* keyObj = TO_IINTERFACE(key);
     AutoPtr<IResources> r;
     {
         AutoLock syncLock(this);
         // Resources is app scale dependent.
         AutoPtr<IInterface> obj, resObj;
-        mActiveResources->Get(TO_IINTERFACE(key), (IInterface**)&obj);
+        mActiveResources->Get(keyObj, (IInterface**)&obj);
         if (obj != NULL) {
             IWeakReference* wr = IWeakReference::Probe(obj);
             wr->Resolve(EIID_IInterface, (IInterface**)&resObj);
@@ -393,9 +393,10 @@ ECode CResourcesManager::GetTopLevelResources(
         Logger::I(TAG, "=======================================================");
     }
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj, resObj;
-        mActiveResources->Get(TO_IINTERFACE(key), (IInterface**)&obj);
+        mActiveResources->Get(keyObj, (IInterface**)&obj);
         if (obj != NULL) {
             IWeakReference* wr = IWeakReference::Probe(obj);
             wr->Resolve(EIID_IInterface, (IInterface**)&resObj);
@@ -420,7 +421,7 @@ ECode CResourcesManager::GetTopLevelResources(
         IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(r);
         AutoPtr<IWeakReference> wr;
         wrs->GetWeakReference((IWeakReference**)&wr);
-        mActiveResources->Put(TO_IINTERFACE(key), TO_IINTERFACE(wr));
+        mActiveResources->Put(keyObj, TO_IINTERFACE(wr));
         *result = r;
         REFCOUNT_ADD(*result)
     }

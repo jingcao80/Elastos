@@ -109,7 +109,6 @@ static int CompareHeapRecords(const void* vrec1, const void* vrec2)
 ECode Debug::DumpHeap(
     /* [in] */ IFileDescriptor* fd)
 {
-    Slogger::D(TAG, " >> DumpHeap <<");
     /* dup() the descriptor so we don't close the original with fclose() */
     Int32 origFd;
     fd->GetDescriptor(&origFd);
