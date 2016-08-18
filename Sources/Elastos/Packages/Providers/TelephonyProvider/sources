@@ -21,6 +21,9 @@ SOURCES += CLowStorageMonitor.cpp
 SOURCES += MmsSmsDatabaseHelper.cpp
 SOURCES += CMmsProvider.cpp
 SOURCES += CMmsSmsProvider.cpp
+SOURCES += CBlacklistProvider.cpp
+SOURCES += CHbpcdLookupDatabaseHelper.cpp
+SOURCES += CHbpcdLookupProvider.cpp
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

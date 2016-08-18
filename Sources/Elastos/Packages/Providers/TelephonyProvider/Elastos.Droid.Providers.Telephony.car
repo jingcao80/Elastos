@@ -4,11 +4,14 @@ module
 
     merge("car/elastos/droid/providers/telephony/MmsSmsProvider.car");
     merge("car/elastos/droid/providers/telephony/MmsProvider.car");
+    merge("car/elastos/droid/providers/telephony/HbpcdLookupProvider.car");
 
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IContentProvider;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Database.Sqlite.ISQLiteOpenHelper;
 
     namespace Elastos {
     namespace Droid {
@@ -48,6 +51,32 @@ module
             constructor();
 
             interface IMmsSmsProvider;
+            interface IContentProvider;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+        }
+
+        class CBlacklistProvider {
+            constructor();
+
+            interface IContentProvider;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+        }
+
+        [local]
+        class CHbpcdLookupDatabaseHelper {
+            constructor();
+
+            constructor(
+                [in] IContext* context);
+
+            interface ISQLiteOpenHelper;
+        }
+
+        class CHbpcdLookupProvider {
+            constructor();
+
             interface IContentProvider;
             interface IComponentCallbacks;
             interface IComponentCallbacks2;
