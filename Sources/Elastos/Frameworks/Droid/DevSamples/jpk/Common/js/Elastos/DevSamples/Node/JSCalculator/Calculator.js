@@ -11,10 +11,10 @@ module.exports = function(aoElastos, aoActivity){
     var oActivity = aoActivity.ActivityInstance;
     var oHandler = aoActivity.ActivityHandler;
 
-    function CActivityListener(host) {
-        this.mHost = host;
-    }
-    var _apt = CActivityListener.prototype;
+    // function CActivityListener(host) {
+    //     this.mHost = host;
+    // }
+    // var _apt = CActivityListener.prototype;
 
     var IView__VISIBLE = 0x00000000;
     var IView__INVISIBLE = 0x00000004;
@@ -1225,117 +1225,213 @@ module.exports = function(aoElastos, aoActivity){
 // import com.android.calculator2.CalculatorEditText.OnTextSizeChangeListener;
 // import com.android.calculator2.CalculatorExpressionEvaluator.EvaluateCallback;
 
+    var CalculatorExpressionTokenizer = require("CalculatorExpressionTokenizer.js")(aoElastos, aoActivity);
+    var CalculatorExpressionEvaluator = require("CalculatorExpressionEvaluator.js")(aoElastos, aoActivity);
+
 // public class Calculator extends Activity
 //         implements OnTextSizeChangeListener, EvaluateCallback, OnLongClickListener {
+    function CActivityListener(host) {
+        this.mHost = host;
+    }
+    var _apt = CActivityListener.prototype;
 
 //     private static final String NAME = Calculator.class.getName();
+        var NAME = Calculator.class.getName();
 
 //     // instance state keys
 //     private static final String KEY_CURRENT_STATE = NAME + "_currentState";
+        var KEY_CURRENT_STATE = NAME + "_currentState";
 //     private static final String KEY_CURRENT_EXPRESSION = NAME + "_currentExpression";
+        var KEY_CURRENT_EXPRESSION = NAME + "_currentExpression";
 
 //     /**
 //      * Constant for an invalid resource id.
 //      */
 //     public static final int INVALID_RES_ID = -1;
+        var INVALID_RES_ID = -1;
 
 //     private enum CalculatorState {
 //         INPUT, EVALUATE, RESULT, ERROR
 //     }
+        var CalculatorState = {
+            INPUT:0, EVALUATE:1, RESULT:2, ERROR:3
+        };
 
 //     private final TextWatcher mFormulaTextWatcher = new TextWatcher() {
+        var mFormulaTextWatcher = {
 //         @Override
 //         public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+            BeforeTextChanged : function(charSequence, start, count, after) {
 //         }
+            },
 
 //         @Override
 //         public void onTextChanged(CharSequence charSequence, int start, int count, int after) {
+            OnTextChanged : function(charSequence, start, count, after) {
 //         }
+            },
 
 //         @Override
 //         public void afterTextChanged(Editable editable) {
+            AfterTextChanged : function(editable) {
 //             setState(CalculatorState.INPUT);
+                setState(CalculatorState.INPUT);
 //             mEvaluator.evaluate(editable, Calculator.this);
+                mEvaluator.evaluate(editable, oActivity);
 //         }
+            }
 //     };
+        };
 
 //     private final OnKeyListener mFormulaOnKeyListener = new OnKeyListener() {
+        var mFormulaOnKeyListener = {
 //         @Override
 //         public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+            OnKey : function(view, keyCode, keyEvent) {
 //             switch (keyCode) {
+                switch (keyCode) {
 //                 case KeyEvent.KEYCODE_NUMPAD_ENTER:
+                    case KeyEvent.KEYCODE_NUMPAD_ENTER:
 //                 case KeyEvent.KEYCODE_ENTER:
+                    case KeyEvent.KEYCODE_ENTER:
+                    {
 //                     if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                        if (keyEvent.GetAction() == KeyEvent.ACTION_UP) {
 //                         mCurrentButton = mEqualButton;
+                            mCurrentButton = mEqualButton;
 //                         onEquals();
+                            onEquals();
 //                     }
+                        }
 //                     // ignore all other actions
 //                     return true;
+                        return true;
+                    }
 //             }
+                }
 //             return false;
+                return false;
 //         }
+            }
 //     };
+        };
 
 //     private final Editable.Factory mFormulaEditableFactory = new Editable.Factory() {
+        var mFormulaEditableFactory = {
 //         @Override
 //         public Editable newEditable(CharSequence source) {
+            newEditable : function (source, result) {
 //             final boolean isEdited = mCurrentState == CalculatorState.INPUT
 //                     || mCurrentState == CalculatorState.ERROR;
+                var isEdited = mCurrentState == CalculatorState.INPUT
+                        || mCurrentState == CalculatorState.ERROR;
 //             return new CalculatorExpressionBuilder(source, mTokenizer, isEdited);
+                result.data = new require("CalculatorExpressionBuilder.js")(aoElastos, aoActivity)(source, mTokenizer, isEdited);
 //         }
+            }
 //     };
+        };
 
 //     private CalculatorState mCurrentState;
+        var mCurrentState;
 //     private CalculatorExpressionTokenizer mTokenizer;
+        var mTokenizer;
 //     private CalculatorExpressionEvaluator mEvaluator;
+        var mEvaluator;
 
 //     private View mDisplayView;
+        var mDisplayView;
 //     private CalculatorEditText mFormulaEditText;
+        var mFormulaEditText;
 //     private CalculatorEditText mResultEditText;
+        var mResultEditText;
 //     private ViewPager mPadViewPager;
+        var mPadViewPager;
 //     private View mDeleteButton;
+        var mDeleteButton;
 //     private View mEqualButton;
+        var mEqualButton;
 //     private View mClearButton;
+        var mClearButton;
 
 //     private View mCurrentButton;
+        var mCurrentButton;
 //     private Animator mCurrentAnimator;
+        var mCurrentAnimator;
 
 //     @Override
 //     protected void onCreate(Bundle savedInstanceState) {
+        _apt.OnCreate = function(context, savedInstanceState){
+            elog('====jso_activity_cb====OnCreate.begin==999==');
+
 //         super.onCreate(savedInstanceState);
 //         setContentView(R.layout.activity_calculator);
+            oActivity.SetContentView(R.layout.activity_calculator);
 
 //         mDisplayView = findViewById(R.id.display);
+            mDisplayView = oActivity.FindViewById(R.id.display);
 //         mFormulaEditText = (CalculatorEditText) findViewById(R.id.formula);
+            mFormulaEditText = oActivity.FindViewById(R.id.formula);
 //         mResultEditText = (CalculatorEditText) findViewById(R.id.result);
+            mResultEditText = oActivity.FindViewById(R.id.result);
 //         mPadViewPager = (ViewPager) findViewById(R.id.pad_pager);
+            mPadViewPager = oActivity.FindViewById(R.id.pad_pager);
 //         mDeleteButton = findViewById(R.id.del);
+            mDeleteButton = oActivity.FindViewById(R.id.del);
 //         mClearButton = findViewById(R.id.clr);
+            mClearButton = oActivity.FindViewById(R.id.clr);
 
 //         mEqualButton = findViewById(R.id.pad_numeric).findViewById(R.id.eq);
+            mEqualButton = oActivity.FindViewById(R.id.pad_numeric).FindViewById(R.id.eq);
 //         if (mEqualButton == null || mEqualButton.getVisibility() != View.VISIBLE) {
+            if (mEqualButton == null || mEqualButton.GetVisibility() != IView__VISIBLE) {
 //             mEqualButton = findViewById(R.id.pad_operator).findViewById(R.id.eq);
+                mEqualButton = oActivity.FindViewById(R.id.pad_operator).FindViewById(R.id.eq);
 //         }
+            }
 
 //         mTokenizer = new CalculatorExpressionTokenizer(this);
+            mTokenizer = new CalculatorExpressionTokenizer(this);
 //         mEvaluator = new CalculatorExpressionEvaluator(mTokenizer);
+            mEvaluator = new CalculatorExpressionEvaluator(mTokenizer);
 
 //         savedInstanceState = savedInstanceState == null ? Bundle.EMPTY : savedInstanceState;
+            var bhl = Droid_New("Elastos.Droid.Os.CBundleHelper");
+            var empty = bhl.GetEMPTY();
+            savedInstanceState = savedInstanceState == null ? empty : savedInstanceState;
 //         setState(CalculatorState.values()[
 //                 savedInstanceState.getInt(KEY_CURRENT_STATE, CalculatorState.INPUT.ordinal())]);
+            oActivity.SetState(
+                    savedInstanceState.GetInt32(KEY_CURRENT_STATE, CalculatorState.INPUT));
 //         mFormulaEditText.setText(mTokenizer.getLocalizedExpression(
 //                 savedInstanceState.getString(KEY_CURRENT_EXPRESSION, "")));
+            mFormulaEditText.SetText(mTokenizer.GetLocalizedExpression(
+                    savedInstanceState.GetString(KEY_CURRENT_EXPRESSION, "")));
 //         mEvaluator.evaluate(mFormulaEditText.getText(), this);
+            //TODO:this shoud be convert to IEvaluateCallback automatically
+            //TODO:just as: IEvaluateCallback::Probe(this)
+            mEvaluator.Evaluate(mFormulaEditText.GetText(), this);
 
 //         mFormulaEditText.setEditableFactory(mFormulaEditableFactory);
+            mFormulaEditText.SetEditableFactory(mFormulaEditableFactory);
 //         mFormulaEditText.addTextChangedListener(mFormulaTextWatcher);
+            mFormulaEditText.AddTextChangedListener(mFormulaTextWatcher);
 //         mFormulaEditText.setOnKeyListener(mFormulaOnKeyListener);
+            mFormulaEditText.SetOnKeyListener(mFormulaOnKeyListener);
 //         mFormulaEditText.setOnTextSizeChangeListener(this);
+            mFormulaEditText.SetOnTextSizeChangeListener(this);
 //         mDeleteButton.setOnLongClickListener(this);
+            mDeleteButton.DetOnLongClickListener(this);
+
+            elog('====jso_activity_cb====OnCreate.end==999==');
 //     }
+        }
 
 //     @Override
 //     protected void onSaveInstanceState(@NonNull Bundle outState) {
+        _apt.OnSaveInstanceState = function(context, outState){
+            elog('====jso_activity_cb====OnSaveInstanceState.begin====');
+
 //         // If there's an animation in progress, cancel it first to ensure our state is up-to-date.
 //         if (mCurrentAnimator != null) {
 //             mCurrentAnimator.cancel();
@@ -1347,8 +1443,12 @@ module.exports = function(aoElastos, aoActivity){
 //         outState.putString(KEY_CURRENT_EXPRESSION,
 //                 mTokenizer.getNormalizedExpression(mFormulaEditText.getText().toString()));
 //     }
+        }
 
 //     private void setState(CalculatorState state) {
+        function setState(state) {
+            elog('====Calculator.js====setState.begin====');
+
 //         if (mCurrentState != state) {
 //             mCurrentState = state;
 
@@ -1375,9 +1475,13 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     @Override
 //     public void onBackPressed() {
+        _apt.OnBackPressed = function(context){
+            elog('====jso_activity_cb====OnBackPressed.begin====');
+
 //         if (mPadViewPager == null || mPadViewPager.getCurrentItem() == 0) {
 //             // If the user is currently looking at the first pad (or the pad is not paged),
 //             // allow the system to handle the Back button.
@@ -1387,9 +1491,13 @@ module.exports = function(aoElastos, aoActivity){
 //             mPadViewPager.setCurrentItem(mPadViewPager.getCurrentItem() - 1);
 //         }
 //     }
+        }
 
 //     @Override
 //     public void onUserInteraction() {
+        _apt.OnUserInteraction = function(context){
+            elog('====jso_activity_cb====OnUserInteraction.begin====');
+
 //         super.onUserInteraction();
 
 //         // If there's an animation in progress, cancel it so the user interaction can be handled
@@ -1398,8 +1506,12 @@ module.exports = function(aoElastos, aoActivity){
 //             mCurrentAnimator.cancel();
 //         }
 //     }
+        }
 
 //     public void onButtonClick(View view) {
+        function onButtonClick(view) {
+            elog('====Calculator.js====onButtonClick.begin====');
+
 //         mCurrentButton = view;
 
 //         switch (view.getId()) {
@@ -1425,9 +1537,13 @@ module.exports = function(aoElastos, aoActivity){
 //                 break;
 //         }
 //     }
+        }
 
 //     @Override
 //     public boolean onLongClick(View view) {
+        _apt.OnLongClick = function(context, view){
+            elog('====jso_activity_cb====OnLongClick.begin====');
+
 //         mCurrentButton = view;
 
 //         if (view.getId() == R.id.del) {
@@ -1436,9 +1552,13 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return false;
 //     }
+        }
 
 //     @Override
 //     public void onEvaluate(String expr, String result, int errorResourceId) {
+        _apt.OnEvaluate = function(context, expr, result, errorResourceId){
+            elog('====jso_activity_cb====OnEvaluate.begin====');
+
 //         if (mCurrentState == CalculatorState.INPUT) {
 //             mResultEditText.setText(result);
 //         } else if (errorResourceId != INVALID_RES_ID) {
@@ -1452,9 +1572,13 @@ module.exports = function(aoElastos, aoActivity){
 
 //         mFormulaEditText.requestFocus();
 //     }
+        }
 
 //     @Override
 //     public void onTextSizeChanged(final TextView textView, float oldSize) {
+        _apt.OnTextSizeChanged = function(context, textView, oldSize){
+            elog('====jso_activity_cb====OnTextSizeChanged.begin====');
+
 //         if (mCurrentState != CalculatorState.INPUT) {
 //             // Only animate text changes that occur from user input.
 //             return;
@@ -1478,15 +1602,23 @@ module.exports = function(aoElastos, aoActivity){
 //         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
 //         animatorSet.start();
 //     }
+        }
 
 //     private void onEquals() {
+        function onEquals() {
+            elog('====Calculator.js====onEquals.begin====');
+
 //         if (mCurrentState == CalculatorState.INPUT) {
 //             setState(CalculatorState.EVALUATE);
 //             mEvaluator.evaluate(mFormulaEditText.getText(), this);
 //         }
 //     }
+        }
 
 //     private void onDelete() {
+        function onDelete() {
+            elog('====Calculator.js====onDelete.begin====');
+
 //         // Delete works like backspace; remove the last character from the expression.
 //         final Editable formulaText = mFormulaEditText.getEditableText();
 //         final int formulaLength = formulaText.length();
@@ -1494,8 +1626,12 @@ module.exports = function(aoElastos, aoActivity){
 //             formulaText.delete(formulaLength - 1, formulaLength);
 //         }
 //     }
+        }
 
 //     private void reveal(View sourceView, int colorRes, AnimatorListener listener) {
+        function reveal(sourceView, colorRes, listener) {
+            elog('====Calculator.js====reveal.begin====');
+
 //         final ViewGroupOverlay groupOverlay =
 //                 (ViewGroupOverlay) getWindow().getDecorView().getOverlay();
 
@@ -1548,8 +1684,12 @@ module.exports = function(aoElastos, aoActivity){
 //         mCurrentAnimator = animatorSet;
 //         animatorSet.start();
 //     }
+        }
 
 //     private void onClear() {
+        function onClear() {
+            elog('====Calculator.js====onClear.begin====');
+
 //         if (TextUtils.isEmpty(mFormulaEditText.getText())) {
 //             return;
 //         }
@@ -1561,8 +1701,12 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         });
 //     }
+        }
 
 //     private void onError(final int errorResourceId) {
+        function onError(errorResourceId) {
+            elog('====Calculator.js====onError.begin====');
+
 //         if (mCurrentState != CalculatorState.EVALUATE) {
 //             // Only animate error on evaluate.
 //             mResultEditText.setText(errorResourceId);
@@ -1577,8 +1721,12 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         });
 //     }
+        }
 
 //     private void onResult(final String result) {
+        function onResult(result) {
+            elog('====Calculator.js====onResult.begin====');
+
 //         // Calculate the values needed to perform the scale and translation animations,
 //         // accounting for how the scale will affect the final position of the text.
 //         final float resultScale =
@@ -1640,17 +1788,18 @@ module.exports = function(aoElastos, aoActivity){
 //         mCurrentAnimator = animatorSet;
 //         animatorSet.start();
 //     }
+        }
 // }
 
 //--------.java----end----
 
 //--------Listener----default begin----
-//
+
     // _apt.OnCreate = function(context, savedInstanceState){
     //     elog('====jso_activity_cb====OnCreate.begin====');
     // }  //OnCreate
     _apt.OnStart = function(context){
-        elog('====jso_activity_cb====OnStart.begin====');
+        elog('====jso_activity_cb====OnStart.begin==000==');
     }
     _apt.OnResume = function(context){
         elog('====jso_activity_cb====OnResume.begin====');
@@ -1685,5 +1834,6 @@ module.exports = function(aoElastos, aoActivity){
 
 //--------Listener----default end----
 
-    return new CActivityListener(oActivity);
+    var oListener = new CActivityListener(oActivity);
+    return oListener;
 };  //module.exports

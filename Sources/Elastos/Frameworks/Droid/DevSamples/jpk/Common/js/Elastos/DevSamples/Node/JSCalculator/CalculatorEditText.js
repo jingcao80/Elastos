@@ -170,7 +170,7 @@ module.exports = function(aoElastos, aoActivity){
             }
 //         setTextSize(TypedValue.COMPLEX_UNIT_PX, mMaximumTextSize);
             var TypedValue__COMPLEX_UNIT_PX = 0; //TODO
-            _this.SetTextSize(_this, TypedValue__COMPLEX_UNIT_PX, this.mMaximumTextSize);
+            _this.SetTextSize(TypedValue__COMPLEX_UNIT_PX, this.mMaximumTextSize);
 
 //         setMinHeight(getLineHeight() + getCompoundPaddingBottom() + getCompoundPaddingTop());
             _this.SetMinHeight(_this.GetLineHeight() + _this.GetCompoundPaddingBottom() + _this.GetCompoundPaddingTop());
