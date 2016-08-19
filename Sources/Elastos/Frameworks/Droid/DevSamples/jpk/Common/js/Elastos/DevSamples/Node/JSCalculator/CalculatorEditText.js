@@ -25,21 +25,21 @@ module.exports = function(aoElastos, aoActivity){
 
 //--------.java----begin----
 
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// /*
+//  * Copyright (C) 2014 The Android Open Source Project
+//  *
+//  * Licensed under the Apache License, Version 2.0 (the "License");
+//  * you may not use this file except in compliance with the License.
+//  * You may obtain a copy of the License at
+//  *
+//  *   http://www.apache.org/licenses/LICENSE-2.0
+//  *
+//  * Unless required by applicable law or agreed to in writing, software
+//  * distributed under the License is distributed on an "AS IS" BASIS,
+//  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  * See the License for the specific language governing permissions and
+//  * limitations under the License.
+// */
 
 // package com.android.calculator2;
 
@@ -380,47 +380,6 @@ module.exports = function(aoElastos, aoActivity){
 // }
 
 //--------.java----end----
-
-//--------Listener----default begin----
-
-//     // _pt.OnCreate = function(context, savedInstanceState){
-//     //     elog('====jso_activity_cb====OnCreate.begin====');
-//     // }  //OnCreate
-//     _pt.OnStart = function(context){
-//         elog('====jso_activity_cb====OnStart.begin====');
-//     }
-//     _pt.OnResume = function(context){
-//         elog('====jso_activity_cb====OnResume.begin====');
-//     }
-//     _pt.OnPause = function(context){
-//         elog('====jso_activity_cb====OnPause.begin====');
-//     }
-//     _pt.OnStop = function(context){
-//         elog('====jso_activity_cb====OnStop.begin====');
-//     }
-//     _pt.OnDestroy = function(context){
-//         elog('====jso_activity_cb====OnDestroy.begin====');
-//     }
-//     _pt.OnActivityResult = function(context, aiRequestCode, aiResultCode, aoIntentData){
-//         elog('====jso_activity_cb====OnActivityResult.begin====');
-//     }
-//     _pt.OnCreateDialog = function(context, aiId, out_aoDialog){
-//         elog('====jso_activity_cb====OnCreateDialog.begin====');
-//     }   //OnCreateDialog
-//     _pt.OnCreateContextMenu = function(context, aoMenu, aoV, aoMenuInfo){
-//         elog('====jso_activity_cb====OnCreateContextMenu.begin====');
-//     }
-//     _pt.CreateNavigationBar = function(context){
-//         elog('====jso_activity_cb====CreateNavigationBar.begin====');
-//     }
-//     _pt.OnExchangeData = function(aiTimes ,aoInObject, aoOutObject) {
-//         elog('====jso_activity_cb====OnExchangeData.begin====');
-//     }
-//     _pt.OnHandleMessage = function(context, aoMessage){
-//         elog('====jso_activity_cb====OnHandleMessage.begin====');
-//     }
-
-// //--------Listener----default end----
 
     //_super = aoCustomControl;
     //var _super = aoActivity;

@@ -1,102 +1,117 @@
+module.exports = function(aoElastos, aoActivity){
+//--------common definition----begin----
+    var CObject = aoElastos.CObject;
 
-#include "elastos/droid/calculator2/CalculatorExpressionEvaluator.h"
-#include "R.h"
-#include "org/javia/arity/Util.h"
-#include <Elastos.CoreLibrary.h>
-#include <elastos/core/StringUtils.h>
-#include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+    var CString = aoElastos.Core.CString;
+    var Droid_New = aoElastos.Droid.New;
+    var Core_New = aoElastos.Core.New;
 
-using Elastos::Utility::Logging::Slogger;
+    var R = aoElastos.Application.R;
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::CoreUtils;
-using Elastos::Core::IDouble;
-using Org::Javia::Arity::CSymbols;
-using Org::Javia::Arity::Util;
+    var oActivity = aoActivity.ActivityInstance;
+    var oHandler = aoActivity.ActivityHandler;
 
-namespace Elastos {
-namespace Droid {
-namespace Calculator2 {
+    var IView__VISIBLE = 0x00000000;
 
-const Int32 CalculatorExpressionEvaluator::MAX_DIGITS = 12;
-const Int32 CalculatorExpressionEvaluator::ROUNDING_DIGITS = 2;
+//--------common definition----end----
 
-CalculatorExpressionEvaluator::CalculatorExpressionEvaluator()
-{}
+//--------.java----begin----
 
-CalculatorExpressionEvaluator::~CalculatorExpressionEvaluator()
-{}
+// /*
+//  * Copyright (C) 2014 The Android Open Source Project
+//  *
+//  * Licensed under the Apache License, Version 2.0 (the "License");
+//  * you may not use this file except in compliance with the License.
+//  * You may obtain a copy of the License at
+//  *
+//  *   http://www.apache.org/licenses/LICENSE-2.0
+//  *
+//  * Unless required by applicable law or agreed to in writing, software
+//  * distributed under the License is distributed on an "AS IS" BASIS,
+//  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  * See the License for the specific language governing permissions and
+//  * limitations under the License.
+//  */
 
-CAR_INTERFACE_IMPL(CalculatorExpressionEvaluator, Object, ICalculatorExpressionEvaluator)
+// package com.android.calculator2;
 
-ECode CalculatorExpressionEvaluator::constructor(
-    /* [in] */ ICalculatorExpressionTokenizer* tokenizer)
-{
-    CSymbols::New((ISymbols**)&mSymbols);
-    mTokenizer = tokenizer;
-    return NOERROR;
-}
+// import org.javia.arity.Symbols;
+var Symbols = require("arity/Symbols.js")();
+// import org.javia.arity.SyntaxException;
+var SyntaxException = require("arity/SyntaxException.js")();
+// import org.javia.arity.Util;
+var Util = require("arity/Util.js")();
 
-ECode CalculatorExpressionEvaluator::Evaluate(
-    /* [in] */ ICharSequence* expr,
-    /* [in] */ IEvaluateCallback* callback)
-{
-    String str;
-    expr->ToString(&str);
-    return Evaluate(str, callback);
-}
+// public class CalculatorExpressionEvaluator {
 
-ECode CalculatorExpressionEvaluator::Evaluate(
-    /* [in] */ const String& expr,
-    /* [in] */ IEvaluateCallback* callback)
-{
-    String strexpr;
-    mTokenizer->GetNormalizedExpression(expr, &strexpr);
-    // remove any trailing operators
-    while (strexpr.GetLength() > 0 && String("+-/*").IndexOf(strexpr.GetChar(strexpr.GetLength() - 1)) != -1) {
-        strexpr = strexpr.Substring(0, strexpr.GetLength() - 1);
-    }
+//     private static final int MAX_DIGITS = 12;
+        var MAX_DIGITS = 12;
+//     private static final int ROUNDING_DIGITS = 2;
+        var ROUNDING_DIGITS = 2;
 
-    // try {
-    Double value;
-    if (strexpr.GetLength() == 0 || StringUtils::Parse(strexpr, &value) == (ECode)NOERROR) {
-        callback->OnEvaluate(strexpr, String(NULL), ICalculator::INVALID_RES_ID);
-        return NOERROR;
-    }
-    // } catch (NumberFormatException e) {
-        // strexpr is not a simple number
-    // }
+//     private final Symbols mSymbols;
+        var mSymbols;
+//     private final CalculatorExpressionTokenizer mTokenizer;
+        var mTokenizer;
 
-    // try {
-    Double result;
-    FAIL_RETURN(mSymbols->Eval(strexpr, &result))
-    Boolean flag = FALSE;
-    if ((CoreUtils::Convert(result)->IsNaN(&flag), flag)) {
-        ECode ec = callback->OnEvaluate(strexpr, String(NULL), R::string::error_nan);
-        if (ec == (ECode)E_SYNTAX_EXCEPTION) {
-            return callback->OnEvaluate(strexpr, String(NULL), R::string::error_syntax);
+//     public CalculatorExpressionEvaluator(CalculatorExpressionTokenizer tokenizer) {
+        function CalculatorExpressionEvaluator(tokenizer) {
+//         mSymbols = new Symbols();
+            mSymbols = new Symbols();
+//         mTokenizer = tokenizer;
+            mTokenizer = tokenizer;
+//     }
         }
-    }
-    else {
-        // The arity library uses floating point arithmetic when evaluating the expression
-        // leading to precision errors in the result. The method doubleToString hides these
-        // errors; rounding the result by dropping N digits of precision.
-        String temp = Util::DoubleToString(result, MAX_DIGITS, ROUNDING_DIGITS);
-        String resultString;
-        mTokenizer->GetLocalizedExpression(
-                Util::DoubleToString(result, MAX_DIGITS, ROUNDING_DIGITS), &resultString);
-        ECode ec = callback->OnEvaluate(strexpr, resultString, ICalculator::INVALID_RES_ID);
-        if (ec == (ECode)E_SYNTAX_EXCEPTION) {
-            return callback->OnEvaluate(strexpr, String(NULL), R::string::error_syntax);
-        }
-    }
-    // } catch (SyntaxException e) {
-    // return callback->OnEvaluate(strexpr, String(NULL), R::string::error_syntax);
-    // }
-    return NOERROR;
-}
+        var _pt = CalculatorExpressionEvaluator.prototype;
 
-} // namespace Calculator2
-} // namespace Droid
-} // namespace Elastos
+//     public void evaluate(CharSequence expr, EvaluateCallback callback) {
+        _pt.evaluate = function(expr, callback) {
+//         evaluate(expr.toString(), callback);
+//     }
+        }
+
+//     public void evaluate(String expr, EvaluateCallback callback) {
+        _pt.evaluate = function(expr, callback) {
+//         expr = mTokenizer.getNormalizedExpression(expr);
+
+//         // remove any trailing operators
+//         while (expr.length() > 0 && "+-/*".indexOf(expr.charAt(expr.length() - 1)) != -1) {
+//             expr = expr.substring(0, expr.length() - 1);
+//         }
+
+//         try {
+//             if (expr.length() == 0 || Double.valueOf(expr) != null) {
+//                 callback.onEvaluate(expr, null, Calculator.INVALID_RES_ID);
+//                 return;
+//             }
+//         } catch (NumberFormatException e) {
+//             // expr is not a simple number
+//         }
+
+//         try {
+//             double result = mSymbols.eval(expr);
+//             if (Double.isNaN(result)) {
+//                 callback.onEvaluate(expr, null, R.string.error_nan);
+//             } else {
+//                 // The arity library uses floating point arithmetic when evaluating the expression
+//                 // leading to precision errors in the result. The method doubleToString hides these
+//                 // errors; rounding the result by dropping N digits of precision.
+//                 final String resultString = mTokenizer.getLocalizedExpression(
+//                         Util.doubleToString(result, MAX_DIGITS, ROUNDING_DIGITS));
+//                 callback.onEvaluate(expr, resultString, Calculator.INVALID_RES_ID);
+//             }
+//         } catch (SyntaxException e) {
+//             callback.onEvaluate(expr, null, R.string.error_syntax);
+//         }
+//     }
+        }
+
+//     public interface EvaluateCallback {
+//         public void onEvaluate(String expr, String result, int errorResourceId);
+//     }
+// }
+
+//--------.java----end----
+
+    return CalculatorExpressionEvaluator;
+};  //module.exports

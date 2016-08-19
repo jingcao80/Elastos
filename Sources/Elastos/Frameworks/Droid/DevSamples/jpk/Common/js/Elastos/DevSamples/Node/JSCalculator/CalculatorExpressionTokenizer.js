@@ -1,107 +1,108 @@
+module.exports = function(aoElastos, aoActivity){
+//--------common definition----begin----
+    var CObject = aoElastos.CObject;
 
-#include "elastos/droid/calculator2/CalculatorExpressionTokenizer.h"
-#include "R.h"
-// #include <Elastos.CoreLibrary.Utility.h>
-#include <Elastos.Droid.Content.h>
-#include <elastos/core/StringUtils.h>
+    var CString = aoElastos.Core.CString;
+    var Droid_New = aoElastos.Droid.New;
+    var Core_New = aoElastos.Core.New;
 
-using Elastos::Core::StringUtils;
+    var R = aoElastos.Application.R;
 
-namespace Elastos {
-namespace Droid {
-namespace Calculator2 {
+    var oActivity = aoActivity.ActivityInstance;
+    var oHandler = aoActivity.ActivityHandler;
 
-CalculatorExpressionTokenizer::CalculatorExpressionTokenizer()
-{}
+    var IView__VISIBLE = 0x00000000;
 
-CalculatorExpressionTokenizer::~CalculatorExpressionTokenizer()
-{}
+//--------common definition----end----
 
-CAR_INTERFACE_IMPL(CalculatorExpressionTokenizer, Object, ICalculatorExpressionTokenizer)
+//--------.java----begin----
 
-ECode CalculatorExpressionTokenizer::constructor(
-    /* [in] */ IContext* context)
-{
-    String str;
-    context->GetString(R::string::dec_point, &str);
-    mReplacementMap[String(".")] = str;
-    context->GetString(R::string::digit_0, &str);
-    mReplacementMap[String("0")] = str;
-    context->GetString(R::string::digit_1, &str);
-    mReplacementMap[String("1")] = str;
-    context->GetString(R::string::digit_2, &str);
-    mReplacementMap[String("2")] = str;
-    context->GetString(R::string::digit_3, &str);
-    mReplacementMap[String("3")] = str;
-    context->GetString(R::string::digit_4, &str);
-    mReplacementMap[String("4")] = str;
-    context->GetString(R::string::digit_5, &str);
-    mReplacementMap[String("5")] = str;
-    context->GetString(R::string::digit_6, &str);
-    mReplacementMap[String("6")] = str;
-    context->GetString(R::string::digit_7, &str);
-    mReplacementMap[String("7")] = str;
-    context->GetString(R::string::digit_8, &str);
-    mReplacementMap[String("8")] = str;
-    context->GetString(R::string::digit_9, &str);
-    mReplacementMap[String("9")] = str;
+// /*
+//  * Copyright (C) 2014 The Android Open Source Project
+//  *
+//  * Licensed under the Apache License, Version 2.0 (the 'License');
+//  * you may not use this file except in compliance with the License.
+//  * You may obtain a copy of the License at
+//  *
+//  *   http://www.apache.org/licenses/LICENSE-2.0
+//  *
+//  * Unless required by applicable law or agreed to in writing, software
+//  * distributed under the License is distributed on an 'AS IS' BASIS,
+//  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  * See the License for the specific language governing permissions and
+//  * limitations under the License.
+//  */
 
-    context->GetString(R::string::op_div, &str);
-    mReplacementMap[String("/")] = str;
-    context->GetString(R::string::op_mul, &str);
-    mReplacementMap[String("*")] = str;
-    context->GetString(R::string::op_sub, &str);
-    mReplacementMap[String("-")] = str;
+// package com.android.calculator2;
 
-    context->GetString(R::string::fun_cos, &str);
-    mReplacementMap[String("cos")] = str;
-    context->GetString(R::string::fun_ln, &str);
-    mReplacementMap[String("ln")] = str;
-    context->GetString(R::string::fun_log, &str);
-    mReplacementMap[String("log")] = str;
-    context->GetString(R::string::fun_sin, &str);
-    mReplacementMap[String("sin")] = str;
-    context->GetString(R::string::fun_tan, &str);
-    mReplacementMap[String("tan")] = str;
+// import android.content.Context;
 
-    context->GetString(R::string::inf, &str);
-    mReplacementMap[String("Infinity")] = str;
+// import java.util.HashMap;
+// import java.util.Map;
+// import java.util.Map.Entry;
 
-    return NOERROR;
-}
+// public class CalculatorExpressionTokenizer {
 
-ECode CalculatorExpressionTokenizer::GetNormalizedExpression(
-    /* [in] */ const String& _expr,
-    /* [out] */ String* result)
-{
-    VALIDATE_NOT_NULL(result)
-    String expr = _expr;
-    HashMap<String, String>::Iterator it = mReplacementMap.Begin();
-    for (; it != mReplacementMap.End(); ++it) {
-        String temp;
-        StringUtils::Replace(expr, it->mSecond, it->mFirst, &temp);
-        expr = temp;
-    }
-    *result = expr;
-    return NOERROR;
-}
+//     private final Map<String, String> mReplacementMap;
+        var mReplacementMap;
 
-ECode CalculatorExpressionTokenizer::GetLocalizedExpression(
-    /* [in] */ const String& _expr,
-    /* [out] */ String* result)
-{
-    VALIDATE_NOT_NULL(result)
-    String expr = _expr;
-    HashMap<String, String>::Iterator it = mReplacementMap.Begin();
-    for (; it != mReplacementMap.End(); ++it) {
-        String temp;
-        StringUtils::Replace(expr, it->mFirst, it->mSecond, &temp);
-        expr = temp;
-    }
-    *result = expr;
-    return NOERROR;
-}
+//     public CalculatorExpressionTokenizer(Context context) {
+        function CalculatorExpressionTokenizer(context) {
+            elog("CalculatorExpressionTokenizer.js====CalculatorExpressionTokenizer====");
 
-} // namespace Calculator2
-} // namespace Droid
-} // namespace Elastos
+//         mReplacementMap = new HashMap<>();
+            mReplacementMap = [];
+
+//         mReplacementMap.put(".", context.getString(R.string.dec_point));
+
+//         mReplacementMap.put("0", context.getString(R.string.digit_0));
+//         mReplacementMap.put("1", context.getString(R.string.digit_1));
+//         mReplacementMap.put("2", context.getString(R.string.digit_2));
+//         mReplacementMap.put("3", context.getString(R.string.digit_3));
+//         mReplacementMap.put("4", context.getString(R.string.digit_4));
+//         mReplacementMap.put("5", context.getString(R.string.digit_5));
+//         mReplacementMap.put("6", context.getString(R.string.digit_6));
+//         mReplacementMap.put("7", context.getString(R.string.digit_7));
+//         mReplacementMap.put("8", context.getString(R.string.digit_8));
+//         mReplacementMap.put("9", context.getString(R.string.digit_9));
+
+//         mReplacementMap.put("/", context.getString(R.string.op_div));
+//         mReplacementMap.put("*", context.getString(R.string.op_mul));
+//         mReplacementMap.put("-", context.getString(R.string.op_sub));
+
+//         mReplacementMap.put("cos", context.getString(R.string.fun_cos));
+//         mReplacementMap.put("ln", context.getString(R.string.fun_ln));
+//         mReplacementMap.put("log", context.getString(R.string.fun_log));
+//         mReplacementMap.put("sin", context.getString(R.string.fun_sin));
+//         mReplacementMap.put("tan", context.getString(R.string.fun_tan));
+
+//         mReplacementMap.put("Infinity", context.getString(R.string.inf));
+//     }
+        }
+        var _pt = CalculatorExpressionTokenizer.prototype;
+
+//     public String getNormalizedExpression(String expr) {
+        _pt.getNormalizedExpression = function(expr) {
+            elog("CalculatorExpressionTokenizer.js====getNormalizedExpression====");
+//         for (Entry<String, String> replacementEntry : mReplacementMap.entrySet()) {
+//             expr = expr.replace(replacementEntry.getValue(), replacementEntry.getKey());
+//         }
+//         return expr;
+//     }
+        }
+
+//     public String getLocalizedExpression(String expr) {
+        _pt.getLocalizedExpression = function(expr) {
+            elog("CalculatorExpressionTokenizer.js====getLocalizedExpression====");
+//         for (Entry<String, String> replacementEntry : mReplacementMap.entrySet()) {
+//             expr = expr.replace(replacementEntry.getKey(), replacementEntry.getValue());
+//         }
+//         return expr;
+//     }
+        }
+// }
+
+//--------.java----end----
+
+    return CalculatorExpressionTokenizer;
+};  //module.exports

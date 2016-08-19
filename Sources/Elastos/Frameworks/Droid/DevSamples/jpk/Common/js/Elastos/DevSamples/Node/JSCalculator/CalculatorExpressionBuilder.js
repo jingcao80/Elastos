@@ -1,120 +1,124 @@
-#include "elastos/droid/calculator2/CalculatorExpressionBuilder.h"
-#include <Elastos.CoreLibrary.h>
-#include <elastos/droid/text/SpannableStringBuilder.h>
-#include <elastos/core/StringUtils.h>
-#include <elastos/droid/text/TextUtils.h>
+module.exports = function(aoElastos, aoActivity){
+//--------common definition----begin----
+    var CObject = aoElastos.CObject;
 
-using Elastos::Droid::Text::TextUtils;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::StringUtils;
+    var CString = aoElastos.Core.CString;
+    var Droid_New = aoElastos.Droid.New;
+    var Core_New = aoElastos.Core.New;
 
-namespace Elastos {
-namespace Droid {
-namespace Calculator2 {
+    var R = aoElastos.Application.R;
 
-CalculatorExpressionBuilder::CalculatorExpressionBuilder()
-{}
+    var oActivity = aoActivity.ActivityInstance;
+    var oHandler = aoActivity.ActivityHandler;
 
-CalculatorExpressionBuilder::~CalculatorExpressionBuilder()
-{}
+    var IView__VISIBLE = 0x00000000;
 
-CAR_INTERFACE_IMPL(CalculatorExpressionBuilder, SpannableStringBuilder, ICalculatorExpressionBuilder)\
+//--------common definition----end----
 
-ECode CalculatorExpressionBuilder::constructor(
-    /* [in] */ ICharSequence* text,
-    /* [in] */ ICalculatorExpressionTokenizer* tokenizer,
-    /* [in] */ Boolean isEdited)
-{
-    SpannableStringBuilder::constructor(text);
-    mTokenizer = (CalculatorExpressionTokenizer*)tokenizer;
-    mIsEdited = isEdited;
-    return NOERROR;
-}
+//--------.java----begin----
 
-ECode CalculatorExpressionBuilder::Replace(
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 end,
-    /* [in] */ ICharSequence* tb,
-    /* [in] */ Int32 tbstart,
-    /* [in] */ Int32 tbend)
-{
-    Int32 length;
-    GetLength(&length);
-    if (start != length || end != length) {
-        mIsEdited = TRUE;
-        return SpannableStringBuilder::Replace(start, end, tb, tbstart, tbend);
-    }
+// /*
+//  * Copyright (C) 2014 The Android Open Source Project
+//  *
+//  * Licensed under the Apache License, Version 2.0 (the "License");
+//  * you may not use this file except in compliance with the License.
+//  * You may obtain a copy of the License at
+//  *
+//  *   http://www.apache.org/licenses/LICENSE-2.0
+//  *
+//  * Unless required by applicable law or agreed to in writing, software
+//  * distributed under the License is distributed on an "AS IS" BASIS,
+//  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  * See the License for the specific language governing permissions and
+//  * limitations under the License.
+//  */
 
-    AutoPtr<ICharSequence> cs;
-    tb->SubSequence(tbstart, tbend, (ICharSequence**)&cs);
-    String str;
-    cs->ToString(&str);
-    String appendExpr;
-    mTokenizer->GetNormalizedExpression(str, &appendExpr);
-    if (appendExpr.GetLength() == 1) {
-        String tmpStr;
-        ToString(&tmpStr);
-        String expr;
-        mTokenizer->GetNormalizedExpression(tmpStr, &expr);
-        switch (appendExpr.GetChar(0)) {
-            case '.':
-                {
-                    // don't allow two decimals in the same number
-                    Int32 index = expr.LastIndexOf('.');
-                    String subStr = expr.Substring(index + 1, start);
+// package com.android.calculator2;
 
-                    if (index != -1 && TextUtils::IsDigitsOnly(StringUtils::ParseCharSequence(subStr))) {
-                        appendExpr = String("");
-                    }
-                    break;
-                }
+// import android.content.Context;
+// import android.text.SpannableStringBuilder;
+// import android.text.TextUtils;
 
-            case '+':
-            case '*':
-            case '/':
-                {
-                    // don't allow leading operator
-                    if (start == 0) {
-                        appendExpr = String("");
-                        break;
-                    }
+// public class CalculatorExpressionBuilder extends SpannableStringBuilder {
 
-                    // don't allow multiple successive operators
-                    while (start > 0 && String("+-*/").IndexOf(expr.GetChar(start - 1)) != -1) {
-                        --start;
-                    }
-                    // fall through
-                }
+//     private final CalculatorExpressionTokenizer mTokenizer;
+        var mTokenizer;
+//     private boolean mIsEdited;
+        var mIsEdited;
 
-            case '-':
-                {
-                    // don't allow -- or +-
-                    if (start > 0 && String("+-").IndexOf(expr.GetChar(start - 1)) != -1) {
-                        --start;
-                    }
+//     public CalculatorExpressionBuilder(
+//             CharSequence text, CalculatorExpressionTokenizer tokenizer, boolean isEdited) {
+        function CalculatorExpressionBuilder(text, tokenizer, isEdited) {
+//         super(text);
 
-                    // mark as edited since operators can always be appended
-                    mIsEdited = TRUE;
-                    break;
-                }
-
-            default:
-                break;
+//         mTokenizer = tokenizer;
+//         mIsEdited = isEdited;
+//     }
         }
-    }
+        var _pt = CalculatorExpressionBuilder.prototype;
 
-    // since this is the first edit replace the entire string
-    if (!mIsEdited && appendExpr.GetLength() > 0) {
-        start = 0;
-        mIsEdited = TRUE;
-    }
+//     @Override
+//     public SpannableStringBuilder replace(int start, int end, CharSequence tb, int tbstart,
+//             int tbend) {
+        _pt.replace = function(start, end, tb, tbstart, tbend) {
+//         if (start != length() || end != length()) {
+//             mIsEdited = true;
+//             return super.replace(start, end, tb, tbstart, tbend);
+//         }
 
-    String tmp;
-    mTokenizer->GetLocalizedExpression(appendExpr, &tmp);
-    appendExpr = tmp;
-    return SpannableStringBuilder::Replace(start, end, StringUtils::ParseCharSequence(appendExpr), 0, appendExpr.GetLength());
-}
+//         String appendExpr =
+//                 mTokenizer.getNormalizedExpression(tb.subSequence(tbstart, tbend).toString());
+//         if (appendExpr.length() == 1) {
+//             final String expr = mTokenizer.getNormalizedExpression(toString());
+//             switch (appendExpr.charAt(0)) {
+//                 case '.':
+//                     // don't allow two decimals in the same number
+//                     final int index = expr.lastIndexOf('.');
+//                     if (index != -1 && TextUtils.isDigitsOnly(expr.substring(index + 1, start))) {
+//                         appendExpr = "";
+//                     }
+//                     break;
+//                 case '+':
+//                 case '*':
+//                 case '/':
+//                     // don't allow leading operator
+//                     if (start == 0) {
+//                         appendExpr = "";
+//                         break;
+//                     }
 
-} // namespace Calculator2
-} // namespace Droid
-} // namespace Elastos
+//                     // don't allow multiple successive operators
+//                     while (start > 0 && "+-*/".indexOf(expr.charAt(start - 1)) != -1) {
+//                         --start;
+//                     }
+//                     // fall through
+//                 case '-':
+//                     // don't allow -- or +-
+//                     if (start > 0 && "+-".indexOf(expr.charAt(start - 1)) != -1) {
+//                         --start;
+//                     }
+
+//                     // mark as edited since operators can always be appended
+//                     mIsEdited = true;
+//                     break;
+//                 default:
+//                     break;
+//             }
+//         }
+
+//         // since this is the first edit replace the entire string
+//         if (!mIsEdited && appendExpr.length() > 0) {
+//             start = 0;
+//             mIsEdited = true;
+//         }
+
+//         appendExpr = mTokenizer.getLocalizedExpression(appendExpr);
+//         return super.replace(start, end, appendExpr, 0, appendExpr.length());
+//     }
+        }
+// }
+
+//--------.java----end----
+
+    return CalculatorExpressionBuilder;
+};  //module.exports
