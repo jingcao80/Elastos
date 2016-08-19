@@ -656,6 +656,7 @@ ECode LockPatternView::SetInStealthMode(
     /* [in] */ Boolean inStealthMode)
 {
     mInStealthMode = inStealthMode;
+    assert(0 && "make 'mInStealthMode = FALSE' temporarily for testting, because 'inStealthMode' will be setted FALSE in Setting App");
     return NOERROR;
 }
 
@@ -1033,9 +1034,9 @@ void LockPatternView::AddCellToPattern(
     AutoPtr<IBoolean> b;
     CBoolean::New(TRUE, (IBoolean**)&b);
     (*mPatternDrawLookup)[row]->Set(column, b);
-    Int32 size = 0;
-    mPattern->GetSize(&size);
-    mPattern->Set(size, (IObject*)newCell);
+    Boolean res;
+    mPattern->Add(TO_IINTERFACE(newCell), &res);
+
     if (!mInStealthMode) {
         StartCellActivatedAnimation(newCell);
     }

@@ -1034,6 +1034,7 @@ ECode LockPatternUtils::PatternToString(
 {
     VALIDATE_NOT_NULL(str)
 
+    Slogger::D(TAG, ">>>>>>>>>>>>>>LockPatternUtils::PatternToString pattern=%s", TO_CSTR(pattern));
     if (pattern == NULL) {
         *str = String("");
         return NOERROR;
