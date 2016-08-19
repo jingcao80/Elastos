@@ -1,5 +1,5 @@
 
-#DIRS += applications
+DIRS += applications
 DIRS += dashboard
 DIRS += drawable
 DIRS += inputmethod

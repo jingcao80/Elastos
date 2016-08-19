@@ -10,6 +10,7 @@ module
     merge("car/elastos/droid/ZonePicker.car");
     merge("car/elastos/droid/applications/ApplicationsState.car");
     merge("car/elastos/droid/applications/ManageApplications.car");
+    merge("car/elastos/droid/applications/RunningState.car");
     merge("car/elastos/droid/dashboard/SearchResultsSummary.car");
     merge("car/elastos/droid/inputmethod/InputMethodPreference.car");
     merge("car/elastos/droid/inputmethod/KeyboardLayoutDialogFragment.car");
@@ -56,8 +57,9 @@ module
     using interface Elastos.Droid.Hardware.Input.IInputDeviceIdentifier;
     using interface Elastos.Droid.Internal.App.ILocalePicker;
     using interface Elastos.Droid.Internal.App.ILocaleSelectionListener;
-    using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Preference.IPreference;
     using interface Elastos.Droid.Preference.ISwitchPreference;
     using interface Elastos.Droid.Preference.ITwoStatePreference;
@@ -103,6 +105,7 @@ module
     using interface Elastos.Droid.Widget.ISearchViewOnQueryTextListener;
     using interface Elastos.Droid.Widget.ISearchViewOnCloseListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
     using interface Elastos.Droid.Widget.ICompoundButtonOnCheckedChangeListener;
     using interface Elastos.Droid.Wifi.IScanResult;
     using interface Elastos.Droid.Wifi.IWifiConfiguration;
@@ -113,23 +116,38 @@ module
     using interface Elastos.Core.IComparable;
     using interface Elastos.Utility.IArrayList;
 
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace Settings {
-//    namespace Applications {
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Applications {
 
-//    class CApplicationsStatePackageStatsObserver {
-//        constructor(
-//            [in] IApplicationsState* host);
+    class CApplicationsStatePackageStatsObserver {
+        constructor(
+            [in] IApplicationsState* host,
+            [in] IHandler* owner);
 
-//        interface IIPackageStatsObserver;
-//        interface IBinder;
-//    }
+        interface IIPackageStatsObserver;
+        interface IBinder;
+    }
 
-//    } // namespace Applications
-//    } // namespace Settings
-//    } // namespace Droid
-//    } // namespace Elastos
+    class CManageApplications {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface IManageApplicationsAppClickListener;
+        interface IDialogInterfaceOnClickListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IAdapterViewOnItemSelectedListener;
+    }
+
+    } // namespace Applications
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
 
     namespace Elastos {
     namespace Droid {

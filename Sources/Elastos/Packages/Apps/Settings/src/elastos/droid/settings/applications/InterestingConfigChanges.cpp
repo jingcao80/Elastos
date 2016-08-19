@@ -1,4 +1,5 @@
 
+#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/settings/applications/InterestingConfigChanges.h"
 
 using Elastos::Droid::Content::Pm::IActivityInfo;

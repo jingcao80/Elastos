@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_SETTINGS_APPLICATIONS_INTERESTINGCONFIGCHANGES_H__
 #define __ELASTOS_DROID_SETTINGS_APPLICATIONS_INTERESTINGCONFIGCHANGES_H__
 
+#include "Elastos.Droid.Content.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::Res::IConfiguration;
@@ -20,7 +21,7 @@ public:
 
     ~InterestingConfigChanges();
 
-    CARAPI_(Boolean) ApplyNewConfig(
+    virtual CARAPI_(Boolean) ApplyNewConfig(
         /* [in] */ IResources* res);
 
 protected:

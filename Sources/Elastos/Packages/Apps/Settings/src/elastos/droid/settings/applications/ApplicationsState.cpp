@@ -1,8 +1,10 @@
 
 #include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Internal.h"
 #include "elastos/droid/settings/applications/ApplicationsState.h"
 #include "elastos/droid/settings/applications/CApplicationsStatePackageStatsObserver.h"
 #include "elastos/droid/os/Process.h"
+#include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/text/format/Formatter.h"
@@ -16,18 +18,24 @@
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IPackageInfo;
+using Elastos::Droid::Content::Pm::EIID_IIPackageStatsObserver;
+using Elastos::Droid::Internal::Content::IPackageHelper;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Text::Format::Formatter;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IComparator;
+using Elastos::Core::IThread;
 using Elastos::IO::CFile;
 using Elastos::Text::INormalizer;
-using Elastos::Text::INormalizerHelper;
 using Elastos::Text::CNormalizerHelper;
 using Elastos::Text::CCollatorHelper;
 using Elastos::Text::ICollatorHelper;
@@ -92,6 +100,56 @@ const Int32 ApplicationsState::BackgroundHandler::MSG_REBUILD_LIST;
 const Int32 ApplicationsState::BackgroundHandler::MSG_LOAD_ENTRIES;
 const Int32 ApplicationsState::BackgroundHandler::MSG_LOAD_ICONS;
 const Int32 ApplicationsState::BackgroundHandler::MSG_LOAD_SIZES;
+
+//===============================================================================
+//                  CanBeOnSdCardChecker
+//===============================================================================
+
+CanBeOnSdCardChecker::CanBeOnSdCardChecker()
+    : mInstallLocation(0)
+{
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("package"));
+    mPm = IIPackageManager::Probe(obj);
+}
+
+void CanBeOnSdCardChecker::Init()
+{
+    ECode ec = mPm->GetInstallLocation(&mInstallLocation);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        Logger::E("CanBeOnSdCardChecker", "Is Package Manager running?");
+        return;
+    }
+}
+
+Boolean CanBeOnSdCardChecker::Check(
+    /* [in] */ IApplicationInfo* info)
+{
+    Boolean canBe = FALSE;
+    Int32 flags;
+    info->GetFlags(&flags);
+    if ((flags & IApplicationInfo::FLAG_EXTERNAL_STORAGE) != 0) {
+        canBe = TRUE;
+    }
+    else {
+        if ((flags & IApplicationInfo::FLAG_SYSTEM) == 0) {
+            Int32 installLocation;
+            info->GetInstallLocation(&installLocation);
+            if (installLocation == IPackageInfo::INSTALL_LOCATION_PREFER_EXTERNAL ||
+                    installLocation == IPackageInfo::INSTALL_LOCATION_AUTO) {
+                canBe = TRUE;
+            }
+            else if (installLocation
+                    == IPackageInfo::INSTALL_LOCATION_UNSPECIFIED) {
+                if (mInstallLocation == IPackageHelper::APP_INSTALL_EXTERNAL) {
+                    // For apps with no preference and the default value set
+                    // to install on sdcard.
+                    canBe = TRUE;
+                }
+            }
+        }
+    }
+    return canBe;
+}
 
 //===============================================================================
 //                  ApplicationsState::SizeInfo
@@ -505,7 +563,7 @@ void ApplicationsState::Session::HandleRebuildList()
         mRebuildComparator = NULL;
     }
 
-    Process::SetThreadPriority(Process::THREAD_PRIORITY_FOREGROUND);
+    Process::SetThreadPriority(IProcess::THREAD_PRIORITY_FOREGROUND);
 
     if (filter != NULL) {
         filter->Init();
@@ -567,197 +625,7 @@ void ApplicationsState::Session::HandleRebuildList()
         }
     }
 
-    Process::SetThreadPriority(Process::THREAD_PRIORITY_BACKGROUND);
-}
-
-//===============================================================================
-//                  ApplicationsState::ApplicationsStatePackageStatsObserver
-//===============================================================================
-
-CAR_INTERFACE_IMPL2(ApplicationsState::ApplicationsStatePackageStatsObserver, Object, IIPackageStatsObserver, IBinder)
-
-ApplicationsState::ApplicationsStatePackageStatsObserver::ApplicationsStatePackageStatsObserver()
-
-ECode ApplicationsState::ApplicationsStatePackageStatsObserver::constructor(
-    /* [in] */ IApplicationsState* host)
-{
-    mHost = (ApplicationsState*)host;
-    return NOERROR;
-}
-
-ApplicationsState::ApplicationsStatePackageStatsObserver::~ApplicationsStatePackageStatsObserver()
-{}
-
-ECode ApplicationsState::ApplicationsStatePackageStatsObserver::OnGetStatsCompleted(
-    /* [in] */ IPackageStats* stats,
-    /* [in] */ Boolean succeeded)
-{
-    Boolean sizeChanged = FALSE;
-    {
-        AutoLock syncLock(mHost->mEntriesMap);
-        if (DEBUG_LOCKING) Logger::V(TAG, "onGetStatsCompleted acquired lock");
-        String packageName;
-        stats->GetPackageName(&packageName);
-        AutoPtr<IInterface> obj;
-        mHost->mEntriesMap->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
-        AppEntry* entry = (AppEntry*)IApplicationsStateAppEntry::Probe(obj);
-        if (entry != NULL) {
-            {
-                AutoLock syncLock(entry);
-                entry->mSizeStale = FALSE;
-                entry->mSizeLoadStart = 0;
-                Int64 statsExternalCodeSize, statsExternalObbSize;
-                stats->GetExternalCodeSize(&statsExternalCodeSize);
-                stats->GetExternalObbSize(&statsExternalObbSize);
-                Int64 externalCodeSize = statsExternalCodeSize
-                        + statsExternalObbSize;
-                Int64 statsExternalDataSize, statsExternalMediaSize;
-                stats->GetExternalDataSize(&statsExternalDataSize);
-                stats->GetExternalMediaSize(&statsExternalMediaSize);
-                Int64 externalDataSize = statsExternalDataSize
-                        + statsExternalMediaSize;
-                Int64 newSize = externalCodeSize + externalDataSize
-                        + mHost->GetTotalInternalSize(stats);
-                Int64 cacheSize, codeSize, dataSize, externalCacheSize;
-                if (entry->mSize != newSize ||
-                        entry->mCacheSize != (stats->GetCacheSize(&cacheSize), cacheSize) ||
-                        entry->mCodeSize != (stats->GetCodeSize(&codeSize), codeSize) ||
-                        entry->mDataSize != (stats->GetDataSize(&dataSize), dataSize) ||
-                        entry->mExternalCodeSize != externalCodeSize ||
-                        entry->mExternalDataSize != externalDataSize ||
-                        entry->mExternalCacheSize != (stats->GetExternalCacheSize(&externalCacheSize), externalCacheSize)) {
-                    entry->mSize = newSize;
-                    entry->mCacheSize = (stats->GetCacheSize(&cacheSize), cacheSize);
-                    entry->mCodeSize = (stats->GetCodeSize(&codeSize), codeSize);
-                    entry->mDataSize = (stats->GetDataSize(&dataSize), dataSize);
-                    entry->mExternalCodeSize = externalCodeSize;
-                    entry->mExternalDataSize = externalDataSize;
-                    entry->mExternalCacheSize = (stats->GetExternalCacheSize(&externalCacheSize), externalCacheSize);
-                    entry->mSizeStr = mHost->GetSizeStr(entry->mSize);
-                    entry->mInternalSize = mHost->GetTotalInternalSize(stats);
-                    entry->mInternalSizeStr = mHost->GetSizeStr(entry->mInternalSize);
-                    entry->mExternalSize = mHost->GetTotalExternalSize(stats);
-                    entry->mExternalSizeStr = mHost->GetSizeStr(entry->mExternalSize);
-                    if (DEBUG) Logger::I(TAG, "Set size of %s %s: %s",
-                            entry->mLabel.string(), TO_CSTR(entry), entry->mSizeStr.string());
-                    sizeChanged = TRUE;
-                }
-            }
-            if (sizeChanged) {
-                AutoPtr<IMessage> msg;
-                mHost->mMainHandler->ObtainMessage(
-                        MainHandler::MSG_PACKAGE_SIZE_CHANGED, CoreUtils::Convert(packageName), (IMessage**)&msg);
-                Boolean res;
-                mHost->mMainHandler->SendMessage(msg, &res);
-            }
-        }
-
-        if (mHost->mCurComputingSizePkg.IsNull()
-                || mHost->mCurComputingSizePkg.Equals(packageName)) {
-            mHost->mCurComputingSizePkg = String(NULL);
-            Boolean res;
-            SendEmptyMessage(MSG_LOAD_SIZES, &res);
-        }
-        if (DEBUG_LOCKING) Logger::V(TAG, "onGetStatsCompleted releasing lock");
-    }
-    return NOERROR;
-}
-
-// ECode ApplicationsState::ApplicationsStatePackageStatsObserver::ToString(
-//     /* [out] */ String* result)
-// {
-//     VALIDATE_NOT_NULL(result)
-//     *result = "ApplicationsState::ApplicationsStatePackageStatsObserver";
-//     return NOERROR;
-// }
-
-//===============================================================================
-//                  ApplicationsState::MainHandler
-//===============================================================================
-
-ApplicationsState::MainHandler::MainHandler(
-    /* [in] */ ApplicationsState* host)
-    : mHost(host)
-{}
-
-ApplicationsState::MainHandler::~MainHandler()
-{}
-
-ECode ApplicationsState::MainHandler::HandleMessage(
-    /* [in] */ IMessage* msg)
-{
-    mHost->RebuildActiveSessions();
-    Int32 what;
-    msg->GetWhat(&what);
-    switch (what) {
-        case MSG_REBUILD_COMPLETE: {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            Session* s = (Session*)IObject::Probe(obj);
-            Boolean res;
-            if (mHost->mActiveSessions->Contains(IObject::Probe(obj), &res), res) {
-                s->mCallbacks->OnRebuildComplete(s->mLastAppList);
-            }
-        } break;
-
-        case MSG_PACKAGE_LIST_CHANGED: {
-            Int32 size;
-            mHost->mActiveSessions->GetSize(&size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
-                ((Session*)IObject::Probe(obj))->mCallbacks->OnPackageListChanged();
-            }
-        } break;
-
-        case MSG_PACKAGE_ICON_CHANGED: {
-            Int32 size;
-            mHost->mActiveSessions->GetSize(&size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
-                ((Session*)IObject::Probe(obj))->mCallbacks->OnPackageIconChanged();
-            }
-        } break;
-
-        case MSG_PACKAGE_SIZE_CHANGED: {
-            Int32 size;
-            mHost->mActiveSessions->GetSize(&size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
-
-                AutoPtr<IInterface> msgObj;
-                msg->GetObj((IInterface**)&msgObj);
-
-                ((Session*)IObject::Probe(obj))->mCallbacks->OnPackageSizeChanged(
-                        Object::ToString(msgObj));
-            }
-        } break;
-
-        case MSG_ALL_SIZES_COMPUTED: {
-            Int32 size;
-            mHost->mActiveSessions->GetSize(&size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
-                ((Session*)IObject::Probe(obj))->mCallbacks->OnAllSizesComputed();
-            }
-        } break;
-
-        case MSG_RUNNING_STATE_CHANGED: {
-            Int32 size;
-            mHost->mActiveSessions->GetSize(&size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
-                Int32 arg1;
-                msg->GetArg1(&arg1);
-                ((Session*)IObject::Probe(obj))->mCallbacks->OnRunningStateChanged(arg1 != 0);
-            }
-        } break;
-    }
-    return NOERROR;
+    Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
 }
 
 //===============================================================================
@@ -771,7 +639,7 @@ ApplicationsState::BackgroundHandler::BackgroundHandler(
     , mHost(host)
 {
     Handler::constructor(looper);
-    CApplicationsStatePackageStatsObserver::New((IApplicationsState*)this, (IIPackageStatsObserver**)&mStatsObserver);
+    CApplicationsStatePackageStatsObserver::New(mHost, this, (IIPackageStatsObserver**)&mStatsObserver);
 }
 
 ECode ApplicationsState::BackgroundHandler::HandleMessage(
@@ -939,6 +807,191 @@ ECode ApplicationsState::BackgroundHandler::HandleMessage(
 }
 
 //===============================================================================
+//                  ApplicationsState::ApplicationsStatePackageStatsObserver
+//===============================================================================
+
+CAR_INTERFACE_IMPL_2(ApplicationsState::ApplicationsStatePackageStatsObserver, Object, IIPackageStatsObserver, IBinder)
+
+ApplicationsState::ApplicationsStatePackageStatsObserver::ApplicationsStatePackageStatsObserver()
+{}
+
+ECode ApplicationsState::ApplicationsStatePackageStatsObserver::constructor(
+    /* [in] */ IApplicationsState* host,
+    /* [in] */ IHandler* owner)
+{
+    mHost = (ApplicationsState*)host;
+    mOwner = (BackgroundHandler*)owner;
+    return NOERROR;
+}
+
+ApplicationsState::ApplicationsStatePackageStatsObserver::~ApplicationsStatePackageStatsObserver()
+{}
+
+ECode ApplicationsState::ApplicationsStatePackageStatsObserver::OnGetStatsCompleted(
+    /* [in] */ IPackageStats* stats,
+    /* [in] */ Boolean succeeded)
+{
+    Boolean sizeChanged = FALSE;
+    {
+        AutoLock syncLock(mHost->mEntriesMap);
+        if (DEBUG_LOCKING) Logger::V(TAG, "onGetStatsCompleted acquired lock");
+        String packageName;
+        stats->GetPackageName(&packageName);
+        AutoPtr<IInterface> obj;
+        mHost->mEntriesMap->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
+        AppEntry* entry = (AppEntry*)IApplicationsStateAppEntry::Probe(obj);
+        if (entry != NULL) {
+            {
+                AutoLock syncLock(entry);
+                entry->mSizeStale = FALSE;
+                entry->mSizeLoadStart = 0;
+                Int64 statsExternalCodeSize, statsExternalObbSize;
+                stats->GetExternalCodeSize(&statsExternalCodeSize);
+                stats->GetExternalObbSize(&statsExternalObbSize);
+                Int64 externalCodeSize = statsExternalCodeSize
+                        + statsExternalObbSize;
+                Int64 statsExternalDataSize, statsExternalMediaSize;
+                stats->GetExternalDataSize(&statsExternalDataSize);
+                stats->GetExternalMediaSize(&statsExternalMediaSize);
+                Int64 externalDataSize = statsExternalDataSize
+                        + statsExternalMediaSize;
+                Int64 newSize = externalCodeSize + externalDataSize
+                        + mHost->GetTotalInternalSize(stats);
+                Int64 cacheSize, codeSize, dataSize, externalCacheSize;
+                if (entry->mSize != newSize ||
+                        entry->mCacheSize != (stats->GetCacheSize(&cacheSize), cacheSize) ||
+                        entry->mCodeSize != (stats->GetCodeSize(&codeSize), codeSize) ||
+                        entry->mDataSize != (stats->GetDataSize(&dataSize), dataSize) ||
+                        entry->mExternalCodeSize != externalCodeSize ||
+                        entry->mExternalDataSize != externalDataSize ||
+                        entry->mExternalCacheSize != (stats->GetExternalCacheSize(&externalCacheSize), externalCacheSize)) {
+                    entry->mSize = newSize;
+                    entry->mCacheSize = (stats->GetCacheSize(&cacheSize), cacheSize);
+                    entry->mCodeSize = (stats->GetCodeSize(&codeSize), codeSize);
+                    entry->mDataSize = (stats->GetDataSize(&dataSize), dataSize);
+                    entry->mExternalCodeSize = externalCodeSize;
+                    entry->mExternalDataSize = externalDataSize;
+                    entry->mExternalCacheSize = (stats->GetExternalCacheSize(&externalCacheSize), externalCacheSize);
+                    entry->mSizeStr = mHost->GetSizeStr(entry->mSize);
+                    entry->mInternalSize = mHost->GetTotalInternalSize(stats);
+                    entry->mInternalSizeStr = mHost->GetSizeStr(entry->mInternalSize);
+                    entry->mExternalSize = mHost->GetTotalExternalSize(stats);
+                    entry->mExternalSizeStr = mHost->GetSizeStr(entry->mExternalSize);
+                    if (DEBUG) Logger::I(TAG, "Set size of %s %s: %s",
+                            entry->mLabel.string(), TO_CSTR(entry), entry->mSizeStr.string());
+                    sizeChanged = TRUE;
+                }
+            }
+            if (sizeChanged) {
+                AutoPtr<IMessage> msg;
+                mHost->mMainHandler->ObtainMessage(
+                        MainHandler::MSG_PACKAGE_SIZE_CHANGED, CoreUtils::Convert(packageName), (IMessage**)&msg);
+                Boolean res;
+                mHost->mMainHandler->SendMessage(msg, &res);
+            }
+        }
+
+        if (mHost->mCurComputingSizePkg.IsNull()
+                || mHost->mCurComputingSizePkg.Equals(packageName)) {
+            mHost->mCurComputingSizePkg = String(NULL);
+            Boolean res;
+            mOwner->SendEmptyMessage(BackgroundHandler::MSG_LOAD_SIZES, &res);
+        }
+        if (DEBUG_LOCKING) Logger::V(TAG, "onGetStatsCompleted releasing lock");
+    }
+    return NOERROR;
+}
+
+//===============================================================================
+//                  ApplicationsState::MainHandler
+//===============================================================================
+
+ApplicationsState::MainHandler::MainHandler(
+    /* [in] */ ApplicationsState* host)
+    : mHost(host)
+{}
+
+ApplicationsState::MainHandler::~MainHandler()
+{}
+
+ECode ApplicationsState::MainHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    mHost->RebuildActiveSessions();
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case MSG_REBUILD_COMPLETE: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            Session* s = (Session*)IObject::Probe(obj);
+            Boolean res;
+            if (mHost->mActiveSessions->Contains(IObject::Probe(obj), &res), res) {
+                s->mCallbacks->OnRebuildComplete(s->mLastAppList);
+            }
+        } break;
+
+        case MSG_PACKAGE_LIST_CHANGED: {
+            Int32 size;
+            mHost->mActiveSessions->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
+                ((Session*)IObject::Probe(obj))->mCallbacks->OnPackageListChanged();
+            }
+        } break;
+
+        case MSG_PACKAGE_ICON_CHANGED: {
+            Int32 size;
+            mHost->mActiveSessions->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
+                ((Session*)IObject::Probe(obj))->mCallbacks->OnPackageIconChanged();
+            }
+        } break;
+
+        case MSG_PACKAGE_SIZE_CHANGED: {
+            Int32 size;
+            mHost->mActiveSessions->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
+
+                AutoPtr<IInterface> msgObj;
+                msg->GetObj((IInterface**)&msgObj);
+
+                ((Session*)IObject::Probe(obj))->mCallbacks->OnPackageSizeChanged(
+                        Object::ToString(msgObj));
+            }
+        } break;
+
+        case MSG_ALL_SIZES_COMPUTED: {
+            Int32 size;
+            mHost->mActiveSessions->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
+                ((Session*)IObject::Probe(obj))->mCallbacks->OnAllSizesComputed();
+            }
+        } break;
+
+        case MSG_RUNNING_STATE_CHANGED: {
+            Int32 size;
+            mHost->mActiveSessions->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mHost->mActiveSessions->Get(i, (IInterface**)&obj);
+                Int32 arg1;
+                msg->GetArg1(&arg1);
+                ((Session*)IObject::Probe(obj))->mCallbacks->OnRunningStateChanged(arg1 != 0);
+            }
+        } break;
+    }
+    return NOERROR;
+}
+
+//===============================================================================
 //                  ApplicationsState::PackageIntentReceiver
 //===============================================================================
 
@@ -1051,12 +1104,12 @@ ApplicationsState::ApplicationsState(
     mMainHandler = new MainHandler(this);
     mMainHandler->constructor();
 
-    mContext = app;
+    mContext = IContext::Probe(app);
     mPm = NULL;
     mContext->GetPackageManager((IPackageManager**)&mPm);
     CHandlerThread::New(String("ApplicationsState.Loader"),
-            Process::THREAD_PRIORITY_BACKGROUND, (IHandlerThread**)&mThread);
-    mThread->Start();
+            IProcess::THREAD_PRIORITY_BACKGROUND, (IHandlerThread**)&mThread);
+    IThread::Probe(mThread)->Start();
     AutoPtr<ILooper> looper;
     mThread->GetLooper((ILooper**)&looper);
     mBackgroundHandler = new BackgroundHandler(looper, this);
@@ -1089,7 +1142,7 @@ ApplicationsState::ApplicationsState(
     {
         AutoLock syncLock(mEntriesMap);
         // try {
-        mEntriesMap->Wait(1);
+        ((Object*)mEntriesMap.Get())->Wait(1);
         // } catch (InterruptedException e) {
         // }
     }
@@ -1142,7 +1195,7 @@ void ApplicationsState::RebuildActiveSessions()
     }
 }
 
-AutoPtr<Session> ApplicationsState::NewSession(
+AutoPtr<ApplicationsState::Session> ApplicationsState::NewSession(
     /* [in] */ IApplicationsStateCallbacks* callbacks)
 {
     AutoPtr<Session> s = new Session(callbacks, this);
@@ -1250,7 +1303,7 @@ void ApplicationsState::DoPauseIfNeededLocked()
     }
 }
 
-AutoPtr<AppEntry> ApplicationsState::GetEntry(
+AutoPtr<ApplicationsState::AppEntry> ApplicationsState::GetEntry(
     /* [in] */ const String& packageName)
 {
     if (DEBUG_LOCKING) Logger::V(TAG, "getEntry about to acquire lock...");
@@ -1449,7 +1502,7 @@ void ApplicationsState::InvalidatePackage(
     AddPackage(pkgName);
 }
 
-AutoPtr<AppEntry> ApplicationsState::GetEntryLocked(
+AutoPtr<ApplicationsState::AppEntry> ApplicationsState::GetEntryLocked(
     /* [in] */ IApplicationInfo* info)
 {
     String packageName;
@@ -1457,9 +1510,10 @@ AutoPtr<AppEntry> ApplicationsState::GetEntryLocked(
     AutoPtr<IInterface> obj;
     mEntriesMap->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
     AutoPtr<AppEntry> entry = (AppEntry*) IApplicationsStateAppEntry::Probe(obj);
-    if (DEBUG) Logger::I(TAG, "Looking up entry of pkg " + info.packageName + ": " + entry);
+
+    if (DEBUG) Logger::I(TAG, "Looking up entry of pkg %s: %s", packageName.string(), TO_CSTR(entry));
     if (entry == NULL) {
-        if (DEBUG) Logger::I(TAG, "Creating AppEntry for " + info.packageName);
+        if (DEBUG) Logger::I(TAG, "Creating AppEntry for %s", packageName.string());
         entry = new AppEntry(mContext, info, mCurId++);
         mEntriesMap->Put(CoreUtils::Convert(packageName), (IApplicationsStateAppEntry*)entry);
         mAppEntries->Add((IApplicationsStateAppEntry*)entry);

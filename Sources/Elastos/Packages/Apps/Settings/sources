@@ -44,7 +44,7 @@ SOURCES += SecuritySettings.cpp
 SOURCES += TrustAgentUtils.cpp
 SOURCES += settings.cpp
 
-#ELASTOS_LIBS += src/elastos/droid/settings/applications/applications.lib
+ELASTOS_LIBS += src/elastos/droid/settings/applications/applications.lib
 ELASTOS_LIBS += src/elastos/droid/settings/dashboard/dashboard.lib
 ELASTOS_LIBS += src/elastos/droid/settings/drawable/drawable.lib
 ELASTOS_LIBS += src/elastos/droid/settings/inputmethod/inputmethod.lib

@@ -492,6 +492,7 @@
 # ==== build Packages/Apps/Settings ====
   Elastos/Packages/Apps/Settings Elastos.Droid.Settings.car
   Elastos/Packages/Apps/Settings R.cpp
+> Elastos/Packages/Apps/Settings/src/elastos/droid/settings/applications
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings/wifi/p2p
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings/wifi
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings/dashboard

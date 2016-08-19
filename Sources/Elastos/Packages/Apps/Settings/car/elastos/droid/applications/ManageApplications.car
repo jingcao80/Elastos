@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Droid.Widget.IAdapterView;
+    using interface Elastos.Droid.View.IView;
 
     namespace Elastos {
     namespace Droid {
@@ -11,6 +13,16 @@ module
      * interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener
      */
     interface IManageApplicationsTabInfo {
+    }
+
+    [local]
+    interface IManageApplicationsAppClickListener {
+        OnItemClick(
+            [in] IManageApplicationsTabInfo* tab,
+            [in] IAdapterView* parent,
+            [in] IView* view,
+            [in] Int32 position,
+            [in] Int64 id);
     }
 
     } // namespace Applications

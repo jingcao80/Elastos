@@ -18,6 +18,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IIPackageStatsObserver;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Content::Pm::IPackageStats;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::Handler;
@@ -32,13 +33,28 @@ using Elastos::Utility::IHashMap;
 using Elastos::Utility::IList;
 using Elastos::Utility::Regex::IPattern;
 
-// using Elastos::Text::Normalizer::IForm;
-// using Elastos::Utility::ICollections;
-
 namespace Elastos {
 namespace Droid {
 namespace Settings {
 namespace Applications {
+
+class CanBeOnSdCardChecker
+    : public Object
+{
+public:
+    TO_STRING_IMPL("CanBeOnSdCardChecker")
+
+    CanBeOnSdCardChecker();
+
+    virtual CARAPI_(void) Init();
+
+    virtual CARAPI_(Boolean) Check(
+        /* [in] */ IApplicationInfo* info);
+
+public:
+    AutoPtr<IIPackageManager> mPm;
+    Int32 mInstallLocation;
+};
 
 /**
  * Keeps track of information about all installed applications, lazy-loading
@@ -48,6 +64,8 @@ class ApplicationsState
     : public Object
     , public IApplicationsState
 {
+    friend class AppViewHolder;
+    friend class ManageApplications;
 public:
     class SizeInfo
         : public Object
@@ -86,14 +104,6 @@ public:
 
         TO_STRING_IMPL("ApplicationsState::AppEntry")
 
-        CARAPI_(void) EnsureLabel(
-            /* [in] */ IContext* context);
-
-        CARAPI_(Boolean) EnsureIconLocked(
-            /* [in] */ IContext* context,
-            /* [in] */ IPackageManager* pm);
-
-    protected:
         AppEntry(
             /* [in] */ IContext* context,
             /* [in] */ IApplicationInfo* info,
@@ -101,7 +111,14 @@ public:
 
         virtual ~AppEntry();
 
-        CARAPI_(String) GetNormalizedLabel();
+        virtual CARAPI_(void) EnsureLabel(
+            /* [in] */ IContext* context);
+
+        virtual CARAPI_(Boolean) EnsureIconLocked(
+            /* [in] */ IContext* context,
+            /* [in] */ IPackageManager* pm);
+
+        virtual CARAPI_(String) GetNormalizedLabel();
 
     public:
         AutoPtr<IFile> mApkFile;
@@ -207,6 +224,10 @@ public:
     public:
         TO_STRING_IMPL("ApplicationsState::Session")
 
+        Session(
+            /* [in] */ IApplicationsStateCallbacks* callbacks,
+            /* [in] */ ApplicationsState* host);
+
         virtual CARAPI Resume();
 
         virtual CARAPI Pause();
@@ -215,13 +236,8 @@ public:
 
         CARAPI_(void) HandleRebuildList();
 
-    protected:
-        Session(
-            /* [in] */ IApplicationsStateCallbacks* callbacks,
-            /* [in] */ ApplicationsState* host);
-
         // Creates a new list of app entries with the given filter and comparator.
-        CARAPI_(AutoPtr<IArrayList>) Rebuild(
+        virtual CARAPI_(AutoPtr<IArrayList>) Rebuild(
             /* [in] */ IApplicationsStateAppFilter* filter,
             /* [in] */ IComparator* comparator);
 
@@ -239,63 +255,6 @@ public:
         AutoPtr<IApplicationsStateAppFilter> mRebuildFilter;
         AutoPtr<IComparator>/*Comparator<AppEntry>*/ mRebuildComparator;
         AutoPtr<IArrayList>/*ArrayList<AppEntry>*/ mRebuildResult;
-
-    private:
-        ApplicationsState* mHost;
-    };
-
-    class ApplicationsStatePackageStatsObserver
-        : public Object
-        , public IIPackageStatsObserver
-        , public IBinder
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        TO_STRING_IMPL("ApplicationsState::ApplicationsStatePackageStatsObserver")
-
-        ApplicationsStatePackageStatsObserver();
-
-        CARAPI constructor(
-            /* [in] */ IApplicationsState* host);
-
-        ~ApplicationsStatePackageStatsObserver();
-
-        CARAPI OnGetStatsCompleted(
-            /* [in] */ IPackageStats* stats,
-            /* [in] */ Boolean succeeded);
-
-        // //@Override
-        // CARAPI ToString(
-        //     /* [out] */ String* result);
-
-    private:
-        ApplicationsState* mHost;
-    };
-
-protected:
-    class MainHandler
-        : public Handler
-    {
-    public:
-        TO_STRING_IMPL("ApplicationsState::MainHandler")
-
-        MainHandler(
-            /* [in] */ ApplicationsState* host);
-
-        ~MainHandler();
-
-        //@Override
-        CARAPI HandleMessage(
-            /* [in] */ IMessage* msg);
-
-    public:
-        static const Int32 MSG_REBUILD_COMPLETE = 1;
-        static const Int32 MSG_PACKAGE_LIST_CHANGED = 2;
-        static const Int32 MSG_PACKAGE_ICON_CHANGED = 3;
-        static const Int32 MSG_PACKAGE_SIZE_CHANGED = 4;
-        static const Int32 MSG_ALL_SIZES_COMPUTED = 5;
-        static const Int32 MSG_RUNNING_STATE_CHANGED = 6;
 
     private:
         ApplicationsState* mHost;
@@ -329,6 +288,61 @@ protected:
         ApplicationsState* mHost;
     };
 
+    class ApplicationsStatePackageStatsObserver
+        : public Object
+        , public IIPackageStatsObserver
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("ApplicationsState::ApplicationsStatePackageStatsObserver")
+
+        ApplicationsStatePackageStatsObserver();
+
+        CARAPI constructor(
+            /* [in] */ IApplicationsState* host,
+            /* [in] */ IHandler* owner);
+
+        ~ApplicationsStatePackageStatsObserver();
+
+        CARAPI OnGetStatsCompleted(
+            /* [in] */ IPackageStats* stats,
+            /* [in] */ Boolean succeeded);
+
+    private:
+        ApplicationsState* mHost;
+        BackgroundHandler* mOwner;
+    };
+
+protected:
+    class MainHandler
+        : public Handler
+    {
+    public:
+        TO_STRING_IMPL("ApplicationsState::MainHandler")
+
+        MainHandler(
+            /* [in] */ ApplicationsState* host);
+
+        ~MainHandler();
+
+        //@Override
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    public:
+        static const Int32 MSG_REBUILD_COMPLETE = 1;
+        static const Int32 MSG_PACKAGE_LIST_CHANGED = 2;
+        static const Int32 MSG_PACKAGE_ICON_CHANGED = 3;
+        static const Int32 MSG_PACKAGE_SIZE_CHANGED = 4;
+        static const Int32 MSG_ALL_SIZES_COMPUTED = 5;
+        static const Int32 MSG_RUNNING_STATE_CHANGED = 6;
+
+    private:
+        ApplicationsState* mHost;
+    };
+
 private:
     /**
      * Receives notifications when applications are added/removed.
@@ -349,9 +363,9 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        virtual void RegisterReceiver();
+        virtual CARAPI_(void) RegisterReceiver();
 
-        virtual void UnregisterReceiver();
+        virtual CARAPI_(void) UnregisterReceiver();
 
     private:
         ApplicationsState* mHost;
