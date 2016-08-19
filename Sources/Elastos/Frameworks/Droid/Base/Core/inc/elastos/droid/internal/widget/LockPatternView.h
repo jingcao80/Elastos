@@ -76,7 +76,6 @@ public:
         Int32 mRow;
         Int32 mColumn;
         static AutoPtr<ArrayOf<IArrayOf*> > sCells;
-        static Boolean sInit;
     };
 
     class CellState

@@ -58,18 +58,33 @@ const Int32 LockPatternView::MILLIS_PER_CIRCLE_ANIMATING = 700;
 const Boolean LockPatternView::PROFILE_DRAWING = FALSE;
 const Float LockPatternView::DRAG_THRESHHOLD = 0.0f;
 
-Boolean static InitStatic()
-{
-    LockPatternView::Cell::UpdateSize(ILockPatternUtils::PATTERN_SIZE_DEFAULT);
-    return TRUE;
-}
-
 /////////////////////////////////////////////////////////////
 //                  LockPatternView::Cell
 /////////////////////////////////////////////////////////////
-Boolean LockPatternView::Cell::sInit = InitStatic();
-AutoPtr<ArrayOf<IArrayOf*> > LockPatternView::Cell::sCells;
+
+static AutoPtr<ArrayOf<IArrayOf*> > InitCells(
+    /* [in] */ Int32 size)
+{
+    AutoPtr<ArrayOf<IArrayOf*> > cells = ArrayOf<IArrayOf*>::Alloc(size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IArrayOf> item;
+        CArrayOf::New(EIID_ILockPatternViewCell, size, (IArrayOf**)&item);
+
+        for (Int32 j = 0; j < size; j++) {
+            AutoPtr<ILockPatternViewCell> cell;
+            CLockPatternViewCell::New(i, j, size, (ILockPatternViewCell**)&cell);
+            item->Set(j, cell);
+        }
+
+        cells->Set(i, item);
+    }
+    return cells;
+}
+
+AutoPtr<ArrayOf<IArrayOf*> > LockPatternView::Cell::sCells = InitCells(ILockPatternUtils::PATTERN_SIZE_DEFAULT);
+
 CAR_INTERFACE_IMPL(LockPatternView::Cell, Object, ILockPatternViewCell);
+
 LockPatternView::Cell::Cell()
     : mRow(0)
     , mColumn(0)
@@ -130,19 +145,7 @@ AutoPtr<ILockPatternViewCell> LockPatternView::Cell::Of(
 ECode LockPatternView::Cell::UpdateSize(
     /* [in] */ Byte size)
 {
-    sCells = ArrayOf<IArrayOf*>::Alloc(size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IArrayOf> item;
-        CArrayOf::New(EIID_ILockPatternViewCell, size, (IArrayOf**)&item);
-
-        for (Int32 j = 0; j < size; j++) {
-            AutoPtr<ILockPatternViewCell> cell;
-            CLockPatternViewCell::New(i, j, size, (ILockPatternViewCell**)&cell);
-            item->Set(j, cell);
-        }
-
-        sCells->Set(i, item);
-    }
+    sCells = InitCells(size);
     return NOERROR;
 }
 
@@ -760,7 +763,7 @@ ECode LockPatternView::SetPattern(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> item;
         pattern->Get(i, (IInterface**)&item);
-        Cell* cell = (Cell*)IObject::Probe(item);
+        Cell* cell = (Cell*)ILockPatternViewCell::Probe(item);
         cell->GetRow(&row);
         cell->GetColumn(&column);
         AutoPtr<IBoolean> b;
@@ -784,7 +787,7 @@ ECode LockPatternView::SetDisplayMode(
         mAnimatingPeriodStart = SystemClock::GetElapsedRealtime();
         AutoPtr<IInterface> item;
         mPattern->Get(0, (IInterface**)&item);
-        Cell* first = (Cell*)IObject::Probe(item);
+        Cell* first = (Cell*)ILockPatternViewCell::Probe(item);
         Int32 row = 0, column = 0;
         first->GetColumn(&column);
         first->GetRow(&row);
@@ -982,7 +985,7 @@ AutoPtr<LockPatternView::Cell> LockPatternView::DetectAndAddHit(
         if ((pattern->GetSize(&size), size) != 0) {
             AutoPtr<IInterface> item;
             pattern->Get(size - 1, (IInterface**)&item);
-            Cell* lastCell = (Cell*)IObject::Probe(item);
+            Cell* lastCell = (Cell*)ILockPatternViewCell::Probe(item);
             Int32 dRow = cell->mRow - lastCell->mRow;
             Int32 dColumn = cell->mColumn - lastCell->mColumn;
 
@@ -1112,6 +1115,9 @@ AutoPtr<ILockPatternViewCell> LockPatternView::CheckForNewHit(
         return NULL;
     }
 
+    Logger::D(TAG, ">>>>>>>>>>>>>>>>LockPatternView::CheckForNewHit rowHit=%d, columnHit=%d, mPatternSize=%d",
+         rowHit, columnHit, mPatternSize);
+
     AutoPtr<IInterface> obj;
     (*mPatternDrawLookup)[rowHit]->Get(columnHit, (IInterface**)&obj);
     AutoPtr<IBoolean> ib = IBoolean::Probe(obj);
@@ -1195,7 +1201,7 @@ void LockPatternView::HandleActionMove(
             AutoPtr<IArrayList> pattern = mPattern;
             AutoPtr<IInterface> item;
             pattern->Get(patternSize - 1, (IInterface**)&item);
-            Cell* lastCell = (Cell*)IObject::Probe(item);
+            Cell* lastCell = (Cell*)ILockPatternViewCell::Probe(item);
             Float lastCellCenterX = GetCenterXForColumn(lastCell->mColumn);
             Float lastCellCenterY = GetCenterYForRow(lastCell->mRow);
 
@@ -1402,7 +1408,8 @@ ECode LockPatternView::OnMeasure(
             viewWidth = Elastos::Core::Math::Min(viewWidth, viewHeight);
             break;
     }
-    return NOERROR;
+    Logger::V(TAG, "LockPatternView dimensions: %dx%d", viewWidth, viewHeight);
+    return SetMeasuredDimension(viewWidth, viewHeight);
 }
 
 void LockPatternView::OnDraw(
@@ -1422,7 +1429,7 @@ void LockPatternView::OnDraw(
         for (Int32 i = 0; i < numCircles; i++) {
             AutoPtr<IInterface> item;
             pattern->Get(i, (IInterface**)&item);
-            Cell* cell = (Cell*)IObject::Probe(item);
+            Cell* cell = (Cell*)ILockPatternViewCell::Probe(item);
             cell->GetRow(&row);
             cell->GetColumn(&column);
             AutoPtr<IBoolean> b;
@@ -1438,13 +1445,13 @@ void LockPatternView::OnDraw(
 
             AutoPtr<IInterface> item;
             pattern->Get(numCircles - 1, (IInterface**)&item);
-            Cell* currentCell = (Cell*)IObject::Probe(item);
+            Cell* currentCell = (Cell*)ILockPatternViewCell::Probe(item);
             Float centerX = GetCenterXForColumn(currentCell->mColumn);
             Float centerY = GetCenterYForRow(currentCell->mRow);
 
             item = NULL;
             pattern->Get(numCircles, (IInterface**)&item);
-            Cell* nextCell = (Cell*)IObject::Probe(item);
+            Cell* nextCell = (Cell*)ILockPatternViewCell::Probe(item);
             Float dx = percentageOfNextCircle * (GetCenterXForColumn(nextCell->mColumn) - centerX);
             Float dy = percentageOfNextCircle * (GetCenterYForRow(nextCell->mRow) - centerY);
             mInProgressX = centerX + dx;
@@ -1493,7 +1500,7 @@ void LockPatternView::OnDraw(
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IInterface> item;
             pattern->Get(i, (IInterface**)&item);
-            Cell* cell = (Cell*)IObject::Probe(item);
+            Cell* cell = (Cell*)ILockPatternViewCell::Probe(item);
 
             // only draw the part of the pattern stored in
             // the lookup table (this is only different in the case
