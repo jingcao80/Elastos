@@ -161,24 +161,21 @@ ECode CCarrierText::OnFinishInflate()
     resources->GetString(R::string::kg_text_message_separator, &str);
     mSeparator = CoreUtils::Convert(str);
 
-    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Boolean screenOn;
-    monitor->IsScreenOn(&screenOn);
+    KeyguardUpdateMonitor::GetInstance(mContext)->IsScreenOn(&screenOn);
     return SetSelected(screenOn); // Allow marquee to work.
 }
 
 ECode CCarrierText::OnAttachedToWindow()
 {
     TextView::OnAttachedToWindow();
-    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    return monitor->RegisterCallback(mCallback);
+    return KeyguardUpdateMonitor::GetInstance(mContext)->RegisterCallback(mCallback);
 }
 
 ECode CCarrierText::OnDetachedFromWindow()
 {
     TextView::OnDetachedFromWindow();
-    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    return monitor->RemoveCallback(mCallback);
+    return KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mCallback);
 }
 
 AutoPtr<ICharSequence> CCarrierText::GetCarrierTextForSimState(
