@@ -287,15 +287,17 @@ module
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
+        interface ICalculatorEditText;
+
         interface IEditText;
+
         interface ITextView;
         interface IOnPreDrawListener;
+
         interface IView;
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-
-        interface ICalculatorEditText;
     }
 
     class CNodeListener {

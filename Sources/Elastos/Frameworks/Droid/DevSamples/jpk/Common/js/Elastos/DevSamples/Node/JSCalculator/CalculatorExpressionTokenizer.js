@@ -84,6 +84,7 @@ module.exports = function(aoElastos, aoActivity){
 //     public String getNormalizedExpression(String expr) {
         _pt.getNormalizedExpression = function(expr) {
             elog("CalculatorExpressionTokenizer.js====getNormalizedExpression====");
+
 //         for (Entry<String, String> replacementEntry : mReplacementMap.entrySet()) {
 //             expr = expr.replace(replacementEntry.getValue(), replacementEntry.getKey());
 //         }
@@ -94,6 +95,7 @@ module.exports = function(aoElastos, aoActivity){
 //     public String getLocalizedExpression(String expr) {
         _pt.getLocalizedExpression = function(expr) {
             elog("CalculatorExpressionTokenizer.js====getLocalizedExpression====");
+
 //         for (Entry<String, String> replacementEntry : mReplacementMap.entrySet()) {
 //             expr = expr.replace(replacementEntry.getKey(), replacementEntry.getValue());
 //         }

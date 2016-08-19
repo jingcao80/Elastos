@@ -64,9 +64,9 @@ module.exports = function(aoElastos, aoActivity){
 // import com.android.calculator2.CalculatorEditText.OnTextSizeChangeListener;
 // import com.android.calculator2.CalculatorExpressionEvaluator.EvaluateCallback;
 
-    var CalculatorExpressionTokenizer = require("CalculatorExpressionTokenizer.js")(aoElastos, aoActivity);
-    var CalculatorExpressionEvaluator = require("CalculatorExpressionEvaluator.js")(aoElastos, aoActivity);
-    var CalculatorExpressionBuilder = require("CalculatorExpressionBuilder.js")(aoElastos, aoActivity);
+    var CalculatorExpressionTokenizer = require("./CalculatorExpressionTokenizer.js")(aoElastos, aoActivity);
+    var CalculatorExpressionEvaluator = require("./CalculatorExpressionEvaluator.js")(aoElastos, aoActivity);
+    var CalculatorExpressionBuilder = require("./CalculatorExpressionBuilder.js")(aoElastos, aoActivity);
 
 // public class Calculator extends Activity
 //         implements OnTextSizeChangeListener, EvaluateCallback, OnLongClickListener {
@@ -230,7 +230,7 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             }
 
-            elog('====jso_activity_cb====OnCreate==111==');
+            elog('====jso_activity_cb====OnCreate==1888==');
 
 //         mTokenizer = new CalculatorExpressionTokenizer(this);
             mTokenizer = new CalculatorExpressionTokenizer(this);
@@ -251,14 +251,26 @@ module.exports = function(aoElastos, aoActivity){
 
 //         setState(CalculatorState.values()[
 //                 savedInstanceState.getInt(KEY_CURRENT_STATE, CalculatorState.INPUT.ordinal())]);
-            oActivity.SetState(
+            setState(
                     savedInstanceState.GetInt32(KEY_CURRENT_STATE, CalculatorState.INPUT));
 
             elog('====jso_activity_cb====OnCreate==5==');
 
 //         mFormulaEditText.setText(mTokenizer.getLocalizedExpression(
 //                 savedInstanceState.getString(KEY_CURRENT_EXPRESSION, "")));
-            mFormulaEditText.SetText(mTokenizer.GetLocalizedExpression(
+
+elog("====showMethod===savedInstanceState====");
+CObject.showMethods(savedInstanceState, "String");
+elog("====showMethod===mTokenizer====");
+CObject.showMethods(mTokenizer, "Expression");
+elog("====showMethod===mFormulaEditText====");
+CObject.showMethods(mFormulaEditText, "etText");
+
+            var aaa = savedInstanceState.GetString(KEY_CURRENT_EXPRESSION, "");
+            var bbb = mTokenizer.getLocalizedExpression(aaa);
+            var ccc = mFormulaEditText.SetText(bbb);
+
+            mFormulaEditText.SetText(mTokenizer.getLocalizedExpression(
                     savedInstanceState.GetString(KEY_CURRENT_EXPRESSION, "")));
 
             elog('====jso_activity_cb====OnCreate==6==');

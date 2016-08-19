@@ -36,11 +36,11 @@ module.exports = function(aoElastos, aoActivity){
 // package com.android.calculator2;
 
 // import org.javia.arity.Symbols;
-var Symbols = require("arity/Symbols.js")();
+var Symbols = require("./arity/Symbols.js")(aoElastos, aoActivity);
 // import org.javia.arity.SyntaxException;
-var SyntaxException = require("arity/SyntaxException.js")();
+var SyntaxException = require("./arity/SyntaxException.js")(aoElastos, aoActivity);
 // import org.javia.arity.Util;
-var Util = require("arity/Util.js")();
+var Util = require("./arity/Util.js")(aoElastos, aoActivity);
 
 // public class CalculatorExpressionEvaluator {
 
@@ -56,6 +56,8 @@ var Util = require("arity/Util.js")();
 
 //     public CalculatorExpressionEvaluator(CalculatorExpressionTokenizer tokenizer) {
         function CalculatorExpressionEvaluator(tokenizer) {
+            elog("CalculatorExpressionEvaluator.js====CalculatorExpressionEvaluator====");
+
 //         mSymbols = new Symbols();
             mSymbols = new Symbols();
 //         mTokenizer = tokenizer;
@@ -65,13 +67,15 @@ var Util = require("arity/Util.js")();
         var _pt = CalculatorExpressionEvaluator.prototype;
 
 //     public void evaluate(CharSequence expr, EvaluateCallback callback) {
-        _pt.evaluate = function(expr, callback) {
 //         evaluate(expr.toString(), callback);
 //     }
-        }
 
 //     public void evaluate(String expr, EvaluateCallback callback) {
         _pt.evaluate = function(expr, callback) {
+            elog("CalculatorExpressionEvaluator.js====evaluate====");
+
+            if (typeof expr != "string") expr = expr.ToString();
+
 //         expr = mTokenizer.getNormalizedExpression(expr);
 
 //         // remove any trailing operators

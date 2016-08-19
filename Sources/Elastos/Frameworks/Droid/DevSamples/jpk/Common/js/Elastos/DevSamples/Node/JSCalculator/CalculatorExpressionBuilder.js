@@ -49,6 +49,8 @@ module.exports = function(aoElastos, aoActivity){
 //     public CalculatorExpressionBuilder(
 //             CharSequence text, CalculatorExpressionTokenizer tokenizer, boolean isEdited) {
         function CalculatorExpressionBuilder(text, tokenizer, isEdited) {
+            elog("CalculatorExpressionBuilder.js====CalculatorExpressionBuilder====");
+
 //         super(text);
 
 //         mTokenizer = tokenizer;
@@ -61,6 +63,8 @@ module.exports = function(aoElastos, aoActivity){
 //     public SpannableStringBuilder replace(int start, int end, CharSequence tb, int tbstart,
 //             int tbend) {
         _pt.replace = function(start, end, tb, tbstart, tbend) {
+            elog("CalculatorExpressionBuilder.js====replace====");
+
 //         if (start != length() || end != length()) {
 //             mIsEdited = true;
 //             return super.replace(start, end, tb, tbstart, tbend);

@@ -131,6 +131,9 @@ module.exports = function(aoElastos, aoActivity){
         _pt.OnCreate = function(_this, context, attrs, defStyle) {
             elog(FullClassName + "========OnCreate begin========");
 
+elog("========test000========");
+CObject.showMethods(_this, "etText");
+
             //_super = _this.GetSuperObject();
 
 //         super(context, attrs, defStyle);
