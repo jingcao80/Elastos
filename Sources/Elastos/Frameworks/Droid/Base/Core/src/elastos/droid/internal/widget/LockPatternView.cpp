@@ -1409,7 +1409,8 @@ ECode LockPatternView::OnMeasure(
             break;
     }
     Logger::V(TAG, "LockPatternView dimensions: %dx%d", viewWidth, viewHeight);
-    return SetMeasuredDimension(viewWidth, viewHeight);
+    SetMeasuredDimension(viewWidth, viewHeight);
+    return NOERROR;
 }
 
 void LockPatternView::OnDraw(
