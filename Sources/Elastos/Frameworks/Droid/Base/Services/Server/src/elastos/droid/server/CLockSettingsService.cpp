@@ -19,8 +19,6 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContentValues;
@@ -62,6 +60,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::CString;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::IList;
 using Elastos::Utility::IIterator;

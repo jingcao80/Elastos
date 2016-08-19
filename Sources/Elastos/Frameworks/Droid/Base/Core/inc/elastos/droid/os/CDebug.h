@@ -26,6 +26,14 @@ public:
         /* [in] */ IFileDescriptor* fd);
 
     /**
+     * Retrieves /proc/meminfo.  outSizes is filled with fields
+     * as defined by MEMINFO_* offsets.
+     * @hide
+     */
+    CARAPI GetMemInfo(
+        /* [out] */ ArrayOf<Int64>** outSizes);
+
+    /**
      * Retrieves information about this processes memory usages. This information is broken down by
      * how much is in use by dalivk, the native heap, and everything else.
      */

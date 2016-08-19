@@ -138,6 +138,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     // @Override
     CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,

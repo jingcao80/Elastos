@@ -45,7 +45,7 @@ ECode InputMonitor::NotifyInputChannelBroken(
     }
 
     AutoLock lock(mService->mWindowMapLock);
-    WindowState* windowState = (WindowState*)(IWindowState*)inputWindowHandle->mWindowState.Get();
+    WindowState* windowState = (WindowState*)inputWindowHandle->mWindowState;
     if (windowState != NULL) {
         // Slog.i(WindowManagerService.TAG, "WINDOW DIED " + windowState);
         mService->RemoveWindowLocked(windowState->mSession, windowState);
@@ -73,7 +73,7 @@ ECode InputMonitor::NotifyANR(
         AutoLock lock(mService->mWindowMapLock);
 
         if (inputWindowHandle != NULL) {
-            windowState = (WindowState*)(IWindowState*)inputWindowHandle->mWindowState.Get();
+            windowState = (WindowState*)inputWindowHandle->mWindowState;
             if (windowState != NULL) {
                 appWindowToken = windowState->mAppToken;
             }
@@ -406,7 +406,7 @@ ECode InputMonitor::InterceptKeyBeforeDispatching(
     /* [out] */ Int64* ret)
 {
     AutoPtr<WindowState> windowState = focus != NULL ?
-            (WindowState*)(IWindowState*)((InputWindowHandle*)focus)->mWindowState.Get() : NULL;
+            (WindowState*)(IWindowState*)((InputWindowHandle*)focus)->mWindowState : NULL;
     return mService->mPolicy->InterceptKeyBeforeDispatching(windowState, event, policyFlags, ret);
 }
 
@@ -418,7 +418,7 @@ ECode InputMonitor::DispatchUnhandledKey(
 {
     VALIDATE_NOT_NULL(keyEvent)
     AutoPtr<WindowState> windowState = focus != NULL ?
-            (WindowState*)(IWindowState*)((InputWindowHandle*)focus)->mWindowState.Get() : NULL;
+            (WindowState*)(IWindowState*)((InputWindowHandle*)focus)->mWindowState : NULL;
     return mService->mPolicy->DispatchUnhandledKey(windowState, event, policyFlags, keyEvent);
 }
 

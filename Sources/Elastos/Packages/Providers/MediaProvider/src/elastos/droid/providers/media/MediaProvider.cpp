@@ -3247,8 +3247,6 @@ ECode MediaProvider::BulkInsert(
     /* [in] */ ArrayOf<IContentValues*>* values,
     /* [out] */ Int32* result)
 {
-    Logger::I(TAG, "====================BulkInsert: %s, %d",
-        TO_CSTR(uri), values ? values->GetLength() : 0);
     VALIDATE_NOT_NULL(result)
     *result = 0;
 

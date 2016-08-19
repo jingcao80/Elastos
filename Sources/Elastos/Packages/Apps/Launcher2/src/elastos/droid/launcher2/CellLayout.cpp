@@ -1952,8 +1952,9 @@ ECode CellLayout::GetContentRect(
 {
     VALIDATE_NOT_NULL(outrect);
 
-    if (r == NULL) {
-        CRect::New((IRect**)&r);
+    AutoPtr<IRect> rect = r;
+    if (rect == NULL) {
+        CRect::New((IRect**)&rect);
     }
     Int32 left, top, right, bottom;
     GetPadding(&left, &top, &right, &bottom);
@@ -1962,8 +1963,8 @@ ECode CellLayout::GetContentRect(
     GetHeight(&h);
     right = left + w - left - right;
     bottom = top + h - top - bottom;
-    r->Set(left, top, right, bottom);
-    *outrect = r;
+    rect->Set(left, top, right, bottom);
+    *outrect = rect;
     REFCOUNT_ADD(*outrect);
     return NOERROR;
 }
