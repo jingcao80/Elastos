@@ -273,7 +273,7 @@ ECode InCallTonePlayer::Run()
     } while(FALSE);
     // } finally {
     if (toneGenerator != NULL) {
-        toneGenerator->Release();
+        toneGenerator->ReleaseResources();
     }
     CleanUpTonePlayer();
     return ec;

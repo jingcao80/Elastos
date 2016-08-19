@@ -59,7 +59,7 @@ private:
         CARAPI Run();
 
     private:
-        InCallTonePlayer* mHost;
+        AutoPtr<InCallTonePlayer> mHost;
     };
 
 public:

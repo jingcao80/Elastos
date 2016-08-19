@@ -30,7 +30,8 @@ String PhoneNumberHelper::FormatNumber(
     /* [in] */ const String& phoneNumberE164,
     /* [in] */ const String& defaultCountryIso)
 {
-    assert(0 && "TODO");
+    Logger::E("PhoneNumberHelper", "TODO FormatNumber no impl");
+    return phoneNumber;
 
     // Int32 len = phoneNumber->GetLength();
     // for (Int32 i = 0; i < len; i++) {

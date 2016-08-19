@@ -376,28 +376,29 @@ String CallerInfo::GetGeoDescription(
     if (TextUtils::IsEmpty(number)) {
         return String(NULL);
     }
-assert(0);
-    // PhoneNumberUtil util = PhoneNumberUtil.getInstance();
-    // PhoneNumberOfflineGeocoder geocoder = PhoneNumberOfflineGeocoder.getInstance();
+    Logger::V(TAG, "TODO CallerInfo::GetGeoDescription, com.google.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder is not ok");
+    //TODO
+    //PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+    //PhoneNumberOfflineGeocoder geocoder = PhoneNumberOfflineGeocoder.getInstance();
 
-    // Locale locale = context.getResources().getConfiguration().locale;
-    // String countryIso = TelephonyManagerUtils.getCurrentCountryIso(context, locale);
-    // PhoneNumber pn = null;
-    // try {
-    //     Logger::V(TAG, "parsing '" + number
-    //             + "' for countryIso '" + countryIso + "'...");
-    //     pn = util.parse(number, countryIso);
-    //     Logger::V(TAG, "- parsed number: " + pn);
-    // } catch (NumberParseException e) {
-    //     Logger::V(TAG, "getGeoDescription: NumberParseException for incoming number '" +
-    //             number + "'");
-    // }
+    //Locale locale = context.getResources().getConfiguration().locale;
+    //String countryIso = TelephonyManagerUtils.getCurrentCountryIso(context, locale);
+    //PhoneNumber pn = null;
+    //try {
+    //    Logger::V(TAG, "parsing '" + number
+    //            + "' for countryIso '" + countryIso + "'...");
+    //    pn = util.parse(number, countryIso);
+    //    Logger::V(TAG, "- parsed number: " + pn);
+    //} catch (NumberParseException e) {
+    //    Logger::V(TAG, "getGeoDescription: NumberParseException for incoming number '" +
+    //            number + "'");
+    //}
 
-    // if (pn != null) {
-    //     String description = geocoder.getDescriptionForNumber(pn, locale);
-    //     Logger::V(TAG, "- got description: '" + description + "'");
-    //     return description;
-    // }
+    //if (pn != null) {
+    //    String description = geocoder.getDescriptionForNumber(pn, locale);
+    //    Logger::V(TAG, "- got description: '" + description + "'");
+    //    return description;
+    //}
 
     return String(NULL);
 }

@@ -139,7 +139,7 @@ private:
         AutoPtr<IContext> mQueryContext;
         AutoPtr<IUri> mQueryUri;
         AutoPtr<CallerInfo> mCallerInfo;
-        CallerInfoAsyncQuery* mHost;
+        AutoPtr<CallerInfoAsyncQuery> mHost;
     };
 
 public:

@@ -1260,6 +1260,9 @@ ECode ContentResolver::AcquireUnstableProvider(
     VALIDATE_NOT_NULL(contentProvider)
     *contentProvider = NULL;
 
+    if (uri == NULL) {
+        return NOERROR;
+    }
     String scheme;
     uri->GetScheme(&scheme);
     if (!IContentResolver::SCHEME_CONTENT.Equals(scheme)) {

@@ -1,5 +1,8 @@
 
 #include "elastos/droid/contacts/common/util/TelephonyManagerUtils.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -22,7 +25,10 @@ ECode TelephonyManagerUtils::GetCurrentCountryIso(
     /* [in] */ ILocale* locale,
     /* [out] */ String* iso)
 {
-    assert(0);
+    VALIDATE_NOT_NULL(iso);
+    Logger::E("TelephonyManagerUtils", "TODO GetCurrentCountryIso no impl, default US");
+    *iso = String("US");
+    //assert(0);
     return NOERROR;
 }
 

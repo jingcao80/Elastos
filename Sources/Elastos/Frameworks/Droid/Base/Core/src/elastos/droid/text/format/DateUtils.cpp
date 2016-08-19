@@ -582,8 +582,8 @@ String DateUtils::FormatElapsedTime(
     args->Set(2, seconds_);
 
     AutoPtr<ArrayOf<IInterface*> > args_ = ArrayOf<IInterface*>::Alloc(2);
-    args_->Set(0, hours_);
-    args_->Set(1, minutes_);
+    args_->Set(0, minutes_);
+    args_->Set(1, seconds_);
     String ret;
     if (hours > 0) {
         f->Format(sElapsedFormatHMMSS, args);
