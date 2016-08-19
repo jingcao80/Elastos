@@ -135,10 +135,13 @@ struct addrinfo_deleter {
 };
 
 template <typename rc_t>
-static rc_t ErrorIfMinusOne(const char* name, rc_t rc, ECode* ec) {
+static rc_t ErrorIfMinusOne(const char* name, rc_t rc, ECode* ec, const char* param = NULL) {
     *ec = NOERROR;
     if (rc == rc_t(-1)) {
-        ALOGE("CPosix: System-call error: %s %s", name, strerror(errno));
+        if (param != NULL)
+            ALOGE("CPosix: System-call error: %s %s, param: %s", name, strerror(errno), param);
+        else
+            ALOGE("CPosix: System-call error: %s %s", name, strerror(errno));
         *ec = E_ERRNO_EXCEPTION;
     }
     return rc;
@@ -1374,7 +1377,7 @@ ECode CPosix::Mkdir(
         return NOERROR;
     }
     ECode ec;
-    ErrorIfMinusOne("mkdir", TEMP_FAILURE_RETRY(mkdir(path, mode)), &ec);
+    ErrorIfMinusOne("mkdir", TEMP_FAILURE_RETRY(mkdir(path, mode)), &ec, path.string());
     return ec;
 }
 
@@ -1468,7 +1471,7 @@ ECode CPosix::Open(
         return NOERROR;
     }
     ECode ec;
-    Int32 _fd = ErrorIfMinusOne("open", TEMP_FAILURE_RETRY(open(path, flags, mode)), &ec);
+    Int32 _fd = ErrorIfMinusOne("open", TEMP_FAILURE_RETRY(open(path, flags, mode)), &ec, path.string());
     FAIL_RETURN(ec)
 
     if (_fd != -1) {

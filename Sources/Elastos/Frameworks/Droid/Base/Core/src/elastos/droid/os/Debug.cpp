@@ -386,6 +386,112 @@ ECode Debug::GetMemoryInfo(
     return NOERROR;
 }
 
+enum {
+    MEMINFO_TOTAL,
+    MEMINFO_FREE,
+    MEMINFO_BUFFERS,
+    MEMINFO_CACHED,
+    MEMINFO_SHMEM,
+    MEMINFO_SLAB,
+    MEMINFO_SWAP_TOTAL,
+    MEMINFO_SWAP_FREE,
+    MEMINFO_ZRAM_TOTAL,
+    MEMINFO_COUNT
+};
+
+ECode Debug::GetMemInfo(
+    /* [out] */ ArrayOf<Int64>** outSizes)
+{
+    VALIDATE_NOT_NULL(outSizes)
+
+    char buffer[1024];
+    int numFound = 0;
+
+    int fd = open("/proc/meminfo", O_RDONLY);
+
+    if (fd < 0) {
+        Slogger::W("Debug", "Unable to open /proc/meminfo: %s\n", strerror(errno));
+        return NOERROR;
+    }
+
+    int len = read(fd, buffer, sizeof(buffer)-1);
+    close(fd);
+
+    if (len < 0) {
+        Slogger::W("Debug", "Empty /proc/meminfo");
+        return NOERROR;
+    }
+    buffer[len] = 0;
+
+    static const char* const tags[] = {
+            "MemTotal:",
+            "MemFree:",
+            "Buffers:",
+            "Cached:",
+            "Shmem:",
+            "Slab:",
+            "SwapTotal:",
+            "SwapFree:",
+            NULL
+    };
+    static const int tagsLen[] = {
+            9,
+            8,
+            8,
+            7,
+            6,
+            5,
+            10,
+            9,
+            0
+    };
+    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    char* p = buffer;
+    while (*p && numFound < 8) {
+        int i = 0;
+        while (tags[i]) {
+            if (strncmp(p, tags[i], tagsLen[i]) == 0) {
+                p += tagsLen[i];
+                while (*p == ' ') p++;
+                char* num = p;
+                while (*p >= '0' && *p <= '9') p++;
+                if (*p != 0) {
+                    *p = 0;
+                    p++;
+                }
+                mem[i] = atoll(num);
+                numFound++;
+                break;
+            }
+            i++;
+        }
+        while (*p && *p != '\n') {
+            p++;
+        }
+        if (*p) p++;
+    }
+
+    fd = open("/sys/block/zram0/mem_used_total", O_RDONLY);
+    if (fd >= 0) {
+        len = read(fd, buffer, sizeof(buffer)-1);
+        close(fd);
+        if (len > 0) {
+            buffer[len] = 0;
+            mem[MEMINFO_ZRAM_TOTAL] = atoll(buffer)/1024;
+        }
+    }
+
+    AutoPtr<ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(MEMINFO_COUNT);
+    for (int i=0; i<MEMINFO_COUNT; i++) {
+        (*array)[i] = mem[i];
+    }
+
+    *outSizes = array;
+    REFCOUNT_ADD(*outSizes)
+    return NOERROR;
+}
+
 // Container used to retrieve graphics memory pss
 struct graphics_memory_pss
 {

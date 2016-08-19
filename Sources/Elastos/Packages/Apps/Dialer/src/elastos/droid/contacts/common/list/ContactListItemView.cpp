@@ -473,7 +473,10 @@ ECode ContactListItemView::OnLayout(
         mActivatedBackgroundDrawable->SetBounds(mBoundsWithoutHeader);
     }
 
-    AutoPtr<IView> photoView = mQuickContact != NULL ? IView::Probe(mQuickContact) : IView::Probe(mPhotoView);
+    AutoPtr<IView> photoView = IView::Probe(mQuickContact);
+    if (photoView == NULL) {
+        photoView = IView::Probe(mPhotoView);
+    }
     if (mPhotoPosition == PhotoPosition_LEFT) {
         // Photo is the left most view. All the other Views should on the right of the photo.
         if (photoView != NULL) {

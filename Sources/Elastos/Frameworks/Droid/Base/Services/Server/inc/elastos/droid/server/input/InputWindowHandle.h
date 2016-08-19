@@ -43,7 +43,7 @@ public:
     AutoPtr<InputApplicationHandle> mInputApplicationHandle;
 
     // The window manager's window state.
-    AutoPtr<IWindowState> mWindowState;
+    IWindowState* mWindowState;
 
     // The input channel associated with the window.
     AutoPtr<IInputChannel> mInputChannel;

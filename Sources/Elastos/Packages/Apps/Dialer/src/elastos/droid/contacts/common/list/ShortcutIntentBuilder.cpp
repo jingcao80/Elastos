@@ -372,14 +372,14 @@ void ShortcutIntentBuilder::CreatePhoneNumberShortcutIntent(
         // Make the URI a direct tel: URI so that it will always continue to work
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-        helper->FormParts(IPhoneAccount::SCHEME_TEL, phoneNumber, String(NULL), (Iuri**)&phoneUri);
+        helper->FormParts(IPhoneAccount::SCHEME_TEL, phoneNumber, String(NULL), (IUri**)&phoneUri);
         bitmap = GeneratePhoneNumberIcon(drawable, phoneType, phoneLabel,
                 Elastos::Droid::Dialer::R::drawable::badge_action_call);
     }
     else {
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-        helper->FormParts(ContactsUtils::SCHEME_SMSTO, phoneNumber, String(NULL), (Iuri**)&phoneUri);
+        helper->FormParts(ContactsUtils::SCHEME_SMSTO, phoneNumber, String(NULL), (IUri**)&phoneUri);
         bitmap = GeneratePhoneNumberIcon(drawable, phoneType, phoneLabel,
                 Elastos::Droid::Dialer::R::drawable::badge_action_sms);
     }
