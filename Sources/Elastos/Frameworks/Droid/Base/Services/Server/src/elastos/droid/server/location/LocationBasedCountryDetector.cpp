@@ -191,11 +191,14 @@ AutoPtr<ILocation> LocationBasedCountryDetector::GetLastKnownLocation()
         AutoPtr<ILocation> lastKnownLocation;
         mLocationManager->GetLastKnownLocation(provider, (ILocation**)&lastKnownLocation);
         if (lastKnownLocation != NULL) {
-            Int64 elapsedRealtimeNanos1, elapsedRealtimeNanos2;
-            bestLocation->GetElapsedRealtimeNanos(&elapsedRealtimeNanos1);
-            lastKnownLocation->GetElapsedRealtimeNanos(&elapsedRealtimeNanos2);
-            if (bestLocation == NULL || elapsedRealtimeNanos1 < elapsedRealtimeNanos2) {
-                bestLocation = lastKnownLocation;
+            if (bestLocation == NULL) bestLocation = lastKnownLocation;
+            else {
+                Int64 elapsedRealtimeNanos1, elapsedRealtimeNanos2;
+                bestLocation->GetElapsedRealtimeNanos(&elapsedRealtimeNanos1);
+                lastKnownLocation->GetElapsedRealtimeNanos(&elapsedRealtimeNanos2);
+                if (elapsedRealtimeNanos1 < elapsedRealtimeNanos2) {
+                    bestLocation = lastKnownLocation;
+                }
             }
         }
     }
