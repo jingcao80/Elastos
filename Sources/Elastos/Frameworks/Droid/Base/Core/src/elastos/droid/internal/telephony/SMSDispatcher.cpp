@@ -5,8 +5,10 @@
 #include "elastos/droid/database/sqlite/SQLiteWrapper.h"
 #include "elastos/droid/internal/telephony/CSmsApplication.h"
 #include "elastos/droid/internal/telephony/CSmsResponse.h"
+#include "elastos/droid/internal/telephony/CGsmAlphabetTextEncodingDetails.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
 #include "elastos/droid/internal/telephony/SMSDispatcher.h"
+#include "elastos/droid/internal/telephony/SmsHeader.h"
 #include "elastos/droid/internal/telephony/SmsUsageMonitor.h"
 #include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/internal/telephony/uicc/UiccController.h"
@@ -178,7 +180,7 @@ ECode SMSDispatcher::SMSDispatcherReceiver::OnReceive(
             else {
                 Logger::E(TAG, "Can't find messageref in result extras.");
             }
-            mHost->mSendPendingList->Add((IInterface*)(IObject*)mTracker.Get());
+            mHost->mSendPendingList->Add(mTracker->Probe(EIID_IInterface));
         }
         else {
             Logger::D(TAG, "Sending SMS by IP failed.");
@@ -430,9 +432,8 @@ CARAPI SMSDispatcher::SmsTracker::OnSent(IContext* context)
     }
     if (isSinglePartOrLastPart) {
         Boolean success = TRUE;
-        Boolean b;
-        mAnyPartFailed->Get(&b);
-        if (mAnyPartFailed != NULL && b) {
+        Boolean b = FALSE;
+        if (mAnyPartFailed != NULL && (mAnyPartFailed->Get(&b), b)) {
             success = FALSE;
         }
         if (success) {
@@ -511,7 +512,7 @@ CARAPI SMSDispatcher::ConfirmDialogListener::OnClick(IDialogInterface* dialog, I
         //                     -1 : mTracker->mAppInfo.applicationInfo.uid);
         AutoPtr<IMessage> msg;
         mHost->ObtainMessage(EVENT_SEND_CONFIRMED_SMS,
-                (IInterface*)(IObject*)mTracker.Get(), (IMessage**)&msg);
+                mTracker->Probe(EIID_IInterface), (IMessage**)&msg);
         Boolean b;
         mHost->SendMessage(msg, &b);
         if (mRememberChoice) {
@@ -526,7 +527,7 @@ CARAPI SMSDispatcher::ConfirmDialogListener::OnClick(IDialogInterface* dialog, I
         //                     -1 :  mTracker->mAppInfo.applicationInfo.uid);
         AutoPtr<IMessage> msg;
         mHost->ObtainMessage(EVENT_STOP_SENDING,
-                (IInterface*)(IObject*)mTracker.Get(), (IMessage**)&msg);
+                mTracker->Probe(EIID_IInterface), (IMessage**)&msg);
         Boolean b;
         mHost->SendMessage(msg, &b);
         if (mRememberChoice) {
@@ -545,7 +546,7 @@ CARAPI SMSDispatcher::ConfirmDialogListener::OnCancel(IDialogInterface* dialog)
    Logger::D(TAG, "dialog dismissed: don't send SMS");
    AutoPtr<IMessage> msg;
    mHost->ObtainMessage(EVENT_STOP_SENDING,
-        (IInterface*)(IObject*)mTracker.Get(), (IMessage**)&msg);
+        mTracker->Probe(EIID_IInterface), (IMessage**)&msg);
    Boolean b;
    mHost->SendMessage(msg, &b);
    return NOERROR;
@@ -781,29 +782,29 @@ ECode SMSDispatcher::HandleMessage(
     switch (what) {
     case EVENT_SEND_SMS_COMPLETE:
         // An outbound SMS has been successfully transferred, or failed.
-        HandleSendComplete((AsyncResult*)(IObject*)obj.Get());
+        HandleSendComplete((AsyncResult*)IAsyncResult::Probe(obj));
         break;
 
     case EVENT_SEND_RETRY:
         Logger::D(TAG, "SMS retry..");
-        SendRetrySms((SmsTracker*)(IObject*)obj.Get());
+        SendRetrySms((SmsTracker*)IObject::Probe(obj));
         break;
 
     case EVENT_SEND_LIMIT_REACHED_CONFIRMATION:
-        HandleReachSentLimit((SmsTracker*)(IObject*)obj.Get());
+        HandleReachSentLimit((SmsTracker*)IObject::Probe(obj));
         break;
 
     case EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE:
-        HandleConfirmShortCode(FALSE, (SmsTracker*)(IObject*)obj.Get());
+        HandleConfirmShortCode(FALSE, (SmsTracker*)IObject::Probe(obj));
         break;
 
     case EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE:
-        HandleConfirmShortCode(TRUE, (SmsTracker*)(IObject*)obj.Get());
+        HandleConfirmShortCode(TRUE, (SmsTracker*)IObject::Probe(obj));
         break;
 
     case EVENT_SEND_CONFIRMED_SMS:
     {
-        AutoPtr<SmsTracker> tracker = (SmsTracker*)(IObject*)obj.Get();
+        AutoPtr<SmsTracker> tracker = (SmsTracker*)IObject::Probe(obj);
         if (tracker->IsMultipart()) {
             SendMultipartSms(tracker);
         }
@@ -822,7 +823,7 @@ ECode SMSDispatcher::HandleMessage(
 
     case EVENT_STOP_SENDING:
     {
-        AutoPtr<SmsTracker> tracker = (SmsTracker*)(IObject*)obj.Get();
+        AutoPtr<SmsTracker> tracker = (SmsTracker*)IObject::Probe(obj);
         tracker->OnFailed(mContext, ISmsManager::RESULT_ERROR_LIMIT_EXCEEDED, 0/*errorCode*/);
         mPendingTrackerCount--;
         break;
@@ -869,7 +870,7 @@ Boolean SMSDispatcher::IsSystemUid(
 void SMSDispatcher::HandleSendComplete(
     /* [in] */ AsyncResult* ar)
 {
-    AutoPtr<SmsTracker> tracker = (SmsTracker*)(IObject*)ar->mUserObj.Get();
+    AutoPtr<SmsTracker> tracker = (SmsTracker*)IObject::Probe(ar->mUserObj);
     AutoPtr<IPendingIntent> sentIntent = tracker->mSentIntent;
 
     if (ar->mResult != NULL) {
@@ -884,7 +885,7 @@ void SMSDispatcher::HandleSendComplete(
 
         if (tracker->mDeliveryIntent != NULL) {
             // Expecting a status report.  Add it to the list.
-            mDeliveryPendingList->Add((IInterface*)(IObject*)tracker);
+            mDeliveryPendingList->Add(tracker->Probe(EIID_IInterface));
         }
         tracker->OnSent(mContext);
     }
@@ -1094,27 +1095,26 @@ void SMSDispatcher::SendMultipartText(const String& destAddr, const String& scAd
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&anyPartFailed);
 
     for (Int32 i = 0; i < msgCount; i++) {
-        AutoPtr<ISmsHeader> smsHeader;
-// TODO: Need SmsHeader
-        // AutoPtr<ISmsHeaderConcatRef> concatRef = new SmsHeader->ConcatRef();
-        // concatRef->refNumber = refNumber;
-        // concatRef->seqNumber = i + 1;  // 1-based sequence
-        // concatRef->msgCount = msgCount;
-        // // TODO: We currently set this to TRUE since our messaging app will never
-        // // send more than 255 Parts (it converts the message to MMS well before that).
-        // // However, we should support 3rd party messaging apps that might need 16-bit
-        // // references
-        // // Note:  It's not sufficient to just flip this bit to TRUE; it will have
-        // // ripple Effects (several calculations assume 8-bit ref).
-        // concatRef->isEightBits = TRUE;
-        // smsHeader = new SmsHeader();
-        // smsHeader.concatRef = concatRef;
+        AutoPtr<SmsHeader> smsHeader;
+        AutoPtr<SmsHeader::ConcatRef> concatRef = new SmsHeader::ConcatRef();
+        concatRef->refNumber = refNumber;
+        concatRef->seqNumber = i + 1;  // 1-based sequence
+        concatRef->msgCount = msgCount;
+        // TODO: We currently set this to TRUE since our messaging app will never
+        // send more than 255 Parts (it converts the message to MMS well before that).
+        // However, we should support 3rd party messaging apps that might need 16-bit
+        // references
+        // Note:  It's not sufficient to just flip this bit to TRUE; it will have
+        // ripple Effects (several calculations assume 8-bit ref).
+        concatRef->isEightBits = TRUE;
+        smsHeader = new SmsHeader();
+        smsHeader->mConcatRef = concatRef;
 
-        // // Set the national language tables for 3GPP 7-bit encoding, if enabled.
-        // if (encoding == ISmsConstants::ENCODING_7BIT) {
-        //     smsHeader.languageTable = (*encodingForParts)[i].languageTable;
-        //     smsHeader.languageShiftTable = (*encodingForParts)[i].languageShiftTable;
-        // }
+        // Set the national language tables for 3GPP 7-bit encoding, if enabled.
+        if (encoding == ISmsConstants::ENCODING_7BIT) {
+            smsHeader->mLanguageTable = ((CGsmAlphabetTextEncodingDetails*)(*encodingForParts)[i])->mLanguageTable;
+            smsHeader->mLanguageShiftTable = ((CGsmAlphabetTextEncodingDetails*)(*encodingForParts)[i])->mLanguageShiftTable;
+        }
 
         Int32 size;
         AutoPtr<IInterface> obj;
@@ -1307,12 +1307,14 @@ void SMSDispatcher::SendRawPdu(SmsTracker* tracker)
         // check for excessive outgoing SMS usage by this app
         String pkgName;
         appInfo->GetPackageName(&pkgName);
-        Boolean b;
-        mUsageMonitor->Check(pkgName, SINGLE_PART_SMS, &b);
+        Boolean b = FALSE;
+        if (mUsageMonitor != NULL) {
+            mUsageMonitor->Check(pkgName, SINGLE_PART_SMS, &b);
+        }
         if (!b) {
             AutoPtr<IMessage> msg;
             ObtainMessage(EVENT_SEND_LIMIT_REACHED_CONFIRMATION,
-                    (IInterface*)(IObject*)tracker, (IMessage**)&msg);
+                    tracker->Probe(EIID_IInterface), (IMessage**)&msg);
             SendMessage(msg, &b);
             return;
         }
@@ -1361,7 +1363,9 @@ Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
                 mTelephonyManager->GetNetworkCountryIso(&simCountryIso);
             }
 
-            mUsageMonitor->CheckDestination(tracker->mDestAddress, simCountryIso, &smsCategory);
+            if (mUsageMonitor != NULL) {
+                mUsageMonitor->CheckDestination(tracker->mDestAddress, simCountryIso, &smsCategory);
+            }
         }
         if (rule == PREMIUM_RULE_USE_NETWORK || rule == PREMIUM_RULE_USE_BOTH) {
             String networkCountryIso;
@@ -1371,8 +1375,10 @@ Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
                 mTelephonyManager->GetSimCountryIso(&networkCountryIso);
             }
 
-            Int32 val;
-            mUsageMonitor->CheckDestination(tracker->mDestAddress, networkCountryIso, &val);
+            Int32 val = 0;
+            if (mUsageMonitor != NULL) {
+                mUsageMonitor->CheckDestination(tracker->mDestAddress, networkCountryIso, &val);
+            }
             SmsUsageMonitor::MergeShortCodeCategories(smsCategory, val, &smsCategory);
         }
 
@@ -1385,8 +1391,10 @@ Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
         // Wait for user confirmation unless the user has set permission to always allow/deny
         String pkgName;
         tracker->mAppInfo->GetPackageName(&pkgName);
-        Int32 premiumSmsPermission;
-        mUsageMonitor->GetPremiumSmsPermission(pkgName, &premiumSmsPermission);
+        Int32 premiumSmsPermission = 0;
+        if (mUsageMonitor != NULL) {
+            mUsageMonitor->GetPremiumSmsPermission(pkgName, &premiumSmsPermission);
+        }
         if (premiumSmsPermission == ISmsUsageMonitor::PREMIUM_SMS_PERMISSION_UNKNOWN) {
             // First time trying to send to premium SMS.
             premiumSmsPermission = ISmsUsageMonitor::PREMIUM_SMS_PERMISSION_ASK_USER;
@@ -1400,7 +1408,7 @@ Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
             case ISmsUsageMonitor::PREMIUM_SMS_PERMISSION_NEVER_ALLOW: {
                 Logger::W(TAG, "User denied this app from sending to premium SMS");
                 AutoPtr<IMessage> msg;
-                ObtainMessage(EVENT_STOP_SENDING, (IInterface*)(IObject*)tracker, (IMessage**)&msg);
+                ObtainMessage(EVENT_STOP_SENDING, tracker->Probe(EIID_IInterface), (IMessage**)&msg);
                 SendMessage(msg, &b);
                 return FALSE;   // reject this message
             }
@@ -1413,7 +1421,7 @@ Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
                     event = EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE;
                 }
                 AutoPtr<IMessage> msg;
-                ObtainMessage(event, (IInterface*)(IObject*)tracker, (IMessage**)&msg);
+                ObtainMessage(event, tracker->Probe(EIID_IInterface), (IMessage**)&msg);
                 SendMessage(msg, &b);
                 return FALSE;   // wait for user confirmation
             }
@@ -1624,7 +1632,12 @@ void SMSDispatcher::HandleConfirmShortCode(Boolean isPremium, SmsTracker* tracke
  */
 ECode SMSDispatcher::GetPremiumSmsPermission(const String& packageName, Int32* result)
 {
-    return mUsageMonitor->GetPremiumSmsPermission(packageName, result);
+    VALIDATE_NOT_NULL(result);
+    *result = 0;
+    if (mUsageMonitor != NULL) {
+        return mUsageMonitor->GetPremiumSmsPermission(packageName, result);
+    }
+    return NOERROR;
 }
 
 /**
@@ -1637,7 +1650,10 @@ ECode SMSDispatcher::GetPremiumSmsPermission(const String& packageName, Int32* r
  */
 ECode SMSDispatcher::SetPremiumSmsPermission(const String& packageName, Int32 permission)
 {
-    return mUsageMonitor->SetPremiumSmsPermission(packageName, permission);
+    if (mUsageMonitor != NULL) {
+        return mUsageMonitor->SetPremiumSmsPermission(packageName, permission);
+    }
+    return NOERROR;
 }
 
 /**

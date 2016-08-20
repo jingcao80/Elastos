@@ -82,19 +82,18 @@ public:
         /* [out, callee] */ ArrayOf<Byte>** result);
 
 public:
-    AutoPtr<PortAddrs> portAddrs;
-    AutoPtr<ConcatRef> concatRef;
+    AutoPtr<PortAddrs> mPortAddrs;
+    AutoPtr<ConcatRef> mConcatRef;
     //ArrayList<SpecialSmsMsg> specialSmsMsgList = new ArrayList<SpecialSmsMsg>();
-    AutoPtr<IArrayList> specialSmsMsgList;
+    AutoPtr<IArrayList> mSpecialSmsMsgList;
     //ArrayList<MiscElt> miscEltList = new ArrayList<MiscElt>();
-    AutoPtr<IArrayList> miscEltList;
+    AutoPtr<IArrayList> mMiscEltList;
 
     /** 7 bit national language locking shift table, or 0 for GSM default 7 bit alphabet. */
-    Int32 languageTable;
+    Int32 mLanguageTable;
 
     /** 7 bit national language single shift table, or 0 for GSM default 7 bit extension table. */
-    Int32 languageShiftTable;
-
+    Int32 mLanguageShiftTable;
 };
 
 } // namespace Telephony

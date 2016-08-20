@@ -24,6 +24,7 @@
 #include <unicode/decimfmt.h>
 #include <unicode/dtfmtsym.h>
 #include <unicode/gregocal.h>
+#include <unicode/uidna.h>
 #include <unicode/locid.h>
 #include <unicode/numfmt.h>
 #include <unicode/strenum.h>
@@ -1607,6 +1608,29 @@ ECode ICUUtil::UTF16ByteArrayToString(
     ElStringByteSink sink(&str);
     us.toUTF8(sink);
     *result = str;
+    return NOERROR;
+}
+
+ECode ICUUtil::UTF8ByteArrayToUTF16ByteArray(
+    /* [in] */ ArrayOf<Byte>* utf8Array,
+    /* [out, callee] */ ArrayOf<UInt16>** utf16Array)
+{
+    VALIDATE_NOT_NULL(utf16Array);
+    *utf16Array = NULL;
+
+    UnicodeString unicodeS = UnicodeString::fromUTF8((char*)utf8Array->GetPayload());
+    UChar dst[256];
+    UErrorCode status = U_ZERO_ERROR;
+    size_t resultLength = uidna_IDNToUnicode(unicodeS.getBuffer(), unicodeS.length(), &dst[0], sizeof(dst), UIDNA_DEFAULT, NULL, &status);
+    if (U_FAILURE(status)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    AutoPtr< ArrayOf<UInt16> > outarr = ArrayOf<UInt16>::Alloc(resultLength);
+    for (size_t i = 0; i < resultLength; ++i) {
+        (*outarr)[i] = dst[i];
+    }
+    *utf16Array = outarr;
+    REFCOUNT_ADD(*utf16Array);
     return NOERROR;
 }
 

@@ -6,6 +6,7 @@
 ;
 framework.jar           /system/framework
 framework-res.apk       /system/framework
+telephony-common.jar    /system/framework
 libandroid_runtime.so   /system/lib
 ../Linux/usr/lib/libelwebviewchromium.so       /system/lib
 bootanimation.zip       /system/media

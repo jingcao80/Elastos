@@ -22,6 +22,7 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Character.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Content::Res::IResourcesHelper;
@@ -63,7 +64,6 @@ using Elastos::Droid::Text::Style::IRelativeSizeSpan;
 using Elastos::Droid::Text::Style::ITextAppearanceSpan;
 // using Elastos::Droid::Text::Style::CTextAppearanceSpan;
 
-
 using Org::Xml::Sax::EIID_IContentHandler;
 using Org::Xml::Sax::IInputSource;
 using Org::Xml::Sax::CInputSource;
@@ -72,6 +72,7 @@ using Elastos::Core::Character;
 using Elastos::Core::CString;
 using Elastos::IO::CStringReader;
 using Elastos::IO::IStringReader;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -93,6 +94,8 @@ AutoPtr<ISpanned> Html::FromHtml(
     /* [in] */ IHtmlImageGetter* imageGetter,
     /* [in] */ IHtmlTagHandler* tagHandler)
 {
+    Logger::D("Html", "TODO need [org.ccil.cowan.tagsoup.Parser]");
+    return NULL;
 //    AutoPtr<IParser> parser;// = new Parser();
 //    try {
 //        parser.setProperty(Parser.schemaProperty, HtmlParser.schema);

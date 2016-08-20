@@ -3,12 +3,10 @@
 #include "elastos/droid/internal/telephony/CSmsNumberUtils.h"
 #include "elastos/droid/telephony/PhoneNumberUtils.h"
 #include "elastos/droid/os/Build.h"
-
+#include <elastos/utility/logging/Logger.h>
 using Elastos::Core::IntegralToString;
 //using Elastos::Utility::IArrays;
 using Elastos::Utility::IList;
-
-
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Text::ITextUtils;
@@ -16,9 +14,9 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Telephony::PhoneNumberUtils;
 using Elastos::Droid::Telephony::ITelephonyManager;
-//using Elastos::Droid::Telephony::IRlog;
 //using Elastos::Droid::Internal::Telephony::HbpcdLookup::IMccIdd;
 //using Elastos::Droid::Internal::Telephony::HbpcdLookup::IMccLookup;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -35,61 +33,61 @@ CAR_SINGLETON_IMPL(CSmsNumberUtils)
 
 CAR_INTERFACE_IMPL(CSmsNumberUtils, Singleton, ISmsNumberUtils)
 
-const String TAG("SmsNumberUtils");
-const Boolean DBG = Build::IS_DEBUGGABLE;
+const String CSmsNumberUtils::TAG("SmsNumberUtils");
+const Boolean CSmsNumberUtils::DBG = Build::IS_DEBUGGABLE;
 
-const String PLUS_SIGN("+");
+const String CSmsNumberUtils::PLUS_SIGN("+");
 
-const Int32 NANP_SHORT_LENGTH = 7;
-const Int32 NANP_MEDIUM_LENGTH = 10;
-const Int32 NANP_LONG_LENGTH = 11;
+const Int32 CSmsNumberUtils::NANP_SHORT_LENGTH = 7;
+const Int32 CSmsNumberUtils::NANP_MEDIUM_LENGTH = 10;
+const Int32 CSmsNumberUtils::NANP_LONG_LENGTH = 11;
 
-const Int32 NANP_CC = 1;
-const String NANP_NDD("1");
-const String NANP_IDD("011");
+const Int32 CSmsNumberUtils::NANP_CC = 1;
+const String CSmsNumberUtils::NANP_NDD("1");
+const String CSmsNumberUtils::NANP_IDD("011");
 
-const Int32 MIN_COUNTRY_AREA_LOCAL_LENGTH = 10;
+const Int32 CSmsNumberUtils::MIN_COUNTRY_AREA_LOCAL_LENGTH = 10;
 
-const Int32 GSM_UMTS_NETWORK = 0;
-const Int32 CDMA_HOME_NETWORK = 1;
-const Int32 CDMA_ROAMING_NETWORK = 2;
+const Int32 CSmsNumberUtils::GSM_UMTS_NETWORK = 0;
+const Int32 CSmsNumberUtils::CDMA_HOME_NETWORK = 1;
+const Int32 CSmsNumberUtils::CDMA_ROAMING_NETWORK = 2;
 
-const Int32 NP_NONE = 0;
-const Int32 NP_NANP_BEGIN = 1;
+const Int32 CSmsNumberUtils::NP_NONE = 0;
+const Int32 CSmsNumberUtils::NP_NANP_BEGIN = 1;
 
 /* <Phone Number>, <NXX>-<XXXX> N[2-9] */
-const Int32 NP_NANP_LOCAL = NP_NANP_BEGIN;
+const Int32 CSmsNumberUtils::NP_NANP_LOCAL = NP_NANP_BEGIN;
 
 /* <Area_code>-<Phone Number>, <NXX>-<NXX>-<XXXX> N[2-9] */
-const Int32 NP_NANP_AREA_LOCAL = NP_NANP_BEGIN + 1;
+const Int32 CSmsNumberUtils::NP_NANP_AREA_LOCAL = NP_NANP_BEGIN + 1;
 
 /* <1>-<Area_code>-<Phone Number>, 1-<NXX>-<NXX>-<XXXX> N[2-9] */
-const Int32 NP_NANP_NDD_AREA_LOCAL = NP_NANP_BEGIN + 2;
+const Int32 CSmsNumberUtils::NP_NANP_NDD_AREA_LOCAL = NP_NANP_BEGIN + 2;
 
 /* <+><U.S.Country_code><Area_code><Phone Number>, +1-<NXX>-<NXX>-<XXXX> N[2-9] */
-const Int32 NP_NANP_NBPCD_CC_AREA_LOCAL = NP_NANP_BEGIN + 3;
+const Int32 CSmsNumberUtils::NP_NANP_NBPCD_CC_AREA_LOCAL = NP_NANP_BEGIN + 3;
 
 /* <Local_IDD><Country_code><Area_code><Phone Number>, 001-1-<NXX>-<NXX>-<XXXX> N[2-9] */
-const Int32 NP_NANP_LOCALIDD_CC_AREA_LOCAL = NP_NANP_BEGIN + 4;
+const Int32 CSmsNumberUtils::NP_NANP_LOCALIDD_CC_AREA_LOCAL = NP_NANP_BEGIN + 4;
 
 /* <+><Home_IDD><Country_code><Area_code><Phone Number>, +011-1-<NXX>-<NXX>-<XXXX> N[2-9] */
-const Int32 NP_NANP_NBPCD_HOMEIDD_CC_AREA_LOCAL = NP_NANP_BEGIN + 5;
+const Int32 CSmsNumberUtils::NP_NANP_NBPCD_HOMEIDD_CC_AREA_LOCAL = NP_NANP_BEGIN + 5;
 
-const Int32 NP_INTERNATIONAL_BEGIN = 100;
+const Int32 CSmsNumberUtils::NP_INTERNATIONAL_BEGIN = 100;
 /* <+>-<Home_IDD>-<Country_code>-<Area_code>-<Phone Number>, +011-86-25-86281234 */
-const Int32 NP_NBPCD_HOMEIDD_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN;
+const Int32 CSmsNumberUtils::NP_NBPCD_HOMEIDD_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN;
 
 /* <Home_IDD>-<Country_code>-<Area_code>-<Phone Number>, 011-86-25-86281234 */
-const Int32 NP_HOMEIDD_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 1;
+const Int32 CSmsNumberUtils::NP_HOMEIDD_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 1;
 
 /* <NBPCD>-<Country_code>-<Area_code>-<Phone Number>, +1-86-25-86281234 */
-const Int32 NP_NBPCD_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 2;
+const Int32 CSmsNumberUtils::NP_NBPCD_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 2;
 
 /* <Local_IDD>-<Country_code>-<Area_code>-<Phone Number>, 00-86-25-86281234 */
-const Int32 NP_LOCALIDD_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 3;
+const Int32 CSmsNumberUtils::NP_LOCALIDD_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 3;
 
 /* <Country_code>-<Area_code>-<Phone Number>, 86-25-86281234*/
-const Int32 NP_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 4;
+const Int32 CSmsNumberUtils::NP_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 4;
 
 //TODO
 //HashMap<String, ArrayList<String>> IDDS_MAPS =
@@ -519,7 +517,8 @@ ECode CSmsNumberUtils::FilterDestAddr(
     /* [in] */ const String& destAddr,
     /* [out] */ String* result)
 {
-    assert(0 && "TODO");
+    Logger::D(TAG, "[TODO] FilterDestAddr Not Implemented");
+    *result = destAddr;
     return NOERROR;
 //    if (DBG) Rlog->D(TAG, "enter filterDestAddr. destAddr=\"" + destAddr + "\"" );
 //

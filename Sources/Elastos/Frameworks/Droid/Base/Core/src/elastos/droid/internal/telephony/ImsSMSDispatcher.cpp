@@ -496,7 +496,7 @@ ECode ImsSMSDispatcher::SendRetrySms(
             Elastos::Droid::Internal::Telephony::Gsm::CSmsMessage::GetSubmitPdu(
                     scAddr, destAddr, text, (tracker->mDeliveryIntent != NULL), (ArrayOf<Byte>*)NULL
                     , (ISmsMessageSubmitPdu**)&ssp);
-            pdu = (SmsMessageBase::SubmitPduBase*)ssp.Get();
+            pdu = (SmsMessageBase::SubmitPduBase*)ISmsMessageBaseSubmitPduBase::Probe(ssp);
         }
     }
     else if (dataFlag) {
@@ -534,7 +534,7 @@ ECode ImsSMSDispatcher::SendRetrySms(
                         scAddr, destAddr, intValue, data,
                         (tracker->mDeliveryIntent != NULL)
                         , (ISmsMessageSubmitPdu**)&ssp);
-            pdu = (SmsMessageBase::SubmitPduBase*)ssp.Get();
+            pdu = (SmsMessageBase::SubmitPduBase*)ISmsMessageBaseSubmitPduBase::Probe(ssp);
         }
     }
 

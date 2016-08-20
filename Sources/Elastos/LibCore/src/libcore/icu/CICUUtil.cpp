@@ -362,5 +362,12 @@ ECode CICUUtil::UTF16ByteArrayToString(
     return ICUUtil::UTF16ByteArrayToString(utf16Array, offset, length, result);
 }
 
+ECode CICUUtil::UTF8ByteArrayToUTF16ByteArray(
+    /* [in] */ ArrayOf<Byte>* utf8Array,
+    /* [out, callee] */ ArrayOf<UInt16>** utf16Array)
+{
+    return ICUUtil::UTF8ByteArrayToUTF16ByteArray(utf8Array, utf16Array);
+}
+
 } // namespace ICU
 } // namespace Libcore

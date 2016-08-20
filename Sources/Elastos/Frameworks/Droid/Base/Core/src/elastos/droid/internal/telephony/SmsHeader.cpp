@@ -28,9 +28,11 @@ namespace Telephony {
 CAR_INTERFACE_IMPL(SmsHeader, Object, ISmsHeader)
 
 SmsHeader::SmsHeader()
+    : mLanguageTable(0)
+    , mLanguageShiftTable(0)
 {
-    CArrayList::New((IArrayList**)&specialSmsMsgList);
-    CArrayList::New((IArrayList**)&miscEltList);
+    CArrayList::New((IArrayList**)&mSpecialSmsMsgList);
+    CArrayList::New((IArrayList**)&mMiscEltList);
 }
 
 ECode SmsHeader::FromByteArray(
@@ -58,7 +60,7 @@ ECode SmsHeader::FromByteArray(
         Int32 length;
         inStream->Read(&length);
         AutoPtr<ConcatRef> concatRef;
-        AutoPtr<PortAddrs> portAddrs;
+        AutoPtr<PortAddrs> mPortAddrs;
         switch (id) {
             case ELT_ID_CONCATENATED_8_BIT_REFERENCE: {
                 concatRef = new ConcatRef();
@@ -72,7 +74,7 @@ ECode SmsHeader::FromByteArray(
                 concatRef->isEightBits = TRUE;
                 if (concatRef->msgCount != 0 && concatRef->seqNumber != 0 &&
                         concatRef->seqNumber <= concatRef->msgCount) {
-                    smsHeader->concatRef = concatRef;
+                    smsHeader->mConcatRef = concatRef;
                 }
                 break;
             }
@@ -89,44 +91,44 @@ ECode SmsHeader::FromByteArray(
                 concatRef->isEightBits = FALSE;
                 if (concatRef->msgCount != 0 && concatRef->seqNumber != 0 &&
                         concatRef->seqNumber <= concatRef->msgCount) {
-                    smsHeader->concatRef = concatRef;
+                    smsHeader->mConcatRef = concatRef;
                 }
                 break;
             }
             case ELT_ID_APPLICATION_PORT_ADDRESSING_8_BIT: {
-                portAddrs = new PortAddrs();
+                mPortAddrs = new PortAddrs();
                 Int32 value;
                 inStream->Read(&value);
-                portAddrs->destPort = value;
+                mPortAddrs->destPort = value;
                 inStream->Read(&value);
-                portAddrs->origPort = value;
-                portAddrs->areEightBits = TRUE;
-                smsHeader->portAddrs = portAddrs;
+                mPortAddrs->origPort = value;
+                mPortAddrs->areEightBits = TRUE;
+                smsHeader->mPortAddrs = mPortAddrs;
                 break;
             }
             case ELT_ID_APPLICATION_PORT_ADDRESSING_16_BIT: {
-                portAddrs = new PortAddrs();
+                mPortAddrs = new PortAddrs();
                 Int32 value, v2;
                 inStream->Read(&value);
                 inStream->Read(&v2);
-                portAddrs->destPort = (value << 8) | v2;
+                mPortAddrs->destPort = (value << 8) | v2;
                 inStream->Read(&value);
                 inStream->Read(&v2);
-                portAddrs->origPort = (value << 8) | v2;
-                portAddrs->areEightBits = FALSE;
-                smsHeader->portAddrs = portAddrs;
+                mPortAddrs->origPort = (value << 8) | v2;
+                mPortAddrs->areEightBits = FALSE;
+                smsHeader->mPortAddrs = mPortAddrs;
                 break;
             }
             case ELT_ID_NATIONAL_LANGUAGE_SINGLE_SHIFT: {
                 Int32 value;
                 inStream->Read(&value);
-                smsHeader->languageShiftTable = value;
+                smsHeader->mLanguageShiftTable = value;
                 break;
             }
             case ELT_ID_NATIONAL_LANGUAGE_LOCKING_SHIFT:
                 Int32 value;
                 inStream->Read(&value);
-                smsHeader->languageTable = value;
+                smsHeader->mLanguageTable = value;
                 break;
             case ELT_ID_SPECIAL_SMS_MESSAGE_INDICATION: {
                 AutoPtr<SpecialSmsMsg> specialSmsMsg = new SpecialSmsMsg();
@@ -135,7 +137,7 @@ ECode SmsHeader::FromByteArray(
                 specialSmsMsg->msgIndType = value;
                 inStream->Read(&value);
                 specialSmsMsg->msgCount = value;
-                smsHeader->specialSmsMsgList->Add(TO_IINTERFACE(specialSmsMsg));
+                smsHeader->mSpecialSmsMsgList->Add(TO_IINTERFACE(specialSmsMsg));
                 break;
             }
             default: {
@@ -144,7 +146,7 @@ ECode SmsHeader::FromByteArray(
                 miscElt->data = ArrayOf<Byte>::Alloc(length);
                 Int32 num;
                 inStream->Read(miscElt->data, 0, length, &num);
-                smsHeader->miscEltList->Add(TO_IINTERFACE(miscElt));
+                smsHeader->mMiscEltList->Add(TO_IINTERFACE(miscElt));
             }
         }
     }
@@ -163,18 +165,18 @@ ECode SmsHeader::ToByteArray(
 
     SmsHeader* smsHeader = (SmsHeader*)(IObject::Probe(_smsHeader));
     Boolean isEmpty;
-    if ((smsHeader->portAddrs == NULL) &&
-            (smsHeader->concatRef == NULL) &&
-            (smsHeader->specialSmsMsgList->IsEmpty(&isEmpty), isEmpty) &&
-            (smsHeader->miscEltList->IsEmpty(&isEmpty), isEmpty) &&
-            (smsHeader->languageShiftTable == 0) &&
-            (smsHeader->languageTable == 0)) {
+    if ((smsHeader->mPortAddrs == NULL) &&
+            (smsHeader->mConcatRef == NULL) &&
+            (smsHeader->mSpecialSmsMsgList->IsEmpty(&isEmpty), isEmpty) &&
+            (smsHeader->mMiscEltList->IsEmpty(&isEmpty), isEmpty) &&
+            (smsHeader->mLanguageShiftTable == 0) &&
+            (smsHeader->mLanguageTable == 0)) {
         return NOERROR;
     }
 
     AutoPtr<IByteArrayOutputStream> baOutStream;
     CByteArrayOutputStream::New(ISmsConstants::MAX_USER_DATA_BYTES, (IByteArrayOutputStream**)&baOutStream);
-    AutoPtr<ConcatRef> concatRef = smsHeader->concatRef;
+    AutoPtr<ConcatRef> concatRef = smsHeader->mConcatRef;
     IOutputStream* outStream = IOutputStream::Probe(baOutStream);
     if (concatRef != NULL) {
         if (concatRef->isEightBits) {
@@ -191,49 +193,49 @@ ECode SmsHeader::ToByteArray(
         outStream->Write(concatRef->msgCount);
         outStream->Write(concatRef->seqNumber);
     }
-    AutoPtr<PortAddrs> portAddrs = smsHeader->portAddrs;
-    if (portAddrs != NULL) {
-        if (portAddrs->areEightBits) {
+    AutoPtr<PortAddrs> mPortAddrs = smsHeader->mPortAddrs;
+    if (mPortAddrs != NULL) {
+        if (mPortAddrs->areEightBits) {
             outStream->Write(ELT_ID_APPLICATION_PORT_ADDRESSING_8_BIT);
             outStream->Write(2);
-            outStream->Write(portAddrs->destPort);
-            outStream->Write(portAddrs->origPort);
+            outStream->Write(mPortAddrs->destPort);
+            outStream->Write(mPortAddrs->origPort);
         } else {
             outStream->Write(ELT_ID_APPLICATION_PORT_ADDRESSING_16_BIT);
             outStream->Write(4);
-            UInt32 value = (UInt32)portAddrs->destPort;
-            outStream->Write(portAddrs->destPort >> 8);// in java >>>
-            outStream->Write(portAddrs->destPort & 0x00FF);
-            value = (UInt32)portAddrs->origPort;
-            outStream->Write(portAddrs->origPort >> 8); // in java >>>
-            outStream->Write(portAddrs->origPort & 0x00FF);
+            UInt32 value = (UInt32)mPortAddrs->destPort;
+            outStream->Write(mPortAddrs->destPort >> 8);// in java >>>
+            outStream->Write(mPortAddrs->destPort & 0x00FF);
+            value = (UInt32)mPortAddrs->origPort;
+            outStream->Write(mPortAddrs->origPort >> 8); // in java >>>
+            outStream->Write(mPortAddrs->origPort & 0x00FF);
         }
     }
-    if (smsHeader->languageShiftTable != 0) {
+    if (smsHeader->mLanguageShiftTable != 0) {
         outStream->Write(ELT_ID_NATIONAL_LANGUAGE_SINGLE_SHIFT);
         outStream->Write(1);
-        outStream->Write(smsHeader->languageShiftTable);
+        outStream->Write(smsHeader->mLanguageShiftTable);
     }
-    if (smsHeader->languageTable != 0) {
+    if (smsHeader->mLanguageTable != 0) {
         outStream->Write(ELT_ID_NATIONAL_LANGUAGE_LOCKING_SHIFT);
         outStream->Write(1);
-        outStream->Write(smsHeader->languageTable);
+        outStream->Write(smsHeader->mLanguageTable);
     }
     Int32 size;
-    smsHeader->specialSmsMsgList->GetSize(&size);
+    smsHeader->mSpecialSmsMsgList->GetSize(&size);
     for(Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
-        smsHeader->specialSmsMsgList->Get(i, (IInterface**)&obj);
+        smsHeader->mSpecialSmsMsgList->Get(i, (IInterface**)&obj);
         SpecialSmsMsg* specialSmsMsg = (SpecialSmsMsg*)(IObject::Probe(obj));
         outStream->Write(ELT_ID_SPECIAL_SMS_MESSAGE_INDICATION);
         outStream->Write(2);
         outStream->Write(specialSmsMsg->msgIndType & 0xFF);
         outStream->Write(specialSmsMsg->msgCount & 0xFF);
     }
-    smsHeader->miscEltList->GetSize(&size);
+    smsHeader->mMiscEltList->GetSize(&size);
     for(Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
-        smsHeader->miscEltList->Get(i, (IInterface**)&obj);
+        smsHeader->mMiscEltList->Get(i, (IInterface**)&obj);
         MiscElt* miscElt = (MiscElt*)(IObject::Probe(obj));
         outStream->Write(miscElt->id);
         Int32 len = miscElt->data->GetLength();
@@ -252,44 +254,44 @@ CARAPI SmsHeader::ToString(
     AutoPtr<StringBuilder> builder = new StringBuilder();
     builder->Append("UserDataHeader ");
     builder->Append("{ ConcatRef ");
-    if (concatRef == NULL) {
+    if (mConcatRef == NULL) {
         builder->Append("unset");
     } else {
         builder->Append("{ refNumber=");
-        builder->Append(concatRef->refNumber);
+        builder->Append(mConcatRef->refNumber);
         builder->Append(", msgCount=");
-        builder->Append(concatRef->msgCount);
+        builder->Append(mConcatRef->msgCount);
         builder->Append(", seqNumber=");
-        builder->Append(concatRef->seqNumber);
+        builder->Append(mConcatRef->seqNumber);
         builder->Append(", isEightBits=");
-        builder->Append(concatRef->isEightBits);
+        builder->Append(mConcatRef->isEightBits);
         builder->Append(" }");
     }
     builder->Append(", PortAddrs ");
-    if (portAddrs == NULL) {
+    if (mPortAddrs == NULL) {
         builder->Append("unset");
     } else {
         builder->Append("{ destPort=");
-        builder->Append(portAddrs->destPort);
+        builder->Append(mPortAddrs->destPort);
         builder->Append(", origPort=");
-        builder->Append(portAddrs->origPort);
+        builder->Append(mPortAddrs->origPort);
         builder->Append(", areEightBits=");
-        builder->Append(portAddrs->areEightBits);
+        builder->Append(mPortAddrs->areEightBits);
         builder->Append(" }");
     }
-    if (languageShiftTable != 0) {
-        builder->Append(", languageShiftTable=");
-        builder->Append(languageShiftTable);
+    if (mLanguageShiftTable != 0) {
+        builder->Append(", mLanguageShiftTable=");
+        builder->Append(mLanguageShiftTable);
     }
-    if (languageTable != 0) {
-        builder->Append(", languageTable=");
-        builder->Append(languageTable);
+    if (mLanguageTable != 0) {
+        builder->Append(", mLanguageTable=");
+        builder->Append(mLanguageTable);
     }
     Int32 size;
-    specialSmsMsgList->GetSize(&size);
+    mSpecialSmsMsgList->GetSize(&size);
     for(Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
-        specialSmsMsgList->Get(i, (IInterface**)&obj);
+        mSpecialSmsMsgList->Get(i, (IInterface**)&obj);
         SpecialSmsMsg* specialSmsMsg = (SpecialSmsMsg*)(IObject::Probe(obj));
         builder->Append(", SpecialSmsMsg ");
         builder->Append("{ msgIndType=");
@@ -298,10 +300,10 @@ CARAPI SmsHeader::ToString(
         builder->Append(specialSmsMsg->msgCount);
         builder->Append(" }");
     }
-    miscEltList->GetSize(&size);
+    mMiscEltList->GetSize(&size);
     for(Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
-        miscEltList->Get(i, (IInterface**)&obj);
+        mMiscEltList->Get(i, (IInterface**)&obj);
         MiscElt* miscElt = (MiscElt*)(IObject::Probe(obj));
         builder->Append(", MiscElt ");
         builder->Append("{ id=");

@@ -18,6 +18,7 @@ namespace Droid {
 namespace Internal {
 namespace Telephony {
 
+CAR_INTERFACE_IMPL(SmsMessageBase::SubmitPduBase, Object, ISmsMessageBaseSubmitPduBase)
 SmsMessageBase::SubmitPduBase::~SubmitPduBase()
 {}
 

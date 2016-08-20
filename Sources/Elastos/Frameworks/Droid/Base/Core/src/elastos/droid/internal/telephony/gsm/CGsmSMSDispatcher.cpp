@@ -154,7 +154,7 @@ ECode CGsmSMSDispatcher::SendData(
     if (pdu != NULL) {
         AutoPtr<IHashMap> map;
         map = GetSmsTrackerMap(destAddr, scAddr, destPort, origPort, data,
-                (SmsMessageBase::SubmitPduBase*)pdu.Get());
+                (SmsMessageBase::SubmitPduBase*)ISmsMessageBaseSubmitPduBase::Probe(pdu));
         AutoPtr<SmsTracker> tracker;
         String str;
         GetFormat(&str);
@@ -201,7 +201,7 @@ ECode CGsmSMSDispatcher::SendText(
         }
         AutoPtr<IHashMap> map;
         map = GetSmsTrackerMap(destAddr, scAddr, text,
-                (SmsMessageBase::SubmitPduBase*)pdu.Get());
+                (SmsMessageBase::SubmitPduBase*)ISmsMessageBaseSubmitPduBase::Probe(pdu));
         AutoPtr<SmsTracker> tracker;
         String str;
         GetFormat(&str);
@@ -250,16 +250,16 @@ ECode CGsmSMSDispatcher::SendNewSubmitPdu(
     AutoPtr<ArrayOf<Byte> > bytes;
     SmsHeader::ToByteArray(smsHeader, (ArrayOf<Byte>**)&bytes);
     AutoPtr<ISmsMessageSubmitPdu> pdu;
-// TODO: Need SmsHeader
-    // CSmsMessage::GetSubmitPdu(scAddress, destinationAddress,
-    //         message, deliveryIntent != NULL, bytes,
-    //         encoding, smsHeader->mLanguageTable, smsHeader->mLanguageShiftTable, validityPeriod,
-    //         (ISmsMessageSubmitPdu**)&pdu);
+    CSmsMessage::GetSubmitPdu(scAddress, destinationAddress,
+            message, deliveryIntent != NULL, bytes,
+            encoding, ((SmsHeader*)smsHeader)->mLanguageTable
+            , ((SmsHeader*)smsHeader)->mLanguageShiftTable, validityPeriod,
+            (ISmsMessageSubmitPdu**)&pdu);
 
     if (pdu != NULL) {
         AutoPtr<IHashMap> map;
         map = GetSmsTrackerMap(destinationAddress, scAddress, message,
-                (SmsMessageBase::SubmitPduBase*)pdu.Get());
+                (SmsMessageBase::SubmitPduBase*)ISmsMessageBaseSubmitPduBase::Probe(pdu));
         AutoPtr<SmsTracker> tracker;
         String str;
         GetFormat(&str);
@@ -279,27 +279,19 @@ void CGsmSMSDispatcher::SendSms(
     AutoPtr<IHashMap> map = tracker->mData;
 
     AutoPtr<IInterface> obj;
-    map->Get(CoreUtils::Convert(String("smsc")), (IInterface**)&obj);
-    AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
-    Int32 size;
-    iarray->GetLength(&size);
-    AutoPtr<ArrayOf<Byte> > smsc = ArrayOf<Byte>::Alloc(size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IInterface> tmp;
-        iarray->Get(i, (IInterface**)&tmp);
-        IByte::Probe(tmp)->GetValue(&(*smsc)[i]);
-    }
-
-    obj = NULL;
     map->Get(CoreUtils::Convert(String("pdu")), (IInterface**)&obj);
-    iarray = NULL;
-    iarray = IArrayOf::Probe(obj);
-    iarray->GetLength(&size);
-    AutoPtr<ArrayOf<Byte> > pdu = ArrayOf<Byte>::Alloc(size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IInterface> tmp;
-        iarray->Get(i, (IInterface**)&tmp);
-        IByte::Probe(tmp)->GetValue(&(*pdu)[i]);
+    AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
+
+    AutoPtr<ArrayOf<Byte> > pdu;
+    if (iarray != NULL) {
+        Int32 size = 0;
+        iarray->GetLength(&size);
+        pdu = ArrayOf<Byte>::Alloc(size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> tmp;
+            iarray->Get(i, (IInterface**)&tmp);
+            IByte::Probe(tmp)->GetValue(&(*pdu)[i]);
+        }
     }
 
     if (tracker->mRetryCount > 0) {
@@ -313,7 +305,7 @@ void CGsmSMSDispatcher::SendSms(
         //   and TP-MR is set to previously failed sms TP-MR
         if (((0x01 & (*pdu)[0]) == 0x01)) {
             (*pdu)[0] |= 0x04; // TP-RD
-            (*pdu)[1] = (byte) tracker->mMessageRef; // TP-MR
+            (*pdu)[1] = (Byte) tracker->mMessageRef; // TP-MR
         }
     }
     // Logger::D(TAG, "sendSms: "
@@ -332,16 +324,31 @@ void CGsmSMSDispatcher::SendSms(
     if (carrierPackage != NULL) {
         intent->SetPackage(carrierPackage);
         intent->PutByteArrayExtra(String("pdu"), pdu);
+
+        obj = NULL;
+        map->Get(CoreUtils::Convert(String("smsc")), (IInterface**)&obj);
+        iarray = IArrayOf::Probe(obj);
+        AutoPtr<ArrayOf<Byte> > smsc;
+        if (iarray != NULL) {
+            Int32 size = 0;
+            iarray->GetLength(&size);
+            smsc = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> tmp;
+                iarray->Get(i, (IInterface**)&tmp);
+                IByte::Probe(tmp)->GetValue(&(*smsc)[i]);
+            }
+        }
+
         intent->PutByteArrayExtra(String("smsc"), smsc);
         String str;
         intent->PutExtra(String("format"), (GetFormat(&str), str));
-// TODO: Need SmsHeader
-        // if (tracker->mSmsHeader != NULL && tracker->mSmsHeader->concatRef != NULL) {
-        //     AutoPtr<SmsHeaderConcatRef> concatRef = tracker->mSmsHeader->concatRef;
-        //     intent->PutExtra(String("concat.refNumber"), concatRef->refNumber);
-        //     intent->PutExtra(String("concat.seqNumber"), concatRef->seqNumber);
-        //     intent->PutExtra(String("concat.msgCount"), concatRef->msgCount);
-        // }
+        if (tracker->mSmsHeader != NULL && ((SmsHeader*)tracker->mSmsHeader.Get())->mConcatRef != NULL) {
+            AutoPtr<SmsHeader::ConcatRef> concatRef = ((SmsHeader*)tracker->mSmsHeader.Get())->mConcatRef;
+            intent->PutExtra(String("concat.refNumber"), concatRef->refNumber);
+            intent->PutExtra(String("concat.seqNumber"), concatRef->seqNumber);
+            intent->PutExtra(String("concat.msgCount"), concatRef->msgCount);
+        }
         intent->AddFlags(IIntent::FLAG_RECEIVER_NO_ABORT);
         Logger::D(TAG, "Sending SMS by carrier app.");
         mContext->SendOrderedBroadcast(intent, Manifest::permission::RECEIVE_SMS,
@@ -370,21 +377,23 @@ void CGsmSMSDispatcher::SendSmsByPstn(
 
     AutoPtr<IHashMap> map = tracker->mData;
 
+    AutoPtr<ArrayOf<Byte> > smsc;
     AutoPtr<IInterface> obj;
     map->Get(CoreUtils::Convert(String("smsc")), (IInterface**)&obj);
     AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
     Int32 size;
-    iarray->GetLength(&size);
-    AutoPtr<ArrayOf<Byte> > smsc = ArrayOf<Byte>::Alloc(size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IInterface> tmp;
-        iarray->Get(i, (IInterface**)&tmp);
-        IByte::Probe(tmp)->GetValue(&(*smsc)[i]);
+    if (iarray != NULL) {
+        iarray->GetLength(&size);
+        smsc = ArrayOf<Byte>::Alloc(size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> tmp;
+            iarray->Get(i, (IInterface**)&tmp);
+            IByte::Probe(tmp)->GetValue(&(*smsc)[i]);
+        }
     }
 
     obj = NULL;
     map->Get(CoreUtils::Convert(String("pdu")), (IInterface**)&obj);
-    iarray = NULL;
     iarray = IArrayOf::Probe(obj);
     iarray->GetLength(&size);
     AutoPtr<ArrayOf<Byte> > pdu = ArrayOf<Byte>::Alloc(size);
@@ -408,7 +417,7 @@ void CGsmSMSDispatcher::SendSmsByPstn(
             //   and TP-MR is set to previously failed sms TP-MR
             if (((0x01 & (*pdu)[0]) == 0x01)) {
                 (*pdu)[0] |= 0x04; // TP-RD
-                (*pdu)[1] = (byte) tracker->mMessageRef; // TP-MR
+                (*pdu)[1] = (Byte) tracker->mMessageRef; // TP-MR
             }
         }
         if (tracker->mRetryCount == 0 && tracker->mExpectMore) {

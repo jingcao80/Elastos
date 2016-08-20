@@ -207,6 +207,13 @@ module
             [in] Int32 offset,
             [in] Int32 length,
             [out] String* result);
+
+        /**
+          * convert the byte array encoded in UTF8 to UTF16 byte array
+          */
+        UTF8ByteArrayToUTF16ByteArray(
+            [in] ArrayOf<Byte>* utf8Array,
+            [out, callee] ArrayOf<UInt16>* utf16Array);
     }
 
     } // IO

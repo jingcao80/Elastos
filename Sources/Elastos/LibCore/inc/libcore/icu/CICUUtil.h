@@ -176,6 +176,9 @@ public:
         /* [in] */ Int32 length,
         /* [out] */ String* result);
 
+    CARAPI UTF8ByteArrayToUTF16ByteArray(
+        /* [in] */ ArrayOf<Byte>* utf8Array,
+        /* [out, callee] */ ArrayOf<UInt16>** utf16Array);
 };
 
 } // namespace ICU

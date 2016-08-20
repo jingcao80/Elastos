@@ -77,7 +77,7 @@ namespace Cdma {
 //=====================================================================
 //                              CDMASmsMessage::SubmitPdu
 //=====================================================================
-CAR_INTERFACE_IMPL(CDMASmsMessage::SubmitPdu, /*TODO SmsMessageBase::SubmitPduBase*/Object, ISmsMessageSubmitPdu);
+CAR_INTERFACE_IMPL(CDMASmsMessage::SubmitPdu, SmsMessageBase::SubmitPduBase, ISmsMessageSubmitPdu);
 
 //=====================================================================
 //                              CDMASmsMessage
@@ -1133,14 +1133,9 @@ AutoPtr<CDMASmsMessage::SubmitPdu> CDMASmsMessage::PrivateGetSubmitPdu(
     ICloseable::Probe(dos)->Close();
 
     AutoPtr<SubmitPdu> pdu = new SubmitPdu();
-// TODO: Need SmsMessageBase::SubmitPduBase
-    // baos->ToByteArray((ArrayOf<Byte>**)&pdu->encodedMessage);
-    // pdu->encodedScAddress = NULL;
+    baos->ToByteArray((ArrayOf<Byte>**)&pdu->mEncodedMessage);
+    pdu->mEncodedScAddress = NULL;
     return pdu;
-    // } catch(IOException ex) {
-    //     Logger::E(LOGTAG, "creating SubmitPdu failed: " + ex);
-    // }
-    return NULL;
 }
 
 void CDMASmsMessage::CreatePdu()

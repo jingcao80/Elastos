@@ -813,12 +813,12 @@ Int32 InboundSmsHandler::DispatchNormalMessage(
     SmsHeader* smsHeader = (SmsHeader*)(IObject::Probe(ismsHeader));
     AutoPtr<InboundSmsTracker> tracker;
 
-    if ((smsHeader == NULL) || (smsHeader->concatRef == NULL)) {
+    if ((smsHeader == NULL) || (smsHeader->mConcatRef == NULL)) {
         // Message is not concatenated.
         Int32 destPort = -1;
-        if (smsHeader != NULL && smsHeader->portAddrs != NULL) {
+        if (smsHeader != NULL && smsHeader->mPortAddrs != NULL) {
             // The message was sent to a port.
-            destPort = smsHeader->portAddrs->destPort;
+            destPort = smsHeader->mPortAddrs->destPort;
             if (DBG) Log(String("destination port: ") + StringUtils::ToString(destPort));
         }
 
@@ -830,8 +830,8 @@ Int32 InboundSmsHandler::DispatchNormalMessage(
     }
     else {
         // Create a tracker for this message segment.
-        AutoPtr<SmsHeader::ConcatRef> concatRef = smsHeader->concatRef;
-        AutoPtr<SmsHeader::PortAddrs> portAddrs = smsHeader->portAddrs;
+        AutoPtr<SmsHeader::ConcatRef> concatRef = smsHeader->mConcatRef;
+        AutoPtr<SmsHeader::PortAddrs> portAddrs = smsHeader->mPortAddrs;
         Int32 destPort = (portAddrs != NULL ? portAddrs->destPort : -1);
 
         AutoPtr<ArrayOf<Byte> > pdu;
@@ -1012,7 +1012,9 @@ Boolean InboundSmsHandler::ProcessMessagePart(
         AutoPtr<ArrayOf<Byte> > bs;
         output->ToByteArray((ArrayOf<Byte>**)&bs);
         Int32 result = 0;
-        mWapPush->DispatchWapPdu(bs, resultReceiver, this, address, &result);
+        if (mWapPush != NULL) {
+            mWapPush->DispatchWapPdu(bs, resultReceiver, this, address, &result);
+        }
         if (DBG) Log(String("dispatchWapPdu() returned ") + StringUtils::ToString(result));
         // result is IActivity::RESULT_OK if an ordered broadcast was sent
         return (result == IActivity::RESULT_OK);

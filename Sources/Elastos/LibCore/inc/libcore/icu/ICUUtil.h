@@ -203,6 +203,10 @@ public:
         /* [in] */ Int32 length,
         /* [out] */ String* result);
 
+    static CARAPI UTF8ByteArrayToUTF16ByteArray(
+        /* [in] */ ArrayOf<Byte>* utf8Array,
+        /* [out, callee] */ ArrayOf<UInt16>** utf16Array);
+
 private:
     static CARAPI_(String) ToLowerCase(
         /* [in] */ const String& s,

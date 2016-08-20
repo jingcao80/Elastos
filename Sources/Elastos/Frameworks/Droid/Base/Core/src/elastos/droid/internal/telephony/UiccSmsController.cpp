@@ -273,7 +273,7 @@ void UiccSmsController::BroadcastOutgoingSms(
     broadcast->PutExtra(String("destAddr"), destAddr);
     broadcast->PutExtra(String("scAddr"), scAddr);
     broadcast->PutExtra(String("subId"), subId);
-    broadcast->PutExtra(String("multipart"), multipart);
+    broadcast->PutBooleanExtra(String("multipart"), multipart);
     broadcast->PutExtra(String("callingPackage"), callingPackage);
     AutoPtr<IBinderHelper> bhlp;
     CBinderHelper::AcquireSingleton((IBinderHelper**)&bhlp);

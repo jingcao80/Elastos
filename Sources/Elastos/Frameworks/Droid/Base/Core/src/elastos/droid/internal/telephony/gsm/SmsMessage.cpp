@@ -2,8 +2,7 @@
 #include "elastos/droid/internal/telephony/gsm/CSmsMessage.h"
 #include "elastos/droid/internal/telephony/gsm/SmsMessage.h"
 #include "elastos/droid/internal/telephony/gsm/CGsmSmsAddress.h"
-// TODO: Need CSms7BitEncodingTranslator
-// #include "elastos/droid/internal/telephony/CSms7BitEncodingTranslator.h"
+#include "elastos/droid/internal/telephony/CSms7BitEncodingTranslator.h"
 #include "elastos/droid/internal/telephony/CSmsHeader.h"
 #include "elastos/droid/internal/telephony/CGsmAlphabetTextEncodingDetails.h"
 #include "elastos/droid/internal/telephony/GsmAlphabet.h"
@@ -12,6 +11,7 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/telephony/PhoneNumberUtils.h"
 #include "elastos/droid/telephony/SmsMessage.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/format/CTime.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
@@ -21,8 +21,7 @@
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::CGsmAlphabetTextEncodingDetails;
-// TODO: Need CSms7BitEncodingTranslator
-// using Elastos::Droid::Internal::Telephony::CSms7BitEncodingTranslator;
+using Elastos::Droid::Internal::Telephony::CSms7BitEncodingTranslator;
 using Elastos::Droid::Internal::Telephony::CSmsHeader;
 using Elastos::Droid::Internal::Telephony::GsmAlphabet;
 using Elastos::Droid::Internal::Telephony::IccUtils;
@@ -31,6 +30,7 @@ using Elastos::Droid::Internal::Telephony::ISmsHeader;
 using Elastos::Droid::Internal::Telephony::SmsHeader;
 using Elastos::Droid::R;
 using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Format::CTime;
 using Elastos::Droid::Text::Format::ITime;
 using Elastos::Core::CoreUtils;
@@ -57,7 +57,7 @@ const Int32 SmsMessage::VALIDITY_PERIOD_MIN;
 const Int32 SmsMessage::VALIDITY_PERIOD_MAX;
 const Int32 SmsMessage::INVALID_VALIDITY_PERIOD;
 
-CAR_INTERFACE_IMPL(SmsMessage::SubmitPdu, Object, ISmsMessageSubmitPdu)
+CAR_INTERFACE_IMPL(SmsMessage::SubmitPdu, SmsMessageBase::SubmitPduBase, ISmsMessageSubmitPdu)
 
 //==============================================================================
 //  SmsMessage::PduParser
@@ -563,7 +563,6 @@ ECode SmsMessage::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
     // Perform NULL parameter checks.
     if (message == NULL || destinationAddress == NULL) {
         *result = NULL;
@@ -581,25 +580,25 @@ ECode SmsMessage::GetSubmitPdu(
         if (encoding == ISmsConstants::ENCODING_7BIT &&
                 (languageTable != 0 || languageShiftTable != 0)) {
             if (header != NULL) {
-                AutoPtr<ISmsHeader> smsHeader;
-                SmsHeader::FromByteArray(header, (ISmsHeader**)&smsHeader);
-// TODO: Need SmsHeader
-                // if (smsHeader->mLanguageTable != languageTable
-                //         || smsHeader->mLanguageShiftTable != languageShiftTable) {
-                //     Logger::W(TAG, "Updating language table in SMS header: "
-                //             + smsHeader->mLanguageTable + " -> " + languageTable + ", "
-                //             + smsHeader->mLanguageShiftTable + " -> " + languageShiftTable);
-                //     smsHeader->mLanguageTable = languageTable;
-                //     smsHeader->mLanguageShiftTable = languageShiftTable;
-                //     SmsHeader::ToByteArray(smsHeader, (ArrayOf<Byte>**)&header);
-                // }
+                AutoPtr<ISmsHeader> _smsHeader;
+                SmsHeader::FromByteArray(header, (ISmsHeader**)&_smsHeader);
+                SmsHeader* smsHeader = (SmsHeader*)_smsHeader.Get();
+                if (smsHeader->mLanguageTable != languageTable
+                        || smsHeader->mLanguageShiftTable != languageShiftTable) {
+                    Logger::W(TAG, "Updating language table in SMS header: %d -> %d, %d -> %d"
+                            , smsHeader->mLanguageTable, languageTable
+                            , smsHeader->mLanguageShiftTable, languageShiftTable);
+                    smsHeader->mLanguageTable = languageTable;
+                    smsHeader->mLanguageShiftTable = languageShiftTable;
+                    SmsHeader::ToByteArray(smsHeader, (ArrayOf<Byte>**)&header);
+                }
             }
             else {
-                AutoPtr<ISmsHeader> smsHeader;
-                CSmsHeader::New((ISmsHeader**)&smsHeader);
-// TODO: Need SmsHeader
-                // smsHeader->mLanguageTable = languageTable;
-                // smsHeader->mLanguageShiftTable = languageShiftTable;
+                AutoPtr<ISmsHeader> _smsHeader;
+                CSmsHeader::New((ISmsHeader**)&_smsHeader);
+                CSmsHeader* smsHeader = (CSmsHeader*)_smsHeader.Get();
+                smsHeader->mLanguageTable = languageTable;
+                smsHeader->mLanguageShiftTable = languageShiftTable;
                 SmsHeader::ToByteArray(smsHeader, (ArrayOf<Byte>**)&header);
             }
         }
@@ -690,8 +689,7 @@ ECode SmsMessage::GetSubmitPdu(
     }
 
     IOutputStream::Probe(bo)->Write(userData, 0, userData->GetLength());
-// TODO: Need SmsMessageBase::SubmitPduBase
-    // bo->ToByteArray((ArrayOf<Byte>**)&ret->mEncodedMessage);
+    bo->ToByteArray((ArrayOf<Byte>**)&ret->mEncodedMessage);
     *result = ret;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -743,16 +741,14 @@ ECode SmsMessage::GetSubmitPdu(
     /* [out] */ ISmsMessageSubmitPdu** result)
 {
     VALIDATE_NOT_NULL(result)
-// TODO: Need SmsHeader::PortAddrs
-    // AutoPtr<SmsHeaderPortAddrs> portAddrs = new SmsHeaderPortAddrs();
-    // portAddrs->mDestPort = destinationPort;
-    // portAddrs->mOrigPort = originatorPort;
-    // portAddrs->mAreEightBits = FALSE;
+    AutoPtr<SmsHeader::PortAddrs> portAddrs = new SmsHeader::PortAddrs();
+    portAddrs->destPort = destinationPort;
+    portAddrs->origPort = originatorPort;
+    portAddrs->areEightBits = FALSE;
 
     AutoPtr<ISmsHeader> smsHeader;
     CSmsHeader::New((ISmsHeader**)&smsHeader);
-// TODO: Need SmsHeader::PortAddrs
-    // smsHeader->mPortAddrs = portAddrs;
+    ((CSmsHeader*)smsHeader.Get())->mPortAddrs = portAddrs;
 
     AutoPtr<ArrayOf<Byte> > smsHeaderData;
     SmsHeader::ToByteArray(smsHeader, (ArrayOf<Byte>**)&smsHeaderData);
@@ -786,9 +782,8 @@ ECode SmsMessage::GetSubmitPdu(
     // User data
     IOutputStream::Probe(bo)->Write(data, 0, data->GetLength());
 
-// TODO: Need SmsMessageBase::SubmitPduBase
-    // bo->ToByteArray((ArrayOf<Byte>**)&ret->mEncodedMessage);
-    *result = ret;
+    bo->ToByteArray((ArrayOf<Byte>**)&ret->mEncodedMessage);
+    *result = (ISmsMessageSubmitPdu*)ret->Probe(EIID_ISmsMessageSubmitPdu);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -805,12 +800,11 @@ ECode SmsMessage::CalculateLength(
     Boolean b;
     if (r->GetBoolean(R::bool_::config_sms_force_7bit_encoding, &b), b) {
         AutoPtr<ISms7BitEncodingTranslator> helper;
-// TODO: Need CSms7BitEncodingTranslator
-        // CSms7BitEncodingTranslator::AcquirSinglenton((ISms7BitEncodingTranslator**)&helper);
+        CSms7BitEncodingTranslator::AcquireSingleton((ISms7BitEncodingTranslator**)&helper);
         helper->Translate(msgBody, &str);
     }
     newMsgBody = CoreUtils::Convert(str);
-    if (str.IsEmpty()) {
+    if (TextUtils::IsEmpty(str)) {
         newMsgBody = msgBody;
     }
     AutoPtr<IGsmAlphabetTextEncodingDetails> ted;
@@ -1022,8 +1016,17 @@ AutoPtr<ArrayOf<Byte> > SmsMessage::EncodeUCS2(
 {
     AutoPtr<ArrayOf<Byte> > userData;
     AutoPtr<ArrayOf<Byte> > textPart;
-    assert(0 && "TODO string getbytes UTF-16BE");
-    textPart = message.GetBytes();   // message->GetBytes("utf-16be");
+    AutoPtr<IICUUtil> icuUtil;
+    CICUUtil::AcquireSingleton((IICUUtil**)&icuUtil);
+    AutoPtr<ArrayOf<UInt16> > utf16Array;
+    icuUtil->UTF8ByteArrayToUTF16ByteArray(message.GetBytes(), (ArrayOf<UInt16>**)&utf16Array);
+    Int32 len = utf16Array->GetLength();
+    textPart = ArrayOf<Byte>::Alloc(2 * len); // message->GetBytes("utf-16be");
+    for (Int32 i = 0; i < len; i++) {
+        UInt16 item = (*utf16Array)[i];
+        (*textPart)[2 * i] = (item >> 8) & 0xFF;
+        (*textPart)[2 * i + 1] = item & 0xFF;
+    }
 
     if (header != NULL) {
         // Need 1 byte for UDHL
@@ -1054,13 +1057,11 @@ AutoPtr<IByteArrayOutputStream> SmsMessage::GetSubmitPduHead(
 
     // SMSC address with length octet, or 0
     if (scAddress == NULL) {
-// TODO: Need SmsMessageBase::SubmitPduBase
-        // ret->mEncodedScAddress = NULL;
+        ret->mEncodedScAddress = NULL;
     }
     else {
-// TODO: Need SmsMessageBase::SubmitPduBase
-        // PhoneNumberUtils::NetworkPortionToCalledPartyBCDWithLength(
-        //         scAddress, &ret->mEncodedScAddress);
+        PhoneNumberUtils::NetworkPortionToCalledPartyBCDWithLength(
+                scAddress, (ArrayOf<Byte>**)&ret->mEncodedScAddress);
     }
 
     // TP-Message-Type-Indicator (and friends)
@@ -1417,7 +1418,7 @@ void SmsMessage::ParseUserData(
      * msg_count = 0x00 ..0xFF
      */
     if (hasUserDataHeader) {
-        AutoPtr<IArrayList> specialSmsMsgList = ((SmsHeader*)(mUserDataHeader.Get()))->specialSmsMsgList;
+        AutoPtr<IArrayList> specialSmsMsgList = ((SmsHeader*)(mUserDataHeader.Get()))->mSpecialSmsMsgList;
         Int32 size;
         specialSmsMsgList->GetSize(&size);
         if (size != 0) {
@@ -1507,8 +1508,8 @@ void SmsMessage::ParseUserData(
         // only hasUserDataHeader is TRUE, the below line is correct
         SmsHeader* smsHeader = ((SmsHeader*)(mUserDataHeader.Get()));
         p->GetUserDataGSM7Bit(count,
-                hasUserDataHeader ? smsHeader->languageTable : 0,
-                hasUserDataHeader ? smsHeader->languageShiftTable : 0, &mMessageBody);
+                hasUserDataHeader ? smsHeader->mLanguageTable : 0,
+                hasUserDataHeader ? smsHeader->mLanguageShiftTable : 0, &mMessageBody);
         break;
     }
     case ISmsConstants::ENCODING_16BIT:

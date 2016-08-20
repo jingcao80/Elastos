@@ -18,9 +18,13 @@ class SmsMessageBase
 {
 public:
     // TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.
-    class SubmitPduBase: public Object
+    class SubmitPduBase
+        : public Object
+        , public ISmsMessageBaseSubmitPduBase
     {
     public:
+        CAR_INTERFACE_DECL()
+
         virtual ~SubmitPduBase() = 0;
 
         // @Override

@@ -674,9 +674,16 @@ ECode IccSmsInterfaceManager::SendText(
                 String("Sending SMS message"));
     }
     if (Logger::IsLoggable("SMS", Logger::VERBOSE)) {
+        String ss;
+        if (sentIntent != NULL) {
+            ss = TO_CSTR(sentIntent);
+        }
+        String ds;
+        if (deliveryIntent != NULL) {
+            ds = TO_CSTR(deliveryIntent);
+        }
         Log(String("sendText: destAddr=") + destAddr + " scAddr=" + scAddr +
-            " text='"+ text + "' sentIntent=" +
-            TO_CSTR(sentIntent) + " deliveryIntent=" + TO_CSTR(deliveryIntent));
+            " text='"+ text + "' sentIntent=" + ss + " deliveryIntent=" + ds);
     }
 
     Int32 v = 0;
@@ -1771,8 +1778,13 @@ ECode IccSmsInterfaceManager::IsShortSMSCode(
         telephonyManager->GetNetworkCountryIso(&countryIso);
     }
 
-    Int32 val;
-    ((PhoneBase*)mPhone.Get())->mSmsUsageMonitor->CheckDestination(destAddr, countryIso, &val);
+    Int32 val = 0;
+    if (((PhoneBase*)mPhone.Get())->mSmsUsageMonitor != NULL) {
+        ((PhoneBase*)mPhone.Get())->mSmsUsageMonitor->CheckDestination(destAddr, countryIso, &val);
+    }
+    else {
+        Logger::D(TAG, "[TODO] ((PhoneBase*)mPhone.Get())->mSmsUsageMonitor = NULL");
+    }
     SmsUsageMonitor::MergeShortCodeCategories(smsCategory, val, &smsCategory);
 
     if (smsCategory == SmsUsageMonitor::CATEGORY_NOT_SHORT_CODE
