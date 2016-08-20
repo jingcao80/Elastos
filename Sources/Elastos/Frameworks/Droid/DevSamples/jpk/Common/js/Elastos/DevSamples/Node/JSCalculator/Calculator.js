@@ -209,24 +209,46 @@ module.exports = function(aoElastos, aoActivity){
             oActivity.SetContentView(R.layout.activity_calculator);
 
 //         mDisplayView = findViewById(R.id.display);
+            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.display');
             mDisplayView = oActivity.FindViewById(R.id.display);
 //         mFormulaEditText = (CalculatorEditText) findViewById(R.id.formula);
+            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.formula');
             mFormulaEditText = oActivity.FindViewById(R.id.formula);
+
+elog("====showMethod===mFormulaEditText==0==");
+CObject.showMethods(mFormulaEditText, "etText");
+
 //         mResultEditText = (CalculatorEditText) findViewById(R.id.result);
+            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.result');
             mResultEditText = oActivity.FindViewById(R.id.result);
+
+elog("====showMethod===mResultEditText==0==");
+CObject.showMethods(mResultEditText, "etText");
+
 //         mPadViewPager = (ViewPager) findViewById(R.id.pad_pager);
+            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.pad_pager');
             mPadViewPager = oActivity.FindViewById(R.id.pad_pager);
 //         mDeleteButton = findViewById(R.id.del);
+            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.del');
             mDeleteButton = oActivity.FindViewById(R.id.del);
 //         mClearButton = findViewById(R.id.clr);
+            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.clr');
             mClearButton = oActivity.FindViewById(R.id.clr);
 
 //         mEqualButton = findViewById(R.id.pad_numeric).findViewById(R.id.eq);
-            mEqualButton = oActivity.FindViewById(R.id.pad_numeric).FindViewById(R.id.eq);
+            //mEqualButton = oActivity.FindViewById(R.id.pad_numeric).FindViewById(R.id.eq);
+            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.numeric');
+            var oNumeric = oActivity.FindViewById(R.id.pad_numeric);
+            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.eq==1==');
+            mEqualButton = oNumeric.FindViewById(R.id.eq);
 //         if (mEqualButton == null || mEqualButton.getVisibility() != View.VISIBLE) {
             if (mEqualButton == null || mEqualButton.GetVisibility() != IView__VISIBLE) {
 //             mEqualButton = findViewById(R.id.pad_operator).findViewById(R.id.eq);
-                mEqualButton = oActivity.FindViewById(R.id.pad_operator).FindViewById(R.id.eq);
+                //mEqualButton = oActivity.FindViewById(R.id.pad_operator).FindViewById(R.id.eq);
+                elog('====jso_activity_cb====OnCreate====FindViewById====R.id.pad_operator==');
+                var oOperator = oActivity.FindViewById(R.id.pad_operator);
+                elog('====jso_activity_cb====OnCreate====FindViewById====R.id.eq==2==');
+                mEqualButton = oOperator.FindViewById(R.id.eq);
 //         }
             }
 

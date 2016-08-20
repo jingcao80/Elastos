@@ -92,14 +92,14 @@ module
 
     [deprecated]
     interface INodeBridgeListener {
-        OnRegistActivity(
+        OnRegisterActivity(
             [in] String packageName,
             [in] String activityName,
             [in] IInterface* activityInstance,
             [in] Int32 activityListener,    //IActivityListener**
             [in] IHandler* activityHandler,
             [out] Boolean* result);
-        OnRegistCustomControl(
+        OnRegisterCalculatorEditText(
             [in] IContext* context,
             [in] IInterface* control,
             [in] Int32 listener, //ICalculatorEditTextListener**
@@ -168,13 +168,6 @@ module
     [local]
     interface ICalculatorEditText
     {
-        SetOnTextSizeChangeListener(
-            [in] IOnTextSizeChangeListener* listener);
-
-        GetVariableTextSize(
-            [in] String text,
-            [out] Float* result);
-
         GetSuperObject(
             [out] ICalculatorEditTextSuperObject** superObject);
 

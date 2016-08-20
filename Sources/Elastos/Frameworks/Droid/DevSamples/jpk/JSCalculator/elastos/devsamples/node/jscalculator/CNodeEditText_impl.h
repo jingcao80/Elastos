@@ -1,190 +1,9 @@
-// #include "CNodeActivity.h"
-
-// #include <elastos/utility/logging/Logger.h>
-
-// using Elastos::Droid::App::EIID_IActivity;
-// using Elastos::Droid::App::IAlertDialog;
-// using Elastos::Utility::Logging::Logger;
-
-// namespace Elastos {
-// namespace DevSamples {
-// namespace Node {
-// namespace JSPkgName {
-
-// EXTERN NodeBridge* g_pNodeBridge;
-// EXTERN NodeBridge** g_ppNodeBridge;
-
-// EXTERN IHandler* myHandler;
-
-// const String JSActName::TAG(JSActNameStr);
-
-// static const String DBG_TAG(JSActNameStr);
-
-// ECode JSActName::MyHandler::HandleMessage(
-//     /* [in] */ IMessage* msg)
-// {
-//     AutoPtr<IMessageListener> listener = IMessageListener::Probe(mHost->mListener);
-//     return listener->OnHandleMessage(mHost, msg);
-// }
-
-// CAR_INTERFACE_IMPL(JSActName, Activity, IActivityOne)
-
-// JS_CAR_OBJECT_IMPL(JSActName)
-
-// ECode JSActName::constructor()
-// {
-//     Logger::I(TAG, " >> constructor()");
-
-//     return Activity::constructor();
-// }
-
-// ECode JSActName::OnCreate(
-//     /* [in] */ IBundle* savedInstanceState)
-// {
-//     Logger::D(TAG, "OnCreate()-----");
-//     Activity::OnCreate(savedInstanceState);
-
-//     mHandler = new MyHandler(this);
-
-//     myHandler = mHandler;
-
-//     String _pkgPath = String("/data/temp/node/bin/");
-//     String _pkgName = String(JSPkgNameStr);
-//     String _nspName = String("Elastos.DevSamples.Node.");
-
-//     mPackageName = _nspName + _pkgName;
-//     mActivityName = String(JSActNameStr);
-
-//     String _helperEcoName = _pkgPath + mPackageName + String(".Helper.eco");
-//     String _helperClsName = mPackageName + String(".") + mActivityName + String("Helper");
-
-//     AutoPtr<IInterface> helper;
-//     ECode ec = JSEvtName::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
-
-//     if (FAILED(ec)) {
-//         ALOGD("OnCreate========create Helper failed!======nodejs module will be used");
-//         AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
-//         JSEvtName::RegisterActivity(mPackageName, mActivityName, _this, (IActivityListener**)&mListener, mHandler.Get());
-//     }
-//     else {
-//         ALOGD("OnCreate========create Helper success!======C++ epk will be used");
-//         mListener = IActivityListener::Probe(helper);
-//     }
-
-//     return mListener->OnCreate(this, savedInstanceState);
-// }
-
-// ECode JSActName::OnStart()
-// {
-//     Logger::I(DBG_TAG, " >> OnStart()");
-//     ECode ec = Activity::OnStart();
-//     mListener->OnStart(this);
-//     return ec;
-// }
-
-// ECode JSActName::OnResume()
-// {
-//     Logger::I(DBG_TAG, " >> OnResume()");
-//     ECode ec = Activity::OnResume();
-//     mListener->OnResume(this);
-//     return ec;
-// }
-
-// ECode JSActName::OnPause()
-// {
-//     Logger::I(DBG_TAG, " >> OnPause()");
-//     ECode ec = Activity::OnPause();
-//     mListener->OnPause(this);
-//     return ec;
-// }
-
-// ECode JSActName::OnStop()
-// {
-//     Logger::I(DBG_TAG, " >> OnStop()");
-//     ECode ec = Activity::OnStop();
-//     mListener->OnStop(this);
-//     return ec;
-// }
-
-// ECode JSActName::OnDestroy()
-// {
-//     Logger::I(DBG_TAG, " >> OnDestroy()");
-//     ECode ec = Activity::OnDestroy();
-//     mListener->OnDestroy(this);
-//     return ec;
-// }
-
-// ECode JSActName::OnActivityResult(
-//     /* [in] */ Int32 requestCode,
-//     /* [in] */ Int32 resultCode,
-//     /* [in] */ IIntent *data)
-// {
-//     return mListener->OnActivityResult(this, requestCode, resultCode, data);
-// }
-
-// AutoPtr<IDialog> JSActName::OnCreateDialog(
-//    /* [in] */ Int32 id)
-// {
-//     AutoPtr<IDialog> dlg;
-
-//     AutoPtr<IInterface> alertDialog;
-//     mListener->OnCreateDialog(this, id, (IInterface**)&alertDialog);
-//     dlg = IDialog::Probe(alertDialog.Get());
-
-//     return dlg;
-// }
-
-// ECode JSActName::OnCreateContextMenu(
-//     /* [in] */ IContextMenu* menu,
-//     /* [in] */ IView* v,
-//     /* [in] */ IContextMenuInfo* menuInfo)
-// {
-//     return mListener->OnCreateContextMenu(this, menu, v, menuInfo);
-// }
-
-// ECode JSActName::OnClickPopupWindow(
-//     /* [in] */ IView* view)
-// {
-//     return NOERROR;
-// }
-
-// } // namespace JSPkgName
-// } // namespace Node
-// } // namespace DevSamples
-// } // namespace Elastos
-
-
-//-----------------------------------------------
-
-
 #include "CNodeEditText.h"
 
 #include <elastos/utility/logging/Logger.h>
 
-//#include "elastos/droid/calculator2/CalculatorEditText.h"
-#include "R.h"
-#include <Elastos.Droid.Content.h>
-#include <Elastos.Droid.Graphics.h>
-#include <Elastos.Droid.View.h>
-#include <Elastos.Droid.Text.h>
-#include <elastos/core/Math.h>
-
-using Elastos::Droid::Content::Res::ITypedArray;
-using Elastos::Droid::Graphics::IPaint;
-using Elastos::Droid::Graphics::IPaintFontMetricsInt;
-using Elastos::Droid::Graphics::CRect;
-using Elastos::Droid::Text::CTextPaint;
-using Elastos::Droid::Text::Method::CScrollingMovementMethodHelper;
-using Elastos::Droid::Text::Method::IScrollingMovementMethodHelper;
-using Elastos::Droid::Utility::ITypedValue;
-using Elastos::Droid::View::IMotionEvent;
-using Elastos::Core::Math;
-
 using Elastos::Utility::Logging::Logger;
 
-// namespace Elastos {
-// namespace Droid {
-// namespace Calculator2 {
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
@@ -195,83 +14,14 @@ EXTERN NodeBridge** g_ppNodeBridge;
 
 EXTERN IHandler* myHandler;
 
-//const String JSActName::TAG(JSActNameStr);
-
-//static const String DBG_TAG(JSActNameStr);
-
 CAR_INTERFACE_IMPL(JSActName, EditText, ICalculatorEditText)
 
 JS_CAR_OBJECT_IMPL(JSActName)
 
 CAR_INTERFACE_IMPL(JSActName::SuperObject, Object, ICalculatorEditTextSuperObject)
 
-//----------------------------------------------------------------
-//           JSActName::MyActionModeCallback
-//----------------------------------------------------------------
-// JSActName::MyActionModeCallback::MyActionModeCallback()
-// {}
-
-// CAR_INTERFACE_IMPL(JSActName::MyActionModeCallback, Object, IActionModeCallback)
-
-// ECode JSActName::MyActionModeCallback::OnActionItemClicked(
-//     /* [in] */ IActionMode* mode,
-//     /* [in] */ IMenuItem* item,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     *result = FALSE;
-//     return NOERROR;
-// }
-
-// ECode JSActName::MyActionModeCallback::OnCreateActionMode(
-//     /* [in] */ IActionMode* mode,
-//     /* [in] */ IMenu* menu,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     *result = FALSE;
-//     return NOERROR;
-// }
-
-// ECode JSActName::MyActionModeCallback::OnDestroyActionMode(
-//     /* [in] */ IActionMode* mode)
-// {
-//     return NOERROR;
-// }
-
-// ECode JSActName::MyActionModeCallback::OnPrepareActionMode(
-//     /* [in] */ IActionMode* mode,
-//     /* [in] */ IMenu* menu,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     *result = FALSE;
-//     return NOERROR;
-// }
-
-//----------------------------------------------------------------
-//           CalculatorEditText
-//----------------------------------------------------------------
-
-// AutoPtr<JSActName::MyActionModeCallback> JSActName::InitCallback()
-// {
-//     return new MyActionModeCallback();
-// }
-// const AutoPtr<JSActName::MyActionModeCallback> JSActName::NO_SELECTION_ACTION_MODE_CALLBACK = InitCallback();
-
-JSActName::CCalculatorEditText()
-    // : mWidthConstraint(-1)
-{
-    ALOGD("CCalculatorEditText::CCalculatorEditText========begin========");
-
-    // CTextPaint::New((IPaint**)&mTempPaint);
-    // CRect::New((IRect**)&mTempRect);
-}
-
-JSActName::~CCalculatorEditText()
-{}
-
-//CAR_INTERFACE_IMPL(CalculatorEditText, EditText, ICalculatorEditText)
+JSActName::CCalculatorEditText(){}
+JSActName::~CCalculatorEditText(){}
 
 ECode JSActName::constructor(
     /* [in] */ IContext* context)
@@ -306,7 +56,7 @@ ECode JSActName::constructor(
     mSuperObject = (ICalculatorEditTextSuperObject*)superObject->Probe(EIID_ICalculatorEditTextSuperObject);
 
     AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
-    JSEvtName::RegisterCustomControl(context, _this, (ICalculatorEditTextListener**)&mListener);
+    JSEvtName::RegisterCalculatorEditText(context, _this, (ICalculatorEditTextListener**)&mListener);
 
     if (mListener) {
         ec = mListener->OnCreate(_this, context, attrs, defStyle);
@@ -452,60 +202,6 @@ ECode JSActName::SetTextSize(
     return ec;
 }
 
-//to be deleted
-ECode JSActName::SetOnTextSizeChangeListener(
-    /* [in] */ IOnTextSizeChangeListener* listener)
-{
-    ALOGD("CCalculatorEditText::SetOnTextSizeChangeListener========begin========");
-    return NOERROR;
-
-    // mOnTextSizeChangeListener = listener;
-    // return NOERROR;
-}
-
-//to be deleted
-ECode JSActName::GetVariableTextSize(
-    /* [in] */ const String& text,
-    /* [out] */ Float* result)
-{
-    ALOGD("CCalculatorEditText::SetOnTextSizeChangeListener========begin========");
-    return NOERROR;
-
-    // VALIDATE_NOT_NULL(result);
-
-    // if (mWidthConstraint < 0 || mMaximumTextSize <= mMinimumTextSize) {
-    //     // Not measured, bail early.
-    //     Float size;
-    //     GetTextSize(&size);
-    //     *result = size;
-    //     return NOERROR;
-    // }
-
-    // // Capture current paint state.
-    // AutoPtr<ITextPaint> paint;
-    // GetPaint((ITextPaint**)&paint);
-    // mTempPaint->Set(IPaint::Probe(paint));
-
-    // // Step through increasing text sizes until the text would no longer fit.
-    // Float lastFitTextSize = mMinimumTextSize;
-    // Float width;
-    // while (lastFitTextSize < mMaximumTextSize) {
-    //     Float nextSize = Elastos::Core::Math::Min(lastFitTextSize + mStepTextSize, mMaximumTextSize);
-    //     mTempPaint->SetTextSize(nextSize);
-
-    //     mTempPaint->MeasureText(text, &width);
-    //     if (width > mWidthConstraint) {
-    //         break;
-    //     }
-    //     else {
-    //         lastFitTextSize = nextSize;
-    //     }
-    // }
-
-    // *result = lastFitTextSize;
-    // return NOERROR;
-}
-
 ECode JSActName::_GetCompoundPaddingTop(
     /* [out] */ Int32* result)
 {
@@ -576,9 +272,6 @@ ECode JSActName::SuperObject::SetTextSize(
     return NOERROR;
 }
 
-// } // namespace Calculator2
-// } // namespace Droid
-// } // namespace Elastos
 } // namespace JSPkgName
 } // namespace Node
 } // namespace DevSamples

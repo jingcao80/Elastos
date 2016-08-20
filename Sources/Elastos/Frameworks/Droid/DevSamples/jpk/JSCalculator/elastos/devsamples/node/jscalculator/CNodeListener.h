@@ -213,7 +213,7 @@ public:
 
         Boolean result = false;
         if(JSEvtName::mNodeBridgeListener) {
-            JSEvtName::mNodeBridgeListener->OnRegistActivity(
+            JSEvtName::mNodeBridgeListener->OnRegisterActivity(
                 packageName, activityName, activityInstance, (Int32)activityListener, activityHandler, &result);
         }
         else {
@@ -221,19 +221,19 @@ public:
         }
     }
 
-    static void RegisterCustomControl(IContext* context, IInterface* control, ICalculatorEditTextListener** listener) {
-        ALOGD("RegisterCustomControl========0========");
+    static void RegisterCalculatorEditText(IContext* context, IInterface* control, ICalculatorEditTextListener** listener) {
+        ALOGD("RegisterCalculatorEditText========0========");
         Boolean result = false;
         if(JSEvtName::mNodeBridgeListener) {
-            ALOGD("RegisterCustomControl========1========");
-            JSEvtName::mNodeBridgeListener->OnRegistCustomControl(
+            ALOGD("RegisterCalculatorEditText========1========");
+            JSEvtName::mNodeBridgeListener->OnRegisterCalculatorEditText(
                 context, control, (Int32)listener, &result);
-            ALOGD("RegisterCustomControl========2========");
+            ALOGD("RegisterCalculatorEditText========2========");
         }
         else {
-            ALOGD("RegisterCustomControl================mNodeBridgeListener is null================");
+            ALOGD("RegisterCalculatorEditText================mNodeBridgeListener is null================");
         }
-        ALOGD("RegisterCustomControl========3========");
+        ALOGD("RegisterCalculatorEditText========3========");
     }
 
     static ECode Require(
