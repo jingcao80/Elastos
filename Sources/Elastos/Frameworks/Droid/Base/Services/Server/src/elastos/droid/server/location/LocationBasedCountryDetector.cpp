@@ -39,7 +39,8 @@ ECode LocationBasedCountryDetector::MyTimerTask::Run()
     mHost->Stop();
     // Looks like no provider could provide the location, let's try the last
     // known location.
-    mHost->QueryCountryCode(mHost->GetLastKnownLocation());
+    AutoPtr<ILocation> location = mHost->GetLastKnownLocation();
+    mHost->QueryCountryCode(location);
     return NOERROR;
 }
 
@@ -98,18 +99,24 @@ LocationBasedCountryDetector::MyRunnable::MyRunnable(
 
 ECode LocationBasedCountryDetector::MyRunnable::Run()
 {
+    // prevent mHost be released when calling host->NotifyListener;
+    AutoPtr<LocationBasedCountryDetector> host = mHost;
+
     String countryIso;
     if (mLocation != NULL) {
-        countryIso = mHost->GetCountryFromLocation(mLocation);
+        countryIso = host->GetCountryFromLocation(mLocation);
     }
     if (countryIso.IsNull()) {
-        CCountry::New(countryIso, ICountry::COUNTRY_SOURCE_LOCATION, (ICountry**)(&(mHost->mDetectedCountry)));
-    } else {
-        mHost->mDetectedCountry = NULL;
+        AutoPtr<ICountry> country;
+        CCountry::New(countryIso, ICountry::COUNTRY_SOURCE_LOCATION, (ICountry**)&country);
+        host->mDetectedCountry = country;
     }
-    mHost->NotifyListener(mHost->mDetectedCountry);
+    else {
+        host->mDetectedCountry = NULL;
+    }
+    host->NotifyListener(host->mDetectedCountry);
 
-    mHost->mQueryThread = NULL;
+    host->mQueryThread = NULL;
     return NOERROR;
 }
 
@@ -143,10 +150,10 @@ String LocationBasedCountryDetector::GetCountryFromLocation(
     ECode ec = geoCoder->GetFromLocation(latitude, longitude, 1, (IList**)&addresses);
     if (FAILED(ec)) {
         Slogger::W(TAG, "Exception occurs when getting country from location");
+        return String(NULL);
     }
     Int32 size;
-    addresses->GetSize(&size);
-    if (addresses != NULL && size > 0) {
+    if (addresses != NULL && (addresses->GetSize(&size), size > 0)) {
         AutoPtr<IInterface> obj;
         addresses->Get(0, (IInterface**)&obj);
         IAddress::Probe(obj)->GetCountryCode(&country);
@@ -222,7 +229,8 @@ ECode LocationBasedCountryDetector::DetectCountry(
     /* [out] */ ICountry** country)
 {
     VALIDATE_NOT_NULL(country)
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mLocationListeners  != NULL) {
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -250,7 +258,8 @@ ECode LocationBasedCountryDetector::DetectCountry(
         }
         else {
             // There is no provider enabled.
-            QueryCountryCode(GetLastKnownLocation());
+            AutoPtr<ILocation> location = GetLastKnownLocation();
+            QueryCountryCode(location);
         }
         *country = mDetectedCountry;
         REFCOUNT_ADD(*country)
@@ -260,7 +269,8 @@ ECode LocationBasedCountryDetector::DetectCountry(
 
 ECode LocationBasedCountryDetector::Stop()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mLocationListeners != NULL) {
             Int32 size;
             mLocationListeners->GetSize(&size);
@@ -282,13 +292,15 @@ ECode LocationBasedCountryDetector::Stop()
 void LocationBasedCountryDetector::QueryCountryCode(
     /* [in] */ ILocation* location)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (location == NULL) {
             NotifyListener(NULL);
             return;
         }
         if (mQueryThread != NULL) return;
-        CThread::New((IRunnable*)(new MyRunnable(this, location)), (IThread**)&mQueryThread);
+        AutoPtr<IRunnable> r = new MyRunnable(this, location);
+        CThread::New(r, (IThread**)&mQueryThread);
         mQueryThread->Start();
     }
 }

@@ -102,7 +102,7 @@ private:
 
     private:
         LocationBasedCountryDetector* mHost;
-        ILocation* mLocation;
+        AutoPtr<ILocation> mLocation;
     };
 
 public:
