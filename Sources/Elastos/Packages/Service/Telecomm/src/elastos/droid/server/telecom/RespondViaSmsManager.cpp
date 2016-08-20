@@ -39,7 +39,9 @@ namespace Telecom {
 RespondViaSmsManager::SubHandler::SubHandler(
     /* [in] */ RespondViaSmsManager* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode RespondViaSmsManager::SubHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -100,7 +102,9 @@ RespondViaSmsManager::SubThread::SubThread(
     : mHost(host)
     , mResponse(response)
     , mContext(context)
-{}
+{
+    Thread::constructor();
+}
 
 ECode RespondViaSmsManager::SubThread::Run()
 {
