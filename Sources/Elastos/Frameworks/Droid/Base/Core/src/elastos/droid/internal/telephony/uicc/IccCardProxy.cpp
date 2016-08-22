@@ -1094,11 +1094,38 @@ void IccCardProxy::UnregisterUiccCardEvents()
     if (mIccRecords != NULL) mIccRecords->UnregisterForRecordsEvents(this);
 }
 
+static const String StateToString(
+    /* [in] */ IccCardConstantsState state)
+{
+    switch (state) {
+        case IccCardConstantsState_ABSENT:
+            return String("ABSENT");
+        case IccCardConstantsState_PIN_REQUIRED:
+            return String("PIN_REQUIRED");
+        case IccCardConstantsState_PUK_REQUIRED:
+            return String("PUK_REQUIRED");
+        case IccCardConstantsState_PERSO_LOCKED:
+            return String("PERSO_LOCKED");
+        case IccCardConstantsState_READY:
+            return String("READY");
+        case IccCardConstantsState_NOT_READY:
+            return String("NOT_READY");
+        case IccCardConstantsState_PERM_DISABLED:
+            return String("PERM_DISABLED");
+        case IccCardConstantsState_CARD_IO_ERROR:
+            return String("CARD_IO_ERROR");
+        case IccCardConstantsState_UNKNOWN:
+        default:
+            return String("UNKNOWN");
+    }
+    return String("UNKNOWN");
+}
+
 void IccCardProxy::UpdateStateProperty()
 {
     IccCardConstantsState state;
     GetState(&state);
-    SetSystemProperty(ITelephonyProperties::PROPERTY_SIM_STATE, mCardIndex, StringUtils::ToString(state));
+    SetSystemProperty(ITelephonyProperties::PROPERTY_SIM_STATE, mCardIndex, StateToString(state));
 }
 
 void IccCardProxy::BroadcastIccStateChangedIntent(
@@ -1151,7 +1178,7 @@ void IccCardProxy::SetExternalState(
         mExternalState = newState;
         IccCardConstantsState state;
         GetState(&state);
-        SetSystemProperty(ITelephonyProperties::PROPERTY_SIM_STATE, mCardIndex, StringUtils::ToString(state));
+        SetSystemProperty(ITelephonyProperties::PROPERTY_SIM_STATE, mCardIndex, StateToString(state));
         BroadcastIccStateChangedIntent(GetIccStateIntentString(mExternalState),
                 GetIccStateReason(mExternalState));
         // TODO: Need to notify registrants for other states as well.
