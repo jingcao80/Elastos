@@ -78,6 +78,7 @@ KeyguardDisableHandler::KeyguardDisableHandler(
     , mPolicy(policy)
     , mAllowDisableKeyguard(ALLOW_DISABLE_UNKNOWN)
 {
+    Handler::constructor();
 }
 
 ECode KeyguardDisableHandler::HandleMessage(
