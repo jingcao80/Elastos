@@ -7,8 +7,8 @@
 
 #include "nan-ext.h"
 
+#include "car-interface-adapter.h"
 #include "car-object.h"
-#include "car-object-adapter.h"
 #include "error.h"
 #include "parse-uri.h"
 #include "require.h"
@@ -59,7 +59,7 @@ static NAN_MODULE_INIT(Initialize)
 {
     CARObject::Initialize();
 
-    CARObjectAdapter::Initialize();
+    CARInterfaceAdapter::Initialize();
 
     Export(target, "version", New("0.0.0").ToLocalChecked());
 

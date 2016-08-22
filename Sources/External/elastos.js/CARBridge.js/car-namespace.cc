@@ -292,13 +292,10 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
 
     if (nEnums > 0) {
         AutoPtr<ArrayOf<IEnumInfo const *> > enumInfos;
-        ArrayOf<IEnumInfo const *> *_enumInfos;
 
-        _enumInfos = ArrayOf<IEnumInfo const *>::Alloc(nEnums), _enumInfos->AddRef();
-        if (_enumInfos == 0)
+        enumInfos = ArrayOf<IEnumInfo const *>::Alloc(nEnums);
+        if (enumInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        enumInfos = _enumInfos, _enumInfos->Release();
 
         ec = moduleInfo->GetAllEnumInfos(reinterpret_cast<ArrayOf<IEnumInfo *> *>(enumInfos.Get()));
         if (FAILED(ec))
@@ -313,13 +310,10 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
 
     if (nInterfaces > 0) {
         AutoPtr<ArrayOf<IInterfaceInfo const *> > interfaceInfos;
-        ArrayOf<IInterfaceInfo const *> *_interfaceInfos;
 
-        _interfaceInfos = ArrayOf<IInterfaceInfo const *>::Alloc(nInterfaces), _interfaceInfos->AddRef();
-        if (_interfaceInfos == 0)
+        interfaceInfos = ArrayOf<IInterfaceInfo const *>::Alloc(nInterfaces);
+        if (interfaceInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        interfaceInfos = _interfaceInfos, _interfaceInfos->Release();
 
         ec = moduleInfo->GetAllInterfaceInfos(reinterpret_cast<ArrayOf<IInterfaceInfo *> *>(interfaceInfos.Get()));
         if (FAILED(ec))
@@ -334,13 +328,10 @@ Local<ObjectTemplate> CARNamespaceTemplate(IModuleInfo const *moduleInfo, char c
 
     if (nClasses > 0) {
         AutoPtr<ArrayOf<IClassInfo const *> > classInfos;
-        ArrayOf<IClassInfo const *> *_classInfos;
 
-        _classInfos = ArrayOf<IClassInfo const *>::Alloc(nClasses), _classInfos->AddRef();
-        if (_classInfos == 0)
+        classInfos = ArrayOf<IClassInfo const *>::Alloc(nClasses);
+        if (classInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        classInfos = _classInfos, _classInfos->Release();
 
         ec = moduleInfo->GetAllClassInfos(reinterpret_cast<ArrayOf<IClassInfo *> *>(classInfos.Get()));
         if (FAILED(ec))

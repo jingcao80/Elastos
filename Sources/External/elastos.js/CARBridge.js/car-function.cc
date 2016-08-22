@@ -50,7 +50,6 @@ static Local<Object> _CARFunction(IFunctionInfo const *functionInfo, char const 
     _ELASTOS Int32 nParams;
 
     AutoPtr<ArrayOf<IParamInfo const *> > paramInfos;
-    ArrayOf<IParamInfo const *> *_paramInfos;
 
     auto &_function = _mapFunctionInfoToCARFunction[functionInfo];
     if (!_function.IsEmpty())
@@ -87,11 +86,9 @@ static Local<Object> _CARFunction(IFunctionInfo const *functionInfo, char const 
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams), _paramInfos->AddRef();
-    if (_paramInfos == 0)
+    paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams);
+    if (paramInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    paramInfos = _paramInfos, _paramInfos->Release();
 
     ec = functionInfo->GetAllParamInfos(reinterpret_cast<ArrayOf<IParamInfo *> *>(paramInfos.Get()));
     if (FAILED(ec))

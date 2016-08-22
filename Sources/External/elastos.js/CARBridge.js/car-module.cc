@@ -93,13 +93,10 @@ Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
 
     if (nImportedModules > 0) {
         AutoPtr<ArrayOf<IModuleInfo const *> > importedModuleInfos;
-        ArrayOf<IModuleInfo const *> *_importedModuleInfos;
 
-        _importedModuleInfos = ArrayOf<IModuleInfo const *>::Alloc(nImportedModules), _importedModuleInfos->AddRef();
-        if (_importedModuleInfos == 0)
+        importedModuleInfos = ArrayOf<IModuleInfo const *>::Alloc(nImportedModules);
+        if (importedModuleInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        importedModuleInfos = _importedModuleInfos, _importedModuleInfos->Release();
 
         ec = GetAllImportedModuleInfos(moduleInfo, importedModuleInfos);
         if (FAILED(ec))
@@ -131,15 +128,12 @@ Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
 
     if (nConstants > 0) {
         AutoPtr<ArrayOf<IConstantInfo const *> > constantInfos;
-        ArrayOf<IConstantInfo const *> *_constantInfos;
 
         Local<Object> constants;
 
-        _constantInfos = ArrayOf<IConstantInfo const *>::Alloc(nConstants), _constantInfos->AddRef();
-        if (_constantInfos == 0)
+        constantInfos = ArrayOf<IConstantInfo const *>::Alloc(nConstants);
+        if (constantInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        constantInfos = _constantInfos, _constantInfos->Release();
 
         ec = moduleInfo->GetAllConstantInfos(reinterpret_cast<ArrayOf<IConstantInfo *> *>(constantInfos.Get()));
         if (FAILED(ec))
@@ -178,13 +172,10 @@ Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
 
     if (nStructs > 0) {
         AutoPtr<ArrayOf<IStructInfo const *> > structInfos;
-        ArrayOf<IStructInfo const *> *_structInfos;
 
-        _structInfos = ArrayOf<IStructInfo const *>::Alloc(nStructs), _structInfos->AddRef();
-        if (_structInfos == 0)
+        structInfos = ArrayOf<IStructInfo const *>::Alloc(nStructs);
+        if (structInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        structInfos = _structInfos, _structInfos->Release();
 
         ec = moduleInfo->GetAllStructInfos(reinterpret_cast<ArrayOf<IStructInfo *> *>(structInfos.Get()));
         if (FAILED(ec))
@@ -216,13 +207,10 @@ Local<ObjectTemplate> CARModuleTemplate(IModuleInfo const *moduleInfo)
 
     if (nTypeAliases > 0) {
         AutoPtr<ArrayOf<ITypeAliasInfo const *> > typeAliasInfos;
-        ArrayOf<ITypeAliasInfo const *> *_typeAliasInfos;
 
-        _typeAliasInfos = ArrayOf<ITypeAliasInfo const *>::Alloc(nTypeAliases), _typeAliasInfos->AddRef();
-        if (_typeAliasInfos == 0)
+        typeAliasInfos = ArrayOf<ITypeAliasInfo const *>::Alloc(nTypeAliases);
+        if (typeAliasInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        typeAliasInfos = _typeAliasInfos, _typeAliasInfos->Release();
 
         ec = moduleInfo->GetAllTypeAliasInfos(reinterpret_cast<ArrayOf<ITypeAliasInfo *> *>(typeAliasInfos.Get()));
         if (FAILED(ec))

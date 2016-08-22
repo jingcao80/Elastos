@@ -14,8 +14,8 @@
 
 #include "libc-ext.h"
 
+#include "car-interface-adapter.h"
 #include "car-object.h"
-#include "car-object-adapter.h"
 #include "error.h"
 
 
@@ -2126,7 +2126,6 @@ bool IsStruct(IStructInfo const *structInfo, Local<Value> value)
     _ELASTOS Int32 nFields;
 
     AutoPtr<ArrayOf<IFieldInfo const *> > fieldInfos;
-    ArrayOf<IFieldInfo const *> *_fieldInfos;
 
     if (!value->IsObject())
         return false;
@@ -2140,11 +2139,9 @@ bool IsStruct(IStructInfo const *structInfo, Local<Value> value)
     if (GetOwnPropertyNames(object).ToLocalChecked()->Length() != (uint32_t)nFields)
         return false;
 
-    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields), _fieldInfos->AddRef();
-    if (_fieldInfos == 0)
+    fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields);
+    if (fieldInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    fieldInfos = _fieldInfos, _fieldInfos->Release();
 
     ec = structInfo->GetAllFieldInfos(reinterpret_cast<ArrayOf<IFieldInfo *> *>(fieldInfos.Get()));
     if (FAILED(ec))
@@ -2214,7 +2211,6 @@ void ToStruct(IStructInfo const *structInfo, IStructSetter *structSetter, Local<
     _ELASTOS Int32 nFields;
 
     AutoPtr<ArrayOf<IFieldInfo const *> > fieldInfos;
-    ArrayOf<IFieldInfo const *> *_fieldInfos;
 
     Local<::v8::Object> object;
 
@@ -2222,11 +2218,9 @@ void ToStruct(IStructInfo const *structInfo, IStructSetter *structSetter, Local<
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields), _fieldInfos->AddRef();
-    if (_fieldInfos == 0)
+    fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields);
+    if (fieldInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    fieldInfos = _fieldInfos, _fieldInfos->Release();
 
     ec = structInfo->GetAllFieldInfos(reinterpret_cast<ArrayOf<IFieldInfo *> *>(fieldInfos.Get()));
     if (FAILED(ec))
@@ -2460,7 +2454,6 @@ Local<Value> ToValue(IStructInfo const *structInfo, IStructGetter const *structG
     _ELASTOS Int32 nFields;
 
     AutoPtr<ArrayOf<IFieldInfo const *> > fieldInfos;
-    ArrayOf<IFieldInfo const *> *_fieldInfos;
 
     Local<::v8::Object> object;
 
@@ -2468,11 +2461,9 @@ Local<Value> ToValue(IStructInfo const *structInfo, IStructGetter const *structG
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields), _fieldInfos->AddRef();
-    if (_fieldInfos == 0)
+    fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFields);
+    if (fieldInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    fieldInfos = _fieldInfos, _fieldInfos->Release();
 
     ec = structInfo->GetAllFieldInfos(reinterpret_cast<ArrayOf<IFieldInfo *> *>(fieldInfos.Get()));
     if (FAILED(ec))
@@ -2807,7 +2798,6 @@ bool CanBeUsedAsInterface(IInterfaceInfo const *interfaceInfo, Local<Value> valu
     _ELASTOS Int32 nMethods;
 
     AutoPtr<ArrayOf<IMethodInfo const *> > methodInfos;
-    ArrayOf<IMethodInfo const *> *_methodInfos;
 
     Local<::v8::Object> object;
 
@@ -2825,11 +2815,9 @@ bool CanBeUsedAsInterface(IInterfaceInfo const *interfaceInfo, Local<Value> valu
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods), _methodInfos->AddRef();
-    if (_methodInfos == 0)
+    methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods);
+    if (methodInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    methodInfos = _methodInfos, _methodInfos->Release();
 
     ec = interfaceInfo->GetAllMethodInfos(reinterpret_cast<ArrayOf<IMethodInfo *> *>(methodInfos.Get()));
     if (FAILED(ec))
@@ -2868,8 +2856,7 @@ IInterface *ToInterface(IInterfaceInfo const *interfaceInfo, Local<Value> value)
 
     InterfaceID interfaceId;
 
-    AutoPtr<CARObjectAdapter> carObjectAdapter;
-    CARObjectAdapter *_carObjectAdapter;
+    IInterface *interface_;
 
     if (!CanBeUsedAsInterface(interfaceInfo, value, &priority))
         throw Error(Error::INVALID_ARGUMENT, "");
@@ -2888,13 +2875,11 @@ IInterface *ToInterface(IInterfaceInfo const *interfaceInfo, Local<Value> value)
         return carObject->carObject()->Probe(interfaceId);
     }
 
-    ec = CARObjectAdapter::New(&_carObjectAdapter, interfaceInfo, object);
+    ec = CARInterfaceAdapter::New(&interface_, interfaceInfo, object);
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    carObjectAdapter = _carObjectAdapter, _carObjectAdapter->Release();
-
-    return carObjectAdapter->Probe(interfaceId);
+    return interface_;
 }
 
 Local<Value> ToValue(IInterface *interface_)

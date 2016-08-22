@@ -469,14 +469,26 @@ static NAN_GETTER(_GetCalleeAllocOutputArgument)
     }
 }
 
+struct _Allocated {
+    bool allocated = false;
+};
+
+struct _CalleeAllocCARArray: CalleeAllocCARArray, _Allocated {};
+
 #define _GetCalleeAllocOutputArgumentOfCARArray _GetCalleeAllocOutputArgument
 
 static NAN_SETTER(_SetCalleeAllocOutputArgumentOfCARArray)
 {
     try {
-        struct CalleeAllocCARArray *carArray;
+        struct _CalleeAllocCARArray *carArray;
 
-        carArray = (struct CalleeAllocCARArray *)info.Data().As<External>()->Value();
+        carArray = (struct _CalleeAllocCARArray *)info.Data().As<External>()->Value();
+
+        if (carArray->allocated) {
+            _CarQuintet_Release(*carArray->carQuintet);
+
+            carArray->allocated = false;
+        }
 
         if (CanBeUsedAsCARArray(carArray->carArrayInfo, value)) {
             ECode ec;
@@ -508,6 +520,8 @@ static NAN_SETTER(_SetCalleeAllocOutputArgumentOfCARArray)
                 throw Error(Error::TYPE_ELASTOS, ec, "");
 
             *carArray->carQuintet = _CarQuintet_Clone(carQuintet);
+
+            carArray->allocated = true;
         }
 
         carArray->value.Reset(value);
@@ -528,7 +542,7 @@ static Local<Value> _CalleeAllocOutputArgumentOfCARArray(ICarArrayInfo const *ca
 
     Local<Value> argument;
 
-    unique_ptr<struct CalleeAllocCARArray, CalleeAllocCARArray::Deleter> carArray(
+    unique_ptr<struct _CalleeAllocCARArray, _CalleeAllocCARArray::Deleter> carArray(
             CalleeAllocCARArray_(carArrayInfo, carQuintet)
             );
 
@@ -554,14 +568,22 @@ static void _SetCalleeAllocOutputArgumentOfCARArray(ICarArrayInfo const *carArra
     argv[index] = _CalleeAllocOutputArgumentOfCARArray(carArrayInfo, carQuintet);
 }
 
+struct _CalleeAllocStruct: CalleeAllocStruct, _Allocated {};
+
 #define _GetCalleeAllocOutputArgumentOfStruct _GetCalleeAllocOutputArgument
 
 static NAN_SETTER(_SetCalleeAllocOutputArgumentOfStruct)
 {
     try {
-        struct CalleeAllocStruct *struct_;
+        struct _CalleeAllocStruct *struct_;
 
-        struct_ = (struct CalleeAllocStruct *)info.Data().As<External>()->Value();
+        struct_ = (struct _CalleeAllocStruct *)info.Data().As<External>()->Value();
+
+        if (struct_->allocated) {
+            operator delete(*struct_->struct_);
+
+            struct_->allocated = false;
+        }
 
         if (CanBeUsedAsStruct(struct_->structInfo, value)) {
             ECode ec;
@@ -579,6 +601,8 @@ static NAN_SETTER(_SetCalleeAllocOutputArgumentOfStruct)
             ToStruct(struct_->structInfo, _struct.get(), value);
 
             *struct_->struct_ = _struct.release();
+
+            struct_->allocated = true;
         }
 
         struct_->value.Reset(value);
@@ -599,7 +623,9 @@ static Local<Value> _CalleeAllocOutputArgumentOfStruct(IStructInfo const *struct
 
     Local<Value> argument;
 
-    unique_ptr<struct CalleeAllocStruct, CalleeAllocStruct::Deleter> _struct(CalleeAllocStruct_(structInfo, struct_));
+    unique_ptr<struct _CalleeAllocStruct, _CalleeAllocStruct::Deleter> _struct(
+            CalleeAllocStruct_(structInfo, struct_)
+            );
 
     argument = _CalleeAllocOutputArgumentOf(static_cast<IDataTypeInfo const *>(structInfo),
             _GetCalleeAllocOutputArgumentOfStruct,
@@ -2327,7 +2353,6 @@ ECode CARFunctionAdapter::Call(Local<Function> function, Local<Value> receiver,
         _ELASTOS Int32 nParams;
 
         AutoPtr<ArrayOf<IParamInfo const *> > paramInfos;
-        ArrayOf<IParamInfo const *> *_paramInfos;
 
         size_t argc;
 
@@ -2335,11 +2360,9 @@ ECode CARFunctionAdapter::Call(Local<Function> function, Local<Value> receiver,
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
 
-        _paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams), _paramInfos->AddRef();
-        if (_paramInfos == 0)
+        paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams);
+        if (paramInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        paramInfos = _paramInfos, _paramInfos->Release();
 
         ec = functionInfo->GetAllParamInfos(reinterpret_cast<ArrayOf<IParamInfo *> *>(paramInfos.Get()));
         if (FAILED(ec))
@@ -2372,17 +2395,14 @@ CARFunctionAdapter::CARFunctionAdapter(IFunctionInfo const *functionInfo,
     _ELASTOS Int32 nParams;
 
     AutoPtr<ArrayOf<IParamInfo const *> > paramInfos;
-    ArrayOf<IParamInfo const *> *__paramInfos;
 
     ec = functionInfo->GetParamCount(&nParams);
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    __paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams), __paramInfos->AddRef();
-    if (__paramInfos == 0)
+    paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams);
+    if (paramInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    paramInfos = __paramInfos, __paramInfos->Release();
 
     ec = functionInfo->GetAllParamInfos(reinterpret_cast<ArrayOf<IParamInfo *> *>(paramInfos.Get()));
     if (FAILED(ec))

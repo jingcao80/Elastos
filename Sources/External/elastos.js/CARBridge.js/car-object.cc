@@ -674,7 +674,6 @@ static IFunctionInfo const *_GetMatchingFunctionForCall(
         _ELASTOS Int32 nParams;
 
         AutoPtr<ArrayOf<IParamInfo const *> > paramInfos;
-        ArrayOf<IParamInfo const *> *_paramInfos;
 
         int _priority;
 
@@ -698,11 +697,9 @@ static IFunctionInfo const *_GetMatchingFunctionForCall(
         if ((size_t)nParams > argc)
             continue;
 
-        _paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams), _paramInfos->AddRef();
-        if (_paramInfos == 0)
+        paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams);
+        if (paramInfos == 0)
             throw Error(Error::NO_MEMORY, "");
-
-        paramInfos = _paramInfos, _paramInfos->Release();
 
         ec = const_cast<IFunctionInfo *>(functionInfo)->GetAllParamInfos(
                 reinterpret_cast<ArrayOf<IParamInfo *> *>(paramInfos.Get())
@@ -2764,7 +2761,6 @@ static IArgumentList *_CreateArgumentList(FunctionInfo const *functionInfo, size
     _ELASTOS Int32 nParams;
 
     AutoPtr<ArrayOf<IParamInfo const *> > paramInfos;
-    ArrayOf<IParamInfo const *> *_paramInfos;
 
     ec = functionInfo->CreateArgumentList(&_argumentList);
     if (FAILED(ec))
@@ -2776,11 +2772,9 @@ static IArgumentList *_CreateArgumentList(FunctionInfo const *functionInfo, size
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams), _paramInfos->AddRef();
-    if (_paramInfos == 0)
+    paramInfos = ArrayOf<IParamInfo const *>::Alloc(nParams);
+    if (paramInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    paramInfos = _paramInfos, _paramInfos->Release();
 
     ec = functionInfo->GetAllParamInfos(reinterpret_cast<ArrayOf<IParamInfo *> *>(paramInfos.Get()));
     if (FAILED(ec))
@@ -3181,29 +3175,24 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo,
     _ELASTOS Int32 nAspects;
 
     AutoPtr<ArrayOf<IClassInfo const *> > aspectInfos;
-    ArrayOf<IClassInfo const *> *_aspectInfos;
 
     Local<ObjectTemplate> aggregateeTemplates;
 
     _ELASTOS Int32 nAggregatees;
 
     AutoPtr<ArrayOf<IClassInfo const *> > aggregateeInfos;
-    ArrayOf<IClassInfo const *> *_aggregateeInfos;
 
     _ELASTOS Int32 nInterfaces;
 
     AutoPtr<ArrayOf<IInterfaceInfo const *> > interfaceInfos;
-    ArrayOf<IInterfaceInfo const *> *_interfaceInfos;
 
     _ELASTOS Int32 nCallbackInterfaces;
 
     AutoPtr<ArrayOf<ICallbackInterfaceInfo const *> > callbackInterfaceInfos;
-    ArrayOf<ICallbackInterfaceInfo const *> *_callbackInterfaceInfos;
 
     _ELASTOS Int32 nMethods;
 
     AutoPtr<ArrayOf<IMethodInfo const *> > methodInfos;
-    ArrayOf<IMethodInfo const *> *_methodInfos;
 
     map<_ELASTOS String, unique_ptr<struct _MethodInfos, _MethodInfos::Deleter>> mapNameToMethodInfos;
 
@@ -3393,11 +3382,9 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo,
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _aspectInfos = ArrayOf<IClassInfo const *>::Alloc(nAspects), _aspectInfos->AddRef();
-    if (_aspectInfos == 0)
+    aspectInfos = ArrayOf<IClassInfo const *>::Alloc(nAspects);
+    if (aspectInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    aspectInfos = _aspectInfos, _aspectInfos->Release();
 
     ec = classInfo->GetAllAspectInfos(reinterpret_cast<ArrayOf<IClassInfo *> *>(aspectInfos.Get()));
     if (FAILED(ec))
@@ -3433,11 +3420,9 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo,
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _aggregateeInfos = ArrayOf<IClassInfo const *>::Alloc(nAggregatees), _aggregateeInfos->AddRef();
-    if (_aggregateeInfos == 0)
+    aggregateeInfos = ArrayOf<IClassInfo const *>::Alloc(nAggregatees);
+    if (aggregateeInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    aggregateeInfos = _aggregateeInfos, _aggregateeInfos->Release();
 
     ec = classInfo->GetAllAggregateeInfos(reinterpret_cast<ArrayOf<IClassInfo *> *>(aggregateeInfos.Get()));
     if (FAILED(ec))
@@ -3476,11 +3461,9 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo,
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _interfaceInfos = ArrayOf<IInterfaceInfo const *>::Alloc(nInterfaces), _interfaceInfos->AddRef();
-    if (_interfaceInfos == 0)
+    interfaceInfos = ArrayOf<IInterfaceInfo const *>::Alloc(nInterfaces);
+    if (interfaceInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    interfaceInfos = _interfaceInfos, _interfaceInfos->Release();
 
     ec = classInfo->GetAllInterfaceInfos(reinterpret_cast<ArrayOf<IInterfaceInfo *> *>(interfaceInfos.Get()));
     if (FAILED(ec))
@@ -3509,12 +3492,9 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo,
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _callbackInterfaceInfos = ArrayOf<ICallbackInterfaceInfo const *>::Alloc(nCallbackInterfaces);
-    _callbackInterfaceInfos->AddRef();
-    if (_callbackInterfaceInfos == 0)
+    callbackInterfaceInfos = ArrayOf<ICallbackInterfaceInfo const *>::Alloc(nCallbackInterfaces);
+    if (callbackInterfaceInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    callbackInterfaceInfos = _callbackInterfaceInfos, _callbackInterfaceInfos->Release();
 
     ec = classInfo->GetAllCallbackInterfaceInfos(
             reinterpret_cast<ArrayOf<ICallbackInterfaceInfo *> *>(callbackInterfaceInfos.Get())
@@ -3571,11 +3551,9 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo,
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods), _methodInfos->AddRef();
-    if (_methodInfos == 0)
+    methodInfos = ArrayOf<IMethodInfo const *>::Alloc(nMethods);
+    if (methodInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    methodInfos = _methodInfos, _methodInfos->Release();
 
     ec = classInfo->GetAllMethodInfos(reinterpret_cast<ArrayOf<IMethodInfo *> *>(methodInfos.Get()));
     if (FAILED(ec))
@@ -3621,17 +3599,14 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo,
     _ELASTOS Int32 nConstructors;
 
     AutoPtr<ArrayOf<IConstructorInfo const *> > constructorInfos;
-    ArrayOf<IConstructorInfo const *> *_constructorInfos;
 
     ec = classInfo->GetConstructorCount(&nConstructors);
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _constructorInfos = ArrayOf<IConstructorInfo const *>::Alloc(nConstructors), _constructorInfos->AddRef();
-    if (_constructorInfos == 0)
+    constructorInfos = ArrayOf<IConstructorInfo const *>::Alloc(nConstructors);
+    if (constructorInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    constructorInfos = _constructorInfos, _constructorInfos->Release();
 
     ec = classInfo->GetAllConstructorInfos(reinterpret_cast<ArrayOf<IConstructorInfo *> *>(constructorInfos.Get()));
     if (FAILED(ec))
@@ -3758,7 +3733,6 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo)
     _ELASTOS Int32 nConstructors;
 
     AutoPtr<ArrayOf<IConstructorInfo const *> > constructorInfos;
-    ArrayOf<IConstructorInfo const *> *_constructorInfos;
 
     Local<FunctionTemplate> classTemplate;
 
@@ -3772,11 +3746,9 @@ Local<FunctionTemplate> CARObject::NewClassTemplate(IClassInfo const *classInfo)
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _constructorInfos = ArrayOf<IConstructorInfo const *>::Alloc(nConstructors), _constructorInfos->AddRef();
-    if (_constructorInfos == 0)
+    constructorInfos = ArrayOf<IConstructorInfo const *>::Alloc(nConstructors);
+    if (constructorInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    constructorInfos = _constructorInfos, _constructorInfos->Release();
 
     ec = classInfo->GetAllConstructorInfos(reinterpret_cast<ArrayOf<IConstructorInfo *> *>(constructorInfos.Get()));
     if (FAILED(ec))

@@ -217,7 +217,6 @@ Local<Object> CAREnum(IEnumInfo const *enumInfo)
     _ELASTOS Int32 nItems;
 
     AutoPtr<ArrayOf<IEnumItemInfo const *> > itemInfos;
-    ArrayOf<IEnumItemInfo const *> *_itemInfos;
 
     auto &_enum = _mapEnumInfoToCAREnum[enumInfo];
     if (!_enum.IsEmpty())
@@ -254,11 +253,9 @@ Local<Object> CAREnum(IEnumInfo const *enumInfo)
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _itemInfos = ArrayOf<IEnumItemInfo const *>::Alloc(nItems), _itemInfos->AddRef();
-    if (_itemInfos == 0)
+    itemInfos = ArrayOf<IEnumItemInfo const *>::Alloc(nItems);
+    if (itemInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    itemInfos = _itemInfos, _itemInfos->Release();
 
     ec = enumInfo->GetAllItemInfos(reinterpret_cast<ArrayOf<IEnumItemInfo *> *>(itemInfos.Get()));
     if (FAILED(ec))
@@ -405,7 +402,6 @@ Local<Object> CARStruct(IStructInfo const *structInfo)
     _ELASTOS Int32 nFieldInfos;
 
     AutoPtr<ArrayOf<IFieldInfo const *> > fieldInfos;
-    ArrayOf<IFieldInfo const *> *_fieldInfos;
 
     auto &_struct = _mapStructInfoToCARStruct[structInfo];
     if (!_struct.IsEmpty())
@@ -431,11 +427,9 @@ Local<Object> CARStruct(IStructInfo const *structInfo)
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFieldInfos), _fieldInfos->AddRef();
-    if (_fieldInfos == 0)
+    fieldInfos = ArrayOf<IFieldInfo const *>::Alloc(nFieldInfos);
+    if (fieldInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    fieldInfos = _fieldInfos, _fieldInfos->Release();
 
     ec = structInfo->GetAllFieldInfos(reinterpret_cast<ArrayOf<IFieldInfo *> *>(fieldInfos.Get()));
     if (FAILED(ec))
@@ -516,7 +510,6 @@ static Local<Object> _CARInterface(IInterfaceInfo const *interfaceInfo, char con
     _ELASTOS Int32 nMethods;
 
     AutoPtr<ArrayOf<IFunctionInfo const *> > methodInfos;
-    ArrayOf<IFunctionInfo const *> *_methodInfos;
 
     map<_ELASTOS String, vector<IFunctionInfo const *>> mapNameToMethodInfos;
 
@@ -587,11 +580,9 @@ static Local<Object> _CARInterface(IInterfaceInfo const *interfaceInfo, char con
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
-    _methodInfos = ArrayOf<IFunctionInfo const *>::Alloc(nMethods), _methodInfos->AddRef();
-    if (_methodInfos == 0)
+    methodInfos = ArrayOf<IFunctionInfo const *>::Alloc(nMethods);
+    if (methodInfos == 0)
         throw Error(Error::NO_MEMORY, "");
-
-    methodInfos = _methodInfos, _methodInfos->Release();
 
     ec = interfaceInfo->GetAllMethodInfos(reinterpret_cast<ArrayOf<IMethodInfo *> *>(methodInfos.Get()));
     if (FAILED(ec))

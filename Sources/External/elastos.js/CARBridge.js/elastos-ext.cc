@@ -341,7 +341,7 @@ ECode GetImportedModuleInfo(IModuleInfo const *moduleInfo,
 
     Int32 nImportedModules;
 
-    ArrayOf<IModuleInfo const *> *importedModuleInfos;
+    AutoPtr<ArrayOf<IModuleInfo const *> > importedModuleInfos;
 
     if (moduleInfo == 0)
         return E_INVALID_ARGUMENT;
@@ -353,13 +353,13 @@ ECode GetImportedModuleInfo(IModuleInfo const *moduleInfo,
     if (FAILED(ec))
         return ec;
 
-    importedModuleInfos = ArrayOf<IModuleInfo const *>::Alloc(nImportedModules), importedModuleInfos->AddRef();
+    importedModuleInfos = ArrayOf<IModuleInfo const *>::Alloc(nImportedModules);
     if (importedModuleInfos == 0)
         return E_OUT_OF_MEMORY;
 
-    ec = moduleInfo->GetAllImportModuleInfos(reinterpret_cast<ArrayOf<IModuleInfo *> *>(importedModuleInfos));
+    ec = moduleInfo->GetAllImportModuleInfos(reinterpret_cast<ArrayOf<IModuleInfo *> *>(importedModuleInfos.Get()));
     if (FAILED(ec))
-        goto exit;
+        return ec;
 
     for (Int32 i = 0; i < nImportedModules; ++i) {
         IModuleInfo const *_importedModuleInfo;
@@ -370,22 +370,16 @@ ECode GetImportedModuleInfo(IModuleInfo const *moduleInfo,
 
         ec = _importedModuleInfo->GetPath(&_path);
         if (FAILED(ec))
-            goto exit;
+            return ec;
 
         if (_path == path) {
             *importedModuleInfo = _importedModuleInfo;
 
-            goto exit;
+            return NOERROR;
         }
     }
 
     *importedModuleInfo = 0;
-
-exit:
-    importedModuleInfos->Release();
-
-    if (FAILED(ec))
-        return ec;
 
     return NOERROR;
 }
