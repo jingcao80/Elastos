@@ -41,6 +41,7 @@ module.exports = function(aoElastos, aoActivity){
 // import android.database.DataSetObserver;
 // import android.graphics.Canvas;
 // import android.graphics.Rect;
+    var Rect = Elastos.Droid.Graphics.CRect;
 // import android.graphics.drawable.Drawable;
 // import android.os.Build;
 // import android.os.Bundle;
@@ -107,174 +108,259 @@ module.exports = function(aoElastos, aoActivity){
 //  */
 // public class ViewPager extends ViewGroup {
 //     private static final String TAG = "ViewPager";
+        var TAG = "ViewPager";
 //     private static final boolean DEBUG = false;
+        var DEBUG = false;
 
 //     private static final boolean USE_CACHE = false;
+        var USE_CACHE = false;
 
 //     private static final int DEFAULT_OFFSCREEN_PAGES = 1;
+        var DEFAULT_OFFSCREEN_PAGES = 1;
 //     private static final int MAX_SETTLE_DURATION = 600; // ms
+        var MAX_SETTLE_DURATION = 600; // ms
 //     private static final int MIN_DISTANCE_FOR_FLING = 25; // dips
+        var MIN_DISTANCE_FOR_FLING = 25; // dips
 
 //     private static final int DEFAULT_GUTTER_SIZE = 16; // dips
+        var DEFAULT_GUTTER_SIZE = 16; // dips
 
 //     private static final int MIN_FLING_VELOCITY = 400; // dips
+        var MIN_FLING_VELOCITY = 400; // dips
 
 //     private static final int[] LAYOUT_ATTRS = new int[] {
+        var LAYOUT_ATTRS = [
 //         android.R.attr.layout_gravity
+            R.attr.layout_gravity
 //     };
+        ];
 
 //     /**
 //      * Used to track what the expected number of items in the adapter should be.
 //      * If the app changes this when we don't expect it, we'll throw a big obnoxious exception.
 //      */
 //     private int mExpectedAdapterCount;
+        var mExpectedAdapterCount;
 
 //     static class ItemInfo {
+        function ItemInfo() {
 //         Object object;
 //         int position;
 //         boolean scrolling;
 //         float widthFactor;
 //         float offset;
 //     }
+        }
 
 //     private static final Comparator<ItemInfo> COMPARATOR = new Comparator<ItemInfo>(){
+        var COMPARATOR = {
 //         @Override
 //         public int compare(ItemInfo lhs, ItemInfo rhs) {
 //             return lhs.position - rhs.position;
 //         }
 //     };
+        };
 
 //     private static final Interpolator sInterpolator = new Interpolator() {
+        var sInterpolator = {
 //         public float getInterpolation(float t) {
 //             t -= 1.0f;
 //             return t * t * t * t * t + 1.0f;
 //         }
 //     };
+        };
 
 //     private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
+        var mItems = [];
 //     private final ItemInfo mTempItem = new ItemInfo();
+        var mTempItem = new ItemInfo();
 
 //     private final Rect mTempRect = new Rect();
+        //var mTempRect = Droid_New("android.graphics.Rect");
+        var mTempRect = new Rect();
 
 //     private PagerAdapter mAdapter;
+        var mAdapter;
 //     private int mCurItem;   // Index of currently displayed page.
+        var mCurItem;   // Index of currently displayed page.
 //     private int mRestoredCurItem = -1;
+        var mRestoredCurItem = -1;
 //     private Parcelable mRestoredAdapterState = null;
+        var mRestoredAdapterState = null;
 //     private ClassLoader mRestoredClassLoader = null;
+        var mRestoredClassLoader = null;
 //     private Scroller mScroller;
+        var mScroller;
 //     private PagerObserver mObserver;
+        var mObserver;
 
 //     private int mPageMargin;
+        var mPageMargin;
 //     private Drawable mMarginDrawable;
+        var mMarginDrawable;
 //     private int mTopPageBounds;
+        var mTopPageBounds;
 //     private int mBottomPageBounds;
+        var mBottomPageBounds;
 
 //     // Offsets of the first and last items, if known.
 //     // Set during population, used to determine if we are at the beginning
 //     // or end of the pager data set during touch scrolling.
 //     private float mFirstOffset = -Float.MAX_VALUE;
+        var mFirstOffset = -Elastos.Core.Math.FLOAT_MAX_VALUE;
 //     private float mLastOffset = Float.MAX_VALUE;
+        var mLastOffset = Elastos.Core.Math.FLOAT_MAX_VALUE;
 
 //     private int mChildWidthMeasureSpec;
+        var mChildWidthMeasureSpec;
 //     private int mChildHeightMeasureSpec;
+        var mChildHeightMeasureSpec;
 //     private boolean mInLayout;
+        var mInLayout;
 
 //     private boolean mScrollingCacheEnabled;
+        var mScrollingCacheEnabled;
 
 //     private boolean mPopulatePending;
+        var mPopulatePending;
 //     private int mOffscreenPageLimit = DEFAULT_OFFSCREEN_PAGES;
+        var mOffscreenPageLimit = DEFAULT_OFFSCREEN_PAGES;
 
 //     private boolean mIsBeingDragged;
+        var mIsBeingDragged;
 //     private boolean mIsUnableToDrag;
+        var mIsUnableToDrag;
 //     private boolean mIgnoreGutter;
+        var mIgnoreGutter;
 //     private int mDefaultGutterSize;
+        var mDefaultGutterSize;
 //     private int mGutterSize;
+        var mGutterSize;
 //     private int mTouchSlop;
+        var mTouchSlop;
 //     /**
 //      * Position of the last motion event.
 //      */
 //     private float mLastMotionX;
+        var mLastMotionX;
 //     private float mLastMotionY;
+        var mLastMotionY;
 //     private float mInitialMotionX;
+        var mInitialMotionX;
 //     private float mInitialMotionY;
+        var mInitialMotionY;
 //     /**
 //      * ID of the active pointer. This is used to retain consistency during
 //      * drags/flings if multiple pointers are used.
 //      */
 //     private int mActivePointerId = INVALID_POINTER;
+        var mActivePointerId = INVALID_POINTER;
 //     /**
 //      * Sentinel value for no current active pointer.
 //      * Used by {@link #mActivePointerId}.
 //      */
 //     private static final int INVALID_POINTER = -1;
+        var INVALID_POINTER = -1;
 
 //     /**
 //      * Determines speed during touch scrolling
 //      */
 //     private VelocityTracker mVelocityTracker;
+        var mVelocityTracker;
 //     private int mMinimumVelocity;
+        var mMinimumVelocity;
 //     private int mMaximumVelocity;
+        var mMaximumVelocity;
 //     private int mFlingDistance;
+        var mFlingDistance;
 //     private int mCloseEnough;
+        var mCloseEnough;
 
 //     // If the pager is at least this close to its final position, complete the scroll
 //     // on touch down and let the user interact with the content inside instead of
 //     // "catching" the flinging pager.
 //     private static final int CLOSE_ENOUGH = 2; // dp
+        var CLOSE_ENOUGH = 2; // dp
 
 //     private boolean mFakeDragging;
+        var mFakeDragging;
 //     private long mFakeDragBeginTime;
+        var mFakeDragBeginTime;
 
 //     private EdgeEffectCompat mLeftEdge;
+        var mLeftEdge;
 //     private EdgeEffectCompat mRightEdge;
+        var mRightEdge;
 
 //     private boolean mFirstLayout = true;
+        var mFirstLayout = true;
 //     private boolean mNeedCalculatePageOffsets = false;
+        var mNeedCalculatePageOffsets = false;
 //     private boolean mCalledSuper;
+        var mCalledSuper;
 //     private int mDecorChildCount;
+        var mDecorChildCount;
 
 //     private OnPageChangeListener mOnPageChangeListener;
+        var mOnPageChangeListener;
 //     private OnPageChangeListener mInternalPageChangeListener;
+        var mInternalPageChangeListener;
 //     private OnAdapterChangeListener mAdapterChangeListener;
+        var mAdapterChangeListener;
 //     private PageTransformer mPageTransformer;
+        var mPageTransformer;
 //     private Method mSetChildrenDrawingOrderEnabled;
+        var mSetChildrenDrawingOrderEnabled;
 
 //     private static final int DRAW_ORDER_DEFAULT = 0;
+        var DRAW_ORDER_DEFAULT = 0;
 //     private static final int DRAW_ORDER_FORWARD = 1;
+        var DRAW_ORDER_FORWARD = 1;
 //     private static final int DRAW_ORDER_REVERSE = 2;
+        var DRAW_ORDER_REVERSE = 2;
 //     private int mDrawingOrder;
+        var mDrawingOrder;
 //     private ArrayList<View> mDrawingOrderedChildren;
+        var mDrawingOrderedChildren;
 //     private static final ViewPositionComparator sPositionComparator = new ViewPositionComparator();
+        var sPositionComparator = new ViewPositionComparator();
 
 //     /**
 //      * Indicates that the pager is in an idle, settled state. The current page
 //      * is fully in view and no animation is in progress.
 //      */
 //     public static final int SCROLL_STATE_IDLE = 0;
+        var SCROLL_STATE_IDLE = 0;
 
 //     /**
 //      * Indicates that the pager is currently being dragged by the user.
 //      */
 //     public static final int SCROLL_STATE_DRAGGING = 1;
+        var SCROLL_STATE_DRAGGING = 1;
 
 //     /**
 //      * Indicates that the pager is in the process of settling to a final position.
 //      */
 //     public static final int SCROLL_STATE_SETTLING = 2;
+        var SCROLL_STATE_SETTLING = 2;
 
 //     private final Runnable mEndScrollRunnable = new Runnable() {
+        var mEndScrollRunnable = {
 //         public void run() {
 //             setScrollState(SCROLL_STATE_IDLE);
 //             populate();
 //         }
 //     };
+        };
 
 //     private int mScrollState = SCROLL_STATE_IDLE;
+        var mScrollState = SCROLL_STATE_IDLE;
 
 //     /**
 //      * Callback interface for responding to changing state of the selected page.
 //      */
 //     public interface OnPageChangeListener {
+        function OnPageChangeListener() {
 
 //         /**
 //          * This method will be invoked when the current page is scrolled, either as part
@@ -307,6 +393,7 @@ module.exports = function(aoElastos, aoActivity){
 //          */
 //         public void onPageScrollStateChanged(int state);
 //     }
+        }
 
 //     /**
 //      * Simple implementation of the {@link OnPageChangeListener} interface with stub
@@ -314,6 +401,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * every method of {@link OnPageChangeListener}.
 //      */
 //     public static class SimpleOnPageChangeListener implements OnPageChangeListener {
+        function SimpleOnPageChangeListener() {
 //         @Override
 //         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 //             // This space for rent
@@ -329,6 +417,7 @@ module.exports = function(aoElastos, aoActivity){
 //             // This space for rent
 //         }
 //     }
+        }
 
 //     /**
 //      * A PageTransformer is invoked whenever a visible/attached page is scrolled.
@@ -340,6 +429,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * be ignored.</p>
 //      */
 //     public interface PageTransformer {
+        function PageTransformer() {
 //         /**
 //          * Apply a property transformation to the given page.
 //          *
@@ -350,24 +440,30 @@ module.exports = function(aoElastos, aoActivity){
 //          */
 //         public void transformPage(View page, float position);
 //     }
+        }
 
 //     /**
 //      * Used internally to monitor when adapters are switched.
 //      */
 //     interface OnAdapterChangeListener {
+        function OnAdapterChangeListener() {
 //         public void onAdapterChanged(PagerAdapter oldAdapter, PagerAdapter newAdapter);
 //     }
+        }
 
 //     /**
 //      * Used internally to tag special types of child views that should be added as
 //      * pager decorations by default.
 //      */
 //     interface Decor {}
+        function Decor() {}
 
 //     public ViewPager(Context context) {
+        function ViewPager(context) {
 //         super(context);
 //         initViewPager();
 //     }
+        }
 
 //     public ViewPager(Context context, AttributeSet attrs) {
         function ViewPager(context, attrs) {
@@ -378,6 +474,7 @@ module.exports = function(aoElastos, aoActivity){
         var _pt = ViewPager.prototype;
 
 //     void initViewPager() {
+        function initViewPager() {
 //         setWillNotDraw(false);
 //         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 //         setFocusable(true);
@@ -404,14 +501,18 @@ module.exports = function(aoElastos, aoActivity){
 //                     ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
 //         }
 //     }
+        }
 
 //     @Override
 //     protected void onDetachedFromWindow() {
+        _pt.OnDetachedFromWindow = function() {
 //         removeCallbacks(mEndScrollRunnable);
 //         super.onDetachedFromWindow();
 //     }
+        }
 
 //     private void setScrollState(int newState) {
+        function setScrollState(newState) {
 //         if (mScrollState == newState) {
 //             return;
 //         }
@@ -425,6 +526,7 @@ module.exports = function(aoElastos, aoActivity){
 //             mOnPageChangeListener.onPageScrollStateChanged(newState);
 //         }
 //     }
+        }
 
 //     /**
 //      * Set a PagerAdapter that will supply views for this pager as needed.
@@ -432,6 +534,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param adapter Adapter to use
 //      */
 //     public void setAdapter(PagerAdapter adapter) {
+        function setAdapter(adapter) {
 //         if (mAdapter != null) {
 //             mAdapter.unregisterDataSetObserver(mObserver);
 //             mAdapter.startUpdate(this);
@@ -476,8 +579,10 @@ module.exports = function(aoElastos, aoActivity){
 //             mAdapterChangeListener.onAdapterChanged(oldAdapter, adapter);
 //         }
 //     }
+        }
 
 //     private void removeNonDecorViews() {
+        function removeNonDecorViews() {
 //         for (int i = 0; i < getChildCount(); i++) {
 //             final View child = getChildAt(i);
 //             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -487,6 +592,7 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     /**
 //      * Retrieve the current adapter supplying pages.
@@ -494,16 +600,22 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return The currently registered PagerAdapter
 //      */
 //     public PagerAdapter getAdapter() {
+        function getAdapter() {
 //         return mAdapter;
 //     }
+        }
 
 //     void setOnAdapterChangeListener(OnAdapterChangeListener listener) {
+        function setOnAdapterChangeListener(listener) {
 //         mAdapterChangeListener = listener;
 //     }
+        }
 
 //     private int getClientWidth() {
+        function getClientWidth() {
 //         return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
 //     }
+        }
 
 //     /**
 //      * Set the currently selected page. If the ViewPager has already been through its first
@@ -513,9 +625,11 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param item Item index to select
 //      */
 //     public void setCurrentItem(int item) {
+        function setCurrentItem(item) {
 //         mPopulatePending = false;
 //         setCurrentItemInternal(item, !mFirstLayout, false);
 //     }
+        }
 
 //     /**
 //      * Set the currently selected page.
@@ -524,19 +638,26 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param smoothScroll True to smoothly scroll to the new item, false to transition immediately
 //      */
 //     public void setCurrentItem(int item, boolean smoothScroll) {
+        function setCurrentItem(item, smoothScroll) {
 //         mPopulatePending = false;
 //         setCurrentItemInternal(item, smoothScroll, false);
 //     }
+        }
 
 //     public int getCurrentItem() {
+        function getCurrentItem() {
 //         return mCurItem;
 //     }
+        }
 
 //     void setCurrentItemInternal(int item, boolean smoothScroll, boolean always) {
+        function setCurrentItemInternal(item, smoothScroll, always) {
 //         setCurrentItemInternal(item, smoothScroll, always, 0);
 //     }
+        }
 
 //     void setCurrentItemInternal(int item, boolean smoothScroll, boolean always, int velocity) {
+        function setCurrentItemInternal(item, smoothScroll, always, velocity) {
 //         if (mAdapter == null || mAdapter.getCount() <= 0) {
 //             setScrollingCacheEnabled(false);
 //             return;
@@ -578,9 +699,11 @@ module.exports = function(aoElastos, aoActivity){
 //             scrollToItem(item, smoothScroll, velocity, dispatchSelected);
 //         }
 //     }
+        }
 
 //     private void scrollToItem(int item, boolean smoothScroll, int velocity,
 //             boolean dispatchSelected) {
+        function scrollToItem(item, smoothScroll, velocity, dispatchSelected) {
 //         final ItemInfo curInfo = infoForPosition(item);
 //         int destX = 0;
 //         if (curInfo != null) {
@@ -608,6 +731,7 @@ module.exports = function(aoElastos, aoActivity){
 //             pageScrolled(destX);
 //         }
 //     }
+        }
 
 //     /**
 //      * Set a listener that will be invoked whenever the page changes or is incrementally
@@ -616,8 +740,10 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param listener Listener to set
 //      */
 //     public void setOnPageChangeListener(OnPageChangeListener listener) {
+        function setOnPageChangeListener(listener) {
 //         mOnPageChangeListener = listener;
 //     }
+        }
 
 //     /**
 //      * Set a {@link PageTransformer} that will be called for each attached page whenever
@@ -632,6 +758,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param transformer PageTransformer that will modify each page's animation properties
 //      */
 //     public void setPageTransformer(boolean reverseDrawingOrder, PageTransformer transformer) {
+        function setPageTransformer(reverseDrawingOrder, transformer) {
 //         if (Build.VERSION.SDK_INT >= 11) {
 //             final boolean hasTransformer = transformer != null;
 //             final boolean needsPopulate = hasTransformer != (mPageTransformer != null);
@@ -645,8 +772,10 @@ module.exports = function(aoElastos, aoActivity){
 //             if (needsPopulate) populate();
 //         }
 //     }
+        }
 
 //     void setChildrenDrawingOrderEnabledCompat(boolean enable) {
+        function setChildrenDrawingOrderEnabledCompat(enable) {
 //         if (Build.VERSION.SDK_INT >= 7) {
 //             if (mSetChildrenDrawingOrderEnabled == null) {
 //                 try {
@@ -663,13 +792,16 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     @Override
 //     protected int getChildDrawingOrder(int childCount, int i) {
+        _pt.getChildDrawingOrder = function(childCount, i) {
 //         final int index = mDrawingOrder == DRAW_ORDER_REVERSE ? childCount - 1 - i : i;
 //         final int result = ((LayoutParams) mDrawingOrderedChildren.get(index).getLayoutParams()).childIndex;
 //         return result;
 //     }
+        }
 
 //     /**
 //      * Set a separate OnPageChangeListener for internal use by the support library.
@@ -678,10 +810,12 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return The old listener that was set, if any.
 //      */
 //     OnPageChangeListener setInternalPageChangeListener(OnPageChangeListener listener) {
+        function setInternalPageChangeListener(listener) {
 //         OnPageChangeListener oldListener = mInternalPageChangeListener;
 //         mInternalPageChangeListener = listener;
 //         return oldListener;
 //     }
+        }
 
 //     /**
 //      * Returns the number of pages that will be retained to either side of the
@@ -691,8 +825,10 @@ module.exports = function(aoElastos, aoActivity){
 //      * @see #setOffscreenPageLimit(int)
 //      */
 //     public int getOffscreenPageLimit() {
+        function getOffscreenPageLimit() {
 //         return mOffscreenPageLimit;
 //     }
+        }
 
 //     /**
 //      * Set the number of pages that should be retained to either side of the
@@ -712,6 +848,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param limit How many pages will be kept offscreen in an idle state.
 //      */
 //     public void setOffscreenPageLimit(int limit) {
+        function setOffscreenPageLimit(limit) {
 //         if (limit < DEFAULT_OFFSCREEN_PAGES) {
 //             Log.w(TAG, "Requested offscreen page limit " + limit + " too small; defaulting to " +
 //                     DEFAULT_OFFSCREEN_PAGES);
@@ -722,6 +859,7 @@ module.exports = function(aoElastos, aoActivity){
 //             populate();
 //         }
 //     }
+        }
 
 //     /**
 //      * Set the margin between pages.
@@ -732,6 +870,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @see #setPageMarginDrawable(int)
 //      */
 //     public void setPageMargin(int marginPixels) {
+        function setPageMargin(marginPixels) {
 //         final int oldMargin = mPageMargin;
 //         mPageMargin = marginPixels;
 
@@ -740,6 +879,7 @@ module.exports = function(aoElastos, aoActivity){
 
 //         requestLayout();
 //     }
+        }
 
 //     /**
 //      * Return the margin between pages.
@@ -747,8 +887,10 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return The size of the margin in pixels
 //      */
 //     public int getPageMargin() {
+        function getPageMargin() {
 //         return mPageMargin;
 //     }
+        }
 
 //     /**
 //      * Set a drawable that will be used to fill the margin between pages.
@@ -756,11 +898,13 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param d Drawable to display between pages
 //      */
 //     public void setPageMarginDrawable(Drawable d) {
+        function setPageMarginDrawable(d) {
 //         mMarginDrawable = d;
 //         if (d != null) refreshDrawableState();
 //         setWillNotDraw(d == null);
 //         invalidate();
 //     }
+        }
 
 //     /**
 //      * Set a drawable that will be used to fill the margin between pages.
@@ -768,32 +912,40 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param resId Resource ID of a drawable to display between pages
 //      */
 //     public void setPageMarginDrawable(@DrawableRes int resId) {
+        function setPageMarginDrawable(resId) {
 //         setPageMarginDrawable(getContext().getResources().getDrawable(resId));
 //     }
+        }
 
 //     @Override
 //     protected boolean verifyDrawable(Drawable who) {
+        _pt.VerifyDrawable = function(who) {
 //         return super.verifyDrawable(who) || who == mMarginDrawable;
 //     }
+        }
 
 //     @Override
 //     protected void drawableStateChanged() {
+        _pt.DrawableStateChanged() {
 //         super.drawableStateChanged();
 //         final Drawable d = mMarginDrawable;
 //         if (d != null && d.isStateful()) {
 //             d.setState(getDrawableState());
 //         }
 //     }
+        }
 
 //     // We want the duration of the page snap animation to be influenced by the distance that
 //     // the screen has to travel, however, we don't want this duration to be effected in a
 //     // purely linear fashion. Instead, we use this method to moderate the effect that the distance
 //     // of travel has on the overall snap duration.
 //     float distanceInfluenceForSnapDuration(float f) {
+        function distanceInfluenceForSnapDuration(f) {
 //         f -= 0.5f; // center the values about 0.
 //         f *= 0.3f * Math.PI / 2.0f;
 //         return (float) Math.sin(f);
 //     }
+        }
 
 //     /**
 //      * Like {@link View#scrollBy}, but scroll smoothly instead of immediately.
@@ -802,8 +954,10 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param y the number of pixels to scroll by on the Y axis
 //      */
 //     void smoothScrollTo(int x, int y) {
+        function smoothScrollTo(x, y) {
 //         smoothScrollTo(x, y, 0);
 //     }
+        }
 
 //     /**
 //      * Like {@link View#scrollBy}, but scroll smoothly instead of immediately.
@@ -813,6 +967,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param velocity the velocity associated with a fling, if applicable. (0 otherwise)
 //      */
 //     void smoothScrollTo(int x, int y, int velocity) {
+        function smoothScrollTo(x, y, velocity) {
 //         if (getChildCount() == 0) {
 //             // Nothing to do.
 //             setScrollingCacheEnabled(false);
@@ -852,8 +1007,10 @@ module.exports = function(aoElastos, aoActivity){
 //         mScroller.startScroll(sx, sy, dx, dy, duration);
 //         ViewCompat.postInvalidateOnAnimation(this);
 //     }
+        }
 
 //     ItemInfo addNewItem(int position, int index) {
+        function addNewItem(position, index) {
 //         ItemInfo ii = new ItemInfo();
 //         ii.position = position;
 //         ii.object = mAdapter.instantiateItem(this, position);
@@ -865,8 +1022,10 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return ii;
 //     }
+        }
 
 //     void dataSetChanged() {
+        function dataSetChanged() {
 //         // This method only gets called if our observer is attached, so mAdapter is non-null.
 
 //         final int adapterCount = mAdapter.getCount();
@@ -936,12 +1095,16 @@ module.exports = function(aoElastos, aoActivity){
 //             requestLayout();
 //         }
 //     }
+        }
 
 //     void populate() {
+        function populate() {
 //         populate(mCurItem);
 //     }
+        }
 
 //     void populate(int newCurrentItem) {
+        function populate(newCurrentItem) {
 //         ItemInfo oldCurInfo = null;
 //         int focusDirection = View.FOCUS_FORWARD;
 //         if (mCurItem != newCurrentItem) {
@@ -1128,8 +1291,10 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     private void sortChildDrawingOrder() {
+        function sortChildDrawingOrder() {
 //         if (mDrawingOrder != DRAW_ORDER_DEFAULT) {
 //             if (mDrawingOrderedChildren == null) {
 //                 mDrawingOrderedChildren = new ArrayList<View>();
@@ -1144,8 +1309,10 @@ module.exports = function(aoElastos, aoActivity){
 //             Collections.sort(mDrawingOrderedChildren, sPositionComparator);
 //         }
 //     }
+        }
 
 //     private void calculatePageOffsets(ItemInfo curItem, int curIndex, ItemInfo oldCurInfo) {
+        function calculatePageOffsets(curItem, curIndex, oldCurInfo) {
 //         final int N = mAdapter.getCount();
 //         final int width = getClientWidth();
 //         final float marginOffset = width > 0 ? (float) mPageMargin / width : 0;
@@ -1230,6 +1397,7 @@ module.exports = function(aoElastos, aoActivity){
 
 //         mNeedCalculatePageOffsets = false;
 //     }
+        }
 
 //     /**
 //      * This is the persistent state that is saved by ViewPager.  Only needed
@@ -1238,6 +1406,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * contains that state.
 //      */
 //     public static class SavedState extends BaseSavedState {
+        function saveState() {
 //         int position;
 //         Parcelable adapterState;
 //         ClassLoader loader;
@@ -1282,9 +1451,11 @@ module.exports = function(aoElastos, aoActivity){
 //             this.loader = loader;
 //         }
 //     }
+        }
 
 //     @Override
 //     public Parcelable onSaveInstanceState() {
+        _pt.OnSaveInstanceState = function(result) {
 //         Parcelable superState = super.onSaveInstanceState();
 //         SavedState ss = new SavedState(superState);
 //         ss.position = mCurItem;
@@ -1293,9 +1464,11 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return ss;
 //     }
+        }
 
 //     @Override
 //     public void onRestoreInstanceState(Parcelable state) {
+        _pt.OnRestoreInstanceState = function(state) {
 //         if (!(state instanceof SavedState)) {
 //             super.onRestoreInstanceState(state);
 //             return;
@@ -1313,9 +1486,11 @@ module.exports = function(aoElastos, aoActivity){
 //             mRestoredClassLoader = ss.loader;
 //         }
 //     }
+        }
 
 //     @Override
 //     public void addView(View child, int index, ViewGroup.LayoutParams params) {
+        _pt.AddView = function(child, index, params) {
 //         if (!checkLayoutParams(params)) {
 //             params = generateLayoutParams(params);
 //         }
@@ -1339,17 +1514,21 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     @Override
 //     public void removeView(View view) {
+        _pt.removeView = function(view) {
 //         if (mInLayout) {
 //             removeViewInLayout(view);
 //         } else {
 //             super.removeView(view);
 //         }
 //     }
+        }
 
 //     ItemInfo infoForChild(View child) {
+        function infoForChild(child) {
 //         for (int i=0; i<mItems.size(); i++) {
 //             ItemInfo ii = mItems.get(i);
 //             if (mAdapter.isViewFromObject(child, ii.object)) {
@@ -1358,8 +1537,10 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return null;
 //     }
+        }
 
 //     ItemInfo infoForAnyChild(View child) {
+        function infoForAnyChild(child) {
 //         ViewParent parent;
 //         while ((parent=child.getParent()) != this) {
 //             if (parent == null || !(parent instanceof View)) {
@@ -1369,8 +1550,10 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return infoForChild(child);
 //     }
+        }
 
 //     ItemInfo infoForPosition(int position) {
+        function infoForPosition(position) {
 //         for (int i = 0; i < mItems.size(); i++) {
 //             ItemInfo ii = mItems.get(i);
 //             if (ii.position == position) {
@@ -1379,15 +1562,19 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return null;
 //     }
+        }
 
 //     @Override
 //     protected void onAttachedToWindow() {
+        _pt.OnAttachedToWindow = function() {
 //         super.onAttachedToWindow();
 //         mFirstLayout = true;
 //     }
+        }
 
 //     @Override
 //     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        _pt.OnMeasure = function(widthMeasureSpec, heightMeasureSpec) {
 //         // For simple implementation, our internal size is always 0.
 //         // We depend on the container to specify the layout size of
 //         // our view.  We can't really know what it is since we will be
@@ -1480,9 +1667,11 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     @Override
 //     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        _pt.OnSizeChanged = function(w, h, oldw, oldh) {
 //         super.onSizeChanged(w, h, oldw, oldh);
 
 //         // Make sure scroll position is set correctly.
@@ -1490,8 +1679,10 @@ module.exports = function(aoElastos, aoActivity){
 //             recomputeScrollPosition(w, oldw, mPageMargin, mPageMargin);
 //         }
 //     }
+        }
 
 //     private void recomputeScrollPosition(int width, int oldWidth, int margin, int oldMargin) {
+        function recomputeScrollPosition(width, oldWidth, margin, oldMargin) {
 //         if (oldWidth > 0 && !mItems.isEmpty()) {
 //             final int widthWithMargin = width - getPaddingLeft() - getPaddingRight() + margin;
 //             final int oldWidthWithMargin = oldWidth - getPaddingLeft() - getPaddingRight()
@@ -1519,9 +1710,11 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     @Override
 //     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        _pt.OnLayout = function(changed, l, t, r, b) {
 //         final int count = getChildCount();
 //         int width = r - l;
 //         int height = b - t;
@@ -1628,9 +1821,11 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         mFirstLayout = false;
 //     }
+        }
 
 //     @Override
 //     public void computeScroll() {
+        _pt.ComputeScroll = function() {
 //         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
 //             int oldX = getScrollX();
 //             int oldY = getScrollY();
@@ -1653,8 +1848,10 @@ module.exports = function(aoElastos, aoActivity){
 //         // Done with scroll, clean up state.
 //         completeScroll(true);
 //     }
+        }
 
 //     private boolean pageScrolled(int xpos) {
+        function pageScrolled(xpos) {
 //         if (mItems.size() == 0) {
 //             mCalledSuper = false;
 //             onPageScrolled(0, 0, 0);
@@ -1681,6 +1878,7 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return true;
 //     }
+        }
 
 //     /**
 //      * This method will be invoked when the current page is scrolled, either as part
@@ -1695,6 +1893,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param offsetPixels Value in pixels indicating the offset from position.
 //      */
 //     protected void onPageScrolled(int position, float offset, int offsetPixels) {
+        function onPageScrolled(position, offset, offsetPixels) {
 //         // Offset any decor views if needed - keep them on-screen at all times.
 //         if (mDecorChildCount > 0) {
 //             final int scrollX = getScrollX();
@@ -1758,8 +1957,10 @@ module.exports = function(aoElastos, aoActivity){
 
 //         mCalledSuper = true;
 //     }
+        }
 
 //     private void completeScroll(boolean postEvents) {
+        function completeScroll(postEvents) {
 //         boolean needPopulate = mScrollState == SCROLL_STATE_SETTLING;
 //         if (needPopulate) {
 //             // Done with scroll, no longer want to cache view drawing.
@@ -1789,12 +1990,16 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     private boolean isGutterDrag(float x, float dx) {
+        function isGutterDrag(x, dx) {
 //         return (x < mGutterSize && dx > 0) || (x > getWidth() - mGutterSize && dx < 0);
 //     }
+        }
 
 //     private void enableLayers(boolean enable) {
+        function enableLayers(enable) {
 //         final int childCount = getChildCount();
 //         for (int i = 0; i < childCount; i++) {
 //             final int layerType = enable ?
@@ -1802,9 +2007,11 @@ module.exports = function(aoElastos, aoActivity){
 //             ViewCompat.setLayerType(getChildAt(i), layerType, null);
 //         }
 //     }
+        }
 
 //     @Override
 //     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        _pt.OnInterceptTouchEvent = function(ev, result) {
 //         /*
 //          * This method JUST determines whether we want to intercept the motion.
 //          * If we return true, onMotionEvent will be called and we do the actual
@@ -1946,9 +2153,11 @@ module.exports = function(aoElastos, aoActivity){
 //          */
 //         return mIsBeingDragged;
 //     }
+        }
 
 //     @Override
 //     public boolean onTouchEvent(MotionEvent ev) {
+        _pt.OnTouchEvent = function(ev, result) {
 //         if (mFakeDragging) {
 //             // A fake drag is in progress already, ignore this real one
 //             // but still eat the touch events.
@@ -2072,15 +2281,19 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return true;
 //     }
+        }
 
 //     private void requestParentDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        function requestParentDisallowInterceptTouchEvent(disallowIntercept) {
 //         final ViewParent parent = getParent();
 //         if (parent != null) {
 //             parent.requestDisallowInterceptTouchEvent(disallowIntercept);
 //         }
 //     }
+        }
 
 //     private boolean performDrag(float x) {
+        function performDrag(x) {
 //         boolean needsInvalidate = false;
 
 //         final float deltaX = mLastMotionX - x;
@@ -2126,12 +2339,14 @@ module.exports = function(aoElastos, aoActivity){
 
 //         return needsInvalidate;
 //     }
+        }
 
 //     /**
 //      * @return Info about the page at the current scroll position.
 //      *         This can be synthetic for a missing middle page; the 'object' field can be null.
 //      */
 //     private ItemInfo infoForCurrentScrollPosition() {
+        function infoForCurrentScrollPosition() {
 //         final int width = getClientWidth();
 //         final float scrollOffset = width > 0 ? (float) getScrollX() / width : 0;
 //         final float marginOffset = width > 0 ? (float) mPageMargin / width : 0;
@@ -2172,8 +2387,10 @@ module.exports = function(aoElastos, aoActivity){
 
 //         return lastItem;
 //     }
+        }
 
 //     private int determineTargetPage(int currentPage, float pageOffset, int velocity, int deltaX) {
+        function determineTargetPage(currentPage, pageOffset, velocity, deltaX) {
 //         int targetPage;
 //         if (Math.abs(deltaX) > mFlingDistance && Math.abs(velocity) > mMinimumVelocity) {
 //             targetPage = velocity > 0 ? currentPage : currentPage + 1;
@@ -2192,9 +2409,11 @@ module.exports = function(aoElastos, aoActivity){
 
 //         return targetPage;
 //     }
+        }
 
 //     @Override
 //     public void draw(Canvas canvas) {
+        _pt.Draw = function(canvas) {
 //         super.draw(canvas);
 //         boolean needsInvalidate = false;
 
@@ -2234,9 +2453,11 @@ module.exports = function(aoElastos, aoActivity){
 //             ViewCompat.postInvalidateOnAnimation(this);
 //         }
 //     }
+        }
 
 //     @Override
 //     protected void onDraw(Canvas canvas) {
+        _pt.OnDraw = function(canvas) {
 //         super.onDraw(canvas);
 
 //         // Draw the margin drawable between pages if needed.
@@ -2278,6 +2499,7 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     /**
 //      * Start a fake drag of the pager.
@@ -2297,6 +2519,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @see #endFakeDrag()
 //      */
 //     public boolean beginFakeDrag() {
+        function beginFakeDrag() {
 //         if (mIsBeingDragged) {
 //             return false;
 //         }
@@ -2315,6 +2538,7 @@ module.exports = function(aoElastos, aoActivity){
 //         mFakeDragBeginTime = time;
 //         return true;
 //     }
+        }
 
 //     /**
 //      * End a fake drag of the pager.
@@ -2323,6 +2547,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @see #fakeDragBy(float)
 //      */
 //     public void endFakeDrag() {
+        function endFakeDrag() {
 //         if (!mFakeDragging) {
 //             throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
 //         }
@@ -2345,6 +2570,7 @@ module.exports = function(aoElastos, aoActivity){
 
 //         mFakeDragging = false;
 //     }
+        }
 
 //     /**
 //      * Fake drag by an offset in pixels. You must have called {@link #beginFakeDrag()} first.
@@ -2354,6 +2580,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @see #endFakeDrag()
 //      */
 //     public void fakeDragBy(float xOffset) {
+        function fakeDragBy(xOffset) {
 //         if (!mFakeDragging) {
 //             throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
 //         }
@@ -2393,6 +2620,7 @@ module.exports = function(aoElastos, aoActivity){
 //         mVelocityTracker.addMovement(ev);
 //         ev.recycle();
 //     }
+        }
 
 //     /**
 //      * Returns true if a fake drag is in progress.
@@ -2404,10 +2632,13 @@ module.exports = function(aoElastos, aoActivity){
 //      * @see #endFakeDrag()
 //      */
 //     public boolean isFakeDragging() {
+        function isFakeDragging() {
 //         return mFakeDragging;
 //     }
+        }
 
 //     private void onSecondaryPointerUp(MotionEvent ev) {
+        function onSecondaryPointerUp(ev) {
 //         final int pointerIndex = MotionEventCompat.getActionIndex(ev);
 //         final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
 //         if (pointerId == mActivePointerId) {
@@ -2421,8 +2652,10 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     private void endDrag() {
+        function endDrag() {
 //         mIsBeingDragged = false;
 //         mIsUnableToDrag = false;
 
@@ -2431,8 +2664,10 @@ module.exports = function(aoElastos, aoActivity){
 //             mVelocityTracker = null;
 //         }
 //     }
+        }
 
 //     private void setScrollingCacheEnabled(boolean enabled) {
+        function setScrollingCacheEnabled(enabled) {
 //         if (mScrollingCacheEnabled != enabled) {
 //             mScrollingCacheEnabled = enabled;
 //             if (USE_CACHE) {
@@ -2446,8 +2681,10 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     public boolean canScrollHorizontally(int direction) {
+        function canScrollHorizontally(direction) {
 //         if (mAdapter == null) {
 //             return false;
 //         }
@@ -2462,6 +2699,7 @@ module.exports = function(aoElastos, aoActivity){
 //             return false;
 //         }
 //     }
+        }
 
 //     /**
 //      * Tests scrollability within child views of v given a delta of dx.
@@ -2475,6 +2713,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return true if child views of v can be scrolled by delta of dx.
 //      */
 //     protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
+        function canScroll(v, checkV, dx, x, y) {
 //         if (v instanceof ViewGroup) {
 //             final ViewGroup group = (ViewGroup) v;
 //             final int scrollX = v.getScrollX();
@@ -2496,12 +2735,15 @@ module.exports = function(aoElastos, aoActivity){
 
 //         return checkV && ViewCompat.canScrollHorizontally(v, -dx);
 //     }
+        }
 
 //     @Override
 //     public boolean dispatchKeyEvent(KeyEvent event) {
+        _pt.DispatchKeyEvent = function(event, result) {
 //         // Let the focused view and/or our descendants get the key first
 //         return super.dispatchKeyEvent(event) || executeKeyEvent(event);
 //     }
+        }
 
 //     /**
 //      * You can call this function yourself to have the scroll view perform
@@ -2512,6 +2754,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return Return true if the event was handled, else false.
 //      */
 //     public boolean executeKeyEvent(KeyEvent event) {
+        function executeKeyEvent(event) {
 //         boolean handled = false;
 //         if (event.getAction() == KeyEvent.ACTION_DOWN) {
 //             switch (event.getKeyCode()) {
@@ -2536,8 +2779,10 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return handled;
 //     }
+        }
 
 //     public boolean arrowScroll(int direction) {
+        function arrowScroll(direction) {
 //         View currentFocused = findFocus();
 //         if (currentFocused == this) {
 //             currentFocused = null;
@@ -2602,8 +2847,10 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return handled;
 //     }
+        }
 
 //     private Rect getChildRectInPagerCoordinates(Rect outRect, View child) {
+        function getChildRectInPagerCoordinates(outRect, child) {
 //         if (outRect == null) {
 //             outRect = new Rect();
 //         }
@@ -2628,28 +2875,34 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return outRect;
 //     }
+        }
 
 //     boolean pageLeft() {
+        function pageLeft() {
 //         if (mCurItem > 0) {
 //             setCurrentItem(mCurItem-1, true);
 //             return true;
 //         }
 //         return false;
 //     }
+        }
 
 //     boolean pageRight() {
+        function pageRight() {
 //         if (mAdapter != null && mCurItem < (mAdapter.getCount()-1)) {
 //             setCurrentItem(mCurItem+1, true);
 //             return true;
 //         }
 //         return false;
 //     }
+        }
 
 //     /**
 //      * We only want the current page that is being shown to be focusable.
 //      */
 //     @Override
 //     public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
+        _pt.AddFocusables = function(views, direction, focusableMode) {
 //         final int focusableCount = views.size();
 
 //         final int descendantFocusability = getDescendantFocusability();
@@ -2688,12 +2941,14 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     /**
 //      * We only want the current page that is being shown to be touchable.
 //      */
 //     @Override
 //     public void addTouchables(ArrayList<View> views) {
+        _pt.AddTouchables = function(views) {
 //         // Note that we don't call super.addTouchables(), which means that
 //         // we don't call View.addTouchables().  This is okay because a ViewPager
 //         // is itself not touchable.
@@ -2707,6 +2962,7 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //         }
 //     }
+        }
 
 //     /**
 //      * We only want the current page that is being shown to be focusable.
@@ -2714,6 +2970,7 @@ module.exports = function(aoElastos, aoActivity){
 //     @Override
 //     protected boolean onRequestFocusInDescendants(int direction,
 //             Rect previouslyFocusedRect) {
+        _pt.OnRequestFocusInDescendants = function(direction, previouslyFocusedRect, result) {
 //         int index;
 //         int increment;
 //         int end;
@@ -2740,9 +2997,11 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 //         return false;
 //     }
+        }
 
 //     @Override
 //     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        _pt.DispatchPopulateAccessibilityEvent = function(event) {
 //         // Dispatch scroll events from this ViewPager.
 //         if (event.getEventType() == AccessibilityEventCompat.TYPE_VIEW_SCROLLED) {
 //             return super.dispatchPopulateAccessibilityEvent(event);
@@ -2763,29 +3022,38 @@ module.exports = function(aoElastos, aoActivity){
 
 //         return false;
 //     }
+        }
 
 //     @Override
 //     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
+        _pt.GenerateDefaultLayoutParams = function() {
 //         return new LayoutParams();
 //     }
+        }
 
 //     @Override
 //     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        _pt.GenerateLayoutParams = function(p) {
 //         return generateDefaultLayoutParams();
 //     }
+        }
 
 //     @Override
 //     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        _pt.CheckLayoutParams = function(p) {
 //         return p instanceof LayoutParams && super.checkLayoutParams(p);
 //     }
+        }
 
 //     @Override
 //     public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
+        _pt.GenerateLayoutParams = function(attrs) {
 //         return new LayoutParams(getContext(), attrs);
 //     }
+        }
 
 //     class MyAccessibilityDelegate extends AccessibilityDelegateCompat {
-
+        function MyAccessibilityDelegate() {
 //         @Override
 //         public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
 //             super.onInitializeAccessibilityEvent(host, event);
@@ -2839,8 +3107,10 @@ module.exports = function(aoElastos, aoActivity){
 //             return (mAdapter != null) && (mAdapter.getCount() > 1);
 //         }
 //     }
+        }
 
 //     private class PagerObserver extends DataSetObserver {
+        function PagerObserver() {
 //         @Override
 //         public void onChanged() {
 //             dataSetChanged();
@@ -2850,12 +3120,14 @@ module.exports = function(aoElastos, aoActivity){
 //             dataSetChanged();
 //         }
 //     }
+        }
 
 //     /**
 //      * Layout parameters that should be supplied for views added to a
 //      * ViewPager.
 //      */
 //     public static class LayoutParams extends ViewGroup.LayoutParams {
+        function LayoutParams() {
 //         /**
 //          * true if this view is a decoration on the pager itself and not
 //          * a view supplied by the adapter.
@@ -2902,8 +3174,10 @@ module.exports = function(aoElastos, aoActivity){
 //             a.recycle();
 //         }
 //     }
+        }
 
 //     static class ViewPositionComparator implements Comparator<View> {
+        function ViewPositionComparator() {
 //         @Override
 //         public int compare(View lhs, View rhs) {
 //             final LayoutParams llp = (LayoutParams) lhs.getLayoutParams();
@@ -2914,6 +3188,7 @@ module.exports = function(aoElastos, aoActivity){
 //             return llp.position - rlp.position;
 //         }
 //     }
+        }
 // }
 
 //--------.java----end----

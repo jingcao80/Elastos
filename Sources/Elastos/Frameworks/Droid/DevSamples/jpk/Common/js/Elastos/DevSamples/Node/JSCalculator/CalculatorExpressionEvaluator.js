@@ -111,8 +111,10 @@ var Util = require("./arity/Util.js")(aoElastos, aoActivity);
         }
 
 //     public interface EvaluateCallback {
+        function EvaluateCallback() {
 //         public void onEvaluate(String expr, String result, int errorResourceId);
 //     }
+        }
 // }
 
 //--------.java----end----

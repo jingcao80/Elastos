@@ -48,7 +48,7 @@ module.exports = function(aoElastos, aoActivity){
     var _this;
 
 //     private final PagerAdapter mStaticPagerAdapter = new PagerAdapter() {
-        var mStaticPagerAdapter = {
+        var mStaticPagerAdapter = new PagerAdapter().extend({
 //         @Override
 //         public int getCount() {
             getCount : function(result) {
@@ -89,7 +89,7 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             }
 //     };
-        };
+        });
 
 //     private final OnPageChangeListener mOnPageChangeListener = new SimpleOnPageChangeListener() {
         var mOnPageChangeListener = {
@@ -159,13 +159,17 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     protected void onFinishInflate() {
-        _pt.onFinishInflate = function() {
+        _pt.OnFinishInflate = function() {
 //         super.onFinishInflate();
+            _super.OnFinishInflate();
 
 //         // Invalidate the adapter's data set since children may have been added during inflation.
 //         if (getAdapter() == mStaticPagerAdapter) {
+            if (_this.GetAdapter() == mStaticPagerAdapter) {
 //             mStaticPagerAdapter.notifyDataSetChanged();
+                mStaticPagerAdapter.notifyDataSetChanged();
 //         }
+            }
 //     }
         }
 // }
