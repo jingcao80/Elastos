@@ -416,10 +416,10 @@ LockPatternView::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ Float targetY)
     : mHost(host)
     , mCellState(state)
-    , mStartX(0)
-    , mStartY(0)
-    , mTargetX(0)
-    , mTargetY(0)
+    , mStartX(startX)
+    , mStartY(startY)
+    , mTargetX(targetX)
+    , mTargetY(targetY)
 {}
 
 ECode LockPatternView::AnimatorUpdateListener::OnAnimationUpdate(
@@ -1115,9 +1115,6 @@ AutoPtr<ILockPatternViewCell> LockPatternView::CheckForNewHit(
     if (columnHit < 0) {
         return NULL;
     }
-
-    Logger::D(TAG, ">>>>>>>>>>>>>>>>LockPatternView::CheckForNewHit rowHit=%d, columnHit=%d, mPatternSize=%d",
-         rowHit, columnHit, mPatternSize);
 
     AutoPtr<IInterface> obj;
     (*mPatternDrawLookup)[rowHit]->Get(columnHit, (IInterface**)&obj);

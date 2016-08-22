@@ -323,6 +323,8 @@ ECode LockPatternUtils::CheckPattern(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    assert(0 && "return TRUE or FALSE for testting until Setting APP works!");
+
     Int32 userId = GetCurrentOrCallingUserId();
     Boolean matched = FALSE;
     String str;
@@ -1034,7 +1036,6 @@ ECode LockPatternUtils::PatternToString(
 {
     VALIDATE_NOT_NULL(str)
 
-    Slogger::D(TAG, ">>>>>>>>>>>>>>LockPatternUtils::PatternToString pattern=%s", TO_CSTR(pattern));
     if (pattern == NULL) {
         *str = String("");
         return NOERROR;
