@@ -72,7 +72,7 @@ CLockPatternUtilsCache::CLockPatternUtilsCache()
 {
     CArrayMap::New((IArrayMap**)&mCache);
     mCacheKey = new CacheKey();
-    CLockPatternUtilsCacheObserver::New((IILockSettingsObserver**)&mObserver);
+    CLockPatternUtilsCacheObserver::New(this, (IILockSettingsObserver**)&mObserver);
 }
 
 AutoPtr<ILockPatternUtilsCache> CLockPatternUtilsCache::GetInstance(

@@ -60,6 +60,7 @@ module
     interface Elastos.Droid.InputMethodService.IOnKeyboardActionListener;
     interface Elastos.Droid.Internal.Widget.IPointerLocationView;
     interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.View.IAbsSavedState;
     interface Elastos.Droid.View.IKeyEventCallback;
     interface Elastos.Droid.View.IViewGroup;
@@ -337,6 +338,7 @@ module
             [in] ILockPatternUtilsCache* service);
 
         interface IILockSettingsObserver;
+        interface IBinder;
     }
 
     singleton class CLockPatternUtilsCacheHelper {

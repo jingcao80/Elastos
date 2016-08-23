@@ -670,8 +670,7 @@ ECode CLockSettingsService::RegisterObserver(
 
         AutoPtr<LockSettingsObserver> o = new LockSettingsObserver(this);
         o->mRemote = remote;
-        AutoPtr<IBinder> binder = IBinder::Probe(o->mRemote);
-        IProxy* proxy = ((IProxy*)o->mRemote->Probe(EIID_IProxy));
+        IProxy* proxy = (IProxy*)(o->mRemote->Probe(EIID_IProxy));
         if (proxy != NULL) proxy->LinkToDeath((IProxyDeathRecipient*)o.Get(), 0);
         mObservers.PushBack(o);
     }

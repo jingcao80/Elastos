@@ -2,13 +2,16 @@
 #include "elastos/droid/internal/widget/CLockPatternUtilsCacheObserver.h"
 #include "elastos/droid/internal/widget/CLockPatternUtilsCache.h"
 
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::EIID_IBinder;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Widget {
 
 CAR_OBJECT_IMPL(CLockPatternUtilsCacheObserver)
-CAR_INTERFACE_IMPL(CLockPatternUtilsCacheObserver, Object, IILockSettingsObserver);
+CAR_INTERFACE_IMPL_2(CLockPatternUtilsCacheObserver, Object, IILockSettingsObserver, IBinder);
 
 ECode CLockPatternUtilsCacheObserver::constructor()
 {
