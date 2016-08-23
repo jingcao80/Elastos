@@ -481,7 +481,7 @@ ECode InputMethodAndLanguageSettings::PreferenceOnPreferenceClickListener::OnPre
                 }
                 // targetFragment = UserDictionarySettings.class;
                 mHost->StartFragment(mHost,
-                        String("Elastos.Droid.Settings.UserDictionarySettings"),
+                        String("Elastos.Droid.Settings.CUserDictionarySettings"),
                         -1, -1, extras);
             }
             else {

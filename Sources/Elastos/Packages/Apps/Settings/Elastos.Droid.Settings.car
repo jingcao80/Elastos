@@ -15,6 +15,7 @@ module
     merge("car/elastos/droid/inputmethod/InputMethodPreference.car");
     merge("car/elastos/droid/inputmethod/KeyboardLayoutDialogFragment.car");
     merge("car/elastos/droid/inputmethod/SpellCheckerPreference.car");
+    merge("car/elastos/droid/inputmethod/UserDictionaryAddWordFragment.car");
     merge("car/elastos/droid/search/Indexable.car");
     merge("car/elastos/droid/search/IndexDatabaseHelper.car");
     merge("car/elastos/droid/search/SearchIndexableRaw.car");
@@ -107,6 +108,7 @@ module
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
     using interface Elastos.Droid.Widget.ICompoundButtonOnCheckedChangeListener;
+    using interface Elastos.Droid.Widget.IRecyclerListener;
     using interface Elastos.Droid.Wifi.IScanResult;
     using interface Elastos.Droid.Wifi.IWifiConfiguration;
     using interface Elastos.Droid.Wifi.P2p.IWifiP2pManagerPersistentGroupInfoListener;
@@ -142,6 +144,26 @@ module
         interface IDialogInterfaceOnClickListener;
         interface IDialogInterfaceOnDismissListener;
         interface IAdapterViewOnItemSelectedListener;
+    }
+
+    [local]
+    class CRunningProcessesView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IFrameLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+
+        interface IAdapterViewOnItemClickListener;
+        interface IRecyclerListener;
+        interface IRunningStateOnRefreshUiListener;
     }
 
     } // namespace Applications
@@ -335,6 +357,20 @@ module
         interface ISpellCheckerPreferenceOnRadioButtonPreferenceListener;
     }
 
+    class CUserDictionaryAddWordFragment {
+        constructor();
+
+        interface IUserDictionaryAddWordFragment;
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface IAdapterViewOnItemSelectedListener;
+        interface ILocaleSelectionListener;
+    }
+
     class CUserDictionaryList {
         constructor();
 
@@ -346,6 +382,18 @@ module
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
+    }
+
+    class CUserDictionaryLocalePicker {
+        constructor(
+            [in] IUserDictionaryAddWordFragment* parent);
+
+        interface ILocalePicker;
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
     }
 
     } // namespace Inputmethod
@@ -946,6 +994,16 @@ module
         interface ISearchViewOnQueryTextListener;
         interface ISearchViewOnCloseListener;
         interface IOnActionExpandListener;
+    }
+
+    class CUserDictionarySettings {
+        constructor();
+
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
     }
 
     [local]

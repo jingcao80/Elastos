@@ -1,6 +1,39 @@
 
-// #include "Elastos.Droid.Utility.h"
-#include "elastos/droid/settings/applications/RunningProcessesView.h"
+#include "elastos/droid/settings/applications/CRunningProcessesView.h"
+#include "elastos/droid/settings/CSettingsActivity.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/text/format/DateUtils.h"
+#include "elastos/droid/text/format/Formatter.h"
+#include "../R.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Droid::App::CActivityManagerMemoryInfo;
+using Elastos::Droid::App::IActivityManagerMemoryInfo;
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Internal::Utility::CMemInfoReader;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Text::IBidiFormatter;
+using Elastos::Droid::Text::IBidiFormatterHelper;
+using Elastos::Droid::Text::CBidiFormatterHelper;
+using Elastos::Droid::Text::Format::DateUtils;
+using Elastos::Droid::Text::Format::Formatter;
+using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::IAbsListView;
+using Elastos::Droid::Widget::EIID_IRecyclerListener;
+using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
@@ -8,23 +41,24 @@ namespace Settings {
 namespace Applications {
 
 //===============================================================================
-//                  RunningProcessesView::ActiveItem
+//                  CRunningProcessesView::ActiveItem
 //===============================================================================
 
-RunningProcessesView::ActiveItem::ActiveItem()
+CRunningProcessesView::ActiveItem::ActiveItem()
     : mFirstRunTime(0)
     , mSetBackground(FALSE)
 {}
 
-RunningProcessesView::ActiveItem::~ActiveItem()
+CRunningProcessesView::ActiveItem::~ActiveItem()
+{}
 
-void RunningProcessesView::ActiveItem::UpdateTime(
+void CRunningProcessesView::ActiveItem::UpdateTime(
     /* [in] */ IContext* context,
     /* [in] */ const String& builder)
 {
     AutoPtr<ITextView> uptimeView;
 
-    AutoPtr<RunningState::BaseItem> _mItem = (RunningState::BaseItem*)mItem;
+    AutoPtr<RunningState::BaseItem> _mItem = (RunningState::BaseItem*)mItem.Get();
 
     if (IRunningStateServiceItem::Probe(mItem) != NULL) {
         // If we are displaying a service, then the service
@@ -36,14 +70,14 @@ void RunningProcessesView::ActiveItem::UpdateTime(
         String size = !_mItem->mSizeStr.IsNull() ? _mItem->mSizeStr : String("");
         if (!size.Equals(_mItem->mCurSizeStr)) {
             _mItem->mCurSizeStr = size;
-            mHolder->mSize->SetText(size);
+            mHolder->mSize->SetText(CoreUtils::Convert(size));
         }
 
         if (_mItem->mBackground) {
             // This is a background process; no uptime.
             if (!mSetBackground) {
                 mSetBackground = TRUE;
-                mHolder->mUptime->SetText(String(""));
+                mHolder->mUptime->SetText(CoreUtils::Convert(""));
             }
         }
         else if (IRunningStateMergedItem::Probe(mItem) != NULL) {
@@ -58,14 +92,14 @@ void RunningProcessesView::ActiveItem::UpdateTime(
         if (mFirstRunTime >= 0) {
             //Logger::I("foo", "Time for " + mItem.mDisplayLabel
             //        + ": " + (SystemClock->UptimeMillis()-mFirstRunTime));
-            uptimeView->SetText(DateUtils::FormatElapsedTime(builder,
-                    (SystemClock::GetElapsedRealtime()-mFirstRunTime)/1000));
+            uptimeView->SetText(CoreUtils::Convert(DateUtils::FormatElapsedTime(builder,
+                    (SystemClock::GetElapsedRealtime()-mFirstRunTime)/1000)));
         }
         else {
             Boolean isService = FALSE;
             if (IRunningStateMergedItem::Probe(mItem) != NULL) {
                 Int32 size;
-                ((RunningState::MergedItem*)mItem)->mServices->GetSize(&size);
+                ((RunningState::MergedItem*)mItem.Get())->mServices->GetSize(&size);
                 isService = size > 0;
             }
             if (isService) {
@@ -77,17 +111,17 @@ void RunningProcessesView::ActiveItem::UpdateTime(
                 uptimeView->SetText(cs);
             }
             else {
-                uptimeView->SetText(String(""));
+                uptimeView->SetText(CoreUtils::Convert(""));
             }
         }
     }
 }
 
 //===============================================================================
-//                  RunningProcessesView::ViewHolder
+//                  CRunningProcessesView::ViewHolder
 //===============================================================================
 
-RunningProcessesView::ViewHolder::ViewHolder(
+CRunningProcessesView::ViewHolder::ViewHolder(
     /* [in] */ IView* v)
 {
     mRootView = v;
@@ -106,10 +140,10 @@ RunningProcessesView::ViewHolder::ViewHolder(
     tmp = NULL;
     v->FindViewById(R::id::uptime, (IView**)&tmp);
     mUptime = ITextView::Probe(tmp);
-    v->SetTag(this);
+    v->SetTag((IObject*)this);
 }
 
-AutoPtr<ActiveItem> RunningProcessesView::ViewHolder::Bind(
+AutoPtr<CRunningProcessesView::ActiveItem> CRunningProcessesView::ViewHolder::Bind(
     /* [in] */ RunningState* state,
     /* [in] */ RunningState::BaseItem* item,
     /* [in] */ const String& builder)
@@ -142,23 +176,23 @@ AutoPtr<ActiveItem> RunningProcessesView::ViewHolder::Bind(
             mDescription->SetText(cs);
         }
         else {
-            mDescription->SetText(item->mDescription);
+            mDescription->SetText(CoreUtils::Convert(item->mDescription));
         }
         item->mCurSizeStr = String(NULL);
         AutoPtr<IDrawable> drawable;
         item->LoadIcon(context, state, (IDrawable**)&drawable);
         mIcon->SetImageDrawable(drawable);
-        mIcon->SetVisibility(IView::VISIBLE);
+        IView::Probe(mIcon)->SetVisibility(IView::VISIBLE);
         ai->UpdateTime(context, builder);
         return ai;
     }
 }
 
 //===============================================================================
-//                  RunningProcessesView::TimeTicker
+//                  CRunningProcessesView::TimeTicker
 //===============================================================================
 
-RunningProcessesView::TimeTicker::TimeTicker(
+CRunningProcessesView::TimeTicker::TimeTicker(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -166,12 +200,12 @@ RunningProcessesView::TimeTicker::TimeTicker(
 }
 
 //===============================================================================
-//                  RunningProcessesView::ServiceListAdapter
+//                  CRunningProcessesView::ServiceListAdapter
 //===============================================================================
 
-RunningProcessesView::ServiceListAdapter::ServiceListAdapter(
+CRunningProcessesView::ServiceListAdapter::ServiceListAdapter(
     /* [in] */ RunningState* state,
-    /* [in] */ RunningProcessesView* host)
+    /* [in] */ CRunningProcessesView* host)
     : mShowBackground(FALSE)
     , mHost(host)
 {
@@ -179,7 +213,7 @@ RunningProcessesView::ServiceListAdapter::ServiceListAdapter(
 
     mState = state;
     AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
+    mHost->GetContext((IContext**)&context);
     AutoPtr<IInterface> obj;
     context->GetSystemService(
             IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
@@ -187,23 +221,23 @@ RunningProcessesView::ServiceListAdapter::ServiceListAdapter(
     RefreshItems();
 }
 
-void RunningProcessesView::ServiceListAdapter::SetShowBackground(
+void CRunningProcessesView::ServiceListAdapter::SetShowBackground(
     /* [in] */ Boolean showBackground)
 {
     if (mShowBackground != showBackground) {
         mShowBackground = showBackground;
         mState->SetWatchingBackgroundItems(showBackground);
         RefreshItems();
-        RefreshUi(TRUE);
+        mHost->RefreshUi(TRUE);
     }
 }
 
-Boolean RunningProcessesView::ServiceListAdapter::GetShowBackground()
+Boolean CRunningProcessesView::ServiceListAdapter::GetShowBackground()
 {
     return mShowBackground;
 }
 
-void RunningProcessesView::ServiceListAdapter::RefreshItems()
+void CRunningProcessesView::ServiceListAdapter::RefreshItems()
 {
     AutoPtr<IArrayList> newItems;//ArrayList<RunningState.MergedItem>
     if (mShowBackground) {
@@ -220,17 +254,17 @@ void RunningProcessesView::ServiceListAdapter::RefreshItems()
         }
         else {
             mItems->Clear();
-            mItems->AddAll(newItems);
+            mItems->AddAll(ICollection::Probe(newItems));
             if (mShowBackground) {
                 AutoPtr<ICollections> coll;
                 CCollections::AcquireSingleton((ICollections**)&coll);
-                coll->Sort(mItems, mState->mBackgroundComparator);
+                coll->Sort(IList::Probe(mItems), mState->mBackgroundComparator);
             }
         }
     }
 }
 
-ECode RunningProcessesView::ServiceListAdapter::HasStableIds(
+ECode CRunningProcessesView::ServiceListAdapter::HasStableIds(
     /* [out] */ Boolean* has)
 {
     VALIDATE_NOT_NULL(has)
@@ -238,14 +272,14 @@ ECode RunningProcessesView::ServiceListAdapter::HasStableIds(
     return NOERROR;
 }
 
-ECode RunningProcessesView::ServiceListAdapter::GetCount(
+ECode CRunningProcessesView::ServiceListAdapter::GetCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count)
-    return mItems->Size(count);
+    return mItems->GetSize(count);
 }
 
-ECode RunningProcessesView::ServiceListAdapter::IsEmpty(
+ECode CRunningProcessesView::ServiceListAdapter::IsEmpty(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
@@ -254,7 +288,7 @@ ECode RunningProcessesView::ServiceListAdapter::IsEmpty(
     return NOERROR;
 }
 
-ECode RunningProcessesView::ServiceListAdapter::GetItem(
+ECode CRunningProcessesView::ServiceListAdapter::GetItem(
     /* [in] */ Int32 position,
     /* [out] */ IInterface** result)
 {
@@ -262,7 +296,7 @@ ECode RunningProcessesView::ServiceListAdapter::GetItem(
     return mItems->Get(position, result);
 }
 
-ECode RunningProcessesView::ServiceListAdapter::GetItemId(
+ECode CRunningProcessesView::ServiceListAdapter::GetItemId(
     /* [in] */ Int32 position,
     /* [out] */ Int64* result)
 {
@@ -275,7 +309,7 @@ ECode RunningProcessesView::ServiceListAdapter::GetItemId(
     return NOERROR;
 }
 
-ECode RunningProcessesView::ServiceListAdapter::AreAllItemsEnabled(
+ECode CRunningProcessesView::ServiceListAdapter::AreAllItemsEnabled(
     /* [out] */ Boolean* enabled)
 {
     VALIDATE_NOT_NULL(enabled)
@@ -283,7 +317,7 @@ ECode RunningProcessesView::ServiceListAdapter::AreAllItemsEnabled(
     return NOERROR;
 }
 
-ECode RunningProcessesView::ServiceListAdapter::IsEnabled(
+ECode CRunningProcessesView::ServiceListAdapter::IsEnabled(
     /* [in] */ Int32 position,
     /* [out] */ Boolean* enabled)
 {
@@ -295,7 +329,7 @@ ECode RunningProcessesView::ServiceListAdapter::IsEnabled(
     return NOERROR;
 }
 
-ECode RunningProcessesView::ServiceListAdapter::GetView(
+ECode CRunningProcessesView::ServiceListAdapter::GetView(
     /* [in] */ Int32 position,
     /* [in] */ IView* convertView,
     /* [in] */ IViewGroup* parent,
@@ -316,7 +350,7 @@ ECode RunningProcessesView::ServiceListAdapter::GetView(
     return NOERROR;
 }
 
-ECode RunningProcessesView::ServiceListAdapter::NewView(
+ECode CRunningProcessesView::ServiceListAdapter::NewView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
@@ -331,7 +365,7 @@ ECode RunningProcessesView::ServiceListAdapter::NewView(
     return NOERROR;
 }
 
-ECode RunningProcessesView::ServiceListAdapter::BindView(
+ECode CRunningProcessesView::ServiceListAdapter::BindView(
     /* [in] */ IView* view,
     /* [in] */ Int32 position)
 {
@@ -351,19 +385,44 @@ ECode RunningProcessesView::ServiceListAdapter::BindView(
         obj = NULL;
         mItems->Get(position, (IInterface**)&obj);
         AutoPtr<RunningState::MergedItem> item = (RunningState::MergedItem*)IRunningStateMergedItem::Probe(obj);
-        AutoPtr<ActiveItem> ai = vh->Bind(mState, item, mHost->mBuilder.ToString());
-        mHost->mActiveItems->Put(view, ai);
+        AutoPtr<ActiveItem> ai = vh->Bind(mState, item, mHost->mBuilder->ToString());
+        mHost->mActiveItems->Put(view, (IObject*)ai);
     }
     return NOERROR;
 }
 
 //===============================================================================
-//                  RunningProcessesView
+//                  CRunningProcessesView
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(RunningProcessesView, FrameLayout, IAdapterViewOnItemClickListener, IRecyclerListener, IRunningStateOnRefreshUiListener)
+CAR_INTERFACE_IMPL_3(CRunningProcessesView, FrameLayout, IAdapterViewOnItemClickListener, IRecyclerListener, IRunningStateOnRefreshUiListener)
 
-void RunningProcessesView::RefreshUi(
+CAR_OBJECT_IMPL(CRunningProcessesView)
+
+CRunningProcessesView::CRunningProcessesView()
+    : mMyUserId(0)
+    , SECONDARY_SERVER_MEM(0)
+    , mCurTotalRam(-1)
+    , mCurHighRam(-1)
+    , mCurMedRam(-1)
+    , mCurLowRam(-1)
+    , mCurShowCached(FALSE)
+{
+    CHashMap::New((IHashMap**)&mActiveItems);
+    mBuilder = new StringBuilder(128);
+    CMemInfoReader::New((IMemInfoReader**)&mMemInfoReader);
+}
+
+ECode CRunningProcessesView::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    FrameLayout::constructor(context, attrs);
+    mMyUserId = UserHandle::GetMyUserId();
+    return NOERROR;
+}
+
+void CRunningProcessesView::RefreshUi(
     /* [in] */ Boolean dataChanged)
 {
     if (dataChanged) {
@@ -471,14 +530,15 @@ void RunningProcessesView::RefreshUi(
             resources->GetString(
                     R::string::running_processes_header_ram, args, &tmp);
             mForegroundProcessText->SetText(CoreUtils::Convert(tmp));
-            mColorBar->SetRatios(highRam/(Float)totalRam,
-                    medRam/(Float)totalRam,
-                    lowRam/(Float)totalRam);
+            assert(0 && "TODO");
+            // mColorBar->SetRatios(highRam/(Float)totalRam,
+            //         medRam/(Float)totalRam,
+            //         lowRam/(Float)totalRam);
         }
     }
 }
 
-ECode RunningProcessesView::OnItemClick(
+ECode CRunningProcessesView::OnItemClick(
     /* [in] */ IAdapterView* parent,
     /* [in] */ IView* v,
     /* [in] */ Int32 position,
@@ -489,13 +549,13 @@ ECode RunningProcessesView::OnItemClick(
     parent->GetAdapter((IAdapter**)&adapter);
     AutoPtr<IInterface> obj;
     adapter->GetItem(position, (IInterface**)&obj);
-    AutoPtr<RunningState::MergedItem> mi = (RunningState.MergedItem*)IRunningStateMergedItem::Probe(obj);
+    AutoPtr<RunningState::MergedItem> mi = (RunningState::MergedItem*)IRunningStateMergedItem::Probe(obj);
     mCurSelected = mi;
     StartServiceDetailsActivity(mi);
     return NOERROR;
 }
 
-void RunningProcessesView::StartServiceDetailsActivity(
+void CRunningProcessesView::StartServiceDetailsActivity(
     /* [in] */ RunningState::MergedItem* mi)
 {
     if (mOwner != NULL) {
@@ -503,45 +563,27 @@ void RunningProcessesView::StartServiceDetailsActivity(
         AutoPtr<IBundle> args;
         CBundle::New((IBundle**)&args);
         if (mi->mProcess != NULL) {
-            args->PutInt32(RunningServiceDetails::KEY_UID, mi->mProcess->mUid);
-            args->PutString(RunningServiceDetails::KEY_PROCESS, mi->mProcess->mProcessName);
+            args->PutInt32(String("uid")/*RunningServiceDetails::KEY_UID*/, mi->mProcess->mUid);
+            args->PutString(String("process")/*RunningServiceDetails::KEY_PROCESS*/, mi->mProcess->mProcessName);
         }
-        args->PutInt32(RunningServiceDetails::KEY_USER_ID, mi->mUserId);
-        args->PutBoolean(RunningServiceDetails::KEY_BACKGROUND, mAdapter->mShowBackground);
+        args->PutInt32(String("user_id")/*RunningServiceDetails::KEY_USER_ID*/, mi->mUserId);
+        args->PutBoolean(String("background")/*RunningServiceDetails::KEY_BACKGROUND*/, mAdapter->mShowBackground);
 
         AutoPtr<IActivity> activity;
         mOwner->GetActivity((IActivity**)&activity);
-        SettingsActivity* sa = (SettingsActivity*)activity;
+        CSettingsActivity* sa = (CSettingsActivity*)ISettingsActivity::Probe(activity);
         sa->StartPreferencePanel(String("Elastos.Droid.Settings.Applications.CRunningServiceDetails"), args,
                 R::string::runningservicedetails_settings_title, NULL, NULL, 0);
     }
 }
 
-ECode RunningProcessesView::OnMovedToScrapHeap(
+ECode CRunningProcessesView::OnMovedToScrapHeap(
     /* [in] */ IView* view)
 {
     return mActiveItems->Remove(view);
 }
 
-RunningProcessesView::RunningProcessesView(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-    : mMyUserId(0)
-    , SECONDARY_SERVER_MEM(0)
-    , mCurTotalRam(-1)
-    , mCurHighRam(-1)
-    , mCurMedRam(-1)
-    , mCurLowRam(-1)
-    , mCurShowCached(FALSE)
-{
-    FrameLayout::FrameLayout(context, attrs);
-    mMyUserId = UserHandle::GetMyUserId();
-
-    CHashMap::New((IHashMap**)&mActiveItems);
-    CMemInfoReader::New((IMemInfoReader**)&mMemInfoReader);
-}
-
-ECode RunningProcessesView::DoCreate(
+ECode CRunningProcessesView::DoCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     AutoPtr<IContext> context;
@@ -554,20 +596,21 @@ ECode RunningProcessesView::DoCreate(
     context->GetSystemService(
             IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
     AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
-    inflater->Inflate(R::layout::running_processes_view, this);
+    AutoPtr<IView> viewInflater;
+    inflater->Inflate(R::layout::running_processes_view, this, (IView**)&viewInflater);
     AutoPtr<IView> tmp;
     FindViewById(Elastos::Droid::R::id::list, (IView**)&tmp);
     mListView = IListView::Probe(tmp);
-    tmp = NULL;
-    FindViewById(R::id::empty, (IView**)&tmp);
-    AutoPtr<IView> emptyView = IView::Probe(tmp);
+    AutoPtr<IView> emptyView;
+    FindViewById(Elastos::Droid::R::id::empty, (IView**)&emptyView);
+    IAdapterView* _listView  = IAdapterView::Probe(mListView);
     if (emptyView != NULL) {
-        mListView->SetEmptyView(emptyView);
+        _listView->SetEmptyView(emptyView);
     }
-    mListView->SetOnItemClickListener(this);
-    mListView->SetRecyclerListener(this);
+    _listView->SetOnItemClickListener(this);
+    IAbsListView::Probe(mListView)->SetRecyclerListener(this);
     mAdapter = new ServiceListAdapter(mState, this);
-    mListView->SetAdapter(mAdapter);
+    _listView->SetAdapter(mAdapter);
     mHeader = NULL;
     inflater->Inflate(R::layout::running_processes_header, NULL, (IView**)&mHeader);
     mListView->AddHeaderView(mHeader, NULL, FALSE /* set as not selectable */);
@@ -578,10 +621,10 @@ ECode RunningProcessesView::DoCreate(
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     Int32 color1, color2, color3;
-    res->GetColor(R::Color::running_processes_system_ram, &color1);
-    res->GetColor(R::Color::running_processes_apps_ram, &color2);
-    res->GetColor(R::Color::running_processes_free_ram, &color3);
-    mColorBar->SetColors(color1, color2, color3);
+    res->GetColor(R::color::running_processes_system_ram, &color1);
+    res->GetColor(R::color::running_processes_apps_ram, &color2);
+    res->GetColor(R::color::running_processes_free_ram, &color3);
+    // mColorBar->SetColors(color1, color2, color3);
     tmp = NULL;
     mHeader->FindViewById(R::id::freeSizePrefix, (IView**)&tmp);
     mBackgroundProcessPrefix = ITextView::Probe(tmp);
@@ -603,12 +646,13 @@ ECode RunningProcessesView::DoCreate(
 
     AutoPtr<IActivityManagerMemoryInfo> memInfo;
     CActivityManagerMemoryInfo::New((IActivityManagerMemoryInfo**)&memInfo);
-    mAm->GetMemoryInfo(memInfo);
+    memInfo = NULL;
+    mAm->GetMemoryInfo((IActivityManagerMemoryInfo**)&memInfo);
     memInfo->GetSecondaryServerThreshold(&SECONDARY_SERVER_MEM);
     return NOERROR;
 }
 
-ECode RunningProcessesView::DoPause()
+ECode CRunningProcessesView::DoPause()
 {
     mState->Pause();
     mDataAvail = NULL;
@@ -616,7 +660,7 @@ ECode RunningProcessesView::DoPause()
     return NOERROR;
 }
 
-Boolean RunningProcessesView::DoResume(
+Boolean CRunningProcessesView::DoResume(
     /* [in] */ IFragment* owner,
     /* [in] */ IRunnable* dataAvail)
 {
@@ -632,12 +676,12 @@ Boolean RunningProcessesView::DoResume(
     return FALSE;
 }
 
-void RunningProcessesView::UpdateTimes()
+void CRunningProcessesView::UpdateTimes()
 {
     AutoPtr<ICollection> values;
     mActiveItems->GetValues((ICollection**)&values);
     AutoPtr<IIterator> it;
-    it->GetIterator((IIterator**)&it);
+    values->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
@@ -652,11 +696,11 @@ void RunningProcessesView::UpdateTimes()
         }
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        ai->UpdateTime(context, mBuilder);
+        ai->UpdateTime(context, mBuilder->ToString());
     }
 }
 
-ECode RunningProcessesView::OnRefreshUi(
+ECode CRunningProcessesView::OnRefreshUi(
     /* [in] */ Int32 what)
 {
     switch (what) {

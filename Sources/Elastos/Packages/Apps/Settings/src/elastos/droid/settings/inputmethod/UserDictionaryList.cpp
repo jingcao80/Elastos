@@ -273,7 +273,7 @@ AutoPtr<IPreference> UserDictionaryList::CreateUserDictionaryPreference(
         bundle->PutString(String("locale"), locale);
     }
     newPref->SetIntent(intent);
-    newPref->SetFragment(String("Elastos.Droid.Settings.UserDictionarySettings"));
+    newPref->SetFragment(String("Elastos.Droid.Settings.CUserDictionarySettings"));
     return newPref;
 }
 

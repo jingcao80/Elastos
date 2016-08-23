@@ -374,6 +374,8 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
+    TO_STRING_IMPL("ApplicationsState")
+
     static CARAPI_(String) Normalize(
         /* [in] */ const String& str);
 

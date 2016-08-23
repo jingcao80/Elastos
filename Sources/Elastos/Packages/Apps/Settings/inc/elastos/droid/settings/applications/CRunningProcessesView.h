@@ -1,56 +1,58 @@
-#ifndef __ELASTOS_DROID_SETTINGS_APPLICATIONS_RUNNINGPROCESSESVIEW_H__
-#define __ELASTOS_DROID_SETTINGS_APPLICATIONS_RUNNINGPROCESSESVIEW_H__
+#ifndef __ELASTOS_DROID_SETTINGS_APPLICATIONS_CRUNNINGPROCESSESVIEW_H__
+#define __ELASTOS_DROID_SETTINGS_APPLICATIONS_CRUNNINGPROCESSESVIEW_H__
 
+#include "_Elastos_Droid_Settings_Applications_CRunningProcessesView.h"
 #include "elastos/droid/settings/applications/RunningState.h"
-
-using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Text::IBidiFormatter;
-using Elastos::Droid::Internal::Utility::IMemInfoReader;
+#include "elastos/droid/widget/BaseAdapter.h"
+#include "elastos/droid/widget/FrameLayout.h"
+#include "elastos/droid/widget/TextView.h"
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Internal::Utility::IMemInfoReader;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::ISystemClock;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Text::Format::IDateUtils;
-using Elastos::Droid::Text::Format::IFormatter;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IAdapterView;
-using Elastos::Droid::Widget::IBaseAdapter;
-using Elastos::Droid::Widget::IFrameLayout;
+using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
+using Elastos::Droid::Widget::BaseAdapter;
+using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::Widget::AbsListView::IRecyclerListener;
-using Elastos::Droid::Settings::ISettingsActivity;
-
+using Elastos::Droid::Widget::TextView;
+using Elastos::Droid::Widget::IRecyclerListener;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::IArrayList;
-using Elastos::Utility::ICollections;
 using Elastos::Utility::IHashMap;
-using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
 namespace Settings {
 namespace Applications {
 
-class RunningProcessesView
-    : public FrameLayout
+CarClass(CRunningProcessesView)
+    , public FrameLayout
     , public IAdapterViewOnItemClickListener
     , public IRecyclerListener
     , public IRunningStateOnRefreshUiListener
 {
 public:
+    class ViewHolder;
+
     class ActiveItem
         : public Object
     {
+        friend class CRunningProcessesView;
+        friend class ViewHolder;
     protected:
+        TO_STRING_IMPL("CRunningProcessesView::ActiveItem")
+
         ActiveItem();
 
         ~ActiveItem();
@@ -72,13 +74,15 @@ public:
         : public Object
     {
     public:
+        TO_STRING_IMPL("CRunningProcessesView::ViewHolder")
+
         ViewHolder(
-            /* [in] */ IView* v)
+            /* [in] */ IView* v);
 
         CARAPI_(AutoPtr<ActiveItem>) Bind(
             /* [in] */ RunningState* state,
             /* [in] */ RunningState::BaseItem* item,
-            /* [in] */ const String& builder)
+            /* [in] */ const String& builder);
 
     public:
         AutoPtr<IView> mRootView;
@@ -94,6 +98,8 @@ protected:
         : public TextView
     {
     public:
+        TO_STRING_IMPL("CRunningProcessesView::TimeTicker")
+
         TimeTicker(
             /* [in] */ IContext* context,
             /* [in] */ IAttributeSet* attrs);
@@ -102,7 +108,10 @@ protected:
     class ServiceListAdapter
         : public BaseAdapter
     {
+        friend class CRunningProcessesView;
     public:
+        TO_STRING_IMPL("CRunningProcessesView::ServiceListAdapter")
+
         CARAPI HasStableIds(
             /* [out] */ Boolean* has);
 
@@ -145,8 +154,9 @@ protected:
     protected:
         ServiceListAdapter(
             /* [in] */ RunningState* state,
-            /* [in] */ RunningProcessesView* host);
+            /* [in] */ CRunningProcessesView* host);
 
+        friend class ManageApplications;
         virtual CARAPI_(void) SetShowBackground(
             /* [in] */ Boolean showBackground);
 
@@ -165,13 +175,17 @@ protected:
         AutoPtr<IArrayList> mItems;
 
     private:
-        RunningProcessesView* mHost;
+        CRunningProcessesView* mHost;
     };
 
 public:
     CAR_INTERFACE_DECL()
 
-    RunningProcessesView(
+    CAR_OBJECT_DECL()
+
+    CRunningProcessesView();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
@@ -224,14 +238,16 @@ protected:
 
     AutoPtr<IRunnable> mDataAvail;
 
-    StringBuilder mBuilder;// = new StringBuilder(128);
+    AutoPtr<StringBuilder> mBuilder;// = new StringBuilder(128);
 
     AutoPtr<RunningState::BaseItem> mCurSelected;
 
     AutoPtr<IListView> mListView;
     AutoPtr<IView> mHeader;
+
+    friend class ManageApplications;
     AutoPtr<ServiceListAdapter> mAdapter;
-    AutoPtr<LinearColorBar> mColorBar;
+    // AutoPtr<LinearColorBar> mColorBar;
     AutoPtr<ITextView> mBackgroundProcessPrefix;
     AutoPtr<ITextView> mAppsProcessPrefix;
     AutoPtr<ITextView> mForegroundProcessPrefix;
@@ -255,4 +271,4 @@ protected:
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SETTINGS_APPLICATIONS_RUNNINGPROCESSESVIEW_H__
+#endif //__ELASTOS_DROID_SETTINGS_APPLICATIONS_CRUNNINGPROCESSESVIEW_H__

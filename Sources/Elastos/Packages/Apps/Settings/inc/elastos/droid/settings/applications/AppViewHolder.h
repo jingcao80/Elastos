@@ -23,6 +23,8 @@ class AppViewHolder
     : public Object
 {
 public:
+    TO_STRING_IMPL("AppViewHolder")
+
     static CARAPI_(AutoPtr<AppViewHolder>) CreateOrRecycle(
         /* [in] */ ILayoutInflater* inflater,
         /* [in] */ IView* convertView);

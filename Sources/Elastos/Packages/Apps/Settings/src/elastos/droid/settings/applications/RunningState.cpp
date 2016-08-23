@@ -1,11 +1,15 @@
 
 #include "elastos/droid/settings/applications/RunningState.h"
+#include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/text/format/Formatter.h"
 #include "../R.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::ActivityManagerNative;
@@ -25,7 +29,11 @@ using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IComparator;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IThread;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IList;
@@ -372,7 +380,7 @@ void RunningState::ProcessItem::EnsureLabel(
         mDisplayLabel = NULL;
         IPackageItemInfo::Probe(ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
         mDisplayLabel->ToString(&mLabel);
-        mPackageInfo = ai;
+        mPackageInfo = IPackageItemInfo::Probe(ai);
         return;
     }
     // } catch (PackageManager.NameNotFoundException e) {
@@ -392,7 +400,7 @@ void RunningState::ProcessItem::EnsureLabel(
         mDisplayLabel = NULL;
         IPackageItemInfo::Probe(ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
         mDisplayLabel->ToString(&mLabel);
-        mPackageInfo = ai;
+        mPackageInfo = IPackageItemInfo::Probe(ai);
         return;
         // } catch (PackageManager.NameNotFoundException e) {
         // }
@@ -416,7 +424,7 @@ void RunningState::ProcessItem::EnsureLabel(
             if (nm != NULL) {
                 mDisplayLabel = nm;
                 nm->ToString(&mLabel);
-                mPackageInfo = applicationInfo;
+                mPackageInfo = IPackageItemInfo::Probe(applicationInfo);
                 return;
             }
         }
@@ -438,7 +446,7 @@ void RunningState::ProcessItem::EnsureLabel(
         IRunningStateServiceItem* si = IRunningStateServiceItem::Probe(obj);
         AutoPtr<IApplicationInfo> ai;
         IComponentInfo::Probe(((ServiceItem*)si)->mServiceInfo)->GetApplicationInfo((IApplicationInfo**)&ai);
-        mPackageInfo = ai;
+        mPackageInfo = IPackageItemInfo::Probe(ai);
         mDisplayLabel = NULL;
         mPackageInfo->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
         mDisplayLabel->ToString(&mLabel);
@@ -453,7 +461,7 @@ void RunningState::ProcessItem::EnsureLabel(
     mDisplayLabel = NULL;
     IPackageItemInfo::Probe(_ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
     mDisplayLabel->ToString(&mLabel);
-    mPackageInfo = _ai;
+    mPackageInfo = IPackageItemInfo::Probe(_ai);
     return;
     // } catch (PackageManager.NameNotFoundException e) {
     // }
@@ -497,13 +505,13 @@ Boolean RunningState::ProcessItem::UpdateService(
         si->mRunningService->GetService((IComponentName**)&comName);
         String className;
         comName->GetClassName(&className);
-        si->mDisplayLabel = MakeLabel(pm, className, si->mServiceInfo);
+        si->mDisplayLabel = MakeLabel(pm, className, IPackageItemInfo::Probe(si->mServiceInfo));
         mLabel = String(NULL);
         if (mDisplayLabel != NULL) {
             mDisplayLabel->ToString(&mLabel);
         }
         IComponentInfo::Probe(si->mServiceInfo)->GetApplicationInfo((IApplicationInfo**)&si->mPackageInfo);
-        mServices->Put(comService, si);
+        mServices->Put(comService, (IRunningStateServiceItem*)si);
     }
     si->mCurSeq = mCurSeq;
     si->mRunningService = service;
@@ -528,7 +536,7 @@ Boolean RunningState::ProcessItem::UpdateService(
         // try {
             AutoPtr<IResources> clientr;
             ECode ec = pm->GetResourcesForApplication(clientPackage, (IResources**)&clientr);
-            if (SUCCEEDED(EC)) {
+            if (SUCCEEDED(ec)) {
                 String label;
                 clientr->GetString(clientLabel, &label);
                 AutoPtr<IResources> resources;
@@ -688,8 +696,8 @@ Boolean RunningState::MergedItem::Update(
         mChildren->Get(0, (IInterface**)&obj);
         MergedItem* child0 = (MergedItem*)IRunningStateMergedItem::Probe(obj);
         mPackageInfo = child0->mProcess->mPackageInfo;
-        mLabel = mUser != NULL ? mUser->mLabel : NULL;
-        mDisplayLabel = mLabel;
+        mLabel = mUser != NULL ? mUser->mLabel : String(NULL);
+        mDisplayLabel = CoreUtils::Convert(mLabel);
         Int32 numProcesses = 0;
         Int32 numServices = 0;
         mActiveSince = -1;
@@ -797,7 +805,7 @@ ECode RunningState::MergedItem::LoadIcon(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     return resources->GetDrawable(
-            R::drawable::ic_menu_cc, result);
+            Elastos::Droid::R::drawable::ic_menu_cc, result);
 }
 
 //===============================================================================
@@ -806,7 +814,9 @@ ECode RunningState::MergedItem::LoadIcon(
 
 CAR_INTERFACE_IMPL(RunningState::ServiceProcessComparator, Object, IComparator)
 
-RunningState::ServiceProcessComparator::ServiceProcessComparator()
+RunningState::ServiceProcessComparator::ServiceProcessComparator(
+    /* [in] */ RunningState* host)
+    : mHost(host)
 {}
 
 RunningState::ServiceProcessComparator::~ServiceProcessComparator()
@@ -824,15 +834,15 @@ ECode RunningState::ServiceProcessComparator::Compare(
     AutoPtr<ProcessItem> object2= (ProcessItem*)IRunningStateProcessItem::Probe(rhs);
 
     if (object1->mUserId != object2->mUserId) {
-        if (object1->mUserId == mMyUserId) {
+        if (object1->mUserId == mHost->mMyUserId) {
             *result = -1;
             return NOERROR;
         }
-        if (object2->mUserId == mMyUserId) {
+        if (object2->mUserId == mHost->mMyUserId) {
             *result = 1;
             return NOERROR;
         }
-        *result = object1->mUserId < object2->mUserId ? -1 : 1
+        *result = object1->mUserId < object2->mUserId ? -1 : 1;
         return NOERROR;
     }
     if (object1->mIsStarted != object2->mIsStarted) {
@@ -880,7 +890,9 @@ AutoPtr<ICharSequence> RunningState::MakeLabel(
     if (tail >= 0) {
         label = label.Substring(tail + 1, label.GetLength());
     }
-    return label;
+
+    AutoPtr<ICharSequence> cs = CoreUtils::Convert(label);
+    return cs;
 }
 
 AutoPtr<RunningState> RunningState::GetInstance(
@@ -920,7 +932,7 @@ RunningState::RunningState(
     mMyUserId = UserHandle::GetMyUserId();
     mResumed = FALSE;
     CHandlerThread::New(String("RunningState:Background"), (IHandlerThread**)&mBackgroundThread);
-    mBackgroundThread->Start();
+    IThread::Probe(mBackgroundThread)->Start();
     AutoPtr<ILooper> looper;
     mBackgroundThread->GetLooper((ILooper**)&looper);
     mBackgroundHandler = new BackgroundHandler(looper, this);
@@ -928,7 +940,7 @@ RunningState::RunningState(
     mInterestingConfigChanges = new InterestingConfigChanges();
     CSparseArray::New((ISparseArray**)&mServiceProcessesByName);
     CSparseArray::New((ISparseArray**)&mServiceProcessesByPid);
-    mServiceProcessComparator = new ServiceProcessComparator();
+    mServiceProcessComparator = new ServiceProcessComparator(this);
     CArrayList::New((IArrayList**)&mInterestingProcesses);
     CSparseArray::New((ISparseArray**)&mRunningProcesses);
     CArrayList::New((IArrayList**)&mProcessItems);
@@ -1088,7 +1100,7 @@ void RunningState::AddOtherUserItem(
             AutoPtr<IResources> resources;
             context->GetResources((IResources**)&resources);
             AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-            args->Set(0, name);
+            args->Set(0, CoreUtils::Convert(name));
             resources->GetString(
                     R::string::running_process_item_user_label, args, &userItem->mUser->mLabel);
         }
@@ -1159,7 +1171,7 @@ Boolean RunningState::Update(
         IActivityManagerRunningAppProcessInfo* pi = IActivityManagerRunningAppProcessInfo::Probe(obj);
         Int32 pid;
         pi->GetPid(&pid);
-        mTmpAppProcesses->Put(pid, new AppProcessInfo(pi));
+        mTmpAppProcesses->Put(pid, (IObject*)new AppProcessInfo(pi));
     }
 
     // Initial iteration through running services to collect per-process
@@ -1467,7 +1479,7 @@ Boolean RunningState::Update(
             AutoPtr<IInterface> obj;
             uidToDelete->Get(i, (IInterface**)&obj);
             Int32 uid;
-            IInterger::Probe(obj)->GetValue(&uid);
+            IInteger32::Probe(obj)->GetValue(&uid);
             mServiceProcessesByName->Remove(uid);
         }
     }
@@ -1528,7 +1540,7 @@ Boolean RunningState::Update(
 
         AutoPtr<ICollections> collections;
         CCollections::AcquireSingleton((ICollections**)&collections);
-        collections->Sort(sortedProcesses, mServiceProcessComparator);
+        collections->Sort(IList::Probe(sortedProcesses), mServiceProcessComparator);
 
         AutoPtr<IArrayList> newItems; // ArrayList<BaseItem>
         CArrayList::New((IArrayList**)&newItems);
@@ -1572,10 +1584,10 @@ Boolean RunningState::Update(
                 needDivider = TRUE;
                 newItems->Add((IRunningStateServiceItem*)si);
                 if (si->mMergedItem != NULL) {
-                    if (mergedItem != NULL && mergedItem != si->mMergedItem) {
+                    if (mergedItem != NULL && mergedItem.Get() != (MergedItem*)si->mMergedItem.Get()) {
                         haveAllMerged = FALSE;
                     }
-                    mergedItem = si->mMergedItem;
+                    mergedItem = (MergedItem*)si->mMergedItem.Get();
                 }
                 else {
                     haveAllMerged = FALSE;
@@ -1630,12 +1642,14 @@ Boolean RunningState::Update(
             if (proc->mClient == NULL && (proc->mServices->GetSize(&size), size) <= 0) {
                 if (proc->mMergedItem == NULL) {
                     proc->mMergedItem = new MergedItem(proc->mUserId);
-                    proc->mMergedItem->mProcess = proc;
+                    ((MergedItem*)proc->mMergedItem.Get())->mProcess = proc;
                 }
-                proc->mMergedItem->Update(context, FALSE);
-                if (proc->mMergedItem->mUserId != mMyUserId) {
+
+                MergedItem* _proc = (MergedItem*)proc->mMergedItem.Get();
+                _proc->Update(context, FALSE);
+                if (_proc->mUserId != mMyUserId) {
                     AddOtherUserItem(context, newMergedItems, mOtherUserMergedItems,
-                            proc->mMergedItem);
+                            _proc);
                 }
                 else {
                     newMergedItems->Add(0, (IRunningStateMergedItem*)proc->mMergedItem);
@@ -1667,7 +1681,7 @@ Boolean RunningState::Update(
     // Count number of interesting other (non-active) processes, and
     // build a list of all processes we will retrieve memory for.
     mAllProcessItems->Clear();
-    mAllProcessItems->AddAll(mProcessItems);
+    mAllProcessItems->AddAll(ICollection::Probe(mProcessItems));
     Int32 numBackgroundProcesses = 0;
     Int32 numForegroundProcesses = 0;
     Int32 numServiceProcesses = 0;
@@ -1690,7 +1704,7 @@ Boolean RunningState::Update(
                 mAllProcessItems->Add((IRunningStateProcessItem*)proc);
             }
             else {
-                Logger::I("RunningState", "Unknown non-service process: %s #%d", proc->mProcessName, proc->mPid);
+                Logger::I("RunningState", "Unknown non-service process: %s #%d", proc->mProcessName.string(), proc->mPid);
             }
         }
         else {
@@ -1730,8 +1744,9 @@ Boolean RunningState::Update(
                 backgroundProcessMemory += proc->mSize;
                 AutoPtr<MergedItem> mergedItem;
                 if (newBackgroundItems != NULL) {
-                    mergedItem = proc->mMergedItem = new MergedItem(proc->mUserId);
-                    proc->mMergedItem->mProcess = proc;
+                    proc->mMergedItem = new MergedItem(proc->mUserId);
+                    mergedItem = (MergedItem*)proc->mMergedItem.Get();
+                    ((MergedItem*)proc->mMergedItem.Get())->mProcess = proc;
                     diffUsers |= mergedItem->mUserId != mMyUserId;
                     newBackgroundItems->Add((IRunningStateMergedItem*)mergedItem);
                 }
@@ -1739,23 +1754,24 @@ Boolean RunningState::Update(
                     AutoPtr<IInterface> tmp;
                     if (bgIndex >= (mBackgroundItems->GetSize(&size), size)
                             || (mBackgroundItems->Get(bgIndex, (IInterface**)&tmp),
-                                ((MergedItem*)IRunningStateMergedItem::Probe(tmp))->mProcess) != proc) {
+                                ((MergedItem*)IRunningStateMergedItem::Probe(tmp))->mProcess).Get() != proc) {
                         CArrayList::New(numBackgroundProcesses, (IArrayList**)&newBackgroundItems);
                         for (Int32 bgi = 0; bgi < bgIndex; bgi++) {
                             AutoPtr<IInterface> tmpObj;
-                            mBackgroundItems->Get(bgi, (IInterface**)&tmpobj);
+                            mBackgroundItems->Get(bgi, (IInterface**)&tmpObj);
                             mergedItem = (MergedItem*)IRunningStateMergedItem::Probe(tmpObj);
                             diffUsers |= mergedItem->mUserId != mMyUserId;
                             newBackgroundItems->Add((IRunningStateMergedItem*)mergedItem);
                         }
-                        mergedItem = proc->mMergedItem = new MergedItem(proc->mUserId);
-                        proc->mMergedItem->mProcess = proc;
+                        proc->mMergedItem = new MergedItem(proc->mUserId);
+                        mergedItem = (MergedItem*)proc->mMergedItem.Get();
+                        ((MergedItem*)proc->mMergedItem.Get())->mProcess = proc;
                         diffUsers |= mergedItem->mUserId != mMyUserId;
                         newBackgroundItems->Add((IRunningStateMergedItem*)mergedItem);
                     }
                     else {
                         AutoPtr<IInterface> tmpObj;
-                        mBackgroundItems->Get(bgIndex, (IInterface**)&tmpobj);
+                        mBackgroundItems->Get(bgIndex, (IInterface**)&tmpObj);
                         mergedItem = (MergedItem*)IRunningStateMergedItem::Probe(tmpObj);
                     }
                 }

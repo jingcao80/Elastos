@@ -32,7 +32,7 @@ namespace Widget {
  * {@link #convertToString(android.database.Cursor)} and
  * {@link #runQueryOnBackgroundThread(CharSequence)} for more information.
  */
-class SimpleCursorAdapter
+class ECO_PUBLIC SimpleCursorAdapter
     : public ResourceCursorAdapter
     , public ISimpleCursorAdapter
 {
@@ -278,7 +278,7 @@ private:
      * @param c the cursor to find the columns from
      * @param from the Strings naming the columns of interest
      */
-    CARAPI FindColumns(
+    ECO_LOCAL CARAPI FindColumns(
         /* [in] */ ICursor* c,
         /* [in] */ ArrayOf<String>* from);
 

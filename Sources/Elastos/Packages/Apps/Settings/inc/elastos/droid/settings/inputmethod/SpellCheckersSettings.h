@@ -38,6 +38,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("SpellCheckersSettings::AlertDialogOnClickListener")
+
         AlertDialogOnClickListener(
             /* [in] */ SpellCheckersSettings* host,
             /* [in] */ Int32 id,

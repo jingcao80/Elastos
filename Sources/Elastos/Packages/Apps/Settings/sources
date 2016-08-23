@@ -33,6 +33,7 @@ SOURCES += HomeSettings.cpp
 SOURCES += Utils.cpp
 SOURCES += UserSpinnerAdapter.cpp
 SOURCES += CUserSpinnerAdapter.cpp
+SOURCES += CUserDictionarySettings.cpp
 SOURCES += CSettings.cpp
 SOURCES += CSubSettings.cpp
 SOURCES += VoiceInputOutputSettings.cpp

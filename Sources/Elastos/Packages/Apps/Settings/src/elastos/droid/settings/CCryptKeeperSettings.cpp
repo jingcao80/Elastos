@@ -2,7 +2,7 @@
 #include "Elastos.Droid.Preference.h"
 #include "elastos/droid/settings/CCryptKeeperSettings.h"
 #include "elastos/droid/settings/ChooseLockSettingsHelper.h"
-#include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/R.h"
@@ -257,7 +257,7 @@ void CCryptKeeperSettings::ShowFinalConfirmation(
     extras->PutInt32(String("type"), type);
     extras->PutString(String("password"), password);
     Boolean res;
-    ((SettingsActivity*)activity.Get())->OnPreferenceStartFragment(NULL, preference, &res);
+    ((CSettingsActivity*)activity.Get())->OnPreferenceStartFragment(NULL, preference, &res);
 }
 
 } // namespace Settings

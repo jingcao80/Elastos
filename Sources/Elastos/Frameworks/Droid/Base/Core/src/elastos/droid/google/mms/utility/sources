@@ -9,7 +9,7 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/
 C_DEFINES += -DDROID_CORE
 
 SOURCES = AbstractCache.cpp
-// SOURCES += DownloadDrmHelper.cpp
+#SOURCES += DownloadDrmHelper.cpp
 SOURCES += DrmConvertSession.cpp
 SOURCES += PduCache.cpp
 SOURCES += PduCacheEntry.cpp

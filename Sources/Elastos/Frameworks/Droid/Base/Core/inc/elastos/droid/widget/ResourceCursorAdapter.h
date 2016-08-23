@@ -14,7 +14,7 @@ namespace Widget {
  * An easy adapter that creates views defined in an XML file. You can specify
  * the XML file that defines the appearance of the views.
  */
-class ResourceCursorAdapter
+class ECO_PUBLIC ResourceCursorAdapter
     : public CursorAdapter
     , public IResourceCursorAdapter
 {

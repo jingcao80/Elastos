@@ -27,7 +27,7 @@ namespace Widget {
  * {@link android.widget.ListView ListView} widget. The Cursor must include
  * a column named "_id" or this class will not work.
  */
-class CursorAdapter
+class ECO_PUBLIC CursorAdapter
     : public BaseAdapter
     , public ICursorAdapter
     , public IFilterable

@@ -40,6 +40,7 @@ namespace Applications {
 class RunningState
     : public Object
 {
+    friend class CRunningProcessesView;
 protected:
     class AppProcessInfo
         : public Object
@@ -242,6 +243,7 @@ protected:
         //         = new SparseArray<ProcessItem>();
         AutoPtr<ISparseArray> mDependentProcesses;
 
+        friend class CRunningProcessesView;
         Int32 mUid;
         String mProcessName;
         Int32 mPid;
@@ -266,6 +268,7 @@ protected:
         : public BaseItem
         , public IRunningStateMergedItem
     {
+        friend class CRunningProcessesView;
         friend class InitComparator;
         friend class RunningState;
     public:
@@ -317,7 +320,8 @@ protected:
 
         TO_STRING_IMPL("RunningState::ServiceProcessComparator")
 
-        ServiceProcessComparator();
+        ServiceProcessComparator(
+            /* [in] */ RunningState* host);
 
         ~ServiceProcessComparator();
 
@@ -326,9 +330,14 @@ protected:
             /* [in] */ IInterface* lhs,
             /* [in] */ IInterface* rhs,
             /* [out] */ Int32* result);
+
+    private:
+        RunningState* mHost;
     };
 
 protected:
+    TO_STRING_IMPL("RunningState")
+
     static CARAPI_(AutoPtr<ICharSequence>) MakeLabel(
         /* [in] */ IPackageManager* pm,
         /* [in] */ const String& className,

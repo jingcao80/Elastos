@@ -586,12 +586,12 @@
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name="UserDictionarySettings"
+        <activity-alias android:name="CUserDictionarySettings"
                 android:label="@string/user_dict_settings_title"
                 android:exported="true"
                 android:targetActivity="CSettings$UserDictionarySettingsActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.UserDictionarySettings" />
+                android:value="Elastos.Droid.Settings.CUserDictionarySettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/language_settings" />
         </activity-alias>

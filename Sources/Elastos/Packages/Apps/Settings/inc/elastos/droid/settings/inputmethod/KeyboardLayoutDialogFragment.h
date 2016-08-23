@@ -56,6 +56,8 @@ private:
         : public ArrayAdapter
     {
     public:
+        TO_STRING_IMPL("KeyboardLayoutDialogFragment::KeyboardLayoutAdapter")
+
         KeyboardLayoutAdapter(
             /* [in] */ IContext* context);
 
@@ -101,6 +103,8 @@ private:
         : public AsyncTaskLoader
     {
     public:
+        TO_STRING_IMPL("KeyboardLayoutDialogFragment::KeyboardLayoutLoader")
+
         KeyboardLayoutLoader(
             /* [in] */ IContext* context,
             /* [in] */ IInputDeviceIdentifier* inputDeviceIdentifier);
@@ -129,6 +133,8 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        TO_STRING_IMPL("KeyboardLayoutDialogFragment::DialogInterfaceOnClickListener")
+
         DialogInterfaceOnClickListener(
             /* [in] */ KeyboardLayoutDialogFragment* host,
             /* [in] */ Int32 id);
@@ -147,6 +153,8 @@ private:
 
 public:
     CAR_INTERFACE_DECL();
+
+    TO_STRING_IMPL("KeyboardLayoutDialogFragment")
 
     KeyboardLayoutDialogFragment();
 

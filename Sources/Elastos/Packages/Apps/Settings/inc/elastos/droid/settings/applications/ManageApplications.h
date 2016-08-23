@@ -7,7 +7,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/settings/CUserSpinnerAdapter.h"
 #include "elastos/droid/settings/applications/ApplicationsState.h"
-// #include "elastos/droid/settings/applications/RunningProcessesView.h"
+#include "elastos/droid/settings/applications/CRunningProcessesView.h"
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/os/AsyncTask.h"
 // #include "elastos/droid/support/v4/view/PagerAdapter.h"
@@ -147,9 +147,10 @@ public:
 
         // ListView used to display list
         AutoPtr<IListView> mListView;
+
+        friend class ManageApplications;
         // Custom view used to display running processes
-        // TODO
-        // AutoPtr<RunningProcessesView> mRunningProcessesView;
+        AutoPtr<CRunningProcessesView> mRunningProcessesView;
 
         //private LinearColorBar mColorBar;
         //private TextView mStorageChartLabel;

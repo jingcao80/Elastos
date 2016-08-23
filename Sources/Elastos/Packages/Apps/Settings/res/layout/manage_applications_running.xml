@@ -28,7 +28,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent" >
 
-        <view class="Elastos.Droid.Settings.Applications.RunningProcessesView"
+        <view class="Elastos.Droid.Settings.Applications.CRunningProcessesView"
                 android:id="@+id/running_processes"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

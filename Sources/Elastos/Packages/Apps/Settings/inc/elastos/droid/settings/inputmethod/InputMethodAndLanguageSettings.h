@@ -57,6 +57,8 @@ public:
         : public BaseSearchIndexProvider
     {
     public:
+        TO_STRING_IMPL("InputMethodAndLanguageSettings::MyBaseSearchIndexProvider")
+
         MyBaseSearchIndexProvider();
 
         ~MyBaseSearchIndexProvider();
@@ -73,6 +75,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("InputMethodAndLanguageSettings::SettingsObserver")
+
         SettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ IContext* context,
@@ -99,6 +103,8 @@ private:
     {
     public:
         CAR_INTERFACE_DECL();
+
+        TO_STRING_IMPL("InputMethodAndLanguageSettings::PreferenceOnPreferenceClickListener")
 
         PreferenceOnPreferenceClickListener(
             /* [in] */ InputMethodAndLanguageSettings* host,
@@ -127,6 +133,8 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        TO_STRING_IMPL("InputMethodAndLanguageSettings::Comparator")
+
         Comparator(
             /* [in] */ ICollator* collator);
 
@@ -144,6 +152,8 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("InputMethodAndLanguageSettings")
 
     InputMethodAndLanguageSettings();
 

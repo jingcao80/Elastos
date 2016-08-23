@@ -3,7 +3,7 @@
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/settings/applications/ManageApplications.h"
 #include "elastos/droid/settings/applications/AppViewHolder.h"
-#include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -13,9 +13,6 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
-
-using Elastos::Droid::Settings::SettingsActivity;
-using Elastos::Droid::Settings::Utils;
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::CAlertDialogBuilder;
@@ -219,11 +216,10 @@ AutoPtr<IView> ManageApplications::TabInfo::Build(
     tmp = NULL;
     mRootView->FindViewById(
             R::id::running_processes, (IView**)&tmp);
-    assert(0 && "TODO");
-    // mRunningProcessesView = (RunningProcessesView*)tmp;
-    // if (mRunningProcessesView != NULL) {
-    //     mRunningProcessesView->DoCreate(mSavedInstanceState);
-    // }
+    mRunningProcessesView = (CRunningProcessesView*)tmp.Get();
+    if (mRunningProcessesView != NULL) {
+        mRunningProcessesView->DoCreate(mSavedInstanceState);
+    }
 
     return mRootView;
 }
@@ -247,17 +243,16 @@ ECode ManageApplications::TabInfo::Resume(
     if (mApplications != NULL) {
         mApplications->Resume(sortOrder);
     }
-    assert(0 && "TODO");
-    // if (mRunningProcessesView != NULL) {
-    //     Boolean haveData = mRunningProcessesView->DoResume(mOwner, mRunningProcessesAvail);
-    //     if (haveData) {
-    //         mRunningProcessesView->SetVisibility(IView::VISIBLE);
-    //         mLoadingContainer->SetVisibility(IView::INVISIBLE);
-    //     }
-    //     else {
-    //         mLoadingContainer->SetVisibility(IView::VISIBLE);
-    //     }
-    // }
+    if (mRunningProcessesView != NULL) {
+        Boolean haveData = mRunningProcessesView->DoResume(mOwner, mRunningProcessesAvail);
+        if (haveData) {
+            mRunningProcessesView->SetVisibility(IView::VISIBLE);
+            mLoadingContainer->SetVisibility(IView::INVISIBLE);
+        }
+        else {
+            mLoadingContainer->SetVisibility(IView::VISIBLE);
+        }
+    }
     return NOERROR;
 }
 
@@ -266,10 +261,9 @@ ECode ManageApplications::TabInfo::Pause()
     if (mApplications != NULL) {
         mApplications->Pause();
     }
-    assert(0 && "TODO");
-    // if (mRunningProcessesView != NULL) {
-    //     mRunningProcessesView->DoPause();
-    // }
+    if (mRunningProcessesView != NULL) {
+        mRunningProcessesView->DoPause();
+    }
     return NOERROR;
 }
 
@@ -427,9 +421,8 @@ void ManageApplications::TabInfo::HandleRunningProcessesAvail()
     animation = NULL;
     AnimationUtils::LoadAnimation(
             activity, Elastos::Droid::R::anim::fade_in, (IAnimation**)&animation);
-    assert(0 && "TODO");
-    // mRunningProcessesView->StartAnimation(animation);
-    // mRunningProcessesView->SetVisibility(IView::VISIBLE);
+    mRunningProcessesView->StartAnimation(animation);
+    mRunningProcessesView->SetVisibility(IView::VISIBLE);
     mLoadingContainer->SetVisibility(IView::GONE);
 }
 
@@ -1509,7 +1502,7 @@ void ManageApplications::StartApplicationDetailsActivity()
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    SettingsActivity* sa = (SettingsActivity*)activity.Get();
+    CSettingsActivity* sa = (CSettingsActivity*)ISettingsActivity::Probe(activity);
     sa->StartPreferencePanel(String("Elastos.Droid.Settings.Applications.CInstalledAppDetails"), args,
             R::string::application_info_label, NULL, this, INSTALLED_APP_DETAILS);
 }
@@ -1576,10 +1569,9 @@ void ManageApplications::UpdateOptionsMenu()
     if (mCurTab != NULL && mCurTab->mListType == LIST_TYPE_RUNNING) {
         AutoPtr<TabInfo> tab = TabForType(LIST_TYPE_RUNNING);
         Boolean showingBackground = FALSE;
-        assert(0 && "TODO");
-        // if (tab != NULL && tab->mRunningProcessesView != NULL) {
-        //     tab->mRunningProcessesView->mAdapter->GetShowBackground(&showingBackground);
-        // }
+        if (tab != NULL && tab->mRunningProcessesView != NULL) {
+            showingBackground = tab->mRunningProcessesView->mAdapter->GetShowBackground();
+        }
         AutoPtr<IMenuItem> item;
         mOptionsMenu->FindItem(SORT_ORDER_ALPHA, (IMenuItem**)&item);
         item->SetVisible(FALSE);
@@ -1689,17 +1681,15 @@ ECode ManageApplications::OnOptionsItemSelected(
     }
     else if (menuId == SHOW_RUNNING_SERVICES) {
         mShowBackground = FALSE;
-        assert(0 && "TODO");
-        // if (mCurTab != NULL && mCurTab->mRunningProcessesView != NULL) {
-        //     mCurTab->mRunningProcessesView->mAdapter->SetShowBackground(FALSE);
-        // }
+        if (mCurTab != NULL && mCurTab->mRunningProcessesView != NULL) {
+            mCurTab->mRunningProcessesView->mAdapter->SetShowBackground(FALSE);
+        }
     }
     else if (menuId == SHOW_BACKGROUND_PROCESSES) {
         mShowBackground = TRUE;
-        assert(0 && "TODO");
-        // if (mCurTab != NULL && mCurTab->mRunningProcessesView != NULL) {
-        //     mCurTab->mRunningProcessesView->mAdapter->SetShowBackground(TRUE);
-        // }
+        if (mCurTab != NULL && mCurTab->mRunningProcessesView != NULL) {
+            mCurTab->mRunningProcessesView->mAdapter->SetShowBackground(TRUE);
+        }
     }
     else if (menuId == RESET_APP_PREFERENCES) {
         BuildResetDialog();
