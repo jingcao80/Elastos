@@ -70,6 +70,8 @@ module {
 
     [local]
     interface ITest {
+        TestSelf();
+
         TestVoid();
 
         TestInt16(

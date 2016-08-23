@@ -37,17 +37,6 @@ ECode CTest::constructor(void)
     return NOERROR;
 }
 
-ECode CTest::TestVoid(void)
-{
-    if (freopen(_outputFile, "w+", _output) == NULL)
-        return E_FAIL;
-
-    if (fprintf(_output, "void (void)\n") < 0)
-        return E_FAIL;
-
-    return NOERROR;
-}
-
 template<class T, ECode (CTest::*output)(T, size_t)>
 ECode CTest::TestNonarray(T nonarray, char const *name)
 {
@@ -61,6 +50,30 @@ ECode CTest::TestNonarray(T nonarray, char const *name)
         return ec;
 
     if (fprintf(_output, " (%s)\n", name) < 0)
+        return E_FAIL;
+
+    return NOERROR;
+}
+
+inline ECode CTest::Output(ITest *itest, size_t indent = 0)
+{
+    if (fprintf(_output, "%p", itest) < 0)
+        return E_FAIL;
+
+    return NOERROR;
+}
+
+ECode CTest::TestSelf(void)
+{
+    return TestNonarray<ITest *, &Output>(static_cast<ITest *>(this), "ITest");
+}
+
+ECode CTest::TestVoid(void)
+{
+    if (freopen(_outputFile, "w+", _output) == NULL)
+        return E_FAIL;
+
+    if (fprintf(_output, "void (void)\n") < 0)
         return E_FAIL;
 
     return NOERROR;
@@ -461,14 +474,6 @@ ECode CTest::TestCARArrayOfECode(
         /* [in] */ ArrayOf<ECode> const &ecodes)
 {
     return TestArray<ECode, &OutputECode>(ecodes, "ECode");
-}
-
-inline ECode CTest::Output(ITest *itest, size_t indent = 0)
-{
-    if (fprintf(_output, "%p", itest) < 0)
-        return E_FAIL;
-
-    return NOERROR;
 }
 
 ECode CTest::TestCARArray(

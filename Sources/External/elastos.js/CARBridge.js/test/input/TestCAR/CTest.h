@@ -24,6 +24,8 @@ public:
 
     CARAPI constructor(void);
 
+    CARAPI TestSelf(void);
+
     CARAPI TestVoid(void);
 
     CARAPI TestInt16(
@@ -147,6 +149,8 @@ private:
     template<class T, ECode (CTest::*)(T, size_t)>
     ECode TestNonarray(T nonarray, char const *name);
 
+    ECode Output(ITest *itest, size_t indent);
+
     ECode Output(Int16 i16, size_t indent);
 
     ECode Output(Int32 i32, size_t indent);
@@ -182,8 +186,6 @@ private:
     ECode TestArray(
             ArrayOf<typename RemoveConst<typename RemoveReference<T>::Type>::Type> const &array,
             char const *name);
-
-    ECode Output(ITest *itest, size_t indent);
 
     ECode Output(STestHelper const &stest, size_t indent);
 
