@@ -66,7 +66,7 @@ ECode CTest::TestNonarray(T nonarray, char const *name)
     return NOERROR;
 }
 
-ECode CTest::Output(Int16 i16, size_t indent = 0)
+inline ECode CTest::Output(Int16 i16, size_t indent = 0)
 {
     if (fprintf(_output, "%d", i16) < 0)
         return E_FAIL;
@@ -80,7 +80,7 @@ ECode CTest::TestInt16(
     return TestNonarray<Int16, &Output>(i16, "Int16");
 }
 
-ECode CTest::Output(Int32 i32, size_t indent = 0)
+inline ECode CTest::Output(Int32 i32, size_t indent = 0)
 {
     if (fprintf(_output, "%d", i32) < 0)
         return E_FAIL;
@@ -94,7 +94,7 @@ ECode CTest::TestInt32(
     return TestNonarray<Int32, &Output>(i32, "Int32");
 }
 
-ECode CTest::Output(Int64 i64, size_t indent = 0)
+inline ECode CTest::Output(Int64 i64, size_t indent = 0)
 {
     if (fprintf(_output, "%lld", i64) < 0)
         return E_FAIL;
@@ -108,7 +108,7 @@ ECode CTest::TestInt64(
     return TestNonarray<Int64, &Output>(i64, "Int64");
 }
 
-ECode CTest::Output(Byte byte, size_t indent = 0)
+inline ECode CTest::Output(Byte byte, size_t indent = 0)
 {
     if (fprintf(_output, "\'%c\'", byte) < 0)
         return E_FAIL;
@@ -122,7 +122,7 @@ ECode CTest::TestByte(
     return TestNonarray<Byte, &Output>(byte, "Byte");
 }
 
-ECode CTest::Output(Float f, size_t indent = 0)
+inline ECode CTest::Output(Float f, size_t indent = 0)
 {
     if (fprintf(_output, "%f", f) < 0)
         return E_FAIL;
@@ -136,7 +136,7 @@ ECode CTest::TestFloat(
     return TestNonarray<Float, &Output>(f, "Float");
 }
 
-ECode CTest::Output(Double d, size_t indent = 0)
+inline ECode CTest::Output(Double d, size_t indent = 0)
 {
     if (fprintf(_output, "%lf", d) < 0)
         return E_FAIL;
@@ -150,7 +150,7 @@ ECode CTest::TestDouble(
     return TestNonarray<Double, &Output>(d, "Double");
 }
 
-ECode CTest::Output(Char32 c32, size_t indent = 0)
+inline ECode CTest::Output(Char32 c32, size_t indent = 0)
 {
     if (fprintf(_output, "\'%lc\'", c32) < 0)
         return E_FAIL;
@@ -164,7 +164,7 @@ ECode CTest::TestChar32(
     return TestNonarray<Char32, &Output>(c32, "Char32");
 }
 
-ECode CTest::Output(String const &s, size_t indent = 0)
+inline ECode CTest::Output(String const &s, size_t indent = 0)
 {
     if (fprintf(_output, "\"%s\"", static_cast<char const *>(s)) < 0)
         return E_FAIL;
@@ -285,7 +285,7 @@ ECode CTest::TestECode(
     return TestNonarray<ECode, &OutputECode>(ecode, "ECode");
 }
 
-ECode CTest::Output(PVoid ptr, size_t indent = 0)
+inline ECode CTest::Output(PVoid ptr, size_t indent = 0)
 {
     if (fprintf(_output, "%p", ptr) < 0)
         return E_FAIL;
@@ -463,7 +463,7 @@ ECode CTest::TestCARArrayOfECode(
     return TestArray<ECode, &OutputECode>(ecodes, "ECode");
 }
 
-ECode CTest::Output(ITest *itest, size_t indent = 0)
+inline ECode CTest::Output(ITest *itest, size_t indent = 0)
 {
     if (fprintf(_output, "%p", itest) < 0)
         return E_FAIL;

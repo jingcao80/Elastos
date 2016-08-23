@@ -147,33 +147,33 @@ private:
     template<class T, ECode (CTest::*)(T, size_t)>
     ECode TestNonarray(T nonarray, char const *name);
 
-    inline ECode Output(Int16 i16, size_t indent);
+    ECode Output(Int16 i16, size_t indent);
 
-    inline ECode Output(Int32 i32, size_t indent);
+    ECode Output(Int32 i32, size_t indent);
 
-    inline ECode Output(Int64 i64, size_t indent);
+    ECode Output(Int64 i64, size_t indent);
 
-    inline ECode Output(Byte byte, size_t indent);
+    ECode Output(Byte byte, size_t indent);
 
-    inline ECode Output(Float f, size_t indent);
+    ECode Output(Float f, size_t indent);
 
-    inline ECode Output(Double d, size_t indent);
+    ECode Output(Double d, size_t indent);
 
-    inline ECode Output(Char32 c32, size_t indent);
+    ECode Output(Char32 c32, size_t indent);
 
-    inline ECode Output(String const &s, size_t indent);
+    ECode Output(String const &s, size_t indent);
 
-    inline ECode OutputBoolean(Boolean b, size_t indent);
+    ECode OutputBoolean(Boolean b, size_t indent);
 
-    inline ECode Output(EMuid const &id, size_t indent);
+    ECode Output(EMuid const &id, size_t indent);
 
-    inline ECode Output(EGuid const &id, size_t indent);
+    ECode Output(EGuid const &id, size_t indent);
 
-    inline ECode OutputECode(ECode ecode, size_t indent);
+    ECode OutputECode(ECode ecode, size_t indent);
 
-    inline ECode Output(PVoid ptr, size_t indent);
+    ECode Output(PVoid ptr, size_t indent);
 
-    inline ECode OutputETest(ETest etest, size_t indent);
+    ECode OutputETest(ETest etest, size_t indent);
 
     template<class T, ECode (CTest::*)(T, size_t)>
     ECode Output(size_t size, typename RemoveReference<T>::Type const array[], size_t indent);
@@ -183,11 +183,11 @@ private:
             ArrayOf<typename RemoveConst<typename RemoveReference<T>::Type>::Type> const &array,
             char const *name);
 
-    inline ECode Output(ITest *itest, size_t indent);
+    ECode Output(ITest *itest, size_t indent);
 
-    inline ECode Output(STestHelper const &stest, size_t indent);
+    ECode Output(STestHelper const &stest, size_t indent);
 
-    inline ECode Output(STest const &stest, size_t indent);
+    ECode Output(STest const &stest, size_t indent);
 
     template<class T, ECode (CTest::*)(T, size_t)>
     ECode Output(size_t m, size_t n, typename RemoveReference<T>::Type const *vv, size_t indent);
