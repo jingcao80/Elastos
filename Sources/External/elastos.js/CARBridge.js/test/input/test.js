@@ -1,5 +1,5 @@
 
 let CARBridge = require('CARBridge.js');
 
-let Test = CARBridge.require('./Test.eco');
+let Test = CARBridge.require('./TestCAR/Test.eco');
 

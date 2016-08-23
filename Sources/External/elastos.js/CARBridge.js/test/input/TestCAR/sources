@@ -1,0 +1,16 @@
+TARGET_NAME = Test
+TARGET_TYPE = eco
+
+#C_FLAGS += -std=c++11
+#C_FLAGS += -Wall
+#C_FLAGS += -O0
+
+include $(XDK_SOURCE_PATH)/Elastos/LibCore/src/sources.inc
+
+SOURCES += Test.car
+SOURCES += CTest.cpp
+
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib

@@ -1,0 +1,235 @@
+module Test.eco
+{
+    importlib("Elastos.CoreLibrary.eco");
+
+    interface IInterface;
+    interface IObject;
+    interface IAspect;
+    interface IClassObject;
+    interface ITest;
+    interface IWeakReferenceSource;
+    interface IWeakReference;
+
+    enum ETest {
+        ETest_0 = 0,
+        ETest_1 = 1,
+    }
+
+    typedef [dummytype] EGuid ClassID;
+    typedef [dummytype] Int32 AggregateType;
+    typedef [dummytype] EMuid InterfaceID;
+
+    struct STestHelper {
+        Int16 i16;
+    }
+
+    struct STest {
+        Int16 i16;
+        Int32 i32;
+        Int64 i64;
+        Byte byte;
+        Float f;
+        Double d;
+        Char32 c32;
+        Boolean b;
+        EMuid emuid;
+        EGuid eguid;
+        ECode ecode;
+        PVoid ptr;
+        ETest etest;
+        struct STestHelper stest;
+        Int16 vi16[2];
+        Int32 vi32[2];
+        Int64 vi64[2];
+        Byte vbyte[2];
+        Float vf[2];
+        Double vd[2];
+        Char32 vc32[2];
+        Boolean vb[2];
+        EMuid vemuid[2];
+        EGuid veguid[2];
+        ECode vecode[2];
+        PVoid vptr[2];
+        ETest vetest[2];
+        struct STestHelper vstest[2];
+        Int16 vvi16[2][2];
+        Int32 vvi32[2][2];
+        Int64 vvi64[2][2];
+        Byte vvbyte[2][2];
+        Float vvf[2][2];
+        Double vvd[2][2];
+        Char32 vvc32[2][2];
+        Boolean vvb[2][2];
+        EMuid vvemuid[2][2];
+        EGuid vveguid[2][2];
+        ECode vvecode[2][2];
+        PVoid vvptr[2][2];
+        ETest vvetest[2][2];
+        struct STestHelper vvstest[2][2];
+    }
+
+    interface IInterface {
+    }
+
+    interface IObject {
+        Aggregate(
+            [in] Int32 type, 
+            [in] IInterface * object);
+
+        GetDomain(
+            [out] IInterface ** object);
+
+        GetClassID(
+            [out] ClassID * clsid);
+
+        GetHashCode(
+            [out] Int32 * pHashCode);
+
+        Equals(
+            [in] IInterface * pInterface, 
+            [out] Boolean * pEquals);
+
+        ToString(
+            [out] String * pInfo);
+    }
+
+    interface IAspect {
+        AspectAggregate(
+            [in] AggregateType type, 
+            [in] IInterface * object);
+
+        AspectGetDomain(
+            [out] IInterface ** object);
+
+        GetAspectID(
+            [out] ClassID * clsid);
+    }
+
+    interface IClassObject {
+        CreateObject(
+            [in] IInterface * outer, 
+            [in] InterfaceID riid, 
+            [out] IInterface ** object);
+
+        StayResident(
+            [in] Boolean bIsStayResident);
+    }
+
+    [
+        local
+    ]
+    interface ITest {
+        TestVoid();
+
+        TestInt16(
+            [in] Int16 i16);
+
+        TestInt32(
+            [in] Int32 i32);
+
+        TestInt64(
+            [in] Int64 i64);
+
+        TestByte(
+            [in] Byte byte);
+
+        TestFloat(
+            [in] Float f);
+
+        TestDouble(
+            [in] Double d);
+
+        TestChar32(
+            [in] Char32 c32);
+
+        TestString(
+            [in] const String& s);
+
+        TestBoolean(
+            [in] Boolean b);
+
+        TestEMuid(
+            [in] EMuid id);
+
+        TestEGuid(
+            [in] EGuid id);
+
+        TestECode(
+            [in] ECode ecode);
+
+        TestLocalPtr(
+            [in] PVoid ptr);
+
+        TestEnum(
+            [in] ETest etest);
+
+        TestCARArray(
+            [in] ArrayOf<Int16> i16s);
+
+        TestCARArray(
+            [in] ArrayOf<Int32> i32s);
+
+        TestCARArray(
+            [in] ArrayOf<Int64> i64s);
+
+        TestCARArray(
+            [in] ArrayOf<Byte> bytes);
+
+        TestCARArray(
+            [in] ArrayOf<Float> fs);
+
+        TestCARArray(
+            [in] ArrayOf<Double> ds);
+
+        TestCARArrayOfEnum(
+            [in] ArrayOf<ETest> etests);
+
+        TestCARArray(
+            [in] ArrayOf<Char32> c32s);
+
+        TestCARArray(
+            [in] ArrayOf<String> ss);
+
+        TestCARArrayOfBoolean(
+            [in] ArrayOf<Boolean> bs);
+
+        TestCARArray(
+            [in] ArrayOf<EMuid> ids);
+
+        TestCARArray(
+            [in] ArrayOf<EGuid> ids);
+
+        TestCARArrayOfECode(
+            [in] ArrayOf<ECode> ecodes);
+
+        TestCARArray(
+            [in] ArrayOf<ITest *> itests);
+
+        TestCARArray(
+            [in] ArrayOf<struct STest> stests);
+
+        TestStruct(
+            [in] struct STest stest);
+
+        TestInterface(
+            [in] ITest * itest);
+    }
+
+    interface IWeakReferenceSource {
+        GetWeakReference(
+            [out] IWeakReference ** weakReference);
+    }
+
+    interface IWeakReference {
+        Resolve(
+            [in] InterfaceID riid, 
+            [out] IInterface ** objectReference);
+    }
+
+    [
+
+    ]
+    class CTest {
+        interface ITest;
+    }
+}

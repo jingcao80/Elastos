@@ -1,9 +1,14 @@
 
 module {
+    importlib("Elastos.CoreLibrary.eco");
+
     enum ETest {
         ETest_0,
-        ETest_1,
-        ETest_2
+        ETest_1
+    }
+
+    struct STestHelper {
+        Int16 i16;
     }
 
     struct STest {
@@ -17,17 +22,56 @@ module {
         Boolean b;
         EMuid emuid;
         EGuid eguid;
-        ECode ec;
-        LocalPtr localPtr;
-        LocalType localTypeObject;
-        enum ETest etest;
-        struct SInnerTest {
-            Int16 i16;
-        } stest;
-        cppVector;
+        ECode ecode;
+        PVoid ptr;
+        /**
+         * Do not test it temporarily.
+         */
+        //LocalType object;
+        ETest etest;
+        STestHelper stest;
+        Int16 vi16[2];
+        Int32 vi32[2];
+        Int64 vi64[2];
+        Byte vbyte[2];
+        Float vf[2];
+        Double vd[2];
+        Char32 vc32[2];
+        Boolean vb[2];
+        EMuid vemuid[2];
+        EGuid veguid[2];
+        ECode vecode[2];
+        PVoid vptr[2];
+        /**
+         * Do not test it temporarily.
+         */
+        //LocalType vobject[2];
+        ETest vetest[2];
+        STestHelper vstest[2];
+        Int16 vvi16[2][2];
+        Int32 vvi32[2][2];
+        Int64 vvi64[2][2];
+        Byte vvbyte[2][2];
+        Float vvf[2][2];
+        Double vvd[2][2];
+        Char32 vvc32[2][2];
+        Boolean vvb[2][2];
+        EMuid vvemuid[2][2];
+        EGuid vveguid[2][2];
+        ECode vvecode[2][2];
+        PVoid vvptr[2][2];
+        /**
+         * Do not test it temporarily.
+         */
+        //LocalType vvobject[2][2];
+        ETest vvetest[2][2];
+        STestHelper vvstest[2][2];
     }
 
+    [local]
     interface ITest {
+        TestVoid();
+
         TestInt16(
                 [in] Int16 i16);
 
@@ -62,77 +106,80 @@ module {
                 [in] EGuid id);
 
         TestECode(
-                [in] ECode ec);
+                [in] ECode ecode);
 
         TestLocalPtr(
-                [in] LocalPtr localPtr);
+                [in] PVoid ptr);
 
-        TestLocalType(
-                [in] PVoid localTypeObject);
+        /**
+         * Do not test it temporarily.
+         */
+        //TestLocalType(
+                //[in] LocalType object);
 
         TestEnum(
-                [in] enum ETest etest);
+                [in] ETest etest);
 
         TestCARArray(
-                [in] ArrayOf<Int16> carArray);
+                [in] ArrayOf<Int16> i16s);
 
         TestCARArray(
-                [in] ArrayOf<Int32> carArray);
+                [in] ArrayOf<Int32> i32s);
 
         TestCARArray(
-                [in] ArrayOf<Int64> carArray);
+                [in] ArrayOf<Int64> i64s);
 
         TestCARArray(
-                [in] ArrayOf<Byte> carArray);
+                [in] ArrayOf<Byte> bytes);
 
         TestCARArray(
-                [in] ArrayOf<Float> carArray);
+                [in] ArrayOf<Float> fs);
 
         TestCARArray(
-                [in] ArrayOf<Double> carArray);
+                [in] ArrayOf<Double> ds);
+
+        TestCARArrayOfEnum(
+                [in] ArrayOf<ETest> etests);
 
         TestCARArray(
-                [in] ArrayOf<enum ETest> carArray);
+                [in] ArrayOf<Char32> c32s);
 
         TestCARArray(
-                [in] ArrayOf<Char32> carArray);
+                [in] ArrayOf<String> ss);
+
+        TestCARArrayOfBoolean(
+                [in] ArrayOf<Boolean> bs);
 
         TestCARArray(
-                [in] ArrayOf<String> carArray);
+                [in] ArrayOf<EMuid> ids);
 
         TestCARArray(
-                [in] ArrayOf<Boolean> carArray);
+                [in] ArrayOf<EGuid> ids);
+
+        TestCARArrayOfECode(
+                [in] ArrayOf<ECode> ecodes);
+
+        /**
+         * Do not test it temporarily.
+         */
+        //TestCARArray(
+                //[in] ArrayOf<LocalType> objects);
 
         TestCARArray(
-                [in] ArrayOf<EMuid> carArray);
+                [in] ArrayOf<ITest *> itests);
 
         TestCARArray(
-                [in] ArrayOf<EGuid> carArray);
-
-        TestCARArray(
-                [in] ArrayOf<ECode> carArray);
-
-        TestCARArray(
-                [in] ArrayOf<> carArray);
-
-        TestCARArray(
-                [in] ArrayOf<ITest *> carArray);
-
-        TestCARArray(
-                [in] ArrayOf<struct STest> carArray);
-
-        TestCPPVector(
-                [in] PCarQuintet cppVector);
+                [in] ArrayOf<STest> stests);
 
         TestStruct(
-                [in] struct STest stest);
+                [in] STest stest);
 
         TestInterface(
                 [in] ITest *itest);
     }
 
     class CTest {
-        constructor(void);
+        constructor();
 
         interface ITest;
     }
