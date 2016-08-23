@@ -1,4 +1,7 @@
 
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Widget.h"
+#include <Elastos.CoreLibrary.h>
 #include "elastos/droid/contacts/common/list/ContactEntryListAdapter.h"
 #include "elastos/droid/contacts/common/list/ContactListItemView.h"
 #include "elastos/droid/contacts/common/list/ContactListPinnedHeaderView.h"
@@ -14,13 +17,12 @@
 #include <elastos/utility/etl/HashSet.h>
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
-#include "Elastos.Droid.Provider.h"
-#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Contacts::Common::ContactPhotoManager;
 using Elastos::Droid::Contacts::Common::List::EIID_IContactEntryListAdapter;
 using Elastos::Droid::Contacts::Common::Util::SearchUtil;
+using Elastos::Droid::Common::Widget::ICompositeCursorAdapterPartition;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriBuilder;
@@ -31,6 +33,7 @@ using Elastos::Droid::Provider::IContactsContractContactsColumns;
 using Elastos::Droid::Provider::IContactsContractContacts;
 using Elastos::Droid::Provider::CContactsContractContacts;
 using Elastos::Droid::Provider::IContactsContract;
+using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::LayoutInflater;
@@ -38,6 +41,8 @@ using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IQuickContactBadge;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
 using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::Logging::Logger;
 
@@ -49,7 +54,7 @@ namespace List {
 
 const String ContactEntryListAdapter::TAG("ContactEntryListAdapter");
 
-CAR_INTERFACE_DECL(ContactEntryListAdapter, IndexerListAdapter, IContactEntryListAdapter)
+CAR_INTERFACE_IMPL(ContactEntryListAdapter, IndexerListAdapter, IContactEntryListAdapter)
 
 ContactEntryListAdapter::ContactEntryListAdapter()
     : mDisplayOrder(0)
@@ -103,7 +108,8 @@ AutoPtr<IView> ContactEntryListAdapter::NewView(
     /* [in] */ Int32 position,
     /* [in] */ IViewGroup* parent)
 {
-    AutoPtr<ContactListItemView> view = new ContactListItemView(context, NULL);
+    AutoPtr<ContactListItemView> view = new ContactListItemView();
+    view->constructor(context, NULL);
     Boolean enabled;
     IsSectionHeaderDisplayEnabled(&enabled);
     view->SetIsSectionHeaderEnabled(enabled);
@@ -113,7 +119,7 @@ AutoPtr<IView> ContactEntryListAdapter::NewView(
 }
 
 void ContactEntryListAdapter::BindView(
-    /* [in] */ IView* v,
+    /* [in] */ IView* itemView,
     /* [in] */ Int32 partition,
     /* [in] */ ICursor* cursor,
     /* [in] */ Int32 position)
@@ -128,7 +134,7 @@ AutoPtr<IView> ContactEntryListAdapter::CreatePinnedSectionHeaderView(
     /* [in] */ IContext* context,
     /* [in] */ IViewGroup* parent)
 {
-    AutoPtr<ContactListPinnedHeaderView> view = new ContactListPinnedHeaderView(context, NULL, parent);
+    AutoPtr<ContactListPinnedHeaderView> view = new ContactListPinnedHeaderView(context, NULL, IView::Probe(parent));
     return IView::Probe(view);
 }
 
@@ -136,13 +142,14 @@ void ContactEntryListAdapter::SetPinnedSectionTitle(
     /* [in] */ IView* pinnedHeaderView,
     /* [in] */ const String& title)
 {
-    AutoPtr<ContactListItemView> view = (ContactListItemView*)IContactListItemView::Probe(pinnedHeaderView);
+    AutoPtr<ContactListPinnedHeaderView> view
+            = (ContactListPinnedHeaderView*)IContactListPinnedHeaderView::Probe(pinnedHeaderView);
     view->SetSectionHeaderTitle(title);
 }
 
 void ContactEntryListAdapter::AddPartitions()
 {
-    AutoPtr<IDirectoryPartition> partition = CreateDefaultDirectoryPartition()
+    AutoPtr<IDirectoryPartition> partition = CreateDefaultDirectoryPartition();
     AddPartition(ICompositeCursorAdapterPartition::Probe(partition));
 }
 
@@ -192,7 +199,7 @@ Int32 ContactEntryListAdapter::GetPartitionByDirectoryId(
         GetPartition(i, (ICompositeCursorAdapterPartition**)&temp);
         AutoPtr<IDirectoryPartition> partition = IDirectoryPartition::Probe(temp);
         if (partition != NULL) {
-            if ((DirectoryPartition*)partition.Get())->GetDirectoryId() == id) {
+            if (((DirectoryPartition*)partition.Get())->GetDirectoryId() == id) {
                 return i;
             }
         }
@@ -286,13 +293,10 @@ ECode ContactEntryListAdapter::SetQueryString(
 {
     mQueryString = queryString;
     if (TextUtils::IsEmpty(queryString)) {
-        mUpperCaseQueryString = NULL;
+        mUpperCaseQueryString = String(NULL);
     }
     else {
-        String str = SearchUtil::CleanStartAndEndOfSearchQuery(queryString.ToUpperCase());
-        AutoPtr<ICharSequence> cs;
-        CString::New(str, (ICharSequence**)&cs);
-        mUpperCaseQueryString = cs;
+        mUpperCaseQueryString = SearchUtil::CleanStartAndEndOfSearchQuery(queryString.ToUpperCase());
     }
     return NOERROR;
 }
@@ -301,7 +305,8 @@ ECode ContactEntryListAdapter::GetUpperCaseQueryString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    return mUpperCaseQueryString->ToString(result);
+    *result = mUpperCaseQueryString;
+    return NOERROR;
 }
 
 ECode ContactEntryListAdapter::GetDirectorySearchMode(
@@ -333,7 +338,7 @@ ECode ContactEntryListAdapter::GetDirectoryResultLimit(
 {
     VALIDATE_NOT_NULL(limit)
     Int32 lim = ((DirectoryPartition*)directoryPartition)->GetResultLimit();
-    *limit = lim == IDirectoryPartition::RESULT_LIMIT_DEFAULT ? mDirectoryResultLimit : limit;
+    *limit = lim == IDirectoryPartition::RESULT_LIMIT_DEFAULT ? mDirectoryResultLimit : lim;
     return NOERROR;
 }
 
@@ -504,7 +509,7 @@ ECode ContactEntryListAdapter::SetProfileExists(
             GetContext((IContext**)&context);
             String header;
             context->GetString(Elastos::Droid::Dialer::R::string::user_profile_contacts_list_header, &header);
-            ((ContactsSectionIndexer*)indexer)->SetProfileHeader(header);
+            ((ContactsSectionIndexer*)indexer.Get())->SetProfileHeader(header);
         }
     }
     return NOERROR;
@@ -538,7 +543,7 @@ ECode ContactEntryListAdapter::ChangeDirectories(
     HashSet<Int64> directoryIds;
 
     Int32 idColumnIndex;
-    cursor->GetColumnIndex(IContactsContractDirectory::ID, &idColumnIndex);
+    cursor->GetColumnIndex(IBaseColumns::ID, &idColumnIndex);
     Int32 directoryTypeColumnIndex;
     cursor->GetColumnIndex(DirectoryListLoader::DIRECTORY_TYPE, &directoryTypeColumnIndex);
     Int32 displayNameColumnIndex;
@@ -555,8 +560,8 @@ ECode ContactEntryListAdapter::ChangeDirectories(
         Int64 id;
         cursor->GetInt64(idColumnIndex, &id);
         directoryIds.Insert(id);
-        Int32 partition;
-        if (GetPartitionByDirectoryId(id, &partition), partition == -1) {
+        Int32 partition = GetPartitionByDirectoryId(id);
+        if (partition == -1) {
             AutoPtr<DirectoryPartition> partition = new DirectoryPartition(FALSE, TRUE);
             partition->SetDirectoryId(id);
             if (IsRemoteDirectory(id)) {
@@ -583,7 +588,6 @@ ECode ContactEntryListAdapter::ChangeDirectories(
     }
 
     // Phase II: remove deleted directories
-    Int32 count;
     GetPartitionCount(&count);
     for (Int32 i = count; --i >= 0; ) {
         AutoPtr<ICompositeCursorAdapterPartition> temp;
@@ -591,7 +595,7 @@ ECode ContactEntryListAdapter::ChangeDirectories(
         AutoPtr<IDirectoryPartition> partition = IDirectoryPartition::Probe(temp);
         if (partition != NULL) {
             Int64 id = ((DirectoryPartition*)partition.Get())->GetDirectoryId();
-            if (directoryIds.Find(id) == directories.End()) {
+            if (directoryIds.Find(id) == directoryIds.End()) {
                 RemovePartition(i);
             }
         }
@@ -655,7 +659,7 @@ void ContactEntryListAdapter::UpdateIndexer(
     AutoPtr<IBundle> bundle;
     cursor->GetExtras((IBundle**)&bundle);
     Boolean containsT, containsC;
-    if ((bundle->ContainsKey(IContactsContractContactCounts::EXTRA_ADDRESS_BOOK_INDEX_TITLES, &contains), contains) &&
+    if ((bundle->ContainsKey(IContactsContractContactCounts::EXTRA_ADDRESS_BOOK_INDEX_TITLES, &containsT), containsT) &&
             (bundle->ContainsKey(IContactsContractContactCounts::EXTRA_ADDRESS_BOOK_INDEX_COUNTS, &containsC), containsC)) {
         AutoPtr<ArrayOf<String> > sections;
         bundle->GetStringArray(IContactsContractContactCounts::EXTRA_ADDRESS_BOOK_INDEX_TITLES,
@@ -705,7 +709,7 @@ ECode ContactEntryListAdapter::GetViewTypeCount(
 }
 
 Int32 ContactEntryListAdapter::GetItemViewType(
-    /* [in] */ Int32 partition,
+    /* [in] */ Int32 partitionIndex,
     /* [in] */ Int32 position)
 {
     Int32 type = IndexerListAdapter::GetItemViewType(partitionIndex, position);
@@ -834,7 +838,7 @@ AutoPtr<IView> ContactEntryListAdapter::NewHeaderView(
 
 void ContactEntryListAdapter::BindHeaderView(
     /* [in] */ IView* view,
-    /* [in] */ Int32 partition,
+    /* [in] */ Int32 partitionIndex,
     /* [in] */ ICursor* cursor)
 {
     AutoPtr<ICompositeCursorAdapterPartition> temp;
@@ -856,7 +860,7 @@ void ContactEntryListAdapter::BindHeaderView(
     CString::New(directoryPartition->GetLabel(), (ICharSequence**)&labelCS);
     labelTextView->SetText(labelCS);
     if (!IsRemoteDirectory(directoryId)) {
-        displayNameTextView->SetText(NULL);
+        displayNameTextView->SetText((ICharSequence*)NULL);
     }
     else {
         String directoryName = directoryPartition->GetDisplayName();
@@ -876,7 +880,8 @@ void ContactEntryListAdapter::BindHeaderView(
     GetPartition(0, (ICompositeCursorAdapterPartition**)&temp1);
     AutoPtr<DirectoryPartition> dp = (DirectoryPartition*)IDirectoryPartition::Probe(temp1);
     Int32 offset;
-    Int32 headerPaddingTop = partitionIndex == 1 && dp->IsEmpty()?
+    Boolean isEmpty;
+    Int32 headerPaddingTop = partitionIndex == 1 && (dp->IsEmpty(&isEmpty), isEmpty)?
             0 : (res->GetDimensionPixelOffset(Elastos::Droid::Dialer::R::dimen::directory_header_extra_top_padding, &offset), offset);
     // There should be no extra padding at the top of the first directory header
     Int32 start, end, bottom;
@@ -910,7 +915,7 @@ Boolean ContactEntryListAdapter::IsUserProfile(
             Int32 offset;
             cursor->GetPosition(&offset);
             AutoPtr<IInterface> temp;
-            GetItem(position, (IInterface**)&temp)
+            GetItem(position, (IInterface**)&temp);
             cursor = ICursor::Probe(temp);
             if (cursor != NULL) {
                 Int32 profileColumnIndex;
@@ -1015,7 +1020,7 @@ void ContactEntryListAdapter::BindQuickContact(
     quickContact->AssignContactUri(uri);
 
     if (photoId != 0 || photoUriColumn == -1) {
-        GetPhotoLoader()->LoadThumbnail(quickContact, photoId, mDarkTheme, mCircularPhotos, NULL);
+        GetPhotoLoader()->LoadThumbnail(IImageView::Probe(quickContact), photoId, mDarkTheme, mCircularPhotos, NULL);
     }
     else {
         String photoUriString;
@@ -1031,7 +1036,7 @@ void ContactEntryListAdapter::BindQuickContact(
             GetDefaultImageRequestFromCursor(cursor, displayNameColumn,
                     lookUpKeyColumn, (IContactPhotoManagerDefaultImageRequest**)&request);
         }
-        GetPhotoLoader()->LoadPhoto(quickContact, photoUri, -1, mDarkTheme, mCircularPhotos,
+        GetPhotoLoader()->LoadPhoto(IImageView::Probe(quickContact), photoUri, -1, mDarkTheme, mCircularPhotos,
                 request);
     }
 }

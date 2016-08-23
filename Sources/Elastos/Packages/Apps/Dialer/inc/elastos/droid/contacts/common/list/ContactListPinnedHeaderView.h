@@ -23,12 +23,15 @@ namespace List {
  */
 class ContactListPinnedHeaderView
     : public TextView
+    , public IContactListPinnedHeaderView
 {
 public:
     ContactListPinnedHeaderView(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ IView* parent);
+
+    CAR_INTERFACE_DECL()
 
     /**
      * Sets section header or makes it invisible if the title is null.

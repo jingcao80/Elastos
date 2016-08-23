@@ -115,7 +115,6 @@ module
         LoadDirectoryPhoto(
             [in] IImageView* view,
             [in] IUri* photoUri,
-            [in] Int32 requestedExtent,
             [in] Boolean darkTheme,
             [in] Boolean isCircular,
             [in] IContactPhotoManagerDefaultImageRequest* defaultImageRequest);

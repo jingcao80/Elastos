@@ -17,6 +17,7 @@ using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Text::TextUtilsTruncateAt;
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Widget::ISelectionBoundsAdjuster;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IQuickContactBadge;

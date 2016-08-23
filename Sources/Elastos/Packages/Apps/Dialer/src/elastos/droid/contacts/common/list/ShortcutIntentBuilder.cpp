@@ -1,9 +1,11 @@
 
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.Utility.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/contacts/common/list/ShortcutIntentBuilder.h"
 #include "elastos/droid/contacts/common/ContactPhotoManager.h"
@@ -53,6 +55,7 @@ using Elastos::Droid::Text::CTextPaint;
 using Elastos::Droid::Text::TextUtilsTruncateAt_END;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CString;
 using Elastos::IO::ICloseable;
 
 namespace Elastos {
@@ -162,8 +165,8 @@ ShortcutIntentBuilder::PhoneNumberLoadingAsyncTask::PhoneNumberLoadingAsyncTask(
     /* [in] */ IUri* uri,
     /* [in] */ const String& shortcutAction)
     : LoadingAsyncTask(host, uri)
-    , mPhoneType(0)
     , mShortcutAction(shortcutAction)
+    , mPhoneType(0)
 {}
 
 void ShortcutIntentBuilder::PhoneNumberLoadingAsyncTask::LoadData()
@@ -271,15 +274,17 @@ void ShortcutIntentBuilder::CreateContactShortcutIntent(
     /* [in] */ IUri* contactUri)
 {
     AutoPtr<ContactLoadingAsyncTask> task = new ContactLoadingAsyncTask(this, contactUri);
-    task->Execute();
+    AutoPtr<ArrayOf<IInterface*> > agrs = ArrayOf<IInterface*>::Alloc(0);
+    task->Execute(agrs);
 }
 
 void ShortcutIntentBuilder::CreatePhoneNumberShortcutIntent(
-    /* [in] */ IUri* dataUri,
+    /* [in] */ IUri* contactUri,
     /* [in] */ const String& shortcutAction)
 {
     AutoPtr<PhoneNumberLoadingAsyncTask> task = new PhoneNumberLoadingAsyncTask(this, contactUri, shortcutAction);
-    task->Execute();
+    AutoPtr<ArrayOf<IInterface*> > agrs = ArrayOf<IInterface*>::Alloc(0);
+    task->Execute(agrs);
 }
 
 AutoPtr<IDrawable> ShortcutIntentBuilder::GetPhotoDrawable(
@@ -294,14 +299,14 @@ AutoPtr<IDrawable> ShortcutIntentBuilder::GetPhotoDrawable(
         factory->DecodeByteArray(bitmapData, 0, bitmapData->GetLength(), NULL, (IBitmap**)&bitmap);
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
-        AutoPtr<IBitmap> bm;
-        CBitmapDrawable::New(res, bitmap, (IBitmap**)&bm);
-        return bm;
+        AutoPtr<IDrawable> drawable;
+        CBitmapDrawable::New(res, bitmap, (IDrawable**)&drawable);
+        return drawable;
     }
     else {
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
-        AutoPtr<ContactPhotoManagerDefaultImageRequest> request
+        AutoPtr<ContactPhotoManager::DefaultImageRequest> request
                 = new ContactPhotoManager::DefaultImageRequest(displayName, lookupKey, FALSE);
         return ContactPhotoManager::GetDefaultAvatarDrawableForContact(res, FALSE, request);
     }
@@ -372,14 +377,14 @@ void ShortcutIntentBuilder::CreatePhoneNumberShortcutIntent(
         // Make the URI a direct tel: URI so that it will always continue to work
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-        helper->FormParts(IPhoneAccount::SCHEME_TEL, phoneNumber, String(NULL), (IUri**)&phoneUri);
+        helper->FromParts(IPhoneAccount::SCHEME_TEL, phoneNumber, String(NULL), (IUri**)&phoneUri);
         bitmap = GeneratePhoneNumberIcon(drawable, phoneType, phoneLabel,
                 Elastos::Droid::Dialer::R::drawable::badge_action_call);
     }
     else {
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-        helper->FormParts(ContactsUtils::SCHEME_SMSTO, phoneNumber, String(NULL), (IUri**)&phoneUri);
+        helper->FromParts(ContactsUtils::SCHEME_SMSTO, phoneNumber, String(NULL), (IUri**)&phoneUri);
         bitmap = GeneratePhoneNumberIcon(drawable, phoneType, phoneLabel,
                 Elastos::Droid::Dialer::R::drawable::badge_action_sms);
     }
@@ -397,7 +402,7 @@ void ShortcutIntentBuilder::CreatePhoneNumberShortcutIntent(
     mListener->OnShortcutIntentCreated(uri, intent);
 }
 
-AutoPtr<IBitmap> ShortcutIntentBuilder::CenerateQuickContactIcon(
+AutoPtr<IBitmap> ShortcutIntentBuilder::GenerateQuickContactIcon(
     /* [in] */ IDrawable* photo)
 {
     // Setup the drawing classes
@@ -430,7 +435,7 @@ AutoPtr<IBitmap> ShortcutIntentBuilder::CenerateQuickContactIcon(
     return roundedBitmap;
 }
 
-AutoPtr<IBitmap> ShortcutIntentBuilder::CeneratePhoneNumberIcon(
+AutoPtr<IBitmap> ShortcutIntentBuilder::GeneratePhoneNumberIcon(
     /* [in] */ IDrawable* photo,
     /* [in] */ Int32 phoneType,
     /* [in] */ const String& phoneLabel,
@@ -464,7 +469,9 @@ AutoPtr<IBitmap> ShortcutIntentBuilder::CeneratePhoneNumberIcon(
     AutoPtr<IContactsContractCommonDataKindsPhone> phone;
     CContactsContractCommonDataKindsPhone::AcquireSingleton((IContactsContractCommonDataKindsPhone**)&phone);
     AutoPtr<ICharSequence> overlay;
-    phone->GetTypeLabel(r, phoneType, phoneLabel, (ICharSequence**)&overlay);
+    AutoPtr<ICharSequence> cs;
+    CString::New(phoneLabel, (ICharSequence**)&cs);
+    phone->GetTypeLabel(r, phoneType, cs, (ICharSequence**)&overlay);
 
     if (overlay != NULL) {
         AutoPtr<IPaint> textPaint;
@@ -473,10 +480,10 @@ AutoPtr<IBitmap> ShortcutIntentBuilder::CeneratePhoneNumberIcon(
         r->GetDimension(Elastos::Droid::Dialer::R::dimen::shortcut_overlay_text_size, &dimension);
         textPaint->SetTextSize(dimension);
         Int32 color;
-        r->GetColor(Elastos::Droid::Dialer::R::color::textColorIconOverlay, &color)
+        r->GetColor(Elastos::Droid::Dialer::R::color::textColorIconOverlay, &color);
         textPaint->SetColor(color);
-        r->GetColor(Elastos::Droid::Dialer::R::color::textColorIconOverlayShadow, &color)
-        textPaint->SetShadowLayer(4f, 0, 2f, color);
+        r->GetColor(Elastos::Droid::Dialer::R::color::textColorIconOverlayShadow, &color);
+        textPaint->SetShadowLayer(4.0, 0, 2.0, color);
 
         AutoPtr<IPaintFontMetricsInt> fmi;
         textPaint->GetFontMetricsInt((IPaintFontMetricsInt**)&fmi);
@@ -495,11 +502,13 @@ AutoPtr<IBitmap> ShortcutIntentBuilder::CeneratePhoneNumberIcon(
         dst->Set(0, mIconSize - textBandHeight, mIconSize, mIconSize);
         canvas->DrawRect(dst, workPaint);
 
-        overlay = TextUtils::Ellipsize(overlay, textPaint, mIconSize, TextUtilsTruncateAt_END);
+        overlay = TextUtils::Ellipsize(overlay, ITextPaint::Probe(textPaint), mIconSize, TextUtilsTruncateAt_END);
         Float textWidth;
-        textPaint->MeasureText(overlay, 0, overlay->GetLength(), &textWidth);
-        canvas->DrawText(overlay, 0, overlay->GetLength(), (mIconSize - textWidth) / 2, mIconSize
-                - fmi.descent - textPadding, textPaint);
+        Int32 len;
+        overlay->GetLength(&len);
+        textPaint->MeasureText(overlay, 0, len, &textWidth);
+        canvas->DrawText(overlay, 0, len, (mIconSize - textWidth) / 2,
+                mIconSize - descent - textPadding, textPaint);
     }
 
     // Draw the phone action icon as an overlay

@@ -23,6 +23,9 @@ module
     merge("car/elastos/droid/contacts/common/list/ExtendedPhoneDirectoriesManager.car");
     merge("car/elastos/droid/contacts/common/list/AccountFilterActivity.car");
     merge("car/elastos/droid/contacts/common/list/AutoScrollListView.car");
+    merge("car/elastos/droid/contacts/common/list/ContactListPinnedHeaderView.car");
+    merge("car/elastos/droid/contacts/common/list/ContactListFilterView.car");
+    merge("car/elastos/droid/contacts/common/list/CustomContactListFilterActivity.car");
     merge("car/elastos/droid/contacts/common/model/AccountTypeManager.car");
     merge("car/elastos/droid/contacts/common/model/account/AccountTypeWithDataSet.car");
     merge("car/elastos/droid/contacts/common/model/account/AccountType.car");
@@ -158,6 +161,7 @@ module
 //    using interface Elastos.Droid.App.IListActivity;
 //    using interface Elastos.Droid.App.Backup.IBackupAgent;
 //    using interface Elastos.Droid.App.Backup.IBackupAgentHelper;
+    using interface Elastos.Droid.App.ILoaderManagerLoaderCallbacks;
 //    using interface Elastos.Droid.Content.IAsyncQueryHandler;
 //    using interface Elastos.Droid.Content.IAsyncTaskLoader;
     using interface Elastos.Droid.Content.IContextWrapper;
@@ -240,6 +244,7 @@ module
     using interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback;
     using interface Elastos.Droid.Widget.IAbsListViewOnScrollListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+    using interface Elastos.Droid.Widget.IExpandableListViewOnChildClickListener;
     using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
 
@@ -1767,6 +1772,32 @@ module
 //    }
 //
 //    [local]
+//    class CCustomContactListFilterActivity {
+//        interface ICustomContactListFilterActivity;
+//        interface IViewOnClickListener;
+//        interface IExpandableListViewOnChildClickListener;
+//        interface ILoaderManagerLoaderCallbacks;
+//        interface IActivity;
+//        interface IContext;
+//        interface IContextThemeWrapper;
+//        interface ILayoutInflaterFactory;
+//        interface ILayoutInflaterFactory2;
+//        interface IWindowCallback;
+//        interface IKeyEventCallback;
+//        interface IViewOnCreateContextMenuListener;
+//        interface IComponentCallbacks;
+//        interface IComponentCallbacks2;
+//    }
+//
+//    class CGroupDelta {
+//        constructor();
+//
+//        interface IGroupDelta;
+//        interface IValuesDelta;
+//        interface IParcelable;
+//    }
+//
+//    [local]
 //    class CPinnedHeaderListView {
 //        constructor(
 //            [in] IContext* ctx);
@@ -1795,6 +1826,26 @@ module
 //        interface IFilterListener;
 //        interface IOnTouchModeChangeListener;
 //        interface IRemoteAdapterConnectionCallback;
+//        interface IViewParent;
+//        interface IViewManager;
+//        interface IDrawableCallback;
+//        interface IKeyEventCallback;
+//        interface IAccessibilityEventSource;
+//    }
+//
+//    [local]
+//    class CContactListFilterView {
+//        constructor(
+//            [in] IContext* ctx);
+//
+//        constructor(
+//            [in] IContext* ctx,
+//            [in] IAttributeSet* attrs);
+//
+//        interface IContactListFilterView;
+//        interface ILinearLayout;
+//        interface IViewGroup;
+//        interface IView;
 //        interface IViewParent;
 //        interface IViewManager;
 //        interface IDrawableCallback;

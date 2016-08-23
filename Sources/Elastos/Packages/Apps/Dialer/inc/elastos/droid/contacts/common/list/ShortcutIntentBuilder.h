@@ -4,6 +4,7 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include <elastos/core/Object.h>
@@ -64,7 +65,7 @@ private:
     };
 
     class ContactLoadingAsyncTask
-        : LoadingAsyncTask
+        : public LoadingAsyncTask
     {
     public:
         ContactLoadingAsyncTask(
@@ -81,7 +82,7 @@ private:
     };
 
     class PhoneNumberLoadingAsyncTask
-        : LoadingAsyncTask
+        : public LoadingAsyncTask
     {
     public:
         PhoneNumberLoadingAsyncTask(
@@ -139,14 +140,14 @@ private:
         /* [in] */ const String& phoneLabel,
         /* [in] */ const String& shortcutAction);
 
-    CARAPI_(AutoPtr<IBitmap>) CenerateQuickContactIcon(
+    CARAPI_(AutoPtr<IBitmap>) GenerateQuickContactIcon(
         /* [in] */ IDrawable* photo);
 
     /**
      * Generates a phone number shortcut icon. Adds an overlay describing the type of the phone
      * number, and if there is a photo also adds the call action icon.
      */
-    CARAPI_(AutoPtr<IBitmap>) CeneratePhoneNumberIcon(
+    CARAPI_(AutoPtr<IBitmap>) GeneratePhoneNumberIcon(
         /* [in] */ IDrawable* photo,
         /* [in] */ Int32 phoneType,
         /* [in] */ const String& phoneLabel,
