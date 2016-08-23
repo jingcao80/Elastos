@@ -11,13 +11,16 @@
 using Elastos::Droid::Accounts::IAccount;
 using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
 using Elastos::Droid::App::ILoaderManager;
+using Elastos::Droid::App::IActionBar;
 using Elastos::Droid::Contacts::Common::List::EIID_IAccountFilterActivity;
+using Elastos::Droid::Contacts::Common::List::CLSID_CCustomContactListFilterActivity;
 using Elastos::Droid::Contacts::Common::Model::AccountTypeManager;
 using Elastos::Droid::Contacts::Common::Model::Account::IAccountWithDataSet;
 using Elastos::Droid::Contacts::Common::Model::Account::IAccountType;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Os::IParcelable;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IAdapter;
@@ -47,7 +50,7 @@ ECode CAccountFilterActivity::FilterLoader::LoadInBackground(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IList> filters = CAccountFilterActivity::LoadAccountFilters(mContext);
-    *result = IInterface::Probe(filters)
+    *result = IInterface::Probe(filters);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -59,7 +62,8 @@ ECode CAccountFilterActivity::FilterLoader::OnStartLoading()
 
 ECode CAccountFilterActivity::FilterLoader::OnStopLoading()
 {
-    return CancelLoad();
+    Boolean result;
+    return CancelLoad(&result);
 }
 
 ECode CAccountFilterActivity::FilterLoader::OnReset()
@@ -94,7 +98,7 @@ ECode CAccountFilterActivity::MyLoaderCallbacks::OnLoadFinished(
         return NOERROR;
     }
     AutoPtr<FilterListAdapter> listAdapter = new FilterListAdapter(IContext::Probe(mHost),
-            IList::Probe(data), mCurrentFilter);
+            IList::Probe(data), mHost->mCurrentFilter);
     (IAdapterView::Probe(mHost->mListView))->SetAdapter(IAdapter::Probe(listAdapter));
     return NOERROR;
 }
@@ -126,7 +130,7 @@ ECode CAccountFilterActivity::FilterListAdapter::GetCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count)
-    return mFilters->GetSize(&count);
+    return mFilters->GetSize(count);
 }
 
 ECode CAccountFilterActivity::FilterListAdapter::GetItemId(
@@ -209,8 +213,8 @@ ECode CAccountFilterActivity::OnCreate(
 
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
-    AutoPtr<IParcelabel> parcelable;
-    intent->GetParcelableExtra(KEY_EXTRA_CURRENT_FILTER, (IParcelabel**)&parcelable);
+    AutoPtr<IParcelable> parcelable;
+    intent->GetParcelableExtra(KEY_EXTRA_CURRENT_FILTER, (IParcelable**)&parcelable);
     mCurrentFilter = IContactListFilter::Probe(parcelable);
     AutoPtr<ILoaderManager> lm;
     GetLoaderManager((ILoaderManager**)&lm);
@@ -239,11 +243,11 @@ AutoPtr<IList> CAccountFilterActivity::LoadAccountFilters(
         AutoPtr<IAccountWithDataSet> account = IAccountWithDataSet::Probe(next);
         String type, dataSet;
         IAccount::Probe(account)->GetType(&type);
-        accout->GetDataSet(&dataSet);
+        account->GetDataSet(&dataSet);
         AutoPtr<IAccountType> accountType;
         accountTypes->GetAccountType(type, dataSet, (IAccountType**)&accountType);
         Boolean isExtension;
-        Boolean hasData
+        Boolean hasData;
         if ((accountType->IsExtension(&isExtension), isExtension) &&
                 (account->HasData(context, &hasData), !hasData)) {
             // Hide extensions with no raw_contacts.
@@ -300,7 +304,7 @@ ECode CAccountFilterActivity::OnItemClick(
     else {
         AutoPtr<IIntent> intent;
         CIntent::New((IIntent**)&intent);
-        intent->PutExtra(KEY_EXTRA_CONTACT_LIST_FILTER, IParcelabel::Probe(filter));
+        intent->PutExtra(KEY_EXTRA_CONTACT_LIST_FILTER, IParcelable::Probe(filter));
         SetResult(IActivity::RESULT_OK, intent);
         Finish();
     }
@@ -322,7 +326,7 @@ ECode CAccountFilterActivity::OnActivityResult(
             CIntent::New((IIntent**)&intent);
             AutoPtr<IContactListFilter> filter = CContactListFilter::CreateFilterWithType(
                     IContactListFilter::FILTER_TYPE_CUSTOM);
-            intent->PutExtra(KEY_EXTRA_CONTACT_LIST_FILTER, IParcelabel::Probe(filter));
+            intent->PutExtra(KEY_EXTRA_CONTACT_LIST_FILTER, IParcelable::Probe(filter));
             SetResult(IActivity::RESULT_OK, intent);
             Finish();
             break;

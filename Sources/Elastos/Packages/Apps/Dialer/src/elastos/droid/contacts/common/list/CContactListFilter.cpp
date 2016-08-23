@@ -5,6 +5,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Contacts::Common::List::EIID_IContactListFilter;
 using Elastos::Droid::Provider::IContactsContractSyncColumns;
 using Elastos::Droid::Provider::IContactsContractRawContactsColumns;
@@ -82,7 +83,7 @@ ECode CContactListFilter::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    switch (filterType) {
+    switch (mFilterType) {
         case FILTER_TYPE_DEFAULT:
             *str = String("default");
         case FILTER_TYPE_ALL_ACCOUNTS:
@@ -92,11 +93,11 @@ ECode CContactListFilter::ToString(
         case FILTER_TYPE_STARRED:
             *str = String("starred");
         case FILTER_TYPE_WITH_PHONE_NUMBERS_ONLY:
-            return "with_phones");
+            *str = String("with_phones");
         case FILTER_TYPE_SINGLE_CONTACT:
-            return "single");
+            *str = String("single");
         case FILTER_TYPE_ACCOUNT:
-            *str = String("account: ") + mAccountType + (!mDataSet.IsNull()? "/" + mDataSet : "")
+            *str = String("account: ") + mAccountType + (!mDataSet.IsNull()? String("/") + mDataSet : "")
                     + " " + mAccountName;
     }
     return NOERROR;
@@ -143,6 +144,7 @@ ECode CContactListFilter::GetHashCode(
         code = code * 31 + mDataSet.GetHashCode();
     }
     *hashCode = code;
+    return NOERROR;
 }
 
 ECode CContactListFilter::Equals(
@@ -150,13 +152,13 @@ ECode CContactListFilter::Equals(
     /* [out] */ Boolean* isEqual)
 {
     VALIDATE_NOT_NULL(isEqual)
-    if (IInterface::Probe(this) == other) {
+    if (Probe(EIID_IInterface) == obj) {
         *isEqual = TRUE;
         return NOERROR;
     }
 
     AutoPtr<IContactListFilter> otherFilter = IContactListFilter::Probe(obj);
-    if (filter == NULL) {
+    if (otherFilter == NULL) {
         *isEqual = FALSE;
         return NOERROR;
     }
@@ -183,18 +185,19 @@ void CContactListFilter::StoreToPreferences(
     if (filter != NULL && (filter->GetFilterType(&filterType), filterType == FILTER_TYPE_SINGLE_CONTACT)) {
         return;
     }
-    prefs->Edit();
-    prefs->PutInt32(KEY_FILTER_TYPE, filter == NULL ? FILTER_TYPE_DEFAULT : filterType);
+    AutoPtr<ISharedPreferencesEditor> editor;
+    prefs->Edit((ISharedPreferencesEditor**)&editor);
+    editor->PutInt32(KEY_FILTER_TYPE, filter == NULL ? FILTER_TYPE_DEFAULT : filterType);
     String accountName;
-    prefs->PutString(KEY_ACCOUNT_NAME,
+    editor->PutString(KEY_ACCOUNT_NAME,
             filter == NULL ? String(NULL) : (filter->GetAccountName(&accountName), accountName));
     String accountType;
-    prefs->PutString(KEY_ACCOUNT_TYPE,
+    editor->PutString(KEY_ACCOUNT_TYPE,
             filter == NULL ? String(NULL) : (filter->GetAccountType(&accountType), accountType));
     String dataSet;
-    prefs->PutString(KEY_DATA_SET,
+    editor->PutString(KEY_DATA_SET,
             filter == NULL ? String(NULL) : (filter->GetDataSet(&dataSet), dataSet));
-    prefs->Apply();
+    editor->Apply();
 }
 
 AutoPtr<IContactListFilter> CContactListFilter::RestoreDefaultPreferences(
@@ -219,7 +222,7 @@ AutoPtr<IContactListFilter> CContactListFilter::RestoreFromPreferences(
     /* [in] */ ISharedPreferences* prefs)
 {
     Int32 filterType;
-    prefs->GetInt(KEY_FILTER_TYPE, FILTER_TYPE_DEFAULT, &filterType);
+    prefs->GetInt32(KEY_FILTER_TYPE, FILTER_TYPE_DEFAULT, &filterType);
     if (filterType == FILTER_TYPE_DEFAULT) {
         return NULL;
     }
@@ -261,7 +264,7 @@ ECode CContactListFilter::GetId(
 {
     VALIDATE_NOT_NULL(id)
     if (mId.IsNull()) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb;
         sb.Append(mFilterType);
         if (!mAccountType.IsNull()) {
             sb.AppendChar('-');
@@ -319,7 +322,8 @@ ECode CContactListFilter::ToDebugString(
         builder.Append(mDataSet);
     }
     builder.Append(", icon: ");
-    builder.Append(TO_CSTR(mIcon) + "]");
+    builder.Append(TO_CSTR(mIcon));
+    builder.Append("]");
     *debugStr = builder.ToString();
     return NOERROR;
 }

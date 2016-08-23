@@ -8,6 +8,7 @@
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Contacts::Common::List::EIID_IContactListPinnedHeaderView;
 using Elastos::Droid::Contacts::Common::Util::ViewUtil;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Text::TextUtils;
@@ -80,6 +81,8 @@ ContactListPinnedHeaderView::ContactListPinnedHeaderView(
             end,
             bottom);
 }
+
+CAR_INTERFACE_IMPL(ContactListPinnedHeaderView, TextView, IContactListPinnedHeaderView)
 
 void ContactListPinnedHeaderView::SetSectionHeaderTitle(
     /* [in] */ const String& title)

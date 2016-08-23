@@ -1,0 +1,48 @@
+
+module
+{
+
+    interface Elastos.Droid.Contacts.Common.List.IContactListFilter;
+    interface Elastos.Droid.Contacts.Common.Model.IAccountTypeManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.ILinearLayout
+     *
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IContactListFilterView {
+
+        SetContactListFilter(
+            [in] IContactListFilter* filter);
+
+        GetContactListFilter(
+            [out] IContactListFilter** filter);
+
+        SetSingleAccount(
+            [in] Boolean flag);
+
+        BindView(
+            [in] IAccountTypeManager* accountTypes);
+
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+}

@@ -1,10 +1,12 @@
 
 #include "Elastos.Droid.Provider.h"
-// #include "elastos/droid/contacts/common/ContactPhotoManager.h"
+#include "elastos/droid/contacts/common/GeoUtil.h"
+#include "elastos/droid/contacts/common/ContactPhotoManager.h"
 #include "elastos/droid/contacts/common/list/PhoneNumberListAdapter.h"
 #include "elastos/droid/contacts/common/list/ContactListItemView.h"
 #include "elastos/droid/contacts/common/list/DirectoryPartition.h"
 #include "elastos/droid/contacts/common/list/Constants.h"
+#include "elastos/droid/contacts/common/list/DirectoryListLoader.h"
 #include "elastos/droid/contacts/common/extensions/ExtensionsFactory.h"
 #include "elastos/droid/contacts/common/preference/ContactsPreferences.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -16,11 +18,14 @@
 #include "elastos/droid/R.h"
 #include "R.h"
 
-using Elastos::Droid::Contacts::IContentUris;
-using Elastos::Droid::Contacts::CContentUris;
-// using Elastos::Droid::Contacts::Common::ContactPhotoManager;
+using Elastos::Droid::Content::IContentUris;
+using Elastos::Droid::Content::CContentUris;
+using Elastos::Droid::Contacts::Common::GeoUtil;
+using Elastos::Droid::Contacts::Common::ContactPhotoManager;
 using Elastos::Droid::Contacts::Common::Extensions::ExtensionsFactory;
 using Elastos::Droid::Contacts::Common::List::EIID_IPhoneNumberListAdapter;
+using Elastos::Droid::Contacts::Common::Preference::ContactsPreferences;
+using Elastos::Droid::Common::Widget::ICompositeCursorAdapterPartition;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriBuilder;
@@ -42,6 +47,7 @@ using Elastos::Droid::Provider::IContactsContractContacts;
 using Elastos::Droid::Provider::CContactsContractContacts;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CString;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Etl::List;
@@ -86,7 +92,7 @@ static AutoPtr<ArrayOf<String> > InitProjectionAlternative()
     (*projection)[8] = IContactsContractContactsColumns::PHOTO_THUMBNAIL_URI;
     return projection;
 }
-const AutoPtr<ArrayOf<String> > PhoneNumberListAdapter::PhoneQuery::PROJECTION_ALTERNATIVE = InitProjectionAlternative()();
+const AutoPtr<ArrayOf<String> > PhoneNumberListAdapter::PhoneQuery::PROJECTION_ALTERNATIVE = InitProjectionAlternative();
 const Int32 PhoneNumberListAdapter::PhoneQuery::PHONE_ID;
 const Int32 PhoneNumberListAdapter::PhoneQuery::PHONE_TYPE;
 const Int32 PhoneNumberListAdapter::PhoneQuery::PHONE_LABEL;
@@ -102,7 +108,8 @@ const Int32 PhoneNumberListAdapter::PhoneQuery::PHOTO_URI;
 // PhoneNumberListAdapter
 //=================================================================
 const String PhoneNumberListAdapter::TAG("PhoneNumberListAdapter");
-const String PhoneNumberListAdapter::IGNORE_NUMBER_TOO_LONG_CLAUSE("length(" + Phone.NUMBER + ") < 1000");
+const String PhoneNumberListAdapter::IGNORE_NUMBER_TOO_LONG_CLAUSE(String("length(")
+        + IContactsContractCommonDataKindsPhone::NUMBER + ") < 1000");
 
 CAR_INTERFACE_IMPL(PhoneNumberListAdapter, ContactEntryListAdapter, IPhoneNumberListAdapter)
 
@@ -146,10 +153,10 @@ ECode PhoneNumberListAdapter::ConfigureLoader(
         query = String("");
     }
     if (IsExtendedDirectory(directoryId)) {
-        AutoPtr<DirectoryPartition> directory = GetExtendedDirectoryFromId(directoryId);
+        AutoPtr<DirectoryPartition> directory = (DirectoryPartition*)GetExtendedDirectoryFromId(directoryId).Get();
         String contentUri = directory->GetContentUri();
         if (contentUri.IsNull()) {
-            Logger::E(TAG, "Extended directory must have a content URL: %s", directory.string());
+            Logger::E(TAG, "Extended directory must have a content URL: %s", TO_CSTR(directory));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         AutoPtr<IUriHelper> helper;
@@ -166,7 +173,7 @@ ECode PhoneNumberListAdapter::ConfigureLoader(
         AutoPtr<IUri> u;
         builder->Build((IUri**)&u);
         loader->SetUri(u);
-        loader->SetProjection(PROJECTION_PRIMARY);
+        loader->SetProjection(PhoneQuery::PROJECTION_PRIMARY);
     }
     else {
         Boolean isRemoteDirectoryQuery = IsRemoteDirectory(directoryId);
@@ -253,13 +260,12 @@ ECode PhoneNumberListAdapter::ConfigureLoader(
         // TODO a projection that includes the search snippet
         Int32 order;
         if (GetContactNameDisplayOrder(&order), order == ContactsPreferences::DISPLAY_ORDER_PRIMARY) {
-            loader->SetProjection(PROJECTION_PRIMARY);
+            loader->SetProjection(PhoneQuery::PROJECTION_PRIMARY);
         }
         else {
-            loader->SetProjection(PROJECTION_ALTERNATIVE);
+            loader->SetProjection(PhoneQuery::PROJECTION_ALTERNATIVE);
         }
 
-        Int32 order;
         if (GetSortOrder(&order), order == ContactsPreferences::SORT_ORDER_PRIMARY) {
             loader->SetSortOrder(IContactsContractContactNameColumns::SORT_KEY_PRIMARY);
         }
@@ -302,7 +308,7 @@ void PhoneNumberListAdapter::ApplyFilter(
     switch (filterType) {
         case IContactListFilter::FILTER_TYPE_CUSTOM: {
             selection.Append(IContactsContractContactsColumns::IN_VISIBLE_GROUP + "=1");
-            selection.Append(String(" AND ") + Contacts.HAS_PHONE_NUMBER + "=1");
+            selection.Append(String(" AND ") + IContactsContractContactsColumns::HAS_PHONE_NUMBER + "=1");
             break;
         }
         case IContactListFilter::FILTER_TYPE_ACCOUNT: {
@@ -378,7 +384,7 @@ ECode PhoneNumberListAdapter::GetDataUri(
     *uri = NULL;
 
     AutoPtr<ICompositeCursorAdapterPartition> temp;
-    GetPartition(i, (ICompositeCursorAdapterPartition**)&temp);
+    GetPartition(partitionIndex, (ICompositeCursorAdapterPartition**)&temp);
     AutoPtr<IDirectoryPartition> partition = IDirectoryPartition::Probe(temp);
     Int64 directoryId = ((DirectoryPartition*)partition.Get())->GetDirectoryId();
     if (!IsRemoteDirectory(directoryId)) {
@@ -413,7 +419,7 @@ AutoPtr<IView> PhoneNumberListAdapter::NewView(
 }
 
 void PhoneNumberListAdapter::SetHighlight(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* temp,
     /* [in] */ ICursor* cursor)
 {
     AutoPtr<ContactListItemView> view = (ContactListItemView*)IContactListItemView::Probe(temp);
@@ -517,16 +523,18 @@ void PhoneNumberListAdapter::BindView(
     }
 
     AutoPtr<ICompositeCursorAdapterPartition> temp;
-    GetPartition(i, (ICompositeCursorAdapterPartition**)&temp);
+    GetPartition(partition, (ICompositeCursorAdapterPartition**)&temp);
     AutoPtr<DirectoryPartition> directory = (DirectoryPartition*)IDirectoryPartition::Probe(temp);
     BindPhoneNumber((IContactListItemView*)view, cursor, directory->IsDisplayNumber());
 }
 
 void PhoneNumberListAdapter::BindPhoneNumber(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* _view,
     /* [in] */ ICursor* cursor,
     /* [in] */ Boolean displayNumber)
 {
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
+;
     AutoPtr<ICharSequence> label;
     Boolean isNull;
     if (displayNumber && (cursor->IsNull(PhoneQuery::PHONE_TYPE, &isNull), !isNull)) {
@@ -542,7 +550,9 @@ void PhoneNumberListAdapter::BindPhoneNumber(
         context->GetResources((IResources**)&res);
         AutoPtr<IContactsContractCommonDataKindsPhone> phone;
         CContactsContractCommonDataKindsPhone::AcquireSingleton((IContactsContractCommonDataKindsPhone**)&phone);
-        phont->GetTypeLabel(res, type, customLabel, &label);
+        AutoPtr<ICharSequence> cs;
+        CString::New(customLabel, (ICharSequence**)&cs);
+        phone->GetTypeLabel(res, type, cs, (ICharSequence**)&label);
     }
     view->SetLabel(label);
     String text;
@@ -566,13 +576,14 @@ void PhoneNumberListAdapter::BindPhoneNumber(
 }
 
 void PhoneNumberListAdapter::BindSectionHeaderAndDivider(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* _view,
     /* [in] */ Int32 position)
 {
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
     Boolean enabled;
     if (IsSectionHeaderDisplayEnabled(&enabled), enabled) {
         AutoPtr<IIndexerListAdapterPlacement> temp;
-        GetItemPlacementInSection((IIndexerListAdapterPlacement**)&temp);
+        GetItemPlacementInSection(position, (IIndexerListAdapterPlacement**)&temp);
         AutoPtr<Placement> placement = (Placement*)temp.Get();
         view->SetSectionHeader(placement->mFirstInSection ? placement->mSectionHeader : String(NULL));
     }
@@ -587,14 +598,14 @@ void PhoneNumberListAdapter::BindName(
 {
     Int32 order;
     GetContactNameDisplayOrder(&order);
-    view->ShowDisplayName(cursor, PhoneQuery::DISPLAY_NAME, order);
+    ((ContactListItemView*)view)->ShowDisplayName(cursor, PhoneQuery::DISPLAY_NAME, order);
     // Note: we don't show phonetic names any more (see issue 5265330)
 }
 
 void PhoneNumberListAdapter::UnbindName(
     /* [in] */ IContactListItemView* view)
 {
-    view->HideDisplayName();
+    ((ContactListItemView*)view)->HideDisplayName();
 }
 
 void PhoneNumberListAdapter::BindPhoto(
@@ -639,8 +650,7 @@ void PhoneNumberListAdapter::BindPhoto(
             cursor->GetString(PhoneQuery::LOOKUP_KEY, &lookupKey);
             Boolean result;
             GetCircularPhotos(&result);
-            assert(0);
-            // request = new ContactPhotoManager::DefaultImageRequest(displayName, lookupKey, result);
+            request = new ContactPhotoManager::DefaultImageRequest(displayName, lookupKey, result);
         }
         AutoPtr<IImageView> photoView = view->GetPhotoView();
         Boolean result;
@@ -758,7 +768,7 @@ AutoPtr<IUri> PhoneNumberListAdapter::GetContactUri(
     builder->AppendQueryParameter(IContactsContractDirectory::DISPLAY_NAME, directory->GetLabel());
     builder->AppendQueryParameter(IContactsContract::DIRECTORY_PARAM_KEY, StringUtils::ToString(directoryId));
     String str;
-    cursor->GetString(lookUpKeyColumn, *str);
+    cursor->GetString(lookUpKeyColumn, &str);
     builder->EncodedFragment(str);
     AutoPtr<IUri> uri;
     builder->Build((IUri**)&uri);

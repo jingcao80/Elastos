@@ -21,3 +21,5 @@ SOURCES += AutoScrollListView.cpp
 SOURCES += CPinnedHeaderListView.cpp
 SOURCES += ContactListPinnedHeaderView.cpp
 SOURCES += ContactsSectionIndexer.cpp
+SOURCES += CContactListFilterView.cpp
+SOURCES += CCustomContactListFilterActivity.cpp

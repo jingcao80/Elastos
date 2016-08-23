@@ -13,3 +13,4 @@ SOURCES += SchedulingUtils.cpp
 SOURCES += TelephonyManagerUtils.cpp
 SOURCES += SearchUtil.cpp
 SOURCES += AccountFilterUtil.cpp
+SOURCES += WeakAsyncTask.cpp
