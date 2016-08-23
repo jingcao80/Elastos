@@ -1209,7 +1209,7 @@ protected:
 
     IWindowCallback* mCallback;
 
-    AutoPtr<IOnWindowDismissedCallback> mOnWindowDismissedCallback;
+    IOnWindowDismissedCallback* mOnWindowDismissedCallback;
 
     // if mContext is IActiviy, this must not have it's reference
     //

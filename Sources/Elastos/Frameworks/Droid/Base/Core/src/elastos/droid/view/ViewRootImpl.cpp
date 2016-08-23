@@ -1092,10 +1092,8 @@ ViewRootImpl::SendWindowContentChangedAccessibilityEvent::SendWindowContentChang
 ECode ViewRootImpl::SendWindowContentChangedAccessibilityEvent::Run()
 {
     // The accessibility may be turned off while we were waiting so check again.
-    AutoPtr<IAccessibilityManager> amg;
-    CAccessibilityManager::GetInstance(sContext, (IAccessibilityManager**)&amg);
     Boolean isEnabled;
-    amg->IsEnabled(&isEnabled);
+    mHost->mAccessibilityManager->IsEnabled(&isEnabled);
     if (isEnabled) {
         mLastEventTimeMillis = SystemClock::GetUptimeMillis();
         AutoPtr<IAccessibilityEvent> event;
@@ -1224,8 +1222,6 @@ Boolean ViewRootImpl::sFirstDrawComplete = FALSE;
 List<AutoPtr<IComponentCallbacks> > ViewRootImpl::sConfigCallbacks;
 Object ViewRootImpl::sConfigCallbacksLock;
 
-AutoPtr<IContext> ViewRootImpl::sContext;
-
 static AutoPtr<IInterpolator> CreateInterpolator()
 {
     AutoPtr<CAccelerateDecelerateInterpolator> interpolator;
@@ -1336,7 +1332,6 @@ ECode ViewRootImpl::constructor(
             (IViewRootImpl*)this, 0, String("ViewRootImpl"));
     }
 
-    sContext = context;
     mWindowSession = CWindowManagerGlobal::GetWindowSession();
     mDisplay = display;
     context->GetBasePackageName(&mBasePackageName);
@@ -1846,7 +1841,7 @@ void ViewRootImpl::EnableHardwareAcceleration(
 
             CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)attrs;
             Boolean translucent = wmlp->mFormat != IPixelFormat::OPAQUE;
-            mAttachInfo->mHardwareRenderer = HardwareRenderer::Create(sContext, translucent);
+            mAttachInfo->mHardwareRenderer = HardwareRenderer::Create(((View*)mView.Get())->mContext, translucent);
             if (mAttachInfo->mHardwareRenderer != NULL) {
                 AutoPtr<ICharSequence> temp;
                 attrs->GetTitle((ICharSequence**)&temp);

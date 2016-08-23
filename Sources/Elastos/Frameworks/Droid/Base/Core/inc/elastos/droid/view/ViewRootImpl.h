@@ -126,8 +126,6 @@ private:
     static List<AutoPtr<IComponentCallbacks> > sConfigCallbacks;
     static Object sConfigCallbacksLock;
 
-    static AutoPtr<IContext> sContext;
-
     static AutoPtr<Elastos::Droid::View::Animation::IInterpolator> mResizeInterpolator;
 
 private:
