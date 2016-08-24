@@ -857,7 +857,7 @@ void UiccCard::CreateAndUpdateCatService()
         }
         mCatService = NULL;
     }
-    Logger::E("leliang", "line:%d, func:%s, mCatService:%p\n", __LINE__, __func__, mCatService.Get());
+    //Logger::E("leliang", "line:%d, func:%s, mCatService:%p\n", __LINE__, __func__, mCatService.Get());
 }
 
 ECode UiccCard::Finalize()

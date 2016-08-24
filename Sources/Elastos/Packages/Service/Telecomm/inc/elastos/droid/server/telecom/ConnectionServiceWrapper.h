@@ -228,7 +228,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        AutoPtr<ConnectionServiceWrapper> mHost;// life is longer
+        AutoPtr<IWeakReference> mHost;
     };
 
     class SubQueryBindCallback

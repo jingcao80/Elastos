@@ -6,6 +6,8 @@
 #include "elastos/droid/server/telecom/Log.h"
 #include <elastos/droid/internal/os/SomeArgs.h>
 #include <elastos/droid/net/Uri.h>
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::Internal::Os::ISomeArgs;
 using Elastos::Droid::Internal::Os::SomeArgs;
@@ -588,14 +590,18 @@ ECode ConnectionServiceWrapper::SubCreateBindCallback::OnFailure()
 //=============================================================================
 ConnectionServiceWrapper::SubHandler::SubHandler(
     /* [in] */ ConnectionServiceWrapper* host)
-    : mHost(host)
 {
     Handler::constructor();
+    IWeakReferenceSource* source = IWeakReferenceSource::Probe(TO_IINTERFACE(host));
+    source->GetWeakReference((IWeakReference**)&mHost);
 }
 
 ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
+    AutoPtr<IInterface> ws;
+    mHost->Resolve(EIID_IInterface, (IInterface**)&ws);
+    AutoPtr<ConnectionServiceWrapper> host = (ConnectionServiceWrapper*)(IObject::Probe(ws));
     Int32 msgWhat;
     msg->GetWhat(&msgWhat);
     AutoPtr<IInterface> msgObj;
@@ -603,6 +609,10 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     Int32 msgArg1;
     msg->GetArg1(&msgArg1);
     AutoPtr<ICall> call;
+    if (host == NULL) {
+        Logger::E("ConnectionServiceWrapper", "host is already destructed, what:%d", msgWhat);
+        return NOERROR;
+    }
     if (msgWhat == MSG_HANDLE_CREATE_CONNECTION_COMPLETE) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
@@ -610,15 +620,15 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         IObject::Probe(args->mArg1)->ToString(&callId);
         AutoPtr<IConnectionRequest> request = IConnectionRequest::Probe(args->mArg2);
         AutoPtr<IParcelableConnection> connection = IParcelableConnection::Probe(args->mArg3);
-        mHost->HandleCreateConnectionComplete(callId, request, connection);
+        host->HandleCreateConnectionComplete(callId, request, connection);
         // } finally {
         args->Recycle();
         // }
     }
     else if (msgWhat == MSG_SET_ACTIVE) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
-            mHost->mCallsManager->MarkCallAsActive(call);
+            host->mCallsManager->MarkCallAsActive(call);
         } else {
             //Log.w(this, "setActive, unknown call id: %s", msg.obj);
         }
@@ -629,26 +639,26 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         String callId;
         IObject::Probe(args->mArg1)->ToString(&callId);
         AutoPtr<IBundle> extras = IBundle::Probe(args->mArg2);
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(callId), (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(callId), (ICall**)&call);
         if (call != NULL) {
-            mHost->mCallsManager->SetCallExtras(call, extras);
+            host->mCallsManager->SetCallExtras(call, extras);
         }
         // } finally {
         args->Recycle();
         // }
     }
     else if (msgWhat == MSG_SET_RINGING) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
-            mHost->mCallsManager->MarkCallAsRinging(call);
+            host->mCallsManager->MarkCallAsRinging(call);
         } else {
             //Log.w(this, "setRinging, unknown call id: %s", msg.obj);
         }
     }
     else if (msgWhat == MSG_SET_DIALING) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
-            mHost->mCallsManager->MarkCallAsDialing(call);
+            host->mCallsManager->MarkCallAsDialing(call);
         } else {
             //Log.w(this, "setDialing, unknown call id: %s", msg.obj);
         }
@@ -656,11 +666,11 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     else if (msgWhat == MSG_SET_DISCONNECTED) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         AutoPtr<IDisconnectCause> disconnectCause = IDisconnectCause::Probe(args->mArg2);
         Log::D("ConnectionServiceWrapper", "disconnect call %s %s", TO_CSTR(disconnectCause), TO_CSTR(call));
         if (call != NULL) {
-            mHost->mCallsManager->MarkCallAsDisconnected(call, disconnectCause);
+            host->mCallsManager->MarkCallAsDisconnected(call, disconnectCause);
         } else {
             //Log.w(this, "setDisconnected, unknown call id: %s", args->mArg1);
         }
@@ -669,15 +679,15 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         // }
     }
     else if (msgWhat == MSG_SET_ON_HOLD) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
-            mHost->mCallsManager->MarkCallAsOnHold(call);
+            host->mCallsManager->MarkCallAsOnHold(call);
         } else {
             //Log.w(this, "setOnHold, unknown call id: %s", msg.obj);
         }
     }
     else if (msgWhat == MSG_SET_RINGBACK_REQUESTED) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
             ((Call*) call.Get())->SetRingbackRequested(msgArg1 == 1);
         } else {
@@ -685,7 +695,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         }
     }
     else if (msgWhat == MSG_SET_CALL_CAPABILITIES) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
             ((Call*) call.Get())->SetCallCapabilities(msgArg1);
         } else {
@@ -694,7 +704,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         }
     }
     else if (msgWhat == MSG_SET_CALL_PROPERTIES) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
             ((Call*) call.Get())->SetCallProperties(msgArg1);
         } else {
@@ -706,7 +716,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
         AutoPtr<ICall> childCall;
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&childCall);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&childCall);
         Log::D("ConnectionServiceWrapper", "SET_IS_CONFERENCE: %s %s", TO_CSTR(args->mArg1), TO_CSTR(args->mArg2));
         if (childCall != NULL) {
             String conferenceCallId;
@@ -716,7 +726,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
                 ((Call*) childCall.Get())->SetParentCall(NULL);
             } else {
                 AutoPtr<ICall> conferenceCall;
-                ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(conferenceCallId), (ICall**)&conferenceCall);
+                ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(conferenceCallId), (ICall**)&conferenceCall);
                 ((Call*) childCall.Get())->SetParentCall(conferenceCall);
             }
         } else {
@@ -732,7 +742,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         String id;
         IObject::Probe(args->mArg1)->ToString(&id);
         AutoPtr<ICall> call;
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(id), (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(id), (ICall**)&call);
         if (call != NULL) {
             Log::W("ConnectionServiceWrapper", "Attempting to add a conference call using an existing "
                     "call id %s", id.string());
@@ -741,9 +751,9 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
             AutoPtr<IParcelableConference> parcelableConference = IParcelableConference::Probe(args->mArg2);
             // need to create a new Call
             AutoPtr<ICall> conferenceCall;
-            mHost->mCallsManager->CreateConferenceCall(NULL, parcelableConference, (ICall**)&conferenceCall);
-            ((CallIdMapper*) mHost->mCallIdMapper.Get())->AddCall(conferenceCall, id);
-            ((Call*) conferenceCall.Get())->SetConnectionService(mHost);
+            host->mCallsManager->CreateConferenceCall(NULL, parcelableConference, (ICall**)&conferenceCall);
+            ((CallIdMapper*) host->mCallIdMapper.Get())->AddCall(conferenceCall, id);
+            ((Call*) conferenceCall.Get())->SetConnectionService(host);
             AutoPtr<IList> connectionIds;
             parcelableConference->GetConnectionIds((IList**)&connectionIds);
             Log::D("ConnectionServiceWrapper", "adding children to conference %s",
@@ -757,7 +767,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
                 String callId;
                 IObject::Probe(obj)->ToString(&callId);
                 AutoPtr<ICall> childCall;
-                ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(callId), (ICall**)&childCall);
+                ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(callId), (ICall**)&childCall);
                 Log::D("ConnectionServiceWrapper", "found child: %s", callId.string());
                 AutoPtr<IPhoneAccountHandle> phoneAccountHandle;
                 ((Call*) conferenceCall.Get())->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
@@ -776,24 +786,23 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         // }
     }
     else if (msgWhat == MSG_REMOVE_CALL) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
             Boolean isActive;
             ((Call*) call.Get())->IsActive(&isActive);
             if (isActive) {
                 AutoPtr<IDisconnectCause> disconnectCause;
                 CDisconnectCause::New(IDisconnectCause::REMOTE, (IDisconnectCause**)&disconnectCause);
-                mHost->mCallsManager->MarkCallAsDisconnected(call, disconnectCause);
+                host->mCallsManager->MarkCallAsDisconnected(call, disconnectCause);
             } else {
-                mHost->mCallsManager->MarkCallAsRemoved(call);
+                host->mCallsManager->MarkCallAsRemoved(call);
             }
         }
-        mHost = NULL;
     }
     else if (msgWhat == MSG_ON_POST_DIAL_WAIT) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         if (call != NULL) {
             String remaining;
             IObject::Probe(args->mArg2)->ToString(&remaining);
@@ -806,12 +815,12 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         // }
     }
     else if (msgWhat == MSG_QUERY_REMOTE_CALL_SERVICES) {
-        mHost->QueryRemoteConnectionServices(IRemoteServiceCallback::Probe(msgObj));
+        host->QueryRemoteConnectionServices(IRemoteServiceCallback::Probe(msgObj));
     }
     else if (msgWhat == MSG_SET_VIDEO_PROVIDER) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         AutoPtr<IIVideoProvider> videoProvider = IIVideoProvider::Probe(args->mArg2);
         if (call != NULL) {
             call->SetVideoProvider(videoProvider);
@@ -821,7 +830,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         // }
     }
     else if (msgWhat == MSG_SET_IS_VOIP_AUDIO_MODE) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
             call->SetIsVoipAudioMode(msgArg1 == 1);
         }
@@ -829,7 +838,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     else if (msgWhat == MSG_SET_STATUS_HINTS) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         AutoPtr<IStatusHints> statusHints = IStatusHints::Probe(args->mArg2);
         if (call != NULL) {
             call->SetStatusHints(statusHints);
@@ -841,7 +850,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     else if (msgWhat == MSG_SET_ADDRESS) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         if (call != NULL) {
             ((Call*) call.Get())->SetHandle(IUri::Probe(args->mArg2), args->mArgi1);
         }
@@ -852,7 +861,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     else if (msgWhat == MSG_SET_CALLER_DISPLAY_NAME) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         if (call != NULL) {
             ((Call*) call.Get())->SetCallerDisplayName(TO_STR(args->mArg2), args->mArgi1);
         }
@@ -861,7 +870,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         // }
     }
     else if (msgWhat == MSG_SET_VIDEO_STATE) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
             call->SetVideoState(msgArg1);
         }
@@ -869,7 +878,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     else if (msgWhat == MSG_SET_CONFERENCEABLE_CONNECTIONS) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         if (call != NULL) {
             // @SuppressWarnings("unchecked")
             AutoPtr<IList> conferenceableIds = IList::Probe(args->mArg2);
@@ -886,7 +895,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
                 String otherId;
                 IObject::Probe(obj)->ToString(&otherId);
                 AutoPtr<ICall> otherCall;
-                ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(otherId), (ICall**)&otherCall);
+                ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(StringUtils::ParseCharSequence(otherId), (ICall**)&otherCall);
                 if (otherCall != NULL && otherCall != call) {
                     conferenceableCalls->Add(otherCall);
                 }
@@ -900,7 +909,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     else if (msgWhat == MSG_SET_PHONE_ACCOUNT) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
         // try {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(args->mArg1, (ICall**)&call);
         if (call != NULL) {
             AutoPtr<IPhoneAccountHandle> pHandle = IPhoneAccountHandle::Probe(args->mArg2);
             ((Call*) call.Get())->SetTargetPhoneAccount(pHandle);
@@ -912,7 +921,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         // }
     }
     else if (msgWhat == MSG_SET_CALL_SUBSTATE) {
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->GetCall(msgObj, (ICall**)&call);
         if (call != NULL) {
             call->SetCallSubstate(msgArg1);
         }
@@ -924,9 +933,9 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
         IObject::Probe(args->mArg1)->ToString(&callId);
         AutoPtr<IParcelableConnection> connection = IParcelableConnection::Probe(args->mArg2);
         AutoPtr<ICall> existingCall;
-        mHost->mCallsManager->CreateCallForExistingConnection(callId, connection, (ICall**)&existingCall);
-        ((CallIdMapper*) mHost->mCallIdMapper.Get())->AddCall(existingCall, callId);
-        ((Call*) existingCall.Get())->SetConnectionService(mHost);
+        host->mCallsManager->CreateCallForExistingConnection(callId, connection, (ICall**)&existingCall);
+        ((CallIdMapper*) host->mCallIdMapper.Get())->AddCall(existingCall, callId);
+        ((Call*) existingCall.Get())->SetConnectionService(host);
         // } finally {
         args->Recycle();
         // }
