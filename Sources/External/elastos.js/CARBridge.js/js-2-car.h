@@ -193,7 +193,7 @@ extern bool CanBeUsedAsInterface(IInterfaceInfo const *interfaceInfo,
         ::v8::Local<::v8::Value> value,
         int *priority = nullptr);
 
-extern IInterface *ToInterface(IInterfaceInfo const *interfaceInfo, ::v8::Local<::v8::Value> value);
+extern _ELASTOS AutoPtr<IInterface> ToInterface(IInterfaceInfo const *interfaceInfo, ::v8::Local<::v8::Value> value);
 
 extern ::v8::Local<::v8::Value> ToValue(IInterface *interface_);
 
@@ -203,17 +203,17 @@ extern bool CanBeUsedAs(IDataTypeInfo const *dataTypeInfo, ::v8::Local<::v8::Val
 
 extern bool IsCARObject(::v8::Local<::v8::Value> value);
 
-extern IInterface *ToCARObject(::v8::Local<::v8::Value> value);
+extern IInterface *AsCARObject(::v8::Local<::v8::Value> value);
 
 extern bool IsGeneric(::v8::Local<::v8::Value> value);
 
 extern bool IsRegime(::v8::Local<::v8::Value> value);
 
-extern IRegime *ToRegime(::v8::Local<::v8::Value> value);
+extern IRegime *AsRegime(::v8::Local<::v8::Value> value);
 
 extern bool IsAspect(::v8::Local<::v8::Value> value);
 
-extern IAspect *ToAspect(::v8::Local<::v8::Value> value);
+extern IAspect *AsAspect(::v8::Local<::v8::Value> value);
 
 CAR_BRIDGE_NAMESPACE_END
 

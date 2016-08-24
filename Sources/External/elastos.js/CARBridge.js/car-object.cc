@@ -652,7 +652,7 @@ static bool _CanBeUsedAsArgumentOf(IParamInfo const *paramInfo, struct _Value co
 }
 
 template<class FunctionInfo>
-static IFunctionInfo const *_GetMatchingFunctionForCall(
+static AutoPtr<IFunctionInfo const> _GetMatchingFunctionForCall(
         size_t nFunctionInfos, IFunctionInfo const *functionInfos[], size_t argc, struct _Value const *argv[])
 {
     _ELASTOS String name;
@@ -1057,12 +1057,10 @@ static void _SetInputArgumentOfInterface(IInterfaceInfo const *interfaceInfo,
         IArgumentList *argumentList, size_t index, struct _InputValue const *value)
 {
     AutoPtr<IInterface> interface_;
-    IInterface *_interface;
 
     ECode ec;
 
-    _interface = ToInterface(interfaceInfo, New(value->data));
-    interface_ = _interface, _interface->Release();
+    interface_ = ToInterface(interfaceInfo, New(value->data));
 
     ec = argumentList->SetInputArgumentOfObjectPtr(index, interface_);
     if (FAILED(ec))
@@ -2584,6 +2582,8 @@ static void __SetCallerAllocOutputArgumentOfInterface(IInterfaceInfo const *inte
 {
     ::Nan::HandleScope scope;
 
+    AutoPtr<IInterface> interface__;
+
     IInterface **__interface;
 
     ECode ec;
@@ -2592,7 +2592,8 @@ static void __SetCallerAllocOutputArgumentOfInterface(IInterfaceInfo const *inte
     if (interface_ == nullptr)
         throw Error(Error::NO_MEMORY, "");
 
-    *interface_ = ToInterface(interfaceInfo, New(value->data));
+    interface__ = ToInterface(interfaceInfo, New(value->data));
+    interface__->AddRef(), *interface_ = interface__;
 
     unique_ptr<struct _CallerAllocInterface, _CallerAllocInterface::Deleter> _interface(
             CallerAllocInterface_<struct _CallerAllocInterface>(interfaceInfo, interface_.get())
@@ -2751,7 +2752,7 @@ static void _SetArgumentOf(IParamInfo const *paramInfo,
 }
 
 template<class FunctionInfo>
-static IArgumentList *_CreateArgumentList(FunctionInfo const *functionInfo, size_t argc, struct _Value *argv[])
+static AutoPtr<IArgumentList> _CreateArgumentList(FunctionInfo const *functionInfo, size_t argc, struct _Value *argv[])
 {
     ECode ec;
 
@@ -2783,7 +2784,7 @@ static IArgumentList *_CreateArgumentList(FunctionInfo const *functionInfo, size
     for (_ELASTOS Int32 i = 0; i < nParams; ++i)
         _SetArgumentOf((*paramInfos)[i], argumentList, i, argv[i]);
 
-    return argumentList->AddRef(), argumentList;
+    return argumentList;
 }
 
 struct _ClassInfo: WeakExternalBase {
@@ -2954,10 +2955,8 @@ CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const
     unique_ptr<unique_ptr<struct _Value> []> _argv;
 
     AutoPtr<IConstructorInfo const> constructorInfo;
-    IConstructorInfo const *_constructorInfo;
 
     AutoPtr<IArgumentList> argumentList;
-    IArgumentList *_argumentList;
 
     _classInfo = classInfo;
 
@@ -2971,16 +2970,14 @@ CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const
 
     _argv = unique_ptr<unique_ptr<struct _Value> []>(_ParseValues(argc, argv));
 
-    _constructorInfo = static_cast<IConstructorInfo const *>(
+    constructorInfo = static_cast<IConstructorInfo const *>(
             _GetMatchingFunctionForCall<IConstructorInfo>(
                 constructorInfos.GetLength(), reinterpret_cast<IFunctionInfo const **>(constructorInfos.GetPayload()),
-                argc, reinterpret_cast<struct _Value const **>(_argv.get()))
+                argc, reinterpret_cast<struct _Value const **>(_argv.get())).Get()
             );
-    constructorInfo = _constructorInfo, _constructorInfo->Release();
 
-    _argumentList =
+    argumentList =
         _CreateArgumentList<IConstructorInfo>(constructorInfo, argc, reinterpret_cast<struct _Value **>(_argv.get()));
-    argumentList = _argumentList, _argumentList->Release();
 
     ec = constructorInfo->CreateObjectInRegime(regime, argumentList, &carObject);
     if (FAILED(ec))
@@ -3097,10 +3094,8 @@ NAN_METHOD(CARObject::InvokeMethod)
         size_t argc;
 
         AutoPtr<IMethodInfo const> methodInfo;
-        IMethodInfo const *_methodInfo;
 
         AutoPtr<IArgumentList> argumentList;
-        IArgumentList *_argumentList;
 
         ECode ec;
 
@@ -3111,16 +3106,14 @@ NAN_METHOD(CARObject::InvokeMethod)
         argc = info.Length();
         unique_ptr<unique_ptr<struct _Value> []> argv(_ParseValues(argc, info));
 
-        _methodInfo = static_cast<IMethodInfo const *>(
+        methodInfo = static_cast<IMethodInfo const *>(
                 _GetMatchingFunctionForCall<IMethodInfo>(
                     methodInfos->methodInfos.size(), (IFunctionInfo const **)&methodInfos->methodInfos[0],
-                    argc, reinterpret_cast<struct _Value const **>(argv.get()))
+                    argc, reinterpret_cast<struct _Value const **>(argv.get())).Get()
                 );
-        methodInfo = _methodInfo, _methodInfo->Release();
 
-        _argumentList =
+        argumentList =
             _CreateArgumentList<IMethodInfo>(methodInfo, argc, reinterpret_cast<struct _Value **>(argv.get()));
-        argumentList = _argumentList, _argumentList->Release();
 
         ec = methodInfo->Invoke(thatCARObject->_carObject, argumentList);
         if (FAILED(ec))
@@ -3656,10 +3649,8 @@ CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const
     unique_ptr<unique_ptr<struct _Value> []> _argv;
 
     AutoPtr<IConstructorInfo const> constructorInfo;
-    IConstructorInfo const *_constructorInfo;
 
     AutoPtr<IArgumentList> argumentList;
-    IArgumentList *_argumentList;
 
     _classInfo = classInfo;
 
@@ -3673,16 +3664,14 @@ CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const
 
     _argv = unique_ptr<unique_ptr<struct _Value> []>(_ParseValues(argc, argv));
 
-    _constructorInfo = static_cast<IConstructorInfo const *>(
+    constructorInfo = static_cast<IConstructorInfo const *>(
             _GetMatchingFunctionForCall<IConstructorInfo>(
                 constructorInfos.GetLength(), reinterpret_cast<IFunctionInfo const **>(constructorInfos.GetPayload()),
-                argc, reinterpret_cast<struct _Value const **>(_argv.get()))
+                argc, reinterpret_cast<struct _Value const **>(_argv.get())).Get()
             );
-    constructorInfo = _constructorInfo, _constructorInfo->Release();
 
-    _argumentList =
+    argumentList =
         _CreateArgumentList<IConstructorInfo>(constructorInfo, argc, reinterpret_cast<struct _Value **>(_argv.get()));
-    argumentList = _argumentList, _argumentList->Release();
 
     ec = constructorInfo->CreateObject(argumentList, &carObject);
     if (FAILED(ec))

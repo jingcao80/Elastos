@@ -72,11 +72,9 @@ private:
 IInterface *Probe(Local<Object> object, EIID const &iid)
 {
     if (IsCARObject(object)) {
-        AutoPtr<IInterface> carObject;
-        IInterface *_carObject;
+        IInterface *carObject;
 
-        _carObject = ToCARObject(object);
-        carObject = _carObject, _carObject->Release();
+        carObject = AsCARObject(object);
 
         return carObject->Probe(iid);
     } else {
@@ -115,19 +113,17 @@ void AttachAspect(Local<Object> object, ClassID const &aspectId)
     aspect = _aspect, _aspect->Release();
 
     if (IsCARObject(object)) {
-        AutoPtr<IInterface> carObject;
-        IInterface *_carObject;
+        IInterface *carObject;
 
-        IObject *__carObject;
+        IObject *_carObject;
 
-        _carObject = ToCARObject(object);
-        carObject = _carObject, _carObject->Release();
+        carObject = AsCARObject(object);
 
-        __carObject = (IObject *)carObject->Probe(EIID_IObject);
-        if (__carObject == 0)
+        _carObject = (IObject *)carObject->Probe(EIID_IObject);
+        if (_carObject == 0)
             throw Error(Error::INVALID_ARGUMENT, "");
 
-        ec = aspect->AspectAggregate(AggrType_Aggregate, __carObject);
+        ec = aspect->AspectAggregate(AggrType_Aggregate, _carObject);
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
     } else {
@@ -156,21 +152,19 @@ void AttachAspect(Local<Object> object, ClassID const &aspectId)
 void DetachAspect(Local<Object> object, ClassID const &aspectId)
 {
     if (IsCARObject(object)) {
-        AutoPtr<IInterface> carObject;
-        IInterface *_carObject;
+        IInterface *carObject;
 
-        IObject *__carObject;
+        IObject *_carObject;
 
         ECode ec;
 
-        _carObject = ToCARObject(object);
-        carObject = _carObject, _carObject->Release();
+        carObject = AsCARObject(object);
 
-        __carObject = (IObject *)carObject->Probe(EIID_IObject);
-        if (__carObject == 0)
+        _carObject = (IObject *)carObject->Probe(EIID_IObject);
+        if (_carObject == 0)
             throw Error(Error::INVALID_ARGUMENT, "");
 
-        ec = __carObject->Aggregate(AggrType_Unaggregate,
+        ec = _carObject->Aggregate(AggrType_Unaggregate,
                 const_cast<IInterface *>(reinterpret_cast<IInterface const *>(&aspectId)));
         if (FAILED(ec))
             throw Error(Error::TYPE_ELASTOS, ec, "");
