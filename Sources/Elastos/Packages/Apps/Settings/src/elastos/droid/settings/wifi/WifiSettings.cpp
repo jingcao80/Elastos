@@ -1436,15 +1436,13 @@ void WifiSettings::Submit(
     AutoPtr<IWifiConfiguration> config = ((WifiConfigController*)configController)->GetConfig();
 
     Int32 networkId;
-    config->GetNetworkId(&networkId);
-
     if (config == NULL) {
         if (mSelectedAccessPoint != NULL
                 && ((CAccessPoint*)mSelectedAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
             Connect(((CAccessPoint*)mSelectedAccessPoint.Get())->mNetworkId);
         }
     }
-    else if (networkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+    else if (config->GetNetworkId(&networkId), networkId != IWifiConfiguration::INVALID_NETWORK_ID) {
         if (mSelectedAccessPoint != NULL) {
             mWifiManager->Save(config, mSaveListener);
         }
