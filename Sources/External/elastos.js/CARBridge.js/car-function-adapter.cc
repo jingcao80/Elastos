@@ -2095,8 +2095,12 @@ static NAN_SETTER(_SetCallerAllocOutputArgumentOfInterface)
 
         interface_ = (struct CallerAllocInterface *)info.Data().As<External>()->Value();
 
-        if (CanBeUsedAsInterface(interface_->interfaceInfo, value))
-            *interface_->interface_ = ToInterface(interface_->interfaceInfo, value);
+        if (CanBeUsedAsInterface(interface_->interfaceInfo, value)) {
+            AutoPtr<IInterface> interface__;
+
+            interface__ = ToInterface(interface_->interfaceInfo, value);
+            interface__->AddRef(), *interface_->interface_ = interface__;
+        }
 
         interface_->value.Reset(value);
     } catch (Error const &error) {

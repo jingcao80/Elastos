@@ -1112,18 +1112,16 @@ inline void _SetStructElement(ArraySetter *arraySetter,
     ToStruct(static_cast<IStructInfo const *>(dataTypeInfo), structSetter, value);
 }
 
-IInterface *ToCARObject(Local<Value> value);
+IInterface *AsCARObject(Local<Value> value);
 
 template<class ArraySetter>
 inline void _SetCARObjectElement(ArraySetter *arraySetter, _ELASTOS Int32 index, Local<Value> value)
 {
-    AutoPtr<IInterface> carObject;
-    IInterface *_carObject;
+    IInterface *carObject;
 
     ECode ec;
 
-    _carObject = ToCARObject(value);
-    carObject = _carObject, _carObject->Release();
+    carObject = AsCARObject(value);
 
     ec = arraySetter->SetObjectPtrElement(index, carObject);
     if (FAILED(ec))
@@ -2846,7 +2844,7 @@ bool CanBeUsedAsInterface(IInterfaceInfo const *interfaceInfo, Local<Value> valu
     return true;
 }
 
-IInterface *ToInterface(IInterfaceInfo const *interfaceInfo, Local<Value> value)
+AutoPtr<IInterface> ToInterface(IInterfaceInfo const *interfaceInfo, Local<Value> value)
 {
     int priority;
 
@@ -2856,7 +2854,8 @@ IInterface *ToInterface(IInterfaceInfo const *interfaceInfo, Local<Value> value)
 
     InterfaceID interfaceId;
 
-    IInterface *interface_;
+    AutoPtr<IInterface> interface_;
+    IInterface *_interface;
 
     if (!CanBeUsedAsInterface(interfaceInfo, value, &priority))
         throw Error(Error::INVALID_ARGUMENT, "");
@@ -2875,9 +2874,11 @@ IInterface *ToInterface(IInterfaceInfo const *interfaceInfo, Local<Value> value)
         return carObject->carObject()->Probe(interfaceId);
     }
 
-    ec = CARInterfaceAdapter::New(&interface_, interfaceInfo, object);
+    ec = CARInterfaceAdapter::New(&_interface, interfaceInfo, object);
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
+
+    interface_ = _interface, _interface->Release();
 
     return interface_;
 }
@@ -3045,19 +3046,15 @@ bool IsCARObject(Local<Value> value)
     return CARObject::HasInstance(value.As<::v8::Object>());
 }
 
-IInterface *ToCARObject(Local<Value> value)
+IInterface *AsCARObject(Local<Value> value)
 {
     CARObject *carObject;
-
-    IInterface *_carObject;
 
     carObject = CARObject::Unwrap<CARObject>(value.As<::v8::Object>());
     if (carObject == nullptr)
         return 0;
 
-    _carObject = carObject->carObject();
-
-    return _carObject->AddRef(), _carObject;
+    return carObject->carObject();
 }
 
 bool IsGeneric(Local<Value> value)
@@ -3122,9 +3119,9 @@ bool IsRegime(Local<Value> value)
     return isRegime != FALSE ? true : false;
 }
 
-IRegime *ToRegime(Local<Value> value)
+IRegime *AsRegime(Local<Value> value)
 {
-    return static_cast<IRegime *>(ToCARObject(value));
+    return static_cast<IRegime *>(AsCARObject(value));
 }
 
 bool IsAspect(Local<Value> value)
@@ -3158,9 +3155,9 @@ bool IsAspect(Local<Value> value)
     return isAspect != FALSE ? true : false;
 }
 
-IAspect *ToAspect(Local<Value> value)
+IAspect *AsAspect(Local<Value> value)
 {
-    return static_cast<IAspect *>(ToCARObject(value));
+    return static_cast<IAspect *>(AsCARObject(value));
 }
 
 CAR_BRIDGE_NAMESPACE_END
