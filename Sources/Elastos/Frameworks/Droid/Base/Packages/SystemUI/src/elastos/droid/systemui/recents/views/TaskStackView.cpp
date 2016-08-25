@@ -357,7 +357,8 @@ ECode TaskStackView::constructor(
     mStackScroller->SetCallbacks(mWrapper);
     mTouchHandler = new TaskStackViewTouchHandler(context, this, mConfig, mStackScroller);
     AutoPtr<Runnable> runnable = new SleepRunnable(this);
-    mUIDozeTrigger = new DozeTrigger(mConfig->mTaskBarDismissDozeDelaySeconds, runnable);
+    mUIDozeTrigger = new DozeTrigger();
+    mUIDozeTrigger->constructor(mConfig->mTaskBarDismissDozeDelaySeconds, runnable);
     return NOERROR;
 }
 
