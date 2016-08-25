@@ -211,7 +211,7 @@ private:
 
 private:
     // The object to which the verifier is attached.
-    AutoPtr<IInterface> mCaller;
+    IInterface* mCaller; // weak-ref
 
     // Consistency verifier flags.
     Int32 mFlags;

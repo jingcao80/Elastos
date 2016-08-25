@@ -180,11 +180,11 @@ using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::IBatteryStatsUidProc;
 using Elastos::Droid::Os::IBatteryStatsHistoryItem;
-// using Elastos::Droid::Os::CDebug;
+using Elastos::Droid::Os::CDebug;
 using Elastos::Droid::Os::IDebug;
-// using Elastos::Droid::Os::CDebugMemoryInfo;
+using Elastos::Droid::Os::CDebugMemoryInfo;
 using Elastos::Droid::Os::IDebugMemoryInfo;
-// using Elastos::Droid::Os::CDebugMemoryInfoHelper;
+using Elastos::Droid::Os::CDebugMemoryInfoHelper;
 using Elastos::Droid::Os::IDebugMemoryInfoHelper;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::EIID_IIRemoteCallback;
@@ -290,63 +290,6 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Am {
-
-// static void DumpMemery(const char* filename)
-// {
-//     AutoPtr<IOsConstants> osConstans;
-//     COsConstants::AcquireSingleton((IOsConstants**)&osConstans);
-//     Int32 m1, m2, m3;
-//     osConstans->GetOsConstant(String("O_RDWR"), &m1);
-//     osConstans->GetOsConstant(String("O_CREAT"), &m2);
-//     osConstans->GetOsConstant(String("O_TRUNC"), &m3);
-
-//     AutoPtr<IFile> file;
-//     CFile::New(String("/data/debug"), (IFile**)&file);
-//     Boolean res;
-//     file->Mkdirs(&res);
-//     AutoPtr<IFileDescriptor> ifd;
-//     CFileDescriptor::New((IFileDescriptor**)&ifd);
-//     AutoPtr<IIoBridge> ioBridge;
-//     CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-//     String path("/data/debug/");
-//     path.AppendFormat("%s.txt", filename);
-//     Int32 fd;
-//     ECode ec = ioBridge->Open(path, m1 | m2 | m3, &fd);
-//     if (FAILED(ec)) {
-//         ALOGE("Please run 'chmod 777 /data/debug' in adb shell.");
-//         return;
-//     }
-
-//     ifd->SetDescriptor(fd);
-
-//     AutoPtr<IDebug> dbg;
-//     CDebug::AcquireSingleton((IDebug**)&dbg);
-//     dbg->DumpHeap(ifd);
-
-//     ALOGD(" >> dump memery to %s", path.string());
-// }
-
-// static ECode GetInt32Prop(
-//    /* [in] */ const String& name,
-//    /* [in] */ Boolean allowZero,
-//    /* [out] */ Int32* value)
-// {
-//     AutoPtr<ISystemProperties> sysProp;
-//     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-//     String str;
-//     sysProp->Get(name, &str);
-//    if (str.IsNull()) {
-// //        throw new IllegalArgumentException("Property not defined: " + name);
-//        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//    }
-//    Int32 val = StringUtils::ParseInt32(str);
-//    if (val == 0 && !allowZero) {
-// //        throw new IllegalArgumentException("Property must not be zero: " + name);
-//        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//    }
-//    *value = val;
-//    return NOERROR;
-// }
 
 // 9d9d1d7f-98d8-4b71-b75f-d455e4ce60a1
 extern "C" const InterfaceID EIID_StringObjectHashMap =
@@ -1167,10 +1110,6 @@ CActivityManagerService::ReportMemUsageThread::ReportMemUsageThread(
 
 ECode CActivityManagerService::ReportMemUsageThread::Run()
 {
-    Logger::I(TAG, "TODO: ReportMemUsageThread::Run(), CDebug not implemented.");
-    // assert(0 && "TODO");
-    return NOERROR;
-
     IList* memInfos = mMemInfos;
     Int32 size;
     memInfos->GetSize(&size);
@@ -1183,7 +1122,7 @@ ECode CActivityManagerService::ReportMemUsageThread::Run()
     }
     mHost->UpdateCpuStatsNow();
     AutoPtr<IDebug> debug;
-    // CDebug::AcquireSingleton((IDebug**)&debug);
+    CDebug::AcquireSingleton((IDebug**)&debug);
     {
         AutoLock lock(mHost->mProcessCpuTracker);
         Int32 N;
@@ -1197,7 +1136,7 @@ ECode CActivityManagerService::ReportMemUsageThread::Run()
                 Int32 pid;
                 st->GetPid(&pid);
                 Int64 pss = 0;
-                // debug->GetPss(pid, NULL, &pss);
+                debug->GetPss(pid, NULL, &pss);
                 if (pss > 0) {
                     if (infoMap.Find(pid) == infoMap.End()) {
                         String name;
@@ -1219,7 +1158,7 @@ ECode CActivityManagerService::ReportMemUsageThread::Run()
         mMemInfos->Get(i, (IInterface**)&item);
         AutoPtr<ProcessMemInfo> mi = (ProcessMemInfo*)IProcessMemInfo::Probe(item);
         if (mi->mPss == 0) {
-            // debug->GetPss(mi->mPid, NULL, &mi->mPss);
+            debug->GetPss(mi->mPid, NULL, &mi->mPss);
         }
         totalPss += mi->mPss;
     }
@@ -1317,9 +1256,8 @@ ECode CActivityManagerService::ReportMemUsageThread::Run()
     ProcessList::AppendRamKb(&logBuilder, totalPss);
     logBuilder.Append(" kB: TOTAL\n");
 
-    AutoPtr<ArrayOf<Int64> > infos = ArrayOf<Int64>::Alloc(IDebug::MEMINFO_COUNT);
-    assert(0);
-    // debug->GetMemInfo(infos);
+    AutoPtr<ArrayOf<Int64> > infos;
+    debug->GetMemInfo((ArrayOf<Int64>**)&infos);
     logBuilder.Append("  MemInfo: ");
     logBuilder.Append((*infos)[IDebug::MEMINFO_SLAB]);
     logBuilder.Append(" kB slab, ");
@@ -1364,7 +1302,8 @@ ECode CActivityManagerService::ReportMemUsageThread::Run()
     */
     AutoPtr<IWriter> catSw;
     CStringWriter::New((IWriter**)&catSw);
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         AutoPtr<IPrintWriter> catPw;
         CFastPrintWriter::New(catSw, FALSE, 256, (IPrintWriter**)&catPw);
         AutoPtr<ArrayOf<String> > emptyArgs = ArrayOf<String>::Alloc(0);
@@ -1383,7 +1322,8 @@ ECode CActivityManagerService::ReportMemUsageThread::Run()
         NULL, tag.ToString(), dropBuilder.ToString(), NULL, NULL);
     //Slogger::I(TAG, "Sent to dropbox:");
     //Slogger::I(TAG, dropBuilder.toString());
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         Int64 now = SystemClock::GetUptimeMillis();
         if (mHost->mLastMemUsageReportTime < now) {
             mHost->mLastMemUsageReportTime = now;
@@ -6548,9 +6488,6 @@ void CActivityManagerService::DumpStackTraces(
     /* [in] */ HashMap<Int32, Boolean>* lastPids,
     /* [in] */ ArrayOf<String>* nativeProcs)
  {
-    //assert(0 && "TODO");
-    return;
-
     // Use a FileObserver to detect when traces finish writing.
     // The order of traces is considered important to maintain for legibility.
     AutoPtr<DumpStackTracesFileObserver> observer =
@@ -6580,8 +6517,7 @@ void CActivityManagerService::DumpStackTraces(
         Process::GetPidsForCommands(*nativeProcs, (ArrayOf<Int32>**)&pids);
         if (pids != NULL) {
             AutoPtr<IDebug> debug;
-            assert(0);
-            // CDebug::AcquireSingleton((IDebug**)&debug);
+            CDebug::AcquireSingleton((IDebug**)&debug);
             for (Int32 i = 0; i < pids->GetLength(); ++i) {
                 debug->DumpNativeBacktraceToFile((*pids)[i], tracesPath);
             }
@@ -6593,7 +6529,8 @@ void CActivityManagerService::DumpStackTraces(
         processCpuTracker->Init();
         processCpuTracker->Update();
         // try {
-            {    AutoLock syncLock(processCpuTracker);
+            {
+                AutoLock syncLock(processCpuTracker);
                 ((Object*)IObject::Probe(processCpuTracker))->Wait(500); // measure over 1/2 second.
             }
         // } catch (InterruptedException e) {
@@ -7368,14 +7305,12 @@ ECode CActivityManagerService::GetProcessMemoryInfo(
 {
     VALIDATE_NOT_NULL(retInfos);
     *retInfos = NULL;
-    Logger::E(TAG, "TODO: GetProcessMemoryInfo() need CDebug");
-    return NOERROR;
+
     FAIL_RETURN(EnforceNotIsolatedCaller(String("getProcessMemoryInfo")));
     Int32 length = pids->GetLength();
     AutoPtr<ArrayOf<IDebugMemoryInfo*> > infos = ArrayOf<IDebugMemoryInfo*>::Alloc(length);
     AutoPtr<IDebug> dbg;
-    assert(0);
-    // CDebug::AcquireSingleton((IDebug**)&dbg);
+    CDebug::AcquireSingleton((IDebug**)&dbg);
     for (Int32 i = length - 1; i >= 0; i--) {
         AutoPtr<ProcessRecord> proc;
         Int32 oomAdj = 0;
@@ -7424,8 +7359,7 @@ ECode CActivityManagerService::GetProcessPss(
     Int32 length = pids->GetLength();
     AutoPtr<ArrayOf<Int64> > pss = ArrayOf<Int64>::Alloc(length);
     AutoPtr<IDebug> dbg;
-    assert(0);
-    // CDebug::AcquireSingleton((IDebug**)&dbg);
+    CDebug::AcquireSingleton((IDebug**)&dbg);
     for (Int32 i = length - 1; i >= 0; i--) {
         AutoPtr<ProcessRecord> proc;
         Int32 oomAdj = 0;
@@ -7441,16 +7375,13 @@ ECode CActivityManagerService::GetProcessPss(
                 oomAdj = proc != NULL ? proc->mSetAdj : 0;
             }
         }
-        AutoPtr<ArrayOf<Int64> > tmpUss = ArrayOf<Int64>::Alloc(1);
-        assert(0);
-        // dbg->GetPss((*pids)[i], tmpUss, &(*pss)[i]);
+        AutoPtr<ArrayOf<Int64> > tmpUss;
+        dbg->GetPss((*pids)[i], (ArrayOf<Int64>**)&tmpUss, &(*pss)[i]);
         if (proc != NULL) {
-            {
-                AutoLock lock(this);
-                if (proc->mThread != NULL && proc->mSetAdj == oomAdj) {
-                    // Record this for posterity if the process has been stable.
-                    proc->mBaseProcessTracker->AddPss((*pss)[i], (*tmpUss)[0], FALSE, proc->mPkgList);
-                }
+            AutoLock lock(this);
+            if (proc->mThread != NULL && proc->mSetAdj == oomAdj) {
+                // Record this for posterity if the process has been stable.
+                proc->mBaseProcessTracker->AddPss((*pss)[i], (*tmpUss)[0], FALSE, proc->mPkgList);
             }
         }
     }
@@ -11088,6 +11019,7 @@ ECode CActivityManagerService::CleanUpRemovedTaskLocked(
         // Find any running processes associated with this app.
         String pkg;
         component->GetPackageName(&pkg);
+        AutoPtr<ICharSequence> pkgKey = CoreUtils::Convert(pkg);
         List<AutoPtr<ProcessRecord> > procs;
         AutoPtr<HashMap<String, AutoPtr<HashMap<Int32, AutoPtr<ProcessRecord> > > > > pmap;
         pmap = mProcessNames->GetMap();
@@ -11102,7 +11034,7 @@ ECode CActivityManagerService::CleanUpRemovedTaskLocked(
                 }
 
                 Boolean res;
-                proc->mPkgList->ContainsKey(CoreUtils::Convert(pkg), &res);
+                proc->mPkgList->ContainsKey(pkgKey, &res);
                 if (!res) {
                     continue;
                 }
@@ -17859,7 +17791,7 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
     const Boolean isCheckinRequest = ScanArgs(args, String("--checkin"));
     Int64 uptime = SystemClock::GetUptimeMillis();
     Int64 realtime = SystemClock::GetElapsedRealtime();
-    AutoPtr<ArrayOf<Int64> > tmpLong = ArrayOf<Int64>::Alloc(1);
+    AutoPtr<ArrayOf<Int64> > tmpLong;
 
     AutoPtr<List<AutoPtr<ProcessRecord> > > procs = CollectProcesses(pw, opti, packages, args);
     if (procs == NULL) {
@@ -17902,19 +17834,17 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
                         pw->Println(str);
                     }
                     if (mi == NULL) {
-                        assert(0);
-                        // CDebugMemoryInfo::New((IDebugMemoryInfo**)&mi);
+                        CDebugMemoryInfo::New((IDebugMemoryInfo**)&mi);
                     }
                     AutoPtr<IDebug> dbg;
-                    assert(0);
-                    // CDebug::AcquireSingleton((IDebug**)&dbg);
+                    CDebug::AcquireSingleton((IDebug**)&dbg);
                     if (dumpDetails || (!brief && !oomOnly)) {
                         dbg->GetMemoryInfo(pid, (IDebugMemoryInfo**)&mi);
                     }
                     else {
                         Int64 pss = 0;
-                        assert(0);
-                        // dbg->GetPss(pid, tmpLong, &pss);
+                        tmpLong = NULL;
+                        dbg->GetPss(pid, (ArrayOf<Int64>**)&tmpLong, &pss);
                         mi->SetDalvikPss((Int32)pss);
                         mi->SetDalvikPrivateDirty((Int32)(*tmpLong)[0]);
                     }
@@ -17958,8 +17888,7 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
     AutoPtr<IDebugMemoryInfo> mi;
     Int32 mem = 0;
     AutoPtr<IDebug> dbg;
-    assert(0);
-    // CDebug::AcquireSingleton((IDebug**)&dbg);
+    CDebug::AcquireSingleton((IDebug**)&dbg);
 
     List<AutoPtr<ProcessRecord> >::ReverseIterator rit;
     for (rit = procs->RBegin(); rit != procs->REnd(); ++rit) {
@@ -17982,16 +17911,15 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
                 pw->Println(str);
             }
             if (mi == NULL) {
-                assert(0);
-                // CDebugMemoryInfo::New((IDebugMemoryInfo**)&mi);
+                CDebugMemoryInfo::New((IDebugMemoryInfo**)&mi);
             }
             if (dumpDetails || (!brief && !oomOnly)) {
                 dbg->GetMemoryInfo(pid, (IDebugMemoryInfo**)&mi);
             }
             else {
                 Int64 pss = 0;
-                assert(0);
-                // dbg->GetPss(pid, tmpLong, &pss);
+                tmpLong = NULL;
+                dbg->GetPss(pid, (ArrayOf<Int64>**)&tmpLong, &pss);
                 mi->SetDalvikPss((Int32)pss);
                 mi->SetDalvikPrivateDirty((Int32)(*tmpLong)[0]);
             }
@@ -18095,16 +18023,15 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
                 st->GetPid(&pid);
                 if (vsize > 0 && procMemsMap.Find(pid) == procMemsMap.End()) {
                     if (mi == NULL) {
-                        assert(0);
-                        // CDebugMemoryInfo::New((IDebugMemoryInfo**)&mi);
+                        CDebugMemoryInfo::New((IDebugMemoryInfo**)&mi);
                     }
                     if (!brief && !oomOnly) {
                         dbg->GetMemoryInfo(pid, (IDebugMemoryInfo**)&mi);
                     }
                     else {
                         Int64 pss = 0;
-                        assert(0);
-                        // dbg->GetPss(pid, tmpLong, &pss);
+                        tmpLong = NULL;
+                        dbg->GetPss(pid, (ArrayOf<Int64>**)&tmpLong, &pss);
                         mi->SetNativePss((Int32)pss);
                         mi->SetNativePrivateDirty((Int32)(*tmpLong)[0]);
                     }
@@ -18159,8 +18086,7 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
 
         String label;
         AutoPtr<IDebugMemoryInfoHelper> helper;
-        assert(0);
-        // CDebugMemoryInfoHelper::AcquireSingleton((IDebugMemoryInfoHelper**)&helper);
+        CDebugMemoryInfoHelper::AcquireSingleton((IDebugMemoryInfoHelper**)&helper);
         for (Int32 j = 0; j < IDebugMemoryInfo::NUM_OTHER_STATS; j++) {
             helper->GetOtherLabel(j, &label);
             AutoPtr<MemItem> _pssItem = new MemItem(label, label, (*miscPss)[j], j);
@@ -24962,25 +24888,22 @@ void CActivityManagerService::HandleReportMemUsageMsg(
 
 void CActivityManagerService::HandleCollectPssBgMsg()
 {
-    //assert(0 && "TODO");
-    Slogger::E(TAG, "TODO: need CDebug.");
-    return;
-
     Int64 start = SystemClock::GetUptimeMillis();
     AutoPtr<IMemInfoReader> memInfo;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mFullPssPending) {
             mFullPssPending = FALSE;
             CMemInfoReader::New((IMemInfoReader**)&memInfo);
         }
     }
     AutoPtr<IDebug> dbg;
-    assert(0);
-    // CDebug::AcquireSingleton((IDebug**)&dbg);
+    CDebug::AcquireSingleton((IDebug**)&dbg);
     if (memInfo != NULL) {
         UpdateCpuStatsNow();
         Int64 nativeTotalPss = 0;
-        {    AutoLock syncLock(mProcessCpuTracker);
+        {
+            AutoLock syncLock(mProcessCpuTracker);
             Int32 N;
             mProcessCpuTracker->CountStats(&N);
             for (Int32 j = 0; j < N; j++) {
@@ -24993,23 +24916,23 @@ void CActivityManagerService::HandleCollectPssBgMsg()
                     // This is definitely an application process; skip it.
                     continue;
                 }
+                Int32 pid;
+                st->GetPid(&pid);
                 {
                     AutoLock lock(mPidsSelfLockedLock);
-                    Int32 pid;
-                    st->GetPid(&pid);
                     if (mPidsSelfLocked.Find(pid) != mPidsSelfLocked.End()) {
                         // This is one of our own processes; skip it.
                         continue;
                     }
                 }
                 Int64 pss = 0;
-                assert(0);
-                // dbg->GetPss(pid, NULL, &pss);
+                dbg->GetPss(pid, NULL, &pss);
                 nativeTotalPss += pss;
             }
         }
         memInfo->ReadMemInfo();
-        {    AutoLock syncLock(this);
+        {
+            AutoLock syncLock(this);
             if (DEBUG_PSS) Slogger::D(TAG, "Collected native and kernel memory in %lldms",
                 SystemClock::GetUptimeMillis() - start);
             Int64 cachedSizeKb, freeSizeKb, zramTotalSizeKb, buffersSizeKb, shmemSizeKb, slabSizeKb;
@@ -25025,13 +24948,14 @@ void CActivityManagerService::HandleCollectPssBgMsg()
     }
 
     Int32 i = 0, num = 0;
-    AutoPtr<ArrayOf<Int64> > tmp = ArrayOf<Int64>::Alloc(1);
+    AutoPtr<ArrayOf<Int64> > tmp;
     List<AutoPtr<ProcessRecord> >::Iterator it = mPendingPssProcesses.Begin();
     do {
         AutoPtr<ProcessRecord> proc;
         Int32 procState = 0;
         Int32 pid = 0;
-        {    AutoLock syncLock(this);
+        {
+            AutoLock syncLock(this);
             if (it == mPendingPssProcesses.End()) {
                 if (DEBUG_PSS) Slogger::D(TAG, "Collected PSS of %d of %d processes in %lldms",
                         num, i, SystemClock::GetUptimeMillis()-start);
@@ -25052,9 +24976,10 @@ void CActivityManagerService::HandleCollectPssBgMsg()
         }
         if (proc != NULL) {
             Int64 pss = 0;
-            assert(0);
-            // dbg->GetPss(pid, tmp, &pss);
-            {    AutoLock syncLock(this);
+            tmp = NULL;
+            dbg->GetPss(pid, (ArrayOf<Int64>**)&tmp, &pss);
+            {
+                AutoLock syncLock(this);
                 if (proc->mThread != NULL && proc->mSetProcState == procState
                     && proc->mPid == pid) {
                     num++;

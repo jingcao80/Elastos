@@ -467,7 +467,7 @@ void CWindowManagerGlobal::RemoveViewLocked(
 {
     AutoPtr<IInterface> temp;
     mRoots->Get(index, (IInterface**)&temp);
-    IViewRootImpl* root = IViewRootImpl::Probe(temp);
+    AutoPtr<IViewRootImpl> root = IViewRootImpl::Probe(temp);
     AutoPtr<IView> view;
     root->GetView((IView**)&view);
 

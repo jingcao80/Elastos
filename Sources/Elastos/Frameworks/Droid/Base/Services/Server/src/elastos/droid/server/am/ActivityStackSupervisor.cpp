@@ -4116,9 +4116,9 @@ ECode ActivityStackSupervisor::ReleaseSomeActivitiesLocked(
                 if (tasks == NULL) {
                     //tasks = new ArraySet<>();
                     CArraySet::New((IArraySet**)&tasks);
-                    ISet::Probe(tasks)->Add(TO_IINTERFACE(firstTask));
+                    tasks->Add(TO_IINTERFACE(firstTask));
                 }
-                ISet::Probe(tasks)->Add(TO_IINTERFACE(r->mTask));
+                tasks->Add(TO_IINTERFACE(r->mTask));
             }
         }
     }

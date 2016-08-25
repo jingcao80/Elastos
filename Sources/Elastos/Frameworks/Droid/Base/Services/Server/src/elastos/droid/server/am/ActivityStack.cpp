@@ -1589,7 +1589,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     if (mResumedActivity != NULL) {
         pausing |= StartPausingLocked(userLeaving, FALSE, TRUE, dontWaitForPause);
         if (ActivityStackSupervisor::DEBUG_STATES) {
-            Slogger::D(TAG, "resumeTopActivityLocked: Pausing %s", mResumedActivity->ToString().string());
+            Slogger::D(TAG, "resumeTopActivityLocked: Pausing %s", TO_CSTR(mResumedActivity));
         }
     }
     if (pausing) {
