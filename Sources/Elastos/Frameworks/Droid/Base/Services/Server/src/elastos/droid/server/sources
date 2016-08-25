@@ -140,7 +140,7 @@ ELASTOS_LIBS += media/media.lib
 
 #ELASTOS_LIBS += usb/usb.lib
 ELASTOS_LIBS += accounts/accounts.lib
-#ELASTOS_LIBS += search/search.lib
+ELASTOS_LIBS += search/search.lib
 #ELASTOS_LIBS += zigbee/zigbee.lib
 #ELASTOS_LIBS += remote/remote.lib
 

@@ -1,7 +1,8 @@
 module
 {
-    using interface Elastos.Droid.Content.IComponentName;
     using interface Elastos.Droid.App.ISearchableInfo;
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -21,13 +22,13 @@ module
         BuildSearchableList();
 
         GetSearchablesList(
-            [out] IObjectContainer** infos);
+            [out] IArrayList** infos);
 
         GetSearchablesInGlobalSearchList(
-            [out] IObjectContainer** infos);
+            [out] IArrayList** infos);
 
         GetGlobalSearchActivities(
-            [out] IObjectContainer** infos);
+            [out] IArrayList** infos);
 
         GetGlobalSearchActivity(
             [out] IComponentName** cName);

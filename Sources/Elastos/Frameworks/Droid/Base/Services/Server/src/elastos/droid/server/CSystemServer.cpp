@@ -30,7 +30,7 @@
 #include "elastos/droid/server/pm/CLauncherAppsService.h"
 #include "elastos/droid/server/power/ShutdownThread.h"
 #include "elastos/droid/server/twilight/CTwilightService.h"
-//#include "elastos/droid/server/search/CSearchManagerService.h"
+#include "elastos/droid/server/search/CSearchManagerService.h"
 #include "elastos/droid/server/WiredAccessoryManager.h"
 #include "elastos/droid/server/webkit/WebViewUpdateService.h"
 #include "elastos/droid/server/wm/InputMonitor.h"
@@ -115,6 +115,7 @@ using Elastos::Droid::Server::Notification::CNotificationManagerService;
 using Elastos::Droid::Server::Os::CSchedulingPolicyService;
 using Elastos::Droid::Server::Pm::CLauncherAppsService;
 using Elastos::Droid::Server::Power::ShutdownThread;
+using Elastos::Droid::Server::Search::CSearchManagerService;
 using Elastos::Droid::Server::Twilight::CTwilightService;
 using Elastos::Droid::Server::Webkit::WebViewUpdateService;
 using Elastos::Droid::Server::Wm::InputMonitor;
@@ -892,17 +893,17 @@ ECode SystemServer::StartOtherServices()
                 ServiceManager::AddService(IContext::COUNTRY_DETECTOR, (IBinder*)countryDetector);
         }
 
-        // if (!disableNonCoreServices) {
-        //     // try {
-        //     Slogger::I(TAG, "Search Service");
-        //     AutoPtr<IISearchManager> searchManager;
-        //     ec = CSearchManagerService::New(context, (IISearchManager**)&searchManager);
-        //     if (FAILED(ec)) ReportWtf("starting Audio Service", ec);
-        //     ServiceManager::AddService(IContext::SEARCH_SERVICE, searchManager.Get());
-        //     // } catch (Throwable e) {
-        //     //     ReportWtf("starting Search Service", ec);
-        //     // }
-        // }
+        if (!disableNonCoreServices) {
+            // try {
+            Slogger::I(TAG, "Search Service");
+            AutoPtr<IISearchManager> searchManager;
+            ec = CSearchManagerService::New(context, (IISearchManager**)&searchManager);
+            if (FAILED(ec)) ReportWtf("starting Audio Service", ec);
+            ServiceManager::AddService(IContext::SEARCH_SERVICE, searchManager.Get());
+            // } catch (Throwable e) {
+            //     ReportWtf("starting Search Service", ec);
+            // }
+        }
 
     //     try {
     //         Slogger::I(TAG, "DropBox Service");

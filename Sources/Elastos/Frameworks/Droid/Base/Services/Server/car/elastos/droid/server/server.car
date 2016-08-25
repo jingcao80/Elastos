@@ -114,7 +114,7 @@ module
     // merge("power/ScreenOnBlocker.car");
     // merge("RecognitionManagerService.car");
     // merge("DeviceStorageMonitorService.car");
-    // merge("search/Searchables.car");
+    merge("search/Searchables.car");
 
     interface Elastos.Droid.Server.Display.IColorFade;
     interface Elastos.Droid.Server.Display.IDisplayBlanker;
@@ -809,38 +809,38 @@ module
 
 //     } // namespace Usb
 
-//    namespace Search {
-//        [local]
-//        class CSearchManagerService {
-//            constructor(
-//               [in] IContext* ctx);
+    namespace Search {
+        [local]
+        class CSearchManagerService {
+            constructor(
+               [in] IContext* ctx);
 
-//            interface IISearchManager;
-//            interface IBinder;
-//        }
+            interface IISearchManager;
+            interface IBinder;
+        }
 
-//        class CSearchManagerServiceBootCompletedReceiver {
-//            constructor(
-//                [in] IInterface* host);
+        class CSearchManagerServiceBootCompletedReceiver {
+            constructor(
+                [in] IInterface* host);
 
-//            interface IBroadcastReceiver;
-//        }
+            interface IBroadcastReceiver;
+        }
 
-//        class CSearchManagerServiceUserReceiver {
-//            constructor(
-//                [in] IInterface* host);
+        class CSearchManagerServiceUserReceiver {
+            constructor(
+                [in] IInterface* host);
 
-//            interface IBroadcastReceiver;
-//        }
+            interface IBroadcastReceiver;
+        }
 
-//        class CSearchManagerServiceGlobalSearchProviderObserver {
-//            constructor(
-//                [in] IContentResolver* resolver,
-//                [in] IInterface* host);
+        class CSearchManagerServiceGlobalSearchProviderObserver {
+            constructor(
+                [in] IContentResolver* resolver,
+                [in] IInterface* host);
 
-//            interface IContentObserver;
-//        }
-//    }
+            interface IContentObserver;
+        }
+    }
 
     namespace Wm {
 

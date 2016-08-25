@@ -5,20 +5,25 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Server_Search_CSearchManagerService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/content/PackageMonitor.h"
+#include <elastos/core/Thread.h>
+#include <elastos/droid/internal/content/PackageMonitor.h>
 #include "elastos/droid/database/ContentObserver.h"
-#include "search/Searchables.h"
+// #include "search/Searchables.h"
 #include <elastos/utility/etl/HashMap.h>
 
+using Elastos::Droid::App::IISearchManager;
+using Elastos::Droid::App::ISearchableInfo;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Internal::Content::PackageMonitor;
-using Elastos::Droid::Internal::Content::IPackageMonitor;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Database::IContentObserver;
-using Elastos::Droid::App::IISearchManager;
+using Elastos::Droid::Internal::Content::IPackageMonitor;
+using Elastos::Droid::Internal::Content::PackageMonitor;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::IList;
+using Elastos::Core::Thread;
 
 namespace Elastos {
 namespace Droid {
@@ -27,8 +32,8 @@ namespace Search {
 
 CarClass(CSearchManagerService)
     , public Object
-    , public IISearchManager;
-    , public IBinder;
+    , public IISearchManager
+    , public IBinder
 {
 public:
     class BootCompletedReceiver
@@ -117,10 +122,10 @@ public:
         /* [out] */ ISearchableInfo** info);
 
     CARAPI GetSearchablesInGlobalSearch(
-        /* [out] */ IObjectContainer** infos);
+        /* [out] */ IList** infos);
 
     CARAPI GetGlobalSearchActivities(
-        /* [out] */ IObjectContainer** infos);
+        /* [out] */ IList** infos);
 
     CARAPI GetGlobalSearchActivity(
         /* [out] */ IComponentName** name);
@@ -132,12 +137,14 @@ public:
         /* [in] */ Int32 userHandle,
         /* [out] */ IComponentName** name);
 
+    CARAPI LaunchAssistAction(
+        /* [in] */ Int32 requestType,
+        /* [in] */ const String& hint,
+        /* [in] */ Int32 userHandle,
+        /* [out] */ Boolean* result);
+
     CARAPI ToString(
         /* [out] */ String* str);
-
-protected:
-    CARAPI Init(
-        /* [in] */ IContext* context);
 
 private:
     CARAPI GetSearchables(
