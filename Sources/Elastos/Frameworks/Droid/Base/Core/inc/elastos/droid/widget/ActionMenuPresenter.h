@@ -88,7 +88,7 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        OverflowMenuButton(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ ActionMenuPresenter* host);
 

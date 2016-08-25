@@ -90,7 +90,7 @@ ECode ActionMenuPresenter::MyForwardingListener::OnForwardingStopped(
 
 CAR_INTERFACE_IMPL(ActionMenuPresenter::OverflowMenuButton, ImageButton, IActionMenuChildView)
 
-ActionMenuPresenter::OverflowMenuButton::OverflowMenuButton(
+ECode ActionMenuPresenter::OverflowMenuButton::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ActionMenuPresenter* host)
 {
@@ -103,6 +103,7 @@ ActionMenuPresenter::OverflowMenuButton::OverflowMenuButton(
     SetEnabled(TRUE);
     AutoPtr<MyForwardingListener> listener = new MyForwardingListener(this, mHost);
     SetOnTouchListener(listener);
+    return NOERROR;
 }
 
 //@Override
@@ -435,7 +436,9 @@ ECode ActionMenuPresenter::InitForMenu(
     Int32 width = mWidthLimit;
     if (mReserveOverflow) {
         if (mOverflowButton == NULL) {
-            mOverflowButton = new OverflowMenuButton(mSystemContext, this);
+            AutoPtr<OverflowMenuButton> omb = new OverflowMenuButton();
+            omb->constructor(mSystemContext, this);
+            mOverflowButton = (IView*)omb.Get();
             const Int32 spec = Elastos::Droid::View::View::MeasureSpec::MakeMeasureSpec(0, Elastos::Droid::View::View::MeasureSpec::UNSPECIFIED);
             mOverflowButton->Measure(spec, spec);
         }
@@ -633,7 +636,9 @@ ECode ActionMenuPresenter::UpdateMenuView(
     }
 
     if (mOverflowButton == NULL) {
-        mOverflowButton = new OverflowMenuButton(mSystemContext, this);
+        AutoPtr<OverflowMenuButton> omb = new OverflowMenuButton();
+        omb->constructor(mSystemContext, this);
+        mOverflowButton = (IView*)omb.Get();
     }
 
     AutoPtr<IViewParent> par;

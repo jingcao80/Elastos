@@ -810,7 +810,7 @@ private:
     Boolean mValid;
     // Do not access directly unless you are ThreadedRenderer
     Int64 mNativeRenderNode;
-    IView* mOwningView; // weak-ref
+    AutoPtr<IWeakReference> mOwningView;
 };
 
 } // view

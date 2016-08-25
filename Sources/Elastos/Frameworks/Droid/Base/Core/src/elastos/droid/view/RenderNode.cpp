@@ -57,7 +57,10 @@ RenderNode::RenderNode(
     : mValid(FALSE)
 {
     mNativeRenderNode = nCreate(name);
-    mOwningView = owningView;
+    if (owningView != NULL) {
+        IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(owningView);
+        wrs->GetWeakReference((IWeakReference**)&mOwningView);
+    }
 }
 
 RenderNode::RenderNode(
@@ -933,7 +936,12 @@ ECode RenderNode::GetDebugSize(
 ECode RenderNode::AddAnimator(
     /* [in] */ IRenderNodeAnimator* animator)
 {
-    if (mOwningView == NULL || ((View*)mOwningView)->mAttachInfo == NULL) {
+    AutoPtr<IView> owningView;
+    if (mOwningView != NULL) {
+        mOwningView->Resolve(EIID_IView, (IInterface**)&owningView);
+    }
+
+    if (owningView == NULL || ((View*)owningView.Get())->mAttachInfo == NULL) {
         Logger::E("RenderNode", "Cannot start this animator on a detached view!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -941,7 +949,7 @@ ECode RenderNode::AddAnimator(
     Int64 ptr;
     animator->GetNativeAnimator(&ptr);
     nAddAnimator(mNativeRenderNode, ptr);
-    ((View*)mOwningView)->mAttachInfo->mViewRootImpl->RegisterAnimatingRenderNode(this);
+    ((View*)owningView.Get())->mAttachInfo->mViewRootImpl->RegisterAnimatingRenderNode(this);
     return NOERROR;
 }
 
@@ -975,8 +983,10 @@ ECode RenderNode::ToString(
     sb += ", isValid=";
     sb += mValid;
     if (mOwningView != NULL) {
+        AutoPtr<IView> owningView;
+        mOwningView->Resolve(EIID_IView, (IInterface**)&owningView);
         sb += ", owningView=";
-        sb += TO_CSTR(mOwningView);
+        sb += TO_CSTR(owningView);
     }
     sb += "}";
     *str = sb.ToString();

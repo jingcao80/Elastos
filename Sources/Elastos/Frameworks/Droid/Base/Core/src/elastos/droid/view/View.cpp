@@ -816,40 +816,40 @@ ECode View::AccessibilityDelegate::CreateAccessibilityNodeInfo(
 
 ECode View::CheckForTap::Run()
 {
-    mView->mPrivateFlags &= ~PFLAG_PREPRESSED;
-    mView->SetPressed(TRUE, mX, mY);
-    mView->CheckForLongClick(CViewConfiguration::GetTapTimeout());
+    AutoPtr<IView> view;
+    mWeakHost->Resolve(EIID_IView, (IInterface**)&view);
+    if (view == NULL) {
+        return NOERROR;
+    }
 
+    View* host = (View*)view.Get();
+    host->mPrivateFlags &= ~PFLAG_PREPRESSED;
+    host->SetPressed(TRUE, mX, mY);
+    host->CheckForLongClick(CViewConfiguration::GetTapTimeout());
     return NOERROR;
 }
 
 ECode View::ViewPerformClick::Run()
 {
-    Boolean res;
-    mView->PerformClick(&res);
-    return NOERROR;
-}
+    AutoPtr<IView> view;
+    mWeakHost->Resolve(EIID_IView, (IInterface**)&view);
+    if (view == NULL) {
+        return NOERROR;
+    }
 
-ECode View::ViewPerformClick::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str)
-    *str = "ViewPerformClick";
-    return NOERROR;
+    Boolean res;
+    return view->PerformClick(&res);
 }
 
 ECode View::UnsetPressedState::Run()
 {
-    mView->SetPressed(FALSE);
-    return NOERROR;
-}
+    AutoPtr<IView> view;
+    mWeakHost->Resolve(EIID_IView, (IInterface**)&view);
+    if (view == NULL) {
+        return NOERROR;
+    }
 
-ECode View::UnsetPressedState::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str)
-    *str = "UnsetPressedState";
-    return NOERROR;
+    return view->SetPressed(FALSE);
 }
 
 const Int32 View::AttachInfo::InvalidateInfo::POOL_LIMIT = 10;
@@ -963,8 +963,8 @@ AutoPtr<ArrayOf<Float> > View::ScrollabilityCache::TRANSPARENT = InitTRANSPARENT
 
 View::ScrollabilityCache::ScrollabilityCache(
     /* [in] */ IViewConfiguration* configuration,
-    /* [in] */ View* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
     , mFadeScrollBars(FALSE)
     , mFadingEdgeLength(0)
     , mScrollBarDefaultDelayBeforeFade(0)
@@ -996,6 +996,12 @@ View::ScrollabilityCache::ScrollabilityCache(
 
 ECode View::ScrollabilityCache::Run()
 {
+    AutoPtr<IView> view;
+    mWeakHost->Resolve(EIID_IView, (IInterface**)&view);
+    if (view == NULL) {
+        return NOERROR;
+    }
+
     Int64 now;
     AnimationUtils::CurrentAnimationTimeMillis(&now);
     if (now >= mFadeStartTime) {
@@ -1020,7 +1026,8 @@ ECode View::ScrollabilityCache::Run()
         mState = FADING;
 
         // Kick off the fade animation
-        mHost->Invalidate(TRUE);
+        View* host = (View*)view.Get();
+        host->Invalidate(TRUE);
     }
     return NOERROR;
 }
@@ -1649,8 +1656,10 @@ void View::InitializeScrollbarsInternal(
 void View::InitScrollCache()
 {
     if (mScrollCache == NULL) {
+        AutoPtr<IWeakReference> wr;
+        GetWeakReference((IWeakReference**)&wr);
         AutoPtr<IViewConfiguration> configuration = CViewConfiguration::Get(mContext);
-        mScrollCache = new ScrollabilityCache(configuration, this);
+        mScrollCache = new ScrollabilityCache(configuration, wr);
     }
 }
 
@@ -6995,7 +7004,9 @@ ECode View::OnTouchEvent(
                                 // performClick directly. This lets other visual state
                                 // of the view update before click actions start.
                                 if (mPerformClick == NULL) {
-                                    mPerformClick = new ViewPerformClick(this);
+                                    AutoPtr<IWeakReference> wr;
+                                    GetWeakReference((IWeakReference**)&wr);
+                                    mPerformClick = new ViewPerformClick(wr);
                                 }
 
                                 if (Post(mPerformClick, &bval), !bval) {
@@ -7005,7 +7016,9 @@ ECode View::OnTouchEvent(
                         }
 
                         if (mUnsetPressedState == NULL) {
-                            mUnsetPressedState = new UnsetPressedState(this);
+                            AutoPtr<IWeakReference> wr;
+                            GetWeakReference((IWeakReference**)&wr);
+                            mUnsetPressedState = new UnsetPressedState(wr);
                         }
 
                         if (prepressed) {
@@ -7038,7 +7051,9 @@ ECode View::OnTouchEvent(
                     if (isInScrollingContainer) {
                         mPrivateFlags |= PFLAG_PREPRESSED;
                         if (mPendingCheckForTap == NULL) {
-                            mPendingCheckForTap = new CheckForTap(this);
+                            AutoPtr<IWeakReference> wr;
+                            GetWeakReference((IWeakReference**)&wr);
+                            mPendingCheckForTap = new CheckForTap(wr);
                         }
                         event->GetX(&(mPendingCheckForTap->mX));
                         event->GetY(&(mPendingCheckForTap->mY));

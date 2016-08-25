@@ -2316,9 +2316,11 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("View::CheckForTap")
+
         CheckForTap(
-            /* [in] */ View* view)
-            : mView(view)
+            /* [in] */ IWeakReference* view)
+            : mWeakHost(view)
         {}
 
         CARAPI Run();
@@ -2326,43 +2328,41 @@ private:
         Float mX;
         Float mY;
     private:
-        View* mView;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class ViewPerformClick
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("View::ViewPerformClick")
+
         ViewPerformClick(
-            /* [in] */ View* view)
-            : mView(view)
+            /* [in] */ IWeakReference* view)
+            : mWeakHost(view)
         {}
 
         CARAPI Run();
 
-        CARAPI ToString(
-            /* [out] */ String* str);
-
     private:
-        View* mView;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class UnsetPressedState
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("View::UnsetPressedState")
+
         UnsetPressedState(
-            /* [in] */ View* view)
-            : mView(view)
+            /* [in] */ IWeakReference* view)
+            : mWeakHost(view)
         {}
 
         CARAPI Run();
 
-        CARAPI ToString(
-            /* [out] */ String* str);
-
     private:
-        View* mView;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     /**
@@ -2392,7 +2392,7 @@ private:
     public:
         ScrollabilityCache(
             /* [in] */ IViewConfiguration* configuration,
-            /* [in] */ View* host);
+            /* [in] */ IWeakReference* host);
 
         CARAPI Run();
 
@@ -2401,7 +2401,7 @@ private:
             /* [in] */ Int32 color);
 
     public:
-        View* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
 
         Boolean mFadeScrollBars;
         Int32 mFadingEdgeLength;
