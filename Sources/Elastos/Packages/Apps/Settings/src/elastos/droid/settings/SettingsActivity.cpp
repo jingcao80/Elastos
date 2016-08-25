@@ -1144,6 +1144,7 @@ ECode SettingsActivity::SwitchToFragment(
     CFragmentHelper::AcquireSingleton((IFragmentHelper**)&helper);
     AutoPtr<IFragment> f;
     helper->Instantiate(this, fragmentName, args, (IFragment**)&f);
+    assert(f != NULL);
     AutoPtr<IFragmentManager> manager;
     GetFragmentManager((IFragmentManager**)&manager);
     AutoPtr<IFragmentTransaction> transaction;

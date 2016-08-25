@@ -30,17 +30,19 @@ private:
     {
     public:
         DozeRunnable(
-            /* [in] */ DozeTrigger* host);
+            /* [in] */ IWeakReference* host);
 
         // @Override
         CARAPI Run();
 
     private:
-        DozeTrigger* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
 public:
-    DozeTrigger(
+    DozeTrigger();
+
+    CARAPI constructor(
         /* [in] */ Int32 dozeDurationSeconds,
         /* [in] */ IRunnable* sleepRunnable);
 

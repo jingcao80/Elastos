@@ -13,15 +13,20 @@ namespace Misc {
 //=================================
 
 DozeTrigger::DozeRunnable::DozeRunnable(
-    /* [in] */ DozeTrigger* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 ECode DozeTrigger::DozeRunnable::Run()
 {
-    mHost->mSleepRunnable->Run();
-    mHost->mIsDozing = FALSE;
-    mHost->mHasTriggered = TRUE;
+    AutoPtr<IObject> obj;
+    mWeakHost->Resolve(EIID_IObject, (IInterface**)&obj);
+    if (obj) {
+        DozeTrigger* host = (DozeTrigger*)obj.Get();
+        host->mSleepRunnable->Run();
+        host->mIsDozing = FALSE;
+        host->mHasTriggered = TRUE;
+    }
     return NOERROR;
 }
 
@@ -29,14 +34,25 @@ ECode DozeTrigger::DozeRunnable::Run()
 // DozeTrigger
 //=================================
 
-DozeTrigger::DozeTrigger(
+DozeTrigger::DozeTrigger()
+    : mIsDozing(FALSE)
+    , mHasTriggered(FALSE)
+    , mDozeDurationSeconds(0)
+{
+}
+
+ECode DozeTrigger::constructor(
     /* [in] */ Int32 dozeDurationSeconds,
     /* [in] */ IRunnable* sleepRunnable)
-    : mDozeDurationSeconds(dozeDurationSeconds)
-    , mSleepRunnable(sleepRunnable)
 {
+    mDozeDurationSeconds = dozeDurationSeconds;
+    mSleepRunnable = sleepRunnable;
+
     CHandler::New((IHandler**)&mHandler);
-    mDozeRunnable = new DozeRunnable(this);
+    AutoPtr<IWeakReference> wr;
+    GetWeakReference((IWeakReference**)&wr);
+    mDozeRunnable = new DozeRunnable(wr);
+    return NOERROR;
 }
 
 void DozeTrigger::StartDozing()
