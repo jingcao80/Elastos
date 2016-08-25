@@ -51,6 +51,10 @@ NotificationData::Entry::Entry(
     /* [in] */ IStatusBarIconView* ic)
     : mNotification(n)
     , mIcon(ic)
+    , mAutoRedacted(FALSE)
+    , mLegacy(FALSE)
+    , mTargetSdk(0)
+    , mInterruption(FALSE)
 {
     n->GetKey(&mKey);
 }
