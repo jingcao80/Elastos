@@ -81,10 +81,14 @@ ECode ViewStub::constructor(
 void ViewStub::Initialize(
     /* [in] */ IContext* context)
 {
+    View::constructor();
+
     mContext = context;
+    mHoldContext = FALSE;
     // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
     if (IContextThemeWrapperInLayoutInflater::Probe(context) != NULL) {
         mContext->AddRef();
+        mHoldContext = TRUE;
     }
     SetVisibility(IView::GONE);
     SetWillNotDraw(TRUE);

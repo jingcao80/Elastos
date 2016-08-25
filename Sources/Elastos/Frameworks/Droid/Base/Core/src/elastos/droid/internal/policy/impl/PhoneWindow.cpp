@@ -358,37 +358,6 @@ ECode PhoneWindow::_DecorView::ActionModeCallbackWrapper::OnDestroyActionMode(
 }
 
 //===============================================================================================
-// PhoneWindow::_DecorView::DecorViewWeakReferenceImpl
-//===============================================================================================
-CAR_INTERFACE_IMPL(PhoneWindow::_DecorView::DecorViewWeakReferenceImpl, Object, IWeakReference)
-
-PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::DecorViewWeakReferenceImpl(
-   /* [in] */ IInterface* object,
-   /* [in] */ ElRefBase::WeakRefType* ref)
-   : mObject(object)
-   , mRef(ref)
-{}
-
-PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::~DecorViewWeakReferenceImpl()
-{
-   if (mRef) mRef->DecWeak(this);
-}
-
-ECode PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::Resolve(
-   /* [in] */ const InterfaceID& riid,
-   /* [out] */ IInterface** objectReference)
-{
-   *objectReference = NULL;
-   if (mObject && mRef && mRef->AttemptIncStrong(objectReference)) {
-       *objectReference = mObject->Probe(riid);
-       REFCOUNT_ADD(*objectReference);
-       ((DecorView*)(IFrameLayout::Probe(mObject)))->_Release();
-   }
-   return NOERROR;
-}
-
-
-//===============================================================================================
 // PhoneWindow::_DecorView::StylusGestureFilter::
 //===============================================================================================
 const Int32 PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_UP = 1;
@@ -2178,6 +2147,37 @@ ECode PhoneWindow::_DecorView::StartActionMode(
 
     *res = mActionMode;
     REFCOUNT_ADD(*res);
+    return NOERROR;
+}
+
+//===============================================================================================
+// PhoneWindow::DecorView::DecorViewWeakReferenceImpl
+//===============================================================================================
+CAR_INTERFACE_IMPL(PhoneWindow::DecorView::DecorViewWeakReferenceImpl, Object, IWeakReference)
+
+PhoneWindow::DecorView::DecorViewWeakReferenceImpl::DecorViewWeakReferenceImpl(
+    /* [in] */ IInterface* object,
+    /* [in] */ ElRefBase::WeakRefType* ref)
+    : mObject(object)
+    , mRef(ref)
+{}
+
+PhoneWindow::DecorView::DecorViewWeakReferenceImpl::~DecorViewWeakReferenceImpl()
+{
+    if (mRef) mRef->DecWeak(this);
+}
+
+ECode PhoneWindow::DecorView::DecorViewWeakReferenceImpl::Resolve(
+   /* [in] */ const InterfaceID& riid,
+   /* [out] */ IInterface** objectReference)
+{
+    VALIDATE_NOT_NULL(objectReference)
+    *objectReference = NULL;
+    if (mObject && mRef && mRef->AttemptIncStrong(objectReference)) {
+        *objectReference = mObject->Probe(riid);
+        REFCOUNT_ADD(*objectReference);
+        ((DecorView*)IObject::Probe(mObject))->_Release();
+    }
     return NOERROR;
 }
 
@@ -5729,7 +5729,7 @@ void PhoneWindow::InstallDecor()
     if (mDecor == NULL) {
         AutoPtr<DecorView> dv = GenerateDecor();
         mDecor = dv;
-        mDecor->AddRef();
+        mDecor->_AddRef();  // Notes: use DecorView::_AddRef() not DecorView::AddRef().
         mDecor->SetDescendantFocusability(ViewGroup::FOCUS_AFTER_DESCENDANTS);
         mDecor->SetIsRootNamespace(TRUE);
 

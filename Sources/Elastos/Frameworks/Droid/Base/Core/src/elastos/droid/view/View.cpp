@@ -1315,18 +1315,11 @@ View::View()
     , mRightPaddingDefined(FALSE)
     , mHoldContext(FALSE)
 {
-    if (InputEventConsistencyVerifier::IsInstrumentationEnabled()) {
-        mInputEventConsistencyVerifier =
-            new InputEventConsistencyVerifier(TO_IINTERFACE(this), 0);
-    }
-
-    mRenderNode = RenderNode::Create(String("View"), this);
 }
 
 View::~View()
 {
-    // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
-    if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL || mHoldContext) {
+    if (mHoldContext) {
         REFCOUNT_RELEASE(mContext);
     }
     mInputEventConsistencyVerifier = NULL;
@@ -11145,6 +11138,15 @@ ECode View::DispatchAttachedToWindow(
     /* [in] */ AttachInfo* info,
     /* [in] */ Int32 visibility)
 {
+#ifdef DEBUG
+    if (mRenderNode == NULL) {
+        Logger::E(TAG, " %s, mRenderNode is null. Maybe View::constructor() was not called"
+            " in subclass's constructors.", TO_CSTR(this));
+        assert(0);
+        return NOERROR;
+    }
+#endif
+
     //System.out.println("Attached! " + this);
     mAttachInfo = info;
     if (mOverlay != NULL) {
@@ -17803,13 +17805,28 @@ ECode View::FindNamedViews(
     return NOERROR;
 }
 
+ECode View::constructor()
+{
+    if (InputEventConsistencyVerifier::IsInstrumentationEnabled()) {
+        mInputEventConsistencyVerifier =
+            new InputEventConsistencyVerifier(TO_IINTERFACE(this), 0);
+    }
+
+    mRenderNode = RenderNode::Create(String("View"), this);
+    return NOERROR;
+}
+
 ECode View::constructor(
     /* [in] */ IContext* context)
 {
+    constructor();
+
     mContext = context;
+    mHoldContext = FALSE;
     // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
     if (IContextThemeWrapperInLayoutInflater::Probe(context) != NULL) {
         mContext->AddRef();
+        mHoldContext = TRUE;
     }
     if (context != NULL) {
         context->GetResources((IResources**)&mResources);
@@ -17828,8 +17845,6 @@ ECode View::constructor(
     SetOverScrollMode(IView::OVER_SCROLL_IF_CONTENT_SCROLLS);
     mUserPaddingStart = UNDEFINED_PADDING;
     mUserPaddingEnd = UNDEFINED_PADDING;
-
-    mRenderNode = RenderNode::Create(String("View"), this);
 
     if (!sCompatibilityDone && context) {
         AutoPtr<IApplicationInfo> info;
@@ -18554,8 +18569,10 @@ Boolean View::InLiveRegion()
 
 void View::HoldContext()
 {
-    mHoldContext = TRUE;
-    REFCOUNT_ADD(mContext);
+    if (!mHoldContext) {
+        mHoldContext = TRUE;
+        REFCOUNT_ADD(mContext);
+    }
 }
 
 /////////////////////////////////////////////////////////

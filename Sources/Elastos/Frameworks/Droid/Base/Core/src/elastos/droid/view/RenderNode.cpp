@@ -933,7 +933,7 @@ ECode RenderNode::GetDebugSize(
 ECode RenderNode::AddAnimator(
     /* [in] */ IRenderNodeAnimator* animator)
 {
-    if (mOwningView == NULL || ((View*)mOwningView.Get())->mAttachInfo == NULL) {
+    if (mOwningView == NULL || ((View*)mOwningView)->mAttachInfo == NULL) {
         Logger::E("RenderNode", "Cannot start this animator on a detached view!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -941,7 +941,7 @@ ECode RenderNode::AddAnimator(
     Int64 ptr;
     animator->GetNativeAnimator(&ptr);
     nAddAnimator(mNativeRenderNode, ptr);
-    ((View*)mOwningView.Get())->mAttachInfo->mViewRootImpl->RegisterAnimatingRenderNode(this);
+    ((View*)mOwningView)->mAttachInfo->mViewRootImpl->RegisterAnimatingRenderNode(this);
     return NOERROR;
 }
 

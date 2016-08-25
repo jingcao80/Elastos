@@ -88,8 +88,6 @@ namespace Internal {
 namespace Policy {
 namespace Impl {
 
-extern "C" const InterfaceID EIID_CPhoneWindow;
-
 class PhoneWindow
     : public Window
     , public IPhoneWindow
@@ -243,28 +241,6 @@ private:
         private:
             AutoPtr<IActionModeCallback> mWrapped;
             _DecorView* mHost;
-        };
-
-        class DecorViewWeakReferenceImpl
-           : public Object
-           , public IWeakReference
-        {
-        public:
-            CAR_INTERFACE_DECL()
-
-            DecorViewWeakReferenceImpl(
-                /* [in] */ IInterface* object,
-                /* [in] */ ElRefBase::WeakRefType* ref);
-
-            ~DecorViewWeakReferenceImpl();
-
-            CARAPI Resolve(
-               /* [in] */ const InterfaceID& riid,
-               /* [out] */ IInterface** objectReference);
-
-        private:
-            IInterface* mObject;
-            ElRefBase::WeakRefType* mRef;
         };
 
         class StylusGestureFilter
@@ -578,6 +554,29 @@ private:
     class DecorView
        : public _DecorView
     {
+    private:
+        class DecorViewWeakReferenceImpl
+           : public Object
+           , public IWeakReference
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            DecorViewWeakReferenceImpl(
+                /* [in] */ IInterface* object,
+                /* [in] */ ElRefBase::WeakRefType* ref);
+
+            ~DecorViewWeakReferenceImpl();
+
+            CARAPI Resolve(
+               /* [in] */ const InterfaceID& riid,
+               /* [out] */ IInterface** objectReference);
+
+        private:
+            IInterface* mObject;
+            ElRefBase::WeakRefType* mRef;
+        };
+
     public:
        DecorView(
             /* [in] */ PhoneWindow* host);

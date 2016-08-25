@@ -2552,6 +2552,13 @@ public:
 
     View();
 
+    virtual ~View();
+
+protected:
+    // subclasses must call this method.
+    CARAPI constructor();
+
+public:
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -2569,8 +2576,6 @@ public:
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyleAttr,
         /* [in] */ Int32 defStyleRes);
-
-    virtual ~View();
 
     virtual CARAPI GetVerticalFadingEdgeLength(
          /* [out] */ Int32* length);
@@ -6279,6 +6284,7 @@ private:
 
     AutoPtr< ArrayOf<Int32> > mTempNestedScrollConsumed;
 
+protected:
     Boolean mHoldContext;
 };
 
