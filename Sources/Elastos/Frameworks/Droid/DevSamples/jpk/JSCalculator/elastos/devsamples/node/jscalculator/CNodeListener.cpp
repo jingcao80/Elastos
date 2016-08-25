@@ -163,6 +163,22 @@ ECode JSEvtName::SetCalculatorEditTextListener(
     return NOERROR;
 }
 
+ECode JSEvtName::SetCalculatorPadViewPagerListener(
+    /* [in] */ Int32 ppCalculatorPadViewPagerListener,    //ICalculatorPadViewPagerListener**
+    /* [in] */ ICalculatorPadViewPagerListener* pJsCalculatorPadViewPagerListener)
+{
+    *(ICalculatorPadViewPagerListener**)ppCalculatorPadViewPagerListener = pJsCalculatorPadViewPagerListener;
+    return NOERROR;
+}
+
+ECode JSEvtName::SetCalculatorPadLayoutListener(
+    /* [in] */ Int32 ppCalculatorPadLayoutListener,    //ICalculatorPadLayoutListener**
+    /* [in] */ ICalculatorPadLayoutListener* pJsCalculatorPadLayoutListener)
+{
+    *(ICalculatorPadLayoutListener**)ppCalculatorPadLayoutListener = pJsCalculatorPadLayoutListener;
+    return NOERROR;
+}
+
 ECode JSEvtName::SetNodeBridgeListener(
     /* [in] */ INodeBridgeListener* pNodeBridgeListener)
 {

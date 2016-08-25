@@ -55,7 +55,7 @@ module.exports = function(aoElastos, aoActivity){
 //             return getChildCount();
                 result.data = _this.getChildCount();
 //         }
-            }
+            },
 
 //         @Override
 //         public Object instantiateItem(ViewGroup container, int position) {
@@ -63,7 +63,7 @@ module.exports = function(aoElastos, aoActivity){
 //             return getChildAt(position);
                 result.data = getChildAt(position);
 //         }
-            }
+            },
 
 //         @Override
 //         public void destroyItem(ViewGroup container, int position, Object object) {
@@ -71,7 +71,7 @@ module.exports = function(aoElastos, aoActivity){
 //             removeViewAt(position);
                 _this.removeViewAt(position);
 //         }
-            }
+            },
 
 //         @Override
 //         public boolean isViewFromObject(View view, Object object) {
@@ -79,7 +79,7 @@ module.exports = function(aoElastos, aoActivity){
 //             return view == object;
                 result.data = (view == object);
 //         }
-            }
+            },
 
 //         @Override
 //         public float getPageWidth(int position) {
@@ -87,7 +87,7 @@ module.exports = function(aoElastos, aoActivity){
 //             return position == 1 ? 7.0f / 9.0f : 1.0f;
                 result.data = position == 1 ? 7.0 / 9.0 : 1.0;
 //         }
-            }
+            },
 //     };
         });
 
@@ -104,7 +104,7 @@ module.exports = function(aoElastos, aoActivity){
 //                 view.setEnabled(enabled);
 //             }
 //         }
-            }
+            },
 
 //         @Override
 //         public void onPageSelected(int position) {
@@ -116,7 +116,7 @@ module.exports = function(aoElastos, aoActivity){
 //                 }
 //             }
 //         }
-            }
+            },
 //     };
         };
 
@@ -135,7 +135,7 @@ module.exports = function(aoElastos, aoActivity){
 //                 view.setAlpha(1.0f);
 //             }
 //         }
-            }
+            },
 //     };
         };
 

@@ -1,6 +1,9 @@
 module
 {
+    importlib("Org.Javia.Arity.eco");
     importlib("Elastos.Droid.Core.eco");
+
+    //merge("../../../../../../../../../Frameworks/Droid/Support/V4/Elastos.Droid.Support.V4.car");
 
     interface Elastos.Droid.Os.IMessage;
     interface Elastos.Droid.Os.IHandler;
@@ -34,6 +37,19 @@ module
 
     using interface Elastos.Droid.View.IMotionEvent;
     using interface Elastos.Core.ICharSequence;
+
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewManager;
+    using interface Elastos.Droid.View.IViewParent;
+
+    using interface Elastos.Droid.View.IViewGroupLayoutParams;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Graphics.ICanvas;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEvent;
+    using interface Elastos.Droid.View.IViewGroupLayoutParams;
 
     namespace Elastos {
     namespace DevSamples {
@@ -89,6 +105,8 @@ module
     }
 
     interface ICalculatorEditTextListener;
+    interface ICalculatorPadLayoutListener;
+    interface ICalculatorPadViewPagerListener;
 
     [deprecated]
     interface INodeBridgeListener {
@@ -99,10 +117,23 @@ module
             [in] Int32 activityListener,    //IActivityListener**
             [in] IHandler* activityHandler,
             [out] Boolean* result);
+
         OnRegisterCalculatorEditText(
             [in] IContext* context,
             [in] IInterface* control,
             [in] Int32 listener, //ICalculatorEditTextListener**
+            [out] Boolean* result);
+
+        OnRegisterCalculatorPadLayout(
+            [in] IContext* context,
+            [in] IInterface* control,
+            [in] Int32 listener, //ICalculatorPadLayoutListener**
+            [out] Boolean* result);
+
+        OnRegisterCalculatorPadViewPager(
+            [in] IContext* context,
+            [in] IInterface* control,
+            [in] Int32 listener, //ICalculatorPadViewPagerListener**
             [out] Boolean* result);
     }
 
@@ -128,6 +159,14 @@ module
         SetCalculatorEditTextListener(
             [in] Int32 calculatorEditTextListener,    //ICalculatorEditTextListener**
             [in] ICalculatorEditTextListener* jsCalculatorEditTextListener);
+
+        SetCalculatorPadLayoutListener(
+            [in] Int32 calculatorPadLayoutListener,    //ICalculatorPadLayoutListener**
+            [in] ICalculatorPadLayoutListener* jsCalculatorPadLayoutListener);
+
+        SetCalculatorPadViewPagerListener(
+            [in] Int32 calculatorPadViewPagerListener,    //ICalculatorPadViewPagerListener**
+            [in] ICalculatorPadViewPagerListener* jsCalculatorPadViewPagerListener);
 
         SetNodeBridgeListener(
             [in] INodeBridgeListener* nodeBridgeListener);
@@ -248,6 +287,329 @@ module
             [in] Int32 lengthAfter);
     }
 
+    [local]
+    interface ICalculatorPadLayoutSuperObject
+    {
+        Test();
+    }
+
+    [local]
+    interface ICalculatorPadLayout
+    {
+        GetSuperObject(
+            [out] ICalculatorPadLayoutSuperObject** superObject);
+
+        _constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        //public
+        _ShouldDelayChildPressedState(
+            [out] Boolean* result);
+        //protected
+        _OnLayout(
+            [in] Boolean changed,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+        //public
+        _GenerateLayoutParams(
+            [in] IAttributeSet* attrs,
+            [out] IViewGroupLayoutParams** result);
+        //public
+        _GenerateDefaultLayoutParams(
+            [out] IViewGroupLayoutParams** result);
+        //protected
+        _GenerateLayoutParams(
+            [in] IViewGroupLayoutParams* p,
+            [out] IViewGroupLayoutParams** result);
+        //protected
+        _CheckLayoutParams(
+            [in] IViewGroupLayoutParams* p,
+            [out] Boolean* result);
+    }
+
+    [local]
+    interface ICalculatorPadLayoutListener
+    {
+        OnCreate(   //constructor
+            [in] IInterface* _this,
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        //public
+        ShouldDelayChildPressedState(
+            [in] IInterface* _this,
+            [out] Boolean* result);
+        //protected
+        OnLayout(
+            [in] IInterface* _this,
+            [in] Boolean changed,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+        //public
+        GenerateLayoutParams(
+            [in] IInterface* _this,
+            [in] IAttributeSet* attrs,
+            [out] IViewGroupLayoutParams** result);
+        //public
+        GenerateDefaultLayoutParams(
+            [in] IInterface* _this,
+            [out] IViewGroupLayoutParams** result);
+        //protected
+        GenerateLayoutParams(
+            [in] IInterface* _this,
+            [in] IViewGroupLayoutParams* p,
+            [out] IViewGroupLayoutParams** result);
+        //protected
+        CheckLayoutParams(
+            [in] IInterface* _this,
+            [in] IViewGroupLayoutParams* p,
+            [out] Boolean* result);
+    }
+
+    [local]
+    interface ICalculatorPadViewPagerSuperObject
+    {
+        Test();
+    }
+
+    [local]
+    interface ICalculatorPadViewPager
+    {
+        GetSuperObject(
+            [out] ICalculatorPadViewPagerSuperObject** superObject);
+
+        _constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        //protected:
+        _OnFinishInflate();
+    }
+
+    [local]
+    interface IViewPager
+    {
+        //protected:
+        _OnDetachedFromWindow();
+        _GetChildDrawingOrder(
+            [in] Int32 childCount,
+            [in] Int32 i);
+        _VerifyDrawable(
+            [in] IDrawable* who,
+            [out] Boolean* result);
+        _DrawableStateChanged();
+
+        //public
+        _OnSaveInstanceState(
+            [out] IParcelable** result);
+        _OnRestoreInstanceState(
+            [in] IParcelable* state);
+        _AddView(
+            [in] IView* child,
+            [in] Int32 index,
+            [in] IViewGroupLayoutParams* params);
+        _RemoveView(
+            [in] IView* view);
+
+        //protected
+        _OnAttachedToWindow();
+        _OnMeasure(
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
+        _OnSizeChanged(
+            [in] Int32 w,
+            [in] Int32 h,
+            [in] Int32 oldw,
+            [in] Int32 oldh);
+        _OnLayout(
+            [in] Boolean changed,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        //public
+        _ComputeScroll();
+        _OnInterceptTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* res);
+        _OnTouchEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* res);
+        _Draw(
+            [in] ICanvas* canvas);
+        _OnDraw(
+            [in] ICanvas* canvas);
+        _DispatchKeyEvent(
+            [in] IKeyEvent* event,
+            [out] Boolean* res);
+        _AddFocusables(
+            [in] IArrayList* views,
+            [in] Int32 direction,
+            [in] Int32 focusableMode);
+        _AddTouchables(
+            [in] IArrayList* views);
+
+        //protected
+        _OnRequestFocusInDescendants(
+            [in] Int32 direction,
+            [in] IRect* previouslyFocusedRect,
+            [out] Boolean* result);
+
+        //public
+        _DispatchPopulateAccessibilityEvent(
+            [in] IAccessibilityEvent* event,
+            [out] Boolean* res);
+
+        //protected
+        _GenerateDefaultLayoutParams(
+            [out] IViewGroupLayoutParams** params);
+        _GenerateLayoutParams(
+            [in] IViewGroupLayoutParams* p,
+            [out] IViewGroupLayoutParams** params);
+        _CheckLayoutParams(
+            [in] IViewGroupLayoutParams* p,
+            [out] Boolean* result);
+
+        //public
+        _GenerateLayoutParams(
+            [in] IAttributeSet* attrs,
+            [out] IViewGroupLayoutParams** params);
+    }
+
+    [local]
+    interface ICalculatorPadViewPagerListener
+    {
+        OnCreate(   //constructor
+            [in] IInterface* _this,
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        //protected:
+        OnFinishInflate(
+            [in] IInterface* _this);
+
+        //protected:
+        OnDetachedFromWindow(
+            [in] IInterface* _this);
+        GetChildDrawingOrder(
+            [in] IInterface* _this,
+            [in] Int32 childCount,
+            [in] Int32 i);
+        VerifyDrawable(
+            [in] IInterface* _this,
+            [in] IDrawable* who,
+            [out] Boolean* result);
+        DrawableStateChanged(
+            [in] IInterface* _this);
+
+        //public
+        OnSaveInstanceState(
+            [in] IInterface* _this,
+            [out] IParcelable** result);
+        OnRestoreInstanceState(
+            [in] IInterface* _this,
+            [in] IParcelable* state);
+        AddView(
+            [in] IInterface* _this,
+            [in] IView* child,
+            [in] Int32 index,
+            [in] IViewGroupLayoutParams* params);
+        RemoveView(
+            [in] IInterface* _this,
+            [in] IView* view);
+
+        //protected
+        OnAttachedToWindow(
+            [in] IInterface* _this);
+        OnMeasure(
+            [in] IInterface* _this,
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
+        OnSizeChanged(
+            [in] IInterface* _this,
+            [in] Int32 w,
+            [in] Int32 h,
+            [in] Int32 oldw,
+            [in] Int32 oldh);
+        OnLayout(
+            [in] IInterface* _this,
+            [in] Boolean changed,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+
+        //public
+        ComputeScroll(
+            [in] IInterface* _this);
+        OnInterceptTouchEvent(
+            [in] IInterface* _this,
+            [in] IMotionEvent* ev,
+            [out] Boolean* res);
+        OnTouchEvent(
+            [in] IInterface* _this,
+            [in] IMotionEvent* event,
+            [out] Boolean* res);
+        Draw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
+        OnDraw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
+        DispatchKeyEvent(
+            [in] IInterface* _this,
+            [in] IKeyEvent* event,
+            [out] Boolean* res);
+        AddFocusables(
+            [in] IInterface* _this,
+            [in] IArrayList* views,
+            [in] Int32 direction,
+            [in] Int32 focusableMode);
+        AddTouchables(
+            [in] IInterface* _this,
+            [in] IArrayList* views);
+
+        //protected
+        OnRequestFocusInDescendants(
+            [in] IInterface* _this,
+            [in] Int32 direction,
+            [in] IRect* previouslyFocusedRect,
+            [out] Boolean* result);
+
+        //public
+        DispatchPopulateAccessibilityEvent(
+            [in] IInterface* _this,
+            [in] IAccessibilityEvent* event,
+            [out] Boolean* res);
+
+        //protected
+        GenerateDefaultLayoutParams(
+            [in] IInterface* _this,
+            [out] IViewGroupLayoutParams** params);
+        GenerateLayoutParams(
+            [in] IInterface* _this,
+            [in] IViewGroupLayoutParams* p,
+            [out] IViewGroupLayoutParams** params);
+        CheckLayoutParams(
+            [in] IInterface* _this,
+            [in] IViewGroupLayoutParams* p,
+            [out] Boolean* result);
+
+        //public
+        GenerateLayoutParams(
+            [in] IInterface* _this,
+            [in] IAttributeSet* attrs,
+            [out] IViewGroupLayoutParams** params);
+    }
+
     class CCalculator {
         constructor();
 
@@ -286,6 +648,58 @@ module
 
         interface ITextView;
         interface IOnPreDrawListener;
+
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+
+    [local]
+    class CCalculatorPadLayout
+    {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface ICalculatorPadLayout;
+
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CCalculatorPadViewPager
+    {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface ICalculatorPadViewPager;
+
+        interface IViewPager;
+
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
 
         interface IView;
         interface IDrawableCallback;

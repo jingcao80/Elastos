@@ -236,6 +236,36 @@ public:
         ALOGD("RegisterCalculatorEditText========3========");
     }
 
+    static void RegisterCalculatorPadLayout(IContext* context, IInterface* control, ICalculatorPadLayoutListener** listener) {
+        ALOGD("RegisterCalculatorPadLayout========0========");
+        Boolean result = false;
+        if(JSEvtName::mNodeBridgeListener) {
+            ALOGD("RegisterCalculatorPadLayout========1========");
+            JSEvtName::mNodeBridgeListener->OnRegisterCalculatorPadLayout(
+                context, control, (Int32)listener, &result);
+            ALOGD("RegisterCalculatorPadLayout========2========");
+        }
+        else {
+            ALOGD("RegisterCalculatorPadLayout================mNodeBridgeListener is null================");
+        }
+        ALOGD("RegisterCalculatorPadLayout========3========");
+    }
+
+    static void RegisterCalculatorPadViewPager(IContext* context, IInterface* control, ICalculatorPadViewPagerListener** listener) {
+        ALOGD("RegisterCalculatorPadViewPager========0========");
+        Boolean result = false;
+        if(JSEvtName::mNodeBridgeListener) {
+            ALOGD("RegisterCalculatorPadViewPager========1========");
+            JSEvtName::mNodeBridgeListener->OnRegisterCalculatorPadViewPager(
+                context, control, (Int32)listener, &result);
+            ALOGD("RegisterCalculatorPadViewPager========2========");
+        }
+        else {
+            ALOGD("RegisterCalculatorPadViewPager================mNodeBridgeListener is null================");
+        }
+        ALOGD("RegisterCalculatorPadViewPager========3========");
+    }
+
     static ECode Require(
         /* [in] */ const String& moduleName,
         /* [in] */ const String& className,
@@ -299,6 +329,14 @@ public:
     CARAPI SetCalculatorEditTextListener(
         /* [in] */ Int32 ppCalculatorEditTextListener,    //ICalculatorEditTextListener**
         /* [in] */ ICalculatorEditTextListener* pJsCalculatorEditTextListener);
+
+    CARAPI SetCalculatorPadViewPagerListener(
+        /* [in] */ Int32 ppCalculatorPadViewPagerListener,    //ICalculatorPadViewPagerListener**
+        /* [in] */ ICalculatorPadViewPagerListener* pJsCalculatorPadViewPagerListener);
+
+    CARAPI SetCalculatorPadLayoutListener(
+        /* [in] */ Int32 ppCalculatorPadLayoutListener,    //ICalculatorPadLayoutListener**
+        /* [in] */ ICalculatorPadLayoutListener* pJsCalculatorPadLayoutListener);
 
     CARAPI SetNodeBridgeListener(
         /* [in] */ INodeBridgeListener* pNodeBridgeListener);

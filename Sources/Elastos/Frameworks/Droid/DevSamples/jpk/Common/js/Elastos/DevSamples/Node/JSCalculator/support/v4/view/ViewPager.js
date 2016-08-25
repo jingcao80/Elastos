@@ -69,12 +69,15 @@ module.exports = function(aoElastos, aoActivity){
 // import android.view.ViewParent;
 // import android.view.accessibility.AccessibilityEvent;
 // import android.view.animation.Interpolator;
+    var Interpolator = Elastos.Droid.View.Animation.IInterpolator;
 // import android.widget.Scroller;
 
 // import java.lang.reflect.Method;
 // import java.util.ArrayList;
+    var ArrayList = Elastos.Utility.IArrayList;
 // import java.util.Collections;
 // import java.util.Comparator;
+    var Comparator = Elastos.Core.IComparator;
 
 // /**
 //  * Layout manager that allows the user to flip left and right
@@ -143,7 +146,7 @@ module.exports = function(aoElastos, aoActivity){
         var mExpectedAdapterCount;
 
 //     static class ItemInfo {
-        function ItemInfo() {
+        var ItemInfo = function() {
 //         Object object;
 //         int position;
 //         boolean scrolling;
@@ -153,30 +156,36 @@ module.exports = function(aoElastos, aoActivity){
         }
 
 //     private static final Comparator<ItemInfo> COMPARATOR = new Comparator<ItemInfo>(){
-        var COMPARATOR = {
+        var COMPARATOR = new Comparator().extend({
 //         @Override
 //         public int compare(ItemInfo lhs, ItemInfo rhs) {
+            Compare : function(lhs, rhs, result) {
 //             return lhs.position - rhs.position;
+                result.data = lhs.position - rhs.position;
 //         }
+            }
 //     };
-        };
+        });
 
 //     private static final Interpolator sInterpolator = new Interpolator() {
-        var sInterpolator = {
+        var sInterpolator = new Interpolator().extend({
 //         public float getInterpolation(float t) {
+            GetInterpolation : function(t, result) {
 //             t -= 1.0f;
+                t -= 1.0;
 //             return t * t * t * t * t + 1.0f;
+                result.data = t * t * t * t * t + 1.0;
 //         }
+            }
 //     };
-        };
+        });
 
 //     private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
-        var mItems = [];
+        var mItems = new ArrayList();
 //     private final ItemInfo mTempItem = new ItemInfo();
         var mTempItem = new ItemInfo();
 
 //     private final Rect mTempRect = new Rect();
-        //var mTempRect = Droid_New("android.graphics.Rect");
         var mTempRect = new Rect();
 
 //     private PagerAdapter mAdapter;
@@ -345,13 +354,15 @@ module.exports = function(aoElastos, aoActivity){
         var SCROLL_STATE_SETTLING = 2;
 
 //     private final Runnable mEndScrollRunnable = new Runnable() {
-        var mEndScrollRunnable = {
+        var mEndScrollRunnable = new Runnable().extend({
 //         public void run() {
+            run : function() {
 //             setScrollState(SCROLL_STATE_IDLE);
 //             populate();
 //         }
+            }
 //     };
-        };
+        });
 
 //     private int mScrollState = SCROLL_STATE_IDLE;
         var mScrollState = SCROLL_STATE_IDLE;
@@ -459,11 +470,9 @@ module.exports = function(aoElastos, aoActivity){
         function Decor() {}
 
 //     public ViewPager(Context context) {
-        function ViewPager(context) {
 //         super(context);
 //         initViewPager();
 //     }
-        }
 
 //     public ViewPager(Context context, AttributeSet attrs) {
         function ViewPager(context, attrs) {
@@ -796,7 +805,7 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     protected int getChildDrawingOrder(int childCount, int i) {
-        _pt.getChildDrawingOrder = function(childCount, i) {
+        _pt.GetChildDrawingOrder = function(childCount, i, result) {
 //         final int index = mDrawingOrder == DRAW_ORDER_REVERSE ? childCount - 1 - i : i;
 //         final int result = ((LayoutParams) mDrawingOrderedChildren.get(index).getLayoutParams()).childIndex;
 //         return result;
@@ -919,14 +928,14 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     protected boolean verifyDrawable(Drawable who) {
-        _pt.VerifyDrawable = function(who) {
+        _pt.VerifyDrawable = function(who, result) {
 //         return super.verifyDrawable(who) || who == mMarginDrawable;
 //     }
         }
 
 //     @Override
 //     protected void drawableStateChanged() {
-        _pt.DrawableStateChanged() {
+        _pt.DrawableStateChanged = function() {
 //         super.drawableStateChanged();
 //         final Drawable d = mMarginDrawable;
 //         if (d != null && d.isStateful()) {
@@ -1518,7 +1527,7 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     public void removeView(View view) {
-        _pt.removeView = function(view) {
+        _pt.RemoveView = function(view) {
 //         if (mInLayout) {
 //             removeViewInLayout(view);
 //         } else {
@@ -3001,7 +3010,7 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        _pt.DispatchPopulateAccessibilityEvent = function(event) {
+        _pt.DispatchPopulateAccessibilityEvent = function(event, result) {
 //         // Dispatch scroll events from this ViewPager.
 //         if (event.getEventType() == AccessibilityEventCompat.TYPE_VIEW_SCROLLED) {
 //             return super.dispatchPopulateAccessibilityEvent(event);
@@ -3026,36 +3035,37 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
-        _pt.GenerateDefaultLayoutParams = function() {
+        _pt.GenerateDefaultLayoutParams = function(result) {
 //         return new LayoutParams();
 //     }
         }
 
 //     @Override
 //     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
-        _pt.GenerateLayoutParams = function(p) {
+        _pt.GenerateLayoutParams = function(p, result) {
 //         return generateDefaultLayoutParams();
 //     }
         }
 
 //     @Override
 //     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-        _pt.CheckLayoutParams = function(p) {
+        _pt.CheckLayoutParams = function(p, result) {
 //         return p instanceof LayoutParams && super.checkLayoutParams(p);
 //     }
         }
 
 //     @Override
 //     public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
-        _pt.GenerateLayoutParams = function(attrs) {
+        _pt.GenerateLayoutParams = function(attrs, result) {
 //         return new LayoutParams(getContext(), attrs);
 //     }
         }
 
 //     class MyAccessibilityDelegate extends AccessibilityDelegateCompat {
-        function MyAccessibilityDelegate() {
+        var MyAccessibilityDelegate = AccessibilityDelegateCompat.extend({
 //         @Override
 //         public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
+            OnInitializeAccessibilityEvent : function(host, event) {
 //             super.onInitializeAccessibilityEvent(host, event);
 //             event.setClassName(ViewPager.class.getName());
 //             final AccessibilityRecordCompat recordCompat = AccessibilityRecordCompat.obtain();
@@ -3067,9 +3077,11 @@ module.exports = function(aoElastos, aoActivity){
 //                 recordCompat.setToIndex(mCurItem);
 //             }
 //         }
+            },
 
 //         @Override
 //         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
+            OnInitializeAccessibilityNodeInfo : function(host, info) {
 //             super.onInitializeAccessibilityNodeInfo(host, info);
 //             info.setClassName(ViewPager.class.getName());
 //             info.setScrollable(canScroll());
@@ -3080,9 +3092,11 @@ module.exports = function(aoElastos, aoActivity){
 //                 info.addAction(AccessibilityNodeInfoCompat.ACTION_SCROLL_BACKWARD);
 //             }
 //         }
+            },
 
 //         @Override
 //         public boolean performAccessibilityAction(View host, int action, Bundle args) {
+            PerformAccessibilityAction : function(host, action, args, result) {
 //             if (super.performAccessibilityAction(host, action, args)) {
 //                 return true;
 //             }
@@ -3102,32 +3116,39 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //             return false;
 //         }
+            },
 
 //         private boolean canScroll() {
+            CanScroll : function(result) {
 //             return (mAdapter != null) && (mAdapter.getCount() > 1);
 //         }
+            },
 //     }
-        }
+        });
 
 //     private class PagerObserver extends DataSetObserver {
-        function PagerObserver() {
+        var PagerObserver = DataSetObserver.extend({
 //         @Override
 //         public void onChanged() {
+            OnChanged : function() {
 //             dataSetChanged();
 //         }
+            },
 //         @Override
 //         public void onInvalidated() {
+            OnInvalidated() {
 //             dataSetChanged();
 //         }
+            },
 //     }
-        }
+        });
 
 //     /**
 //      * Layout parameters that should be supplied for views added to a
 //      * ViewPager.
 //      */
 //     public static class LayoutParams extends ViewGroup.LayoutParams {
-        function LayoutParams() {
+        var LayoutParams = ViewGroup.LayoutParams.extend({
 //         /**
 //          * true if this view is a decoration on the pager itself and not
 //          * a view supplied by the adapter.
@@ -3163,23 +3184,28 @@ module.exports = function(aoElastos, aoActivity){
 //         int childIndex;
 
 //         public LayoutParams() {
+            LayoutParams : function() {
 //             super(FILL_PARENT, FILL_PARENT);
 //         }
+            },
 
 //         public LayoutParams(Context context, AttributeSet attrs) {
+            LayoutParams : function(context, attrs) {
 //             super(context, attrs);
 
 //             final TypedArray a = context.obtainStyledAttributes(attrs, LAYOUT_ATTRS);
 //             gravity = a.getInteger(0, Gravity.TOP);
 //             a.recycle();
 //         }
+            },
 //     }
-        }
+        });
 
 //     static class ViewPositionComparator implements Comparator<View> {
-        function ViewPositionComparator() {
+        var ViewPositionComparator = Comparator.extend({
 //         @Override
 //         public int compare(View lhs, View rhs) {
+            compare : function(View lhs, View rhs) {
 //             final LayoutParams llp = (LayoutParams) lhs.getLayoutParams();
 //             final LayoutParams rlp = (LayoutParams) rhs.getLayoutParams();
 //             if (llp.isDecor != rlp.isDecor) {
@@ -3187,8 +3213,9 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //             return llp.position - rlp.position;
 //         }
+            }
 //     }
-        }
+        });
 // }
 
 //--------.java----end----
