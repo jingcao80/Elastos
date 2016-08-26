@@ -24487,9 +24487,8 @@ void CActivityManagerService::HandleShowNotRespondingMsg(
             if (it != data->End()) {
                 record = (ActivityRecord*)IActivityRecord::Probe(it->mSecond);
             }
-            AutoPtr<AppNotRespondingDialog> appDialog = new AppNotRespondingDialog(this,
-                GetUiContext(), proc, record,
-                arg1 != 0);
+            AutoPtr<AppNotRespondingDialog> appDialog = new AppNotRespondingDialog();
+            appDialog->constructor(this, GetUiContext(), proc, record, arg1 != 0);
             AutoPtr<IDialog> d = IDialog::Probe(appDialog);
             d->Show();
             proc->mAnrDialog = d;
@@ -24529,8 +24528,8 @@ void CActivityManagerService::HandleShowStrictModeViolationMsg(
         }
 
         if (mShowDialogs && !mSleeping && !mShuttingDown) {
-            AutoPtr<StrictModeViolationDialog> dialog = new StrictModeViolationDialog(GetUiContext(),
-                this, res, proc);
+            AutoPtr<StrictModeViolationDialog> dialog = new StrictModeViolationDialog();
+            dialog->constructor(GetUiContext(), this, res, proc);
             AutoPtr<IDialog> d = IDialog::Probe(dialog);
             d->Show();
             proc->mCrashDialog = d;
@@ -24547,7 +24546,8 @@ void CActivityManagerService::HandleShowStrictModeViolationMsg(
 void CActivityManagerService::HandleShowFactoryErrorMsg(
     /* [in] */ ICharSequence* msg)
 {
-    AutoPtr<FactoryErrorDialog> dialog = new FactoryErrorDialog(GetUiContext(), msg);
+    AutoPtr<FactoryErrorDialog> dialog = new FactoryErrorDialog();
+    dialog->constructor(GetUiContext(), msg);
     AutoPtr<IDialog> d = IDialog::Probe(dialog);
     d->Show();
     EnsureBootCompleted();
@@ -24575,7 +24575,8 @@ void CActivityManagerService::HandleWaitForDebuggerMsg(
     AutoLock lock(this);
     if (arg1 != 0) {
         if (!app->mWaitedForDebugger) {
-            AutoPtr<AppWaitingForDebuggerDialog> appDialog = new AppWaitingForDebuggerDialog(this, GetUiContext(), app);
+            AutoPtr<AppWaitingForDebuggerDialog> appDialog = new AppWaitingForDebuggerDialog();
+            appDialog->constructor(this, GetUiContext(), app);
             AutoPtr<IDialog> d = IDialog::Probe(appDialog);
             app->mWaitDialog = d;
             app->mWaitedForDebugger = TRUE;

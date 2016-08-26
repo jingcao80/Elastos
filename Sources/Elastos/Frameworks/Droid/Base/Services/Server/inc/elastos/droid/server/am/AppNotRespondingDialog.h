@@ -36,7 +36,7 @@ private:
     };
 
 public:
-    AppNotRespondingDialog(
+    CARAPI constructor(
         /* [in] */ CActivityManagerService* service,
         /* [in] */ IContext* context,
         /* [in] */ ProcessRecord* app,

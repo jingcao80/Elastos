@@ -332,7 +332,7 @@ ECode WifiConfigStore::InnerDelayedDiskWriteWriter::OnWriteCalled(
                         + StringUtils::ToString(size));
 
             AutoPtr<ISet> keySet;
-            connectChoices->GetKeySet((ISet**)&keySet);
+            linkedConfigurations->GetKeySet((ISet**)&keySet);
             AutoPtr<IIterator> keyIter;
             keySet->GetIterator((IIterator**)&keyIter);
             Boolean isflag = FALSE;

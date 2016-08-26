@@ -32,7 +32,7 @@ private:
     };
 
 public:
-    FactoryErrorDialog(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICharSequence* msg);
 

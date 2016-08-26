@@ -11,14 +11,14 @@ namespace Droid {
 namespace Server {
 namespace Am {
 
-AppWaitingForDebuggerDialog::AppWaitingForDebuggerDialog(
+ECode AppWaitingForDebuggerDialog::constructor(
     /* [in] */ CActivityManagerService* service,
     /* [in] */ IContext* context,
     /* [in] */ ProcessRecord* app)
-    : mService(service)
-    , mProc(app)
 {
-    BaseErrorDialog::Init(context);
+    FAIL_RETURN(BaseErrorDialog::Init(context))
+    mService = service;
+    mProc = app;
     AutoPtr<IPackageManager> pkgManager;
     context->GetPackageManager((IPackageManager**)&pkgManager);
     pkgManager->GetApplicationLabel(app->mInfo, (ICharSequence**)&mAppName);
@@ -60,6 +60,8 @@ AppWaitingForDebuggerDialog::AppWaitingForDebuggerDialog(
     CString::New(String("Waiting For Debugger: ") + processName, (ICharSequence**)&attrsTitle);
     attrs->SetTitle(attrsTitle);
     window->SetAttributes(attrs);
+
+    return NOERROR;
 }
 
 ECode AppWaitingForDebuggerDialog::OnStop()

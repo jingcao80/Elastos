@@ -36,7 +36,7 @@ private:
     };
 
 public:
-    StrictModeViolationDialog(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ CActivityManagerService* service,
         /* [in] */ AppErrorResult* result,

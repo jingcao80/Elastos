@@ -22,16 +22,16 @@ Int32 const AppNotRespondingDialog::FORCE_CLOSE = 1;
 Int32 const AppNotRespondingDialog::WAIT = 2;
 Int32 const AppNotRespondingDialog::WAIT_AND_REPORT = 3;
 
-AppNotRespondingDialog::AppNotRespondingDialog(
+ECode AppNotRespondingDialog::constructor(
     /* [in] */ CActivityManagerService* service,
     /* [in] */ IContext* context,
     /* [in] */ ProcessRecord* app,
     /* [in] */ ActivityRecord* activity,
     /* [in] */ Boolean aboveSystem)
-    : mService(service)
-    , mProc(app)
 {
-    BaseErrorDialog::Init(context);
+    FAIL_RETURN(BaseErrorDialog::Init(context))
+    mService = service;
+    mProc = app;
     mHandler = new MyHandler(this);
 
     AutoPtr<IResources> res;
@@ -126,6 +126,7 @@ AppNotRespondingDialog::AppNotRespondingDialog(
     attrs->SetPrivateFlags( IWindowManagerLayoutParams::PRIVATE_FLAG_SYSTEM_ERROR
             | IWindowManagerLayoutParams::PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
     window->SetAttributes(attrs);
+    return NOERROR;
 }
 
 ECode AppNotRespondingDialog::OnStop()

@@ -24,11 +24,11 @@ ECode FactoryErrorDialog::MyHandler::HandleMessage(
     return E_RUNTIME_EXCEPTION;
 }
 
-FactoryErrorDialog::FactoryErrorDialog(
+ECode FactoryErrorDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICharSequence* msg)
-    : BaseErrorDialog(context)
 {
+    FAIL_RETURN(BaseErrorDialog::Init(context))
     mHandler = new MyHandler();
 
     SetCancelable(FALSE);
@@ -52,6 +52,8 @@ FactoryErrorDialog::FactoryErrorDialog(
     CString::New(String("Factory Error"), (ICharSequence**)&fcs);
     attrs->SetTitle(fcs);
     window->SetAttributes(attrs);
+
+    return NOERROR;
 }
 
 ECode FactoryErrorDialog::OnStop()

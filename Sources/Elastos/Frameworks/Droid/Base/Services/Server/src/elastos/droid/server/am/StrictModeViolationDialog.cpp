@@ -51,16 +51,16 @@ const Int32 StrictModeViolationDialog::ACTION_OK = 0;
 const Int32 StrictModeViolationDialog::ACTION_OK_AND_REPORT = 1;
 const Int64 StrictModeViolationDialog::DISMISS_TIMEOUT = 1000 * 60 * 1;
 
-StrictModeViolationDialog::StrictModeViolationDialog(
+ECode StrictModeViolationDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ CActivityManagerService* service,
     /* [in] */ AppErrorResult* result,
     /* [in] */ ProcessRecord* app)
-    : BaseErrorDialog(context)
-    , mService(service)
-    , mResult(result)
-    , mProc(app)
 {
+    FAIL_RETURN(BaseErrorDialog::Init(context))
+    mService = service;
+    mResult = result;
+    mProc = app;
     mHandler = new MyHandler(this);
 
     AutoPtr<IResources> res;
@@ -129,6 +129,8 @@ StrictModeViolationDialog::StrictModeViolationDialog(
     mHandler->ObtainMessage(ACTION_OK, (IMessage**)&msg);
     Boolean posted;
     mHandler->SendMessageDelayed(msg, DISMISS_TIMEOUT, &posted);
+
+    return NOERROR;
 }
 
 } // namespace Am
