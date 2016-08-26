@@ -24425,8 +24425,8 @@ void CActivityManagerService::HandleShowErrorMsg(
             return;
         }
         if (mShowDialogs && !mSleeping && !mShuttingDown) {
-            AutoPtr<AppErrorDialog> errorDialog = new AppErrorDialog(GetUiContext(),
-                    this, res, proc);
+            AutoPtr<AppErrorDialog> errorDialog = new AppErrorDialog();
+            errorDialog->constructor(GetUiContext(), this, res, proc);
             AutoPtr<IDialog> d = IDialog::Probe(errorDialog);
             d->Show();
             proc->mCrashDialog = d;
