@@ -257,7 +257,8 @@ Boolean SMSDispatcher::SmsTracker::IsMultipart()
 /**
  * Persist this as a sent message
  */
-void SMSDispatcher::SmsTracker::WriteSentMessage(IContext* context)
+void SMSDispatcher::SmsTracker::WriteSentMessage(
+    /* [in] */ IContext* context)
 {
     AutoPtr<IInterface> obj;
     mData->Get(CoreUtils::Convert(String("text")), (IInterface**)&obj);
@@ -291,7 +292,9 @@ void SMSDispatcher::SmsTracker::WriteSentMessage(IContext* context)
 /**
  * Update the status of this message if we persisted it
  */
-CARAPI SMSDispatcher::SmsTracker::UpdateSentMessageStatus(IContext* context, Int32 status)
+ECode SMSDispatcher::SmsTracker::UpdateSentMessageStatus(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 status)
 {
     if (mMessageUri != NULL) {
         // if we wrote this message in writeSentMessage, update it now
@@ -313,7 +316,9 @@ CARAPI SMSDispatcher::SmsTracker::UpdateSentMessageStatus(IContext* context, Int
  * @param context The Context
  * @param errorCode The error code
  */
-void SMSDispatcher::SmsTracker::UpdateMessageErrorCode(IContext* context, Int32 errorCode)
+void SMSDispatcher::SmsTracker::UpdateMessageErrorCode(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 errorCode)
 {
     if (mMessageUri == NULL) {
         return;
@@ -342,7 +347,9 @@ void SMSDispatcher::SmsTracker::UpdateMessageErrorCode(IContext* context, Int32 
  * @param context The Context
  * @param messageType The final message type
  */
-void SMSDispatcher::SmsTracker::SetMessageFinalState(IContext* context, Int32 messageType)
+void SMSDispatcher::SmsTracker::SetMessageFinalState(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 messageType)
 {
     if (mMessageUri == NULL) {
         return;
@@ -372,7 +379,10 @@ void SMSDispatcher::SmsTracker::SetMessageFinalState(IContext* context, Int32 me
  * @param error The error to send back with
  * @param errorCode
  */
-CARAPI SMSDispatcher::SmsTracker::OnFailed(IContext* context, Int32 error, Int32 errorCode)
+ECode SMSDispatcher::SmsTracker::OnFailed(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 error,
+    /* [in] */ Int32 errorCode)
 {
     if (mAnyPartFailed != NULL) {
         mAnyPartFailed->Set(TRUE);
@@ -421,7 +431,8 @@ CARAPI SMSDispatcher::SmsTracker::OnFailed(IContext* context, Int32 error, Int32
  *
  * @param context The Context
  */
-CARAPI SMSDispatcher::SmsTracker::OnSent(IContext* context)
+ECode SMSDispatcher::SmsTracker::OnSent(
+    /* [in] */ IContext* context)
 {
     // is single part or last part of multipart message
     Boolean isSinglePartOrLastPart = TRUE;
@@ -487,18 +498,22 @@ SMSDispatcher::ConfirmDialogListener::ConfirmDialogListener(
 {
 }
 
-void SMSDispatcher::ConfirmDialogListener::SetPositiveButton(IButton* button)
+void SMSDispatcher::ConfirmDialogListener::SetPositiveButton(
+    /* [in] */ IButton* button)
 {
     mPositiveButton = button;
 }
 
-void SMSDispatcher::ConfirmDialogListener::SetNegativeButton(IButton* button)
+void SMSDispatcher::ConfirmDialogListener::SetNegativeButton(
+    /* [in] */ IButton* button)
 {
     mNegativeButton = button;
 }
 
 //@Override
-CARAPI SMSDispatcher::ConfirmDialogListener::OnClick(IDialogInterface* dialog, Int32 which)
+ECode SMSDispatcher::ConfirmDialogListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
 {
     // Always set the SMS permission so that Settings will show a permission setting
     // for the App (it won't be shown until after the app tries to send to a short code).
@@ -541,7 +556,8 @@ CARAPI SMSDispatcher::ConfirmDialogListener::OnClick(IDialogInterface* dialog, I
 }
 
 //@Override
-CARAPI SMSDispatcher::ConfirmDialogListener::OnCancel(IDialogInterface* dialog)
+ECode SMSDispatcher::ConfirmDialogListener::OnCancel(
+    /* [in] */ IDialogInterface* dialog)
 {
    Logger::D(TAG, "dialog dismissed: don't send SMS");
    AutoPtr<IMessage> msg;
@@ -553,7 +569,9 @@ CARAPI SMSDispatcher::ConfirmDialogListener::OnCancel(IDialogInterface* dialog)
 }
 
 //@Override
-CARAPI SMSDispatcher::ConfirmDialogListener::OnCheckedChanged(ICompoundButton* buttonView, Boolean isChecked)
+ECode SMSDispatcher::ConfirmDialogListener::OnCheckedChanged(
+    /* [in] */ ICompoundButton* buttonView,
+    /* [in] */ Boolean isChecked)
 {
     Logger::D(TAG, "remember this choice: %d", isChecked);
     mRememberChoice = isChecked;
@@ -1033,10 +1051,17 @@ Int32 SMSDispatcher::GetNotInServiceError(
  *  Validity Period(Maximum) -> 635040 Mins(i.e.63 weeks).
  *  Any Other values included Negative considered as Invalid Validity Period of the message.
  */
-void SMSDispatcher::SendMultipartText(const String& destAddr, const String& scAddr,
-        IArrayList* parts, IArrayList* sentIntents,
-        IArrayList* deliveryIntents, IUri* messageUri, const String& callingPkg,
-        Int32 priority, Boolean isExpectMore, Int32 validityPeriod)
+void SMSDispatcher::SendMultipartText(
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ IArrayList* parts,
+    /* [in] */ IArrayList* sentIntents,
+    /* [in] */ IArrayList* deliveryIntents,
+    /* [in] */ IUri* messageUri,
+    /* [in] */ const String& callingPkg,
+    /* [in] */ Int32 priority,
+    /* [in] */ Boolean isExpectMore,
+    /* [in] */ Int32 validityPeriod)
 {
     if (mSmsPseudoMultipart) {
         // Send as individual messages as the combination of device and
@@ -1187,11 +1212,17 @@ void SMSDispatcher::SendMultipartText(const String& destAddr, const String& scAd
  *  Validity Period(Maximum) -> 635040 Mins(i.e.63 weeks).
  *  Any Other values included Negative considered as Invalid Validity Period of the message.
  */
-void SMSDispatcher::SendPseudoMultipartText(const String& destAddr, const String& scAddr,
-        IArrayList* parts, IArrayList* sentIntents,
-        IArrayList* deliveryIntents,
-        IUri* messageUri, const String& callingPkg,
-        Int32 priority, Boolean isExpectMore, Int32 validityPeriod)
+void SMSDispatcher::SendPseudoMultipartText(
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ IArrayList* parts,
+    /* [in] */ IArrayList* sentIntents,
+    /* [in] */ IArrayList* deliveryIntents,
+    /* [in] */ IUri* messageUri,
+    /* [in] */ const String& callingPkg,
+    /* [in] */ Int32 priority,
+    /* [in] */ Boolean isExpectMore,
+    /* [in] */ Int32 validityPeriod)
 {
     Int32 msgCount;
     parts->GetSize(&msgCount);
@@ -1243,13 +1274,13 @@ void SMSDispatcher::SendPseudoMultipartText(const String& destAddr, const String
  *  raw pdu of the status report is in the extended Data ("pdu").
  * -param destAddr the destination phone Number (for short code confirmation)
  */
-void SMSDispatcher::SendRawPdu(SmsTracker* tracker)
+void SMSDispatcher::SendRawPdu(
+    /* [in] */ SmsTracker* tracker)
 {
     AutoPtr<IHashMap> map = tracker->mData;
     AutoPtr<IInterface> obj;
     map->Get(CoreUtils::Convert(String("pdu")), (IInterface**)&obj);
     AutoPtr<IArrayOf> pdu = IArrayOf::Probe(obj);
-    // AutoPtr<ArrayOf<Byte> > pdu = (Byte[]) map->Get("pdu");
 
     if (mSmsSendDisabled) {
         Logger::E(TAG, "Device does not support sending sms.");
@@ -1307,7 +1338,7 @@ void SMSDispatcher::SendRawPdu(SmsTracker* tracker)
         // check for excessive outgoing SMS usage by this app
         String pkgName;
         appInfo->GetPackageName(&pkgName);
-        Boolean b = FALSE;
+        Boolean b = TRUE;
         if (mUsageMonitor != NULL) {
             mUsageMonitor->Check(pkgName, SINGLE_PART_SMS, &b);
         }
@@ -1330,7 +1361,8 @@ void SMSDispatcher::SendRawPdu(SmsTracker* tracker)
  * @param tracker the tracker for the SMS to send
  * @return TRUE if the destination is approved; FALSE if user confirmation event was sent
  */
-Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
+Boolean SMSDispatcher::CheckDestination(
+    /* [in] */ SmsTracker* tracker)
 {
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
@@ -1435,7 +1467,8 @@ Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
  * @param tracker the SmsTracker for the message to send
  * @return TRUE if the message was denied; FALSE to continue with send confirmation
  */
- Boolean SMSDispatcher::DenyIfQueueLimitReached(SmsTracker* tracker)
+ Boolean SMSDispatcher::DenyIfQueueLimitReached(
+    /* [in] */ SmsTracker* tracker)
 {
     if (mPendingTrackerCount >= MO_MSG_QUEUE_LIMIT) {
         // Deny sending message when the queue limit is reached.
@@ -1453,7 +1486,8 @@ Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
  * @param appPackage the package name of the app requesting to send an SMS
  * @return the label for the specified app, or the package name if GetApplicationInfo() fails
  */
-AutoPtr<ICharSequence> SMSDispatcher::GetAppLabel(const String& appPackage)
+AutoPtr<ICharSequence> SMSDispatcher::GetAppLabel(
+    /* [in] */ const String& appPackage)
 {
     AutoPtr<IPackageManager> pm;
     mContext->GetPackageManager((IPackageManager**)&pm);
@@ -1476,7 +1510,8 @@ AutoPtr<ICharSequence> SMSDispatcher::GetAppLabel(const String& appPackage)
  * @param tracker
  * @return the package name that created the original sms
  */
-String SMSDispatcher::ResolvePackageName(SmsTracker* tracker)
+String SMSDispatcher::ResolvePackageName(
+    /* [in] */ SmsTracker* tracker)
 {
     AutoPtr<IPendingIntent> sentIntent = tracker->mSentIntent;
     String packageName;
@@ -1497,7 +1532,8 @@ String SMSDispatcher::ResolvePackageName(SmsTracker* tracker)
  * Post an alert when SMS needs confirmation due to excessive usage.
  * @param tracker an SmsTracker for the current message.
  */
-void SMSDispatcher::HandleReachSentLimit(SmsTracker* tracker)
+void SMSDispatcher::HandleReachSentLimit(
+    /* [in] */ SmsTracker* tracker)
 {
     if (DenyIfQueueLimitReached(tracker)) {
         return;     // queue limit reached; error was returned to caller
@@ -1538,7 +1574,9 @@ void SMSDispatcher::HandleReachSentLimit(SmsTracker* tracker)
  * @param isPremium TRUE if the destination is known to be a premium short code
  * @param tracker the SmsTracker for the current message.
  */
-void SMSDispatcher::HandleConfirmShortCode(Boolean isPremium, SmsTracker* tracker)
+void SMSDispatcher::HandleConfirmShortCode(
+    /* [in] */ Boolean isPremium,
+    /* [in] */ SmsTracker* tracker)
 {
     if (DenyIfQueueLimitReached(tracker)) {
         return;     // queue limit reached; error was returned to caller
@@ -1630,7 +1668,9 @@ void SMSDispatcher::HandleConfirmShortCode(Boolean isPremium, SmsTracker* tracke
  *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_NEVER_ALLOW}, or
  *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW}
  */
-ECode SMSDispatcher::GetPremiumSmsPermission(const String& packageName, Int32* result)
+ECode SMSDispatcher::GetPremiumSmsPermission(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
     *result = 0;
@@ -1648,7 +1688,9 @@ ECode SMSDispatcher::GetPremiumSmsPermission(const String& packageName, Int32* r
  *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_NEVER_ALLOW}, or
  *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW}
  */
-ECode SMSDispatcher::SetPremiumSmsPermission(const String& packageName, Int32 permission)
+ECode SMSDispatcher::SetPremiumSmsPermission(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 permission)
 {
     if (mUsageMonitor != NULL) {
         return mUsageMonitor->SetPremiumSmsPermission(packageName, permission);
@@ -1661,7 +1703,8 @@ ECode SMSDispatcher::SetPremiumSmsPermission(const String& packageName, Int32 pe
  *
  * @param tracker holds the SMS message to send
  */
-ECode SMSDispatcher::SendRetrySms(SmsTracker* tracker)
+ECode SMSDispatcher::SendRetrySms(
+    /* [in] */ SmsTracker* tracker)
 {
     // re-routing to ImsSMSDispatcher
     if (mImsSMSDispatcher != NULL) {
@@ -1678,7 +1721,8 @@ ECode SMSDispatcher::SendRetrySms(SmsTracker* tracker)
  *
  * @param tracker holds the multipart Sms tracker ready to be sent
  */
-void SMSDispatcher::SendMultipartSms(SmsTracker* tracker)
+void SMSDispatcher::SendMultipartSms(
+    /* [in] */ SmsTracker* tracker)
 {
     AutoPtr<IArrayList> parts;
     AutoPtr<IArrayList> sentIntents;
@@ -1881,8 +1925,12 @@ ECode SMSDispatcher::GetImsSmsFormat(
     return NOERROR;
 }
 
-AutoPtr<IUri> SMSDispatcher::WriteOutboxMessage(Int64 subId, const String& address, const String& text,
-        Boolean requireDeliveryReport, const String& creator)
+AutoPtr<IUri> SMSDispatcher::WriteOutboxMessage(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& address,
+    /* [in] */ const String& text,
+    /* [in] */ Boolean requireDeliveryReport,
+    /* [in] */ const String& creator)
 {
     AutoPtr<IContentValues> values;
     CContentValues::New(8, (IContentValues**)&values);
@@ -1924,7 +1972,10 @@ AutoPtr<IUri> SMSDispatcher::WriteOutboxMessage(Int64 subId, const String& addre
     return uri;
 }
 
-void SMSDispatcher::MoveToOutbox(Int64 subId, IUri* messageUri, const String& creator)
+void SMSDispatcher::MoveToOutbox(
+    /* [in] */ Int64 subId,
+    /* [in] */ IUri* messageUri,
+    /* [in] */ const String& creator)
 {
     AutoPtr<IContentValues> values;
     CContentValues::New(4, (IContentValues**)&values);
@@ -1959,7 +2010,8 @@ void SMSDispatcher::MoveToOutbox(Int64 subId, IUri* messageUri, const String& cr
     // }
 }
 
-String SMSDispatcher::GetMultipartMessageText(IArrayList* parts)
+String SMSDispatcher::GetMultipartMessageText(
+    /* [in] */ IArrayList* parts)
 {
     StringBuilder sb;
     Int32 size;
@@ -1979,7 +2031,8 @@ String SMSDispatcher::GetMultipartMessageText(IArrayList* parts)
     return str;
 }
 
-String SMSDispatcher::GetCarrierAppPackageName(IIntent* intent)
+String SMSDispatcher::GetCarrierAppPackageName(
+    /* [in] */ IIntent* intent)
 {
     AutoPtr<IUiccController> uc = UiccController::GetInstance();
     AutoPtr<IUiccCard> card;

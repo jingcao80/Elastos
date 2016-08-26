@@ -7,6 +7,7 @@
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/Character.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -32,7 +33,7 @@ using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CPairHelper;
 using Elastos::Droid::Utility::IPairHelper;
-// using Elastos::Core::Character;
+using Elastos::Core::Character;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IBoolean;
 using Elastos::Core::ICharSequence;
@@ -608,8 +609,7 @@ AutoPtr<IPair> CBlacklistProvider::NormalizeNumber(
         Char32 c = number.GetChar(i);
         // Character.digit() supports ASCII and Unicode digits (fullwidth, Arabic-Indic, etc.)
         Int32 digit;
-        assert(0 && "TODO: Need Character::ToDigit");
-        // digit = Character::ToDigit(c, 10);
+        digit = Character::ToDigit(c, 10);
         if (digit != -1) {
             ret.Append(digit);
         }
