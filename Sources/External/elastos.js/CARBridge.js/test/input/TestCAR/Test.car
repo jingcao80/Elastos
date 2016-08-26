@@ -2,6 +2,8 @@
 module {
     importlib("Elastos.CoreLibrary.eco");
 
+    const OUTPUT_FILE = "output";
+
     enum ETest {
         ETest_0,
         ETest_1

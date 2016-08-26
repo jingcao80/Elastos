@@ -589,7 +589,7 @@ exit:
 }
 
 template<class Array>
-static unique_ptr<struct _Value> *_ParseValues(size_t argc, Array const &argv)
+static struct _Value **_ParseValues(size_t argc, Array const &argv)
 {
     unique_ptr<unique_ptr<struct _Value> []> _argv(new(nothrow) unique_ptr<struct _Value>[argc]);
     if (_argv == nullptr)
@@ -598,7 +598,7 @@ static unique_ptr<struct _Value> *_ParseValues(size_t argc, Array const &argv)
     for (size_t i = 0; i < argc; ++i)
         _argv[i] = unique_ptr<struct _Value>(_ParseValue(argv[i]));
 
-    return _argv.release();
+    return reinterpret_cast<struct _Value **>(_argv.release());
 }
 
 static bool _CanBeUsedAsArgumentOf(IParamInfo const *paramInfo, struct _Value const *value, int *priority)
@@ -2968,7 +2968,9 @@ CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const
         goto done;
     }
 
-    _argv = unique_ptr<unique_ptr<struct _Value> []>(_ParseValues(argc, argv));
+    _argv = unique_ptr<unique_ptr<struct _Value> []>(
+            reinterpret_cast<unique_ptr<struct _Value> *>(_ParseValues(argc, argv))
+            );
 
     constructorInfo = static_cast<IConstructorInfo const *>(
             _GetMatchingFunctionForCall<IConstructorInfo>(
@@ -3104,7 +3106,9 @@ NAN_METHOD(CARObject::InvokeMethod)
         methodInfos = (struct _MethodInfos const *)info.Data().As<External>()->Value();
 
         argc = info.Length();
-        unique_ptr<unique_ptr<struct _Value> []> argv(_ParseValues(argc, info));
+        unique_ptr<unique_ptr<struct _Value> []> argv(
+                reinterpret_cast<unique_ptr<struct _Value> *>(_ParseValues(argc, info))
+                );
 
         methodInfo = static_cast<IMethodInfo const *>(
                 _GetMatchingFunctionForCall<IMethodInfo>(
@@ -3662,7 +3666,9 @@ CARObject::CARObject(IClassInfo const *classInfo, ArrayOf<IConstructorInfo const
         goto done;
     }
 
-    _argv = unique_ptr<unique_ptr<struct _Value> []>(_ParseValues(argc, argv));
+    _argv = unique_ptr<unique_ptr<struct _Value> []>(
+            reinterpret_cast<unique_ptr<struct _Value> *>(_ParseValues(argc, argv))
+            );
 
     constructorInfo = static_cast<IConstructorInfo const *>(
             _GetMatchingFunctionForCall<IConstructorInfo>(

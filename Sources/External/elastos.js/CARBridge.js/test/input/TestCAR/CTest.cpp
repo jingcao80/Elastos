@@ -28,9 +28,7 @@ CAR_INTERFACE_IMPL(CTest, Object, ITest)
 
 ECode CTest::constructor(void)
 {
-    _outputFile = "";
-
-    _output = fopen(_outputFile, "w+");
+    _output = fopen(OUTPUT_FILE, "w+");
     if (_output == NULL)
         return E_FAIL;
 
@@ -42,7 +40,7 @@ ECode CTest::TestNonarray(T nonarray, char const *name)
 {
     ECode ec;
 
-    if (freopen(_outputFile, "w+", _output) == NULL)
+    if (freopen(OUTPUT_FILE, "w+", _output) == NULL)
         return E_FAIL;
 
     ec = (this->*output)(nonarray, 0);
@@ -65,12 +63,12 @@ inline ECode CTest::Output(ITest *itest, size_t indent = 0)
 
 ECode CTest::TestSelf(void)
 {
-    return TestNonarray<ITest *, &Output>(static_cast<ITest *>(this), "ITest");
+    return TestNonarray<ITest *, &Output>(this, "ITest");
 }
 
 ECode CTest::TestVoid(void)
 {
-    if (freopen(_outputFile, "w+", _output) == NULL)
+    if (freopen(OUTPUT_FILE, "w+", _output) == NULL)
         return E_FAIL;
 
     if (fprintf(_output, "void (void)\n") < 0)
@@ -337,7 +335,7 @@ ECode CTest::OutputETest(ETest etest, size_t indent = 0)
 ECode CTest::TestEnum(
         /* [in] */ ETest etest)
 {
-    return TestNonarray<ETest, &OutputETest>(etest, "ETest");
+    return TestNonarray<ETest, &OutputETest>(etest, "Enum (ETest)");
 }
 
 template<class T, ECode (CTest::*output)(T, size_t)>
@@ -385,7 +383,7 @@ ECode CTest::TestArray(
 {
     ECode ec;
 
-    if (freopen(_outputFile, "w+", _output) == NULL)
+    if (freopen(OUTPUT_FILE, "w+", _output) == NULL)
         return E_FAIL;
 
     ec = Output<T, output>(array.GetLength(), array.GetPayload());
@@ -1028,13 +1026,13 @@ ECode CTest::TestCARArray(
 ECode CTest::TestStruct(
         /* [in] */ STest const &stest)
 {
-    return TestNonarray<STest const &, &Output>(stest, "STest");
+    return TestNonarray<STest const &, &Output>(stest, "Struct (STest)");
 }
 
 ECode CTest::TestInterface(
         /* [in] */ ITest *itest)
 {
-    return TestNonarray<ITest *, &Output>(itest, "ITest");
+    return TestNonarray<ITest *, &Output>(itest, "Interface (ITest)");
 }
 
 ECode CTest::Lock()

@@ -15,6 +15,8 @@ module Test.eco
         ETest_1 = 1,
     }
 
+    const OUTPUT_FILE = "output";
+
     typedef [dummytype] EGuid ClassID;
     typedef [dummytype] Int32 AggregateType;
     typedef [dummytype] EMuid InterfaceID;

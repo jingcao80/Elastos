@@ -142,8 +142,6 @@ public:
             /* [out] */ IWeakReference **weakReference);
 
 private:
-    char const *_outputFile;
-
     FILE *_output;
 
     template<class T, ECode (CTest::*)(T, size_t)>
