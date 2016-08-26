@@ -25,19 +25,19 @@
     android:orientation="vertical"
     android:background="@drawable/default_preference_background">
 
-    <android.support.v4.view.ViewPager
+    <Elastos.Droid.Support.V4.View.CViewPager
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1">
-        <android.support.v4.view.PagerTabStrip
+        <Elastos.Droid.Support.V4.View.CPagerTabStrip
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top"
                 android:textAppearance="@style/TextAppearance.PagerTabs"
                 android:padding="0dp">
-        </android.support.v4.view.PagerTabStrip>
-    </android.support.v4.view.ViewPager>
+        </Elastos.Droid.Support.V4.View.CPagerTabStrip>
+    </Elastos.Droid.Support.V4.View.CViewPager>
 
 </LinearLayout>

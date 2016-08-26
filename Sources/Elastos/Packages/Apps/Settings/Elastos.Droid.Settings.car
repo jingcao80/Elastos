@@ -9,9 +9,11 @@ module
     merge("car/elastos/droid/SettingsPreferenceFragment.car");
     merge("car/elastos/droid/ZonePicker.car");
     merge("car/elastos/droid/applications/ApplicationsState.car");
+    merge("car/elastos/droid/applications/LinearColorBar.car");
     merge("car/elastos/droid/applications/ManageApplications.car");
     merge("car/elastos/droid/applications/RunningState.car");
     merge("car/elastos/droid/dashboard/SearchResultsSummary.car");
+    merge("car/elastos/droid/deviceinfo/StorageMeasurement.car");
     merge("car/elastos/droid/inputmethod/InputMethodPreference.car");
     merge("car/elastos/droid/inputmethod/KeyboardLayoutDialogFragment.car");
     merge("car/elastos/droid/inputmethod/SpellCheckerPreference.car");
@@ -32,6 +34,14 @@ module
     merge("car/elastos/droid/wifi/WifiSettingsForSetupWizardXL.car");
     merge("car/elastos/droid/wifi/WifiPickerActivity.car");
     merge("car/elastos/droid/wifi/WpsDialog.car");
+
+
+    merge("car/elastos/droid/support/v4/view/PagerTabStrip.car");
+    merge("car/elastos/droid/support/v4/view/PagerTitleStrip.car");
+    merge("car/elastos/droid/support/v4/view/PagerAdapter.car");
+    merge("car/elastos/droid/support/v4/view/ViewPager.car");
+
+    interface Elastos.Droid.Support.V4.View.IViewPagerSavedState;
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IDialogFragment;
@@ -130,6 +140,22 @@ module
 
         interface IIPackageStatsObserver;
         interface IBinder;
+    }
+
+    [local]
+    class CLinearColorBar {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface ILinearLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     class CManageApplications {
@@ -1044,4 +1070,71 @@ module
     } // namespace Settings
     } // namespace Droid
     } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Support {
+    namespace V4 {
+    namespace View {
+
+    [local]
+    class CPagerTabStrip {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IPagerTabStrip;
+        interface IPagerTitleStrip;
+        interface IViewPagerDecor;
+
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CViewPager {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IViewPager;
+
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    class CViewPagerSavedState {
+        constructor();
+
+        constructor(
+            [in] IParcelable* state);
+
+        interface IViewPagerSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
+    } // namespace View
+    } // namespace V4
+    } // namespace Support
+    } // namepsace Droid
+    } // namespace Elastos
+
 }

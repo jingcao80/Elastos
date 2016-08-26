@@ -8,6 +8,7 @@ INCLUDES += $(MAKEDIR)/../../../../../
 SOURCES += ApplicationsState.cpp
 SOURCES += AppViewHolder.cpp
 SOURCES += InterestingConfigChanges.cpp
+SOURCES += CLinearColorBar.cpp
 SOURCES += ManageApplications.cpp
 SOURCES += CRunningProcessesView.cpp
 SOURCES += RunningState.cpp

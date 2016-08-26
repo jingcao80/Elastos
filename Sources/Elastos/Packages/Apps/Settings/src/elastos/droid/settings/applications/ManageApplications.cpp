@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/settings/applications/ManageApplications.h"
 #include "elastos/droid/settings/applications/AppViewHolder.h"
+#include "elastos/droid/settings/deviceinfo/StorageMeasurement.h"
 #include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/os/UserHandle.h"
@@ -13,6 +14,11 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Settings::Deviceinfo::StorageMeasurement;
+using Elastos::Droid::Support::V4::View::EIID_IViewPagerOnPageChangeListener;
+using Elastos::Droid::Support::V4::View::IPagerTabStrip;
+using Elastos::Droid::Support::V4::View::IPagerAdapter;
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::CAlertDialogBuilder;
@@ -827,109 +833,109 @@ ECode ManageApplications::TabInfoRunnable::Run()
     return NOERROR;
 }
 
-//===============================================================================
+// ===============================================================================
 //                  ManageApplications::MyPagerAdapter
-//===============================================================================
+// ===============================================================================
 
-// CAR_INTERFACE_IMPL(ManageApplications::MyPagerAdapter, PagerAdapter, IViewPagerOnPageChangeListener)
+CAR_INTERFACE_IMPL(ManageApplications::MyPagerAdapter, PagerAdapter, IViewPagerOnPageChangeListener)
 
-// ManageApplications::MyPagerAdapter::MyPagerAdapter(
-//     /* [in] */ ManageApplications* host)
-//     : mCurPos(0)
-//     , mHost(host)
-// {}
+ManageApplications::MyPagerAdapter::MyPagerAdapter(
+    /* [in] */ ManageApplications* host)
+    : mCurPos(0)
+    , mHost(host)
+{}
 
-// ManageApplications::MyPagerAdapter::~MyPagerAdapter()
-// {}
+ManageApplications::MyPagerAdapter::~MyPagerAdapter()
+{}
 
-// ECode ManageApplications::MyPagerAdapter::GetCount(
-//     /* [out] */ Int32* count)
-// {
-//     VALIDATE_NOT_NULL(count)
-//     *count = mHost->mNumTabs;
-//     return NOERROR;
-// }
+ECode ManageApplications::MyPagerAdapter::GetCount(
+    /* [out] */ Int32* count)
+{
+    VALIDATE_NOT_NULL(count)
+    *count = mHost->mNumTabs;
+    return NOERROR;
+}
 
-// ECode ManageApplications::MyPagerAdapter::InstantiateItem(
-//     /* [in] */ IViewGroup* container,
-//     /* [in] */ Int32 position,
-//     /* [out] */ IInterface** item)
-// {
-//     VALIDATE_NOT_NULL(item)
+ECode ManageApplications::MyPagerAdapter::InstantiateItem(
+    /* [in] */ IViewGroup* container,
+    /* [in] */ Int32 position,
+    /* [out] */ IInterface** item)
+{
+    VALIDATE_NOT_NULL(item)
 
-//     AutoPtr<IInterface> obj;
-//     mHost->mTabs->Get(position, (IInterface**)&obj);
-//     AutoPtr<TabInfo> tab = (TabInfo*) IManageApplicationsTabInfo::Probe(obj);
-//     AutoPtr<IView> root = tab->Build(mHost->mInflater, mHost->mContentContainer, mHost->mRootView);
-//     container->AddView(root);
-//     root->SetTag(R::id::name, tab);
-//     *item = root;
-//     REFCOUNT_ADD(*item)
-//     return NOERROR;
-// }
+    AutoPtr<IInterface> obj;
+    mHost->mTabs->Get(position, (IInterface**)&obj);
+    IManageApplicationsTabInfo* tab = IManageApplicationsTabInfo::Probe(obj);
+    AutoPtr<IView> root = ((TabInfo*)tab)->Build(mHost->mInflater, mHost->mContentContainer, mHost->mRootView);
+    container->AddView(root);
+    root->SetTag(R::id::name, tab);
+    *item = root;
+    REFCOUNT_ADD(*item)
+    return NOERROR;
+}
 
-// ECode ManageApplications::MyPagerAdapter::DestroyItem(
-//     /* [in] */ IViewGroup* container,
-//     /* [in] */ Int32 position,
-//     /* [in] */ IInterface* object)
-// {
-//     return container->RemoveView(IView::Probe(object));
-// }
+ECode ManageApplications::MyPagerAdapter::DestroyItem(
+    /* [in] */ IViewGroup* container,
+    /* [in] */ Int32 position,
+    /* [in] */ IInterface* object)
+{
+    return container->RemoveView(IView::Probe(object));
+}
 
-// ECode ManageApplications::MyPagerAdapter::IsViewFromObject(
-//     /* [in] */ IView* view,
-//     /* [in] */ IInterface* object,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result)
-//     *result = view == IView::Probe(object);
-//     return NOERROR;
-// }
+ECode ManageApplications::MyPagerAdapter::IsViewFromObject(
+    /* [in] */ IView* view,
+    /* [in] */ IInterface* object,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = view == IView::Probe(object);
+    return NOERROR;
+}
 
-// ECode ManageApplications::MyPagerAdapter::GetItemPosition(
-//     /* [in] */ IInterface* object,
-//     /* [out] */ Int32* pos)
-// {
-//     VALIDATE_NOT_NULL(pos)
-//     //return ((TabInfo)((View)object).GetTag(R.id.name)).mListType;
-//     return PagerAdapter::GetItemPosition(object, pos);
-// }
+ECode ManageApplications::MyPagerAdapter::GetItemPosition(
+    /* [in] */ IInterface* object,
+    /* [out] */ Int32* pos)
+{
+    VALIDATE_NOT_NULL(pos)
+    //return ((TabInfo)((View)object).GetTag(R.id.name)).mListType;
+    return PagerAdapter::GetItemPosition(object, pos);
+}
 
-// ECode ManageApplications::MyPagerAdapter::GetPageTitle(
-//     /* [in] */ Int32 position,
-//     /* [out] */ ICharSequence** title)
-// {
-//     VALIDATE_NOT_NULL(title)
-//     AutoPtr<IInterface> obj;
-//     mHost->mTabs->Get(position, (IInterface**)&obj);
-//     *title = ((TabInfo*)IManageApplicationsTabInfo::Probe(obj))->mLabel;
-//     REFCOUNT_ADD(*title)
-//     return NOERROR;
-// }
+ECode ManageApplications::MyPagerAdapter::GetPageTitle(
+    /* [in] */ Int32 position,
+    /* [out] */ ICharSequence** title)
+{
+    VALIDATE_NOT_NULL(title)
+    AutoPtr<IInterface> obj;
+    mHost->mTabs->Get(position, (IInterface**)&obj);
+    *title = ((TabInfo*)IManageApplicationsTabInfo::Probe(obj))->mLabel;
+    REFCOUNT_ADD(*title)
+    return NOERROR;
+}
 
-// ECode ManageApplications::MyPagerAdapter::OnPageScrolled(
-//     /* [in] */ Int32 position,
-//     /* [in] */ Float positionOffset,
-//     /* [in] */ Int32 positionOffsetPixels)
-// {
-//     return NOERROR;
-// }
+ECode ManageApplications::MyPagerAdapter::OnPageScrolled(
+    /* [in] */ Int32 position,
+    /* [in] */ Float positionOffset,
+    /* [in] */ Int32 positionOffsetPixels)
+{
+    return NOERROR;
+}
 
-// ECode ManageApplications::MyPagerAdapter::OnPageSelected(
-//     /* [in] */ Int32 position)
-// {
-//     mCurPos = position;
-//     return NOERROR;
-// }
+ECode ManageApplications::MyPagerAdapter::OnPageSelected(
+    /* [in] */ Int32 position)
+{
+    mCurPos = position;
+    return NOERROR;
+}
 
-// ECode ManageApplications::MyPagerAdapter::OnPageScrollStateChanged(
-//     /* [in] */ Int32 state)
-// {
-//     if (state == IViewPager::SCROLL_STATE_IDLE) {
-//         mHost->UpdateCurrentTab(mCurPos);
-//     }
-//     return NOERROR;
-// }
+ECode ManageApplications::MyPagerAdapter::OnPageScrollStateChanged(
+    /* [in] */ Int32 state)
+{
+    if (state == IViewPager::SCROLL_STATE_IDLE) {
+        mHost->UpdateCurrentTab(mCurPos);
+    }
+    return NOERROR;
+}
 
 //===============================================================================
 //                  ManageApplications::ApplicationsAdapterFilter
@@ -1218,8 +1224,7 @@ ECode ManageApplications::OnCreate(
 
     AutoPtr<IIntent> containerIntent;
     CIntent::New((IIntent**)&containerIntent);
-    assert(0 && "TODO");
-    // containerIntent->SetComponent(StorageMeasurement::DEFAULT_CONTAINER_COMPONENT);
+    containerIntent->SetComponent(StorageMeasurement::DEFAULT_CONTAINER_COMPONENT);
 
     IContext* _activity = IContext::Probe(activity);
     Boolean res;
@@ -1286,16 +1291,14 @@ ECode ManageApplications::OnCreateView(
 
     AutoPtr<IView> tmp;
     rootView->FindViewById(R::id::pager, (IView**)&tmp);
-    assert(0 && "TODO");
-    // mViewPager = IViewPager::Probe(tmp);
-    // AutoPtr<MyPagerAdapter> adapter = new MyPagerAdapter(this);
-    // mViewPager->SetAdapter(adapter);
-    // mViewPager->SetOnPageChangeListener(adapter);
+    mViewPager = IViewPager::Probe(tmp);
+    AutoPtr<MyPagerAdapter> adapter = new MyPagerAdapter(this);
+    mViewPager->SetAdapter(adapter);
+    mViewPager->SetOnPageChangeListener((IViewPagerOnPageChangeListener*)adapter.Get());
     tmp = NULL;
     rootView->FindViewById(R::id::tabs, (IView**)&tmp);
-    assert(0 && "TODO");
-    // AutoPtr<IPagerTabStrip> tabs = IPagerTabStrip::Probe(tmp);
-    // tabs->SetTabIndicatorColorResource(R::color::theme_accent);
+    AutoPtr<IPagerTabStrip> tabs = IPagerTabStrip::Probe(tmp);
+    tabs->SetTabIndicatorColorResource(R::color::theme_accent);
 
     // We have to do this now because PreferenceFrameLayout looks at it
     // only when the view is added.
@@ -1326,8 +1329,7 @@ ECode ManageApplications::OnCreateView(
             mTabs->Get(i, (IInterface**)&obj);
             IManageApplicationsTabInfo* tab = IManageApplicationsTabInfo::Probe(obj);
             if (((TabInfo*)tab)->mListType == currentListType) {
-                assert(0 && "TODO");
-                // mViewPager->SetCurrentItem(i);
+                mViewPager->SetCurrentItem(i);
                 break;
             }
         }
@@ -1348,8 +1350,7 @@ ECode ManageApplications::OnResume()
     Fragment::OnResume();
     mActivityResumed = TRUE;
     Int32 item;
-    assert(0 && "TODO");
-    // mViewPager->GetCurrentItem(&item);
+    mViewPager->GetCurrentItem(&item);
     UpdateCurrentTab(item);
     UpdateNumTabs();
     UpdateOptionsMenu();
@@ -1439,8 +1440,7 @@ ECode ManageApplications::OnItemSelected(
         intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
         intent->AddFlags(IIntent::FLAG_ACTIVITY_CLEAR_TASK);
         Int32 currentTab;
-        assert(0 && "TODO");
-        // mViewPager->GetCurrentItem(&currentTab);
+        mViewPager->GetCurrentItem(&currentTab);
         AutoPtr<IInterface> obj;
         mTabs->Get(currentTab, (IInterface**)&obj);
         intent->PutExtra(EXTRA_LIST_TYPE, ((TabInfo*)IManageApplicationsTabInfo::Probe(obj))->mListType);
@@ -1467,12 +1467,11 @@ void ManageApplications::UpdateNumTabs()
 
     if (newNum != mNumTabs) {
         mNumTabs = newNum;
-        assert(0 && "TODO");
-        // if (mViewPager != NULL) {
-        //     AutoPtr<IPagerAdapter> adapter;
-        //     mViewPager->GetAdapter((IPagerAdapter**)&adapter);
-        //     adapter->NotifyDataSetChanged();
-        // }
+        if (mViewPager != NULL) {
+            AutoPtr<IPagerAdapter> adapter;
+            mViewPager->GetAdapter((IPagerAdapter**)&adapter);
+            adapter->NotifyDataSetChanged();
+        }
     }
 }
 
@@ -1497,8 +1496,7 @@ void ManageApplications::StartApplicationDetailsActivity()
     // start new fragment to display extended information
     AutoPtr<IBundle> args;
     CBundle::New((IBundle**)&args);
-    assert(0 && "TODO");
-    // args->PutString(InstalledAppDetails::ARG_PACKAGE_NAME, mCurrentPkgName);
+    args->PutString(String("package")/*InstalledAppDetails::ARG_PACKAGE_NAME*/, mCurrentPkgName);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);

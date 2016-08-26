@@ -530,10 +530,9 @@ void CRunningProcessesView::RefreshUi(
             resources->GetString(
                     R::string::running_processes_header_ram, args, &tmp);
             mForegroundProcessText->SetText(CoreUtils::Convert(tmp));
-            assert(0 && "TODO");
-            // mColorBar->SetRatios(highRam/(Float)totalRam,
-            //         medRam/(Float)totalRam,
-            //         lowRam/(Float)totalRam);
+            mColorBar->SetRatios(highRam/(Float)totalRam,
+                    medRam/(Float)totalRam,
+                    lowRam/(Float)totalRam);
         }
     }
 }
@@ -616,15 +615,14 @@ ECode CRunningProcessesView::DoCreate(
     mListView->AddHeaderView(mHeader, NULL, FALSE /* set as not selectable */);
     tmp = NULL;
     mHeader->FindViewById(R::id::color_bar, (IView**)&tmp);
-    assert(0 && "TODO");
-    // mColorBar = ILinearColorBar::Probe(tmp);
+    mColorBar = (CLinearColorBar*)tmp.Get();
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     Int32 color1, color2, color3;
     res->GetColor(R::color::running_processes_system_ram, &color1);
     res->GetColor(R::color::running_processes_apps_ram, &color2);
     res->GetColor(R::color::running_processes_free_ram, &color3);
-    // mColorBar->SetColors(color1, color2, color3);
+    mColorBar->SetColors(color1, color2, color3);
     tmp = NULL;
     mHeader->FindViewById(R::id::freeSizePrefix, (IView**)&tmp);
     mBackgroundProcessPrefix = ITextView::Probe(tmp);

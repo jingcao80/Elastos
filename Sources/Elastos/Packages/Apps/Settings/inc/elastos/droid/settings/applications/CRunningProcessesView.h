@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_SETTINGS_APPLICATIONS_CRUNNINGPROCESSESVIEW_H__
 
 #include "_Elastos_Droid_Settings_Applications_CRunningProcessesView.h"
+#include "elastos/droid/settings/applications/CLinearColorBar.h"
 #include "elastos/droid/settings/applications/RunningState.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/widget/FrameLayout.h"
@@ -247,7 +248,7 @@ protected:
 
     friend class ManageApplications;
     AutoPtr<ServiceListAdapter> mAdapter;
-    // AutoPtr<LinearColorBar> mColorBar;
+    AutoPtr<CLinearColorBar> mColorBar;
     AutoPtr<ITextView> mBackgroundProcessPrefix;
     AutoPtr<ITextView> mAppsProcessPrefix;
     AutoPtr<ITextView> mForegroundProcessPrefix;

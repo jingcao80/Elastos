@@ -7,6 +7,7 @@ INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/src
 
 VPATH += $(MAKEDIR)/src/elastos/droid/settings
+VPATH += $(MAKEDIR)/src/elastos/droid/support
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
@@ -47,12 +48,14 @@ SOURCES += settings.cpp
 
 ELASTOS_LIBS += src/elastos/droid/settings/applications/applications.lib
 ELASTOS_LIBS += src/elastos/droid/settings/dashboard/dashboard.lib
+ELASTOS_LIBS += src/elastos/droid/settings/deviceinfo/deviceinfo.lib
 ELASTOS_LIBS += src/elastos/droid/settings/drawable/drawable.lib
 ELASTOS_LIBS += src/elastos/droid/settings/inputmethod/inputmethod.lib
 ELASTOS_LIBS += src/elastos/droid/settings/search/search.lib
 ELASTOS_LIBS += src/elastos/droid/settings/voice/voice.lib
 ELASTOS_LIBS += src/elastos/droid/settings/widget/widget.lib
 ELASTOS_LIBS += src/elastos/droid/settings/wifi/wifi.lib
+ELASTOS_LIBS += src/elastos/droid/support/v4/view/view.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

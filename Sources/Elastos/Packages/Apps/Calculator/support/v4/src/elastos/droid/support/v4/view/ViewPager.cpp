@@ -603,10 +603,11 @@ ECode ViewPager::GetAdapter(
     return NOERROR;
 }
 
-void ViewPager::SetOnAdapterChangeListener(
+ECode ViewPager::SetOnAdapterChangeListener(
     /* [in] */ IViewPagerOnAdapterChangeListener* listener)
 {
     mAdapterChangeListener = listener;
+    return NOERROR;
 }
 
 Int32 ViewPager::GetClientWidth()
@@ -805,12 +806,16 @@ Int32 ViewPager::GetChildDrawingOrder(
     return result;
 }
 
-AutoPtr<IViewPagerOnPageChangeListener> ViewPager::SetInternalPageChangeListener(
-    /* [in] */ IViewPagerOnPageChangeListener* listener)
+ECode ViewPager::SetInternalPageChangeListener(
+    /* [in] */ IViewPagerOnPageChangeListener* listener,
+    /* [out] */ IViewPagerOnPageChangeListener** result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IViewPagerOnPageChangeListener> oldListener = mInternalPageChangeListener;
     mInternalPageChangeListener = listener;
-    return oldListener;
+    *result = oldListener;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode ViewPager::GetOffscreenPageLimit(

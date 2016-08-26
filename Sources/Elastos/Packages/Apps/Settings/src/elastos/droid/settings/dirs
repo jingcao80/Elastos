@@ -1,6 +1,7 @@
 
 DIRS += applications
 DIRS += dashboard
+DIRS += deviceinfo
 DIRS += drawable
 DIRS += inputmethod
 DIRS += search

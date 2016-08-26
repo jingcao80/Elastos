@@ -15,8 +15,9 @@ namespace Applications {
 
 AutoPtr<AppViewHolder> AppViewHolder::CreateOrRecycle(
     /* [in] */ ILayoutInflater* inflater,
-    /* [in] */ IView* convertView)
+    /* [in] */ IView* _convertView)
 {
+    AutoPtr<IView> convertView = _convertView;
     if (convertView == NULL) {
         inflater->Inflate(R::layout::manage_applications_item, NULL, (IView**)&convertView);
 

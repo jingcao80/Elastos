@@ -11,4 +11,5 @@ INCLUDES += ../../../../../../
 SOURCES += ViewPager.cpp
 SOURCES += view.cpp
 SOURCES += PagerAdapter.cpp
-
+#SOURCES += PagerTitleStrip.cpp
+#SOURCES += PagerTabStrip.cpp

@@ -90,8 +90,9 @@ RunningState::BackgroundHandler::BackgroundHandler(
 }
 
 ECode RunningState::BackgroundHandler::HandleMessage(
-    /* [in] */ IMessage* msg)
+    /* [in] */ IMessage* _msg)
 {
+    AutoPtr<IMessage> msg = _msg;
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {

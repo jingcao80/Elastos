@@ -1142,7 +1142,7 @@ ApplicationsState::ApplicationsState(
     {
         AutoLock syncLock(mEntriesMap);
         // try {
-        ((Object*)mEntriesMap.Get())->Wait(1);
+        ISynchronize::Probe(mEntriesMap)->Wait(1);
         // } catch (InterruptedException e) {
         // }
     }

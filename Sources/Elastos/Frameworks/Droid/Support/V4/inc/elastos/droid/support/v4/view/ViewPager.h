@@ -355,6 +355,9 @@ public:
     CARAPI GetAdapter(
         /* [out] */ IPagerAdapter** adapter);
 
+    CARAPI SetOnAdapterChangeListener(
+        /* [in] */ IViewPagerOnAdapterChangeListener* listener);
+
     /**
      * Set the currently selected page. If the ViewPager has already been through its first
      * layout with its current adapter there will be a smooth animated transition between
@@ -402,6 +405,16 @@ public:
     CARAPI SetPageTransformer(
         /* [in] */ Boolean reverseDrawingOrder,
         /* [in] */ IViewPagerPageTransformer* transformer);
+
+    /**
+     * Set a separate OnPageChangeListener for internal use by the support library.
+     *
+     * @param listener Listener to set
+     * @return The old listener that was set, if any.
+     */
+    CARAPI SetInternalPageChangeListener(
+        /* [in] */ IViewPagerOnPageChangeListener* listener,
+        /* [out] */ IViewPagerOnPageChangeListener** result);
 
     /**
      * Returns the number of pages that will be retained to either side of the
@@ -628,9 +641,6 @@ protected:
     // @Override
     CARAPI OnDetachedFromWindow();
 
-    CARAPI_(void) SetOnAdapterChangeListener(
-        /* [in] */ IViewPagerOnAdapterChangeListener* listener);
-
     CARAPI_(void) SetCurrentItemInternal(
         /* [in] */ Int32 item,
         /* [in] */ Boolean smoothScroll,
@@ -648,15 +658,6 @@ protected:
     CARAPI_(Int32) GetChildDrawingOrder(
         /* [in] */ Int32 childCount,
         /* [in] */ Int32 i);
-
-    /**
-     * Set a separate OnPageChangeListener for internal use by the support library.
-     *
-     * @param listener Listener to set
-     * @return The old listener that was set, if any.
-     */
-    CARAPI_(AutoPtr<IViewPagerOnPageChangeListener>) SetInternalPageChangeListener(
-        /* [in] */ IViewPagerOnPageChangeListener* listener);
 
     // @Override
     CARAPI_(Boolean) VerifyDrawable(

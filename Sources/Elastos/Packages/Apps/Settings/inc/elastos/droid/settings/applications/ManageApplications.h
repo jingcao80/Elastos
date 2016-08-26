@@ -10,9 +10,14 @@
 #include "elastos/droid/settings/applications/CRunningProcessesView.h"
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/os/AsyncTask.h"
-// #include "elastos/droid/support/v4/view/PagerAdapter.h"
+#include "elastos/droid/support/v4/view/PagerAdapter.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/widget/Filter.h"
+#include "_Elastos.Droid.Settings.h"
+
+using Elastos::Droid::Support::V4::View::IViewPagerOnPageChangeListener;
+using Elastos::Droid::Support::V4::View::PagerAdapter;
+using Elastos::Droid::Support::V4::View::IViewPager;
 
 using Elastos::Droid::App::Fragment;
 using Elastos::Droid::App::IAlertDialog;
@@ -28,9 +33,6 @@ using Elastos::Droid::Net::INetworkPolicyManager;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
-// using Elastos::Droid::Support::V4::View::PagerAdapter;
-// using Elastos::Droid::Support::V4::View::IPagerTabStrip;
-// using Elastos::Droid::Support::V4::View::IViewPager;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuInflater;
@@ -294,72 +296,72 @@ protected:
         TabInfo* mHost;
     };
 
-    // class MyPagerAdapter
-    //     : public PagerAdapter
-    //     , public IViewPagerOnPageChangeListener
-    // {
-    // public:
-    //     CAR_INTERFACE_DECL()
+    class MyPagerAdapter
+        // , public IViewPagerOnPageChangeListener
+        : public PagerAdapter
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    //     TO_STRING_IMPL("ManageApplications::MyPagerAdapter")
+        TO_STRING_IMPL("ManageApplications::MyPagerAdapter")
 
-    //     MyPagerAdapter(
-    //         /* [in] */ ManageApplications* host);
+        MyPagerAdapter(
+            /* [in] */ ManageApplications* host);
 
-    //     ~MyPagerAdapter();
+        ~MyPagerAdapter();
 
-    //     //@Override
-    //     CARAPI GetCount(
-    //         /* [out] */ Int32* count);
+        //@Override
+        CARAPI GetCount(
+            /* [out] */ Int32* count);
 
-    //     //@Override
-    //     CARAPI InstantiateItem(
-    //         /* [in] */ IViewGroup* container,
-    //         /* [in] */ Int32 position,
-    //         /* [out] */ IInterface** item);
+        //@Override
+        CARAPI InstantiateItem(
+            /* [in] */ IViewGroup* container,
+            /* [in] */ Int32 position,
+            /* [out] */ IInterface** item);
 
-    //     //@Override
-    //     CARAPI DestroyItem(
-    //         /* [in] */ IViewGroup* container,
-    //         /* [in] */ Int32 position,
-    //         /* [in] */ IInterface* object);
+        //@Override
+        CARAPI DestroyItem(
+            /* [in] */ IViewGroup* container,
+            /* [in] */ Int32 position,
+            /* [in] */ IInterface* object);
 
-    //     //@Override
-    //     CARAPI IsViewFromObject(
-    //         /* [in] */ IView* view,
-    //         /* [in] */ IInterface* object,
-    //         /* [out] */ Boolean* result);
+        //@Override
+        CARAPI IsViewFromObject(
+            /* [in] */ IView* view,
+            /* [in] */ IInterface* object,
+            /* [out] */ Boolean* result);
 
-    //     //@Override
-    //     CARAPI GetItemPosition(
-    //         /* [in] */ IInterface* object,
-    //         /* [out] */ Int32* pos);
+        //@Override
+        CARAPI GetItemPosition(
+            /* [in] */ IInterface* object,
+            /* [out] */ Int32* pos);
 
-    //     //@Override
-    //     CARAPI GetPageTitle(
-    //         /* [in] */ Int32 position,
-    //         /* [out] */ ICharSequence** title);
+        //@Override
+        CARAPI GetPageTitle(
+            /* [in] */ Int32 position,
+            /* [out] */ ICharSequence** title);
 
-    //     //@Override
-    //     CARAPI OnPageScrolled(
-    //         /* [in] */ Int32 position,
-    //         /* [in] */ Float positionOffset,
-    //         /* [in] */ Int32 positionOffsetPixels);
+        //@Override
+        CARAPI OnPageScrolled(
+            /* [in] */ Int32 position,
+            /* [in] */ Float positionOffset,
+            /* [in] */ Int32 positionOffsetPixels);
 
-    //     //@Override
-    //     CARAPI OnPageSelected(
-    //         /* [in] */ Int32 position);
+        //@Override
+        CARAPI OnPageSelected(
+            /* [in] */ Int32 position);
 
-    //     //@Override
-    //     CARAPI OnPageScrollStateChanged(
-    //         /* [in] */ Int32 state);
+        //@Override
+        CARAPI OnPageScrollStateChanged(
+            /* [in] */ Int32 state);
 
-    // protected:
-    //     Int32 mCurPos;
+    protected:
+        Int32 mCurPos;
 
-    // private:
-    //     ManageApplications* mHost;
-    // };
+    private:
+        ManageApplications* mHost;
+    };
 
     class ApplicationsAdapterFilter
         : public Filter
@@ -655,8 +657,7 @@ private:
 
     AutoPtr<IViewGroup> mContentContainer;
     AutoPtr<IView> mRootView;
-    // TODO
-    // AutoPtr<IViewPager> mViewPager;
+    AutoPtr<IViewPager> mViewPager;
     AutoPtr<CUserSpinnerAdapter> mProfileSpinnerAdapter;
     AutoPtr<IContext> mContext;
 

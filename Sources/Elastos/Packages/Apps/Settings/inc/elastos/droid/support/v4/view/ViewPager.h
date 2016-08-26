@@ -2,14 +2,15 @@
 #ifndef __ELASTOS_DROID_SUPPORT_V4_VIEW_VIEWPAGER_H__
 #define __ELASTOS_DROID_SUPPORT_V4_VIEW_VIEWPAGER_H__
 
-#include "_Elastos.Droid.Support.V4.View.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/ViewGroup.h"
-#include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Widget.h"
+#include "_Elastos.Droid.Settings.h"
 
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
@@ -20,7 +21,6 @@ using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::Animation::IInterpolator;
-using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Widget::IScroller;
 using Elastos::Droid::Widget::IEdgeEffect;
 using Elastos::Core::IComparator;
@@ -319,7 +319,6 @@ private:
         // @Override
         CARAPI OnInvalidated();
 
-
         TO_STRING_IMPL("ViewPager::PagerObserver")
 
     private:
@@ -355,6 +354,9 @@ public:
      */
     CARAPI GetAdapter(
         /* [out] */ IPagerAdapter** adapter);
+
+    CARAPI SetOnAdapterChangeListener(
+        /* [in] */ IViewPagerOnAdapterChangeListener* listener);
 
     /**
      * Set the currently selected page. If the ViewPager has already been through its first
@@ -403,6 +405,16 @@ public:
     CARAPI SetPageTransformer(
         /* [in] */ Boolean reverseDrawingOrder,
         /* [in] */ IViewPagerPageTransformer* transformer);
+
+    /**
+     * Set a separate OnPageChangeListener for internal use by the support library.
+     *
+     * @param listener Listener to set
+     * @return The old listener that was set, if any.
+     */
+    CARAPI SetInternalPageChangeListener(
+        /* [in] */ IViewPagerOnPageChangeListener* listener,
+        /* [out] */ IViewPagerOnPageChangeListener** result);
 
     /**
      * Returns the number of pages that will be retained to either side of the
@@ -622,19 +634,6 @@ public:
     CARAPI GenerateLayoutParams(
         /* [in] */ IAttributeSet* attrs,
         /* [out] */ IViewGroupLayoutParams** params);
-
-    CARAPI SetOnAdapterChangeListener(
-        /* [in] */ IViewPagerOnAdapterChangeListener* listener);
-
-    /**
-     * Set a separate OnPageChangeListener for internal use by the support library.
-     *
-     * @param listener Listener to set
-     * @return The old listener that was set, if any.
-     */
-    CARAPI SetInternalPageChangeListener(
-        /* [in] */ IViewPagerOnPageChangeListener* listener,
-        /* [out] */ IViewPagerOnPageChangeListener** result);
 
 protected:
     CARAPI_(void) InitViewPager();

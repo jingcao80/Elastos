@@ -1,0 +1,8 @@
+TARGET_NAME = deviceinfo
+TARGET_TYPE = lib
+
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../
+
+SOURCES = StorageMeasurement.cpp
