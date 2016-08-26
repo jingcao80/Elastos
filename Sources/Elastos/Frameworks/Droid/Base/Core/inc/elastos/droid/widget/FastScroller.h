@@ -421,40 +421,40 @@ private:
 
 private:
     /** Duration of fade-out animation. */
-    const static Int32 DURATION_FADE_OUT = 300;
+    const static Int32 DURATION_FADE_OUT;// = 300;
 
     /** Duration of fade-in animation. */
-    const static Int32 DURATION_FADE_IN = 150;
+    const static Int32 DURATION_FADE_IN;// = 150;
 
     /** Duration of transition cross-fade animation. */
-    const static Int32 DURATION_CROSS_FADE = 50;
+    const static Int32 DURATION_CROSS_FADE;// = 50;
 
     /** Duration of transition resize animation. */
-    const static Int32 DURATION_RESIZE = 100;
+    const static Int32 DURATION_RESIZE;// = 100;
 
     /** Inactivity timeout before fading controls. */
-    const static Int64 FADE_TIMEOUT = 1500;
+    const static Int64 FADE_TIMEOUT;// = 1500;
 
     /** Minimum number of pages to justify showing a fast scroll thumb. */
-    const static Int32 MIN_PAGES = 4;
+    const static Int32 MIN_PAGES;// = 4;
 
     /** Scroll thumb and preview not showing. */
-    const static Int32 STATE_NONE = 0;
+    const static Int32 STATE_NONE;// = 0;
 
     /** Scroll thumb visible and moving along with the scrollbar. */
-    const static Int32 STATE_VISIBLE = 1;
+    const static Int32 STATE_VISIBLE;// = 1;
 
     /** Scroll thumb and preview being dragged by user. */
-    const static Int32 STATE_DRAGGING = 2;
+    const static Int32 STATE_DRAGGING;// = 2;
 
     // Positions for preview image and text.
-    const static Int32 OVERLAY_FLOATING = 0;
-    const static Int32 OVERLAY_AT_THUMB = 1;
-    const static Int32 OVERLAY_ABOVE_THUMB = 2;
+    const static Int32 OVERLAY_FLOATING;// = 0;
+    const static Int32 OVERLAY_AT_THUMB;// = 1;
+    const static Int32 OVERLAY_ABOVE_THUMB;// = 2;
 
     // Indices for mPreviewResId.
-    const static Int32 PREVIEW_LEFT = 0;
-    const static Int32 PREVIEW_RIGHT = 1;
+    const static Int32 PREVIEW_LEFT;// = 0;
+    const static Int32 PREVIEW_RIGHT;// = 1;
 
     /** Delay before considering a tap in the thumb area to be a drag. */
     const static Int64 TAP_TIMEOUT;// = ViewConfiguration.getTapTimeout();
