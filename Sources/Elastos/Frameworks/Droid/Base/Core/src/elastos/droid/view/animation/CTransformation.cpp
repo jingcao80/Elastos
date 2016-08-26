@@ -28,14 +28,15 @@ CTransformation::CTransformation()
     , mTransformationType(0)
     , mHasClipRect(FALSE)
 {
-    CRect::New((IRect**)&mClipRect);
 }
 
 CTransformation::~CTransformation()
-{}
+{
+}
 
 ECode CTransformation::constructor()
 {
+    CRect::New((IRect**)&mClipRect);
     return Clear();
 }
 

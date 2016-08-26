@@ -1219,7 +1219,7 @@ void BroadcastQueue::BroadcastTimeoutLocked(
 void BroadcastQueue::AddBroadcastToHistoryLocked(
     /* [in] */ BroadcastRecord* r)
 {
-    // disable for MemoryLeak detect
+    // disable for detecting memory leak
     // return;
 
     if (r->mCallingUid < 0) {

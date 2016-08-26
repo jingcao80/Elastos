@@ -82,6 +82,8 @@
 #include <cutils/properties.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#include <elastos/droid/utility/MemoryDumper.h>
+using Elastos::Droid::Utility::MemoryDumper;
 
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::IAppOpsManager;
@@ -3114,7 +3116,7 @@ ECode CActivityManagerService::UpdateCpuStats()
 
 ECode CActivityManagerService::UpdateCpuStatsNow()
 {
-    // disable for MemoryLeak detect
+    // disable for detecting memory leak
     // return NOERROR;
 
     AutoLock lock(mProcessCpuTracker);
@@ -4725,6 +4727,9 @@ ECode CActivityManagerService::StartActivityAsUser(
     /* [in] */ Int32 userId,
     /* [out] */ Int32* result)
 {
+    Slogger::I(TAG, " >> StartActivityAsUser: %s, intent: %s", callingPackage.string(), TO_CSTR(intent));
+    MemoryDumper::Dump();
+
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
@@ -5615,6 +5620,9 @@ Boolean CActivityManagerService::MoveAffiliatedTasksToFront(
 ECode CActivityManagerService::AddRecentTaskLocked(
     /* [in] */ TaskRecord* task)
 {
+    // disable for detecting memory leak
+    // return NOERROR;
+
     Boolean isAffiliated = task->mAffiliatedTaskId != task->mTaskId
             || task->mNextAffiliateTaskId != -1 || task->mPrevAffiliateTaskId != -1;
 
@@ -10946,6 +10954,7 @@ ECode CActivityManagerService::AddAppTask(
             tr->RemovedFromRecents(mTaskPersister);
         }
 
+        // disable for detecting memory leak
         task->mInRecents = TRUE;
         mRecentTasks->PushBack(task);
         r->mTask->mStack->AddTask(task, FALSE, FALSE);

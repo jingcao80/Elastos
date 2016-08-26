@@ -8,6 +8,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/etl/List.h>
 
@@ -911,6 +912,35 @@ ECode CConfiguration::Equals(
     Int32 res;
     CompareTo(that, &res);
     *result = (res == 0);
+    return NOERROR;
+}
+
+ECode CConfiguration::GetHashCode(
+    /* [out] */ Int32* hash)
+{
+    VALIDATE_NOT_NULL(hash)
+
+    Int32 result = 17;
+    result = 31 * result + Elastos::Core::Math::FloatToInt32Bits(mFontScale);
+    result = 31 * result + mMcc;
+    result = 31 * result + mMnc;
+    result = 31 * result + Object::GetHashCode(mLocale);
+    result = 31 * result + mTouchscreen;
+    result = 31 * result + mKeyboard;
+    result = 31 * result + mKeyboardHidden;
+    result = 31 * result + mHardKeyboardHidden;
+    result = 31 * result + mNavigation;
+    result = 31 * result + mNavigationHidden;
+    result = 31 * result + mOrientation;
+    result = 31 * result + mScreenLayout;
+    result = 31 * result + mUiMode;
+    result = 31 * result + mScreenWidthDp;
+    result = 31 * result + mScreenHeightDp;
+    result = 31 * result + mSmallestScreenWidthDp;
+    result = 31 * result + mDensityDpi;
+    result = 31 * result + Object::GetHashCode(mThemeConfig);
+
+    *hash = result;
     return NOERROR;
 }
 

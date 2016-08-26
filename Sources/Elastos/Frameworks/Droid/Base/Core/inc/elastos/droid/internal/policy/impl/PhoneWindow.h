@@ -106,6 +106,8 @@ private:
         SettingsObserver(
             /* [in] */ PhoneWindow* host);
 
+        ~SettingsObserver();
+
         CARAPI constructor(
             /* [in] */ IHandler* handler);
 
@@ -244,8 +246,32 @@ private:
         };
 
         class StylusGestureFilter
-            : public GestureDetector::SimpleOnGestureListener
+            : public Object
         {
+        private:
+            class StylusOnGestureListener
+                : public GestureDetector::SimpleOnGestureListener
+            {
+            public:
+                StylusOnGestureListener(
+                    /* [in] */ StylusGestureFilter* host);
+
+                CARAPI OnFling(
+                    /* [in] */ IMotionEvent* e1,
+                    /* [in] */ IMotionEvent* e2,
+                    /* [in] */ Float velocityX,
+                    /* [in] */ Float velocityY,
+                    /* [out] */ Boolean* res);
+
+                CARAPI OnDoubleTap(
+                    /* [in] */ IMotionEvent* e,
+                    /* [out] */ Boolean* res);
+
+                CARAPI OnLongPress(
+                    /* [in] */ IMotionEvent* e);
+            private:
+                StylusGestureFilter* mHost;
+            };
         public:
             StylusGestureFilter(
                 /* [in] */ _DecorView* host);
@@ -759,17 +785,6 @@ private:
             /* [in] */ Int32 featureId,
             /* [in] */ PhoneWindow* host);
 
-//        CARAPI_(PInterface) Probe(
-//            /* [in]  */ REIID riid);
-//
-//        CARAPI_(UInt32) AddRef();
-//
-//        CARAPI_(UInt32) Release();
-//
-//        CARAPI GetInterfaceID(
-//            /* [in] */ IInterface* iinterface,
-//            /* [in] */ InterfaceID* id);
-
         CARAPI OnCloseMenu(
             /* [in] */ IMenuBuilder* menu,
             /* [in] */ Boolean allMenusAreClosing);
@@ -858,27 +873,27 @@ private:
         PhoneWindow* mOwner;
     };
 
-//    class MyMenuBuilderCallback
-//        : public Object
-//        , public IMenuBuilderCallback
-//    {
-//    public:
-//        MyMenuBuilderCallback(
-//            /* [in] */ PhoneWindow* host);
-//
-//        CAR_INTERFACE_DECL()
-//
-//        CARAPI OnMenuItemSelected(
-//            /* [in] */ IMenuBuilder* menu,
-//            /* [in] */ IMenuItem* item,
-//            /* [out] */ Boolean* state);
-//
-//        CARAPI OnMenuModeChange(
-//            /* [in] */ IMenuBuilder* menu);
-//
-//    private:
-//        AutoPtr<IWeakReference> mWeakHost;
-//    };
+   class MyMenuBuilderCallback
+       : public Object
+       , public IMenuBuilderCallback
+   {
+   public:
+       CAR_INTERFACE_DECL()
+
+       MyMenuBuilderCallback(
+           /* [in] */ IWeakReference* host);
+
+       CARAPI OnMenuItemSelected(
+           /* [in] */ IMenuBuilder* menu,
+           /* [in] */ IMenuItem* item,
+           /* [out] */ Boolean* state);
+
+       CARAPI OnMenuModeChange(
+           /* [in] */ IMenuBuilder* menu);
+
+   private:
+       AutoPtr<IWeakReference> mWeakHost;
+   };
 
 public:
     CAR_INTERFACE_DECL()

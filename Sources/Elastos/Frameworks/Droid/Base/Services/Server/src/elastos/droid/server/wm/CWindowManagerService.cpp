@@ -2991,7 +2991,7 @@ Int32 CWindowManagerService::AddWindow(
 
         Int32 inputFeatures;
         attrs->GetInputFeatures(&inputFeatures);
-        if (outInputChannel != NULL && (inputFeatures
+        if (inInputChannel != NULL && (inputFeatures
                 & IWindowManagerLayoutParams::INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) {
             String name = win->MakeInputChannelName();
             AutoPtr<IInputChannelHelper> helper;

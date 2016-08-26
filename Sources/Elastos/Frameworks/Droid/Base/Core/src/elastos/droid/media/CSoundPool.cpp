@@ -104,11 +104,7 @@ ECode CSoundPool::Builder::Build(
         aab->Build((IAudioAttributes**)&attr);
         mAudioAttributes = attr;
     }
-    AutoPtr<ISoundPool> sp;
-    CSoundPool::New(mMaxStreams, mAudioAttributes, (ISoundPool**)&sp);
-    *result = sp.Get();
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    return CSoundPool::New(mMaxStreams, mAudioAttributes, result);
 }
 
 //----------------------------
@@ -137,7 +133,9 @@ CSoundPool::SoundPoolImpl::SoundPoolImpl()
 {}
 
 CSoundPool::SoundPoolImpl::~SoundPoolImpl()
-{}
+{
+    Finalize();
+}
 
 ECode CSoundPool::SoundPoolImpl::constructor(
     /* [in] */ CSoundPool* proxy,
@@ -283,7 +281,7 @@ ECode CSoundPool::SoundPoolImpl::Unload(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -323,7 +321,7 @@ ECode CSoundPool::SoundPoolImpl::_Play(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -334,7 +332,7 @@ ECode CSoundPool::SoundPoolImpl::_Play(
 ECode CSoundPool::SoundPoolImpl::Pause(
     /* [in] */ Int32 streamID)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -345,7 +343,7 @@ ECode CSoundPool::SoundPoolImpl::Pause(
 ECode CSoundPool::SoundPoolImpl::Resume(
     /* [in] */ Int32 streamID)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -355,7 +353,7 @@ ECode CSoundPool::SoundPoolImpl::Resume(
 
 ECode CSoundPool::SoundPoolImpl::AutoPause()
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -365,7 +363,7 @@ ECode CSoundPool::SoundPoolImpl::AutoPause()
 
 ECode CSoundPool::SoundPoolImpl::AutoResume()
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -376,7 +374,7 @@ ECode CSoundPool::SoundPoolImpl::AutoResume()
 ECode CSoundPool::SoundPoolImpl::Stop(
     /* [in] */ Int32 streamID)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -410,7 +408,7 @@ ECode CSoundPool::SoundPoolImpl::SetPriority(
     /* [in] */ Int32 streamID,
     /* [in] */ Int32 priority)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -422,7 +420,7 @@ ECode CSoundPool::SoundPoolImpl::SetLoop(
     /* [in] */ Int32 streamID,
     /* [in] */ Int32 loop)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -434,7 +432,7 @@ ECode CSoundPool::SoundPoolImpl::SetRate(
     /* [in] */ Int32 streamID,
     /* [in] */ Float rate)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return NOERROR;
     }
@@ -473,7 +471,7 @@ ECode CSoundPool::SoundPoolImpl::SetOnLoadCompleteListener(
 
 ECode CSoundPool::SoundPoolImpl::ReleaseSoundPoolImpl()
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap != NULL) {
         // release weak reference
         IWeakReference* weakRef = (IWeakReference*)ap->getUserData();
@@ -491,7 +489,7 @@ Int32 CSoundPool::SoundPoolImpl::_Load(
     /* [in] */ const String& uri,
     /* [in] */ Int32 priority)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     return ap->load(uri.string(), priority);
 }
 
@@ -501,7 +499,7 @@ Int32 CSoundPool::SoundPoolImpl::_Load(
     /* [in] */ Int64 length,
     /* [in] */ Int32 priority)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return 0;
     }
@@ -531,7 +529,7 @@ void CSoundPool::SoundPoolImpl::_SetVolume(
     /* [in] */ Float leftVolume,
     /* [in] */ Float rightVolume)
 {
-    android::SoundPool* ap = (android::SoundPool*)mNativeContext;
+    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
     if (ap == NULL) {
         return ;
     }
@@ -601,7 +599,7 @@ Int32 CSoundPool::SoundPoolImpl::Native_setup(
     }
 
     // save pointer to SoundPool C++ object in opaque field in Java object
-    mNativeContext = (Int64)ap;
+    mNativeContext = reinterpret_cast<Int64>(ap);
 
     // set callback with weak reference
     weakRef->AddRef();

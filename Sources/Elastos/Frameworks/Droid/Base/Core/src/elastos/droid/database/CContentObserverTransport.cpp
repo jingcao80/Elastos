@@ -2,11 +2,13 @@
 #include "elastos/droid/database/CContentObserverTransport.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Database::EIID_IIContentObserver;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -16,10 +18,17 @@ CAR_INTERFACE_IMPL_3(CContentObserverTransport, Object, IContentObserverTranspor
 
 CAR_OBJECT_IMPL(CContentObserverTransport)
 
+CContentObserverTransport::~CContentObserverTransport()
+{
+}
+
 ECode CContentObserverTransport::constructor(
     /* [in] */ IContentObserver* contentObserver)
 {
-    mContentObserver = contentObserver;
+    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(contentObserver);
+    if (wrs) {
+        wrs->GetWeakReference((IWeakReference**)&mWeakContentObserver);
+    }
     return NOERROR;
 }
 
@@ -28,16 +37,19 @@ ECode CContentObserverTransport::OnChange(
     /* [in] */ IUri* uri,
     /* [in] */ Int32 userId)
 {
-    AutoPtr<IContentObserver> contentObserver = mContentObserver;
-    if (contentObserver) {
-        contentObserver->DispatchChange(selfChange, uri, userId);
+    if (mWeakContentObserver != NULL) {
+        AutoPtr<IContentObserver> co;
+        mWeakContentObserver->Resolve(EIID_IContentObserver, (IInterface**)&co);
+        if (co) {
+            co->DispatchChange(selfChange, uri, userId);
+        }
     }
     return NOERROR;
 }
 
 ECode CContentObserverTransport::ReleaseContentObserver()
 {
-    mContentObserver = NULL;
+    mWeakContentObserver = NULL;
     return NOERROR;
 }
 
@@ -48,7 +60,14 @@ ECode CContentObserverTransport::ToString(
     StringBuilder sb("CContentObserverTransport{");
     sb += StringUtils::ToHexString((Int32)this);
     sb += " contentObserver=";
-    sb += Object::ToString(mContentObserver);
+    if (mWeakContentObserver != NULL) {
+        AutoPtr<IContentObserver> co;
+        mWeakContentObserver->Resolve(EIID_IContentObserver, (IInterface**)&co);
+        sb += Object::ToString(co);
+    }
+    else {
+        sb += "NULL";
+    }
     sb += "}";
     *str = sb.ToString();
     return NOERROR;

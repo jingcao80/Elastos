@@ -240,6 +240,10 @@ CCompatibilityInfo::CCompatibilityInfo()
     , mCompatibilityFlags(0)
 {}
 
+CCompatibilityInfo::~CCompatibilityInfo()
+{
+}
+
 ECode CCompatibilityInfo::IsScalingRequired(
     /* [out] */ Boolean* isRequire)
 {

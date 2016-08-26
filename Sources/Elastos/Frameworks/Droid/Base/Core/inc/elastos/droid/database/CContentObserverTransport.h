@@ -25,6 +25,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    ~CContentObserverTransport();
+
     CARAPI OnChange(
         /* [in] */ Boolean selfchange,
         /* [in] */ IUri* uri,
@@ -39,7 +41,7 @@ public:
         /* [out] */ String* str);
 
 private:
-    AutoPtr<IContentObserver> mContentObserver;
+    AutoPtr<IWeakReference> mWeakContentObserver;   // IContentObserver
 };
 
 } //Database

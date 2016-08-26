@@ -230,6 +230,10 @@ PhoneWindow::SettingsObserver::SettingsObserver(
     : mHost(host)
 {}
 
+PhoneWindow::SettingsObserver::~SettingsObserver()
+{
+}
+
 ECode PhoneWindow::SettingsObserver::constructor(
     /* [in] */ IHandler* handler)
 {
@@ -357,8 +361,42 @@ ECode PhoneWindow::_DecorView::ActionModeCallbackWrapper::OnDestroyActionMode(
     return NOERROR;
 }
 
+
 //===============================================================================================
-// PhoneWindow::_DecorView::StylusGestureFilter::
+// PhoneWindow::_DecorView::StylusGestureFilter::StylusOnGestureListener
+//===============================================================================================
+PhoneWindow::_DecorView::StylusGestureFilter::StylusOnGestureListener::StylusOnGestureListener(
+    /* [in] */ StylusGestureFilter* host)
+    : mHost(host)
+{
+}
+
+ECode PhoneWindow::_DecorView::StylusGestureFilter::StylusOnGestureListener::OnFling(
+    /* [in] */ IMotionEvent* e1,
+    /* [in] */ IMotionEvent* e2,
+    /* [in] */ Float velocityX,
+    /* [in] */ Float velocityY,
+    /* [out] */ Boolean* res)
+{
+    return mHost->OnFling(e1, e2, velocityX, velocityY, res);
+}
+
+ECode PhoneWindow::_DecorView::StylusGestureFilter::StylusOnGestureListener::OnDoubleTap(
+    /* [in] */ IMotionEvent* e,
+    /* [out] */ Boolean* res)
+{
+    return mHost->OnDoubleTap(e, res);
+}
+
+ECode PhoneWindow::_DecorView::StylusGestureFilter::StylusOnGestureListener::OnLongPress(
+    /* [in] */ IMotionEvent* e)
+{
+    return mHost->OnLongPress(e);
+}
+
+
+//===============================================================================================
+// PhoneWindow::_DecorView::StylusGestureFilter
 //===============================================================================================
 const Int32 PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_UP = 1;
 const Int32 PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_DOWN = 2;
@@ -384,8 +422,9 @@ PhoneWindow::_DecorView::StylusGestureFilter::StylusGestureFilter(
 
 ECode PhoneWindow::_DecorView::StylusGestureFilter::constructor()
 {
-    GestureDetector::SimpleOnGestureListener::constructor();
-    return CGestureDetector::New(this, (IGestureDetector**)&mDetector);
+    AutoPtr<StylusOnGestureListener> listener = new StylusOnGestureListener(this);
+    listener->constructor();
+    return CGestureDetector::New(listener.Get(), (IGestureDetector**)&mDetector);
 }
 
 ECode PhoneWindow::_DecorView::StylusGestureFilter::OnTouchEvent(
@@ -2874,43 +2913,49 @@ ECode PhoneWindow::InnerSwipeDismissLayoutOnSwipeProgressChangedListener1::OnSwi
     return NOERROR;
 }
 
-//CAR_INTERFACE_IMPL(PhoneWindow::MyMenuBuilderCallback, Object, IMenuBuilderCallback);
-//
-//PhoneWindow::MyMenuBuilderCallback::MyMenuBuilderCallback(
-//    /* [in] */ PhoneWindow* host)
-//{
-//    host->GetWeakReference((IWeakReference**)&mWeakHost);
-//}
-//
-//ECode PhoneWindow::MyMenuBuilderCallback::OnMenuItemSelected(
-//    /* [in] */ IMenuBuilder* menu,
-//    /* [in] */ IMenuItem* item,
-//    /* [out] */ Boolean* state)
-//{
-//    VALIDATE_NOT_NULL(state)
-//    *state = FALSE;
-//
-//    AutoPtr<IPhoneWindow> w;
-//    mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
-//    if (w == NULL)
-//        return NOERROR;
-//
-//    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
-//    return mHost->OnMenuItemSelected(menu, item, state);
-//}
-//
-//ECode PhoneWindow::MyMenuBuilderCallback::OnMenuModeChange(
-//    /* [in] */ IMenuBuilder* menu)
-//{
-//    AutoPtr<IPhoneWindow> w;
-//    mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
-//    if (w == NULL)
-//        return NOERROR;
-//
-//    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
-//    return mHost->OnMenuModeChange(menu);
-//}
+//=====================================================================
+// PhoneWindow::MyMenuBuilderCallback
+//=====================================================================
+CAR_INTERFACE_IMPL(PhoneWindow::MyMenuBuilderCallback, Object, IMenuBuilderCallback)
 
+PhoneWindow::MyMenuBuilderCallback::MyMenuBuilderCallback(
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
+{
+}
+
+ECode PhoneWindow::MyMenuBuilderCallback::OnMenuItemSelected(
+   /* [in] */ IMenuBuilder* menu,
+   /* [in] */ IMenuItem* item,
+   /* [out] */ Boolean* state)
+{
+    VALIDATE_NOT_NULL(state)
+    *state = FALSE;
+
+    AutoPtr<IPhoneWindow> w;
+    mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
+    if (w == NULL)
+        return NOERROR;
+
+    PhoneWindow* mHost = (PhoneWindow*)w.Get();
+    return mHost->OnMenuItemSelected(menu, item, state);
+}
+
+ECode PhoneWindow::MyMenuBuilderCallback::OnMenuModeChange(
+    /* [in] */ IMenuBuilder* menu)
+{
+    AutoPtr<IPhoneWindow> w;
+    mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
+    if (w == NULL)
+        return NOERROR;
+
+    PhoneWindow* mHost = (PhoneWindow*)w.Get();
+    return mHost->OnMenuModeChange(menu);
+}
+
+//=====================================================================
+// PhoneWindow
+//=====================================================================
 PhoneWindow::PhoneWindow()
     : mResourcesSetFlags(0)
     , mIconRes(0)
@@ -6550,7 +6595,10 @@ Boolean PhoneWindow::InitializePanelMenu(
 
     AutoPtr<IMenuBuilder> menu;
     CMenuBuilder::New(context, (IMenuBuilder**)&menu);
-    menu->SetCallback(this/*new MyMenuBuilderCallback(this)*/);
+    AutoPtr<IWeakReference> wr;
+    GetWeakReference((IWeakReference**)&wr);
+    AutoPtr<MyMenuBuilderCallback> cb = new MyMenuBuilderCallback(wr);
+    menu->SetCallback(cb.Get());
     st->SetMenu(menu);
 
     return TRUE;

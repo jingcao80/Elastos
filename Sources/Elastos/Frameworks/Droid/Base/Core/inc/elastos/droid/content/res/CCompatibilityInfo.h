@@ -115,6 +115,8 @@ public:
 
     CCompatibilityInfo();
 
+    ~CCompatibilityInfo();
+
     /**
      * @return true if the scaling is required
      */

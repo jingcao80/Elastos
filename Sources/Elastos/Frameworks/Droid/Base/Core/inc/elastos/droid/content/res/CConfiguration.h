@@ -162,6 +162,9 @@ public:
         /* [in] */ IConfiguration* that,
         /* [out] */ Boolean* result);
 
+    CARAPI GetHashCode(
+        /* [out] */ Int32* hash);
+
     CARAPI ToString(
         /* [out] */ String* result);
 

@@ -579,7 +579,7 @@ ECode CAssetManager::List(
     VALIDATE_NOT_NULL(names);
     *names = NULL;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -827,7 +827,7 @@ ECode CAssetManager::AddAssetPath(
         return NOERROR;
     }
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -1030,7 +1030,7 @@ ECode CAssetManager::AddOverlayPath(
             return NOERROR;
         }
 
-        android::AssetManager* am = (android::AssetManager*)mObject;
+        android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
         if (am == NULL) {
             return NOERROR;
         }
@@ -1080,7 +1080,7 @@ ECode CAssetManager::AddCommonOverlayPath(
                     return NOERROR;
                 }
 
-                android::AssetManager* am = (android::AssetManager*)mObject;
+                android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
                 if (am == NULL) {
                     return NOERROR;
                 }
@@ -1122,7 +1122,7 @@ ECode CAssetManager::AddIconPath(
             return NOERROR;
         }
 
-        android::AssetManager* am = (android::AssetManager*)mObject;
+        android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
         if (am == NULL) {
             return NOERROR;
         }
@@ -1152,7 +1152,7 @@ ECode CAssetManager::RemoveOverlayPath(
             return E_NULL_POINTER_EXCEPTION;
         }
 
-        android::AssetManager* am = (android::AssetManager*)mObject;
+        android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
         if (am == NULL) {
             return NOERROR;
         }
@@ -1170,7 +1170,7 @@ ECode CAssetManager::IsUpToDate(
 {
     VALIDATE_NOT_NULL(isUpdated);
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         *isUpdated = TRUE;
         return NOERROR;
@@ -1186,7 +1186,7 @@ ECode CAssetManager::SetLocale(
         return NOERROR;
     }
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -1202,7 +1202,7 @@ ECode CAssetManager::GetLocales(
 
     android::Vector<android::String8> locs;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         *locales = NULL;
         return NOERROR;
@@ -1241,7 +1241,7 @@ ECode CAssetManager::SetConfiguration(
     /* [in] */Int32 uiMode,
     /* [in] */Int32 majorVersion)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -1282,7 +1282,7 @@ Int32 CAssetManager::GetResourceIdentifier(
         return 0;
     }
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return 0;
     }
@@ -1324,7 +1324,7 @@ Int32 CAssetManager::GetResourceIdentifier(
 String CAssetManager::GetResourceName(
     /* [in] */ Int32 resid)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return String(NULL);
     }
@@ -1369,7 +1369,7 @@ String CAssetManager::GetResourceName(
 String CAssetManager::GetResourcePackageName(
     /* [in] */ Int32 resid)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return String(NULL);
     }
@@ -1390,7 +1390,7 @@ String CAssetManager::GetResourcePackageName(
 String CAssetManager::GetResourceTypeName(
     /* [in] */ Int32 resid)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return String(NULL);
     }
@@ -1415,7 +1415,7 @@ String CAssetManager::GetResourceTypeName(
 String CAssetManager::GetResourceEntryName(
     /* [in] */ Int32 resid)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return String(NULL);
     }
@@ -1443,7 +1443,7 @@ ECode CAssetManager::OpenAsset(
     /* [out] */ Int64* asset)
 {
     VALIDATE_NOT_NULL(asset);
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         *asset = 0;
         return NOERROR;
@@ -1512,7 +1512,7 @@ AutoPtr<IParcelFileDescriptor> CAssetManager::OpenAssetFd(
     /* [in] */ const String& fileName,
     /* [in] */ ArrayOf<Int64>* outOffsets)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NULL;
     }
@@ -1541,7 +1541,7 @@ ECode CAssetManager::OpenNonAssetNative(
     /* [in] */ Int32 accessMode,
     /* [out] */ Int64* value)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         *value = 0;
         return NOERROR;
@@ -1583,7 +1583,7 @@ AutoPtr<IParcelFileDescriptor> CAssetManager::OpenNonAssetFdNative(
     /* [in] */ const String& fileName,
     /* [in] */ ArrayOf<Int64>* outOffsets)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NULL;
     }
@@ -1729,7 +1729,7 @@ ECode CAssetManager::LoadResourceValue(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -1778,7 +1778,7 @@ ECode CAssetManager::LoadResourceBagValue(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2288,7 +2288,7 @@ ECode CAssetManager::RetrieveAttributes(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2414,7 +2414,7 @@ ECode CAssetManager::RetrieveAttributes(
 Int32 CAssetManager::GetArraySize(
     /* [in] */ Int32 resource)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return 0;
     }
@@ -2442,7 +2442,7 @@ ECode CAssetManager::RetrieveArray(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2522,7 +2522,7 @@ ECode CAssetManager::RetrieveArray(
 
 Int32 CAssetManager::GetStringBlockCount()
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return 0;
     }
@@ -2532,7 +2532,7 @@ Int32 CAssetManager::GetStringBlockCount()
 Int64 CAssetManager::GetNativeStringBlock(
     /* [in] */ Int32 block)
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return 0;
     }
@@ -2545,7 +2545,7 @@ ECode CAssetManager::GetCookieName(
 {
     VALIDATE_NOT_NULL(name);
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         *name = String(NULL);
         return NOERROR;
@@ -2566,7 +2566,7 @@ ECode CAssetManager::GetAssignedPackageIdentifiers(
     VALIDATE_NOT_NULL(sparseArray)
     *sparseArray = NULL;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2618,7 +2618,7 @@ Int32 CAssetManager::GetGlobalAssetManagerCount()
 
 Int64 CAssetManager::NewTheme()
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return 0;
     }
@@ -2639,7 +2639,7 @@ ECode CAssetManager::OpenXmlAssetNative(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2685,7 +2685,7 @@ ECode CAssetManager::GetArrayStringResource(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2750,7 +2750,7 @@ ECode CAssetManager::GetArrayStringInfo(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2816,7 +2816,7 @@ ECode CAssetManager::Init(
     am->addDefaultAssets();
 
     if (LocalLOGV) Logger::V(TAG, "Created AssetManager %p for object %p\n", am, this);
-    mObject = (Int64)am;
+    mObject = reinterpret_cast<Int64>(am);
     return NOERROR;
 }
 
@@ -2824,7 +2824,7 @@ ECode CAssetManager::GetBasePackageCount(
     /* [out] */ Int32* pkgCount)
 {
     VALIDATE_NOT_NULL(pkgCount)
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         *pkgCount = 0;
         return NOERROR;
@@ -2840,7 +2840,7 @@ ECode CAssetManager::GetBasePackageName(
 {
     VALIDATE_NOT_NULL(pkgName)
     *pkgName = String(NULL);
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2855,7 +2855,7 @@ ECode CAssetManager::GetBaseResourcePackageName(
 {
     VALIDATE_NOT_NULL(pkgName)
     *pkgName = String(NULL);
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2870,7 +2870,7 @@ ECode CAssetManager::GetBasePackageId(
 {
     VALIDATE_NOT_NULL(pkgId)
     *pkgId = 0;
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2881,7 +2881,7 @@ ECode CAssetManager::GetBasePackageId(
 
 void CAssetManager::Destroy()
 {
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am != NULL) {
         delete am;
         mObject = 0;
@@ -2896,7 +2896,7 @@ ECode CAssetManager::GetArrayIntResource(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
@@ -2947,7 +2947,7 @@ ECode CAssetManager::GetStyleAttributes(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    android::AssetManager* am = (android::AssetManager*)mObject;
+    android::AssetManager* am = reinterpret_cast<android::AssetManager*>(mObject);
     if (am == NULL) {
         return NOERROR;
     }
