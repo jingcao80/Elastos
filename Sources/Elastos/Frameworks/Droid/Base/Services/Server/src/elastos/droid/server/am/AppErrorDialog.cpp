@@ -55,20 +55,21 @@ ECode AppErrorDialog::MyHandler::HandleMessage(
 }
 
 
-AppErrorDialog::AppErrorDialog(
+ECode AppErrorDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ CActivityManagerService* service,
     /* [in] */ AppErrorResult* result,
     /* [in] */ ProcessRecord* app)
-    : mService(service)
-    , mResult(result)
-    , mProc(app)
 {
-    BaseErrorDialog::Init(context);
+    FAIL_RETURN(BaseErrorDialog::Init(context));
+
     mHandler = new MyHandler(this);
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
 
+    mService = service;
+    mProc = app;
+    mResult = result;
     AutoPtr<ICharSequence> name;
 
     AutoPtr<IPackageManager> pkgManager;
@@ -122,7 +123,6 @@ AppErrorDialog::AppErrorDialog(
     SetTitle(title);
     AutoPtr<IWindow> window;
     Dialog::GetWindow((IWindow**)&window);
-    //window->AddFlags(IViewGroupLayoutParams::FLAG_SYSTEM_ERROR);
     AutoPtr<IWindowManagerLayoutParams> attrs;
     window->GetAttributes((IWindowManagerLayoutParams**)&attrs);
     String processName;
@@ -145,6 +145,7 @@ AppErrorDialog::AppErrorDialog(
     mHandler->ObtainMessage(FORCE_QUIT, (IMessage**)&msg);
     Boolean sended;
     mHandler->SendMessageDelayed(msg, DISMISS_TIMEOUT, &sended);
+    return NOERROR;
 }
 
 } // namespace Am

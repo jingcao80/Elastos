@@ -38,7 +38,9 @@ private:
     };
 
 public:
-    AppErrorDialog(
+    AppErrorDialog() {}
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ CActivityManagerService* service,
         /* [in] */ AppErrorResult* result,
