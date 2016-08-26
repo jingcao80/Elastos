@@ -31,6 +31,7 @@ using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERSO_LOCKED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_UNKNOWN;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Telephony::Cdma::IEriInfo;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::INetworkInfo;
@@ -952,15 +953,14 @@ Boolean NetworkControllerImpl::IsCdmaEri()
     if (mServiceState != NULL) {
         Int32 iconIndex = 0;
         mServiceState->GetCdmaEriIconIndex(&iconIndex);
-        assert(0 && "TODO");
-        // if (iconIndex != EriInfo.ROAMING_INDICATOR_OFF) {
-        //     Int32 iconMode = 0;
-        //     mServiceState->GetCdmaEriIconMode(&iconMode);
-        //     if (iconMode == EriInfo.ROAMING_ICON_MODE_NORMAL
-        //             || iconMode == EriInfo.ROAMING_ICON_MODE_FLASH) {
-        //         return TRUE;
-        //     }
-        // }
+        if (iconIndex != IEriInfo::ROAMING_INDICATOR_OFF) {
+            Int32 iconMode = 0;
+            mServiceState->GetCdmaEriIconMode(&iconMode);
+            if (iconMode == IEriInfo::ROAMING_ICON_MODE_NORMAL
+                || iconMode == IEriInfo::ROAMING_ICON_MODE_FLASH) {
+                return TRUE;
+            }
+        }
     }
     return FALSE;
 }
