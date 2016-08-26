@@ -2,6 +2,8 @@ module
 {
     using interface Elastos.Droid.Widget.ITextView;
 
+    submodule Elastos.Droid.Support.V4.View {
+
     namespace Elastos {
     namespace Droid {
     namespace Support {
@@ -99,4 +101,6 @@ module
     } // namespace Support
     } // namespace Droid
     } // namespace Elastos
+
+    } // submodule
 }

@@ -95,7 +95,7 @@ PagerTitleStrip::PagerTitleStripImplIcs::~PagerTitleStripImplIcs()
 ECode PagerTitleStrip::PagerTitleStripImplIcs::SetSingleLineAllCaps(
     /* [in] */ ITextView* text)
 {
-    assert(0 && "TODO");
+    Slogger::I("PagerTitleStrip::PagerTitleStripImplIcs", "PagerTitleStripImplIcs is TODO");
     // PagerTitleStripIcs::SetSingleLineAllCaps(text);
     return NOERROR;
 }

@@ -1,5 +1,17 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewParent;
+    using interface Elastos.Droid.View.IViewManager;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+
+    submodule Elastos.Droid.Support.V4.View {
+
     namespace Elastos {
     namespace Droid {
     namespace Support {
@@ -74,9 +86,33 @@ module
             [out] Boolean* drawFullUnderline);
     }
 
+    [local]
+    class CPagerTabStrip {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IPagerTabStrip;
+        interface IPagerTitleStrip;
+        interface IViewPagerDecor;
+
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
     } // namespace View
     } // namespace V4
     } // namespace Support
     } // namespace Droid
     } // namespace Elastos
+
+    } // submodule
 }

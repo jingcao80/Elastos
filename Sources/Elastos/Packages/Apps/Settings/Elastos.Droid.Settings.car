@@ -35,11 +35,10 @@ module
     merge("car/elastos/droid/wifi/WifiPickerActivity.car");
     merge("car/elastos/droid/wifi/WpsDialog.car");
 
-
-    merge("car/elastos/droid/support/v4/view/PagerTabStrip.car");
-    merge("car/elastos/droid/support/v4/view/PagerTitleStrip.car");
-    merge("car/elastos/droid/support/v4/view/PagerAdapter.car");
-    merge("car/elastos/droid/support/v4/view/ViewPager.car");
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerTitleStrip.car");
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerTabStrip.car");
 
     interface Elastos.Droid.Support.V4.View.IViewPagerSavedState;
 
@@ -1070,71 +1069,4 @@ module
     } // namespace Settings
     } // namespace Droid
     } // namespace Elastos
-
-    namespace Elastos {
-    namespace Droid {
-    namespace Support {
-    namespace V4 {
-    namespace View {
-
-    [local]
-    class CPagerTabStrip {
-        constructor(
-            [in] IContext* ctx);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        interface IPagerTabStrip;
-        interface IPagerTitleStrip;
-        interface IViewPagerDecor;
-
-        interface IViewGroup;
-        interface IViewParent;
-        interface IViewManager;
-        interface IView;
-        interface IDrawableCallback;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
-    }
-
-    [local]
-    class CViewPager {
-        constructor(
-            [in] IContext* ctx);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        interface IViewPager;
-
-        interface IViewGroup;
-        interface IViewParent;
-        interface IViewManager;
-        interface IView;
-        interface IDrawableCallback;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
-    }
-
-    class CViewPagerSavedState {
-        constructor();
-
-        constructor(
-            [in] IParcelable* state);
-
-        interface IViewPagerSavedState;
-        interface IViewBaseSavedState;
-        interface IAbsSavedState;
-        interface IParcelable;
-    }
-
-    } // namespace View
-    } // namespace V4
-    } // namespace Support
-    } // namepsace Droid
-    } // namespace Elastos
-
 }

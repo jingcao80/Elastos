@@ -5,9 +5,10 @@ EXPORT_ALL_SYMBOLS = 1
 
 INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/src
+INCLUDES += $(MAKEDIR)/../../../Frameworks/Droid/Support/V4/inc
 
 VPATH += $(MAKEDIR)/src/elastos/droid/settings
-VPATH += $(MAKEDIR)/src/elastos/droid/support
+VPATH += $(MAKEDIR)/../../../Frameworks/Droid/Support/V4/src/elastos/droid/support/v4/view/
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
@@ -46,6 +47,14 @@ SOURCES += SecuritySettings.cpp
 SOURCES += TrustAgentUtils.cpp
 SOURCES += settings.cpp
 
+SOURCES += ViewPager.cpp
+SOURCES += PagerAdapter.cpp
+SOURCES += PagerTitleStrip.cpp
+SOURCES += PagerTabStrip.cpp
+SOURCES += CPagerTabStrip.cpp
+SOURCES += CViewPager.cpp
+SOURCES += CViewPagerSavedState.cpp
+
 ELASTOS_LIBS += src/elastos/droid/settings/applications/applications.lib
 ELASTOS_LIBS += src/elastos/droid/settings/dashboard/dashboard.lib
 ELASTOS_LIBS += src/elastos/droid/settings/deviceinfo/deviceinfo.lib
@@ -55,7 +64,6 @@ ELASTOS_LIBS += src/elastos/droid/settings/search/search.lib
 ELASTOS_LIBS += src/elastos/droid/settings/voice/voice.lib
 ELASTOS_LIBS += src/elastos/droid/settings/widget/widget.lib
 ELASTOS_LIBS += src/elastos/droid/settings/wifi/wifi.lib
-ELASTOS_LIBS += src/elastos/droid/support/v4/view/view.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

@@ -4,6 +4,7 @@ TARGET_TYPE = lib
 INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 INCLUDES += $(MAKEDIR)/../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../../Frameworks/Droid/Support/V4/inc
 
 SOURCES += ApplicationsState.cpp
 SOURCES += AppViewHolder.cpp

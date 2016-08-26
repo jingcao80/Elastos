@@ -1,3 +1,2 @@
 
 DIRS += src/elastos/droid/settings
-DIRS += src/elastos/droid/support/v4/view
