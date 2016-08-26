@@ -11,9 +11,8 @@ module
     merge("car/elastos/droid/packageinstaller/UninstallAppProgress.car");
     merge("car/elastos/droid/packageinstaller/UninstallerActivity.car");
 
-    submodule Elastos.Droid.Support.V4.View {
-        merge("car/elastos/droid/support/v4/view.car");
-    }
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.Content.IContext;

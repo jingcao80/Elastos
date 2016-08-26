@@ -1,7 +1,0 @@
-TARGET_NAME= app
-TARGET_TYPE= lib
-
-INCLUDES += $(MAKEDIR)/../../../../../../inc
-INCLUDES += ../../../../../../
-
-SOURCES = FragmentPagerAdapter.cpp

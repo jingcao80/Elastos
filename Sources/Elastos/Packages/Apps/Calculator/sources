@@ -8,10 +8,10 @@ LUBE_FLAGS += -n -u
 INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/src
 INCLUDES += $(MAKEDIR)/../Arity/inc
-INCLUDES += $(MAKEDIR)/support/v4/inc
+INCLUDES += $(MAKEDIR)/../../../Frameworks/Droid/Support/V4/inc
 
 VPATH += $(MAKEDIR)/src/elastos/droid/calculator2
-VPATH += $(MAKEDIR)/support/v4/src/elastos/droid/support/v4/view
+VPATH += $(MAKEDIR)/../../../Frameworks/Droid/Support/V4/src/elastos/droid/support/v4/view/
 
 SOURCES += Elastos.Droid.Calculator2.car
 SOURCES += R.cpp
@@ -25,7 +25,7 @@ SOURCES += CalculatorPadViewPager.cpp
 SOURCES += calculator.cpp
 SOURCES += ViewPager.cpp
 SOURCES += PagerAdapter.cpp
-SOURCES += view.cpp
+SOURCES += CViewPagerSavedState.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Org.Javia.Arity.cpp

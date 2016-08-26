@@ -2,13 +2,13 @@
 #ifndef __ELASTOS_DROID_SUPPORT_V4_VIEW_VIEWPAGER_H__
 #define __ELASTOS_DROID_SUPPORT_V4_VIEW_VIEWPAGER_H__
 
-#include "_Elastos.Droid.Support.V4.View.h"
+#include "Elastos.Droid.Support.V4.View.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/ViewGroup.h"
-#include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Database::DataSetObserver;
@@ -63,7 +63,7 @@ namespace View {
  * {@sample development/samples/Support13Demos/src/com/example/android/supportv13/app/ActionBarTabsPager.java
  *      complete}
  */
-class ECO_PUBLIC ViewPager
+class ViewPager
     : public ViewGroup
     , public IViewPager
 {

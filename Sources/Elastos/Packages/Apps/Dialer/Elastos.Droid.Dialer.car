@@ -148,9 +148,10 @@ module
     merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadView.car");
-    merge("car/elastos/droid/support/v4/view/ViewPager.car");
-    merge("car/elastos/droid/support/v4/view/PagerAdapter.car");
-//
+
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
+
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IFragment;
 //    using interface Elastos.Droid.App.IListFragment;
@@ -1690,49 +1691,6 @@ module
     } // namespace Phone
     } // namespace Droid
     } // namespace Elastos
-
-    namespace Elastos {
-    namespace Droid {
-    namespace Support {
-    namespace V4 {
-    namespace View {
-
-    class CViewPagerSavedState {
-        constructor();
-
-        constructor(
-            [in] IParcelable* state);
-
-        interface IViewPagerSavedState;
-        interface IViewBaseSavedState;
-        interface IAbsSavedState;
-        interface IParcelable;
-    }
-
-    [local]
-    class CViewPager {
-        constructor(
-            [in] IContext* ctx);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        interface IView;
-        interface IDrawableCallback;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
-        interface IViewParent;
-        interface IViewManager;
-        interface IViewGroup;
-        interface IViewPager;
-    }
-
-    } //namespace View
-    } //namespace V4
-    } //namespace Support
-    } //namespace Droid
-    } //namespace Elastos
 
 //    namespace Elastos {
 //    namespace Droid {

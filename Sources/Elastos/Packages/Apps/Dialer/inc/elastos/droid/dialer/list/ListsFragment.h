@@ -9,9 +9,9 @@
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include <elastos/droid/dialerbind/analytics/AnalyticsFragment.h>
-#include <elastos/droid/support/v4/view/CViewPager.h>
-#include <elastos/droid/support/v13/app/FragmentPagerAdapter.h>
+#include "elastos/droid/dialerbind/analytics/AnalyticsFragment.h"
+#include "elastos/droid/support/v4/view/CViewPager.h"
+#include "elastos/droid/support/v13/app/FragmentPagerAdapter.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IActionBar;

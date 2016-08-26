@@ -5,5 +5,3 @@ DIRS += dialerbind
 DIRS += incallui
 DIRS += incalluibind
 DIRS += phone/common
-DIRS += support/v4/view
-DIRS += support/v13/app

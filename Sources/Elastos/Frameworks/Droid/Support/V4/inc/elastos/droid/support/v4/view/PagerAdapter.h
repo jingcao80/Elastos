@@ -2,18 +2,18 @@
 #ifndef __ELASTOS_DROID_SUPPORT_V4_VIEW_PAGERADAPTER_H__
 #define __ELASTOS_DROID_SUPPORT_V4_VIEW_PAGERADAPTER_H__
 
-#include "_Elastos.Droid.Support.V4.View.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
+#include "Elastos.Droid.Support.V4.View.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Database::IDataSetObservable;
 using Elastos::Droid::Database::IDataSetObserver;
-using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IView;
-using Elastos::Core::IClassLoader;
+using Elastos::Droid::View::IViewGroup;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::IClassLoader;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -74,16 +74,12 @@ namespace View {
  * ViewPager will keep the current page active provided the adapter implements
  * the method {@link #getItemPosition(Object)}.</p>
  */
-class ECO_PUBLIC PagerAdapter
+class PagerAdapter
     : public Object
     , public IPagerAdapter
 {
 public:
-    PagerAdapter();
-
-    virtual ~PagerAdapter() {}
-
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     /**
      * Called when a change in the shown pages is going to start being made.
@@ -107,7 +103,7 @@ public:
     CARAPI InstantiateItem(
         /* [in] */ IViewGroup* container,
         /* [in] */ Int32 position,
-        /* [out] */ IInterface** item);
+        /* [out] */ IInterface** newPage);
 
     /**
      * Remove a page for the given position.  The adapter is responsible
@@ -174,7 +170,7 @@ public:
     CARAPI InstantiateItem(
         /* [in] */ IView* container,
         /* [in] */ Int32 position,
-        /* [out] */ IInterface** item);
+        /* [out] */ IInterface** newPage);
 
     /**
      * Remove a page for the given position.  The adapter is responsible
@@ -222,20 +218,6 @@ public:
         /* [in] */ IView* container);
 
     /**
-     * Determines whether a page View is associated with a specific key object
-     * as returned by {@link #instantiateItem(ViewGroup, int)}. This method is
-     * required for a PagerAdapter to function properly.
-     *
-     * @param view Page View to check for association with <code>object</code>
-     * @param object Object to check for association with <code>view</code>
-     * @return true if <code>view</code> is associated with the key object <code>object</code>
-     */
-    CARAPI IsViewFromObject(
-        /* [in] */ IView* view,
-        /* [in] */ IInterface* object,
-        /* [out] */ Boolean* result);
-
-    /**
      * Save any instance state associated with this adapter and its pages that should be
      * restored if the current UI state needs to be reconstructed.
      *
@@ -272,7 +254,7 @@ public:
      */
     CARAPI GetItemPosition(
         /* [in] */ IInterface* object,
-        /* [out] */ Int32* pos);
+        /* [out] */ Int32* position);
 
     /**
      * This method should be called by the application if the data backing this adapter has changed
@@ -320,6 +302,9 @@ public:
         /* [in] */ Int32 position,
         /* [out] */ Float* width);
 
+protected:
+    PagerAdapter();
+
 private:
     AutoPtr<IDataSetObservable> mObservable;
 };
@@ -330,4 +315,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SUPPORT_V4_VIEW_PAGERADAPTER_H__
+#endif // __ELASTOS_DROID_SUPPORT_V4_VIEW_PAGERADAPTER_H__
