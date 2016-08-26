@@ -1284,7 +1284,8 @@ ECode PhoneNumberUtils::FormatNumberToE164(
     /* [out] */ String* res)
 {
     VALIDATE_NOT_NULL(res)
-    assert(0);
+    *res = String("");
+    Logger::D(TAG, "[TODO] Need i18n.phonenumbers.PhoneNumberUtil");
 // TODO: Need i18n.phonenumbers.PhoneNumberUtil
     // PhoneNumberUtil util = PhoneNumberUtil.getInstance();
     // String result = null;
