@@ -4727,8 +4727,8 @@ ECode CActivityManagerService::StartActivityAsUser(
     /* [in] */ Int32 userId,
     /* [out] */ Int32* result)
 {
-    Slogger::I(TAG, " >> StartActivityAsUser: %s, intent: %s", callingPackage.string(), TO_CSTR(intent));
-    MemoryDumper::Dump();
+    // Slogger::I(TAG, " >> StartActivityAsUser: %s, intent: %s", callingPackage.string(), TO_CSTR(intent));
+    // MemoryDumper::Dump();
 
     VALIDATE_NOT_NULL(result);
     *result = 0;

@@ -25,6 +25,7 @@ SOURCES += CalculatorPadViewPager.cpp
 SOURCES += calculator.cpp
 SOURCES += ViewPager.cpp
 SOURCES += PagerAdapter.cpp
+SOURCES += CViewPager.cpp
 SOURCES += CViewPagerSavedState.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
