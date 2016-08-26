@@ -1294,7 +1294,7 @@ ECode ManageApplications::OnCreateView(
     mViewPager = IViewPager::Probe(tmp);
     AutoPtr<MyPagerAdapter> adapter = new MyPagerAdapter(this);
     mViewPager->SetAdapter(adapter);
-    mViewPager->SetOnPageChangeListener((IViewPagerOnPageChangeListener*)adapter.Get());
+    mViewPager->SetOnPageChangeListener(adapter);
     tmp = NULL;
     rootView->FindViewById(R::id::tabs, (IView**)&tmp);
     AutoPtr<IPagerTabStrip> tabs = IPagerTabStrip::Probe(tmp);

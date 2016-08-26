@@ -297,8 +297,8 @@ protected:
     };
 
     class MyPagerAdapter
-        // , public IViewPagerOnPageChangeListener
         : public PagerAdapter
+        , public IViewPagerOnPageChangeListener
     {
     public:
         CAR_INTERFACE_DECL()
