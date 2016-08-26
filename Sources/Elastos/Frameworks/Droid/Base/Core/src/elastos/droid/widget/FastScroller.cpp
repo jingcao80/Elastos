@@ -8,6 +8,7 @@
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CHandler.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CRectF.h"
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -35,6 +36,7 @@ using Elastos::Droid::Animation::PropertyValuesHolder;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Res::IResourcesTheme;
 using Elastos::Droid::Content::Res::IColorStateList;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::Drawable::INinePatchDrawable;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IHandler;
@@ -241,6 +243,21 @@ ECode FastScroller::BottomProperty::SetValue(
 //              FastScroller
 //==============================================================================
 
+const Int32 FastScroller::DURATION_FADE_OUT = 300;
+const Int32 FastScroller::DURATION_FADE_IN = 150;
+const Int32 FastScroller::DURATION_CROSS_FADE = 50;
+const Int32 FastScroller::DURATION_RESIZE = 100;
+const Int64 FastScroller::FADE_TIMEOUT = 1500;
+const Int32 FastScroller::MIN_PAGES = 4;
+const Int32 FastScroller::STATE_NONE = 0;
+const Int32 FastScroller::STATE_VISIBLE = 1;
+const Int32 FastScroller::STATE_DRAGGING = 2;
+const Int32 FastScroller::OVERLAY_FLOATING = 0;
+const Int32 FastScroller::OVERLAY_AT_THUMB = 1;
+const Int32 FastScroller::OVERLAY_ABOVE_THUMB = 2;
+const Int32 FastScroller::PREVIEW_LEFT = 0;
+const Int32 FastScroller::PREVIEW_RIGHT = 1;
+
 const Int64 FastScroller::TAP_TIMEOUT = ViewConfiguration::GetTapTimeout();
 AutoPtr<IProperty> FastScroller::LEFT = new FastScroller::Leftroperty(String("left"));
 AutoPtr<IProperty> FastScroller::TOP = new FastScroller::TopProperty(String("top"));
@@ -250,7 +267,41 @@ AutoPtr<IProperty> FastScroller::BOTTOM = new FastScroller::BottomProperty(Strin
 FastScroller::FastScroller(
     /* [in] */ IAbsListView* listView,
     /* [in] */ Int32 styleResId)
+    : mPreviewPadding(0)
+    , mPreviewMinWidth(0)
+    , mPreviewMinHeight(0)
+    , mThumbMinWidth(0)
+    , mThumbMinHeight(0)
+    , mTextSize(0.0)
+    , mTextAppearance(0)
+    , mWidth(0)
+    , mShowingPrimary(FALSE)
+    , mScrollCompleted(FALSE)
+    , mFirstVisibleItem(0)
+    , mHeaderCount(0)
+    , mCurrentSection(-1)
+    , mScrollbarPosition(-1)
+    , mLongList(FALSE)
+    , mUpdatingLayout(FALSE)
+    , mState(0)
+    , mShowingPreview(FALSE)
+    , mLayoutFromRight(FALSE)
+    , mEnabled(FALSE)
+    , mAlwaysShow(FALSE)
+    , mOverlayPosition(0)
+    , mScrollBarStyle(0)
+    , mMatchDragPosition(FALSE)
+    , mInitialTouchY(0.0)
+    , mPendingDrag(-1)
+    , mOldItemCount(0)
+    , mOldChildCount(0)
 {
+    CRect::New((IRect**)&mTempBounds);
+    CRect::New((IRect**)&mTempMargins);
+    CRect::New((IRect**)&mContainerRect);
+
+    mPreviewResId = ArrayOf<Int32>::Alloc(2);
+
     mList = listView;
     IAdapterView::Probe(listView)->GetCount(&mOldItemCount);
     IViewGroup::Probe(listView)->GetChildCount(&mOldChildCount);
@@ -312,7 +363,7 @@ void FastScroller::SetStyle(
 
     Int32 N;
     ta->GetIndexCount(&N);
-    for (int i = 0; i < N; i++) {
+    for (Int32 i = 0; i < N; i++) {
         Int32 index;
         ta->GetIndex(i, &index);
         switch (index) {
