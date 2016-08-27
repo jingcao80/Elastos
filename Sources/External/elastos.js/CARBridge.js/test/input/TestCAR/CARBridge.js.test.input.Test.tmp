@@ -1,4 +1,4 @@
-module Test.eco
+module CARBridge.js.test.input.Test.eco
 {
     importlib("Elastos.CoreLibrary.eco");
 

@@ -1,4 +1,4 @@
-TARGET_NAME = Test
+TARGET_NAME = CARBridge.js.test.input.Test
 TARGET_TYPE = eco
 
 #C_FLAGS += -std=c++11
@@ -7,7 +7,7 @@ TARGET_TYPE = eco
 
 include $(XDK_SOURCE_PATH)/Elastos/LibCore/src/sources.inc
 
-SOURCES += Test.car
+SOURCES += CARBridge.js.test.input.Test.car
 SOURCES += CTest.cpp
 
 LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib

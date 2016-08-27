@@ -1,12 +1,17 @@
 
 #include <assert.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <elastos.h>
 
-#include <Test.h>
+#include <CARBridge.js.test.input.Test.h>
+#include "../CTest.h"
+
+
+#define _BUF_SIZE 4096
 
 
 
@@ -29,7 +34,7 @@ char const *_GetString(ETest etest)
     }
 }
 
-int main(int argc, char const argv[])
+int main(int argc, char const *argv[])
 {
     AutoPtr<ITest> itest;
     ITest *_itest;
@@ -38,8 +43,8 @@ int main(int argc, char const argv[])
 
     int n;
 
-    char ebuf[4096];
-    char obuf[4096];
+    char ebuf[_BUF_SIZE];
+    char obuf[_BUF_SIZE];
 
     Int16 i16;
 
@@ -62,11 +67,13 @@ int main(int argc, char const argv[])
     EMuid emuid;
 
     EGuid eguid;
-    eguid.mUunm = "fqufrv3q0h038qtugN20Vg85HQ3b0Gj0Q2gJ3Q0J503GrJfErKgJRvh";
+    char _eguidUunm[] = "fqufrv3q0h038qtugN20Vg85HQ3b0Gj0Q2gJ3Q0J503GrJfErKgJRvh";
+    eguid.mUunm = _eguidUunm;
 
     ECode ecode;
 
-    PVoid ptr = "";
+    int __;
+    PVoid ptr = &__;
 
     ETest etest;
 
@@ -104,8 +111,10 @@ int main(int argc, char const argv[])
     ArrayOf<EMuid> emuids(_emuids, 2);
 
     EGuid _eguids[2];
-    _eguids[0].mUunm = "jArwwgj08vcj09arhgV0aiernVofjvofjosAijoaijvjRvIh0VwrivjsFhjFlKgflvfoeiIJdjvkfnlkdf";
-    _eguids[1].mUunm = "DsjkEe98Ug38rqhgb3ibaerijvoJv9Q3yghvAr9hAihv9hgawirneihb398Bhr89ygQ983y57GhBj";
+    char _eguids0Uunm[] = "jArwwgj08vcj09arhgV0aiernVofjvofjosAijoaijvjRvIh0VwrivjsFhjFlKgflvfoeiIJdjvkfnlkdf";
+    _eguids[0].mUunm = _eguids0Uunm;
+    char _eguids1Uunm[] = "DsjkEe98Ug38rqhgb3ibaerijvoJv9Q3yghvAr9hAihv9hgawirneihb398Bhr89ygQ983y57GhBj";
+    _eguids[1].mUunm = _eguids1Uunm;
     ArrayOf<EGuid> eguids(_eguids, 2);
 
     ECode _ecodes[2];
@@ -115,30 +124,51 @@ int main(int argc, char const argv[])
     ArrayOf<ITest *> itests(_itests, 2);
 
     STest _stests[2];
-    _stests[0].eguid.mUunm = "oY608uht4W98yhq3rijNb3750ohjbnr3q98yh250F49hjn9ih";
-    _stests[0].veguid[0].mUunm = "Q8nYbhy0n4th409jnm3y0on4tw9eujBn03yo5nm3509b3rq9jbF53jh548yfF237r2F058Uy653";
-    _stests[0].veguid[1].mUunm = "omnsgplm9etw8hbjw0ribn40ofkfj9uqh0y5mb49uh";
-    _stests[0].vveguid[0][0].mUunm = "09qijv02ijqh0wi9uyjnaoJ0N5NM4QKBJ0Fwhg89248gHvw";
-    _stests[0].vveguid[0][1].mUunm = "Uhjm4w09hjbmf0hj309hjt0jbthj03hj40hj509h";
-    _stests[0].vveguid[1][0].mUunm = "q83HgN35Qh249iNqT2u2059uH359mcF3v0Nu3nyUb3hjVTmU930bn3v4uG49Wu";
-    _stests[0].vveguid[1][1].mUunm = "I307i8o4Uwty31bytv2uny0bn6uihm460hu65j439ub05vunHb56yiv24yuvtCy25";
-    _stests[1].eguid.mUunm = "f487Ytvu0F569ui360yiTq9483yh9gfyuG58omi7ubyvT9crTtyUb540";
-    _stests[1].veguid[0].mUunm = "uiN758vtun3HB8u6yJrMv4uyv0mYbu4vttybuyjv5ub9y654imVIomtu09u9036bIyM2509";
-    _stests[1].veguid[1].mUunm = "uByF420nvy375F725t659yubb6ojHmeroIghtigjsg7w68rtg83qynB35jh0tce5Sc5etgHj7o";
-    _stests[1].vveguid[0][0].mUunm = "69U88rv7typ8Pk5sx54wwereecry0uYYmi59vtu398yv54uv3qUtyv3vt536";
-    _stests[1].vveguid[0][1].mUunm = "u4Mior3qu98Trw98ybuM4bpoityv3teNgetiOphn7509jvny4w9ejGvu4w5yboIm450B";
-    _stests[1].vveguid[1][0].mUunm = "yVuJn498vUyb5e6Byu49rv67435yBF609u4012089t9854uhJwo";
-    _stests[1].vveguid[1][1].mUunm = "PiiubE509mgUn4w7yv359Mubo5eiUn9tr8jYbu509myuVn54rcUN48tyuB56";
+    char _stests0EGuidUunm[] = "oY608uht4W98yhq3rijNb3750ohjbnr3q98yh250F49hjn9ih";
+    _stests[0].eguid.mUunm = _stests0EGuidUunm;
+    char _stests0VEGuid0Uunm[] = "Q8nYbhy0n4th409jnm3y0on4tw9eujBn03yo5nm3509b3rq9jbF53jh548yfF237r2F058Uy653";
+    _stests[0].veguid[0].mUunm = _stests0VEGuid0Uunm;
+    char _stests0VEGuid1Uunm[] = "omnsgplm9etw8hbjw0ribn40ofkfj9uqh0y5mb49uh";
+    _stests[0].veguid[1].mUunm = _stests0VEGuid1Uunm;
+    char _stests0VVEGuid00Uunm[] = "09qijv02ijqh0wi9uyjnaoJ0N5NM4QKBJ0Fwhg89248gHvw";
+    _stests[0].vveguid[0][0].mUunm = _stests0VVEGuid00Uunm;
+    char _stests0VVEGuid01Uunm[] = "Uhjm4w09hjbmf0hj309hjt0jbthj03hj40hj509h";
+    _stests[0].vveguid[0][1].mUunm = _stests0VVEGuid01Uunm;
+    char _stests0VVEGuid10Uunm[] = "q83HgN35Qh249iNqT2u2059uH359mcF3v0Nu3nyUb3hjVTmU930bn3v4uG49Wu";
+    _stests[0].vveguid[1][0].mUunm = _stests0VVEGuid10Uunm;
+    char _stests0VVEGuid11Uunm[] = "I307i8o4Uwty31bytv2uny0bn6uihm460hu65j439ub05vunHb56yiv24yuvtCy25";
+    _stests[0].vveguid[1][1].mUunm = _stests0VVEGuid11Uunm;
+    char _stests1EGuidUunm[] = "f487Ytvu0F569ui360yiTq9483yh9gfyuG58omi7ubyvT9crTtyUb540";
+    _stests[1].eguid.mUunm = _stests1EGuidUunm;
+    char _stests1VEGuid0Uunm[] = "uiN758vtun3HB8u6yJrMv4uyv0mYbu4vttybuyjv5ub9y654imVIomtu09u9036bIyM2509";
+    _stests[1].veguid[0].mUunm = _stests1VEGuid0Uunm;
+    char _stests1VEGuid1Uunm[] = "uByF420nvy375F725t659yubb6ojHmeroIghtigjsg7w68rtg83qynB35jh0tce5Sc5etgHj7o";
+    _stests[1].veguid[1].mUunm = _stests1VEGuid1Uunm;
+    char _stests1VVEGuid00Uunm[] = "69U88rv7typ8Pk5sx54wwereecry0uYYmi59vtu398yv54uv3qUtyv3vt536";
+    _stests[1].vveguid[0][0].mUunm = _stests1VVEGuid00Uunm;
+    char _stests1VVEGuid01Uunm[] = "u4Mior3qu98Trw98ybuM4bpoityv3teNgetiOphn7509jvny4w9ejGvu4w5yboIm450B";
+    _stests[1].vveguid[0][1].mUunm = _stests1VVEGuid01Uunm;
+    char _stests1VVEGuid10Uunm[] = "yVuJn498vUyb5e6Byu49rv67435yBF609u4012089t9854uhJwo";
+    _stests[1].vveguid[1][0].mUunm = _stests1VVEGuid10Uunm;
+    char _stests1VVEGuid11Uunm[] = "PiiubE509mgUn4w7yv359Mubo5eiUn9tr8jYbu509myuVn54rcUN48tyuB56";
+    _stests[1].vveguid[1][1].mUunm = _stests1VVEGuid11Uunm;
     ArrayOf<STest> stests(_stests, 2);
 
     STest stest;
-    stest.eguid.mUunm = "jFwajGj249G3jFvoAJf0943qUg93gVAhrHgQgGhrq9hVr9aH";
-    stest.veguid[0].mUunm = "83hQgOR3g9vh3rfIrJ9pghwrVNq3uGj3qirng5Uhjw4tOjwGj39iVh9Gh";
-    stest.veguid[1].mUunm = "Q9uGHq3r9UhWrUhG3ruVhqr39hGruvQ309hGr3iWbh4wthRhbuHbRhR";
-    stest.vveguid[0][0].mUunm = "alkGjq398Ygh93q8yg9w48hb9Q428hy98eahbwoijBerjbw4p9uhBjwF29hGj";
-    stest.vveguid[0][1].mUunm = "209qHb4w90uJhb50ejN590hj458hj4wt09hm4tijb40jh4w0IJn4thj40";
-    stest.vveguid[1][0].mUunm = "94jB498Whj05924hj5109hj4209ug49w7vwaFfyu10F3";
-    stest.vveguid[1][1].mUunm = "Jhwt4OibjnWibnrwoIjnwt4hBF4598j4098hNt4oihj049Jb4tijbn9Yt4jb6";
+    char _stestEGuidUunm[] = "jFwajGj249G3jFvoAJf0943qUg93gVAhrHgQgGhrq9hVr9aH";
+    stest.eguid.mUunm = _stestEGuidUunm;
+    char _stestVEGuid0Uunm[] = "83hQgOR3g9vh3rfIrJ9pghwrVNq3uGj3qirng5Uhjw4tOjwGj39iVh9Gh";
+    stest.veguid[0].mUunm = _stestVEGuid0Uunm;
+    char _stestVEGuid1Uunm[] = "Q9uGHq3r9UhWrUhG3ruVhqr39hGruvQ309hGr3iWbh4wthRhbuHbRhR";
+    stest.veguid[1].mUunm = _stestVEGuid1Uunm;
+    char _stestVVEGuid00Uunm[] = "alkGjq398Ygh93q8yg9w48hb9Q428hy98eahbwoijBerjbw4p9uhBjwF29hGj";
+    stest.vveguid[0][0].mUunm = _stestVVEGuid00Uunm;
+    char _stestVVEGuid01Uunm[] = "209qHb4w90uJhb50ejN590hj458hj4wt09hm4tijb40jh4w0IJn4thj40";
+    stest.vveguid[0][1].mUunm = _stestVVEGuid01Uunm;
+    char _stestVVEGuid10Uunm[] = "94jB498Whj05924hj5109hj4209ug49w7vwaFfyu10F3";
+    stest.vveguid[1][0].mUunm = _stestVVEGuid10Uunm;
+    char _stestVVEGuid11Uunm[] = "Jhwt4OibjnWibnrwoIjnwt4hBF4598j4098hNt4oihj049Jb4tijbn9Yt4jb6";
+    stest.vveguid[1][1].mUunm = _stestVVEGuid11Uunm;
 
     ITest *itest_;
 
@@ -147,11 +177,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestSelf()));
 
-    assert((n = sprintf(ebuf, "%p (ITest)\n", itest)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%p (ITest)\n", itest.Get())) >= 0);
 
-    assert(output = fopen(OUTPUT_FILE, "r") != NULL);
+    assert((output = fopen(OUTPUT_FILE, "r")) != NULL);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -159,11 +189,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestVoid()));
 
-    assert((n = sprintf(ebuf, "void (void)\n")) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "void (void)\n")) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -171,11 +201,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestInt16(i16)));
 
-    assert((n = sprintf(ebuf, "%d (Int16)\n", i16)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%d (Int16)\n", i16)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -183,11 +213,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestInt32(i32)));
 
-    assert((n = sprintf(ebuf, "%d (Int32)\n", i32)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%d (Int32)\n", i32)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -195,11 +225,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestInt64(i64)));
 
-    assert((n = sprintf(ebuf, "%d (Int64)\n", i64)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%lld (Int64)\n", i64)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -207,11 +237,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestByte(byte)));
 
-    assert((n = sprintf(ebuf, "\'%c\' (Byte)\n", byte)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "\'%c\' (Byte)\n", byte)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -219,11 +249,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestFloat(f)));
 
-    assert((n = sprintf(ebuf, "%f (Float)\n", f)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%f (Float)\n", f)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -231,11 +261,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestDouble(d)));
 
-    assert((n = sprintf(ebuf, "%lf (Double)\n", d)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%lf (Double)\n", d)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -243,11 +273,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestChar32(c32)));
 
-    assert((n = sprintf(ebuf, "\'%lc\' (Char32)\n", c32)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "\'%lc\' (Char32)\n", c32)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -255,11 +285,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestString(s)));
 
-    assert((n = sprintf(ebuf, "\"%s\" (String)\n", s)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "\"%s\" (String)\n", static_cast<char const *>(s))) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -267,11 +297,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestBoolean(b)));
 
-    assert((n = sprintf(ebuf, "%s (Boolean)\n", _GetString(b))) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%s (Boolean)\n", _GetString(b))) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -279,7 +309,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestEMuid(emuid)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "{\n"
                     "  \"mData1\": %u,\n"
                     "  \"mData2\": %u,\n"
@@ -309,7 +339,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -317,7 +347,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestEGuid(eguid)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "{\n"
                     "  \"mClsid\": {\n"
                     "    \"mData1\": %u,\n"
@@ -353,7 +383,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -361,11 +391,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestECode(ecode)));
 
-    assert((n = sprintf(ebuf, "%d (ECode)\n", ecode)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%d (ECode)\n", ecode)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -373,11 +403,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestLocalPtr(ptr)));
 
-    assert((n = sprintf(ebuf, "%p (LocalPtr (PVoid))\n", ptr)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%p (LocalPtr (PVoid))\n", ptr)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -385,11 +415,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestEnum(etest)));
 
-    assert((n = sprintf(ebuf, "%s (Enum (ETest))\n", _GetString(etest))) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%s (Enum (ETest))\n", _GetString(etest))) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -397,7 +427,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(i16s)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  %d,\n"
                     "  %d\n"
@@ -407,7 +437,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -415,7 +445,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(i32s)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  %d,\n"
                     "  %d\n"
@@ -425,7 +455,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -433,17 +463,17 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(i64s)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
-                    "  %ld,\n"
-                    "  %ld\n"
+                    "  %lld,\n"
+                    "  %lld\n"
                     "] (ArrayOf<Int64>)\n",
                     i64s[0],
                     i64s[1])) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -451,7 +481,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(bytes)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  \'%c\',\n"
                     "  \'%c\'\n"
@@ -461,7 +491,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -469,7 +499,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(fs)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  %f,\n"
                     "  %f\n"
@@ -479,7 +509,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -487,7 +517,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(ds)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  %lf,\n"
                     "  %lf\n"
@@ -497,7 +527,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -505,7 +535,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArrayOfEnum(etests)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  %s,\n"
                     "  %s\n"
@@ -515,7 +545,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -523,7 +553,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(c32s)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  \'%lc\',\n"
                     "  \'%lc\'\n"
@@ -533,7 +563,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -541,17 +571,17 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(ss)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  \"%s\",\n"
                     "  \"%s\"\n"
                     "] (ArrayOf<String>)\n",
-                    ss[0],
-                    ss[1])) >= 0);
+                    static_cast<char const *>(ss[0]),
+                    static_cast<char const *>(ss[1]))) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -559,7 +589,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArrayOfBoolean(bs)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  %s,\n"
                     "  %s\n"
@@ -569,7 +599,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -577,7 +607,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(emuids)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  {\n"
                     "    \"mData1\": %u,\n"
@@ -635,7 +665,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -643,7 +673,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(eguids)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  {\n"
                     "    \"mClsid\": {\n"
@@ -713,7 +743,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -721,7 +751,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArrayOfECode(ecodes)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  %d,\n"
                     "  %d\n"
@@ -731,7 +761,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -742,7 +772,7 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(itests)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  %p,\n"
                     "  %p\n"
@@ -752,7 +782,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -760,12 +790,12 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestCARArray(stests)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "[\n"
                     "  {\n"
                     "    \"i16\": %d,\n"
                     "    \"i32\": %d,\n"
-                    "    \"i64\": %ld,\n"
+                    "    \"i64\": %lld,\n"
                     "    \"byte\": \'%c\',\n"
                     "    \"f\": %f,\n"
                     "    \"d\": %lf,\n"
@@ -820,8 +850,8 @@ int main(int argc, char const argv[])
                     "      %d\n"
                     "    ],\n"
                     "    \"vi64\": [\n"
-                    "      %d,\n"
-                    "      %d\n"
+                    "      %lld,\n"
+                    "      %lld\n"
                     "    ],\n"
                     "    \"vbyte\": [\n"
                     "      \'%c\',\n"
@@ -957,12 +987,12 @@ int main(int argc, char const argv[])
                     "    ],\n"
                     "    \"vvi64\": [\n"
                     "      [\n"
-                    "        %ld,\n"
-                    "        %ld\n"
+                    "        %lld,\n"
+                    "        %lld\n"
                     "      ],\n"
                     "      [\n"
-                    "        %ld,\n"
-                    "        %ld\n"
+                    "        %lld,\n"
+                    "        %lld\n"
                     "      ]\n"
                     "    ],\n"
                     "    \"vvbyte\": [\n"
@@ -1215,7 +1245,7 @@ int main(int argc, char const argv[])
                     "  {\n"
                     "    \"i16\": %d,\n"
                     "    \"i32\": %d,\n"
-                    "    \"i64\": %ld,\n"
+                    "    \"i64\": %lld,\n"
                     "    \"byte\": \'%c\',\n"
                     "    \"f\": %f,\n"
                     "    \"d\": %lf,\n"
@@ -1270,8 +1300,8 @@ int main(int argc, char const argv[])
                     "      %d\n"
                     "    ],\n"
                     "    \"vi64\": [\n"
-                    "      %d,\n"
-                    "      %d\n"
+                    "      %lld,\n"
+                    "      %lld\n"
                     "    ],\n"
                     "    \"vbyte\": [\n"
                     "      \'%c\',\n"
@@ -1407,12 +1437,12 @@ int main(int argc, char const argv[])
                     "    ],\n"
                     "    \"vvi64\": [\n"
                     "      [\n"
-                    "        %ld,\n"
-                    "        %ld\n"
+                    "        %lld,\n"
+                    "        %lld\n"
                     "      ],\n"
                     "      [\n"
-                    "        %ld,\n"
-                    "        %ld\n"
+                    "        %lld,\n"
+                    "        %lld\n"
                     "      ]\n"
                     "    ],\n"
                     "    \"vvbyte\": [\n"
@@ -2170,7 +2200,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -2178,11 +2208,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestStruct(stest)));
 
-    assert((n = sprintf(ebuf, ""
+    assert((n = snprintf(ebuf, _BUF_SIZE, ""
                     "{\n"
                     "  \"i16\": %d,\n"
                     "  \"i32\": %d,\n"
-                    "  \"i64\": %ld,\n"
+                    "  \"i64\": %lld,\n"
                     "  \"byte\": \'%c\',\n"
                     "  \"f\": %f,\n"
                     "  \"d\": %lf,\n"
@@ -2237,8 +2267,8 @@ int main(int argc, char const argv[])
                     "    %d\n"
                     "  ],\n"
                     "  \"vi64\": [\n"
-                    "    %d,\n"
-                    "    %d\n"
+                    "    %lld,\n"
+                    "    %lld\n"
                     "  ],\n"
                     "  \"vbyte\": [\n"
                     "    \'%c\',\n"
@@ -2374,12 +2404,12 @@ int main(int argc, char const argv[])
                     "  ],\n"
                     "  \"vvi64\": [\n"
                     "    [\n"
-                    "      %ld,\n"
-                    "      %ld\n"
+                    "      %lld,\n"
+                    "      %lld\n"
                     "    ],\n"
                     "    [\n"
-                    "      %ld,\n"
-                    "      %ld\n"
+                    "      %lld,\n"
+                    "      %lld\n"
                     "    ]\n"
                     "  ],\n"
                     "  \"vvbyte\": [\n"
@@ -2884,7 +2914,7 @@ int main(int argc, char const argv[])
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
@@ -2894,11 +2924,11 @@ int main(int argc, char const argv[])
 
     assert(!FAILED(itest->TestInterface(itest_)));
 
-    assert((n = sprintf(ebuf, "%p (Interface (ITest))\n", itest_)) >= 0);
+    assert((n = snprintf(ebuf, _BUF_SIZE, "%p (Interface (ITest))\n", itest_)) >= 0);
 
     rewind(output);
 
-    assert(fread(obuf, 1, n + 1, output) == n);
+    assert(fread(obuf, 1, n + 1, output) == static_cast<size_t>(n));
 
     assert(strcmp(obuf, ebuf) == 0);
 
