@@ -320,8 +320,7 @@ AutoPtr<IPhoneSubInfoProxy> PhoneSubInfoController::GetPhoneSubInfoProxy(
 Int64 PhoneSubInfoController::GetDefaultSubId()
 {
     AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
     AutoPtr<ISubscriptionController> sc;
     hlp->GetInstance((ISubscriptionController**)&sc);
     Int64 id = 0;
@@ -332,8 +331,7 @@ Int64 PhoneSubInfoController::GetDefaultSubId()
 Int64 PhoneSubInfoController::GetDefaultVoiceSubId()
 {
     AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
     AutoPtr<ISubscriptionController> sc;
     hlp->GetInstance((ISubscriptionController**)&sc);
     Int64 id = 0;
@@ -345,13 +343,11 @@ Int64 PhoneSubInfoController::GetFirstPhoneSubId()
 {
     // get subId from first Phone/slot Id(i.e 0)
     AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
     AutoPtr<ISubscriptionController> sc;
     hlp->GetInstance((ISubscriptionController**)&sc);
     AutoPtr<ArrayOf<Int64> > subId;
-    assert(0 && "TODO");
-    // IISub::Probe(sc)->GetSubId(IPhoneConstants::PHONE_ID1, (ArrayOf<Int64>**)&subId);
+    IISub::Probe(sc)->GetSubId(IPhoneConstants::PHONE_ID1, (ArrayOf<Int64>**)&subId);
     return (*subId)[0];
 }
 

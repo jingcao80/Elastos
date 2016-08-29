@@ -4,6 +4,7 @@
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/database/sqlite/SQLiteWrapper.h"
 #include "elastos/droid/internal/telephony/CSmsApplication.h"
+#include "elastos/droid/internal/telephony/CSmsHeader.h"
 #include "elastos/droid/internal/telephony/CSmsResponse.h"
 #include "elastos/droid/internal/telephony/CGsmAlphabetTextEncodingDetails.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
@@ -1110,7 +1111,7 @@ void SMSDispatcher::SendMultipartText(
                         || encoding == ISmsConstants::ENCODING_7BIT)) {
             encoding = codeUnitSize;
         }
-        (*encodingForParts)[i] = details;
+        encodingForParts->Set(i, details);
     }
 
     // States to track at the message Level (for all parts)
@@ -1120,7 +1121,6 @@ void SMSDispatcher::SendMultipartText(
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&anyPartFailed);
 
     for (Int32 i = 0; i < msgCount; i++) {
-        AutoPtr<SmsHeader> smsHeader;
         AutoPtr<SmsHeader::ConcatRef> concatRef = new SmsHeader::ConcatRef();
         concatRef->refNumber = refNumber;
         concatRef->seqNumber = i + 1;  // 1-based sequence
@@ -1132,13 +1132,14 @@ void SMSDispatcher::SendMultipartText(
         // Note:  It's not sufficient to just flip this bit to TRUE; it will have
         // ripple Effects (several calculations assume 8-bit ref).
         concatRef->isEightBits = TRUE;
-        smsHeader = new SmsHeader();
-        smsHeader->mConcatRef = concatRef;
+        AutoPtr<ISmsHeader> smsHeader;
+        CSmsHeader::New((ISmsHeader**)&smsHeader);
+        ((CSmsHeader*)smsHeader.Get())->mConcatRef = concatRef;
 
         // Set the national language tables for 3GPP 7-bit encoding, if enabled.
         if (encoding == ISmsConstants::ENCODING_7BIT) {
-            smsHeader->mLanguageTable = ((CGsmAlphabetTextEncodingDetails*)(*encodingForParts)[i])->mLanguageTable;
-            smsHeader->mLanguageShiftTable = ((CGsmAlphabetTextEncodingDetails*)(*encodingForParts)[i])->mLanguageShiftTable;
+            ((CSmsHeader*)smsHeader.Get())->mLanguageTable = ((CGsmAlphabetTextEncodingDetails*)(*encodingForParts)[i])->mLanguageTable;
+            ((CSmsHeader*)smsHeader.Get())->mLanguageShiftTable = ((CGsmAlphabetTextEncodingDetails*)(*encodingForParts)[i])->mLanguageShiftTable;
         }
 
         Int32 size;

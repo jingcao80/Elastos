@@ -591,11 +591,11 @@ ECode UiccSmsController::SendMultipartTextWithOptionsUsingSubscriber(
     }
 
     if (sentIntents != NULL) {
-        CArrayList::New(ICollection::Probe(sentIntents), (IArrayList**)&pParts);
+        CArrayList::New(ICollection::Probe(sentIntents), (IArrayList**)&pSentIntents);
     }
 
     if (deliveryIntents != NULL) {
-        CArrayList::New(ICollection::Probe(deliveryIntents), (IArrayList**)&pParts);
+        CArrayList::New(ICollection::Probe(deliveryIntents), (IArrayList**)&pDeliveryIntents);
     }
     BroadcastOutgoingSms(subId, callingPackage, destAddr, scAddr, TRUE,
             pParts,

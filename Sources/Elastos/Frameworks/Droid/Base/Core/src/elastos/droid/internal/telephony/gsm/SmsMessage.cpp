@@ -1020,12 +1020,12 @@ AutoPtr<ArrayOf<Byte> > SmsMessage::EncodeUCS2(
     CICUUtil::AcquireSingleton((IICUUtil**)&icuUtil);
     AutoPtr<ArrayOf<UInt16> > utf16Array;
     icuUtil->UTF8ByteArrayToUTF16ByteArray(message.GetBytes(), (ArrayOf<UInt16>**)&utf16Array);
-    Int32 len = utf16Array->GetLength();
+    Int32 len = message.GetLength();
     textPart = ArrayOf<Byte>::Alloc(2 * len); // message->GetBytes("utf-16be");
     for (Int32 i = 0; i < len; i++) {
         UInt16 item = (*utf16Array)[i];
-        (*textPart)[2 * i] = (item >> 8) & 0xFF;
-        (*textPart)[2 * i + 1] = item & 0xFF;
+        (*textPart)[2 * i] = (Byte)((item >> 8) & 0xFF);
+        (*textPart)[2 * i + 1] = (Byte)(item & 0xFF);
     }
 
     if (header != NULL) {
