@@ -323,18 +323,21 @@ ECode LockPatternUtils::CheckPattern(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "return TRUE or FALSE for testting until Setting APP works!");
 
-    Int32 userId = GetCurrentOrCallingUserId();
-    Boolean matched = FALSE;
-    String str;
-    PatternToString(pattern, &str);
-    ECode ec = GetLockSettings()->CheckPattern(str, userId, &matched);
-    if (FAILED(ec)) {
-        *result = TRUE;
-        return NOERROR;
-    }
-    *result = matched;
+    // Int32 userId = GetCurrentOrCallingUserId();
+    // Boolean matched = FALSE;
+    // String str;
+    // PatternToString(pattern, &str);
+    // ECode ec = GetLockSettings()->CheckPattern(str, userId, &matched);
+    // if (FAILED(ec)) {
+    //     *result = TRUE;
+    //     return NOERROR;
+    // }
+    // *result = matched;
+    // return NOERROR;
+
+    Slogger::D("LockPatternUtils", "===[snow]===return TRUE or FALSE for testting until Setting APP works!");
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -1746,20 +1749,23 @@ ECode LockPatternUtils::IsSecure(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    Int32 m = 0;
-    GetKeyguardStoredPasswordQuality(&m);
-    Int64 mode = m;
-    Boolean isPattern = mode == IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING;
-    Boolean isPassword = mode == IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC
-            || mode == IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC_COMPLEX
-            || mode == IDevicePolicyManager::PASSWORD_QUALITY_ALPHABETIC
-            || mode == IDevicePolicyManager::PASSWORD_QUALITY_ALPHANUMERIC
-            || mode == IDevicePolicyManager::PASSWORD_QUALITY_COMPLEX;
+    // Int32 m = 0;
+    // GetKeyguardStoredPasswordQuality(&m);
+    // Int64 mode = m;
+    // Boolean isPattern = mode == IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING;
+    // Boolean isPassword = mode == IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC
+    //         || mode == IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC_COMPLEX
+    //         || mode == IDevicePolicyManager::PASSWORD_QUALITY_ALPHABETIC
+    //         || mode == IDevicePolicyManager::PASSWORD_QUALITY_ALPHANUMERIC
+    //         || mode == IDevicePolicyManager::PASSWORD_QUALITY_COMPLEX;
 
-    Boolean tmp = FALSE;
-    Boolean secure = (isPattern && (IsLockPatternEnabled(&tmp), tmp) && (SavedPatternExists(&tmp), tmp))
-            || (isPassword && (SavedPasswordExists(&tmp), tmp));
-    *result = secure;
+    // Boolean tmp = FALSE;
+    // Boolean secure = (isPattern && (IsLockPatternEnabled(&tmp), tmp) && (SavedPatternExists(&tmp), tmp))
+    //         || (isPassword && (SavedPasswordExists(&tmp), tmp));
+    // *result = secure;
+
+    Slogger::D("LockPatternUtils", "===[snow]===return TRUE for testting until Setting APP works!");
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -1777,8 +1783,7 @@ ECode LockPatternUtils::GetActiveProfileLockMode(
         return NOERROR;
     }
     AutoPtr<IProfile> profile;
-//TODO: Need IProfileManager
-    // mProfileManager->GetActiveProfile((IProfile**)&profile);
+    mProfileManager->GetActiveProfile((IProfile**)&profile);
     if (profile == NULL) {
         *result = IProfileLockMode::DEFAULT;
     }

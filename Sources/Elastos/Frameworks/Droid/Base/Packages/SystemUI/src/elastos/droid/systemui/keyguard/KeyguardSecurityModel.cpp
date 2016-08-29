@@ -70,60 +70,64 @@ ECode KeyguardSecurityModel::GetSecurityMode(
     /* [out] */ SecurityMode* outmode)
 {
     VALIDATE_NOT_NULL(outmode)
-    *outmode = SecurityMode_None;
+    // *outmode = SecurityMode_None;
 
-    SecurityMode mode = SecurityMode_None;
+    // SecurityMode mode = SecurityMode_None;
 
-    AutoPtr<IKeyguardUpdateMonitor> updateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    IccCardConstantsState simState =
-    updateMonitor->GetSimState(&simState);
+    // AutoPtr<IKeyguardUpdateMonitor> updateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    // IccCardConstantsState simState =
+    // updateMonitor->GetSimState(&simState);
 
-    Boolean res;
-    if (simState == IccCardConstantsState_PIN_REQUIRED) {
-        mode = SecurityMode_SimPin;
-    }
-    else if (simState == IccCardConstantsState_PUK_REQUIRED
-            && (mLockPatternUtils->IsPukUnlockScreenEnable(&res), res)) {
-        mode = SecurityMode_SimPuk;
-    }
-    else {
-        Int32 security;
-        mLockPatternUtils->GetKeyguardStoredPasswordQuality(&security);
-        switch (security) {
-            case IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC:
-            case IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC_COMPLEX:
-            {
-                Boolean res;
-                mode = (mLockPatternUtils->IsLockPasswordEnabled(&res), res) ?
-                        SecurityMode_PIN : SecurityMode_None;
-                break;
-            }
-            case IDevicePolicyManager::PASSWORD_QUALITY_ALPHABETIC:
-            case IDevicePolicyManager::PASSWORD_QUALITY_ALPHANUMERIC:
-            case IDevicePolicyManager::PASSWORD_QUALITY_COMPLEX:
-            {
-                Boolean res;
-                mode = (mLockPatternUtils->IsLockPasswordEnabled(&res), res) ?
-                        SecurityMode_Password : SecurityMode_None;
-                break;
-            }
-            case IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING:
-            case IDevicePolicyManager::PASSWORD_QUALITY_UNSPECIFIED:
-            {
-                Boolean res;
-                if (mLockPatternUtils->IsLockPatternEnabled(&res), res) {
-                    mode = (mLockPatternUtils->IsPermanentlyLocked(&res), res) ?
-                        SecurityMode_Account : SecurityMode_Pattern;
-                }
-                break;
-            }
-            default:
-                Logger::E(TAG, "Unknown security quality:%d", security);
-                return E_ILLEGAL_STATE_EXCEPTION;
-        }
-    }
+    // Boolean res;
+    // if (simState == IccCardConstantsState_PIN_REQUIRED) {
+    //     mode = SecurityMode_SimPin;
+    // }
+    // else if (simState == IccCardConstantsState_PUK_REQUIRED
+    //         && (mLockPatternUtils->IsPukUnlockScreenEnable(&res), res)) {
+    //     mode = SecurityMode_SimPuk;
+    // }
+    // else {
+    //     Int32 security;
+    //     mLockPatternUtils->GetKeyguardStoredPasswordQuality(&security);
+    //     switch (security) {
+    //         case IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC:
+    //         case IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC_COMPLEX:
+    //         {
+    //             Boolean res;
+    //             mode = (mLockPatternUtils->IsLockPasswordEnabled(&res), res) ?
+    //                     SecurityMode_PIN : SecurityMode_None;
+    //             break;
+    //         }
+    //         case IDevicePolicyManager::PASSWORD_QUALITY_ALPHABETIC:
+    //         case IDevicePolicyManager::PASSWORD_QUALITY_ALPHANUMERIC:
+    //         case IDevicePolicyManager::PASSWORD_QUALITY_COMPLEX:
+    //         {
+    //             Boolean res;
+    //             mode = (mLockPatternUtils->IsLockPasswordEnabled(&res), res) ?
+    //                     SecurityMode_Password : SecurityMode_None;
+    //             break;
+    //         }
+    //         case IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING:
+    //         case IDevicePolicyManager::PASSWORD_QUALITY_UNSPECIFIED:
+    //         {
+    //             Boolean res;
+    //             if (mLockPatternUtils->IsLockPatternEnabled(&res), res) {
+    //                 mode = (mLockPatternUtils->IsPermanentlyLocked(&res), res) ?
+    //                     SecurityMode_Account : SecurityMode_Pattern;
+    //             }
+    //             break;
+    //         }
+    //         default:
+    //             Logger::E(TAG, "Unknown security quality:%d", security);
+    //             return E_ILLEGAL_STATE_EXCEPTION;
+    //     }
+    // }
 
-    *outmode = mode;
+    // *outmode = mode;
+    // return NOERROR;
+
+    Logger::D("KeyguardSecurityModel", "===[snow]===just return SecurityMode_Pattern for testting until Setting APP works!");
+    *outmode = SecurityMode_Pattern;
     return NOERROR;
 }
 

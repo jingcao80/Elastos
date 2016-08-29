@@ -38,7 +38,9 @@ CAR_INTERFACE_IMPL(CEmergencyButton::MyOnClickListener, Object, IViewOnClickList
 ECode CEmergencyButton::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
-    return mHost->TakeEmergencyCallAction();
+    //return mHost->TakeEmergencyCallAction();
+    Logger::D("CEmergencyButton", "===[snow]===do not call TakeEmergencyCallAction() for testting until Setting APP works!");
+    return NOERROR;
 }
 
 const Int32 CEmergencyButton::EMERGENCY_CALL_TIMEOUT = 10000; // screen timeout after starting e.d.
@@ -141,9 +143,8 @@ void CEmergencyButton::UpdateEmergencyCallButton(
         enabled = TRUE; // always show "return to call" if phone is off-hook
     }
     else if (mLockPatternUtils->IsEmergencyCallCapable(&res), res) {
-        AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
         Boolean simLocked;
-        monitor->IsSimLocked(&simLocked);
+        KeyguardUpdateMonitor::GetInstance(mContext)->IsSimLocked(&simLocked);
         if (simLocked) {
             // Some countries can't handle emergency calls while SIM is locked.
             mLockPatternUtils->IsEmergencyCallEnabledWhileSimLocked(&enabled);

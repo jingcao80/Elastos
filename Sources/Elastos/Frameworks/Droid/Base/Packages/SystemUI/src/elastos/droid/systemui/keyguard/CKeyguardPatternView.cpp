@@ -205,7 +205,7 @@ ECode CKeyguardPatternView::constructor(
     AutoPtr<IInterpolator> interpolator;
     helper->LoadInterpolator(
             mContext, Elastos::Droid::R::interpolator::linear_out_slow_in, (IInterpolator**)&interpolator);
-    mAppearAnimationUtils = new AppearAnimationUtils;
+    mAppearAnimationUtils = new AppearAnimationUtils();
     mAppearAnimationUtils->constructor(context,
             AppearAnimationUtils::DEFAULT_APPEAR_DURATION, 1.5f /* delayScale */,
             2.0f /* transitionScale */, interpolator);
