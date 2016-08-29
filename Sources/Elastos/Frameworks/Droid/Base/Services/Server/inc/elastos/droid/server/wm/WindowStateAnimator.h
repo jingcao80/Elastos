@@ -136,6 +136,8 @@ public:
         /* [in] */ IWindowManagerLayoutParams* attrs,
         /* [in] */ Boolean hideForced);
 
+    CARAPI_(AutoPtr<WindowState>) GetWindowState();
+
 private:
     CARAPI_(Boolean) StepAnimation(
         /* [in] */ Int64 currentTime);
@@ -163,7 +165,6 @@ public:
 public:
     // Unchanging local convenience fields.
     AutoPtr<CWindowManagerService> mService;
-    WindowState* mWin;
     AutoPtr<WindowStateAnimator> mAttachedWinAnimator;
     AutoPtr<WindowAnimator> mAnimator;
     AutoPtr<AppWindowAnimator> mAppAnimator;
@@ -257,6 +258,8 @@ public:
     Int32 mAttrType;
 
 private:
+    AutoPtr<IWeakReference> mWeakWin;   // WindowState* mWin;
+
     static const Int32 SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
             IView::SYSTEM_UI_FLAG_LAYOUT_STABLE | IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 };

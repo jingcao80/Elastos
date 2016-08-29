@@ -99,6 +99,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    ~CActivityOne();
+
     CARAPI constructor();
 
     virtual CARAPI OnCreateContextMenu(

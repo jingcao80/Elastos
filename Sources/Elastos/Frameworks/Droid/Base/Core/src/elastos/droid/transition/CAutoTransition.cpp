@@ -17,6 +17,7 @@ CAR_OBJECT_IMPL(CAutoTransition)
 
 ECode CAutoTransition::constructor()
 {
+    TransitionSet::constructor();
     Init();
     return NOERROR;
 }
@@ -33,15 +34,15 @@ ECode CAutoTransition::constructor(
 void CAutoTransition::Init()
 {
     SetOrdering(ORDERING_SEQUENTIAL);
-    AutoPtr<IFade> f;
-    CFade::New(CFade::OUT, (IFade**)&f);
-    AddTransition(ITransition::Probe(f));
-    AutoPtr<IChangeBounds> c;
-    CChangeBounds::New((IChangeBounds**)&c);
-    AddTransition(ITransition::Probe(c));
-    AutoPtr<IFade> fIn;
-    CFade::New(CFade::IN, (IFade**)&fIn);
-    AddTransition(ITransition::Probe(fIn));
+    AutoPtr<ITransition> f;
+    CFade::New(CFade::OUT, (ITransition**)&f);
+    AddTransition(f);
+    AutoPtr<ITransition> c;
+    CChangeBounds::New((ITransition**)&c);
+    AddTransition(c);
+    AutoPtr<ITransition> fIn;
+    CFade::New(CFade::IN, (ITransition**)&fIn);
+    AddTransition(fIn);
 }
 
 } // namespace Transition

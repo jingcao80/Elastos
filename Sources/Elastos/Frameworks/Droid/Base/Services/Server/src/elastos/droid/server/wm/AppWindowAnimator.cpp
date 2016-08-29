@@ -348,7 +348,10 @@ Boolean AppWindowAnimator::StepAnimationLocked(
     for (; it != mAllAppWinAnimators.End(); ++it) {
         AutoPtr<WindowStateAnimator> winAnim = *it;
         if (appToken->mLaunchTaskBehind) {
-            winAnim->mWin->mExiting = TRUE;
+            AutoPtr<WindowState> windowState = winAnim->GetWindowState();
+            if (windowState) {
+                windowState->mExiting = TRUE;
+            }
         }
         winAnim->FinishExit();
     }

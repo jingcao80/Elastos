@@ -194,6 +194,10 @@ public:
     AutoPtr<IArrayMap> mSceneTransitions;
     AutoPtr<IArrayMap> mScenePairTransitions;
 
+    static pthread_key_t sRunningTransitionsKey;
+    static pthread_once_t sKeyOnce;
+//    static AutoPtr<IThreadLocal> sRunningTransitions;
+
 private:
     static const String TAG;
 
@@ -201,7 +205,6 @@ private:
 
     static AutoPtr<ArrayOf<String> > EMPTY_STRINGS;
 
-//    static AutoPtr<IThreadLocal> sRunningTransitions;
     static AutoPtr<IArrayList> sPendingTransitions;
 };
 

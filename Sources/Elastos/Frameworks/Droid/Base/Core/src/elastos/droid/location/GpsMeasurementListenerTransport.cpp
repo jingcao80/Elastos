@@ -73,15 +73,15 @@ CAR_INTERFACE_IMPL(GpsMeasurementListenerTransport, LocalListenerHelper, IGpsMea
 GpsMeasurementListenerTransport::GpsMeasurementListenerTransport()
     : LocalListenerHelper(String("GpsMeasurementListenerTransport"))
 {
-    AutoPtr<IIGpsMeasurementsListener> lt;
-    CGpsMeasurementListenerTransportListenerTransport::New(this, (IIGpsMeasurementsListener**)&lt);
-    mListenerTransport = IIGpsMeasurementsListener::Probe(lt);
 }
 
 ECode GpsMeasurementListenerTransport::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IILocationManager* locationManager)
 {
+    AutoPtr<IIGpsMeasurementsListener> lt;
+    CGpsMeasurementListenerTransportListenerTransport::New(this, (IIGpsMeasurementsListener**)&mListenerTransport);
+
     mContext = context;
     mLocationManager = locationManager;
     return NOERROR;

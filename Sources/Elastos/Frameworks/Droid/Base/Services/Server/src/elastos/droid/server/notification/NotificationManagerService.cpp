@@ -163,7 +163,7 @@ namespace Server {
 namespace Notification {
 
 const String NotificationManagerService::TAG("NotificationService");
-const Boolean NotificationManagerService::DBG = TRUE;
+const Boolean NotificationManagerService::DBG = FALSE;
 
 const Int32 NotificationManagerService::MAX_PACKAGE_NOTIFICATIONS = 50;
 
@@ -2149,7 +2149,6 @@ ECode NotificationManagerService::MyBroadcastReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    Logger::D("NotificationManagerService::MyBroadcastReceiver", "OnReceive %s", action.string());
 
     Boolean queryRestart = FALSE;
     Boolean queryRemove = FALSE;

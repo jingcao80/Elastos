@@ -242,7 +242,8 @@ ECode PopupWindow::PopupWindowScrollChangedListener::OnScrollChanged()
 CAR_INTERFACE_IMPL(PopupWindow, Object, IPopupWindow);
 
 PopupWindow::PopupWindow()
-    : mIsShowing(FALSE)
+    : mContext(NULL)
+    , mIsShowing(FALSE)
     , mIsDropdown(FALSE)
     , mFocusable(FALSE)
     , mInputMethodMode(0/*INPUT_METHOD_FROM_FOCUSABLE*/)
@@ -415,7 +416,9 @@ ECode PopupWindow::constructor(
     /* [in] */ Boolean focusable)
 {
     if (contentView != NULL) {
-        contentView->GetContext((IContext**)&mContext);
+        AutoPtr<IContext> ctx;
+        contentView->GetContext((IContext**)&ctx);
+        mContext = ctx.Get();
         AutoPtr<IInterface> obj;
         mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
         mWindowManager = IWindowManager::Probe(obj);
@@ -502,7 +505,9 @@ ECode PopupWindow::SetContentView(
 
     mContentView = contentView;
     if (mContext == NULL && mContentView != NULL) {
-        mContentView->GetContext((IContext**)&mContext);
+        AutoPtr<IContext> ctx;
+        mContentView->GetContext((IContext**)&ctx);
+        mContext = ctx.Get();
     }
 
     if (mWindowManager == NULL && mContentView != NULL) {

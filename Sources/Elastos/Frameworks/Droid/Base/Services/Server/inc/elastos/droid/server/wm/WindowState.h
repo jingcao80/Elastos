@@ -88,7 +88,13 @@ private:
     };
 
 public:
-    WindowState(
+    CAR_INTERFACE_DECL()
+
+    WindowState();
+
+    ~WindowState();
+
+    CARAPI constructor(
         /* [in] */ CWindowManagerService* service,
         /* [in] */ CSession* s,
         /* [in] */ IIWindow* c,
@@ -100,7 +106,6 @@ public:
         /* [in] */ Int32 viewVisibility,
         /* [in] */ DisplayContent* displayContent);
 
-    CAR_INTERFACE_DECL()
 
     CARAPI_(void) Attach();
 

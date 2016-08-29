@@ -77,15 +77,15 @@ ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
 }
 
 //=====================================================================
-//         ActionBarOverlayLayout::InnerAnimatorListenerAdapter
+//         ActionBarOverlayLayout::TopAnimatorListenerAdapter
 //=====================================================================
-ActionBarOverlayLayout::InnerAnimatorListenerAdapter::InnerAnimatorListenerAdapter(
+ActionBarOverlayLayout::TopAnimatorListenerAdapter::TopAnimatorListenerAdapter(
     /* [in] */ ActionBarOverlayLayout* owner)
     : mOwner(owner)
 {
 }
 
-ECode ActionBarOverlayLayout::InnerAnimatorListenerAdapter::OnAnimationEnd(
+ECode ActionBarOverlayLayout::TopAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mOwner->mCurrentActionBarTopAnimator = NULL;
@@ -93,7 +93,7 @@ ECode ActionBarOverlayLayout::InnerAnimatorListenerAdapter::OnAnimationEnd(
     return NOERROR;
 }
 
-ECode ActionBarOverlayLayout::InnerAnimatorListenerAdapter::OnAnimationCancel(
+ECode ActionBarOverlayLayout::TopAnimatorListenerAdapter::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     mOwner->mCurrentActionBarTopAnimator = NULL;
@@ -102,14 +102,14 @@ ECode ActionBarOverlayLayout::InnerAnimatorListenerAdapter::OnAnimationCancel(
 }
 
 //=====================================================================
-//        ActionBarOverlayLayout::InnerAnimatorListenerAdapter1
+//        ActionBarOverlayLayout::BottomAnimatorListenerAdapter
 //=====================================================================
-ActionBarOverlayLayout::InnerAnimatorListenerAdapter1::InnerAnimatorListenerAdapter1(
+ActionBarOverlayLayout::BottomAnimatorListenerAdapter::BottomAnimatorListenerAdapter(
     /* [in] */ ActionBarOverlayLayout* owner)
     : mOwner(owner)
 {}
 
-ECode ActionBarOverlayLayout::InnerAnimatorListenerAdapter1::OnAnimationEnd(
+ECode ActionBarOverlayLayout::BottomAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mOwner->mCurrentActionBarBottomAnimator = NULL;
@@ -117,7 +117,7 @@ ECode ActionBarOverlayLayout::InnerAnimatorListenerAdapter1::OnAnimationEnd(
     return NOERROR;
 }
 
-ECode ActionBarOverlayLayout::InnerAnimatorListenerAdapter1::OnAnimationCancel(
+ECode ActionBarOverlayLayout::BottomAnimatorListenerAdapter::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     mOwner->mCurrentActionBarBottomAnimator = NULL;
@@ -250,8 +250,8 @@ ActionBarOverlayLayout::ActionBarOverlayLayout()
     CRect::New((IRect**)&mInnerInsets);
     CRect::New((IRect**)&mLastInnerInsets);
 
-    mTopAnimatorListener = new InnerAnimatorListenerAdapter(this);
-    mBottomAnimatorListener = new InnerAnimatorListenerAdapter1(this);
+    mTopAnimatorListener = new TopAnimatorListenerAdapter(this);
+    mBottomAnimatorListener = new BottomAnimatorListenerAdapter(this);
 
     mRemoveActionBarHideOffset = new InnerRunnable(this);
     mAddActionBarHideOffset = new InnerRunnable1(this);

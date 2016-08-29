@@ -25,26 +25,35 @@ namespace Transition {
 //===============================================================
 // Visibility::
 //===============================================================
-String Visibility::PROPNAME_VISIBILITY = String("android:visibility:visibility");
-String Visibility::PROPNAME_PARENT = String("android:visibility:parent");
-String Visibility::PROPNAME_SCREEN_LOCATION = String("android:visibility:screenLocation");
+String Visibility::PROPNAME_VISIBILITY("android:visibility:visibility");
+String Visibility::PROPNAME_PARENT ("android:visibility:parent");
+String Visibility::PROPNAME_SCREEN_LOCATION("android:visibility:screenLocation");
 
 Int32 Visibility::MODE_IN = 0x1;
 
 Int32 Visibility::MODE_OUT = 0x2;
 
-AutoPtr<ArrayOf<String> > Visibility::sTransitionProperties = ArrayOf<String>::Alloc(1);
+static AutoPtr<ArrayOf<String> > InitTransitionProperties()
+{
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
+    array->Set(0, String("android:visibility:visibility")); // PROPNAME_VISIBILITY
+    return array;
+}
+
+AutoPtr<ArrayOf<String> > Visibility::sTransitionProperties = InitTransitionProperties();
 
 CAR_INTERFACE_IMPL(Visibility, Transition, IVisibility)
 
 Visibility::Visibility()
+    : mMode(MODE_IN | MODE_OUT)
+    , mForcedStartVisibility(-1)
+    , mForcedEndVisibility(-1)
 {
-    (*sTransitionProperties)[0] = PROPNAME_VISIBILITY;
 }
 
 ECode Visibility::constructor()
 {
-    return NOERROR;
+    return Transition::constructor();
 }
 
 ECode Visibility::constructor(

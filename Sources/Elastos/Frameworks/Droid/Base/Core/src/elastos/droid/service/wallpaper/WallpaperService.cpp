@@ -1278,7 +1278,7 @@ ECode WallpaperService::IWallpaperEngineWrapper::constructor(
     mHost = (WallpaperService*)context;
     AutoPtr<ILooper> looper;
     IContext::Probe(context)->GetMainLooper((ILooper**)&looper);
-    CHandlerCaller::New(IContext::Probe(context), looper.Get(), this, TRUE, TRUE, (IHandlerCaller**)&mCaller);
+    CHandlerCaller::New(IContext::Probe(context), looper.Get(), this, TRUE, FALSE, (IHandlerCaller**)&mCaller);
     mConnection = conn;
     mWindowToken = windowToken;
     mWindowType = windowType;
@@ -1502,10 +1502,9 @@ ECode WallpaperService::IWallpaperServiceWrapper::Attach(
     /* [in] */ Int32 reqHeight,
     /* [in] */ IRect* padding)
 {
-    AutoPtr<IIWallpaperEngineWrapper> wrapper;
-    CIWallpaperEngineWrapper::New(mTarget, conn, windowToken,
-            windowType, isPreview, reqWidth, reqHeight, padding, (IIWallpaperEngineWrapper**)&wrapper);
-    return NOERROR;
+    return CIWallpaperEngineWrapper::New(mTarget, conn, windowToken,
+        windowType, isPreview, reqWidth, reqHeight, padding,
+        (IIWallpaperEngineWrapper**)&mWallpaperEngineWrapper);
 }
 
 //===============================

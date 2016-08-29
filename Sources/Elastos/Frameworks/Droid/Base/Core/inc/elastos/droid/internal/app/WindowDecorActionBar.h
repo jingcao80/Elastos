@@ -50,7 +50,6 @@ namespace App {
 class WindowDecorActionBar
     : public ActionBar
     , public IWindowDecorActionBar
-    , public IActionBarVisibilityCallback
 {
 public:
     /**
@@ -705,8 +704,8 @@ private:
 
     AutoPtr<IContext> mContext;
     AutoPtr<IContext> mThemedContext;
-    AutoPtr<IActivity> mActivity;
-    AutoPtr<IDialog> mDialog;
+    IActivity* mActivity;
+    IDialog* mDialog;
 
     AutoPtr<IActionBarOverlayLayout> mOverlayLayout;
     AutoPtr<IActionBarContainer> mContainerView;

@@ -403,9 +403,8 @@ ActionMenuPresenter::ActionMenuPresenter()
 ECode ActionMenuPresenter::constructor(
     /* [in] */ IContext* context)
 {
-    BaseMenuPresenter::constructor(context, R::layout::action_menu_layout,
+    return BaseMenuPresenter::constructor(context, R::layout::action_menu_layout,
             R::layout::action_menu_item_layout);
-    return NOERROR;
 }
 
 //@Override
@@ -417,7 +416,6 @@ ECode ActionMenuPresenter::InitForMenu(
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
-
 
     AutoPtr<IActionBarPolicy> abp = ActionBarPolicy::Get(context);
     if (!mReserveOverflowSet) {

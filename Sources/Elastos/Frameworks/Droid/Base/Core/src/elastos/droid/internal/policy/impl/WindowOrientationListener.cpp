@@ -349,38 +349,6 @@ ECode WindowOrientationListener::SensorEventListenerImpl::OnSensorChanged(
     return NOERROR;
 }
 
-//AutoPtr< ArrayOf< AutoPtr< ArrayOf<Int32> > > > WindowOrientationListener::SensorEventListenerImpl::MiddleInitTiltTolerance()
-//{
-//    // ==================before translated======================
-//    // int[][] result = new int[][] {
-//    //              /* ROTATION_0   */ { -25, 70 },
-//    //              /* ROTATION_90  */ { -25, 65 },
-//    //              /* ROTATION_180 */ { -25, 60 },
-//    //              /* ROTATION_270 */ { -25, 65 }
-//    //          };
-//    assert(0);
-//    AutoPtr< ArrayOf< AutoPtr< ArrayOf<Int32> > > > empty;
-//    return empty;
-//}
-//
-//AutoPtr< ArrayOf<Float> > WindowOrientationListener::SensorEventListenerImpl::MiddleInitMtilthistory()
-//{
-//    // ==================before translated======================
-//    // float[] result = new float[TILT_HISTORY_SIZE];
-//    assert(0);
-//    AutoPtr< ArrayOf<Float> > empty;
-//    return empty;
-//}
-//
-//AutoPtr< ArrayOf<Int64> > WindowOrientationListener::SensorEventListenerImpl::MiddleInitMtilthistorytimestampnanos()
-//{
-//    // ==================before translated======================
-//    // long[] result = new long[TILT_HISTORY_SIZE];
-//    assert(0);
-//    AutoPtr< ArrayOf<Int64> > empty;
-//    return empty;
-//}
-
 Boolean WindowOrientationListener::SensorEventListenerImpl::IsTiltAngleAcceptableLocked(
     /* [in] */ Int32 rotation,
     /* [in] */ Int32 tiltAngle)

@@ -56,13 +56,9 @@ Boolean Transition::DBG = FALSE;
 
 const Int32 Transition::MATCH_INSTANCE = 0x1;
 const Int32 Transition::MATCH_FIRST = MATCH_INSTANCE;
-
 const Int32 Transition::MATCH_NAME = 0x2;
-
 const Int32 Transition::MATCH_ID = 0x3;
-
 const Int32 Transition::MATCH_ITEM_ID = 0x4;
-
 const Int32 Transition::MATCH_LAST = MATCH_ITEM_ID;
 
 const String Transition::MATCH_INSTANCE_STR("instance");
@@ -72,19 +68,19 @@ const String Transition::MATCH_VIEW_NAME_STR("viewName");
 const String Transition::MATCH_ID_STR("id");
 const String Transition::MATCH_ITEM_ID_STR("itemId");
 
-AutoPtr<ArrayOf<Int32> > Transition::DEFAULT_MATCH_ORDER = Init_DEFAULT_MATCH_ORDER();
-
-AutoPtr<IPathMotion> Transition::STRAIGHT_PATH_MOTION = new PathMotionOverride();
-
-AutoPtr< ArrayOf<Int32> > Transition::Init_DEFAULT_MATCH_ORDER()
+static AutoPtr< ArrayOf<Int32> > InitDEFAULT_MATCH_ORDER()
 {
     AutoPtr< ArrayOf<Int32> > order =  ArrayOf<Int32>::Alloc(4);
-    (*DEFAULT_MATCH_ORDER)[0] = MATCH_NAME;
-    (*DEFAULT_MATCH_ORDER)[1] = MATCH_INSTANCE;
-    (*DEFAULT_MATCH_ORDER)[2] = MATCH_ID;
-    (*DEFAULT_MATCH_ORDER)[3] = MATCH_ITEM_ID;
+    (*order)[0] = Transition::MATCH_NAME;
+    (*order)[1] = Transition::MATCH_INSTANCE;
+    (*order)[2] = Transition::MATCH_ID;
+    (*order)[3] = Transition::MATCH_ITEM_ID;
     return order;
 }
+
+AutoPtr<ArrayOf<Int32> > Transition::DEFAULT_MATCH_ORDER = InitDEFAULT_MATCH_ORDER();
+
+AutoPtr<IPathMotion> Transition::STRAIGHT_PATH_MOTION = new PathMotionOverride();
 
 // Per-animator information used for later canceling when future transitions overlap
 //AutoPtr<IThreadLocal> Transition::sRunningAnimators = new ThreadLocal();
@@ -101,11 +97,10 @@ Transition::Transition()
 {
     CArrayList::New((IArrayList**)&mTargetIds);
     CArrayList::New((IArrayList**)&mTargets);
-    // TODO:
-    // mStartValues = new TransitionValuesMaps();
-    // mEndValues = new TransitionValuesMaps();
     CArrayList::New((IArrayList**)&mCurrentAnimators);
     CArrayList::New((IArrayList**)&mAnimators);
+    mStartValues = new TransitionValuesMaps();
+    mEndValues = new TransitionValuesMaps();
     mPathMotion = STRAIGHT_PATH_MOTION;
 }
 

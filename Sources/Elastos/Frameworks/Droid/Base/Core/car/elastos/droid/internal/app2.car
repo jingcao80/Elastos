@@ -465,7 +465,6 @@ module
 
         interface IWindowDecorActionBar;
         interface IActionBar;
-        interface IActionBarVisibilityCallback;
     }
 
     } // namespace App

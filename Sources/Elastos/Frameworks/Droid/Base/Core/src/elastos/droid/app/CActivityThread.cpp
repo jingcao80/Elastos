@@ -180,7 +180,6 @@ AutoPtr<IPattern> CActivityThread::PATTERN_SEMICOLON = InitPATTERN_SEMICOLON();
 AutoPtr<IActivityThread> CActivityThread::sCurrentActivityThread;
 
 pthread_key_t CActivityThread::sCurrentBroadcastIntentKey;
-pthread_key_t CActivityThread::sKey;
 pthread_once_t CActivityThread::sKeyOnce = PTHREAD_ONCE_INIT;
 
 
@@ -206,12 +205,13 @@ ECode ProviderKey::Equals(
         return NOERROR;
     }
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+    IObject* oo = IObject::Probe(o);
+    if ((IObject*)this == oo) {
         *result = TRUE;
         return NOERROR;
     }
 
-    ProviderKey* other = (ProviderKey*)IObject::Probe(o);
+    ProviderKey* other = (ProviderKey*)oo;
     if (other->mUserId == mUserId && other->mAuthority == mAuthority) {
         *result = TRUE;
         return NOERROR;
@@ -1175,14 +1175,6 @@ CAR_INTERFACE_IMPL(CActivityThread, Object, IActivityThread)
 
 CAR_OBJECT_IMPL(CActivityThread)
 
-static void ActivityThreadDestructor(void* st)
-{
-    IActivityThread* obj = static_cast<IActivityThread*>(st);
-    if (obj) {
-        obj->Release();
-    }
-}
-
 static void IntentDestructor(void* st)
 {
     IIntent* obj = static_cast<IIntent*>(st);
@@ -1193,10 +1185,7 @@ static void IntentDestructor(void* st)
 
 static void MakeKey()
 {
-    Int32 UNUSED(result) = pthread_key_create(&CActivityThread::sKey, ActivityThreadDestructor);
-    assert(result == 0);
-
-    result = pthread_key_create(&CActivityThread::sCurrentBroadcastIntentKey, IntentDestructor);
+    Int32 UNUSED(result) = pthread_key_create(&CActivityThread::sCurrentBroadcastIntentKey, IntentDestructor);
     assert(result == 0);
 }
 
@@ -1212,6 +1201,10 @@ CActivityThread::CActivityThread()
 
 CActivityThread::~CActivityThread()
 {
+    mLocalProvidersByName.Clear();
+    mLocalProviders.Clear();
+    mProviderRefCountMap.Clear();
+    mProviderMap.Clear();
     mOnPauseListeners.Clear();
     Slogger::I(TAG, " >> ~CActivityThread: %p", this);
 }
@@ -1400,7 +1393,7 @@ ECode CActivityThread::GetPackageInfo(
                 packageInfo = (LoadedPkg*)IObject::Probe(obj);
             }
         }
-        Slogger::I(TAG, "getPackageInfo %s : %s", packageName.string(), TO_CSTR(packageInfo));
+
         //if (packageInfo != NULL) Slog.i(TAG, "isUptoDate " + packageInfo.mResDir
         //        + ": " + packageInfo.mResources.getAssets().isUpToDate());
         AutoPtr<IAssetManager> assertmr;
@@ -1409,11 +1402,11 @@ ECode CActivityThread::GetPackageInfo(
             (packageInfo->mResources->GetAssets((IAssetManager**)&assertmr), assertmr->IsUpToDate(&isUpdated), isUpdated))) {
             if (packageInfo->IsSecurityViolation()
                     && (flags & IContext::CONTEXT_IGNORE_SECURITY) == 0) {
-    //            throw new SecurityException(
-    //                    "Requesting code from " + packageName
-    //                    + " to be run in process "
-    //                    + mBoundApplication.processName
-    //                    + "/" + mBoundApplication.appInfo.uid);
+                Int32 uid;
+                mBoundApplication->mAppInfo->GetUid(&uid);
+                Slogger::E(TAG, "Requesting code from %s to be run in process %s/%d",
+                    packageName.string(), mBoundApplication->mProcessName.string(), uid);
+                return E_SECURITY_EXCEPTION;
             }
 
             *loadedPkg = ILoadedPkg::Probe(packageInfo);
@@ -5763,9 +5756,7 @@ ECode CActivityThread::CompleteRemoveProvider(
             // There was a race!  Some other client managed to acquire
             // the provider before the removal was completed.
             // Abort the removal.  We will do it later.
-            String ss("completeRemoveProvider: lost the race,");
-            ss += " provider still in use";
-            if (DEBUG_PROVIDER) Slogger::V(TAG, ss.string());
+            if (DEBUG_PROVIDER) Slogger::V(TAG, "completeRemoveProvider: lost the race, provider still in use");
             return NOERROR;
         }
 
@@ -6126,8 +6117,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
 //                     try {
                     AutoPtr<IBinder> connection;
                     holder->GetConnection((IBinder**)&connection);
-                    ActivityManagerNative::GetDefault()->RemoveContentProvider(
-                            connection, stable);
+                    ActivityManagerNative::GetDefault()->RemoveContentProvider(connection, stable);
 //                     } catch (RemoteException e) {
 //                         //do nothing content provider object is dead any way
 //                     }
@@ -6156,7 +6146,6 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
 ECode CActivityThread::Attach(
     /* [in] */ Boolean sys)
 {
-    Slogger::I(TAG, " >>> Enter Attach <<<");
     sCurrentActivityThread = this;
     mSystemThread = sys;
     if (!sys) {
@@ -6212,7 +6201,6 @@ ECode CActivityThread::Attach(
     GetWeakReference((IWeakReference**)&wr);
     AutoPtr<IComponentCallbacks> callbacks = new ConfigurationChangedCallbacks(wr);
     ViewRootImpl::AddConfigCallback(callbacks);
-    Slogger::I(TAG, " >>> Leave Attach <<<");
     return NOERROR;
 }
 

@@ -132,7 +132,7 @@ public:
         /* [in] */ IActionMode* mode);
 
 private:
-    AutoPtr<IWindowCallback> mWrapped;
+    AutoPtr<IWeakReference> mWeakCallback;  // IWindowCallback
 };
 
 } // namespace View

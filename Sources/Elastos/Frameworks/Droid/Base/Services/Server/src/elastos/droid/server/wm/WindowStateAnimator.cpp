@@ -54,8 +54,7 @@ String WindowStateAnimator::DrawStateToString(
 
 WindowStateAnimator::WindowStateAnimator(
     /* [in] */ WindowState* win)
-    : mWin(win)
-    , mAnimating(FALSE)
+    : mAnimating(FALSE)
     , mLocalAnimating(FALSE)
     , mAnimationIsEntrance(FALSE)
     , mHasTransformation(FALSE)
@@ -94,6 +93,8 @@ WindowStateAnimator::WindowStateAnimator(
     , mDrawState(0)
     , mLastHidden(FALSE)
 {
+    win->GetWeakReference((IWeakReference**)&mWeakWin);
+
     CTransformation::New((ITransformation**)&mUniverseTransform);
     CTransformation::New((ITransformation**)&mTransformation);
 
@@ -124,6 +125,16 @@ WindowStateAnimator::WindowStateAnimator(
     win->mAttrs->GetType(&mAttrType);
     mIsWallpaper = win->mIsWallpaper;
     AutoPtr<IDisplay> display = win->mDisplayContent->GetDisplay();
+}
+
+AutoPtr<WindowState> WindowStateAnimator::GetWindowState()
+{
+    AutoPtr<IObject> obj;
+    mWeakWin->Resolve(EIID_IObject, (IInterface**)&obj);
+    if (obj) {
+        return (WindowState*)obj.Get();
+    }
+    return NULL;
 }
 
 void WindowStateAnimator::SetAnimation(
@@ -211,6 +222,11 @@ Boolean WindowStateAnimator::StepAnimation(
 Boolean WindowStateAnimator::StepAnimationLocked(
     /* [in] */ Int64 currentTime)
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return FALSE;
+    }
+
     // Save the animation state as it was before this step so WindowManagerService can tell if
     // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
     mWasAnimating = mAnimating;
@@ -367,11 +383,10 @@ Boolean WindowStateAnimator::StepAnimationLocked(
 
 void WindowStateAnimator::FinishExit()
 {
-    // if (CWindowManagerService::DEBUG_ANIM) Slogger::V(
-    //         TAG, "finishExit in " + this
-    //         + ": exiting=" + mWin.mExiting
-    //         + " remove=" + mWin.mRemoveOnExit
-    //         + " windowAnimating=" + isWindowAnimating());
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
 
     Int32 N;
     mWin->mChildWindows->GetSize(&N);
@@ -417,6 +432,7 @@ void WindowStateAnimator::Hide()
         if (mSurfaceControl != NULL) {
             mSurfaceShown = FALSE;
             // try {
+            AutoPtr<WindowState> mWin = GetWindowState();
             if (FAILED(mSurfaceControl->Hide())) {
                 Slogger::W(TAG, "Exception hiding surface in %s", TO_CSTR(mWin));
             }
@@ -461,6 +477,11 @@ Boolean WindowStateAnimator::FinishDrawingLocked()
 Boolean WindowStateAnimator::CommitFinishDrawingLocked(
     /* [in] */ Int64 currentTime)
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return TRUE;
+    }
+
     Int32 type;
     mWin->mAttrs->GetType(&type);
     Boolean starting = type == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING;
@@ -486,6 +507,11 @@ Boolean WindowStateAnimator::CommitFinishDrawingLocked(
 
 AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return NULL;
+    }
+
     AutoPtr<WindowState> w = mWin;
     if (mSurfaceControl == NULL) {
         if (CWindowManagerService::DEBUG_ANIM || CWindowManagerService::DEBUG_ORIENTATION) {
@@ -694,6 +720,11 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
 
 void WindowStateAnimator::DestroySurfaceLocked()
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     if (mWin->mAppToken != NULL && mWin == mWin->mAppToken->mStartingWindow) {
         mWin->mAppToken->mStartingDisplayed = FALSE;
     }
@@ -803,6 +834,11 @@ fail:
 
 void WindowStateAnimator::DestroyDeferredSurfaceLocked()
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     // try {
     if (mPendingDestroySurface != NULL) {
         // if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
@@ -831,6 +867,11 @@ void WindowStateAnimator::DestroyDeferredSurfaceLocked()
 
 void WindowStateAnimator::ComputeShownFrameLocked()
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     Boolean selfTransformation = mHasLocalTransformation;
     AutoPtr<ITransformation> attachedTransformation =
             (mAttachedWinAnimator != NULL && mAttachedWinAnimator->mHasLocalTransformation)
@@ -1126,6 +1167,11 @@ void WindowStateAnimator::ComputeShownFrameLocked()
 void WindowStateAnimator::ApplyDecorRect(
     /* [in] */ IRect* decorRect)
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     AutoPtr<WindowState> w = mWin;
     Int32 width, height;
     w->mFrame->GetWidth(&width);
@@ -1166,6 +1212,11 @@ void WindowStateAnimator::ApplyDecorRect(
 void WindowStateAnimator::UpdateSurfaceWindowCrop(
     /* [in] */ Boolean recoveringMemory)
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     AutoPtr<WindowState> w = mWin;
     AutoPtr<DisplayContent> displayContent = w->GetDisplayContent();
     if (displayContent == NULL) {
@@ -1279,7 +1330,6 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
     surfaceInsets->GetTop(&sit);
     clipRect->Offset(sil, sit);
 
-    Boolean equals;
     if (!Object::Equals(clipRect, mLastClipRect)) {
         mLastClipRect->Set(clipRect);
         // try {
@@ -1306,6 +1356,11 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
 void WindowStateAnimator::SetSurfaceBoundariesLocked(
     /* [in] */ Boolean recoveringMemory)
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     AutoPtr<WindowState> w = mWin;
     Int32 width, height;
     Int32 flags;
@@ -1434,6 +1489,11 @@ fail:
 void WindowStateAnimator::PrepareSurfaceLocked(
     /* [in] */ Boolean recoveringMemory)
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     AutoPtr<WindowState> w = mWin;
     if (mSurfaceControl == NULL) {
         if (w->mOrientationChanging) {
@@ -1598,6 +1658,11 @@ void WindowStateAnimator::SetTransparentRegionHintLocked(
 void WindowStateAnimator::SetWallpaperOffset(
     /* [in] */ IRectF* shownFrame)
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     AutoPtr<IWindowManagerLayoutParams> attrs;
     mWin->GetAttrs((IWindowManagerLayoutParams**)&attrs);
     Float sfl;
@@ -1633,14 +1698,14 @@ void WindowStateAnimator::SetWallpaperOffset(
         mWin->mFrame->GetLeft(&winLeft);
         mWin->mFrame->GetTop(&winTop);
         if (FAILED(mSurfaceControl->SetPosition(winLeft + left, winTop + top))) {
-            Slogger::W(TAG, "Error positioning surface of %p size=(%d,%d)", mWin, left, top);
+            Slogger::W(TAG, "Error positioning surface of %s size=(%d,%d)", TO_CSTR(mWin), left, top);
             surfaceHelper->CloseTransaction();
             if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
             return;
         }
         if (mSurfaceControlBlur != NULL) {
             if (FAILED(mSurfaceControlBlur->SetPosition(winLeft + left, winTop + top))) {
-                Slogger::W(TAG, "Error positioning surface of %p size=(%d,%d)", mWin, left, top);
+                Slogger::W(TAG, "Error positioning surface of %s size=(%d,%d)", TO_CSTR(mWin), left, top);
                 surfaceHelper->CloseTransaction();
                 if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
                 return;
@@ -1684,6 +1749,11 @@ void WindowStateAnimator::SetOpaqueLocked(
 
 Boolean WindowStateAnimator::PerformShowLocked()
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return FALSE;
+    }
+
     if (mWin->IsHiddenFromUserLocked()) {
         return FALSE;
     }
@@ -1793,21 +1863,26 @@ Boolean WindowStateAnimator::PerformShowLocked()
 
 Boolean WindowStateAnimator::ShowSurfaceRobustlyLocked()
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return FALSE;
+    }
+
     // try {
     if (mSurfaceControl != NULL) {
         mSurfaceShown = TRUE;
         ECode ec = mSurfaceControl->Show();
         if (FAILED(ec)) {
-            Slogger::W(TAG, "Failure showing surface %p in %p 0x%08x",
-                    mSurfaceControl.Get(), mWin, ec);
+            Slogger::W(TAG, "Failure showing surface %s in %s 0x%08x",
+                TO_CSTR(mSurfaceControl), TO_CSTR(mWin), ec);
             mService->ReclaimSomeSurfaceMemoryLocked(this, String("show"), TRUE);
             return FALSE;
         }
         if (mSurfaceControlBlur != NULL) {
             ec = mSurfaceControlBlur->Show();
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Failure showing surface %p in %p 0x%08x",
-                        mSurfaceControl.Get(), mWin, ec);
+                Slogger::W(TAG, "Failure showing surface %s in %s 0x%08x",
+                    TO_CSTR(mSurfaceControl), TO_CSTR(mWin), ec);
                 mService->ReclaimSomeSurfaceMemoryLocked(this, String("show"), TRUE);
                 return FALSE;
             }
@@ -1827,6 +1902,11 @@ Boolean WindowStateAnimator::ShowSurfaceRobustlyLocked()
 
 void WindowStateAnimator::ApplyEnterAnimationLocked()
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return;
+    }
+
     Int32 transit;
     if (mEnterAnimationPending) {
         mEnterAnimationPending = FALSE;
@@ -1847,6 +1927,11 @@ Boolean WindowStateAnimator::ApplyAnimationLocked(
     /* [in] */ Int32 transit,
     /* [in] */ Boolean isEntrance)
 {
+    AutoPtr<WindowState> mWin = GetWindowState();
+    if (mWin == NULL) {
+        return FALSE;
+    }
+
     if (mLocalAnimating && mAnimationIsEntrance == isEntrance) {
         // If we are trying to apply an animation, but already running
         // an animation of the same type, then just leave that one alone.

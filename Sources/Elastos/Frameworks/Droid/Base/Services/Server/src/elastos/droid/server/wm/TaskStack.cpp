@@ -131,6 +131,7 @@ Boolean TaskStack::IsFullscreen()
 
 Boolean TaskStack::IsAnimating()
 {
+    AutoPtr<WindowState> windowState;
     List<AutoPtr<Task> >::ReverseIterator taskRit = mTasks.RBegin();
     for (; taskRit != mTasks.REnd(); ++taskRit) {
         AutoPtr<IArrayList> activities = (*taskRit)->mAppTokens;
@@ -146,7 +147,9 @@ Boolean TaskStack::IsAnimating()
                 AutoPtr<IInterface> obj;
                 windows->Get(winNdx, (IInterface**)&obj);
                 AutoPtr<WindowStateAnimator> winAnimator = To_WindowState(obj)->mWinAnimator;
-                if (winAnimator->IsAnimating() || winAnimator->mWin->mExiting) {
+                if (winAnimator->IsAnimating() || (
+                    (windowState = winAnimator->GetWindowState(), windowState != NULL)
+                    && windowState->mExiting)) {
                     return TRUE;
                 }
             }
@@ -307,14 +310,17 @@ Int64 TaskStack::GetDimBehindFadeDuration(
 Boolean TaskStack::AnimateDimLayers()
 {
     Int32 dimLayer;
-    Float dimAmount;
+    Float dimAmount = 0;
     if (mDimWinAnimator == NULL) {
         dimLayer = mDimLayer->GetLayer();
         dimAmount = 0;
     }
     else {
         dimLayer = mDimWinAnimator->mAnimLayer - CWindowManagerService::LAYER_OFFSET_DIM;
-        mDimWinAnimator->mWin->mAttrs->GetDimAmount(&dimAmount);
+        AutoPtr<WindowState> windowState = mDimWinAnimator->GetWindowState();
+        if (windowState != NULL) {
+            windowState->mAttrs->GetDimAmount(&dimAmount);
+        }
     }
     Float targetAlpha = mDimLayer->GetTargetAlpha();
     if (targetAlpha != dimAmount) {

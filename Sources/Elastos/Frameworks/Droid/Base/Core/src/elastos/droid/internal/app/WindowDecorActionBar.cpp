@@ -578,10 +578,12 @@ const Int32 WindowDecorActionBar::CONTEXT_DISPLAY_NORMAL = 0;
 const Int32 WindowDecorActionBar::CONTEXT_DISPLAY_SPLIT = 1;
 const Int32 WindowDecorActionBar::INVALID_POSITION = -1;
 
-CAR_INTERFACE_IMPL_2(WindowDecorActionBar, ActionBar, IWindowDecorActionBar, IActionBarVisibilityCallback)
+CAR_INTERFACE_IMPL(WindowDecorActionBar, ActionBar, IWindowDecorActionBar)
 
 WindowDecorActionBar::WindowDecorActionBar()
     : mHideOnContentScroll(FALSE)
+    , mActivity(NULL)
+    , mDialog(NULL)
     , mSavedTabPosition(INVALID_POSITION)
     , mDisplayHomeAsUpSet(FALSE)
     , mLastMenuVisibility(FALSE)
@@ -642,11 +644,11 @@ ECode WindowDecorActionBar::Init(
     /* [in] */ IView* decor)
 {
     AutoPtr<IView> view;
-    decor->FindViewById(
-        R::id::decor_content_parent, (IView**)&view);
+    decor->FindViewById(R::id::decor_content_parent, (IView**)&view);
     mOverlayLayout = IActionBarOverlayLayout::Probe(view);
     if (mOverlayLayout != NULL) {
-        mOverlayLayout->SetActionBarVisibilityCallback(this);
+        AutoPtr<IActionBarVisibilityCallback> cb = new ActionBarVisibilityCallback(this);
+        mOverlayLayout->SetActionBarVisibilityCallback(cb);
     }
     view = NULL;
     decor->FindViewById(R::id::action_bar, (IView**)&view);

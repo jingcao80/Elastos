@@ -434,8 +434,9 @@ void SystemSensorManager::SensorEventQueue::DispatchSensorEvent(
     /* [in] */ Int64 timestamp)
 {
     AutoPtr<ISensor> sensor = sHandleToSensor[handle];
-    AutoPtr<ISensorEvent> t = NULL;
-    {    AutoLock syncLock(mSensorsEventsLock);
+    AutoPtr<ISensorEvent> t;
+    {
+        AutoLock syncLock(mSensorsEventsLock);
         t = mSensorsEvents[handle];
     }
 

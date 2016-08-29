@@ -15,7 +15,6 @@ module
     /**
      * @Involve
      * interface IActionBar
-     * interface IActionBarVisibilityCallback
      */
     [local]
     interface IWindowDecorActionBar {

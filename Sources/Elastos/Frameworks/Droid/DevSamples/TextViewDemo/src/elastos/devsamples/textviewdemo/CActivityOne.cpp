@@ -304,6 +304,11 @@ CAR_INTERFACE_IMPL(CActivityOne, Activity, IActivityOne)
 
 CAR_OBJECT_IMPL(CActivityOne)
 
+CActivityOne::~CActivityOne()
+{
+    Logger::I(DBG_TAG, " >> Destory ~CActivityOne()");
+}
+
 ECode CActivityOne::constructor()
 {
     Logger::I(DBG_TAG, " >> constructor()");

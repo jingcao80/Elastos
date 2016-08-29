@@ -155,8 +155,9 @@ protected:
         /* [in] */ Int32 childIndex);
 
 protected:
-    AutoPtr<IContext> mSystemContext;
-    AutoPtr<IContext> mContext;
+    IContext* mSystemContext;
+    IContext* mContext;
+
     AutoPtr<IMenuBuilder> mMenu;
     AutoPtr<ILayoutInflater> mSystemInflater;
     AutoPtr<ILayoutInflater> mInflater;

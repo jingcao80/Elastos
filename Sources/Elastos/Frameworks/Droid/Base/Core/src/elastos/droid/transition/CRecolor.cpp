@@ -38,8 +38,7 @@ ECode CRecolor::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    Transition::constructor(context, attrs);
-    return NOERROR;
+    return Transition::constructor(context, attrs);
 }
 
 void CRecolor::CaptureValues(

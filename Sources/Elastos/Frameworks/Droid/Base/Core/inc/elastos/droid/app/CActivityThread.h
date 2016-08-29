@@ -1400,8 +1400,6 @@ private:
 
 public:
     static pthread_key_t sCurrentBroadcastIntentKey;
-//    static ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
-    static pthread_key_t sKey;
     static pthread_once_t sKeyOnce;
 };
 

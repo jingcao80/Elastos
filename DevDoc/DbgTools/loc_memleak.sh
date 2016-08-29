@@ -91,8 +91,12 @@ function mem_dummper()
 
 function memdump_formatter()
 {
-    echo "now dump formatter"
+    echo "now dump formatter -u -n"
+    #-u : unique, no repeat
+    #-m : number bigger than 1
+    #-n : order by number
     $FORMATTEREXE -u -m -n $LOGCATFILE $ADDR2LINE
+    #$FORMATTEREXE -u -n $LOGCATFILE $ADDR2LINE
 }
 
 function logcat_dump()

@@ -24,7 +24,9 @@ ECode WindowCallbackWrapper::constructor(
         // throw new IllegalArgumentException("Window callback may not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    mWrapped = wrapped;
+
+    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(wrapped);
+    wrs->GetWeakReference((IWeakReference**)&mWeakCallback);
     return NOERROR;
 }
 
@@ -33,7 +35,13 @@ ECode WindowCallbackWrapper::DispatchKeyEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->DispatchKeyEvent(event, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->DispatchKeyEvent(event, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::DispatchKeyShortcutEvent(
@@ -41,7 +49,13 @@ ECode WindowCallbackWrapper::DispatchKeyShortcutEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->DispatchKeyShortcutEvent(event, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->DispatchKeyShortcutEvent(event, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::DispatchTouchEvent(
@@ -49,7 +63,13 @@ ECode WindowCallbackWrapper::DispatchTouchEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->DispatchTouchEvent(event, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->DispatchTouchEvent(event, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::DispatchTrackballEvent(
@@ -57,7 +77,13 @@ ECode WindowCallbackWrapper::DispatchTrackballEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->DispatchTrackballEvent(event, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->DispatchTrackballEvent(event, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::DispatchGenericMotionEvent(
@@ -65,7 +91,13 @@ ECode WindowCallbackWrapper::DispatchGenericMotionEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->DispatchGenericMotionEvent(event, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->DispatchGenericMotionEvent(event, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::DispatchPopulateAccessibilityEvent(
@@ -73,7 +105,13 @@ ECode WindowCallbackWrapper::DispatchPopulateAccessibilityEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->DispatchPopulateAccessibilityEvent(event, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->DispatchPopulateAccessibilityEvent(event, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnCreatePanelView(
@@ -81,7 +119,12 @@ ECode WindowCallbackWrapper::OnCreatePanelView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    return mWrapped->OnCreatePanelView(featureId, view);
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnCreatePanelView(featureId, view);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnCreatePanelMenu(
@@ -90,7 +133,13 @@ ECode WindowCallbackWrapper::OnCreatePanelMenu(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->OnCreatePanelMenu(featureId, menu, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnCreatePanelMenu(featureId, menu, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnPreparePanel(
@@ -100,7 +149,13 @@ ECode WindowCallbackWrapper::OnPreparePanel(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->OnPreparePanel(featureId, view, menu, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnPreparePanel(featureId, view, menu, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnMenuOpened(
@@ -109,7 +164,13 @@ ECode WindowCallbackWrapper::OnMenuOpened(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->OnMenuOpened(featureId, menu, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnMenuOpened(featureId, menu, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnMenuItemSelected(
@@ -118,48 +179,90 @@ ECode WindowCallbackWrapper::OnMenuItemSelected(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->OnMenuItemSelected(featureId, item, result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnMenuItemSelected(featureId, item, result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnWindowAttributesChanged(
     /* [in] */ IWindowManagerLayoutParams* attrs)
 {
-    return mWrapped->OnWindowAttributesChanged(attrs);
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnWindowAttributesChanged(attrs);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnContentChanged()
 {
-    return mWrapped->OnContentChanged();
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnContentChanged();
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnWindowFocusChanged(
     /* [in] */ Boolean hasFocus)
 {
-    return mWrapped->OnWindowFocusChanged(hasFocus);
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnWindowFocusChanged(hasFocus);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnAttachedToWindow()
 {
-    return mWrapped->OnAttachedToWindow();
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnAttachedToWindow();
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnDetachedFromWindow()
 {
-    return mWrapped->OnDetachedFromWindow();
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnDetachedFromWindow();
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnPanelClosed(
     /* [in] */ Int32 featureId,
     /* [in] */ IMenu* menu)
 {
-    return mWrapped->OnPanelClosed(featureId, menu);
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnPanelClosed(featureId, menu);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnSearchRequested(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mWrapped->OnSearchRequested(result);
+    *result = FALSE;
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnSearchRequested(result);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnWindowStartingActionMode(
@@ -167,19 +270,34 @@ ECode WindowCallbackWrapper::OnWindowStartingActionMode(
     /* [out] */ IActionMode** mode)
 {
     VALIDATE_NOT_NULL(mode);
-    return mWrapped->OnWindowStartingActionMode(callback, mode);
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnWindowStartingActionMode(callback, mode);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnActionModeStarted(
     /* [in] */ IActionMode* mode)
 {
-    return mWrapped->OnActionModeStarted(mode);
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnActionModeStarted(mode);
+    }
+    return NOERROR;
 }
 
 ECode WindowCallbackWrapper::OnActionModeFinished(
     /* [in] */ IActionMode* mode)
 {
-    return mWrapped->OnActionModeFinished(mode);
+    AutoPtr<IWindowCallback> cb;
+    mWeakCallback->Resolve(EIID_IWindowCallback, (IInterface**)&cb);
+    if (cb) {
+        return cb->OnActionModeFinished(mode);
+    }
+    return NOERROR;
 }
 
 } // namespace View

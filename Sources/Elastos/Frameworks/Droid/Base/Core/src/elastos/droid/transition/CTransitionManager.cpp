@@ -11,6 +11,7 @@ using Elastos::Droid::View::EIID_IViewOnAttachStateChangeListener;
 
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IMap;
+using Elastos::Droid::Utility::EIID_IArrayMap;
 using Elastos::Utility::ICollection;
 
 namespace Elastos {
@@ -22,12 +23,40 @@ namespace Transition {
 //===============================================================
 const String CTransitionManager::TAG("TransitionManager");
 
-AutoPtr<ITransition> CTransitionManager::sDefaultTransition;
+static AutoPtr<ITransition> InitDefaultTransition()
+{
+    AutoPtr<ITransition> t;
+    CAutoTransition::New((ITransition**)&t);
+    return t;
+}
 
-AutoPtr<ArrayOf<String> > CTransitionManager::EMPTY_STRINGS;// = new String[0];
+static AutoPtr<IArrayList> InitPendingTransitions()
+{
+    AutoPtr<IArrayList> list;
+    CArrayList::New((IArrayList**)&list);
+    return list;
+}
 
-//AutoPtr<IThreadLocal> CTransitionManager::sRunningTransitions = new ThreadLocal();
-AutoPtr<IArrayList> CTransitionManager::sPendingTransitions;
+
+pthread_key_t CTransitionManager::sRunningTransitionsKey;
+pthread_once_t CTransitionManager::sKeyOnce = PTHREAD_ONCE_INIT;
+
+static void ThreadDestructor(void* st)
+{
+    IWeakReference* obj = static_cast<IWeakReference*>(st);
+    if (obj) {
+        obj->Release();
+    }
+}
+
+static void MakeKey()
+{
+    ASSERT_TRUE(pthread_key_create(&CTransitionManager::sRunningTransitionsKey, ThreadDestructor) == 0);
+}
+
+AutoPtr<ITransition> CTransitionManager::sDefaultTransition = InitDefaultTransition();
+AutoPtr<ArrayOf<String> > CTransitionManager::EMPTY_STRINGS = ArrayOf<String>::Alloc(0);
+AutoPtr<IArrayList> CTransitionManager::sPendingTransitions = InitPendingTransitions();
 
 CAR_OBJECT_IMPL(CTransitionManager)
 
@@ -35,12 +64,12 @@ CAR_INTERFACE_IMPL(CTransitionManager, Object, ITransitionManager)
 
 CTransitionManager::CTransitionManager()
 {
-    CAutoTransition::New((ITransition**)&sDefaultTransition);
-    CArrayList::New((IArrayList**)&sPendingTransitions);
 }
 
 ECode CTransitionManager::constructor()
 {
+    CArrayMap::New((IArrayMap**)&mSceneTransitions);
+    CArrayMap::New((IArrayMap**)&mScenePairTransitions);
     return NOERROR;
 }
 
@@ -60,7 +89,7 @@ ECode CTransitionManager::SetTransition(
     /* [in] */ IScene* scene,
     /* [in] */ ITransition* transition)
 {
-    IMap::Probe(mSceneTransitions)->Put(scene, transition);
+    mSceneTransitions->Put(scene, transition);
     return NOERROR;
 }
 
@@ -70,13 +99,13 @@ ECode CTransitionManager::SetTransition(
     /* [in] */ ITransition* transition)
 {
     AutoPtr<IInterface> p;
-    IMap::Probe(mScenePairTransitions)->Get(toScene, (IInterface**)&p);
+    mScenePairTransitions->Get(toScene, (IInterface**)&p);
     AutoPtr<IArrayMap> sceneTransitionMap = IArrayMap::Probe(p);
     if (sceneTransitionMap == NULL) {
         CArrayMap::New((IArrayMap**)&sceneTransitionMap);
-        IMap::Probe(mScenePairTransitions)->Put(toScene, sceneTransitionMap);
+        mScenePairTransitions->Put(toScene, sceneTransitionMap);
     }
-    IMap::Probe(sceneTransitionMap)->Put(fromScene, transition);
+    sceneTransitionMap->Put(fromScene, transition);
     return NOERROR;
 }
 
@@ -91,11 +120,11 @@ AutoPtr<ITransition> CTransitionManager::GetTransition(
         AutoPtr<IScene> currScene = CScene::GetCurrentScene(IView::Probe(sceneRoot));
         if (currScene != NULL) {
             AutoPtr<IInterface> sc;
-            IMap::Probe(mScenePairTransitions)->Get(scene, (IInterface**)&sc);
+            mScenePairTransitions->Get(scene, (IInterface**)&sc);
             AutoPtr<IArrayMap> sceneTransitionMap = IArrayMap::Probe(sc);
             if (sceneTransitionMap != NULL) {
                 AutoPtr<IInterface> cS;
-                IMap::Probe(sceneTransitionMap)->Get(currScene, (IInterface**)&cS);
+                sceneTransitionMap->Get(currScene, (IInterface**)&cS);
                 transition = ITransition::Probe(cS);
                 if (transition != NULL) {
                     return transition;
@@ -104,7 +133,7 @@ AutoPtr<ITransition> CTransitionManager::GetTransition(
         }
     }
     AutoPtr<IInterface> sce;
-    IMap::Probe(mSceneTransitions)->Get(scene, (IInterface**)&sce);
+    mSceneTransitions->Get(scene, (IInterface**)&sce);
     transition = ITransition::Probe(sce);
     return (transition != NULL) ? transition : sDefaultTransition;
 }
@@ -141,16 +170,21 @@ void CTransitionManager::ChangeScene(
 
 AutoPtr<IArrayMap> CTransitionManager::GetRunningTransitions()
 {
-    assert(0 && "TODO");
-//     AutoPtr<IWeakReference> runningTransitions;// = sRunningTransitions->Get();
-//     if (runningTransitions == NULL || runningTransitions->Get() == NULL) {
-//         AutoPtr<IArrayMap> transitions;
-//         CArrayMap::New((IArrayMap**)&transitions);
-//         runningTransitions = new WeakReference(transitions);
-// //        sRunningTransitions->Set(runningTransitions);
-//     }
-//     return runningTransitions->Get();
-    return NULL;
+    pthread_once(&sKeyOnce, MakeKey);
+
+    AutoPtr<IArrayMap> transitions;
+    AutoPtr<IWeakReference> wr = (IWeakReference*)pthread_getspecific(sRunningTransitionsKey);
+    if (!wr) {
+        CArrayMap::New((IArrayMap**)&transitions);
+        IWeakReferenceSource::Probe(transitions)->GetWeakReference((IWeakReference**)&wr);
+        pthread_setspecific(sRunningTransitionsKey, wr.Get());
+        wr->AddRef();
+    }
+    else {
+        wr->Resolve(EIID_IArrayMap, (IInterface**)&transitions);
+    }
+
+    return transitions;
 }
 
 void CTransitionManager::SceneChangeRunTransition(
@@ -173,7 +207,7 @@ void CTransitionManager::SceneChangeSetup(
     // Capture current values
     AutoPtr<IArrayMap> p = GetRunningTransitions();
     AutoPtr<IInterface> rt;
-    IMap::Probe(p)->Get(sceneRoot, (IInterface**)&rt);
+    p->Get(sceneRoot, (IInterface**)&rt);
     AutoPtr<IArrayList> runningTransitions = IArrayList::Probe(rt);
 
     Int32 size = 0;
@@ -285,7 +319,7 @@ ECode CTransitionManager::MultiListener::OnViewDetachedFromWindow(
     sPendingTransitions->Remove(mSceneRoot);
     AutoPtr<IArrayMap> p = GetRunningTransitions();
     AutoPtr<IInterface> rt;
-    IMap::Probe(p)->Get(mSceneRoot, (IInterface**)&rt);
+    p->Get(mSceneRoot, (IInterface**)&rt);
     AutoPtr<IArrayList> runningTransitions = IArrayList::Probe(rt);
     Int32 size = 0;
     if (runningTransitions != NULL && (runningTransitions->GetSize(&size), size) > 0) {
@@ -310,13 +344,13 @@ ECode CTransitionManager::MultiListener::OnPreDraw(
     // Add to running list, handle end to remove it
     AutoPtr<IArrayMap> runningTransitions = GetRunningTransitions();
     AutoPtr<IInterface> cT;
-    IMap::Probe(runningTransitions)->Get(mSceneRoot, (IInterface**)&cT);
+    runningTransitions->Get(mSceneRoot, (IInterface**)&cT);
     AutoPtr<IArrayList> currentTransitions = IArrayList::Probe(cT);
     AutoPtr<IArrayList> previousRunningTransitions;
     Int32 size = 0;
     if (currentTransitions == NULL) {
         CArrayList::New((IArrayList**)&currentTransitions);
-        IMap::Probe(runningTransitions)->Put(mSceneRoot, currentTransitions);
+        runningTransitions->Put(mSceneRoot, currentTransitions);
     }
     else if ((currentTransitions->GetSize(&size), size) > 0) {
         CArrayList::New(ICollection::Probe(currentTransitions), (IArrayList**)&previousRunningTransitions);
@@ -355,7 +389,7 @@ ECode CTransitionManager::TransitionListenerAdapterOverride::OnTransitionEnd(
     /* [in] */ ITransition* transition)
 {
     AutoPtr<IInterface> r;
-    IMap::Probe(mRunningTransitions)->Get(mSceneRoot, (IInterface**)&r);
+    mRunningTransitions->Get(mSceneRoot, (IInterface**)&r);
     AutoPtr<IArrayList> currentTransitions = IArrayList::Probe(r);
     currentTransitions->Remove(transition);
     return NOERROR;

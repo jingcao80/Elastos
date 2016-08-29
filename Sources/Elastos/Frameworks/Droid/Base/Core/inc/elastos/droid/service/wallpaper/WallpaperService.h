@@ -620,6 +620,7 @@ public:
 
     private:
         AutoPtr<IWallpaperService> mTarget;
+        AutoPtr<IIWallpaperEngineWrapper> mWallpaperEngineWrapper;
 
     };
 

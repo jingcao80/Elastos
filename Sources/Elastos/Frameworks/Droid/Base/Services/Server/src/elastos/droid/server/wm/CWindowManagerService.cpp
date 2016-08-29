@@ -2965,7 +2965,8 @@ Int32 CWindowManagerService::AddWindow(
             addToken = TRUE;
         }
 
-        win = new WindowState(this, session, client, token,
+        win = new WindowState();
+        win->constructor(this, session, client, token,
                 attachedWindow, (*appOp)[0],seq, attrs, viewVisibility, displayContent);
         if (win->mDeathRecipient == NULL) {
             // Client has apparently died, so there is no reason to
@@ -12709,7 +12710,12 @@ Boolean CWindowManagerService::CopyAnimToLayoutParamsLocked()
 Int32 CWindowManagerService::AdjustAnimationBackground(
     /* [in] */ WindowStateAnimator* winAnimator)
 {
-    AutoPtr<WindowList> windows = winAnimator->mWin->GetWindowList();
+    AutoPtr<WindowState> windowState = winAnimator->GetWindowState();
+    if (windowState == NULL) {
+        return 0;
+    }
+
+    AutoPtr<WindowList> windows = windowState->GetWindowList();
     Int32 N;
     windows->GetSize(&N);
     for (Int32 i = N - 1; i >= 0; --i) {
@@ -12832,6 +12838,7 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
     }
 
     if (leakedSurface || killedApps) {
+        AutoPtr<WindowState> windowState = winAnimator->GetWindowState();
         // We managed to reclaim some memory, so get rid of the trouble
         // surface and ask the app to request another one.
         Slogger::W(TAG, "Looks like we have reclaimed some memory, clearing surface for retry.");
@@ -12842,12 +12849,16 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
             winAnimator->mSurfaceShown = FALSE;
             winAnimator->mSurfaceShown = FALSE;
             winAnimator->mSurfaceControl = NULL;
-            winAnimator->mWin->mHasSurface = FALSE;
-            ScheduleRemoveStartingWindowLocked(winAnimator->mWin->mAppToken);
+            if (windowState) {
+                windowState->mHasSurface = FALSE;
+                ScheduleRemoveStartingWindowLocked(windowState->mAppToken);
+            }
         }
 
         // try {
-        winAnimator->mWin->mClient->DispatchGetNewSurface();
+        if (windowState) {
+            windowState->mClient->DispatchGetNewSurface();
+        }
         // } catch (RemoteException e) {
         // }
     }
@@ -12933,9 +12944,11 @@ Boolean CWindowManagerService::UpdateFocusedWindowLocked(
 
 AutoPtr<WindowState> CWindowManagerService::ComputeFocusedWindowLocked()
 {
-    if (mAnimator->mUniverseBackground != NULL
-            && mAnimator->mUniverseBackground->mWin->CanReceiveKeys()) {
-        return mAnimator->mUniverseBackground->mWin;
+    if (mAnimator->mUniverseBackground != NULL) {
+        AutoPtr<WindowState> windowState = mAnimator->mUniverseBackground->GetWindowState();
+        if (windowState != NULL && windowState->CanReceiveKeys()) {
+            return windowState;
+        }
     }
 
     Int32 displayCount;

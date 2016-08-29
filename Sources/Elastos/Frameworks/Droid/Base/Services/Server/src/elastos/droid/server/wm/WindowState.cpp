@@ -113,28 +113,9 @@ const String WindowState::TAG("WindowState");
 
 CAR_INTERFACE_IMPL(WindowState, Object, IWindowState)
 
-WindowState::WindowState(
-    /* [in] */ CWindowManagerService* service,
-    /* [in] */ CSession* s,
-    /* [in] */ IIWindow* c,
-    /* [in] */ WindowToken* token,
-    /* [in] */ WindowState* attachedWindow,
-    /* [in] */ Int32 appOp,
-    /* [in] */ Int32 seq,
-    /* [in] */ IWindowManagerLayoutParams* attrs,
-    /* [in] */ Int32 viewVisibility,
-    /* [in] */ DisplayContent* displayContent)
-    : mService(service)
-    , mPolicy(service->mPolicy)
-    , mContext(service->mContext)
-    , mSession(s)
-    , mClient(c)
-    , mAppOp(appOp)
-    , mOwnerUid(0)
-    , mToken(token)
+WindowState::WindowState()
+    : mOwnerUid(0)
     , mAppToken(NULL)
-    , mSeq(seq)
-    , mViewVisibility(viewVisibility)
     , mSystemUiVisibility(0)
     , mPolicyVisibility(TRUE)
     , mPolicyVisibilityAfterAnim(TRUE)
@@ -185,10 +166,37 @@ WindowState::WindowState(
     , mWasExiting(FALSE)
     , mHasSurface(FALSE)
     , mNotOnAppsDisplay(FALSE)
-    , mDisplayContent(displayContent)
     , mUnderStatusBar(TRUE)
     , mShowToOwnerOnly(FALSE)
+{}
+
+WindowState::~WindowState()
 {
+}
+
+ECode WindowState::constructor(
+    /* [in] */ CWindowManagerService* service,
+    /* [in] */ CSession* s,
+    /* [in] */ IIWindow* c,
+    /* [in] */ WindowToken* token,
+    /* [in] */ WindowState* attachedWindow,
+    /* [in] */ Int32 appOp,
+    /* [in] */ Int32 seq,
+    /* [in] */ IWindowManagerLayoutParams* attrs,
+    /* [in] */ Int32 viewVisibility,
+    /* [in] */ DisplayContent* displayContent)
+{
+    mService = service;
+    mPolicy = service->mPolicy;
+    mContext = service->mContext;
+    mSession = s;
+    mClient =c;
+    mAppOp = appOp;
+    mToken = token;
+    mSeq = seq;
+    mViewVisibility = viewVisibility;
+    mDisplayContent = displayContent;
+
     CWindowManagerLayoutParams::New((IWindowManagerLayoutParams**)&mAttrs);
     CArrayList::New((WindowList**)&mChildWindows);
 
@@ -247,7 +255,7 @@ WindowState::WindowState(
         mSubLayer = 0;
         mInputWindowHandle = NULL;
         mWinAnimator = NULL;
-        return;
+        return NOERROR;
     }
     else {
         mDeathRecipient = deathRecipient;
@@ -348,6 +356,7 @@ WindowState::WindowState(
             mAppToken != NULL ? mAppToken->mInputApplicationHandle : NULL, this,
             displayContent->GetDisplayId());
     }
+    return NOERROR;
 }
 
 void WindowState::Attach()
@@ -1504,7 +1513,7 @@ ECode WindowState::ToString(
         title = NULL;
         CString::New(pkg, (ICharSequence**)&title);
     }
-    Boolean equals;
+
     if (mStringNameCache.IsNull() || !Object::Equals(mLastTitle, title) || mWasExiting != mExiting) {
         mLastTitle = title;
         String info;

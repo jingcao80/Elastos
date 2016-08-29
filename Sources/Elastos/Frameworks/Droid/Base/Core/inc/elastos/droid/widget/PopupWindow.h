@@ -1007,7 +1007,7 @@ private:
 
 private:
     ECO_LOCAL static const Int32 DEFAULT_ANCHORED_GRAVITY;
-    AutoPtr<IContext> mContext;
+    IContext* mContext; // weak-ref
     AutoPtr<IWindowManager> mWindowManager;
 
     Boolean mIsShowing;

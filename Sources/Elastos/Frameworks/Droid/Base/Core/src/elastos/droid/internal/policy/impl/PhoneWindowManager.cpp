@@ -59,6 +59,7 @@
 #include "elastos/droid/view/WindowManagerImpl.h"
 #include "elastos/droid/view/WindowManagerPolicyControl.h"
 #include "elastos/droid/widget/CToastHelper.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
@@ -67,8 +68,6 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <sys/reboot.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::App::CActivityManagerHelper;
@@ -181,6 +180,7 @@ using Elastos::Droid::View::IWindowManagerGlobal;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IToastHelper;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::ClassLoader;
 using Elastos::Core::CPathClassLoader;
 using Elastos::Core::CString;
@@ -284,7 +284,7 @@ const Boolean PhoneWindowManager::localLOGV = FALSE;
 const Boolean PhoneWindowManager::DEBUG_LAYOUT = FALSE;
 const Boolean PhoneWindowManager::DEBUG_INPUT = FALSE;
 const Boolean PhoneWindowManager::DEBUG_STARTING_WINDOW = FALSE;
-const Boolean PhoneWindowManager::DEBUG_WAKEUP = TRUE;
+const Boolean PhoneWindowManager::DEBUG_WAKEUP = FALSE;
 const Boolean PhoneWindowManager::SHOW_STARTING_ANIMATIONS = TRUE;
 const Boolean PhoneWindowManager::SHOW_PROCESSES_ON_ALT_MENU = FALSE;
 

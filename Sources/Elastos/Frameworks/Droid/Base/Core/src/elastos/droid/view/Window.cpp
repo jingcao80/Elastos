@@ -268,6 +268,7 @@ ECode Window::AdjustLayoutParamsForSubWindow(
 ECode Window::GetWindowManager(
     /* [out] */ IWindowManager** wm)
 {
+    VALIDATE_NOT_NULL(wm)
     *wm = mWindowManager.Get();
     REFCOUNT_ADD(*wm);
     return NOERROR;
@@ -292,6 +293,7 @@ ECode Window::SetCallback(
 ECode Window::GetCallback(
     /* [out] */ IWindowCallback** cb)
 {
+    VALIDATE_NOT_NULL(cb)
     *cb = mCallback;
     REFCOUNT_ADD(*cb);
     return NOERROR;

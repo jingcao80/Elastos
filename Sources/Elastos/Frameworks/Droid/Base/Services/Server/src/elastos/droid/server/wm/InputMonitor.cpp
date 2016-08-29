@@ -289,11 +289,9 @@ void InputMonitor::UpdateInputWindowsLw(
                 continue;
             }
 
-            Int32 flags;
+            Int32 flags, privateFlags, type;
             child->mAttrs->GetFlags(&flags);
-            Int32 privateFlags;
             child->mAttrs->GetPrivateFlags(&privateFlags);
-            Int32 type;
             child->mAttrs->GetType(&type);
 
             Boolean hasFocus = (child == mInputFocus);
@@ -311,13 +309,11 @@ void InputMonitor::UpdateInputWindowsLw(
 
             if (universeBackground != NULL && !addedUniverse
                     && child->mBaseLayer < aboveUniverseLayer && onDefaultDisplay) {
-                AutoPtr<WindowState> u = universeBackground->mWin;
-                if (u->mInputChannel != NULL && u->mInputWindowHandle != NULL) {
-                    Int32 uFlags;
+                AutoPtr<WindowState> u = universeBackground->GetWindowState();
+                if (u != NULL && u->mInputChannel != NULL && u->mInputWindowHandle != NULL) {
+                    Int32 uFlags, uPrivateFlags, uType;
                     u->mAttrs->GetFlags(&uFlags);
-                    Int32 uPrivateFlags;
                     u->mAttrs->GetPrivateFlags(&uPrivateFlags);
-                    Int32 uType;
                     u->mAttrs->GetType(&uType);
                     AddInputWindowHandleLw(u->mInputWindowHandle, u, uFlags, uPrivateFlags, uType,
                             TRUE, u == mInputFocus, FALSE);

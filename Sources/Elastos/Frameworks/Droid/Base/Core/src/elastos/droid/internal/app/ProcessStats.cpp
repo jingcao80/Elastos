@@ -4349,7 +4349,7 @@ ECode ProcessStats::ReadFromParcel(
                     ProcessState* commonProc = (ProcessState*)IProcessState::Probe(_commonProc);
                     if (DEBUG_PARCEL) Slogger::D(TAG, "Got common proc %s %d: %s",
                         procName.string(), uid, commonProc == NULL ? "NULL"
-                            : commonProc->ToString().string());
+                            : TO_CSTR(commonProc));
                     if (commonProc == NULL) {
                         mReadError = String("no common proc: ") + procName;
                         return NOERROR;
@@ -4383,7 +4383,7 @@ ECode ProcessStats::ReadFromParcel(
                     }
                     else {
                         if (DEBUG_PARCEL) Slogger::D(TAG, "Adding package %s process: %s %d %s",
-                            pkgName.string(), procName.string(), uid, commonProc->ToString().string());
+                            pkgName.string(), procName.string(), uid, TO_CSTR(commonProc));
                         pkgState->mProcesses->Put(CoreUtils::Convert(procName), (IProcessState*)commonProc);
                     }
                 }
@@ -4581,18 +4581,19 @@ ECode ProcessStats::GetProcessStateLocked(
     AutoPtr<ProcessState> commonProc = (ProcessState*)IProcessState::Probe(_commonProc);
     if (commonProc == NULL) {
         commonProc = new ProcessState();
-        commonProc->constructor( this, packageName, uid, vers, processName);
+        commonProc->constructor(this, packageName, uid, vers, processName);
         mProcesses->Put(processName, uid, (IProcessState*)commonProc);
-        if (DEBUG) Slogger::D(TAG, "GETPROC created new common %s",
-            commonProc->ToString().string());
+        if (DEBUG) Slogger::D(TAG, "GETPROC created new common %s", TO_CSTR(commonProc));
+        Slogger::I(TAG, " >> create new ProcessState for %s, %s, %s",
+            packageName.string(), processName.string(), TO_CSTR(commonProc));
     }
+
     if (!commonProc->mMultiPackage) {
         if (packageName.Equals(commonProc->mPackage) && vers == commonProc->mVersion) {
             // This common process is not in use by multiple packages, and
             // is for the calling package, so we can just use it directly.
             ps = commonProc;
-            if (DEBUG) Slogger::D(TAG, "GETPROC also using for pkg %s",
-                commonProc->ToString().string());
+            if (DEBUG) Slogger::D(TAG, "GETPROC also using for pkg %s", TO_CSTR(commonProc));
         }
         else {
             if (DEBUG) Slogger::D(TAG, "GETPROC need to split common proc!");

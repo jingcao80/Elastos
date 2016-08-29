@@ -77,11 +77,11 @@ public:
     };
 
 private:
-    class InnerAnimatorListenerAdapter
+    class TopAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
-        InnerAnimatorListenerAdapter(
+        TopAnimatorListenerAdapter(
             /* [in] */ ActionBarOverlayLayout* owner);
 
         // @Override
@@ -96,11 +96,11 @@ private:
         ActionBarOverlayLayout* mOwner;
     };
 
-    class InnerAnimatorListenerAdapter1
+    class BottomAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
-        InnerAnimatorListenerAdapter1(
+        BottomAnimatorListenerAdapter(
             /* [in] */ ActionBarOverlayLayout* owner);
 
         // @Override

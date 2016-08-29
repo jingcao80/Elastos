@@ -634,7 +634,6 @@ void PanelView::OnTrackingStopped(
 
 void PanelView::OnTrackingStarted()
 {
-    Logger::I(TAG, " >> OnTrackingStarted");
     mClosing = FALSE;
     mTracking = TRUE;
     mCollapseAfterPeek = FALSE;
