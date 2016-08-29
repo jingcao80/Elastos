@@ -1460,7 +1460,7 @@ Boolean RunningState::Update(
             AutoPtr<ICollection> coll;
             pi->mServices->GetValues((ICollection**)&coll);
             AutoPtr<IIterator> sit; //Iterator<ServiceItem>
-            coll->GetIterator((IIterator**)&pit);
+            coll->GetIterator((IIterator**)&sit);
             Boolean result;
             while (sit->HasNext(&result), result) {
                 obj = NULL;

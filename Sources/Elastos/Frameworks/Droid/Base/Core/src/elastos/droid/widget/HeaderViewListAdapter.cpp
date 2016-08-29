@@ -153,8 +153,7 @@ ECode HeaderViewListAdapter::AreAllItemsEnabled(
     VALIDATE_NOT_NULL(enabled);
     if(mAdapter != NULL) {
         Boolean res = FALSE;
-        mAdapter->AreAllItemsEnabled(&res);
-        *enabled = mAreAllFixedViewsSelectable && res;
+        *enabled = mAreAllFixedViewsSelectable && (mAdapter->AreAllItemsEnabled(&res), res);
         return NOERROR;
     }
     *enabled = TRUE;
@@ -184,6 +183,12 @@ ECode HeaderViewListAdapter::IsEnabled(
         if (adjPosition < adapterCount) {
             return mAdapter->IsEnabled(adjPosition, enabled);
         }
+    }
+
+    Int32 c = 0;
+    if (adjPosition - adapterCount >= (GetFootersCount(&c), c)) {
+        *enabled = FALSE;
+        return NOERROR;
     }
 
     // Footer (off-limits positions will throw an IndexOutOfBoundsException)

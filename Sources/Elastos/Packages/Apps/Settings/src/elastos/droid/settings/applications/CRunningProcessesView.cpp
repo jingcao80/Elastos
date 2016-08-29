@@ -514,21 +514,25 @@ void CRunningProcessesView::RefreshUi(
             AutoPtr<IResources> resources;
             GetResources((IResources**)&resources);
 
-            AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-            args->Set(0, CoreUtils::Convert(sizeStr));
+            AutoPtr< ArrayOf<IInterface*> > args1 = ArrayOf<IInterface*>::Alloc(1);
+            args1->Set(0, CoreUtils::Convert(sizeStr));
             String tmp;
             resources->GetString(
-                    R::string::running_processes_header_ram, args, &tmp);
+                    R::string::running_processes_header_ram, args1, &tmp);
             mBackgroundProcessText->SetText(CoreUtils::Convert(tmp));
             bidiFormatter->UnicodeWrap(
                     Formatter::FormatShortFileSize(context, medRam), &sizeStr);
+            AutoPtr< ArrayOf<IInterface*> > args2 = ArrayOf<IInterface*>::Alloc(1);
+            args2->Set(0, CoreUtils::Convert(sizeStr));
             resources->GetString(
-                    R::string::running_processes_header_ram, args, &tmp);
+                    R::string::running_processes_header_ram, args2, &tmp);
             mAppsProcessText->SetText(CoreUtils::Convert(tmp));
             bidiFormatter->UnicodeWrap(
                     Formatter::FormatShortFileSize(context, highRam), &sizeStr);
+            AutoPtr< ArrayOf<IInterface*> > args3 = ArrayOf<IInterface*>::Alloc(1);
+            args3->Set(0, CoreUtils::Convert(sizeStr));
             resources->GetString(
-                    R::string::running_processes_header_ram, args, &tmp);
+                    R::string::running_processes_header_ram, args3, &tmp);
             mForegroundProcessText->SetText(CoreUtils::Convert(tmp));
             mColorBar->SetRatios(highRam/(Float)totalRam,
                     medRam/(Float)totalRam,

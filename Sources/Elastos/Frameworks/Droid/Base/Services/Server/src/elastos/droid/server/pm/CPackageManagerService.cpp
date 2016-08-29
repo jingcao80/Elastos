@@ -10109,7 +10109,7 @@ AutoPtr< ArrayOf<String> > CPackageManagerService::GetAppDexInstructionSets(
 
     AutoPtr< ArrayOf<String> > sets;
     String is = GetPreferredInstructionSet();
-    if (is != NULL) {
+    if (!is.IsNull()) {
         sets = ArrayOf<String>::Alloc(1);
         (*sets)[0] = GetPreferredInstructionSet();
     }
@@ -16750,7 +16750,7 @@ Boolean CPackageManagerService::GetPackageSizeInfoLI(
         }
         HashMap<String, AutoPtr<PackageSetting> >::Iterator settingIt = mSettings->mPackages.Find(packageName);
         if (settingIt != mSettings->mPackages.End()) {
-
+            ps = settingIt->mSecond;
         }
         if (p == NULL) {
             dataOnly = TRUE;

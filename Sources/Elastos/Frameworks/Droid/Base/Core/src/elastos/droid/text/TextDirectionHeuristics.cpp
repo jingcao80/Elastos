@@ -19,37 +19,37 @@ namespace Elastos {
 namespace Droid {
 namespace Text {
 
-AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::LTR =
+INIT_PROI_3 AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::LTR =
         new TextDirectionHeuristics::TextDirectionHeuristicInternal(NULL /* no algorithm */, FALSE);
 
-AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::RTL =
+INIT_PROI_3 AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::RTL =
         new TextDirectionHeuristics::TextDirectionHeuristicInternal(NULL /* no algorithm */, TRUE);
 
-AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::FIRSTSTRONG_LTR =
+INIT_PROI_3 AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::FIRSTSTRONG_LTR =
        new TextDirectionHeuristics::TextDirectionHeuristicInternal(
             TextDirectionHeuristics::FirstStrong::INSTANCE, FALSE);
 
-AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::FIRSTSTRONG_RTL =
+INIT_PROI_3 AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::FIRSTSTRONG_RTL =
        new TextDirectionHeuristics::TextDirectionHeuristicInternal(
             TextDirectionHeuristics::FirstStrong::INSTANCE, TRUE);
 
-AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::ANYRTL_LTR =
+INIT_PROI_3 AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::ANYRTL_LTR =
        new TextDirectionHeuristics::TextDirectionHeuristicInternal(
             TextDirectionHeuristics::AnyStrong::INSTANCE_RTL, FALSE);
 
-AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::LOCALE =
+INIT_PROI_3 AutoPtr<ITextDirectionHeuristic> TextDirectionHeuristics::LOCALE =
         TextDirectionHeuristics::TextDirectionHeuristicLocale::INSTANCE;
 
 const Int32 TextDirectionHeuristics::STATE_TRUE = 0;
 const Int32 TextDirectionHeuristics::STATE_FALSE = 1;
 const Int32 TextDirectionHeuristics::STATE_UNKNOWN = 2;
 
-AutoPtr<TextDirectionHeuristics::FirstStrong> TextDirectionHeuristics::FirstStrong::INSTANCE = new FirstStrong();
+INIT_PROI_2 AutoPtr<TextDirectionHeuristics::FirstStrong> TextDirectionHeuristics::FirstStrong::INSTANCE = new FirstStrong();
 
-AutoPtr<TextDirectionHeuristics::AnyStrong> TextDirectionHeuristics::AnyStrong::INSTANCE_RTL = new AnyStrong(TRUE);
-AutoPtr<TextDirectionHeuristics::AnyStrong> TextDirectionHeuristics::AnyStrong::INSTANCE_LTR = new AnyStrong(FALSE);
+INIT_PROI_2 AutoPtr<TextDirectionHeuristics::AnyStrong> TextDirectionHeuristics::AnyStrong::INSTANCE_RTL = new AnyStrong(TRUE);
+INIT_PROI_2 AutoPtr<TextDirectionHeuristics::AnyStrong> TextDirectionHeuristics::AnyStrong::INSTANCE_LTR = new AnyStrong(FALSE);
 
-AutoPtr<TextDirectionHeuristics::TextDirectionHeuristicLocale> TextDirectionHeuristics::TextDirectionHeuristicLocale::INSTANCE = new TextDirectionHeuristicLocale();
+INIT_PROI_2 AutoPtr<TextDirectionHeuristics::TextDirectionHeuristicLocale> TextDirectionHeuristics::TextDirectionHeuristicLocale::INSTANCE = new TextDirectionHeuristicLocale();
 
 //============================================================
 // TextDirectionHeuristics::TextDirectionHeuristicImpl

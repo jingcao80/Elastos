@@ -252,7 +252,7 @@ ECode ListView::constructor(
         Int32 count = entries->GetLength();
         AutoPtr< ArrayOf<IInterface*> > objects = ArrayOf<IInterface*>::Alloc(count);
         for (Int32 i = 0; i < count; ++i) {
-            objects->Set(i, IInterface::Probe((*entries)[i]));
+            objects->Set(i, (*entries)[i]);
         }
         AutoPtr<IAdapter> a;
         FAIL_RETURN(CArrayAdapter::New(context, R::layout::simple_list_item_1, objects, (IAdapter**)&a));

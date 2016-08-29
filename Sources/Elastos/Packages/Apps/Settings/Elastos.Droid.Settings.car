@@ -40,8 +40,6 @@ module
     merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerTitleStrip.car");
     merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerTabStrip.car");
 
-    interface Elastos.Droid.Support.V4.View.IViewPagerSavedState;
-
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IDialogFragment;
     using interface Elastos.Droid.App.IFragment;
