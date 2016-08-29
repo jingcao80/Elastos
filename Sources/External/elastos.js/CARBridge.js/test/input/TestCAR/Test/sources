@@ -4,10 +4,13 @@ TARGET_TYPE = ecx
 #C_FLAGS += -std=c++11
 #C_FLAGS += -Wall
 #C_FLAGS += -O0
+C_FLAGS += -Wno-maybe-uninitialized
 
-IMPORTS = Test.eco
+IMPORTS += $(XDK_TARGETS)/CARBridge.js.test.input.Test.eco
 
 include $(XDK_SOURCE_PATH)/Elastos/LibCore/src/sources.inc
+
+INCLUDES += $(TARGET_OBJ_PATH)/../
 
 SOURCES += Test.cpp
 
