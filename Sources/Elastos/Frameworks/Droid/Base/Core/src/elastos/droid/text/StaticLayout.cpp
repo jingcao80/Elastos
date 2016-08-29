@@ -320,7 +320,7 @@ ECode StaticLayout::Generate(
 
                 // LeadingMarginSpan2 is odd.  The count affects all
                 // leading margin spans, not just this particular one
-                ILeadingMarginSpan2* lms2 = ILeadingMarginSpan2::Probe(lms2);
+                ILeadingMarginSpan2* lms2 = ILeadingMarginSpan2::Probe(lms);
                 if (lms2) {
                     Int32 temp = 0;
                     spanned->GetSpanStart(lms2, &temp);
