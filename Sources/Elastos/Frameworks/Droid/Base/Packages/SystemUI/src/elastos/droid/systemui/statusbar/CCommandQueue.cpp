@@ -101,7 +101,7 @@ ECode CCommandQueue::Disable(
 
     mHandler->RemoveMessages(MSG_DISABLE);
     AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MSG_DISABLE, 0, 0, (IMessage**)&msg);
+    mHandler->ObtainMessage(MSG_DISABLE, state, 0, (IMessage**)&msg);
     Boolean result;
     return mHandler->SendMessage(msg, &result);
 }

@@ -82,7 +82,9 @@ private:
         GestureHandler(
             /* [in] */ GestureDetector* host)
             : mHost(host)
-        {}
+        {
+            Handler::constructor();
+        }
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
