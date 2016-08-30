@@ -16,6 +16,7 @@ using Elastos::Droid::App::IActionBarLayoutParams;
 using Elastos::Droid::Internal::View::Menu::EIID_IMenuPresenter;
 using Elastos::Droid::Internal::Widget::CToolbarWidgetWrapper;
 using Elastos::Droid::Internal::Widget::IToolbarWidgetWrapper;
+using Elastos::Droid::Internal::Widget::EIID_IDecorToolbar;
 using Elastos::Droid::View::Gravity;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewParent;
@@ -651,7 +652,7 @@ ECode Toolbar::SetMenu(
     EnsureMenuView();
     AutoPtr<IMenuBuilder> oldMenu;
     mMenuView->PeekMenu((IMenuBuilder**)&oldMenu);
-    if (IMenuBuilder::Probe(oldMenu) == IMenuBuilder::Probe(menu)) {
+    if (oldMenu.Get() == menu) {
         return NOERROR;
     }
 
@@ -664,14 +665,16 @@ ECode Toolbar::SetMenu(
         mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter(this);
     }
 
+    IMenuPresenter* mp = IMenuPresenter::Probe(outerPresenter);
     outerPresenter->SetExpandedActionViewsExclusive(TRUE);
     if (menu != NULL) {
-        menu->AddMenuPresenter(IMenuPresenter::Probe(outerPresenter), mPopupContext);
+        menu->AddMenuPresenter(mp, mPopupContext);
         menu->AddMenuPresenter(mExpandedMenuPresenter, mPopupContext);
-    } else {
-        IMenuPresenter::Probe(outerPresenter)->InitForMenu(mPopupContext, NULL);
+    }
+    else {
+        mp->InitForMenu(mPopupContext, NULL);
         mExpandedMenuPresenter->InitForMenu(mPopupContext, NULL);
-        IMenuPresenter::Probe(outerPresenter)->UpdateMenuView(TRUE);
+        mp->UpdateMenuView(TRUE);
         mExpandedMenuPresenter->UpdateMenuView(TRUE);
     }
     mMenuView->SetPopupTheme(mPopupTheme);
@@ -1198,10 +1201,18 @@ ECode Toolbar::GetWrapper(
     /* [out] */ IDecorToolbar** bar)
 {
     VALIDATE_NOT_NULL(bar)
-    if (mWrapper == NULL) {
-        CToolbarWidgetWrapper::New((IToolbar*)this, TRUE, (IToolbarWidgetWrapper**)&mWrapper);
+    AutoPtr<IDecorToolbar> dtb;
+    if (mWeakWrapper != NULL) {
+        mWeakWrapper->Resolve(EIID_IDecorToolbar, (IInterface**)&dtb);
     }
-    *bar = IDecorToolbar::Probe(mWrapper);
+
+    if (dtb == NULL) {
+        mWeakWrapper = NULL;
+        CToolbarWidgetWrapper::New(this, TRUE, (IDecorToolbar**)&dtb);
+        IWeakReferenceSource::Probe(dtb)->GetWeakReference((IWeakReference**)&mWeakWrapper);
+    }
+
+    *bar = dtb;
     REFCOUNT_ADD(*bar)
     return NOERROR;
 }

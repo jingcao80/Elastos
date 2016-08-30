@@ -28,6 +28,8 @@ class InputWindowHandle
 public:
     CAR_INTERFACE_DECL()
 
+    InputWindowHandle();
+
     InputWindowHandle(
         /* [in] */ InputApplicationHandle* inputApplicationHandle,
         /* [in] */ IWindowState* windowState,
@@ -35,15 +37,14 @@ public:
 
     virtual ~InputWindowHandle();
 
+    AutoPtr<IWindowState> GetWindowState();
+
 private:
     void NativeDispose();
 
 public:
     // The input application handle.
     AutoPtr<InputApplicationHandle> mInputApplicationHandle;
-
-    // The window manager's window state.
-    IWindowState* mWindowState;
 
     // The input channel associated with the window.
     AutoPtr<IInputChannel> mInputChannel;
@@ -100,17 +101,18 @@ public:
     // Display this input is on.
     Int32 mDisplayId;
 
-public:
     // Pointer to the native input window handle.
     // This field is lazily initialized via JNI.
     Int64 mPtr;
+
+private:
+    // The window manager's window state.
+    AutoPtr<IWeakReference> mWeakWindowState;
 };
 
 } // Input
 } // Server
 } // Droid
 } // Elastos
-
-DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Input::InputWindowHandle, IInterface)
 
 #endif // __ELASTOS_DROID_Server_Input_InputWindowHandle_H__

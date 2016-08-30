@@ -4,7 +4,6 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/server/wm/CSession.h"
 #include "elastos/droid/server/wm/WindowToken.h"
-#include "elastos/droid/server/input/InputWindowHandle.h"
 #include "elastos/droid/os/Runnable.h"
 
 using Elastos::Droid::View::IWindowState;
@@ -24,7 +23,7 @@ using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Os::IRemoteCallbackList;
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Server::Input::InputWindowHandle;
+using Elastos::Droid::Server::Input::IInputWindowHandle;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;
 
@@ -659,7 +658,7 @@ public:
     Boolean mRebuilding;
 
     // InpAutoPtr<ut channel and input window handle used by the input dispatcher.
-    AutoPtr<InputWindowHandle> mInputWindowHandle;
+    AutoPtr<IInputWindowHandle> mInputWindowHandle;
     AutoPtr<IInputChannel> mInputChannel;
 
     // Used to improve performance of toString()

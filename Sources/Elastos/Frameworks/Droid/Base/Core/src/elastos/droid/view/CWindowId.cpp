@@ -23,9 +23,25 @@ namespace Droid {
 namespace View {
 
 CAR_OBJECT_IMPL(CWindowId);
+
 CAR_INTERFACE_IMPL_2(CWindowId, Object, IWindowId, IParcelable);
+
 ECode CWindowId::constructor()
 {
+    return NOERROR;
+}
+
+ECode CWindowId::constructor(
+    /* [in] */ IIWindowId* target)
+{
+    mToken = target;
+    return NOERROR;
+}
+
+ECode CWindowId::constructor(
+    /* [in] */ IBinder* target)
+{
+    mToken = IIWindowId::Probe(target);
     return NOERROR;
 }
 
@@ -142,20 +158,6 @@ ECode CWindowId::GetTarget(
     VALIDATE_NOT_NULL(id);
     *id = mToken;
     REFCOUNT_ADD(*id);
-    return NOERROR;
-}
-
-ECode CWindowId::constructor(
-    /* [in] */ IIWindowId* target)
-{
-    mToken = target;
-    return NOERROR;
-}
-
-ECode CWindowId::constructor(
-    /* [in] */ IBinder* target)
-{
-    mToken = IIWindowId::Probe(target);
     return NOERROR;
 }
 

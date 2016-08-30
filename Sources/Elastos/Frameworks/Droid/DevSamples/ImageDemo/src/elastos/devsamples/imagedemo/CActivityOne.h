@@ -36,6 +36,9 @@ public:
 public:
     CAR_OBJECT_DECL()
 
+    ~CActivityOne();
+
+
     CARAPI constructor();
 
 protected:

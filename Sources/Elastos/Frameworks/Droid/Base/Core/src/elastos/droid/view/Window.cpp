@@ -105,7 +105,9 @@ ECode Window::GetContext(
 ECode Window::GetWindowStyle(
     /* [out] */ ITypedArray** attrs)
 {
-    {    AutoLock syncLock(this);
+    VALIDATE_NOT_NULL(attrs)
+    {
+        AutoLock syncLock(this);
         if (mWindowStyle == NULL) {
             AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Window);
             FAIL_RETURN(mContext->ObtainStyledAttributes(attrIds, (ITypedArray**)&mWindowStyle));

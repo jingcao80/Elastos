@@ -336,7 +336,7 @@ ECode LockPatternUtils::CheckPattern(
     // *result = matched;
     // return NOERROR;
 
-    Slogger::D("LockPatternUtils", "===[snow]===return TRUE or FALSE for testting until Setting APP works!");
+    // Slogger::D("LockPatternUtils", "TODO ===[snow]===return TRUE or FALSE for testting until Setting APP works!");
     *result = TRUE;
     return NOERROR;
 }
@@ -1764,7 +1764,7 @@ ECode LockPatternUtils::IsSecure(
     //         || (isPassword && (SavedPasswordExists(&tmp), tmp));
     // *result = secure;
 
-    Slogger::D("LockPatternUtils", "===[snow]===return TRUE for testting until Setting APP works!");
+    // Slogger::D("LockPatternUtils", "TODO===[snow]===return TRUE for testting until Setting APP works!");
     *result = TRUE;
     return NOERROR;
 }

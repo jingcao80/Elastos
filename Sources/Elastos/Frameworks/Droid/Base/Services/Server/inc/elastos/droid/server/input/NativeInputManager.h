@@ -51,7 +51,7 @@ public:
         /* [in] */ const android::sp<android::InputChannel>& inputChannel);
 
     void setInputWindows(
-        /* [in] */ ArrayOf<InputWindowHandle*>* windows);
+        /* [in] */ ArrayOf<IInputWindowHandle*>* windows);
 
     void setFocusedApplication(
         /* [in] */ InputApplicationHandle* application);

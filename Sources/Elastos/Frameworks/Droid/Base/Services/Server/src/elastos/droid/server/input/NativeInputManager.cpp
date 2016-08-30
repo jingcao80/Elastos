@@ -590,13 +590,13 @@ void NativeInputManager::getDispatcherConfiguration(
 }
 
 void NativeInputManager::setInputWindows(
-    /* [in] */ ArrayOf<InputWindowHandle*>* windowHandleObjArray)
+    /* [in] */ ArrayOf<IInputWindowHandle*>* windowHandleObjArray)
 {
     android::Vector<android::sp<android::InputWindowHandle> > windowHandles;
 
     Int32 length = windowHandleObjArray != NULL ? windowHandleObjArray->GetLength() : 0;
     for (Int32 i = 0; i < length; i++) {
-        InputWindowHandle* windowHandleObj = (*windowHandleObjArray)[i];
+        InputWindowHandle* windowHandleObj = (InputWindowHandle*)(*windowHandleObjArray)[i];
         if (! windowHandleObj) {
             break; // found null element indicating end of used portion of the array
         }

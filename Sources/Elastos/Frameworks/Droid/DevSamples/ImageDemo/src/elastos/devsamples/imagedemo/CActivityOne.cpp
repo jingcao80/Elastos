@@ -49,6 +49,11 @@ ECode CActivityOne::MyListener::OnClick(
 
 CAR_OBJECT_IMPL(CActivityOne)
 
+CActivityOne::~CActivityOne()
+{
+    Logger::I(TAG, " >> Destory ImageDemo::CActivityOne");
+}
+
 ECode CActivityOne::constructor()
 {
     Logger::I(TAG, " >> constructor()");

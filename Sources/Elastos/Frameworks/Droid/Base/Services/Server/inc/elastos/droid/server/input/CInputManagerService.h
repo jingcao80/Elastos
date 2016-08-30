@@ -612,7 +612,7 @@ public:
      */
     CARAPI RegisterInputChannel(
         /* [in] */ IInputChannel* inputChannel,
-        /* [in] */ InputWindowHandle* inputWindowHandle);
+        /* [in] */ IInputWindowHandle* inputWindowHandle);
 
     /**
      * Unregisters an input channel.
@@ -738,7 +738,7 @@ public:
         /* [in] */ Int32 direction);
 
     CARAPI_(void) SetInputWindows(
-        /* [in] */ ArrayOf<InputWindowHandle*>* windowHandles);
+        /* [in] */ ArrayOf<IInputWindowHandle*>* windowHandles);
 
     CARAPI_(void) SetFocusedApplication(
         /* [in] */ InputApplicationHandle* application);
@@ -1038,7 +1038,7 @@ private:
 
     CARAPI NativeRegisterInputChannel(
         /* [in] */ IInputChannel* inputChannelObj,
-        /* [in] */ InputWindowHandle* inputWindowHandle,
+        /* [in] */ IInputWindowHandle* inputWindowHandle,
         /* [in] */ Boolean monitor);
 
     CARAPI NativeUnregisterInputChannel(
@@ -1057,7 +1057,7 @@ private:
         /* [in] */ Int32 policyFlags);
 
     CARAPI_(void) NativeSetInputWindows(
-        /* [in] */ ArrayOf<InputWindowHandle*>* windowHandles);
+        /* [in] */ ArrayOf<IInputWindowHandle*>* windowHandles);
 
     CARAPI_(void) NativeSetInputDispatchMode(
         /* [in] */ Boolean enabled,

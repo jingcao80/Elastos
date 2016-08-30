@@ -3,6 +3,7 @@
 #include "elastos/droid/server/wm/CWindowId.h"
 #include "elastos/droid/server/wm/AccessibilityController.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/server/input/InputWindowHandle.h"
 #include "elastos/droid/os/UserHandle.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
@@ -22,6 +23,7 @@ using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::CGravity;
 using Elastos::Droid::View::IInternalInsetsInfo;
 using Elastos::Droid::View::EIID_IWindowState;
+using Elastos::Droid::Server::Input::InputWindowHandle;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
@@ -172,6 +174,7 @@ WindowState::WindowState()
 
 WindowState::~WindowState()
 {
+    Slogger::I(TAG, " >> Destory WindowState: %p", this);
 }
 
 ECode WindowState::constructor(
@@ -324,7 +327,7 @@ ECode WindowState::constructor(
             mIsFloatingLayer = mIsImWindow || mIsWallpaper;
         }
 
-        WindowState* appWin = this;
+        AutoPtr<WindowState> appWin = this;
         while (appWin->mAttachedWindow != NULL) {
             appWin = appWin->mAttachedWindow;
         }
@@ -1100,7 +1103,7 @@ void WindowState::SetInputChannel(
     assert(mInputChannel == NULL);
 
     mInputChannel = inputChannel;
-    mInputWindowHandle->mInputChannel = inputChannel;
+    ((InputWindowHandle*)mInputWindowHandle.Get())->mInputChannel = inputChannel;
 }
 
 void WindowState::DisposeInputChannel()
@@ -1112,7 +1115,7 @@ void WindowState::DisposeInputChannel()
         mInputChannel = NULL;
     }
 
-    mInputWindowHandle->mInputChannel = NULL;
+    ((InputWindowHandle*)mInputWindowHandle.Get())->mInputChannel = NULL;
 }
 
 Boolean WindowState::CanReceiveKeys()
