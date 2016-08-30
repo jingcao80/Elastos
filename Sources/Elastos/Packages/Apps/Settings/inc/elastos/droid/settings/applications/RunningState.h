@@ -41,6 +41,7 @@ class RunningState
     : public Object
 {
     friend class CRunningProcessesView;
+    friend class CRunningServiceDetails;
 protected:
     class AppProcessInfo
         : public Object
@@ -179,6 +180,7 @@ protected:
         : public BaseItem
         , public IRunningStateServiceItem
     {
+        friend class CRunningServiceDetails;
         friend class ProcessItem;
         friend class RunningState;
     public:
@@ -201,6 +203,7 @@ protected:
         : public BaseItem
         , public IRunningStateProcessItem
     {
+        friend class CRunningServiceDetails;
         friend class InitComparator;
         friend class MergedItem;
         friend class RunningState;
@@ -269,6 +272,7 @@ protected:
         , public IRunningStateMergedItem
     {
         friend class CRunningProcessesView;
+        friend class CRunningServiceDetails;
         friend class InitComparator;
         friend class RunningState;
     public:

@@ -12,5 +12,6 @@ SOURCES += InterestingConfigChanges.cpp
 SOURCES += CLinearColorBar.cpp
 SOURCES += ManageApplications.cpp
 SOURCES += CRunningProcessesView.cpp
+SOURCES += CRunningServiceDetails.cpp
 SOURCES += RunningState.cpp
 SOURCES += applications.cpp

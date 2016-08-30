@@ -371,18 +371,22 @@ void RunningState::ProcessItem::EnsureLabel(
         return;
     }
 
+    ECode ec = NOERROR;
+
     // try {
     AutoPtr<IApplicationInfo> ai;
-    pm->GetApplicationInfo(mProcessName,
+    ec = pm->GetApplicationInfo(mProcessName,
             IPackageManager::GET_UNINSTALLED_PACKAGES, (IApplicationInfo**)&ai);
-    Int32 uid;
-    ai->GetUid(&uid);
-    if (uid == mUid) {
-        mDisplayLabel = NULL;
-        IPackageItemInfo::Probe(ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
-        mDisplayLabel->ToString(&mLabel);
-        mPackageInfo = IPackageItemInfo::Probe(ai);
-        return;
+    if (SUCCEEDED(ec)) {
+        Int32 uid;
+        ai->GetUid(&uid);
+        if (uid == mUid) {
+            mDisplayLabel = NULL;
+            IPackageItemInfo::Probe(ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
+            mDisplayLabel->ToString(&mLabel);
+            mPackageInfo = IPackageItemInfo::Probe(ai);
+            return;
+        }
     }
     // } catch (PackageManager.NameNotFoundException e) {
     // }
@@ -396,13 +400,15 @@ void RunningState::ProcessItem::EnsureLabel(
     if (pkgs->GetLength() == 1) {
         // try {
         AutoPtr<IApplicationInfo> ai;
-        pm->GetApplicationInfo((*pkgs)[0],
+        ec = pm->GetApplicationInfo((*pkgs)[0],
                 IPackageManager::GET_UNINSTALLED_PACKAGES, (IApplicationInfo**)&ai);
-        mDisplayLabel = NULL;
-        IPackageItemInfo::Probe(ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
-        mDisplayLabel->ToString(&mLabel);
-        mPackageInfo = IPackageItemInfo::Probe(ai);
-        return;
+        if (SUCCEEDED(ec)) {
+            mDisplayLabel = NULL;
+            IPackageItemInfo::Probe(ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
+            mDisplayLabel->ToString(&mLabel);
+            mPackageInfo = IPackageItemInfo::Probe(ai);
+            return;
+        }
         // } catch (PackageManager.NameNotFoundException e) {
         // }
     }
@@ -413,20 +419,22 @@ void RunningState::ProcessItem::EnsureLabel(
         String name = (*pkgs)[i];
         // try {
         AutoPtr<IPackageInfo> pi;
-        pm->GetPackageInfo(name, 0, (IPackageInfo**)&pi);
-        Int32 sharedUserLabel;
-        pi->GetSharedUserLabel(&sharedUserLabel);
-        if (sharedUserLabel != 0) {
-            AutoPtr<IApplicationInfo> applicationInfo;
-            pi->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
-            AutoPtr<ICharSequence> nm;
-            pm->GetText(name, sharedUserLabel,
-                    applicationInfo, (ICharSequence**)&nm);
-            if (nm != NULL) {
-                mDisplayLabel = nm;
-                nm->ToString(&mLabel);
-                mPackageInfo = IPackageItemInfo::Probe(applicationInfo);
-                return;
+        ec = pm->GetPackageInfo(name, 0, (IPackageInfo**)&pi);
+        if (SUCCEEDED(ec)) {
+            Int32 sharedUserLabel;
+            pi->GetSharedUserLabel(&sharedUserLabel);
+            if (sharedUserLabel != 0) {
+                AutoPtr<IApplicationInfo> applicationInfo;
+                pi->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
+                AutoPtr<ICharSequence> nm;
+                pm->GetText(name, sharedUserLabel,
+                        applicationInfo, (ICharSequence**)&nm);
+                if (nm != NULL) {
+                    mDisplayLabel = nm;
+                    nm->ToString(&mLabel);
+                    mPackageInfo = IPackageItemInfo::Probe(applicationInfo);
+                    return;
+                }
             }
         }
         // } catch (PackageManager.NameNotFoundException e) {
@@ -457,13 +465,15 @@ void RunningState::ProcessItem::EnsureLabel(
     // Finally... whatever, just pick the first package's name.
     // try {
     AutoPtr<IApplicationInfo> _ai;
-    pm->GetApplicationInfo((*pkgs)[0],
+    ec = pm->GetApplicationInfo((*pkgs)[0],
             IPackageManager::GET_UNINSTALLED_PACKAGES, (IApplicationInfo**)&_ai);
-    mDisplayLabel = NULL;
-    IPackageItemInfo::Probe(_ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
-    mDisplayLabel->ToString(&mLabel);
-    mPackageInfo = IPackageItemInfo::Probe(_ai);
-    return;
+    if (SUCCEEDED(ec)) {
+        mDisplayLabel = NULL;
+        IPackageItemInfo::Probe(_ai)->LoadLabel(pm, (ICharSequence**)&mDisplayLabel);
+        mDisplayLabel->ToString(&mLabel);
+        mPackageInfo = IPackageItemInfo::Probe(_ai);
+        return;
+    }
     // } catch (PackageManager.NameNotFoundException e) {
     // }
 }
@@ -474,6 +484,8 @@ Boolean RunningState::ProcessItem::UpdateService(
 {
     AutoPtr<IPackageManager> pm;
     context->GetPackageManager((IPackageManager**)&pm);
+
+    ECode ec = NOERROR;
 
     AutoPtr<IComponentName> comService;
     service->GetService((IComponentName**)&comService);
@@ -492,13 +504,14 @@ Boolean RunningState::ProcessItem::UpdateService(
             helper->GetPackageManager((IIPackageManager**)&pkgManager);
             Int32 uid;
             service->GetUid(&uid);
-            pkgManager->GetServiceInfo(
+            ec = pkgManager->GetServiceInfo(
                     comService, IPackageManager::GET_UNINSTALLED_PACKAGES,
                     UserHandle::GetUserId(uid), (IServiceInfo**)&si->mServiceInfo);
-
-            if (si->mServiceInfo == NULL) {
-                Logger::D("RunningService", "getServiceInfo returned NULL for: %s", TO_CSTR(comService));
-                return FALSE;
+            if (SUCCEEDED(ec)) {
+                if (si->mServiceInfo == NULL) {
+                    Logger::D("RunningService", "getServiceInfo returned NULL for: %s", TO_CSTR(comService));
+                    return FALSE;
+                }
             }
         // } catch (RemoteException e) {
         // }

@@ -365,20 +365,21 @@ ECode ApplicationPackageManager::GetApplicationInfo(
     /* [out] */ IApplicationInfo** info)
 {
     VALIDATE_NOT_NULL(info)
-    AutoPtr<IApplicationInfo> ai;
-    #if 1
+    *info = NULL;
+
     Int32 id;
     mContext->GetUserId(&id);
-    FAIL_RETURN(mPM->GetApplicationInfo(packageName, flags, id, (IApplicationInfo**)&ai));
-    #else
-        FAIL_RETURN(mPM->GetApplicationInfo(packageName, flags, 0, (IApplicationInfo**)&ai));
-    #endif
+    AutoPtr<IApplicationInfo> ai;
+    ECode ec = mPM->GetApplicationInfo(packageName, flags, id, (IApplicationInfo**)&ai);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "Package manager has died");
+        return E_RUNTIME_EXCEPTION;
+    }
     if (ai != NULL) {
         // This is a temporary hack. Callers must use
         // createPackageContext(packageName).getApplicationInfo() to
         // get the right paths.
         MaybeAdjustApplicationInfo(ai);
-
         *info = ai;
         REFCOUNT_ADD(*info)
         return NOERROR;

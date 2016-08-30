@@ -50,6 +50,7 @@ public:
         : public Object
     {
         friend class CRunningProcessesView;
+        friend class CRunningServiceDetails;
         friend class ViewHolder;
     protected:
         TO_STRING_IMPL("CRunningProcessesView::ActiveItem")

@@ -774,7 +774,7 @@
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".Applications.InstalledAppDetails"
+        <activity-alias android:name=".Applications.CInstalledAppDetails"
                 android:label="@string/application_info_label"
                 android:exported="true"
                 android:targetActivity=".Applications.InstalledAppDetailsTop">

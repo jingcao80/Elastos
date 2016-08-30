@@ -189,6 +189,30 @@ module
         interface IRunningStateOnRefreshUiListener;
     }
 
+    class CRunningServiceDetails {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface IRunningStateOnRefreshUiListener;
+    }
+
+    class CRunningServiceDetailsAlertDialogFragment {
+        constructor();
+
+        interface IDialogFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+    }
+
     } // namespace Applications
     } // namespace Settings
     } // namespace Droid

@@ -566,11 +566,11 @@ void CRunningProcessesView::StartServiceDetailsActivity(
         AutoPtr<IBundle> args;
         CBundle::New((IBundle**)&args);
         if (mi->mProcess != NULL) {
-            args->PutInt32(String("uid")/*RunningServiceDetails::KEY_UID*/, mi->mProcess->mUid);
-            args->PutString(String("process")/*RunningServiceDetails::KEY_PROCESS*/, mi->mProcess->mProcessName);
+            args->PutInt32(String("uid")/*CRunningServiceDetails::KEY_UID*/, mi->mProcess->mUid);
+            args->PutString(String("process")/*CRunningServiceDetails::KEY_PROCESS*/, mi->mProcess->mProcessName);
         }
-        args->PutInt32(String("user_id")/*RunningServiceDetails::KEY_USER_ID*/, mi->mUserId);
-        args->PutBoolean(String("background")/*RunningServiceDetails::KEY_BACKGROUND*/, mAdapter->mShowBackground);
+        args->PutInt32(String("user_id")/*CRunningServiceDetails::KEY_USER_ID*/, mi->mUserId);
+        args->PutBoolean(String("background")/*CRunningServiceDetails::KEY_BACKGROUND*/, mAdapter->mShowBackground);
 
         AutoPtr<IActivity> activity;
         mOwner->GetActivity((IActivity**)&activity);

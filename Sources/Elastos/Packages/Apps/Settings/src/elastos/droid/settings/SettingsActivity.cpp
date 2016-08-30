@@ -177,7 +177,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[51] = "Elastos.Droid.Settings.Notification.NotificationSettings";
     (*args)[52] = "Elastos.Droid.Settings.ChooseLockPassword.ChooseLockPasswordFragment";
     (*args)[53] = "Elastos.Droid.Settings.ChooseLockPattern.ChooseLockPatternFragment";
-    (*args)[54] = "Elastos.Droid.Settings.Applications.InstalledAppDetails";
+    (*args)[54] = "Elastos.Droid.Settings.Applications.CInstalledAppDetails";
     (*args)[55] = "Elastos.Droid.Settings.Fuelgauge.BatterySaverSettings";
     (*args)[56] = "Elastos.Droid.Settings.Notification.NotificationAppList";
     (*args)[57] = "Elastos.Droid.Settings.Notification.AppNotificationSettings";
