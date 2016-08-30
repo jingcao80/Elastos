@@ -98,7 +98,7 @@ public:
         /* [out] */ String* key);
 
 private:
-    AutoPtr<MenuBuilder> mParentMenu;
+    MenuBuilder* mParentMenu;
     AutoPtr<IMenuItemImpl> mItem;
 };
 

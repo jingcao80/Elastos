@@ -18,6 +18,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Internal::View::Menu::IActionMenuItem;
 using Elastos::Droid::Internal::View::Menu::IMenuPresenterCallback;
+using Elastos::Droid::Internal::View::Menu::IBaseMenuPresenter;
 using Elastos::Droid::Internal::Widget::IDecorToolbar;
 using Elastos::Droid::Internal::Widget::IScrollingTabContainerView;
 using Elastos::Droid::Internal::Widget::IToolbarWidgetWrapper;
@@ -363,7 +364,7 @@ private:
     AutoPtr<ICharSequence> mHomeDescription;
     AutoPtr<IWindowCallback> mWindowCallback;
     Boolean mMenuPrepared;
-    AutoPtr<IActionMenuPresenter> mActionMenuPresenter;
+    AutoPtr<IBaseMenuPresenter> mActionMenuPresenter;
     Int32 mNavigationMode;
     Int32 mDefaultNavigationContentDescription;
     AutoPtr<IDrawable> mDefaultNavigationIcon;

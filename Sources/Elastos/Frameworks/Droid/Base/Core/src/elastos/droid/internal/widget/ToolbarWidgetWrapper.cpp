@@ -537,11 +537,11 @@ ECode ToolbarWidgetWrapper::SetMenu(
     if (mActionMenuPresenter == NULL) {
         AutoPtr<IContext> context;
         IView::Probe(mToolbar)->GetContext((IContext**)&context);
-        CActionMenuPresenter::New(context, (IActionMenuPresenter**)&mActionMenuPresenter);
-        IBaseMenuPresenter::Probe(mActionMenuPresenter)->SetId(R::id::action_menu_presenter);
+        CActionMenuPresenter::New(context, (IBaseMenuPresenter**)&mActionMenuPresenter);
+        mActionMenuPresenter->SetId(R::id::action_menu_presenter);
     }
-    IBaseMenuPresenter::Probe(mActionMenuPresenter)->SetCallback(cb);
-    mToolbar->SetMenu(IMenuBuilder::Probe(menu), mActionMenuPresenter);
+    mActionMenuPresenter->SetCallback(cb);
+    mToolbar->SetMenu(IMenuBuilder::Probe(menu), IActionMenuPresenter::Probe(mActionMenuPresenter));
     return NOERROR;
 }
 

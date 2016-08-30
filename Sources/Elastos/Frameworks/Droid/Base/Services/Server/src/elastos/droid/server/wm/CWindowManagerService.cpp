@@ -1012,8 +1012,7 @@ ECode CWindowManagerService::constructor(
     AutoPtr< ArrayOf<IDisplay*> > displays;
     mDisplayManager->GetDisplays((ArrayOf<IDisplay*>**)&displays);
     for (Int32 i = 0; i < displays->GetLength(); ++i) {
-        AutoPtr<IDisplay> display = (*displays)[i];
-        CreateDisplayContentLocked(display);
+        CreateDisplayContentLocked((*displays)[i]);
     }
 
     mKeyguardDisableHandler = new KeyguardDisableHandler(mContext, mPolicy);
@@ -1103,8 +1102,6 @@ ECode CWindowManagerService::constructor(
     // for surfaceflinger to get service window
     mWindowBinder = new WindowBinder();
     mWindowBinder->Register();
-
-    Slogger::D(TAG, " <<<<<<<<<<<<<<<<<<<<< CWindowManagerService::constructor");
     return NOERROR;
 }
 
@@ -9963,7 +9960,8 @@ ECode CWindowManagerService::HandleReportApplicationTokenWindows(
 ECode CWindowManagerService::HandleWindowFreezeTimeout()
 {
     // TODO(multidisplay): Can non-default displays rotate?
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         Slogger::W(TAG, "Window freeze timeout expired.");
         AutoPtr<WindowList> windows = GetDefaultWindowListLocked();
         Int32 i;

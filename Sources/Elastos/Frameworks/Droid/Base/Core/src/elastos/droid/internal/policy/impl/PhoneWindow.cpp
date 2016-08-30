@@ -56,6 +56,7 @@
 #include "elastos/droid/internal/policy/impl/CPhoneWindowRotationWatcher.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
+// #include <utils/CallStack.h>
 
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -1974,8 +1975,7 @@ ECode PhoneWindow::_DecorView::OnDetachedFromWindow()
     AutoPtr<PanelFeatureState> st;
     FAIL_RETURN(mHost->GetPanelState(FEATURE_OPTIONS_PANEL, FALSE, (PanelFeatureState**)&st));
     if (st != NULL && st->mMenu != NULL && mFeatureId < 0) {
-        Boolean res = FALSE;
-        st->mMenu->Close(res);//TODO should be pointer
+        IMenu::Probe(st->mMenu)->Close();
     }
 
     return NOERROR;
@@ -2224,17 +2224,18 @@ ECode PhoneWindow::DecorView::DecorViewWeakReferenceImpl::Resolve(
 // PhoneWindow::DecorView
 //===============================================================================================
 PhoneWindow::DecorView::DecorView(
-   /* [in] */ PhoneWindow* host)
-   : _DecorView(host)
-   , mUseSelfRef(FALSE)
+    /* [in] */ PhoneWindow* host)
+    : _DecorView(host)
+    , mUseSelfRef(FALSE)
 {
 }
 
 PhoneWindow::DecorView::~DecorView()
 {
-   if (!mUseSelfRef) {
-       mHost->mDecor = NULL;
-   }
+    if (!mUseSelfRef) {
+        mHost->mDecor = NULL;
+    }
+    Slogger::I(TAG, " >> Destory DecorView: %p", this);
 }
 
 ECode PhoneWindow::DecorView::constructor(
@@ -2994,6 +2995,7 @@ PhoneWindow::PhoneWindow()
 
 PhoneWindow::~PhoneWindow()
 {
+    Slogger::I(TAG, " >> Destory PhoneWindow: %p", this);
 }
 
 ECode PhoneWindow::constructor(
@@ -3042,22 +3044,39 @@ ECode PhoneWindow::GetInterfaceID(
         return NOERROR;
     }
 
-   return Window::GetInterfaceID(pObject, pIID);
+    return Window::GetInterfaceID(pObject, pIID);
 }
 
 UInt32 PhoneWindow::AddRef()
 {
-   return Window::AddRef();
+    UInt32 count = Window::AddRef();
+
+    // android::CallStack stack;
+    // stack.update();
+    // String backtrace(stack.toString("").string());
+    // Logger::I(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    // Logger::I(TAG, ">> PhoneWindow::AddRef %p, refcount: %d, callstack:\n%s", this, count, backtrace.string());
+    // Logger::I(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+    return count;
 }
 
 UInt32 PhoneWindow::Release()
 {
-   DecorView* decor = mDecor;
-   UInt32 ref = Window::Release();
-   if (decor != NULL && ref == 1) {
-       decor->_Release();
-   }
-   return ref;
+    // android::CallStack stack;
+    // stack.update();
+    // String backtrace(stack.toString("").string());
+    // UInt32 count = GetStrongCount();
+    // Logger::I(TAG, "-------------------------------------------------------");
+    // Logger::I(TAG, ">> PhoneWindow::Release %p, refcount: %d, callstack:\n%s", this, count, backtrace.string());
+    // Logger::I(TAG, "-------------------------------------------------------");
+
+    DecorView* decor = mDecor;
+    UInt32 ref = Window::Release();
+    if (decor != NULL && ref == 1) {
+        decor->_Release();
+    }
+    return ref;
 }
 
 ECode PhoneWindow::SetContainer(
@@ -3837,6 +3856,8 @@ ECode PhoneWindow::ClosePanel(
     /* [in] */ PanelFeatureState* st,
     /* [in] */ Boolean doCallback)
 {
+    Slogger::I(TAG, " >> ClosePanel");
+
     Boolean showing = FALSE;
     if (doCallback && st->mFeatureId == FEATURE_OPTIONS_PANEL
         && mDecorContentParent != NULL
@@ -3881,6 +3902,7 @@ ECode PhoneWindow::ClosePanel(
     // add by xihao: there are several circular references
     // PhoneWindow->PanelFeatureState->CMenuBuilder->Activity->PhoneWindow
     // PhoneWindow->PanelFeatureState->DecorView->PhoneWindow
+    // PhoneWindow->CListMenuPresenter->Activity->PhoneWindow
     // CMenuBuilder->CListMenuPresenter->CMenuBuilder, and so on
     //
     st->SetMenu(NULL);
@@ -4067,6 +4089,7 @@ AutoPtr<ITransition> PhoneWindow::GetTransition(
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         tifHelper->From(context, (ITransitionInflater**)&inflater);
+        transition = NULL;
         inflater->InflateTransition(transitionId, (ITransition**)&transition);
         ITransitionSet* ts = ITransitionSet::Probe(transition);
         Int32 count = 0;
@@ -4184,12 +4207,11 @@ ECode PhoneWindow::CloseAllPanels()
         return NOERROR;
     }
 
-    const AutoPtr< ArrayOf<PanelFeatureState*> > panels = mPanels;
-    const Int32 N = panels != NULL ? panels->GetLength() : 0;
-    for (int i = 0; i < N; i++) {
-        const AutoPtr<PanelFeatureState> panel = (*panels)[i];
-        if (panel != NULL) {
-            ClosePanel(panel, TRUE);
+    AutoPtr< ArrayOf<PanelFeatureState*> > panels = mPanels;
+    Int32 N = panels != NULL ? panels->GetLength() : 0;
+    for (Int32 i = 0; i < N; i++) {
+        if ((*panels)[i] != NULL) {
+            ClosePanel((*panels)[i], TRUE);
         }
     }
 
@@ -4239,8 +4261,7 @@ Boolean PhoneWindow::PerformPanelShortcut(
         st->mIsHandled = TRUE;
 
         // Only close down the menu if we don't have an action bar keeping it open.
-        if ((flags & IMenu::FLAG_PERFORM_NO_CLOSE) == 0 && mDecorContentParent == NULL)
-        {
+        if ((flags & IMenu::FLAG_PERFORM_NO_CLOSE) == 0 && mDecorContentParent == NULL) {
             ClosePanel(st, TRUE);
         }
     }
@@ -6405,6 +6426,7 @@ ECode PhoneWindow::PreparePanel(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* prepared)
 {
+    Slogger::I(TAG, " >> PreparePanel");
     VALIDATE_NOT_NULL(prepared)
     *prepared = FALSE;
 
@@ -6538,12 +6560,12 @@ ECode PhoneWindow::PreparePanel(
 Boolean PhoneWindow::InitializePanelMenu(
     /* [in] */ PanelFeatureState* st)
 {
+    Slogger::I(TAG, " >> InitializePanelMenu");
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
 
     // If we have an action bar, initialize the menu with a context themed for it.
-    if ((st->mFeatureId == FEATURE_OPTIONS_PANEL || st->mFeatureId == FEATURE_ACTION_BAR) && mDecorContentParent != NULL)
-    {
+    if ((st->mFeatureId == FEATURE_OPTIONS_PANEL || st->mFeatureId == FEATURE_ACTION_BAR) && mDecorContentParent != NULL) {
         AutoPtr<ITypedValue> outValue;
         CTypedValue::New((ITypedValue**)&outValue);
 
@@ -6556,8 +6578,7 @@ Boolean PhoneWindow::InitializePanelMenu(
         AutoPtr<IResourcesTheme> widgetTheme;
         Int32 targetThemeRes = 0;
         outValue->GetResourceId(&targetThemeRes);
-        if (targetThemeRes != 0)
-        {
+        if (targetThemeRes != 0) {
             AutoPtr<IResources> resources;
             context->GetResources((IResources**)&resources);
             resources->NewTheme((IResourcesTheme**)&widgetTheme);
@@ -6565,15 +6586,12 @@ Boolean PhoneWindow::InitializePanelMenu(
             widgetTheme->ApplyStyle(targetThemeRes, TRUE);
             widgetTheme->ResolveAttribute(R::attr::actionBarWidgetTheme, outValue, TRUE, &tmp);
         }
-        else
-        {
+        else {
             baseTheme->ResolveAttribute(R::attr::actionBarWidgetTheme, outValue, TRUE, &tmp);
         }
 
-        if (targetThemeRes != 0)
-        {
-            if (widgetTheme == NULL)
-            {
+        if (targetThemeRes != 0) {
+            if (widgetTheme == NULL) {
                 AutoPtr<IResources> resources;
                 context->GetResources((IResources**)&resources);
                 resources->NewTheme((IResourcesTheme**)&widgetTheme);
@@ -6582,8 +6600,7 @@ Boolean PhoneWindow::InitializePanelMenu(
             widgetTheme->ApplyStyle(targetThemeRes, TRUE);
         }
 
-        if (widgetTheme != NULL)
-        {
+        if (widgetTheme != NULL) {
             AutoPtr<IContext> temp;
             CContextThemeWrapper::New(context, 0, (IContext**)&temp);
             context = temp;
@@ -6593,11 +6610,11 @@ Boolean PhoneWindow::InitializePanelMenu(
         }
     }
 
-    AutoPtr<IMenuBuilder> menu;
-    CMenuBuilder::New(context, (IMenuBuilder**)&menu);
     AutoPtr<IWeakReference> wr;
     GetWeakReference((IWeakReference**)&wr);
     AutoPtr<MyMenuBuilderCallback> cb = new MyMenuBuilderCallback(wr);
+    AutoPtr<IMenuBuilder> menu;
+    CMenuBuilder::New(context, (IMenuBuilder**)&menu);
     menu->SetCallback(cb.Get());
     st->SetMenu(menu);
 
@@ -6693,7 +6710,8 @@ ECode PhoneWindow::GetPanelState(
         if (!required) {
             return NOERROR;
         }
-        Slogger::E(TAG, "GetPanelState: The feature has not been requested: content: %p, featureId: %d, mFeatures: %08x, mInvalidatePanelMenuFeatures: %08x",
+        Slogger::E(TAG, "GetPanelState: The feature has not been requested:"
+            " content: %p, featureId: %d, mFeatures: %08x, mInvalidatePanelMenuFeatures: %08x",
             &mFeatures, featureId, mFeatures, mInvalidatePanelMenuFeatures);
         return E_RUNTIME_EXCEPTION;
     }

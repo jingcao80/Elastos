@@ -12,9 +12,9 @@ namespace Menu {
 CAR_INTERFACE_IMPL_2(SubMenuBuilder, MenuBuilder, ISubMenuBuilder, ISubMenu)
 
 ECode SubMenuBuilder::constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IMenuBuilder* parentMenu,
-        /* [in] */ IMenuItemImpl* item)
+    /* [in] */ IContext* context,
+    /* [in] */ IMenuBuilder* parentMenu,
+    /* [in] */ IMenuItemImpl* item)
 {
     FAIL_RETURN(MenuBuilder::constructor(context))
     mParentMenu = (MenuBuilder*)parentMenu;
@@ -85,9 +85,8 @@ Boolean SubMenuBuilder::DispatchMenuItemSelected(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ IMenuItem* item)
 {
-
     return MenuBuilder::DispatchMenuItemSelected(menu, item) ||
-         ((MenuBuilder*)mParentMenu.Get())->DispatchMenuItemSelected(menu, item);
+         ((MenuBuilder*)mParentMenu)->DispatchMenuItemSelected(menu, item);
 }
 
 ECode SubMenuBuilder::SetIcon(

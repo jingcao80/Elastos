@@ -133,8 +133,8 @@ ECode NativeActivity::OnCreate(
 
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
-    window->TakeSurface(this);
-    window->TakeInputQueue(this);
+    window->TakeSurface(this);      // TODO memory leak zhaohui
+    window->TakeInputQueue(this);   // TODO memory leak zhaohui
     window->SetFormat(IPixelFormat::RGB_565);
     window->SetSoftInputMode(
         IWindowManagerLayoutParams::SOFT_INPUT_STATE_UNSPECIFIED

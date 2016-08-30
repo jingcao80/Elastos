@@ -21,6 +21,8 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
+CAR_INTERFACE_IMPL(InputMonitor, Object, IWindowManagerCallbacks)
+
 InputMonitor::InputMonitor(
     /* [in] */ CWindowManagerService* service)
     : mService(service)
@@ -33,8 +35,6 @@ InputMonitor::InputMonitor(
     CRect::New((IRect**)&mTmpRect);
 }
 
-CAR_INTERFACE_IMPL(InputMonitor, Object, IWindowManagerCallbacks)
-
 ECode InputMonitor::NotifyInputChannelBroken(
     /* [in] */ IInputWindowHandle* _inputWindowHandle)
 {
@@ -45,9 +45,10 @@ ECode InputMonitor::NotifyInputChannelBroken(
     }
 
     AutoLock lock(mService->mWindowMapLock);
-    WindowState* windowState = (WindowState*)inputWindowHandle->mWindowState;
-    if (windowState != NULL) {
-        // Slog.i(WindowManagerService.TAG, "WINDOW DIED " + windowState);
+    AutoPtr<IWindowState> ws = inputWindowHandle->GetWindowState();
+    if (ws) {
+        WindowState* windowState = (WindowState*)ws.Get();
+        Slogger::I(CWindowManagerService::TAG, "WINDOW DIED %s", TO_CSTR(windowState));
         mService->RemoveWindowLocked(windowState->mSession, windowState);
     }
 
@@ -73,8 +74,9 @@ ECode InputMonitor::NotifyANR(
         AutoLock lock(mService->mWindowMapLock);
 
         if (inputWindowHandle != NULL) {
-            windowState = (WindowState*)inputWindowHandle->mWindowState;
-            if (windowState != NULL) {
+            AutoPtr<IWindowState> ws = inputWindowHandle->GetWindowState();
+            if (ws) {
+                windowState = (WindowState*)ws.Get();
                 appWindowToken = windowState->mAppToken;
             }
         }
@@ -145,21 +147,21 @@ ECode InputMonitor::NotifyANR(
 }
 
 void InputMonitor::AddInputWindowHandleLw(
-    /* [in] */ InputWindowHandle* windowHandle)
+    /* [in] */ IInputWindowHandle* windowHandle)
 {
     if (mInputWindowHandles == NULL) {
-        mInputWindowHandles = ArrayOf<InputWindowHandle*>::Alloc(16);
+        mInputWindowHandles = ArrayOf<IInputWindowHandle*>::Alloc(16);
     }
     if (mInputWindowHandleCount >= mInputWindowHandles->GetLength()) {
-        AutoPtr<ArrayOf<InputWindowHandle*> > temp = mInputWindowHandles;
-        mInputWindowHandles = ArrayOf<InputWindowHandle*>::Alloc(mInputWindowHandleCount * 2);
+        AutoPtr<ArrayOf<IInputWindowHandle*> > temp = mInputWindowHandles;
+        mInputWindowHandles = ArrayOf<IInputWindowHandle*>::Alloc(mInputWindowHandleCount * 2);
         mInputWindowHandles->Copy(temp);
     }
     mInputWindowHandles->Set(mInputWindowHandleCount++, windowHandle);
 }
 
 void InputMonitor::AddInputWindowHandleLw(
-    /* [in] */ InputWindowHandle* inputWindowHandle,
+    /* [in] */ IInputWindowHandle* _inputWindowHandle,
     /* [in] */ WindowState* child,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 privateFlags,
@@ -168,6 +170,7 @@ void InputMonitor::AddInputWindowHandleLw(
     /* [in] */ Boolean hasFocus,
     /* [in] */ Boolean hasWallpaper)
 {
+    InputWindowHandle* inputWindowHandle = (InputWindowHandle*)_inputWindowHandle;
     // Add a window to our list of input windows.
     child->ToString(&inputWindowHandle->mName);
     Boolean modal = (flags & (IWindowManagerLayoutParams::FLAG_NOT_TOUCH_MODAL
@@ -199,10 +202,8 @@ void InputMonitor::AddInputWindowHandleLw(
     child->mAttrs->GetInputFeatures(&inputWindowHandle->mInputFeatures);
 
     AutoPtr<IRect> frame = child->mFrame;
-    frame->GetLeft(&inputWindowHandle->mFrameLeft);
-    frame->GetTop(&inputWindowHandle->mFrameTop);
-    frame->GetRight(&inputWindowHandle->mFrameRight);
-    frame->GetBottom(&inputWindowHandle->mFrameBottom);
+    frame->Get(&inputWindowHandle->mFrameLeft, &inputWindowHandle->mFrameTop,
+        &inputWindowHandle->mFrameRight, &inputWindowHandle->mFrameBottom);
 
     if (child->mGlobalScale != 1) {
         // If we are scaling the window, input coordinates need
@@ -214,7 +215,7 @@ void InputMonitor::AddInputWindowHandleLw(
         inputWindowHandle->mScaleFactor = 1;
     }
 
-    AddInputWindowHandleLw(inputWindowHandle);
+    AddInputWindowHandleLw(_inputWindowHandle);
 }
 
 void InputMonitor::ClearInputWindowHandlesLw()
@@ -283,7 +284,7 @@ void InputMonitor::UpdateInputWindowsLw(
             windows->Get(winNdx, (IInterface**)&obj);
             AutoPtr<WindowState> child = To_WindowState(obj);
             AutoPtr<IInputChannel> inputChannel = child->mInputChannel;
-            AutoPtr<InputWindowHandle> inputWindowHandle = child->mInputWindowHandle;
+            AutoPtr<InputWindowHandle> inputWindowHandle = (InputWindowHandle*)child->mInputWindowHandle.Get();
             if (inputChannel == NULL || inputWindowHandle == NULL || child->mRemoved) {
                 // Skip this window because it cannot possibly receive input.
                 continue;
@@ -401,8 +402,14 @@ ECode InputMonitor::InterceptKeyBeforeDispatching(
     /* [in] */ Int32 policyFlags,
     /* [out] */ Int64* ret)
 {
-    AutoPtr<WindowState> windowState = focus != NULL ?
-            (WindowState*)(IWindowState*)((InputWindowHandle*)focus)->mWindowState : NULL;
+    VALIDATE_NOT_NULL(ret)
+    AutoPtr<WindowState> windowState;
+    if (focus != NULL) {
+        AutoPtr<IWindowState> ws = ((InputWindowHandle*)focus)->GetWindowState();
+        if (ws) {
+            windowState = (WindowState*)ws.Get();
+        }
+    }
     return mService->mPolicy->InterceptKeyBeforeDispatching(windowState, event, policyFlags, ret);
 }
 
@@ -413,8 +420,14 @@ ECode InputMonitor::DispatchUnhandledKey(
     /* [out] */ IKeyEvent** keyEvent)
 {
     VALIDATE_NOT_NULL(keyEvent)
-    AutoPtr<WindowState> windowState = focus != NULL ?
-            (WindowState*)(IWindowState*)((InputWindowHandle*)focus)->mWindowState : NULL;
+
+    AutoPtr<WindowState> windowState;
+    if (focus != NULL) {
+        AutoPtr<IWindowState> ws = ((InputWindowHandle*)focus)->GetWindowState();
+        if (ws) {
+            windowState = (WindowState*)ws.Get();
+        }
+    }
     return mService->mPolicy->DispatchUnhandledKey(windowState, event, policyFlags, keyEvent);
 }
 

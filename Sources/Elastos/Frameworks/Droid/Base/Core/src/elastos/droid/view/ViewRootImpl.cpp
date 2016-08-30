@@ -1399,6 +1399,7 @@ ECode ViewRootImpl::constructor(
 
 ViewRootImpl::~ViewRootImpl()
 {
+    Slogger::I(TAG, " >> Destroy ViewRootImpl: %p", this);
 }
 
 static void RunQueueDestructor(void* st)

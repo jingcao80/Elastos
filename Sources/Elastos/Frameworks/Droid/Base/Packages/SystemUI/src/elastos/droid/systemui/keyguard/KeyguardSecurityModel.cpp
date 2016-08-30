@@ -126,8 +126,9 @@ ECode KeyguardSecurityModel::GetSecurityMode(
     // *outmode = mode;
     // return NOERROR;
 
-    Logger::D("KeyguardSecurityModel", "===[snow]===just return SecurityMode_Pattern for testting until Setting APP works!");
-    *outmode = SecurityMode_Pattern;
+    // Logger::D("KeyguardSecurityModel", "===[snow]===just return SecurityMode_Pattern for testting until Setting APP works!");
+    // *outmode = SecurityMode_Pattern;
+    *outmode = SecurityMode_None;
     return NOERROR;
 }
 

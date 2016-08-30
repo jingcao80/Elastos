@@ -377,7 +377,9 @@ String ContentProvider::SetCallingPackage(
     /* [in] */ const String& callingPackage)
 {
     String original = GetTlsCallingPackage();
-    SetTlsCallingPackage(callingPackage);
+    if (!original.Equals(callingPackage)) {
+        SetTlsCallingPackage(callingPackage);
+    }
     return original;
 }
 

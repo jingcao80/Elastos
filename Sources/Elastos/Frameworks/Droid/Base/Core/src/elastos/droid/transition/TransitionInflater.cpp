@@ -75,7 +75,8 @@ ECode TransitionInflater::InflateTransition(
     mContext->GetResources((IResources**)&res);
     AutoPtr<IXmlResourceParser> parser;
     res->GetXml(resource, (IXmlResourceParser**)&parser);
-    AutoPtr<ITransition> p = CreateTransitionFromXml(IXmlPullParser::Probe(parser), Xml::AsAttributeSet(IXmlPullParser::Probe(parser)), NULL);
+    IXmlPullParser* xpp = IXmlPullParser::Probe(parser);
+    AutoPtr<ITransition> p = CreateTransitionFromXml(xpp, Xml::AsAttributeSet(xpp), NULL);
     *result = p;
     REFCOUNT_ADD(*result)
     parser->Close();
@@ -93,7 +94,8 @@ ECode TransitionInflater::InflateTransitionManager(
     mContext->GetResources((IResources**)&res);
     AutoPtr<IXmlResourceParser> parser;
     res->GetXml(resource, (IXmlResourceParser**)&parser);
-    AutoPtr<ITransitionManager> p = CreateTransitionManagerFromXml(IXmlPullParser::Probe(parser), Xml::AsAttributeSet(IXmlPullParser::Probe(parser)), sceneRoot);
+    IXmlPullParser* xpp = IXmlPullParser::Probe(parser);
+    AutoPtr<ITransitionManager> p = CreateTransitionManagerFromXml(xpp, Xml::AsAttributeSet(xpp), sceneRoot);
     *result = p;
     REFCOUNT_ADD(*result)
     parser->Close();

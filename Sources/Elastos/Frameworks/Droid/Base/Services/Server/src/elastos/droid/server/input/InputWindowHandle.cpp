@@ -4,6 +4,7 @@
 #include <utils/threads.h>
 
 using Elastos::Droid::Graphics::CRegion;
+using Elastos::Droid::View::EIID_IWindowState;
 
 namespace Elastos {
 namespace Droid {
@@ -19,7 +20,6 @@ InputWindowHandle::InputWindowHandle(
     /* [in] */ IWindowState* windowState,
     /* [in] */ Int32 displayId)
     : mInputApplicationHandle(inputApplicationHandle)
-    , mWindowState(windowState)
     , mLayoutParamsFlags(0)
     , mLayoutParamsPrivateFlags(0)
     , mLayoutParamsType(0)
@@ -42,6 +42,8 @@ InputWindowHandle::InputWindowHandle(
     , mPtr(0)
 {
     CRegion::New((IRegion**)&mTouchableRegion);
+    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(windowState);
+    wrs->GetWeakReference((IWeakReference**)&mWeakWindowState);
 }
 
 InputWindowHandle::~InputWindowHandle()
@@ -51,6 +53,13 @@ InputWindowHandle::~InputWindowHandle()
     //} finally {
     //    super.finalize();
     //}
+}
+
+AutoPtr<IWindowState> InputWindowHandle::GetWindowState()
+{
+    AutoPtr<IWindowState> obj;
+    mWeakWindowState->Resolve(EIID_IWindowState, (IInterface**)&obj);
+    return obj;
 }
 
 void InputWindowHandle::NativeDispose()

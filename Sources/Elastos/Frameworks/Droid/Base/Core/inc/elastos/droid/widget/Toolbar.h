@@ -566,7 +566,7 @@ private:
 
     AutoPtr<IActionMenuViewOnMenuItemClickListener> mMenuViewItemClickListener;//
 
-    AutoPtr<IToolbarWidgetWrapper> mWrapper;
+    AutoPtr<IWeakReference> mWeakWrapper;
     AutoPtr<IActionMenuPresenter> mOuterActionMenuPresenter;
     AutoPtr<ExpandedActionViewMenuPresenter> mExpandedMenuPresenter;
     AutoPtr<IMenuPresenterCallback> mActionMenuPresenterCallback;

@@ -901,7 +901,7 @@ static void HandleInputChannelDisposed(
 
 ECode CInputManagerService::NativeRegisterInputChannel(
     /* [in] */ IInputChannel* inputChannelObj,
-    /* [in] */ InputWindowHandle* inputWindowHandleObj,
+    /* [in] */ IInputWindowHandle* inputWindowHandleObj,
     /* [in] */ Boolean monitor)
 {
     Handle64 ptr;
@@ -914,7 +914,7 @@ ECode CInputManagerService::NativeRegisterInputChannel(
     }
 
     android::sp<android::InputWindowHandle> inputWindowHandle =
-            GetNativeInputWindowHandle(inputWindowHandleObj);
+            GetNativeInputWindowHandle((InputWindowHandle*)inputWindowHandleObj);
 
     android::status_t status = mPtr->registerInputChannel(
             inputChannel, inputWindowHandle, monitor);
@@ -1022,7 +1022,7 @@ Int32 CInputManagerService::NativeInjectInputEvent(
 }
 
 void CInputManagerService::NativeSetInputWindows(
-    /* [in] */ ArrayOf<InputWindowHandle*>* windowHandles)
+    /* [in] */ ArrayOf<IInputWindowHandle*>* windowHandles)
 {
     mPtr->setInputWindows(windowHandles);
 }
@@ -1426,7 +1426,7 @@ ECode CInputManagerService::MonitorInput(
  */
 ECode CInputManagerService::RegisterInputChannel(
     /* [in] */ IInputChannel* inputChannel,
-    /* [in] */ InputWindowHandle* inputWindowHandle)
+    /* [in] */ IInputWindowHandle* inputWindowHandle)
 {
     if (inputChannel == NULL) {
         Slogger::E(TAG, "inputChannel must not be NULL");
@@ -2453,7 +2453,7 @@ void CInputManagerService::HandleSwitchKeyboardLayout(
 }
 
 void CInputManagerService::SetInputWindows(
-    /* [in] */ ArrayOf<InputWindowHandle*>* windowHandles)
+    /* [in] */ ArrayOf<IInputWindowHandle*>* windowHandles)
 {
     NativeSetInputWindows(windowHandles);
 }

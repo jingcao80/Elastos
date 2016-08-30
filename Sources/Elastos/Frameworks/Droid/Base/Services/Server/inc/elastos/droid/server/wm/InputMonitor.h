@@ -5,14 +5,12 @@
 #define HASH_FOR_OS
 #include "elastos/droid/ext/frameworkhash.h"
 #include "elastos/droid/server/wm/WindowToken.h"
-#include "elastos/droid/server/input/InputWindowHandle.h"
 #include "elastos/droid/server/input/CInputManagerService.h"
 
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::Server::Input::IWindowManagerCallbacks;
 using Elastos::Droid::Server::Input::IInputApplicationHandle;
-using Elastos::Droid::Server::Input::InputWindowHandle;
 using Elastos::Droid::Server::Input::IInputWindowHandle;
 
 namespace Elastos {
@@ -134,10 +132,10 @@ public:
 
 private:
     CARAPI_(void) AddInputWindowHandleLw(
-        /* [in] */ InputWindowHandle* windowHandle);
+        /* [in] */ IInputWindowHandle* windowHandle);
 
     CARAPI_(void) AddInputWindowHandleLw(
-        /* [in] */ InputWindowHandle* inputWindowHandle,
+        /* [in] */ IInputWindowHandle* inputWindowHandle,
         /* [in] */ WindowState* child,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 privateFlags,
@@ -154,7 +152,7 @@ public:
     AutoPtr<IRect> mTmpRect;
 
 private:
-    AutoPtr<CWindowManagerService> mService;
+    CWindowManagerService* mService;
 
     // Current window with input focus for keys and other non-touch events.  May be null.
     AutoPtr<WindowState> mInputFocus;
@@ -171,7 +169,7 @@ private:
     Boolean mUpdateInputWindowsNeeded;
 
     // Array of window handles to provide to the input dispatcher.
-    AutoPtr< ArrayOf<InputWindowHandle*> > mInputWindowHandles;
+    AutoPtr< ArrayOf<IInputWindowHandle*> > mInputWindowHandles;
     Int32 mInputWindowHandleCount;
 
     // Set to true when the first input device configuration change notification
