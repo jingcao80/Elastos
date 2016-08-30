@@ -15,5 +15,3 @@ DIRS += Base/Packages/
 DIRS += JavaProxy
 DIRS += DevSamples
 #DIRS += Commands
-DIRS += Support/V4/
-
