@@ -3,10 +3,11 @@
 #include "elastos/droid/server/am/BaseErrorDialog.h"
 #include "elastos/droid/R.h"
 
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
 using Elastos::Droid::R;
+using Elastos::Droid::App::EIID_IAlertDialog;
 using Elastos::Droid::Os::CHandler;
+using Elastos::Core::CString;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -18,9 +19,9 @@ const Int32 BaseErrorDialog::DISABLE_BUTTONS= 0;
 
 BaseErrorDialog::MyHandler::MyHandler(
     /* [in] */ BaseErrorDialog* service)
-    : mHost(service)
 {
     Handler::constructor();
+    service->GetWeakReference((IWeakReference**)&mHost);
 }
 
 ECode BaseErrorDialog::MyHandler::HandleMessage(
@@ -29,10 +30,16 @@ ECode BaseErrorDialog::MyHandler::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
 
+    AutoPtr<IAlertDialog> dialog;
+    mHost->Resolve(EIID_IAlertDialog, (IInterface**)&dialog);
+    if (dialog == NULL) return NOERROR;
+
+    BaseErrorDialog* host = (BaseErrorDialog*)dialog.Get();
     if (what == ENABLE_BUTTONS) {
-        mHost->HandleOnStartMessage();
-    } else if (what == DISABLE_BUTTONS) {
-        mHost->SetEnabled(FALSE);
+        host->HandleOnStartMessage();
+    }
+    else if (what == DISABLE_BUTTONS) {
+        host->SetEnabled(FALSE);
     }
 
     return NOERROR;

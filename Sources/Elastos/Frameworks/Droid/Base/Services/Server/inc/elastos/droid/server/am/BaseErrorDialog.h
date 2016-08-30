@@ -30,7 +30,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        BaseErrorDialog* mHost;
+        AutoPtr<IWeakReference> mHost;
     };
 
 public:
