@@ -1587,8 +1587,7 @@ AutoPtr<ViewPager::ItemInfo> ViewPager::InfoForAnyChild(
     /* [in] */ IView* child)
 {
     AutoPtr<IViewParent> parent;
-    child->GetParent((IViewParent**)&parent);
-    while (parent.Get() != IViewParent::Probe(this)) {
+    while (parent = NULL, child->GetParent((IViewParent**)&parent), parent.Get() != IViewParent::Probe(this)) {
         if (parent == NULL || IView::Probe(parent) == NULL) {
             return NULL;
         }
