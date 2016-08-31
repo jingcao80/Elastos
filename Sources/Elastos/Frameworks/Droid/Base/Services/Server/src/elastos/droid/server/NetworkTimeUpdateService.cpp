@@ -56,6 +56,15 @@ namespace Server {
 //=============================================================================
 // NetworkTimeUpdateService
 //=============================================================================
+const String NetworkTimeUpdateService::TAG("NetworkTimeUpdateService");
+const Boolean NetworkTimeUpdateService::DBG = TRUE;
+const Int32 NetworkTimeUpdateService::EVENT_AUTO_TIME_CHANGED = 1;
+const Int32 NetworkTimeUpdateService::EVENT_POLL_NETWORK_TIME = 2;
+const Int32 NetworkTimeUpdateService::EVENT_NETWORK_CONNECTED = 3;
+const String NetworkTimeUpdateService::ACTION_POLL("com.android.server.NetworkTimeUpdateService.action.POLL");
+Int32 NetworkTimeUpdateService::POLL_REQUEST = 0;
+const Int64 NetworkTimeUpdateService::NOT_SET = -1;
+
 NetworkTimeUpdateService::MyHandler::MyHandler(
     /* [in] */ ILooper* l,
     /* [in] */ NetworkTimeUpdateService* host)
@@ -87,7 +96,11 @@ NetworkTimeUpdateService::NetworkTimeUpdateService()
     , mTryAgainTimesMax(0)
     , mTimeErrorThresholdMs(0)
     , mTryAgainCounter(0)
-{}
+{
+    mConnectivityReceiver = new ConnectivityReceiver(this);
+    //TODO Make the ref >= 1 always
+    AddRef();
+}
 
 ECode NetworkTimeUpdateService::constructor(
     /* [in] */ IContext *context)
@@ -129,8 +142,7 @@ ECode NetworkTimeUpdateService::SendMessage(
 {
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(event, (IMessage**)&msg);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
+    return msg->SendToTarget();
 }
 
 ECode NetworkTimeUpdateService::SystemRunning()
@@ -203,8 +215,8 @@ void NetworkTimeUpdateService::OnPollNetworkTime(
         Int64 cacheAge = 0;
         mTime->GetCacheAge(&cacheAge);
         if (cacheAge >= mPollingIntervalMs) {
-           Boolean isForceRefreshed;
-           mTime->ForceRefresh(&isForceRefreshed);
+            Boolean isForceRefreshed;
+            mTime->ForceRefresh(&isForceRefreshed);
         }
 
         // only update when NTP time is fresh
@@ -234,7 +246,8 @@ void NetworkTimeUpdateService::OnPollNetworkTime(
                 if (ntp / 1000 < Integer_MAX_VALUE) {
                     SystemClock::SetCurrentTimeMillis(ntp);
                 }
-            } else {
+            }
+            else {
                 if (DBG) {
                     StringBuilder builder("Ntp time is close enough = ");
                     builder += ntp;
@@ -242,12 +255,14 @@ void NetworkTimeUpdateService::OnPollNetworkTime(
                 }
             }
             mLastNtpFetchTime = SystemClock::GetElapsedRealtime();
-        } else {
+        }
+        else {
             // Try again shortly
             mTryAgainCounter++;
             if (mTryAgainTimesMax < 0 || mTryAgainCounter <= mTryAgainTimesMax) {
                 ResetAlarm(mPollingIntervalShorterMs);
-            } else {
+            }
+            else {
                 // Try much later
                 mTryAgainCounter = 0;
                 ResetAlarm(mPollingIntervalMs);
@@ -297,7 +312,6 @@ Boolean NetworkTimeUpdateService::IsAutomaticTimeRequested()
     return value != 0;
 }
 
-
 //====================================================================
 // NetworkTimeUpdateService::NitzReceiver
 //====================================================================
@@ -315,12 +329,12 @@ ECode NetworkTimeUpdateService::NitzReceiver::OnReceive(
     intent->GetAction(&action);
     if (ITelephonyIntents::ACTION_NETWORK_SET_TIME.Equals(action)) {
         mHost->mNitzTimeSetTime = SystemClock::GetElapsedRealtime();
-    } else if (ITelephonyIntents::ACTION_NETWORK_SET_TIMEZONE.Equals(action)) {
+    }
+    else if (ITelephonyIntents::ACTION_NETWORK_SET_TIMEZONE.Equals(action)) {
         mHost->mNitzZoneSetTime = SystemClock::GetElapsedRealtime();
     }
     return NOERROR;
 }
-
 
 //====================================================================
 // NetworkTimeUpdateService::ConnectivityReceiver
@@ -329,6 +343,7 @@ NetworkTimeUpdateService::ConnectivityReceiver::ConnectivityReceiver(
     /* [in] */ NetworkTimeUpdateService* owner)
     : mHost(owner)
 {
+    BroadcastReceiver::constructor();
 }
 
 ECode NetworkTimeUpdateService::ConnectivityReceiver::OnReceive(
@@ -354,13 +369,11 @@ ECode NetworkTimeUpdateService::ConnectivityReceiver::OnReceive(
                     (type == IConnectivityManager::TYPE_WIFI ||
                         type == IConnectivityManager::TYPE_ETHERNET) ) {
                 mHost->SendMessage(EVENT_NETWORK_CONNECTED);
-                //mHandler.obtainMessage(EVENT_NETWORK_CONNECTED).sendToTarget();
             }
         }
     }
     return NOERROR;
 }
-
 
 //====================================================================
 // NetworkTimeUpdateService::SettingsObserver
@@ -370,10 +383,10 @@ NetworkTimeUpdateService::SettingsObserver::SettingsObserver(
     /* [in] */ Int32 msg,
     /* [in] */ NetworkTimeUpdateService* owner)
 {
+    ContentObserver::constructor(handler);
     mHandler = handler;
     mMsg = msg;
     mHost = owner;
-    //ContentObserver(handler);
 }
 
 ECode NetworkTimeUpdateService::SettingsObserver::Observe(

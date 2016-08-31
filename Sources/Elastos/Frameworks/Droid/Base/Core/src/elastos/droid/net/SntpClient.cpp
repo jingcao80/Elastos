@@ -54,7 +54,7 @@ ECode SntpClient::RequestTime(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
+    *result = TRUE;
 
     AutoPtr<IDatagramSocket> socket;
     //try {
@@ -136,13 +136,12 @@ ECode SntpClient::RequestTime(
 _EXIT_:
     if (FAILED(ec)) {
         Slogger::E(TAG, "request time failed: %08x", ec);
+        *result = FALSE;
     }
 
     //finally...
     socket->Close();
-
-    *result = TRUE;
-    return ec;
+    return NOERROR;
 }
 
 ECode SntpClient::GetNtpTime(
@@ -190,7 +189,8 @@ ECode SntpClient::Read32(
     Int32 i2 = ((b2 & 0x80) == 0x80 ? (b2 & 0x7F) + 0x80 : b2);
     Int32 i3 = ((b3 & 0x80) == 0x80 ? (b3 & 0x7F) + 0x80 : b3);
 
-    return ((Int64)i0 << 24) + ((Int64)i1 << 16) + ((Int64)i2 << 8) + (Int64)i3;
+    *result = ((Int64)i0 << 24) + ((Int64)i1 << 16) + ((Int64)i2 << 8) + (Int64)i3;
+    return NOERROR;
 }
 
 ECode SntpClient::ReadTimeStamp(
@@ -204,7 +204,8 @@ ECode SntpClient::ReadTimeStamp(
     Read32(buffer, offset, &seconds);
     Int64 fraction = 0;
     Read32(buffer, offset + 4, &fraction);
-    return ((seconds - OFFSET_1900_TO_1970) * 1000) + ((fraction * 1000L) / 0x100000000L);
+    *result = ((seconds - OFFSET_1900_TO_1970) * 1000) + ((fraction * 1000L) / 0x100000000L);
+    return NOERROR;
 }
 
 ECode SntpClient::WriteTimeStamp(

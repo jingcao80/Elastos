@@ -420,13 +420,13 @@ ECode AlarmManagerService::BinderService::SetTime(
 
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
-    FAIL_RETURN(context->EnforceCallingPermission(
+    FAIL_RETURN(context->EnforceCallingOrSelfPermission(
         String("android.permission.SET_TIME"),
         String("SetTime")))
 
     if (mHost->mNativeData == 0) {
         Slogger::W(TAG, "Not setting time since no alarm driver is available.");
-        return FALSE;
+        return NOERROR;
     }
 
     {    AutoLock syncLock(mHost->mLock);
@@ -440,7 +440,7 @@ ECode AlarmManagerService::BinderService::SetTimeZone(
 {
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
-    FAIL_RETURN(context->EnforceCallingPermission(
+    FAIL_RETURN(context->EnforceCallingOrSelfPermission(
         String("android.permission.SET_TIME_ZONE"),
         String("SetTimeZone")))
 
@@ -671,9 +671,8 @@ Boolean AlarmManagerService::Batch::Remove(
     Boolean didRemove = FALSE;
     Int64 newStart = 0;  // recalculate endpoints as we go
     Int64 newEnd = Elastos::Core::Math::INT64_MAX_VALUE;
-    Int32 N;
-    mAlarms->GetSize(&N);
-    for (Int32 i = 0; i < N;) {
+    Int32 N = 0;
+    for (Int32 i = 0; i < (mAlarms->GetSize(&N), N);) {
         AutoPtr<IInterface> obj;
         mAlarms->Get(i, (IInterface**)&obj);
         Alarm* alarm = (Alarm*)IObject::Probe(obj);
@@ -2791,16 +2790,14 @@ Boolean AlarmManagerService::RemoveWithStatusLocked(
 {
     Boolean didRemove = FALSE;
     Int32 size = 0;
-    mAlarmBatches->GetSize(&size);
-    for (Int32 i = size - 1; i >= 0; i--) {
+    for (Int32 i = (mAlarmBatches->GetSize(&size), size) - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         mAlarmBatches->Get(i, (IInterface**)&obj);
         Batch* b = (Batch*)IObject::Probe(obj);
         AutoPtr<IArrayList> alarmList = b->mAlarms;
         AutoPtr<Alarm> alarm;
         Int32 lSize = 0;
-        alarmList->GetSize(&lSize);
-        for (Int32 j = lSize - 1; j >= 0; j--) {
+        for (Int32 j = (alarmList->GetSize(&lSize), lSize) - 1; j >= 0; j--) {
             AutoPtr<IInterface> p;
             alarmList->Get(j, (IInterface**)&p);
             alarm = (Alarm*)IObject::Probe(p);

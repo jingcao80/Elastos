@@ -11,8 +11,8 @@
 #include "elastos/droid/utility/NtpTrustedTime.h"
 
 #include "elastos/droid/provider/Settings.h"
-//#include "elastos/droid/os/SystemClock.h"
-//#include "elastos/droid/net/CSntpClient.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/net/CSntpClient.h"
 
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
@@ -25,9 +25,9 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsGlobal;
-// using Elastos::Droid::Net::ISntpClient;
-// using Elastos::Droid::Net::CSntpClient;
-//using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Net::ISntpClient;
+using Elastos::Droid::Net::CSntpClient;
+using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::Math;
 
@@ -103,25 +103,27 @@ ECode NtpTrustedTime::ForceRefresh(
         return NOERROR;
     }
 
-    // AutoPtr<ISntpClient> client;
-    // CSntpClient::New((ISntpClient**)&client);
-    // Boolean hasTime;
-    // client->RequestTime(mServer, (Int32) mTimeout, &hasTime);
-    // if (hasTime) {
-    //     mHasCache = TRUE;
-    //     client->GetNtpTime(&mCachedNtpTime);
-    //     client->GetNtpTimeReference(&mCachedNtpElapsedRealtime);
-    //     Int64 tripTime;
-    //     client->GetRoundTripTime(&tripTime);
-    //     mCachedNtpCertainty = tripTime / 2;
-    //     *isRefreshed = TRUE;
-    // }
+    AutoPtr<ISntpClient> client;
+    CSntpClient::New((ISntpClient**)&client);
+    Boolean hasTime;
+    client->RequestTime(mServer, (Int32) mTimeout, &hasTime);
+    if (hasTime) {
+        mHasCache = TRUE;
+        client->GetNtpTime(&mCachedNtpTime);
+        client->GetNtpTimeReference(&mCachedNtpElapsedRealtime);
+        Int64 tripTime;
+        client->GetRoundTripTime(&tripTime);
+        mCachedNtpCertainty = tripTime / 2;
+        *isRefreshed = TRUE;
+    }
 
     if (LOGD) {
-        if (*isRefreshed)
+        if (*isRefreshed) {
             Logger::D(TAG, "forceRefresh() has time CachedNtpCertainty %lld.", mCachedNtpCertainty);
-        else
+        }
+        else {
             Logger::D(TAG, "forceRefresh() has no time.");
+        }
     }
 
     return NOERROR;
@@ -139,12 +141,12 @@ ECode NtpTrustedTime::GetCacheAge(
     /* [out] */  Int64* cacheAge)
 {
     VALIDATE_NOT_NULL(cacheAge);
-    // if (mHasCache) {
-    //     *cacheAge = SystemClock::GetElapsedRealtime() - mCachedNtpElapsedRealtime;
-    // }
-    // else {
-    //     *cacheAge = Elastos::Core::Math::INT64_MAX_VALUE;
-    // }
+    if (mHasCache) {
+        *cacheAge = SystemClock::GetElapsedRealtime() - mCachedNtpElapsedRealtime;
+    }
+    else {
+        *cacheAge = Elastos::Core::Math::INT64_MAX_VALUE;
+    }
     return NOERROR;
 }
 

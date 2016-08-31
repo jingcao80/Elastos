@@ -493,7 +493,7 @@ ECode SystemServer::StartOtherServices()
     // AutoPtr<CBluetoothManagerService> bluetooth;
     // AutoPtr<CUsbService> usb;
     // AutoPtr<CSerialService> serial;
-    // AutoPtr<CNetworkTimeUpdateService> networkTimeUpdater;
+    AutoPtr<NetworkTimeUpdateService> networkTimeUpdater;
     // AutoPtr<CCommonTimeManagementService> commonTimeMgmtService;
     AutoPtr<CInputManagerService> inputManager;
     // AutoPtr<CTelephonyRegistry> telephonyRegistry;
@@ -1033,14 +1033,15 @@ ECode SystemServer::StartOtherServices()
     //         ReportWtf("starting SamplingProfiler Service", ec);
     //     }
 
-    //     if (!disableNetwork) {
-    //         try {
-    //             Slogger::I(TAG, "NetworkTimeUpdateService");
-    //             networkTimeUpdater = new NetworkTimeUpdateService(context);
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting NetworkTimeUpdate service", ec);
-    //         }
-    //     }
+        if (!disableNetwork) {
+            // try {
+                Slogger::I(TAG, "NetworkTimeUpdateService");
+                networkTimeUpdater = new NetworkTimeUpdateService();
+                networkTimeUpdater->constructor(context);
+            // } catch (Throwable e) {
+            //     ReportWtf("starting NetworkTimeUpdate service", ec);
+            // }
+        }
 
     //     if (!disableMedia) {
     //         try {
@@ -1310,7 +1311,7 @@ ECode SystemServer::StartOtherServices()
     bundle->mImmF = imm;
     bundle->mLocationF = location;
     bundle->mCountryDetectorF = countryDetector;
-    // bundle->mNetworkTimeUpdaterF = networkTimeUpdater;
+    bundle->mNetworkTimeUpdaterF = networkTimeUpdater;
     // bundle->mCommonTimeMgmtServiceF = commonTimeMgmtService;
     bundle->mTextServiceManagerServiceF = tsms;
     bundle->mStatusBarF = statusBar;
@@ -1446,10 +1447,10 @@ ECode SystemServer::SystemReadyRunnable::Run()
         if (FAILED(ec)) mHost->ReportWtf("Notifying CountryDetectorService running", ec);
     }
 
-    // if (mServiceBundle->mNetworkTimeUpdaterF != NULL) {
-    //     ec = mServiceBundle->mNetworkTimeUpdaterF->SystemRunning();
-    //     if (FAILED(ec)) mHost->ReportWtf("Notifying NetworkTimeService running", ec);
-    // }
+    if (mServiceBundle->mNetworkTimeUpdaterF != NULL) {
+        ec = mServiceBundle->mNetworkTimeUpdaterF->SystemRunning();
+        if (FAILED(ec)) mHost->ReportWtf("Notifying NetworkTimeService running", ec);
+    }
 
     // if (mServiceBundle->mCommonTimeMgmtServiceF != NULL) {
     //     ec = mServiceBundle->mCommonTimeMgmtServiceF->SystemRunning();

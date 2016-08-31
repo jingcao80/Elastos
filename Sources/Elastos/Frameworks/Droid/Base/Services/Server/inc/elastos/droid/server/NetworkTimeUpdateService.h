@@ -40,6 +40,7 @@ private:
             /* [in] */ IIntent* intent);
 
         TO_STRING_IMPL("NetworkTimeUpdateService::NitzReceiver: ")
+
     private:
         NetworkTimeUpdateService* mHost;
     };
@@ -118,6 +119,7 @@ private:
 
         virtual CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
     private:
         NetworkTimeUpdateService* mHost;
     };
@@ -163,9 +165,9 @@ private:
     static const String TAG;
     static const Boolean DBG;
 
-    static const Int32 EVENT_AUTO_TIME_CHANGED = 1;
-    static const Int32 EVENT_POLL_NETWORK_TIME = 2;
-    static const Int32 EVENT_NETWORK_CONNECTED = 3;
+    static const Int32 EVENT_AUTO_TIME_CHANGED;
+    static const Int32 EVENT_POLL_NETWORK_TIME;
+    static const Int32 EVENT_NETWORK_CONNECTED;
 
     static const String ACTION_POLL;
     static Int32 POLL_REQUEST;

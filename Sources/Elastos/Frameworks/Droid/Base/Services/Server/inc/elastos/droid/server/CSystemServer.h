@@ -24,6 +24,7 @@
 #include "elastos/droid/server/CNetworkScoreService.h"
 #include "elastos/droid/server/CAssetAtlasService.h"
 #include "elastos/droid/server/CThemeService.h"
+#include "elastos/droid/server/NetworkTimeUpdateService.h"
 #include <elastos/core/Singleton.h>
 #include <elastos/droid/os/Runnable.h>
 
@@ -70,7 +71,7 @@ private:
         AutoPtr<CInputMethodManagerService> mImmF;
         AutoPtr<CLocationManagerService> mLocationF;
         AutoPtr<CCountryDetectorService> mCountryDetectorF;
-        // AutoPtr<CNetworkTimeUpdateService> mNetworkTimeUpdaterF;
+        AutoPtr<NetworkTimeUpdateService> mNetworkTimeUpdaterF;
         // AutoPtr<CCommonTimeManagementService> mCommonTimeMgmtServiceF;
         AutoPtr<CTextServicesManagerService> mTextServiceManagerServiceF;
         AutoPtr<CStatusBarManagerService> mStatusBarF;

@@ -44,7 +44,8 @@ void SystemClock::Sleep(
     }
 }
 
-Boolean SystemClock::SetCurrentTimeMillis(Int64 millis)
+Boolean SystemClock::SetCurrentTimeMillis(
+    /* [in] */ Int64 millis)
 {
     AutoPtr<IInterface> service = ServiceManager::GetService(IContext::ALARM_SERVICE);
     AutoPtr<IIAlarmManager> mgr = IIAlarmManager::Probe(service);
