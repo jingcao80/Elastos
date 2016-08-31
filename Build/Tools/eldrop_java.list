@@ -22,6 +22,7 @@ Gallery2                /system/app          dir
 webview                 /system/app          dir
 Mms                     /system/app          dir
 MmsService              /system/app          dir
+Eleven                  /system/app          dir
 com.qualcomm.location   /system/app          dir
 com.qualcomm.services.location  /system/app  dir
 com.example.Location    /system/app          dir

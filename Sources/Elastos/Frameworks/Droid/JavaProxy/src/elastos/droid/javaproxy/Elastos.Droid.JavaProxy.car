@@ -66,6 +66,7 @@ module
     using interface Elastos.Droid.Media.IIRingtonePlayer;
     using interface Elastos.Droid.Media.IIAudioRoutesObserver;
     using interface Elastos.Droid.Media.IIVolumeController;
+    using interface Elastos.Droid.Media.Session.IISessionCallback;
     using interface Elastos.Droid.Net.IINetworkPolicyListener;
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IICancellationSignal;
@@ -903,6 +904,15 @@ module
             [in] Handle64 jInstance);
 
         interface IINetworkPolicyListener;
+        interface IBinder;
+    }
+
+    class CMediaSessionCallbackStubNative {
+        constructor(
+            [in] Handle64 jVM,
+            [in] Handle64 jInstance);
+
+        interface IISessionCallback;
         interface IBinder;
     }
 
