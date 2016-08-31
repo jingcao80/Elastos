@@ -551,11 +551,14 @@
 < Elastos/Packages/Apps/PackageInstaller
 
 # ==== build DevSamples ====
- Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
-> Elastos/Frameworks/Droid/DevSamples/ImageDemo
- Elastos/Frameworks/Droid/DevSamples/TabHostDemo Elastos.DevSamples.TabHostDemo.car
-> Elastos/Frameworks/Droid/DevSamples/TabHostDemo
- Elastos/Frameworks/Droid/DevSamples/TextViewDemo Elastos.DevSamples.TextViewDemo.car
-> Elastos/Frameworks/Droid/DevSamples/TextViewDemo
+  Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
+  Elastos/Frameworks/Droid/DevSamples/ImageDemo R.cpp
+< Elastos/Frameworks/Droid/DevSamples/ImageDemo
+  Elastos/Frameworks/Droid/DevSamples/TabHostDemo Elastos.DevSamples.TabHostDemo.car
+  Elastos/Frameworks/Droid/DevSamples/TabHostDemo R.cpp
+< Elastos/Frameworks/Droid/DevSamples/TabHostDemo
+  Elastos/Frameworks/Droid/DevSamples/TextViewDemo Elastos.DevSamples.TextViewDemo.car
+  Elastos/Frameworks/Droid/DevSamples/TextViewDemo R.cpp
+< Elastos/Frameworks/Droid/DevSamples/TextViewDemo
 
 > Elastos
