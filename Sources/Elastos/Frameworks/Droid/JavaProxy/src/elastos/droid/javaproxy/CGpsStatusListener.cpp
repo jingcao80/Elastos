@@ -155,7 +155,7 @@ ECode CGpsStatusListener::OnNmeaReceived(
     jclass c = env->FindClass("android/location/IGpsStatusListener");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IGpsStatusListener %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "onNmeaReceived", "(ILjava/lang/String;)V");
+    jmethodID m = env->GetMethodID(c, "onNmeaReceived", "(JLjava/lang/String;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: onNmeaReceived %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, timestamp, jnmea);
