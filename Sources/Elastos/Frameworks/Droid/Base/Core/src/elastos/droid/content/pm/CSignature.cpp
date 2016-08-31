@@ -46,10 +46,7 @@ ECode CSignature::constructor(
 ECode CSignature::constructor(
     /* [in] */ const String& text)
 {
-    AutoPtr<ArrayOf<Char16> > utf16str = text.GetChar16s();
-    Int32 size = utf16str->GetLength() * sizeof(Char16);
-    AutoPtr<ArrayOf<Byte> > input = ArrayOf<Byte>::Alloc(size);
-    input->Copy((const Byte*)utf16str->GetPayload(), size);
+    AutoPtr<ArrayOf<Byte> > input = text.GetBytes();
     const Int32 N = input->GetLength();
 
     if (N % 2 != 0) {

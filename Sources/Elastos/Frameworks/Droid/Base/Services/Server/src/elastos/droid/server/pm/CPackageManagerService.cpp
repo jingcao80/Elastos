@@ -8630,6 +8630,10 @@ ECode CPackageManagerService::GetPersistentApplications(
                     AutoPtr<IApplicationInfo> ai = PackageParser::GenerateApplicationInfo(p, flags,
                             ps->ReadUserState(userId), userId);
                     if (ai != NULL) {
+                        // add by xihao, 2016.8.26
+                        if (p->mPackageName.Equals("com.qualcomm.location")) {
+                            ai->SetSeinfo(String("elsystem"));
+                        }
                         finalList->Add(ai);
                     }
                 }

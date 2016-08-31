@@ -155,6 +155,8 @@ Boolean SELinuxMMAC::ReadInstallPolicy()
     Xml::NewPullParser((IXmlPullParser**)&parser);
     parser->SetInput(policyFile);
 
+    XmlUtils::BeginDocument(parser, String("policy"));
+
     ECode ec = NOERROR;
     String nullStr;
     Int32 type;
@@ -206,7 +208,7 @@ Boolean SELinuxMMAC::ReadInstallPolicy()
             ec = ReadPolicyTags(parser, (Policy**)&policy);
             if (FAILED(ec)) break;
             if (policy->IsValid()) {
-                sSigSeinfo[signature] = policy;
+                sigSeinfo[signature] = policy;
             }
         }
         else if (tagName.Equals("default")) {
