@@ -534,8 +534,7 @@ void CRunningServiceDetails::AddServiceDetailsView(
     }
 
     Int32 clientLabel;
-    si->mRunningService->GetClientLabel(&clientLabel);
-    if (si != NULL && clientLabel != 0) {
+    if (si != NULL && (si->mRunningService->GetClientLabel(&clientLabel), clientLabel) != 0) {
         AutoPtr<IComponentName> service;
         si->mRunningService->GetService((IComponentName**)&service);
         mAm->GetRunningServiceControlPanel(service, (IPendingIntent**)&(detail->mManageIntent));
