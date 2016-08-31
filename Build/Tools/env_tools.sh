@@ -156,6 +156,15 @@ start_copy ()
     fi
 }
 
+function clean_r ()
+{
+    local TARGET_DIR="Elastos/Frameworks/Droid/Base/Packages Elastos/Packages Elastos/Frameworks/Droid/DevSamples"
+    for I in $TARGET_DIR; do
+        find $XDK_SOURCE_PATH/$I -name "R.cpp" |  grep -v bak | grep -v jpk | xargs -i rm -f {} 1>/dev/null 2>/dev/null
+        find $XDK_SOURCE_PATH/$I -name "R.h" |  grep -v bak | grep -v jpk | xargs -i rm -f {} 1>/dev/null 2>/dev/null
+    done
+}
+
 function elrsh ()
 {
     if [ "$XDK_TARGET_PLATFORM-$XDK_TARGET_CPU" == "android-arm" ]; then
