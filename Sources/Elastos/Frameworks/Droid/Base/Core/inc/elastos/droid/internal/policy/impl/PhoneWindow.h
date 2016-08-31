@@ -717,7 +717,7 @@ public:
         Int32 mY;
         Int32 mWindowAnimations;
         /** Dynamic state of the panel. */
-        AutoPtr<DecorView> mDecorView;
+        DecorView* mDecorView;
         /** The panel that was returned by onCreatePanelView(). */
         AutoPtr<IView> mCreatedPanelView;
         /** The panel that we are actually showing. */

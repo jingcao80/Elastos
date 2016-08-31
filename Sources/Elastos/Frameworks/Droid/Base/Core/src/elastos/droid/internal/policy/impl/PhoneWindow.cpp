@@ -2251,53 +2251,53 @@ ECode PhoneWindow::DecorView::constructor(
 PInterface PhoneWindow::DecorView::Probe(
    /* [in] */ REIID riid)
 {
-   return _DecorView::Probe(riid);
+    return _DecorView::Probe(riid);
 }
 
 ECode PhoneWindow::DecorView::GetInterfaceID(
    /* [in] */ IInterface *pObject,
    /* [out] */ InterfaceID *pIID)
 {
-   return _DecorView::GetInterfaceID(pObject, pIID);
+    return _DecorView::GetInterfaceID(pObject, pIID);
 }
 
 UInt32 PhoneWindow::DecorView::AddRef()
 {
-   if (mUseSelfRef)
-       return ElRefBase::AddRef();
-   else {
-       assert(mHost != NULL);
-       return mHost->AddRef();
-   }
+    if (mUseSelfRef)
+        return ElRefBase::AddRef();
+    else {
+        assert(mHost != NULL);
+        return mHost->AddRef();
+    }
 }
 
 UInt32 PhoneWindow::DecorView::Release()
 {
-   if (mUseSelfRef)
-       return ElRefBase::Release();
-   else {
-       assert(mHost != NULL);
-       return mHost->Release();
-   }
+    if (mUseSelfRef)
+        return ElRefBase::Release();
+    else {
+        assert(mHost != NULL);
+        return mHost->Release();
+    }
 }
 
 UInt32 PhoneWindow::DecorView::_AddRef()
 {
-   return ElRefBase::AddRef();
+    return ElRefBase::AddRef();
 }
 
 UInt32 PhoneWindow::DecorView::_Release()
 {
-   return ElRefBase::Release();
+    return ElRefBase::Release();
 }
 
 ECode PhoneWindow::DecorView::GetWeakReference(
    /* [out] */ IWeakReference** weakReference)
 {
-   VALIDATE_NOT_NULL(weakReference)
-   *weakReference = new DecorViewWeakReferenceImpl(Probe(EIID_IInterface), CreateWeak(this));
-   REFCOUNT_ADD(*weakReference)
-   return NOERROR;
+    VALIDATE_NOT_NULL(weakReference)
+    *weakReference = new DecorViewWeakReferenceImpl(Probe(EIID_IInterface), CreateWeak(this));
+    REFCOUNT_ADD(*weakReference)
+    return NOERROR;
 }
 
 //=====================================================================
@@ -2356,6 +2356,7 @@ PhoneWindow::PanelFeatureState::PanelFeatureState(
     , mX(0)
     , mY(0)
     , mWindowAnimations(0)
+    , mDecorView(NULL)
     , mIsCompact(FALSE)
     , mListPresenterTheme(0)
     , mIsPrepared(FALSE)
@@ -2382,14 +2383,12 @@ ECode PhoneWindow::PanelFeatureState::HasPanelItems(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (mShownPanelView == NULL)
-    {
+    if (mShownPanelView == NULL) {
         *result = FALSE;
         return NOERROR;
     }
 
-    if (mCreatedPanelView != NULL)
-    {
+    if (mCreatedPanelView != NULL) {
         *result = TRUE;
         return NOERROR;
     }
@@ -2677,7 +2676,7 @@ ECode PhoneWindow::DialogMenuCallback::OnOpenSubMenu(
     subMenu->SetCallback(this);
 
     // The window manager will give us a valid window token
-     CMenuDialogHelper::New(subMenu, (IMenuDialogHelper**)&mSubMenuHelper);
+    CMenuDialogHelper::New(subMenu, (IMenuDialogHelper**)&mSubMenuHelper);
     mSubMenuHelper->Show(NULL);
 
     *state = TRUE;
@@ -3214,20 +3213,17 @@ ECode PhoneWindow::SetContentView(
     if (mContentParent == NULL) {
         InstallDecor();
     }
-    else if (!hFeature)
-    {
+    else if (!hFeature) {
         mContentParent->RemoveAllViews();
     }
 
-    if (hFeature)
-    {
+    if (hFeature) {
         view->SetLayoutParams(params);
         AutoPtr<IScene> newScene;
         CScene::New(mContentParent, view, (IScene**)&newScene);
         TransitionTo(newScene);
     }
-    else
-    {
+    else {
         mContentParent->AddView(view, params);
     }
 
@@ -3250,8 +3246,7 @@ ECode PhoneWindow::AddContentView(
 
     Boolean hFeature = FALSE;
     HasFeature(FEATURE_CONTENT_TRANSITIONS, &hFeature);
-    if (hFeature)
-    {
+    if (hFeature) {
         Logger::V(TAG, "addContentView does not support content transitions");
     }
 
@@ -3822,7 +3817,7 @@ void PhoneWindow::OpenPanel(
 
     ((CWindowManagerLayoutParams*)wlp.Get())->mWindowAnimations = st->mWindowAnimations;
 
-    IViewManager::Probe(wm)->AddView((IView*)st->mDecorView.Get(), IViewGroupLayoutParams::Probe(wlp));
+    IViewManager::Probe(wm)->AddView((IView*)st->mDecorView, IViewGroupLayoutParams::Probe(wlp));
     st->mIsOpen = TRUE;
    // Log.v(TAG, "Adding main menu to window manager.");
 }
@@ -3870,7 +3865,7 @@ ECode PhoneWindow::ClosePanel(
     GetWindowManager((IWindowManager**)&wm);
     if ((wm != NULL) && st->mIsOpen) {
         if (st->mDecorView != NULL) {
-            IViewManager::Probe(wm)->RemoveView((IView*)st->mDecorView.Get());
+            IViewManager::Probe(wm)->RemoveView((IView*)st->mDecorView);
             // Log.v(TAG, "Removing main menu from window manager.");
             if (st->mIsCompact) {
                 sRotationWatcher->RemoveWindow(this);
@@ -3905,6 +3900,7 @@ ECode PhoneWindow::ClosePanel(
     // PhoneWindow->CListMenuPresenter->Activity->PhoneWindow
     // CMenuBuilder->CListMenuPresenter->CMenuBuilder, and so on
     //
+    Slogger::I(TAG, " >> ClosePanel Clear PanelFeatureState %s", TO_CSTR(st));
     st->SetMenu(NULL);
     mPanels->Set(st->mFeatureId, NULL);
 
@@ -5874,7 +5870,7 @@ void PhoneWindow::InstallDecor()
             if (mTitleView != NULL) {
                 Int32 direction = 0;
                 mDecor->GetLayoutDirection(&direction);
-                IView::Probe(mTitleView)->SetLayoutDirection(direction);
+                obj->SetLayoutDirection(direction);
                 if ((GetLocalFeatures() & (1 << IWindow::FEATURE_NO_TITLE)) != 0) {
                     AutoPtr<IView> titleContainer;
                     FindViewById(R::id::title_container,
@@ -5883,7 +5879,7 @@ void PhoneWindow::InstallDecor()
                         titleContainer->SetVisibility(IView::GONE);
                     }
                     else {
-                        IView::Probe(mTitleView)->SetVisibility(IView::GONE);
+                        obj->SetVisibility(IView::GONE);
                     }
                     if (IFrameLayout::Probe(mContentParent) != NULL) {
                         IFrameLayout::Probe(mContentParent)->SetForeground(NULL);

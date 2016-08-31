@@ -136,8 +136,7 @@ ECode ListMenuPresenter::OnItemClickListener::OnItemClick(
     return mOwner->OnItemClick(parent, v, position, id);
 }
 
-CAR_INTERFACE_IMPL_3(ListMenuPresenter, Object, IListMenuPresenter,
-    IMenuPresenter, IAdapterViewOnItemClickListener)
+CAR_INTERFACE_IMPL_2(ListMenuPresenter, Object, IListMenuPresenter, IMenuPresenter)
 
 ListMenuPresenter::ListMenuPresenter()
     : mThemeRes(0)
@@ -145,6 +144,11 @@ ListMenuPresenter::ListMenuPresenter()
     , mItemIndexOffset(0)
     , mId(0)
 {}
+
+ListMenuPresenter::~ListMenuPresenter()
+{
+    Logger::I(TAG, " >> Destory ListMenuPresenter: %p", this);
+}
 
 ECode ListMenuPresenter::constructor(
     /* [in] */ IContext* ctx,

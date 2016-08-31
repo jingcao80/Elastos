@@ -21,6 +21,7 @@ namespace Internal {
 namespace View {
 
 CAR_INTERFACE_IMPL(StandaloneActionMode::MenuBuilderCallback, Object, IMenuBuilderCallback)
+
 StandaloneActionMode::MenuBuilderCallback::MenuBuilderCallback(
     /* [in] */ StandaloneActionMode* owner)
     : mOwner(owner)
@@ -40,9 +41,6 @@ ECode StandaloneActionMode::MenuBuilderCallback::OnMenuModeChange(
 {
     return mOwner->OnMenuModeChange(menu);
 }
-
-CAR_INTERFACE_IMPL(StandaloneActionMode, ActionMode, IMenuBuilderCallback);
-
 StandaloneActionMode::StandaloneActionMode()
     : mFinished(FALSE)
     , mFocusable(FALSE)

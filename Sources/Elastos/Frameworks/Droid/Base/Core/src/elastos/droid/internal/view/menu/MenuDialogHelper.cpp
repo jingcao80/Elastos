@@ -71,8 +71,6 @@ ECode MenuDialogHelper::Listener::OnOpenSubMenu(
     return mOwner->OnOpenSubMenu(subMenu, result);
 }
 
-CAR_INTERFACE_IMPL_4(MenuDialogHelper, Object, IDialogInterfaceOnKeyListener,
-    IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener, IMenuPresenterCallback)
 
 ECode MenuDialogHelper::constructor(
     /* [in] */ IMenuBuilder* menu)

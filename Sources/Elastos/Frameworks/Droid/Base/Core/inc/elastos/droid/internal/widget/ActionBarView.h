@@ -595,7 +595,7 @@ private:
     Boolean mIncludeTabs;
     Boolean mIsCollapsible;
     Boolean mWasHomeEnabled;
-    AutoPtr<IMenuBuilder> mOptionsMenu;
+    IMenuBuilder* mOptionsMenu;
     Boolean mMenuPrepared;
     AutoPtr<IActionBarContextView> mContextView;
     AutoPtr<IActionMenuItem> mLogoNavItem;

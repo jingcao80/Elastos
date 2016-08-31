@@ -16,7 +16,6 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.View.Menu.IMenuPresenter
-     * interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener
      */
     [local]
     interface IListMenuPresenter {

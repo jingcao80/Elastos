@@ -45,14 +45,12 @@ class MenuBuilder
     , public IMenuBuilder
     , public IMenu
 {
-    // friend class ActionMenuPresenter;
-    // friend class IconMenuPresenter;
-    // friend class ListMenuPresenter;
-    // friend class MenuItemImpl;
 public:
+    CAR_INTERFACE_DECL()
+
     MenuBuilder();
 
-    CAR_INTERFACE_DECL()
+    ~MenuBuilder();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -874,7 +872,7 @@ private:
 
     // In order to use convenient
     // AutoPtr<ICopyOnWriteArrayList> mPresenters;
-    AutoPtr<IList> mPresenters;
+    AutoPtr<IList> mPresenters; // weak-ref of IMenuPresenter
 
     /**
      * Currently expanded menu item; must be collapsed when we clear.

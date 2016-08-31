@@ -23,7 +23,6 @@ namespace View {
 
 class StandaloneActionMode
     : public ActionMode
-    , public IMenuBuilderCallback
 {
 private:
     class MenuBuilderCallback
@@ -50,8 +49,6 @@ private:
 
 public:
     StandaloneActionMode();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context,

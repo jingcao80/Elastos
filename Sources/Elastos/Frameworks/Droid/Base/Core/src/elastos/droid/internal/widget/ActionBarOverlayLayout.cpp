@@ -46,36 +46,6 @@ const String ActionBarOverlayLayout::TAG("ActionBarOverlayLayout");
 //=====================================================================
 CAR_INTERFACE_IMPL(ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams, ViewGroup::MarginLayoutParams, IActionBarOverlayLayoutLayoutParams)
 
-ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::ActionBarOverlayLayoutLayoutParams()
-{
-}
-
-ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
-    /* [in] */ IContext* c,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return ViewGroup::MarginLayoutParams::constructor(c, attrs);
-}
-
-ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height)
-{
-    return ViewGroup::MarginLayoutParams::constructor(width, height);
-}
-
-ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
-    /* [in] */ IViewGroupLayoutParams* source)
-{
-    return ViewGroup::MarginLayoutParams::constructor(source);
-}
-
-ECode ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams::constructor(
-    /* [in] */ IViewGroupMarginLayoutParams* source)
-{
-    return ViewGroup::MarginLayoutParams::constructor(source);
-}
-
 //=====================================================================
 //         ActionBarOverlayLayout::TopAnimatorListenerAdapter
 //=====================================================================
@@ -255,6 +225,11 @@ ActionBarOverlayLayout::ActionBarOverlayLayout()
 
     mRemoveActionBarHideOffset = new InnerRunnable(this);
     mAddActionBarHideOffset = new InnerRunnable1(this);
+}
+
+ActionBarOverlayLayout::~ActionBarOverlayLayout()
+{
+    Logger::I(TAG, " >> Destroy ActionBarOverlayLayout: %p", this);
 }
 
 ECode ActionBarOverlayLayout::constructor(

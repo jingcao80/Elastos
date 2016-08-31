@@ -145,8 +145,12 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("Toolbar::ExpandedActionViewMenuPresenter")
+
         ExpandedActionViewMenuPresenter(
             /* [in] */ Toolbar* host);
+
+        ~ExpandedActionViewMenuPresenter();
 
         CARAPI InitForMenu(
             /* [in] */ IContext* ctx,
@@ -226,13 +230,15 @@ private:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<Toolbar> mHost;
+        Toolbar* mHost;
     };
 
 public:
     CAR_INTERFACE_DECL()
 
     Toolbar();
+
+    ~Toolbar();
 
     CARAPI constructor(
         /* [in] */ IContext* context,

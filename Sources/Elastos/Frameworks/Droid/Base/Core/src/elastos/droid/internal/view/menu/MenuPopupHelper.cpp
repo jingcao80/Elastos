@@ -185,6 +185,23 @@ ECode MenuPopupHelper::MyListener::OnDismiss()
     return mOwner->OnDismiss();
 }
 
+ECode MenuPopupHelper::MyListener::OnGlobalLayout()
+{
+    return mOwner->OnGlobalLayout();
+}
+
+ECode MenuPopupHelper::MyListener::OnViewAttachedToWindow(
+    /* [in] */ IView* v)
+{
+    return mOwner->OnViewAttachedToWindow(v);
+}
+
+ECode MenuPopupHelper::MyListener::OnViewDetachedFromWindow(
+    /* [in] */ IView* v)
+{
+    return mOwner->OnViewDetachedFromWindow(v);
+}
+
 CAR_INTERFACE_IMPL_7(MenuPopupHelper, Object, IMenuPopupHelper, IAdapterViewOnItemClickListener, IOnGlobalLayoutListener,
     IViewOnKeyListener, IPopupWindowOnDismissListener, IViewOnAttachStateChangeListener, IMenuPresenter)
 
@@ -223,6 +240,7 @@ ECode MenuPopupHelper::constructor(
     mContext = context;
     LayoutInflater::From(context, (ILayoutInflater**)&mInflater);
     mMenu = menu;
+    mListener = new MyListener(this);
     mAdapter = new MenuAdapter(mMenu, this);
     mOverflowOnly = overflowOnly;
     mPopupStyleAttr = popupStyleAttr;
@@ -295,9 +313,8 @@ ECode MenuPopupHelper::TryShow(
     VALIDATE_NOT_NULL(result)
     mPopup = NULL;
     CListPopupWindow::New(mContext, NULL, mPopupStyleAttr, (IListPopupWindow**)&mPopup);
-    AutoPtr<MyListener> listener = new MyListener(this);
-    mPopup->SetOnDismissListener(listener);
-    mPopup->SetOnItemClickListener(listener);
+    mPopup->SetOnDismissListener(mListener);
+    mPopup->SetOnItemClickListener(mListener);
     mPopup->SetAdapter(mAdapter);
     mPopup->SetModal(TRUE);
 
@@ -306,8 +323,8 @@ ECode MenuPopupHelper::TryShow(
         Boolean addGlobalListener = mTreeObserver == NULL;
         mTreeObserver = NULL;
         anchor->GetViewTreeObserver((IViewTreeObserver**)&mTreeObserver); // Refresh to latest
-        if (addGlobalListener) mTreeObserver->AddOnGlobalLayoutListener(this);
-        anchor->AddOnAttachStateChangeListener(this);
+        if (addGlobalListener) mTreeObserver->AddOnGlobalLayoutListener(mListener);
+        anchor->AddOnAttachStateChangeListener(mListener);
         mPopup->SetAnchorView(anchor);
         mPopup->SetDropDownGravity(mDropDownGravity);
     }
@@ -327,7 +344,7 @@ ECode MenuPopupHelper::TryShow(
 
     AutoPtr<IListView> listView;
     mPopup->GetListView((IListView**)&listView);
-    IView::Probe(listView)->SetOnKeyListener(listener);
+    IView::Probe(listView)->SetOnKeyListener(mListener);
     *result = TRUE;
     return NOERROR;
 }
@@ -355,11 +372,11 @@ ECode MenuPopupHelper::OnDismiss()
             mAnchorView->GetViewTreeObserver((IViewTreeObserver**)&mTreeObserver);
         }
 
-        mTreeObserver->RemoveGlobalOnLayoutListener(this);
+        mTreeObserver->RemoveGlobalOnLayoutListener(mListener);
         mTreeObserver = NULL;
     }
 
-    return mAnchorView->RemoveOnAttachStateChangeListener(this);
+    return mAnchorView->RemoveOnAttachStateChangeListener(mListener);
 }
 
 ECode MenuPopupHelper::IsShowing(
@@ -485,10 +502,10 @@ ECode MenuPopupHelper::OnViewDetachedFromWindow(
             v->GetViewTreeObserver((IViewTreeObserver**)&mTreeObserver);
         }
 
-        mTreeObserver->RemoveGlobalOnLayoutListener(this);
+        mTreeObserver->RemoveGlobalOnLayoutListener(mListener);
     }
 
-    return v->RemoveOnAttachStateChangeListener(this);
+    return v->RemoveOnAttachStateChangeListener(mListener);
 }
 
 ECode MenuPopupHelper::InitForMenu(

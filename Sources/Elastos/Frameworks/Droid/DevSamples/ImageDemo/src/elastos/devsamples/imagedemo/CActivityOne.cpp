@@ -7,6 +7,7 @@
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Widget.h>
 #include <elastos/utility/logging/Logger.h>
+#include <utils/CallStack.h>
 
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::IContext;
@@ -52,6 +53,32 @@ CAR_OBJECT_IMPL(CActivityOne)
 CActivityOne::~CActivityOne()
 {
     Logger::I(TAG, " >> Destory ImageDemo::CActivityOne");
+}
+
+UInt32 CActivityOne::AddRef()
+{
+    UInt32 count = Activity::AddRef();
+    // android::CallStack stack;
+    // stack.update();
+    // String backtrace(stack.toString("").string());
+    // Logger::I(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    // Logger::I(TAG, "ImageDemoActivity::AddRef, refcount: %d, callstack:\n%s", count, backtrace.string());
+    // Logger::I(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    return count;
+}
+
+UInt32 CActivityOne::Release()
+{
+    UInt32 count = Activity::Release();
+    Logger::I(TAG, "ImageDemoActivity::Release, refcount: %d", count);
+    // android::CallStack stack;
+    // stack.update();
+    // String backtrace(stack.toString("").string());
+    // Logger::I(TAG, "-------------------------------------------------------");
+    // Logger::I(TAG, "ImageDemoActivity::Release, refcount: %d, callstack:\n%s", GetStrongCount(), backtrace.string());
+    // Logger::I(TAG, "-------------------------------------------------------");
+
+    return count;
 }
 
 ECode CActivityOne::constructor()

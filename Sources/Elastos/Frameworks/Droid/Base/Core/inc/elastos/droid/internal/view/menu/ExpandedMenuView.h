@@ -80,7 +80,7 @@ protected:
     CARAPI OnDetachedFromWindow();
 
 private:
-    AutoPtr<IMenuBuilder> mMenu;
+    IMenuBuilder* mMenu;
 
     /** Default animations for this menu */
     Int32 mAnimations;

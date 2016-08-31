@@ -145,7 +145,7 @@ private:
         CARAPI OnDismiss();
 
     private:
-        AutoPtr<ISubMenuBuilder> mSubMenu;
+        ISubMenuBuilder* mSubMenu;
         ActionMenuPresenter*  mHost;
     };
 
@@ -225,6 +225,8 @@ public:
     CAR_INTERFACE_DECL()
 
     ActionMenuPresenter();
+
+    ~ActionMenuPresenter();
 
     CARAPI constructor(
         /* [in] */ IContext* context);

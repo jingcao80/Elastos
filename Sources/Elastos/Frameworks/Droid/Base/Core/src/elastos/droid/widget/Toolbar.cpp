@@ -233,6 +233,11 @@ Toolbar::ExpandedActionViewMenuPresenter::ExpandedActionViewMenuPresenter(
     : mHost(host)
 {}
 
+Toolbar::ExpandedActionViewMenuPresenter::~ExpandedActionViewMenuPresenter()
+{
+    Logger::I(TAG, " >> Destory ExpandedActionViewMenuPresenter: %p", this);
+}
+
 ECode Toolbar::ExpandedActionViewMenuPresenter::InitForMenu(
     /* [in] */ IContext* ctx,
     /* [in] */ IMenuBuilder* menu)
@@ -460,6 +465,11 @@ Toolbar::Toolbar()
     mContentInsets = new RtlSpacingHelper();
     CArrayList::New((IArrayList**)&mTempViews);
     mTempMargins = ArrayOf<Int32>::Alloc(2);
+}
+
+Toolbar::~Toolbar()
+{
+    Logger::I(TAG, " >> Destory Toolbar: %p", this);
 }
 
 ECode Toolbar::constructor(
@@ -1283,6 +1293,7 @@ ECode Toolbar::OnRestoreInstanceState(
     if (bval) {
         PostShowOverflowMenu();
     }
+    return NOERROR;
 }
 
 ECode Toolbar::OnDetachedFromWindow()

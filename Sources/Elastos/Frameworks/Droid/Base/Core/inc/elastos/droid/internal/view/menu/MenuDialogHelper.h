@@ -30,10 +30,6 @@ namespace Menu {
  */
 class MenuDialogHelper
     : public Object
-    , public IDialogInterfaceOnKeyListener
-    , public IDialogInterfaceOnClickListener
-    , public IDialogInterfaceOnDismissListener
-    , public IMenuPresenterCallback
 {
 private:
     class Listener
@@ -75,8 +71,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CARAPI constructor(
         /* [in] */ IMenuBuilder* menu);
 
@@ -124,7 +118,7 @@ protected:
         /* [in] */ IMenuBuilder* menu);
 
 private:
-    AutoPtr<IMenuBuilder> mMenu;
+    IMenuBuilder* mMenu;
     // In order to use convenient
     AutoPtr<IDialog> mDialog;
     // AutoPtr<IAlertDialog> mDialog;

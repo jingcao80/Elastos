@@ -400,6 +400,11 @@ ActionMenuPresenter::ActionMenuPresenter()
     mPopupPresenterCallback = new PopupPresenterCallback(this);
 }
 
+ActionMenuPresenter::~ActionMenuPresenter()
+{
+    Logger::I(TAG, " >> Destroy ActionMenuPresenter: %p", this);
+}
+
 ECode ActionMenuPresenter::constructor(
     /* [in] */ IContext* context)
 {

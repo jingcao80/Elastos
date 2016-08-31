@@ -18,17 +18,40 @@ namespace Elastos {
 namespace Droid {
 namespace InputMethodService {
 
-CAR_INTERFACE_IMPL(CExtractEditLayout::ExtractActionMode, ActionMode, IMenuBuilderCallback);
+
+CAR_INTERFACE_IMPL(CExtractEditLayout::ExtractActionMode::MenuBuilderCallback, Object, IMenuBuilderCallback);
+
+
+CExtractEditLayout::ExtractActionMode::MenuBuilderCallback::MenuBuilderCallback(
+    /* [in] */ ExtractActionMode* host)
+    : mHost(host)
+{}
+
+ECode CExtractEditLayout::ExtractActionMode::MenuBuilderCallback::OnMenuItemSelected(
+    /* [in] */ IMenuBuilder* menu,
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnMenuItemSelected(menu, item, result);
+}
+
+ECode CExtractEditLayout::ExtractActionMode::MenuBuilderCallback::OnMenuModeChange(
+    /* [in] */ IMenuBuilder* menu)
+{
+    return mHost->OnMenuModeChange(menu);
+}
+
 CExtractEditLayout::ExtractActionMode::ExtractActionMode(
     /* [in] */ IActionModeCallback* cb,
     /* [in] */ CExtractEditLayout* host)
     : mHost(host)
 {
+    mCallback = cb;
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
     CMenuBuilder::New(context, (IMenuBuilder**)&mMenu);
-    mMenu->SetCallback(this);
-    mCallback = cb;
+    mMenuCallback = new MenuBuilderCallback(this);
+    mMenu->SetCallback(mMenuCallback);
 }
 
 ECode CExtractEditLayout::ExtractActionMode::SetTitle(

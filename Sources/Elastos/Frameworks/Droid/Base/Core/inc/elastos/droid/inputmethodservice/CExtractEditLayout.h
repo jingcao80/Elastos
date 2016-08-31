@@ -41,11 +41,33 @@ CarClass(CExtractEditLayout)
 protected:
     class ExtractActionMode
         : public ActionMode
-        , public IMenuBuilderCallback
     {
-    public:
-        CAR_INTERFACE_DECL()
+    private:
+        class MenuBuilderCallback
+            : public Object
+            , public IMenuBuilderCallback
+        {
+        public:
+            CAR_INTERFACE_DECL()
 
+            MenuBuilderCallback(
+                /* [in] */ ExtractActionMode* host);
+
+                //@Override
+            CARAPI OnMenuItemSelected(
+                /* [in] */ IMenuBuilder* menu,
+                /* [in] */ IMenuItem* item,
+                /* [out] */ Boolean* result);
+
+            //@Override
+            CARAPI OnMenuModeChange(
+                /* [in] */ IMenuBuilder* menu);
+
+        private:
+            ExtractActionMode* mHost;
+
+        };
+    public:
         ExtractActionMode(
             /* [in] */ IActionModeCallback* cb,
             /* [in] */ CExtractEditLayout* host);
@@ -115,6 +137,7 @@ protected:
     private:
         AutoPtr<IActionModeCallback> mCallback;
         AutoPtr<IMenuBuilder> mMenu;
+        AutoPtr<IMenuBuilderCallback> mMenuCallback;
         CExtractEditLayout* mHost;
 
         friend class CExtractEditLayout;

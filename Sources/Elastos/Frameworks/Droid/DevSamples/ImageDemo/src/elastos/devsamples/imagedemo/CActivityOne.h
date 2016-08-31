@@ -38,6 +38,9 @@ public:
 
     ~CActivityOne();
 
+    UInt32 AddRef();
+
+    UInt32 Release();
 
     CARAPI constructor();
 

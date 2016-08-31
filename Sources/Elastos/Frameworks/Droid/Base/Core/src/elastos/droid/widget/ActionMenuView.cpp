@@ -247,6 +247,11 @@ ActionMenuView::ActionMenuView()
 {
 }
 
+ActionMenuView::~ActionMenuView()
+{
+    Logger::I(TAG, " >> Destroy ActionMenuView: %p", this);
+}
+
 ECode ActionMenuView::constructor(
     /* [in] */ IContext* context)
 {
@@ -296,8 +301,8 @@ ECode ActionMenuView::SetPresenter(
     if (presenter != NULL) {
         IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(presenter);
         wrs->GetWeakReference((IWeakReference**)&mPresenter);
+        presenter->SetMenuView(this);
     }
-    presenter->SetMenuView(this);
     return NOERROR;
 }
 

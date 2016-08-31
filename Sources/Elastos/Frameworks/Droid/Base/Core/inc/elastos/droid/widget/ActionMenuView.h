@@ -148,6 +148,8 @@ public:
 
     ActionMenuView();
 
+    ~ActionMenuView();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -328,7 +330,7 @@ public:
 private:
     static String TAG;
 
-    AutoPtr<IMenuBuilder> mMenu;
+    IMenuBuilder* mMenu;
     /** Context against which to inflate popup menus. */
     AutoPtr<IContext> mPopupContext;
 

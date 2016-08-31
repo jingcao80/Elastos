@@ -58,22 +58,6 @@ public:
     {
     public:
         CAR_INTERFACE_DECL()
-
-        ActionBarOverlayLayoutLayoutParams();
-
-        CARAPI constructor(
-            /* [in] */ IContext* c,
-            /* [in] */ IAttributeSet* attrs);
-
-        CARAPI constructor(
-            /* [in] */ Int32 width,
-            /* [in] */ Int32 height);
-
-        CARAPI constructor(
-            /* [in] */ IViewGroupLayoutParams* source);
-
-        CARAPI constructor(
-            /* [in] */ IViewGroupMarginLayoutParams* source);
     };
 
 private:
@@ -168,6 +152,8 @@ public:
     CAR_INTERFACE_DECL()
 
     ActionBarOverlayLayout();
+
+    ~ActionBarOverlayLayout();
 
     CARAPI constructor(
         /* [in] */ IContext* context);

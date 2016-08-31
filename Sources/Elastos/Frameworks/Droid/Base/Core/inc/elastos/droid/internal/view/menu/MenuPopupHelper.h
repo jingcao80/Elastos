@@ -40,11 +40,6 @@ namespace Menu {
 class MenuPopupHelper
     : public Object
     , public IMenuPopupHelper
-    , public IAdapterViewOnItemClickListener
-    , public IViewOnKeyListener
-    , public IOnGlobalLayoutListener
-    , public IPopupWindowOnDismissListener
-    , public IViewOnAttachStateChangeListener
     , public IMenuPresenter
 {
 private:
@@ -93,6 +88,8 @@ private:
         , public IAdapterViewOnItemClickListener
         , public IViewOnKeyListener
         , public IPopupWindowOnDismissListener
+        , public IOnGlobalLayoutListener
+        , public IViewOnAttachStateChangeListener
     {
     public:
         CAR_INTERFACE_DECL()
@@ -115,6 +112,14 @@ private:
             /* [out] */ Boolean* result);
 
         CARAPI OnDismiss();
+
+        CARAPI OnGlobalLayout();
+
+        CARAPI OnViewAttachedToWindow(
+            /* [in] */ IView* v);
+
+        CARAPI OnViewDetachedFromWindow(
+            /* [in] */ IView* v);
 
     private:
         MenuPopupHelper* mOwner;
@@ -251,7 +256,7 @@ private:
 
     AutoPtr<IContext> mContext;
     AutoPtr<ILayoutInflater> mInflater;
-    AutoPtr<IMenuBuilder> mMenu;
+    IMenuBuilder* mMenu;
     AutoPtr<MenuAdapter> mAdapter;
     Boolean mOverflowOnly;
     Int32 mPopupMaxWidth;
@@ -272,6 +277,7 @@ private:
     Int32 mContentWidth;
 
     Int32 mDropDownGravity;
+    AutoPtr<MyListener> mListener;
 };
 
 } // namespace Menu

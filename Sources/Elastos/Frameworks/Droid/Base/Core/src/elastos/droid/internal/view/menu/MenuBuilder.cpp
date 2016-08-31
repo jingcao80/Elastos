@@ -12,6 +12,7 @@
 #include "elastos/droid/view/CKeyCharacterMap.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CComponentName;
@@ -32,6 +33,8 @@ using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::Concurrent::CCopyOnWriteArrayList;
+using Elastos::Utility::Logging::Logger;
+#include <utils/CallStack.h>
 
 namespace Elastos {
 namespace Droid {
@@ -53,7 +56,64 @@ const Int32  MenuBuilder::sCategoryToOrder[6] = {
     0, /* SELECTED_ALTERNATIVE */
 };
 
-CAR_INTERFACE_IMPL_2(MenuBuilder, Object, IMenuBuilder, IMenu)
+// CAR_INTERFACE_IMPL_2(MenuBuilder, Object, IMenuBuilder, IMenu)
+
+PInterface MenuBuilder::Probe(
+   /* [in] */ REIID riid)
+{
+    if (riid == EIID_IInterface) {
+        return (IInterface*)(IMenuBuilder*)this;
+    }
+    if (riid == EIID_IMenuBuilder) {
+        return (IInterface*)(IMenuBuilder*)this;
+    }
+    else if (riid == EIID_IMenu) {
+        return (IInterface*)(IMenu*)this;
+    }
+    return Object::Probe(riid);
+}
+
+ECode MenuBuilder::GetInterfaceID(
+   /* [in] */ IInterface *pObject,
+   /* [out] */ InterfaceID *pIID)
+{
+    VALIDATE_NOT_NULL(pIID)
+    if (pObject == ((IInterface*)(IMenuBuilder*)this)) {
+        *pIID = EIID_IMenuBuilder;
+        return NOERROR;
+    }
+    else if (pObject == ((IInterface*)(IMenu*)this)) {
+        *pIID = EIID_IMenu;
+        return NOERROR;
+    }
+
+    return Object::GetInterfaceID(pObject, pIID);
+}
+
+UInt32 MenuBuilder::AddRef()
+{
+    UInt32 count = Object::AddRef();
+    // android::CallStack stack;
+    // stack.update();
+    // String backtrace(stack.toString("").string());
+    // Logger::I(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    // Logger::I(TAG, "MenuBuilder::AddRef, refcount: %d, callstack:\n%s", count, backtrace.string());
+    // Logger::I(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    return count;
+}
+
+UInt32 MenuBuilder::Release()
+{
+    UInt32 count = Object::Release();
+    Logger::I(TAG, "MenuBuilder::Release, refcount: %d", count);
+    // android::CallStack stack;
+    // stack.update();
+    // String backtrace(stack.toString("").string());
+    // Logger::I(TAG, "-------------------------------------------------------");
+    // Logger::I(TAG, "MenuBuilder::Release, refcount: %d, callstack:\n%s", GetStrongCount(), backtrace.string());
+    // Logger::I(TAG, "-------------------------------------------------------");
+    return count;
+}
 
 MenuBuilder::MenuBuilder()
     : mQwertyMode(FALSE)
@@ -67,6 +127,11 @@ MenuBuilder::MenuBuilder()
 {
     mTempShortcutItemList = new MenuItemImplList();
     CCopyOnWriteArrayList::New((IList**)&mPresenters);
+}
+
+MenuBuilder::~MenuBuilder()
+{
+    Logger::I(TAG, " >> Destroy MenuBuilder: %p", this);
 }
 
 ECode MenuBuilder::constructor(

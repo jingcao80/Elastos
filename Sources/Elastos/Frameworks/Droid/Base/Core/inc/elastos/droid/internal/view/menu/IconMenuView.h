@@ -344,7 +344,7 @@ private:
 private:
     static const Int32 ITEM_CAPTION_CYCLE_DELAY = 1000;
 
-    AutoPtr<IMenuBuilder> mMenu;
+    IMenuBuilder* mMenu;
 
     /** Height of each row */
     Int32 mRowHeight;

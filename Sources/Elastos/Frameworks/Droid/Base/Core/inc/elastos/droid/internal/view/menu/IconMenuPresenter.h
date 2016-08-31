@@ -45,6 +45,8 @@ protected:
     };
 
 public:
+    ~IconMenuPresenter();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 

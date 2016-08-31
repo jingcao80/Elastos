@@ -31,7 +31,6 @@ class ListMenuPresenter
     : public Object
     , public IListMenuPresenter
     , public IMenuPresenter
-    , public IAdapterViewOnItemClickListener
 {
 private:
     class MenuAdapter
@@ -92,6 +91,8 @@ private:
 
 public:
     ListMenuPresenter();
+
+    ~ListMenuPresenter();
 
     CAR_INTERFACE_DECL()
 

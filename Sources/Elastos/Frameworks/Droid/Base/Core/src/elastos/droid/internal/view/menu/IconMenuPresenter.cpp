@@ -76,6 +76,11 @@ IconMenuPresenter::IconMenuPresenter()
     mSubMenuPresenterCallback = new SubMenuPresenterCallback(this);
 }
 
+IconMenuPresenter::~IconMenuPresenter()
+{
+    Logger::I("IconMenuPresenter", " >> Destroy IconMenuPresenter %p", this);
+}
+
 ECode IconMenuPresenter::constructor(
     /* [in] */ IContext* context)
 {

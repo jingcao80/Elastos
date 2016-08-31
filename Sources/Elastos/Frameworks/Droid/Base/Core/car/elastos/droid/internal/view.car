@@ -300,7 +300,6 @@ module
 
         interface IListMenuPresenter;
         interface IMenuPresenter;
-        interface IAdapterViewOnItemClickListener;
     }
 
     [local]
