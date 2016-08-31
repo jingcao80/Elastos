@@ -2,4 +2,9 @@
 DIRS += interactions
 DIRS += util
 DIRS += widget
-#DIRS += list
+DIRS += preference
+DIRS += format
+DIRS += extensions
+DIRS += lettertiles
+DIRS += model
+DIRS += list

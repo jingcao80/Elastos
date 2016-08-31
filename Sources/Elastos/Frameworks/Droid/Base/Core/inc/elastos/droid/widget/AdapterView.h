@@ -22,7 +22,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class AdapterView
+class ECO_PUBLIC AdapterView
     : public ViewGroup
     , public IAdapterView
 {
@@ -85,7 +85,7 @@ public:
     };
 
 private:
-    class SelectionNotifier
+    class ECO_LOCAL SelectionNotifier
         : public Object
         , public IRunnable
     {
@@ -302,14 +302,14 @@ protected:
     CARAPI_(Boolean) CanAnimate();
 
 private:
-    CARAPI_(void) UpdateEmptyStatus(
+    ECO_LOCAL CARAPI_(void) UpdateEmptyStatus(
         /* [in] */ Boolean empty);
 
-    CARAPI_(void) FireOnSelected();
+    ECO_LOCAL CARAPI_(void) FireOnSelected();
 
-    CARAPI_(void) PerformAccessibilityActionsOnSelected();
+    ECO_LOCAL CARAPI_(void) PerformAccessibilityActionsOnSelected();
 
-    CARAPI_(Boolean) IsScrollableForAccessibility();
+    ECO_LOCAL CARAPI_(Boolean) IsScrollableForAccessibility();
 
 public:
     static const Int32 SYNC_MAX_DURATION_MILLIS = 100;

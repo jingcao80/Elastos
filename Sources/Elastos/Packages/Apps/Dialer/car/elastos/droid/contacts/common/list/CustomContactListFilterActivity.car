@@ -40,6 +40,9 @@ module
     [local]
     interface IGroupDelta {
 
+        GetUngrouped(
+            [out] Boolean* ungrouped);
+
         SetUngrouped(
             [in] Boolean accountHasGroups);
 
@@ -64,7 +67,7 @@ module
          * changes to the {@link Groups} or {@link Settings} row described by
          * this {@link GroupDelta}.
          */
-        GuildDiff(
+        BuildDiff(
             [out] IContentProviderOperation** operation);
     }
 

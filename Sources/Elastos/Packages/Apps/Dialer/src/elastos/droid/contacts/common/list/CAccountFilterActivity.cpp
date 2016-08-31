@@ -13,14 +13,13 @@ using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
 using Elastos::Droid::App::ILoaderManager;
 using Elastos::Droid::App::IActionBar;
 using Elastos::Droid::Contacts::Common::List::EIID_IAccountFilterActivity;
-using Elastos::Droid::Contacts::Common::List::CLSID_CCustomContactListFilterActivity;
+using Elastos::Droid::Contacts::Common::List::ECLSID_CCustomContactListFilterActivity;
 using Elastos::Droid::Contacts::Common::Model::AccountTypeManager;
 using Elastos::Droid::Contacts::Common::Model::Account::IAccountWithDataSet;
 using Elastos::Droid::Contacts::Common::Model::Account::IAccountType;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Os::IParcelable;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IAdapter;
@@ -196,6 +195,8 @@ const Int32 CAccountFilterActivity::FILTER_LOADER_ID;
 
 CAR_INTERFACE_IMPL_2(CAccountFilterActivity, Activity, IAccountFilterActivity, IAdapterViewOnItemClickListener)
 
+CAR_OBJECT_IMPL(CAccountFilterActivity)
+
 ECode CAccountFilterActivity::OnCreate(
     /* [in] */ IBundle* icicle)
 {
@@ -206,7 +207,8 @@ ECode CAccountFilterActivity::OnCreate(
     mListView = IListView::Probe(temp);
     IAdapterView::Probe(mListView)->SetOnItemClickListener(IAdapterViewOnItemClickListener::Probe(this));
 
-    AutoPtr<IActionBar> actionBar = GetActionBar();
+    AutoPtr<IActionBar> actionBar;
+    GetActionBar((IActionBar**)&actionBar);
     if (actionBar != NULL) {
         actionBar->SetDisplayHomeAsUpEnabled(TRUE);
     }
@@ -298,7 +300,7 @@ ECode CAccountFilterActivity::OnItemClick(
     Int32 filterType;
     if (filter->GetFilterType(&filterType), filterType == IContactListFilter::FILTER_TYPE_CUSTOM) {
         AutoPtr<IIntent> intent;
-        CIntent::New(IContext::Probe(this), CLSID_CCustomContactListFilterActivity, (IIntent**)&intent);
+        CIntent::New(IContext::Probe(this), ECLSID_CCustomContactListFilterActivity, (IIntent**)&intent);
         StartActivityForResult(intent, SUBACTIVITY_CUSTOMIZE_FILTER);
     }
     else {
@@ -353,7 +355,7 @@ ECode CAccountFilterActivity::OnOptionsItemSelected(
         default:
             break;
     }
-    return Activity->OnOptionsItemSelected(item, res);
+    return Activity::OnOptionsItemSelected(item, res);
 }
 
 } // List

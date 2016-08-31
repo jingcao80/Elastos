@@ -25,7 +25,7 @@ namespace Widget {
  * @see SimpleExpandableListAdapter
  * @see SimpleCursorTreeAdapter
  */
-class BaseExpandableListAdapter
+class ECO_PUBLIC BaseExpandableListAdapter
     : public Object
     , public IBaseExpandableListAdapter
     , public IExpandableListAdapter
@@ -35,6 +35,8 @@ public:
     CAR_INTERFACE_DECL()
 
     BaseExpandableListAdapter();
+
+    virtual ~BaseExpandableListAdapter() {}
 
     virtual CARAPI RegisterDataSetObserver(
         /* [in] */ IDataSetObserver* observer);

@@ -8,6 +8,7 @@ using Elastos::Droid::Contacts::Common::Model::Account::IAccountType;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::Widget::ICheckable;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Utility::Logging::Logger;
@@ -65,7 +66,7 @@ ECode CContactListFilterView::SetActivated(
 {
     FAIL_RETURN(LinearLayout::SetActivated(activated))
     if (mRadioButton != NULL) {
-        mRadioButton->SetChecked(activated);
+        ICheckable::Probe(mRadioButton)->SetChecked(activated);
     }
     else {
         // We're guarding against null-pointer exceptions,
@@ -93,8 +94,8 @@ ECode CContactListFilterView::BindView(
         FindViewById(Elastos::Droid::Dialer::R::id::radioButton, (IView**)&radioButton);
         mRadioButton = IRadioButton::Probe(radioButton);
         Boolean isActivated;
-        isActivated(&isActivated);
-        mRadioButton->SetChecked(isActivated);
+        IsActivated(&isActivated);
+        ICheckable::Probe(mRadioButton)->SetChecked(isActivated);
     }
 
     if (mFilter == NULL) {
@@ -102,7 +103,7 @@ ECode CContactListFilterView::BindView(
         return NOERROR;
     }
 
-    mAccountUserName->SetVisibility(IView::GONE);
+    IView::Probe(mAccountUserName)->SetVisibility(IView::GONE);
     Int32 filterType;
     mFilter->GetFilterType(&filterType);
     switch (filterType) {
@@ -129,8 +130,8 @@ ECode CContactListFilterView::BindView(
             break;
         }
         case IContactListFilter::FILTER_TYPE_ACCOUNT: {
-            mAccountUserName->SetVisibility(IView::VISIBLE);
-            mIcon->SetVisibility(IView::VISIBLE);
+            IView::Probe(mAccountUserName)->SetVisibility(IView::VISIBLE);
+            IView::Probe(mIcon)->SetVisibility(IView::VISIBLE);
             AutoPtr<IDrawable> icon;
             mFilter->GetIcon((IDrawable**)&icon);
             if (icon != NULL) {
@@ -140,9 +141,10 @@ ECode CContactListFilterView::BindView(
                 mIcon->SetImageResource(Elastos::Droid::Dialer::R::drawable::unknown_source);
             }
             AutoPtr<IAccountType> accountType;
-            String dataSet;
+            String at, dataSet;
+            mFilter->GetAccountType(&at);
             mFilter->GetDataSet(&dataSet);
-            accountTypes->GetAccountType(accountType, dataSet, (IAccountType**)&accountType);
+            accountTypes->GetAccountType(at, dataSet, (IAccountType**)&accountType);
             String accountName;
             mFilter->GetAccountName(&accountName);
             AutoPtr<ICharSequence> cs;
@@ -151,7 +153,7 @@ ECode CContactListFilterView::BindView(
             AutoPtr<IContext> ctx;
             GetContext((IContext**)&ctx);
             AutoPtr<ICharSequence> label;
-            accountType->GetDisplayLabel(context, (ICharSequence**)&label);
+            accountType->GetDisplayLabel(ctx, (ICharSequence**)&label);
             mAccountType->SetText(label);
             break;
         }
@@ -164,15 +166,14 @@ void CContactListFilterView::BindView(
     /* [in] */ Int32 textResource)
 {
     if (iconResource != 0) {
-        mIcon->SetVisibility(IView::VISIBLE);
+        IView::Probe(mIcon)->SetVisibility(IView::VISIBLE);
         mIcon->SetImageResource(iconResource);
     }
     else {
-        mIcon->SetVisibility(IView::GONE);
+        IView::Probe(mIcon)->SetVisibility(IView::GONE);
     }
 
     mAccountType->SetText(textResource);
-    return NOERROR;
 }
 
 } // List

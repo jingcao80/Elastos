@@ -225,6 +225,7 @@ EXPORT_HEADERS += elastos/droid/widget/BaseAdapter.h
 EXPORT_HEADERS += elastos/droid/widget/CursorAdapter.h
 EXPORT_HEADERS += elastos/droid/widget/ResourceCursorAdapter.h
 EXPORT_HEADERS += elastos/droid/widget/SimpleCursorAdapter.h
+EXPORT_HEADERS += elastos/droid/widget/BaseExpandableListAdapter.h
 //EXPORT_HEADERS += elastos/droid/widget/Adapter.h
 EXPORT_HEADERS += elastos/droid/widget/EditText.h
 EXPORT_HEADERS += elastos/droid/widget/Filter.h

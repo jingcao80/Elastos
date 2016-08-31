@@ -5,28 +5,28 @@ module
     namespace Dialer {
     namespace List {
 
-//    /**
-//     * @Involve
-//     * interface Elastos.Droid.Content.IComponentCallbacks
-//     * interface Elastos.Droid.Content.IComponentCallbacks2
-//     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
-//     * interface Elastos.Droid.App.IFragment
-//     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
-//     * interface Elastos.Apps.Contacts.Common.List.IContactEntryListFragment
-//     * interface Elastos.Apps.Contacts.Common.List.IPhoneNumberPickerFragment
-//     */
-//    interface ISearchFragment {
-//        SetAddToContactNumber(
-//            [in] String addToContactNumber);
-//
-//        /**
-//         * Updates the position and padding of the search fragment, depending on whether the dialpad is
-//         * shown. This can be optionally animated.
-//         * @param animate
-//         */
-//        UpdatePosition(
-//            [in] Boolean animate);
-//    }
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+     * interface Elastos.Apps.Contacts.Common.List.IContactEntryListFragment
+     * interface Elastos.Apps.Contacts.Common.List.IPhoneNumberPickerFragment
+     */
+    interface ISearchFragment {
+        SetAddToContactNumber(
+            [in] String addToContactNumber);
+
+        /**
+         * Updates the position and padding of the search fragment, depending on whether the dialpad is
+         * shown. This can be optionally animated.
+         * @param animate
+         */
+        UpdatePosition(
+            [in] Boolean animate);
+    }
 
     interface ISearchFragmentHostInterface {
         IsActionBarShowing(

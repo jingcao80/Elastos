@@ -31,7 +31,7 @@ public:
         , mSmoothScrollRequested(FALSE)
     {}
 
-    virtual ~AutoScrollListView();
+    virtual ~AutoScrollListView() {}
 
     CAR_INTERFACE_DECL()
 

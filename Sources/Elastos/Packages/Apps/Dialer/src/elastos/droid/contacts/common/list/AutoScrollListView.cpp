@@ -59,7 +59,7 @@ ECode AutoScrollListView::LayoutChildren()
     Int32 lastPosition;
     GetLastVisiblePosition(&lastPosition);
     if (position >= firstPosition && position <= lastPosition) {
-        return; // Already on screen
+        return NOERROR; // Already on screen
     }
 
     Int32 height;

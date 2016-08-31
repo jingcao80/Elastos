@@ -33,9 +33,9 @@ ContactListPinnedHeaderView::ContactListPinnedHeaderView(
 
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
+    AutoPtr<ArrayOf<Int32> > params = TO_ATTRS_ARRAYOF(Elastos::Droid::Dialer::R::styleable::ContactListItemView);
     AutoPtr<ITypedArray> a;
-    ctx->ObtainStyledAttributes(attrs, Elastos::Droid::Dialer::R::styleable::ContactListItemView,
-            (ITypedArray**)&a);
+    ctx->ObtainStyledAttributes(attrs, params, (ITypedArray**)&a);
     Int32 backgroundColor;
     a->GetColor(
             Elastos::Droid::Dialer::R::styleable::ContactListItemView_list_item_background_color,
@@ -94,7 +94,7 @@ void ContactListPinnedHeaderView::SetSectionHeaderTitle(
         SetVisibility(IView::VISIBLE);
     }
     else {
-        setVisibility(IView::GONE);
+        SetVisibility(IView::GONE);
     }
 }
 

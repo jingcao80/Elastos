@@ -23,3 +23,4 @@ SOURCES += ContactListPinnedHeaderView.cpp
 SOURCES += ContactsSectionIndexer.cpp
 SOURCES += CContactListFilterView.cpp
 SOURCES += CCustomContactListFilterActivity.cpp
+SOURCES += CGroupDelta.cpp

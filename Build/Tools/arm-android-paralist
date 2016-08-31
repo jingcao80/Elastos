@@ -515,7 +515,12 @@
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/interactions
   Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/util
   Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/widget
-#  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/list
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/list
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/preference
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/format
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/lettertiles
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/model
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/extensions
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/activity
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/database

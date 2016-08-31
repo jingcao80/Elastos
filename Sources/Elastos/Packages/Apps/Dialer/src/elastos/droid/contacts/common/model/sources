@@ -6,3 +6,5 @@ INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += ../../../../../../
 
 SOURCES += AccountTypeManager.cpp
+SOURCES += ValuesDelta.cpp
+SOURCES += CValuesDelta.cpp

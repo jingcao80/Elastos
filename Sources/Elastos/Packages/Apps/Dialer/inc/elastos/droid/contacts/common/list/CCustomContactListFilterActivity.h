@@ -16,17 +16,24 @@
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::App::Activity;
-using Elastos::Droid::App::ILoader;
 using Elastos::Droid::App::IProgressDialog;
 using Elastos::Droid::App::ILoaderManagerLoaderCallbacks;
 using Elastos::Droid::Contacts::Common::Model::IAccountTypeManager;
+using Elastos::Droid::Contacts::Common::Util::WeakAsyncTask;
+using Elastos::Droid::Content::ILoader;
+using Elastos::Droid::Content::AsyncTaskLoader;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IOnMenuItemClickListener;
+using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IExpandableListViewOnChildClickListener;
 using Elastos::Droid::Widget::IExpandableListView;
 using Elastos::Droid::Widget::IAdapterView;
@@ -43,6 +50,8 @@ namespace Contacts {
 namespace Common {
 namespace List {
 
+class CGroupDelta;
+
 CarClass(CCustomContactListFilterActivity)
     , public Activity
     , public ICustomContactListFilterActivity
@@ -50,6 +59,9 @@ CarClass(CCustomContactListFilterActivity)
     , public IExpandableListViewOnChildClickListener
     , public ILoaderManagerLoaderCallbacks
 {
+public:
+    class CustomFilterConfigurationLoader;
+
 protected:
     /**
      * Set of all {@link AccountDisplay} entries, one for each source.
@@ -120,8 +132,10 @@ protected:
         String mDataSet;
 
         AutoPtr<IGroupDelta> mUngrouped;
-        List<AutoPtr<IGroupDelta> > mSyncedGroups;
-        List<AutoPtr<IGroupDelta> > mUnsyncedGroups;
+        AutoPtr<IArrayList> mSyncedGroups;
+        AutoPtr<IArrayList> mUnsyncedGroups;
+
+        friend class CustomFilterConfigurationLoader;
     };
 
     /**
@@ -211,6 +225,8 @@ protected:
         AutoPtr<AccountSet> mAccounts;
 
         Boolean mChildWithPhones;
+
+        friend class CCustomContactListFilterActivity;
     };
 
 public:
@@ -292,6 +308,92 @@ private:
             /* [out] */ Int32* result);
     };
 
+    class SyncRemoveClickListener
+        : public Object
+        , public IOnMenuItemClickListener
+    {
+    public:
+        SyncRemoveClickListener(
+            /* [in] */ AccountDisplay* account,
+            /* [in] */ IGroupDelta* child,
+            /* [in] */ Int32 syncMode,
+            /* [in] */ ICharSequence* title,
+            /* [in] */ CCustomContactListFilterActivity* host)
+            : mAccount(account)
+            , mChild(child)
+            , mSyncMode(syncMode)
+            , mTitle(title)
+            , mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI OnMenuItemClick(
+            /* [in] */ IMenuItem* item,
+            /* [out] */ Boolean* isConsumed);
+
+    private:
+        AutoPtr<AccountDisplay> mAccount;
+        AutoPtr<IGroupDelta> mChild;
+        Int32 mSyncMode;
+        AutoPtr<ICharSequence> mTitle;
+        CCustomContactListFilterActivity* mHost;
+    };
+
+    class OkClickListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        OkClickListener(
+            /* [in] */ AccountDisplay* account,
+            /* [in] */ IGroupDelta* child,
+            /* [in] */ CCustomContactListFilterActivity* host)
+            : mAccount(account)
+            , mChild(child)
+            , mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+    private:
+        AutoPtr<AccountDisplay> mAccount;
+        AutoPtr<IGroupDelta> mChild;
+        CCustomContactListFilterActivity* mHost;
+    };
+
+    class AddSyncClickListener
+        : public Object
+        , public IOnMenuItemClickListener
+    {
+    public:
+        AddSyncClickListener(
+            /* [in] */ AccountDisplay* account,
+            /* [in] */ IGroupDelta* child,
+            /* [in] */ Int32 syncMode,
+            /* [in] */ CCustomContactListFilterActivity* host)
+            : mAccount(account)
+            , mChild(child)
+            , mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI OnMenuItemClick(
+            /* [in] */ IMenuItem* item,
+            /* [out] */ Boolean* isConsumed);
+
+    private:
+        AutoPtr<AccountDisplay> mAccount;
+        AutoPtr<IGroupDelta> mChild;
+        Int32 mSyncMode;
+        CCustomContactListFilterActivity* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -343,16 +445,10 @@ protected:
     // @Override
     CARAPI OnStart();
 
-    // @Override
-    CARAPI OnActivityResult(
-        /* [in] */ Int32 requestCode,
-        /* [in] */ Int32 resultCode,
-        /* [in] */ IIntent *data);
-
     CARAPI_(Int32) GetSyncMode(
         /* [in] */ AccountDisplay* account);
 
-    CARAPI_(void) SshowRemoveSync(
+    CARAPI_(void) ShowRemoveSync(
         /* [in] */ IContextMenu* menu,
         /* [in] */ AccountDisplay* account,
         /* [in] */ IGroupDelta* child,
@@ -370,6 +466,8 @@ protected:
         /* [in] */ Int32 syncMode);
 
 private:
+    static CARAPI_(AutoPtr<IComparator>) InitIdComparator();
+
     static CARAPI_(AutoPtr<IUri>) AddCallerIsSyncAdapterParameter(
         /* [in] */ IUri* uri);
 
@@ -397,7 +495,11 @@ private:
     /**
      * {@link Comparator} to sort by {@link Groups#_ID}.
      */
-    static AutoPtr<IComparator> sIdComparator;// = new Comparator<GroupDelta>()
+    static AutoPtr<IComparator> sIdComparator;
+
+    friend class SyncRemoveClickListener;
+    friend class CGroupDelta;
+    friend class UpdateTask;
 };
 
 } // List

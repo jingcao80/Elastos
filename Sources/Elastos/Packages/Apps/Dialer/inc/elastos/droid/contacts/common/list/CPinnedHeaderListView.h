@@ -260,4 +260,6 @@ private:
 } // Droid
 } // Elastos
 
+DEFINE_CONVERSION_FOR(Elastos::Droid::Contacts::Common::List::CPinnedHeaderListView::PinnedHeader, IInterface)
+
 #endif //__ELASTOS_DROID_CONTACTS_COMMON_LIST_CPINNEDHEADERLISTVIEW_H__

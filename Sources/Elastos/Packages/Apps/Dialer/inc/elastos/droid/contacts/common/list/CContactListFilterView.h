@@ -6,6 +6,7 @@
 #include "elastos/droid/widget/LinearLayout.h"
 
 using Elastos::Droid::Contacts::Common::Model::IAccountTypeManager;
+using Elastos::Droid::Widget::LinearLayout;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IRadioButton;

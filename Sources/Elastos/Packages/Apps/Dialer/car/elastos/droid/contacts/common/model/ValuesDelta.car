@@ -1,0 +1,254 @@
+module
+{
+
+    using interface Elastos.Droid.Content.IContentValues;
+    using interface Elastos.Droid.Content.IContentProviderOperationBuilder;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Core.IInteger32;
+    using interface Elastos.Core.IInteger64;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.Utility.ISet;
+
+    interface Elastos.Droid.Contacts.Common.Model.Account.IAccountTypeWithDataSet;
+    interface Elastos.Droid.Contacts.Common.Model.Account.IAccountType;
+    interface Elastos.Droid.Contacts.Common.Model.Account.IAccountWithDataSet;
+    interface Elastos.Droid.Contacts.Common.Model.Dataitem.IDataKind;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace Model {
+
+    [deprecated]
+    interface IValuesDelta {
+
+        // @NeededForTesting
+        GetAfter(
+            [out] IContentValues** after);
+
+        SetAfter(
+            [in] IContentValues* after);
+
+        ContainsKey(
+            [in] String key,
+            [out] Boolean* contains);
+
+        GetAsString(
+            [in] String key,
+            [out] String* str);
+
+        GetAsByteArray(
+            [in] String key,
+            [out, callee] ArrayOf<Byte>* byteArray);
+
+        GetAsInt64(
+            [in] String key,
+            [out] IInteger64** value);
+
+        GetAsInteger(
+            [in] String key,
+            [out] IInteger32** value);
+
+        GetAsInteger(
+            [in] String key,
+            [in] IInteger32* defaultValue,
+            [out] IInteger32** value);
+
+        IsChanged(
+            [in] String key,
+            [out] Boolean* isChanged);
+
+        GetMimetype(
+            [out] String* mimetype);
+
+        GetId(
+            [out] IInteger64** id);
+
+        SetIdColumn(
+            [in] String idColumn);
+
+        IsPrimary(
+            [out] Boolean* isPrimary);
+
+        SetFromTemplate(
+            [in] Boolean isFromTemplate);
+
+        IsFromTemplate(
+            [out] Boolean* isFromTemplate);
+
+        IsSuperPrimary(
+            [out] Boolean* isSuperPrimary);
+
+        BeforeExists(
+            [out] Boolean* isBefore);
+
+        /**
+         * When "after" is present, then visible
+         */
+        IsVisible(
+            [out] Boolean* isVisible);
+
+        /**
+         * When "after" is wiped, action is "delete"
+         */
+        IsDelete(
+            [out] Boolean* isDelete);
+
+        /**
+         * When no "before" or "after", is transient
+         */
+        IsTransient(
+            [out] Boolean* isTransient);
+
+        /**
+         * When "after" has some changes, action is "update"
+         */
+        IsUpdate(
+            [out] Boolean* isUpdate);
+
+        /**
+         * When "after" has no changes, action is no-op
+         */
+        IsNoop(
+            [out] Boolean* isNoop);
+
+        /**
+         * When no "before" id, and has "after", action is "insert"
+         */
+        IsInsert(
+            [out] Boolean* isInsert);
+
+        MarkDeleted();
+
+        Put(
+            [in] String key,
+            [in] String value);
+
+        Put(
+            [in] String key,
+            [in] ArrayOf<Byte>* value);
+
+        Put(
+            [in] String key,
+            [in] Int32 value);
+
+        Put(
+            [in] String key,
+            [in] Int64 value);
+
+        PutNull(
+            [in] String key);
+
+        CopyStringFrom(
+            [in] IValuesDelta* from,
+            [in] String key);
+
+        /**
+         * Return set of all keys defined through this object.
+         */
+        GetKeySet(
+            [out] ISet** set);
+
+        /**
+         * Return complete set of "before" and "after" values mixed together,
+         * giving full state regardless of edits.
+         */
+        GetCompleteValues(
+            [out] IContentValues** values);
+
+        /**
+         * Check if the given {@link ValuesDelta} is both a subset of this
+         * object, and any defined keys have equal values.
+         */
+        SubsetEquals(
+            [in] IValuesDelta* other,
+            [out] Boolean* equals);
+
+        /**
+         * Build a {@link android.content.ContentProviderOperation} that will transform our
+         * "before" state into our "after" state, using insert, update, or
+         * delete as needed.
+         */
+        BuildDiff(
+            [in] IUri* targetUri,
+            [out] IContentProviderOperationBuilder** builder);
+
+        SetGroupRowId(
+            [in] Int64 groupId);
+
+        GetGroupRowId(
+            [out] Int64* id);
+
+        SetPhoto(
+            [in] ArrayOf<Byte>* value);
+
+        GetPhoto(
+            [out, callee] ArrayOf<Byte>* photo);
+
+        SetSuperPrimary(
+            [in] Boolean val);
+
+        SetPhoneticFamilyName(
+            [in] String value);
+
+        SetPhoneticMiddleName(
+            [in] String value);
+
+        SetPhoneticGivenName(
+            [in] String value);
+
+        GetPhoneticFamilyName(
+            [out] String* name);
+
+        GetPhoneticMiddleName(
+            [out] String* name);
+
+        GetPhoneticGivenName(
+            [out] String* name);
+
+        GetDisplayName(
+            [out] String* name);
+
+        SetDisplayName(
+            [in] String name);
+
+        CopyStructuredNameFieldsFrom(
+            [in] IValuesDelta* name);
+
+        GetPhoneNumber(
+            [out] String* number);
+
+        GetPhoneNormalizedNumber(
+            [out] String* number);
+
+        PhoneHasType(
+            [out] Boolean* result);
+
+        GetPhoneType(
+            [out] Int32* type);
+
+        GetPhoneLabel(
+            [out] String* label);
+
+        GetEmailData(
+            [out] String* data);
+
+        EmailHasType(
+            [out] Boolean* result);
+
+        GetEmailType(
+            [out] Int32* type);
+
+        GetEmailLabel(
+            [out] String* label);
+
+    }
+
+    } // Model
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}

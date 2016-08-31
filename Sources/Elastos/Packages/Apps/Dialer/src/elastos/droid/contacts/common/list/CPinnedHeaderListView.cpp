@@ -89,7 +89,7 @@ ECode CPinnedHeaderListView::OnLayout(
 ECode CPinnedHeaderListView::SetAdapter(
     /* [in] */ IAdapter* adapter)
 {
-    mAdapter = PinnedHeaderAdapter::Probe(adapter);
+    mAdapter = IPinnedHeaderAdapter::Probe(adapter);
     return AutoScrollListView::SetAdapter(adapter);
 }
 
@@ -162,7 +162,6 @@ ECode CPinnedHeaderListView::OnScroll(
 Float CPinnedHeaderListView::GetTopFadingEdgeStrength()
 {
     // Disable vertical fading at the top when the pinned header is present
-    Float strength;
     return mSize > 0 ? 0 : AutoScrollListView::GetTopFadingEdgeStrength();
 }
 
@@ -266,7 +265,7 @@ ECode CPinnedHeaderListView::SetHeaderPinnedAtBottom(
     header->mState = BOTTOM;
     if (header->mAnimating) {
         header->mTargetTime = mAnimationTargetTime;
-        header->mSourceY = header.y;
+        header->mSourceY = header->mY;
         header->mTargetY = y;
     }
     else if (animate && (header->mY != y || !header->mVisible)) {
@@ -332,7 +331,7 @@ ECode CPinnedHeaderListView::SetHeaderInvisible(
     AutoPtr<PinnedHeader> header = (*mHeaders)[viewIndex];
     if (header->mVisible && (animate || header->mAnimating) && header->mState == BOTTOM) {
         header->mSourceY = header->mY;
-        if (!header.animating) {
+        if (!header->mAnimating) {
             header->mVisible = TRUE;
             Int32 bottom;
             GetBottom(&bottom);
@@ -544,7 +543,8 @@ ECode CPinnedHeaderListView::DispatchDraw(
     }
 
     if (hasVisibleHeaders) {
-        canvas->Save();
+        Int32 result;
+        canvas->Save(&result);
     }
 
     AutoScrollListView::DispatchDraw(canvas);
@@ -559,10 +559,9 @@ ECode CPinnedHeaderListView::DispatchDraw(
         if (mSize > 0 && (GetFirstVisiblePosition(&pos), pos == 0)) {
             AutoPtr<IView> firstChild;
             GetChildAt(0, (IView**)&firstChild);
-            AutoPtr<PinnedHeader> header = (*mHeaders)[0];
+            AutoPtr<PinnedHeader> firstHeader = (*mHeaders)[0];
 
             if (firstHeader != NULL) {
-                Int32 top;
                 Int32 firstHeaderTop = 0;
                 if (firstChild != NULL) {
                     firstChild->GetTop(&firstHeaderTop);
@@ -597,7 +596,7 @@ void CPinnedHeaderListView::DrawHeader(
     /* [in] */ Int64 currentTime)
 {
     if (header->mAnimating) {
-        Int32 timeLeft = (Int32)(header->mtargetTime - currentTime);
+        Int32 timeLeft = (Int32)(header->mTargetTime - currentTime);
         if (timeLeft <= 0) {
             header->mY = header->mTargetY;
             header->mVisible = header->mTargetVisible;
@@ -623,7 +622,8 @@ void CPinnedHeaderListView::DrawHeader(
             view->GetWidth(&viewW);
             view->GetHeight(&viewH);
             mBounds->Set(0, 0, viewW, viewH);
-            canvas->SaveLayerAlpha(mBounds, header->mAlpha, ICanvas::ALL_SAVE_FLAG);
+            Int32 result;
+            canvas->SaveLayerAlpha(mBounds, header->mAlpha, ICanvas::ALL_SAVE_FLAG, &result);
         }
         view->Draw(canvas);
         canvas->RestoreToCount(saveCount);
