@@ -303,13 +303,13 @@ void PhoneNumberPickerFragment::SetPhotoPosition(
     IPhoneNumberListAdapter::Probe(adapter)->SetPhotoPosition(mPhotoPosition);
 }
 
-ECode PhoneNumberPickerFragment::InflateView(
+AutoPtr<IView> PhoneNumberPickerFragment::InflateView(
     /* [in] */ ILayoutInflater* inflater,
-    /* [in] */ IViewGroup* container,
-    /* [out] */ IView** view)
+    /* [in] */ IViewGroup* container)
 {
-    VALIDATE_NOT_NULL(view)
-    return inflater->Inflate(Elastos::Droid::Dialer::R::layout::contact_list_content, NULL, view);
+    AutoPtr<IView> view;
+    inflater->Inflate(Elastos::Droid::Dialer::R::layout::contact_list_content, NULL, (IView**)&view);
+    return view;
 }
 
 void PhoneNumberPickerFragment::PickPhoneNumber(

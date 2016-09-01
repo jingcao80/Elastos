@@ -1,12 +1,18 @@
 
 #include "elastos/droid/dialer/list/SmartDialNumberListAdapter.h"
+#include "elastos/droid/contacts/common/list/ContactListItemView.h"
+#include "elastos/droid/contacts/common/list/PhoneNumberListAdapter.h"
 #include "elastos/droid/dialer/list/DialerPhoneNumberListAdapter.h"
-#include "elastos/droid/dialer/dialpad/CSmartDialNameMatcher.h"
-#include "elastos/droid/dialer/dialpad/SmartDialPrefix.h"
+#include "elastos/droid/contacts/common/CallUtil.h"
+// #include "elastos/droid/dialer/dialpad/SmartDialNameMatcher.h"
+// #include "elastos/droid/dialer/dialpad/SmartDialPrefix.h"
 #include "elastos/utility/logging/Logger.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/droid/text/TextUtils.h>
 
+using Elastos::Droid::Contacts::Common::List::ContactListItemView;
+using Elastos::Droid::Contacts::Common::List::PhoneNumberListAdapter;
+using Elastos::Droid::Contacts::Common::CallUtil;
 using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Content::CContentUris;
 using Elastos::Droid::Provider::IContactsContractData;
@@ -28,8 +34,8 @@ ECode SmartDialNumberListAdapter::constructor(
     /* [in] */ IContext* context)
 {
     DialerPhoneNumberListAdapter::constructor(context);
-    CSmartDialNameMatcher::New(String(""), SmartDialPrefix::GetMap(),
-            (ISmartDialNameMatcher**)&mNameMatcher);
+    // TODO: SmartDialNameMatcher not implement
+    // mNameMatcher = new SmartDialNameMatcher("", SmartDialPrefix.getMap());
 
     if (DEBUG) {
         Logger::V(TAG, "Constructing List Adapter");
@@ -49,56 +55,58 @@ ECode SmartDialNumberListAdapter::ConfigureLoader(
 
     if (str.IsNull()) {
         loader->ConfigureQuery(String(""));
-        mNameMatcher->SetQuery(String(""));
+        // TODO:
+        // mNameMatcher->SetQuery(String(""));
     }
     else {
         loader->ConfigureQuery(str);
-        mNameMatcher->SetQuery(PhoneNumberUtils::NormalizeNumber(str));
+        // TODO:
+        // mNameMatcher->SetQuery(PhoneNumberUtils::NormalizeNumber(str));
     }
     return NOERROR;
 }
 
-// TODO:
-// ECode SmartDialNumberListAdapter::SetHighlight(
-//     /* [in] */ IContactListItemView* view,
-//     /* [in] */ ICursor* cursor)
-// {
-//     view->ClearHighlightSequences();
+void SmartDialNumberListAdapter::SetHighlight(
+    /* [in] */ IContactListItemView* _view,
+    /* [in] */ ICursor* cursor)
+{
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
+    view->ClearHighlightSequences();
 
-//     String name;
-//     cursor->GetString(IPhoneNumberListAdapterPhoneQuery::DISPLAY_NAME, &name);
-//     Boolean result;
-//     if (mNameMatcher->Matches(name, &result), result) {
-//         AutoPtr<IArrayList> nameMatches;
-//         mNameMatcher->GetMatchPositions((IArrayList**)&nameMatches);
+    // TODO:
+    // String name;
+    // cursor->GetString(IPhoneNumberListAdapterPhoneQuery::DISPLAY_NAME, &name);
+    // Boolean result;
+    // if (mNameMatcher->Matches(name, &result), result) {
+    //     AutoPtr<IArrayList> nameMatches;
+    //     mNameMatcher->GetMatchPositions((IArrayList**)&nameMatches);
 
-//         AutoPtr<IIterator> it;
-//         nameMatches->GetIterator((IIterator**)&it);
-//         Boolean hasNext;
-//         while(it->HasNext(&hasNext), hasNext) {
-//             AutoPtr<IInterface> item;
-//             it->GetNext((IInterface**)&item);
-//             CSmartDialMatchPosition* match = (CSmartDialMatchPosition*)item;
-//             view->AddNameHighlightSequence(match->mStart, match->mEnd);
-//             if (DEBUG) {
-//                 String query;
-//                 mNameMatcher->GetQuery(&query);
-//                 Logger::V(TAG, "%s %s %d", str.string(), query.string(), match->mStart);
-//             }
-//         }
-//     }
+    //     AutoPtr<IIterator> it;
+    //     nameMatches->GetIterator((IIterator**)&it);
+    //     Boolean hasNext;
+    //     while(it->HasNext(&hasNext), hasNext) {
+    //         AutoPtr<IInterface> item;
+    //         it->GetNext((IInterface**)&item);
+    //         CSmartDialMatchPosition* match = (CSmartDialMatchPosition*)item;
+    //         view->AddNameHighlightSequence(match->mStart, match->mEnd);
+    //         if (DEBUG) {
+    //             String query;
+    //             mNameMatcher->GetQuery(&query);
+    //             Logger::V(TAG, "%s %s %d", str.string(), query.string(), match->mStart);
+    //         }
+    //     }
+    // }
 
-//     String number;
-//     cursor->GetString(IPhoneNumberListAdapterPhoneQuery::PHONE_NUMBER, &number);
-//     AutoPtr<ISmartDialMatchPosition> numberMatch;
-//     mNameMatcher->MatchesNumber(number, (ISmartDialMatchPosition**)&numberMatch);
-//     if (numberMatch != NULL) {
-//         view->AddNumberHighlightSequence(
-//                 ((CSmartDialMatchPosition*)numberMatch)->mStart,
-//                 ((CSmartDialMatchPosition*)numberMatch)->mEnd);
-//     }
-//     return NOERROR;
-// }
+    // String number;
+    // cursor->GetString(IPhoneNumberListAdapterPhoneQuery::PHONE_NUMBER, &number);
+    // AutoPtr<ISmartDialMatchPosition> numberMatch;
+    // mNameMatcher->MatchesNumber(number, (ISmartDialMatchPosition**)&numberMatch);
+    // if (numberMatch != NULL) {
+    //     view->AddNumberHighlightSequence(
+    //             ((CSmartDialMatchPosition*)numberMatch)->mStart,
+    //             ((CSmartDialMatchPosition*)numberMatch)->mEnd);
+    // }
+}
 
 ECode SmartDialNumberListAdapter::GetDataUri(
     /* [in] */ Int32 position,
@@ -107,11 +115,11 @@ ECode SmartDialNumberListAdapter::GetDataUri(
     VALIDATE_NOT_NULL(uri);
 
     AutoPtr<IInterface> cursor;
-    GetItem(position, (IInterface**)&cursor)
+    GetItem(position, (IInterface**)&cursor);
     if (cursor != NULL) {
         Int64 id;
         ICursor::Probe(cursor)->GetInt64(
-                IPhoneNumberListAdapterPhoneQuery::PHONE_ID, &id);
+                PhoneNumberListAdapter::PhoneQuery::PHONE_ID, &id);
 
         AutoPtr<IContactsContractData> data;
         CContactsContractData::AcquireSingleton((IContactsContractData**)&data);
@@ -133,7 +141,7 @@ ECode SmartDialNumberListAdapter::SetQueryString(
 {
     String str;
     GetFormattedQueryString(&str);
-    const Boolean showNumberShortcuts = !TextUtils::IsEmpty(str);
+    Boolean showNumberShortcuts = !TextUtils::IsEmpty(str);
     Boolean changed = FALSE;
     Boolean result;
     SetShortcutEnabled(SHORTCUT_ADD_NUMBER_TO_CONTACTS, showNumberShortcuts, &result);
@@ -141,10 +149,9 @@ ECode SmartDialNumberListAdapter::SetQueryString(
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    assert(0 && "TODO");
-    // SetShortcutEnabled(SHORTCUT_MAKE_VIDEO_CALL,
-    //         showNumberShortcuts && CallUtil::IsVideoEnabled(context), &result);
-    changed |= result
+    SetShortcutEnabled(SHORTCUT_MAKE_VIDEO_CALL,
+            showNumberShortcuts && CallUtil::IsVideoEnabled(context), &result);
+    changed |= result;
     if (changed) {
         NotifyDataSetChanged();
     }

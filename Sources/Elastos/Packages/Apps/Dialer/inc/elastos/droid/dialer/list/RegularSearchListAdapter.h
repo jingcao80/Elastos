@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_REGULARSEARCHLISTADAPTER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include "elastos/apps/dialer/list/DialerPhoneNumberListAdapter.h"
+#include "elastos/droid/dialer/list/DialerPhoneNumberListAdapter.h"
 #include "Elastos.Droid.Content.h"
 
 using Elastos::Droid::Content::IContext;
@@ -35,7 +35,7 @@ public:
     // @Override
     CARAPI SetQueryString(
         /* [in] */ const String& queryString);
-}
+};
 
 } // List
 } // Dialer

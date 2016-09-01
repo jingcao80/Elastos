@@ -2,10 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_SMARTDIALSEARCHFRAGMENT_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include "elastos/apps/dialer/list/SearchFragment.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Os.h"
+#include "elastos/droid/dialer/list/SearchFragment.h"
 
 using Elastos::Droid::Content::ILoader;
 using Elastos::Droid::Net::IUri;
@@ -40,9 +37,7 @@ protected:
      * Creates a SmartDialListAdapter to display and operate on search results.
      */
     // @Override
-    // TODO:
-    // CARAPI CreateListAdapter(
-    //     /* [out] */ IContactEntryListAdapter** adapter);
+    CARAPI_(AutoPtr<IContactEntryListAdapter>) CreateListAdapter();
 
     /**
      * Gets the Phone Uri of an entry for calling.

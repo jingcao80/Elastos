@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_REGULARSEARCHFRAGMENT_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include "elastos/apps/dialer/list/SearchFragment.h"
+#include "elastos/droid/dialer/list/SearchFragment.h"
 #include "Elastos.Droid.View.h"
 
 using Elastos::Droid::View::ILayoutInflater;
@@ -19,9 +19,9 @@ class RegularSearchFragment
     , public IRegularSearchFragment
 {
 public:
-    CAR_INTERFACE_DECL();
+    RegularSearchFragment();
 
-    CARAPI constructor();
+    CAR_INTERFACE_DECL();
 
     CARAPI ConfigureDirectorySearch();
 
@@ -31,8 +31,8 @@ protected:
         /* [in] */ ILayoutInflater* inflater,
         /* [in] */ IViewGroup* container);
 
-    // TODO:
-    // CARAPI_(AutoPtr<IContactEntryListAdapter>) CreateListAdapter();
+    // @Override
+    CARAPI_(AutoPtr<IContactEntryListAdapter>) CreateListAdapter();
 
     // @Override
     CARAPI CacheContactInfo(

@@ -1,6 +1,9 @@
 
 #include "elastos/droid/dialer/list/SmartDialSearchFragment.h"
-#include "elastos/droid/dialer/dialpad/CSmartDialCursorLoader.h"
+#include "elastos/droid/dialer/list/SmartDialNumberListAdapter.h"
+#include "elastos/droid/dialer/dialpad/SmartDialCursorLoader.h"
+
+using Elastos::Droid::Dialer::Dialpad::SmartDialCursorLoader;
 
 namespace Elastos {
 namespace Droid {
@@ -9,31 +12,24 @@ namespace List {
 
 const String SmartDialSearchFragment::TAG("SmartDialSearchFragment");
 
-CAR_INTERFACE_DECL(SmartDialSearchFragment, SearchFragment, ISmartDialSearchFragment);
+CAR_INTERFACE_IMPL(SmartDialSearchFragment, SearchFragment, ISmartDialSearchFragment);
 
-// TODO:
-// ECode SmartDialSearchFragment::CreateListAdapter(
-//     /* [out] */ IContactEntryListAdapter** listAdapter)
-// {
-//     VALIDATE_NOT_NULL(listAdapter);
-//     AutoPtr<IActivity> activity;
-//     GetActivity(&activity);
-//     AutoPtr<ISmartDialNumberListAdapter> adapter;
-//     CSmartDialNumberListAdapter::New(
-//             IActivity::Probe(activity), (ISmartDialNumberListAdapter**)&adapter);
-//     Boolean result;
-//     SearchFragment::UsesCallableUri(&result);
-//     adapter->SetUseCallableUri(result);
-//     adapter->SetQuickContactEnabled(TRUE);
-//     // Disable the direct call shortcut for the smart dial fragment, since the call button
-//     // will already be showing anyway.
-//     adapter->SetShortcutEnabled(ISmartDialNumberListAdapter::SHORTCUT_DIRECT_CALL, FALSE);
-//     adapter->SetShortcutEnabled(ISmartDialNumberListAdapter::SHORTCUT_ADD_NUMBER_TO_CONTACTS,
-//             FALSE);
-//     *listAdapter = adapter;
-//     REFCOUNT_ADD(*listAdapter);
-//     return NOERROR;
-// }
+AutoPtr<IContactEntryListAdapter> SmartDialSearchFragment::CreateListAdapter()
+{
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    AutoPtr<SmartDialNumberListAdapter> adapter = new SmartDialNumberListAdapter();
+    adapter->constructor(IContext::Probe(activity));
+    adapter->SetUseCallableUri(UsesCallableUri());
+    adapter->SetQuickContactEnabled(TRUE);
+    // Disable the direct call shortcut for the smart dial fragment, since the call button
+    // will already be showing anyway.
+    Boolean result;
+    adapter->SetShortcutEnabled(SmartDialNumberListAdapter::SHORTCUT_DIRECT_CALL, FALSE, &result);
+    adapter->SetShortcutEnabled(SmartDialNumberListAdapter::SHORTCUT_ADD_NUMBER_TO_CONTACTS,
+            FALSE, &result);
+    return IContactEntryListAdapter::Probe(adapter);
+}
 
 ECode SmartDialSearchFragment::OnCreateLoader(
     /* [in] */ Int32 id,
@@ -49,17 +45,16 @@ ECode SmartDialSearchFragment::OnCreateLoader(
         return SearchFragment::OnCreateLoader(id, args, loader);
     }
     else {
-        AutoPtr<IInterface> adpater;
-        GetAdapter((IInterface**)&adpater);
+        AutoPtr<IInterface> adapter;
+        GetAdapter((IInterface**)&adapter);
         AutoPtr<IContext> context;
         SearchFragment::GetContext((IContext**)&context);
-        AutoPtr<ISmartDialCursorLoader> smartLoader;
-        CSmartDialCursorLoader::New(context, (ISmartDialCursorLoader**)&smartLoader);
-        ISmartDialNumberListAdapter::Probe(adapter)->ConfigureLoader(smartLoader);
-        *loader = smartLoader;
+        AutoPtr<SmartDialCursorLoader> smartLoader = new SmartDialCursorLoader(context);
+        ISmartDialNumberListAdapter::Probe(adapter)->ConfigureLoader(ISmartDialCursorLoader::Probe(smartLoader));
+        *loader = ILoader::Probe(smartLoader);
         REFCOUNT_ADD(*loader)
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode SmartDialSearchFragment::GetPhoneUri(
@@ -68,8 +63,8 @@ ECode SmartDialSearchFragment::GetPhoneUri(
 {
     VALIDATE_NOT_NULL(uri);
 
-    AutoPtr<IInterface> adpater;
-    GetAdapter((IInterface**)&adpater);
+    AutoPtr<IInterface> adapter;
+    GetAdapter((IInterface**)&adapter);
     return ISmartDialNumberListAdapter::Probe(adapter)->GetDataUri(position, uri);
 }
 

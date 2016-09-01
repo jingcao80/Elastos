@@ -2,12 +2,14 @@
 #define __ELASTOS_DROID_DIALER_LIST_SEARCHFRAGMENT_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/contacts/common/list/PhoneNumberPickerFragment.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Contacts::Common::List::PhoneNumberPickerFragment;
+using Elastos::Droid::Contacts::Common::List::IContactEntryListAdapter;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::IAbsListViewOnScrollListener;
@@ -18,9 +20,7 @@ namespace Dialer {
 namespace List {
 
 class SearchFragment
-    // TODO:
-    /*: public PhoneNumberPickerFragment*/
-    : public Object
+    : public PhoneNumberPickerFragment
     , public ISearchFragment
 {
 private:
@@ -51,6 +51,8 @@ private:
     };
 
 public:
+    SearchFragment();
+
     CAR_INTERFACE_DECL();
 
     // @Override
@@ -81,13 +83,11 @@ protected:
     CARAPI SetSearchMode(
         /* [in] */ Boolean flag);
 
-    // TODO:
     // @Override
-    // CARAPI CreateListAdapter(
-    //     /* [out] */ IContactEntryListAdapter** adapter);
+    CARAPI_(AutoPtr<IContactEntryListAdapter>) CreateListAdapter();
 
     // @Override
-    CARAPI OnItemClick(
+    CARAPI_(void) OnItemClick(
         /* [in] */ Int32 position,
         /* [in] */ Int64 id);
 
@@ -106,7 +106,7 @@ private:
     Int32 mHideDialpadDuration;
 
     AutoPtr<ISearchFragmentHostInterface> mActivity;
-}
+};
 
 } // List
 } // Dialer
