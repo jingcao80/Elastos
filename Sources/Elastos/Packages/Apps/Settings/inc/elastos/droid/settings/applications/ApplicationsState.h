@@ -65,6 +65,7 @@ class ApplicationsState
     , public IApplicationsState
 {
     friend class AppViewHolder;
+    friend class CInstalledAppDetails;
     friend class ManageApplications;
 public:
     class SizeInfo

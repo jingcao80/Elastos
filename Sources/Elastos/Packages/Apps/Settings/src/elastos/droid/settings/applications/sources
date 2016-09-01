@@ -9,6 +9,7 @@ INCLUDES += $(MAKEDIR)/../../../../../../../../Frameworks/Droid/Support/V4/inc
 SOURCES += ApplicationsState.cpp
 SOURCES += AppViewHolder.cpp
 SOURCES += InterestingConfigChanges.cpp
+SOURCES += CInstalledAppDetails.cpp
 SOURCES += CLinearColorBar.cpp
 SOURCES += ManageApplications.cpp
 SOURCES += CRunningProcessesView.cpp

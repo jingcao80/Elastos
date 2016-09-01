@@ -59,6 +59,8 @@ module
     using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
     using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
     using interface Elastos.Droid.Content.ISharedPreferencesOnSharedPreferenceChangeListener;
+    using interface Elastos.Droid.Content.Pm.IIPackageDataObserver;
+    using interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
     using interface Elastos.Droid.Content.Pm.IIPackageStatsObserver;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     using interface Elastos.Droid.Hardware.Input.IInputDeviceListener;
@@ -136,6 +138,59 @@ module
             [in] IHandler* owner);
 
         interface IIPackageStatsObserver;
+        interface IBinder;
+    }
+
+    class CInstalledAppDetails {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface IViewOnClickListener;
+        interface ICompoundButtonOnCheckedChangeListener;
+        interface IApplicationsStateCallbacks;
+    }
+
+    class CInstalledAppDetailsAlertDialogFragment {
+        constructor();
+
+        interface IDialogFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+    }
+
+    [local]
+    class CInstalledAppDetailsClearUserDataObserver {
+        constructor(
+            [in] IFragment* host);
+
+        interface IIPackageDataObserver;
+        interface IBinder;
+    }
+
+    [local]
+    class CInstalledAppDetailsClearCacheObserver {
+        constructor(
+            [in] IFragment* host);
+
+        interface IIPackageDataObserver;
+        interface IBinder;
+    }
+
+    [local]
+    class CInstalledAppDetailsPackageMoveObserver {
+        constructor(
+            [in] IFragment* host);
+
+        interface IIPackageMoveObserver;
         interface IBinder;
     }
 

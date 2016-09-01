@@ -4,7 +4,6 @@
 #include "_Elastos_Droid_Settings_Applications_CRunningServiceDetails.h"
 #include "elastos/droid/settings/applications/CRunningProcessesView.h"
 #include "elastos/droid/app/DialogFragment.h"
-#include "elastos/droid/app/Fragment.h"
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::App::IActivity;
