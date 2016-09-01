@@ -154,7 +154,7 @@ private:
         static const Int32 MSG_UPDATE_VOLUME = 8;
         static const Int32 MSG_DESTROYED = 9;
 
-        MediaSessionRecord* mHost;
+        AutoPtr<MediaSessionRecord> mHost;
 
         friend class CMediaSession;
         friend class MediaSessionRecord;

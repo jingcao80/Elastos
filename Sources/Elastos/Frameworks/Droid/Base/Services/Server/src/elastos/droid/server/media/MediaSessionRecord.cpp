@@ -950,6 +950,7 @@ void MediaSessionRecord::PushSessionDestroyed()
         // After notifying clear all listeners
         mControllerCallbacks.Clear();
     }
+    mHandler = NULL;
 }
 
 AutoPtr<IPlaybackState> MediaSessionRecord::GetStateWithUpdatedPosition()
