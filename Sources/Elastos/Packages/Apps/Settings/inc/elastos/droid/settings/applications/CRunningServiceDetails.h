@@ -42,13 +42,9 @@ public:
     public:
         TO_STRING_IMPL("CRunningServiceDetails::MyAlertDialogFragment")
 
-        MyAlertDialogFragment();
-
-        virtual ~MyAlertDialogFragment();
-
         CARAPI constructor();
 
-        static CARAPI_(AutoPtr<IDialogFragment>) /*MyAlertDialogFragment*/ NewConfirmStop(
+        static CARAPI_(AutoPtr<IDialogFragment>) NewConfirmStop(
             /* [in] */ Int32 id,
             /* [in] */ IComponentName* comp);
 
@@ -65,7 +61,6 @@ protected:
         : public Object
         , public IViewOnClickListener
     {
-        friend class CRunningServiceDetails;
     public:
         CAR_INTERFACE_DECL()
 
@@ -74,15 +69,13 @@ protected:
         ActiveDetail(
             /* [in] */ CRunningServiceDetails* host);
 
-        ~ActiveDetail();
-
         CARAPI_(void) StopActiveService(
             /* [in] */ Boolean confirmed);
 
         CARAPI OnClick(
             /* [in] */ IView* v);
 
-    protected:
+    public:
         AutoPtr<IView> mRootView;
         AutoPtr<IButton> mStopButton;
         AutoPtr<IButton> mReportButton;
@@ -110,8 +103,6 @@ private:
             /* [in] */ MyAlertDialogFragment* host,
             /* [in] */ IComponentName* comp);
 
-        ~MyOnClickListener();
-
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
             /* [in] */ Int32 which);
@@ -130,8 +121,6 @@ private:
         MyRunnable(
             /* [in] */ CRunningServiceDetails* host);
 
-        ~MyRunnable();
-
         //@Override
         CARAPI Run();
 
@@ -147,8 +136,6 @@ public:
     TO_STRING_IMPL("CRunningServiceDetails")
 
     CRunningServiceDetails();
-
-    ~CRunningServiceDetails();
 
     CARAPI constructor();
 
@@ -213,7 +200,7 @@ private:
     CARAPI_(void) ShowConfirmStopDialog(
         /* [in] */ IComponentName* comp);
 
-protected:
+public:
     static const String TAG;
 
     static const String KEY_UID;
@@ -221,7 +208,7 @@ protected:
     static const String KEY_PROCESS;
     static const String KEY_BACKGROUND;
 
-    static const Int32 DIALOG_CONFIRM_STOP;
+    static const Int32 DIALOG_CONFIRM_STOP = 1;
 
     AutoPtr<IActivityManager> mAm;
     AutoPtr<ILayoutInflater> mInflater;

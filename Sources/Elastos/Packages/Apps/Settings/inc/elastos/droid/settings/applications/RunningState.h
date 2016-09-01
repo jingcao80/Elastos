@@ -42,23 +42,44 @@ class RunningState
 {
     friend class CRunningProcessesView;
     friend class CRunningServiceDetails;
+
 protected:
     class AppProcessInfo
         : public Object
     {
-        friend class RunningState;
-    protected:
+    public:
         TO_STRING_IMPL("RunningState::AppProcessInfo")
 
         AppProcessInfo(
             /* [in] */ IActivityManagerRunningAppProcessInfo* _info);
 
-        ~AppProcessInfo();
-
-    protected:
+    public:
         AutoPtr<IActivityManagerRunningAppProcessInfo> mInfo;
         Boolean mHasServices;
         Boolean mHasForegroundServices;
+    };
+
+    class BackgroundComparator
+        // <RunningState.MergedItem>()
+        : public Object
+        , public IComparator
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("RunningState::BackgroundComparator")
+
+        BackgroundComparator(
+            /* [in] */ RunningState* host);
+
+        //@Override
+        CARAPI Compare(
+            /* [in] */ IInterface* _lhs,
+            /* [in] */ IInterface* _rhs,
+            /* [out] */ Int32* result);
+
+    private:
+        RunningState* mHost;
     };
 
     class BackgroundHandler
@@ -79,47 +100,20 @@ protected:
         RunningState* mHost;
     };
 
-    class InitComparator
-        // <RunningState.MergedItem>()
-        : public Object
-        , public IComparator
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        TO_STRING_IMPL("RunningState::InitComparator")
-
-        InitComparator(
-            /* [in] */ RunningState* host);
-
-        ~InitComparator();
-
-        //@Override
-        CARAPI Compare(
-            /* [in] */ IInterface* _lhs,
-            /* [in] */ IInterface* _rhs,
-            /* [out] */ Int32* result);
-
-    private:
-        RunningState* mHost;
-    };
-
-    class InitHandler
+    class MyHandler
         : public Handler
     {
     public:
         TO_STRING_IMPL("RunningState::InitHandler")
 
-        InitHandler(
+        MyHandler(
             /* [in] */ RunningState* host);
-
-        ~InitHandler();
 
         //@Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
-    protected:
+    public:
         Int32 mNextUpdate;
 
     private:
@@ -129,9 +123,7 @@ protected:
     class UserState
         : public Object
     {
-        friend class RunningState;
-        friend class MergedItem;
-    protected:
+    public:
         AutoPtr<IUserInfo> mInfo;
         String mLabel;
         AutoPtr<IDrawable> mIcon;
@@ -176,13 +168,12 @@ protected:
         Boolean mBackground;
     };
 
+    class MergedItem;
+
     class ServiceItem
         : public BaseItem
         , public IRunningStateServiceItem
     {
-        friend class CRunningServiceDetails;
-        friend class ProcessItem;
-        friend class RunningState;
     public:
         CAR_INTERFACE_DECL()
 
@@ -191,22 +182,18 @@ protected:
         ServiceItem(
             /* [in] */ Int32 userId);
 
-    protected:
+    public:
         AutoPtr<IActivityManagerRunningServiceInfo> mRunningService;
         AutoPtr<IServiceInfo> mServiceInfo;
         Boolean mShownAsStarted;
 
-        AutoPtr<IRunningStateMergedItem> mMergedItem;
+        AutoPtr<MergedItem> mMergedItem;
     };
 
     class ProcessItem
         : public BaseItem
         , public IRunningStateProcessItem
     {
-        friend class CRunningServiceDetails;
-        friend class InitComparator;
-        friend class MergedItem;
-        friend class RunningState;
     public:
         CAR_INTERFACE_DECL()
 
@@ -238,7 +225,7 @@ protected:
             /* [in] */ IArrayList* dest,//ArrayList<BaseItem>
             /* [in] */ IArrayList* destProc);//ArrayList<ProcessItem>
 
-    protected:
+    public:
         // final HashMap<ComponentName, ServiceItem> mServices
         //         = new HashMap<ComponentName, ServiceItem>();
         AutoPtr<IHashMap> mServices;
@@ -246,18 +233,17 @@ protected:
         //         = new SparseArray<ProcessItem>();
         AutoPtr<ISparseArray> mDependentProcesses;
 
-        friend class CRunningProcessesView;
         Int32 mUid;
         String mProcessName;
         Int32 mPid;
 
-        AutoPtr<IRunningStateProcessItem> mClient;
+        AutoPtr<ProcessItem> mClient;
         Int32 mLastNumDependentProcesses;
 
         Int32 mRunningSeq;
         AutoPtr<IActivityManagerRunningAppProcessInfo> mRunningProcessInfo;
 
-        AutoPtr<IRunningStateMergedItem> mMergedItem;
+        AutoPtr<MergedItem> mMergedItem;
 
         Boolean mInteresting;
 
@@ -271,10 +257,6 @@ protected:
         : public BaseItem
         , public IRunningStateMergedItem
     {
-        friend class CRunningProcessesView;
-        friend class CRunningServiceDetails;
-        friend class InitComparator;
-        friend class RunningState;
     public:
         CAR_INTERFACE_DECL()
 
@@ -301,7 +283,7 @@ protected:
             /* [in] */ Int32 numProcesses,
             /* [in] */ Int32 numServices);
 
-    protected:
+    public:
         AutoPtr<ProcessItem> mProcess;
         AutoPtr<UserState> mUser;
         // final ArrayList<ProcessItem> mOtherProcesses = new ArrayList<ProcessItem>();
@@ -312,7 +294,8 @@ protected:
         AutoPtr<IArrayList> mChildren;
 
     private:
-        Int32 mLastNumProcesses, mLastNumServices;
+        Int32 mLastNumProcesses;
+        Int32 mLastNumServices;
     };
 
     class ServiceProcessComparator
@@ -326,8 +309,6 @@ protected:
 
         ServiceProcessComparator(
             /* [in] */ RunningState* host);
-
-        ~ServiceProcessComparator();
 
         //@Override
         CARAPI Compare(
@@ -393,7 +374,7 @@ protected:
     static const String TAG;
     static const Boolean DEBUG_COMPARE;
 
-    static AutoPtr<Object> sGlobalLock;
+    static Object sGlobalLock;
     static AutoPtr<RunningState> sInstance;
 
     static const Int32 MSG_RESET_CONTENTS = 1;
@@ -477,7 +458,7 @@ protected:
 
     // Lock for protecting the state that will be shared between the
     // background update thread and the UI thread.
-    AutoPtr<Object> mLock;
+    Object mLock;
 
     Boolean mResumed;
     Boolean mHaveData;

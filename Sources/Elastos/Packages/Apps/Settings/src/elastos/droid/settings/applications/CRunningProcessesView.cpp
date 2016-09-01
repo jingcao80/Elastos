@@ -1,5 +1,6 @@
 
 #include "elastos/droid/settings/applications/CRunningProcessesView.h"
+#include "elastos/droid/settings/applications/CRunningServiceDetails.h"
 #include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/UserHandle.h"
@@ -49,31 +50,25 @@ CRunningProcessesView::ActiveItem::ActiveItem()
     , mSetBackground(FALSE)
 {}
 
-CRunningProcessesView::ActiveItem::~ActiveItem()
-{}
-
 void CRunningProcessesView::ActiveItem::UpdateTime(
     /* [in] */ IContext* context,
     /* [in] */ const String& builder)
 {
     AutoPtr<ITextView> uptimeView;
 
-    AutoPtr<RunningState::BaseItem> _mItem = (RunningState::BaseItem*)mItem.Get();
-
     if (IRunningStateServiceItem::Probe(mItem) != NULL) {
         // If we are displaying a service, then the service
         // uptime goes at the top.
         uptimeView = mHolder->mSize;
-
     }
     else {
-        String size = !_mItem->mSizeStr.IsNull() ? _mItem->mSizeStr : String("");
-        if (!size.Equals(_mItem->mCurSizeStr)) {
-            _mItem->mCurSizeStr = size;
+        String size = !mItem->mSizeStr.IsNull() ? mItem->mSizeStr : String("");
+        if (!size.Equals(mItem->mCurSizeStr)) {
+            mItem->mCurSizeStr = size;
             mHolder->mSize->SetText(CoreUtils::Convert(size));
         }
 
-        if (_mItem->mBackground) {
+        if (mItem->mBackground) {
             // This is a background process; no uptime.
             if (!mSetBackground) {
                 mSetBackground = TRUE;
@@ -93,7 +88,7 @@ void CRunningProcessesView::ActiveItem::UpdateTime(
             //Logger::I("foo", "Time for " + mItem.mDisplayLabel
             //        + ": " + (SystemClock->UptimeMillis()-mFirstRunTime));
             uptimeView->SetText(CoreUtils::Convert(DateUtils::FormatElapsedTime(builder,
-                    (SystemClock::GetElapsedRealtime()-mFirstRunTime)/1000)));
+                    (SystemClock::GetElapsedRealtime() - mFirstRunTime)/1000)));
         }
         else {
             Boolean isService = FALSE;
@@ -116,6 +111,7 @@ void CRunningProcessesView::ActiveItem::UpdateTime(
         }
     }
 }
+
 
 //===============================================================================
 //                  CRunningProcessesView::ViewHolder
@@ -148,56 +144,56 @@ AutoPtr<CRunningProcessesView::ActiveItem> CRunningProcessesView::ViewHolder::Bi
     /* [in] */ RunningState::BaseItem* item,
     /* [in] */ const String& builder)
 {
-    {
-        AutoLock syncLock(state->mLock);
-        AutoPtr<IContext> context;
-        mRootView->GetContext((IContext**)&context);
-        AutoPtr<IPackageManager> pm;
-        context->GetPackageManager((IPackageManager**)&pm);
-        if (item->mPackageInfo == NULL && IRunningStateMergedItem::Probe(item) != NULL) {
-            // Items for background processes don't normally load
-            // their labels for performance reasons.  Do it now.
-            RunningState::MergedItem* mergedItem = (RunningState::MergedItem*)item;
-            if (mergedItem->mProcess != NULL) {
-                mergedItem->mProcess->EnsureLabel(pm);
-                item->mPackageInfo = mergedItem->mProcess->mPackageInfo;
-                item->mDisplayLabel = mergedItem->mProcess->mDisplayLabel;
-            }
+    AutoLock syncLock(state->mLock);
+    AutoPtr<IContext> context;
+    mRootView->GetContext((IContext**)&context);
+    AutoPtr<IPackageManager> pm;
+    context->GetPackageManager((IPackageManager**)&pm);
+    if (item->mPackageInfo == NULL && IRunningStateMergedItem::Probe(item) != NULL) {
+        // Items for background processes don't normally load
+        // their labels for performance reasons.  Do it now.
+        RunningState::MergedItem* mergedItem = (RunningState::MergedItem*)item;
+        if (mergedItem->mProcess != NULL) {
+            mergedItem->mProcess->EnsureLabel(pm);
+            item->mPackageInfo = mergedItem->mProcess->mPackageInfo;
+            item->mDisplayLabel = mergedItem->mProcess->mDisplayLabel;
         }
-        mName->SetText(item->mDisplayLabel);
-        AutoPtr<ActiveItem> ai = new ActiveItem();
-        ai->mRootView = mRootView;
-        ai->mItem = item;
-        ai->mHolder = this;
-        ai->mFirstRunTime = item->mActiveSince;
-        if (item->mBackground) {
-            AutoPtr<ICharSequence> cs;
-            context->GetText(R::string::cached, (ICharSequence**)&cs);
-            mDescription->SetText(cs);
-        }
-        else {
-            mDescription->SetText(CoreUtils::Convert(item->mDescription));
-        }
-        item->mCurSizeStr = String(NULL);
-        AutoPtr<IDrawable> drawable;
-        item->LoadIcon(context, state, (IDrawable**)&drawable);
-        mIcon->SetImageDrawable(drawable);
-        IView::Probe(mIcon)->SetVisibility(IView::VISIBLE);
-        ai->UpdateTime(context, builder);
-        return ai;
     }
+    mName->SetText(item->mDisplayLabel);
+    AutoPtr<ActiveItem> ai = new ActiveItem();
+    ai->mRootView = mRootView;
+    ai->mItem = item;
+    ai->mHolder = this;
+    ai->mFirstRunTime = item->mActiveSince;
+    if (item->mBackground) {
+        AutoPtr<ICharSequence> cs;
+        context->GetText(R::string::cached, (ICharSequence**)&cs);
+        mDescription->SetText(cs);
+    }
+    else {
+        mDescription->SetText(CoreUtils::Convert(item->mDescription));
+    }
+    item->mCurSizeStr = NULL;
+    AutoPtr<IDrawable> drawable;
+    item->LoadIcon(context, state, (IDrawable**)&drawable);
+    mIcon->SetImageDrawable(drawable);
+    IView::Probe(mIcon)->SetVisibility(IView::VISIBLE);
+    ai->UpdateTime(context, builder);
+    return ai;
 }
+
 
 //===============================================================================
 //                  CRunningProcessesView::TimeTicker
 //===============================================================================
 
-CRunningProcessesView::TimeTicker::TimeTicker(
+ECode CRunningProcessesView::TimeTicker::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    TextView::constructor(context, attrs);
+    return TextView::constructor(context, attrs);
 }
+
 
 //===============================================================================
 //                  CRunningProcessesView::ServiceListAdapter
@@ -359,7 +355,6 @@ ECode CRunningProcessesView::ServiceListAdapter::NewView(
     AutoPtr<IView> v;
     mInflater->Inflate(R::layout::running_processes_item, parent, FALSE, (IView**)&v);
     AutoPtr<ViewHolder> holder = new ViewHolder(v);
-
     *view = v;
     REFCOUNT_ADD(*view)
     return NOERROR;
@@ -369,27 +364,26 @@ ECode CRunningProcessesView::ServiceListAdapter::BindView(
     /* [in] */ IView* view,
     /* [in] */ Int32 position)
 {
-    {
-        AutoLock syncLock(mState->mLock);
-        Int32 size;
-        mItems->GetSize(&size);
-        if (position >= size) {
-            // List must have changed since we last reported its
-            // size...  ignore here, we will be doing a data changed
-            // to refresh the entire list.
-            return NOERROR;
-        }
-        AutoPtr<IInterface> obj;
-        view->GetTag((IInterface**)&obj);
-        AutoPtr<ViewHolder> vh = (ViewHolder*)IObject::Probe(obj);
-        obj = NULL;
-        mItems->Get(position, (IInterface**)&obj);
-        AutoPtr<RunningState::MergedItem> item = (RunningState::MergedItem*)IRunningStateMergedItem::Probe(obj);
-        AutoPtr<ActiveItem> ai = vh->Bind(mState, item, mHost->mBuilder->ToString());
-        mHost->mActiveItems->Put(view, (IObject*)ai);
+    AutoLock syncLock(mState->mLock);
+    Int32 size;
+    mItems->GetSize(&size);
+    if (position >= size) {
+        // List must have changed since we last reported its
+        // size...  ignore here, we will be doing a data changed
+        // to refresh the entire list.
+        return NOERROR;
     }
+    AutoPtr<IInterface> obj;
+    view->GetTag((IInterface**)&obj);
+    AutoPtr<ViewHolder> vh = (ViewHolder*)IObject::Probe(obj);
+    obj = NULL;
+    mItems->Get(position, (IInterface**)&obj);
+    AutoPtr<RunningState::MergedItem> item = (RunningState::MergedItem*)IRunningStateMergedItem::Probe(obj);
+    AutoPtr<ActiveItem> ai = vh->Bind(mState, item, mHost->mBuilder->ToString());
+    mHost->mActiveItems->Put(view, (IObject*)ai);
     return NOERROR;
 }
+
 
 //===============================================================================
 //                  CRunningProcessesView
@@ -534,9 +528,9 @@ void CRunningProcessesView::RefreshUi(
             resources->GetString(
                     R::string::running_processes_header_ram, args3, &tmp);
             mForegroundProcessText->SetText(CoreUtils::Convert(tmp));
-            mColorBar->SetRatios(highRam/(Float)totalRam,
-                    medRam/(Float)totalRam,
-                    lowRam/(Float)totalRam);
+            mColorBar->SetRatios(highRam / (Float)totalRam,
+                    medRam / (Float)totalRam,
+                    lowRam / (Float)totalRam);
         }
     }
 }
@@ -552,7 +546,7 @@ ECode CRunningProcessesView::OnItemClick(
     parent->GetAdapter((IAdapter**)&adapter);
     AutoPtr<IInterface> obj;
     adapter->GetItem(position, (IInterface**)&obj);
-    AutoPtr<RunningState::MergedItem> mi = (RunningState::MergedItem*)IRunningStateMergedItem::Probe(obj);
+    RunningState::MergedItem* mi = (RunningState::MergedItem*)IRunningStateMergedItem::Probe(obj);
     mCurSelected = mi;
     StartServiceDetailsActivity(mi);
     return NOERROR;
@@ -566,11 +560,11 @@ void CRunningProcessesView::StartServiceDetailsActivity(
         AutoPtr<IBundle> args;
         CBundle::New((IBundle**)&args);
         if (mi->mProcess != NULL) {
-            args->PutInt32(String("uid")/*CRunningServiceDetails::KEY_UID*/, mi->mProcess->mUid);
-            args->PutString(String("process")/*CRunningServiceDetails::KEY_PROCESS*/, mi->mProcess->mProcessName);
+            args->PutInt32(CRunningServiceDetails::KEY_UID, mi->mProcess->mUid);
+            args->PutString(CRunningServiceDetails::KEY_PROCESS, mi->mProcess->mProcessName);
         }
-        args->PutInt32(String("user_id")/*CRunningServiceDetails::KEY_USER_ID*/, mi->mUserId);
-        args->PutBoolean(String("background")/*CRunningServiceDetails::KEY_BACKGROUND*/, mAdapter->mShowBackground);
+        args->PutInt32(CRunningServiceDetails::KEY_USER_ID, mi->mUserId);
+        args->PutBoolean(CRunningServiceDetails::KEY_BACKGROUND, mAdapter->mShowBackground);
 
         AutoPtr<IActivity> activity;
         mOwner->GetActivity((IActivity**)&activity);
@@ -647,8 +641,6 @@ ECode CRunningProcessesView::DoCreate(
     mForegroundProcessText = ITextView::Probe(tmp);
 
     AutoPtr<IActivityManagerMemoryInfo> memInfo;
-    CActivityManagerMemoryInfo::New((IActivityManagerMemoryInfo**)&memInfo);
-    memInfo = NULL;
     mAm->GetMemoryInfo((IActivityManagerMemoryInfo**)&memInfo);
     memInfo->GetSecondaryServerThreshold(&SECONDARY_SERVER_MEM);
     return NOERROR;

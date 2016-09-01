@@ -64,97 +64,6 @@ namespace Droid {
 namespace Settings {
 namespace Applications {
 
-const String CRunningServiceDetails::TAG("CRunningServiceDetails");
-
-const String CRunningServiceDetails::KEY_UID("uid");
-const String CRunningServiceDetails::KEY_USER_ID("user_id");
-const String CRunningServiceDetails::KEY_PROCESS("process");
-const String CRunningServiceDetails::KEY_BACKGROUND("background");
-
-const Int32 CRunningServiceDetails::DIALOG_CONFIRM_STOP = 1;
-
-//===============================================================================
-//                  CRunningServiceDetails::MyAlertDialogFragment
-//===============================================================================
-
-CRunningServiceDetails::MyAlertDialogFragment::MyAlertDialogFragment()
-{}
-
-CRunningServiceDetails::MyAlertDialogFragment::~MyAlertDialogFragment()
-{}
-
-ECode CRunningServiceDetails::MyAlertDialogFragment::constructor()
-{
-    return DialogFragment::constructor();
-}
-
-AutoPtr<IDialogFragment> CRunningServiceDetails::MyAlertDialogFragment::NewConfirmStop(
-    /* [in] */ Int32 id,
-    /* [in] */ IComponentName* comp)
-{
-    AutoPtr<IDialogFragment> frag;
-    CRunningServiceDetailsAlertDialogFragment::New((IDialogFragment**)&frag);
-    AutoPtr<IBundle> args;
-    CBundle::New((IBundle**)&args);
-    args->PutInt32(String("id"), id);
-    args->PutParcelable(String("comp"), IParcelable::Probe(comp));
-    IFragment::Probe(frag)->SetArguments(args);
-    return frag;
-}
-
-AutoPtr<CRunningServiceDetails> CRunningServiceDetails::MyAlertDialogFragment::GetOwner()
-{
-    AutoPtr<IFragment> frag;
-    GetTargetFragment((IFragment**)&frag);
-    AutoPtr<CRunningServiceDetails> result = (CRunningServiceDetails*)frag.Get();
-    return result;
-}
-
-ECode CRunningServiceDetails::MyAlertDialogFragment::OnCreateDialog(
-    /* [in] */ IBundle* savedInstanceState,
-    /* [out] */ IDialog** result)
-{
-    VALIDATE_NOT_NULL(result)
-    *result = NULL;
-
-    AutoPtr<IBundle> bundles;
-    GetArguments((IBundle**)&bundles);
-    Int32 id;
-    bundles->GetInt32(String("id"), &id);
-    switch (id) {
-        case DIALOG_CONFIRM_STOP: {
-            AutoPtr<IParcelable> parcelable;
-            bundles->GetParcelable(String("comp"), (IParcelable**)&parcelable);
-            AutoPtr<IComponentName> comp = IComponentName::Probe(parcelable);
-            if (GetOwner()->ActiveDetailForService(comp) == NULL) {
-                return NOERROR;
-            }
-
-            AutoPtr<IActivity> _activity;
-            GetActivity((IActivity**)&_activity);
-            IContext* activity = IContext::Probe(_activity);
-            AutoPtr<IAlertDialogBuilder> builder;
-            CAlertDialogBuilder::New(activity, (IAlertDialogBuilder**)&builder);
-            String str;
-            activity->GetString(R::string::runningservicedetails_stop_dlg_title, &str);
-            builder->SetTitle(CoreUtils::Convert(str));
-            activity->GetString(R::string::runningservicedetails_stop_dlg_text, &str);
-            builder->SetMessage(CoreUtils::Convert(str));
-
-            AutoPtr<MyOnClickListener> listener = new MyOnClickListener(this, comp);
-            builder->SetPositiveButton(R::string::dlg_ok, listener);
-            builder->SetNegativeButton(R::string::dlg_cancel, NULL);
-            AutoPtr<IAlertDialog> dialog;
-            builder->Create((IAlertDialog**)&dialog);
-            *result = IDialog::Probe(dialog);
-            REFCOUNT_ADD(*result)
-            return NOERROR;
-        }
-    }
-    Logger::E(TAG, "unknown id %d", id);
-    return E_ILLEGAL_ARGUMENT_EXCEPTION;
-}
-
 //===============================================================================
 //                  CRunningServiceDetails::ActiveDetail
 //===============================================================================
@@ -164,9 +73,6 @@ CAR_INTERFACE_IMPL(CRunningServiceDetails::ActiveDetail, Object, IViewOnClickLis
 CRunningServiceDetails::ActiveDetail::ActiveDetail(
     /* [in] */ CRunningServiceDetails* host)
     : mHost(host)
-{}
-
-CRunningServiceDetails::ActiveDetail::~ActiveDetail()
 {}
 
 void CRunningServiceDetails::ActiveDetail::StopActiveService(
@@ -194,7 +100,7 @@ void CRunningServiceDetails::ActiveDetail::StopActiveService(
     mHost->GetActivity((IActivity**)&activity);
     Boolean res;
     IContext::Probe(activity)->StopService(intent, &res);
-    Int32  size;
+    Int32 size;
     if (mHost->mMergedItem == NULL) {
         // If this is gone, we are gone.
         mHost->mState->UpdateNow();
@@ -316,9 +222,6 @@ ECode CRunningServiceDetails::ActiveDetail::OnClick(
         return NOERROR;
     }
 
-    RunningState::BaseItem* item = (RunningState::BaseItem*)mActiveItem->mItem.Get();
-    String packageName;
-    item->mPackageInfo->GetPackageName(&packageName);
     if (mManageIntent != NULL) {
         // try {
             AutoPtr<IIntentSender> intentSender;
@@ -343,18 +246,100 @@ ECode CRunningServiceDetails::ActiveDetail::OnClick(
     else if (mServiceItem != NULL) {
         StopActiveService(FALSE);
     }
-    else if (item->mBackground) {
+    else if (mActiveItem->mItem->mBackground) {
         // Background process.  Just kill it.
+        String packageName;
+        mActiveItem->mItem->mPackageInfo->GetPackageName(&packageName);
         mHost->mAm->KillBackgroundProcesses(packageName);
         mHost->Finish();
     }
     else {
+        String packageName;
+        mActiveItem->mItem->mPackageInfo->GetPackageName(&packageName);
         // Heavy-weight process.  We'll do a force-stop on it.
         mHost->mAm->ForceStopPackage(packageName);
         mHost->Finish();
     }
     return NOERROR;
 }
+
+
+//===============================================================================
+//                  CRunningServiceDetails::MyAlertDialogFragment
+//===============================================================================
+
+ECode CRunningServiceDetails::MyAlertDialogFragment::constructor()
+{
+    return DialogFragment::constructor();
+}
+
+AutoPtr<IDialogFragment> CRunningServiceDetails::MyAlertDialogFragment::NewConfirmStop(
+    /* [in] */ Int32 id,
+    /* [in] */ IComponentName* comp)
+{
+    AutoPtr<IDialogFragment> frag;
+    CRunningServiceDetailsAlertDialogFragment::New((IDialogFragment**)&frag);
+    AutoPtr<IBundle> args;
+    CBundle::New((IBundle**)&args);
+    args->PutInt32(String("id"), id);
+    args->PutParcelable(String("comp"), IParcelable::Probe(comp));
+    IFragment::Probe(frag)->SetArguments(args);
+    return frag;
+}
+
+AutoPtr<CRunningServiceDetails> CRunningServiceDetails::MyAlertDialogFragment::GetOwner()
+{
+    AutoPtr<IFragment> frag;
+    GetTargetFragment((IFragment**)&frag);
+    AutoPtr<CRunningServiceDetails> result = (CRunningServiceDetails*)frag.Get();
+    return result;
+}
+
+ECode CRunningServiceDetails::MyAlertDialogFragment::OnCreateDialog(
+    /* [in] */ IBundle* savedInstanceState,
+    /* [out] */ IDialog** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    AutoPtr<IBundle> bundles;
+    GetArguments((IBundle**)&bundles);
+    Int32 id;
+    bundles->GetInt32(String("id"), &id);
+    switch (id) {
+        case DIALOG_CONFIRM_STOP: {
+            AutoPtr<IParcelable> parcelable;
+            bundles->GetParcelable(String("comp"), (IParcelable**)&parcelable);
+            AutoPtr<IComponentName> comp = IComponentName::Probe(parcelable);
+            if (GetOwner()->ActiveDetailForService(comp) == NULL) {
+                return NOERROR;
+            }
+
+            AutoPtr<IActivity> _activity;
+            GetActivity((IActivity**)&_activity);
+            IContext* activity = IContext::Probe(_activity);
+            AutoPtr<IAlertDialogBuilder> builder;
+            CAlertDialogBuilder::New(activity, (IAlertDialogBuilder**)&builder);
+            String str;
+            activity->GetString(R::string::runningservicedetails_stop_dlg_title, &str);
+            builder->SetTitle(CoreUtils::Convert(str));
+            activity->GetString(R::string::runningservicedetails_stop_dlg_text, &str);
+            builder->SetMessage(CoreUtils::Convert(str));
+
+            AutoPtr<MyOnClickListener> listener = new MyOnClickListener(this, comp);
+            builder->SetPositiveButton(R::string::dlg_ok, listener);
+            builder->SetNegativeButton(R::string::dlg_cancel, NULL);
+            AutoPtr<IAlertDialog> dialog;
+            builder->Create((IAlertDialog**)&dialog);
+            *result = IDialog::Probe(dialog);
+            REFCOUNT_ADD(*result)
+            return NOERROR;
+        }
+    }
+    Logger::E(TAG, "unknown id %d", id);
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+}
+
 
 //===============================================================================
 //                  CRunningServiceDetails::MyOnClickListener
@@ -369,9 +354,6 @@ CRunningServiceDetails::MyOnClickListener::MyOnClickListener(
     , mComp(comp)
 {}
 
-CRunningServiceDetails::MyOnClickListener::~MyOnClickListener()
-{}
-
 ECode CRunningServiceDetails::MyOnClickListener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
@@ -383,6 +365,7 @@ ECode CRunningServiceDetails::MyOnClickListener::OnClick(
     return NOERROR;
 }
 
+
 //===============================================================================
 //                  CRunningServiceDetails::MyRunnable
 //===============================================================================
@@ -390,9 +373,6 @@ ECode CRunningServiceDetails::MyOnClickListener::OnClick(
 CRunningServiceDetails::MyRunnable::MyRunnable(
     /* [in] */ CRunningServiceDetails* host)
     : mHost(host)
-{}
-
-CRunningServiceDetails::MyRunnable::~MyRunnable()
 {}
 
 ECode CRunningServiceDetails::MyRunnable::Run()
@@ -405,9 +385,18 @@ ECode CRunningServiceDetails::MyRunnable::Run()
     return NOERROR;
 }
 
+
 //===============================================================================
 //                  CRunningServiceDetails
 //===============================================================================
+const String CRunningServiceDetails::TAG("CRunningServiceDetails");
+
+const String CRunningServiceDetails::KEY_UID("uid");
+const String CRunningServiceDetails::KEY_USER_ID("user_id");
+const String CRunningServiceDetails::KEY_PROCESS("process");
+const String CRunningServiceDetails::KEY_BACKGROUND("background");
+
+const Int32 CRunningServiceDetails::DIALOG_CONFIRM_STOP;
 
 CAR_INTERFACE_IMPL(CRunningServiceDetails, Fragment, IRunningStateOnRefreshUiListener)
 
@@ -424,9 +413,6 @@ CRunningServiceDetails::CRunningServiceDetails()
     CArrayList::New((IArrayList**)&mActiveDetails);
     mBuilder = new StringBuilder(128);
 }
-
-CRunningServiceDetails::~CRunningServiceDetails()
-{}
 
 ECode CRunningServiceDetails::constructor()
 {
@@ -512,10 +498,7 @@ void CRunningServiceDetails::AddServiceDetailsView(
         AddProcessesHeader();
     }
 
-    AutoPtr<RunningState::BaseItem> bi = mi;
-    if (si != NULL) {
-        bi = si;
-    }
+    AutoPtr<RunningState::BaseItem> bi = si != NULL ? (RunningState::BaseItem*)si : (RunningState::BaseItem*)mi;
 
     AutoPtr<ActiveDetail> detail = new ActiveDetail(this);
     AutoPtr<IView> root;
@@ -525,7 +508,8 @@ void CRunningServiceDetails::AddServiceDetailsView(
     detail->mRootView = root;
     detail->mServiceItem = si;
     detail->mViewHolder = new CRunningProcessesView::ViewHolder(root);
-    detail->mActiveItem = detail->mViewHolder->Bind(mState, bi, mBuilder->ToString());
+    // TODO:
+    detail->mActiveItem = detail->mViewHolder->Bind(mState, mMergedItem/*bi*/, mBuilder->ToString());
 
     if (!inclDetails) {
         AutoPtr<IView> tmp;
@@ -553,9 +537,6 @@ void CRunningServiceDetails::AddServiceDetailsView(
     AutoPtr<IActivity> _activity;
     GetActivity((IActivity**)&_activity);
     IContext* activity = IContext::Probe(_activity);
-    AutoPtr<IPackageManager> packageManager;
-    activity->GetPackageManager((IPackageManager**)&packageManager);
-
     if (isService && mi->mUserId != UserHandle::GetMyUserId()) {
         // For services from other users, we don't show any description or
         // controls, because the current user can not perform
@@ -574,6 +555,9 @@ void CRunningServiceDetails::AddServiceDetailsView(
             AutoPtr<IApplicationInfo> applicationInfo;
             IComponentInfo::Probe(si->mServiceInfo)->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
 
+            AutoPtr<IPackageManager> packageManager;
+            activity->GetPackageManager((IPackageManager**)&packageManager);
+
             AutoPtr<ICharSequence> cs;
             packageManager->GetText(
                     packageName, descriptionRes, applicationInfo, (ICharSequence**)&cs);
@@ -585,6 +569,9 @@ void CRunningServiceDetails::AddServiceDetailsView(
             }
             else if (detail->mManageIntent != NULL) {
                 // try {
+                    AutoPtr<IPackageManager> packageManager;
+                    activity->GetPackageManager((IPackageManager**)&packageManager);
+
                     String clientPackage;
                     si->mRunningService->GetClientPackage(&clientPackage);
                     AutoPtr<IResources> clientr;
@@ -654,8 +641,6 @@ void CRunningServiceDetails::AddProcessDetailsView(
 {
     AddProcessesHeader();
 
-    ECode ec = NOERROR;
-
     AutoPtr<ActiveDetail> detail = new ActiveDetail(this);
     AutoPtr<IView> root;
     mInflater->Inflate(R::layout::running_service_details_process,
@@ -686,18 +671,17 @@ void CRunningServiceDetails::AddProcessDetailsView(
         //        + " pid=" + rpi.importanceReasonPid + " comp=" + comp);
         Int32 importanceReasonCode;
         rpi->GetImportanceReasonCode(&importanceReasonCode);
-
-        AutoPtr<IActivity> activity;
-        GetActivity((IActivity**)&activity);
-        AutoPtr<IPackageManager> packageManager;
-        IContext::Probe(activity)->GetPackageManager((IPackageManager**)&packageManager);
         switch (importanceReasonCode) {
             case IActivityManagerRunningAppProcessInfo::REASON_PROVIDER_IN_USE:
                 textid = R::string::process_provider_in_use_description;
                 if (comp != NULL) {
                     // try {
+                        AutoPtr<IActivity> activity;
+                        GetActivity((IActivity**)&activity);
+                        AutoPtr<IPackageManager> packageManager;
+                        IContext::Probe(activity)->GetPackageManager((IPackageManager**)&packageManager);
                         AutoPtr<IProviderInfo> prov;
-                        ec = packageManager->GetProviderInfo(comp, 0, (IProviderInfo**)&prov);
+                        ECode ec = packageManager->GetProviderInfo(comp, 0, (IProviderInfo**)&prov);
                         if (SUCCEEDED(ec)) {
                             IPackageItemInfo* _prov = IPackageItemInfo::Probe(prov);
                             String name;
@@ -712,8 +696,12 @@ void CRunningServiceDetails::AddProcessDetailsView(
                 textid = R::string::process_service_in_use_description;
                 if (comp != NULL) {
                     // try {
+                        AutoPtr<IActivity> activity;
+                        GetActivity((IActivity**)&activity);
+                        AutoPtr<IPackageManager> packageManager;
+                        IContext::Probe(activity)->GetPackageManager((IPackageManager**)&packageManager);
                         AutoPtr<IServiceInfo> serv;
-                        ec = packageManager->GetServiceInfo(comp, 0, (IServiceInfo**)&serv);
+                        ECode ec = packageManager->GetServiceInfo(comp, 0, (IServiceInfo**)&serv);
                         if (SUCCEEDED(ec)) {
                             IPackageItemInfo* _serv = IPackageItemInfo::Probe(serv);
                             String name;
@@ -728,6 +716,8 @@ void CRunningServiceDetails::AddProcessDetailsView(
         if (textid != 0 && label != NULL) {
             AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
             args->Set(0, label);
+            AutoPtr<IActivity> activity;
+            GetActivity((IActivity**)&activity);
             String str;
             IContext::Probe(activity)->GetString(textid, args, &str);
             description->SetText(CoreUtils::Convert(str));

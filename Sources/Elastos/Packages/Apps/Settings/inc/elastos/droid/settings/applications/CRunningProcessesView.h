@@ -49,23 +49,18 @@ public:
     class ActiveItem
         : public Object
     {
-        friend class CRunningProcessesView;
-        friend class CRunningServiceDetails;
-        friend class ViewHolder;
-    protected:
+    public:
         TO_STRING_IMPL("CRunningProcessesView::ActiveItem")
 
         ActiveItem();
-
-        ~ActiveItem();
 
         CARAPI_(void) UpdateTime(
             /* [in] */ IContext* context,
             /* [in] */ const String& builder);
 
-    protected:
+    public:
         AutoPtr<IView> mRootView;
-        AutoPtr<IRunningStateBaseItem> mItem;
+        AutoPtr<RunningState::BaseItem> mItem;
         AutoPtr<IActivityManagerRunningServiceInfo> mService;
         AutoPtr<ViewHolder> mHolder;
         Int64 mFirstRunTime;
@@ -102,7 +97,7 @@ protected:
     public:
         TO_STRING_IMPL("CRunningProcessesView::TimeTicker")
 
-        TimeTicker(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ IAttributeSet* attrs);
     };
@@ -110,9 +105,19 @@ protected:
     class ServiceListAdapter
         : public BaseAdapter
     {
-        friend class CRunningProcessesView;
     public:
         TO_STRING_IMPL("CRunningProcessesView::ServiceListAdapter")
+
+        ServiceListAdapter(
+            /* [in] */ RunningState* state,
+            /* [in] */ CRunningProcessesView* host);
+
+        virtual CARAPI_(void) SetShowBackground(
+            /* [in] */ Boolean showBackground);
+
+        virtual CARAPI_(Boolean) GetShowBackground();
+
+        virtual CARAPI_(void) RefreshItems();
 
         CARAPI HasStableIds(
             /* [out] */ Boolean* has);
@@ -153,20 +158,7 @@ protected:
             /* [in] */ IView* view,
             /* [in] */ Int32 position);
 
-    protected:
-        ServiceListAdapter(
-            /* [in] */ RunningState* state,
-            /* [in] */ CRunningProcessesView* host);
-
-        friend class ManageApplications;
-        virtual CARAPI_(void) SetShowBackground(
-            /* [in] */ Boolean showBackground);
-
-        virtual CARAPI_(Boolean) GetShowBackground();
-
-        virtual CARAPI_(void) RefreshItems();
-
-    protected:
+    public:
         AutoPtr<RunningState> mState;
         AutoPtr<ILayoutInflater> mInflater;
         Boolean mShowBackground;
@@ -224,7 +216,7 @@ private:
     CARAPI_(void) StartServiceDetailsActivity(
         /* [in] */ RunningState::MergedItem* mi);
 
-protected:
+public:
     Int32 mMyUserId;
 
     Int64 SECONDARY_SERVER_MEM;
@@ -246,8 +238,6 @@ protected:
 
     AutoPtr<IListView> mListView;
     AutoPtr<IView> mHeader;
-
-    friend class ManageApplications;
     AutoPtr<ServiceListAdapter> mAdapter;
     AutoPtr<CLinearColorBar> mColorBar;
     AutoPtr<ITextView> mBackgroundProcessPrefix;
