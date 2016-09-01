@@ -107,6 +107,8 @@ public:
 
     ToolbarWidgetWrapper();
 
+    ~ToolbarWidgetWrapper();
+
     CARAPI constructor(
         /* [in] */ IToolbar* toolbar,
         /* [in] */ Boolean style);

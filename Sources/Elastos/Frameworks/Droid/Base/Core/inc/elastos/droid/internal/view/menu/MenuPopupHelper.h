@@ -254,7 +254,7 @@ private:
     static const String TAG;
     static const Int32 ITEM_LAYOUT;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<ILayoutInflater> mInflater;
     IMenuBuilder* mMenu;
     AutoPtr<MenuAdapter> mAdapter;

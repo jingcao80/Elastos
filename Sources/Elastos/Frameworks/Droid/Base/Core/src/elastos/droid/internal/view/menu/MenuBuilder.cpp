@@ -2,10 +2,10 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/internal/view/menu/MenuBuilder.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/res/CConfiguration.h"
+#include "elastos/droid/internal/view/menu/MenuBuilder.h"
 #include "elastos/droid/internal/view/menu/CSubMenuBuilder.h"
 #include "elastos/droid/internal/view/menu/CMenuItemImpl.h"
 #include "elastos/droid/utility/CSparseArray.h"
@@ -27,6 +27,7 @@ using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::View::CKeyCharacterMap;
 using Elastos::Droid::View::EIID_IMenu;
 using Elastos::Droid::View::IActionProvider;
+using Elastos::Droid::View::IContextThemeWrapperInLayoutInflater;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IIterator;
@@ -34,7 +35,6 @@ using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::Concurrent::CCopyOnWriteArrayList;
 using Elastos::Utility::Logging::Logger;
-#include <utils/CallStack.h>
 
 namespace Elastos {
 namespace Droid {
@@ -116,7 +116,9 @@ UInt32 MenuBuilder::Release()
 }
 
 MenuBuilder::MenuBuilder()
-    : mQwertyMode(FALSE)
+    : mContext(NULL)
+    , mHolderContext(FALSE)
+    , mQwertyMode(FALSE)
     , mShortcutsVisible(FALSE)
     , mIsVisibleItemsStale(TRUE)
     , mDefaultShowAsAction(IMenuItem::SHOW_AS_ACTION_NEVER)
@@ -131,13 +133,19 @@ MenuBuilder::MenuBuilder()
 
 MenuBuilder::~MenuBuilder()
 {
-    Logger::I(TAG, " >> Destroy MenuBuilder: %p", this);
+    if (mHolderContext) {
+        REFCOUNT_RELEASE(mContext)
+    }
 }
 
 ECode MenuBuilder::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
+    if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL) {
+        REFCOUNT_ADD(mContext)
+        mHolderContext = TRUE;
+    }
     context->GetResources((IResources**)&mResources);
 
     mItems = new MenuItemImplList();
@@ -172,10 +180,8 @@ ECode MenuBuilder::AddMenuPresenter(
 {
     VALIDATE_NOT_NULL(presenter);
 
-    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(presenter);
-    assert(wrs != NULL);
     AutoPtr<IWeakReference> wr;
-    wrs->GetWeakReference((IWeakReference**)&wr);
+    IWeakReferenceSource::Probe(presenter)->GetWeakReference((IWeakReference**)&wr);
     mPresenters->Add(wr);
     presenter->InitForMenu(menuContext, this);
     mIsActionItemsStale = TRUE;

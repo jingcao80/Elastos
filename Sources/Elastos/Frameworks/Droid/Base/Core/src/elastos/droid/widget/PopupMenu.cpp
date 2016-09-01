@@ -96,6 +96,7 @@ Boolean PopupMenu::MyForwardingListener::OnForwardingStopped()
 CAR_INTERFACE_IMPL(PopupMenu, Object, IPopupMenu);
 
 PopupMenu::PopupMenu()
+    : mContext(NULL)
 {}
 
 PopupMenu::~PopupMenu()
@@ -148,15 +149,10 @@ ECode PopupMenu::GetMenu(
 }
 
 ECode PopupMenu::GetMenuInflater(
-    /* [out] */ IMenuInflater** flater)
+    /* [out] */ IMenuInflater** inflate)
 {
-    VALIDATE_NOT_NULL(flater);
-
-    AutoPtr<IMenuInflater> inflate;
-    CMenuInflater::New(mContext, (IMenuInflater**)&inflate);
-    *flater = inflate;
-    REFCOUNT_ADD(*flater);
-    return NOERROR;
+    VALIDATE_NOT_NULL(inflate);
+    return CMenuInflater::New(mContext, inflate);
 }
 
 ECode PopupMenu::Inflate(

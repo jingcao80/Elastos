@@ -14,6 +14,7 @@ namespace View {
 
 CarClass(CActionBarPolicyHelper)
     , public Singleton
+    , public IActionBarPolicyHelper
 {
 public:
     CAR_INTERFACE_DECL()

@@ -163,7 +163,7 @@ private:
         /* [in] */ IKeyEvent* event);
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 
     Boolean mIsQwerty;
 

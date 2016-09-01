@@ -174,7 +174,6 @@ private:
     static const String TAG;
     static const Boolean DEBUG;
 
-    AutoPtr<IContext> mContext;
     AutoPtr<H> mHandler;
 
     String mTag;

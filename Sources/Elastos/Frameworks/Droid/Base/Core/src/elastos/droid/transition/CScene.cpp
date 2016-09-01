@@ -23,7 +23,9 @@ CAR_OBJECT_IMPL(CScene)
 CAR_INTERFACE_IMPL(CScene, Object, IScene)
 
 CScene::CScene()
-    : mLayoutId(0)
+    : mContext(NULL)
+    , mLayoutId(0)
+    , mSceneRoot(NULL)
 {
 }
 

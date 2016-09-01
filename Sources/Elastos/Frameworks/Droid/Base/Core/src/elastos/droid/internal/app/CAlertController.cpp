@@ -251,7 +251,7 @@ CAlertController::CAlertController()
 
 CAlertController::~CAlertController()
 {
-    // Slogger::V("CAlertController", " >> destory ~CAlertController(): %p", this);
+    // Slogger::V("CAlertController", " >> Destroy ~CAlertController(): %p", this);
 }
 
 Boolean CAlertController::ShouldCenterSingleButton(

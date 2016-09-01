@@ -147,7 +147,7 @@ private:
     AutoPtr<IDrawable> mIcon;
 
     Int32 mTextAppearance;
-    AutoPtr<IContext> mTextAppearanceContext;
+    IContext* mTextAppearanceContext;
 
     Float mDisabledAlpha;
 

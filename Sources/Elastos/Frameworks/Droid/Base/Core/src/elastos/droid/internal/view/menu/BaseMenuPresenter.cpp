@@ -8,6 +8,7 @@ using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::IContextThemeWrapperInLayoutInflater;
 using Elastos::Utility::IArrayList;
 
 
@@ -20,10 +21,25 @@ namespace Menu {
 CAR_INTERFACE_IMPL_2(BaseMenuPresenter, Object, IBaseMenuPresenter, IMenuPresenter)
 
 BaseMenuPresenter::BaseMenuPresenter()
-    : mMenuLayoutRes(0)
+    : mSystemContext(NULL)
+    , mContext(NULL)
+    , mHolderSystemContext(FALSE)
+    , mHolderContext(FALSE)
+    , mMenuLayoutRes(0)
     , mItemLayoutRes(0)
     , mId(0)
 {
+}
+
+BaseMenuPresenter::~BaseMenuPresenter()
+{
+    if (mHolderSystemContext && mSystemContext != NULL) {
+        REFCOUNT_RELEASE(mSystemContext)
+    }
+
+    if (mHolderContext && mContext != NULL) {
+        REFCOUNT_RELEASE(mContext)
+    }
 }
 
 ECode BaseMenuPresenter::constructor(
@@ -32,6 +48,10 @@ ECode BaseMenuPresenter::constructor(
     /* [in] */ Int32 itemLayoutRes)
 {
     mSystemContext = context;
+    if (IContextThemeWrapperInLayoutInflater::Probe(mSystemContext)) {
+        REFCOUNT_ADD(mSystemContext)
+        mHolderSystemContext = TRUE;
+    }
     FAIL_RETURN(LayoutInflater::From(context, (ILayoutInflater**)&mSystemInflater))
     mMenuLayoutRes = menuLayoutRes;
     mItemLayoutRes = itemLayoutRes;
@@ -43,6 +63,10 @@ ECode BaseMenuPresenter::InitForMenu(
     /* [in] */ IMenuBuilder* menu)
 {
     mContext = context;
+    if (IContextThemeWrapperInLayoutInflater::Probe(mContext)) {
+        REFCOUNT_ADD(mContext)
+        mHolderContext = TRUE;
+    }
     FAIL_RETURN(LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater))
     mMenu = menu;
     return NOERROR;

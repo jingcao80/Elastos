@@ -546,7 +546,7 @@ ECode ZenModePanel::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     LinearLayout::constructor(context, attrs);
-    mContext = context;
+
     mHandler = new H(this);
     mPrefs = new Prefs(this);
     AutoPtr<IContext> ctx;

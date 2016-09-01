@@ -892,7 +892,7 @@ ECode LayoutInflater::CreateViewFromTag(
     if (themeResId != 0) {
         // mContext of class View is naked pointer
         AutoPtr<ContextThemeWrapperInLayoutInflater> themeContex = new ContextThemeWrapperInLayoutInflater();
-        themeContex->constructor(viewContext, themeResId);
+        themeContex->constructor(viewContext, themeResId, FALSE/* do not hold */);
         viewContext = themeContex;
     }
     ta->Recycle();

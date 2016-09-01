@@ -54,8 +54,9 @@ ECode OverScroller::constructor(
     /* [in] */ Boolean flywheel)
 {
     if (interpolator == NULL) {
-        // mInterpolator = new Scroller.ViscousFluidInterpolator();
-    } else {
+        mInterpolator = new Scroller::ViscousFluidInterpolator();
+    }
+    else {
         mInterpolator = interpolator;
     }
     mFlywheel = flywheel;
@@ -87,8 +88,9 @@ ECode OverScroller::SetInterpolator(
     /* [in] */ IInterpolator* interpolator)
 {
     if (interpolator == NULL) {
-        // mInterpolator = new Scroller.ViscousFluidInterpolator();
-    } else {
+        mInterpolator = new Scroller::ViscousFluidInterpolator();
+    }
+    else {
         mInterpolator = interpolator;
     }
     return NOERROR;

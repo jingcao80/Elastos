@@ -460,7 +460,6 @@ private:
     const static Int32 FIRST_CONDITION_INDEX;
     const static Float SILENT_HINT_PULSE_SCALE;
 
-    AutoPtr<IContext> mContext;
     AutoPtr<ILayoutInflater> mInflater;
     AutoPtr<H> mHandler;
     AutoPtr<Prefs> mPrefs;

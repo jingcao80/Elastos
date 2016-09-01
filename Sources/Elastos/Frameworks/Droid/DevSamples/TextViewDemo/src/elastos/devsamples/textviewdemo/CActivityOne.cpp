@@ -306,7 +306,7 @@ CAR_OBJECT_IMPL(CActivityOne)
 
 CActivityOne::~CActivityOne()
 {
-    Logger::I(DBG_TAG, " >> Destory ~CActivityOne()");
+    Logger::I(DBG_TAG, " >> Destroy ~CActivityOne()");
 }
 
 ECode CActivityOne::constructor()

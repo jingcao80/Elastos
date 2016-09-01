@@ -202,7 +202,8 @@ protected:
     CARAPI_(Int32) GetItemIndexOffset();
 
 public:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
+    Boolean mHolderContext;
     AutoPtr<ILayoutInflater> mInflater;
     AutoPtr<IMenuBuilder> mMenu;
     AutoPtr<IExpandedMenuView> mMenuView;

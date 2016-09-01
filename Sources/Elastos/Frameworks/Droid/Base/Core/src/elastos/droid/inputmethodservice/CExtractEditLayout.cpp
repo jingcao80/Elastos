@@ -171,10 +171,9 @@ ECode CExtractEditLayout::ExtractActionMode::GetCustomView(
 ECode CExtractEditLayout::ExtractActionMode::GetMenuInflater(
     /* [out] */ IMenuInflater** inflater)
 {
-    assert(inflater != NULL);
-    assert(0);
-    //return CMenuInflater::New(mHost->GetContext(), inflater);
-    return NOERROR;
+    AutoPtr<IContext> context;
+    mHost->GetContext((IContext**)&context);
+    return CMenuInflater::New(context, inflater);
 }
 
 ECode CExtractEditLayout::ExtractActionMode::OnMenuItemSelected(

@@ -23,7 +23,7 @@ AlertDialog::AlertDialog()
 
 AlertDialog::~AlertDialog()
 {
-    Logger::V("AlertDialog", " >> destory ~AlertDialog() %p", this);
+    Logger::V("AlertDialog", " >> Destroy ~AlertDialog() %p", this);
 }
 
 ECode AlertDialog::constructor(

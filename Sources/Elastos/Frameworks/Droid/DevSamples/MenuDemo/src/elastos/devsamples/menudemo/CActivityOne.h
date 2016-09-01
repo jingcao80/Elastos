@@ -21,6 +21,8 @@ public:
 
     CARAPI constructor();
 
+    ~CActivityOne();
+
 protected:
 
     CARAPI OnCreate(

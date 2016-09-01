@@ -332,7 +332,8 @@ private:
 
     IMenuBuilder* mMenu;
     /** Context against which to inflate popup menus. */
-    AutoPtr<IContext> mPopupContext;
+    IContext* mPopupContext;    // raw pointer, see flag mHolderPopupContext
+    Boolean mHolderPopupContext;
 
     /** Theme resource against which to inflate popup menus. */
     Int32 mPopupTheme;

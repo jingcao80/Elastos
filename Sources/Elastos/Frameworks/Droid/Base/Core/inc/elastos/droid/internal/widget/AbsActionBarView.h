@@ -89,6 +89,8 @@ public:
 
     AbsActionBarView();
 
+    ~AbsActionBarView();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -197,8 +199,9 @@ protected:
         /* [in] */ Int32 b);
 
 protected:
-    /*const*/ AutoPtr<VisibilityAnimListener> mVisAnimListener;
-    /*const*/ AutoPtr<IContext> mPopupContext;
+    AutoPtr<VisibilityAnimListener> mVisAnimListener;
+    IContext* mPopupContext;
+    Boolean mHolderPopupContext;
     AutoPtr<IActionMenuView> mMenuView;
     AutoPtr<IActionMenuPresenter> mActionMenuPresenter;
     AutoPtr<IViewGroup> mSplitView;

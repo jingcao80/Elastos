@@ -21,12 +21,11 @@
 #include "elastos/droid/transition/CSceneHelper.h"
 #include "elastos/droid/transition/CScene.h"
 #include "elastos/droid/view/CView.h"
-#include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/CKeyCharacterMap.h"
 #include "elastos/droid/view/CKeyCharacterMapHelper.h"
 #include "elastos/droid/view/CKeyEvent.h"
 #include "elastos/droid/view/CGestureDetector.h"
-#include "elastos/droid/view/CContextThemeWrapper.h"
+#include "elastos/droid/view/ContextThemeWrapperInLayoutInflater.h"
 #include "elastos/droid/view/CMotionEvent.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
@@ -135,8 +134,7 @@ using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::CView;
 using Elastos::Droid::View::IViewConfiguration;
-using Elastos::Droid::View::CContextThemeWrapper;
-using Elastos::Droid::View::IContextThemeWrapper;
+using Elastos::Droid::View::ContextThemeWrapperInLayoutInflater;
 using Elastos::Droid::View::CViewGroupLayoutParams;
 using Elastos::Droid::View::CWindowManagerLayoutParams;
 using Elastos::Droid::View::EIID_IActionModeCallback;
@@ -2095,11 +2093,15 @@ ECode PhoneWindow::_DecorView::StartActionMode(
                     actionBarTheme->SetTo(baseTheme);
                     actionBarTheme->ApplyStyle(resId, TRUE);
 
-                    CContextThemeWrapper::New(mContext, 0, (IContext**)&actionBarContext);
+                    AutoPtr<ContextThemeWrapperInLayoutInflater> temp = new ContextThemeWrapperInLayoutInflater();
+                    temp->constructor(mContext, 0, FALSE/* do not hold */);
+                    actionBarContext = temp.Get();
+
                     AutoPtr<IResourcesTheme> ctxTheme;
                     actionBarContext->GetTheme((IResourcesTheme**)&ctxTheme);
                     ctxTheme->SetTo(actionBarTheme);
-                } else {
+                }
+                else {
                     actionBarContext = mContext;
                 }
                 CActionBarContextView::New(actionBarContext, (IActionBarContextView**)&mActionModeView);
@@ -2235,7 +2237,7 @@ PhoneWindow::DecorView::~DecorView()
     if (!mUseSelfRef) {
         mHost->mDecor = NULL;
     }
-    Slogger::I(TAG, " >> Destory DecorView: %p", this);
+    Slogger::I(TAG, " >> Destroy DecorView: %p", this);
 }
 
 ECode PhoneWindow::DecorView::constructor(
@@ -2994,7 +2996,7 @@ PhoneWindow::PhoneWindow()
 
 PhoneWindow::~PhoneWindow()
 {
-    Slogger::I(TAG, " >> Destory PhoneWindow: %p", this);
+    Slogger::I(TAG, " >> Destroy PhoneWindow: %p", this);
 }
 
 ECode PhoneWindow::constructor(
@@ -3851,8 +3853,6 @@ ECode PhoneWindow::ClosePanel(
     /* [in] */ PanelFeatureState* st,
     /* [in] */ Boolean doCallback)
 {
-    Slogger::I(TAG, " >> ClosePanel");
-
     Boolean showing = FALSE;
     if (doCallback && st->mFeatureId == FEATURE_OPTIONS_PANEL
         && mDecorContentParent != NULL
@@ -3900,10 +3900,8 @@ ECode PhoneWindow::ClosePanel(
     // PhoneWindow->CListMenuPresenter->Activity->PhoneWindow
     // CMenuBuilder->CListMenuPresenter->CMenuBuilder, and so on
     //
-    Slogger::I(TAG, " >> ClosePanel Clear PanelFeatureState %s", TO_CSTR(st));
     st->SetMenu(NULL);
     mPanels->Set(st->mFeatureId, NULL);
-
     return NOERROR;
 }
 
@@ -6597,9 +6595,9 @@ Boolean PhoneWindow::InitializePanelMenu(
         }
 
         if (widgetTheme != NULL) {
-            AutoPtr<IContext> temp;
-            CContextThemeWrapper::New(context, 0, (IContext**)&temp);
-            context = temp;
+            AutoPtr<ContextThemeWrapperInLayoutInflater> temp = new ContextThemeWrapperInLayoutInflater();
+            temp->constructor(context, 0, FALSE/* do not hold */);
+            context = temp.Get();
             AutoPtr<IResourcesTheme> ctxTheme;
             context->GetTheme((IResourcesTheme**)&ctxTheme);
             ctxTheme->SetTo(widgetTheme);

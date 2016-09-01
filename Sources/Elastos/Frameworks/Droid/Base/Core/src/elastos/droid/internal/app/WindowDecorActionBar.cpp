@@ -582,6 +582,9 @@ CAR_INTERFACE_IMPL(WindowDecorActionBar, ActionBar, IWindowDecorActionBar)
 
 WindowDecorActionBar::WindowDecorActionBar()
     : mHideOnContentScroll(FALSE)
+    , mContext(NULL)
+    , mThemedContext(NULL)
+    , mHoldThemedContext(FALSE)
     , mActivity(NULL)
     , mDialog(NULL)
     , mSavedTabPosition(INVALID_POSITION)
@@ -602,6 +605,13 @@ WindowDecorActionBar::WindowDecorActionBar()
     mHideListener = new HideListener(this);
     mShowListener = new ShowListener(this);
     mUpdateListener = new UpdateListener(this);
+}
+
+WindowDecorActionBar::~WindowDecorActionBar()
+{
+    if (mHoldThemedContext && mThemedContext) {
+        REFCOUNT_RELEASE(mThemedContext)
+    }
 }
 
 ECode WindowDecorActionBar::constructor(
@@ -668,7 +678,10 @@ ECode WindowDecorActionBar::Init(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    mDecorToolbar->GetContext((IContext**)&mContext);
+    AutoPtr<IContext> ctx;
+    mDecorToolbar->GetContext((IContext**)&ctx);
+    mContext = ctx;
+
     Boolean isSplit;
     mDecorToolbar->IsSplit(&isSplit);
     mContextDisplayMode = isSplit ? CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
@@ -1619,10 +1632,12 @@ ECode WindowDecorActionBar::GetThemedContext(
 
         Int32 resId;
         if (targetThemeRes != 0 && (mContext->GetThemeResId(&resId), resId != targetThemeRes)) {
-            CContextThemeWrapper::New(mContext, targetThemeRes, (IContext**)&mThemedContext);
+            CContextThemeWrapper::New(mContext, targetThemeRes, FALSE/* do not hold */, (IContext**)&mThemedContext);
+            mHoldThemedContext = TRUE;
         }
         else {
             mThemedContext = mContext;
+            mHoldThemedContext = FALSE;
         }
     }
     *context = mThemedContext;

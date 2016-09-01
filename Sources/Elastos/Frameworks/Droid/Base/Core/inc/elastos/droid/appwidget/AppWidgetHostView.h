@@ -263,7 +263,6 @@ protected:
     // views that are allowed in RemoteViews.
     static AutoPtr<ILayoutInflaterFilter> sInflaterFilter;
 
-    AutoPtr<IContext> mContext;
     AutoPtr<IContext> mRemoteContext;
 
     Int32 mAppWidgetId;

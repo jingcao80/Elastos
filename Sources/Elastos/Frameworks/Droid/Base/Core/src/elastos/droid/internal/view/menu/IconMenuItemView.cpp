@@ -28,6 +28,7 @@ CAR_INTERFACE_IMPL_2(IconMenuItemView, TextView, IIconMenuItemView, IMenuItemVie
 
 IconMenuItemView::IconMenuItemView()
     : mTextAppearance(0)
+    , mTextAppearanceContext(NULL)
     , mDisabledAlpha(0.f)
     , mShortcutCaptionMode(FALSE)
 {

@@ -225,7 +225,7 @@ public:
         /* [in] */ IMenuBuilder* menu);
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IMenuBuilder> mMenu;
     AutoPtr<IView> mAnchor;
     AutoPtr<IMenuPopupHelper> mPopup;

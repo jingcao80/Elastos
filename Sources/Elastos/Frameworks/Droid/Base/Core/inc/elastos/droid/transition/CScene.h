@@ -154,9 +154,9 @@ public:
     AutoPtr<IRunnable> mExitAction;
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     Int32 mLayoutId;
-    AutoPtr<IViewGroup> mSceneRoot;
+    IViewGroup* mSceneRoot;
     AutoPtr<IView> mLayout; // alternative to layoutId
 };
 

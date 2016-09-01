@@ -286,7 +286,6 @@ ECode CQSPanel::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     ViewGroup::constructor(context, attrs);
-    mContext = context;
 
     CArrayList::New((IArrayList**)&mRecords);
     mHandler = new H(this);

@@ -533,7 +533,8 @@ private:
     AutoPtr<IView> mExpandedActionView;
 
     /** Context against which to inflate popup menus. */
-    AutoPtr<IContext> mPopupContext;
+    IContext* mPopupContext;
+    Boolean mHolderPopupContext;
 
     /** Theme resource against which to inflate popup menus. */
     Int32 mPopupTheme;

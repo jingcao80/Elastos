@@ -350,7 +350,6 @@ private:
 private:
     static const Float TILE_ASPECT;
 
-    AutoPtr<IContext> mContext;
     AutoPtr<IArrayList> mRecords;  /*<TileRecord*/
     AutoPtr<IView> mDetail;
     AutoPtr<IViewGroup> mDetailContent;
