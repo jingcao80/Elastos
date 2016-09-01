@@ -20,7 +20,7 @@
 #include "elastos/droid/app/LoadedPkg.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
-#include "elastos/droid/view/ContextThemeWrapperInLayoutInflater.h"
+#include "elastos/droid/view/ContextThemeWrapperHolder.h"
 #include "elastos/droid/widget/CBlinkLayout.h"
 
 using Elastos::Droid::Utility::Xml;
@@ -891,7 +891,7 @@ ECode LayoutInflater::CreateViewFromTag(
     ta->GetResourceId(0, 0, &themeResId);
     if (themeResId != 0) {
         // mContext of class View is naked pointer
-        AutoPtr<ContextThemeWrapperInLayoutInflater> themeContex = new ContextThemeWrapperInLayoutInflater();
+        AutoPtr<ContextThemeWrapperHolder> themeContex = new ContextThemeWrapperHolder();
         themeContex->constructor(viewContext, themeResId, FALSE/* do not hold */);
         viewContext = themeContex;
     }

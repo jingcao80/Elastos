@@ -102,7 +102,7 @@ module
      * @Involve
      * interface Elastos.Droid.Content.IContextWrapper
      */
-    interface IContextThemeWrapperInLayoutInflater {
+    interface IContextThemeWrapperHolder {
     }
 
     /**

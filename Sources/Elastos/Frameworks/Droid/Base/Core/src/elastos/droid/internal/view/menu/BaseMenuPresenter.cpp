@@ -8,7 +8,7 @@ using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::LayoutInflater;
-using Elastos::Droid::View::IContextThemeWrapperInLayoutInflater;
+using Elastos::Droid::View::IContextThemeWrapperHolder;
 using Elastos::Utility::IArrayList;
 
 
@@ -48,7 +48,7 @@ ECode BaseMenuPresenter::constructor(
     /* [in] */ Int32 itemLayoutRes)
 {
     mSystemContext = context;
-    if (IContextThemeWrapperInLayoutInflater::Probe(mSystemContext)) {
+    if (IContextThemeWrapperHolder::Probe(mSystemContext)) {
         REFCOUNT_ADD(mSystemContext)
         mHolderSystemContext = TRUE;
     }
@@ -63,7 +63,7 @@ ECode BaseMenuPresenter::InitForMenu(
     /* [in] */ IMenuBuilder* menu)
 {
     mContext = context;
-    if (IContextThemeWrapperInLayoutInflater::Probe(mContext)) {
+    if (IContextThemeWrapperHolder::Probe(mContext)) {
         REFCOUNT_ADD(mContext)
         mHolderContext = TRUE;
     }

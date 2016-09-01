@@ -27,7 +27,7 @@ using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::View::CKeyCharacterMap;
 using Elastos::Droid::View::EIID_IMenu;
 using Elastos::Droid::View::IActionProvider;
-using Elastos::Droid::View::IContextThemeWrapperInLayoutInflater;
+using Elastos::Droid::View::IContextThemeWrapperHolder;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IIterator;
@@ -142,7 +142,7 @@ ECode MenuBuilder::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL) {
+    if (IContextThemeWrapperHolder::Probe(mContext) != NULL) {
         REFCOUNT_ADD(mContext)
         mHolderContext = TRUE;
     }

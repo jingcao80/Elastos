@@ -25,7 +25,7 @@
 #include "elastos/droid/view/CKeyCharacterMapHelper.h"
 #include "elastos/droid/view/CKeyEvent.h"
 #include "elastos/droid/view/CGestureDetector.h"
-#include "elastos/droid/view/ContextThemeWrapperInLayoutInflater.h"
+#include "elastos/droid/view/ContextThemeWrapperHolder.h"
 #include "elastos/droid/view/CMotionEvent.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
@@ -134,7 +134,7 @@ using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::CView;
 using Elastos::Droid::View::IViewConfiguration;
-using Elastos::Droid::View::ContextThemeWrapperInLayoutInflater;
+using Elastos::Droid::View::ContextThemeWrapperHolder;
 using Elastos::Droid::View::CViewGroupLayoutParams;
 using Elastos::Droid::View::CWindowManagerLayoutParams;
 using Elastos::Droid::View::EIID_IActionModeCallback;
@@ -2093,7 +2093,7 @@ ECode PhoneWindow::_DecorView::StartActionMode(
                     actionBarTheme->SetTo(baseTheme);
                     actionBarTheme->ApplyStyle(resId, TRUE);
 
-                    AutoPtr<ContextThemeWrapperInLayoutInflater> temp = new ContextThemeWrapperInLayoutInflater();
+                    AutoPtr<ContextThemeWrapperHolder> temp = new ContextThemeWrapperHolder();
                     temp->constructor(mContext, 0, FALSE/* do not hold */);
                     actionBarContext = temp.Get();
 
@@ -6595,7 +6595,7 @@ Boolean PhoneWindow::InitializePanelMenu(
         }
 
         if (widgetTheme != NULL) {
-            AutoPtr<ContextThemeWrapperInLayoutInflater> temp = new ContextThemeWrapperInLayoutInflater();
+            AutoPtr<ContextThemeWrapperHolder> temp = new ContextThemeWrapperHolder();
             temp->constructor(context, 0, FALSE/* do not hold */);
             context = temp.Get();
             AutoPtr<IResourcesTheme> ctxTheme;

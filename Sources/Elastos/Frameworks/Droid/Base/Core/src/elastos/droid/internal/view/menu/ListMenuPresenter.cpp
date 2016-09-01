@@ -4,7 +4,7 @@
 #include "elastos/droid/internal/view/menu/CMenuDialogHelper.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "elastos/droid/view/ContextThemeWrapperInLayoutInflater.h"
+#include "elastos/droid/view/ContextThemeWrapperHolder.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/R.h"
@@ -16,8 +16,8 @@ using Elastos::Droid::View::IContextThemeWrapper;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::LayoutInflater;
-using Elastos::Droid::View::ContextThemeWrapperInLayoutInflater;
-using Elastos::Droid::View::IContextThemeWrapperInLayoutInflater;
+using Elastos::Droid::View::ContextThemeWrapperHolder;
+using Elastos::Droid::View::IContextThemeWrapperHolder;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 
@@ -163,7 +163,7 @@ ECode ListMenuPresenter::constructor(
 {
     constructor(itemLayoutRes, 0);
     mContext = ctx;
-    if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL) {
+    if (IContextThemeWrapperHolder::Probe(mContext) != NULL) {
         REFCOUNT_ADD(mContext)
         mHolderContext = TRUE;
     }
@@ -191,7 +191,7 @@ ECode ListMenuPresenter::InitForMenu(
         mHolderContext = FALSE;
         mContext = NULL;
         mInflater = NULL;
-        AutoPtr<ContextThemeWrapperInLayoutInflater> temp = new ContextThemeWrapperInLayoutInflater();
+        AutoPtr<ContextThemeWrapperHolder> temp = new ContextThemeWrapperHolder();
         temp->constructor(context, mThemeRes, FALSE/* do not hold */);
         mContext = temp.Get();
         REFCOUNT_ADD(mContext)

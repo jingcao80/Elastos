@@ -4,13 +4,13 @@
 #include "elastos/droid/internal/view/menu/IconMenuView.h"
 #include "elastos/droid/internal/view/menu/CMenuDialogHelper.h"
 #include "elastos/droid/internal/view/menu/IconMenuItemView.h"
-#include "elastos/droid/view/ContextThemeWrapperInLayoutInflater.h"
+#include "elastos/droid/view/ContextThemeWrapperHolder.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::View::ContextThemeWrapperInLayoutInflater;
+using Elastos::Droid::View::ContextThemeWrapperHolder;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewParent;
@@ -82,7 +82,7 @@ IconMenuPresenter::~IconMenuPresenter()
 ECode IconMenuPresenter::constructor(
     /* [in] */ IContext* context)
 {
-    AutoPtr<ContextThemeWrapperInLayoutInflater> themeContext = new ContextThemeWrapperInLayoutInflater();
+    AutoPtr<ContextThemeWrapperHolder> themeContext = new ContextThemeWrapperHolder();
     themeContext->constructor(context, R::style::Theme_IconMenu, FALSE/* do not hold */);
     return BaseMenuPresenter::constructor(themeContext.Get(), R::layout::icon_menu_layout,
             R::layout::icon_menu_item_layout);

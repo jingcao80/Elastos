@@ -17840,7 +17840,7 @@ ECode View::constructor(
     mContext = context;
     mHoldContext = FALSE;
     // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
-    if (IContextThemeWrapperInLayoutInflater::Probe(context) != NULL) {
+    if (IContextThemeWrapperHolder::Probe(context) != NULL) {
         mContext->AddRef();
         mHoldContext = TRUE;
     }
