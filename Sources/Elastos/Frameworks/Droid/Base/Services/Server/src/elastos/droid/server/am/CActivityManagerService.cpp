@@ -3117,7 +3117,7 @@ ECode CActivityManagerService::UpdateCpuStats()
 ECode CActivityManagerService::UpdateCpuStatsNow()
 {
     // disable for detecting memory leak
-    return NOERROR;
+    // return NOERROR;
 
     AutoLock lock(mProcessCpuTracker);
     mProcessCpuMutexFree->Set(FALSE);
@@ -5621,7 +5621,7 @@ ECode CActivityManagerService::AddRecentTaskLocked(
     /* [in] */ TaskRecord* task)
 {
     // disable for detecting memory leak
-    return NOERROR;
+    // return NOERROR;
 
     Boolean isAffiliated = task->mAffiliatedTaskId != task->mTaskId
             || task->mNextAffiliateTaskId != -1 || task->mPrevAffiliateTaskId != -1;

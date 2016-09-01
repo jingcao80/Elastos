@@ -1220,7 +1220,7 @@ void BroadcastQueue::AddBroadcastToHistoryLocked(
     /* [in] */ BroadcastRecord* r)
 {
     // disable for detecting memory leak
-    return;
+    // return;
 
     if (r->mCallingUid < 0) {
         // This was from a registerReceiver() call; ignore it.
