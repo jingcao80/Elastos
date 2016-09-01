@@ -27,6 +27,10 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* base);
 
+    CARAPI constructor(
+        /* [in] */ IContext* base,
+        /* [in] */ Boolean holdBaseContext);
+
     /**
      * @return the base context as set by the constructor or setBaseContext
      */
@@ -554,8 +558,13 @@ protected:
     virtual CARAPI AttachBaseContext(
         /* [in] */ IContext* base);
 
+    virtual CARAPI AttachBaseContext(
+        /* [in] */ IContext* base,
+        /* [in] */ Boolean holdBaseContext);
+
 protected:
-    AutoPtr<IContext> mBase;
+    IContext* mBase;
+    Boolean mHoldBaseContext;
 };
 
 }

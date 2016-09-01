@@ -321,6 +321,11 @@ module
             [in] IContext* base,
             [in] Int32 themeres);
 
+        constructor(
+            [in] IContext* base,
+            [in] Int32 themeres,
+            [in] Boolean holdBaseContext);
+
         interface IContext;
         interface IContextWrapper;
         interface IContextThemeWrapper;

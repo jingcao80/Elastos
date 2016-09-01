@@ -34,15 +34,17 @@ ECode ContextThemeWrapper::constructor(
     /* [in] */ IContext* base,
     /* [in] */ Int32 themeres)
 {
-    FAIL_RETURN(ContextWrapper::constructor(base));
-    mThemeResource = themeres;
-    return NOERROR;
+    return constructor(base, themeres, TRUE);
 }
 
-ECode ContextThemeWrapper::AttachBaseContext(
-    /* [in] */ IContext* newBase)
+ECode ContextThemeWrapper::constructor(
+    /* [in] */ IContext* base,
+    /* [in] */ Int32 themeres,
+    /* [in] */ Boolean holdBaseContext)
 {
-    return ContextWrapper::AttachBaseContext(newBase);
+    FAIL_RETURN(ContextWrapper::constructor(base, holdBaseContext));
+    mThemeResource = themeres;
+    return NOERROR;
 }
 
 ECode ContextThemeWrapper::ApplyOverrideConfiguration(

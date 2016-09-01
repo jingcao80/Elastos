@@ -11,17 +11,39 @@ ContextWrapper::ContextWrapper()
 {}
 
 ContextWrapper::~ContextWrapper()
-{}
+{
+    if (mHoldBaseContext && mBase) {
+        REFCOUNT_RELEASE(mBase)
+    }
+}
 
 ECode ContextWrapper::constructor(
     /* [in] */ IContext* base)
 {
+    return constructor(base, TRUE);
+}
+
+ECode ContextWrapper::constructor(
+    /* [in] */ IContext* base,
+    /* [in] */ Boolean holdBaseContext)
+{
     mBase = base;
+    mHoldBaseContext = holdBaseContext;
+    if (mHoldBaseContext) {
+        REFCOUNT_ADD(mBase)
+    }
     return NOERROR;
 }
 
 ECode ContextWrapper::AttachBaseContext(
     /* [in] */ IContext* base)
+{
+    return AttachBaseContext(base, TRUE);
+}
+
+ECode ContextWrapper::AttachBaseContext(
+    /* [in] */ IContext* base,
+    /* [in] */ Boolean holdBaseContext)
 {
     if (NULL != mBase) {
         //throw new IllegalStateException("Base context already set");
@@ -29,6 +51,10 @@ ECode ContextWrapper::AttachBaseContext(
     }
 
     mBase = base;
+    mHoldBaseContext = holdBaseContext;
+    if (mHoldBaseContext) {
+        REFCOUNT_ADD(mBase)
+    }
     return NOERROR;
 }
 
@@ -103,7 +129,7 @@ ECode ContextWrapper::RecreateTheme()
 ECode ContextWrapper::GetClassLoader(
     /* [out] */ IClassLoader** loader)
 {
-    return ((Context*)mBase.Get())->GetClassLoader(loader);
+    return ((Context*)mBase)->GetClassLoader(loader);
 }
 
 ECode ContextWrapper::GetPackageName(
@@ -437,7 +463,7 @@ ECode ContextWrapper::SendBroadcast(
     /* [in] */ const String& receiverPermission,
     /* [in] */ Int32 appOp)
 {
-    return ((Context*)mBase.Get())->SendBroadcast(intent, receiverPermission, appOp);
+    return ((Context*)mBase)->SendBroadcast(intent, receiverPermission, appOp);
 }
 
 ECode ContextWrapper::SendOrderedBroadcast(
@@ -470,7 +496,7 @@ ECode ContextWrapper::SendOrderedBroadcast(
     /* [in] */ const String& initialData,
     /* [in] */ IBundle* initialExtras)
 {
-    return ((Context*)mBase.Get())->SendOrderedBroadcast(intent, receiverPermission, appOp, resultReceiver, scheduler,
+    return ((Context*)mBase)->SendOrderedBroadcast(intent, receiverPermission, appOp, resultReceiver, scheduler,
         initialCode, initialData, initialExtras);
 }
 
@@ -514,7 +540,7 @@ ECode ContextWrapper::SendOrderedBroadcastAsUser(
     /* [in] */ const String& initialData,
     /* [in] */ IBundle* initialExtras)
 {
-    return ((Context*)mBase.Get())->SendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp,
+    return ((Context*)mBase)->SendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp,
         resultReceiver, scheduler, initialCode, initialData, initialExtras);
 }
 
@@ -653,7 +679,7 @@ ECode ContextWrapper::BindServiceAsUser(
     /* [in] */ IUserHandle* userHandle,
     /* [out] */ Boolean* succeeded)
 {
-    return ((Context*)mBase.Get())->BindServiceAsUser(service, conn, flags, userHandle, succeeded);
+    return ((Context*)mBase)->BindServiceAsUser(service, conn, flags, userHandle, succeeded);
 }
 
 ECode ContextWrapper::UnbindService(
@@ -829,7 +855,7 @@ ECode ContextWrapper::CreatePackageContextAsUser(
     /* [in] */ IUserHandle* user,
     /* [out] */ IContext** ctx)
 {
-    return ((Context*)mBase.Get())->CreatePackageContextAsUser(packageName, flags, user, ctx);
+    return ((Context*)mBase)->CreatePackageContextAsUser(packageName, flags, user, ctx);
 }
 
 ECode ContextWrapper::CreateApplicationContext(
@@ -852,7 +878,7 @@ ECode ContextWrapper::CreateApplicationContext(
 ECode ContextWrapper::GetUserId(
     /* [out] */ Int32* userId)
 {
-    return ((Context*)mBase.Get())->GetUserId(userId);
+    return ((Context*)mBase)->GetUserId(userId);
 }
 
 ECode ContextWrapper::CreateConfigurationContext(
@@ -889,7 +915,7 @@ ECode ContextWrapper::GetDisplayAdjustments(
     /* [in] */ Int32 displayId,
     /* [out] */ IDisplayAdjustments** da)
 {
-    return ((Context*)mBase.Get())->GetDisplayAdjustments(displayId, da);
+    return ((Context*)mBase)->GetDisplayAdjustments(displayId, da);
 }
 
 }

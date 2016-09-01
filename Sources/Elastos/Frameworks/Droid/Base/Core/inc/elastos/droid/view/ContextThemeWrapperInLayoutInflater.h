@@ -4,6 +4,7 @@
 
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/view/ContextThemeWrapper.h"
+#include "elastos/droid/ext/frameworkdef.h"
 
 namespace Elastos {
 namespace Droid {
@@ -16,8 +17,7 @@ class ContextThemeWrapperInLayoutInflater
 public:
     CAR_INTERFACE_DECL()
 
-    CARAPI ToString(
-        /* [out] */ String* str);
+    TO_STRING_IMPL("ContextThemeWrapperInLayoutInflater")
 };
 
 } // namespace View

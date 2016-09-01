@@ -28,6 +28,11 @@ public:
         /* [in] */ IContext* base,
         /* [in] */ Int32 themeres);
 
+    CARAPI constructor(
+        /* [in] */ IContext* base,
+        /* [in] */ Int32 themeres,
+        /* [in] */ Boolean holdBaseContext);
+
     /**
      * Call to set an "override configuration" on this context -- this is
      * a configuration that replies one or more values of the standard
@@ -58,8 +63,6 @@ public:
         /* [out] */ IInterface** object);
 
 protected:
-    CARAPI AttachBaseContext(
-        /* [in] */ IContext* base);
 
     virtual CARAPI OnApplyThemeResource(
         /* [in] */ IResourcesTheme* theme,
