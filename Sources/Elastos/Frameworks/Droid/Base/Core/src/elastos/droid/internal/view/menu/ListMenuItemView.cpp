@@ -23,6 +23,7 @@ CAR_INTERFACE_IMPL_2(ListMenuItemView, LinearLayout, IListMenuItemView, IMenuIte
 
 ListMenuItemView::ListMenuItemView()
     : mTextAppearance(0)
+    , mTextAppearanceContext(NULL)
     , mPreserveIconSpacing(FALSE)
     , mMenuType(0)
     , mForceShowIcon(FALSE)

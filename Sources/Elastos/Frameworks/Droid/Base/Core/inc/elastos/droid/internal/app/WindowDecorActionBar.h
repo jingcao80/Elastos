@@ -342,6 +342,8 @@ private:
 public:
     WindowDecorActionBar();
 
+    ~WindowDecorActionBar();
+
     CAR_INTERFACE_DECL()
 
     CARAPI constructor(
@@ -702,8 +704,9 @@ private:
     static const Int32 CONTEXT_DISPLAY_SPLIT;
     static const Int32 INVALID_POSITION ;
 
-    AutoPtr<IContext> mContext;
-    AutoPtr<IContext> mThemedContext;
+    IContext* mContext;
+    IContext* mThemedContext;
+    Boolean mHoldThemedContext;
     IActivity* mActivity;
     IDialog* mDialog;
 

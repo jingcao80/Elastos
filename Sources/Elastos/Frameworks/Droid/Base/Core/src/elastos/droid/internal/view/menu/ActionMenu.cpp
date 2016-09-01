@@ -29,7 +29,8 @@ namespace Menu {
 CAR_INTERFACE_IMPL_2(ActionMenu, Object, IActionMenu, IMenu)
 
 ActionMenu::ActionMenu()
-    : mIsQwerty(FALSE)
+    : mContext(NULL)
+    , mIsQwerty(FALSE)
 {
 }
 

@@ -237,7 +237,11 @@ ECode ActionMenuView::ActionMenuPresenterCallback::OnOpenSubMenu(
 CAR_INTERFACE_IMPL_3(ActionMenuView, LinearLayout, IActionMenuView, IMenuView, IMenuBuilderItemInvoker)
 
 ActionMenuView::ActionMenuView()
-    : mReserveOverflow(FALSE)
+    : mMenu(NULL)
+    , mPopupContext(NULL)
+    , mHolderPopupContext(FALSE)
+    , mPopupTheme(0)
+    , mReserveOverflow(FALSE)
     , mFormatItems(FALSE)
     , mFormatItemsWidth(0)
     , mMinCellSize(0)
@@ -249,7 +253,10 @@ ActionMenuView::ActionMenuView()
 
 ActionMenuView::~ActionMenuView()
 {
-    Logger::I(TAG, " >> Destroy ActionMenuView: %p", this);
+    if (mHolderPopupContext && mPopupContext != NULL) {
+        REFCOUNT_RELEASE(mPopupContext)
+        mPopupContext = NULL;
+    }
 }
 
 ECode ActionMenuView::constructor(
@@ -272,10 +279,18 @@ ECode ActionMenuView::SetPopupTheme(
 {
     if (mPopupTheme != resId) {
         mPopupTheme = resId;
+        if (mHolderPopupContext && mPopupContext != NULL) {
+            REFCOUNT_RELEASE(mPopupContext)
+            mPopupContext = NULL;
+        }
+
         if (resId == 0) {
             mPopupContext = mContext;
-        } else {
-            CContextThemeWrapper::New(mContext, resId, (IContext**)&mPopupContext);
+            mHolderPopupContext = FALSE;
+        }
+        else {
+            CContextThemeWrapper::New(mContext, resId, FALSE/* do not hold */, (IContext**)&mPopupContext);
+            mHolderPopupContext = TRUE;
         }
     }
     return NOERROR;
@@ -897,6 +912,7 @@ ECode ActionMenuView::OnDetachedFromWindow()
 ECode ActionMenuView::IsOverflowReserved(
     /* [out */ Boolean* reserveOverflow)
 {
+    VALIDATE_NOT_NULL(reserveOverflow)
     *reserveOverflow = mReserveOverflow;
     return NOERROR;
 }
@@ -1012,20 +1028,26 @@ ECode ActionMenuView::GetMenu(
     if (mMenu == NULL) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        CMenuBuilder::New(context, (IMenuBuilder**)&mMenu);
-        AutoPtr<MenuBuilderCallback> cb = new MenuBuilderCallback(this);
-        mMenu->SetCallback(cb);
-        AutoPtr<IActionMenuPresenter> tmp;
-        CActionMenuPresenter::New(context, (IActionMenuPresenter**)&tmp);
-        mPresenter = NULL;
-        IWeakReferenceSource::Probe(tmp)->GetWeakReference((IWeakReference**)&mPresenter);
-        tmp->SetReserveOverflow(TRUE);
 
-        AutoPtr<IMenuPresenterCallback> acb = new ActionMenuPresenterCallback();
-        IMenuPresenter::Probe(tmp)->SetCallback(mActionMenuPresenterCallback != NULL
-                ? mActionMenuPresenterCallback : acb);
-        mMenu->AddMenuPresenter(IMenuPresenter::Probe(tmp), mPopupContext);
-        tmp->SetMenuView(this);
+        AutoPtr<MenuBuilderCallback> builderCallback = new MenuBuilderCallback(this);
+        AutoPtr<IMenuPresenterCallback> presenterCallback = mActionMenuPresenterCallback;
+        if (presenterCallback == NULL) {
+            presenterCallback = new ActionMenuPresenterCallback();
+        }
+
+        AutoPtr<IActionMenuPresenter> presenter;
+        CActionMenuPresenter::New(context, (IActionMenuPresenter**)&presenter);
+        IMenuPresenter* menuPresenter = IMenuPresenter::Probe(presenter);
+        presenter->SetReserveOverflow(TRUE);
+        menuPresenter->SetCallback(presenterCallback);
+
+        CMenuBuilder::New(context, (IMenuBuilder**)&mMenu);
+        mMenu->SetCallback(builderCallback);
+        mMenu->AddMenuPresenter(menuPresenter, mPopupContext);
+        presenter->SetMenuView(this);
+
+        mPresenter = NULL;
+        IWeakReferenceSource::Probe(presenter)->GetWeakReference((IWeakReference**)&mPresenter);
     }
 
     *menu = IMenu::Probe(mMenu);
@@ -1205,6 +1227,7 @@ void ActionMenuView::InitActionMenu(
     mMinCellSize = (Int32) (MIN_CELL_SIZE * density);
     mGeneratedItemPadding = (Int32) (GENERATED_ITEM_PADDING * density);
     mPopupContext = context;
+    mHolderPopupContext = FALSE;
     mPopupTheme = 0;
 }
 

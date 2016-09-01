@@ -4,6 +4,7 @@
 #include "elastos/droid/internal/view/menu/CMenuDialogHelper.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/LayoutInflater.h"
+#include "elastos/droid/view/ContextThemeWrapperInLayoutInflater.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/R.h"
@@ -15,6 +16,8 @@ using Elastos::Droid::View::IContextThemeWrapper;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::ContextThemeWrapperInLayoutInflater;
+using Elastos::Droid::View::IContextThemeWrapperInLayoutInflater;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 
@@ -139,7 +142,9 @@ ECode ListMenuPresenter::OnItemClickListener::OnItemClick(
 CAR_INTERFACE_IMPL_2(ListMenuPresenter, Object, IListMenuPresenter, IMenuPresenter)
 
 ListMenuPresenter::ListMenuPresenter()
-    : mThemeRes(0)
+    : mContext(NULL)
+    , mHolderContext(FALSE)
+    , mThemeRes(0)
     , mItemLayoutRes(0)
     , mItemIndexOffset(0)
     , mId(0)
@@ -147,7 +152,9 @@ ListMenuPresenter::ListMenuPresenter()
 
 ListMenuPresenter::~ListMenuPresenter()
 {
-    Logger::I(TAG, " >> Destory ListMenuPresenter: %p", this);
+    if (mHolderContext && mContext) {
+        REFCOUNT_RELEASE(mContext)
+    }
 }
 
 ECode ListMenuPresenter::constructor(
@@ -156,6 +163,10 @@ ECode ListMenuPresenter::constructor(
 {
     constructor(itemLayoutRes, 0);
     mContext = ctx;
+    if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL) {
+        REFCOUNT_ADD(mContext)
+        mHolderContext = TRUE;
+    }
     LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater);
     return NOERROR;
 }
@@ -174,12 +185,25 @@ ECode ListMenuPresenter::InitForMenu(
     /* [in] */ IMenuBuilder* menu)
 {
     if (mThemeRes != 0) {
+        if (mHolderContext && mContext) {
+            REFCOUNT_RELEASE(mContext)
+        }
+        mHolderContext = FALSE;
         mContext = NULL;
         mInflater = NULL;
-        CContextThemeWrapper::New(context, mThemeRes, (IContext**)&mContext);
+        AutoPtr<ContextThemeWrapperInLayoutInflater> temp = new ContextThemeWrapperInLayoutInflater();
+        temp->constructor(context, mThemeRes, FALSE/* do not hold */);
+        mContext = temp.Get();
+        REFCOUNT_ADD(mContext)
+        mHolderContext = TRUE;
+
         LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater);
     }
     else if (mContext != NULL) {
+        if (mHolderContext && mContext) {
+            REFCOUNT_RELEASE(mContext)
+        }
+        mHolderContext = FALSE;
         mContext = context;
         if (mInflater == NULL) {
             LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater);

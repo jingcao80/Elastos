@@ -229,7 +229,19 @@ ActionBarOverlayLayout::ActionBarOverlayLayout()
 
 ActionBarOverlayLayout::~ActionBarOverlayLayout()
 {
-    Logger::I(TAG, " >> Destroy ActionBarOverlayLayout: %p", this);
+    mContent = NULL;
+    mActionBarBottom = NULL;
+    mActionBarTop = NULL;
+    mDecorToolbar = NULL;
+    mWindowContentOverlay = NULL;
+    mActionBarVisibilityCallback = NULL;
+    mFlingEstimator = NULL;
+    mCurrentActionBarTopAnimator = NULL;
+    mCurrentActionBarBottomAnimator = NULL;
+    mTopAnimatorListener = NULL;
+    mBottomAnimatorListener = NULL;
+    mRemoveActionBarHideOffset = NULL;
+    mAddActionBarHideOffset = NULL;
 }
 
 ECode ActionBarOverlayLayout::constructor(

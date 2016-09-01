@@ -134,11 +134,21 @@ const Int32 AbsActionBarView::FADE_DURATION = 200;
 CAR_INTERFACE_IMPL(AbsActionBarView, ViewGroup, IAbsActionBarView)
 
 AbsActionBarView::AbsActionBarView()
-    : mSplitActionBar(FALSE)
+    : mPopupContext(NULL)
+    , mHolderPopupContext(FALSE)
+    , mSplitActionBar(FALSE)
     , mSplitWhenNarrow(FALSE)
     , mContentHeight(0)
 {
     mVisAnimListener = new VisibilityAnimListener(this);
+}
+
+AbsActionBarView::~AbsActionBarView()
+{
+    if (mHolderPopupContext && mPopupContext != NULL) {
+        REFCOUNT_RELEASE(mPopupContext)
+        mPopupContext = NULL;
+    }
 }
 
 ECode AbsActionBarView::constructor(
@@ -180,10 +190,12 @@ ECode AbsActionBarView::constructor(
     Int32 resourceId = 0;
     tv->GetResourceId(&resourceId);
     if (resTmp && resourceId != 0) {
-        CContextThemeWrapper::New(context, resourceId, (IContext**)&mPopupContext);
+        CContextThemeWrapper::New(context, resourceId, FALSE/* do not hold */, (IContext**)&mPopupContext);
+        mHolderPopupContext = TRUE;
     }
     else {
         mPopupContext = context;
+        mHolderPopupContext = FALSE;
     }
     return NOERROR;
 }

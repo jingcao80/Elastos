@@ -112,7 +112,6 @@ private:
     CARAPI_(void) UpdateText();
 
 private:
-    AutoPtr<IContext> mContext;
     AutoPtr<ITextView> mFirstLine;
     AutoPtr<IImageView> mFirstLineCaret;
     AutoPtr<ITextView> mSecondLine;

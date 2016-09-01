@@ -111,7 +111,6 @@ ECode CQSDetailItems::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     FrameLayout::constructor(context, attrs);
-    mContext = context;
     mTag = TAG;
     return NOERROR;
 }

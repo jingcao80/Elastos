@@ -18,7 +18,7 @@ class Scroller
     : public Object
     , public IScroller
 {
-protected:
+public:
     class ViscousFluidInterpolator
         : public Object
         , public IInterpolator

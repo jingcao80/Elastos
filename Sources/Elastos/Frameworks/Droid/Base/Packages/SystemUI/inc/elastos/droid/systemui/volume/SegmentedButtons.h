@@ -99,7 +99,6 @@ private:
     const static AutoPtr<ITypeface> BOLD;
     const static Int32 LABEL_RES_KEY;
 
-    AutoPtr<IContext> mContext;
     AutoPtr<ILayoutInflater> mInflater;
 
     AutoPtr<ISegmentedButtonsCallback> mCallback;

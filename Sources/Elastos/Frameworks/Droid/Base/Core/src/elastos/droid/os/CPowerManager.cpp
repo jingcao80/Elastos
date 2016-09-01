@@ -7,10 +7,11 @@
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Content::EIID_IContext;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -25,27 +26,45 @@ CAR_OBJECT_IMPL(CPowerManager)
 ECode CPowerManager::GetMinimumScreenBrightnessSetting(
     /* [out] */ Int32* screenBrightness)
 {
-    VALIDATE_NOT_NULL(screenBrightness);
+    VALIDATE_NOT_NULL(screenBrightness)
+    *screenBrightness = 0;
+
+    AutoPtr<IContext> context = GetContext();
+    if (context == NULL) {
+        return NOERROR;
+    }
     AutoPtr<IResources> res;
-    FAIL_RETURN(mContext->GetResources((IResources**)&res));
+    FAIL_RETURN(context->GetResources((IResources**)&res));
     return res->GetInteger(R::integer::config_screenBrightnessSettingMinimum, screenBrightness);
 }
 
 ECode CPowerManager::GetMaximumScreenBrightnessSetting(
     /* [out] */ Int32* screenBrightness)
 {
-    VALIDATE_NOT_NULL(screenBrightness);
+    VALIDATE_NOT_NULL(screenBrightness)
+    *screenBrightness = 0;
+
+    AutoPtr<IContext> context = GetContext();
+    if (context == NULL) {
+        return NOERROR;
+    }
     AutoPtr<IResources> res;
-    FAIL_RETURN(mContext->GetResources((IResources**)&res));
+    FAIL_RETURN(context->GetResources((IResources**)&res));
     return res->GetInteger(R::integer::config_screenBrightnessSettingMaximum, screenBrightness);
 }
 
 ECode CPowerManager::GetDefaultScreenBrightnessSetting(
     /* [out] */ Int32* screenBrightness)
 {
-    VALIDATE_NOT_NULL(screenBrightness);
+    VALIDATE_NOT_NULL(screenBrightness)
+    *screenBrightness = 0;
+
+    AutoPtr<IContext> context = GetContext();
+    if (context == NULL) {
+        return NOERROR;
+    }
     AutoPtr<IResources> res;
-    FAIL_RETURN(mContext->GetResources((IResources**)&res));
+    FAIL_RETURN(context->GetResources((IResources**)&res));
     return res->GetInteger(R::integer::config_screenBrightnessSettingDefault, screenBrightness);
 }
 
@@ -61,10 +80,16 @@ ECode CPowerManager::NewWakeLock(
     /* [in] */ const String& tag,
     /* [out] */ IPowerManagerWakeLock** wakeLock)
 {
-    VALIDATE_NOT_NULL(wakeLock);
+    VALIDATE_NOT_NULL(wakeLock)
+    *wakeLock = NULL;
+
+    AutoPtr<IContext> context = GetContext();
+    if (context == NULL) {
+        return NOERROR;
+    }
     FAIL_RETURN(ValidateWakeLockParameters(levelAndFlags, tag));
     String name;
-    mContext->GetOpPackageName(&name);
+    context->GetOpPackageName(&name);
     return CPowerManagerWakeLock::New(levelAndFlags, tag, name, this, wakeLock);
 }
 
@@ -220,12 +245,18 @@ ECode CPowerManager::constructor(
     /* [in] */ IIPowerManager* service,
     /* [in] */ IHandler* handler)
 {
-    mContext = context;
+    IWeakReferenceSource::Probe(context)->GetWeakReference((IWeakReference**)&mWeakContext);
     mService = service;
     mHandler = handler;
     return NOERROR;
 }
 
+AutoPtr<IContext> CPowerManager::GetContext()
+{
+    AutoPtr<IContext> ctx;
+    mWeakContext->Resolve(EIID_IContext, (IInterface**)&ctx);
+    return ctx;
+}
 
 ECode CPowerManager::CpuBoost(
     /* [in] */ Int32 duration)
@@ -242,12 +273,18 @@ ECode CPowerManager::CpuBoost(
 ECode CPowerManager::HasPowerProfiles(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    AutoPtr<IContext> context = GetContext();
+    if (context == NULL) {
+        return NOERROR;
+    }
+
     String defaultProfile, profile;
     GetDefaultPowerProfile(&defaultProfile);
     AutoPtr<IResources> res;
-    mContext->GetResources((IResources**)&res);
-
-    // res->GetString(R::string::config_perf_profile_prop, &profile);
+    context->GetResources((IResources**)&res);
+    res->GetString(R::string::config_perf_profile_prop, &profile);
     *result = !TextUtils::IsEmpty(defaultProfile) &&
            !TextUtils::IsEmpty(profile);
     return NOERROR;
@@ -256,11 +293,16 @@ ECode CPowerManager::HasPowerProfiles(
 ECode CPowerManager::GetDefaultPowerProfile(
     /* [out] */ String* profile)
 {
-    AutoPtr<IResources> res;
-    mContext->GetResources((IResources**)&res);
+    VALIDATE_NOT_NULL(profile)
+    *profile = String(NULL);
 
-    // res->GetString(R::string::config_perf_profile_default_entry, profile);
-    return NOERROR;
+    AutoPtr<IContext> context = GetContext();
+    if (context == NULL) {
+        return NOERROR;
+    }
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    return res->GetString(R::string::config_perf_profile_default_entry, profile);
 }
 
 ECode CPowerManager::SetPowerProfile(
@@ -350,23 +392,35 @@ ECode CPowerManager::SetKeyboardLight(
 ECode CPowerManager::GetDefaultButtonBrightness(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+
+    AutoPtr<IContext> context = GetContext();
+    if (context == NULL) {
+        return NOERROR;
+    }
     AutoPtr<IResources> res;
-    mContext->GetResources((IResources**)&res);
-    // return res->GetInteger(R::integer::config_buttonBrightnessSettingDefault, result);
-    return NOERROR;
+    context->GetResources((IResources**)&res);
+    return res->GetInteger(R::integer::config_buttonBrightnessSettingDefault, result);
 }
 
 ECode CPowerManager::GetDefaultKeyboardBrightness(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+
+    AutoPtr<IContext> context = GetContext();
+    if (context == NULL) {
+        return NOERROR;
+    }
     AutoPtr<IResources> res;
-    mContext->GetResources((IResources**)&res);
-    // return res->GetInteger(R::integer::config_keyboardBrightnessSettingDefault, result);
-    return NOERROR;
+    context->GetResources((IResources**)&res);
+    return res->GetInteger(R::integer::config_keyboardBrightnessSettingDefault, result);
 }
 
 ECode CPowerManager::WakeUpWithProximityCheck(
-        /* [in] */ Int64 time)
+    /* [in] */ Int64 time)
 {
     // try {
     return mService->WakeUpWithProximityCheck(time);

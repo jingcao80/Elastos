@@ -28,6 +28,7 @@ ActionMenuItem::ActionMenuItem()
     , mShortcutNumericChar(0)
     , mShortcutAlphabeticChar(0)
     , mIconResId(NO_ICON)
+    , mContext(NULL)
     , mFlags(ENABLED)
 {
 }

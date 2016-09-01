@@ -171,7 +171,6 @@ private:
     static Boolean sInit;
     static AutoPtr<IAudioAttributes> VIBRATION_ATTRIBUTES;
 
-    AutoPtr<IContext> mContext;
     AutoPtr<IBaseStatusBar> mBar;
 
     AutoPtr<ISearchPanelCircleView> mCircle;

@@ -471,7 +471,8 @@ private:
 //          SplineOverScroller
 //===============================================================================
 
-class SplineOverScroller : public ElRefBase
+class SplineOverScroller
+    : public Object
 {
 public:
     SplineOverScroller(

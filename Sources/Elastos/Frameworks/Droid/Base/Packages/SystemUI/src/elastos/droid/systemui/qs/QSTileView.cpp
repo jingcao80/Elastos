@@ -78,7 +78,6 @@ ECode QSTileView::constructor(
 {
     ViewGroup::constructor(context);
 
-    mContext = context;
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
     res->GetDimensionPixelSize(R::dimen::qs_tile_icon_size, &mIconSizePx);

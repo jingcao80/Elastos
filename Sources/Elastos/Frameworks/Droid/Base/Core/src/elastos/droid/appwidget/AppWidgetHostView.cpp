@@ -132,7 +132,8 @@ AppWidgetHostView::ParcelableSparseArray::ReadFromParcel(
 CAR_INTERFACE_IMPL(AppWidgetHostView, FrameLayout, IAppWidgetHostView);
 
 AppWidgetHostView::AppWidgetHostView()
-    : mAppWidgetId(0)
+    : mRemoteContext(NULL)
+    , mAppWidgetId(0)
     , mViewMode(VIEW_MODE_NOINIT)
     , mLayoutId(-1)
     , mFadeStartTime(-1)
@@ -164,7 +165,6 @@ ECode AppWidgetHostView::constructor(
     /* [in] */ Int32 animationOut)
 {
     FrameLayout::constructor(context);
-    mContext = context;
     // We want to segregate the view ids within AppWidgets to prevent
     // problems when those ids collide with view ids in the AppWidgetHost.
     SetIsRootNamespace(TRUE);
@@ -407,7 +407,7 @@ ECode AppWidgetHostView::GenerateLayoutParams(
     // We're being asked to inflate parameters, probably by a LayoutInflater
     // in a remote Context. To help resolve any remote references, we
     // inflate through our last mRemoteContext when it exists.
-    AutoPtr<IContext> context = mRemoteContext != NULL ? mRemoteContext : mContext;
+    AutoPtr<IContext> context = mRemoteContext != NULL ? mRemoteContext.Get() : mContext;
     AutoPtr<IFrameLayoutLayoutParams> lp;
     FAIL_RETURN(CFrameLayoutLayoutParams::New(context, attrs, (IFrameLayoutLayoutParams**)&lp));
     *params = IViewGroupLayoutParams::Probe(lp);

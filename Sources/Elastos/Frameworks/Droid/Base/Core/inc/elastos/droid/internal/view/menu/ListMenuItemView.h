@@ -111,7 +111,7 @@ private:
 
     AutoPtr<IDrawable> mBackground;
     Int32 mTextAppearance;
-    AutoPtr<IContext> mTextAppearanceContext;
+    IContext* mTextAppearanceContext;
     Boolean mPreserveIconSpacing;
 
     Int32 mMenuType;

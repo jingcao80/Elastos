@@ -2339,7 +2339,7 @@ ECode Activity::GetLayoutInflater(
     return win->GetLayoutInflater(inflater);
 }
 
-ECode Activity::GetMenuInflater (
+ECode Activity::GetMenuInflater(
     /* [out] */ IMenuInflater** menuInflater)
 {
     VALIDATE_NOT_NULL(menuInflater);

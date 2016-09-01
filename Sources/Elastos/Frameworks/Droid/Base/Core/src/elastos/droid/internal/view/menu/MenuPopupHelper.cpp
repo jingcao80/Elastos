@@ -206,7 +206,8 @@ CAR_INTERFACE_IMPL_7(MenuPopupHelper, Object, IMenuPopupHelper, IAdapterViewOnIt
     IViewOnKeyListener, IPopupWindowOnDismissListener, IViewOnAttachStateChangeListener, IMenuPresenter)
 
 MenuPopupHelper::MenuPopupHelper()
-    : mOverflowOnly(FALSE)
+    : mContext(NULL)
+    , mOverflowOnly(FALSE)
     , mPopupMaxWidth(0)
     , mPopupStyleAttr(0)
     , mForceShowIcon(FALSE)

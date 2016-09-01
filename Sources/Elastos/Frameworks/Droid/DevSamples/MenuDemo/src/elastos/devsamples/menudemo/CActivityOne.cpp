@@ -27,6 +27,11 @@ static const String TAG("MenuDemo::CActivityOne");
 
 CAR_OBJECT_IMPL(CActivityOne)
 
+CActivityOne::~CActivityOne()
+{
+    Logger::I(TAG, " >> Destroy constructor()");
+}
+
 ECode CActivityOne::constructor()
 {
     Logger::I(TAG, " >> constructor()");

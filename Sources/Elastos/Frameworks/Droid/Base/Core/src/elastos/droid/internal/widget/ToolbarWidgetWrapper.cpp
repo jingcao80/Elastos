@@ -3,6 +3,7 @@
 #include "elastos/droid/internal/widget/ToolbarWidgetWrapper.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/view/LayoutInflater.h"
+#include "elastos/droid/view/WindowCallbackWrapper.h"
 #include "elastos/droid/widget/CActionMenuPresenter.h"
 #include "elastos/droid/widget/CSpinner.h"
 #include "elastos/droid/widget/CToolbarLayoutParams.h"
@@ -11,6 +12,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IActionBarLayoutParams;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Internal::View::Menu::CActionMenuItem;
@@ -21,13 +23,14 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::IWindow;
-using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::WindowCallbackWrapper;
 using Elastos::Droid::Widget::CActionMenuPresenter;
 using Elastos::Droid::Widget::CSpinner;
 using Elastos::Droid::Widget::IAdapter;
@@ -122,6 +125,19 @@ ToolbarWidgetWrapper::ToolbarWidgetWrapper()
     , mNavigationMode(0)
     , mDefaultNavigationContentDescription(0)
 {
+}
+
+ToolbarWidgetWrapper::~ToolbarWidgetWrapper()
+{
+    mToolbar = NULL;
+    mTabView = NULL;
+    mSpinner = NULL;
+    mCustomView = NULL;
+    mIcon = NULL;
+    mLogo = NULL;
+    mNavIcon = NULL;
+    mWindowCallback = NULL;
+    mActionMenuPresenter = NULL;
 }
 
 ECode ToolbarWidgetWrapper::constructor(
@@ -313,7 +329,14 @@ ECode ToolbarWidgetWrapper::CollapseActionView()
 ECode ToolbarWidgetWrapper::SetWindowCallback(
     /* [in] */ IWindowCallback* cb)
 {
-    mWindowCallback = cb;
+    if (IContext::Probe(cb) != NULL) {
+        AutoPtr<WindowCallbackWrapper> wrapper = new WindowCallbackWrapper();
+        wrapper->constructor(cb);
+        mWindowCallback = wrapper.Get();
+    }
+    else {
+        mWindowCallback = cb;
+    }
     return NOERROR;
 }
 

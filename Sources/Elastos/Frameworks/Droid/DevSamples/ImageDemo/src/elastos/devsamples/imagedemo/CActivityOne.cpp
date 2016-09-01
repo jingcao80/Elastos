@@ -50,9 +50,13 @@ ECode CActivityOne::MyListener::OnClick(
 
 CAR_OBJECT_IMPL(CActivityOne)
 
+CActivityOne::CActivityOne()
+    : mDestroyed(0)
+{}
+
 CActivityOne::~CActivityOne()
 {
-    Logger::I(TAG, " >> Destory ImageDemo::CActivityOne");
+    Logger::I(TAG, " >> Destroy ImageDemo::CActivityOne");
 }
 
 UInt32 CActivityOne::AddRef()
@@ -78,6 +82,14 @@ UInt32 CActivityOne::Release()
     // Logger::I(TAG, "ImageDemoActivity::Release, refcount: %d, callstack:\n%s", GetStrongCount(), backtrace.string());
     // Logger::I(TAG, "-------------------------------------------------------");
 
+    if (mDestroyed && count == 1) {
+        if (mDestroyed == 0) {
+            mDestroyed = 1;
+        }
+        else if (mDestroyed == 1) {
+            // Release();
+        }
+    }
     return count;
 }
 
@@ -132,7 +144,9 @@ ECode CActivityOne::OnStop()
 ECode CActivityOne::OnDestroy()
 {
     Logger::I(TAG, " >> OnDestroy()");
-    return Activity::OnDestroy();
+    ECode ec =  Activity::OnDestroy();
+    mDestroyed = 1;
+    return ec;
 }
 
 ECode CActivityOne::OnActivityResult(

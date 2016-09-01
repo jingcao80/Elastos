@@ -30,9 +30,11 @@ class BaseMenuPresenter
     , public IMenuPresenter
 {
 public:
+    CAR_INTERFACE_DECL()
+
     BaseMenuPresenter();
 
-    CAR_INTERFACE_DECL()
+    ~BaseMenuPresenter();
 
     /**
      * Construct a new BaseMenuPresenter.
@@ -157,6 +159,8 @@ protected:
 protected:
     IContext* mSystemContext;
     IContext* mContext;
+    Boolean mHolderSystemContext;
+    Boolean mHolderContext;
 
     AutoPtr<IMenuBuilder> mMenu;
     AutoPtr<ILayoutInflater> mSystemInflater;

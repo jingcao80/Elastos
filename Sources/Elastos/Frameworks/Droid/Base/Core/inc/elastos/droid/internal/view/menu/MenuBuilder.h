@@ -790,7 +790,8 @@ private:
 
     static const Int32 sCategoryToOrder[6];
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
+    Boolean mHolderContext;
     AutoPtr<IResources> mResources;
 
     /**

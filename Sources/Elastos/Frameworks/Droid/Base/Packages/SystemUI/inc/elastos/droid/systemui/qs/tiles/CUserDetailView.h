@@ -47,7 +47,7 @@ public:
             /* [in] */ IView* view);
 
     private:
-        AutoPtr<IContext> mContext;
+        IContext* mContext;
     };
 
 public:

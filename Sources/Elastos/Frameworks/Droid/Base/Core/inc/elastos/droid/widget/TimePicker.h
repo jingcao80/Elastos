@@ -56,7 +56,7 @@ public:
         // The delegator
         AutoPtr<ITimePicker> mDelegator;
         // The context
-        AutoPtr<IContext> mContext;
+        IContext* mContext;
         // The current locale
         AutoPtr<ILocale> mCurrentLocale;
         // Callbacks

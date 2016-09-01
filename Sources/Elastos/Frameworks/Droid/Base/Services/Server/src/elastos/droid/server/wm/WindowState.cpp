@@ -174,7 +174,7 @@ WindowState::WindowState()
 
 WindowState::~WindowState()
 {
-    Slogger::I(TAG, " >> Destory WindowState: %p", this);
+    Slogger::I(TAG, " >> Destroy WindowState: %p", this);
 }
 
 ECode WindowState::constructor(

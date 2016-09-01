@@ -117,7 +117,7 @@ public:
     CARAPI_(Boolean) IsUiFocusable();
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IActionBarContextView> mContextView;
     AutoPtr<IActionModeCallback> mCallback;
     AutoPtr<IWeakReference> mCustomView;

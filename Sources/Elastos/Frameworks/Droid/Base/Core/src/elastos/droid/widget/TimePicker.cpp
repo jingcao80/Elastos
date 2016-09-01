@@ -21,6 +21,7 @@ namespace Widget {
 CAR_INTERFACE_IMPL_2(TimePicker::AbstractTimePickerDelegate, Object, ITimePickerDelegate, ITimePickerAbstractTimePickerDelegate)
 
 TimePicker::AbstractTimePickerDelegate::AbstractTimePickerDelegate()
+    : mContext(NULL)
 {
 }
 

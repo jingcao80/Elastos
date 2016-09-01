@@ -115,9 +115,6 @@ private:
 
     static CARAPI_(AutoPtr<ITypeface>) InitStatic();
 
-protected:
-    AutoPtr<IContext> mContext;
-
 private:
     static AutoPtr<ITypeface> CONDENSED;
 

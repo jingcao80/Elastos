@@ -42,7 +42,8 @@ ECode StandaloneActionMode::MenuBuilderCallback::OnMenuModeChange(
     return mOwner->OnMenuModeChange(menu);
 }
 StandaloneActionMode::StandaloneActionMode()
-    : mFinished(FALSE)
+    : mContext(NULL)
+    , mFinished(FALSE)
     , mFocusable(FALSE)
 {
 }

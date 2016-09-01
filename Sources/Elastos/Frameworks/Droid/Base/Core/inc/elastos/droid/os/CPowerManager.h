@@ -567,10 +567,11 @@ public:
     CARAPI WakeUpWithProximityCheck(
         /* [in] */ Int64 time);
 
+    CARAPI_(AutoPtr<IContext>) GetContext();
 private:
     static const String TAG;
 
-    AutoPtr<IContext> mContext;
+    AutoPtr<IWeakReference> mWeakContext;
     AutoPtr<IIPowerManager> mService;
     AutoPtr<IHandler> mHandler;
 

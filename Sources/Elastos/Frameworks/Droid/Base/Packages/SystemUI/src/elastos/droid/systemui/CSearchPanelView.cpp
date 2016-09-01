@@ -93,8 +93,10 @@ const String CSearchPanelView::TAG("SearchPanelView");
 const String CSearchPanelView::ASSIST_ICON_METADATA_NAME("com.android.systemui.action_assist_icon");
 Boolean CSearchPanelView::sInit = InitStatic();
 AutoPtr<IAudioAttributes> CSearchPanelView::VIBRATION_ATTRIBUTES;
+
 CAR_OBJECT_IMPL(CSearchPanelView)
 CAR_INTERFACE_IMPL_2(CSearchPanelView, FrameLayout, ISearchPanelView, IStatusBarPanel);
+
 CSearchPanelView::CSearchPanelView()
     : mThreshold(0)
     , mHorizontal(FALSE)
@@ -119,7 +121,6 @@ ECode CSearchPanelView::constructor(
     /* [in] */ Int32 defStyle)
 {
     FrameLayout::constructor(context, attrs, defStyle);
-    mContext = context;
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
     res->GetDimensionPixelSize(R::dimen::search_panel_threshold, &mThreshold);

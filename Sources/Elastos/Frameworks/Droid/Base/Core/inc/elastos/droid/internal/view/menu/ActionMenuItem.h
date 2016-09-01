@@ -205,7 +205,7 @@ private:
     AutoPtr<IDrawable> mIconDrawable;
     Int32 mIconResId;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 
     AutoPtr<IOnMenuItemClickListener> mClickListener;
 

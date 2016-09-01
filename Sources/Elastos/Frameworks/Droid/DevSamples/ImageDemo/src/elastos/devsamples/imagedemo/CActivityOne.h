@@ -36,6 +36,8 @@ public:
 public:
     CAR_OBJECT_DECL()
 
+    CActivityOne();
+
     ~CActivityOne();
 
     UInt32 AddRef();
@@ -66,6 +68,7 @@ private:
         /* [in] */ IIntent *data);
 
 private:
+    Boolean mDestroyed;
 };
 
 } // namespace ImageDemo

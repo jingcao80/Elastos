@@ -92,7 +92,7 @@ private:
     AutoPtr<IDrawable> mDrawable;
     AutoPtr<IUri> mContentUri;
     Int32 mResourceId;
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     String mSource;
 };
 

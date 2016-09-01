@@ -102,7 +102,6 @@ ECode SegmentedButtons::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     LinearLayout::constructor(context, attrs);
-    mContext = context;
 
     mClick = new MyClick(this);
     LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater);

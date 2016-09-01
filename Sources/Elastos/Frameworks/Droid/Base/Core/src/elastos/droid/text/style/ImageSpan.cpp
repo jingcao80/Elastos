@@ -20,6 +20,8 @@ namespace Style {
 CAR_INTERFACE_IMPL(ImageSpan, DynamicDrawableSpan, IImageSpan)
 
 ImageSpan::ImageSpan()
+    : mResourceId(0)
+    , mContext(NULL)
 {}
 
 ImageSpan::~ImageSpan()

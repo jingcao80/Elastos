@@ -235,7 +235,6 @@ Toolbar::ExpandedActionViewMenuPresenter::ExpandedActionViewMenuPresenter(
 
 Toolbar::ExpandedActionViewMenuPresenter::~ExpandedActionViewMenuPresenter()
 {
-    Logger::I(TAG, " >> Destory ExpandedActionViewMenuPresenter: %p", this);
 }
 
 ECode Toolbar::ExpandedActionViewMenuPresenter::InitForMenu(
@@ -445,7 +444,8 @@ CAR_INTERFACE_IMPL(Toolbar, ViewGroup, IToolbar)
 const String Toolbar::TAG("Toolbar");
 
 Toolbar::Toolbar()
-    : ViewGroup()
+    : mPopupContext(NULL)
+    , mHolderPopupContext(FALSE)
     , mPopupTheme(0)
     , mTitleTextAppearance(0)
     , mSubtitleTextAppearance(0)
@@ -469,7 +469,9 @@ Toolbar::Toolbar()
 
 Toolbar::~Toolbar()
 {
-    Logger::I(TAG, " >> Destory Toolbar: %p", this);
+    if (mHolderPopupContext && mPopupContext != NULL) {
+        REFCOUNT_RELEASE(mPopupContext)
+    }
 }
 
 ECode Toolbar::constructor(
@@ -538,6 +540,7 @@ ECode Toolbar::constructor(
 
     // Set the default context, since setPopupTheme() may be a no-op.
     mPopupContext = mContext;
+    mHolderPopupContext = FALSE;
     Int32 theme;
     a->GetResourceId(R::styleable::Toolbar_popupTheme, 0, &theme);
     SetPopupTheme(theme);
@@ -563,10 +566,19 @@ ECode Toolbar::SetPopupTheme(
 {
     if (mPopupTheme != resId) {
         mPopupTheme = resId;
+
+        if (mHolderPopupContext && mPopupContext != NULL) {
+            REFCOUNT_RELEASE(mPopupContext)
+            mPopupContext = NULL;
+        }
+
         if (resId == 0) {
             mPopupContext = mContext;
-        } else {
-            CContextThemeWrapper::New(mContext, resId, (IContext**)&mPopupContext);
+            mHolderPopupContext = FALSE;
+        }
+        else {
+            CContextThemeWrapper::New(mContext, resId, FALSE/* do not hold */, (IContext**)&mPopupContext);
+            mHolderPopupContext = TRUE;
         }
     }
     return NOERROR;
@@ -653,7 +665,7 @@ ECode Toolbar::HideOverflowMenu(
 
 ECode Toolbar::SetMenu(
     /* [in] */ IMenuBuilder* menu,
-    /* [in] */ IActionMenuPresenter* outerPresenter)
+    /* [in] */ IActionMenuPresenter* presenter)
 {
     if (menu == NULL && mMenuView == NULL) {
         return NOERROR;
@@ -675,21 +687,21 @@ ECode Toolbar::SetMenu(
         mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter(this);
     }
 
-    IMenuPresenter* mp = IMenuPresenter::Probe(outerPresenter);
-    outerPresenter->SetExpandedActionViewsExclusive(TRUE);
+    IMenuPresenter* actionMenuPresenter = IMenuPresenter::Probe(presenter);
+    presenter->SetExpandedActionViewsExclusive(TRUE);
     if (menu != NULL) {
-        menu->AddMenuPresenter(mp, mPopupContext);
+        menu->AddMenuPresenter(actionMenuPresenter, mPopupContext);
         menu->AddMenuPresenter(mExpandedMenuPresenter, mPopupContext);
     }
     else {
-        mp->InitForMenu(mPopupContext, NULL);
+        actionMenuPresenter->InitForMenu(mPopupContext, NULL);
         mExpandedMenuPresenter->InitForMenu(mPopupContext, NULL);
-        mp->UpdateMenuView(TRUE);
+        actionMenuPresenter->UpdateMenuView(TRUE);
         mExpandedMenuPresenter->UpdateMenuView(TRUE);
     }
     mMenuView->SetPopupTheme(mPopupTheme);
-    mMenuView->SetPresenter(outerPresenter);
-    mOuterActionMenuPresenter = outerPresenter;
+    mMenuView->SetPresenter(presenter);
+    mOuterActionMenuPresenter = presenter;
     return NOERROR;
 }
 
@@ -1827,6 +1839,7 @@ ECode Toolbar::EnsureMenu()
 ECode Toolbar::EnsureMenuView()
 {
     if (mMenuView == NULL) {
+        Logger::I(TAG, " >> EnsureMenuView");
         AutoPtr<IContext> ctx;
         GetContext((IContext**)&ctx);
         CActionMenuView::New(ctx, (IActionMenuView**)&mMenuView);

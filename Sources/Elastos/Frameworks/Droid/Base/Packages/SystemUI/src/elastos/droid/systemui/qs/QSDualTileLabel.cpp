@@ -68,7 +68,6 @@ QSDualTileLabel::QSDualTileLabel(
 {
     LinearLayout::constructor(context);
     mUpdateText = new UpdateTextRunnable(this);
-    mContext = context;
     SetOrientation(ILinearLayout::VERTICAL);
 
     AutoPtr<IResources> res;
