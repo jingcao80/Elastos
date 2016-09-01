@@ -36,6 +36,7 @@ module
     using interface Elastos.Droid.Content.Pm.IIPackageInstallObserver2;
     using interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
     using interface Elastos.Droid.Content.Pm.IIPackageStatsObserver;
+    using interface Elastos.Droid.Content.Pm.IElSignatureParser;
     using interface Elastos.Droid.Database.ICursor;
     using interface Elastos.Droid.Database.IContentObserver;
     using interface Elastos.Droid.Database.IDataSetObserver;
@@ -913,6 +914,14 @@ module
             [in] Handle64 jInstance);
 
         interface IISessionCallback;
+        interface IBinder;
+    }
+
+    class CElSignatureParser {
+        constructor(
+            [in] Handle32 jVM);
+
+        interface IElSignatureParser;
         interface IBinder;
     }
 

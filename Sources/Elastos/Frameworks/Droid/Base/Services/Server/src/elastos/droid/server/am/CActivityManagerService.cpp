@@ -7335,8 +7335,7 @@ ECode CActivityManagerService::GetProcessMemoryInfo(
             }
         }
         AutoPtr<IDebugMemoryInfo> info;
-        assert(0);
-        // CDebugMemoryInfo::New((IDebugMemoryInfo**)&info);
+        CDebugMemoryInfo::New((IDebugMemoryInfo**)&info);
         infos->Set(i, info);
         dbg->GetMemoryInfo((*pids)[i], (IDebugMemoryInfo**)&info);
         if (proc != NULL) {

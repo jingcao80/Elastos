@@ -14,6 +14,7 @@ namespace Accounts {
 CarClass(CAccount)
     , public Object
     , public IAccount
+    , public IParcelable
 {
 public:
     CAR_OBJECT_DECL()

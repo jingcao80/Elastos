@@ -22,6 +22,7 @@ module
     interface Elastos.Droid.Content.Pm.IVerifierDeviceIdentity;
     interface Elastos.Droid.Content.Pm.IIPackageStatsObserver;
     interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
+    interface Elastos.Droid.Content.Pm.IElSignatureParser;
     interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Content.IComponentName;
     interface Elastos.Droid.Content.IIntentFilter;
@@ -780,6 +781,10 @@ module
             [in] String packageName);
 
         ClearPreLaunchCheckPackages();
+
+        // TODO: delete this api after signature can be parsed
+        ParseSignatureByJava(
+            [in] IElSignatureParser* parser);
     }
 
     } // namespace Pm

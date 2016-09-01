@@ -6,11 +6,32 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
-CAR_INTERFACE_IMPL(CDebugMemoryInfo, Object, IDebugMemoryInfo)
+CAR_INTERFACE_IMPL_2(CDebugMemoryInfo, Object, IDebugMemoryInfo, IParcelable)
 
 CAR_OBJECT_IMPL(CDebugMemoryInfo)
 
 CDebugMemoryInfo::CDebugMemoryInfo()
+    : mDalvikPss(0)
+    , mDalvikSwappablePss(0)
+    , mDalvikPrivateDirty(0)
+    , mDalvikSharedDirty(0)
+    , mDalvikPrivateClean(0)
+    , mDalvikSharedClean(0)
+    , mDalvikSwappedOut(0)
+    , mNativePss(0)
+    , mNativeSwappablePss(0)
+    , mNativePrivateDirty(0)
+    , mNativeSharedDirty(0)
+    , mNativePrivateClean(0)
+    , mNativeSharedClean(0)
+    , mNativeSwappedOut(0)
+    , mOtherPss(0)
+    , mOtherSwappablePss(0)
+    , mOtherPrivateDirty(0)
+    , mOtherSharedDirty(0)
+    , mOtherPrivateClean(0)
+    , mOtherSharedClean(0)
+    , mOtherSwappedOut(0)
 {
     mOtherStats = ArrayOf<Int32>::Alloc(IDebugMemoryInfo::NUM_OTHER_STATS * 3);
 }
@@ -26,14 +47,18 @@ ECode CDebugMemoryInfo::constructor()
 ECode CDebugMemoryInfo::GetTotalUss(
     /* [out] */ Int32* totalUss)
 {
-    assert(0 && "TODO");
+    VALIDATE_NOT_NULL(totalUss)
+    *totalUss = mDalvikPrivateClean + mDalvikPrivateDirty
+        + mNativePrivateClean + mNativePrivateDirty
+        + mOtherPrivateClean + mOtherPrivateDirty;
     return NOERROR;
 }
 
 ECode CDebugMemoryInfo::GetTotalSwappablePss(
-    /* [out] */ Int32* totalUss)
+    /* [out] */ Int32* totalSwappablePss)
 {
-    assert(0 && "TODO");
+    VALIDATE_NOT_NULL(totalSwappablePss)
+    *totalSwappablePss = mDalvikSwappablePss + mNativeSwappablePss + mOtherSwappablePss;
     return NOERROR;
 }
 
@@ -281,14 +306,26 @@ ECode CDebugMemoryInfo::ReadFromParcel(
     VALIDATE_NOT_NULL(source);
 
     source->ReadInt32(&mDalvikPss);
+    source->ReadInt32(&mDalvikSwappablePss);
     source->ReadInt32(&mDalvikPrivateDirty);
     source->ReadInt32(&mDalvikSharedDirty);
+    source->ReadInt32(&mDalvikPrivateClean);
+    source->ReadInt32(&mDalvikSharedClean);
+    source->ReadInt32(&mDalvikSwappedOut);
     source->ReadInt32(&mNativePss);
+    source->ReadInt32(&mNativeSwappablePss);
     source->ReadInt32(&mNativePrivateDirty);
     source->ReadInt32(&mNativeSharedDirty);
+    source->ReadInt32(&mNativePrivateClean);
+    source->ReadInt32(&mNativeSharedClean);
+    source->ReadInt32(&mNativeSwappedOut);
     source->ReadInt32(&mOtherPss);
+    source->ReadInt32(&mOtherSwappablePss);
     source->ReadInt32(&mOtherPrivateDirty);
     source->ReadInt32(&mOtherSharedDirty);
+    source->ReadInt32(&mOtherPrivateClean);
+    source->ReadInt32(&mOtherSharedClean);
+    source->ReadInt32(&mOtherSwappedOut);
     source->ReadArrayOf((Handle32*)(&mOtherStats));
 
     return NOERROR;
@@ -300,14 +337,26 @@ ECode CDebugMemoryInfo::WriteToParcel(
     VALIDATE_NOT_NULL(dest);
 
     dest->WriteInt32(mDalvikPss);
+    dest->WriteInt32(mDalvikSwappablePss);
     dest->WriteInt32(mDalvikPrivateDirty);
     dest->WriteInt32(mDalvikSharedDirty);
+    dest->WriteInt32(mDalvikPrivateClean);
+    dest->WriteInt32(mDalvikSharedClean);
+    dest->WriteInt32(mDalvikSwappedOut);
     dest->WriteInt32(mNativePss);
+    dest->WriteInt32(mNativeSwappablePss);
     dest->WriteInt32(mNativePrivateDirty);
     dest->WriteInt32(mNativeSharedDirty);
+    dest->WriteInt32(mNativePrivateClean);
+    dest->WriteInt32(mNativeSharedClean);
+    dest->WriteInt32(mNativeSwappedOut);
     dest->WriteInt32(mOtherPss);
+    dest->WriteInt32(mOtherSwappablePss);
     dest->WriteInt32(mOtherPrivateDirty);
     dest->WriteInt32(mOtherSharedDirty);
+    dest->WriteInt32(mOtherPrivateClean);
+    dest->WriteInt32(mOtherSharedClean);
+    dest->WriteInt32(mOtherSwappedOut);
     dest->WriteArrayOf((Handle32)mOtherStats.Get());
 
     return NOERROR;

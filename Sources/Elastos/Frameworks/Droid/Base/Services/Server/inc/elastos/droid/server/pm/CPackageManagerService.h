@@ -82,6 +82,7 @@ using Elastos::Droid::Content::Pm::IKeySet;
 using Elastos::Droid::Content::Pm::PackageParser;
 using Elastos::Droid::Content::Pm::IPackageInstallerSessionParams;
 using Elastos::Droid::Content::Pm::IIPackageInstaller;
+using Elastos::Droid::Content::Pm::IElSignatureParser;
 using Elastos::Droid::Content::Res::IThemeConfig;
 using Elastos::Droid::Internal::App::IIMediaContainerService;
 using Elastos::Droid::Net::IUri;
@@ -2232,6 +2233,9 @@ public:
 
     CARAPI ClearPreLaunchCheckPackages();
 
+    CARAPI ParseSignatureByJava(
+        /* [in] */ IElSignatureParser* parser);
+
 private:
     static CARAPI_(void) GetDefaultDisplayMetrics(
         /* [in] */ IContext* context,
@@ -3404,6 +3408,8 @@ private:
     Boolean mMediaMounted;
 
     static Int32 sLastScanError;
+
+    AutoPtr<IElSignatureParser> mElSignatureParser;
 };
 
 } // namespace Pm

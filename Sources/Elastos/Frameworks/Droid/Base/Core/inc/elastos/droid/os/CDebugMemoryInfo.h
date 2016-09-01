@@ -135,17 +135,37 @@ public:
         /* [out] */ String* label);
 
 public:
-    /** The proportional set size for dalvik. */
+    /** The proportional set size for dalvik heap.  (Doesn't include other Dalvik overhead.) */
     Int32 mDalvikPss;
 
-    /** The private dirty pages used by dalvik. */
+    /** The proportional set size that is swappable for dalvik heap. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mDalvikSwappablePss;
+
+    /** The private dirty pages used by dalvik heap. */
     Int32 mDalvikPrivateDirty;
 
-    /** The shared dirty pages used by dalvik. */
+    /** The shared dirty pages used by dalvik heap. */
     Int32 mDalvikSharedDirty;
+
+    /** The private clean pages used by dalvik heap. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mDalvikPrivateClean;
+
+    /** The shared clean pages used by dalvik heap. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mDalvikSharedClean;
+
+    /** The dirty dalvik pages that have been swapped out. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mDalvikSwappedOut;
 
     /** The proportional set size for the native heap. */
     Int32 mNativePss;
+
+    /** The proportional set size that is swappable for the native heap. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mNativeSwappablePss;
 
     /** The private dirty pages used by the native heap. */
     Int32 mNativePrivateDirty;
@@ -153,14 +173,42 @@ public:
     /** The shared dirty pages used by the native heap. */
     Int32 mNativeSharedDirty;
 
+    /** The private clean pages used by the native heap. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mNativePrivateClean;
+
+    /** The shared clean pages used by the native heap. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mNativeSharedClean;
+
+    /** The dirty native pages that have been swapped out. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mNativeSwappedOut;
+
     /** The proportional set size for everything else. */
     Int32 mOtherPss;
+
+    /** The proportional set size that is swappable for everything else. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mOtherSwappablePss;
 
     /** The private dirty pages used by everything else. */
     Int32 mOtherPrivateDirty;
 
     /** The shared dirty pages used by everything else. */
     Int32 mOtherSharedDirty;
+
+    /** The private clean pages used by everything else. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mOtherPrivateClean;
+
+    /** The shared clean pages used by everything else. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mOtherSharedClean;
+
+    /** The dirty pages used by anyting else that have been swapped out. */
+    /** @hide We may want to expose this, eventually. */
+    Int32 mOtherSwappedOut;
 
 private:
     AutoPtr<ArrayOf<Int32> > mOtherStats;/* = new int[NUM_OTHER_STATS*3]*/

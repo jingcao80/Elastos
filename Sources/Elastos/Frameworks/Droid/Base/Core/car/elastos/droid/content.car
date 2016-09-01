@@ -118,6 +118,7 @@ module
     merge("content/pm/PackageParser.car");
     merge("content/pm/BaseThemeInfo.car");
     merge("content/pm/ThemeInfo.car");
+    merge("content/pm/IElSignatureParser.car");
 
     merge("content/res/AssetFileDescriptor.car");
     merge("content/res/AssetManager.car");

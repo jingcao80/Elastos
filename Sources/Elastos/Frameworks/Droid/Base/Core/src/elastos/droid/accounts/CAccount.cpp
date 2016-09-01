@@ -17,7 +17,7 @@ const String CAccount::TAG("Account");
 
 CAR_OBJECT_IMPL(CAccount)
 
-CAR_INTERFACE_IMPL(CAccount, Object, IAccount)
+CAR_INTERFACE_IMPL_2(CAccount, Object, IAccount, IParcelable)
 
 ECode CAccount::constructor(
     /* [in] */ const String& name,

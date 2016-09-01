@@ -19018,6 +19018,27 @@ ECode CPackageManagerService::ToString(
     return Object::ToString(str);
 }
 
+ECode CPackageManagerService::ParseSignatureByJava(
+    /* [in] */ IElSignatureParser* parser)
+{
+    AutoLock lock(mPackagesLock);
+    if (mElSignatureParser != NULL)
+        return NOERROR;
+
+    HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it;
+    for (it = mPackages.Begin(); it != mPackages.End(); ++it) {
+        AutoPtr<ISignature> signature;
+        parser->GetSignature(it->mFirst, (ISignature**)&signature);
+        if (signature != NULL) {
+            AutoPtr<PackageParser::Package> p = it->mSecond;
+            p->mSignatures = ArrayOf<ISignature*>::Alloc(1);
+            p->mSignatures->Set(0, signature);
+        }
+    }
+    mElSignatureParser = parser;
+    return NOERROR;
+}
+
 } // namespace Pm
 } // namespace Server
 } // namespace Droid
