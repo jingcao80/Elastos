@@ -2,16 +2,16 @@
 #define __ELASTOS_DROID_DIALER_LIST_SMARTDIALNUMBERLISTADAPTER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include "elastos/apps/dialer/list/DialerPhoneNumberListAdapter.h"
+#include "elastos/droid/dialer/list/DialerPhoneNumberListAdapter.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
 
+using Elastos::Droid::Contacts::Common::List::IContactListItemView;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Dialer::Dialpad::ISmartDialCursorLoader;
-using Elastos::Droid::Dialer::Dialpad::ISmartDialNameMatcher;
 
 namespace Elastos {
 namespace Droid {
@@ -57,16 +57,15 @@ protected:
      * @param cursor Object containing information of the associated List item.
      */
     // @Override
-    // TODO:
-    // CARAPI SetHighlight(
-    //     /* [in] */ IContactListItemView* view,
-    //     /* [in] */ ICursor* cursor);
+    CARAPI_(void) SetHighlight(
+        /* [in] */ IContactListItemView* view,
+        /* [in] */ ICursor* cursor);
 
 private:
     static const String TAG; // = SmartDialNumberListAdapter.class.getSimpleName();
     static const Boolean DEBUG; // = false;
 
-    AutoPtr<ISmartDialNameMatcher> mNameMatcher;
+    // AutoPtr<SmartDialNameMatcher> mNameMatcher;
 };
 
 } // List

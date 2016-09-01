@@ -1,16 +1,27 @@
 
 #include "elastos/droid/dialer/list/DialerPhoneNumberListAdapter.h"
+#include "elastos/droid/contacts/common/GeoUtil.h"
+#include "elastos/droid/contacts/common/list/ContactListItemView.h"
 #include "Elastos.Droid.Telephony.h"
 #include <elastos/utility/logging/Logger.h>
+#include "R.h"
 
+using Elastos::Droid::Contacts::Common::GeoUtil;
+using Elastos::Droid::Contacts::Common::List::ContactListItemView;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Dialer::List::EIID_IDialerPhoneNumberListAdapter;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace List {
+
+CAR_INTERFACE_IMPL(DialerPhoneNumberListAdapter, PhoneNumberListAdapter, IDialerPhoneNumberListAdapter)
 
 DialerPhoneNumberListAdapter::DialerPhoneNumberListAdapter()
 {
@@ -20,24 +31,23 @@ DialerPhoneNumberListAdapter::DialerPhoneNumberListAdapter()
 ECode DialerPhoneNumberListAdapter::constructor(
     /* [in] */ IContext* context)
 {
-    assert(0 && "TODO");
-    // PhoneNumberListAdapter::constructor(context);
-    // mCountryIso = GeoUtil::GetCurrentCountryIso(context);
+    PhoneNumberListAdapter::constructor(context);
+    mCountryIso = GeoUtil::GetCurrentCountryIso(context);
 
     // Enable all shortcuts by default
     for (Int32 i = 0; i < mShortcutEnabled->GetLength(); i++) {
         (*mShortcutEnabled)[i] = TRUE;
     }
+    return NOERROR;
 }
 
 ECode DialerPhoneNumberListAdapter::GetCount(
     /* [out] */ Int32* count)
 {
-    VALIDATE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count)
 
     Int32 superCount, shortcutCount;
-    assert(0 && "TODO");
-    // PhoneNumberListAdapter::GetCount(&superCount);
+    PhoneNumberListAdapter::GetCount(&superCount);
     GetShortcutCount(&shortcutCount);
     *count = superCount + shortcutCount;
     return NOERROR;
@@ -46,7 +56,7 @@ ECode DialerPhoneNumberListAdapter::GetCount(
 ECode DialerPhoneNumberListAdapter::GetShortcutCount(
     /* [out] */ Int32* shortcutCount)
 {
-    VALIDATE_NOT_NULL(shortcutCount);
+    VALIDATE_NOT_NULL(shortcutCount)
 
     Int32 count = 0;
     for (Int32 i = 0; i < mShortcutEnabled->GetLength(); i++) {
@@ -60,34 +70,30 @@ ECode DialerPhoneNumberListAdapter::GetItemViewType(
     /* [in] */ Int32 position,
     /* [out] */ Int32* type)
 {
-    VALIDATE_NOT_NULL(type);
+    VALIDATE_NOT_NULL(type)
 
     Int32 shortcut;
     GetShortcutTypeFromPosition(position, &shortcut);
     if (shortcut >= 0) {
         // shortcutPos should always range from 1 to SHORTCUT_COUNT
         Int32 count;
-        assert(0 && "TODO");
-        // PhoneNumberListAdapter::GetViewTypeCount(*count);
+        PhoneNumberListAdapter::GetViewTypeCount(&count);
         *type = count + shortcut;
         return NOERROR;
     }
     else {
-        assert(0 && "TODO");
-        return NOERROR;
-        // return PhoneNumberListAdapter::GetItemViewType(position, type);
+        return PhoneNumberListAdapter::GetItemViewType(position, type);
     }
 }
 
 ECode DialerPhoneNumberListAdapter::GetViewTypeCount(
     /* [in] */ Int32* count)
 {
-    VALIDATE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count)
 
     // Number of item view types in the super implementation + 2 for the 2 new shortcuts
     Int32 viewTypeCount;
-    assert(0 && "TODO");
-    // PhoneNumberListAdapter::GetViewTypeCount(&viewTypeCount);
+    PhoneNumberListAdapter::GetViewTypeCount(&viewTypeCount);
     *count = viewTypeCount + SHORTCUT_COUNT;
     return NOERROR;
 }
@@ -98,34 +104,30 @@ ECode DialerPhoneNumberListAdapter::GetView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view)
 
     Int32 shortcutType;
     GetShortcutTypeFromPosition(position, &shortcutType);
     if (shortcutType >= 0) {
         if (convertView != NULL) {
-            assert(0 && "TODO");
-            // AssignShortcutToView(IContactListItemView::Probe(convertView), shortcutType);
+            AssignShortcutToView(IContactListItemView::Probe(convertView), shortcutType);
             *view = convertView;
             REFCOUNT_ADD(*view);
             return NOERROR;
         }
         else {
-            assert(0 && "TODO");
-            // AutoPtr<IContext> context;
-            // GetContext((IContext**)&context);
-            // AutoPtr<IContactListItemView> v;
-            // CContactListItemView::New(context, NULL, (IContactListItemView**)&v);
-            // AssignShortcutToView(v, shortcutType);
-            // *view = v;
+            AutoPtr<IContext> context;
+            GetContext((IContext**)&context);
+            AutoPtr<ContactListItemView> v = new ContactListItemView();
+            v->constructor(context, NULL);
+            AssignShortcutToView(IContactListItemView::Probe(v), shortcutType);
+            *view = IView::Probe(v);
             REFCOUNT_ADD(*view);
             return NOERROR;
         }
     }
     else {
-        assert(0 && "TODO");
-        // return PhoneNumberListAdapter::GetView(position, convertView, parent, view);
-        return NOERROR;
+        return PhoneNumberListAdapter::GetView(position, convertView, parent, view);
     }
 }
 
@@ -133,11 +135,10 @@ ECode DialerPhoneNumberListAdapter::GetShortcutTypeFromPosition(
     /* [in] */ Int32 position,
     /* [out] */ Int32* type)
 {
-    VALIDATE_NOT_NULL(type);
+    VALIDATE_NOT_NULL(type)
 
     Int32 count;
-    assert(0 && "TODO");
-    // PhoneNumberListAdapter::GetCount(&count);
+    PhoneNumberListAdapter::GetCount(&count);
     Int32 shortcutCount = position - count;
     if (shortcutCount >= 0) {
         // Iterate through the array of shortcuts, looking only for shortcuts where
@@ -153,8 +154,7 @@ ECode DialerPhoneNumberListAdapter::GetShortcutTypeFromPosition(
         }
         // throw new IllegalArgumentException("Invalid position - greater than cursor count "
         //         + " but not a shortcut.");
-        Logger::E(String("DialerPhoneNumberListAdapter"), "Invalid position - greater than cursor count "
-            " but not a shortcut.");
+        Logger::E(String("DialerPhoneNumberListAdapter"), "Invalid position - greater than cursor count  but not a shortcut.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     *type = IDialerPhoneNumberListAdapter::SHORTCUT_INVALID;
@@ -169,8 +169,7 @@ ECode DialerPhoneNumberListAdapter::IsEmpty(
     Int32 count;
     GetShortcutCount(&count);
     Boolean isEmpty;
-    assert(0 && "TODO");
-    // *result = count == 0 && PhoneNumberListAdapter::IsEmpty(&isEmpty), isEmpty;
+    *result = count == 0 && (PhoneNumberListAdapter::IsEmpty(&isEmpty), isEmpty);
     return NOERROR;
 }
 
@@ -187,54 +186,59 @@ ECode DialerPhoneNumberListAdapter::IsEnabled(
         return NOERROR;
     }
     else {
-        assert(0 && "TODO");
-        // return PhoneNumberListAdapter::IsEnabled(position, result);
-        return NOERROR;
+        return PhoneNumberListAdapter::IsEnabled(position, result);
     }
 }
 
-// TODO:
-// ECode DialerPhoneNumberListAdapter::AssignShortcutToView(
-//     /* [in] */ IContactListItemView* v,
-//     /* [in] */ Int32 shortcutType)
-// {
-//     AutoPtr<ICharSequence> text;
-//     Int32 drawableId;
+ECode DialerPhoneNumberListAdapter::AssignShortcutToView(
+    /* [in] */ IContactListItemView* _v,
+    /* [in] */ Int32 shortcutType)
+{
+    AutoPtr<ContactListItemView> v = (ContactListItemView*)_v;
+    String text;
+    Int32 drawableId;
 
-//     AutoPtr<IContext> context;
-//     GetContext((IContext**)&context);
-//     AutoPtr<IResources> resources;
-//     context->GetResources((IResources**)&resources);
-//     String number;
-//     GetFormattedQueryString(&number);
-//     switch (shortcutType) {
-//         case SHORTCUT_DIRECT_CALL:
-//             resources->GetString(R::string::search_shortcut_call_number,
-//                     number, (ICharSequence**)&text);
-//             drawableId = R::drawable::ic_search_phone;
-//             break;
-//         case SHORTCUT_ADD_NUMBER_TO_CONTACTS:
-//             resources->GetString(R::string::search_shortcut_add_to_contacts, (ICharSequence**)&text);
-//             drawableId = R::drawable::ic_search_add_contact;
-//             break;
-//         case SHORTCUT_MAKE_VIDEO_CALL:
-//             resources->GetString(R::string::search_shortcut_make_video_call, (ICharSequence**)&text);
-//             drawableId = R::drawable::ic_videocam;
-//             break;
-//         default:
-//             Logger::E(String("DialerPhoneNumberListAdapter"), "Invalid shortcut type");
-//             return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//             // throw new IllegalArgumentException("Invalid shortcut type");
-//     }
-//     v->SetDrawableResource(R::drawable::search_shortcut_background, drawableId);
-//     v->SetDisplayName(text);
-//     Int32 position;
-//     PhoneNumberListAdapter::GetPhotoPosition(&position);
-//     v->SetPhotoPosition(position);
-//     v->SetAdjustSelectionBoundsEnabled(FALSE);
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    AutoPtr<IResources> resources;
+    context->GetResources((IResources**)&resources);
+    String number;
+    GetFormattedQueryString(&number);
+    switch (shortcutType) {
+        case SHORTCUT_DIRECT_CALL: {
+            AutoPtr<ArrayOf<IInterface*> > attrs = ArrayOf<IInterface*>::Alloc(1);
+            AutoPtr<ICharSequence> cs;
+            CString::New(number, (ICharSequence**)&cs);
+            attrs->Set(0, cs);
+            resources->GetString(Elastos::Droid::Dialer::R::string::search_shortcut_call_number,
+                    attrs, &text);
+            drawableId = Elastos::Droid::Dialer::R::drawable::ic_search_phone;
+            break;
+        }
+        case SHORTCUT_ADD_NUMBER_TO_CONTACTS:
+            resources->GetString(Elastos::Droid::Dialer::R::string::search_shortcut_add_to_contacts, &text);
+            drawableId = Elastos::Droid::Dialer::R::drawable::ic_search_add_contact;
+            break;
+        case SHORTCUT_MAKE_VIDEO_CALL:
+            resources->GetString(Elastos::Droid::Dialer::R::string::search_shortcut_make_video_call, &text);
+            drawableId = Elastos::Droid::Dialer::R::drawable::ic_videocam;
+            break;
+        default:
+            Logger::E(String("DialerPhoneNumberListAdapter"), "Invalid shortcut type");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            // throw new IllegalArgumentException("Invalid shortcut type");
+    }
+    v->SetDrawableResource(Elastos::Droid::Dialer::R::drawable::search_shortcut_background, drawableId);
+    AutoPtr<ICharSequence> cs;
+    CString::New(text, (ICharSequence**)&cs);
+    v->SetDisplayName(cs);
+    Int32 position;
+    PhoneNumberListAdapter::GetPhotoPosition(&position);
+    v->SetPhotoPosition(position);
+    v->SetAdjustSelectionBoundsEnabled(FALSE);
 
-//     return NOERROR;
-// }
+    return NOERROR;
+}
 
 ECode DialerPhoneNumberListAdapter::SetShortcutEnabled(
     /* [in] */ Int32 shortcutType,
@@ -266,9 +270,7 @@ ECode DialerPhoneNumberListAdapter::SetQueryString(
     String number;
     utils->NormalizeNumber(queryString, &number);
     utils->FormatNumber(number, mCountryIso, &mFormattedQueryString);
-    assert(0 && "TODO");
-    // return PhoneNumberListAdapter::SetQueryString(queryString);
-    return NOERROR;
+    return PhoneNumberListAdapter::SetQueryString(queryString);
 }
 
 } // List

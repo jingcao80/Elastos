@@ -2,10 +2,12 @@
 #define __ELASTOS_DROID_DIALER_LIST_DIALERPHONENUMBERLISTADAPTER_H__
 
 #include "_Elastos.Droid.Dialer.h"
+#include "elastos/droid/contacts/common/list/PhoneNumberListAdapter.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
-#include <elastos/core/Object.h>
 
+using Elastos::Droid::Contacts::Common::List::PhoneNumberListAdapter;
+using Elastos::Droid::Contacts::Common::List::IContactListItemView;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
@@ -25,13 +27,11 @@ namespace List {
  * list.
  */
 class DialerPhoneNumberListAdapter
-    // TODO:
-    /*: public PhoneNumberListAdapter*/
-    : public Object
+    : public PhoneNumberListAdapter
     , public IDialerPhoneNumberListAdapter
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     DialerPhoneNumberListAdapter();
 
@@ -51,7 +51,7 @@ public:
     // @Override
     CARAPI GetItemViewType(
         /* [in] */ Int32 position,
-        /* [in] */ Int32* type);
+        /* [out] */ Int32* type);
 
     // @Override
     CARAPI GetViewTypeCount(
@@ -98,10 +98,9 @@ public:
         /* [in] */ const String& queryString);
 
 private:
-    // TODO:
-    // CARAPI AssignShortcutToView(
-    //     /* [in] */ IContactListItemView* v,
-    //     /* [in] */ Int32 shortcutType);
+    CARAPI AssignShortcutToView(
+        /* [in] */ IContactListItemView* v,
+        /* [in] */ Int32 shortcutType);
 
 private:
     String mFormattedQueryString;

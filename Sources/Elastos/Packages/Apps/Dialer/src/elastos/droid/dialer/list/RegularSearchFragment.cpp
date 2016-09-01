@@ -1,21 +1,19 @@
 
 #include "elastos/droid/dialer/list/RegularSearchFragment.h"
-#include "elastos/droid/dialer/CObjectFactory.h"
+#include "elastos/droid/dialer/list/RegularSearchListAdapter.h"
+#include "elastos/droid/dialerbind/ObjectFactory.h"
 
-using Elastos::Apps::Dialer::IObjectFactory;
-using Elastos::Apps::Dialer::CObjectFactory;
+using Elastos::Droid::Contacts::Common::List::IPinnedHeaderListView;
+using Elastos::Droid::DialerBind::ObjectFactory;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace List {
 
-AutoPtr<ICachedNumberLookupService> CreateLooupService()
+static AutoPtr<ICachedNumberLookupService> CreateLooupService()
 {
-    AutoPtr<IObjectFactory> factory;
-    CObjectFactory::AcquireSingleton((IObjectFactory**)&factory);
-    AutoPtr<ICachedNumberLookupService> service;
-    factory->NewCachedNumberLookupService((ICachedNumberLookupService**)&service);
+    AutoPtr<ICachedNumberLookupService> service = ObjectFactory::NewCachedNumberLookupService();
     return service;
 }
 
@@ -25,9 +23,9 @@ const AutoPtr<ICachedNumberLookupService> RegularSearchFragment::mCachedNumberLo
 
 CAR_INTERFACE_IMPL(RegularSearchFragment, SearchFragment, IRegularSearchFragment);
 
-ECode RegularSearchFragment::constructor()
+RegularSearchFragment::RegularSearchFragment()
 {
-    return ConfigureDirectorySearch();
+    ConfigureDirectorySearch();
 }
 
 ECode RegularSearchFragment::ConfigureDirectorySearch()
@@ -44,31 +42,33 @@ ECode RegularSearchFragment::OnCreateView(
     SearchFragment::OnCreateView(inflater, container);
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
-    assert(0 && "TODO");
-    // IPinnedHeaderListView::Probe(listView)->SetScrollToSectionOnHeaderTouch(TRUE);
+    IPinnedHeaderListView::Probe(listView)->SetScrollToSectionOnHeaderTouch(TRUE);
     return NOERROR;
 }
 
-// TODO:
-// AutoPtr<IContactEntryListAdapter> RegularSearchFragment::CreateListAdapter()
-// {
-//     AutoPtr<IActivity> activity;
-//     GetActivity(&activity);
-//     AutoPtr<IRegularSearchListAdapter> adapter;
-//     CRegularSearchListAdapter::New(activity, (IRegularSearchListAdapter**)&adapter);
-//     adapter->SetDisplayPhotos(TRUE);
-//     Boolean result;
-//     UsesCallableUri(&result);
-//     adapter->SetUseCallableUri(result);
-//     return adapter;
-// }
+AutoPtr<IContactEntryListAdapter> RegularSearchFragment::CreateListAdapter()
+{
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    AutoPtr<RegularSearchListAdapter> adapter = new RegularSearchListAdapter();
+    adapter->constructor(IContext::Probe(activity));
+    adapter->SetDisplayPhotos(TRUE);
+    adapter->SetUseCallableUri(UsesCallableUri());
+    return adapter;
+}
 
 ECode RegularSearchFragment::CacheContactInfo(
     /* [in] */ Int32 position)
 {
-    if (mDraggedEntry != NULL) {
-        UnstarAndUnpinContact(((CContactEntry*)mDraggedEntry)->mLookupUri);
-        mAwaitingRemove = TRUE;
+    if (mCachedNumberLookupService != NULL) {
+        AutoPtr<IInterface> temp;
+        GetAdapter((IInterface**)&temp);
+        AutoPtr<IRegularSearchListAdapter> adapter = IRegularSearchListAdapter::Probe(temp);
+        AutoPtr<IContext> context;
+        GetContext((IContext**)&context);
+        AutoPtr<ICachedContactInfo> info;
+        adapter->GetContactInfo(mCachedNumberLookupService, position, (ICachedContactInfo**)&info);
+        mCachedNumberLookupService->AddContact(context, info);
     }
     return NOERROR;
 }

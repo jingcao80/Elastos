@@ -1,16 +1,29 @@
 
 #include "elastos/droid/dialer/list/SearchFragment.h"
+#include "elastos/droid/contacts/common/list/ContactListItemView.h"
+#include "elastos/droid/contacts/common/util/ViewUtil.h"
+#include "elastos/droid/dialer/list/DialerPhoneNumberListAdapter.h"
 #include "elastos/droid/dialer/util/DialerUtils.h"
 #include "elastos/droid/dialer/DialtactsActivity.h"
+#include "elastos/droid/phone/common/animation/AnimUtils.h"
 #include <elastos/droid/text/TextUtils.h>
 #include "R.h"
 
+using Elastos::Droid::Common::Widget::ICompositeCursorAdapter;
+using Elastos::Droid::Contacts::Common::List::ContactListItemView;
+using Elastos::Droid::Contacts::Common::Util::ViewUtil;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Dialer::DialtactsActivity;
+using Elastos::Droid::Dialer::Util::DialerUtils;
+using Elastos::Droid::Dialer::List::EIID_ISearchFragment;
+using Elastos::Droid::Phone::Common::Animation::AnimUtils;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::Widget::IListView;
-using Elastos::Apps::Dialer::DialtactsActivity;
-using Elastos::Apps::Dialer::Util::DialerUtils;
+using Elastos::Droid::Widget::EIID_IAbsListViewOnScrollListener;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
 
 namespace Elastos {
 namespace Droid {
@@ -20,7 +33,7 @@ namespace List {
 //=================================================================
 // SearchFragment::MyOnScrollListener
 //=================================================================
-CAR_INTERFACE_IMPL(SearchFragment::MyOnScrollListener, Object, IListViewOnScrollListener);
+CAR_INTERFACE_IMPL(SearchFragment::MyOnScrollListener, Object, IAbsListViewOnScrollListener);
 
 SearchFragment::MyOnScrollListener::MyOnScrollListener(
     /* [in] */ SearchFragment* host)
@@ -47,6 +60,14 @@ ECode SearchFragment::MyOnScrollListener::OnScroll(
 //=================================================================
 // SearchFragment
 //=================================================================
+SearchFragment::SearchFragment()
+    : mActionBarHeight(0)
+    , mShadowHeight(0)
+    , mPaddingTop(0)
+    , mShowDialpadDuration(0)
+    , mHideDialpadDuration(0)
+{}
+
 CAR_INTERFACE_IMPL(SearchFragment, PhoneNumberPickerFragment, ISearchFragment);
 
 ECode SearchFragment::OnAttach(
@@ -66,39 +87,39 @@ ECode SearchFragment::OnAttach(
     if (mActivityScrollListener == NULL) {
         String str;
         activity->ToString(&str);
-        Logger::E(TAG, "%s must implement OnListFragmentScrolledListener", str.string());
-        return E_CLASS_EXCEPTION;
+        Logger::E("SearchFragment", "%s must implement OnListFragmentScrolledListener", str.string());
+        return E_CLASS_CAST_EXCEPTION;
     }
     // } catch (ClassCastException e) {
     //     throw new ClassCastException(activity.toString()
     //             + " must implement OnListFragmentScrolledListener");
     // }
+    return NOERROR;
 }
 
 ECode SearchFragment::OnStart()
 {
-    PhoneNumberPickerFragment::onStart();
+    PhoneNumberPickerFragment::OnStart();
     Boolean result;
     if (IsSearchMode(&result), result) {
         AutoPtr<IInterface> adpater;
         GetAdapter((IInterface**)&adpater);
-        assert(0 && "TODO");
-        // IContactEntryListAdapter::Probe(adpater)->SetHasHeader(0, FALSE);
+        ICompositeCursorAdapter::Probe(adpater)->SetHasHeader(0, FALSE);
     }
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    mActivity = IHostInterface::Probe(activity);
+    mActivity = ISearchFragmentHostInterface::Probe(activity);
 
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     mActivity->GetActionBarHeight(&mActionBarHeight);
     AutoPtr<IDrawable> drawable;
-    res->GetDrawable(R::drawable::search_shadow, (IDrawable**)&drawable);
+    res->GetDrawable(Elastos::Droid::Dialer::R::drawable::search_shadow, (IDrawable**)&drawable);
     drawable->GetIntrinsicHeight(&mShadowHeight);
-    res->GetDimensionPixelSize(R::dimen::search_list_padding_top, &mPaddingTop);
-    res->GetInteger(R::integer::dialpad_slide_in_duration, &mShowDialpadDuration);
-    res->GetInteger(R::integer::dialpad_slide_out_duration, &mHideDialpadDuration);
+    res->GetDimensionPixelSize(Elastos::Droid::Dialer::R::dimen::search_list_padding_top, &mPaddingTop);
+    res->GetInteger(Elastos::Droid::Dialer::R::integer::dialpad_slide_in_duration, &mShowDialpadDuration);
+    res->GetInteger(Elastos::Droid::Dialer::R::integer::dialpad_slide_out_duration, &mHideDialpadDuration);
 
     AutoPtr<IView> parentView;
     GetView((IView**)&parentView);
@@ -107,11 +128,12 @@ ECode SearchFragment::OnStart()
     GetListView((IListView**)&listView);
 
     Int32 color;
-    res->GetColor(R::color::background_dialer_results, &color)
-    listView->SetBackgroundColor(color);
-    listView->SetClipToPadding(FALSE);
+    res->GetColor(Elastos::Droid::Dialer::R::color::background_dialer_results, &color);
+    IView::Probe(listView)->SetBackgroundColor(color);
+    IViewGroup::Probe(listView)->SetClipToPadding(FALSE);
     SetVisibleScrollbarEnabled(FALSE);
-    listView->setOnScrollListener((IListViewOnScrollListener*)new MyOnScrollListener(this));
+    AutoPtr<IAbsListViewOnScrollListener> listener = (IAbsListViewOnScrollListener*)new MyOnScrollListener(this);
+    IAbsListView::Probe(listView)->SetOnScrollListener(listener);
 
     UpdatePosition(FALSE /* animate */);
 
@@ -122,27 +144,25 @@ ECode SearchFragment::OnViewCreated(
     /* [in] */ IView* view,
     /* [in] */ IBundle* savedInstanceState)
 {
-    assert(0 && "TODO");
-    // PhoneNumberPickerFragment::OnViewCreated(view, savedInstanceState);
+    PhoneNumberPickerFragment::OnViewCreated(view, savedInstanceState);
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
-    ViewUtil->AddBottomPaddingToListViewForFab(listView, res);
+    ViewUtil::AddBottomPaddingToListViewForFab(listView, res);
     return NOERROR;
 }
 
 ECode SearchFragment::SetSearchMode(
     /* [in] */ Boolean flag)
 {
-    assert(0 && "TODO");
-    // PhoneNumberPickerFragment::SetSearchMode(flag);
+    PhoneNumberPickerFragment::SetSearchMode(flag);
     // This hides the "All contacts with phone numbers" header in the search fragment
-    // AutoPtr<IInterface> adpater;
-    // GetAdapter((IInterface**)&adpater);
-    // if (IContactEntryListAdapter::Probe(adpater) != NULL) {
-    //     IContactEntryListAdapter::Probe(adpater)->SetHasHeader(0, FALSE);
-    // }
+    AutoPtr<IInterface> adpater;
+    GetAdapter((IInterface**)&adpater);
+    if (IContactEntryListAdapter::Probe(adpater) != NULL) {
+        ICompositeCursorAdapter::Probe(adpater)->SetHasHeader(0, FALSE);
+    }
     return NOERROR;
 }
 
@@ -153,66 +173,60 @@ ECode SearchFragment::SetAddToContactNumber(
     return NOERROR;
 }
 
-// TODO:
-// ECode SearchFragment::CreateListAdapter(
-//     /* [out] */ IContactEntryListAdapter** listAdapter)
-// {
-//     VALIDATE_NOT_NULL(listAdapter);
+AutoPtr<IContactEntryListAdapter> SearchFragment::CreateListAdapter()
+{
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    AutoPtr<DialerPhoneNumberListAdapter> adapter = new DialerPhoneNumberListAdapter();
+    adapter->constructor(IContext::Probe(activity));
+    adapter->SetDisplayPhotos(TRUE);
+    adapter->SetUseCallableUri(PhoneNumberPickerFragment::UsesCallableUri());
+    return IContactEntryListAdapter::Probe(adapter);
+}
 
-//     AutoPtr<IActivity> activity;
-//     GetActivity((IActivity**)&activity);
-//     AutoPtr<IDialerPhoneNumberListAdapter> adapter;
-//     CDialerPhoneNumberListAdapter::New(activity, (IDialerPhoneNumberListAdapter**)&adapter);
-//     adapter->SetDisplayPhotos(TRUE);
-//     Boolean result;
-//     PhoneNumberPickerFragment::UsesCallableUri(&result);
-//     adapter->SetUseCallableUri(result);
-//     *listAdapter = adapter;
-//     REFCOUNT_ADD(*listAdapter);
-//     return NOERROR;
-// }
-
-ECode SearchFragment::OnItemClick(
+void SearchFragment::OnItemClick(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
-    AutoPtr<IInterface> adpater;
-    GetAdapter((IInterface**)&adpater);
+    AutoPtr<IInterface> adapter;
+    GetAdapter((IInterface**)&adapter);
+    AutoPtr<IDialerPhoneNumberListAdapter> listAdapter = IDialerPhoneNumberListAdapter::Probe(adapter);
     Int32 shortcutType;
-    IDialerPhoneNumberListAdapter::Probe(adapter)->
-            GetShortcutTypeFromPosition(position, &shortcutType);
+    listAdapter->GetShortcutTypeFromPosition(position, &shortcutType);
     AutoPtr<IOnPhoneNumberPickerActionListener> listener;
 
     switch (shortcutType) {
         case IDialerPhoneNumberListAdapter::SHORTCUT_INVALID:
-            assert(0 && "TODO");
-            // PhoneNumberPickerFragment::OnItemClick(position, id);
+            PhoneNumberPickerFragment::OnItemClick(position, id);
             break;
         case IDialerPhoneNumberListAdapter::SHORTCUT_DIRECT_CALL:
-             GetOnPhoneNumberPickerListener((IOnPhoneNumberPickerActionListener**)&listener);
+            listener = GetOnPhoneNumberPickerListener();
             if (listener != NULL) {
                 String str;
                 GetQueryString(&str);
                 listener->OnCallNumberDirectly(str);
             }
             break;
-        case IDialerPhoneNumberListAdapter::SHORTCUT_ADD_NUMBER_TO_CONTACTS:
+        case IDialerPhoneNumberListAdapter::SHORTCUT_ADD_NUMBER_TO_CONTACTS:{
             String number;
             if (TextUtils::IsEmpty(mAddToContactNumber)) {
-                IDialerPhoneNumberListAdapter::Probe(adapter)->GetFormattedQueryString(&number);
+                listAdapter->GetFormattedQueryString(&number);
             }
             else {
                 number = mAddToContactNumber;
             }
 
-            AutoPtr<IIntent> intent = DialtactsActivity::GetAddNumberToContactIntent(number);
+            AutoPtr<ICharSequence> cs;
+            CString::New(number, (ICharSequence**)&cs);
+            AutoPtr<IIntent> intent = DialtactsActivity::GetAddNumberToContactIntent(cs);
             AutoPtr<IActivity> activity;
-            GetActivity(&activity);
-            DialerUtils::StartActivityWithErrorToast(activity, intent,
-                    R::string::add_contact_not_available);
+            GetActivity((IActivity**)&activity);
+            DialerUtils::StartActivityWithErrorToast(IContext::Probe(activity), intent,
+                    Elastos::Droid::Dialer::R::string::add_contact_not_available);
             break;
+        }
         case IDialerPhoneNumberListAdapter::SHORTCUT_MAKE_VIDEO_CALL:
-             GetOnPhoneNumberPickerListener((IOnPhoneNumberPickerActionListener**)&listener);
+            listener = GetOnPhoneNumberPickerListener();
             if (listener != NULL) {
                 String str;
                 GetQueryString(&str);
@@ -220,7 +234,6 @@ ECode SearchFragment::OnItemClick(
             }
             break;
     }
-    return NOERROR;
 }
 
 ECode SearchFragment::UpdatePosition(
@@ -229,28 +242,28 @@ ECode SearchFragment::UpdatePosition(
     // Use negative shadow height instead of 0 to account for the 9-patch's shadow.
     Boolean result;
     Int32 startTranslationValue =
-            mActivity->IsDialpadShown(&result), result ?
+            (mActivity->IsDialpadShown(&result), result) ?
             mActionBarHeight - mShadowHeight: -mShadowHeight;
     Int32 endTranslationValue = 0;
     // Prevents ListView from being translated down after a rotation when the ActionBar is up.
     if (animate || mActivity->IsActionBarShowing(&result), result) {
         endTranslationValue =
-                mActivity->IsDialpadShown(&result), result ? 0 : mActionBarHeight -mShadowHeight;
+                (mActivity->IsDialpadShown(&result), result) ? 0 : mActionBarHeight -mShadowHeight;
     }
     if (animate) {
-        assert(0 && "TODO");
-        // AutoPtr<IInterpolator> interpolator =
-        //         mActivity->IsDialpadShown(&result), result ? IAnimUtils::EASE_IN : IAnimUtils::EASE_OUT ;
-        // Int32 duration =
-        //         mActivity->IsDialpadShown(&result), result ? mShowDialpadDuration : mHideDialpadDuration;
+        AutoPtr<IInterpolator> interpolator =
+                (mActivity->IsDialpadShown(&result), result) ? AnimUtils::EASE_IN : AnimUtils::EASE_OUT ;
+        Int32 duration =
+                (mActivity->IsDialpadShown(&result), result) ? mShowDialpadDuration : mHideDialpadDuration;
 
-        // AutoPtr<IView> view;
-        // GetView((IView**)&view);
-        // view->SetTranslationY(startTranslationValue);
-        // view->Animate()
-        // view->TranslationY(endTranslationValue)
-        // view->SetInterpolator(interpolator)
-        // view->SetDuration(duration);
+        AutoPtr<IView> view;
+        GetView((IView**)&view);
+        view->SetTranslationY(startTranslationValue);
+        AutoPtr<IViewPropertyAnimator> animator;
+        view->Animate((IViewPropertyAnimator**)&animator);
+        animator->TranslationY(endTranslationValue);
+        animator->SetInterpolator(ITimeInterpolator::Probe(interpolator));
+        animator->SetDuration(duration);
     }
     else {
         AutoPtr<IView> view;
@@ -259,14 +272,15 @@ ECode SearchFragment::UpdatePosition(
     }
 
     // There is padding which should only be applied when the dialpad is not shown.
-    Int32 paddingTop = mActivity->IsDialpadShown(&result), result ? 0 : mPaddingTop;
+    Int32 paddingTop = (mActivity->IsDialpadShown(&result), result) ? 0 : mPaddingTop;
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
+    AutoPtr<IView> v = IView::Probe(listView);
     Int32 start, end, bottom;
-    listView->GetPaddingStart(&start);
-    listView->GetPaddingEnd(&end);bottom
-    listView->GetPaddingBottom(&end);
-    listView->SetPaddingRelative(start, paddingTop, end, bottom);
+    v->GetPaddingStart(&start);
+    v->GetPaddingEnd(&end);
+    v->GetPaddingBottom(&bottom);
+    v->SetPaddingRelative(start, paddingTop, end, bottom);
 
     return NOERROR;
 }

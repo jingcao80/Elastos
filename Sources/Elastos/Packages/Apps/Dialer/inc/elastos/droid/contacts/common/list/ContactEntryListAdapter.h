@@ -165,6 +165,8 @@ public:
     CARAPI GetViewTypeCount(
         /* [out] */ Int32* count);
 
+    using IndexerListAdapter::GetItemViewType;
+
     // @Override
     CARAPI_(Int32) GetItemViewType(
         /* [in] */ Int32 partition,

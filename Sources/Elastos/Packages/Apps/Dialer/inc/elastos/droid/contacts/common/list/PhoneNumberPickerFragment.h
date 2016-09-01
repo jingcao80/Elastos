@@ -155,10 +155,9 @@ protected:
         /* [in] */ IContactEntryListAdapter* adapter);
 
     // @Override
-    CARAPI InflateView(
+    CARAPI_(AutoPtr<IView>) InflateView(
         /* [in] */ ILayoutInflater* inflater,
-        /* [in] */ IViewGroup* container,
-        /* [out] */ IView** view);
+        /* [in] */ IViewGroup* container);
 
     CARAPI_(void) StartPhoneNumberShortcutIntent(
         /* [in] */ IUri* uri);
