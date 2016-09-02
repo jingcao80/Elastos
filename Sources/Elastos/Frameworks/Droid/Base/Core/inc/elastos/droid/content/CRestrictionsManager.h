@@ -191,7 +191,7 @@ private:
 
     static const String TAG_RESTRICTION;// = "restriction";
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IIRestrictionsManager> mService;
 };
 

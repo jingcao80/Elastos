@@ -302,7 +302,7 @@ private:
     static const char* TAG;
     static const Boolean DEBUG = FALSE;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IDisplayManagerGlobal> mGlobal;
 
     Object mLock;

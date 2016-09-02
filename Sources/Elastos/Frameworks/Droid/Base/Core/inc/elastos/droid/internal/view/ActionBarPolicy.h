@@ -48,7 +48,7 @@ private:
         /* [in] */ IContext* ctx);
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 };
 
 } // namespace View

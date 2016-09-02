@@ -35,7 +35,7 @@ public:
         /* [out] */ String* str);
 
 private:
-    AutoPtr<CAccessibilityManager> mHost;
+    CAccessibilityManager* mHost;
 };
 
 } // Accessibility

@@ -1776,7 +1776,7 @@ private:
 private:
     static const String TAG;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IIAccountManager> mService;
     AutoPtr<IHandler> mMainHandler;
 

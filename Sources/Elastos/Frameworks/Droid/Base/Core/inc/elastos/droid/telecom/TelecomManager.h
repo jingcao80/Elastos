@@ -387,7 +387,7 @@ private:
 private:
     static String TAG;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 };
 
 } // namespace Telecom

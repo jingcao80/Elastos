@@ -177,7 +177,7 @@ public:
 
 private:
     static String TAG; // = "MediaProjectionManager";
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IArrayMap> mCallbacks;
     AutoPtr<IIMediaProjectionManager> mService;
 

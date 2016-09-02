@@ -693,7 +693,7 @@ public:
 private:
     static const String TAG;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IIAppOpsService> mService;
     HashMap<AutoPtr<IAppOpsManagerOnOpChangedListener>, AutoPtr<IIAppOpsCallback> > mModeWatchers;
     Object mModeWatchersLock;

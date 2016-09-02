@@ -1216,7 +1216,7 @@ private:
 private:
     static const String TAG;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IILocationManager> mService;
     AutoPtr<IGpsMeasurementListenerTransport> mGpsMeasurementListenerTransport;
     AutoPtr<IGpsNavigationMessageListenerTransport> mGpsNavigationMessageListenerTransport;

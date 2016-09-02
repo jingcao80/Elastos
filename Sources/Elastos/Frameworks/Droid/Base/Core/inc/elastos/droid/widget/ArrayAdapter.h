@@ -239,8 +239,7 @@ private:
     Boolean mNotifyOnChange;
 
     // context usually holds adapter, we use weak-reference here.
-    // AutoPtr<IWeakReference> mWeakContext;
-    AutoPtr<IContext> mContext;
+    AutoPtr<IWeakReference> mWeakContext;
 
     // A copy of the original mObjects array, initialized from and then used instead as soon as
     // the mFilter ArrayFilter is used. mObjects will then only contain the filtered values.

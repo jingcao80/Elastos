@@ -671,7 +671,7 @@ private:
     static AutoPtr<IUserManager> sInstance;
 
     AutoPtr<IIUserManager> mService;
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 };
 
 } // namespace Os

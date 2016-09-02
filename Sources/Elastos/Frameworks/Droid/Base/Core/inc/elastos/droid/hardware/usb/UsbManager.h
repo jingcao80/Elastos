@@ -211,7 +211,7 @@ private:
 private:
     static const String TAG;
 
-    AutoPtr<IContext>  mContext;
+    IContext*  mContext;
     AutoPtr<IIUsbManager>  mService;
 };
 

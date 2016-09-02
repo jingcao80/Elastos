@@ -688,7 +688,7 @@ private:
     static Boolean localLOGV;
     static Int32 gMaxRecentTasks;// = -1;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IHandler> mHandler;
 
     AutoPtr<IPoint> mAppTaskThumbnailSize;

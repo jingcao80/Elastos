@@ -1119,14 +1119,12 @@ CAR_OBJECT_IMPL(CMediaRouter)
 ECode CMediaRouter::constructor(
     /* [in] */ IContext* context)
 {
-    {
-      AutoLock lock(mStaticClass);
-      if (sStatic == NULL) {
-          AutoPtr<IContext> appContext;
-          context->GetApplicationContext((IContext**)&appContext);
-          sStatic = new Static(appContext, this);
-          ((Static*)(sStatic.Get()))->StartMonitoringRoutes(appContext);
-      }
+    AutoLock lock(mStaticClass);
+    if (sStatic == NULL) {
+        AutoPtr<IContext> appContext;
+        context->GetApplicationContext((IContext**)&appContext);
+        sStatic = new Static(appContext, this);
+        ((Static*)(sStatic.Get()))->StartMonitoringRoutes(appContext);
     }
     return NOERROR;
 }

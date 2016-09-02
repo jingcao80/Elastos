@@ -145,7 +145,7 @@ private:
     // A blank profile that is created to be returned if profiles disabled
     static AutoPtr<IProfile> sEmptyProfile;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 
 };
 

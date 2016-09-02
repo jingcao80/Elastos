@@ -147,7 +147,7 @@ public:
         /* [in] */ IINetworkScoreCache* scoreCache);
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 
     AutoPtr<IINetworkScoreService> mService;
 };

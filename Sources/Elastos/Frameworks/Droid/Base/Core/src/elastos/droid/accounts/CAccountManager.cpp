@@ -1042,7 +1042,6 @@ CAR_INTERFACE_IMPL(CAccountManager, Object, IAccountManager)
 
 CAccountManager::CAccountManager()
 {
-    mAccountsChangedBroadcastReceiver = new AccountsChangedBroadcastReceiver(this);
 }
 
 ECode CAccountManager::constructor(
@@ -1051,6 +1050,7 @@ ECode CAccountManager::constructor(
 {
     mContext = context;
     mService = service;
+    mAccountsChangedBroadcastReceiver = new AccountsChangedBroadcastReceiver(this);
     AutoPtr<ILooper> looper;
     ASSERT_SUCCEEDED(mContext->GetMainLooper((ILooper**)&looper));
     return CHandler::New(looper, (IHandler**)&mMainHandler);
