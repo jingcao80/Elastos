@@ -72,7 +72,7 @@ private:
     CARAPI_(AutoPtr<IIStatusBarService>) GetService();
 
 public:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IIStatusBarService> mService;
     AutoPtr<IBinder> mToken;
 };

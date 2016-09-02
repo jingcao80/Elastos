@@ -57,7 +57,7 @@ public:
 private:
     static const String TAG;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IISerialManager> mService;
 };
 

@@ -150,7 +150,7 @@ private:
 
     AutoPtr<IIFingerprintService> mService;
     AutoPtr<IFingerprintManagerReceiver> mClientReceiver;
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IBinder> mToken;
 
     AutoPtr<IHandler> mHandler;

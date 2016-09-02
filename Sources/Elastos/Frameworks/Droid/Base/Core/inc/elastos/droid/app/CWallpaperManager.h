@@ -490,7 +490,7 @@ private:
     static const String PROP_WALLPAPER_COMPONENT;// = "ro.config.wallpaper_component";
 
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     static Object sSync;
     static AutoPtr<CGlobalsWallpaperManagerCallback> sGlobals;
 };

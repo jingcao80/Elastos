@@ -138,7 +138,7 @@ private:
     static const Int32 MSG_REPORT_PRIMARY_CLIP_CHANGED;
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     List<AutoPtr<IClipboardManagerOnPrimaryClipChangedListener> > mPrimaryClipChangedListeners;
     AutoPtr<IOnPrimaryClipChangedListener> mPrimaryClipChangedServiceListener;
     Object mPrimaryClipChangedListenersLock;

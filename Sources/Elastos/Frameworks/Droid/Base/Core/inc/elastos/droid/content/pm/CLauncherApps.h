@@ -295,7 +295,7 @@ private:
     static const String TAG;
     static const Boolean DEBUG;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IILauncherApps> mService;
     AutoPtr<IPackageManager> mPm;
 

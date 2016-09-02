@@ -1479,7 +1479,7 @@ private:
 
 private:
     static const String TAG;
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IIDevicePolicyManager> mService;
 };
 

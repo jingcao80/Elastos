@@ -1537,7 +1537,7 @@ public:
     AutoPtr<IArrayList> mAudioPatchesCached;
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     Int64 mVolumeKeyUpTime;
     Boolean mUseMasterVolume;
     Boolean mUseVolumeKeySounds;

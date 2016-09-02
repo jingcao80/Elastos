@@ -746,7 +746,7 @@ private:
     /* Number of currently active WifiLocks and MulticastLocks */
     Int32 mActiveLockCount;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IIWifiManager> mService;
 
     static const Int32 INVALID_KEY;

@@ -138,7 +138,7 @@ public:
 private:
     static AutoPtr<IUsageEvents> sEmptyResults;// = new UsageEvents();
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IIUsageStatsManager> mService;
 };
 

@@ -299,7 +299,7 @@ public:
         /* [out] */ Boolean * result);
 
 public:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 
 private:
     const static String TAG;

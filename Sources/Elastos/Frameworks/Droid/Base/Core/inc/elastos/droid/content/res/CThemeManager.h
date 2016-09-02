@@ -111,7 +111,7 @@ public:
 
 private:
     static const String TAG;
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IIThemeService> mService;
     AutoPtr<IHandler> mHandler;
 

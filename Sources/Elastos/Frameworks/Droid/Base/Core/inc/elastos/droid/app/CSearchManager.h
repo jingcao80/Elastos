@@ -287,7 +287,7 @@ public:
      */
     static AutoPtr<IISearchManager> mService;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 
     // package private since they are used by the inner class SearchManagerCallback
     /* package */ AutoPtr<IHandler> mHandler;

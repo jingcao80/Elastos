@@ -426,7 +426,7 @@ private:
 
     AutoPtr<IArrayMap> mCallbackMap;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     Object mLock;
 
     AutoPtr<CameraServiceListener> mServiceListener;

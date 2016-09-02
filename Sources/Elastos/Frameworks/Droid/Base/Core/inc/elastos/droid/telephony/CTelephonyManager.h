@@ -1342,7 +1342,7 @@ private:
 
     static AutoPtr<IITelephonyRegistry> sRegistry;
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
 
     static String sMultiSimConfig;
 

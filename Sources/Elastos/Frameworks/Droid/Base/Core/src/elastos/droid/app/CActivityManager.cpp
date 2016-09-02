@@ -23,8 +23,6 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Build;
@@ -51,6 +49,7 @@ using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Internal::Utility::IMemInfoReader;
 using Elastos::Droid::Internal::Utility::CMemInfoReader;
 using Elastos::Core::StringUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::IArrayList;

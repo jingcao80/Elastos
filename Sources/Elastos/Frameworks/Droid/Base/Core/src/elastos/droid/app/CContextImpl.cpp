@@ -2573,7 +2573,7 @@ ECode CContextImpl::GetSystemService(
             R::style::Theme_DeviceDefault_Dialog,
             R::style::Theme_DeviceDefault_Light_Dialog);
         AutoPtr<IContext> wrapper;
-        CContextThemeWrapper::New(ctx, value, (IContext**)&wrapper);
+        CContextThemeWrapper::New(ctx, value, FALSE, (IContext**)&wrapper);
         AutoPtr<INotificationManager> nm;
         CNotificationManager::New(wrapper, mMainThread->GetHandler(), (INotificationManager**)&nm);
         *object = TO_IINTERFACE(nm);
@@ -3476,13 +3476,8 @@ ECode CContextImpl::CreateConfigurationContext(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<IContextImpl> c;
-    CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
-        mUser, mRestricted, mDisplay, overrideConfiguration, String(NULL), (IContextImpl**)&c);
-
-    *ctx = IContext::Probe(c);
-    REFCOUNT_ADD(*ctx);
-    return NOERROR;
+    return CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
+        mUser, mRestricted, mDisplay, overrideConfiguration, String(NULL), ctx);
 }
 
 ECode CContextImpl::CreateDisplayContext(
@@ -3497,13 +3492,8 @@ ECode CContextImpl::CreateDisplayContext(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<IContextImpl> c;
-    CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
-        mUser, mRestricted, display, mOverrideConfiguration, String(NULL), (IContextImpl**)&c);
-
-    *ctx = IContext::Probe(c);
-    REFCOUNT_ADD(*ctx);
-    return NOERROR;
+    return CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
+        mUser, mRestricted, display, mOverrideConfiguration, String(NULL), ctx);
 }
 
 Int32 CContextImpl::GetDisplayId()

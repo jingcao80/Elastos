@@ -8,8 +8,7 @@
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
+using Elastos::Droid::Content::EIID_IContext;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
@@ -142,9 +141,9 @@ ECode ArrayAdapter::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 resource)
 {
-    AutoPtr<IArrayList> list;
-    CArrayList::New((IArrayList**)&list);
-    return Init(context, resource, 0, IList::Probe(list));
+    AutoPtr<IList> list;
+    CArrayList::New((IList**)&list);
+    return Init(context, resource, 0, list);
 }
 
 ECode ArrayAdapter::constructor(
@@ -152,9 +151,9 @@ ECode ArrayAdapter::constructor(
     /* [in] */ Int32 resource,
     /* [in] */ Int32 textViewResourceId)
 {
-    AutoPtr<IArrayList> list;
-    CArrayList::New((IArrayList**)&list);
-    return Init(context, resource, textViewResourceId, IList::Probe(list));
+    AutoPtr<IList> list;
+    CArrayList::New((IList**)&list);
+    return Init(context, resource, textViewResourceId, list);
 }
 
 ECode ArrayAdapter::constructor(
@@ -332,13 +331,13 @@ ECode ArrayAdapter::Init(
     /* [in] */ Int32 textViewResourceId,
     /* [in] */ IList* objects)
 {
-    mContext = context;
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
     mInflater = ILayoutInflater::Probe(obj);
     mResource = mDropDownResource = resource;
     mObjects = objects;
     mFieldId = textViewResourceId;
+    IWeakReferenceSource::Probe(context)->GetWeakReference((IWeakReference**)&mWeakContext);
     return NOERROR;
 }
 
@@ -346,9 +345,7 @@ ECode ArrayAdapter::GetContext(
     /* [out] */ IContext** context)
 {
     VALIDATE_NOT_NULL(context);
-    *context = mContext;
-    REFCOUNT_ADD(*context);
-    return NOERROR;
+    return mWeakContext->Resolve(EIID_IContext, (IInterface**)context);
 }
 
 ECode ArrayAdapter::GetCount(
