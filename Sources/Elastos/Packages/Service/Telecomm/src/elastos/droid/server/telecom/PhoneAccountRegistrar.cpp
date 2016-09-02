@@ -714,7 +714,7 @@ ECode PhoneAccountRegistrar::GetUserSelectedVoicePhoneAccount(
     assert(0 && "ISubscriptionManager");
     // subscriptionManagerHelper->IsVoicePromptEnabled(&isVoicePrompt);
     AutoPtr<IPhoneAccountHandle> prefPhoneAccount;
-    Log::I("PhoneAccountRegistrar", "getUserSelVoicePhoneAccount, voice subId = %ld prompt = %d", voiceSubId,
+    Log::I("PhoneAccountRegistrar", "getUserSelVoicePhoneAccount, voice subId = %lld prompt = %d", voiceSubId,
             isVoicePrompt);
     if (!isVoicePrompt) {
         Int32 accountsSize;

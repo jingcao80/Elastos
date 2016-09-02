@@ -134,7 +134,7 @@ ECode WifiConfigStore::WpaConfigFileObserver::OnEvent(
         file->GetLength(&length);
         //if (VDBG) LocalLog(String("wpa_supplicant.conf changed; new size = ") + StringUtils::ToString(length));
         if (VDBG) Logger::D("WifiConfigStore::WpaConfigFileObserver",
-                "wpa_supplicant.conf changed; new size = %ld", length);
+                "wpa_supplicant.conf changed; new size = %lld", length);
     }
     return NOERROR;
 }

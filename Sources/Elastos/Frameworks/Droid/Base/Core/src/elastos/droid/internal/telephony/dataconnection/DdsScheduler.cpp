@@ -848,7 +848,7 @@ ECode DdsScheduler::GetCurrentDds(
     if (mCurrentDds == ISubscriptionManager::INVALID_SUB_ID) {
         IISub::Probe(subController)->GetDefaultDataSubId(&mCurrentDds);
     }
-    Logger::D(TAG, "mCurrentDds = %ld", mCurrentDds);
+    Logger::D(TAG, "mCurrentDds = %lld", mCurrentDds);
     *result = mCurrentDds;
     return NOERROR;
 }
@@ -857,7 +857,7 @@ ECode DdsScheduler::UpdateCurrentDds(
     /* [in] */ INetworkRequest* n)
 {
     GetSubIdFromNetworkRequest(n, &mCurrentDds);
-    Logger::D(TAG, "mCurrentDds = %ld", mCurrentDds);
+    Logger::D(TAG, "mCurrentDds = %lld", mCurrentDds);
     return NOERROR;
 }
 

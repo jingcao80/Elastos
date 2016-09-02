@@ -453,7 +453,7 @@ AutoPtr<IUiccCardApplication> CGsmSMSDispatcher::GetUiccCardApplication()
     Int64 sid;
     mPhone->GetSubId(&sid);
     mPhone->GetPhoneId(&pid);
-    Logger::D(TAG, "GsmSMSDispatcher: subId = %ld slotId = %d", sid, pid);
+    Logger::D(TAG, "GsmSMSDispatcher: subId = %lld slotId = %d", sid, pid);
     AutoPtr<IUiccCardApplication> app;
     mUiccController->GetUiccCardApplication(pid,
             IUiccController::APP_FAM_3GPP, (IUiccCardApplication**)&app);

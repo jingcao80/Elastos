@@ -577,7 +577,7 @@ void PowerNotificationWarnings::AttachLowBatterySound(
 
     const Int64 offTime = SystemClock::GetElapsedRealtime() - mScreenOffTime;
     if (silenceAfter > 0 && mScreenOffTime > 0 && offTime > silenceAfter) {
-        Slogger::I(TAG, "screen off too long (%ldms, limit %dms): not waking up the user with low battery sound", offTime, silenceAfter);
+        Slogger::I(TAG, "screen off too long (%lldms, limit %dms): not waking up the user with low battery sound", offTime, silenceAfter);
         return;
     }
 

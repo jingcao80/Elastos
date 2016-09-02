@@ -168,7 +168,7 @@ ECode NotificationPlayer::CmdThread::Run()
             if (mHost->mPlayer != NULL) {
                 Int64 delay = SystemClock::GetUptimeMillis() - cmd->mRequestTime;
                 if (delay > 1000) {
-                    Logger::W(mHost->mTag, "Notification stop delayed by %ldmsecs", delay);
+                    Logger::W(mHost->mTag, "Notification stop delayed by %lldmsecs", delay);
                 }
                 mHost->mPlayer->Stop();
                 mHost->mPlayer->Release();
@@ -264,7 +264,7 @@ void NotificationPlayer::StartSound(
 
     Int64 delay = SystemClock::GetUptimeMillis() - cmd->mRequestTime;
     if (delay > 1000) {
-        Logger::W(mTag, "Notification sound delayed by %ldmsecs", delay);
+        Logger::W(mTag, "Notification sound delayed by %lldmsecs", delay);
     }
     // }
     // catch (Exception e) {

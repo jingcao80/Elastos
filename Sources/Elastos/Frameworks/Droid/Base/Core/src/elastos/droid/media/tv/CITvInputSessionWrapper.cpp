@@ -218,7 +218,7 @@ ECode CITvInputSessionWrapper::ExecuteMessage(
     system->GetCurrentTimeMillis(&endTime);
     Int64 duration = endTime - startTime;
     if (duration > MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS) {
-        Logger::W(TAG, "Handling message (%d) took too long time (duration=%ld ms)", what, duration);
+        Logger::W(TAG, "Handling message (%d) took too long time (duration=%lld ms)", what, duration);
     }
     return NOERROR;
 }

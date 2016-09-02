@@ -91,7 +91,7 @@ ECode GLSurfaceView::DefaultContextFactory::DestroyContext(
         if (LOG_THREADS) {
             Int64 tid;
             Thread::GetCurrentThread()->GetId(&tid);
-            SLOGGERE("DefaultContextFactory", "tid: %ld", tid);
+            SLOGGERE("DefaultContextFactory", "tid: %lld", tid);
         }
         return E_RUNTIME_EXCEPTION;
     }
@@ -301,7 +301,7 @@ ECode GLSurfaceView::EglHelper::Start()
     if (LOG_EGL) {
         Int64 tid;
         Thread::GetCurrentThread()->GetId(&tid);
-        SLOGGERW("EglHelper", "Start tid = %ld", tid)
+        SLOGGERW("EglHelper", "Start tid = %lld", tid)
     }
     /*
      * Get an EGL instance
@@ -358,7 +358,7 @@ ECode GLSurfaceView::EglHelper::Start()
     if (LOG_EGL) {
         Int64 tid;
         Thread::GetCurrentThread()->GetId(&tid);
-        SLOGGERW("EglHelper", "createContext = %p, tid = %ld", mEglContext.Get(), tid)
+        SLOGGERW("EglHelper", "createContext = %p, tid = %lld", mEglContext.Get(), tid)
     }
 
     mEglSurface = NULL;
@@ -374,7 +374,7 @@ ECode GLSurfaceView::EglHelper::CreateSurface(
     if (LOG_EGL) {
         Int64 tid;
         Thread::GetCurrentThread()->GetId(&tid);
-        SLOGGERW("EglHelper", "createSurface()  tid= %ld", tid)
+        SLOGGERW("EglHelper", "createSurface()  tid= %lld", tid)
     }
     /*
      * Check preconditions.
@@ -500,7 +500,7 @@ ECode GLSurfaceView::EglHelper::DestroySurface()
     if (LOG_EGL) {
         Int64 tid;
         Thread::GetCurrentThread()->GetId(&tid);
-        SLOGGERW("EglHelper", "destroySurface()  tid= %ld", tid)
+        SLOGGERW("EglHelper", "destroySurface()  tid= %lld", tid)
     }
     DestroySurfaceImp();
     return NOERROR;
@@ -511,7 +511,7 @@ ECode GLSurfaceView::EglHelper::Finish()
     if (LOG_EGL) {
         Int64 tid;
         Thread::GetCurrentThread()->GetId(&tid);
-        SLOGGERW("EglHelper", "finish()  tid= %ld", tid)
+        SLOGGERW("EglHelper", "finish()  tid= %lld", tid)
     }
     if (mEglContext != NULL) {
         AutoPtr<IGLSurfaceView> obj;
@@ -565,7 +565,7 @@ ECode GLSurfaceView::EglHelper::ThrowEglException(
     if (LOG_EGL) {
         Int64 tid;
         Thread::GetCurrentThread()->GetId(&tid);
-        SLOGGERE("EglHelper", String("LogEglException, tid = %ld") + mes, tid)
+        SLOGGERE("EglHelper", String("LogEglException, tid = %lld") + mes, tid)
     }
     return E_RUNTIME_EXCEPTION;
 }
@@ -662,7 +662,7 @@ ECode GLSurfaceView::GLThread::Run()
     GetId(&id);
     SetName(String("GLThread ") + StringUtils::ToString(id));
     if (LOG_THREADS) {
-        SLOGGERI("GLThread", "starting tid = %ld", id)
+        SLOGGERI("GLThread", "starting tid = %lld", id)
     }
 
     // try {
@@ -916,7 +916,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                             Int64 tid;
                             GetId(&tid);
                             SLOGGERI("GLThread", String("mPaused is now ") +=
-                                mPaused ? String("TRUE") : String("FALSE") += String(" tid = %ld"), tid);
+                                mPaused ? String("TRUE") : String("FALSE") += String(" tid = %lld"), tid);
                         }
                     }
 
@@ -925,7 +925,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                         if (LOG_SURFACE) {
                             Int64 tid;
                             GetId(&tid);
-                            SLOGGERI("GLThread", "releasing EGL context because asked to tid = %ld", tid);
+                            SLOGGERI("GLThread", "releasing EGL context because asked to tid = %lld", tid);
                         }
                         StopEglSurfaceLocked();
                         StopEglContextLocked();
@@ -945,7 +945,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                         if (LOG_SURFACE) {
                             Int64 tid;
                             GetId(&tid);
-                            SLOGGERI("GLThread", "releasing EGL surface because paused tid= %ld", tid);
+                            SLOGGERI("GLThread", "releasing EGL surface because paused tid= %lld", tid);
                         }
                         StopEglSurfaceLocked();
                     }
@@ -965,7 +965,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                             if (LOG_SURFACE) {
                                 Int64 tid;
                                 GetId(&tid);
-                                SLOGGERI("GLThread", "Releasing EGL context because paused tid = %ld", tid)
+                                SLOGGERI("GLThread", "Releasing EGL context because paused tid = %lld", tid)
                             }
                         }
                     }
@@ -977,7 +977,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                             if (LOG_SURFACE) {
                                 Int64 tid;
                                 GetId(&tid);
-                                SLOGGERI("GLThread", "terminating EGL because paused tid = %ld", tid)
+                                SLOGGERI("GLThread", "terminating EGL because paused tid = %lld", tid)
                             }
                         }
                     }
@@ -987,7 +987,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                         if (LOG_SURFACE) {
                             Int64 tid;
                             GetId(&tid);
-                            SLOGGERI("GLThread", "noticed surfaceView surface lost tid = %ld", tid)
+                            SLOGGERI("GLThread", "noticed surfaceView surface lost tid = %lld", tid)
                         }
                         if (mHaveEglSurface) {
                             StopEglSurfaceLocked();
@@ -1002,7 +1002,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                         if (LOG_SURFACE) {
                             Int64 tid;
                             GetId(&tid);
-                            SLOGGERI("GLThread", "noticed surfaceView surface acquired tid = %ld", tid)
+                            SLOGGERI("GLThread", "noticed surfaceView surface acquired tid = %lld", tid)
                         }
                         mWaitingForSurface = FALSE;
                         sLockMgr.NotifyAll();
@@ -1012,7 +1012,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                         if (LOG_SURFACE) {
                             Int64 tid;
                             GetId(&tid);
-                            SLOGGERI("GLThread", "sending render notification tid = %ld", tid)
+                            SLOGGERI("GLThread", "sending render notification tid = %lld", tid)
                         }
                         wantRenderNotification = FALSE;
                         doRenderNotification = FALSE;
@@ -1062,7 +1062,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                                     Int64 tid;
                                     GetId(&tid);
                                     SLOGGERI("GLThread",
-                                            "noticing that we want render notification tid = %ld", tid)
+                                            "noticing that we want render notification tid = %lld", tid)
                                 }
 
                                 // Destroy and recreate the EGL surface.
@@ -1174,7 +1174,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
             if (LOG_RENDERER_DRAW_FRAME) {
                 Int64 tid;
                 GetId(&tid);
-                SLOGGERW("GLThread", "onDrawFrame tid = %ld", tid)
+                SLOGGERW("GLThread", "onDrawFrame tid = %lld", tid)
             }
             {
                 AutoPtr<IGLSurfaceView> obj;
@@ -1193,7 +1193,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                     if (LOG_SURFACE) {
                         Int64 tid;
                         GetId(&tid);
-                        SLOGGERI("GLThread", "egl context lost tid = %ld", tid)
+                        SLOGGERI("GLThread", "egl context lost tid = %lld", tid)
                     }
                     lostEglContext = TRUE;
                     break;
@@ -1241,7 +1241,7 @@ ECode GLSurfaceView::GLThreadManager::ThreadExiting(
     if (LOG_THREADS) {
         Int64 id;
         thread->GetId(&id);
-        SLOGGERI("GLThread", "exiting tid = %ld", id)
+        SLOGGERI("GLThread", "exiting tid = %lld", id)
     }
     thread->mExited = TRUE;
     if (mEglOwner.Get() == thread) {

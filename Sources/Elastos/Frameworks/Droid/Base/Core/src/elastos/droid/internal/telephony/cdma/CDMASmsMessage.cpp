@@ -657,7 +657,7 @@ ECode CDMASmsMessage::ParseSms()
         ITime::Probe(bearerData->msgCenterTimeStamp)->ToMillis(TRUE, &mScTimeMillis);
     }
 
-    if (VDBG) Logger::D(LOGTAG, "SMS SC timestamp: %ld", mScTimeMillis);
+    if (VDBG) Logger::D(LOGTAG, "SMS SC timestamp: %lld", mScTimeMillis);
 
     // Message Type (See 3GPP2 C.S0015-B, v2, 4.5.1)
     if (bearerData->messageType == IBearerData::MESSAGE_TYPE_DELIVERY_ACK) {

@@ -197,7 +197,7 @@ void* CRemoteParcel::WriteInplace(
 
     if ((mDataPos + padded) <= mDataCapacity) {
 restart_write:
-        //printf("Writing %ld bytes, padded to %ld\n", len, padded);
+        //printf("Writing %lld bytes, padded to %lld\n", len, padded);
         UInt8* const data = mData + mDataPos;
 
         // Need to pad at end?

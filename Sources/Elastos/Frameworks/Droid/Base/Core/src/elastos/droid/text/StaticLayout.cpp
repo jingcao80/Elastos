@@ -1153,11 +1153,10 @@ public:
         /* [in] */ ArrayOf<Char32>* inputText,
         /* [in] */ Int32 length)
         : mBreakIterator(breakIterator)
-        , mChars(inputText)
     {
         UErrorCode status = U_ZERO_ERROR;
-        AutoPtr<ArrayOf<Char16> > char16s = String(*inputText).GetChar16s();
-        mUText = utext_openUChars(NULL, (const UChar*)char16s->GetPayload(), length, &status);
+        mChars = String(*inputText).GetChar16s();
+        mUText = utext_openUChars(NULL, (const UChar*)mChars->GetPayload(), length, &status);
         if (mUText == NULL) {
             return;
         }
@@ -1175,7 +1174,7 @@ public:
     }
 private:
     BreakIterator* mBreakIterator;
-    AutoPtr<ArrayOf<Char32> > mChars;
+    AutoPtr<ArrayOf<Char16> > mChars;
     UText* mUText;
 
     // disable copying and assignment

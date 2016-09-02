@@ -3000,7 +3000,7 @@ void ActiveServices::DumpServicesLocked(
                     }
                     else {
                         pw->Print(String("    app="));
-                        pw->Println(r->mApp->ToString());
+                        pw->Println(TO_STR(r->mApp));
                         pw->Print(String("    created="));
                         TimeUtils::FormatDuration(r->mCreateTime, nowReal, pw);
                         pw->Print(String(" started="));

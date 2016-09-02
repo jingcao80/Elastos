@@ -81,7 +81,7 @@ ECode DcSwitchState::IdleState::ProcessMessage(
         AutoPtr<IPhoneBase> pb = IPhoneBase::Probe(phone);
         Int64 subId;
         pb->GetSubId(&subId);
-        mHost->Log("Setting default DDS on %ld primary Sub feature %d",
+        mHost->Log("Setting default DDS on %lld primary Sub feature %d",
                 subId, isPrimarySubFeatureEnable);
         // When isPrimarySubFeatureEnable is enabled apps will take care
         // of sending DDS request during device power-up.

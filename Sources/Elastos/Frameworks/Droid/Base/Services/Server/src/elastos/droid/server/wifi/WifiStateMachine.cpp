@@ -26,6 +26,7 @@ using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Utility::CLruCache;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Net::CDhcpResults;
 using Elastos::Droid::Net::CDhcpStateMachineHelper;
@@ -5661,7 +5662,7 @@ ECode WifiStateMachine::SyncGetScanResultsList(
     {
         AutoLock syncLock(mScanResultCache);
         AutoPtr<IArrayList> scanList;
-        CArrayList::New((IArrayList**)&scanList);
+        CParcelableList::New((IArrayList**)&scanList);
         Int32 size;
         mScanResults->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
@@ -8962,7 +8963,7 @@ void WifiStateMachine::SetScanResults()
                     else {
                         if (PDBG) {
                             Logger::E("WifiStateMachine", "line:%d, func:%s\n", __LINE__, "SetScanResults");
-                            Logger::E("WifiStateMachine", "wifiSsid:%s, bssid:%s, flags:%d, lelvel:%d, freq:%d, tsf: %ld",
+                            Logger::E("WifiStateMachine", "wifiSsid:%s, bssid:%s, flags:%d, lelvel:%d, freq:%d, tsf: %lld",
                                     ssid.string(), bssid.string(), flags.string(), level, freq, tsf);
                         }
                         CScanResult::New(wifiSsid, bssid, flags, level, freq, tsf, (IScanResult**)&scanResult);

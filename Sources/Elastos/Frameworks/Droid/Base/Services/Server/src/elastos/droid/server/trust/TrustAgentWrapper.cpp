@@ -102,7 +102,7 @@ ECode TrustAgentWrapper::InnerSub_Handler::HandleMessage(
                 // DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS.
                 duration = Elastos::Core::Math::Min(durationMs, mHost->mMaximumTimeToLock);
                 if (DEBUG) {
-                    Logger::V(TAG, "DPM lock timeout in effect. Timeout adjusted from %ld to %ld",
+                    Logger::V(TAG, "DPM lock timeout in effect. Timeout adjusted from %lld to %lld",
                             durationMs, duration);
                 }
             }
@@ -186,7 +186,7 @@ ECode TrustAgentWrapper::InnerSub_ITrustAgentServiceCallback::GrantTrust(
     /* [in] */ Int64 durationMs,
     /* [in] */ Boolean initiatedByUser)
 {
-    if (DEBUG) Slogger::V(TAG, "enableTrust(%s, durationMs = %ld, initiatedByUser = %s" ")",
+    if (DEBUG) Slogger::V(TAG, "enableTrust(%s, durationMs = %lld, initiatedByUser = %s" ")",
             TO_CSTR(userMessage), durationMs, initiatedByUser ? "TRUE" : "FALSE");
     AutoPtr<IMessage> msg;
     mHost->mHandler->ObtainMessage(

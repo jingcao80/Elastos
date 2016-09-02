@@ -289,7 +289,7 @@ void BlockingAudioTrack::BlockUntilEstimatedCompletion()
     const Int64 estimatedTimeMs = (lengthInFrames * 1000 / mSampleRateInHz);
 
     if (DBG) {
-        Logger::D(TAG, "About to sleep for: %ld ms for a short utterance", estimatedTimeMs);
+        Logger::D(TAG, "About to sleep for: %lld ms for a short utterance", estimatedTimeMs);
     }
 
     //try {
@@ -327,7 +327,7 @@ void BlockingAudioTrack::BlockUntilCompletion(
             blockedTimeMs += sleepTimeMs;
             // If we've taken too long to make progress, bail.
             if (blockedTimeMs > MAX_PROGRESS_WAIT_MS) {
-                Logger::D(TAG, "Waited unsuccessfully for %ld ms for AudioTrack to make progress, Aborting\n", MAX_PROGRESS_WAIT_MS);
+                Logger::D(TAG, "Waited unsuccessfully for %lld ms for AudioTrack to make progress, Aborting\n", MAX_PROGRESS_WAIT_MS);
                 break;
             }
         }
@@ -337,7 +337,7 @@ void BlockingAudioTrack::BlockUntilCompletion(
         previousPosition = currentPosition;
 
         if (DBG) {
-            Logger::D(TAG, "About to sleep for: %ld ms, Playback position: %d, Length in frames: %d\n", sleepTimeMs, currentPosition, lengthInFrames);
+            Logger::D(TAG, "About to sleep for: %lld ms, Playback position: %d, Length in frames: %d\n", sleepTimeMs, currentPosition, lengthInFrames);
         }
         //try {
             sleep(sleepTimeMs);

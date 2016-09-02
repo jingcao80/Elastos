@@ -153,7 +153,7 @@ ECode DcTrackerBase::TxRxSum::ToString(
     VALIDATE_NOT_NULL(result)
 
     String rev;
-    rev.AppendFormat("{txSum=%ld rxSum=%ld}", mTxPkts, mRxPkts);
+    rev.AppendFormat("{txSum=%lld rxSum=%lld}", mTxPkts, mRxPkts);
     *result = rev;
     return NOERROR;
 }
@@ -498,7 +498,7 @@ ECode DcTrackerBase::OnActionIntentReconnectAlarm(
     Int64 currSubId;
     intent->GetInt64Extra(IPhoneConstants::SUBSCRIPTION_KEY,
             ISubscriptionManager::INVALID_SUB_ID, &currSubId);
-    Log("onActionIntentReconnectAlarm: currSubId = %ld phoneSubId=%ld", currSubId, phoneSubId);
+    Log("onActionIntentReconnectAlarm: currSubId = %lld phoneSubId=%lld", currSubId, phoneSubId);
     // Stop reconnect if not current subId is not correct.
     // FIXME STOPSHIP - phoneSubId is coming up as -1 way after boot and failing this.
 //        if ((currSubId == SubscriptionManager.INVALID_SUB_ID) || (currSubId != phoneSubId)) {
@@ -1786,7 +1786,7 @@ ECode DcTrackerBase::UpdateDataActivity()
         sent = mTxPkts - txPkts;
         received = mRxPkts - rxPkts;
         if (VDBG)
-            Log("updateDataActivity: sent=%ld received=%ld", sent, received);
+            Log("updateDataActivity: sent=%lld received=%lld", sent, received);
         if (sent > 0 && received > 0) {
             newActivity = DctConstantsActivity_DATAINANDOUT;
         } else if (sent > 0 && received == 0) {
@@ -1960,7 +1960,7 @@ ECode DcTrackerBase::UpdateDataStallInfo()
             mSentSinceLastRecv = 0;
         }
         if (DBG) {
-            Log("updateDataStallInfo: OUT sent=%d mSentSinceLastRecv=%ld",
+            Log("updateDataStallInfo: OUT sent=%d mSentSinceLastRecv=%lld",
                     sent, mSentSinceLastRecv);
         }
     } else if (sent == 0 && received > 0) {
@@ -2001,7 +2001,7 @@ ECode DcTrackerBase::OnDataStallAlarm(
         SendMessage(msg, &b);
     } else {
         if (VDBG_STALL) {
-            Log("onDataStallAlarm: tag=%d Sent %ld pkts since last received, < watchdogTrigger=%d",
+            Log("onDataStallAlarm: tag=%d Sent %lld pkts since last received, < watchdogTrigger=%d",
                     tag, mSentSinceLastRecv, hangWatchdogTrigger);
         }
     }
@@ -2033,7 +2033,7 @@ ECode DcTrackerBase::StartDataStallAlarm(
         }
         mDataStallAlarmTag += 1;
         if (VDBG_STALL) {
-            Log("startDataStallAlarm: tag=%ld delay=%ds",
+            Log("startDataStallAlarm: tag=%lld delay=%ds",
                     mDataStallAlarmTag, (delayInMs / 1000));
         }
         AutoPtr<IIntent> intent;
@@ -2047,7 +2047,7 @@ ECode DcTrackerBase::StartDataStallAlarm(
                 SystemClock::GetElapsedRealtime() + delayInMs, mDataStallAlarmIntent);
     } else {
         if (VDBG_STALL) {
-            Log("startDataStallAlarm: NOT started, no connection tag=%ld", mDataStallAlarmTag);
+            Log("startDataStallAlarm: NOT started, no connection tag=%lld", mDataStallAlarmTag);
         }
     }
     return NOERROR;
@@ -2056,7 +2056,7 @@ ECode DcTrackerBase::StartDataStallAlarm(
 ECode DcTrackerBase::StopDataStallAlarm()
 {
     if (VDBG_STALL) {
-        Log("stopDataStallAlarm: current tag=%ld mDataStallAlarmIntent=%s",
+        Log("stopDataStallAlarm: current tag=%lld mDataStallAlarmIntent=%s",
                 mDataStallAlarmTag, TO_CSTR(mDataStallAlarmIntent));
     }
     mDataStallAlarmTag += 1;

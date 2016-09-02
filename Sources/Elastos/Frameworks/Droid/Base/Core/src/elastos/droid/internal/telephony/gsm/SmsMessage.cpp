@@ -1218,7 +1218,7 @@ void SmsMessage::ParseSmsDeliver(
 
     p->GetSCTimestampMillis(&mScTimeMillis);
 
-    if (VDBG) Logger::D(TAG, "SMS SC timestamp: %ld, ", mScTimeMillis);
+    if (VDBG) Logger::D(TAG, "SMS SC timestamp: %lld, ", mScTimeMillis);
 
     Boolean hasUserDataHeader = (firstByte & 0x40) == 0x40;
 

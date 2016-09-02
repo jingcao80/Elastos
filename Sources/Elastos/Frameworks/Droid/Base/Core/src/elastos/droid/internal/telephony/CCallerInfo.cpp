@@ -293,7 +293,7 @@ ECode CCallerInfo::GetCallerInfo(
                 if (contactId != 0 && (ContactsContractContacts::IsEnterpriseContactId(contactId, &b), !b)) {
                     info->mContactIdOrZero = contactId;
                     if (VDBG) {
-                        Logger::V(TAG, "==> got info->mContactIdOrZero: %ld", info->mContactIdOrZero);
+                        Logger::V(TAG, "==> got info->mContactIdOrZero: %lld", info->mContactIdOrZero);
                     }
                 }
             }

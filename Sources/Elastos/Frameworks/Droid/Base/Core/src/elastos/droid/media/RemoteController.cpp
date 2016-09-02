@@ -111,7 +111,7 @@ ECode RemoteController::RcDisplay::SetPlaybackState(
         return NOERROR;
     }
     if (DEBUG) {
-        Slogger::D(TAG, "> new playback state: genId=%d state=%d changeTime=%ld pos=%ldms speed=%f", genId
+        Slogger::D(TAG, "> new playback state: genId=%d state=%d changeTime=%lld pos=%lldms speed=%f", genId
                 ,state ,stateChangeTimeMs, currentPosMs, speed);
     }
 

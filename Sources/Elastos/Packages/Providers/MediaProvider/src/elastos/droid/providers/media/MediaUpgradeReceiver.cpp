@@ -101,7 +101,7 @@ ECode MediaUpgradeReceiver::OnReceive(
             }
             // }
             sys->GetCurrentTimeMillis(&now);
-            Logger::I(TAG, "<--- Finished upgrade of media database %s in %ld ms",
+            Logger::I(TAG, "<--- Finished upgrade of media database %s in %lld ms",
                 file.string(), now - startTime);
         }
     }

@@ -808,7 +808,7 @@ void CMmsSmsProvider::InsertThread(
     mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db);
     Int64 result = 0;
     db->Insert(TABLE_THREADS, String(NULL), values, &result);
-    Logger::D(TAG, "InsertThread: created new thread_id %ld for recipientIds xxxxxxx", result);
+    Logger::D(TAG, "InsertThread: created new thread_id %lld for recipientIds xxxxxxx", result);
 
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);

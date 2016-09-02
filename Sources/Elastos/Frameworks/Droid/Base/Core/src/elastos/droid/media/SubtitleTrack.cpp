@@ -357,7 +357,7 @@ ECode SubtitleTrack::CueList::CueListIterable::GetIterator(
     Boolean bDeBug = FALSE;
     mHost->GetDEBUG(&bDeBug);
     if (bDeBug) {
-        Slogger::E(TAG, "slice ( + %ld , %ld]=", mLTimeMs, mTimeMs);
+        Slogger::E(TAG, "slice ( + %lld , %lld]=", mLTimeMs, mTimeMs);
     }
     AutoPtr<ISortedMap> outSortedMap;
     AutoPtr<ISortedMap> icues = mHost->mCues;
@@ -573,7 +573,7 @@ ECode SubtitleTrack::GetFormat(
 ECode SubtitleTrack::OnTimedEvent(
     /* [in] */ Int64 timeUs)
 {
-    if (DEBUG) Slogger::E(TAG, "onTimedEvent %ld", timeUs);
+    if (DEBUG) Slogger::E(TAG, "onTimedEvent %lld", timeUs);
     {    AutoLock syncLock(this);
         Int64 timeMs = timeUs / 1000;
         UpdateActiveCues(FALSE, timeMs);
@@ -589,7 +589,7 @@ ECode SubtitleTrack::OnTimedEvent(
 ECode SubtitleTrack::OnSeek(
     /* [in] */ Int64 timeUs)
 {
-    if (DEBUG) Slogger::E(TAG, "onSeek %ld", timeUs);
+    if (DEBUG) Slogger::E(TAG, "onSeek %lld", timeUs);
     {    AutoLock syncLock(this);
         Int64 timeMs = timeUs / 1000;
         UpdateActiveCues(TRUE, timeMs);

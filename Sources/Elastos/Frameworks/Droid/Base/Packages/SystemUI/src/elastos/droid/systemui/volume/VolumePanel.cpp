@@ -2023,7 +2023,7 @@ void VolumePanel::ResetTimeout()
 void VolumePanel::ForceTimeout(
     /* [in] */ Int64 delay)
 {
-    if (LOGD) Logger::D(mTag, "forceTimeout delay=%ld callers=%d",delay, 3/*Debug.getCallers(3)*/);
+    if (LOGD) Logger::D(mTag, "forceTimeout delay=%lld callers=%d",delay, 3/*Debug.getCallers(3)*/);
     RemoveMessages(MSG_TIMEOUT);
     Boolean b;
     SendEmptyMessageDelayed(MSG_TIMEOUT, delay, &b);

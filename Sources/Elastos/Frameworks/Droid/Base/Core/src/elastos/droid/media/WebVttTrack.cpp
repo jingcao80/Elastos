@@ -59,7 +59,7 @@ ECode WebVttTrack::OnData(
         // implement intermixing restriction for WebVTT only for now
         {    AutoLock syncLock(mParser);
             if (/*mCurrentRunID != null && */runID != mCurrentRunID) {
-                Slogger::E(TAG, "Run #%ld in progress.  Cannot process run #%ld", mCurrentRunID, runID);
+                Slogger::E(TAG, "Run #%lld in progress.  Cannot process run #%lld", mCurrentRunID, runID);
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
             mCurrentRunID = runID;
@@ -198,7 +198,7 @@ ECode WebVttTrack::UpdateView(
              return NOERROR;
         }
         Int64 v_ = v / 1000;
-        Slogger::D(TAG, "at %ld ms the active cues are:", v_);
+        Slogger::D(TAG, "at %lld ms the active cues are:", v_);
         // } catch (IllegalStateException e) {
             // Log.d(TAG, "at (illegal state) the active cues are:");
         // }

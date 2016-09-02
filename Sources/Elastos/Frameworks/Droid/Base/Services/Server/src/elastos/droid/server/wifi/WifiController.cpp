@@ -221,7 +221,7 @@ Boolean WifiController::ApStaDisabledState::DoDeferEnable(
         return FALSE;
     }
 
-    Logger::D("WifiController::ApStaDisabledState", "WifiController msg xx deferred for %ld ms",
+    Logger::D("WifiController::ApStaDisabledState", "WifiController msg xx deferred for %lld ms",
             (mOwner->mReEnableDelayMillis - delaySoFar));
 
     // need to defer this action.
@@ -400,7 +400,7 @@ Boolean WifiController::StaDisabledWithScanState::DoDeferEnable(
         return FALSE;
     }
 
-    Logger::D("WifiController::StaDisabledWithScanState", "WifiController msg xx deferred for %ld ms",
+    Logger::D("WifiController::StaDisabledWithScanState", "WifiController msg xx deferred for %lld ms",
             (mOwner->mReEnableDelayMillis - delaySoFar));
 
     // need to defer this action.

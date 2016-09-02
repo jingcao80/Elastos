@@ -5117,10 +5117,10 @@ ECode NativeCrypto::X509_NAME_print_ex(
 {
     X509_NAME* x509name = reinterpret_cast<X509_NAME*>(static_cast<uintptr_t>(x509NameRef));
     unsigned long flags = static_cast<unsigned long>(jflags);
-    NATIVE_TRACE("X509_NAME_print_ex(%p, %ld)", x509name, flags);
+    NATIVE_TRACE("X509_NAME_print_ex(%p, %lld)", x509name, flags);
 
     if (x509name == NULL) {
-        NATIVE_TRACE("X509_NAME_print_ex(%p, %ld) => x509name == null", x509name, flags);
+        NATIVE_TRACE("X509_NAME_print_ex(%p, %lld) => x509name == null", x509name, flags);
         *result = NULL;
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -5384,24 +5384,24 @@ ECode NativeCrypto::X509_print_ex(
     X509* x509 = reinterpret_cast<X509*>(static_cast<uintptr_t>(x509Ref));
     long nmflag = static_cast<long>(jnmflag);
     long certflag = static_cast<long>(jcertflag);
-    NATIVE_TRACE("X509_print_ex(%p, %p, %ld, %ld)", bio, x509, nmflag, certflag);
+    NATIVE_TRACE("X509_print_ex(%p, %p, %lld, %lld)", bio, x509, nmflag, certflag);
 
     if (bio == NULL) {
-        NATIVE_TRACE("X509_print_ex(%p, %p, %ld, %ld) => bio == null", bio, x509, nmflag, certflag);
+        NATIVE_TRACE("X509_print_ex(%p, %p, %lld, %lld) => bio == null", bio, x509, nmflag, certflag);
         return E_NULL_POINTER_EXCEPTION;
     }
 
     if (x509 == NULL) {
-        NATIVE_TRACE("X509_print_ex(%p, %p, %ld, %ld) => x509 == null", bio, x509, nmflag, certflag);
+        NATIVE_TRACE("X509_print_ex(%p, %p, %lld, %lld) => x509 == null", bio, x509, nmflag, certflag);
         return E_NULL_POINTER_EXCEPTION;
     }
 
     if (!::X509_print_ex(bio, x509, nmflag, certflag)) {
-        NATIVE_TRACE("X509_print_ex(%p, %p, %ld, %ld) => threw error", bio, x509, nmflag, certflag);
+        NATIVE_TRACE("X509_print_ex(%p, %p, %lld, %lld) => threw error", bio, x509, nmflag, certflag);
         return ThrowExceptionIfNecessary("X509_print_ex");
     }
     else {
-        NATIVE_TRACE("X509_print_ex(%p, %p, %ld, %ld) => success", bio, x509, nmflag, certflag);
+        NATIVE_TRACE("X509_print_ex(%p, %p, %lld, %lld) => success", bio, x509, nmflag, certflag);
         return NOERROR;
     }
 }
@@ -5989,7 +5989,7 @@ ECode NativeCrypto::Get_X509_ex_pathlen(
     /* Just need to do this to cache the ex_* values. */
     X509_check_ca(x509);
 
-    NATIVE_TRACE("get_X509_ex_pathlen(%p) => %ld", x509, x509->ex_pathlen);
+    NATIVE_TRACE("get_X509_ex_pathlen(%p) => %lld", x509, x509->ex_pathlen);
     *result = x509->ex_pathlen;
     return NOERROR;
 }
@@ -6046,7 +6046,7 @@ ECode NativeCrypto::X509_get_version(
     NATIVE_TRACE("X509_get_version(%p)", x509);
 
     long version = X509_GET_VERSION(x509);
-    NATIVE_TRACE("X509_get_version(%p) => %ld", x509, version);
+    NATIVE_TRACE("X509_get_version(%p) => %lld", x509, version);
     *result = version;
     return NOERROR;
 }
@@ -6638,7 +6638,7 @@ ECode NativeCrypto::X509_CRL_get_version(
     NATIVE_TRACE("X509_CRL_get_version(%p)", crl);
 
     long version = ::ASN1_INTEGER_get((crl)->crl->version);
-    NATIVE_TRACE("X509_CRL_get_version(%p) => %ld", crl, version);
+    NATIVE_TRACE("X509_CRL_get_version(%p) => %lld", crl, version);
     *result = version;
     return NOERROR;
 }
@@ -8074,7 +8074,7 @@ ECode NativeCrypto::SSL_get_tls_channel_id(
     else if (ret != 64) {
         Logger::E(LOG_TAG, "%s", ERR_error_string(ERR_peek_error(), NULL));
         SSL_clear(ssl);
-        NATIVE_TRACE("ssl=%p NativeCrypto_SSL_get_tls_channel_id => error, returned %ld", ssl, ret);
+        NATIVE_TRACE("ssl=%p NativeCrypto_SSL_get_tls_channel_id => error, returned %lld", ssl, ret);
         *result = NULL;
         return ThrowSSLExceptionWithSslErrors(ssl, SSL_ERROR_NONE, "Error getting Channel ID");
     }

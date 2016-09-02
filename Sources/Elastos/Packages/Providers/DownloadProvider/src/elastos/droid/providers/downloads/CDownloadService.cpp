@@ -529,7 +529,7 @@ Boolean CDownloadService::UpdateLocked()
     // continues to run in meantime, since it will kick off an update pass.
     if (nextActionMillis > 0 && nextActionMillis < Elastos::Core::Math::INT64_MAX_VALUE) {
         if (Constants::LOGV) {
-            Logger::V(TAG, "scheduling start in %ldms", nextActionMillis);
+            Logger::V(TAG, "scheduling start in %lldms", nextActionMillis);
         }
 
         AutoPtr<IIntent> intent;

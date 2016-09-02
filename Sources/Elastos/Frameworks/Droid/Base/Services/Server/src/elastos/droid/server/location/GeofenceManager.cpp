@@ -372,7 +372,7 @@ ECode GeofenceManager::UpdateFences()
             IObject::Probe(mLastLocationUpdate)->ToString(&locationStr2);
             Int32 size;
             mFences->GetSize(&size);
-            Slogger::D(TAG, "updateFences: location=%s, mFences.size()=%d, mReceivingLocationUpdates=%s, mLocationUpdateInterval=%ld, mLastLocationUpdate=",
+            Slogger::D(TAG, "updateFences: location=%s, mFences.size()=%d, mReceivingLocationUpdates=%s, mLocationUpdateInterval=%lld, mLastLocationUpdate=",
                 locationStr.string(), size, mReceivingLocationUpdates ? "TRUE" : "FALSE", mLocationUpdateInterval, locationStr2.string());
         }
     }

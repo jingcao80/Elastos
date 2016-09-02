@@ -472,7 +472,7 @@ AutoPtr< ArrayOf<Char32> > CommandLine::ReadUtf8FileFully(
     }
 
     if (fileLength > sizeLimit) {
-        Logger::W(TAG, "File %s length %ld exceeds limit %d", fileName.string(), fileLength, sizeLimit);
+        Logger::W(TAG, "File %s length %lld exceeds limit %d", fileName.string(), fileLength, sizeLimit);
         return NULL;
     }
 

@@ -76,7 +76,7 @@ private:
         CARAPI Run();
 
     private:
-        WindowState* mHost;
+        AutoPtr<WindowState> mHost;
         AutoPtr<IRect> mFrame;
         AutoPtr<IRect> mOverscanInsets;
         AutoPtr<IRect> mContentInsets;

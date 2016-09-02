@@ -248,7 +248,7 @@ ECode CDMALTEPhone::UpdateCurrentCarrierInProvider(
 
     Int64 sid;
     GetSubId(&sid);
-    Logger::D(LOGTAG, "updateCurrentCarrierInProvider: mSubscription = %d currentDds = %ld operatorNumeric = %s",
+    Logger::D(LOGTAG, "updateCurrentCarrierInProvider: mSubscription = %d currentDds = %lld operatorNumeric = %s",
             sid, currentDds, operatorNumeric.string());
 
     if (!operatorNumeric.IsEmpty() && (sid == currentDds)) {

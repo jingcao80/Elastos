@@ -977,7 +977,7 @@ Int64 CTelephonyProvider::GetDefaultPreferredApnId()
             ICloseable::Probe(c)->Close();
         }
     }
-    Logger::D(TAG, "Preferred APN: %ld", id);
+    Logger::D(TAG, "Preferred APN: %lld", id);
     return id;
 }
 

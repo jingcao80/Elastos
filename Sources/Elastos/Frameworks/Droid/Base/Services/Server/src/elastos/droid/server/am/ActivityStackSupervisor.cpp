@@ -4357,7 +4357,7 @@ Boolean ActivityStackSupervisor::DumpActivitiesLocked(
         AutoPtr<IArrayList> stacks = activityDisplay->mStacks;
         Int32 stackSize;
         stacks->GetSize(&stackSize);
-        for (Int32 stackNdx = stackSize; stackNdx >= 0; --stackNdx) {
+        for (Int32 stackNdx = stackSize - 1; stackNdx >= 0; --stackNdx) {
             //final ActivityStack stack = stacks.get(stackNdx);
             AutoPtr<IInterface> stackobj;
             stacks->Get(stackNdx, (IInterface**)&stackobj);

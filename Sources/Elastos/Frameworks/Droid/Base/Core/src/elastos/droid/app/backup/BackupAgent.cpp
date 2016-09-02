@@ -467,7 +467,7 @@ ECode BackupAgent::OnRestoreFile(
     String basePath;
 
     if (DEBUG) {
-        Logger::D(TAG, "onRestoreFile() size=%ld type=%d domain=%s relpath=%s mode=%ld mtime=%ld",size, type, domain.string(), path.string(), mode, mtime);
+        Logger::D(TAG, "onRestoreFile() size=%lld type=%d domain=%s relpath=%s mode=%lld mtime=%lld",size, type, domain.string(), path.string(), mode, mtime);
     }
 
     //Parse out the semantic domains into the correct physical location

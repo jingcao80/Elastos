@@ -786,7 +786,7 @@ ECode CPhoneFactory::GetDataSubscription(
     tm->GetPhoneCount(&phoneCount);
     if (phoneId < 0 || phoneId >= phoneCount) {
         subId = 1;
-        // Rlog::I(LOGTAG, "Subscription is invalid...%ld Set to 0", subId);
+        // Rlog::I(LOGTAG, "Subscription is invalid...%lld Set to 0", subId);
         SetDataSubscription(subId);
     }
 
@@ -862,7 +862,7 @@ ECode CPhoneFactory::SetDataSubscription(
                 ISettingsGlobal::MULTI_SIM_DATA_CALL_SUBSCRIPTION,
                 subId,
                 &bRes);
-    // Rlog::D(LOGTAG, "setDataSubscription: %ld", subId);
+    // Rlog::D(LOGTAG, "setDataSubscription: %lld", subId);
 
     // Update the current mobile data flag
     StringBuilder sb(ISettingsGlobal::MOBILE_DATA); sb += subId;

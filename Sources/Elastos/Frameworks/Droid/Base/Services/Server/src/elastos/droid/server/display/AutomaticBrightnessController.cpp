@@ -529,7 +529,7 @@ Float AutomaticBrightnessController::CalculateAmbientLux(
         Float weight = CalculateWeight(startTime, endTime);
         Float lux = mAmbientLightRingBuffer->GetLux(i);
         if (DEBUG) {
-            Slogger::D(TAG, "CalculateAmbientLux: [%ld, %ld]: lux=%f, weight=%f",
+            Slogger::D(TAG, "CalculateAmbientLux: [%lld, %lld]: lux=%f, weight=%f",
                 startTime, endTime, lux, weight);
         }
         totalWeight += weight;
@@ -601,7 +601,7 @@ void AutomaticBrightnessController::UpdateAmbientLux(
             mLightSensorWarmUpTimeConfig + mLightSensorEnableTime;
         if (time < timeWhenSensorWarmedUp) {
             if (DEBUG) {
-                Slogger::D(TAG, "UpdateAmbientLux: Sensor not  ready yet: time=%ld, timeWhenSensorWarmedUp=%ld",
+                Slogger::D(TAG, "UpdateAmbientLux: Sensor not  ready yet: time=%lld, timeWhenSensorWarmedUp=%lld",
                     time, timeWhenSensorWarmedUp);
             }
             Boolean bval;
@@ -645,7 +645,7 @@ void AutomaticBrightnessController::UpdateAmbientLux(
     nextTransitionTime =
             nextTransitionTime > time ? nextTransitionTime : time + LIGHT_SENSOR_RATE_MILLIS;
     if (DEBUG) {
-        Slogger::D(TAG, "UpdateAmbientLux: Scheduling ambient lux update for %ld %s",
+        Slogger::D(TAG, "UpdateAmbientLux: Scheduling ambient lux update for %lld %s",
             nextTransitionTime, TimeUtils::FormatUptime(nextTransitionTime).string());
     }
     Boolean bval;

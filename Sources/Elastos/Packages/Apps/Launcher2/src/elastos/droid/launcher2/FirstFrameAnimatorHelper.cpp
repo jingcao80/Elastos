@@ -34,7 +34,7 @@ ECode FirstFrameAnimatorHelper::MyOnDrawListener::OnDraw()
         CSystem::AcquireSingleton((ISystem**)&system);
         Int64 newTime;
         system->GetCurrentTimeMillis(&newTime);
-        Slogger::D("FirstFrameAnimatorHelper", "TICK %ld", (newTime - mTime));
+        Slogger::D("FirstFrameAnimatorHelper", "TICK %lld", (newTime - mTime));
         mTime = newTime;
     }
     return NOERROR;

@@ -215,7 +215,7 @@ ECode GpsLocationProvider::MyRunnable2::Run()
         CDate::New(time, (IDate**)&date);
         String dateStr;
         IObject::Probe(date)->ToString(&dateStr);
-        Logger::D(TAG, "NTP server returned: %ld (%s) reference: %ld certainty: %ld system time offset: %ld",
+        Logger::D(TAG, "NTP server returned: %lld (%s) reference: %lld certainty: %lld system time offset: %lld",
             time, dateStr.string(), timeReference, certainty, (time - now));
         mHost->Native_inject_time(time, timeReference, (Int32)certainty);
         delay = NTP_INTERVAL;
@@ -1629,7 +1629,7 @@ void GpsLocationProvider::UpdateRequirements()
 
         // check for overflow
         if (mFixInterval != interval) {
-            Logger::W(TAG, "interval overflow: %ld", interval);
+            Logger::W(TAG, "interval overflow: %lld", interval);
             mFixInterval = Elastos::Core::Math::INT32_MAX_VALUE;
         }
 
@@ -1912,7 +1912,7 @@ void GpsLocationProvider::ReportLocation(
     /* [in] */ Float accuracy,
     /* [in] */ Int64 timestamp)
 {
-    if (VERBOSE) Logger::V(TAG, "reportLocation lat: %lf long: %lf timestamp: %ld", latitude,longitude,timestamp);
+    if (VERBOSE) Logger::V(TAG, "reportLocation lat: %lf long: %lf timestamp: %lld", latitude,longitude,timestamp);
 
     {    AutoLock syncLock(mLocation);
         mLocationFlags = flags;

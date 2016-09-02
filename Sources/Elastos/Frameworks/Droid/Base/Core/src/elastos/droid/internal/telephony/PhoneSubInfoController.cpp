@@ -52,7 +52,7 @@ ECode PhoneSubInfoController::GetDeviceIdForSubscriber(
         return IIPhoneSubInfo::Probe(phoneSubInfoProxy)->GetDeviceId(result);
     }
     else {
-        // Rlog::E(TAG,"getDeviceId phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG,"getDeviceId phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;
@@ -69,7 +69,7 @@ ECode PhoneSubInfoController::GetImeiForSubscriber(
         return phoneSubInfoProxy->GetImei(result);
     }
     else {
-        // Rlog::E(TAG, "getDeviceId phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG, "getDeviceId phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;
@@ -108,7 +108,7 @@ ECode PhoneSubInfoController::GetSubscriberIdForSubscriber(
         return IIPhoneSubInfo::Probe(phoneSubInfoProxy)->GetSubscriberId(result);
     }
     else {
-        // Rlog::E(TAG,"getSubscriberId phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG,"getSubscriberId phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;
@@ -132,7 +132,7 @@ ECode PhoneSubInfoController::GetIccSerialNumberForSubscriber(
         return IIPhoneSubInfo::Probe(phoneSubInfoProxy)->GetIccSerialNumber(result);
     }
     else {
-        // Rlog::E(TAG,"getIccSerialNumber phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG,"getIccSerialNumber phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;
@@ -156,7 +156,7 @@ ECode PhoneSubInfoController::GetLine1NumberForSubscriber(
         return IIPhoneSubInfo::Probe(phoneSubInfoProxy)->GetLine1Number(result);
     }
     else {
-        // Rlog::E(TAG,"getLine1Number phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG,"getLine1Number phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;
@@ -180,7 +180,7 @@ ECode PhoneSubInfoController::GetLine1AlphaTagForSubscriber(
         return IIPhoneSubInfo::Probe(phoneSubInfoProxy)->GetLine1AlphaTag(result);
     }
     else {
-        // Rlog::E(TAG,"getLine1AlphaTag phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG,"getLine1AlphaTag phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;
@@ -204,7 +204,7 @@ ECode PhoneSubInfoController::GetMsisdnForSubscriber(
         return IIPhoneSubInfo::Probe(phoneSubInfoProxy)->GetMsisdn(result);
     }
     else {
-        // Rlog::E(TAG,"getMsisdn phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG,"getMsisdn phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;
@@ -228,7 +228,7 @@ ECode PhoneSubInfoController::GetVoiceMailNumberForSubscriber(
         return IIPhoneSubInfo::Probe(phoneSubInfoProxy)->GetVoiceMailNumber(result);
     }
     else {
-        // Rlog::E(TAG,"getVoiceMailNumber phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG,"getVoiceMailNumber phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;
@@ -428,7 +428,7 @@ ECode PhoneSubInfoController::GetGroupIdLevel1ForSubscriber(
         return phoneSubInfoProxy->GetGroupIdLevel1(result);
     }
     else {
-        // Rlog::E(TAG,"getGroupIdLevel1 phoneSubInfoProxy is NULL for Subscription:%ld",
+        // Rlog::E(TAG,"getGroupIdLevel1 phoneSubInfoProxy is NULL for Subscription:%lld",
         //         subId);
         *result = String(NULL);
         return NOERROR;

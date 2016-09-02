@@ -244,7 +244,7 @@ void WifiTrafficPoller::NotifyOnDataActivity()
     trafficStats->GetRxPackets(mInterface, &mRxPkts);
 
     if (VDBG) {
-        Logger::E(TAG, " packet count Tx=%ld, Rx=%ld", mTxPkts, mRxPkts);
+        Logger::E(TAG, " packet count Tx=%lld, Rx=%lld", mTxPkts, mRxPkts);
     }
 
     if (preTxPkts > 0 || preRxPkts > 0) {

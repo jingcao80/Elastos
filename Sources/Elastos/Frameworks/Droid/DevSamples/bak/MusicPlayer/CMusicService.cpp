@@ -415,7 +415,7 @@ ECode CMusicService::OnDestroy()
     editor->PutInt64(String(KEY_AUDIO_ID), mAudioId);
     Boolean result;
     editor->Commit(&result);
-    Logger::D("CMusicService", "OnDestroy() SaveAudioId:id=%ld, result=%d", mAudioId, result);
+    Logger::D("CMusicService", "OnDestroy() SaveAudioId:id=%lld, result=%d", mAudioId, result);
 
 #endif
 

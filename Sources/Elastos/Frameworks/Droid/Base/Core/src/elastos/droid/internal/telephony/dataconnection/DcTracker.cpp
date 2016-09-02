@@ -186,7 +186,7 @@ ECode DcTracker::SubBroadcastReceiverDefaultDds::OnReceive(
     Int64 i64;
     intent->GetInt64Extra(IPhoneConstants::SUBSCRIPTION_KEY,
             ISubscriptionManager::INVALID_SUB_ID, &i64);
-    mHost->Log("got ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, new DDS = %ld", i64);
+    mHost->Log("got ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, new DDS = %lld", i64);
     mHost->UpdateSubIdAndCapability();
     Int64 defaultDataSubId = 0;
     IISub::Probe(SubscriptionController::GetInstance())->GetDefaultDataSubId(&defaultDataSubId);
@@ -209,7 +209,7 @@ ECode DcTracker::SubBroadcastReceiverSubInfo::OnReceive(
     /* [in] */ IIntent* intent)
 {
     mHost->mPhone->GetSubId(&mHost->mSubId);
-    mHost->Log("got ACTION_SUBINFO_RECORD_UPDATED, mySubId = %ld", mHost->mSubId);
+    mHost->Log("got ACTION_SUBINFO_RECORD_UPDATED, mySubId = %lld", mHost->mSubId);
     mHost->UpdateSubIdAndCapability();
     return NOERROR;
 }
@@ -297,7 +297,7 @@ ECode DcTracker::TelephonyNetworkFactory::RegisterOnDemandDdsCallback()
 ECode DcTracker::TelephonyNetworkFactory::UpdateNetworkCapability(
     /* [in] */ Int64 subId)
 {
-    Log("update networkCapabilites for subId = %ld", subId);
+    Log("update networkCapabilites for subId = %lld", subId);
     mNetworkCapabilities->SetNetworkSpecifier(String("") + StringUtils::ToString(subId));
     Int64 defaultDataSubId = 0;
     AutoPtr<ISubscriptionController> sc = SubscriptionController::GetInstance();
@@ -305,12 +305,12 @@ ECode DcTracker::TelephonyNetworkFactory::UpdateNetworkCapability(
     Int32 ss = 0;
     if ((subId > 0 && (IISub::Probe(sc)->GetSubState(subId, &ss), ss) == ISubscriptionManager::ACTIVE) &&
             (subId == defaultDataSubId)) {
-        Log("INTERNET capability is with subId = %ld", subId);
+        Log("INTERNET capability is with subId = %lld", subId);
         //Only defaultDataSub provides INTERNET.
         mNetworkCapabilities->AddCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
     }
     else {
-        Log("INTERNET capability is removed from subId = %ld", subId);
+        Log("INTERNET capability is removed from subId = %lld", subId);
         mNetworkCapabilities->RemoveCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
     }
     SetScoreFilter(50);
@@ -333,9 +333,9 @@ ECode DcTracker::TelephonyNetworkFactory::NeedNetworkFor(
     mPhone->GetSubId(&subId);
     Int64 requestedSpecifier;
     subController->GetSubIdFromNetworkRequest(networkRequest, &requestedSpecifier);
-    Log("CurrentDds = %ld", currentDds);
-    Log("mySubId = %ld", subId);
-    Log("Requested networkSpecifier = %ld", requestedSpecifier);
+    Log("CurrentDds = %lld", currentDds);
+    Log("mySubId = %lld", subId);
+    Log("Requested networkSpecifier = %lld", requestedSpecifier);
     String networkSpecifier;
     mNetworkCapabilities->GetNetworkSpecifier(&networkSpecifier);
     Log("my networkSpecifier = %s", networkSpecifier.string());
@@ -352,7 +352,7 @@ ECode DcTracker::TelephonyNetworkFactory::NeedNetworkFor(
     }
     if (currentDds != requestedSpecifier) {
         Log("This request would result in DDS switch");
-        Log("Requested DDS switch to subId = %ld", requestedSpecifier);
+        Log("Requested DDS switch to subId = %lld", requestedSpecifier);
         //Queue this request and initiate temp DDS switch.
         //Once the DDS switch is done we will revist the pending requests.
         mDdsRequests->Put(((NetworkRequest*)networkRequest)->mRequestId, networkRequest);
@@ -363,7 +363,7 @@ ECode DcTracker::TelephonyNetworkFactory::NeedNetworkFor(
         Boolean isNetworkRequestForInternet;
         IsNetworkRequestForInternet(networkRequest, &isNetworkRequestForInternet);
         if (isNetworkRequestForInternet) {
-            Log("Activating internet request on subId = %ld", subId);
+            Log("Activating internet request on subId = %lld", subId);
             AutoPtr<IApnContext> apnContext;
             mHost->ApnContextForNetworkRequest(networkRequest, (IApnContext**)&apnContext);
             if (apnContext != NULL) {
@@ -517,7 +517,7 @@ ECode DcTracker::TelephonyNetworkFactory::Log(
     Int64 subId;
     mPhone->GetSubId(&subId);
     String tag;
-    tag.AppendFormat("TelephonyNetworkFactory %ld", subId);
+    tag.AppendFormat("TelephonyNetworkFactory %lld", subId);
     return Logger::D(tag, msgBuf);
 }
 
@@ -5054,7 +5054,7 @@ ECode DcTracker::Update()
 {
     Int64 subId;
     mPhone->GetSubId(&subId);
-    Log("update sub = %ld", subId);
+    Log("update sub = %lld", subId);
     Log("update(): Active DDS, register for all events now!");
     RegisterForAllEvents();
     Boolean b;

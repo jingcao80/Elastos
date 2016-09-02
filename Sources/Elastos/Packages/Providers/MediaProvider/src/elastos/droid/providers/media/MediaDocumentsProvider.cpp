@@ -1517,7 +1517,7 @@ Int32 MediaDocumentsProvider::QueryOrientationForImage(
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
             return vol;
         } else {
-            Logger::W(TAG, "Missing orientation data for %ld", id);
+            Logger::W(TAG, "Missing orientation data for %lld", id);
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
             return 0;
         }

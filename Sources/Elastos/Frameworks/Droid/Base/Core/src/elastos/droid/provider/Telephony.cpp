@@ -473,7 +473,7 @@ ECode Telephony::Sms::Intents::GetMessagesFromIntent(
     Int64 subId;
     intent->GetInt64Extra(IPhoneConstants::SUBSCRIPTION_KEY, defaultSubId, &subId);
 
-    Logger::V(TAG, " getMessagesFromIntent sub_id : %ld", subId);
+    Logger::V(TAG, " getMessagesFromIntent sub_id : %lld", subId);
 
     Int32 pos = 0;
     Int32 pduCount = (*arrayBytes)[pos++];

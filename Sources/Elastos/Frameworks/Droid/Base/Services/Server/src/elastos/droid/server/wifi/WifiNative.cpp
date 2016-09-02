@@ -158,7 +158,7 @@ WifiNative::MonitorThread::MonitorThread(
 
 ECode WifiNative::MonitorThread::Run()
 {
-    Logger::I(TAG, "Waiting for HAL events mWifiHalHandle=%ld", sWifiHalHandle);
+    Logger::I(TAG, "Waiting for HAL events mWifiHalHandle=%lld", sWifiHalHandle);
     WifiNative::WaitForHalEventNative();
     return NOERROR;
 }

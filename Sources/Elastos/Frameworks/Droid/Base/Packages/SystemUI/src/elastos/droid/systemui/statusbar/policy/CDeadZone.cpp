@@ -159,14 +159,14 @@ ECode CDeadZone::OnTouchEvent(
         event->GetX(&x);
         event->GetY(&y);
         if (DEBUG) {
-            Slogger::V(TAG, "%p ACTION_DOWN: %ld,%ld", this, x, y);
+            Slogger::V(TAG, "%p ACTION_DOWN: %lld,%lld", this, x, y);
         }
         Int64 time;
         IInputEvent::Probe(event)->GetEventTime(&time);
         Int32 size = (Int32) GetSize(time);
         if ((mVertical && x < size) || y < size) {
             if (CHATTY) {
-                Slogger::V(TAG, "consuming errant click: (%ld,%ld)", x, y);
+                Slogger::V(TAG, "consuming errant click: (%lld,%lld)", x, y);
             }
             if (mShouldFlash) {
                 Boolean tmp = FALSE;
@@ -186,7 +186,7 @@ ECode CDeadZone::Poke(
 {
     IInputEvent::Probe(event)->GetEventTime(&mLastPokeTime);
     if (DEBUG) {
-       Slogger::V(TAG, "poked! size=%ld", GetSize(mLastPokeTime));
+       Slogger::V(TAG, "poked! size=%lld", GetSize(mLastPokeTime));
     }
     if (mShouldFlash) {
         PostInvalidate();

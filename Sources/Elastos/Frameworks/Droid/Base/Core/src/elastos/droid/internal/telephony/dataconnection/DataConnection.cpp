@@ -1110,7 +1110,7 @@ ECode DataConnection::DcActiveState::ProcessMessage(
             mHost->mRetryManager->GetRetryTimer(&delayMillis);
             if (DBG) {
                 mHost->Log("DcActiveState EVENT_LOST_CONNECTION startRetryAlarm"
-                        " mTag=%d delay=%ldms", mHost->mTag, delayMillis);
+                        " mTag=%d delay=%lldms", mHost->mTag, delayMillis);
             }
             mHost->mDcRetryAlarmController->StartRetryAlarm(EVENT_RETRY_CONNECTION, mHost->mTag,
                     delayMillis);
@@ -1991,7 +1991,7 @@ ECode DataConnection::NotifyConnectCompleted(
         if (DBG) {
             String msg;
             MsgToString(connectionCompletedMsg, &msg);
-            Log("notifyConnectCompleted at %ld cause=%s connectionCompletedMsg=%s",
+            Log("notifyConnectCompleted at %lld cause=%s connectionCompletedMsg=%s",
                     timeStamp, TO_CSTR(cause), msg.string());
         }
         connectionCompletedMsg->SendToTarget();
@@ -2621,7 +2621,7 @@ ECode DataConnection::ToStringSimple(
     GetCurrentState()->GetName(&stateName);
     String rev;
     rev.AppendFormat("%s: State=%s mApnSetting=%s RefCount=%d mCid=%d"
-            " mCreateTime=%ld mLastastFailTime=%ld mLastFailCause=%s"
+            " mCreateTime=%lld mLastastFailTime=%lld mLastFailCause=%s"
             " mTag=%d mRetryManager=%s mLinkProperties=%s linkCapabilities=",
             name.string(), stateName.string(), TO_CSTR(mApnSetting), size,
             mCid, mCreateTime, mLastFailTime, TO_CSTR(mLastFailCause), mTag, TO_CSTR(mRetryManager),

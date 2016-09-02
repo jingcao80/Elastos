@@ -35,7 +35,7 @@ ECode FirstFrameAnimatorHelper::MyViewTreeObserverOnDrawListener::OnDraw()
         CSystem::AcquireSingleton((ISystem**)&sys);
         Int64 newTime;
         sys->GetCurrentTimeMillis(&newTime);
-        Logger::D("FirstFrameAnimatorHelper", "TICK %ld", (newTime - mTime));
+        Logger::D("FirstFrameAnimatorHelper", "TICK %lld", (newTime - mTime));
         mTime = newTime;
     }
     return NOERROR;
@@ -186,7 +186,7 @@ ECode FirstFrameAnimatorHelper::Print(
     mTarget->IsDirty(&isDirty);
 
     // Logger::D(
-    //     "FirstFrameAnimatorHelper%ld(%ld)%s dirty? %s %f %s %s",
+    //     "FirstFrameAnimatorHelper%lld(%lld)%s dirty? %s %f %s %s",
     //     sGlobalFrameCounter, sGlobalFrameCounter - mStartFrame,
     //     TO_CSTR(mTarget), (isDirty ? "TRUE" : "FALSE"), flatFraction,
     //     TO_CSTR(this), TO_CSTR(animation));

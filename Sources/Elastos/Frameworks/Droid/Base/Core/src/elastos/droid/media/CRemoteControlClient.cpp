@@ -578,11 +578,11 @@ void CRemoteControlClient::OnPositionDriftCheck()
             if (Elastos::Core::Math::Abs(estPos - actPos) > POSITION_DRIFT_MAX_MS) {
                 // drift happened, report the new position
                 if (DEBUG) {
-                    Slogger::W(TAG, " drift detected: actual=%ld  est=%ld", actPos, estPos);
+                    Slogger::W(TAG, " drift detected: actual=%lld  est=%lld", actPos, estPos);
                 }
                 SetPlaybackState(mPlaybackState, actPos, mPlaybackSpeed);
             } else {
-                if (DEBUG) { Slogger::D(TAG, " no drift: actual=%ld  est=%ld", actPos, estPos);
+                if (DEBUG) { Slogger::D(TAG, " no drift: actual=%lld  est=%lld", actPos, estPos);
                 }
                 // no drift, schedule the next drift check
                 AutoPtr<IMessage> message;

@@ -2805,7 +2805,7 @@ Boolean AlarmManagerService::RemoveWithStatusLocked(
                 Int64 alarmSeconds = 0, alarmNanoseconds = 0;
                 alarmSeconds = alarm->mWhen / 1000;
                 alarmNanoseconds = (alarm->mWhen % 1000) * 1000 * 1000;
-                Slogger::W(TAG,"Clear alarm type=%d,alarmSeconds=%ld", alarm->mType,
+                Slogger::W(TAG,"Clear alarm type=%d,alarmSeconds=%lld", alarm->mType,
                     alarmSeconds);
                 Native_Clear(mNativeData, alarm->mType, alarmSeconds, alarmNanoseconds);
                 mNextRtcWakeup = 0;
@@ -3550,7 +3550,7 @@ Int32 AlarmManagerService::Native_SetKernelTime(
     ret = impl->setTime(&tv);
 
     if(ret < 0) {
-        ALOGW("Unable to set rtc to %ld: %s\n", tv.tv_sec, strerror(errno));
+        ALOGW("Unable to set rtc to %lld: %s\n", tv.tv_sec, strerror(errno));
         ret = -1;
     }
     return ret;

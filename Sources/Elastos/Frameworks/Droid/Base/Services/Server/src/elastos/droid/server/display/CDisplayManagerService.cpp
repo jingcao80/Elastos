@@ -894,7 +894,7 @@ ECode CDisplayManagerService::OnBootPhase(
                     return E_RUNTIME_EXCEPTION;
                 }
                 if (DEBUG) {
-                    // Slogger::D(TAG, "waitForDefaultDisplay: waiting, timeout=%ld", delay);
+                    // Slogger::D(TAG, "waitForDefaultDisplay: waiting, timeout=%lld", delay);
                 }
                 // try {
                     mSyncRoot->Wait(delay);

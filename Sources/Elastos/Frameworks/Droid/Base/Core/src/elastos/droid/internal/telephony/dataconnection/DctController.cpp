@@ -144,7 +144,7 @@ ECode DctController::SubIDataStateChangedCallback::OnDataStateChanged(
     /* [in] */ const String& apnType,
     /* [in] */ Boolean unavailable)
 {
-    mHost->Logd("[DataStateChanged]:state=%s,reason=%s,apnName=%s,apnType=%s,from subId=%ld",
+    mHost->Logd("[DataStateChanged]:state=%s,reason=%s,apnName=%s,apnType=%s,from subId=%lld",
             state.string(), reason.string(), apnName.string(), apnType.string(), subId);
     Int32 phoneId;
     SubscriptionManager::GetPhoneId(subId, &phoneId);
@@ -184,7 +184,7 @@ ECode DctController::DataStateReceiver::OnReceive(
         SubscriptionManager::IsValidSubId(subId, &isValidSubId);
         if (!isValidSubId || (subId < 0) || !isActiveSubId) {
             // FIXME: Maybe add SM.IsRealSubId(subId)??
-            mHost->Logd("DataStateReceiver: ignore invalid subId=%ld phoneId = %d",
+            mHost->Logd("DataStateReceiver: ignore invalid subId=%lld phoneId = %d",
                     subId, phoneId);
             return NOERROR;
         }
@@ -974,7 +974,7 @@ ECode DctController::DoPsDetach()
         Logger::D(LOG__TAG, "PS DETACH on DDS sub is not allowed.");
         return NOERROR;
     }
-    Logger::D(LOG__TAG, "doPsDetach for sub:%ld", currentDds);
+    Logger::D(LOG__TAG, "doPsDetach for sub:%lld", currentDds);
     Int32 phoneId;
     IISub::Probe(mSubController)->GetPhoneId(currentDds, &phoneId);
     AutoPtr<IPhone> phone;
@@ -1130,7 +1130,7 @@ ECode DctController::HandleMessage(
             CInteger32::New(s->mPhoneId, (IInteger32**)&phoneId);
             AutoPtr<ArrayOf<Int64> > subId;
             IISub::Probe(mSubController)->GetSubId(s->mPhoneId, (ArrayOf<Int64>**)&subId);
-            Logger::D(LOG__TAG, "EVENT_SET_DATA_ALLOWED_DONE  phoneId :%ld, switchInfo = %s",
+            Logger::D(LOG__TAG, "EVENT_SET_DATA_ALLOWED_DONE  phoneId :%lld, switchInfo = %s",
                     (*subId)[0], TO_CSTR(s));
             if (((AsyncResult*) ar.Get())->mException != NULL) {
                 Logger::D(LOG__TAG, "Failed, switchInfo = %s attempt delayed retry", TO_CSTR(s));
@@ -1178,7 +1178,7 @@ ECode DctController::HandleMessage(
             CInteger32::New(s->mPhoneId, (IInteger32**)&phoneId);
             AutoPtr<ArrayOf<Int64> > subId;
             IISub::Probe(mSubController)->GetSubId(s->mPhoneId, (ArrayOf<Int64>**)&subId);
-            Logger::D(LOG__TAG, "EVENT_SET_DATA_FALSE  phoneId :%ld, switchInfo = %s",
+            Logger::D(LOG__TAG, "EVENT_SET_DATA_FALSE  phoneId :%lld, switchInfo = %s",
                     (*subId)[0], TO_CSTR(s));
             if (((AsyncResult*) ar.Get())->mException != NULL) {
                 Logger::D(LOG__TAG, "Failed, switchInfo = %s attempt delayed retry", TO_CSTR(s));

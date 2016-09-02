@@ -423,7 +423,7 @@ void CServiceRecord::Dump(
     }
     pw->Print(prefix);
     pw->Print(String("mApp="));
-    pw->Println(mApp->ToString());
+    pw->Println(TO_STR(mApp));
     if (mIsolatedProc != NULL) {
         pw->Print(prefix);
         pw->Print(String("mIsolatedProc="));

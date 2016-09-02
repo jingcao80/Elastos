@@ -116,7 +116,7 @@ GestureRecorder::Gesture::TagRecord::TagRecord(
 String GestureRecorder::Gesture::TagRecord::ToJson()
 {
     String str;
-    str.AppendFormat("{\"type\":\"tag\", \"time\":%ld, \"tag\":\"%s\", \"info\":\"%s\"}",
+    str.AppendFormat("{\"type\":\"tag\", \"time\":%lld, \"tag\":\"%s\", \"info\":\"%s\"}",
             mTime,
             mTag.string(),
             mInfo.string()
@@ -198,7 +198,7 @@ String GestureRecorder::Gesture::ToJson()
 ////////////////////////////////////////////////////////////////////
 //        class GestureRecorder
 ////////////////////////////////////////////////////////////////////
-const Boolean GestureRecorder::DEBUG = FALSE; 
+const Boolean GestureRecorder::DEBUG = FALSE;
 const String GestureRecorder::TAG("GestureRecorder"); //GestureRecorder.class.getSimpleName()
 const Int64 GestureRecorder::SAVE_DELAY = 5000; // ms
 const Int32 GestureRecorder::SAVE_MESSAGE = 6351;

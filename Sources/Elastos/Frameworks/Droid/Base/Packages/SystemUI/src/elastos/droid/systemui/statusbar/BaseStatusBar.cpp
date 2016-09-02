@@ -2750,12 +2750,12 @@ ECode BaseStatusBar::UpdateNotification(
         oldEntry->GetRow((IExpandableNotificationRow**)&row);
         AutoPtr<IViewParent> parent;
         IView::Probe(row)->GetParent((IViewParent**)&parent);
-        Logger::D(TAG, "old notification: when=%ld ongoing=%d expanded=%p contentView=%p bigContentView=%p publicView=%p rowParent=%p"
+        Logger::D(TAG, "old notification: when=%lld ongoing=%d expanded=%p contentView=%p bigContentView=%p publicView=%p rowParent=%p"
                 , when, going, expanded.Get(), oldContentView.Get(), oldBigContentView.Get(),
                 oldPublicContentView.Get(), parent.Get());
 
         n->GetWhen(&when);
-        Logger::D(TAG, "new notification: when=%ld ongoing=%d contentView=%p bigContentView=%p publicView=%p",
+        Logger::D(TAG, "new notification: when=%lld ongoing=%d contentView=%p bigContentView=%p publicView=%p",
                 when, going, contentView.Get(), bigContentView.Get(), publicContentView.Get());
     }
 

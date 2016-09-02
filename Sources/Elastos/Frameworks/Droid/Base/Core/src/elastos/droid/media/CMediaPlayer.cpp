@@ -511,7 +511,7 @@ ECode CMediaPlayer::TimeProvider::NotifyAt(
     /* [in] */ IMediaTimeProviderOnMediaTimeListener* listener)
 {
     {    AutoLock syncLock(this);
-        if (DEBUG) Logger::D(TAG, "notifyAt %ld", timeUs);
+        if (DEBUG) Logger::D(TAG, "notifyAt %lld", timeUs);
         mTimes->Set(RegisterListener(listener), timeUs);
         ScheduleNotification(NOTIFY_TIME, 0 /* delay */);
     }
@@ -633,7 +633,7 @@ void CMediaPlayer::TimeProvider::ScheduleNotification(
         return;
     }
 
-    if (DEBUG) Logger::V(TAG, "scheduleNotification %d in %ld", type, delayUs);
+    if (DEBUG) Logger::V(TAG, "scheduleNotification %d in %lld", type, delayUs);
     mEventHandler->RemoveMessages(NOTIFY);
     AutoPtr<IMessage> msg;
     mEventHandler->ObtainMessage(NOTIFY, type, 0, (IMessage**)&msg);
@@ -648,7 +648,7 @@ void CMediaPlayer::TimeProvider::NotifySeek()
     // try {
     Int64 timeUs;
     GetCurrentTimeUs(TRUE, FALSE, &timeUs);
-    if (DEBUG) Logger::D(TAG, "onSeekComplete at %ld", timeUs);
+    if (DEBUG) Logger::D(TAG, "onSeekComplete at %lld", timeUs);
 
     for (Int32 i = 0; i < mListeners->GetLength(); i++) {
         AutoPtr<IMediaTimeProviderOnMediaTimeListener> listener = (*mListeners)[i];
@@ -775,7 +775,7 @@ void CMediaPlayer::TimeProvider::NotifyTimedEvent(
 
     if (nextTimeUs > nowUs && !mPaused) {
         // schedule callback at nextTimeUs
-        if (DEBUG) Logger::D(TAG, "scheduling for %ld and %ld", nextTimeUs, nowUs);
+        if (DEBUG) Logger::D(TAG, "scheduling for %lld and %lld", nextTimeUs, nowUs);
         ScheduleNotification(NOTIFY_TIME, nextTimeUs - nowUs);
     }
     else {

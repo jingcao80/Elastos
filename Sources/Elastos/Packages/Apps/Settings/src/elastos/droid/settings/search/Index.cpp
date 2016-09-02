@@ -336,7 +336,7 @@ Boolean Index::UpdateIndexTask::ProcessDataToUpdate(
 
     Int64 now;
     sys->GetCurrentTimeMillis(&now);
-    Logger::D(Index::TAG, "Indexing locale '%s' took %ld millis", localeStr.string(), now - current);
+    Logger::D(Index::TAG, "Indexing locale '%s' took %lld millis", localeStr.string(), now - current);
     return result;
 }
 

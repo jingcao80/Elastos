@@ -1157,7 +1157,7 @@ Int32 CAudioRecord::Native_read_in_direct_buffer(
         ALOGE("Buffer direct access is not supported, can't record");
         return 0;
     }
-    //LOGV("capacity = %ld", capacity);
+    //LOGV("capacity = %lld", capacity);
     // jbyte* nativeFromJavaBuf = (jbyte*) env->GetDirectBufferAddress(buffer);
     void* nativeFromJavaBuf = bytes->GetPayload();
     if(nativeFromJavaBuf == NULL) {

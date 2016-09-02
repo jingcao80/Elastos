@@ -438,7 +438,7 @@ ECode ComprehensiveCountryDetector::ScheduleLocationRefresh()
     {    AutoLock syncLock(this);
         if (mLocationRefreshTimer != NULL) return E_NULL_POINTER_EXCEPTION;
         if (DEBUG) {
-            Slogger::D(TAG, "start periodic location refresh timer. Interval: %ld", LOCATION_REFRESH_INTERVAL);
+            Slogger::D(TAG, "start periodic location refresh timer. Interval: %lld", LOCATION_REFRESH_INTERVAL);
         }
         CTimer::New((ITimer**)&mLocationRefreshTimer);
         AutoPtr<MyTimeTask> tt = new MyTimeTask(this);

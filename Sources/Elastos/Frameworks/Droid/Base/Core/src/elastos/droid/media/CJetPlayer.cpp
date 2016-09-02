@@ -559,7 +559,7 @@ ECode CJetPlayer::NativePlayJet(
         //LOGV("android_media_JetPlayer_play(): play successful");
         *result = TRUE;
     } else {
-        Logger::E(TAG, "android_media_JetPlayer_play(): failed to play with EAS error code %ld",
+        Logger::E(TAG, "android_media_JetPlayer_play(): failed to play with EAS error code %lld",
             status);
     }
     return NOERROR;
@@ -587,7 +587,7 @@ ECode CJetPlayer::NativePauseJet(
             // LOGV("android_media_JetPlayer_pause(): paused with an empty queue");
             *result = TRUE;
         } else {
-            Logger::E(TAG, "android_media_JetPlayer_pause(): failed to pause with EAS error code %ld",
+            Logger::E(TAG, "android_media_JetPlayer_pause(): failed to pause with EAS error code %lld",
                 status);
         }
     }
@@ -618,7 +618,7 @@ ECode CJetPlayer::NativeQueueJetSegment(
         //LOGV("android_media_JetPlayer_queueSegment(): segment successfully queued");
         *result = TRUE;
     } else {
-        Logger::E(TAG, "android_media_JetPlayer_queueSegment(): failed with EAS error code %ld",
+        Logger::E(TAG, "android_media_JetPlayer_queueSegment(): failed with EAS error code %lld",
             status);
     }
     return NOERROR;
@@ -667,7 +667,7 @@ ECode CJetPlayer::NativeQueueJetSegmentMuteArray(
         *result = TRUE;
     }
     else {
-        Logger::E(TAG, "android_media_JetPlayer_queueSegmentMuteArray(): failed with EAS error code %ld",
+        Logger::E(TAG, "android_media_JetPlayer_queueSegmentMuteArray(): failed with EAS error code %lld",
             status);
     }
 
@@ -693,7 +693,7 @@ ECode CJetPlayer::NativeSetMuteFlags(
         //LOGV("android_media_JetPlayer_setMuteFlags(): mute flags successfully updated");
         *result = TRUE;
     } else {
-        Logger::E(TAG, "android_media_JetPlayer_setMuteFlags(): failed with EAS error code %ld", status);
+        Logger::E(TAG, "android_media_JetPlayer_setMuteFlags(): failed with EAS error code %lld", status);
     }
     return NOERROR;
 }
@@ -736,7 +736,7 @@ ECode CJetPlayer::NativeSetMuteArray(
         *result = TRUE;
     } else {
         Logger::E(TAG, "android_media_JetPlayer_setMuteArray(): \
-            failed to update mute flags with EAS error code %ld", status);
+            failed to update mute flags with EAS error code %lld", status);
     }
     return NOERROR;
 }
@@ -761,7 +761,7 @@ ECode CJetPlayer::NativeSetMuteFlag(
         //LOGV("android_media_JetPlayer_setMuteFlag(): mute flag successfully updated for track %d", trackId);
         *result = TRUE;
     } else {
-        Logger::E(TAG, "android_media_JetPlayer_setMuteFlag(): failed to update mute flag for track %d with EAS error code %ld",
+        Logger::E(TAG, "android_media_JetPlayer_setMuteFlag(): failed to update mute flag for track %d with EAS error code %lld",
             trackId, status);
     }
     return NOERROR;
@@ -785,7 +785,7 @@ ECode CJetPlayer::NativeTriggerClip(
         //LOGV("android_media_JetPlayer_triggerClip(): triggerClip successful for clip %d", clipId);
         *result = TRUE;
     } else {
-        Logger::E(TAG, "android_media_JetPlayer_triggerClip(): triggerClip for clip %d failed with EAS error code %ld",
+        Logger::E(TAG, "android_media_JetPlayer_triggerClip(): triggerClip for clip %d failed with EAS error code %lld",
             clipId, status);
     }
     return NOERROR;
@@ -808,7 +808,7 @@ ECode CJetPlayer::NativeClearQueue(
         //LOGV("android_media_JetPlayer_clearQueue(): clearQueue successful");
         *result = TRUE;
     } else {
-        Logger::E(TAG, "android_media_JetPlayer_clearQueue(): clearQueue failed with EAS error code %ld",
+        Logger::E(TAG, "android_media_JetPlayer_clearQueue(): clearQueue failed with EAS error code %lld",
             status);
     }
     return NOERROR;

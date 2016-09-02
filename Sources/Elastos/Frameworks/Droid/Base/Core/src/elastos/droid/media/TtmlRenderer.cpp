@@ -653,7 +653,7 @@ ECode TtmlTrack::OnData(
     // implement intermixing restriction for TTML.
     {    AutoLock syncLock(mParser);
         if (mCurrentRunID != NULL && runID != mCurrentRunID) {
-            Slogger::E("TtmlTrack", "Run #%ld in progress.  Cannot process run #%d", mCurrentRunID, runID);
+            Slogger::E("TtmlTrack", "Run #%lld in progress.  Cannot process run #%d", mCurrentRunID, runID);
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         mCurrentRunID = runID;
@@ -713,7 +713,7 @@ ECode TtmlTrack::UpdateView(
         Int64 vol;
         ECode ec = mTimeProvider->GetCurrentTimeUs(FALSE, TRUE, &vol);
         if (SUCCEEDED(ec)) {
-            Slogger::D(TAG, "at %ld ms the active cues are:", vol/1000);
+            Slogger::D(TAG, "at %lld ms the active cues are:", vol/1000);
         }
 
         if (ec == (ECode)E_ILLEGAL_STATE_EXCEPTION) {
