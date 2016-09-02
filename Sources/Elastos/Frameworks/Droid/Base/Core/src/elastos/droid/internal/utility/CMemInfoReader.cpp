@@ -1,14 +1,14 @@
 
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/internal/utility/CMemInfoReader.h"
-// #include "elastos/droid/os/CDebug.h"
+#include "elastos/droid/os/Debug.h"
 #include "elastos/droid/os/CStrictMode.h"
 #include <elastos/utility/logging/Logger.h>
 
-// using Elastos::Droid::Os::CDebug;
+using Elastos::Droid::Os::Debug;
+using Elastos::Droid::Os::IDebug;
 using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Os::CStrictMode;
-using Elastos::Droid::Os::IDebug;
 using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Os::IStrictModeThreadPolicy;
 using Elastos::Utility::Logging::Logger;
@@ -42,10 +42,9 @@ ECode CMemInfoReader::ReadMemInfo()
     CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
     AutoPtr<IStrictModeThreadPolicy> savedPolicy;
     strictMode->AllowThreadDiskReads((IStrictModeThreadPolicy**)&savedPolicy);
-    // assert(0 && "TODO:CDebug is not implemented");
-    // //ECode ec = CDebug::GetMemInfo(mInfos);
-    // strictMode->SetThreadPolicy(savedPolicy);
-    return NOERROR;//ec;
+    ECode ec = Debug::GetMemInfo(mInfos);
+    strictMode->SetThreadPolicy(savedPolicy);
+    return ec;
 }
 
 ECode CMemInfoReader::GetTotalSize(

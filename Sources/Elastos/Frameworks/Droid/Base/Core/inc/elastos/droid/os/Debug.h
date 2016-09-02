@@ -22,7 +22,7 @@ public:
      * @hide
      */
     static CARAPI GetMemInfo(
-        /* [out] */ ArrayOf<Int64>** outSizes);
+        /* [out] */ ArrayOf<Int64>* outSizes);
 
     /**
      * Retrieves information about this processes memory usages. This information is broken down by

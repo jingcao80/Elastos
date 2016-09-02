@@ -185,7 +185,7 @@ module
         GetNativeHeapFreeSize();
 
         GetMemInfo(
-            [out, callee] ArrayOf<Int64>* outSizes);
+            [out] ArrayOf<Int64> outSizes);
 
         GetMemoryInfo(
             [out] IDebugMemoryInfo** memoryInfo);

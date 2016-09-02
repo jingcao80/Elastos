@@ -1258,8 +1258,8 @@ ECode CActivityManagerService::ReportMemUsageThread::Run()
     ProcessList::AppendRamKb(&logBuilder, totalPss);
     logBuilder.Append(" kB: TOTAL\n");
 
-    AutoPtr<ArrayOf<Int64> > infos;
-    debug->GetMemInfo((ArrayOf<Int64>**)&infos);
+    AutoPtr<ArrayOf<Int64> > infos = ArrayOf<Int64>::Alloc(IDebug::MEMINFO_COUNT);
+    debug->GetMemInfo(infos);
     logBuilder.Append("  MemInfo: ");
     logBuilder.Append((*infos)[IDebug::MEMINFO_SLAB]);
     logBuilder.Append(" kB slab, ");

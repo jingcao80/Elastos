@@ -400,7 +400,7 @@ enum {
 };
 
 ECode Debug::GetMemInfo(
-    /* [out] */ ArrayOf<Int64>** outSizes)
+    /* [out] */ ArrayOf<Int64>* outSizes)
 {
     VALIDATE_NOT_NULL(outSizes)
 
@@ -482,13 +482,10 @@ ECode Debug::GetMemInfo(
         }
     }
 
-    AutoPtr<ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(MEMINFO_COUNT);
-    for (int i=0; i<MEMINFO_COUNT; i++) {
-        (*array)[i] = mem[i];
+    for (int i = 0; i < MEMINFO_COUNT; i++) {
+        (*outSizes)[i] = mem[i];
     }
 
-    *outSizes = array;
-    REFCOUNT_ADD(*outSizes)
     return NOERROR;
 }
 

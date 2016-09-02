@@ -18,7 +18,7 @@ ECode CDebug::DumpHeap(
 }
 
 ECode CDebug::GetMemInfo(
-    /* [out] */ ArrayOf<Int64>** outSizes)
+    /* [out] */ ArrayOf<Int64>* outSizes)
 {
     return Debug::GetMemInfo(outSizes);
 }
