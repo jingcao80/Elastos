@@ -509,7 +509,7 @@ void CRunningServiceDetails::AddServiceDetailsView(
     detail->mServiceItem = si;
     detail->mViewHolder = new CRunningProcessesView::ViewHolder(root);
     // TODO:
-    detail->mActiveItem = detail->mViewHolder->Bind(mState, mMergedItem/*bi*/, mBuilder->ToString());
+    detail->mActiveItem = detail->mViewHolder->Bind(mState, bi, mBuilder->ToString());
 
     if (!inclDetails) {
         AutoPtr<IView> tmp;

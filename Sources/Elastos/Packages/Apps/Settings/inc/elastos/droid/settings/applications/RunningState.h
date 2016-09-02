@@ -187,7 +187,7 @@ protected:
         AutoPtr<IServiceInfo> mServiceInfo;
         Boolean mShownAsStarted;
 
-        AutoPtr<MergedItem> mMergedItem;
+        MergedItem* mMergedItem;
     };
 
     class ProcessItem
@@ -243,7 +243,7 @@ protected:
         Int32 mRunningSeq;
         AutoPtr<IActivityManagerRunningAppProcessInfo> mRunningProcessInfo;
 
-        AutoPtr<MergedItem> mMergedItem;
+        MergedItem* mMergedItem;
 
         Boolean mInteresting;
 

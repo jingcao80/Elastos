@@ -305,6 +305,7 @@ RunningState::ServiceItem::ServiceItem(
     /* [in] */ Int32 userId)
     : BaseItem::BaseItem(FALSE, userId)
     , mShownAsStarted(FALSE)
+    , mMergedItem(NULL)
 {}
 
 
@@ -324,6 +325,7 @@ RunningState::ProcessItem::ProcessItem(
     , mPid(0)
     , mLastNumDependentProcesses(0)
     , mRunningSeq(0)
+    , mMergedItem(NULL)
     , mInteresting(FALSE)
     , mIsSystem(FALSE)
     , mIsStarted(FALSE)
@@ -469,21 +471,21 @@ Boolean RunningState::ProcessItem::UpdateService(
         si = new ServiceItem(mUserId);
         si->mRunningService = service;
         // try {
-            AutoPtr<IActivityThreadHelper> helper;
-            CActivityThreadHelper::AcquireSingleton((IActivityThreadHelper**)&helper);
-            AutoPtr<IIPackageManager> pkgManager;
-            helper->GetPackageManager((IIPackageManager**)&pkgManager);
-            Int32 uid;
-            service->GetUid(&uid);
-            ECode ec = pkgManager->GetServiceInfo(
-                    comService, IPackageManager::GET_UNINSTALLED_PACKAGES,
-                    UserHandle::GetUserId(uid), (IServiceInfo**)&si->mServiceInfo);
-            if (SUCCEEDED(ec)) {
-                if (si->mServiceInfo == NULL) {
-                    Logger::D("RunningService", "getServiceInfo returned NULL for: %s", TO_CSTR(comService));
-                    return FALSE;
-                }
+        AutoPtr<IActivityThreadHelper> helper;
+        CActivityThreadHelper::AcquireSingleton((IActivityThreadHelper**)&helper);
+        AutoPtr<IIPackageManager> pkgManager;
+        helper->GetPackageManager((IIPackageManager**)&pkgManager);
+        Int32 uid;
+        service->GetUid(&uid);
+        ECode ec = pkgManager->GetServiceInfo(
+                comService, IPackageManager::GET_UNINSTALLED_PACKAGES,
+                UserHandle::GetUserId(uid), (IServiceInfo**)&si->mServiceInfo);
+        if (SUCCEEDED(ec)) {
+            if (si->mServiceInfo == NULL) {
+                Logger::D("RunningService", "getServiceInfo returned NULL for: %s", TO_CSTR(comService));
+                return FALSE;
             }
+        }
         // } catch (RemoteException e) {
         // }
         AutoPtr<IComponentName> comName;
@@ -495,7 +497,9 @@ Boolean RunningState::ProcessItem::UpdateService(
         if (mDisplayLabel != NULL) {
             mDisplayLabel->ToString(&mLabel);
         }
-        IComponentInfo::Probe(si->mServiceInfo)->GetApplicationInfo((IApplicationInfo**)&si->mPackageInfo);
+        AutoPtr<IApplicationInfo> appInfo;
+        IComponentInfo::Probe(si->mServiceInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+        si->mPackageInfo = IPackageItemInfo::Probe(appInfo);
         mServices->Put(comService, (IRunningStateServiceItem*)si);
     }
     si->mCurSeq = mCurSeq;
@@ -1250,8 +1254,7 @@ Boolean RunningState::Update(
         si->GetProcess(&process);
         obj = NULL;
         procs->Get(CoreUtils::Convert(process), (IInterface**)&obj);
-        AutoPtr<ProcessItem> proc;
-        if (obj != NULL) proc = (ProcessItem*)IRunningStateProcessItem::Probe(obj);
+        AutoPtr<ProcessItem> proc = (ProcessItem*)IRunningStateProcessItem::Probe(obj);
         if (proc == NULL) {
             changed = TRUE;
             proc = new ProcessItem(context, uid, process);

@@ -3,13 +3,14 @@
 #include "elastos/droid/server/am/AppErrorDialog.h"
 #include "elastos/core/AutoLock.h"
 
+using Elastos::Droid::App::EIID_IAlertDialog;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::R;
 using Elastos::Droid::View::IWindow;
+using Elastos::Droid::R;
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
@@ -26,8 +27,9 @@ Int64 const AppErrorDialog::DISMISS_TIMEOUT = 1000 * 60 * 5;
 AppErrorDialog::MyHandler::MyHandler(
     /* [in] */ AppErrorDialog* host)
     : Handler(FALSE)
-    , mHost(host)
-{}
+{
+    host->GetWeakReference((IWeakReference**)&mHost);
+}
 
 AppErrorDialog::MyHandler::~MyHandler()
 {}
@@ -35,22 +37,28 @@ AppErrorDialog::MyHandler::~MyHandler()
 ECode AppErrorDialog::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
+    AutoPtr<IAlertDialog> dialog;
+    mHost->Resolve(EIID_IAlertDialog, (IInterface**)&dialog);
+    if (dialog == NULL) return NOERROR;
+
+    AppErrorDialog* host = (AppErrorDialog*)dialog.Get();
+
     {
-        AutoLock lock(mHost->mService);
-        if (mHost->mProc != NULL && mHost->mProc->mCrashDialog == mHost) {
-            mHost->mProc->mCrashDialog = NULL;
+        AutoLock lock(host->mService);
+        if (host->mProc != NULL && host->mProc->mCrashDialog == host) {
+            host->mProc->mCrashDialog = NULL;
         }
     }
     Int32 type;
     msg->GetWhat(&type);
-    mHost->mResult->SetResult(type);
+    host->mResult->SetResult(type);
 
     // Make sure we don't have time timeout still hanging around.
     RemoveMessages(FORCE_QUIT);
 
     // If this is a timeout we won't be automatically closed, so go
     // ahead and explicitly dismiss ourselves just in case.
-    mHost->Dismiss();
+    host->Dismiss();
     return NOERROR;
 }
 

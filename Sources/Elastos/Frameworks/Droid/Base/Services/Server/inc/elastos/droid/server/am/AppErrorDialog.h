@@ -34,7 +34,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        AppErrorDialog* mHost;
+        AutoPtr<IWeakReference> mHost;
     };
 
 public:
