@@ -982,6 +982,9 @@ public:
      */
     AutoPtr<IClassLoader> mContextClassLoader;
 
+    /** Looked up reflectively and used by java.util.concurrent.locks.LockSupport. */
+    AutoPtr<IInterface> mParkBlocker;
+
 protected:
     /* some of these are accessed directly by the VM; do not rename them */
     // volatile VMThread vmThread;
@@ -1036,9 +1039,6 @@ private:
 
     /** the park state of the thread */
     Int32 mParkState;
-
-    /** Looked up reflectively and used by java.util.concurrent.locks.LockSupport. */
-    // private Object parkBlocker;
 
     /**
      * The synchronization object responsible for this thread's join/sleep/park operations.

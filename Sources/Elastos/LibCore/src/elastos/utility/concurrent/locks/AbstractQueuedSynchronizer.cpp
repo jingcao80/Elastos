@@ -47,7 +47,7 @@ ECode AbstractQueuedSynchronizer::Node::Predecessor(
 //==========================================================
 //       AbstractQueuedSynchronizer::ConditionObject
 //==========================================================
-const Int64 AbstractQueuedSynchronizer::ConditionObject::sSerialVersionUID = 1173984872572414699L;
+const Int64 AbstractQueuedSynchronizer::ConditionObject::sSerialVersionUID = 1173984872572414699LL;
 
 const Int32 AbstractQueuedSynchronizer::ConditionObject::REINTERRUPT =  1;
 
@@ -93,7 +93,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::AwaitUninterruptibly()
     Int32 savedState = mHost->FullyRelease(node);
     Boolean interrupted = FALSE;
     while (!mHost->IsOnSyncQueue(node)) {
-        LockSupport::Park(TO_IINTERFACE(this));
+        LockSupport::Park((IObject*)this);
         if (Thread::Interrupted()) {
             interrupted = TRUE;
         }
@@ -114,7 +114,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::Await()
     Int32 savedState = mHost->FullyRelease(node);
     Int32 interruptMode = 0;
     while (!mHost->IsOnSyncQueue(node)) {
-        LockSupport::Park(TO_IINTERFACE(this));
+        LockSupport::Park((IObject*)this);
         if ((interruptMode = CheckInterruptWhileWaiting(node)) != 0)
             break;
     }
@@ -151,7 +151,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::AwaitNanos(
             mHost->TransferAfterCancelledWait(node);
             break;
         }
-        LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
+        LockSupport::ParkNanos((IObject*)this, nanosTimeout);
         if ((interruptMode = CheckInterruptWhileWaiting(node)) != 0)
             break;
 
@@ -204,7 +204,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::AwaitUntil(
             timedout = mHost->TransferAfterCancelledWait(node);
             break;
         }
-        LockSupport::ParkUntil(TO_IINTERFACE(this), abstime);
+        LockSupport::ParkUntil((IObject*)this, abstime);
         if ((interruptMode = CheckInterruptWhileWaiting(node)) != 0)
             break;
     }
@@ -251,7 +251,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::Await(
             break;
         }
         if (nanosTimeout >= mHost->sSpinForTimeoutThreshold)
-            LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
+            LockSupport::ParkNanos((IObject*)this, nanosTimeout);
         if ((interruptMode = CheckInterruptWhileWaiting(node)) != 0)
             break;
         Int64 now;
@@ -663,7 +663,8 @@ void AbstractQueuedSynchronizer::SelfInterrupt()
 
 Boolean AbstractQueuedSynchronizer::ParkAndCheckInterrupt()
 {
-    // LockSupport.park(this);
+    // TODO:
+    // LockSupport::Park((IObject*)this);
     return Thread::Interrupted();
 }
 
@@ -953,7 +954,7 @@ Boolean AbstractQueuedSynchronizer::DoAcquireNanos(
         }
         if (ShouldParkAfterFailedAcquire(p, node) &&
             nanosTimeout > sSpinForTimeoutThreshold) {
-            LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
+            LockSupport::ParkNanos((IObject*)this, nanosTimeout);
         }
         Int64 now;
         system->GetNanoTime(&now);
@@ -1419,7 +1420,7 @@ Boolean AbstractQueuedSynchronizer::DoAcquireSharedNanos(
             return FALSE;
         if (ShouldParkAfterFailedAcquire(p, node) &&
             nanosTimeout > sSpinForTimeoutThreshold) {
-            LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
+            LockSupport::ParkNanos((IObject*)this, nanosTimeout);
         }
         Int64 now;
         system->GetNanoTime(&now);

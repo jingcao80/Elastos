@@ -1,6 +1,7 @@
 
 #include "LockSupport.h"
 #include <Thread.h>
+#include <cutils/atomic.h>
 
 using Elastos::Core::Thread;
 
@@ -8,8 +9,6 @@ namespace Elastos {
 namespace Utility {
 namespace Concurrent {
 namespace Locks {
-
-const Int64 LockSupport::mParkBlockerOffset = 0;
 
 ECode LockSupport::Unpark(
     /* [in] */ IThread* thread)
@@ -24,24 +23,24 @@ ECode LockSupport::Park(
     /* [in] */ IInterface* blocker)
 {
     AutoPtr<IThread> t = Thread::GetCurrentThread();
-    // TODO:
-    // setBlocker(t, blocker);
-    return t->ParkFor(0);
-    // setBlocker(t, null);
+    SetBlocker(t, blocker);
+    ECode ec = t->ParkFor(0);
+    SetBlocker(t, NULL);
+    return ec;
 }
 
 ECode LockSupport::ParkNanos(
     /* [in] */ IInterface* blocker,
     /* [in] */ Int64 nanos)
 {
+    ECode ec = NOERROR;
     if (nanos > 0) {
         AutoPtr<IThread> t = Thread::GetCurrentThread();
-        // TODO:
-        // setBlocker(t, blocker);
-        return t->ParkFor(nanos);
-        // setBlocker(t, null);
+        SetBlocker(t, blocker);
+        ec = t->ParkFor(nanos);
+        SetBlocker(t, NULL);
     }
-    return NOERROR;
+    return ec;
 }
 
 ECode LockSupport::ParkUntil(
@@ -50,8 +49,7 @@ ECode LockSupport::ParkUntil(
 {
     AutoPtr<IThread> t = Thread::GetCurrentThread();
     SetBlocker(t, blocker);
-    assert(0 && "TODO");
-    // unsafe.park(true, deadline);
+    t->ParkUntil(deadline);
     SetBlocker(t, NULL);
     return NOERROR;
 }
@@ -63,46 +61,40 @@ AutoPtr<IInterface> LockSupport::GetBlocker(
         // throw new NullPointerException();
         return NULL;
     }
-    assert(0 && "TODO");
-    return NULL;
-    // return unsafe.getObjectVolatile(t, parkBlockerOffset);
+    volatile int32_t* address = (volatile int32_t*) (&((Thread*)t)->mParkBlocker);
+
+    AutoPtr<IInterface> blocker = reinterpret_cast<IInterface*>(android_atomic_acquire_load(address));
+    return blocker;
 }
 
 ECode LockSupport::Park()
 {
-    assert(0 && "TODO");
-    // unsafe.park(false, 0L);
+    Thread::GetCurrentThread()->ParkFor(0);
     return NOERROR;
 }
 
 ECode LockSupport::ParkNanos(
     /* [in] */ Int64 nanos)
 {
-    assert(0 && "TODO");
-    // if (nanos > 0)
-    //     unsafe.park(false, nanos);
+    if (nanos > 0) {
+        Thread::GetCurrentThread()->ParkFor(nanos);
+    }
     return NOERROR;
 }
 
 ECode LockSupport::ParkUntil(
     /* [in] */ Int64 deadline)
 {
-    // unsafe.park(true, deadline);
-    assert(0 && "TODO");
+    Thread::GetCurrentThread()->ParkUntil(deadline);
     return NOERROR;
-}
-
-LockSupport::LockSupport()
-{
 }
 
 ECode LockSupport::SetBlocker(
     /* [in] */ IThread* t,
     /* [in] */ IInterface* arg)
 {
-    // // Even though volatile, hotspot doesn't need a write barrier here.
-    // unsafe.putObject(t, parkBlockerOffset, arg);
-    assert(0 && "TODO");
+    // Even though volatile, hotspot doesn't need a write barrier here.
+    ((Thread*)t)->mParkBlocker = arg;
     return NOERROR;
 }
 

@@ -241,23 +241,11 @@ public:
         /* [in] */ Int64 deadline);
 
 private:
-    LockSupport();
+    LockSupport() {}
 
     static CARAPI SetBlocker(
         /* [in] */ IThread* t,
         /* [in] */ IInterface* arg);
-
-private:
-    // Hotspot implementation via intrinsics API
-    // private static final Unsafe unsafe = Unsafe.getUnsafe();
-    static const Int64 mParkBlockerOffset;
-
-    // static {
-    //     try {
-    //         parkBlockerOffset = unsafe.objectFieldOffset
-    //             (java.lang.Thread.class.getDeclaredField("parkBlocker"));
-    //     } catch (Exception ex) { throw new Error(ex); }
-    // }
 };
 
 } // namespace Locks
