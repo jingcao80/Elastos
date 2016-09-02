@@ -1,4 +1,4 @@
-TARGET_NAME= list
+TARGET_NAME= list1
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../../inc
