@@ -29,6 +29,10 @@ CAR_OBJECT_IMPL(CViewRootImplW)
 
 CAR_INTERFACE_IMPL_2(CViewRootImplW, Object, IIWindow, IBinder)
 
+CViewRootImplW::~CViewRootImplW()
+{
+}
+
 ECode CViewRootImplW::constructor(
     /* [in] */ IViewRootImpl* vri)
 {

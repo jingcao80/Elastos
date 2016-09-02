@@ -48,6 +48,8 @@ public:
     AppWindowAnimator(
         /* [in] */ AppWindowToken* atoken);
 
+    ~AppWindowAnimator();
+
     CARAPI Init();
 
     CARAPI_(void) SetAnimation(
@@ -84,7 +86,7 @@ public:
     static const String TAG;
 
     AutoPtr<IWeakReference> mWeakAppToken; // AppWindowToken has AppWindowAnimator's ref
-    AutoPtr<CWindowManagerService> mService;
+    CWindowManagerService* mService;
     AutoPtr<WindowAnimator> mAnimator;
 
     Boolean mAnimating;

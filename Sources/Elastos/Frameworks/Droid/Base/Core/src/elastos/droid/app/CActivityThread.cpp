@@ -152,7 +152,7 @@ const Boolean CActivityThread::DEBUG_RESULTS = FALSE;
 const Boolean CActivityThread::DEBUG_BACKUP = FALSE;
 const Boolean CActivityThread::DEBUG_CONFIGURATION = FALSE;
 const Boolean CActivityThread::DEBUG_SERVICE = FALSE;
-const Boolean CActivityThread::DEBUG_MEMORY_TRIM = TRUE;
+const Boolean CActivityThread::DEBUG_MEMORY_TRIM = FALSE;
 const Boolean CActivityThread::DEBUG_PROVIDER = FALSE;
 
 const Int64 CActivityThread::MIN_TIME_BETWEEN_GCS;
@@ -3921,8 +3921,6 @@ ECode CActivityThread::HandleSleeping(
         Slogger::W(TAG, "handleSleeping: no activity for token %s", TO_CSTR(token));
         return NOERROR;
     }
-
-    Slogger::I(TAG, " >> HandleSleeping : %s, %d", TO_CSTR(r), sleeping);
 
     if (sleeping) {
         if (!r->mStopped && !r->IsPreHoneycomb()) {

@@ -118,6 +118,20 @@ TaskRecord::TaskRecord()
     system->GetCurrentTimeMillis(&mLastTimeMoved);
 }
 
+TaskRecord::~TaskRecord()
+{
+}
+
+String TaskRecord::GenerateFilename(
+    /* [in] */ Int32 taskId)
+{
+    StringBuilder sb(64);
+    sb += taskId;
+    sb += TASK_THUMBNAIL_SUFFIX;
+    sb += TaskPersister::IMAGE_EXTENSION;
+    return sb.ToString();
+}
+
 ECode TaskRecord::constructor(
     /* [in] */ CActivityManagerService* service,
     /* [in] */ Int32 taskId,
@@ -127,7 +141,7 @@ ECode TaskRecord::constructor(
     /* [in] */ IIVoiceInteractor* voiceInteractor)
 {
     mService = service;
-    mFilename = StringUtils::ToString(taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister::IMAGE_EXTENSION;
+    mFilename = GenerateFilename(taskId);
     CFile::New(TaskPersister::sImagesDir, mFilename, (IFile**)&mLastThumbnailFile);
     mTaskId = taskId;
     mAffiliatedTaskId = taskId;
@@ -147,7 +161,7 @@ ECode TaskRecord::constructor(
     /* [in] */ IActivityManagerTaskDescription* taskDescription)
 {
     mService = service;
-    mFilename = StringUtils::ToString(taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister::IMAGE_EXTENSION;
+    mFilename = GenerateFilename(taskId);
     CFile::New(TaskPersister::sImagesDir, mFilename, (IFile**)&mLastThumbnailFile);
     mTaskId = taskId;
     mAffiliatedTaskId = taskId;
@@ -213,8 +227,7 @@ ECode TaskRecord::constructor(
     /* [in] */ const String& callingPackage)
 {
     mService = service;
-    mFilename = StringUtils::ToString(taskId) + TASK_THUMBNAIL_SUFFIX +
-            TaskPersister::IMAGE_EXTENSION;
+    mFilename = GenerateFilename(taskId);
     CFile::New(TaskPersister::sImagesDir, mFilename, (IFile**)&mLastThumbnailFile);
     mTaskId = taskId;
     mIntent = intent;
@@ -284,8 +297,7 @@ void TaskRecord::SetIntent(
     if (mIntent == NULL) {
         Int32 flags;
         info->GetFlags(&flags);
-        mNeverRelinquishIdentity =
-                (flags & IActivityInfo::FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+        mNeverRelinquishIdentity = (flags & IActivityInfo::FLAG_RELINQUISH_TASK_IDENTITY) == 0;
     }
     else if (mNeverRelinquishIdentity) {
         return;

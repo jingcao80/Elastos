@@ -127,9 +127,9 @@ public:
 
     Object mSelfLock;
 
-    AutoPtr<CWindowManagerService> mService;
-    AutoPtr<IContext> mContext;
-    AutoPtr<IWindowManagerPolicy> mPolicy;
+    CWindowManagerService* mService;
+    IContext* mContext;
+    IWindowManagerPolicy* mPolicy;
 
     Boolean mAnimating;
 
@@ -142,9 +142,9 @@ public:
      * from the wallpaper.  This means we need to ensure the wallpaper is
      * visible behind it in case it animates in a way that would allow it to be
      * seen. If multiple windows satisfy this, use the lowest window. */
-    AutoPtr<WindowState> mWindowDetachedWallpaper;
+    WindowState* mWindowDetachedWallpaper;  // weak-ref WindowState->WindowStateAnimator->AppWindowAnimator->WindowAnimator
 
-    AutoPtr<WindowStateAnimator> mUniverseBackground;
+    WindowStateAnimator* mUniverseBackground;   // weak-ref WindowStateAnimator>AppWindowAnimator->WindowAnimator
     Int32 mAboveUniverseLayer;
 
     Int32 mBulkUpdateParams;

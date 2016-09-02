@@ -564,11 +564,7 @@ ECode ToolbarWidgetWrapper::SetMenu(
         mActionMenuPresenter->SetId(R::id::action_menu_presenter);
     }
     mActionMenuPresenter->SetCallback(cb);
-    mToolbar->SetMenu(IMenuBuilder::Probe(menu), IActionMenuPresenter::Probe(mActionMenuPresenter));
-
-    Logger::I(TAG, " >> SetMenu: toolbar: %s, menu: %s, presenter: %s, cb: %s",
-        TO_CSTR(mToolbar), TO_CSTR(menu), TO_CSTR(mActionMenuPresenter), TO_CSTR(cb));
-    return NOERROR;
+    return mToolbar->SetMenu(IMenuBuilder::Probe(menu), IActionMenuPresenter::Probe(mActionMenuPresenter));
 }
 
 ECode ToolbarWidgetWrapper::DismissPopupMenus()

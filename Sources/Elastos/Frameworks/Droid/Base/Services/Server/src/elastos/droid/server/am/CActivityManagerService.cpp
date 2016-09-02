@@ -7750,7 +7750,7 @@ Boolean CActivityManagerService::ForceStopPackageLocked(
 
     if (doit) {
         if (purgeCache && !name.IsNull()) {
-            AttributeCache* ac = AttributeCache::GetInstance();
+            AutoPtr<AttributeCache> ac = AttributeCache::GetInstance();
             if (ac != NULL) {
                 ac->RemovePackage(name);
             }

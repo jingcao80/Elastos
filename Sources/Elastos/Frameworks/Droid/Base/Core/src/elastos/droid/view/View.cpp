@@ -6602,7 +6602,6 @@ ECode View::OnKeyUp(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, " >> OnKeyUp");
     VALIDATE_NOT_NULL(res)
     Boolean result;
     AutoPtr<IKeyEventHelper> helper;

@@ -146,7 +146,7 @@ private:
 
 public:
     static const String TAG;
-    static const Boolean DEBUG = FALSE;
+    static const Boolean DEBUG;
     static const String IMAGE_EXTENSION;
 
     static AutoPtr<IFile> sImagesDir;

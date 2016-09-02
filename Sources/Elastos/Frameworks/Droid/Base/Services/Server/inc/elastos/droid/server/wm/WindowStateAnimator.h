@@ -164,13 +164,14 @@ public:
 
 public:
     // Unchanging local convenience fields.
-    AutoPtr<CWindowManagerService> mService;
+    CWindowManagerService* mService;
+    WindowAnimator* mAnimator;
+    CSession* mSession;
+    IWindowManagerPolicy* mPolicy;
+    IContext* mContext;
+
     AutoPtr<WindowStateAnimator> mAttachedWinAnimator;
-    AutoPtr<WindowAnimator> mAnimator;
     AutoPtr<AppWindowAnimator> mAppAnimator;
-    AutoPtr<CSession> mSession;
-    AutoPtr<IWindowManagerPolicy> mPolicy;
-    AutoPtr<IContext> mContext;
     Boolean mIsWallpaper;
 
     // If this is a universe background window, this is the transformation

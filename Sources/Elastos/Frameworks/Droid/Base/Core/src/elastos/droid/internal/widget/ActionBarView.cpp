@@ -8,6 +8,7 @@
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/Gravity.h"
 #include "elastos/droid/view/LayoutInflater.h"
+#include "elastos/droid/view/WindowCallbackWrapper.h"
 #include "elastos/droid/widget/CActionMenuPresenter.h"
 #include "elastos/droid/widget/CLinearLayout.h"
 #include "elastos/droid/widget/CLinearLayoutLayoutParams.h"
@@ -44,6 +45,7 @@ using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::WindowCallbackWrapper;
 using Elastos::Droid::Widget::CActionMenuPresenter;
 using Elastos::Droid::Widget::CLinearLayout;
 using Elastos::Droid::Widget::CLinearLayoutLayoutParams;
@@ -826,7 +828,14 @@ ECode ActionBarView::constructor(
 ECode ActionBarView::SetWindowCallback(
     /* [in] */ IWindowCallback* cb)
 {
-    mWindowCallback = cb;
+    if (IContext::Probe(cb) != NULL) {
+        AutoPtr<WindowCallbackWrapper> wrapper = new WindowCallbackWrapper();
+        wrapper->constructor(cb);
+        mWindowCallback = wrapper.Get();
+    }
+    else {
+        mWindowCallback = cb;
+    }
     return NOERROR;
 }
 

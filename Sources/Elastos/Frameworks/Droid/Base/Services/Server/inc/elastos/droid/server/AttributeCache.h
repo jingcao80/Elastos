@@ -13,7 +13,6 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::IWeakHashMap;
 using Elastos::Utility::Etl::HashMap;
 
 #ifndef HASH_EQUALTO_FUNC_FOR_AUTOPTR_INT32ARRAY
@@ -53,7 +52,7 @@ public:
         /* [in] */ IContext* c,
         /* [in] */ ITypedArray* ta);
 
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<ITypedArray> mArray;
 };
 
@@ -114,7 +113,8 @@ public:
 private:
     static AutoPtr<AttributeCache> sInstance;
     AutoPtr<IContext> mContext;
-    AutoPtr<IWeakHashMap> mPackages;//WeakHashMap<String, Package>
+    // WeakHashMap<String, Package>
+    HashMap<String, AutoPtr<Package> > mPackages;
     AutoPtr<IConfiguration> mConfiguration;
 };
 

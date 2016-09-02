@@ -4481,8 +4481,7 @@ AutoPtr<TaskRecord> ActivityStack::CreateTaskRecord(
     /* [in] */ Boolean toTop)
 {
     AutoPtr<TaskRecord> task = new TaskRecord();
-    task->constructor(mService, taskId, info, intent, voiceSession,
-            voiceInteractor);
+    task->constructor(mService, taskId, info, intent, voiceSession, voiceInteractor);
     AddTask(task, toTop, FALSE);
     return task;
 }
@@ -4502,7 +4501,8 @@ void ActivityStack::AddTask(
     task->mStack = this;
     if (toTop) {
         InsertTaskAtTop(task);
-    } else {
+    }
+    else {
         mTaskHistory->Add(0, TO_IINTERFACE(task));
         UpdateTaskMovement(task, FALSE);
     }

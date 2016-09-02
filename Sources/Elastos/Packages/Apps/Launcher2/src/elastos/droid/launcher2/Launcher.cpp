@@ -3623,8 +3623,6 @@ ECode Launcher::StartActivitySafely(
     /* [in] */ IInterface* tag,
     /* [out] */ Boolean* result)
 {
-    Slogger::I(TAG, " >> StartActivitySafely %s, intent:%s, tag:%s",
-        TO_CSTR(v), TO_CSTR(intent), TO_CSTR(tag));
     VALIDATE_NOT_NULL(result);
 
     Boolean success = FALSE;

@@ -17,7 +17,7 @@ public:
     CAR_INTERFACE_DECL()
 
     InputApplicationHandle(
-        /* [in] */ IObject* appWindowToken);
+        /* [in] */ IWeakReference* appWindowToken);
 
     virtual ~InputApplicationHandle();
 
@@ -26,7 +26,7 @@ private:
 
 public:
     // The window manager's application window token.
-    AutoPtr<IObject> mAppWindowToken;
+    AutoPtr<IWeakReference> mWeakAppWindowToken;
 
     // Application name.
     String mName;

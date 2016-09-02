@@ -56,64 +56,7 @@ const Int32  MenuBuilder::sCategoryToOrder[6] = {
     0, /* SELECTED_ALTERNATIVE */
 };
 
-// CAR_INTERFACE_IMPL_2(MenuBuilder, Object, IMenuBuilder, IMenu)
-
-PInterface MenuBuilder::Probe(
-   /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (IInterface*)(IMenuBuilder*)this;
-    }
-    if (riid == EIID_IMenuBuilder) {
-        return (IInterface*)(IMenuBuilder*)this;
-    }
-    else if (riid == EIID_IMenu) {
-        return (IInterface*)(IMenu*)this;
-    }
-    return Object::Probe(riid);
-}
-
-ECode MenuBuilder::GetInterfaceID(
-   /* [in] */ IInterface *pObject,
-   /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID)
-    if (pObject == ((IInterface*)(IMenuBuilder*)this)) {
-        *pIID = EIID_IMenuBuilder;
-        return NOERROR;
-    }
-    else if (pObject == ((IInterface*)(IMenu*)this)) {
-        *pIID = EIID_IMenu;
-        return NOERROR;
-    }
-
-    return Object::GetInterfaceID(pObject, pIID);
-}
-
-UInt32 MenuBuilder::AddRef()
-{
-    UInt32 count = Object::AddRef();
-    // android::CallStack stack;
-    // stack.update();
-    // String backtrace(stack.toString("").string());
-    // Logger::I(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    // Logger::I(TAG, "MenuBuilder::AddRef, refcount: %d, callstack:\n%s", count, backtrace.string());
-    // Logger::I(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    return count;
-}
-
-UInt32 MenuBuilder::Release()
-{
-    UInt32 count = Object::Release();
-    Logger::I(TAG, "MenuBuilder::Release, refcount: %d", count);
-    // android::CallStack stack;
-    // stack.update();
-    // String backtrace(stack.toString("").string());
-    // Logger::I(TAG, "-------------------------------------------------------");
-    // Logger::I(TAG, "MenuBuilder::Release, refcount: %d, callstack:\n%s", GetStrongCount(), backtrace.string());
-    // Logger::I(TAG, "-------------------------------------------------------");
-    return count;
-}
+CAR_INTERFACE_IMPL_2(MenuBuilder, Object, IMenuBuilder, IMenu)
 
 MenuBuilder::MenuBuilder()
     : mContext(NULL)

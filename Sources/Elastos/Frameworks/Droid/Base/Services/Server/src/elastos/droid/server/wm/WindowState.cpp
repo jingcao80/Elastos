@@ -170,7 +170,8 @@ WindowState::WindowState()
     , mNotOnAppsDisplay(FALSE)
     , mUnderStatusBar(TRUE)
     , mShowToOwnerOnly(FALSE)
-{}
+{
+}
 
 WindowState::~WindowState()
 {

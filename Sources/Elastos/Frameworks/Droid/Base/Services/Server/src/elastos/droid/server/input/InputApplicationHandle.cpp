@@ -12,8 +12,8 @@ static android::Mutex gHandleMutex;
 CAR_INTERFACE_IMPL(InputApplicationHandle, Object, IInputApplicationHandle);
 
 InputApplicationHandle::InputApplicationHandle(
-    /* [in] */ IObject* appWindowToken)
-    : mAppWindowToken(appWindowToken)
+    /* [in] */ IWeakReference* appWindowToken)
+    : mWeakAppWindowToken(appWindowToken)
     , mDispatchingTimeoutNanos(0)
     , mPtr(0)
 {}

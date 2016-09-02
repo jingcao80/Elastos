@@ -1839,7 +1839,6 @@ ECode Toolbar::EnsureMenu()
 ECode Toolbar::EnsureMenuView()
 {
     if (mMenuView == NULL) {
-        Logger::I(TAG, " >> EnsureMenuView");
         AutoPtr<IContext> ctx;
         GetContext((IContext**)&ctx);
         CActionMenuView::New(ctx, (IActionMenuView**)&mMenuView);

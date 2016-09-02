@@ -42,7 +42,7 @@ ECode AppWindowAnimator::DummyAnimation::Clone(
 //                  AppWindowAnimator
 //==============================================================================
 
-static const Boolean DEBUG_ANIM = TRUE;
+static const Boolean DEBUG_ANIM = FALSE;
 const String AppWindowAnimator::TAG("AppWindowAnimator");
 const AutoPtr<IAnimation> AppWindowAnimator::sDummyAnimation = (IAnimation*)new DummyAnimation();
 
@@ -63,12 +63,18 @@ AppWindowAnimator::AppWindowAnimator(
     , mThumbnailForceAboveLayer(0)
     , mDeferThumbnailDestruction(FALSE)
 {
+    Slogger::I(TAG, " >> Create AppWindowAnimator %p", this);
     AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)atoken;
     assert(wrs != NULL);
     wrs->GetWeakReference((IWeakReference**)&mWeakAppToken);
 
     CTransformation::New((ITransformation**)&mTransformation);
     CTransformation::New((ITransformation**)&mThumbnailTransformation);
+}
+
+AppWindowAnimator::~AppWindowAnimator()
+{
+    Slogger::I(TAG, " >> Destroy AppWindowAnimator %p", this);
 }
 
 AutoPtr<AppWindowToken> AppWindowAnimator::GetAppToken()

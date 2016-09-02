@@ -2361,7 +2361,7 @@ ECode CContextImpl::GetSystemService(
         AutoPtr<IInterface> service = ServiceManager::GetService(IContext::ACCOUNT_SERVICE);
         AutoPtr<IIAccountManager> accountService = IIAccountManager::Probe(service);
         AutoPtr<IAccountManager> accountManager;
-        CAccountManager::New((IContext*)this, accountService, (IAccountManager**)&accountManager);
+        CAccountManager::New(this, accountService, (IAccountManager**)&accountManager);
         *object = accountManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;
@@ -3436,12 +3436,8 @@ ECode CContextImpl::CreatePackageContextAsUser(
 
     Boolean restricted = (flags & IContext::CONTEXT_RESTRICTED) == IContext::CONTEXT_RESTRICTED;
     if (packageName.Equals("system") || packageName.Equals("android")) {
-        AutoPtr<IContextImpl> c;
-        CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
-            user, restricted, mDisplay, mOverrideConfiguration, themePackageName, (IContextImpl**)&c);
-        *ctx = IContext::Probe(c);
-        REFCOUNT_ADD(*ctx)
-        return NOERROR;
+        return CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
+            user, restricted, mDisplay, mOverrideConfiguration, themePackageName, ctx);
     }
 
     AutoPtr<ICompatibilityInfo> ci;
@@ -3452,21 +3448,19 @@ ECode CContextImpl::CreatePackageContextAsUser(
     mMainThread->GetPackageInfo(packageName, ci,
         flags | IContext::CONTEXT_REGISTER_PACKAGE, uid, (ILoadedPkg**)&pi);
     if (pi != NULL) {
-        AutoPtr<IContextImpl> c;
-        CContextImpl::New(this, mMainThread, pi, mActivityToken,
-            user, restricted, mDisplay, mOverrideConfiguration, themePackageName, (IContextImpl**)&c);
-        if (((CContextImpl*)c.Get())->mResources != NULL) {
+        AutoPtr<CContextImpl> c;
+        CContextImpl::NewByFriend(this, mMainThread, pi, mActivityToken,
+            user, restricted, mDisplay, mOverrideConfiguration, themePackageName, (CContextImpl**)&c);
+        if (c->mResources != NULL) {
             *ctx = IContext::Probe(c);
             REFCOUNT_ADD(*ctx)
             return NOERROR;
         }
-
     }
 
     // Should be a better exception.
     Logger::E(TAG, "NameNotFoundException : Application package %s not found",
         packageName.string());
-
     return E_NAME_NOT_FOUND_EXCEPTION;
 }
 

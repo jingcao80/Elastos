@@ -311,7 +311,7 @@ Boolean WindowStateAnimator::StepAnimationLocked(
         mAnimation->Cancel();
         mAnimation = NULL;
     }
-    if (mAnimator->mWindowDetachedWallpaper.Get() == mWin) {
+    if (mAnimator->mWindowDetachedWallpaper == mWin) {
         mAnimator->mWindowDetachedWallpaper = NULL;
     }
     mAnimLayer = mWin->mLayer;
@@ -765,7 +765,7 @@ void WindowStateAnimator::DestroySurfaceLocked()
                     if (FAILED(ec)) {
                         Slogger::W(TAG,
                                 "Exception thrown when destroying Window %s surface %s session %s : 0x%08x"
-                                , this, mSurfaceControl.Get(), mSession.Get(), ec);
+                                , this, mSurfaceControl.Get(), TO_CSTR(mSession), ec);
                         goto fail;
                     }
                 }

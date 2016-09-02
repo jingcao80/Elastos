@@ -118,6 +118,13 @@ void ContentProvider::SetTlsCallingPackage(
 {
     AutoPtr<ICharSequence> callingPackage = (ICharSequence*)pthread_getspecific(mTlsKey);
     if (callingPackage != NULL) {
+        String prev;
+        callingPackage->ToString(&prev);
+        if (pakcage.Equals(prev)) {
+            // same content, do nothing.
+            return;
+        }
+
         REFCOUNT_RELEASE(callingPackage)
         callingPackage = NULL;
     }

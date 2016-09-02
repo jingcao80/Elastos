@@ -6420,7 +6420,6 @@ ECode PhoneWindow::PreparePanel(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* prepared)
 {
-    Slogger::I(TAG, " >> PreparePanel");
     VALIDATE_NOT_NULL(prepared)
     *prepared = FALSE;
 
@@ -6554,7 +6553,6 @@ ECode PhoneWindow::PreparePanel(
 Boolean PhoneWindow::InitializePanelMenu(
     /* [in] */ PanelFeatureState* st)
 {
-    Slogger::I(TAG, " >> InitializePanelMenu");
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
 

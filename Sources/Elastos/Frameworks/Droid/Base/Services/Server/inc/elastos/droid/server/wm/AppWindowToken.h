@@ -24,15 +24,18 @@ class AppWindowAnimator;
 class WindowAnimator;
 class WindowState;
 
-class AppWindowToken : public WindowToken
+class AppWindowToken
+    : public WindowToken
 {
 public:
-    AppWindowToken(
+    AppWindowToken();
+
+    ~AppWindowToken();
+
+    CARAPI constructor(
         /* [in] */ CWindowManagerService* service,
         /* [in] */ IApplicationToken* token,
         /* [in] */ Boolean voiceInteraction);
-
-    CARAPI Init();
 
     CARAPI_(void) SendAppVisibilityToClients();
 

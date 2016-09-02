@@ -2313,13 +2313,15 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
     /* [in] */ Int32 startFlags,
     /* [in] */ Boolean doResume,
     /* [in] */ IBundle* options,
-    /* [in] */ TaskRecord* inTask,
+    /* [in] */ TaskRecord* inTaskRecord,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
     *result = IActivityManager::START_SUCCESS;
     AutoPtr<IIntent> intent = r->mIntent;
     Int32 callingUid = r->mLaunchedFromUid;
+
+    AutoPtr<TaskRecord> inTask = inTaskRecord;
 
     // In some flows in to this function, we retrieve the task record and hold on to it
     // without a lock before calling back in to here...  so the task at this point may
@@ -2497,15 +2499,17 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         // If the task is not empty and the caller is asking to start it as the root
         // of a new task, then we don't actually want to start this on the task.  We
         // will bring the task to the front, and possibly give it a new intent.
-        } else if ((launchFlags & IIntent::FLAG_ACTIVITY_NEW_TASK) != 0) {
+        }
+        else if ((launchFlags & IIntent::FLAG_ACTIVITY_NEW_TASK) != 0) {
             addingToTask = FALSE;
-
-        } else {
+        }
+        else {
             addingToTask = TRUE;
         }
 
         reuseTask = inTask;
-    } else {
+    }
+    else {
         inTask = NULL;
     }
 
@@ -2834,11 +2838,11 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
             targetStack->MoveToFront();
         }
         if (reuseTask == NULL) {
-            r->SetTask(targetStack->CreateTaskRecord(GetNextTaskId(),
-                    newTaskInfo != NULL ? newTaskInfo : r->mInfo,
-                    newTaskIntent != NULL ? newTaskIntent : intent,
-                    voiceSession, voiceInteractor, !launchTaskBehind /* toTop */),
-                    taskToAffiliate);
+            AutoPtr<TaskRecord> task = targetStack->CreateTaskRecord(GetNextTaskId(),
+                newTaskInfo != NULL ? newTaskInfo : r->mInfo,
+                newTaskIntent != NULL ? newTaskIntent : intent,
+                voiceSession, voiceInteractor, !launchTaskBehind /* toTop */);
+            r->SetTask(task, taskToAffiliate);
             if (CActivityManagerService::DEBUG_TASKS)
                 Slogger::V(TAG, "Starting new activity %s in new task %s", TO_CSTR(r), TO_CSTR(r->mTask));
         } else {

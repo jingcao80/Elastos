@@ -39,6 +39,8 @@ class TaskRecord : public Object
 public:
     TaskRecord();
 
+    ~TaskRecord();
+
     CARAPI constructor(
         /* [in] */ CActivityManagerService* service,
         /* [in] */ Int32 taskId,
@@ -236,6 +238,8 @@ private:
         /* [in] */ IIntent* intent,
         /* [in] */ IActivityInfo* info);
 
+    CARAPI_(String) GenerateFilename(
+        /* [in] */ Int32 taskId);
 public:
     static const Boolean IGNORE_RETURN_TO_RECENTS = TRUE;
 
@@ -274,7 +278,7 @@ public:
     AutoPtr<IArrayList> mActivities;
 
     /** Current stack */
-    ActivityStack* mStack;
+    ActivityStack* mStack;  // weak-ref
 
     /** Takes on same set of values as ActivityRecord.mActivityType */
     Int32 mTaskType;

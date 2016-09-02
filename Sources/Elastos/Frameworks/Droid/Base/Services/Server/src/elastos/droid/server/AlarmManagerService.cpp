@@ -47,8 +47,6 @@
 #include <linux/android_alarm.h>
 #include <linux/rtc.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::UserHandle;
@@ -82,6 +80,7 @@ using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::CSparseBooleanArray;
 using Elastos::Droid::Internal::Utility::CLocalLog;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;

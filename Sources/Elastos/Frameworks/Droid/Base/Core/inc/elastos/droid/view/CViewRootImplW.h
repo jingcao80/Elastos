@@ -26,6 +26,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    ~CViewRootImplW();
+
     CARAPI constructor(
         /* [in] */ IViewRootImpl* viewRoot);
 

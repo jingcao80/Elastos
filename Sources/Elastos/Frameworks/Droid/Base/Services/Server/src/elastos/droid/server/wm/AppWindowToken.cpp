@@ -19,13 +19,8 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
-AppWindowToken::AppWindowToken(
-    /* [in] */ CWindowManagerService* service,
-    /* [in] */ IApplicationToken* token,
-    /* [in] */ Boolean voiceInteraction)
-    : WindowToken(service, IBinder::Probe(token), IWindowManagerLayoutParams::TYPE_APPLICATION, TRUE)
-    , mAppToken(token)
-    , mVoiceInteraction(voiceInteraction)
+AppWindowToken::AppWindowToken()
+    : mVoiceInteraction(FALSE)
     , mGroupId(-1)
     , mAppFullscreen(FALSE)
     , mRequestedOrientation(IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED)
@@ -51,16 +46,29 @@ AppWindowToken::AppWindowToken(
     , mLaunchTaskBehind(FALSE)
     , mEnteringAnimation(FALSE)
 {
-    CArrayList::New((WindowList**)&mAllAppWindows);
-    mAppWindowToken = this;
-    mInputApplicationHandle = new InputApplicationHandle(this);
-    mAnimator = service->mAnimator;
 }
 
-ECode AppWindowToken::Init()
+AppWindowToken::~AppWindowToken()
 {
+}
+
+ECode AppWindowToken::constructor(
+    /* [in] */ CWindowManagerService* service,
+    /* [in] */ IApplicationToken* token,
+    /* [in] */ Boolean voiceInteraction)
+{
+    WindowToken::constructor(service, IBinder::Probe(token), IWindowManagerLayoutParams::TYPE_APPLICATION, TRUE);
+
+    mAppToken = token;
+    mVoiceInteraction = voiceInteraction;
+    mAnimator = service->mAnimator;
+
+    mAppWindowToken = this;
+    AutoPtr<IWeakReference> wr;
+    GetWeakReference((IWeakReference**)&wr);
+    mInputApplicationHandle = new InputApplicationHandle(wr);
     mAppAnimator = new AppWindowAnimator(this);
-    return NOERROR;
+    return CArrayList::New((WindowList**)&mAllAppWindows);
 }
 
 void AppWindowToken::SendAppVisibilityToClients()

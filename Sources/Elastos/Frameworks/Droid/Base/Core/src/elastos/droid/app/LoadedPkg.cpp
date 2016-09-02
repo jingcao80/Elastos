@@ -350,7 +350,6 @@ LoadedPkg::ServiceDispatcher::DeathMonitor::DeathMonitor(
 //@Override
 ECode LoadedPkg::ServiceDispatcher::DeathMonitor::ProxyDied()
 {
-    Slogger::W("LoadedPkg::ServiceDispatcher::DeathMonitor", " >> ProxyDied()");
     AutoPtr<IInterface> obj;
     mOwner->Resolve(EIID_IInterface, (IInterface**)&obj);
     IServiceDispatcher* sdObj = IServiceDispatcher::Probe(obj);
@@ -1117,8 +1116,8 @@ ECode LoadedPkg::MakeApplication(
         InitializeJavaContextClassLoader();
     }
 
-    Slogger::I(TAG, " >> MakeApplication: packageName %s, appClass %s, classLoader:%s",
-        mPackageName.string(), appClass.string(), TO_CSTR(cl));
+    // Slogger::I(TAG, " >> MakeApplication: packageName %s, appClass %s, classLoader:%s",
+    //     mPackageName.string(), appClass.string(), TO_CSTR(cl));
 
     AutoPtr<IContextImpl> appContext;
     CContextImpl::CreateAppContext(mActivityThread, this, (IContextImpl**)&appContext);

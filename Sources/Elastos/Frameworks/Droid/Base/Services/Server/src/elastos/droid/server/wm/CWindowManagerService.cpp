@@ -2890,7 +2890,8 @@ Int32 CWindowManagerService::AddWindow(
                     attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
-            token = new WindowToken(this, attrsToken, -1, FALSE);
+            token = new WindowToken();
+            token->constructor(this, attrsToken, -1, FALSE);
             addToken = TRUE;
         }
         else if (type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
@@ -2958,7 +2959,8 @@ Int32 CWindowManagerService::AddWindow(
             // It is not valid to use an app token with other system types; we will
             // instead make a new token for it (as if null had been passed in for the token).
             attrs->SetToken(NULL);
-            token = new WindowToken(this, NULL, -1, FALSE);
+            token = new WindowToken();
+            token->constructor(this, NULL, -1, FALSE);
             addToken = TRUE;
         }
 
@@ -4377,7 +4379,8 @@ ECode CWindowManagerService::AddWindowToken(
             Slogger::W(TAG, "Attempted to add existing input method token: %p", token);
             return NOERROR;
         }
-        wtoken = new WindowToken(this, token, type, TRUE);
+        wtoken = new WindowToken();
+        wtoken->constructor(this, token, type, TRUE);
         mTokenMap[token] = wtoken;
         if (type == IWindowManagerLayoutParams::TYPE_WALLPAPER) {
             mWallpaperTokens->Add((IObject*)wtoken);
@@ -4541,15 +4544,16 @@ ECode CWindowManagerService::AddAppToken(
     //     inputDispatchingTimeoutNanos = DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
     // }
 
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> atoken = FindAppWindowToken(IBinder::Probe(token));
         if (atoken != NULL) {
             Slogger::W(TAG, "Attempted to add existing app token: %p", token);
             return NOERROR;
         }
 
-        atoken = new AppWindowToken(this, token, voiceInteraction);
-        atoken->Init();
+        atoken = new AppWindowToken();
+        atoken->constructor(this, token, voiceInteraction);
 
         atoken->mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
         atoken->mGroupId = taskId;
@@ -12766,7 +12770,7 @@ Boolean CWindowManagerService::ReclaimSomeSurfaceMemoryLocked(
             AutoPtr<WindowStateAnimator> wsa = ws->mWinAnimator;
             if (wsa->mSurfaceControl != NULL) {
                 Boolean contains;
-                if (mSessions->Contains((IWindowSession*)wsa->mSession.Get(), &contains), !contains) {
+                if (mSessions->Contains((IWindowSession*)wsa->mSession, &contains), !contains) {
                     Slogger::W(TAG, "LEAKED SURFACE (session doesn't exist): %p surface=%p token=%p pid=%d uid=%d"
                             , ws.Get(), wsa->mSurfaceControl.Get(), ws->mToken.Get()
                             , ws->mSession->mPid, ws->mSession->mUid);

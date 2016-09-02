@@ -24,15 +24,10 @@ class WindowToken
     : public Object
 {
 public:
-    WindowToken(
-    /* [in] */ CWindowManagerService* service,
-    /* [in] */ IBinder* token,
-    /* [in] */ Int32 type,
-    /* [in] */ Boolean _explicit)
-        : mService(service)
-        , mToken(token)
-        , mWindowType(type)
-        , mExplicit(_explicit)
+    WindowToken()
+        : mService(NULL)
+        , mWindowType(0)
+        , mExplicit(FALSE)
         , mAppWindowToken(NULL)
         , mPaused(FALSE)
         , mHidden(FALSE)
@@ -41,8 +36,19 @@ public:
         , mWaitingToHide(FALSE)
         , mSendingToBottom(FALSE)
         , mSendingToTop(FALSE)
+    {}
+
+    CARAPI constructor(
+        /* [in] */ CWindowManagerService* service,
+        /* [in] */ IBinder* token,
+        /* [in] */ Int32 type,
+        /* [in] */ Boolean isExplicit)
     {
-        CArrayList::New((IArrayList**)&mWindows);
+        mService = service;
+        mToken = token;
+        mWindowType = type;
+        mExplicit = isExplicit;
+        return CArrayList::New((IArrayList**)&mWindows);
     }
 
     CARAPI ToString(

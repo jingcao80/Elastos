@@ -81,7 +81,11 @@ ECode InputMonitor::NotifyANR(
             }
         }
         if (appWindowToken == NULL && inputApplicationHandle != NULL) {
-            appWindowToken = (AppWindowToken*)(Object*)inputApplicationHandle->mAppWindowToken.Get();
+            AutoPtr<IObject> obj;
+            inputApplicationHandle->mWeakAppWindowToken->Resolve(EIID_IObject, (IInterface**)&obj);
+            if (obj) {
+                appWindowToken = (AppWindowToken*)obj.Get();
+            }
         }
 
         if (windowState != NULL) {

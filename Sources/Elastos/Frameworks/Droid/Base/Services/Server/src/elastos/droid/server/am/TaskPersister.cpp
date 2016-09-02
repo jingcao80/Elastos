@@ -16,8 +16,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::BitmapCompressFormat_PNG;
 using Elastos::Droid::Graphics::CBitmapFactory;
 using Elastos::Droid::Graphics::IBitmapFactory;
@@ -27,6 +25,7 @@ using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::Utility::Xml;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuffer;
@@ -57,7 +56,7 @@ const Int32 TaskPersister::WriteQueueItem::TYPE_TASK;
 const Int32 TaskPersister::WriteQueueItem::TYPE_IMAGE;
 
 const String TaskPersister::TAG("TaskPersister");
-const Boolean TaskPersister::DEBUG;
+const Boolean TaskPersister::DEBUG = FALSE;
 const String TaskPersister::IMAGE_EXTENSION(".png");
 AutoPtr<IFile> TaskPersister::sImagesDir;
 AutoPtr<IFile> TaskPersister::sTasksDir;
@@ -228,10 +227,9 @@ ECode TaskPersister::LazyTaskWriterThread::Run()
                     if (file != NULL) {
                         atomicFile->FailWrite(file);
                     }
-                    String str;
-                    IObject::Probe(atomicFile)->ToString(&str);
+
                     Slogger::E(TAG, "Unable to open %s for persisting. 0x%08x",
-                        str.string(), ec);
+                        TO_CSTR(atomicFile), ec);
                 }
             }
         }
@@ -317,7 +315,8 @@ void TaskPersister::Wakeup(
     /* [in] */ TaskRecord* task,
     /* [in] */ Boolean flush)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (task != NULL) {
             List<AutoPtr<WriteQueueItem> >::ReverseIterator riter;
             for (riter = mWriteQueue.RBegin(); riter != mWriteQueue.REnd(); ++riter) {
@@ -346,7 +345,7 @@ void TaskPersister::Wakeup(
             mNextWriteTime = SystemClock::GetUptimeMillis() + PRE_TASK_DELAY_MS;
         }
         if (DEBUG) Slogger::D(TAG, "wakeup: task=%s flush=%d mNextWriteTime=%lld"
-            " mWriteQueue.size=%d Callers=", task->ToString().string(), flush,
+            " mWriteQueue.size=%d Callers=", TO_CSTR(task), flush,
             mNextWriteTime, mWriteQueue.GetSize()/*, Debug::GetCallers(4)*/);
         NotifyAll();
     }
@@ -356,7 +355,8 @@ void TaskPersister::Wakeup(
 
 void TaskPersister::Flush()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mNextWriteTime = FLUSH_QUEUE;
         NotifyAll();
         do {
@@ -369,12 +369,13 @@ void TaskPersister::SaveImage(
     /* [in] */ IBitmap* image,
     /* [in] */ const String& filename)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         List<AutoPtr<WriteQueueItem> >::ReverseIterator riter;
         for (riter = mWriteQueue.RBegin(); riter != mWriteQueue.REnd(); ++riter) {
-            AutoPtr<WriteQueueItem> item = *riter;
+            WriteQueueItem* item = *riter;
             if (item->mType == WriteQueueItem::TYPE_IMAGE) {
-                ImageWriteQueueItem* imageWriteQueueItem = (ImageWriteQueueItem*)item.Get();
+                ImageWriteQueueItem* imageWriteQueueItem = (ImageWriteQueueItem*)item;
                 if (imageWriteQueueItem->mFilename.Equals(filename)) {
                     // replace the Bitmap with the new one.
                     imageWriteQueueItem->mImage = image;
@@ -391,8 +392,8 @@ void TaskPersister::SaveImage(
         else if (mNextWriteTime == 0) {
             mNextWriteTime = SystemClock::GetUptimeMillis() + PRE_TASK_DELAY_MS;
         }
-        if (DEBUG) Slogger::D(TAG, "saveImage: filename=%s now=%lld mNextWriteTime=%lld Callers=",
-            filename.string(), SystemClock::GetUptimeMillis(), mNextWriteTime/*, Debug::GetCallers(4)*/);
+        if (DEBUG) Slogger::D(TAG, "saveImage: filename=%s now=%lld mNextWriteTime=%lld",
+            filename.string(), SystemClock::GetUptimeMillis(), mNextWriteTime);
         NotifyAll();
     }
 
@@ -413,15 +414,14 @@ AutoPtr<IBitmap> TaskPersister::GetTaskDescriptionIcon(
 AutoPtr<IBitmap> TaskPersister::GetImageFromWriteQueue(
     /* [in] */ const String& filename)
 {
-    {    AutoLock syncLock(this);
-        List<AutoPtr<WriteQueueItem> >::ReverseIterator riter;
-        for (riter = mWriteQueue.RBegin(); riter != mWriteQueue.REnd(); ++riter) {
-            AutoPtr<WriteQueueItem> item = *riter;
-            if (item->mType == WriteQueueItem::TYPE_IMAGE) {
-                ImageWriteQueueItem* imageWriteQueueItem = (ImageWriteQueueItem*)item.Get();
-                if (imageWriteQueueItem->mFilename.Equals(filename)) {
-                    return imageWriteQueueItem->mImage;
-                }
+    AutoLock syncLock(this);
+    List<AutoPtr<WriteQueueItem> >::ReverseIterator riter;
+    for (riter = mWriteQueue.RBegin(); riter != mWriteQueue.REnd(); ++riter) {
+        WriteQueueItem* item = *riter;
+        if (item->mType == WriteQueueItem::TYPE_IMAGE) {
+            ImageWriteQueueItem* imageWriteQueueItem = (ImageWriteQueueItem*)item;
+            if (imageWriteQueueItem->mFilename.Equals(filename)) {
+                return imageWriteQueueItem->mImage;
             }
         }
     }
@@ -570,10 +570,8 @@ AutoPtr<List<AutoPtr<TaskRecord> > > TaskPersister::RestoreTasksLocked()
                             mStackSupervisor->SetNextTaskId(taskId);
                         }
                         else {
-                            String str;
-                            IObject::Probe(taskFile)->ToString(&str);
                             Slogger::E(TAG, "Unable to restore taskFile=%s: %s",
-                                str.string(), FileToString(taskFile).string());
+                                TO_CSTR(taskFile), FileToString(taskFile).string());
                         }
                     }
                     else {
@@ -585,9 +583,7 @@ AutoPtr<List<AutoPtr<TaskRecord> > > TaskPersister::RestoreTasksLocked()
             }
         } while (0);
         if (FAILED(ec)) {
-            String str;
-            IObject::Probe(taskFile)->ToString(&str);
-            Slogger::W/*Wtf*/(TAG, "Unable to parse%s. Error 0x%08x", str.string(), ec);
+            Slogger::W(TAG, "Unable to parse%s. Error 0x%08x", TO_CSTR(taskFile), ec);
             Slogger::E(TAG, "Failing file: %s", FileToString(taskFile).string());
             deleteFile = TRUE;
         }

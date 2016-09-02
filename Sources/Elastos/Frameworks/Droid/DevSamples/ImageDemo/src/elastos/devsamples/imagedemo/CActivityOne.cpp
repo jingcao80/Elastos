@@ -74,22 +74,13 @@ UInt32 CActivityOne::AddRef()
 UInt32 CActivityOne::Release()
 {
     UInt32 count = Activity::Release();
-    Logger::I(TAG, "ImageDemoActivity::Release, refcount: %d", count);
+    // Logger::I(TAG, "ImageDemoActivity::Release, refcount: %d", count);
     // android::CallStack stack;
     // stack.update();
     // String backtrace(stack.toString("").string());
     // Logger::I(TAG, "-------------------------------------------------------");
     // Logger::I(TAG, "ImageDemoActivity::Release, refcount: %d, callstack:\n%s", GetStrongCount(), backtrace.string());
     // Logger::I(TAG, "-------------------------------------------------------");
-
-    if (mDestroyed && count == 1) {
-        if (mDestroyed == 0) {
-            mDestroyed = 1;
-        }
-        else if (mDestroyed == 1) {
-            // Release();
-        }
-    }
     return count;
 }
 
