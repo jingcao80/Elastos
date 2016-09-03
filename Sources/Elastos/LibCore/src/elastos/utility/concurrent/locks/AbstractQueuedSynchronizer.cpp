@@ -540,7 +540,10 @@ void AbstractQueuedSynchronizer::DoReleaseShared()
                 continue;                // loop on failed CAS
             }
         }
-        if (Object::Equals(h->Probe(EIID_IInterface), mHead->Probe(EIID_IInterface))) {                   // loop if mHead changed
+        if (h == NULL && mHead == NULL) {
+            break;
+        }
+        else if (h != NULL && mHead != NULL && Object::Equals(h->Probe(EIID_IInterface), mHead->Probe(EIID_IInterface))) {                   // loop if mHead changed
             break;
         }
     }
@@ -663,8 +666,7 @@ void AbstractQueuedSynchronizer::SelfInterrupt()
 
 Boolean AbstractQueuedSynchronizer::ParkAndCheckInterrupt()
 {
-    // TODO:
-    // LockSupport::Park((IObject*)this);
+    LockSupport::Park((IObject*)this);
     return Thread::Interrupted();
 }
 

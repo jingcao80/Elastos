@@ -69,7 +69,8 @@ ECode CCountDownLatch::Await(
 
 ECode CCountDownLatch::CountDown()
 {
-    mSync->TryReleaseShared(1);
+    Boolean res;
+    mSync->ReleaseShared(1, &res);
     return NOERROR;
 }
 
