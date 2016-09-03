@@ -4866,7 +4866,7 @@ ECode MediaProvider::Update(
     oUri = SafeUncanonicalize(uri);
     uri = oUri;
     Int32 count;
-    Logger::V(TAG, "update for uri=%p, initValues=", uri, initialValues);
+    Logger::V(TAG, "update for uri=%s, initValues=%s", TO_CSTR(uri), TO_CSTR(initialValues));
     Int32 match;
     GetURI_MATCHER()->Match(uri, &match);
     AutoPtr<IDatabaseHelper> helper;
@@ -5510,6 +5510,10 @@ ECode MediaProvider::OpenFileAndEnforcePathPermissionsHelper(
     pfh->ParseMode(mode, &modeBits);//
 
     AutoPtr<IFile> file = QueryForDataFile(uri);//
+    if (file == NULL) {
+        Logger::E(TAG, "data file not found for uri:%s", TO_CSTR(uri));
+        return E_FILE_NOT_FOUND_EXCEPTION;
+    }
 
     FAIL_RETURN(CheckAccess(uri, file, modeBits))
 
@@ -7515,7 +7519,6 @@ AutoPtr<IParcelFileDescriptor> MediaProvider::MakeThumbInternal(
            resolver->NotifyChange(MEDIA_URI, NULL);
            OpenFileHelper(out, String("r"), (IParcelFileDescriptor**)&pfd);
            d->mDb->SetTransactionSuccessful();
-           return pfd;
         }
        // } catch (IOException ex) {
            // do nothing, just return null below
@@ -7535,6 +7538,7 @@ AutoPtr<IParcelFileDescriptor> MediaProvider::MakeThumbInternal(
             resolver->Delete(out, String(NULL), NULL, &vol);
         }
        // }
+       return pfd;
     }
     return NULL;
 }

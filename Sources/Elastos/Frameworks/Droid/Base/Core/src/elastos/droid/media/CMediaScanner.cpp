@@ -1546,10 +1546,10 @@ ECode CMediaScanner::ExtractAlbumArt(
         return NOERROR;
     }
 
-    Int64 len = *((Int64*)data);
+    Int32 len = data->size();
     AutoPtr< ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(len);
     if (array != NULL) {
-        memcpy(array, data + 4, len);
+        memcpy(array, data->data(), len);
     }
 
 done:
@@ -1712,7 +1712,7 @@ ECode CMediaScanner::Prescan( //throws RemoteException
 
                         mfHelper->IsPlayListFileType(fileType, &bval);
                         if (!bval) {
-                        Logger::V("CMediaScanner", " > Prescan %s: row: %lld, path: %s", path.string(), rowId, filePath.string());
+                        Logger::V("CMediaScanner", " > Prescan path:%s: row: %lld, path: %s, fileType:%d", path.string(), rowId, filePath.string(), fileType);
                             deleter->Delete(rowId);
                             if (path.ToLowerCase().EndWith("/.nomedia")) {
                                 deleter->Flush();

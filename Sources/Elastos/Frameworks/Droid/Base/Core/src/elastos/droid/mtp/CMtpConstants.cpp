@@ -23,7 +23,7 @@ ECode CMtpConstants::IsAbstractObject(
         case IMtpConstants::FORMAT_ABSTRACT_VIDEO_PLAYLIST:
         case IMtpConstants::FORMAT_ABSTRACT_MEDIACAST:
         case IMtpConstants::FORMAT_ABSTRACT_DOCUMENT:
-            *result = TRUE;
+            *result = TRUE; break;
         default:
             *result = FALSE;
     }
