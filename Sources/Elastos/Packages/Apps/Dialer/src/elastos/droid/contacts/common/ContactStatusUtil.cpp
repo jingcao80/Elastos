@@ -13,7 +13,7 @@ namespace Common {
 
 const String ContactStatusUtil::TAG("ContactStatusUtil");
 
-String ContactStatusUtil::GetPresenceIcon(
+String ContactStatusUtil::GetStatusString(
     /* [in] */ IContext* context,
     /* [in] */ Int32 presence)
 {

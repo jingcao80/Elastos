@@ -2,7 +2,7 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
-    merge("car/elastos/droid/common/widget/CompositeCursorAdapter.car");
+    merge("../../../Frameworks/Droid/Ex/Common/car/elastos/droid/common/widget/CompositeCursorAdapter.car");
 
     merge("car/elastos/droid/contacts/common/ContactsUtils.car");
     merge("car/elastos/droid/contacts/common/ContactPhotoManager.car");

@@ -1,8 +1,0 @@
-TARGET_NAME= widget
-TARGET_TYPE= lib
-
-INCLUDES += $(MAKEDIR)/../../../../../inc
-INCLUDES += $(MAKEDIR)/../../../../../
-INCLUDES += ../../../../../
-
-SOURCES += CompositeCursorAdapter.cpp

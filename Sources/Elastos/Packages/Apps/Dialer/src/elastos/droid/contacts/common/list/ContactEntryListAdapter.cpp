@@ -20,6 +20,7 @@
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Contacts::Common::ContactPhotoManager;
+using Elastos::Droid::Contacts::Common::List::ContactListItemView;
 using Elastos::Droid::Contacts::Common::List::EIID_IContactEntryListAdapter;
 using Elastos::Droid::Contacts::Common::Util::SearchUtil;
 using Elastos::Droid::Common::Widget::ICompositeCursorAdapterPartition;

@@ -23,6 +23,7 @@ using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IQuickContactBadge;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Core::ICharSequence;
+using Elastos::Utility::Etl::List;
 using Elastos::Utility::Regex::IPattern;
 
 namespace Elastos {
@@ -64,6 +65,8 @@ protected:
     private:
         Int32 mStart;
         Int32 mEnd;
+
+        friend class ContactListItemView;
     };
 
 public:
