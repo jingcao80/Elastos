@@ -428,7 +428,8 @@ ECode AlarmManagerService::BinderService::SetTime(
         return NOERROR;
     }
 
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         *result = mHost->Native_SetKernelTime(mHost->mNativeData, millis) == 0;
     }
     return NOERROR;
@@ -3485,8 +3486,7 @@ void AlarmManagerService::Native_Set(
     if (result < 0)
     {
         ALOGE("Unable to set alarm to %lld.%09lld: %s\n",
-              static_cast<long long>(seconds),
-              static_cast<long long>(nanoseconds), strerror(errno));
+                seconds, nanoseconds, strerror(errno));
     }
 }
 
@@ -3505,8 +3505,7 @@ void AlarmManagerService::Native_Clear(
     if (result < 0)
     {
         ALOGE("Unable to clear alarm  %lld.%09lld: %s\n",
-              static_cast<long long>(seconds),
-              static_cast<long long>(nanoseconds), strerror(errno));
+                seconds, nanoseconds, strerror(errno));
     }
 }
 
@@ -3549,8 +3548,8 @@ Int32 AlarmManagerService::Native_SetKernelTime(
 
     ret = impl->setTime(&tv);
 
-    if(ret < 0) {
-        ALOGW("Unable to set rtc to %lld: %s\n", tv.tv_sec, strerror(errno));
+    if (ret < 0) {
+        ALOGW("Unable to set rtc to %d: %s\n", (int) tv.tv_sec, strerror(errno));
         ret = -1;
     }
     return ret;

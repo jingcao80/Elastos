@@ -1708,7 +1708,8 @@ ECode CInputManagerService::RegisterInputDevicesChangedListener(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    {    AutoLock syncLock(mInputDevicesLock);
+    {
+        AutoLock syncLock(mInputDevicesLock);
         Int32 callingPid = Binder::GetCallingPid();
         AutoPtr<IInterface> outface;
         mInputDevicesChangedListeners->Get(callingPid, (IInterface**)&outface);
@@ -1736,7 +1737,8 @@ ECode CInputManagerService::RegisterInputDevicesChangedListener(
 void CInputManagerService::OnInputDevicesChangedListenerDied(
     /* [in] */ Int32 pid)
 {
-    {    AutoLock syncLock(mInputDevicesLock);
+    {
+        AutoLock syncLock(mInputDevicesLock);
         mInputDevicesChangedListeners->Remove(pid);
     }
 }
@@ -1749,18 +1751,19 @@ void CInputManagerService::DeliverInputDevicesChanged(
     Int32 numFullKeyboardsAdded = 0;
     mTempInputDevicesChangedListenersToNotify->Clear();
     mTempFullKeyboards->Clear();
+    Int32 numListeners = 0;
     AutoPtr<ArrayOf<Int32> > deviceIdAndGeneration;
-    {    AutoLock syncLock(mInputDevicesLock);
+    {
+        AutoLock syncLock(mInputDevicesLock);
         if (!mInputDevicesChangedPending) {
             return;
         }
         mInputDevicesChangedPending = FALSE;
 
-        Int32 size;
-        mInputDevicesChangedListeners->GetSize(&size);
-        for (Int32 i = 0;  i < size;  i++) {
+        mInputDevicesChangedListeners->GetSize(&numListeners);
+        for (Int32 i = 0;  i < numListeners;  i++) {
             AutoPtr<IInterface> outface;
-            mInputDevicesChangedListeners->Get(i, (IInterface**)&outface);
+            mInputDevicesChangedListeners->ValueAt(i, (IInterface**)&outface);
             mTempInputDevicesChangedListenersToNotify->Add(outface);
         }
 
@@ -1790,9 +1793,7 @@ void CInputManagerService::DeliverInputDevicesChanged(
     }
 
     // Notify listeners.
-    Int32 numListeners;
-    mInputDevicesChangedListeners->GetSize(&numListeners);
-    for (int i = 0; i < numListeners; i++) {
+    for (Int32 i = 0; i < numListeners; i++) {
         AutoPtr<IInterface> obj;
         mTempInputDevicesChangedListenersToNotify->Get(i, (IInterface**)&obj);
         InputDevicesChangedListenerRecord* inputDeviceRec = (InputDevicesChangedListenerRecord*)IObject::Probe(obj);
