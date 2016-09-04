@@ -1,5 +1,7 @@
 
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/contacts/common/ContactPresenceIconUtil.h"
 #include "elastos/droid/contacts/common/ContactStatusUtil.h"
@@ -14,6 +16,10 @@
 #include "elastos/droid/R.h"
 #include "R.h"
 
+using Elastos::Droid::Contacts::Common::ContactPresenceIconUtil;
+using Elastos::Droid::Contacts::Common::ContactStatusUtil;
+using Elastos::Droid::Contacts::Common::Util::ViewUtil;
+using Elastos::Droid::Contacts::Common::Util::SearchUtil;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::CCharArrayBuffer;
@@ -23,21 +29,26 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::ITypeface;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Provider::IContactsContract;
-using Elastos::Droid::Provider::IContacts;
+using Elastos::Droid::Provider::IContactsContractContactsColumns;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::ISpannableString;
 using Elastos::Droid::Text::CSpannableString;
 using Elastos::Droid::Text::ISpannable;
+using Elastos::Droid::Text::ISpanned;
 using Elastos::Droid::Text::TextUtilsTruncateAt_MARQUEE;
+using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::Widget::ImageViewScaleType_FIT_CENTER;
 using Elastos::Droid::Widget::EIID_ISelectionBoundsAdjuster;
 using Elastos::Droid::Widget::CTextView;
 using Elastos::Droid::Widget::CImageView;
 using Elastos::Droid::Widget::ImageViewScaleType_CENTER;
+using Elastos::Droid::Widget::CQuickContactBadge;
 using Elastos::Core::CString;
 using Elastos::Core::Character;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocale;
@@ -83,10 +94,10 @@ ContactListItemView::ContactListItemView()
     , mPhotoViewWidth(0)
     , mPhotoViewHeight(0)
     , mKeepHorizontalPaddingForPhotoView(FALSE)
-    , mKeepVerticalPaddingForPhotoView(IColor::BLACK)
+    , mKeepVerticalPaddingForPhotoView(FALSE)
     , mPhotoViewWidthAndHeightAreReady(FALSE)
     , mNameTextViewHeight(FALSE)
-    , mNameTextViewTextColor(FALSE)
+    , mNameTextViewTextColor(IColor::BLACK)
     , mPhoneticNameTextViewHeight(FALSE)
     , mLabelViewHeight(FALSE)
     , mDataViewHeight(FALSE)
@@ -138,9 +149,9 @@ ECode ContactListItemView::constructor(
     // Read all style values
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
+    AutoPtr<ArrayOf<Int32> > params = TO_ATTRS_ARRAYOF(Elastos::Droid::Dialer::R::styleable::ContactListItemView);
     AutoPtr<ITypedArray> a;
-    ctx->ObtainStyledAttributes(attrs, Elastos::Droid::Dialer::R::styleable::ContactListItemView,
-            (ITypedArray**)&a);
+    ctx->ObtainStyledAttributes(attrs, params, (ITypedArray**)&a);
     a->GetDimensionPixelSize(
             Elastos::Droid::Dialer::R::styleable::ContactListItemView_list_item_height,
             mPreferredHeight, &mPreferredHeight);
@@ -192,16 +203,16 @@ ECode ContactListItemView::constructor(
     Int32 left, top, right, bottom;
     a->GetDimensionPixelOffset(
             Elastos::Droid::Dialer::R::styleable::ContactListItemView_list_item_padding_left,
-            0, &left),
+            0, &left);
     a->GetDimensionPixelOffset(
             Elastos::Droid::Dialer::R::styleable::ContactListItemView_list_item_padding_top,
-            0, &top),
+            0, &top);
     a->GetDimensionPixelOffset(
             Elastos::Droid::Dialer::R::styleable::ContactListItemView_list_item_padding_right,
-            0, &right),
+            0, &right);
     a->GetDimensionPixelOffset(
             Elastos::Droid::Dialer::R::styleable::ContactListItemView_list_item_padding_bottom,
-            0, &bottom)
+            0, &bottom);
 
     SetPaddingRelative(left, top, right, bottom);
 
@@ -209,8 +220,9 @@ ECode ContactListItemView::constructor(
 
     a->Recycle();
 
+    params = TO_ATTRS_ARRAYOF(Elastos::Droid::Dialer::R::styleable::Theme);
     AutoPtr<ITypedArray> ta;
-    ctx->ObtainStyledAttributes(Elastos::Droid::Dialer::R::styleable::Theme, (ITypedArray**)&ta);
+    ctx->ObtainStyledAttributes(params, (ITypedArray**)&ta);
     a = ta;
     a->GetColorStateList(Elastos::Droid::Dialer::R::styleable::Theme_android_textColorSecondary,
             (IColorStateList**)&mSecondaryTextColor);
@@ -245,8 +257,7 @@ ECode ContactListItemView::OnMeasure(
 {
     // We will match parent's width and wrap content vertically, but make sure
     // height is no less than listPreferredItemHeight.
-    Int32 specWidth;
-    ResolveSize(0, widthMeasureSpec, &specWidth);
+    Int32 specWidth = ResolveSize(0, widthMeasureSpec);
     Int32 preferredHeight = mPreferredHeight;
 
     mNameTextViewHeight = 0;
@@ -287,7 +298,7 @@ ECode ContactListItemView::OnMeasure(
     if (IsVisible(view)) {
         // Calculate width for name text - this parallels similar measurement in onLayout.
         Int32 nameTextWidth = effectiveWidth;
-        if (mPhotoPosition != PhotoPosition.LEFT) {
+        if (mPhotoPosition != PhotoPosition_LEFT) {
             nameTextWidth -= mTextIndent;
         }
         view->Measure(
@@ -364,7 +375,7 @@ ECode ContactListItemView::OnMeasure(
         view->Measure(
                 MeasureSpec::MakeMeasureSpec(mPresenceIconSize, MeasureSpec::EXACTLY),
                 MeasureSpec::MakeMeasureSpec(mPresenceIconSize, MeasureSpec::EXACTLY));
-        mPresenceIcon->GetMeasuredHeight(&mStatusTextViewHeight);
+        IView::Probe(mPresenceIcon)->GetMeasuredHeight(&mStatusTextViewHeight);
     }
 
     view = IView::Probe(mStatusView);
@@ -577,14 +588,14 @@ ECode ContactListItemView::OnLayout(
         }
     }
 
-    if (IsVisible(IView::Probe(mStatusView)) || isVisible(IView::Probe(mPresenceIcon))) {
+    if (IsVisible(IView::Probe(mStatusView)) || IsVisible(IView::Probe(mPresenceIcon))) {
         textTopBound += mStatusTextViewHeight;
     }
 
     // Rest of text views
     Int32 dataLeftBound = leftBound;
     view = IView::Probe(mPhoneticNameTextView);
-    if (isVisible(view)) {
+    if (IsVisible(view)) {
         view->Layout(leftBound,
                 textTopBound,
                 rightBound,
@@ -756,7 +767,7 @@ void ContactListItemView::SetSectionHeader(
             AddView(IView::Probe(mHeaderTextView));
         }
         AutoPtr<ICharSequence> cs;
-        CString::New(title, (ICharSequence**)&cs)
+        CString::New(title, (ICharSequence**)&cs);
         SetMarqueeText(mHeaderTextView, cs);
         IView::Probe(mHeaderTextView)->SetVisibility(IView::VISIBLE);
         mHeaderTextView->SetAllCaps(TRUE);
@@ -791,11 +802,11 @@ ECode ContactListItemView::GetQuickContact(
         if (mNameTextView != NULL) {
             AutoPtr<ICharSequence> cs;
             mNameTextView->GetText((ICharSequence**)&cs);
-            String text;
-            cs->ToString(&text);
+            AutoPtr<ArrayOf<IInterface*> > attrs = ArrayOf<IInterface*>::Alloc(1);
+            attrs->Set(0, cs);
             String str;
             context->GetString(Elastos::Droid::Dialer::R::string::description_quick_contact_for,
-                    text, &str);
+                    attrs, &str);
             AutoPtr<ICharSequence> desc;
             CString::New(str, (ICharSequence**)&desc);
             IView::Probe(mQuickContact)->SetContentDescription(desc);
@@ -1018,8 +1029,10 @@ void ContactListItemView::SetPhoneNumber(
 
         // Sets phone number texts for display after highlighting it, if applicable.
         // CharSequence textToSet = text;
+        AutoPtr<ICharSequence> cs;
+        CString::New(text, (ICharSequence**)&cs);
         AutoPtr<ISpannableString> textToSet;
-        CSpannableString::New(text, (ISpannableString**)&textToSet);
+        CSpannableString::New(cs, (ISpannableString**)&textToSet);
 
         if (mNumberHighlightSequence.Begin() != mNumberHighlightSequence.End()) {
             AutoPtr<HighlightSequence> highlightSequence = *(mNumberHighlightSequence.Begin());
@@ -1027,7 +1040,7 @@ void ContactListItemView::SetPhoneNumber(
                     highlightSequence->mEnd);
         }
 
-        SetMarqueeText(mDataView, textToSet);
+        SetMarqueeText(mDataView, ICharSequence::Probe(textToSet));
         AutoPtr<IView> view = IView::Probe(mDataView);
         view->SetVisibility(VISIBLE);
 
@@ -1043,7 +1056,9 @@ void ContactListItemView::SetMarqueeText(
     /* [in] */ Int32 size)
 {
     if (GetTextEllipsis() == TextUtilsTruncateAt_MARQUEE) {
-        SetMarqueeText(textView, String(*text, 0, size));
+        AutoPtr<ICharSequence> cs;
+        CString::New(String(*text, 0, size), (ICharSequence**)&cs);
+        SetMarqueeText(textView, cs);
     }
     else {
         textView->SetText(text, 0, size);
@@ -1060,8 +1075,10 @@ void ContactListItemView::SetMarqueeText(
         AutoPtr<ISpannableString> spannable;
         CSpannableString::New(text, (ISpannableString**)&spannable);
         Int32 len;
-        spannable->GetLength(&len);
-        spannable->SetSpan(TextUtilsTruncateAt_MARQUEE, 0, len, ISpannable::SPAN_EXCLUSIVE_EXCLUSIVE);
+        ICharSequence::Probe(spannable)->GetLength(&len);
+        AutoPtr<IInteger32> integer;
+        CInteger32::New(TextUtilsTruncateAt_MARQUEE, (IInteger32**)&integer);
+        ISpannable::Probe(spannable)->SetSpan(integer, 0, len, ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         textView->SetText(ICharSequence::Probe(spannable));
     }
     else {
@@ -1112,7 +1129,7 @@ AutoPtr<ITextView> ContactListItemView::GetSnippetView()
         CTextView::New(context, (ITextView**)&mSnippetView);
         mSnippetView->SetSingleLine(TRUE);
         mSnippetView->SetEllipsize(GetTextEllipsis());
-        mSnippetView->SetTextAppearance(context, Elastos::Droid::Dialer::R::style::TextAppearance_Small);
+        mSnippetView->SetTextAppearance(context, Elastos::Droid::R::style::TextAppearance_Small);
         AutoPtr<IView> view = IView::Probe(mSnippetView);
         Boolean isActivated;
         IsActivated(&isActivated);
@@ -1130,7 +1147,7 @@ AutoPtr<ITextView> ContactListItemView::GetStatusView()
         CTextView::New(context, (ITextView**)&mStatusView);
         mStatusView->SetSingleLine(TRUE);
         mStatusView->SetEllipsize(GetTextEllipsis());
-        mStatusView->SetTextAppearance(context, Elastos::Droid::Dialer::R::style::TextAppearance_Small);
+        mStatusView->SetTextAppearance(context, Elastos::Droid::R::style::TextAppearance_Small);
         mStatusView->SetTextColor(mSecondaryTextColor);
         AutoPtr<IView> view = IView::Probe(mStatusView);
         Boolean isActivated;
@@ -1169,7 +1186,7 @@ void ContactListItemView::SetPresence(
         }
         mPresenceIcon->SetImageDrawable(icon);
         mPresenceIcon->SetScaleType(ImageViewScaleType_FIT_CENTER);
-        IView::Probe(mPresenceIcon)->SetVisibility(View.VISIBLE);
+        IView::Probe(mPresenceIcon)->SetVisibility(IView::VISIBLE);
     }
     else {
         if (mPresenceIcon != NULL) {
@@ -1202,10 +1219,10 @@ void ContactListItemView::ShowDisplayName(
         GetContext((IContext**)&context);
         AutoPtr<ICharSequence> textCS;
         mNameTextView->GetText((ICharSequence**)&textCS);
-        String text;
-        textCS->ToString(&text);
+        AutoPtr<ArrayOf<IInterface*> > attrs = ArrayOf<IInterface*>::Alloc(1);
+        attrs->Set(0, textCS);
         context->GetString(Elastos::Droid::Dialer::R::string::description_quick_contact_for,
-                text, &str);
+                attrs, &str);
         AutoPtr<ICharSequence> desc;
         CString::New(str, (ICharSequence**)&desc);
         IView::Probe(mQuickContact)->SetContentDescription(desc);
@@ -1236,7 +1253,7 @@ void ContactListItemView::SetDisplayName(
         else if (mNameHighlightSequence.Begin() != mNameHighlightSequence.End()) {
             AutoPtr<ISpannableString> spannableName;
             CSpannableString::New(name, (ISpannableString**)&spannableName);
-            List<AutoPtr<HighlightSequence> >::Iterator it = mNameHighlightSequence.Begin();
+            Elastos::Utility::Etl::List<AutoPtr<HighlightSequence> >::Iterator it = mNameHighlightSequence.Begin();
             for (; it != mNameHighlightSequence.End(); ++it) {
                 AutoPtr<HighlightSequence> highlightSequence = *it;
                 mTextHighlighter->ApplyMaskingHighlight(spannableName, highlightSequence->mStart,
@@ -1248,7 +1265,7 @@ void ContactListItemView::SetDisplayName(
     else {
         name = mUnknownNameText;
     }
-    SetMarqueeText(getNameTextView(), name);
+    SetMarqueeText(GetNameTextView(), name);
 }
 
 void ContactListItemView::HideDisplayName()
@@ -1301,7 +1318,6 @@ void ContactListItemView::ShowPresenceAndStatusMessage(
     SetPresence(icon);
 
     String statusMessage(NULL);
-    Boolean isNull;
     if (contactStatusColumnIndex != 0 && (cursor->IsNull(contactStatusColumnIndex, &isNull), !isNull)) {
         cursor->GetString(contactStatusColumnIndex, &statusMessage);
     }
@@ -1312,7 +1328,9 @@ void ContactListItemView::ShowPresenceAndStatusMessage(
         GetContext((IContext**)&context);
         statusMessage = ContactStatusUtil::GetStatusString(context, presence);
     }
-    SetStatus(statusMessage);
+    AutoPtr<ICharSequence> cs;
+    CString::New(statusMessage, (ICharSequence**)&cs);
+    SetStatus(cs);
 }
 
 void ContactListItemView::ShowSnippet(
@@ -1326,7 +1344,7 @@ void ContactListItemView::ShowSnippet(
     }
 
     String snippet;
-    cursor->GetString(summarySnippetColumnIndex, *snippet);
+    cursor->GetString(summarySnippetColumnIndex, &snippet);
 
     // Do client side snippeting if provider didn't do it
     AutoPtr<IBundle> extras;
@@ -1339,7 +1357,7 @@ void ContactListItemView::ShowSnippet(
 
         String displayName(NULL);
         Int32 displayNameIndex;
-        cursor->GetColumnIndex(IContacts::DISPLAY_NAME, &displayNameIndex);
+        cursor->GetColumnIndex(IContactsContractContactsColumns::DISPLAY_NAME, &displayNameIndex);
         if (displayNameIndex >= 0) {
             cursor->GetString(displayNameIndex, &displayName);
         }
@@ -1350,7 +1368,7 @@ void ContactListItemView::ShowSnippet(
     else {
         if (!snippet.IsNull()) {
             Int32 from = 0;
-            Int32 to = snippet->GetLength();
+            Int32 to = snippet.GetLength();
             Int32 start = snippet.IndexOf(IDefaultContactListAdapter::SNIPPET_START_MATCH);
             if (start == -1) {
                 snippet = String(NULL);
@@ -1386,9 +1404,10 @@ void ContactListItemView::ShowSnippet(
 
 String ContactListItemView::UpdateSnippet(
     /* [in] */ const String& snippet,
-    /* [in] */ const String& query,
+    /* [in] */ const String& _query,
     /* [in] */ const String& displayName)
 {
+    String query = _query;
     if (TextUtils::IsEmpty(snippet) || TextUtils::IsEmpty(query)) {
         return String(NULL);
     }
@@ -1506,7 +1525,7 @@ AutoPtr<ArrayOf<String> > ContactListItemView::Split(
     Int32 i = 0;
     while (matcher->Find(&hasNext), hasNext) {
         String str;
-        matcher->Group(&str);
+        result->Group(&str);
         (*tokens)[i] = str;
         i++;
     }

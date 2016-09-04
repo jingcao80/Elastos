@@ -96,7 +96,7 @@ static AutoPtr<ArrayOf<String> > InitResultProjection()
     (*projections)[3] = IContactsContractDirectory::PHOTO_SUPPORT;
     return projections;
 }
-const AutoPtr<ArrayOf<String> > RESULT_PROJECTION = InitResultProjection();
+const AutoPtr<ArrayOf<String> > DirectoryListLoader::RESULT_PROJECTION = InitResultProjection();
 
 DirectoryListLoader::DirectoryListLoader(
     /* [in] */ IContext* ctx)

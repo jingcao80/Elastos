@@ -1,5 +1,5 @@
 
-TARGET_NAME= common
+TARGET_NAME= phone_common
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc

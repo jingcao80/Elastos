@@ -1,5 +1,5 @@
 
-TARGET_NAME= common
+TARGET_NAME= contacts_common
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc
@@ -14,7 +14,7 @@ SOURCES += ContactsUtils.cpp
 SOURCES += ContactPhotoManager.cpp
 
 ELASTOS_LIBS += interactions/interactions.lib
-ELASTOS_LIBS += list/list1.lib
+ELASTOS_LIBS += list/contacts_list.lib
 ELASTOS_LIBS += util/util.lib
 ELASTOS_LIBS += widget/widget.lib
 ELASTOS_LIBS += preference/preference.lib

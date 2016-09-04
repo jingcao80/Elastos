@@ -1,9 +1,10 @@
-TARGET_NAME= list1
+TARGET_NAME= contacts_list
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += ../../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../../../Frameworks/Droid/Ex/Common/inc
 
 SOURCES += ContactEntryListFragment.cpp
 SOURCES += DirectoryListLoader.cpp
@@ -24,3 +25,5 @@ SOURCES += ContactsSectionIndexer.cpp
 SOURCES += CContactListFilterView.cpp
 SOURCES += CCustomContactListFilterActivity.cpp
 SOURCES += CGroupDelta.cpp
+SOURCES += ContactListItemView.cpp
+SOURCES += ContactListFilterController.cpp
