@@ -360,7 +360,7 @@ ECode CContentProviderOperationBuilder::WithSelection(
     /* [in] */ const String& selection,
     /* [in] */ ArrayOf<String>* selectionArgs)
 {
-    if (mType != IContentProviderOperation::TYPE_INSERT
+    if (mType != IContentProviderOperation::TYPE_UPDATE
         && mType != IContentProviderOperation::TYPE_DELETE
         && mType != IContentProviderOperation::TYPE_ASSERT) {
         Logger::E("CContentProviderOperationBuilder", "only inserts, deletes, and asserts can have selections");
@@ -382,7 +382,7 @@ ECode CContentProviderOperationBuilder::WithSelection(
 ECode CContentProviderOperationBuilder::WithExpectedCount(
     /* [in] */ Int32 count)
 {
-    if (mType != IContentProviderOperation::TYPE_INSERT
+    if (mType != IContentProviderOperation::TYPE_UPDATE
         && mType != IContentProviderOperation::TYPE_DELETE
         && mType != IContentProviderOperation::TYPE_ASSERT) {
         Logger::E("CContentProviderOperationBuilder", "only inserts, updates, and asserts can have expected counts");

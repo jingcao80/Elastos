@@ -8845,11 +8845,13 @@ ECode CActivityManagerService::IsIntentSenderTargetedToPackage(
     String pkgName;
     for (Int32 i = 0; i < res->mKey->mAllIntents->GetLength(); i++) {
         AutoPtr<IIntent> intent = (*res->mKey->mAllIntents)[i];
-        intent->GetPackage(&pkgName);
-        AutoPtr<IComponentName> compName;
-        intent->GetComponent((IComponentName**)&compName);
-        if (!pkgName.IsNull() && compName != NULL) {
-            return NOERROR;
+        if (intent != NULL) {
+            intent->GetPackage(&pkgName);
+            AutoPtr<IComponentName> compName;
+            intent->GetComponent((IComponentName**)&compName);
+            if (!pkgName.IsNull() && compName != NULL) {
+                return NOERROR;
+            }
         }
     }
 

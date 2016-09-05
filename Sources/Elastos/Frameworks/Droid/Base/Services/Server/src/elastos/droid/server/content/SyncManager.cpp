@@ -2278,6 +2278,8 @@ ECode SyncManager::SyncStatusObserver::OnStatusChanged(
 // SyncManager
 //==========================================================================================
 
+CAR_INTERFACE_IMPL(SyncManager, Object, ISyncManager)
+
 AutoPtr<IList> SyncManager::GetAllUsers()
 {
     AutoPtr<IList> list;

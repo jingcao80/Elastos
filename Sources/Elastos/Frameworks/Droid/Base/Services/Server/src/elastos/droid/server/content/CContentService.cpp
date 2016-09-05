@@ -396,8 +396,7 @@ AutoPtr<SyncManager> CContentService::GetSyncManager()
     // try {
         // Try to create the SyncManager, return NULL if it fails (e.g. the disk is full).
     if (mSyncManager == NULL) {
-        // mSyncManager = new SyncManager(mContext, mFactoryTest);
-        // Slogger::W(TAG, "TODO, SyncManager not implemented");
+        mSyncManager = new SyncManager(mContext, mFactoryTest);
     }
     // } catch (SQLiteException e) {
     //     Log.e(TAG, "Can't create SyncManager", e);
