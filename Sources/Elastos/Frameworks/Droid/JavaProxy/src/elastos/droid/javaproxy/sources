@@ -104,6 +104,7 @@ SOURCES += CIWindowSessionCallbackNative.cpp
 SOURCES += CINetworkPolicyListenerNative.cpp
 SOURCES += CMediaSessionCallbackStubNative.cpp
 SOURCES += CElSignatureParser.cpp
+SOURCES += CIMediaRouterClientNative.cpp
 
 LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

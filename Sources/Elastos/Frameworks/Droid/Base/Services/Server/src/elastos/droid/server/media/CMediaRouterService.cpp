@@ -1130,7 +1130,7 @@ ECode CMediaRouterService::constructor(
     return NOERROR;
 }
 
-void CMediaRouterService::SystemRunning()
+ECode CMediaRouterService::SystemRunning()
 {
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_USER_SWITCHED, (IIntentFilter**)&filter);
@@ -1138,6 +1138,7 @@ void CMediaRouterService::SystemRunning()
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(receiver, filter, (IIntent**)&intent);
     SwitchUser();
+    return NOERROR;
 }
 
 ECode CMediaRouterService::Monitor()
