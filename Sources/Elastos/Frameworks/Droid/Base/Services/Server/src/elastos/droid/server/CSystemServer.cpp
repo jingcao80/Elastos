@@ -511,7 +511,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<CTextServicesManagerService> tsms;
     AutoPtr<CLockSettingsService> lockSettings;
     AutoPtr<IIAssetAtlas> atlas;
-    // AutoPtr<CMediaRouterService> mediaRouter;
+    AutoPtr<CMediaRouterService> mediaRouter;
     // EdgeGestureService edgeGestureService = null;
     // GestureService gestureService = null;
     AutoPtr<IIThemeService> themeService;
@@ -588,7 +588,7 @@ ECode SystemServer::StartOtherServices()
     Slogger::I(TAG, "Consumer IR Service");
     AutoPtr<IIConsumerIrService> cirs;
     ec = CConsumerIrService::New(context, (IIConsumerIrService**)&cirs);
-    if (FAILED(ec)) ReportWtf("starting Consumer IR service", ec);
+    // if (FAILED(ec)) ReportWtf("starting Consumer IR service", ec);
     ServiceManager::AddService(IContext::CONSUMER_IR_SERVICE, cirs.Get());
     consumerIr = (CConsumerIrService*)cirs.Get();
 
@@ -1122,27 +1122,23 @@ ECode SystemServer::StartOtherServices()
     //     reportWtf("starting KillSwitch Service", e);
     // }
 
-    //     if (!disableNonCoreServices) {
-    //         try {
-    //             Slogger::I(TAG, "Media Router Service");
-    //             mediaRouter = new MediaRouterService(context);
-    //             ServiceManager::AddService(IContext::MEDIA_ROUTER_SERVICE, mediaRouter);
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting MediaRouterService", ec);
-    //         }
+        if (!disableNonCoreServices) {
+            Slogger::I(TAG, "Media Router Service");
+            ec = CMediaRouterService::NewByFriend(context, (CMediaRouterService**)&mediaRouter);
+            if (FAILED(ec)) ReportWtf("starting MediaRouterService", ec);
+            ServiceManager::AddService(IContext::MEDIA_ROUTER_SERVICE, (IBinder*)mediaRouter);
 
-    //         mSystemServiceManager->StartService(TrustManagerService.class);
+            // mSystemServiceManager->StartService(TrustManagerService.class);
 
-    //         mSystemServiceManager->StartService(FingerprintService.class);
+            // mSystemServiceManager->StartService(FingerprintService.class);
 
-    //         try {
-    //             Slogger::I(TAG, "BackgroundDexOptService");
-    //             BackgroundDexOptService.schedule(context);
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting BackgroundDexOptService", ec);
-    //         }
-
-    //     }
+            // try {
+            //     Slogger::I(TAG, "BackgroundDexOptService");
+            //     BackgroundDexOptService.schedule(context);
+            // } catch (Throwable e) {
+            //     ReportWtf("starting BackgroundDexOptService", ec);
+            // }
+        }
 
         if (!disableNonCoreServices) {
             Slogger::I(TAG, "Launcher CmHardwareService");
@@ -1318,7 +1314,7 @@ ECode SystemServer::StartOtherServices()
     bundle->mAtlasF = (CAssetAtlasService*)atlas.Get();
     bundle->mInputManagerF = inputManager;
     // bundle->mTelephonyRegistryF = telephonyRegistry;
-    // bundle->mMediaRouterF = mediaRouter;
+    bundle->mMediaRouterF = mediaRouter;
     bundle->mAudioServiceF = audioService;
     // bundle->mMmsServiceF = mmsService;
     bundle->mThemeServiceF = (CThemeService*)themeService.Get();
@@ -1479,10 +1475,10 @@ ECode SystemServer::SystemReadyRunnable::Run()
 
     // }
 
-    // if (mServiceBundle->mMediaRouterF != NULL) {
-    //     ec = mServiceBundle->mMediaRouterF->SystemRunning();
-    //     if (FAILED(ec)) mHost->ReportWtf("Notifying MediaRouterService running", ec);
-    // }
+    if (mServiceBundle->mMediaRouterF != NULL) {
+        ec = mServiceBundle->mMediaRouterF->SystemRunning();
+        if (FAILED(ec)) mHost->ReportWtf("Notifying MediaRouterService running", ec);
+    }
 
     // if (mServiceBundle->mMmsServiceF != NULL) {
     //     ec = mServiceBundle->mMmsServiceF->SystemRunning();

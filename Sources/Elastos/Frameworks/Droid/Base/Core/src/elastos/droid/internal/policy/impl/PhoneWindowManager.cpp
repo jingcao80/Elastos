@@ -6462,7 +6462,7 @@ Boolean PhoneWindowManager::ProcessKeyguardSetHiddenResultLw(
         attrs->SetPrivateFlags(privateFlags & ~IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD);
         Int32 flags;
         attrs->GetFlags(&flags);
-        attrs->SetFlags(flags | ~IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
+        attrs->SetFlags(flags & ~IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
         return TRUE;
     }
     else {

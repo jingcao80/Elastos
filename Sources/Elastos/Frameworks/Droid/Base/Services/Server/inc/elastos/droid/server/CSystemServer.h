@@ -20,6 +20,7 @@
 #include "elastos/droid/server/CNetworkManagementService.h"
 #include "elastos/droid/server/net/CNetworkStatsService.h"
 #include "elastos/droid/server/net/CNetworkPolicyManagerService.h"
+#include "elastos/droid/server/media/CMediaRouterService.h"
 #include "elastos/droid/server/CConnectivityService.h"
 #include "elastos/droid/server/CNetworkScoreService.h"
 #include "elastos/droid/server/CAssetAtlasService.h"
@@ -44,6 +45,7 @@ using Elastos::Droid::Server::StatusBar::CStatusBarManagerService;
 using Elastos::Droid::Server::Wallpaper::CWallpaperManagerService;
 using Elastos::Droid::Server::Net::CNetworkStatsService;
 using Elastos::Droid::Server::Net::CNetworkPolicyManagerService;
+using Elastos::Droid::Server::Media::CMediaRouterService;
 using Elastos::Utility::ITimer;
 
 
@@ -78,7 +80,7 @@ private:
         AutoPtr<CAssetAtlasService> mAtlasF;
         AutoPtr<CInputManagerService> mInputManagerF;
         // AutoPtr<CTelephonyRegistry> mTelephonyRegistryF;
-        // AutoPtr<CMediaRouterService> mMediaRouterF;
+        AutoPtr<CMediaRouterService> mMediaRouterF;
         AutoPtr<IAudioService> mAudioServiceF;
         // AutoPtr<CMmsServiceBroker> mMmsServiceF;
         AutoPtr<CThemeService> mThemeServiceF;

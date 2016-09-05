@@ -692,7 +692,7 @@ static bool isFileDifferent(const char* filePath, size_t fileSize, time_t modifi
 
     // For some reason, bionic doesn't define st_mtime as time_t
     if (time_t(st->st_mtime) != modifiedTime) {
-        ALOGV("mod time doesn't match: %lld vs. %lld\n", st->st_mtime, modifiedTime);
+        ALOGV("mod time doesn't match: %ld vs. %ld\n", st->st_mtime, modifiedTime);
         return true;
     }
 

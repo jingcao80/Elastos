@@ -19,8 +19,8 @@ using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
-// using Elastos::Droid::Hardware::Display::CWifiDisplay;
-// using Elastos::Droid::Hardware::Display::CWifiDisplayStatus;
+using Elastos::Droid::Hardware::Display::CWifiDisplay;
+using Elastos::Droid::Hardware::Display::CWifiDisplayStatus;
 using Elastos::Droid::Hardware::Display::IDisplayManager;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IUserHandle;
@@ -719,9 +719,8 @@ void WifiDisplayAdapter::RequestRenameLocked(
             String deviceName;
             display->GetDeviceName(&deviceName);
             display = NULL;
-            assert(0 && "TODO");
-            // CWifiDisplay::New(address, deviceName, alias,
-            //     FALSE, FALSE, FALSE, (IWifiDisplay**)&display);
+            CWifiDisplay::New(address, deviceName, alias,
+                FALSE, FALSE, FALSE, (IWifiDisplay**)&display);
             if (mPersistentDataStore->RememberWifiDisplay(display)) {
                 mPersistentDataStore->SaveIfNeeded();
                 UpdateRememberedDisplaysLocked();
@@ -762,11 +761,10 @@ void WifiDisplayAdapter::RequestForgetLocked(
 AutoPtr<IWifiDisplayStatus> WifiDisplayAdapter::GetWifiDisplayStatusLocked()
 {
     if (mCurrentStatus == NULL) {
-        assert(0 && "TODO");
-        // CWifiDisplayStatus::New(
-        //     mFeatureState, mScanState, mActiveDisplayState,
-        //     mActiveDisplay, mDisplays, mSessionInfo,
-        //     (IWifiDisplayStatus**)&mCurrentStatus);
+        CWifiDisplayStatus::New(
+            mFeatureState, mScanState, mActiveDisplayState,
+            mActiveDisplay, mDisplays, mSessionInfo,
+            (IWifiDisplayStatus**)&mCurrentStatus);
     }
 
     if (DEBUG) {
@@ -802,8 +800,7 @@ void WifiDisplayAdapter::UpdateDisplaysLocked()
             d->GetDeviceName(&name);
             d->GetDeviceAlias(&alias);
             AutoPtr<IWifiDisplay> wd;
-            assert(0 && "TODO");
-            // CWifiDisplay::New(address, name, alias, FALSE, FALSE, TRUE, (IWifiDisplay**)&wd);
+            CWifiDisplay::New(address, name, alias, FALSE, FALSE, TRUE, (IWifiDisplay**)&wd);
             displays->Add(wd.Get());
         }
     }
@@ -816,8 +813,7 @@ void WifiDisplayAdapter::UpdateDisplaysLocked()
         d->GetDeviceAlias(&alias);
         d->CanConnect(&canConnect);
         AutoPtr<IWifiDisplay> wd;
-        assert(0 && "TODO");
-        // CWifiDisplay(address, name, alias, TRUE, canConnect, (*remembered)[i], (IWifiDisplay**)&wd);
+        CWifiDisplay::New(address, name, alias, TRUE, canConnect, (*remembered)[i], (IWifiDisplay**)&wd);
         displays->Add(wd.Get());
     }
 

@@ -426,7 +426,7 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context);
 
-    CARAPI_(void) SystemRunning();
+    CARAPI SystemRunning();
 
     // @Override
     CARAPI Monitor();
