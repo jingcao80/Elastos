@@ -192,7 +192,6 @@ module
 //    using interface Elastos.Droid.Preference.IPreference;
 //    using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
 //    using interface Elastos.Droid.Preference.IPreferenceManagerOnActivityResultListener;
-//    using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
 //    using interface Elastos.Droid.Preference.IRingtonePreference;
 //    using interface Elastos.Droid.Preference.IPreferenceFragment;
 //    using interface Elastos.Droid.Preference.//IPreferenceFragmentOnPreferenceStartFragmentCallback;
@@ -1033,7 +1032,6 @@ module
 //    class CDialerSettingsActivity {
 //        constructor();
 //        interface IListActivity;
-//        interface IPreferenceManagerOnPreferenceTreeClickListener;
 //        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
 //        interface IActivity;
 //        interface IContextThemeWrapper;
@@ -1055,7 +1053,6 @@ module
 //
 //    class CGeneralSettingsFragment {
 //        interface IFragment;
-//        interface IPreferenceManagerOnPreferenceTreeClickListener;
 //        interface IComponentCallbacks2;
 //        interface IViewOnCreateContextMenuListener;
 //        interface IPreferenceFragment;

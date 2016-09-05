@@ -58,9 +58,19 @@ ECode CFragmentTwo::MyListener::OnClick(
 //=======================================================================
 CAR_OBJECT_IMPL(CFragmentTwo)
 
+CFragmentTwo::CFragmentOne()
+{
+    Logger::I(TAG, " >> Create CFragmentTwo: %p", this);
+}
+
+CFragmentTwo::~CFragmentTwo()
+{
+    Logger::I(TAG, " >> Destroy CFragmentTwo: %p", this);
+}
+
 ECode CFragmentTwo::constructor()
 {
-    return NOERROR;
+    return FragmentTwo::constructor();
 }
 
 ECode CFragmentTwo::OnCreateView(

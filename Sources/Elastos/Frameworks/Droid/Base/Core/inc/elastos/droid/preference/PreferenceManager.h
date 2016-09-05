@@ -249,7 +249,7 @@ private:
     /**
      * Fragment that owns this instance.
      */
-    AutoPtr<IPreferenceFragment> mFragment;
+    IPreferenceFragment* mFragment;
 
     /**
      * The context to use. This should always be set.

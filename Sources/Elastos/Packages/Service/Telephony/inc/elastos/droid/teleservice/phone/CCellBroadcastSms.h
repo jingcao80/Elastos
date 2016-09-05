@@ -24,9 +24,27 @@ namespace Phone {
  */
 CarClass(CCellBroadcastSms)
     , public PreferenceActivity
-    , public IPreferenceOnPreferenceChangeListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CCellBroadcastSms* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* objValue,
+            /* [out] */ Boolean* result);
+
+    private:
+        CCellBroadcastSms* mHost;
+    };
+
     class MyHandler
         : public Handler
     {
@@ -90,31 +108,12 @@ private:
         static AutoPtr<ArrayOf<Int32> > mConfigDataComplete;
     };
 
-    class PreferenceOnPreferenceChangeListener
-        : public Object
-        , public IPreferenceOnPreferenceChangeListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        PreferenceOnPreferenceChangeListener(
-            /* [in] */ CCellBroadcastSms* host);
-
-        CARAPI OnPreferenceChange(
-            /* [in] */ IPreference* preference,
-            /* [in] */ IInterface* objValue,
-            /* [out] */ Boolean* result);
-
-    private:
-        CCellBroadcastSms* mHost;
-    };
-
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CCellBroadcastSms() {}
+
+    CARAPI constructor();
 
     /**
      * Invoked on each preference click in this hierarchy, overrides

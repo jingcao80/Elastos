@@ -21,9 +21,28 @@ namespace Server {
 namespace Telecom {
 
 //=============================================================================
+// RespondViaSmsSettings::Settings::InnerListener
+//=============================================================================
+
+CAR_INTERFACE_IMPL(RespondViaSmsSettings::Settings::InnerListener, Object, IPreferenceOnPreferenceChangeListener)
+
+RespondViaSmsSettings::Settings::InnerListener::InnerListener(
+    /* [in] */ Settings* host)
+    : mHost(host)
+{}
+
+ECode RespondViaSmsSettings::Settings::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* newValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(preference, newValue, result);
+}
+
+//=============================================================================
 // RespondViaSmsSettings::Settings
 //=============================================================================
-CAR_INTERFACE_IMPL_2(RespondViaSmsSettings::Settings, PreferenceActivity, IPreferenceOnPreferenceChangeListener, IRespondViaSmsSettingsSettings)
+CAR_INTERFACE_IMPL(RespondViaSmsSettings::Settings, PreferenceActivity, IRespondViaSmsSettingsSettings)
 
 ECode RespondViaSmsSettings::Settings::OnCreate(
     /* [in] */ IBundle* icicle)
@@ -56,29 +75,30 @@ ECode RespondViaSmsSettings::Settings::OnCreate(
     String text;
     pref->GetText(&text);
     assert(0 && "TODO IEditTextPreference");
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     // pref->SetTitle(text);
-    // pref->SetOnPreferenceChangeListener(this);
+    // pref->SetOnPreferenceChangeListener(listener);
     preference = NULL;
     FindPreference(QuickResponseUtils::KEY_CANNED_RESPONSE_PREF_2, (IPreference**)&preference);
     pref = IEditTextPreference::Probe(preference);
     pref->GetText(&text);
     assert(0 && "TODO IEditTextPreference");
     // pref->SetTitle(text);
-    // pref->SetOnPreferenceChangeListener(this);
+    // pref->SetOnPreferenceChangeListener(listener);
     preference = NULL;
     FindPreference(QuickResponseUtils::KEY_CANNED_RESPONSE_PREF_3, (IPreference**)&preference);
     pref = IEditTextPreference::Probe(preference);
     pref->GetText(&text);
     assert(0 && "TODO IEditTextPreference");
     // pref->SetTitle(text);
-    // pref->SetOnPreferenceChangeListener(this);
+    // pref->SetOnPreferenceChangeListener(listener);
     preference = NULL;
     FindPreference(QuickResponseUtils::KEY_CANNED_RESPONSE_PREF_4, (IPreference**)&preference);
     pref = IEditTextPreference::Probe(preference);
     pref->GetText(&text);
     assert(0 && "TODO IEditTextPreference");
     // pref->SetTitle(text);
-    // pref->SetOnPreferenceChangeListener(this);
+    // pref->SetOnPreferenceChangeListener(listener);
     AutoPtr<IActionBar> actionBar;
     GetActionBar((IActionBar**)&actionBar);
     if (actionBar != NULL) {

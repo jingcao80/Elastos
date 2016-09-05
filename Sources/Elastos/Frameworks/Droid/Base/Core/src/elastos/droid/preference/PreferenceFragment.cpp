@@ -66,17 +66,18 @@ ECode PreferenceFragment::RequestFocus::Run()
 }
 
 /////////////////////////////////////////////////////
-// PreferenceFragment::PreferenceFragmentOnKeyListener
+// PreferenceFragment::InnerListener
 /////////////////////////////////////////////////////
 
-CAR_INTERFACE_IMPL(PreferenceFragment::PreferenceFragmentOnKeyListener, Object, IViewOnKeyListener)
+CAR_INTERFACE_IMPL_2(PreferenceFragment::InnerListener, Object, \
+    IViewOnKeyListener, IPreferenceManagerOnPreferenceTreeClickListener)
 
-PreferenceFragment::PreferenceFragmentOnKeyListener::PreferenceFragmentOnKeyListener(
+PreferenceFragment::InnerListener::InnerListener(
     /* [in] */ PreferenceFragment* host)
     : mHost(host)
 {}
 
-ECode PreferenceFragment::PreferenceFragmentOnKeyListener::OnKey(
+ECode PreferenceFragment::InnerListener::OnKey(
     /* [in] */ IView* v,
     /* [in] */ Int32 keyCode,
     /* [in] */ IKeyEvent* event,
@@ -95,12 +96,19 @@ ECode PreferenceFragment::PreferenceFragmentOnKeyListener::OnKey(
     return NOERROR;
 }
 
+ECode PreferenceFragment::InnerListener::OnPreferenceTreeClick(
+    /*[in]*/ IPreferenceScreen* preferenceScreen,
+    /*[in]*/ IPreference* preference,
+    /*[out]*/ Boolean* result)
+{
+    return mHost->OnPreferenceTreeClick(preferenceScreen, preference, result);
+}
 
 /////////////////////////////////////////////////////
 // PreferenceFragment
 /////////////////////////////////////////////////////
 
-CAR_INTERFACE_IMPL_2(PreferenceFragment, Fragment, IPreferenceFragment,IPreferenceManagerOnPreferenceTreeClickListener)
+CAR_INTERFACE_IMPL(PreferenceFragment, Fragment, IPreferenceFragment)
 
 PreferenceFragment::PreferenceFragment()
     : mHavePrefs(FALSE)
@@ -117,7 +125,7 @@ ECode PreferenceFragment::OnCreate(
     mHandler = new PreferenceFragmentHandler(this);
     mHandler->constructor();
     mRequestFocus = new RequestFocus(this);
-    mListOnKeyListener = new PreferenceFragmentOnKeyListener(this);
+    mListOnKeyListener = new InnerListener(this);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
@@ -176,7 +184,8 @@ ECode PreferenceFragment::OnActivityCreated(
 ECode PreferenceFragment::OnStart()
 {
     Fragment::OnStart();
-    mPreferenceManager->SetOnPreferenceTreeClickListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mPreferenceManager->SetOnPreferenceTreeClickListener(listener);
     return NOERROR;
 }
 

@@ -59,11 +59,38 @@ CarClass(CCallFeaturesSetting)
     , public PreferenceActivity
     , public ICallFeaturesSetting
     , public IDialogInterfaceOnClickListener
-    , public IPreferenceOnPreferenceChangeListener
-    , public IEditPhoneNumberPreferenceOnDialogClosedListener
-    , public IEditPhoneNumberPreferenceGetDefaultNumberListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+        , public IEditPhoneNumberPreferenceOnDialogClosedListener
+        , public IEditPhoneNumberPreferenceGetDefaultNumberListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CCallFeaturesSetting::InnerListener")
+
+        InnerListener(
+            /* [in] */ CCallFeaturesSetting* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* objValue,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnDialogClosed(
+            /* [in] */ IEditPhoneNumberPreference* preference,
+            /* [in] */ Int32 buttonClicked);
+
+        CARAPI OnGetDefaultNumber(
+            /* [in] */ IEditPhoneNumberPreference* preference,
+            /* [out] */ String* str);
+    private:
+        CCallFeaturesSetting* mHost;
+    };
+
     class VoiceMailProvider
         : public Object
     {
@@ -196,25 +223,6 @@ private:
         {}
 
         CARAPI Run();
-
-    private:
-        CCallFeaturesSetting* mHost;
-    };
-
-    class PreferenceOnPreferenceChangeListener
-        : public Object
-        , public IPreferenceOnPreferenceChangeListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        PreferenceOnPreferenceChangeListener(
-            /* [in] */ CCallFeaturesSetting* host);
-
-        CARAPI OnPreferenceChange(
-            /* [in] */ IPreference* preference,
-            /* [in] */ IInterface* objValue,
-            /* [out] */ Boolean* result);
 
     private:
         CCallFeaturesSetting* mHost;

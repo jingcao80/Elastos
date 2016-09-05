@@ -34,9 +34,28 @@ public:
      */
     class Settings
         : public PreferenceActivity
-        , public IPreferenceOnPreferenceChangeListener
         , public IRespondViaSmsSettingsSettings
     {
+    private:
+        class InnerListener
+            : public Object
+            , public IPreferenceOnPreferenceChangeListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            TO_STRING_IMPL("RespondViaSmsSettings::Settings::InnerListener")
+
+            InnerListener(
+                /* [in] */ Settings* host);
+
+            CARAPI OnPreferenceChange(
+                /* [in] */ IPreference* preference,
+                /* [in] */ IInterface* newValue,
+                /* [out] */ Boolean* result);
+        private:
+            Settings* mHost;
+        };
     public:
         CAR_INTERFACE_DECL()
 

@@ -1175,8 +1175,6 @@ ECode TaskStackView::OnStackTaskRemoved(
     /* [in] */ ITask* removedTask,
     /* [in] */ ITask* newFrontMostTask)
 {
-    Logger::I(TAG, " >> OnStackTaskRemoved: %s", TO_CSTR(removedTask), TO_CSTR(newFrontMostTask));
-
     TaskStack* stack = (TaskStack*)_stack;
     // Remove the view associated with this task, we can't rely on updateTransforms
     // to work here because the task is no longer in the list
@@ -1459,8 +1457,6 @@ ECode TaskStackView::OnTaskViewClicked(
 ECode TaskStackView::OnTaskViewDismissed(
     /* [in] */ ITaskView* _tv)
 {
-    Logger::I(TAG, " >> OnTaskViewDismissed: %s", TO_CSTR(_tv));
-
     TaskView* tv = (TaskView*)_tv;
     AutoPtr<Task> task = tv->GetTask();
     Int32 taskIndex = mStack->IndexOfTask(task);

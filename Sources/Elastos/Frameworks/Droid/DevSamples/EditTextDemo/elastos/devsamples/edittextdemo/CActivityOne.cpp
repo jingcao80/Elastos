@@ -11,7 +11,7 @@ namespace Elastos {
 namespace DevSamples {
 namespace EditTextDemo {
 
-static const String DBG_TAG("CActivityOne");
+static const String DBG_TAG("EditTextDemo::CActivityOne");
 
 //=======================================================================
 // CActivityOne::MyListener
@@ -90,8 +90,7 @@ ECode CActivityOne::OnCreate(
     mEditText = IEditText::Probe(temp);
     assert(mEditText != NULL);
     AutoPtr<MyListener> l = new MyListener(this);
-    IViewOnKeyListener* keyListener = (IViewOnKeyListener*)l.Get();
-    IView::Probe(mEditText)->SetOnKeyListener(keyListener);
+    IView::Probe(mEditText)->SetOnKeyListener(l;
 
     return NOERROR;
 }

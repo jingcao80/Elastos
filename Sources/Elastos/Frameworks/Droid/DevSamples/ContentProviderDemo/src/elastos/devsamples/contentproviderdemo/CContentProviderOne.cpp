@@ -37,6 +37,16 @@ AutoPtr<IUriMatcher> CContentProviderOne::GetUriMatcher()
     return sUriMatcher;
 }
 
+CContentProviderOne::CContentProviderOne()
+{
+    Logger::I(TAG, " >> Create CContentProviderOne: %p", this);
+}
+
+CContentProviderOne::~CContentProviderOne()
+{
+    Logger::I(TAG, " >> Destroy CContentProviderOne: %p", this);
+}
+
 ECode CContentProviderOne::constructor()
 {
     Logger::I(TAG, "constructor");

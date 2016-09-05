@@ -44,16 +44,16 @@ class ECO_PUBLIC PreferenceActivity
     , public IPreferenceFragmentOnPreferenceStartFragmentCallback
 {
 private:
-    class ECO_LOCAL PreferenceManagerOnPreferenceTreeClickListener
+    class ECO_LOCAL InnerListener
         : public Object
         , public IPreferenceManagerOnPreferenceTreeClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        TO_STRING_IMPL("PreferenceActivity::PreferenceManagerOnPreferenceTreeClickListener")
+        TO_STRING_IMPL("PreferenceActivity::InnerListener")
 
-        PreferenceManagerOnPreferenceTreeClickListener(
+        InnerListener(
             /* [in] */ PreferenceActivity* host);
 
         CARAPI OnPreferenceTreeClick(
@@ -778,7 +778,7 @@ public:
      *
      * @Deprecated
      */
-    CARAPI OnPreferenceTreeClick(
+    virtual CARAPI OnPreferenceTreeClick(
         /* [in] */ IPreferenceScreen* preferenceScreen,
         /* [in] */ IPreference* preference,
         /* [out] */ Boolean* result);

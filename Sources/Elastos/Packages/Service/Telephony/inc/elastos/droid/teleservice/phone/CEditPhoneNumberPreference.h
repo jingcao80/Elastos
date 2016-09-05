@@ -271,7 +271,7 @@ private:
     AutoPtr<IEditPhoneNumberPreferenceGetDefaultNumberListener> mGetDefaultNumberListener;
 
     //Activity values
-    AutoPtr<IActivity> mParentActivity;
+    IActivity* mParentActivity;
     AutoPtr<IIntent> mContactListIntent;
     /** Arbitrary activity-assigned preference id value */
     Int32 mPrefId;

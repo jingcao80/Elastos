@@ -76,7 +76,6 @@ module
     using interface Elastos.Droid.Preference.IPreferenceFragment;
     using interface Elastos.Droid.Preference.IPreferenceOnPreferenceClickListener;
     using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
-    using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
     using interface Elastos.Droid.Provider.ISearchIndexablesProvider;
     using interface Elastos.Droid.Settings.IDialogCreatable;
@@ -361,7 +360,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -418,7 +416,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -448,7 +445,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -479,7 +475,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -649,7 +644,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -695,7 +689,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -710,7 +703,6 @@ module
         interface IIndexable;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -725,7 +717,6 @@ module
         interface IIndexable;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -772,7 +763,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -785,7 +775,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -835,6 +824,7 @@ module
         constructor();
 
         interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
 
         interface IActivity;
         interface IContext;
@@ -857,6 +847,7 @@ module
         interface IChooseLockGenericInternalActivity;
 
         interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
 
         interface IActivity;
         interface IContext;
@@ -879,7 +870,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -890,6 +880,7 @@ module
         constructor();
 
         interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
 
         interface IActivity;
         interface IContext;
@@ -912,7 +903,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -944,6 +934,7 @@ module
         constructor();
 
         interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
 
         interface IActivity;
         interface IContext;
@@ -966,7 +957,6 @@ module
         interface ISettingsPreferenceFragment;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -981,6 +971,7 @@ module
         constructor();
 
         interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
 
         interface IActivity;
         interface IContext;
@@ -1020,6 +1011,7 @@ module
         constructor();
 
         interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
 
         interface IActivity;
         interface IContext;
@@ -1040,6 +1032,7 @@ module
         constructor();
 
         interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
 
         interface IActivity;
         interface IContext;
@@ -1083,7 +1076,6 @@ module
         interface IIndexable;
         interface IPreferenceFragment;
         interface IFragment;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;

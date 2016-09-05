@@ -61,6 +61,7 @@ CAR_OBJECT_IMPL(CEditPhoneNumberPreference)
 
 CEditPhoneNumberPreference::CEditPhoneNumberPreference()
     : mConfirmationMode(0)
+    , mParentActivity(NULL)
     , mPrefId(0)
     , mButtonClicked(0)
     , mPhoneNumber(NULL)

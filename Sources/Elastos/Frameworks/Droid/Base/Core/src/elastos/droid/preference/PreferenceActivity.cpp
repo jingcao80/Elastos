@@ -75,15 +75,15 @@ const Int32 PreferenceActivity::MSG_BUILD_HEADERS;
 //====================================================
 // PreferenceActivity::MHandler
 //====================================================
-CAR_INTERFACE_IMPL(PreferenceActivity::PreferenceManagerOnPreferenceTreeClickListener, \
+CAR_INTERFACE_IMPL(PreferenceActivity::InnerListener, \
     Object, IPreferenceManagerOnPreferenceTreeClickListener)
 
-PreferenceActivity::PreferenceManagerOnPreferenceTreeClickListener::PreferenceManagerOnPreferenceTreeClickListener(
+PreferenceActivity::InnerListener::InnerListener(
     /* [in] */ PreferenceActivity* host)
     : mHost(host)
 {}
 
-ECode PreferenceActivity::PreferenceManagerOnPreferenceTreeClickListener::OnPreferenceTreeClick(
+ECode PreferenceActivity::InnerListener::OnPreferenceTreeClick(
     /* [in] */ IPreferenceScreen* preferenceScreen,
     /* [in] */ IPreference* preference,
     /* [out] */ Boolean* result)
@@ -810,7 +810,7 @@ ECode PreferenceActivity::OnCreate(
         mPrefsContainer = IViewGroup::Probe(view);
         CPreferenceManager::New(this, FIRST_REQUEST_CODE, (IPreferenceManager**)&mPreferenceManager);
         AutoPtr<IPreferenceManagerOnPreferenceTreeClickListener> listener;
-        listener = new PreferenceManagerOnPreferenceTreeClickListener(this);
+        listener = new InnerListener(this);
         mPreferenceManager->SetOnPreferenceTreeClickListener(listener);
     }
 

@@ -70,6 +70,16 @@ ECode CActivityOne::MyListener::OnClick(
 
 CAR_OBJECT_IMPL(CActivityOne)
 
+CActivityOne::CActivityOne()
+{
+    Logger::I(TAG, " >> Create CActivityOne: %p", this);
+}
+
+CActivityOne::~CActivityOne()
+{
+    Logger::I(TAG, " >> Destroy CActivityOne: %p", this);
+}
+
 ECode CActivityOne::constructor()
 {
     Logger::I(TAG, " >> constructor()");

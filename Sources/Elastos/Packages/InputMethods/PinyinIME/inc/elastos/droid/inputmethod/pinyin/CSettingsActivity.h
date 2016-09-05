@@ -25,12 +25,33 @@ namespace Pinyin {
  */
 class CSettingsActivity
     : public PreferenceActivity
-    , public IPreferenceOnPreferenceChangeListener
 {
-public:
-    CAR_OBJECT_DECL();
+private:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    CAR_INTERFACE_DECL();
+        TO_STRING_IMPL("CSettingsActivity::InnerListener")
+
+        InnerListener(
+            /* [in] */ CSettingsActivity* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* newValue,
+            /* [out] */ Boolean* result);
+
+    private:
+        CSettingsActivity* mHost;
+    };
+
+public:
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor();
 
     CARAPI OnPreferenceChange(
         /* [in] */ IPreference* preference,

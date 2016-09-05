@@ -211,14 +211,14 @@ Int32 CCellBroadcastSms::CellBroadcastSmsConfig::GetConfigDataLanguage()
     }
 }
 
-CAR_INTERFACE_IMPL(CCellBroadcastSms::PreferenceOnPreferenceChangeListener, Object, \
-        IPreferenceOnPreferenceChangeListener)
-CCellBroadcastSms::PreferenceOnPreferenceChangeListener::PreferenceOnPreferenceChangeListener(
+CAR_INTERFACE_IMPL(CCellBroadcastSms::InnerListener, Object, IPreferenceOnPreferenceChangeListener)
+
+CCellBroadcastSms::InnerListener::InnerListener(
     /* [in] */ CCellBroadcastSms* host)
     : mHost(host)
 {}
 
-ECode CCellBroadcastSms::PreferenceOnPreferenceChangeListener::OnPreferenceChange(
+ECode CCellBroadcastSms::InnerListener::OnPreferenceChange(
     /* [in] */ IPreference* preference,
     /* [in] */ IInterface* objValue,
     /* [out] */ Boolean* result)
@@ -267,8 +267,13 @@ const String CCellBroadcastSms::BUTTON_REGIONAL_ENTERTAINMENT_NEWS_KEY("button_r
 const String CCellBroadcastSms::BUTTON_NATIONAL_ENTERTAINMENT_NEWS_KEY("button_national_entertainment_news");
 const String CCellBroadcastSms::BUTTON_INTERNATIONAL_ENTERTAINMENT_NEWS_KEY("button_international_entertainment_news");
 
-CAR_INTERFACE_IMPL(CCellBroadcastSms, PreferenceActivity, IPreferenceOnPreferenceChangeListener)
 CAR_OBJECT_IMPL(CCellBroadcastSms)
+
+ECode CCellBroadcastSms::constructor()
+{
+    return PreferenceActivity::constructor();
+}
+
 ECode CCellBroadcastSms::OnPreferenceTreeClick(
     /* [in] */ IPreferenceScreen* preferenceScreen,
     /* [in] */ IPreference* preference,
@@ -595,7 +600,7 @@ ECode CCellBroadcastSms::OnCreate(
     mListLanguage = IListPreference::Probe(preference);
 
     // set the listener for the language list preference
-    AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
+    AutoPtr<InnerListener> l = new InnerListener(this);
     IPreference::Probe(mListLanguage)->SetOnPreferenceChangeListener(l);
     preference = NULL;
     cs = NULL;

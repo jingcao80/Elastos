@@ -30,10 +30,32 @@ namespace Phone {
  */
 CarClass(CFdnSetting)
     , public PreferenceActivity
-    , public IEditPinPreferenceOnPinEnteredListener
-    , public IDialogInterfaceOnCancelListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IEditPinPreferenceOnPinEnteredListener
+        , public IDialogInterfaceOnCancelListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CFdnSetting::InnerListener")
+
+        InnerListener(
+            /* [in] */ CFdnSetting* host);
+
+        CARAPI OnPinEntered(
+            /* [in] */ IPhoneEditPinPreference* preference,
+            /* [in] */ Boolean positiveResult);
+
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* dialog);
+
+    private:
+        CFdnSetting* mHost;
+    };
+
     class MyHandler
         : public Handler
     {
@@ -51,8 +73,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CFdnSetting();

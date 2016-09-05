@@ -206,13 +206,12 @@ const Int32 SettingsActivity::MSG_BUILD_CATEGORIES;
 //===============================================================================
 //                  SettingsActivity::InnerListener
 //===============================================================================
-CAR_INTERFACE_IMPL_6(SettingsActivity::InnerListener, Object, \
+CAR_INTERFACE_IMPL_5(SettingsActivity::InnerListener, Object, \
     IFragmentManagerOnBackStackChangedListener, \
     ISearchViewOnQueryTextListener, \
     ISearchViewOnCloseListener, \
     IOnActionExpandListener, \
-    IPreferenceManagerOnPreferenceTreeClickListener, \
-    IPreferenceFragmentOnPreferenceStartFragmentCallback)
+    IPreferenceManagerOnPreferenceTreeClickListener)
 
 SettingsActivity::InnerListener::InnerListener(
     /* [in] */ SettingsActivity* host)
@@ -256,14 +255,6 @@ ECode SettingsActivity::InnerListener::OnMenuItemActionCollapse(
     /* [out] */ Boolean* result)
 {
     return mHost->OnMenuItemActionCollapse(item, result);
-}
-
-ECode SettingsActivity::InnerListener::OnPreferenceStartFragment(
-    /* [in] */ IPreferenceFragment* caller,
-    /* [in] */ IPreference* pref,
-    /* [out] */ Boolean* result)
-{
-    return mHost->OnPreferenceStartFragment(caller, pref, result);
 }
 
 ECode SettingsActivity::InnerListener::OnPreferenceTreeClick(

@@ -28,7 +28,6 @@ namespace Preference {
 class ECO_PUBLIC PreferenceFragment
     : public Fragment
     , public IPreferenceFragment
-    , public IPreferenceManagerOnPreferenceTreeClickListener
 {
 private:
     class ECO_LOCAL PreferenceFragmentHandler
@@ -60,14 +59,15 @@ private:
         PreferenceFragment* mHost;
     };
 
-    class ECO_LOCAL PreferenceFragmentOnKeyListener
+    class ECO_LOCAL InnerListener
         : public Object
         , public IViewOnKeyListener
+        , public IPreferenceManagerOnPreferenceTreeClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        PreferenceFragmentOnKeyListener(
+        InnerListener(
             /* [in] */ PreferenceFragment* host);
 
         CARAPI OnKey(
@@ -76,6 +76,10 @@ private:
             /* [in] */ IKeyEvent* event,
             /* [out]*/ Boolean* result);
 
+        CARAPI OnPreferenceTreeClick(
+            /*[in]*/ IPreferenceScreen* preferenceScreen,
+            /*[in]*/ IPreference* preference,
+            /*[out]*/ Boolean* result);
     private:
         PreferenceFragment* mHost;
     };
@@ -165,7 +169,7 @@ public:
     /**
      * {@inheritDoc}
      */
-    CARAPI OnPreferenceTreeClick(
+    virtual CARAPI OnPreferenceTreeClick(
         /*[in]*/ IPreferenceScreen* preferenceScreen,
         /*[in]*/ IPreference* preference,
         /*[out]*/ Boolean* result);

@@ -62,6 +62,7 @@ class SettingsActivity
     : public Activity
     , public ISettingsActivity
     , public IButtonBarHandler
+    , public IPreferenceFragmentOnPreferenceStartFragmentCallback
 {
 public:
     class InnerListener
@@ -71,7 +72,6 @@ public:
         , public IOnActionExpandListener
         , public IFragmentManagerOnBackStackChangedListener
         , public IPreferenceManagerOnPreferenceTreeClickListener
-        , public IPreferenceFragmentOnPreferenceStartFragmentCallback
     {
     public:
         CAR_INTERFACE_DECL()
@@ -104,12 +104,6 @@ public:
         //@Override
         CARAPI OnMenuItemActionCollapse(
             /* [in] */ IMenuItem* item,
-            /* [out] */ Boolean* result);
-
-        //@Override
-        CARAPI OnPreferenceStartFragment(
-            /* [in] */ IPreferenceFragment* caller,
-            /* [in] */ IPreference* pref,
             /* [out] */ Boolean* result);
 
         //@Override
@@ -222,7 +216,7 @@ public:
         /* [out] */ IList** categories); //List<DashboardCategory>
 
     //@Override
-    CARAPI OnPreferenceStartFragment(
+    virtual CARAPI OnPreferenceStartFragment(
         /* [in] */ IPreferenceFragment* caller,
         /* [in] */ IPreference* pref,
         /* [out] */ Boolean* result);

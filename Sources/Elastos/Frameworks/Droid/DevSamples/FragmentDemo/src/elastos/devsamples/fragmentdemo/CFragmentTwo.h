@@ -36,6 +36,10 @@ public:
 public:
     CAR_OBJECT_DECL()
 
+    CFragmentTwo();
+
+    ~CFragmentTwo();
+
     CARAPI constructor();
 
     CARAPI OnCreateView(

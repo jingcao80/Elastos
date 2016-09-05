@@ -8,7 +8,6 @@ module
     /**
      * @Involve
      * interface IListActivity
-     * interface IPreferenceManagerOnPreferenceTreeClickListener
      * interface IPreferenceFragmentOnPreferenceStartFragmentCallback
      * interface IActivity
      * interface IContextThemeWrapper
@@ -16,10 +15,10 @@ module
      * interface ILayoutInflaterFactory2
      * interface IWindowCallback
      * interface IKeyEventCallback
-     * interface IViewOnCreateContextMenuListener //undefined
+     * interface IViewOnCreateContextMenuListener
      * interface IComponentCallbacks2
      * interface IComponentCallbacks
-     * interface IOnWindowDismissedCallback  //IOnWindowDismissedCallback
+     * interface IOnWindowDismissedCallback
      * interface IContextWrapper
      * interface IContext
      * interface IPreferenceActivity

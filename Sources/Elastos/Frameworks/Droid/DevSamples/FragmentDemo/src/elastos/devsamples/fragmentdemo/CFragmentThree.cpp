@@ -58,9 +58,19 @@ ECode CFragmentThree::MyListener::OnClick(
 //=======================================================================
 CAR_OBJECT_IMPL(CFragmentThree)
 
+CFragmentThree::CFragmentThree()
+{
+    Logger::I(TAG, " >> Create CFragmentThree: %p", this);
+}
+
+CFragmentThree::~CFragmentThree()
+{
+    Logger::I(TAG, " >> Destroy CFragmentThree: %p", this);
+}
+
 ECode CFragmentThree::constructor()
 {
-    return NOERROR;
+    return Fragment::constructor();
 }
 
 ECode CFragmentThree::OnCreateView(

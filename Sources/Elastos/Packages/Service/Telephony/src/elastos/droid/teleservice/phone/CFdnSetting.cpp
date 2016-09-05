@@ -38,6 +38,29 @@ namespace Droid {
 namespace TeleService {
 namespace Phone {
 
+CAR_INTERFACE_IMPL_2(CFdnSetting::InnerListener, Object, \
+    IEditPinPreferenceOnPinEnteredListener, \
+    IDialogInterfaceOnCancelListener)
+
+CFdnSetting::InnerListener::InnerListener(
+    /* [in] */ CFdnSetting* host)
+    : mHost(host)
+{
+}
+
+ECode CFdnSetting::InnerListener::OnPinEntered(
+    /* [in] */ IPhoneEditPinPreference* preference,
+    /* [in] */ Boolean positiveResult)
+{
+    return mHost->OnPinEntered(preference, positiveResult);
+}
+
+ECode CFdnSetting::InnerListener::OnCancel(
+    /* [in] */ IDialogInterface* dialog)
+{
+    return mHost->OnCancel(dialog);
+}
+
 CFdnSetting::MyHandler::MyHandler(
     /* [in] */ CFdnSetting* host)
     : mHost(host)
@@ -165,9 +188,6 @@ const String CFdnSetting::DIALOG_PIN_ENTRY_KEY("dialog_pin_entry_key");
 
 const Int32 CFdnSetting::MIN_PIN_LENGTH = 4;
 const Int32 CFdnSetting::MAX_PIN_LENGTH = 8;
-
-CAR_INTERFACE_IMPL_2(CFdnSetting, PreferenceActivity, IEditPinPreferenceOnPinEnteredListener,
-        IDialogInterfaceOnCancelListener)
 
 CAR_OBJECT_IMPL(CFdnSetting)
 
@@ -556,11 +576,12 @@ ECode CFdnSetting::OnCreate(
     IPreferenceGroup::Probe(prefSet)->FindPreference(cchar2, (IPreference**)&preference2);
     mButtonChangePin2 = IPhoneEditPinPreference::Probe(preference2);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     //assign click listener and update state
-    mButtonEnableFDN->SetOnPinEnteredListener(this);
+    mButtonEnableFDN->SetOnPinEnteredListener(listener);
     UpdateEnableFDN();
 
-    mButtonChangePin2->SetOnPinEnteredListener(this);
+    mButtonChangePin2->SetOnPinEnteredListener(listener);
 
     // Only reset the pin change dialog if we're not in the middle of changing it.
     if (icicle == NULL) {

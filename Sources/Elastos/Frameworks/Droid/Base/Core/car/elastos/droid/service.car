@@ -81,7 +81,6 @@ module
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.Preference.IPreferenceActivity;
     interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
-    interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
     interface Elastos.Droid.Graphics.IRect;
     interface Elastos.Droid.View.IContextThemeWrapper;
     interface Elastos.Droid.View.IKeyEventCallback;
@@ -227,7 +226,6 @@ module
             interface IContextWrapper;
             interface IContext;
             interface IPreferenceActivity;
-            interface IPreferenceManagerOnPreferenceTreeClickListener;
             interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
             interface IWallpaperSettingsActivity;
         }

@@ -20,6 +20,10 @@ CarClass(CContentProviderOne)
 public:
     CAR_OBJECT_DECL()
 
+    CContentProviderOne();
+
+    ~CContentProviderOne();
+
     CARAPI constructor();
 
     CARAPI OnCreate(

@@ -94,7 +94,6 @@ module
     using interface Elastos.Droid.Preference.IPreferenceManagerOnActivityDestroyListener;
     using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
     using interface Elastos.Droid.Preference.IPreferenceScreen;
-    using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
     using interface Elastos.Droid.Preference.ITwoStatePreference;
     using interface Elastos.Droid.Widget.IOnEditorActionListener;
     using interface Elastos.Core.IComparable;
@@ -140,13 +139,9 @@ module
         constructor();
 
         interface ICallFeaturesSetting;
-        interface IPreferenceActivity;
         interface IDialogInterfaceOnClickListener;
-        interface IPreferenceOnPreferenceChangeListener;
-        interface IEditPhoneNumberPreferenceOnDialogClosedListener;
-        interface IEditPhoneNumberPreferenceGetDefaultNumberListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceActivity;
         interface IListActivity;
         interface IActivity;
         interface IContext;
@@ -214,7 +209,6 @@ module
 
         interface IPreferenceActivity;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IListActivity;
         interface IActivity;
         interface IContext;
@@ -298,10 +292,10 @@ module
     }
 
     class CCellBroadcastSms {
+        constructor();
+        
         interface IPreferenceActivity;
-        interface IPreferenceOnPreferenceChangeListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IListActivity;
         interface IActivity;
         interface IContext;
@@ -406,7 +400,6 @@ module
 
         interface IListActivity;
         interface IActivity;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IContextThemeWrapper;
         interface ILayoutInflaterFactory;
@@ -438,7 +431,6 @@ module
 
         interface IListActivity;
         interface IActivity;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IContextThemeWrapper;
         interface ILayoutInflaterFactory;
@@ -554,7 +546,6 @@ module
 
         interface IListActivity;
         interface IActivity;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IContextThemeWrapper;
         interface ILayoutInflaterFactory;
@@ -575,7 +566,6 @@ module
 
         interface IListActivity;
         interface IActivity;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IContextThemeWrapper;
         interface ILayoutInflaterFactory;
@@ -599,7 +589,6 @@ module
 
         interface IListActivity;
         interface IActivity;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IContextThemeWrapper;
         interface ILayoutInflaterFactory;
@@ -665,7 +654,6 @@ module
 
         interface IListActivity;
         interface IActivity;
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IContextThemeWrapper;
         interface ILayoutInflaterFactory;
@@ -679,9 +667,6 @@ module
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
-
-        interface IEditPinPreferenceOnPinEnteredListener;
-        interface IDialogInterfaceOnCancelListener;
     }
 
     class CFdnList {
@@ -932,7 +917,6 @@ module
 
             interface IListActivity;
             interface IActivity;
-            interface IPreferenceManagerOnPreferenceTreeClickListener;
             interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
             interface IContextThemeWrapper;
             interface ILayoutInflaterFactory;
@@ -1025,7 +1009,6 @@ module
         class CSipSettings {
             interface IListActivity;
             interface IActivity;
-            interface IPreferenceManagerOnPreferenceTreeClickListener;
             interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
             interface IContextThemeWrapper;
             interface ILayoutInflaterFactory;
@@ -1044,7 +1027,6 @@ module
         class CSipEditor {
             interface IListActivity;
             interface IActivity;
-            interface IPreferenceManagerOnPreferenceTreeClickListener;
             interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
             interface IContextThemeWrapper;
             interface ILayoutInflaterFactory;

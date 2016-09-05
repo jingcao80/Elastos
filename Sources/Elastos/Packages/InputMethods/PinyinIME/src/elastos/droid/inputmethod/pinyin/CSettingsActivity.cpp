@@ -15,11 +15,29 @@ namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
+CAR_INTERFACE_IMPL(CSettingsActivity::InnerListener, Object, IPreferenceOnPreferenceChangeListener)
+
+CSettingsActivity::InnerListener::InnerListener(
+    /* [in] */ CSettingsActivity* host)
+    : mHost(host)
+{}
+
+ECode CSettingsActivity::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* newValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(preference, newValue, result);
+}
+
 const String CSettingsActivity::TAG("SettingsActivity");
 
 CAR_OBJECT_IMPL(CSettingsActivity);
 
-CAR_INTERFACE_IMPL(CSettingsActivity, PreferenceActivity, IPreferenceOnPreferenceChangeListener);
+ECode CSettingsActivity::constructor()
+{
+    return PreferenceActivity::constructor();
+}
 
 ECode CSettingsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
@@ -52,7 +70,8 @@ ECode CSettingsActivity::OnCreate(
     IPreferenceGroup::Probe(prefSet)->FindPreference(value, (IPreference**)&pref);
     mPredictionPref = ICheckBoxPreference::Probe(pref);
 
-    IPreference::Probe(prefSet)->SetOnPreferenceChangeListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    IPreference::Probe(prefSet)->SetOnPreferenceChangeListener(listener);
 
     AutoPtr<IContext> ctx;
     GetApplicationContext((IContext**)&ctx);

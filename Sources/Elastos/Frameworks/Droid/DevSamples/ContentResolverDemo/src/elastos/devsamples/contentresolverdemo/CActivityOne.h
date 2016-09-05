@@ -38,6 +38,10 @@ public:
 public:
     CAR_OBJECT_DECL()
 
+    CActivityOne();
+
+    ~CActivityOne();
+
     CARAPI constructor();
 
 protected:

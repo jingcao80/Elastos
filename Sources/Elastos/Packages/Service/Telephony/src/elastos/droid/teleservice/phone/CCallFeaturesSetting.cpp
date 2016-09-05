@@ -382,20 +382,6 @@ ECode CCallFeaturesSetting::MyRunnable::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CCallFeaturesSetting::PreferenceOnPreferenceChangeListener, Object, \
-        IPreferenceOnPreferenceChangeListener)
-CCallFeaturesSetting::PreferenceOnPreferenceChangeListener::PreferenceOnPreferenceChangeListener(
-    /* [in] */ CCallFeaturesSetting* host)
-    : mHost(host)
-{}
-
-ECode CCallFeaturesSetting::PreferenceOnPreferenceChangeListener::OnPreferenceChange(
-    /* [in] */ IPreference* preference,
-    /* [in] */ IInterface* objValue,
-    /* [out] */ Boolean* result)
-{
-    return mHost->OnPreferenceChange(preference, objValue, result);
-}
 
 AutoPtr<ArrayOf<ICallForwardInfo*> > CCallFeaturesSetting::FWD_SETTINGS_DONT_TOUCH;
 
@@ -451,10 +437,41 @@ static AutoPtr<ArrayOf<Int32> > initFORWARDING_SETTINGS_REASONS()
 
 AutoPtr<ArrayOf<Int32> > CCallFeaturesSetting::FORWARDING_SETTINGS_REASONS = initFORWARDING_SETTINGS_REASONS();
 
-CAR_INTERFACE_IMPL_5(CCallFeaturesSetting, PreferenceActivity, ICallFeaturesSetting,
-        IDialogInterfaceOnClickListener, IPreferenceOnPreferenceChangeListener,
-        IEditPhoneNumberPreferenceOnDialogClosedListener,
-        IEditPhoneNumberPreferenceGetDefaultNumberListener)
+CAR_INTERFACE_IMPL_3(CCallFeaturesSetting::InnerListener, Object, \
+    IPreferenceOnPreferenceChangeListener, \
+    IEditPhoneNumberPreferenceOnDialogClosedListener, \
+    IEditPhoneNumberPreferenceGetDefaultNumberListener)
+
+CCallFeaturesSetting::InnerListener::InnerListener(
+    /* [in] */ CCallFeaturesSetting* host)
+    : mHost(host)
+{}
+
+ECode CCallFeaturesSetting::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* objValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(preference, objValue, result);
+}
+
+ECode CCallFeaturesSetting::InnerListener::OnDialogClosed(
+    /* [in] */ IEditPhoneNumberPreference* preference,
+    /* [in] */ Int32 buttonClicked)
+{
+    return mHost->OnDialogClosed(preference, buttonClicked);
+}
+
+ECode CCallFeaturesSetting::InnerListener::OnGetDefaultNumber(
+    /* [in] */ IEditPhoneNumberPreference* preference,
+    /* [out] */ String* str)
+{
+    return mHost->OnGetDefaultNumber(preference, str);
+}
+
+
+CAR_INTERFACE_IMPL_2(CCallFeaturesSetting, PreferenceActivity, ICallFeaturesSetting,
+        IDialogInterfaceOnClickListener)
 
 CAR_OBJECT_IMPL(CCallFeaturesSetting)
 
@@ -472,17 +489,14 @@ CCallFeaturesSetting::CCallFeaturesSetting()
     , mReadingSettingsForDefaultProvider(FALSE)
     , mShowVoicemailPreference(FALSE)
 {
-    mVoicemailRingtoneLookupComplete = new MyHandler(this);
-
-    mGetOptionComplete = new MyHandler2(this);
-
-    mSetOptionComplete = new MyHandler3(this);
-
-    mRevertOptionComplete = new MyHandler4(this);
 }
 
 ECode CCallFeaturesSetting::constructor()
 {
+    mVoicemailRingtoneLookupComplete = new MyHandler(this);
+    mGetOptionComplete = new MyHandler2(this);
+    mSetOptionComplete = new MyHandler3(this);
+    mRevertOptionComplete = new MyHandler4(this);
     return PreferenceActivity::constructor();
 }
 
@@ -1686,8 +1700,9 @@ ECode CCallFeaturesSetting::OnResume()
     FindPreference(BUTTON_VOICEMAIL_KEY, (IPreference**)&preference);
     mSubMenuVoicemailSettings = IEditPhoneNumberPreference::Probe(preference);
     if (mSubMenuVoicemailSettings != NULL) {
-        mSubMenuVoicemailSettings->SetParentActivity(this, VOICEMAIL_PREF_ID, this);
-        mSubMenuVoicemailSettings->SetDialogOnClosedListener(this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        mSubMenuVoicemailSettings->SetParentActivity(this, VOICEMAIL_PREF_ID, listener);
+        mSubMenuVoicemailSettings->SetDialogOnClosedListener(listener.Get());
         IDialogPreference::Probe(mSubMenuVoicemailSettings)->SetDialogTitle(Elastos::Droid::TeleService::R::string::voicemail_settings_number_label);
     }
 
@@ -1712,8 +1727,8 @@ ECode CCallFeaturesSetting::OnResume()
     mVoicemailProviders = IListPreference::Probe(preference6);
 
     if (mVoicemailProviders != NULL) {
-        AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
-        IPreference::Probe(mVoicemailProviders)->SetOnPreferenceChangeListener(l);
+        AutoPtr<InnerListener> l = new InnerListener(this);
+        IPreference::Probe(mVoicemailProviders)->SetOnPreferenceChangeListener(l.Get());
 
         AutoPtr<IPreference> preference7;
         FindPreference(VOICEMAIL_SETTING_SCREEN_PREF_KEY, (IPreference**)&preference7);
@@ -1737,8 +1752,8 @@ ECode CCallFeaturesSetting::OnResume()
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         if (resources->GetBoolean(Elastos::Droid::TeleService::R::bool_::dtmf_type_enabled, &res), res) {
-            AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
-            IPreference::Probe(mButtonDTMF)->SetOnPreferenceChangeListener(l);
+            AutoPtr<InnerListener> l = new InnerListener(this);
+            IPreference::Probe(mButtonDTMF)->SetOnPreferenceChangeListener(l.Get());
         }
         else {
             IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonDTMF), &res);
@@ -1750,8 +1765,8 @@ ECode CCallFeaturesSetting::OnResume()
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         if (resources->GetBoolean(Elastos::Droid::TeleService::R::bool_::auto_retry_enabled, &res), res) {
-            AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
-            IPreference::Probe(mButtonAutoRetry)->SetOnPreferenceChangeListener(l);
+            AutoPtr<InnerListener> l = new InnerListener(this);
+            IPreference::Probe(mButtonAutoRetry)->SetOnPreferenceChangeListener(l.Get());
         }
         else {
             IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonAutoRetry), &res);
@@ -1763,8 +1778,8 @@ ECode CCallFeaturesSetting::OnResume()
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         if (resources->GetBoolean(Elastos::Droid::TeleService::R::bool_::hac_enabled, &res), res) {
-            AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
-            IPreference::Probe(mButtonHAC)->SetOnPreferenceChangeListener(l);
+            AutoPtr<InnerListener> l = new InnerListener(this);
+            IPreference::Probe(mButtonHAC)->SetOnPreferenceChangeListener(l.Get());
         }
         else {
             IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonHAC), &res);
@@ -1778,8 +1793,8 @@ ECode CCallFeaturesSetting::OnResume()
         AutoPtr<ITelecomManager> telecomManager;
         helper->From(this, (ITelecomManager**)&telecomManager);
         if (telecomManager != NULL && (telecomManager->IsTtySupported(&res), res)) {
-            AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
-            IPreference::Probe(mButtonTTY)->SetOnPreferenceChangeListener(l);
+            AutoPtr<InnerListener> l = new InnerListener(this);
+            IPreference::Probe(mButtonTTY)->SetOnPreferenceChangeListener(l.Get());
         }
         else {
             IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonTTY), &res);

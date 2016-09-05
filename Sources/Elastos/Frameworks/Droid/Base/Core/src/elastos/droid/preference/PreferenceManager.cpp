@@ -38,6 +38,7 @@ CAR_INTERFACE_IMPL(PreferenceManager, Object, IPreferenceManager)
 
 PreferenceManager::PreferenceManager()
     : mActivity(NULL)
+    , mFragment(NULL)
     , mContext(NULL)
     , mNextId(0)
     , mNextRequestCode(0)
