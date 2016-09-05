@@ -5,11 +5,10 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::CHashSet;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::ICollection;
@@ -26,6 +25,7 @@ LocalListenerHelper::LocalListenerHelper(
     : mTag(name)
 {
     Preconditions::CheckNotNull(name);
+    CHashSet::New((IHashSet**)&mListeners);
 }
 
 ECode LocalListenerHelper::Add(

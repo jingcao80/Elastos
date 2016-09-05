@@ -90,6 +90,14 @@ ECode ActionMenuPresenter::MyForwardingListener::OnForwardingStopped(
 
 CAR_INTERFACE_IMPL(ActionMenuPresenter::OverflowMenuButton, ImageButton, IActionMenuChildView)
 
+ActionMenuPresenter::OverflowMenuButton::OverflowMenuButton()
+{
+}
+
+ActionMenuPresenter::OverflowMenuButton::~OverflowMenuButton()
+{
+}
+
 ECode ActionMenuPresenter::OverflowMenuButton::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ActionMenuPresenter* host)
@@ -110,6 +118,7 @@ ECode ActionMenuPresenter::OverflowMenuButton::constructor(
 ECode ActionMenuPresenter::OverflowMenuButton::PerformClick(
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     ImageButton::PerformClick(res);
     if (*res) {
         return NOERROR;
@@ -124,6 +133,7 @@ ECode ActionMenuPresenter::OverflowMenuButton::PerformClick(
 ECode ActionMenuPresenter::OverflowMenuButton::NeedsDividerBefore(
     /* [out] */ Boolean* rst)
 {
+    VALIDATE_NOT_NULL(rst)
     *rst = FALSE;
     return NOERROR;
 }
@@ -131,6 +141,7 @@ ECode ActionMenuPresenter::OverflowMenuButton::NeedsDividerBefore(
 ECode ActionMenuPresenter::OverflowMenuButton::NeedsDividerAfter(
     /* [out] */ Boolean* rst)
 {
+    VALIDATE_NOT_NULL(rst)
     *rst = FALSE;
     return NOERROR;
 }
@@ -397,7 +408,6 @@ ActionMenuPresenter::ActionMenuPresenter()
     , mExpandedActionViewsExclusive(FALSE)
     , mMinCellSize(0)
 {
-    mPopupPresenterCallback = new PopupPresenterCallback(this);
 }
 
 ActionMenuPresenter::~ActionMenuPresenter()
@@ -407,6 +417,7 @@ ActionMenuPresenter::~ActionMenuPresenter()
 ECode ActionMenuPresenter::constructor(
     /* [in] */ IContext* context)
 {
+    mPopupPresenterCallback = new PopupPresenterCallback(this);
     return BaseMenuPresenter::constructor(context, R::layout::action_menu_layout,
             R::layout::action_menu_item_layout);
 }

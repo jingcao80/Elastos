@@ -72,6 +72,7 @@ CAR_INTERFACE_IMPL(GpsMeasurementListenerTransport, LocalListenerHelper, IGpsMea
 
 GpsMeasurementListenerTransport::GpsMeasurementListenerTransport()
     : LocalListenerHelper(String("GpsMeasurementListenerTransport"))
+    , mContext(NULL)
 {
 }
 

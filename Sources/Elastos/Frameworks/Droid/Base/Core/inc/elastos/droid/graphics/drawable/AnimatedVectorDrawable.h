@@ -23,6 +23,8 @@ protected:
         : public ConstantState
     {
     public:
+        TO_STRING_IMPL("AnimatedVectorDrawableState")
+
         AnimatedVectorDrawableState(
             /* [in] */ AnimatedVectorDrawableState* copy);
 

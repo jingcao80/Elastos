@@ -88,19 +88,18 @@ CAR_INTERFACE_IMPL(GpsStatus, Object, IGpsStatus)
 GpsStatus::GpsStatus()
     : mTimeToFirstFix(0)
 {
-    mSatellites = ArrayOf<IGpsSatellite*>::Alloc(NUM_SATELLITES);
-    for(Int32 i = 0; i < mSatellites->GetLength(); i++)
-    {
-        AutoPtr<IGpsSatellite> satellite;
-        CGpsSatellite::New(i + 1, (IGpsSatellite**)&satellite);
-        mSatellites->Set(i, satellite);
-    }
-    AutoPtr<StatelliteList> sl= new StatelliteList(this);
-    mSatelliteList = IIterable::Probe(sl);
 }
 
 ECode GpsStatus::constructor()
 {
+    mSatellites = ArrayOf<IGpsSatellite*>::Alloc(NUM_SATELLITES);
+    for(Int32 i = 0; i < mSatellites->GetLength(); i++) {
+        AutoPtr<IGpsSatellite> satellite;
+        CGpsSatellite::New(i + 1, (IGpsSatellite**)&satellite);
+        mSatellites->Set(i, satellite);
+    }
+    AutoPtr<StatelliteList> sl = new StatelliteList(this);
+    mSatelliteList = IIterable::Probe(sl);
     return NOERROR;
 }
 

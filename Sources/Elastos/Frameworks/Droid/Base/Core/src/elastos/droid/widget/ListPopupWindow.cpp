@@ -101,6 +101,7 @@ ECode ListPopupWindow::ForwardingListener::TriggerLongPress::Run()
 CAR_INTERFACE_IMPL_2(ListPopupWindow::ForwardingListener, Object, IViewOnTouchListener, IViewOnAttachStateChangeListener)
 
 ListPopupWindow::ForwardingListener::ForwardingListener()
+    : mSrc(NULL)
 {}
 
 ECode ListPopupWindow::ForwardingListener::constructor(

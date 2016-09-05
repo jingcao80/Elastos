@@ -770,7 +770,6 @@ ECode CTypedArray::GetDrawable(
         value->GetResourceId(&resourceId);
         return mResources->LoadDrawable((ITypedValue*)value.Get(), value->mResourceId, mTheme, drawable);
     }
-    *drawable = NULL;
     return NOERROR;
 }
 
@@ -792,7 +791,6 @@ ECode CTypedArray::GetTextArray(
         value->GetResourceId(&resourceId);
         return mResources->GetTextArray(resourceId, array);
     }
-    *array = NULL;
     return NOERROR;
 }
 

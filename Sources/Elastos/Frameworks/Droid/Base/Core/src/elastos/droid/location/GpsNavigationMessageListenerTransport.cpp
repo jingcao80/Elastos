@@ -66,10 +66,8 @@ CAR_INTERFACE_IMPL(GpsNavigationMessageListenerTransport, LocalListenerHelper, I
 
 GpsNavigationMessageListenerTransport::GpsNavigationMessageListenerTransport()
     : LocalListenerHelper(String("GpsNavigationMessageListenerTransport"))
+    , mContext(NULL)
 {
-    AutoPtr<IIGpsNavigationMessageListener> lt;
-    CGpsNavigationMessageListenerTransportListenerTransport::New(this, (IIGpsNavigationMessageListener**)&lt);
-    mListenerTransport = IIGpsNavigationMessageListener::Probe(lt);
 }
 
 ECode GpsNavigationMessageListenerTransport::constructor(
@@ -78,9 +76,9 @@ ECode GpsNavigationMessageListenerTransport::constructor(
 {
     mContext = context;
     mLocationManager = locationManager;
+    CGpsNavigationMessageListenerTransportListenerTransport::New(this, (IIGpsNavigationMessageListener**)&mListenerTransport);
     return NOERROR;
 }
-
 
 ECode GpsNavigationMessageListenerTransport::RegisterWithServer(
     /* [out] */ Boolean* result)

@@ -87,7 +87,7 @@ protected:
     CARAPI UnregisterFromServer();
 
 private:
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IILocationManager> mLocationManager;
 
     AutoPtr<IIGpsMeasurementsListener> mListenerTransport;

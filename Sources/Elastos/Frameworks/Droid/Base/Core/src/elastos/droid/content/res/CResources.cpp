@@ -2261,6 +2261,11 @@ ECode CResources::LoadDrawable(
         LoadDrawableForCookie(typedValue, id, theme, (IDrawable**)&dr);
     }
 
+    if (id == R::styleable::ActionMode_background) {
+        Logger::I(TAG, " >> Load R::styleable::ActionMode_background: %s, dr: %s, key: %08x",
+            TO_CSTR(cs), TO_CSTR(dr), key);
+    }
+
     // If we were able to obtain a drawable, store it in the appropriate
     // cache (either preload or themed).
     if (dr != NULL) {

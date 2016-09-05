@@ -4061,10 +4061,11 @@ Boolean PhoneWindow::IsTranslucent()
 }
 
 AutoPtr<ITransition> PhoneWindow::GetTransition(
-    /* [in] */ ITransition* currentValue,
+    /* [in] */ ITransition* current,
     /* [in] */ ITransition* defaultValue,
     /* [in] */ Int32 id)
 {
+    AutoPtr<ITransition> currentValue = current;
     if (currentValue != defaultValue) {
         return currentValue;
     }

@@ -28,6 +28,8 @@ protected:
         : public ConstantState
     {
     public:
+        TO_STRING_IMPL("VectorDrawableState")
+
         VectorDrawableState();
 
         // Deep copy for mutate() or implicitly mutate.

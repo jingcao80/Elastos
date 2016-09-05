@@ -178,7 +178,7 @@ public:
         /*const*/ Float mScaledTouchSlop;
         /*const*/ Int32 mTapTimeout;
         /*const*/ Int32 mLongPressTimeout;
-        /*const*/ AutoPtr<IView> mSrc;
+        IView* mSrc;  // weak-ref
         AutoPtr<IRunnable> mDisallowIntercept;
         AutoPtr<IRunnable> mTriggerLongPress;
         Boolean mForwarding;

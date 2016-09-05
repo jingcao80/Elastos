@@ -48,7 +48,18 @@ const String CChangeBounds::PROPNAME_BOUNDS("android:changeBounds:bounds");
 const String CChangeBounds::PROPNAME_PARENT("android:changeBounds:parent");
 const String CChangeBounds::PROPNAME_WINDOW_X("android:changeBounds:windowX");
 const String CChangeBounds::PROPNAME_WINDOW_Y("android:changeBounds:windowY");
-AutoPtr<ArrayOf<String> > CChangeBounds::sTransitionProperties = ArrayOf<String>::Alloc(4);
+
+static AutoPtr<ArrayOf<String> > InitTransitionProperties()
+{
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(4);
+    array->Set(0, String("android:changeBounds:bounds"));   //PROPNAME_BOUNDS
+    array->Set(1, String("android:changeBounds:bounds"));   //PROPNAME_PARENT
+    array->Set(2, String("android:changeBounds:parent"));   //PROPNAME_WINDOW_X
+    array->Set(3, String("android:changeBounds:windowY"));   //PROPNAME_WINDOW_Y
+    return array;
+}
+
+AutoPtr<ArrayOf<String> > CChangeBounds::sTransitionProperties = InitTransitionProperties();
 
 AutoPtr<IProperty> CChangeBounds::DRAWABLE_ORIGIN_PROPERTY = new PointFProperty(String("boundsOrigin"));
 
@@ -284,24 +295,22 @@ CAR_OBJECT_IMPL(CChangeBounds)
 CAR_INTERFACE_IMPL(CChangeBounds, Transition, IChangeBounds)
 
 CChangeBounds::CChangeBounds()
+    : mResizeClip(FALSE)
+    , mReparent(FALSE)
 {
-    (*sTransitionProperties)[0] = PROPNAME_BOUNDS;
-    (*sTransitionProperties)[1] = PROPNAME_PARENT;
-    (*sTransitionProperties)[2] = PROPNAME_WINDOW_X;
-    (*sTransitionProperties)[3] = PROPNAME_WINDOW_Y;
+    mTempLocation = ArrayOf<Int32>::Alloc(2);
 }
 
 ECode CChangeBounds::constructor()
 {
-    return NOERROR;
+    return Transition::constructor();
 }
 
 ECode CChangeBounds::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    Transition::constructor(context, attrs);
-    return NOERROR;
+    return Transition::constructor(context, attrs);
 }
 
 ECode CChangeBounds::GetTransitionProperties(
