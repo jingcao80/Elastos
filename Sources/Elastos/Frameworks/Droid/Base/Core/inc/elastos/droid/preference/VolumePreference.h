@@ -28,9 +28,6 @@ namespace Preference {
  */
 class VolumePreference
     : public SeekBarDialogPreference
-    , public IPreferenceManagerOnActivityStopListener
-    , public IViewOnKeyListener
-    , public ISeekBarVolumizerCallback
     , public IVolumePreference
 {
 public:
@@ -60,6 +57,36 @@ public:
     public:
         Int32 mVolume;
         Int32 mOriginalVolume;
+    };
+
+private:
+    class InnerListener
+        : public Object
+        , public IPreferenceManagerOnActivityStopListener
+        , public IViewOnKeyListener
+        , public ISeekBarVolumizerCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("VolumePreference::InnerListener")
+
+        InnerListener(
+            /* [in] */ VolumePreference* host);
+
+        CARAPI OnActivityStop();
+
+        CARAPI OnKey(
+            /* [in] */ IView* v,
+            /* [in] */ Int32 keyCode,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnSampleStarting(
+            /* [in] */ ISeekBarVolumizer* volumizer);
+
+    private:
+        VolumePreference* mHost;
     };
 
 public:
@@ -118,6 +145,7 @@ public:
 private:
     Int32 mStreamType;
     AutoPtr<ISeekBarVolumizer> mSeekBarVolumizer;
+    AutoPtr<InnerListener> mListener;
 };
 
 }

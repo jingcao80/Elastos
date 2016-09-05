@@ -80,7 +80,8 @@ const Int32 FragmentBreadCrumbs::DEFAULT_GRAVITY = IGravity::START | IGravity::C
 CAR_INTERFACE_IMPL_2(FragmentBreadCrumbs, ViewGroup, IFragmentBreadCrumbs, IFragmentManagerOnBackStackChangedListener)
 
 FragmentBreadCrumbs::FragmentBreadCrumbs()
-    : mMaxVisible(-1)
+    : mActivity(NULL)
+    , mMaxVisible(-1)
     , mGravity(0)
     , mLayoutResId(0)
     , mTextColor(0)

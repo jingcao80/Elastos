@@ -75,6 +75,25 @@ const Int32 PreferenceActivity::MSG_BUILD_HEADERS;
 //====================================================
 // PreferenceActivity::MHandler
 //====================================================
+CAR_INTERFACE_IMPL(PreferenceActivity::PreferenceManagerOnPreferenceTreeClickListener, \
+    Object, IPreferenceManagerOnPreferenceTreeClickListener)
+
+PreferenceActivity::PreferenceManagerOnPreferenceTreeClickListener::PreferenceManagerOnPreferenceTreeClickListener(
+    /* [in] */ PreferenceActivity* host)
+    : mHost(host)
+{}
+
+ECode PreferenceActivity::PreferenceManagerOnPreferenceTreeClickListener::OnPreferenceTreeClick(
+    /* [in] */ IPreferenceScreen* preferenceScreen,
+    /* [in] */ IPreference* preference,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceTreeClick(preferenceScreen, preference, result);
+}
+
+//====================================================
+// PreferenceActivity::MHandler
+//====================================================
 
 PreferenceActivity::MHandler::MHandler(
     /* [in] */ PreferenceActivity* host)
@@ -632,7 +651,7 @@ ECode PreferenceActivity::NextButtonListener::OnClick(
 // PreferenceActivity
 //====================================================
 
-CAR_INTERFACE_IMPL_3(PreferenceActivity, ListActivity, IPreferenceActivity, IPreferenceManagerOnPreferenceTreeClickListener, IPreferenceFragmentOnPreferenceStartFragmentCallback)
+CAR_INTERFACE_IMPL_2(PreferenceActivity, ListActivity, IPreferenceActivity, IPreferenceFragmentOnPreferenceStartFragmentCallback)
 
 PreferenceActivity::PreferenceActivity()
     : mSinglePane(FALSE)
@@ -791,7 +810,7 @@ ECode PreferenceActivity::OnCreate(
         mPrefsContainer = IViewGroup::Probe(view);
         CPreferenceManager::New(this, FIRST_REQUEST_CODE, (IPreferenceManager**)&mPreferenceManager);
         AutoPtr<IPreferenceManagerOnPreferenceTreeClickListener> listener;
-        listener = this;
+        listener = new PreferenceManagerOnPreferenceTreeClickListener(this);
         mPreferenceManager->SetOnPreferenceTreeClickListener(listener);
     }
 

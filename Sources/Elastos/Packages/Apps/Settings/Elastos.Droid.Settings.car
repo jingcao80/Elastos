@@ -848,13 +848,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IButtonBarHandler;
-        interface IFragmentManagerOnBackStackChangedListener;
-        interface ISearchViewOnQueryTextListener;
-        interface ISearchViewOnCloseListener;
-        interface IOnActionExpandListener;
     }
 
     class CChooseLockGenericInternalActivity {
@@ -876,13 +870,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IButtonBarHandler;
-        interface IFragmentManagerOnBackStackChangedListener;
-        interface ISearchViewOnQueryTextListener;
-        interface ISearchViewOnCloseListener;
-        interface IOnActionExpandListener;
     }
 
     class CChooseLockGenericFragment {
@@ -915,13 +903,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IButtonBarHandler;
-        interface IFragmentManagerOnBackStackChangedListener;
-        interface ISearchViewOnQueryTextListener;
-        interface ISearchViewOnCloseListener;
-        interface IOnActionExpandListener;
     }
 
     class CEncryptionInterstitialFragment {
@@ -975,13 +957,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IButtonBarHandler;
-        interface IFragmentManagerOnBackStackChangedListener;
-        interface ISearchViewOnQueryTextListener;
-        interface ISearchViewOnCloseListener;
-        interface IOnActionExpandListener;
     }
 
     class CSecuritySettings {
@@ -1018,13 +994,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IButtonBarHandler;
-        interface IFragmentManagerOnBackStackChangedListener;
-        interface ISearchViewOnQueryTextListener;
-        interface ISearchViewOnCloseListener;
-        interface IOnActionExpandListener;
     }
 
     [local]
@@ -1063,13 +1033,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IButtonBarHandler;
-        interface IFragmentManagerOnBackStackChangedListener;
-        interface ISearchViewOnQueryTextListener;
-        interface ISearchViewOnCloseListener;
-        interface IOnActionExpandListener;
     }
 
     class CSubSettings {
@@ -1089,13 +1053,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IPreferenceManagerOnPreferenceTreeClickListener;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IButtonBarHandler;
-        interface IFragmentManagerOnBackStackChangedListener;
-        interface ISearchViewOnQueryTextListener;
-        interface ISearchViewOnCloseListener;
-        interface IOnActionExpandListener;
     }
 
     class CUserDictionarySettings {

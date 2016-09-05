@@ -963,13 +963,13 @@ public:
     AutoPtr<IFragmentManagerImpl> mFragmentManager;
 
     // Activity this fragment is attached to.
-    AutoPtr<IActivity> mActivity;
+    IActivity* mActivity;
 
     // Private fragment manager for child fragments inside of this one.
     AutoPtr<IFragmentManagerImpl> mChildFragmentManager;
 
     // If this Fragment is contained in another Fragment, this is that container.
-    AutoPtr<IFragment> mParentFragment;
+    IFragment* mParentFragment;
 
     // The optional identifier for this fragment -- either the container ID if it
     // was dynamically added to the view hierarchy, or the ID supplied in

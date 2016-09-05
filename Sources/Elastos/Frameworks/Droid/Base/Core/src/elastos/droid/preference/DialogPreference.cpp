@@ -31,7 +31,20 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-CAR_INTERFACE_IMPL_4(DialogPreference, Preference, IDialogPreference, IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener, IPreferenceManagerOnActivityDestroyListener)
+CAR_INTERFACE_IMPL(DialogPreference::InnerListener, Object, IPreferenceManagerOnActivityDestroyListener)
+
+DialogPreference::InnerListener::InnerListener(
+    /* [in] */ DialogPreference* host)
+    : mHost(host)
+{}
+
+ECode DialogPreference::InnerListener::OnActivityDestroy()
+{
+    return mHost->OnActivityDestroy();
+}
+
+CAR_INTERFACE_IMPL_3(DialogPreference, Preference, IDialogPreference, \
+    IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener)
 
 DialogPreference::DialogPreference()
     : mDialogLayoutResId(0)
@@ -73,6 +86,8 @@ ECode DialogPreference::constructor(
     CString::New(tmpString, (ICharSequence**)&mNegativeButtonText);
     a->GetResourceId(R::styleable::DialogPreference_dialogLayout, mDialogLayoutResId, &mDialogLayoutResId);
     a->Recycle();
+
+    mListener = new InnerListener(this);
     return NOERROR;
 }
 
@@ -306,7 +321,7 @@ ECode DialogPreference::CreateDialog(
 
     AutoPtr<IPreferenceManager> manager;
     GetPreferenceManager((IPreferenceManager**)&manager);
-    manager->RegisterOnActivityDestroyListener(this);
+    manager->RegisterOnActivityDestroyListener(mListener.Get());
 
     // Create the dialog
     AutoPtr<IAlertDialog> alertDialog;
@@ -390,7 +405,7 @@ ECode DialogPreference::OnDismiss(
 {
     AutoPtr<IPreferenceManager> manager;
     GetPreferenceManager((IPreferenceManager**)&manager);
-    manager->UnregisterOnActivityDestroyListener(this);
+    manager->UnregisterOnActivityDestroyListener(mListener.Get());
 
     mDialog = NULL;
     OnDialogClosed(mWhichButtonClicked == IDialogInterface::BUTTON_POSITIVE);

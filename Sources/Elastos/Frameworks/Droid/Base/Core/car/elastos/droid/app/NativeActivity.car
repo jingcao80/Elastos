@@ -42,9 +42,6 @@ module {
     /**
      * @Involve
      * interface IActivity
-     * interface ISurfaceHolderCallback2
-     * interface IInputQueueCallback
-     * interface IOnGlobalLayoutListener
      */
     interface INativeActivity {
         /**

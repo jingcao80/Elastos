@@ -18,6 +18,37 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
+
+/////////////////////////VolumePreference::InnerListener//////////////////////////////////////
+CAR_INTERFACE_IMPL_3(VolumePreference::InnerListener, Object, IPreferenceManagerOnActivityStopListener, \
+    IViewOnKeyListener, ISeekBarVolumizerCallback)
+
+VolumePreference::InnerListener::InnerListener(
+    /* [in] */ VolumePreference* host)
+    : mHost(host)
+{
+}
+
+ECode VolumePreference::InnerListener::OnActivityStop()
+{
+    return mHost->OnActivityStop();
+}
+
+ECode VolumePreference::InnerListener::OnKey(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnKey(v, keyCode, event, result);
+}
+
+ECode VolumePreference::InnerListener::OnSampleStarting(
+    /* [in] */ ISeekBarVolumizer* volumizer)
+{
+    return mHost->OnSampleStarting(volumizer);
+}
+
 /////////////////////////VolumePreference::VolumeStore//////////////////////////////////////
 
 CAR_INTERFACE_IMPL(VolumePreference::VolumeStore, Object, IVolumePreferenceVolumeStore)
@@ -67,7 +98,7 @@ ECode VolumePreference::VolumeStore::SetOriginalVolume(
 
 const String VolumePreference::TAG("VolumePreference");
 
-CAR_INTERFACE_IMPL_4(VolumePreference, SeekBarDialogPreference,IVolumePreference, IPreferenceManagerOnActivityStopListener,IViewOnKeyListener,ISeekBarVolumizerCallback);
+CAR_INTERFACE_IMPL(VolumePreference, SeekBarDialogPreference, IVolumePreference);
 
 VolumePreference::VolumePreference()
     : mStreamType(0)
@@ -86,6 +117,8 @@ ECode VolumePreference::constructor(
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     a->GetInt32(R::styleable::VolumePreference_streamType, 0, &mStreamType);
     a->Recycle();
+
+    mListener = new InnerListener(this);
     return NOERROR;
 }
 
@@ -120,17 +153,16 @@ ECode VolumePreference::OnBindDialogView(
     view->FindViewById(R::id::seekbar, (IView**)&seekBarView);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    CSeekBarVolumizer::New(context, mStreamType, NULL,
-            ISeekBarVolumizerCallback::Probe(this),(ISeekBarVolumizer**)&mSeekBarVolumizer);
+    CSeekBarVolumizer::New(context, mStreamType, NULL, mListener.Get(),(ISeekBarVolumizer**)&mSeekBarVolumizer);
     mSeekBarVolumizer->SetSeekBar(ISeekBar::Probe(seekBarView));
 
     AutoPtr<IPreferenceManager> manager;
     GetPreferenceManager((IPreferenceManager**)&manager);
-    manager->RegisterOnActivityStopListener(this);
+    manager->RegisterOnActivityStopListener(mListener.Get());
 
     // grab focus and key events so that pressing the volume buttons in the
     // dialog doesn't also show the normal volume adjust toast.
-    view->SetOnKeyListener(this);
+    view->SetOnKeyListener(mListener.Get());
     view->SetFocusableInTouchMode(TRUE);
     Boolean result;
     view->RequestFocus(&result);
@@ -203,7 +235,7 @@ void VolumePreference::Cleanup()
 {
     AutoPtr<IPreferenceManager> manager;
     GetPreferenceManager((IPreferenceManager**)&manager);
-    manager->UnregisterOnActivityStopListener(this);
+    manager->UnregisterOnActivityStopListener(mListener);
 
     if (mSeekBarVolumizer != NULL) {
         AutoPtr<IDialog> dialog;

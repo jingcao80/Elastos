@@ -25,7 +25,6 @@ module
      * @Involve
      * interface IPreference
      * interface IComparable
-     * interface IPreferenceManagerOnActivityResultListener
      */
     [local]
     interface IRingtonePreference {

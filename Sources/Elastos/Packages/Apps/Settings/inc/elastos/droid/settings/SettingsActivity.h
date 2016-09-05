@@ -61,14 +61,67 @@ namespace Settings {
 class SettingsActivity
     : public Activity
     , public ISettingsActivity
-    , public IPreferenceManagerOnPreferenceTreeClickListener
-    , public IPreferenceFragmentOnPreferenceStartFragmentCallback
     , public IButtonBarHandler
-    , public IFragmentManagerOnBackStackChangedListener
-    , public ISearchViewOnQueryTextListener
-    , public ISearchViewOnCloseListener
-    , public IOnActionExpandListener
 {
+public:
+    class InnerListener
+        : public Object
+        , public ISearchViewOnQueryTextListener
+        , public ISearchViewOnCloseListener
+        , public IOnActionExpandListener
+        , public IFragmentManagerOnBackStackChangedListener
+        , public IPreferenceManagerOnPreferenceTreeClickListener
+        , public IPreferenceFragmentOnPreferenceStartFragmentCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ SettingsActivity* host);
+
+        //@Override
+        CARAPI OnBackStackChanged();
+
+        //@Override
+        CARAPI OnQueryTextSubmit(
+            /* [in] */ const String& query,
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI OnQueryTextChange(
+            /* [in] */ const String& newText,
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI OnClose(
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI OnMenuItemActionExpand(
+            /* [in] */ IMenuItem* item,
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI OnMenuItemActionCollapse(
+            /* [in] */ IMenuItem* item,
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI OnPreferenceStartFragment(
+            /* [in] */ IPreferenceFragment* caller,
+            /* [in] */ IPreference* pref,
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI OnPreferenceTreeClick(
+            /* [in] */ IPreferenceScreen* preferenceScreen,
+            /* [in] */ IPreference* preference,
+            /* [out] */ Boolean* result);
+
+    private:
+        SettingsActivity* mHost;
+    };
+
 private:
     class BatteryInfoReceiver
         : public BroadcastReceiver
@@ -529,6 +582,7 @@ private:
     Int32 mHomeActivitiesCount;
 
     AutoPtr<IIntent> mResultIntentData;
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Settings

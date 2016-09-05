@@ -171,7 +171,7 @@ private:
     static const String TAG;
     AutoPtr<IViewOnClickListener> mOnClickListener;
 
-    AutoPtr<IActivity> mActivity;
+    IActivity* mActivity;   // weak-ref
     AutoPtr<ILayoutInflater> mInflater;
     AutoPtr<ILinearLayout> mContainer;
     Int32 mMaxVisible;

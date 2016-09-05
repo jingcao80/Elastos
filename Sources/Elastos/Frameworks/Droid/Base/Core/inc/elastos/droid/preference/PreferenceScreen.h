@@ -22,9 +22,31 @@ namespace Preference {
 class PreferenceScreen
     : public PreferenceGroup
     , public IPreferenceScreen
-    , public IAdapterViewOnItemClickListener
     , public IDialogInterfaceOnDismissListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("PreferenceScreen::InnerListener")
+
+        InnerListener(
+            /* [in] */ PreferenceScreen* host);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+    private:
+        PreferenceScreen* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

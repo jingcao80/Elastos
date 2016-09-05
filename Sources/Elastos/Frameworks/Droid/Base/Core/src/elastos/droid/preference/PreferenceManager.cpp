@@ -37,7 +37,9 @@ const String PreferenceManager::TAG("PreferenceManager");
 CAR_INTERFACE_IMPL(PreferenceManager, Object, IPreferenceManager)
 
 PreferenceManager::PreferenceManager()
-    : mNextId(0)
+    : mActivity(NULL)
+    , mContext(NULL)
+    , mNextId(0)
     , mNextRequestCode(0)
     , mNoCommit(FALSE)
     , mSharedPreferencesMode(0)

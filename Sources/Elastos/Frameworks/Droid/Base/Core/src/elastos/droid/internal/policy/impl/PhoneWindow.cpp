@@ -4016,12 +4016,10 @@ Boolean PhoneWindow::LaunchDefaultSearch()
 void PhoneWindow::TransitionTo(
     /* [in] */ IScene* scene)
 {
-    if (mContentScene == NULL)
-    {
+    if (mContentScene == NULL) {
         scene->Enter();
     }
-    else
-    {
+    else {
         mTransitionManager->TransitionTo(scene);
     }
     mContentScene = scene;
@@ -4047,8 +4045,7 @@ AutoPtr<IViewRootImpl> PhoneWindow::GetViewRootImpl()
             return viewRootImpl;
         }
     }
-    //throw new IllegalStateException("view not added");
-    Logger::E(TAG, "PhoneWindow::GetViewRootImpl error");
+    Logger::E(TAG, "PhoneWindow::GetViewRootImpl error view not added");
     return NULL;
 }
 
@@ -4484,8 +4481,7 @@ ECode PhoneWindow::SetLocalFocus(
     /* [in] */ Boolean inTouchMode)
 {
     AutoPtr<IViewRootImpl> vri = GetViewRootImpl();
-    if (vri == NULL)
-    {
+    if (vri == NULL) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     vri->WindowFocusChanged(hasFocus, inTouchMode);
@@ -4498,8 +4494,7 @@ ECode PhoneWindow::InjectInputEvent(
     /* [in] */ IInputEvent* event)
 {
     AutoPtr<IViewRootImpl> vri = GetViewRootImpl();
-    if (vri == NULL)
-    {
+    if (vri == NULL) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return vri->DispatchInputEvent(event);
@@ -5654,12 +5649,10 @@ ECode PhoneWindow::GetSharedElementReenterTransition(
     /* [out] */ ITransition** transition)
 {
     VALIDATE_NOT_NULL(transition);
-    if (mSharedElementReenterTransition == USE_DEFAULT_TRANSITION)
-    {
+    if (mSharedElementReenterTransition == USE_DEFAULT_TRANSITION) {
         return GetSharedElementExitTransition(transition);
     }
-    else
-    {
+    else  {
         *transition = mSharedElementReenterTransition;
         REFCOUNT_ADD(*transition);
     }
@@ -5739,7 +5732,6 @@ ECode PhoneWindow::GetSharedElementsUseOverlay(
     return NOERROR;
 }
 
-
 // @Override
 ECode PhoneWindow::GetStatusBarColor(
     /* [out] */ Int32* result)
@@ -5777,8 +5769,7 @@ ECode PhoneWindow::SetNavigationBarColor(
 {
     mNavigationBarColor = color;
     mForcedNavigationBarColor = TRUE;
-    if (mDecor != NULL)
-    {
+    if (mDecor != NULL) {
         mDecor->UpdateColorViews(NULL);
     }
     return NOERROR;
@@ -6149,8 +6140,7 @@ void PhoneWindow::UpdateProgressBars(
     const Int32 features = GetLocalFeatures();
     if (value == PROGRESS_VISIBILITY_ON) {
         if ((features & (1 << FEATURE_PROGRESS)) != 0) {
-            if (horizontalProgressBar != NULL)
-            {
+            if (horizontalProgressBar != NULL) {
                 Int32 level = 0;
                 horizontalProgressBar->GetProgress(&level);
                 Boolean isIndeterminate = FALSE;
@@ -6159,70 +6149,57 @@ void PhoneWindow::UpdateProgressBars(
                     IView::VISIBLE : IView::INVISIBLE;
                 IView::Probe(horizontalProgressBar)->SetVisibility(visibility);
             }
-            else
-            {
+            else {
                 Logger::E(TAG, "Horizontal progress bar not located in current window decor");
             }
         }
         if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0) {
-            if (circularProgressBar != NULL)
-            {
+            if (circularProgressBar != NULL) {
                 IView::Probe(circularProgressBar)->SetVisibility(IView::VISIBLE);
             }
-            else
-            {
+            else {
                 Logger::E(TAG, "Circular progress bar not located in current window decor");
             }
         }
     } else if (value == PROGRESS_VISIBILITY_OFF) {
         if ((features & (1 << FEATURE_PROGRESS)) != 0) {
-            if (horizontalProgressBar != NULL)
-            {
+            if (horizontalProgressBar != NULL) {
                 IView::Probe(horizontalProgressBar)->SetVisibility(IView::GONE);
             }
-            else
-            {
+            else {
                 Logger::E(TAG, "Horizontal progress bar not located in current window decor");
             }
         }
         if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0) {
-            if (circularProgressBar != NULL)
-            {
+            if (circularProgressBar != NULL) {
                 IView::Probe(circularProgressBar)->SetVisibility(IView::GONE);
             }
-            else
-            {
+            else {
                 Logger::E(TAG, "Circular progress bar not located in current window decor");
             }
         }
     } else if (value == PROGRESS_INDETERMINATE_ON) {
-        if (horizontalProgressBar != NULL)
-        {
+        if (horizontalProgressBar != NULL) {
             horizontalProgressBar->SetIndeterminate(TRUE);
         }
-        else
-        {
+        else {
             Logger::E(TAG, "Horizontal progress bar not located in current window decor");
         }
     } else if (value == PROGRESS_INDETERMINATE_OFF) {
-        if (horizontalProgressBar != NULL)
-        {
+        if (horizontalProgressBar != NULL) {
             horizontalProgressBar->SetIndeterminate(FALSE);
         }
-        else
-        {
+        else {
             Logger::E(TAG, "Horizontal progress bar not located in current window decor");
         }
     } else if (PROGRESS_START <= value && value <= PROGRESS_END) {
         // We want to set the progress value before testing for visibility
         // so that when the progress bar becomes visible again, it has the
         // correct level.
-        if (horizontalProgressBar != NULL)
-        {
+        if (horizontalProgressBar != NULL) {
             horizontalProgressBar->SetProgress(value - PROGRESS_START);
         }
-        else
-        {
+        else {
             Logger::E(TAG, "Horizontal progress bar not located in current window decor");
         }
 
@@ -6232,12 +6209,10 @@ void PhoneWindow::UpdateProgressBars(
             HideProgressBars(horizontalProgressBar, circularProgressBar);
         }
     } else if (PROGRESS_SECONDARY_START <= value && value <= PROGRESS_SECONDARY_END) {
-        if (horizontalProgressBar != NULL)
-        {
+        if (horizontalProgressBar != NULL) {
             horizontalProgressBar->SetSecondaryProgress(value - PROGRESS_SECONDARY_START);
         }
-        else
-        {
+        else {
             Logger::E(TAG, "Horizontal progress bar not located in current window decor");
         }
 
@@ -6283,8 +6258,7 @@ void PhoneWindow::HideProgressBars(
         IView::Probe(spinnyProgressBar)->StartAnimation(anim);
         IView::Probe(spinnyProgressBar)->SetVisibility(IView::INVISIBLE);
     }
-    if (horizontalProgressBar != NULL)
-    {
+    if (horizontalProgressBar != NULL) {
         Int32 hpBarVisibale =0;
         if ((features & (1 << FEATURE_PROGRESS)) != 0 &&
                 (IView::Probe(horizontalProgressBar)->GetVisibility(&hpBarVisibale), hpBarVisibale) == IView::VISIBLE) {

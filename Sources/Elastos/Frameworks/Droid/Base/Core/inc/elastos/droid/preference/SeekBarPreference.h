@@ -16,8 +16,36 @@ namespace Preference {
 
 class SeekBarPreference
     : public Preference
-    , public ISeekBarOnSeekBarChangeListener
+    , public ISeekBarPreference
 {
+private:
+    class InnerListener
+        : public Object
+        , public ISeekBarOnSeekBarChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("SeekBarPreference::InnerListener")
+
+        InnerListener(
+            /* [in] */ SeekBarPreference* host);
+
+        CARAPI OnProgressChanged(
+                /* [in] */ ISeekBar* seekBar,
+                /* [in] */ Int32 progress,
+                /* [in] */ Boolean fromUser);
+
+        CARAPI OnStartTrackingTouch(
+            /* [in] */ ISeekBar* seekBar);
+
+        CARAPI OnStopTrackingTouch(
+            /* [in] */ ISeekBar* seekBar);
+
+    private:
+        SeekBarPreference* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

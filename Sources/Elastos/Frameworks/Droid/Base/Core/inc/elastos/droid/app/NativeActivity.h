@@ -40,11 +40,50 @@ namespace App {
 class NativeActivity
     : public Activity
     , public INativeActivity
-    , public ISurfaceHolderCallback2
-    , public ISurfaceHolderCallback
-    , public IInputQueueCallback
-    , public IOnGlobalLayoutListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public ISurfaceHolderCallback2
+        , public ISurfaceHolderCallback
+        , public IInputQueueCallback
+        , public IOnGlobalLayoutListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("NativeActivity::InnerListener")
+
+        InnerListener(
+            /* [in] */ NativeActivity* host);
+
+        CARAPI SurfaceCreated(
+            /* [in] */ ISurfaceHolder* holder);
+
+        CARAPI SurfaceChanged(
+            /* [in] */ ISurfaceHolder* holder,
+            /* [in] */ Int32 format,
+            /* [in] */ Int32 width,
+            /* [in] */ Int32 height);
+
+        CARAPI SurfaceRedrawNeeded(
+            /* [in] */ ISurfaceHolder* holder);
+
+        CARAPI SurfaceDestroyed(
+            /* [in] */ ISurfaceHolder* holder);
+
+        CARAPI OnInputQueueCreated(
+            /* [in] */ IInputQueue* queue);
+
+        CARAPI OnInputQueueDestroyed(
+            /* [in] */ IInputQueue* queue);
+
+        CARAPI OnGlobalLayout();
+
+    private:
+        NativeActivity* mHost;
+    };
+
 public:
     class NativeContentView
         : public Elastos::Droid::View::View

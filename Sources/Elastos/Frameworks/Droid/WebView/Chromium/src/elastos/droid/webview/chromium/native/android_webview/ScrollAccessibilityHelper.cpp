@@ -67,7 +67,7 @@ ScrollAccessibilityHelper::ScrollAccessibilityHelper(
     : mMsgViewScrolledQueued(FALSE)
 {
     AutoPtr<IHandlerCallback> callback = new HandlerCallback(this, eventSender);
-    CHandler::New(callback, FALSE, (IHandler**)&mHandler);
+    CHandler::New(callback, TRUE, (IHandler**)&mHandler);
 }
 
 /**

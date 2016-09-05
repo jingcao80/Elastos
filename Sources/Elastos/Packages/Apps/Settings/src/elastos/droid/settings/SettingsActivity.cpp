@@ -202,6 +202,78 @@ const AutoPtr< ArrayOf<String> > SettingsActivity::LIKE_SHORTCUT_INTENT_ACTION_A
 const String SettingsActivity::MSG_DATA_FORCE_REFRESH("msg_data_force_refresh");
 const Int32 SettingsActivity::MSG_BUILD_CATEGORIES;
 
+
+//===============================================================================
+//                  SettingsActivity::InnerListener
+//===============================================================================
+CAR_INTERFACE_IMPL_6(SettingsActivity::InnerListener, Object, \
+    IFragmentManagerOnBackStackChangedListener, \
+    ISearchViewOnQueryTextListener, \
+    ISearchViewOnCloseListener, \
+    IOnActionExpandListener, \
+    IPreferenceManagerOnPreferenceTreeClickListener, \
+    IPreferenceFragmentOnPreferenceStartFragmentCallback)
+
+SettingsActivity::InnerListener::InnerListener(
+    /* [in] */ SettingsActivity* host)
+    : mHost(host)
+{}
+
+ECode SettingsActivity::InnerListener::OnBackStackChanged()
+{
+    return mHost->OnBackStackChanged();
+}
+
+ECode SettingsActivity::InnerListener::OnQueryTextSubmit(
+    /* [in] */ const String& query,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnQueryTextSubmit(query, result);
+}
+
+ECode SettingsActivity::InnerListener::OnQueryTextChange(
+    /* [in] */ const String& newText,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnQueryTextChange(newText, result);
+}
+
+ECode SettingsActivity::InnerListener::OnClose(
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnClose(result);
+}
+
+ECode SettingsActivity::InnerListener::OnMenuItemActionExpand(
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnMenuItemActionExpand(item, result);
+}
+
+ECode SettingsActivity::InnerListener::OnMenuItemActionCollapse(
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnMenuItemActionCollapse(item, result);
+}
+
+ECode SettingsActivity::InnerListener::OnPreferenceStartFragment(
+    /* [in] */ IPreferenceFragment* caller,
+    /* [in] */ IPreference* pref,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceStartFragment(caller, pref, result);
+}
+
+ECode SettingsActivity::InnerListener::OnPreferenceTreeClick(
+    /* [in] */ IPreferenceScreen* preferenceScreen,
+    /* [in] */ IPreference* preference,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceTreeClick(preferenceScreen, preference, result);
+}
+
 //===============================================================================
 //                  SettingsActivity::BatteryInfoReceiver
 //===============================================================================
@@ -375,7 +447,9 @@ SettingsActivity::SettingsActivity()
 }
 
 SettingsActivity::~SettingsActivity()
-{}
+{
+    Slogger::I(TAG, " >> Destroy SettingsActivity %p", this);
+}
 
 ECode SettingsActivity::constructor()
 {
@@ -390,6 +464,7 @@ ECode SettingsActivity::constructor()
     mHandler = new BuildCategoriesHandler(this);
     mHandler->constructor();
 
+    mListener = new InnerListener(this);
     return NOERROR;
 }
 
@@ -427,7 +502,6 @@ ECode SettingsActivity::OnPreferenceStartFragment(
     VALIDATE_NOT_NULL(result);
 
     Slogger::I(TAG, " >> enter SettingsActivity::OnPreferenceStartFragment");
-
 
     // Override the fragment title for Wallpaper settings
     Int32 titleRes;
@@ -542,9 +616,9 @@ ECode SettingsActivity::OnCreateOptionsMenu(
         ((CSearchResultsSummary*)mSearchResultsFragment.Get())->SetSearchView(mSearchView);
     }
 
-    mSearchMenuItem->SetOnActionExpandListener(this);
-    mSearchView->SetOnQueryTextListener(this);
-    mSearchView->SetOnCloseListener(this);
+    mSearchMenuItem->SetOnActionExpandListener(mListener);
+    mSearchView->SetOnQueryTextListener(mListener);
+    mSearchView->SetOnCloseListener(mListener);
 
     if (mSearchMenuItemExpanded) {
         Boolean res;
@@ -651,7 +725,7 @@ ECode SettingsActivity::OnCreate(
 
     AutoPtr<IFragmentManager> manager;
     GetFragmentManager((IFragmentManager**)&manager);
-    manager->AddOnBackStackChangedListener(this);
+    manager->AddOnBackStackChangedListener(mListener);
 
     if (mIsShowingDashboard) {
         AutoPtr<IContext> context;
@@ -1034,8 +1108,8 @@ String SettingsActivity::GetStartingFragmentClass(
     if (intentClass.Equals(klassNamespace + "." + klassName)) return String(NULL);
 
     if (intentClass.Equals("Elastos.Droid.Settings.CManageApplications")
-            || intentClass.Equals("Elastos.Droid.Settings.RunningServices")
-            || intentClass.Equals("Elastos.Droid.Settings.Applications.StorageUse")) {
+            || intentClass.Equals("Elastos.Droid.Settings.CRunningServices")
+            || intentClass.Equals("Elastos.Droid.Settings.Applications.CStorageUse")) {
         // Old names of manage apps.
         intentClass = "Elastos.Droid.Settings.Applications.CManageApplications";
     }

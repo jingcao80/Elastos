@@ -18,8 +18,29 @@ namespace Preference {
 class RingtonePreference
     : public Preference
     , public IRingtonePreference
-    , public IPreferenceManagerOnActivityResultListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IPreferenceManagerOnActivityResultListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("RingtonePreference::InnerListener")
+
+        InnerListener(
+            /* [in] */ RingtonePreference* host);
+
+        CARAPI OnActivityResult(
+            /* [in] */ Int32 requestCode,
+            /* [in] */ Int32 resultCode,
+            /* [in] */ IIntent* data,
+            /* [out] */ Boolean* result);
+    private:
+        RingtonePreference* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

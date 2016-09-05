@@ -21,9 +21,25 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
+CAR_INTERFACE_IMPL(RingtonePreference::InnerListener, Object, IPreferenceManagerOnActivityResultListener)
+
+RingtonePreference::InnerListener::InnerListener(
+    /* [in] */ RingtonePreference* host)
+    : mHost(host)
+{}
+
+ECode RingtonePreference::InnerListener::OnActivityResult(
+    /* [in] */ Int32 requestCode,
+    /* [in] */ Int32 resultCode,
+    /* [in] */ IIntent* data,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnActivityResult(requestCode, resultCode, data, result);
+}
+
 const String RingtonePreference::TAG("RingtonePreference");
 
-CAR_INTERFACE_IMPL_2(RingtonePreference, Preference, IRingtonePreference, IPreferenceManagerOnActivityResultListener)
+CAR_INTERFACE_IMPL(RingtonePreference, Preference, IRingtonePreference)
 
 RingtonePreference::RingtonePreference()
     : mRingtoneType(0)
@@ -48,8 +64,7 @@ ECode RingtonePreference::constructor(
     a->GetInt32(R::styleable::RingtonePreference_ringtoneType, IRingtoneManager::TYPE_RINGTONE, &mRingtoneType);
     a->GetBoolean(R::styleable::RingtonePreference_showDefault, TRUE, &mShowDefault);
     a->GetBoolean(R::styleable::RingtonePreference_showSilent, TRUE, &mShowSilent);
-    assert(0);
-    // TODO: a->GetResourceId(R::styleable::RingtonePreference_dialogStyle, 0, &mDialogStyle);
+    a->GetResourceId(R::styleable::RingtonePreference_dialogStyle, 0, &mDialogStyle);
     a->Recycle();
     return NOERROR;
 }
@@ -198,8 +213,7 @@ ECode RingtonePreference::OnPrepareRingtonePickerIntent(
         }
     }
     if (mDialogStyle != 0) {
-        // TODO: ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_DIALOG_THEME, mDialogStyle);
-        assert(0);
+        ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_DIALOG_THEME, mDialogStyle);
     }
 
     ringtonePickerIntent->PutBooleanExtra(IRingtoneManager::EXTRA_RINGTONE_SHOW_SILENT, mShowSilent);
@@ -213,8 +227,10 @@ ECode RingtonePreference::OnPrepareRingtonePickerIntent(
 ECode RingtonePreference::OnSaveRingtone(
     /* [in] */ IUri* ringtoneUri)
 {
-    String uri("");
-    if (ringtoneUri != NULL) IObject::Probe(ringtoneUri)->ToString((String*)&uri);
+    String uri = Object::ToString(ringtoneUri);
+    if (uri.IsNull()) {
+        uri = "";
+    }
     Boolean result;
     return PersistString(uri, &result);
 }
@@ -284,7 +300,8 @@ ECode RingtonePreference::OnAttachedToHierarchy(
 {
     FAIL_RETURN(Preference::OnAttachedToHierarchy(preferenceManager))
 
-    preferenceManager->RegisterOnActivityResultListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    preferenceManager->RegisterOnActivityResultListener(listener.Get());
     preferenceManager->GetNextRequestCode(&mRequestCode);
     return NOERROR;
 }

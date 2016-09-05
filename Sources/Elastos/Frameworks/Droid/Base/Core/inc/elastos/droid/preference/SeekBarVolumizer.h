@@ -36,10 +36,35 @@ namespace Preference {
 class SeekBarVolumizer
     : public Object
     , public ISeekBarVolumizer
-    , public ISeekBarOnSeekBarChangeListener
     , public IHandlerCallback
 {
 private:
+    class InnerListener
+        : public Object
+        , public ISeekBarOnSeekBarChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("SeekBarVolumizer::InnerListener")
+
+        InnerListener(
+            /* [in] */ SeekBarVolumizer* owner);
+
+        CARAPI OnProgressChanged(
+            /* [in] */ ISeekBar* seekBar,
+            /* [in] */ Int32 progress,
+            /* [in] */ Boolean fromTouch);
+
+        CARAPI OnStartTrackingTouch(
+            /* [in] */ ISeekBar* seekBar);
+
+        CARAPI OnStopTrackingTouch(
+            /* [in] */ ISeekBar* seekBar);
+    private:
+        SeekBarVolumizer* mHost;
+    };
+
     class SeekBarVolumizerH
         : public Handler
     {
@@ -58,7 +83,7 @@ private:
 
     private:
         const static Int32 UPDATE_SLIDER = 1;
-        SeekBarVolumizer* mOwner;
+        SeekBarVolumizer* mHost;
     };
 
     class SeekBarVolumizerObserver
@@ -76,7 +101,7 @@ private:
         CARAPI OnChange(
             /* [in] */ Boolean selfChange);
     private:
-        SeekBarVolumizer* mOwner;
+        SeekBarVolumizer* mHost;
     };
 
     class SeekBarVolumizerReceiver
@@ -98,7 +123,7 @@ private:
             /* [in] */ IIntent* intent);
     private:
         Boolean mListening;
-        SeekBarVolumizer* mOwner;
+        SeekBarVolumizer* mHost;
     };
 
 public:

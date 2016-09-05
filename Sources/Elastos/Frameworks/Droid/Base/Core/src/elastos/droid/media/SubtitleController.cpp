@@ -115,12 +115,12 @@ SubtitleController::SubtitleController()
     : mTrackIsExplicit(FALSE)
     , mVisibilityIsExplicit(FALSE)
 {
-    mCallback = new MyHandlerCallback(this);
-    mCaptioningChangeListener = new MyCaptioningChangeListener(this);
 }
 
 SubtitleController::~SubtitleController()
-{}
+{
+    Finalize();
+}
 
 ECode SubtitleController::constructor(
     /* [in] */ IContext* context,
@@ -129,6 +129,10 @@ ECode SubtitleController::constructor(
 {
     mTimeProvider = timeProvider;
     mListener = listener;
+
+
+    mCallback = new MyHandlerCallback(this);
+    mCaptioningChangeListener = new MyCaptioningChangeListener(this);
 
     CVector::New((IVector**)&mRenderers);
     mShowing = FALSE;
@@ -143,7 +147,6 @@ ECode SubtitleController::Finalize()
 {
     return mCaptioningManager->RemoveCaptioningChangeListener(
             mCaptioningChangeListener.Get());
-    // super->Finalize();
 }
 
 ECode SubtitleController::GetTracks(
@@ -502,8 +505,7 @@ ECode SubtitleController::SetAnchor(
     if (mAnchor != NULL) {
         AutoPtr<ILooper> looper;
         mAnchor->GetSubtitleLooper((ILooper**)&looper);
-        AutoPtr<IHandlerCallback> mCallback;
-        // CHandler::New(looper, mCallback.Get(), (IHandler**)&mHandler);
+        CHandler::New(looper, mCallback.Get(), FALSE, (IHandler**)&mHandler);
         CheckAnchorLooper();
         AutoPtr<ISubtitleTrackRenderingWidget> strw;
         GetRenderingWidget((ISubtitleTrackRenderingWidget**)&strw);

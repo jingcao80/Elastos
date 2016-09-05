@@ -33,7 +33,6 @@ module
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.Utility.IAttributeSet;
     interface Elastos.Droid.Os.IHandlerCallback;
-    interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeInternalListener;
     interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     interface Elastos.Droid.View.IAbsSavedState;
@@ -43,13 +42,10 @@ module
     interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
     interface Elastos.Droid.View.IViewGroupLayoutParams;
     interface Elastos.Droid.View.IViewManager;
-    interface Elastos.Droid.View.IViewOnKeyListener;
     interface Elastos.Droid.View.IViewParent;
-    interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     interface Elastos.Droid.Widget.IBaseAdapter;
     interface Elastos.Droid.Widget.IFrameLayout;
     interface Elastos.Droid.Widget.IFrameLayoutLayoutParams;
-    interface Elastos.Droid.Widget.ISeekBarOnSeekBarChangeListener;
     using interface Elastos.Core.IComparable;
 
     namespace Elastos {
@@ -165,7 +161,6 @@ module
             interface IDialogPreference;
             interface IPreference;
             interface IComparable;
-            interface IPreferenceManagerOnActivityDestroyListener;
             interface IDialogInterfaceOnDismissListener;
             interface IDialogInterfaceOnClickListener;
         }
@@ -206,7 +201,6 @@ module
             interface IDialogPreference;
             interface IPreference;
             interface IComparable;
-            interface IPreferenceManagerOnActivityDestroyListener;
             interface IDialogInterfaceOnDismissListener;
             interface IDialogInterfaceOnClickListener;
         }
@@ -247,7 +241,6 @@ module
             interface IDialogPreference;
             interface IPreference;
             interface IComparable;
-            interface IPreferenceManagerOnActivityDestroyListener;
             interface IDialogInterfaceOnDismissListener;
             interface IDialogInterfaceOnClickListener;
         }
@@ -288,7 +281,6 @@ module
             interface IDialogPreference;
             interface IPreference;
             interface IComparable;
-            interface IPreferenceManagerOnActivityDestroyListener;
             interface IDialogInterfaceOnDismissListener;
             interface IDialogInterfaceOnClickListener;
         }
@@ -329,7 +321,6 @@ module
             interface IDialogPreference;
             interface IPreference;
             interface IComparable;
-            interface IPreferenceManagerOnActivityDestroyListener;
             interface IDialogInterfaceOnDismissListener;
             interface IDialogInterfaceOnClickListener;
         }
@@ -347,7 +338,6 @@ module
                 [in] ISeekBarVolumizerCallback* cb);
 
             interface ISeekBarVolumizer;
-            interface ISeekBarOnSeekBarChangeListener;
             interface IHandlerCallback;
         }
 
@@ -396,13 +386,9 @@ module
 
             interface IVolumePreference;
             interface ISeekBarDialogPreference;
-            interface IPreferenceManagerOnActivityStopListener;
-            interface IViewOnKeyListener;
-            interface ISeekBarVolumizerCallback;
             interface IDialogPreference;
             interface IPreference;
             interface IComparable;
-            interface IPreferenceManagerOnActivityDestroyListener;
             interface IDialogInterfaceOnDismissListener;
             interface IDialogInterfaceOnClickListener;
         }
@@ -489,7 +475,6 @@ module
                [in] IPreferenceGroup* preferenceGroup);
 
            interface IPreferenceGroupAdapter;
-           interface IPreferenceOnPreferenceChangeInternalListener;
            interface IBaseAdapter;
         }
 
@@ -516,7 +501,6 @@ module
             interface IPreference;
             interface IRingtonePreference;
             interface IComparable;
-            interface IPreferenceManagerOnActivityResultListener;
         }
 
         [local]
@@ -576,7 +560,6 @@ module
             interface IComparable;
             interface IGenericInflaterParent;
             interface IPreferenceGroup;
-            interface IAdapterViewOnItemClickListener;
         }
 
         class CPreferenceScreenSavedState {
@@ -614,7 +597,6 @@ module
             interface ISeekBarPreference;
             interface IPreference;
             interface IComparable;
-            interface ISeekBarOnSeekBarChangeListener;
         }
 
         class CSeekBarPreferenceSavedState {

@@ -328,6 +328,8 @@ Fragment::Fragment()
     , mInLayout(FALSE)
     , mRestored(FALSE)
     , mBackStackNesting(0)
+    , mActivity(NULL)
+    , mParentFragment(NULL)
     , mFragmentId(0)
     , mContainerId(0)
     , mHidden(FALSE)
@@ -1304,7 +1306,7 @@ ECode Fragment::GetLoaderManager(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mCheckedForLoaderManager = TRUE;
-    AutoPtr<Activity> act = (Activity*)mActivity.Get();;
+    AutoPtr<Activity> act = (Activity*)mActivity;
     mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, TRUE);
     *manager = ILoaderManager::Probe(mLoaderManager);
     REFCOUNT_ADD(*manager);
@@ -1527,7 +1529,7 @@ ECode Fragment::OnStart()
         mLoadersStarted = TRUE;
         if (!mCheckedForLoaderManager) {
             mCheckedForLoaderManager = TRUE;
-            AutoPtr<Activity> act = (Activity*)mActivity.Get();;
+            AutoPtr<Activity> act = (Activity*)mActivity;
             mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);
         }
         if (mLoaderManager != NULL) {
@@ -1594,7 +1596,7 @@ ECode Fragment::OnDestroy()
     //        + " mLoaderManager=" + mLoaderManager);
     if (!mCheckedForLoaderManager) {
         mCheckedForLoaderManager = TRUE;
-        AutoPtr<Activity> act = (Activity*)mActivity.Get();;
+        AutoPtr<Activity> act = (Activity*)mActivity;
         mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);
     }
     if (mLoaderManager != NULL) {
@@ -1913,11 +1915,11 @@ ECode Fragment::Dump(
     }
     if (mActivity != NULL) {
         writer->Print(prefix); writer->Print(String("mActivity="));
-                writer->Println(mActivity.Get());
+                writer->Println(mActivity);
     }
     if (mParentFragment != NULL) {
         writer->Print(prefix); writer->Print(String("mParentFragment="));
-                writer->Println(mParentFragment.Get());
+                writer->Println(mParentFragment);
     }
     if (mArguments != NULL) {
         writer->Print(prefix); writer->Print(String("mArguments="));
@@ -2282,7 +2284,7 @@ ECode Fragment::PerformStop()
 
     if (mLoadersStarted) {
         mLoadersStarted = FALSE;
-        AutoPtr<Activity> act = (Activity*)mActivity.Get();;
+        AutoPtr<Activity> act = (Activity*)mActivity;
         if (!mCheckedForLoaderManager) {
             mCheckedForLoaderManager = TRUE;
             mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);

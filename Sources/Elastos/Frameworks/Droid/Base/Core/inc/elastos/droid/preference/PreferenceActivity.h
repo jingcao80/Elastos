@@ -41,10 +41,30 @@ namespace Preference {
 class ECO_PUBLIC PreferenceActivity
     : public ListActivity
     , public IPreferenceActivity
-    , public IPreferenceManagerOnPreferenceTreeClickListener
     , public IPreferenceFragmentOnPreferenceStartFragmentCallback
 {
 private:
+    class ECO_LOCAL PreferenceManagerOnPreferenceTreeClickListener
+        : public Object
+        , public IPreferenceManagerOnPreferenceTreeClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("PreferenceActivity::PreferenceManagerOnPreferenceTreeClickListener")
+
+        PreferenceManagerOnPreferenceTreeClickListener(
+            /* [in] */ PreferenceActivity* host);
+
+        CARAPI OnPreferenceTreeClick(
+            /* [in] */ IPreferenceScreen* preferenceScreen,
+            /* [in] */ IPreference* preference,
+            /* [out] */ Boolean* result);
+
+    private:
+        PreferenceActivity* mHost;
+    };
+
     class ECO_LOCAL MHandler
         : public Handler
     {

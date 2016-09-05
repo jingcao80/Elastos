@@ -13,7 +13,35 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-CAR_INTERFACE_IMPL(SeekBarPreference, Preference, ISeekBarOnSeekBarChangeListener)
+
+CAR_INTERFACE_IMPL(SeekBarPreference::InnerListener, Object, ISeekBarOnSeekBarChangeListener)
+
+SeekBarPreference::InnerListener::InnerListener(
+    /* [in] */ SeekBarPreference* host)
+    : mHost(host)
+{}
+
+ECode SeekBarPreference::InnerListener::OnProgressChanged(
+    /* [in] */ ISeekBar* seekBar,
+    /* [in] */ Int32 progress,
+    /* [in] */ Boolean fromUser)
+{
+    return mHost->OnProgressChanged(seekBar, progress, fromUser);
+}
+
+ECode SeekBarPreference::InnerListener::OnStartTrackingTouch(
+    /* [in] */ ISeekBar* seekBar)
+{
+    return mHost->OnStartTrackingTouch(seekBar);
+}
+
+ECode SeekBarPreference::InnerListener::OnStopTrackingTouch(
+    /* [in] */ ISeekBar* seekBar)
+{
+    return mHost->OnStopTrackingTouch(seekBar);
+}
+
+CAR_INTERFACE_IMPL(SeekBarPreference, Preference, ISeekBarPreference)
 
 SeekBarPreference::SeekBarPreference()
     : mProgress(0)
@@ -75,10 +103,12 @@ ECode SeekBarPreference::OnBindView(
     /* [in] */ IView* view)
 {
     FAIL_RETURN(Preference::OnBindView(view))
+
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IView> tempView;
     view->FindViewById(R::id::seekbar, (IView**)&tempView);
     ISeekBar* seekBar = ISeekBar::Probe(tempView);
-    seekBar->SetOnSeekBarChangeListener(this);
+    seekBar->SetOnSeekBarChangeListener(listener);
     IProgressBar::Probe(seekBar)->SetMax(mMax);
     IProgressBar::Probe(seekBar)->SetProgress(mProgress);
     Boolean isEnabled;

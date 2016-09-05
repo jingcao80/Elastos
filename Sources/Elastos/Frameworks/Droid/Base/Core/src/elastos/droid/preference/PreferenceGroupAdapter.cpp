@@ -34,6 +34,28 @@ namespace Preference {
 //====================================================
 // PreferenceGroupAdapter::PreferenceLayout
 //====================================================
+CAR_INTERFACE_IMPL(PreferenceGroupAdapter::InnerListener, Object, IPreferenceOnPreferenceChangeInternalListener)
+
+PreferenceGroupAdapter::InnerListener::InnerListener(
+    /* [in] */ PreferenceGroupAdapter* host)
+    : mHost(host)
+{}
+
+ECode PreferenceGroupAdapter::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference)
+{
+    return mHost->OnPreferenceChange(preference);
+}
+
+ECode PreferenceGroupAdapter::InnerListener::OnPreferenceHierarchyChange(
+    /* [in] */ IPreference* preference)
+{
+    return mHost->OnPreferenceHierarchyChange(preference);
+}
+
+//====================================================
+// PreferenceGroupAdapter::PreferenceLayout
+//====================================================
 
 CAR_INTERFACE_IMPL_2(PreferenceGroupAdapter::PreferenceLayout, Object, IPreferenceLayout, IComparable)
 
@@ -156,16 +178,13 @@ AutoPtr<IViewGroupLayoutParams> PreferenceGroupAdapter::sWrapperLayoutParams = i
 
 const String PreferenceGroupAdapter::TAG("PreferenceGroupAdapter");
 
-CAR_INTERFACE_IMPL_2(PreferenceGroupAdapter, BaseAdapter, IPreferenceGroupAdapter, IPreferenceOnPreferenceChangeInternalListener)
+CAR_INTERFACE_IMPL(PreferenceGroupAdapter, BaseAdapter, IPreferenceGroupAdapter)
 
 PreferenceGroupAdapter::PreferenceGroupAdapter()
     : mHasReturnedViewTypeCount(FALSE)
     , mIsSyncing(FALSE)
     , mHighlightedPosition(-1)
 {
-    mTempPreferenceLayout = new PreferenceLayout();
-    CHandler::New((IHandler**)&mHandler);
-    mSyncRunnable = new SyncRunnable(this);
 }
 
 ECode PreferenceGroupAdapter::constructor(
@@ -175,9 +194,12 @@ ECode PreferenceGroupAdapter::constructor(
     IWeakReferenceSource::Probe(preferenceGroup)->GetWeakReference((IWeakReference**)&wr);
     mWeakPreferenceGroup = wr.Get();
 
-    AutoPtr<IPreferenceGroup> _mPreferenceGroup;
-    wr->Resolve(EIID_IPreferenceGroup, (IInterface**)&_mPreferenceGroup);
-    IPreference::Probe(_mPreferenceGroup)->SetOnPreferenceChangeInternalListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    IPreference::Probe(preferenceGroup)->SetOnPreferenceChangeInternalListener(listener);
+
+    mTempPreferenceLayout = new PreferenceLayout();
+    CHandler::New((IHandler**)&mHandler);
+    mSyncRunnable = new SyncRunnable(this);
 
     CArrayList::New((IList**)&mPreferenceList);
     CArrayList::New((IList**)&mPreferenceLayouts);
@@ -243,7 +265,8 @@ void PreferenceGroupAdapter::FlattenPreferenceGroup(
             }
         }
 
-        preference->SetOnPreferenceChangeInternalListener(this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        preference->SetOnPreferenceChangeInternalListener(listener);
     }
 }
 

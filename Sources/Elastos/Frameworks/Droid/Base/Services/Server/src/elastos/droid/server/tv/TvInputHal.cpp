@@ -574,10 +574,14 @@ CAR_INTERFACE_IMPL(TvInputHal, Object, IHandlerCallback)
 TvInputHal::TvInputHal()
     : mPtr(0)
 {
-    Elastos::Core::CObject::New((IObject**)&mLock);
     CSparseInt32Array::New((ISparseInt32Array**)&mStreamConfigGenerations);
     CSparseArray::New((ISparseArray**)&mStreamConfigs);
     CLinkedList::New((IQueue**)&mPendingMessageQueue);
+}
+
+TvInputHal::~TvInputHal()
+{
+    Close();
 }
 
 Int64 TvInputHal::NativeOpen(
@@ -623,7 +627,7 @@ ECode TvInputHal::constructor(
     /* [in] */ ITvInputHalCallback* callback)
 {
     mCallback = callback;
-    CHandler::New(IHandlerCallback::Probe(this), FALSE, (IHandler**)&mHandler);
+    CHandler::New(this, FALSE, FALSE, (IHandler**)&mHandler);
     return NOERROR;
 }
 
@@ -699,6 +703,7 @@ ECode TvInputHal::Close()
     {    AutoLock syncLock(mLock);
         if (mPtr != 0l) {
             NativeClose(mPtr);
+            mPtr = 0;
         }
     }
     return NOERROR;

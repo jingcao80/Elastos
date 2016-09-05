@@ -24,8 +24,24 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-CAR_INTERFACE_IMPL_3(PreferenceScreen, PreferenceGroup, IPreferenceScreen, \
-    IAdapterViewOnItemClickListener, IDialogInterfaceOnDismissListener)
+CAR_INTERFACE_IMPL(PreferenceScreen::InnerListener, Object, IAdapterViewOnItemClickListener)
+
+PreferenceScreen::InnerListener::InnerListener(
+    /* [in] */ PreferenceScreen* host)
+    : mHost(host)
+{}
+
+ECode PreferenceScreen::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+CAR_INTERFACE_IMPL_2(PreferenceScreen, PreferenceGroup, IPreferenceScreen, \
+    IDialogInterfaceOnDismissListener)
 
 PreferenceScreen::PreferenceScreen()
 {
@@ -65,8 +81,9 @@ ECode PreferenceScreen::OnCreateRootAdapter(
 ECode PreferenceScreen::Bind(
     /* [in] */ IListView* listView)
 {
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IAdapterView> av = IAdapterView::Probe(listView);
-    av->SetOnItemClickListener(this);
+    av->SetOnItemClickListener(listener.Get());
     AutoPtr<IListAdapter> adapter;
     GetRootAdapter((IListAdapter**)&adapter);
     IAdapter* a = IAdapter::Probe(adapter);

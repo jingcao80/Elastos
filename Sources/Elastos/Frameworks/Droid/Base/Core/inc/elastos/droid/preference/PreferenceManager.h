@@ -244,7 +244,7 @@ private:
     /**
      * @see #getActivity()
      */
-    AutoPtr<IActivity> mActivity;
+    IActivity* mActivity;   // weak-ref
 
     /**
      * Fragment that owns this instance.
@@ -256,7 +256,7 @@ private:
      *
      * @see #mActivity
      */
-    AutoPtr<IContext> mContext;
+    IContext* mContext;     // weak-ref
 
     /**
      * The counter for unique IDs.

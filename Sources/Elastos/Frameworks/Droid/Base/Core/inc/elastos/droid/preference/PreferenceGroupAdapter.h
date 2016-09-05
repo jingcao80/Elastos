@@ -29,9 +29,30 @@ namespace Preference {
 class PreferenceGroupAdapter
     : public BaseAdapter
     , public IPreferenceGroupAdapter
-    , public IPreferenceOnPreferenceChangeInternalListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeInternalListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("PreferenceGroupAdapter::InnerListener")
+
+        InnerListener(
+            /* [in] */ PreferenceGroupAdapter* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference);
+
+        CARAPI OnPreferenceHierarchyChange(
+            /* [in] */ IPreference* preference);
+
+    private:
+        PreferenceGroupAdapter* mHost;
+    };
+
     class PreferenceLayout
         : public Object
         , public IComparable

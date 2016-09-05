@@ -49,6 +49,62 @@ namespace App {
 //========================================================================
 // NativeActivity::NativeContentView
 //========================================================================
+CAR_INTERFACE_IMPL_4(NativeActivity::InnerListener, Object, \
+    ISurfaceHolderCallback2, ISurfaceHolderCallback, \
+    IInputQueueCallback, IOnGlobalLayoutListener)
+
+NativeActivity::InnerListener::InnerListener(
+    /* [in] */ NativeActivity* host)
+    : mHost(host)
+{}
+
+ECode NativeActivity::InnerListener::SurfaceCreated(
+    /* [in] */ ISurfaceHolder* holder)
+{
+    return mHost->SurfaceCreated(holder);
+}
+
+ECode NativeActivity::InnerListener::SurfaceChanged(
+    /* [in] */ ISurfaceHolder* holder,
+    /* [in] */ Int32 format,
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 height)
+{
+    return mHost->SurfaceChanged(holder, format, width, height);
+}
+
+ECode NativeActivity::InnerListener::SurfaceRedrawNeeded(
+    /* [in] */ ISurfaceHolder* holder)
+{
+    return mHost->SurfaceRedrawNeeded(holder);
+}
+
+ECode NativeActivity::InnerListener::SurfaceDestroyed(
+    /* [in] */ ISurfaceHolder* holder)
+{
+    return mHost->SurfaceDestroyed(holder);
+}
+
+ECode NativeActivity::InnerListener::OnInputQueueCreated(
+    /* [in] */ IInputQueue* queue)
+{
+    return mHost->OnInputQueueCreated(queue);
+}
+
+ECode NativeActivity::InnerListener::OnInputQueueDestroyed(
+    /* [in] */ IInputQueue* queue)
+{
+    return mHost->OnInputQueueDestroyed(queue);
+}
+
+ECode NativeActivity::InnerListener::OnGlobalLayout()
+{
+    return mHost->OnGlobalLayout();
+}
+
+//========================================================================
+// NativeActivity::NativeContentView
+//========================================================================
 CAR_INTERFACE_IMPL(NativeActivity::NativeContentView, Elastos::Droid::View::View, INativeContentView)
 
 NativeActivity::NativeContentView::NativeContentView()
@@ -126,6 +182,7 @@ ECode NativeActivity::OnCreate(
     String libname("main");
     String funcname("ANativeActivity_onCreate");
     AutoPtr<IActivityInfo> ai;
+    AutoPtr<InnerListener> listener = new InnerListener(this);
 
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
@@ -133,8 +190,8 @@ ECode NativeActivity::OnCreate(
 
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
-    window->TakeSurface(this);      // TODO memory leak zhaohui
-    window->TakeInputQueue(this);   // TODO memory leak zhaohui
+    window->TakeSurface(listener);
+    window->TakeInputQueue(listener);
     window->SetFormat(IPixelFormat::RGB_565);
     window->SetSoftInputMode(
         IWindowManagerLayoutParams::SOFT_INPUT_STATE_UNSPECIFIED
@@ -148,7 +205,7 @@ ECode NativeActivity::OnCreate(
     view->RequestFocus(&bval);
     AutoPtr<IViewTreeObserver> vto;
     view->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    vto->AddOnGlobalLayoutListener(this);
+    vto->AddOnGlobalLayoutListener(listener);
 
     // try {
     AutoPtr<IIntent> intent;

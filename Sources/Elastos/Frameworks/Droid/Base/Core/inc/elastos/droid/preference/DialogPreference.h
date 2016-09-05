@@ -34,8 +34,25 @@ class ECO_PUBLIC DialogPreference
     , public IDialogPreference
     , public IDialogInterfaceOnClickListener
     , public IDialogInterfaceOnDismissListener
-    , public IPreferenceManagerOnActivityDestroyListener
 {
+protected:
+    class InnerListener
+        : public Object
+        , public IPreferenceManagerOnActivityDestroyListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("DialogPreference::InnerListener")
+
+        InnerListener(
+            /* [in] */ DialogPreference* host);
+
+        CARAPI OnActivityDestroy();
+
+    private:
+        DialogPreference* mHost;
+    };
 public:
     DialogPreference();
 
@@ -321,6 +338,7 @@ private:
 
     /** Which button was clicked. */
     Int32 mWhichButtonClicked;
+    AutoPtr<InnerListener> mListener;
 };
 
 }

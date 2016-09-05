@@ -65,7 +65,6 @@ module
      * interface IComparable
      * interface IGenericInflaterParent
      * interface IPreferenceGroup
-     * interface IAdapterViewOnItemClickListener
      */
     [local]
     interface IPreferenceScreen {

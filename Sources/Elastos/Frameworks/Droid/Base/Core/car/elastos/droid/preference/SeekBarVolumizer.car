@@ -19,7 +19,6 @@ module
      *
      * @Involve
      * interface IHandlerCallback
-     * interface ISeekBarOnSeekBarChangeListener
      */
     interface ISeekBarVolumizer {
         SetSeekBar(

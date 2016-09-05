@@ -564,11 +564,11 @@ public:
     static const Boolean DEBUG_VISIBLE_BEHIND;
     static const Int32 HOME_STACK_ID = 0;
     /** How long we wait until giving up on the last activity telling us it is idle. */
-    static const Int32 IDLE_TIMEOUT = 10*1000;
+    static const Int32 IDLE_TIMEOUT;
     /** How long we can hold the sleep wake lock before giving up. */
-    static const Int32 SLEEP_TIMEOUT = 5*1000;
+    static const Int32 SLEEP_TIMEOUT;
     // How long we can hold the launch wake lock before giving up.
-    static const Int32 LAUNCH_TIMEOUT = 10*1000;
+    static const Int32 LAUNCH_TIMEOUT;
     static const Int32 IDLE_TIMEOUT_MSG = CActivityManagerService::FIRST_SUPERVISOR_STACK_MSG;
     static const Int32 IDLE_NOW_MSG = CActivityManagerService::FIRST_SUPERVISOR_STACK_MSG + 1;
     static const Int32 RESUME_TOP_ACTIVITY_MSG = CActivityManagerService::FIRST_SUPERVISOR_STACK_MSG + 2;

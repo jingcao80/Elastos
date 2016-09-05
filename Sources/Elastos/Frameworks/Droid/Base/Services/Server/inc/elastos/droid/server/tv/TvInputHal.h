@@ -43,6 +43,8 @@ public:
 
     TvInputHal();
 
+    ~TvInputHal();
+
     CARAPI constructor(
         /* [in] */ ITvInputHalCallback* callback);
 
@@ -121,7 +123,7 @@ private:
     static const Boolean DEBUG;
     static const String TAG;
 
-    AutoPtr<IObject> mLock;
+    Object mLock;
     Int64 mPtr;
     AutoPtr<ITvInputHalCallback> mCallback;
     AutoPtr<IHandler> mHandler;

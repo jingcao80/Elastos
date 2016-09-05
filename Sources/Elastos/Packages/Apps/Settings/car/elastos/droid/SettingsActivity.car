@@ -7,15 +7,9 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.App.IActivity
-     * interface Elastos.Droid.App.IFragmentManagerOnBackStackChangedListener
      * interface Elastos.Droid.Content.IContext
      * interface Elastos.Droid.Content.IContextWrapper
-     * interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener
-     * interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback
      * interface Elastos.Droid.View.IContextThemeWrapper
-     * interface Elastos.Droid.View.IOnActionExpandListener
-     * interface Elastos.Droid.Widget.ISearchViewOnCloseListener
-     * interface Elastos.Droid.Widget.ISearchViewOnQueryTextListener
      * interface IButtonBarHandler
      * interface ILayoutInflaterFactory
      * interface ILayoutInflaterFactory2

@@ -89,6 +89,8 @@ module
     interface Elastos.Droid.View.ILayoutInflaterFactory2;
     interface Elastos.Droid.View.IWindowCallback;
     interface Elastos.Droid.View.IIWindow;
+    interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    interface Elastos.Droid.View.IOnWindowDismissedCallback;
     interface Elastos.Droid.Internal.Os.IHandlerCallerCallback;
     interface Elastos.Droid.Internal.App.IIVoiceInteractionManagerService;
     interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
@@ -218,10 +220,10 @@ module
             interface ILayoutInflaterFactory2;
             interface IWindowCallback;
             interface IKeyEventCallback;
-            //interface IViewOnCreateContextMenuListener; //undefined
+            interface IViewOnCreateContextMenuListener;
             interface IComponentCallbacks2;
             interface IComponentCallbacks;
-            //interface IOnWindowDismissedCallback;  //IOnWindowDismissedCallback
+            interface IOnWindowDismissedCallback;
             interface IContextWrapper;
             interface IContext;
             interface IPreferenceActivity;
