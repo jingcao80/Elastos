@@ -220,6 +220,7 @@ CWindowManagerService::SettingsObserver::SettingsObserver(
     : mHost(host)
 {
 }
+
 ECode CWindowManagerService::SettingsObserver::constructor()
 {
     AutoPtr<IHandler> h;
@@ -233,7 +234,7 @@ ECode CWindowManagerService::SettingsObserver::constructor()
 
     AutoPtr<IContentResolver> resolver;
     mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
-    return　resolver->RegisterContentObserver(uri, FALSE, this);
+    return resolver->RegisterContentObserver(uri, FALSE, this);
 }
 
 ECode CWindowManagerService::SettingsObserver::OnChange(
