@@ -58,7 +58,7 @@ ECode CFragmentTwo::MyListener::OnClick(
 //=======================================================================
 CAR_OBJECT_IMPL(CFragmentTwo)
 
-CFragmentTwo::CFragmentOne()
+CFragmentTwo::CFragmentTwo()
 {
     Logger::I(TAG, " >> Create CFragmentTwo: %p", this);
 }
@@ -70,7 +70,7 @@ CFragmentTwo::~CFragmentTwo()
 
 ECode CFragmentTwo::constructor()
 {
-    return FragmentTwo::constructor();
+    return Fragment::constructor();
 }
 
 ECode CFragmentTwo::OnCreateView(

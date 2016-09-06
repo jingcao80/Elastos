@@ -312,6 +312,8 @@ private:
         SettingsObserver(
             /* [in] */ CWindowManagerService* host);
 
+        CARAPI constructor();
+
         CARAPI OnChange(
             /* [in] */ Boolean selfChange);
 

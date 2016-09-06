@@ -227,7 +227,8 @@ AutoPtr<IPhoneWindowRotationWatcher> PhoneWindow::sRotationWatcher = InitStaticW
 PhoneWindow::SettingsObserver::SettingsObserver(
     /* [in] */ PhoneWindow* host)
     : mHost(host)
-{}
+{
+}
 
 PhoneWindow::SettingsObserver::~SettingsObserver()
 {
@@ -4066,7 +4067,7 @@ AutoPtr<ITransition> PhoneWindow::GetTransition(
     /* [in] */ Int32 id)
 {
     AutoPtr<ITransition> currentValue = current;
-    if (currentValue != defaultValue) {
+    if (current != defaultValue) {
         return currentValue;
     }
     Int32 transitionId;

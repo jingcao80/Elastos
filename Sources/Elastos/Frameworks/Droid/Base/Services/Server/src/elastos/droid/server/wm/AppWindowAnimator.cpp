@@ -63,7 +63,6 @@ AppWindowAnimator::AppWindowAnimator(
     , mThumbnailForceAboveLayer(0)
     , mDeferThumbnailDestruction(FALSE)
 {
-    Slogger::I(TAG, " >> Create AppWindowAnimator %p", this);
     AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)atoken;
     assert(wrs != NULL);
     wrs->GetWeakReference((IWeakReference**)&mWeakAppToken);
@@ -74,7 +73,6 @@ AppWindowAnimator::AppWindowAnimator(
 
 AppWindowAnimator::~AppWindowAnimator()
 {
-    Slogger::I(TAG, " >> Destroy AppWindowAnimator %p", this);
 }
 
 AutoPtr<AppWindowToken> AppWindowAnimator::GetAppToken()

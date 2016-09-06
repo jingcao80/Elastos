@@ -18,6 +18,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <utils/CallStack.h>
 
 using Elastos::Droid::App::CActivityManagerTaskDescription;
 using Elastos::Droid::App::CActivityOptions;
@@ -129,6 +130,11 @@ ActivityRecord::ActivityRecord()
 ActivityRecord::~ActivityRecord()
 {
     Slogger::D("ActivityRecord", " =========== ~ActivityRecord() %s", ToString().string());
+    android::CallStack stack;
+    stack.update();
+    Logger::I(TAG, "-------------------------------------------------------");
+    Logger::I(TAG, "callstack:\n%s", stack.toString("").string());
+    Logger::I(TAG, "-------------------------------------------------------");
 }
 
 ECode ActivityRecord::constructor(
