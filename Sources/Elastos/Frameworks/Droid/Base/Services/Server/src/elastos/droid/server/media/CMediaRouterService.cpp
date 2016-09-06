@@ -2,6 +2,7 @@
 #include "elastos/droid/server/media/CMediaRouterService.h"
 #include "elastos/droid/server/Watchdog.h"
 #include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/Manifest.h"
@@ -24,6 +25,7 @@ using Elastos::Droid::Media::IMediaRouterRouteInfo;
 using Elastos::Droid::Media::EIID_IIMediaRouterService;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Server::Watchdog;
@@ -136,6 +138,7 @@ CMediaRouterService::UserHandler::UserHandler(
     , mConnectionTimeoutStartTime(0)
     , mClientStateUpdateScheduled(FALSE)
 {
+    Handler::constructor(Looper::GetMainLooper(), NULL, TRUE);
     mWatcher = new RemoteDisplayProviderWatcher(service->mContext, (RemoteDisplayProviderWatcher::ICallback*)this,
             this, mUserRecord->mUserId);
 }
