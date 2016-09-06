@@ -12,8 +12,6 @@
 #include <Elastos.Droid.Database.h>
 #include <Elastos.Droid.Net.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -30,6 +28,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Content::EIID_IIContentService;
 using Elastos::Droid::Content::IContentResolverHelper;
 using Elastos::Droid::Content::CContentResolverHelper;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
@@ -243,9 +242,7 @@ ECode CContentService::ObserverNode::AddObserverLocked(
     // Look to see if the proper child already exists
     String segment = GetUriSegment(uri, index);
     if (segment.IsNull()) {
-        String uriStr = Object::ToString(uri);
-        String observerStr = Object::ToString(observer);
-        Slogger::E(TAG, "Invalid Uri [%s] used for observer [%s]", uriStr.string(), observerStr.string());
+        Slogger::E(TAG, "Invalid Uri [%s] used for observer [%s]", TO_CSTR(uri), TO_CSTR(observer));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -282,21 +279,22 @@ Boolean CContentService::ObserverNode::RemoveObserverLocked(
     }
 
     AutoPtr<IProxy> proxy = (IProxy*)observer->Probe(EIID_IProxy);
-    if (proxy != NULL) {
-        Boolean result;
-        List<AutoPtr<ObserverEntry> >::Iterator it2 = mObservers.Begin();
-        for (; it2 != mObservers.End();) {
-            AutoPtr<ObserverEntry> entry = *it2;
-            if (entry->mObserver.Get() == observer) {
-                // We no longer need to listen for death notifications. Remove it.
+    Boolean result;
+    List<AutoPtr<ObserverEntry> >::Iterator it2 = mObservers.Begin();
+    for (; it2 != mObservers.End();) {
+        AutoPtr<ObserverEntry> entry = *it2;
+        if (entry->mObserver.Get() == observer) {
+            // We no longer need to listen for death notifications. Remove it.
+            if (proxy != NULL) {
                 proxy->UnlinkToDeath(entry, 0, &result);
-                it2 = mObservers.Erase(it2);
             }
-            else {
-                ++it2;
-            }
+            it2 = mObservers.Erase(it2);
+        }
+        else {
+            ++it2;
         }
     }
+
 
     if (mChildren.IsEmpty() && mObservers.IsEmpty()) {
         return TRUE;

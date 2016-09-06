@@ -321,7 +321,7 @@ private:
     AutoPtr<IUri> mNotifyUri;
 
     Object mSelfObserverLock;
-    AutoPtr<IContentObserver> mSelfObserver;
+    AutoPtr<SelfContentObserver> mSelfObserver;
     Boolean mSelfObserverRegistered;
 
     AutoPtr<IDataSetObservable> mDataSetObservable;

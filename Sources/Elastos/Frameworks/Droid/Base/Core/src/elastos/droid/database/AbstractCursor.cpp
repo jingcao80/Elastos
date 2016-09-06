@@ -10,10 +10,9 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Core::AutoLock;
 using Elastos::IO::EIID_ICloseable;
 using Elastos::Utility::Logging::Slogger;
 
@@ -80,7 +79,7 @@ AbstractCursor::~AbstractCursor()
 {
     mUpdatedRows.Clear();
 
-    if (mSelfObserver != NULL && mSelfObserverRegistered == TRUE) {
+    if (mSelfObserver != NULL && mSelfObserverRegistered) {
         mContentResolver->UnregisterContentObserver(mSelfObserver);
     }
     // try {
@@ -135,7 +134,7 @@ ECode AbstractCursor::Deactivate()
 
 ECode AbstractCursor::OnDeactivateOrClose()
 {
-    if (mSelfObserver != NULL) {
+    if (mSelfObserver != NULL && mSelfObserverRegistered) {
         mContentResolver->UnregisterContentObserver(mSelfObserver);
         mSelfObserverRegistered = FALSE;
     }
@@ -464,15 +463,17 @@ ECode AbstractCursor::SetNotificationUri(
     /* [in] */ IUri* notifyUri,
     /* [in] */ Int32 userHandle)
 {
-    {    AutoLock syncLock(mSelfObserverLock);
+    {
+        AutoLock syncLock(mSelfObserverLock);
+
         mNotifyUri = notifyUri;
         mContentResolver = cr;
         if (mSelfObserver != NULL) {
             mContentResolver->UnregisterContentObserver(mSelfObserver);
         }
-        AutoPtr<SelfContentObserver> sco = new SelfContentObserver();
-        sco->constructor(this);
-        mSelfObserver = sco.Get();
+
+        mSelfObserver = new SelfContentObserver();
+        mSelfObserver->constructor(this);
         mContentResolver->RegisterContentObserver(mNotifyUri, TRUE, mSelfObserver);
         mSelfObserverRegistered = TRUE;
     }

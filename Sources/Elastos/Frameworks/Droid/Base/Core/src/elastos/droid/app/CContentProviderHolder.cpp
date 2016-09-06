@@ -42,9 +42,6 @@ ECode CContentProviderHolder::ReadFromParcel(
 {
     source->ReadInterfacePtr((Handle32*)&mInfo);
     source->ReadInterfacePtr((Handle32*)&mProvider);
-    // TODO:
-//    provider = ContentProviderNative.asInterface(
-//        source.readStrongBinder());
     source->ReadInterfacePtr((Handle32*)&mConnection);
     source->ReadBoolean(&mNoReleaseNeeded);
     return NOERROR;

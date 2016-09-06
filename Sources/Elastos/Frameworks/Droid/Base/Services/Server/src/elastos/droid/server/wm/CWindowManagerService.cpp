@@ -219,17 +219,21 @@ CWindowManagerService::SettingsObserver::SettingsObserver(
     /* [in] */ CWindowManagerService* host)
     : mHost(host)
 {
+}
+ECode CWindowManagerService::SettingsObserver::constructor()
+{
     AutoPtr<IHandler> h;
     CHandler::New((IHandler**)&h);
-    constructor(h);
-    AutoPtr<IContentResolver> resolver;
-    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
+    ContentObserver::constructor(h);
+
     AutoPtr<IUri> uri;
     Settings::Secure::GetUriFor(ISettingsSecure::SHOW_IME_WITH_HARD_KEYBOARD, (IUri**)&uri);
-
     AutoPtr<IList> pathSegments;
     uri->GetPathSegments((IList**)&pathSegments);
-    resolver->RegisterContentObserver(uri, FALSE, this);
+
+    AutoPtr<IContentResolver> resolver;
+    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
+    return　resolver->RegisterContentObserver(uri, FALSE, this);
 }
 
 ECode CWindowManagerService::SettingsObserver::OnChange(
@@ -1061,6 +1065,7 @@ ECode CWindowManagerService::constructor(
     mContext->RegisterReceiver(mBroadcastReceiver, filter, (IIntent**)&intent);
 
     mSettingsObserver = new SettingsObserver(this);
+    mSettingsObserver->constructor();
     UpdateShowImeWithHardKeyboard();
 
     mPowerManager->NewWakeLock(IPowerManager::SCREEN_BRIGHT_WAKE_LOCK | IPowerManager::ON_AFTER_RELEASE,

@@ -25,6 +25,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CContentObserverTransport();
+
     ~CContentObserverTransport();
 
     CARAPI OnChange(

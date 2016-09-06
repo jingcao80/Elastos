@@ -4727,7 +4727,7 @@ ECode CActivityManagerService::StartActivityAsUser(
     /* [in] */ Int32 userId,
     /* [out] */ Int32* result)
 {
-    // Slogger::I(TAG, " >> StartActivityAsUser: %s, intent: %s", callingPackage.string(), TO_CSTR(intent));
+    // Slogger::I(TAG, " >> memory leak StartActivityAsUser: %s, intent: %s", callingPackage.string(), TO_CSTR(intent));
     // MemoryDumper::Dump();
 
     VALIDATE_NOT_NULL(result);
@@ -14279,6 +14279,8 @@ ECode CActivityManagerService::LoadResourcesOnSystemReady()
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     res->GetBoolean(R::bool_::config_hasRecents, &mHasRecents);
+    // disable for detecting memory leak.
+    // mHasRecents = FALSE;
     res->GetDimensionPixelSize(R::dimen::thumbnail_width, &mThumbnailWidth);
     res->GetDimensionPixelSize(R::dimen::thumbnail_height, &mThumbnailHeight);
     return NOERROR;

@@ -113,7 +113,7 @@ public:
     // Count for external process for which we have no handles.
     Int32 mExternalProcessNoHandleCount;
     ProcessRecord* mProc; // weak-ref if non-null, hosting process.
-    AutoPtr<ProcessRecord> mLaunchingApp; // weak-ref if non-null, waiting for this app to be launched.
+    AutoPtr<ProcessRecord> mLaunchingApp;
     String mStringName;
     String mShortStringName;
 };

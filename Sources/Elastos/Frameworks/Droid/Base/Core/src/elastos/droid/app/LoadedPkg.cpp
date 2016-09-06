@@ -1252,6 +1252,7 @@ ECode LoadedPkg::RemoveContextRegistrations(
             // } catch (RemoteException e) {
             //     // system crashed, nothing we can do
             // }
+            ++it;
         }
     }
 
@@ -1294,6 +1295,7 @@ ECode LoadedPkg::RemoveContextRegistrations(
             //     // system crashed, nothing we can do
             // }
             sd->DoForget();
+            ++it;
         }
     }
 
