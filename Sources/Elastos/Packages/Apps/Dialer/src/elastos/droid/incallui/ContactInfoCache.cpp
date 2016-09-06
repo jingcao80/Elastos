@@ -6,6 +6,7 @@
 #include "elastos/droid/contacts/common/util/PhoneNumberHelper.h"
 #include "elastos/droid/os/Looper.h"
 #include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include "elastos/core/StringUtils.h"
 #include <elastos/core/Thread.h>
 #include <elastos/utility/logging/Logger.h>
@@ -30,6 +31,7 @@ using Elastos::Droid::Provider::CContactsContractContacts;
 using Elastos::Droid::Provider::IContactsContractContacts;
 using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
@@ -157,10 +159,23 @@ ECode ContactInfoCache::ContactCacheEntry::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String("name: ") + mName + "number: " + mNumber + "location: " + mLocation
-            + "label: " + mLabel + "photo: " + TO_CSTR(mPhoto) + "isSipCall: " + StringUtils::ToString(mIsSipCall)
-            + "contactUri: " + TO_CSTR(mContactUri) + "displayPhotoUri: " + TO_CSTR(mDisplayPhotoUri);
-    return NOERROR;
+    StringBuilder sb("name: ");
+    sb.Append(mName);
+    sb.Append("number: ");
+    sb.Append(mNumber);
+    sb.Append("location: ");
+    sb.Append(mLocation);
+    sb.Append("label: ");
+    sb.Append(mLabel);
+    sb.Append("photo: ");
+    sb.Append(IInterface::Probe(mPhoto));
+    sb.Append("isSipCall: ");
+    sb.Append(mIsSipCall);
+    sb.Append("contactUri: ");
+    sb.Append(IInterface::Probe(mContactUri));
+    sb.Append("displayPhotoUri: ");
+    sb.Append(IInterface::Probe(mDisplayPhotoUri));
+    return sb.ToString(str);
 }
 
 
