@@ -11327,7 +11327,8 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
                 // Byte dexoptRequired = DexFile.isDexOptNeededInternal(pkg.baseCodePath, pkg.packageName, dexCodeInstructionSet, false);
                 // boolean isDexOptNeeded =  dexoptRequired != DexFile.UP_TO_DATE;
 
-                Boolean isCopyNativeBinariesNeeded = /*isDexOptNeeded ||*/ IsUpdatedSystemApp(pkg);
+                // isCopyNativeBinariesNeeded never be TRUE, when apk is in /data/app/
+                Boolean isCopyNativeBinariesNeeded = TRUE;// /*isDexOptNeeded ||*/ IsUpdatedSystemApp(pkg);
                 if (isCopyNativeBinariesNeeded) {
                     nlh->CopyNativeBinariesForSupportedAbi(handle,
                             nativeLibraryRoot, abiList, useIsaSpecificSubdirs, &copyRet);

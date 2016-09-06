@@ -1,6 +1,5 @@
-#ifndef THROW_ON_BAD_ID
+
 #define THROW_ON_BAD_ID 0
-#endif
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/ext/frameworkext.h"

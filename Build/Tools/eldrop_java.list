@@ -28,3 +28,4 @@ com.qualcomm.services.location  /system/app  dir
 com.example.Location    /system/app          dir
 CMFileManager           /system/app          dir
 WeChat_840.apk          /data/app
+vlc.apk                 /data/app
