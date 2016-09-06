@@ -479,6 +479,8 @@ SyncStorageEngine::SyncStorageEngine(
     /* [in] */ IContext* context,
     /* [in] */ IFile* dataDir)
 {
+    Handler::constructor();
+
     CRemoteCallbackList::New((IRemoteCallbackList**)&mChangeListeners);
 
     mNextAuthorityId = 0;
@@ -3008,7 +3010,7 @@ ECode SyncStorageEngine::ReadPendingOperationsLocked()
         ec = parser->Next(&eventType);
         FAIL_GOTO(ec, _EXIT_)
     }
-    if (eventType == IXmlPullParser::END_DOCUMENT) return NOERROR; // Nothing to read.
+    if (eventType == IXmlPullParser::END_DOCUMENT) goto _EXIT_; // Nothing to read.
 
     do {
         if (eventType == IXmlPullParser::START_TAG) {
@@ -3024,7 +3026,8 @@ ECode SyncStorageEngine::ReadPendingOperationsLocked()
 
                 if (versionString == NULL || StringUtils::ParseInt32(versionString) != PENDING_OPERATION_VERSION) {
                     Logger::W(TAG, "Unknown pending operation version %s", versionString.string());
-                    return E_IO_EXCEPTION;
+                    // throw new java.io.IOException("Unknown version.");
+                    goto _EXIT_;
                 }
 
                 ec = parser->GetAttributeValue(nullStr, XML_ATTR_AUTHORITYID, &strVal);
@@ -3358,6 +3361,7 @@ void SyncStorageEngine::RequestSync(
 void SyncStorageEngine::ReadStatisticsLocked()
 {
     AutoPtr<IParcel> in;
+    CParcel::New((IParcel**)&in);
     ECode ec = NOERROR;
     Int32 token, day;
     Int32 index = 0;

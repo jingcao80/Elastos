@@ -32,6 +32,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Security.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/net/Uri.h"
 
 #define TAG "Util"
 
@@ -52,6 +53,7 @@ using Elastos::Droid::Net::CHierarchicalUri;
 using Elastos::Droid::Net::COpaqueUri;
 using Elastos::Droid::Net::NetworkInfoState;
 using Elastos::Droid::Net::NetworkInfoDetailedState;
+using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Wifi::IWifiConfiguration;
 using Elastos::Droid::Wifi::IWifiInfo;
 using Elastos::Droid::Content::CIntent;
@@ -11626,23 +11628,8 @@ jobject Util::ToJavaContentProviderOperation(
     Int32 type = 0;
     parcel->ReadInt32(&type);
 
-    Int32 uriType = 0;
-    parcel->ReadInt32(&uriType);
-    parcel->SetDataPosition(sizeof(Int32));
-
     AutoPtr<IUri> uri;
-    if (1 == uriType) {
-        CStringUri::New((IUri**)&uri);
-        IParcelable::Probe(uri)->ReadFromParcel(parcel);
-    }
-    else if (2 == uriType) {
-        COpaqueUri::New((IUri**)&uri);
-        IParcelable::Probe(uri)->ReadFromParcel(parcel);
-    }
-    else if (3 == uriType) {
-        CHierarchicalUri::New((IUri**)&uri);
-        IParcelable::Probe(uri)->ReadFromParcel(parcel);
-    }
+    Uri::ReadFromParcel(parcel, (IUri**)&uri);
 
     jobject juri = NULL;
     if (uri !=  NULL) {
@@ -11654,9 +11641,9 @@ jobject Util::ToJavaContentProviderOperation(
 
     Int32 tempInt = 0;
     if ((parcel->ReadInt32(&tempInt), tempInt) != 0) {
-        AutoPtr<IContentValues> values;
-        CContentValues::New((IContentValues**)&values);
-        IParcelable::Probe(values)->ReadFromParcel(parcel);
+        AutoPtr<IInterface> contentValues;
+        parcel->ReadInterfacePtr((Handle32*)(IInterface**)&contentValues);
+        AutoPtr<IContentValues> values = IContentValues::Probe(contentValues);
 
         jobject jvalues = Util::ToJavaContentValues(env, values);
 

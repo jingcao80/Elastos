@@ -425,7 +425,7 @@ ECode CContentProviderNative::BulkInsert(
     jmethodID m = env->GetMethodID(c, "bulkInsert", "(Ljava/lang/String;Landroid/net/Uri;[Landroid/content/ContentValues;)I");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: bulkInsert Line: %d", __LINE__);
 
-    *number = env->CallIntMethod(mJInstance, m, juri, jinitialValues);
+    *number = env->CallIntMethod(mJInstance, m, jcallingPkg, juri, jinitialValues);
     Util::CheckErrorAndLog(env, TAG, "CallIntMethod: call bulkInsert: %d", __LINE__);
 
     env->DeleteLocalRef(juri);
@@ -467,7 +467,7 @@ ECode CContentProviderNative::Delete(
         "(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: Delete Line: %d", __LINE__);
 
-    *rowsAffected = env->CallIntMethod(mJInstance, m, juri, jselection, jselectionArgs);
+    *rowsAffected = env->CallIntMethod(mJInstance, m, jcallingPkg, juri, jselection, jselectionArgs);
     ECode ec = Util::CheckErrorAndLog(env, TAG, "CallIntMethod: Delete Line: %d", __LINE__);
 
     if (NULL != c) {
@@ -532,7 +532,7 @@ ECode CContentProviderNative::Update(
         "(Ljava/lang/String;Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: Update Line: %d", __LINE__);
 
-    *rowsAffected = env->CallIntMethod(mJInstance, m, juri, jInitialValues, jselection, jselectionArgs);
+    *rowsAffected = env->CallIntMethod(mJInstance, m, jcallingPkg, juri, jInitialValues, jselection, jselectionArgs);
     ECode ec = Util::CheckErrorAndLog(env, TAG, "CallIntMethod: Update Line: %d", __LINE__);
 
     if (NULL != c) {
