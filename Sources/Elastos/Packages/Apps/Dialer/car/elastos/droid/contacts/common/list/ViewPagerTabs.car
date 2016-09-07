@@ -1,0 +1,38 @@
+module
+{
+
+    interface Elastos.Droid.Support.V4.View.IViewPager;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.Widget.IHorizontalScrollView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IViewPagerTabs {
+
+        SetViewPager(
+            [in] IViewPager* viewPager);
+
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}

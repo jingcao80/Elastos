@@ -26,6 +26,7 @@ module
     merge("car/elastos/droid/contacts/common/list/ContactListPinnedHeaderView.car");
     merge("car/elastos/droid/contacts/common/list/ContactListFilterView.car");
     merge("car/elastos/droid/contacts/common/list/CustomContactListFilterActivity.car");
+    merge("car/elastos/droid/contacts/common/list/ViewPagerTabs.car");
     merge("car/elastos/droid/contacts/common/model/AccountTypeManager.car");
     merge("car/elastos/droid/contacts/common/model/ValuesDelta.car");
     merge("car/elastos/droid/contacts/common/model/account/AccountTypeWithDataSet.car");
@@ -230,6 +231,7 @@ module
     using interface Elastos.Droid.Widget.IAdapterView;
     using interface Elastos.Droid.Widget.IAbsListView;
     using interface Elastos.Droid.Widget.IGridView;
+    using interface Elastos.Droid.Widget.IHorizontalScrollView;
 //    using interface Elastos.Droid.Widget.IBaseAdapter;
 //    using interface Elastos.Droid.Widget.IListAdapter;
 //    using interface Elastos.Droid.Widget.ISpinnerAdapter;
@@ -1801,6 +1803,33 @@ module
 
         interface IContactListFilterView;
         interface ILinearLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CViewPagerTabs {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IViewPagerTabs;
+        interface IViewPagerOnPageChangeListener;
+        interface IHorizontalScrollView;
+        interface IFrameLayout;
         interface IViewGroup;
         interface IView;
         interface IViewParent;
