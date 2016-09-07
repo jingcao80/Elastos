@@ -15,6 +15,8 @@ DownloadProvider        /system/priv-app     dir
 AMapNetworkLocation     /system/priv-app     dir
 Browser                 /system/app          dir
 Camera2                 /system/app          dir
+CalendarProvider        /system/priv-app     dir
+Calendar                /system/app          dir
 Contacts                /system/app          dir
 ContactsProvider        /system/app          dir
 DeskClock               /system/app          dir
@@ -31,3 +33,4 @@ com.example.Location    /system/app          dir
 CMFileManager           /system/app          dir
 WeChat_840.apk          /data/app
 vlc.apk                 /data/app
+OfflineCalendar.apk     /data/app

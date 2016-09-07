@@ -540,10 +540,7 @@ void AbstractQueuedSynchronizer::DoReleaseShared()
                 continue;                // loop on failed CAS
             }
         }
-        if (h == NULL && mHead == NULL) {
-            break;
-        }
-        else if (h != NULL && mHead != NULL && Object::Equals(h->Probe(EIID_IInterface), mHead->Probe(EIID_IInterface))) {                   // loop if mHead changed
+        if (Object::Equals(h, mHead)) { // loop if mHead changed
             break;
         }
     }
