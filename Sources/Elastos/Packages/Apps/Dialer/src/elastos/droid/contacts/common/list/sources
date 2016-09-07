@@ -27,3 +27,5 @@ SOURCES += CCustomContactListFilterActivity.cpp
 SOURCES += CGroupDelta.cpp
 SOURCES += ContactListItemView.cpp
 SOURCES += ContactListFilterController.cpp
+SOURCES += CViewPagerTabs.cpp
+SOURCES += ViewPagerTabStrip.cpp
