@@ -687,6 +687,10 @@ ECode CContentService::SyncAsUser(
     /* [in] */ ISyncRequest* request,
     /* [in] */ Int32 userId)
 {
+    if (request == NULL) {
+        Logger::E(TAG, "line:%d, func:%s, request is null", __LINE__, __func__);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     StringBuilder sb("no permission to request sync as user: ");
     sb += userId;
     FAIL_RETURN(EnforceCrossUserPermission(userId, sb.ToString()))
@@ -697,6 +701,7 @@ ECode CContentService::SyncAsUser(
     Int64 identityToken = Binder::ClearCallingIdentity();
     AutoPtr<SyncManager> syncManager = GetSyncManager();
     if (syncManager == NULL) {
+        Binder::RestoreCallingIdentity(identityToken);
         return NOERROR;
     }
 
