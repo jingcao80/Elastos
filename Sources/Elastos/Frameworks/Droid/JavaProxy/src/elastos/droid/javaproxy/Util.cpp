@@ -11705,7 +11705,7 @@ jobject Util::ToJavaContentProviderOperation(
         jobject jselectionArgsBackReferences = env->NewObject(hmKlass, m);
         Util::CheckErrorAndLog(env, "ToJavaContentProviderOperation", "NewObject: HashMap line: %d", __LINE__);
 
-        m = env->GetMethodID(hmKlass, "put", "(Ljava/lang/Integer;Ljava/lang/Integer;)Ljava/lang/Integer;");
+        m = env->GetMethodID(hmKlass, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
         Util::CheckErrorAndLog(env, "ToJavaContentProviderOperation", "GetMethodID: put line: %d", __LINE__);
 
         Int32 size = 0;
@@ -11716,9 +11716,24 @@ jobject Util::ToJavaContentProviderOperation(
             parcel->ReadInt32(&key);
             parcel->ReadInt32(&value);
 
-            jobject jvalue = env->CallObjectMethod(jselectionArgsBackReferences, m, (jint)key, (jint)value);
+            jclass jintegerCls = env->FindClass("java/lang/Integer");
+            Util::CheckErrorAndLog(env, "ToJavaContentProviderOperation", "FindClass: Integer line: %d", __LINE__);
+
+            jmethodID integerInit = env->GetMethodID(jintegerCls, "<init>", "(I)V");
+            Util::CheckErrorAndLog(env, "ToJavaContentProviderOperation", "GetMethodID: Integer line: %d", __LINE__);
+
+            jobject jintegerK = env->NewObject(jintegerCls, integerInit, key);
+            Util::CheckErrorAndLog(env, "ToJavaContentProviderOperation", "NewObject: Integer K line: %d", __LINE__);
+            jobject jintegerV = env->NewObject(jintegerCls, integerInit, value);
+            Util::CheckErrorAndLog(env, "ToJavaContentProviderOperation", "NewObject: Integer V line: %d", __LINE__);
+
+            jobject jvalue = env->CallObjectMethod(jselectionArgsBackReferences, m, jintegerK, jintegerV);
             Util::CheckErrorAndLog(env, "ToJavaHashMap", "CallObjectMethod: put line: %d", __LINE__);
 
+            env->DeleteLocalRef(jvalue);
+            env->DeleteLocalRef(jintegerV);
+            env->DeleteLocalRef(jintegerK);
+            env->DeleteLocalRef(jintegerCls);
             env->DeleteLocalRef(jvalue);
         }
 

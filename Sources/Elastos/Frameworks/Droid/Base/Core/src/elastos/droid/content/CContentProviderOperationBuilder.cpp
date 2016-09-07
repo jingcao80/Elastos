@@ -114,7 +114,7 @@ ECode CContentProviderOperationBuilder::WithSelectionBackReference(
     /* [in] */ Int32 selectionArgIndex,
     /* [in] */ Int32 previousResult)
 {
-    if (mType != IContentProviderOperation::TYPE_INSERT
+    if (mType != IContentProviderOperation::TYPE_UPDATE
         && mType != IContentProviderOperation::TYPE_DELETE
         && mType != IContentProviderOperation::TYPE_ASSERT) {
         Logger::E("CContentProviderOperationBuilder", "only inserts, deletes, and asserts can have selection back-references");
