@@ -365,7 +365,10 @@ CursorTreeAdapter::MyCursorHelper::MyCursorHelper(
         cursor->GetColumnIndex(String("_id"), &mRowIDColumn);
 
     mContentObserver = new MyContentObserver(this);
+    mContentObserver->constructor(mOwner->mHandler);
+
     mDataSetObserver = new MyDataSetObserver(this);
+    mDataSetObserver->constructor();
     if (cursorPresent) {
         cursor->RegisterContentObserver(mContentObserver);
         cursor->RegisterDataSetObserver(mDataSetObserver);
@@ -465,7 +468,6 @@ Boolean CursorTreeAdapter::MyCursorHelper::IsValid()
 CursorTreeAdapter::MyCursorHelper::MyContentObserver::MyContentObserver(
     /* [in] */ MyCursorHelper* owner)
 {
-    ContentObserver::constructor(mHandler);
     mOwner = owner;
 }
 

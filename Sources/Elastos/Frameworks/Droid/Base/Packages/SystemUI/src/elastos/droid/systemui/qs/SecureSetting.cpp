@@ -13,20 +13,25 @@ namespace SystemUI {
 namespace Qs {
 
 CAR_INTERFACE_IMPL(SecureSetting, ContentObserver, IListenable)
-SecureSetting::SecureSetting(
+
+SecureSetting::SecureSetting()
+    : mListening(FALSE)
+    , mUserId(0)
+{}
+
+ECode SecureSetting::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ const String& settingName)
-    : mListening(FALSE)
-    , mUserId(0)
 {
     ContentObserver::constructor(handler);
+
     mContext = context;
     mSettingName = settingName;
     AutoPtr<IActivityManagerHelper> helper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
     helper->GetCurrentUser(&mUserId);
-    SetListening(TRUE);
+    return SetListening(TRUE);
 }
 
 Int32 SecureSetting::GetValue()

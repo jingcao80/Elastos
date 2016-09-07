@@ -19,8 +19,11 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
+static const String TAG("AppWindowToken");
+
 AppWindowToken::AppWindowToken()
-    : mVoiceInteraction(FALSE)
+    : mAnimator(NULL)
+    , mVoiceInteraction(FALSE)
     , mGroupId(-1)
     , mAppFullscreen(FALSE)
     , mRequestedOrientation(IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED)
@@ -39,6 +42,8 @@ AppWindowToken::AppWindowToken()
     , mReportedVisible(FALSE)
     , mReportedDrawn(FALSE)
     , mRemoved(FALSE)
+    , mStartingWindow(NULL)
+    , mStartingView(NULL)
     , mStartingDisplayed(FALSE)
     , mStartingMoved(FALSE)
     , mFirstWindowDrawn(FALSE)
@@ -50,6 +55,11 @@ AppWindowToken::AppWindowToken()
 
 AppWindowToken::~AppWindowToken()
 {
+    mInputApplicationHandle = NULL;
+    mAppAnimator = NULL;
+    mAnimator = NULL;
+    mStartingWindow = NULL;
+    mStartingView = NULL;
 }
 
 ECode AppWindowToken::constructor(

@@ -662,7 +662,7 @@ public:
 
     static const String TAG;
 
-    AutoPtr<FragmentManagerImpl> mManager;
+    FragmentManagerImpl* mManager;
 
     static const Int32 OP_NULL;
     static const Int32 OP_ADD;

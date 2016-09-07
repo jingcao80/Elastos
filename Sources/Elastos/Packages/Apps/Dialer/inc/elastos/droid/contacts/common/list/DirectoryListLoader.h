@@ -45,10 +45,8 @@ private:
     public:
         TO_STRING_IMPL("DirectoryListLoader::MyObserver")
 
-        MyObserver(
-            /* [in] */ DirectoryListLoader* host)
-            : mHost(host)
-        {}
+        CARAPI constructor(
+            /* [in] */ DirectoryListLoader* host);
 
         // @Override
         CARAPI OnChange(
@@ -103,7 +101,7 @@ private:
 
     static const AutoPtr<ArrayOf<String> > RESULT_PROJECTION;
 
-    AutoPtr<IContentObserver> mObserver;
+    AutoPtr<MyObserver> mObserver;
 
     Int32 mDirectorySearchMode;
     Boolean mLocalInvisibleDirectoryEnabled;

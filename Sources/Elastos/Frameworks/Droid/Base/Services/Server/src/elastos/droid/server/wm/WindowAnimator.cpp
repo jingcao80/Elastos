@@ -76,6 +76,26 @@ WindowAnimator::WindowAnimator(
     mAnimationRunnable = new AnimationRunnable(this);
 }
 
+AutoPtr<WindowStateAnimator> WindowAnimator::GetUniverseBackground()
+{
+    if (mUniverseBackground != NULL) {
+        AutoPtr<IObject> obj;
+        mUniverseBackground->Resolve(EIID_IObject, (IInterface**)&obj);
+        if (obj) {
+            return (WindowStateAnimator*)obj.Get();
+        }
+    }
+
+    return NULL;
+}
+
+void WindowAnimator::SetUniverseBackground(
+    /* [in] */ WindowStateAnimator* animator)
+{
+    mUniverseBackground = NULL;
+    animator->GetWeakReference((IWeakReference**)&mUniverseBackground);
+}
+
 String WindowAnimator::ForceHidingToString()
 {
     switch (mForceHiding) {

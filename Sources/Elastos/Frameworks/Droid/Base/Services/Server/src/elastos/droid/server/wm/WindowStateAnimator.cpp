@@ -54,7 +54,15 @@ String WindowStateAnimator::DrawStateToString(
 
 WindowStateAnimator::WindowStateAnimator(
     /* [in] */ WindowState* win)
-    : mAnimating(FALSE)
+    : mService(NULL)
+    , mAnimator(NULL)
+    , mSession(NULL)
+    , mPolicy(NULL)
+    , mContext(NULL)
+    , mAttachedWinAnimator(NULL)
+    , mAppAnimator(NULL)
+    , mIsWallpaper(FALSE)
+    , mAnimating(FALSE)
     , mLocalAnimating(FALSE)
     , mAnimationIsEntrance(FALSE)
     , mHasTransformation(FALSE)
@@ -125,6 +133,12 @@ WindowStateAnimator::WindowStateAnimator(
     win->mAttrs->GetType(&mAttrType);
     mIsWallpaper = win->mIsWallpaper;
     AutoPtr<IDisplay> display = win->mDisplayContent->GetDisplay();
+}
+
+WindowStateAnimator::~WindowStateAnimator()
+{
+    mAttachedWinAnimator = NULL;
+    mAppAnimator = NULL;
 }
 
 AutoPtr<WindowState> WindowStateAnimator::GetWindowState()
@@ -725,7 +739,7 @@ void WindowStateAnimator::DestroySurfaceLocked()
         return;
     }
 
-    if (mWin->mAppToken != NULL && mWin == mWin->mAppToken->mStartingWindow) {
+    if (mWin->mAppToken != NULL && mWin.Get() == mWin->mAppToken->mStartingWindow) {
         mWin->mAppToken->mStartingDisplayed = FALSE;
     }
 
@@ -905,6 +919,7 @@ void WindowStateAnimator::ComputeShownFrameLocked()
         }
     }
 
+    AutoPtr<WindowStateAnimator> universeBackgroundAnimator = mAnimator->GetUniverseBackground();
     Int32 displayId = mWin->GetDisplayId();
     AutoPtr<ScreenRotationAnimation> screenRotationAnimation =
             mAnimator->GetScreenRotationAnimationLocked(displayId);
@@ -961,9 +976,9 @@ void WindowStateAnimator::ComputeShownFrameLocked()
             appTransformation->GetMatrix((IMatrix**)&m);
             tmpMatrix->PostConcat(m, &bval);
         }
-        if (mAnimator->mUniverseBackground != NULL) {
+        if (universeBackgroundAnimator != NULL) {
             m = NULL;
-            mAnimator->mUniverseBackground->mUniverseTransform->GetMatrix((IMatrix**)&m);
+            universeBackgroundAnimator->mUniverseTransform->GetMatrix((IMatrix**)&m);
             tmpMatrix->PostConcat(m, &bval);
         }
         if (screenAnimation) {
@@ -1059,8 +1074,8 @@ void WindowStateAnimator::ComputeShownFrameLocked()
                     mHasClipRect = TRUE;
                 }
             }
-            if (mAnimator->mUniverseBackground != NULL) {
-                mAnimator->mUniverseBackground->mUniverseTransform->GetAlpha(&alpha);
+            if (universeBackgroundAnimator != NULL) {
+                universeBackgroundAnimator->mUniverseTransform->GetAlpha(&alpha);
                 mShownAlpha *= alpha;
             }
             if (screenAnimation) {
@@ -1092,7 +1107,7 @@ void WindowStateAnimator::ComputeShownFrameLocked()
     }
 
     Int32 type;
-    Boolean applyUniverseTransformation = (mAnimator->mUniverseBackground != NULL
+    Boolean applyUniverseTransformation = (universeBackgroundAnimator != NULL
             && (mWin->mAttrs->GetType(&type), type != IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND)
             && mWin->mBaseLayer < mAnimator->mAboveUniverseLayer);
     AutoPtr<IMagnificationSpec> spec;
@@ -1114,7 +1129,7 @@ void WindowStateAnimator::ComputeShownFrameLocked()
 
         if (applyUniverseTransformation) {
             AutoPtr<IMatrix> m;
-            mAnimator->mUniverseBackground->mUniverseTransform->GetMatrix((IMatrix**)&m);
+            universeBackgroundAnimator->mUniverseTransform->GetMatrix((IMatrix**)&m);
             tmpMatrix->PostConcat(m, &result);
         }
 
@@ -1146,7 +1161,7 @@ void WindowStateAnimator::ComputeShownFrameLocked()
         mShownAlpha = mAlpha;
         if (applyUniverseTransformation) {
             Float alpha;
-            mAnimator->mUniverseBackground->mUniverseTransform->GetAlpha(&alpha);
+            universeBackgroundAnimator->mUniverseTransform->GetAlpha(&alpha);
             mShownAlpha *= alpha;
         }
     }

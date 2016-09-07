@@ -1177,7 +1177,7 @@ private:
 
     // static Boolean class_init_native_value;
 
-    AutoPtr<ContentObserver> mDefaultApnObserver;
+    AutoPtr<DefaultApnObserver> mDefaultApnObserver;
 
     static Boolean class_init_Native_value;
 };

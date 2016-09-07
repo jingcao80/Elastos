@@ -27,7 +27,7 @@ private:
     public:
         TO_STRING_IMPL("ProfileTriggerHelper::MyContentObserver")
 
-        MyContentObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ ProfileTriggerHelper* host);
 
@@ -35,7 +35,6 @@ private:
             /* [in] */ Boolean selfChange);
 
     private:
-        AutoPtr<IHandler> mHandler;
         ProfileTriggerHelper* mHost;
     };
 

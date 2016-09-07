@@ -327,7 +327,7 @@ private:
     public:
         TO_STRING_IMPL("CConnectivityService::SettingsObserver")
 
-        SettingsObserver(
+        ECode constructor(
             /* [in] */ IHandler* observerHandler,
             /* [in] */ Int32 what,
             /* [in] */ CConnectivityService* host);

@@ -38,17 +38,14 @@ const Boolean LocationBlacklist::D = FALSE;//ILocationManagerService::D;
 const String LocationBlacklist::BLACKLIST_CONFIG_NAME("locationPackagePrefixBlacklist");
 const String LocationBlacklist::WHITELIST_CONFIG_NAME("locationPackagePrefixWhitelist");
 
-LocationBlacklist::LocationBlacklist(
+ECode LocationBlacklist::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler)
-    : mCurrentUserId(IUserHandle::USER_OWNER)
 {
-    ContentObserver::constructor(handler);
     mContext = context;
-}
+    mCurrentUserId = IUserHandle::USER_OWNER;
+    ContentObserver::constructor(handler);
 
-ECode LocationBlacklist::Init()
-{
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<IUri> uri;

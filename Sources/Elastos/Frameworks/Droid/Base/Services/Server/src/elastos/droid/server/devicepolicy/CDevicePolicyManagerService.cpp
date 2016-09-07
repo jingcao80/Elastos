@@ -5235,7 +5235,6 @@ ECode CDevicePolicyManagerService::SaveSettingsLocked(
 void CDevicePolicyManagerService::SendChangedNotification(
     /* [in] */ Int32 userHandle)
 {
-    Logger::I(TAG, " >> SendChangedNotification: ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED");
     AutoPtr<IIntent> intent;
     CIntent::New(IDevicePolicyManager::ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED, (IIntent**)&intent);
     intent->SetFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY);

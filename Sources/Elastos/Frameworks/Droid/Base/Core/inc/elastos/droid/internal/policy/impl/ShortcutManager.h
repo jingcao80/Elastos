@@ -34,8 +34,7 @@ public:
     TO_STRING_IMPL("ShortcutManager")
 
     ShortcutManager(
-        /* [in] */ IContext* context,
-        /* [in] */ IHandler* handler);
+        /* [in] */ IContext* context);
 
     /** Observes the provider of shortcut+intents */
     CARAPI_(void) Observe();

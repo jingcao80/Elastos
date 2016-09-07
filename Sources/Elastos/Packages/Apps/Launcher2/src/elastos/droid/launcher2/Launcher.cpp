@@ -761,14 +761,8 @@ Launcher::AppWidgetResetObserver::AppWidgetResetObserver()
 {
 }
 
-ECode Launcher::AppWidgetResetObserver::constructor()
-{
-    return NOERROR;//ContentObserver::constructor();
-}
-
 ECode Launcher::AppWidgetResetObserver::constructor(
     /* [in] */ ILauncher* host)
-
 {
     mHost = (Launcher*)host;
     AutoPtr<IHandler> handler;

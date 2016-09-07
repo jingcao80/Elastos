@@ -82,12 +82,12 @@ ECode DynamicIndexableContentMonitor::MyHandler::HandleMessage(
 //                DynamicIndexableContentMonitor::UserDictionaryContentObserver
 //===============================================================================
 
-DynamicIndexableContentMonitor::UserDictionaryContentObserver::UserDictionaryContentObserver(
+ECode DynamicIndexableContentMonitor::UserDictionaryContentObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ DynamicIndexableContentMonitor* host)
-    : mHost(host)
 {
-    ContentObserver::constructor(handler);
+    mHost = host;
+    return ContentObserver::constructor(handler);
 }
 
 DynamicIndexableContentMonitor::UserDictionaryContentObserver::~UserDictionaryContentObserver()
@@ -127,7 +127,8 @@ DynamicIndexableContentMonitor::DynamicIndexableContentMonitor()
     mHandler = new MyHandler(this);
     mHandler->constructor();
 
-    mUserDictionaryContentObserver = new UserDictionaryContentObserver(mHandler, this);
+    mUserDictionaryContentObserver = new UserDictionaryContentObserver();
+    mUserDictionaryContentObserver->constructor(mHandler, this);
 }
 
 DynamicIndexableContentMonitor::~DynamicIndexableContentMonitor()

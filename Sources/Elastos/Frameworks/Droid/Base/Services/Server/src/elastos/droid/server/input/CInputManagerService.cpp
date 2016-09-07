@@ -624,12 +624,12 @@ ECode CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayoutOverlay::Vis
 //------------------------------------------------------------------------------
 //  CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver
 //------------------------------------------------------------------------------
-CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver::ContentObserverInRegisterPointerSpeedSettingObserver(
+ECode CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver::constructor(
     /* [in] */ CInputManagerService* owner,
     /* [in] */ IHandler* handler)
-    : mOwner(owner)
 {
-    ContentObserver::constructor(handler);
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver::OnChange(
@@ -643,12 +643,12 @@ ECode CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver
 //------------------------------------------------------------------------------
 //  CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver
 //------------------------------------------------------------------------------
-CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver::ContentObserverInRegisterShowTouchesSettingObserver(
+ECode CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver::constructor(
     /* [in] */ CInputManagerService* owner,
     /* [in] */ IHandler* handler)
-    : mOwner(owner)
 {
-    ContentObserver::constructor(handler);
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver::OnChange(
@@ -662,12 +662,12 @@ ECode CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver:
 //------------------------------------------------------------------------------
 //  CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver
 //------------------------------------------------------------------------------
-CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver::ContentObserverInRegisterStylusIconEnabledSettingObserver(
+ECode CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver::constructor(
     /* [in] */ CInputManagerService* owner,
     /* [in] */ IHandler* handler)
-    : mOwner(owner)
 {
-    ContentObserver::constructor(handler);
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver::OnChange(
@@ -680,12 +680,12 @@ ECode CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObs
 //------------------------------------------------------------------------------
 //  CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver
 //------------------------------------------------------------------------------
-CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver::ContentObserverInRegisterVolumeKeysRotationSettingObserver(
+ECode CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver::constructor(
     /* [in] */ CInputManagerService* owner,
     /* [in] */ IHandler* handler)
-    : mOwner(owner)
 {
-    ContentObserver::constructor(handler);
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver::OnChange(
@@ -2540,7 +2540,8 @@ void CInputManagerService::UpdateStylusIconEnabledFromSettings()
 void CInputManagerService::RegisterStylusIconEnabledSettingObserver()
 {
     AutoPtr<ContentObserverInRegisterStylusIconEnabledSettingObserver> observer =
-            new ContentObserverInRegisterStylusIconEnabledSettingObserver(this, mHandler);
+            new ContentObserverInRegisterStylusIconEnabledSettingObserver();
+    observer->constructor(this, mHandler);
     AutoPtr<IUri> uri;
     Settings::System::GetUriFor(ISettingsSystem::STYLUS_ICON_ENABLED, (IUri**)&uri);
     AutoPtr<IContentResolver> resolver;
@@ -2570,7 +2571,8 @@ void CInputManagerService::UpdateVolumeKeysRotationFromSettings()
 void CInputManagerService::RegisterVolumeKeysRotationSettingObserver()
 {
     AutoPtr<ContentObserverInRegisterVolumeKeysRotationSettingObserver> observer =
-            new ContentObserverInRegisterVolumeKeysRotationSettingObserver(this, mHandler);
+            new ContentObserverInRegisterVolumeKeysRotationSettingObserver();
+    observer->constructor(this, mHandler);
     AutoPtr<IUri> uri;
     Settings::System::GetUriFor(
             ISettingsSystem::SWAP_VOLUME_KEYS_ON_ROTATION, (IUri**)&uri);
@@ -2611,7 +2613,8 @@ void CInputManagerService::SetPointerSpeedUnchecked(
 void CInputManagerService::RegisterPointerSpeedSettingObserver()
 {
     AutoPtr<ContentObserverInRegisterPointerSpeedSettingObserver> settingsObserver =
-            new ContentObserverInRegisterPointerSpeedSettingObserver(this, mHandler);
+            new ContentObserverInRegisterPointerSpeedSettingObserver();
+    settingsObserver->constructor(this, mHandler);
 
     AutoPtr<IUri> uri;
     Settings::System::GetUriFor(ISettingsSystem::POINTER_SPEED, (IUri**)&uri);
@@ -2640,7 +2643,8 @@ void CInputManagerService::UpdateShowTouchesFromSettings()
 void CInputManagerService::RegisterShowTouchesSettingObserver()
 {
     AutoPtr<ContentObserverInRegisterShowTouchesSettingObserver> settingsObserver =
-            new ContentObserverInRegisterShowTouchesSettingObserver(this, mHandler);
+            new ContentObserverInRegisterShowTouchesSettingObserver();
+    settingsObserver->constructor(this, mHandler);
     AutoPtr<IUri> uri;
     Settings::System::GetUriFor(ISettingsSystem::SHOW_TOUCHES, (IUri**)&uri);
     AutoPtr<IContentResolver> resolver;

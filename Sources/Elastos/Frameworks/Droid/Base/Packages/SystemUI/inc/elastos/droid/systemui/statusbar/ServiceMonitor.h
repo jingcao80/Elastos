@@ -52,7 +52,6 @@ public:
     {
     public:
         SettingObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ ServiceMonitor* host);
 
         CARAPI OnChange(
@@ -155,7 +154,7 @@ private:
     static const Int32 RECHECK_DELAY;
     static const Int32 WAIT_FOR_STOP;
     AutoPtr<IHandler> mHandler;
-    AutoPtr<IContentObserver> mSettingObserver;
+    AutoPtr<SettingObserver> mSettingObserver;
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
 
     String mTag;

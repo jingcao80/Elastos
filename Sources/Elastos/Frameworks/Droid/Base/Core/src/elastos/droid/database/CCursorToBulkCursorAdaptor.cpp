@@ -43,8 +43,10 @@ ECode CCursorToBulkCursorAdaptor::ContentObserverProxy::UnlinkToDeath(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IProxy> proxy = (IProxy*)mRemote->Probe(EIID_IProxy);
-    assert(proxy != NULL);
-    return proxy->UnlinkToDeath(recipient, 0, result);
+    if (proxy != NULL) {
+        return proxy->UnlinkToDeath(recipient, 0, result);
+    }
+    return NOERROR;
 }
 
 ECode CCursorToBulkCursorAdaptor::ContentObserverProxy::DeliverSelfNotifications(

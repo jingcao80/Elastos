@@ -62,7 +62,7 @@ private:
     public:
         TO_STRING_IMPL("ZenModeHelper::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handle,
             /* [in] */ ZenModeHelper* host);
 

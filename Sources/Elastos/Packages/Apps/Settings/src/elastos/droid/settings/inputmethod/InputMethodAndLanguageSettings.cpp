@@ -385,14 +385,14 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
 //                  InputMethodAndLanguageSettings::SettingsObserver
 //===============================================================================
 
-InputMethodAndLanguageSettings::SettingsObserver::SettingsObserver(
+ECode InputMethodAndLanguageSettings::SettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ IContext* context,
     /* [in] */ InputMethodAndLanguageSettings* host)
-    : mContext(context)
-    , mHost(host)
 {
-    ContentObserver::constructor(handler);
+    mContext = context;
+    mHost = host;
+    return ContentObserver::constructor(handler);
 }
 
 InputMethodAndLanguageSettings::SettingsObserver::~SettingsObserver()
@@ -673,7 +673,8 @@ ECode InputMethodAndLanguageSettings::OnCreate(
 
     mHandler = NULL;
     CHandler::New((IHandler**)&mHandler);
-    mSettingsObserver = new SettingsObserver(mHandler, conObj, this);
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(mHandler, conObj, this);
     obj = NULL;
     conObj->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
     mDpm = IDevicePolicyManager::Probe(obj);

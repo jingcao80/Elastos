@@ -649,6 +649,8 @@ private:
         SettingsObserver(
             /* [in] */ CAudioService* host);
 
+        CARAPI constructor();
+
         CARAPI OnChange(
             /* [in] */ Boolean selfChange);
 

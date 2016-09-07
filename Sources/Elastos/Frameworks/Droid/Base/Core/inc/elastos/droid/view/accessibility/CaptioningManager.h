@@ -381,7 +381,7 @@ private:
     AutoPtr<IArrayList> mListeners;
     AutoPtr<IHandler> mHandler;
     AutoPtr<IContentResolver> mContentResolver;
-    AutoPtr<IContentObserver> mContentObserver;
+    AutoPtr<MyContentObserver> mContentObserver;
     AutoPtr<IRunnable> mStyleChangedRunnable;
 };
 

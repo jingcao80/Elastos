@@ -252,7 +252,8 @@ private:
         : public ContentObserver
     {
         friend class CSettingsAppWidgetProvider;
-        SettingsObserver(
+
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ IContext* context);
 

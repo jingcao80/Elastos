@@ -223,7 +223,7 @@ private:
         : public BroadcastReceiver
     {
     public:
-        TO_STRING_IMPL("WifiNotificationController::InnerBroadcastReceiver1")
+        TO_STRING_IMPL("WifiServiceImpl::InnerBroadcastReceiver1")
 
         InnerBroadcastReceiver1(
             /* [in] */ WifiServiceImpl* owner);
@@ -268,7 +268,7 @@ private:
         : public BroadcastReceiver
     {
     public:
-        TO_STRING_IMPL("WifiNotificationController::InnerBroadcastReceiver2")
+        TO_STRING_IMPL("WifiServiceImpl::InnerBroadcastReceiver2")
 
         InnerBroadcastReceiver2(
             /* [in] */ WifiServiceImpl* owner);
@@ -286,9 +286,9 @@ private:
         : public ContentObserver
     {
     public:
-        TO_STRING_IMPL("WifiNotificationController::InnerContentObserver1")
+        TO_STRING_IMPL("WifiServiceImpl::InnerContentObserver1")
 
-        InnerContentObserver1(
+        CARAPI constructor(
             /* [in] */ WifiServiceImpl* owner);
 
         // @Override

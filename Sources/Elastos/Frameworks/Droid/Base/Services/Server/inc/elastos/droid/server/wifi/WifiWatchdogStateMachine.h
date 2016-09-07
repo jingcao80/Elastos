@@ -475,15 +475,10 @@ private:
     public:
         TO_STRING_IMPL("WifiWatchdogStateMachine::LocalContentObserver")
 
-        LocalContentObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ Int32 msg,
-            /* [in] */ WifiWatchdogStateMachine* owner)
-            : mOwner(owner)
-            , mMsg(msg)
-        {
-            ContentObserver::constructor(handler);
-        }
+            /* [in] */ WifiWatchdogStateMachine* owner);
 
         virtual CARAPI OnChange(
             /* [in] */ Boolean selfChange);

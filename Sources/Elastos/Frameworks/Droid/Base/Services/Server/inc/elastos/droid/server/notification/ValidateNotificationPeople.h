@@ -101,7 +101,7 @@ private:
     public:
         TO_STRING_IMPL("ValidateNotificationPeople::MyContentObserver")
 
-        MyContentObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handle,
             /* [in] */ ValidateNotificationPeople* host);
 

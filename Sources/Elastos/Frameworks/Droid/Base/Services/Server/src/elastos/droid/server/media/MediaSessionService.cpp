@@ -95,14 +95,14 @@ ECode MediaSessionService::SessionsListenerRecord::ProxyDied()
 //                  MediaSessionService::SettingsObserver
 //==============================================================================
 
-MediaSessionService::SettingsObserver::SettingsObserver(
+ECode MediaSessionService::SettingsObserver::constructor(
     /* [in] */ MediaSessionService* host)
-    : mHost(host)
 {
+    mHost = host;
     ContentObserver::constructor(NULL);
     AutoPtr<ISettingsSecure> settingsSecure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
-    settingsSecure->GetUriFor(ISettingsSecure::ENABLED_NOTIFICATION_LISTENERS, (IUri**)&mSecureSettingsUri);
+    return settingsSecure->GetUriFor(ISettingsSecure::ENABLED_NOTIFICATION_LISTENERS, (IUri**)&mSecureSettingsUri);
 }
 
 void MediaSessionService::SettingsObserver::Observe()
@@ -194,7 +194,8 @@ ECode MediaSessionService::OnStart()
     mKeyguardManager = IKeyguardManager::Probe(service);
     mAudioService = GetAudioService();
     context->GetContentResolver((IContentResolver**)&mContentResolver);
-    mSettingsObserver = new SettingsObserver(this);
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(this);
     mSettingsObserver->Observe();
     return NOERROR;
 }

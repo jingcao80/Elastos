@@ -249,7 +249,7 @@ void InputMonitor::UpdateInputWindowsLw(
     // As an optimization, we could try to prune the list of windows but this turns
     // out to be difficult because only the native code knows for sure which window
     // currently has touch focus.
-    AutoPtr<WindowStateAnimator> universeBackground = mService->mAnimator->mUniverseBackground;
+    AutoPtr<WindowStateAnimator> universeBackground = mService->mAnimator->GetUniverseBackground();
     Int32 aboveUniverseLayer = mService->mAnimator->mAboveUniverseLayer;
     Boolean addedUniverse = FALSE;
 

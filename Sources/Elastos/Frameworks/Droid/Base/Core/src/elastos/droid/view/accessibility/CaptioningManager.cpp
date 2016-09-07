@@ -420,6 +420,7 @@ ECode CaptioningManager::constructor(
     CHandler::New((IHandler**)&mHandler);
     context->GetContentResolver((IContentResolver**)&mContentResolver);
     mContentObserver = new MyContentObserver(this);
+    mContentObserver->constructor();
     mStyleChangedRunnable = new MyRunnable(this);
     return NOERROR;
 }

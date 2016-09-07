@@ -28,7 +28,9 @@ public:
 
     TO_STRING_IMPL("SecureSetting")
 
-    SecureSetting(
+    SecureSetting();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler,
         /* [in] */ const String& settingName);

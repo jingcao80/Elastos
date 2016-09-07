@@ -798,7 +798,6 @@ ECode NotificationManagerService::BinderService::GetActiveNotificationsFromListe
         }
         list->Add(sbnToSend);
     }
-    Logger::I(TAG, " >> GetActiveNotificationsFromListener: %d notifications.", (list->GetSize(&size), size));
     return CParceledListSlice::New(IList::Probe(list), slice);
 }
 
@@ -1473,11 +1472,11 @@ ECode NotificationManagerService::MediaSessionManagerOnActiveSessionsChangedList
 //                  NotificationManagerService::SettingsObserver
 //===============================================================================
 
-NotificationManagerService::SettingsObserver::SettingsObserver(
+ECode NotificationManagerService::SettingsObserver::constructor(
     /* [in] */ NotificationManagerService* host,
     /* [in] */ IHandler* handler)
-    : mHost(host)
 {
+    mHost = host;
     ContentObserver::constructor(handler);
     AutoPtr<ISettingsSystem> systemSettings;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&systemSettings);
@@ -1485,7 +1484,7 @@ NotificationManagerService::SettingsObserver::SettingsObserver(
             (IUri**)&NOTIFICATION_LIGHT_PULSE_URI);
     AutoPtr<ISettingsSecure> systemSecure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&systemSecure);
-    systemSecure->GetUriFor(ISettingsSecure::ENABLED_NOTIFICATION_LISTENERS,
+    return systemSecure->GetUriFor(ISettingsSecure::ENABLED_NOTIFICATION_LISTENERS,
             (IUri**)&ENABLED_NOTIFICATION_LISTENERS_URI);
 }
 
@@ -3178,7 +3177,8 @@ ECode NotificationManagerService::OnStart()
     stickyIntent = NULL;
     context->RegisterReceiver(mIntentReceiver, sdFilter, (IIntent**)&stickyIntent);
 
-    mSettingsObserver = new SettingsObserver(this, mHandler);
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(this, mHandler);
     mSettingsObserver->Observe();
 
     resources->GetInteger(R::integer::config_notificationServiceArchiveSize, &value);

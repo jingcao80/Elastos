@@ -63,7 +63,6 @@ private:
     {
     public:
         SettingsObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ IContext* context,
             /* [in] */ IAtomicBoolean* enabled);
 
@@ -93,7 +92,6 @@ private:
     {
     public:
         SmsLimitObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ IContext* context);
 
         CARAPI OnChange(

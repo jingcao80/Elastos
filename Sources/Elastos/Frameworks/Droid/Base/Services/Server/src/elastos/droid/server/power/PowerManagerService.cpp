@@ -1004,12 +1004,12 @@ ECode PowerManagerService::DockReceiver::OnReceive(
 //          PowerManagerService::SettingsObserver
 //==============================================================================
 
-PowerManagerService::SettingsObserver::SettingsObserver(
+ECode PowerManagerService::SettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ PowerManagerService* host)
-    : mHost(host)
 {
-    ContentObserver::constructor(handler);
+    mHost = host;
+    return ContentObserver::constructor(handler);
 }
 
 ECode PowerManagerService::SettingsObserver::OnChange(
@@ -1802,7 +1802,8 @@ ECode PowerManagerService::SystemReady(
         mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
                 CreateSuspendBlockerLocked(String("PowerManagerService.WirelessChargerDetector")),
                 mHandler);
-        mSettingsObserver = new SettingsObserver(mHandler, this);
+        mSettingsObserver = new SettingsObserver();
+        mSettingsObserver->constructor(mHandler, this);
 
         obj = GetLocalService(EIID_ILightsManager);
         AutoPtr<ILightsManager> manager = ILightsManager::Probe(obj);

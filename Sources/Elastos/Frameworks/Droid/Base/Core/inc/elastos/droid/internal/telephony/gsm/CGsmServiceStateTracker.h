@@ -77,11 +77,9 @@ private:
         TO_STRING_IMPL("CGsmServiceStateTracker::AutoTimeContentObserver")
 
         AutoTimeContentObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ CGsmServiceStateTracker* host)
             : mHost(host)
         {
-            ContentObserver::constructor(handler);
         }
 
         // @Override
@@ -97,11 +95,9 @@ private:
     {
     public:
         AutoTimeZoneContentObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ CGsmServiceStateTracker* host)
             : mHost(host)
         {
-            ContentObserver::constructor(handler);
         }
 
         // @Override
@@ -433,9 +429,9 @@ private:
 
     AutoPtr<IBroadcastReceiver> mIntentReceiver;
 
-    AutoPtr<IContentObserver> mAutoTimeObserver;
+    AutoPtr<AutoTimeContentObserver> mAutoTimeObserver;
 
-    AutoPtr<IContentObserver> mAutoTimeZoneObserver;
+    AutoPtr<AutoTimeZoneContentObserver> mAutoTimeZoneObserver;
 };
 
 } // namespace Gem

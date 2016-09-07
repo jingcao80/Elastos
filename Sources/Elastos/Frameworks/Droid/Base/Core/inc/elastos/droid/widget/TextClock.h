@@ -67,7 +67,6 @@ private:
         TO_STRING_IMPL("TextClock::TextClockContentObserver")
 
         TextClockContentObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ TextClock* host);
 
         // @Override

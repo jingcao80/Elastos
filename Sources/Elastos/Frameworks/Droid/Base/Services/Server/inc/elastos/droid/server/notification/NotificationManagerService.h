@@ -532,7 +532,7 @@ protected:
     public:
         TO_STRING_IMPL("NotificationManagerService::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ NotificationManagerService* host,
             /* [in] */ IHandler* handler);
 

@@ -31,11 +31,9 @@ class LocationBlacklist
 public:
     TO_STRING_IMPL("LocationBlacklist")
 
-    LocationBlacklist(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);
-
-    CARAPI Init();
 
     /**
      * Return true if in blacklist

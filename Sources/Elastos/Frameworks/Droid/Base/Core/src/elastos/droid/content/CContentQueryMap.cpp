@@ -27,12 +27,9 @@ namespace Content {
 // CContentQueryMap::KeepUpdatedContentObserver
 //=========================================================================
 CContentQueryMap::KeepUpdatedContentObserver::KeepUpdatedContentObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ IWeakReference* host)
-    //: ContentObserver(handler)
     : mHost(host)
 {
-    assert(0 && "TODO");
 }
 
 // @Override
@@ -119,9 +116,8 @@ ECode CContentQueryMap::SetKeepUpdated(
         if (NULL == mContentObserver) {
             AutoPtr<IWeakReference> wr;
             GetWeakReference((IWeakReference**)&wr);
-            assert(0 && "TODO");
-            // mContentObserver = new KeepUpdatedContentObserver(
-            //     mHandlerForUpdateNotifications, wr);
+            mContentObserver = new KeepUpdatedContentObserver(wr);
+            mContentObserver->constructor(mHandlerForUpdateNotifications);
         }
         FAIL_RETURN(mCursor->RegisterContentObserver(mContentObserver))
         // mark dirty, since it is possible the cursor's backing data had changed before we

@@ -162,7 +162,8 @@ ECode NetworkTimeUpdateService::SystemRunning()
     // Check the network time on the new thread
     SendMessage(EVENT_POLL_NETWORK_TIME);
 
-    mSettingsObserver = new SettingsObserver(mHandler, EVENT_AUTO_TIME_CHANGED, this);
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(mHandler, EVENT_AUTO_TIME_CHANGED, this);
     mSettingsObserver->Observe(mContext);
 
     return NOERROR;
@@ -378,15 +379,15 @@ ECode NetworkTimeUpdateService::ConnectivityReceiver::OnReceive(
 //====================================================================
 // NetworkTimeUpdateService::SettingsObserver
 //====================================================================
-NetworkTimeUpdateService::SettingsObserver::SettingsObserver(
+ECode NetworkTimeUpdateService::SettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ Int32 msg,
     /* [in] */ NetworkTimeUpdateService* owner)
 {
-    ContentObserver::constructor(handler);
     mHandler = handler;
     mMsg = msg;
     mHost = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode NetworkTimeUpdateService::SettingsObserver::Observe(

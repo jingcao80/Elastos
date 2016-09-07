@@ -68,6 +68,13 @@ const Int32 DirectoryListLoader::DirectoryQuery::PHOTO_SUPPORT;
 // DirectoryListLoader::MyObserver
 //=================================================================
 
+ECode DirectoryListLoader::MyObserver::constructor(
+    /* [in] */ DirectoryListLoader* host)
+{
+    mHost = host;
+    return ContentObserver::constructor();
+}
+
 ECode DirectoryListLoader::MyObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
@@ -103,8 +110,10 @@ DirectoryListLoader::DirectoryListLoader(
     : mDirectorySearchMode(0)
     , mLocalInvisibleDirectoryEnabled(FALSE)
 {
+    assert(0 && "TODO using constructor");
     AsyncTaskLoader::constructor(ctx);
-    mObserver = new MyObserver(this);
+    mObserver = new MyObserver();
+    mObserver->constructor(this);
 }
 
 void DirectoryListLoader::SetDirectorySearchMode(

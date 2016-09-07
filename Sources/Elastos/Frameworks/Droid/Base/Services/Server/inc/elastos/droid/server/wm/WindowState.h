@@ -431,9 +431,9 @@ public:
     static const String TAG;
 
 public:
-    AutoPtr<CWindowManagerService> mService;
-    AutoPtr<IWindowManagerPolicy> mPolicy;
-    AutoPtr<IContext> mContext;
+    CWindowManagerService* mService;
+    IWindowManagerPolicy* mPolicy;
+    IContext* mContext;
     AutoPtr<CSession> mSession;
     AutoPtr<IIWindow> mClient;
     Int32 mAppOp;

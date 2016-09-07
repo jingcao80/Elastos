@@ -662,7 +662,6 @@ GpsLocationProvider::DefaultApnObserver::DefaultApnObserver(
     /* [in] */ GpsLocationProvider* host)
     : mHost(host)
 {
-    ContentObserver::constructor(host->mHandler);
 }
 
 ECode GpsLocationProvider::DefaultApnObserver::OnChange(
@@ -946,6 +945,7 @@ GpsLocationProvider::GpsLocationProvider(
     mSvMasks = ArrayOf<Int32>::Alloc(3);
     mNmeaBuffer = ArrayOf<Byte>::Alloc(120);
     mDefaultApnObserver = new DefaultApnObserver(this);
+    mDefaultApnObserver->constructor(mHandler);
 
     AutoPtr<INtpTrustedTimeHelper> ntth;
     CNtpTrustedTimeHelper::AcquireSingleton((INtpTrustedTimeHelper**)&ntth);

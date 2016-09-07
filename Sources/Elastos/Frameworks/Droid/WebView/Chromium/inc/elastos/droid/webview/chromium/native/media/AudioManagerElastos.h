@@ -142,7 +142,7 @@ public:
     public:
         TO_STRING_IMPL("AudioManagerElastos::InnerContentObserver").
 
-        InnerContentObserver(
+        CARAPI constructor(
             /* [in] */ AudioManagerElastos* owner);
 
         ECode OnChange(
@@ -520,7 +520,7 @@ private:
     AutoPtr< ArrayOf<Boolean> > mAudioDevices;
 
     /*TODO const*/ AutoPtr<IContentResolver> mContentResolver;
-    AutoPtr<IContentObserver> mSettingsObserver;
+    AutoPtr<InnerContentObserver> mSettingsObserver;
     AutoPtr<IHandlerThread> mSettingsObserverThread;
     Int32 mCurrentVolume;
 

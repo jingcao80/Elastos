@@ -28,11 +28,6 @@ LauncherApplication::MyContentObserver::MyContentObserver()
 {
 }
 
-LauncherApplication::MyContentObserver::constructor()
-{
-    return ContentObserver::constructor();
-}
-
 LauncherApplication::MyContentObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ ILauncherApplication* host)

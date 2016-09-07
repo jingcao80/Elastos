@@ -276,8 +276,6 @@ CThemeService::SettingsObserver::constructor(
     assert(ALARM_ALERT_URI != NULL);
     assert(NOTIFICATION_URI != NULL);
     assert(RINGTONE_URI != NULL);
-    Logger::I(TAG, ">> create SettingsObserver: \nALARM_ALERT_URI:%s\nNOTIFICATION_URI:%s\nRINGTONE_URI:%s",
-        TO_CSTR(ALARM_ALERT_URI), TO_CSTR(NOTIFICATION_URI), TO_CSTR(RINGTONE_URI));
     return ContentObserver::constructor(NULL);
 }
 
@@ -786,7 +784,6 @@ void CThemeService::DoApplyDefaultTheme()
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     String defaultThemePkg;
     settingsSecure->GetString(resolver, ISettingsSecure::DEFAULT_THEME_PACKAGE, &defaultThemePkg);
-    Logger::I(TAG, " >>> DoApplyDefaultTheme: %s", defaultThemePkg.string());
     if (!TextUtils::IsEmpty(CoreUtils::Convert(defaultThemePkg))) {
         String defaultThemeComponents;
         settingsSecure->GetString(resolver, ISettingsSecure::DEFAULT_THEME_COMPONENTS, &defaultThemeComponents);

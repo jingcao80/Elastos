@@ -269,12 +269,12 @@ Float ValidateNotificationPeople::PeopleRankingReconsideration::GetContactAffini
 //                  ValidateNotificationPeople::MyContentObserver
 //===============================================================================
 
-ValidateNotificationPeople::MyContentObserver::MyContentObserver(
+ECode ValidateNotificationPeople::MyContentObserver::constructor(
     /* [in] */ IHandler* handle,
     /* [in] */ ValidateNotificationPeople* host)
-    : mHost(host)
 {
-    ContentObserver::constructor(handle);
+    mHost = host;
+    return ContentObserver::constructor(handle);
 }
 
 ValidateNotificationPeople::MyContentObserver::~MyContentObserver()
@@ -349,7 +349,8 @@ ECode ValidateNotificationPeople::Initialize(
     mEnabled = ENABLE_PEOPLE_VALIDATOR && 1 == value;
     if (mEnabled) {
         CHandler::New((IHandler**)&mHandler);
-        mObserver = new MyContentObserver(mHandler, this);
+        mObserver = new MyContentObserver();
+        mObserver->constructor(mHandler, this);
         AutoPtr<IContactsContractContacts> con;
         CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&con);
         AutoPtr<IUri> uri;

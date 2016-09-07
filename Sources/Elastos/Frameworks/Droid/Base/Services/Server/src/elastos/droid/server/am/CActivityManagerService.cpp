@@ -23669,8 +23669,6 @@ ECode CActivityManagerService::SendUserSwitchBroadcastsLocked(
     /* [in] */ Int32 oldUserId,
     /* [in] */ Int32 newUserId)
 {
-    Logger::I(TAG, " >> SendUserSwitchBroadcastsLocked: oldUserId: %d, newUserId: %d",
-        oldUserId, newUserId);
     Int64 ident = Binder::ClearCallingIdentity();
     String nullStr;
     // try {
@@ -23723,7 +23721,6 @@ ECode CActivityManagerService::SendUserSwitchBroadcastsLocked(
             | IIntent::FLAG_RECEIVER_FOREGROUND);
         intent->PutExtra(IIntent::EXTRA_USER_HANDLE, newUserId);
 
-        Logger::I(TAG, " >> SendUserSwitchBroadcastsLocked: %s", TO_CSTR(intent));
         Int32 result;
         BroadcastIntentLocked(NULL, nullStr, intent,
                 nullStr, NULL, 0, nullStr, NULL,

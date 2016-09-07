@@ -152,11 +152,14 @@ FragmentManagerImpl::FragmentManagerImpl()
     , mDestroyed(FALSE)
     , mHavePendingDeferredStart(FALSE)
 {
+    Logger::I(TAG, " >> Create FragmentManagerImpl: %p", this);
     mExecCommit = new ExecCommitRunnable(this);
 }
 
 FragmentManagerImpl::~FragmentManagerImpl()
-{}
+{
+    Logger::I(TAG, " >> Destroy FragmentManagerImpl: %p", this);
+}
 
 ECode FragmentManagerImpl::BeginTransaction(
     /* [out] */ IFragmentTransaction** transaction)

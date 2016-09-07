@@ -40,7 +40,6 @@ AttributeCache::Package::Package(
 
 AttributeCache::Package::~Package()
 {
-    Slogger::I("AttributeCache::Package", " >> Destroy Package: %p", this);
 }
 
 //=======================================================================

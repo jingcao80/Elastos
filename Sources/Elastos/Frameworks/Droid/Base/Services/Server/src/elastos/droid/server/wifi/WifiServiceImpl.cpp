@@ -629,10 +629,11 @@ ECode WifiServiceImpl::InnerBroadcastReceiver2::OnReceive(
 //=====================================================================
 //                WifiServiceImpl::InnerContentObserver1
 //=====================================================================
-WifiServiceImpl::InnerContentObserver1::InnerContentObserver1(
+ECode WifiServiceImpl::InnerContentObserver1::constructor(
     /* [in] */ WifiServiceImpl* owner)
-    : mOwner(owner)
 {
+    mOwner = owner;
+    return ContentObserver::constructor();
 }
 
 ECode WifiServiceImpl::InnerContentObserver1::OnChange(
@@ -2187,7 +2188,8 @@ Boolean WifiServiceImpl::IsOwner(
 
 void WifiServiceImpl::RegisterForScanModeChange()
 {
-    AutoPtr<IContentObserver> contentObserver = new InnerContentObserver1(this);
+    AutoPtr<InnerContentObserver1> contentObserver = new InnerContentObserver1();
+    contentObserver->constructor(this);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);

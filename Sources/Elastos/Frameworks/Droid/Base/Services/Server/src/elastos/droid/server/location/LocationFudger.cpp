@@ -31,12 +31,12 @@ namespace Location {
 //LocationFudger::SettingsObserver
 //============================
 
-LocationFudger::SettingsObserver::SettingsObserver(
+ECode LocationFudger::SettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ LocationFudger* host)
-    : mHandler(handler)
-    , mHost(host)
 {
+    mHost = host;
+    return ContentObserver::constructor(handler);
 }
 
 ECode LocationFudger::SettingsObserver::OnChange(
@@ -80,8 +80,8 @@ LocationFudger::LocationFudger(
     Logger::E(TAG, "TODO: CSecureRandom is not implemented!");
     CRandom::New((IRandom**)&mRandom);
     mContext = context;
-    AutoPtr<SettingsObserver> so = new SettingsObserver(handler, this);
-    mSettingsObserver = (IContentObserver*)so.Get();
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(handler, this);
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ISettingsSecure> ss;

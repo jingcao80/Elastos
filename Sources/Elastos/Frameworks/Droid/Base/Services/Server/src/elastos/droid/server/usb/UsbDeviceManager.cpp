@@ -102,11 +102,12 @@ const Int32 UsbDeviceManager::MSG_BOOT_COMPLETED = 4;
 const Int32 UsbDeviceManager::MSG_USER_SWITCHED = 5;
 const Int32 UsbDeviceManager::MSG_BOOTFAST_SWITCHED = 6;
 
-UsbDeviceManager::AdbSettingsObserver::AdbSettingsObserver(
+ECode UsbDeviceManager::AdbSettingsObserver::constructor(
     /* [in] */ UsbDeviceManager* host)
-    : ContentObserver(NULL)
-    , mHost(host)
-{}
+{
+    mHost = host;
+    return ContentObserver::constructor();
+}
 
 ECode UsbDeviceManager::AdbSettingsObserver::OnChange(
     /* [in] */ Boolean selfChange)
@@ -286,7 +287,8 @@ ECode UsbDeviceManager::UsbHandler::Init()
     }
 
     // register observer to listen for settings changes
-    AutoPtr<AdbSettingsObserver> adbsettingobsvr = new AdbSettingsObserver(mHost);
+    AutoPtr<AdbSettingsObserver> adbsettingobsvr = new AdbSettingsObserver();
+    adbsettingobsvr->constructor(mHost);
     AutoPtr<IUri> uri;
     AutoPtr<ISettingsGlobal> settingsGlobal;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);

@@ -165,12 +165,12 @@ ECode HdmiControlService::HdmiControlBroadcastReceiver::OnReceive(
 //=============================================================================
 // HdmiControlService::SettingsObserver
 //=============================================================================
-HdmiControlService::SettingsObserver::SettingsObserver(
+ECode HdmiControlService::SettingsObserver::constructor(
     /* [in] */ HdmiControlService* host,
     /* [in] */ IHandler* handler)
-    : mHost(host)
 {
-    ContentObserver::constructor(handler);
+    mHost = host;
+    return ContentObserver::constructor(handler);
 }
 
 ECode HdmiControlService::SettingsObserver::OnChange(
@@ -1397,7 +1397,8 @@ ECode HdmiControlService::constructor(
     String type;
     helper->Get(Constants::PROPERTY_DEVICE_TYPE, &type);
     GetInt32List(type, (IList**)&mLocalDevices);
-    mSettingsObserver = new SettingsObserver(this, mHandler);
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(this, mHandler);
     return NOERROR;
 }
 

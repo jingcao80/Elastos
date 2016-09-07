@@ -28,11 +28,9 @@ const Int32 ShortcutManager::COLUMN_INTENT = 1;
 const AutoPtr< ArrayOf<String> > ShortcutManager::sProjection = ShortcutManager::InitProjection();
 
 ShortcutManager::ShortcutManager(
-    /* [in] */ IContext* context,
-    /* [in] */ IHandler* handler)
+    /* [in] */ IContext* context)
     : mContext(context)
 {
-    ContentObserver::constructor(handler);
     mShortcutIntents = new HashMap< Int32, AutoPtr<IInterface> >();
 }
 

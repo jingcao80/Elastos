@@ -282,7 +282,6 @@ String CBackupManagerService::BackupRequest::ToString() {
 CBackupManagerService::ProvisionedObserver::ProvisionedObserver(
     /* [in] */ IHandler* handler,
     /* [in] */ CBackupManagerService* service)
-    : ContentObserver(handler)
     , mHost(service)
 {
 }
@@ -4632,7 +4631,8 @@ ECode CBackupManagerService::constructor(
     secure->GetInt32(resolver, ISettingsSecure::BACKUP_AUTO_RESTORE, 1, &tmpValue);
     mAutoRestore = (tmpValue != 0);
 
-    mProvisionedObserver = new ProvisionedObserver(mBackupHandler, this);
+    mProvisionedObserver = new ProvisionedObserver(this);
+    mProvisionedObserver->constructor(mBackupHandler);
     AutoPtr<IUri> uri;
     settingsGlobal->GetUriFor(ISettingsGlobal::DEVICE_PROVISIONED, (IUri**)&uri);
     resolver->RegisterContentObserver(uri, FALSE, mProvisionedObserver);

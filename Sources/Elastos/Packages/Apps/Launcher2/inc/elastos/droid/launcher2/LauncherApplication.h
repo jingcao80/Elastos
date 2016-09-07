@@ -32,8 +32,6 @@ public:
     public:
         MyContentObserver();
 
-        CARAPI constructor();
-
         CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ ILauncherApplication* host);
@@ -43,7 +41,7 @@ public:
             /* [in] */ Boolean selfChange);
 
     private:
-        AutoPtr<LauncherApplication> mHost;
+        LauncherApplication* mHost;
     };
 
 public:

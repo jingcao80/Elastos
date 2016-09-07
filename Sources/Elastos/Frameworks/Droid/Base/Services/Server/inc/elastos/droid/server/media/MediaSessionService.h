@@ -132,8 +132,7 @@ public:
             /* [in] */ Boolean selfChange,
             /* [in] */ IUri* uri);
 
-    private:
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ MediaSessionService* host);
 
         CARAPI_(void) Observe();

@@ -169,7 +169,6 @@ CPowerUI::MyObs::MyObs(
     /* [in] */ CPowerUI* host)
     : mHost(host)
 {
-    ContentObserver::constructor(mHost->mHandler);
 }
 
 ECode CPowerUI::MyObs::OnChange(
@@ -224,6 +223,7 @@ ECode CPowerUI::Start()
     mWarnings = warnings;
 
     AutoPtr<MyObs> obs = new MyObs(this);
+    obs->constructor(mHandler);
 
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);

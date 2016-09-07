@@ -159,12 +159,10 @@ Int32 SmsUsageMonitor::ShortCodePatternMatcher::GetNumberCategory(
  * Observe the secure setting for enable flag
  */
 SmsUsageMonitor::SettingsObserver::SettingsObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ IContext* context,
     /* [in] */ IAtomicBoolean* enabled)
 {
-    assert(0 && "TODO");
-//    ContentObserver(handler);
+    assert(0 && "TODO Implement constructor and call ContentObserver::constructor(IHandler*)");
 //    mContext = context;
 //    mEnabled = enabled;
 //    OnChange(FALSE);
@@ -185,7 +183,8 @@ SmsUsageMonitor::SettingsObserverHandler::SettingsObserverHandler(
 {
     assert(0 && "TODO");
 //    ContentResolver resolver = context->GetContentResolver();
-//    ContentObserver globalObserver = new SettingsObserver(this, context, enabled);
+//    ContentObserver globalObserver = new SettingsObserver(context, enabled);
+//    globalObserver->constructor(this); // TODO memory leak, zhaohui
 //    resolver->RegisterContentObserver(Settings::Global::>GetUrifor(
 //            Settings::Global::SMS_SHORT_CODE_CONFIRMATION), FALSE, globalObserver);
 }
@@ -194,11 +193,9 @@ SmsUsageMonitor::SettingsObserverHandler::SettingsObserverHandler(
  * Observe the global setting for sms limits
  */
 SmsUsageMonitor::SmsLimitObserver::SmsLimitObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ IContext* context)
 {
-    assert(0 && "TODO");
-//    ContentObserver(handler);
+    assert(0 && "TODO Implement constructor and call ContentObserver::constructor(IHandler*)");
 //    mContext = context;
 //    OnChange(FALSE);
 }
@@ -232,8 +229,8 @@ SmsUsageMonitor::SmsLimitObserverHandler::SmsLimitObserverHandler(
     assert(0 && "TODO");
 //    ContentResolver resolver = context->GetContentResolver();
 //
-//    ContentObserver globalObserver = new SmsLimitObserver(this, context);
-//
+//    ContentObserver globalObserver = new SmsLimitObserver(context);
+//    globalObserver->constructor(this); // TODO memory leak, zhaohui
 //    resolver->RegisterContentObserver(Settings.Secure->GetUrifor(
 //            Settings::Global::SMS_OUTGOING_CHECK_MAX_COUNT), FALSE, globalObserver);
 //    resolver->RegisterContentObserver(Settings.Secure->GetUrifor(

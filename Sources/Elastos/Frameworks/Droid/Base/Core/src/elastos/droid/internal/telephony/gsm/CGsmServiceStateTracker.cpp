@@ -181,13 +181,6 @@ CGsmServiceStateTracker::CGsmServiceStateTracker()
     , mCurShowPlmn(FALSE)
     , mCurShowSpn(FALSE)
 {
-    mIntentReceiver = new MyBroadcastReceiver(this);
-    AutoPtr<IHandler> handler1;
-    CHandler::New((IHandler**)&handler1);
-    mAutoTimeObserver = new AutoTimeContentObserver(handler1, this);
-    AutoPtr<IHandler> handler2;
-    CHandler::New((IHandler**)&handler2);
-    mAutoTimeZoneObserver = new AutoTimeZoneContentObserver(handler2, this);
 }
 
 CGsmServiceStateTracker::~CGsmServiceStateTracker()
@@ -197,12 +190,32 @@ CGsmServiceStateTracker::~CGsmServiceStateTracker()
 
 ECode CGsmServiceStateTracker::constructor()
 {
+    mIntentReceiver = new MyBroadcastReceiver(this);
+    AutoPtr<IHandler> handler1;
+    CHandler::New((IHandler**)&handler1);
+    mAutoTimeObserver = new AutoTimeContentObserver(this);
+    mAutoTimeObserver->constructor(handler1);
+    AutoPtr<IHandler> handler2;
+    CHandler::New((IHandler**)&handler2);
+    mAutoTimeZoneObserver = new AutoTimeZoneContentObserver(this);
+    mAutoTimeZoneObserver->constructor(handler2);
+
     return NOERROR;
 }
 
 ECode CGsmServiceStateTracker::constructor(
     /* [in] */ IGSMPhone* phone)
 {
+    mIntentReceiver = new MyBroadcastReceiver(this);
+    AutoPtr<IHandler> handler1;
+    CHandler::New((IHandler**)&handler1);
+    mAutoTimeObserver = new AutoTimeContentObserver(this);
+    mAutoTimeObserver->constructor(handler1);
+    AutoPtr<IHandler> handler2;
+    CHandler::New((IHandler**)&handler2);
+    mAutoTimeZoneObserver = new AutoTimeZoneContentObserver(this);
+    mAutoTimeZoneObserver->constructor(handler2);
+
     AutoPtr<ICellInfoGsm> cig;
     CCellInfoGsm::New((ICellInfoGsm**)&cig);
     ServiceStateTracker::constructor(IPhoneBase::Probe(phone),

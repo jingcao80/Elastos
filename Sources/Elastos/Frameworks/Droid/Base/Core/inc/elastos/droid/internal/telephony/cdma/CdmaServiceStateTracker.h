@@ -83,6 +83,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CdmaServiceStateTracker::InnerContentObserver")
+
         InnerContentObserver(
             /* [in] */ CdmaServiceStateTracker* owner);
 
@@ -98,6 +100,8 @@ private:
         : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("CdmaServiceStateTracker::InnerContentObserver1")
+
         InnerContentObserver1(
             /* [in] */ CdmaServiceStateTracker* owner);
 

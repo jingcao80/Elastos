@@ -1591,8 +1591,6 @@ void CDisplayManagerService::AddLogicalDisplayLocked(
     }
 
     mLogicalDisplays[displayId] = display;
-    Slogger::D(TAG, " >> AddLogicalDisplayLocked: id=%d, device=%p, display=%p, isDefault=%d, layerStack=%d",
-        displayId, device, display.Get(), isDefault, layerStack);
 
     // Wake up waitForDefaultDisplay.
     if (isDefault) {

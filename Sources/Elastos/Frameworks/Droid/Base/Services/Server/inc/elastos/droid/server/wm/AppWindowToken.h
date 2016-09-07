@@ -58,7 +58,7 @@ public:
     AutoPtr<WindowList> mAllAppWindows;
     AutoPtr<AppWindowAnimator> mAppAnimator;
 
-    AutoPtr<WindowAnimator> mAnimator;
+    WindowAnimator* mAnimator;
 
     Boolean mVoiceInteraction;
 
@@ -107,8 +107,8 @@ public:
 
     // Information about an application starting window if displayed.
     AutoPtr<StartingData> mStartingData;
-    AutoPtr<WindowState> mStartingWindow;
-    AutoPtr<IView> mStartingView;
+    WindowState* mStartingWindow;
+    IView* mStartingView;
     Boolean mStartingDisplayed;
     Boolean mStartingMoved;
     Boolean mFirstWindowDrawn;

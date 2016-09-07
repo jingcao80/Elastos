@@ -31,7 +31,6 @@ private:
     {
     public:
         MyContentObserver(
-            /* [in] */ IHandler* hdl,
             /* [in] */ SubscriptionHelper* host);
 
         //@Override
@@ -134,7 +133,7 @@ public:
 
     static Boolean mNwModeUpdated;
 
-    AutoPtr<IContentObserver> mNwModeObserver;
+    AutoPtr<MyContentObserver> mNwModeObserver;
 };
 
 } // namespace Telephony

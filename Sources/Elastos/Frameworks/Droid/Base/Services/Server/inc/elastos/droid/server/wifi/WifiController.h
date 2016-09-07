@@ -407,7 +407,7 @@ private:
     public:
         TO_STRING_IMPL("WifiController::InnerContentObserver1")
 
-        InnerContentObserver1(
+        CARAPI constructor(
             /* [in] */ WifiController* owner,
             /* [in] */ IHandler* handler);
 
@@ -425,7 +425,7 @@ private:
     public:
         TO_STRING_IMPL("WifiController::InnerContentObserver3")
 
-        InnerContentObserver3(
+        CARAPI constructor(
             /* [in] */ WifiController* owner,
             /* [in] */ IHandler* handler);
 
@@ -443,7 +443,7 @@ private:
     public:
         TO_STRING_IMPL("WifiController::InnerContentObserver5")
 
-        InnerContentObserver5(
+        CARAPI constructor(
             /* [in] */ WifiController* owner,
             /* [in] */ IHandler* handler);
 

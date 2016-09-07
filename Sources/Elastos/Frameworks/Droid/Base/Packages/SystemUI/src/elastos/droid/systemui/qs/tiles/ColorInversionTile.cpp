@@ -13,14 +13,15 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-ColorInversionTile::ColorSettings::ColorSettings(
+ECode ColorInversionTile::ColorSettings::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ const String& settingName,
     /* [in] */ ColorInversionTile* host)
-    : SecureSetting(context, handler, settingName)
-    , mHost(host)
-{}
+{
+    mHost = host;
+    return SecureSetting::constructor(context, handler, settingName);
+}
 
 ECode ColorInversionTile::ColorSettings::HandleValueChanged(
     /* [in] */ Int32 value)
@@ -40,7 +41,8 @@ ColorInversionTile::ColorInversionTile(
     : mListening(FALSE)
 {
     QSTile::constructor(host);
-    mSetting = new ColorSettings(mContext, mHandler,
+    mSetting = new ColorSettings();
+    mSetting->constructor(mContext, mHandler,
             ISettingsSecure::ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, this);
 
     AutoPtr<IContext> ctx;

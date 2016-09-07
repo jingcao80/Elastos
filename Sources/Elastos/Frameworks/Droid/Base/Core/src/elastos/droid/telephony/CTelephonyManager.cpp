@@ -112,10 +112,6 @@ ECode CTelephonyManager::constructor(
         mContext = context;
     }
 
-    if (sRegistry == NULL) {
-        AutoPtr<IInterface> b = ServiceManager::GetService(String("telephony.registry"));
-        sRegistry = IITelephonyRegistry::Probe(b);
-    }
     return NOERROR;
 }
 
@@ -1105,6 +1101,11 @@ ECode CTelephonyManager::Listen(
     // try {
     Boolean notifyNow = (GetITelephony() != NULL);
     PhoneStateListener* l = (PhoneStateListener*)listener;
+
+    if (sRegistry == NULL) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(String("telephony.registry"));
+        sRegistry = IITelephonyRegistry::Probe(b);
+    }
     return sRegistry->ListenForSubscriber(pkgForDebug, l->mSubId, l->mCallback, events, notifyNow);
     // } catch (RemoteException ex) {
     //     // system process dead

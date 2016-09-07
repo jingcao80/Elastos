@@ -109,7 +109,6 @@ private:
         TO_STRING_IMPL("CBackupManagerService::ProvisionedObserver")
 
         ProvisionedObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ CBackupManagerService* service);
 
         //@Override

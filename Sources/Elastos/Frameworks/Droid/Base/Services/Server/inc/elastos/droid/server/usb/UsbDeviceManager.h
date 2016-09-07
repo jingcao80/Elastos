@@ -46,7 +46,7 @@ private:
     public:
         TO_STRING_IMPL("UsbDeviceManager::AdbSettingsObserver")
 
-        AdbSettingsObserver(
+        CARAPI constructor(
             /* [in] */ UsbDeviceManager* host);
 
         CARAPI OnChange(

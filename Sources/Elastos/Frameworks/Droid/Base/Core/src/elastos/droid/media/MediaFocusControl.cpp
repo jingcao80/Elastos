@@ -123,11 +123,14 @@ MediaFocusControl::NotificationListenerObserver::NotificationListenerObserver(
     /* [in] */ MediaFocusControl* host)
     : mHost(host)
 {
-    constructor(mHost->mEventHandler);
+}
+
+ECode MediaFocusControl::NotificationListenerObserver::constructor()
+{
+    ContentObserver::constructor(mHost->mEventHandler);
     AutoPtr<IUri> uri;
-    Settings::Secure::GetUriFor(ISettingsSecure::ENABLED_NOTIFICATION_LISTENERS,
-            (IUri**)&uri);
-    mHost->mContentResolver->RegisterContentObserver(uri, FALSE, this);
+    Settings::Secure::GetUriFor(ISettingsSecure::ENABLED_NOTIFICATION_LISTENERS, (IUri**)&uri);
+    return mHost->mContentResolver->RegisterContentObserver(uri, FALSE, this);
 }
 
 ECode MediaFocusControl::NotificationListenerObserver::OnChange(
@@ -388,30 +391,6 @@ MediaFocusControl::MediaFocusControl()
     , mMainRemoteIsActive(FALSE)
     , mHasRemotePlayback(FALSE)
 {
-    mKeyEventDone = new MyBroadcastReceiver(this);
-    CStack::New((IStack**)&mPRStack);
-    CArrayList::New((IArrayList**)&mRcDisplays);
-    mPhoneStateListener = new MyPhoneStateListener(this);
-}
-
-MediaFocusControl::MediaFocusControl(
-    /* [in] */ ILooper* looper,
-    /* [in] */ IContext* cntxt,
-    /* [in] */ IAudioServiceVolumeController* volumeCtrl,
-    /* [in] */ IAudioService* as)
-    : mIsRinging(FALSE)
-    , mVoiceButtonDown(FALSE)
-    , mVoiceButtonHandled(FALSE)
-    , mCurrentRcClientGen(0)
-    , mMainRemoteIsActive(FALSE)
-    , mHasRemotePlayback(FALSE)
-{
-    mKeyEventDone = new MyBroadcastReceiver(this);
-    CStack::New((IStack**)&mPRStack);
-    CArrayList::New((IArrayList**)&mRcDisplays);
-    mPhoneStateListener = new MyPhoneStateListener(this);
-    CStack::New((IStack**)&mFocusStack);
-    constructor(looper, cntxt, volumeCtrl, as);
 }
 
 MediaFocusControl::~MediaFocusControl()
@@ -424,6 +403,13 @@ ECode MediaFocusControl::constructor(
     /* [in] */ IAudioServiceVolumeController* volumeCtrl,
     /* [in] */ IAudioService* as)
 {
+    CStack::New((IStack**)&mPRStack);
+    CStack::New((IStack**)&mFocusStack);
+    CArrayList::New((IArrayList**)&mRcDisplays);
+
+    mPhoneStateListener = new MyPhoneStateListener(this);
+    mKeyEventDone = new MyBroadcastReceiver(this);
+
     mEventHandler = new MediaEventHandler(this, looper);
     mContext = cntxt;
     mContext->GetContentResolver((IContentResolver**)&mContentResolver);
@@ -458,6 +444,7 @@ ECode MediaFocusControl::constructor(
     mContext->GetSystemService(IContext::KEYGUARD_SERVICE, ((IInterface**)&service));
     mKeyguardManager = IKeyguardManager::Probe(service);
     mNotifListenerObserver = new NotificationListenerObserver(this);
+    mNotifListenerObserver->constructor();
 
     mHasRemotePlayback = FALSE;
     mMainRemoteIsActive = FALSE;

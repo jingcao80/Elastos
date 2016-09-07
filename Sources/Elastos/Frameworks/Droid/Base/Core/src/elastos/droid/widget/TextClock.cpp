@@ -35,11 +35,9 @@ namespace Droid {
 namespace Widget {
 
 TextClock::TextClockContentObserver::TextClockContentObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ TextClock* host)
     : mHost(host)
 {
-    ContentObserver::constructor(handler);
 }
 
 ECode TextClock::TextClockContentObserver::OnChange(
@@ -119,11 +117,6 @@ TextClock::TextClock()
     : mHasSeconds(FALSE)
     , mAttached(FALSE)
 {
-    AutoPtr<IHandler> handler;
-    CHandler::New((IHandler**)&handler);
-    mFormatChangeObserver = new TextClockContentObserver(handler, this);
-    mIntentReceiver = new TextClockBroadcastReceiver(this);
-    mTicker = new TextClockRunnable(this);
 }
 
 ECode TextClock::constructor(
@@ -171,6 +164,13 @@ ECode TextClock::constructor(
 
 void TextClock::Init()
 {
+    AutoPtr<IHandler> handler;
+    CHandler::New((IHandler**)&handler);
+    mFormatChangeObserver = new TextClockContentObserver(this);
+    mFormatChangeObserver->constructor(handler);
+    mIntentReceiver = new TextClockBroadcastReceiver(this);
+    mTicker = new TextClockRunnable(this);
+
     if (mFormat12 == NULL || mFormat24 == NULL) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);

@@ -1041,14 +1041,16 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
 //==============================================================================
 // CConnectivityService::SettingsObserver
 //==============================================================================
-CConnectivityService::SettingsObserver::SettingsObserver(
+ECode CConnectivityService::SettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ Int32 what,
     /* [in] */ CConnectivityService* host)
-    : mHandler(handler)
-    , mWhat(what)
-    , mHost(host)
-{}
+{
+    mHandler = handler;
+    mWhat = what;
+    mHost = host;
+    return ContentObserver::constructor(mHandler);
+}
 
 ECode CConnectivityService::SettingsObserver::Observe(
     /* [in] */ IContext* context)
@@ -1311,8 +1313,8 @@ ECode CConnectivityService::constructor(
         mInetLog = new List<String>();
     }
 
-    mSettingsObserver = new SettingsObserver(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY, this);
-    mSettingsObserver->constructor(mHandler);
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY, this);
     mSettingsObserver->Observe(mContext);
 
     mDataConnectionStats = new DataConnectionStats(mContext);

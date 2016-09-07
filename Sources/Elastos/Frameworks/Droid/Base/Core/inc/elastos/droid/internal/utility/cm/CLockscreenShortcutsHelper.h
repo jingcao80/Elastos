@@ -152,7 +152,7 @@ private:
     AutoPtr<ILockscreenShortcutsHelperOnChangeListener> mListener;
     AutoPtr<IList> mTargetActivities;
 
-    AutoPtr<IContentObserver> mObserver;
+    AutoPtr<MyContentObserver> mObserver;
 };
 
 } // namespace Cm

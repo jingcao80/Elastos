@@ -116,7 +116,11 @@ const String WindowState::TAG("WindowState");
 CAR_INTERFACE_IMPL(WindowState, Object, IWindowState)
 
 WindowState::WindowState()
-    : mOwnerUid(0)
+    : mService(NULL)
+    , mPolicy(NULL)
+    , mContext(NULL)
+    , mAppOp(0)
+    , mOwnerUid(0)
     , mAppToken(NULL)
     , mSystemUiVisibility(0)
     , mPolicyVisibility(TRUE)
@@ -171,11 +175,14 @@ WindowState::WindowState()
     , mUnderStatusBar(TRUE)
     , mShowToOwnerOnly(FALSE)
 {
+    Slogger::I(TAG, " >> Create WindowState: %p", this);
 }
 
 WindowState::~WindowState()
 {
     Slogger::I(TAG, " >> Destroy WindowState: %p", this);
+    mAttachedWindow = NULL;
+    mWinAnimator = NULL;
 }
 
 ECode WindowState::constructor(

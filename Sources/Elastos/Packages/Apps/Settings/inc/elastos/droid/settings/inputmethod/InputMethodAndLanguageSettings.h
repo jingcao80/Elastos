@@ -77,7 +77,7 @@ private:
     public:
         TO_STRING_IMPL("InputMethodAndLanguageSettings::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ IContext* context,
             /* [in] */ InputMethodAndLanguageSettings* host);

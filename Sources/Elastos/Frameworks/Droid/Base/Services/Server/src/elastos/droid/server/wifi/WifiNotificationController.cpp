@@ -83,12 +83,12 @@ ECode WifiNotificationController::InnerBroadcastReceiver1::OnReceive(
 //=====================================================================
 //    WifiNotificationController::NotificationEnabledSettingObserver
 //=====================================================================
-WifiNotificationController::NotificationEnabledSettingObserver::NotificationEnabledSettingObserver(
+ECode WifiNotificationController::NotificationEnabledSettingObserver::constructor(
     /* [in] */ WifiNotificationController* owner,
     /* [in] */ IHandler* handler)
-    : mOwner(owner)
 {
-    ContentObserver::constructor(handler);
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode WifiNotificationController::NotificationEnabledSettingObserver::Register()
@@ -162,7 +162,8 @@ WifiNotificationController::WifiNotificationController(
     NOTIFICATION_REPEAT_DELAY_MS = value * 1000l;
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(this, handler);
+    mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver();
+    mNotificationEnabledSettingObserver->constructor(this, handler);
     mNotificationEnabledSettingObserver->Register();
 }
 

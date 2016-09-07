@@ -629,11 +629,9 @@ ECode PhoneWindowManager::KeyguardDelegateActivityDrawn::Run()
 //==============================================================================
 
 PhoneWindowManager::SettingsObserver::SettingsObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ PhoneWindowManager* host)
     : mHost(host)
 {
-    ContentObserver::constructor(handler);
 }
 
 ECode PhoneWindowManager::SettingsObserver::OnChange(
@@ -2242,9 +2240,11 @@ ECode PhoneWindowManager::Init(
     Int32 rotation;
     mWindowManager->GetRotation(&rotation);
     mOrientationListener->SetCurrentRotation(rotation);
-    mSettingsObserver = new SettingsObserver(mHandler, this);
+    mSettingsObserver = new SettingsObserver(this);
+    mSettingsObserver->constructor(mHandler);
     mSettingsObserver->Observe();
-    mShortcutManager = new ShortcutManager(context, mHandler);
+    mShortcutManager = new ShortcutManager(context);
+    mShortcutManager->constructor(mHandler);
     mShortcutManager->Observe();
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);

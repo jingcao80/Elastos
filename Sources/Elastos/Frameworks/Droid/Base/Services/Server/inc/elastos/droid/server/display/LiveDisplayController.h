@@ -35,7 +35,7 @@ private:
     public:
         TO_STRING_IMPL("LiveDisplayController::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ LiveDisplayController* host);
 
         CARAPI_(void) Register(

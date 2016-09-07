@@ -638,12 +638,12 @@ ECode WifiController::InnerBroadcastReceiver1::OnReceive(
 //=====================================================================
 //                WifiController::InnerContentObserver1
 //=====================================================================
-WifiController::InnerContentObserver1::InnerContentObserver1(
+ECode WifiController::InnerContentObserver1::constructor(
     /* [in] */ WifiController* owner,
     /* [in] */ IHandler* handler)
-    : mOwner(owner)
 {
-    ContentObserver::constructor(handler);
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode WifiController::InnerContentObserver1::OnChange(
@@ -656,12 +656,12 @@ ECode WifiController::InnerContentObserver1::OnChange(
 //=====================================================================
 //                WifiController::InnerContentObserver3
 //=====================================================================
-WifiController::InnerContentObserver3::InnerContentObserver3(
+ECode WifiController::InnerContentObserver3::constructor(
     /* [in] */ WifiController* owner,
     /* [in] */ IHandler* handler)
-    : mOwner(owner)
 {
-    ContentObserver::constructor(handler);
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode WifiController::InnerContentObserver3::OnChange(
@@ -674,12 +674,12 @@ ECode WifiController::InnerContentObserver3::OnChange(
 //=====================================================================
 //                WifiController::InnerContentObserver5
 //=====================================================================
-WifiController::InnerContentObserver5::InnerContentObserver5(
+ECode WifiController::InnerContentObserver5::constructor(
     /* [in] */ WifiController* owner,
     /* [in] */ IHandler* handler)
-    : mOwner(owner)
 {
-    ContentObserver::constructor(handler);
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode WifiController::InnerContentObserver5::OnChange(
@@ -874,7 +874,8 @@ void WifiController::ReadWifiReEnableDelay()
 void WifiController::RegisterForStayAwakeModeChange(
     /* [in] */ IHandler* handler)
 {
-    AutoPtr<IContentObserver> contentObserver = new InnerContentObserver1(this, handler);
+    AutoPtr<InnerContentObserver1> contentObserver = new InnerContentObserver1();
+    contentObserver->constructor(this, handler);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
@@ -888,7 +889,8 @@ void WifiController::RegisterForStayAwakeModeChange(
 void WifiController::RegisterForWifiIdleTimeChange(
     /* [in] */ IHandler* handler)
 {
-    AutoPtr<IContentObserver> contentObserver = new InnerContentObserver3(this, handler);
+    AutoPtr<InnerContentObserver3> contentObserver = new InnerContentObserver3();
+    contentObserver->constructor(this, handler);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
@@ -901,7 +903,8 @@ void WifiController::RegisterForWifiIdleTimeChange(
 void WifiController::RegisterForWifiSleepPolicyChange(
     /* [in] */ IHandler* handler)
 {
-    AutoPtr<IContentObserver> contentObserver = new InnerContentObserver5(this, handler);
+    AutoPtr<InnerContentObserver5> contentObserver = new InnerContentObserver5();
+    contentObserver->constructor(this, handler);
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
 

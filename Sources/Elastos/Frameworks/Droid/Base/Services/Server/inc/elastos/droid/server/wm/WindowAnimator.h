@@ -92,6 +92,11 @@ public:
     CARAPI_(AutoPtr<ScreenRotationAnimation>) GetScreenRotationAnimationLocked(
         /* [in] */ Int32 displayId);
 
+    CARAPI_(AutoPtr<WindowStateAnimator>) GetUniverseBackground();
+
+    CARAPI_(void) SetUniverseBackground(
+        /* [in] */ WindowStateAnimator* animator);
+
 private:
     CARAPI_(String) ForceHidingToString();
 
@@ -144,7 +149,7 @@ public:
      * seen. If multiple windows satisfy this, use the lowest window. */
     WindowState* mWindowDetachedWallpaper;  // weak-ref WindowState->WindowStateAnimator->AppWindowAnimator->WindowAnimator
 
-    WindowStateAnimator* mUniverseBackground;   // weak-ref WindowStateAnimator>AppWindowAnimator->WindowAnimator
+    AutoPtr<IWeakReference> mUniverseBackground;    // weak-ref WindowStateAnimator>AppWindowAnimator->WindowAnimator
     Int32 mAboveUniverseLayer;
 
     Int32 mBulkUpdateParams;

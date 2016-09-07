@@ -36,6 +36,8 @@ public:
     WindowStateAnimator(
         /* [in] */ WindowState* win);
 
+    ~WindowStateAnimator();
+
     static CARAPI_(String) DrawStateToString(
         /* [in] */ Int32 state);
 
@@ -170,8 +172,8 @@ public:
     IWindowManagerPolicy* mPolicy;
     IContext* mContext;
 
-    AutoPtr<WindowStateAnimator> mAttachedWinAnimator;
-    AutoPtr<AppWindowAnimator> mAppAnimator;
+    WindowStateAnimator* mAttachedWinAnimator;
+    AppWindowAnimator* mAppAnimator;
     Boolean mIsWallpaper;
 
     // If this is a universe background window, this is the transformation

@@ -73,6 +73,9 @@ AppWindowAnimator::AppWindowAnimator(
 
 AppWindowAnimator::~AppWindowAnimator()
 {
+    mTransformation = NULL;
+    mThumbnailTransformation = NULL;
+    mAllAppWinAnimators.Clear();
 }
 
 AutoPtr<AppWindowToken> AppWindowAnimator::GetAppToken()
@@ -348,16 +351,20 @@ Boolean AppWindowAnimator::StepAnimationLocked(
 
     mTransformation->Clear();
 
-    List<AutoPtr<WindowStateAnimator> >::Iterator it = mAllAppWinAnimators.Begin();
+    List< AutoPtr<IWeakReference> >::Iterator it = mAllAppWinAnimators.Begin();
     for (; it != mAllAppWinAnimators.End(); ++it) {
-        AutoPtr<WindowStateAnimator> winAnim = *it;
-        if (appToken->mLaunchTaskBehind) {
-            AutoPtr<WindowState> windowState = winAnim->GetWindowState();
-            if (windowState) {
-                windowState->mExiting = TRUE;
+        AutoPtr<IObject> obj;
+        (*it)->Resolve(EIID_IObject, (IInterface**)&obj);
+        if (obj) {
+            WindowStateAnimator* winAnim = (WindowStateAnimator*)obj.Get();
+            if (appToken->mLaunchTaskBehind) {
+                AutoPtr<WindowState> windowState = winAnim->GetWindowState();
+                if (windowState) {
+                    windowState->mExiting = TRUE;
+                }
             }
+            winAnim->FinishExit();
         }
-        winAnim->FinishExit();
     }
     if (appToken->mLaunchTaskBehind) {
         // try {
@@ -383,13 +390,18 @@ Boolean AppWindowAnimator::StepAnimationLocked(
 Boolean AppWindowAnimator::ShowAllWindowsLocked()
 {
     Boolean isAnimating = FALSE;
-    List<AutoPtr<WindowStateAnimator> >::Iterator it = mAllAppWinAnimators.Begin();
+
+    List< AutoPtr<IWeakReference> >::Iterator it = mAllAppWinAnimators.Begin();
     for (; it != mAllAppWinAnimators.End(); ++it) {
-        AutoPtr<WindowStateAnimator> winAnimator = *it;
-        // if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-        //         "performing show on: " + winAnimator);
-        winAnimator->PerformShowLocked();
-        isAnimating |= winAnimator->IsAnimating();
+        AutoPtr<IObject> obj;
+        (*it)->Resolve(EIID_IObject, (IInterface**)&obj);
+        if (obj) {
+            WindowStateAnimator* winAnimator = (WindowStateAnimator*)obj.Get();
+            // if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+            //         "performing show on: " + winAnimator);
+            winAnimator->PerformShowLocked();
+            isAnimating |= winAnimator->IsAnimating();
+        }
     }
     return isAnimating;
 }

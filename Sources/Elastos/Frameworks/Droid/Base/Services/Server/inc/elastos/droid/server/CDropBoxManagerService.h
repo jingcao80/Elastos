@@ -178,12 +178,10 @@ private:
     public:
         TO_STRING_IMPL("CDropBoxManagerService::MyContentObserver")
 
-        MyContentObserver(
+        CARAPI constructor(
             /* [in] */ CDropBoxManagerService* owner,
-            /* [in] */ IContext* context)
-            : mHost(owner)
-            , mContext(context)
-        {}
+            /* [in] */ IHandler* handler,
+            /* [in] */ IContext* context);
 
         CARAPI OnChange(
             /* [in] */ Boolean selfChange);

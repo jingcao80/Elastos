@@ -102,11 +102,12 @@ const String CLockscreenShortcutsHelper::CAMERA_DEFAULT_ICON("ic_camera_alt_24dp
 
 CLockscreenShortcutsHelper::CLockscreenShortcutsHelper()
 {
-    mObserver = new MyContentObserver(this);
 }
 
 ECode CLockscreenShortcutsHelper::constructor()
 {
+    mObserver = new MyContentObserver(this);
+    mObserver->constructor();
     return NOERROR;
 }
 
@@ -114,6 +115,9 @@ ECode CLockscreenShortcutsHelper::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ILockscreenShortcutsHelperOnChangeListener* listener)
 {
+    mObserver = new MyContentObserver(this);
+    mObserver->constructor();
+
     mContext = context;
     if (listener != NULL) {
         mListener = listener;

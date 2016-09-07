@@ -123,14 +123,18 @@ namespace Telephony {
  * Observe the secure setting for updated premium sms determination rules
  */
 SMSDispatcher::SettingsObserver::SettingsObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ IAtomicInteger32* premiumSmsRule,
     /* [in] */ IContext* context)
     : mPremiumSmsRule(premiumSmsRule)
     , mContext(context)
 {
+}
+
+ECode SMSDispatcher::SettingsObserver::constructor(
+    /* [in] */ IHandler* handler)
+{
     ContentObserver::constructor(handler);
-    OnChange(FALSE); // load initial value;
+    return OnChange(FALSE); // load initial value;
 }
 
 //@Override
@@ -725,7 +729,8 @@ ECode SMSDispatcher::constructor(
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     mTelephonyManager = ITelephonyManager::Probe(obj) ;
-    mSettingsObserver = new SettingsObserver(this, mPremiumSmsRule, mContext);
+    mSettingsObserver = new SettingsObserver(mPremiumSmsRule, mContext);
+    mSettingsObserver->constructor(this);   // TODO memory leak, zhaohui
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<IUri> uri;

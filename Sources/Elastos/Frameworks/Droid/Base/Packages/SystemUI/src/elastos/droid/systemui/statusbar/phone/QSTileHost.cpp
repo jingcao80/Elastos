@@ -67,9 +67,6 @@ QSTileHost::Observer::Observer(
     : mRegistered(FALSE)
     , mHost(host)
 {
-    AutoPtr<IHandler> handler;
-    CHandler::New(Looper::GetMainLooper(), (IHandler**)&handler);
-    ContentObserver::constructor(handler);
 }
 
 ECode QSTileHost::Observer::Register()
@@ -122,6 +119,7 @@ void QSTileHost::UserTracker::OnUserSwitched(
 }
 
 CAR_INTERFACE_IMPL_2(QSTileHost, Object, IPhoneQSTileHost, IQSTileHost);
+
 QSTileHost::QSTileHost(
     /* [in] */ IContext* context,
     /* [in] */ IPhoneStatusBar* statusBar,
@@ -139,6 +137,10 @@ QSTileHost::QSTileHost(
 {
     CLinkedHashMap::New((ILinkedHashMap**)&mTiles);
     mObserver = new Observer(this);
+    AutoPtr<IHandler> handler;
+    CHandler::New(Looper::GetMainLooper(), (IHandler**)&handler);
+    mObserver->constructor(handler);
+
     mContext = context;
     mStatusBar = statusBar;
     mBluetooth = bluetooth;

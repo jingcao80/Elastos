@@ -54,7 +54,7 @@ private:
         : public ContentObserver
     {
     public:
-        UserDictionaryContentObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ DynamicIndexableContentMonitor* host);
 
@@ -142,7 +142,7 @@ private:
 
     AutoPtr<MyHandler> mHandler;
 
-    AutoPtr<IContentObserver> mUserDictionaryContentObserver;
+    AutoPtr<UserDictionaryContentObserver> mUserDictionaryContentObserver;
 
     AutoPtr<IContext> mContext;
     Boolean mHasFeaturePrinting;

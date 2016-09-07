@@ -128,7 +128,7 @@ public:
             /* [in] */ IIntent* intent);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     /**
@@ -153,7 +153,7 @@ public:
             /* [in] */ IIntent* intent);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     /**
@@ -167,8 +167,6 @@ public:
 
         AppWidgetResetObserver();
 
-        CARAPI constructor();
-
         CARAPI constructor(
             /* [in] */ ILauncher* host);
 
@@ -177,7 +175,7 @@ public:
             /* [in] */ Boolean selfChange);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
 private:
@@ -193,7 +191,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyAsyncTask
@@ -216,7 +214,7 @@ private:
             /* [in] */ IInterface* result);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class LocaleConfiguration
@@ -245,7 +243,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<LocaleConfiguration> mLocaleConfiguration;
     };
 
@@ -264,7 +262,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         Int32 mAppWidgetId;
         AutoPtr<IAppWidgetHostView> mLayout;
         Int32 mResultCode;
@@ -283,7 +281,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         Int32 mResultCode;
     };
 
@@ -301,7 +299,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         Int32 mAppWidgetId;
     };
 
@@ -323,7 +321,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<Launcher> mHost;
+            Launcher* mHost;
             AutoPtr<IOnDrawListener> mListener;
         };
 
@@ -338,7 +336,7 @@ private:
         CARAPI OnDraw();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         Boolean mStarted;
     };
 
@@ -371,7 +369,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyRunnable6
@@ -387,7 +385,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         Boolean mAlreadyOnHome;
     };
 
@@ -406,7 +404,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<ICellLayout> mCl;
         AutoPtr<IFolderIcon> mFi;
     };
@@ -429,7 +427,7 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IView> mFromView;
         AutoPtr<IAppsCustomizeTabHost> mToView;
     };
@@ -457,7 +455,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IView> mFromView;
         AutoPtr<IAppsCustomizeTabHost> mToView;
         Boolean mAnimated;
@@ -482,7 +480,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IAnimatorSet> mStateAnimation;
         AutoPtr<IView> mFromView;
         AutoPtr<IAppsCustomizeTabHost> mToView;
@@ -528,7 +526,7 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IView> mFromView;
         AutoPtr<IView> mToView;
     };
@@ -550,7 +548,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IView> mFromView;
         AutoPtr<IView> mToView;
         Boolean mAnimated;
@@ -569,7 +567,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyRunnable9
@@ -586,7 +584,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         Boolean mSuccessfulDrop;
         AutoPtr<IRunnable> mOnCompleteRunnable;
     };
@@ -606,7 +604,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IArrayList> mShortcuts;
         Int32 mStart;
         Int32 mEnd;
@@ -625,7 +623,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IHashMap> mFolders;
     };
 
@@ -642,7 +640,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<ILauncherAppWidgetInfo> mItem;
     };
 
@@ -658,7 +656,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyRunnable14
@@ -673,7 +671,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyComparator
@@ -704,7 +702,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyThread3
@@ -720,7 +718,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyRunnable15
@@ -736,7 +734,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IArrayList> mApps;
     };
 
@@ -753,7 +751,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IArrayList> mApps;
     };
 
@@ -770,7 +768,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IArrayList> mApps;
     };
 
@@ -790,7 +788,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<IArrayList> mPackageNames;
         AutoPtr<IArrayList> mAppInfos;
         Boolean mMatchPackageNamesOnly;
@@ -809,7 +807,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyRunnable20
@@ -824,7 +822,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
     };
 
     class MyRunnable21
@@ -840,7 +838,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<ICling> mCling;
     };
 
@@ -858,7 +856,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         String mFlag;
     };
 
@@ -877,7 +875,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<Launcher> mHost;
+        Launcher* mHost;
         AutoPtr<ICling> mCling;
         String mFlag;
     };

@@ -441,12 +441,12 @@ ECode CSettingsAppWidgetProvider::WifiStateTrackerTask::DoInBackground(
 //                  CSettingsAppWidgetProvider::SettingsObserver
 //===============================================================================
 
-CSettingsAppWidgetProvider::SettingsObserver::SettingsObserver(
+ECode CSettingsAppWidgetProvider::SettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ IContext* context)
 {
-    ContentObserver::constructor(handler);
     mContext = context;
+    return ContentObserver::constructor(handler);
 }
 
 void CSettingsAppWidgetProvider::SettingsObserver::StartObserving()
@@ -574,7 +574,8 @@ void CSettingsAppWidgetProvider::CheckObserver(
         CHandler::New((IHandler**)&handler);
         AutoPtr<IContext> cxt;
         context->GetApplicationContext((IContext**)&cxt);
-        sSettingsObserver = new SettingsObserver(handler, cxt);
+        sSettingsObserver = new SettingsObserver();
+        sSettingsObserver->constructor(handler, cxt);
         sSettingsObserver->StartObserving();
     }
 }

@@ -42,12 +42,13 @@ const String ProfileTriggerHelper::TAG("ProfileTriggerHelper");
 //-----------------------------------------------------------------------
 //              ProfileTriggerHelper::MyContentObserver
 //-----------------------------------------------------------------------
-ProfileTriggerHelper::MyContentObserver::MyContentObserver(
+ECode ProfileTriggerHelper::MyContentObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ ProfileTriggerHelper* host)
-    : mHandler(handler)
-    , mHost(host)
-{}
+{
+    mHost= host;
+    return ContentObserver::constructor(handler);
+}
 
 ECode ProfileTriggerHelper::MyContentObserver::OnChange(
     /* [in] */ Boolean selfChange)
@@ -91,8 +92,9 @@ ECode ProfileTriggerHelper::constructor(
     resolver->RegisterContentObserver(uri.Get(), FALSE, mSettingsObserver);
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    AutoPtr<MyContentObserver> sob = new MyContentObserver(IHandler::Probe(handler), this);
-    mSettingsObserver = IContentObserver::Probe(sob);
+    AutoPtr<MyContentObserver> sob = new MyContentObserver();
+    sob->constructor(handler, this);
+    mSettingsObserver = sob.Get();
     return NOERROR;
 }
 

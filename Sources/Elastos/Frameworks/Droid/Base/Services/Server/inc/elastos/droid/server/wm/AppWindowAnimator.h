@@ -130,7 +130,7 @@ public:
     AutoPtr<ISurfaceControl> mDeferredThumbnail;
 
     /** WindowStateAnimator from mAppAnimator.allAppWindows as of last performLayout */
-    List< AutoPtr<WindowStateAnimator> > mAllAppWinAnimators;
+    List< AutoPtr<IWeakReference> > mAllAppWinAnimators;    // WindowStateAnimator*
 
     static const AutoPtr<IAnimation> sDummyAnimation;
 

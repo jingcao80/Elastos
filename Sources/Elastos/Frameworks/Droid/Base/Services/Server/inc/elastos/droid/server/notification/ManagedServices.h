@@ -157,7 +157,7 @@ private:
     public:
         TO_STRING_IMPL("ManagedServices::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ ManagedServices* host,
             /* [in] */ IHandler* handler);
 

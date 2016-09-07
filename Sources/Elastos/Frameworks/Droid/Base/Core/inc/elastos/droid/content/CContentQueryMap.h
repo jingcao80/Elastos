@@ -81,7 +81,6 @@ public:
         TO_STRING_IMPL("KeepUpdatedContentObserver::KeepUpdatedContentObserver")
 
         KeepUpdatedContentObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ IWeakReference* host);
 
         // @Override
@@ -110,7 +109,7 @@ private:
     Boolean mKeepUpdated;
 
     AutoPtr<IMap> mValues;
-    AutoPtr<IContentObserver> mContentObserver;
+    AutoPtr<KeepUpdatedContentObserver> mContentObserver;
 
     /** Set when a cursor change notification is received and is cleared on a call to requery(). */
     Boolean mDirty;

@@ -295,7 +295,7 @@ private:
     public:
         TO_STRING_IMPL("HdmiControlService::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ HdmiControlService* host,
             /* [in] */ IHandler* handler);
 

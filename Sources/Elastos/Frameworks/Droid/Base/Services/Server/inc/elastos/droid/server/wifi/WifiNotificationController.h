@@ -51,7 +51,7 @@ private:
     public:
         TO_STRING_IMPL("WifiNotificationController::NotificationEnabledSettingObserver")
 
-        NotificationEnabledSettingObserver(
+        CARAPI constructor(
             /* [in] */ WifiNotificationController* owner,
             /* [in] */ IHandler* handler);
 

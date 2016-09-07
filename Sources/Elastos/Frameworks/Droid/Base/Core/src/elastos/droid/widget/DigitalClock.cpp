@@ -63,9 +63,6 @@ DigitalClock::FormatChangeObserver::FormatChangeObserver(
     /* [in] */ DigitalClock* host)
     : mHost(host)
 {
-    AutoPtr<IHandler> handler;
-    CHandler::New((IHandler**)&handler);
-    ContentObserver::constructor(handler);
 }
 
 ECode DigitalClock::FormatChangeObserver::OnChange(
@@ -110,7 +107,11 @@ void DigitalClock::InitClock()
         helper->GetInstance((ICalendar**)&mCalendar);
     }
 
+    AutoPtr<IHandler> handler;
+    CHandler::New((IHandler**)&handler);
     mFormatChangeObserver = new FormatChangeObserver(this);
+    mFormatChangeObserver->constructor(handler);
+
     AutoPtr<IContext> cxt;
     GetContext((IContext**)&cxt);
     AutoPtr<IContentResolver> resolver;

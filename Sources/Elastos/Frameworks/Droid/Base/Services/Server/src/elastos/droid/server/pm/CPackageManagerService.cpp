@@ -4300,7 +4300,6 @@ ECode CPackageManagerService::constructor(
     /* [in] */ Boolean factoryTest,
     /* [in] */ Boolean onlyCore)
 {
-    Logger::I(TAG, ">>>>>>>>>>>>>> CPackageManagerService::constructor");
 //     EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
 //             SystemClock.uptimeMillis());
 
@@ -5011,7 +5010,6 @@ ECode CPackageManagerService::constructor(
     // tidy.
     // Runtime.getRuntime().gc();
 
-    Logger::I(TAG, "<<<<<<<<<<<<<< CPackageManagerService::constructor");
     return NOERROR;
 }
 
@@ -18980,7 +18978,6 @@ ECode CPackageManagerService::ProcessThemeResources(
 void CPackageManagerService::ProcessThemeResourcesInThemeService(
     /* [in] */ const String& pkgName)
 {
-    Logger::I(TAG, " >> ProcessThemeResourcesInThemeService: %s", pkgName.string());
     AutoPtr<IInterface> service;
     mContext->GetSystemService(IContext::THEME_SERVICE, (IInterface**)&service);
     AutoPtr<IThemeManager> tm = IThemeManager::Probe(service);

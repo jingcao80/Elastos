@@ -39,7 +39,6 @@ CVolumeUI::MyObserver::MyObserver(
     /* [in] */ CVolumeUI* host)
     : mHost(host)
 {
-    ContentObserver::constructor(mHost->mHandler);
 }
 
 ECode CVolumeUI::MyObserver::OnChange(
@@ -280,6 +279,7 @@ ECode CVolumeUI::constructor()
 {
     CHandler::New((IHandler**)&mHandler);
     mObserver = new MyObserver(this);
+    mObserver->constructor(mHandler);
     mStartZenSettings = new MyRunnable(this);
     return NOERROR;
 }

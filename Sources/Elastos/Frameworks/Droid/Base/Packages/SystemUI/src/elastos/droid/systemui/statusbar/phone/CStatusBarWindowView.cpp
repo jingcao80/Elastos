@@ -100,7 +100,6 @@ ECode CStatusBarWindowView::OnAttachedToWindow()
     mDragDownHelper = new DragDownHelper(ctx, this,
         IExpandHelperCallback::Probe(mStackScrollLayout), IDragDownCallback::Probe(mService));
     FindViewById(R::id::brightness_mirror, (IView**)&mBrightnessMirror);
-    Logger::I(TAG, " >> OnAttachedToWindow:: brightness_mirror: %s", TO_CSTR(mBrightnessMirror));
 
     // We really need to be able to animate while window animations are going on
     // so that activities may be started asynchronously from panel animations

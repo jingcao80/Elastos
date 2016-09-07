@@ -674,7 +674,6 @@ module
 
     [local]
     class CLauncherApplicationContentObserver {
-        constructor();
 
         constructor(
             [in] IHandler* handler,

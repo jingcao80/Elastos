@@ -71,15 +71,15 @@ void ZenModeHelper::Callback::OnZenModeChanged()
 //                  ZenModeHelper::SettingsObserver
 //===============================================================================
 
-ZenModeHelper::SettingsObserver::SettingsObserver(
+ECode ZenModeHelper::SettingsObserver::constructor(
     /* [in] */ IHandler* handle,
     /* [in] */ ZenModeHelper* host)
-    : mHost(host)
 {
+    mHost = host;
     ContentObserver::constructor(handle);
     AutoPtr<ISettingsGlobal> global;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&global);
-    global->GetUriFor(ISettingsGlobal::ZEN_MODE, (IUri**)&ZEN_MODE);
+    return global->GetUriFor(ISettingsGlobal::ZEN_MODE, (IUri**)&ZEN_MODE);
 }
 
 ZenModeHelper::SettingsObserver::~SettingsObserver()
@@ -168,7 +168,8 @@ ZenModeHelper::ZenModeHelper(
     context->GetResources((IResources**)&resources);
     ReadDefaultConfig(resources, (IZenModeConfig**)&mDefaultConfig);
     mConfig = mDefaultConfig;
-    mSettingsObserver = new SettingsObserver(mHandler, this);
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(mHandler, this);
     mSettingsObserver->Observe();
 
     AutoPtr<IIntentFilter> filter;

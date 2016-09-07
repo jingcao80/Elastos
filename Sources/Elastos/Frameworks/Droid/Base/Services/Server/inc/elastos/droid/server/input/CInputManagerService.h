@@ -448,7 +448,7 @@ private:
     public:
         TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver")
 
-        ContentObserverInRegisterPointerSpeedSettingObserver(
+        CARAPI constructor(
             /* [in] */ CInputManagerService* owner,
             /* [in] */ IHandler* handler);
 
@@ -465,7 +465,7 @@ private:
     public:
         TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver")
 
-        ContentObserverInRegisterShowTouchesSettingObserver(
+        CARAPI constructor(
             /* [in] */ CInputManagerService* owner,
             /* [in] */ IHandler* handler);
 
@@ -482,7 +482,7 @@ private:
     public:
         TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver")
 
-        ContentObserverInRegisterStylusIconEnabledSettingObserver(
+        CARAPI constructor(
             /* [in] */ CInputManagerService* owner,
             /* [in] */ IHandler* handler);
 
@@ -499,7 +499,7 @@ private:
     public:
         TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver")
 
-        ContentObserverInRegisterVolumeKeysRotationSettingObserver(
+        CARAPI constructor(
             /* [in] */ CInputManagerService* owner,
             /* [in] */ IHandler* handler);
 

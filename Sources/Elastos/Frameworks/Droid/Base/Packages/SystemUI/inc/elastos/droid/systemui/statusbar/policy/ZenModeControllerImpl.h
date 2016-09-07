@@ -85,7 +85,9 @@ private:
     public:
         TO_STRING_IMPL("ZenModeControllerImpl::SetupObserver")
 
-        SetupObserver(
+        SetupObserver();
+
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ ZenModeControllerImpl* host);
 
@@ -112,7 +114,7 @@ private:
         : public GlobalSetting
     {
     public:
-        ModeSetting(
+        CARAPI constructor(
             /* [in] */ ZenModeControllerImpl* host,
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
@@ -131,7 +133,7 @@ private:
         : public GlobalSetting
     {
     public:
-        ConfigSetting(
+        CARAPI constructor(
             /* [in] */ ZenModeControllerImpl* host,
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
@@ -224,8 +226,8 @@ private:
 
     AutoPtr<IArrayList> mCallbacks;  /*<Callback*/
     AutoPtr<IContext> mContext;
-    AutoPtr<IGlobalSetting> mModeSetting;
-    AutoPtr<IGlobalSetting> mConfigSetting;
+    AutoPtr<ModeSetting> mModeSetting;
+    AutoPtr<ConfigSetting> mConfigSetting;
     AutoPtr<IINotificationManager> mNotificationManager;
     AutoPtr<ILinkedHashMap> mConditions;  /*<Uri, Condition*/
     AutoPtr<IAlarmManager> mAlarmManager;

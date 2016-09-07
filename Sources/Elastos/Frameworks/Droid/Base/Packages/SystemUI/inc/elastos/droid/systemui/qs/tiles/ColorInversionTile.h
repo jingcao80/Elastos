@@ -21,7 +21,7 @@ private:
     class ColorSettings: public SecureSetting
     {
     public:
-        ColorSettings(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
             /* [in] */ const String& settingName,
@@ -71,7 +71,7 @@ protected:
     CARAPI_(String) ComposeChangeAnnouncement();
 
 private:
-    AutoPtr<SecureSetting> mSetting;
+    AutoPtr<ColorSettings> mSetting;
     AutoPtr<UsageTracker> mUsageTracker;
 
     Boolean mListening;

@@ -2330,6 +2330,10 @@ CAudioService::SettingsObserver::SettingsObserver(
     /* [in] */ CAudioService* host)
     : mHost(host)
 {
+}
+
+ECode CAudioService::SettingsObserver::constructor()
+{
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
     ContentObserver::constructor(handler);
@@ -2341,7 +2345,7 @@ CAudioService::SettingsObserver::SettingsObserver(
     uri = NULL;
     Settings::Global::GetUriFor(
         ISettingsGlobal::DOCK_AUDIO_MEDIA_ENABLED, (IUri**)&uri);
-    mHost->mContentResolver->RegisterContentObserver(uri, FALSE, this);
+    return mHost->mContentResolver->RegisterContentObserver(uri, FALSE, this);
 }
 
 ECode CAudioService::SettingsObserver::OnChange(
@@ -3188,9 +3192,10 @@ ECode CAudioService::constructor(
 
     AutoPtr<ILooper> looper;
     mAudioHandler->GetLooper((ILooper**)&looper);
-    mMediaFocusControl = new MediaFocusControl(looper,
-            mContext, IAudioServiceVolumeController::Probe(mVolumeController),
-            this);
+
+    mMediaFocusControl = new MediaFocusControl();
+    mMediaFocusControl->constructor(looper, mContext,
+        IAudioServiceVolumeController::Probe(mVolumeController), this);
 
     AudioSystem::SetErrorCallback(mAudioSystemCallback);
 
@@ -3221,6 +3226,7 @@ ECode CAudioService::constructor(
     UpdateStreamVolumeAlias(FALSE /*updateVolumes*/);
     ReadPersistedSettings();
     mSettingsObserver = new SettingsObserver(this);
+    mSettingsObserver->constructor();
     CreateStreamStates();
 
     ReadAndSetLowRamDevice();

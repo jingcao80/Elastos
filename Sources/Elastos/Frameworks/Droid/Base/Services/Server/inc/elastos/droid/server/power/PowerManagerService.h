@@ -428,7 +428,7 @@ private:
     public:
         TO_STRING_IMPL("PowerManagerService::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ PowerManagerService* host);
 

@@ -11,14 +11,18 @@ namespace Qs {
 
 CAR_INTERFACE_IMPL_2(GlobalSetting, ContentObserver, IGlobalSetting, IListenable);
 
-GlobalSetting::GlobalSetting(
+GlobalSetting::GlobalSetting()
+{
+}
+
+ECode GlobalSetting::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ const String& settingName)
 {
-    ContentObserver::constructor(handler);
     mContext = context;
     mSettingName = settingName;
+    return ContentObserver::constructor(handler);
 }
 
 ECode GlobalSetting::GetValue(

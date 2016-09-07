@@ -444,21 +444,21 @@ public:
     static Boolean DEBUG;
     static const String TAG;
 
-    AutoPtr<IArrayList> mPendingActions;
+    AutoPtr<IArrayList> mPendingActions;    //Runnable
     AutoPtr< ArrayOf<IRunnable* > > mTmpActions;
     Boolean mExecutingActions;
 
-    AutoPtr<IArrayList> mActive;
-    AutoPtr<IArrayList> mAdded;
-    AutoPtr<IArrayList> mAvailIndices;
-    AutoPtr<IArrayList> mBackStack;
-    AutoPtr<IArrayList> mCreatedMenus;
+    AutoPtr<IArrayList> mActive;        // Fragment
+    AutoPtr<IArrayList> mAdded;         // Fragment
+    AutoPtr<IArrayList> mAvailIndices;  // Integer
+    AutoPtr<IArrayList> mBackStack;     // BackStackRecord
+    AutoPtr<IArrayList> mCreatedMenus;  // Fragment
 
     // Must be accessed while locked.
-    AutoPtr<IArrayList> mBackStackIndices;
-    AutoPtr<IArrayList> mAvailBackStackIndices;
+    AutoPtr<IArrayList> mBackStackIndices;      // BackStackRecord
+    AutoPtr<IArrayList> mAvailBackStackIndices; // Integer
 
-    AutoPtr<IArrayList> mBackStackChangeListeners;
+    AutoPtr<IArrayList> mBackStackChangeListeners;  // OnBackStackChangedListener
 
     Int32 mCurState;
     IActivity* mActivity;
@@ -473,7 +473,7 @@ public:
 
     // Temporary vars for state save and restore.
     AutoPtr<IBundle> mStateBundle;
-    AutoPtr<ISparseArray> mStateArray;
+    AutoPtr<ISparseArray> mStateArray;  // Parcelable
     AutoPtr<ExecCommitRunnable> mExecCommit;
 };
 

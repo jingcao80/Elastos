@@ -75,11 +75,9 @@ ECode ServiceMonitor::MonitorHandler::HandleMessage(
 }
 
 ServiceMonitor::SettingObserver::SettingObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ ServiceMonitor* host)
     : mHost(host)
 {
-    ContentObserver::constructor(handler);
 }
 
 ECode ServiceMonitor::SettingObserver::OnChange(
@@ -186,7 +184,8 @@ ServiceMonitor::ServiceMonitor(
     , mContext(context)
 {
     mHandler = new MonitorHandler(this);
-    mSettingObserver = new SettingObserver(mHandler, this);
+    mSettingObserver = new SettingObserver(this);
+    mSettingObserver->constructor(mHandler);
     mBroadcastReceiver = new MonitorBroadcastReceiver(this);
     mCallbacks = callbacks;
     mSettingKey = settingKey;

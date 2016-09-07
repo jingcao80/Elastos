@@ -97,11 +97,11 @@ const AutoPtr<IUri> LiveDisplayController::SettingsObserver::DISPLAY_COLOR_ENHAN
 const AutoPtr<IUri> LiveDisplayController::SettingsObserver::DISPLAY_COLOR_ADJUSTMENT_URI =
         InitURI(ISettingsSystem::DISPLAY_COLOR_ADJUSTMENT);
 
-LiveDisplayController::SettingsObserver::SettingsObserver(
+ECode LiveDisplayController::SettingsObserver::constructor(
     /* [in] */ LiveDisplayController* host)
-    : mHost(host)
 {
-    ContentObserver::constructor(mHost->mHandler);
+    mHost = host;
+    return ContentObserver::constructor(mHost->mHandler);
 }
 
 void LiveDisplayController::SettingsObserver::Register(
@@ -453,7 +453,8 @@ LiveDisplayController::LiveDisplayController(
     (*mRGB)[1] = 0.0;
     (*mRGB)[2] = 0.0;
 
-    mObserver = new SettingsObserver(this);
+    mObserver = new SettingsObserver();
+    mObserver->constructor(this);
     mTwilightListener = new TwilightListener(this);
 
     mContext = context;

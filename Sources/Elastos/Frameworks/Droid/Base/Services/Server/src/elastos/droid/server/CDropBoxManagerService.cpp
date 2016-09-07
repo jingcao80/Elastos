@@ -21,6 +21,8 @@ using Elastos::Droid::Os::IDropBoxManager;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::CStatFs;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::CHandler;
 // using Elastos::Droid::Os::CDropBoxManagerEntry;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
@@ -324,6 +326,16 @@ ECode CDropBoxManagerService::CleanupBroadcastReceiver::OnReceive(
 //====================================================================
 // CDropBoxManagerService::MyContentObserver
 //====================================================================
+ECode CDropBoxManagerService::MyContentObserver::constructor(
+    /* [in] */ CDropBoxManagerService* owner,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IContext* context)
+{
+    mHost = owner;
+    mContext = context;
+    return ContentObserver::constructor(handler);
+}
+
 ECode CDropBoxManagerService::MyContentObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
@@ -369,7 +381,10 @@ ECode CDropBoxManagerService::constructor(
     AutoPtr<IIntent> result;
     context->RegisterReceiver(mReceiver, filter, (IIntent**)&result);
 
-    AutoPtr<MyContentObserver> observer = new MyContentObserver(this, context);
+    AutoPtr<IHandler> handler;
+    CHandler::New((IHandler**)&handler);
+    AutoPtr<MyContentObserver> observer = new MyContentObserver();
+    observer->constructor(this, handler, context);
     AutoPtr<ISettingsGlobal> settings;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settings);
     AutoPtr<IUri> uri;

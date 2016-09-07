@@ -16,14 +16,14 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-AirplaneModeTile::Setting::Setting(
+ECode AirplaneModeTile::Setting::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ const String& settingName,
     /* [in] */ AirplaneModeTile* host)
-    : GlobalSetting(context, handler, settingName)
-    , mHost(host)
 {
+    mHost = host;
+    return GlobalSetting::constructor(context, handler, settingName);
 }
 
 ECode AirplaneModeTile::Setting::HandleValueChanged(
@@ -56,7 +56,8 @@ AirplaneModeTile::AirplaneModeTile(
     /* [in] */ IQSTileHost* host)
 {
     QSTile::constructor(host);
-    mSetting = new Setting(mContext, mHandler, ISettingsGlobal::AIRPLANE_MODE_ON, this);
+    mSetting = new Setting();
+    mSetting->constructor(mContext, mHandler, ISettingsGlobal::AIRPLANE_MODE_ON, this);
     mReceiver = new Receiver(this);
 }
 

@@ -466,7 +466,8 @@ CWindowManagerService::RotationWatcherDeathRecipint::RotationWatcherDeathRecipin
 
 ECode CWindowManagerService::RotationWatcherDeathRecipint::ProxyDied()
 {
-    {    AutoLock syncLock(mOwner->mWindowMapLock);
+    {
+        AutoLock syncLock(mOwner->mWindowMapLock);
         List<AutoPtr<RotationWatcher> >::Iterator iter = mOwner->mRotationWatchers.Begin();
         while (iter != mOwner->mRotationWatchers.End()) {
             AutoPtr<IBinder> b = IBinder::Probe((*iter)->mWatcher);
@@ -477,9 +478,7 @@ ECode CWindowManagerService::RotationWatcherDeathRecipint::ProxyDied()
                     Boolean res;
                     proxy->UnlinkToDeath(this, 0, &res);
                 }
-                List<AutoPtr<RotationWatcher> >::Iterator temp = iter;
-                iter++;
-                mOwner->mRotationWatchers.Erase(temp);
+                iter = mOwner->mRotationWatchers.Erase(iter);
             }
             else
                 ++iter;
@@ -2120,7 +2119,7 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
             continue;
         }
         topCurW = NULL;
-        if (w != mAnimator->mWindowDetachedWallpaper && w->mAppToken != NULL) {
+        if (w.Get() != mAnimator->mWindowDetachedWallpaper && w->mAppToken != NULL) {
             // If this window's app token is hidden and not animating,
             // it is of no interest to us.
             if (w->mAppToken->mHidden && w->mAppToken->mAppAnimator->mAnimation == NULL) {
@@ -2154,7 +2153,7 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
             }
             break;
         }
-        else if (w == mAnimator->mWindowDetachedWallpaper) {
+        else if (w.Get() == mAnimator->mWindowDetachedWallpaper) {
             windowDetachedI = i;
         }
     }
@@ -3350,7 +3349,7 @@ void CWindowManagerService::RemoveWindowInnerLocked(
     }
 
     if (atoken != NULL) {
-        if (atoken->mStartingWindow.Get() == win) {
+        if (atoken->mStartingWindow == win) {
             atoken->mStartingWindow = NULL;
         }
         else if ((atoken->mAllAppWindows->GetSize(&N), N == 0) && atoken->mStartingData != NULL) {
@@ -9846,7 +9845,7 @@ ECode CWindowManagerService::HandleAddStarting(
 
             if (DEBUG_STARTING_WINDOW) {
                 Slogger::V(TAG, "Added starting %p: startingWindow=%p, startingView=%p",
-                    wtoken, wtoken->mStartingWindow.Get(), wtoken->mStartingView.Get());
+                    wtoken, wtoken->mStartingWindow, wtoken->mStartingView);
             }
         }
 
@@ -9870,7 +9869,7 @@ ECode CWindowManagerService::HandleRemoveStarting(
 
         if (DEBUG_STARTING_WINDOW) {
             Slogger::V(TAG, "Remove starting %p: startingWindow=%p, startingView=%p",
-                wtoken, wtoken->mStartingWindow.Get(), wtoken->mStartingView.Get());
+                wtoken, wtoken->mStartingWindow, wtoken->mStartingView);
         }
 
         if (wtoken->mStartingWindow != NULL) {
@@ -9909,7 +9908,7 @@ ECode CWindowManagerService::HandleFinishedStarting()
 
             if (DEBUG_STARTING_WINDOW) {
                 Slogger::V(TAG, "Finished starting %p: startingWindow=%p startingView=%p",
-                    wtoken.Get(), wtoken->mStartingWindow.Get(), wtoken->mStartingView.Get());
+                    wtoken.Get(), wtoken->mStartingWindow, wtoken->mStartingView);
             }
 
             if (wtoken->mStartingWindow == NULL) {
@@ -11115,9 +11114,9 @@ void CWindowManagerService::PerformLayoutLockedInner(
         }
     }
 
-    if (mAnimator->mUniverseBackground  != universeBackground) {
+    if (mAnimator->GetUniverseBackground() != universeBackground) {
         mFocusMayChange = TRUE;
-        mAnimator->mUniverseBackground = universeBackground;
+        mAnimator->SetUniverseBackground(universeBackground);
     }
 
     Boolean attachedBehindDream = FALSE;
@@ -11428,7 +11427,9 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
             for (Int32 j = 0; j < N; j++) {
                 AutoPtr<IInterface> obj;
                 wtoken->mAllAppWindows->Get(i, (IInterface**)&obj);
-                appAnimator->mAllAppWinAnimators.PushBack(To_WindowState(obj)->mWinAnimator);
+                AutoPtr<IWeakReference> wr;
+                To_WindowState(obj)->mWinAnimator->GetWeakReference((IWeakReference**)&wr);
+                appAnimator->mAllAppWinAnimators.PushBack(wr);
             }
             mAnimator->mAnimating |= appAnimator->ShowAllWindowsLocked();
 
@@ -12952,8 +12953,9 @@ Boolean CWindowManagerService::UpdateFocusedWindowLocked(
 
 AutoPtr<WindowState> CWindowManagerService::ComputeFocusedWindowLocked()
 {
-    if (mAnimator->mUniverseBackground != NULL) {
-        AutoPtr<WindowState> windowState = mAnimator->mUniverseBackground->GetWindowState();
+    AutoPtr<WindowStateAnimator> animator = mAnimator->GetUniverseBackground();
+    if (animator != NULL) {
+        AutoPtr<WindowState> windowState = animator->GetWindowState();
         if (windowState != NULL && windowState->CanReceiveKeys()) {
             return windowState;
         }

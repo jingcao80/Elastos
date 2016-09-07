@@ -632,15 +632,13 @@ private:
 
     class InnerContentObserver
         : public ContentObserver
-        , public Handler
     {
     public:
         TO_STRING_IMPL("ContentViewCore::InnerContentObserver").
 
-        InnerContentObserver(
-            /* [in] */ ContentViewCore* owner);
-
-        CAR_INTERFACE_DECL()
+        CARAPI constructor(
+            /* [in] */ ContentViewCore* owner,
+            /* [in] */ IHandler* handler);
 
         CARAPI OnChange(
             /* [in] */ Boolean selfChange,

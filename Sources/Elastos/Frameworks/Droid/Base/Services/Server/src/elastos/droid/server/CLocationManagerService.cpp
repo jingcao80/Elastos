@@ -888,8 +888,8 @@ ECode CLocationManagerService::SystemRunning()
 
         // prepare mLocationHandler's dependents
         mLocationFudger = new LocationFudger(mContext, mLocationHandler);
-        mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
-        mBlacklist->Init();
+        mBlacklist = new LocationBlacklist();
+        mBlacklist->constructor(mContext, mLocationHandler);
         mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
 
         // Monitor for app ops mode changes.

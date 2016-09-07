@@ -254,7 +254,8 @@ const Int32 BackStackRecord::OP_DETACH = 6;
 const Int32 BackStackRecord::OP_ATTACH = 7;
 
 BackStackRecord::BackStackRecord()
-    : mNumOp(0)
+    : mManager(NULL)
+    , mNumOp(0)
     , mEnterAnim(0)
     , mExitAnim(0)
     , mPopEnterAnim(0)
@@ -506,7 +507,7 @@ ECode BackStackRecord::DoAddOp(
     /* [in] */ const String& tag,
     /* [in] */ Int32 opcmd)
 {
-    fragment->SetFragmentManager(mManager.Get());
+    fragment->SetFragmentManager(mManager);
 
     if (!tag.IsNull()) {
         String memTag;
@@ -902,6 +903,8 @@ ECode BackStackRecord::Run()
             case OP_REPLACE: {
                 AutoPtr<IFragment> f = op->mFragment;
                 if (mManager->mAdded != NULL) {
+                    Logger::I(TAG, " >> mManager: %, mAdded: %p", mManager, mManager->mAdded.Get());
+                    Logger::I(TAG, " >> mAdded: %s", TO_CSTR(mManager->mAdded));
                     Int32 N;
                     mManager->mAdded->GetSize(&N);
                     for (Int32 i = 0; i < N; i++) {
@@ -921,6 +924,7 @@ ECode BackStackRecord::Run()
                                     CArrayList::New((IArrayList**)&op->mRemoved);
                                 }
                                 op->mRemoved->Add(old);
+                                Logger::I(TAG, " >> op: %p, mRemoved: %p, %s", op.Get(), op->mRemoved.Get(), TO_CSTR(op->mRemoved));
                                 old->SetNextAnim(op->mExitAnim);
                                 if (mAddToBackStack) {
                                     Int32 oldNesting;
@@ -1115,6 +1119,9 @@ ECode BackStackRecord::CalculateBackFragments(
 
             case OP_REPLACE:
                 if (op->mRemoved != NULL) {
+                    Logger::I(TAG, " >> op: %p, mRemoved: %p", op.Get(), op->mRemoved.Get());
+                    Logger::I(TAG, " >> mRemoved: %s", TO_CSTR(op->mRemoved));
+
                     Int32 size;
                     op->mRemoved->GetSize(&size);
                     for (Int32 i = size - 1; i >= 0; i--) {

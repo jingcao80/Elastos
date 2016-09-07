@@ -30,7 +30,9 @@ public:
 
     TO_STRING_IMPL("GlobalSetting")
 
-    GlobalSetting(
+    GlobalSetting();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler,
         /* [in] */ const String& settingName);

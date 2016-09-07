@@ -25,7 +25,7 @@ private:
     class Setting: public GlobalSetting
     {
     public:
-        Setting(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
             /* [in] */ const String& settingName,
@@ -86,7 +86,7 @@ private:
         /* [in] */ Boolean enabled);
 
 private:
-    AutoPtr<GlobalSetting> mSetting;
+    AutoPtr<Setting> mSetting;
 
     Boolean mListening;
     AutoPtr<IBroadcastReceiver> mReceiver;

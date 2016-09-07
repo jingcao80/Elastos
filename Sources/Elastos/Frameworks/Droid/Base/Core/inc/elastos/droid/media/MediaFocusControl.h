@@ -56,6 +56,8 @@ private:
         NotificationListenerObserver(
             /* [in] */ MediaFocusControl* host);
 
+        CARAPI constructor();
+
         CARAPI OnChange(
             /* [in] */ Boolean selfChange,
             /* [in] */ IUri* uri);
@@ -184,17 +186,11 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     MediaFocusControl();
 
-    MediaFocusControl(
-        /* [in] */ ILooper* looper,
-        /* [in] */ IContext* cntxt,
-        /* [in] */ IAudioServiceVolumeController* volumeCtrl,
-        /* [in] */ IAudioService* as);
-
     virtual ~MediaFocusControl();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ ILooper* looper,
@@ -740,7 +736,7 @@ private:
 
     AutoPtr<IPowerManagerWakeLock> mMediaEventWakeLock;
     AutoPtr<MediaEventHandler> mEventHandler;
-    AutoPtr<IContext> mContext;
+    IContext* mContext;
     AutoPtr<IContentResolver> mContentResolver;
     AutoPtr<IAudioServiceVolumeController> mVolumeController;
     AutoPtr<IAppOpsManager> mAppOps;

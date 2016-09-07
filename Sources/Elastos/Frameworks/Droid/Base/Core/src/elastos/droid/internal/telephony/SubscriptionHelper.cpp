@@ -59,7 +59,6 @@ namespace Telephony {
 //==============================================================
 
 SubscriptionHelper::MyContentObserver::MyContentObserver(
-    /* [in] */ IHandler* hdl,
     /* [in] */ SubscriptionHelper* host)
     : mHost(host)
 {
@@ -138,7 +137,8 @@ ECode SubscriptionHelper::constructor(
 {
     AutoPtr<IHandler> h;
     CHandler::New((IHandler**)&h);
-    mNwModeObserver = new MyContentObserver(h, this);
+    mNwModeObserver = new MyContentObserver(this);
+    mNwModeObserver->constructor(h);
 
     mContext = c;
     mCi = ci;

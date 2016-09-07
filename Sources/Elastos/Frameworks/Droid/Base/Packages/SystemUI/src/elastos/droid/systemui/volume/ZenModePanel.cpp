@@ -875,7 +875,6 @@ void ZenModePanel::UpdateWidgets()
     const Boolean zenImportant = zen == ISettingsGlobal::ZEN_MODE_IMPORTANT_INTERRUPTIONS;
     const Boolean zenNone = zen == ISettingsGlobal::ZEN_MODE_NO_INTERRUPTIONS;
     const Boolean expanded = !mHidden && mExpanded;
-    Logger::I(TAG, " >> ZenModePanel expanded: %d", expanded);
 
     mZenButtons->SetVisibility(mHidden ? GONE : VISIBLE);
     mZenSubhead->SetVisibility(!mHidden && !zenOff ? VISIBLE : GONE);
@@ -948,7 +947,6 @@ void ZenModePanel::HandleUpdateConditions()
     // countdown
     AutoPtr<IView> v2;
     zenConditions->GetChildAt(TIME_CONDITION_INDEX, (IView**)&v2);
-    Logger::D(TAG, " >> Bind: %s, contentView:%s", TO_CSTR(mTimeCondition), TO_CSTR(v2));
     Bind(mTimeCondition, v2);
     // provider conditions
     Boolean foundDowntime = FALSE;

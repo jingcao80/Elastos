@@ -822,10 +822,12 @@ ECode ContentViewCore::DeferredHandleFadeInRunnable::Run()
 //             ContentViewCore::InnerContentObserver
 //===============================================================
 
-ContentViewCore::InnerContentObserver::InnerContentObserver(
-    /* [in] */ ContentViewCore* owner)
-    : mOwner(owner)
+ECode ContentViewCore::InnerContentObserver::constructor(
+    /* [in] */ ContentViewCore* owner,
+    /* [in] */ IHandler* handler)
 {
+    mOwner = owner;
+    return ContentObserver::constructor(handler);
 }
 
 ECode ContentViewCore::InnerContentObserver::OnChange(
@@ -3851,8 +3853,8 @@ Boolean ContentViewCore::IsDeviceAccessibilityScriptInjectionEnabled()
         if (mAccessibilityScriptInjectionObserver == NULL) {
             AutoPtr<IHandler> handle;
             CHandler::New((IHandler**)&handle);
-            AutoPtr<ContentObserver> _contentObserver = new InnerContentObserver(this);
-            _contentObserver->constructor(handle);
+            AutoPtr<ContentObserver> _contentObserver = new InnerContentObserver();
+            _contentObserver->(this, handle);
             AutoPtr<IContentObserver> contentObserver = _contentObserver;
             AutoPtr<IUri> uri;
             settingsSecure->GetUriFor(accessibilityScriptInjection, (IUri**)&uri);

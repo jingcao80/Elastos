@@ -42,7 +42,7 @@ private:
     public:
         TO_STRING_IMPL("LocationFudger::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ LocationFudger* host);
 
@@ -51,7 +51,6 @@ private:
             /* [in] */ Boolean selfChange);
 
     private:
-        AutoPtr<IHandler> mHandler;
         LocationFudger* mHost;
     };
 
@@ -221,7 +220,7 @@ public:
     /**
      * Used to monitor coarse accuracy secure setting for changes.
      */
-    AutoPtr<IContentObserver> mSettingsObserver;
+    AutoPtr<SettingsObserver> mSettingsObserver;
 
     /**
      * Used to resolve coarse accuracy setting.

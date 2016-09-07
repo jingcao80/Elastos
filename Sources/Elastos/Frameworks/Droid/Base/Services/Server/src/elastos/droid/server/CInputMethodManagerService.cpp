@@ -1120,7 +1120,6 @@ ECode CInputMethodManagerService::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IIWindowManager* windowManager)
 {
-    Slogger::I(TAG, " >>>> constructor");
     mVisibleConnection =  new VisibleServiceConnection();
     CArrayList::New((IArrayList**)&mMethodList);
     CHashMap::New((IHashMap**)&mShortcutInputMethodsAndSubtypes);
@@ -1254,7 +1253,6 @@ ECode CInputMethodManagerService::constructor(
     AutoPtr<CheckReceiver> checkReceiver = new CheckReceiver();
     checkReceiver->constructor(this);
 
-    Slogger::I(TAG, " <<<< constructor");
     stickyIntent = NULL;
     return mContext->RegisterReceiver(checkReceiver.Get(), filter, (IIntent**)&stickyIntent);
 }

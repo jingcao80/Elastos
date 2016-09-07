@@ -350,10 +350,11 @@ ECode AudioManagerElastos::BluetoothScoIntentBroadcastReceiver::OnReceive(
 //           AudioManagerElastos::InnerContentObserver
 //===============================================================
 
-AudioManagerElastos::InnerContentObserver::InnerContentObserver(
+ECode AudioManagerElastos::InnerContentObserver::constructor(
     /* [in] */ AudioManagerElastos* owner)
-    : mOwner(owner)
 {
+    mOwner = owner;
+    return ContentObserver::constructor();
 }
 
 ECode AudioManagerElastos::InnerContentObserver::OnChange(
@@ -1378,7 +1379,8 @@ void AudioManagerElastos::StartObservingVolumeChanges()
     AutoPtr<IThread> thread = IThread::Probe(mSettingsObserverThread);
     thread->Start();
 
-    mSettingsObserver = new InnerContentObserver(this);
+    mSettingsObserver = new InnerContentObserver();
+    mSettingsObserver->constructor(this);
 
     AutoPtr<IUri> uri;
     AutoPtr<ISettingsSystem> settingsSystem;

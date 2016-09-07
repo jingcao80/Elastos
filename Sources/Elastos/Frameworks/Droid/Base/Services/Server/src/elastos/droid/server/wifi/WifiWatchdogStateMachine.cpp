@@ -871,6 +871,16 @@ Int32 WifiWatchdogStateMachine::BssidStatistics::FindRssiTarget(
 // WifiWatchdogStateMachine::LocalContentObserver
 //==============================================================
 
+ECode WifiWatchdogStateMachine::LocalContentObserver::constructor(
+    /* [in] */ IHandler* handler,
+    /* [in] */ Int32 msg,
+    /* [in] */ WifiWatchdogStateMachine* owner)
+{
+    mOwner = owner;
+    mMsg = msg;
+    return ContentObserver::constructor(handler);
+}
+
 ECode WifiWatchdogStateMachine::LocalContentObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
@@ -1030,7 +1040,8 @@ void WifiWatchdogStateMachine::RegisterForWatchdogToggle()
 {
     AutoPtr<IHandler> h;
     GetHandler((IHandler**)&h);
-    AutoPtr<IContentObserver> contentObserver = new LocalContentObserver(h, EVENT_WATCHDOG_TOGGLED, this);
+    AutoPtr<LocalContentObserver> contentObserver = new LocalContentObserver();
+    contentObserver->constructor(h, EVENT_WATCHDOG_TOGGLED, this);
 
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
@@ -1045,7 +1056,8 @@ void WifiWatchdogStateMachine::RegisterForSettingsChanges()
 {
     AutoPtr<IHandler> h;
     GetHandler((IHandler**)&h);
-    AutoPtr<IContentObserver> contentObserver = new LocalContentObserver(h, EVENT_WATCHDOG_SETTINGS_CHANGE, this);
+    AutoPtr<LocalContentObserver> contentObserver = new LocalContentObserver();
+    contentObserver->constructor(h, EVENT_WATCHDOG_SETTINGS_CHANGE, this);
 
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);

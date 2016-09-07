@@ -71,7 +71,7 @@ private:
     public:
         TO_STRING_IMPL("NetworkTimeUpdateService::SettingsObserver")
 
-        SettingsObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ Int32 msg,
             /* [in] */ NetworkTimeUpdateService* owner);

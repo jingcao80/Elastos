@@ -89,14 +89,17 @@ ECode ZenModeControllerImpl::Receiver::OnReceive(
 //==========================================================================
 // ZenModeControllerImpl::SetupObserver
 //==========================================================================
-ZenModeControllerImpl::SetupObserver::SetupObserver(
+ZenModeControllerImpl::SetupObserver::SetupObserver()
+    : mRegistered(FALSE)
+{}
+
+ECode ZenModeControllerImpl::SetupObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ ZenModeControllerImpl* host)
-    : mRegistered(FALSE)
-    , mHost(host)
 {
+    mHost = host;
     ContentObserver::constructor(handler);
-    mHost->mContext->GetContentResolver((IContentResolver**)&mResolver);
+    return mHost->mContext->GetContentResolver((IContentResolver**)&mResolver);
 }
 
 ECode ZenModeControllerImpl::SetupObserver::IsUserSetup(
@@ -175,14 +178,15 @@ ECode ZenModeControllerImpl::SetupObserver::OnChange(
 //==========================================================================
 // ZenModeControllerImpl::ModeSetting
 //==========================================================================
-ZenModeControllerImpl::ModeSetting::ModeSetting(
+ECode ZenModeControllerImpl::ModeSetting::constructor(
     /* [in] */ ZenModeControllerImpl* host,
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ const String& tag)
-    : GlobalSetting(context, handler, tag)
-    , mHost(host)
-{}
+{
+    mHost = host;
+    return GlobalSetting::constructor(context, handler, tag);
+}
 
 ECode ZenModeControllerImpl::ModeSetting::HandleValueChanged(
     /* [in] */ Int32 value)
@@ -191,14 +195,15 @@ ECode ZenModeControllerImpl::ModeSetting::HandleValueChanged(
     return NOERROR;
 }
 
-ZenModeControllerImpl::ConfigSetting::ConfigSetting(
+ECode ZenModeControllerImpl::ConfigSetting::constructor(
     /* [in] */ ZenModeControllerImpl* host,
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ const String& tag)
-    : GlobalSetting(context, handler, tag)
-    , mHost(host)
-{}
+{
+    mHost = host;
+    return GlobalSetting::constructor(context, handler, tag);
+}
 
 ECode ZenModeControllerImpl::ConfigSetting::HandleValueChanged(
     /* [in] */ Int32 value)
@@ -230,13 +235,13 @@ ECode ZenModeControllerImpl::constructor(
     CArrayList::New((IArrayList**)&mCallbacks);
     CLinkedHashMap::New((ILinkedHashMap**)&mConditions);
 
-    AutoPtr<ModeSetting> ms = new ModeSetting(
-        this, mContext, handler, ISettingsGlobal::ZEN_MODE);
+    AutoPtr<ModeSetting> ms = new ModeSetting();
+    ms->constructor(this, mContext, handler, ISettingsGlobal::ZEN_MODE);
     ms->SetListening(TRUE);
     mModeSetting = ms.Get();
 
-    AutoPtr<ConfigSetting> cs = new ConfigSetting(
-        this, mContext, handler, ISettingsGlobal::ZEN_MODE_CONFIG_ETAG);
+    AutoPtr<ConfigSetting> cs = new ConfigSetting();
+    cs->constructor(this, mContext, handler, ISettingsGlobal::ZEN_MODE_CONFIG_ETAG);
     cs->SetListening(TRUE);
     mConfigSetting = cs.Get();
 
@@ -247,7 +252,8 @@ ECode ZenModeControllerImpl::constructor(
     context->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
     mAlarmManager = IAlarmManager::Probe(obj);
 
-    mSetupObserver = new SetupObserver(handler, this);
+    mSetupObserver = new SetupObserver();
+    mSetupObserver->constructor(handler, this);
     mSetupObserver->Register();
     return NOERROR;
 }

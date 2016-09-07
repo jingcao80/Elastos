@@ -186,7 +186,6 @@ ECode CVibratorService::Vibration::ToString(
 // CVibratorService::SettingsObserver
 //====================================================================
 CVibratorService::SettingsObserver::SettingsObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ CVibratorService* owner)
     : mHost(owner)
 {}
@@ -433,8 +432,8 @@ ECode CVibratorService::SystemReady()
     mContext->GetSystemService(IContext::INPUT_SERVICE, (IInterface**)&obj);
     mIm = IInputManager::Probe(obj);
 
-    mSettingObserver = new SettingsObserver(mH, this);
-    mSettingObserver->constructor(NULL);
+    mSettingObserver = new SettingsObserver(this);
+    mSettingObserver->constructor(mH);
 
     mPowerManagerInternal = IPowerManagerInternal::Probe(LocalServices::GetService(EIID_IPowerManagerInternal));
     AutoPtr<ILowPowerModeListener> listener = (LowPowerModeListener*)new LowPowerModeListener(this);

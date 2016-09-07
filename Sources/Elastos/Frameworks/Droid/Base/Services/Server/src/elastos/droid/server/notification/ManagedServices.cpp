@@ -295,15 +295,15 @@ Boolean ManagedServices::UserProfiles::IsCurrentProfile(
 //                  ManagedServices::SettingsObserver
 //===============================================================================
 
-ManagedServices::SettingsObserver::SettingsObserver(
+ECode ManagedServices::SettingsObserver::constructor(
     /* [in] */ ManagedServices* host,
     /* [in] */ IHandler* handler)
-    : mHost(host)
 {
+    mHost = host;
     ContentObserver::constructor(handler);
     AutoPtr<ISettingsSecure> secure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure);
-    secure->GetUriFor(mHost->mConfig->mSecureSettingName,
+    return secure->GetUriFor(mHost->mConfig->mSecureSettingName,
             (IUri**)&mSecureSettingsUri);
 }
 
@@ -426,7 +426,8 @@ ECode ManagedServices::constructor(
     mMutex = (Object*)IObject::Probe(mutex);
     mUserProfiles = userProfiles;
     mConfig = GetConfig();
-    mSettingsObserver = new SettingsObserver(this, handler);
+    mSettingsObserver = new SettingsObserver();
+    mSettingsObserver->constructor(this, handler);
     CArrayList::New((IArrayList**)&mServices);
     CArrayList::New((IArrayList**)&mServicesBinding);
     CArraySet::New((IArraySet**)&mEnabledServicesForCurrentProfiles);

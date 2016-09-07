@@ -64,7 +64,6 @@ ECode ReceiverList::GetHashCode(
 
 ECode ReceiverList::ProxyDied()
 {
-    Slogger::W("ReceiverList", " >> %p ProxyDied()", this);
     mLinkedToDeath = FALSE;
     return mOwner->UnregisterReceiver(mReceiver);
 }

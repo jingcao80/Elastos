@@ -156,10 +156,14 @@ private:
     class ECO_LOCAL SettingsObserver : public ContentObserver
     {
     public:
+        TO_STRING_IMPL("SMSDispatcher::SettingsObserver")
+
         SettingsObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ IAtomicInteger32* premiumSmsRule,
             /* [in] */ IContext* context);
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler);
 
         CARAPI OnChange(
             /* [in] */ Boolean selfChange);
