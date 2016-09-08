@@ -40,7 +40,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <!--<Elastos.Droid.Contacts.Common.List.CViewPagerTabs
+            <Elastos.Droid.Contacts.Common.List.CViewPagerTabs
                 android:id="@+id/lists_pager_header"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/tab_height"
@@ -48,7 +48,7 @@
                 android:orientation="horizontal"
                 android:layout_gravity="top"
                 android:elevation="@dimen/tab_elevation"
-                style="@style/DialtactsActionBarTabTextStyle" />-->
+                style="@style/DialtactsActionBarTabTextStyle" />
 
             <Elastos.Droid.Support.V4.View.CViewPager
                 android:id="@+id/lists_pager"

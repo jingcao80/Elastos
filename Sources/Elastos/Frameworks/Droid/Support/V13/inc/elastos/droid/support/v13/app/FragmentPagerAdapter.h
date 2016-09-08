@@ -64,8 +64,9 @@ public:
     /**
      * Return the Fragment associated with a specified position.
      */
-    virtual CARAPI_(AutoPtr<IFragment>) GetItem(
-        /* [in] */ Int32 position) = 0;
+    virtual CARAPI GetItem(
+        /* [in] */ Int32 position,
+        /* [out] */ IFragment** item) = 0;
 
     // @Override
     CARAPI StartUpdate(
@@ -94,7 +95,7 @@ public:
         /* [in] */ IViewGroup* container);
 
     // @Override
-    CARAPI isViewFromObject(
+    CARAPI IsViewFromObject(
         /* [in] */ IView* view,
         /* [in] */ IInterface* object,
         /* [out] */ Boolean* result);

@@ -14,6 +14,8 @@
 #include "elastos/droid/dialer/dialpad/CDialpadFragment.h"
 #include "elastos/droid/dialer/list/CListsFragment.h"
 #include "elastos/droid/dialer/list/DragDropController.h"
+#include "elastos/droid/dialer/list/RegularSearchFragment.h"
+#include "elastos/droid/dialer/list/SmartDialSearchFragment.h"
 #include "elastos/droid/dialer/widget/ActionBarController.h"
 #include "elastos/droid/phone/common/animation/AnimationListenerAdapter.h"
 #include <elastos/droid/widget/PopupMenu.h>
@@ -60,8 +62,8 @@ using Elastos::Droid::Dialer::List::ISpeedDialFragmentHostInterface;
 using Elastos::Droid::Dialer::List::ISearchFragmentHostInterface;
 using Elastos::Droid::Dialer::List::IOnDragDropListener;
 using Elastos::Droid::Dialer::List::IPhoneFavoriteSquareTileView;
-// using Elastos::Droid::Dialer::List::IRegularSearchFragment;
-// using Elastos::Droid::Dialer::List::ISmartDialSearchFragment;
+using Elastos::Droid::Dialer::List::RegularSearchFragment;
+using Elastos::Droid::Dialer::List::SmartDialSearchFragment;
 using Elastos::Droid::Dialer::Widget::ActionBarController;
 using Elastos::Droid::Dialer::Widget::IActionBarControllerActivityUi;
 using Elastos::Droid::Dialer::Widget::IOnBackButtonClickedListener;
@@ -603,12 +605,12 @@ private:
     /**
      * Fragment for searching phone numbers using the alphanumeric keyboard.
      */
-    // AutoPtr<CRegularSearchFragment> mRegularSearchFragment;
+    AutoPtr<RegularSearchFragment> mRegularSearchFragment;
 
     /**
      * Fragment for searching phone numbers using the dialpad.
      */
-    // AutoPtr<CSmartDialSearchFragment> mSmartDialSearchFragment;
+    AutoPtr<SmartDialSearchFragment> mSmartDialSearchFragment;
 
     /**
      * Animation that slides in.

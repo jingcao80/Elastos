@@ -56,6 +56,7 @@ const String ActionBarController::KEY_IS_EXPANDED("key_actionbar_is_expanded");
 ActionBarController::ActionBarController(
     /* [in] */ IActionBarControllerActivityUi* activityUi,
     /* [in] */ CSearchEditTextLayout* searchBox)
+    : mIsActionBarSlidUp(FALSE)
 {
     mActivityUi = activityUi;
     mSearchBox = searchBox;
@@ -205,7 +206,7 @@ void ActionBarController::SetHideOffset(
     mIsActionBarSlidUp = offset >= height;
     AutoPtr<IActionBar> actionBar;
     mActivityUi->GetActionBar((IActionBar**)&actionBar);
-    actionBar->SetHideOffset(offset);
+    ECode ec = actionBar->SetHideOffset(offset);
 }
 
 Int32 ActionBarController::GetHideOffset()
@@ -261,6 +262,7 @@ void ActionBarController::RestoreInstanceState(
 
 void ActionBarController::RestoreActionBarOffset()
 {
+    Logger::E("ActionBarController", "mIsActionBarSlidUp : %d", mIsActionBarSlidUp);
     SlideActionBar(mIsActionBarSlidUp /* slideUp */, FALSE /* animate */);
 }
 

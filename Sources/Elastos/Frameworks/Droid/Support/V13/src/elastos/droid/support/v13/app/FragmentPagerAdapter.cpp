@@ -13,7 +13,7 @@ namespace V13 {
 namespace App {
 
 const String FragmentPagerAdapter::TAG("FragmentPagerAdapter");
-const Boolean FragmentPagerAdapter::DEBUG = FALSE;
+const Boolean FragmentPagerAdapter::DEBUG = TRUE;
 
 ECode FragmentPagerAdapter::StartUpdate(
     /* [in] */ IViewGroup* container)
@@ -45,7 +45,7 @@ ECode FragmentPagerAdapter::InstantiateItem(
         mCurTransaction->Attach(fragment);
     }
     else {
-        fragment = GetItem(position);
+        GetItem(position, (IFragment**)&fragment);
         if (DEBUG) Logger::V(TAG, "Adding item #%d: f=%s", itemId, TO_CSTR(fragment));
         IView::Probe(container)->GetId(&viewId);
         mCurTransaction->Add(viewId, fragment,
@@ -119,7 +119,7 @@ ECode FragmentPagerAdapter::FinishUpdate(
 }
 
 // @Override
-ECode FragmentPagerAdapter::isViewFromObject(
+ECode FragmentPagerAdapter::IsViewFromObject(
     /* [in] */ IView* view,
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* result)

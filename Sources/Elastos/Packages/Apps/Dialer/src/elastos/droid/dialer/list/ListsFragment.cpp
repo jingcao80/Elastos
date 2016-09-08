@@ -7,8 +7,8 @@
 // #include "elastos/droid/dialer/calllog/CCallLogFragment.h"
 // #include "elastos/droid/dialer/calllog/CContactInfoHelper.h"
 // #include "elastos/droid/dialer/calllog/CCallLogQueryHandler.h"
-// #include "elastos/droid/dialer/util/DialerUtils.h"
-// #include "elastos/droid/dialerbind/CObjectFactory.h"
+#include "elastos/droid/dialer/util/DialerUtils.h"
+#include "elastos/droid/dialerbind/ObjectFactory.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -21,22 +21,21 @@ using Elastos::Droid::Content::ISharedPreferencesEditor;
 // using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::Widget::IAdapterView;
-using Elastos::Core::CoreUtils;
-// using Elastos::Core::ISystem;
-// using Elastos::Core::CSystem;
-using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Logger;
-// using Elastos::Apps::Dialer::CallLog::ICallLogQuery;
-// using Elastos::Apps::Dialer::CallLog::CCallLogFragment;
-// using Elastos::Apps::Dialer::CallLog::CCallLogQueryHandler;
-// using Elastos::Apps::Dialer::Util::DialerUtils;
-// using Elastos::Apps::Dialer::IDialtactsActivity;
-// using Elastos::Apps::DialerBind::IObjectFactory;
-// using Elastos::Apps::DialerBind::CObjectFactory;
+// using Elastos::Droid::Dialer::CallLog::ICallLogQuery;
+// using Elastos::Droid::Dialer::CallLog::CCallLogFragment;
+// using Elastos::Droid::Dialer::CallLog::CCallLogQueryHandler;
+using Elastos::Droid::Dialer::Util::DialerUtils;
+// using Elastos::Droid::Dialer::IDialtactsActivity;
+using Elastos::Droid::DialerBind::ObjectFactory;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogAdapterCallFetcher;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogQueryHandlerListener;
 using Elastos::Droid::Dialer::Widget::EIID_IPanelSlideCallbacks;
 using Elastos::Droid::Support::V4::View::IViewPager;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -61,41 +60,47 @@ Int64 ListsFragment::ViewPagerAdapter::GetItemId(
     return id;
 }
 
-AutoPtr<IFragment> ListsFragment::ViewPagerAdapter::GetItem(
-    /* [in] */ Int32 position)
+ECode ListsFragment::ViewPagerAdapter::GetItem(
+    /* [in] */ Int32 position,
+    /* [out] */ IFragment** item)
 {
-    assert(0 && "TODO");
-    // Int32 rtl;
-    // mHost->GetRtlPosition(position, &rtl);
-    // switch (rtl) {
-    //     case TAB_INDEX_SPEED_DIAL:
-    //         CSpeedDialFragment::New((ISpeedDialFragment**)&(mHost->mSpeedDialFragment));
-    //         *item = IFragment::Probe(mHost->mSpeedDialFragment);
-    //         REFCOUNT_ADD(*item);
-    //         return NOERROR;
-    //     case TAB_INDEX_RECENTS:
-    //     {
-    //         AutoPtr<ISystem> sys;
-    //         CSystem::AcquireSingleton((ISystem**)&sys);
-    //         Int64 value;
-    //         sys->GetCurrentTimeMillis(&value);
-    //         CCallLogFragment::New(ICallLogQueryHandler::CALL_TYPE_ALL, MAX_RECENTS_ENTRIES,
-    //                 value - OLDEST_RECENTS_DATE, (ICallLogFragment**)&(mHost->mRecentsFragment));
-    //         mHost->mRecentsFragment->SetHasFooterView(TRUE);
-    //         *item = IFragment::Probe(mHost->mRecentsFragment);
-    //         REFCOUNT_ADD(*item);
-    //         return NOERROR;
-    //     }
-    //     case TAB_INDEX_ALL_CONTACTS:
-    //         CAllContactsFragment::New((IAllContactsFragment**)&(mHost->mAllContactsFragment));
-    //         *item = IFragment::Probe(mHost->mAllContactsFragment);
-    //         REFCOUNT_ADD(*item);
-    //         return NOERROR;
-    // }
-    // // throw new IllegalStateException("No fragment at position " + position);
-    // Logger::E(ListsFragment::TAG, "No fragment at position %d", position);
-    // return E_ILLEGAL_STATE_EXCEPTION;
-    return NULL;
+    VALIDATE_NOT_NULL(item)
+    *item = NULL;
+
+    Int32 rtl;
+    mHost->GetRtlPosition(position, &rtl);
+    switch (rtl) {
+        case TAB_INDEX_SPEED_DIAL:
+            // assert(0);
+            // TODO
+            // CSpeedDialFragment::New((ISpeedDialFragment**)&(mHost->mSpeedDialFragment));
+            *item = IFragment::Probe(mHost->mSpeedDialFragment);
+            REFCOUNT_ADD(*item);
+            return NOERROR;
+        case TAB_INDEX_RECENTS:
+        {
+            AutoPtr<ISystem> sys;
+            CSystem::AcquireSingleton((ISystem**)&sys);
+            Int64 value;
+            sys->GetCurrentTimeMillis(&value);
+            assert(0);
+            // CCallLogFragment::New(ICallLogQueryHandler::CALL_TYPE_ALL, MAX_RECENTS_ENTRIES,
+            //         value - OLDEST_RECENTS_DATE, (ICallLogFragment**)&(mHost->mRecentsFragment));
+            mHost->mRecentsFragment->SetHasFooterView(TRUE);
+            *item = IFragment::Probe(mHost->mRecentsFragment);
+            REFCOUNT_ADD(*item);
+            return NOERROR;
+        }
+        case TAB_INDEX_ALL_CONTACTS:
+            assert(0);
+            // CAllContactsFragment::New((IAllContactsFragment**)&(mHost->mAllContactsFragment));
+            *item = IFragment::Probe(mHost->mAllContactsFragment);
+            REFCOUNT_ADD(*item);
+            return NOERROR;
+    }
+    // throw new IllegalStateException("No fragment at position " + position);
+    Logger::E(ListsFragment::TAG, "No fragment at position %d", position);
+    return E_ILLEGAL_STATE_EXCEPTION;
 }
 
 ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
@@ -103,13 +108,13 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
     /* [in] */ Int32 position,
     /* [out] */ IInterface** item)
 {
-    VALIDATE_NOT_NULL(item);
-
-    // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
-    // Copy the fragments that the FragmentManager finds so that we can store them in
-    // instance variables for later.
-    AutoPtr<IInterface> fragment;
-    assert(0 && "TODO");
+    VALIDATE_NOT_NULL(item)
+    *item = NULL;
+// TODO
+    // // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
+    // // Copy the fragments that the FragmentManager finds so that we can store them in
+    // // instance variables for later.
+    // AutoPtr<IInterface> fragment;
     // FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
     // if (ISpeedDialFragment::Probe(fragment) != NULL) {
     //     mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
@@ -120,8 +125,8 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
     // else if (IAllContactsFragment::Probe(fragment) != NULL) {
     //     mHost->mAllContactsFragment = IAllContactsFragment::Probe(fragment);
     // }
-    *item = fragment;
-    REFCOUNT_ADD(*item);
+    // *item = fragment;
+    // REFCOUNT_ADD(*item);
     return NOERROR;
 }
 
@@ -313,8 +318,6 @@ ECode ListsFragment::OnCreate(
     // String currentCountryIso;
     // currentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
 
-    // AutoPtr<IObjectFactory> factory;
-    // CObjectFactory::AcquireSingleton((IObjectFactory**)&factory);
     // AutoPtr<IContactInfoHelper> helper;
     // CContactInfoHelper::New(IContext::Probe(activity),
     //         currentCountryIso, (IContactInfoHelper**)&helper);
@@ -379,16 +382,15 @@ ECode ListsFragment::OnCreateView(
     parentView->FindViewById(R::id::lists_pager, (IView**)&temp);
     mViewPager = (CViewPager*)IViewPager::Probe(temp);
 
-    // TODO:
-    // AutoPtr<IFragmentManager> manager;
-    // GetChildFragmentManager((IFragmentManager**)&manager);
-    // CViewPagerAdapter::New(manager, (IViewPagerAdapter**)&mViewPagerAdapter);
-    // mViewPager->SetAdapter(mViewPagerAdapter);
-    // mViewPager->SetOffscreenPageLimit(2);
-    // mViewPager->SetOnPageChangeListener(this);
-    // Int32 rtl;
-    // GetRtlPosition(TAB_INDEX_SPEED_DIAL, &rtl);
-    // mViewPager->SetCurrentItem(rtl);
+    AutoPtr<IFragmentManager> manager;
+    GetChildFragmentManager((IFragmentManager**)&manager);
+    mViewPagerAdapter = new ViewPagerAdapter(manager, this);
+    mViewPager->SetAdapter(mViewPagerAdapter);
+    mViewPager->SetOffscreenPageLimit(2);
+    mViewPager->SetOnPageChangeListener(this);
+    Int32 rtl;
+    GetRtlPosition(TAB_INDEX_SPEED_DIAL, &rtl);
+    mViewPager->SetCurrentItem(rtl);
 
     mTabTitles = ArrayOf<String>::Alloc(TAB_INDEX_COUNT);
     AutoPtr<IResources> resources;
@@ -402,11 +404,10 @@ ECode ListsFragment::OnCreateView(
     mTabTitles->Set(TAB_INDEX_ALL_CONTACTS, contacts);
 
     temp = NULL;
-    // TODO:
-    // parentView->FindViewById(R::id::lists_pager_header, (IView**)&temp);
-    // mViewPagerTabs = IViewPagerTabs::Probe(temp);
-    // mViewPagerTabs->SetViewPager(mViewPager);
-    // AddOnPageChangeListener(mViewPagerTabs);
+    parentView->FindViewById(R::id::lists_pager_header, (IView**)&temp);
+    mViewPagerTabs = IViewPagerTabs::Probe(temp);
+    mViewPagerTabs->SetViewPager(mViewPager);
+    AddOnPageChangeListener(IViewPagerOnPageChangeListener::Probe(mViewPagerTabs));
 
     temp = NULL;
     parentView->FindViewById(R::id::shortcut_card_list, (IView**)&temp);
@@ -415,10 +416,10 @@ ECode ListsFragment::OnCreateView(
 
     temp = NULL;
     parentView->FindViewById(R::id::remove_view, (IView**)&temp);
-    // mRemoveView = IRemoveView::Probe(temp);
+    mRemoveView = IRemoveView::Probe(temp);
     parentView->FindViewById(R::id::remove_view_content, (IView**)&mRemoveViewContent);
 
-    // SetupPaneLayout(IOverlappingPaneLayout::Probe(parentView));
+    SetupPaneLayout(IOverlappingPaneLayout::Probe(parentView));
 
     *view = parentView;
     REFCOUNT_ADD(*view);
@@ -580,28 +581,28 @@ ECode ListsFragment::IsPaneOpen(
     return NOERROR;
 }
 
-// void ListsFragment::SetupPaneLayout(
-//     /* [in] */ IOverlappingPaneLayout* paneLayout)
-// {
-//     // TODO: Remove the notion of a capturable view. The entire view be slideable, once
-//     // the framework better supports nested scrolling.
-//     assert(0 && "TODO");
-//     // paneLayou->SetCapturableView(mViewPagerTabs);
-//     paneLayout->OpenPane();
-//     paneLayout->SetPanelSlideCallbacks(mPanelSlideCallbacks);
+void ListsFragment::SetupPaneLayout(
+    /* [in] */ IOverlappingPaneLayout* paneLayout)
+{
+    // TODO: Remove the notion of a capturable view. The entire view be slideable, once
+    // the framework better supports nested scrolling.
+    paneLayout->SetCapturableView(IView::Probe(mViewPagerTabs));
+    Boolean result;
+    paneLayout->OpenPane(&result);
+    paneLayout->SetPanelSlideCallbacks(mPanelSlideCallbacks);
 
-//     AutoPtr<IActivity> activity;
-//     GetActivity((IActivity**)&activity);
-//     Int32 height;
-//     IListsFragmentHostInterface::Probe(activity)->GetActionBarHeight(&height);
-//     paneLayout->SetIntermediatePinnedOffset(height);
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    Int32 height;
+    IListsFragmentHostInterface::Probe(activity)->GetActionBarHeight(&height);
+    paneLayout->SetIntermediatePinnedOffset(height);
 
-//     AutoPtr<ILayoutTransition> transition;
-//     paneLayout->GetLayoutTransition((ILayoutTransition**)&transition);
-//     // Turns on animations for all types of layout changes so that they occur for
-//     // height changes.
-//     transition->EnableTransitionType(ILayoutTransition::CHANGING);
-// }
+    AutoPtr<ILayoutTransition> transition;
+    IViewGroup::Probe(paneLayout)->GetLayoutTransition((ILayoutTransition**)&transition);
+    // Turns on animations for all types of layout changes so that they occur for
+    // height changes.
+    transition->EnableTransitionType(ILayoutTransition::CHANGING);
+}
 
 ECode ListsFragment::GetSpeedDialFragment(
     /* [out] */ ISpeedDialFragment** fragment)
@@ -628,11 +629,10 @@ ECode ListsFragment::GetRtlPosition(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // if (DialerUtils::IsRtl()) {
-    //     *result = TAB_INDEX_COUNT - 1 - position;
-    //     return NOERROR;
-    // }
+    if (DialerUtils::IsRtl()) {
+        *result = TAB_INDEX_COUNT - 1 - position;
+        return NOERROR;
+    }
     *result = position;
     return NOERROR;
 }

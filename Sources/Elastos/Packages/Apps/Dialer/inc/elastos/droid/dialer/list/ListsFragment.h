@@ -26,12 +26,13 @@ using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;
+using Elastos::Droid::Contacts::Common::List::IViewPagerTabs;
 // using Elastos::Droid::Dialer::CallLog::ICallLogAdapter;
 using Elastos::Droid::Dialer::CallLog::ICallLogAdapterCallFetcher;
-// using Elastos::Droid::Dialer::CallLog::ICallLogFragment;
+using Elastos::Droid::Dialer::CallLog::ICallLogFragment;
 // using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandler;
 using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandlerListener;
-// using Elastos::Droid::Dialer::Widget::IOverlappingPaneLayout;
+using Elastos::Droid::Dialer::Widget::IOverlappingPaneLayout;
 using Elastos::Droid::Dialer::Widget::IPanelSlideCallbacks;
 using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
 using Elastos::Droid::Support::V4::View::CViewPager;
@@ -72,8 +73,9 @@ public:
             /* [in] */ Int32 position);
 
         // @Override
-        CARAPI_(AutoPtr<IFragment>) GetItem(
-            /* [in] */ Int32 position);
+        CARAPI GetItem(
+            /* [in] */ Int32 position,
+            /* [out] */ IFragment** item);
 
         // @Override
         CARAPI InstantiateItem(
@@ -213,8 +215,8 @@ private:
     CARAPI GetCurrentListView(
         /* [out] */ IAbsListView** listView);
 
-    // CARAPI_(void) SetupPaneLayout(
-    //     /* [in] */ IOverlappingPaneLayout* paneLayout);
+    CARAPI_(void) SetupPaneLayout(
+        /* [in] */ IOverlappingPaneLayout* paneLayout);
 
 private:
     static const Boolean DEBUG;
@@ -228,15 +230,14 @@ private:
 
     AutoPtr<IActionBar> mActionBar;
     AutoPtr<CViewPager> mViewPager;
-    // TODO:
-    // AutoPtr<IViewPagerTabs> mViewPagerTabs;
+    AutoPtr<IViewPagerTabs> mViewPagerTabs;
     AutoPtr<ViewPagerAdapter> mViewPagerAdapter;
     AutoPtr<IListView> mShortcutCardsListView;
-    // AutoPtr<IRemoveView> mRemoveView;
+    AutoPtr<IRemoveView> mRemoveView;
     AutoPtr<IView> mRemoveViewContent;
-    // AutoPtr<ISpeedDialFragment> mSpeedDialFragment;
-    // AutoPtr<ICallLogFragment> mRecentsFragment;
-    // AutoPtr<IAllContactsFragment> mAllContactsFragment;
+    AutoPtr<ISpeedDialFragment> mSpeedDialFragment;
+    AutoPtr<ICallLogFragment> mRecentsFragment;
+    AutoPtr<IAllContactsFragment> mAllContactsFragment;
     AutoPtr<IArrayList> mOnPageChangeListeners;
 
     AutoPtr<ArrayOf<String> > mTabTitles;

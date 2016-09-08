@@ -21,6 +21,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
 
+using Elastos::Droid::Graphics::IColor;
+
 // using Elastos::Droid::App::IActionBar;
 // using Elastos::Droid::App::IFragment;
 using Elastos::Droid::App::IFragmentManager;
@@ -28,6 +30,8 @@ using Elastos::Droid::App::IFragmentTransaction;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 // using Elastos::Droid::Content::Res::IResources;
+// using Elastos::Droid::Dialer::CallLog::ECLSID_CCallLogActivity;
+using Elastos::Droid::Dialer::List::ISpeedDialFragment;
 using Elastos::Droid::Net::IUri;
 // using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Provider::IContactsContractContacts;
@@ -70,6 +74,9 @@ using Elastos::Droid::Dialer::List::EIID_IListsFragmentHostInterface;
 using Elastos::Droid::Dialer::List::EIID_IOnDragDropListener;
 using Elastos::Droid::Dialer::List::EIID_ISearchFragmentHostInterface;
 using Elastos::Droid::Dialer::List::EIID_ISpeedDialFragmentHostInterface;
+using Elastos::Droid::Dialer::List::ISearchFragment;
+using Elastos::Droid::Dialer::List::IRegularSearchFragment;
+using Elastos::Droid::Dialer::List::ISmartDialSearchFragment;
 using Elastos::Droid::Dialer::Widget::ISearchEditTextLayout;
 using Elastos::Droid::Dialer::Widget::CSearchEditTextLayout;
 using Elastos::Droid::Dialer::Widget::EIID_IActionBarControllerActivityUi;
@@ -78,6 +85,8 @@ using Elastos::Droid::Dialer::Util::DialerUtils;
 using Elastos::Droid::DialerBind::DatabaseHelperManager;
 using Elastos::Droid::Contacts::Common::Interactions::TouchPointManager;
 using Elastos::Droid::Contacts::Common::List::EIID_IOnPhoneNumberPickerActionListener;
+using Elastos::Droid::Contacts::Common::List::IContactEntryListFragment;
+using Elastos::Droid::Common::Widget::ICompositeCursorAdapter;
 using Elastos::Droid::Phone::Common::Animation::AnimUtils;
 
 namespace Elastos {
@@ -105,10 +114,11 @@ ECode DialtactsActivity::OptionsPopupMenu::Show()
     GetMenu((IMenu**)&menu);
     AutoPtr<IMenuItem> clearFrequents;
     menu->FindItem(R::id::menu_clear_frequents, (IMenuItem**)&clearFrequents);
-    assert(0 && "TODO");
-    // clearFrequents->SetVisible(mHost->mListsFragment != NULL &&
-    //         mHost->mListsFragment->GetSpeedDialFragment() != NULL &&
-    //         mHost->mListsFragment->GetSpeedDialFragment()->HasFrequents());
+    AutoPtr<ISpeedDialFragment> speedDialFragment;
+    Boolean hasFrequents;
+    clearFrequents->SetVisible(mHost->mListsFragment != NULL &&
+            (mHost->mListsFragment->GetSpeedDialFragment((ISpeedDialFragment**)&speedDialFragment), speedDialFragment != NULL) &&
+            (speedDialFragment->HasFrequents(&hasFrequents), hasFrequents));
     PopupMenu::Show();
     return NOERROR;
 }
@@ -193,16 +203,15 @@ ECode DialtactsActivity::PhoneSearchQueryTextListener::OnTextChanged(
         }
     }
 
-    // TODO:
-    // Boolean visible;
-    // if (mHost->mSmartDialSearchFragment != NULL &&
-    //         mHost->mSmartDialSearchFragment->IsVisible(&visible), visible) {
-    //     mHost->mSmartDialSearchFragment->SetQueryString(mHost->mSearchQuery, FALSE  delaySelection );
-    // }
-    // else if (mHost->mRegularSearchFragment != NULL &&
-    //         mHost->mRegularSearchFragment->IsVisible(&visible), visible) {
-    //     mHost->mRegularSearchFragment->SetQueryString(mHost->mSearchQuery, FALSE /* delaySelection */);
-    // }
+    Boolean visible;
+    if (mHost->mSmartDialSearchFragment != NULL &&
+            (mHost->mSmartDialSearchFragment->IsVisible(&visible), visible)) {
+        mHost->mSmartDialSearchFragment->SetQueryString(mHost->mSearchQuery, FALSE /* delaySelection */);
+    }
+    else if (mHost->mRegularSearchFragment != NULL &&
+            (mHost->mRegularSearchFragment->IsVisible(&visible), visible)) {
+        mHost->mRegularSearchFragment->SetQueryString(mHost->mSearchQuery, FALSE /* delaySelection */);
+    }
     return NOERROR;
 }
 
@@ -607,15 +616,14 @@ ECode DialtactsActivity::OnAttachFragment(
             transaction->Commit(&id);
         }
     }
-    // TODO:
-    // else if (ISmartDialSearchFragment::Probe(fragment) != NULL) {
-    //     mSmartDialSearchFragment = ISmartDialSearchFragment::Probe(fragment);
-    //     mSmartDialSearchFragment->SetOnPhoneNumberPickerActionListener(this);
-    // }
-    // else if (ISearchFragment::Probe(fragment) != NULL) {
-    //     mRegularSearchFragment = IRegularSearchFragment::Probe(fragment);
-    //     mRegularSearchFragment->SetOnPhoneNumberPickerActionListener(this);
-    // }
+    else if (ISmartDialSearchFragment::Probe(fragment) != NULL) {
+        mSmartDialSearchFragment = (SmartDialSearchFragment*)ISmartDialSearchFragment::Probe(fragment);
+        mSmartDialSearchFragment->SetOnPhoneNumberPickerActionListener(this);
+    }
+    else if (ISearchFragment::Probe(fragment) != NULL) {
+        mRegularSearchFragment = (RegularSearchFragment*)IRegularSearchFragment::Probe(fragment);
+        mRegularSearchFragment->SetOnPhoneNumberPickerActionListener(this);
+    }
     else if (IListsFragment::Probe(fragment) != NULL) {
         mListsFragment = (CListsFragment*)IListsFragment::Probe(fragment);
         mListsFragment->AddOnPageChangeListener(this);
@@ -871,20 +879,19 @@ void DialtactsActivity::CommitDialpadFragmentHide()
 
 void DialtactsActivity::UpdateSearchFragmentPosition()
 {
-    // TODO:
-    // AutoPtr<ISearchFragment> fragment;
-    // Boolean isVisible;
-    // if (mSmartDialSearchFragment != NULL &&
-    //         mSmartDialSearchFragment->IsVisible(&isVisible), isVisible) {
-    //     fragment = mSmartDialSearchFragment;
-    // }
-    // else if (mRegularSearchFragment != NULL &&
-    //         mRegularSearchFragment->IsVisible(&isVisible), isVisible) {
-    //     fragment = mRegularSearchFragment;
-    // }
-    // if (fragment != NULL && fragment->IsVisible(&isVisible), isVisible) {
-    //     fragment->UpdatePosition(TRUE /* animate */);
-    // }
+    AutoPtr<ISearchFragment> fragment;
+    Boolean isVisible;
+    if (mSmartDialSearchFragment != NULL &&
+            (mSmartDialSearchFragment->IsVisible(&isVisible), isVisible)) {
+        fragment = ISearchFragment::Probe(mSmartDialSearchFragment);
+    }
+    else if (mRegularSearchFragment != NULL &&
+            (mRegularSearchFragment->IsVisible(&isVisible), isVisible)) {
+        fragment = ISearchFragment::Probe(mRegularSearchFragment);
+    }
+    if (fragment != NULL && (IFragment::Probe(fragment)->IsVisible(&isVisible), isVisible)) {
+        fragment->UpdatePosition(TRUE /* animate */);
+    }
 }
 
 ECode DialtactsActivity::IsInSearchUi(
@@ -1065,13 +1072,12 @@ void DialtactsActivity::EnterSearchUi(
 
     AutoPtr<IFragmentTransaction> transaction;
     manager->BeginTransaction((IFragmentTransaction**)&transaction);
-    // TODO:
-    // if (mInDialpadSearch && mSmartDialSearchFragment != NULL) {
-    //     transaction->Remove(mSmartDialSearchFragment);
-    // }
-    // else if (mInRegularSearch && mRegularSearchFragment != NULL) {
-    //     transaction->Remove(mRegularSearchFragment);
-    // }
+    if (mInDialpadSearch && mSmartDialSearchFragment != NULL) {
+        transaction->Remove(IFragment::Probe(mSmartDialSearchFragment));
+    }
+    else if (mInRegularSearch && mRegularSearchFragment != NULL) {
+        transaction->Remove(IFragment::Probe(mRegularSearchFragment));
+    }
 
     String tag;
     if (smartDialSearch) {
@@ -1086,23 +1092,25 @@ void DialtactsActivity::EnterSearchUi(
     AutoPtr<IFragment> fragment;
     manager->FindFragmentByTag(tag, (IFragment**)&fragment);
     transaction->SetCustomAnimations(Elastos::Droid::R::animator::fade_in, 0);
-    // TODO:
-    // if (fragment == NULL) {
-    //     if (smartDialSearch) {
-    //         CSmartDialSearchFragment::New((IFragment**)&fragment);
-    //     }
-    //     else {
-    //         CRegularSearchFragment::New((IFragment**)&fragment);
-    //     }
-    //     transaction->Add(R::id::dialtacts_frame, fragment, tag);
-    // }
-    // else {
-    //     transaction->Show(fragment);
-    // }
+    if (fragment == NULL) {
+        if (smartDialSearch) {
+            AutoPtr<SmartDialSearchFragment> smartFragment = new SmartDialSearchFragment();
+            fragment = IFragment::Probe(smartFragment);
+        }
+        else {
+            AutoPtr<RegularSearchFragment> regularFragment = new RegularSearchFragment();
+            fragment = IFragment::Probe(regularFragment);
+        }
+        // transaction->Add(R::id::dialtacts_frame, fragment, tag);
+    }
+    else {
+        transaction->Show(fragment);
+    }
     // DialtactsActivity will provide the options menu
-    // fragment->SetHasOptionsMenu(FALSE);
-    // fragment->SetShowEmptyListForNullQuery(TRUE);
-    // fragment->SetQueryString(query, FALSE /* delaySelection */);
+    fragment->SetHasOptionsMenu(FALSE);
+    AutoPtr<IContactEntryListFragment> f = IContactEntryListFragment::Probe(fragment);
+    f->SetShowEmptyListForNullQuery(TRUE);
+    f->SetQueryString(query, FALSE /* delaySelection */);
     Int32 id;
     transaction->Commit(&id);
 
@@ -1130,13 +1138,12 @@ void DialtactsActivity::ExitSearchUi()
 
     AutoPtr<IFragmentTransaction> transaction;
     manager->BeginTransaction((IFragmentTransaction**)&transaction);
-    // TODO:
-    // if (mSmartDialSearchFragment != NULL) {
-    //     transaction->Remove(mSmartDialSearchFragment);
-    // }
-    // if (mRegularSearchFragment != NULL) {
-    //     transaction->Remove(mRegularSearchFragment);
-    // }
+    if (mSmartDialSearchFragment != NULL) {
+        transaction->Remove(IFragment::Probe(mSmartDialSearchFragment));
+    }
+    if (mRegularSearchFragment != NULL) {
+        transaction->Remove(IFragment::Probe(mRegularSearchFragment));
+    }
     Int32 id;
     transaction->Commit(&id);
 
@@ -1164,16 +1171,15 @@ ECode DialtactsActivity::OnBackPressed()
         Boolean isVisible;
         AutoPtr<IInterface> adapter;
         Int32 count;
-        // TODO:
-        // if (TextUtils::IsEmpty(mSearchQuery) ||
-        //         (mSmartDialSearchFragment != NULL &&
-        //                 (mSmartDialSearchFragment->IsVisible(&isVisible), isVisible) &&
-        //                 (IContactEntryListFragment::Probe(mSmartDialSearchFragment)
-        //                         ->GetAdapter((IInterface**)&adapter),
-        //                         IContactEntryListAdapter::Probe(adapter)->GetCount(&count),
-        //                         count == 0))) {
-        //     ExitSearchUi();
-        // }
+        if (TextUtils::IsEmpty(mSearchQuery) ||
+                (mSmartDialSearchFragment != NULL &&
+                        (mSmartDialSearchFragment->IsVisible(&isVisible), isVisible) &&
+                        (IContactEntryListFragment::Probe(mSmartDialSearchFragment)
+                                ->GetAdapter((IInterface**)&adapter),
+                                ICompositeCursorAdapter::Probe(adapter)->GetCount(&count),
+                                count == 0))) {
+            ExitSearchUi();
+        }
         HideDialpadFragment(TRUE, FALSE);
     }
     else if (IsInSearchUi(&inSearchUi), inSearchUi) {
@@ -1200,11 +1206,11 @@ Boolean DialtactsActivity::MaybeExitSearchUi()
 ECode DialtactsActivity::OnDialpadQueryChanged(
     /* [in] */ const String& query)
 {
-    assert(0 && "TODO");
-    // if (mSmartDialSearchFragment != NULL) {
-    //     mSmartDialSearchFragment->SetAddToContactNumber(query);
-    // }
+    if (mSmartDialSearchFragment != NULL) {
+        mSmartDialSearchFragment->SetAddToContactNumber(query);
+    }
     String normalizedQuery;
+    // TODO:
     // String normalizedQuery = SmartDialNameMatcher::NormalizeNumber(query,
     //         SmartDialNameMatcher::LATIN_SMART_DIAL_MAP);
 
@@ -1288,7 +1294,7 @@ ECode DialtactsActivity::ShowCallHistory()
     // Use explicit CallLogActivity intent instead of ACTION_VIEW +
     // CONTENT_TYPE, so that we always open our call log from our dialer
     AutoPtr<IIntent> intent;
-    assert(0 && "TODO");
+    assert(0);
     // CIntent::New(this, ECLSID_CCallLogActivity, (IIntent**)&intent);
     StartActivity(intent);
     return NOERROR;

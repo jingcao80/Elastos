@@ -39,7 +39,7 @@ module
 //    merge("car/elastos/droid/dialer/calllog/CallDetailHistoryAdapter.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogActivity.car");
     merge("car/elastos/droid/dialer/calllog/CallLogAdapter.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogFragment.car");
+    merge("car/elastos/droid/dialer/calllog/CallLogFragment.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogGroupBuilder.car");
     merge("car/elastos/droid/dialer/calllog/CallLogListItemView.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogListItemViews.car");
@@ -68,7 +68,7 @@ module
 //    merge("car/elastos/droid/dialer/dialpad/SmartDialNameMatcher.car");
 //    merge("car/elastos/droid/dialer/interactions/PhoneNumberInteraction.car");
 //    merge("car/elastos/droid/dialer/interactions/UndemoteOutgoingCallReceiver.car");
-//    merge("car/elastos/droid/dialer/list/AllContactsFragment.car");
+    merge("car/elastos/droid/dialer/list/AllContactsFragment.car");
     merge("car/elastos/droid/dialer/list/DialerPhoneNumberListAdapter.car");
     merge("car/elastos/droid/dialer/list/DragDropController.car");
     merge("car/elastos/droid/dialer/list/ListsFragment.car");
@@ -269,7 +269,6 @@ module
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapter;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterHelper;
     interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterCallFetcher;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogFragment;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogQuery;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandler;
     interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandlerListener;
