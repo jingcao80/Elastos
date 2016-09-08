@@ -2,11 +2,13 @@
 #include "elastos/droid/dialer/widget/ViewDragHelper.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Widget.h"
+#include "elastos/droid/support/v4/view/MotionEventCompat.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Support::V4::View::MotionEventCompat;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
@@ -732,15 +734,14 @@ void ViewDragHelper::SaveInitialMotion(
 void ViewDragHelper::SaveLastMotion(
     /* [in] */ IMotionEvent* ev)
 {
-    assert(0 && "TODO");
-    // Int32 pointerCount = MotionEventCompat.getPointerCount(ev);
-    // for (Int32 i = 0; i < pointerCount; i++) {
-    //     Int32 pointerId = MotionEventCompat.getPointerId(ev, i);
-    //     Float x = MotionEventCompat.getX(ev, i);
-    //     Float y = MotionEventCompat.getY(ev, i);
-    //     mLastMotionX[pointerId] = x;
-    //     mLastMotionY[pointerId] = y;
-    // }
+    Int32 pointerCount = MotionEventCompat::GetPointerCount(ev);
+    for (Int32 i = 0; i < pointerCount; i++) {
+        Int32 pointerId = MotionEventCompat::GetPointerId(ev, i);
+        Float x = MotionEventCompat::GetX(ev, i);
+        Float y = MotionEventCompat::GetY(ev, i);
+        (*mLastMotionX)[pointerId] = x;
+        (*mLastMotionY)[pointerId] = y;
+    }
 }
 
 Boolean ViewDragHelper::IsPointerDown(
@@ -826,9 +827,8 @@ Boolean ViewDragHelper::ShouldInterceptTouchEvent(
 {
     Int32 action;
     Int32 actionIndex;
-    assert(0 && "TODO");
-    // action = MotionEventCompat.getActionMasked(ev);
-    // actionIndex = MotionEventCompat.getActionIndex(ev);
+    action = MotionEventCompat::GetActionMasked(ev);
+    actionIndex = MotionEventCompat::GetActionIndex(ev);
 
     if (action == IMotionEvent::ACTION_DOWN) {
         // Reset things for a new event stream, just in case we didn't get
@@ -850,8 +850,7 @@ Boolean ViewDragHelper::ShouldInterceptTouchEvent(
             Float y;
             ev->GetY(&y);
             Int32 pointerId;
-            assert(0 && "TODO");
-            // pointerId = MotionEventCompat.getPointerId(ev, 0);
+            pointerId = MotionEventCompat::GetPointerId(ev, 0);
             SaveInitialMotion(x, y, pointerId);
 
             AutoPtr<IView> toCapture = FindTopChildUnder((Int32) x, (Int32) y);
@@ -868,44 +867,38 @@ Boolean ViewDragHelper::ShouldInterceptTouchEvent(
             break;
         }
 
-        // TODO:
-        // case MotionEventCompat.ACTION_POINTER_DOWN: {
-        //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
-        //     Float x = MotionEventCompat.getX(ev, actionIndex);
-        //     Float y = MotionEventCompat.getY(ev, actionIndex);
+        case MotionEventCompat::ACTION_POINTER_DOWN: {
+            Int32 pointerId = MotionEventCompat::GetPointerId(ev, actionIndex);
+            Float x = MotionEventCompat::GetX(ev, actionIndex);
+            Float y = MotionEventCompat::GetY(ev, actionIndex);
 
-        //     saveInitialMotion(x, y, pointerId);
+            SaveInitialMotion(x, y, pointerId);
 
-        //     // A ViewDragHelper can only manipulate one view at a time.
-        //     if (mDragState == IViewDragHelper::STATE_IDLE) {
-        //         Int32 edgesTouched = mInitialEdgesTouched[pointerId];
-        //         if ((edgesTouched & mTrackingEdges) != 0) {
-        //             mCallback.onEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
-        //         }
-        //     }
-        //     else if (mDragState == IViewDragHelper::STATE_SETTLING) {
-        //         // Catch a settling view if possible.
-        //         final View toCapture = findTopChildUnder((int) x, (int) y);
-        //         if (toCapture == mCapturedView) {
-        //             tryCaptureViewForDrag(toCapture, pointerId);
-        //         }
-        //     }
-        //     break;
-        // }
+            // A ViewDragHelper can only manipulate one view at a time.
+            if (mDragState == STATE_IDLE) {
+                Int32 edgesTouched = (*mInitialEdgesTouched)[pointerId];
+                if ((edgesTouched & mTrackingEdges) != 0) {
+                    mCallback->OnEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
+                }
+            }
+            else if (mDragState == STATE_SETTLING) {
+                // Catch a settling view if possible.
+                AutoPtr<IView> toCapture = FindTopChildUnder((Int32)x, (Int32)y);
+                if (toCapture == mCapturedView) {
+                    TryCaptureViewForDrag(toCapture, pointerId);
+                }
+            }
+            break;
+        }
 
         case IMotionEvent::ACTION_MOVE: {
             // First to cross a touch slop over a draggable view wins. Also report edge drags.
             Int32 pointerCount;
-            assert(0 && "TODO");
-            // pointerCount = MotionEventCompat.getPointerCount(ev);
+            pointerCount = MotionEventCompat::GetPointerCount(ev);
             for (Int32 i = 0; i < pointerCount; i++) {
-                Int32 pointerId;
-                assert(0 && "TODO");
-                // pointerId = MotionEventCompat.getPointerId(ev, i);
-                Float x;
-                // x = MotionEventCompat.getX(ev, i);
-                Float y;
-                // y = MotionEventCompat.getY(ev, i);
+                Int32 pointerId = MotionEventCompat::GetPointerId(ev, i);
+                Float x = MotionEventCompat::GetX(ev, i);
+                Float y = MotionEventCompat::GetY(ev, i);
                 Float dx = x - (*mInitialMotionX)[pointerId];
                 Float dy = y - (*mInitialMotionY)[pointerId];
 
@@ -927,12 +920,11 @@ Boolean ViewDragHelper::ShouldInterceptTouchEvent(
             break;
         }
 
-        // TODO:
-        // case MotionEventCompat.ACTION_POINTER_UP: {
-        //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
-        //     clearMotionHistory(pointerId);
-        //     break;
-        // }
+        case MotionEventCompat::ACTION_POINTER_UP: {
+            Int32 pointerId = MotionEventCompat::GetPointerId(ev, actionIndex);
+            ClearMotionHistory(pointerId);
+            break;
+        }
 
         case IMotionEvent::ACTION_UP:
         case IMotionEvent::ACTION_CANCEL: {
@@ -947,11 +939,8 @@ Boolean ViewDragHelper::ShouldInterceptTouchEvent(
 void ViewDragHelper::ProcessTouchEvent(
     /* [in] */ IMotionEvent* ev)
 {
-    Int32 action;
-    assert(0 && "TODO");
-    // action = MotionEventCompat.getActionMasked(ev);
-    Int32 actionIndex;
-    // actionIndex = MotionEventCompat.getActionIndex(ev);
+    Int32 action = MotionEventCompat::GetActionMasked(ev);
+    Int32 actionIndex = MotionEventCompat::GetActionIndex(ev);
 
     if (action == IMotionEvent::ACTION_DOWN) {
         // Reset things for a new event stream, just in case we didn't get
@@ -972,9 +961,7 @@ void ViewDragHelper::ProcessTouchEvent(
             ev->GetX(&x);
             Float y;
             ev->GetY(&y);
-            Int32 pointerId;
-            assert(0 && "TODO");
-            // pointerId = MotionEventCompat.getPointerId(ev, 0);
+            Int32 pointerId = MotionEventCompat::GetPointerId(ev, 0);
             AutoPtr<IView> toCapture = FindTopChildUnder((Int32) x, (Int32) y);
 
             SaveInitialMotion(x, y, pointerId);
@@ -991,44 +978,40 @@ void ViewDragHelper::ProcessTouchEvent(
             break;
         }
 
-        // TODO:
-        // case MotionEventCompat.ACTION_POINTER_DOWN: {
-        //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
-        //     Float x = MotionEventCompat.getX(ev, actionIndex);
-        //     Float y = MotionEventCompat.getY(ev, actionIndex);
+        case MotionEventCompat::ACTION_POINTER_DOWN: {
+            Int32 pointerId = MotionEventCompat::GetPointerId(ev, actionIndex);
+            Float x = MotionEventCompat::GetX(ev, actionIndex);
+            Float y = MotionEventCompat::GetY(ev, actionIndex);
 
-        //     saveInitialMotion(x, y, pointerId);
+            SaveInitialMotion(x, y, pointerId);
 
-        //     // A ViewDragHelper can only manipulate one view at a time.
-        //     if (mDragState == STATE_IDLE) {
-        //         // If we're idle we can do anything! Treat it like a normal down event.
+            // A ViewDragHelper can only manipulate one view at a time.
+            if (mDragState == STATE_IDLE) {
+                // If we're idle we can do anything! Treat it like a normal down event.
 
-        //         final View toCapture = findTopChildUnder((int) x, (int) y);
-        //         tryCaptureViewForDrag(toCapture, pointerId);
+                AutoPtr<IView> toCapture = FindTopChildUnder((Int32)x, (Int32)y);
+                TryCaptureViewForDrag(toCapture, pointerId);
 
-        //         Int32 edgesTouched = mInitialEdgesTouched[pointerId];
-        //         if ((edgesTouched & mTrackingEdges) != 0) {
-        //             mCallback.onEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
-        //         }
-        //     } else if (isCapturedViewUnder((int) x, (int) y)) {
-        //         // We're still tracking a captured view. If the same view is under this
-        //         // point, we'll swap to controlling it with this pointer instead.
-        //         // (This will still work if we're "catching" a settling view.)
+                Int32 edgesTouched = (*mInitialEdgesTouched)[pointerId];
+                if ((edgesTouched & mTrackingEdges) != 0) {
+                    mCallback->OnEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
+                }
+            }
+            else if (IsCapturedViewUnder((Int32)x, (Int32)y)) {
+                // We're still tracking a captured view. If the same view is under this
+                // point, we'll swap to controlling it with this pointer instead.
+                // (This will still work if we're "catching" a settling view.)
 
-        //         tryCaptureViewForDrag(mCapturedView, pointerId);
-        //     }
-        //     break;
-        // }
+                TryCaptureViewForDrag(mCapturedView, pointerId);
+            }
+            break;
+        }
 
         case IMotionEvent::ACTION_MOVE: {
             if (mDragState == STATE_DRAGGING) {
-                Int32 index;
-                assert(0 && "TODO");
-                // index = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-                Float x;
-                // x = MotionEventCompat.getX(ev, index);
-                Float y;
-                // y = MotionEventCompat.getY(ev, index);
+                Int32 index = MotionEventCompat::FindPointerIndex(ev, mActivePointerId);
+                Float x = MotionEventCompat::GetX(ev, index);
+                Float y = MotionEventCompat::GetY(ev, index);
                 Int32 idx = (Int32) (x - (*mLastMotionX)[mActivePointerId]);
                 Int32 idy = (Int32) (y - (*mLastMotionY)[mActivePointerId]);
 
@@ -1041,17 +1024,11 @@ void ViewDragHelper::ProcessTouchEvent(
             }
             else {
                 // Check to see if any pointer is now over a draggable view.
-                Int32 pointerCount;
-                assert(0 && "TODO");
-                // pointerCount = MotionEventCompat.getPointerCount(ev);
+                Int32 pointerCount = MotionEventCompat::GetPointerCount(ev);
                 for (Int32 i = 0; i < pointerCount; i++) {
-                    Int32 pointerId;
-                    assert(0 && "TODO");
-                    // pointerId = MotionEventCompat.getPointerId(ev, i);
-                    Float x;
-                    // x = MotionEventCompat.getX(ev, i);
-                    Float y;
-                    // y = MotionEventCompat.getY(ev, i);
+                    Int32 pointerId = MotionEventCompat::GetPointerId(ev, i);
+                    Float x = MotionEventCompat::GetX(ev, i);
+                    Float y = MotionEventCompat::GetY(ev, i);
                     Float dx = x - (*mInitialMotionX)[pointerId];
                     Float dy = y - (*mInitialMotionY)[pointerId];
 
@@ -1072,37 +1049,36 @@ void ViewDragHelper::ProcessTouchEvent(
             break;
         }
 
-        // TODO:
-        // case MotionEventCompat.ACTION_POINTER_UP: {
-        //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
-        //     if (mDragState == STATE_DRAGGING && pointerId == mActivePointerId) {
-        //         // Try to find another pointer that's still holding on to the captured view.
-        //         int newActivePointer = INVALID_POINTER;
-        //         Int32 pointerCount = MotionEventCompat.getPointerCount(ev);
-        //         for (int i = 0; i < pointerCount; i++) {
-        //             Int32 id = MotionEventCompat.getPointerId(ev, i);
-        //             if (id == mActivePointerId) {
-        //                 // This one's going away, skip.
-        //                 continue;
-        //             }
+        case MotionEventCompat::ACTION_POINTER_UP: {
+            Int32 pointerId = MotionEventCompat::GetPointerId(ev, actionIndex);
+            if (mDragState == STATE_DRAGGING && pointerId == mActivePointerId) {
+                // Try to find another pointer that's still holding on to the captured view.
+                Int32 newActivePointer = INVALID_POINTER;
+                Int32 pointerCount = MotionEventCompat::GetPointerCount(ev);
+                for (Int32 i = 0; i < pointerCount; i++) {
+                    Int32 id = MotionEventCompat::GetPointerId(ev, i);
+                    if (id == mActivePointerId) {
+                        // This one's going away, skip.
+                        continue;
+                    }
 
-        //             Float x = MotionEventCompat.getX(ev, i);
-        //             Float y = MotionEventCompat.getY(ev, i);
-        //             if (findTopChildUnder((int) x, (int) y) == mCapturedView &&
-        //                     tryCaptureViewForDrag(mCapturedView, id)) {
-        //                 newActivePointer = mActivePointerId;
-        //                 break;
-        //             }
-        //         }
+                    Float x = MotionEventCompat::GetX(ev, i);
+                    Float y = MotionEventCompat::GetY(ev, i);
+                    if (FindTopChildUnder((Int32)x, (Int32)y) == mCapturedView &&
+                            TryCaptureViewForDrag(mCapturedView, id)) {
+                        newActivePointer = mActivePointerId;
+                        break;
+                    }
+                }
 
-        //         if (newActivePointer == INVALID_POINTER) {
-        //             // We didn't find another pointer still touching the view, release it.
-        //             releaseViewForPointerUp();
-        //         }
-        //     }
-        //     clearMotionHistory(pointerId);
-        //     break;
-        // }
+                if (newActivePointer == INVALID_POINTER) {
+                    // We didn't find another pointer still touching the view, release it.
+                    ReleaseViewForPointerUp();
+                }
+            }
+            ClearMotionHistory(pointerId);
+            break;
+        }
 
         case IMotionEvent::ACTION_UP: {
             if (mDragState == STATE_DRAGGING) {

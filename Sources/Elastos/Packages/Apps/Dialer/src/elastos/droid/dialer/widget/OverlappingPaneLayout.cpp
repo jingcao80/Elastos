@@ -3,6 +3,7 @@
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/dialer/widget/OverlappingPaneLayout.h"
 #include "elastos/droid/dialer/widget/COverlappingPaneLayoutSavedState.h"
+#include "elastos/droid/support/v4/view/MotionEventCompat.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -11,6 +12,7 @@ using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Os::Build;
+using Elastos::Droid::Support::V4::View::MotionEventCompat;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
@@ -1067,9 +1069,7 @@ ECode OverlappingPaneLayout::OnInterceptTouchEvent(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    Int32 action;
-    assert(0 && "TODO");
-    // MotionEventCompat.getActionMasked(ev);
+    Int32 action = MotionEventCompat::GetActionMasked(ev);
 
     // Preserve the open state based on the last view that was touched.
     Int32 count;

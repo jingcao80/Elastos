@@ -508,16 +508,15 @@ ECode ListsFragment::OnPageScrolled(
 ECode ListsFragment::OnPageSelected(
     /* [in] */ Int32 position)
 {
-    assert(0 && "TODO");
-    // if (position == TAB_INDEX_SPEED_DIAL && mSpeedDialFragment != NULL) {
-    //     mSpeedDialFragment->SendScreenView();
-    // }
-    // else if (position == TAB_INDEX_RECENTS && mRecentsFragment != NULL) {
-    //     mRecentsFragment->SendScreenView();
-    // }
-    // else if (position == TAB_INDEX_ALL_CONTACTS && mAllContactsFragment != NULL) {
-    //     mAllContactsFragment->SendScreenView();
-    // }
+    if (position == TAB_INDEX_SPEED_DIAL && mSpeedDialFragment != NULL) {
+        IAnalyticsInterface::Probe(mSpeedDialFragment)->SendScreenView();
+    }
+    else if (position == TAB_INDEX_RECENTS && mRecentsFragment != NULL) {
+        IAnalyticsInterface::Probe(mRecentsFragment)->SendScreenView();
+    }
+    else if (position == TAB_INDEX_ALL_CONTACTS && mAllContactsFragment != NULL) {
+        IAnalyticsInterface::Probe(mAllContactsFragment)->SendScreenView();
+    }
     Int32 count;
     mOnPageChangeListeners->GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
