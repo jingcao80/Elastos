@@ -18,6 +18,8 @@ module
     merge("car/elastos/droid/inputmethod/KeyboardLayoutDialogFragment.car");
     merge("car/elastos/droid/inputmethod/SpellCheckerPreference.car");
     merge("car/elastos/droid/inputmethod/UserDictionaryAddWordFragment.car");
+    merge("car/elastos/droid/notification/DropDownPreference.car");
+    merge("car/elastos/droid/notification/VolumeSeekBarPreference.car");
     merge("car/elastos/droid/search/Indexable.car");
     merge("car/elastos/droid/search/IndexDatabaseHelper.car");
     merge("car/elastos/droid/search/SearchIndexableRaw.car");
@@ -71,6 +73,8 @@ module
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Preference.IPreference;
+    using interface Elastos.Droid.Preference.IRingtonePreference;
+    using interface Elastos.Droid.Preference.ISeekBarPreference;
     using interface Elastos.Droid.Preference.ISwitchPreference;
     using interface Elastos.Droid.Preference.ITwoStatePreference;
     using interface Elastos.Droid.Preference.IPreferenceFragment;
@@ -79,6 +83,7 @@ module
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
     using interface Elastos.Droid.Provider.ISearchIndexablesProvider;
     using interface Elastos.Droid.Settings.IDialogCreatable;
+    using interface Elastos.Droid.Settings.Notification.IDropDownPreference;
     using interface Elastos.Droid.Settings.Search.IIndexable;
     using interface Elastos.Droid.Settings.ISettingsPreferenceFragment;
     using interface Elastos.Droid.Settings.Widget.ISwitchBarOnSwitchChangeListener;
@@ -147,10 +152,6 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
-
-        interface IViewOnClickListener;
-        interface ICompoundButtonOnCheckedChangeListener;
-        interface IApplicationsStateCallbacks;
     }
 
     class CInstalledAppDetailsAlertDialogFragment {
@@ -237,10 +238,6 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-
-        interface IAdapterViewOnItemClickListener;
-        interface IRecyclerListener;
-        interface IRunningStateOnRefreshUiListener;
     }
 
     class CRunningServiceDetails {
@@ -375,7 +372,7 @@ module
     [local]
     class CInputMethodPreference {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IInputMethodInfo* imi,
             [in] Boolean isImeEnabler,
             [in] Boolean isAllowedByOrganization,
@@ -427,7 +424,7 @@ module
     [local]
     class CSpellCheckerPreference {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ISpellCheckerInfo* sci,
             [in] ISpellCheckerPreferenceOnRadioButtonPreferenceListener* onRadioButtonListener);
 
@@ -494,6 +491,92 @@ module
     }
 
     } // namespace Inputmethod
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Notification {
+
+    [local]
+    class CDropDownPreference {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IDropDownPreference;
+        interface IPreference;
+        interface IComparable;
+    }
+
+    [local]
+    class CManagedServiceSettingsScaryWarningDialogFragment {
+        constructor(
+            [in] IListFragment* fragment);
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CNotificationAccessSettings {
+        constructor();
+
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CNotificationSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+        interface IIndexable;
+    }
+
+    [local]
+    class CVolumeSeekBarPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context);
+
+        interface ISeekBarPreference;
+        interface IPreference;
+        interface IComparable;
+    }
+
+    } // namespace Notification
     } // namespace Settings
     } // namespace Droid
     } // namespace Elastos
@@ -619,7 +702,7 @@ module
     [local]
     class CWifiP2pPeer {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IWifiP2pDevice* dev);
 
         interface IWifiP2pPeer;
@@ -630,7 +713,7 @@ module
     [local]
     class CWifiP2pPersistentGroup {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IWifiP2pGroup* group);
 
         interface IWifiP2pPersistentGroup;
@@ -667,15 +750,15 @@ module
     [local]
     class CAccessPoint {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IWifiConfiguration* config);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IScanResult* result);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IBundle* savedState);
 
         interface IAccessPoint;
@@ -804,6 +887,17 @@ module
         interface IAdapterViewOnItemClickListener;
         interface ICompoundButtonOnCheckedChangeListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+    }
+
+    [local]
+    class CDefaultRingtonePreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IRingtonePreference;
+        interface IPreference;
+        interface IComparable;
     }
 
     class CLocalePicker {

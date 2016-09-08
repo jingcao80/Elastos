@@ -4,6 +4,7 @@ DIRS += dashboard
 DIRS += deviceinfo
 DIRS += drawable
 DIRS += inputmethod
+DIRS += notification
 DIRS += search
 DIRS += voice
 DIRS += widget

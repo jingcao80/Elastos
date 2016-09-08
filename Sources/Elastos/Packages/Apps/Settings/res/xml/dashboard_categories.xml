@@ -96,7 +96,7 @@
         <dashboard-tile
                 android:id="@+id/notification_settings"
                 android:title="@string/notification_settings"
-                android:fragment="Elastos.Droid.Settings.Notification.NotificationSettings"
+                android:fragment="Elastos.Droid.Settings.Notification.CNotificationSettings"
                 android:icon="@drawable/ic_settings_notifications"
                 />
 

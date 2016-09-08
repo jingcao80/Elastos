@@ -588,7 +588,7 @@ Boolean RunningState::ProcessItem::BuildDependencyChain(
         AutoPtr<IInterface> obj;
         mDependentProcesses->ValueAt(i, (IInterface**)&obj);
         ProcessItem* proc = (ProcessItem*)IRunningStateProcessItem::Probe(obj);
-        if (proc->mClient != this) {
+        if (proc->mClient.Get() != this) {
             changed = TRUE;
             proc->mClient = this;
         }
@@ -1577,7 +1577,7 @@ Boolean RunningState::Update(
                 needDivider = TRUE;
                 newItems->Add((IRunningStateServiceItem*)si);
                 if (si->mMergedItem != NULL) {
-                    if (mergedItem != NULL && mergedItem != si->mMergedItem) {
+                    if (mergedItem != NULL && mergedItem.Get() != si->mMergedItem) {
                         haveAllMerged = FALSE;
                     }
                     mergedItem = si->mMergedItem;

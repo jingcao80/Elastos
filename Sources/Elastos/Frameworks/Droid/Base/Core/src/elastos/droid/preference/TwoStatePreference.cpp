@@ -210,7 +210,7 @@ ECode TwoStatePreference::OnGetDefaultValue(
     a->GetBoolean(index, FALSE, &retVal);
     AutoPtr<IBoolean> retObj;
     CBoolean::New(retVal, (IBoolean**)&retObj);
-    *value = (IInterface*)retObj;
+    *value = retObj;
     REFCOUNT_ADD(*value)
     return NOERROR;
 }
@@ -224,7 +224,7 @@ ECode TwoStatePreference::OnSetInitialValue(
         GetPersistedBoolean(mChecked, &value);
     }
     else {
-        AutoPtr<IBoolean> defaultVal = IBoolean::Probe(defaultVal);
+        AutoPtr<IBoolean> defaultVal = IBoolean::Probe(defaultValue);
         if(defaultVal != NULL){
             defaultVal->GetValue(&value);
         }

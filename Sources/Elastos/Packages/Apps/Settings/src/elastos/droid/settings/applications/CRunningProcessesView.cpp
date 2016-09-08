@@ -42,6 +42,38 @@ namespace Settings {
 namespace Applications {
 
 //===============================================================================
+//                  CRunningProcessesView::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_3(CRunningProcessesView::InnerListener, Object, IAdapterViewOnItemClickListener, IRecyclerListener, IRunningStateOnRefreshUiListener)
+
+CRunningProcessesView::InnerListener::InnerListener(
+    /* [in] */ CRunningProcessesView* host)
+    : mHost(host)
+{}
+
+ECode CRunningProcessesView::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* v,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, v, position, id);
+}
+
+ECode CRunningProcessesView::InnerListener::OnMovedToScrapHeap(
+    /* [in] */ IView* view)
+{
+    return mHost->OnMovedToScrapHeap(view);
+}
+
+ECode CRunningProcessesView::InnerListener::OnRefreshUi(
+    /* [in] */ Int32 what)
+{
+    return mHost->OnRefreshUi(what);
+}
+
+//===============================================================================
 //                  CRunningProcessesView::ActiveItem
 //===============================================================================
 
@@ -389,8 +421,6 @@ ECode CRunningProcessesView::ServiceListAdapter::BindView(
 //                  CRunningProcessesView
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(CRunningProcessesView, FrameLayout, IAdapterViewOnItemClickListener, IRecyclerListener, IRunningStateOnRefreshUiListener)
-
 CAR_OBJECT_IMPL(CRunningProcessesView)
 
 CRunningProcessesView::CRunningProcessesView()
@@ -405,6 +435,7 @@ CRunningProcessesView::CRunningProcessesView()
     CHashMap::New((IHashMap**)&mActiveItems);
     mBuilder = new StringBuilder(128);
     CMemInfoReader::New((IMemInfoReader**)&mMemInfoReader);
+    mListener = new InnerListener(this);
 }
 
 ECode CRunningProcessesView::constructor(
@@ -604,8 +635,8 @@ ECode CRunningProcessesView::DoCreate(
     if (emptyView != NULL) {
         _listView->SetEmptyView(emptyView);
     }
-    _listView->SetOnItemClickListener(this);
-    IAbsListView::Probe(mListView)->SetRecyclerListener(this);
+    _listView->SetOnItemClickListener(mListener);
+    IAbsListView::Probe(mListView)->SetRecyclerListener(mListener);
     mAdapter = new ServiceListAdapter(mState, this);
     _listView->SetAdapter(mAdapter);
     mHeader = NULL;
@@ -659,7 +690,7 @@ Boolean CRunningProcessesView::DoResume(
     /* [in] */ IRunnable* dataAvail)
 {
     mOwner = owner;
-    mState->Resume(this);
+    mState->Resume(mListener);
     if (mState->HasData()) {
         // If the state already has its data, then let's populate our
         // list right now to avoid flicker.
@@ -698,14 +729,14 @@ ECode CRunningProcessesView::OnRefreshUi(
     /* [in] */ Int32 what)
 {
     switch (what) {
-        case REFRESH_TIME:
+        case IRunningStateOnRefreshUiListener::REFRESH_TIME:
             UpdateTimes();
             break;
-        case REFRESH_DATA:
+        case IRunningStateOnRefreshUiListener::REFRESH_DATA:
             RefreshUi(FALSE);
             UpdateTimes();
             break;
-        case REFRESH_STRUCTURE:
+        case IRunningStateOnRefreshUiListener::REFRESH_STRUCTURE:
             RefreshUi(TRUE);
             UpdateTimes();
             break;

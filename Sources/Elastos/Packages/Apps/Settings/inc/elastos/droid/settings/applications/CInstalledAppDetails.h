@@ -4,6 +4,7 @@
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Hardware.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Widget.h"
 #include "_Elastos_Droid_Settings_Applications_CInstalledAppDetails.h"
 #include "elastos/droid/settings/applications/ApplicationsState.h"
 #include "elastos/droid/app/DialogFragment.h"
@@ -68,11 +69,56 @@ namespace Applications {
  */
 CarClass(CInstalledAppDetails)
     , public Fragment
-    , public IViewOnClickListener
-    , public ICompoundButtonOnCheckedChangeListener
-    , public IApplicationsStateCallbacks
 {
 public:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public ICompoundButtonOnCheckedChangeListener
+        , public IApplicationsStateCallbacks
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        TO_STRING_IMPL("CInstalledAppDetails::InnerListener")
+
+        InnerListener(
+            /* [in] */ CInstalledAppDetails* host);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+        //@Override
+        CARAPI OnCheckedChanged(
+            /* [in] */ ICompoundButton* buttonView,
+            /* [in] */ Boolean isChecked);
+
+        //@Override
+        CARAPI OnRunningStateChanged(
+            /* [in] */ Boolean running);
+
+        //@Override
+        CARAPI OnPackageListChanged();
+
+        //@Override
+        CARAPI OnRebuildComplete(
+            /* [in] */ IArrayList* apps);
+
+        //@Override
+        CARAPI OnPackageIconChanged();
+
+        //@Override
+        CARAPI OnPackageSizeChanged(
+            /* [in] */ const String& packageName);
+
+        //@Override
+        CARAPI OnAllSizesComputed();
+
+    private:
+        CInstalledAppDetails* mHost;
+    };
+
     class MyAlertDialogFragment
         : public DialogFragment
     {
@@ -300,8 +346,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL()
 
     TO_STRING_IMPL("CInstalledAppDetails")
@@ -568,6 +612,8 @@ private:
     AutoPtr<Handler> mHandler;
 
     AutoPtr<BroadcastReceiver> mCheckKillProcessesReceiver;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Applications

@@ -75,12 +75,14 @@ ECode Preference::constructor(
                 a->GetResourceId(attr, 0, &mTitleRes);
                 String str;
                 a->GetString(attr, &str);
+                mTitle = NULL;
                 CString::New(str, (ICharSequence**)&mTitle);
                 break;
             }
             case R::styleable::Preference_summary: {
                 String str;
                 a->GetString(attr, &str);
+                mSummary = NULL;
                 CString::New(str, (ICharSequence**)&mSummary);
                 break;
             }
@@ -109,6 +111,7 @@ ECode Preference::constructor(
                 a->GetString(attr, &mDependencyKey);
                 break;
             case R::styleable::Preference_defaultValue:
+                mDefaultValue = NULL;
                 OnGetDefaultValue(a, attr, (IInterface**)&mDefaultValue);
                 break;
             case R::styleable::Preference_shouldDisableView:

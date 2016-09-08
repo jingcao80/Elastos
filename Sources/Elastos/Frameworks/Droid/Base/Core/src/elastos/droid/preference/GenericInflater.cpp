@@ -213,8 +213,7 @@ ECode GenericInflater::Inflate(
     ctx->GetResources((IResources**)&res);
     AutoPtr<IXmlResourceParser> parser;
     res->GetXml(resource, (IXmlResourceParser**)&parser);
-    AutoPtr<IXmlPullParser> pp = IXmlPullParser::Probe(parser);
-    ECode ec = Inflate(pp, root, attachToRoot, t);
+    ECode ec = Inflate(IXmlPullParser::Probe(parser), root, attachToRoot, t);
     parser->Close();
     return ec;
 }
@@ -311,6 +310,7 @@ ECode GenericInflater::CreateItem(
         if (!prefix.IsNull()) {
             prefixName = prefix + name;
         }
+
         ec = cl->LoadClass(prefixName, (IClassInfo**)&clazz);
         FAIL_GOTO(ec, fail)
         ec = clazz->GetConstructorInfoByParamNames(sConstructorSignature, (IConstructorInfo**)&constructor);
