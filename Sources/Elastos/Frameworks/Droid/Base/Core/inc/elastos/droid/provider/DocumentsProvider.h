@@ -34,6 +34,8 @@ public:
 
     virtual ~DocumentsProvider();
 
+    CARAPI constructor();
+
     //@Override
     CARAPI AttachInfo(
         /* [in] */ IContext* context,

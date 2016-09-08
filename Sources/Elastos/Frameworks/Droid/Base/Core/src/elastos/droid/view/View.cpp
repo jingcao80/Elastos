@@ -1330,33 +1330,37 @@ View::~View()
     if (mHoldContext) {
         REFCOUNT_RELEASE(mContext);
     }
-    mInputEventConsistencyVerifier = NULL;
-    mAccessibilityDelegate = NULL;
-    mLayerPaint = NULL;
-    mAnimator = NULL;
-    mFloatingTreeObserver = NULL;
-    mTouchDelegate = NULL;
-    mUnsetPressedState = NULL;
-    mSendViewScrolledAccessibilityEvent = NULL;
-    mPerformClick = NULL;
-    mPendingCheckForTap = NULL;
-    mPendingCheckForLongPress = NULL;
-    mUnscaledDrawingCache = NULL;
-    mDrawingCache = NULL;
-    mDrawableState = NULL;
-    mScrollCache = NULL;
-    mListenerInfo = NULL;
-    mBackground = NULL;
-    mBGDrawable = NULL;
-    mResources = NULL;
-    mMatchIdPredicate = NULL;
-    mMatchLabelForPredicate = NULL;
-    mContentDescription = NULL;
-    mLayoutInsets = NULL;
-    mTransformationInfo = NULL;
-    mLayoutParams = NULL;
+    mAttachInfo = NULL;
     mTag = NULL;
-    mCurrentAnimation = NULL;
+    mParent = NULL;
+    mLayoutParams = NULL;
+    mTransformationInfo = NULL;
+    mLayoutInsets = NULL;
+    mMatchLabelForPredicate = NULL;
+    mMatchIdPredicate = NULL;
+    mResources = NULL;
+    mListenerInfo = NULL;
+    mScrollCache = NULL;
+    mOutlineProvider = NULL;
+    mStateListAnimator = NULL;
+    mPendingCheckForLongPress = NULL;
+    mPendingCheckForTap = NULL;
+    mPerformClick = NULL;
+    mSendViewScrolledAccessibilityEvent = NULL;
+    mUnsetPressedState = NULL;
+    mTouchDelegate = NULL;
+    mFloatingTreeObserver = NULL;
+    mAnimator = NULL;
+    mRenderNode = NULL;
+    mOverlay = NULL;
+    mGhostView = NULL;
+    mAccessibilityDelegate = NULL;
+    mInputEventConsistencyVerifier = NULL;
+    mSendViewStateChangedAccessibilityEvent = NULL;
+    mKeyedTags = NULL;
+    mBackgroundTint = NULL;
+    mBackgroundRenderNode = NULL;
+    mNestedScrollingParent = NULL;
 }
 
 /**

@@ -152,13 +152,11 @@ FragmentManagerImpl::FragmentManagerImpl()
     , mDestroyed(FALSE)
     , mHavePendingDeferredStart(FALSE)
 {
-    Logger::I(TAG, " >> Create FragmentManagerImpl: %p", this);
     mExecCommit = new ExecCommitRunnable(this);
 }
 
 FragmentManagerImpl::~FragmentManagerImpl()
 {
-    Logger::I(TAG, " >> Destroy FragmentManagerImpl: %p", this);
 }
 
 ECode FragmentManagerImpl::BeginTransaction(
@@ -1663,11 +1661,10 @@ ECode FragmentManagerImpl::PopBackStackState(
         if (last < 0) return NOERROR;
         AutoPtr<IInterface> obj;
         mBackStack->Remove(last, (IInterface**)&obj);
-        IBackStackRecord* record = IBackStackRecord::Probe(obj);
+        BackStackRecord* bss = (BackStackRecord*)IBackStackRecord::Probe(obj);
         AutoPtr<ISparseArray> firstOutFragments, lastInFragments;
         CSparseArray::New((ISparseArray**)&firstOutFragments);
         CSparseArray::New((ISparseArray**)&lastInFragments);
-        BackStackRecord* bss = (BackStackRecord*)record;
         bss->CalculateBackFragments(firstOutFragments, lastInFragments);
         AutoPtr<IBackStackRecordTransitionState> tmp;
         bss->PopFromBackStack(TRUE, NULL, firstOutFragments, lastInFragments, (IBackStackRecordTransitionState**)&tmp);

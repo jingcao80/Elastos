@@ -38,6 +38,8 @@ public:
 
     CDownloadStorageProvider();
 
+    CARAPI constructor();
+
     CARAPI OnCreate(
         /* [out] */ Boolean* result);
 

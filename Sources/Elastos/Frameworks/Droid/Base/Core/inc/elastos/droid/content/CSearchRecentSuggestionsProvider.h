@@ -59,6 +59,8 @@ public:
 
     virtual ~CSearchRecentSuggestionsProvider();
 
+    CARAPI constructor();
+
     /**
      * This method is provided for use by the ContentResolver.  Do not override, or directly
      * call from your own code.

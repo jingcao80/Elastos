@@ -83,6 +83,12 @@ CDownloadStorageProvider::CDownloadStorageProvider()
     (*DEFAULT_DOCUMENT_PROJECTION)[6] = IDocumentsContractDocument::COLUMN_SIZE;
 }
 
+
+ECode CDownloadStorageProvider::constructor()
+{
+    return DocumentsProvider::constructor();
+}
+
 ECode CDownloadStorageProvider::OnCreate(
     /* [out] */ Boolean* result)
 {

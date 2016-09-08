@@ -51,6 +51,8 @@ module
     }
 
     class CDownloadIdleService {
+        constructor();
+        
         interface IService;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
@@ -86,6 +88,8 @@ module
     }
 
     class CDownloadReceiver {
+        constructor();
+
         interface IBroadcastReceiver;
         interface IDownloadReceiver;
     }
@@ -100,11 +104,15 @@ module
     }
 
     class CDownloadService {
+        constructor();
+
         interface IService;
         interface IDownloadService;
     }
 
     class CDownloadStorageProvider {
+        constructor();
+
         interface IContentProvider;
         interface IDownloadStorageProvider;
     }

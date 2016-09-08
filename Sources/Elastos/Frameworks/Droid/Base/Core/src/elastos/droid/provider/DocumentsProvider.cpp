@@ -59,6 +59,11 @@ DocumentsProvider::DocumentsProvider()
 DocumentsProvider::~DocumentsProvider()
 {}
 
+ECode DocumentsProvider::constructor()
+{
+    return ContentProvider::constructor();
+}
+
 //@Override
 ECode DocumentsProvider::AttachInfo(
     /* [in] */ IContext* context,
