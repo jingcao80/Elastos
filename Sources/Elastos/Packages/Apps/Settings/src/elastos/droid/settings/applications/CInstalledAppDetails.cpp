@@ -111,6 +111,63 @@ const Int32 CInstalledAppDetails::DLG_DISABLE_NOTIFICATIONS = DLG_BASE + 8;
 const Int32 CInstalledAppDetails::DLG_SPECIAL_DISABLE = DLG_BASE + 9;
 
 //===============================================================================
+//                  CInstalledAppDetails::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_3(CInstalledAppDetails::InnerListener, Object, IViewOnClickListener, ICompoundButtonOnCheckedChangeListener, IApplicationsStateCallbacks)
+
+CInstalledAppDetails::InnerListener::InnerListener(
+    /* [in] */ CInstalledAppDetails* host)
+    : mHost(host)
+{}
+
+ECode CInstalledAppDetails::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+ECode CInstalledAppDetails::InnerListener::OnCheckedChanged(
+    /* [in] */ ICompoundButton* buttonView,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnCheckedChanged(buttonView, isChecked);
+}
+
+ECode CInstalledAppDetails::InnerListener::OnRunningStateChanged(
+    /* [in] */ Boolean running)
+{
+    return mHost->OnRunningStateChanged(running);
+}
+
+ECode CInstalledAppDetails::InnerListener::OnPackageListChanged()
+{
+    return mHost->OnPackageListChanged();
+}
+
+ECode CInstalledAppDetails::InnerListener::OnRebuildComplete(
+    /* [in] */ IArrayList* apps)
+{
+    return mHost->OnRebuildComplete(apps);
+}
+
+ECode CInstalledAppDetails::InnerListener::OnPackageIconChanged()
+{
+    return mHost->OnPackageIconChanged();
+}
+
+ECode CInstalledAppDetails::InnerListener::OnPackageSizeChanged(
+    /* [in] */ const String& packageName)
+{
+    return mHost->OnPackageSizeChanged(packageName);
+}
+
+ECode CInstalledAppDetails::InnerListener::OnAllSizesComputed()
+{
+    return mHost->OnAllSizesComputed();
+}
+
+//===============================================================================
 //                  CInstalledAppDetails::MyAlertDialogFragment
 //===============================================================================
 
@@ -649,8 +706,6 @@ ECode CInstalledAppDetails::MyOnClickListener::OnClick(
 //                  CInstalledAppDetails
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(CInstalledAppDetails, Fragment, IViewOnClickListener, ICompoundButtonOnCheckedChangeListener, IApplicationsStateCallbacks)
-
 CAR_OBJECT_IMPL(CInstalledAppDetails)
 
 CInstalledAppDetails::CInstalledAppDetails()
@@ -672,6 +727,7 @@ CInstalledAppDetails::CInstalledAppDetails()
     CHashSet::New((IHashSet**)&mHomePackages);
     mHandler = new InitHandler(this);
     mCheckKillProcessesReceiver = new InitBroadcastReceiver(this);
+    mListener = new InnerListener(this);
 }
 
 CInstalledAppDetails::~CInstalledAppDetails()
@@ -723,7 +779,7 @@ void CInstalledAppDetails::InitDataButtons()
         else {
             clearDataButton1->SetText(R::string::clear_user_data_text);
         }
-        clearDataButton2->SetOnClickListener(this);
+        clearDataButton2->SetOnClickListener(mListener);
     }
 
     if (mAppControlRestricted) {
@@ -792,7 +848,7 @@ void CInstalledAppDetails::InitMoveButton()
         moveAppButton1->SetEnabled(FALSE);
     }
     else {
-        moveAppButton1->SetOnClickListener(this);
+        moveAppButton1->SetOnClickListener(mListener);
         moveAppButton1->SetEnabled(TRUE);
     }
 }
@@ -839,7 +895,7 @@ void CInstalledAppDetails::InitUninstallButtons()
         Boolean showSpecialDisable = FALSE;
         if (isBundled) {
             showSpecialDisable = HandleDisableable(mSpecialDisableButton);
-            IView::Probe(mSpecialDisableButton)->SetOnClickListener(this);
+            IView::Probe(mSpecialDisableButton)->SetOnClickListener(mListener);
         }
         if (mAppControlRestricted) {
             showSpecialDisable = FALSE;
@@ -916,7 +972,7 @@ void CInstalledAppDetails::InitUninstallButtons()
     _uninstallButton->SetEnabled(enabled);
     if (enabled) {
         // Register listener
-        _uninstallButton->SetOnClickListener(this);
+        _uninstallButton->SetOnClickListener(mListener);
     }
 }
 
@@ -943,7 +999,7 @@ void CInstalledAppDetails::InitNotificationButton()
     }
     else {
         notificationSwitch->SetEnabled(TRUE);
-        mNotificationSwitch->SetOnCheckedChangeListener(this);
+        mNotificationSwitch->SetOnCheckedChangeListener(mListener);
     }
 }
 
@@ -957,7 +1013,7 @@ ECode CInstalledAppDetails::OnCreate(
     AutoPtr<IApplication> application;
     _activity->GetApplication((IApplication**)&application);
     mState = ApplicationsState::GetInstance(application);
-    mSession = mState->NewSession(this);
+    mSession = mState->NewSession(mListener);
     IContext* activity = IContext::Probe(_activity);
     activity->GetPackageManager((IPackageManager**)&mPm);
     AutoPtr<IInterface> obj;
@@ -1541,7 +1597,7 @@ Boolean CInstalledAppDetails::RefreshUi()
         autoLaunchView->SetText(text);
         IView* activitiesButton = IView::Probe(mActivitiesButton);
         activitiesButton->SetEnabled(TRUE);
-        activitiesButton->SetOnClickListener(this);
+        activitiesButton->SetOnClickListener(mListener);
     }
 
     // Screen compatibility section.
@@ -1561,9 +1617,9 @@ Boolean CInstalledAppDetails::RefreshUi()
         Boolean res;
         am->GetPackageAskScreenCompat(packageName, &res);
         ICheckable::Probe(mAskCompatibilityCB)->SetChecked(res);
-        ICompoundButton::Probe(mAskCompatibilityCB)->SetOnCheckedChangeListener(this);
+        ICompoundButton::Probe(mAskCompatibilityCB)->SetOnCheckedChangeListener(mListener);
         ICheckable::Probe(mEnableCompatibilityCB)->SetChecked(compatMode == IActivityManager::COMPAT_MODE_ENABLED);
-        ICompoundButton::Probe(mEnableCompatibilityCB)->SetOnCheckedChangeListener(this);
+        ICompoundButton::Probe(mEnableCompatibilityCB)->SetOnCheckedChangeListener(mListener);
     }
     else {
         mScreenCompatSection->SetVisibility(IView::GONE);
@@ -1842,14 +1898,14 @@ void CInstalledAppDetails::RefreshSizeInfo()
         }
         else {
             clearDataButton->SetEnabled(TRUE);
-            clearDataButton->SetOnClickListener(this);
+            clearDataButton->SetOnClickListener(mListener);
         }
         if (cacheSize <= 0) {
             clearCacheButton->SetEnabled(FALSE);
         }
         else {
             clearCacheButton->SetEnabled(TRUE);
-            clearCacheButton->SetOnClickListener(this);
+            clearCacheButton->SetOnClickListener(mListener);
         }
     }
     if (mAppControlRestricted) {
@@ -1995,7 +2051,7 @@ void CInstalledAppDetails::UpdateForceStopButton(
     }
     else {
         forceStopButton->SetEnabled(enabled);
-        forceStopButton->SetOnClickListener(this);
+        forceStopButton->SetOnClickListener(mListener);
     }
 }
 

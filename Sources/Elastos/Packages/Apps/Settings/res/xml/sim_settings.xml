@@ -14,29 +14,29 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/sim_settings_title">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="sim_cards"
             android:title="@string/sim_settings_title" />
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="sim_activities"
             android:title="@string/sim_pref_divider">
 
-        <Elastos.Droid.Settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.Notification.CDropDownPreference
             android:key="sim_cellular_data"
             android:title="@string/cellular_data_title" />
 
-        <Elastos.Droid.Settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.Notification.CDropDownPreference
             android:key="sim_calls"
             android:title="@string/calls_title" />
 
-        <Elastos.Droid.Settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.Notification.CDropDownPreference
             android:key="sim_sms"
             android:title="@string/sms_messages_title" />
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

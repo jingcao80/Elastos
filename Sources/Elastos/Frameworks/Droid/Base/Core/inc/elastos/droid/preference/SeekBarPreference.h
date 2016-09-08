@@ -14,12 +14,12 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-class SeekBarPreference
+class ECO_PUBLIC SeekBarPreference
     : public Preference
     , public ISeekBarPreference
 {
 private:
-    class InnerListener
+    class ECO_LOCAL InnerListener
         : public Object
         , public ISeekBarOnSeekBarChangeListener
     {
@@ -125,7 +125,7 @@ protected:
         /* [in] */ IParcelable* state);
 
 private:
-    CARAPI SetProgress(
+    ECO_LOCAL CARAPI SetProgress(
         /* [in] */ Int32 progress,
         /* [in] */ Boolean notifyChanged);
 

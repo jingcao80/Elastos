@@ -96,7 +96,7 @@ static AutoPtr<IHashMap> InitsRankMap()
 
     // Notifications
     InitPut(map,
-            String("Elastos.Droid.Settings.Notification.NotificationSettings"),
+            String("Elastos.Droid.Settings.Notification.CNotificationSettings"),
             Ranking::RANK_NOTIFICATIONS);
     InitPut(map,
             String("Elastos.Droid.Settings.Notification.OtherSoundSettings"),

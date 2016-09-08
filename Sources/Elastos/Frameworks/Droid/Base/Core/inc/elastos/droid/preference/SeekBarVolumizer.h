@@ -33,7 +33,7 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-class SeekBarVolumizer
+class ECO_PUBLIC SeekBarVolumizer
     : public Object
     , public ISeekBarVolumizer
     , public IHandlerCallback
@@ -49,7 +49,7 @@ private:
         TO_STRING_IMPL("SeekBarVolumizer::InnerListener")
 
         InnerListener(
-            /* [in] */ SeekBarVolumizer* owner);
+            /* [in] */ SeekBarVolumizer* host);
 
         CARAPI OnProgressChanged(
             /* [in] */ ISeekBar* seekBar,
@@ -65,7 +65,7 @@ private:
         SeekBarVolumizer* mHost;
     };
 
-    class SeekBarVolumizerH
+    class ECO_LOCAL SeekBarVolumizerH
         : public Handler
     {
         friend class SeekBarVolumizer;
@@ -73,7 +73,7 @@ private:
         TO_STRING_IMPL("SeekBarVolumizer::SeekBarVolumizerH")
 
         SeekBarVolumizerH(
-            /* [in] */ SeekBarVolumizer* owner);
+            /* [in] */ SeekBarVolumizer* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
@@ -86,16 +86,16 @@ private:
         SeekBarVolumizer* mHost;
     };
 
-    class SeekBarVolumizerObserver
+    class ECO_LOCAL SeekBarVolumizerObserver
         : public ContentObserver
     {
         friend class SeekBarVolumizer;
     public:
         TO_STRING_IMPL("SeekBarVolumizer::SeekBarVolumizerObserver")
 
-        SeekBarVolumizerObserver(
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
-            /* [in] */ SeekBarVolumizer* owner);
+            /* [in] */ SeekBarVolumizer* host);
 
         //@Override
         CARAPI OnChange(
@@ -104,7 +104,7 @@ private:
         SeekBarVolumizer* mHost;
     };
 
-    class SeekBarVolumizerReceiver
+    class ECO_LOCAL SeekBarVolumizerReceiver
         : public BroadcastReceiver
     {
         friend class SeekBarVolumizer;
@@ -112,7 +112,7 @@ private:
         TO_STRING_IMPL("SeekBarVolumizer::SeekBarVolumizerReceiver")
 
         SeekBarVolumizerReceiver(
-            /* [in] */ SeekBarVolumizer* owner);
+            /* [in] */ SeekBarVolumizer* host);
 
         CARAPI_(void) SetListening(
             /* [in] */ Boolean listening);
@@ -186,13 +186,13 @@ public:
         /* [in] */ IVolumePreferenceVolumeStore* volumeStore);
 
 private:
-    CARAPI_(void) OnInitSample();
-    CARAPI_(void) PostStartSample();
-    CARAPI_(void) OnStartSample();
-    CARAPI_(void) OnStopSample();
+    ECO_LOCAL CARAPI_(void) OnInitSample();
+    ECO_LOCAL CARAPI_(void) PostStartSample();
+    ECO_LOCAL CARAPI_(void) OnStartSample();
+    ECO_LOCAL CARAPI_(void) OnStopSample();
 
 private:
-    const static String TAG;
+    ECO_LOCAL const static String TAG;
     AutoPtr<IContext> mContext;
     AutoPtr<IHandler> mHandler;
     AutoPtr<SeekBarVolumizerH> mUiHandler;
@@ -210,11 +210,11 @@ private:
     AutoPtr<ISeekBar> mSeekBar;
     Int32 mVolumeBeforeMute;
 
-    const static Int32 MSG_SET_STREAM_VOLUME = 0;
-    const static Int32 MSG_START_SAMPLE = 1;
-    const static Int32 MSG_STOP_SAMPLE = 2;
-    const static Int32 MSG_INIT_SAMPLE = 3;
-    const static Int32 CHECK_RINGTONE_PLAYBACK_DELAY_MS = 1000;
+    ECO_LOCAL const static Int32 MSG_SET_STREAM_VOLUME = 0;
+    ECO_LOCAL const static Int32 MSG_START_SAMPLE = 1;
+    ECO_LOCAL const static Int32 MSG_STOP_SAMPLE = 2;
+    ECO_LOCAL const static Int32 MSG_INIT_SAMPLE = 3;
+    ECO_LOCAL const static Int32 CHECK_RINGTONE_PLAYBACK_DELAY_MS = 1000;
 };
 
 } // Preference

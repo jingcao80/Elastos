@@ -14,21 +14,21 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/battery_saver"
         android:key="battery_saver">
 
     <!-- Turn on automatically -->
-    <Elastos.Droid.Settings.notification.DropDownPreference
+    <Elastos.Droid.Settings.Notification.CDropDownPreference
             android:key="turn_on_automatically"
             android:title="@string/battery_saver_turn_on_automatically_title"
             android:persistent="false" />
 
     <!-- Feature description text -->
-    <Preference
+    <Elastos.Droid.Preference.CPreference
             android:key="description"
             android:summary="@*android:string/battery_saver_description"
             android:persistent="false"
             android:selectable="false" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

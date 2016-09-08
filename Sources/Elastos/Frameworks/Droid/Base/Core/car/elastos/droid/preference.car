@@ -450,7 +450,7 @@ module
             interface IPreferenceGroup;
             interface IPreference;
             interface IComparable;
-            // interface IGenericInflaterParent;
+            interface IGenericInflaterParent;
         }
 
         [local]

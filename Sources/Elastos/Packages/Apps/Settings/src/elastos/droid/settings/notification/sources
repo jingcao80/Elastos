@@ -1,0 +1,13 @@
+TARGET_NAME = notification
+TARGET_TYPE = lib
+
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../
+
+SOURCES += CDropDownPreference.cpp
+SOURCES += CNotificationSettings.cpp
+SOURCES += CVolumeSeekBarPreference.cpp
+SOURCES += ManagedServiceSettings.cpp
+SOURCES += CNotificationAccessSettings.cpp
+SOURCES += notification.cpp

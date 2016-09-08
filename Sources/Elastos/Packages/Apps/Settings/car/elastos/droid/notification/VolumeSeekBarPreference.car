@@ -1,0 +1,23 @@
+module
+{
+    using interface Elastos.Droid.Preference.ISeekBarVolumizer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Notification {
+
+    interface IVolumeSeekBarPreferenceCallback {
+        OnSampleStarting(
+            [in] ISeekBarVolumizer* sbv);
+
+        OnStreamValueChanged(
+            [in] Int32 stream,
+            [in] Int32 progress);
+    }
+
+    } // namespace Notification
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

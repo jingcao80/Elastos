@@ -39,11 +39,38 @@ namespace Applications {
 
 CarClass(CRunningProcessesView)
     , public FrameLayout
-    , public IAdapterViewOnItemClickListener
-    , public IRecyclerListener
-    , public IRunningStateOnRefreshUiListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+        , public IRecyclerListener
+        , public IRunningStateOnRefreshUiListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        TO_STRING_IMPL("CRunningProcessesView::InnerListener")
+
+        InnerListener(
+            /* [in] */ CRunningProcessesView* host);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* v,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        CARAPI OnMovedToScrapHeap(
+            /* [in] */ IView* view);
+
+        CARAPI OnRefreshUi(
+            /* [in] */ Int32 what);
+
+    private:
+        CRunningProcessesView* mHost;
+    };
+
     class ViewHolder;
 
     class ActiveItem
@@ -173,8 +200,6 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL()
 
     CRunningProcessesView();
@@ -256,6 +281,8 @@ public:
     AutoPtr<IDialog> mCurDialog;
 
     AutoPtr<IMemInfoReader> mMemInfoReader;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Applications

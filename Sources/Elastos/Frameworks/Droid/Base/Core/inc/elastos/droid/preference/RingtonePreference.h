@@ -15,12 +15,12 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-class RingtonePreference
+class ECO_PUBLIC RingtonePreference
     : public Preference
     , public IRingtonePreference
 {
 private:
-    class InnerListener
+    class ECO_LOCAL InnerListener
         : public Object
         , public IPreferenceManagerOnActivityResultListener
     {
@@ -126,7 +126,7 @@ protected:
         /* [in] */ IPreferenceManager* preferenceManager);
 
 private:
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
     // TODO: Add your private member variables here.
     Int32 mRingtoneType;
     Boolean mShowDefault;

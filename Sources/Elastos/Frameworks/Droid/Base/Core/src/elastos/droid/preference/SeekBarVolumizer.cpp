@@ -67,6 +67,7 @@ SeekBarVolumizer::SeekBarVolumizerH::SeekBarVolumizerH(
     : mHost(host)
 {
 }
+
 ECode SeekBarVolumizer::SeekBarVolumizerH::HandleMessage(
     /* [in] */ IMessage* msg)
 {
@@ -94,12 +95,12 @@ ECode SeekBarVolumizer::SeekBarVolumizerH::PostUpdateSlider(
 
 //**************SeekBarVolumizer::SeekBarVolumizerObserver***************//
 
-SeekBarVolumizer::SeekBarVolumizerObserver::SeekBarVolumizerObserver(
+ECode SeekBarVolumizer::SeekBarVolumizerObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ SeekBarVolumizer* host)
-    : mHost(host)
 {
-    ContentObserver::constructor(handler);
+    mHost = host;
+    return ContentObserver::constructor(handler);
 }
 
 ECode SeekBarVolumizer::SeekBarVolumizerObserver::OnChange(
@@ -207,7 +208,8 @@ ECode SeekBarVolumizer::constructor(
     CHandler::New(looper, this, FALSE, (IHandler**)&mHandler);
     mCallback = callback;
     mAudioManager->GetStreamVolume(mStreamType, &mOriginalStreamVolume);
-    mVolumeObserver = new SeekBarVolumizerObserver(mHandler, this);
+    mVolumeObserver = new SeekBarVolumizerObserver();
+    mVolumeObserver->constructor(mHandler, this);
 
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);

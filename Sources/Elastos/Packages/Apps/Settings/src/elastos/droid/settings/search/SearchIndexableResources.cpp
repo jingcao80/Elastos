@@ -79,7 +79,7 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_display);
 
-    InitPut(map, String("Elastos.Droid.Settings.Notification.NotificationSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Notification.CNotificationSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_notifications);
 
