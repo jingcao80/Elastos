@@ -1,0 +1,48 @@
+module
+{
+    using interface Elastos.Droid.View.IMotionEvent;
+
+    submodule Elastos.Droid.Support.V4.View {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Support {
+    namespace V4 {
+    namespace View {
+
+    interface IMotionEventVersionImpl {
+
+        FindPointerIndex(
+            [in] IMotionEvent* event,
+            [in] Int32 pointerId,
+            [out] Int32* index);
+
+        GetPointerId(
+            [in] IMotionEvent* event,
+            [in] Int32 pointerIndex,
+            [out] Int32* id);
+
+        GetX(
+            [in] IMotionEvent* event,
+            [in] Int32 pointerIndex,
+            [out] Float* x);
+
+        GetY(
+            [in] IMotionEvent* event,
+            [in] Int32 pointerIndex,
+            [out] Float* y);
+
+        GetPointerCount(
+            [in] IMotionEvent* event,
+            [out] Int32* count);
+
+    }
+
+    } // namespace View
+    } // namespace V4
+    } // namespace Support
+    } // namespace Droid
+    } // namespace Elastos
+
+    } // submodule
+}

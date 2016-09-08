@@ -3,6 +3,7 @@ TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../../Frameworks/Droid/Support/V4/inc
 INCLUDES += ../../../../../
 
 SOURCES += ActionBarController.cpp
