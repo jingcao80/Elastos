@@ -1,0 +1,94 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.IX509KeyManager;
+    using interface Elastosx.Net.Ssl.IX509TrustManager;
+    using interface Elastosx.Security.Auth.X500.IX500Principal;
+    using interface Elastosx.Crypto.ISecretKey;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /**
+     * For abstracting the X509KeyManager calls between
+     * {@link X509KeyManager#chooseClientAlias(String[], java.security.Principal[], java.net.Socket)}
+     * and
+     * {@link X509ExtendedKeyManager#chooseEngineClientAlias(String[], java.security.Principal[], javax.net.ssl.SSLEngine)}
+     */
+    [deprecated]
+    interface ISSLParametersImplAliasChooser {
+        ChooseClientAlias(
+            [in] IX509KeyManager* keyManager,
+            [in] ArrayOf<IX500Principal*>* issuers,
+            [in] ArrayOf<String>* keyTypes,
+            [out] String* result);
+
+        ChooseServerAlias(
+            [in] IX509KeyManager* keyManager,
+            [in] String keyType,
+            [out] String* result);
+    }
+
+    /**
+     * For abstracting the {@code PSKKeyManager} calls between those taking an {@code SSLSocket} and
+     * those taking an {@code SSLEngine}.
+     */
+    interface ISSLParametersImplPSKCallbacks {
+        ChooseServerPSKIdentityHint(
+            [in] IPSKKeyManager* keyManager,
+            [out] String* result);
+
+        ChooseClientPSKIdentity(
+            [in] IPSKKeyManager* keyManager,
+            [in] String identityHint,
+            [out] String* result);
+
+        GetPSKKey(
+            [in] IPSKKeyManager* keyManager,
+            [in] String identityHint,
+            [in] String identity,
+            [out] ISecretKey** result);
+    }
+
+    /*
+     * @Involve
+     * interface ICloneable
+     */
+    interface ISSLParametersImpl {
+        /**
+         * Returns the appropriate session context.
+         */
+        // GetSessionContext(
+        //     [out] IAbstractSessionContext** result);
+
+        GetEndpointIdentificationAlgorithm(
+            [out] String* result);
+
+        SetEndpointIdentificationAlgorithm(
+            [in] String endpointIdentificationAlgorithm);
+    }
+
+    [local]
+    interface ISSLParametersImplHelper {
+        /**
+         * Gets the default X.509 trust manager.
+         *
+         * TODO: Move this to a published API under dalvik.system.
+         */
+        GetDefaultX509TrustManager(
+            [out] IX509TrustManager** result);
+
+        /**
+         * Similar to getServerKeyType, but returns value given TLS
+         * ClientCertificateType byte values from a CertificateRequest
+         * message for use with X509KeyManager.chooseClientAlias or
+         * X509ExtendedKeyManager.chooseEngineClientAlias.
+         */
+        GetClientKeyType(
+            [in] Byte keyType,
+            [out] String* result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

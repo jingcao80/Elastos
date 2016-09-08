@@ -1,0 +1,16 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.ISSLSession;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface ISSLNullSessionHelper {
+        GetNullSession(
+            [out] ISSLSession** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

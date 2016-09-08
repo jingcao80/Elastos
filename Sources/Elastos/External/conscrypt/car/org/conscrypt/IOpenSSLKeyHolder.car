@@ -1,0 +1,14 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLKeyHolder {
+        // GetOpenSSLKey(
+        //     [out] IOpenSSLKey** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

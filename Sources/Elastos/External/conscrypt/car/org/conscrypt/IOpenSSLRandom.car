@@ -1,0 +1,13 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLRandom {
+        SeedOpenSSLPRNGFromLinuxRNG();
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

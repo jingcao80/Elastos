@@ -1,0 +1,23 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Security.Cert.ICertPath;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLX509CertPathHelper {
+        FromEncoding(
+            [in] IInputStream* inStream,
+            [in] String encoding,
+            [out] ICertPath** result);
+
+        FromEncoding(
+            [in] IInputStream* inStream,
+            [out] ICertPath** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

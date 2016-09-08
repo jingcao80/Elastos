@@ -1,0 +1,110 @@
+
+module
+{
+    using interface Elastos.Net.ISocket;
+    // using interface Elastos.Net.Ssl.ISSLEngine;
+    using interface Elastosx.Crypto.ISecretKey;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IKeyManager
+     */
+    interface IPSKKeyManager {
+        /**
+         * Maximum supported length (in bytes) for PSK identity hint (in modified UTF-8 representation).
+         */
+        const Int32 MAX_IDENTITY_HINT_LENGTH_BYTES = 128;
+
+        /** Maximum supported length (in bytes) for PSK identity (in modified UTF-8 representation). */
+        const Int32 MAX_IDENTITY_LENGTH_BYTES = 128;
+
+        /** Maximum supported length (in bytes) for PSK key. */
+        const Int32 MAX_KEY_LENGTH_BYTES = 256;
+
+        /**
+         * Gets the PSK identity hint to report to the client to help agree on the PSK for the provided
+         * socket.
+         *
+         * @return PSK identity hint to be provided to the client or {@code null} to provide no hint.
+         */
+        ChooseServerKeyIdentityHint(
+            [in] ISocket* socket,
+            [out] String* result);
+
+        /**
+         * Gets the PSK identity hint to report to the client to help agree on the PSK for the provided
+         * engine.
+         *
+         * @return PSK identity hint to be provided to the client or {@code null} to provide no hint.
+         */
+        // ChooseServerKeyIdentityHint(
+        //     [in] ISSLEngine* engine,
+        //     [out] String* result);
+
+        /**
+         * Gets the PSK identity to report to the server to help agree on the PSK for the provided
+         * socket.
+         *
+         * @param identityHint identity hint provided by the server or {@code null} if none provided.
+         *
+         * @return PSK identity to provide to the server. {@code null} is permitted but will be
+         *         converted into an empty string.
+         */
+        ChooseClientKeyIdentity(
+            [in] String identityHint,
+            [in] ISocket* socket,
+            [out] String* result);
+
+        /**
+         * Gets the PSK identity to report to the server to help agree on the PSK for the provided
+         * engine.
+         *
+         * @param identityHint identity hint provided by the server or {@code null} if none provided.
+         *
+         * @return PSK identity to provide to the server. {@code null} is permitted but will be
+         *         converted into an empty string.
+         */
+        // ChooseClientKeyIdentity(
+        //     [in] String identityHint,
+        //     [in] ISSLEngine* engine,
+        //     [out] String* result);
+
+        /**
+         * Gets the PSK to use for the provided socket.
+         *
+         * @param identityHint identity hint provided by the server to help select the key or
+         *        {@code null} if none provided.
+         * @param identity identity provided by the client to help select the key.
+         *
+         * @return key or {@code null} to signal to peer that no suitable key is available and to abort
+         *         the handshake.
+         */
+        GetKey(
+            [in] String identityHint,
+            [in] String identity,
+            [in] ISocket* socket,
+            [out] ISecretKey** result);
+
+        /**
+         * Gets the PSK to use for the provided engine.
+         *
+         * @param identityHint identity hint provided by the server to help select the key or
+         *        {@code null} if none provided.
+         * @param identity identity provided by the client to help select the key.
+         *
+         * @return key or {@code null} to signal to peer that no suitable key is available and to abort
+         *         the handshake.
+         */
+        // GetKey(
+        //     [in] String identityHint,
+        //     [in] String identity,
+        //     [in] ISSLEngine* engine,
+        //     [out] ISecretKey** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

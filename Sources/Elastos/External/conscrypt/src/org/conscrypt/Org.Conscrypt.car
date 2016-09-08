@@ -6,7 +6,22 @@ module
     merge("../../../car/org/conscrypt/INativeCrypto.car");
     merge("../../../car/org/conscrypt/IOpenSSLBIOInputStream.car");
     merge("../../../car/org/conscrypt/IOpenSSLDigestContext.car");
+    merge("../../../car/org/conscrypt/IOpenSSLKeyHolder.car");
     merge("../../../car/org/conscrypt/IOpenSSLNativeReference.car");
+    merge("../../../car/org/conscrypt/IOpenSSLRandom.car");
+    merge("../../../car/org/conscrypt/IOpenSSLSecretKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLServerSocketImpl.car");
+    merge("../../../car/org/conscrypt/IOpenSSLSocketImpl.car");
+    merge("../../../car/org/conscrypt/IOpenSSLX509CRL.car");
+    merge("../../../car/org/conscrypt/IOpenSSLX509CertPath.car");
+    merge("../../../car/org/conscrypt/IOpenSSLX509Certificate.car");
+    merge("../../../car/org/conscrypt/IPSKKeyManager.car");
+    merge("../../../car/org/conscrypt/ISSLClientSessionCache.car");
+    merge("../../../car/org/conscrypt/ISSLNullSession.car");
+    merge("../../../car/org/conscrypt/ISSLParametersImpl.car");
+    merge("../../../car/org/conscrypt/ISSLRecordProtocol.car");
+    merge("../../../car/org/conscrypt/ISSLServerSessionCache.car");
+    merge("../../../car/org/conscrypt/IServerSessionContext.car");
 
     using interface Elastos.Security.IProvider;
 

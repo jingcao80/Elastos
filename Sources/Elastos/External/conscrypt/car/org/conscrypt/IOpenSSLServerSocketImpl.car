@@ -1,0 +1,23 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLServerSocketImpl {
+        /**
+         * Enables/disables the TLS Channel ID extension for this server socket.
+         */
+        SetChannelIdEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Checks whether the TLS Channel ID extension is enabled for this server socket.
+         */
+        IsChannelIdEnabled(
+            [out] Boolean* result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

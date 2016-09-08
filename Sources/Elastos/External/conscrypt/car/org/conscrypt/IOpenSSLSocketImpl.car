@@ -1,0 +1,125 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    [deprecated]
+    interface IOpenSSLSocketImpl {
+        /**
+         * This method enables session ticket support.
+         *
+         * @param useSessionTickets True to enable session tickets
+         */
+        SetUseSessionTickets(
+            [in] Boolean useSessionTickets);
+
+        /**
+         * This method enables Server Name Indication
+         *
+         * @param hostname the desired SNI hostname, or null to disable
+         */
+        SetHostname(
+            [in] String hostname);
+
+        /**
+         * Enables/disables TLS Channel ID for this server socket.
+         *
+         * <p>This method needs to be invoked before the handshake starts.
+         *
+         * @throws IllegalStateException if this is a client socket or if the handshake has already
+         *         started.
+         */
+        SetChannelIdEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Gets the TLS Channel ID for this server socket. Channel ID is only available once the
+         * handshake completes.
+         *
+         * @return channel ID or {@code null} if not available.
+         *
+         * @throws IllegalStateException if this is a client socket or if the handshake has not yet
+         *         completed.
+         * @throws SSLException if channel ID is available but could not be obtained.
+         */
+        GetChannelId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Sets the {@link PrivateKey} to be used for TLS Channel ID by this client socket.
+         *
+         * <p>This method needs to be invoked before the handshake starts.
+         *
+         * @param privateKey private key (enables TLS Channel ID) or {@code null} for no key (disables
+         *        TLS Channel ID). The private key must be an Elliptic Curve (EC) key based on the NIST
+         *        P-256 curve (aka SECG secp256r1 or ANSI X9.62 prime256v1).
+         *
+         * @throws IllegalStateException if this is a server socket or if the handshake has already
+         *         started.
+         */
+        // SetChannelIdPrivateKey(
+        //     [in] IPrivateKey* privateKey);
+
+        /**
+         * Note write timeouts are not part of the javax.net.ssl.SSLSocket API
+         */
+        SetSoWriteTimeout(
+            [in] Int32 writeTimeoutMilliseconds);
+
+        /**
+         * Note write timeouts are not part of the javax.net.ssl.SSLSocket API
+         */
+        GetSoWriteTimeout(
+            [out] Int32* result);
+
+        /**
+         * Set the handshake timeout on this socket.  This timeout is specified in
+         * milliseconds and will be used only during the handshake process.
+         */
+        SetHandshakeTimeout(
+            [in] Int32 handshakeTimeoutMilliseconds);
+
+        /**
+         * Returns the protocol agreed upon by client and server, or null if no
+         * protocol was agreed upon.
+         */
+        GetNpnSelectedProtocol(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Returns the protocol agreed upon by client and server, or {@code null} if
+         * no protocol was agreed upon.
+         */
+        GetAlpnSelectedProtocol(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Sets the list of protocols this peer is interested in. If null no
+         * protocols will be used.
+         *
+         * @param npnProtocols a non-empty array of protocol names. From
+         *     SSL_select_next_proto, "vector of 8-bit, length prefixed byte
+         *     strings. The length byte itself is not included in the length. A byte
+         *     string of length 0 is invalid. No byte string may be truncated.".
+         */
+        SetNpnProtocols(
+            [in] ArrayOf<Byte>* npnProtocols);
+
+        /**
+         * Sets the list of protocols this peer is interested in. If the list is
+         * {@code null}, no protocols will be used.
+         *
+         * @param alpnProtocols a non-empty array of protocol names. From
+         *            SSL_select_next_proto, "vector of 8-bit, length prefixed byte
+         *            strings. The length byte itself is not included in the length.
+         *            A byte string of length 0 is invalid. No byte string may be
+         *            truncated.".
+         */
+        SetAlpnProtocols(
+            [in] ArrayOf<Byte>* alpnProtocols);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

@@ -1,0 +1,51 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Security.Cert.ICertificate;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLX509Certificate {
+        /**
+         * Returns the raw pointer to the X509 context for use in JNI calls. The
+         * life cycle of this native pointer is managed by the
+         * {@code OpenSSLX509Certificate} instance and must not be destroyed or
+         * freed by users of this API.
+         */
+        GetContext(
+            [out] Int64* result);
+    }
+
+    [deprecated]
+    interface IOpenSSLX509CertificateHelper {
+        FromX509DerInputStream(
+            [in] IInputStream* is,
+            [out] IOpenSSLX509Certificate** result);
+
+        FromX509Der(
+            [in] ArrayOf<Byte>* encoded,
+            [out] IOpenSSLX509Certificate** result);
+
+        FromPkcs7DerInputStream(
+            [in] IInputStream* is,
+            [out] IList** result);
+
+        FromX509PemInputStream(
+            [in] IInputStream* is,
+            [out] IOpenSSLX509Certificate** result);
+
+        FromPkcs7PemInputStream(
+            [in] IInputStream* is,
+            [out] IList** result);
+
+        FromCertificate(
+            [in] ICertificate* cert,
+            [out] IOpenSSLX509Certificate** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

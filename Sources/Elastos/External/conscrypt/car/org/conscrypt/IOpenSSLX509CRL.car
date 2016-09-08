@@ -1,0 +1,33 @@
+
+module
+{
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Utility.IList;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLX509CRL {
+    }
+
+    interface IOpenSSLX509CRLHelper {
+        FromX509DerInputStream(
+            [in] IInputStream* is,
+            [out] IOpenSSLX509CRL** result);
+
+        FromPkcs7DerInputStream(
+            [in] IInputStream* is,
+            [out] IList** result);
+
+        FromX509PemInputStream(
+            [in] IInputStream* is,
+            [out] IOpenSSLX509CRL** result);
+
+        FromPkcs7PemInputStream(
+            [in] IInputStream* is,
+            [out] IList** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

@@ -1,0 +1,18 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IAbstractSessionContext
+     */
+    interface IServerSessionContext {
+        SetPersistentCache(
+            [in] ISSLServerSessionCache* persistentCache);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}
