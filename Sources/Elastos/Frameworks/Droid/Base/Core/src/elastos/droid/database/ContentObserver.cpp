@@ -6,7 +6,6 @@
 #include "elastos/droid/os/UserHandle.h"
 #include <elastos/core/AutoLock.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::UserHandle;
 

@@ -95,6 +95,11 @@ CSearchRecentSuggestionsProvider::CSearchRecentSuggestionsProvider()
 CSearchRecentSuggestionsProvider::~CSearchRecentSuggestionsProvider()
 {}
 
+ECode CSearchRecentSuggestionsProvider::constructor()
+{
+    return ContentProvider::constructor();
+}
+
 ECode CSearchRecentSuggestionsProvider::Delete(
     /* [in] */ IUri* uri,
     /* [in] */ const String& selection,

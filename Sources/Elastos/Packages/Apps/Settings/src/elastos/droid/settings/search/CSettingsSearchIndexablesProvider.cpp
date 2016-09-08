@@ -34,7 +34,7 @@ CSettingsSearchIndexablesProvider::~CSettingsSearchIndexablesProvider()
 
 ECode CSettingsSearchIndexablesProvider::constructor()
 {
-    return NOERROR;
+    return SearchIndexablesProvider::constructor();
 }
 
 ECode CSettingsSearchIndexablesProvider::OnCreate(

@@ -27,6 +27,8 @@ namespace Telephony {
 class ECO_PUBLIC IccProvider: public ContentProvider
 {
 public:
+    CARAPI constructor();
+
     // @Override
     CARAPI OnCreate(
         /* [out] */ Boolean* result);

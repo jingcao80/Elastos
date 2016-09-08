@@ -944,7 +944,7 @@ ECode LoadedPkg::GetClassLoader(
         }
     }
 
-    Slogger::V(TAG, "GetClassLoader for %s : %s", mPackageName.string(), TO_CSTR(mClassLoader));
+    // Slogger::V(TAG, "GetClassLoader for %s : %s", mPackageName.string(), TO_CSTR(mClassLoader));
     *loader = mClassLoader;
     REFCOUNT_ADD(*loader)
     return NOERROR;

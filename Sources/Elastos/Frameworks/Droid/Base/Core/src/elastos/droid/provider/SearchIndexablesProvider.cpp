@@ -27,13 +27,13 @@ const Int32 SearchIndexablesProvider::MATCH_RES_CODE = 1;
 const Int32 SearchIndexablesProvider::MATCH_RAW_CODE = 2;
 const Int32 SearchIndexablesProvider::MATCH_NON_INDEXABLE_KEYS_CODE = 3;
 
+CAR_INTERFACE_IMPL(SearchIndexablesProvider, ContentProvider, ISearchIndexablesProvider)
+
 SearchIndexablesProvider::SearchIndexablesProvider()
 {}
 
 SearchIndexablesProvider::~SearchIndexablesProvider()
 {}
-
-CAR_INTERFACE_IMPL(SearchIndexablesProvider, ContentProvider, ISearchIndexablesProvider)
 
 ECode SearchIndexablesProvider::constructor()
 {

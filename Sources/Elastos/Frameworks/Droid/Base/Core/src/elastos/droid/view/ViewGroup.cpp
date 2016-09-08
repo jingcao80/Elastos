@@ -1111,6 +1111,7 @@ CAR_INTERFACE_IMPL_3(ViewGroup, View, IViewGroup, IViewParent, IViewManager)
 ViewGroup::ViewGroup()
     : mGroupFlags(0)
     , mPersistentDrawingCache(0)
+    , mCurrentDragView(NULL)
     , mChildAcceptsDrag(FALSE)
     , mLastTouchDownTime(0)
     , mLastTouchDownIndex(-1)
@@ -1123,10 +1124,21 @@ ViewGroup::ViewGroup()
     , mLayoutCalledWhileSuppressed(FALSE)
     , mChildCountWithTransientState(0)
 {
-    CTransformation::New((ITransformation**)&mChildTransformation);
-    CPointF::New((IPointF**)&mLocalPoint);
+}
 
-    mLayoutTransitionListener = new LayoutTransitionListener(this);
+ViewGroup::~ViewGroup()
+{
+    mDisappearingChildren = NULL;
+    mFocused = NULL;
+    mCurrentDragView = NULL;
+    mCurrentDrag = NULL;
+    mDragNotifiedChildren.Clear();
+    mFirstTouchTarget = NULL;
+    mFirstHoverTarget = NULL;
+    mChildren = NULL;
+    mTransitioningViews.Clear();
+    mVisibilityChangingChildren.Clear();
+    mPreSortedChildren = NULL;
 }
 
 ECode ViewGroup::constructor(
@@ -1157,6 +1169,12 @@ ECode ViewGroup::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     FAIL_RETURN(View::constructor(context, attrs, defStyleAttr, defStyleRes))
+
+    CTransformation::New((ITransformation**)&mChildTransformation);
+    CPointF::New((IPointF**)&mLocalPoint);
+
+    mLayoutTransitionListener = new LayoutTransitionListener(this);
+
     InitViewGroup();
     InitFromAttributes(context, attrs, defStyleAttr, defStyleRes);
     return NOERROR;

@@ -83,6 +83,11 @@ AutoPtr<IUriMatcher> IccProvider::InitUriMatcher()
     return um;
 }
 
+ECode IccProvider::constructor()
+{
+    return ContentProvider::constructor();
+}
+
 // @Override
 ECode IccProvider::OnCreate(
     /* [out] */ Boolean* result)

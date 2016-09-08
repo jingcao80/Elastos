@@ -570,9 +570,11 @@ private:
 
 public:
 
+    CAR_INTERFACE_DECL()
+
     ViewGroup();
 
-    CAR_INTERFACE_DECL()
+    ~ViewGroup();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
