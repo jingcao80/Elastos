@@ -395,37 +395,32 @@ Int32 CopyFunc(ArrayOf<T>* dstArray, Int32 dstOffset, T const* src, Int32 srcOff
         return copyCount;
     }
 
-    T prb = NULL;
     dst += dstOffset;
     src += srcOffset;
 
     Boolean isOverlap = (isSelfCopy && (dstOffset > srcOffset) && (dstOffset < srcOffset + copyCount));
     if (isOverlap) {
         for (Int32 i = copyCount - 1; i >= 0; --i) {
-            prb = *(src + i);
-            if (prb) {
-                prb->AddRef();
+            if (*(src + i) == *(dst + i)) {
+                continue;
             }
 
-            prb = *(dst + i);
-            if (prb) {
-                prb->Release();
-            }
+            if (*(src + i)) (*(src + i))->AddRef();
+            if (*(dst + i)) (*(dst + i))->Release();
 
             *(dst + i) = *(src + i);
         }
     }
     else {
         for (Int32 i = 0; i < copyCount; ++i) {
-            prb = *src;
-            if (prb) {
-                prb->AddRef();
+            if (*src == *dst) {
+                ++dst;
+                ++src;
+                continue;
             }
 
-            prb = *dst;
-            if (prb) {
-                prb->Release();
-            }
+            if (*src) (*src)->AddRef();
+            if (*dst) (*dst)->Release();
 
             *dst++ = *src++;
         }
