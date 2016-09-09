@@ -731,8 +731,10 @@ ActionBarView::ActionBarView()
     , mMenuPrepared(FALSE)
     , mDefaultUpDescription(R::string::action_bar_up_description)
 {
-    mExpandedActionViewUpListener = new InnerOnClickListener(this);
-    mUpClickListener = new InnerOnClickListener1(this);
+}
+
+ActionBarView::~ActionBarView()
+{
 }
 
 ECode ActionBarView::constructor(
@@ -740,6 +742,9 @@ ECode ActionBarView::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     AbsActionBarView::constructor(context, attrs);
+
+    mExpandedActionViewUpListener = new InnerOnClickListener(this);
+    mUpClickListener = new InnerOnClickListener1(this);
 
     // Background is always provided by the container.
     SetBackgroundResource(0);

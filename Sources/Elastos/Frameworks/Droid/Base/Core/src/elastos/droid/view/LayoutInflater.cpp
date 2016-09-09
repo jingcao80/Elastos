@@ -278,7 +278,6 @@ void LayoutInflater::BlinkLayout::MakeBlink()
 //=======================================================================================
 
 CAR_INTERFACE_IMPL_2(LayoutInflater::FactoryMerger, Object, ILayoutInflaterFactory, ILayoutInflaterFactory2)
-CAR_INTERFACE_IMPL(LayoutInflater, Object, ILayoutInflater)
 
 LayoutInflater::FactoryMerger::FactoryMerger(
     /* [in] */ ILayoutInflaterFactory* f1,
@@ -346,6 +345,8 @@ ECode LayoutInflater::FactoryMerger::OnCreateView(
 //=======================================================================================
 // LayoutInflater
 //=======================================================================================
+CAR_INTERFACE_IMPL(LayoutInflater, Object, ILayoutInflater)
+
 LayoutInflater::LayoutInflater()
     : mContext(NULL)
     , mFactorySet(FALSE)
@@ -892,6 +893,16 @@ ECode LayoutInflater::CreateViewFromTag(
     if (themeResId != 0) {
         // mContext of class View is naked pointer
         AutoPtr<ContextThemeWrapperHolder> themeContex = new ContextThemeWrapperHolder();
+
+        String name = TO_STR(viewContext);
+        if (name.Contains("BasePackageName=android OpPackageName=android")) {
+            themeContex->mMemoryLeakTarget = TRUE;
+            Slogger::I(TAG, " >>================================================");
+            Slogger::I(TAG, " >> %p Create ContextThemeWrapperHolder %p: for %s",
+                this, themeContex.Get(), name.string());
+            Slogger::I(TAG, " >>================================================");
+        }
+
         themeContex->constructor(viewContext, themeResId, FALSE/* do not hold */);
         viewContext = themeContex;
     }

@@ -75,6 +75,8 @@ public:
 
     ActionBarContainer();
 
+    ~ActionBarContainer();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 

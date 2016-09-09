@@ -118,6 +118,10 @@ ActionBarContainer::ActionBarContainer()
 {
 }
 
+ActionBarContainer::~ActionBarContainer()
+{
+}
+
 ECode ActionBarContainer::constructor(
     /* [in] */ IContext* context)
 {
@@ -159,8 +163,8 @@ ECode ActionBarContainer::OnFinishInflate()
 {
     FAIL_RETURN(FrameLayout::OnFinishInflate());
     mActionBarView = NULL;
-    FindViewById(R::id::action_bar, (IView**)&mActionBarView);
     mActionContextView = NULL;
+    FindViewById(R::id::action_bar, (IView**)&mActionBarView);
     FindViewById(R::id::action_context_bar, (IView**)&mActionContextView);
     return NOERROR;
 }
