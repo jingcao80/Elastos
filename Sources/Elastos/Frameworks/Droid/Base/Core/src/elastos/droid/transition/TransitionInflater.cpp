@@ -128,24 +128,24 @@ AutoPtr<ITransition> TransitionInflater::CreateTransitionFromXml(
         String name;
         parser->GetName(&name);
         if (name.Equals(String("fade"))) {
-            AutoPtr<IFade> p;
-            CFade::New(mContext, attrs, (IFade**)&p);
-            transition = ITransition::Probe(p);
+            AutoPtr<ITransition> p;
+            CFade::New(mContext, attrs, (ITransition**)&p);
+            transition = p;
         }
         else if (name.Equals(String("changeBounds"))) {
-            AutoPtr<IChangeBounds> p;
-            CChangeBounds::New(mContext, attrs, (IChangeBounds**)&p);
-            transition = ITransition::Probe(p);
+            AutoPtr<ITransition> p;
+            CChangeBounds::New(mContext, attrs, (ITransition**)&p);
+            transition = p;
         }
         else if (name.Equals(String("slide"))) {
-            AutoPtr<ISlide> p;
-            CSlide::New(mContext, attrs, (ISlide**)&p);
-            transition = ITransition::Probe(p);
+            AutoPtr<ITransition> p;
+            CSlide::New(mContext, attrs, (ITransition**)&p);
+            transition = p;
         }
         else if (name.Equals(String("explode"))) {
-            AutoPtr<IVisibility> p;
-            CExplode::New(mContext, attrs, (IVisibility**)&p);
-            transition = ITransition::Probe(p);
+            AutoPtr<ITransition> p;
+            CExplode::New(mContext, attrs, (ITransition**)&p);
+            transition = p;
         }
         else if (name.Equals(String("changeImageTransform"))) {
             AutoPtr<ITransition> p;
@@ -153,9 +153,9 @@ AutoPtr<ITransition> TransitionInflater::CreateTransitionFromXml(
             transition = p;
         }
         else if (name.Equals(String("changeTransform"))) {
-            AutoPtr<IChangeTransform> p;
-            CChangeTransform::New(mContext, attrs, (IChangeTransform**)&p);
-            transition = ITransition::Probe(p);
+            AutoPtr<ITransition> p;
+            CChangeTransform::New(mContext, attrs, (ITransition**)&p);
+            transition = p;
         }
         else if (name.Equals(String("changeClipBounds"))) {
             AutoPtr<ITransition> p;
@@ -163,9 +163,9 @@ AutoPtr<ITransition> TransitionInflater::CreateTransitionFromXml(
             transition = p;
         }
         else if (name.Equals(String("autoTransition"))) {
-            AutoPtr<ITransitionSet> p;
-            CAutoTransition::New(mContext, attrs, (ITransitionSet**)&p);
-            transition = ITransition::Probe(p);
+            AutoPtr<ITransition> p;
+            CAutoTransition::New(mContext, attrs, (ITransition**)&p);
+            transition = p;
         }
         else if (name.Equals(String("recolor"))) {
             AutoPtr<ITransition> p;
@@ -178,9 +178,9 @@ AutoPtr<ITransition> TransitionInflater::CreateTransitionFromXml(
             transition = p;
         }
         else if (name.Equals(String("transitionSet"))) {
-            AutoPtr<ITransitionSet> p;
-            CTransitionSet::New(mContext, attrs, (ITransitionSet**)&p);
-            transition = ITransition::Probe(p);
+            AutoPtr<ITransition> p;
+            CTransitionSet::New(mContext, attrs, (ITransition**)&p);
+            transition = p;
         }
         else if (name.Equals(String("transition"))) {
             assert(0 && "TODO");
@@ -190,18 +190,18 @@ AutoPtr<ITransition> TransitionInflater::CreateTransitionFromXml(
             GetTargetIds(parser, attrs, parent);
         }
         else if (name.Equals(String("arcMotion"))) {
-            AutoPtr<IArcMotion> p;
-            CArcMotion::New(mContext, attrs, (IArcMotion**)&p);
-            parent->SetPathMotion(IPathMotion::Probe(p));
+            AutoPtr<IPathMotion> p;
+            CArcMotion::New(mContext, attrs, (IPathMotion**)&p);
+            parent->SetPathMotion(p);
         }
         else if (name.Equals(String("pathMotion"))) {
             assert(0 && "TODO");
 //            parent->SetPathMotion((PathMotion)createCustom(attrs, PathMotion.class, "pathMotion"));
         }
         else if (name.Equals(String("patternPathMotion"))) {
-            AutoPtr<IPatternPathMotion> p;
-            CPatternPathMotion::New(mContext, attrs, (IPatternPathMotion**)&p);
-            parent->SetPathMotion(IPathMotion::Probe(p));
+            AutoPtr<IPathMotion> p;
+            CPatternPathMotion::New(mContext, attrs, (IPathMotion**)&p);
+            parent->SetPathMotion(p);
         }
         else {
 //            return E_RUNTIME_EXCEPTION;
