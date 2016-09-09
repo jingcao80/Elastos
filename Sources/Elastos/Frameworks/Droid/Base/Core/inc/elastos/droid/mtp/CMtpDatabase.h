@@ -54,6 +54,8 @@ private:
 public:
     CMtpDatabase();
 
+    ~CMtpDatabase();
+
     CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
@@ -75,9 +77,6 @@ public:
 
     CARAPI GetNativeContext(
         /* [out] */ Int64* nativeContext);
-
-protected:
-    CARAPI_(void) Finalize();
 
 public:
     CARAPI_(void) InitDeviceProperties(
@@ -225,16 +224,16 @@ private:
 
     static const Int32 DEVICE_PROPERTIES_DATABASE_VERSION;
 
-    static ArrayOf<String>* ID_PROJECTION;
-    static ArrayOf<String>* PATH_PROJECTION;
-    static ArrayOf<String>* PATH_FORMAT_PROJECTION;
-    static ArrayOf<String>* OBJECT_INFO_PROJECTION;
+    static AutoPtr<ArrayOf<String> > ID_PROJECTION;
+    static AutoPtr<ArrayOf<String> > PATH_PROJECTION;
+    static AutoPtr<ArrayOf<String> > PATH_FORMAT_PROJECTION;
+    static AutoPtr<ArrayOf<String> > OBJECT_INFO_PROJECTION;
 
-    static ArrayOf<Int32>* FILE_PROPERTIES;
-    static ArrayOf<Int32>* AUDIO_PROPERTIES;
-    static ArrayOf<Int32>* VIDEO_PROPERTIES;
-    static ArrayOf<Int32>* IMAGE_PROPERTIES;
-    static ArrayOf<Int32>* ALL_PROPERTIES;
+    static AutoPtr<ArrayOf<Int32> > FILE_PROPERTIES;
+    static AutoPtr<ArrayOf<Int32> > AUDIO_PROPERTIES;
+    static AutoPtr<ArrayOf<Int32> > VIDEO_PROPERTIES;
+    static AutoPtr<ArrayOf<Int32> > IMAGE_PROPERTIES;
+    static AutoPtr<ArrayOf<Int32> > ALL_PROPERTIES;
 
     static const String ID_WHERE;
     static const String PATH_WHERE;

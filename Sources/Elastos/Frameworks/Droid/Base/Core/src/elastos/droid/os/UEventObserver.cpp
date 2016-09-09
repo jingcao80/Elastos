@@ -38,7 +38,7 @@ UEventObserver::UEvent::UEvent(
     Int32 equals, at;
     while (offset < length) {
         equals = message.IndexOf(String("="), offset);
-        at = message.IndexOf(String("\0"), offset);
+        at = message.IndexOf('$', offset);
         if (at < 0) break;
 
         if (equals > offset && equals < at) {
@@ -239,7 +239,7 @@ static Boolean IsMatch(
         const char* end = buffer + length + 1;
         do {
             if (strstr(field, match.string())) {
-                Logger::V("Matched uevent message with pattern: %s", match.string());
+                Logger::V("UEventObserver", "Matched uevent message with pattern: %s", match.string());
                 return TRUE;
             }
             field += strlen(field) + 1;
@@ -259,11 +259,16 @@ String UEventObserver::NativeWaitForNextEvent()
         }
         buffer[length] = '\0';
 
-        // Logger::V("Received uevent message: %s", buffer);
+        // Logger::V(TAG, "Received uevent message: %s", buffer);
 
         if (IsMatch(buffer, length)) {
             // Assume the message is ASCII.
-            return String(buffer);
+            // String can't contain '\0' in middle, replace '\0' by '$' except end char
+            for (Int32 i = 0; i < length; i++) {
+                if (buffer[i] == '\0')
+                    buffer[i] = '$';
+            }
+            return String(buffer, length);
         }
     }
 }

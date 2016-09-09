@@ -7,7 +7,6 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
-#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/media/CMediaScanner.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CIntentFilter.h"
@@ -52,7 +51,6 @@ using Elastos::Core::CSystem;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBatteryManager;
-using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Media::CMediaScanner;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IWindowManager;
@@ -709,7 +707,7 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(
     info.mCompressedSize = (length > 0xFFFFFFFFLL ? 0xFFFFFFFF : (uint32_t)length);
 
     Boolean b = mDatabase->GetObjectInfo((Int32)handle, mIntBuffer, mStringBuffer, mLongBuffer);
-    if(b) {
+    if (!b) {
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     }
 
@@ -1042,20 +1040,18 @@ void MyMtpDatabase::sessionEnded() {
     // checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
-
-
 const String CMtpDatabase::TAG("MtpDatabase");
 const Int32 CMtpDatabase::DEVICE_PROPERTIES_DATABASE_VERSION = 1;
 
-ArrayOf<String>* CMtpDatabase::ID_PROJECTION;
-ArrayOf<String>* CMtpDatabase::PATH_PROJECTION;
-ArrayOf<String>* CMtpDatabase::PATH_FORMAT_PROJECTION;
-ArrayOf<String>* CMtpDatabase::OBJECT_INFO_PROJECTION;
-ArrayOf<Int32>* CMtpDatabase::FILE_PROPERTIES;
-ArrayOf<Int32>* CMtpDatabase::AUDIO_PROPERTIES;
-ArrayOf<Int32>* CMtpDatabase::VIDEO_PROPERTIES;
-ArrayOf<Int32>* CMtpDatabase::IMAGE_PROPERTIES;
-ArrayOf<Int32>* CMtpDatabase::ALL_PROPERTIES;
+AutoPtr<ArrayOf<String> > CMtpDatabase::ID_PROJECTION;
+AutoPtr<ArrayOf<String> > CMtpDatabase::PATH_PROJECTION;
+AutoPtr<ArrayOf<String> > CMtpDatabase::PATH_FORMAT_PROJECTION;
+AutoPtr<ArrayOf<String> > CMtpDatabase::OBJECT_INFO_PROJECTION;
+AutoPtr<ArrayOf<Int32> > CMtpDatabase::FILE_PROPERTIES;
+AutoPtr<ArrayOf<Int32> > CMtpDatabase::AUDIO_PROPERTIES;
+AutoPtr<ArrayOf<Int32> > CMtpDatabase::VIDEO_PROPERTIES;
+AutoPtr<ArrayOf<Int32> > CMtpDatabase::IMAGE_PROPERTIES;
+AutoPtr<ArrayOf<Int32> > CMtpDatabase::ALL_PROPERTIES;
 
 const String CMtpDatabase::ID_WHERE = IBaseColumns::ID + "=?";
 const String CMtpDatabase::PATH_WHERE = IMediaStoreMediaColumns::DATA + "=?";
@@ -1238,6 +1234,11 @@ CMtpDatabase::CMtpDatabase()
     CHashMap::New((IHashMap**)&mPropertyGroupsByFormat);
 }
 
+CMtpDatabase::~CMtpDatabase()
+{
+    NativeFinalize();
+}
+
 CAR_INTERFACE_IMPL(CMtpDatabase, Object, IMtpDatabase)
 
 CAR_OBJECT_IMPL(CMtpDatabase)
@@ -1309,11 +1310,6 @@ ECode CMtpDatabase::constructor(
     }
     InitDeviceProperties(context);
     return NOERROR;
-}
-
-void CMtpDatabase::Finalize()
-{
-    NativeFinalize();
 }
 
 ECode CMtpDatabase::SetServer(
@@ -1498,25 +1494,21 @@ Int32 CMtpDatabase::BeginSendObject(
     // make sure the object does not exist
     if (path.IsNull()) {
         AutoPtr<ICursor> c;
-        //try {
         AutoPtr<ArrayOf<String> > s = ArrayOf<String>::Alloc(1);
         s->Set(0, path);
-        mMediaProvider->Query(mPackageName, mObjectsUri, ID_PROJECTION, PATH_WHERE, s, String(NULL), NULL, (ICursor**)&c);
-        if (c != NULL) {
+        if (FAILED(mMediaProvider->Query(mPackageName, mObjectsUri, ID_PROJECTION,
+            PATH_WHERE, s, String(NULL), NULL, (ICursor**)&c))) {
+            Logger::E(TAG, "RemoteException in beginSendObject");
+        }
+        else if (c != NULL) {
             Int32 count;
             c->GetCount(&count);
+            ICloseable::Probe(c)->Close();
             if (count > 0) {
-                // Log->W(TAG, "file already exists in beginSendObject: " + path);
+                Logger::W(TAG, "file already exists in beginSendObject: %s", path.string());
                 return -1;
             }
         }
-        //} catch (RemoteException e) {
-        //    Log->E(TAG, "RemoteException in beginSendObject", e);
-        //} finally {
-        if (c != NULL) {
-            ICloseable::Probe(c)->Close();
-        }
-        //}
     }
 
     mDatabaseModified = TRUE;
@@ -1756,8 +1748,9 @@ AutoPtr<ArrayOf<Int32> > CMtpDatabase::GetObjectList(
     }
     Int32 count;
     c->GetCount(&count);
+    AutoPtr<ArrayOf<Int32> > result;
     if (count > 0) {
-        AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(count);
+        result = ArrayOf<Int32>::Alloc(count);
         for (Int32 i = 0; i < count; i++) {
             Boolean b;
             c->MoveToNext(&b);
@@ -1765,7 +1758,6 @@ AutoPtr<ArrayOf<Int32> > CMtpDatabase::GetObjectList(
             c->GetInt32(0, &value);
             result->Set(i, value);
         }
-        return result;
     }
     //} catch (RemoteException e) {
     //    Log->E(TAG, "RemoteException in getObjectList", e);
@@ -1774,7 +1766,7 @@ AutoPtr<ArrayOf<Int32> > CMtpDatabase::GetObjectList(
             ICloseable::Probe(c)->Close();
         }
     //}
-    return NULL;
+    return result;
 }
 
 Int32 CMtpDatabase::GetNumObjects(
@@ -1788,14 +1780,12 @@ Int32 CMtpDatabase::GetNumObjects(
         if (c != NULL) {
             Int32 count;
             c->GetCount(&count);
+            ICloseable::Probe(c)->Close();
             return count;
         }
     //} catch (RemoteException e) {
     //    Log->E(TAG, "RemoteException in getNumObjects", e);
     //} finally {
-        if (c != NULL) {
-            ICloseable::Probe(c)->Close();
-        }
     //}
     return -1;
 }
@@ -1930,20 +1920,21 @@ Int32 CMtpDatabase::RenameFile(
     String path;
     AutoPtr<ArrayOf<String> > whereArgs = ArrayOf<String>::Alloc(1);
     whereArgs->Set(0, StringUtils::ToString(handle));
-    //try {
-        mMediaProvider->Query(mPackageName, mObjectsUri, PATH_PROJECTION, ID_WHERE, whereArgs, String(NULL), NULL, (ICursor**)&c);
-        Boolean b;
-        if (c != NULL && (c->MoveToNext(&b), b)) {
-            c->GetString(1, &path);
-        }
-    //} catch (RemoteException e) {
-    //    Log->E(TAG, "RemoteException in getObjectFilePath", e);
+
+    if (FAILED(mMediaProvider->Query(mPackageName, mObjectsUri, PATH_PROJECTION, ID_WHERE,
+        whereArgs, String(NULL), NULL, (ICursor**)&c))) {
+        Logger::E(TAG, "RemoteException in RenameFile");
         return IMtpConstants::RESPONSE_GENERAL_ERROR;
-    //} finally {
-        if (c != NULL) {
-            ICloseable::Probe(c)->Close();
-        }
-    //}
+    }
+    Boolean b;
+    if (c != NULL && (c->MoveToNext(&b), b)) {
+        c->GetString(1, &path);
+    }
+
+    if (c != NULL) {
+        ICloseable::Probe(c)->Close();
+    }
+
     if (path == NULL) {
         return IMtpConstants::RESPONSE_INVALID_OBJECT_HANDLE;
     }
@@ -2048,10 +2039,10 @@ Int32 CMtpDatabase::GetDeviceProperty(
     AutoPtr<IWindowManager> wm;
     String value;
     Int32 length;
-    AutoPtr<ICharSequence> csq;
     Int32 width;
     Int32 height;
     String imageSize;
+    AutoPtr< ArrayOf<Char32> > chars;
     switch (property) {
         case IMtpConstants::DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
         case IMtpConstants::DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
@@ -2061,9 +2052,8 @@ Int32 CMtpDatabase::GetDeviceProperty(
             if (length > 255) {
                 length = 255;
             }
-            CString::New(value, (ICharSequence**)&csq);
-//TODO: Need TextUtils
-            // TextUtils::GetChars(csq, 0, length, outStringValue, 0);
+            chars = value.GetChars(0, value.GetLength());
+            outStringValue->Copy(chars);
             outStringValue->Set(length, 0);
             return IMtpConstants::RESPONSE_OK;
 
@@ -2076,9 +2066,8 @@ Int32 CMtpDatabase::GetDeviceProperty(
             display->GetMaximumSizeDimension(&width);
             display->GetMaximumSizeDimension(&height);
             imageSize = StringUtils::ToString(width) + "x" +  StringUtils::ToString(height);
-            CString::New(imageSize, (ICharSequence**)&csq);
-//TODO: Need TextUtils
-            // TextUtils::GetChars(csq, 0, imageSize.GetLength(), outStringValue, 0);
+            chars = imageSize.GetChars(0, imageSize.GetLength());
+            outStringValue->Copy(chars);
             outStringValue->Set(imageSize.GetLength(), 0);
             return IMtpConstants::RESPONSE_OK;
         }
@@ -2123,6 +2112,7 @@ Boolean CMtpDatabase::GetObjectInfo(
         array->Set(0, StringUtils::ToString(handle));
         mMediaProvider->Query(mPackageName, mObjectsUri, OBJECT_INFO_PROJECTION,
                         ID_WHERE, array, String(NULL), NULL, (ICursor**)&c);
+        Boolean result = FALSE;
         Boolean b;
         if (c != NULL && (c->MoveToNext(&b),b)) {
             Int32 c1, c2, c3;
@@ -2142,10 +2132,8 @@ Boolean CMtpDatabase::GetObjectInfo(
             if (end - start > 255) {
                 end = start + 255;
             }
-            AutoPtr<ICharSequence> csq;
-            CString::New(path, (ICharSequence**)&csq);
-//TODO: Need TextUtils
-            // TextUtils::GetChars(csq, start, end, outName, 0);
+            AutoPtr< ArrayOf<Char32> > chars = path.GetChars(start, end);
+            outName->Copy(chars);
             outName->Set(end - start, 0);
 
             Int64 value;
@@ -2158,7 +2146,7 @@ Boolean CMtpDatabase::GetObjectInfo(
             if ((*outCreatedModified)[0] == 0) {
                 (*outCreatedModified)[0] = (*outCreatedModified)[1];
             }
-            return TRUE;
+            result = TRUE;
         }
     //} catch (RemoteException e) {
     //    Log->E(TAG, "RemoteException in getObjectInfo", e);
@@ -2167,7 +2155,7 @@ Boolean CMtpDatabase::GetObjectInfo(
             ICloseable::Probe(c)->Close();
         }
     //}
-    return FALSE;
+    return result;
 }
 
 Int32 CMtpDatabase::GetObjectFilePath(
@@ -2177,54 +2165,50 @@ Int32 CMtpDatabase::GetObjectFilePath(
 {
     if (handle == 0) {
         // special case root directory
-        AutoPtr<ICharSequence> csq;
-        CString::New(mMediaStoragePath, (ICharSequence**)&csq);
-//TODO: Need TextUtils
-        // TextUtils::GetChars(csq, 0, mMediaStoragePath.GetLength(), outFilePath, 0);
+        AutoPtr< ArrayOf<Char32> > chars = mMediaStoragePath.GetChars(0, mMediaStoragePath.GetLength());
+        outFilePath->Copy(chars);
         outFilePath->Set(mMediaStoragePath.GetLength(), 0);
         outFileLengthFormat->Set(0, 0);
         outFileLengthFormat->Set(1, IMtpConstants::FORMAT_ASSOCIATION);
         return IMtpConstants::RESPONSE_OK;
     }
     AutoPtr<ICursor> c;
-    //try {
-        AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
-        array->Set(0, StringUtils::ToString(handle));
-        mMediaProvider->Query(mPackageName, mObjectsUri, PATH_FORMAT_PROJECTION,
-                        ID_WHERE, array, String(NULL), NULL, (ICursor**)&c);
-        Boolean b;
-        if (c != NULL && (c->MoveToNext(&b),b)) {
-            String path;
-            c->GetString(1, &path);
-            AutoPtr<ICharSequence> csq;
-            CString::New(path, (ICharSequence**)&csq);
-//TODO: Need TextUtils
-            // TextUtils::GetChars(csq, 0, path.GetLength(), outFilePath, 0);
-            outFilePath->Set(path.GetLength(), 0);
-            // File transfers from device to host will likely fail if the size is incorrect.
-            // So to be safe, use the actual file size here.
-            AutoPtr<IFile> file;
-            CFile::New(path, (IFile**)&file);
-            Int64 len, value;
-            file->GetLength(&len);
-            outFileLengthFormat->Set(0, len);
-            c->GetInt64(2, &value);
-            outFileLengthFormat->Set(1, value);
-            return IMtpConstants::RESPONSE_OK;
-        } else {
-            return IMtpConstants::RESPONSE_INVALID_OBJECT_HANDLE;
-        }
-        assert(0);
+
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
+    array->Set(0, StringUtils::ToString(handle));
+    if (FAILED(mMediaProvider->Query(mPackageName, mObjectsUri, PATH_FORMAT_PROJECTION,
+                    ID_WHERE, array, String(NULL), NULL, (ICursor**)&c))) {
+        Logger::E(TAG, "RemoteException in getObjectFilePath");
+        return IMtpConstants::RESPONSE_GENERAL_ERROR;
+    }
+
+    Int32 result;
+    Boolean b;
+    if (c != NULL && (c->MoveToNext(&b),b)) {
+        String path;
+        c->GetString(1, &path);
+        AutoPtr< ArrayOf<Char32> > chars = path.GetChars(0, path.GetLength());
+        outFilePath->Copy(chars);
+        outFilePath->Set(path.GetLength(), 0);
+        // File transfers from device to host will likely fail if the size is incorrect.
+        // So to be safe, use the actual file size here.
+        AutoPtr<IFile> file;
+        CFile::New(path, (IFile**)&file);
+        Int64 len, value;
+        file->GetLength(&len);
+        outFileLengthFormat->Set(0, len);
+        c->GetInt64(2, &value);
+        outFileLengthFormat->Set(1, value);
+        result = IMtpConstants::RESPONSE_OK;
+    }
+    else {
+        result = IMtpConstants::RESPONSE_INVALID_OBJECT_HANDLE;
+    }
 
     if (c != NULL) {
         ICloseable::Probe(c)->Close();
     }
-    //} catch (RemoteException e) {
-    //    Log->E(TAG, "RemoteException in getObjectFilePath", e);
-        return IMtpConstants::RESPONSE_GENERAL_ERROR;
-    //} finally {
-
-    //}
+    return result;
 }
 
 Int32 CMtpDatabase::DeleteFile(
@@ -2234,12 +2218,17 @@ Int32 CMtpDatabase::DeleteFile(
     String path;
     Int32 format;
 
+    Int32 result;
     AutoPtr<ICursor> c;
-    //try {
+    do {
         AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
         array->Set(0, StringUtils::ToString(handle));
-        mMediaProvider->Query(mPackageName, mObjectsUri, PATH_FORMAT_PROJECTION,
-                        ID_WHERE, array, String(NULL), NULL, (ICursor**)&c);
+        if (FAILED(mMediaProvider->Query(mPackageName, mObjectsUri, PATH_FORMAT_PROJECTION,
+            ID_WHERE, array, String(NULL), NULL, (ICursor**)&c))) {
+            Logger::E(TAG, "RemoteException in deleteFile");
+            result = IMtpConstants::RESPONSE_GENERAL_ERROR;
+            break;
+        }
         Boolean b;
         if (c != NULL && (c->MoveToNext(&b),b)) {
             // don't convert to media path here, since we will be matching
@@ -2248,16 +2237,19 @@ Int32 CMtpDatabase::DeleteFile(
             c->GetInt32(2, &format);
         }
         else {
-            return IMtpConstants::RESPONSE_INVALID_OBJECT_HANDLE;
+            result = IMtpConstants::RESPONSE_INVALID_OBJECT_HANDLE;
+            break;
         }
 
         if (path == NULL || format == 0) {
-            return IMtpConstants::RESPONSE_GENERAL_ERROR;
+            result = IMtpConstants::RESPONSE_GENERAL_ERROR;
+            break;
         }
 
         // do not allow deleting any of the special subdirectories
         if (IsStorageSubDirectory(path)) {
-            return IMtpConstants::RESPONSE_OBJECT_WRITE_PROTECTED;
+            result = IMtpConstants::RESPONSE_OBJECT_WRITE_PROTECTED;
+            break;
         }
 
         if (format == IMtpConstants::FORMAT_ASSOCIATION) {
@@ -2273,10 +2265,14 @@ Int32 CMtpDatabase::DeleteFile(
             ss->Set(0, path + "/%");
             ss->Set(1, StringUtils::ToString(len));
             ss->Set(2, path + "/%");
-            mMediaProvider->Delete(mPackageName, uri,
+            if (FAILED(mMediaProvider->Delete(mPackageName, uri,
                 // the 'like' makes it use the index, the 'lower()' makes it correct
                 // when the path contains sqlite wildcard characters
-                String("_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)"), ss, &count);
+                String("_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)"), ss, &count))) {
+                Logger::E(TAG, "RemoteException in deleteFile");
+                result = IMtpConstants::RESPONSE_GENERAL_ERROR;
+                break;
+            }
         }
 
         AutoPtr<IUri> uri;
@@ -2284,7 +2280,11 @@ Int32 CMtpDatabase::DeleteFile(
         CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
         files->GetMtpObjectsUri(mVolumeName, handle, (IUri**)&uri);
         Int32 v;
-        mMediaProvider->Delete(mPackageName, uri, String(NULL), NULL, &v);
+        if (FAILED(mMediaProvider->Delete(mPackageName, uri, String(NULL), NULL, &v))) {
+            Logger::E(TAG, "RemoteException in deleteFile");
+            result = IMtpConstants::RESPONSE_GENERAL_ERROR;
+            break;
+        }
         if (v > 0) {
             if (format != IMtpConstants::FORMAT_ASSOCIATION
                     && path.ToLowerCase(/*Locale->US*/).EndWith("/.nomedia")) {
@@ -2296,18 +2296,17 @@ Int32 CMtpDatabase::DeleteFile(
                 //    Log->E(TAG, "failed to unhide/rescan for " + path);
                 //}
             }
-            return IMtpConstants::RESPONSE_OK;
-        } else {
-            return IMtpConstants::RESPONSE_INVALID_OBJECT_HANDLE;
+            result = IMtpConstants::RESPONSE_OK;
         }
-    //} catch (RemoteException e) {
-    //    Log->E(TAG, "RemoteException in deleteFile", e);
-        return IMtpConstants::RESPONSE_GENERAL_ERROR;
-    //} finally {
-    //    if (c != NULL) {
-    //        ICloseable::Probe(c)->Close();
-    //    }
-    //}
+        else {
+            result = IMtpConstants::RESPONSE_INVALID_OBJECT_HANDLE;
+        }
+    } while(0);
+
+    if (c != NULL) {
+       ICloseable::Probe(c)->Close();
+    }
+    return result;
 }
 
 AutoPtr<ArrayOf<Int32> > CMtpDatabase::GetObjectReferences(
@@ -2318,32 +2317,32 @@ AutoPtr<ArrayOf<Int32> > CMtpDatabase::GetObjectReferences(
     CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
     files->GetMtpReferencesUri(mVolumeName, handle, (IUri**)&uri);
     AutoPtr<ICursor> c;
-    //try {
-        mMediaProvider->Query(mPackageName, uri, ID_PROJECTION, String(NULL), NULL, String(NULL), NULL, (ICursor**)&c);
-        if (c == NULL) {
-            return NULL;
+
+    if (FAILED(mMediaProvider->Query(mPackageName, uri, ID_PROJECTION, String(NULL),
+        NULL, String(NULL), NULL, (ICursor**)&c))) {
+        Logger::E(TAG, "RemoteException in getObjectList");
+        return NULL;
+    }
+    if (c == NULL) {
+        return NULL;
+    }
+    Int32 count;
+    c->GetCount(&count);
+    AutoPtr<ArrayOf<Int32> > result;
+    if (count > 0) {
+        result = ArrayOf<Int32>::Alloc(count);
+        for (Int32 i = 0; i < count; i++) {
+            Boolean b;
+            c->MoveToNext(&b);
+            Int32 value;
+            c->GetInt32(0, &value);
+            result->Set(i, value);
         }
-        Int32 count;
-        c->GetCount(&count);
-        if (count > 0) {
-            AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(count);
-            for (Int32 i = 0; i < count; i++) {
-                Boolean b;
-                c->MoveToNext(&b);
-                Int32 value;
-                c->GetInt32(0, &value);
-                result->Set(i, value);
-            }
-            return result;
-        }
-    //} catch (RemoteException e) {
-    //    Log->E(TAG, "RemoteException in getObjectList", e);
-    //} finally {
-        if (c != NULL) {
-            ICloseable::Probe(c)->Close();
-        }
-    //}
-    return NULL;
+    }
+
+    ICloseable::Probe(c)->Close();
+
+    return result;
 }
 
 Int32 CMtpDatabase::SetObjectReferences(

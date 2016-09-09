@@ -179,15 +179,15 @@ private:
     AutoPtr<IStorageEventListener> mStorageEventListener;
 
     AutoPtr<IMtpDatabase> mDatabase;
-    static AutoPtr<IMtpServer> mServer;
+    AutoPtr<IMtpServer> mServer;
     AutoPtr<IStorageManager> mStorageManager;
     /** Flag indicating if MTP is disabled due to keyguard */
     Boolean mMtpDisabled;
     Boolean mPtpMode;
-    static HashMap<String, AutoPtr<IStorageVolume> > mVolumeMap;
-    static HashMap<String, AutoPtr<IMtpStorage> > mStorageMap;
+    HashMap<String, AutoPtr<IStorageVolume> > mVolumeMap;
+    HashMap<String, AutoPtr<IMtpStorage> > mStorageMap;
     AutoPtr<ArrayOf<IStorageVolume*> > mVolumes;
-    static AutoPtr<IIMtpService> mBinder;
+    AutoPtr<IIMtpService> mBinder;
 };
 
 } // namespace Media

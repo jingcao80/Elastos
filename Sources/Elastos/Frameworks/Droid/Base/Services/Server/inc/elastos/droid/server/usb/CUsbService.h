@@ -3,15 +3,17 @@
 #define __ELASTOS_DROID_SERVER_USB_CUSBSERVICE_H__
 
 #include "_Elastos_Droid_Server_Usb_CUsbService.h"
-#include "elastos/droid/ext/frameworkdef.h"
-#include "usb/UsbSettingsManager.h"
-#include "usb/UsbDeviceManager.h"
-#include "usb/UsbHostManager.h"
+#include "elastos/droid/server/SystemService.h"
+#include "elastos/droid/server/usb/UsbSettingsManager.h"
+#include "elastos/droid/server/usb/UsbDeviceManager.h"
+#include "elastos/droid/server/usb/UsbHostManager.h"
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Hardware::Usb::IIUsbManager;
 using Elastos::Droid::Hardware::Usb::IUsbAccessory;
 using Elastos::Droid::Hardware::Usb::IUsbDevice;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 
@@ -26,7 +28,28 @@ namespace Usb {
  * support is delegated to UsbDeviceManager.
  */
 CarClass(CUsbService)
+    , public Object
+    , public IIUsbManager
+    , public IBinder
 {
+public:
+    class Lifecycle : public SystemService
+    {
+    public:
+        Lifecycle(
+            /* [in] */ IContext* context);
+
+        // @Override
+        CARAPI OnStart();
+
+        // @Override
+        CARAPI OnBootPhase(
+            /* [in] */ Int32 phase);
+
+    private:
+        AutoPtr<CUsbService> mUsbService;
+    };
+
 private:
     class UserChangedReceiver : public BroadcastReceiver
     {
@@ -39,12 +62,12 @@ private:
             /* [in] */ IIntent* intent);
 
         TO_STRING_IMPL("CUsbService::UserChangedReceiver: ")
+
     private:
         CUsbService* mHost;
     };
 
 public:
-
     CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
@@ -162,7 +185,12 @@ public:
     /* Deny USB debugging from the attached host */
     CARAPI DenyUsbDebugging();
 
+    CARAPI ClearUsbDebuggingKeys();
+
     CARAPI_(void) SystemReady();
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     CARAPI_(AutoPtr<UsbSettingsManager>) GetSettingsForUser(

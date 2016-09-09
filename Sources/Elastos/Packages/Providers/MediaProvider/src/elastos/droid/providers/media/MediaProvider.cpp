@@ -3667,7 +3667,9 @@ ECode MediaProvider::InsertFile(
         Int32 ival;
         ivalObj->GetValue(&ival);
         rowId = ival;
-        CContentValues::New(values, (IContentValues**)&values);
+        AutoPtr<IContentValues> newValues;
+        CContentValues::New(values, (IContentValues**)&newValues);
+        values = newValues;
         values->Remove(IMediaStoreMediaColumns::MEDIA_SCANNER_NEW_OBJECT_ID);
     }
 
@@ -3783,7 +3785,7 @@ ECode MediaProvider::InsertFile(
 
         AutoPtr<IInteger64> parent;
         values->GetAsInteger64(IMediaStoreFilesFileColumns::PARENT, (IInteger64**)&parent);
-        if (parent != NULL) {
+        if (parent == NULL) {
             if (!path.IsNull()) {
                 Int64 parentId = GetParent(helper, db, path);
                 values->Put(IMediaStoreFilesFileColumns::PARENT, parentId);

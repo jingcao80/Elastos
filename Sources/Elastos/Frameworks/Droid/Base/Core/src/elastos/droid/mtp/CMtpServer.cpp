@@ -20,6 +20,8 @@ namespace Elastos {
 namespace Droid {
 namespace Mtp {
 
+static const String TAG("CMtpServer");
+
 CMtpServer::CMtpServer()
     : mNativeContext(0)
 {}
@@ -109,7 +111,7 @@ void CMtpServer::NativeSetup(
         mNativeContext = (Int32)server;
     }
     else {
-        //ALOGE("could not open MTP driver, errno: %d", errno);
+        Logger::E(TAG, "could not open MTP driver, errno: %d", errno);
     }
 }
 
@@ -119,7 +121,7 @@ void CMtpServer::NativeRun()
     if (server)
         server->run();
     else {
-        //ALOGE("server is null in run");
+        Logger::E(TAG, "server is null in run");
     }
 }
 
@@ -133,7 +135,7 @@ void CMtpServer::NativeCleanup()
         mNativeContext = 0;
     }
     else {
-        //ALOGE("server is null in cleanup");
+        Logger::E(TAG, "server is null in cleanup");
     }
 }
 
@@ -146,7 +148,7 @@ void CMtpServer::NativeSendObjectAdded(
     if (server)
         server->sendObjectAdded(handle);
     else {
-        //ALOGE("server is null in send_object_added");
+        Logger::E(TAG, "server is null in send_object_added");
     }
 }
 
@@ -159,7 +161,7 @@ void CMtpServer::NativeSendObjectRemoved(
     if (server)
         server->sendObjectRemoved(handle);
     else {
-        //ALOGE("server is null in send_object_removed");
+        Logger::E(TAG, "server is null in send_object_removed");
     }
 }
 
@@ -172,7 +174,7 @@ void CMtpServer::NativeSendDevicePropertyChanged(
     if (server)
         server->sendDevicePropertyChanged(property);
     else {
-        //ALOGE("server is null in send_object_removed");
+        Logger::E(TAG, "server is null in send_object_removed");
     }
 }
 
@@ -207,7 +209,7 @@ void CMtpServer::NativeAddStorage(
         }
     }
     else {
-        //ALOGE("server is null in add_storage");
+        Logger::E(TAG, "server is null in add_storage");
     }
 }
 
@@ -225,7 +227,7 @@ void CMtpServer::NativeRemoveStorage(
         }
     }
     else {
-        //ALOGE("server is null in remove_storage");
+        Logger::E(TAG, "server is null in remove_storage");
     }
 }
 

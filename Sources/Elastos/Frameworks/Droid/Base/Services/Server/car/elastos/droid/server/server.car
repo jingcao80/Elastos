@@ -193,6 +193,7 @@ module
     using interface Elastos.Droid.Hardware.Input.IIInputManager;
     using interface Elastos.Droid.Hardware.Input.IInputDeviceListener;
     using interface Elastos.Droid.Hardware.Location.IIFusedLocationHardware;
+    using interface Elastos.Droid.Hardware.Usb.IIUsbManager;
     using interface Elastos.Droid.Internal.App.IIAppOpsService;
     using interface Elastos.Droid.Internal.App.IIBatteryStats;
     using interface Elastos.Droid.Internal.App.IIProcessStats;
@@ -798,16 +799,18 @@ module
 // //
 // //    } // namespace Updates
 
-//     namespace Usb {
+    namespace Usb {
 
-//     class CUsbService {
-//         constructor(
-//             [in] IContext* ctx);
+    [local]
+    class CUsbService {
+        constructor(
+            [in] IContext* ctx);
 
-//         interface IIUsbManager;
-//     }
+        interface IIUsbManager;
+        interface IBinder;
+    }
 
-//     } // namespace Usb
+    } // namespace Usb
 
     namespace Search {
         [local]

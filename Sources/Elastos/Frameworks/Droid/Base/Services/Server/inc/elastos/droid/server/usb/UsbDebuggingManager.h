@@ -3,16 +3,22 @@
 #define __ELASTOS_DROID_SERVER_USB_USBDEBUGGINGMANAGER_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/Runnable.h"
+#include <Elastos.Droid.Content.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.IO.h>
 
-using Elastos::IO::IOutputStream;
-using Elastos::Core::IRunnable;
-using Elastos::Core::IThread;
-using Elastos::Droid::Os::HandlerBase;
-using Elastos::Droid::Os::IHandlerThread;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Net::ILocalSocket;
-using Elastos::Droid::Content::IContext;
+using Elastos::Core::IThread;
+using Elastos::IO::IFile;
+using Elastos::IO::IOutputStream;
 
 namespace Elastos {
 namespace Droid {
@@ -20,47 +26,12 @@ namespace Server {
 namespace Usb {
 
 class UsbDebuggingManager
-    : public ElRefBase
-    , public IRunnable
+    : public Runnable
 {
-public:
-    UsbDebuggingManager(
-        /* [in] */ IContext* context);
-
-    CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface* pObject,
-        /* [out] */ InterfaceID* pIID);
-
-    /**
-     * Starts executing the active part of the class' code. This method is
-     * called when a thread is started that has been created with a class which
-     * implements {@code Runnable}.
-     */
-    CARAPI Run();
-
-    CARAPI_(void) SetAdbEnabled(
-        /* [in] */ Boolean enabled);
-
-    CARAPI_(void) AllowUsbDebugging(
-        /* [in] */ Boolean alwaysAllow,
-        /* [in] */ const String& publicKey);
-
-    CARAPI_(void) DenyUsbDebugging();
-
-    // public void dump(FileDescriptor fd, PrintWriter pw)
-
 private:
     class UsbDebuggingHandler
-        : public HandlerBase
+        : public Handler
     {
-        friend class UsbDebuggingManager;
     public:
         TO_STRING_IMPL("UsbDebuggingManager::UsbDebuggingHandler")
 
@@ -90,10 +61,37 @@ private:
         static const Int32 MESSAGE_ADB_ALLOW = 3;
         static const Int32 MESSAGE_ADB_DENY = 4;
         static const Int32 MESSAGE_ADB_CONFIRM = 5;
+        static const Int32 MESSAGE_ADB_CLEAR = 6;
 
     private:
         UsbDebuggingManager* mHost;
     };
+
+public:
+    UsbDebuggingManager(
+        /* [in] */ IContext* context);
+
+    /**
+     * Starts executing the active part of the class' code. This method is
+     * called when a thread is started that has been created with a class which
+     * implements {@code Runnable}.
+     */
+    CARAPI Run();
+
+    CARAPI_(void) SetAdbEnabled(
+        /* [in] */ Boolean enabled);
+
+    CARAPI_(void) AllowUsbDebugging(
+        /* [in] */ Boolean alwaysAllow,
+        /* [in] */ const String& publicKey);
+
+    CARAPI_(void) DenyUsbDebugging();
+
+    CARAPI_(void) ClearUsbDebuggingKeys();
+
+    // public void dump(FileDescriptor fd, PrintWriter pw)
+
+    TO_STRING_IMPL("UsbDebuggingManager")
 
 private:
     CARAPI ListenToSocket();
@@ -106,12 +104,37 @@ private:
     CARAPI_(String) GetFingerprints(
         /* [in] */ const String& key);
 
-    CARAPI_(void) ShowConfirmationDialog(
+    CARAPI_(void) StartConfirmation(
         /* [in] */ const String& key,
         /* [in] */ const String& fingerprints);
 
+    /**
+     * @returns true if the componentName led to an Activity that was started.
+     */
+    CARAPI_(Boolean) StartConfirmationActivity(
+        /* [in] */ IComponentName* componentName,
+        /* [in] */ const String& key,
+        /* [in] */ const String& fingerprints);
+
+    /**
+     * @returns true if the componentName led to a Service that was started.
+     */
+    CARAPI_(Boolean) StartConfirmationService(
+        /* [in] */ IComponentName* componentName,
+        /* [in] */ const String& key,
+        /* [in] */ const String& fingerprints);
+
+    CARAPI_(AutoPtr<IIntent>) CreateConfirmationIntent(
+        /* [in] */ IComponentName* componentName,
+        /* [in] */ const String& key,
+        /* [in] */ const String& fingerprints);
+
+    CARAPI_(AutoPtr<IFile>) GetUserKeyFile();
+
     CARAPI_(void) WriteKey(
         /* [in] */ const String& key);
+
+    CARAPI_(void) DeleteKeyFile();
 
 private:
     static const String TAG;
@@ -123,14 +146,12 @@ private:
     static const Int32 BUFFER_SIZE;
 
     AutoPtr<IContext> mContext;
-    AutoPtr<IHandler> mHandler;
-    AutoPtr<IHandlerThread> mHandlerThread;
+    AutoPtr<UsbDebuggingHandler> mHandler;
     AutoPtr<IThread> mThread;
     Boolean mAdbEnabled;
     String mFingerprints;
     AutoPtr<ILocalSocket> mSocket;
     AutoPtr<IOutputStream> mOutputStream;
-    AutoPtr<UsbDebuggingHandler> mUsbDebuggingHandler;
 };
 
 } // namespace Usb

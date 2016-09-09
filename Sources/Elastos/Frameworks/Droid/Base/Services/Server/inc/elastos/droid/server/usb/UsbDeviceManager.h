@@ -2,11 +2,10 @@
 #ifndef __ELASTOS_DROID_SERVER_USB_USBDEVICEMANAGER_H__
 #define __ELASTOS_DROID_SERVER_USB_USBDEVICEMANAGER_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/server/usb/UsbSettingsManager.h"
+#include "elastos/droid/server/usb/UsbDebuggingManager.h"
 #include "elastos/droid/os/UEventObserver.h"
-#include "elastos/droid/os/HandlerBase.h"
-#include "usb/UsbSettingsManager.h"
-#include "usb/UsbDebuggingManager.h"
+#include "elastos/droid/os/Handler.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include <elastos/utility/etl/List.h>
@@ -15,9 +14,10 @@
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::Pair;
 using Elastos::Utility::Etl::HashMap;
-using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Os::UEventObserver;
 using Elastos::Droid::App::INotificationManager;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -38,7 +38,7 @@ typedef List< Pair<String, String> > StringPairList;
 /**
  * UsbDeviceManager manages USB state in device mode.
  */
-class UsbDeviceManager : public ElRefBase
+class UsbDeviceManager : public Object
 {
 private:
     class AdbSettingsObserver : public ContentObserver
@@ -65,7 +65,7 @@ private:
         MyUEventObserver(
             /* [in] */ UsbDeviceManager* host);
 
-        CARAPI_(void) OnUEvent(
+        CARAPI OnUEvent(
             /* [in] */ IUEvent* event);
 
     private:
@@ -73,7 +73,7 @@ private:
     };
 
     class UsbHandler
-        : public HandlerBase
+        : public Handler
     {
     private:
         class BootCompletedReceiver : public BroadcastReceiver
@@ -106,17 +106,26 @@ private:
             UsbHandler* mHost;
         };
 
-        class BootFastReceiver : public BroadcastReceiver
+        class AdbNotificationObserver : public ContentObserver
         {
         public:
-            BootFastReceiver(
-                /* [in] */ UsbHandler* host);
+            TO_STRING_IMPL("UsbDeviceManager::UsbHandler::AdbNotificationObserver")
 
-            CARAPI OnReceive(
-                /* [in] */ IContext* context,
-                /* [in] */ IIntent* intent);
+            CARAPI constructor(
+                /* [in] */ UsbHandler* host)
+            {
+                ContentObserver::constructor(NULL);
+                mHost = host;
+                return NOERROR;
+            }
 
-            TO_STRING_IMPL("UsbHandler::BootFastReceiver: ")
+            CARAPI OnChange(
+                /* [in] */ Boolean selfChange)
+            {
+                mHost->UpdateAdbNotification();
+                return NOERROR;
+            }
+
         private:
             UsbHandler* mHost;
         };
@@ -136,7 +145,7 @@ private:
         CARAPI_(void) UpdateState(
             /* [in] */ const String& state);
 
-        using HandlerBase::SendMessage;
+        using Handler::SendMessage;
 
         void SendMessage(
             /* [in] */ Int32 what,
@@ -168,9 +177,6 @@ private:
 
         CARAPI_(void) HandleMsgUserSwitched(
             /* [in] */ Int32 currentUser);
-
-        CARAPI_(void) HandleMsgBootFastSwitched(
-            /* [in] */ Int32 boot);
 
         CARAPI_(AutoPtr<IUsbAccessory>) GetCurrentAccessory();
 
@@ -209,7 +215,7 @@ private:
         String mDefaultFunctions;
         AutoPtr<IUsbAccessory> mCurrentAccessory;
         Int32 mUsbNotificationId;
-        Boolean mAdbNotificationShown;
+        Int32 mAdbNotificationId;
         Int32 mCurrentUser;
 
         AutoPtr<IBroadcastReceiver> mBootCompletedReceiver;
@@ -222,9 +228,6 @@ public:
         /* [in] */ IContext* context);
 
     ~UsbDeviceManager();
-
-    CARAPI Init(
-        /* [in] */ IContext* context);
 
     CARAPI_(void) SetCurrentSettings(
         /* [in] */ UsbSettingsManager* settings);
@@ -252,13 +255,12 @@ public:
 
     CARAPI_(void) DenyUsbDebugging();
 
+    CARAPI ClearUsbDebuggingKeys();
+
     // public void dump(FileDescriptor fd, PrintWriter pw);
 
 private:
     CARAPI_(AutoPtr<UsbSettingsManager>) GetCurrentSettings();
-
-    CARAPI_(void) EnableWakeLock(
-        /* [in] */ Boolean enable);
 
     CARAPI_(void) StartAccessoryMode();
 
@@ -306,25 +308,24 @@ private:
     static const Int32 AUDIO_MODE_NONE = 0;
     static const Int32 AUDIO_MODE_SOURCE = 1;
 
-    //add by kinier for detect usb port
-    static const String USB_PORT_PM_STATE;
-
-    static const String USB_PORT_STATE_SYS_PATH;
-
-    //add by kinier end
-
     static const Int32 MSG_UPDATE_STATE;
     static const Int32 MSG_ENABLE_ADB;
     static const Int32 MSG_SET_CURRENT_FUNCTIONS;
     static const Int32 MSG_SYSTEM_READY;
     static const Int32 MSG_BOOT_COMPLETED;
     static const Int32 MSG_USER_SWITCHED;
-    static const Int32 MSG_BOOTFAST_SWITCHED;
 
     // Delay for debouncing USB disconnects.
     // We often get rapid connect/disconnect events when enabling USB functions,
     // which need debouncing.
     static const Int32 UPDATE_DELAY;
+
+    // Time we received a request to enter USB accessory mode
+    Int64 mAccessoryModeRequestTime;
+
+    // Timeout for entering USB request mode.
+    // Request is cancelled if host does not configure device within 10 seconds.
+    static const Int32 ACCESSORY_REQUEST_TIMEOUT;
 
     static const String BOOT_MODE_PROPERTY;
 
@@ -350,13 +351,7 @@ private:
 
     AutoPtr<ArrayOf<String> > mAccessoryStrings;
     AutoPtr<UsbDebuggingManager> mDebuggingManager;
-
-    AutoPtr<IPowerManagerWakeLock> mWl;
-    Int32 mWlref;
-
     AutoPtr<MyUEventObserver> mUEventObserver;
-
-    friend class UsbHandler;
 };
 
 } // namespace Usb

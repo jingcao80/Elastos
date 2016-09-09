@@ -2,22 +2,19 @@
 #ifndef __ELASTOS_DROID_SERVER_USB_USBSETTINGSMANAGER_H__
 #define __ELASTOS_DROID_SERVER_USB_USBSETTINGSMANAGER_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Binder.h"
-#include "elastos/droid/content/PackageMonitor.h"
-#include "util/Xml.h"
-#include "util/XmlUtils.h"
+#include "elastos/droid/internal/content/PackageMonitor.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
+#include "elastos/droid/utility/Xml.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Hardware.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IComponentName;
-using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageInfo;
@@ -25,165 +22,178 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
 using Elastos::Droid::Internal::Content::PackageMonitor;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Hardware::Usb::IUsbAccessory;
-using Elastos::Droid::Os::Binder;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Hardware::Usb::IUsbDevice;
+using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Utility::IAtomicFile;
-using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::Xml;
-using Elastos::Droid::Utility::XmlUtils;
 using Elastos::IO::IFile;
-using Elastos::IO::CFile;
-using Elastos::IO::IFileInputStream;
-using Elastos::IO::CFileInputStream;
-using Elastos::IO::IFileOutputStream;
-using Elastos::IO::IIoUtils;
-using Elastos::IO::CIoUtils;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Etl::HashMap;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Org::Xmlpull::V1::IXmlSerializer;
-
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Usb {
 
-extern const InterfaceID EIID_DeviceFilter;
-extern const InterfaceID EIID_AccessoryFilter;
+/*
+ * This class is used to describe a USB device.
+ * When used in HashMaps all values must be specified,
+ * but wildcards can be used for any of the fields in
+ * the package meta-data.
+ */
+class DeviceFilter : public Object
+{
+public:
+    DeviceFilter(
+        /* [in] */ Int32 vid,
+        /* [in] */ Int32 pid,
+        /* [in] */ Int32 clasz,
+        /* [in] */ Int32 subclass,
+        /* [in] */ Int32 protocol,
+        /* [in] */ const String& manufacturer,
+        /* [in] */ const String& product,
+        /* [in] */ const String& serialnum);
+
+    DeviceFilter(
+        /* [in] */ IUsbDevice* device);
+
+    CAR_INTERFACE_DECL()
+
+    /*
+     * public static DeviceFilter read(XmlPullParser parser) throws XmlPullParserException, IOException {...}
+     */
+    static CARAPI Read(
+        /* [in] */ IXmlPullParser* parser,
+        /* [out] */ DeviceFilter** filter);
+
+    /*
+     * public void write(XmlSerializer serializer) throws IOException {...}
+     */
+    CARAPI Write(
+        /* [in] */ IXmlSerializer* serializer);
+
+    CARAPI_(Boolean) Matches(
+        /* [in] */ IUsbDevice* device);
+
+    CARAPI_(Boolean) Matches(
+        /* [in] */ DeviceFilter* filter);
+
+    CARAPI Equals(
+        /* [in] */ IInterface* obj,
+        /* [out] */ Boolean* res);
+
+    CARAPI GetHashCode(
+        /* [out] */ Int32* hashCode);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+private:
+    CARAPI_(Boolean) Matches(
+        /* [in] */ Int32 clasz,
+        /* [in] */ Int32 subclass,
+        /* [in] */ Int32 protocol);
+
+private:
+    // USB Vendor ID (or -1 for unspecified)
+    Int32 mVendorId;
+    // USB Product ID (or -1 for unspecified)
+    Int32 mProductId;
+    // USB device or interface class (or -1 for unspecified)
+    Int32 mClass;
+    // USB device subclass (or -1 for unspecified)
+    Int32 mSubclass;
+    // USB device protocol (or -1 for unspecified)
+    Int32 mProtocol;
+    // USB device manufacturer name string (or null for unspecified)
+    String mManufacturerName;
+    // USB device product name string (or null for unspecified)
+    String mProductName;
+    // USB device serial number string (or null for unspecified)
+    String mSerialNumber;
+};
+
+/*
+ * This class is used to describe a USB accessory.
+ * When used in HashMaps all values must be specified,
+ * but wildcards can be used for any of the fields in
+ * the package meta-data.
+ */
+class AccessoryFilter : public Object
+{
+public:
+    AccessoryFilter(
+        /* [in] */ const String& manufacturer,
+        /* [in] */ const String& model,
+        /* [in] */ const String& ver);
+
+    AccessoryFilter(
+        /* [in] */ IUsbAccessory* accessory);
+
+    CAR_INTERFACE_DECL()
+
+    /*
+     * public static AccessoryFilter read(XmlPullParser parser) throws XmlPullParserException, IOException {...}
+     */
+    static CARAPI Read(
+        /* [in] */ IXmlPullParser* parser,
+        /* [out] */ AccessoryFilter** filter);
+
+    /*
+     * public void write(XmlSerializer serializer)throws IOException {...}
+     */
+    CARAPI Write(
+        /* [in] */ IXmlSerializer* serializer);
+
+    CARAPI_(Boolean) Matches(
+        /* [in] */ IUsbAccessory* accessory);
+
+    CARAPI_(Boolean) Matches(
+        /* [in] */ AccessoryFilter* filter);
+
+    CARAPI Equals(
+        /* [in] */ IInterface* obj,
+        /* [out] */ Boolean* res);
+
+    CARAPI GetHashCode(
+        /* [out] */ Int32* hashCode);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+private:
+    // USB accessory manufacturer (or null for unspecified)
+    String mManufacturer;
+    // USB accessory model (or null for unspecified)
+    String mModel;
+    // USB accessory version (or null for unspecified)
+    String mVersion;
+};
+
+} // namespace Usb
+} // namespace Server
+} // namepsace Droid
+} // namespace Elastos
+
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Hardware::Usb::IUsbAccessory)
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Server::Usb::DeviceFilter)
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Server::Usb::AccessoryFilter)
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Usb {
 
 typedef HashMap<Int32, Boolean> Int32BooleanMap;
 typedef HashMap<Int32, Boolean>::Iterator Int32BooleanMapIterator;
 
-
-class UsbSettingsManager : public ElRefBase
+class UsbSettingsManager : public Object
 {
 private:
-    /*
-     * This class is used to describe a USB device.
-     * When used in HashMaps all values must be specified,
-     * but wildcards can be used for any of the fields in
-     * the package meta-data.
-     */
-    class DeviceFilter
-        : public ElRefBase
-        , public IInterface
-    {
-    public:
-        DeviceFilter(
-            /* [in] */ Int32 vid,
-            /* [in] */ Int32 pid,
-            /* [in] */ Int32 clasz,
-            /* [in] */ Int32 subclass,
-            /* [in] */ Int32 protocol);
-
-        DeviceFilter(
-            /* [in] */ IUsbDevice* device);
-
-        CAR_INTERFACE_DECL()
-
-        /*
-         * public static DeviceFilter read(XmlPullParser parser) throws XmlPullParserException, IOException {...}
-         */
-        static CARAPI Read(
-            /* [in] */ IXmlPullParser* parser,
-            /* [out] */ DeviceFilter** filter);
-
-        /*
-         * public void write(XmlSerializer serializer) throws IOException {...}
-         */
-        CARAPI Write(
-            /* [in] */ IXmlSerializer* serializer);
-
-        CARAPI_(Boolean) Matches(
-            /* [in] */ IUsbDevice* device);
-
-        CARAPI_(Boolean) Matches(
-            /* [in] */ DeviceFilter* filter);
-
-        CARAPI_(Boolean) Equals(
-            /* [in] */ IInterface* obj) const;
-
-        CARAPI_(Int32) GetHashCode() const;
-
-        CARAPI_(String) ToString();
-
-    private:
-        CARAPI_(Boolean) Matches(
-            /* [in] */ Int32 clasz,
-            /* [in] */ Int32 subclass,
-            /* [in] */ Int32 protocol);
-
-    private:
-        // USB Vendor ID (or -1 for unspecified)
-        Int32 mVendorId;
-        // USB Product ID (or -1 for unspecified)
-        Int32 mProductId;
-        // USB device or interface class (or -1 for unspecified)
-        Int32 mClass;
-        // USB device subclass (or -1 for unspecified)
-        Int32 mSubclass;
-        // USB device protocol (or -1 for unspecified)
-        Int32 mProtocol;
-    };
-
-    /*
-     * This class is used to describe a USB accessory.
-     * When used in HashMaps all values must be specified,
-     * but wildcards can be used for any of the fields in
-     * the package meta-data.
-     */
-    class AccessoryFilter
-        : public ElRefBase
-        , public IInterface
-    {
-    public:
-        AccessoryFilter(
-            /* [in] */ const String& manufacturer,
-            /* [in] */ const String& model,
-            /* [in] */ const String& ver);
-
-        AccessoryFilter(
-            /* [in] */ IUsbAccessory* accessory);
-
-        CAR_INTERFACE_DECL()
-
-        /*
-         * public static AccessoryFilter read(XmlPullParser parser) throws XmlPullParserException, IOException {...}
-         */
-        static CARAPI Read(
-            /* [in] */ IXmlPullParser* parser,
-            /* [out] */ AccessoryFilter** filter);
-
-        /*
-         * public void write(XmlSerializer serializer)throws IOException {...}
-         */
-        CARAPI Write(
-            /* [in] */ IXmlSerializer* serializer);
-
-        CARAPI_(Boolean) Matches(
-            /* [in] */ IUsbAccessory* accessory);
-
-        CARAPI_(Boolean) Matches(
-            /* [in] */ AccessoryFilter* filter);
-
-        CARAPI_(Boolean) Equals(
-            /* [in] */ IInterface* obj) const;
-
-        CARAPI_(Int32) GetHashCode() const;
-
-        CARAPI_(String) ToString();
-
-    private:
-        // USB accessory manufacturer (or null for unspecified)
-        String mManufacturer;
-        // USB accessory model (or null for unspecified)
-        String mModel;
-        // USB accessory version (or null for unspecified)
-        String mVersion;
-    };
-
     class MyPackageMonitor : public PackageMonitor
     {
     public:
@@ -197,7 +207,8 @@ private:
         CARAPI OnPackageChanged(
             /* [in] */ const String& packageName,
             /* [in] */ Int32 uid,
-            /* [in] */ ArrayOf<String>* components);
+            /* [in] */ ArrayOf<String>* components,
+            /* [out] */ Boolean* res);
 
         CARAPI OnPackageRemoved(
             /* [in] */ const String& packageName,
@@ -328,39 +339,6 @@ private:
     CARAPI_(Boolean) ClearPackageDefaultsLocked(
         /* [in] */ const String& packageName);
 
-public:
-    struct HashPK_DeviceFilter
-    {
-        size_t operator()(DeviceFilter* s) const
-        {
-            return (size_t)s->GetHashCode();
-        }
-    };
-
-    struct PKEq_DeviceFilter
-    {
-        Boolean operator()(DeviceFilter* x, IInterface* y) const
-        {
-            return x->Equals(y);
-        }
-    };
-
-    struct HashPK_AccessoryFilter
-    {
-        size_t operator()(const AccessoryFilter* s) const
-        {
-            return (size_t)s->GetHashCode();
-        }
-    };
-
-    struct PKEq_AccessoryFilter
-    {
-        Boolean operator()(const AccessoryFilter* x, const IInterface* y) const
-        {
-            return x->Equals(const_cast<IInterface*>(y));
-        }
-    };
-
 private:
     static const String TAG;
     static const Boolean DEBUG;
@@ -370,6 +348,7 @@ private:
 
     AutoPtr<IUserHandle> mUser;
     AutoPtr<IAtomicFile> mSettingsFile;
+    Boolean mDisablePermissionDialogs;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IContext> mUserContext;
@@ -382,16 +361,14 @@ private:
     HashMap< AutoPtr<IUsbAccessory>, AutoPtr<Int32BooleanMap> > mAccessoryPermissionMap;
 
     // Maps DeviceFilter to user preferred application package
-    HashMap< AutoPtr<DeviceFilter>, String, HashPK_DeviceFilter, PKEq_DeviceFilter > mDevicePreferenceMap;
+    HashMap< AutoPtr<DeviceFilter>, String> mDevicePreferenceMap;
 
     // Maps AccessoryFilter to user preferred application package
-    HashMap< AutoPtr<AccessoryFilter>, String, HashPK_AccessoryFilter, PKEq_AccessoryFilter > mAccessoryPreferenceMap;
+    HashMap< AutoPtr<AccessoryFilter>, String> mAccessoryPreferenceMap;
 
     Object mLock;
 
     AutoPtr<MyPackageMonitor> mPackageMonitor;
-
-    friend class MyPackageMonitor;
 };
 
 } // namespace Usb

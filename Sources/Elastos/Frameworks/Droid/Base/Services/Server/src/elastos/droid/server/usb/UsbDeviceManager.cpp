@@ -1,56 +1,29 @@
 
-#include "elastos/droid/R.h"
+#include "elastos/droid/server/usb/UsbDeviceManager.h"
+#include "elastos/droid/server/FgThread.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/UserHandle.h"
-#include "usb/UsbDeviceManager.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Character.h>
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
 #include <fcntl.h>
 #include <linux/ioctl.h>
 #include <linux/usb/f_accessory.h>
 
-using Elastos::IO::CFile;
-using Elastos::IO::IFile;
-using Elastos::IO::CFileWriter;
-using Elastos::IO::IFileWriter;
-using Elastos::IO::IFileInputStream;
-using Elastos::IO::CFileInputStream;
-using Elastos::IO::IDataInputStream;
-using Elastos::IO::CDataInputStream;
-using Elastos::IO::IBufferedInputStream;
-using Elastos::IO::CBufferedInputStream;
-using Elastos::IO::IOutputStreamWriter;
-using Elastos::IO::COutputStreamWriter;
-using Elastos::Core::Character;
-using Elastos::Core::StringBuilder;
-using Elastos::Core::StringUtils;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::FileUtils;
-using Elastos::Droid::Os::UserHandle;
-using Elastos::Droid::Os::CHandlerThread;
-using Elastos::Droid::Os::IHandlerThread;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::CSystemProperties;
-using Elastos::Droid::Os::CParcelFileDescriptor;
-using Elastos::Droid::Net::IUri;
+using Elastos::Droid::App::CAppOpsManagerHelper;
+using Elastos::Droid::App::IAppOpsManagerHelper;
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::CNotification;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
-using Elastos::Droid::Media::IRingtone;
-using Elastos::Droid::Media::CRingtone;
-using Elastos::Droid::Media::IRingtoneManager;
-using Elastos::Droid::Media::CRingtoneManager;
-using Elastos::Droid::Media::IRingtoneManagerHelper;
-using Elastos::Droid::Media::CRingtoneManagerHelper;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntentHelper;
@@ -63,12 +36,54 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Hardware::Usb::IUsbManager;
 using Elastos::Droid::Hardware::Usb::CUsbAccessory;
-using Elastos::Droid::Provider::CSettingsGlobal;
-using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::IRingtone;
+using Elastos::Droid::Media::CRingtone;
+using Elastos::Droid::Media::IRingtoneManager;
+using Elastos::Droid::Media::CRingtoneManager;
+using Elastos::Droid::Media::IRingtoneManagerHelper;
+using Elastos::Droid::Media::CRingtoneManagerHelper;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Os::FileUtils;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Os::IHandlerThread;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::CParcelFileDescriptor;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::Storage::CStorageManagerHelper;
 using Elastos::Droid::Os::Storage::IStorageManagerHelper;
 using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::Storage::IStorageVolume;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Core::Character;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
+using Elastos::IO::CFile;
+using Elastos::IO::IFile;
+using Elastos::IO::CFileWriter;
+using Elastos::IO::IFileWriter;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::CFileInputStream;
+using Elastos::IO::IDataInputStream;
+using Elastos::IO::CDataInputStream;
+using Elastos::IO::IBufferedInputStream;
+using Elastos::IO::CBufferedInputStream;
+using Elastos::IO::IOutputStreamWriter;
+using Elastos::IO::COutputStreamWriter;
+using Elastos::Utility::CScanner;
+using Elastos::Utility::IScanner;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -84,10 +99,7 @@ const String UsbDeviceManager::STATE_PATH("/sys/class/android_usb/android0/state
 const String UsbDeviceManager::MASS_STORAGE_FILE_PATH("/sys/class/android_usb/android0/f_mass_storage/lun/file");
 const String UsbDeviceManager::RNDIS_ETH_ADDR_PATH("/sys/class/android_usb/android0/f_rndis/ethaddr");
 const String UsbDeviceManager::AUDIO_SOURCE_PCM_PATH("/sys/class/android_usb/android0/f_audio_source/pcm");
-//add by kinier for detect usb port
-const String UsbDeviceManager::USB_PORT_PM_STATE("DEVPATH=/devices/virtual/usb_port_pm/port_pm");
-const String UsbDeviceManager::USB_PORT_STATE_SYS_PATH("/sys/class/usb_port_pm/port_pm/state");
-//add by kinier end
+const Int32 UsbDeviceManager::ACCESSORY_REQUEST_TIMEOUT = 10 * 1000;
 const String UsbDeviceManager::BOOT_MODE_PROPERTY("ro.bootmode");
 const String UsbDeviceManager::DRIVER_NAME("/dev/usb_accessory");
 const Int32 UsbDeviceManager::AUDIO_MODE_NONE;
@@ -100,13 +112,13 @@ const Int32 UsbDeviceManager::MSG_SET_CURRENT_FUNCTIONS = 2;
 const Int32 UsbDeviceManager::MSG_SYSTEM_READY = 3;
 const Int32 UsbDeviceManager::MSG_BOOT_COMPLETED = 4;
 const Int32 UsbDeviceManager::MSG_USER_SWITCHED = 5;
-const Int32 UsbDeviceManager::MSG_BOOTFAST_SWITCHED = 6;
 
 ECode UsbDeviceManager::AdbSettingsObserver::constructor(
     /* [in] */ UsbDeviceManager* host)
 {
+    ContentObserver::constructor(NULL);
     mHost = host;
-    return ContentObserver::constructor();
+    return NOERROR;
 }
 
 ECode UsbDeviceManager::AdbSettingsObserver::OnChange(
@@ -127,20 +139,16 @@ UsbDeviceManager::MyUEventObserver::MyUEventObserver(
     : mHost(host)
 {}
 
-void UsbDeviceManager::MyUEventObserver::OnUEvent(
+ECode UsbDeviceManager::MyUEventObserver::OnUEvent(
     /* [in] */ IUEvent* event)
 {
     if (UsbDeviceManager::DEBUG) {
-        Slogger::V(UsbDeviceManager::TAG, "USB UEVENT: %s" , event->ToString().string());
+        Slogger::V(UsbDeviceManager::TAG, "USB UEVENT: %s", TO_CSTR(event));
     }
 
-    String state = event->Get(String("USB_STATE"));
-    String accessory = event->Get(String("ACCESSORY"));
-
-    //add by kinier for detect usb port
-    String port_state = event->Get(String("USB_PORT_STATE"));
-    //add by kinier end
-
+    String state, accessory;
+    event->Get(String("USB_STATE"), &state);
+    event->Get(String("ACCESSORY"), &accessory);
     if (!state.IsNull()) {
         mHost->mHandler->UpdateState(state);
     }
@@ -150,18 +158,7 @@ void UsbDeviceManager::MyUEventObserver::OnUEvent(
         }
         mHost->StartAccessoryMode();
     }
-    //add by kinier for detect usb port
-    else if(!port_state.IsNull()){
-        Slogger::D(String("kinier"), "%s", port_state.string());
-
-        AutoPtr<IIntent> intent;
-        CIntent::New(String("android.hardware.usb.action.USB_PORT_STATE"), (IIntent**)&intent);
-        intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
-        intent->PutExtra(String("USB_PORT_STATE"), port_state);
-        mHost->mContext->SendStickyBroadcast(intent);
-
-    }
-    //add by kinier end
+    return NOERROR;
 }
 
 UsbDeviceManager::UsbHandler::BootCompletedReceiver::BootCompletedReceiver(
@@ -173,7 +170,7 @@ ECode UsbDeviceManager::UsbHandler::BootCompletedReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    if (UsbDeviceManager::DEBUG) Slogger::D(UsbDeviceManager::TAG, "boot completed");
+    if (UsbDeviceManager::DEBUG) Slogger::D(TAG, "boot completed");
 
     Boolean result;
     mHost->mHost->mHandler->SendEmptyMessage(UsbDeviceManager::MSG_BOOT_COMPLETED, &result);
@@ -198,42 +195,22 @@ ECode UsbDeviceManager::UsbHandler::UserSwitchedReceiver::OnReceive(
     return NOERROR;
 }
 
-UsbDeviceManager::UsbHandler::BootFastReceiver::BootFastReceiver(
-    /* [in] */ UsbHandler* host)
-    : mHost(host)
-{}
-
-ECode UsbDeviceManager::UsbHandler::BootFastReceiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    Slogger::D(String("UsbDeviceManager"), "mBootFastReceiver reveived ACTION_BOOT_FAST");
-    Int32 boot = 0;
-    intent->GetInt32Extra(IIntent::EXTRA_BOOT_FAST, 0, &boot);
-
-    AutoPtr<IMessage> msg;
-    mHost->mHost->mHandler->ObtainMessage(MSG_BOOTFAST_SWITCHED, boot, 0, (IMessage**)&msg);
-    msg->SendToTarget();
-    return NOERROR;
-}
-
 //==================================================================
 // UsbDeviceManager::UsbHandler
 //==================================================================
 UsbDeviceManager::UsbHandler::UsbHandler(
     /* [in] */ UsbDeviceManager* host,
     /* [in] */ ILooper* looper)
-    : HandlerBase(looper)
+    : Handler(looper)
     , mHost(host)
     , mConnected(FALSE)
     , mConfigured(FALSE)
     , mUsbNotificationId(0)
-    , mAdbNotificationShown(FALSE)
+    , mAdbNotificationId(0)
     , mCurrentUser(IUserHandle::USER_NULL)
 {
     mBootCompletedReceiver = (IBroadcastReceiver*)new BootCompletedReceiver(this);
     mUserSwitchedReceiver = (IBroadcastReceiver*)new UserSwitchedReceiver(this);
-    mBootFastReceiver = (IBroadcastReceiver*)new BootFastReceiver(this);
 }
 
 ECode UsbDeviceManager::UsbHandler::Init()
@@ -298,24 +275,30 @@ ECode UsbDeviceManager::UsbHandler::Init()
     }
     mHost->mContentResolver->RegisterContentObserver(uri, FALSE, adbsettingobsvr);
 
+    AutoPtr<AdbNotificationObserver> adbNotificationObserver = new AdbNotificationObserver();
+    adbNotificationObserver->constructor(this);
+
+    AutoPtr<ISettingsSecure> settingsSecure;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
+    uri = NULL;
+    settingsSecure->GetUriFor(ISettingsSecure::ADB_PORT, (IUri**)&uri);
+    mHost->mContentResolver->RegisterContentObserver(uri, FALSE, adbNotificationObserver);
+    uri = NULL;
+    settingsSecure->GetUriFor(ISettingsSecure::ADB_NOTIFY, (IUri**)&uri);
+    mHost->mContentResolver->RegisterContentObserver(uri, FALSE, adbNotificationObserver);
+
     // Watch for USB configuration changes
     mHost->mUEventObserver->StartObserving(USB_STATE_MATCH);
     mHost->mUEventObserver->StartObserving(ACCESSORY_START_MATCH);
 
-    //add by kinier  for detect USB port state
-    mHost->mUEventObserver->StartObserving(USB_PORT_PM_STATE);
-    //add by kinier end
-
     AutoPtr<IIntent> intent;
-    AutoPtr<IIntentFilter> filter1, filter2, filter3;
+    AutoPtr<IIntentFilter> filter1, filter2;
     CIntentFilter::New(IIntent::ACTION_BOOT_COMPLETED, (IIntentFilter**)&filter1);
+    filter1->SetPriority(IIntentFilter::SYSTEM_HIGH_PRIORITY);
     CIntentFilter::New(IIntent::ACTION_USER_SWITCHED, (IIntentFilter**)&filter2);
-    CIntentFilter::New(IIntent::ACTION_BOOT_FAST, (IIntentFilter**)&filter3);
     mHost->mContext->RegisterReceiver(mBootCompletedReceiver, filter1, (IIntent**)&intent);
     intent = NULL;
     mHost->mContext->RegisterReceiver(mUserSwitchedReceiver, filter2, (IIntent**)&intent);
-    intent = NULL;
-    mHost->mContext->RegisterReceiver(mBootFastReceiver, filter3, (IIntent**)&intent);
     // } catch (Exception e) {
     //     Slog.e(TAG, "Error initializing UsbHandler", e);
     // }
@@ -341,7 +324,7 @@ void UsbDeviceManager::UsbHandler::UpdateState(
         configured = 1;
     }
     else {
-        Slogger::E(UsbDeviceManager::TAG, "unknown state %s", state.string());
+        Slogger::E(TAG, "unknown state %s", state.string());
         return;
     }
 
@@ -391,45 +374,6 @@ void UsbDeviceManager::UsbHandler::SendMessage(
     SendMessage(m, &result);
 }
 
-ECode UsbDeviceManager::UsbHandler::HandleMessage(
-    /* [in] */ IMessage* msg)
-{
-    Int32 what, arg1, arg2;
-    msg->GetWhat(&what);
-    msg->GetArg1(&arg1);
-    msg->GetArg2(&arg2);
-
-    switch (what) {
-        case UsbDeviceManager::MSG_UPDATE_STATE:
-            HandleMsgUpdateState(arg1 == 1, arg2 == 1);
-            break;
-        case UsbDeviceManager::MSG_ENABLE_ADB:
-            HandleMsgEnableAdb(arg1 == 1);
-            break;
-        case UsbDeviceManager::MSG_SET_CURRENT_FUNCTIONS: {
-                AutoPtr<IInterface> seq;
-                msg->GetObj((IInterface**)&seq);
-                String info;
-                ICharSequence::Probe(seq)->ToString(&info);
-                HandleMsgSetCurrentFunctions(info, arg1 == 1);
-            }
-            break;
-        case UsbDeviceManager::MSG_SYSTEM_READY:
-            HandleMsgSystemReady();
-            break;
-        case UsbDeviceManager::MSG_BOOT_COMPLETED:
-            HandleMsgBootCompleted();
-            break;
-        case UsbDeviceManager::MSG_BOOTFAST_SWITCHED:
-            HandleMsgBootFastSwitched(arg1);
-            break;
-        case UsbDeviceManager::MSG_USER_SWITCHED:
-            HandleMsgUserSwitched(arg1);
-            break;
-    }
-    return NOERROR;
-}
-
 Boolean UsbDeviceManager::UsbHandler::WaitForState(
     /* [in] */ const String& state)
 {
@@ -453,7 +397,7 @@ Boolean UsbDeviceManager::UsbHandler::WaitForState(
 Boolean UsbDeviceManager::UsbHandler::SetUsbConfig(
     /* [in] */ const String& config)
 {
-    if (UsbDeviceManager::DEBUG) Slogger::D(UsbDeviceManager::TAG, "setUsbConfig(%s)", (const char*) config);
+    if (UsbDeviceManager::DEBUG) Slogger::D(TAG, "setUsbConfig(%s)", (const char*) config);
     // set the new configuration
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
@@ -464,7 +408,7 @@ Boolean UsbDeviceManager::UsbHandler::SetUsbConfig(
 void UsbDeviceManager::UsbHandler::SetAdbEnabled(
     /* [in] */ Boolean enable)
 {
-    if (UsbDeviceManager::DEBUG) Slogger::D(UsbDeviceManager::TAG, "setAdbEnabled: (%d)", enable);
+    if (UsbDeviceManager::DEBUG) Slogger::D(TAG, "setAdbEnabled: (%d)", enable);
     if (enable != mHost->mAdbEnabled) {
         mHost->mAdbEnabled = enable;
         // Due to the persist.sys.usb.config property trigger, changing adb state requires
@@ -482,10 +426,14 @@ void UsbDeviceManager::UsbHandler::SetEnabledFunctions(
     /* [in] */ Boolean makeDefault)
 {
     String functions = str;
+    if (DEBUG) Slogger::D(TAG, "setEnabledFunctions %s makeDefault: %d",
+        functions.string(), makeDefault);
+
     // Do not update persystent.sys.usb.config if the device is booted up
     // with OEM specific mode.
     if (!functions.IsNull() && makeDefault && !mHost->NeedsOemUsbOverride()) {
-        if (mHost->mAdbEnabled) {
+        if (!IUsbManager::USB_FUNCTION_CHARGING.Equals(functions)
+            && mHost->mAdbEnabled) {
             functions = AddFunction(functions, IUsbManager::USB_FUNCTION_ADB);
         }
         else {
@@ -493,7 +441,7 @@ void UsbDeviceManager::UsbHandler::SetEnabledFunctions(
         }
         if (!mDefaultFunctions.Equals(functions)) {
             if (!SetUsbConfig(String("none"))) {
-                Slogger::E(UsbDeviceManager::TAG, "Failed to disable USB");
+                Slogger::E(TAG, "Failed to disable USB");
                 // revert to previous configuration if we fail
                 SetUsbConfig(mCurrentFunctions);
                 return;
@@ -508,7 +456,7 @@ void UsbDeviceManager::UsbHandler::SetEnabledFunctions(
                 mDefaultFunctions = functions;
             }
             else {
-                Slogger::E(UsbDeviceManager::TAG, "Failed to switch persistent USB config to %s", functions.string());
+                Slogger::E(TAG, "Failed to switch persistent USB config to %s", functions.string());
                 // revert to previous configuration if we fail
                 sysProp->Set(String("persist.sys.usb.config"), mDefaultFunctions);
             }
@@ -522,7 +470,8 @@ void UsbDeviceManager::UsbHandler::SetEnabledFunctions(
         // Override with bootmode specific usb mode if needed
         functions = mHost->ProcessOemUsbOverride(functions);
 
-        if (mHost->mAdbEnabled) {
+        if (!IUsbManager::USB_FUNCTION_CHARGING.Equals(functions)
+            && mHost->mAdbEnabled) {
             functions = AddFunction(functions, IUsbManager::USB_FUNCTION_ADB);
         }
         else {
@@ -530,7 +479,7 @@ void UsbDeviceManager::UsbHandler::SetEnabledFunctions(
         }
         if (!mCurrentFunctions.Equals(functions)) {
             if (!SetUsbConfig(String("none"))) {
-                Slogger::E(UsbDeviceManager::TAG, "Failed to disable USB");
+                Slogger::E(TAG, "Failed to disable USB");
                 // revert to previous configuration if we fail
                 SetUsbConfig(mCurrentFunctions);
                 return;
@@ -539,7 +488,7 @@ void UsbDeviceManager::UsbHandler::SetEnabledFunctions(
                 mCurrentFunctions = functions;
             }
             else {
-                Slogger::E(UsbDeviceManager::TAG, "Failed to switch USB config to %s", functions.string());
+                Slogger::E(TAG, "Failed to switch USB config to %s", functions.string());
                 // revert to previous configuration if we fail
                 SetUsbConfig(mCurrentFunctions);
             }
@@ -549,26 +498,31 @@ void UsbDeviceManager::UsbHandler::SetEnabledFunctions(
 
 void UsbDeviceManager::UsbHandler::UpdateCurrentAccessory()
 {
-    if (!mHost->mHasUsbAccessory) return;
+    // We are entering accessory mode if we have received a request from the host
+    // and the request has not timed out yet.
+    Boolean enteringAccessoryMode = mHost->mAccessoryModeRequestTime > 0 &&
+        SystemClock::GetElapsedRealtime() < mHost->mAccessoryModeRequestTime + ACCESSORY_REQUEST_TIMEOUT;
 
-    if (mConfigured) {
+    if (mConfigured && enteringAccessoryMode) {
+        // successfully entered accessory mode
+
         if (mHost->mAccessoryStrings != NULL) {
             mCurrentAccessory = NULL;
             CUsbAccessory::New(*mHost->mAccessoryStrings, (IUsbAccessory**)&mCurrentAccessory);
-            Slogger::D(UsbDeviceManager::TAG, "entering USB accessory mode: %p", mCurrentAccessory.Get());
+            Slogger::D(TAG, "entering USB accessory mode: %p", mCurrentAccessory.Get());
             // defer accessoryAttached if system is not ready
             if (mHost->mBootCompleted) {
                 mHost->GetCurrentSettings()->AccessoryAttached(mCurrentAccessory);
             } // else handle in mBootCompletedReceiver
         }
         else {
-            Slogger::E(UsbDeviceManager::TAG, "nativeGetAccessoryStrings failed");
+            Slogger::E(TAG, "nativeGetAccessoryStrings failed");
         }
     }
-    else if (!mConnected) {
+    else if (!enteringAccessoryMode) {
         // make sure accessory mode is off
         // and restore default functions
-        Slogger::D(UsbDeviceManager::TAG, "exited USB accessory mode");
+        Slogger::D(TAG, "exited USB accessory mode");
         SetEnabledFunctions(mDefaultFunctions, FALSE);
 
         if (mCurrentAccessory != NULL) {
@@ -598,6 +552,9 @@ void UsbDeviceManager::UsbHandler::UpdateUsbState()
         }
     }
 
+    if (DEBUG) Slogger::D(TAG, "broadcasting %s connected: %d configured: %d",
+        TO_CSTR(intent), mConnected, mConfigured);
+
     mHost->mContext->SendStickyBroadcastAsUser(intent, UserHandle::ALL);
 }
 
@@ -608,58 +565,79 @@ void UsbDeviceManager::UsbHandler::UpdateAudioSourceFunction()
     if (enabled != mHost->mAudioSourceEnabled) {
         // send a sticky broadcast containing current USB state
         AutoPtr<IIntent> intent;
-        CIntent::New(IIntent::ACTION_USB_AUDIO_ACCESSORY_PLUG,(IIntent**)&intent);
+        CIntent::New(IAudioManager::ACTION_USB_AUDIO_ACCESSORY_PLUG,(IIntent**)&intent);
         intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
         intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY);
         intent->PutExtra(String("state"), enabled ? 1 : 0);
         if (enabled) {
-            AutoPtr<IFile> file;
-            ECode ec = CFile::New(AUDIO_SOURCE_PCM_PATH, (IFile**)&file);
-            if(FAILED(ec)) {
-                Slogger::E(TAG, "could not open audio source PCM file");
-                mHost->mContext->SendStickyBroadcastAsUser(intent, UserHandle::ALL);
-                mHost->mAudioSourceEnabled = enabled;
-                return;
-            }
+            AutoPtr<IScanner> scanner;
+            ECode ec;
+            do {
+                AutoPtr<IFile> file;
+                ec = CFile::New(AUDIO_SOURCE_PCM_PATH, (IFile**)&file);
+                if (FAILED(ec))
+                    break;
+                ec = CScanner::New(file, (IScanner**)&scanner);
+                if (FAILED(ec))
+                    break;
+                Int32 card, device;
+                ec = scanner->NextInt32(&card);
+                if (FAILED(ec))
+                    break;
+                ec = scanner->NextInt32(&device);
+                if (FAILED(ec))
+                    break;
+                intent->PutExtra(String("card"), card);
+                intent->PutExtra(String("device"), device);
+            } while (0);
 
-            String result;
-            ec = FileUtils::ReadTextFile(file, 0, String(NULL), &result);
-            if(FAILED(ec)) {
-                Slogger::E(TAG, "could not open audio source PCM file");
-                mHost->mContext->SendStickyBroadcastAsUser(intent, UserHandle::ALL);
-                mHost->mAudioSourceEnabled = enabled;
-                return;
+            if (FAILED(ec)) {
+                Slogger::E(TAG, "could not open audio source PCM file ec = 0x%08x", ec);
             }
-            AutoPtr< ArrayOf<String> > tok;
-            StringUtils::Split(result, String(" "), (ArrayOf<String>**)&tok);
-            if((*tok)[0].IsNullOrEmpty()) {
-                Slogger::E(TAG, "card is null or empty");
+            if (scanner != NULL) {
+                scanner->Close();
             }
-            Int32 card, device;
-            card = StringUtils::ParseInt32((*tok)[0]);
-
-            if((*tok)[1].IsNullOrEmpty()) {
-                Slogger::E(TAG, "device is null or empty");
-            }
-            device = StringUtils::ParseInt32((*tok)[1]);
-
-            intent->PutExtra(String("card"), card);
-            intent->PutExtra(String("device"), device);
-            /*
-            try {
-                Scanner scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
-                int card = scanner.nextInt();
-                int device = scanner.nextInt();
-                intent->PutExtra("card", card);
-                intent->PutExtra("device", device);
-            } catch (FileNotFoundException e) {
-                Slog.e(TAG, "could not open audio source PCM file", e);
-            }*/
         }
 
         mHost->mContext->SendStickyBroadcastAsUser(intent, UserHandle::ALL);
         mHost->mAudioSourceEnabled = enabled;
     }
+}
+
+ECode UsbDeviceManager::UsbHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    Int32 what, arg1, arg2;
+    msg->GetWhat(&what);
+    msg->GetArg1(&arg1);
+    msg->GetArg2(&arg2);
+
+    switch (what) {
+        case UsbDeviceManager::MSG_UPDATE_STATE:
+            HandleMsgUpdateState(arg1 == 1, arg2 == 1);
+            break;
+        case UsbDeviceManager::MSG_ENABLE_ADB:
+            HandleMsgEnableAdb(arg1 == 1);
+            break;
+        case UsbDeviceManager::MSG_SET_CURRENT_FUNCTIONS: {
+                AutoPtr<IInterface> seq;
+                msg->GetObj((IInterface**)&seq);
+                String info;
+                ICharSequence::Probe(seq)->ToString(&info);
+                HandleMsgSetCurrentFunctions(info, arg1 == 1);
+            }
+            break;
+        case UsbDeviceManager::MSG_SYSTEM_READY:
+            HandleMsgSystemReady();
+            break;
+        case UsbDeviceManager::MSG_BOOT_COMPLETED:
+            HandleMsgBootCompleted();
+            break;
+        case UsbDeviceManager::MSG_USER_SWITCHED:
+            HandleMsgUserSwitched(arg1);
+            break;
+    }
+    return NOERROR;
 }
 
 void UsbDeviceManager::UsbHandler::HandleMsgUpdateState(
@@ -669,17 +647,12 @@ void UsbDeviceManager::UsbHandler::HandleMsgUpdateState(
     mConnected = connected;
     mConfigured = configured;
 
-    mHost->EnableWakeLock(mConnected);
-    //enableDPMLock(mConnected);
-
     UpdateUsbNotification();
     UpdateAdbNotification();
     if (mHost->ContainsFunction(mCurrentFunctions,
             IUsbManager::USB_FUNCTION_ACCESSORY)) {
         UpdateCurrentAccessory();
-    }
-
-    if (!mConnected) {
+    } else if (!mConnected) {
         // restore defaults when USB is disconnected
         SetEnabledFunctions(mDefaultFunctions, FALSE);
     }
@@ -717,62 +690,6 @@ void UsbDeviceManager::UsbHandler::HandleMsgBootCompleted()
         mHost->GetCurrentSettings()->AccessoryAttached(mCurrentAccessory);
     }
 
-    //add by kinier for detect usb port state
-    // try{
-    AutoPtr<IFile> file;
-    ECode ec = CFile::New(UsbDeviceManager::USB_PORT_STATE_SYS_PATH, (IFile**)&file);
-    if (FAILED(ec)) {
-        Slogger::E(UsbDeviceManager::TAG, "read usb port state fail!");
-        if (mHost->mDebuggingManager != NULL) {
-            mHost->mDebuggingManager->SetAdbEnabled(mHost->mAdbEnabled);
-        }
-        return;
-    }
-    String temp;
-    ec = FileUtils::ReadTextFile(file, 0, String(NULL), &temp);
-    if (FAILED(ec)) {
-        Slogger::E(UsbDeviceManager::TAG, "read usb port state fail!");
-        if (mHost->mDebuggingManager != NULL) {
-            mHost->mDebuggingManager->SetAdbEnabled(mHost->mAdbEnabled);
-        }
-        return;
-    }
-    String port_state = temp.Trim();
-    Thread::Sleep(1000);
-    //read again
-    file = NULL;
-    ec = CFile::New(UsbDeviceManager::USB_PORT_STATE_SYS_PATH, (IFile**)&file);
-    if (FAILED(ec)) {
-        Slogger::E(UsbDeviceManager::TAG, "read usb port state fail!");
-        if (mHost->mDebuggingManager != NULL) {
-            mHost->mDebuggingManager->SetAdbEnabled(mHost->mAdbEnabled);
-        }
-        return;
-    }
-    ec = FileUtils::ReadTextFile(file, 0, String(NULL), &temp);
-    if (FAILED(ec)) {
-        Slogger::E(UsbDeviceManager::TAG, "read usb port state fail!");
-        if (mHost->mDebuggingManager != NULL) {
-            mHost->mDebuggingManager->SetAdbEnabled(mHost->mAdbEnabled);
-        }
-        return;
-    }
-    port_state = temp.Trim();
-
-    if(!port_state.IsNull()) {
-        Slogger::D(String("kinier"), "%s read from Node", port_state.string());
-
-        AutoPtr<IIntent> intent;
-        CIntent::New(String("android.hardware.usb.action.USB_PORT_STATE"), (IIntent**)&intent);
-        intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
-        intent->PutExtra(String("USB_PORT_STATE"), port_state);
-        mHost->mContext->SendStickyBroadcast(intent);
-    }
-    // }catch (Exception e) {
-    //      Slog.e(TAG, "read usb port state fail!");
-    // }
-    //add by kinier end
-
     if (mHost->mDebuggingManager != NULL) {
         mHost->mDebuggingManager->SetAdbEnabled(mHost->mAdbEnabled);
     }
@@ -781,28 +698,27 @@ void UsbDeviceManager::UsbHandler::HandleMsgBootCompleted()
 void UsbDeviceManager::UsbHandler::HandleMsgUserSwitched(
     /* [in] */ Int32 currentUser)
 {
+    AutoPtr<IInterface> service;
+    mHost->mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&service);
+    AutoPtr<IUserManager> userManager = IUserManager::Probe(service);
+    Boolean res;
+    userManager->HasUserRestriction(IUserManager::DISALLOW_USB_FILE_TRANSFER, &res);
+    if (res) {
+        Slogger::V(TAG, "Switched to user with DISALLOW_USB_FILE_TRANSFER restriction; disabling USB.");
+        SetUsbConfig(String("none"));
+        mCurrentUser = currentUser;
+        return;
+    }
+
     Boolean mtpActive =
-                mHost->ContainsFunction(mCurrentFunctions, IUsbManager::USB_FUNCTION_MTP)
-                || mHost->ContainsFunction(mCurrentFunctions, IUsbManager::USB_FUNCTION_PTP);
+        mHost->ContainsFunction(mCurrentFunctions, IUsbManager::USB_FUNCTION_MTP)
+        || mHost->ContainsFunction(mCurrentFunctions, IUsbManager::USB_FUNCTION_PTP);
     if (mtpActive && mCurrentUser != IUserHandle::USER_NULL) {
-        Slogger::V(UsbDeviceManager::TAG, "Current user switched; resetting USB host stack for MTP");
+        Slogger::V(TAG, "Current user switched; resetting USB host stack for MTP");
         SetUsbConfig(String("none"));
         SetUsbConfig(mCurrentFunctions);
     }
     mCurrentUser = currentUser;
-}
-
-void UsbDeviceManager::UsbHandler::HandleMsgBootFastSwitched(
-    /* [in] */ Int32 boot)
-{
-    if(boot == 0){
-        Slogger::D(UsbDeviceManager::TAG, "boot fast usb switch to none");
-        SetUsbConfig(String("none"));
-    }
-    else{
-        Slogger::D(UsbDeviceManager::TAG, "boot fast usb switch to ok");
-        SetUsbConfig(mCurrentFunctions);
-    }
 }
 
 AutoPtr<IUsbAccessory> UsbDeviceManager::UsbHandler::GetCurrentAccessory()
@@ -818,7 +734,10 @@ void UsbDeviceManager::UsbHandler::UpdateUsbNotification()
     AutoPtr<IResources> r;
     mHost->mContext->GetResources((IResources**)&r);
     if (mConnected) {
-        if (ContainsFunction(mCurrentFunctions, IUsbManager::USB_FUNCTION_MTP)) {
+        if (ContainsFunction(mCurrentFunctions, IUsbManager::USB_FUNCTION_CHARGING)) {
+            id = R::string::usb_charging_notification_title;
+        }
+        else if (ContainsFunction(mCurrentFunctions, IUsbManager::USB_FUNCTION_MTP)) {
             id = R::string::usb_mtp_notification_title;
         }
         else if (ContainsFunction(mCurrentFunctions, IUsbManager::USB_FUNCTION_PTP)) {
@@ -832,6 +751,13 @@ void UsbDeviceManager::UsbHandler::UpdateUsbNotification()
             id = R::string::usb_accessory_notification_title;
         }
         else {
+            AutoPtr<IAppOpsManagerHelper> aomHelper;
+            CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aomHelper);
+            Boolean isStrictEnable;
+            aomHelper->IsStrictEnable(&isStrictEnable);
+            if (isStrictEnable) {
+                id = R::string::usb_choose_notification_title;
+            }
             // There is a different notification for USB tethering so we don't need one here
             //if (!containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_RNDIS)) {
             //    Slog.e(TAG, "No known USB function in updateUsbNotification");
@@ -876,7 +802,11 @@ void UsbDeviceManager::UsbHandler::UpdateUsbNotification()
             CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&pendingIntentHelper);
             pendingIntentHelper->GetActivityAsUser(mHost->mContext, 0,
                     intent, 0, NULL, UserHandle::CURRENT, (IPendingIntent**)&pi);
+            Int32 color;
+            r->GetColor(R::color::system_notification_accent_color, &color);
+            notification->SetColor(color);
             notification->SetLatestEventInfo(mHost->mContext, title, message, pi);
+            notification->SetVisibility(INotification::VISIBILITY_PUBLIC);
             mHost->mNotificationManager->NotifyAsUser(String(NULL), id, notification,
                     UserHandle::ALL);
             mUsbNotificationId = id;
@@ -888,20 +818,47 @@ void UsbDeviceManager::UsbHandler::UpdateAdbNotification()
 {
     if (mHost->mNotificationManager == NULL) return;
 
-    Int32 id = R::string::adb_active_notification_title;
-    if (mHost->mAdbEnabled && mConnected) {
-        AutoPtr<ISystemProperties> sysProp;
-        CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-        String value;
-        sysProp->Get(String("persist.adb.notify"), &value);
-        if (value.Equals("0")) return;
+    Int32 id;
+    Boolean usbAdbActive = mHost->mAdbEnabled && mConnected;
+    AutoPtr<ISettingsSecure> settingsSecure;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
+    Int32 adbPort;
+    settingsSecure->GetInt32(mHost->mContentResolver, ISettingsSecure::ADB_PORT, -1, &adbPort);
+    Boolean netAdbActive = mHost->mAdbEnabled && adbPort > 0;
+    Int32 adbNotify;
+    settingsSecure->GetInt32(mHost->mContentResolver, ISettingsSecure::ADB_NOTIFY, 1, &adbNotify);
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    String value;
+    sysProp->Get(String("persist.adb.notify"), &value);
+    Boolean hideNotification = value.Equals("0") || adbNotify == 0;
 
-        if (!mAdbNotificationShown) {
+    if (hideNotification) {
+        id = 0;
+    }
+    else if (usbAdbActive && netAdbActive) {
+        id = R::string::adb_both_active_notification_title;
+    }
+    else if (usbAdbActive) {
+        id = R::string::adb_active_notification_title;
+    }
+    else if (netAdbActive) {
+        id = R::string::adb_net_active_notification_title;
+    }
+    else {
+        id = 0;
+    }
+
+    if (id != mAdbNotificationId) {
+        if (mAdbNotificationId != 0) {
+            mHost->mNotificationManager->CancelAsUser(String(NULL), mAdbNotificationId, UserHandle::ALL);
+        }
+        if (id != 0) {
             AutoPtr<IResources> r;
             mHost->mContext->GetResources((IResources**)&r);
             AutoPtr<ICharSequence> title, message;
             r->GetText(id, (ICharSequence**)&title);
-            r->GetText(R::string::adb_active_notification_message, (ICharSequence**)&message);
+            r->GetText(R::string::adb_active_generic_notification_message, (ICharSequence**)&message);
 
             AutoPtr<INotification> notification;
             CNotification::New((INotification**)&notification);
@@ -930,15 +887,15 @@ void UsbDeviceManager::UsbHandler::UpdateAdbNotification()
             pendingIntentHelper->GetActivityAsUser(mHost->mContext, 0,
                     intent, 0, NULL, UserHandle::CURRENT, (IPendingIntent**)&pi);
 
+            Int32 color;
+            r->GetColor(R::color::system_notification_accent_color, &color);
+            notification->SetColor(color);
             notification->SetLatestEventInfo(mHost->mContext, title, message, pi);
-            mAdbNotificationShown = TRUE;
+            notification->SetVisibility(INotification::VISIBILITY_PUBLIC);
             mHost->mNotificationManager->NotifyAsUser(String(NULL), id, notification,
                     UserHandle::ALL);
         }
-    }
-    else if (mAdbNotificationShown) {
-        mAdbNotificationShown = FALSE;
-        mHost->mNotificationManager->CancelAsUser(String(NULL), id, UserHandle::ALL);
+        mAdbNotificationId = id;
     }
 }
 
@@ -963,20 +920,13 @@ void UsbDeviceManager::UsbHandler::UpdateAdbNotification()
 
 UsbDeviceManager::UsbDeviceManager(
     /* [in] */ IContext* context)
-    : mBootCompleted(FALSE)
+    : mAccessoryModeRequestTime(0)
+    , mBootCompleted(FALSE)
     , mContext(context)
     , mUseUsbNotification(FALSE)
     , mAdbEnabled(FALSE)
     , mAudioSourceEnabled(FALSE)
-    , mWlref(0)
 {
-}
-
-ECode UsbDeviceManager::Init(
-    /* [in] */ IContext* context)
-{
-    mContext = context;
-
     mUEventObserver = new MyUEventObserver(this);
 
     context->GetContentResolver((IContentResolver**)&mContentResolver);
@@ -985,19 +935,10 @@ ECode UsbDeviceManager::Init(
     pm->HasSystemFeature(IPackageManager::FEATURE_USB_ACCESSORY, &mHasUsbAccessory);
     InitRndisAddress();
 
-    AutoPtr<IInterface> power;
-    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&power);
-    IPowerManager::Probe(power)->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, TAG, (IPowerManagerWakeLock**)&mWl);
-
     ReadOemUsbOverrideConfig();
 
-    // create a thread for our Handler
-    AutoPtr<IHandlerThread> thread;
-    CHandlerThread::New(String("UsbDeviceManager"), IProcess::THREAD_PRIORITY_BACKGROUND, (IHandlerThread**)&thread);
-    thread->Start();
-
     AutoPtr<ILooper> looper;
-    thread->GetLooper((ILooper**)&looper);
+    FgThread::Get()->GetLooper((ILooper**)&looper);
     mHandler = new UsbHandler(this, looper);
     mHandler->Init();
 
@@ -1010,16 +951,18 @@ ECode UsbDeviceManager::Init(
 
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    Boolean secureAdbEnabled;
+    sysProp->GetBoolean(String("ro.adb.secure"), FALSE, &secureAdbEnabled);
     String value;
-    sysProp->Get(String("ro.adb.secure"), &value);
-    if (value.Equals("1")) {
+    sysProp->Get(String("vold.decrypt"), &value);
+    Boolean dataEncrypted = value.Equals("1");
+    if (secureAdbEnabled && !dataEncrypted) {
         mDebuggingManager = new UsbDebuggingManager(context);
     }
 }
 
 UsbDeviceManager::~UsbDeviceManager()
 {
-    mOemModeMap = NULL;
 }
 
 void UsbDeviceManager::SetCurrentSettings(
@@ -1038,7 +981,7 @@ AutoPtr<UsbSettingsManager> UsbDeviceManager::GetCurrentSettings()
 void UsbDeviceManager::SystemReady()
 {
     if (DEBUG) {
-        Slogger::D(UsbDeviceManager::TAG, "systemReady");
+        Slogger::D(TAG, "systemReady");
     }
 
     AutoPtr<IInterface> obj;
@@ -1057,43 +1000,25 @@ void UsbDeviceManager::SystemReady()
     if (primary != NULL) {
         primary->AllowMassStorage(&massStorageSupported);
     }
-    AutoPtr< ArrayOf<IStorageVolume*> > volumes;
-    storageMgr->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
-    if (volumes->GetLength() > 0) {
-        (*volumes)[0]->AllowMassStorage(&massStorageSupported);
-    }
     mUseUsbNotification = !massStorageSupported;
 
     // make sure the ADB_ENABLED setting value matches the current state
     Boolean result;
     AutoPtr<ISettingsGlobal> settingsGlobal;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
-    settingsGlobal->PutInt32(mContentResolver, ISettingsGlobal::ADB_ENABLED, mAdbEnabled ? 1 : 0, &result);
+    if (FAILED(settingsGlobal->PutInt32(mContentResolver,
+        ISettingsGlobal::ADB_ENABLED, mAdbEnabled ? 1 : 0, &result))) {
+        // If UserManager.DISALLOW_DEBUGGING_FEATURES is on, that this setting can't be changed.
+        Slogger::D(TAG, "ADB_ENABLED is restricted.");
+    }
 
     mHandler->SendEmptyMessage(MSG_SYSTEM_READY, &result);
 }
 
-void UsbDeviceManager::EnableWakeLock(
-    /* [in] */ Boolean enable)
-{
-    if(enable){
-        Slogger::D(TAG, "enable %s wakelock wlref = %d", TAG.string(), mWlref);
-        if(mWlref == 0){
-            mWlref++;
-            mWl->AcquireLock();
-        }
-    }
-    else{
-        Slogger::D(TAG, "disable %s wakelock wlref = %d", TAG.string(), mWlref);
-        if(mWlref == 1){
-            mWl->ReleaseLock();
-            mWlref--;
-        }
-   }
-}
-
 void UsbDeviceManager::StartAccessoryMode()
 {
+    if (!mHasUsbAccessory) return;
+
     mAccessoryStrings = NativeGetAccessoryStrings();
     Boolean enableAudio = (NativeGetAudioMode() == AUDIO_MODE_SOURCE);
     // don't start accessory mode if our mandatory strings have not been set
@@ -1116,6 +1041,7 @@ void UsbDeviceManager::StartAccessoryMode()
     }
 
     if (!functions.IsNull()) {
+        mAccessoryModeRequestTime = SystemClock::GetElapsedRealtime();
         SetCurrentFunctions(functions, FALSE);
     }
 }
@@ -1139,10 +1065,11 @@ void UsbDeviceManager::InitRndisAddress()
         (*address)[i % (ETH_ALEN - 1) + 1] ^= (Int32)serial.GetChar(i);
     }
 
-    char tmpBuf[50];
-    sprintf(tmpBuf, "%02X:%02X:%02X:%02X:%02X:%02X",
-            (*address)[0], (*address)[1], (*address)[2], (*address)[3], (*address)[4], (*address)[5]);
-    String addrString(tmpBuf);
+    // String addrString = String.format(Locale.US, "%02X:%02X:%02X:%02X:%02X:%02X",
+    //         address[0], address[1], address[2], address[3], address[4], address[5]);
+    String addrString;
+    addrString.AppendFormat("%02X:%02X:%02X:%02X:%02X:%02X", (*address)[0], (*address)[1],
+        (*address)[2], (*address)[3], (*address)[4], (*address)[5]);
     // try {
     if(FAILED(FileUtils::StringToFile(RNDIS_ETH_ADDR_PATH, addrString))) {
         Slogger::E(TAG, "failed to write to %s", RNDIS_ETH_ADDR_PATH.string());
@@ -1204,7 +1131,7 @@ Boolean UsbDeviceManager::ContainsFunction(
     Int32 index = functions.IndexOf(function);
     if (index < 0) return FALSE;
     if (index > 0 && functions.GetChar(index - 1) != ',') return FALSE;
-    UInt32 charAfter = index + function.GetLength();
+    Int32 charAfter = index + function.GetLength();
     if (charAfter < functions.GetLength() && functions.GetChar(charAfter) != ',') return FALSE;
     return TRUE;
 }
@@ -1351,12 +1278,24 @@ void UsbDeviceManager::DenyUsbDebugging()
     }
 }
 
+ECode UsbDeviceManager::ClearUsbDebuggingKeys()
+{
+    if (mDebuggingManager != NULL) {
+        mDebuggingManager->ClearUsbDebuggingKeys();
+    }
+    else {
+        Slogger::E(TAG, "Cannot clear Usb Debugging keys, UsbDebuggingManager not enabled");
+        return E_RUNTIME_EXCEPTION;
+    }
+    return NOERROR;
+}
+
 static void set_accessory_string(int fd, int cmd, ArrayOf<String>* strArray, int index)
 {
     char buffer[256];
 
     buffer[0] = 0;
-    int length = ioctl(fd, cmd, buffer);
+    ioctl(fd, cmd, buffer);
     if (buffer[0]) {
         (*strArray)[index] = String(buffer);
     }

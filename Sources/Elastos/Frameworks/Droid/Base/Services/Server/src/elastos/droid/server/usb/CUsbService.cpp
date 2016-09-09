@@ -1,12 +1,21 @@
 
-#include "usb/CUsbService.h"
+#include "elastos/droid/server/usb/CUsbService.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/Manifest.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Hardware::Usb::EIID_IIUsbManager;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::IO::CFile;
+using Elastos::IO::IFile;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -14,6 +23,32 @@ namespace Server {
 namespace Usb {
 
 const String CUsbService::TAG("UsbService");
+
+CUsbService::Lifecycle::Lifecycle(
+    /* [in] */ IContext* context)
+{
+    constructor(context);
+}
+
+// @Override
+ECode CUsbService::Lifecycle::OnStart()
+{
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    CUsbService::NewByFriend(context, (CUsbService**)&mUsbService);
+    PublishBinderService(IContext::USB_SERVICE, mUsbService);
+    return NOERROR;
+}
+
+// @Override
+ECode CUsbService::Lifecycle::OnBootPhase(
+    /* [in] */ Int32 phase)
+{
+    if (phase == SystemService::PHASE_ACTIVITY_MANAGER_READY) {
+        mUsbService->SystemReady();
+    }
+    return NOERROR;
+}
 
 CUsbService::UserChangedReceiver::UserChangedReceiver(
     /* [in] */ CUsbService* host)
@@ -33,7 +68,7 @@ ECode CUsbService::UserChangedReceiver::OnReceive(
         mHost->SetCurrentUser(userId);
     }
     else if (action.Equals(IIntent::ACTION_USER_STOPPED)) {
-        AutoLock lock(mHost->_m_syncLock);
+        AutoLock lock(mHost);
         HashMap<Int32, AutoPtr<UsbSettingsManager> >::Iterator it = mHost->mSettingsByUser.Find(userId);
         if (it != mHost->mSettingsByUser.End()) {
             mHost->mSettingsByUser.Erase(it);
@@ -43,6 +78,9 @@ ECode CUsbService::UserChangedReceiver::OnReceive(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL_2(CUsbService, Object, IIUsbManager, IBinder)
+
+CAR_OBJECT_IMPL(CUsbService)
 
 CUsbService::CUsbService()
 {
@@ -87,7 +125,6 @@ ECode CUsbService::constructor(
     Boolean isExist = FALSE;
     if (file->Exists(&isExist), isExist) {
         mDeviceManager = new UsbDeviceManager(context);
-        mDeviceManager->Init(context);
     }
 
     SetCurrentUser(IUserHandle::USER_OWNER);
@@ -284,6 +321,20 @@ ECode CUsbService::SetCurrentFunction(
     /* [in] */ Boolean makeDefault)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::MANAGE_USB, String(NULL)));
+
+    // If attempt to change USB function while file transfer is restricted, ensure that
+    // the current function is set to "none", and return.
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&service);
+    AutoPtr<IUserManager> userManager = IUserManager::Probe(service);
+    Boolean res;
+    userManager->HasUserRestriction(IUserManager::DISALLOW_USB_FILE_TRANSFER, &res);
+    if (res) {
+        if (mDeviceManager != NULL)
+            mDeviceManager->SetCurrentFunctions(String("none"), FALSE);
+        return NOERROR;
+    }
+
     if (mDeviceManager == NULL) {
         // throw new IllegalStateException("USB device mode not supported");
         Slogger::E(TAG, "USB device mode not supported");
@@ -320,6 +371,19 @@ ECode CUsbService::DenyUsbDebugging()
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::MANAGE_USB, String(NULL)));
     mDeviceManager->DenyUsbDebugging();
     return NOERROR;
+}
+
+ECode CUsbService::ClearUsbDebuggingKeys()
+{
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::MANAGE_USB, String(NULL)));
+    mDeviceManager->ClearUsbDebuggingKeys();
+    return NOERROR;
+}
+
+ECode CUsbService::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
 }
 
 } // namespace Usb

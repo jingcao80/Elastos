@@ -6,12 +6,9 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
 #include "elastos/droid/mtp/CMtpPropertyList.h"
-//TODO: Need provider/CMediaStoreFiles
-// #include "elastos/droid/provider/CMediaStoreFiles.h"
-//TODO: Need provider/CMediaStoreAudioMedia
-// #include "elastos/droid/provider/CMediaStoreAudioMedia.h"
-//TODO: Need provider/CMediaStoreAudioGenres
-// #include "elastos/droid/provider/CMediaStoreAudioGenres.h"
+#include "elastos/droid/provider/CMediaStoreFiles.h"
+#include "elastos/droid/provider/CMediaStoreAudioMedia.h"
+#include "elastos/droid/provider/CMediaStoreAudioGenres.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -24,19 +21,16 @@ using Elastos::Droid::Mtp::CMtpPropertyList;
 using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Provider::IMediaStoreFilesFileColumns;
 using Elastos::Droid::Provider::IMediaStoreFiles;
-//TODO: Need provider/CMediaStoreFiles
-// using Elastos::Droid::Provider::CMediaStoreFiles;
+using Elastos::Droid::Provider::CMediaStoreFiles;
 using Elastos::Droid::Provider::IMediaStoreMediaColumns;
 using Elastos::Droid::Provider::IMediaStoreAudioAudioColumns;
 using Elastos::Droid::Provider::IMediaStoreAudioPlaylistsColumns;
 using Elastos::Droid::Provider::IMediaStoreImagesImageColumns;
 using Elastos::Droid::Provider::IMediaStoreAudioGenresColumns;
 using Elastos::Droid::Provider::IMediaStoreAudioMedia;
-//TODO: Need provider/CMediaStoreAudioMedia
-// using Elastos::Droid::Provider::CMediaStoreAudioMedia;
+using Elastos::Droid::Provider::CMediaStoreAudioMedia;
 using Elastos::Droid::Provider::IMediaStoreAudioGenres;
-//TODO: Need provider/CMediaStoreAudioGenres
-// using Elastos::Droid::Provider::CMediaStoreAudioGenres;
+using Elastos::Droid::Provider::CMediaStoreAudioGenres;
 
 namespace Elastos {
 namespace Droid {
@@ -78,8 +72,7 @@ ECode CMtpPropertyGroup::constructor(
     mPackageName = packageName;
     mVolumeName = volume;
     AutoPtr<IMediaStoreFiles> files;
-//TODO: Need provider/CMediaStoreFiles
-    // CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
+    CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
     files->GetMtpObjectsUri(volume, (IUri**)&mUri);
 
     Int32 count = properties->GetLength();
@@ -444,8 +437,7 @@ String CMtpPropertyGroup::QueryAudio(
         AutoPtr<ArrayOf<String> > s2 = ArrayOf<String>::Alloc(1);
         s1->Set(0, StringUtils::ToString(id));
         AutoPtr<IMediaStoreAudioMedia> am;
-//TODO: Need provider/CMediaStoreAudioMedia
-        // CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&am);
+        CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&am);
         AutoPtr<IUri> uri;
         am->GetContentUri(mVolumeName, (IUri**)&uri);
         mProvider->Query(mPackageName, uri, s1, ID_WHERE, s2, String(NULL), NULL, (ICursor**)&c);
@@ -474,8 +466,7 @@ String CMtpPropertyGroup::QueryGenre(
     //try {
         AutoPtr<IUri> uri;
         AutoPtr<IMediaStoreAudioGenres> ag;
-//TODO: Need provider/CMediaStoreAudioGenres
-        // CMediaStoreAudioGenres::AcquireSingleton((IMediaStoreAudioGenres**)&ag);
+        CMediaStoreAudioGenres::AcquireSingleton((IMediaStoreAudioGenres**)&ag);
         ag->GetContentUriForAudioId(mVolumeName, id, (IUri**)&uri);
         AutoPtr<ArrayOf<String> > s1 = ArrayOf<String>::Alloc(2);
         s1->Set(0, IBaseColumns::ID);

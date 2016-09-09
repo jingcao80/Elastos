@@ -42,6 +42,30 @@ module
             [out] String* name);
 
         /**
+         * Returns the manufacturer name of the device.
+         *
+         * @return the manufacturer name
+         */
+        GetManufacturerName(
+            [out] String* name);
+
+        /**
+         * Returns the product name of the device.
+         *
+         * @return the product name
+         */
+        GetProductName(
+            [out] String* name);
+
+        /**
+         * Returns the serial number of the device.
+         *
+         * @return the serial number name
+         */
+        GetSerialNumber(
+            [out] String* name);
+
+        /**
          * Returns a unique integer ID for the device.
          * This is a convenience for clients that want to use an integer to represent
          * the device, rather than the device name.

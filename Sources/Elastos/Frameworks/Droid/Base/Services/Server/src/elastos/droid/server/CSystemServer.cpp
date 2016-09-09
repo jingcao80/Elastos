@@ -33,6 +33,7 @@
 #include "elastos/droid/server/search/CSearchManagerService.h"
 #include "elastos/droid/server/WiredAccessoryManager.h"
 #include "elastos/droid/server/webkit/WebViewUpdateService.h"
+#include "elastos/droid/server/usb/CUsbService.h"
 #include "elastos/droid/server/wm/InputMonitor.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "elastos/droid/server/dreams/CDreamManagerService.h"
@@ -117,6 +118,7 @@ using Elastos::Droid::Server::Pm::CLauncherAppsService;
 using Elastos::Droid::Server::Power::ShutdownThread;
 using Elastos::Droid::Server::Search::CSearchManagerService;
 using Elastos::Droid::Server::Twilight::CTwilightService;
+using Elastos::Droid::Server::Usb::CUsbService;
 using Elastos::Droid::Server::Webkit::WebViewUpdateService;
 using Elastos::Droid::Server::Wm::InputMonitor;
 using Elastos::Droid::Server::DevicePolicy::CDevicePolicyManagerService;
@@ -956,23 +958,24 @@ ECode SystemServer::StartOtherServices()
             //}
         }
 
-        // if (!disableNonCoreServices) {
-        //     if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
-        //             || mPackageManager.hasSystemFeature(
-        //                     PackageManager.FEATURE_USB_ACCESSORY)) {
-        //         // Manage USB host and device support
-        //         mSystemServiceManager->StartService(USB_SERVICE_CLASS);
-        //     }
+        if (!disableNonCoreServices) {
+            Boolean res;
+            if ((mPackageManager->HasSystemFeature(IPackageManager::FEATURE_USB_HOST, &res), res)
+                || (mPackageManager->HasSystemFeature(IPackageManager::FEATURE_USB_ACCESSORY, &res), res)) {
+                // Manage USB host and device support
+                systemService = new CUsbService::Lifecycle(context);
+                mSystemServiceManager->StartService(systemService);
+            }
 
-        //     try {
-        //         Slogger::I(TAG, "Serial Service");
-        //         // Serial port support
-        //         serial = new SerialService(context);
-        //         ServiceManager::AddService(IContext::SERIAL_SERVICE, serial);
-        //     } catch (Throwable e) {
-        //         Slog.e(TAG, "Failure starting SerialService", ec);
-        //     }
-        // }
+            // try {
+            //     Slogger::I(TAG, "Serial Service");
+            //     // Serial port support
+            //     serial = new SerialService(context);
+            //     ServiceManager::AddService(IContext::SERIAL_SERVICE, serial);
+            // } catch (Throwable e) {
+            //     Slog.e(TAG, "Failure starting SerialService", ec);
+            // }
+        }
 
         Slogger::I(TAG, "Twilight Service");
         systemService = NULL;

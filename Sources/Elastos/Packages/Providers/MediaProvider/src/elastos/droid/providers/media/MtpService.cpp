@@ -66,12 +66,6 @@ static AutoPtr<ArrayOf<String> > InitPTP_DIRECTORIES()
 }
 
 const AutoPtr<ArrayOf<String> > MtpService::PTP_DIRECTORIES = InitPTP_DIRECTORIES();
-AutoPtr<IMtpServer> MtpService::mServer;
-
-HashMap<String, AutoPtr<IStorageVolume> > MtpService::mVolumeMap;
-HashMap<String, AutoPtr<IMtpStorage> > MtpService::mStorageMap;
-
-AutoPtr<IIMtpService> MtpService::mBinder;
 
 //===========================================================
 // MtpService::MyStorageEventListener
@@ -187,7 +181,7 @@ ECode MtpService::MyIMtpService::SendObjectAdded(
     /* [in] */ Int32 objectHandle)
 {
     AutoLock syncLock(mOwner->mBinder);
-    if (mServer != NULL) {
+    if (mOwner->mServer != NULL) {
         return mOwner->mServer->SendObjectAdded(objectHandle);
     }
     return NOERROR;
@@ -197,8 +191,8 @@ ECode MtpService::MyIMtpService::SendObjectRemoved(
     /* [in] */ Int32 objectHandle)
 {
     AutoLock syncLock(mOwner->mBinder);
-    if (mServer != NULL) {
-        return mServer->SendObjectRemoved(objectHandle);
+    if (mOwner->mServer != NULL) {
+        return mOwner->mServer->SendObjectRemoved(objectHandle);
     }
     return NOERROR;
 }
@@ -297,6 +291,7 @@ ECode MtpService::OnStartCommand(
     smh->GetPrimaryVolume(mVolumes, (IStorageVolume**)&primary);
     if (mDatabase != NULL) {
         mDatabase->SetServer(NULL);
+        mDatabase = NULL;
     }
     String path;
     primary->GetPath(&path);
@@ -372,7 +367,8 @@ void MtpService::UpdateDisabledStateLocked()
     Boolean flag = FALSE;
     keyguardManager->IsKeyguardLocked(&flag);
     Boolean isKs = FALSE;
-    keyguardManager->IsKeyguardSecure(&isKs);
+    Logger::E(TAG, "TODO: isKs never be FALSE for LockPatternUtils::IsSecure always return TRUE");
+    // keyguardManager->IsKeyguardSecure(&isKs);
     mMtpDisabled = (flag && isKs) || !isCurrentUser;
     if (LOGD) {
         Logger::D(TAG, "updating state; isCurrentUser=%d, mMtpLocked=%d", isCurrentUser, mMtpDisabled);

@@ -3,7 +3,6 @@ TARGET_TYPE= lib
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc
-INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
 
 C_DEFINES += -DDROID_SERVER
 

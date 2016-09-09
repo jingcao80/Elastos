@@ -1,3 +1,3 @@
 source ~/.bashrc
 
-source ~/ElastosRDK5_0/Setup/SetEnv.sh arm_android
+source /home/chenxihao/Workspace/Elastos5/Setup/SetEnv.sh arm_android

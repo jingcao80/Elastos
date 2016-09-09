@@ -136,9 +136,7 @@ ELASTOS_LIBS += wallpaper/wallpaper.lib
 ELASTOS_LIBS += webkit/webkit.lib
 ELASTOS_LIBS += wifi/wifi.lib
 ELASTOS_LIBS += media/media.lib
-
-
-#ELASTOS_LIBS += usb/usb.lib
+ELASTOS_LIBS += usb/usb.lib
 ELASTOS_LIBS += accounts/accounts.lib
 ELASTOS_LIBS += search/search.lib
 #ELASTOS_LIBS += zigbee/zigbee.lib

@@ -1,22 +1,46 @@
 
-#include "usb/UsbSettingsManager.h"
+#include "elastos/droid/server/usb/UsbSettingsManager.h"
+#include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/os/Environment.h"
+#include "elastos/core/AutoLock.h"
+#include "Elastos.CoreLibrary.Libcore.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringToIntegral.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
+#include "elastos/droid/R.h"
+#include "Elastos.Droid.App.h"
 
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::Environment;
+using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Hardware::Usb::IUsbInterface;
+using Elastos::Droid::Hardware::Usb::IUsbManager;
+using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
+using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringToIntegral;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CBoolean;
+using Elastos::IO::ICloseable;
+using Elastos::IO::CFile;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::CFileInputStream;
+using Elastos::IO::IFileOutputStream;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IOutputStream;
 using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Os::UserHandle;
-using Elastos::Droid::Os::IEnvironment;
-using Elastos::Droid::Os::CEnvironment;
-using Elastos::Droid::Utility::IFastXmlSerializer;
-using Elastos::Droid::Utility::CFastXmlSerializer;
-using Elastos::Droid::Hardware::Usb::IUsbInterface;
-using Elastos::Droid::Hardware::Usb::IUsbManager;
+using Libcore::IO::IIoUtils;
+using Libcore::IO::CIoUtils;
+using Org::Xmlpull::V1::IXmlSerializer;
 
 namespace Elastos {
 namespace Droid {
@@ -24,11 +48,11 @@ namespace Server {
 namespace Usb {
 
 // {FA18F3C1-31E9-49AF-9D86-B3FBF893AB03}
-extern const InterfaceID EIID_DeviceFilter =
+const InterfaceID EIID_DeviceFilter =
     { 0xfa18f3c1, 0x31e9, 0x49af, { 0x9d, 0x86, 0xb3, 0xfb, 0xf8, 0x93, 0xab, 0x3 } };
 
 // {0DCF6C2C-40B1-46DD-A41D-3BB07F01E38A}
-extern const InterfaceID EIID_AccessoryFilter =
+const InterfaceID EIID_AccessoryFilter =
     { 0xdcf6c2c, 0x40b1, 0x46dd, { 0xa4, 0x1d, 0x3b, 0xb0, 0x7f, 0x1, 0xe3, 0x8a } };
 
 
@@ -44,21 +68,26 @@ static AutoPtr<IFile> InitSingleUserSettingsFile()
 
 AutoPtr<IFile> UsbSettingsManager::sSingleUserSettingsFile = InitSingleUserSettingsFile();
 
-
-UsbSettingsManager::DeviceFilter::DeviceFilter(
+DeviceFilter::DeviceFilter(
     /* [in] */ Int32 vid,
     /* [in] */ Int32 pid,
     /* [in] */ Int32 clasz,
     /* [in] */ Int32 subclass,
-    /* [in] */ Int32 protocol)
+    /* [in] */ Int32 protocol,
+    /* [in] */ const String& manufacturer,
+    /* [in] */ const String& product,
+    /* [in] */ const String& serialnum)
     : mVendorId(vid)
     , mProductId(pid)
     , mClass(clasz)
     , mSubclass(subclass)
     , mProtocol(protocol)
+    , mManufacturerName(manufacturer)
+    , mProductName(product)
+    , mSerialNumber(serialnum)
 {}
 
-UsbSettingsManager::DeviceFilter::DeviceFilter(
+DeviceFilter::DeviceFilter(
     /* [in] */ IUsbDevice* device)
 {
     device->GetVendorId(&mVendorId);
@@ -66,38 +95,38 @@ UsbSettingsManager::DeviceFilter::DeviceFilter(
     device->GetDeviceClass(&mClass);
     device->GetDeviceSubclass(&mSubclass);
     device->GetDeviceProtocol(&mProtocol);
+    // device->GetManufacturerName(&mManufacturerName);
+    // device->GetProductName(&mProductName);
+    // device->GetSerialNumber(&mSerialNumber);
 }
 
-PInterface UsbSettingsManager::DeviceFilter::Probe(
+PInterface DeviceFilter::Probe(
     /* [in]  */ REIID riid)
 {
-    if ( riid == EIID_IInterface) {
-        return this;
-    }
-    else if (riid == EIID_DeviceFilter) {
+    if (riid == EIID_DeviceFilter) {
         return reinterpret_cast<PInterface>(this);
     }
-    return NULL;
+    return Object::Probe(riid);
 }
 
-UInt32 UsbSettingsManager::DeviceFilter::AddRef()
+UInt32 DeviceFilter::AddRef()
 {
     return ElRefBase::AddRef();
 }
 
-UInt32 UsbSettingsManager::DeviceFilter::Release()
+UInt32 DeviceFilter::Release()
 {
     return ElRefBase::Release();
 }
 
-ECode UsbSettingsManager::DeviceFilter::GetInterfaceID(
+ECode DeviceFilter::GetInterfaceID(
     /* [in] */ IInterface *pObject,
     /* [out] */ InterfaceID *pIID)
 {
     return NOERROR;
 }
 
-ECode UsbSettingsManager::DeviceFilter::Read(
+ECode DeviceFilter::Read(
     /* [in] */ IXmlPullParser* parser,
     /* [out] */ DeviceFilter** filter)
 {
@@ -108,6 +137,9 @@ ECode UsbSettingsManager::DeviceFilter::Read(
     Int32 deviceClass = -1;
     Int32 deviceSubclass = -1;
     Int32 deviceProtocol = -1;
+    String manufacturerName;
+    String productName;
+    String serialNumber;
 
     Int32 count;
     parser->GetAttributeCount(&count);
@@ -115,55 +147,89 @@ ECode UsbSettingsManager::DeviceFilter::Read(
         String name;
         parser->GetAttributeName(i, &name);
         // All attribute values are ints
-        String attrValue;
-        parser->GetAttributeValue(i, &attrValue);
-        Int32 value = StringUtils::ParseInt32(attrValue);
+        String value;
+        parser->GetAttributeValue(i, &value);
 
-        if (name.Equals("vendor-id")) {
-            vendorId = value;
+        // Attribute values are ints or strings
+        if (name.Equals("manufacturer-name")) {
+            manufacturerName = value;
         }
-        else if (name.Equals("product-id")) {
-            productId = value;
+        else if (name.Equals("product-name")) {
+            productName = value;
         }
-        else if (name.Equals("class")) {
-            deviceClass = value;
+        else if (name.Equals("serial-number")) {
+            serialNumber = value;
         }
-        else if (name.Equals("subclass")) {
-            deviceSubclass = value;
-        }
-        else if (name.Equals("protocol")) {
-            deviceProtocol = value;
+        else {
+            Int32 intValue = -1;
+            Int32 radix = 10;
+            if (value != NULL && value.GetLength() > 2 && value.GetChar(0) == '0' &&
+                (value.GetChar(1) == 'x' || value.GetChar(1) == 'X')) {
+                // allow hex values starting with 0x or 0X
+                radix = 16;
+                value = value.Substring(2);
+            }
+            if (FAILED(StringToIntegral::Parse(value, radix, &intValue))) {
+                Slogger::E("UsbSettingsManager", "invalid number for field %s", name.string());
+                continue;
+            }
+
+            if (name.Equals("vendor-id")) {
+                vendorId = intValue;
+            }
+            else if (name.Equals("product-id")) {
+                productId = intValue;
+            }
+            else if (name.Equals("class")) {
+                deviceClass = intValue;
+            }
+            else if (name.Equals("subclass")) {
+                deviceSubclass = intValue;
+            }
+            else if (name.Equals("protocol")) {
+                deviceProtocol = intValue;
+            }
         }
     }
 
-    *filter = new DeviceFilter(vendorId, productId, deviceClass, deviceSubclass, deviceProtocol);
+    *filter = new DeviceFilter(vendorId, productId, deviceClass, deviceSubclass,
+        deviceProtocol, manufacturerName, productName, serialNumber);
     REFCOUNT_ADD(*filter);
     return NOERROR;
 }
 
-ECode UsbSettingsManager::DeviceFilter::Write(
+ECode DeviceFilter::Write(
     /* [in] */ IXmlSerializer* serializer)
 {
     serializer->WriteStartTag(String(NULL), String("usb-device"));
     if (mVendorId != -1) {
-        serializer->WriteAttribute(String(NULL), String("vendor-id"), StringUtils::Int32ToString(mVendorId));
+        serializer->WriteAttribute(String(NULL), String("vendor-id"), StringUtils::ToString(mVendorId));
     }
     if (mProductId != -1) {
-        serializer->WriteAttribute(String(NULL), String("product-id"), StringUtils::Int32ToString(mProductId));
+        serializer->WriteAttribute(String(NULL), String("product-id"), StringUtils::ToString(mProductId));
     }
     if (mClass != -1) {
-        serializer->WriteAttribute(String(NULL), String("class"), StringUtils::Int32ToString(mClass));
+        serializer->WriteAttribute(String(NULL), String("class"), StringUtils::ToString(mClass));
     }
     if (mSubclass != -1) {
-        serializer->WriteAttribute(String(NULL), String("subclass"), StringUtils::Int32ToString(mSubclass));
+        serializer->WriteAttribute(String(NULL), String("subclass"), StringUtils::ToString(mSubclass));
     }
     if (mProtocol != -1) {
-        serializer->WriteAttribute(String(NULL), String("protocol"), StringUtils::Int32ToString(mProtocol));
+        serializer->WriteAttribute(String(NULL), String("protocol"), StringUtils::ToString(mProtocol));
+    }
+    if (mManufacturerName != NULL) {
+        serializer->WriteAttribute(String(NULL), String("manufacturer-name"), mManufacturerName);
+    }
+    if (mProductName != NULL) {
+        serializer->WriteAttribute(String(NULL), String("product-name"), mProductName);
+    }
+    if (mSerialNumber != NULL) {
+        serializer->WriteAttribute(String(NULL), String("serial-number"), mSerialNumber);
     }
     return serializer->WriteEndTag(String(NULL), String("usb-device"));
 }
 
-Boolean UsbSettingsManager::DeviceFilter::Matches(
+Boolean DeviceFilter::Matches(
     /* [in] */ Int32 clasz,
     /* [in] */ Int32 subclass,
     /* [in] */ Int32 protocol)
@@ -173,7 +239,7 @@ Boolean UsbSettingsManager::DeviceFilter::Matches(
             (mProtocol == -1 || protocol == mProtocol));
 }
 
-Boolean UsbSettingsManager::DeviceFilter::Matches(
+Boolean DeviceFilter::Matches(
     /* [in] */ IUsbDevice* device)
 {
     Int32 vendorId;
@@ -187,6 +253,27 @@ Boolean UsbSettingsManager::DeviceFilter::Matches(
     if (mProductId != -1 && productId != mProductId) {
         return FALSE;
     }
+
+    String manufacturerName, productName, serialNumber;
+    // device->GetManufacturerName(&manufacturerName);
+    // device->GetProductName(&productName);
+    // device->GetSerialNumber(&serialNumber);
+
+    if (mManufacturerName != NULL && manufacturerName == NULL)
+        return FALSE;
+    if (mProductName != NULL && productName == NULL)
+        return FALSE;
+    if (mSerialNumber != NULL && serialNumber == NULL)
+        return FALSE;
+    if (mManufacturerName != NULL && manufacturerName != NULL &&
+        !mManufacturerName.Equals(manufacturerName))
+        return FALSE;
+    if (mProductName != NULL && productName != NULL &&
+        !mProductName.Equals(productName))
+        return FALSE;
+    if (mSerialNumber != NULL && serialNumber != NULL &&
+        !mSerialNumber.Equals(serialNumber))
+        return FALSE;
 
     // check device class/subclass/protocol
     Int32 deviceCls;
@@ -219,7 +306,7 @@ Boolean UsbSettingsManager::DeviceFilter::Matches(
     return FALSE;
 }
 
-Boolean UsbSettingsManager::DeviceFilter::Matches(
+Boolean DeviceFilter::Matches(
     /* [in] */ DeviceFilter* filter)
 {
     if (mVendorId != -1 && filter->mVendorId != mVendorId) {
@@ -228,46 +315,135 @@ Boolean UsbSettingsManager::DeviceFilter::Matches(
     if (mProductId != -1 && filter->mProductId != mProductId) {
         return FALSE;
     }
-
+    if (filter->mManufacturerName != NULL && mManufacturerName == NULL)
+        return FALSE;
+    if (filter->mProductName != NULL && mProductName == NULL)
+        return FALSE;
+    if (filter->mSerialNumber != NULL && mSerialNumber == NULL)
+        return FALSE;
+    if (mManufacturerName != NULL && filter->mManufacturerName != NULL &&
+        !mManufacturerName.Equals(filter->mManufacturerName))
+        return FALSE;
+    if (mProductName != NULL && filter->mProductName != NULL &&
+        !mProductName.Equals(filter->mProductName))
+        return FALSE;
+    if (mSerialNumber != NULL && filter->mSerialNumber != NULL &&
+        !mSerialNumber.Equals(filter->mSerialNumber))
+        return FALSE;
     // check device class/subclass/protocol
     return Matches(filter->mClass, filter->mSubclass, filter->mProtocol);
 }
 
-Boolean UsbSettingsManager::DeviceFilter::Equals(
-    /* [in] */ IInterface* obj) const
+ECode DeviceFilter::Equals(
+    /* [in] */ IInterface* obj,
+    /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
+
     // can't compare if we have wildcard strings
     if (mVendorId == -1 || mProductId == -1 ||
             mClass == -1 || mSubclass == -1 || mProtocol == -1) {
-        return FALSE;
+        *res = FALSE;
+        return NOERROR;
     }
     if (obj->Probe(EIID_DeviceFilter) != NULL) {
-        AutoPtr<DeviceFilter> filter = (DeviceFilter*)obj;
-        return (filter->mVendorId == mVendorId &&
-                filter->mProductId == mProductId &&
-                filter->mClass == mClass &&
-                filter->mSubclass == mSubclass &&
-                filter->mProtocol == mProtocol);
+        AutoPtr<DeviceFilter> filter = (DeviceFilter*)IObject::Probe(obj);
+        if (filter->mVendorId != mVendorId ||
+                filter->mProductId != mProductId ||
+                filter->mClass != mClass ||
+                filter->mSubclass != mSubclass ||
+                filter->mProtocol != mProtocol) {
+            *res = FALSE;
+            return NOERROR;
+        }
+        if ((filter->mManufacturerName != NULL &&
+                mManufacturerName == NULL) ||
+            (filter->mManufacturerName == NULL &&
+                mManufacturerName != NULL) ||
+            (filter->mProductName != NULL &&
+                mProductName == NULL)  ||
+            (filter->mProductName == NULL &&
+                mProductName != NULL) ||
+            (filter->mSerialNumber != NULL &&
+                mSerialNumber == NULL)  ||
+            (filter->mSerialNumber == NULL &&
+                mSerialNumber != NULL)) {
+            *res = FALSE;
+            return NOERROR;
+        }
+        if  ((filter->mManufacturerName != NULL &&
+                mManufacturerName != NULL &&
+                !mManufacturerName.Equals(filter->mManufacturerName)) ||
+             (filter->mProductName != NULL &&
+                mProductName != NULL &&
+                !mProductName.Equals(filter->mProductName)) ||
+             (filter->mSerialNumber != NULL &&
+                mSerialNumber != NULL &&
+                !mSerialNumber.Equals(filter->mSerialNumber))) {
+            *res = FALSE;
+            return NOERROR;
+        }
+        *res = TRUE;
+        return NOERROR;
     }
     if (IUsbDevice::Probe(obj)) {
         AutoPtr<IUsbDevice> device = IUsbDevice::Probe(obj);
         Int32 vendorId, productId, deviceClass, subClass, protocol;
-        return ((device->GetVendorId(&vendorId), vendorId == mVendorId) &&
+        *res = ((device->GetVendorId(&vendorId), vendorId == mVendorId) &&
                 (device->GetProductId(&productId), productId == mProductId) &&
                 (device->GetDeviceClass(&deviceClass), deviceClass == mClass) &&
                 (device->GetDeviceSubclass(&subClass), subClass == mSubclass) &&
                 (device->GetDeviceProtocol(&protocol), protocol == mProtocol));
+
+        if ((device->GetVendorId(&vendorId), vendorId) != mVendorId ||
+            (device->GetProductId(&productId), productId) != mProductId ||
+            (device->GetDeviceClass(&deviceClass), deviceClass) != mClass ||
+            (device->GetDeviceSubclass(&subClass), subClass) != mSubclass ||
+            (device->GetDeviceProtocol(&protocol), protocol) != mProtocol) {
+            *res = FALSE;
+            return NOERROR;
+        }
+        String manufacturerName, productName, serialNumber;
+        // device->GetManufacturerName(&manufacturerName);
+        // device->GetProductName(&productName);
+        // device->GetSerialNumber(&serialNumber);
+        if ((mManufacturerName != NULL && manufacturerName == NULL) ||
+            (mManufacturerName == NULL && manufacturerName != NULL) ||
+            (mProductName != NULL && productName == NULL) ||
+            (mProductName == NULL && productName != NULL) ||
+            (mSerialNumber != NULL && serialNumber == NULL) ||
+            (mSerialNumber == NULL && serialNumber != NULL)) {
+            *res = FALSE;
+            return NOERROR;
+        }
+        if ((manufacturerName != NULL &&
+            !mManufacturerName.Equals(manufacturerName)) ||
+            (productName != NULL &&
+                !mProductName.Equals(productName)) ||
+            (serialNumber != NULL &&
+                !mSerialNumber.Equals(serialNumber))) {
+            *res = FALSE;
+            return NOERROR;
+        }
+
+        *res = TRUE;
+        return NOERROR;
     }
-    return FALSE;
+    *res = FALSE;
+    return NOERROR;
 }
 
-Int32 UsbSettingsManager::DeviceFilter::GetHashCode() const
+ECode DeviceFilter::GetHashCode(
+    /* [out] */ Int32* hashCode)
 {
-    return (((mVendorId << 16) | mProductId) ^
+    VALIDATE_NOT_NULL(hashCode)
+    *hashCode = (((mVendorId << 16) | mProductId) ^
             ((mClass << 16) | (mSubclass << 8) | mProtocol));
+    return NOERROR;
 }
 
-String UsbSettingsManager::DeviceFilter::ToString()
+ECode DeviceFilter::ToString(
+    /* [out] */ String* str)
 {
     StringBuilder builder("DeviceFilter[mVendorId=");
     builder += mVendorId;
@@ -279,12 +455,17 @@ String UsbSettingsManager::DeviceFilter::ToString()
     builder += mSubclass;
     builder += ",mProtocol=";
     builder += mProtocol;
+    builder += ",mManufacturerName=";
+    builder += mManufacturerName;
+    builder += ",mProductName=";
+    builder += mProductName;
+    builder += ",mSerialNumber=";
+    builder += mSerialNumber;
     builder += "]";
-    return builder.ToString();
+    return builder.ToString(str);
 }
 
-
-UsbSettingsManager::AccessoryFilter::AccessoryFilter(
+AccessoryFilter::AccessoryFilter(
     /* [in] */ const String& manufacturer,
     /* [in] */ const String& model,
     /* [in] */ const String& ver)
@@ -293,7 +474,7 @@ UsbSettingsManager::AccessoryFilter::AccessoryFilter(
     , mVersion(ver)
 {}
 
-UsbSettingsManager::AccessoryFilter::AccessoryFilter(
+AccessoryFilter::AccessoryFilter(
     /* [in] */ IUsbAccessory* accessory)
 {
     accessory->GetManufacturer(&mManufacturer);
@@ -301,36 +482,33 @@ UsbSettingsManager::AccessoryFilter::AccessoryFilter(
     accessory->GetVersion(&mVersion);
 }
 
-PInterface UsbSettingsManager::AccessoryFilter::Probe(
+PInterface AccessoryFilter::Probe(
     /* [in]  */ REIID riid)
 {
-    if ( riid == EIID_IInterface) {
-        return this;
-    }
-    else if (riid == EIID_AccessoryFilter) {
+    if (riid == EIID_AccessoryFilter) {
         return reinterpret_cast<PInterface>(this);
     }
-    return NULL;
+    return Object::Probe(riid);
 }
 
-UInt32 UsbSettingsManager::AccessoryFilter::AddRef()
+UInt32 AccessoryFilter::AddRef()
 {
     return ElRefBase::AddRef();
 }
 
-UInt32 UsbSettingsManager::AccessoryFilter::Release()
+UInt32 AccessoryFilter::Release()
 {
     return ElRefBase::Release();
 }
 
-ECode UsbSettingsManager::AccessoryFilter::GetInterfaceID(
+ECode AccessoryFilter::GetInterfaceID(
     /* [in] */ IInterface *pObject,
     /* [out] */ InterfaceID *pIID)
 {
     return NOERROR;
 }
 
-ECode UsbSettingsManager::AccessoryFilter::Read(
+ECode AccessoryFilter::Read(
     /* [in] */ IXmlPullParser* parser,
     /* [out] */ AccessoryFilter** filter)
 {
@@ -364,7 +542,7 @@ ECode UsbSettingsManager::AccessoryFilter::Read(
     return NOERROR;
 }
 
-ECode UsbSettingsManager::AccessoryFilter::Write(
+ECode AccessoryFilter::Write(
     /* [in] */ IXmlSerializer* serializer)
 {
     serializer->WriteStartTag(String(NULL), String("usb-accessory"));
@@ -380,7 +558,7 @@ ECode UsbSettingsManager::AccessoryFilter::Write(
     return serializer->WriteEndTag(String(NULL), String("usb-accessory"));
 }
 
-Boolean UsbSettingsManager::AccessoryFilter::Matches(
+Boolean AccessoryFilter::Matches(
     /* [in] */ IUsbAccessory* accessory)
 {
     String manufacturer;
@@ -398,7 +576,7 @@ Boolean UsbSettingsManager::AccessoryFilter::Matches(
     return TRUE;
 }
 
-Boolean UsbSettingsManager::AccessoryFilter::Matches(
+Boolean AccessoryFilter::Matches(
     /* [in] */ AccessoryFilter* filter)
 {
     if (!mManufacturer.IsNull() && !filter->mManufacturer.Equals(mManufacturer)) {
@@ -413,15 +591,18 @@ Boolean UsbSettingsManager::AccessoryFilter::Matches(
     return TRUE;
 }
 
-Boolean UsbSettingsManager::AccessoryFilter::Equals(
-    /* [in] */ IInterface* obj) const
+ECode AccessoryFilter::Equals(
+    /* [in] */ IInterface* obj,
+    /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
+
     // can't compare if we have wildcard strings
     if (mManufacturer == NULL || mModel == NULL || mVersion == NULL) {
         return FALSE;
     }
     if (obj->Probe(EIID_AccessoryFilter) != NULL) {
-        AutoPtr<AccessoryFilter> filter = (AccessoryFilter*)obj;
+        AutoPtr<AccessoryFilter> filter = (AccessoryFilter*)IObject::Probe(obj);
         return (mManufacturer.Equals(filter->mManufacturer) &&
                 mModel.Equals(filter->mModel) &&
                 mVersion.Equals(filter->mVersion));
@@ -437,14 +618,18 @@ Boolean UsbSettingsManager::AccessoryFilter::Equals(
     return FALSE;
 }
 
-Int32 UsbSettingsManager::AccessoryFilter::GetHashCode() const
+ECode AccessoryFilter::GetHashCode(
+    /* [out] */ Int32* hashCode)
 {
-    return ((mManufacturer.IsNull() ? 0 : mManufacturer.GetHashCode()) ^
+    VALIDATE_NOT_NULL(hashCode)
+    *hashCode = ((mManufacturer.IsNull() ? 0 : mManufacturer.GetHashCode()) ^
             (mModel.IsNull() ? 0 : mModel.GetHashCode()) ^
             (mVersion.IsNull() ? 0 : mVersion.GetHashCode()));
+    return NOERROR;
 }
 
-String UsbSettingsManager::AccessoryFilter::ToString()
+ECode AccessoryFilter::ToString(
+    /* [out] */ String* str)
 {
     StringBuilder builder("AccessoryFilter[mManufacturer=\"");
     builder += mManufacturer;
@@ -453,9 +638,8 @@ String UsbSettingsManager::AccessoryFilter::ToString()
     builder += "\", mVersion=\"";
     builder += mVersion;
     builder += "\"]";
-    return builder.ToString();
+    return builder.ToString(str);
 }
-
 
 UsbSettingsManager::MyPackageMonitor::MyPackageMonitor(
     /* [in] */ UsbSettingsManager* host)
@@ -473,9 +657,12 @@ ECode UsbSettingsManager::MyPackageMonitor::OnPackageAdded(
 ECode UsbSettingsManager::MyPackageMonitor::OnPackageChanged(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 uid,
-    /* [in] */ ArrayOf<String>* components)
+    /* [in] */ ArrayOf<String>* components,
+    /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     mHost->HandlePackageUpdate(packageName);
+    *res = FALSE;
     return NOERROR;
 }
 
@@ -491,10 +678,11 @@ ECode UsbSettingsManager::MyPackageMonitor::OnPackageRemoved(
 UsbSettingsManager::UsbSettingsManager(
     /* [in] */ IContext* context,
     /* [in] */ IUserHandle* userHandle)
+    : mDisablePermissionDialogs(FALSE)
 {
     mPackageMonitor = new MyPackageMonitor(this);
 
-    if (DEBUG) Slogger::V(TAG, "Creating settings for %p", userHandle);
+    if (DEBUG) Slogger::V(TAG, "Creating settings for %s", TO_CSTR(userHandle));
 
     if (FAILED(context->CreatePackageContextAsUser(String("android"), 0,
             userHandle, (IContext**)&mUserContext))) {
@@ -508,13 +696,14 @@ UsbSettingsManager::UsbSettingsManager(
     mUser = userHandle;
     Int32 userId;
     userHandle->GetIdentifier(&userId);
-    AutoPtr<IEnvironment> env;
-    CEnvironment::AcquireSingleton((IEnvironment**)&env);
-    AutoPtr<IFile> systemDir;
-    env->GetUserSystemDirectory(userId, (IFile**)&systemDir);
+    AutoPtr<IFile> systemDir = Environment::GetUserSystemDirectory(userId);
     AutoPtr<IFile> baseName;
     CFile::New(systemDir, String("usb_device_manager.xml"), (IFile**)&baseName);
     CAtomicFile::New(baseName, (IAtomicFile**)&mSettingsFile);
+
+    AutoPtr<IResources> r;
+    context->GetResources((IResources**)&r);
+    r->GetBoolean(R::bool_::config_disableUsbPermissionDialogs, &mDisablePermissionDialogs);
 
     {
         AutoLock lock(mLock);
@@ -557,12 +746,12 @@ ECode UsbSettingsManager::ReadPreference(
     parser->GetName(&elmtName);
     if (elmtName.Equals("usb-device")) {
         AutoPtr<DeviceFilter> filter;
-        FAIL_RETURN(UsbSettingsManager::DeviceFilter::Read(parser, (DeviceFilter**)&filter));
+        FAIL_RETURN(DeviceFilter::Read(parser, (DeviceFilter**)&filter));
         mDevicePreferenceMap[filter] = packageName;
     }
     else if (elmtName.Equals("usb-accessory")) {
         AutoPtr<AccessoryFilter> filter;
-        FAIL_RETURN(UsbSettingsManager::AccessoryFilter::Read(parser, (AccessoryFilter**)&filter));
+        FAIL_RETURN(AccessoryFilter::Read(parser, (AccessoryFilter**)&filter));
         mAccessoryPreferenceMap[filter] = packageName;
     }
     return XmlUtils::NextElement(parser);
@@ -575,11 +764,12 @@ void UsbSettingsManager::UpgradeSingleUserLocked()
         mDevicePreferenceMap.Clear();
         mAccessoryPreferenceMap.Clear();
 
-        AutoPtr<IFileInputStream> fis;
+        AutoPtr<IInputStream> fis;
         // try {
-        CFileInputStream::New(sSingleUserSettingsFile, (IFileInputStream**)&fis);
+        CFileInputStream::New(sSingleUserSettingsFile, (IInputStream**)&fis);
 
-        AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
+        AutoPtr<IXmlPullParser> parser;
+        Xml::NewPullParser((IXmlPullParser**)&parser);
         parser->SetInput(fis, String(NULL));
 
         Int32 eventType;
@@ -615,7 +805,7 @@ void UsbSettingsManager::UpgradeSingleUserLocked()
 failed:
         AutoPtr<IIoUtils> ioUtils;
         CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-        ioUtils->CloseQuietly(fis);
+        ioUtils->CloseQuietly(ICloseable::Probe(fis));
 
         WriteSettingsLocked();
 
@@ -639,11 +829,12 @@ void UsbSettingsManager::ReadSettingsLocked()
         if (DEBUG) Slogger::D(TAG, "settings file not found");
         AutoPtr<IIoUtils> ioUtils;
         CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-        ioUtils->CloseQuietly(stream);
+        ioUtils->CloseQuietly(ICloseable::Probe(stream));
         return;
     }
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-    parser->SetInput(stream, String(NULL));
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    parser->SetInput(IInputStream::Probe(stream), String(NULL));
 
     Int32 eventType;
 
@@ -683,7 +874,7 @@ void UsbSettingsManager::ReadSettingsLocked()
 failed:
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-    ioUtils->CloseQuietly(stream);
+    ioUtils->CloseQuietly(ICloseable::Probe(stream));
 }
 
 void UsbSettingsManager::WriteSettingsLocked()
@@ -701,9 +892,9 @@ void UsbSettingsManager::WriteSettingsLocked()
         return;
     }
 
-    AutoPtr<IFastXmlSerializer> serializer;
-    CFastXmlSerializer::New((IFastXmlSerializer**)&serializer);
-    ec = serializer->SetOutput(fos, String("utf-8"));
+    AutoPtr<IXmlSerializer> serializer;
+    CFastXmlSerializer::New((IXmlSerializer**)&serializer);
+    ec = serializer->SetOutput(IOutputStream::Probe(fos), String("utf-8"));
     if (ec == (ECode)E_IO_EXCEPTION) {
         Slogger::E(TAG, "Failed to write settings 0x%08x", ec);
         if (fos != NULL) {
@@ -711,9 +902,7 @@ void UsbSettingsManager::WriteSettingsLocked()
         }
     }
 
-    AutoPtr<IBoolean> b;
-    CBoolean::New(TRUE, (IBoolean**)&b);
-    ec = serializer->StartDocument(String(NULL), b);
+    ec = serializer->StartDocument(String(NULL), TRUE);
     if (ec == (ECode)E_IO_EXCEPTION) {
         Slogger::E(TAG, "Failed to write settings 0x%08x", ec);
         if (fos != NULL) {
@@ -737,7 +926,7 @@ void UsbSettingsManager::WriteSettingsLocked()
         }
     }
 
-    HashMap< AutoPtr<DeviceFilter>, String, HashPK_DeviceFilter, PKEq_DeviceFilter >::Iterator devFilterIt
+    HashMap< AutoPtr<DeviceFilter>, String>::Iterator devFilterIt
             = mDevicePreferenceMap.Begin();
     for (; devFilterIt != mDevicePreferenceMap.End(); ++devFilterIt) {
         AutoPtr<DeviceFilter> filter = devFilterIt->mFirst;
@@ -765,7 +954,7 @@ void UsbSettingsManager::WriteSettingsLocked()
         }
     }
 
-    HashMap< AutoPtr<AccessoryFilter>, String, HashPK_AccessoryFilter, PKEq_AccessoryFilter >::Iterator accFilterIt
+    HashMap< AutoPtr<AccessoryFilter>, String>::Iterator accFilterIt
             = mAccessoryPreferenceMap.Begin();
     for (; accFilterIt != mAccessoryPreferenceMap.End(); ++accFilterIt) {
         AutoPtr<AccessoryFilter> filter = accFilterIt->mFirst;
@@ -828,18 +1017,19 @@ Boolean UsbSettingsManager::PackageMatchesLocked(
     AutoPtr<IActivityInfo> ai;
     info->GetActivityInfo((IActivityInfo**)&ai);
 
-    AutoPtr<IXmlResourceParser> parser;
+    AutoPtr<IXmlResourceParser> _parser;
 
     // try {
-    ECode ec = ai->LoadXmlMetaData(mPackageManager, metaDataName, (IXmlResourceParser**)&parser);
+    ECode ec = IPackageItemInfo::Probe(ai)->LoadXmlMetaData(mPackageManager, metaDataName, (IXmlResourceParser**)&_parser);
     if (FAILED(ec)) {
         String str;
         info->ToString(&str);
         Slogger::W(TAG, "Unable to load component info %s 0x%08x", str.string(), ec);
-        goto failed;
+        return FALSE;
     }
+    IXmlPullParser* parser = IXmlPullParser::Probe(_parser);
     if (parser == NULL) {
-        Slogger::W(TAG, "no meta-data for %p", info);
+        Slogger::W(TAG, "no meta-data for %s", TO_CSTR(info));
         return FALSE;
     }
 
@@ -857,7 +1047,7 @@ Boolean UsbSettingsManager::PackageMatchesLocked(
         parser->GetName(&tagName);
         if (device != NULL && tagName.Equals("usb-device")) {
             AutoPtr<DeviceFilter> filter;
-            ec = UsbSettingsManager::DeviceFilter::Read(parser, (DeviceFilter**)&filter);
+            ec = DeviceFilter::Read(parser, (DeviceFilter**)&filter);
             if (FAILED(ec)) {
                 String str;
                 info->ToString(&str);
@@ -865,13 +1055,13 @@ Boolean UsbSettingsManager::PackageMatchesLocked(
                 break;
             }
             if (filter->Matches(device)) {
-                if (parser) parser->Close();
+                if (parser) ICloseable::Probe(parser)->Close();
                 return TRUE;
             }
         }
         else if (accessory != NULL && tagName.Equals("usb-accessory")) {
             AutoPtr<AccessoryFilter> filter;
-            ec = UsbSettingsManager::AccessoryFilter::Read(parser, (AccessoryFilter**)&filter);
+            ec = AccessoryFilter::Read(parser, (AccessoryFilter**)&filter);
             if (FAILED(ec)) {
                 String str;
                 info->ToString(&str);
@@ -879,7 +1069,7 @@ Boolean UsbSettingsManager::PackageMatchesLocked(
                 break;
             }
             if (filter->Matches(accessory)) {
-                if (parser) parser->Close();
+                if (parser) ICloseable::Probe(parser)->Close();
                 return TRUE;
             }
         }
@@ -898,7 +1088,7 @@ Boolean UsbSettingsManager::PackageMatchesLocked(
     // }
 failed:
     if (parser != NULL) {
-        parser->Close();
+        ICloseable::Probe(parser)->Close();
     }
     return FALSE;
 }
@@ -908,14 +1098,13 @@ AutoPtr<List<AutoPtr<IResolveInfo> > > UsbSettingsManager::GetDeviceMatchesLocke
     /* [in] */ IIntent* intent)
 {
     AutoPtr<List<AutoPtr<IResolveInfo> > > matches = new List<AutoPtr<IResolveInfo> >();
-    AutoPtr<IObjectContainer> resolveInfos;
-    mPackageManager->QueryIntentActivities(intent, IPackageManager::GET_META_DATA, (IObjectContainer**)&resolveInfos);
-    AutoPtr<IObjectEnumerator> enumerator;
-    resolveInfos->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-    Boolean hasNext;
-    while (enumerator->MoveNext(&hasNext), hasNext) {
+    AutoPtr<IList> resolveInfos;
+    mPackageManager->QueryIntentActivities(intent, IPackageManager::GET_META_DATA, (IList**)&resolveInfos);
+    Int32 size;
+    resolveInfos->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
-        enumerator->Current((IInterface**)&obj);
+        resolveInfos->Get(i, (IInterface**)&obj);
         IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
         String action;
         intent->GetAction(&action);
@@ -931,14 +1120,13 @@ AutoPtr<List<AutoPtr<IResolveInfo> > > UsbSettingsManager::GetAccessoryMatchesLo
     /* [in] */ IIntent* intent)
 {
     AutoPtr<List<AutoPtr<IResolveInfo> > > matches = new List<AutoPtr<IResolveInfo> >();
-    AutoPtr<IObjectContainer> resolveInfos;
-    mPackageManager->QueryIntentActivities(intent, IPackageManager::GET_META_DATA, (IObjectContainer**)&resolveInfos);
-    AutoPtr<IObjectEnumerator> enumerator;
-    resolveInfos->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-    Boolean hasNext;
-    while (enumerator->MoveNext(&hasNext), hasNext) {
+    AutoPtr<IList> resolveInfos;
+    mPackageManager->QueryIntentActivities(intent, IPackageManager::GET_META_DATA, (IList**)&resolveInfos);
+    Int32 size;
+    resolveInfos->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
-        enumerator->Current((IInterface**)&obj);
+        resolveInfos->Get(i, (IInterface**)&obj);
         IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
         String action;
         intent->GetAction(&action);
@@ -965,7 +1153,7 @@ void UsbSettingsManager::DeviceAttached(
         // Launch our default activity directly, if we have one.
         // Otherwise we will start the UsbResolverActivity to allow the user to choose.
         AutoPtr<DeviceFilter> filter = new DeviceFilter(device);
-        HashMap< AutoPtr<DeviceFilter>, String, HashPK_DeviceFilter, PKEq_DeviceFilter >::Iterator it
+        HashMap< AutoPtr<DeviceFilter>, String>::Iterator it
                 = mDevicePreferenceMap.Find(filter);
         if (it != mDevicePreferenceMap.End()) {
             defaultPackage = it->mSecond;
@@ -990,7 +1178,7 @@ void UsbSettingsManager::DeviceDetached(
     AutoPtr<IIntent> intent;
     CIntent::New(IUsbManager::ACTION_USB_DEVICE_DETACHED, (IIntent**)&intent);
     intent->PutExtra(IUsbManager::EXTRA_DEVICE, IParcelable::Probe(device));
-    if (DEBUG) Slogger::D(TAG, "usbDeviceRemoved, sending %p", intent.Get());
+    if (DEBUG) Slogger::D(TAG, "usbDeviceRemoved, sending %s", TO_CSTR(intent));
     mContext->SendBroadcastAsUser(intent, UserHandle::ALL);
 }
 
@@ -1012,7 +1200,7 @@ void UsbSettingsManager::AccessoryAttached(
          * Otherwise we will start the UsbResolverActivity to allow the user to choose.
          */
         AutoPtr<AccessoryFilter> filter = new AccessoryFilter(accessory);
-        HashMap< AutoPtr<AccessoryFilter>, String, HashPK_AccessoryFilter, PKEq_AccessoryFilter >::Iterator it
+        HashMap< AutoPtr<AccessoryFilter>, String>::Iterator it
                 = mAccessoryPreferenceMap.Find(filter);
         if (it != mAccessoryPreferenceMap.End()) {
             defaultPackage = it->mSecond;
@@ -1037,10 +1225,11 @@ void UsbSettingsManager::AccessoryDetached(
 void UsbSettingsManager::ResolveActivity(
     /* [in] */ IIntent* intent,
     /* [in] */ List<AutoPtr<IResolveInfo> >* matches,
-    /* [in] */ const String& defaultPackage,
+    /* [in] */ const String& _defaultPackage,
     /* [in] */ IUsbDevice* device,
     /* [in] */ IUsbAccessory* accessory)
 {
+    String defaultPackage = _defaultPackage;
     // don't show the resolver activity if there are no choices available
     if (matches->IsEmpty()) {
         if (accessory != NULL) {
@@ -1079,13 +1268,22 @@ void UsbSettingsManager::ResolveActivity(
         rInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
         if (activityInfo != NULL) {
             AutoPtr<IApplicationInfo> applicationInfo;
-            activityInfo->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
+            IComponentInfo::Probe(activityInfo)->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
             if (applicationInfo != NULL) {
                 Int32 flags;
                 applicationInfo->GetFlags(&flags);
                 if ((flags & IApplicationInfo::FLAG_SYSTEM) != 0) {
                     defaultRI = rInfo;
                 }
+            }
+        }
+        if (mDisablePermissionDialogs) {
+            // bypass dialog and launch the only matching activity
+            rInfo = *matches->Begin();
+            AutoPtr<IActivityInfo> activityInfo;
+            rInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
+            if (activityInfo != NULL) {
+                IPackageItemInfo::Probe(activityInfo)->GetPackageName(&defaultPackage);
             }
         }
     }
@@ -1098,7 +1296,7 @@ void UsbSettingsManager::ResolveActivity(
             rInfo->GetActivityInfo((IActivityInfo**)&aInfo);
             if (aInfo != NULL) {
                 String pName;
-                aInfo->GetPackageName(&pName);
+                IPackageItemInfo::Probe(aInfo)->GetPackageName(&pName);
                 if (defaultPackage.Equals(pName)) {
                     defaultRI = rInfo;
                     break;
@@ -1113,7 +1311,7 @@ void UsbSettingsManager::ResolveActivity(
             AutoPtr<IActivityInfo> activityInfo;
             defaultRI->GetActivityInfo((IActivityInfo**)&activityInfo);
             AutoPtr<IApplicationInfo> appInfo;
-            activityInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
+            IComponentInfo::Probe(activityInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
             Int32 uid;
             appInfo->GetUid(&uid);
             GrantDevicePermission(device, uid);
@@ -1122,7 +1320,7 @@ void UsbSettingsManager::ResolveActivity(
             AutoPtr<IActivityInfo> activityInfo;
             defaultRI->GetActivityInfo((IActivityInfo**)&activityInfo);
             AutoPtr<IApplicationInfo> appInfo;
-            activityInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
+            IComponentInfo::Probe(activityInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
             Int32 uid;
             appInfo->GetUid(&uid);
             GrantAccessoryPermission(accessory, uid);
@@ -1133,9 +1331,9 @@ void UsbSettingsManager::ResolveActivity(
         AutoPtr<IActivityInfo> activityInfo;
         defaultRI->GetActivityInfo((IActivityInfo**)&activityInfo);
         String packageName;
-        activityInfo->GetPackageName(&packageName);
+        IPackageItemInfo::Probe(activityInfo)->GetPackageName(&packageName);
         String name;
-        activityInfo->GetName(&name);
+        IPackageItemInfo::Probe(activityInfo)->GetName(&name);
         AutoPtr<IComponentName> compName;
         CComponentName::New(packageName, name, (IComponentName**)&compName);
         intent->SetComponent(compName);
@@ -1180,7 +1378,7 @@ void UsbSettingsManager::ResolveActivity(
         }
         // try {
         if (FAILED(mUserContext->StartActivityAsUser(resolverIntent, mUser))) {
-            Slogger::E(TAG, "unable to start activity %p", resolverIntent.Get());
+            Slogger::E(TAG, "unable to start activity %s", TO_CSTR(resolverIntent));
         }
         // } catch (ActivityNotFoundException e) {
         //     Slog.e(TAG, "unable to start activity " + resolverIntent);
@@ -1193,7 +1391,7 @@ Boolean UsbSettingsManager::ClearCompatibleMatchesLocked(
     /* [in] */ DeviceFilter* filter)
 {
     Boolean changed = FALSE;
-    HashMap< AutoPtr<DeviceFilter>, String, HashPK_DeviceFilter, PKEq_DeviceFilter >::Iterator it
+    HashMap< AutoPtr<DeviceFilter>, String>::Iterator it
             = mDevicePreferenceMap.Begin();
     for (; it != mDevicePreferenceMap.End();) {
         AutoPtr<DeviceFilter> test = it->mFirst;
@@ -1213,7 +1411,7 @@ Boolean UsbSettingsManager::ClearCompatibleMatchesLocked(
     /* [in] */ AccessoryFilter* filter)
 {
     Boolean changed = FALSE;
-    HashMap< AutoPtr<AccessoryFilter>, String, HashPK_AccessoryFilter, PKEq_AccessoryFilter >::Iterator it
+    HashMap< AutoPtr<AccessoryFilter>, String>::Iterator it
             = mAccessoryPreferenceMap.Begin();
     for (; it != mAccessoryPreferenceMap.End();) {
         AutoPtr<AccessoryFilter> test = it->mFirst;
@@ -1233,17 +1431,18 @@ Boolean UsbSettingsManager::HandlePackageUpdateLocked(
     /* [in] */ IActivityInfo* aInfo,
     /* [in] */ const String& metaDataName)
 {
-    AutoPtr<IXmlResourceParser> parser;
+    AutoPtr<IXmlResourceParser> _parser;
     Boolean changed = FALSE;
 
     // try {
-    ECode ec = aInfo->LoadXmlMetaData(mPackageManager, metaDataName, (IXmlResourceParser**)&parser);
+    ECode ec = IPackageItemInfo::Probe(aInfo)->LoadXmlMetaData(mPackageManager, metaDataName, (IXmlResourceParser**)&_parser);
     if (FAILED(ec)) {
         String s;
         aInfo->ToString(&s);
         Slogger::W(TAG, "Unable to load component info %s 0x%08x", s.string(), ec);
         return FALSE;
     }
+    IXmlPullParser* parser = IXmlPullParser::Probe(_parser);
     if (parser == NULL) {
         return FALSE;
     }
@@ -1254,7 +1453,7 @@ Boolean UsbSettingsManager::HandlePackageUpdateLocked(
         aInfo->ToString(&s);
         Slogger::W(TAG, "Unable to load component info %s 0x%08x", s.string(), ec);
         if (parser != NULL) {
-            parser->Close();
+            ICloseable::Probe(parser)->Close();
         }
         return changed;
     }
@@ -1265,13 +1464,13 @@ Boolean UsbSettingsManager::HandlePackageUpdateLocked(
 
         if (tagName.Equals("usb-device")) {
             AutoPtr<DeviceFilter> filter;
-            ec = UsbSettingsManager::DeviceFilter::Read(parser, (DeviceFilter**)&filter);
+            ec = DeviceFilter::Read(parser, (DeviceFilter**)&filter);
             if (FAILED(ec)) {
                 String s;
                 aInfo->ToString(&s);
                 Slogger::W(TAG, "Unable to load component info %s 0x%08x", s.string(), ec);
                 if (parser != NULL) {
-                    parser->Close();
+                    ICloseable::Probe(parser)->Close();
                 }
                 return changed;
             }
@@ -1281,13 +1480,13 @@ Boolean UsbSettingsManager::HandlePackageUpdateLocked(
         }
         else if (tagName.Equals("usb-accessory")) {
             AutoPtr<AccessoryFilter> filter;
-            ec = UsbSettingsManager::AccessoryFilter::Read(parser, (AccessoryFilter**)&filter);
+            ec = AccessoryFilter::Read(parser, (AccessoryFilter**)&filter);
             if (FAILED(ec)) {
                 String s;
                 aInfo->ToString(&s);
                 Slogger::W(TAG, "Unable to load component info %s 0x%08x", s.string(), ec);
                 if (parser != NULL) {
-                    parser->Close();
+                    ICloseable::Probe(parser)->Close();
                 }
                 return changed;
             }
@@ -1301,14 +1500,14 @@ Boolean UsbSettingsManager::HandlePackageUpdateLocked(
             aInfo->ToString(&s);
             Slogger::W(TAG, "Unable to load component info %s 0x%08x", s.string(), ec);
             if (parser != NULL) {
-                parser->Close();
+                ICloseable::Probe(parser)->Close();
             }
             return changed;
         }
     }
 
     if (parser != NULL) {
-        parser->Close();
+        ICloseable::Probe(parser)->Close();
     }
     // } catch (Exception e) {
     //     Slog.w(TAG, "Unable to load component info " + aInfo.toString(), e);
@@ -1361,6 +1560,11 @@ Boolean UsbSettingsManager::HasPermission(
     /* [in] */ IUsbDevice* device)
 {
     AutoLock lock(mLock);
+    Int32 uid = Binder::GetCallingUid();
+    if (uid == IProcess::SYSTEM_UID || mDisablePermissionDialogs) {
+        return TRUE;
+    }
+
     String name;
     device->GetDeviceName(&name);
     AutoPtr<Int32BooleanMap> uidList;
@@ -1371,7 +1575,7 @@ Boolean UsbSettingsManager::HasPermission(
     if (uidList == NULL) {
         return FALSE;
     }
-    Int32BooleanMapIterator resultIt = uidList->Find(Binder::GetCallingUid());
+    Int32BooleanMapIterator resultIt = uidList->Find(uid);
     Boolean result = FALSE;
     if (resultIt != uidList->End()) {
         result = resultIt->mSecond;
@@ -1383,6 +1587,11 @@ Boolean UsbSettingsManager::HasPermission(
     /* [in] */ IUsbAccessory* accessory)
 {
     AutoLock lock(mLock);
+    Int32 uid = Binder::GetCallingUid();
+    if (uid == IProcess::SYSTEM_UID || mDisablePermissionDialogs) {
+        return TRUE;
+    }
+
     AutoPtr<Int32BooleanMap> uidList;
     HashMap< AutoPtr<IUsbAccessory>, AutoPtr<Int32BooleanMap> >::Iterator it = mAccessoryPermissionMap.Find(accessory);
     if (it != mAccessoryPermissionMap.End()) {
@@ -1391,7 +1600,7 @@ Boolean UsbSettingsManager::HasPermission(
     if (uidList == NULL) {
         return FALSE;
     }
-    Int32BooleanMapIterator resultIt = uidList->Find(Binder::GetCallingUid());
+    Int32BooleanMapIterator resultIt = uidList->Find(uid);
     Boolean result = FALSE;
     if (resultIt != uidList->End()) {
         result = resultIt->mSecond;
@@ -1403,7 +1612,7 @@ ECode UsbSettingsManager::CheckPermission(
     /* [in] */ IUsbDevice* device)
 {
     if (!HasPermission(device)) {
-        Slogger::E(TAG, "User has not given permission to device %p", device);
+        Slogger::E(TAG, "User has not given permission to device %s", TO_CSTR(device));
         return E_SECURITY_EXCEPTION;
         // throw new SecurityException("User has not given permission to device " + device);
     }
@@ -1414,7 +1623,7 @@ ECode UsbSettingsManager::CheckPermission(
     /* [in] */ IUsbAccessory* accessory)
 {
     if (!HasPermission(accessory)) {
-        Slogger::E(TAG, "User has not given permission to accessory %p", accessory);
+        Slogger::E(TAG, "User has not given permission to accessory %s", TO_CSTR(accessory));
         return E_SECURITY_EXCEPTION;
         // throw new SecurityException("User has not given permission to accessory " + accessory);
     }
@@ -1531,7 +1740,7 @@ void UsbSettingsManager::SetDevicePackage(
 
     AutoLock lock(mLock);
     if (packageName.IsNull()) {
-        HashMap< AutoPtr<DeviceFilter>, String, HashPK_DeviceFilter, PKEq_DeviceFilter >::Iterator it
+        HashMap< AutoPtr<DeviceFilter>, String>::Iterator it
                 = mDevicePreferenceMap.Find(filter);
         if (it != mDevicePreferenceMap.End()) {
             mDevicePreferenceMap.Erase(it);
@@ -1559,7 +1768,7 @@ void UsbSettingsManager::SetAccessoryPackage(
 
     AutoLock lock(mLock);
     if (packageName.IsNull()) {
-        HashMap< AutoPtr<AccessoryFilter>, String, HashPK_AccessoryFilter, PKEq_AccessoryFilter >::Iterator it
+        HashMap< AutoPtr<AccessoryFilter>, String>::Iterator it
                 = mAccessoryPreferenceMap.Find(filter);
         if (it != mAccessoryPreferenceMap.End()) {
             mAccessoryPreferenceMap.Erase(it);
@@ -1612,12 +1821,12 @@ Boolean UsbSettingsManager::HasDefaults(
     /* [in] */ const String& packageName)
 {
     AutoLock lock(mLock);
-    HashMap< AutoPtr<DeviceFilter>, String, HashPK_DeviceFilter, PKEq_DeviceFilter >::Iterator it1
+    HashMap< AutoPtr<DeviceFilter>, String>::Iterator it1
             = mDevicePreferenceMap.Begin();
     for (; it1 != mDevicePreferenceMap.End(); ++it1) {
         if (packageName == it1->mSecond) return TRUE;
     }
-    HashMap< AutoPtr<AccessoryFilter>, String, HashPK_AccessoryFilter, PKEq_AccessoryFilter >::Iterator it2
+    HashMap< AutoPtr<AccessoryFilter>, String>::Iterator it2
             = mAccessoryPreferenceMap.Begin();
     for (; it2 != mAccessoryPreferenceMap.End(); ++it2) {
         if (packageName == it2->mSecond) return TRUE;
@@ -1641,7 +1850,7 @@ Boolean UsbSettingsManager::ClearPackageDefaultsLocked(
 
     AutoLock lock(mLock);
     Boolean isContain = FALSE;
-    HashMap< AutoPtr<DeviceFilter>, String, HashPK_DeviceFilter, PKEq_DeviceFilter >::Iterator it1
+    HashMap< AutoPtr<DeviceFilter>, String>::Iterator it1
             = mDevicePreferenceMap.Begin();
     for (; it1 != mDevicePreferenceMap.End(); ++it1) {
         if (packageName == it1->mSecond) {
@@ -1661,7 +1870,7 @@ Boolean UsbSettingsManager::ClearPackageDefaultsLocked(
         }
     }
     isContain = FALSE;
-    HashMap< AutoPtr<AccessoryFilter>, String, HashPK_AccessoryFilter, PKEq_AccessoryFilter >::Iterator it2
+    HashMap< AutoPtr<AccessoryFilter>, String>::Iterator it2
             = mAccessoryPreferenceMap.Begin();
     for (; it2 != mAccessoryPreferenceMap.End(); ++it2) {
         if (packageName == it2->mSecond) {

@@ -118,7 +118,7 @@ ECode CSpeedBumpView::AnimateDivider(
         animator->SetStartDelay(delay);
         animator->ScaleX(endValue);
         animator->ScaleY(endValue);
-        IAnimator::Probe(animator)->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
+        animator->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
         animator->WithEndAction(onFinishedRunnable);
         mIsVisible = nowVisible;
     }
