@@ -18,6 +18,12 @@ public:
     CAR_INTERFACE_DECL()
 
     TO_STRING_IMPL("ContextThemeWrapperHolder")
+
+    ContextThemeWrapperHolder();
+
+    ~ContextThemeWrapperHolder();
+
+    Boolean mMemoryLeakTarget;
 };
 
 } // namespace View

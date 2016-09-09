@@ -286,6 +286,8 @@ public:
 
     ActionBarView();
 
+    ~ActionBarView();
+
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);

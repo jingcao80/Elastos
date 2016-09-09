@@ -23,6 +23,10 @@ ContextThemeWrapper::ContextThemeWrapper()
 
 ContextThemeWrapper::~ContextThemeWrapper()
 {
+    mInflater = NULL;
+    mTheme = NULL;
+    mOverrideConfiguration = NULL;
+    mResources = NULL;
 }
 
 ECode ContextThemeWrapper::constructor()
@@ -64,6 +68,7 @@ ECode ContextThemeWrapper::ApplyOverrideConfiguration(
 ECode ContextThemeWrapper::GetResources(
     /* [out] */ IResources** resources)
 {
+    VALIDATE_NOT_NULL(resources)
     if (mResources != NULL) {
         *resources = mResources;
         REFCOUNT_ADD(*resources);

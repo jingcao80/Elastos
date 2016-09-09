@@ -40,6 +40,10 @@ BaseMenuPresenter::~BaseMenuPresenter()
     if (mHolderContext && mContext != NULL) {
         REFCOUNT_RELEASE(mContext)
     }
+    mInflater = NULL;
+    mSystemInflater = NULL;
+    mMenu = NULL;
+    mMenuView = NULL;
 }
 
 ECode BaseMenuPresenter::constructor(
@@ -67,6 +71,7 @@ ECode BaseMenuPresenter::InitForMenu(
         REFCOUNT_ADD(mContext)
         mHolderContext = TRUE;
     }
+    mInflater = NULL;
     FAIL_RETURN(LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater))
     mMenu = menu;
     return NOERROR;
@@ -104,6 +109,7 @@ ECode BaseMenuPresenter::UpdateMenuView(
         mMenu->GetVisibleItems((IArrayList**)&visibleItems);
         Int32 itemCount;
         visibleItems->GetSize(&itemCount);
+        IMenuItemView* menuItemView = NULL;
         for (Int32 i = 0; i < itemCount; i++) {
             AutoPtr<IInterface> elem;
             visibleItems->Get(i, (IInterface**)&elem);
@@ -114,8 +120,9 @@ ECode BaseMenuPresenter::UpdateMenuView(
                 parent->GetChildAt(childIndex, (IView**)&convertView);
 
                 AutoPtr<IMenuItemImpl> oldItem;
-                if (IMenuItemView::Probe(convertView) != NULL) {
-                    IMenuItemView::Probe(convertView)->GetItemData((IMenuItemImpl**)&oldItem);
+                menuItemView = IMenuItemView::Probe(convertView);
+                if (menuItemView != NULL) {
+                    menuItemView->GetItemData((IMenuItemImpl**)&oldItem);
                 }
 
                 AutoPtr<IView> itemView;
