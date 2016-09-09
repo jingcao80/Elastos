@@ -59,6 +59,23 @@ const String CWifiP2pSettings::SAVE_DEVICE_NAME("DEV_NAME");
 const String CWifiP2pSettings::SAVE_SELECTED_GROUP("GROUP_NAME");
 
 //===============================================================================
+//                  CWifiP2pSettings::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(CWifiP2pSettings::InnerListener, Object, IWifiP2pManagerPeerListListener)
+
+CWifiP2pSettings::InnerListener::InnerListener(
+    /* [in] */ CWifiP2pSettings* host)
+    : mHost(host)
+{}
+
+ECode CWifiP2pSettings::InnerListener::OnPeersAvailable(
+    /* [in] */ IWifiP2pDeviceList* peers)
+{
+    return mHost->OnPeersAvailable(peers);
+}
+
+//===============================================================================
 //                  CWifiP2pSettings::InitBroadcastReceiver
 //===============================================================================
 
@@ -319,7 +336,7 @@ ECode CWifiP2pSettings::DialogInterfaceOnClickListener::OnClick(
 
 CAR_OBJECT_IMPL(CWifiP2pSettings)
 
-CAR_INTERFACE_IMPL_2(CWifiP2pSettings, SettingsPreferenceFragment, IWifiP2pManagerPersistentGroupInfoListener, IWifiP2pManagerPeerListListener)
+CAR_INTERFACE_IMPL(CWifiP2pSettings, SettingsPreferenceFragment, IWifiP2pManagerPersistentGroupInfoListener)
 
 CWifiP2pSettings::CWifiP2pSettings()
     : mWifiP2pEnabled(FALSE)
@@ -330,6 +347,7 @@ CWifiP2pSettings::CWifiP2pSettings()
     CIntentFilter::New((IIntentFilter**)&mIntentFilter);
     CWifiP2pDeviceList::New((IWifiP2pDeviceList**)&mPeers);
     mReceiver = new InitBroadcastReceiver(this);
+    mReceiver->constructor();
 }
 
 CWifiP2pSettings::~CWifiP2pSettings()
@@ -430,7 +448,8 @@ ECode CWifiP2pSettings::OnResume()
     AutoPtr<IIntent> intent;
     IContext::Probe(activity)->RegisterReceiver(mReceiver, mIntentFilter, (IIntent**)&intent);
     if (mWifiP2pManager != NULL) {
-        mWifiP2pManager->RequestPeers(mChannel, this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        mWifiP2pManager->RequestPeers(mChannel, listener);
     }
     return NOERROR;
 }

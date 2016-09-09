@@ -726,6 +726,7 @@ CInstalledAppDetails::CInstalledAppDetails()
 {
     CHashSet::New((IHashSet**)&mHomePackages);
     mHandler = new InitHandler(this);
+    mHandler->constructor();
     mCheckKillProcessesReceiver = new InitBroadcastReceiver(this);
     mListener = new InnerListener(this);
 }

@@ -5,8 +5,7 @@
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "elastos/droid/settings/RestrictedSettingsFragment.h"
 #include "elastos/droid/settings/wifi/WifiEnabler.h"
-#include "elastos/droid/settings/wifi/WifiDialog.h"
-#include "elastos/droid/settings/wifi/WriteWifiConfigToNfcDialog.h"
+#include "elastos/droid/settings/wifi/CWifiDialog.h"
 #include "elastos/droid/settings/search/BaseSearchIndexProvider.h"
 
 using Elastos::Droid::App::IDialog;
@@ -459,8 +458,8 @@ private:
 
     AutoPtr<IAtomicBoolean> mConnected;
 
-    AutoPtr<WifiDialog> mDialog;
-    AutoPtr<WriteWifiConfigToNfcDialog> mWifiToNfcDialog;
+    AutoPtr<CWifiDialog> mDialog;
+    AutoPtr<IDialog> /*CWriteWifiConfigToNfcDialog*/ mWifiToNfcDialog;
 
     AutoPtr<ITextView> mEmptyView;
 

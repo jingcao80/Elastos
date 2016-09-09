@@ -1,8 +1,9 @@
-#ifndef __ELASTOS_DROID_SETTINGS_WIFI_WPSDIALOG_H__
-#define __ELASTOS_DROID_SETTINGS_WIFI_WPSDIALOG_H__
+#ifndef __ELASTOS_DROID_SETTINGS_WIFI_CWPSDIALOG_H__
+#define __ELASTOS_DROID_SETTINGS_WIFI_CWPSDIALOG_H__
 
 #include "Elastos.Droid.Wifi.h"
 #include "Elastos.Droid.Widget.h"
+#include "_Elastos_Droid_Settings_Wifi_CWpsDialog.h"
 #include "elastos/droid/app/AlertDialog.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "_Elastos.Droid.Settings.h"
@@ -35,8 +36,8 @@ namespace Wifi {
 /**
  * Dialog to show WPS progress.
  */
-class WpsDialog
-    : public AlertDialog
+CarClass(CWpsDialog)
+    , public AlertDialog
 {
 private:
     class WpsListener
@@ -44,10 +45,12 @@ private:
         , public IWifiManagerWpsCallback
     {
     public:
+        TO_STRING_IMPL("CWpsDialog::WpsListener")
+
         CAR_INTERFACE_DECL();
 
         WpsListener(
-            /* [in] */ WpsDialog* host);
+            /* [in] */ CWpsDialog* host);
 
         ~WpsListener();
 
@@ -60,17 +63,17 @@ private:
             /* [in] */ Int32 reason);
 
     private:
-        WpsDialog* mHost;
+        CWpsDialog* mHost;
     };
 
     class InitBroadcastReceiver
         : public BroadcastReceiver
     {
     public:
-        TO_STRING_IMPL("WpsDialog::InitBroadcastReceiver")
+        TO_STRING_IMPL("CWpsDialog::InitBroadcastReceiver")
 
         InitBroadcastReceiver(
-            /* [in] */ WpsDialog* host);
+            /* [in] */ CWpsDialog* host);
 
         ~InitBroadcastReceiver();
 
@@ -80,15 +83,17 @@ private:
             /* [in] */ IIntent* intent);
 
     private:
-        WpsDialog* mHost;
+        CWpsDialog* mHost;
     };
 
     class UpdateDialogRunnable
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("CWpsDialog::UpdateDialogRunnable")
+
         UpdateDialogRunnable(
-            /* [in] */ WpsDialog* host,
+            /* [in] */ CWpsDialog* host,
             /* [in] */ WpsDialogState state,
             /* [in] */ const String& msg);
 
@@ -98,7 +103,7 @@ private:
         CARAPI Run();
 
     private:
-        WpsDialog* mHost;
+        CWpsDialog* mHost;
         WpsDialogState mState;
         String mMsg;
     };
@@ -108,10 +113,12 @@ private:
         , public IViewOnClickListener
     {
     public:
+        TO_STRING_IMPL("CWpsDialog::OnCreateViewOnClickListener")
+
         CAR_INTERFACE_DECL();
 
         OnCreateViewOnClickListener(
-            /* [in] */ WpsDialog* host);
+            /* [in] */ CWpsDialog* host);
 
         ~OnCreateViewOnClickListener();
 
@@ -120,7 +127,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        WpsDialog* mHost;
+        CWpsDialog* mHost;
     };
 
     class OnStartRunnable
@@ -128,8 +135,10 @@ private:
     {
         friend class OnStartTimerTask;
     public:
+        TO_STRING_IMPL("CWpsDialog::OnStartRunnable")
+
         OnStartRunnable(
-            /* [in] */ WpsDialog* host);
+            /* [in] */ CWpsDialog* host);
 
         ~OnStartRunnable();
 
@@ -137,15 +146,17 @@ private:
         CARAPI Run();
 
     private:
-        WpsDialog* mHost;
+        CWpsDialog* mHost;
     };
 
     class OnStartTimerTask
         : public TimerTask
     {
     public:
+        TO_STRING_IMPL("CWpsDialog::OnStartTimerTask")
+
         OnStartTimerTask(
-            /* [in] */ WpsDialog* host);
+            /* [in] */ CWpsDialog* host);
 
         ~OnStartTimerTask();
 
@@ -153,15 +164,19 @@ private:
         CARAPI Run();
 
     private:
-        WpsDialog* mHost;
+        CWpsDialog* mHost;
     };
 
 public:
-    WpsDialog(
+    CAR_OBJECT_DECL()
+
+    CWpsDialog();
+
+    ~CWpsDialog();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Int32 wpsSetup);
-
-    ~WpsDialog();
 
     //@Override
     CARAPI OnSaveInstanceState(
@@ -224,4 +239,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SETTINGS_WIFI_WPSDIALOG_H__
+#endif //__ELASTOS_DROID_SETTINGS_WIFI_CWPSDIALOG_H__

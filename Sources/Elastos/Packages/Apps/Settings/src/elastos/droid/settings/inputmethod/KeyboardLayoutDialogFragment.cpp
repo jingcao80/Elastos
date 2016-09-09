@@ -36,6 +36,56 @@ namespace Inputmethod {
 const String KeyboardLayoutDialogFragment::KEY_INPUT_DEVICE_IDENTIFIER("inputDeviceIdentifier");
 
 //===============================================================================
+//                  KeyboardLayoutDialogFragment::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_2(KeyboardLayoutDialogFragment::InnerListener, Object, IInputDeviceListener, ILoaderManagerLoaderCallbacks)
+
+KeyboardLayoutDialogFragment::InnerListener::InnerListener(
+    /* [in] */ KeyboardLayoutDialogFragment* host)
+    : mHost(host)
+{}
+
+ECode KeyboardLayoutDialogFragment::InnerListener::OnInputDeviceAdded(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceAdded(deviceId);
+}
+
+ECode KeyboardLayoutDialogFragment::InnerListener::OnInputDeviceChanged(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceChanged(deviceId);
+}
+
+ECode KeyboardLayoutDialogFragment::InnerListener::OnInputDeviceRemoved(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceRemoved(deviceId);
+}
+
+ECode KeyboardLayoutDialogFragment::InnerListener::OnCreateLoader(
+    /* [in] */ Int32 id,
+    /* [in] */ IBundle* args,
+    /* [out] */ ILoader** loader)
+{
+    return mHost->OnCreateLoader(id, args, loader);
+}
+
+ECode KeyboardLayoutDialogFragment::InnerListener::OnLoadFinished(
+    /* [in] */ ILoader* loader,
+    /* [in] */ IInterface* data)
+{
+    return mHost->OnLoadFinished(loader, data);
+}
+
+ECode KeyboardLayoutDialogFragment::InnerListener::OnLoaderReset(
+    /* [in] */ ILoader* loader)
+{
+    return mHost->OnLoaderReset(loader);
+}
+
+//===============================================================================
 //                  KeyboardLayoutDialogFragment::Keyboards
 //===============================================================================
 
@@ -300,12 +350,11 @@ ECode KeyboardLayoutDialogFragment::DialogInterfaceOnClickListener::OnClick(
 //                  KeyboardLayoutDialogFragment
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(KeyboardLayoutDialogFragment, DialogFragment,
-        IInputDeviceListener, ILoaderManagerLoaderCallbacks)
-
 KeyboardLayoutDialogFragment::KeyboardLayoutDialogFragment()
     : mInputDeviceId(-1)
-{}
+{
+    mListener = new InnerListener(this);
+}
 
 KeyboardLayoutDialogFragment::~KeyboardLayoutDialogFragment()
 {}
@@ -351,7 +400,7 @@ ECode KeyboardLayoutDialogFragment::OnCreate(
     AutoPtr<ILoaderManager> lm;
     GetLoaderManager((ILoaderManager**)&lm);
     AutoPtr<ILoader> loader;
-    return lm->InitLoader(0, NULL, this, (ILoader**)&loader);
+    return lm->InitLoader(0, NULL, mListener, (ILoader**)&loader);
 }
 
 ECode KeyboardLayoutDialogFragment::OnSaveInstanceState(
@@ -399,7 +448,7 @@ ECode KeyboardLayoutDialogFragment::OnResume()
 {
     DialogFragment::OnResume();
 
-    mIm->RegisterInputDeviceListener(this, NULL);
+    mIm->RegisterInputDeviceListener(mListener, NULL);
 
     String dsp;
     mInputDeviceIdentifier->GetDescriptor(&dsp);
@@ -414,7 +463,7 @@ ECode KeyboardLayoutDialogFragment::OnResume()
 
 ECode KeyboardLayoutDialogFragment::OnPause()
 {
-    mIm->UnregisterInputDeviceListener(this);
+    mIm->UnregisterInputDeviceListener(mListener);
     mInputDeviceId = -1;
 
     return DialogFragment::OnPause();
@@ -527,7 +576,7 @@ ECode KeyboardLayoutDialogFragment::OnInputDeviceChanged(
         AutoPtr<ILoaderManager> lm;
         GetLoaderManager((ILoaderManager**)&lm);
         AutoPtr<ILoader> loader;
-        lm->RestartLoader(0, NULL, this, (ILoader**)&loader);
+        lm->RestartLoader(0, NULL, mListener, (ILoader**)&loader);
     }
     return NOERROR;
 }

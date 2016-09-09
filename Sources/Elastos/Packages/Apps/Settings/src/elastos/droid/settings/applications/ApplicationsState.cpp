@@ -631,15 +631,17 @@ void ApplicationsState::Session::HandleRebuildList()
 //===============================================================================
 //                  ApplicationsState::BackgroundHandler
 //===============================================================================
-
 ApplicationsState::BackgroundHandler::BackgroundHandler(
-    /* [in] */ ILooper* looper,
     /* [in] */ ApplicationsState* host)
     : mRunning(FALSE)
     , mHost(host)
+{}
+
+ECode ApplicationsState::BackgroundHandler::constructor(
+    /* [in] */ ILooper* looper)
 {
-    Handler::constructor(looper);
     CApplicationsStatePackageStatsObserver::New(mHost, this, (IIPackageStatsObserver**)&mStatsObserver);
+    return Handler::constructor(looper);
 }
 
 ECode ApplicationsState::BackgroundHandler::HandleMessage(
@@ -1112,7 +1114,8 @@ ApplicationsState::ApplicationsState(
     IThread::Probe(mThread)->Start();
     AutoPtr<ILooper> looper;
     mThread->GetLooper((ILooper**)&looper);
-    mBackgroundHandler = new BackgroundHandler(looper, this);
+    mBackgroundHandler = new BackgroundHandler(this);
+    mBackgroundHandler->constructor(looper);
 
     // Only the owner can see all apps.
     if (UserHandle::GetMyUserId() == 0) {

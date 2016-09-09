@@ -43,12 +43,56 @@ namespace Wifi {
 class WifiConfigController
     : public Object
     , public IWifiConfigController
-    , public ITextWatcher
     , public INoCopySpan
-    , public IAdapterViewOnItemSelectedListener
     , public ICompoundButtonOnCheckedChangeListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public ITextWatcher
+        , public IAdapterViewOnItemSelectedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("WifiConfigController::InnerListener")
+
+        InnerListener(
+            /* [in] */ WifiConfigController* host);
+
+        // @Override
+        CARAPI AfterTextChanged(
+            /* [in] */ IEditable* s);
+
+        // @Override
+        CARAPI BeforeTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [in] */ Int32 after);
+
+        // @Override
+        CARAPI OnTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 before,
+            /* [in] */ Int32 count);
+
+        // @Override
+        CARAPI OnItemSelected(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        // @Override
+        CARAPI OnNothingSelected(
+            /* [in] */ IAdapterView* parent);
+
+    private:
+        WifiConfigController* mHost;
+    };
+
     class AfterTextChangedRunnable
         : public Runnable
     {
@@ -272,6 +316,8 @@ private:
     AutoPtr<ITextView> mSsidView;
 
     AutoPtr<IContext> mContext;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Wifi

@@ -1,6 +1,6 @@
 
 #include "Elastos.Droid.Net.h"
-#include "elastos/droid/settings/wifi/WpsDialog.h"
+#include "elastos/droid/settings/wifi/CWpsDialog.h"
 #include "elastos/droid/settings/wifi/CWpsDialogHelper.h"
 #include "../R.h"
 #include <elastos/core/CoreUtils.h>
@@ -21,27 +21,27 @@ namespace Droid {
 namespace Settings {
 namespace Wifi {
 
-const String WpsDialog::TAG("WpsDialog");
-const String WpsDialog::DIALOG_STATE("android:dialogState");
-const String WpsDialog::DIALOG_MSG_STRING("android:dialogMsg");
+const String CWpsDialog::TAG("CWpsDialog");
+const String CWpsDialog::DIALOG_STATE("android:dialogState");
+const String CWpsDialog::DIALOG_MSG_STRING("android:dialogMsg");
 
-const Int32 WpsDialog::WPS_TIMEOUT_S = 120;
+const Int32 CWpsDialog::WPS_TIMEOUT_S = 120;
 
 //===============================================================================
-//                  WpsDialog::WpsListener
+//                  CWpsDialog::WpsListener
 //===============================================================================
 
-CAR_INTERFACE_IMPL(WpsDialog::WpsListener, Object, IWifiManagerWpsCallback);
+CAR_INTERFACE_IMPL(CWpsDialog::WpsListener, Object, IWifiManagerWpsCallback);
 
-WpsDialog::WpsListener::WpsListener(
-    /* [in] */ WpsDialog* host)
+CWpsDialog::WpsListener::WpsListener(
+    /* [in] */ CWpsDialog* host)
     : mHost(host)
 {}
 
-WpsDialog::WpsListener::~WpsListener()
+CWpsDialog::WpsListener::~WpsListener()
 {}
 
-ECode WpsDialog::WpsListener::OnStarted(
+ECode CWpsDialog::WpsListener::OnStarted(
     /* [in] */ const String& pin)
 {
     if (!pin.IsNull()) {
@@ -59,7 +59,7 @@ ECode WpsDialog::WpsListener::OnStarted(
     return NOERROR;
 }
 
-ECode WpsDialog::WpsListener::OnSucceeded()
+ECode CWpsDialog::WpsListener::OnSucceeded()
 {
     String str;
     mHost->mContext->GetString(R::string::wifi_wps_complete, &str);
@@ -67,7 +67,7 @@ ECode WpsDialog::WpsListener::OnSucceeded()
     return NOERROR;
 }
 
-ECode WpsDialog::WpsListener::OnFailed(
+ECode CWpsDialog::WpsListener::OnFailed(
     /* [in] */ Int32 reason)
 {
     String msg;
@@ -93,18 +93,18 @@ ECode WpsDialog::WpsListener::OnFailed(
 }
 
 //===============================================================================
-//                  WpsDialog::InitBroadcastReceiver
+//                  CWpsDialog::InitBroadcastReceiver
 //===============================================================================
 
-WpsDialog::InitBroadcastReceiver::InitBroadcastReceiver(
-    /* [in] */ WpsDialog* host)
+CWpsDialog::InitBroadcastReceiver::InitBroadcastReceiver(
+    /* [in] */ CWpsDialog* host)
     : mHost(host)
 {}
 
-WpsDialog::InitBroadcastReceiver::~InitBroadcastReceiver()
+CWpsDialog::InitBroadcastReceiver::~InitBroadcastReceiver()
 {}
 
-ECode WpsDialog::InitBroadcastReceiver::OnReceive(
+ECode CWpsDialog::InitBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -113,11 +113,11 @@ ECode WpsDialog::InitBroadcastReceiver::OnReceive(
 }
 
 //===============================================================================
-//                  WpsDialog::UpdateDialogRunnable
+//                  CWpsDialog::UpdateDialogRunnable
 //===============================================================================
 
-WpsDialog::UpdateDialogRunnable::UpdateDialogRunnable(
-    /* [in] */ WpsDialog* host,
+CWpsDialog::UpdateDialogRunnable::UpdateDialogRunnable(
+    /* [in] */ CWpsDialog* host,
     /* [in] */ WpsDialogState state,
     /* [in] */ const String& msg)
     : mHost(host)
@@ -125,10 +125,10 @@ WpsDialog::UpdateDialogRunnable::UpdateDialogRunnable(
     , mMsg(msg)
 {}
 
-WpsDialog::UpdateDialogRunnable::~UpdateDialogRunnable()
+CWpsDialog::UpdateDialogRunnable::~UpdateDialogRunnable()
 {}
 
-ECode WpsDialog::UpdateDialogRunnable::Run()
+ECode CWpsDialog::UpdateDialogRunnable::Run()
 {
     switch(mState) {
         case WpsDialogState_WPS_COMPLETE:
@@ -153,55 +153,55 @@ ECode WpsDialog::UpdateDialogRunnable::Run()
 }
 
 //===============================================================================
-//                  WpsDialog::OnCreateViewOnClickListener
+//                  CWpsDialog::OnCreateViewOnClickListener
 //===============================================================================
 
-CAR_INTERFACE_IMPL(WpsDialog::OnCreateViewOnClickListener, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CWpsDialog::OnCreateViewOnClickListener, Object, IViewOnClickListener);
 
-WpsDialog::OnCreateViewOnClickListener::OnCreateViewOnClickListener(
-    /* [in] */ WpsDialog* host)
+CWpsDialog::OnCreateViewOnClickListener::OnCreateViewOnClickListener(
+    /* [in] */ CWpsDialog* host)
     : mHost(host)
 {}
 
-WpsDialog::OnCreateViewOnClickListener::~OnCreateViewOnClickListener()
+CWpsDialog::OnCreateViewOnClickListener::~OnCreateViewOnClickListener()
 {}
 
-ECode WpsDialog::OnCreateViewOnClickListener::OnClick(
+ECode CWpsDialog::OnCreateViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     return mHost->Dismiss();
 }
 
 //===============================================================================
-//                  WpsDialog::OnStartRunnable
+//                  CWpsDialog::OnStartRunnable
 //===============================================================================
 
-WpsDialog::OnStartRunnable::OnStartRunnable(
-    /* [in] */ WpsDialog* host)
+CWpsDialog::OnStartRunnable::OnStartRunnable(
+    /* [in] */ CWpsDialog* host)
     : mHost(host)
 {}
 
-WpsDialog::OnStartRunnable::~OnStartRunnable()
+CWpsDialog::OnStartRunnable::~OnStartRunnable()
 {}
 
-ECode WpsDialog::OnStartRunnable::Run()
+ECode CWpsDialog::OnStartRunnable::Run()
 {
     return mHost->mTimeoutBar->IncrementProgressBy(1);
 }
 
 //===============================================================================
-//                  WpsDialog::OnStartTimerTask
+//                  CWpsDialog::OnStartTimerTask
 //===============================================================================
 
-WpsDialog::OnStartTimerTask::OnStartTimerTask(
-    /* [in] */ WpsDialog* host)
+CWpsDialog::OnStartTimerTask::OnStartTimerTask(
+    /* [in] */ CWpsDialog* host)
     : mHost(host)
 {}
 
-WpsDialog::OnStartTimerTask::~OnStartTimerTask()
+CWpsDialog::OnStartTimerTask::~OnStartTimerTask()
 {}
 
-ECode WpsDialog::OnStartTimerTask::Run()
+ECode CWpsDialog::OnStartTimerTask::Run()
 {
     AutoPtr<IRunnable> runnable = new OnStartRunnable(mHost);
     Boolean res;
@@ -209,15 +209,20 @@ ECode WpsDialog::OnStartTimerTask::Run()
 }
 
 //===============================================================================
-//                  WpsDialog
+//                  CWpsDialog
 //===============================================================================
 
-WpsDialog::WpsDialog(
-    /* [in] */ IContext* context,
-    /* [in] */ Int32 wpsSetup)
+CAR_OBJECT_IMPL(CWpsDialog)
+
+CWpsDialog::CWpsDialog()
     : mWpsSetup(0)
     , mMsgString(String(""))
     , mDialogState(WpsDialogState_WPS_INIT)
+{}
+
+ECode CWpsDialog::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 wpsSetup)
 {
     AlertDialog::constructor(context);
     mContext = context;
@@ -230,13 +235,13 @@ WpsDialog::WpsDialog(
     CIntentFilter::New((IIntentFilter**)&mFilter);
     mFilter->AddAction(IWifiManager::NETWORK_STATE_CHANGED_ACTION);
     mReceiver = new InitBroadcastReceiver(this);
-    SetCanceledOnTouchOutside(FALSE);
+    return SetCanceledOnTouchOutside(FALSE);
 }
 
-WpsDialog::~WpsDialog()
+CWpsDialog::~CWpsDialog()
 {}
 
-ECode WpsDialog::OnSaveInstanceState(
+ECode CWpsDialog::OnSaveInstanceState(
     /* [out] */ IBundle** result)
 {
     AutoPtr<IBundle> bundle;
@@ -253,7 +258,7 @@ ECode WpsDialog::OnSaveInstanceState(
     return NOERROR;
 }
 
-ECode WpsDialog::OnRestoreInstanceState(
+ECode CWpsDialog::OnRestoreInstanceState(
     /* [in] */ IBundle* savedInstanceState)
 {
     if (savedInstanceState != NULL) {
@@ -275,7 +280,7 @@ ECode WpsDialog::OnRestoreInstanceState(
     return NOERROR;
 }
 
-ECode WpsDialog::OnCreate(
+ECode CWpsDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     AutoPtr<ILayoutInflater> inflater;
@@ -313,7 +318,7 @@ ECode WpsDialog::OnCreate(
     return AlertDialog::OnCreate(savedInstanceState);
 }
 
-ECode WpsDialog::OnStart()
+ECode CWpsDialog::OnStart()
 {
     /*
      * increment timeout bar per second.
@@ -332,7 +337,7 @@ ECode WpsDialog::OnStart()
     return NOERROR;
 }
 
-ECode WpsDialog::OnStop()
+ECode CWpsDialog::OnStop()
 {
     if (mDialogState != WpsDialogState_WPS_COMPLETE) {
         mWifiManager->CancelWps(NULL);
@@ -349,7 +354,7 @@ ECode WpsDialog::OnStop()
     return NOERROR;
 }
 
-void WpsDialog::UpdateDialog(
+void CWpsDialog::UpdateDialog(
     /* [in] */ WpsDialogState state,
     /* [in] */ const String& msg)
 {
@@ -371,7 +376,7 @@ void WpsDialog::UpdateDialog(
     mHandler->Post((IRunnable*)runnable, &res);
 }
 
-void WpsDialog::HandleEvent(
+void CWpsDialog::HandleEvent(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {

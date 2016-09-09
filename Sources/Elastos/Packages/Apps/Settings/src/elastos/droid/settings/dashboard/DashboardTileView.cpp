@@ -12,9 +12,28 @@ namespace Droid {
 namespace Settings {
 namespace Dashboard {
 
-const Int32 DashboardTileView::DEFAULT_COL_SPAN = 1;
+//===============================================================================
+//                  DashboardTileView::InnerListener
+//===============================================================================
 
-CAR_INTERFACE_IMPL(DashboardTileView, FrameLayout, IViewOnClickListener);
+CAR_INTERFACE_IMPL(DashboardTileView::InnerListener, Object, IViewOnClickListener)
+
+DashboardTileView::InnerListener::InnerListener(
+    /* [in] */ DashboardTileView* host)
+    : mHost(host)
+{}
+
+ECode DashboardTileView::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+//===============================================================================
+//                  DashboardTileView
+//===============================================================================
+
+const Int32 DashboardTileView::DEFAULT_COL_SPAN = 1;
 
 DashboardTileView::DashboardTileView()
     : mColSpan(DEFAULT_COL_SPAN)
@@ -51,7 +70,8 @@ ECode DashboardTileView::constructor(
     mStatusTextView = ITextView::Probe(_view);
     view->FindViewById(R::id::tile_divider, (IView**)&mDivider);
 
-    SetOnClickListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    SetOnClickListener(listener);
     SetBackgroundResource(R::drawable::dashboard_tile_background);
     SetFocusable(TRUE);
     return NOERROR;

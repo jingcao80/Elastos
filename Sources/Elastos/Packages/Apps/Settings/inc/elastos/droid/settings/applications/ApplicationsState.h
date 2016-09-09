@@ -268,8 +268,10 @@ public:
         TO_STRING_IMPL("ApplicationsState::BackgroundHandler")
 
         BackgroundHandler(
-            /* [in] */ ILooper* looper,
             /* [in] */ ApplicationsState* host);
+
+        CARAPI constructor(
+            /* [in] */ ILooper* looper);
 
         //@Override
         CARAPI HandleMessage(

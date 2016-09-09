@@ -214,7 +214,6 @@ AutoPtr<CRunningProcessesView::ActiveItem> CRunningProcessesView::ViewHolder::Bi
     return ai;
 }
 
-
 //===============================================================================
 //                  CRunningProcessesView::TimeTicker
 //===============================================================================
@@ -225,7 +224,6 @@ ECode CRunningProcessesView::TimeTicker::constructor(
 {
     return TextView::constructor(context, attrs);
 }
-
 
 //===============================================================================
 //                  CRunningProcessesView::ServiceListAdapter

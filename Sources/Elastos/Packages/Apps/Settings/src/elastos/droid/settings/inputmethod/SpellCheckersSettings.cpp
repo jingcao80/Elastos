@@ -35,6 +35,31 @@ const String SpellCheckersSettings::KEY_SPELL_CHECKER_LANGUAGE("spellchecker_lan
 const Int32 SpellCheckersSettings::ITEM_ID_USE_SYSTEM_LANGUAGE = 0;
 
 //===============================================================================
+//                  SpellCheckersSettings::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_2(SpellCheckersSettings::InnerListener, Object, ISwitchBarOnSwitchChangeListener, IPreferenceOnPreferenceClickListener)
+
+SpellCheckersSettings::InnerListener::InnerListener(
+    /* [in] */ SpellCheckersSettings* host)
+    : mHost(host)
+{}
+
+ECode SpellCheckersSettings::InnerListener::OnSwitchChanged(
+    /* [in] */ ISwitch* switchView,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnSwitchChanged(switchView, isChecked);
+}
+
+ECode SpellCheckersSettings::InnerListener::OnPreferenceClick(
+    /* [in] */ IPreference* pref,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceClick(pref, result);
+}
+
+//===============================================================================
 //                  SpellCheckersSettings::AlertDialogOnClickListener
 //===============================================================================
 
@@ -94,18 +119,19 @@ ECode SpellCheckersSettings::AlertDialogOnClickListener::OnClick(
 //                  SpellCheckersSettings
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(SpellCheckersSettings, SettingsPreferenceFragment, ISwitchBarOnSwitchChangeListener,
-        IPreferenceOnPreferenceClickListener, ISpellCheckerPreferenceOnRadioButtonPreferenceListener);
+CAR_INTERFACE_IMPL(SpellCheckersSettings, SettingsPreferenceFragment, ISpellCheckerPreferenceOnRadioButtonPreferenceListener);
 
 SpellCheckersSettings::SpellCheckersSettings()
-{}
+{
+    mListener = new InnerListener(this);
+}
 
 SpellCheckersSettings::~SpellCheckersSettings()
 {}
 
 ECode SpellCheckersSettings::constructor()
 {
-    return NOERROR;
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode SpellCheckersSettings::OnCreate(
@@ -115,7 +141,7 @@ ECode SpellCheckersSettings::OnCreate(
 
     AddPreferencesFromResource(R::xml::spellchecker_prefs);
     FindPreference(CoreUtils::Convert(KEY_SPELL_CHECKER_LANGUAGE), (IPreference**)&mSpellCheckerLanaguagePref);
-    mSpellCheckerLanaguagePref->SetOnPreferenceClickListener(this);
+    mSpellCheckerLanaguagePref->SetOnPreferenceClickListener(mListener);
 
     AutoPtr<IInterface> obj = GetSystemService(IContext::TEXT_SERVICES_MANAGER_SERVICE);
     mTsm = ITextServicesManager::Probe(obj);
@@ -157,7 +183,7 @@ ECode SpellCheckersSettings::OnResume()
     ((CSettingsActivity*)activity.Get())->GetSwitchBar((ISwitchBar**)&mSwitchBar);
     CSwitchBar* switchBar = (CSwitchBar*)mSwitchBar.Get();
     switchBar->Show();
-    switchBar->AddOnSwitchChangeListener(this);
+    switchBar->AddOnSwitchChangeListener(mListener);
     UpdatePreferenceScreen();
     return NOERROR;
 }
@@ -165,7 +191,7 @@ ECode SpellCheckersSettings::OnResume()
 ECode SpellCheckersSettings::OnPause()
 {
     SettingsPreferenceFragment::OnPause();
-    ((CSwitchBar*)mSwitchBar.Get())->RemoveOnSwitchChangeListener(this);
+    ((CSwitchBar*)mSwitchBar.Get())->RemoveOnSwitchChangeListener(mListener);
     return NOERROR;
 }
 

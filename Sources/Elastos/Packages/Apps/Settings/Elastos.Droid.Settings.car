@@ -43,6 +43,8 @@ module
     merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerTabStrip.car");
 
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IAlertDialog;
+    using interface Elastos.Droid.App.IDialog;
     using interface Elastos.Droid.App.IDialogFragment;
     using interface Elastos.Droid.App.IFragment;
     using interface Elastos.Droid.App.IDatePickerDialogOnDateSetListener;
@@ -57,6 +59,7 @@ module
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IDialogInterface;
     using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
     using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
@@ -87,6 +90,7 @@ module
     using interface Elastos.Droid.Settings.Search.IIndexable;
     using interface Elastos.Droid.Settings.ISettingsPreferenceFragment;
     using interface Elastos.Droid.Settings.Widget.ISwitchBarOnSwitchChangeListener;
+    using interface Elastos.Droid.Text.INoCopySpan;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     using interface Elastos.Droid.View.InputMethod.IInputMethodInfo;
@@ -124,6 +128,7 @@ module
     using interface Elastos.Droid.Widget.IRecyclerListener;
     using interface Elastos.Droid.Wifi.IScanResult;
     using interface Elastos.Droid.Wifi.IWifiConfiguration;
+    using interface Elastos.Droid.Wifi.IWifiManager;
     using interface Elastos.Droid.Wifi.P2p.IWifiP2pManagerPersistentGroupInfoListener;
     using interface Elastos.Droid.Wifi.P2p.IWifiP2pManagerPeerListListener;
     using interface Elastos.Droid.Wifi.P2p.IWifiP2pDevice;
@@ -220,7 +225,6 @@ module
 
         interface IManageApplicationsAppClickListener;
         interface IDialogInterfaceOnClickListener;
-        interface IDialogInterfaceOnDismissListener;
         interface IAdapterViewOnItemSelectedListener;
     }
 
@@ -328,7 +332,6 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-        interface IViewOnClickListener;
     }
 
     class CSearchResultsSummary {
@@ -362,8 +365,6 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
 
-        interface IPreferenceOnPreferenceChangeListener;
-        interface IInputDeviceListener;
         interface IOnSetupKeyboardLayoutsListener;
         interface IIndexable;
         interface IOnSavePreferenceListener;
@@ -384,9 +385,6 @@ module
         interface ITwoStatePreference;
         interface IComparable;
         interface IPreference;
-
-        interface IPreferenceOnPreferenceClickListener;
-        interface IPreferenceOnPreferenceChangeListener;
     }
 
     class CKeyboardLayoutDialogFragment {
@@ -402,9 +400,6 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
-
-        interface IInputDeviceListener;
-        interface ILoaderManagerLoaderCallbacks;
     }
 
     class CKeyboardLayoutPickerFragment {
@@ -417,8 +412,6 @@ module
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
-
-        interface IInputDeviceListener;
     }
 
     [local]
@@ -432,8 +425,6 @@ module
 
         interface IPreference;
         interface IComparable;
-
-        interface IViewOnClickListener;
     }
 
     class CSpellCheckersSettings {
@@ -447,8 +438,6 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
 
-        interface ISwitchBarOnSwitchChangeListener;
-        interface IPreferenceOnPreferenceClickListener;
         interface ISpellCheckerPreferenceOnRadioButtonPreferenceListener;
     }
 
@@ -733,7 +722,6 @@ module
         interface IDialogCreatable;
 
         interface IWifiP2pManagerPersistentGroupInfoListener;
-        interface IWifiP2pManagerPeerListListener;
     }
 
     } // namespace P2p
@@ -779,6 +767,21 @@ module
         interface IPreferenceOnPreferenceChangeListener;
     }
 
+    class CAdvancedWifiSettingsWpsFragment {
+        constructor();
+
+        constructor(
+            [in] Int32 wpsSetup);
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
     class CSavedAccessPointsWifiSettings {
         constructor();
 
@@ -807,6 +810,32 @@ module
         interface IDialogInterfaceOnClickListener;
     }
 
+    [local]
+    class CWifiDialog {
+        constructor(
+            [in] IContext* ctx,
+            [in] IDialogInterfaceOnClickListener* listener,
+            [in] IAccessPoint* accessPoint,
+            [in] Boolean edit,
+            [in] Boolean hideSubmitButton);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IDialogInterfaceOnClickListener* listener,
+            [in] IAccessPoint* accessPoint,
+            [in] Boolean edit);
+
+        interface IAlertDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+
+        interface IWifiConfigUiBase;
+    }
+
     class CWifiSettingsForSetupWizardXL {
         constructor();
 
@@ -823,12 +852,43 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
+    }
 
-        interface IViewOnClickListener;
+    [local]
+    class CWpsDialog {
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 wpsSetup);
+
+        interface IAlertDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
     }
 
     singleton class CWpsDialogHelper {
         interface IWpsDialogHelper;
+    }
+
+    [local]
+    class CWriteWifiConfigToNfcDialog {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAccessPoint* accessPoint,
+            [in] IWifiManager* wifiManager);
+
+        interface IAlertDialog;
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+
+        interface INoCopySpan;
     }
 
     } // namespace Wifi
@@ -883,9 +943,6 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IViewOnClickListener;
-        interface IAdapterViewOnItemClickListener;
-        interface ICompoundButtonOnCheckedChangeListener;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
     }
 
@@ -910,7 +967,6 @@ module
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
 
-        interface ILocaleSelectionListener;
         interface IDialogCreatable;
     }
 
@@ -1002,7 +1058,6 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
 
-        interface IViewOnClickListener;
         interface IDialogInterfaceOnClickListener;
     }
 
@@ -1056,7 +1111,6 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
 
-        interface IPreferenceOnPreferenceChangeListener;
         interface IDialogInterfaceOnClickListener;
         interface IIndexable;
     }

@@ -48,9 +48,28 @@ namespace P2p {
 CarClass(CWifiP2pSettings)
     , public SettingsPreferenceFragment
     , public IWifiP2pManagerPersistentGroupInfoListener
-    , public IWifiP2pManagerPeerListListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IWifiP2pManagerPeerListListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CWifiP2pSettings::InnerListener")
+
+        InnerListener(
+            /* [in] */ CWifiP2pSettings* host);
+
+        //@Override
+        CARAPI OnPeersAvailable(
+            /* [in] */ IWifiP2pDeviceList* peers);
+
+    private:
+        CWifiP2pSettings* mHost;
+    };
+
     class InitBroadcastReceiver
         : public BroadcastReceiver
     {

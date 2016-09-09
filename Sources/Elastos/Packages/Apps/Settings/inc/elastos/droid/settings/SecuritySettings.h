@@ -37,11 +37,32 @@ namespace Settings {
  */
 class SecuritySettings
     : public SettingsPreferenceFragment
-    , public IPreferenceOnPreferenceChangeListener
     , public IDialogInterfaceOnClickListener
     , public IIndexable
 {
 private:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        TO_STRING_IMPL("SecuritySettings::InnerListener")
+
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ SecuritySettings* host);
+
+        //@Override
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* value,
+            /* [out] */ Boolean* res);
+
+    private:
+        SecuritySettings* mHost;
+    };
+
     class SecuritySearchIndexProvider
         : public BaseSearchIndexProvider
     {

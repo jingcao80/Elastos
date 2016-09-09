@@ -40,7 +40,6 @@ ECode CDashboardContainerView::constructor(
     return NOERROR;
 }
 
-
 ECode CDashboardContainerView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
@@ -101,7 +100,6 @@ ECode CDashboardContainerView::OnMeasure(
     SetMeasuredDimension(width, newHeight);
     return NOERROR;
 }
-
 
 ECode CDashboardContainerView::OnLayout(
     /* [in] */ Boolean changed,

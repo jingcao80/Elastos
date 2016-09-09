@@ -104,6 +104,56 @@ const Int32 WifiConfigController::STATIC_IP = 1;
 const Int32 WifiConfigController::unspecifiedCertIndex = 0;
 
 //===============================================================================
+//                  WifiConfigController::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_2(WifiConfigController::InnerListener, Object, ITextWatcher, IAdapterViewOnItemSelectedListener)
+
+WifiConfigController::InnerListener::InnerListener(
+    /* [in] */ WifiConfigController* host)
+    : mHost(host)
+{}
+
+ECode WifiConfigController::InnerListener::AfterTextChanged(
+    /* [in] */ IEditable* s)
+{
+    return mHost->AfterTextChanged(s);
+}
+
+ECode WifiConfigController::InnerListener::BeforeTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 count,
+    /* [in] */ Int32 after)
+{
+    return mHost->BeforeTextChanged(s, start, count, after);
+}
+
+ECode WifiConfigController::InnerListener::OnTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 before,
+    /* [in] */ Int32 count)
+{
+    return mHost->OnTextChanged(s, start, before, count);
+}
+
+ECode WifiConfigController::InnerListener::OnItemSelected(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemSelected(parent, view, position, id);
+}
+
+ECode WifiConfigController::InnerListener::OnNothingSelected(
+    /* [in] */ IAdapterView* parent)
+{
+    return mHost->OnNothingSelected(parent);
+}
+
+//===============================================================================
 //                  WifiConfigController::AfterTextChangedRunnable
 //===============================================================================
 
@@ -125,7 +175,7 @@ ECode WifiConfigController::AfterTextChangedRunnable::Run()
 //                  WifiConfigController
 //===============================================================================
 
-CAR_INTERFACE_IMPL_5(WifiConfigController, Object, IWifiConfigController, ITextWatcher, INoCopySpan, IAdapterViewOnItemSelectedListener, ICompoundButtonOnCheckedChangeListener);
+CAR_INTERFACE_IMPL_3(WifiConfigController, Object, IWifiConfigController, INoCopySpan, ICompoundButtonOnCheckedChangeListener);
 
 WifiConfigController::WifiConfigController(
     /* [in] */ IWifiConfigUiBase* parent,
@@ -139,6 +189,8 @@ WifiConfigController::WifiConfigController(
     , mProxySettings(UNASSIGNED_ProxySettings)
     , mEdit(FALSE)
 {
+    mListener = new InnerListener(this);
+
     mConfigUi = parent;
     mInXlSetupWizard = IWifiConfigUiForSetupWizardXL::Probe(parent) != NULL;
 
@@ -182,11 +234,11 @@ WifiConfigController::WifiConfigController(
     AutoPtr<IView> view;
     mView->FindViewById(R::id::ip_settings, (IView**)&view);
     mIpSettingsSpinner = ISpinner::Probe(view);
-    IAdapterView::Probe(mIpSettingsSpinner)->SetOnItemSelectedListener((IAdapterViewOnItemSelectedListener*)this);
+    IAdapterView::Probe(mIpSettingsSpinner)->SetOnItemSelectedListener(mListener);
     view = NULL;
     mView->FindViewById(R::id::proxy_settings, (IView**)&view);
     mProxySettingsSpinner = ISpinner::Probe(view);
-    IAdapterView::Probe(mProxySettingsSpinner)->SetOnItemSelectedListener((IAdapterViewOnItemSelectedListener*)this);
+    IAdapterView::Probe(mProxySettingsSpinner)->SetOnItemSelectedListener(mListener);
 
     if (mAccessPoint == NULL) { // new network
         mConfigUi->SetTitle(R::string::wifi_add_network);
@@ -194,11 +246,11 @@ WifiConfigController::WifiConfigController(
         view = NULL;
         mView->FindViewById(R::id::ssid, (IView**)&view);
         mSsidView = ITextView::Probe(view);
-        mSsidView->AddTextChangedListener((ITextWatcher*)this);
+        mSsidView->AddTextChangedListener(mListener);
         view = NULL;
         mView->FindViewById(R::id::security, (IView**)&view);
         mSecuritySpinner = ISpinner::Probe(view);
-        IAdapterView::Probe(mSecuritySpinner)->SetOnItemSelectedListener((IAdapterViewOnItemSelectedListener*)this);
+        IAdapterView::Probe(mSecuritySpinner)->SetOnItemSelectedListener(mListener);
         if (mInXlSetupWizard) {
             view = NULL;
             mView->FindViewById(R::id::type_ssid, (IView**)&view);
@@ -234,7 +286,7 @@ WifiConfigController::WifiConfigController(
         view->SetVisibility(IView::VISIBLE);
         view = NULL;
         mView->FindViewById(R::id::wifi_advanced_togglebox, (IView**)&view);
-        ICompoundButton::Probe(view)->SetOnCheckedChangeListener((ICompoundButtonOnCheckedChangeListener*)this);
+        ICompoundButton::Probe(view)->SetOnCheckedChangeListener(this);
 
         String str;
         res->GetString(R::string::wifi_save, &str);
@@ -298,7 +350,7 @@ WifiConfigController::WifiConfigController(
             view->SetVisibility(IView::VISIBLE);
             view = NULL;
             mView->FindViewById(R::id::wifi_advanced_togglebox, (IView**)&view);
-            ICompoundButton::Probe(view)->SetOnCheckedChangeListener((ICompoundButtonOnCheckedChangeListener*)this);
+            ICompoundButton::Probe(view)->SetOnCheckedChangeListener(this);
 
             if (showAdvancedFields) {
                 view = NULL;
@@ -875,10 +927,10 @@ void WifiConfigController::ShowSecurityFields()
         view = NULL;
         mView->FindViewById(R::id::password, (IView**)&view);
         mPasswordView = ITextView::Probe(view);
-        mPasswordView->AddTextChangedListener((ITextWatcher*)this);
+        mPasswordView->AddTextChangedListener(mListener);
         view = NULL;
         mView->FindViewById(R::id::show_password, (IView**)&view);
-        ICompoundButton::Probe(view)->SetOnCheckedChangeListener((ICompoundButtonOnCheckedChangeListener*)this);
+        ICompoundButton::Probe(view)->SetOnCheckedChangeListener(this);
 
         if (mAccessPoint != NULL && ((CAccessPoint*)mAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
             mPasswordView->SetHint(R::string::wifi_unchanged);
@@ -899,7 +951,7 @@ void WifiConfigController::ShowSecurityFields()
         view = NULL;
         mView->FindViewById(R::id::method, (IView**)&view);
         mEapMethodSpinner = ISpinner::Probe(view);
-        IAdapterView::Probe(mEapMethodSpinner)->SetOnItemSelectedListener((IAdapterViewOnItemSelectedListener*)this);
+        IAdapterView::Probe(mEapMethodSpinner)->SetOnItemSelectedListener(mListener);
         view = NULL;
         mView->FindViewById(R::id::phase2, (IView**)&view);
         mPhase2Spinner = ISpinner::Probe(view);
@@ -1109,24 +1161,24 @@ void WifiConfigController::ShowIpConfigFields()
             view = NULL;
             mView->FindViewById(R::id::ipaddress, (IView**)&view);
             mIpAddressView = ITextView::Probe(view);
-            mIpAddressView->AddTextChangedListener((ITextWatcher*)this);
+            mIpAddressView->AddTextChangedListener(mListener);
             view = NULL;
             mView->FindViewById(R::id::gateway, (IView**)&view);
             mGatewayView = ITextView::Probe(view);
-            mGatewayView->AddTextChangedListener((ITextWatcher*)this);
+            mGatewayView->AddTextChangedListener(mListener);
             view = NULL;
             mView->FindViewById(
                     R::id::network_prefix_length, (IView**)&view);
             mNetworkPrefixLengthView = ITextView::Probe(view);
-            mNetworkPrefixLengthView->AddTextChangedListener((ITextWatcher*)this);
+            mNetworkPrefixLengthView->AddTextChangedListener(mListener);
             view = NULL;
             mView->FindViewById(R::id::dns1, (IView**)&view);
             mDns1View = ITextView::Probe(view);
-            mDns1View->AddTextChangedListener((ITextWatcher*)this);
+            mDns1View->AddTextChangedListener(mListener);
             view = NULL;
             mView->FindViewById(R::id::dns2, (IView**)&view);
             mDns2View = ITextView::Probe(view);
-            mDns2View->AddTextChangedListener((ITextWatcher*)this);
+            mDns2View->AddTextChangedListener(mListener);
         }
         if (config != NULL) {
             AutoPtr<IStaticIpConfiguration> staticConfig;
@@ -1205,15 +1257,15 @@ void WifiConfigController::ShowProxyFields()
             view = NULL;
             mView->FindViewById(R::id::proxy_hostname, (IView**)&view);
             mProxyHostView = ITextView::Probe(view);
-            mProxyHostView->AddTextChangedListener((ITextWatcher*)this);
+            mProxyHostView->AddTextChangedListener(mListener);
             view = NULL;
             mView->FindViewById(R::id::proxy_port, (IView**)&view);
             mProxyPortView = ITextView::Probe(view);
-            mProxyPortView->AddTextChangedListener((ITextWatcher*)this);
+            mProxyPortView->AddTextChangedListener(mListener);
             view = NULL;
             mView->FindViewById(R::id::proxy_exclusionlist, (IView**)&view);
             mProxyExclusionListView = ITextView::Probe(view);
-            mProxyExclusionListView->AddTextChangedListener((ITextWatcher*)this);
+            mProxyExclusionListView->AddTextChangedListener(mListener);
         }
         if (config != NULL) {
             AutoPtr<IProxyInfo> proxyProperties;
@@ -1240,7 +1292,7 @@ void WifiConfigController::ShowProxyFields()
             view = NULL;
             mView->FindViewById(R::id::proxy_pac, (IView**)&view);
             mProxyPacView = ITextView::Probe(view);
-            mProxyPacView->AddTextChangedListener((ITextWatcher*)this);
+            mProxyPacView->AddTextChangedListener(mListener);
         }
         if (config != NULL) {
             AutoPtr<IProxyInfo> proxyInfo;

@@ -32,6 +32,24 @@ const String WifiEnabler::EVENT_DATA_IS_WIFI_ON("is_wifi_on");
 const Int32 WifiEnabler::EVENT_UPDATE_INDEX;
 
 //===============================================================================
+//                  WifiEnabler::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(WifiEnabler::InnerListener, Object, ISwitchBarOnSwitchChangeListener)
+
+WifiEnabler::InnerListener::InnerListener(
+    /* [in] */ WifiEnabler* host)
+    : mHost(host)
+{}
+
+ECode WifiEnabler::InnerListener::OnSwitchChanged(
+    /* [in] */ ISwitch* switchView,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnSwitchChanged(switchView, isChecked);
+}
+
+//===============================================================================
 //                  WifiEnabler::InitBroadcastReceiver
 //===============================================================================
 
@@ -117,8 +135,6 @@ ECode WifiEnabler::InitHandler::HandleMessage(
 //                  WifiEnabler
 //===============================================================================
 
-CAR_INTERFACE_IMPL(WifiEnabler, Object, ISwitchBarOnSwitchChangeListener);
-
 WifiEnabler::WifiEnabler(
     /* [in] */ IContext* context,
     /* [in] */ ISwitchBar* switchBar)
@@ -127,6 +143,7 @@ WifiEnabler::WifiEnabler(
 {
     mContext = context;
     mSwitchBar = switchBar;
+    mListener = new InnerListener(this);
 
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mConnected);
     mReceiver = new InitBroadcastReceiver(this);
@@ -155,7 +172,7 @@ ECode WifiEnabler::SetupSwitchBar()
     HandleWifiStateChanged(state);
     CSwitchBar* switchBar = (CSwitchBar*)mSwitchBar.Get();
     if (!mListeningToOnSwitchChange) {
-        switchBar->AddOnSwitchChangeListener(this);
+        switchBar->AddOnSwitchChangeListener(mListener);
         mListeningToOnSwitchChange = TRUE;
     }
     switchBar->Show();
@@ -166,7 +183,7 @@ ECode WifiEnabler::TeardownSwitchBar()
 {
     CSwitchBar* switchBar = (CSwitchBar*)mSwitchBar.Get();
     if (mListeningToOnSwitchChange) {
-        switchBar->RemoveOnSwitchChangeListener(this);
+        switchBar->RemoveOnSwitchChangeListener(mListener);
         mListeningToOnSwitchChange = FALSE;
     }
     switchBar->Hide();
@@ -181,7 +198,7 @@ ECode WifiEnabler::Resume(
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(mReceiver, mIntentFilter, (IIntent**)&intent);
     if (!mListeningToOnSwitchChange) {
-        ((CSwitchBar*)mSwitchBar.Get())->AddOnSwitchChangeListener(this);
+        ((CSwitchBar*)mSwitchBar.Get())->AddOnSwitchChangeListener(mListener);
         mListeningToOnSwitchChange = TRUE;
     }
     return NOERROR;
@@ -191,7 +208,7 @@ ECode WifiEnabler::Pause()
 {
     mContext->UnregisterReceiver(mReceiver);
     if (mListeningToOnSwitchChange) {
-        ((CSwitchBar*)mSwitchBar.Get())->RemoveOnSwitchChangeListener(this);
+        ((CSwitchBar*)mSwitchBar.Get())->RemoveOnSwitchChangeListener(mListener);
         mListeningToOnSwitchChange = FALSE;
     }
     return NOERROR;

@@ -125,7 +125,7 @@ ECode WifiConfigUiForSetupWizardXL::RequestFocusAndShowKeyboard(
         }
         else {
             // After acquiring the focus, we show software keyboard.
-            viewToBeFocused->SetOnFocusChangeListener((IViewOnFocusChangeListener*)this);
+            viewToBeFocused->SetOnFocusChangeListener(this);
             Boolean requestFocusResult;
             viewToBeFocused->RequestFocus(&requestFocusResult);
             String str("");

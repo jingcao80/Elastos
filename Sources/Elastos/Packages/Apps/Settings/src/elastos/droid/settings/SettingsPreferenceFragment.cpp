@@ -53,7 +53,7 @@ SettingsPreferenceFragment::SettingsDialogFragment::~SettingsDialogFragment()
 
 ECode SettingsPreferenceFragment::SettingsDialogFragment::constructor()
 {
-    return NOERROR;
+    return DialogFragment::constructor();
 }
 
 ECode SettingsPreferenceFragment::SettingsDialogFragment::constructor(
@@ -277,7 +277,7 @@ SettingsPreferenceFragment::~SettingsPreferenceFragment()
 
 ECode SettingsPreferenceFragment::constructor()
 {
-    return NOERROR;
+    return PreferenceFragment::constructor();
 }
 
 ECode SettingsPreferenceFragment::OnCreate(

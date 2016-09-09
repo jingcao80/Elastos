@@ -29,10 +29,32 @@ class EncryptionInterstitial
 public:
     class EncryptionInterstitialFragment
         : public SettingsPreferenceFragment
-        , public IViewOnClickListener
         , public IDialogInterfaceOnClickListener
     {
     public:
+        class InnerListener
+            : public Object
+            , public IViewOnClickListener
+        {
+        public:
+            TO_STRING_IMPL("EncryptionInterstitial::EncryptionInterstitialFragment::InnerListener")
+
+            CAR_INTERFACE_DECL()
+
+            InnerListener(
+                /* [in] */ EncryptionInterstitialFragment* host);
+
+            //@Override
+            CARAPI OnClick(
+                /* [in] */ IView* v);
+
+        private:
+            EncryptionInterstitialFragment* mHost;
+        };
+
+    public:
+        TO_STRING_IMPL("EncryptionInterstitial::EncryptionInterstitialFragment")
+
         CAR_INTERFACE_DECL()
 
         EncryptionInterstitialFragment();

@@ -106,6 +106,44 @@ AutoPtr<IIndexableSearchIndexProvider> InputMethodAndLanguageSettings::GetSEARCH
 }
 
 //===============================================================================
+//                  InputMethodAndLanguageSettings::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_2(InputMethodAndLanguageSettings::InnerListener, Object,
+        IPreferenceOnPreferenceChangeListener, IInputDeviceListener)
+
+InputMethodAndLanguageSettings::InnerListener::InnerListener(
+    /* [in] */ InputMethodAndLanguageSettings* host)
+    : mHost(host)
+{}
+
+ECode InputMethodAndLanguageSettings::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* value,
+    /* [out] */ Boolean* res)
+{
+    return mHost->OnPreferenceChange(preference, value, res);
+}
+
+ECode InputMethodAndLanguageSettings::InnerListener::OnInputDeviceAdded(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceAdded(deviceId);
+}
+
+ECode InputMethodAndLanguageSettings::InnerListener::OnInputDeviceChanged(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceChanged(deviceId);
+}
+
+ECode InputMethodAndLanguageSettings::InnerListener::OnInputDeviceRemoved(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceRemoved(deviceId);
+}
+
+//===============================================================================
 //                  InputMethodAndLanguageSettings::MyBaseSearchIndexProvider
 //===============================================================================
 
@@ -533,10 +571,8 @@ ECode InputMethodAndLanguageSettings::Comparator::Compare(
 //                  InputMethodAndLanguageSettings
 //===============================================================================
 
-CAR_INTERFACE_IMPL_5(InputMethodAndLanguageSettings, SettingsPreferenceFragment,
-        IPreferenceOnPreferenceChangeListener, IInputDeviceListener,
-        IOnSetupKeyboardLayoutsListener, IIndexable,
-        IOnSavePreferenceListener)
+CAR_INTERFACE_IMPL_3(InputMethodAndLanguageSettings, SettingsPreferenceFragment,
+        IOnSetupKeyboardLayoutsListener, IIndexable, IOnSavePreferenceListener)
 
 InputMethodAndLanguageSettings::InputMethodAndLanguageSettings()
     : mDefaultInputMethodSelectorVisibility(0)
@@ -544,6 +580,8 @@ InputMethodAndLanguageSettings::InputMethodAndLanguageSettings()
 {
     CArrayList::New((IArrayList**)&mInputMethodPreferenceList);
     CArrayList::New((IArrayList**)&mHardKeyboardPreferenceList);
+
+    mListener = new InnerListener(this);
 }
 
 InputMethodAndLanguageSettings::~InputMethodAndLanguageSettings()
@@ -551,7 +589,7 @@ InputMethodAndLanguageSettings::~InputMethodAndLanguageSettings()
 
 ECode InputMethodAndLanguageSettings::constructor()
 {
-    return NOERROR;
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode InputMethodAndLanguageSettings::OnCreate(
@@ -602,7 +640,7 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         FindPreference(CoreUtils::Convert(KEY_INPUT_METHOD_SELECTOR),
                 (IPreference**)&pref);
         mShowInputMethodSelectorPref = IListPreference::Probe(pref);
-        IPreference::Probe(mShowInputMethodSelectorPref)->SetOnPreferenceChangeListener(this);
+        IPreference::Probe(mShowInputMethodSelectorPref)->SetOnPreferenceChangeListener(mListener);
         // TODO: Update current input method name on summary
         UpdateInputMethodSelectorSummary(LoadInputMethodSelectorVisibility());
     }
@@ -737,7 +775,7 @@ ECode InputMethodAndLanguageSettings::OnResume()
     SettingsPreferenceFragment::OnResume();
 
     mSettingsObserver->Resume();
-    mIm->RegisterInputDeviceListener(this, NULL);
+    mIm->RegisterInputDeviceListener(mListener, NULL);
 
     AutoPtr<IPreference> spellChecker;
     FindPreference(CoreUtils::Convert(KEY_SPELL_CHECKERS), (IPreference**)&spellChecker);
@@ -771,7 +809,7 @@ ECode InputMethodAndLanguageSettings::OnResume()
                 (IPreference**)&pref);
         UpdateUserDictionaryPreference(pref);
         if (SHOW_INPUT_METHOD_SWITCHER_SETTINGS) {
-            IPreference::Probe(mShowInputMethodSelectorPref)->SetOnPreferenceChangeListener(this);
+            IPreference::Probe(mShowInputMethodSelectorPref)->SetOnPreferenceChangeListener(mListener);
         }
     }
 
@@ -790,7 +828,7 @@ ECode InputMethodAndLanguageSettings::OnPause()
     Slogger::I("InputMethodAndLanguageSettings", " >> enter InputMethodAndLanguageSettings::OnPause");
     SettingsPreferenceFragment::OnPause();
 
-    mIm->UnregisterInputDeviceListener(this);
+    mIm->UnregisterInputDeviceListener(mListener);
     mSettingsObserver->Pause();
 
     if (SHOW_INPUT_METHOD_SWITCHER_SETTINGS) {

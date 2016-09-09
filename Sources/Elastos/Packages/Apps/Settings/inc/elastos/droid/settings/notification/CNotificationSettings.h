@@ -128,7 +128,7 @@ private:
     public:
         TO_STRING_IMPL("CNotificationSettings::H");
 
-        H(
+        CARAPI constructor(
             /* [in] */ CNotificationSettings* host);
 
         //@Override

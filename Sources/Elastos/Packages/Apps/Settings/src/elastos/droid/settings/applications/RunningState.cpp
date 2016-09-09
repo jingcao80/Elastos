@@ -168,12 +168,12 @@ ECode RunningState::BackgroundComparator::Compare(
 //                  RunningState::BackgroundHandler
 //===============================================================================
 
-RunningState::BackgroundHandler::BackgroundHandler(
+ECode RunningState::BackgroundHandler::constructor(
     /* [in] */ ILooper* looper,
     /* [in] */ RunningState* host)
-    : mHost(host)
 {
-    Handler::constructor(looper);
+    mHost = host;
+    return Handler::constructor(looper);
 }
 
 ECode RunningState::BackgroundHandler::HandleMessage(
@@ -217,7 +217,11 @@ RunningState::MyHandler::MyHandler(
     : mNextUpdate(IRunningStateOnRefreshUiListener::REFRESH_TIME)
     , mHost(host)
 {
-    Handler::constructor();
+}
+
+ECode RunningState::MyHandler::constructor()
+{
+    return Handler::constructor();
 }
 
 ECode RunningState::MyHandler::HandleMessage(
@@ -944,6 +948,7 @@ RunningState::RunningState(
     CArrayList::New((IArrayList**)&mUserBackgroundItems);
 
     mHandler = new MyHandler(this);
+    mHandler->constructor();
 
     context->GetApplicationContext((IContext**)&mApplicationContext);
     AutoPtr<IInterface> obj;
@@ -959,7 +964,8 @@ RunningState::RunningState(
     IThread::Probe(mBackgroundThread)->Start();
     AutoPtr<ILooper> looper;
     mBackgroundThread->GetLooper((ILooper**)&looper);
-    mBackgroundHandler = new BackgroundHandler(looper, this);
+    mBackgroundHandler = new BackgroundHandler();
+    mBackgroundHandler->constructor(looper, this);
 }
 
 void RunningState::Resume(

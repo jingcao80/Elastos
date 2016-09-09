@@ -40,6 +40,30 @@ static AutoPtr< ArrayOf<Int32> > InitMARGIN_ATTRIBUTES()
 AutoPtr< ArrayOf<Int32> > SwitchBar::MARGIN_ATTRIBUTES = InitMARGIN_ATTRIBUTES();
 
 //===============================================================================
+//                  SwitchBar::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_2(SwitchBar::InnerListener, Object, IViewOnClickListener, ICompoundButtonOnCheckedChangeListener)
+
+SwitchBar::InnerListener::InnerListener(
+    /* [in] */ SwitchBar* host)
+    : mHost(host)
+{}
+
+ECode SwitchBar::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+ECode SwitchBar::InnerListener::OnCheckedChanged(
+    /* [in] */ ICompoundButton* buttonView,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnCheckedChanged(buttonView, isChecked);
+}
+
+//===============================================================================
 //                  SwitchBar::SavedState
 //===============================================================================
 
@@ -121,12 +145,10 @@ ECode SwitchBar::SwitchBarOnSwitchChangeListener::OnSwitchChanged(
 //                  SwitchBar
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(SwitchBar, LinearLayout, ISwitchBar, ICompoundButtonOnCheckedChangeListener, IViewOnClickListener);
+CAR_INTERFACE_IMPL(SwitchBar, LinearLayout, ISwitchBar)
 
 SwitchBar::SwitchBar()
-{
-    CArrayList::New((IArrayList**)&mSwitchChangeListeners);
-}
+{}
 
 SwitchBar::~SwitchBar()
 {}
@@ -158,12 +180,15 @@ ECode SwitchBar::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
+    CArrayList::New((IArrayList**)&mSwitchChangeListeners);
+    mListener = new InnerListener(this);
+
     LinearLayout::constructor(context, attrs, defStyleAttr, defStyleRes);
 
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(context, (ILayoutInflater**)&inflater);
-    AutoPtr<IView> view;
-    inflater->Inflate(R::layout::switch_bar, this, (IView**)&view);
+    AutoPtr<IView> tmp;
+    inflater->Inflate(R::layout::switch_bar, this, (IView**)&tmp);
 
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, MARGIN_ATTRIBUTES, (ITypedArray**)&a);
@@ -174,30 +199,30 @@ ECode SwitchBar::constructor(
     Int32 switchBarMarginEnd = (Int32)value;
     a->Recycle();
 
-    view = NULL;
-    FindViewById(R::id::switch_text, (IView**)&view);
-    mTextView = ITextView::Probe(view);
+    AutoPtr<IView> textViewTmp;
+    FindViewById(R::id::switch_text, (IView**)&textViewTmp);
+    mTextView = ITextView::Probe(textViewTmp);
     mTextView->SetText(R::string::switch_off_text);
     AutoPtr<IViewGroupLayoutParams> params;
-    IView::Probe(mTextView)->GetLayoutParams((IViewGroupLayoutParams**)&params);
+    textViewTmp->GetLayoutParams((IViewGroupLayoutParams**)&params);
     IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(params);
     lp->SetMarginStart(switchBarMarginStart);
 
-    view = NULL;
-    FindViewById(R::id::switch_widget, (IView**)&view);
-    mSwitch = IToggleSwitch::Probe(view);
+    AutoPtr<IView> switchTmp;
+    FindViewById(R::id::switch_widget, (IView**)&switchTmp);
+    mSwitch = IToggleSwitch::Probe(switchTmp);
     // Prevent OnSaveInstanceState() to be called as we are managing the state of the Switch
     // on our own
-    IView::Probe(mSwitch)->SetSaveEnabled(FALSE);
+    switchTmp->SetSaveEnabled(FALSE);
     params = NULL;
-    IView::Probe(mSwitch)->GetLayoutParams((IViewGroupLayoutParams**)&params);
+    switchTmp->GetLayoutParams((IViewGroupLayoutParams**)&params);
     lp = IViewGroupMarginLayoutParams::Probe(params);
     lp->SetMarginEnd(switchBarMarginEnd);
 
     AutoPtr<SwitchBarOnSwitchChangeListener> listener = new SwitchBarOnSwitchChangeListener(this);
     AddOnSwitchChangeListener(listener);
 
-    SetOnClickListener(this);
+    SetOnClickListener(mListener);
 
     // Default is hide
     SetVisibility(IView::GONE);
@@ -247,7 +272,7 @@ ECode SwitchBar::Show()
 {
     if (!IsShowing()) {
         SetVisibility(IView::VISIBLE);
-        return ICompoundButton::Probe(mSwitch)->SetOnCheckedChangeListener(this);
+        return ICompoundButton::Probe(mSwitch)->SetOnCheckedChangeListener(mListener);
     }
     return NOERROR;
 }
@@ -345,7 +370,7 @@ ECode SwitchBar::OnRestoreInstanceState(
     ((CToggleSwitch*)mSwitch.Get())->SetCheckedInternal(ss->mChecked);
     SetTextViewLabel(ss->mChecked);
     SetVisibility(ss->mVisible ? IView::VISIBLE : IView::GONE);
-    ICompoundButton::Probe(mSwitch)->SetOnCheckedChangeListener(ss->mVisible ? this : NULL);
+    ICompoundButton::Probe(mSwitch)->SetOnCheckedChangeListener(ss->mVisible ? mListener : NULL);
 
     RequestLayout();
     return NOERROR;

@@ -59,7 +59,7 @@ ECode RestrictedSettingsFragment::constructor(
     /* [in] */ const String& restrictionKey)
 {
     mRestrictionKey = restrictionKey;
-    return NOERROR;
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode RestrictedSettingsFragment::OnCreate(

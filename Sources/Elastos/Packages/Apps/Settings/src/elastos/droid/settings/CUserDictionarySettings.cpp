@@ -93,14 +93,16 @@ const Int32 CUserDictionarySettings::OPTIONS_MENU_ADD = IMenu::FIRST;
 
 CAR_INTERFACE_IMPL(CUserDictionarySettings::MyAdapter, SimpleCursorAdapter, ISectionIndexer)
 
-CUserDictionarySettings::MyAdapter::MyAdapter(
+ECode CUserDictionarySettings::MyAdapter::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 layout,
     /* [in] */ ICursor* c,
     /* [in] */ ArrayOf<String>* from,
     /* [in] */ ArrayOf<Int32>* to,
-    /* [in] */ CUserDictionarySettings* settings)
+    /* [in] */ CUserDictionarySettings* host)
 {
+    mHost = host;
+
     SimpleCursorAdapter::constructor(context, layout, c, from, to);
 
     mViewBinder = new ViewBinder();
@@ -113,7 +115,7 @@ CUserDictionarySettings::MyAdapter::MyAdapter(
         c->GetColumnIndexOrThrow(IUserDictionaryWords::WORD, &wordColIndex);
         CAlphabetIndexer::New(c, wordColIndex, CoreUtils::Convert(alphabet), (IAlphabetIndexer**)&mIndexer);
     }
-    SetViewBinder(mViewBinder);
+    return SetViewBinder(mViewBinder);
 }
 
 CUserDictionarySettings::MyAdapter::~MyAdapter()
@@ -355,7 +357,8 @@ AutoPtr<IListAdapter> CUserDictionarySettings::CreateAdapter()
     (*args2)[0] = Elastos::Droid::R::id::text1;
     (*args2)[1] = Elastos::Droid::R::id::text2;
 
-    AutoPtr<IListAdapter> adapter = new MyAdapter(IContext::Probe(activity),
+    AutoPtr<IListAdapter> adapter = new MyAdapter();
+    ((MyAdapter*)adapter.Get())->constructor(IContext::Probe(activity),
             R::layout::user_dictionary_item, mCursor,
             args1, args2, this);
     return adapter;

@@ -38,6 +38,40 @@ const String DateTimeSettingsSetupWizard::TAG("DateTimeSettingsSetupWizard");
 const String DateTimeSettingsSetupWizard::EXTRA_INITIAL_AUTO_DATETIME_VALUE("extra_initial_auto_datetime_value");
 
 //===============================================================================
+//                  DateTimeSettingsSetupWizard::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_3(DateTimeSettingsSetupWizard::InnerListener, Object, IViewOnClickListener,
+        IAdapterViewOnItemClickListener, ICompoundButtonOnCheckedChangeListener)
+
+DateTimeSettingsSetupWizard::InnerListener::InnerListener(
+    /* [in] */ DateTimeSettingsSetupWizard* host)
+    : mHost(host)
+{}
+
+ECode DateTimeSettingsSetupWizard::InnerListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+ECode DateTimeSettingsSetupWizard::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+ECode DateTimeSettingsSetupWizard::InnerListener::OnCheckedChanged(
+    /* [in] */ ICompoundButton* buttonView,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnCheckedChanged(buttonView, isChecked);
+}
+
+//===============================================================================
 //                  DateTimeSettingsSetupWizard::InitBroadcastReceiver
 //===============================================================================
 
@@ -61,14 +95,14 @@ ECode DateTimeSettingsSetupWizard::InitBroadcastReceiver::OnReceive(
 //                  DateTimeSettingsSetupWizard
 //===============================================================================
 
-CAR_INTERFACE_IMPL_4(DateTimeSettingsSetupWizard, Activity, IViewOnClickListener,
-        IAdapterViewOnItemClickListener, ICompoundButtonOnCheckedChangeListener,
+CAR_INTERFACE_IMPL(DateTimeSettingsSetupWizard, Activity,
         IPreferenceFragmentOnPreferenceStartFragmentCallback);
 
 DateTimeSettingsSetupWizard::DateTimeSettingsSetupWizard()
     : mUsingXLargeLayout(FALSE)
 {
     mIntentReceiver = new InitBroadcastReceiver(this);
+    mListener = new InnerListener(this);
 }
 
 DateTimeSettingsSetupWizard::~DateTimeSettingsSetupWizard()
@@ -76,7 +110,7 @@ DateTimeSettingsSetupWizard::~DateTimeSettingsSetupWizard()
 
 ECode DateTimeSettingsSetupWizard::constructor()
 {
-    return NOERROR;
+    return Activity::constructor();
 }
 
 ECode DateTimeSettingsSetupWizard::OnCreate(
@@ -99,7 +133,7 @@ ECode DateTimeSettingsSetupWizard::OnCreate(
     else {
         view = NULL;
         FindViewById(R::id::next_button, (IView**)&view);
-        view->SetOnClickListener(this);
+        view->SetOnClickListener(mListener);
     }
 
     mTimeZoneAdapter = ZonePicker::ConstructTimezoneAdapter(this, FALSE,
@@ -143,7 +177,7 @@ ECode DateTimeSettingsSetupWizard::InitUiForXl()
     String name;
     tz->GetDisplayName(&name);
     ITextView::Probe(mTimeZoneButton)->SetText(CoreUtils::Convert(name));
-    tmp->SetOnClickListener(this);
+    tmp->SetOnClickListener(mListener);
 
     Boolean autoDateTimeEnabled;
     AutoPtr<IIntent> intent;
@@ -160,7 +194,7 @@ ECode DateTimeSettingsSetupWizard::InitUiForXl()
     FindViewById(R::id::date_time_auto_button, (IView**)&tmp);
     mAutoDateTimeButton = ICompoundButton::Probe(tmp);
     ICheckable::Probe(mAutoDateTimeButton)->SetChecked(autoDateTimeEnabled);
-    mAutoDateTimeButton->SetOnCheckedChangeListener(this);
+    mAutoDateTimeButton->SetOnCheckedChangeListener(mListener);
 
     tmp = NULL;
     FindViewById(R::id::time_picker, (IView**)&tmp);
@@ -179,12 +213,12 @@ ECode DateTimeSettingsSetupWizard::InitUiForXl()
 
     tmp = NULL;
     FindViewById(R::id::next_button, (IView**)&tmp);
-    tmp->SetOnClickListener(this);
+    tmp->SetOnClickListener(mListener);
     tmp = NULL;
     FindViewById(R::id::skip_button, (IView**)&tmp);
     AutoPtr<IButton> skipButton = IButton::Probe(tmp);
     if (skipButton != NULL) {
-        tmp->SetOnClickListener(this);
+        tmp->SetOnClickListener(mListener);
     }
     Slogger::I(TAG, " << leave InitUiForXl ");
     return NOERROR;
@@ -398,7 +432,7 @@ void DateTimeSettingsSetupWizard::ShowTimezonePicker(
     mTimeZonePopup->SetWidth(width);
     mTimeZonePopup->SetAnchorView(anchorView);
     mTimeZonePopup->SetAdapter(IListAdapter::Probe(mTimeZoneAdapter));
-    mTimeZonePopup->SetOnItemClickListener(this);
+    mTimeZonePopup->SetOnItemClickListener(mListener);
     mTimeZonePopup->SetModal(TRUE);
     mTimeZonePopup->Show();
 }

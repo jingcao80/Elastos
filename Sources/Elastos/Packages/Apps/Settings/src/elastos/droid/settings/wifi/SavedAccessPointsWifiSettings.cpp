@@ -121,7 +121,7 @@ SavedAccessPointsWifiSettings::~SavedAccessPointsWifiSettings()
 
 ECode SavedAccessPointsWifiSettings::constructor()
 {
-    return NOERROR;
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode SavedAccessPointsWifiSettings::OnCreate(
@@ -299,9 +299,9 @@ ECode SavedAccessPointsWifiSettings::OnCreateDialog(
                 mAccessPointSavedState = NULL;
             }
             mSelectedAccessPoint = mDlgAccessPoint;
-            mDialog = new WifiDialog();
-            mDialog->constructor(_activity, this, mDlgAccessPoint,
-                    FALSE /* not editting */, TRUE /* hide the submit button */);
+            mDialog = NULL;
+            CWifiDialog::NewByFriend(_activity, this, mDlgAccessPoint,
+                    FALSE /* not editting */, TRUE /* hide the submit button */, (CWifiDialog**)&mDialog);
             AutoPtr<IAlertDialog> alertDialog = (IAlertDialog*)mDialog.Get();
             *dialog = IDialog::Probe(alertDialog);
             REFCOUNT_ADD(*dialog);
@@ -332,7 +332,7 @@ ECode SavedAccessPointsWifiSettings::OnClick(
     /* [in] */ IDialogInterface* dialogInterface,
     /* [in] */ Int32 button)
 {
-    if (button == WifiDialog::BUTTON_FORGET && mSelectedAccessPoint != NULL) {
+    if (button == CWifiDialog::BUTTON_FORGET && mSelectedAccessPoint != NULL) {
         mWifiManager->Forget(((CAccessPoint*)mSelectedAccessPoint.Get())->mNetworkId, NULL);
         AutoPtr<IPreferenceScreen> screen;
         GetPreferenceScreen((IPreferenceScreen**)&screen);

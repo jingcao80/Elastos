@@ -26,11 +26,36 @@ namespace Inputmethod {
 
 class SpellCheckersSettings
     : public SettingsPreferenceFragment
-    , public ISwitchBarOnSwitchChangeListener
-    , public IPreferenceOnPreferenceClickListener
     , public ISpellCheckerPreferenceOnRadioButtonPreferenceListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public ISwitchBarOnSwitchChangeListener
+        , public IPreferenceOnPreferenceClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("SpellCheckersSettings::InnerListener")
+
+        InnerListener(
+            /* [in] */ SpellCheckersSettings* host);
+
+        //@Override
+        CARAPI OnSwitchChanged(
+            /* [in] */ ISwitch* switchView,
+            /* [in] */ Boolean isChecked);
+
+        //@Override
+        CARAPI OnPreferenceClick(
+            /* [in] */ IPreference* pref,
+            /* [out] */ Boolean* result);
+
+    private:
+        SpellCheckersSettings* mHost;
+    };
+
     class AlertDialogOnClickListener
         : public Object
         , public IDialogInterfaceOnClickListener
@@ -127,6 +152,8 @@ private:
     AutoPtr<ISpellCheckerInfo> mCurrentSci;
     AutoPtr< ArrayOf<ISpellCheckerInfo*> > mEnabledScis;
     AutoPtr<ITextServicesManager> mTsm;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Inputmethod

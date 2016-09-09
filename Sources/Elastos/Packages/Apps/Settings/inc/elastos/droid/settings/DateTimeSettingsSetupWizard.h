@@ -35,12 +35,44 @@ namespace Settings {
 
 class DateTimeSettingsSetupWizard
     : public Activity
-    , public IViewOnClickListener
-    , public IAdapterViewOnItemClickListener
-    , public ICompoundButtonOnCheckedChangeListener
     , public IPreferenceFragmentOnPreferenceStartFragmentCallback
 {
 private:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public IAdapterViewOnItemClickListener
+        , public ICompoundButtonOnCheckedChangeListener
+    {
+    public:
+        TO_STRING_IMPL("DateTimeSettingsSetupWizard::InnerListener")
+
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ DateTimeSettingsSetupWizard* host);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* view);
+
+        //@Override
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        //@Override
+        CARAPI OnCheckedChanged(
+            /* [in] */ ICompoundButton* buttonView,
+            /* [in] */ Boolean isChecked);
+
+    private:
+        DateTimeSettingsSetupWizard* mHost;
+    };
+
+
     class InitBroadcastReceiver
         : public BroadcastReceiver
     {
@@ -152,6 +184,8 @@ private:
     AutoPtr<IInputMethodManager> mInputMethodManager;
 
     AutoPtr<BroadcastReceiver> mIntentReceiver;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Settings

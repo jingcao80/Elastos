@@ -31,9 +31,28 @@ namespace Wifi {
 class WifiSettingsForSetupWizardXL
     : public Activity
     , public IWifiSettingsForSetupWizardXL
-    , public IViewOnClickListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("WifiSettingsForSetupWizardXL::InnerListener")
+
+        InnerListener(
+            /* [in] */ WifiSettingsForSetupWizardXL* host);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* view);
+
+    private:
+        WifiSettingsForSetupWizardXL* mHost;
+    };
+
     class WifiManagerActionListener
         : public Object
         , public IWifiManagerActionListener

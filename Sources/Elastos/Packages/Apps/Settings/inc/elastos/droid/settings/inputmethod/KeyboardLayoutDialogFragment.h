@@ -32,11 +32,53 @@ namespace Inputmethod {
 
 class KeyboardLayoutDialogFragment
     : public DialogFragment
-    , public IInputDeviceListener
-    , public ILoaderManagerLoaderCallbacks
 {
     //LoaderCallbacks<KeyboardLayoutDialogFragment.Keyboards>
 public:
+    class InnerListener
+        : public Object
+        , public IInputDeviceListener
+        , public ILoaderManagerLoaderCallbacks
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("KeyboardLayoutDialogFragment::InnerListener")
+
+        InnerListener(
+            /* [in] */ KeyboardLayoutDialogFragment* host);
+
+        //@Override
+        CARAPI OnInputDeviceAdded(
+            /* [in] */ Int32 deviceId);
+
+        //@Override
+        CARAPI OnInputDeviceChanged(
+            /* [in] */ Int32 deviceId);
+
+        //@Override
+        CARAPI OnInputDeviceRemoved(
+            /* [in] */ Int32 deviceId);
+
+        //@Override
+        CARAPI OnCreateLoader(
+            /* [in] */ Int32 id,
+            /* [in] */ IBundle* args,
+            /* [out] */ ILoader** loader);
+
+        //@Override
+        CARAPI OnLoadFinished(
+            /* [in] */ ILoader* loader,
+            /* [in] */ IInterface* data);
+
+        //@Override
+        CARAPI OnLoaderReset(
+            /* [in] */ ILoader* loader);
+
+    private:
+        KeyboardLayoutDialogFragment* mHost;
+    };
+
     class Keyboards
         : public Object
     {
@@ -152,8 +194,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
-
     TO_STRING_IMPL("KeyboardLayoutDialogFragment")
 
     KeyboardLayoutDialogFragment();
@@ -240,6 +280,8 @@ private:
     Int32 mInputDeviceId;
     AutoPtr<IInputManager> mIm;
     AutoPtr<KeyboardLayoutAdapter> mAdapter;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Inputmethod

@@ -1,6 +1,7 @@
-#ifndef __ELASTOS_DROID_SETTINGS_WIFI_WIFIDIALOG_H__
-#define __ELASTOS_DROID_SETTINGS_WIFI_WIFIDIALOG_H__
+#ifndef __ELASTOS_DROID_SETTINGS_WIFI_CWIFIDIALOG_H__
+#define __ELASTOS_DROID_SETTINGS_WIFI_CWIFIDIALOG_H__
 
+#include "_Elastos_Droid_Settings_Wifi_CWifiDialog.h"
 #include "elastos/droid/app/AlertDialog.h"
 #include "elastos/droid/settings/wifi/WifiConfigController.h"
 #include "_Elastos.Droid.Settings.h"
@@ -17,16 +18,18 @@ namespace Droid {
 namespace Settings {
 namespace Wifi {
 
-class WifiDialog
-    : public AlertDialog
+CarClass(CWifiDialog)
+    , public AlertDialog
     , public IWifiConfigUiBase
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    WifiDialog();
+    CAR_OBJECT_DECL()
 
-    ~WifiDialog();
+    CWifiDialog();
+
+    ~CWifiDialog();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -114,4 +117,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SETTINGS_WIFI_WIFIDIALOG_H__
+#endif //__ELASTOS_DROID_SETTINGS_WIFI_CWIFIDIALOG_H__

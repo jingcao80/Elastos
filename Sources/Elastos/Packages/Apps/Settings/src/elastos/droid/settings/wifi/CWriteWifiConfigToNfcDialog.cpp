@@ -1,5 +1,5 @@
 #include "Elastos.Droid.Nfc.h"
-#include "elastos/droid/settings/wifi/WriteWifiConfigToNfcDialog.h"
+#include "elastos/droid/settings/wifi/CWriteWifiConfigToNfcDialog.h"
 #include "elastos/droid/settings/wifi/AccessPoint.h"
 #include "elastos/droid/settings/wifi/CAccessPoint.h"
 #include "../R.h"
@@ -42,28 +42,77 @@ namespace Droid {
 namespace Settings {
 namespace Wifi {
 
-const String WriteWifiConfigToNfcDialog::NFC_TOKEN_MIME_TYPE("application/vnd.wfa.wsc");
+const String CWriteWifiConfigToNfcDialog::NFC_TOKEN_MIME_TYPE("application/vnd.wfa.wsc");
 
-const String WriteWifiConfigToNfcDialog::TAG("Elastos.Droid.Settings.Wifi.WriteWifiConfigToNfcDialog");
-const String WriteWifiConfigToNfcDialog::PASSWORD_FORMAT("102700%s%s");
-const Int32 WriteWifiConfigToNfcDialog::HEX_RADIX = 16;
-const AutoPtr<ArrayOf<Char32> > WriteWifiConfigToNfcDialog::hexArray = String("0123456789ABCDEF").GetChars();
+const String CWriteWifiConfigToNfcDialog::TAG("Elastos.Droid.Settings.Wifi.CWriteWifiConfigToNfcDialog");
+const String CWriteWifiConfigToNfcDialog::PASSWORD_FORMAT("102700%s%s");
+const Int32 CWriteWifiConfigToNfcDialog::HEX_RADIX = 16;
+const AutoPtr<ArrayOf<Char32> > CWriteWifiConfigToNfcDialog::hexArray = String("0123456789ABCDEF").GetChars();
 
 //===============================================================================
-//                  WriteWifiConfigToNfcDialog::MyRunnable
+//                  CWriteWifiConfigToNfcDialog::InnerListener
 //===============================================================================
 
-WriteWifiConfigToNfcDialog::MyRunnable::MyRunnable(
-    /* [in] */ WriteWifiConfigToNfcDialog* host,
+CAR_INTERFACE_IMPL_3(CWriteWifiConfigToNfcDialog::InnerListener, Object, ITextWatcher,
+        IViewOnClickListener, ICompoundButtonOnCheckedChangeListener)
+
+CWriteWifiConfigToNfcDialog::InnerListener::InnerListener(
+    /* [in] */ CWriteWifiConfigToNfcDialog* host)
+    : mHost(host)
+{}
+
+ECode CWriteWifiConfigToNfcDialog::InnerListener::OnTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 before,
+    /* [in] */ Int32 count)
+{
+    return mHost->OnTextChanged(s, start, before, count);
+}
+
+ECode CWriteWifiConfigToNfcDialog::InnerListener::BeforeTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 count,
+    /* [in] */ Int32 after)
+{
+    return mHost->BeforeTextChanged(s, start, count, after);
+}
+
+ECode CWriteWifiConfigToNfcDialog::InnerListener::AfterTextChanged(
+    /* [in] */ IEditable* s)
+{
+    return mHost->AfterTextChanged(s);
+}
+
+ECode CWriteWifiConfigToNfcDialog::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+ECode CWriteWifiConfigToNfcDialog::InnerListener::OnCheckedChanged(
+    /* [in] */ ICompoundButton* buttonView,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnCheckedChanged(buttonView, isChecked);
+}
+
+//===============================================================================
+//                  CWriteWifiConfigToNfcDialog::MyRunnable
+//===============================================================================
+
+CWriteWifiConfigToNfcDialog::MyRunnable::MyRunnable(
+    /* [in] */ CWriteWifiConfigToNfcDialog* host,
     /* [in] */ Int32 id)
     : mHost(host)
     , mId(id)
 {}
 
-WriteWifiConfigToNfcDialog::MyRunnable::~MyRunnable()
+CWriteWifiConfigToNfcDialog::MyRunnable::~MyRunnable()
 {}
 
-ECode WriteWifiConfigToNfcDialog::MyRunnable::Run()
+ECode CWriteWifiConfigToNfcDialog::MyRunnable::Run()
 {
     switch (mId) {
         case 0:
@@ -77,21 +126,21 @@ ECode WriteWifiConfigToNfcDialog::MyRunnable::Run()
 }
 
 //===============================================================================
-//                  WriteWifiConfigToNfcDialog::NfcAdapterReaderCallback
+//                  CWriteWifiConfigToNfcDialog::NfcAdapterReaderCallback
 //===============================================================================
 
-CAR_INTERFACE_IMPL(WriteWifiConfigToNfcDialog::NfcAdapterReaderCallback, Object,
+CAR_INTERFACE_IMPL(CWriteWifiConfigToNfcDialog::NfcAdapterReaderCallback, Object,
     INfcAdapterReaderCallback);
 
-WriteWifiConfigToNfcDialog::NfcAdapterReaderCallback::NfcAdapterReaderCallback(
-    /* [in] */ WriteWifiConfigToNfcDialog* host)
+CWriteWifiConfigToNfcDialog::NfcAdapterReaderCallback::NfcAdapterReaderCallback(
+    /* [in] */ CWriteWifiConfigToNfcDialog* host)
     : mHost(host)
 {}
 
-WriteWifiConfigToNfcDialog::NfcAdapterReaderCallback::~NfcAdapterReaderCallback()
+CWriteWifiConfigToNfcDialog::NfcAdapterReaderCallback::~NfcAdapterReaderCallback()
 {}
 
-ECode WriteWifiConfigToNfcDialog::NfcAdapterReaderCallback::OnTagDiscovered(
+ECode CWriteWifiConfigToNfcDialog::NfcAdapterReaderCallback::OnTagDiscovered(
     /* [in] */ ITag* tag)
 {
     mHost->HandleWriteNfcEvent(tag);
@@ -99,38 +148,39 @@ ECode WriteWifiConfigToNfcDialog::NfcAdapterReaderCallback::OnTagDiscovered(
 }
 
 //===============================================================================
-//                  WriteWifiConfigToNfcDialog::SetViewTextRunnable::
+//                  CWriteWifiConfigToNfcDialog::SetViewTextRunnable
 //===============================================================================
 
-WriteWifiConfigToNfcDialog::SetViewTextRunnable::SetViewTextRunnable(
+CWriteWifiConfigToNfcDialog::SetViewTextRunnable::SetViewTextRunnable(
     /* [in] */ ITextView* textView,
     /* [in] */ Int32 resid)
     : mTextView(textView)
     , mResid(resid)
 {}
 
-WriteWifiConfigToNfcDialog::SetViewTextRunnable::~SetViewTextRunnable()
+CWriteWifiConfigToNfcDialog::SetViewTextRunnable::~SetViewTextRunnable()
 {}
 
-ECode WriteWifiConfigToNfcDialog::SetViewTextRunnable::Run()
+ECode CWriteWifiConfigToNfcDialog::SetViewTextRunnable::Run()
 {
     return mTextView->SetText(mResid);
 }
 
 //===============================================================================
-//                  WriteWifiConfigToNfcDialog
+//                  CWriteWifiConfigToNfcDialog
 //===============================================================================
 
-CAR_INTERFACE_IMPL_4(WriteWifiConfigToNfcDialog, AlertDialog, ITextWatcher,
-        INoCopySpan, IViewOnClickListener, ICompoundButtonOnCheckedChangeListener);
+CAR_INTERFACE_IMPL(CWriteWifiConfigToNfcDialog, AlertDialog, INoCopySpan)
 
-WriteWifiConfigToNfcDialog::WriteWifiConfigToNfcDialog()
+CAR_OBJECT_IMPL(CWriteWifiConfigToNfcDialog)
+
+CWriteWifiConfigToNfcDialog::CWriteWifiConfigToNfcDialog()
 {}
 
-WriteWifiConfigToNfcDialog::~WriteWifiConfigToNfcDialog()
+CWriteWifiConfigToNfcDialog::~CWriteWifiConfigToNfcDialog()
 {}
 
-ECode WriteWifiConfigToNfcDialog::constructor(
+ECode CWriteWifiConfigToNfcDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAccessPoint* accessPoint,
     /* [in] */ IWifiManager* wifiManager)
@@ -149,7 +199,7 @@ ECode WriteWifiConfigToNfcDialog::constructor(
     return NOERROR;
 }
 
-ECode WriteWifiConfigToNfcDialog::OnCreate(
+ECode CWriteWifiConfigToNfcDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     AutoPtr<ILayoutInflater> inflate;
@@ -177,11 +227,12 @@ ECode WriteWifiConfigToNfcDialog::OnCreate(
     view = NULL;
     mView->FindViewById(R::id::password_label, (IView**)&view);
     mLabelView = ITextView::Probe(view);
-    mPasswordView->AddTextChangedListener((ITextWatcher*)this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mPasswordView->AddTextChangedListener(listener);
     view = NULL;
     mView->FindViewById(R::id::show_password, (IView**)&view);
     mPasswordCheckBox = ICheckBox::Probe(view);
-    ICompoundButton::Probe(mPasswordCheckBox)->SetOnCheckedChangeListener((ICompoundButtonOnCheckedChangeListener*)this);
+    ICompoundButton::Probe(mPasswordCheckBox)->SetOnCheckedChangeListener(listener);
     view = NULL;
     mView->FindViewById(R::id::progress_bar, (IView**)&view);
     mProgressBar = IProgressBar::Probe(view);
@@ -190,7 +241,7 @@ ECode WriteWifiConfigToNfcDialog::OnCreate(
 
     mSubmitButton = NULL;
     GetButton(IDialogInterface::BUTTON_NEUTRAL, (IButton**)&mSubmitButton);
-    IView::Probe(mSubmitButton)->SetOnClickListener((IViewOnClickListener*)this);
+    IView::Probe(mSubmitButton)->SetOnClickListener(listener);
     IView::Probe(mSubmitButton)->SetEnabled(FALSE);
 
     mCancelButton = NULL;
@@ -198,7 +249,7 @@ ECode WriteWifiConfigToNfcDialog::OnCreate(
     return NOERROR;
 }
 
-ECode WriteWifiConfigToNfcDialog::OnClick(
+ECode CWriteWifiConfigToNfcDialog::OnClick(
     /* [in] */ IView* v)
 {
     mWakeLock->AcquireLock();
@@ -266,7 +317,7 @@ ECode WriteWifiConfigToNfcDialog::OnClick(
     return NOERROR;
 }
 
-void WriteWifiConfigToNfcDialog::HandleWriteNfcEvent(
+void CWriteWifiConfigToNfcDialog::HandleWriteNfcEvent(
     /* [in] */ ITag* tag)
 {
     AutoPtr<INdefHelper> helper;
@@ -317,7 +368,7 @@ void WriteWifiConfigToNfcDialog::HandleWriteNfcEvent(
     }
 }
 
-ECode WriteWifiConfigToNfcDialog::Dismiss()
+ECode CWriteWifiConfigToNfcDialog::Dismiss()
 {
     Boolean res;
     if (mWakeLock->IsHeld(&res), res) {
@@ -327,7 +378,7 @@ ECode WriteWifiConfigToNfcDialog::Dismiss()
     return AlertDialog::Dismiss();
 }
 
-ECode WriteWifiConfigToNfcDialog::OnTextChanged(
+ECode CWriteWifiConfigToNfcDialog::OnTextChanged(
     /* [in] */ ICharSequence* s,
     /* [in] */ Int32 start,
     /* [in] */ Int32 before,
@@ -338,7 +389,7 @@ ECode WriteWifiConfigToNfcDialog::OnTextChanged(
     return mOnTextChangedHandler->Post((IRunnable*)runnable, &res);
 }
 
-void WriteWifiConfigToNfcDialog::EnableSubmitIfAppropriate()
+void CWriteWifiConfigToNfcDialog::EnableSubmitIfAppropriate()
 {
     if (mPasswordView != NULL) {
         if (((CAccessPoint*)mAccessPoint.Get())->mSecurity == AccessPoint::SECURITY_WEP) {
@@ -357,7 +408,7 @@ void WriteWifiConfigToNfcDialog::EnableSubmitIfAppropriate()
     }
 }
 
-void WriteWifiConfigToNfcDialog::SetViewText(
+void CWriteWifiConfigToNfcDialog::SetViewText(
     /* [in] */ ITextView* view,
     /* [in] */ Int32 resid)
 {
@@ -367,7 +418,7 @@ void WriteWifiConfigToNfcDialog::SetViewText(
     activity->RunOnUiThread((IRunnable*)runnable);
 }
 
-ECode WriteWifiConfigToNfcDialog::OnCheckedChanged(
+ECode CWriteWifiConfigToNfcDialog::OnCheckedChanged(
     /* [in] */ ICompoundButton* buttonView,
     /* [in] */ Boolean isChecked)
 {
@@ -378,7 +429,7 @@ ECode WriteWifiConfigToNfcDialog::OnCheckedChanged(
     return NOERROR;
 }
 
-AutoPtr< ArrayOf<Byte> > WriteWifiConfigToNfcDialog::HexStringToByteArray(
+AutoPtr< ArrayOf<Byte> > CWriteWifiConfigToNfcDialog::HexStringToByteArray(
     /* [in] */ const String& s)
 {
     Int32 len = s.GetLength();
@@ -392,7 +443,7 @@ AutoPtr< ArrayOf<Byte> > WriteWifiConfigToNfcDialog::HexStringToByteArray(
     return data;
 }
 
-String WriteWifiConfigToNfcDialog::ByteArrayToHexString(
+String CWriteWifiConfigToNfcDialog::ByteArrayToHexString(
     /* [in] */ ArrayOf<Byte>* bytes)
 {
     AutoPtr< ArrayOf<Char32> > hexChars = ArrayOf<Char32>::Alloc(bytes->GetLength() * 2);
@@ -406,7 +457,7 @@ String WriteWifiConfigToNfcDialog::ByteArrayToHexString(
     return str;
 }
 
-ECode WriteWifiConfigToNfcDialog::BeforeTextChanged(
+ECode CWriteWifiConfigToNfcDialog::BeforeTextChanged(
     /* [in] */ ICharSequence* s,
     /* [in] */ Int32 start,
     /* [in] */ Int32 count,
@@ -415,7 +466,7 @@ ECode WriteWifiConfigToNfcDialog::BeforeTextChanged(
     return NOERROR;
 }
 
-ECode WriteWifiConfigToNfcDialog::AfterTextChanged(
+ECode CWriteWifiConfigToNfcDialog::AfterTextChanged(
     /* [in] */ IEditable* s)
 {
     return NOERROR;

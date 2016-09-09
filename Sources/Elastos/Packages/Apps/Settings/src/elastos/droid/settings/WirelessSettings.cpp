@@ -238,7 +238,7 @@ WirelessSettings::~WirelessSettings()
 
 ECode WirelessSettings::constructor()
 {
-    return NOERROR;
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode WirelessSettings::OnPreferenceTreeClick(

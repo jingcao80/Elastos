@@ -220,11 +220,11 @@ const Int32 CNotificationSettings::H::UPDATE_NOTIFICATION_RINGTONE;
 const Int32 CNotificationSettings::H::STOP_SAMPLE;
 const Int32 CNotificationSettings::H::UPDATE_RINGER_ICON;
 
-CNotificationSettings::H::H(
+ECode CNotificationSettings::H::constructor(
     /* [in] */ CNotificationSettings* host)
-    : mHost(host)
 {
-    Handler::constructor(Looper::GetMainLooper());
+    mHost = host;
+    return Handler::constructor(Looper::GetMainLooper());
 }
 
 ECode CNotificationSettings::H::HandleMessage(
@@ -408,7 +408,8 @@ CNotificationSettings::CNotificationSettings()
     , mLockscreenSelectedValue(0)
 {
     mVolumeCallback = new VolumePreferenceCallback(this);
-    mHandler = new H(this);
+    mHandler = new H();
+    mHandler->constructor(this);
     mSettingsObserver = new SettingsObserver(this);
     mSettingsObserver->constructor();
     mLookupRingtoneNames = new MyRunnable(this);

@@ -4,7 +4,8 @@
 #include "elastos/droid/settings/wifi/WifiSettings.h"
 #include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/settings/search/SearchIndexableRaw.h"
-#include "elastos/droid/settings/wifi/WpsDialog.h"
+#include "elastos/droid/settings/wifi/CWpsDialog.h"
+#include "elastos/droid/settings/wifi/CWriteWifiConfigToNfcDialog.h"
 #include "elastos/droid/settings/wifi/CAccessPoint.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/os/Build.h"
@@ -906,8 +907,8 @@ ECode WifiSettings::OnCreateDialog(
             GetActivity((IActivity**)&activity);
             if (ap == NULL) { // For re-launch from saved state
                 if (mAccessPointSavedState != NULL) {
-                    CAccessPoint::New(IContext::Probe(activity), mAccessPointSavedState,
-                            (IAccessPoint**)&ap);
+                    CAccessPoint::New(IContext::Probe(activity),
+                            mAccessPointSavedState, (IAccessPoint**)&ap);
                     // For repeated orientation changes
                     mDlgAccessPoint = ap;
                     // Reset the saved access point data
@@ -916,8 +917,8 @@ ECode WifiSettings::OnCreateDialog(
             }
             // If it's NULL, fine, it's for Add Network
             mSelectedAccessPoint = ap;
-            mDialog = new WifiDialog();
-            mDialog->constructor(IContext::Probe(activity), this, ap, mDlgEdit);
+            mDialog = NULL;
+            CWifiDialog::NewByFriend(IContext::Probe(activity), this, ap, mDlgEdit, (CWifiDialog**)&mDialog);
             AutoPtr<IAlertDialog> alertDialog = (IAlertDialog*)mDialog.Get();
             *dialog = IDialog::Probe(alertDialog);
             REFCOUNT_ADD(*dialog);
@@ -926,32 +927,21 @@ ECode WifiSettings::OnCreateDialog(
         case WPS_PBC_DIALOG_ID: {
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
-            AutoPtr<WpsDialog> wpsDialog = new WpsDialog(
-                    IContext::Probe(activity), IWpsInfo::PBC);
-            AutoPtr<IAlertDialog> alertDialog = (IAlertDialog*)wpsDialog.Get();
-            *dialog = IDialog::Probe(alertDialog);
-            REFCOUNT_ADD(*dialog);
-            return NOERROR;
+            return CWpsDialog::New(IContext::Probe(activity), IWpsInfo::PBC, dialog);
         }
         case WPS_PIN_DIALOG_ID: {
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
-            AutoPtr<WpsDialog> wpsDialog = new WpsDialog(
-                    IContext::Probe(activity), IWpsInfo::DISPLAY);
-            AutoPtr<IAlertDialog> alertDialog = (IAlertDialog*)wpsDialog.Get();
-            *dialog = IDialog::Probe(alertDialog);
-            REFCOUNT_ADD(*dialog);
-            return NOERROR;
+            return CWpsDialog::New(IContext::Probe(activity), IWpsInfo::DISPLAY, dialog);
         }
         case WRITE_NFC_DIALOG_ID: {
             if (mSelectedAccessPoint != NULL) {
                 AutoPtr<IActivity> activity;
                 GetActivity((IActivity**)&activity);
-                mWifiToNfcDialog = new WriteWifiConfigToNfcDialog();
-                mWifiToNfcDialog->constructor(IContext::Probe(activity),
-                        mSelectedAccessPoint, mWifiManager);
-                AutoPtr<IAlertDialog> alertDialog = (IAlertDialog*)mWifiToNfcDialog.Get();
-                *dialog = IDialog::Probe(alertDialog);
+                mWifiToNfcDialog = NULL;
+                CWriteWifiConfigToNfcDialog::New(IContext::Probe(activity),
+                        mSelectedAccessPoint, mWifiManager, (IDialog**)&mWifiToNfcDialog);
+                *dialog = mWifiToNfcDialog;
                 REFCOUNT_ADD(*dialog);
                 return NOERROR;
             }
@@ -1417,10 +1407,10 @@ ECode WifiSettings::OnClick(
     /* [in] */ IDialogInterface* dialogInterface,
     /* [in] */ Int32 button)
 {
-    if (button == WifiDialog::BUTTON_FORGET && mSelectedAccessPoint != NULL) {
+    if (button == CWifiDialog::BUTTON_FORGET && mSelectedAccessPoint != NULL) {
         Forget();
     }
-    else if (button == WifiDialog::BUTTON_SUBMIT) {
+    else if (button == CWifiDialog::BUTTON_SUBMIT) {
         if (mDialog != NULL) {
             AutoPtr<IWifiConfigController> controller;
             mDialog->GetController((IWifiConfigController**)&controller);

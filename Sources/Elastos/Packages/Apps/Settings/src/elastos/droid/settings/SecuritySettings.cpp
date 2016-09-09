@@ -140,6 +140,25 @@ const AutoPtr<ArrayOf<String> > SecuritySettings::SWITCH_PREFERENCE_KEYS = InitS
 const Boolean SecuritySettings::ONLY_ONE_TRUST_AGENT = TRUE;
 
 //===============================================================================
+//                  SecuritySettings::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(SecuritySettings::InnerListener, Object, IPreferenceOnPreferenceChangeListener)
+
+SecuritySettings::InnerListener::InnerListener(
+    /* [in] */ SecuritySettings* host)
+    : mHost(host)
+{}
+
+ECode SecuritySettings::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* value,
+    /* [out] */ Boolean* res)
+{
+    return mHost->OnPreferenceChange(preference, value, res);
+}
+
+//===============================================================================
 //                  SecuritySettings::SecuritySearchIndexProvider
 //===============================================================================
 
@@ -351,7 +370,7 @@ ECode SecuritySettings::SecuritySearchIndexProvider::GetNonIndexableKeys(
 //                 SecuritySettings
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(SecuritySettings, SettingsPreferenceFragment, IPreferenceOnPreferenceChangeListener, IDialogInterfaceOnClickListener, IIndexable);
+CAR_INTERFACE_IMPL_2(SecuritySettings, SettingsPreferenceFragment, IDialogInterfaceOnClickListener, IIndexable);
 
 SecuritySettings::SecuritySettings()
     : mIsPrimary(FALSE)
@@ -696,7 +715,8 @@ AutoPtr<IPreferenceScreen> SecuritySettings::CreatePreferenceHierarchy()
     for (Int32 i = 0; i < SWITCH_PREFERENCE_KEYS->GetLength(); i++) {
         AutoPtr<IPreference> pref;
         FindPreference(CoreUtils::Convert((*SWITCH_PREFERENCE_KEYS)[i]), (IPreference**)&pref);
-        if (pref != NULL) pref->SetOnPreferenceChangeListener(this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        if (pref != NULL) pref->SetOnPreferenceChangeListener(listener);
     }
     return root;
 }
@@ -821,7 +841,8 @@ void SecuritySettings::SetupLockAfterPreference()
     secure->GetInt64(GetContentResolver(),
             ISettingsSecure::LOCK_SCREEN_LOCK_AFTER_TIMEOUT, 5000, &currentTimeout);
     mLockAfter->SetValue(StringUtils::ToString(currentTimeout));
-    IPreference::Probe(mLockAfter)->SetOnPreferenceChangeListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    IPreference::Probe(mLockAfter)->SetOnPreferenceChangeListener(listener);
     Int64 adminTimeout = 0;
     if (mDPM != NULL) {
         mDPM->GetMaximumTimeToLock(NULL, &adminTimeout);

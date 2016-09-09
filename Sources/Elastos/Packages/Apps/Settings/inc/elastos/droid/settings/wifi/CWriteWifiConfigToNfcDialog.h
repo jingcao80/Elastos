@@ -1,9 +1,11 @@
-#ifndef __ELASTOS_DROID_SETTINGS_WIFI_WRITEWIFICONFIGTONFCDIALOG_H__
-#define __ELASTOS_DROID_SETTINGS_WIFI_WRITEWIFICONFIGTONFCDIALOG_H__
+#ifndef __ELASTOS_DROID_SETTINGS_WIFI_CWRITEWIFICONFIGTONFCDIALOG_H__
+#define __ELASTOS_DROID_SETTINGS_WIFI_CWRITEWIFICONFIGTONFCDIALOG_H__
 
+#include "Elastos.Droid.Nfc.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.Wifi.h"
+#include "_Elastos_Droid_Settings_Wifi_CWriteWifiConfigToNfcDialog.h"
 #include "elastos/droid/app/AlertDialog.h"
 #include "_Elastos.Droid.Settings.h"
 
@@ -30,20 +32,62 @@ namespace Droid {
 namespace Settings {
 namespace Wifi {
 
-class WriteWifiConfigToNfcDialog
-    : public AlertDialog
-    , public ITextWatcher
+CarClass(CWriteWifiConfigToNfcDialog)
+    , public AlertDialog
     , public INoCopySpan
-    , public IViewOnClickListener
-    , public ICompoundButtonOnCheckedChangeListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public ITextWatcher
+        , public IViewOnClickListener
+        , public ICompoundButtonOnCheckedChangeListener
+    {
+    public:
+        TO_STRING_IMPL("CWriteWifiConfigToNfcDialog::InnerListener")
+
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CWriteWifiConfigToNfcDialog* host);
+
+        //@Override
+        CARAPI OnTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 before,
+            /* [in] */ Int32 count);
+
+        //@Override
+        CARAPI BeforeTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [in] */ Int32 after);
+
+        //@Override
+        CARAPI AfterTextChanged(
+            /* [in] */ IEditable* s);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+        //@Override
+        CARAPI OnCheckedChanged(
+            /* [in] */ ICompoundButton* buttonView,
+            /* [in] */ Boolean isChecked);
+
+    private:
+        CWriteWifiConfigToNfcDialog* mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {
     public:
         MyRunnable(
-            /* [in] */ WriteWifiConfigToNfcDialog* host,
+            /* [in] */ CWriteWifiConfigToNfcDialog* host,
             /* [in] */ Int32 id);
 
         ~MyRunnable();
@@ -52,7 +96,7 @@ public:
         CARAPI Run();
 
     private:
-        WriteWifiConfigToNfcDialog* mHost;
+        CWriteWifiConfigToNfcDialog* mHost;
         Int32 mId;
     };
 
@@ -64,7 +108,7 @@ public:
         CAR_INTERFACE_DECL();
 
         NfcAdapterReaderCallback(
-            /* [in] */ WriteWifiConfigToNfcDialog* host);
+            /* [in] */ CWriteWifiConfigToNfcDialog* host);
 
         ~NfcAdapterReaderCallback();
 
@@ -73,7 +117,7 @@ public:
             /* [in] */ ITag* tag);
 
     private:
-        WriteWifiConfigToNfcDialog* mHost;
+        CWriteWifiConfigToNfcDialog* mHost;
     };
 
     class SetViewTextRunnable
@@ -95,11 +139,13 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    WriteWifiConfigToNfcDialog();
+    CAR_OBJECT_DECL()
 
-    ~WriteWifiConfigToNfcDialog();
+    CWriteWifiConfigToNfcDialog();
+
+    ~CWriteWifiConfigToNfcDialog();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -185,4 +231,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SETTINGS_WIFI_WRITEWIFICONFIGTONFCDIALOG_H__
+#endif //__ELASTOS_DROID_SETTINGS_WIFI_CWRITEWIFICONFIGTONFCDIALOG_H__

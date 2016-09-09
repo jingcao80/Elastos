@@ -88,7 +88,7 @@ protected:
     public:
         TO_STRING_IMPL("RunningState::BackgroundHandler")
 
-        BackgroundHandler(
+        CARAPI constructor(
             /* [in] */ ILooper* looper,
             /* [in] */ RunningState* host);
 
@@ -108,6 +108,8 @@ protected:
 
         MyHandler(
             /* [in] */ RunningState* host);
+
+        CARAPI constructor();
 
         //@Override
         CARAPI HandleMessage(

@@ -34,10 +34,36 @@ namespace Inputmethod {
 class InputMethodPreference
     : public SwitchPreference
     , public IInputMethodPreference
-    , public IPreferenceOnPreferenceClickListener
-    , public IPreferenceOnPreferenceChangeListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceClickListener
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("InputMethodPreference::InnerListener")
+
+        InnerListener(
+            /* [in] */ InputMethodPreference* host);
+
+        //@Override
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* newValue,
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI OnPreferenceClick(
+            /* [in] */ IPreference* preference,
+            /* [out] */ Boolean* result);
+
+    private:
+        InputMethodPreference* mHost;
+    };
+
     class DialogInterfaceOnClickListener
         : public Object
         , public IDialogInterfaceOnClickListener

@@ -21,10 +21,29 @@ namespace Settings {
 
 CarClass(CLocalePicker)
     , public LocalePicker
-    , public ILocaleSelectionListener
     , public IDialogCreatable
 {
 private:
+    class InnerListener
+        : public Object
+        , public ILocaleSelectionListener
+    {
+    public:
+        TO_STRING_IMPL("CLocalePicker::InnerListener")
+
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CLocalePicker* host);
+
+        //@Override
+        CARAPI OnLocaleSelected(
+            /* [in] */ ILocale* locale);
+
+    private:
+        CLocalePicker* mHost;
+    };
+
     class OnCreateDialogRunnable
         : public Object
         , public IRunnable

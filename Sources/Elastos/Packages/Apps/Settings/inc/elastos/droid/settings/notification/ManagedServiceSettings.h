@@ -114,7 +114,9 @@ private:
     public:
         TO_STRING_IMPL("ManagedServiceSettings::ServiceListAdapter")
 
-        ServiceListAdapter(
+        ServiceListAdapter();
+
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ ManagedServiceSettings* host);
 

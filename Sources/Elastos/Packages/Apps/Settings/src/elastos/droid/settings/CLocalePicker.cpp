@@ -24,6 +24,23 @@ const Int32 CLocalePicker::DLG_SHOW_GLOBAL_WARNING = 1;
 const String CLocalePicker::SAVE_TARGET_LOCALE("locale");
 
 //===============================================================================
+//                  CLocalePicker::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(CLocalePicker::InnerListener, Object, ILocaleSelectionListener)
+
+CLocalePicker::InnerListener::InnerListener(
+    /* [in] */ CLocalePicker* host)
+    : mHost(host)
+{}
+
+ECode CLocalePicker::InnerListener::OnLocaleSelected(
+    /* [in] */ ILocale* locale)
+{
+    return mHost->OnLocaleSelected(locale);
+}
+
+//===============================================================================
 //                  CLocalePicker::OnCreateDialogRunnable
 //===============================================================================
 
@@ -53,7 +70,7 @@ ECode CLocalePicker::OnCreateDialogRunnable::Run()
 //                  CLocalePicker
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(CLocalePicker, LocalePicker, ILocaleSelectionListener, IDialogCreatable)
+CAR_INTERFACE_IMPL(CLocalePicker, LocalePicker, IDialogCreatable)
 
 CAR_OBJECT_IMPL(CLocalePicker)
 
@@ -66,8 +83,8 @@ CLocalePicker::~CLocalePicker()
 ECode CLocalePicker::constructor()
 {
     LocalePicker::constructor();
-    SetLocaleSelectionListener(this);
-    return NOERROR;
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    return SetLocaleSelectionListener(listener);
 }
 
 ECode CLocalePicker::OnCreate(

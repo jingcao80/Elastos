@@ -89,6 +89,23 @@ const Int32 WifiSettingsForSetupWizardXL::SCREEN_STATE_CONNECTING = 2;
 const Int32 WifiSettingsForSetupWizardXL::SCREEN_STATE_CONNECTED = 3;
 
 //===============================================================================
+//                  WifiSettingsForSetupWizardXL::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(WifiSettingsForSetupWizardXL::InnerListener, Object, IViewOnClickListener)
+
+WifiSettingsForSetupWizardXL::InnerListener::InnerListener(
+    /* [in] */ WifiSettingsForSetupWizardXL* host)
+    : mHost(host)
+{}
+
+ECode WifiSettingsForSetupWizardXL::InnerListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+//===============================================================================
 //                  WifiSettingsForSetupWizardXL::WifiManagerActionListener
 //===============================================================================
 
@@ -116,7 +133,7 @@ ECode WifiSettingsForSetupWizardXL::WifiManagerActionListener::OnFailure(
 //                  WifiSettingsForSetupWizardXL
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(WifiSettingsForSetupWizardXL, Activity, IWifiSettingsForSetupWizardXL, IViewOnClickListener);
+CAR_INTERFACE_IMPL(WifiSettingsForSetupWizardXL, Activity, IWifiSettingsForSetupWizardXL);
 
 WifiSettingsForSetupWizardXL::WifiSettingsForSetupWizardXL()
     : mScreenState(SCREEN_STATE_DISCONNECTED)
@@ -130,7 +147,7 @@ WifiSettingsForSetupWizardXL::~WifiSettingsForSetupWizardXL()
 
 ECode WifiSettingsForSetupWizardXL::constructor()
 {
-    return NOERROR;
+    return Activity::constructor();
 }
 
 ECode WifiSettingsForSetupWizardXL::OnCreate(
@@ -197,26 +214,27 @@ void WifiSettingsForSetupWizardXL::InitViews()
     mProgressBar->SetIndeterminate(TRUE);
     IView::Probe(mTopDividerNoProgress)->SetVisibility(IView::GONE);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     tmp = NULL;
     FindViewById(R::id::wifi_setup_add_network, (IView**)&tmp);
     mAddNetworkButton = IButton::Probe(tmp);
-    tmp->SetOnClickListener(this);
+    tmp->SetOnClickListener(listener);
     tmp = NULL;
     FindViewById(R::id::wifi_setup_refresh_list, (IView**)&tmp);
     mRefreshButton = IButton::Probe(tmp);
-    tmp->SetOnClickListener(this);
+    tmp->SetOnClickListener(listener);
     tmp = NULL;
     FindViewById(R::id::wifi_setup_skip_or_next, (IView**)&tmp);
     mSkipOrNextButton = IButton::Probe(tmp);
-    tmp->SetOnClickListener(this);
+    tmp->SetOnClickListener(listener);
     tmp = NULL;
     FindViewById(R::id::wifi_setup_connect, (IView**)&tmp);
     mConnectButton = IButton::Probe(tmp);
-    tmp->SetOnClickListener(this);
+    tmp->SetOnClickListener(listener);
     tmp = NULL;
     FindViewById(R::id::wifi_setup_cancel, (IView**)&tmp);
     mBackButton = IButton::Probe(tmp);
-    tmp->SetOnClickListener(this);
+    tmp->SetOnClickListener(listener);
 
     FindViewById(R::id::top_padding, (IView**)&mTopPadding);
     FindViewById(R::id::content_padding, (IView**)&mContentPadding);

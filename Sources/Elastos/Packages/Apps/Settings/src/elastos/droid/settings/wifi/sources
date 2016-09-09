@@ -12,13 +12,13 @@ SOURCES += Summary.cpp
 SOURCES += WifiConfigController.cpp
 SOURCES += WifiConfigUiForSetupWizardXL.cpp
 SOURCES += WifiSettingsForSetupWizardXL.cpp
-SOURCES += WifiDialog.cpp
+SOURCES += CWifiDialog.cpp
 SOURCES += WifiEnabler.cpp
 SOURCES += WifiPickerActivity.cpp
 SOURCES += WifiSettings.cpp
-SOURCES += WpsDialog.cpp
+SOURCES += CWpsDialog.cpp
 SOURCES += CWpsDialogHelper.cpp
-SOURCES += WriteWifiConfigToNfcDialog.cpp
+SOURCES += CWriteWifiConfigToNfcDialog.cpp
 SOURCES += wifi.cpp
 
 ELASTOS_LIBS += p2p/p2p.lib

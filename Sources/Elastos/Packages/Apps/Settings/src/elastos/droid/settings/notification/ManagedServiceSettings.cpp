@@ -127,17 +127,21 @@ ECode ManagedServiceSettings::ScaryWarningDialogFragment::OnCreateDialog(
 //                  ManagedServiceSettings::ServiceListAdapter
 //===============================================================================
 
-ManagedServiceSettings::ServiceListAdapter::ServiceListAdapter(
+ManagedServiceSettings::ServiceListAdapter::ServiceListAdapter()
+{}
+
+ECode ManagedServiceSettings::ServiceListAdapter::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ManagedServiceSettings* host)
-    : mHost(host)
 {
+    mHost = host;
     ArrayAdapter::constructor(context, 0, 0);
     AutoPtr<IActivity> activity;
     mHost->GetActivity((IActivity**)&activity);
     AutoPtr<IInterface> obj;
     IContext::Probe(activity)->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
     mInflater = ILayoutInflater::Probe(obj);
+    return NOERROR;
 }
 
 ECode ManagedServiceSettings::ServiceListAdapter::HasStableIds(
@@ -328,7 +332,8 @@ ECode ManagedServiceSettings::OnCreate(
     IContext* activity = IContext::Probe(_activity);
     activity->GetPackageManager((IPackageManager**)&mPM);
     activity->GetContentResolver((IContentResolver**)&mCR);
-    mListAdapter = new ServiceListAdapter(activity, this);
+    mListAdapter = new ServiceListAdapter();
+    mListAdapter->constructor(activity, this);
     return NOERROR;
 }
 

@@ -65,11 +65,30 @@ class ManageApplications
     : public Fragment
     , public IManageApplicationsAppClickListener
     , public IDialogInterfaceOnClickListener
-    , public IDialogInterfaceOnDismissListener
     , public IAdapterViewOnItemSelectedListener
 {
     friend class AppViewHolder;
 public:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnDismissListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("ManageApplications::InnerListener")
+
+        InnerListener(
+            /* [in] */ ManageApplications* host);
+
+        //@Override
+        CARAPI OnDismiss(
+            /* [in] */ IDialogInterface* dialog);
+
+    private:
+        ManageApplications* mHost;
+    };
+
     class ApplicationsAdapter;
 
     class TabInfo

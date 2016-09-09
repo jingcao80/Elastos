@@ -46,13 +46,46 @@ namespace Inputmethod {
 
 class InputMethodAndLanguageSettings
     : public SettingsPreferenceFragment
-    , public IPreferenceOnPreferenceChangeListener
-    , public IInputDeviceListener
     , public IOnSetupKeyboardLayoutsListener
     , public IIndexable
     , public IOnSavePreferenceListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+        , public IInputDeviceListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("InputMethodAndLanguageSettings::InnerListener")
+
+        InnerListener(
+            /* [in] */ InputMethodAndLanguageSettings* host);
+
+        //@Override
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* value,
+            /* [out] */ Boolean* res);
+
+        //@Override
+        CARAPI OnInputDeviceAdded(
+            /* [in] */ Int32 deviceId);
+
+        //@Override
+        CARAPI OnInputDeviceChanged(
+            /* [in] */ Int32 deviceId);
+
+        //@Override
+        CARAPI OnInputDeviceRemoved(
+            /* [in] */ Int32 deviceId);
+
+    private:
+        InputMethodAndLanguageSettings* mHost;
+    };
+
     class MyBaseSearchIndexProvider
         : public BaseSearchIndexProvider
     {
@@ -283,6 +316,8 @@ private:
     AutoPtr<IIntent> mIntentWaitingForResult;
     AutoPtr<InputMethodSettingValuesWrapper> mInputMethodSettingValues;
     AutoPtr<IDevicePolicyManager> mDpm;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Inputmethod

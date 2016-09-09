@@ -2,8 +2,9 @@
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.KeyStore.h"
 #include "elastos/droid/settings/wifi/AdvancedWifiSettings.h"
+#include "elastos/droid/settings/wifi/CAdvancedWifiSettingsWpsFragment.h"
 #include "elastos/droid/settings/wifi/WifiSettings.h"
-#include "elastos/droid/settings/wifi/WpsDialog.h"
+#include "elastos/droid/settings/wifi/CWpsDialog.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "../R.h"
@@ -60,11 +61,11 @@ const String AdvancedWifiSettings::KEY_WIFI_DIRECT("wifi_direct");
 const String AdvancedWifiSettings::KEY_WPS_PUSH("wps_push_button");
 const String AdvancedWifiSettings::KEY_WPS_PIN("wps_pin_entry");
 
-Int32 AdvancedWifiSettings::WpsFragment::mWpsSetup;
-
 //===============================================================================
 //                  AdvancedWifiSettings::WpsFragment
 //===============================================================================
+
+Int32 AdvancedWifiSettings::WpsFragment::mWpsSetup;
 
 AdvancedWifiSettings::WpsFragment::WpsFragment()
 {}
@@ -80,9 +81,8 @@ ECode AdvancedWifiSettings::WpsFragment::constructor()
 ECode AdvancedWifiSettings::WpsFragment::constructor(
     /* [in] */ Int32 wpsSetup)
 {
-    DialogFragment::constructor();
     mWpsSetup = wpsSetup;
-    return NOERROR;
+    return DialogFragment::constructor();
 }
 
 ECode AdvancedWifiSettings::WpsFragment::OnCreateDialog(
@@ -92,10 +92,7 @@ ECode AdvancedWifiSettings::WpsFragment::OnCreateDialog(
     VALIDATE_NOT_NULL(dialog)
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    AutoPtr<WpsDialog> wd = new WpsDialog(IContext::Probe(activity), mWpsSetup);
-    *dialog = IDialog::Probe(wd);
-    REFCOUNT_ADD(*dialog);
-    return NOERROR;
+    return CWpsDialog::New(IContext::Probe(activity), mWpsSetup, dialog);
 }
 
 //===============================================================================
@@ -146,8 +143,8 @@ ECode AdvancedWifiSettings::InitOnPreferenceClickListener::OnPreferenceClick(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<WpsFragment> wpsFragment = new WpsFragment();
-    wpsFragment->constructor(mId);
+    AutoPtr<CAdvancedWifiSettingsWpsFragment> wpsFragment;
+    CAdvancedWifiSettingsWpsFragment::NewByFriend(mId, (CAdvancedWifiSettingsWpsFragment**)&wpsFragment);
     AutoPtr<IFragmentManager> manager;
     mHost->GetFragmentManager((IFragmentManager**)&manager);
     wpsFragment->Show(manager, mKey);
@@ -162,16 +159,16 @@ ECode AdvancedWifiSettings::InitOnPreferenceClickListener::OnPreferenceClick(
 CAR_INTERFACE_IMPL(AdvancedWifiSettings, SettingsPreferenceFragment, IPreferenceOnPreferenceChangeListener);
 
 AdvancedWifiSettings::AdvancedWifiSettings()
-{
-    mReceiver = new MyBroadcastReceiver(this);
-}
+{}
 
 AdvancedWifiSettings::~AdvancedWifiSettings()
 {}
 
 ECode AdvancedWifiSettings::constructor()
 {
-    return NOERROR;
+    mReceiver = new MyBroadcastReceiver(this);
+    mReceiver->constructor();
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode AdvancedWifiSettings::OnCreate(

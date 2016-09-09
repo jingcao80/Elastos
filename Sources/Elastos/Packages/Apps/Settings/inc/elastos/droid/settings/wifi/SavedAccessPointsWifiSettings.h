@@ -3,7 +3,7 @@
 
 #include "elastos/droid/settings/SettingsPreferenceFragment.h"
 #include "elastos/droid/settings/search/BaseSearchIndexProvider.h"
-#include "elastos/droid/settings/wifi/WifiDialog.h"
+#include "elastos/droid/settings/wifi/CWifiDialog.h"
 
 using Elastos::Droid::Settings::Search::BaseSearchIndexProvider;
 using Elastos::Droid::Settings::Search::IIndexable;
@@ -108,7 +108,7 @@ private:
 private:
     static const String TAG;
 
-    AutoPtr<WifiDialog> mDialog;
+    AutoPtr<CWifiDialog> mDialog;
     AutoPtr<IWifiManager> mWifiManager;
     AutoPtr<IAccessPoint> mDlgAccessPoint;
     AutoPtr<IBundle> mAccessPointSavedState;

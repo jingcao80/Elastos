@@ -22,11 +22,29 @@ namespace Dashboard {
 
 class DashboardTileView
     : public FrameLayout
-    , public IViewOnClickListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("DashboardTileView::InnerListener")
+
+        InnerListener(
+            /* [in] */ DashboardTileView* host);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        DashboardTileView* mHost;
+    };
+
+public:
     DashboardTileView();
 
     ~DashboardTileView();

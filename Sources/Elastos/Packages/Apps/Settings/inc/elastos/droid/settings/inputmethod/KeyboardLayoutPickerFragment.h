@@ -24,11 +24,37 @@ namespace Inputmethod {
 
 class KeyboardLayoutPickerFragment
     : public SettingsPreferenceFragment
-    , public IInputDeviceListener
 {
 public:
-    CAR_INTERFACE_DECL();
+    class InnerListener
+        : public Object
+        , public IInputDeviceListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("KeyboardLayoutPickerFragment::InnerListener")
+
+        InnerListener(
+            /* [in] */ KeyboardLayoutPickerFragment* host);
+
+        //@Override
+        CARAPI OnInputDeviceAdded(
+            /* [in] */ Int32 deviceId);
+
+        //@Override
+        CARAPI OnInputDeviceChanged(
+            /* [in] */ Int32 deviceId);
+
+        //@Override
+        CARAPI OnInputDeviceRemoved(
+            /* [in] */ Int32 deviceId);
+
+    private:
+        KeyboardLayoutPickerFragment* mHost;
+    };
+
+public:
     KeyboardLayoutPickerFragment();
 
     ~KeyboardLayoutPickerFragment();
@@ -83,6 +109,8 @@ private:
     // HashMap<CheckBoxPreference, KeyboardLayout> mPreferenceMap =
             // new HashMap<CheckBoxPreference, KeyboardLayout>();
     AutoPtr<IHashMap> mPreferenceMap;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Inputmethod

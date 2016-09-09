@@ -106,6 +106,23 @@ const Int32 ManageApplications::MENU_OPTIONS_BASE;
 const Int32 ManageApplications::LIST_TYPE_MISSING = -1;
 
 //===============================================================================
+//                  ManageApplications::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(ManageApplications::InnerListener, Object, IDialogInterfaceOnDismissListener)
+
+ManageApplications::InnerListener::InnerListener(
+    /* [in] */ ManageApplications* host)
+    : mHost(host)
+{}
+
+ECode ManageApplications::InnerListener::OnDismiss(
+    /* [in] */ IDialogInterface* dialog)
+{
+    return mHost->OnDismiss(dialog);
+}
+
+//===============================================================================
 //                  ManageApplications::TabInfo
 //===============================================================================
 
@@ -1144,8 +1161,8 @@ ECode ManageApplications::InitServiceConnection::OnServiceDisconnected(
 //                  ManageApplications
 //===============================================================================
 
-CAR_INTERFACE_IMPL_4(ManageApplications, Fragment, IManageApplicationsAppClickListener,
-        IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener, IAdapterViewOnItemSelectedListener)
+CAR_INTERFACE_IMPL_3(ManageApplications, Fragment, IManageApplicationsAppClickListener,
+        IDialogInterfaceOnClickListener, IAdapterViewOnItemSelectedListener)
 
 ManageApplications::ManageApplications()
     : mSortOrder(SORT_ORDER_ALPHA)
@@ -1619,7 +1636,8 @@ void ManageApplications::BuildResetDialog()
         builder->SetNegativeButton(R::string::cancel, NULL);
         mResetDialog = NULL;
         builder->Show((IAlertDialog**)&mResetDialog);
-        IDialog::Probe(mResetDialog)->SetOnDismissListener(this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        IDialog::Probe(mResetDialog)->SetOnDismissListener(listener);
     }
 }
 

@@ -28,9 +28,29 @@ namespace Wifi {
 
 class WifiEnabler
     : public Object
-    , public ISwitchBarOnSwitchChangeListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public ISwitchBarOnSwitchChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("WifiEnabler::InnerListener")
+
+        InnerListener(
+            /* [in] */ WifiEnabler* host);
+
+        //@Override
+        CARAPI OnSwitchChanged(
+            /* [in] */ ISwitch* switchView,
+            /* [in] */ Boolean isChecked);
+
+    private:
+        WifiEnabler* mHost;
+    };
+
     class InitBroadcastReceiver
         : public BroadcastReceiver
     {
@@ -71,8 +91,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
-
     WifiEnabler(
         /* [in] */ IContext* context,
         /* [in] */ ISwitchBar* switchBar);
@@ -121,6 +139,8 @@ private:
     static const Int32 EVENT_UPDATE_INDEX = 0;
 
     AutoPtr<Handler> mHandler;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Wifi

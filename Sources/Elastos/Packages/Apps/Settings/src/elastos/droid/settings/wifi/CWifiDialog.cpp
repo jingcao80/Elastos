@@ -1,28 +1,27 @@
-#include "elastos/droid/settings/wifi/WifiDialog.h"
+#include "elastos/droid/settings/wifi/CWifiDialog.h"
 #include "../R.h"
-#include <elastos/utility/logging/Logger.h>
-
-using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Settings {
 namespace Wifi {
 
-const Int32 WifiDialog::BUTTON_SUBMIT = IDialogInterface::BUTTON_POSITIVE;
-const Int32 WifiDialog::BUTTON_FORGET = IDialogInterface::BUTTON_NEUTRAL;
+const Int32 CWifiDialog::BUTTON_SUBMIT = IDialogInterface::BUTTON_POSITIVE;
+const Int32 CWifiDialog::BUTTON_FORGET = IDialogInterface::BUTTON_NEUTRAL;
 
-CAR_INTERFACE_IMPL(WifiDialog, AlertDialog, IWifiConfigUiBase);
+CAR_INTERFACE_IMPL(CWifiDialog, AlertDialog, IWifiConfigUiBase);
 
-WifiDialog::WifiDialog()
+CAR_OBJECT_IMPL(CWifiDialog)
+
+CWifiDialog::CWifiDialog()
     : mEdit(FALSE)
     , mHideSubmitButton(FALSE)
 {}
 
-WifiDialog::~WifiDialog()
+CWifiDialog::~CWifiDialog()
 {}
 
-ECode WifiDialog::constructor(
+ECode CWifiDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IDialogInterfaceOnClickListener* listener,
     /* [in] */ IAccessPoint* accessPoint,
@@ -34,7 +33,7 @@ ECode WifiDialog::constructor(
     return NOERROR;
 }
 
-ECode WifiDialog::constructor(
+ECode CWifiDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IDialogInterfaceOnClickListener* listener,
     /* [in] */ IAccessPoint* accessPoint,
@@ -48,7 +47,7 @@ ECode WifiDialog::constructor(
     return NOERROR;
 }
 
-ECode WifiDialog::GetController(
+ECode CWifiDialog::GetController(
     /* [out] */ IWifiConfigController** controller)
 {
     VALIDATE_NOT_NULL(controller)
@@ -57,7 +56,7 @@ ECode WifiDialog::GetController(
     return NOERROR;
 }
 
-ECode WifiDialog::OnCreate(
+ECode CWifiDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     AutoPtr<ILayoutInflater> inflate;
@@ -80,7 +79,7 @@ ECode WifiDialog::OnCreate(
     }
 }
 
-ECode WifiDialog::IsEdit(
+ECode CWifiDialog::IsEdit(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -88,7 +87,7 @@ ECode WifiDialog::IsEdit(
     return NOERROR;
 }
 
-ECode WifiDialog::GetSubmitButton(
+ECode CWifiDialog::GetSubmitButton(
     /* [out] */ IButton** button)
 {
     VALIDATE_NOT_NULL(button)
@@ -96,59 +95,59 @@ ECode WifiDialog::GetSubmitButton(
     return GetButton(BUTTON_SUBMIT, button);
 }
 
-ECode WifiDialog::GetForgetButton(
+ECode CWifiDialog::GetForgetButton(
     /* [out] */ IButton** button)
 {
     VALIDATE_NOT_NULL(button)
     return GetButton(BUTTON_FORGET, button);
 }
 
-ECode WifiDialog::GetCancelButton(
+ECode CWifiDialog::GetCancelButton(
     /* [out] */ IButton** button)
 {
     VALIDATE_NOT_NULL(button)
     return GetButton(BUTTON_NEGATIVE, button);
 }
 
-ECode WifiDialog::SetSubmitButton(
+ECode CWifiDialog::SetSubmitButton(
     /* [in] */ ICharSequence* text)
 {
     return SetButton(BUTTON_SUBMIT, text, mListener);
 }
 
-ECode WifiDialog::SetForgetButton(
+ECode CWifiDialog::SetForgetButton(
     /* [in] */ ICharSequence* text)
 {
     return SetButton(BUTTON_FORGET, text, mListener);
 }
 
-ECode WifiDialog::SetCancelButton(
+ECode CWifiDialog::SetCancelButton(
     /* [in] */ ICharSequence* text)
 {
     return SetButton(BUTTON_NEGATIVE, text, mListener);
 }
 
 // the under method use to fix compile error
-ECode WifiDialog::GetContext(
+ECode CWifiDialog::GetContext(
     /* [out] */ IContext** context)
 {
     VALIDATE_NOT_NULL(context)
     return AlertDialog::GetContext(context);
 }
 
-ECode WifiDialog::SetTitle(
+ECode CWifiDialog::SetTitle(
     /* [in] */ Int32 id)
 {
     return AlertDialog::SetTitle(id);
 }
 
-ECode WifiDialog::SetTitle(
+ECode CWifiDialog::SetTitle(
     /* [in] */ ICharSequence* title)
 {
     return AlertDialog::SetTitle(title);
 }
 
-ECode WifiDialog::GetLayoutInflater(
+ECode CWifiDialog::GetLayoutInflater(
     /* [out] */ ILayoutInflater** inflater)
 {
     VALIDATE_NOT_NULL(inflater);

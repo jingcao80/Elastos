@@ -41,6 +41,33 @@ const String InputMethodPreference::TAG("InputMethodPreference");
 const String InputMethodPreference::EMPTY_TEXT("");
 
 //===============================================================================
+//                  InputMethodPreference::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL_2(InputMethodPreference::InnerListener, Object,
+        IPreferenceOnPreferenceClickListener, IPreferenceOnPreferenceChangeListener)
+
+InputMethodPreference::InnerListener::InnerListener(
+    /* [in] */ InputMethodPreference* host)
+    : mHost(host)
+{}
+
+ECode InputMethodPreference::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* newValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(preference, newValue, result);
+}
+
+ECode InputMethodPreference::InnerListener::OnPreferenceClick(
+    /* [in] */ IPreference* preference,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceClick(preference, result);
+}
+
+//===============================================================================
 //                  InputMethodPreference::DialogInterfaceOnClickListener
 //===============================================================================
 
@@ -81,8 +108,7 @@ ECode InputMethodPreference::DialogInterfaceOnClickListener::OnClick(
 //                  InputMethodPreference
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(InputMethodPreference, SwitchPreference, IInputMethodPreference,
-        IPreferenceOnPreferenceClickListener, IPreferenceOnPreferenceChangeListener);
+CAR_INTERFACE_IMPL(InputMethodPreference, SwitchPreference, IInputMethodPreference);
 
 InputMethodPreference::InputMethodPreference()
     : mHasPriorityInSorting(FALSE)
@@ -139,8 +165,9 @@ ECode InputMethodPreference::constructor(
     Boolean res;
     mHasPriorityInSorting = (imu->IsSystemIme(imi, &res), res)
             && mInputMethodSettingValues->IsValidSystemNonAuxAsciiCapableIme(imi, context);
-    SetOnPreferenceClickListener(this);
-    SetOnPreferenceChangeListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    SetOnPreferenceClickListener(listener);
+    SetOnPreferenceChangeListener(listener);
     return NOERROR;
 }
 

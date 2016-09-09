@@ -8,7 +8,6 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IIActivityManager;
@@ -29,7 +28,6 @@ using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -89,7 +87,7 @@ Int32 InputMethodSettingValuesWrapper::GetDefaultCurrentUserId()
         return id;
     }
     // } catch (RemoteException e) {
-    Slogger::W(TAG, "Couldn't get current user ID; guessing it's 0. 0x%08x", ec);
+    Logger::W(TAG, "Couldn't get current user ID; guessing it's 0. 0x%08x", ec);
     // }
     return 0;
 }

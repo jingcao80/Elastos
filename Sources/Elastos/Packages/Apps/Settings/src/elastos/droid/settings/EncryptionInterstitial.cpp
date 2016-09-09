@@ -33,10 +33,27 @@ const String EncryptionInterstitial::EXTRA_PASSWORD_QUALITY("extra_password_qual
 const Int32 EncryptionInterstitial::EncryptionInterstitialFragment::ACCESSIBILITY_WARNING_DIALOG = 1;
 
 //===============================================================================
+//         EncryptionInterstitial::EncryptionInterstitialFragment::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(EncryptionInterstitial::EncryptionInterstitialFragment::InnerListener, Object, IViewOnClickListener)
+
+EncryptionInterstitial::EncryptionInterstitialFragment::InnerListener::InnerListener(
+    /* [in] */ EncryptionInterstitialFragment* host)
+    : mHost(host)
+{}
+
+ECode EncryptionInterstitial::EncryptionInterstitialFragment::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+//===============================================================================
 //                  EncryptionInterstitial::EncryptionInterstitialFragment
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(EncryptionInterstitial::EncryptionInterstitialFragment, SettingsPreferenceFragment, IViewOnClickListener, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL(EncryptionInterstitial::EncryptionInterstitialFragment, SettingsPreferenceFragment, IDialogInterfaceOnClickListener)
 
 EncryptionInterstitial::EncryptionInterstitialFragment::EncryptionInterstitialFragment()
     : mPasswordRequired(FALSE)
@@ -100,10 +117,12 @@ ECode EncryptionInterstitial::EncryptionInterstitialFragment::OnCreateView(
     }
     mEncryptionMessage->SetText(msgId);
 
-    IView::Probe(mRequirePasswordToDecryptButton)->SetOnClickListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
+    IView::Probe(mRequirePasswordToDecryptButton)->SetOnClickListener(listener);
     ITextView::Probe(mRequirePasswordToDecryptButton)->SetText(enableId);
 
-    IView::Probe(mDontRequirePasswordToDecryptButton)->SetOnClickListener(this);
+    IView::Probe(mDontRequirePasswordToDecryptButton)->SetOnClickListener(listener);
     ITextView::Probe(mDontRequirePasswordToDecryptButton)->SetText(disableId);
 
     Boolean res;

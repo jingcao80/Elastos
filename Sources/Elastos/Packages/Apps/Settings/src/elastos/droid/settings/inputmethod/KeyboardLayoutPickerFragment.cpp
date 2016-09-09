@@ -25,12 +25,44 @@ namespace Inputmethod {
 
 const String KeyboardLayoutPickerFragment::EXTRA_INPUT_DEVICE_IDENTIFIER("input_device_identifier");
 
-CAR_INTERFACE_IMPL(KeyboardLayoutPickerFragment, SettingsPreferenceFragment, IInputDeviceListener);
+//===============================================================================
+//                  KeyboardLayoutPickerFragment::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(KeyboardLayoutPickerFragment::InnerListener, Object, IInputDeviceListener);
+
+KeyboardLayoutPickerFragment::InnerListener::InnerListener(
+    /* [in] */ KeyboardLayoutPickerFragment* host)
+    : mHost(host)
+{}
+
+ECode KeyboardLayoutPickerFragment::InnerListener::OnInputDeviceAdded(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceAdded(deviceId);
+}
+
+ECode KeyboardLayoutPickerFragment::InnerListener::OnInputDeviceChanged(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceChanged(deviceId);
+}
+
+ECode KeyboardLayoutPickerFragment::InnerListener::OnInputDeviceRemoved(
+    /* [in] */ Int32 deviceId)
+{
+    return mHost->OnInputDeviceRemoved(deviceId);
+}
+
+//===============================================================================
+//                  KeyboardLayoutPickerFragment
+//===============================================================================
 
 KeyboardLayoutPickerFragment::KeyboardLayoutPickerFragment()
     : mInputDeviceId(-1)
 {
     CHashMap::New((IHashMap**)&mPreferenceMap);
+    mListener = new InnerListener(this);
 }
 
 KeyboardLayoutPickerFragment::~KeyboardLayoutPickerFragment()
@@ -68,7 +100,7 @@ ECode KeyboardLayoutPickerFragment::OnResume()
 {
     SettingsPreferenceFragment::OnResume();
 
-    mIm->RegisterInputDeviceListener(this, NULL);
+    mIm->RegisterInputDeviceListener(mListener, NULL);
 
     String str;
     mInputDeviceIdentifier->GetDescriptor(&str);
@@ -89,7 +121,7 @@ ECode KeyboardLayoutPickerFragment::OnResume()
 
 ECode KeyboardLayoutPickerFragment::OnPause()
 {
-    mIm->UnregisterInputDeviceListener(this);
+    mIm->UnregisterInputDeviceListener(mListener);
     mInputDeviceId = -1;
 
     SettingsPreferenceFragment::OnPause();

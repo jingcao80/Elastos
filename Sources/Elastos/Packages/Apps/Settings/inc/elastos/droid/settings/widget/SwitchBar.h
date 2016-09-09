@@ -26,10 +26,34 @@ namespace Widget {
 class SwitchBar
     : public LinearLayout
     , public ISwitchBar
-    , public ICompoundButtonOnCheckedChangeListener
-    , public IViewOnClickListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public ICompoundButtonOnCheckedChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("SwitchBar::InnerListener")
+
+        InnerListener(
+            /* [in] */ SwitchBar* host);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+        //@Override
+        CARAPI OnCheckedChanged(
+            /* [in] */ ICompoundButton* buttonView,
+            /* [in] */ Boolean isChecked);
+
+    private:
+        SwitchBar* mHost;
+    };
+
     class SavedState
         : public View::BaseSavedState
         , public ISwitchBarSavedState
@@ -167,6 +191,8 @@ private:
     AutoPtr<IArrayList> mSwitchChangeListeners;
 
     static AutoPtr< ArrayOf<Int32> > MARGIN_ATTRIBUTES;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Widget

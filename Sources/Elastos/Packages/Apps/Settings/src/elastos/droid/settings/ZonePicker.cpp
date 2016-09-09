@@ -257,7 +257,7 @@ ZonePicker::~ZonePicker()
 
 ECode ZonePicker::constructor()
 {
-    return NOERROR;
+    return ListFragment::constructor();
 }
 
 AutoPtr<ISimpleAdapter> ZonePicker::ConstructTimezoneAdapter(

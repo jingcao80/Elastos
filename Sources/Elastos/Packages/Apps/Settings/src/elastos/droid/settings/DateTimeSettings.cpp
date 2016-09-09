@@ -111,7 +111,7 @@ DateTimeSettings::~DateTimeSettings()
 
 ECode DateTimeSettings::constructor()
 {
-    return NOERROR;
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode DateTimeSettings::OnCreate(

@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_SETTINGS_INPUTMETHOD_CSPELLCHECKERSPREFERENCE_H__
 
 #include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "_Elastos_Droid_Settings_Inputmethod_CSpellCheckerPreference.h"
 #include "elastos/droid/preference/Preference.h"
@@ -29,8 +30,28 @@ namespace Inputmethod {
 CarClass(CSpellCheckerPreference)
     , public Elastos::Droid::Preference::Preference
     , public ISpellCheckerPreference
-    , public IViewOnClickListener
 {
+public:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CSpellCheckerPreference::InnerListener")
+
+        InnerListener(
+            /* [in] */ CSpellCheckerPreference* host);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CSpellCheckerPreference* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

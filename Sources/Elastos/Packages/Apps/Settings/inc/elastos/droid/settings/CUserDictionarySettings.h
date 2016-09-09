@@ -40,13 +40,13 @@ private:
 
         TO_STRING_IMPL("CUserDictionarySettings::MyAdapter")
 
-        MyAdapter(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ Int32 layout,
             /* [in] */ ICursor* c,
             /* [in] */ ArrayOf<String>* from,
             /* [in] */ ArrayOf<Int32>* to,
-            /* [in] */ CUserDictionarySettings* settings);
+            /* [in] */ CUserDictionarySettings* host);
 
         ~MyAdapter();
 
@@ -68,6 +68,8 @@ private:
         AutoPtr<IAlphabetIndexer> mIndexer;
 
         AutoPtr<ISimpleCursorAdapterViewBinder> mViewBinder;
+
+        CUserDictionarySettings* mHost;
     };
 
     class ViewBinder

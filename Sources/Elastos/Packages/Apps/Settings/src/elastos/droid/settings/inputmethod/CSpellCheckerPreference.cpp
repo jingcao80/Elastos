@@ -23,7 +23,28 @@ namespace Droid {
 namespace Settings {
 namespace Inputmethod {
 
-CAR_INTERFACE_IMPL_2(CSpellCheckerPreference, Elastos::Droid::Preference::Preference, ISpellCheckerPreference, IViewOnClickListener);
+//===============================================================================
+//                  CSpellCheckerPreference::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(CSpellCheckerPreference::InnerListener, Object, IViewOnClickListener)
+
+CSpellCheckerPreference::InnerListener::InnerListener(
+    /* [in] */ CSpellCheckerPreference* host)
+    : mHost(host)
+{}
+
+ECode CSpellCheckerPreference::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+//===============================================================================
+//                  CSpellCheckerPreference
+//===============================================================================
+
+CAR_INTERFACE_IMPL(CSpellCheckerPreference, Elastos::Droid::Preference::Preference, ISpellCheckerPreference);
 
 CAR_OBJECT_IMPL(CSpellCheckerPreference)
 
@@ -77,9 +98,10 @@ ECode CSpellCheckerPreference::OnBindView(
     view->FindViewById(R::id::pref_radio, (IView**)&tmp);
     mRadioButton = IRadioButton::Probe(tmp);
     view->FindViewById(R::id::pref_left_button, (IView**)&mPrefLeftButton);
-    mPrefLeftButton->SetOnClickListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mPrefLeftButton->SetOnClickListener(listener);
     view->FindViewById(R::id::pref_right_button, (IView**)&mSettingsButton);
-    mSettingsButton->SetOnClickListener(this);
+    mSettingsButton->SetOnClickListener(listener);
     UpdateSelectedState(mSelected);
     return NOERROR;
 }
