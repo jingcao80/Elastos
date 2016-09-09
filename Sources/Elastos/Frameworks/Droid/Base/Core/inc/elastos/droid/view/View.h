@@ -6280,7 +6280,7 @@ private:
     AutoPtr<TintInfo> mBackgroundTint;
     AutoPtr<IRenderNode> mBackgroundRenderNode;
     String mTransitionName;
-    AutoPtr<IViewParent> mNestedScrollingParent;
+    IViewParent* mNestedScrollingParent;
 
     AutoPtr< ArrayOf<Int32> > mTempNestedScrollConsumed;
 

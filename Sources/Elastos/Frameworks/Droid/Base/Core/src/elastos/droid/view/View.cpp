@@ -1321,6 +1321,7 @@ View::View()
     , mSendingHoverAccessibilityEvents(FALSE)
     , mLeftPaddingDefined(FALSE)
     , mRightPaddingDefined(FALSE)
+    , mNestedScrollingParent(NULL)
     , mHoldContext(FALSE)
 {
 }
