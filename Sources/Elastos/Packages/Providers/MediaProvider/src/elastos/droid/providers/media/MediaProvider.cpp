@@ -4933,22 +4933,17 @@ ECode MediaProvider::Update(
                    if (count > 0) {
                        // update the paths of any files and folders contained in the directory
                        AutoPtr<ArrayOf<IInterface*> > bindArgs = ArrayOf<IInterface*>::Alloc(6);
-                       AutoPtr<ArrayOf<ICharSequence*> > _bind = ArrayOf<ICharSequence*>::Alloc(6);
-                       (*_bind)[0] = CoreUtils::Convert(newPath);
+                       bindArgs->Set(0, CoreUtils::Convert(newPath));
                        Int32 oldLen = oldPath.GetLength();
-                       (*_bind)[1] = CoreUtils::Convert(StringUtils::ToString(oldLen + 1));
-                       (*_bind)[2] = CoreUtils::Convert(oldPath + "/");
-                       (*_bind)[3] = CoreUtils::Convert(oldPath + "0");
+                       bindArgs->Set(1, CoreUtils::Convert(StringUtils::ToString(oldLen + 1)));
+                       bindArgs->Set(2, CoreUtils::Convert(oldPath + "/"));
+                       bindArgs->Set(3, CoreUtils::Convert(oldPath + "0"));
                        f->GetName(&name);
-                       (*_bind)[4] = CoreUtils::Convert(name);
+                       bindArgs->Set(4, CoreUtils::Convert(name));
                        f->ToString(&name);
-                       (*_bind)[5] = CoreUtils::Convert(StringUtils::ToString(name.ToLowerCase().GetHashCode()));
+                       bindArgs->Set(5, CoreUtils::Convert(StringUtils::ToString(name.ToLowerCase().GetHashCode())));
 
                        dbh->mNumUpdates++;
-                       Int32 bLen = _bind->GetLength();
-                       for(Int32 i = 0; i < bLen; i++) {
-                           bindArgs->Set(i, TO_IINTERFACE((*_bind)[i]));
-                       }
                        db->ExecSQL(String("UPDATE files SET _data=?1||SUBSTR(_data, ?2)") +
                                // also update bucket_display_name
                                ",bucket_display_name=?5" +

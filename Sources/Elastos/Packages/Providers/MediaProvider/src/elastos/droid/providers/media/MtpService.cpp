@@ -268,8 +268,8 @@ ECode MtpService::OnStartCommand(
     AutoLock syncLock(mBinder);
     UpdateDisabledStateLocked();
     Boolean flag = FALSE;
-    intent->GetBooleanExtra(IUsbManager::USB_FUNCTION_PTP, FALSE, &flag);
-    mPtpMode = (intent == NULL ? FALSE : flag);
+    mPtpMode = (intent == NULL ? FALSE : (intent->GetBooleanExtra(
+        IUsbManager::USB_FUNCTION_PTP, FALSE, &flag), flag));
     AutoPtr<ArrayOf<String> > subdirs;
     if (mPtpMode) {
         Int32 count = PTP_DIRECTORIES->GetLength();

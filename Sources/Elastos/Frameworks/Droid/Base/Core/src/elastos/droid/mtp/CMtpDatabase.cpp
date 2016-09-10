@@ -1109,7 +1109,7 @@ CMtpDatabase::CMtpDatabase()
     PATH_FORMAT_PROJECTION->Set(1, IMediaStoreMediaColumns::DATA);
     PATH_FORMAT_PROJECTION->Set(2, IMediaStoreFilesFileColumns::FORMAT);
 
-    OBJECT_INFO_PROJECTION = ArrayOf<String>::Alloc(6);
+    OBJECT_INFO_PROJECTION = ArrayOf<String>::Alloc(7);
     OBJECT_INFO_PROJECTION->Set(0, IBaseColumns::ID);
     OBJECT_INFO_PROJECTION->Set(1, IMediaStoreFilesFileColumns::STORAGE_ID);
     OBJECT_INFO_PROJECTION->Set(2, IMediaStoreFilesFileColumns::FORMAT);
