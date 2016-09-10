@@ -1271,7 +1271,7 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
                     AutoPtr<IInterface> obj;
                     windows->Get(newIdx, (IInterface**)&obj);
                     tokenWindowsPos = IndexOfWinInWindowList(
-                            To_WindowState(obj), token->mWindows);
+                            To_WindowState(obj), token->mWindows) + 1;
                 }
                 mWindowsChanged = TRUE;
             }
@@ -6239,7 +6239,7 @@ Int32 CWindowManagerService::ReAddAppWindowsLocked(
         token->mWindows->Get(i, (IInterface**)&obj);
         AutoPtr<WindowState> win = To_WindowState(obj);
         AutoPtr<DisplayContent> winDisplayContent = win->GetDisplayContent();
-        if (win->mDisplayContent.Get() == displayContent || winDisplayContent == NULL) {
+        if (winDisplayContent.Get() == displayContent || winDisplayContent == NULL) {
             win->mDisplayContent = displayContent;
             index = ReAddWindowLocked(index, win);
         }

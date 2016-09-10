@@ -445,7 +445,7 @@ ECode CWindowManagerGlobal::CloseAll(
             mRoots->Get(i, (IInterface**)&temp);
             IViewRootImpl* root = IViewRootImpl::Probe(temp);
 
-            Logger::I("foo", "Force closing %d" + (Int32)root);
+            Logger::I("foo", "Force closing %d", (Int32)root);
             if (who != NULL) {
                 // WindowLeaked leak = new WindowLeaked(
                 //         what + " " + who + " has leaked window "
