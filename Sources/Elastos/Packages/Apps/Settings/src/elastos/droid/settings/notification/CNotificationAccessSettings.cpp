@@ -13,10 +13,6 @@ namespace Droid {
 namespace Settings {
 namespace Notification {
 
-//===============================================================================
-//                  CNotificationAccessSettings
-//===============================================================================
-
 const String CNotificationAccessSettings::TAG("CNotificationAccessSettings");
 
 const AutoPtr<ManagedServiceSettings::Config> CNotificationAccessSettings::CONFIG = GetNotificationListenerConfig();

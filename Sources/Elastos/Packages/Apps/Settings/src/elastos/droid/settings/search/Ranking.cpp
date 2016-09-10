@@ -99,10 +99,10 @@ static AutoPtr<IHashMap> InitsRankMap()
             String("Elastos.Droid.Settings.Notification.CNotificationSettings"),
             Ranking::RANK_NOTIFICATIONS);
     InitPut(map,
-            String("Elastos.Droid.Settings.Notification.OtherSoundSettings"),
+            String("Elastos.Droid.Settings.Notification.COtherSoundSettings"),
             Ranking::RANK_NOTIFICATIONS);
     InitPut(map,
-            String("Elastos.Droid.Settings.Notification.ZenModeSettings"),
+            String("Elastos.Droid.Settings.Notification.CZenModeSettings"),
             Ranking::RANK_NOTIFICATIONS);
 
     // Memory

@@ -1,33 +1,44 @@
+#ifndef __ELASTOS_DROID_SETTINGS_PINNEDHEADERLISTFRAGMENT_H__
+#define __ELASTOS_DROID_SETTINGS_PINNEDHEADERLISTFRAGMENT_H__
 
+#include "elastos/droid/app/ListFragment.h"
 
-package com.android.settings;
-
-using Elastos::Droid::App::IListFragment;
+using Elastos::Droid::App::ListFragment;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::View::IViewGroup;
+
+namespace Elastos {
+namespace Droid {
+namespace Settings {
 
 /**
  * A ListFragment with a pinned header
  */
-public class PinnedHeaderListFragment extends ListFragment {
+class PinnedHeaderListFragment
+    : public ListFragment
+{
+public:
+    PinnedHeaderListFragment();
 
-    public PinnedHeaderListFragment() {
-        Super();
-    }
+    virtual ~PinnedHeaderListFragment();
+
+    CARAPI constructor();
 
     /**
      * Set the pinned header view. This can only be done when the ListView is already created.
      *
      * @param pinnedHeaderView the view to be used for the pinned header view.
      */
-    CARAPI SetPinnedHeaderView(View pinnedHeaderView) {
-        ((ViewGroup) GetListView()->GetParent()).AddView(pinnedHeaderView, 0);
-    }
+    virtual CARAPI SetPinnedHeaderView(
+        /* [in] */ IView* pinnedHeaderView);
 
     /**
      * Clear the pinned header view. This can only be done when the ListView is already created.
      */
-    CARAPI ClearPinnedHeaderView() {
-        ((ViewGroup) GetListView()->GetParent()).RemoveViewAt(0);
-    }
-}
+    virtual CARAPI ClearPinnedHeaderView();
+};
+
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_PINNEDHEADERLISTFRAGMENT_H__

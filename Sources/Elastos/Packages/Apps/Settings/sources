@@ -28,6 +28,7 @@ SOURCES += DateTimeSettingsSetupWizard.cpp
 SOURCES += HelpUtils.cpp
 SOURCES += RestrictedSettingsFragment.cpp
 SOURCES += SettingsPreferenceFragment.cpp
+SOURCES += PinnedHeaderListFragment.cpp
 SOURCES += ProxySelector.cpp
 SOURCES += WirelessSettings.cpp
 SOURCES += SettingsActivity.cpp

@@ -1,6 +1,10 @@
+#ifndef __ELASTOS_DROID_SETTINGS_NOTIFICATION_SETTINGPREF_H__
+#define __ELASTOS_DROID_SETTINGS_NOTIFICATION_SETTINGPREF_H__
 
+#include "Elastos.Droid.Net.h"
+#include "elastos/droid/settings/SettingsPreferenceFragment.h"
 
-package com.android.settings.notification;
+using Elastos::Droid::Settings::SettingsPreferenceFragment;
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
@@ -8,130 +12,144 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::ITwoStatePreference;
-using Elastos::Droid::Preference::Preference::IOnPreferenceChangeListener;
-using Elastos::Droid::Provider::Settings::IGlobal;
-using Elastos::Droid::Provider::Settings::ISystem;
+using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
 
-using Elastos::Droid::Settings::ISettingsPreferenceFragment;
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Notification {
 
 /** Helper to manage a two-state or dropdown preference bound to a global or system setting. */
-public class SettingPref {
-    public static const Int32 TYPE_GLOBAL = 1;
-    public static const Int32 TYPE_SYSTEM = 2;
+class SettingPref
+    : public Object
+    , public ISettingPref
+{
+private:
+    class PreferenceOnPreferenceChangeListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        TO_STRING_IMPL("SettingPref::PreferenceOnPreferenceChangeListener")
 
-    protected final Int32 mType;
-    private final String mKey;
-    protected final String mSetting;
-    protected final Int32 mDefault;
-    private final Int32[] mValues;
-    private final Uri mUri;
+        CAR_INTERFACE_DECL()
 
-    protected TwoStatePreference mTwoState;
-    protected DropDownPreference mDropDown;
+        PreferenceOnPreferenceChangeListener(
+            /* [in] */ SettingPref* host,
+            /* [in] */ IContext* context);
 
-    public SettingPref(Int32 type, String key, String setting, Int32 def, Int32... values) {
-        mType = type;
-        mKey = key;
-        mSetting = setting;
-        mDefault = def;
-        mValues = values;
-        mUri = GetUriFor(mType, mSetting);
-    }
+        //@Override
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* newValue,
+            /* [out] */ Boolean* result);
 
-    public Boolean IsApplicable(Context context) {
-        return TRUE;
-    }
+    private:
+        SettingPref* mHost;
+        AutoPtr<IContext> mContext;
+    };
 
-    protected String GetCaption(Resources res, Int32 value) {
-        throw new UnsupportedOperationException();
-    }
+    class DropDownPreferenceCallback
+        : public Object
+        , public IDropDownPreferenceCallback
+    {
+    public:
+        TO_STRING_IMPL("SettingPref::DropDownPreferenceCallback")
 
-    public Preference Init(SettingsPreferenceFragment settings) {
-        final Context context = settings->GetActivity();
-        Preference p = settings->GetPreferenceScreen()->FindPreference(mKey);
-        if (p != NULL && !IsApplicable(context)) {
-            settings->GetPreferenceScreen()->RemovePreference(p);
-            p = NULL;
-        }
-        if (p instanceof TwoStatePreference) {
-            mTwoState = (TwoStatePreference) p;
-        } else if (p instanceof DropDownPreference) {
-            mDropDown = (DropDownPreference) p;
-            for (Int32 value : mValues) {
-                mDropDown->AddItem(GetCaption(context->GetResources(), value), value);
-            }
-        }
-        Update(context);
-        if (mTwoState != NULL) {
-            p->SetOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-                //@Override
-                public Boolean OnPreferenceChange(Preference preference, Object newValue) {
-                    SetSetting(context, (Boolean) newValue ? 1 : 0);
-                    return TRUE;
-                }
-            });
-            return mTwoState;
-        }
-        if (mDropDown != NULL) {
-            mDropDown->SetCallback(new DropDownPreference->Callback() {
-                //@Override
-                public Boolean OnItemSelected(Int32 pos, Object value) {
-                    return SetSetting(context, (Integer) value);
-                }
-            });
-            return mDropDown;
-        }
-        return NULL;
-    }
+        CAR_INTERFACE_DECL()
 
-    protected Boolean SetSetting(Context context, Int32 value) {
-        return PutInt(mType, context->GetContentResolver(), mSetting, value);
-    }
+        DropDownPreferenceCallback(
+            /* [in] */ SettingPref* host,
+            /* [in] */ IContext* context);
 
-    public Uri GetUri() {
-        return mUri;
-    }
+        //@Override
+        CARAPI OnItemSelected(
+            /* [in] */ Int32 pos,
+            /* [in] */ IInterface* value,
+            /* [out] */ Boolean* result);
 
-    public String GetKey() {
-        return mKey;
-    }
+    private:
+        SettingPref* mHost;
+        AutoPtr<IContext> mContext;
+    };
 
-    CARAPI Update(Context context) {
-        final Int32 val = GetInt(mType, context->GetContentResolver(), mSetting, mDefault);
-        if (mTwoState != NULL) {
-            mTwoState->SetChecked(val != 0);
-        } else if (mDropDown != NULL) {
-            mDropDown->SetSelectedValue(val);
-        }
-    }
+public:
+    TO_STRING_IMPL("SettingPref")
 
-    private static Uri GetUriFor(Int32 type, String setting) {
-        Switch(type) {
-            case TYPE_GLOBAL:
-                return Global->GetUriFor(setting);
-            case TYPE_SYSTEM:
-                return System->GetUriFor(setting);
-        }
-        throw new IllegalArgumentException();
-    }
+    CAR_INTERFACE_DECL()
 
-    protected static Boolean PutInt(Int32 type, ContentResolver cr, String setting, Int32 value) {
-        Switch(type) {
-            case TYPE_GLOBAL:
-                return Global->PutInt(cr, setting, value);
-            case TYPE_SYSTEM:
-                return System->PutInt(cr, setting, value);
-        }
-        throw new IllegalArgumentException();
-    }
+    SettingPref(
+        /* [in] */ Int32 type,
+        /* [in] */ const String& key,
+        /* [in] */ const String& setting,
+        /* [in] */ Int32 def,
+        /* [in] */ ArrayOf<Int32>* values);
 
-    protected static Int32 GetInt(Int32 type, ContentResolver cr, String setting, Int32 def) {
-        Switch(type) {
-            case TYPE_GLOBAL:
-                return Global->GetInt(cr, setting, def);
-            case TYPE_SYSTEM:
-                return System->GetInt(cr, setting, def);
-        }
-        throw new IllegalArgumentException();
-    }
-}
+    virtual CARAPI_(Boolean) IsApplicable(
+        /* [in] */ IContext* context);
+
+    virtual CARAPI_(AutoPtr<IPreference>) Init(
+        /* [in] */ SettingsPreferenceFragment* settings);
+
+    virtual CARAPI_(AutoPtr<IUri>) GetUri();
+
+    virtual CARAPI_(String) GetKey();
+
+    virtual CARAPI Update(
+        /* [in] */ IContext* context);
+
+protected:
+    virtual CARAPI GetCaption(
+        /* [in] */ IResources* res,
+        /* [in] */ Int32 value,
+        /* [out] */ String* result);
+
+    virtual CARAPI SetSetting(
+        /* [in] */ IContext* context,
+        /* [in] */ Int32 value,
+        /* [out] */ Boolean* result);
+
+    static CARAPI PutInt32(
+        /* [in] */ Int32 type,
+        /* [in] */ IContentResolver* cr,
+        /* [in] */ const String& setting,
+        /* [in] */ Int32 value,
+        /* [out] */ Boolean* result);
+
+    static CARAPI GetInt32(
+        /* [in] */ Int32 type,
+        /* [in] */ IContentResolver* cr,
+        /* [in] */ const String& setting,
+        /* [in] */ Int32 def,
+        /* [out] */ Int32* result);
+
+private:
+    static GetUriFor(
+        /* [in] */ Int32 type,
+        /* [in] */ const String& setting,
+        /* [out] */ IUri** result);
+
+public:
+    static const Int32 TYPE_GLOBAL = 1;
+    static const Int32 TYPE_SYSTEM = 2;
+
+protected:
+    Int32 mType;
+    String mSetting;
+    Int32 mDefault;
+
+    AutoPtr<ITwoStatePreference> mTwoState;
+    AutoPtr<IDropDownPreference> mDropDown;
+
+private:
+    String mKey;
+    AutoPtr< ArrayOf<Int32> > mValues;
+    AutoPtr<IUri> mUri;
+};
+
+} // namespace Notification
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_NOTIFICATION_SETTINGPREF_H__

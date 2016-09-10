@@ -4,6 +4,7 @@ module
     namespace Droid {
     namespace Settings {
     namespace Notification {
+
     /**
      * @Involved
      * interface IComparable

@@ -607,7 +607,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.notification.ZenModeSettings" />
+                android:value="Elastos.Droid.Settings.Notification.CZenModeSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/notification_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -830,7 +830,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.notification.NotificationStation" />
+                android:value="Elastos.Droid.Settings.Notification.CNotificationStation" />
         </activity>
 
         <!--
@@ -1812,7 +1812,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                       android:value="com.android.settings.notification.NotificationAccessSettings" />
+                       android:value="Elastos.Droid.Settings.Notification.CNotificationAccessSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                        android:resource="@id/security_settings" />
         </activity>
@@ -1826,7 +1826,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                       android:value="com.android.settings.notification.ConditionProviderSettings" />
+                       android:value="Elastos.Droid.Settings.Notification.CConditionProviderSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                        android:resource="@id/notification_settings" />
         </activity>
@@ -1890,7 +1890,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.notification.OtherSoundSettings" />
+                android:value="Elastos.Droid.Settings.Notification.COtherSoundSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/notification_settings" />
         </activity>
@@ -1901,7 +1901,7 @@
                 android:exported="true"
                 android:taskAffinity="">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.notification.NotificationAppList" />
+                android:value="Elastos.Droid.Settings.Notification.CNotificationAppList" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/notification_settings" />
         </activity>

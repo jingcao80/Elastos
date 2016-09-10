@@ -7,14 +7,15 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Text.h"
 #include "elastos/droid/settings/inputmethod/CInputMethodAndLanguageSettings.h"
+#include "elastos/droid/settings/notification/COtherSoundSettings.h"
 #include "elastos/droid/settings/notification/CNotificationSettings.h"
-#include "elastos/droid/settings/wifi/CWifiSettings.h"
-#include "elastos/droid/settings/wifi/CSavedAccessPointsWifiSettings.h"
 #include "elastos/droid/settings/search/Index.h"
 #include "elastos/droid/settings/search/IndexDatabaseHelper.h"
 #include "elastos/droid/settings/search/SearchIndexableResources.h"
 #include "elastos/droid/settings/search/Ranking.h"
 #include "elastos/droid/settings/search/SearchIndexableRaw.h"
+#include "elastos/droid/settings/wifi/CSavedAccessPointsWifiSettings.h"
+#include "elastos/droid/settings/wifi/CWifiSettings.h"
 #include "elastos/droid/settings/CSecuritySettings.h"
 #include "elastos/droid/settings/CWirelessSettings.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -33,6 +34,7 @@ using Elastos::Droid::Settings::CSecuritySettings;
 using Elastos::Droid::Settings::CWirelessSettings;
 using Elastos::Droid::Settings::Inputmethod::CInputMethodAndLanguageSettings;
 using Elastos::Droid::Settings::Notification::CNotificationSettings;
+using Elastos::Droid::Settings::Notification::COtherSoundSettings;
 using Elastos::Droid::Settings::Wifi::CWifiSettings;
 using Elastos::Droid::Settings::Wifi::CSavedAccessPointsWifiSettings;
 
@@ -1340,12 +1342,15 @@ void Index::IndexOneRaw(
 Boolean Index::IsIndexableClass(
     /* [in] */ const String& className)
 {
-    if (className.Equals("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings")) return TRUE;
-    if (className.Equals("Elastos.Droid.Settings.Notification.CNotificationSettings")) return TRUE;
-    if (className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")) return TRUE;
-    if (className.Equals("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")) return TRUE;
-    if (className.Equals("Elastos.Droid.Settings.CWirelessSettings")) return TRUE;
-    if (className.Equals("Elastos.Droid.Settings.CSecuritySettings")) return TRUE;
+    if (className.Equals("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings")
+            || className.Equals("Elastos.Droid.Settings.Notification.CNotificationSettings")
+            || className.Equals("Elastos.Droid.Settings.Notification.COtherSoundSettings")
+            || className.Equals("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")
+            || className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")
+            || className.Equals("Elastos.Droid.Settings.CSecuritySettings")
+            || className.Equals("Elastos.Droid.Settings.CWirelessSettings")) {
+        return TRUE;
+    }
     // TODO
     // else if....  other  class implements Indexable
     return FALSE;
@@ -1441,6 +1446,9 @@ AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(const Strin
     }
     else if (className.Equals("Elastos.Droid.Settings.Notification.CNotificationSettings")) {
         return CNotificationSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+    }
+    else if (className.Equals("Elastos.Droid.Settings.Notification.COtherSoundSettings")) {
+        return COtherSoundSettings::GetSEARCH_INDEX_DATA_PROVIDER();
     }
     else if (className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")) {
         return CWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();

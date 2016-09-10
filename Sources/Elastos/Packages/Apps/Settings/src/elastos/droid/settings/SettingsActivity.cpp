@@ -166,22 +166,22 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[40] = "Elastos.Droid.Settings.DataUsageSummary";
     (*args)[41] = "Elastos.Droid.Settings.DreamSettings";
     (*args)[42] = "Elastos.Droid.Settings.Users.UserSettings";
-    (*args)[43] = "Elastos.Droid.Settings.Notification.NotificationAccessSettings";
-    (*args)[44] = "Elastos.Droid.Settings.Notification.ConditionProviderSettings";
+    (*args)[43] = "Elastos.Droid.Settings.Notification.CNotificationAccessSettings";
+    (*args)[44] = "Elastos.Droid.Settings.Notification.CConditionProviderSettings";
     (*args)[45] = "Elastos.Droid.Settings.Print.PrintSettingsFragment";
     (*args)[46] = "Elastos.Droid.Settings.Print.PrintJobSettingsFragment";
     (*args)[47] = "Elastos.Droid.Settings.TrustedCredentialsSettings";
     (*args)[48] = "Elastos.Droid.Settings.Nfc.PaymentSettings";
     (*args)[49] = "Elastos.Droid.Settings.Inputmethod.KeyboardLayoutPickerFragment";
-    (*args)[50] = "Elastos.Droid.Settings.Notification.ZenModeSettings";
+    (*args)[50] = "Elastos.Droid.Settings.Notification.CZenModeSettings";
     (*args)[51] = "Elastos.Droid.Settings.Notification.CNotificationSettings";
     (*args)[52] = "Elastos.Droid.Settings.ChooseLockPassword.ChooseLockPasswordFragment";
     (*args)[53] = "Elastos.Droid.Settings.ChooseLockPattern.ChooseLockPatternFragment";
     (*args)[54] = "Elastos.Droid.Settings.Applications.CInstalledAppDetails";
     (*args)[55] = "Elastos.Droid.Settings.Fuelgauge.BatterySaverSettings";
-    (*args)[56] = "Elastos.Droid.Settings.Notification.NotificationAppList";
+    (*args)[56] = "Elastos.Droid.Settings.Notification.CNotificationAppList";
     (*args)[57] = "Elastos.Droid.Settings.Notification.CAppNotificationSettings";
-    (*args)[58] = "Elastos.Droid.Settings.Notification.OtherSoundSettings";
+    (*args)[58] = "Elastos.Droid.Settings.Notification.COtherSoundSettings";
     (*args)[59] = "Elastos.Droid.Settings.Quicklaunch.QuickLaunchSettings";
     (*args)[60] = "Elastos.Droid.Settings.ApnSettings";
 

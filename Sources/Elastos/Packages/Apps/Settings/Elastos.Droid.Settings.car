@@ -19,6 +19,8 @@ module
     merge("car/elastos/droid/inputmethod/SpellCheckerPreference.car");
     merge("car/elastos/droid/inputmethod/UserDictionaryAddWordFragment.car");
     merge("car/elastos/droid/notification/DropDownPreference.car");
+    merge("car/elastos/droid/notification/NotificationAppList.car");
+    merge("car/elastos/droid/notification/SettingPref.car");
     merge("car/elastos/droid/notification/VolumeSeekBarPreference.car");
     merge("car/elastos/droid/search/Indexable.car");
     merge("car/elastos/droid/search/IndexDatabaseHelper.car");
@@ -489,6 +491,16 @@ module
     namespace Settings {
     namespace Notification {
 
+    class CConditionProviderSettings {
+        constructor();
+
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
     [local]
     class CDropDownPreference {
         constructor(
@@ -528,6 +540,19 @@ module
     }
 
     class CNotificationSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+        interface IIndexable;
+    }
+
+    class COtherSoundSettings {
         constructor();
 
         interface ISettingsPreferenceFragment;

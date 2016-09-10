@@ -5,9 +5,12 @@ INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 INCLUDES += $(MAKEDIR)/../../../../../
 
+SOURCES += CConditionProviderSettings.cpp
 SOURCES += CDropDownPreference.cpp
 SOURCES += CNotificationSettings.cpp
 SOURCES += CVolumeSeekBarPreference.cpp
 SOURCES += ManagedServiceSettings.cpp
 SOURCES += CNotificationAccessSettings.cpp
+SOURCES += COtherSoundSettings.cpp
+SOURCES += SettingPref.cpp
 SOURCES += notification.cpp

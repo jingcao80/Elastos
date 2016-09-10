@@ -83,11 +83,11 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_notifications);
 
-    InitPut(map, String("Elastos.Droid.Settings.Notification.OtherSoundSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Notification.COtherSoundSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_notifications);
 
-    InitPut(map, String("Elastos.Droid.Settings.Notification.ZenModeSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Notification.CZenModeSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_notifications);
 
