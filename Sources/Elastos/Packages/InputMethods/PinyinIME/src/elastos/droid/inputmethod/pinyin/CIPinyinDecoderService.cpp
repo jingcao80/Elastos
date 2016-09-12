@@ -303,8 +303,7 @@ ECode CIPinyinDecoderService::ImSyncGetCapacity(
 ECode CIPinyinDecoderService::ToString(
     /* [out] */ String* str)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    return Object::ToString(str);
 }
 
 } // namespace Pinyin

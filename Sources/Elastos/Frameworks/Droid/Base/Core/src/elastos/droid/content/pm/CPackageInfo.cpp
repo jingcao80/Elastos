@@ -41,11 +41,9 @@ ECode CPackageInfo::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    // return "PackageInfo{"
-    //         + Integer.toHexString(System.identityHashCode(this))
-    //         + " " + packageName + "}";
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    *str = NULL;
+    str->AppendFormat("PackageInfo{%p %s}", this, mPackageName.string());
+    return NOERROR;
 }
 
 ECode CPackageInfo::ReadFromParcel(

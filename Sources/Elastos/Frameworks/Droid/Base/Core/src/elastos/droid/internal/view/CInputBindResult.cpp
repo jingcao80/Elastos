@@ -104,11 +104,10 @@ ECode CInputBindResult::GetUserActionNotificationSequenceNumber(
 ECode CInputBindResult::ToString(
     /* [out] */ String* str)
 {
-    String strMethod;
-    IObject::Probe(mMethod)->ToString(&strMethod);
+    VALIDATE_NOT_NULL(str)
     *str = NULL;
     str->AppendFormat("InputBindResult{%s %s sequence:%d userActionNotificationSequenceNumber:%d}",
-        strMethod.string(), mId.string(), mSequence, mUserActionNotificationSequenceNumber);
+        TO_CSTR(mMethod), mId.string(), mSequence, mUserActionNotificationSequenceNumber);
     return NOERROR;
 }
 

@@ -8725,15 +8725,12 @@ ECode CActivityManagerService::GetIntentSenderLocked(
 
     rec = NULL;
     CPendingIntentRecord::NewByFriend(this, (Handle32)key.Get(), callingUid, (CPendingIntentRecord**)&rec);
-    AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)rec->Probe(EIID_IWeakReferenceSource);
-    AutoPtr<IWeakReference> wr;
-    wrs->GetWeakReference((IWeakReference**)&wr);
-    mIntentSenderRecords[key] = wr;
+    mIntentSenderRecords[key] = rec->mRef;
     if (type == IActivityManager::INTENT_SENDER_ACTIVITY_RESULT) {
         if (activity->mPendingResults == NULL) {
             activity->mPendingResults = new HashSet< AutoPtr<IWeakReference> >(9);
         }
-        activity->mPendingResults->Insert(wr);
+        activity->mPendingResults->Insert(rec->mRef);
     }
     *sender = rec;
     REFCOUNT_ADD(*sender);
