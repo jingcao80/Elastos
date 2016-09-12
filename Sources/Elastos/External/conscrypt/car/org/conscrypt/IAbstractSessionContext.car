@@ -1,0 +1,44 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.ISSLSession;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface ISSLSessionContext
+     */
+    [deprecated]
+    interface IAbstractSessionContext {
+        /** Identifies OpenSSL sessions. */
+        const Int32 OPEN_SSL = 1;
+
+        /**
+         * Converts the given session to bytes.
+         *
+         * @return session data as bytes or null if the session can't be converted
+         */
+        ToBytes(
+            [in] ISSLSession* session,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Creates a session from the given bytes.
+         *
+         * @return a session or null if the session can't be converted
+         */
+        ToSession(
+            [in] ArrayOf<Byte>* data,
+            [in] String host,
+            [in] Int32 port,
+            [out] ISSLSession** result);
+
+        PutSession(
+            [in] ISSLSession* session);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

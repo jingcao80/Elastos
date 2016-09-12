@@ -1,0 +1,29 @@
+
+module
+{
+    using interface Elastos.Security.IPrivateKey;
+    using interface Elastosx.Crypto.ISecretKey;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLEngine {
+        GetPrivateKeyById(
+            [in] String id,
+            [out] IPrivateKey** result);
+
+        GetSecretKeyById(
+            [in] String id,
+            [in] String algorithm,
+            [out] ISecretKey** result);
+    }
+
+    interface IOpenSSLEngineHelper {
+        GetInstance(
+            [in] String engine,
+            [out] IOpenSSLEngine** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

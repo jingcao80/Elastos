@@ -1,0 +1,17 @@
+
+module
+{
+    using interface Elastos.Security.Cert.IX509Certificate;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    [deprecated]
+    interface IChainStrengthAnalyzer {
+        Check(
+            [in] ArrayOf<IX509Certificate*>* chain);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

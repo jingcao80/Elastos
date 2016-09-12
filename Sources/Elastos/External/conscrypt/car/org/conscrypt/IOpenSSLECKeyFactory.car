@@ -1,0 +1,16 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IKeyFactorySpi
+     */
+    interface IOpenSSLECKeyFactory {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

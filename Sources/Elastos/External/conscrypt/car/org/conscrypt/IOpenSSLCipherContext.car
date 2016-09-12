@@ -1,0 +1,14 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLCipherContext {
+        GetContext(
+            [out] Int64* result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

@@ -2,39 +2,81 @@
 module
 {
     importlib("Elastos.CoreLibrary.eco");
+    importlib("Elastos.Droid.Core.eco");
 
+    merge("../../../car/org/conscrypt/IPlatform.car");
+
+    merge("../../../car/org/conscrypt/IAbstractSessionContext.car");
+    merge("../../../car/org/conscrypt/IByteArray.car");
+    merge("../../../car/org/conscrypt/IChainStrengthAnalyzer.car");
+    // merge("../../../car/org/conscrypt/IClientSessionContext.car");
+    merge("../../../car/org/conscrypt/ICryptoUpcalls.car");
+    merge("../../../car/org/conscrypt/IDefaultSSLContextImpl.car");
+    // merge("../../../car/org/conscrypt/IFileClientSessionCache.car");
+    merge("../../../car/org/conscrypt/IKeyManagerFactoryImpl.car");
+    merge("../../../car/org/conscrypt/IKeyManagerImpl.car");
     merge("../../../car/org/conscrypt/INativeCrypto.car");
     merge("../../../car/org/conscrypt/IOpenSSLBIOInputStream.car");
+    merge("../../../car/org/conscrypt/IOpenSSLBIOSink.car");
+    merge("../../../car/org/conscrypt/IOpenSSLBIOSource.car");
+    merge("../../../car/org/conscrypt/IOpenSSLCipher.car");
+    merge("../../../car/org/conscrypt/IOpenSSLCipherContext.car");
+    merge("../../../car/org/conscrypt/IOpenSSLCipherRSA.car");
+    // merge("../../../car/org/conscrypt/IOpenSSLContextImpl.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDHKeyFactory.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDHKeyPairGenerator.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDHPrivateKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDHPublicKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDSAKeyFactory.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDSAKeyPairGenerator.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDSAParams.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDSAPublicKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLDigestContext.car");
+    merge("../../../car/org/conscrypt/IOpenSSLECDHKeyAgreement.car");
+    merge("../../../car/org/conscrypt/IOpenSSLECGroupContext.car");
+    merge("../../../car/org/conscrypt/IOpenSSLECKeyFactory.car");
+    merge("../../../car/org/conscrypt/IOpenSSLECKeyPairGenerator.car");
+    merge("../../../car/org/conscrypt/IOpenSSLECPrivateKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLECPublicKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLEngine.car");
+
     merge("../../../car/org/conscrypt/IOpenSSLKeyHolder.car");
     merge("../../../car/org/conscrypt/IOpenSSLNativeReference.car");
     merge("../../../car/org/conscrypt/IOpenSSLRandom.car");
     merge("../../../car/org/conscrypt/IOpenSSLSecretKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLServerSocketImpl.car");
-    merge("../../../car/org/conscrypt/IOpenSSLSocketImpl.car");
+    // merge("../../../car/org/conscrypt/IOpenSSLSocketImpl.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509CRL.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509CertPath.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509Certificate.car");
-    merge("../../../car/org/conscrypt/IPSKKeyManager.car");
-    merge("../../../car/org/conscrypt/ISSLClientSessionCache.car");
+    // merge("../../../car/org/conscrypt/IPSKKeyManager.car");
+    // merge("../../../car/org/conscrypt/ISSLClientSessionCache.car");
     merge("../../../car/org/conscrypt/ISSLNullSession.car");
-    merge("../../../car/org/conscrypt/ISSLParametersImpl.car");
+    // merge("../../../car/org/conscrypt/ISSLParametersImpl.car");
     merge("../../../car/org/conscrypt/ISSLRecordProtocol.car");
     merge("../../../car/org/conscrypt/ISSLServerSessionCache.car");
     merge("../../../car/org/conscrypt/IServerSessionContext.car");
 
-    using interface Elastos.Security.IProvider;
+    // using interface Elastos.Security.IProvider;
 
     namespace Org {
     namespace Conscrypt {
 
-    class COpenSSLProvider {
-        constructor();
+    // class COpenSSLProvider {
+    //     constructor();
 
-        constructor(
-            [in] String providerName);
+    //     constructor(
+    //         [in] String providerName);
 
-        interface IProvider;
+    //     interface IProvider;
+    // }
+
+    singleton class CPlatform {
+        interface IPlatform;
+    }
+
+    singleton class CChainStrengthAnalyzer {
+        interface IChainStrengthAnalyzer;
     }
 
     } // namespace Conscrypt

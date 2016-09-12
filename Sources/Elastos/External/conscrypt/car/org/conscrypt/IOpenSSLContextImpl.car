@@ -1,0 +1,22 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.IKeyManager;
+    using interface Elastosx.Net.Ssl.ITrustManager;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /**
+     * OpenSSL-backed SSLContext service provider interface.
+     */
+    /*
+     * @Involve
+     * interface ISSLContextSpi
+     */
+    interface IOpenSSLContextImpl {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

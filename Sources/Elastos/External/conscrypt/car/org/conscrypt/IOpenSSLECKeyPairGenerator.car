@@ -1,0 +1,16 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IKeyPairGenerator
+     */
+    interface IOpenSSLECKeyPairGenerator {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

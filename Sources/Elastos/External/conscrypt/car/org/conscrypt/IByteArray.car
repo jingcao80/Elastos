@@ -1,0 +1,15 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /**
+     * Byte array wrapper for hashtable use. Implements equals() and hashCode().
+     */
+    interface IByteArray {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

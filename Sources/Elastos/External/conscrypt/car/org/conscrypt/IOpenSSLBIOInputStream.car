@@ -4,8 +4,24 @@ module
     namespace Org {
     namespace Conscrypt {
 
+    /**
+     * Provides an interface to OpenSSL's BIO system directly from a Java
+     * InputStream. It allows an OpenSSL API to read directly from something more
+     * flexible interface than a byte array.
+     */
+    /*
+     * @Involve
+     * interface IFilterInputStream
+     * interface Elastos.IO.ICloseable;
+     * interface IInputStream;
+     */
     [deprecated]
     interface IOpenSSLBIOInputStream {
+        GetBioContext(
+            [out] Int64* result);
+
+        ReleaseResources();
+
         /**
          * Similar to a {@code readLine} method, but matches what OpenSSL expects
          * from a {@code BIO_gets} method.

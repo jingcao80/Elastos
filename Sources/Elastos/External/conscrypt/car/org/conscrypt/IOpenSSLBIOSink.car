@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLBIOSink {
+        Available(
+            [out] Int32* result);
+
+        Reset();
+
+        Skip(
+            [in] Int64 byteCount,
+            [out] Int64* result);
+
+        GetContext(
+            [out] Int64* result);
+
+        ToByteArray(
+            [out, callee] ArrayOf<Byte>* result);
+
+        Position(
+            [out] Int32* result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

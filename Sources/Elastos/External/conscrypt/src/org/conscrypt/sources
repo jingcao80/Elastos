@@ -9,15 +9,22 @@ INCLUDES += $(MAKEDIR)/../../../inc/org/conscrypt
 INCLUDES += $(MAKEDIR)/../../../../../LibCore/inc/corelibrary
 
 SOURCES = Org.Conscrypt.car
-SOURCES += COpenSSLProvider.cpp
-SOURCES += CryptoUpcalls.cpp
-SOURCES += NativeCrypto.cpp
+SOURCES += AbstractSessionContext.cpp
+SOURCES += ByteArray.cpp
 SOURCES += Platform.cpp
+SOURCES += CPlatform.cpp
+SOURCES += ChainStrengthAnalyzer.cpp
+SOURCES += CChainStrengthAnalyzer.cpp
+
+#SOURCES += COpenSSLProvider.cpp
+#SOURCES += CryptoUpcalls.cpp
+#SOURCES += NativeCrypto.cpp
 SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
 
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
-LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
-
 LIBRARIES += -llog -lssl -lcrypto

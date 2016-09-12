@@ -1,0 +1,17 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IOpenSSLKeyHolder
+     * interface IDSAPublicKey
+     */
+    interface IOpenSSLDSAPublicKey {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

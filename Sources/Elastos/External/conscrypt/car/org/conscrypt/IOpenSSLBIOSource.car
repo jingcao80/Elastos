@@ -1,0 +1,24 @@
+
+module
+{
+    using interface Elastos.IO.IByteBuffer;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLBIOSource {
+        GetContext(
+            [out] Int64* result);
+
+        ReleaseResources();
+    }
+
+    interface IOpenSSLBIOSourceHelper{
+        Wrap(
+            [in] IByteBuffer* buffer,
+            [out] IOpenSSLBIOSource** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

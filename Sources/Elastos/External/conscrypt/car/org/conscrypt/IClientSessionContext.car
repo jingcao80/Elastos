@@ -1,0 +1,41 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.ISSLSession;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /**
+     * Caches client sessions. Indexes by host and port. Users are typically
+     * looking to reuse any session for a given host and port.
+     */
+    /*
+     * @Involve
+     * interface ISSLSessionContext
+     * interface IAbstractSessionContext
+     */
+    [deprecated]
+    interface IClientSessionContext {
+        Size(
+            [out] Int32* result);
+
+        SetPersistentCache(
+            [in] ISSLClientSessionCache* persistentCache);
+
+        /**
+         * Finds a cached session for the given host name and port.
+         *
+         * @param host of server
+         * @param port of server
+         * @return cached session or null if none found
+         */
+        GetSession(
+            [in] String host,
+            [in] Int32 port,
+            [out] ISSLSession** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

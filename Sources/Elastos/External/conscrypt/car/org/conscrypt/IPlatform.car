@@ -1,0 +1,76 @@
+
+module
+{
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.Net.ISocket;
+    using interface Elastos.Security.Cert.IX509Certificate;
+    using interface Elastos.Security.IPrivateKey;
+    using interface Elastos.Security.Spec.IECParameterSpec;
+    using interface Elastosx.Net.Ssl.ISSLParameters;
+    using interface Elastosx.Net.Ssl.IX509TrustManager;
+// TODO:
+    // interface Org.Conscrypt.IOpenSSLKey;
+    // interface Org.Conscrypt.IOpenSSLSocketImpl;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    [local, deprecated]
+    interface IPlatform {
+        Setup();
+
+        GetFileDescriptor(
+            [in] ISocket* s,
+            [out] IFileDescriptor** result);
+
+// TODO:
+        // GetFileDescriptorFromSSLSocket(
+        //     [in] IOpenSSLSocketImpl* openSSLSocketImpl,
+        //     [out] IFileDescriptor** result);
+
+        GetCurveName(
+            [in] IECParameterSpec* spec,
+            [out] String* result);
+
+        SetCurveName(
+            [in] IECParameterSpec* spec,
+            [in] String curveName);
+
+        SetSocketTimeout(
+            [in] ISocket* s,
+            [in] Int64 timeoutMillis);
+
+        SetEndpointIdentificationAlgorithm(
+            [in] ISSLParameters* params,
+            [in] String endpointIdentificationAlgorithm);
+
+        GetEndpointIdentificationAlgorithm(
+            [in] ISSLParameters* params,
+            [out] String* result);
+
+        CheckServerTrusted(
+            [in] IX509TrustManager* x509tm,
+            [in] ArrayOf<IX509Certificate*>* chain,
+            [in] String authType,
+            [in] String host);
+
+        /**
+         * Wraps an old AndroidOpenSSL key instance. This is not needed on platform
+         * builds since we didn't backport, so return null. This code is from
+         * Chromium's net/android/java/src/org/chromium/net/DefaultAndroidKeyStore.java
+         */
+// TODO:
+        // WrapRsaKey(
+        //     [in] IPrivateKey* javaKey,
+        //     [out] IOpenSSLKey** result);
+
+        /**
+         * Logs to the system EventLog system.
+         */
+        LogEvent(
+            [in] String message);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

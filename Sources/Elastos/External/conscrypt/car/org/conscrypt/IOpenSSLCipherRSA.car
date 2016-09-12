@@ -1,0 +1,35 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.IKeyManager;
+    using interface Elastosx.Net.Ssl.ITrustManager;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface ICipherSpi
+     */
+    interface IOpenSSLCipherRSA {
+    }
+
+    /*
+     * @Involve
+     * interface ICipherSpi
+     * interface IOpenSSLCipherRSA
+     */
+    interface IOpenSSLCipherRSAPKCS1 {
+    }
+
+    /*
+     * @Involve
+     * interface ICipherSpi
+     * interface IOpenSSLCipherRSA
+     */
+    interface IOpenSSLCipherRSARaw {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

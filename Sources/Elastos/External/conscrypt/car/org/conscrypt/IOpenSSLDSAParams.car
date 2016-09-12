@@ -1,0 +1,17 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IDSAParams
+     * interface IAlgorithmParameterSpec
+     */
+    interface IOpenSSLDSAParams {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

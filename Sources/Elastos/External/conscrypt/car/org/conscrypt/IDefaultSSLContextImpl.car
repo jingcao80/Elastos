@@ -1,0 +1,27 @@
+
+module
+{
+    using interface Elastosx.Net.Ssl.IKeyManager;
+    using interface Elastosx.Net.Ssl.ITrustManager;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /**
+     * Support class for this package.
+     */
+    /*
+     * @Involve
+     * interface IOpenSSLContextImpl
+     */
+    interface IDefaultSSLContextImpl {
+        GetKeyManagers(
+            [out, callee] ArrayOf<IKeyManager*>* result);
+
+        GetTrustManagers(
+            [out, callee] ArrayOf<ITrustManager*>* result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

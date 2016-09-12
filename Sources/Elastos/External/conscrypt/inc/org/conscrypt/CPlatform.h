@@ -1,11 +1,9 @@
 
-#ifndef __ORG_CONSCRYPT_PLATFORM_H__
-#define __ORG_CONSCRYPT_PLATFORM_H__
+#ifndef __ORG_CONSCRYPT_CPLATFORM_H__
+#define __ORG_CONSCRYPT_CPLATFORM_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include <Elastos.CoreLibrary.Extensions.h>
-#include <Elastos.CoreLibrary.Net.h>
-#include <Elastos.CoreLibrary.Security.h>
+#include "_Org_Conscrypt_CPlatform.h"
+#include <elastos/core/Singleton.h>
 
 using Elastos::IO::IFileDescriptor;
 using Elastos::Net::ISocket;
@@ -14,46 +12,53 @@ using Elastos::Security::IPrivateKey;
 using Elastos::Security::Spec::IECParameterSpec;
 using Elastosx::Net::Ssl::ISSLParameters;
 using Elastosx::Net::Ssl::IX509TrustManager;
+// TODO:
 // using Org::Conscrypt::IOpenSSLKey;
 using Org::Conscrypt::IOpenSSLSocketImpl;
 
 namespace Org {
 namespace Conscrypt {
 
-class Platform
+CarClass(CPlatform)
+    , public Singleton
+    , public IPlatform
 {
 public:
-    static CARAPI Setup();
+    CAR_SINGLETON_DECL()
 
-    static CARAPI GetFileDescriptor(
+    CAR_INTERFACE_DECL()
+
+    CARAPI Setup();
+
+    CARAPI GetFileDescriptor(
         /* [in] */ ISocket* s,
         /* [out] */ IFileDescriptor** result);
 
-    static CARAPI GetFileDescriptorFromSSLSocket(
+    CARAPI GetFileDescriptorFromSSLSocket(
         /* [in] */ IOpenSSLSocketImpl* openSSLSocketImpl,
         /* [out] */ IFileDescriptor** result);
 
-    static CARAPI GetCurveName(
+    CARAPI GetCurveName(
         /* [in] */ IECParameterSpec* spec,
         /* [out] */ String* result);
 
-    static CARAPI SetCurveName(
+    CARAPI SetCurveName(
         /* [in] */ IECParameterSpec* spec,
         /* [in] */ const String& curveName);
 
-    static CARAPI SetSocketTimeout(
+    CARAPI SetSocketTimeout(
         /* [in] */ ISocket* s,
         /* [in] */ Int64 timeoutMillis);
 
-    static CARAPI SetEndpointIdentificationAlgorithm(
+    CARAPI SetEndpointIdentificationAlgorithm(
         /* [in] */ ISSLParameters* params,
         /* [in] */ const String& endpointIdentificationAlgorithm);
 
-    static CARAPI GetEndpointIdentificationAlgorithm(
+    CARAPI GetEndpointIdentificationAlgorithm(
         /* [in] */ ISSLParameters* params,
         /* [out] */ String* result);
 
-    static CARAPI CheckServerTrusted(
+    CARAPI CheckServerTrusted(
         /* [in] */ IX509TrustManager* x509tm,
         /* [in] */ ArrayOf<IX509Certificate*>* chain,
         /* [in] */ const String& authType,
@@ -64,29 +69,19 @@ public:
      * builds since we didn't backport, so return null. This code is from
      * Chromium's net/android/java/src/org/chromium/net/DefaultAndroidKeyStore.java
      */
-    // static CARAPI WrapRsaKey(
+// TODO:
+    // CARAPI WrapRsaKey(
     //     /* [in] */ IPrivateKey* javaKey,
     //     /* [out] */ IOpenSSLKey** result);
 
     /**
      * Logs to the system EventLog system.
      */
-    static CARAPI LogEvent(
+    CARAPI LogEvent(
         /* [in] */ const String& message);
-
-private:
-    static CARAPI_(Boolean) InitStatic();
-
-private:
-    static const String TAG; // = "Conscrypt";
-
-// TODO: Need Method
-    // static Method m_getCurveName;
-
-    static Boolean sInit;
 };
 
 } // namespace Conscrypt
 } // namespace Org
 
-#endif //__ORG_CONSCRYPT_PLATFORM_H__
+#endif //__ORG_CONSCRYPT_CPLATFORM_H__

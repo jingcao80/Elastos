@@ -1,0 +1,27 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /**
+     * KeyManager implementation.
+     *
+     * This implementation uses hashed key store information. It works faster than retrieving all of the
+     * data from the key store. Any key store changes, that happen after key manager was created, have
+     * no effect. The implementation does not use peer information (host, port) that may be obtained
+     * from socket or engine.
+     *
+     * @see javax.net.ssl.KeyManager
+     *
+     */
+    /*
+     * @Involve
+     * interface IX509ExtendedKeyManager
+     */
+    interface IKeyManagerImpl {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

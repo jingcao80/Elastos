@@ -1,0 +1,38 @@
+
+module
+{
+    using interface Elastos.Security.IPrivateKey;
+    using interface Elastos.Security.IProvider;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /**
+     * Provides a place where NativeCrypto can call back up to do Java language
+     * calls to work on delegated key types from native code.
+     */
+    [deprecated]
+    interface ICryptoUpcalls {
+        /**
+         * Finds the first provider which provides {@code algorithm} but is not from
+         * the same ClassLoader as ours.
+         */
+        GetExternalProvider(
+            [in] String algorithm,
+            [out] IProvider** result);
+
+        RawSignDigestWithPrivateKey(
+            [in] IPrivateKey* javaKey,
+            [in] ArrayOf<Byte>* message,
+            [out, callee] ArrayOf<Byte>* result);
+
+        RawCipherWithPrivateKey(
+            [in] IPrivateKey* javaKey,
+            [in] Boolean encrypt,
+            [in] ArrayOf<Byte>* input,
+            [out, callee] ArrayOf<Byte>* result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

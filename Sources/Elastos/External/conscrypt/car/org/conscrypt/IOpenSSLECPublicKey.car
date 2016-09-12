@@ -1,0 +1,26 @@
+
+module
+{
+    using interface Elastos.Security.Interfaces.IECPublicKey;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IOpenSSLKeyHolder
+     * interface IECPublicKey
+     */
+    interface IOpenSSLECPublicKey {
+    }
+
+    interface IOpenSSLECPublicKeyHelper {
+// TODO: Need IOpenSSLKey
+        // GetInstance(
+        //     [in] IECPublicKey* ecPublicKey,
+        //     [out] IOpenSSLKey** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

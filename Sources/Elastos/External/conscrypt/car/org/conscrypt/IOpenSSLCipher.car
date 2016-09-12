@@ -1,0 +1,40 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface ICipherSpi
+     */
+    interface IOpenSSLCipher {
+    }
+
+    /*
+     * @Involve
+     * interface ICipherSpi
+     * interface IOpenSSLCipher
+     */
+    interface IOpenSSLCipherAES {
+    }
+
+    /*
+     * @Involve
+     * interface ICipherSpi
+     * interface IOpenSSLCipher
+     */
+    interface IOpenSSLCipherDESEDE {
+    }
+
+    /*
+     * @Involve
+     * interface ICipherSpi
+     * interface IOpenSSLCipher
+     */
+    interface IOpenSSLCipherARC4 {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

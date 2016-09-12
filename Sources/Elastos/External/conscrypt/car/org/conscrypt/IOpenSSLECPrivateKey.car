@@ -1,0 +1,30 @@
+
+module
+{
+    using interface Elastos.Security.Interfaces.IECPrivateKey;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IOpenSSLKeyHolder
+     * interface IECPrivateKey
+     */
+    interface IOpenSSLECPrivateKey {
+    }
+
+    interface IOpenSSLECPrivateKeyHelper {
+// TODO: Need IOpenSSLKey
+        // WrapPlatformKey(
+        //     [in] IECPrivateKey* ecPrivateKey,
+        //     [out] IOpenSSLKey** result);
+
+        // GetInstance(
+        //     [in] IECPrivateKey* ecPrivateKey,
+        //     [out] IOpenSSLKey** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

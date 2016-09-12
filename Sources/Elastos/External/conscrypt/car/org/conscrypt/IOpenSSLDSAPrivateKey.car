@@ -1,0 +1,25 @@
+
+module
+{
+    using interface Elastos.Security.Interfaces.IDSAPrivateKey;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IOpenSSLKeyHolder
+     * interface IDSAPrivateKey
+     */
+    interface IOpenSSLDSAPrivateKey {
+    }
+
+    interface IOpenSSLDSAPrivateKeyHelper {
+        WrapPlatformKey(
+            [in] IDSAPrivateKey* dsaPrivateKey,
+            [out] IOpenSSLKey** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

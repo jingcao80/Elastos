@@ -1,0 +1,19 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IOpenSSLKeyHolder
+     * interface IDHPrivateKey
+     * interface IDHKey;
+     * interface Elastos.Security.IPrivateKey;
+     */
+    interface IOpenSSLDHPrivateKey {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}
