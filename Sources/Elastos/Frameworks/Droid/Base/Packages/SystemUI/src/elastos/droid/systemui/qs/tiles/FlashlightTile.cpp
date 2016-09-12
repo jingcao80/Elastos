@@ -17,6 +17,35 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
+
+CAR_INTERFACE_IMPL(FlashlightTile::InnerListener, Object, IFlashlightListener)
+
+FlashlightTile::InnerListener::InnerListener(
+    /* [in] */ FlashlightTile* host)
+    : mHost(host)
+{
+}
+
+// @Override
+ECode FlashlightTile::InnerListener::OnFlashlightOff()
+{
+    return mHost->OnFlashlightOff();
+}
+
+// @Override
+ECode FlashlightTile::InnerListener::OnFlashlightError()
+{
+    return mHost->OnFlashlightError();
+}
+
+// @Override
+ECode FlashlightTile::InnerListener::OnFlashlightAvailabilityChanged(
+    /* [in] */ Boolean available)
+{
+    return mHost->OnFlashlightAvailabilityChanged(available);
+}
+
+
 FlashlightTile::RecentlyOnTimeout::RecentlyOnTimeout(
     /* [in] */ FlashlightTile* host)
     : mHost(host)
@@ -30,21 +59,21 @@ ECode FlashlightTile::RecentlyOnTimeout::Run()
 
 const Int64 FlashlightTile::RECENTLY_ON_DURATION_MILLIS = 500;
 
-CAR_INTERFACE_IMPL(FlashlightTile, QSTile, IFlashlightListener)
 
 FlashlightTile::FlashlightTile(
     /* [in] */ IQSTileHost* host)
 {
     QSTile::constructor(host);
     mRecentlyOnTimeout = new RecentlyOnTimeout(this);
+    mListener = new InnerListener(this);
     host->GetFlashlightController((IFlashlightController**)&mFlashlightController);
-    mFlashlightController->AddListener(this);
+    mFlashlightController->AddListener(mListener);
 }
 
 void FlashlightTile::HandleDestroy()
 {
     QSTile::HandleDestroy();
-    mFlashlightController->RemoveListener(this);
+    mFlashlightController->RemoveListener(mListener);
 }
 
 AutoPtr<QSTile::State> FlashlightTile::NewTileState()

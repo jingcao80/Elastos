@@ -51,7 +51,7 @@ public:
         /* [out] */ Boolean* result);
 
 private:
-    AutoPtr<IBaseStatusBar> mBar;
+    IBaseStatusBar* mBar;
     Boolean mIsVertical;
     Boolean mIsRTL;
 

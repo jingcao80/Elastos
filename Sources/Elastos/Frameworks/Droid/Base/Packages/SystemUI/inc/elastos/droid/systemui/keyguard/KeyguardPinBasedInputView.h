@@ -29,25 +29,31 @@ namespace Keyguard {
  */
 class KeyguardPinBasedInputView
     : public KeyguardAbsKeyInputView
-    , public IViewOnKeyListener
 {
 private:
-    class MyOnClickListener
+    class PasswordListener
         : public Object
         , public IViewOnClickListener
+        , public IViewOnKeyListener
     {
     public:
-        TO_STRING_IMPL("KeyguardPinBasedInputView::MyOnClickListener")
+        TO_STRING_IMPL("KeyguardPinBasedInputView::PasswordListener")
 
         CAR_INTERFACE_DECL()
 
-        MyOnClickListener(
+        PasswordListener(
             /* [in] */ KeyguardPinBasedInputView* host)
             : mHost(host)
         {}
 
         CARAPI OnClick(
             /* [in] */ IView* v);
+
+        CARAPI OnKey(
+            /* [in] */ IView* v,
+            /* [in] */ Int32 keyCode,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
 
     private:
         KeyguardPinBasedInputView* mHost;
@@ -120,8 +126,6 @@ private:
 public:
     TO_STRING_IMPL("KeyguardPinBasedInputView")
 
-    CAR_INTERFACE_DECL()
-
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -139,7 +143,7 @@ public:
         /* [out] */ Boolean* result);
 
     //@Override
-    CARAPI OnKey(
+    virtual CARAPI OnKey(
         /* [in] */ IView* v,
         /* [in] */ Int32 keyCode,
         /* [in] */ IKeyEvent* event,

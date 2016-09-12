@@ -48,6 +48,39 @@ namespace Phone {
 static const String TAG("CStatusBarHeaderView");
 
 //====================================================================================
+// CStatusBarHeaderView::InnerCallback
+//====================================================================================
+CAR_INTERFACE_IMPL_2(CStatusBarHeaderView::InnerCallback, Object, \
+    IBatteryStateChangeCallback, INextAlarmChangeCallback)
+
+CStatusBarHeaderView::InnerCallback::InnerCallback(
+    /* [in] */ CStatusBarHeaderView* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode CStatusBarHeaderView::InnerCallback::OnBatteryLevelChanged(
+    /* [in] */ Int32 level,
+    /* [in] */ Boolean pluggedIn,
+    /* [in] */ Boolean charging)
+{
+    return mHost->OnBatteryLevelChanged(level, pluggedIn, charging);
+}
+
+// @Override
+ECode CStatusBarHeaderView::InnerCallback::OnPowerSaveChanged()
+{
+    return mHost->OnPowerSaveChanged();
+}
+
+// @Override
+ECode CStatusBarHeaderView::InnerCallback::OnNextAlarmChanged(
+    /* [in] */ IAlarmClockInfo* nextAlarm)
+{
+    return mHost->OnNextAlarmChanged(nextAlarm);
+}
+
+//====================================================================================
 // CStatusBarHeaderView::LayoutValues
 //====================================================================================
 CStatusBarHeaderView::LayoutValues::LayoutValues()
@@ -404,8 +437,7 @@ ECode CStatusBarHeaderView::OnUserInfoChangedListener::OnUserInfoChanged(
 //====================================================================================
 CAR_OBJECT_IMPL(CStatusBarHeaderView)
 
-CAR_INTERFACE_IMPL_4(CStatusBarHeaderView, RelativeLayout, IStatusBarHeaderView, \
-    IViewOnClickListener, IBatteryStateChangeCallback, INextAlarmChangeCallback)
+CAR_INTERFACE_IMPL(CStatusBarHeaderView, RelativeLayout, IStatusBarHeaderView)
 
 CStatusBarHeaderView::CStatusBarHeaderView()
     : mExpanded(FALSE)
@@ -782,13 +814,17 @@ void CStatusBarHeaderView::UpdateSystemIconsLayoutParams()
 
 void CStatusBarHeaderView::UpdateListeners()
 {
+    if (mInnerCallback == NULL) {
+        mInnerCallback = new InnerCallback(this);
+    }
+
     if (mListening) {
-        mBatteryController->AddStateChangedCallback(this);
-        mNextAlarmController->AddStateChangedCallback(this);
+        mBatteryController->AddStateChangedCallback(mInnerCallback);
+        mNextAlarmController->AddStateChangedCallback(mInnerCallback);
     }
     else {
-        mBatteryController->RemoveStateChangedCallback(this);
-        mNextAlarmController->RemoveStateChangedCallback(this);
+        mBatteryController->RemoveStateChangedCallback(mInnerCallback);
+        mNextAlarmController->RemoveStateChangedCallback(mInnerCallback);
     }
 }
 

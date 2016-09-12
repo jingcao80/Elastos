@@ -209,7 +209,7 @@ ECode RecentsActivity::OnDebugModeTriggeredRunnable::Run()
 //----------------------------------------------------------------------
 
 RecentsActivity::AppWidgetHostCallbackRunnable::AppWidgetHostCallbackRunnable(
-    /* [in] */ IWeakReference* callback,
+    /* [in] */ IRecentsAppWidgetHostCallbacks* callback,
     /* [in] */ RecentsActivity* host)
     : mCallback(callback)
     , mHost(host)
@@ -217,22 +217,68 @@ RecentsActivity::AppWidgetHostCallbackRunnable::AppWidgetHostCallbackRunnable(
 
 ECode RecentsActivity::AppWidgetHostCallbackRunnable::Run()
 {
-    AutoPtr<IInterface> obj;
-    mCallback->Resolve(EIID_IInterface, (IInterface**)&obj);
-    IRecentsAppWidgetHostCallbacks* cb = IRecentsAppWidgetHostCallbacks::Probe(obj);
-
-    if (cb != NULL) {
-        mHost->mAppWidgetHost->StartListening(cb);
+    if (mCallback != NULL) {
+        mHost->mAppWidgetHost->StartListening(mCallback);
     }
     return NOERROR;
+}
+
+CAR_INTERFACE_IMPL_3(RecentsActivity::InnerCallback, Object, IRecentsViewCallbacks,
+    IDebugOverlayViewCallbacks, IRecentsAppWidgetHostCallbacks)
+
+RecentsActivity::InnerCallback::InnerCallback(
+    /* [in] */ RecentsActivity* host)
+    : mHost(host)
+{
+}
+
+// @Override
+ECode RecentsActivity::InnerCallback::OnExitToHomeAnimationTriggered()
+{
+    return mHost->OnExitToHomeAnimationTriggered();
+}
+
+// @Override
+ECode RecentsActivity::InnerCallback::OnTaskViewClicked()
+{
+    return mHost->OnTaskViewClicked();
+}
+
+// @Override
+ECode RecentsActivity::InnerCallback::OnTaskLaunchFailed()
+{
+    return mHost->OnTaskLaunchFailed();
+}
+
+// @Override
+ECode RecentsActivity::InnerCallback::OnAllTaskViewsDismissed()
+{
+    return mHost->OnAllTaskViewsDismissed();
+}
+
+ECode RecentsActivity::InnerCallback::OnPrimarySeekBarChanged(
+    /* [in] */ Float progress)
+{
+    return mHost->OnPrimarySeekBarChanged(progress);
+}
+
+// @Override
+ECode RecentsActivity::InnerCallback::OnSecondarySeekBarChanged(
+    /* [in] */ Float progress)
+{
+    return mHost->OnSecondarySeekBarChanged(progress);
+}
+
+ECode RecentsActivity::InnerCallback::RefreshSearchWidget()
+{
+    return mHost->RefreshSearchWidget();
 }
 
 //---------------------------------------------------------------------
 // RecentsActivity
 //----------------------------------------------------------------------
 
-CAR_INTERFACE_IMPL_4(RecentsActivity, Activity, IRecentsViewCallbacks, \
-    IRecentsAppWidgetHostCallbacks, IDebugOverlayViewCallbacks, IRecentsActivity)
+CAR_INTERFACE_IMPL(RecentsActivity, Activity, IRecentsActivity)
 
 RecentsActivity::RecentsActivity()
     : mVisible(FALSE)
@@ -522,7 +568,8 @@ ECode RecentsActivity::OnCreate(
     FindViewById(R::id::recents_view, (IView**)&v);
     mRecentsView = (RecentsView*)v.Get();
 
-    mRecentsView->SetCallbacks((IRecentsViewCallbacks*)this);
+    AutoPtr<InnerCallback> cb = new InnerCallback(this);
+    mRecentsView->SetCallbacks(cb);
     mRecentsView->SetSystemUiVisibility(IView::SYSTEM_UI_FLAG_LAYOUT_STABLE |
         IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
         IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -571,10 +618,8 @@ ECode RecentsActivity::OnCreate(
     // Start listening for widget package changes if there is one bound, post it since we don't
     // want it stalling the startup
     if (mConfig->mSearchBarAppWidgetId >= 0) {
-        AutoPtr<IWeakReference> callback;
-        GetWeakReference((IWeakReference**)&callback);
-
-        AutoPtr<AppWidgetHostCallbackRunnable> mr = new AppWidgetHostCallbackRunnable(callback, this);
+        AutoPtr<InnerCallback> cb = new InnerCallback(this);
+        AutoPtr<AppWidgetHostCallbackRunnable> mr = new AppWidgetHostCallbackRunnable(cb, this);
         Boolean b;
         mRecentsView->Post(mr, &b);
     }
@@ -588,7 +633,8 @@ ECode RecentsActivity::InflateDebugOverlay()
         AutoPtr<IView> v;
         mDebugOverlayStub->Inflate((IView**)&v);
         mDebugOverlay = IDebugOverlayView::Probe(v);
-        mDebugOverlay->SetCallbacks((IDebugOverlayViewCallbacks*)this);
+        AutoPtr<InnerCallback> cb = new InnerCallback(this);
+        mDebugOverlay->SetCallbacks(cb);
         mRecentsView->SetDebugOverlay((DebugOverlayView*)mDebugOverlay.Get());
     }
     return NOERROR;

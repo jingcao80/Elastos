@@ -23,8 +23,26 @@ namespace Phone {
 CarClass(CNotificationsQuickSettingsContainer)
     , public FrameLayout
     , public INotificationsQuickSettingsContainer
-    , public IViewStubOnInflateListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IViewStubOnInflateListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CNotificationsQuickSettingsContainer* host);
+
+        // @Override
+        CARAPI OnInflate(
+            /* [in] */ IViewStub* stub,
+            /* [in] */ IView* inflated);
+    private:
+        CNotificationsQuickSettingsContainer* mHost;
+    };
+
 public:
     CAR_OBJECT_DECL()
 

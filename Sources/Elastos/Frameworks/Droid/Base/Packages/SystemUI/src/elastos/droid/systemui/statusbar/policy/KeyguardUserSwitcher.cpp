@@ -28,7 +28,9 @@ namespace Policy {
 
 const String KeyguardUserSwitcher::TAG("KeyguardUserSwitcher");
 const Boolean KeyguardUserSwitcher::ALWAYS_ON = FALSE;
+
 CAR_INTERFACE_IMPL(KeyguardUserSwitcher::Adapter, BaseUserAdapter, IViewOnClickListener)
+
 KeyguardUserSwitcher::Adapter::Adapter(
     /* [in] */ IContext* context,
     /* [in] */ IUserSwitcherController* controller,

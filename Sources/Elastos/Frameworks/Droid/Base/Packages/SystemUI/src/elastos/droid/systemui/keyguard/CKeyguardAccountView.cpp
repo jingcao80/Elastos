@@ -31,6 +31,44 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+CAR_INTERFACE_IMPL_2(CKeyguardAccountView::InnerListener, Object, IViewOnClickListener, ITextWatcher)
+
+CKeyguardAccountView::InnerListener::InnerListener(
+    /* [in] */ CKeyguardAccountView* host)
+    : mHost(host)
+{}
+
+ECode CKeyguardAccountView::InnerListener::AfterTextChanged(
+    /* [in] */ IEditable* s)
+{
+    return mHost->AfterTextChanged(s);
+}
+
+ECode CKeyguardAccountView::InnerListener::BeforeTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 count,
+    /* [in] */ Int32 after)
+{
+    return mHost->BeforeTextChanged(s, start, count, after);
+}
+
+ECode CKeyguardAccountView::InnerListener::OnTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 before,
+    /* [in] */ Int32 count)
+{
+    return mHost->OnTextChanged(s, start, before, count);
+}
+
+ECode CKeyguardAccountView::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+
 ECode CKeyguardAccountView::MyRunnable::Run()
 {
     if (mSuccess) {
@@ -113,8 +151,7 @@ const String CKeyguardAccountView::LOCK_PATTERN_CLASS(LOCK_PATTERN_PACKAGE + Str
 
 CAR_OBJECT_IMPL(CKeyguardAccountView)
 
-CAR_INTERFACE_IMPL_3(CKeyguardAccountView, LinearLayout, IKeyguardSecurityView,
-        IViewOnClickListener, ITextWatcher)
+CAR_INTERFACE_IMPL(CKeyguardAccountView, LinearLayout, IKeyguardSecurityView)
 
 CKeyguardAccountView::CKeyguardAccountView()
     : mEnableFallback(FALSE)
@@ -150,6 +187,8 @@ ECode CKeyguardAccountView::OnFinishInflate()
 {
     LinearLayout::OnFinishInflate();
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
     AutoPtr<IView> view;
     FindViewById(R::id::login, (IView**)&view);
     mLogin = IEditText::Probe(view);
@@ -158,17 +197,17 @@ ECode CKeyguardAccountView::OnFinishInflate()
     AutoPtr<IInputFilter> filter = new UsernameFilterGeneric();
     array->Set(0, filter);
     ITextView::Probe(mLogin)->SetFilters(array);
-    ITextView::Probe(mLogin)->AddTextChangedListener(this);
+    ITextView::Probe(mLogin)->AddTextChangedListener(listener);
 
     AutoPtr<IView> view2;
     FindViewById(R::id::password, (IView**)&view2);
     mPassword = IEditText::Probe(view2);
-    ITextView::Probe(mPassword)->AddTextChangedListener(this);
+    ITextView::Probe(mPassword)->AddTextChangedListener(listener);
 
     AutoPtr<IView> view3;
     FindViewById(R::id::ok, (IView**)&view3);
     mOk = IButton::Probe(view3);
-    IView::Probe(mOk)->SetOnClickListener(this);
+    IView::Probe(mOk)->SetOnClickListener(listener);
 
     AutoPtr<CKeyguardMessageArea::Helper> tmp =
             new CKeyguardMessageArea::Helper();

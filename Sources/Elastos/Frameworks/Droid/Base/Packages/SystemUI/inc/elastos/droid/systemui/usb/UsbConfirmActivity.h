@@ -30,11 +30,33 @@ namespace Usb {
 
 class UsbConfirmActivity
     : public AlertActivity
-    , public IDialogInterfaceOnClickListener
-    , public ICompoundButtonOnCheckedChangeListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+        , public ICompoundButtonOnCheckedChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ UsbConfirmActivity* host);
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+        // @Override
+        CARAPI OnCheckedChanged(
+            /* [in] */ ICompoundButton* buttonView,
+            /* [in] */ Boolean isChecked);
+
+    private:
+        UsbConfirmActivity* mHost;
+    };
+
 public:
-    CAR_INTERFACE_DECL()
 
     UsbConfirmActivity();
 

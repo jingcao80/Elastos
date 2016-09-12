@@ -230,6 +230,22 @@ static AutoPtr<IIntent> InitIntent(
     return intent;
 }
 
+CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::AccessibilityStateChangedCallback,
+    Object, IAccessibilityStateChangedCallback)
+
+CKeyguardBottomAreaView::AccessibilityStateChangedCallback::AccessibilityStateChangedCallback(
+    /* [in] */ CKeyguardBottomAreaView* host)
+    : mHost(host)
+{}
+
+ECode CKeyguardBottomAreaView::AccessibilityStateChangedCallback::OnStateChanged(
+    /* [in] */ Boolean accessibilityEnabled,
+    /* [in] */ Boolean touchExplorationEnabled)
+{
+    return mHost->OnStateChanged(accessibilityEnabled, touchExplorationEnabled);
+}
+
+
 AutoPtr<IIntent> CKeyguardBottomAreaView::SECURE_CAMERA_INTENT = InitIntent(
     IMediaStore::INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE, IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 AutoPtr<IIntent> CKeyguardBottomAreaView::INSECURE_CAMERA_INTENT = InitIntent(
@@ -238,8 +254,9 @@ AutoPtr<IIntent> CKeyguardBottomAreaView::PHONE_INTENT = InitIntent(
     IIntent::ACTION_DIAL, -1);
 
 CAR_OBJECT_IMPL(CKeyguardBottomAreaView)
-CAR_INTERFACE_IMPL_5(CKeyguardBottomAreaView, FrameLayout, IKeyguardBottomAreaView, IViewOnClickListener \
-        , IOnUnlockMethodChangedListener, IAccessibilityStateChangedCallback, IViewOnLongClickListener);
+
+CAR_INTERFACE_IMPL(CKeyguardBottomAreaView, FrameLayout, IKeyguardBottomAreaView)
+
 CKeyguardBottomAreaView::CKeyguardBottomAreaView()
     : mLastUnlockIconRes(0)
 {
@@ -385,7 +402,8 @@ ECode CKeyguardBottomAreaView::SetAccessibilityController(
     /* [in] */ IAccessibilityController* accessibilityController)
 {
     mAccessibilityController = accessibilityController;
-    accessibilityController->AddStateChangedCallback(this);
+    AutoPtr<AccessibilityStateChangedCallback> cb = new AccessibilityStateChangedCallback(this);
+    mAccessibilityController->AddStateChangedCallback(cb);
     return NOERROR;
 }
 

@@ -24,6 +24,8 @@ public:
     ~ContextThemeWrapperHolder();
 
     Boolean mMemoryLeakTarget;
+    Boolean mMemoryCount;
+
 };
 
 } // namespace View

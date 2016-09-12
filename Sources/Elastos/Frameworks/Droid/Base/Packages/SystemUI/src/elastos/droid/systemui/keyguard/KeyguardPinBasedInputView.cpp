@@ -14,13 +14,22 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyOnClickListener,
-        Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL_2(KeyguardPinBasedInputView::PasswordListener,
+        Object, IViewOnClickListener, IViewOnKeyListener)
 
-ECode KeyguardPinBasedInputView::MyOnClickListener::OnClick(
+ECode KeyguardPinBasedInputView::PasswordListener::OnClick(
     /* [in] */ IView* v)
 {
     return mHost->mCallback->UserActivity();
+}
+
+ECode KeyguardPinBasedInputView::PasswordListener::OnKey(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnKey(v, keyCode, event, result);
 }
 
 CAR_INTERFACE_IMPL(KeyguardPinBasedInputView::MyOnClickListener2,
@@ -68,9 +77,6 @@ ECode KeyguardPinBasedInputView::MyViewOnLongClickListener::OnLongClick(
     *result = TRUE;
     return NOERROR;
 }
-
-CAR_INTERFACE_IMPL(KeyguardPinBasedInputView, KeyguardAbsKeyInputView,
-        IViewOnKeyListener)
 
 ECode KeyguardPinBasedInputView::constructor(
     /* [in] */ IContext* context)
@@ -205,15 +211,15 @@ ECode KeyguardPinBasedInputView::OnFinishInflate()
     GetPasswordTextViewId(&id);
     AutoPtr<IView> view;
     FindViewById(id, (IView**)&view);
+
+
+    AutoPtr<PasswordListener> lis = new PasswordListener(this);
     mPasswordEntry = IPasswordTextView::Probe(view);
-    IView::Probe(mPasswordEntry)->SetOnKeyListener(this);
-
+    view->SetOnKeyListener(lis);
     // Set selected property on so the view can send accessibility events.
-    IView::Probe(mPasswordEntry)->SetSelected(TRUE);
-
+    view->SetSelected(TRUE);
     // Poke the wakelock any time the text is selected or modified
-    AutoPtr<IViewOnClickListener> lis = new MyOnClickListener(this);
-    IView::Probe(mPasswordEntry)->SetOnClickListener(lis);
+    view->SetOnClickListener(lis);
 
     FindViewById(R::id::key_enter, (IView**)&mOkButton);
     if (mOkButton != NULL) {
@@ -223,7 +229,7 @@ ECode KeyguardPinBasedInputView::OnFinishInflate()
         GetContext((IContext**)&context);
         AutoPtr<LiftToActivateListener> lis = new LiftToActivateListener();
         lis->constructor(context);
-        mOkButton->SetOnHoverListener(IViewOnHoverListener::Probe(lis));
+        mOkButton->SetOnHoverListener(lis);
     }
 
     FindViewById(R::id::delete_button, (IView**)&mDeleteButton);

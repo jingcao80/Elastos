@@ -235,7 +235,7 @@ ECode CNotificationPanelView::ViewOnClickListener::OnClick(
     return mHost->OnClick(v);
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::ScrollViewListener, Object, IListener)
+CAR_INTERFACE_IMPL(CNotificationPanelView::ScrollViewListener, Object, IObservableScrollViewListener)
 
 CNotificationPanelView::ScrollViewListener::ScrollViewListener(
     /* [in] */ CNotificationPanelView* host)
@@ -500,8 +500,7 @@ const Int64 CNotificationPanelView::DOZE_BACKGROUND_ANIM_DURATION = ScrimControl
 
 CAR_OBJECT_IMPL(CNotificationPanelView)
 
-CAR_INTERFACE_IMPL_5(CNotificationPanelView, PanelView, INotificationPanelView, IExpandableViewOnHeightChangedListener \
-    , IListener, IViewOnClickListener, IOnOverscrollTopChangedListener);
+CAR_INTERFACE_IMPL(CNotificationPanelView, PanelView, INotificationPanelView);
 
 CNotificationPanelView::CNotificationPanelView()
     : mNotificationTopPadding(0)

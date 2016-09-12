@@ -34,6 +34,20 @@ namespace Droid {
 namespace SystemUI {
 namespace Usb {
 
+CAR_INTERFACE_IMPL(UsbDebuggingActivity::InnerListener, Object, IDialogInterfaceOnClickListener)
+
+UsbDebuggingActivity::InnerListener::InnerListener(
+    /* [in] */ UsbDebuggingActivity* host)
+    : mHost(host)
+{}
+
+ECode UsbDebuggingActivity::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->OnClick(dialog, which);
+}
+
 //-------------------------------------------------------------------------
 // UsbDebuggingActivity::UsbDisconnectedReceiver
 //-------------------------------------------------------------------------
@@ -125,13 +139,14 @@ ECode UsbDebuggingActivity::OnCreate(
     CString::New(str3, (ICharSequence**)&cs4);
     ap->SetPositiveButtonText(cs4);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     String str4;
     GetString(Elastos::Droid::R::string::cancel, &str4);
     AutoPtr<ICharSequence> cs5;
     CString::New(str4, (ICharSequence**)&cs5);
     ap->SetNegativeButtonText(cs5);
-    ap->SetPositiveButtonListener(this);
-    ap->SetNegativeButtonListener(this);
+    ap->SetPositiveButtonListener(listener);
+    ap->SetNegativeButtonListener(listener);
 
     // add "always allow" checkbox
     AutoPtr<IContext> ctx;

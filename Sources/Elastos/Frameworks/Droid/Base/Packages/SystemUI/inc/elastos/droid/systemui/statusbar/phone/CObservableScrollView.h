@@ -34,7 +34,7 @@ public:
         /* [in] */ IAttributeSet* attrs);
 
     CARAPI SetListener(
-        /* [in] */ IListener* listener);
+        /* [in] */ IObservableScrollViewListener* listener);
 
     CARAPI SetTouchEnabled(
         /* [in] */ Boolean touchEnabled);
@@ -98,7 +98,7 @@ private:
     CARAPI_(Int32) GetMaxScrollY();
 
 private:
-    AutoPtr<IListener> mListener;
+    AutoPtr<IObservableScrollViewListener> mListener;
     Int32 mLastOverscrollAmount;
     Boolean mTouchEnabled;
     Boolean mHandlingTouchEvent;

@@ -27,9 +27,25 @@ namespace Usb {
 
 class UsbDebuggingActivity
     : public AlertActivity
-    , public IDialogInterfaceOnClickListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ UsbDebuggingActivity* host);
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+    private:
+        UsbDebuggingActivity* mHost;
+    };
+
     class UsbDisconnectedReceiver
         : public BroadcastReceiver
     {

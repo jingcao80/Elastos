@@ -161,6 +161,29 @@ const Int32 BaseStatusBar::HIDDEN_NOTIFICATION_ID = 10000;
 const String BaseStatusBar::BANNER_ACTION_CANCEL("com.android.systemui.statusbar.banner_action_cancel");
 const String BaseStatusBar::BANNER_ACTION_SETUP("com.android.systemui.statusbar.banner_action_setup");
 
+CAR_INTERFACE_IMPL(BaseStatusBar::ActivatableNotificationViewListener, Object, \
+    IActivatableNotificationViewOnActivatedListener)
+
+BaseStatusBar::ActivatableNotificationViewListener::ActivatableNotificationViewListener(
+    /* [in] */ BaseStatusBar* host)
+    : mHost(host)
+{
+}
+
+// @Override
+ECode BaseStatusBar::ActivatableNotificationViewListener::OnActivated(
+    /* [in] */ IActivatableNotificationView* view)
+{
+    return mHost->OnActivated(view);
+}
+
+// @Override
+ECode BaseStatusBar::ActivatableNotificationViewListener::OnActivationReset(
+    /* [in] */ IActivatableNotificationView* view)
+{
+    return mHost->OnActivationReset(view);
+}
+
 //==============================================================================
 //                  CSettingsObserver
 //==============================================================================
@@ -1070,9 +1093,8 @@ ECode BaseStatusBar::BaseAnimatorListenerAdapter::OnAnimationEnd(
 //==============================================================================
 //                  BaseStatusBar
 //==============================================================================
-CAR_INTERFACE_IMPL_6(BaseStatusBar, SystemUI, IBaseStatusBar, ICommandQueueCallbacks, \
-        IActivatableNotificationViewOnActivatedListener, IRecentsComponentCallbacks, \
-        IExpansionLogger, INotificationEnvironment);
+CAR_INTERFACE_IMPL_5(BaseStatusBar, SystemUI, IBaseStatusBar, ICommandQueueCallbacks, \
+    IRecentsComponentCallbacks, IExpansionLogger, INotificationEnvironment);
 
 BaseStatusBar::BaseStatusBar()
     : mHeadsUpNotificationDecay(0)
@@ -2399,7 +2421,8 @@ Boolean BaseStatusBar::InflateViews(
     AutoPtr<IExpandableNotificationRow> nr;
     entry->GetRow((IExpandableNotificationRow**)&nr);
     nr->SetHeightRange(mRowMinHeight, maxHeight);
-    IActivatableNotificationView::Probe(nr)->SetOnActivatedListener(this);
+    AutoPtr<ActivatableNotificationViewListener> listener = new ActivatableNotificationViewListener(this);
+    IActivatableNotificationView::Probe(nr)->SetOnActivatedListener(listener);
     entry->SetExpanded(contentViewLocal);
     entry->SetExpandedPublic(publicViewLocal);
     entry->SetBigContentView(bigContentViewLocal);

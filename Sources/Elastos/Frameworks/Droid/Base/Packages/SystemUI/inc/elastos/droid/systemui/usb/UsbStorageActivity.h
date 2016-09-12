@@ -42,8 +42,6 @@ namespace Usb {
  */
 class UsbStorageActivity
     : public Activity
-    , public IViewOnClickListener
-    , public IDialogInterfaceOnCancelListener
     , public IUsbStorageActivity
 {
 private:
@@ -64,7 +62,6 @@ private:
     private:
         UsbStorageActivity* mHost;
     };
-
 
     class MyStorageListener
         : public Object
@@ -180,19 +177,40 @@ private:
         UsbStorageActivity* mHost;
     };
 
-    class MyDialogInterfaceOnClickListener
+    class DialogInterfaceListener
         : public Object
         , public IDialogInterfaceOnClickListener
+        , public IDialogInterfaceOnCancelListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyDialogInterfaceOnClickListener(
+        DialogInterfaceListener(
             /* [in] */ UsbStorageActivity* host);
 
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
             /* [in] */ Int32 which);
+
+        //@Override
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* dialog);
+    private:
+        UsbStorageActivity* mHost;
+    };
+
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ UsbStorageActivity* host);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
 
     private:
         UsbStorageActivity* mHost;

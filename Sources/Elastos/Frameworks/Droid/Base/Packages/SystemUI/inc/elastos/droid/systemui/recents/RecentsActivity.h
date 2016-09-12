@@ -57,9 +57,6 @@ namespace Recents {
  */
 class RecentsActivity
     : public Activity
-    , public IRecentsViewCallbacks
-    , public IRecentsAppWidgetHostCallbacks
-    , public IDebugOverlayViewCallbacks
     , public IRecentsActivity
 {
 public:
@@ -98,6 +95,43 @@ public:
     };
 
 private:
+    class InnerCallback
+        : public Object
+        , public IRecentsViewCallbacks
+        , public IDebugOverlayViewCallbacks
+        , public IRecentsAppWidgetHostCallbacks
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerCallback(
+            /* [in] */ RecentsActivity* host);
+
+        // @Override
+        CARAPI OnExitToHomeAnimationTriggered();
+
+        // @Override
+        CARAPI OnTaskViewClicked();
+
+        // @Override
+        CARAPI OnTaskLaunchFailed();
+
+        // @Override
+        CARAPI OnAllTaskViewsDismissed();
+
+        CARAPI OnPrimarySeekBarChanged(
+            /* [in] */ Float progress);
+
+        // @Override
+        CARAPI OnSecondarySeekBarChanged(
+            /* [in] */ Float progress);
+
+        CARAPI RefreshSearchWidget();
+
+    private:
+        RecentsActivity* mHost;
+    };
+
     /**
      * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
      * launching Home with some ActivityOptions.  Generally we always launch home when we exit
@@ -151,14 +185,14 @@ private:
          * ActivityOptions.
          */
         AppWidgetHostCallbackRunnable(
-            /* [in] */ IWeakReference* callback,
+            /* [in] */ IRecentsAppWidgetHostCallbacks* callback,
             /* [in] */ RecentsActivity* host);
 
         // @Override
         CARAPI Run();
 
     private:
-        AutoPtr<IWeakReference> mCallback;
+        AutoPtr<IRecentsAppWidgetHostCallbacks> mCallback;
         RecentsActivity* mHost;
     };
 
@@ -248,30 +282,30 @@ public:
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
 
     // @Override
-    CARAPI OnExitToHomeAnimationTriggered();
+    virtual CARAPI OnExitToHomeAnimationTriggered();
 
     // @Override
-    CARAPI OnTaskViewClicked();
+    virtual CARAPI OnTaskViewClicked();
 
     // @Override
-    CARAPI OnTaskLaunchFailed();
+    virtual CARAPI OnTaskLaunchFailed();
 
     // @Override
-    CARAPI OnAllTaskViewsDismissed();
+    virtual CARAPI OnAllTaskViewsDismissed();
 
     /**** RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks Implementation ****/
 
     // @Override
-    CARAPI RefreshSearchWidget();
+    virtual CARAPI RefreshSearchWidget();
 
     /**** DebugOverlayView.DebugOverlayViewCallbacks ****/
 
     // @Override
-    CARAPI OnPrimarySeekBarChanged(
+    virtual CARAPI OnPrimarySeekBarChanged(
         /* [in] */ Float progress);
 
     // @Override
-    CARAPI OnSecondarySeekBarChanged(
+    virtual CARAPI OnSecondarySeekBarChanged(
         /* [in] */ Float progress);
 
 public:

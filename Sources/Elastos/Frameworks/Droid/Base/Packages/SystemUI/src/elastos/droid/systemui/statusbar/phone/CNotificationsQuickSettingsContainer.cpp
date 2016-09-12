@@ -10,10 +10,25 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+
+CAR_INTERFACE_IMPL(CNotificationsQuickSettingsContainer::InnerListener, Object, IViewStubOnInflateListener);
+
+CNotificationsQuickSettingsContainer::InnerListener::InnerListener(
+    /* [in] */ CNotificationsQuickSettingsContainer* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode CNotificationsQuickSettingsContainer::InnerListener::OnInflate(
+    /* [in] */ IViewStub* stub,
+    /* [in] */ IView* inflated)
+{
+    return mHost->OnInflate(stub, inflated);
+}
+
 CAR_OBJECT_IMPL(CNotificationsQuickSettingsContainer)
 
-CAR_INTERFACE_IMPL_2(CNotificationsQuickSettingsContainer, FrameLayout, INotificationsQuickSettingsContainer \
-    , IViewStubOnInflateListener);
+CAR_INTERFACE_IMPL(CNotificationsQuickSettingsContainer, FrameLayout, INotificationsQuickSettingsContainer);
 
 CNotificationsQuickSettingsContainer::CNotificationsQuickSettingsContainer()
     : mInflated(FALSE)
@@ -28,8 +43,9 @@ ECode CNotificationsQuickSettingsContainer::OnFinishInflate()
     AutoPtr<IView> view;
     FindViewById(R::id::keyguard_user_switcher, (IView**)&view);
     AutoPtr<IViewStub> userSwitcher = IViewStub::Probe(view);
-    userSwitcher->SetOnInflateListener(this);
-    mUserSwitcher = IView::Probe(userSwitcher);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    userSwitcher->SetOnInflateListener(listener);
+    mUserSwitcher = view;
     return NOERROR;
 }
 

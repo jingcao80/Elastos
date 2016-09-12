@@ -36,9 +36,25 @@ CarClass(CHeadsUpNotificationView)
     , public IHeadsUpNotificationView
     , public ISwipeHelperCallback
     , public IExpandHelperCallback
-    , public IOnComputeInternalInsetsListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IOnComputeInternalInsetsListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CHeadsUpNotificationView* host);
+
+        CARAPI OnComputeInternalInsets(
+            /* [in] */ IInternalInsetsInfo* info);
+
+    private:
+        CHeadsUpNotificationView* mHost;
+    };
+
     class EdgeSwipeHelper
         : public Object
         , public IGefingerpoken

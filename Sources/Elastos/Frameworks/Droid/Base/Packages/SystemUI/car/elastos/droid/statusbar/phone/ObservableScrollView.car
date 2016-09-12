@@ -7,7 +7,7 @@ module
     namespace StatusBar {
     namespace Phone {
 
-    interface IListener {
+    interface IObservableScrollViewListener {
 
         OnScrollChanged();
 
@@ -27,7 +27,7 @@ module
     interface IObservableScrollView {
 
         SetListener(
-            [in] IListener* listener);
+            [in] IObservableScrollViewListener* listener);
 
         SetTouchEnabled(
             [in] Boolean touchEnabled);

@@ -53,7 +53,6 @@ namespace Recent {
 class RecentsPanelView
     : public FrameLayout
     , public IAdapterViewOnItemClickListener
-    , public IRecentsCallback
     , public IStatusBarPanel
     , public IAnimatorListener
     , public IRecentsPanelView
@@ -135,6 +134,36 @@ public:
     };
 
 private:
+    class InnerListener
+        : public Object
+        , public IRecentsCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("RecentsPanelView::InnerListener")
+
+        InnerListener(
+            /* [in] */ RecentsPanelView* host);
+
+        CARAPI HandleOnClick(
+            /* [in] */ IView* view);
+
+        CARAPI HandleSwipe(
+            /* [in] */ IView* view);
+
+        CARAPI HandleLongPress(
+            /* [in] */ IView* selectedView,
+            /* [in] */ IView* anchorView,
+            /* [in] */ IView* thumbnailView);
+
+        CARAPI Dismiss();
+
+    public:
+        RecentsPanelView* mHost;
+
+    };
+
     class OnLongClickDelegate
         : public Object
         , public IViewOnLongClickListener
