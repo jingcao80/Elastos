@@ -2,7 +2,7 @@
 #ifndef __ORG_CONSCRYPT_BYTEARRAY_H__
 #define __ORG_CONSCRYPT_BYTEARRAY_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/coredef.h>
 #include <elastos/core/Object.h>
 #include "_Org.Conscrypt.h"
 

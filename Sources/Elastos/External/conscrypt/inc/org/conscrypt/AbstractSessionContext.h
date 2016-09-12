@@ -2,11 +2,11 @@
 #ifndef __ORG_CONSCRYPT_ABSTRACTSESSIONCONTEXT_H__
 #define __ORG_CONSCRYPT_ABSTRACTSESSIONCONTEXT_H__
 
-#include "elastos/droid/ext/frameworkext.h"
 #include <Elastos.CoreLibrary.Extensions.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Security.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/coredef.h>
 #include <elastos/core/Object.h>
 #include <elastos/utility/LinkedHashMap.h>
 #include "_Org.Conscrypt.h"

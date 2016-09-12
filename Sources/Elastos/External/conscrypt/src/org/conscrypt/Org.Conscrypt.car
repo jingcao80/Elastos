@@ -45,7 +45,7 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLRandom.car");
     merge("../../../car/org/conscrypt/IOpenSSLSecretKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLServerSocketImpl.car");
-    // merge("../../../car/org/conscrypt/IOpenSSLSocketImpl.car");
+    merge("../../../car/org/conscrypt/IOpenSSLSocketImpl.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509CRL.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509CertPath.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509Certificate.car");
