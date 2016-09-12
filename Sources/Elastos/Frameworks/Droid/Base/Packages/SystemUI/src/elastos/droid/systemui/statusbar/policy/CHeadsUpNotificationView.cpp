@@ -34,8 +34,24 @@ const Boolean CHeadsUpNotificationView::DEBUG = FALSE;
 const Boolean CHeadsUpNotificationView::SPEW = DEBUG;
 AutoPtr<IViewOutlineProvider> CHeadsUpNotificationView::CONTENT_HOLDER_OUTLINE_PROVIDER = new _ViewOutlineProvider();
 
+
+CAR_INTERFACE_IMPL(CHeadsUpNotificationView::InnerListener, Object, IOnComputeInternalInsetsListener)
+
+CHeadsUpNotificationView::InnerListener::InnerListener(
+    /* [in] */ CHeadsUpNotificationView* host)
+    : mHost(host)
+{}
+
+ECode CHeadsUpNotificationView::InnerListener::OnComputeInternalInsets(
+    /* [in] */ IInternalInsetsInfo* info)
+{
+    return mHost->OnComputeInternalInsets(info);
+}
+
 const Boolean CHeadsUpNotificationView::EdgeSwipeHelper::DEBUG_EDGE_SWIPE = FALSE;
+
 CAR_INTERFACE_IMPL(CHeadsUpNotificationView::EdgeSwipeHelper, Object, IGefingerpoken)
+
 CHeadsUpNotificationView::EdgeSwipeHelper::EdgeSwipeHelper(
     /* [in] */ Float touchSlop,
     /* [in] */ CHeadsUpNotificationView* host)
@@ -126,8 +142,10 @@ ECode CHeadsUpNotificationView::_ViewOutlineProvider::GetOutline(
 
 
 CAR_OBJECT_IMPL(CHeadsUpNotificationView)
-CAR_INTERFACE_IMPL_4(CHeadsUpNotificationView, FrameLayout, IHeadsUpNotificationView, ISwipeHelperCallback, \
-        IExpandHelperCallback, IOnComputeInternalInsetsListener);
+
+CAR_INTERFACE_IMPL_3(CHeadsUpNotificationView, FrameLayout, IHeadsUpNotificationView,
+    ISwipeHelperCallback, IExpandHelperCallback);
+
 CHeadsUpNotificationView::CHeadsUpNotificationView()
     : mTouchSensitivityDelay(0)
     , mMaxAlpha(1.f)
@@ -373,7 +391,8 @@ ECode CHeadsUpNotificationView::OnAttachedToWindow()
 
     AutoPtr<IViewTreeObserver> vo;
     GetViewTreeObserver((IViewTreeObserver**)&vo);
-    vo->AddOnComputeInternalInsetsListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    vo->AddOnComputeInternalInsetsListener(listener);
     return NOERROR;
 }
 

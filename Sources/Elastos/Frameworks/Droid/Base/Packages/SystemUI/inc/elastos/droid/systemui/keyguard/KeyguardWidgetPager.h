@@ -37,11 +37,41 @@ namespace Keyguard {
 class KeyguardWidgetPager
     : public PagedView
     , public IKeyguardWidgetPager
-    , public IPagedViewPageSwitchListener
-    , public IViewOnLongClickListener
     , public IChallengeLayoutOnBouncerStateChangedListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IPagedViewPageSwitchListener
+        , public IViewOnLongClickListener
+    {
+    public:
+        TO_STRING_IMPL("KeyguardWidgetPager::InnerListener")
+
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ KeyguardWidgetPager* host);
+
+        //@Override
+        CARAPI OnPageSwitching(
+            /* [in] */ IView* newPage,
+            /* [in] */ Int32 newPageIndex);
+
+        //@Override
+        CARAPI OnPageSwitched(
+            /* [in] */ IView* newPage,
+            /* [in] */ Int32 newPageIndex);
+
+        //@Override
+        CARAPI OnLongClick(
+            /* [in] */ IView* v,
+            /* [out] */ Boolean* result);
+
+    private:
+        KeyguardWidgetPager* mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {

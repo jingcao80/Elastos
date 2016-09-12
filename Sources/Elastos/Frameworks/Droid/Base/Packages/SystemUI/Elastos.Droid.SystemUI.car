@@ -294,8 +294,6 @@ module
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IDialogInterface;
-    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
-    using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     using interface Elastos.Droid.Content.IIntent;
     using interface Elastos.Droid.Content.Res.IResources;
     using interface Elastos.Droid.Content.Pm.IResolveInfo;
@@ -334,7 +332,6 @@ module
     using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
-    using interface Elastos.Droid.View.IOnComputeInternalInsetsListener;
     using interface Elastos.Droid.View.IOnPreDrawListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
@@ -346,7 +343,6 @@ module
     using interface Elastos.Droid.View.IWindowCallback;
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.IViewOnKeyListener;
-    using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.Animation.IInterpolator;
     using interface Elastos.Droid.Widget.IButton;
@@ -380,7 +376,6 @@ module
     interface Elastos.Droid.SystemUI.ISwipeHelperCallback;
     interface Elastos.Droid.SystemUI.Qs.IQSPanel;
     interface Elastos.Droid.SystemUI.Qs.IQSTile;
-    interface Elastos.Droid.SystemUI.StatusBar.IActivatableNotificationViewOnActivatedListener;
     interface Elastos.Droid.SystemUI.StatusBar.IBaseStatusBar;
     interface Elastos.Droid.SystemUI.StatusBar.ICommandQueueCallbacks;
     interface Elastos.Droid.SystemUI.StatusBar.IDragDownCallback;
@@ -964,8 +959,6 @@ module
             interface IDrawableCallback;
             interface ILinearLayout;
             interface IKeyguardSecurityView;
-            interface IViewOnClickListener;
-            interface ITextWatcher;
         }
 
         [local]
@@ -1200,8 +1193,6 @@ module
             interface IDrawableCallback;
             interface ILinearLayout;
             interface IKeyguardSecurityView;
-            interface ITextWatcher;
-            interface IOnEditorActionListener;
         }
 
         [local]
@@ -1243,7 +1234,6 @@ module
             interface IDrawableCallback;
             interface ILinearLayout;
             interface IKeyguardSecurityView;
-            interface IViewOnKeyListener;
         }
 
         [local]
@@ -1264,7 +1254,6 @@ module
             interface IDrawableCallback;
             interface ILinearLayout;
             interface IKeyguardSecurityView;
-            interface IViewOnKeyListener;
         }
 
         [local]
@@ -1306,10 +1295,7 @@ module
             interface IViewParent;
             interface IViewManager;
             interface IPagedView;
-            interface IViewGroupOnHierarchyChangeListener;
             interface IKeyguardWidgetPager;
-            interface IPagedViewPageSwitchListener;
-            interface IViewOnLongClickListener;
             interface IChallengeLayoutOnBouncerStateChangedListener;
         }
 
@@ -1335,10 +1321,7 @@ module
             interface IViewParent;
             interface IViewManager;
             interface IPagedView;
-            interface IViewGroupOnHierarchyChangeListener;
             interface IKeyguardWidgetPager;
-            interface IPagedViewPageSwitchListener;
-            interface IViewOnLongClickListener;
             interface IChallengeLayoutOnBouncerStateChangedListener;
         }
 
@@ -1472,7 +1455,6 @@ module
             interface IOnWindowDismissedCallback;
             interface IActivity;
             interface IAlertActivity;
-            interface IDialogInterfaceOnClickListener;
         }
 
         class CUsbConfirmActivity {
@@ -1491,8 +1473,6 @@ module
             interface IOnWindowDismissedCallback;
             interface IActivity;
             interface IAlertActivity;
-            interface IDialogInterfaceOnClickListener;
-            interface ICompoundButtonOnCheckedChangeListener;
         }
 
         class CUsbStorageActivity {
@@ -1511,8 +1491,6 @@ module
             interface IComponentCallbacks2;
             interface IOnWindowDismissedCallback;
             interface IActivity;
-            interface IViewOnClickListener;
-            interface IDialogInterfaceOnCancelListener;
         }
 
         class CUsbDebuggingActivity {
@@ -1531,7 +1509,6 @@ module
             interface IOnWindowDismissedCallback;
             interface IActivity;
             interface IAlertActivity;
-            interface IDialogInterfaceOnClickListener;
         }
 
         class CUsbPermissionActivity {
@@ -1550,8 +1527,6 @@ module
             interface IOnWindowDismissedCallback;
             interface IActivity;
             interface IAlertActivity;
-            interface IDialogInterfaceOnClickListener;
-            interface ICompoundButtonOnCheckedChangeListener;
         }
 
         class CUsbResolverActivity {
@@ -1569,7 +1544,6 @@ module
             interface IComponentCallbacks2;
             interface IOnWindowDismissedCallback;
             interface IActivity;
-            interface IAdapterViewOnItemClickListener;
             interface IResolverActivity;
         }
 
@@ -1714,8 +1688,6 @@ module
             interface IOnWindowDismissedCallback;
             interface IActivity;
             interface IAlertActivity;
-            interface IDialogInterfaceOnClickListener;
-            interface ICompoundButtonOnCheckedChangeListener;
         }
 
         [local]
@@ -1797,7 +1769,6 @@ module
 
             interface IRecentsPanelView;
             interface IAdapterViewOnItemClickListener;
-            interface IRecentsCallback;
             interface IStatusBarPanel;
             interface IAnimatorListener;
             interface IFrameLayout;
@@ -1891,9 +1862,6 @@ module
             interface IComponentCallbacks;
             interface IComponentCallbacks2;
             interface IOnWindowDismissedCallback;
-            interface IRecentsViewCallbacks;
-            interface IRecentsAppWidgetHostCallbacks;
-            interface IDebugOverlayViewCallbacks;
             interface IRecentsActivity;
         }
 
@@ -2711,7 +2679,6 @@ module
                 interface ISwipeHelperCallback;
                 interface IExpandHelperCallback;
                 interface IScrollAdapter;
-                interface IExpandableViewOnHeightChangedListener;
                 interface IViewGroup;
                 interface IView;
                 interface IViewParent;
@@ -2822,7 +2789,6 @@ module
             interface IHeadsUpNotificationView;
             interface ISwipeHelperCallback;
             interface IExpandHelperCallback;
-            interface IOnComputeInternalInsetsListener;
             interface IFrameLayout;
             interface IViewGroup;
             interface IView;
@@ -3024,10 +2990,6 @@ module
                 [in] Int32 defStyle);
 
             interface IKeyguardBottomAreaView;
-            interface IViewOnClickListener;
-            interface IOnUnlockMethodChangedListener;
-            interface IAccessibilityStateChangedCallback;
-            interface IViewOnLongClickListener;
             interface IFrameLayout;
             interface IViewGroup;
             interface IView;
@@ -3085,7 +3047,6 @@ module
                 [in] IAttributeSet* attrs);
 
             interface IKeyguardStatusBarView;
-            interface IBatteryStateChangeCallback;
             interface IRelativeLayout;
             interface IViewGroup;
             interface IView;
@@ -3103,7 +3064,6 @@ module
                 [in] IAttributeSet* attrs);
 
             interface IMultiUserSwitch;
-            interface IViewOnClickListener;
             interface IFrameLayout;
             interface IViewGroup;
             interface IView;
@@ -3138,7 +3098,6 @@ module
                 [in] IAttributeSet* attrs);
 
             interface INotificationsQuickSettingsContainer;
-            interface IViewStubOnInflateListener;
             interface IFrameLayout;
             interface IViewGroup;
             interface IView;
@@ -3156,10 +3115,6 @@ module
                 [in] IAttributeSet* attrs);
 
             interface INotificationPanelView;
-            interface IExpandableViewOnHeightChangedListener;
-            interface IListener;
-            interface IViewOnClickListener;
-            interface IOnOverscrollTopChangedListener;
             interface IPanelView;
             interface IFrameLayout;
             interface IViewGroup;
@@ -3259,9 +3214,6 @@ module
                 [in] IAttributeSet* attrs);
 
             interface IStatusBarHeaderView;
-            interface IViewOnClickListener;
-            interface IBatteryStateChangeCallback;
-            interface INextAlarmChangeCallback;
             interface IRelativeLayout;
             interface IViewGroup;
             interface IView;
@@ -3299,7 +3251,6 @@ module
             interface IActivityStarter;
             interface IBaseStatusBar;
             interface ICommandQueueCallbacks;
-            interface IActivatableNotificationViewOnActivatedListener;
             interface IRecentsComponentCallbacks;
             interface IExpansionLogger;
             interface INotificationEnvironment;

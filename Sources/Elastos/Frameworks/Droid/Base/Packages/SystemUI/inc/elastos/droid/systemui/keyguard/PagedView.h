@@ -53,7 +53,6 @@ namespace Keyguard {
 class PagedView
     : public ViewGroup
     , public IPagedView
-    , public IViewGroupOnHierarchyChangeListener
 {
 public:
     class SavedState
@@ -76,20 +75,33 @@ public:
 
     public:
         Int32 mCurrentPage;
-
-        // public static final Parcelable.Creator<SavedState> CREATOR =
-        //         new Parcelable.Creator<SavedState>() {
-        //     public SavedState createFromParcel(Parcel in) {
-        //         return new SavedState(in);
-        //     }
-
-        //     public SavedState[] newArray(int size) {
-        //         return new SavedState[size];
-        //     }
-        // };
     };
 
 private:
+    class InnerListener
+        : public Object
+        , public IViewGroupOnHierarchyChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ PagedView* host);
+
+        //@Override
+        CARAPI OnChildViewAdded(
+            /* [in] */ IView* parent,
+            /* [in] */ IView* child);
+
+        //@Override
+        CARAPI OnChildViewRemoved(
+            /* [in] */ IView* parent,
+            /* [in] */ IView* child);
+
+    private:
+        PagedView* mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {

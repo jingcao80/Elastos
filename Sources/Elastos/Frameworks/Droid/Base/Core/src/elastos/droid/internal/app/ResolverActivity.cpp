@@ -893,7 +893,7 @@ Int64 ResolverActivity::ResolverComparator::GetPackageTimeSpent(
     return 0;
 }
 
-CAR_INTERFACE_IMPL_2(ResolverActivity, Activity, IResolverActivity, IAdapterViewOnItemClickListener)
+CAR_INTERFACE_IMPL(ResolverActivity, Activity, IResolverActivity)
 
 ResolverActivity::ResolverActivity()
     : mLaunchedFromUid(0)

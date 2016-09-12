@@ -44,9 +44,29 @@ CarClass(CNotificationStackScrollLayout)
     , public ISwipeHelperCallback
     , public IExpandHelperCallback
     , public IScrollAdapter
-    , public IExpandableViewOnHeightChangedListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IExpandableViewOnHeightChangedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CNotificationStackScrollLayout* host);
+
+        // @Override
+        CARAPI OnHeightChanged(
+            /* [in] */ IExpandableView* view);
+
+        // @Override
+        CARAPI OnReset(
+            /* [in] */ IExpandableView* view);
+    private:
+        CNotificationStackScrollLayout* mHost;
+    };
+
     class AnimationEvent: public Object
     {
     public:

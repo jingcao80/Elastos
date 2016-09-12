@@ -25,11 +25,34 @@ namespace Media {
 
 class MediaProjectionPermissionActivity
     : public AlertActivity
-    , public IDialogInterfaceOnClickListener
-    , public ICompoundButtonOnCheckedChangeListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+        , public ICompoundButtonOnCheckedChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ MediaProjectionPermissionActivity* host);
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+        // @Override
+        CARAPI OnCheckedChanged(
+            /* [in] */ ICompoundButton* buttonView,
+            /* [in] */ Boolean isChecked);
+
+    private:
+        MediaProjectionPermissionActivity* mHost;
+    };
+
 public:
-    CAR_INTERFACE_DECL()
 
     MediaProjectionPermissionActivity();
 

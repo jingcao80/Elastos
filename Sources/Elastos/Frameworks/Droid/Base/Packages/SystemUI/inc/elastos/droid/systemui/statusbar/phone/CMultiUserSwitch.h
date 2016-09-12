@@ -24,7 +24,6 @@ namespace Phone {
 CarClass(CMultiUserSwitch)
     , public FrameLayout
     , public IMultiUserSwitch
-    , public IViewOnClickListener
 {
 private:
     class ViewOnClickListener

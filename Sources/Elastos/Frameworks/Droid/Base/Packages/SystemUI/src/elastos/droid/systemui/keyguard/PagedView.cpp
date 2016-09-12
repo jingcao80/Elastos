@@ -52,6 +52,30 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+CAR_INTERFACE_IMPL(PagedView::InnerListener, Object, IViewGroupOnHierarchyChangeListener)
+
+PagedView::InnerListener::InnerListener(
+    /* [in] */ PagedView* host)
+    : mHost(host)
+{
+}
+
+//@Override
+ECode PagedView::InnerListener::OnChildViewAdded(
+    /* [in] */ IView* parent,
+    /* [in] */ IView* child)
+{
+    return mHost->OnChildViewAdded(parent, child);
+}
+
+//@Override
+ECode PagedView::InnerListener::OnChildViewRemoved(
+    /* [in] */ IView* parent,
+    /* [in] */ IView* child)
+{
+    return mHost->OnChildViewRemoved(parent, child);
+}
+
 PagedView::SavedState::SavedState()
     : mCurrentPage(-1)
 {
@@ -607,7 +631,7 @@ const Boolean PagedView::DISABLE_TOUCH_INTERACTION = FALSE;
 const Boolean PagedView::DISABLE_TOUCH_SIDE_PAGES = TRUE;
 const Boolean PagedView::DISABLE_FLING_TO_DELETE = FALSE;
 
-CAR_INTERFACE_IMPL_2(PagedView, ViewGroup, IPagedView, IViewGroupOnHierarchyChangeListener)
+CAR_INTERFACE_IMPL(PagedView, ViewGroup, IPagedView)
 
 PagedView::PagedView()
     : mFlingThresholdVelocity(0)
@@ -780,7 +804,9 @@ ECode PagedView::Init()
     mFlingThresholdVelocity = (Int32)(FLING_THRESHOLD_VELOCITY * mDensity);
     mMinFlingVelocity = (Int32)(MIN_FLING_VELOCITY * mDensity);
     mMinSnapVelocity = (Int32)(MIN_SNAP_VELOCITY * mDensity);
-    return SetOnHierarchyChangeListener(this);
+
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    return SetOnHierarchyChangeListener(listener);
 }
 
 ECode PagedView::SetDeleteDropTarget(

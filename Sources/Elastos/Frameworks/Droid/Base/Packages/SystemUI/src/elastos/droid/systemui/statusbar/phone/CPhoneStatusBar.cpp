@@ -1776,7 +1776,8 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     inflater->Inflate(R::layout::status_bar_notification_keyguard_overflow,
         IViewGroup::Probe(mStackScroller), FALSE, (IView**)&view);
     mKeyguardIconOverflowContainer = INotificationOverflowContainer::Probe(view);
-    IActivatableNotificationView::Probe(mKeyguardIconOverflowContainer)->SetOnActivatedListener(this);
+    AutoPtr<ActivatableNotificationViewListener> anvl = new ActivatableNotificationViewListener(this);
+    IActivatableNotificationView::Probe(mKeyguardIconOverflowContainer)->SetOnActivatedListener(anvl);
     view->SetOnClickListener(mOverflowClickListener);
     IViewGroup::Probe(mStackScroller)->AddView(view);
 

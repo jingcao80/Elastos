@@ -35,10 +35,6 @@ namespace Phone {
 CarClass(CNotificationPanelView)
     , public PanelView
     , public INotificationPanelView
-    , public IExpandableViewOnHeightChangedListener
-    , public IListener
-    , public IViewOnClickListener
-    , public IOnOverscrollTopChangedListener
 {
 private:
     class AffordanceHelperCallback
@@ -293,7 +289,7 @@ private:
 
     class ScrollViewListener
         : public Object
-        , public IListener
+        , public IObservableScrollViewListener
     {
     public:
         CAR_INTERFACE_DECL()

@@ -50,10 +50,43 @@ namespace Keyguard {
 CarClass(CKeyguardAccountView)
     , public LinearLayout
     , public IKeyguardSecurityView
-    , public IViewOnClickListener
-    , public ITextWatcher
 {
 private:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public ITextWatcher
+    {
+    public:
+        TO_STRING_IMPL("CKeyguardAccountView::InnerListener")
+
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CKeyguardAccountView* host);
+
+        CARAPI AfterTextChanged(
+            /* [in] */ IEditable* s);
+
+        CARAPI BeforeTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [in] */ Int32 after);
+
+        CARAPI OnTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 before,
+            /* [in] */ Int32 count);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CKeyguardAccountView* mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {

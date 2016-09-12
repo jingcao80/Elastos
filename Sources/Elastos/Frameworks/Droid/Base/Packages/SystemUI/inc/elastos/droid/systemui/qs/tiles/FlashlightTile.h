@@ -18,9 +18,32 @@ namespace Tiles {
 /** Quick settings tile: Control flashlight **/
 class FlashlightTile
     : public QSTile
-    , public IFlashlightListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IFlashlightListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ FlashlightTile* host);
+
+        // @Override
+        CARAPI OnFlashlightOff();
+
+        // @Override
+        CARAPI OnFlashlightError();
+
+        // @Override
+        CARAPI OnFlashlightAvailabilityChanged(
+            /* [in] */ Boolean available);
+
+    private:
+        FlashlightTile* mHost;
+    };
+
     class RecentlyOnTimeout: public Runnable
     {
     public:
@@ -35,8 +58,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     FlashlightTile(
         /* [in] */ IQSTileHost* host);
 
@@ -86,6 +107,7 @@ private:
     AutoPtr<IFlashlightController> mFlashlightController;
     Int64 mWasLastOn;
     AutoPtr<IRunnable> mRecentlyOnTimeout;
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Tiles

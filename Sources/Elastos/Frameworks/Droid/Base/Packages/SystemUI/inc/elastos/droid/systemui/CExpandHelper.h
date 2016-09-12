@@ -233,7 +233,7 @@ private:
     Float mLastMotionY;
     Int32 mPopDuration;
     Float mPullGestureMinXSpan;
-    AutoPtr<IExpandHelperCallback> mCallback;
+    IExpandHelperCallback* mCallback;   // weak-ref
     AutoPtr<IScaleGestureDetector> mSGD;
     AutoPtr<ExpandScaleGestureListener> mScaleGestureListener;
     AutoPtr<IViewScaler> mScaler;

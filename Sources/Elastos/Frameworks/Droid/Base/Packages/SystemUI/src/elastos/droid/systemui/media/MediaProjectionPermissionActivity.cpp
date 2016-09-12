@@ -37,9 +37,35 @@ namespace Droid {
 namespace SystemUI {
 namespace Media {
 
+CAR_INTERFACE_IMPL_2(MediaProjectionPermissionActivity::InnerListener, Object,
+    IDialogInterfaceOnClickListener, ICompoundButtonOnCheckedChangeListener)
+
+
+MediaProjectionPermissionActivity::InnerListener::InnerListener(
+    /* [in] */ MediaProjectionPermissionActivity* host)
+    : mHost(host)
+{
+}
+
+// @Override
+ECode MediaProjectionPermissionActivity::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->OnClick(dialog, which);
+}
+
+// @Override
+ECode MediaProjectionPermissionActivity::InnerListener::OnCheckedChanged(
+    /* [in] */ ICompoundButton* buttonView,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnCheckedChanged(buttonView, isChecked);
+}
+
+
 const String MediaProjectionPermissionActivity::TAG("MediaProjectionPermissionActivity");
 
-CAR_INTERFACE_IMPL_2(MediaProjectionPermissionActivity, AlertActivity, IDialogInterfaceOnClickListener, ICompoundButtonOnCheckedChangeListener)
 
 MediaProjectionPermissionActivity::MediaProjectionPermissionActivity()
     : mUid(0)
@@ -104,6 +130,8 @@ ECode MediaProjectionPermissionActivity::OnCreate(
     IPackageItemInfo::Probe(aInfo)->LoadIcon(packageManager, (IDrawable**)&icon);
     ap->SetIcon(icon);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
     AutoPtr<ICharSequence> csappname;
     CString::New(appName, (ICharSequence**)&csappname);
     AutoPtr<ArrayOf<IInterface*> > arrappname = ArrayOf<IInterface*>::Alloc(1);
@@ -123,8 +151,8 @@ ECode MediaProjectionPermissionActivity::OnCreate(
     AutoPtr<ICharSequence> ntext;
     CString::New(str3, (ICharSequence**)&ntext);
     ap->SetNegativeButtonText(ntext);
-    ap->SetPositiveButtonListener(this);
-    ap->SetNegativeButtonListener(this);
+    ap->SetPositiveButtonListener(listener);
+    ap->SetNegativeButtonListener(listener);
 
     // add "always use" checkbox
     AutoPtr<IInterface> inflaterObj;
@@ -137,7 +165,7 @@ ECode MediaProjectionPermissionActivity::OnCreate(
     view->FindViewById(R::id::remember, (IView**)&v);
 
     AutoPtr<ICheckBox> rememberPermissionCheckbox = ICheckBox::Probe(v);
-    ICompoundButton::Probe(rememberPermissionCheckbox)->SetOnCheckedChangeListener(this);
+    ICompoundButton::Probe(rememberPermissionCheckbox)->SetOnCheckedChangeListener(listener);
     SetupAlert();
     return NOERROR;
 }

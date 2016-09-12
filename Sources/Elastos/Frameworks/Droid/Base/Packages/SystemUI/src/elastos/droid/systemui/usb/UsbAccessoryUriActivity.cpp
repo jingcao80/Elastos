@@ -26,13 +26,26 @@ namespace Droid {
 namespace SystemUI {
 namespace Usb {
 
+CAR_INTERFACE_IMPL(UsbAccessoryUriActivity::InnerListener, Object, IDialogInterfaceOnClickListener)
+
+UsbAccessoryUriActivity::InnerListener::InnerListener(
+    /* [in] */ UsbAccessoryUriActivity* host)
+    : mHost(host)
+{}
+
+ECode UsbAccessoryUriActivity::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->OnClick(dialog, which);
+}
+
 //-------------------------------------------------------------------------------------
 // UsbAccessoryUriActivity
 //-------------------------------------------------------------------------------------
 
 const String UsbAccessoryUriActivity::TAG("UsbAccessoryUriActivity");
 
-CAR_INTERFACE_IMPL(UsbAccessoryUriActivity, AlertActivity, IDialogInterfaceOnClickListener)
 
 ECode UsbAccessoryUriActivity::constructor()
 {
@@ -104,9 +117,10 @@ ECode UsbAccessoryUriActivity::OnCreate(
     GetString(Elastos::Droid::R::string::cancel, aa, &str4);
     AutoPtr<ICharSequence> text2;
     CString::New(str4, (ICharSequence**)&text2);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     ap->SetNegativeButtonText(text2);
-    ap->SetPositiveButtonListener(this);
-    ap->SetNegativeButtonListener(this);
+    ap->SetPositiveButtonListener(listener);
+    ap->SetNegativeButtonListener(listener);
 
     AlertActivity::SetupAlert();
     return NOERROR;

@@ -58,7 +58,7 @@ public:
 
 public:
     AutoPtr<IRectF> mInitialTouch;
-    AutoPtr<IBaseStatusBar> mBar;
+    IBaseStatusBar* mBar;
 
 private:
     AutoPtr<IView> mDelegateView;

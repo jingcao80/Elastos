@@ -30,10 +30,25 @@ namespace Usb {
  */
 class UsbAccessoryUriActivity
     : public AlertActivity
-    , public IDialogInterfaceOnClickListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ UsbAccessoryUriActivity* host);
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+    private:
+        UsbAccessoryUriActivity* mHost;
+    };
 public:
-    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
 

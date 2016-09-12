@@ -15,6 +15,7 @@ namespace View {
 
 ContextThemeWrapperHolder::ContextThemeWrapperHolder()
     : mMemoryLeakTarget(FALSE)
+    , mMemoryCount(0)
 {
     Logger::I("ContextThemeWrapperHolder", " >> Create ContextThemeWrapperHolder: %p", this);
 }
@@ -69,10 +70,7 @@ UInt32 ContextThemeWrapperHolder::AddRef()
 UInt32 ContextThemeWrapperHolder::Release()
 {
     if (mMemoryLeakTarget) {
-        Thread::Sleep(5);   // special trick for fixing memory leak by zhaohui.
-
-        Int32 count = GetStrongCount();
-        if (count < 3) {
+        if (GetStrongCount() < 3) {
             Logger::I("ContextThemeWrapperHolder", " >> Release: %p, refcount: %d", this, GetStrongCount());
         }
 
@@ -84,7 +82,14 @@ UInt32 ContextThemeWrapperHolder::Release()
         // Logger::I("ContextThemeWrapperHolder", "-------------------------------------------------------");
     }
 
-    return Object::Release();
+    Int32 count = Object::Release();
+    if (mMemoryLeakTarget) {
+        if (count == 1 && (++mMemoryCount == 3)) {
+            Release();
+        }
+    }
+
+    return count;
 }
 
 } // namespace View

@@ -45,9 +45,30 @@ namespace Droid {
 namespace SystemUI {
 namespace Usb {
 
-const String UsbConfirmActivity::TAG("UsbConfirmActivity");
 
-CAR_INTERFACE_IMPL_2(UsbConfirmActivity, AlertActivity, IDialogInterfaceOnClickListener, ICompoundButtonOnCheckedChangeListener)
+CAR_INTERFACE_IMPL_2(UsbConfirmActivity::InnerListener, Object,
+    IDialogInterfaceOnClickListener, ICompoundButtonOnCheckedChangeListener)
+
+UsbConfirmActivity::InnerListener::InnerListener(
+    /* [in] */ UsbConfirmActivity* host)
+    : mHost(host)
+{}
+
+ECode UsbConfirmActivity::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->OnClick(dialog, which);
+}
+
+ECode UsbConfirmActivity::InnerListener::OnCheckedChanged(
+    /* [in] */ ICompoundButton* buttonView,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnCheckedChanged(buttonView, isChecked);
+}
+
+const String UsbConfirmActivity::TAG("UsbConfirmActivity");
 
 UsbConfirmActivity::UsbConfirmActivity()
     : mPermissionGranted(FALSE)
@@ -113,13 +134,15 @@ ECode UsbConfirmActivity::OnCreate(
     CString::New(str3, (ICharSequence**)&text);
     ap->SetPositiveButtonText(text);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
     String str4;
     GetString(Elastos::Droid::R::string::cancel, &str4);
     AutoPtr<ICharSequence> text2;
     CString::New(str4, (ICharSequence**)&text2);
     ap->SetNegativeButtonText(text2);
-    ap->SetPositiveButtonListener(this);
-    ap->SetNegativeButtonListener(this);
+    ap->SetPositiveButtonListener(listener);
+    ap->SetNegativeButtonListener(listener);
 
     // add "always use" checkbox
     AutoPtr<IInterface> obj;
@@ -141,7 +164,7 @@ ECode UsbConfirmActivity::OnCreate(
         CString::New(StringUtils::ToString(R::string::always_use_device), (ICharSequence**)&cs2);
         ITextView::Probe(mAlwaysUse)->SetText(cs2);
     }
-    ICompoundButton::Probe(mAlwaysUse)->SetOnCheckedChangeListener(this);
+    ICompoundButton::Probe(mAlwaysUse)->SetOnCheckedChangeListener(listener);
     AutoPtr<IView> view3;
     view->FindViewById(Elastos::Droid::R::id::clearDefaultHint, (IView**)&view3);
     mClearDefaultHint = ITextView::Probe(view3);

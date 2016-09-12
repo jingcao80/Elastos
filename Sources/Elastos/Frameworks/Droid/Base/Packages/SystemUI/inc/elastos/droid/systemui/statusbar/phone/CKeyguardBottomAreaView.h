@@ -37,10 +37,6 @@ namespace Phone {
 CarClass(CKeyguardBottomAreaView)
     , public FrameLayout
     , public IKeyguardBottomAreaView
-    , public IViewOnClickListener
-    , public IOnUnlockMethodChangedListener
-    , public IAccessibilityStateChangedCallback
-    , public IViewOnLongClickListener
 {
 public:
     /**
@@ -151,6 +147,24 @@ private:
         CKeyguardBottomAreaView* mHost;
     };
 
+    class AccessibilityStateChangedCallback
+        : public Object
+        , public IAccessibilityStateChangedCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        AccessibilityStateChangedCallback(
+            /* [in] */ CKeyguardBottomAreaView* host);
+
+        CARAPI OnStateChanged(
+            /* [in] */ Boolean accessibilityEnabled,
+            /* [in] */ Boolean touchExplorationEnabled);
+
+    private:
+        CKeyguardBottomAreaView* mHost;
+    };
+
     class UnlockMethodChangedListener
         : public Object
         , public IOnUnlockMethodChangedListener
@@ -254,7 +268,7 @@ public:
         /* [in] */ IPhoneStatusBar* phoneStatusBar);
 
     // @Override
-    CARAPI OnStateChanged(
+    virtual CARAPI OnStateChanged(
         /* [in] */ Boolean accessibilityEnabled,
         /* [in] */ Boolean touchExplorationEnabled);
 

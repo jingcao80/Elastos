@@ -31,6 +31,48 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+CAR_INTERFACE_IMPL_2(CKeyguardPasswordView::PasswordListener, Object,
+    IOnEditorActionListener, ITextWatcher)
+
+CKeyguardPasswordView::PasswordListener::PasswordListener(
+    /* [in] */ CKeyguardPasswordView* host)
+    : mHost(host)
+{}
+
+ECode CKeyguardPasswordView::PasswordListener:: OnTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 before,
+    /* [in] */ Int32 count)
+{
+    return mHost->OnTextChanged(s, start, before, count);
+}
+
+ECode CKeyguardPasswordView::PasswordListener:: BeforeTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 count,
+    /* [in] */ Int32 after)
+{
+    return mHost->BeforeTextChanged(s, start, count, after);
+}
+
+ECode CKeyguardPasswordView::PasswordListener:: AfterTextChanged(
+    /* [in] */ IEditable* s)
+{
+    return mHost->AfterTextChanged(s);
+}
+
+ECode CKeyguardPasswordView::PasswordListener:: OnEditorAction(
+    /* [in] */ ITextView* v,
+    /* [in] */ Int32 actionId,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnEditorAction(v, actionId, event, result);
+}
+
+
 ECode CKeyguardPasswordView::MyRunnable::Run()
 {
     Boolean res;
@@ -90,9 +132,6 @@ ECode CKeyguardPasswordView::MyOnClickListener2::OnClick(
 }
 
 CAR_OBJECT_IMPL(CKeyguardPasswordView)
-
-CAR_INTERFACE_IMPL_2(CKeyguardPasswordView, KeyguardAbsKeyInputView,
-        IOnEditorActionListener, ITextWatcher)
 
 CKeyguardPasswordView::CKeyguardPasswordView()
     : mShowImeAtScreenOn(FALSE)
@@ -186,11 +225,11 @@ ECode CKeyguardPasswordView::OnFinishInflate()
 
     Boolean imeOrDeleteButtonVisible = FALSE;
 
+    AutoPtr<PasswordListener> listener = new PasswordListener(this);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<IInterface> obj;
-    context->GetSystemService(
-            IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
+    context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
     mImm = IInputMethodManager::Probe(obj);
 
     Int32 id;
@@ -206,8 +245,8 @@ ECode CKeyguardPasswordView::OnFinishInflate()
     mPasswordEntry->SetKeyListener(IKeyListener::Probe(ret));
     mPasswordEntry->SetInputType(IInputType::TYPE_CLASS_TEXT
             | IInputType::TYPE_TEXT_VARIATION_PASSWORD);
-    mPasswordEntry->SetOnEditorActionListener(this);
-    mPasswordEntry->AddTextChangedListener(this);
+    mPasswordEntry->SetOnEditorActionListener(listener);
+    mPasswordEntry->AddTextChangedListener(listener);
 
     // Poke the wakelock any time the text is selected or modified
     AutoPtr<IViewOnClickListener> lis = new MyOnClickListener(this);

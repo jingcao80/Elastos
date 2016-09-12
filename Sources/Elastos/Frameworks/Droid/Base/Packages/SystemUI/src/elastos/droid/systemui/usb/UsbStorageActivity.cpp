@@ -46,6 +46,18 @@ namespace Droid {
 namespace SystemUI {
 namespace Usb {
 
+CAR_INTERFACE_IMPL(UsbStorageActivity::InnerListener, Object, IViewOnClickListener)
+
+UsbStorageActivity::InnerListener::InnerListener(
+    /* [in] */ UsbStorageActivity* host)
+{}
+
+ECode UsbStorageActivity::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
 //---------------------------------------------------------------------------------------------
 // UsbStorageActivity::MyUsbStateReceiver
 //---------------------------------------------------------------------------------------------
@@ -204,23 +216,31 @@ ECode UsbStorageActivity::R6::Run()
 }
 
 //---------------------------------------------------------------------------------------------
-// UsbStorageActivity::MyDialogInterfaceOnClickListener
+// UsbStorageActivity::DialogInterfaceListener
 //---------------------------------------------------------------------------------------------
 
-CAR_INTERFACE_IMPL(UsbStorageActivity::MyDialogInterfaceOnClickListener, Object, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL_2(UsbStorageActivity::DialogInterfaceListener, Object,
+    IDialogInterfaceOnCancelListener, IDialogInterfaceOnClickListener)
 
-UsbStorageActivity::MyDialogInterfaceOnClickListener::MyDialogInterfaceOnClickListener(
+UsbStorageActivity::DialogInterfaceListener::DialogInterfaceListener(
     /* [in] */ UsbStorageActivity* host)
     : mHost(host)
 {}
 
-ECode UsbStorageActivity::MyDialogInterfaceOnClickListener::OnClick(
+ECode UsbStorageActivity::DialogInterfaceListener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
     mHost->SwitchUsbMassStorage(TRUE);
     return NOERROR;
 }
+
+ECode UsbStorageActivity::DialogInterfaceListener::OnCancel(
+    /* [in] */ IDialogInterface* dialog)
+{
+    return mHost->OnCancel(dialog);
+}
+
 
 //---------------------------------------------------------------------------------------------
 // UsbStorageActivity
@@ -293,15 +313,16 @@ ECode UsbStorageActivity::OnCreate(
     FindViewById(R::id::message, (IView**)&view3);
     mMessage = ITextView::Probe(view3);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IView> view4;
     FindViewById(R::id::mount_button, (IView**)&view4);
     mMountButton = IButton::Probe(view4);
-    IView::Probe(mMountButton)->SetOnClickListener(this);
+    IView::Probe(mMountButton)->SetOnClickListener(listener);
 
     AutoPtr<IView> view5;
     FindViewById(R::id::unmount_button, (IView**)&view5);
     mUnmountButton = IButton::Probe(view5);
-    IView::Probe(mUnmountButton)->SetOnClickListener(this);
+    IView::Probe(mUnmountButton)->SetOnClickListener(listener);
 
     AutoPtr<IView> view6;
     FindViewById(R::id::progress, (IView**)&view6);
@@ -415,12 +436,11 @@ AutoPtr<IDialog> UsbStorageActivity::OnCreateDialog(
             AutoPtr<IAlertDialogBuilder> adb;
             CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&adb);
             adb->SetTitle(R::string::dlg_confirm_kill_storage_users_title);
-            AutoPtr<MyDialogInterfaceOnClickListener> diol =
-                new MyDialogInterfaceOnClickListener(this);
+            AutoPtr<DialogInterfaceListener> diol = new DialogInterfaceListener(this);
             adb->SetPositiveButton(R::string::dlg_ok, diol);
             adb->SetNegativeButton(R::string::cancel, NULL);
             adb->SetMessage(R::string::dlg_confirm_kill_storage_users_text);
-            adb->SetOnCancelListener(this);
+            adb->SetOnCancelListener(diol);
             AutoPtr<IAlertDialog> ad;
             adb->Create((IAlertDialog**)&ad);
             return IDialog::Probe(adb);
@@ -431,7 +451,8 @@ AutoPtr<IDialog> UsbStorageActivity::OnCreateDialog(
             adb->SetTitle(R::string::dlg_error_title);
             adb->SetNeutralButton(R::string::dlg_ok, NULL);
             adb->SetMessage(R::string::usb_storage_error_message);
-            adb->SetOnCancelListener(this);
+            AutoPtr<DialogInterfaceListener> diol = new DialogInterfaceListener(this);
+            adb->SetOnCancelListener(diol);
             AutoPtr<IAlertDialog> ad;
             adb->Create((IAlertDialog**)&ad);
             return IDialog::Probe(adb);

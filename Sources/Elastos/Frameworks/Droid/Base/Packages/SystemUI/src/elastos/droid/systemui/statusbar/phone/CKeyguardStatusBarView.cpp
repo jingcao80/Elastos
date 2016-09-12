@@ -32,7 +32,9 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(CKeyguardStatusBarView::OnUserInfoChangedListener, Object, IUserInfoControllerOnUserInfoChangedListener)
+CAR_INTERFACE_IMPL(CKeyguardStatusBarView::OnUserInfoChangedListener, \
+    Object, IUserInfoControllerOnUserInfoChangedListener)
+
 CKeyguardStatusBarView::OnUserInfoChangedListener::OnUserInfoChangedListener(
     /* [in] */ CKeyguardStatusBarView* host)
     : mHost(host)
@@ -118,8 +120,33 @@ ECode CKeyguardStatusBarView::OnPreDrawListener::OnPreDraw(
     return NOERROR;
 }
 
+
+CAR_INTERFACE_IMPL(CKeyguardStatusBarView::BatteryStateChangeCallback, Object, IBatteryStateChangeCallback);
+
+CKeyguardStatusBarView::BatteryStateChangeCallback::BatteryStateChangeCallback(
+    /* [in] */ CKeyguardStatusBarView* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode CKeyguardStatusBarView::BatteryStateChangeCallback::OnBatteryLevelChanged(
+    /* [in] */ Int32 level,
+    /* [in] */ Boolean pluggedIn,
+    /* [in] */ Boolean charging)
+{
+    return mHost->OnBatteryLevelChanged(level, pluggedIn, charging);
+}
+
+ECode CKeyguardStatusBarView::BatteryStateChangeCallback::OnPowerSaveChanged()
+{
+    return mHost->OnPowerSaveChanged();
+}
+
+
 CAR_OBJECT_IMPL(CKeyguardStatusBarView)
-CAR_INTERFACE_IMPL_2(CKeyguardStatusBarView, RelativeLayout, IKeyguardStatusBarView, IBatteryStateChangeCallback);
+
+CAR_INTERFACE_IMPL(CKeyguardStatusBarView, RelativeLayout, IKeyguardStatusBarView);
+
 CKeyguardStatusBarView::CKeyguardStatusBarView()
     : mBatteryCharging(FALSE)
     , mKeyguardUserSwitcherShowing(FALSE)
@@ -227,12 +254,17 @@ ECode CKeyguardStatusBarView::SetListening(
     if (listening == mBatteryListening) {
         return NOERROR;
     }
+
+    if (mBatteryStateChangeCallback == NULL) {
+        mBatteryStateChangeCallback = new BatteryStateChangeCallback(this);
+    }
+
     mBatteryListening = listening;
     if (mBatteryListening) {
-        mBatteryController->AddStateChangedCallback(this);
+        mBatteryController->AddStateChangedCallback(mBatteryStateChangeCallback);
     }
     else {
-        mBatteryController->RemoveStateChangedCallback(this);
+        mBatteryController->RemoveStateChangedCallback(mBatteryStateChangeCallback);
     }
     return NOERROR;
 }

@@ -124,8 +124,9 @@ const Int32 CameraWidgetFrame::WIDGET_ANIMATION_DURATION = 250; // ms
 const Int32 CameraWidgetFrame::WIDGET_WAIT_DURATION = 400; // ms
 const Int32 CameraWidgetFrame::RECOVERY_DELAY = 1000; // ms
 
-CAR_INTERFACE_IMPL_2(CameraWidgetFrame, KeyguardWidgetFrame, ICameraWidgetFrame,
-        IViewOnClickListener)
+CAR_INTERFACE_IMPL(CameraWidgetFrame::InnerListener, Object, IViewOnClickListener)
+
+CAR_INTERFACE_IMPL(CameraWidgetFrame, KeyguardWidgetFrame, ICameraWidgetFrame)
 
 CameraWidgetFrame::CameraWidgetFrame()
     : mLaunchCameraStart(0)
@@ -134,20 +135,6 @@ CameraWidgetFrame::CameraWidgetFrame()
     , mDown(FALSE)
     , mUseFastTransition(FALSE)
 {
-    CHandler::New((IHandler**)&mHandler);
-    CPoint::New((IPoint**)&mRenderedSize);
-
-    mTmpLoc = ArrayOf<Int32>::Alloc(2);
-
-    CRect::New((IRect**)&mInsets);
-
-    mTransitionToCameraRunnable = new MyRunnable(this);
-    mTransitionToCameraEndAction = new MyRunnable2(this);
-    mPostTransitionToCameraEndAction = new MyRunnable3(this);
-    mRecoverRunnable = new MyRunnable4(this);
-    mRenderRunnable = new MyRunnable5(this);
-    mSecureCameraActivityStartedRunnable = new MyRunnable6(this);
-    mCallback = new MyKeyguardUpdateMonitorCallback(this);
 }
 
 ECode CameraWidgetFrame::constructor(
@@ -158,6 +145,19 @@ ECode CameraWidgetFrame::constructor(
     /* [in] */ IView* previewWidget)
 {
     KeyguardWidgetFrame::constructor(context);
+
+    CHandler::New((IHandler**)&mHandler);
+    CPoint::New((IPoint**)&mRenderedSize);
+    CRect::New((IRect**)&mInsets);
+    mTmpLoc = ArrayOf<Int32>::Alloc(2);
+
+    mTransitionToCameraRunnable = new MyRunnable(this);
+    mTransitionToCameraEndAction = new MyRunnable2(this);
+    mPostTransitionToCameraEndAction = new MyRunnable3(this);
+    mRecoverRunnable = new MyRunnable4(this);
+    mRenderRunnable = new MyRunnable5(this);
+    mSecureCameraActivityStartedRunnable = new MyRunnable6(this);
+    mCallback = new MyKeyguardUpdateMonitorCallback(this);
 
     mCallbacks = callbacks;
     mActivityLauncher = activityLauncher;
@@ -172,10 +172,11 @@ ECode CameraWidgetFrame::constructor(
     mPreview->AddView(previewWidget);
     AddView(mPreview);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IView> clickBlocker;
     CView::New(context, (IView**)&clickBlocker);
     clickBlocker->SetBackgroundColor(IColor::TRANSPARENT);
-    clickBlocker->SetOnClickListener(this);
+    clickBlocker->SetOnClickListener(listener);
     AddView(clickBlocker);
 
     String str;

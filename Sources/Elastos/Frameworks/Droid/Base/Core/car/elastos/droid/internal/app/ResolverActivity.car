@@ -27,7 +27,6 @@ module
      * interface IComponentCallbacks2
      * interface IOnWindowDismissedCallback
      * interface IActivity
-     * interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener
      */
     [local]
     interface IResolverActivity {

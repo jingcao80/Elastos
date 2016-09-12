@@ -96,6 +96,42 @@ namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
+
+//=================================================================================
+// RecentsPanelView::InnerListener
+//=================================================================================
+CAR_INTERFACE_IMPL(RecentsPanelView::InnerListener, Object, IRecentsCallback)
+
+RecentsPanelView::InnerListener::InnerListener(
+    /* [in] */ RecentsPanelView* host)
+    : mHost(host)
+{}
+
+ECode RecentsPanelView::InnerListener::HandleOnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->HandleOnClick(view);
+}
+
+ECode RecentsPanelView::InnerListener::HandleSwipe(
+    /* [in] */ IView* view)
+{
+    return mHost->HandleSwipe(view);
+}
+
+ECode RecentsPanelView::InnerListener::HandleLongPress(
+    /* [in] */ IView* selectedView,
+    /* [in] */ IView* anchorView,
+    /* [in] */ IView* thumbnailView)
+{
+    return mHost->HandleLongPress(selectedView, anchorView, thumbnailView);
+}
+
+ECode RecentsPanelView::InnerListener::Dismiss()
+{
+    return mHost->Dismiss();
+}
+
 //=================================================================================
 // RecentsPanelView::ViewHolder
 //=================================================================================
@@ -523,8 +559,8 @@ ECode RecentsPanelView::OnScrollListenerRunnable::Run()
 const String RecentsPanelView::TAG("RecentsPanelView");
 const Boolean RecentsPanelView::DEBUG = FALSE;
 
-CAR_INTERFACE_IMPL_5(RecentsPanelView, FrameLayout, IAdapterViewOnItemClickListener, \
-    IRecentsCallback, IStatusBarPanel, IAnimatorListener, IRecentsPanelView)
+CAR_INTERFACE_IMPL_4(RecentsPanelView, FrameLayout, IAdapterViewOnItemClickListener, \
+    IStatusBarPanel, IAnimatorListener, IRecentsPanelView)
 
 RecentsPanelView::RecentsPanelView()
     : mShowing(FALSE)
@@ -816,9 +852,10 @@ ECode RecentsPanelView::OnFinishInflate()
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     mListAdapter = new TaskDescriptionAdapter(context, this);
     mRecentsContainer->SetAdapter(mListAdapter);
-    mRecentsContainer->SetCallback(this);
+    mRecentsContainer->SetCallback(listener);
 
     FindViewById(R::id::recents_bg_protect, (IView**)&mRecentsScrim);
     FindViewById(R::id::recents_no_apps, (IView**)&mRecentsNoApps);

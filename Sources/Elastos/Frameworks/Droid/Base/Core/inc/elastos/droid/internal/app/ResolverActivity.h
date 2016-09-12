@@ -40,7 +40,6 @@ namespace App {
 class ECO_PUBLIC ResolverActivity
     : public Activity
     , public IResolverActivity
-    , public IAdapterViewOnItemClickListener
 {
     friend class ResolveListAdapter;
 
@@ -373,7 +372,7 @@ public:
         /* [in] */ IResolveInfo* ri,
         /* [out] */ IDrawable** drawable);
 
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,

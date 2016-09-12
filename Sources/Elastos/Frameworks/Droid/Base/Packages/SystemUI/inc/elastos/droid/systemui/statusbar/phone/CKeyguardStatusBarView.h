@@ -32,9 +32,30 @@ namespace Phone {
 CarClass(CKeyguardStatusBarView)
     , public RelativeLayout
     , public IKeyguardStatusBarView
-    , public IBatteryStateChangeCallback
 {
 private:
+    class BatteryStateChangeCallback
+        : public Object
+        , public IBatteryStateChangeCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        BatteryStateChangeCallback(
+            /* [in] */ CKeyguardStatusBarView* host);
+
+        // @Override
+        CARAPI OnBatteryLevelChanged(
+            /* [in] */ Int32 level,
+            /* [in] */ Boolean pluggedIn,
+            /* [in] */ Boolean charging);
+
+        // @Override
+        CARAPI OnPowerSaveChanged();
+    private:
+        CKeyguardStatusBarView* mHost;
+    };
+
     class OnUserInfoChangedListener
         : public Object
         , public IUserInfoControllerOnUserInfoChangedListener
@@ -111,13 +132,13 @@ public:
         /* [in] */ IUserInfoController* userInfoController);
 
     // @Override
-    CARAPI OnBatteryLevelChanged(
+    virtual CARAPI OnBatteryLevelChanged(
         /* [in] */ Int32 level,
         /* [in] */ Boolean pluggedIn,
         /* [in] */ Boolean charging);
 
     // @Override
-    CARAPI OnPowerSaveChanged();
+    virtual CARAPI OnPowerSaveChanged();
 
     CARAPI SetKeyguardUserSwitcher(
         /* [in] */ IKeyguardUserSwitcher* keyguardUserSwitcher);
@@ -169,6 +190,7 @@ private:
 
     Int32 mSystemIconsSwitcherHiddenExpandedMargin;
     AutoPtr<IInterpolator> mFastOutSlowInInterpolator;
+    AutoPtr<BatteryStateChangeCallback> mBatteryStateChangeCallback;
 };
 
 } // namespace Phone

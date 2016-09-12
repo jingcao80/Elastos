@@ -53,6 +53,38 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+CAR_INTERFACE_IMPL_2(KeyguardWidgetPager::InnerListener, Object,
+    IPagedViewPageSwitchListener, IViewOnLongClickListener)
+
+KeyguardWidgetPager::InnerListener::InnerListener(
+    /* [in] */ KeyguardWidgetPager* host)
+    : mHost(host)
+{}
+
+//@Override
+ECode KeyguardWidgetPager::InnerListener::OnPageSwitching(
+    /* [in] */ IView* newPage,
+    /* [in] */ Int32 newPageIndex)
+{
+    mHost->OnPageSwitching(newPage, newPageIndex);
+}
+
+//@Override
+ECode KeyguardWidgetPager::InnerListener::OnPageSwitched(
+    /* [in] */ IView* newPage,
+    /* [in] */ Int32 newPageIndex)
+{
+    mHost->OnPageSwitched(newPage, newPageIndex);
+}
+
+//@Override
+ECode KeyguardWidgetPager::InnerListener::OnLongClick(
+    /* [in] */ IView* v,
+    /* [out] */ Boolean* result)
+{
+    mHost->OnLongClick(v, result);
+}
+
 ECode KeyguardWidgetPager::MyRunnable::Run()
 {
     Boolean res;
@@ -134,9 +166,8 @@ const Int32 KeyguardWidgetPager::FLAG_HAS_LOCAL_MINUTE = 0x2;
 const Int64 KeyguardWidgetPager::CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
 const String KeyguardWidgetPager::TAG("KeyguardWidgetPager");
 
-CAR_INTERFACE_IMPL_4(KeyguardWidgetPager, PagedView, IKeyguardWidgetPager,
-        IPagedViewPageSwitchListener, IViewOnLongClickListener,
-        IChallengeLayoutOnBouncerStateChangedListener)
+CAR_INTERFACE_IMPL_2(KeyguardWidgetPager, PagedView, IKeyguardWidgetPager,
+    IChallengeLayoutOnBouncerStateChangedListener)
 
 KeyguardWidgetPager::KeyguardWidgetPager()
     : mShowHintsAfterLayout(FALSE)
@@ -180,7 +211,8 @@ ECode KeyguardWidgetPager::constructor(
         SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
-    SetPageSwitchListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    SetPageSwitchListener(listener);
 
     CHandlerThread::New(String("KeyguardWidgetPager Worker"), (IHandlerThread**)&mBackgroundWorkerThread);
     IThread::Probe(mBackgroundWorkerThread)->Start();
@@ -516,7 +548,8 @@ ECode KeyguardWidgetPager::AddWidget(
     CViewGroupLayoutParams::New(
             IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::MATCH_PARENT,
             (IViewGroupLayoutParams**)&pageLp);
-    IView::Probe(frame)->SetOnLongClickListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    IView::Probe(frame)->SetOnLongClickListener(listener);
     frame->SetWorkerHandler(mBackgroundWorkerHandler);
 
     if (pageIndex == -1) {

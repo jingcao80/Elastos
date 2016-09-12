@@ -71,7 +71,7 @@ protected:
 public:
     static const String TAG;
     static const Boolean DEBUG;
-    AutoPtr<IPhoneStatusBar> mService;
+    IPhoneStatusBar* mService;
 
 private:
     AutoPtr<DragDownHelper> mDragDownHelper;

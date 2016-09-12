@@ -47,11 +47,36 @@ namespace Phone {
 CarClass(CStatusBarHeaderView)
     , public RelativeLayout
     , public IStatusBarHeaderView
-    , public IViewOnClickListener
-    , public IBatteryStateChangeCallback
-    , public INextAlarmChangeCallback
 {
 private:
+    class InnerCallback
+        : public Object
+        , public IBatteryStateChangeCallback
+        , public INextAlarmChangeCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerCallback(
+            /* [in] */ CStatusBarHeaderView* host);
+
+        // @Override
+        CARAPI OnBatteryLevelChanged(
+            /* [in] */ Int32 level,
+            /* [in] */ Boolean pluggedIn,
+            /* [in] */ Boolean charging);
+
+        // @Override
+        CARAPI OnPowerSaveChanged();
+
+        // @Override
+        CARAPI OnNextAlarmChanged(
+            /* [in] */ IAlarmClockInfo* nextAlarm);
+
+    private:
+        CStatusBarHeaderView* mHost;
+    };
+
     /**
      * Captures all layout values (position, visibility) for a certain state. This is used for
      * animations.
@@ -492,6 +517,7 @@ private:
     Float mCurrentT;
     Boolean mShowingDetail;
     AutoPtr<IQSPanelCallback> mQsPanelCallback;
+    AutoPtr<InnerCallback> mInnerCallback;
 };
 
 } // namespace Phone

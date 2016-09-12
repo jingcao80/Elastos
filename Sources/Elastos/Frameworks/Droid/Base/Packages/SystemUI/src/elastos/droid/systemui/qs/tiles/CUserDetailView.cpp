@@ -16,6 +16,7 @@ namespace Qs {
 namespace Tiles {
 
 CAR_INTERFACE_IMPL(CUserDetailView::Adapter, BaseUserAdapter, IViewOnClickListener)
+
 CUserDetailView::Adapter::Adapter(
     /* [in] */ IContext* context,
     /* [in] */ IUserSwitcherController* controller)

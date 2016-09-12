@@ -49,7 +49,7 @@ Boolean DelegateViewHelper::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* event)
 {
     if (mSourceView == NULL || mDelegateView == NULL
-        || ((BaseStatusBar*)mBar.Get())->ShouldDisableNavbarGestures()) {
+        || ((BaseStatusBar*)mBar)->ShouldDisableNavbarGestures()) {
         return FALSE;
     }
 

@@ -38,10 +38,46 @@ namespace Keyguard {
  */
 CarClass(CKeyguardPasswordView)
     , public KeyguardAbsKeyInputView
-    , public IOnEditorActionListener
-    , public ITextWatcher
 {
 private:
+    class PasswordListener
+        : public Object
+        , public IOnEditorActionListener
+        , public ITextWatcher
+    {
+    public:
+        TO_STRING_IMPL("CKeyguardPasswordView::PasswordListener")
+
+        CAR_INTERFACE_DECL()
+
+        PasswordListener(
+            /* [in] */ CKeyguardPasswordView* host);
+
+        CARAPI OnTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 before,
+            /* [in] */ Int32 count);
+
+        CARAPI BeforeTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [in] */ Int32 after);
+
+        CARAPI AfterTextChanged(
+            /* [in] */ IEditable* s);
+
+        CARAPI OnEditorAction(
+            /* [in] */ ITextView* v,
+            /* [in] */ Int32 actionId,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+    private:
+        CKeyguardPasswordView* mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {
@@ -140,8 +176,6 @@ private:
 
 public:
     CAR_OBJECT_DECL()
-
-    CAR_INTERFACE_DECL()
 
     CKeyguardPasswordView();
 

@@ -109,7 +109,6 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
-        interface IAdapterViewOnItemClickListener;
     }
 
     class CDisableCarModeActivity {
@@ -370,7 +369,6 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
-        interface IAdapterViewOnItemClickListener;
     }
 
     [local]

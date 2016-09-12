@@ -71,7 +71,6 @@ class BaseStatusBar
     : public SystemUI
     , public IBaseStatusBar
     , public ICommandQueueCallbacks
-    , public IActivatableNotificationViewOnActivatedListener
     , public IRecentsComponentCallbacks
     , public IExpansionLogger
     , public INotificationEnvironment
@@ -101,6 +100,28 @@ public:
     };
 
 protected:
+    class ActivatableNotificationViewListener
+        : public Object
+        , public IActivatableNotificationViewOnActivatedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ActivatableNotificationViewListener(
+            /* [in] */ BaseStatusBar* host);
+
+        // @Override
+        CARAPI OnActivated(
+            /* [in] */ IActivatableNotificationView* view);
+
+        // @Override
+        CARAPI OnActivationReset(
+            /* [in] */ IActivatableNotificationView* view);
+
+    private:
+        BaseStatusBar* mHost;
+    };
+
     class RecentsPreloadOnTouchListener
         : public Object
         , public IViewOnTouchListener
@@ -615,6 +636,14 @@ public:
      * @return The number of notifications we show on Keyguard.
      */
     virtual CARAPI_(Int32) GetMaxKeyguardNotifications() = 0;
+
+    // @Override
+    virtual CARAPI OnActivated(
+        /* [in] */ IActivatableNotificationView* view) = 0;
+
+    // @Override
+    virtual CARAPI OnActivationReset(
+        /* [in] */ IActivatableNotificationView* view) = 0;
 
 protected:
     // UI-specific methods

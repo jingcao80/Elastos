@@ -30,9 +30,31 @@ namespace Keyguard {
 class CameraWidgetFrame
     : public KeyguardWidgetFrame
     , public ICameraWidgetFrame
-    , public IViewOnClickListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CameraWidgetFrame* host)
+            : mHost(host)
+        {}
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* v)
+        {
+            return mHost->OnClick(v);
+        }
+
+    private:
+        CameraWidgetFrame* mHost;
+    };
+
     class FixedSizeFrameLayout
         : public FrameLayout
     {

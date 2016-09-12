@@ -41,7 +41,9 @@ ECode CMultiUserSwitch::ViewOnClickListener::OnClick(
 }
 
 CAR_OBJECT_IMPL(CMultiUserSwitch)
-CAR_INTERFACE_IMPL_2(CMultiUserSwitch, FrameLayout, IMultiUserSwitch, IViewOnClickListener);
+
+CAR_INTERFACE_IMPL(CMultiUserSwitch, FrameLayout, IMultiUserSwitch);
+
 CMultiUserSwitch::CMultiUserSwitch()
     : mKeyguardMode(FALSE)
 {}

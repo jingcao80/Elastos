@@ -236,6 +236,29 @@ const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_VIEW_
 const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_EVERYTHING;
 
 //============================================================================
+// CNotificationStackScrollLayout::InnerListener
+//============================================================================
+CAR_INTERFACE_IMPL(CNotificationStackScrollLayout::InnerListener, Object, IExpandableViewOnHeightChangedListener)
+
+CNotificationStackScrollLayout::InnerListener::InnerListener(
+    /* [in] */ CNotificationStackScrollLayout* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode CNotificationStackScrollLayout::InnerListener::OnHeightChanged(
+    /* [in] */ IExpandableView* view)
+{
+    return mHost->OnHeightChanged(view);
+}
+
+ECode CNotificationStackScrollLayout::InnerListener::OnReset(
+    /* [in] */ IExpandableView* view)
+{
+    return mHost->OnHeightChanged(view);
+}
+
+//============================================================================
 // CNotificationStackScrollLayout::AnimationEvent
 //============================================================================
 CNotificationStackScrollLayout::AnimationEvent::AnimationEvent(
@@ -356,8 +379,8 @@ const Float CNotificationStackScrollLayout::RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.
 const Float CNotificationStackScrollLayout::RUBBER_BAND_FACTOR_ON_PANEL_EXPAND = 0.21f;
 const Int32 CNotificationStackScrollLayout::INVALID_POINTER = -1;
 
-CAR_INTERFACE_IMPL_5(CNotificationStackScrollLayout, ViewGroup, INotificationStackScrollLayout \
-    , ISwipeHelperCallback, IExpandHelperCallback, IScrollAdapter, IExpandableViewOnHeightChangedListener)
+CAR_INTERFACE_IMPL_4(CNotificationStackScrollLayout, ViewGroup, INotificationStackScrollLayout \
+    , ISwipeHelperCallback, IExpandHelperCallback, IScrollAdapter)
 
 CAR_OBJECT_IMPL(CNotificationStackScrollLayout)
 
@@ -2178,7 +2201,8 @@ void CNotificationStackScrollLayout::OnViewAdded(
 {
     ViewGroup::OnViewAdded(child);
     mStackScrollAlgorithm->NotifyChildrenChanged(this);
-    IExpandableView::Probe(child)->SetOnHeightChangedListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    IExpandableView::Probe(child)->SetOnHeightChangedListener(listener);
     GenerateAddAnimation(child, FALSE /* fromMoreCard */);
     UpdateAnimationState(child);
 }
