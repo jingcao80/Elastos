@@ -142,14 +142,17 @@ void StatusBarWindowManager::ApplyFocusableFlag(
     if (state->IsKeyguardShowingAndNotOccluded() && state->mKeyguardNeedsInput
             && state->mBouncerShowing) {
         mLp->SetFlags(flags & ~IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE);
+        mLp->GetFlags(&flags);
         mLp->SetFlags(flags & ~IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM);
     }
     else if (state->IsKeyguardShowingAndNotOccluded() || state->mStatusBarFocusable) {
         mLp->SetFlags(flags & ~IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE);
+        mLp->GetFlags(&flags);
         mLp->SetFlags(flags | IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM);
     }
     else {
         mLp->SetFlags(flags | IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE);
+        mLp->GetFlags(&flags);
         mLp->SetFlags(flags & ~IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM);
     }
 }
