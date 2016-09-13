@@ -491,6 +491,18 @@ module
     namespace Settings {
     namespace Notification {
 
+    class CAppNotificationSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+    }
+
     class CConditionProviderSettings {
         constructor();
 
@@ -537,6 +549,18 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
+    }
+
+    class CNotificationAppList {
+        constructor();
+
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface IAdapterViewOnItemSelectedListener;
     }
 
     class CNotificationSettings {
@@ -1181,6 +1205,27 @@ module
     }
 
     class CSettingsKeyboardLayoutPickerActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsNotificationAppListActivity {
         constructor();
 
         interface ISettingsActivity;

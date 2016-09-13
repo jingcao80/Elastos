@@ -384,11 +384,11 @@ public class ZenModeSettings extends SettingsPreferenceFragment implements Index
 
     private void RefreshAutomationSection() {
         if (mConditionProviders != NULL) {
-            final Int32 total = ConditionProviderSettings->GetProviderCount(mPM);
+            final Int32 total = CConditionProviderSettings::GetProviderCount(mPM);
             if (total == 0) {
                 GetPreferenceScreen()->RemovePreference(mAutomationCategory);
             } else {
-                final Int32 n = ConditionProviderSettings->GetEnabledProviderCount(mContext);
+                final Int32 n = CConditionProviderSettings::GetEnabledProviderCount(mContext);
                 if (n == 0) {
                     mConditionProviders->SetSummary(GetResources()->GetString(
                             R::string::manage_condition_providers_summary_zero));
