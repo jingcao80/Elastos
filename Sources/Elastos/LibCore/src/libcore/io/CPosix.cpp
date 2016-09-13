@@ -188,13 +188,13 @@ static AutoPtr<IStructStat> MakeStructStat(
 {
     AutoPtr<IStructStat> rst;
     CStructStat::New(
-        static_cast<Int32>(sb.st_dev), static_cast<Int32>(sb.st_ino),
-        static_cast<Int32>(sb.st_mode), static_cast<Int32>(sb.st_nlink),
+        static_cast<Int64>(sb.st_dev), static_cast<Int64>(sb.st_ino),
+        static_cast<Int32>(sb.st_mode), static_cast<Int64>(sb.st_nlink),
         static_cast<Int32>(sb.st_uid), static_cast<Int32>(sb.st_gid),
-        static_cast<Int32>(sb.st_rdev), static_cast<Int32>(sb.st_size),
-        static_cast<Int32>(sb.st_atime), static_cast<Int32>(sb.st_mtime),
-        static_cast<Int32>(sb.st_ctime), static_cast<Int32>(sb.st_blksize),
-        static_cast<Int32>(sb.st_blocks), (IStructStat**)&rst);
+        static_cast<Int64>(sb.st_rdev), static_cast<Int64>(sb.st_size),
+        static_cast<Int64>(sb.st_atime), static_cast<Int64>(sb.st_mtime),
+        static_cast<Int64>(sb.st_ctime), static_cast<Int64>(sb.st_blksize),
+        static_cast<Int64>(sb.st_blocks), (IStructStat**)&rst);
     return rst;
 }
 
