@@ -31,6 +31,25 @@ namespace Internal {
 namespace Policy {
 namespace Impl {
 
+//=====================================================================
+//               RecentApplicationsDialog::InnerListener
+//=====================================================================
+CAR_INTERFACE_IMPL(RecentApplicationsDialog::InnerListener, Object, IViewOnClickListener)
+
+RecentApplicationsDialog::InnerListener::InnerListener(
+    /* [in] */ RecentApplicationsDialog* host)
+    : mHost(host)
+{}
+
+ECode RecentApplicationsDialog::InnerListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+//=====================================================================
+//               RecentApplicationsDialog::MyBroadcastReceiver
+//=====================================================================
 RecentApplicationsDialog::MyBroadcastReceiver::MyBroadcastReceiver(
     /* [in] */ RecentApplicationsDialog* host)
     : mHost(host)
@@ -84,7 +103,7 @@ ECode RecentApplicationsDialog::CleanupRunnable::Run()
 //=====================================================================
 //                       RecentApplicationsDialog
 //=====================================================================
-CAR_INTERFACE_IMPL(RecentApplicationsDialog, Dialog, IViewOnClickListener)
+
 
 const String RecentApplicationsDialog::TAG("RecentApplicationsDialog");
 const Boolean RecentApplicationsDialog::DBG_FORCE_EMPTY_LIST = FALSE;
@@ -176,11 +195,12 @@ ECode RecentApplicationsDialog::OnCreate(
 
     FindViewById(R::id::no_applications_message, (IView**)&mNoAppsText);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     for (Int32 i = 0; i < mIcons->GetLength(); ++i) {
         AutoPtr<ITextView> icon = (*mIcons)[i];
         if (icon) {
             IView* v = IView::Probe(icon);
-            v->SetOnClickListener(this);
+            v->SetOnClickListener(listener);
         }
     }
     return NOERROR;

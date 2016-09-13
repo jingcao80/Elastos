@@ -35,15 +35,15 @@ namespace Widget {
  */
 
 class ECO_PUBLIC TabWidget
-    : public LinearLayout //implements OnFocusChangeListener
+    : public LinearLayout
     , public ITabWidget
-    , public IViewOnFocusChangeListener
 {
 private:
     // registered with each tab indicator so we can notify tab host
-    class TabClickListener
+    class TabListener
         : public Object
         , public IViewOnClickListener
+        , public IViewOnFocusChangeListener
     {
         friend class TabWidget;
 
@@ -53,8 +53,11 @@ private:
         CARAPI OnClick(
             /* [in] */ IView* v);
 
+        virtual CARAPI OnFocusChange(
+            /* [in] */ IView* v,
+            /* [in] */ Boolean hasFocus);
     private:
-        TabClickListener(
+        TabListener(
             /* [in] */ Int32 tabIndex,
             /* [in] */ TabWidget* owner);
 

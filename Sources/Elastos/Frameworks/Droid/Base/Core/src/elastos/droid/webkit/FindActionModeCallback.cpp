@@ -78,18 +78,48 @@ ECode FindActionModeCallback::NoAction::ToString(
 }
 
 //===============================================================
+//                   FindActionModeCallback::InnerListener
+//===============================================================
+CAR_INTERFACE_IMPL_2(FindActionModeCallback::InnerListener, Object, \
+    IViewOnClickListener, IWebViewFindListener);
+
+FindActionModeCallback::InnerListener::InnerListener(
+    /* [in] */ FindActionModeCallback* host)
+    : mHost(host)
+{}
+
+ECode FindActionModeCallback::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+ECode FindActionModeCallback::InnerListener::OnFindResultReceived(
+    /* [in] */ Int32 activeMatchOrdinal,
+    /* [in] */ Int32 numberOfMatches,
+    /* [in] */ Boolean isDoneCounting)
+{
+    return mHost->OnFindResultReceived(activeMatchOrdinal, numberOfMatches, isDoneCounting);
+}
+
+//===============================================================
 //                   FindActionModeCallback
 //===============================================================
 
-CAR_INTERFACE_IMPL_4(FindActionModeCallback, Object, IActionModeCallback, ITextWatcher,
-        IViewOnClickListener, IWebViewFindListener);
+CAR_INTERFACE_IMPL_2(FindActionModeCallback, Object, IActionModeCallback, ITextWatcher);
 
-FindActionModeCallback::FindActionModeCallback(
-    /* [in] */ IContext* context)
+FindActionModeCallback::FindActionModeCallback()
     : mMatchesFound(FALSE)
     , mNumberOfMatches(0)
     , mActiveMatchIndex(0)
 {
+}
+
+ECode FindActionModeCallback::constructor(
+    /* [in] */ IContext* context)
+{
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
     AutoPtr<ILayoutInflater> inflate;
     LayoutInflater::From(context, (ILayoutInflater**)&inflate);
     inflate->Inflate(R::layout::webview_find, NULL, (IView**)&mCustomView);
@@ -98,7 +128,7 @@ FindActionModeCallback::FindActionModeCallback(
     mEditText = IEditText::Probe(editTextView);
     AutoPtr<NoAction> action = new NoAction();
     ITextView::Probe(mEditText)->SetCustomSelectionActionModeCallback(action);
-    IView::Probe(mEditText)->SetOnClickListener(this);
+    editTextView->SetOnClickListener(listener);
     SetText(String(""));
     AutoPtr<IView> matchesView;
     mCustomView->FindViewById(R::id::matches, (IView**)&matchesView);
@@ -106,7 +136,7 @@ FindActionModeCallback::FindActionModeCallback(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
     mInput = IInputMethodManager::Probe(obj);
-    context->GetResources((IResources**)&mResources);
+    return context->GetResources((IResources**)&mResources);
 }
 
 void FindActionModeCallback::Finish()
@@ -150,7 +180,8 @@ ECode FindActionModeCallback::SetWebView(
         return E_ASSERTION_ERROR;
     }
     mWebView = webView;
-    mWebView->SetFindDialogFindListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mWebView->SetFindDialogFindListener(listener);
     return NOERROR;
 }
 

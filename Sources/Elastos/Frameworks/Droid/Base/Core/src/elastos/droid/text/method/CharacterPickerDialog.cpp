@@ -40,6 +40,29 @@ namespace Droid {
 namespace Text {
 namespace Method {
 
+CAR_INTERFACE_IMPL_2(CharacterPickerDialog::InnerListener, Object, \
+    IAdapterViewOnItemClickListener, IViewOnClickListener)
+
+CharacterPickerDialog::InnerListener::InnerListener(
+    /* [in] */ CharacterPickerDialog* host)
+    : mHost(host)
+{}
+
+ECode CharacterPickerDialog::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+ECode CharacterPickerDialog::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
 /*****************************CharacterPickerDialog::OptionsAdapter*****************************/
 CharacterPickerDialog::OptionsAdapter::OptionsAdapter()
 {
@@ -66,7 +89,8 @@ ECode CharacterPickerDialog::OptionsAdapter::GetView(
     AutoPtr<IButton> b = IButton::Probe(v);
     Char32 c = (mHost->mOptions).GetChar(position);
     ITextView::Probe(b)->SetText(c);
-    IView::Probe(b)->SetOnClickListener(IViewOnClickListener::Probe(this));
+    AutoPtr<CharacterPickerDialog::InnerListener> listener = new CharacterPickerDialog::InnerListener(mHost);
+    IView::Probe(b)->SetOnClickListener(listener);
     *ret = IView::Probe(b);
     REFCOUNT_ADD(*ret);
     return NOERROR;
@@ -113,8 +137,7 @@ CharacterPickerDialog::CharacterPickerDialog()
 CharacterPickerDialog::~CharacterPickerDialog()
 {}
 
-CAR_INTERFACE_IMPL_3(CharacterPickerDialog, Dialog, IAdapterViewOnItemClickListener, \
-    IViewOnClickListener, ICharacterPickerDialog)
+CAR_INTERFACE_IMPL(CharacterPickerDialog, Dialog, ICharacterPickerDialog)
 
 ECode CharacterPickerDialog::constructor(
     /* [in] */ IContext* context,
@@ -158,14 +181,16 @@ ECode CharacterPickerDialog::OnCreate(
     AutoPtr<OptionsAdapter> adapter = new OptionsAdapter();
     adapter->constructor(context.Get(), this);
     IAdapterView::Probe(grid)->SetAdapter(IAdapter::Probe(adapter));
+
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IAdapterView> iav;
-    IAdapterView::Probe(grid)->SetOnItemClickListener(this);
+    IAdapterView::Probe(grid)->SetOnItemClickListener(listener);
 
     gview = NULL;
     Dialog::FindViewById(R::id::cancel, (IView**)&gview);
     AutoPtr<IButton> button = IButton::Probe(gview);
     mCancelButton = button;
-    IView::Probe(mCancelButton)->SetOnClickListener(IViewOnClickListener::Probe(this));
+    IView::Probe(mCancelButton)->SetOnClickListener(listener);
     return NOERROR;
 }
 

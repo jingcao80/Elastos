@@ -16,7 +16,6 @@ module
      * @Involve
      * interface Elastos.Droid.Widget.IDatePickerDelegate
      * interface Elastos.Droid.Widget.IDatePickerController
-     * interface Elastos.Droid.View.IViewOnClickListener
      */
     interface IDatePickerCalendarDelegate {
     }

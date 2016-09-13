@@ -25,23 +25,35 @@ namespace App {
 class TimePickerDialog
     : public AlertDialog
     , public ITimePickerDialog
-    , public IDialogInterfaceOnClickListener
-    , public ITimePickerOnTimeChangedListener
 {
 private:
-    class MyValidationCallback
+    class InnerListener
         : public Object
         , public ITimePickerValidationCallback
+        , public IDialogInterfaceOnClickListener
+        , public ITimePickerOnTimeChangedListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyValidationCallback(
+        InnerListener(
             /* [in] */ TimePickerDialog* host);
 
         //@Override
         CARAPI OnValidationChanged(
             /* [in] */ Boolean valid);
+
+        //@Override
+        CARAPI OnTimeChanged(
+            /* [in] */ ITimePicker* view,
+            /* [in] */ Int32 hourOfDay,
+            /* [in] */ Int32 minute);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
     private:
         TimePickerDialog* mHost;
     };
@@ -116,7 +128,7 @@ public:
         /* [in] */ IBundle* savedInstanceState);
 
 private:
-    AutoPtr<ITimePickerValidationCallback> mValidationCallback;
+    AutoPtr<InnerListener> mListener;
 
     static const String HOUR;
     static const String MINUTE;

@@ -43,7 +43,59 @@ const Int32 PasswordEntryKeyboardHelper::QWERTY_SHIFTED = 2;
 const Int32 PasswordEntryKeyboardHelper::SYMBOLS = 3;
 const Int32 PasswordEntryKeyboardHelper::SYMBOLS_SHIFTED = 4;
 
-CAR_INTERFACE_IMPL_2(PasswordEntryKeyboardHelper, Object, IPasswordEntryKeyboardHelper, IOnKeyboardActionListener)
+CAR_INTERFACE_IMPL(PasswordEntryKeyboardHelper::InnerListener, Object, IOnKeyboardActionListener)
+
+PasswordEntryKeyboardHelper::InnerListener::InnerListener(
+    /* [in] */ PasswordEntryKeyboardHelper* host)
+    : mHost(host)
+{}
+
+ECode PasswordEntryKeyboardHelper::InnerListener::OnKey(
+    /* [in] */ Int32 primaryCode,
+    /* [in] */ ArrayOf<Int32>* keyCodes)
+{
+    return  mHost->OnKey(primaryCode, keyCodes);
+}
+
+ECode PasswordEntryKeyboardHelper::InnerListener::OnPress(
+    /* [in] */ Int32 primaryCode)
+{
+    return  mHost->OnPress(primaryCode);
+}
+
+ECode PasswordEntryKeyboardHelper::InnerListener::OnRelease(
+    /* [in] */ Int32 primaryCode)
+{
+    return  mHost->OnRelease(primaryCode);
+}
+
+ECode PasswordEntryKeyboardHelper::InnerListener::OnText(
+    /* [in] */ ICharSequence* text)
+{
+    return  mHost->OnText(text);
+}
+
+ECode PasswordEntryKeyboardHelper::InnerListener::SwipeDown()
+{
+    return  mHost->SwipeDown();
+}
+
+ECode PasswordEntryKeyboardHelper::InnerListener::SwipeLeft()
+{
+    return  mHost->SwipeLeft();
+}
+
+ECode PasswordEntryKeyboardHelper::InnerListener::SwipeRight()
+{
+    return  mHost->SwipeRight();
+}
+
+ECode PasswordEntryKeyboardHelper::InnerListener::SwipeUp()
+{
+    return  mHost->SwipeUp();
+}
+
+CAR_INTERFACE_IMPL(PasswordEntryKeyboardHelper, Object, IPasswordEntryKeyboardHelper)
 
 PasswordEntryKeyboardHelper::PasswordEntryKeyboardHelper()
     : mKeyboardMode(KEYBOARD_MODE_ALPHA)
@@ -86,8 +138,8 @@ ECode PasswordEntryKeyboardHelper::constructor(
     mContext = context;
     mTargetView = targetView;
     mKeyboardView = keyboardView;
-    assert(0 && "TODO"); // IKeyboardActionListener not implmented.
-    // mKeyboardView->SetOnKeyboardActionListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mKeyboardView->SetOnKeyboardActionListener(listener);
     mUsingScreenWidth = useFullScreenWidth;
     if (layouts != NULL) {
         if (layouts->GetLength() != mLayouts->GetLength()) {

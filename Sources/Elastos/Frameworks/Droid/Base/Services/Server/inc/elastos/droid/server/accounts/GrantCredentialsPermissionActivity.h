@@ -25,9 +25,24 @@ namespace Accounts {
 
 class GrantCredentialsPermissionActivity
     : public Activity
-    , public IViewOnClickListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ GrantCredentialsPermissionActivity* host);
+
+        CARAPI OnClick(
+            /* [in] */ IView* vs);
+    private:
+        GrantCredentialsPermissionActivity* mHost;
+    };
+
     class OnCreateAccountManagerCallback
         : public Object
         , public IAccountManagerCallback
@@ -67,11 +82,9 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     GrantCredentialsPermissionActivity();
 
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* vs);
 
     CARAPI_(void) SetAccountAuthenticatorResult(

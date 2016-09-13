@@ -32,8 +32,23 @@ namespace Input {
 //==================================================================
 //            InsertionHandleController::PastePopupMenu
 //==================================================================
-CAR_INTERFACE_IMPL(InsertionHandleController::PastePopupMenu, Object, IViewOnClickListener);
+CAR_INTERFACE_IMPL(InsertionHandleController::PastePopupMenu::InnerListener, Object, IViewOnClickListener);
 
+
+InsertionHandleController::PastePopupMenu::InnerListener::InnerListener(
+    /* [in] */ PastePopupMenu* owner)
+    : mOwner(owner)
+{}
+
+ECode InsertionHandleController::PastePopupMenu::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mOwner->OnClick(v);
+}
+
+//==================================================================
+//            InsertionHandleController::PastePopupMenu
+//==================================================================
 InsertionHandleController::PastePopupMenu::PastePopupMenu(
     /* [in] */ InsertionHandleController* owner)
     : mOwner(owner)
@@ -41,8 +56,8 @@ InsertionHandleController::PastePopupMenu::PastePopupMenu(
     , mPositionY(0)
 {
     CPopupWindow::New(mOwner->mContext, NULL,
-             R::attr::textSelectHandleWindowStyle,
-             (IPopupWindow**)&mContainer);
+         R::attr::textSelectHandleWindowStyle,
+         (IPopupWindow**)&mContainer);
     mContainer->SetSplitTouchEnabled(TRUE);
     mContainer->SetClippingEnabled(FALSE);
 
@@ -58,8 +73,8 @@ InsertionHandleController::PastePopupMenu::PastePopupMenu(
     Int32 length = POPUP_LAYOUT_ATTRS->GetLength();
     mPasteViews = ArrayOf<IView*>::Alloc(length);
     for (Int32 i = 0; i < length; ++i) {
-        AutoPtr<IView> view = new View::View();
-        //CView::New((IView**)&view);
+        AutoPtr<IView> view;
+        CView::New((IView**)&view);
         (*mPasteViews)[i] = view;
     }
 
@@ -113,7 +128,8 @@ void InsertionHandleController::PastePopupMenu::UpdateContent(
         view->SetLayoutParams(params);
         view->Measure(size, size);
 
-        view->SetOnClickListener(this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        view->SetOnClickListener(listener);
 
         (*mPasteViews)[viewIndex] = view;
     }

@@ -26,8 +26,44 @@ namespace Content {
 namespace Browser {
 namespace Input {
 
-CAR_INTERFACE_IMPL_3(DateTimePickerDialog, AlertDialog,
-        IDialogInterfaceOnClickListener, IDatePickerOnDateChangedListener, ITimePickerOnTimeChangedListener);
+CAR_INTERFACE_IMPL_3(DateTimePickerDialog::InnerListener, Object,
+    IDialogInterfaceOnClickListener, IDatePickerOnDateChangedListener,
+    ITimePickerOnTimeChangedListener);
+
+DateTimePickerDialog::InnerListener::InnerListener(
+    /* [in] */ DateTimePickerDialog* host)
+    : mHost(host)
+{}
+
+ECode DateTimePickerDialog::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->OnClick(dialog, which);
+}
+
+ECode DateTimePickerDialog::InnerListener::OnDateChanged(
+    /* [in] */ IDatePicker* view,
+    /* [in] */ Int32 year,
+    /* [in] */ Int32 month,
+    /* [in] */ Int32 day)
+{
+    return mHost->OnDateChanged(view, year, month, day);
+}
+
+ECode DateTimePickerDialog::InnerListener::OnTimeChanged(
+    /* [in] */ ITimePicker* view,
+    /* [in] */ Int32 hourOfDay,
+    /* [in] */ Int32 minute)
+{
+    return mHost->OnTimeChanged(view, hourOfDay, minute);
+}
+
+
+DateTimePickerDialog::DateTimePickerDialog()
+    : mMinTimeMillis(0)
+    , mMaxTimeMillis(0)
+{}
 
 /**
  * @param context The context the dialog is to run in.
@@ -36,7 +72,7 @@ CAR_INTERFACE_IMPL_3(DateTimePickerDialog, AlertDialog,
  * @param monthOfYear The initial month of the dialog.
  * @param dayOfMonth The initial day of the dialog.
  */
-DateTimePickerDialog::DateTimePickerDialog(
+ECode DateTimePickerDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ DateTimePickerDialog::OnDateTimeSetListener* callBack,
     /* [in] */ Int32 year,
@@ -47,14 +83,16 @@ DateTimePickerDialog::DateTimePickerDialog(
     /* [in] */ Boolean is24HourView,
     /* [in] */ Double min,
     /* [in] */ Double max)
-    : mCallBack(callBack)
-    , mMinTimeMillis((Int64)min)
-    , mMaxTimeMillis((Int64)max)
 {
     AlertDialog::constructor(context, 0);
+
+    mCallBack = callBack;
+    mMinTimeMillis = (Int64)min;
+    mMaxTimeMillis = (Int64)max;
+    mListener = new InnerListener(this);
+
     AutoPtr<ICharSequence> setCS;
-    context->GetText(
-             R::string::date_picker_dialog_set, (ICharSequence**)&setCS);
+    context->GetText(R::string::date_picker_dialog_set, (ICharSequence**)&setCS);
      SetButton(IDialogInterface::BUTTON_POSITIVE, setCS, this);
     AutoPtr<ICharSequence> cancelCS;
     context->GetText(Elastos::Droid::R::string::cancel, (ICharSequence**)&cancelCS);
@@ -84,12 +122,12 @@ DateTimePickerDialog::DateTimePickerDialog(
     mTimePicker->SetIs24HourView(is24HourView);
     mTimePicker->SetCurrentHour(hourOfDay);
     mTimePicker->SetCurrentMinute(minute);
-    mTimePicker->SetOnTimeChangedListener(this);
+    mTimePicker->SetOnTimeChangedListener(mListener);
 
     Int32 currentHour, currentMinute;
     mTimePicker->GetCurrentHour(&currentHour);
     mTimePicker->GetCurrentMinute(&currentMinute);
-    OnTimeChanged(mTimePicker, currentHour, currentMinute);
+    return OnTimeChanged(mTimePicker, currentHour, currentMinute);
 }
 
 //@Override

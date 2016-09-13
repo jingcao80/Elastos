@@ -688,7 +688,6 @@ module
      * interface ILayoutInflaterFactory2
      * interface IWindowCallback
      * interface IKeyEventCallback
-     * interface IViewOnCreateContextMenuListener
      * interface IComponentCallbacks
      * interface IComponentCallbacks2
      * interface IOnWindowDismissedCallback

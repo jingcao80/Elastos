@@ -318,11 +318,26 @@ protected:
 //==============================================================================
 class EasyEditPopupWindow
     : public PinnedPopupWindow
-    , public IViewOnClickListener
 {
-public:
-    CAR_INTERFACE_DECL()
+private:
+    class ClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
+        ClickListener(
+            /* [in] */ EasyEditPopupWindow* host);
+
+        virtual CARAPI OnClick(
+            /* [in] */ IView* view);
+
+    private:
+        EasyEditPopupWindow* mHost;
+    };
+
+public:
     TO_STRING_IMPL("EasyEditPopupWindow");
 
     EasyEditPopupWindow(
@@ -425,11 +440,29 @@ private:
 //==============================================================================
 class SuggestionsPopupWindow
     : public PinnedPopupWindow
-    , public IAdapterViewOnItemClickListener
 {
-public:
-    CAR_INTERFACE_DECL()
+private:
+    class ItemClickListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
+        ItemClickListener(
+            /* [in] */ SuggestionsPopupWindow* host);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+    private:
+        SuggestionsPopupWindow* mHost;
+    };
+
+public:
     TO_STRING_IMPL("SuggestionsPopupWindow");
 
     typedef HashMap<AutoPtr<ISuggestionSpan>, AutoPtr<IInteger32> > SuggestionSpanHashMap;
@@ -463,7 +496,7 @@ public:
 
     CARAPI Hide();
 
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,
@@ -542,10 +575,25 @@ private:
 //==============================================================================
 class ActionPopupWindow
     : public PinnedPopupWindow
-    , public IViewOnClickListener
 {
+private:
+    class ClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ClickListener(
+            /* [in] */ ActionPopupWindow* host);
+
+        virtual CARAPI OnClick(
+            /* [in] */ IView* view);
+
+    private:
+        ActionPopupWindow* mHost;
+    };
 public:
-    CAR_INTERFACE_DECL()
 
     TO_STRING_IMPL("ActionPopupWindow");
 

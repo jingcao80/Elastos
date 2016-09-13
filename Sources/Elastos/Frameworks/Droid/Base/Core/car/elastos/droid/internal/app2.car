@@ -286,7 +286,6 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
         interface IDialogInterface;
-        interface IDialogInterfaceOnClickListener;
     }
 
     class CPlatLogoActivity {

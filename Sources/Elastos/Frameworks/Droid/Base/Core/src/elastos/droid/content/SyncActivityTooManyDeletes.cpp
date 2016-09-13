@@ -15,8 +15,24 @@ namespace Elastos {
 namespace Droid {
 namespace Content {
 
-CAR_INTERFACE_IMPL_2(SyncActivityTooManyDeletes, Activity, \
-    ISyncActivityTooManyDeletes, IAdapterViewOnItemClickListener)
+
+CAR_INTERFACE_IMPL(SyncActivityTooManyDeletes::InnerListener, Object, IAdapterViewOnItemClickListener)
+
+SyncActivityTooManyDeletes::InnerListener::InnerListener(
+    /* [in] */ SyncActivityTooManyDeletes* host)
+    : mHost(host)
+{}
+
+ECode SyncActivityTooManyDeletes::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+CAR_INTERFACE_IMPL(SyncActivityTooManyDeletes, Activity, ISyncActivityTooManyDeletes)
 
 SyncActivityTooManyDeletes::SyncActivityTooManyDeletes()
     : mNumDeletes(0)
@@ -69,7 +85,8 @@ ECode SyncActivityTooManyDeletes::OnCreate(
     // // CListView::New(this, (IListView**)&listView);
     // listView->SetAdapter(adapter);
     // listView->SetItemsCanFocus(true);
-    // listView->SetOnItemClickListener(this);
+    // AutoPtr<InnerListener> listener = new InnerListener(this);
+    // listView->SetOnItemClickListener(listener);
 
     // AutoPtr<ITextView> textView;
     // // CTextView::New(this, (ITextView**)&textView);

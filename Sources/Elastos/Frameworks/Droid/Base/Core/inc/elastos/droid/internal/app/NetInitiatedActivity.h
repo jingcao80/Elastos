@@ -21,7 +21,6 @@ namespace App {
 class NetInitiatedActivity
     : public AlertActivity
     , public INetInitiatedActivity
-    , public IDialogInterfaceOnClickListener
 {
 private:
     class NetInitiatedReceiver

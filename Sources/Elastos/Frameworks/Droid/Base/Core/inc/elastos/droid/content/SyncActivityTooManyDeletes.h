@@ -26,8 +26,27 @@ namespace Content {
 class SyncActivityTooManyDeletes
     : public Activity
     , public ISyncActivityTooManyDeletes
-    , public IAdapterViewOnItemClickListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ SyncActivityTooManyDeletes* host);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+    private:
+        SyncActivityTooManyDeletes* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -40,7 +59,7 @@ public:
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
 
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,

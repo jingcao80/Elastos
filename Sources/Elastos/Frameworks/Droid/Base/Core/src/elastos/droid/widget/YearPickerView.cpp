@@ -14,6 +14,28 @@ namespace Elastos {
 namespace Droid {
 namespace Widget{
 
+CAR_INTERFACE_IMPL_2(YearPickerView::InnerListener, Object, \
+    IAdapterViewOnItemClickListener, IOnDateChangedListener)
+
+YearPickerView::InnerListener::InnerListener(
+    /* [in] */ YearPickerView* host)
+    : mHost(host)
+{}
+
+ECode YearPickerView::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+ECode YearPickerView::InnerListener::OnDateChanged()
+{
+    return mHost->OnDateChanged();
+}
+
 ///////////////////////////////////////////////////////////////
 //              YearPickerView::YearAdapter
 ///////////////////////////////////////////////////////////////
@@ -99,7 +121,7 @@ ECode YearPickerView::YearRunnable::Run()
 ///////////////////////////////////////////////////////////////
 //                  YearPickerView
 ///////////////////////////////////////////////////////////////
-CAR_INTERFACE_IMPL_3(YearPickerView, ListView, IYearPickerView, IAdapterViewOnItemClickListener, IOnDateChangedListener)
+CAR_INTERFACE_IMPL(YearPickerView, ListView, IYearPickerView)
 
 YearPickerView::YearPickerView()
     : mViewSize(0)
@@ -140,6 +162,8 @@ ECode YearPickerView::constructor(
 {
     ListView::constructor(context, attrs, defStyleAttr, defStyleRes);
 
+    mListener = new InnerListener(this);
+
     AutoPtr<IViewGroupLayoutParams> frame;
     CAbsListViewLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
         IViewGroupLayoutParams::WRAP_CONTENT, (IViewGroupLayoutParams**)&frame);
@@ -157,7 +181,7 @@ ECode YearPickerView::constructor(
     res->GetDimensionPixelSize(R::dimen::datepicker_year_picker_padding_top, &paddingTop);
     SetPadding(0, paddingTop, 0, 0);
 
-    SetOnItemClickListener(this);
+    SetOnItemClickListener(mListener);
     SetDividerHeight(0);
     return NOERROR;
 }
@@ -166,7 +190,7 @@ ECode YearPickerView::Init(
     /* [in] */ IDatePickerController* controller)
 {
     mController = controller;
-    mController->RegisterOnDateChangedListener(this);
+    mController->RegisterOnDateChangedListener(mListener);
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     mAdapter = new YearAdapter();

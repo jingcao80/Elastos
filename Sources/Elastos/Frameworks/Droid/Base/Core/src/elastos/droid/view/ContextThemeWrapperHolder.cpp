@@ -70,6 +70,7 @@ UInt32 ContextThemeWrapperHolder::AddRef()
 UInt32 ContextThemeWrapperHolder::Release()
 {
     if (mMemoryLeakTarget) {
+        Thread::Sleep(10);
         if (GetStrongCount() < 3) {
             Logger::I("ContextThemeWrapperHolder", " >> Release: %p, refcount: %d", this, GetStrongCount());
         }
@@ -83,11 +84,11 @@ UInt32 ContextThemeWrapperHolder::Release()
     }
 
     Int32 count = Object::Release();
-    if (mMemoryLeakTarget) {
-        if (count == 1 && (++mMemoryCount == 3)) {
-            Release();
-        }
-    }
+    // if (mMemoryLeakTarget) {
+    //     if (count == 1 && (++mMemoryCount == 3)) {
+    //         Release();
+    //     }
+    // }
 
     return count;
 }

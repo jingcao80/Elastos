@@ -47,82 +47,59 @@ namespace Ui {
   */
 class ColorPickerDialog
     : public AlertDialog
-    , public IOnColorChangedListener
 {
 public:
-    class InnerOnClickListener
+    class InnerListener
         : public Object
         , public IDialogInterfaceOnClickListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerOnClickListener(
-            /* [in] */ ColorPickerDialog* owner);
-
-        // @Override
-        CARAPI OnClick(
-            /* [in] */ IDialogInterface* dialogInterface,
-            /* [in] */ Int32 i);
-
-    private:
-        ColorPickerDialog* mOwner;
-    };
-
-    class InnerOnClickListener1
-        : public Object
-        , public IDialogInterfaceOnClickListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerOnClickListener1(
-            /* [in] */ ColorPickerDialog* owner);
-
-        // @Override
-        CARAPI OnClick(
-            /* [in] */ IDialogInterface* dialogInterface,
-            /* [in] */ Int32 i);
-
-    private:
-        ColorPickerDialog* mOwner;
-    };
-
-    class InnerOnCancelListener
-        : public Object
         , public IDialogInterfaceOnCancelListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerOnCancelListener(
-            /* [in] */ ColorPickerDialog* owner);
-
-        // @Override
-        CARAPI OnCancel(
-            /* [in] */ IDialogInterface* arg0);
-
-    private:
-        ColorPickerDialog* mOwner;
-    };
-
-    class InnerButtonOnClickListener
-        : public Object
+        , public IOnColorChangedListener
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        InnerButtonOnClickListener(
+        InnerListener(
             /* [in] */ ColorPickerDialog* owner);
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialogInterface,
+            /* [in] */ Int32 i);
+
+        // @Override
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* arg0);
 
         // @Override
         CARAPI OnClick(
             /* [in] */ IView* v);
 
+        CARAPI OnColorChanged(
+            /* [in] */ Int32 color);
     private:
         ColorPickerDialog* mOwner;
     };
+
+    class NegativeButtonListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        NegativeButtonListener(
+            /* [in] */ ColorPickerDialog* owner);
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialogInterface,
+            /* [in] */ Int32 i);
+
+    private:
+        ColorPickerDialog* mOwner;
+    };
+
 
 public:
     CAR_INTERFACE_DECL()

@@ -222,26 +222,6 @@ ECode ColorSuggestionListAdapter::SetUpColorButton(
     /* [in] */ Int32 index)
 {
     VALIDATE_NOT_NULL(button);
-    // ==================before translated======================
-    // if (index >= mSuggestions.length) {
-    //     button.setTag(null);
-    //     button.setContentDescription(null);
-    //     button.setVisibility(View.INVISIBLE);
-    //     return;
-    // }
-    // button.setTag(mSuggestions[index]);
-    // button.setVisibility(View.VISIBLE);
-    // ColorSuggestion suggestion = mSuggestions[index];
-    // LayerDrawable layers = (LayerDrawable) button.getBackground();
-    // GradientDrawable swatch =
-    //         (GradientDrawable) layers.findDrawableByLayerId(R.id.color_button_swatch);
-    // swatch.setColor(suggestion.mColor);
-    // String description = suggestion.mLabel;
-    // if (TextUtils.isEmpty(description)) {
-    //     description = String.format("#%06X", (0xFFFFFF & suggestion.mColor));
-    // }
-    // button.setContentDescription(description);
-    // button.setOnClickListener(this);
 
     IView* viewTmp = IView::Probe(button);
     if (index >= mSuggestions->GetLength()) {

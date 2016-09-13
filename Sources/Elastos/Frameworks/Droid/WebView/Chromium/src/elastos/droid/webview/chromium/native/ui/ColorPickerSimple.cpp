@@ -23,39 +23,40 @@ namespace Ui {
 AutoPtr< ArrayOf<Int32> > ColorPickerSimple::DEFAULT_COLORS = ColorPickerSimple::MiddleInitDefaultColors();
 AutoPtr< ArrayOf<Int32> > ColorPickerSimple::DEFAULT_COLOR_LABEL_IDS = ColorPickerSimple::MiddleInitDefaultColorLabelIds();
 
-CAR_INTERFACE_IMPL(ColorPickerSimple, ListView, IOnColorSuggestionClickListener)
+CAR_INTERFACE_IMPL(ColorPickerSimple::InnerListener, Object, IOnColorSuggestionClickListener)
 
-ColorPickerSimple::ColorPickerSimple(
-    /* [in] */ IContext* context)
-    : mOnColorChangedListener(NULL)
+ColorPickerSimple::InnerListener::InnerListener(
+    /* [in] */ ColorPickerSimple* host)
+    : mHost(host)
 {
-    // ==================before translated======================
-    // super(context);
-
-    ListView::constructor(context);
 }
 
-ColorPickerSimple::ColorPickerSimple(
+ECode ColorPickerSimple::InnerListener::OnColorSuggestionClick(
+    /* [in] */ IInterface* suggestion)
+{
+    return mHost->OnColorSuggestionClick(suggestion);
+}
+
+
+ECode ColorPickerSimple::constructor(
+    /* [in] */ IContext* context)
+{
+    return ListView::constructor(context);
+}
+
+ECode ColorPickerSimple::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
-    : mOnColorChangedListener(NULL)
 {
-    // ==================before translated======================
-    // super(context, attrs);
-
-    ListView::constructor(context, attrs);
+    return ListView::constructor(context, attrs);
 }
 
-ColorPickerSimple::ColorPickerSimple(
+ECode ColorPickerSimple::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
-    : mOnColorChangedListener(NULL)
 {
-    // ==================before translated======================
-    // super(context, attrs, defStyle);
-
-    ListView::constructor(context, attrs, defStyle);
+    return ListView::constructor(context, attrs, defStyle);
 }
 
 // suggestion type is ColorSuggestion
@@ -64,21 +65,6 @@ ECode ColorPickerSimple::Init(
     /* [in] */ IOnColorChangedListener* onColorChangedListener)
 {
     VALIDATE_NOT_NULL(onColorChangedListener);
-    // ==================before translated======================
-    // mOnColorChangedListener = onColorChangedListener;
-    //
-    // if (suggestions == null) {
-    //     suggestions = new ColorSuggestion[DEFAULT_COLORS.length];
-    //     for (int i = 0; i < suggestions.length; ++i) {
-    //         suggestions[i] = new ColorSuggestion(DEFAULT_COLORS[i],
-    //                 getContext().getString(DEFAULT_COLOR_LABEL_IDS[i]));
-    //     }
-    // }
-    //
-    // ColorSuggestionListAdapter adapter = new ColorSuggestionListAdapter(
-    //         getContext(), suggestions);
-    // adapter.setOnColorSuggestionClickListener(this);
-    // setAdapter(adapter);
 
     mOnColorChangedListener = onColorChangedListener;
     if (NULL == suggestions) {
@@ -97,7 +83,8 @@ ECode ColorPickerSimple::Init(
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<ColorSuggestionListAdapter> adapter = new ColorSuggestionListAdapter(context, suggestions);
-    adapter->SetOnColorSuggestionClickListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    adapter->SetOnColorSuggestionClickListener(listener);
     SetAdapter(adapter);
     return NOERROR;
 }
@@ -106,8 +93,6 @@ ECode ColorPickerSimple::OnColorSuggestionClick(
     /* [in] */ IInterface* suggestion)
 {
     VALIDATE_NOT_NULL(suggestion);
-    // ==================before translated======================
-    // mOnColorChangedListener.onColorChanged(suggestion.mColor);
 
     IObject* objTmp = IObject::Probe(suggestion);
     ColorSuggestion* suggestionTmp = (ColorSuggestion*)objTmp;
@@ -117,18 +102,6 @@ ECode ColorPickerSimple::OnColorSuggestionClick(
 
 AutoPtr< ArrayOf<Int32> > ColorPickerSimple::MiddleInitDefaultColors()
 {
-    // ==================before translated======================
-    // ->WWZ_SIGN: ARRAY_INIT_START {
-    // Color.RED,
-    //          Color.CYAN,
-    //          Color.BLUE,
-    //          Color.GREEN,
-    //          Color.MAGENTA,
-    //          Color.YELLOW,
-    //          Color.BLACK,
-    //          Color.WHITE
-    // ->WWZ_SIGN: ARRAY_INIT_END }
-
     Int32 tmps[] = {
         IColor::RED,
         IColor::CYAN,
@@ -151,18 +124,6 @@ AutoPtr< ArrayOf<Int32> > ColorPickerSimple::MiddleInitDefaultColors()
 
 AutoPtr< ArrayOf<Int32> > ColorPickerSimple::MiddleInitDefaultColorLabelIds()
 {
-    // ==================before translated======================
-    // ->WWZ_SIGN: ARRAY_INIT_START {
-    // R.string.color_picker_button_red,
-    //          R.string.color_picker_button_cyan,
-    //          R.string.color_picker_button_blue,
-    //          R.string.color_picker_button_green,
-    //          R.string.color_picker_button_magenta,
-    //          R.string.color_picker_button_yellow,
-    //          R.string.color_picker_button_black,
-    //          R.string.color_picker_button_white
-    // ->WWZ_SIGN: ARRAY_INIT_END }
-
     Int32 tmps[] = {
         Elastos::Droid::Webkit::Webview::Chromium::Ui::R::string::color_picker_button_red,
         Elastos::Droid::Webkit::Webview::Chromium::Ui::R::string::color_picker_button_cyan,

@@ -86,7 +86,7 @@ ECode NetInitiatedActivity::OnClickListener::OnClick(
     return mHost->OnClick(dialog, which);
 }
 
-CAR_INTERFACE_IMPL_2(NetInitiatedActivity, AlertActivity, INetInitiatedActivity, IDialogInterfaceOnClickListener);
+CAR_INTERFACE_IMPL(NetInitiatedActivity, AlertActivity, INetInitiatedActivity);
 
 NetInitiatedActivity::NetInitiatedActivity()
     : mNotificationId(-1)
@@ -114,6 +114,8 @@ ECode NetInitiatedActivity::OnCreate(
     mHandler = new MyHandler(this);
     mHandler->constructor();
 
+    AutoPtr<OnClickListener> listener = new OnClickListener(this);
+
     // Set up the "dialog"
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
@@ -130,10 +132,10 @@ ECode NetInitiatedActivity::OnCreate(
     String format;
     context->GetString(R::string::gpsVerifYes, &format);
     p->SetPositiveButtonText(CoreUtils::Convert(StringUtils::Format(format, NULL)));
-    p->SetPositiveButtonListener(this);
+    p->SetPositiveButtonListener(listener);
     context->GetString(R::string::gpsVerifNo, &format);
     p->SetNegativeButtonText(CoreUtils::Convert(StringUtils::Format(format, NULL)));
-    p->SetNegativeButtonListener(this);
+    p->SetNegativeButtonListener(listener);
 
     intent->GetInt32Extra(IGpsNetInitiatedHandler::NI_INTENT_KEY_NOTIF_ID, -1, &mNotificationId);
     intent->GetInt32Extra(IGpsNetInitiatedHandler::NI_INTENT_KEY_TIMEOUT,

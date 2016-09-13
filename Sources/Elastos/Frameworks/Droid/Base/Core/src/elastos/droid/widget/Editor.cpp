@@ -437,12 +437,28 @@ Boolean PinnedPopupWindow::IsShowing()
     return isShowing;
 }
 
+
+//==============================================================================
+//              EasyEditPopupWindow::ClickListener
+//==============================================================================
+CAR_INTERFACE_IMPL(EasyEditPopupWindow::ClickListener, Object, IViewOnClickListener)
+
+EasyEditPopupWindow::ClickListener::ClickListener(
+    /* [in] */ EasyEditPopupWindow* host)
+    : mHost(host)
+{
+}
+
+ECode EasyEditPopupWindow::ClickListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
 //==============================================================================
 //              EasyEditPopupWindow
 //==============================================================================
 const Int32 EasyEditPopupWindow::POPUP_TEXT_LAYOUT = R::layout::text_edit_action_popup_text;
-
-CAR_INTERFACE_IMPL(EasyEditPopupWindow, PinnedPopupWindow, IViewOnClickListener)
 
 EasyEditPopupWindow::EasyEditPopupWindow(
     /* [in] */ Editor* editor)
@@ -483,12 +499,13 @@ ECode EasyEditPopupWindow::InitContentView()
         IViewGroupLayoutParams::WRAP_CONTENT,
         (IViewGroupLayoutParams**)&wrapContent);
 
+    AutoPtr<ClickListener> listener = new ClickListener(this);
     AutoPtr<IView> view;
     inflater->Inflate(POPUP_TEXT_LAYOUT, NULL, (IView**)&view);
     mDeleteTextView = ITextView::Probe(view);
     view->SetLayoutParams(wrapContent);
     mDeleteTextView->SetText(R::string::delete_);
-    view->SetOnClickListener(this);
+    view->SetOnClickListener(listener);
     mContentView->AddView(view);
     return NOERROR;
 }
@@ -697,11 +714,30 @@ ECode SuggestionSpanComparator::Compare(
 //              SuggestionsPopupWindow
 //==============================================================================
 
+CAR_INTERFACE_IMPL(SuggestionsPopupWindow::ItemClickListener, Object, IAdapterViewOnItemClickListener)
+
+SuggestionsPopupWindow::ItemClickListener::ItemClickListener(
+    /* [in] */ SuggestionsPopupWindow* host)
+    : mHost(host)
+{}
+
+ECode SuggestionsPopupWindow::ItemClickListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+//==============================================================================
+//              SuggestionsPopupWindow
+//==============================================================================
+
 const Int32 SuggestionsPopupWindow::MAX_NUMBER_SUGGESTIONS = ISuggestionSpan::SUGGESTIONS_MAX_SIZE;
 const Int32 SuggestionsPopupWindow::ADD_TO_DICTIONARY = -1;
 const Int32 SuggestionsPopupWindow::DELETE_TEXT = -2;
 
-CAR_INTERFACE_IMPL(SuggestionsPopupWindow, PinnedPopupWindow, IAdapterViewOnItemClickListener)
 
 SuggestionsPopupWindow::SuggestionsPopupWindow(
     /* [in] */ Editor* editor)
@@ -737,10 +773,12 @@ ECode SuggestionsPopupWindow::InitContentView()
     AutoPtr<IListView> listView;
     CListView::New(context, (IListView**)&listView);
 
+    AutoPtr<ItemClickListener> listener = new ItemClickListener(this);
+
     mSuggestionsAdapter = new SuggestionAdapter(mEditor, this);
     IAdapterView* _listView = IAdapterView::Probe(listView);
     _listView->SetAdapter(IAdapter::Probe(mSuggestionsAdapter));
-    _listView->SetOnItemClickListener(this);
+    _listView->SetOnItemClickListener(listener);
     mContentView = IViewGroup::Probe(listView);
 
     // Inflate the suggestion items once and for all. + 2 for add to dictionary and delete
@@ -1454,12 +1492,27 @@ ECode SelectionActionModeCallback::OnDestroyActionMode(
 }
 
 //==============================================================================
+//              ActionPopupWindow::ClickListener
+//==============================================================================
+CAR_INTERFACE_IMPL(ActionPopupWindow::ClickListener, Object, IViewOnClickListener)
+
+ActionPopupWindow::ClickListener::ClickListener(
+    /* [in] */ ActionPopupWindow* host)
+    : mHost(host)
+{
+}
+
+ECode ActionPopupWindow::ClickListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+//==============================================================================
 //              ActionPopupWindow
 //==============================================================================
 
 const Int32 ActionPopupWindow::POPUP_TEXT_LAYOUT = R::layout::text_edit_action_popup_text;
-
-CAR_INTERFACE_IMPL(ActionPopupWindow, PinnedPopupWindow, IViewOnClickListener)
 
 ActionPopupWindow::ActionPopupWindow(
     /* [in] */ Editor* editor)
@@ -1502,13 +1555,15 @@ ECode ActionPopupWindow::InitContentView()
         IViewGroupLayoutParams::WRAP_CONTENT,
         (IViewGroupLayoutParams**)&wrapContent);
 
+    AutoPtr<ClickListener> listener = new ClickListener(this);
+
     AutoPtr<IView> ptv;
     inflater->Inflate(POPUP_TEXT_LAYOUT, NULL, (IView**)&ptv);
     mPasteTextView = ITextView::Probe(ptv);
     ptv->SetLayoutParams(wrapContent);
     mContentView->AddView(ptv);
     mPasteTextView->SetText(R::string::paste);
-    ptv->SetOnClickListener(this);
+    ptv->SetOnClickListener(listener);
 
     AutoPtr<IView> rtv;
     inflater->Inflate(POPUP_TEXT_LAYOUT, NULL, (IView**)&rtv);
@@ -1516,7 +1571,7 @@ ECode ActionPopupWindow::InitContentView()
     rtv->SetLayoutParams(wrapContent);
     mContentView->AddView(rtv);
     mReplaceTextView->SetText(R::string::replace);
-    rtv->SetOnClickListener(this);
+    rtv->SetOnClickListener(listener);
 
     return NOERROR;
 }

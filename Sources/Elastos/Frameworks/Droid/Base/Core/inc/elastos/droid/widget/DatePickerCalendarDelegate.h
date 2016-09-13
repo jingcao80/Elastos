@@ -21,9 +21,25 @@ namespace Widget {
 class DatePickerCalendarDelegate
     : public DatePicker::AbstractDatePickerDelegate
     , public IDatePickerCalendarDelegate
-    , public IViewOnClickListener
     , public IDatePickerController
 {
+private:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ DatePickerCalendarDelegate* host);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+    private:
+        DatePickerCalendarDelegate* mHost;
+    };
+
 public:
     /**
      * Class for managing state storing/restoring.
@@ -228,7 +244,7 @@ public:
 
     CARAPI TryVibrate();
 
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* v);
 
 private:

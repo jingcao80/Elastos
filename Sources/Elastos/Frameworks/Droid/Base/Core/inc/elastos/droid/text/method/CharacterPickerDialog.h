@@ -10,8 +10,8 @@
 using Elastos::Droid::App::Dialog;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Text::Method::ICharacterPickerDialog;
 using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::Text::Method::ICharacterPickerDialog;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
@@ -29,8 +29,6 @@ namespace Method {
 
 class CharacterPickerDialog
     : public Dialog
-    , public IAdapterViewOnItemClickListener
-    , public IViewOnClickListener
     , public ICharacterPickerDialog
 {
 private:
@@ -67,6 +65,30 @@ private:
         CharacterPickerDialog* mHost;
     };
 
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CharacterPickerDialog* host);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CharacterPickerDialog* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -81,13 +103,13 @@ public:
         /* [in] */ const String& options,
         /* [in] */ Boolean insert);
 
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,
         /* [in] */ Int64 id);
 
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* v);
 
 protected:

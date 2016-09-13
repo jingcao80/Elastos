@@ -42,6 +42,23 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+
+// ==================================================================
+//                DatePickerCalendarDelegate::InnerListener
+// ==================================================================
+CAR_INTERFACE_IMPL(DatePickerCalendarDelegate::InnerListener, Object, IViewOnClickListener)
+
+DatePickerCalendarDelegate::InnerListener::InnerListener(
+    /* [in] */ DatePickerCalendarDelegate* host)
+    : mHost(host)
+{}
+
+ECode DatePickerCalendarDelegate::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
 // ==================================================================
 //                DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::
 // ==================================================================
@@ -178,7 +195,7 @@ const Int32 DatePickerCalendarDelegate::MONTH_INDEX = 0;
 const Int32 DatePickerCalendarDelegate::DAY_INDEX = 1;
 const Int32 DatePickerCalendarDelegate::YEAR_INDEX = 2;
 
-CAR_INTERFACE_IMPL_3(DatePickerCalendarDelegate, DatePicker::AbstractDatePickerDelegate, IDatePickerCalendarDelegate, IViewOnClickListener, IDatePickerController)
+CAR_INTERFACE_IMPL_2(DatePickerCalendarDelegate, DatePicker::AbstractDatePickerDelegate, IDatePickerCalendarDelegate, IDatePickerController)
 
 DatePickerCalendarDelegate::DatePickerCalendarDelegate()
     : mIsEnabled(TRUE)
@@ -207,6 +224,7 @@ ECode DatePickerCalendarDelegate::constructor(
 {
     DatePicker::AbstractDatePickerDelegate::constructor(delegator, context);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<ILocaleHelper> hlp;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&hlp);
     AutoPtr<ILocale> locale;
@@ -254,7 +272,7 @@ ECode DatePickerCalendarDelegate::constructor(
     mainView->FindViewById(
             R::id::date_picker_month_and_day_layout, (IView**)&v);
     mMonthAndDayLayout = ILinearLayout::Probe(v);
-    IView::Probe(mMonthAndDayLayout)->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     mainView->FindViewById(R::id::date_picker_month, (IView**)&v);
     mHeaderMonthTextView = ITextView::Probe(v);
@@ -264,7 +282,7 @@ ECode DatePickerCalendarDelegate::constructor(
     v = NULL;
     mainView->FindViewById(R::id::date_picker_year, (IView**)&v);
     mHeaderYearTextView = ITextView::Probe(v);
-    IView::Probe(mHeaderYearTextView)->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
 
     // Obtain default highlight color from the theme.
     Int32 defaultHighlightColor = 0;

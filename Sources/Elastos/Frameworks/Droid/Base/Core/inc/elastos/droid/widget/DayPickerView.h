@@ -32,8 +32,6 @@ namespace Widget {
 class DayPickerView
     : public ListView
     , public IDayPickerView
-    , public IAbsListViewOnScrollListener
-    , public IOnDateChangedListener
 {
 protected:
     class ScrollStateRunnable
@@ -82,6 +80,35 @@ private:
     private:
         DayPickerView* mOwner;
         Int32 mPosition;
+    };
+
+    class InnerListener
+        : public Object
+        , public IAbsListViewOnScrollListener
+        , public IOnDateChangedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+          /* [in] */ DayPickerView* host);
+
+        CARAPI OnScroll(
+            /* [in] */ IAbsListView* view,
+            /* [in] */ Int32 firstVisibleItem,
+            /* [in] */ Int32 visibleItemCount,
+            /* [in] */ Int32 totalItemCount);
+
+        // @Override
+        CARAPI OnScrollStateChanged(
+            /* [in] */ IAbsListView* view,
+            /* [in] */ Int32 scrollState);
+
+        // @Override
+        CARAPI OnDateChanged();
+
+    private:
+        DayPickerView* mHost;
     };
 
 public:
@@ -246,6 +273,7 @@ private:
     AutoPtr<IDatePickerController> mController;
     Boolean mPerformingScroll;
     AutoPtr<ScrollStateRunnable> mScrollStateChangedRunnable;
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Widget

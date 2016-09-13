@@ -57,7 +57,6 @@ module
     interface Elastos.Droid.Utility.IAttributeSet;
     interface Elastos.Droid.InputMethodService.IKeyboard;
     interface Elastos.Droid.InputMethodService.IKeyboardView;
-    interface Elastos.Droid.InputMethodService.IOnKeyboardActionListener;
     interface Elastos.Droid.Internal.Widget.IPointerLocationView;
     interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     interface Elastos.Droid.Os.IBinder;
@@ -80,7 +79,6 @@ module
     interface Elastos.Droid.Widget.IFrameLayout;
     interface Elastos.Droid.Widget.ILinearLayout;
     interface Elastos.Droid.Widget.IRelativeLayout;
-    interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     interface Elastos.Droid.Widget.IHorizontalScrollView;
     interface Elastos.Droid.Widget.ITextView;
     interface Elastos.Droid.Widget.IViewAnimator;
@@ -300,7 +298,6 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-        interface IAdapterViewOnItemClickListener;
     }
 
     [local]
@@ -506,7 +503,6 @@ module
             [in] ArrayOf<Int32>* layouts);
 
         interface IPasswordEntryKeyboardHelper;
-        interface IOnKeyboardActionListener;
     }
 
     [local]

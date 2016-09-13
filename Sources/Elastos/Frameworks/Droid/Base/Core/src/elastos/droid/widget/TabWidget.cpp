@@ -20,29 +20,36 @@ namespace Droid {
 namespace Widget {
 
 //==============================================================================
-//              TabWidget::TabClickListener
+//              TabWidget::TabListener
 //==============================================================================
 
-CAR_INTERFACE_IMPL(TabWidget::TabClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL_2(TabWidget::TabListener, Object, IViewOnClickListener, IViewOnFocusChangeListener)
 
-TabWidget::TabClickListener::TabClickListener(
+TabWidget::TabListener::TabListener(
     /* [in] */ Int32 tabIndex,
     /* [in] */ TabWidget* owner)
     : mTabIndex(tabIndex)
     , mHost(owner)
 {}
 
-ECode TabWidget::TabClickListener::OnClick(
+ECode TabWidget::TabListener::OnClick(
      /* [in] */ IView* v)
 {
     return mHost->mSelectionChangedListener->OnTabSelectionChanged(mTabIndex, TRUE);
+}
+
+ECode TabWidget::TabListener::OnFocusChange(
+    /* [in] */ IView* v,
+    /* [in] */ Boolean hasFocus)
+{
+    return mHost->OnFocusChange(v, hasFocus);
 }
 
 
 //==============================================================================
 //              TabWidget
 //==============================================================================
-CAR_INTERFACE_IMPL_2(TabWidget, LinearLayout, ITabWidget, IViewOnFocusChangeListener)
+CAR_INTERFACE_IMPL(TabWidget, LinearLayout, ITabWidget)
 
 TabWidget::TabWidget()
     : mSelectedTab(-1)
@@ -143,7 +150,8 @@ void TabWidget::InitTabWidget()
     // Deal with focus, as we don't want the focus to go by default
     // to a tab other than the current tab
     SetFocusable(TRUE);
-    SetOnFocusChangeListener(this);
+    AutoPtr<TabListener> listener = new TabListener(0, this);
+    SetOnFocusChangeListener(listener);
 }
 
 void TabWidget::MeasureChildBeforeLayout(
@@ -624,9 +632,9 @@ ECode TabWidget::AddView(
     // than potentially interfere with the view's listener
     Int32 count;
     GetTabCount(&count);
-    AutoPtr<TabClickListener> listener = new TabClickListener(count - 1, this);
-    child->SetOnClickListener((IViewOnClickListener*)listener);
-    child->SetOnFocusChangeListener(this);
+    AutoPtr<TabListener> listener = new TabListener(count - 1, this);
+    child->SetOnClickListener(listener);
+    child->SetOnFocusChangeListener(listener);
 
     return NOERROR;
 }

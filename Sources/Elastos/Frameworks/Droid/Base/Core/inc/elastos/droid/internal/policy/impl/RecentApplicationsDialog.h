@@ -24,9 +24,25 @@ namespace Impl {
 
 class RecentApplicationsDialog
     : public Dialog
-    , public IViewOnClickListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ RecentApplicationsDialog* host);
+
+        virtual CARAPI OnClick(
+            /* [in] */ IView* view);
+
+    private:
+        RecentApplicationsDialog* mHost;
+    };
+
     /**
      * This is the listener for the ACTION_CLOSE_SYSTEM_DIALOGS intent.  It's an indication that
      * we should close ourselves immediately, in order to allow a higher-priority UI to take over
@@ -73,8 +89,6 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     RecentApplicationsDialog();
 
     CARAPI constructor(

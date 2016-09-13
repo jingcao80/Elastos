@@ -24,7 +24,8 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-CAR_INTERFACE_IMPL(PreferenceScreen::InnerListener, Object, IAdapterViewOnItemClickListener)
+CAR_INTERFACE_IMPL_2(PreferenceScreen::InnerListener, Object, \
+    IAdapterViewOnItemClickListener, IDialogInterfaceOnDismissListener)
 
 PreferenceScreen::InnerListener::InnerListener(
     /* [in] */ PreferenceScreen* host)
@@ -40,8 +41,13 @@ ECode PreferenceScreen::InnerListener::OnItemClick(
     return mHost->OnItemClick(parent, view, position, id);
 }
 
-CAR_INTERFACE_IMPL_2(PreferenceScreen, PreferenceGroup, IPreferenceScreen, \
-    IDialogInterfaceOnDismissListener)
+ECode PreferenceScreen::InnerListener::OnDismiss(
+    /* [in] */ IDialogInterface* dialog)
+{
+    return mHost->OnDismiss(dialog);
+}
+
+CAR_INTERFACE_IMPL(PreferenceScreen, PreferenceGroup, IPreferenceScreen)
 
 PreferenceScreen::PreferenceScreen()
 {
@@ -144,7 +150,8 @@ ECode PreferenceScreen::ShowDialog(
         dialog->SetTitle(title);
     }
     dialog->SetContentView(childPrefScreen);
-    dialog->SetOnDismissListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    dialog->SetOnDismissListener(listener);
     if (state != NULL) {
         dialog->OnRestoreInstanceState(state);
     }

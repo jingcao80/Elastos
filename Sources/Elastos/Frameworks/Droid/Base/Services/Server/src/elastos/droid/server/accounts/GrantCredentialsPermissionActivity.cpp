@@ -97,6 +97,21 @@ ECode GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::Run(
 }
 
 //=============================================================================
+// GrantCredentialsPermissionActivity::InnerListener
+//=============================================================================
+CAR_INTERFACE_IMPL(GrantCredentialsPermissionActivity::InnerListener, Object, IViewOnClickListener)
+
+GrantCredentialsPermissionActivity::InnerListener::InnerListener(
+    /* [in] */ GrantCredentialsPermissionActivity* host)
+{}
+
+ECode GrantCredentialsPermissionActivity::InnerListener::OnClick(
+    /* [in] */ IView* vs)
+{
+    return mHost->OnClick(vs);
+}
+
+//=============================================================================
 // GrantCredentialsPermissionActivity
 //=============================================================================
 const String GrantCredentialsPermissionActivity::EXTRAS_ACCOUNT("account");
@@ -106,8 +121,6 @@ const String GrantCredentialsPermissionActivity::EXTRAS_RESPONSE("response");
 const String GrantCredentialsPermissionActivity::EXTRAS_ACCOUNT_TYPE_LABEL("accountTypeLabel");
 const String GrantCredentialsPermissionActivity::EXTRAS_PACKAGES("application");
 const String GrantCredentialsPermissionActivity::EXTRAS_REQUESTING_UID("uid");
-
-CAR_INTERFACE_IMPL(GrantCredentialsPermissionActivity, Activity, IViewOnClickListener)
 
 GrantCredentialsPermissionActivity::GrantCredentialsPermissionActivity()
     : mUid(0)
@@ -188,12 +201,13 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
     accountManager->GetAuthTokenLabel(type, mAuthTokenType, callback,
             NULL, (IAccountManagerFuture**)&future);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     view = NULL;
     ASSERT_SUCCEEDED(FindViewById(R::id::allow_button, (IView**)&view));
-    view->SetOnClickListener(this);
+    view->SetOnClickListener(listener);
     view = NULL;
     ASSERT_SUCCEEDED(FindViewById(R::id::deny_button, (IView**)&view));
-    view->SetOnClickListener(this);
+    view->SetOnClickListener(listener);
 
     view = NULL;
     ASSERT_SUCCEEDED(FindViewById(R::id::packages_list, (IView**)&view));

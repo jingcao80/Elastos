@@ -94,7 +94,24 @@ ECode ZoomButtonsController::MyHandler::HandleMessage(
     return NOERROR;
 }
 
+
+CAR_INTERFACE_IMPL(ZoomButtonsController::InnerListener, Object, IViewOnTouchListener);
+
+ZoomButtonsController::InnerListener::InnerListener(
+    /* [in] */ ZoomButtonsController* host)
+    : mHost(host)
+{}
+
+ECode ZoomButtonsController::InnerListener::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnTouch(v, event, result);
+}
+
 CAR_INTERFACE_IMPL(ZoomButtonsController::MyClickListener, Object, IViewOnClickListener);
+
 ZoomButtonsController::MyClickListener::MyClickListener(
     /* [in] */ ZoomButtonsController* host,
     /* [in] */ Boolean onZoom)
@@ -174,12 +191,18 @@ ECode ZoomButtonsController::MyBroadcastReceiver::ToString(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL_2(ZoomButtonsController, Object, IZoomButtonsController, IViewOnTouchListener);
+CAR_INTERFACE_IMPL(ZoomButtonsController, Object, IZoomButtonsController);
+
 ZoomButtonsController::ZoomButtonsController()
     : mTouchPaddingScaledSq(0)
     , mAutoDismissControls(TRUE)
     , mReleaseTouchListenerOnUp(FALSE)
     , mIsVisible(FALSE)
+{
+}
+
+ECode ZoomButtonsController::constructor(
+    /* [in] */ IView* ownerView)
 {
     mOwnerViewRawLocation = ArrayOf<Int32>::Alloc(2);
     mContainerRawLocation = ArrayOf<Int32>::Alloc(2);
@@ -189,11 +212,7 @@ ZoomButtonsController::ZoomButtonsController()
     CIntentFilter::New(IIntent::ACTION_CONFIGURATION_CHANGED, (IIntentFilter**)&mConfigurationChangedFilter);
     mConfigurationChangedReceiver = new MyBroadcastReceiver(this);
     mHandler = new MyHandler(this);
-}
 
-ECode ZoomButtonsController::constructor(
-    /* [in] */ IView* ownerView)
-{
     ownerView->GetContext((IContext**)&mContext);
     AutoPtr<IInterface> sTemp;
     mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&sTemp);
@@ -369,7 +388,8 @@ ECode ZoomButtonsController::SetVisible(
         mContext->RegisterReceiver(mConfigurationChangedReceiver, mConfigurationChangedFilter, (IIntent**)&rst);
 
         // Steal touches events from the owner
-        mOwnerView->SetOnTouchListener(this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        mOwnerView->SetOnTouchListener(listener);
         mReleaseTouchListenerOnUp = FALSE;
 
     }

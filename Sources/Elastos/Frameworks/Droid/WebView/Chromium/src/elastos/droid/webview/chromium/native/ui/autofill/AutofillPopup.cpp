@@ -28,7 +28,20 @@ const Int32 AutofillPopup::ITEM_ID_PASSWORD_ENTRY;
 const Int32 AutofillPopup::ITEM_ID_SEPARATOR_ENTRY;
 const Int32 AutofillPopup::ITEM_ID_DATA_LIST_ENTRY;
 
-CAR_INTERFACE_IMPL(AutofillPopup, DropdownPopupWindow, IAdapterViewOnItemClickListener);
+CAR_INTERFACE_IMPL(AutofillPopup::InnerListener, Object, IAdapterViewOnItemClickListener);
+
+AutofillPopup::InnerListener::InnerListener(
+  /* [in] */ AutofillPopup* host);
+
+// @Override
+ECode AutofillPopup::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
 
 AutofillPopup::AutofillPopup(
     /* [in] */ IContext* context,
@@ -45,7 +58,8 @@ AutofillPopup::AutofillPopup(
     //
     // setOnItemClickListener(this);
 
-    SetOnItemClickListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    SetOnItemClickListener(listener);
 }
 
 ECode AutofillPopup::FilterAndShow(

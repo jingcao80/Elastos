@@ -39,19 +39,34 @@ class ColorSuggestion;
   */
 class ColorPickerSimple
     : public ListView
-    , public IOnColorSuggestionClickListener
 {
-public:
-    CAR_INTERFACE_DECL()
+private:
+    class InnerListener
+      : public Object
+      , public IOnColorSuggestionClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    ColorPickerSimple(
+        InnerListener(
+            /* [in] */ ColorPickerSimple* host);
+
+        CARAPI OnColorSuggestionClick(
+            /* [in] */ IInterface* suggestion);
+    private:
+        ColorPickerSimple* mHost;
+    };
+
+public:
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    ColorPickerSimple(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    ColorPickerSimple(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);

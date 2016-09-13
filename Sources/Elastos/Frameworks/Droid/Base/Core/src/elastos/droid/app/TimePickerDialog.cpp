@@ -23,17 +23,18 @@ namespace Droid {
 namespace App {
 
 //========================================================================================
-// TimePickerDialog::MyValidationCallback
+// TimePickerDialog::InnerListener
 //========================================================================================
-CAR_INTERFACE_IMPL(TimePickerDialog::MyValidationCallback, Object, ITimePickerValidationCallback)
+CAR_INTERFACE_IMPL_3(TimePickerDialog::InnerListener, Object, ITimePickerValidationCallback, \
+    IDialogInterfaceOnClickListener, ITimePickerOnTimeChangedListener)
 
-TimePickerDialog::MyValidationCallback::MyValidationCallback(
+TimePickerDialog::InnerListener::InnerListener(
     /* [in] */ TimePickerDialog* host)
     : mHost(host)
 {}
 
 //@Override
-ECode TimePickerDialog::MyValidationCallback::OnValidationChanged(
+ECode TimePickerDialog::InnerListener::OnValidationChanged(
     /* [in] */ Boolean valid)
 {
     AutoPtr<IButton> positive;
@@ -44,6 +45,21 @@ ECode TimePickerDialog::MyValidationCallback::OnValidationChanged(
     return NOERROR;
 }
 
+ECode TimePickerDialog::InnerListener::OnTimeChanged(
+    /* [in] */ ITimePicker* view,
+    /* [in] */ Int32 hourOfDay,
+    /* [in] */ Int32 minute)
+{
+    return mHost->OnTimeChanged(view, hourOfDay, minute);
+}
+
+ECode TimePickerDialog::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->OnClick(dialog, which);
+}
+
 //========================================================================================
 // TimePickerDialog
 //========================================================================================
@@ -51,8 +67,7 @@ const String TimePickerDialog::HOUR("hour");
 const String TimePickerDialog::MINUTE("minute");
 const String TimePickerDialog::IS_24_HOUR("is24hour");
 
-CAR_INTERFACE_IMPL_3(TimePickerDialog, AlertDialog, ITimePickerDialog, \
-    IDialogInterfaceOnClickListener, ITimePickerOnTimeChangedListener)
+CAR_INTERFACE_IMPL(TimePickerDialog, AlertDialog, ITimePickerDialog)
 
 TimePickerDialog::TimePickerDialog()
     : mInitialHourOfDay(0)
@@ -83,6 +98,8 @@ ECode TimePickerDialog::constructor(
 {
     AlertDialog::constructor(context, ResolveDialogTheme(context, theme));
 
+    mListener = new InnerListener(this);
+
     mTimeSetCallback = callBack;
     mInitialHourOfDay = hourOfDay;
     mInitialMinute = minute;
@@ -99,8 +116,8 @@ ECode TimePickerDialog::constructor(
     String ok, cancel;
     themeContext->GetString(R::string::ok, &ok);
     themeContext->GetString(R::string::cancel, &cancel);
-    SetButton(IDialogInterface::BUTTON_POSITIVE, CoreUtils::Convert(ok), this);
-    SetButton(IDialogInterface::BUTTON_NEGATIVE, CoreUtils::Convert(cancel), this);
+    SetButton(IDialogInterface::BUTTON_POSITIVE, CoreUtils::Convert(ok), mListener);
+    SetButton(IDialogInterface::BUTTON_NEGATIVE, CoreUtils::Convert(cancel), mListener);
     SetButtonPanelLayoutHint(IAlertDialog::LAYOUT_HINT_SIDE);
 
     AutoPtr<IView> tmp;
@@ -109,8 +126,8 @@ ECode TimePickerDialog::constructor(
     mTimePicker->SetIs24HourView(mIs24HourView);
     mTimePicker->SetCurrentHour(mInitialHourOfDay);
     mTimePicker->SetCurrentMinute(mInitialMinute);
-    mTimePicker->SetOnTimeChangedListener(this);
-    mTimePicker->SetValidationCallback(mValidationCallback);
+    mTimePicker->SetOnTimeChangedListener(mListener);
+    mTimePicker->SetValidationCallback(mListener);
     return NOERROR;
 }
 
