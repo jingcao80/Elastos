@@ -35,8 +35,27 @@ namespace Widget {
 class TimePickerSpinnerDelegate
     : public TimePicker::AbstractTimePickerDelegate
     , public ITimePickerSpinnerDelegate
-    , public IOnValueSelectedListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IOnValueSelectedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+          /* [in] */ TimePickerSpinnerDelegate* host);
+
+        CARAPI OnValueSelected(
+          /* [in] */ Int32 pickerIndex,
+          /* [in] */ Int32 newValue,
+          /* [in] */ Boolean autoAdvance);
+
+    private:
+        TimePickerSpinnerDelegate* mOwner;
+    };
+
 public:
     /**
       * Used to save / restore state of time picker
@@ -330,7 +349,7 @@ public:
       * Called by the picker for updating the header display.
       */
     // @Override
-    CARAPI OnValueSelected(
+    virtual CARAPI OnValueSelected(
         /* [in] */ Int32 pickerIndex,
         /* [in] */ Int32 newValue,
         /* [in] */ Boolean autoAdvance);

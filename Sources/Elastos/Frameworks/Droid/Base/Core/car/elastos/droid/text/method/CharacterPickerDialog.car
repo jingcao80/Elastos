@@ -12,8 +12,6 @@ module
      * Dialog for choosing accented characters related to a base character.
      *
      * @Involve
-     * interface IViewOnClickListener;
-     * interface IAdapterViewOnItemClickListener;
      * interface IOnWindowDismissedCallback;
      * interface IViewOnCreateContextMenuListener;
      * interface IKeyEventCallback;

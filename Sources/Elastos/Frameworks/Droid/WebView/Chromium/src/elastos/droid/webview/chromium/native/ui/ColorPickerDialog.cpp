@@ -21,37 +21,56 @@ namespace Chromium {
 namespace Ui {
 
 //=====================================================================
-//            ColorPickerDialog::InnerOnClickListener
+//            ColorPickerDialog::InnerListener
 //=====================================================================
-CAR_INTERFACE_IMPL(ColorPickerDialog::InnerOnClickListener, Object, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL(ColorPickerDialog::InnerListener, Object, IDialogInterfaceOnClickListener)
 
-ColorPickerDialog::InnerOnClickListener::InnerOnClickListener(
+ColorPickerDialog::InnerListener::InnerListener(
     /* [in] */ ColorPickerDialog* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
-ECode ColorPickerDialog::InnerOnClickListener::OnClick(
+ECode ColorPickerDialog::InnerListener::OnClick(
     /* [in] */ IDialogInterface* dialogInterface,
     /* [in] */ Int32 i)
 {
     VALIDATE_NOT_NULL(dialogInterface);
-    // ==================before translated======================
-    // tryNotifyColorSet(mCurrentColor);
-
     assert(NULL != mOwner);
     mOwner->TryNotifyColorSet(mOwner->mCurrentColor);
     return NOERROR;
 }
 
-//=====================================================================
-//            ColorPickerDialog::InnerOnClickListener1
-//=====================================================================
-CAR_INTERFACE_IMPL(ColorPickerDialog::InnerOnClickListener1, Object, IDialogInterfaceOnClickListener)
+ECode ColorPickerDialog::InnerListener::OnCancel(
+    /* [in] */ IDialogInterface* arg0)
+{
+    VALIDATE_NOT_NULL(arg0);
+    assert(NULL != mOwner);
+    mOwner->TryNotifyColorSet(mOwner->mInitialColor);
+    return NOERROR;
+}
 
-ColorPickerDialog::InnerOnClickListener1::InnerOnClickListener1(
+ECode ColorPickerDialog::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    VALIDATE_NOT_NULL(v);
+    assert(NULL != mOwner);
+    mOwner->ShowAdvancedView();
+    return NOERROR;
+}
+
+ECode ColorPickerDialog::InnerListener::OnColorChanged(
+    /* [in] */ Int32 color)
+{
+    return mOwner->OnColorChanged(color);
+}
+
+//=====================================================================
+//            ColorPickerDialog::NegativeButtonListener
+//=====================================================================
+CAR_INTERFACE_IMPL(ColorPickerDialog::NegativeButtonListener, Object, IDialogInterfaceOnClickListener)
+
+ColorPickerDialog::NegativeButtonListener::NegativeButtonListener(
     /* [in] */ ColorPickerDialog* owner)
     : mOwner(owner)
 {
@@ -59,7 +78,7 @@ ColorPickerDialog::InnerOnClickListener1::InnerOnClickListener1(
     // mOwner = owner;
 }
 
-ECode ColorPickerDialog::InnerOnClickListener1::OnClick(
+ECode ColorPickerDialog::NegativeButtonListener::OnClick(
     /* [in] */ IDialogInterface* dialogInterface,
     /* [in] */ Int32 i)
 {
@@ -72,55 +91,6 @@ ECode ColorPickerDialog::InnerOnClickListener1::OnClick(
     return NOERROR;
 }
 
-//=====================================================================
-//       ColorPickerDialog::InnerOnCancelListener
-//=====================================================================
-CAR_INTERFACE_IMPL(ColorPickerDialog::InnerOnCancelListener, Object, IDialogInterfaceOnCancelListener)
-
-ColorPickerDialog::InnerOnCancelListener::InnerOnCancelListener(
-    /* [in] */ ColorPickerDialog* owner)
-    : mOwner(owner)
-{
-    // ==================before translated======================
-    // mOwner = owner;
-}
-
-ECode ColorPickerDialog::InnerOnCancelListener::OnCancel(
-    /* [in] */ IDialogInterface* arg0)
-{
-    VALIDATE_NOT_NULL(arg0);
-    // ==================before translated======================
-    // tryNotifyColorSet(mInitialColor);
-
-    assert(NULL != mOwner);
-    mOwner->TryNotifyColorSet(mOwner->mInitialColor);
-    return NOERROR;
-}
-
-//=====================================================================
-//            ColorPickerDialog::InnerButtonOnClickListener
-//=====================================================================
-CAR_INTERFACE_IMPL(ColorPickerDialog::InnerButtonOnClickListener, Object, IViewOnClickListener)
-
-ColorPickerDialog::InnerButtonOnClickListener::InnerButtonOnClickListener(
-    /* [in] */ ColorPickerDialog* owner)
-    : mOwner(owner)
-{
-    // ==================before translated======================
-    // mOwner = owner;
-}
-
-ECode ColorPickerDialog::InnerButtonOnClickListener::OnClick(
-    /* [in] */ IView* v)
-{
-    VALIDATE_NOT_NULL(v);
-    // ==================before translated======================
-    // showAdvancedView();
-
-    assert(NULL != mOwner);
-    mOwner->ShowAdvancedView();
-    return NOERROR;
-}
 
 //=====================================================================
 //                          ColorPickerDialog
@@ -231,10 +201,10 @@ ColorPickerDialog::ColorPickerDialog(
     // Initialize Set/Cancel buttons
     String positiveButtonText;
     context->GetString(R::string::color_picker_button_set, &positiveButtonText);
-    AutoPtr<InnerOnClickListener> positiveOnClickListener = new InnerOnClickListener(this);
+    AutoPtr<InnerListener> innerListener = new InnerListener(this);
     AutoPtr<ICharSequence> charSequenceTmp;
     CString::New(positiveButtonText, (ICharSequence**)&charSequenceTmp);
-    SetButton(BUTTON_POSITIVE, charSequenceTmp, positiveOnClickListener);
+    SetButton(BUTTON_POSITIVE, charSequenceTmp, innerListener);
 
     // Note that with the color picker there's not really any such thing as
     // "cancelled".
@@ -245,13 +215,12 @@ ColorPickerDialog::ColorPickerDialog(
     // the color that we were initialized with.
     String negativeButtonText;
     context->GetString(R::string::color_picker_button_cancel, &negativeButtonText);
-    AutoPtr<InnerOnClickListener1> negativeListener = new InnerOnClickListener1(this);
+    AutoPtr<NegativeButtonListener> negativeListener = new NegativeButtonListener(this);
     AutoPtr<ICharSequence> charSequenceTmp1;
     CString::New(negativeButtonText, (ICharSequence**)&charSequenceTmp1);
     SetButton(BUTTON_NEGATIVE, charSequenceTmp1, negativeListener);
 
-    AutoPtr<InnerOnCancelListener> onCancelListener = new InnerOnCancelListener(this);
-    SetOnCancelListener(onCancelListener);
+    SetOnCancelListener(innerListener);
 
     // Initialize main content view
     AutoPtr<IView> content;
@@ -263,8 +232,7 @@ ColorPickerDialog::ColorPickerDialog(
     content->FindViewById(R::id::more_colors_button, (IView**)&viewTmp);
     mMoreButton = IButton::Probe(viewTmp);
 
-    AutoPtr<InnerOnClickListener> onClickListener = new InnerOnClickListener(this);
-    IView::Probe(mMoreButton)->SetOnClickListener(IViewOnClickListener::Probe(onClickListener));
+    IView::Probe(mMoreButton)->SetOnClickListener(innerListener);
 
     // Initialize advanced color view (hidden initially).
     AutoPtr<IView> viewTmp1;
@@ -293,19 +261,6 @@ ECode ColorPickerDialog::OnColorChanged(
 
 ECode ColorPickerDialog::ShowAdvancedView()
 {
-    // ==================before translated======================
-    // // Only need to hide the borders, not the Views themselves, since the Views are
-    // // contained within the borders.
-    // View buttonBorder = findViewById(R.id.more_colors_button_border);
-    // buttonBorder.setVisibility(View.GONE);
-    //
-    // View simpleView = findViewById(R.id.color_picker_simple);
-    // simpleView.setVisibility(View.GONE);
-    //
-    // mAdvancedColorPicker.setVisibility(View.VISIBLE);
-    // mAdvancedColorPicker.setListener(this);
-    // mAdvancedColorPicker.setColor(mCurrentColor);
-
     // Only need to hide the borders, not the Views themselves, since the Views are
     // contained within the borders.
     AutoPtr<IView> buttonBorder;
@@ -317,7 +272,8 @@ ECode ColorPickerDialog::ShowAdvancedView()
     simpleView->SetVisibility(IView::GONE);
 
     IView::Probe(mAdvancedColorPicker)->SetVisibility(IView::VISIBLE);
-    mAdvancedColorPicker->SetListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mAdvancedColorPicker->SetListener(listener);
     mAdvancedColorPicker->SetColor(mCurrentColor);
     return NOERROR;
 }

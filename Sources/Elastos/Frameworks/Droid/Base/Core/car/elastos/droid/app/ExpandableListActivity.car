@@ -132,9 +132,6 @@ module
      * @Involve
      * interface IActivity
      * interface IViewOnCreateContextMenuListener
-     * interface IExpandableListViewOnChildClickListener
-     * interface IExpandableListViewOnGroupCollapseListener
-     * interface IExpandableListViewOnGroupExpandListener;
      */
     [local]
     interface IExpandableListActivity {

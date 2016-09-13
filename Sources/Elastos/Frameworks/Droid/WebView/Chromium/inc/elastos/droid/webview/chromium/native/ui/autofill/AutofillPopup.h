@@ -46,11 +46,29 @@ namespace Autofill {
   */
 class AutofillPopup
     : public DropdownPopupWindow
-    , public IAdapterViewOnItemClickListener
 {
-public:
-    CAR_INTERFACE_DECL()
-    /**
+private:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+          /* [in] */ AutofillPopup* host);
+
+        // @Override
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+    private:
+        AutofillPopup* mHost;
+    };
+
+public:    /**
       * An interface to handle the touch interaction with an AutofillPopup object.
       */
     class AutofillPopupDelegate

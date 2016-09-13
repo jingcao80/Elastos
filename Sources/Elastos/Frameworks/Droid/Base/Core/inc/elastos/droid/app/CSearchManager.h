@@ -3,6 +3,7 @@
 
 #include "_Elastos_Droid_App_CSearchManager.h"
 #include <elastos/core/Object.h>
+#include <Elastos.Droid.Content.h>
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
@@ -23,9 +24,35 @@ namespace App {
 CarClass(CSearchManager)
     , public Object
     , public ISearchManager
-    , public IDialogInterfaceOnDismissListener
-    , public IDialogInterfaceOnCancelListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnDismissListener
+        , public IDialogInterfaceOnCancelListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CSearchManager* host);
+        /**
+         * @deprecated This method is an obsolete internal implementation detail. Do not use.
+         */
+        //@Deprecated
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* dialog);
+
+        /**
+         * @deprecated This method is an obsolete internal implementation detail. Do not use.
+         */
+        //@Deprecated
+        CARAPI OnDismiss(
+            /* [in] */ IDialogInterface* dialog);
+    private:
+        CSearchManager* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

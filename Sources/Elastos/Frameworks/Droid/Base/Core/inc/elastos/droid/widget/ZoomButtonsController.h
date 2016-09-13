@@ -30,7 +30,6 @@ namespace Widget {
 class ZoomButtonsController
     : public Object
     , public IZoomButtonsController
-    , public IViewOnTouchListener
 {
 private:
     class MyHandler : public Handler
@@ -114,6 +113,24 @@ private:
 
         CARAPI Run();
 
+    private:
+        ZoomButtonsController* mHost;
+    };
+
+    class InnerListener
+        : public Object
+        , public IViewOnTouchListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ ZoomButtonsController* host);
+
+        CARAPI OnTouch(
+            /* [in] */ IView* v,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
     private:
         ZoomButtonsController* mHost;
     };

@@ -148,10 +148,38 @@ namespace App {
 class ExpandableListActivity
     : public Activity
     , public IExpandableListActivity
-    , public IExpandableListViewOnChildClickListener
-    , public IExpandableListViewOnGroupCollapseListener
-    , public IExpandableListViewOnGroupExpandListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IExpandableListViewOnChildClickListener
+        , public IExpandableListViewOnGroupCollapseListener
+        , public IExpandableListViewOnGroupExpandListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ ExpandableListActivity* host);
+
+        CARAPI OnChildClick(
+            /* [in] */ IExpandableListView* parent,
+            /* [in] */ IView* v,
+            /* [in] */ Int32 groupPosition,
+            /* [in] */ Int32 childPosition,
+            /* [in] */ Int64 id,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnGroupCollapse(
+            /* [in] */ Int32 groupPosition);
+
+        CARAPI OnGroupExpand(
+            /* [in] */ Int32 groupPosition);
+
+    private:
+        ExpandableListActivity* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -179,7 +207,7 @@ public:
      * <p>
      * {@inheritDoc}
      */
-    CARAPI OnChildClick(
+    virtual CARAPI OnChildClick(
         /* [in] */ IExpandableListView* parent,
         /* [in] */ IView* v,
         /* [in] */ Int32 groupPosition,
@@ -190,13 +218,13 @@ public:
     /**
      * Override this for receiving callbacks when a group has been collapsed.
      */
-    CARAPI OnGroupCollapse(
+    virtual CARAPI OnGroupCollapse(
         /* [in] */ Int32 groupPosition);
 
     /**
      * Override this for receiving callbacks when a group has been expanded.
      */
-    CARAPI OnGroupExpand(
+    virtual CARAPI OnGroupExpand(
         /* [in] */ Int32 groupPosition);
 
     /**
@@ -293,6 +321,7 @@ public:
     AutoPtr<IExpandableListAdapter> mAdapter;
     AutoPtr<IExpandableListView> mList;
     Boolean mFinishedStart;
+    AutoPtr<InnerListener> mListener;
 };
 
 

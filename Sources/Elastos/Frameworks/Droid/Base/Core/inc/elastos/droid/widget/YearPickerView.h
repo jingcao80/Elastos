@@ -14,10 +14,31 @@ namespace Widget{
 class YearPickerView
     : public ListView
     , public IYearPickerView
-    , public IAdapterViewOnItemClickListener
-    , public IOnDateChangedListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+        , public IOnDateChangedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ YearPickerView* host);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        CARAPI OnDateChanged();
+
+    private:
+        YearPickerView* mHost;
+    };
+
     class YearAdapter
         : public ArrayAdapter
     {
@@ -132,6 +153,7 @@ private:
     Int32 mChildSize;
     Int32 mSelectedPosition;
     Int32 mYearSelectedCircleColor;
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Widget

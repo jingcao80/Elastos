@@ -28,10 +28,30 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
+
+CAR_INTERFACE_IMPL_2(CSearchManager::InnerListener, Object, \
+    IDialogInterfaceOnDismissListener, IDialogInterfaceOnCancelListener)
+
+CSearchManager::InnerListener::InnerListener(
+    /* [in] */ CSearchManager* host)
+    : mHost(host)
+{}
+
+ECode CSearchManager::InnerListener::OnCancel(
+    /* [in] */ IDialogInterface* dialog)
+{
+    return mHost->OnCancel(dialog);
+}
+
+ECode CSearchManager::InnerListener::OnDismiss(
+    /* [in] */ IDialogInterface* dialog)
+{
+    return mHost->OnDismiss(dialog);
+}
+
 AutoPtr<IISearchManager> CSearchManager::mService;
 
-CAR_INTERFACE_IMPL_3(CSearchManager, Object, ISearchManager, \
-    IDialogInterfaceOnDismissListener, IDialogInterfaceOnCancelListener)
+CAR_INTERFACE_IMPL(CSearchManager, Object, ISearchManager)
 
 CAR_OBJECT_IMPL(CSearchManager)
 
@@ -371,10 +391,11 @@ ECode CSearchManager::LaunchAssistAction(
 void CSearchManager::EnsureSearchDialog()
 {
     if (mSearchDialog == NULL) {
+        AutoPtr<InnerListener> listener = new InnerListener(this);
         CSearchDialog::New(mContext, this, (ISearchDialog**)&mSearchDialog);
         IDialog* dialog = IDialog::Probe(mSearchDialog);
-        dialog->SetOnCancelListener(this);
-        dialog->SetOnDismissListener(this);
+        dialog->SetOnCancelListener(listener);
+        dialog->SetOnDismissListener(listener);
     }
 }
 

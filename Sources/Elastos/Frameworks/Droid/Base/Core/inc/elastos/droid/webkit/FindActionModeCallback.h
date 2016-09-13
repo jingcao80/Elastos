@@ -35,9 +35,30 @@ class ECO_PUBLIC FindActionModeCallback
     : public Object
     , public IActionModeCallback
     , public ITextWatcher
-    , public IViewOnClickListener
-    , public IWebViewFindListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public IWebViewFindListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ FindActionModeCallback* host);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+        CARAPI OnFindResultReceived(
+            /* [in] */ Int32 activeMatchOrdinal,
+            /* [in] */ Int32 numberOfMatches,
+            /* [in] */ Boolean isDoneCounting);
+
+    private:
+        FindActionModeCallback* mHost;
+    };
 public:
     class NoAction
         : public Object
@@ -69,10 +90,12 @@ public:
     };
 
 public:
-    FindActionModeCallback(
-        /* [in] */ IContext* context);
-
     CAR_INTERFACE_DECL()
+
+    FindActionModeCallback();
+
+    CARAPI constructor(
+        /* [in] */ IContext* context);
 
     virtual CARAPI_(void) Finish();
 
@@ -90,7 +113,7 @@ public:
     virtual CARAPI SetWebView(
         /* [in] */ CWebView* webView);
 
-    CARAPI OnFindResultReceived(
+    virtual CARAPI OnFindResultReceived(
         /* [in] */ Int32 activeMatchOrdinal,
         /* [in] */ Int32 numberOfMatches,
         /* [in] */ Boolean isDoneCounting);
@@ -109,7 +132,7 @@ public:
 
     // OnClickListener implementation
 
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* v);
 
     // ActionMode.Callback implementation

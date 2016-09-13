@@ -15,7 +15,6 @@ module
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.View.IOnWindowDismissedCallback
      * interface Elastos.Droid.App.IDialog
-     * interface Elastos.Droid.View.IViewOnClickListener
      */
     [local]
     interface IRecentApplicationsDialog {

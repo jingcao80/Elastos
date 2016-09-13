@@ -282,7 +282,6 @@ module
             [in] Int32 defStyleRes);
 
         interface ITabWidget;
-        interface IViewOnFocusChangeListener;
         interface ILinearLayout;
         interface IViewGroup;
         interface IView;
@@ -1146,7 +1145,6 @@ module
 
         interface IDatePickerCalendarDelegate;
         interface IDatePickerDelegate;
-        interface IViewOnClickListener;
         interface IDatePickerController;
     }
 
@@ -1910,7 +1908,6 @@ module
             [in] IView* ownerView);
 
         interface IZoomButtonsController;
-        interface IViewOnTouchListener;
     }
 
     [local]
@@ -3219,7 +3216,6 @@ module
         interface ITimePickerSpinnerDelegate;
         interface ITimePickerAbstractTimePickerDelegate;
         interface ITimePickerDelegate;
-        interface IOnValueSelectedListener;
     }
 
     class CTimePickerSpinnerDelegateSavedState {

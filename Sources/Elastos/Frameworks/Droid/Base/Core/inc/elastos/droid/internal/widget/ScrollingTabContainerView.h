@@ -41,14 +41,30 @@ namespace Widget {
 class ScrollingTabContainerView
     : public HorizontalScrollView
     , public IScrollingTabContainerView
-    , public IAdapterViewOnItemClickListener
 {
 public:
     class TabView
         : public LinearLayout
         , public ITabView
-        , public IViewOnLongClickListener
     {
+    private:
+        class LongClickListener
+            : public Object
+            , public IViewOnLongClickListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            LongClickListener(
+                /* [in] */ TabView* host);
+
+            CARAPI OnLongClick(
+                /* [in] */ IView* v,
+                /* [out] */ Boolean* rst);
+
+        private:
+            TabView* mHost;
+        };
     public:
         CAR_INTERFACE_DECL()
 
@@ -136,18 +152,25 @@ private:
         ScrollingTabContainerView* mHost;
     };
 
-    class TabClickListener
+    class InnerListener
         : public Object
         , public IViewOnClickListener
+        , public IAdapterViewOnItemClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        TabClickListener(
+        InnerListener(
             /* [in] */ ScrollingTabContainerView* host);
 
         CARAPI OnClick(
             /* [in] */ IView* view);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
     private:
         ScrollingTabContainerView* mHost;
     };
@@ -272,7 +295,7 @@ private:
     static const Int32 FADE_DURATION;
 
     AutoPtr<IRunnable> mTabSelector;
-    AutoPtr<TabClickListener> mTabClickListener;
+    AutoPtr<InnerListener> mInnerListener;
 
     AutoPtr<ILinearLayout> mTabLayout;
     AutoPtr<ISpinner> mTabSpinner;

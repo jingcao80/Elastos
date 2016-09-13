@@ -22,12 +22,12 @@ namespace Preference {
 class PreferenceScreen
     : public PreferenceGroup
     , public IPreferenceScreen
-    , public IDialogInterfaceOnDismissListener
 {
 private:
     class InnerListener
         : public Object
         , public IAdapterViewOnItemClickListener
+        , public IDialogInterfaceOnDismissListener
     {
     public:
         CAR_INTERFACE_DECL()
@@ -43,6 +43,8 @@ private:
             /* [in] */ Int32 position,
             /* [in] */ Int64 id);
 
+        CARAPI OnDismiss(
+            /* [in] */ IDialogInterface* dialog);
     private:
         PreferenceScreen* mHost;
     };

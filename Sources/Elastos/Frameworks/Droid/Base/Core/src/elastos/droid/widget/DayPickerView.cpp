@@ -31,6 +31,41 @@ namespace Droid {
 namespace Widget {
 
 //=====================================================================
+//                  DayPickerView::InnerListener
+//=====================================================================
+CAR_INTERFACE_IMPL_2(DayPickerView::InnerListener, Object, \
+    IAbsListViewOnScrollListener, IOnDateChangedListener)
+
+DayPickerView::InnerListener::InnerListener(
+    /* [in] */ DayPickerView* host)
+    : mHost(host)
+{
+}
+
+ECode DayPickerView::InnerListener::OnScroll(
+    /* [in] */ IAbsListView* view,
+    /* [in] */ Int32 firstVisibleItem,
+    /* [in] */ Int32 visibleItemCount,
+    /* [in] */ Int32 totalItemCount)
+{
+    return mHost->OnScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+}
+
+// @Override
+ECode DayPickerView::InnerListener::OnScrollStateChanged(
+    /* [in] */ IAbsListView* view,
+    /* [in] */ Int32 scrollState)
+{
+    return mHost->OnScrollStateChanged(view, scrollState);
+}
+
+// @Override
+ECode DayPickerView::InnerListener::OnDateChanged()
+{
+    return mHost->OnDateChanged();
+}
+
+//=====================================================================
 //                  DayPickerView::ScrollStateRunnable
 //=====================================================================
 DayPickerView::ScrollStateRunnable::ScrollStateRunnable(
@@ -139,7 +174,7 @@ const Int32 DayPickerView::GOTO_SCROLL_DURATION;
 const Int32 DayPickerView::SCROLL_CHANGE_DELAY;
 const Int32 DayPickerView::LIST_TOP_OFFSET;
 
-CAR_INTERFACE_IMPL_3(DayPickerView, ListView, IDayPickerView, IAbsListViewOnScrollListener, IOnDateChangedListener)
+CAR_INTERFACE_IMPL(DayPickerView, ListView, IDayPickerView)
 
 DayPickerView::DayPickerView()
     : mFriction(1.0f)
@@ -148,6 +183,14 @@ DayPickerView::DayPickerView()
     , mCurrentScrollState(IAbsListViewOnScrollListener::SCROLL_STATE_IDLE)
     , mPerformingScroll(FALSE)
 {
+}
+
+ECode DayPickerView::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IDatePickerController* controller)
+{
+    ListView::constructor(context);
+
     AutoPtr<ILocaleHelper> helper;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
     AutoPtr<ILocale> locale;
@@ -159,15 +202,11 @@ DayPickerView::DayPickerView()
     calHelper->GetInstance((ICalendar**)&mSelectedDay);
     calHelper->GetInstance((ICalendar**)&mTempDay);
 
-    mScrollStateChangedRunnable = new ScrollStateRunnable(this, (IView*)this);
-}
+    mScrollStateChangedRunnable = new ScrollStateRunnable(this, this);
+    mListener = new InnerListener(this);
 
-ECode DayPickerView::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IDatePickerController* controller)
-{
-    ListView::constructor(context);
     Init();
+
     SetController(controller);
     return NOERROR;
 }
@@ -176,10 +215,10 @@ ECode DayPickerView::SetController(
     /* [in] */ IDatePickerController* controller)
 {
     if (mController != NULL) {
-        mController->UnregisterOnDateChangedListener(this);
+        mController->UnregisterOnDateChangedListener(mListener);
     }
     mController = controller;
-    mController->RegisterOnDateChangedListener(this);
+    mController->RegisterOnDateChangedListener(mListener);
     SetUpAdapter();
     SetAdapter(IAdapter::Probe(mAdapter));
     OnDateChanged();
@@ -481,7 +520,7 @@ void DayPickerView::SetUpListView()
     // The thumb gets in the way, so disable it
     SetFastScrollEnabled(FALSE);
     SetVerticalScrollBarEnabled(FALSE);
-    SetOnScrollListener(this);
+    SetOnScrollListener(mListener);
     SetFadingEdgeLength(0);
     // Make the scrolling behavior nicer
     AutoPtr<IViewConfigurationHelper> helper;

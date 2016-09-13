@@ -78,7 +78,22 @@ ECode ScrollingTabContainerView::AnimateToTabRunnable::Run()
 }
 
 
-CAR_INTERFACE_IMPL_2(ScrollingTabContainerView::TabView, LinearLayout, ITabView, IViewOnLongClickListener);
+CAR_INTERFACE_IMPL(ScrollingTabContainerView::TabView::LongClickListener, Object, IViewOnLongClickListener);
+
+ScrollingTabContainerView::TabView::LongClickListener::LongClickListener(
+    /* [in] */ ScrollingTabContainerView::TabView* host)
+    : mHost(host)
+{}
+
+ECode ScrollingTabContainerView::TabView::LongClickListener::OnLongClick(
+    /* [in] */ IView* v,
+    /* [out] */ Boolean* rst)
+{
+    return mHost->OnLongClick(v, rst);
+}
+
+CAR_INTERFACE_IMPL(ScrollingTabContainerView::TabView, LinearLayout, ITabView);
+
 ECode ScrollingTabContainerView::TabView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IActionBarTab* tab,
@@ -237,7 +252,8 @@ ECode ScrollingTabContainerView::TabView::Update()
         }
 
         if (!hasText && !TextUtils::IsEmpty(cs)) {
-            SetOnLongClickListener(this);
+            AutoPtr<LongClickListener> listener = new LongClickListener(this);
+            SetOnLongClickListener(listener);
         }
         else {
             SetOnLongClickListener(NULL);
@@ -347,14 +363,16 @@ ECode ScrollingTabContainerView::TabAdapter::GetView(
 }
 
 
-CAR_INTERFACE_IMPL(ScrollingTabContainerView::TabClickListener, Object, IViewOnClickListener)
-ScrollingTabContainerView::TabClickListener::TabClickListener(
+CAR_INTERFACE_IMPL_2(ScrollingTabContainerView::InnerListener, Object, \
+    IViewOnClickListener, IAdapterViewOnItemClickListener)
+
+ScrollingTabContainerView::InnerListener::InnerListener(
     /* [in] */ ScrollingTabContainerView* host)
     : mHost(host)
 {
 }
 
-ECode ScrollingTabContainerView::TabClickListener::OnClick(
+ECode ScrollingTabContainerView::InnerListener::OnClick(
     /* [in] */ IView* view)
 {
     AutoPtr<ITabView> tabView = ITabView::Probe(view);
@@ -372,8 +390,17 @@ ECode ScrollingTabContainerView::TabClickListener::OnClick(
     return NOERROR;
 }
 
+ECode ScrollingTabContainerView::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
 
 CAR_INTERFACE_IMPL(ScrollingTabContainerView::VisibilityAnimListener, Object, IAnimatorListener)
+
 ScrollingTabContainerView::VisibilityAnimListener::VisibilityAnimListener(
     /* [in] */ ScrollingTabContainerView* host)
     : mHost(host)
@@ -432,7 +459,8 @@ const String ScrollingTabContainerView::TAG("ScrollingTabContainerView");
 AutoPtr<ITimeInterpolator> ScrollingTabContainerView::sAlphaInterpolator = InitIpt();
 const Int32 ScrollingTabContainerView::FADE_DURATION = 200;
 
-CAR_INTERFACE_IMPL_2(ScrollingTabContainerView, HorizontalScrollView, IScrollingTabContainerView, IAdapterViewOnItemClickListener);
+CAR_INTERFACE_IMPL(ScrollingTabContainerView, HorizontalScrollView, IScrollingTabContainerView)
+
 ScrollingTabContainerView::ScrollingTabContainerView()
     : mAllowCollapse(FALSE)
     , mMaxTabWidth(0)
@@ -640,7 +668,10 @@ AutoPtr<ISpinner> ScrollingTabContainerView::CreateSpinner()
         IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::MATCH_PARENT, (ILinearLayoutLayoutParams**)&lp);
 
     IView::Probe(spinner)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
-    IAdapterView::Probe(spinner)->SetOnItemClickListener(this);
+    if (mInnerListener == NULL) {
+        mInnerListener = new InnerListener(this);
+    }
+    IAdapterView::Probe(spinner)->SetOnItemClickListener(mInnerListener);
     return spinner;
 }
 
@@ -750,10 +781,10 @@ AutoPtr<ITabView> ScrollingTabContainerView::CreateTabView(
     else {
         IView::Probe(tabView)->SetFocusable(TRUE);
 
-        if (mTabClickListener == NULL) {
-            mTabClickListener = new TabClickListener(this);
+        if (mInnerListener == NULL) {
+            mInnerListener = new InnerListener(this);
         }
-        IView::Probe(tabView)->SetOnClickListener(mTabClickListener);
+        IView::Probe(tabView)->SetOnClickListener(mInnerListener);
     }
     return tabView;
 }

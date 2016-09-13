@@ -54,6 +54,26 @@ namespace Widget {
 using Elastos::Droid::Text::Format::IDateFormat;
 
 //=====================================================================
+//      TimePickerSpinnerDelegate::InnerListener
+//=====================================================================
+CAR_INTERFACE_IMPL(TimePickerSpinnerDelegate::InnerListener, Object, IOnValueSelectedListener)
+
+TimePickerSpinnerDelegate::InnerListener::InnerListener(
+    /* [in] */ TimePickerSpinnerDelegate* owner)
+    : mOwner(owner)
+{
+}
+
+ECode TimePickerSpinnerDelegate::InnerListener::OnValueSelected(
+    /* [in] */ Int32 pickerIndex,
+    /* [in] */ Int32 newValue,
+    /* [in] */ Boolean autoAdvance)
+{
+    return mOwner->OnValueSelected(pickerIndex, newValue, autoAdvance);
+}
+
+
+//=====================================================================
 //                TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState
 //=====================================================================
 CAR_INTERFACE_IMPL(TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState, Elastos::Droid::View::View::BaseSavedState, ITimePickerSpinnerDelegateSavedState)
@@ -862,7 +882,8 @@ void TimePickerSpinnerDelegate::SetupListeners()
     mHeaderView->SetOnFocusChangeListener(mFocusListener);
     mHeaderView->SetFocusable(TRUE);
 
-    mRadialTimePickerView->SetOnValueSelectedListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mRadialTimePickerView->SetOnValueSelectedListener(listener);
 
     AutoPtr<IViewOnClickListener> hourOnClickListener = new InnerViewHourOnClickListener(this);
     IView::Probe(mHourView)->SetOnClickListener(hourOnClickListener);

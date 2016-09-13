@@ -752,8 +752,6 @@ module
             [in] IHandler* handler);
 
         interface ISearchManager;
-        interface IDialogInterfaceOnDismissListener;
-        interface IDialogInterfaceOnCancelListener;
     }
 
     [local, parcelable]
@@ -1699,8 +1697,6 @@ module
             [in] Boolean is24HourView);
 
         interface ITimePickerDialog;
-        interface IDialogInterfaceOnClickListener;
-        interface ITimePickerOnTimeChangedListener;
         interface IAlertDialog;
         interface IDialog;
         interface IDialogInterface;

@@ -33,8 +33,6 @@ module
     /**
      * @Invovle
      * interface IAlertDialog
-     * interface IDialogInterfaceOnClickListener
-     * interface ITimePickerOnTimeChangedListener
      */
     interface ITimePickerDialog {
 

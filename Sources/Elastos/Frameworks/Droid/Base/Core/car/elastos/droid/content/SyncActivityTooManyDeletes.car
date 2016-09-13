@@ -18,7 +18,6 @@ module
      * interface IComponentCallbacks
      * interface IComponentCallbacks2
      * interface IOnWindowDismissedCallback
-     * interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener
      */
     interface ISyncActivityTooManyDeletes {
     }

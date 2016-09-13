@@ -36,11 +36,6 @@ module
      * <a href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
      * </div>
      */
-    /**
-     * @Invovle
-     * interface IDialogInterfaceOnDismissListener
-     * interface IDialogInterfaceOnCancelListener
-     */
     [local]
     interface ISearchManager {
         /**

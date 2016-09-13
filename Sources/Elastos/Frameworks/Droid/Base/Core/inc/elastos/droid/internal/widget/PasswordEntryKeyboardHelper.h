@@ -24,8 +24,43 @@ namespace Widget {
 class PasswordEntryKeyboardHelper
     : public Object
     , public IPasswordEntryKeyboardHelper
-    , public IOnKeyboardActionListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IOnKeyboardActionListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ PasswordEntryKeyboardHelper* host);
+
+        CARAPI OnKey(
+            /* [in] */ Int32 primaryCode,
+            /* [in] */ ArrayOf<Int32>* keyCodes);
+
+        CARAPI OnPress(
+            /* [in] */ Int32 primaryCode);
+
+        CARAPI OnRelease(
+            /* [in] */ Int32 primaryCode);
+
+        CARAPI OnText(
+            /* [in] */ ICharSequence* text);
+
+        CARAPI SwipeDown();
+
+        CARAPI SwipeLeft();
+
+        CARAPI SwipeRight();
+
+        CARAPI SwipeUp();
+
+    private:
+        PasswordEntryKeyboardHelper* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

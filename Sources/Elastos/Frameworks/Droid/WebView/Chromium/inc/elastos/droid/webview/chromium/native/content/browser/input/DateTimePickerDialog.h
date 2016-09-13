@@ -34,10 +34,42 @@ namespace Input {
 
 class DateTimePickerDialog
     : public AlertDialog
-    , public IDialogInterfaceOnClickListener
-    , public IDatePickerOnDateChangedListener
-    , public ITimePickerOnTimeChangedListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+        , public IDatePickerOnDateChangedListener
+        , public ITimePickerOnTimeChangedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ DateTimePickerDialog* host);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+        //@Override
+        CARAPI OnDateChanged(
+            /* [in] */ IDatePicker* view,
+            /* [in] */ Int32 year,
+            /* [in] */ Int32 month,
+            /* [in] */ Int32 day);
+
+        //@Override
+        CARAPI OnTimeChanged(
+            /* [in] */ ITimePicker* view,
+            /* [in] */ Int32 hourOfDay,
+            /* [in] */ Int32 minute);
+
+    private:
+        DateTimePickerDialog* mHost;
+    };
+
 public:
     /**
      * The callback used to indicate the user is done filling in the date.
@@ -66,7 +98,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    DateTimePickerDialog();
 
     /**
      * @param context The context the dialog is to run in.
@@ -75,7 +107,7 @@ public:
      * @param monthOfYear The initial month of the dialog.
      * @param dayOfMonth The initial day of the dialog.
      */
-    DateTimePickerDialog(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ OnDateTimeSetListener* callBack,
         /* [in] */ Int32 year,
@@ -127,8 +159,9 @@ private:
     /*const*/ AutoPtr<ITimePicker> mTimePicker;
     /*const*/ AutoPtr<OnDateTimeSetListener> mCallBack;
 
-    const Int64 mMinTimeMillis;
-    const Int64 mMaxTimeMillis;
+    Int64 mMinTimeMillis;
+    Int64 mMaxTimeMillis;
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Input

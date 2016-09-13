@@ -25,7 +25,6 @@ module
      * interface IActivity
      * interface IDialogInterface
      * interface IAlertActivity
-     * interface IDialogInterfaceOnClickListener
      */
     [local]
     interface INetInitiatedActivity {

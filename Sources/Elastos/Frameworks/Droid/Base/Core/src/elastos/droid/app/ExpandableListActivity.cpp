@@ -20,9 +20,41 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-CAR_INTERFACE_IMPL_4(ExpandableListActivity, Activity, \
-    IExpandableListActivity, IExpandableListViewOnChildClickListener, \
-    IExpandableListViewOnGroupCollapseListener, IExpandableListViewOnGroupExpandListener)
+
+CAR_INTERFACE_IMPL_3(ExpandableListActivity::InnerListener, Object, \
+    IExpandableListViewOnChildClickListener, \
+    IExpandableListViewOnGroupCollapseListener, \
+    IExpandableListViewOnGroupExpandListener)
+
+ExpandableListActivity::InnerListener::InnerListener(
+    /* [in] */ ExpandableListActivity* host)
+    : mHost(host)
+{}
+
+ECode ExpandableListActivity::InnerListener::OnChildClick(
+    /* [in] */ IExpandableListView* parent,
+    /* [in] */ IView* v,
+    /* [in] */ Int32 groupPosition,
+    /* [in] */ Int32 childPosition,
+    /* [in] */ Int64 id,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnChildClick(parent, v, groupPosition, childPosition, id, result);
+}
+
+ECode ExpandableListActivity::InnerListener::OnGroupCollapse(
+    /* [in] */ Int32 groupPosition)
+{
+    return mHost->OnGroupCollapse(groupPosition);
+}
+
+ECode ExpandableListActivity::InnerListener::OnGroupExpand(
+    /* [in] */ Int32 groupPosition)
+{
+    return mHost->OnGroupExpand(groupPosition);
+}
+
+CAR_INTERFACE_IMPL(ExpandableListActivity, Activity, IExpandableListActivity)
 
 ExpandableListActivity::ExpandableListActivity()
     : mFinishedStart(FALSE)
@@ -36,7 +68,7 @@ ECode ExpandableListActivity::OnCreateContextMenu(
     /* [in] */ IView* v,
     /* [in] */ IContextMenuInfo* menuInfo)
 {
-    return NOERROR;
+    return Activity::OnCreateContextMenu(menu, v, menuInfo);
 }
 
 ECode ExpandableListActivity::OnChildClick(
@@ -86,9 +118,13 @@ ECode ExpandableListActivity::OnContentChanged()
     if (emptyView != NULL) {
         IAdapterView::Probe(mList)->SetEmptyView(emptyView);
     }
-    mList->SetOnChildClickListener(this);
-    mList->SetOnGroupExpandListener(this);
-    mList->SetOnGroupCollapseListener(this);
+
+    if (mListener == NULL) {
+        mListener = new InnerListener(this);
+    }
+    mList->SetOnChildClickListener(mListener);
+    mList->SetOnGroupExpandListener(mListener);
+    mList->SetOnGroupCollapseListener(mListener);
 
     if (mFinishedStart) {
         SetListAdapter(mAdapter);

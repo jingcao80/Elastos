@@ -47,11 +47,25 @@ public:
      */
     class PastePopupMenu
         : public Object
-        , public IViewOnClickListener
     {
-    public:
-        CAR_INTERFACE_DECL()
+    private:
+        class InnerListener
+            : public Object
+            , public IViewOnClickListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
 
+            InnerListener(
+                /* [in] */ PastePopupMenu* owner);
+
+            CARAPI OnClick(
+                /* [in] */ IView* v);
+        private:
+            PastePopupMenu* mOwner;
+        };
+
+    public:
         PastePopupMenu(
             /* [in] */ InsertionHandleController* owner);
 
