@@ -278,10 +278,10 @@ Int32 CSpellCheckerSubtype::HashCodeInternal(
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(2);
     AutoPtr<ICharSequence> loc;
     CString::New(locale, (ICharSequence**)&loc);
-    (*arr)[0] = loc;
+    arr->Set(0, loc);
     AutoPtr<ICharSequence> ext;
     CString::New(extraValue, (ICharSequence**)&ext);
-    (*arr)[1] = ext;
+    arr->Set(1, ext);
     return Arrays::GetHashCode(arr);
 }
 
