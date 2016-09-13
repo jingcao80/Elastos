@@ -2,7 +2,6 @@
 module
 {
     importlib("Elastos.CoreLibrary.eco");
-    importlib("Elastos.Droid.Core.eco");
 
     merge("../../../car/org/conscrypt/IPlatform.car");
 
@@ -50,7 +49,7 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLX509CertPath.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509Certificate.car");
     merge("../../../car/org/conscrypt/IPSKKeyManager.car");
-    // merge("../../../car/org/conscrypt/ISSLClientSessionCache.car");
+    merge("../../../car/org/conscrypt/ISSLClientSessionCache.car");
     merge("../../../car/org/conscrypt/ISSLNullSession.car");
     merge("../../../car/org/conscrypt/ISSLParametersImpl.car");
     merge("../../../car/org/conscrypt/ISSLRecordProtocol.car");
