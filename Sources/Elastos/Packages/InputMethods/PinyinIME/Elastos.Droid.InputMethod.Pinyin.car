@@ -88,8 +88,6 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-        interface IViewOnTouchListener;
-        interface IAnimationAnimationListener;
         interface IArrowUpdater;
     }
 
@@ -134,7 +132,6 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-        interface IViewOnTouchListener;
     }
 
     [local]

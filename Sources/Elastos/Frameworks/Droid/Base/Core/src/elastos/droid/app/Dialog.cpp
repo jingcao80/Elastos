@@ -58,6 +58,27 @@ const String Dialog::TAG("Dialog");
 const String Dialog::DIALOG_SHOWING_TAG("android:dialogShowing");
 const String Dialog::DIALOG_HIERARCHY_TAG("android:dialogHierarchy");
 
+
+//=============================================================================
+// Dialog::ViewCreateContextMenuListener
+//=============================================================================
+
+CAR_INTERFACE_IMPL(Dialog::ViewCreateContextMenuListener, Object, IViewOnCreateContextMenuListener)
+
+Dialog::ViewCreateContextMenuListener::ViewCreateContextMenuListener(
+    /* [in] */ Dialog* host)
+    : mHost(host)
+{
+}
+
+ECode Dialog::ViewCreateContextMenuListener::OnCreateContextMenu(
+    /* [in] */ IContextMenu* menu,
+    /* [in] */ IView* v,
+    /* [in] */ IContextMenuInfo* menuInfo)
+{
+    return mHost->OnCreateContextMenu(menu, v, menuInfo);
+}
+
 //==============================================================================
 // Dialog::ListenersHandler
 //==============================================================================
@@ -195,6 +216,7 @@ ECode Dialog::constructor(
     CHandler::New((IHandler**)&mHandler);
     assert(mHandler != NULL);
 
+    mViewCreateContextMenuListener = new ViewCreateContextMenuListener(this);
     return NOERROR;
 }
 
@@ -988,7 +1010,7 @@ ECode Dialog::OnCreateContextMenu(
 ECode Dialog::RegisterForContextMenu(
     /* [in] */ IView* view)
 {
-    return view->SetOnCreateContextMenuListener(this);
+    return view->SetOnCreateContextMenuListener(mViewCreateContextMenuListener);
 }
 
 ECode Dialog::UnregisterForContextMenu(

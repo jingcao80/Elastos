@@ -61,18 +61,19 @@ namespace Elastos {
 namespace Droid {
 namespace Providers {
 namespace Media {
+
 //===========================================================
-//  RingtonePickerActivity::MyDialogInterfaceOnClickListener
+//  RingtonePickerActivity::RingtoneClickListener
 //===========================================================
-CAR_INTERFACE_IMPL(RingtonePickerActivity::MyDialogInterfaceOnClickListener, Object, \
+CAR_INTERFACE_IMPL(RingtonePickerActivity::RingtoneClickListener, Object, \
     IDialogInterfaceOnClickListener)
 
-RingtonePickerActivity::MyDialogInterfaceOnClickListener::MyDialogInterfaceOnClickListener(
+RingtonePickerActivity::RingtoneClickListener::RingtoneClickListener(
     /* [in] */ RingtonePickerActivity* owner)
     : mOwner(owner)
 {}
 
-ECode RingtonePickerActivity::MyDialogInterfaceOnClickListener::OnClick(
+ECode RingtonePickerActivity::RingtoneClickListener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
@@ -82,6 +83,47 @@ ECode RingtonePickerActivity::MyDialogInterfaceOnClickListener::OnClick(
     // Play clip
     mOwner->PlayRingtone(which, 0);
     return NOERROR;
+}
+
+//===========================================================
+//  RingtonePickerActivity::InnerListener
+//===========================================================
+CAR_INTERFACE_IMPL_3(RingtonePickerActivity::InnerListener, Object, \
+    IDialogInterfaceOnClickListener,
+    IAdapterViewOnItemSelectedListener,
+    IAlertControllerAlertParamsOnPrepareListViewListener)
+
+RingtonePickerActivity::InnerListener::InnerListener(
+    /* [in] */ RingtonePickerActivity* owner)
+    : mOwner(owner)
+{}
+
+ECode RingtonePickerActivity::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mOwner->OnClick(dialog, which);
+}
+
+ECode RingtonePickerActivity::InnerListener::OnPrepareListView(
+    /* [in] */ IListView* listView)
+{
+    return mOwner->OnPrepareListView(listView);
+}
+
+ECode RingtonePickerActivity::InnerListener::OnItemSelected(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mOwner->OnItemSelected(parent, view, position, id);
+}
+
+ECode RingtonePickerActivity::InnerListener::OnNothingSelected(
+    /* [in] */ IAdapterView* parent)
+{
+    return mOwner->OnNothingSelected(parent);
 }
 
 //===========================================================
@@ -97,6 +139,19 @@ ECode RingtonePickerActivity::MyRunnable::Run()
     return mOwner->mCursor->Deactivate();
 }
 
+//===========================================================
+//  RingtonePickerActivity::InnerRunnable
+//===========================================================
+RingtonePickerActivity::InnerRunnable::InnerRunnable(
+    /* [in] */ RingtonePickerActivity* owner)
+    : mOwner(owner)
+{}
+
+ECode RingtonePickerActivity::InnerRunnable::Run()
+{
+    return mOwner->Run();
+}
+
 const Int32 RingtonePickerActivity::POS_UNKNOWN = -1;
 const String RingtonePickerActivity::TAG("RingtonePickerActivity");
 const Int32 RingtonePickerActivity::DELAY_MS_SELECTION_PLAYED = 300;
@@ -104,10 +159,7 @@ const String RingtonePickerActivity::SAVE_CLICKED_POS("clicked_pos");
 
 AutoPtr<IRingtone> RingtonePickerActivity::sPlayingRingtone;
 
-CAR_INTERFACE_IMPL_5(RingtonePickerActivity, \
-    AlertActivity, IAdapterViewOnItemSelectedListener, IRunnable, \
-    IDialogInterfaceOnClickListener, IAlertControllerAlertParamsOnPrepareListViewListener, \
-    IRingtonePickerActivity);
+CAR_INTERFACE_IMPL_2(RingtonePickerActivity, AlertActivity, IRunnable, IRingtonePickerActivity);
 
 RingtonePickerActivity::RingtonePickerActivity()
     : mType(0)
@@ -127,7 +179,6 @@ RingtonePickerActivity::~RingtonePickerActivity()
 
 ECode RingtonePickerActivity::constructor()
 {
-    mRingtoneClickListener = new MyDialogInterfaceOnClickListener(this);
     return Activity::constructor();
 }
 
@@ -137,6 +188,9 @@ ECode RingtonePickerActivity::OnCreate(
     Logger::I(TAG, " >> OnCreate");
     Activity::OnCreate(savedInstanceState);
 
+    mInnerRunnable = new InnerRunnable(this);
+    mInnerListener = new InnerListener(this);
+    mRingtoneClickListener = new RingtoneClickListener(this);
     CHandler::New((IHandler**)&mHandler);
 
     AutoPtr<IIntent> intent;
@@ -191,15 +245,15 @@ ECode RingtonePickerActivity::OnCreate(
     p->SetOnClickListener(mRingtoneClickListener);
     p->SetLabelColumn(IMediaStoreMediaColumns::TITLE);
     p->SetIsSingleChoice(TRUE);
-    p->SetOnItemSelectedListener(this);
+    p->SetOnItemSelectedListener(mInnerListener);
     String tmp;
     GetString(Elastos::Droid::R::string::ok, &tmp);
     p->SetPositiveButtonText(CoreUtils::Convert(tmp));
-    p->SetPositiveButtonListener(this);
+    p->SetPositiveButtonListener(mInnerListener);
     GetString(Elastos::Droid::R::string::cancel, &tmp);
     p->SetNegativeButtonText(CoreUtils::Convert(tmp));
-    p->SetPositiveButtonListener(this);
-    p->SetOnPrepareListViewListener(this);
+    p->SetPositiveButtonListener(mInnerListener);
+    p->SetOnPrepareListViewListener(mInnerListener);
     AutoPtr<ICharSequence> cs;
     intent->GetCharSequenceExtra(IRingtoneManager::EXTRA_RINGTONE_TITLE, (ICharSequence**)&cs);
     p->SetTitle(cs);
@@ -351,10 +405,10 @@ void RingtonePickerActivity::PlayRingtone(
     /* [in] */ Int32 position,
     /* [in] */ Int32 delayMs)
 {
-    mHandler->RemoveCallbacks(this);
+    mHandler->RemoveCallbacks(mInnerRunnable);
     mSampleRingtonePos = position;
     Boolean flag = FALSE;
-    mHandler->PostDelayed(this, delayMs, &flag);
+    mHandler->PostDelayed(mInnerRunnable, delayMs, &flag);
 }
 
 ECode RingtonePickerActivity::Run()

@@ -91,7 +91,7 @@ DashboardSummary::~DashboardSummary()
 
 ECode DashboardSummary::constructor()
 {
-    return NOERROR;
+    return Fragment::constructor();
 }
 
 ECode DashboardSummary::OnResume()

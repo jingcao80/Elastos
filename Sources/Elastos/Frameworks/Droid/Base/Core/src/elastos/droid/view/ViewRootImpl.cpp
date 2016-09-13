@@ -521,7 +521,7 @@ ECode ViewRootImpl::WindowInputEventReceiver::OnInputEvent(
         AutoPtr<IInterface> obj;
         mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj) {
-            AutoPtr<IViewRootImpl> viewRoot = IViewRootImpl::Probe(obj);
+            IViewRootImpl* viewRoot = IViewRootImpl::Probe(obj);
             viewRoot->EnqueueInputEvent(event, this, 0, TRUE);
         }
     }
@@ -1722,16 +1722,18 @@ ECode ViewRootImpl::SetView(
         attrs->GetTitle((ICharSequence**)&counterSuffix);
         String titleStr;
         counterSuffix->ToString(&titleStr);
-        mSyntheticInputStage = new SyntheticInputStage(this);
-        AutoPtr<InputStage> viewPostImeStage = new ViewPostImeInputStage(this, mSyntheticInputStage);
+        AutoPtr<IWeakReference> wr;
+        GetWeakReference((IWeakReference**)&wr);
+        mSyntheticInputStage = new SyntheticInputStage(wr);
+        AutoPtr<InputStage> viewPostImeStage = new ViewPostImeInputStage(wr, mSyntheticInputStage);
 
-        AutoPtr<InputStage> nativePostImeStage = new NativePostImeInputStage(this, viewPostImeStage,
+        AutoPtr<InputStage> nativePostImeStage = new NativePostImeInputStage(wr, viewPostImeStage,
                 String("aq:native-post-ime:") + titleStr);
-        AutoPtr<InputStage> earlyPostImeStage = new EarlyPostImeInputStage(this, nativePostImeStage);
-        AutoPtr<InputStage> imeStage = new ImeInputStage(this, earlyPostImeStage,
+        AutoPtr<InputStage> earlyPostImeStage = new EarlyPostImeInputStage(wr, nativePostImeStage);
+        AutoPtr<InputStage> imeStage = new ImeInputStage(wr, earlyPostImeStage,
                 String("aq:ime:") + titleStr);
-        AutoPtr<InputStage> viewPreImeStage = new ViewPreImeInputStage(this, imeStage);
-        AutoPtr<InputStage> nativePreImeStage = new NativePreImeInputStage(this, viewPreImeStage,
+        AutoPtr<InputStage> viewPreImeStage = new ViewPreImeInputStage(wr, imeStage);
+        AutoPtr<InputStage> nativePreImeStage = new NativePreImeInputStage(wr, viewPreImeStage,
                 String("aq:native-pre-ime:") + titleStr);
 
         mFirstInputStage = nativePreImeStage;
@@ -6592,11 +6594,22 @@ ECode ViewRootImpl::ProfileFrameCallback::DoFrame(
 ////////////////////////////////////////////////////////////
 
 ViewRootImpl::InputStage::InputStage(
-    /* [in] */ ViewRootImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ InputStage* next)
-    : mHost(host)
+    : mWeakHost(host)
     , mNext(next)
 {}
+
+AutoPtr<ViewRootImpl> ViewRootImpl::InputStage::GetHost()
+{
+    AutoPtr<IViewRootImpl> obj;
+    mWeakHost->Resolve(EIID_IViewRootImpl, (IInterface**)&obj);
+    if (obj != NULL) {
+        ViewRootImpl* host = (ViewRootImpl*)obj.Get();
+        return host;
+    }
+    return NULL;
+}
 
 ECode ViewRootImpl::InputStage::Deliver(
     /* [in] */ QueuedInputEvent* q)
@@ -6662,8 +6675,12 @@ ECode ViewRootImpl::InputStage::OnDeliverToNext(
 {
     if (mNext != NULL) {
         mNext->Deliver(q);
-    } else {
-        mHost->FinishInputEvent(q);
+    }
+    else {
+        AutoPtr<ViewRootImpl> host = GetHost();
+        if (host != NULL) {
+            host->FinishInputEvent(q);
+        }
     }
     return NOERROR;
 }
@@ -6671,9 +6688,11 @@ ECode ViewRootImpl::InputStage::OnDeliverToNext(
 Boolean ViewRootImpl::InputStage::ShouldDropInputEvent(
     /* [in] */ QueuedInputEvent* q)
 {
-    if (mHost->mView == NULL || !mHost->mAdded) {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host == NULL || host->mView == NULL || !host->mAdded) {
         return TRUE;
-    } else if (!mHost->mAttachInfo->mHasWindowFocus) {
+    }
+    else if (!host->mAttachInfo->mHasWindowFocus) {
         Boolean isFromSource;
         q->mEvent->IsFromSource(IInputDevice::SOURCE_CLASS_POINTER, &isFromSource);
         if (!isFromSource && !IsTerminalInputEvent(q->mEvent)) {
@@ -6701,7 +6720,7 @@ ECode ViewRootImpl::InputStage::Dump(
 ////////////////////////////////////////////////////////////
 
 ViewRootImpl::AsyncInputStage::AsyncInputStage(
-    /* [in] */ ViewRootImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ InputStage* next,
     /* [in] */ const String& traceCounter)
     : InputStage(host, next)
@@ -6848,7 +6867,7 @@ void ViewRootImpl::AsyncInputStage::Dequeue(
 CAR_INTERFACE_IMPL(ViewRootImpl::NativePreImeInputStage, AsyncInputStage, IInputQueueFinishedInputEventCallback)
 
 ViewRootImpl::NativePreImeInputStage::NativePreImeInputStage(
-    /* [in] */ ViewRootImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ InputStage* next,
     /* [in] */ const String& traceCounter)
     : AsyncInputStage(host, next, traceCounter)
@@ -6870,8 +6889,9 @@ ECode ViewRootImpl::NativePreImeInputStage::OnFinishedInputEvent(
 Int32 ViewRootImpl::NativePreImeInputStage::OnProcess(
     /* [in] */ QueuedInputEvent* q)
 {
-    if (mHost->mInputQueue != NULL && IKeyEvent::Probe(q->mEvent)) {
-        mHost->mInputQueue->SendInputEvent(q->mEvent, TO_IINTERFACE(q), TRUE, this);
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host != NULL && host->mInputQueue != NULL && IKeyEvent::Probe(q->mEvent)) {
+        host->mInputQueue->SendInputEvent(q->mEvent, TO_IINTERFACE(q), TRUE, this);
         return DEFER;
     }
     return FORWARD;
@@ -6881,7 +6901,7 @@ Int32 ViewRootImpl::NativePreImeInputStage::OnProcess(
 //          ViewRootImpl::ViewPreImeInputStage
 ////////////////////////////////////////////////////////////
 ViewRootImpl::ViewPreImeInputStage::ViewPreImeInputStage(
-    /* [in] */ ViewRootImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ InputStage* next)
     : InputStage(host, next)
 {}
@@ -6898,10 +6918,13 @@ Int32 ViewRootImpl::ViewPreImeInputStage::OnProcess(
 Int32 ViewRootImpl::ViewPreImeInputStage::ProcessKeyEvent(
     /* [in] */ QueuedInputEvent* q)
 {
-    AutoPtr<IKeyEvent> event = IKeyEvent::Probe(q->mEvent);
-    Boolean res;
-    if (mHost->mView->DispatchKeyEventPreIme(event, &res), res) {
-        return FINISH_HANDLED;
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host != NULL) {
+        AutoPtr<IKeyEvent> event = IKeyEvent::Probe(q->mEvent);
+        Boolean res;
+        if (host->mView->DispatchKeyEventPreIme(event, &res), res) {
+            return FINISH_HANDLED;
+        }
     }
     return FORWARD;
 }
@@ -6912,7 +6935,7 @@ Int32 ViewRootImpl::ViewPreImeInputStage::ProcessKeyEvent(
 CAR_INTERFACE_IMPL(ViewRootImpl::ImeInputStage, AsyncInputStage, IInputMethodManagerFinishedInputEventCallback)
 
 ViewRootImpl::ImeInputStage::ImeInputStage(
-    /* [in] */ ViewRootImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ InputStage* next,
     /* [in] */ const String& traceCounter)
     : AsyncInputStage(host, next, traceCounter)
@@ -6934,12 +6957,13 @@ ECode ViewRootImpl::ImeInputStage::OnFinishedInputEvent(
 Int32 ViewRootImpl::ImeInputStage::OnProcess(
     /* [in] */ QueuedInputEvent* q)
 {
-    if (mHost->mLastWasImTarget && !mHost->IsInLocalFocusMode()) {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host != NULL && host->mLastWasImTarget && !host->IsInLocalFocusMode()) {
         AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
         if (imm != NULL) {
             AutoPtr<IInputEvent> event = q->mEvent;
             Int32 result = 0;
-            imm->DispatchInputEvent(event, TO_IINTERFACE(q), this, mHost->mHandler, &result);
+            imm->DispatchInputEvent(event, TO_IINTERFACE(q), this, host->mHandler, &result);
             if (result == IInputMethodManager::DISPATCH_HANDLED) {
                 return FINISH_HANDLED;
             } else if (result == IInputMethodManager::DISPATCH_NOT_HANDLED) {
@@ -6957,7 +6981,7 @@ Int32 ViewRootImpl::ImeInputStage::OnProcess(
 //          ViewRootImpl::EarlyPostImeInputStage
 ////////////////////////////////////////////////////////////
 ViewRootImpl::EarlyPostImeInputStage::EarlyPostImeInputStage(
-    /* [in] */ ViewRootImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ InputStage* next)
     : InputStage(host, next)
 {}
@@ -6984,24 +7008,33 @@ Int32 ViewRootImpl::EarlyPostImeInputStage::ProcessKeyEvent(
 
     // If the key's purpose is to exit touch mode then we consume it
     // and consider it handled.
-    if (mHost->CheckForLeavingTouchModeAndConsume(event)) {
-        return FINISH_HANDLED;
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host) {
+        if (host->CheckForLeavingTouchModeAndConsume(event)) {
+            return FINISH_HANDLED;
+        }
+
+        // Make sure the fallback event policy sees all keys that will be
+        // delivered to the view hierarchy.
+        host->mFallbackEventHandler->PreDispatchKeyEvent(event);
     }
 
-    // Make sure the fallback event policy sees all keys that will be
-    // delivered to the view hierarchy.
-    mHost->mFallbackEventHandler->PreDispatchKeyEvent(event);
     return FORWARD;
 }
 
 Int32 ViewRootImpl::EarlyPostImeInputStage::ProcessPointerEvent(
     /* [in] */ QueuedInputEvent* q)
 {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host == NULL) {
+        return FORWARD;
+    }
+
     AutoPtr<IMotionEvent> event = IMotionEvent::Probe(q->mEvent);
 
     // Translate the pointer event for compatibility, if needed.
-    if (mHost->mTranslator != NULL) {
-        mHost->mTranslator->TranslateEventInScreenToAppWindow(event);
+    if (host->mTranslator != NULL) {
+        host->mTranslator->TranslateEventInScreenToAppWindow(event);
     }
 
     // Enter touch mode on down or scroll.
@@ -7009,18 +7042,18 @@ Int32 ViewRootImpl::EarlyPostImeInputStage::ProcessPointerEvent(
     event->GetAction(&action);
     if (action == IMotionEvent::ACTION_DOWN || action == IMotionEvent::ACTION_SCROLL) {
         Boolean temp;
-        mHost->EnsureTouchMode(TRUE, &temp);
+        host->EnsureTouchMode(TRUE, &temp);
     }
 
     // Offset the scroll position.
-    if (mHost->mCurScrollY != 0) {
-        event->OffsetLocation(0, mHost->mCurScrollY);
+    if (host->mCurScrollY != 0) {
+        event->OffsetLocation(0, host->mCurScrollY);
     }
 
     // Remember the touch position for possible drag-initiation.
     Boolean isTouchEvent;
     if (event->IsTouchEvent(&isTouchEvent), isTouchEvent) {
-        AutoPtr<CPointF> temp = (CPointF*)mHost->mLastTouchPoint.Get();
+        AutoPtr<CPointF> temp = (CPointF*)host->mLastTouchPoint.Get();
         event->GetRawX(&temp->mX);
         event->GetRawY(&temp->mY);
     }
@@ -7033,7 +7066,7 @@ Int32 ViewRootImpl::EarlyPostImeInputStage::ProcessPointerEvent(
 CAR_INTERFACE_IMPL(ViewRootImpl::NativePostImeInputStage, AsyncInputStage, IInputQueueFinishedInputEventCallback)
 
 ViewRootImpl::NativePostImeInputStage::NativePostImeInputStage(
-    /* [in] */ ViewRootImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ InputStage* next,
     /* [in] */ const String& traceCounter)
     : AsyncInputStage(host, next, traceCounter)
@@ -7055,8 +7088,9 @@ ECode ViewRootImpl::NativePostImeInputStage::OnFinishedInputEvent(
 Int32 ViewRootImpl::NativePostImeInputStage::OnProcess(
     /* [in] */ QueuedInputEvent* q)
 {
-    if (mHost->mInputQueue != NULL) {
-        mHost->mInputQueue->SendInputEvent(q->mEvent, TO_IINTERFACE(q), FALSE, this);
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host != NULL && host->mInputQueue != NULL) {
+        host->mInputQueue->SendInputEvent(q->mEvent, TO_IINTERFACE(q), FALSE, this);
         return DEFER;
     }
     return FORWARD;
@@ -7067,7 +7101,7 @@ Int32 ViewRootImpl::NativePostImeInputStage::OnProcess(
 ////////////////////////////////////////////////////////////
 
 ViewRootImpl::ViewPostImeInputStage::ViewPostImeInputStage(
-    /* [in] */ ViewRootImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ InputStage* next)
     : InputStage(host, next)
 {}
@@ -7081,7 +7115,11 @@ Int32 ViewRootImpl::ViewPostImeInputStage::OnProcess(
     else {
         // If delivering a new non-key event, make sure the window is
         // now allowed to start updating.
-        mHost->HandleDispatchDoneAnimating();
+        AutoPtr<ViewRootImpl> host = GetHost();
+        if (host != NULL) {
+            host->HandleDispatchDoneAnimating();
+        }
+
         Int32 source = 0;
         q->mEvent->GetSource(&source);
         if ((source & IInputDevice::SOURCE_CLASS_POINTER) != 0) {
@@ -7103,11 +7141,12 @@ ECode ViewRootImpl::ViewPostImeInputStage::OnDeliverToNext(
     Boolean isTouchEvent = FALSE;
     if (me) me->IsTouchEvent(&isTouchEvent);
 
-    if (mHost->mUnbufferedInputDispatch
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host != NULL && host->mUnbufferedInputDispatch
             && me && isTouchEvent
-            && mHost->IsTerminalInputEvent(q->mEvent)) {
-        mHost->mUnbufferedInputDispatch = FALSE;
-        mHost->ScheduleConsumeBatchedInput();
+            && host->IsTerminalInputEvent(q->mEvent)) {
+        host->mUnbufferedInputDispatch = FALSE;
+        host->ScheduleConsumeBatchedInput();
     }
     InputStage::OnDeliverToNext(q);
     return NOERROR;
@@ -7116,6 +7155,11 @@ ECode ViewRootImpl::ViewPostImeInputStage::OnDeliverToNext(
 Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
     /* [in] */ QueuedInputEvent* q)
 {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host == NULL) {
+        return FORWARD;
+    }
+
     AutoPtr<IKeyEvent> event = IKeyEvent::Probe(q->mEvent);
 
     Int32 action = 0;
@@ -7123,12 +7167,12 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
     if (action != IKeyEvent::ACTION_UP) {
         // If delivering a new key event, make sure the window is
         // now allowed to start updating.
-        mHost->HandleDispatchDoneAnimating();
+        host->HandleDispatchDoneAnimating();
     }
 
     // Deliver the key to the view hierarchy.
     Boolean dispatchKeyEvent;
-    if (mHost->mView->DispatchKeyEvent(event, &dispatchKeyEvent), dispatchKeyEvent) {
+    if (host->mView->DispatchKeyEvent(event, &dispatchKeyEvent), dispatchKeyEvent) {
         return FINISH_HANDLED;
     }
 
@@ -7145,7 +7189,7 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
             && (event->GetRepeatCount(&repeatCount), repeatCount == 0)
             && !CKeyEvent::IsModifierKey(keyCode)) {
         Boolean tempEvent;
-        mHost->mView->DispatchKeyShortcutEvent(event, &tempEvent);
+        host->mView->DispatchKeyShortcutEvent(event, &tempEvent);
         if (tempEvent) {
             return FINISH_HANDLED;
         }
@@ -7156,7 +7200,7 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
 
     // Apply the fallback event policy.
     Boolean fallbackEventHandler;
-    mHost->mFallbackEventHandler->DispatchKeyEvent(event, &fallbackEventHandler);
+    host->mFallbackEventHandler->DispatchKeyEvent(event, &fallbackEventHandler);
     if (fallbackEventHandler) {
         return FINISH_HANDLED;
     }
@@ -7214,7 +7258,7 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
         }
         if (direction != 0) {
             AutoPtr<IView> focused;
-            mHost->mView->FindFocus((IView**)&focused);
+            host->mView->FindFocus((IView**)&focused);
             Boolean temp;
             if (focused != NULL) {
                 AutoPtr<IView> v;
@@ -7223,26 +7267,26 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
                     // do the math the get the interesting rect
                     // of previous focused into the coord system of
                     // newly focused view
-                    focused->GetFocusedRect(mHost->mTempRect);
-                    IViewGroup* vg = IViewGroup::Probe(mHost->mView);
+                    focused->GetFocusedRect(host->mTempRect);
+                    IViewGroup* vg = IViewGroup::Probe(host->mView);
                     if (vg) {
-                        vg->OffsetDescendantRectToMyCoords(focused, mHost->mTempRect);
-                        vg->OffsetRectIntoDescendantCoords(v, mHost->mTempRect);
+                        vg->OffsetDescendantRectToMyCoords(focused, host->mTempRect);
+                        vg->OffsetRectIntoDescendantCoords(v, host->mTempRect);
                     }
 
-                    if (v->RequestFocus(direction, mHost->mTempRect, &temp), temp) {
-                        mHost->PlaySoundEffect(SoundEffectConstants::GetContantForFocusDirection(direction));
+                    if (v->RequestFocus(direction, host->mTempRect, &temp), temp) {
+                        host->PlaySoundEffect(SoundEffectConstants::GetContantForFocusDirection(direction));
                         return FINISH_HANDLED;
                     }
                 }
                 // Give the focused view a last chance to handle the dpad key.
-                if (mHost->mView->DispatchUnhandledMove(focused, direction, &temp), temp) {
+                if (host->mView->DispatchUnhandledMove(focused, direction, &temp), temp) {
                     return FINISH_HANDLED;
                 }
             } else {
                 // find the best view to give focus to in this non-touch-mode with no-focus
                 AutoPtr<IView> v;
-                mHost->FocusSearch(NULL, direction, (IView**)&v);
+                host->FocusSearch(NULL, direction, (IView**)&v);
                 if (v != NULL && (v->RequestFocus(direction, &temp), temp)) {
                     return FINISH_HANDLED;
                 }
@@ -7255,15 +7299,20 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
 Int32 ViewRootImpl::ViewPostImeInputStage::ProcessPointerEvent(
     /* [in] */ QueuedInputEvent* q)
 {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host == NULL) {
+        return FORWARD;
+    }
+
     AutoPtr<IMotionEvent> event = IMotionEvent::Probe(q->mEvent);
 
-    mHost->mAttachInfo->mUnbufferedDispatchRequested = FALSE;
+    host->mAttachInfo->mUnbufferedDispatchRequested = FALSE;
     Boolean handled;
-    mHost->mView->DispatchPointerEvent(event, &handled);
-    if (mHost->mAttachInfo->mUnbufferedDispatchRequested && !mHost->mUnbufferedInputDispatch) {
-        mHost->mUnbufferedInputDispatch = TRUE;
-        if (mHost->mConsumeBatchedInputScheduled) {
-            mHost->ScheduleConsumeBatchedInputImmediately();
+    host->mView->DispatchPointerEvent(event, &handled);
+    if (host->mAttachInfo->mUnbufferedDispatchRequested && !host->mUnbufferedInputDispatch) {
+        host->mUnbufferedInputDispatch = TRUE;
+        if (host->mConsumeBatchedInputScheduled) {
+            host->ScheduleConsumeBatchedInputImmediately();
         }
     }
     return handled ? FINISH_HANDLED : FORWARD;
@@ -7272,9 +7321,14 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessPointerEvent(
 Int32 ViewRootImpl::ViewPostImeInputStage::ProcessTrackballEvent(
     /* [in] */ QueuedInputEvent* q)
 {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host == NULL) {
+        return FORWARD;
+    }
+
     AutoPtr<IMotionEvent> event = IMotionEvent::Probe(q->mEvent);
     Boolean res;
-    mHost->mView->DispatchTrackballEvent(event, &res);
+    host->mView->DispatchTrackballEvent(event, &res);
     if (res) {
         return FINISH_HANDLED;
     }
@@ -7284,11 +7338,16 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessTrackballEvent(
 Int32 ViewRootImpl::ViewPostImeInputStage::ProcessGenericMotionEvent(
     /* [in] */ QueuedInputEvent* q)
 {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host == NULL) {
+        return FORWARD;
+    }
+
     AutoPtr<IMotionEvent> event = IMotionEvent::Probe(q->mEvent);
 
     // Deliver the event to the view.
     Boolean res;
-    mHost->mView->DispatchGenericMotionEvent(event, &res);
+    host->mView->DispatchGenericMotionEvent(event, &res);
     if (res) {
         return FINISH_HANDLED;
     }
@@ -7299,9 +7358,10 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessGenericMotionEvent(
 //          ViewRootImpl::SyntheticInputStage
 ////////////////////////////////////////////////////////////
 ViewRootImpl::SyntheticInputStage::SyntheticInputStage(
-        /* [in] */ ViewRootImpl* host)
-    : InputStage(host, NULL)
+        /* [in] */ IWeakReference* weakHost)
+    : InputStage(weakHost, NULL)
 {
+    AutoPtr<ViewRootImpl> host = GetHost();
     mTrackball = new SyntheticTrackballHandler(host);
     mJoystick = new SyntheticJoystickHandler(host);
     mJoystick->constructor(TRUE);
@@ -7313,6 +7373,11 @@ ViewRootImpl::SyntheticInputStage::SyntheticInputStage(
 Int32 ViewRootImpl::SyntheticInputStage::OnProcess(
     /* [in] */ QueuedInputEvent* q)
 {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host == NULL) {
+        return FORWARD;
+    }
+
     q->mFlags |= QueuedInputEvent::FLAG_RESYNTHESIZED;
     if (IMotionEvent::Probe(q->mEvent)) {
         AutoPtr<IMotionEvent> event = IMotionEvent::Probe(q->mEvent);
@@ -7340,6 +7405,11 @@ Int32 ViewRootImpl::SyntheticInputStage::OnProcess(
 ECode ViewRootImpl::SyntheticInputStage::OnDeliverToNext(
     /* [in] */ QueuedInputEvent* q)
 {
+    AutoPtr<ViewRootImpl> host = GetHost();
+    if (host == NULL) {
+        return InputStage::OnDeliverToNext(q);
+    }
+
     if ((q->mFlags & QueuedInputEvent::FLAG_RESYNTHESIZED) == 0) {
         // Cancel related synthetic events if any prior stage has handled the event.
         if (IMotionEvent::Probe(q->mEvent)) {

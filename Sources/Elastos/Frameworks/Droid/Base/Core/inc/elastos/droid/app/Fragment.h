@@ -123,6 +123,26 @@ class ECO_PUBLIC Fragment
     , public IComponentCallbacks2
     , public IViewOnCreateContextMenuListener
 {
+private:
+    class ECO_LOCAL ViewCreateContextMenuListener
+        : public Object
+        , public IViewOnCreateContextMenuListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ViewCreateContextMenuListener(
+            /* [in] */ Fragment* host);
+
+        CARAPI OnCreateContextMenu(
+            /* [in] */ IContextMenu* menu,
+            /* [in] */ IView* v,
+            /* [in] */ IContextMenuInfo* menuInfo);
+
+    private:
+        Fragment* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -1039,8 +1059,15 @@ public:
     AutoPtr<ISharedElementCallback> mEnterTransitionCallback;// = SharedElementCallback.NULL_CALLBACK;
     AutoPtr<ISharedElementCallback> mExitTransitionCallback;// = SharedElementCallback.NULL_CALLBACK;
 
+protected:
+    AutoPtr<IViewOnCreateContextMenuListener> mViewCreateContextMenuListener;
+
 private:
     ECO_LOCAL static HashMap<String, AutoPtr<IClassInfo> > sClassMap;
+
+#if defined(_DEBUG)
+     Boolean mIsConstructed;
+#endif
 };
 
 } // namespace App

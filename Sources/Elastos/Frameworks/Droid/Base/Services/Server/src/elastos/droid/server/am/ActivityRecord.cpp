@@ -130,11 +130,11 @@ ActivityRecord::ActivityRecord()
 ActivityRecord::~ActivityRecord()
 {
     Slogger::D("ActivityRecord", " =========== ~ActivityRecord() %s", ToString().string());
-    android::CallStack stack;
-    stack.update();
-    Logger::I(TAG, "-------------------------------------------------------");
-    Logger::I(TAG, "callstack:\n%s", stack.toString("").string());
-    Logger::I(TAG, "-------------------------------------------------------");
+    // android::CallStack stack;
+    // stack.update();
+    // Logger::I(TAG, "-------------------------------------------------------");
+    // Logger::I(TAG, "callstack:\n%s", stack.toString("").string());
+    // Logger::I(TAG, "-------------------------------------------------------");
 }
 
 ECode ActivityRecord::constructor(

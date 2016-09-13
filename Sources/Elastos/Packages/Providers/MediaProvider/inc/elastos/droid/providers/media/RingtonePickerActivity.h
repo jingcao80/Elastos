@@ -32,29 +32,54 @@ namespace Media {
 
 class RingtonePickerActivity
     : public AlertActivity
-    , public IAdapterViewOnItemSelectedListener
-    , public IRunnable
-    , public IDialogInterfaceOnClickListener
-    , public IAlertControllerAlertParamsOnPrepareListViewListener
     , public IRingtonePickerActivity
 {
 private:
-    class MyDialogInterfaceOnClickListener
+    class RingtoneClickListener
         : public Object
         , public IDialogInterfaceOnClickListener
     {
-        friend class RingtonePickerActivity;
-
     public:
         CAR_INTERFACE_DECL()
 
-        MyDialogInterfaceOnClickListener(
+        RingtoneClickListener(
             /* [in] */ RingtonePickerActivity* owner);
 
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
             /* [in] */ Int32 which);
 
+    private:
+        RingtonePickerActivity* mOwner;
+    };
+
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+        , public IAdapterViewOnItemSelectedListener
+        , public IAlertControllerAlertParamsOnPrepareListViewListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ RingtonePickerActivity* owner);
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+        CARAPI OnPrepareListView(
+            /* [in] */ IListView* listView);
+
+        CARAPI OnItemSelected(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        CARAPI OnNothingSelected(
+            /* [in] */ IAdapterView* parent);
     private:
         RingtonePickerActivity* mOwner;
     };
@@ -72,6 +97,20 @@ private:
     private:
         RingtonePickerActivity* mOwner;
     };
+
+    class InnerRunnable
+        : public Runnable
+    {
+    public:
+        InnerRunnable(
+            /* [in] */ RingtonePickerActivity* owner);
+
+        CARAPI Run();
+
+    private:
+        RingtonePickerActivity* mOwner;
+    };
+
 
 public:
     CAR_INTERFACE_DECL()
@@ -196,7 +235,9 @@ private:
      */
     static AutoPtr<IRingtone> sPlayingRingtone;
 
-    AutoPtr<IDialogInterfaceOnClickListener> mRingtoneClickListener;
+    AutoPtr<InnerRunnable> mInnerRunnable;
+    AutoPtr<InnerListener> mInnerListener;
+    AutoPtr<RingtoneClickListener> mRingtoneClickListener;
 };
 
 } // namespace Media

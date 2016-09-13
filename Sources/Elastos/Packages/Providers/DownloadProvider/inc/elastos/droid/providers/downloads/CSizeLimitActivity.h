@@ -27,10 +27,30 @@ namespace Downloads {
  */
 CarClass(CSizeLimitActivity)
     , public Activity
-    , public IDialogInterfaceOnCancelListener
-    , public IDialogInterfaceOnClickListener
     , public ISizeLimitActivity
 {
+private:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnCancelListener
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CSizeLimitActivity* host);
+
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* dialog);
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+    private:
+        CSizeLimitActivity* mHost;
+    };
+
 public:
     CAR_OBJECT_DECL()
 
@@ -63,6 +83,7 @@ private:
     AutoPtr<IQueue> mDownloadsToShow;
     AutoPtr<IUri> mCurrentUri;
     AutoPtr<IIntent> mCurrentIntent;
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Downloads

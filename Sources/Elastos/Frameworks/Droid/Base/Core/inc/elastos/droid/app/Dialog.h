@@ -93,6 +93,25 @@ private:
         AutoPtr<IWeakReference> mDialog; //WeakReference<DialogInterface> mDialog;
     };
 
+    class ECO_LOCAL ViewCreateContextMenuListener
+        : public Object
+        , public IViewOnCreateContextMenuListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ViewCreateContextMenuListener(
+            /* [in] */ Dialog* host);
+
+        CARAPI OnCreateContextMenu(
+            /* [in] */ IContextMenu* menu,
+            /* [in] */ IView* v,
+            /* [in] */ IContextMenuInfo* menuInfo);
+
+    private:
+        Dialog* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -535,6 +554,9 @@ public:
      * {@hide}
      */
     Boolean mCancelable;
+
+protected:
+    AutoPtr<IViewOnCreateContextMenuListener> mViewCreateContextMenuListener;
 
 private:
     ECO_LOCAL const static String TAG;

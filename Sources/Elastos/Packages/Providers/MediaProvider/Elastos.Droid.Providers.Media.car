@@ -23,9 +23,7 @@ module
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IDialogInterface;
-    using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
-    using interface Elastos.Droid.Internal.App.IAlertControllerAlertParamsOnPrepareListViewListener;
     using interface Elastos.Droid.Internal.App.IAlertActivity;
     using interface Elastos.Droid.Graphics.IBitmap;
     using interface Elastos.Droid.Media.IIMediaScannerService;
@@ -38,7 +36,6 @@ module
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
-    using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
     using interface Elastos.Droid.Providers.Media.IMediaDocumentsProvider;
     using interface Elastos.Droid.Providers.Media.IMediaProvider;
     using interface Elastos.Droid.Providers.Media.IMediaScannerReceiver;
@@ -151,10 +148,7 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IDialogInterface;
-        interface IAdapterViewOnItemSelectedListener;
         interface IRunnable;
-        interface IDialogInterfaceOnClickListener;
-        interface IAlertControllerAlertParamsOnPrepareListViewListener;
     }
 
     class CMediaThumbRequest {

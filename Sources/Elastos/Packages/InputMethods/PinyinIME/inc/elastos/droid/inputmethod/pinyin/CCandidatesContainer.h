@@ -33,10 +33,38 @@ class CBalloonHint;
 CarClass(CCandidatesContainer)
     , public RelativeLayout
     , public ICandidatesContainer
-    , public IViewOnTouchListener
-    , public IAnimationAnimationListener
     , public IArrowUpdater
 {
+private:
+    class InnerListener
+        : public Object
+        , public IViewOnTouchListener
+        , public IAnimationAnimationListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CCandidatesContainer* host);
+
+        CARAPI OnTouch(
+            /* [in] */ IView* v,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnAnimationEnd(
+            /* [in] */  IAnimation* animation);
+
+        CARAPI OnAnimationRepeat(
+            /* [in] */  IAnimation* animation);
+
+        CARAPI OnAnimationStart(
+            /* [in] */  IAnimation* animation);
+
+    private:
+        CCandidatesContainer* mHost;
+    };
+
 public:
     CCandidatesContainer();
 
@@ -245,6 +273,8 @@ protected:
      * Current page number in display.
      */
     Int32 mCurrentPage;
+
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Pinyin

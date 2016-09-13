@@ -26,6 +26,25 @@ namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
+
+//=====================================================
+// CSkbContainer::LongPressTimer
+//=====================================================
+CAR_INTERFACE_IMPL(CSkbContainer::InnerListener, Object, IViewOnTouchListener)
+
+CSkbContainer::InnerListener::InnerListener(
+    /* [in] */ CSkbContainer* host)
+    : mHost(host)
+{}
+
+ECode CSkbContainer::InnerListener::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnTouch(v, event, result);
+}
+
 //=====================================================
 // CSkbContainer::LongPressTimer
 //=====================================================
@@ -102,7 +121,7 @@ Boolean CSkbContainer::POPUPWINDOW_FOR_PRESSED_UI = FALSE;
 
 CAR_OBJECT_IMPL(CSkbContainer);
 
-CAR_INTERFACE_IMPL_2(CSkbContainer, RelativeLayout, ISkbContainer, IViewOnTouchListener);
+CAR_INTERFACE_IMPL(CSkbContainer, RelativeLayout, ISkbContainer);
 
 CSkbContainer::CSkbContainer()
     : mSkbLayout(0)
@@ -227,7 +246,6 @@ void CSkbContainer::UpdateInputMode()
 void CSkbContainer::UpdateSkbLayout()
 {
     Int32 screenWidth = mEnvironment->GetScreenWidth();
-    Int32 keyHeight = mEnvironment->GetKeyHeight();
     Int32 skbHeight = mEnvironment->GetSkbHeight();
 
     AutoPtr<IResources> r;
@@ -332,7 +350,9 @@ void CSkbContainer::PopupSymbols()
             mPopupSkbView->OnMeasure(IViewGroupLayoutParams::WRAP_CONTENT,
                     IViewGroupLayoutParams::WRAP_CONTENT);
         }
-        mPopupSkbView->SetOnTouchListener(this);
+
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        mPopupSkbView->SetOnTouchListener(listener);
         mPopupSkbView->SetSoftKeyboard(skb);
         mPopupSkbView->SetBalloonHint(mBalloonOnKey, mBalloonPopup, TRUE);
 

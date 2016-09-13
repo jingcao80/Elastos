@@ -37,9 +37,32 @@ namespace Droid {
 namespace Providers {
 namespace Downloads {
 
+
+CAR_INTERFACE_IMPL_2(CSizeLimitActivity::InnerListener, Object,
+    IDialogInterfaceOnCancelListener, IDialogInterfaceOnClickListener)
+
+CSizeLimitActivity::InnerListener::InnerListener(
+    /* [in] */ CSizeLimitActivity* host)
+    : mHost(host)
+{
+}
+
+ECode CSizeLimitActivity::InnerListener::OnCancel(
+    /* [in] */ IDialogInterface* dialog)
+{
+    return mHost->OnCancel(dialog);
+}
+
+ECode CSizeLimitActivity::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->OnClick(dialog, which);
+}
+
 CAR_OBJECT_IMPL(CSizeLimitActivity)
 
-CAR_INTERFACE_IMPL_3(CSizeLimitActivity, Activity, IDialogInterfaceOnCancelListener, IDialogInterfaceOnClickListener, ISizeLimitActivity)
+CAR_INTERFACE_IMPL(CSizeLimitActivity, Activity, ISizeLimitActivity)
 
 CSizeLimitActivity::CSizeLimitActivity()
 {
@@ -105,6 +128,10 @@ void CSizeLimitActivity::ShowNextDialog()
 void CSizeLimitActivity::ShowDialog(
     /* [in] */ ICursor* cursor)
 {
+    if (mListener == NULL) {
+        mListener = new InnerListener(this);
+    }
+
     Int32 index = 0;
     cursor->GetColumnIndexOrThrow(IDownloadsImpl::COLUMN_TOTAL_BYTES, &index);
     Int32 size = 0;
@@ -131,18 +158,18 @@ void CSizeLimitActivity::ShowDialog(
         String str;
         GetString(R::string::wifi_required_body, pArr, &str);
         builder->SetMessage(StringUtils::ParseInt32(str));
-        builder->SetPositiveButton(R::string::button_queue_for_wifi, this);
-        builder->SetNegativeButton(R::string::button_cancel_download, this);
+        builder->SetPositiveButton(R::string::button_queue_for_wifi, mListener);
+        builder->SetNegativeButton(R::string::button_cancel_download, mListener);
     }
     else {
         builder->SetTitle(R::string::wifi_recommended_title);
         String str;
         GetString(R::string::wifi_recommended_body, pArr, &str);
         builder->SetMessage(StringUtils::ParseInt32(str));
-        builder->SetPositiveButton(R::string::button_start_now, this);
-        builder->SetNegativeButton(R::string::button_queue_for_wifi, this);
+        builder->SetPositiveButton(R::string::button_start_now, mListener);
+        builder->SetNegativeButton(R::string::button_queue_for_wifi, mListener);
     }
-    builder->SetOnCancelListener(this);
+    builder->SetOnCancelListener(mListener);
     AutoPtr<IAlertDialog> ad;
     builder->Show((IAlertDialog**)&ad);
     mDialog = IDialog::Probe(ad);

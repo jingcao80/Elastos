@@ -98,6 +98,25 @@ private:
         Activity* mHost;
     };
 
+    class ECO_LOCAL ViewCreateContextMenuListener
+        : public Object
+        , public IViewOnCreateContextMenuListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ViewCreateContextMenuListener(
+            /* [in] */ Activity* host);
+
+        CARAPI OnCreateContextMenu(
+            /* [in] */ IContextMenu* menu,
+            /* [in] */ IView* v,
+            /* [in] */ IContextMenuInfo* menuInfo);
+
+    private:
+        Activity* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -3766,6 +3785,7 @@ public:
 
 protected:
     AutoPtr<IBinder> mToken;
+    AutoPtr<IViewOnCreateContextMenuListener> mViewCreateContextMenuListener;
 
 //protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 

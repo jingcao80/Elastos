@@ -298,6 +298,26 @@ ECode FragmentState::GetInstance(
     return NOERROR;
 }
 
+//=============================================================================
+// Activity::ViewCreateContextMenuListener
+//=============================================================================
+
+CAR_INTERFACE_IMPL(Fragment::ViewCreateContextMenuListener, Object, IViewOnCreateContextMenuListener)
+
+Fragment::ViewCreateContextMenuListener::ViewCreateContextMenuListener(
+    /* [in] */ Fragment* host)
+    : mHost(host)
+{
+}
+
+ECode Fragment::ViewCreateContextMenuListener::OnCreateContextMenu(
+    /* [in] */ IContextMenu* menu,
+    /* [in] */ IView* v,
+    /* [in] */ IContextMenuInfo* menuInfo)
+{
+    return mHost->OnCreateContextMenu(menu, v, menuInfo);
+}
+
 //===================================================================
 // Fragment
 //===================================================================
@@ -346,6 +366,9 @@ Fragment::Fragment()
     , mCheckedForLoaderManager(FALSE)
     , mAllowReturnTransitionOverlap(TRUE)
     , mAllowEnterTransitionOverlap(TRUE)
+#if defined(_DEBUG)
+    , mIsConstructed(FALSE)
+#endif
 {}
 
 Fragment::~Fragment()
@@ -353,6 +376,10 @@ Fragment::~Fragment()
 
 ECode Fragment::constructor()
 {
+    mViewCreateContextMenuListener = new ViewCreateContextMenuListener(this);
+#if defined(_DEBUG)
+    mIsConstructed = TRUE;
+#endif
     return NOERROR;
 }
 
@@ -1458,6 +1485,12 @@ ECode Fragment::OnInflate(
 ECode Fragment::OnAttach(
     /* [in] */ IActivity* activity)
 {
+#if _DEBUG
+    if (!mIsConstructed) {
+        Slogger::E(TAG, "Error: Fragment::constructor() is not called by sub classes %s!", TO_CSTR(this));
+        assert(0 && "Error: Fragment::constructor() is not called by sub classes");
+    }
+#endif
     mCalled = TRUE;
     return NOERROR;
 }
@@ -1476,6 +1509,12 @@ ECode Fragment::OnCreateAnimator(
 ECode Fragment::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+#if _DEBUG
+    if (!mIsConstructed) {
+        Slogger::E(TAG, "Error: Fragment::constructor() is not called by sub classes %s!", TO_CSTR(this));
+        assert(0 && "Error: Fragment::constructor() is not called by sub classes");
+    }
+#endif
     mCalled = TRUE;
     return NOERROR;
 }
@@ -1684,15 +1723,13 @@ ECode Fragment::OnCreateContextMenu(
 ECode Fragment::RegisterForContextMenu(
     /* [in] */ IView* view)
 {
-    view->SetOnCreateContextMenuListener(this);
-    return NOERROR;
+    return view->SetOnCreateContextMenuListener(mViewCreateContextMenuListener);
 }
 
 ECode Fragment::UnregisterForContextMenu(
     /* [in] */ IView* view)
 {
-    view->SetOnCreateContextMenuListener(NULL);
-    return NOERROR;
+    return view->SetOnCreateContextMenuListener(NULL);
 }
 
 ECode Fragment::OnContextItemSelected(

@@ -28,7 +28,7 @@ private:
         : public FrameLayout
     {
     public:
-        PopupViewContainer(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ PopupWindow* host);
 

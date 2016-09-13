@@ -54,12 +54,12 @@ const String PopupWindow::PopupViewContainer::TAG("PopupWindow.PopupViewContaine
 //          PopupWindow::PopupViewContainer
 //==============================================================================
 
-PopupWindow::PopupViewContainer::PopupViewContainer(
+ECode PopupWindow::PopupViewContainer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ PopupWindow* host)
-    : mHost(host)
 {
-    FrameLayout::constructor(context);
+    mHost = host;
+    return FrameLayout::constructor(context);
 }
 
 ECode PopupWindow::PopupViewContainer::OnCreateDrawableState(
@@ -908,14 +908,15 @@ ECode PopupWindow::PreparePopup(
 
         // when a background is available, we embed the content view
         // within another view that owns the background drawable
-        AutoPtr<PopupViewContainer> popupViewContainer = new PopupViewContainer(mContext, this);
-        AutoPtr<IFrameLayoutLayoutParams> listParams;
+        AutoPtr<IViewGroupLayoutParams> listParams;
         CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, height,
-                (IFrameLayoutLayoutParams**)&listParams);
+            (IViewGroupLayoutParams**)&listParams);
+        AutoPtr<PopupViewContainer> popupViewContainer = new PopupViewContainer();
+        popupViewContainer->constructor(mContext, this);
         popupViewContainer->SetBackground(mBackground);
-        IViewGroup::Probe(popupViewContainer)->AddView(mContentView, IViewGroupLayoutParams::Probe(listParams));
+        popupViewContainer->AddView(mContentView, listParams);
 
-        mPopupView = IView::Probe(popupViewContainer);
+        mPopupView = (IView*)popupViewContainer.Get();
     }
     else {
         mPopupView = mContentView;

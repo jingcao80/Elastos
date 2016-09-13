@@ -24,9 +24,43 @@ Int32 CCandidatesContainer::ARROW_ALPHA_ENABLED = 0xff;
 Int32 CCandidatesContainer::ARROW_ALPHA_DISABLED = 0x40;
 Int32 CCandidatesContainer::ANIMATION_TIME = 200;
 
+CAR_INTERFACE_IMPL_2(CCandidatesContainer::InnerListener, Object, \
+    IViewOnTouchListener, IAnimationAnimationListener)
+
+CCandidatesContainer::InnerListener::InnerListener(
+    /* [in] */ CCandidatesContainer* host)
+    : mHost(host)
+{}
+
+ECode CCandidatesContainer::InnerListener::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnTouch(v, event, result);
+}
+
+ECode CCandidatesContainer::InnerListener::OnAnimationEnd(
+    /* [in] */  IAnimation* animation)
+{
+    return mHost->OnAnimationEnd(animation);
+}
+
+ECode CCandidatesContainer::InnerListener::OnAnimationRepeat(
+    /* [in] */  IAnimation* animation)
+{
+    return mHost->OnAnimationRepeat(animation);
+}
+
+ECode CCandidatesContainer::InnerListener::OnAnimationStart(
+    /* [in] */  IAnimation* animation)
+{
+    return mHost->OnAnimationStart(animation);
+}
+
 CAR_OBJECT_IMPL(CCandidatesContainer);
 
-CAR_INTERFACE_IMPL_4(CCandidatesContainer, RelativeLayout, ICandidatesContainer, IViewOnTouchListener, IAnimationAnimationListener, IArrowUpdater);
+CAR_INTERFACE_IMPL_2(CCandidatesContainer, RelativeLayout, ICandidatesContainer, IArrowUpdater);
 
 CCandidatesContainer::CCandidatesContainer()
     : mXOffsetForFlipper(0)
@@ -37,6 +71,7 @@ ECode CCandidatesContainer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
+    mListener = new InnerListener(this);
     return RelativeLayout::constructor(context, attrs);
 }
 
@@ -53,8 +88,8 @@ ECode CCandidatesContainer::Initialize(
     view = NULL;
     FindViewById(R::id::arrow_right_btn, (IView**)&view);
     mRightArrowBtn = IImageButton::Probe(view);
-    IView::Probe(mLeftArrowBtn)->SetOnTouchListener(this);
-    IView::Probe(mRightArrowBtn)->SetOnTouchListener(this);
+    IView::Probe(mLeftArrowBtn)->SetOnTouchListener(mListener);
+    IView::Probe(mRightArrowBtn)->SetOnTouchListener(mListener);
 
     view = NULL;
     FindViewById(R::id::candidate_flipper, (IView**)&view);
@@ -398,7 +433,7 @@ ECode CCandidatesContainer::LoadAnimation(
         }
     }
 
-    mInAnimInUse->SetAnimationListener(this);
+    mInAnimInUse->SetAnimationListener(mListener);
 
     IViewAnimator::Probe(mFlipper)->SetInAnimation(mInAnimInUse);
     IViewAnimator::Probe(mFlipper)->SetOutAnimation(mOutAnimInUse);

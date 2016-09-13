@@ -165,6 +165,26 @@ ECode Activity::FragmentContainerLocal::HasView(
 }
 
 //=============================================================================
+// Activity::ViewCreateContextMenuListener
+//=============================================================================
+
+CAR_INTERFACE_IMPL(Activity::ViewCreateContextMenuListener, Object, IViewOnCreateContextMenuListener)
+
+Activity::ViewCreateContextMenuListener::ViewCreateContextMenuListener(
+    /* [in] */ Activity* host)
+    : mHost(host)
+{
+}
+
+ECode Activity::ViewCreateContextMenuListener::OnCreateContextMenu(
+    /* [in] */ IContextMenu* menu,
+    /* [in] */ IView* v,
+    /* [in] */ IContextMenuInfo* menuInfo)
+{
+    return mHost->OnCreateContextMenu(menu, v, menuInfo);
+}
+
+//=============================================================================
 // Activity
 //=============================================================================
 const Boolean Activity::DEBUG_LIFECYCLE = FALSE;
@@ -221,6 +241,7 @@ ECode Activity::constructor()
 {
     mFragments = new FragmentManagerImpl();
     mContainer = new FragmentContainerLocal(this);
+    mViewCreateContextMenuListener = new ViewCreateContextMenuListener(this);
 
     Logger::I(TAG, "TODO TrackActivity");
     // assert(0 && "TODO");
@@ -2089,8 +2110,7 @@ ECode Activity::RegisterForContextMenu(
     /* [in] */ IView* view)
 {
     VALIDATE_NOT_NULL(view);
-    return view->SetOnCreateContextMenuListener(
-            this);
+    return view->SetOnCreateContextMenuListener(mViewCreateContextMenuListener);
 }
 
 ECode Activity::UnregisterForContextMenu(

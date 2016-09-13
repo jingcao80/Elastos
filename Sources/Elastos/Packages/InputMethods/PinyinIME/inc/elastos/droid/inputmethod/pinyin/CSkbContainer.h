@@ -32,8 +32,27 @@ namespace Pinyin {
 CarClass(CSkbContainer)
     , public RelativeLayout
     , public ISkbContainer
-    , public IViewOnTouchListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IViewOnTouchListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CSkbContainer* host);
+
+        CARAPI OnTouch(
+            /* [in] */ IView* v,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
+
+    private:
+        CSkbContainer* mHost;
+    };
+
 public:
     class LongPressTimer
         : public HandlerRunnable
