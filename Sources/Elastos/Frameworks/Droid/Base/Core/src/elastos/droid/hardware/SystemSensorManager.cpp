@@ -10,13 +10,12 @@
 #include "elastos/droid/os/CMessageQueue.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/content/CIntent.h"
+#include <elastos/core/AutoLock.h>
 #include <android/sensor.h>
 #include <gui/Sensor.h>
 #include <gui/SensorManager.h>
 #include <unistd.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
@@ -30,6 +29,7 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::CMessageQueue;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::CThread;
@@ -555,7 +555,8 @@ ECode SystemSensorManager::constructor(
     AutoPtr<IApplicationInfo> info;
     FAIL_RETURN(context->GetApplicationInfo((IApplicationInfo**)&info))
     FAIL_RETURN(info->GetTargetSdkVersion(&mTargetSdkLevel))
-    {    AutoLock syncLock(sSensorModuleLock);
+    {
+        AutoLock syncLock(sSensorModuleLock);
         if (!sSensorModuleInitialized) {
             sSensorModuleInitialized = TRUE;
 
@@ -636,7 +637,8 @@ ECode SystemSensorManager::RegisterListenerImpl(
     // - one Looper per SensorEventListener
     // - one Looper per SensorEventQueue
     // We map SensorEventListener to a SensorEventQueue, which holds the looper
-    {    AutoLock syncLock(mSensorListenersLock);
+    {
+        AutoLock syncLock(mSensorListenersLock);
         AutoPtr<SensorEventQueue> queue = mSensorListeners[listener];
         if (queue == NULL) {
             AutoPtr<ILooper> looper;
@@ -676,7 +678,8 @@ ECode SystemSensorManager::UnregisterListenerImpl(
         }
     }
 
-    {    AutoLock syncLock(mSensorListenersLock);
+    {
+        AutoLock syncLock(mSensorListenersLock);
         AutoPtr<SensorEventQueue> queue = mSensorListeners[listener];
         if (queue != NULL) {
             Boolean result1, result2;
@@ -715,7 +718,8 @@ ECode SystemSensorManager::RequestTriggerSensorImpl(
         return NOERROR;
     }
 
-    {    AutoLock syncLock(mTriggerListenersLock);
+    {
+        AutoLock syncLock(mTriggerListenersLock);
         AutoPtr<TriggerEventQueue> queue = mTriggerListeners[listener];
         if (queue == NULL) {
             queue = new TriggerEventQueue(listener, mMainLooper, this);
@@ -745,20 +749,22 @@ ECode SystemSensorManager::CancelTriggerSensorImpl(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
     Int32 mode;
     FAIL_RETURN(sensor->GetReportingMode(&mode))
     if (sensor != NULL &&  mode != ISensor::REPORTING_MODE_ONE_SHOT) {
-        *result = FALSE;
         return NOERROR;
     }
-    {    AutoLock syncLock(mTriggerListenersLock);
+    {
+        AutoLock syncLock(mTriggerListenersLock);
         AutoPtr<TriggerEventQueue> queue = mTriggerListeners[listener];
         if (queue != NULL) {
             Boolean result1;
             if (sensor == NULL) {
                 result1 = queue->RemoveAllSensors();
-            } else {
+            }
+            else {
                 result1 = queue->RemoveSensor(sensor, disable);
             }
             Boolean result2 = queue->HasSensors();
@@ -767,12 +773,9 @@ ECode SystemSensorManager::CancelTriggerSensorImpl(
                 queue->Dispose();
             }
             *result = result1;
-            return NOERROR;
         }
-        *result = FALSE;
-        return NOERROR;
     }
-    *result = FALSE;
+
     return NOERROR;
 }
 
@@ -780,19 +783,18 @@ ECode SystemSensorManager::FlushImpl(
     /* [in] */ ISensorEventListener* listener,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     if (listener == NULL) {
         //throw new IllegalArgumentException("listener cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    {    AutoLock syncLock(mSensorListenersLock);
+    {
+        AutoLock syncLock(mSensorListenersLock);
         AutoPtr<SensorEventQueue> queue = mSensorListeners[listener];
-        if (queue == NULL) {
-            *result = FALSE;
-            return NOERROR;
-        } else {
+        if (queue != NULL) {
             Int32 _result;
             FAIL_RETURN(queue->Flush(&_result))
             *result = (_result == 0);

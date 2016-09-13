@@ -31,7 +31,7 @@ public:
     public:
         TO_STRING_IMPL("ScreenRotationAnimation::H")
 
-        H(
+        CARAPI constructor(
             /* [in] */ ILooper* looper,
             /* [in] */ ScreenRotationAnimation* host);
 
@@ -50,7 +50,11 @@ public:
     };
 
 public:
-    ScreenRotationAnimation(
+    ScreenRotationAnimation();
+
+    ~ScreenRotationAnimation();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ DisplayContent* displayContent,
         /* [in] */ ISurfaceSession* session,

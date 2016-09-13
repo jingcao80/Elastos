@@ -7960,7 +7960,7 @@ void CWindowManagerService::UpdateRotationUnchecked(
     /* [in] */ Boolean forceRelayout)
 {
     if (DEBUG_ORIENTATION) {
-        Slogger::V(TAG, "updateRotationUnchecked(alwaysSendConfiguration=%d, forceRelayout=%d)",
+        Slogger::V(TAG, "UpdateRotationUnchecked(alwaysSendConfiguration=%d, forceRelayout=%d)",
             alwaysSendConfiguration, forceRelayout);
     }
 
@@ -7988,7 +7988,7 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
     if (mDeferredRotationPauseCount > 0) {
         // Rotation updates have been paused temporarily.  Defer the update until
         // updates have been resumed.
-        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, rotation is paused.");
+        if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, rotation is paused.");
         return FALSE;
     }
 
@@ -7998,13 +7998,13 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
         // Rotation updates cannot be performed while the previous rotation change
         // animation is still in progress.  Skip this update.  We will try updating
         // again after the animation is finished and the display is unfrozen.
-        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, animation in progress.");
+        if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, animation in progress.");
         return FALSE;
     }
 
     if (!mDisplayEnabled) {
         // No point choosing a rotation if the display is not enabled.
-        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, display is not enabled.");
+        if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, display is not enabled.");
         return FALSE;
     }
 
@@ -8013,32 +8013,29 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
     //       an orientation that has different metrics than it expected.
     //       eg. Portrait instead of Landscape.
 
-    // todo: Eric
     Int32 rotation = ISurface::ROTATION_0;
     mPolicy->RotationForOrientationLw(mForcedAppOrientation, mRotation, &rotation);
     Boolean isCompatible;
-    mPolicy->RotationHasCompatibleMetricsLw(
-            mForcedAppOrientation, rotation, &isCompatible);
+    mPolicy->RotationHasCompatibleMetricsLw(mForcedAppOrientation, rotation, &isCompatible);
     Boolean altOrientation = !isCompatible;
 
-    // if (DEBUG_ORIENTATION) {
-    //     Slogger::V(TAG, "Application requested orientation "
-    //             + mForcedAppOrientation + ", got rotation " + rotation
-    //             + " which has " + (altOrientation ? "incompatible" : "compatible")
-    //             + " metrics");
-    // }
+    if (DEBUG_ORIENTATION) {
+        Slogger::V(TAG,
+            "Application requested orientation %d, got rotation %d which has %s metrics",
+            mForcedAppOrientation, rotation, (altOrientation ? "incompatible" : "compatible"));
+    }
 
     if (mRotation == rotation && mAltOrientation == altOrientation) {
         // No change.
         return FALSE;
     }
 
-    // if (DEBUG_ORIENTATION) {
-    //     Slogger::V(TAG,
-    //         "Rotation changed to " + rotation + (altOrientation ? " (alt)" : "")
-    //         + " from " + mRotation + (mAltOrientation ? " (alt)" : "")
-    //         + ", forceApp=" + mForcedAppOrientation);
-    // }
+    if (DEBUG_ORIENTATION) {
+        Slogger::V(TAG,
+            "Rotation changed to %d(%s) from %d(%s), forceApp=%d",
+            rotation, (altOrientation ? " (alt)" : ""),
+            mRotation, (mAltOrientation ? " (alt)" : ""), mForcedAppOrientation);
+    }
 
     mRotation = rotation;
     mAltOrientation = altOrientation;
@@ -8114,7 +8111,7 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
         windows->Get(i, (IInterface**)&obj);
         AutoPtr<WindowState> w = To_WindowState(obj);
         if (w->mHasSurface) {
-            // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Set mOrientationChanging of " + w);
+            if (DEBUG_ORIENTATION) Slogger::V(TAG, "Set mOrientationChanging of %s", TO_CSTR(w));
             w->mOrientationChanging = TRUE;
             mInnerFields->mOrientationChangeComplete = FALSE;
         }
@@ -13115,7 +13112,8 @@ void CWindowManagerService::StartFreezingDisplayLocked(
         displayContent->UpdateDisplayInfo();
         Boolean isForced;
         mPolicy->IsDefaultOrientationForced(&isForced);
-        screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
+        screenRotationAnimation = new ScreenRotationAnimation();
+        screenRotationAnimation->constructor(mContext, displayContent,
                 mFxSession, inTransaction, isForced, isSecure);
         mAnimator->SetScreenRotationAnimationLocked(displayId, screenRotationAnimation);
     }

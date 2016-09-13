@@ -5,6 +5,7 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Hardware::EIID_ISensorEventListener;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -14,18 +15,28 @@ const String OrientationEventListener::TAG("OrientationEventListener");
 const Boolean OrientationEventListener::DEBUG = FALSE;
 const Boolean OrientationEventListener::localLOGV = FALSE;
 
-CAR_INTERFACE_IMPL(OrientationEventListener, Object, IOrientationEventListener)
+//===========================================================================
+// OrientationEventListener::SensorEventListenerImpl
+//===========================================================================
 CAR_INTERFACE_IMPL(OrientationEventListener::SensorEventListenerImpl, Object, ISensorEventListener)
 
 OrientationEventListener::SensorEventListenerImpl::SensorEventListenerImpl(
-    /* [in] */ OrientationEventListener* host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
-    mHost = host;
 }
 
 ECode OrientationEventListener::SensorEventListenerImpl::OnSensorChanged(
     /* [in] */ ISensorEvent* event)
 {
+    AutoPtr<IOrientationEventListener> host;
+    mWeakHost->Resolve(EIID_IOrientationEventListener, (IInterface**)&host);
+    if (host == NULL) {
+        return NOERROR;
+    }
+
+    OrientationEventListener* mHost = (OrientationEventListener*)host.Get();
+
     AutoPtr<ArrayOf<Float> > values;
     event->GetValues((ArrayOf<Float>**)&values);
     Int32 orientation = IOrientationEventListener::ORIENTATION_UNKNOWN;
@@ -63,11 +74,21 @@ ECode OrientationEventListener::SensorEventListenerImpl::OnAccuracyChanged(
     return NOERROR;
 }
 
+//===========================================================================
+// OrientationEventListener
+//===========================================================================
+CAR_INTERFACE_IMPL(OrientationEventListener, Object, IOrientationEventListener)
+
 OrientationEventListener::OrientationEventListener()
     : mOrientation(ORIENTATION_UNKNOWN)
     , mEnabled(FALSE)
     , mRate(0)
 {}
+
+OrientationEventListener::~OrientationEventListener()
+{
+    Disable();
+}
 
 ECode OrientationEventListener::constructor(
     /* [in] */ IContext* context)
@@ -86,13 +107,15 @@ ECode OrientationEventListener::constructor(
     mSensorManager->GetDefaultSensor(ISensor::TYPE_ACCELEROMETER, (ISensor**)&mSensor);
     if (mSensor != NULL) {
         // Create listener only if sensors do exist
-        mSensorEventListener = new SensorEventListenerImpl(this);
+        AutoPtr<IWeakReference> wr;
+        GetWeakReference((IWeakReference**)&wr);
+        mSensorEventListener = new SensorEventListenerImpl(wr);
     }
     return NOERROR;
 }
 
 ECode OrientationEventListener::RegisterListener(
-    /* [in] */ IOrientationListener* lis)
+    /* [in] */ ISensorListener* lis)
 {
     mOldListener = lis;
     return NOERROR;
@@ -101,14 +124,12 @@ ECode OrientationEventListener::RegisterListener(
 ECode OrientationEventListener::Enable()
 {
     if (mSensor == NULL) {
-        // Log.w(TAG, "Cannot detect sensors. Not enabled");
-        SLOGGERW(TAG, "Cannot detect sensors. Not enabled")
+        Slogger::W(TAG, "Cannot detect sensors. Not enabled");
         return NOERROR;
     }
     if (mEnabled == FALSE) {
         if (localLOGV) {
-            // Log.d(TAG, "OrientationEventListener enabled");
-            SLOGGERW(TAG, "OrientationEventListener enabled")
+            Slogger::W(TAG, "OrientationEventListener enabled");
         }
         Boolean r;
         mSensorManager->RegisterListener(mSensorEventListener, mSensor, mRate, &r);
@@ -120,14 +141,12 @@ ECode OrientationEventListener::Enable()
 ECode OrientationEventListener::Disable()
 {
     if (mSensor == NULL) {
-        // Log.w(TAG, "Cannot detect sensors. Not disable");
-        SLOGGERW(TAG, "Cannot detect sensors. Not disable")
+        Slogger::W(TAG, "Cannot detect sensors. Not disable");
         return NOERROR;
     }
     if (mEnabled == TRUE) {
         if (localLOGV) {
-            // Log.d(TAG, "OrientationEventListener disabled");
-            SLOGGERW(TAG, "OrientationEventListener disabled")
+            Slogger::W(TAG, "OrientationEventListener disabled");
         }
         mSensorManager->UnregisterListener(mSensorEventListener);
         mEnabled = FALSE;
@@ -138,6 +157,7 @@ ECode OrientationEventListener::Disable()
 ECode OrientationEventListener::CanDetectOrientation(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = mSensor != NULL;
     return NOERROR;
 }

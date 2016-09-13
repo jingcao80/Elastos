@@ -38,14 +38,6 @@ module
          */
         Disable();
 
-        OnAccuracyChanged(
-            [in] Int32 sensor,
-            [in] Int32 accuracy);
-
-        OnSensorChanged(
-            [in] Int32 sensor,
-            [in] ArrayOf<Float>* values);
-
         /**
          * Look at {@link android.view.OrientationEventListener#onOrientationChanged}
          * for method description and usage
@@ -55,7 +47,6 @@ module
          */
         OnOrientationChanged(
             [in] Int32 orientation);
-
     }
 
     } // namespace View

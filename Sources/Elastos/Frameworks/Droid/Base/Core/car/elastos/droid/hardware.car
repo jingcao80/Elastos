@@ -8,7 +8,6 @@ module
     merge("hardware/Sensor.car");
     merge("hardware/SensorEvent.car");
     merge("hardware/SensorEventListener.car");
-    merge("hardware/SensorListener.car");
     merge("hardware/SensorManager.car");
     merge("hardware/SerialManager.car");
     merge("hardware/SerialPort.car");

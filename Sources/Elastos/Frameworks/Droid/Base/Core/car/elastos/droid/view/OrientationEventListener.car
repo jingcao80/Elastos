@@ -1,6 +1,8 @@
 
 module
 {
+    using interface Elastos.Droid.Hardware.ISensorListener;
+
     namespace Elastos {
     namespace Droid {
     namespace View {
@@ -19,7 +21,8 @@ module
         const Int32 ORIENTATION_UNKNOWN = -1;
 
         RegisterListener(
-            [in] IOrientationListener* lis);
+            [in] ISensorListener* lis);
+
         /**
          * Enables the OrientationEventListener so it will monitor the sensor and call
          * {@link #onOrientationChanged} when the device orientation changes.
@@ -52,7 +55,6 @@ module
          */
         OnOrientationChanged(
             [in] Int32 orientation);
-
     }
 
     } // namespace View

@@ -365,24 +365,22 @@ AutoPtr<IAudioAttributes> PhoneWindowManager::VIBRATION_ATTRIBUTES = InitVIBRATI
 
 const Int32 PhoneWindowManager::BRIGHTNESS_STEPS = 10;
 
-PhoneWindowManager::MyWakeGestureListener::MyWakeGestureListener(
+ECode PhoneWindowManager::MyWakeGestureListener::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ PhoneWindowManager* host)
-    : mHost(host)
 {
-    WakeGestureListener::constructor(context, handler);
+    mHost = host;
+    return WakeGestureListener::constructor(context, handler);
 }
 
 ECode PhoneWindowManager::MyWakeGestureListener::OnWakeUp()
 {
-    {
-        AutoLock lock(mHost->mLock);
-        if (mHost->ShouldEnableWakeGestureLp()) {
-            Boolean bval;
-            mHost->PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::VIRTUAL_KEY, FALSE, &bval);
-            mHost->mPowerManager->WakeUp(SystemClock::GetUptimeMillis());
-        }
+    AutoLock lock(mHost->mLock);
+    if (mHost->ShouldEnableWakeGestureLp()) {
+        Boolean bval;
+        mHost->PerformHapticFeedbackLw(NULL, IHapticFeedbackConstants::VIRTUAL_KEY, FALSE, &bval);
+        mHost->mPowerManager->WakeUp(SystemClock::GetUptimeMillis());
     }
     return NOERROR;
 }
@@ -775,19 +773,22 @@ ECode PhoneWindowManager::SettingsObserver::Observe()
 // PhoneWindowManager::MyOrientationListener
 //==============================================================================
 
-PhoneWindowManager::MyOrientationListener::MyOrientationListener(
+ECode PhoneWindowManager::MyOrientationListener::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ PhoneWindowManager* host)
-    : mHost(host)
 {
-    WindowOrientationListener::constructor(context, handler);
+    mHost = host;
+    return WindowOrientationListener::constructor(context, handler);
 }
 
 ECode PhoneWindowManager::MyOrientationListener::OnProposedRotationChanged(
     /* [in] */ Int32 rotation)
 {
-    if (localLOGV) Slogger::V(PhoneWindowManager::TAG, "onProposedRotationChanged, rotation=" + rotation);
+    if (localLOGV) {
+        Slogger::V(PhoneWindowManager::TAG, "OnProposedRotationChanged, rotation=%d", rotation);
+    }
+
     mHost->UpdateRotation(FALSE);
     return NOERROR;
 }
@@ -918,12 +919,14 @@ ECode PhoneWindowManager::DockBroadReceiver::OnReceive(
     /* [in] */ IIntent* intent)
 {
     String action;
-    if (IIntent::ACTION_DOCK_EVENT.Equals((intent->GetAction(&action), action))) {
+    intent->GetAction(&action);
+    if (IIntent::ACTION_DOCK_EVENT.Equals(action)) {
         Int32 value = 0;
         intent->GetInt32Extra(IIntent::EXTRA_DOCK_STATE,
                 IIntent::EXTRA_DOCK_STATE_UNDOCKED, &value);
         mHost->mDockMode = value;
-    } else {
+    }
+    else {
         //try {
         AutoPtr<IInterface> tmpObj = ServiceManager::GetService(IContext::UI_MODE_SERVICE);
         IIUiModeManager* uiModeService = IIUiModeManager::Probe(tmpObj);
@@ -2235,8 +2238,10 @@ ECode PhoneWindowManager::Init(
     AutoPtr<PolicyHandler> ph = new PolicyHandler(this);
     ph->constructor();
     mHandler = (IHandler*)ph.Get();
-    mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler, this);
-    mOrientationListener = new MyOrientationListener(mContext, mHandler, this);
+    mWakeGestureListener = new MyWakeGestureListener();
+    mWakeGestureListener->constructor(mContext, mHandler, this);
+    mOrientationListener = new MyOrientationListener();
+    mOrientationListener->constructor(mContext, mHandler, this);
     Int32 rotation;
     mWindowManager->GetRotation(&rotation);
     mOrientationListener->SetCurrentRotation(rotation);
@@ -7700,14 +7705,11 @@ ECode PhoneWindowManager::RotationForOrientationLw(
     /* [out] */ Int32* surfaceRotation)
 {
     VALIDATE_NOT_NULL(surfaceRotation);
-    // if (FALSE) {
-    //     Slogger::V(TAG, "rotationForOrientationLw(orient="
-    //                 + orientation + ", last=" + lastRotation
-    //                 + "); user=" + mUserRotation + " "
-    //                 + ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED)
-    //                     ? "USER_ROTATION_LOCKED" : "")
-    //                 );
-    // }
+    if (FALSE) {
+        Slogger::V(TAG, "RotationForOrientationLw(orient=%d, last=%d), user=%d %s",
+            orientation, lastRotation, mUserRotation,
+            (mUserRotationMode == IWindowManagerPolicy::USER_ROTATION_LOCKED) ? "USER_ROTATION_LOCKED" : "");
+    }
     if (mForceDefaultOrientation) {
         *surfaceRotation = ISurface::ROTATION_0;
         return NOERROR;
@@ -7721,9 +7723,8 @@ ECode PhoneWindowManager::RotationForOrientationLw(
     }
 
     Int32 preferredRotation;
-    if (mLidState == IWindowManagerPolicyWindowManagerFuncs::LID_OPEN
-        && !(mHasRemovableLid
-            && mDockMode == IIntent::EXTRA_DOCK_STATE_UNDOCKED)) {
+    if ((mLidState == IWindowManagerPolicyWindowManagerFuncs::LID_OPEN && mLidOpenRotation >= 0)
+        && !(mHasRemovableLid && mDockMode == IIntent::EXTRA_DOCK_STATE_UNDOCKED)) {
         // Ignore sensor when lid switch is open and rotation is forced
         // and a removable lid was not undocked.
         preferredRotation = mLidOpenRotation;
@@ -7751,7 +7752,7 @@ ECode PhoneWindowManager::RotationForOrientationLw(
         // Note that the dock orientation overrides the HDMI orientation.
         preferredRotation = mDemoHdmiRotation;
     }
-    else if ( mWifiDisplayConnected && (mWifiDisplayCustomRotation > -1)) {
+    else if (mWifiDisplayConnected && (mWifiDisplayCustomRotation > -1)) {
         // Ignore sensor when WFD is active and UIBC rotation is enabled
         preferredRotation = mWifiDisplayCustomRotation;
     }
@@ -7774,15 +7775,15 @@ ECode PhoneWindowManager::RotationForOrientationLw(
     }
 
     else if ((mUserRotationMode == IWindowManagerPolicy::USER_ROTATION_FREE
-                && (orientation == IActivityInfo::SCREEN_ORIENTATION_USER
-                    || orientation == IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED
-                    || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_LANDSCAPE
-                    || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_PORTRAIT
-                    || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_USER))
-            || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR
-            || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_SENSOR
-            || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-            || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR_PORTRAIT) {
+        && (orientation == IActivityInfo::SCREEN_ORIENTATION_USER
+            || orientation == IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED
+            || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_LANDSCAPE
+            || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_PORTRAIT
+            || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_USER))
+        || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR
+        || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_SENSOR
+        || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR_PORTRAIT) {
         // Otherwise, use sensor only if requested by the application or enabled
         // by default for USER or UNSPECIFIED modes.  Does not apply to NOSENSOR.
         if (mAllowAllRotations < 0) {

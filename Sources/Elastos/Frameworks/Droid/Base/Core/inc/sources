@@ -216,6 +216,7 @@ EXPORT_HEADERS += elastos/droid/view/NativeInputChannel.h
 //EXPORT_HEADERS += elastos/droid/view/SoundEffectConstants.h
 EXPORT_HEADERS += elastos/droid/view/WindowIdFocusObserver.h
 EXPORT_HEADERS += elastos/droid/view/SurfaceView.h
+EXPORT_HEADERS += elastos/droid/view/OrientationEventListener.h
 EXPORT_HEADERS += elastos/droid/view/animation/Animation.h
 EXPORT_HEADERS += elastos/droid/view/animation/AnimationUtils.h
 EXPORT_HEADERS += elastos/droid/view/animation/LayoutAnimationController.h

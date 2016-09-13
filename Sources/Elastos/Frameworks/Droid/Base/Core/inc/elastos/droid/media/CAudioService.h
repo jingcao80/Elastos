@@ -394,13 +394,9 @@ private:
         : public OrientationEventListener
     {
     public:
-        AudioOrientationEventListener(
+        CARAPI constructor(
             /* [in] */ CAudioService* host,
-            /* [in] */ IContext* context)
-            : mHost(host)
-        {
-            OrientationEventListener::constructor(context);
-        }
+            /* [in] */ IContext* context);
 
         CARAPI Run();
 

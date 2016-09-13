@@ -69,6 +69,10 @@ module
     merge("../../../car/elastos/droid/utility.car");
     }
 
+    submodule Elastos.Droid.Hardware {
+    merge("../../../car/elastos/droid/hardware2.car"); //should before view.car
+    }
+
     submodule Elastos.Droid.View {
     merge("../../../car/elastos/droid/view.car");
     }

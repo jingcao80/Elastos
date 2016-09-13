@@ -12,29 +12,57 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
+/**
+ * Helper class for receiving notifications from the SensorManager when
+ * the orientation of the device has changed.
+ *  @deprecated use {@link android.view.OrientationEventListener} instead.
+ *  This class internally uses the OrientationEventListener.
+ */
 class OrientationListener
     : public Object
-    , public IOrientationListener
 {
-public:
+private:
+    class SensorListenerInternal
+        : public Object
+        , public ISensorListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IWeakReference* host);
+
+        CARAPI OnAccuracyChanged(
+            /* [in] */ Int32 sensor,
+            /* [in] */ Int32 accuracy);
+
+        CARAPI OnSensorChanged(
+            /* [in] */ Int32 sensor,
+            /* [fl] */ ArrayOf<Float>* values);
+
+    private:
+        AutoPtr<IWeakReference> mWeakHost;
+    };
+
     class OrientationEventListenerInternal
         : public OrientationEventListener
     {
     public:
-        OrientationEventListenerInternal(
+        CARAPI constructor(
             /* [in] */ IContext* context,
-            /* [in] */ OrientationListener* host);
+            /* [in] */ IWeakReference* host);
 
-        OrientationEventListenerInternal(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ Int32 rate,
-            /* [in] */ OrientationListener* host);
+            /* [in] */ IWeakReference* host);
 
         CARAPI OnOrientationChanged(
             /* [in] */ Int32 orientation);
     private:
-        OrientationListener* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
+
 public:
     OrientationListener();
 
@@ -45,20 +73,24 @@ public:
         /* [in] */ IContext* ctx,
         /* [in] */ Int32 rate);
 
-    CARAPI Enable();
+    virtual CARAPI Enable();
 
-    CARAPI Disable();
+    virtual CARAPI Disable();
 
-    CARAPI OnAccuracyChanged(
+    virtual CARAPI OnAccuracyChanged(
         /* [in] */ Int32 sensor,
         /* [in] */ Int32 accuracy);
 
-    CARAPI OnSensorChanged(
+    virtual CARAPI OnSensorChanged(
         /* [in] */ Int32 sensor,
         /* [fl] */ ArrayOf<Float>* values);
 
+    virtual CARAPI OnOrientationChanged(
+        /* [in] */ Int32 orientation);
+
 private:
-    AutoPtr<OrientationEventListener> mOrientationEventLis;
+    AutoPtr<SensorListenerInternal> mOrientationListener;
+    AutoPtr<OrientationEventListenerInternal> mOrientationEventLis;
 };
 
 } // namespace View

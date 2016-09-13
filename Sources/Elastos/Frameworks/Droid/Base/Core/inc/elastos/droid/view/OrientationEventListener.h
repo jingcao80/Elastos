@@ -11,20 +11,19 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Hardware::ISensor;
 using Elastos::Droid::Hardware::ISensorEvent;
 using Elastos::Droid::Hardware::ISensorManager;
+using Elastos::Droid::Hardware::ISensorListener;
 using Elastos::Droid::Hardware::ISensorEventListener;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
 
-class OrientationEventListener
+class ECO_PUBLIC OrientationEventListener
     : public Object
     , public IOrientationEventListener
 {
-public:
-    CAR_INTERFACE_DECL()
-
-    class SensorEventListenerImpl
+private:
+    class ECO_LOCAL SensorEventListenerImpl
         : public Object
         , public ISensorEventListener
     {
@@ -32,7 +31,7 @@ public:
         CAR_INTERFACE_DECL()
 
         SensorEventListenerImpl(
-            /* [in] */ OrientationEventListener* hosts);
+            /* [in] */ IWeakReference* hosts);
 
         CARAPI OnSensorChanged(
             /* [in] */ ISensorEvent* event);
@@ -46,11 +45,15 @@ public:
         static const Int32 _DATA_Y = 1;
         static const Int32 _DATA_Z = 2;
 
-        OrientationEventListener* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     OrientationEventListener();
+
+    virtual ~OrientationEventListener();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -60,7 +63,7 @@ public:
         /* [in] */ Int32 rate);
 
     CARAPI RegisterListener(
-        /* [in] */ IOrientationListener* lis);
+        /* [in] */ ISensorListener* lis);
 
     CARAPI Enable();
 
@@ -69,7 +72,7 @@ public:
     CARAPI CanDetectOrientation(
         /* [out] */ Boolean* result);
 
-    CARAPI OnOrientationChanged(
+    virtual CARAPI OnOrientationChanged(
         /* [in] */ Int32 orientation);
 
 private:
@@ -82,8 +85,7 @@ private:
     Int32 mRate;
     AutoPtr<ISensor> mSensor;
     AutoPtr<ISensorEventListener> mSensorEventListener;
-    IOrientationListener* mOldListener; // weak ref
-
+    AutoPtr<ISensorListener> mOldListener;
 };
 
 } // namespace View

@@ -44,6 +44,21 @@ ECode CActivityOne::MyListener::OnClick(
     return NOERROR;
 }
 
+CActivityOne::OrientationListener::OrientationListener()
+{}
+
+CActivityOne::OrientationListener::~OrientationListener()
+{
+    Logger::I("OrientationListener", " >> Destroy OnOrientationChanged: %p", this);
+}
+
+ECode CActivityOne::OrientationListener::OnOrientationChanged(
+    /* [in] */ Int32 orientation)
+{
+    // Logger::I("OrientationListener", " >> OnOrientationChanged: %d", orientation);
+    return NOERROR;
+}
+
 //=======================================================================
 // CActivityOne
 //=======================================================================
@@ -105,6 +120,13 @@ ECode CActivityOne::OnCreate(
     AutoPtr<MyListener> l = new MyListener(this);
     view->SetOnClickListener(l.Get());
 
+    SetRequestedOrientation(IActivityInfo::SCREEN_ORIENTATION_FULL_SENSOR);
+
+    // setup orientation evnet listener.
+    mOrientationListener = new OrientationListener();
+    mOrientationListener->constructor(this);
+    mOrientationListener->Enable();
+
     return NOERROR;
 }
 
@@ -148,6 +170,27 @@ ECode CActivityOne::OnActivityResult(
     Logger::I(TAG, " >> OnActivityResult()");
     return Activity::OnActivityResult(requestCode, resultCode, data);
 }
+
+ECode CActivityOne::OnConfigurationChanged(
+    /* [in] */ IConfiguration* newConfig)
+{
+    Logger::I(TAG, " >> OnConfigurationChanged: %s", TO_CSTR(newConfig));
+
+    Int32 orientation;
+    newConfig->GetOrientation(&orientation);
+    if (orientation == IConfiguration::ORIENTATION_LANDSCAPE) {
+        Logger::I(TAG, " >> OnConfigurationChanged: LANDSCAPE");
+    }
+    else if (orientation == IConfiguration::ORIENTATION_PORTRAIT) {
+        Logger::I(TAG, " >> OnConfigurationChanged: PORTRAIT");
+    }
+    else {
+        Logger::I(TAG, " >> OnConfigurationChanged: UNDEFINED");
+    }
+
+    return Activity::OnConfigurationChanged(newConfig);
+}
+
 
 } // namespace ImageDemo
 } // namespace DevSamples

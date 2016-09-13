@@ -1,41 +1,104 @@
 #include "elastos/droid/view/OrientationListener.h"
 
+using Elastos::Droid::Hardware::EIID_ISensorListener;
+
 namespace Elastos {
 namespace Droid {
 namespace View {
 
-OrientationListener::OrientationEventListenerInternal::OrientationEventListenerInternal(
-    /* [in] */ IContext* context,
-    /* [in] */ OrientationListener* host)
+//==========================================================================
+// OrientationListener::SensorListenerInternal
+//==========================================================================
+CAR_INTERFACE_IMPL(OrientationListener::SensorListenerInternal, Object, ISensorListener)
+
+ECode OrientationListener::SensorListenerInternal::constructor(
+    /* [in] */ IWeakReference* host)
 {
-    mHost = host;
-    constructor(context);
+    mWeakHost = host;
+    return NOERROR;
 }
 
-OrientationListener::OrientationEventListenerInternal::OrientationEventListenerInternal(
+ECode OrientationListener::SensorListenerInternal::OnAccuracyChanged(
+    /* [in] */ Int32 sensor,
+    /* [in] */ Int32 accuracy)
+{
+    AutoPtr<IObject> obj;
+    mWeakHost->Resolve(EIID_IObject, (IInterface**)&obj);
+    if (obj) {
+        OrientationListener* host = (OrientationListener*)obj.Get();
+        return host->OnAccuracyChanged(sensor, accuracy);
+    }
+    return NOERROR;
+}
+
+ECode OrientationListener::SensorListenerInternal::OnSensorChanged(
+    /* [in] */ Int32 sensor,
+    /* [fl] */ ArrayOf<Float>* values)
+{
+    AutoPtr<IObject> obj;
+    mWeakHost->Resolve(EIID_IObject, (IInterface**)&obj);
+    if (obj) {
+        OrientationListener* host = (OrientationListener*)obj.Get();
+        return host->OnSensorChanged(sensor, values);
+    }
+    return NOERROR;
+}
+
+//==========================================================================
+// OrientationListener::OrientationEventListenerInternal
+//==========================================================================
+ECode OrientationListener::OrientationEventListenerInternal::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IWeakReference* host)
+{
+    mWeakHost = host;
+    return OrientationEventListener::constructor(context);
+}
+
+ECode OrientationListener::OrientationEventListenerInternal::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 rate,
-    /* [in] */ OrientationListener* host)
+    /* [in] */ IWeakReference* host)
 {
-    mHost = host;
-    constructor(context, rate);
-    RegisterListener(mHost);
+    mWeakHost = host;
+    OrientationEventListener::constructor(context, rate);
+
+    AutoPtr<IObject> obj;
+    mWeakHost->Resolve(EIID_IObject, (IInterface**)&obj);
+    if (obj) {
+        OrientationListener* hostObj = (OrientationListener*)obj.Get();
+        return RegisterListener(hostObj->mOrientationListener);
+    }
+
+    return NOERROR;
 }
 
 ECode OrientationListener::OrientationEventListenerInternal::OnOrientationChanged(
     /* [in] */ Int32 orientation)
 {
-    mHost->OnOrientationChanged(orientation);
+    AutoPtr<IObject> obj;
+    mWeakHost->Resolve(EIID_IObject, (IInterface**)&obj);
+    if (obj) {
+        OrientationListener* host = (OrientationListener*)obj.Get();
+        return host->OnOrientationChanged(orientation);
+    }
     return NOERROR;
 }
 
+//==========================================================================
+// OrientationListener
+//==========================================================================
 OrientationListener::OrientationListener()
 {}
 
 ECode OrientationListener::constructor(
     /* [in] */ IContext* ctx)
 {
-    mOrientationEventLis = new OrientationEventListenerInternal(ctx, this);
+    AutoPtr<IWeakReference> wr;
+    mOrientationListener = new SensorListenerInternal();
+    mOrientationListener->constructor(wr);
+    mOrientationEventLis = new OrientationEventListenerInternal();
+    mOrientationEventLis->constructor(ctx, wr);
     return NOERROR;
 }
 
@@ -43,7 +106,11 @@ ECode OrientationListener::constructor(
     /* [in] */ IContext* ctx,
     /* [in] */ Int32 rate)
 {
-    mOrientationEventLis = new OrientationEventListenerInternal(ctx, rate, this);
+    AutoPtr<IWeakReference> wr;
+    mOrientationListener = new SensorListenerInternal();
+    mOrientationListener->constructor(wr);
+    mOrientationEventLis = new OrientationEventListenerInternal();
+    mOrientationEventLis->constructor(ctx, rate, wr);
     return NOERROR;
 }
 
@@ -63,9 +130,16 @@ ECode OrientationListener::OnAccuracyChanged(
 {
     return NOERROR;
 }
+
 ECode OrientationListener::OnSensorChanged(
     /* [in] */ Int32 sensor,
     /* [fl] */ ArrayOf<Float>* values)
+{
+    return NOERROR;
+}
+
+ECode OrientationListener::OnOrientationChanged(
+    /* [in] */ Int32 orientation)
 {
     return NOERROR;
 }

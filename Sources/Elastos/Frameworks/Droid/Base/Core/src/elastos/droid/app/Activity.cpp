@@ -889,13 +889,7 @@ ECode Activity::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     if (DEBUG_LIFECYCLE) {
-        String temp;
-        newConfig->ToString(&temp);
-        StringBuilder sb("onConfigurationChanged ");
-        sb += ToString();
-        sb += ": ";
-        sb += temp;
-        Slogger::V(TAG, sb.ToString());
+        Slogger::V(TAG, "onConfigurationChanged %s: %s", ToString().string(), TO_CSTR(newConfig));
     }
     mCalled = TRUE;
 

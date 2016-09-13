@@ -3,10 +3,12 @@
 #define __Elastos_DevSamples_ImageDemo_CActivityOne_H__
 
 #include <elastos/droid/app/Activity.h>
+#include <elastos/droid/view/OrientationEventListener.h>
 #include "_Elastos_DevSamples_ImageDemo_CActivityOne.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::OrientationEventListener;
 
 namespace Elastos {
 namespace DevSamples {
@@ -16,6 +18,18 @@ CarClass(CActivityOne)
     , public Activity
 {
 public:
+    class OrientationListener
+        : public OrientationEventListener
+    {
+    public:
+        OrientationListener();
+
+        ~OrientationListener();
+
+        CARAPI OnOrientationChanged(
+            /* [in] */ Int32 orientation);
+    };
+
     class MyListener
         : public Object
         , public IViewOnClickListener
@@ -46,6 +60,9 @@ public:
 
     CARAPI constructor();
 
+    CARAPI OnConfigurationChanged(
+        /* [in] */ IConfiguration* newConfig);
+
 protected:
 
     CARAPI OnCreate(
@@ -69,6 +86,7 @@ private:
 
 private:
     Boolean mDestroyed;
+    AutoPtr<OrientationListener> mOrientationListener;
 };
 
 } // namespace ImageDemo

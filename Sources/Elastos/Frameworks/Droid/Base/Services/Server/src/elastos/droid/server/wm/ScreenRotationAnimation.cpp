@@ -35,12 +35,12 @@ namespace Wm {
 const Int32 ScreenRotationAnimation::H::SCREENSHOT_FREEZE_TIMEOUT;
 const Int32 ScreenRotationAnimation::H::FREEZE_TIMEOUT_VAL;
 
-ScreenRotationAnimation::H::H(
+ECode ScreenRotationAnimation::H::constructor(
     /* [in] */ ILooper* looper,
     /* [in] */ ScreenRotationAnimation* host)
-    : mHost(host)
 {
-    Handler::constructor(looper, NULL, TRUE /*async*/);
+    mHost = host;
+    return Handler::constructor(looper, NULL, FALSE, TRUE /*async*/);
 }
 
 ECode ScreenRotationAnimation::H::HandleMessage(
@@ -51,7 +51,7 @@ ECode ScreenRotationAnimation::H::HandleMessage(
     switch (what) {
         case SCREENSHOT_FREEZE_TIMEOUT: {
              if (mHost->mSurfaceControl != NULL && mHost->IsAnimating()) {
-                Slogger::E(ScreenRotationAnimation::TAG, "Exceeded Freeze timeout. Destroy layers");
+                Slogger::E(ScreenRotationAnimation::TAG, "Exceeded Freeze timeout. Destroy layers: %p", mHost);
                 mHost->Kill();
              }
              else if (mHost->mSurfaceControl != NULL){
@@ -82,16 +82,8 @@ const Int32 ScreenRotationAnimation::FREEZE_LAYER
         = CWindowManagerService::TYPE_LAYER_MULTIPLIER * 200;
 Int32 ScreenRotationAnimation::mHwrotation = 0;
 
-ScreenRotationAnimation::ScreenRotationAnimation(
-    /* [in] */ IContext* context,
-    /* [in] */ DisplayContent* displayContent,
-    /* [in] */ ISurfaceSession* session,
-    /* [in] */ Boolean inTransaction,
-    /* [in] */ Boolean forceDefaultOrientation,
-    /* [in] */ Boolean isSecure)
-    : mContext(context)
-    , mDisplayContent(displayContent)
-    , mCurRotation(0)
+ScreenRotationAnimation::ScreenRotationAnimation()
+    : mCurRotation(0)
     , mStarted(FALSE)
     , mAnimRunning(FALSE)
     , mFinishAnimReady(FALSE)
@@ -108,9 +100,29 @@ ScreenRotationAnimation::ScreenRotationAnimation(
     , mMoreStartExit(FALSE)
     , mMoreStartFrame(FALSE)
 {
+}
+
+ScreenRotationAnimation::~ScreenRotationAnimation()
+{
+    Slogger::I(TAG, " >> Destroy ScreenRotationAnimation: %p", this);
+    mHandler->RemoveMessages(H::SCREENSHOT_FREEZE_TIMEOUT);
+}
+
+ECode ScreenRotationAnimation::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ DisplayContent* displayContent,
+    /* [in] */ ISurfaceSession* session,
+    /* [in] */ Boolean inTransaction,
+    /* [in] */ Boolean forceDefaultOrientation,
+    /* [in] */ Boolean isSecure)
+{
+    mContext = context;
+    mDisplayContent = displayContent;
+
     AutoPtr<ILooper> looper;
     DisplayThread::Get()->GetLooper((ILooper**)&looper);
-    mHandler = new H(looper, this);
+    mHandler = new H();
+    mHandler->constructor(looper, this);
 
     CRect::New((IRect**)&mOriginalDisplayRect);
     CRect::New((IRect**)&mCurrentDisplayRect);
@@ -260,6 +272,7 @@ ScreenRotationAnimation::ScreenRotationAnimation(
                 "<<< CLOSE TRANSACTION ScreenRotationAnimation");
     }
     // }
+    return NOERROR;
 }
 
 Boolean ScreenRotationAnimation::HasScreenshot()
@@ -978,14 +991,14 @@ void ScreenRotationAnimation::UpdateSurfacesInTransaction()
 
     if (mSurfaceControl != NULL) {
         if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
-            // if (DEBUG_STATE) Slogger::V(TAG, "Exit animations done, hiding screenshot surface");
+            if (DEBUG_STATE) Slogger::V(TAG, "Exit animations done, hiding screenshot surface");
             mSurfaceControl->Hide();
         }
     }
 
     if (mCustomBlackFrame != NULL) {
         if (!mMoreStartFrame && !mMoreFinishFrame && !mMoreRotateFrame) {
-            // if (DEBUG_STATE) Slogger::V(TAG, "Frame animations done, hiding black frame");
+            if (DEBUG_STATE) Slogger::V(TAG, "Frame animations done, hiding black frame");
             mCustomBlackFrame->Hide();
         }
         else {
@@ -997,7 +1010,7 @@ void ScreenRotationAnimation::UpdateSurfacesInTransaction()
 
     if (mExitingBlackFrame != NULL) {
         if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
-            // if (DEBUG_STATE) Slogger::V(TAG, "Frame animations done, hiding exiting frame");
+            if (DEBUG_STATE) Slogger::V(TAG, "Frame animations done, hiding exiting frame");
             mExitingBlackFrame->Hide();
         }
         else {
@@ -1016,7 +1029,7 @@ void ScreenRotationAnimation::UpdateSurfacesInTransaction()
 
     if (mEnteringBlackFrame != NULL) {
         if (!mMoreStartEnter && !mMoreFinishEnter && !mMoreRotateEnter) {
-            // if (DEBUG_STATE) Slogger::V(TAG, "Frame animations done, hiding entering frame");
+            if (DEBUG_STATE) Slogger::V(TAG, "Frame animations done, hiding entering frame");
             mEnteringBlackFrame->Hide();
         }
         else {
@@ -1035,13 +1048,13 @@ Boolean ScreenRotationAnimation::StepAnimationLocked(
     /* [in] */ Int64 now)
 {
     if (!HasAnimations()) {
-        // if (DEBUG_STATE) Slogger::V(TAG, "Step: no animations running");
+        if (DEBUG_STATE) Slogger::V(TAG, "Step: no animations running");
         mFinishAnimReady = FALSE;
         return FALSE;
     }
 
     if (!mAnimRunning) {
-        // if (DEBUG_STATE) Slogger::V(TAG, "Step: starting start, finish, rotate");
+        if (DEBUG_STATE) Slogger::V(TAG, "Step: starting start, finish, rotate");
         if (TWO_PHASE_ANIMATION) {
             if (mStartEnterAnimation != NULL) {
                 mStartEnterAnimation->SetStartTime(now);

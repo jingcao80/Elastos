@@ -1172,6 +1172,14 @@ ECode CAudioService::AudioPolicyProxy::ProxyDied()
 //  CAudioService::AudioOrientationEventListener
 //==============================================================================
 
+ECode CAudioService::AudioOrientationEventListener::constructor(
+    /* [in] */ CAudioService* host,
+    /* [in] */ IContext* context)
+{
+    mHost = host;
+    return OrientationEventListener::constructor(context);
+}
+
 ECode CAudioService::AudioOrientationEventListener::Run()
 {
     //Even though we're responding to phone orientation events,
@@ -3272,7 +3280,8 @@ ECode CAudioService::constructor(
         dp->GetRotation(&mDeviceRotation);
         Logger::V(TAG, "monitoring device rotation, initial=%d", mDeviceRotation);
 
-        mOrientationListener = new AudioOrientationEventListener(this, mContext);
+        mOrientationListener = new AudioOrientationEventListener();
+        mOrientationListener->constructor(this, mContext);
         mOrientationListener->Enable();
 
         // initialize rotation in AudioSystem

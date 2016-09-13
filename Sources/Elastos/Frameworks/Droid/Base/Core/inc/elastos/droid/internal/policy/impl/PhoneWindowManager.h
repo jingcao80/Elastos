@@ -125,7 +125,7 @@ protected:
     public:
         TO_STRING_IMPL("PhoneWindowManager::MyWakeGestureListener")
 
-        MyWakeGestureListener(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
             /* [in] */ PhoneWindowManager* host);
@@ -313,7 +313,7 @@ protected:
     public:
         TO_STRING_IMPL("PhoneWindowManager::MyOrientationListener")
 
-        MyOrientationListener(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
             /* [in] */ PhoneWindowManager* host);
