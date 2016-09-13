@@ -9,10 +9,10 @@ module
     merge("../../../car/org/conscrypt/IAbstractSessionContext.car");
     merge("../../../car/org/conscrypt/IByteArray.car");
     merge("../../../car/org/conscrypt/IChainStrengthAnalyzer.car");
-    // merge("../../../car/org/conscrypt/IClientSessionContext.car");
+    merge("../../../car/org/conscrypt/IClientSessionContext.car");
     merge("../../../car/org/conscrypt/ICryptoUpcalls.car");
     merge("../../../car/org/conscrypt/IDefaultSSLContextImpl.car");
-    // merge("../../../car/org/conscrypt/IFileClientSessionCache.car");
+    merge("../../../car/org/conscrypt/IFileClientSessionCache.car");
     merge("../../../car/org/conscrypt/IKeyManagerFactoryImpl.car");
     merge("../../../car/org/conscrypt/IKeyManagerImpl.car");
     merge("../../../car/org/conscrypt/INativeCrypto.car");
@@ -22,7 +22,7 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLCipher.car");
     merge("../../../car/org/conscrypt/IOpenSSLCipherContext.car");
     merge("../../../car/org/conscrypt/IOpenSSLCipherRSA.car");
-    // merge("../../../car/org/conscrypt/IOpenSSLContextImpl.car");
+    merge("../../../car/org/conscrypt/IOpenSSLContextImpl.car");
     merge("../../../car/org/conscrypt/IOpenSSLDHKeyFactory.car");
     merge("../../../car/org/conscrypt/IOpenSSLDHKeyPairGenerator.car");
     merge("../../../car/org/conscrypt/IOpenSSLDHPrivateKey.car");
@@ -49,10 +49,10 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLX509CRL.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509CertPath.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509Certificate.car");
-    // merge("../../../car/org/conscrypt/IPSKKeyManager.car");
+    merge("../../../car/org/conscrypt/IPSKKeyManager.car");
     // merge("../../../car/org/conscrypt/ISSLClientSessionCache.car");
     merge("../../../car/org/conscrypt/ISSLNullSession.car");
-    // merge("../../../car/org/conscrypt/ISSLParametersImpl.car");
+    merge("../../../car/org/conscrypt/ISSLParametersImpl.car");
     merge("../../../car/org/conscrypt/ISSLRecordProtocol.car");
     merge("../../../car/org/conscrypt/ISSLServerSessionCache.car");
     merge("../../../car/org/conscrypt/IServerSessionContext.car");
