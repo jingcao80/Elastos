@@ -2,9 +2,11 @@
 #include "X509CRL.h"
 #include "CCertificateFactoryHelper.h"
 #include "CByteArrayInputStream.h"
+#include "Arrays.h"
 
 using Elastos::IO::IInputStream;
 using Elastos::IO::CByteArrayInputStream;
+using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace Security {
@@ -33,7 +35,7 @@ ECode X509CRL::Equals(
     ECode ec;
     FAIL_GOTO(ec = GetEncoded((ArrayOf<Byte>**)&encode), ERROR_PROCESS)
     FAIL_GOTO(ec = reinterpret_cast<X509CRL*>(other->Probe(EIID_X509CRL))->GetEncoded((ArrayOf<Byte>**)&oEncode), ERROR_PROCESS)
-    *result = encode->Equals(oEncode);
+    *result = Arrays::Equals(encode, oEncode);
     return NOERROR;
 ERROR_PROCESS:
     if ((unsigned Int32)ec == E_CRL_EXCEPTION) {

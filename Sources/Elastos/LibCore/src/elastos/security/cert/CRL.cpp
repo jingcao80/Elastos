@@ -1,5 +1,5 @@
 
-#include "CRL.h"
+#include "security/cert/CRL.h"
 
 namespace Elastos {
 namespace Security {
@@ -12,7 +12,7 @@ CRL::CRL(
 {}
 
 ECode CRL::GetType(
-    /* [out] */ String* type) const
+    /* [out] */ String* type)
 {
     VALIDATE_NOT_NULL(type)
     *type = mType;

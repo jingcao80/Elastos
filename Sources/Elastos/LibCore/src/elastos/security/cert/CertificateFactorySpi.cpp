@@ -1,5 +1,5 @@
 
-#include "CertificateFactorySpi.h"
+#include "security/cert/CertificateFactorySpi.h"
 
 namespace Elastos {
 namespace Security {

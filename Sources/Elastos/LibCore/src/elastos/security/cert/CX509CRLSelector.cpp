@@ -7,6 +7,7 @@
 #include "CDate.h"
 #include "X509CRL.h"
 
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CString;
@@ -48,7 +49,7 @@ ECode CX509CRLSelector::SetIssuers(
         AutoPtr<IInterface> issuer;
         it->GetNext((IInterface**)&issuer);
         String name;
-        IX500Principal::Probe(issuer)->GetNameEx(IX500Principal::CANONICAL, &name);
+        IX500Principal::Probe(issuer)->GetName(IX500Principal::CANONICAL, &name);
         AutoPtr<ICharSequence> cs;
         CString::New(name, (ICharSequence**)&cs);
         Boolean isModified;
@@ -101,7 +102,7 @@ ECode CX509CRLSelector::AddIssuer(
         CArrayList::New((IArrayList**)&mIssuerNames);
     }
     String name;
-    issuer->GetNameEx(IX500Principal::CANONICAL, &name);
+    issuer->GetName(IX500Principal::CANONICAL, &name);
     Boolean isContained;
     AutoPtr<ICharSequence> cs;
     CString::New(name, (ICharSequence**)&cs);
@@ -126,12 +127,13 @@ ECode CX509CRLSelector::AddIssuer(
         CX500Principal::New(name, (IX500Principal**)&ixp);
         mIssuerPrincipals->Add(ixp.Get(), &isModified);
     }
-    return mIssuerPrincipals->Add(issuer, isModified);
+    return mIssuerPrincipals->Add(issuer);
 }
 
 ECode CX509CRLSelector::AddIssuerName(
-    /* [in] */ const String& iss_name)
+    /* [in] */ const String& _iss_name)
 {
+    String iss_name = _iss_name;
     if (mIssuerNames == NULL) {
         CArrayList::New((IArrayList**)&mIssuerNames);
     }
@@ -280,40 +282,40 @@ ECode CX509CRLSelector::ToString(
     /* [out] */ String *str)
 {
     StringBuilder result;
-    result.AppendCStr("X509CRLSelector:\n[");
+    result.Append("X509CRLSelector:\n[");
     if (mIssuerNames) {
-        result.AppendCStr("\n  IssuerNames:\n  [");
+        result.Append("\n  IssuerNames:\n  [");
         Int32 size;
         mIssuerNames->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
-            result.AppendCStr("\n    ");
+            result.Append("\n    ");
             AutoPtr<IInterface> elem;
             mIssuerNames->Get(i, (IInterface**)&elem);
             String name;
             ICharSequence::Probe(elem)->ToString(&name);
-            result.AppendString(name);
+            result.Append(name);
         }
-        result.AppendCStr("\n  ]");
+        result.Append("\n  ]");
     }
     if (mMinCRL != NULL) {
-        result.AppendCStr("\n  minCRL: ");
-        result.AppendObject(mMinCRL.Get());
+        result.Append("\n  minCRL: ");
+        result.Append(mMinCRL.Get());
     }
     if (mMaxCRL != NULL) {
-        result.AppendCStr("\n  mMaxCRL: ");
-        result.AppendObject(mMaxCRL.Get());
+        result.Append("\n  mMaxCRL: ");
+        result.Append(mMaxCRL.Get());
     }
     if (mDateAndTime != -1) {
-        result.AppendCStr("\n  dateAndTime: ");
+        result.Append("\n  dateAndTime: ");
         AutoPtr<IDate> dt;
         CDate::New(mDateAndTime, (IDate**)&dt);
-        result.AppendObject(dt.Get());
+        result.Append(dt.Get());
     }
     if (mCertificateChecking != NULL) {
-        result.AppendCStr("\n  certificateChecking: ");
-        result.AppendObject(mCertificateChecking.Get());
+        result.Append("\n  certificateChecking: ");
+        result.Append(mCertificateChecking.Get());
     }
-    result.AppendCStr("\n]");
+    result.Append("\n]");
     return result.ToString(str);
 }
 
@@ -337,7 +339,7 @@ ECode CX509CRLSelector::Match(
         AutoPtr<IX500Principal> principal;
         crlist->GetIssuerX500Principal((IX500Principal**)&principal);
         String name;
-        principal->GetNameEx(IX500Principal::CANONICAL, &name);
+        principal->GetName(IX500Principal::CANONICAL, &name);
         Boolean isContained;
         AutoPtr<ICharSequence> cs;
         CString::New(name, (ICharSequence**)&cs);
@@ -390,7 +392,8 @@ ECode CX509CRLSelector::Clone(
     AutoPtr<IX509CRLSelector> result;
     CX509CRLSelector::New((IX509CRLSelector**)&result);
     if (mIssuerNames != NULL) {
-        CArrayList::New(mIssuerNames, (IArrayList**)&(((CX509CRLSelector*)result.Get())->mIssuerNames));
+        CArrayList::New(ICollection::Probe(mIssuerNames),
+            (IArrayList**)&(((CX509CRLSelector*)result.Get())->mIssuerNames));
     }
     *obj = result.Get();
     REFCOUNT_ADD(*obj)

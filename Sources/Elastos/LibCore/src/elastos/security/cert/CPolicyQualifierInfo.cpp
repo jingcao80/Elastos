@@ -47,11 +47,11 @@ ECode CPolicyQualifierInfo::ToString(
     /* [out] */ String *str)
 {
     StringBuilder sb("PolicyQualifierInfo: [\npolicyQualifierId: ");
-    sb.AppendString(mPolicyQualifierId);
-    sb.AppendCStr("\npolicyQualifier: \n");
+    sb.Append(mPolicyQualifierId);
+    sb.Append("\npolicyQualifier: \n");
     //Apache...Todo late
     //sb.append(Array.toString(policyQualifier, " "));
-    sb.AppendCStr("]");
+    sb.Append("]");
     return sb.ToString(str);
 
 }
@@ -68,13 +68,14 @@ ECode CPolicyQualifierInfo::constructor(
     mEncoded = ArrayOf<Byte>::Alloc(encoded->GetLength());
     mEncoded->Copy(0, encoded, 0, mEncoded->GetLength());
 
+    assert(0 && "TODO");
     // DER Decoding:
     //Apache...Todo late
     /*
     Object[] decoded = (Object[]) org.apache.harmony.security.x509.PolicyQualifierInfo.ASN1
                 .decode(this.encoded);
-    policyQualifierId = ObjectIdentifier.toString((int[]) decoded[0]);
-    policyQualifier = (byte[]) decoded[1];
+    mPolicyQualifierId = ObjectIdentifier.toString((int[]) decoded[0]);
+    mPolicyQualifier = (byte[]) decoded[1];
     */
     return E_NOT_IMPLEMENTED;
 }

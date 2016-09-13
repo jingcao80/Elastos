@@ -19,10 +19,10 @@ ECode CPKIXBuilderParameters::ToString(
     StringBuilder sb("[\n");
     String base;
     PKIXParameters::ToString(&base);
-    sb.AppendString(base);
-    sb.AppendCStr(" Max Path Length: ");
-    sb.AppendInt32(mMaxPathLength);
-    sb.AppendCStr("\n]");
+    sb.Append(base);
+    sb.Append(" Max Path Length: ");
+    sb.Append(mMaxPathLength);
+    sb.Append("\n]");
     return sb.ToString(str);
 
 }

@@ -3,15 +3,18 @@
 #define __ELASTOS_SECURITY_CERT_CCOLLECTIONCERTSTOREPARAMETERS_H__
 
 #include "_Elastos_Security_Cert_CCollectionCertStoreParameters.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "core/Object.h"
 
 using Elastos::Utility::ICollection;
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Security {
 namespace Cert {
 
 CarClass(CCollectionCertStoreParameters)
-    : public Object
+    , public Object
     , public ICollectionCertStoreParameters
     , public ICertStoreParameters
     , public ICloneable
@@ -42,7 +45,7 @@ private:
     static const AutoPtr<ICollection> mDefaultCollection;
     // A <code>Collection</code> of <code>Certificate</code>s
     // and <code>CRL</code>s
-    const AutoPtr<ICollection> mCollection;
+    AutoPtr<ICollection> mCollection;
 };
 
 }

@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_CERT_CPOLICYQUALIFIERINFO_H__
 
 #include "_Elastos_Security_Cert_CPolicyQualifierInfo.h"
+#include "core/Object.h"
 
 namespace Elastos {
 namespace Security {
@@ -34,13 +35,13 @@ public:
 
 private:
     // This PolicyQualifierInfo DER encoding
-    const AutoPtr<ArrayOf<Byte> > mEncoded;
+    AutoPtr<ArrayOf<Byte> > mEncoded;
     // This PolicyQualifierInfo policy qualifier id -
     // OID represented as String containing non-negative integers
     // separated by periods
-    const String mPolicyQualifierId;
+    String mPolicyQualifierId;
     // DER encoding of the policy qualifier - part of encoded
-    const AutoPtr<ArrayOf<Byte> > mPolicyQualifier;
+    AutoPtr<ArrayOf<Byte> > mPolicyQualifier;
 };
 
 }

@@ -1,7 +1,8 @@
 
-#include "CLDAPCertStoreParameters.h"
-#include "StringBuilder.h"
+#include "security/cert/CLDAPCertStoreParameters.h"
+#include "core/StringBuilder.h"
 
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::StringBuilder;
 
 namespace Elastos {
@@ -46,12 +47,12 @@ ECode CLDAPCertStoreParameters::ToString(
     StringBuilder sb("LDAPCertStoreParameters: [\n serverName: ");
     String sn;
     GetServerName(&sn);
-    sb.AppendString(sn);
-    sb.AppendCStr("\n port: ");
+    sb.Append(sn);
+    sb.Append("\n port: ");
     Int32 port;
     GetPort(&port);
-    sb.AppendInt32(port);
-    sb.AppendCStr("\n]");
+    sb.Append(port);
+    sb.Append("\n]");
     return sb.ToString(str);
 }
 

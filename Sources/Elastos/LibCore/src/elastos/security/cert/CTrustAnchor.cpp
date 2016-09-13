@@ -3,6 +3,7 @@
 #include "StringBuilder.h"
 #include "CX500Principal.h"
 
+using Elastos::Security::IPrincipal;
 using Elastosx::Security::Auth::X500::CX500Principal;
 using Elastos::Core::StringBuilder;
 
@@ -66,27 +67,27 @@ ECode CTrustAnchor::ToString(
 {
     StringBuilder sb("TrustAnchor: [\n");
     if (mTrustedCert) {
-        sb.AppendCStr("Trusted CA certificate: ");
-        sb.AppendObject(mTrustedCert.Get());
-        sb.AppendCStr("\n");
+        sb.Append("Trusted CA certificate: ");
+        sb.Append(mTrustedCert);
+        sb.Append("\n");
     }
     if (mCaPrincipal) {
-        sb.AppendCStr("Trusted CA Name: ");
-        sb.AppendObject(mCaPrincipal.Get());
-        sb.AppendCStr("\n");
+        sb.Append("Trusted CA Name: ");
+        sb.Append(mCaPrincipal);
+        sb.Append("\n");
     }
     if (mCaPublicKey) {
-        sb.AppendCStr("Trusted CA Public Key: ");
-        sb.AppendObject(mCaPublicKey.Get());
-        sb.AppendCStr("\n");
+        sb.Append("Trusted CA Public Key: ");
+        sb.Append(mCaPublicKey);
+        sb.Append("\n");
     }
     // FIXME if needed:
     if (mNameConstraints->GetLength()) {
-        sb.AppendCStr("Name Constraints:\n");
+        sb.Append("Name Constraints:\n");
         //Apache...Todo late
         //sb.append(Array.toString(nameConstraints, "    "));
     }
-    sb.AppendCStr("\n]");
+    sb.Append("\n]");
     return sb.ToString(str);
 }
 
@@ -170,7 +171,7 @@ ECode CTrustAnchor::constructor(
         mNameConstraints = NULL;
     }
     mTrustedCert = NULL;
-    caPrincipal->GetName(const_cast<String*>(&mCaName));
+    return IPrincipal::Probe(caPrincipal)->GetName(&mCaName);
 }
 
 ECode CTrustAnchor::ProcessNameConstraints()

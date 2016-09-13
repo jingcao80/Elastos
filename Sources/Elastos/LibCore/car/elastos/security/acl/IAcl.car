@@ -56,7 +56,7 @@ module
          */
         SetName(
             [in] IPrincipal* caller,
-            [in] String name);
+            [in] String name); // throws NotOwnerException;
 
         /**
          * Returns the name of this <i>ACL</i> instance.
@@ -85,7 +85,7 @@ module
         AddEntry(
             [in] IPrincipal* caller,
             [in] IAclEntry* entry,
-            [out] Boolean* result);
+            [out] Boolean* result); // throws NotOwnerException;
 
         /**
          * Removes an {@code AclEntry} from this <i>ACL</i> instance.
@@ -103,7 +103,7 @@ module
         RemoveEntry(
             [in] IPrincipal* caller,
             [in] IAclEntry* entry,
-            [out] Boolean* result);
+            [out] Boolean* result); // throws NotOwnerException;
 
         /**
          * Returns the set of allowed permissions for the specified {@code

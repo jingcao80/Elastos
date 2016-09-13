@@ -1,17 +1,22 @@
 
-#include "CCollectionCertStoreParameters.h"
-#include "StringBuilder.h"
+#include "security/cert/CCollectionCertStoreParameters.h"
+#include "core/StringBuilder.h"
+#include "Collections.h"
 
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Collections;
 
 namespace Elastos {
 namespace Security {
 namespace Cert {
 
-const AutoPtr<ICollection> CCollectionCertStoreParameters::mDefaultCollection; // = Collections.EMPTY_SET;
+const AutoPtr<ICollection> CCollectionCertStoreParameters::mDefaultCollection
+        = ICollection::Probe(Collections::EMPTY_SET);
 
 CAR_OBJECT_IMPL(CCollectionCertStoreParameters)
-CAR_INTERFACE_IMPL_3(CCollectionCertStoreParameters, Object, ICollectionCertStoreParameters, ICertStoreParameters, ICloneable)
+CAR_INTERFACE_IMPL_3(CCollectionCertStoreParameters, Object, \
+    ICollectionCertStoreParameters, ICertStoreParameters, ICloneable)
 
 ECode CCollectionCertStoreParameters::Clone(
     /* [out] */ IInterface **object)
@@ -40,8 +45,8 @@ ECode CCollectionCertStoreParameters::ToString(
     AutoPtr<ICollection> coll;
     GetCollection((ICollection**)&coll);
     String strCol = Object::ToString(coll);
-    sb.AppendString(strCol);
-    sb.AppendCStr("\n]");
+    sb.Append(strCol);
+    sb.Append("\n]");
     return sb.ToString(str);
 }
 

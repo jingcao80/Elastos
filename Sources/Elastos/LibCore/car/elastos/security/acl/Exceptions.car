@@ -11,4 +11,13 @@ module
     const E_ACL_NOT_FOUND_EXCEPTION                         = 0xAC010000;
     const E_LAST_OWNER_EXCEPTION                            = 0xAC020000;
     const E_NOT_OWNER_EXCEPTION                             = 0xAC030000;
+    const E_CERTPATH_BUILDER_EXCEPTION                      = 0xAC040000;
+    const E_CERTPATH_VALIDATOR_EXCEPTION                    = 0xAC050000;
+    const E_CERTSTORE_EXCEPTION                             = 0xAC060000;
+    const E_CERTIFICATEENCODING_EXCEPTION                   = 0xAC070000;
+    const E_CERTIFICATE_EXCEPTION                           = 0xAC080000;
+    const E_CERTIFICATEEXPIRED_EXCEPTION                    = 0xAC090000;
+    const E_CERTIFICATENOTYETVALID_EXCEPTION                = 0xAC0A0000;
+    const E_CERTIFICATEPARSING_EXCEPTION                    = 0xAC0B0000;
+    const E_CERTIFICATEREVOKED_EXCEPTION                    = 0xAC0C0000;
 }

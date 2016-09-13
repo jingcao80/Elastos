@@ -1,6 +1,6 @@
 
-#include "CertPathValidator.h"
-#include "CSecurity.h"
+#include "security/cert/CertPathValidator.h"
+#include "security/CSecurity.h"
 
 using Elastos::Security::ISecurity;
 using Elastos::Security::CSecurity;
@@ -21,7 +21,7 @@ const String CertPathValidator::PROPERTY_NAME(String("certpathvalidator.type"));
 
 // Default value of CertPathBuilder type. It returns if certpathbuild.type
 // property is not defined in java.security file
-const String CertPathValidator::DEFAULTPROPERTY(String("PKIX"));
+const String CertPathValidator::DEFAULT_PROPERTY(String("PKIX"));
 
 CAR_INTERFACE_IMPL(CertPathValidator, Object, ICertPathValidator)
 ECode CertPathValidator::GetAlgorithm(

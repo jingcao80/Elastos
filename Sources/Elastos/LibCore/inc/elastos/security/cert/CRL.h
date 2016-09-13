@@ -2,6 +2,9 @@
 #ifndef __ELASTOS_SECURITY_CERT_CRL_H__
 #define __ELASTOS_SECURITY_CERT_CRL_H__
 
+#include "Elastos.CoreLibrary.Security.h"
+#include "core/Object.h"
+
 using Elastos::Security::ICertificate;
 
 namespace Elastos {
@@ -21,7 +24,7 @@ public:
      * @return the type of this CRL.
      */
     CARAPI GetType(
-        /* [out] */ String* type) const;
+        /* [out] */ String* type);
 
     /**
      * Returns whether the specified certificate is revoked by this CRL.

@@ -2,8 +2,11 @@
 #ifndef __ELASTOS_SECURITY_CERT_PKIXCERTPATHVALIDATORRESULT_H__
 #define __ELASTOS_SECURITY_CERT_PKIXCERTPATHVALIDATORRESULT_H__
 
+#include "Elastos.CoreLibrary.Security.h"
+#include "core/Object.h"
 
 using Elastos::Security::IPublicKey;
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Security {

@@ -2,12 +2,14 @@
 #ifndef __ELASTOS_SECURITY_CERT_PKIXPARAMETERS_H__
 #define __ELASTOS_SECURITY_CERT_PKIXPARAMETERS_H__
 
-#include "Elastos.CoreLibrary_server.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "core/Object.h"
 
 using Elastos::Utility::ISet;
 using Elastos::Utility::IList;
 using Elastos::Utility::IDate;
 using Elastos::Security::IKeyStore;
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Security {

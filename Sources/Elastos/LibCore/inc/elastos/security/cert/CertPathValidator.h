@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_SECURITY_CERT_CERTPATHVALIDATOR_H__
 #define __ELASTOS_SECURITY_CERT_CERTPATHVALIDATOR_H__
 
-#include "Object.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::Security::IProvider;

@@ -1,9 +1,10 @@
 
-#include "CertStore.h"
-#include "CSecurity.h"
+#include "security/cert/CertStore.h"
+#include "security/CSecurity.h"
 
 using Elastos::Security::CSecurity;
 using Elastos::Security::ISecurity;
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Security {
@@ -130,10 +131,11 @@ ECode CertStore::GetCertStoreParameters(
 {
     if (mCertStoreParams == NULL) {
         return NOERROR;
-    } else {
+    }
+    else {
         AutoPtr<IInterface> clonedObj;
-        mCertStoreParams->Clone((IInterface**)&clonedObj);
-        *parameters = clonedObj;
+        ICloneable::Probe(mCertStoreParams)->Clone((IInterface**)&clonedObj);
+        *parameters = ICertStoreParameters::Probe(clonedObj);
         REFCOUNT_ADD(*parameters)
         return NOERROR;
     }
@@ -159,8 +161,8 @@ CertStore::CertStore(
     /* [in] */ const String& type,
     /* [in] */ ICertStoreParameters* params)
     : mProvider(provider)
-    , mType(type)
     , mSpiImpl(storeSpi)
+    , mType(type)
     , mCertStoreParams(params)
 {}
 

@@ -8,11 +8,13 @@
 #include "StringBuilder.h"
 #include "CDate.h"
 
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IEnumeration;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::IListIterator;
-using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::CDate;
@@ -21,15 +23,15 @@ using Elastos::Utility::CDate;
     AutoPtr<INTERFACE_NAME> clonedObj; \
     CLASS_NAME::New((INTERFACE_NAME**)&clonedObj); \
     /* copy fields containing references to mutable objects */ \
-    if (mCertStores) { \
+    if (mCertStores != NULL) { \
         AutoPtr<IArrayList> cs; \
-        CArrayList::New(mCertStores.Get(), (IArrayList**)&cs); \
-        ((PKIXParameters*)(CLASS_NAME*)clonedObj.Get())->mCertStores = cs; \
+        CArrayList::New(ICollection::Probe(mCertStores), (IArrayList**)&cs); \
+        ((PKIXParameters*)(CLASS_NAME*)clonedObj.Get())->mCertStores = IList::Probe(cs); \
     } \
-    if (mCertPathCheckers) { \
+    if (mCertPathCheckers != NULL) { \
         AutoPtr<IArrayList> al; \
-        CArrayList::New(mCertPathCheckers.Get(), (IArrayList**)&al); \
-        ((PKIXParameters*)(CLASS_NAME*)clonedObj.Get())->mCertPathCheckers = al; \
+        CArrayList::New(ICollection::Probe(mCertPathCheckers), (IArrayList**)&al); \
+        ((PKIXParameters*)(CLASS_NAME*)clonedObj.Get())->mCertPathCheckers = IList::Probe(al); \
     } \
     *obj = clonedObj.Get(); \
     REFCOUNT_ADD(*obj) \
@@ -39,7 +41,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-CAR_INTERFACE_IMPL_2(PKIXParameters, Object, IPKIXParameters, ICertPathParameters, ICloneable)
+CAR_INTERFACE_IMPL_3(PKIXParameters, Object, IPKIXParameters, ICertPathParameters, ICloneable)
 PKIXParameters::PKIXParameters()
     : mRevocationEnabled(TRUE)
     , mExplicitPolicyRequired(FALSE)
@@ -68,7 +70,7 @@ ECode PKIXParameters::SetTrustAnchors(
     CheckTrustAnchors(trustAnchors);
     // make shallow copy
     mTrustAnchors = NULL;
-    return CHashSet::New(trustAnchors, (ISet**)&mTrustAnchors);
+    return CHashSet::New(ICollection::Probe(trustAnchors), (ISet**)&mTrustAnchors);
 }
 
 ECode PKIXParameters::IsAnyPolicyInhibited(
@@ -76,6 +78,7 @@ ECode PKIXParameters::IsAnyPolicyInhibited(
 {
     VALIDATE_NOT_NULL(anyPolicyInhibited)
     *anyPolicyInhibited = mAnyPolicyInhibited;
+    return NOERROR;
 }
 
 ECode PKIXParameters::SetAnyPolicyInhibited(
@@ -107,10 +110,10 @@ ECode PKIXParameters::GetCertPathCheckers(
     AutoPtr<IListIterator> it;
     mCertPathCheckers->GetListIterator((IListIterator**)&it);
     Boolean hasNext;
-    while ((it->HasNext(&hasNext), hasNext)) {
+    while ((IIterator::Probe(it)->HasNext(&hasNext), hasNext)) {
         AutoPtr<IInterface> elem, clonedElem;
-        it->GetNext((IInterface**)&elem);
-        IPKIXCertPathChecker::Probe(elem)->Clone((IInterface**)&clonedElem);
+        IIterator::Probe(it)->GetNext((IInterface**)&elem);
+        ICloneable::Probe(elem)->Clone((IInterface**)&clonedElem);
         Boolean isModified;
         modifiableList->Add(clonedElem, &isModified);
     }
@@ -137,10 +140,10 @@ ECode PKIXParameters::SetCertPathCheckers(
     AutoPtr<IListIterator> it;
     certPathCheckers->GetListIterator((IListIterator**)&it);
     Boolean hasNext;
-    while ((it->HasNext(&hasNext), hasNext)) {
+    while ((IIterator::Probe(it)->HasNext(&hasNext), hasNext)) {
         AutoPtr<IInterface> elem, clonedElem;
-        it->GetNext((IInterface**)&elem);
-        IPKIXCertPathChecker::Probe(elem)->Clone((IInterface**)&clonedElem);
+        IIterator::Probe(it)->GetNext((IInterface**)&elem);
+        ICloneable::Probe(elem)->Clone((IInterface**)&clonedElem);
         Boolean isModified;
         mCertPathCheckers->Add(clonedElem, &isModified);
     }
@@ -161,7 +164,7 @@ ECode PKIXParameters::AddCertPathChecker(
     }
     // add a copy to avoid possible modifications
     AutoPtr<IInterface> elem;
-    checker->Clone((IInterface**)&elem);
+    ICloneable::Probe(checker)->Clone((IInterface**)&elem);
     Boolean isModified;
     return mCertPathCheckers->Add(elem, &isModified);
 }
@@ -183,7 +186,7 @@ ECode PKIXParameters::GetCertStores(
     }
     // List is not empty - do shallow copy
     AutoPtr<IArrayList> modifiableList;
-    CArrayList::New(mCertStores, (IArrayList**)&modifiableList);
+    CArrayList::New(ICollection::Probe(mCertStores), (IArrayList**)&modifiableList);
     //return Collections.unmodifiableList(modifiableList);
     return E_NOT_IMPLEMENTED;
 }
@@ -202,7 +205,7 @@ ECode PKIXParameters::SetCertStores(
     }
     // non-empty list provided - do shallow copy
     mCertStores = NULL;
-    return CArrayList::New(certStores, (IList**)&mCertStores);
+    return CArrayList::New(ICollection::Probe(certStores), (IList**)&mCertStores);
 }
 
 ECode PKIXParameters::AddCertStore(
@@ -285,7 +288,7 @@ ECode PKIXParameters::GetInitialPolicies(
     }
     // List is not empty - do shallow copy
     AutoPtr<ISet> modifiableSet;
-    CHashSet::New(mInitialPolicies, (ISet**)&modifiableSet);
+    CHashSet::New(ICollection::Probe(mInitialPolicies), (ISet**)&modifiableSet);
     //return Collections.unmodifiableSet(modifiableSet);
     return E_NOT_IMPLEMENTED;
 }
@@ -304,7 +307,7 @@ ECode PKIXParameters::SetInitialPolicies(
     }
     // non-empty list provided - do shallow copy
     mInitialPolicies = NULL;
-    return CHashSet::New(initialPolicies, (ISet**)&mInitialPolicies);
+    return CHashSet::New(ICollection::Probe(initialPolicies), (ISet**)&mInitialPolicies);
 }
 
 ECode PKIXParameters::IsPolicyMappingInhibited(
@@ -373,7 +376,7 @@ ECode PKIXParameters::GetTargetCertConstraints(
     VALIDATE_NOT_NULL(targetCertConstraints)
     AutoPtr<IInterface> cs;
     if (mTargetCertConstraints) {
-        mTargetCertConstraints->Clone((IInterface**)&cs);
+        ICloneable::Probe(mTargetCertConstraints)->Clone((IInterface**)&cs);
     }
     *targetCertConstraints = ICertSelector::Probe(cs);
     REFCOUNT_ADD(*targetCertConstraints)
@@ -388,7 +391,7 @@ ECode PKIXParameters::SetTargetCertConstraints(
     }
     else {
         AutoPtr<IInterface> cc;
-        targetCertConstraints->Clone((IInterface**)&cc);
+        ICloneable::Probe(targetCertConstraints)->Clone((IInterface**)&cc);
         mTargetCertConstraints = ICertSelector::Probe(cc);
     }
     return NOERROR;
@@ -414,49 +417,49 @@ ECode PKIXParameters::ToString(
     /* [out] */ String *str)
 {
     StringBuilder sb("[\n Trust Anchors: ");
-    sb.AppendObject(mTrustAnchors.Get());
-    sb.AppendCStr("\n Revocation Enabled: ");
-    sb.AppendBoolean(mRevocationEnabled);
-    sb.AppendCStr("\n Explicit Policy Required: ");
-    sb.AppendBoolean(mExplicitPolicyRequired);
-    sb.AppendCStr("\n Policy Mapping Inhibited: ");
-    sb.AppendBoolean(mPolicyMappingInhibited);
-    sb.AppendCStr("\n Any Policy Inhibited: ");
-    sb.AppendBoolean(mAnyPolicyInhibited);
-    sb.AppendCStr("\n Policy Qualifiers Rejected: ");
-    sb.AppendBoolean(mPolicyQualifiersRejected);
-    sb.AppendCStr("\n Initial Policy OIDs: ");
+    sb.Append(mTrustAnchors.Get());
+    sb.Append("\n Revocation Enabled: ");
+    sb.Append(mRevocationEnabled);
+    sb.Append("\n Explicit Policy Required: ");
+    sb.Append(mExplicitPolicyRequired);
+    sb.Append("\n Policy Mapping Inhibited: ");
+    sb.Append(mPolicyMappingInhibited);
+    sb.Append("\n Any Policy Inhibited: ");
+    sb.Append(mAnyPolicyInhibited);
+    sb.Append("\n Policy Qualifiers Rejected: ");
+    sb.Append(mPolicyQualifiersRejected);
+    sb.Append("\n Initial Policy OIDs: ");
     Boolean isEmpty;
     if (!mInitialPolicies || (mInitialPolicies->IsEmpty(&isEmpty), isEmpty)) {
-        sb.AppendCStr("any");
+        sb.Append("any");
     }
     else {
         String policies = Object::ToString(mInitialPolicies);
-        sb.AppendString(policies);
+        sb.Append(policies);
     }
-    sb.AppendCStr("\n Cert Stores: ");
+    sb.Append("\n Cert Stores: ");
     if (mCertStores == NULL || (mCertStores->IsEmpty(&isEmpty), isEmpty)) {
-        sb.AppendCStr("no");
+        sb.Append("no");
     }
     else {
         String certStore = Object::ToString(mCertStores.Get());
-        sb.AppendString(certStore);
+        sb.Append(certStore);
     }
-    sb.AppendCStr("\n Validity Date: ");
-    sb.AppendObject(mDate.Get());
-    sb.AppendCStr("\n Cert Path Checkers: ");
+    sb.Append("\n Validity Date: ");
+    sb.Append(mDate.Get());
+    sb.Append("\n Cert Path Checkers: ");
     if (!mCertPathCheckers || (mCertPathCheckers->IsEmpty(&isEmpty), isEmpty)) {
-        sb.AppendCStr("no");
+        sb.Append("no");
     }
     else {
         String certPathCheckers = Object::ToString(mCertPathCheckers.Get());
-        sb.AppendString(certPathCheckers);
+        sb.Append(certPathCheckers);
     }
-    sb.AppendCStr("\n Signature Provider: ");
-    sb.AppendString(mSigProvider);
-    sb.AppendCStr("\n Target Certificate Constraints: ");
-    sb.AppendObject(mTargetCertConstraints.Get());
-    sb.AppendCStr("\n]");
+    sb.Append("\n Signature Provider: ");
+    sb.Append(mSigProvider);
+    sb.Append("\n Target Certificate Constraints: ");
+    sb.Append(mTargetCertConstraints.Get());
+    sb.Append("\n]");
     return sb.ToString(str);
 }
 
@@ -467,7 +470,7 @@ ECode PKIXParameters::constructor(
         return E_NULL_POINTER_EXCEPTION;
     }
     CheckTrustAnchors(trustAnchors);
-    return CHashSet::New(trustAnchors, (ISet**)&mTrustAnchors);
+    return CHashSet::New(ICollection::Probe(trustAnchors), (ISet**)&mTrustAnchors);
 }
 
 ECode PKIXParameters::constructor(
@@ -490,7 +493,7 @@ ECode PKIXParameters::constructor(
     Boolean hasNext;
     while ((enumeration->HasMoreElements(&hasNext), hasNext)) {
         AutoPtr<IInterface> elem;
-        enumeration->NextElement((IInterface**)&elem);
+        enumeration->GetNextElement((IInterface**)&elem);
         String alias;
         ICharSequence::Probe(elem)->ToString(&alias);
         Boolean isEntry;
@@ -505,7 +508,7 @@ ECode PKIXParameters::constructor(
             if (IX509Certificate::Probe(c.Get()) != NULL) {
                 AutoPtr<ITrustAnchor> trustAnchor;
                 AutoPtr<ArrayOf<Byte> > nullArray = ArrayOf<Byte>::Alloc(0);
-                CTrustAnchor::New(IX509Certificate::Probe(c.Get()), *nullArray, (ITrustAnchor**)&trustAnchor);
+                CTrustAnchor::New(IX509Certificate::Probe(c.Get()), nullArray, (ITrustAnchor**)&trustAnchor);
                 Boolean isModified;
                 mTrustAnchors->Add(trustAnchor.Get(), &isModified);
             }

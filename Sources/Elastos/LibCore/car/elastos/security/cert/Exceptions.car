@@ -9,7 +9,7 @@ module
     //==========================================================================
     // Elastos Security exception codes (Family: 0x2C)
     const E_CERTIFICATE_ENCODING_EXCEPTION                  = 0xAC040000;
-    const E_CERTIFICATE_EXCEPTION                           = 0xAC050000;
+    const E_CERT_CERTIFICATE_EXCEPTION                      = 0xAC050000;
     const E_CERTIFICATE_EXPIRED_EXCEPTION                   = 0xAC060000;
     const E_CERTIFICATE_NOT_YET_VALID_EXCEPTION             = 0xAC070000;
     const E_CERTIFICATE_PARSING_EXCEPTION                   = 0xAC080000;

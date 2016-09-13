@@ -9,17 +9,18 @@ namespace Security {
 namespace Cert {
 
 CAR_OBJECT_IMPL(CPKIXCertPathBuilderResult)
-CAR_INTERFACE_IMPL(CPKIXCertPathBuilderResult, PKIXCertPathValidatorResult, IPKIXCertPathBuilderResult,ICertPathBuilderResult)
+CAR_INTERFACE_IMPL_2(CPKIXCertPathBuilderResult, PKIXCertPathValidatorResult, \
+        IPKIXCertPathBuilderResult,ICertPathBuilderResult)
 ECode CPKIXCertPathBuilderResult::ToString(
     /* [out] */ String *str)
 {
     FAIL_RETURN(PKIXCertPathValidatorResult::ToString(str))
     StringBuilder sb(*str);
-    sb.AppendCStr("\n Certification Path: ");
+    sb.Append("\n Certification Path: ");
     String certPath;
-    mCertPath->ToString(&certPath);
-    sb.AppendString(certPath);
-    sb.AppendCStr("\n]");
+    IObject::Probe(mCertPath)->ToString(&certPath);
+    sb.Append(certPath);
+    sb.Append("\n]");
     return sb.ToString(str);
 }
 

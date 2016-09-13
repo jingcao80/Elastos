@@ -1,8 +1,10 @@
 
-#include "CertPath.h"
-#include "StringBuilder.h"
+#include "security/cert/CertPath.h"
+#include "security/cert/CCertificateFactoryHelper.h"
+#include "core/StringBuilder.h"
 #include "CByteArrayInputStream.h"
-#include "CCertificateFactoryHelper.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::IO::CByteArrayInputStream;
@@ -12,8 +14,10 @@ using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::Cert::ICertPath;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::ICertificateFactoryHelper;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::IListIterator;
 using Elastos::IO::EIID_ISerializable;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Security {
@@ -59,10 +63,12 @@ ECode CertPath::Equals(
             if (certs == oCerts) {
                 *isEqual = TRUE;
                 return NOERROR;
-            } else {
+            }
+            else {
                 certs->Equals(oCerts.Get(), isEqual);
-                if (*isEqual == TRUE)
+                if (*isEqual == TRUE) {
                     return NOERROR;
+                }
             }
         }
     }
@@ -88,28 +94,28 @@ ECode CertPath::ToString(
     /* [out] */ String* str)
 {
     StringBuilder sb(mType);
-    sb.AppendCStr(" Cert Path, len=");
+    sb.Append(" Cert Path, len=");
     AutoPtr<IList> certs;
     GetCertificates((IList**)&certs);
     Int32 size;
     certs->GetSize(&size);
-    sb.AppendInt32(size);
-    sb.AppendCStr(": [\n");
+    sb.Append(size);
+    sb.Append(": [\n");
     Int32 n = 1;
     AutoPtr<IListIterator> listIterator;
     certs->GetListIterator((IListIterator**)&listIterator);
     Boolean hasNext;
-    while((listIterator->HasNext(&hasNext), hasNext)) {
-        sb.AppendCStr("---------------certificate ");
-        sb.AppendInt32(n);
-        sb.AppendCStr("---------------\n");
+    while((IIterator::Probe(listIterator)->HasNext(&hasNext), hasNext)) {
+        sb.Append("---------------certificate ");
+        sb.Append(n);
+        sb.Append("---------------\n");
         AutoPtr<IInterface> elem;
-        listIterator->Next((IInterface**)&elem);
+        IIterator::Probe(listIterator)->GetNext((IInterface**)&elem);
         String tmp = Object::ToString(elem);
-        sb.AppendString(tmp);
+        sb.Append(tmp);
         n++;
     }
-    sb.AppendCStr("\n]");
+    sb.Append("\n]");
     sb.ToString(str);
     return NOERROR;
 }
@@ -130,6 +136,7 @@ ECode CertPath::WriteReplace(
     return NOERROR;
 }
 
+const AutoPtr<ArrayOf<IObjectStreamField*> > CertPath::CertPathRep::sSerialPersistentFields = CertPathRep::InitFields();
 CAR_INTERFACE_IMPL(CertPath::CertPathRep, Object, ISerializable)
 
 CertPath::CertPathRep::CertPathRep(
@@ -154,6 +161,19 @@ ECode CertPath::CertPathRep::ReadResolve(
     *object = cp.Get();
     REFCOUNT_ADD(*object)
     return NOERROR;
+}
+
+AutoPtr<ArrayOf<IObjectStreamField*> > CertPath::CertPathRep::InitFields()
+{
+    AutoPtr<ArrayOf<IObjectStreamField*> > objs = ArrayOf<IObjectStreamField*>::Alloc(2);
+    AutoPtr<IObjectStreamField> field;
+    Slogger::D("CertPath", "[TODO] Need CObjectStreamField");
+    // CObjectStreamField::New(String("type"), /*String.class*/ECLSID_CString, (IObjectStreamField**)&field);
+    objs->Set(0, field);
+    field = NULL;
+    // CObjectStreamField::New(String("data"), /*byte[].class*/ECLSID_CArrayOf, TRUE, (IObjectStreamField**)&field);
+    objs->Set(1, field);
+    return objs;
 }
 
 } // end Cert

@@ -1,6 +1,6 @@
 
-#include "CertPathBuilder.h"
-#include "CSecurity.h"
+#include "security/cert/CertPathBuilder.h"
+#include "security/CSecurity.h"
 
 using Elastos::Security::ISecurity;
 using Elastos::Security::CSecurity;

@@ -134,8 +134,14 @@ module
     merge("security/ISigner.car");
     merge("security/IUnresolvedPermission.car");
 
-    interface Elastos.Utility.IList;
+    interface Elastos.Security.IKeyStore;
+    interface Elastos.Security.IPublicKey;
+    interface Elastosx.Security.Auth.X500.IX500Principal;
+    interface Elastos.Core.ICloneable;
+    interface Elastos.Utility.ICollection;
     interface Elastos.Utility.IMap;
+    interface Elastos.Utility.IList;
+    interface Elastos.Utility.ISet;
 
     namespace Elastos {
     namespace Security {
@@ -187,6 +193,131 @@ module
 
     singleton class CCertificateFactoryHelper {
         interface ICertificateFactoryHelper;
+    }
+
+    class CCollectionCertStoreParameters {
+        constructor();
+
+        constructor(
+            [in] ICollection* collection);
+
+        interface ICollectionCertStoreParameters;
+        interface ICertStoreParameters;
+        interface ICloneable;
+    }
+
+    class CLDAPCertStoreParameters {
+        constructor(
+            [in] String serverName,
+            [in] Int32 port);
+
+        constructor();
+
+        constructor(
+            [in] String serverName);
+
+        interface ILDAPCertStoreParameters;
+        interface ICertStoreParameters;
+        interface ICloneable;
+    }
+
+    class CPKIXParameters {
+        constructor();
+
+        constructor(
+            [in] ISet* trustAnchors);
+
+        constructor(
+            [in] IKeyStore* keyStore);
+
+        interface IPKIXParameters;
+        interface ICertPathParameters;
+        interface ICloneable;
+    }
+
+    class CPKIXBuilderParameters {
+        constructor();
+
+        constructor(
+            [in] ISet* trustAnchors,
+            [in] ICertSelector* targetConstraints);
+
+        constructor(
+            [in] IKeyStore* keyStore,
+            [in] ICertSelector* targetConstraints);
+
+        interface IPKIXBuilderParameters;
+        interface IPKIXParameters;
+        interface ICertPathParameters;
+        interface ICloneable;
+    }
+
+    [deprecated]
+    class CTrustAnchor {
+        constructor(
+            [in] IX509Certificate* trustedCert,
+            [in] ArrayOf<Byte> *nameConstraints);
+
+        constructor(
+            [in] String caName,
+            [in] IPublicKey* caPublicKey,
+            [in] ArrayOf<Byte> *nameConstraints);
+
+        constructor(
+            [in] IX500Principal* caPrincipal,
+            [in] IPublicKey* caPublicKey,
+            [in] ArrayOf<Byte> *nameConstraints);
+
+        interface ITrustAnchor;
+    }
+
+    class CPKIXCertPathBuilderResult {
+        constructor(
+            [in] ICertPath* certPath,
+            [in] ITrustAnchor* trustAnchor,
+            [in] IPolicyNode* policyTree,
+            [in] IPublicKey* subjectPublicKey);
+
+        interface IPKIXCertPathBuilderResult;
+        interface IPKIXCertPathValidatorResult;
+        interface ICertPathValidatorResult;
+        interface ICertPathBuilderResult;
+        interface ICloneable;
+    }
+
+    class CPKIXCertPathValidatorResult {
+        constructor(
+            [in] ITrustAnchor* trustAnchor,
+            [in] IPolicyNode* policyTree,
+            [in] IPublicKey* subjectPublicKey);
+
+        interface IPKIXCertPathValidatorResult;
+        interface ICertPathValidatorResult;
+        interface ICloneable;
+    }
+
+    [deprecated]
+    class CPolicyQualifierInfo {
+        constructor(
+            [in] ArrayOf<Byte> *encoded);
+
+        interface IPolicyQualifierInfo;
+    }
+
+    class CX509CRLSelector {
+        constructor();
+
+        interface IX509CRLSelector;
+        interface ICRLSelector;
+        interface ICloneable;
+    }
+
+    class CX509CertSelector {
+        constructor();
+
+        interface IX509CertSelector;
+        interface ICertSelector;
+        interface ICloneable;
     }
 
     } // namespace Cert

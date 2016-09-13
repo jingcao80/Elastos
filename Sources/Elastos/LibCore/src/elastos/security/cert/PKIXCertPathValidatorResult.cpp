@@ -4,6 +4,7 @@
 #include "CPKIXCertPathValidatorResult.h"
 #include "CPKIXCertPathBuilderResult.h"
 
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::StringBuilder;
 
 namespace Elastos {
@@ -84,22 +85,22 @@ ECode PKIXCertPathValidatorResult::ToString(
 
     *str = Object::ToString(this);
     StringBuilder sb(*str);
-    sb.AppendCStr(": [\n Trust Anchor: ");
+    sb.Append(": [\n Trust Anchor: ");
     String strAnchor;
     mTrustAnchor->ToString(&strAnchor);
-    sb.AppendString(strAnchor);
-    sb.AppendCStr("\n Policy Tree: ");
+    sb.Append(strAnchor);
+    sb.Append("\n Policy Tree: ");
     if (!mPolicyTree) {
-        sb.AppendCStr("no valid policy tree\n");
+        sb.Append("no valid policy tree\n");
     }
     else {
         String strPolicyTree = Object::ToString(mPolicyTree);
-        sb.AppendString(strPolicyTree);
+        sb.Append(strPolicyTree);
     }
-    sb.AppendCStr("\n Subject Public Key: ");
+    sb.Append("\n Subject Public Key: ");
     String subject = Object::ToString(mSubjectPublicKey);
-    sb.AppendString(subject);
-    sb.AppendCStr("\n]");
+    sb.Append(subject);
+    sb.Append("\n]");
     return sb.ToString(str);
 }
 

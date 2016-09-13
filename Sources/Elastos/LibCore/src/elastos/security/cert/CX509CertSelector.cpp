@@ -5,12 +5,12 @@
 #include "CHashSet.h"
 #include "CBoolean.h"
 
+using Elastos::Core::CBoolean;
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::IBoolean;
 using Elastos::Core::ICharSequence;
-using Elastos::Core::CBoolean;
 using Elastos::Core::StringUtils;
-using Elastos::Core::ICloneable;
-
+using Elastos::Security::IPrincipal;
 using Elastosx::Security::Auth::X500::CX500Principal;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CHashSet;
@@ -105,7 +105,7 @@ ECode CX509CertSelector::GetIssuerAsString(
         *issuer = String();
     }
     if (mIssuerName.IsNull()) {
-        mIssuer->GetName(&mIssuerName);
+        IPrincipal::Probe(mIssuer)->GetName(&mIssuerName);
     }
     *issuer = mIssuerName;
     return NOERROR;
@@ -189,7 +189,7 @@ ECode CX509CertSelector::GetSubjectAsString(
         *subjectDN = String();
         return NOERROR;
     }
-    return mSubject->GetName(subjectDN);
+    return IPrincipal::Probe(mSubject)->GetName(subjectDN);
 }
 
 ECode CX509CertSelector::SetSubjectUsingBytes(
@@ -325,14 +325,13 @@ ECode CX509CertSelector::CheckOID(
 {
     Int32 beg = 0;
     Int32 end = oid.IndexOf('.', beg);
-    Int32 comp;
-    FAIL_RETURN(StringUtils::ParseInt32(oid.Substring(beg, end), &comp))
+    Int32 comp = StringUtils::ParseInt32(oid.Substring(beg, end));
     beg = end + 1;
     if (comp < 0 || comp > 2) {
         return E_IO_EXCEPTION;
     }
     end = oid.IndexOf('.', beg);
-    FAIL_RETURN(StringUtils::ParseInt32(oid.Substring(beg, end), &comp))
+    comp = StringUtils::ParseInt32(oid.Substring(beg, end));
     if (comp < 0 || comp > 39) {
         return E_IO_EXCEPTION;
     }
@@ -367,7 +366,7 @@ ECode CX509CertSelector::SetSubjectPublicKey(
     }
     else {
         mSubjectPublicKey = NULL;
-        key->GetEncoded((ArrayOf<Byte>**)&mSubjectPublicKey);
+        IKey::Probe(key)->GetEncoded((ArrayOf<Byte>**)&mSubjectPublicKey);
     }
     mSubjectPublicKeyImpl = key;
     return NOERROR;

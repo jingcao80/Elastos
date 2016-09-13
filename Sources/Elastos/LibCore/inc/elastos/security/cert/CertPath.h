@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_SECURITY_CERT_CERTPATH_H__
 #define __ELASTOS_SECURITY_CERT_CERTPATH_H__
 
-#include "Object.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::Utility::IList;
@@ -151,7 +152,7 @@ protected:
          */
         CertPathRep(
             /* [in] */ const String& type,
-            /* [in] */ArrayOf<Byte>* data);
+            /* [in] */ ArrayOf<Byte>* data);
 
     protected:
         /**
@@ -165,6 +166,8 @@ protected:
         CARAPI ReadResolve(
             /* [out] */ IInterface** object);
 
+    private:
+        static CARAPI_(AutoPtr<ArrayOf<IObjectStreamField*> >) InitFields();
 
     private:
         static const Int64 sSerialVersionUID;/* = 3015633072427920915L;*/

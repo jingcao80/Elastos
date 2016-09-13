@@ -3,7 +3,11 @@
 #define __ELASTOS_SECURITY_CERT_CX509CERTSELECTOR_H__
 
 #include "_Elastos_Security_Cert_CX509CertSelector.h"
+#include "Elastos.CoreLibrary.Extensions.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "core/Object.h"
 
+using Elastos::Core::ICloneable;
 using Elastos::Math::IBigInteger;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IDate;

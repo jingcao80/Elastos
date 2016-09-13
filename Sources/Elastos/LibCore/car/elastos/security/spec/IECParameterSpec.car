@@ -48,6 +48,23 @@ module
          */
         GetOrder(
             [out] IBigInteger** order);
+
+        /**
+         * Used to set the curve name if available.
+         *
+         * @hide
+         */
+        SetCurveName(
+            [in] String curveName);
+
+        /**
+         * Returns the name of the curve if this is a named curve. Returns
+         * {@code null} if this is not known to be a named curve.
+         *
+         * @hide
+         */
+        GetCurveName(
+            [out] String* result);
     }
 
     } // namespace Spec

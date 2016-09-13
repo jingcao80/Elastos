@@ -3,13 +3,16 @@
 #define __ELASTOS_SECURITY_CERT_CLDAPCERTSTOREPARAMETERS_H__
 
 #include "_Elastos_Security_Cert_CLDAPCertStoreParameters.h"
+#include "core/Object.h"
+
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Security {
 namespace Cert {
 
 CarClass(CLDAPCertStoreParameters)
-    : public Object
+    , public Object
     , public ILDAPCertStoreParameters
     , public ICertStoreParameters
     , public ICloneable

@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_SECURITY_CERT_X509CRLENTRY_H__
 #define __ELASTOS_SECURITY_CERT_X509CRLENTRY_H__
 
+#include "Elastos.CoreLibrary.Security.h"
 #include "Object.h"
 
 using Elastos::Core::Object;
@@ -13,20 +14,13 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-extern "C" const InterfaceID EIID_X509CRLEntry;
-
 class X509CRLEntry
     : public Object
     , public IX509CRLEntry
     , public IX509Extension
 {
 public:
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface *object,
-        /* [out] */ InterfaceID *pIID);
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
+    CAR_INTERFACE_DECL()
 
     /**
      * Creates a new {@code X509CRLEntry} instance.
