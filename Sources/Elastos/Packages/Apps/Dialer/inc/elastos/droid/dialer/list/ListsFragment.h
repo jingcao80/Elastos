@@ -137,6 +137,8 @@ public:
 
     ListsFragment();
 
+    CARAPI constructor();
+
     // @Override
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);

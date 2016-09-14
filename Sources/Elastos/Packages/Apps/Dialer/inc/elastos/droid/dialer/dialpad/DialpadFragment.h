@@ -283,6 +283,8 @@ public:
 
     DialpadFragment();
 
+    CARAPI constructor();
+
     // @Override
     CARAPI BeforeTextChanged(
         /* [in] */ ICharSequence* s,

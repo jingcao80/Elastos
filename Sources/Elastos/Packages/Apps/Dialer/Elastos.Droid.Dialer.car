@@ -627,6 +627,8 @@ module
     namespace Dialpad {
 
     class CDialpadFragment {
+        constructor();
+
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -753,6 +755,8 @@ module
 //    }
 
     class CListsFragment {
+        constructor();
+
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
@@ -1534,6 +1538,8 @@ module
     }
 
     class CDialpadFragment {
+        constructor();
+
         interface IFragment;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
