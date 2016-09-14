@@ -279,6 +279,11 @@ ListsFragment::ListsFragment()
     mPanelSlideCallbacks = new PanelSlideCallbacks(this);
 }
 
+ECode ListsFragment::constructor()
+{
+    return Fragment::constructor();
+}
+
 ECode ListsFragment::GetCurrentListView(
     /* [out] */ IAbsListView** listView)
 {

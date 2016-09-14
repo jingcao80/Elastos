@@ -471,6 +471,11 @@ DialpadFragment::DialpadFragment()
     mPhoneStateListener->constructor(this);
 }
 
+ECode DialpadFragment::constructor()
+{
+    return Fragment::constructor();
+}
+
 AutoPtr<IIntent> DialpadFragment::GetVoicemailIntent()
 {
     AutoPtr<IUriHelper> helper;

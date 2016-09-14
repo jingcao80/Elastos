@@ -7,6 +7,7 @@ namespace InCallUI {
 
 ECode BaseFragment::constructor()
 {
+    Fragment::constructor();
     mPresenter = CreatePresenter();
     return NOERROR;
 }

@@ -170,6 +170,8 @@ public:
 
     DialpadFragment();
 
+    CARAPI constructor();
+
     // @Override
     CARAPI OnClick(
         /* [in] */ IView* v);

@@ -281,6 +281,11 @@ DialpadFragment::DialpadFragment()
     BaseFragment::constructor();
 }
 
+ECode DialpadFragment::constructor()
+{
+    return Fragment::constructor();
+}
+
 ECode DialpadFragment::OnClick(
     /* [in] */ IView* v)
 {
