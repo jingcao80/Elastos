@@ -42,6 +42,7 @@ TaskStack::TaskStack(
     CRect::New((IRect**)&mTmpRect);
     CRect::New((IRect**)&mBounds);
     CArrayList::New((IArrayList**)&mExitingAppTokens);
+    CArrayList::New((IArrayList**)&mTasks);
 }
 
 AutoPtr<DisplayContent> TaskStack::GetDisplayContent()
@@ -49,7 +50,7 @@ AutoPtr<DisplayContent> TaskStack::GetDisplayContent()
     return mDisplayContent;
 }
 
-List< AutoPtr<Task> >& TaskStack::GetTasks()
+AutoPtr<IArrayList> TaskStack::GetTasks()
 {
     return mTasks;
 }
@@ -61,9 +62,12 @@ void TaskStack::ResizeWindows()
     Boolean underStatusBar = top == 0;
 
     AutoPtr<WindowList> resizingWindows = mService->mResizingWindows;
-    List<AutoPtr<Task> >::ReverseIterator rit = mTasks.RBegin();
-    for (; rit != mTasks.REnd(); ++rit) {
-        AutoPtr<IArrayList> activities = (*rit)->mAppTokens;
+    Int32 numTasks;
+    mTasks->GetSize(&numTasks);
+    for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+        AutoPtr<IInterface> t;
+        mTasks->Get(taskNdx, (IInterface**)&t);
+        AutoPtr<IArrayList> activities = To_Task(t)->mAppTokens;
         Int32 size;
         activities->GetSize(&size);
         for (Int32 activityNdx = size - 1; activityNdx >= 0; --activityNdx) {
@@ -132,9 +136,12 @@ Boolean TaskStack::IsFullscreen()
 Boolean TaskStack::IsAnimating()
 {
     AutoPtr<WindowState> windowState;
-    List<AutoPtr<Task> >::ReverseIterator taskRit = mTasks.RBegin();
-    for (; taskRit != mTasks.REnd(); ++taskRit) {
-        AutoPtr<IArrayList> activities = (*taskRit)->mAppTokens;
+    Int32 numTasks;
+    mTasks->GetSize(&numTasks);
+    for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+        AutoPtr<IInterface> t;
+        mTasks->Get(taskNdx, (IInterface**)&t);
+        AutoPtr<IArrayList> activities = To_Task(t)->mAppTokens;
         Int32 size;
         activities->GetSize(&size);
         for (Int32 activityNdx = size - 1; activityNdx >= 0; --activityNdx) {
@@ -162,27 +169,29 @@ void TaskStack::AddTask(
     /* [in] */ Task* task,
     /* [in] */ Boolean toTop)
 {
-    List<AutoPtr<Task> >::Iterator it;
+    Int32 stackNdx;
     if (!toTop) {
-        it = mTasks.Begin();
+        stackNdx = 0;
     }
     else {
-        it = mTasks.End();
+        mTasks->GetSize(&stackNdx);
         if (!mService->IsCurrentProfileLocked(task->mUserId)) {
             // Place the task below all current user tasks.
-            while (--it != mTasks.End()) {
-                if (!mService->IsCurrentProfileLocked((*it)->mUserId)) {
+            while (--stackNdx >= 0) {
+                AutoPtr<IInterface> obj;
+                mTasks->Get(stackNdx, (IInterface**)&obj);
+                if (!mService->IsCurrentProfileLocked(To_Task(obj)->mUserId)) {
                     break;
                 }
             }
             // Put it above first non-current user task.
-            ++it;
+            ++stackNdx;
         }
     }
     if (CWindowManagerService::DEBUG_TASK_MOVEMENT) {
-        Slogger::D(CWindowManagerService::TAG, "addTask: task=%p toTop=%d pos=", task, toTop /*, stackNdx*/);
+        Slogger::D(CWindowManagerService::TAG, "addTask: task=%s toTop=%d pos=d", TO_CSTR(task), toTop, stackNdx);
     }
-    mTasks.Insert(it, task);
+    mTasks->Add(stackNdx, (IObject*)task);
 
     task->mStack = this;
     mDisplayContent->MoveStack(this, TRUE);
@@ -194,7 +203,7 @@ void TaskStack::MoveTaskToTop(
 {
     if (CWindowManagerService::DEBUG_TASK_MOVEMENT)
         Slogger::D(CWindowManagerService::TAG, "moveTaskToTop: task=%p Callers=", task/*, Debug.getCallers(6)*/);
-    mTasks.Remove(task);
+    mTasks->Remove((IObject*)task);
     AddTask(task, TRUE);
 }
 
@@ -202,7 +211,7 @@ void TaskStack::MoveTaskToBottom(
     /* [in] */ Task* task)
 {
     if (CWindowManagerService::DEBUG_TASK_MOVEMENT) Slogger::D(CWindowManagerService::TAG, "moveTaskToBottom: task=%p", task);
-    mTasks.Remove(task);
+    mTasks->Remove((IObject*)task);
     AddTask(task, FALSE);
 }
 
@@ -210,9 +219,11 @@ void TaskStack::RemoveTask(
     /* [in] */ Task* task)
 {
     if (CWindowManagerService::DEBUG_TASK_MOVEMENT) Slogger::D(CWindowManagerService::TAG, "removeTask: task=%p", task);
-    mTasks.Remove(task);
+    mTasks->Remove((IObject*)task);
     if (mDisplayContent != NULL) {
-        if (mTasks.IsEmpty()) {
+        Boolean isEmpty;
+        mTasks->IsEmpty(&isEmpty);
+        if (isEmpty) {
             mDisplayContent->MoveStack(this, FALSE);
         }
         mDisplayContent->mLayoutNeeded = TRUE;
@@ -240,9 +251,12 @@ void TaskStack::DetachDisplay()
     // EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
 
     Boolean doAnotherLayoutPass = FALSE;
-    List<AutoPtr<Task> >::ReverseIterator taskRit = mTasks.RBegin();
-    for (; taskRit != mTasks.REnd(); ++taskRit) {
-        AutoPtr<IArrayList> appWindowTokens = (*taskRit)->mAppTokens;
+    Int32 numTasks;
+    mTasks->GetSize(&numTasks);
+    for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+        AutoPtr<IInterface> t;
+        mTasks->Get(taskNdx, (IInterface**)&t);
+        AutoPtr<IArrayList> appWindowTokens = To_Task(t)->mAppTokens;
         Int32 size;
         appWindowTokens->GetSize(&size);
         for (Int32 appNdx = size - 1; appNdx >= 0; --appNdx) {
@@ -507,17 +521,17 @@ void TaskStack::StartBlurringIfNeeded(
 void TaskStack::SwitchUser(
     /* [in] */ Int32 userId)
 {
-    Int32 top = mTasks.GetSize();
-    List<AutoPtr<Task> >::Iterator it = mTasks.Begin();
+    Int32 top;
+    mTasks->GetSize(&top);
     for (Int32 taskNdx = 0; taskNdx < top; ++taskNdx) {
-        AutoPtr<Task> task = *it;
+        AutoPtr<IInterface> t;
+        mTasks->Get(taskNdx, (IInterface**)&t);
+        AutoPtr<Task> task = To_Task(t);
         if (mService->IsCurrentProfileLocked(task->mUserId)) {
-            it = mTasks.Erase(it);
-            mTasks.PushBack(task);
+            mTasks->Remove(taskNdx);
+            mTasks->Add((IObject*)task);
             --top;
-            continue;
         }
-        ++it;
     }
 }
 
@@ -535,7 +549,9 @@ ECode TaskStack::ToString(
     StringBuilder sb("TaskStack{stackId=");
     sb += mStackId;
     sb += ", tasks size=";
-    sb += mTasks.GetSize();
+    Int32 size;
+    mTasks->GetSize(&size);
+    sb += size;
     *str = sb.ToString();
     return NOERROR;
 }

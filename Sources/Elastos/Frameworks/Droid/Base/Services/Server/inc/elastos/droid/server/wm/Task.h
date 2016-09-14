@@ -9,6 +9,8 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
+#define To_Task(obj) ((Task*)IObject::Probe(obj))
+
 class TaskStack;
 class DisplayContent;
 

@@ -3,9 +3,7 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/server/wm/WindowState.h"
-#include <elastos/utility/etl/List.h>
 
-using Elastos::Utility::Etl::List;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IRegion;
 using Elastos::Droid::View::IDisplayInfo;
@@ -55,13 +53,13 @@ public:
 
     CARAPI_(Boolean) IsPrivate();
 
-    CARAPI_(List< AutoPtr<TaskStack> >&) GetStacks();
+    CARAPI_(AutoPtr<IArrayList>) GetStacks();
 
     /**
      * Retrieve the tasks on this display in stack order from the bottommost TaskStack up.
      * @return All the Tasks, in order, on this display.
      */
-    CARAPI_(List< AutoPtr<Task> >&) GetTasks();
+    CARAPI_(AutoPtr<IArrayList>) GetTasks();
 
     CARAPI_(AutoPtr<TaskStack>) GetHomeStack();
 
@@ -167,7 +165,7 @@ public:
     AutoPtr<IRect> mTmpRect;
 
     /** For gathering Task objects in order. */
-    List<AutoPtr<Task> > mTmpTaskHistory;
+    AutoPtr<IArrayList> mTmpTaskHistory; //List<Task>
 
     AutoPtr<CWindowManagerService> mService;
 
@@ -187,7 +185,7 @@ private:
 
     /** Array containing all TaskStacks on this display.  Array
      * is stored in display order with the current bottom stack at 0. */
-    List<AutoPtr<TaskStack> > mStacks;
+    AutoPtr<IArrayList> mStacks;//List<TaskStack>
 
     /** A special TaskStack with id==HOME_STACK_ID that moves to the bottom whenever any TaskStack
      * (except a future lockscreen TaskStack) moves to the top. */

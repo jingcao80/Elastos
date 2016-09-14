@@ -1288,11 +1288,15 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
     // order of applications.
     AutoPtr<WindowState> pos;
 
-    List< AutoPtr<Task> >& tasks = displayContent->GetTasks();
-    List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
+    AutoPtr<IArrayList> tasks = displayContent->GetTasks();
+    Int32 taskNdx;
     Int32 tokenNdx = -1;
-    for (; taskRit != tasks.REnd(); ++taskRit) {
-        AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+    Int32 numTasks;
+    tasks->GetSize(&numTasks);
+    for (taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+        AutoPtr<IInterface> task;
+        tasks->Get(taskNdx, (IInterface**)&task);
+        AutoPtr<IArrayList> tokens = To_Task(task)->mAppTokens;
         Int32 size;
         tokens->GetSize(&size);
         for (tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
@@ -1302,10 +1306,12 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
             if (t == token) {
                 --tokenNdx;
                 if (tokenNdx < 0) {
-                    ++taskRit;
-                    if (taskRit != tasks.REnd()) {
+                    --taskNdx;
+                    if (taskNdx >= 0) {
+                        task = NULL;
+                        tasks->Get(taskNdx, (IInterface**)&task);
                         Int32 s;
-                        (*taskRit)->mAppTokens->GetSize(&s);
+                        To_Task(task)->mAppTokens->GetSize(&s);
                         tokenNdx = s - 1;
                     }
                 }
@@ -1325,10 +1331,6 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
         }
         if (tokenNdx >= 0) {
             // early exit
-            break;
-        }
-
-        if (taskRit == tasks.REnd()) {
             break;
         }
     }
@@ -1363,8 +1365,10 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
 
     // Continue looking down until we find the first
     // token that has windows on this display.
-    for (; taskRit != tasks.REnd(); ++taskRit) {
-        AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+    for ( ; taskNdx >= 0; --taskNdx) {
+        AutoPtr<IInterface> task;
+        tasks->Get(taskNdx, (IInterface**)&task);
+        AutoPtr<IArrayList> tokens = To_Task(task)->mAppTokens;
         for ( ; tokenNdx >= 0; --tokenNdx) {
             AutoPtr<IInterface> value;
             tokens->Get(tokenNdx, (IInterface**)&value);
@@ -3197,15 +3201,15 @@ void CWindowManagerService::RemoveWindowLocked(
 
     win->DisposeInputChannel();
 
-    // if (DEBUG_APP_TRANSITIONS) Slogger::V(
-    //         TAG, "Remove " + win + ": mSurface=" + win.mWinAnimator.mSurfaceControl
-    //         + " mExiting=" + win.mExiting
-    //         + " isAnimating=" + win.mWinAnimator.isAnimating()
-    //         + " app-animation="
-    //         + (win.mAppToken != null ? win.mAppToken.mAppAnimator.animation : null)
-    //         + " inPendingTransaction="
-    //         + (win.mAppToken != null ? win.mAppToken.inPendingTransaction : false)
-    //         + " mDisplayFrozen=" + mDisplayFrozen);
+    if (DEBUG_APP_TRANSITIONS) {
+        Slogger::V(
+            TAG, "Remove %s: mSurface=%s mExiting=%d isAnimating=%d app-animation=%s"
+            " inPendingTransaction=%d mDisplayFrozen=%d", TO_CSTR(win),
+            TO_CSTR(win->mWinAnimator->mSurfaceControl), win->mExiting, win->mWinAnimator->IsAnimating(),
+            (win->mAppToken != NULL ? TO_CSTR(win->mAppToken->mAppAnimator->mAnimation) : NULL),
+            (win->mAppToken != NULL ? win->mAppToken->mInPendingTransaction : FALSE),
+            mDisplayFrozen);
+    }
     // Visibility of the removed window. Will be used later to update orientation later on.
     Boolean wasVisible = FALSE;
     // First, see if we need to run an animation.  If we do, we have
@@ -4260,12 +4264,15 @@ void CWindowManagerService::ValidateAppTokens(
 
         obj = NULL;
         mStackIdToStack->Get(stackId, (IInterface**)&obj);
-        AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(obj);
-        List< AutoPtr<Task> >& localTasks = taskStack->GetTasks();
+        AutoPtr<IArrayList> localTasks = To_TaskStack(obj)->GetTasks();
 
-        List<AutoPtr<Task> >::ReverseIterator taskRit = localTasks.RBegin();
-        for (; taskRit != localTasks.REnd() && t >= 0; ++taskRit, --t) {
-            AutoPtr<IArrayList> localTokens = (*taskRit)->mAppTokens;
+        Int32 numTasks;
+        localTasks->GetSize(&numTasks);
+        Int32 taskNdx;
+        for (taskNdx = numTasks - 1; taskNdx >= 0 && t >= 0; --taskNdx, --t) {
+            AutoPtr<IInterface> lt;
+            localTasks->Get(taskNdx, (IInterface**)&lt);
+            AutoPtr<IArrayList> localTokens = To_Task(lt)->mAppTokens;
 
             obj = NULL;
             tasks->Get(t, (IInterface**)&obj);
@@ -4307,9 +4314,9 @@ void CWindowManagerService::ValidateAppTokens(
             }
         }
 
-        if (taskRit != localTasks.REnd() || t >= 0) {
+        if (taskNdx > 0 || t >= 0) {
             Slogger::W(TAG, "validateAppTokens: Mismatch! ActivityManager=%s", TO_CSTR(tasks));
-            Slogger::W(TAG, "validateAppTokens: Mismatch! WindowManager=");// + localTasks);
+            Slogger::W(TAG, "validateAppTokens: Mismatch! WindowManager=%s", TO_CSTR(localTasks));
             Slogger::W(TAG, "validateAppTokens: Mismatch! Callers=");// + Debug.getCallers(4));
         }
     }
@@ -4491,7 +4498,7 @@ ECode CWindowManagerService::CreateTask(
     if (DEBUG_STACK) Slogger::I(TAG, "createTask: taskId=%d stackId=%d atoken=%p", taskId, stackId, atoken);
     AutoPtr<IInterface> value;
     mStackIdToStack->Get(stackId, (IInterface**)&value);
-    AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
+    AutoPtr<TaskStack> stack = To_TaskStack(value);
     if (stack == NULL) {
         Slogger::E(TAG, "addAppToken: invalid stackId=%d", stackId);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -4680,10 +4687,13 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
     Boolean lastFullscreen = FALSE;
     // TODO: Multi window.
     AutoPtr<DisplayContent> displayContent = GetDefaultDisplayContentLocked();
-    List< AutoPtr<Task> >& tasks = displayContent->GetTasks();
-    List<AutoPtr<Task> >::ReverseIterator rit = tasks.RBegin();
-    for (; rit != tasks.REnd(); ++rit) {
-        AutoPtr<IArrayList> tokens = (*rit)->mAppTokens;
+    AutoPtr<IArrayList> tasks = displayContent->GetTasks();
+    Int32 numTasks;
+    tasks->GetSize(&numTasks);
+    for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+        AutoPtr<IInterface> t;
+        tasks->Get(taskNdx, (IInterface**)&t);
+        AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
         Int32 size;
         tokens->GetSize(&size);
         Int32 firstToken = size - 1;
@@ -5512,9 +5522,10 @@ Boolean CWindowManagerService::SetTokenVisibilityLocked(
     wtoken->mWillBeHidden = FALSE;
     if (wtoken->mHidden == visible) {
         Boolean changed = FALSE;
-        // if (DEBUG_APP_TRANSITIONS) Slogger::V(
-        //         TAG, "Changing app " + wtoken + " hidden=" + wtoken.hidden
-        //         + " performLayout=" + performLayout);
+        if (DEBUG_APP_TRANSITIONS) {
+            Slogger::V(TAG, "Changing app %s hidden=%d performLayout=%d",
+                TO_CSTR(wtoken), wtoken->mHidden, performLayout);
+        }
 
         Boolean runningAppAnimation = FALSE;
 
@@ -5598,9 +5609,10 @@ Boolean CWindowManagerService::SetTokenVisibilityLocked(
              }
         }
 
-        // if (DEBUG_APP_TRANSITIONS) Slogger::V(TAG, "setTokenVisibilityLocked: " + wtoken
-        //         + ": hidden=" + wtoken.hidden + " hiddenRequested="
-        //         + wtoken.hiddenRequested);
+        if (DEBUG_APP_TRANSITIONS) {
+            Slogger::V(TAG, "setTokenVisibilityLocked: %s: hidden=%d hiddenRequested=%d",
+                TO_CSTR(wtoken), wtoken->mHidden, wtoken->mHiddenRequested);
+        }
 
         if (changed) {
             mInputMonitor->SetUpdateInputWindowsNeededLw();
@@ -5651,12 +5663,10 @@ ECode CWindowManagerService::SetAppVisibility(
             return NOERROR;
         }
 
-        // if (DEBUG_APP_TRANSITIONS || DEBUG_ORIENTATION) {
-        //     Slogger::V(TAG, "setAppVisibility(" + token + ", visible=" + visible + "): " + mAppTransition +
-        //             " hidden=" + wtoken.hidden + " hiddenRequested=" +
-        //             wtoken.hiddenRequested, HIDE_STACK_CRAWLS ?
-        //             null : new RuntimeException("here").fillInStackTrace());
-        // }
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ORIENTATION) {
+            Slogger::V(TAG, "setAppVisibility(%s, visible=%d): %s hidden=%d hiddenRequested=%d",
+                TO_CSTR(token), visible, TO_CSTR(mAppTransition), wtoken->mHidden, wtoken->mHiddenRequested);
+        }
 
         // If we are preparing an app transition, then delay changing
         // the visibility of this token until we execute that transition.
@@ -5664,8 +5674,8 @@ ECode CWindowManagerService::SetAppVisibility(
             wtoken->mHiddenRequested = !visible;
 
             if (!wtoken->mStartingDisplayed) {
-                // if (DEBUG_APP_TRANSITIONS) Slogger::V(
-                //         TAG, "Setting dummy animation on: " + wtoken);
+                if (DEBUG_APP_TRANSITIONS) Slogger::V(
+                        TAG, "Setting dummy animation on: %s", TO_CSTR(wtoken));
                 wtoken->mAppAnimator->SetDummyAnimation();
             }
             mOpeningApps.Remove(wtoken);
@@ -6057,12 +6067,15 @@ void CWindowManagerService::DumpAppTokensLocked()
     for (Int32 stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
-        AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
+        AutoPtr<TaskStack> stack = To_TaskStack(value);
         Slogger::V(TAG, "  Stack #%d tasks from bottom to top:", stack->mStackId);
-        List< AutoPtr<Task> >& tasks = stack->GetTasks();
-        List<AutoPtr<Task> >::Iterator tasksIt = tasks.Begin();
-        for (; tasksIt != tasks.End(); ++tasksIt) {
-            AutoPtr<Task> task = *tasksIt;
+        AutoPtr<IArrayList> tasks = stack->GetTasks();
+        Int32 numTasks;
+        tasks->GetSize(&numTasks);
+        for (Int32 taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            AutoPtr<IInterface> t;
+            tasks->Get(taskNdx, (IInterface**)&t);
+            AutoPtr<Task> task = To_Task(t);
             Slogger::V(TAG, "    Task #%d activities from bottom to top:", task->mTaskId);
             AutoPtr<IArrayList> tokens = task->mAppTokens;
             Int32 numTokens;
@@ -6118,10 +6131,13 @@ Int32 CWindowManagerService::FindAppWindowInsertionPointLocked(
     windows->GetSize(&NW);
 
     Boolean found = FALSE;
-    List< AutoPtr<Task> >& tasks = displayContent->GetTasks();
-    List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
-    for (; taskRit != tasks.REnd(); ++taskRit) {
-        AutoPtr<Task> task = *taskRit;
+    AutoPtr<IArrayList> tasks = displayContent->GetTasks();
+    Int32 numTasks;
+    tasks->GetSize(&numTasks);
+    for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+        AutoPtr<IInterface> t;
+        tasks->Get(taskNdx, (IInterface**)&t);
+        AutoPtr<Task> task = To_Task(t);
         if (!found && task->mTaskId != taskId) {
             continue;
         }
@@ -6265,17 +6281,21 @@ void CWindowManagerService::MoveStackWindowsLocked(
     /* [in] */ DisplayContent* displayContent)
 {
     // First remove all of the windows from the list.
-    List< AutoPtr<Task> >& tasks = displayContent->GetTasks();
-    List<AutoPtr<Task> >::Iterator taskIt = tasks.Begin();
-    for (; taskIt != tasks.End(); ++taskIt) {
-        TmpRemoveTaskWindowsLocked(*taskIt);
+    AutoPtr<IArrayList> tasks = displayContent->GetTasks();
+    Int32 numTasks;
+    tasks->GetSize(&numTasks);
+    for (Int32 taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+        AutoPtr<IInterface> t;
+        tasks->Get(taskNdx, (IInterface**)&t);
+        TmpRemoveTaskWindowsLocked(To_Task(t));
     }
 
     // And now add them back at the correct place.
     // Where to start adding?
-    taskIt = tasks.Begin();
-    for (; taskIt != tasks.End(); ++taskIt) {
-        AutoPtr<IArrayList> tokens = (*taskIt)->mAppTokens;
+    for (Int32 taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+        AutoPtr<IInterface> t;
+        tasks->Get(taskNdx, (IInterface**)&t);
+        AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
         Int32 numTokens;
         tokens->GetSize(&numTokens);
         if (numTokens == 0) {
@@ -6379,7 +6399,7 @@ void CWindowManagerService::AttachStack(
         if (displayContent != NULL) {
             AutoPtr<IInterface> value;
             mStackIdToStack->Get(stackId, (IInterface**)&value);
-            AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
+            AutoPtr<TaskStack> stack = To_TaskStack(value);
             if (stack == NULL) {
                 if (DEBUG_STACK) Slogger::D(TAG, "attachStack: stackId=%d", stackId);
                 stack = new TaskStack(this, stackId);
@@ -6418,7 +6438,7 @@ void CWindowManagerService::DetachStack(
     {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IInterface> value;
         mStackIdToStack->Get(stackId, (IInterface**)&value);
-        AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
+        AutoPtr<TaskStack> stack = To_TaskStack(value);
         if (stack != NULL) {
             AutoPtr<DisplayContent> displayContent = stack->GetDisplayContent();
             if (displayContent != NULL) {
@@ -6485,7 +6505,7 @@ void CWindowManagerService::AddTask(
         }
         AutoPtr<IInterface> stackValue;
         mStackIdToStack->Get(stackId, (IInterface**)&stackValue);
-        AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(stackValue);
+        AutoPtr<TaskStack> stack = To_TaskStack(stackValue);
         stack->AddTask(task, toTop);
         AutoPtr<DisplayContent> displayContent = stack->GetDisplayContent();
         displayContent->mLayoutNeeded = TRUE;
@@ -6500,7 +6520,7 @@ ECode CWindowManagerService::ResizeStack(
     {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IInterface> stackValue;
         mStackIdToStack->Get(stackId, (IInterface**)&stackValue);
-        AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(stackValue);
+        AutoPtr<TaskStack> stack = To_TaskStack(stackValue);
         if (stack == NULL) {
             Slogger::E(TAG, "resizeStack: stackId %d not found.", stackId);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -6520,7 +6540,7 @@ void CWindowManagerService::GetStackBounds(
 {
     AutoPtr<IInterface> stackValue;
     mStackIdToStack->Get(stackId, (IInterface**)&stackValue);
-    AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(stackValue);
+    AutoPtr<TaskStack> stack = To_TaskStack(stackValue);
     if (stack != NULL) {
         stack->GetBounds(bounds);
         return;
@@ -10048,11 +10068,14 @@ ECode CWindowManagerService::HandleAppFreezeTimeout()
         for (Int32 stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             AutoPtr<IInterface> value;
             mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
-            AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
-            List< AutoPtr<Task> >& tasks = stack->GetTasks();
-            List<AutoPtr<Task> >::ReverseIterator rit = tasks.RBegin();
-            for (; rit != tasks.REnd(); ++rit) {
-                AutoPtr<IArrayList> tokens = (*rit)->mAppTokens;
+            AutoPtr<TaskStack> stack = To_TaskStack(value);
+            AutoPtr<IArrayList> tasks = stack->GetTasks();
+            Int32 numTasks;
+            tasks->GetSize(&numTasks);
+            for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+                AutoPtr<IInterface> t;
+                tasks->Get(taskNdx, (IInterface**)&t);
+                AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
                 Int32 size;
                 tokens->GetSize(&size);
                 for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
@@ -10750,10 +10773,13 @@ void CWindowManagerService::RebuildAppWindowListLocked(
     // in the main app list, but still have windows shown.  We put them
     // in the back because now that the animation is over we no longer
     // will care about them.
-    List< AutoPtr<TaskStack> >& stacks = displayContent->GetStacks();
-    List<AutoPtr<TaskStack> >::Iterator stackIt = stacks.Begin();
-    for (; stackIt != stacks.End(); ++stackIt) {
-        AutoPtr<IArrayList> exitingAppTokens = (*stackIt)->mExitingAppTokens;
+    AutoPtr<IArrayList> stacks = displayContent->GetStacks();
+    Int32 numStacks;
+    stacks->GetSize(&numStacks);
+    for (Int32 stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+        AutoPtr<IInterface> obj;
+        stacks->Get(stackNdx, (IInterface**)&obj);
+        AutoPtr<IArrayList> exitingAppTokens = To_TaskStack(obj)->mExitingAppTokens;
         Int32 NT;
         exitingAppTokens->GetSize(&NT);
         for (Int32 j = 0; j < NT; j++) {
@@ -10765,11 +10791,16 @@ void CWindowManagerService::RebuildAppWindowListLocked(
     }
 
     // And add in the still active app tokens in Z order.
-    for (stackIt = stacks.Begin(); stackIt != stacks.End(); ++stackIt) {
-        List< AutoPtr<Task> >& tasks = (*stackIt)->GetTasks();
-        List<AutoPtr<Task> >::Iterator taskIt = tasks.Begin();
-        for (; taskIt != tasks.End(); ++taskIt) {
-            AutoPtr<IArrayList> tokens = (*taskIt)->mAppTokens;
+    for (Int32 stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+        AutoPtr<IInterface> obj;
+        stacks->Get(stackNdx, (IInterface**)&obj);
+        AutoPtr<IArrayList> tasks = To_TaskStack(obj)->GetTasks();
+        Int32 numTasks;
+        tasks->GetSize(&numTasks);
+        for (Int32 taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+            AutoPtr<IInterface> t;
+            tasks->Get(taskNdx, (IInterface**)&t);
+            AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
             Int32 numTokens;
             tokens->GetSize(&numTokens);
             for (Int32 tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
@@ -11607,13 +11638,19 @@ Int32 CWindowManagerService::HandleAnimatingStoppedAndTransitionLocked()
 
     mAppTransition->SetIdle();
     // Restore window app tokens to the ActivityManager views
-    List< AutoPtr<TaskStack> >& stacks = GetDefaultDisplayContentLocked()->GetStacks();
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = stacks.RBegin();
-    for (; rit != stacks.REnd(); ++rit) {
-        List< AutoPtr<Task> >& tasks = (*rit)->GetTasks();
-        List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
-        for (; taskRit != tasks.REnd(); ++taskRit) {
-            AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+    AutoPtr<IArrayList> stacks = GetDefaultDisplayContentLocked()->GetStacks();
+    Int32 numStacks;
+    stacks->GetSize(&numStacks);
+    for (Int32 stackNdx = numStacks - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        stacks->Get(stackNdx, (IInterface**)&obj);
+        AutoPtr<IArrayList> tasks = To_TaskStack(obj)->GetTasks();
+        Int32 numTasks;
+        tasks->GetSize(&numTasks);
+        for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+            AutoPtr<IInterface> t;
+            tasks->Get(taskNdx, (IInterface**)&t);
+            AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
             Int32 size;
             tokens->GetSize(&size);
             for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
@@ -11857,13 +11894,19 @@ void CWindowManagerService::UpdateAllDrawnLocked(
 {
     // See if any windows have been drawn, so they (and others
     // associated with them) can now be shown.
-    List< AutoPtr<TaskStack> >& stacks = displayContent->GetStacks();
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = stacks.RBegin();
-    for (; rit != stacks.REnd(); ++rit) {
-        List<AutoPtr<Task> >& tasks = (*rit)->GetTasks();
-        List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
-        for (; taskRit != tasks.REnd(); ++taskRit) {
-            AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+    AutoPtr<IArrayList> stacks = displayContent->GetStacks();
+    Int32 numStacks;
+    stacks->GetSize(&numStacks);
+    for (Int32 stackNdx = numStacks - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        stacks->Get(stackNdx, (IInterface**)&obj);
+        AutoPtr<IArrayList> tasks = To_TaskStack(obj)->GetTasks();
+        Int32 numTasks;
+        tasks->GetSize(&numTasks);
+        for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+            AutoPtr<IInterface> t;
+            tasks->Get(taskNdx, (IInterface**)&t);
+            AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
             Int32 size;
             tokens->GetSize(&size);
             for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
@@ -11928,7 +11971,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         // Initialize state of exiting applications.
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
-        AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(value);
+        AutoPtr<TaskStack> taskStack = To_TaskStack(value);
         AutoPtr<IArrayList> exitingAppTokens = taskStack->mExitingAppTokens;
         Int32 size;
         exitingAppTokens->GetSize(&size);
@@ -12413,7 +12456,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         // Initialize state of exiting applications.
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
-        AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(value);
+        AutoPtr<TaskStack> taskStack = To_TaskStack(value);
         AutoPtr<IArrayList> exitingAppTokens = taskStack->mExitingAppTokens;
         Int32 size;
         exitingAppTokens->GetSize(&size);
@@ -13007,10 +13050,13 @@ AutoPtr<WindowState> CWindowManagerService::FindFocusedWindowLocked(
         Int32 type;
         if (wtoken != NULL && (win->mAttrs->GetType(&type), type != IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING) &&
                 mFocusedApp != NULL) {
-            List< AutoPtr<Task> >& tasks = displayContent->GetTasks();
-            List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
-            for (; taskRit != tasks.REnd(); ++taskRit) {
-                AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+            AutoPtr<IArrayList> tasks = displayContent->GetTasks();
+            Int32 numTasks;
+            tasks->GetSize(&numTasks);
+            for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+                AutoPtr<IInterface> t;
+                tasks->Get(taskNdx, (IInterface**)&t);
+                AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
                 Int32 size;
                 tokens->GetSize(&size);
                 Int32 tokenNdx = size - 1;

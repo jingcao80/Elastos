@@ -4,16 +4,16 @@
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/server/wm/Task.h"
 #include "elastos/droid/server/wm/DimLayer.h"
-#include <elastos/utility/etl/List.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
+
+#define To_TaskStack(obj) ((TaskStack*)IObject::Probe(obj))
 
 class DisplayContent;
 class WindowStateAnimator;
@@ -28,7 +28,7 @@ public:
 
     CARAPI_(AutoPtr<DisplayContent>) GetDisplayContent();
 
-    CARAPI_(List< AutoPtr<Task> >&) GetTasks();
+    CARAPI_(AutoPtr<IArrayList>) GetTasks();
 
     CARAPI_(void) ResizeWindows();
 
@@ -171,7 +171,7 @@ private:
 
     /** The Tasks that define this stack. Oldest Tasks are at the bottom. The ordering must match
      * mTaskHistory in the ActivityStack with the same mStackId */
-    List<AutoPtr<Task> > mTasks;
+    AutoPtr<IArrayList> mTasks; // List<Task>
 
     /** For comparison with DisplayContent bounds. */
     AutoPtr<IRect> mTmpRect;

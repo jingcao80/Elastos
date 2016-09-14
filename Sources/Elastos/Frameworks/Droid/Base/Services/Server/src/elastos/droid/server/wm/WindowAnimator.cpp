@@ -176,14 +176,20 @@ void WindowAnimator::HideWallpapersLocked(
 void WindowAnimator::UpdateAppWindowsLocked(
     /* [in] */ Int32 displayId)
 {
-    List< AutoPtr<TaskStack> >& stacks = mService->GetDisplayContentLocked(displayId)->GetStacks();
-    List<AutoPtr<TaskStack> >::ReverseIterator stackRit = stacks.RBegin();
-    for (; stackRit != stacks.REnd(); ++stackRit) {
-        AutoPtr<TaskStack> stack = *stackRit;
-        List< AutoPtr<Task> >& tasks = stack->GetTasks();
-        List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
-        for (; taskRit != tasks.REnd(); ++taskRit) {
-            AutoPtr<IArrayList> tokens = (*taskRit)->mAppTokens;
+    AutoPtr<IArrayList> stacks = mService->GetDisplayContentLocked(displayId)->GetStacks();
+    Int32 SN;
+    stacks->GetSize(&SN);
+    for (Int32 i = SN - 1; i >= 0; --i) {
+        AutoPtr<IInterface> obj;
+        stacks->Get(i, (IInterface**)&obj);
+        AutoPtr<TaskStack> stack = To_TaskStack(obj);
+        AutoPtr<IArrayList> tasks = stack->GetTasks();
+        Int32 numTasks;
+        tasks->GetSize(&numTasks);
+        for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+            AutoPtr<IInterface> t;
+            tasks->Get(taskNdx, (IInterface**)&t);
+            AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
             Int32 size;
             tokens->GetSize(&size);
             for (Int32 tokenNdx = size - 1; tokenNdx >= 0; --tokenNdx) {
@@ -567,10 +573,13 @@ void WindowAnimator::TestTokenMayBeDrawnLocked(
 {
     // See if any windows have been drawn, so they (and others
     // associated with them) can now be shown.
-    List< AutoPtr<Task> >& tasks = mService->GetDisplayContentLocked(displayId)->GetTasks();
-    List<AutoPtr<Task> >::Iterator it = tasks.Begin();
-    for (; it != tasks.End(); ++it) {
-        AutoPtr<IArrayList> tokens = (*it)->mAppTokens;
+    AutoPtr<IArrayList> tasks = mService->GetDisplayContentLocked(displayId)->GetTasks();
+    Int32 numTasks;
+    tasks->GetSize(&numTasks);
+    for (Int32 taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
+        AutoPtr<IInterface> t;
+        tasks->Get(taskNdx, (IInterface**)&t);
+        AutoPtr<IArrayList> tokens = To_Task(t)->mAppTokens;
         Int32 numTokens;
         tokens->GetSize(&numTokens);
         for (Int32 tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {

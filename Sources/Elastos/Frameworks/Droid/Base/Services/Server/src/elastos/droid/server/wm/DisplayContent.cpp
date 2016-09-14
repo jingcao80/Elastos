@@ -49,6 +49,9 @@ DisplayContent::DisplayContent(
     Boolean result;
     display->GetDisplayInfo(mDisplayInfo, &result);
     mIsDefaultDisplay = mDisplayId == IDisplay::DEFAULT_DISPLAY;
+
+    CArrayList::New((IArrayList**)&mTmpTaskHistory);
+    CArrayList::New((IArrayList**)&mStacks);
 }
 
 Int32 DisplayContent::GetDisplayId()
@@ -85,21 +88,21 @@ Boolean DisplayContent::IsPrivate()
     return (mDisplay->GetFlags(&flags), flags & IDisplay::FLAG_PRIVATE) != 0;
 }
 
-List< AutoPtr<TaskStack> >& DisplayContent::GetStacks()
+AutoPtr<IArrayList> DisplayContent::GetStacks()
 {
     return mStacks;
 }
 
-List< AutoPtr<Task> >& DisplayContent::GetTasks()
+AutoPtr<IArrayList> DisplayContent::GetTasks()
 {
-    mTmpTaskHistory.Clear();
-    List<AutoPtr<TaskStack> >::Iterator it = mStacks.Begin();
-    for (; it != mStacks.End(); ++it) {
-        List< AutoPtr<Task> >& tasks = (*it)->GetTasks();
-        List<AutoPtr<Task> >::Iterator taskIt = tasks.Begin();
-        for (; taskIt != tasks.End(); ++taskIt) {
-            mTmpTaskHistory.PushBack(*taskIt);
-        }
+    mTmpTaskHistory->Clear();
+    Int32 numStacks;
+    mStacks->GetSize(&numStacks);
+    for (Int32 stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        AutoPtr<IArrayList> tasks = To_TaskStack(obj)->GetTasks();
+        mTmpTaskHistory->AddAll(Elastos::Utility::ICollection::Probe(tasks));
     }
     return mTmpTaskHistory;
 }
@@ -116,9 +119,12 @@ void DisplayContent::UpdateDisplayInfo()
 {
     Boolean result;
     mDisplay->GetDisplayInfo(mDisplayInfo, &result);
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        (*rit)->UpdateDisplayInfo();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        To_TaskStack(obj)->UpdateDisplayInfo();
     }
 }
 
@@ -151,7 +157,7 @@ ECode DisplayContent::AttachStack(
         }
         mHomeStack = stack;
     }
-    mStacks.PushBack(stack);
+    mStacks->Add((IObject*)stack);
     mLayoutNeeded = TRUE;
     return NOERROR;
 }
@@ -160,14 +166,15 @@ void DisplayContent::MoveStack(
     /* [in] */ TaskStack* stack,
     /* [in] */ Boolean toTop)
 {
-    mStacks.Remove(stack);
-    mStacks.Insert(toTop ? mStacks.End() : mStacks.Begin(), stack);
+    mStacks->Remove((IObject*)stack);
+    Int32 size;
+    mStacks->Add(toTop ? (mStacks->GetSize(&size), size) : 0, (IObject*)stack);
 }
 
 void DisplayContent::DetachStack(
     /* [in] */ TaskStack* stack)
 {
-    mStacks.Remove(stack);
+    mStacks->Remove((IObject*)stack);
 }
 
 void DisplayContent::Resize(
@@ -180,9 +187,12 @@ Int32 DisplayContent::StackIdFromPoint(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        AutoPtr<TaskStack> stack = *rit;
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        AutoPtr<TaskStack> stack = To_TaskStack(obj);
         stack->GetBounds(mTmpRect);
         Boolean contains;
         if (mTmpRect->Contains(x, y, &contains), contains) {
@@ -206,9 +216,9 @@ void DisplayContent::SetTouchExcludeRegion(
     AutoPtr<WindowList> windows = GetWindowList();
     Int32 N;
     windows->GetSize(&N);
-    for (Int32 i = N - 1; i >= 0; --i) {
+    for (Int32 stackNdx = N - 1; stackNdx >= 0; --stackNdx) {
         AutoPtr<IInterface> obj;
-        windows->Get(i, (IInterface**)&obj);
+        windows->Get(stackNdx, (IInterface**)&obj);
         AutoPtr<WindowState> win = To_WindowState(obj);
         AutoPtr<TaskStack> stack = win->GetStack();
         Boolean isVisible;
@@ -227,9 +237,9 @@ void DisplayContent::SwitchUserStacks(
     AutoPtr<WindowList> windows = GetWindowList();
     Int32 N;
     windows->GetSize(&N);
-    for (Int32 i = 0; i < N; i++) {
+    for (Int32 stackNdx = 0; stackNdx < N; stackNdx++) {
         AutoPtr<IInterface> obj;
-        windows->Get(i, (IInterface**)&obj);
+        windows->Get(stackNdx, (IInterface**)&obj);
         AutoPtr<WindowState> win = To_WindowState(obj);
         if (win->IsHiddenFromUserLocked()) {
             if (CWindowManagerService::DEBUG_VISIBILITY) {
@@ -243,43 +253,58 @@ void DisplayContent::SwitchUserStacks(
         }
     }
 
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        (*rit)->SwitchUser(newUserId);
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        To_TaskStack(obj)->SwitchUser(newUserId);
     }
 }
 
 void DisplayContent::ResetAnimationBackgroundAnimator()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        (*rit)->ResetAnimationBackgroundAnimator();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        To_TaskStack(obj)->ResetAnimationBackgroundAnimator();
     }
 }
 
 Boolean DisplayContent::AnimateDimLayers()
 {
     Boolean result = FALSE;
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        result |= (*rit)->AnimateDimLayers();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        result |= To_TaskStack(obj)->AnimateDimLayers();
     }
     return result;
 }
 
 void DisplayContent::ResetDimming()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        (*rit)->ResetDimmingTag();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        To_TaskStack(obj)->ResetDimmingTag();
     }
 }
 
 Boolean DisplayContent::IsDimming()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        if ((*rit)->IsDimming()) {
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        if (To_TaskStack(obj)->IsDimming()) {
             return TRUE;
         }
     }
@@ -288,35 +313,47 @@ Boolean DisplayContent::IsDimming()
 
 void DisplayContent::StopDimmingIfNeeded()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        (*rit)->StopDimmingIfNeeded();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        To_TaskStack(obj)->StopDimmingIfNeeded();
     }
 }
 
 Boolean DisplayContent::AnimateBlurLayers()
 {
     Boolean result = FALSE;
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        result |= (*rit)->AnimateBlurLayers();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        result |= To_TaskStack(obj)->AnimateBlurLayers();
     }
     return result;
 }
 
 void DisplayContent::ResetBlurring()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        (*rit)->ResetBlurringTag();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        To_TaskStack(obj)->ResetBlurringTag();
     }
 }
 
 Boolean DisplayContent::IsBlurring()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        if ((*rit)->IsBlurring()) {
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        if (To_TaskStack(obj)->IsBlurring()) {
             return TRUE;
         }
     }
@@ -325,25 +362,34 @@ Boolean DisplayContent::IsBlurring()
 
 void DisplayContent::StopBlurringIfNeeded()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        (*rit)->StopBlurringIfNeeded();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        To_TaskStack(obj)->StopBlurringIfNeeded();
     }
 }
 
 void DisplayContent::Close()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        (*rit)->Close();
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        To_TaskStack(obj)->Close();
     }
 }
 
 Boolean DisplayContent::IsAnimating()
 {
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        if ((*rit)->IsAnimating()) {
+    Int32 size;
+    mStacks->GetSize(&size);
+    for (Int32 stackNdx = size - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        if (To_TaskStack(obj)->IsAnimating()) {
             return TRUE;
         }
     }
@@ -353,9 +399,12 @@ Boolean DisplayContent::IsAnimating()
 void DisplayContent::CheckForDeferredActions()
 {
     Boolean animating = FALSE;
-    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
-    for (; rit != mStacks.REnd(); ++rit) {
-        AutoPtr<TaskStack> stack = *rit;
+    Int32 SN;
+    mStacks->GetSize(&SN);
+    for (Int32 stackNdx = SN - 1; stackNdx >= 0; --stackNdx) {
+        AutoPtr<IInterface> obj;
+        mStacks->Get(stackNdx, (IInterface**)&obj);
+        AutoPtr<TaskStack> stack = To_TaskStack(obj);
         if (stack->IsAnimating()) {
             animating = TRUE;
         }
@@ -363,10 +412,13 @@ void DisplayContent::CheckForDeferredActions()
             if (stack->mDeferDetach) {
                 mService->DetachStackLocked(this, stack);
             }
-            List< AutoPtr<Task> >& tasks = stack->GetTasks();
-            List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
-            for (; taskRit != tasks.REnd(); ++taskRit) {
-                AutoPtr<Task> task = *taskRit;
+            AutoPtr<IArrayList> tasks = stack->GetTasks();
+            Int32 numTasks;
+            tasks->GetSize(&numTasks);
+            for (Int32 taskNdx = numTasks - 1; taskNdx >= 0; --taskNdx) {
+                AutoPtr<IInterface> t;
+                tasks->Get(taskNdx, (IInterface**)&t);
+                AutoPtr<Task> task = To_Task(t);
                 AutoPtr<IArrayList> tokens = task->mAppTokens;
                 Int32 size;
                 tokens->GetSize(&size);
@@ -403,7 +455,9 @@ ECode DisplayContent::ToString(
     sb += " info=";
     sb += Object::ToString(mDisplayInfo);
     sb += " stacks=";
-    sb += mStacks.GetSize();
+    Int32 size;
+    mStacks->GetSize(&size);
+    sb += size;
     sb += "}";
     *str = sb.ToString();
     return NOERROR;
