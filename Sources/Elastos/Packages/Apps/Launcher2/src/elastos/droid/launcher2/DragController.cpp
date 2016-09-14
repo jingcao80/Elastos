@@ -953,12 +953,14 @@ ECode DragController::SetWindowToken(
 ECode DragController::AddDragListener(
     /* [in] */ IDragControllerDragListener* l)
 {
+    assert(l != NULL);
     return mListeners->Add(l);
 }
 
 ECode DragController::RemoveDragListener(
     /* [in] */ IDragControllerDragListener* l)
 {
+    assert(l != NULL);
     return mListeners->Remove(l);
 }
 

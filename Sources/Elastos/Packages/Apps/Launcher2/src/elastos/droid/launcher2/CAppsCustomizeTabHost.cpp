@@ -213,13 +213,26 @@ ECode CAppsCustomizeTabHost::MyRunnable2::Run()
     return IAnimator::Probe(animSet)->Start();
 }
 
+CAR_INTERFACE_IMPL(CAppsCustomizeTabHost::TabChangeListener, Object, ITabHostOnTabChangeListener);
+
+CAppsCustomizeTabHost::TabChangeListener::TabChangeListener(
+    /* [in] */ CAppsCustomizeTabHost* host)
+    : mHost(host)
+{}
+
+ECode CAppsCustomizeTabHost::TabChangeListener::OnTabChanged(
+    /* [in] */ const String& tabId)
+{
+    return mHost->OnTabChanged(tabId);
+}
+
 const String CAppsCustomizeTabHost::TAG("AppsCustomizeTabHost");
 
 const String CAppsCustomizeTabHost::APPS_TAB_TAG("APPS");
 const String CAppsCustomizeTabHost::WIDGETS_TAB_TAG("WIDGETS");
 
-CAR_INTERFACE_IMPL_3(CAppsCustomizeTabHost, TabHost, IAppsCustomizeTabHost,
-        ILauncherTransitionable, ITabHostOnTabChangeListener);
+CAR_INTERFACE_IMPL_2(CAppsCustomizeTabHost, TabHost, IAppsCustomizeTabHost,
+        ILauncherTransitionable);
 
 CAR_OBJECT_IMPL(CAppsCustomizeTabHost);
 
@@ -231,6 +244,7 @@ CAppsCustomizeTabHost::CAppsCustomizeTabHost()
 
 ECode CAppsCustomizeTabHost::constructor()
 {
+    mTabChangeListener = new TabChangeListener(this);
     return NOERROR;
 }
 
@@ -239,6 +253,7 @@ ECode CAppsCustomizeTabHost::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     TabHost::constructor(context, attrs);
+    mTabChangeListener = new TabChangeListener(this);
     LayoutInflater::From(context, (ILayoutInflater**)&mLayoutInflater);
     mRelayoutAndMakeVisible = new MyRunnable(this);
     return NOERROR;
@@ -253,7 +268,7 @@ ECode CAppsCustomizeTabHost::SetContentTypeImmediate(
     String str;
     GetTabTagForContentType(type, &str);
     SetCurrentTabByTag(str);
-    return SetOnTabChangedListener(this);
+    return SetOnTabChangedListener(mTabChangeListener);
 }
 
 ECode CAppsCustomizeTabHost::SelectAppsTab()
@@ -347,7 +362,7 @@ ECode CAppsCustomizeTabHost::OnFinishInflate()
     spec2->SetIndicator(IView::Probe(tabView));
     spec2->SetContent(contentFactory);
     AddTab(spec2);
-    SetOnTabChangedListener(this);
+    SetOnTabChangedListener(mTabChangeListener);
 
     // Setup the key listener to jump between the last tab view and the market icon
     AutoPtr<IViewOnKeyListener> keyListener =
@@ -483,7 +498,7 @@ ECode CAppsCustomizeTabHost::SetCurrentTabFromContent(
     String str;
     GetTabTagForContentType(type, &str);
     SetCurrentTabByTag(str);
-    return SetOnTabChangedListener(this);
+    return SetOnTabChangedListener(mTabChangeListener);
 }
 
 ECode CAppsCustomizeTabHost::GetContentTypeForTabTag(

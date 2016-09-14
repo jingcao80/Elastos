@@ -168,6 +168,36 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+CAR_INTERFACE_IMPL_3(Launcher::InnerListener, Object, IViewOnClickListener,
+    IViewOnLongClickListener, IViewOnTouchListener);
+
+Launcher::InnerListener::InnerListener(
+    /* [in] */ Launcher* host)
+    : mHost(host)
+{}
+
+ECode Launcher::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+ECode Launcher::InnerListener::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnTouch(v, event, result);
+}
+
+ECode Launcher::InnerListener::OnLongClick(
+    /* [in] */ IView* v,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnLongClick(v, result);
+}
+
+
 Launcher::MyRunnable::MyRunnable(
     /* [in] */ Launcher* host)
     : mHost(host)
@@ -1144,8 +1174,7 @@ Boolean Launcher::IsPropertyEnabled(
 
 Boolean Launcher::sForceEnableRotation = IsPropertyEnabled(FORCE_ENABLE_ROTATION_PROPERTY);
 
-CAR_INTERFACE_IMPL_5(Launcher, Activity, ILauncher, IViewOnClickListener,
-        IViewOnLongClickListener, ILauncherModelCallbacks, IViewOnTouchListener);
+CAR_INTERFACE_IMPL_2(Launcher, Activity, ILauncher, ILauncherModelCallbacks)
 
 Launcher::Launcher()
     : mState(Launcher_WORKSPACE)
@@ -1173,6 +1202,8 @@ Launcher::Launcher()
 ECode Launcher::constructor()
 {
     Activity::constructor();
+
+    mInnerListener = new InnerListener(this);
 
     CLauncherCloseSystemDialogsIntentReceiver::New(this, (IBroadcastReceiver**)&mCloseSystemDialogsReceiver);
     CLauncherAppWidgetResetObserver::New(this, (IContentObserver**)&mWidgetObserver);
@@ -1235,13 +1266,13 @@ ECode Launcher::OnCreate(
     app->SetLauncher(this, (ILauncherModel**)&mModel);
     app->GetIconCache((IIconCache**)&mIconCache);
     mDragController = new DragController();
-    ((DragController*)mDragController.Get())->constructor((ILauncher*)this);
+    ((DragController*)mDragController.Get())->constructor(this);
     GetLayoutInflater((ILayoutInflater**)&mInflater);
 
     AutoPtr<IAppWidgetManagerHelper> helper;
     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
-    helper->GetInstance((IContext*)this, (IAppWidgetManager**)&mAppWidgetManager);
-    mAppWidgetHost = new LauncherAppWidgetHost((ILauncher*)this, APPWIDGET_HOST_ID);
+    helper->GetInstance(this, (IAppWidgetManager**)&mAppWidgetManager);
+    mAppWidgetHost = new LauncherAppWidgetHost(this, APPWIDGET_HOST_ID);
     IAppWidgetHost::Probe(mAppWidgetHost)->StartListening();
 
     // If we are getting an onCreate, we can actually preempt onResume and unset mPaused here,
@@ -1268,12 +1299,12 @@ ECode Launcher::OnCreate(
 
     AutoPtr<IView> clingDismisView = FindViewById(R::id::cling_dismiss_button);
     btnClingDismisView = IButton::Probe(clingDismisView);
-    IView::Probe(btnClingDismisView)->SetOnClickListener(this);
+    IView::Probe(btnClingDismisView)->SetOnClickListener(mInnerListener);
 
     // Update customization drawer _after_ restoring the states
     if (mAppsCustomizeContent != NULL) {
         AutoPtr<IArrayList> list;
-        LauncherModel::GetSortedWidgetsAndShortcuts((IContext*)this,
+        LauncherModel::GetSortedWidgetsAndShortcuts(this,
                 (IArrayList**)&list);
         mAppsCustomizeContent->OnPackagesUpdated(list);
     }
@@ -1647,7 +1678,7 @@ void Launcher::CompleteTwoStageWidgetDrop(
     if (resultCode == RESULT_OK) {
         animationType = IWorkspace::COMPLETE_TWO_STAGE_WIDGET_DROP_ANIMATION;
         AutoPtr<IAppWidgetHostView> layout;
-        IAppWidgetHost::Probe(mAppWidgetHost)->CreateView((IContext*)this, appWidgetId,
+        IAppWidgetHost::Probe(mAppWidgetHost)->CreateView(this, appWidgetId,
                 mPendingAddWidgetInfo, (IAppWidgetHostView**)&layout);
         boundWidget = layout;
         onCompleteRunnable = new MyRunnable2(this, appWidgetId, layout, resultCode);
@@ -2010,10 +2041,11 @@ void Launcher::SetupViews()
     }
 
     // Setup the workspace
-    IView::Probe(mWorkspace)->SetHapticFeedbackEnabled(FALSE);
-    IView::Probe(mWorkspace)->SetOnLongClickListener(IViewOnLongClickListener::Probe(this));
+    Workspace* workspace = (Workspace*)mWorkspace.Get();
+    workspace->SetHapticFeedbackEnabled(FALSE);
+    workspace->SetOnLongClickListener(mInnerListener);
     mWorkspace->Setup(dragController);
-    dragController->AddDragListener(IDragControllerDragListener::Probe(mWorkspace));
+    dragController->AddDragListener(workspace->mInnerListener);
 
     // Get the search/delete bar
     view = NULL;
@@ -2066,7 +2098,7 @@ ECode Launcher::CreateShortcut(
     mInflater->Inflate(layoutResId, parent, FALSE, (IView**)&view);
     AutoPtr<IBubbleTextView> favorite = IBubbleTextView::Probe(view);
     favorite->ApplyFromShortcutInfo(info, mIconCache);
-    IView::Probe(favorite)->SetOnClickListener(this);
+    IView::Probe(favorite)->SetOnClickListener(mInnerListener);
     *outview = IView::Probe(favorite);
     REFCOUNT_ADD(*outview);
     return NOERROR;
@@ -2179,7 +2211,7 @@ void Launcher::CompleteAddShortcut(
         return;
     }
 
-    LauncherModel::AddItemToDatabase((IContext*)this, (ItemInfo*)IItemInfo::Probe(info),
+    LauncherModel::AddItemToDatabase(this, (ItemInfo*)IItemInfo::Probe(info),
             container, screen, (*cellXY)[0], (*cellXY)[1], FALSE);
 
     if (!mRestoring) {
@@ -2349,7 +2381,7 @@ void Launcher::CompleteAddAppWidget(
     if (!mRestoring) {
         if (hostView == NULL) {
             // Perform actual inflation because we're live
-            IAppWidgetHost::Probe(mAppWidgetHost)->CreateView((IContext*)this,
+            IAppWidgetHost::Probe(mAppWidgetHost)->CreateView(this,
                 appWidgetId, appWidgetInfo, (IAppWidgetHostView**)&(launcherInfo->mHostView));
             launcherInfo->mHostView->SetAppWidget(appWidgetId, appWidgetInfo);
         }
@@ -2529,7 +2561,7 @@ ECode Launcher::ShowOutOfSpaceMessage(
     CToastHelper::AcquireSingleton((IToastHelper**)&helper);
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
     AutoPtr<IToast> toast;
-    helper->MakeText((IContext*)this, cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+    helper->MakeText(this, cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
 
     return toast->Show();
 }
@@ -3148,7 +3180,7 @@ ECode Launcher::AddFolder(
 
     // Create the view
     AutoPtr<IFolderIcon> newFolder;
-    FolderIcon::FromXml(Elastos::Droid::Launcher2::R::layout::folder_icon, (ILauncher*)this,
+    FolderIcon::FromXml(Elastos::Droid::Launcher2::R::layout::folder_icon, this,
             IViewGroup::Probe(layout), IFolderInfo::Probe(folderInfo), mIconCache,
             (IFolderIcon**)&newFolder);
     Boolean res;
@@ -3453,7 +3485,7 @@ ECode Launcher::StartApplicationDetailsActivity(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText((IContext*)this,
+        helper->MakeText(this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3464,7 +3496,7 @@ ECode Launcher::StartApplicationDetailsActivity(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText((IContext*)this,
+        helper->MakeText(this,
             Elastos::Droid::Launcher2::R::string::activity_not_found,
             IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3485,7 +3517,7 @@ ECode Launcher::StartApplicationUninstallActivity(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText((IContext*)this,
+        helper->MakeText(this,
                 Elastos::Droid::Launcher2::R::string::uninstall_system_app_text,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         return toast->Show();
@@ -3590,7 +3622,7 @@ ERROR:
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText((IContext*)this,
+        helper->MakeText(this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3625,7 +3657,7 @@ ECode Launcher::StartActivitySafely(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText((IContext*)this,
+        helper->MakeText(this,
             Elastos::Droid::Launcher2::R::string::activity_not_found,
             IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3653,7 +3685,7 @@ ECode Launcher::StartAppWidgetConfigureActivitySafely(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText((IContext*)this,
+        helper->MakeText(this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         return toast->Show();
@@ -3672,7 +3704,7 @@ ECode Launcher::StartActivityForResultSafely(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText((IContext*)this,
+        helper->MakeText(this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3682,7 +3714,7 @@ ECode Launcher::StartActivityForResultSafely(
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
-        helper->MakeText((IContext*)this,
+        helper->MakeText(this,
                 Elastos::Droid::Launcher2::R::string::activity_not_found,
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -3756,20 +3788,24 @@ void Launcher::HandleFolderClick(
 void Launcher::CopyFolderIconToImage(
     /* [in] */ IFolderIcon* fi)
 {
-    Int32 width;
+    Int32 width,height;
     IView::Probe(fi)->GetMeasuredWidth(&width);
-    Int32 height;
     IView::Probe(fi)->GetMeasuredHeight(&height);
 
     // Lazy load ImageView, Bitmap and Canvas
     if (mFolderIconImageView == NULL) {
         CImageView::New(this, (IImageView**)&mFolderIconImageView);
     }
-    Int32 width2;
-    mFolderIconBitmap->GetWidth(&width2);
-    Int32 height2;
-    mFolderIconBitmap->GetHeight(&height2);
+    IView* iconView = IView::Probe(mFolderIconImageView);
+
+    Int32 width2 = -1, height2 = -1;
+    if (mFolderIconBitmap != NULL) {
+        mFolderIconBitmap->GetWidth(&width2);
+        mFolderIconBitmap->GetHeight(&height2);
+    }
     if (mFolderIconBitmap == NULL || width2 != width || height2 != height) {
+        mFolderIconBitmap = NULL;
+        mFolderIconCanvas = NULL;
         AutoPtr<IBitmapHelper> helper;
         CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
         helper->CreateBitmap(width, height, BitmapConfig_ARGB_8888, (IBitmap**)&mFolderIconBitmap);
@@ -3778,7 +3814,7 @@ void Launcher::CopyFolderIconToImage(
 
     AutoPtr<CDragLayerLayoutParams> lp;
     AutoPtr<IViewGroupLayoutParams> para;
-    IView::Probe(mFolderIconImageView)->GetLayoutParams((IViewGroupLayoutParams**)&para);
+    iconView->GetLayoutParams((IViewGroupLayoutParams**)&para);
     if (IDragLayerLayoutParams::Probe(para) != NULL) {
         lp = (CDragLayerLayoutParams*)IDragLayerLayoutParams::Probe(para);
     }
@@ -3791,11 +3827,10 @@ void Launcher::CopyFolderIconToImage(
     Float scale;
     mDragLayer->GetDescendantRectRelativeToSelf(IView::Probe(fi), mRectForFolderAnimation, &scale);
     lp->mCustomPosition = TRUE;
-    Int32 left;
+    Int32 left, top;
     mRectForFolderAnimation->GetLeft(&left);
-    lp->mX = left;
-    Int32 top;
     mRectForFolderAnimation->GetTop(&top);
+    lp->mX = left;
     lp->mY = top;
     lp->mWidth = (Int32)(scale * width);
     lp->mHeight = (Int32)(scale * height);
@@ -3807,22 +3842,21 @@ void Launcher::CopyFolderIconToImage(
     AutoPtr<IFolder> folder;
     fi->GetFolder((IFolder**)&folder);
     if (folder != NULL) {
-        Float x;
+        Float x, y;
         folder->GetPivotXForIconAnimation(&x);
-        IView::Probe(mFolderIconImageView)->SetPivotX(x);
-        Float y;
         folder->GetPivotYForIconAnimation(&y);
-        IView::Probe(mFolderIconImageView)->SetPivotY(y);
+        iconView->SetPivotX(x);
+        iconView->SetPivotY(y);
     }
     // Just in case this image view is still in the drag layer from a previous animation,
     // we remove it and re-add it.
+    IViewGroup* vg = IViewGroup::Probe(mDragLayer);
     Int32 index;
-    IViewGroup::Probe(mDragLayer)->IndexOfChild(IView::Probe(mFolderIconImageView), &index);
+    vg->IndexOfChild(iconView, &index);
     if (index != -1) {
-        IViewGroup::Probe(mDragLayer)->RemoveView(IView::Probe(mFolderIconImageView));
+        vg->RemoveView(iconView);
     }
-    IViewGroup::Probe(mDragLayer)->AddView(IView::Probe(mFolderIconImageView),
-            IViewGroupLayoutParams::Probe(lp));
+    vg->AddView(iconView, IViewGroupLayoutParams::Probe(lp));
     if (folder != NULL) {
         IView::Probe(folder)->BringToFront();
     }
@@ -5427,7 +5461,7 @@ ECode Launcher::BindAppWidget(
             appWidgetInfo, (IAppWidgetHostView**)&(_item->mHostView));
 
     IView::Probe(_item->mHostView)->SetTag(TO_IINTERFACE(item));
-    item->OnBindAppWidget((ILauncher*)this);
+    item->OnBindAppWidget(this);
 
     workspace->AddInScreen(IView::Probe(_item->mHostView), _item->mContainer, _item->mScreen, _item->mCellX,
             _item->mCellY, _item->mSpanX, _item->mSpanY, FALSE);
@@ -5836,7 +5870,7 @@ Boolean Launcher::IsClingsEnabled()
     AutoPtr<IAccountManagerHelper> helper2;
     CAccountManagerHelper::AcquireSingleton((IAccountManagerHelper**)&helper2);
     AutoPtr<IAccountManager> accountManager;
-    helper2->Get((IContext*)this, (IAccountManager**)&accountManager);
+    helper2->Get(this, (IAccountManager**)&accountManager);
     AutoPtr<ArrayOf<IAccount*> > accounts;
     accountManager->GetAccounts((ArrayOf<IAccount*>**)&accounts);
     if (supportsLimitedUsers && accounts->GetLength() == 0) {
@@ -5874,7 +5908,7 @@ AutoPtr<ICling> Launcher::InitCling(
     FindViewById(clingId, (IView**)&view);
     AutoPtr<ICling> cling = ICling::Probe(view);
     if (cling != NULL) {
-        cling->CCling_Init((ILauncher*)this, positionData);
+        cling->CCling_Init(this, positionData);
         view->SetVisibility(IView::VISIBLE);
         view->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
         if (animate) {
@@ -5955,7 +5989,7 @@ Boolean Launcher::SkipCustomClingIfNoAccounts()
         AutoPtr<IAccountManagerHelper> helper;
         CAccountManagerHelper::AcquireSingleton((IAccountManagerHelper**)&helper);
         AutoPtr<IAccountManager> am;
-        helper->Get((IContext*)this, (IAccountManager**)&am);
+        helper->Get(this, (IAccountManager**)&am);
         AutoPtr<ArrayOf<IAccount*> > accounts;
         am->GetAccountsByType(String("com.google"), (ArrayOf<IAccount*>**)&accounts);
         return accounts->GetLength() == 0;

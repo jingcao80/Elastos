@@ -47,7 +47,7 @@ private:
 
     private:
         Int64 mTime;
-        AutoPtr<FirstFrameAnimatorHelper> mHost;
+        FirstFrameAnimatorHelper* mHost;
     };
 
     class MyRunnable
@@ -63,7 +63,7 @@ private:
 
     private:
         AutoPtr<IValueAnimator> mAnimation;
-        AutoPtr<FirstFrameAnimatorHelper> mHost;
+        FirstFrameAnimatorHelper* mHost;
     };
 
 public:

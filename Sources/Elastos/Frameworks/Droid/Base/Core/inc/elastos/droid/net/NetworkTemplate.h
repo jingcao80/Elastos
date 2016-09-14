@@ -183,13 +183,13 @@ private:
 
     static CARAPI EnsureSubtypeAvailable();
 
-    static CARAPI_(AutoPtr<ArrayOf<Int32> >) CreateDataUsageNetworkTypes();
+    static CARAPI_(AutoPtr<ArrayOf<Int32> >) GetDataUsageNetworkTypes();
 
 private:
     /**
      * Set of {@link NetworkInfo#getType()} that reflect data usage.
      */
-    static const AutoPtr<ArrayOf<Int32> > DATA_USAGE_NETWORK_TYPES;
+    static AutoPtr<ArrayOf<Int32> > DATA_USAGE_NETWORK_TYPES;
 
     static Boolean sForceAllNetworkTypes;
 

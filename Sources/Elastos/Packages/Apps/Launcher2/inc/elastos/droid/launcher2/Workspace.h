@@ -66,12 +66,36 @@ class Workspace
     , public IDropTarget
     , public IDragSource
     , public IDragScroller
-    , public IViewOnTouchListener
-    , public IDragControllerDragListener
     , public ILauncherTransitionable
-    , public IViewGroupOnHierarchyChangeListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IViewOnTouchListener
+        , public IDragControllerDragListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        InnerListener(
+            /* [in] */ Workspace* host);
+
+        CARAPI OnTouch(
+            /* [in] */ IView* v,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnDragStart(
+            /* [in] */ IDragSource* source,
+            /* [in] */ IInterface* info,
+            /* [in] */ Int32 dragAction);
+
+        CARAPI OnDragEnd();
+
+    private:
+        Workspace* mHost;
+    };
+
     class WallpaperOffsetInterpolator
         : public Object
     {
@@ -112,7 +136,7 @@ public:
         CARAPI JumpToFinal();
 
     public:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
         Float mFinalHorizontalWallpaperOffset;
         Float mFinalVerticalWallpaperOffset;
         Float mHorizontalWallpaperOffset;
@@ -245,7 +269,7 @@ public:
         Int32 mCellY;
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
     };
 
     class ReorderAlarmListener
@@ -278,10 +302,11 @@ public:
         AutoPtr<IView> mChild;
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
     };
 
 private:
+
     class MyRunnable
         : public Runnable
     {
@@ -292,7 +317,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
     };
 
     class MyThread
@@ -306,7 +331,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
     };
 
     class MyAnimatorUpdateListener
@@ -323,7 +348,7 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
     };
 
     class MyLauncherAnimatorUpdateListener
@@ -359,7 +384,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
         AutoPtr<ItemInfo> mInfo;
         AutoPtr<ILauncherAppWidgetHostView> mHostView;
         AutoPtr<ICellLayout> mCellLayout;
@@ -376,7 +401,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
         AutoPtr<IRunnable> mAddResizeFrame;
     };
 
@@ -391,7 +416,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
         AutoPtr<IRunnable> mFinalResizeRunnable;
     };
 
@@ -405,7 +430,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
     };
 
     class MyRunnabl6
@@ -422,7 +447,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
         AutoPtr<PendingAddItemInfo> mPendingInfo;
         AutoPtr<ItemInfo> mItem;
         Int64 mContainer;
@@ -458,7 +483,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<Workspace> mHost;
+        Workspace* mHost;
         AutoPtr<IViewGroup> mLayout;
         AutoPtr<IHashSet> mComponentNames;
         AutoPtr<IUserHandle> mUser;
@@ -527,20 +552,20 @@ public:
         /* [in] */ Int32 vSpan,
         /* [out] */ IRect** rect);
 
-    CARAPI OnDragStart(
+    virtual CARAPI OnDragStart(
         /* [in] */ IDragSource* source,
         /* [in] */ IInterface* info,
         /* [in] */ Int32 dragAction);
 
-    CARAPI OnDragEnd();
+    virtual CARAPI OnDragEnd();
 
     //@Override
-    CARAPI OnChildViewAdded(
+    virtual CARAPI OnChildViewAdded(
         /* [in] */ IView* parent,
         /* [in] */ IView* child);
 
     //@Override
-    CARAPI OnChildViewRemoved(
+    virtual CARAPI OnChildViewRemoved(
         /* [in] */ IView* parent,
         /* [in] */ IView* child);
 
@@ -601,7 +626,7 @@ public:
      * that it should intercept touch events, which is not something that is normally supported.
      */
     //@Override
-    CARAPI OnTouch(
+    virtual CARAPI OnTouch(
         /* [in] */ IView* v,
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
@@ -1185,11 +1210,7 @@ protected:
     CARAPI GetCurrentPageDescription(
         /* [out] */ String* str);
 
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        return Object::ToString(str);
-    }
+    TO_STRING_IMPL("Workspace")
 
 private:
     /**
@@ -1367,6 +1388,9 @@ private:
 
     CARAPI_(void) OnResetScrollArea();
 
+public:
+    AutoPtr<InnerListener> mInnerListener;
+
 private:
     static const String TAG;
 
@@ -1431,7 +1455,7 @@ private:
      */
     AutoPtr<ICellLayout> mDropToLayout;
 
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     AutoPtr<IIconCache> mIconCache;
     AutoPtr<IDragController> mDragController;
 

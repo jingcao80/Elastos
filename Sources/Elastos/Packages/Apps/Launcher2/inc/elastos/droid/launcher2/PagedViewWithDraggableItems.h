@@ -30,12 +30,35 @@ namespace Launcher2 {
  */
 class PagedViewWithDraggableItems
     : public PagedView
-    , public IViewOnLongClickListener
-    , public IViewOnTouchListener
 {
-public:
-    CAR_INTERFACE_DECL();
+protected:
+    class LongClickAndTouchListener
+        : public Object
+        , public IViewOnLongClickListener
+        , public IViewOnTouchListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
+        LongClickAndTouchListener(
+            /* [in] */ PagedViewWithDraggableItems* host);
+
+        //@Override
+        CARAPI OnTouch(
+            /* [in] */ IView* v,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI OnLongClick(
+            /* [in] */ IView* v,
+            /* [out] */ Boolean* result);
+
+    private:
+        PagedViewWithDraggableItems* mHost;
+    };
+
+public:
     PagedViewWithDraggableItems();
 
     CARAPI constructor(
@@ -51,29 +74,28 @@ public:
         /* [in] */ Int32 defStyle);
 
     //@Override
-    CARAPI OnInterceptTouchEvent(
+    virtual CARAPI OnInterceptTouchEvent(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARAPI OnTouchEvent(
+    virtual CARAPI OnTouchEvent(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARAPI OnTouch(
+    virtual CARAPI OnTouch(
         /* [in] */ IView* v,
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
 
     //@Override
-    CARAPI OnLongClick(
+    virtual CARAPI OnLongClick(
         /* [in] */ IView* v,
         /* [out] */ Boolean* result);
 
     CARAPI SetDragSlopeThreshold(
         /* [in] */ Float dragSlopeThreshold);
-
 
 protected:
     virtual CARAPI_(Boolean) BeginDragging(
@@ -107,12 +129,15 @@ private:
     CARAPI_(void) HandleTouchEvent(
         /* [in] */ IMotionEvent* ev);
 
+protected:
+    AutoPtr<LongClickAndTouchListener> mLongClickAndTouchListener;
+
 private:
     AutoPtr<IView> mLastTouchedItem;
     Boolean mIsDragging;
     Boolean mIsDragEnabled;
     Float mDragSlopeThreshold;
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
 };
 
 } // namespace Launcher2

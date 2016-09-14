@@ -15,11 +15,13 @@
 #include "elastos/droid/view/View.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.App.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
+using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IPropertyValuesHolderHelper;
 using Elastos::Droid::Animation::CPropertyValuesHolderHelper;
@@ -53,6 +55,69 @@ using Elastos::Utility::ICollections;
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
+
+
+CAR_INTERFACE_IMPL_5(Folder::InnerListener, Object, IViewOnClickListener,
+    IViewOnLongClickListener, IFolderListener,
+    IOnEditorActionListener, IViewOnFocusChangeListener);
+
+Folder::InnerListener::InnerListener(
+    /* [in] */ Folder* host)
+    : mHost(host)
+{}
+
+ECode Folder::InnerListener::OnAdd(
+    /* [in] */ IShortcutInfo* item)
+{
+    return mHost->OnAdd(item);
+}
+
+ECode Folder::InnerListener::OnRemove(
+    /* [in] */ IShortcutInfo* item)
+{
+    return mHost->OnRemove(item);
+}
+
+ECode Folder::InnerListener::OnItemsChanged()
+{
+    return mHost->OnItemsChanged();
+}
+
+ECode Folder::InnerListener::OnTitleChanged(
+    /* [in] */ ICharSequence* title)
+{
+    return mHost->OnTitleChanged(title);
+}
+
+ECode Folder::InnerListener::OnEditorAction(
+    /* [in] */ ITextView* v,
+    /* [in] */ Int32 actionId,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnEditorAction(v, actionId, event, result);
+}
+
+ECode Folder::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+ECode Folder::InnerListener::OnLongClick(
+    /* [in] */ IView* v,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnLongClick(v, result);
+}
+
+ECode Folder::InnerListener::OnFocusChange(
+    /* [in] */ IView* v,
+    /* [in] */ Boolean hasFocus)
+{
+    return mHost->OnFocusChange(v, hasFocus);
+}
+
 
 CAR_INTERFACE_IMPL(Folder::MyActionModeCallback, Object, IActionModeCallback);
 
@@ -271,9 +336,7 @@ const Int32 Folder::ON_EXIT_CLOSE_DELAY = 800;
 String Folder::sDefaultFolderName;
 String Folder::sHintText;
 
-CAR_INTERFACE_IMPL_8(Folder, LinearLayout, IFolder, IDragSource, IViewOnClickListener,
-        IViewOnLongClickListener, IDropTarget, IFolderListener,
-        IOnEditorActionListener, IViewOnFocusChangeListener);
+CAR_INTERFACE_IMPL_3(Folder, LinearLayout, IFolder, IDragSource, IDropTarget)
 
 Folder::Folder()
     : mItemsInvalidated(FALSE)
@@ -321,6 +384,7 @@ ECode Folder::constructor(
     SetAlwaysDrawnWithCacheEnabled(FALSE);
     LayoutInflater::From(context, (ILayoutInflater**)&mInflater);
 
+    mInnerListener = new InnerListener(this);
     AutoPtr<IContext> ctx;
     context->GetApplicationContext((IContext**)&ctx);
     ILauncherApplication::Probe(ctx)->GetIconCache((IIconCache**)&mIconCache);
@@ -386,7 +450,7 @@ ECode Folder::OnFinishInflate()
             (IView**)&view2);
     mFolderName = IFolderEditText::Probe(view2);
     mFolderName->SetFolder(this);
-    IView::Probe(mFolderName)->SetOnFocusChangeListener(this);
+    IView::Probe(mFolderName)->SetOnFocusChangeListener(mInnerListener);
 
     // We find out how tall the text view wants to be (it is set to wrap_content), so that
     // we can allocate the appropriate amount of space for it.
@@ -396,7 +460,7 @@ ECode Folder::OnFinishInflate()
 
     // We disable action mode for now since it messes up the view on phones
     ITextView::Probe(mFolderName)->SetCustomSelectionActionModeCallback(mActionModeCallback);
-    ITextView::Probe(mFolderName)->SetOnEditorActionListener(this);
+    ITextView::Probe(mFolderName)->SetOnEditorActionListener(mInnerListener);
     ITextView::Probe(mFolderName)->SetSelectAllOnFocus(TRUE);
 
     Int32 type;
@@ -705,7 +769,7 @@ ECode Folder::Bind(
 
     mItemsInvalidated = TRUE;
     UpdateTextViewFocus();
-    mInfo->AddListener(this);
+    mInfo->AddListener(mInnerListener);
 
     String str;
     ((FolderInfo*)mInfo.Get())->mTitle->ToString(&str);
@@ -771,10 +835,9 @@ ECode Folder::AnimateOpen()
     values->Set(0, alpha);
     values->Set(1, scaleX);
     values->Set(2, scaleY);
-    AutoPtr<IObjectAnimator> oa = LauncherAnimUtils::OfPropertyValuesHolder(IView::Probe(this), values);
+    AutoPtr<IObjectAnimator> oa = LauncherAnimUtils::OfPropertyValuesHolder(this, values);
 
     AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(this);
-Slogger::D("Folder", "=======Folder::AnimateOpen listener=%p",listener.Get());
     IAnimator::Probe(oa)->AddListener(listener);
     IAnimator::Probe(oa)->SetDuration(mExpandDuration);
     SetLayerType(LAYER_TYPE_HARDWARE, NULL);
@@ -846,7 +909,6 @@ ECode Folder::AnimateClosed()
     AutoPtr<IObjectAnimator> oa = LauncherAnimUtils::OfPropertyValuesHolder(this, values);
 
     AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter2(this);
-Slogger::D("Folder", "=======Folder::AnimateClosed listener=%p",listener.Get());
     IAnimator::Probe(oa)->AddListener(listener);
     IAnimator::Probe(oa)->SetDuration(mExpandDuration);
     SetLayerType(LAYER_TYPE_HARDWARE, NULL);
@@ -923,8 +985,8 @@ ECode Folder::CreateAndAddShortcut(
     }
     IView::Probe(textView)->SetTag(item);
 
-    IView::Probe(textView)->SetOnClickListener(this);
-    IView::Probe(textView)->SetOnLongClickListener(this);
+    IView::Probe(textView)->SetOnClickListener(mInnerListener);
+    IView::Probe(textView)->SetOnLongClickListener(mInnerListener);
 
     // We need to check here to verify that the given item's location isn't already occupied
     // by another item.
@@ -1328,9 +1390,7 @@ void Folder::CenterAboutIcon()
     Int32 height = top1 + bottom + desiredHeight + mFolderNameHeight;
 
     AutoPtr<IView> view;
-    IView::Probe(mLauncher)->FindViewById(
-            Elastos::Droid::Launcher2::R::id::drag_layer,
-            (IView**)&view);
+    IActivity::Probe(mLauncher)->FindViewById(Elastos::Droid::Launcher2::R::id::drag_layer, (IView**)&view);
     AutoPtr<IDragLayer> parent = IDragLayer::Probe(view);
     Float scale;
     parent->GetDescendantRectRelativeToSelf(IView::Probe(mFolderIcon), mTempRect, &scale);
@@ -1791,7 +1851,7 @@ ECode Folder::GetLocationInDragLayer(
     AutoPtr<IDragLayer> dragLayer;
     mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
     Float tmp;
-    return dragLayer->GetLocationInDragLayer(IView::Probe(this), loc, &tmp);
+    return dragLayer->GetLocationInDragLayer(this, loc, &tmp);
 }
 
 ECode Folder::OnFocusChange(

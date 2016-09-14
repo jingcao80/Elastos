@@ -271,7 +271,7 @@ private:
     Int32 mPreviewBitmapHeight;
     String mSize;
     AutoPtr<IContext> mContext;
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     AutoPtr<IPackageManager> mPackageManager;
     AutoPtr<IPagedViewCellLayout> mWidgetSpacingLayout;
 

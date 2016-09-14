@@ -35,12 +35,7 @@ module
      * interface ILinearLayout
      *
      * interface IDragSource
-     * interface IViewOnClickListener
-     * interface IViewOnLongClickListener
      * interface IDropTarget
-     * interface IFolderListener
-     * interface IOnEditorActionListener
-     * interface IViewOnFocusChangeListener
      */
     [deprecated, local]
     interface IFolder {

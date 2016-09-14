@@ -2,6 +2,7 @@
 #include "elastos/droid/launcher2/HideFromAccessibilityHelper.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Launcher2::ECLSID_CAppsCustomizeTabHost;
 using Elastos::Droid::View::IViewGroup;
@@ -11,6 +12,7 @@ using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -83,15 +85,26 @@ void HideFromAccessibilityHelper::RestoreImportantForAccessibilityHelper(
     mPreviousValues->Remove(TO_IINTERFACE(v));
 
     // Call method on children recursively
-    if (IViewGroup::Probe(v) != NULL) {
-        AutoPtr<IViewGroup> vg = IViewGroup::Probe(v);
-
+    AutoPtr<IViewGroup> vg = IViewGroup::Probe(v);
+    if (vg != NULL) {
         // We assume if a class implements OnHierarchyChangeListener, it listens
         // to changes to any of its children (happens to be the case in Launcher)
-        if (IViewGroupOnHierarchyChangeListener::Probe(vg) != NULL) {
-            vg->SetOnHierarchyChangeListener(IViewGroupOnHierarchyChangeListener::Probe(vg));
+        IViewGroupOnHierarchyChangeListenerHolder* holder = IViewGroupOnHierarchyChangeListenerHolder::Probe(vg);
+        if (holder != NULL) {
+            AutoPtr<IViewGroupOnHierarchyChangeListener> listener;
+            holder->GetViewGroupHierarchyChangeListener((IViewGroupOnHierarchyChangeListener**)&listener);
+            vg->SetOnHierarchyChangeListener(listener);
         }
         else {
+            IViewGroupOnHierarchyChangeListener* listener = IViewGroupOnHierarchyChangeListener::Probe(vg);
+            if (listener != NULL) {
+                Logger::E("HideFromAccessibilityHelper",
+                    "Error: %s should implements IViewGroupOnHierarchyChangeListenerHolder"
+                    " instead of IViewGroupOnHierarchyChangeListener to avoid circular reference.", TO_CSTR(vg));
+                assert(0 && "view should implements IViewGroupOnHierarchyChangeListenerHolder"
+                    " instead of IViewGroupOnHierarchyChangeListener to avoid circular reference.");
+            }
+
             vg->SetOnHierarchyChangeListener(NULL);
         }
         Int32 count;

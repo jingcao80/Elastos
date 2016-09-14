@@ -252,10 +252,10 @@ ECode CHotseat::ResetLayout()
     IView::Probe(allAppsButton)->SetContentDescription(cchar);
 
     AutoPtr<MyOnTouchListener> listener1 = new MyOnTouchListener(mLauncher);
-    IView::Probe(allAppsButton)->SetOnTouchListener(IViewOnTouchListener::Probe(listener1));
+    IView::Probe(allAppsButton)->SetOnTouchListener(listener1);
 
     AutoPtr<MyOnClickListener> listener2 = new MyOnClickListener(mLauncher);
-    IView::Probe(allAppsButton)->SetOnClickListener(IViewOnClickListener::Probe(listener2));
+    IView::Probe(allAppsButton)->SetOnClickListener(listener2);
 
     // Note: We do this to ensure that the hotseat is always laid out in the orientation of
     // the hotseat in order regardless of which orientation they were added

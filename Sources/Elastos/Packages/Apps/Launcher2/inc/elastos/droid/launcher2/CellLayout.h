@@ -1524,7 +1524,7 @@ private:
     static const AutoPtr<IPorterDuffXfermode> sAddBlendMode;
     static const AutoPtr<IPaint> sPaint;
 
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     Int32 mCellWidth;
     Int32 mCellHeight;
 

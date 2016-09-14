@@ -47,7 +47,7 @@ namespace Launcher2 {
 class DragLayer
     : public FrameLayout
     , public IDragLayer
-    , public IViewGroupOnHierarchyChangeListener
+    , public IViewGroupOnHierarchyChangeListenerHolder
 {
 public:
     class DragLayerLayoutParams
@@ -97,6 +97,29 @@ public:
     };
 
 private:
+
+    class HierarchyChangeListener
+        : public Object
+        , public IViewGroupOnHierarchyChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        HierarchyChangeListener(
+            /* [in] */ DragLayer* host);
+
+        CARAPI OnChildViewAdded(
+            /* [in] */ IView* parent,
+            /* [in] */ IView* child);
+
+        CARAPI OnChildViewRemoved(
+            /* [in] */ IView* parent,
+            /* [in] */ IView* child);
+
+    private:
+        DragLayer* mHost;;
+    };
+
     class AnimateViewAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
@@ -135,7 +158,7 @@ private:
         Float mInitAlpha;
         AutoPtr<IRect> mFrom;
         AutoPtr<IRect> mTo;
-        AutoPtr<DragLayer> mHost;
+        DragLayer* mHost;
     };
 
     class AnimateViewAnimatorListenerAdapter
@@ -153,7 +176,7 @@ private:
     private:
         AutoPtr<IRunnable> mOnCompleteRunnable;
         Int32 mAnimationEndStyle;
-        AutoPtr<DragLayer> mHost;
+        DragLayer* mHost;
     };
 
     class FadeOutAnimatorUpdateListener
@@ -170,7 +193,7 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<DragLayer> mHost;
+        DragLayer* mHost;
     };
 
     class FadeOutAnimatorListenerAdapter
@@ -184,7 +207,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<DragLayer> mHost;
+        DragLayer* mHost;
     };
 
     class MyRunnable
@@ -206,8 +229,6 @@ public:
     CAR_INTERFACE_DECL();
 
     DragLayer();
-
-    CARAPI constructor();
 
     /**
      * Used to create a new DragLayer from XML.
@@ -407,12 +428,12 @@ public:
         /* [out] */ IView** view);
 
     //@Override
-    CARAPI OnChildViewAdded(
+    virtual CARAPI OnChildViewAdded(
         /* [in] */ IView* parent,
         /* [in] */ IView* child);
 
     //@Override
-    CARAPI OnChildViewRemoved(
+    virtual CARAPI OnChildViewRemoved(
         /* [in] */ IView* parent,
         /* [in] */ IView* child);
 
@@ -420,6 +441,9 @@ public:
         /* [in] */ Int32 direction);
 
     CARAPI OnExitScrollArea();
+
+    CARAPI GetViewGroupHierarchyChangeListener(
+        /* [out] */ IViewGroupOnHierarchyChangeListener** listener);
 
 protected:
     //@Override
@@ -471,7 +495,7 @@ private:
 
     Int32 mXDown;
     Int32 mYDown;
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
 
     // Variables relating to resizing widgets
     AutoPtr<IArrayList> mResizeFrames;
@@ -493,6 +517,7 @@ private:
     Boolean mInScrollArea;
     AutoPtr<IDrawable> mLeftHoverDrawable;
     AutoPtr<IDrawable> mRightHoverDrawable;
+    AutoPtr<IViewGroupOnHierarchyChangeListener> mHierarchyChangeListener;
 };
 
 } // namespace Launcher2

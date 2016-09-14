@@ -151,7 +151,7 @@ const Int32 PagedView::FLING_THRESHOLD_VELOCITY;
 const Int32 PagedView::MIN_SNAP_VELOCITY;
 const Int32 PagedView::MIN_FLING_VELOCITY;
 
-CAR_INTERFACE_IMPL(PagedView, ViewGroup, IPagedView)
+CAR_INTERFACE_IMPL_2(PagedView, ViewGroup, IPagedView, IViewGroupOnHierarchyChangeListenerHolder)
 
 PagedView::PagedView()
     : mFlingThresholdVelocity(0)
@@ -289,8 +289,17 @@ ECode PagedView::Init()
     mFlingThresholdVelocity = (Int32) (FLING_THRESHOLD_VELOCITY * mDensity);
     mMinFlingVelocity = (Int32) (MIN_FLING_VELOCITY * mDensity);
     mMinSnapVelocity = (Int32) (MIN_SNAP_VELOCITY * mDensity);
-    AutoPtr<OnHierarchyChangeListener> listener = new OnHierarchyChangeListener(this);
-    SetOnHierarchyChangeListener(listener);
+    mHierarchyChangeListener = new OnHierarchyChangeListener(this);
+    SetOnHierarchyChangeListener(mHierarchyChangeListener);
+    return NOERROR;
+}
+
+ECode PagedView::GetViewGroupHierarchyChangeListener(
+    /* [out] */ IViewGroupOnHierarchyChangeListener** listener)
+{
+    VALIDATE_NOT_NULL(listener)
+    *listener = mHierarchyChangeListener;
+    REFCOUNT_ADD(*listener)
     return NOERROR;
 }
 

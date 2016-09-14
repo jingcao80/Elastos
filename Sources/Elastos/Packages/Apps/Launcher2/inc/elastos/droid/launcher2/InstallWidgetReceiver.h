@@ -136,7 +136,7 @@ public:
 
     private:
         AutoPtr<ILayoutInflater> mInflater;
-        AutoPtr<ILauncher> mLauncher;
+        ILauncher* mLauncher;
         String mMimeType;
         AutoPtr<IClipData> mClipData;
         AutoPtr<IList> mActivities;

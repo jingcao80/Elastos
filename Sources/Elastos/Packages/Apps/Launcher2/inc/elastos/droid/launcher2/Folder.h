@@ -58,14 +58,55 @@ class Folder
     : public LinearLayout
     , public IFolder
     , public IDragSource
-    , public IViewOnClickListener
-    , public IViewOnLongClickListener
     , public IDropTarget
-    , public IFolderListener
-    , public IOnEditorActionListener
-    , public IViewOnFocusChangeListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IFolderListener
+        , public IOnEditorActionListener
+        , public IViewOnFocusChangeListener
+        , public IViewOnClickListener
+        , public IViewOnLongClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ Folder* host);
+
+        CARAPI OnAdd(
+            /* [in] */ IShortcutInfo* item);
+
+        CARAPI OnRemove(
+            /* [in] */ IShortcutInfo* item);
+
+        CARAPI OnItemsChanged();
+
+        CARAPI OnTitleChanged(
+            /* [in] */ ICharSequence* title);
+
+        CARAPI OnEditorAction(
+            /* [in] */ ITextView* v,
+            /* [in] */ Int32 actionId,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+        CARAPI OnLongClick(
+            /* [in] */ IView* v,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnFocusChange(
+            /* [in] */ IView* v,
+            /* [in] */ Boolean hasFocus);
+
+    private:
+        Folder* mHost;
+    };
+
     class MyActionModeCallback
         : public Object
         , public IActionModeCallback
@@ -210,10 +251,10 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* v);
 
-    CARAPI OnLongClick(
+    virtual CARAPI OnLongClick(
         /* [in] */ IView* v,
         /* [out] */ Boolean* result);
 
@@ -227,7 +268,7 @@ public:
     CARAPI DoneEditingFolderName(
         /* [in] */ Boolean commit);
 
-    CARAPI OnEditorAction(
+    virtual CARAPI OnEditorAction(
         /* [in] */ ITextView* v,
         /* [in] */ Int32 actionId,
         /* [in] */ IKeyEvent* event,
@@ -243,7 +284,7 @@ public:
      * We need to handle touch events to prevent them from falling through to the workspace below.
      */
     //@Override
-    CARAPI OnTouchEvent(
+    virtual CARAPI OnTouchEvent(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
@@ -366,15 +407,15 @@ public:
     CARAPI ShowItem(
         /* [in] */ IShortcutInfo* info);
 
-    CARAPI OnAdd(
+    virtual CARAPI OnAdd(
         /* [in] */ IShortcutInfo* item);
 
-    CARAPI OnRemove(
+    virtual CARAPI OnRemove(
         /* [in] */ IShortcutInfo* item);
 
-    CARAPI OnItemsChanged();
+    virtual CARAPI OnItemsChanged();
 
-    CARAPI OnTitleChanged(
+    virtual CARAPI OnTitleChanged(
         /* [in] */ ICharSequence* title);
 
     CARAPI GetItemsInReadingOrder(
@@ -383,7 +424,7 @@ public:
     CARAPI GetLocationInDragLayer(
         /* [in] */ ArrayOf<Int32>* loc);
 
-    CARAPI OnFocusChange(
+    virtual CARAPI OnFocusChange(
         /* [in] */ IView* v,
         /* [in] */ Boolean hasFocus);
 
@@ -469,7 +510,7 @@ public:
 protected:
     friend class Launcher;
     AutoPtr<IDragController> mDragController;
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     AutoPtr<IFolderInfo> mInfo;
     AutoPtr<ICellLayout> mContent;
 
@@ -511,6 +552,7 @@ private:
     AutoPtr<IRect> mTempRect;
 
     AutoPtr<IActionModeCallback> mActionModeCallback;
+    AutoPtr<InnerListener> mInnerListener;
 };
 
 } // namespace Launcher2

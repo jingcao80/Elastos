@@ -53,7 +53,7 @@ private:
         CARAPI OnClick(
             /* [in] */ IView* v);
 
-        virtual CARAPI OnFocusChange(
+        CARAPI OnFocusChange(
             /* [in] */ IView* v,
             /* [in] */ Boolean hasFocus);
     private:

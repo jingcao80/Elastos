@@ -107,10 +107,10 @@ private:
 protected:
     Int32 mTransitionDuration;
 
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
 
     AutoPtr<ITextView> mText;
-    AutoPtr<ISearchDropTargetBar> mSearchDropTargetBar;
+    ISearchDropTargetBar* mSearchDropTargetBar;     // weak-ref
 
     /** Whether this drop target is active for the current drag */
     Boolean mActive;

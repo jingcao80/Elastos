@@ -47,9 +47,34 @@ namespace Launcher2 {
  */
 class FolderIcon
     : public LinearLayout
-    , public IFolderListener
+    , public IFolderIcon
 {
 public:
+    class FolderListener
+        : public Object
+        , public IFolderListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        FolderListener(
+            /* [in] */ FolderIcon* host);
+
+        CARAPI OnItemsChanged();
+
+        CARAPI OnAdd(
+            /* [in] */ IShortcutInfo* item);
+
+        CARAPI OnRemove(
+            /* [in] */ IShortcutInfo* item);
+
+        CARAPI OnTitleChanged(
+            /* [in] */ ICharSequence* title);
+
+    private:
+        FolderIcon* mHost;
+    };
+
     class FolderRingAnimator
         : public Object
         , public IFolderIconFolderRingAnimator
@@ -72,7 +97,7 @@ public:
                 /* [in] */ IValueAnimator* animation);
 
         private:
-            AutoPtr<FolderIcon::FolderRingAnimator> mHost;
+            FolderRingAnimator* mHost;
             Int32 mPreviewSize;
         };
 
@@ -89,7 +114,7 @@ public:
                 /* [in] */ IAnimator* animation);
 
         private:
-            AutoPtr<FolderIcon::FolderRingAnimator> mHost;
+            FolderRingAnimator* mHost;
         };
 
         class NeutralAnimatorUpdateListener
@@ -109,7 +134,7 @@ public:
                 /* [in] */ IValueAnimator* animation);
 
         private:
-            AutoPtr<FolderIcon::FolderRingAnimator> mHost;
+            FolderRingAnimator* mHost;
             Int32 mPreviewSize;
         };
 
@@ -126,7 +151,7 @@ public:
                 /* [in] */ IAnimator* animation);
 
         private:
-            AutoPtr<FolderIcon::FolderRingAnimator> mHost;
+            FolderRingAnimator* mHost;
         };
 
     public:
@@ -212,7 +237,7 @@ public:
         CARAPI Run();
 
     private:
-        AutoPtr<FolderIcon> mHost;
+        FolderIcon* mHost;
         AutoPtr<IShortcutInfo> mItem;
     };
 
@@ -235,7 +260,7 @@ public:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<FolderIcon> mHost;
+        FolderIcon* mHost;
         Boolean mReverse;
         Float mTransX0;
         Float mTransY0;
@@ -258,12 +283,12 @@ public:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<FolderIcon> mHost;
+        FolderIcon* mHost;
         AutoPtr<IRunnable> mOnCompleteRunnable;
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     FolderIcon();
 
@@ -335,15 +360,15 @@ public:
     CARAPI GetTextVisible(
         /* [out] */ Boolean* result);
 
-    CARAPI OnItemsChanged();
+    virtual CARAPI OnItemsChanged();
 
-    CARAPI OnAdd(
+    virtual CARAPI OnAdd(
         /* [in] */ IShortcutInfo* item);
 
-    CARAPI OnRemove(
+    virtual CARAPI OnRemove(
         /* [in] */ IShortcutInfo* item);
 
-    CARAPI OnTitleChanged(
+    virtual CARAPI OnTitleChanged(
         /* [in] */ ICharSequence* title);
 
     //@Override
@@ -405,9 +430,10 @@ private:
 
 public:
     static AutoPtr<IDrawable> sSharedFolderLeaveBehind;
+    AutoPtr<FolderListener> mFolderListener;
 
 private:
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     AutoPtr<IFolder> mFolder;
     AutoPtr<IFolderInfo> mInfo;
     static Boolean sStaticValuesDirty;

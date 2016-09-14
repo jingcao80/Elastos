@@ -19,8 +19,38 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL_2(LauncherViewPropertyAnimator, Animator, ILauncherViewPropertyAnimator,
-        IAnimatorListener);
+CAR_INTERFACE_IMPL(LauncherViewPropertyAnimator::InnerListener, Object, IAnimatorListener)
+
+LauncherViewPropertyAnimator::InnerListener::InnerListener(
+    /* [in] */ LauncherViewPropertyAnimator* host)
+    : mHost(host)
+{}
+
+ECode LauncherViewPropertyAnimator::InnerListener::OnAnimationCancel(
+    /* [in] */ IAnimator* animation)
+{
+    return mHost->OnAnimationCancel(animation);
+}
+
+ECode LauncherViewPropertyAnimator::InnerListener::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    return mHost->OnAnimationEnd(animation);
+}
+
+ECode LauncherViewPropertyAnimator::InnerListener::OnAnimationRepeat(
+    /* [in] */ IAnimator* animation)
+{
+    return mHost->OnAnimationRepeat(animation);
+}
+
+ECode LauncherViewPropertyAnimator::InnerListener::OnAnimationStart(
+    /* [in] */ IAnimator* animation)
+{
+    return mHost->OnAnimationStart(animation);
+}
+
+CAR_INTERFACE_IMPL(LauncherViewPropertyAnimator, Animator, ILauncherViewPropertyAnimator);
 
 LauncherViewPropertyAnimator::LauncherViewPropertyAnimator(
     /* [in] */ IView* target)
@@ -41,6 +71,7 @@ LauncherViewPropertyAnimator::LauncherViewPropertyAnimator(
 ECode LauncherViewPropertyAnimator::AddListener(
     /* [in] */ IAnimatorListener* listener)
 {
+    assert(listener);
     return mListeners->Add(listener);
 }
 
@@ -272,7 +303,10 @@ ECode LauncherViewPropertyAnimator::Start()
         mViewPropertyAnimator->SetInterpolator(mInterpolator);
     }
 
-    mViewPropertyAnimator->SetListener(this);
+    if (mInnerListener == NULL) {
+        mInnerListener = new InnerListener(this);
+    }
+    mViewPropertyAnimator->SetListener(mInnerListener);
     mViewPropertyAnimator->Start();
     LauncherAnimUtils::CancelOnDestroyActivity(this);
     return NOERROR;

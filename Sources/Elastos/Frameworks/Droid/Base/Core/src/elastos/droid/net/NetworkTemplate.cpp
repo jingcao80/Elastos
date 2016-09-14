@@ -33,14 +33,15 @@ CAR_INTERFACE_IMPL_2(NetworkTemplate, Object, IParcelable, INetworkTemplate)
 
 Boolean NetworkTemplate::sForceAllNetworkTypes = FALSE;
 
-INIT_PROI_6 const AutoPtr<ArrayOf<Int32> > NetworkTemplate::DATA_USAGE_NETWORK_TYPES = CreateDataUsageNetworkTypes();
+AutoPtr<ArrayOf<Int32> > NetworkTemplate::DATA_USAGE_NETWORK_TYPES;
 
-AutoPtr<ArrayOf<Int32> > NetworkTemplate::CreateDataUsageNetworkTypes()
+AutoPtr<ArrayOf<Int32> > NetworkTemplate::GetDataUsageNetworkTypes()
 {
-    AutoPtr<ArrayOf<Int32> > rev;
-    CResources::GetSystem()->GetInt32Array(
-            R::array::config_data_usage_network_types, (ArrayOf<Int32>**)&rev);
-    return rev;
+    if (DATA_USAGE_NETWORK_TYPES == NULL) {
+        CResources::GetSystem()->GetInt32Array(
+                R::array::config_data_usage_network_types, (ArrayOf<Int32>**)&DATA_USAGE_NETWORK_TYPES);
+    }
+    return DATA_USAGE_NETWORK_TYPES;
 }
 
 NetworkTemplate::NetworkTemplate()
@@ -302,8 +303,9 @@ ECode NetworkTemplate::MatchesMobile(
     if (type == IConnectivityManager::TYPE_WIMAX) {
         // TODO: consider matching against WiMAX subscriber identity
         return TRUE;
-    } else {
-        Boolean bol = ArrayUtils::Contains(DATA_USAGE_NETWORK_TYPES.Get(), type);
+    }
+    else {
+        Boolean bol = ArrayUtils::Contains(GetDataUsageNetworkTypes().Get(), type);
         String subscriberid;
         ident->GetSubscriberId(&subscriberid);
         return ((sForceAllNetworkTypes || bol) && mSubscriberId.Equals(subscriberid));

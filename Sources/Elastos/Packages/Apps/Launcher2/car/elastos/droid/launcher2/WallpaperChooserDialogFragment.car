@@ -15,8 +15,6 @@ module
      * interface IDialogInterfaceOnCancelListener
      * interface IDialogInterfaceOnDismissListener
      * interface IDialogFragment
-     * interface IAdapterViewOnItemSelectedListener
-     * interface IAdapterViewOnItemClickListener
     */
     [local]
     interface IWallpaperChooserDialogFragment {

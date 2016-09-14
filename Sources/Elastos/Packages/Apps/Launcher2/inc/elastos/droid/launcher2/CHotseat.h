@@ -45,7 +45,7 @@ private:
             /* [out] */ Boolean* result);
 
     private:
-        AutoPtr<ILauncher> mLauncher;
+        ILauncher* mLauncher;
     };
 
     class MyOnClickListener
@@ -63,7 +63,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<ILauncher> mLauncher;
+        ILauncher* mLauncher;
     };
 
 public:
@@ -125,7 +125,7 @@ private:
     //@SuppressWarnings("unused")
     static const String TAG;
 
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     AutoPtr<ICellLayout> mContent;
 
     Int32 mCellCountX;

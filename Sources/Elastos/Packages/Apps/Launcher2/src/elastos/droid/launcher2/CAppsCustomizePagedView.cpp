@@ -399,6 +399,50 @@ ECode CAppsCustomizePagedView::MyRunnable5::Run()
     return mLayout->SetOnLayoutListener(NULL);
 }
 
+CAR_INTERFACE_IMPL_4(CAppsCustomizePagedView::InnerListener, Object,
+    IViewOnClickListener, IViewOnKeyListener,
+    IPagedViewIconPressedCallback,
+    IPagedViewWidgetShortPressListener);
+
+CAppsCustomizePagedView::InnerListener::InnerListener(
+    /* [in] */ CAppsCustomizePagedView* host)
+    : mHost(host)
+{}
+
+ECode CAppsCustomizePagedView::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+ECode CAppsCustomizePagedView::InnerListener::OnKey(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnKey(v, keyCode, event, result);
+}
+
+ECode CAppsCustomizePagedView::InnerListener::CleanUpShortPress(
+    /* [in] */ IView* v)
+{
+    return mHost->CleanUpShortPress(v);
+}
+
+ECode CAppsCustomizePagedView::InnerListener::OnShortPress(
+    /* [in] */ IView* v)
+{
+    return mHost->OnShortPress(v);
+}
+
+ECode CAppsCustomizePagedView::InnerListener::IconPressed(
+    /* [in] */ IPagedViewIcon* icon)
+{
+    return mHost->IconPressed(icon);
+}
+
+
 const String CAppsCustomizePagedView::TAG("AppsCustomizePagedView");
 
 Float CAppsCustomizePagedView::CAMERA_DISTANCE = 6500;
@@ -417,10 +461,8 @@ const Int32 CAppsCustomizePagedView::WIDGET_INFLATED = 2;
 const Int32 CAppsCustomizePagedView::sLookBehindPageCount = 2;
 const Int32 CAppsCustomizePagedView::sLookAheadPageCount = 2;
 
-CAR_INTERFACE_IMPL_7(CAppsCustomizePagedView, PagedViewWithDraggableItems,
-        IAppsCustomizePagedView, IViewOnClickListener, IViewOnKeyListener,
-        IDragSource, IPagedViewIconPressedCallback,
-        IPagedViewWidgetShortPressListener, ILauncherTransitionable);
+CAR_INTERFACE_IMPL_3(CAppsCustomizePagedView, PagedViewWithDraggableItems,
+    IAppsCustomizePagedView, IDragSource, ILauncherTransitionable);
 
 CAR_OBJECT_IMPL(CAppsCustomizePagedView);
 
@@ -474,6 +516,7 @@ ECode CAppsCustomizePagedView::constructor(
 {
     PagedViewWithDraggableItems::constructor(context, attrs);
 
+    mInnerListener = new InnerListener(this);
     LayoutInflater::From(context, (ILayoutInflater**)&mLayoutInflater);
     context->GetPackageManager((IPackageManager**)&mPackageManager);
     CArrayList::New((IArrayList**)&mApps);
@@ -1652,11 +1695,11 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
                 Elastos::Droid::Launcher2::R::layout::apps_customize_application,
                 IViewGroup::Probe(layout), FALSE, (IView**)&view);
         IPagedViewIcon* icon = IPagedViewIcon::Probe(view);
-        icon->ApplyFromApplicationInfo(info, TRUE, this);
-        view->SetOnClickListener(this);
-        view->SetOnLongClickListener(this);
-        view->SetOnTouchListener(this);
-        view->SetOnKeyListener(this);
+        icon->ApplyFromApplicationInfo(info, TRUE, mInnerListener);
+        view->SetOnClickListener(mInnerListener);
+        view->SetOnLongClickListener(mLongClickAndTouchListener);
+        view->SetOnTouchListener(mLongClickAndTouchListener);
+        view->SetOnKeyListener(mInnerListener);
 
         Int32 index = i - startIndex;
         Int32 x = index % mCellCountX;
@@ -1868,7 +1911,7 @@ ECode CAppsCustomizePagedView::SyncWidgetPageItems(
 
             widget->ApplyFromAppWidgetProviderInfo(info, -1, spanXY, mWidgetPreviewLoader);
             IView::Probe(widget)->SetTag(TO_IINTERFACE(createItemInfo));
-            widget->SetShortPressListener(this);
+            widget->SetShortPressListener(mInnerListener);
         }
         else if (IResolveInfo::Probe(rawInfo) != NULL) {
             // Fill in the shortcuts information
@@ -1888,10 +1931,10 @@ ECode CAppsCustomizePagedView::SyncWidgetPageItems(
             widget->ApplyFromResolveInfo(mPackageManager, info, mWidgetPreviewLoader);
             IView::Probe(widget)->SetTag(TO_IINTERFACE(createItemInfo));
         }
-        _view->SetOnClickListener(this);
-        _view->SetOnLongClickListener(this);
-        _view->SetOnTouchListener(this);
-        _view->SetOnKeyListener(this);
+        _view->SetOnClickListener(mInnerListener);
+        _view->SetOnLongClickListener(mLongClickAndTouchListener);
+        _view->SetOnTouchListener(mLongClickAndTouchListener);
+        _view->SetOnKeyListener(mInnerListener);
 
         // Layout each widget
         Int32 ix = i % mWidgetCountX;

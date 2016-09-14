@@ -18,7 +18,6 @@ module
 
     /**
      * @Involve
-     * interface IAnimatorListener
      * interface ICloneable
      * interface IAnimator
      */

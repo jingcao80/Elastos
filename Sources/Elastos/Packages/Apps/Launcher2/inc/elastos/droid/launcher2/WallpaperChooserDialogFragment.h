@@ -48,8 +48,6 @@ namespace Launcher2 {
 
 class WallpaperChooserDialogFragment
     : public DialogFragment
-    , public IAdapterViewOnItemSelectedListener
-    , public IAdapterViewOnItemClickListener
 {
 public:
     /**
@@ -94,6 +92,37 @@ public:
     };
 
 private:
+
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemSelectedListener
+        , public IAdapterViewOnItemClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        InnerListener(
+            /* [in] */ WallpaperChooserDialogFragment* host);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        CARAPI OnItemSelected(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        CARAPI OnNothingSelected(
+            /* [in] */ IAdapterView* parent);
+
+    private:
+        WallpaperChooserDialogFragment* mHost;
+    };
+
     class MyOnClickListener
         : public Object
         , public IViewOnClickListener
@@ -110,7 +139,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<WallpaperChooserDialogFragment> mHost;
+        WallpaperChooserDialogFragment* mHost;
         AutoPtr<IGallery> mGallery;
     };
 
@@ -140,7 +169,7 @@ private:
             /* [out] */ IView** view);
 
     private:
-        AutoPtr<WallpaperChooserDialogFragment> mHost;
+        WallpaperChooserDialogFragment* mHost;
         AutoPtr<ILayoutInflater> mLayoutInflater;
     };
 
@@ -164,12 +193,11 @@ private:
         CARAPI_(void) Cancel();
 
     private:
-        AutoPtr<WallpaperChooserDialogFragment> mHost;
+        WallpaperChooserDialogFragment* mHost;
     };
 
 
 public:
-    CAR_INTERFACE_DECL();
 
     WallpaperChooserDialogFragment();
 
@@ -212,7 +240,7 @@ public:
 
     // Click handler for the Dialog's GridView
     //@Override
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,
@@ -220,14 +248,14 @@ public:
 
     // Selection handler for the embedded Gallery view
     //@Override
-    CARAPI OnItemSelected(
+    virtual CARAPI OnItemSelected(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,
         /* [in] */ Int64 id);
 
     //@Override
-    CARAPI OnNothingSelected(
+    virtual CARAPI OnNothingSelected(
         /* [in] */ IAdapterView* parent);
 
 private:

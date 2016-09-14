@@ -211,6 +211,7 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
     AutoPtr<IViewParent> vparent2;
     IView::Probe(parent)->GetParent((IViewParent**)&vparent2);
     AutoPtr<IPagedView> container = IPagedView::Probe(vparent2);
+    Logger::I("FocusHelper", " >> HandlePagedViewGridLayoutWidgetKeyEvent: container: %s", TO_CSTR(container));
 
     AutoPtr<ITabHost> tabHost = FindTabHostParent(IView::Probe(container));
     AutoPtr<ITabWidget> tabs;
@@ -340,6 +341,7 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
                 // Simulate a click on the widget
                 AutoPtr<IViewOnClickListener> clickListener =
                         IViewOnClickListener::Probe(container);
+                assert(clickListener != NULL && "maybe should call mInnerListener in container");
                 clickListener->OnClick(IView::Probe(w));
             }
             wasHandled = TRUE;

@@ -45,7 +45,7 @@ protected:
     CARAPI_(void) OnProvidersChanged();
 
 public:
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
 };
 
 } // namespace Launcher2

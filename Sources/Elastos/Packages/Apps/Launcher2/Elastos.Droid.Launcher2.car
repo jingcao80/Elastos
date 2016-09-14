@@ -2,6 +2,7 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
+
     merge("car/elastos/droid/launcher2/Alarm.car");
     merge("car/elastos/droid/launcher2/AccessibleTabView.car");
     merge("car/elastos/droid/launcher2/ApplicationInfo.car");
@@ -57,6 +58,7 @@ module
     merge("car/elastos/droid/launcher2/ShortcutInfo.car");
     merge("car/elastos/droid/launcher2/SearchDropTargetBar.car");
     merge("car/elastos/droid/launcher2/ShortcutAndWidgetContainer.car");
+    merge("car/elastos/droid/launcher2/ViewGroupOnHierarchyChangeListenerHolder.car");
     merge("car/elastos/droid/launcher2/WidgetPreviewLoader.car");
     merge("car/elastos/droid/launcher2/WallpaperChooserDialogFragment.car");
     merge("car/elastos/droid/launcher2/Workspace.car");
@@ -83,25 +85,17 @@ module
     using interface Elastos.Droid.View.IViewParent;
     using interface Elastos.Droid.View.IViewManager;
     using interface Elastos.Droid.View.IOnPreDrawListener;
-    using interface Elastos.Droid.View.IViewOnKeyListener;
     using interface Elastos.Droid.View.IKeyEventCallback;
-    using interface Elastos.Droid.View.IViewOnLongClickListener;
-    using interface Elastos.Droid.View.IViewOnClickListener;
     using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
     using interface Elastos.Droid.View.IWindowCallback;
-    using interface Elastos.Droid.View.IViewOnLongClickListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     using interface Elastos.Droid.View.IViewGroupLayoutParams;
     using interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
-    using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
-    using interface Elastos.Droid.View.IViewOnFocusChangeListener;
-    using interface Elastos.Droid.View.IViewOnTouchListener;
     using interface Elastos.Droid.Widget.ITabHost;
-    using interface Elastos.Droid.Widget.ITabHostOnTabChangeListener;
     using interface Elastos.Droid.Widget.ITextView;
     using interface Elastos.Droid.Widget.IImageView;
     using interface Elastos.Droid.Widget.ILinearLayout;
@@ -109,9 +103,6 @@ module
     using interface Elastos.Droid.Widget.IFrameLayoutLayoutParams;
     using interface Elastos.Droid.Widget.ITabWidget;
     using interface Elastos.Droid.Widget.IEditText;
-    using interface Elastos.Droid.Widget.IOnEditorActionListener;
-    using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
-    using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     using interface Elastos.Droid.Graphics.IBitmap;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
 
@@ -188,7 +179,6 @@ module
         interface IDrawableCallback;
         interface ITabHost;
         interface ILauncherTransitionable;
-        interface ITabHostOnTabChangeListener;
         interface IAppsCustomizeTabHost;
     }
 
@@ -207,13 +197,8 @@ module
         interface IViewParent;
         interface IViewManager;
         interface IPagedView;
-        interface IViewOnLongClickListener;
-        interface IViewOnTouchListener;
-        interface IViewOnClickListener;
-        interface IViewOnKeyListener;
+        interface IViewGroupOnHierarchyChangeListenerHolder;
         interface IDragSource;
-        interface IPagedViewIconPressedCallback;
-        interface IPagedViewWidgetShortPressListener;
         interface ILauncherTransitionable;
         interface IAppsCustomizePagedView;
     }
@@ -300,6 +285,8 @@ module
             [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
+        interface IDragLayer;
+        interface IViewGroupOnHierarchyChangeListenerHolder;
         interface IView;
         interface IViewGroup;
         interface IViewParent;
@@ -308,8 +295,6 @@ module
         interface IAccessibilityEventSource;
         interface IDrawableCallback;
         interface IFrameLayout;
-        interface IViewGroupOnHierarchyChangeListener;
-        interface IDragLayer;
     }
 
     class CDragLayerLayoutParams {
@@ -391,12 +376,7 @@ module
         interface IDrawableCallback;
         interface ILinearLayout;
         interface IDragSource;
-        interface IViewOnClickListener;
-        interface IViewOnLongClickListener;
         interface IDropTarget;
-        interface IFolderListener;
-        interface IOnEditorActionListener;
-        interface IViewOnFocusChangeListener;
         interface IFolder;
     }
 
@@ -437,6 +417,7 @@ module
         constructor(
             [in] IContext* ctx);
 
+        interface IFolderIcon;
         interface IView;
         interface IViewGroup;
         interface IViewParent;
@@ -445,7 +426,6 @@ module
         interface IAccessibilityEventSource;
         interface IDrawableCallback;
         interface ILinearLayout;
-        interface IFolderListener;
     }
 
     singleton class CFolderIconHelper {
@@ -474,7 +454,6 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
         interface IDrawableCallback;
-        interface IViewOnFocusChangeListener;
         interface ITabWidget;
         interface IFocusOnlyTabWidget;
     }
@@ -606,10 +585,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
         interface IActivity;
-        interface IViewOnClickListener;
-        interface IViewOnLongClickListener;
         interface ILauncherModelCallbacks;
-        interface IViewOnTouchListener;
     }
 
     [local]
@@ -817,8 +793,6 @@ module
         interface IDialogInterfaceOnCancelListener;
         interface IDialogInterfaceOnDismissListener;
         interface IDialogFragment;
-        interface IAdapterViewOnItemSelectedListener;
-        interface IAdapterViewOnItemClickListener;
         interface IWallpaperChooserDialogFragment;
     }
 
@@ -837,6 +811,13 @@ module
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
+        interface IWorkspace;
+        interface IPagedView;
+        interface IDropTarget;
+        interface IDragSource;
+        interface IDragScroller;
+        interface ILauncherTransitionable;
+        interface IViewGroupOnHierarchyChangeListenerHolder;
         interface IViewGroup;
         interface IView;
         interface IDrawableCallback;
@@ -844,15 +825,6 @@ module
         interface IAccessibilityEventSource;
         interface IViewParent;
         interface IViewManager;
-        interface IPagedView;
-        interface IDropTarget;
-        interface IDragSource;
-        interface IDragScroller;
-        interface IViewOnTouchListener;
-        interface IDragControllerDragListener;
-        interface ILauncherTransitionable;
-        interface IViewGroupOnHierarchyChangeListener;
-        interface IWorkspace;
     }
 
     singleton class CWorkspaceHelper {

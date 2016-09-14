@@ -35,7 +35,7 @@ ECode DragEnforcer::constructor(
     AutoPtr<ILauncher> launcher = ILauncher::Probe(context);
     AutoPtr<IDragController> controller;
     launcher->GetDragController((IDragController**)&controller);
-    return controller->AddDragListener(IDragControllerDragListener::Probe(this));
+    return controller->AddDragListener(this);
 }
 
 ECode DragEnforcer::OnDragEnter()

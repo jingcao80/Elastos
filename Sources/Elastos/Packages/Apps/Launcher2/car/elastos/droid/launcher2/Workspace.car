@@ -61,10 +61,7 @@ module
      * interface IDropTarget
      * interface IDragSource
      * interface IDragScroller
-     * interface IViewOnTouchListener,
-     * interface IDragControllerDragListener
      * interface ILauncherTransitionable,
-     * interface IViewGroupOnHierarchyChangeListener
      */
     [deprecated, local]
     interface IWorkspace {

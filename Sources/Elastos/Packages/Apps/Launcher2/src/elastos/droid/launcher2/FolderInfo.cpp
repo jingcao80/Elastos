@@ -34,8 +34,7 @@ ECode FolderInfo::Add(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        AutoPtr<IFolderListener> listener = IFolderListener::Probe(obj);
-        listener->OnAdd(item);
+        IFolderListener::Probe(obj)->OnAdd(item);
     }
     return ItemsChanged();
 }
@@ -49,8 +48,7 @@ ECode FolderInfo::Remove(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        AutoPtr<IFolderListener> listener = IFolderListener::Probe(obj);
-        listener->OnRemove(item);
+        IFolderListener::Probe(obj)->OnRemove(item);
     }
     return ItemsChanged();
 }
@@ -64,8 +62,7 @@ ECode FolderInfo::SetTitle(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        AutoPtr<IFolderListener> listener = IFolderListener::Probe(obj);
-        listener->OnTitleChanged(title);
+        IFolderListener::Probe(obj)->OnTitleChanged(title);
     }
     return NOERROR;
 }
@@ -83,7 +80,8 @@ ECode FolderInfo::OnAddToDatabase(
 ECode FolderInfo::AddListener(
     /* [in] */ IFolderListener* listener)
 {
-    return mListeners->Add(TO_IINTERFACE(listener));
+    assert(listener);
+    return mListeners->Add(listener);
 }
 
 ECode FolderInfo::RemoveListener(
@@ -104,8 +102,7 @@ ECode FolderInfo::ItemsChanged()
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        AutoPtr<IFolderListener> listener = IFolderListener::Probe(obj);
-        listener->OnItemsChanged();
+        IFolderListener::Probe(obj)->OnItemsChanged();
     }
     return NOERROR;
 }

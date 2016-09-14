@@ -291,8 +291,31 @@ ECode DragLayer::MyRunnable::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL_2(DragLayer, FrameLayout, IDragLayer,
-        IViewGroupOnHierarchyChangeListener);
+
+CAR_INTERFACE_IMPL(DragLayer::HierarchyChangeListener, Object, IViewGroupOnHierarchyChangeListener);
+
+DragLayer::HierarchyChangeListener::HierarchyChangeListener(
+    /* [in] */ DragLayer* host)
+    : mHost(host)
+{
+}
+
+ECode DragLayer::HierarchyChangeListener::OnChildViewAdded(
+    /* [in] */ IView* parent,
+    /* [in] */ IView* child)
+{
+    return mHost->OnChildViewAdded(parent, child);
+}
+
+ECode DragLayer::HierarchyChangeListener::OnChildViewRemoved(
+    /* [in] */ IView* parent,
+    /* [in] */ IView* child)
+{
+    return mHost->OnChildViewRemoved(parent, child);
+}
+
+
+CAR_INTERFACE_IMPL_2(DragLayer, FrameLayout, IDragLayer, IViewGroupOnHierarchyChangeListenerHolder);
 
 DragLayer::DragLayer()
 {
@@ -309,21 +332,18 @@ DragLayer::DragLayer()
     mInScrollArea = FALSE;
 }
 
-ECode DragLayer::constructor()
-{
-    return NOERROR;
-}
-
 ECode DragLayer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
     FrameLayout::constructor(context, attrs);
 
+    mHierarchyChangeListener = new HierarchyChangeListener(this);
+
     // Disable multitouch across the workspace/all apps/customize tray
     SetMotionEventSplittingEnabled(FALSE);
     SetChildrenDrawingOrderEnabled(TRUE);
-    SetOnHierarchyChangeListener(this);
+    SetOnHierarchyChangeListener(mHierarchyChangeListener);
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
@@ -334,6 +354,15 @@ ECode DragLayer::constructor(
     return resources->GetDrawable(
             Elastos::Droid::Launcher2::R::drawable::page_hover_right_holo,
             (IDrawable**)&mRightHoverDrawable);
+}
+
+ECode DragLayer::GetViewGroupHierarchyChangeListener(
+    /* [out] */ IViewGroupOnHierarchyChangeListener** listener)
+{
+    VALIDATE_NOT_NULL(listener)
+    *listener = mHierarchyChangeListener;
+    REFCOUNT_ADD(*listener)
+    return NOERROR;
 }
 
 ECode DragLayer::Setup(

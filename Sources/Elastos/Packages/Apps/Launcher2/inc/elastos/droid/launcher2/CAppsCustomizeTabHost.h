@@ -39,9 +39,25 @@ CarClass(CAppsCustomizeTabHost)
     , public TabHost
     , public IAppsCustomizeTabHost
     , public ILauncherTransitionable
-    , public ITabHostOnTabChangeListener
 {
 private:
+    class TabChangeListener
+        : public Object
+        , public ITabHostOnTabChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TabChangeListener(
+            /* [in] */ CAppsCustomizeTabHost* host);
+
+        CARAPI OnTabChanged(
+            /* [in] */ const String& tabId);
+
+    private:
+        CAppsCustomizeTabHost* mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {
@@ -269,6 +285,7 @@ private:
     Boolean mTransitioningToWorkspace;
     Boolean mResetAfterTransition;
     AutoPtr<IRunnable> mRelayoutAndMakeVisible;
+    AutoPtr<TabChangeListener> mTabChangeListener;
 };
 
 } // namespace Launcher2

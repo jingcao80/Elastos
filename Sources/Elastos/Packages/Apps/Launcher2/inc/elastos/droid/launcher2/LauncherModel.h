@@ -167,7 +167,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<LauncherModel> mHost;
+        LauncherModel* mHost;
     };
 
     class MyRunnable5
@@ -266,7 +266,7 @@ private:
             /* [in] */ Boolean replacing);
 
     private:
-        AutoPtr<LauncherModel> mHost;
+        LauncherModel* mHost;
     };
 
     class MyRunnable17
@@ -364,7 +364,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<LoaderTask> mHost;
+            LoaderTask* mHost;
         };
 
         class MyComparator
@@ -409,7 +409,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<LoaderTask> mHost;
+            LoaderTask* mHost;
             AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
             AutoPtr<IArrayList> mWorkspaceItems;
             Int32 mStart;
@@ -428,7 +428,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<LoaderTask> mHost;
+            LoaderTask* mHost;
             AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
             AutoPtr<IHashMap> mFolders;
         };
@@ -445,7 +445,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<LoaderTask> mHost;
+            LoaderTask* mHost;
             AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
             AutoPtr<ILauncherAppWidgetInfo> mWidget;
         };
@@ -461,7 +461,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<LoaderTask> mHost;
+            LoaderTask* mHost;
             AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
         };
 
@@ -477,7 +477,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<LoaderTask> mHost;
+            LoaderTask* mHost;
             AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
             Int32 mCurrentScreen;
         };
@@ -494,7 +494,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<LoaderTask> mHost;
+            LoaderTask* mHost;
             AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
             Int64 mT;
         };
@@ -511,7 +511,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<LoaderTask> mHost;
+            LoaderTask* mHost;
             AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
             AutoPtr<IArrayList> mList;
         };
@@ -627,7 +627,7 @@ private:
         CARAPI_(void) LoadAllAppsByBatch();
 
     private:
-        AutoPtr<LauncherModel> mHost;
+        LauncherModel* mHost;
         AutoPtr<IContext> mContext;
         Boolean mIsLaunching;
         Boolean mIsLoadingAndBindingWorkspace;
@@ -654,7 +654,7 @@ private:
         CARAPI Run();
 
     public:
-        AutoPtr<LauncherModel> mHost;
+        LauncherModel* mHost;
         Int32 mOp;
         AutoPtr<ArrayOf<String> > mPackages;
         AutoPtr<IUserHandle> mUser;
@@ -1089,7 +1089,7 @@ private:
 
     Boolean mAppsCanBeOnRemoveableStorage;
 
-    AutoPtr<ILauncherApplication> mApp;
+    ILauncherApplication* mApp;
     Object mLock;
     AutoPtr<DeferredHandler> mHandler;
     AutoPtr<LoaderTask> mLoaderTask;

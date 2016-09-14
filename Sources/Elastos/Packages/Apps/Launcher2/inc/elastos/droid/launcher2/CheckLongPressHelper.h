@@ -30,7 +30,7 @@ public:
         CARAPI Run();
 
     private:
-        AutoPtr<CheckLongPressHelper> mHost;
+        CheckLongPressHelper* mHost;
     };
 
 public:

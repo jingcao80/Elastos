@@ -40,7 +40,7 @@ public:
         /* [in] */ Boolean hasFocus);
 
     //@Override
-    CARAPI OnFocusChange(
+    virtual CARAPI OnFocusChange(
         /* [in] */ IView* v,
         /* [in] */ Boolean hasFocus);
 };

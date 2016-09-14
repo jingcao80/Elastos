@@ -53,7 +53,7 @@ private:
             /* [out] */ Boolean* result);
 
     private:
-        AutoPtr<DeferredHandler> mHost;
+        DeferredHandler* mHost;
     };
 
     class IdleRunnable

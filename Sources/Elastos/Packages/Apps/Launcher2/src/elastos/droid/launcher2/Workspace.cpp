@@ -17,13 +17,12 @@
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IWallpaperInfo;
 using Elastos::Droid::App::CWallpaperManagerHelper;
@@ -50,6 +49,7 @@ using Elastos::Droid::View::Animation::IDecelerateInterpolator;
 using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IImageView;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -855,9 +855,40 @@ const Int32 Workspace::DRAG_MODE_CREATE_FOLDER = 1;
 const Int32 Workspace::DRAG_MODE_ADD_TO_FOLDER = 2;
 const Int32 Workspace::DRAG_MODE_REORDER = 3;
 
-CAR_INTERFACE_IMPL_8(Workspace, SmoothPagedView, IWorkspace, IDropTarget, IDragSource, IDragScroller,
-        IViewOnTouchListener, IDragControllerDragListener, ILauncherTransitionable,
-        IViewGroupOnHierarchyChangeListener);
+
+CAR_INTERFACE_IMPL_2(Workspace::InnerListener, Object,
+    IViewOnTouchListener, IDragControllerDragListener);
+
+Workspace::InnerListener::InnerListener(
+    /* [in] */ Workspace* host)
+    : mHost(host)
+{
+}
+
+ECode Workspace::InnerListener::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnTouch(v, event, result);
+}
+
+ECode Workspace::InnerListener::OnDragStart(
+    /* [in] */ IDragSource* source,
+    /* [in] */ IInterface* info,
+    /* [in] */ Int32 dragAction)
+{
+    return mHost->OnDragStart(source, info, dragAction);
+}
+
+ECode Workspace::InnerListener::OnDragEnd()
+{
+    return mHost->OnDragEnd();
+}
+
+
+CAR_INTERFACE_IMPL_5(Workspace, SmoothPagedView, IWorkspace,
+    IDropTarget, IDragSource, IDragScroller, ILauncherTransitionable);
 
 Workspace::Workspace()
     : mChildrenOutlineAlpha(0)
@@ -931,11 +962,6 @@ Workspace::Workspace()
     mZoomInInterpolator = new ZoomInInterpolator();
 }
 
-ECode Workspace::constructor()
-{
-    return NOERROR;
-}
-
 ECode Workspace::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
@@ -949,8 +975,11 @@ ECode Workspace::constructor(
     /* [in] */ Int32 defStyle)
 {
     SmoothPagedView::constructor(context, attrs, defStyle);
+
     mContentIsRefreshable = FALSE;
     mOriginalPageSpacing = mPageSpacing;
+
+    mInnerListener = new InnerListener(this);
 
     mDragEnforcer = new DragEnforcer();
     mDragEnforcer->constructor(context);
@@ -1046,7 +1075,7 @@ ECode Workspace::constructor(
             1, &mDefaultPage);
     a->Recycle();
 
-    SetOnHierarchyChangeListener(this);
+    SetOnHierarchyChangeListener(mHierarchyChangeListener);
 
     LauncherModel::UpdateWorkspaceLayoutCells(cellCountX, cellCountY);
     SetHapticFeedbackEnabled(FALSE);
@@ -1217,7 +1246,7 @@ ECode Workspace::OnChildViewAdded(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<ICellLayout> cl = ICellLayout::Probe(child);
-    cl->SetOnInterceptTouchListener(this);
+    cl->SetOnInterceptTouchListener(mInnerListener);
     IView::Probe(cl)->SetClickable(TRUE);
 
     AutoPtr<IContext> context;

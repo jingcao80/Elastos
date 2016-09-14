@@ -17,7 +17,6 @@ module
      * interface Elastos.Droid.View.IKeyEventCallback
      * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
-     * interface Elastos.Droid.View.IViewOnFocusChangeListener
      *
      * interface ITabWidget
      */

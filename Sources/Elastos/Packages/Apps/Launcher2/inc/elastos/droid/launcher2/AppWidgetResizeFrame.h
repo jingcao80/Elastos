@@ -42,7 +42,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<AppWidgetResizeFrame> mHost;
+        AppWidgetResizeFrame* mHost;
     };
 
     class MyAnimatorUpdateListener
@@ -58,7 +58,7 @@ private:
         CARAPI OnAnimationUpdate(
             /* [in] */ IValueAnimator* animation);
     private:
-        AutoPtr<AppWidgetResizeFrame> mHost;
+        AppWidgetResizeFrame* mHost;
     };
 
 public:
@@ -181,7 +181,7 @@ private:
 
     static AutoPtr<IRect> sTmpRect;
 
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
 };
 
 } // namespace Launcher2

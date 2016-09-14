@@ -29,6 +29,37 @@ class LauncherViewPropertyAnimator
     , public ILauncherViewPropertyAnimator
     , public IAnimatorListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IAnimatorListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ LauncherViewPropertyAnimator* host);
+
+        //@Override
+        CARAPI OnAnimationCancel(
+            /* [in] */ IAnimator* animation);
+
+        //@Override
+        CARAPI OnAnimationEnd(
+            /* [in] */ IAnimator* animation);
+
+        //@Override
+        CARAPI OnAnimationRepeat(
+            /* [in] */ IAnimator* animation);
+
+        //@Override
+        CARAPI OnAnimationStart(
+            /* [in] */ IAnimator* animation);
+
+    private:
+        LauncherViewPropertyAnimator* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL();
 
@@ -62,19 +93,19 @@ public:
         /* [out] */ Int64* delay);
 
     //@Override
-    CARAPI OnAnimationCancel(
+    virtual CARAPI OnAnimationCancel(
         /* [in] */ IAnimator* animation);
 
     //@Override
-    CARAPI OnAnimationEnd(
+    virtual CARAPI OnAnimationEnd(
         /* [in] */ IAnimator* animation);
 
     //@Override
-    CARAPI OnAnimationRepeat(
+    virtual CARAPI OnAnimationRepeat(
         /* [in] */ IAnimator* animation);
 
     //@Override
-    CARAPI OnAnimationStart(
+    virtual CARAPI OnAnimationStart(
         /* [in] */ IAnimator* animation);
 
     //@Override
@@ -154,6 +185,7 @@ public:
     AutoPtr<IArrayList> mListeners;
     Boolean mRunning;
     AutoPtr<FirstFrameAnimatorHelper> mFirstFrameHelper;
+    AutoPtr<InnerListener> mInnerListener;
 };
 
 } // namespace Launcher2

@@ -56,7 +56,7 @@ private:
 
     private:
         Int32 mDirection;
-        AutoPtr<DragController> mHost;
+        DragController* mHost;
     };
 
 public:
@@ -307,7 +307,7 @@ private:
 
     static const Float MAX_FLING_DEGREES;
 
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     AutoPtr<IHandler> mHandler;
     AutoPtr<IVibrator> mVibrator;
 

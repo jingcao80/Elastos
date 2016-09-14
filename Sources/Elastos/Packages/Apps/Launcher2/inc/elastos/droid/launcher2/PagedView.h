@@ -48,6 +48,7 @@ namespace Launcher2 {
 class PagedView
     : public ViewGroup
     , public IPagedView
+    , public IViewGroupOnHierarchyChangeListenerHolder
 {
 public:
     class SavedState
@@ -231,21 +232,21 @@ public:
      * @param l The listener used to respond to long clicks.
      */
     // @Override
-    CARAPI SetOnLongClickListener(
+    virtual CARAPI SetOnLongClickListener(
         /* [in] */ IViewOnLongClickListener* l);
 
     // @Override
-    CARAPI ScrollBy(
+    virtual CARAPI ScrollBy(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
     // @Override
-    CARAPI ScrollTo(
+    virtual CARAPI ScrollTo(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
     // @Override
-    CARAPI ComputeScroll();
+    virtual CARAPI ComputeScroll();
 
     // A layout scale of 1.0f assumes that the pages, in their unshrunken state, have a
     // scale of 1.0f. A layout scale of 0.8f assumes the pages have a scale of 0.8f, and
@@ -257,30 +258,30 @@ public:
         /* [in] */ Int32 pageSpacing);
 
     // @Override
-    CARAPI OnChildViewAdded(
+    virtual CARAPI OnChildViewAdded(
         /* [in] */ IView* parent,
         /* [in] */ IView* child);
 
     // @Override
-    CARAPI OnChildViewRemoved(
+    virtual CARAPI OnChildViewRemoved(
         /* [in] */ IView* parent,
         /* [in] */ IView* child);
 
     // @Override
-    CARAPI RequestChildRectangleOnScreen(
+    virtual CARAPI RequestChildRectangleOnScreen(
         /* [in] */ IView* child,
         /* [in] */ IRect* rectangle,
         /* [in] */ Boolean immediate,
         /* [out] */ Boolean* res);
 
     // @Override
-    CARAPI DispatchUnhandledMove(
+    virtual CARAPI DispatchUnhandledMove(
         /* [in] */ IView* focused,
         /* [in] */ Int32 direction,
         /* [out] */ Boolean* res);
 
     // @Override
-    CARAPI AddFocusables(
+    virtual CARAPI AddFocusables(
         /* [in] */ IArrayList* views,
         /* [in] */ Int32 direction,
         /* [in] */ Int32 focusableMode);
@@ -581,6 +582,9 @@ protected:
 
     virtual CARAPI_(String) GetCurrentPageDescription();
 
+    CARAPI GetViewGroupHierarchyChangeListener(
+        /* [out] */ IViewGroupOnHierarchyChangeListener** listener);
+
 private:
     // This curve determines how the effect of scrolling over the limits of the page dimishes
     // as the user pulls further and further from the bounds
@@ -694,6 +698,8 @@ protected:
 
     // All syncs and layout passes are deferred until data is ready.
     Boolean mIsDataReady;
+
+    AutoPtr<IViewGroupOnHierarchyChangeListener> mHierarchyChangeListener;
 
 private:
     static const String TAG;

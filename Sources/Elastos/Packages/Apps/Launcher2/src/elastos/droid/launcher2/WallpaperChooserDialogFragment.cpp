@@ -305,11 +305,43 @@ ECode WallpaperChooserDialogFragment::WallpaperDrawable::SetColorFilter(
     return NOERROR;
 }
 
+
+CAR_INTERFACE_IMPL_2(WallpaperChooserDialogFragment::InnerListener, Object,
+    IAdapterViewOnItemSelectedListener, IAdapterViewOnItemClickListener);
+
+WallpaperChooserDialogFragment::InnerListener::InnerListener(
+    /* [in] */ WallpaperChooserDialogFragment* host)
+    : mHost(host)
+{}
+
+ECode WallpaperChooserDialogFragment::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+ECode WallpaperChooserDialogFragment::InnerListener::OnItemSelected(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemSelected(parent, view, position, id);
+}
+
+ECode WallpaperChooserDialogFragment::InnerListener::OnNothingSelected(
+    /* [in] */ IAdapterView* parent)
+{
+    return mHost->OnNothingSelected(parent);
+}
+
+
 const String WallpaperChooserDialogFragment::TAG("Launcher.WallpaperChooserDialogFragment");
 const String WallpaperChooserDialogFragment::EMBEDDED_KEY("Elastos.Droid.Launcher2.WallpaperChooserDialogFragment.EMBEDDED_KEY");
 
-CAR_INTERFACE_IMPL_2(WallpaperChooserDialogFragment, DialogFragment, IAdapterViewOnItemSelectedListener
-        , IAdapterViewOnItemClickListener);
 
 WallpaperChooserDialogFragment::WallpaperChooserDialogFragment()
     : mEmbedded(FALSE)
@@ -438,7 +470,8 @@ ECode WallpaperChooserDialogFragment::OnCreateView(
         view->FindViewById(Elastos::Droid::Launcher2::R::id::gallery, (IView**)&tmp);
         AutoPtr<IGallery> gallery = IGallery::Probe(tmp);
         gallery->SetCallbackDuringFling(FALSE);
-        IAdapterView::Probe(gallery)->SetOnItemSelectedListener(this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        IAdapterView::Probe(gallery)->SetOnItemSelectedListener(listener);
 
         AutoPtr<IActivity> activity;
         GetActivity((IActivity**)&activity);
@@ -447,8 +480,8 @@ ECode WallpaperChooserDialogFragment::OnCreateView(
 
         AutoPtr<IView> setButton;
         view->FindViewById(Elastos::Droid::Launcher2::R::id::set, (IView**)&setButton);
-        AutoPtr<MyOnClickListener> listener = new MyOnClickListener(this, gallery);
-        setButton->SetOnClickListener(IViewOnClickListener::Probe(listener));
+        AutoPtr<MyOnClickListener> clickListener = new MyOnClickListener(this, gallery);
+        setButton->SetOnClickListener(clickListener);
         *outView = view;
         REFCOUNT_ADD(*outView);
     }

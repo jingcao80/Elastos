@@ -123,14 +123,45 @@ public:
 CarClass(CAppsCustomizePagedView)
     , public PagedViewWithDraggableItems
     , public IAppsCustomizePagedView
-    , public IViewOnClickListener
-    , public IViewOnKeyListener
     , public IDragSource
-    , public IPagedViewIconPressedCallback
-    , public IPagedViewWidgetShortPressListener
     , public ILauncherTransitionable
 {
 private:
+    class InnerListener
+        : public Object
+        , public IPagedViewIconPressedCallback
+        , public IPagedViewWidgetShortPressListener
+        , public IViewOnClickListener
+        , public IViewOnKeyListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CAppsCustomizePagedView* host);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+        CARAPI OnKey(
+            /* [in] */ IView* v,
+            /* [in] */ Int32 keyCode,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+        CARAPI CleanUpShortPress(
+            /* [in] */ IView* v);
+
+        CARAPI OnShortPress(
+            /* [in] */ IView* v);
+
+        CARAPI IconPressed(
+            /* [in] */ IPagedViewIcon* icon);
+
+    private:
+        CAppsCustomizePagedView* mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {
@@ -290,10 +321,10 @@ public:
         /* [in] */ Boolean bulkBind);
 
     //@Override
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* v);
 
-    CARAPI OnKey(
+    virtual CARAPI OnKey(
         /* [in] */ IView* v,
         /* [in] */ Int32 keyCode,
         /* [in] */ IKeyEvent* event,
@@ -305,15 +336,15 @@ public:
         /* [out] */ IBundle** bundle);
 
     //@Override
-    CARAPI OnShortPress(
+    virtual CARAPI OnShortPress(
         /* [in] */ IView* v);
 
     //@Override
-    CARAPI CleanUpShortPress(
+    virtual CARAPI CleanUpShortPress(
         /* [in] */ IView* v);
 
     //@Override
-    CARAPI GetContent(
+    virtual CARAPI GetContent(
         /* [out] */ IView** view);
 
     CARAPI OnLauncherTransitionPrepare(
@@ -336,17 +367,17 @@ public:
         /* [in] */ Boolean toWorkspace);
 
     //@Override
-    CARAPI OnDropCompleted(
+    virtual CARAPI OnDropCompleted(
         /* [in] */ IView* target,
         /* [in] */ IDropTargetDragObject* d,
         /* [in] */ Boolean isFlingToDelete,
         /* [in] */ Boolean success);
 
     //@Override
-    CARAPI OnFlingToDeleteCompleted();
+    virtual CARAPI OnFlingToDeleteCompleted();
 
     //@Override
-    CARAPI SupportsFlingToDelete(
+    virtual CARAPI SupportsFlingToDelete(
         /* [out] */ Boolean* result);
 
     CARAPI ClearAllWidgetPages();
@@ -363,10 +394,10 @@ public:
         /* [in] */ Boolean immediate);
 
     //@Override
-    CARAPI SyncPages();
+    virtual CARAPI SyncPages();
 
     //@Override
-    CARAPI SyncPageItems(
+    virtual CARAPI SyncPageItems(
         /* [in] */ Int32 page,
         /* [in] */ Boolean immediate);
 
@@ -377,7 +408,7 @@ public:
         /* [out] */ IView** view);
 
     //@Override
-    CARAPI IndexToPage(
+    virtual CARAPI IndexToPage(
         /* [in] */ Int32 index,
         /* [out] */ Int32* page);
 
@@ -414,7 +445,7 @@ public:
     CARAPI Surrender();
 
     //@Override
-    CARAPI IconPressed(
+    virtual CARAPI IconPressed(
         /* [in] */ IPagedViewIcon* icon);
 
     CARAPI ResetDrawableState();
@@ -590,7 +621,7 @@ private:
     static const String TAG;
 
     // Refs
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     AutoPtr<IDragController> mDragController;
     AutoPtr<ILayoutInflater> mLayoutInflater;
     AutoPtr<IPackageManager> mPackageManager;
@@ -677,6 +708,7 @@ private:
      */
     static const Int32 sLookBehindPageCount;
     static const Int32 sLookAheadPageCount;
+    AutoPtr<InnerListener> mInnerListener;
 };
 
 } // namespace Launcher2

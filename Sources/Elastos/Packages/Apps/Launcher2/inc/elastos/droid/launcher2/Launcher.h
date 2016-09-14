@@ -91,12 +91,37 @@ namespace Launcher2 {
 class Launcher
     : public Activity
     , public ILauncher
-    , public IViewOnClickListener
-    , public IViewOnLongClickListener
     , public ILauncherModelCallbacks
-    , public IViewOnTouchListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public IViewOnLongClickListener
+        , public IViewOnTouchListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ Launcher* host);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+        CARAPI OnTouch(
+            /* [in] */ IView* v,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnLongClick(
+            /* [in] */ IView* v,
+            /* [out] */ Boolean* result);
+
+    private:
+        Launcher* mHost;
+    };
+
     class PendingAddArguments
         : public Object
     {
@@ -1167,10 +1192,10 @@ public:
      *
      * @param v The view representing the clicked shortcut.
      */
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* v);
 
-    CARAPI OnTouch(
+    virtual CARAPI OnTouch(
         /* [in] */ IView* v,
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
@@ -1248,7 +1273,7 @@ public:
     CARAPI CloseFolder(
         /* [in] */ IFolder* folder);
 
-    CARAPI OnLongClick(
+    virtual CARAPI OnLongClick(
         /* [in] */ IView* v,
         /* [out] */ Boolean* result);
 
@@ -1851,6 +1876,9 @@ private:
     CARAPI_(Boolean) SkipCustomClingIfNoAccounts();
 
 
+public:
+    AutoPtr<InnerListener> mInnerListener;
+
 private:
     friend class LauncherModel;
 
@@ -2044,6 +2072,7 @@ private:
     AutoPtr<IRunnable> mBindPackagesUpdatedRunnable;
 
     AutoPtr<IButton> btnClingDismisView;
+
 };
 
 } // namespace Launcher2

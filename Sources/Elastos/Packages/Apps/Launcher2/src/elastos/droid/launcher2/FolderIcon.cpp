@@ -1,5 +1,6 @@
 
 #include "elastos/droid/launcher2/FolderIcon.h"
+#include "elastos/droid/launcher2/Launcher.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
 #include "elastos/droid/launcher2/DropTarget.h"
@@ -38,6 +39,36 @@ using Elastos::Utility::Logging::Slogger;
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
+
+CAR_INTERFACE_IMPL(FolderIcon::FolderListener, Object, IFolderListener)
+
+FolderIcon::FolderListener::FolderListener(
+    /* [in] */ FolderIcon* host)
+    : mHost(host)
+{}
+
+ECode FolderIcon::FolderListener::OnItemsChanged()
+{
+    return mHost->OnItemsChanged();
+}
+
+ECode FolderIcon::FolderListener::OnAdd(
+    /* [in] */ IShortcutInfo* item)
+{
+    return mHost->OnAdd(item);
+}
+
+ECode FolderIcon::FolderListener::OnRemove(
+    /* [in] */ IShortcutInfo* item)
+{
+    return mHost->OnRemove(item);
+}
+
+ECode FolderIcon::FolderListener::OnTitleChanged(
+    /* [in] */ ICharSequence* title)
+{
+    return mHost->OnTitleChanged(title);
+}
 
 //=============================================================
 // FolderIcon::FolderRingAnimator::AcceptAnimatorUpdateListener
@@ -384,7 +415,8 @@ const Float FolderIcon::PERSPECTIVE_SHIFT_FACTOR = 0.24f;
 // (0 means it's not scaled at all, 1 means it's scaled to nothing)
 const Float FolderIcon::PERSPECTIVE_SCALE_FACTOR = 0.35f;
 
-CAR_INTERFACE_IMPL(FolderIcon, LinearLayout, IFolderListener);
+
+CAR_INTERFACE_IMPL(FolderIcon, LinearLayout, IFolderIcon);
 
 FolderIcon::FolderIcon()
     : mIntrinsicIconSize(0)
@@ -418,11 +450,11 @@ ECode FolderIcon::constructor(
 
 void FolderIcon::Init()
 {
+    CArrayList::New((IArrayList**)&mHiddenItems);
     mParams = new PreviewItemDrawingParams(0, 0, 0, 0);
     mAnimParams = new PreviewItemDrawingParams(0, 0, 0, 0);
-    AutoPtr<IArrayList> mHiddenItems;
-    CArrayList::New((IArrayList**)&mHiddenItems);
     mLongPressHelper = new CheckLongPressHelper(this);
+    mFolderListener = new FolderListener(this);
 }
 
 ECode FolderIcon::IsDropEnabled(
@@ -432,15 +464,15 @@ ECode FolderIcon::IsDropEnabled(
 
     AutoPtr<IViewParent> parent;
     GetParent((IViewParent**)&parent);
-    AutoPtr<IViewGroup> cellLayoutChildren = IViewGroup::Probe(parent);
+    IView* cellLayoutChildren = IView::Probe(parent);
 
     AutoPtr<IViewParent> parent2;
-    IView::Probe(cellLayoutChildren)->GetParent((IViewParent**)&parent2);
-    AutoPtr<IViewGroup> cellLayout = IViewGroup::Probe(parent2);
+    cellLayoutChildren->GetParent((IViewParent**)&parent2);
+    IView* cellLayout = IView::Probe(parent2);
 
     AutoPtr<IViewParent> parent3;
-    IView::Probe(cellLayout)->GetParent((IViewParent**)&parent3);
-    AutoPtr<IWorkspace> workspace = IWorkspace::Probe(parent3);
+    cellLayout->GetParent((IViewParent**)&parent3);
+    IWorkspace* workspace = IWorkspace::Probe(parent3);
     Boolean res;
     workspace->IsSmall(&res);
     *result = !res;
@@ -475,32 +507,30 @@ ECode FolderIcon::FromXml(
     inflater->Inflate(resId, group, FALSE, (IView**)&view);
     AutoPtr<IFolderIcon> icon = IFolderIcon::Probe(view);
 
-    FolderIcon* _icon = (FolderIcon*)icon.Get();
-    FolderInfo* _folderInfo = (FolderInfo*)folderInfo;
+    FolderIcon* iconObj = (FolderIcon*)icon.Get();
+    FolderInfo* folderInfoObj = (FolderInfo*)folderInfo;
     AutoPtr<IView> view2;
-    IView::Probe(icon)->FindViewById(
-            Elastos::Droid::Launcher2::R::id::folder_icon_name, (IView**)&view2);
-    _icon->mFolderName = IBubbleTextView::Probe(view2);
-    ITextView::Probe(_icon->mFolderName)->SetText(_folderInfo->mTitle);
+    view->FindViewById(Elastos::Droid::Launcher2::R::id::folder_icon_name, (IView**)&view2);
+    iconObj->mFolderName = IBubbleTextView::Probe(view2);
+    ITextView::Probe(iconObj->mFolderName)->SetText(folderInfoObj->mTitle);
     AutoPtr<IView> view3;
-    IView::Probe(icon)->FindViewById(
-            Elastos::Droid::Launcher2::R::id::preview_background, (IView**)&view3);
-    _icon->mPreviewBackground = IImageView::Probe(view3);
+    view->FindViewById(Elastos::Droid::Launcher2::R::id::preview_background, (IView**)&view3);
+    iconObj->mPreviewBackground = IImageView::Probe(view3);
 
-    IView::Probe(icon)->SetTag(TO_IINTERFACE(folderInfo));
-    IView::Probe(icon)->SetOnClickListener(IViewOnClickListener::Probe(launcher));
-    _icon->mInfo = folderInfo;
-    _icon->mLauncher = launcher;
+    view->SetTag(TO_IINTERFACE(folderInfo));
+    view->SetOnClickListener(((Launcher*)launcher)->mInnerListener);
+    iconObj->mInfo = folderInfo;
+    iconObj->mLauncher = launcher;
 
     String str;
     IContext::Probe(launcher)->GetString(
             Elastos::Droid::Launcher2::R::string::folder_name_format, &str);
     String title;
-    _folderInfo->mTitle->ToString(&title);
+    folderInfoObj->mTitle->ToString(&title);
     String description;
     description.AppendFormat(str, title.string());
     AutoPtr<ICharSequence> cdescription = CoreUtils::Convert(description);
-    _icon->SetContentDescription(cdescription);
+    iconObj->SetContentDescription(cdescription);
     AutoPtr<IFolder> folder;
     Folder::FromXml(IContext::Probe(launcher), (IFolder**)&folder);
     AutoPtr<IDragController> controller;
@@ -508,10 +538,10 @@ ECode FolderIcon::FromXml(
     folder->SetDragController(controller);
     folder->SetFolderIcon(icon);
     folder->Bind(folderInfo);
-    _icon->mFolder = folder;
+    iconObj->mFolder = folder;
 
-    _icon->mFolderRingAnimator = new FolderRingAnimator(launcher, (FolderIcon*)icon.Get());
-    ((FolderInfo*)folderInfo)->AddListener(IFolderListener::Probe(icon));
+    iconObj->mFolderRingAnimator = new FolderRingAnimator(launcher, iconObj);
+    folderInfoObj->AddListener(iconObj->mFolderListener);
 
     *outicon = icon;
     REFCOUNT_ADD(*outicon);

@@ -97,7 +97,7 @@ private:
     static String FOLDER_LANDSCAPE;
     static String FOLDER_LARGE;
 
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     Boolean mIsInitialized;
     String mDrawIdentifier;
     AutoPtr<IDrawable> mBackground;

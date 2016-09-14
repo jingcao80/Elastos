@@ -84,7 +84,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<CDeleteDropTarget> mHost;
+        CDeleteDropTarget* mHost;
         AutoPtr<DragObject> mD;
     };
 
@@ -189,7 +189,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<CDeleteDropTarget> mHost;
+        CDeleteDropTarget* mHost;
         Boolean mIsAllApps;
         AutoPtr<DragObject> mD;
     };

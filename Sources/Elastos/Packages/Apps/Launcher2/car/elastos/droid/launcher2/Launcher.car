@@ -62,10 +62,7 @@ module
      * interface IComponentCallbacks2
      * interface IOnWindowDismissedCallback
      * interface Activity
-     * interface IViewOnClickListener
-     * interface IViewOnLongClickListener
      * interface ILauncherModelCallbacks
-     * interface IViewOnTouchListener
      */
     [deprecated, local]
     interface ILauncher {

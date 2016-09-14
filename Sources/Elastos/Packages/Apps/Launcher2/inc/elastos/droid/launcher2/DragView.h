@@ -49,7 +49,7 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<DragView> mHost;
+        DragView* mHost;
         Float mOffsetX;
         Float mOffsetY;
         Float mInitialScale;
@@ -71,7 +71,7 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<DragView> mHost;
+        DragView* mHost;
     };
 
     class MyRunnable
@@ -84,7 +84,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<DragView> mHost;
+        DragView* mHost;
     };
 
 public:

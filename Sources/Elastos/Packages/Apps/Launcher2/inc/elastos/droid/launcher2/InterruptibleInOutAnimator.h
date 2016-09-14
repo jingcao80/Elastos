@@ -41,7 +41,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<InterruptibleInOutAnimator> mHost;
+        InterruptibleInOutAnimator* mHost;
     };
 
 public:

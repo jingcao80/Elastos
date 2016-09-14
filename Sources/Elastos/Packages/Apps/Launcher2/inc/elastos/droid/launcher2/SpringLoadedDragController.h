@@ -14,10 +14,26 @@ namespace Launcher2 {
 
 class SpringLoadedDragController
     : public Object
-    , public IAlarmOnAlarmListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IAlarmOnAlarmListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ SpringLoadedDragController* host);
+
+        CARAPI OnAlarm(
+            /* [in] */ IAlarm* alarm);
+
+    private:
+        SpringLoadedDragController* mHost;
+    };
+
 public:
-    CAR_INTERFACE_DECL();
 
     SpringLoadedDragController(
         /* [in] */ ILauncher* launcher);
@@ -29,7 +45,7 @@ public:
         /* [in] */ ICellLayout* cl);
 
     // this is called when our timer runs out
-    CARAPI OnAlarm(
+    virtual CARAPI OnAlarm(
         /* [in] */ IAlarm* alarm);
 
 public:
@@ -43,7 +59,7 @@ public:
 private:
     // the screen the user is currently hovering over, if any
     AutoPtr<ICellLayout> mScreen;
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
 };
 
 } // namespace Launcher2

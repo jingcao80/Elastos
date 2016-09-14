@@ -1,0 +1,19 @@
+module
+{
+    
+    using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
+    
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    [local]
+    interface IViewGroupOnHierarchyChangeListenerHolder {
+        GetViewGroupHierarchyChangeListener(
+            [out] IViewGroupOnHierarchyChangeListener** listener);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -56,7 +56,7 @@ public:
 private:
     static const Int32 ORIENTATION_HORIZONTAL;
 
-    AutoPtr<ILauncher> mLauncher;
+    ILauncher* mLauncher;
     Int32 mOrientation;
 };
 

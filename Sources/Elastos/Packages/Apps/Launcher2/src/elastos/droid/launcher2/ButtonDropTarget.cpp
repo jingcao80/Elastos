@@ -17,6 +17,7 @@ CAR_INTERFACE_IMPL_3(ButtonDropTarget, TextView, IButtonDropTarget,
 
 ButtonDropTarget::ButtonDropTarget()
     : mTransitionDuration(0)
+    , mSearchDropTargetBar(NULL)
     , mActive(FALSE)
     , mHoverColor(0)
     , mBottomDragPadding(0)

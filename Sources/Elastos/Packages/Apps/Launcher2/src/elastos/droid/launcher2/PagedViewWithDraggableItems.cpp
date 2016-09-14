@@ -10,7 +10,29 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL_2(PagedViewWithDraggableItems, PagedView, IViewOnLongClickListener, IViewOnTouchListener);
+CAR_INTERFACE_IMPL_2(PagedViewWithDraggableItems::LongClickAndTouchListener, Object,
+    IViewOnLongClickListener, IViewOnTouchListener);
+
+PagedViewWithDraggableItems::LongClickAndTouchListener::LongClickAndTouchListener(
+    /* [in] */ PagedViewWithDraggableItems* host)
+    : mHost(host)
+{}
+
+//@Override
+ECode PagedViewWithDraggableItems::LongClickAndTouchListener::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnTouch(v, event, result);
+}
+
+ECode PagedViewWithDraggableItems::LongClickAndTouchListener::OnLongClick(
+    /* [in] */ IView* v,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnLongClick(v, result);
+}
 
 PagedViewWithDraggableItems::PagedViewWithDraggableItems()
     : mIsDragging(FALSE)
@@ -39,6 +61,7 @@ ECode PagedViewWithDraggableItems::constructor(
 {
     PagedView::constructor(context, attrs, defStyle);
     mLauncher = ILauncher::Probe(context);
+    mLongClickAndTouchListener = new LongClickAndTouchListener(this);
     return NOERROR;
 }
 
