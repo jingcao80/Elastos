@@ -14,5 +14,7 @@ SOURCES += CVolumeSeekBarPreference.cpp
 SOURCES += ManagedServiceSettings.cpp
 SOURCES += CNotificationAccessSettings.cpp
 SOURCES += COtherSoundSettings.cpp
+SOURCES += CZenModeSettings.cpp
 SOURCES += SettingPref.cpp
+SOURCES += ZenModeDowntimeDaysSelection.cpp
 SOURCES += notification.cpp

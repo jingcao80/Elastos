@@ -1,5 +1,8 @@
 
 #include "elastos/droid/settings/notification/CManagedServiceSettingsScaryWarningDialogFragment.h"
+#include "elastos/droid/settings/notification/CZenModeSettingsDowntimeDaysSelection.h"
+#include "elastos/droid/settings/notification/CZenModeSettingsTimePickerFragment.h"
+#include "elastos/droid/settings/notification/CZenModeSettingsTimePickerPreference.h"
 
 namespace Elastos {
 namespace Droid {
@@ -7,6 +10,9 @@ namespace Settings {
 namespace Notification {
 
 CAR_OBJECT_IMPL(CManagedServiceSettingsScaryWarningDialogFragment);
+CAR_OBJECT_IMPL(CZenModeSettingsDowntimeDaysSelection);
+CAR_OBJECT_IMPL(CZenModeSettingsTimePickerFragment);
+CAR_OBJECT_IMPL(CZenModeSettingsTimePickerPreference);
 
 
 } // namespace Notification

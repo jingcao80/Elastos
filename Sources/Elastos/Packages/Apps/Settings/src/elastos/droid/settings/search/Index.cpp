@@ -7,8 +7,9 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Text.h"
 #include "elastos/droid/settings/inputmethod/CInputMethodAndLanguageSettings.h"
-#include "elastos/droid/settings/notification/COtherSoundSettings.h"
 #include "elastos/droid/settings/notification/CNotificationSettings.h"
+#include "elastos/droid/settings/notification/COtherSoundSettings.h"
+#include "elastos/droid/settings/notification/CZenModeSettings.h"
 #include "elastos/droid/settings/search/Index.h"
 #include "elastos/droid/settings/search/IndexDatabaseHelper.h"
 #include "elastos/droid/settings/search/SearchIndexableResources.h"
@@ -35,6 +36,7 @@ using Elastos::Droid::Settings::CWirelessSettings;
 using Elastos::Droid::Settings::Inputmethod::CInputMethodAndLanguageSettings;
 using Elastos::Droid::Settings::Notification::CNotificationSettings;
 using Elastos::Droid::Settings::Notification::COtherSoundSettings;
+using Elastos::Droid::Settings::Notification::CZenModeSettings;
 using Elastos::Droid::Settings::Wifi::CWifiSettings;
 using Elastos::Droid::Settings::Wifi::CSavedAccessPointsWifiSettings;
 
@@ -1345,6 +1347,7 @@ Boolean Index::IsIndexableClass(
     if (className.Equals("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings")
             || className.Equals("Elastos.Droid.Settings.Notification.CNotificationSettings")
             || className.Equals("Elastos.Droid.Settings.Notification.COtherSoundSettings")
+            || className.Equals("Elastos.Droid.Settings.Notification.CZenModeSettings")
             || className.Equals("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")
             || className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")
             || className.Equals("Elastos.Droid.Settings.CSecuritySettings")
@@ -1449,6 +1452,9 @@ AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(const Strin
     }
     else if (className.Equals("Elastos.Droid.Settings.Notification.COtherSoundSettings")) {
         return COtherSoundSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+    }
+    else if (className.Equals("Elastos.Droid.Settings.Notification.CZenModeSettings")) {
+        return CZenModeSettings::GetSEARCH_INDEX_DATA_PROVIDER();
     }
     else if (className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")) {
         return CWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
