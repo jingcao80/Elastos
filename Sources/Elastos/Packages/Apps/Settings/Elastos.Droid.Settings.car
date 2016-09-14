@@ -22,6 +22,7 @@ module
     merge("car/elastos/droid/notification/NotificationAppList.car");
     merge("car/elastos/droid/notification/SettingPref.car");
     merge("car/elastos/droid/notification/VolumeSeekBarPreference.car");
+    merge("car/elastos/droid/notification/ZenModeSettings.car");
     merge("car/elastos/droid/search/Indexable.car");
     merge("car/elastos/droid/search/IndexDatabaseHelper.car");
     merge("car/elastos/droid/search/SearchIndexableRaw.car");
@@ -51,6 +52,7 @@ module
     using interface Elastos.Droid.App.IFragment;
     using interface Elastos.Droid.App.IDatePickerDialogOnDateSetListener;
     using interface Elastos.Droid.App.IFragmentManagerOnBackStackChangedListener;
+    using interface Elastos.Droid.App.IFragmentManager;
     using interface Elastos.Droid.App.IListFragment;
     using interface Elastos.Droid.App.ILoaderManagerLoaderCallbacks;
     using interface Elastos.Droid.App.ITimePickerDialogOnTimeSetListener;
@@ -127,6 +129,7 @@ module
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
     using interface Elastos.Droid.Widget.ICompoundButtonOnCheckedChangeListener;
+    using interface Elastos.Droid.Widget.IScrollView;
     using interface Elastos.Droid.Widget.IRecyclerListener;
     using interface Elastos.Droid.Wifi.IScanResult;
     using interface Elastos.Droid.Wifi.IWifiConfiguration;
@@ -610,6 +613,61 @@ module
             [in] IContext* context);
 
         interface ISeekBarPreference;
+        interface IPreference;
+        interface IComparable;
+    }
+
+    class CZenModeSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+        interface IIndexable;
+    }
+
+    [local]
+    class CZenModeSettingsDowntimeDaysSelection {
+        constructor(
+            [in] ISettingsPreferenceFragment* frag,
+            [in] IContext* ctx,
+            [in] String mode);
+
+        interface IScrollView;
+        interface IFrameLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    class CZenModeSettingsTimePickerFragment {
+        constructor();
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface ITimePickerDialogOnTimeSetListener;
+    }
+
+    [local]
+    class CZenModeSettingsTimePickerPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IFragmentManager* mgr);
+
         interface IPreference;
         interface IComparable;
     }

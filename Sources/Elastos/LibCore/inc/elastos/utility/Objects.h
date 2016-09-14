@@ -13,7 +13,7 @@ namespace Utility {
  * Utility methods for objects.
  * @since 1.7
  */
-class Objects {
+class ECO_PUBLIC Objects {
 public:
     /**
      * Returns 0 if {@code a == b}, or {@code c.compare(a, b)} otherwise.
@@ -114,7 +114,7 @@ private:
 //=============================================================
 
 template<typename T>
- Int32 Objects::Compare(
+Int32 Objects::Compare(
     /* [in] */ T* a,
     /* [in] */ T* b,
     /* [in] */ IComparator* c)
@@ -124,7 +124,7 @@ template<typename T>
 }
 
 template<typename T>
- Int32 Objects::Compare(
+Int32 Objects::Compare(
     /* [in] */ const AutoPtr<T>& a,
     /* [in] */ const AutoPtr<T>& b,
     /* [in] */ IComparator* c)

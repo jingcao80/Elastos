@@ -1,15 +1,8 @@
 
-// #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/settings/notification/SettingPref.h"
 #include "elastos/droid/settings/notification/CDropDownPreference.h"
-// #include "elastos/droid/settings/notification/CManagedServiceSettingsScaryWarningDialogFragment.h"
-// #include "../R.h"
-// #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
-// #include <elastos/core/StringBuilder.h>
-// #include <elastos/core/StringUtils.h>
-// #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Preference::IPreferenceGroup;
 using Elastos::Droid::Preference::IPreferenceScreen;
@@ -21,33 +14,6 @@ using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IBoolean;
 using Elastos::Core::IInteger32;
-
-// using Elastos::Droid::App::CActivityManagerHelper;
-// using Elastos::Droid::App::IActivityManagerHelper;
-// using Elastos::Droid::App::IAlertDialog;
-// using Elastos::Droid::App::CAlertDialogBuilder;
-// using Elastos::Droid::App::IAlertDialogBuilder;
-// using Elastos::Droid::Content::CComponentNameHelper;
-// using Elastos::Droid::Content::IComponentNameHelper;
-// using Elastos::Droid::Content::CComponentName;
-// using Elastos::Droid::Content::IIntentFilter;
-// using Elastos::Droid::Content::CIntentFilter;
-// using Elastos::Droid::Content::CIntent;
-// using Elastos::Droid::Content::Pm::CPackageItemInfoDisplayNameComparator;
-// using Elastos::Droid::Content::Pm::IPackageItemInfo;
-// using Elastos::Droid::Content::Pm::IResolveInfo;
-// using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
-// using Elastos::Droid::Graphics::Drawable::IDrawable;
-// using Elastos::Droid::Os::CBundle;
-// using Elastos::Droid::Os::CHandler;
-// using Elastos::Droid::Provider::CSettingsSecure;
-// using Elastos::Droid::Provider::ISettingsSecure;
-// using Elastos::Droid::Widget::ICheckable;
-// using Elastos::Core::StringUtils;
-// using Elastos::Utility::IList;
-// using Elastos::Utility::IIterator;
-// using Elastos::Utility::CHashSet;
-// using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
