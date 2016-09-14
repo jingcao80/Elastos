@@ -446,9 +446,6 @@ module
         interface IPreferenceActivity;
 
         interface IMobileNetworkSettings;
-        interface IDialogInterfaceOnClickListener;
-        interface IDialogInterfaceOnDismissListener;
-        interface IPreferenceOnPreferenceChangeListener;
     }
 
     class CMMIDialogActivity {
@@ -796,11 +793,6 @@ module
         interface IActivity;
 
         interface IEmergencyDialer;
-        interface IViewOnClickListener;
-        interface IViewOnLongClickListener;
-        interface IViewOnKeyListener;
-        interface ITextWatcher;
-        //interface IDialpadKeyButtonOnPressedListener;
     }
 
     class CEmergencyCallbackModeServiceBroadcastReceiver {
@@ -949,7 +941,6 @@ module
             interface IDialogInterfaceOnDismissListener;
             interface IDialogInterfaceOnClickListener;
 
-            interface IPreferenceOnPreferenceChangeListener;
             interface IAccountSelectionPreference;
         }
     } // namespace Settings

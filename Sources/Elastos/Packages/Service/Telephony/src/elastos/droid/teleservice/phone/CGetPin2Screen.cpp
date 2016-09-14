@@ -29,9 +29,9 @@ namespace Droid {
 namespace TeleService {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(CGetPin2Screen::MyViewOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(CGetPin2Screen::InnerListener, Object, IViewOnClickListener)
 
-CGetPin2Screen::MyViewOnClickListener::OnClick(
+CGetPin2Screen::InnerListener::OnClick(
     /* [in] */ IView* v)
 {
     AutoPtr<ICharSequence> cchar;
@@ -46,15 +46,23 @@ CGetPin2Screen::MyViewOnClickListener::OnClick(
     return NOERROR;
 }
 
+
+ECode CGetPin2Screen::InnerListener::OnEditorAction(
+    /* [in] */ ITextView* v,
+    /* [in] */ Int32 actionId,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnEditorAction(v, actionId, event, result);
+}
+
 const String CGetPin2Screen::TAG("CGetPin2Screen");// = PhoneGlobals.TAG;
 
-CAR_INTERFACE_IMPL(CGetPin2Screen, Activity, IOnEditorActionListener)
 
 CAR_OBJECT_IMPL(CGetPin2Screen)
 
 CGetPin2Screen::CGetPin2Screen()
 {
-    mClicked = new MyViewOnClickListener(this);
 }
 
 ECode CGetPin2Screen::constructor()
@@ -69,6 +77,8 @@ ECode CGetPin2Screen::OnCreate(
 
     SetContentView(Elastos::Droid::TeleService::R::layout::get_pin2_screen);
 
+    mInnerListener = new InnerListener(this);
+
     AutoPtr<IView> view;
     FindViewById(Elastos::Droid::TeleService::R::id::pin, (IView**)&view);
     mPin2Field = IEditText::Probe(view);
@@ -79,14 +89,14 @@ ECode CGetPin2Screen::OnCreate(
     helper->GetInstance((IDigitsKeyListener**)&listener);
     ITextView::Probe(mPin2Field)->SetKeyListener(IKeyListener::Probe(listener));
     ITextView::Probe(mPin2Field)->SetMovementMethod(NULL);
-    ITextView::Probe(mPin2Field)->SetOnEditorActionListener((IOnEditorActionListener*)this);
+    ITextView::Probe(mPin2Field)->SetOnEditorActionListener(mInnerListener);
     ITextView::Probe(mPin2Field)->SetInputType(IInputType::TYPE_CLASS_NUMBER |
             IInputType::TYPE_NUMBER_VARIATION_PASSWORD);
 
     AutoPtr<IView> view2;
     FindViewById(Elastos::Droid::TeleService::R::id::ok, (IView**)&view2);
     mOkButton = IButton::Probe(view2);
-    return IView::Probe(mOkButton)->SetOnClickListener(mClicked);
+    return IView::Probe(mOkButton)->SetOnClickListener(mInnerListener);
 }
 
 String CGetPin2Screen::GetPin2()

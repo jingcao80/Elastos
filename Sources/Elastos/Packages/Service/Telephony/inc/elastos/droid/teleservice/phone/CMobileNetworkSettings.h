@@ -49,11 +49,40 @@ namespace Phone {
 CarClass(CMobileNetworkSettings)
     , public PreferenceActivity
     , public IMobileNetworkSettings
-    , public IDialogInterfaceOnClickListener
-    , public IDialogInterfaceOnDismissListener
-    , public IPreferenceOnPreferenceChangeListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+        , public IDialogInterfaceOnDismissListener
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        TO_STRING_IMPL("CMobileNetworkSettings::InnerListener")
+
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CMobileNetworkSettings* host);
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+        //@Override
+        CARAPI OnDismiss(
+            /* [in] */ IDialogInterface* dialog);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* objValue,
+            /* [out] */ Boolean* result);
+    private:
+        friend class CMobileNetworkSettings;
+
+        CMobileNetworkSettings* mHost;
+    };
+
     class MyHandler
        : public Handler
     {
@@ -61,7 +90,7 @@ private:
         TO_STRING_IMPL("CMobileNetworkSettings::MyHandler")
 
         MyHandler(
-            CMobileNetworkSettings* host);
+            /* [in] */ CMobileNetworkSettings* host);
 
         //@Override
         CARAPI HandleMessage(

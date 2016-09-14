@@ -56,6 +56,39 @@ namespace Droid {
 namespace TeleService {
 namespace Phone {
 
+CAR_INTERFACE_IMPL_3(CMobileNetworkSettings::InnerListener, Object,
+    IDialogInterfaceOnClickListener,
+    IDialogInterfaceOnDismissListener,
+    IPreferenceOnPreferenceChangeListener)
+
+CMobileNetworkSettings::InnerListener::InnerListener(
+    /* [in] */ CMobileNetworkSettings* host)
+    : mHost(host)
+{}
+
+ECode CMobileNetworkSettings::InnerListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->OnClick(dialog, which);
+}
+
+//@Override
+ECode CMobileNetworkSettings::InnerListener::OnDismiss(
+    /* [in] */ IDialogInterface* dialog)
+{
+    return mHost->OnDismiss(dialog);
+}
+
+ECode CMobileNetworkSettings::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* objValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(preference, objValue, result);
+}
+
+
 CMobileNetworkSettings::MyHandler::MyHandler(
     CMobileNetworkSettings* host)
     : mHost(host)
@@ -243,9 +276,7 @@ const String CMobileNetworkSettings::UP_ACTIVITY_CLASS("com.android.settings.Set
 
 const String CMobileNetworkSettings::sIface("rmnet0"); //TODO: this will go away
 
-CAR_INTERFACE_IMPL_4(CMobileNetworkSettings, PreferenceActivity, IMobileNetworkSettings,
-        IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener,
-        IPreferenceOnPreferenceChangeListener)
+CAR_INTERFACE_IMPL(CMobileNetworkSettings, PreferenceActivity, IMobileNetworkSettings)
 
 CAR_OBJECT_IMPL(CMobileNetworkSettings)
 
@@ -457,9 +488,10 @@ ECode CMobileNetworkSettings::OnCreate(
     FindPreference(BUTTON_4G_LTE_KEY, (IPreference**)&preference);
     mButton4glte = ISwitchPreference::Probe(preference);
 
-    IPreference::Probe(mButton4glte)->SetOnPreferenceChangeListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    IPreference::Probe(mButton4glte)->SetOnPreferenceChangeListener(listener);
     assert(0);
-    //mButton4glte->SetChecked(ImsManager::IsEnhanced4gLteModeSettingEnabledByUser(this));
+    //mButton4glte->SetChecked(ImsManager::IsEnhanced4gLteModeSettingEnabledByUser(listener));
 
     //try
     ECode ec = NOERROR;
@@ -501,7 +533,7 @@ ERROR:
     IPreferenceGroup::Probe(prefSet)->FindPreference(cchar4, (IPreference**)&preference4);
     mButtonEnabledNetworks = IListPreference::Probe(preference4);
 
-    IPreference::Probe(mButtonDataRoam)->SetOnPreferenceChangeListener(this);
+    IPreference::Probe(mButtonDataRoam)->SetOnPreferenceChangeListener(listener);
     AutoPtr<ICharSequence> cchar5 = CoreUtils::Convert(BUTTON_CDMA_LTE_DATA_SERVICE_KEY);
     IPreferenceGroup::Probe(prefSet)->FindPreference(cchar5, (IPreference**)&mLteDataServicePref);
 
@@ -544,7 +576,7 @@ ERROR:
         IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonEnabledNetworks), &tmp);
         // set the listener for the mButtonPreferredNetworkMode list preference so we can issue
         // change Preferred Network Mode.
-        IPreference::Probe(mButtonPreferredNetworkMode)->SetOnPreferenceChangeListener(this);
+        IPreference::Probe(mButtonPreferredNetworkMode)->SetOnPreferenceChangeListener(listener);
 
         //Get the networkMode from Settings.System and displays it
         AutoPtr<IContext> context;
@@ -896,6 +928,7 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
         //normally called on the toggle click
         Boolean res;
         if ((ITwoStatePreference::Probe(mButtonDataRoam)->IsChecked(&res), !res)) {
+            AutoPtr<InnerListener> listener = new InnerListener(this);
             // First confirm with a warning dialog about charges
             mOkClicked = FALSE;
             AutoPtr<IAlertDialogBuilder> builder;
@@ -908,11 +941,11 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
             builder->SetMessage(cchar);
             builder->SetTitle(Elastos::Droid::R::string::dialog_alert_title);
             builder->SetIconAttribute(Elastos::Droid::R::attr::alertDialogIcon);
-            builder->SetPositiveButton(Elastos::Droid::R::string::yes, this);
-            builder->SetNegativeButton(Elastos::Droid::R::string::no, this);
+            builder->SetPositiveButton(Elastos::Droid::R::string::yes, listener);
+            builder->SetNegativeButton(Elastos::Droid::R::string::no, listener);
             AutoPtr<IAlertDialog> dialog;
             builder->Show((IAlertDialog**)&dialog);
-            builder->SetOnDismissListener(this);
+            builder->SetOnDismissListener(listener);
         }
         else {
             mPhone->SetDataRoamingEnabled(FALSE);

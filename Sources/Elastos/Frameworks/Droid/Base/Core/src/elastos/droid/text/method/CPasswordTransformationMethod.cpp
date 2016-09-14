@@ -187,7 +187,7 @@ ECode CPasswordTransformationMethod::Visible::constructor(
     mText = sp;
     mTransformer = ptm;
     Boolean result;
-    return PostAtTime(IRunnable::Probe(this), SystemClock::GetUptimeMillis() + 1500, &result);
+    return PostAtTime(this, SystemClock::GetUptimeMillis() + 1500, &result);
 }
 
 ECode CPasswordTransformationMethod::Visible::Run()

@@ -30,11 +30,44 @@ namespace Settings {
 
 class PhoneAccountSettingsFragment
     : public PreferenceFragment
-    , public IPreferenceOnPreferenceChangeListener
-    , public IPreferenceOnPreferenceClickListener
-    , public IAccountSelectionListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+        , public IPreferenceOnPreferenceClickListener
+        , public IAccountSelectionListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ PhoneAccountSettingsFragment* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* pref,
+            /* [in] */ IInterface* objValue,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnPreferenceClick(
+            /* [in] */ IPreference* pref,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnAccountSelected(
+            /* [in] */ IAccountSelectionPreference* pref,
+            /* [in] */ IPhoneAccountHandle* account,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnAccountSelectionDialogShow(
+            /* [in] */ IAccountSelectionPreference* pref);
+
+        CARAPI OnAccountChanged(
+            /* [in] */ IAccountSelectionPreference* pref);
+
+    private:
+        PhoneAccountSettingsFragment* mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {
@@ -56,8 +89,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     PhoneAccountSettingsFragment();
 
     //@Override

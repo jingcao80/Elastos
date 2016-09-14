@@ -281,7 +281,7 @@ ECode NetworkFactory::AddNetworkRequest(
     /* [in] */ Int32 score)
 {
     AutoPtr<IMessage> msg;
-    IHandler::Probe(this)->ObtainMessage(CMD_REQUEST_NETWORK, TO_IINTERFACE(new NetworkRequestInfo(networkRequest, score)), (IMessage**)&msg);
+    ObtainMessage(CMD_REQUEST_NETWORK, TO_IINTERFACE(new NetworkRequestInfo(networkRequest, score)), (IMessage**)&msg);
     Boolean b;
     SendMessage(msg, &b);
     return NOERROR;
@@ -291,7 +291,7 @@ ECode NetworkFactory::RemoveNetworkRequest(
     /* [in] */ INetworkRequest* networkRequest)
 {
     AutoPtr<IMessage> msg;
-    IHandler::Probe(this)->ObtainMessage(CMD_CANCEL_REQUEST, networkRequest, (IMessage**)&msg);
+    ObtainMessage(CMD_CANCEL_REQUEST, networkRequest, (IMessage**)&msg);
     Boolean b;
     SendMessage(msg, &b);
     return NOERROR;
@@ -301,7 +301,7 @@ ECode NetworkFactory::SetScoreFilter(
     /* [in] */ Int32 score)
 {
     AutoPtr<IMessage> msg;
-    IHandler::Probe(this)->ObtainMessage(CMD_SET_SCORE, score, 0, (IMessage**)&msg);
+    ObtainMessage(CMD_SET_SCORE, score, 0, (IMessage**)&msg);
     Boolean b;
     SendMessage(msg, &b);
     return NOERROR;
@@ -313,7 +313,7 @@ ECode NetworkFactory::SetCapabilityFilter(
     AutoPtr<INetworkCapabilities> newNetworkCapabilities;
     CNetworkCapabilities::New(netCap, (INetworkCapabilities**)&newNetworkCapabilities);
     AutoPtr<IMessage> msg;
-    IHandler::Probe(this)->ObtainMessage(CMD_SET_FILTER, newNetworkCapabilities, (IMessage**)&msg);
+    ObtainMessage(CMD_SET_FILTER, newNetworkCapabilities, (IMessage**)&msg);
     Boolean b;
     SendMessage(msg, &b);
     return NOERROR;

@@ -115,6 +115,28 @@ const Int32 MediaFocusControl::RC_INFO_ALL =
         IRemoteControlClient::FLAG_INFORMATION_REQUEST_METADATA |
         IRemoteControlClient::FLAG_INFORMATION_REQUEST_PLAYSTATE;
 
+
+//==============================================================================
+//  MediaFocusControl::PendingIntentOnFinished
+//==============================================================================
+CAR_INTERFACE_IMPL(MediaFocusControl::PendingIntentOnFinished, Object, IPendingIntentOnFinished)
+
+MediaFocusControl::PendingIntentOnFinished::PendingIntentOnFinished(
+    /* [in] */ MediaFocusControl* host)
+    : mHost(host)
+{}
+
+ECode MediaFocusControl::PendingIntentOnFinished::OnSendFinished(
+    /* [in] */ IPendingIntent* pendingIntent,
+    /* [in] */ IIntent* intent,
+    /* [in] */ Int32 resultCode,
+    /* [in] */ const String& resultData,
+    /* [in] */ IBundle* resultExtras)
+{
+    return mHost->OnSendFinished(pendingIntent, intent, resultCode, resultData, resultExtras);
+}
+
+
 //==============================================================================
 //  MediaFocusControl::NotificationListenerObserver
 //==============================================================================
@@ -380,8 +402,6 @@ ECode MediaFocusControl::DisplayInfoForServer::ProxyDied()
 //==============================================================================
 //  MediaFocusControl
 //==============================================================================
-
-CAR_INTERFACE_IMPL(MediaFocusControl, Object, IPendingIntentOnFinished)
 
 MediaFocusControl::MediaFocusControl()
     : mIsRinging(FALSE)
@@ -1597,9 +1617,13 @@ void MediaFocusControl::DispatchMediaKeyEvent(
     AutoPtr<IIntent> keyIntent;
     CIntent::New(IIntent::ACTION_MEDIA_BUTTON, NULL, (IIntent**)&keyIntent);
     keyIntent->PutExtra(IIntent::EXTRA_KEY_EVENT, IParcelable::Probe(keyEvent));
-    {    AutoLock syncLock(mPRStack);
+    {
+        AutoLock syncLock(mPRStack);
         Boolean b;
         if (!(mPRStack->IsEmpty(&b), b)) {
+            if (mPendingIntentOnFinished == NULL) {
+                mPendingIntentOnFinished = new PendingIntentOnFinished(this);
+            }
             // send the intent that was registered by the client
             // try {
             AutoPtr<IInterface> obj;
@@ -1610,7 +1634,7 @@ void MediaFocusControl::DispatchMediaKeyEvent(
             prse->GetMediaButtonIntent((IPendingIntent**)&pIntent);
             pIntent->Send(mContext,
                     needWakeLock ? WAKELOCK_RELEASE_ON_FINISHED : 0 /*code*/,
-                    keyIntent, IPendingIntentOnFinished::Probe(this), mEventHandler);
+                    keyIntent, mPendingIntentOnFinished, mEventHandler);
             // } catch (CanceledException e) {
             //     Logger::E(TAG, "Error sending pending intent " + mPRStack.peek());
             //     e.printStackTrace();

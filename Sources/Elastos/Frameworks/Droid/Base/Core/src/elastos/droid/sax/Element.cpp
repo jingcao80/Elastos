@@ -60,7 +60,7 @@ ECode Element::GetChild(
         FAIL_RETURN(CChildren::New((IChildren**)&mChildren))
     }
 
-    return mChildren->GetOrCreate(IElement::Probe(this), uri, localName, result);
+    return mChildren->GetOrCreate(this, uri, localName, result);
 }
 
 ECode Element::RequireChild(

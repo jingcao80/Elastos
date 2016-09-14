@@ -31,9 +31,25 @@ using Elastos::Droid::View::View;
  */
 class WaveView
     : public View
-    , public IAnimatorUpdateListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IAnimatorUpdateListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ WaveView* host);
+
+        CARAPI OnAnimationUpdate(
+            /* [in] */ IValueAnimator* animation);
+
+    private:
+        WaveView* mHost;
+    };
+
     class InnerLockTimerRunnable
         : public Object
         , public IRunnable
@@ -67,7 +83,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
 
     WaveView();
 

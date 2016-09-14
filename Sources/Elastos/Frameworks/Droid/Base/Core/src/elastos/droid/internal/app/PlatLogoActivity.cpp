@@ -306,7 +306,7 @@ ECode PlatLogoActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     Activity::OnCreate(savedInstanceState);
-    CFrameLayout::New(IContext::Probe(this), (IFrameLayout**)&mLayout);
+    CFrameLayout::New(this, (IFrameLayout**)&mLayout);
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
     intent->HasExtra(String("is_cm"), &mIsCM);

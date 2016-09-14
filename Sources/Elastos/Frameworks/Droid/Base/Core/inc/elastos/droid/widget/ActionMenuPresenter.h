@@ -124,7 +124,7 @@ private:
         : public MenuPopupHelper
     {
     public:
-        OverflowPopup(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ IMenuBuilder* menu,
             /* [in] */ IView* anchorView,
@@ -141,7 +141,7 @@ private:
         : public MenuPopupHelper
     {
     public:
-        ActionButtonSubmenu(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ ISubMenuBuilder* subMenu,
             /* [in] */ ActionMenuPresenter* host);

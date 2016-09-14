@@ -459,10 +459,8 @@ private:
         : public Object
     {
     public:
-        TO_STRING_IMPL("ViewRootImpl::InputStage")
-
         InputStage(
-            /* [in] */ IWeakReference* host,
+            /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next);
 
         virtual CARAPI Deliver(
@@ -493,13 +491,19 @@ private:
         CARAPI_(Boolean) ShouldDropInputEvent(
             /* [in] */ QueuedInputEvent* q);
 
-        CARAPI_(AutoPtr<ViewRootImpl>) GetHost();
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "InputStage";
+            return NOERROR;
+        }
 
     protected:
         static const Int32 FORWARD;
         static const Int32 FINISH_HANDLED;
         static const Int32 FINISH_NOT_HANDLED;
-        AutoPtr<IWeakReference> mWeakHost;
+        ViewRootImpl* mHost;
 
     private:
         AutoPtr<InputStage> mNext;
@@ -510,7 +514,7 @@ private:
     {
     public:
         AsyncInputStage(
-            /* [in] */ IWeakReference* host,
+            /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next,
             /* [in] */ const String& traceCounter);
 
@@ -518,7 +522,13 @@ private:
             /* [in] */ const String& prefix,
             /* [in] */ IPrintWriter* writer);
 
-        TO_STRING_IMPL("ViewRootImpl::AsyncInputStage")
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "AsyncInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI Defer(
             /* [in] */ QueuedInputEvent* q);
@@ -557,7 +567,7 @@ private:
         CAR_INTERFACE_DECL()
 
         NativePreImeInputStage(
-            /* [in] */ IWeakReference* host,
+            /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next,
             /* [in] */ const String& traceCounter);
 
@@ -565,7 +575,13 @@ private:
             /* [in] */ IInterface* token,
             /* [in] */ Boolean handled);
 
-        TO_STRING_IMPL("ViewRootImpl::NativePreImeInputStage")
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "NativePreImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -576,10 +592,16 @@ private:
     {
     public:
         ViewPreImeInputStage(
-            /* [in] */ IWeakReference* host,
+            /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next);
 
-        TO_STRING_IMPL("ViewRootImpl::ViewPreImeInputStage")
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "ViewPreImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -597,7 +619,7 @@ private:
         CAR_INTERFACE_DECL()
 
         ImeInputStage(
-            /* [in] */ IWeakReference* host,
+            /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next,
             /* [in] */ const String& traceCounter);
 
@@ -605,7 +627,13 @@ private:
             /* [in] */ IInterface* token,
             /* [in] */ Boolean handled);
 
-        TO_STRING_IMPL("ViewRootImpl::ImeInputStage")
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "ImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -616,10 +644,16 @@ private:
     {
     public:
         EarlyPostImeInputStage(
-            /* [in] */ IWeakReference* host,
+            /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next);
 
-        TO_STRING_IMPL("ViewRootImpl::EarlyPostImeInputStage")
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "EarlyPostImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -640,7 +674,7 @@ private:
         CAR_INTERFACE_DECL()
 
         NativePostImeInputStage(
-            /* [in] */ IWeakReference* host,
+            /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next,
             /* [in] */ const String& traceCounter);
 
@@ -648,7 +682,13 @@ private:
             /* [in] */ IInterface* token,
             /* [in] */ Boolean handled);
 
-        TO_STRING_IMPL("ViewRootImpl::NativePostImeInputStage")
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "NativePostImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -659,11 +699,16 @@ private:
     {
     public:
         ViewPostImeInputStage(
-            /* [in] */ IWeakReference* host,
+            /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next);
 
-        TO_STRING_IMPL("ViewRootImpl::ViewPostImeInputStage")
-
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "ViewPostImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -924,7 +969,7 @@ private:
     {
     public:
         SyntheticInputStage(
-            /* [in] */ IWeakReference* host);
+            /* [in] */ ViewRootImpl* host);
 
     protected:
         CARAPI_(Int32) OnProcess(

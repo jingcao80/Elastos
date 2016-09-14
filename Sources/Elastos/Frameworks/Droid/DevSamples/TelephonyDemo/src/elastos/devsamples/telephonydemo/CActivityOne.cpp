@@ -843,8 +843,7 @@ ECode CActivityOne::OnTestTelephony()
     intent->PutExtra(ITelecomManager::EXTRA_START_CALL_WITH_VIDEO_STATE, IVideoProfileVideoState::AUDIO_ONLY);
     intent->PutBooleanExtra(String("add_participant"), FALSE);// ADD_PARTICIPANT_KEY, default is FALSE
 
-    AutoPtr<IContext> context = IContext::Probe(this);
-    context->StartActivity(intent);
+    StartActivity(intent);
     return NOERROR;
 }
 

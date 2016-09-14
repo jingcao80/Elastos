@@ -1485,7 +1485,7 @@ ECode Fragment::OnInflate(
 ECode Fragment::OnAttach(
     /* [in] */ IActivity* activity)
 {
-#if _DEBUG
+#if defined(_DEBUG)
     if (!mIsConstructed) {
         Slogger::E(TAG, "Error: Fragment::constructor() is not called by sub classes %s!", TO_CSTR(this));
         assert(0 && "Error: Fragment::constructor() is not called by sub classes");
@@ -1509,7 +1509,7 @@ ECode Fragment::OnCreateAnimator(
 ECode Fragment::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-#if _DEBUG
+#if defined(_DEBUG)
     if (!mIsConstructed) {
         Slogger::E(TAG, "Error: Fragment::constructor() is not called by sub classes %s!", TO_CSTR(this));
         assert(0 && "Error: Fragment::constructor() is not called by sub classes");

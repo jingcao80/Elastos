@@ -69,8 +69,51 @@ const String PhoneAccountSettingsFragment::SIP_SETTINGS_CATEGORY_PREF_KEY("phone
 const String PhoneAccountSettingsFragment::USE_SIP_PREF_KEY("use_sip_calling_options_key");
 const String PhoneAccountSettingsFragment::SIP_RECEIVE_CALLS_PREF_KEY("sip_receive_calls_key");
 
-CAR_INTERFACE_IMPL_3(PhoneAccountSettingsFragment, PreferenceFragment, IPreferenceOnPreferenceChangeListener,
-        IPreferenceOnPreferenceClickListener, IAccountSelectionListener)
+CAR_INTERFACE_IMPL_3(PhoneAccountSettingsFragment::InnerListener, Object,
+    IPreferenceOnPreferenceChangeListener,
+    IPreferenceOnPreferenceClickListener,
+    IAccountSelectionListener)
+
+
+PhoneAccountSettingsFragment::InnerListener::InnerListener(
+    /* [in] */ PhoneAccountSettingsFragment* host)
+    : mHost(host)
+{}
+
+ECode PhoneAccountSettingsFragment::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* pref,
+    /* [in] */ IInterface* objValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(pref, objValue, result);
+}
+
+ECode PhoneAccountSettingsFragment::InnerListener::OnPreferenceClick(
+    /* [in] */ IPreference* pref,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceClick(pref, result);
+}
+
+ECode PhoneAccountSettingsFragment::InnerListener::OnAccountSelected(
+    /* [in] */ IAccountSelectionPreference* pref,
+    /* [in] */ IPhoneAccountHandle* account,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnAccountSelected(pref, account, result);
+}
+
+ECode PhoneAccountSettingsFragment::InnerListener::OnAccountSelectionDialogShow(
+    /* [in] */ IAccountSelectionPreference* pref)
+{
+    return mHost->OnAccountSelectionDialogShow(pref);
+}
+
+ECode PhoneAccountSettingsFragment::InnerListener::OnAccountChanged(
+    /* [in] */ IAccountSelectionPreference* pref)
+{
+    return mHost->OnAccountChanged(pref);
+}
 
 PhoneAccountSettingsFragment::PhoneAccountSettingsFragment()
     : TAG("PhoneAccountSettingsFragment")
@@ -101,6 +144,7 @@ ECode PhoneAccountSettingsFragment::OnResume()
 
     AddPreferencesFromResource(R::xml::phone_account_settings);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(DEFAULT_OUTGOING_ACCOUNT_KEY);
     AutoPtr<IPreference> preference;
     IPreferenceGroup::Probe(preferencescreen)->FindPreference(cchar, (IPreference**)&preference);
@@ -109,7 +153,7 @@ ECode PhoneAccountSettingsFragment::OnResume()
     Int32 count;
     mTelecomManager->GetAllPhoneAccountsCount(&count);
     if (count > 1) {
-        mDefaultOutgoingAccount->SetListener(this);
+        mDefaultOutgoingAccount->SetListener(listener);
         UpdateDefaultOutgoingAccountsModel();
     }
     else {
@@ -128,13 +172,13 @@ ECode PhoneAccountSettingsFragment::OnResume()
         IPreferenceGroup::Probe(preferencescreen)->FindPreference(cchar, (IPreference**)&preference);
         mSelectCallAssistant = IAccountSelectionPreference::Probe(preference);
 
-        mSelectCallAssistant->SetListener(this);
+        mSelectCallAssistant->SetListener(listener);
         IDialogPreference::Probe(mSelectCallAssistant)->SetDialogTitle(
                 R::string::wifi_calling_select_call_assistant_summary);
 
         AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(CONFIGURE_CALL_ASSISTANT_PREF_KEY);
         IPreferenceGroup::Probe(preferencescreen)->FindPreference(cchar2, (IPreference**)&mConfigureCallAssistant);
-        mConfigureCallAssistant->SetOnPreferenceClickListener(this);
+        mConfigureCallAssistant->SetOnPreferenceClickListener(listener);
         UpdateCallAssistantModel();
     }
     else {
@@ -158,7 +202,7 @@ ECode PhoneAccountSettingsFragment::OnResume()
         // mUseSipCalling->SetEntries(!SipManager.isSipWifiOnly(activity)
         //         ? R::array::sip_call_options_wifi_only_entries
         //         : R::array::sip_call_options_entries);
-        IPreference::Probe(mUseSipCalling)->SetOnPreferenceChangeListener((IPreferenceOnPreferenceChangeListener*)this);
+        IPreference::Probe(mUseSipCalling)->SetOnPreferenceChangeListener(listener);
 
         String option;
         mSipSharedPreferences->GetSipCallOption(&option);
@@ -187,8 +231,7 @@ ECode PhoneAccountSettingsFragment::OnResume()
         Boolean res;
         ITwoStatePreference::Probe(mSipReceiveCallsPreference)->SetChecked((
                 mSipSharedPreferences->IsReceivingCallsEnabled(&res), res));
-        IPreference::Probe(mSipReceiveCallsPreference)->SetOnPreferenceChangeListener(
-                (IPreferenceOnPreferenceChangeListener*)this);
+        IPreference::Probe(mSipReceiveCallsPreference)->SetOnPreferenceChangeListener(listener);
     }
     else {
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(SIP_SETTINGS_CATEGORY_PREF_KEY);

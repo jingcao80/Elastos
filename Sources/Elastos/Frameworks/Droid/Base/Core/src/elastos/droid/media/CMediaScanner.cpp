@@ -86,11 +86,10 @@ using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Sax::CRootElement;
 using Elastos::Droid::Sax::EIID_IEndElementListener;
 using Elastos::Droid::Sax::EIID_IStartElementListener;
+using Elastos::Droid::Sax::EIID_IElementListener;
 using Elastos::Droid::Sax::IElement;
 using Elastos::Droid::Sax::IElementListener;
-using Elastos::Droid::Sax::IEndElementListener;
 using Elastos::Droid::Sax::IRootElement;
-using Elastos::Droid::Sax::IStartElementListener;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::Logging::Logger;
@@ -338,32 +337,17 @@ Object CMediaScanner::mLock;
 HashMap<String, String> CMediaScanner::mNoMediaPaths;
 HashMap<String, String> CMediaScanner::mMediaPaths;
 
-//-----------------------------
-//    CMediaScanner::WplHandler
-//-----------------------------
-CAR_INTERFACE_IMPL_2(CMediaScanner::WplHandler, Object, IStartElementListener, IEndElementListener)
+CAR_INTERFACE_IMPL_3(CMediaScanner::ElementListener, Object, IElementListener, IStartElementListener, IEndElementListener)
 
-CMediaScanner::WplHandler::WplHandler(
-    /* [in] */ const String& playListDirectory,
-    /* [in] */ IUri* uri,
-    /* [in] */ ICursor* fileList)
-    : mPlayListDirectory(playListDirectory)
+CMediaScanner::ElementListener::ElementListener(
+    /* [in] */ CMediaScanner* host,
+    /* [in] */ const String& playListDirectory)
+    : mHost(host)
+    , mPlayListDirectory(playListDirectory)
 {
-
-    AutoPtr<IRootElement> root;
-    CRootElement::New(String("smil"), (IRootElement**)&root);
-
-    AutoPtr<IElement> body, seq, media;
-    IElement::Probe(root)->GetChild(String("body"), (IElement**)&body);
-    IElement::Probe(root)->GetChild(String("seq"), (IElement**)&seq);
-    IElement::Probe(root)->GetChild(String("media"), (IElement**)&media);
-
-    media->SetElementListener(IElementListener::Probe(this));
-
-    root->GetContentHandler((IContentHandler**)&mHandler);
 }
 
-ECode CMediaScanner::WplHandler::Start(
+ECode CMediaScanner::ElementListener::Start(
    /* [in] */ IAttributes* attributes)
 {
    String path;
@@ -374,9 +358,34 @@ ECode CMediaScanner::WplHandler::Start(
    return NOERROR;
 }
 
-ECode CMediaScanner::WplHandler::End()
+ECode CMediaScanner::ElementListener::End()
 {
     return NOERROR;
+}
+
+//-----------------------------
+//    CMediaScanner::WplHandler
+//-----------------------------
+
+CMediaScanner::WplHandler::WplHandler(
+    /* [in] */ CMediaScanner* host,
+    /* [in] */ const String& playListDirectory,
+    /* [in] */ IUri* uri,
+    /* [in] */ ICursor* fileList)
+    : mHost(host)
+{
+    AutoPtr<IRootElement> root;
+    CRootElement::New(String("smil"), (IRootElement**)&root);
+
+    AutoPtr<IElement> body, seq, media;
+    IElement::Probe(root)->GetChild(String("body"), (IElement**)&body);
+    IElement::Probe(root)->GetChild(String("seq"), (IElement**)&seq);
+    IElement::Probe(root)->GetChild(String("media"), (IElement**)&media);
+
+    AutoPtr<ElementListener> listener = new ElementListener(mHost, playListDirectory);
+    media->SetElementListener(listener);
+
+    root->GetContentHandler((IContentHandler**)&mHandler);
 }
 
 AutoPtr<IContentHandler> CMediaScanner::WplHandler::GetContentHandler()
@@ -2528,7 +2537,7 @@ void CMediaScanner::ProcessWplPlayList(
             Xml::Encoding encoding = Xml::FindEncodingByName(String("UTF-8"));
 
             AutoPtr<IContentHandler> handler;
-            AutoPtr<WplHandler> wpl = new WplHandler(playListDirectory, uri, fileList);
+            AutoPtr<WplHandler> wpl = new WplHandler(this, playListDirectory, uri, fileList);
             handler = wpl->GetContentHandler();
             Xml::Parse(IInputStream::Probe(fis), encoding, handler.Get());
 

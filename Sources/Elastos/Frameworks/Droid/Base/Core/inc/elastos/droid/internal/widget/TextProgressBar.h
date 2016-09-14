@@ -13,6 +13,7 @@ using Elastos::Droid::View::IGravity;
 using Elastos::Droid::Widget::IChronometer;
 using Elastos::Droid::Widget::IProgressBar;
 using Elastos::Droid::Widget::RelativeLayout;
+using Elastos::Droid::Widget::IOnChronometerTickListener;
 
 namespace Elastos {
 namespace Droid {
@@ -23,6 +24,23 @@ class TextProgressBar
     : public RelativeLayout
     , public ITextProgressBar
 {
+private:
+    class InnerListener
+        : public Object
+        , public IOnChronometerTickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ TextProgressBar* host);
+
+        CARAPI OnChronometerTick(
+            /* [in] */ IChronometer* chronometer);
+    private:
+        TextProgressBar* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

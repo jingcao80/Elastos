@@ -73,7 +73,7 @@ ExitTransitionCoordinator::SharedElementExitTransitionListener::SharedElementExi
 ECode ExitTransitionCoordinator::SharedElementExitTransitionListener::OnTransitionEnd(
     /* [in] */ ITransition* transition)
 {
-    transition->RemoveListener(ITransitionListener::Probe(this));
+    transition->RemoveListener(this);
     if (mHost->mExitComplete) {
         mHost->DelayCancel();
     }
@@ -181,7 +181,7 @@ ECode ExitTransitionCoordinator::SharedElementExitOnPreDrawListener::OnPreDraw(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IViewTreeObserver> vto;
     mDecorView->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    vto->RemoveOnPreDrawListener(IOnPreDrawListener::Probe(this));
+    vto->RemoveOnPreDrawListener(this);
     mHost->SetSharedElementState(mHost->mExitSharedElementBundle, mSharedElementSnapshots);
     *result = TRUE;
     return NOERROR;
@@ -211,7 +211,7 @@ ExitTransitionCoordinator::ExitContinueTransitionListener::ExitContinueTransitio
 ECode ExitTransitionCoordinator::ExitContinueTransitionListener::OnTransitionEnd(
     /* [in] */ ITransition* transition)
 {
-    transition->RemoveListener(ITransitionListener::Probe(this));
+    transition->RemoveListener(this);
     mHost->ExitTransitionComplete();
     if (mHost->mIsHidden && mTransitioningViews != NULL) {
         mHost->ShowViews(mTransitioningViews, TRUE);
@@ -242,7 +242,7 @@ ExitTransitionCoordinator::SharedElementContinueTransitionListener::SharedElemen
 ECode ExitTransitionCoordinator::SharedElementContinueTransitionListener::OnTransitionEnd(
     /* [in] */ ITransition* transition)
 {
-    transition->RemoveListener(ITransitionListener::Probe(this));
+    transition->RemoveListener(this);
     mHost->SharedElementTransitionComplete();
     if (mHost->mIsHidden) {
         mHost->ShowViews(mHost->mSharedElements, TRUE);

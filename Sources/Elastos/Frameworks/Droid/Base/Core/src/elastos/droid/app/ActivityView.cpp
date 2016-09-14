@@ -420,7 +420,7 @@ ECode ActivityView::constructor(
     AutoPtr<IBinder> token;
     mActivity->GetActivityToken((IBinder**)&token);
     AutoPtr<IActivityContainerCallback> cb;
-    CActivityViewActivityContainerCallback::New(IActivityView::Probe(this), (IActivityContainerCallback**)&cb);
+    CActivityViewActivityContainerCallback::New(this, (IActivityContainerCallback**)&cb);
     AutoPtr<IIActivityContainer> ac;
     ECode ec = ActivityManagerNative::GetDefault()->CreateActivityContainer(
         token, cb, (IIActivityContainer**)&ac);

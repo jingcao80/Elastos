@@ -55,7 +55,7 @@ private:
             /* [out] */ String* str);
     private:
         EnterTransitionCoordinator* mHost;
-        AutoPtr<IView> mDecorView;
+        IView* mDecorView;
     };
 
     class DestinationDecorViewOnPreDrawListener
@@ -76,7 +76,7 @@ private:
             /* [out] */ String* str);
     private:
         EnterTransitionCoordinator* mHost;
-        AutoPtr<IView> mDecorView;
+        IView* mDecorView;
     };
 
     class SharedElementOnPreDrawListener
@@ -99,7 +99,7 @@ private:
     private:
         EnterTransitionCoordinator* mHost;
         AutoPtr<IArrayMap> mSharedElements;
-        AutoPtr<IView> mSharedElement;
+        IView* mSharedElement;
     };
 
     class TakeSharedElementsOnPreDrawListener
@@ -121,7 +121,7 @@ private:
             /* [out] */ String* str);
     private:
         EnterTransitionCoordinator* mHost;
-        AutoPtr<IView> mDecorView;
+        IView* mDecorView;
         AutoPtr<IBundle> mSharedElementState;
     };
 
@@ -247,7 +247,7 @@ private:
             /* [out] */ String* str);
     private:
         EnterTransitionCoordinator* mHost;
-        AutoPtr<IView> mDecorView;
+        IView* mDecorView;
         AutoPtr<IArrayList> mRejectedSnapshots;
     };
 

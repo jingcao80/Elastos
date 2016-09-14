@@ -187,19 +187,19 @@ Boolean ActionMenuPresenter::OverflowMenuButton::SetFrame(
     return changed;
 }
 
-ActionMenuPresenter::OverflowPopup::OverflowPopup(
+ECode ActionMenuPresenter::OverflowPopup::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ IView* anchorView,
     /* [in] */ Boolean overflowOnly,
     /* [in] */ ActionMenuPresenter* host)
-    : mHost(host)
 {
     MenuPopupHelper::constructor(context, menu, anchorView, overflowOnly, R::attr::actionOverflowMenuStyle);
+    mHost = host;
     SetGravity(IGravity::END);
     SetCallback(mHost->mPopupPresenterCallback);
+    return NOERROR;
 }
-
 
 ECode ActionMenuPresenter::OverflowPopup::OnDismiss()
 {
@@ -209,13 +209,14 @@ ECode ActionMenuPresenter::OverflowPopup::OnDismiss()
     return NOERROR;
 }
 
-ActionMenuPresenter::ActionButtonSubmenu::ActionButtonSubmenu(
+ECode ActionMenuPresenter::ActionButtonSubmenu::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ISubMenuBuilder* subMenu,
     /* [in] */ ActionMenuPresenter* host)
 {
     MenuPopupHelper::constructor(context, IMenuBuilder::Probe(subMenu), NULL, FALSE, R::attr::actionOverflowMenuStyle);
     mSubMenu = subMenu;
+    mHost = host;
 
     AutoPtr<IMenuItem> menuItem;
     subMenu->GetItem((IMenuItem**)&menuItem);
@@ -245,6 +246,7 @@ ActionMenuPresenter::ActionButtonSubmenu::ActionButtonSubmenu(
         }
     }
     SetForceShowIcon(preserveIconSpacing);
+    return NOERROR;
 }
 
 ECode ActionMenuPresenter::ActionButtonSubmenu::OnDismiss()
@@ -706,7 +708,8 @@ ECode ActionMenuPresenter::OnSubMenuSelected(
     /* [in] */ ISubMenuBuilder* subMenu,
     /* [out] */ Boolean* result)
 {
-    assert(result != NULL && subMenu != NULL);
+    VALIDATE_NOT_NULL(result)
+    assert(subMenu != NULL);
 
     if (IMenu::Probe(subMenu)->HasVisibleItems(result), !(*result)) {
         return NOERROR;
@@ -736,7 +739,8 @@ ECode ActionMenuPresenter::OnSubMenuSelected(
     assert(item != NULL);
 
     item->GetItemId(&mOpenSubMenuId);
-    mActionButtonPopup = new ActionButtonSubmenu(mContext, subMenu, this);
+    mActionButtonPopup = new ActionButtonSubmenu();
+    mActionButtonPopup->constructor(mContext, subMenu, this);
     mActionButtonPopup->SetAnchorView(anchor);
     mActionButtonPopup->Show();
 
@@ -784,7 +788,8 @@ ECode ActionMenuPresenter::ShowOverflowMenu(
         mMenu->GetNonActionItems((IArrayList**)&nonActionItems);
         Boolean empty;
         if (nonActionItems->IsEmpty(&empty), !empty) {
-            AutoPtr<OverflowPopup> popup = new OverflowPopup(mContext, mMenu, mOverflowButton, TRUE, this);
+            AutoPtr<OverflowPopup> popup = new OverflowPopup();
+            popup->constructor(mContext, mMenu, mOverflowButton, TRUE, this);
             mPostedOpenRunnable = new OpenOverflowRunnable(popup, this);
             // Post this for later; we might still need a layout for the anchor to be right.
             Boolean tmp = FALSE;

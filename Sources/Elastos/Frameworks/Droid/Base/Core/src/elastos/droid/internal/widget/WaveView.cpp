@@ -70,7 +70,18 @@ const AutoPtr<IAudioAttributes> WaveView::VIBRATION_ATTRIBUTES = WaveView::Middl
 
 CAR_INTERFACE_IMPL(WaveView::InnerLockTimerRunnable, Object, IRunnable)
 CAR_INTERFACE_IMPL(WaveView::InnerAddWaveRunnable, Object, IRunnable)
-CAR_INTERFACE_IMPL(WaveView, View, IAnimatorUpdateListener)
+CAR_INTERFACE_IMPL(WaveView::InnerListener, Object, IAnimatorUpdateListener)
+
+WaveView::InnerListener::InnerListener(
+    /* [in] */ WaveView* host)
+    : mHost(host)
+{}
+
+ECode WaveView::InnerListener::OnAnimationUpdate(
+    /* [in] */ IValueAnimator* animation)
+{
+    return mHost->OnAnimationUpdate(animation);
+}
 
 WaveView::InnerLockTimerRunnable::InnerLockTimerRunnable(
     /* [in] */ WaveView* host)
@@ -299,6 +310,8 @@ void WaveView::WaveUpdateFrame(
     /* [in] */ Float mouseY,
     /* [in] */ Boolean fingerDown)
 {
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
     Double distX = mouseX - mLockCenterX;
     Double distY = mouseY - mLockCenterY;
     Int32 dragDistance = (Int32) Elastos::Core::Math::Ceil(Elastos::Core::Math::Hypot(distX, distY));
@@ -323,7 +336,7 @@ void WaveView::WaveUpdateFrame(
                     res = NULL;
                 }
                 for (UInt32 i = 0; i < mLightWaves.GetSize(); i++) {
-                    mLightWaves[i]->StartAnimations(IAnimatorUpdateListener::Probe(this));
+                    mLightWaves[i]->StartAnimations(listener);
                 }
 
                 mUnlockRing->AddAnimTo(DURATION, 0, strX, mLockCenterX, TRUE, (IObjectAnimator**)&res);
@@ -490,7 +503,7 @@ void WaveView::WaveUpdateFrame(
                         res = NULL;
                     }
                     for (UInt32 i = 0; i < mLightWaves.GetSize(); i++) {
-                        mLightWaves[i]->StartAnimations(IAnimatorUpdateListener::Probe(this));
+                        mLightWaves[i]->StartAnimations(listener);
                     }
                     res = NULL;
                     mUnlockRing->AddAnimTo(FINAL_DURATION, 0, strX, ringX, FALSE, (IObjectAnimator**)&res);
@@ -573,9 +586,9 @@ void WaveView::WaveUpdateFrame(
             }
             break;
     }
-    mUnlockDefault->StartAnimations(IAnimatorUpdateListener::Probe(this));
-    mUnlockHalo->StartAnimations(IAnimatorUpdateListener::Probe(this));
-    mUnlockRing->StartAnimations(IAnimatorUpdateListener::Probe(this));
+    mUnlockDefault->StartAnimations(listener);
+    mUnlockHalo->StartAnimations(listener);
+    mUnlockRing->StartAnimations(listener);
 }
 
 AutoPtr<IBitmapDrawable> WaveView::CreateDrawable(
@@ -815,7 +828,7 @@ void WaveView::DispatchTriggerEvent(
 {
     Vibrate(VIBRATE_LONG);
     if (mOnTriggerListener != NULL) {
-        mOnTriggerListener->OnTrigger(IView::Probe(this), whichHandle);
+        mOnTriggerListener->OnTrigger(this, whichHandle);
     }
 }
 
@@ -829,7 +842,7 @@ void WaveView::SetGrabbedState(
     if (newState != mGrabbedState) {
         mGrabbedState = newState;
         if (mOnTriggerListener != NULL) {
-            mOnTriggerListener->OnGrabbedStateChange(IView::Probe(this), mGrabbedState);
+            mOnTriggerListener->OnGrabbedStateChange(this, mGrabbedState);
         }
     }
 }

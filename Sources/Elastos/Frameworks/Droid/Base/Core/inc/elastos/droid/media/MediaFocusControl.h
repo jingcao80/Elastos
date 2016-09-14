@@ -43,10 +43,30 @@ namespace Media {
  */
 class MediaFocusControl
     : public Object
-    , public IPendingIntentOnFinished
 {
     friend class PlayerRecord;
 private:
+    class PendingIntentOnFinished
+        : public Object
+        , public IPendingIntentOnFinished
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        PendingIntentOnFinished(
+            /* [in] */ MediaFocusControl* host);
+
+        CARAPI OnSendFinished(
+            /* [in] */ IPendingIntent* pendingIntent,
+            /* [in] */ IIntent* intent,
+            /* [in] */ Int32 resultCode,
+            /* [in] */ const String& resultData,
+            /* [in] */ IBundle* resultExtras);
+
+    private:
+        MediaFocusControl* mHost;
+    };
+
     class NotificationListenerObserver
         : public ContentObserver
     {
@@ -186,8 +206,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     MediaFocusControl();
 
     virtual ~MediaFocusControl();
@@ -863,6 +881,8 @@ private:
      * Access synchronized on mPRStack
      */
     AutoPtr<IArrayList> mRcDisplays;
+
+    AutoPtr<IPendingIntentOnFinished> mPendingIntentOnFinished;
 };
 
 } // namespace Media

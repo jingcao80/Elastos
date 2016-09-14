@@ -70,7 +70,7 @@ UInt32 ContextThemeWrapperHolder::AddRef()
 UInt32 ContextThemeWrapperHolder::Release()
 {
     if (mMemoryLeakTarget) {
-        Thread::Sleep(10);
+        // Thread::Sleep(10);
         if (GetStrongCount() < 3) {
             Logger::I("ContextThemeWrapperHolder", " >> Release: %p, refcount: %d", this, GetStrongCount());
         }
