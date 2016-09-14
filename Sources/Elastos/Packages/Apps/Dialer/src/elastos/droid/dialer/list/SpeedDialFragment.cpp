@@ -340,7 +340,7 @@ ECode SpeedDialFragment::OnCreateView(
     AutoPtr<IView> listView;
     mParentView->FindViewById(R::id::contact_tile_list, (IView**)&listView);
     mListView = IPhoneFavoriteListView::Probe(listView);
-    mListView->SetOnItemClickListener((IAdapterViewOnItemClickListener*)this);
+    mListView->SetOnItemClickListener(this);
     mListView->SetVerticalScrollBarEnabled(FALSE);
     mListView->SetVerticalScrollbarPosition(IView::SCROLLBAR_POSITION_RIGHT);
     mListView->SetScrollBarStyle(IListView::SCROLLBARS_OUTSIDE_OVERLAY);

@@ -1732,10 +1732,8 @@ ECode ProgressBar::OnInitializeAccessibilityNodeInfo(
 void ProgressBar::ScheduleAccessibilityEventSender()
 {
     if (mAccessibilityEventSender == NULL) {
-        AutoPtr<IWeakReferenceSource> wrs = this;
-        assert(wrs);
         AutoPtr<IWeakReference> wr;
-        wrs->GetWeakReference((IWeakReference**)&wr);
+        GetWeakReference((IWeakReference**)&wr);
         mAccessibilityEventSender = new AccessibilityEventSender(wr);
     }
     else {

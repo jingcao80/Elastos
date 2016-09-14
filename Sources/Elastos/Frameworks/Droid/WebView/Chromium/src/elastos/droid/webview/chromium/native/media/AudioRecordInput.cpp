@@ -98,7 +98,7 @@ ECode AudioRecordInput::AudioRecordThread::Run()
 void AudioRecordInput::AudioRecordThread::JoinRecordThread()
 {
     mKeepAlive = FALSE;
-    AutoPtr<IThread> thread = IThread::Probe(this);
+    AutoPtr<IThread> thread = this;
     Boolean alive;
     while (thread->IsAlive(&alive), alive) {
         // try {

@@ -385,7 +385,6 @@ module
             [in] IAttributeSet* attrs);
 
         interface IWaveView;
-        interface IAnimatorUpdateListener;
         interface IView;
         interface IDrawableCallback;
         interface IKeyEventCallback;

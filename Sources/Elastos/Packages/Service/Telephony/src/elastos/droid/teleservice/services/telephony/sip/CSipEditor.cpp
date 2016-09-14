@@ -46,7 +46,36 @@ namespace Services {
 namespace Telephony {
 namespace Sip {
 
-CAR_INTERFACE_IMPL(CSipEditor::AdvancedSettings, Object, IPreferenceOnPreferenceClickListener)
+
+CAR_INTERFACE_IMPL(CSipEditor::InnerListener, Object, IPreferenceOnPreferenceChangeListener)
+
+CSipEditor::InnerListener::InnerListener(
+    /* [in] */ CSipEditor* host)
+    : mHost(host)
+{}
+
+ECode CSipEditor::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* pref,
+    /* [in] */ IInterface* newValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(pref, newValue, result);
+}
+
+CAR_INTERFACE_IMPL(CSipEditor::AdvancedSettings::InnerListener, Object, IPreferenceOnPreferenceClickListener)
+
+
+CSipEditor::AdvancedSettings::InnerListener::InnerListener(
+    /* [in] */ AdvancedSettings* host)
+    : mHost(host)
+{}
+
+ECode CSipEditor::AdvancedSettings::InnerListener::OnPreferenceClick(
+    /* [in] */ IPreference* pref,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceClick(pref, result);
+}
 
 CSipEditor::AdvancedSettings::AdvancedSettings(
     /* [in] */ CSipEditor* host)
@@ -60,7 +89,8 @@ CSipEditor::AdvancedSettings::AdvancedSettings(
     mHost->GetString(R::string::advanced_settings, &str);
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
     IPreferenceGroup::Probe(screen)->FindPreference(cchar, (IPreference**)&mAdvancedSettingsTrigger);
-    mAdvancedSettingsTrigger->SetOnPreferenceClickListener((IPreferenceOnPreferenceClickListener*)this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mAdvancedSettingsTrigger->SetOnPreferenceClickListener(listener);
 
     LoadAdvancedPreferences();
 }
@@ -239,7 +269,7 @@ const Int32 CSipEditor::NA = 0;
 
 CAR_OBJECT_IMPL(CSipEditor)
 
-CAR_INTERFACE_IMPL_2(CSipEditor, PreferenceActivity, ISipEditor, IPreferenceOnPreferenceChangeListener)
+CAR_INTERFACE_IMPL(CSipEditor, PreferenceActivity, ISipEditor)
 
 CSipEditor::CSipEditor()
 {
@@ -646,7 +676,8 @@ void CSipEditor::SetCheckBox(
 void CSipEditor::SetupPreference(
     /* [in] */ IPreference* pref)
 {
-    pref->SetOnPreferenceChangeListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    pref->SetOnPreferenceChangeListener(listener);
     assert(0);
     // for (PreferenceKey key : PreferenceKey.values()) {
     //     String name = getString(key.text);

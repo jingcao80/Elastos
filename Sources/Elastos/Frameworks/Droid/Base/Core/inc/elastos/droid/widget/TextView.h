@@ -484,6 +484,23 @@ public:
     };
 
 private:
+    class ECO_LOCAL PreDrawListener
+        : public Object
+        , public IOnPreDrawListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        PreDrawListener(
+            /* [in] */ TextView* host);
+
+        CARAPI OnPreDraw(
+            /* [out] */ Boolean* res);
+
+    private:
+        TextView* mHost;
+    };
+
     class ECO_LOCAL OnRestoreInstanceStateRunnable
         : public Runnable
     {
@@ -527,7 +544,7 @@ public:
     static CARAPI_(void) InitStatic();
 
 
-    CARAPI OnPreDraw(
+    virtual CARAPI OnPreDraw(
         /* [out] */ Boolean* res);
 
     /**
@@ -3323,6 +3340,8 @@ private:
      * See {@link #createEditorIfNeeded()}.
      */
     AutoPtr<IEditor> mEditor;
+
+    AutoPtr<PreDrawListener> mPreDrawListener;
 };
 
 } // namespace Widget

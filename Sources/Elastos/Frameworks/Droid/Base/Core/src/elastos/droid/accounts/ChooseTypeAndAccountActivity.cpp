@@ -368,7 +368,7 @@ ECode ChooseTypeAndAccountActivity::OnActivityResult(
             if (accountName.IsNull() || accountType.IsNull()) {
                 AutoPtr< ArrayOf<IAccount*> > currentAccounts;
                 AutoPtr<IAccountManager> accountManager;
-                FAIL_RETURN(CAccountManager::Get(IContext::Probe(this), (IAccountManager**)&accountManager));
+                FAIL_RETURN(CAccountManager::Get(this, (IAccountManager**)&accountManager));
                 accountManager->GetAccountsForPackage(mCallingPackage, mCallingUid, (ArrayOf<IAccount*>**)&currentAccounts);
                 AutoPtr<ISet> preExistingAccounts;
                 CHashSet::New((ISet**)&preExistingAccounts);

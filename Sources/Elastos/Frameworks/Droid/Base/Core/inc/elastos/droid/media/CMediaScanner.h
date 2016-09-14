@@ -19,6 +19,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IBitmapFactoryOptions;
 using Elastos::Droid::Sax::IStartElementListener;
 using Elastos::Droid::Sax::IEndElementListener;
+using Elastos::Droid::Sax::IElementListener;
 using Org::Xml::Sax::IContentHandler;
 using Org::Xml::Sax::IAttributes;
 using Elastos::Core::StringBuilder;
@@ -35,18 +36,18 @@ CarClass(CMediaScanner)
     , public IMediaScanner
 {
 public:
-    class WplHandler
+    class ElementListener
         : public Object
+        , public IElementListener
         , public IStartElementListener
         , public IEndElementListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        WplHandler(
-            /* [in] */ const String& playListDirectory,
-            /* [in] */ IUri* uri,
-            /* [in] */ ICursor* fileList);
+        ElementListener(
+            /* [in] */ CMediaScanner* host,
+            /* [in] */ const String& playListDirectory);
 
         CARAPI Start(
            /* [in] */ IAttributes* attributes);
@@ -54,14 +55,26 @@ public:
         //@Override
         CARAPI End();
 
+    private:
+        CMediaScanner* mHost;
+        String mPlayListDirectory;
+    };
+
+    class WplHandler
+        : public Object
+    {
+    public:
+        WplHandler(
+            /* [in] */ CMediaScanner* host,
+            /* [in] */ const String& playListDirectory,
+            /* [in] */ IUri* uri,
+            /* [in] */ ICursor* fileList);
+
         CARAPI_(AutoPtr<IContentHandler>) GetContentHandler();
 
     private:
-        AutoPtr<IContentHandler> mHandler;
-
-        String mPlayListDirectory;
-
         CMediaScanner* mHost;
+        AutoPtr<IContentHandler> mHandler;
     };
 
     /*static*/ class FileEntry : public Object

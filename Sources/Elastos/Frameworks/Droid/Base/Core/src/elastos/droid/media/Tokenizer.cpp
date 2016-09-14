@@ -34,7 +34,7 @@ ECode Tokenizer::DataTokenizer::Start(
     /* [out] */ ITokenizerTokenizerPhase** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = ITokenizerTokenizerPhase::Probe(this);
+    *result = this;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

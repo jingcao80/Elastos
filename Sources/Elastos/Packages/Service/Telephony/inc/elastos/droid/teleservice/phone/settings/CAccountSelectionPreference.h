@@ -29,8 +29,25 @@ namespace Settings {
 CarClass(CAccountSelectionPreference)
     , public ListPreference
     , public IAccountSelectionPreference
-    , public IPreferenceOnPreferenceChangeListener
 {
+private:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CAccountSelectionPreference* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* newValue,
+            /* [out] */ Boolean* res);
+    private:
+        CAccountSelectionPreference* mHost;
+    };
 public:
     CAR_OBJECT_DECL();
 

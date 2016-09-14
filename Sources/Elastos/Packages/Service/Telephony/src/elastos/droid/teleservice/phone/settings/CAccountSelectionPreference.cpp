@@ -18,10 +18,25 @@ namespace TeleService {
 namespace Phone {
 namespace Settings {
 
+CAR_INTERFACE_IMPL(CAccountSelectionPreference::InnerListener, Object,
+        IPreferenceOnPreferenceChangeListener)
+
+CAccountSelectionPreference::InnerListener::InnerListener(
+    /* [in] */ CAccountSelectionPreference* host)
+    : mHost(host)
+{}
+
+ECode CAccountSelectionPreference::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* newValue,
+    /* [out] */ Boolean* res)
+{
+    return mHost->OnPreferenceChange(preference, newValue, res);
+}
+
 CAR_OBJECT_IMPL(CAccountSelectionPreference)
 
-CAR_INTERFACE_IMPL_2(CAccountSelectionPreference, ListPreference, IAccountSelectionPreference,
-        IPreferenceOnPreferenceChangeListener)
+CAR_INTERFACE_IMPL(CAccountSelectionPreference, ListPreference, IAccountSelectionPreference)
 
 CAccountSelectionPreference::CAccountSelectionPreference()
     : mShowSelectionInSummary(TRUE)
@@ -39,7 +54,8 @@ ECode CAccountSelectionPreference::constructor(
 {
     ListPreference::constructor(context, attrs);
     mContext = context;
-    return SetOnPreferenceChangeListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    return SetOnPreferenceChangeListener(listener);
 }
 
 ECode CAccountSelectionPreference::SetListener(

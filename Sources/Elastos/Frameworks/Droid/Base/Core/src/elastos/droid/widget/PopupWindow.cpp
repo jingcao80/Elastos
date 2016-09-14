@@ -54,12 +54,27 @@ const String PopupWindow::PopupViewContainer::TAG("PopupWindow.PopupViewContaine
 //          PopupWindow::PopupViewContainer
 //==============================================================================
 
+PopupWindow::PopupViewContainer::~PopupViewContainer()
+{
+    Logger::I(TAG, " >> Destroy PopupViewContainer: %p", this);
+}
+
 ECode PopupWindow::PopupViewContainer::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ PopupWindow* host)
+    /* [in] */ IWeakReference* host)
 {
-    mHost = host;
+    mWeakHost = host;
     return FrameLayout::constructor(context);
+}
+
+AutoPtr<PopupWindow> PopupWindow::PopupViewContainer::GetHost()
+{
+    AutoPtr<IPopupWindow> obj;
+    mWeakHost->Resolve(EIID_IPopupWindow, (IInterface**)&obj);
+    if (obj) {
+        return (PopupWindow*)obj.Get();
+    }
+    return NULL;
 }
 
 ECode PopupWindow::PopupViewContainer::OnCreateDrawableState(
@@ -68,6 +83,11 @@ ECode PopupWindow::PopupViewContainer::OnCreateDrawableState(
 {
     VALIDATE_NOT_NULL(drawableState);
     *drawableState = NULL;
+
+    AutoPtr<PopupWindow> mHost = GetHost();
+    if (mHost == NULL) {
+        return NOERROR;
+    }
 
     AutoPtr<ArrayOf<Int32> > ds;
     if (mHost->mAboveAnchor) {
@@ -91,6 +111,12 @@ ECode PopupWindow::PopupViewContainer::DispatchKeyEvent(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
+    *res = FALSE;
+
+    AutoPtr<PopupWindow> mHost = GetHost();
+    if (mHost == NULL) {
+        return NOERROR;
+    }
 
     Int32 keyCode;
     event->GetKeyCode(&keyCode);
@@ -139,6 +165,12 @@ ECode PopupWindow::PopupViewContainer::DispatchTouchEvent(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
+    *res = FALSE;
+
+    AutoPtr<PopupWindow> mHost = GetHost();
+    if (mHost == NULL) {
+        return NOERROR;
+    }
 
     if (mHost->mTouchInterceptor != NULL) {
         Boolean result;
@@ -156,8 +188,13 @@ ECode PopupWindow::PopupViewContainer::OnTouchEvent(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-
+    *res = FALSE;
     assert(event != NULL);
+
+    AutoPtr<PopupWindow> mHost = GetHost();
+    if (mHost == NULL) {
+        return NOERROR;
+    }
 
     Float _x, _y;
     event->GetX(&_x);
@@ -189,6 +226,11 @@ ECode PopupWindow::PopupViewContainer::OnTouchEvent(
 ECode PopupWindow::PopupViewContainer::SendAccessibilityEvent(
     /* [in] */ Int32 eventType)
 {
+    AutoPtr<PopupWindow> mHost = GetHost();
+    if (mHost == NULL) {
+        return NOERROR;
+    }
+
     // clinets are interested in the content not the container, make it event source
     if (mHost->mContentView != NULL) {
         return IAccessibilityEventSource::Probe(mHost->mContentView)->SendAccessibilityEvent(eventType);
@@ -279,14 +321,18 @@ PopupWindow::PopupWindow()
     , mOverlapAnchor(FALSE)
     , mPopupViewInitialLayoutDirectionInherited(FALSE)
 {
-    mDrawingLocation = ArrayOf<Int32>::Alloc(2);
-    mScreenLocation = ArrayOf<Int32>::Alloc(2);
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
-    mOnScrollChangedListener = new PopupWindowScrollChangedListener(this);
 }
 
 PopupWindow::~PopupWindow()
-{}
+{
+    Logger::I("PopupWindow", " >> Destroy PopupWindow: %p", this);
+    mWindowManager = NULL;
+    mContentView = NULL;
+    mPopupView = NULL;
+    mTouchInterceptor = NULL;
+    mOnDismissListener = NULL;
+    mOnScrollChangedListener = NULL;
+}
 
 ECode PopupWindow::constructor()
 {
@@ -321,6 +367,11 @@ ECode PopupWindow::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     assert(ctx != NULL);
+
+    mDrawingLocation = ArrayOf<Int32>::Alloc(2);
+    mScreenLocation = ArrayOf<Int32>::Alloc(2);
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
+    mOnScrollChangedListener = new PopupWindowScrollChangedListener(this);
 
     mContext = ctx;
     AutoPtr<IInterface> obj;
@@ -911,8 +962,10 @@ ECode PopupWindow::PreparePopup(
         AutoPtr<IViewGroupLayoutParams> listParams;
         CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, height,
             (IViewGroupLayoutParams**)&listParams);
+        AutoPtr<IWeakReference> wr;
+        GetWeakReference((IWeakReference**)&wr);
         AutoPtr<PopupViewContainer> popupViewContainer = new PopupViewContainer();
-        popupViewContainer->constructor(mContext, this);
+        popupViewContainer->constructor(mContext, wr);
         popupViewContainer->SetBackground(mBackground);
         popupViewContainer->AddView(mContentView, listParams);
 

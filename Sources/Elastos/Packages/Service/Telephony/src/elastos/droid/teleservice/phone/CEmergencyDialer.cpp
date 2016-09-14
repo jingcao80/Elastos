@@ -60,6 +60,69 @@ namespace Droid {
 namespace TeleService {
 namespace Phone {
 
+CAR_INTERFACE_IMPL_4(CEmergencyDialer::InnerListener, Object, IViewOnClickListener, \
+    IViewOnLongClickListener, IViewOnKeyListener, \
+    ITextWatcher/*IDialpadKeyButtonOnPressedListener*/)
+
+CEmergencyDialer::InnerListener::InnerListener(
+    /* [in] */ CEmergencyDialer* host)
+    : mHost(host)
+{
+}
+
+ECode CEmergencyDialer::InnerListener::BeforeTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 count,
+    /* [in] */ Int32 after)
+{
+    return mHost->BeforeTextChanged(s, start, count, after);
+}
+
+ECode CEmergencyDialer::InnerListener::OnTextChanged(
+    /* [in] */ ICharSequence* input,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 before,
+    /* [in] */ Int32 changeCount)
+{
+    return mHost->OnTextChanged(input, start, before, changeCount);
+}
+
+ECode CEmergencyDialer::InnerListener::AfterTextChanged(
+    /* [in] */ IEditable* input)
+{
+    return mHost->AfterTextChanged(input);
+}
+
+ECode CEmergencyDialer::InnerListener::OnKey(
+    /* [in] */ IView* view,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnKey(view, keyCode, event, result);
+}
+
+ECode CEmergencyDialer::InnerListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+ECode CEmergencyDialer::InnerListener::OnPressed(
+    /* [in] */ IView* view,
+    /* [in] */ Boolean pressed)
+{
+    return mHost->OnPressed(view, pressed);
+}
+
+ECode CEmergencyDialer::InnerListener::OnLongClick(
+    /* [in] */ IView* view,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnLongClick(view, result);
+}
+
 
 ECode CEmergencyDialer::MyBroadcastReceiver::constructor(
     /* [in] */ IEmergencyDialer* host)
@@ -114,8 +177,7 @@ const Int32 CEmergencyDialer::DIAL_TONE_STREAM_TYPE = IAudioManager::STREAM_DTMF
 
 const Int32 CEmergencyDialer::BAD_EMERGENCY_NUMBER_DIALOG = 0;
 
-CAR_INTERFACE_IMPL_5(CEmergencyDialer, Activity, IEmergencyDialer , IViewOnClickListener,
-        IViewOnLongClickListener, IViewOnKeyListener, ITextWatcher/*IDialpadKeyButtonOnPressedListener*/)
+CAR_INTERFACE_IMPL(CEmergencyDialer, Activity, IEmergencyDialer)
 
 CAR_OBJECT_IMPL(CEmergencyDialer)
 
@@ -212,13 +274,15 @@ ECode CEmergencyDialer::OnCreate(
     FindViewById(Elastos::Droid::TeleService::R::id::digits, (IView**)&_view);
     mDigits = IEditText::Probe(_view);
 
+    mListener = new InnerListener(this);
+
     AutoPtr<IDialerKeyListenerHelper> helper;
     CDialerKeyListenerHelper::AcquireSingleton((IDialerKeyListenerHelper**)&helper);
     AutoPtr<IDialerKeyListener> listener;
     helper->GetInstance((IDialerKeyListener**)&listener);
     ITextView::Probe(mDigits)->SetKeyListener(IKeyListener::Probe(listener));
-    IView::Probe(mDigits)->SetOnClickListener(this);
-    IView::Probe(mDigits)->SetOnKeyListener(this);
+    IView::Probe(mDigits)->SetOnClickListener(mListener);
+    IView::Probe(mDigits)->SetOnKeyListener(mListener);
     IView::Probe(mDigits)->SetLongClickable(FALSE);
     Boolean result;
     if (mAccessibilityManager->IsEnabled(&result), result) {
@@ -235,8 +299,8 @@ ECode CEmergencyDialer::OnCreate(
     }
 
     FindViewById(Elastos::Droid::TeleService::R::id::deleteButton, (IView**)&mDelete);
-    mDelete->SetOnClickListener(this);
-    mDelete->SetOnLongClickListener(this);
+    mDelete->SetOnClickListener(mListener);
+    mDelete->SetOnLongClickListener(mListener);
 
     FindViewById(Elastos::Droid::TeleService::R::id::floating_action_button, (IView**)&mDialButton);
 
@@ -245,7 +309,7 @@ ECode CEmergencyDialer::OnCreate(
     GetResources((IResources**)&res);
     if (res->GetBoolean(Elastos::Droid::TeleService::R::bool_::config_show_onscreen_dial_button, &result),
             result) {
-        mDialButton->SetOnClickListener(this);
+        mDialButton->SetOnClickListener(mListener);
     }
     else {
         mDialButton->SetVisibility(IView::GONE);
@@ -360,7 +424,7 @@ ECode CEmergencyDialer::OnPostCreate(
     // will play DTMF tones for all the old digits if it is when onRestoreSavedInstanceState()
     // is called. This method will be called every time the activity is created, and
     // will always happen after onRestoreSavedInstanceState().
-    return ITextView::Probe(mDigits)->AddTextChangedListener(this);
+    return ITextView::Probe(mDigits)->AddTextChangedListener(mListener);
 }
 
 void CEmergencyDialer::SetupKeypad()
@@ -373,12 +437,12 @@ void CEmergencyDialer::SetupKeypad()
         FindViewById(id, (IView**)&_view);
         assert(0);
         // AutoPtr<IDialpadKeyButton> key = IDialpadKeyButton::(_view);
-        // key->SetOnPressedListener(this);
+        // key->SetOnPressedListener(mListener);
     }
 
     AutoPtr<IView> view;
     FindViewById(Elastos::Droid::TeleService::R::id::zero, (IView**)&view);
-    view->SetOnLongClickListener(this);
+    view->SetOnLongClickListener(mListener);
 }
 
 ECode CEmergencyDialer::OnKeyDown(

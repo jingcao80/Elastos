@@ -317,8 +317,7 @@ ECode FrameLayout::SetForeground(
 
         if (drawable != NULL) {
             SetWillNotDraw(FALSE);
-            IDrawableCallback* callback = this;
-            drawable->SetCallback(callback);
+            drawable->SetCallback(this);
             Int32 ld = 0;
             GetLayoutDirection(&ld);
             drawable->SetLayoutDirection(ld);

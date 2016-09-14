@@ -40,17 +40,53 @@ namespace Sip {
 CarClass(CSipEditor)
     , public PreferenceActivity
     , public ISipEditor
-    , public IPreferenceOnPreferenceChangeListener
 {
 private:
-    class AdvancedSettings
+    class InnerListener
         : public Object
-        , public IPreferenceOnPreferenceClickListener
+        , public IPreferenceOnPreferenceChangeListener
     {
     public:
-        TO_STRING_IMPL("CSipEditor::AdvancedSettings")
+        TO_STRING_IMPL("CSipEditor::InnerListener")
 
         CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CSipEditor* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* pref,
+            /* [in] */ IInterface* newValue,
+            /* [out] */ Boolean* result);
+    private:
+        CSipEditor* mHost;
+    };
+
+    class AdvancedSettings
+        : public Object
+    {
+    private:
+        class InnerListener
+            : public Object
+            , public IPreferenceOnPreferenceClickListener
+        {
+        public:
+            TO_STRING_IMPL("CSipEditor::AdvancedSettings::InnerListener")
+
+            CAR_INTERFACE_DECL()
+
+            InnerListener(
+                /* [in] */ AdvancedSettings* host);
+
+            CARAPI OnPreferenceClick(
+                /* [in] */ IPreference* pref,
+                /* [out] */ Boolean* result);
+        private:
+            AdvancedSettings* mHost;
+        };
+
+    public:
+        TO_STRING_IMPL("CSipEditor::AdvancedSettings")
 
         AdvancedSettings(
             /* [in] */ CSipEditor* host);

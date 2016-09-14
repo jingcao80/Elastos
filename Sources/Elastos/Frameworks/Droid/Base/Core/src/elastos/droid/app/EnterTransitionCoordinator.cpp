@@ -52,7 +52,7 @@ ECode EnterTransitionCoordinator::DecorViewOnPreDrawListener::OnPreDraw(
     if (mHost->mIsReadyForTransition) {
         AutoPtr<IViewTreeObserver> vto;
         mDecorView->GetViewTreeObserver((IViewTreeObserver**)&vto);
-        vto->RemoveOnPreDrawListener(IOnPreDrawListener::Probe(this));
+        vto->RemoveOnPreDrawListener(this);
     }
     *result = mHost->mIsReadyForTransition;
     return NOERROR;
@@ -87,7 +87,7 @@ ECode EnterTransitionCoordinator::SharedElementOnPreDrawListener::OnPreDraw(
 
     AutoPtr<IViewTreeObserver> vto;
     mSharedElement->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    vto->RemoveOnPreDrawListener(IOnPreDrawListener::Probe(this));
+    vto->RemoveOnPreDrawListener(this);
     mHost->ViewsReady(mSharedElements);
     *result = TRUE;
     return NOERROR;
@@ -120,7 +120,7 @@ ECode EnterTransitionCoordinator::DestinationDecorViewOnPreDrawListener::OnPreDr
     VALIDATE_NOT_NULL(result)
     AutoPtr<IViewTreeObserver> vto;
     mDecorView->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    vto->RemoveOnPreDrawListener(IOnPreDrawListener::Probe(this));
+    vto->RemoveOnPreDrawListener(this);
 
     if (mHost->mResultReceiver != NULL) {
         AutoPtr<IBundle> state = mHost->CaptureSharedElementState();
@@ -159,7 +159,7 @@ ECode EnterTransitionCoordinator::OnAnimationRunnable::Run()
         mHost->GetDecor((IViewGroup**)&vg);
         IView* decorView = IView::Probe(vg);
         if (decorView != NULL) {
-            decorView->PostOnAnimation(IRunnable::Probe(this));
+            decorView->PostOnAnimation(this);
         }
     }
     else if (mHost->mResultReceiver != NULL) {
@@ -199,7 +199,7 @@ ECode EnterTransitionCoordinator::TakeSharedElementsOnPreDrawListener::OnPreDraw
 
     AutoPtr<IViewTreeObserver> vto;
     mDecorView->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    vto->RemoveOnPreDrawListener(IOnPreDrawListener::Probe(this));
+    vto->RemoveOnPreDrawListener(this);
 
     AutoPtr<IRunnable> runnable = new TransitionRunnable(mHost, mSharedElementState);
     mHost->StartTransition(runnable);
@@ -258,7 +258,7 @@ ECode EnterTransitionCoordinator::SharedElementTransitionListener::OnTransitionS
 ECode EnterTransitionCoordinator::SharedElementTransitionListener::OnTransitionEnd(
     /* [in] */ ITransition* transition)
 {
-    transition->RemoveListener(ITransitionListener::Probe(this));
+    transition->RemoveListener(this);
     mHost->SharedElementTransitionComplete();
     return NOERROR;
 }
@@ -296,7 +296,7 @@ ECode EnterTransitionCoordinator::MyContinueTransitionListener::OnTransitionEnd(
     /* [in] */ ITransition* transition)
 {
     mHost->mEnterViewsTransition = NULL;
-    transition->RemoveListener(ITransitionListener::Probe(this));
+    transition->RemoveListener(this);
     mHost->ViewTransitionComplete();
     return ActivityTransitionCoordinator::ContinueTransitionListener::OnTransitionEnd(transition);
 }
@@ -345,7 +345,7 @@ EnterTransitionCoordinator::EnterTransitionListener::EnterTransitionListener(
 ECode EnterTransitionCoordinator::EnterTransitionListener::OnTransitionEnd(
     /* [in] */ ITransition* transition)
 {
-    transition->RemoveListener(ITransitionListener::Probe(this));
+    transition->RemoveListener(this);
     mHost->MakeOpaque();
     return NOERROR;
 }
@@ -468,7 +468,7 @@ ECode EnterTransitionCoordinator::constructor(
     AutoPtr<IBundle> resultReceiverBundle;
     CBundle::New((IBundle**)&resultReceiverBundle);
     resultReceiverBundle->PutParcelable(
-        ActivityTransitionCoordinator::KEY_REMOTE_RECEIVER, IParcelable::Probe(this));
+        ActivityTransitionCoordinator::KEY_REMOTE_RECEIVER, this);
 
     mResultReceiver->Send(
         IActivityTransitionCoordinator::MSG_SET_REMOTE_RECEIVER, resultReceiverBundle);

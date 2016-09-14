@@ -310,7 +310,7 @@ ECode PreferenceGroup::NotifyDependencyChange(
     for (Int32 i = 0; i < preferenceCount; i++) {
         AutoPtr<IPreference> p;
         GetPreference(i, (IPreference**)&p);
-        p->OnParentChanged(IPreference::Probe(this), disableDependents);
+        p->OnParentChanged(this, disableDependents);
     }
     return NOERROR;
 }

@@ -133,7 +133,7 @@ ECode MatrixCursor::NewRow(
     const Int32 endIndex = mRowCount * mColumnCount;
     EnsureCapacity(endIndex);
     AutoPtr<RowBuilder> m_builder = new RowBuilder();
-    m_builder->constructor(row, IMatrixCursor::Probe(this));
+    m_builder->constructor(row, this);
     *builder = IRowBuilder::Probe(m_builder);
     REFCOUNT_ADD(*builder)
     return NOERROR;

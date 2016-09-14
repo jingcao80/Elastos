@@ -213,6 +213,22 @@ namespace Widget {
 #endif
 
 //==============================================================================
+//              TextView::PreDrawListener
+//==============================================================================
+CAR_INTERFACE_IMPL(TextView::PreDrawListener, Object, IOnPreDrawListener)
+
+TextView::PreDrawListener::PreDrawListener(
+    /* [in] */ TextView* host)
+    : mHost(host)
+{}
+
+ECode TextView::PreDrawListener::OnPreDraw(
+    /* [out] */ Boolean* res)
+{
+    return mHost->OnPreDraw(res);
+}
+
+//==============================================================================
 //              UpdateTextServicesLocaleRunnable
 //==============================================================================
 
@@ -5700,9 +5716,10 @@ void TextView::RegisterForPreDraw()
     if (!mPreDrawRegistered) {
         AutoPtr<IViewTreeObserver> observer;
         GetViewTreeObserver((IViewTreeObserver**)&observer);
-        IOnPreDrawListener* listener = this;
-        assert(listener != NULL);
-        observer->AddOnPreDrawListener(listener);
+        if (mPreDrawListener == NULL) {
+            mPreDrawListener = new PreDrawListener(this);
+        }
+        observer->AddOnPreDrawListener(mPreDrawListener);
         mPreDrawRegistered = TRUE;
     }
 }
@@ -5711,7 +5728,7 @@ void TextView::UnregisterForPreDraw()
 {
     AutoPtr<IViewTreeObserver> observer;
     GetViewTreeObserver((IViewTreeObserver**)&observer);
-    observer->RemoveOnPreDrawListener(this);
+    observer->RemoveOnPreDrawListener(mPreDrawListener);
     mPreDrawRegistered = FALSE;
     mPreDrawListenerDetached = FALSE;
 }
@@ -5800,7 +5817,6 @@ ECode TextView::OnAttachedToWindow()
 
 ECode TextView::OnDetachedFromWindowInternal()
 {
-
     if (mPreDrawRegistered) {
         AutoPtr<IViewTreeObserver> observer;
         GetViewTreeObserver((IViewTreeObserver**)&observer);

@@ -5,7 +5,7 @@
 using Elastos::Droid::Internal::Widget::EIID_ITextProgressBar;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::View::IViewGroupLayoutParams;
-using Elastos::Droid::Widget::IOnChronometerTickListener;
+using Elastos::Droid::Widget::EIID_IOnChronometerTickListener;
 using Elastos::Droid::Widget::IRelativeLayoutLayoutParams;
 using Elastos::Droid::Widget::ITextView;
 
@@ -17,6 +17,22 @@ namespace Widget {
 const Int32 TextProgressBar::PROGRESSBAR_ID;
 const Int32 TextProgressBar::CHRONOMETER_ID;
 const String TextProgressBar::TAG("TextProgressBar");
+
+
+CAR_INTERFACE_IMPL(TextProgressBar::InnerListener, Object, IOnChronometerTickListener)
+
+TextProgressBar::InnerListener::InnerListener(
+    /* [in] */ TextProgressBar* host)
+    : mHost(host)
+{
+}
+
+ECode TextProgressBar::InnerListener::OnChronometerTick(
+    /* [in] */ IChronometer* chronometer)
+{
+    return mHost->OnChronometerTick(chronometer);
+}
+
 CAR_INTERFACE_IMPL(TextProgressBar, RelativeLayout, ITextProgressBar)
 
 TextProgressBar::TextProgressBar()
@@ -71,8 +87,9 @@ ECode TextProgressBar::AddView(
     child->GetId(&childId);
 
     if (childId == CHRONOMETER_ID && IChronometer::Probe(child)) {
+        AutoPtr<InnerListener> listener = new InnerListener(this);
         mChronometer = IChronometer::Probe(child);
-        mChronometer->SetOnChronometerTickListener(IOnChronometerTickListener::Probe(this));
+        mChronometer->SetOnChronometerTickListener(listener);
 
         // Check if Chronometer should move with with ProgressBar
         Int32 width;

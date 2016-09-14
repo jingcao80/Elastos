@@ -29,19 +29,19 @@ namespace Phone {
  */
 CarClass(CGetPin2Screen)
     , public Activity
-    , public IOnEditorActionListener
 {
 private:
-    class MyViewOnClickListener
+    class InnerListener
         : public Object
         , public IViewOnClickListener
+        , public IOnEditorActionListener
     {
     public:
-        TO_STRING_IMPL("CGetPin2Screen::MyViewOnClickListener")
+        TO_STRING_IMPL("CGetPin2Screen::InnerListener")
 
         CAR_INTERFACE_DECL()
 
-        MyViewOnClickListener(
+        InnerListener(
             /* [in] */ CGetPin2Screen* host)
             : mHost(host)
         {}
@@ -49,12 +49,16 @@ private:
         CARAPI OnClick(
             /* [in] */ IView* v);
 
+        CARAPI OnEditorAction(
+            /* [in] */ ITextView* v,
+            /* [in] */ Int32 actionId,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
     private:
         CGetPin2Screen* mHost;
     };
 
 public:
-    CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL();
 
@@ -88,7 +92,7 @@ private:
     AutoPtr<IEditText> mPin2Field;
     AutoPtr<IButton> mOkButton;
 
-    AutoPtr<IViewOnClickListener> mClicked;
+    AutoPtr<InnerListener> mInnerListener;
 };
 
 } // namespace Phone

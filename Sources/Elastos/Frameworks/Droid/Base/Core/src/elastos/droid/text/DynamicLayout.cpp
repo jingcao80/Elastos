@@ -336,9 +336,8 @@ ECode DynamicLayout::constructor(
 
     if (ISpannable::Probe(base) != NULL) {
         if (mWatcher == NULL) {
-            IWeakReferenceSource* wrs = this;
             AutoPtr<IWeakReference> wr;
-            wrs->GetWeakReference((IWeakReference**)&wr);
+            GetWeakReference((IWeakReference**)&wr);
             mWatcher = new ChangeWatcher(wr);
         }
 

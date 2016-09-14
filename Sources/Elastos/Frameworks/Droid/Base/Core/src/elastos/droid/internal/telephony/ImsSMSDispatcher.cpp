@@ -58,7 +58,7 @@ ImsSMSDispatcher::ImsSMSDispatcher(
     // broadcast undelivered messages in raw table.
     //TODO attention the circular reference here
     CCdmaSMSDispatcher::New(phone, (ISmsUsageMonitor*)usageMonitor
-            , IImsSMSDispatcher::Probe(this), (ISMSDispatcher**)&mCdmaDispatcher);
+            , this, (ISMSDispatcher**)&mCdmaDispatcher);
     AutoPtr<IContext> ctx;
     IPhone::Probe(phone)->GetContext((IContext**)&ctx);
     GsmInboundSmsHandler::MakeInboundSmsHandler(ctx,
@@ -66,7 +66,7 @@ ImsSMSDispatcher::ImsSMSDispatcher(
     mCdmaInboundSmsHandler = CdmaInboundSmsHandler::MakeInboundSmsHandler(ctx,
             storageMonitor, phone, ICdmaSMSDispatcher::Probe(mCdmaDispatcher));
     CGsmSMSDispatcher::New(phone, (ISmsUsageMonitor*)usageMonitor
-            , IImsSMSDispatcher::Probe(this), mGsmInboundSmsHandler
+            , this, mGsmInboundSmsHandler
                 , (ISMSDispatcher**)&mGsmDispatcher);
     AutoPtr<IThread> broadcastThread;
     AutoPtr<IRunnable> run;

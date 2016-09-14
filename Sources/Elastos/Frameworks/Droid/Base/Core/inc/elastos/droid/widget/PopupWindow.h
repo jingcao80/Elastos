@@ -28,9 +28,11 @@ private:
         : public FrameLayout
     {
     public:
+        ~PopupViewContainer();
+
         CARAPI constructor(
             /* [in] */ IContext* context,
-            /* [in] */ PopupWindow* host);
+            /* [in] */ IWeakReference* host);
 
         // @Override
         virtual CARAPI DispatchKeyEvent(
@@ -57,8 +59,9 @@ private:
             /* [in] */ Int32 extraSpace,
             /* [out] */ ArrayOf<Int32>** drawableState);
 
+        AutoPtr<PopupWindow> GetHost();
     private:
-        PopupWindow* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         static const String TAG;
     };
 

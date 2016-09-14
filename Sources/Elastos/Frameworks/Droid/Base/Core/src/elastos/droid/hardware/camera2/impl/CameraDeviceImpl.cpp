@@ -417,7 +417,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::AsBinder(
 {
     VALIDATE_NOT_NULL(binder);
 
-    *binder = IBinder::Probe(this);
+    *binder = this;
     REFCOUNT_ADD(*binder);
     return NOERROR;
 }

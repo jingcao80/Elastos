@@ -41,13 +41,58 @@ namespace Phone {
 CarClass(CEmergencyDialer)
     , public Activity
     , public IEmergencyDialer
-    , public IViewOnClickListener
-    , public IViewOnLongClickListener
-    , public IViewOnKeyListener
-    , public ITextWatcher
-    //, public IDialpadKeyButtonOnPressedListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public IViewOnLongClickListener
+        , public IViewOnKeyListener
+        , public ITextWatcher
+        //, public IDialpadKeyButtonOnPressedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CEmergencyDialer* host);
+
+        CARAPI BeforeTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [in] */ Int32 after);
+
+        CARAPI OnTextChanged(
+            /* [in] */ ICharSequence* input,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 before,
+            /* [in] */ Int32 changeCount);
+
+        CARAPI AfterTextChanged(
+            /* [in] */ IEditable* input);
+
+        CARAPI OnKey(
+            /* [in] */ IView* view,
+            /* [in] */ Int32 keyCode,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnClick(
+            /* [in] */ IView* view);
+
+        CARAPI OnPressed(
+            /* [in] */ IView* view,
+            /* [in] */ Boolean pressed);
+
+        CARAPI OnLongClick(
+            /* [in] */ IView* view,
+            /* [out] */ Boolean* result);
+
+    private:
+        CEmergencyDialer* mHost;
+    };
+
     class MyBroadcastReceiver
         : public BroadcastReceiver
     {
@@ -248,6 +293,7 @@ private:
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
 
     String mLastNumber; // last number we tried to dial. Used to restore error dialog.
+    AutoPtr<InnerListener> mListener;
 };
 
 } // namespace Phone

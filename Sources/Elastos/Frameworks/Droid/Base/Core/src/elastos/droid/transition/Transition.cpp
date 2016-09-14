@@ -2031,7 +2031,7 @@ ECode Transition::AnimatorListenerAdapter_2::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mOwner->End();
-    animation->RemoveListener(IAnimatorListener::Probe(this));
+    animation->RemoveListener(this);
     return NOERROR;
 }
 
