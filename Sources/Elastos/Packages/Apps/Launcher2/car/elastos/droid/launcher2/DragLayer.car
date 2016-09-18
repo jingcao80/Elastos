@@ -25,7 +25,6 @@ module
      * interface Elastos.Droid.View.IViewGroupMarginLayoutParams
      * interface Elastos.Droid.View.IViewGroupLayoutParams
      * interface IFrameLayoutLayoutParams
-     * interface IViewGroupOnHierarchyChangeListener
      */
     interface IDragLayerLayoutParams {
         SetWidth(
@@ -64,7 +63,6 @@ module
      * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      * interface IFrameLayout
-     * interface IViewGroupOnHierarchyChangeListener
      */
     [deprecated, local]
     interface IDragLayer {

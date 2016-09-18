@@ -395,7 +395,9 @@ ECode QSTileHost::CreateTile(
         qs = new WifiTile(this);
     }
     else if (tileSpec.Equals("bt")) {
-        qs = new BluetoothTile(this);
+        AutoPtr<BluetoothTile> bt = new BluetoothTile();
+        bt->constructor(this);
+        qs = bt.Get();
     }
     else if (tileSpec.Equals("inversion")) {
         qs = new ColorInversionTile(this);

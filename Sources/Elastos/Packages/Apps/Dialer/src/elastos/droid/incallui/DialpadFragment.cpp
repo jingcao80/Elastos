@@ -617,10 +617,10 @@ void DialpadFragment::ConfigureKeypadListeners(
     for (Int32 i = 0; i < buttonIds->GetLength(); i++) {
         AutoPtr<IView> view;
         fragmentView->FindViewById((*buttonIds)[i], (IView**)&view);
-        view->SetOnTouchListener(IViewOnTouchListener::Probe(this));
-        view->SetOnKeyListener(IViewOnKeyListener::Probe(this));
-        view->SetOnHoverListener(IViewOnHoverListener::Probe(this));
-        view->SetOnClickListener(IViewOnClickListener::Probe(this));
+        view->SetOnTouchListener(this);
+        view->SetOnKeyListener(this);
+        view->SetOnHoverListener(this);
+        view->SetOnClickListener(this);
     }
 }
 

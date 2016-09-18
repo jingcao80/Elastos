@@ -44,12 +44,12 @@ ECode CallButtonPresenter::OnUiReady(
 {
     Presenter::OnUiReady(ui);
 
-    AudioModeProvider::GetInstance()->AddListener(IAudioModeListener::Probe(this));
+    AudioModeProvider::GetInstance()->AddListener(this);
 
     // register for call state changes last
-    InCallPresenter::GetInstance()->AddListener(IInCallStateListener::Probe(this));
-    InCallPresenter::GetInstance()->AddIncomingCallListener(IIncomingCallListener::Probe(this));
-    InCallPresenter::GetInstance()->AddDetailsListener(IInCallDetailsListener::Probe(this));
+    InCallPresenter::GetInstance()->AddListener(this);
+    InCallPresenter::GetInstance()->AddIncomingCallListener(this);
+    InCallPresenter::GetInstance()->AddDetailsListener(this);
     return NOERROR;
 }
 
@@ -58,10 +58,10 @@ ECode CallButtonPresenter::OnUiUnready(
 {
     Presenter::OnUiUnready(ui);
 
-    InCallPresenter::GetInstance()->RemoveListener(IInCallStateListener::Probe(this));
-    AudioModeProvider::GetInstance()->RemoveListener(IAudioModeListener::Probe(this));
-    InCallPresenter::GetInstance()->RemoveIncomingCallListener(IIncomingCallListener::Probe(this));
-    InCallPresenter::GetInstance()->RemoveDetailsListener(IInCallDetailsListener::Probe(this));
+    InCallPresenter::GetInstance()->RemoveListener(this);
+    AudioModeProvider::GetInstance()->RemoveListener(this);
+    InCallPresenter::GetInstance()->RemoveIncomingCallListener(this);
+    InCallPresenter::GetInstance()->RemoveDetailsListener(this);
     return NOERROR;
 }
 

@@ -59,8 +59,8 @@ void CVideoCallFragment::VideoCallSurface::RecreateView(
     /* [in] */ ITextureView* view)
 {
     mTextureView = view;
-    mTextureView->SetSurfaceTextureListener(ISurfaceTextureListener::Probe(this));
-    IView::Probe(mTextureView)->SetOnClickListener(IViewOnClickListener::Probe(this));
+    mTextureView->SetSurfaceTextureListener(this);
+    IView::Probe(mTextureView)->SetOnClickListener(this);
 
     if (mSavedSurfaceTexture != NULL) {
         mTextureView->SetSurfaceTexture(mSavedSurfaceTexture);

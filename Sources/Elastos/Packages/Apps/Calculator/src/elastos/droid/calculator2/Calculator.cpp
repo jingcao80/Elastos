@@ -337,13 +337,13 @@ ECode Calculator::OnCreate(
     textView->SetText(StringUtils::ParseCharSequence(text));
     AutoPtr<ICharSequence> cs;
     textView->GetText((ICharSequence**)&cs);
-    mEvaluator->Evaluate(cs, IEvaluateCallback::Probe(this));
+    mEvaluator->Evaluate(cs, this);
 
     textView->SetEditableFactory(mFormulaEditableFactory);
     textView->AddTextChangedListener(mFormulaTextWatcher);
     IView::Probe(mFormulaEditText)->SetOnKeyListener(IViewOnKeyListener::Probe(mFormulaOnKeyListener));
-    mFormulaEditText->SetOnTextSizeChangeListener(IOnTextSizeChangeListener::Probe(this));
-    return mDeleteButton->SetOnLongClickListener(IViewOnLongClickListener::Probe(this));
+    mFormulaEditText->SetOnTextSizeChangeListener(this);
+    return mDeleteButton->SetOnLongClickListener(this);
 }
 
 ECode Calculator::OnSaveInstanceState(

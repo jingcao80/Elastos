@@ -58,8 +58,30 @@ ECode WifiTile::CallbackInfo::ToString(
     return sb.ToString(str);
 }
 
-CAR_INTERFACE_IMPL_3(WifiTile::WifiDetailAdapter, Object, IQSTileDetailAdapter \
-    , INetworkControllerAccessPointCallback, IQSDetailItemsCallback);
+CAR_INTERFACE_IMPL(WifiTile::WifiDetailAdapter::InnerCallback,
+    Object, IQSDetailItemsCallback)
+
+WifiTile::WifiDetailAdapter::InnerCallback::InnerCallback(
+    /* [in] */ WifiDetailAdapter* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode WifiTile::WifiDetailAdapter::InnerCallback::OnDetailItemClick(
+    /* [in] */ IQSDetailItemsItem* item)
+{
+    return mHost->OnDetailItemClick(item);
+}
+
+// @Override
+ECode WifiTile::WifiDetailAdapter::InnerCallback::OnDetailItemDisconnect(
+    /* [in] */ IQSDetailItemsItem* item)
+{
+    return mHost->OnDetailItemDisconnect(item);
+}
+
+CAR_INTERFACE_IMPL_2(WifiTile::WifiDetailAdapter, Object,
+    IQSTileDetailAdapter, INetworkControllerAccessPointCallback);
 
 WifiTile::WifiDetailAdapter::WifiDetailAdapter(
     /* [in] */ WifiTile* host)
@@ -114,7 +136,8 @@ ECode WifiTile::WifiDetailAdapter::CreateDetailView(
     mHost->FireScanStateChanged(TRUE);
     mItems = CQSDetailItems::ConvertOrInflate(context, convertView, parent);
     mItems->SetTagSuffix(String("Wifi"));
-    mItems->SetCallback(this);
+    AutoPtr<InnerCallback> cb = new InnerCallback(this);
+    mItems->SetCallback(cb);
     mItems->SetEmptyState(R::drawable::ic_qs_wifi_detail_empty,
             R::string::quick_settings_wifi_detail_empty_text);
     UpdateItems();
@@ -187,6 +210,7 @@ void WifiTile::WifiDetailAdapter::UpdateItems()
 }
 
 CAR_INTERFACE_IMPL(WifiTile::Callback, Object, INetworkSignalChangedCallback)
+
 WifiTile::Callback::Callback(
     /* [in] */ WifiTile* host)
     : mHost(host)
@@ -245,6 +269,7 @@ ECode WifiTile::Callback::OnMobileDataEnabled(
 }
 
 AutoPtr<IIntent> WifiTile::WIFI_SETTINGS = InitStatic();
+
 WifiTile::WifiTile(
     /* [in] */ IQSTileHost* host)
 {

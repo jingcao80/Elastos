@@ -26,13 +26,37 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-CAR_INTERFACE_IMPL(BluetoothTile::Callback, Object, IBluetoothControllerCallback)
-BluetoothTile::Callback::Callback(
+CAR_INTERFACE_IMPL(BluetoothTile::BluetoothDetailAdapter::QSDetailItemsCallback,
+    Object, IQSDetailItemsCallback)
+
+BluetoothTile::BluetoothDetailAdapter::QSDetailItemsCallback::QSDetailItemsCallback(
+    /* [in] */ BluetoothDetailAdapter* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode BluetoothTile::BluetoothDetailAdapter::QSDetailItemsCallback::OnDetailItemClick(
+    /* [in] */ IQSDetailItemsItem* item)
+{
+    return mHost->OnDetailItemClick(item);
+}
+
+// @Override
+ECode BluetoothTile::BluetoothDetailAdapter::QSDetailItemsCallback::OnDetailItemDisconnect(
+    /* [in] */ IQSDetailItemsItem* item)
+{
+    return mHost->OnDetailItemDisconnect(item);
+}
+
+
+CAR_INTERFACE_IMPL(BluetoothTile::InnerCallback, Object, IBluetoothControllerCallback)
+
+BluetoothTile::InnerCallback::InnerCallback(
     /* [in] */ BluetoothTile* host)
     : mHost(host)
 {}
 
-ECode BluetoothTile::Callback::OnBluetoothStateChange(
+ECode BluetoothTile::InnerCallback::OnBluetoothStateChange(
     /* [in] */ Boolean enabled,
     /* [in] */ Boolean connecting)
 {
@@ -40,7 +64,7 @@ ECode BluetoothTile::Callback::OnBluetoothStateChange(
     return NOERROR;
 }
 
-ECode BluetoothTile::Callback::OnBluetoothPairedDevicesChanged()
+ECode BluetoothTile::InnerCallback::OnBluetoothPairedDevicesChanged()
 {
     Boolean tmp = FALSE;
     AutoPtr<Runnable1> run = new Runnable1(mHost);
@@ -60,11 +84,14 @@ ECode BluetoothTile::Runnable1::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL_2(BluetoothTile::BluetoothDetailAdapter, Object, IQSTileDetailAdapter, IQSDetailItemsCallback);
-BluetoothTile::BluetoothDetailAdapter::BluetoothDetailAdapter(
+CAR_INTERFACE_IMPL(BluetoothTile::BluetoothDetailAdapter, Object, IQSTileDetailAdapter);
+
+ECode BluetoothTile::BluetoothDetailAdapter::constructor(
     /* [in] */ BluetoothTile* host)
-    : mHost(host)
-{}
+{
+    mHost = host;
+    return NOERROR;
+}
 
 ECode BluetoothTile::BluetoothDetailAdapter::GetTitle(
     /* [out] */ Int32* result)
@@ -107,11 +134,13 @@ ECode BluetoothTile::BluetoothDetailAdapter::CreateDetailView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
+    AutoPtr<QSDetailItemsCallback> cb = new QSDetailItemsCallback(this);
+
     mItems = CQSDetailItems::ConvertOrInflate(context, convertView, parent);
     mItems->SetTagSuffix(String("Bluetooth"));
     mItems->SetEmptyState(R::drawable::ic_qs_bluetooth_detail_empty,
             R::string::quick_settings_bluetooth_detail_empty_text);
-    mItems->SetCallback(this);
+    mItems->SetCallback(cb);
     UpdateItems();
     SetItemsVisible(((BooleanState*)mHost->mState.Get())->mValue);
     *view = IView::Probe(mItems);
@@ -190,13 +219,15 @@ ECode BluetoothTile::BluetoothDetailAdapter::OnDetailItemDisconnect(
 }
 
 AutoPtr<IIntent> BluetoothTile::BLUETOOTH_SETTINGS = InitStatic();
-BluetoothTile::BluetoothTile(
+
+ECode BluetoothTile::constructor(
     /* [in] */ IQSTileHost* host)
 {
     QSTile::constructor(host);
-    mCallback = new Callback(this);
+    mCallback = new InnerCallback(this);
     host->GetBluetoothController((IBluetoothController**)&mController);
-    mDetailAdapter = new BluetoothDetailAdapter(this);
+    mDetailAdapter = new BluetoothDetailAdapter();
+    return mDetailAdapter->constructor(this);
 }
 
 AutoPtr<IIntent> BluetoothTile::InitStatic()

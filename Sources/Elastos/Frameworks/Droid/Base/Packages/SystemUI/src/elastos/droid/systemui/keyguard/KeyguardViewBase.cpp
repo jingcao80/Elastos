@@ -62,6 +62,41 @@ ECode KeyguardViewBase::MyKeyguardActivityLauncher::RequestDismissKeyguard()
 {
     return mHost->Dismiss(FALSE);
 }
+//=======================================================================
+// KeyguardViewBase::InnerCallback
+//=======================================================================
+
+CAR_INTERFACE_IMPL(KeyguardViewBase::InnerCallback, Object, IKeyguardSecurityContainerSecurityCallback)
+
+KeyguardViewBase::InnerCallback::InnerCallback(
+    /* [in] */ KeyguardViewBase* host)
+    : mHost(host)
+{}
+
+ECode KeyguardViewBase::InnerCallback::Dismiss(
+    /* [in] */ Boolean authenticated,
+    /* [out] */ Boolean* result)
+{
+    return mHost->Dismiss(authenticated, result);
+}
+
+ECode KeyguardViewBase::InnerCallback::Finish()
+{
+    return mHost->Finish();
+}
+
+//@Override
+ECode KeyguardViewBase::InnerCallback::OnSecurityModeChanged(
+    /* [in] */ SecurityMode securityMode,
+    /* [in] */ Boolean needsInput)
+{
+    return mHost->OnSecurityModeChanged(securityMode, needsInput);
+}
+
+ECode KeyguardViewBase::InnerCallback::UserActivity()
+{
+    return mHost->UserActivity();
+}
 
 //=======================================================================
 // KeyguardViewBase
@@ -71,7 +106,7 @@ const Boolean KeyguardViewBase::KEYGUARD_MANAGES_VOLUME = FALSE;
 
 const String KeyguardViewBase::ENABLE_MENU_KEY_FILE("/data/local/enable_menu_key");
 
-CAR_INTERFACE_IMPL_2(KeyguardViewBase, FrameLayout, IKeyguardViewBase, IKeyguardSecurityContainerSecurityCallback)
+CAR_INTERFACE_IMPL(KeyguardViewBase, FrameLayout, IKeyguardViewBase)
 
 KeyguardViewBase::KeyguardViewBase()
 {
@@ -115,7 +150,8 @@ ECode KeyguardViewBase::OnFinishInflate()
     mSecurityContainer = IKeyguardSecurityContainer::Probe(view);
     CLockPatternUtils::New(mContext, (ILockPatternUtils**)&mLockPatternUtils);
     mSecurityContainer->SetLockPatternUtils(mLockPatternUtils);
-    mSecurityContainer->SetSecurityCallback(this);
+    AutoPtr<InnerCallback> cb = new InnerCallback(this);
+    mSecurityContainer->SetSecurityCallback(cb);
     return mSecurityContainer->ShowPrimarySecurityScreen(FALSE);
     // mSecurityContainer.updateSecurityViews(false /* not bouncing */);
 }
