@@ -62,6 +62,25 @@ const String AdvancedWifiSettings::KEY_WPS_PUSH("wps_push_button");
 const String AdvancedWifiSettings::KEY_WPS_PIN("wps_pin_entry");
 
 //===============================================================================
+//                  AdvancedWifiSettings::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(AdvancedWifiSettings::InnerListener, Object, IPreferenceOnPreferenceChangeListener)
+
+AdvancedWifiSettings::InnerListener::InnerListener(
+    /* [in] */ AdvancedWifiSettings* host)
+    : mHost(host)
+{}
+
+ECode AdvancedWifiSettings::InnerListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* newValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(preference, newValue, result);
+}
+
+//===============================================================================
 //                  AdvancedWifiSettings::WpsFragment
 //===============================================================================
 
@@ -155,8 +174,6 @@ ECode AdvancedWifiSettings::InitOnPreferenceClickListener::OnPreferenceClick(
 //===============================================================================
 //                  AdvancedWifiSettings
 //===============================================================================
-
-CAR_INTERFACE_IMPL(AdvancedWifiSettings, SettingsPreferenceFragment, IPreferenceOnPreferenceChangeListener);
 
 AdvancedWifiSettings::AdvancedWifiSettings()
 {}
@@ -253,6 +270,8 @@ void AdvancedWifiSettings::InitPreferences()
     preference = NULL;
     FindPreference(CoreUtils::Convert(KEY_WIFI_ASSISTANT), (IPreference**)&preference);
     ISwitchPreference* wifiAssistant = ISwitchPreference::Probe(preference);
+
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     if (scorer != NULL) {
         AutoPtr<INetworkScorerAppManager> nsam;
         CNetworkScorerAppManager::AcquireSingleton((INetworkScorerAppManager**)&nsam);
@@ -268,7 +287,7 @@ void AdvancedWifiSettings::InitPreferences()
         String str;
         resource->GetString(R::string::wifi_automatically_manage_summary, args, &str);
         preference->SetSummary(CoreUtils::Convert(str));
-        preference->SetOnPreferenceChangeListener(this);
+        preference->SetOnPreferenceChangeListener(listener);
         ITwoStatePreference::Probe(wifiAssistant)->SetChecked(checked);
     }
     else {
@@ -307,7 +326,7 @@ void AdvancedWifiSettings::InitPreferences()
     Boolean res;
     mWifiManager->IsDualBandSupported(&res);
     if (res) {
-        preference->SetOnPreferenceChangeListener(this);
+        preference->SetOnPreferenceChangeListener(listener);
         Int32 value;
         mWifiManager->GetFrequencyBand(&value);
         if (value != -1) {
@@ -335,7 +354,7 @@ void AdvancedWifiSettings::InitPreferences()
         if (Utils::IsWifiOnly(context)) {
             sleepPolicyPref->SetEntries(R::array::wifi_sleep_policy_entries_wifi_only);
         }
-        preference->SetOnPreferenceChangeListener(this);
+        preference->SetOnPreferenceChangeListener(listener);
         Int32 value;
         global->GetInt32(resolver,
                 ISettingsGlobal::WIFI_SLEEP_POLICY,

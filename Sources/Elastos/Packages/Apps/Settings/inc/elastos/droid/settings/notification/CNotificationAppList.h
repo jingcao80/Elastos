@@ -45,9 +45,35 @@ namespace Notification {
 /** Just a sectioned list of installed applications, nothing else to index **/
 CarClass(CNotificationAppList)
     , public PinnedHeaderListFragment
-    , public IAdapterViewOnItemSelectedListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemSelectedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CNotificationAppList::InnerListener")
+
+        InnerListener(
+            /* [in] */ CNotificationAppList* host);
+
+        //@Override
+        CARAPI OnItemSelected(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        //@Override
+        CARAPI OnNothingSelected(
+            /* [in] */ IAdapterView* parent);
+
+    private:
+        CNotificationAppList* mHost;
+    };
+
     class Row
         : public Object
         , public IRow
@@ -268,8 +294,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL()
 
     CNotificationAppList();

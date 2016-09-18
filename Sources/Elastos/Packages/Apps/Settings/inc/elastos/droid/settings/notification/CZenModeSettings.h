@@ -5,6 +5,7 @@
 #include "elastos/droid/settings/notification/SettingPref.h"
 #include "elastos/droid/settings/notification/ZenModeDowntimeDaysSelection.h"
 #include "elastos/droid/settings/notification/CDropDownPreference.h"
+#include "elastos/droid/settings/notification/CZenModeConditionSelection.h"
 #include "elastos/droid/settings/search/BaseSearchIndexProvider.h"
 #include "elastos/droid/settings/SettingsPreferenceFragment.h"
 #include "elastos/droid/app/DialogFragment.h"
@@ -25,6 +26,8 @@ using Elastos::Droid::App::ITimePickerDialogOnTimeSetListener;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ContentObserver;
@@ -39,6 +42,8 @@ using Elastos::Droid::Preference::ISwitchPreference;
 using Elastos::Droid::Service::Notification::IZenModeConfig;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Widget::ITimePicker;
+using Elastos::Droid::Widget::IScrollView;
+using Elastos::Droid::Widget::CScrollView;
 using Elastos::Text::ISimpleDateFormat;
 using Elastos::Utility::IList;
 
@@ -404,6 +409,55 @@ private:
     private:
         CZenModeSettings* mHost;
         Int32 mId;
+    };
+
+    class ShowConditionSelectionOnClickListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        TO_STRING_IMPL("CZenModeSettings::ShowConditionSelectionOnClickListener")
+
+        CAR_INTERFACE_DECL()
+
+        ShowConditionSelectionOnClickListener(
+            /* [in] */ CZenModeSettings* host,
+            /* [in] */ Int32 id,
+            /* [in] */ CZenModeConditionSelection* zmcs,
+            /* [in] */ Int32 value);
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+    private:
+        CZenModeSettings* mHost;
+        Int32 mId;
+        AutoPtr<CZenModeConditionSelection> mZmcs;
+        Int32 mValue;
+    };
+
+    class ShowConditionSelectionOnCancelListener
+        : public Object
+        , public IDialogInterfaceOnCancelListener
+    {
+    public:
+        TO_STRING_IMPL("CZenModeSettings::ShowConditionSelectionOnCancelListener")
+
+        CAR_INTERFACE_DECL()
+
+        ShowConditionSelectionOnCancelListener(
+            /* [in] */ CZenModeSettings* host,
+            /* [in] */ Int32 value);
+
+        //@Override
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* dialog);
+
+    private:
+        CZenModeSettings* mHost;
+        Int32 mValue;
     };
 
 public:

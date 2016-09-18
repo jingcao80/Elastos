@@ -10,7 +10,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class RadioGroup
+class ECO_PUBLIC RadioGroup
     : public LinearLayout
     , public IRadioGroup
 {
@@ -79,7 +79,7 @@ public:
     };
 
 private:
-    class CheckedStateTracker
+    class ECO_LOCAL CheckedStateTracker
         : public Object
         , public ICompoundButtonOnCheckedChangeListener
     {
@@ -102,7 +102,7 @@ private:
      * to another listener. This allows the table layout to set its own internal
      * hierarchy change listener without preventing the user to setup his.</p>
      */
-    class PassThroughHierarchyChangeListener
+    class ECO_LOCAL PassThroughHierarchyChangeListener
         : public Object
         , public IViewGroupOnHierarchyChangeListener
     {
@@ -244,12 +244,12 @@ protected:
         /* [out] */ ILinearLayoutLayoutParams** params);
 
 private:
-    CARAPI_(void) Init();
+    ECO_LOCAL CARAPI_(void) Init();
 
-    CARAPI_(void) SetCheckedId(
+    ECO_LOCAL CARAPI_(void) SetCheckedId(
         /* [in] */ Int32 id);
 
-    CARAPI_(void) SetCheckedStateForView(
+    ECO_LOCAL CARAPI_(void) SetCheckedStateForView(
         /* [in] */ Int32 viewId,
         /* [in] */ Boolean checked);
 

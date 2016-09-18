@@ -18,6 +18,24 @@ namespace Wifi {
 const String WifiConfigUiForSetupWizardXL::TAG("SetupWizard");
 
 //===============================================================================
+//                  WifiConfigUiForSetupWizardXL::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(WifiConfigUiForSetupWizardXL::InnerListener, Object, IViewOnFocusChangeListener)
+
+WifiConfigUiForSetupWizardXL::InnerListener::InnerListener(
+    /* [in] */ WifiConfigUiForSetupWizardXL* host)
+    : mHost(host)
+{}
+
+ECode WifiConfigUiForSetupWizardXL::InnerListener::OnFocusChange(
+    /* [in] */ IView* view,
+    /* [in] */ Boolean hasFocus)
+{
+    return mHost->OnFocusChange(view, hasFocus);
+}
+
+//===============================================================================
 //                  WifiConfigUiForSetupWizardXL::FocusRunnable
 //===============================================================================
 
@@ -49,8 +67,7 @@ ECode WifiConfigUiForSetupWizardXL::FocusRunnable::Run()
 //                  WifiConfigUiForSetupWizardXL
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(WifiConfigUiForSetupWizardXL, Object, IWifiConfigUiForSetupWizardXL,
-        IWifiConfigUiBase, IViewOnFocusChangeListener)
+CAR_INTERFACE_IMPL_2(WifiConfigUiForSetupWizardXL, Object, IWifiConfigUiForSetupWizardXL, IWifiConfigUiBase)
 
 WifiConfigUiForSetupWizardXL::WifiConfigUiForSetupWizardXL(
     /* [in] */ IWifiSettingsForSetupWizardXL* activity,
@@ -125,7 +142,8 @@ ECode WifiConfigUiForSetupWizardXL::RequestFocusAndShowKeyboard(
         }
         else {
             // After acquiring the focus, we show software keyboard.
-            viewToBeFocused->SetOnFocusChangeListener(this);
+            AutoPtr<InnerListener> listener = new InnerListener(this);
+            viewToBeFocused->SetOnFocusChangeListener(listener);
             Boolean requestFocusResult;
             viewToBeFocused->RequestFocus(&requestFocusResult);
             String str("");

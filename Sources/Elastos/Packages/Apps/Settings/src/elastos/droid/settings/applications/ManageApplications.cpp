@@ -123,10 +123,30 @@ ECode ManageApplications::InnerListener::OnDismiss(
 }
 
 //===============================================================================
+//                  ManageApplications::TabInfo::InnerOnItemClickListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(ManageApplications::TabInfo::InnerOnItemClickListener, Object, IAdapterViewOnItemClickListener)
+
+ManageApplications::TabInfo::InnerOnItemClickListener::InnerOnItemClickListener(
+    /* [in] */ TabInfo* host)
+    : mHost(host)
+{}
+
+ECode ManageApplications::TabInfo::InnerOnItemClickListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+//===============================================================================
 //                  ManageApplications::TabInfo
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(ManageApplications::TabInfo, Object, IManageApplicationsTabInfo, IAdapterViewOnItemClickListener)
+CAR_INTERFACE_IMPL(ManageApplications::TabInfo, Object, IManageApplicationsTabInfo)
 
 ManageApplications::TabInfo::TabInfo(
     /* [in] */ ManageApplications* owner,
@@ -213,7 +233,8 @@ AutoPtr<IView> ManageApplications::TabInfo::Build(
         if (emptyView != NULL) {
             _lv->SetEmptyView(emptyView);
         }
-        _lv->SetOnItemClickListener(this);
+        AutoPtr<InnerOnItemClickListener> listener = new InnerOnItemClickListener(this);
+        _lv->SetOnItemClickListener(listener);
         IView::Probe(lv)->SetSaveEnabled(TRUE);
         lv->SetItemsCanFocus(TRUE);
         IAbsListView::Probe(lv)->SetTextFilterEnabled(TRUE);

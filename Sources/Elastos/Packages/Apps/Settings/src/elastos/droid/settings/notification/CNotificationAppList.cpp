@@ -71,6 +71,32 @@ namespace Settings {
 namespace Notification {
 
 //===============================================================================
+//                  CNotificationAppList::InnerListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(CNotificationAppList::InnerListener, Object, IAdapterViewOnItemSelectedListener)
+
+CNotificationAppList::InnerListener::InnerListener(
+    /* [in] */ CNotificationAppList* host)
+    : mHost(host)
+{}
+
+ECode CNotificationAppList::InnerListener::OnItemSelected(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemSelected(parent, view, position, id);
+}
+
+ECode CNotificationAppList::InnerListener::OnNothingSelected(
+    /* [in] */ IAdapterView* parent)
+{
+    return mHost->OnNothingSelected(parent);
+}
+
+//===============================================================================
 //                  CNotificationAppList::Row
 //===============================================================================
 
@@ -80,7 +106,7 @@ CAR_INTERFACE_IMPL(CNotificationAppList::Row, Object, IRow)
 //                  CNotificationAppList::AppRow
 //===============================================================================
 
-CAR_INTERFACE_IMPL(CNotificationAppList::AppRow, Object, IAppRow)
+CAR_INTERFACE_IMPL(CNotificationAppList::AppRow, Row, IAppRow)
 
 CNotificationAppList::AppRow::AppRow()
     : mUid(0)
@@ -405,7 +431,7 @@ ECode CNotificationAppList::NotificationAppAdapter::GetPositionForSection(
     for (Int32 i = 0; i < n; i++) {
         AutoPtr<IInterface> tmp;
         GetItem(i, (IInterface**)&tmp);
-        Row* r = (Row*)IRow::Probe(obj);
+        Row* r = (Row*)IRow::Probe(tmp);
         if (r->mSection.Equals(section)) {
             *result = i;
             return NOERROR;
@@ -619,8 +645,6 @@ const AutoPtr<IIntent> CNotificationAppList::APP_NOTIFICATION_PREFS_CATEGORY_INT
 
 const AutoPtr<IComparator> CNotificationAppList::mRowComparator = new MyComparator();
 
-CAR_INTERFACE_IMPL(CNotificationAppList, PinnedHeaderListFragment, IAdapterViewOnItemSelectedListener)
-
 CAR_OBJECT_IMPL(CNotificationAppList);
 
 CNotificationAppList::CNotificationAppList()
@@ -691,7 +715,8 @@ ECode CNotificationAppList::OnViewCreated(
         // ISpinner* spinner = ISpinner::Probe(tmp);
         IAdapterView* spinner = IAdapterView::Probe(tmp);
         spinner->SetAdapter((IAdapter*)mProfileSpinnerAdapter);
-        spinner->SetOnItemSelectedListener(this);
+        AutoPtr<InnerListener> listener = new InnerListener(this);
+        spinner->SetOnItemSelectedListener(listener);
         SetPinnedHeaderView(tmp);
     }
     return NOERROR;

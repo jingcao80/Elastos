@@ -1,6 +1,7 @@
 
 #include "elastos/droid/app/CFragmentManagerState.h"
 #include "elastos/droid/app/CBackStackState.h"
+#include "elastos/droid/app/CFragmentState.h"
 
 namespace Elastos {
 namespace Droid {
@@ -33,8 +34,7 @@ ECode CFragmentManagerState::ReadFromParcel(
             AutoPtr<IFragmentState> nc;
             source->ReadInt32(&value);
             if (value != 0) {
-                assert(0);
-//                CFragmentState::New((IFragmentState**)&nc);
+                CFragmentState::New((IFragmentState**)&nc);
                 parcelable = IParcelable::Probe(nc);
                 parcelable->ReadFromParcel(source);
             }

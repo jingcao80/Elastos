@@ -493,7 +493,7 @@ ECode WirelessSettings::OnCreate(
     // mNfcEnabler = new NfcEnabler(activity, nfc, androidBeam);
 
     // mSmsApplicationPreference = (AppListPreference) FindPreference(KEY_SMS_APPLICATION);
-    // mSmsApplicationPreference->SetOnPreferenceChangeListener(this);
+    // mSmsApplicationPreference->SetOnPreferenceChangeListener(this);// writer to InnerListener after open
     // InitSmsApplicationSetting();
 
     // // Remove NSD checkbox by default
