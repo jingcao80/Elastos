@@ -561,6 +561,7 @@ ECode DayPickerView::OnConfigurationChanged(
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
     AutoPtr<ILocale> locale;
     helper->GetDefault((ILocale**)&locale);
+    mYearFormat = NULL;
     return CSimpleDateFormat::New(String("yyyy"), locale, (ISimpleDateFormat**)&mYearFormat);
 }
 

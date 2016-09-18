@@ -30,6 +30,7 @@ BroadcastFilter::BroadcastFilter(
     , mOwningUserId(userId)
     , mIsSystem(isSystem)
 {
+    assert(mReceiverList != NULL);
 }
 
 BroadcastFilter::~BroadcastFilter()
@@ -48,7 +49,9 @@ void BroadcastFilter::Dump(
 {
     // TODO
     // DumpInReceiverList(pw, new PrintWriterPrinter(pw), prefix);
-    mReceiverList->DumpLocal(pw, prefix);
+    if (mReceiverList) {
+        mReceiverList->DumpLocal(pw, prefix);
+    }
 }
 
 void BroadcastFilter::DumpBrief(
@@ -109,8 +112,10 @@ String BroadcastFilter::ToString()
     sb += mPackageName;
     sb += " requiredPermission=";
     sb += mRequiredPermission;
-    sb += " ";
-    sb += mReceiverList->ToString();
+    if (mReceiverList) {
+        sb += " ";
+        sb += mReceiverList->ToString();
+    }
     sb += "}";
     return sb.ToString();
 }

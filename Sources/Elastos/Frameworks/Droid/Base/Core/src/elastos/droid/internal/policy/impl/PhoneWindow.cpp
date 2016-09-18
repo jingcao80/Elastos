@@ -5624,12 +5624,10 @@ ECode PhoneWindow::GetSharedElementReturnTransition(
     /* [out] */ ITransition** transition)
 {
     VALIDATE_NOT_NULL(transition);
-    if (mSharedElementReturnTransition == USE_DEFAULT_TRANSITION)
-    {
+    if (mSharedElementReturnTransition == USE_DEFAULT_TRANSITION) {
         return GetSharedElementEnterTransition(transition);
     }
-    else
-    {
+    else {
         *transition = mSharedElementReturnTransition;
         REFCOUNT_ADD(*transition);
     }

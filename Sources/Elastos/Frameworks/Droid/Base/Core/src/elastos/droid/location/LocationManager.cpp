@@ -391,7 +391,6 @@ CAR_INTERFACE_IMPL(LocationManager, Object, ILocationManager)
 
 LocationManager::LocationManager()
 {
-    CGpsStatus::New((IGpsStatus**)&mGpsStatus);
 }
 
 ECode LocationManager::constructor(
@@ -400,6 +399,7 @@ ECode LocationManager::constructor(
 {
     mService = service;
     mContext = context;
+    CGpsStatus::New((IGpsStatus**)&mGpsStatus);
     CGpsMeasurementListenerTransport::New(mContext, mService, (IGpsMeasurementListenerTransport**)&mGpsMeasurementListenerTransport);
     CGpsNavigationMessageListenerTransport::New(mContext, mService, (IGpsNavigationMessageListenerTransport**)&mGpsNavigationMessageListenerTransport);
     return NOERROR;

@@ -2,7 +2,6 @@
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Utility.h"
-#include "Elastos.Droid.Animation.h"
 #include "elastos/droid/widget/Scroller.h"
 #include "elastos/droid/view/ViewConfiguration.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
@@ -11,7 +10,6 @@
 #include "elastos/droid/utility/FloatMath.h"
 #include <elastos/core/Math.h>
 
-using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Os::Build;
@@ -19,6 +17,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::View::ViewConfiguration;
 using Elastos::Droid::View::Animation::AnimationUtils;
 using Elastos::Droid::View::Animation::EIID_IInterpolator;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::FloatMath;
 
@@ -96,7 +95,8 @@ const Float Scroller::ViscousFluidInterpolator::VISCOUS_FLUID_NORMALIZE
 const Float Scroller::ViscousFluidInterpolator::VISCOUS_FLUID_OFFSET
         = 1.0f - VISCOUS_FLUID_NORMALIZE * Scroller::ViscousFluidInterpolator::ViscousFluid(1.0f);
 
-CAR_INTERFACE_IMPL(Scroller::ViscousFluidInterpolator, Object, IInterpolator);
+CAR_INTERFACE_IMPL_2(Scroller::ViscousFluidInterpolator, Object, IInterpolator, ITimeInterpolator);
+
 Float Scroller::ViscousFluidInterpolator::ViscousFluid(
     /* [in] */ Float x)
 {
@@ -122,6 +122,14 @@ ECode Scroller::ViscousFluidInterpolator::GetInterpolation(
         return NOERROR;
     }
     *interpolation = interpolated;
+    return NOERROR;
+}
+
+ECode Scroller::ViscousFluidInterpolator::HasNativeInterpolator(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
     return NOERROR;
 }
 

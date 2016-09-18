@@ -5,10 +5,12 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
+#include "Elastos.Droid.Animation.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::Animation::ITimeInterpolator;
 
 namespace Elastos {
 namespace Droid {
@@ -22,6 +24,7 @@ public:
     class ViscousFluidInterpolator
         : public Object
         , public IInterpolator
+        , public ITimeInterpolator
     {
     public:
         CAR_INTERFACE_DECL()
@@ -33,6 +36,9 @@ public:
         CARAPI GetInterpolation(
             /* [in] */ Float input,
             /* [out] */ Float* interpolation);
+
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
 
     private:
         /** Controls the viscous fluid effect (how much of it). */

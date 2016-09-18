@@ -526,6 +526,7 @@ ECode SimpleMonthView::OnConfigurationChanged(
     View::OnConfigurationChanged(newConfig);
     AutoPtr<ILocale> locale;
     newConfig->GetLocale((ILocale**)&locale);
+    mDayFormatter = NULL;
     return CSimpleDateFormat::New(String("EEEEE"), locale, (ISimpleDateFormat**)&mDayFormatter);
 }
 

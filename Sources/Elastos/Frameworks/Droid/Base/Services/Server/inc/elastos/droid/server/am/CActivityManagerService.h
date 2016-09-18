@@ -178,7 +178,6 @@ CarClass(CActivityManagerService)
     , public Object
     , public IIActivityManager
     , public IWatchdogMonitor
-    , public IBatteryCallback
     , public IBinder
 {
     friend class ActivityRecord;
@@ -1155,6 +1154,28 @@ private:
             /* [in] */ IRunnable* crashHandler,
             /* [in] */ Int32* result);
 
+    private:
+        CActivityManagerService* mHost;
+    };
+
+    class BatteryCallback
+        : public Object
+        , public IBatteryCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CActivityManagerService::BatteryCallback")
+
+        BatteryCallback(
+            /* [in] */ CActivityManagerService* host)
+            : mHost(host)
+        {}
+
+        CARAPI BatteryNeedsCpuUpdate();
+
+        CARAPI BatteryPowerChanged(
+            /* [in] */ Boolean onBattery);
     private:
         CActivityManagerService* mHost;
     };
