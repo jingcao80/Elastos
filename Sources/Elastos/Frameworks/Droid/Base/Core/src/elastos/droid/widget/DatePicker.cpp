@@ -697,24 +697,26 @@ ECode DatePicker::DatePickerSpinnerDelegate::ReorderSpinners()
     CICUUtil::AcquireSingleton((IICUUtil**)&icuHelper);
     AutoPtr<ArrayOf<Char32> > order;
     icuHelper->GetDateFormatOrder(pattern, (ArrayOf<Char32>**)&order);
-    const Int32 spinnerCount = order->GetLength();
-    for (Int32 i = 0; i < spinnerCount; i++) {
-        switch ((Int32)((*order)[i])) {
-            case 'd':
-                IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mDaySpinner));
-                SetImeOptions(mDaySpinner, spinnerCount, i);
-                break;
-            case 'M':
-                IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mMonthSpinner));
-                SetImeOptions(mMonthSpinner, spinnerCount, i);
-                break;
-            case 'y':
-                IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mYearSpinner));
-                SetImeOptions(mYearSpinner, spinnerCount, i);
-                break;
-            default:
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
-                break;
+    if (order) {
+        const Int32 spinnerCount = order->GetLength();
+        for (Int32 i = 0; i < spinnerCount; i++) {
+            switch ((Int32)((*order)[i])) {
+                case 'd':
+                    IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mDaySpinner));
+                    SetImeOptions(mDaySpinner, spinnerCount, i);
+                    break;
+                case 'M':
+                    IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mMonthSpinner));
+                    SetImeOptions(mMonthSpinner, spinnerCount, i);
+                    break;
+                case 'y':
+                    IViewGroup::Probe(mSpinners)->AddView(IView::Probe(mYearSpinner));
+                    SetImeOptions(mYearSpinner, spinnerCount, i);
+                    break;
+                default:
+                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    break;
+            }
         }
     }
     return NOERROR;

@@ -534,7 +534,8 @@ void DatePickerCalendarDelegate::SetCurrentView(
 
     switch (viewIndex) {
         case MONTH_AND_DAY_VIEW: {
-            IOnDateChangedListener::Probe(mDayPickerView)->OnDateChanged();
+            CDayPickerView* dpv = (CDayPickerView*)mDayPickerView.Get();
+            dpv->OnDateChanged();
             if (mCurrentView != viewIndex) {
                 IView::Probe(mMonthAndDayLayout)->SetSelected(TRUE);
                 IView::Probe(mHeaderYearTextView)->SetSelected(FALSE);
@@ -554,7 +555,8 @@ void DatePickerCalendarDelegate::SetCurrentView(
             break;
         }
         case YEAR_VIEW: {
-            IOnDateChangedListener::Probe(mYearPickerView)->OnDateChanged();
+            CDayPickerView* dpv = (CDayPickerView*)mDayPickerView.Get();
+            dpv->OnDateChanged();
             if (mCurrentView != viewIndex) {
                 IView::Probe(mMonthAndDayLayout)->SetSelected(FALSE);
                 IView::Probe(mHeaderYearTextView)->SetSelected(TRUE);
@@ -814,6 +816,8 @@ ECode DatePickerCalendarDelegate::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     AutoPtr<CConfiguration> cfg = (CConfiguration*)newConfig;
+    mYearFormat = NULL;
+    mDayFormat = NULL;
     CSimpleDateFormat::New(String("y"), cfg->mLocale, (ISimpleDateFormat**)&mYearFormat);
     CSimpleDateFormat::New(String("d"), cfg->mLocale, (ISimpleDateFormat**)&mDayFormat);
     return NOERROR;

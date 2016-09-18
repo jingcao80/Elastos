@@ -2460,6 +2460,22 @@ ECode CActivityManagerService::LocalService::StartIsolatedProcess(
 }
 
 //==============================================================================
+// CActivityManagerService::BatteryCallback
+//==============================================================================
+CAR_INTERFACE_IMPL(CActivityManagerService::BatteryCallback, Object, IBatteryCallback)
+
+ECode CActivityManagerService::BatteryCallback::BatteryNeedsCpuUpdate()
+{
+    return mHost->BatteryNeedsCpuUpdate();
+}
+
+ECode CActivityManagerService::BatteryCallback::BatteryPowerChanged(
+    /* [in] */ Boolean onBattery)
+{
+    return mHost->BatteryPowerChanged(onBattery);
+}
+
+//==============================================================================
 // CActivityManagerService::AppTaskImpl
 //==============================================================================
 
@@ -2825,7 +2841,8 @@ ECode CActivityManagerService::constructor(
     else {
         bstats->IsOnBattery(&mOnBattery);
     }
-    bstats->SetCallback(this);
+    AutoPtr<BatteryCallback> cb = new BatteryCallback(this);
+    bstats->SetCallback(cb);
 
     AutoPtr<IFile> file;
     ECode ec = CFile::New(systemDir, String("procstats"), (IFile**)&file);

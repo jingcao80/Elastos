@@ -1446,7 +1446,7 @@ ECode ICUUtil::GetDateFormatOrder(
         } else if ('G' == ch) {
             // Ignore the era specifier, if present.
         } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
-            // throw new IllegalArgumentException("Bad pattern character '" + ch + "' in " + pattern);
+            Logger::E(TAG, "ICUUtil: Bad pattern character %c in %s", ch, pattern.string());
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         } else if ('\'') {
             if (i < pattern.GetLength() - 1 && '\'' == pattern.GetChar(i + 1)) {
@@ -1454,7 +1454,7 @@ ECode ICUUtil::GetDateFormatOrder(
             } else {
                 i = pattern.IndexOf('\'', i + 1);
                 if (-1 == i) {
-                    // throw new IllegalArgumentException("Bad quoting in " + pattern);
+                    Logger::E(TAG, "ICUUtil: Bad quoting in  %s", ch, pattern.string());
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
                 }
                 ++i;

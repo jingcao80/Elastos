@@ -7088,8 +7088,12 @@ void CWindowManagerService::EnableScreenAfterBoot()
         // If the screen still doesn't come up after 30 seconds, give
         // up and turn it on.
         Boolean result;
-        mH->SendEmptyMessageDelayed(H::BOOT_TIMEOUT, 15 * 1000 /*30*1000*/, &result);
+#if defined(_DEBUG)
+        mH->SendEmptyMessageDelayed(H::BOOT_TIMEOUT, 2 * 60 * 1000 /*30*1000*/, &result);
         Slogger::I(TAG, "TODO set boot timeout to 30s.");
+#else
+        mH->SendEmptyMessageDelayed(H::BOOT_TIMEOUT, 30*1000, &result);
+#endif
     }
 
     mPolicy->SystemBooted();

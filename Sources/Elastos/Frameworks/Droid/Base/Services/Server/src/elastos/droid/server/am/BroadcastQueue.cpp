@@ -1149,14 +1149,8 @@ void BroadcastQueue::BroadcastTimeoutLocked(
         return;
     }
 
-    String record = r->ToString();
-    String receiver;
-    if (r->mReceiver) {
-        r->mReceiver->ToString(&receiver);
-    }
-
-    Slogger::W(TAG, "Timeout of broadcast %s - receiver=%s, started %d ms ago"
-            , record.string(), receiver.string(), (now - r->mReceiverTime));
+    Slogger::W(TAG, "Timeout of broadcast %s - receiver=%s, started %d ms ago",
+        TO_CSTR(r), TO_CSTR(r->mReceiver), (now - r->mReceiverTime));
 
     r->mReceiverTime = now;
     r->mAnrCount++;
@@ -1172,9 +1166,7 @@ void BroadcastQueue::BroadcastTimeoutLocked(
 
     AutoPtr<IInterface> curReceiver;
     r->mReceivers->Get(r->mNextReceiver - 1, (IInterface**)&curReceiver);
-    String str;
-    IObject::Probe(curReceiver)->ToString(&str);
-    Slogger::W(TAG, "Receiver during timeout: %s", str.string());
+    Slogger::W(TAG, "Receiver during timeout: %s", TO_CSTR(curReceiver));
     LogBroadcastReceiverDiscardLocked(r);
     if (IBroadcastFilter::Probe(curReceiver) != NULL) {
         AutoPtr<BroadcastFilter> bf = (BroadcastFilter*)IBroadcastFilter::Probe(curReceiver);
@@ -1192,9 +1184,7 @@ void BroadcastQueue::BroadcastTimeoutLocked(
     }
 
     if (app != NULL) {
-        String str;
-        r->mIntent->ToString(&str);
-        anrMessage.AppendFormat("Broadcast of %s", str.string());
+        anrMessage.AppendFormat("Broadcast of %s", TO_CSTR(r->mIntent));
     }
 
     if (mPendingBroadcast == r) {
@@ -1202,8 +1192,7 @@ void BroadcastQueue::BroadcastTimeoutLocked(
     }
 
     // Move on to the next receiver.
-    FinishReceiverLocked(r, r->mResultCode, r->mResultData,
-            r->mResultExtras, r->mResultAbort, TRUE);
+    FinishReceiverLocked(r, r->mResultCode, r->mResultData, r->mResultExtras, r->mResultAbort, TRUE);
     ScheduleBroadcastsLocked();
 
     if (!anrMessage.IsNull()) {
@@ -1247,38 +1236,14 @@ void BroadcastQueue::LogBroadcastReceiverDiscardLocked(
         r->mReceivers->Get(r->mNextReceiver-1, (IInterface**)&curReceiver);
         AutoPtr<BroadcastFilter> bFilter = (BroadcastFilter*)IBroadcastFilter::Probe(curReceiver);
         if (bFilter != NULL) {
-            String filter = bFilter->ToString();
-            String record = r->ToString();
-            Slogger::W(TAG, "BroadcastRecord: %s, BroadcastFilter: %s", record.string(), filter.string());
-    //         EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_FILTER,
-    //                 bf.owningUserId, System.identityHashCode(r),
-    //                 r->mIntent.getAction(),
-    //                 r->mNextReceiver - 1,
-    //                 System.identityHashCode(bf));
+            Slogger::W(TAG, "BroadcastRecord: %s, BroadcastFilter: %s", TO_CSTR(r), TO_CSTR(bFilter));
         }
         else {
-            AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(curReceiver);
-            String record = r->ToString();
-            String resolve;
-            if (ri) {
-                ri->ToString(&resolve);
-            }
-            Slogger::W(TAG, "BroadcastRecord: %s, ResolveInfo: %s", record.string(), resolve.string());
-
-    //         EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
-    //                 UserHandle.getUserId(ri.activityInfo.applicationInfo.uid),
-    //                 System.identityHashCode(r), r->mIntent.getAction(),
-    //                 r->mNextReceiver - 1, ri.toString());
+            Slogger::W(TAG, "BroadcastRecord: %s, ResolveInfo: %s", TO_CSTR(r), TO_CSTR(curReceiver));
         }
     }
     else {
-        Slogger::W(TAG, "Discarding broadcast before first receiver is invoked: %s",
-                TO_CSTR(r));
-    //     EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
-    //             -1, System.identityHashCode(r),
-    //             r->mIntent.getAction(),
-    //             r->mNextReceiver,
-    //             "NONE");
+        Slogger::W(TAG, "Discarding broadcast before first receiver is invoked: %s", TO_CSTR(r));
     }
 }
 

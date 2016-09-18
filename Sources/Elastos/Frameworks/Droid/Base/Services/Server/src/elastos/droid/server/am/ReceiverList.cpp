@@ -38,8 +38,7 @@ ReceiverList::ReceiverList(
 ReceiverList::~ReceiverList()
 {
     for (Iterator it = Begin(); it !=  End(); ++it) {
-        AutoPtr<BroadcastFilter> filter = *it;
-        filter->mReceiverList = NULL;
+        (*it)->mReceiverList = NULL;
     }
     Clear();
 }
