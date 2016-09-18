@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CPSSPARAMETERSPEC_H__
 
 #include "_Elastos_Security_Spec_CPSSParameterSpec.h"
+#include "core/Object.h"
 
 namespace Elastos {
 namespace Security {

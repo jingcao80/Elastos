@@ -1,7 +1,8 @@
 
 #include "CECParameterSpec.h"
-#include "CBigIntegerHelper.h"
+#include "elastos/math/CBigIntegerHelper.h"
 
+using Elastos::Core::IComparable;
 using Elastos::Math::IBigIntegerHelper;
 using Elastos::Math::CBigIntegerHelper;
 
@@ -66,7 +67,7 @@ ECode CECParameterSpec::constructor(
     AutoPtr<IBigInteger> zero;
     helper->GetZERO((IBigInteger**)&zero);
     Int32 result;
-    mOrder->CompareTo(zero.Get(), &result);
+    IComparable::Probe(mOrder)->CompareTo(zero.Get(), &result);
     if (result <= 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

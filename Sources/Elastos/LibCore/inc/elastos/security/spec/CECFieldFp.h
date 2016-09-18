@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CECFIELDFP_H__
 
 #include "_Elastos_Security_Spec_CECFieldFp.h"
+#include "core/Object.h"
 
 using Elastos::Math::IBigInteger;
 

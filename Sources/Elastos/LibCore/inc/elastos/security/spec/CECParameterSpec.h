@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CECPARAMETERSPEC_H__
 
 #include "_Elastos_Security_Spec_CECParameterSpec.h"
+#include "core/Object.h"
 
 using Elastos::Math::IBigInteger;
 

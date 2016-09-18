@@ -136,8 +136,10 @@ module
 
     interface Elastos.Security.IKeyStore;
     interface Elastos.Security.IPublicKey;
+    interface Elastos.Security.Interfaces.IDSAParams;
     interface Elastosx.Security.Auth.X500.IX500Principal;
     interface Elastos.Core.ICloneable;
+    interface Elastos.Math.IBigInteger;
     interface Elastos.Utility.ICollection;
     interface Elastos.Utility.IMap;
     interface Elastos.Utility.IList;
@@ -321,6 +323,242 @@ module
     }
 
     } // namespace Cert
+
+
+    namespace Spec {
+    class CDSAParameterSpec {
+        constructor(
+            [in] IBigInteger *p,
+            [in] IBigInteger *q,
+            [in] IBigInteger *g);
+
+        interface IAlgorithmParameterSpec;
+        interface IDSAParams;
+    }
+
+    class CDSAPrivateKeySpec {
+        constructor(
+            [in] IBigInteger *x,
+            [in] IBigInteger *p,
+            [in] IBigInteger *q,
+            [in] IBigInteger *g);
+
+        interface IDSAPrivateKeySpec;
+        interface IKeySpec;
+    }
+
+    class CDSAPublicKeySpec {
+        constructor(
+            [in] IBigInteger *y,
+            [in] IBigInteger *p,
+            [in] IBigInteger *q,
+            [in] IBigInteger *g);
+
+        interface IDSAPublicKeySpec;
+        interface IKeySpec;
+    }
+
+    [deprecated]
+    class CECFieldF2m {
+        constructor(
+            [in] Int32 m);
+
+        constructor(
+            [in] Int32 m,
+            [in] IBigInteger *rp);
+
+        constructor(
+            [in] Int32 m,
+            [in] ArrayOf<Int32> *ks);
+
+        interface IECFieldF2m;
+        interface IECField;
+    }
+
+    class CECFieldFp {
+        constructor(
+            [in] IBigInteger *p);
+
+        interface IECFieldFp;
+        interface IECField;
+    }
+
+    class CECGenParameterSpec {
+        constructor(
+            [in] String name);
+
+        interface IECGenParameterSpec;
+        interface IAlgorithmParameterSpec;
+    }
+
+    class CECParameterSpec {
+        constructor(
+            [in] IEllipticCurve *curve,
+            [in] IECPoint *generator,
+            [in] IBigInteger *order,
+            [in] Int32 cofactor);
+
+        interface IECParameterSpec;
+        interface IAlgorithmParameterSpec;
+    }
+
+    class CECPoint {
+        constructor();
+
+        constructor(
+            [in] IBigInteger *affineX,
+            [in] IBigInteger *affineY);
+
+        interface IECPoint;
+    }
+
+    class CECPrivateKeySpec {
+        constructor(
+            [in] IBigInteger *s,
+            [in] IECParameterSpec *params);
+
+        interface IECPrivateKeySpec;
+        interface IKeySpec;
+    }
+
+    class CECPublicKeySpec {
+        constructor(
+            [in] IECPoint *w,
+            [in] IECParameterSpec *params);
+
+        interface IECPublicKeySpec;
+        interface IKeySpec;
+    }
+
+    [deprecated]
+    class CEllipticCurve {
+        constructor(
+            [in] IECField *field,
+            [in] IBigInteger *a,
+            [in] IBigInteger *b,
+            [in] ArrayOf<Byte> *seed);
+
+        constructor(
+            [in] IECField *field,
+            [in] IBigInteger *a,
+            [in] IBigInteger *b);
+
+        interface IEllipticCurve;
+    }
+
+    class CMGF1ParameterSpec {
+       constructor(
+            [in] String mdName);
+
+        interface IMGF1ParameterSpec;
+        interface IAlgorithmParameterSpec;
+    }
+
+    [deprecated]
+    class CPKCS8EncodedKeySpec {
+        constructor(
+            [in] ArrayOf<Byte> *encodedKey);
+
+        interface IPKCS8EncodedKeySpec;
+        interface IEncodedKeySpec;
+        interface IKeySpec;
+    }
+
+    class CPSSParameterSpec {
+        constructor(
+            [in] Int32 saltLen);
+        constructor(
+            [in] String mdName,
+            [in] String mgfName,
+            [in] IAlgorithmParameterSpec *mgfSpec,
+            [in] Int32 saltLen,
+            [in] Int32 trailerField);
+
+        interface IPSSParameterSpec;
+        interface IAlgorithmParameterSpec;
+    }
+
+    class CRSAKeyGenParameterSpec {
+        constructor(
+            [in] Int32 keysize,
+            [in] IBigInteger *publicExponent);
+
+        interface IRSAKeyGenParameterSpec;
+        interface IAlgorithmParameterSpec;
+    }
+
+    [deprecated]
+    class CRSAMultiPrimePrivateCrtKeySpec {
+        constructor(
+            [in] IBigInteger *modulus,
+            [in] IBigInteger *publicExponent,
+            [in] IBigInteger *privateExponent,
+            [in] IBigInteger *primeP,
+            [in] IBigInteger *primeQ,
+            [in] IBigInteger *primeExponentP,
+            [in] IBigInteger *primeExponentQ,
+            [in] IBigInteger *crtCoefficient,
+            [in] ArrayOf<IRSAOtherPrimeInfo*> *otherPrimeInfo);
+
+        interface IRSAMultiPrimePrivateCrtKeySpec;
+        interface IRSAPrivateKeySpec;
+        interface IKeySpec;
+    }
+
+    class CRSAOtherPrimeInfo {
+        constructor(
+            [in] IBigInteger *prime,
+            [in] IBigInteger *primeExponent,
+            [in] IBigInteger *crtCoefficient);
+
+        interface IRSAOtherPrimeInfo;
+    }
+
+    class CRSAPrivateCrtKeySpec {
+        constructor(
+            [in] IBigInteger *modulus,
+            [in] IBigInteger *publicExponent,
+            [in] IBigInteger *privateExponent,
+            [in] IBigInteger *primeP,
+            [in] IBigInteger *primeQ,
+            [in] IBigInteger *primeExponentP,
+            [in] IBigInteger *primeExponentQ,
+            [in] IBigInteger *crtCoefficient);
+
+        interface IRSAPrivateCrtKeySpec;
+        interface IRSAPrivateKeySpec;
+        interface IKeySpec;
+    }
+
+    class CRSAPrivateKeySpec {
+        constructor(
+            [in] IBigInteger *modulus,
+            [in] IBigInteger *privateExponent);
+
+        interface IRSAPrivateKeySpec;
+        interface IKeySpec;
+    }
+
+    class CRSAPublicKeySpec {
+        constructor(
+            [in] IBigInteger *modulus,
+            [in] IBigInteger *publicExponent);
+
+        interface IRSAPublicKeySpec;
+        interface IKeySpec;
+    }
+
+    [deprecated]
+    class CX509EncodedKeySpec {
+        constructor(
+            [in] ArrayOf<Byte> *encodedKey);
+
+        interface IX509EncodedKeySpec;
+        interface IEncodedKeySpec;
+        interface IKeySpec;
+    }
+
+    } // namespace Spec
 
     } // namespace Security
     } // namespace Elastos

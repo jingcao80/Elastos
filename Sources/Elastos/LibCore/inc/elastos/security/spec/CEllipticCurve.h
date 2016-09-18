@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CELLIPTICCURVE_H__
 
 #include "_Elastos_Security_Spec_CEllipticCurve.h"
+#include "core/Object.h"
 
 using Elastos::Math::IBigInteger;
 
@@ -51,17 +52,17 @@ public:
 
 private:
     // Underlying finite field
-    const AutoPtr<IECField> mField;
+    AutoPtr<IECField> mField;
 
     // The first coefficient of the equation defining this elliptic curve
-    const AutoPtr<IBigInteger> mA;
+    AutoPtr<IBigInteger> mA;
 
     // The second coefficient of the equation defining this elliptic curve
-    const AutoPtr<IBigInteger> mB;
+    AutoPtr<IBigInteger> mB;
 
     // Bytes used during this elliptic curve generation,
     // if it was generated randomly
-    const AutoPtr<ArrayOf<Byte> > mSeed;
+    AutoPtr<ArrayOf<Byte> > mSeed;
 
     // Hash code
     volatile Int32 mHash;

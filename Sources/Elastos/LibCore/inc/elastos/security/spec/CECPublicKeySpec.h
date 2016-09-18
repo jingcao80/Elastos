@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CECPUBLICKEYSPEC_H__
 
 #include "_Elastos_Security_Spec_CECPublicKeySpec.h"
+#include "core/Object.h"
 
 namespace Elastos {
 namespace Security {
@@ -30,9 +31,9 @@ public:
 
 private:
     // The public point
-    const AutoPtr<IECPoint> mW;
+    AutoPtr<IECPoint> mW;
     // The associated elliptic curve domain parameters
-    const AutoPtr<IECParameterSpec> mParams;
+    AutoPtr<IECParameterSpec> mParams;
 };
 
 }

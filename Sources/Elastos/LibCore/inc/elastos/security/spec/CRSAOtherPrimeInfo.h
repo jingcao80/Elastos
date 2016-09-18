@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CRSAOTHERPRIMEINFO_H__
 
 #include "_Elastos_Security_Spec_CRSAOtherPrimeInfo.h"
+#include "EncodedKeySpec.h"
 
 using Elastos::Math::IBigInteger;
 

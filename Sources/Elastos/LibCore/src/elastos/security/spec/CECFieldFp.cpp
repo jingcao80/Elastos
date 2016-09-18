@@ -41,7 +41,7 @@ ECode CECFieldFp::Equals(
 ECode CECFieldFp::GetHashCode(
     /* [out] */ Int32 *hashCode)
 {
-    return mP->GetHashCode(hashCode);
+    return IObject::Probe(mP)->GetHashCode(hashCode);
 }
 
 ECode CECFieldFp::constructor(

@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CECPRIVATEKEYSPEC_H__
 
 #include "_Elastos_Security_Spec_CECPrivateKeySpec.h"
+#include "core/Object.h"
 
 using Elastos::Math::IBigInteger;
 
@@ -32,9 +33,9 @@ public:
 
 private:
     // Private value associated with this key
-    const AutoPtr<IBigInteger> mS;
+    AutoPtr<IBigInteger> mS;
     // Elliptic Curve domain parameters associated with this key
-    const AutoPtr<IECParameterSpec> mParams;
+    AutoPtr<IECParameterSpec> mParams;
 };
 
 }

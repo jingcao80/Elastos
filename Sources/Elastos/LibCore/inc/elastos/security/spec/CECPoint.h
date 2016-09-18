@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CECPOINT_H__
 
 #include "_Elastos_Security_Spec_CECPoint.h"
+#include "core/Object.h"
 
 using Elastos::Math::IBigInteger;
 
@@ -47,9 +48,9 @@ public:
 
 private:
     // affine X coordinate of this point
-    const AutoPtr<IBigInteger> mAffineX;
+    AutoPtr<IBigInteger> mAffineX;
     // affine Y coordinate of this point
-    const AutoPtr<IBigInteger> mAffineY;
+    AutoPtr<IBigInteger> mAffineY;
 };
 
 }

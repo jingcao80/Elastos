@@ -20,4 +20,6 @@ module
     const E_CERTIFICATENOTYETVALID_EXCEPTION                = 0xAC0A0000;
     const E_CERTIFICATEPARSING_EXCEPTION                    = 0xAC0B0000;
     const E_CERTIFICATEREVOKED_EXCEPTION                    = 0xAC0C0000;
+    const E_INVALIDKEYSPEC_EXCEPTION                        = 0xAC0D0000;
+    const E_INVALIDPARAMETERSPEC_EXCEPTION                  = 0xAC0E0000;
 }

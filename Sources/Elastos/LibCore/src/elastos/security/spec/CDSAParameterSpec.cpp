@@ -1,5 +1,7 @@
 
-#include "CDSAParameterSpec.h"
+#include "security/spec/CDSAParameterSpec.h"
+
+using Elastos::Security::Interfaces::EIID_IDSAParams;
 
 namespace Elastos {
 namespace Security {
