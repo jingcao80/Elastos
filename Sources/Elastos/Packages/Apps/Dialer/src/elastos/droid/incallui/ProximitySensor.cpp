@@ -35,14 +35,14 @@ ProximitySensor::ProximitySensor(
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
     mPowerManager = IPowerManager::Probe(service);
-    mAccelerometerListener = new AccelerometerListener(context, IOrientationListener::Probe(this));
+    mAccelerometerListener = new AccelerometerListener(context, this);
     mAudioModeProvider = audioModeProvider;
-    mAudioModeProvider->AddListener(IAudioModeListener::Probe(this));
+    mAudioModeProvider->AddListener(this);
 }
 
 void ProximitySensor::TearDown()
 {
-    mAudioModeProvider->RemoveListener(IAudioModeListener::Probe(this));
+    mAudioModeProvider->RemoveListener(this);
 
     mAccelerometerListener->Enable(FALSE);
 

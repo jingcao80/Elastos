@@ -66,8 +66,8 @@ ECode CPinnedHeaderListView::constructor(
     /* [in] */ Int32 defStyle)
 {
     FAIL_RETURN(AutoScrollListView::constructor(context, attrs, defStyle))
-    AutoScrollListView::SetOnScrollListener(IAbsListViewOnScrollListener::Probe(this));
-    AutoScrollListView::SetOnItemSelectedListener(IAdapterViewOnItemSelectedListener::Probe(this));
+    AutoScrollListView::SetOnScrollListener(this);
+    AutoScrollListView::SetOnItemSelectedListener(this);
     return NOERROR;
 }
 
@@ -97,14 +97,14 @@ ECode CPinnedHeaderListView::SetOnScrollListener(
     /* [in] */ IAbsListViewOnScrollListener* onScrollListener)
 {
     mOnScrollListener = onScrollListener;
-    return AutoScrollListView::SetOnScrollListener(IAbsListViewOnScrollListener::Probe(this));
+    return AutoScrollListView::SetOnScrollListener(this);
 }
 
 ECode CPinnedHeaderListView::SetOnItemSelectedListener(
     /* [in] */ IAdapterViewOnItemSelectedListener* listener)
 {
     mOnItemSelectedListener = listener;
-    return AutoScrollListView::SetOnItemSelectedListener(IAdapterViewOnItemSelectedListener::Probe(this));
+    return AutoScrollListView::SetOnItemSelectedListener(this);
 }
 
 ECode CPinnedHeaderListView::SetScrollToSectionOnHeaderTouch(

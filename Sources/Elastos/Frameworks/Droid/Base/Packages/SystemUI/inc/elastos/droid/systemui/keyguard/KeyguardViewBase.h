@@ -32,9 +32,44 @@ namespace Keyguard {
 class KeyguardViewBase
     : public FrameLayout
     , public IKeyguardViewBase
-    , public IKeyguardSecurityContainerSecurityCallback
 {
 private:
+    class InnerCallback
+        : public Object
+        , public IKeyguardSecurityContainerSecurityCallback
+    {
+    public:
+        TO_STRING_IMPL("KeyguardViewBase::InnerCallback")
+
+        CAR_INTERFACE_DECL()
+
+        InnerCallback(
+            /* [in] */ KeyguardViewBase* host);
+
+        //@Override
+        CARAPI Dismiss(
+            /* [in] */ Boolean authenticated,
+            /* [out] */ Boolean* result);
+
+        /**
+         * Authentication has happened and it's time to dismiss keyguard. This function
+         * should clean up and inform KeyguardViewMediator.
+         */
+        //@Override
+        CARAPI Finish();
+
+        //@Override
+        CARAPI OnSecurityModeChanged(
+            /* [in] */ SecurityMode securityMode,
+            /* [in] */ Boolean needsInput);
+
+        CARAPI UserActivity();
+
+    private:
+        KeyguardViewBase* mHost;
+
+    };
+
     class MyKeyguardActivityLauncher
         : public KeyguardActivityLauncher
     {
@@ -104,7 +139,7 @@ public:
         /* [out] */ Boolean* result);
 
     //@Override
-    CARAPI Dismiss(
+    virtual CARAPI Dismiss(
         /* [in] */ Boolean authenticated,
         /* [out] */ Boolean* result);
 
@@ -113,14 +148,14 @@ public:
      * should clean up and inform KeyguardViewMediator.
      */
     //@Override
-    CARAPI Finish();
+    virtual CARAPI Finish();
 
     //@Override
-    CARAPI OnSecurityModeChanged(
+    virtual CARAPI OnSecurityModeChanged(
         /* [in] */ SecurityMode securityMode,
         /* [in] */ Boolean needsInput);
 
-    CARAPI UserActivity();
+    virtual CARAPI UserActivity();
 
     /**
      * Called when the Keyguard is not actively shown anymore on the screen.

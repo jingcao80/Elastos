@@ -205,7 +205,7 @@ ECode CAccountFilterActivity::OnCreate(
 
     AutoPtr<IView> temp = FindViewById(Elastos::Droid::R::id::list);
     mListView = IListView::Probe(temp);
-    IAdapterView::Probe(mListView)->SetOnItemClickListener(IAdapterViewOnItemClickListener::Probe(this));
+    IAdapterView::Probe(mListView)->SetOnItemClickListener(this);
 
     AutoPtr<IActionBar> actionBar;
     GetActionBar((IActionBar**)&actionBar);

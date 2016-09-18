@@ -157,8 +157,7 @@ void ContactsPreferences::RegisterChangeListener(
     mDisplayOrder = -1;
     mSortOrder = -1;
 
-    mPreferences->RegisterOnSharedPreferenceChangeListener(
-            ISharedPreferencesOnSharedPreferenceChangeListener::Probe(this));
+    mPreferences->RegisterOnSharedPreferenceChangeListener(this);
 }
 
 void ContactsPreferences::UnregisterChangeListener()
@@ -167,8 +166,7 @@ void ContactsPreferences::UnregisterChangeListener()
         mListener = NULL;
     }
 
-    mPreferences->UnregisterOnSharedPreferenceChangeListener(
-            ISharedPreferencesOnSharedPreferenceChangeListener::Probe(this));
+    mPreferences->UnregisterOnSharedPreferenceChangeListener(this);
 }
 
 ECode ContactsPreferences::OnSharedPreferenceChanged(

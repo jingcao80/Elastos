@@ -976,10 +976,10 @@ ECode ContactEntryListFragment::OnCreateView(
         adapterV->SetEmptyView(emptyView);
     }
 
-    adapterV->SetOnItemClickListener(IAdapterViewOnItemClickListener::Probe(this));
+    adapterV->SetOnItemClickListener(this);
     AutoPtr<IView> v = IView::Probe(mListView);
-    v->SetOnFocusChangeListener(IViewOnFocusChangeListener::Probe(this));
-    v->SetOnTouchListener(IViewOnTouchListener::Probe(this));
+    v->SetOnFocusChangeListener(this);
+    v->SetOnTouchListener(this);
     Boolean isSearchMode;
     IsSearchMode(&isSearchMode);
     IAbsListView::Probe(mListView)->SetFastScrollEnabled(!isSearchMode);
@@ -1030,7 +1030,7 @@ void ContactEntryListFragment::ConfigurePhotoLoader()
         //     mPhotoManager = ContactPhotoManager::GetInstance(mContext);
         // }
         if (mListView != NULL) {
-            IAbsListView::Probe(mListView)->SetOnScrollListener(IAbsListViewOnScrollListener::Probe(this));
+            IAbsListView::Probe(mListView)->SetOnScrollListener(this);
         }
         if (mAdapter != NULL) {
             // TODO: no ContactPhotoManager

@@ -178,7 +178,7 @@ ECode ActionBarContainer::SetPrimaryBackground(
     }
     mBackground = bg;
     if (bg != NULL) {
-        bg->SetCallback((IDrawableCallback*)this);
+        bg->SetCallback(this);
         if (mActionBarView != NULL) {
             Int32 left = 0, top = 0, right = 0, bottom = 0;
             mActionBarView->GetLeft(&left);
@@ -203,7 +203,7 @@ ECode ActionBarContainer::SetStackedBackground(
     }
     mStackedBackground = bg;
     if (bg != NULL) {
-        bg->SetCallback((IDrawableCallback*)this);
+        bg->SetCallback(this);
         if (mIsStacked && mStackedBackground != NULL) {
             Int32 left = 0, top = 0, right = 0, bottom = 0;
             mTabContainer->GetLeft(&left);
@@ -228,7 +228,7 @@ ECode ActionBarContainer::SetSplitBackground(
     }
     mSplitBackground = bg;
     if (bg != NULL) {
-        bg->SetCallback((IDrawableCallback*)this);
+        bg->SetCallback(this);
         if (mIsSplit && mSplitBackground != NULL) {
             Int32 measureWidth = 0, measureHeight = 0;
             GetMeasuredWidth(&measureWidth);

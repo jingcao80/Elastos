@@ -22,7 +22,7 @@ ECode DialpadPresenter::OnUiReady(
 {
     FAIL_RETURN(Presenter::OnUiReady(ui));
     // register for call state changes last
-    InCallPresenter::GetInstance()->AddListener(IInCallStateListener::Probe(this));
+    InCallPresenter::GetInstance()->AddListener(this);
     mCall = CallList::GetInstance()->GetOutgoingOrActive();
     return NOERROR;
 }
@@ -31,7 +31,7 @@ ECode DialpadPresenter::OnUiUnready(
     /* [in] */ IUi* ui)
 {
     FAIL_RETURN(Presenter::OnUiUnready(ui));
-    InCallPresenter::GetInstance()->RemoveListener(IInCallStateListener::Probe(this));
+    InCallPresenter::GetInstance()->RemoveListener(this);
     return NOERROR;
 }
 

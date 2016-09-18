@@ -89,7 +89,7 @@ ECode CNotificationBackgroundView::SetCustomBackground(
     }
     mBackground = background;
     if (mBackground != NULL) {
-        mBackground->SetCallback(this);//TODO ref-circle
+        mBackground->SetCallback(this);
     }
     Invalidate();
     return NOERROR;

@@ -114,7 +114,7 @@ void CProximitySensorManager::ProximitySensorEventListener::Register()
         AutoLock syncLock(this);
         // It is okay to register multiple times.
         Boolean supported;
-        mSensorManager->RegisterListener(ISensorListener::Probe(this),
+        mSensorManager->RegisterListener(this,
                 mProximitySensor, ISensorManager::SENSOR_DELAY_UI, &supported);
         // We should no longer be waiting for the far state if we are registering again.
         mWaitingForFarState = FALSE;
@@ -140,7 +140,7 @@ void CProximitySensorManager::ProximitySensorEventListener::Unregister()
 
 void CProximitySensorManager::ProximitySensorEventListener::UnregisterWithoutNotification()
 {
-    mSensorManager->UnregisterListener(ISensorListener::Probe(this));
+    mSensorManager->UnregisterListener(this);
     mWaitingForFarState = FALSE;
 }
 

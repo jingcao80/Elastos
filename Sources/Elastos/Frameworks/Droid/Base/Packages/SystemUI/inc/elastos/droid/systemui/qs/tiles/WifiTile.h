@@ -46,8 +46,30 @@ private:
         : public Object
         , public IQSTileDetailAdapter
         , public INetworkControllerAccessPointCallback
-        , public IQSDetailItemsCallback
     {
+    private:
+        class InnerCallback
+            : public Object
+            , public IQSDetailItemsCallback
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            InnerCallback(
+                /* [in] */ WifiDetailAdapter* host);
+
+            // @Override
+            CARAPI OnDetailItemClick(
+                /* [in] */ IQSDetailItemsItem* item);
+
+            // @Override
+            CARAPI OnDetailItemDisconnect(
+                /* [in] */ IQSDetailItemsItem* item);
+
+        private:
+            WifiDetailAdapter* mHost;
+        };
+
     public:
         CAR_INTERFACE_DECL()
 

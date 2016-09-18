@@ -47,6 +47,28 @@ ECode CastTile::Callback::OnKeyguardChanged()
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CastTile::CastDetailAdapter::QSDetailItemsCallback,
+    Object, IQSDetailItemsCallback)
+
+CastTile::CastDetailAdapter::QSDetailItemsCallback::QSDetailItemsCallback(
+    /* [in] */ CastDetailAdapter* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode CastTile::CastDetailAdapter::QSDetailItemsCallback::OnDetailItemClick(
+    /* [in] */ IQSDetailItemsItem* item)
+{
+    return mHost->OnDetailItemClick(item);
+}
+
+// @Override
+ECode CastTile::CastDetailAdapter::QSDetailItemsCallback::OnDetailItemDisconnect(
+    /* [in] */ IQSDetailItemsItem* item)
+{
+    return mHost->OnDetailItemDisconnect(item);
+}
+
 CAR_INTERFACE_IMPL(CastTile::CastDetailAdapter::MyListener, Object, IViewOnAttachStateChangeListener)
 
 CastTile::CastDetailAdapter::MyListener::MyListener(
@@ -69,7 +91,7 @@ ECode CastTile::CastDetailAdapter::MyListener::OnViewDetachedFromWindow(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL_2(CastTile::CastDetailAdapter, Object, IQSTileDetailAdapter, IQSDetailItemsCallback);
+CAR_INTERFACE_IMPL(CastTile::CastDetailAdapter, Object, IQSTileDetailAdapter);
 
 CastTile::CastDetailAdapter::CastDetailAdapter(
     /* [in] */ CastTile* host)
@@ -126,7 +148,9 @@ ECode CastTile::CastDetailAdapter::CreateDetailView(
     }
     mItems->SetEmptyState(R::drawable::ic_qs_cast_detail_empty,
             R::string::quick_settings_cast_detail_empty_text);
-    mItems->SetCallback(this);
+
+    AutoPtr<QSDetailItemsCallback> cb = new QSDetailItemsCallback(this);
+    mItems->SetCallback(cb);
     AutoPtr<ISet> devices;
     mHost->mController->GetCastDevices((ISet**)&devices);
     UpdateItems(devices);

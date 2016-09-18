@@ -58,6 +58,28 @@ private:
         , public IQSDetailItemsCallback
     {
     private:
+        class QSDetailItemsCallback
+            : public Object
+            , public IQSDetailItemsCallback
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            QSDetailItemsCallback(
+                /* [in] */ CastDetailAdapter* host);
+
+            // @Override
+            CARAPI OnDetailItemClick(
+                /* [in] */ IQSDetailItemsItem* item);
+
+            // @Override
+            CARAPI OnDetailItemDisconnect(
+                /* [in] */ IQSDetailItemsItem* item);
+
+        private:
+            CastDetailAdapter* mHost;
+        };
+
         class MyListener
             : public Object
             , public IViewOnAttachStateChangeListener

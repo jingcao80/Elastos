@@ -149,6 +149,25 @@ ECode ContactInfoCache::PhoneNumberServiceListener::OnImageFetchComplete(
     return mHost->OnImageLoadComplete(TOKEN_UPDATE_PHOTO_FOR_CALL_STATE, NULL, bitmap, cs);
 }
 
+//================================================================
+// ContactInfoCache::ImageLoadCompleteListener
+//================================================================
+
+CAR_INTERFACE_IMPL(ContactInfoCache::ImageLoadCompleteListener, Object, IOnImageLoadCompleteListener);
+
+ContactInfoCache::ImageLoadCompleteListener::ImageLoadCompleteListener(
+    /* [in] */ ContactInfoCache* host)
+    : mHost(host)
+{}
+
+ECode ContactInfoCache::ImageLoadCompleteListener::OnImageLoadComplete(
+    /* [in] */ Int32 token,
+    /* [in] */ IDrawable* photo,
+    /* [in] */ IBitmap* photoIcon,
+    /* [in] */ IInterface* cookie)
+{
+    return mHost->OnImageLoadComplete(token, photo, photoIcon, cookie);
+}
 
 //================================================================
 // ContactInfoCache::ContactCacheEntry
@@ -323,19 +342,18 @@ void ContactInfoCache::FindInfoQueryComplete(
         if (!callerInfo->mContactExists && mPhoneNumberService != NULL) {
             Logger::D(TAG, "Contact lookup. Local contacts miss, checking remote");
             AutoPtr<PhoneNumberServiceListener> listener = new PhoneNumberServiceListener(callId, this);
-            mPhoneNumberService->GetPhoneNumberInfo(cacheEntry->mNumber,
-                    INumberLookupListener::Probe(listener), IImageLookupListener::Probe(listener),
-                    isIncoming);
+            mPhoneNumberService->GetPhoneNumberInfo(cacheEntry->mNumber, listener, listener, isIncoming);
         }
         else if (cacheEntry->mDisplayPhotoUri != NULL) {
             Logger::D(TAG, "Contact lookup. Local contact found, starting image load");
             // Load the image with a callback to update the image state.
             // When the load is finished, onImageLoadComplete() will be called.
+            AutoPtr<ImageLoadCompleteListener> listener = new ImageLoadCompleteListener(this);
             AutoPtr<ICharSequence> cs;
             CString::New(callId, (ICharSequence**)&cs);
             ContactsAsyncHelper::StartObtainPhotoAsync(
-                    TOKEN_UPDATE_PHOTO_FOR_CALL_STATE, mContext, cacheEntry->mDisplayPhotoUri,
-                    IOnImageLoadCompleteListener::Probe(this), cs);
+                TOKEN_UPDATE_PHOTO_FOR_CALL_STATE, mContext, cacheEntry->mDisplayPhotoUri,
+                listener, cs);
         }
         else {
             if (callerInfo->mContactExists) {

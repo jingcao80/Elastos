@@ -797,10 +797,10 @@ ECode CCustomContactListFilterActivity::OnCreate(
     AutoPtr<ILayoutInflater> inflater;
     GetLayoutInflater((ILayoutInflater**)&inflater);
 
-    FindViewById(Elastos::Droid::Dialer::R::id::btn_done)->SetOnClickListener(IViewOnClickListener::Probe(this));
-    FindViewById(Elastos::Droid::Dialer::R::id::btn_discard)->SetOnClickListener(IViewOnClickListener::Probe(this));
+    FindViewById(Elastos::Droid::Dialer::R::id::btn_done)->SetOnClickListener(this);
+    FindViewById(Elastos::Droid::Dialer::R::id::btn_discard)->SetOnClickListener(this);
 
-    IView::Probe(mList)->SetOnCreateContextMenuListener(IViewOnCreateContextMenuListener::Probe(this));
+    IView::Probe(mList)->SetOnCreateContextMenuListener(this);
 
     mList->SetAdapter(mAdapter);
 

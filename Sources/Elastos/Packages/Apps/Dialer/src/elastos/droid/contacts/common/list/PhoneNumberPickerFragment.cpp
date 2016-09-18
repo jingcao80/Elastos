@@ -329,7 +329,7 @@ void PhoneNumberPickerFragment::StartPhoneNumberShortcutIntent(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     AutoPtr<ShortcutIntentBuilder> builder
-            = new ShortcutIntentBuilder(IContext::Probe(activity), IOnShortcutIntentCreatedListener::Probe(this));
+            = new ShortcutIntentBuilder(IContext::Probe(activity), this);
     builder->CreatePhoneNumberShortcutIntent(uri, mShortcutAction);
 }
 

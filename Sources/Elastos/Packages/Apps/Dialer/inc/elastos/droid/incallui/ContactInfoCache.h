@@ -109,6 +109,25 @@ private:
         ContactInfoCache* mHost;
     };
 
+    class ImageLoadCompleteListener
+        : public Object
+        , public IOnImageLoadCompleteListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ImageLoadCompleteListener(
+            /* [in] */ ContactInfoCache* host);
+
+        CARAPI OnImageLoadComplete(
+            /* [in] */ Int32 token,
+            /* [in] */ IDrawable* photo,
+            /* [in] */ IBitmap* photoIcon,
+            /* [in] */ IInterface* cookie);
+
+    private:
+        ContactInfoCache* mHost;
+    };
 public:
     static CARAPI_(AutoPtr<ContactInfoCache>) GetInstance(
         /* [in] */ IContext* mContext);
@@ -138,7 +157,7 @@ public:
      * make sure that the call state is reflected after the image is loaded.
      */
     // @Override
-    CARAPI OnImageLoadComplete(
+    virtual CARAPI OnImageLoadComplete(
         /* [in] */ Int32 token,
         /* [in] */ IDrawable* photo,
         /* [in] */ IBitmap* photoIcon,

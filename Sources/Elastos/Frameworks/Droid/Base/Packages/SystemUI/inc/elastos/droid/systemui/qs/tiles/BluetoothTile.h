@@ -23,14 +23,14 @@ namespace Tiles {
 class BluetoothTile: public QSTile
 {
 private:
-    class Callback
+    class InnerCallback
         : public Object
         , public IBluetoothControllerCallback
     {
     public:
         CAR_INTERFACE_DECL()
 
-        Callback(
+        InnerCallback(
             /* [in] */ BluetoothTile* host);
 
         // @Override
@@ -48,12 +48,34 @@ private:
     class BluetoothDetailAdapter
         : public Object
         , public IQSTileDetailAdapter
-        , public IQSDetailItemsCallback
     {
+    private:
+        class QSDetailItemsCallback
+            : public Object
+            , public IQSDetailItemsCallback
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            QSDetailItemsCallback(
+                /* [in] */ BluetoothDetailAdapter* host);
+
+            // @Override
+            CARAPI OnDetailItemClick(
+                /* [in] */ IQSDetailItemsItem* item);
+
+            // @Override
+            CARAPI OnDetailItemDisconnect(
+                /* [in] */ IQSDetailItemsItem* item);
+
+        private:
+            BluetoothDetailAdapter* mHost;
+        };
+
     public:
         CAR_INTERFACE_DECL()
 
-        BluetoothDetailAdapter(
+        CARAPI constructor(
             /* [in] */ BluetoothTile* host);
 
         // @Override
@@ -83,11 +105,11 @@ private:
             /* [in] */ Boolean visible);
 
         // @Override
-        CARAPI OnDetailItemClick(
+        virtual CARAPI OnDetailItemClick(
             /* [in] */ IQSDetailItemsItem* item);
 
         // @Override
-        CARAPI OnDetailItemDisconnect(
+        virtual CARAPI OnDetailItemDisconnect(
             /* [in] */ IQSDetailItemsItem* item);
 
         CARAPI_(void) UpdateItems();
@@ -111,7 +133,7 @@ private:
     };
 
 public:
-    BluetoothTile(
+    CARAPI constructor(
         /* [in] */ IQSTileHost* host);
 
     // @Override

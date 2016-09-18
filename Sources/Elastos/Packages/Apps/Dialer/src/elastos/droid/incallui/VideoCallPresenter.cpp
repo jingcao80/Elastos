@@ -101,9 +101,9 @@ ECode VideoCallPresenter::OnUiReady(
     FAIL_RETURN(Presenter::OnUiReady(ui))
 
     // Register for call state changes last
-    InCallPresenter::GetInstance()->AddListener(IInCallStateListener::Probe(this));
-    InCallPresenter::GetInstance()->AddIncomingCallListener(IIncomingCallListener::Probe(this));
-    InCallPresenter::GetInstance()->AddOrientationListener(IInCallOrientationListener::Probe(this));
+    InCallPresenter::GetInstance()->AddListener(this);
+    InCallPresenter::GetInstance()->AddIncomingCallListener(this);
+    InCallPresenter::GetInstance()->AddOrientationListener(this);
 
     // Register for surface and video events from {@link InCallVideoCallListener}s.
     InCallVideoCallListenerNotifier::GetInstance()->AddSurfaceChangeListener(this);

@@ -283,13 +283,7 @@ ECode CMusicService::OnCreate()
         return NOERROR;
     }
 
-    AutoPtr<IMediaPlayerOnCompletionListener> completionListener = IMediaPlayerOnCompletionListener::Probe(this);
-    if (NULL == completionListener) {
-        Logger::E("CMusicService", "Failed probe IMediaPlayerOnCompletionListener");
-        return E_RUNTIME_EXCEPTION;
-    }
-    mMediaPlayer->SetOnCompletionListener(completionListener);
-
+    mMediaPlayer->SetOnCompletionListener(this);// memory leak
     mRunnable = new RefreshRunnable(this);
     CThread::New(mRunnable, (IThread**)&mThread);
     mThread->Start();
