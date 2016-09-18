@@ -273,8 +273,9 @@ ECode Index::UpdateIndexTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
+    // TODO:
+    return NOERROR;
     VALIDATE_NOT_NULL(result);
-
     AutoPtr<UpdateData> updateData = (UpdateData*)IObject::Probe((*params)[0]);
     AutoPtr<IList> dataToUpdate = updateData->mDataToUpdate;
     AutoPtr<IList> dataToDelete = updateData->mDataToUpdate;
