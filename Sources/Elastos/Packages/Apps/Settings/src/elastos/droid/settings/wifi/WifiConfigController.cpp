@@ -107,7 +107,7 @@ const Int32 WifiConfigController::unspecifiedCertIndex = 0;
 //                  WifiConfigController::InnerListener
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(WifiConfigController::InnerListener, Object, ITextWatcher, IAdapterViewOnItemSelectedListener)
+CAR_INTERFACE_IMPL_3(WifiConfigController::InnerListener, Object, ITextWatcher, IAdapterViewOnItemSelectedListener, ICompoundButtonOnCheckedChangeListener)
 
 WifiConfigController::InnerListener::InnerListener(
     /* [in] */ WifiConfigController* host)
@@ -153,6 +153,13 @@ ECode WifiConfigController::InnerListener::OnNothingSelected(
     return mHost->OnNothingSelected(parent);
 }
 
+ECode WifiConfigController::InnerListener::OnCheckedChanged(
+    /* [in] */ ICompoundButton* view,
+    /* [in] */ Boolean isChecked)
+{
+    return mHost->OnCheckedChanged(view, isChecked);
+}
+
 //===============================================================================
 //                  WifiConfigController::AfterTextChangedRunnable
 //===============================================================================
@@ -175,7 +182,7 @@ ECode WifiConfigController::AfterTextChangedRunnable::Run()
 //                  WifiConfigController
 //===============================================================================
 
-CAR_INTERFACE_IMPL_3(WifiConfigController, Object, IWifiConfigController, INoCopySpan, ICompoundButtonOnCheckedChangeListener);
+CAR_INTERFACE_IMPL_2(WifiConfigController, Object, IWifiConfigController, INoCopySpan);
 
 WifiConfigController::WifiConfigController(
     /* [in] */ IWifiConfigUiBase* parent,
@@ -286,7 +293,7 @@ WifiConfigController::WifiConfigController(
         view->SetVisibility(IView::VISIBLE);
         view = NULL;
         mView->FindViewById(R::id::wifi_advanced_togglebox, (IView**)&view);
-        ICompoundButton::Probe(view)->SetOnCheckedChangeListener(this);
+        ICompoundButton::Probe(view)->SetOnCheckedChangeListener(mListener);
 
         String str;
         res->GetString(R::string::wifi_save, &str);
@@ -350,7 +357,7 @@ WifiConfigController::WifiConfigController(
             view->SetVisibility(IView::VISIBLE);
             view = NULL;
             mView->FindViewById(R::id::wifi_advanced_togglebox, (IView**)&view);
-            ICompoundButton::Probe(view)->SetOnCheckedChangeListener(this);
+            ICompoundButton::Probe(view)->SetOnCheckedChangeListener(mListener);
 
             if (showAdvancedFields) {
                 view = NULL;
@@ -930,7 +937,7 @@ void WifiConfigController::ShowSecurityFields()
         mPasswordView->AddTextChangedListener(mListener);
         view = NULL;
         mView->FindViewById(R::id::show_password, (IView**)&view);
-        ICompoundButton::Probe(view)->SetOnCheckedChangeListener(this);
+        ICompoundButton::Probe(view)->SetOnCheckedChangeListener(mListener);
 
         if (mAccessPoint != NULL && ((CAccessPoint*)mAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
             mPasswordView->SetHint(R::string::wifi_unchanged);

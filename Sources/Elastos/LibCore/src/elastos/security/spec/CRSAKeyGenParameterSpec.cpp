@@ -1,6 +1,6 @@
 
 #include "CRSAKeyGenParameterSpec.h"
-#include "CBigInteger.h"
+#include "elastos/math/CBigInteger.h"
 
 using Elastos::Math::CBigInteger;
 

@@ -5,29 +5,19 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-const AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::SHA1 = CMGF1ParameterSpec::InitStatic();
+const AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::SHA1 = CMGF1ParameterSpec::InitStatic(String("SHA-1"));
 
-const AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::SHA256;
+const AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::SHA256 = CMGF1ParameterSpec::InitStatic(String("SHA-256"));
 
-const AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::SHA384;
+const AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::SHA384 = CMGF1ParameterSpec::InitStatic(String("SHA-384"));
 
-const AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::SHA512;
+const AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::SHA512 = CMGF1ParameterSpec::InitStatic(String("SHA-512"));
 
-AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::InitStatic()
+AutoPtr<IMGF1ParameterSpec> CMGF1ParameterSpec::InitStatic(
+    /* [in] */ const String& type)
 {
     AutoPtr<CMGF1ParameterSpec> tmp, obj;
-    CMGF1ParameterSpec::NewByFriend(String("SHA-1"), (CMGF1ParameterSpec**)&tmp);
-
-    CMGF1ParameterSpec::NewByFriend(String("SHA-256"), (CMGF1ParameterSpec**)&obj);
-    SHA256 = (IMGF1ParameterSpec*)obj.Get();
-
-    obj = NULL;
-    CMGF1ParameterSpec::NewByFriend(String("SHA-384"), (CMGF1ParameterSpec**)&obj);
-    SHA384 = (IMGF1ParameterSpec*)obj.Get();
-
-    obj = NULL;
-    CMGF1ParameterSpec::NewByFriend(String("SHA-512"), (CMGF1ParameterSpec**)&obj);
-    SHA512 = (IMGF1ParameterSpec*)obj.Get();
+    CMGF1ParameterSpec::NewByFriend(type, (CMGF1ParameterSpec**)&tmp);
     return tmp;
 }
 

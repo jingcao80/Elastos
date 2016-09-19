@@ -7,6 +7,12 @@ namespace Spec {
 
 CAR_OBJECT_IMPL(CX509EncodedKeySpec)
 CAR_INTERFACE_IMPL(CX509EncodedKeySpec, EncodedKeySpec, IX509EncodedKeySpec)
+ECode CX509EncodedKeySpec::GetEncoded(
+    /* [out, callee] */ ArrayOf<Byte> **encoded)
+{
+    return EncodedKeySpec::GetEncoded(encoded);
+}
+
 ECode CX509EncodedKeySpec::GetFormat(
     /* [out] */ String *format)
 {

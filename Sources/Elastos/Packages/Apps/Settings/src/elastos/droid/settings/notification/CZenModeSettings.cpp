@@ -6,6 +6,7 @@
 #include "elastos/droid/settings/notification/CZenModeSettingsTimePickerPreference.h"
 #include "elastos/droid/settings/notification/CZenModeSettingsDowntimeDaysSelection.h"
 #include "elastos/droid/settings/notification/CConditionProviderSettings.h"
+#include "elastos/droid/settings/notification/CZenModeAutomaticConditionSelection.h"
 #include "elastos/droid/settings/search/SearchIndexableRaw.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -25,6 +26,8 @@ using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::App::CTimePickerDialog;
 using Elastos::Droid::App::EIID_ITimePickerDialogOnTimeSetListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Preference::IPreferenceScreen;
@@ -750,8 +753,7 @@ ECode CZenModeSettings::OnCreateOnPreferenceClickListener::OnPreferenceClick(
             CAlertDialogBuilder::New(mHost->mContext, (IAlertDialogBuilder**)&builder);
             builder->SetTitle(R::string::zen_mode_entry_conditions_title);
             AutoPtr<IView> selection;
-            assert(0 && "TODO");
-            // CZenModeAutomaticConditionSelection::New(mHost->mContext, (IView**)&selection);
+            CZenModeAutomaticConditionSelection::New(mHost->mContext, (IView**)&selection);
             builder->SetView(selection);
             AutoPtr<OnCreateOnDismissListener> listener = new OnCreateOnDismissListener(mHost , 1);
             builder->SetOnDismissListener(listener);
@@ -790,6 +792,62 @@ ECode CZenModeSettings::OnCreateOnDismissListener::OnDismiss(
             mHost->RefreshAutomationSection();
             break;
     }
+    return NOERROR;
+}
+
+//===============================================================================
+//                  CZenModeSettings::ShowConditionSelectionOnClickListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(CZenModeSettings::ShowConditionSelectionOnClickListener, Object, IDialogInterfaceOnClickListener)
+
+CZenModeSettings::ShowConditionSelectionOnClickListener::ShowConditionSelectionOnClickListener(
+    /* [in] */ CZenModeSettings* host,
+    /* [in] */ Int32 id,
+    /* [in] */ CZenModeConditionSelection* zmcs,
+    /* [in] */ Int32 value)
+    : mHost(host)
+    , mId(id)
+    , mZmcs(zmcs)
+    , mValue(value)
+{}
+
+ECode CZenModeSettings::ShowConditionSelectionOnClickListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    switch (mId) {
+        case 0: {
+            mZmcs->ConfirmCondition();
+            mHost->mDialog = NULL;
+            break;
+        }
+
+        case 1: {
+            mHost->CancelDialog(mValue);
+            break;
+        }
+    }
+    return NOERROR;
+}
+
+//===============================================================================
+//                  CZenModeSettings::ShowConditionSelectionOnCancelListener
+//===============================================================================
+
+CAR_INTERFACE_IMPL(CZenModeSettings::ShowConditionSelectionOnCancelListener, Object, IDialogInterfaceOnCancelListener)
+
+CZenModeSettings::ShowConditionSelectionOnCancelListener::ShowConditionSelectionOnCancelListener(
+    /* [in] */ CZenModeSettings* host,
+    /* [in] */ Int32 value)
+    : mHost(host)
+    , mValue(value)
+{}
+
+ECode CZenModeSettings::ShowConditionSelectionOnCancelListener::OnCancel(
+    /* [in] */ IDialogInterface* dialog)
+{
+    mHost->CancelDialog(mValue);
     return NOERROR;
 }
 
@@ -1250,46 +1308,35 @@ void CZenModeSettings::PutZenModeSetting(
 void CZenModeSettings::ShowConditionSelection(
     /* [in] */ Int32 newSettingsValue)
 {
-    assert(0 && "TODO");
-    // if (mDialog != NULL) return;
+    if (mDialog != NULL) return;
 
-    // final ZenModeConditionSelection zenModeConditionSelection =
-    //         new ZenModeConditionSelection(mContext);
-    // DialogInterface.OnClickListener positiveListener = new DialogInterface->OnClickListener() {
-    //     //@Override
-    //     CARAPI OnClick(
-    //         /* [in] */ IDialogInterface* dialog,
-    //         /* [in] */ Int32 which)
-    //     {
-    //         zenModeConditionSelection->ConfirmCondition();
-    //         mDialog = NULL;
-    //     }
-    // };
-    // final Int32 oldSettingsValue = PREF_ZEN_MODE->GetValue(mContext);
-    // ScrollView scrollView = new ScrollView(mContext);
-    // scrollView->AddView(zenModeConditionSelection);
-    // mDialog = new AlertDialog->Builder(GetActivity())
-    //         .SetTitle(PREF_ZEN_MODE->GetCaption(GetResources(), newSettingsValue))
-    //         .SetView(scrollView)
-    //         .SetPositiveButton(R::string::okay, positiveListener)
-    //         .SetNegativeButton(R::string::cancel_all_caps, new DialogInterface->OnClickListener() {
-    //             //@Override
-    //             CARAPI OnClick(
-    //                 /* [in] */ IDialogInterface* dialog,
-    //                 /* [in] */ Int32 which)
-    //             {
-    //                 CancelDialog(oldSettingsValue);
-    //             }
-    //         })
-    //         .SetOnCancelListener(new DialogInterface->OnCancelListener() {
-    //             //@Override
-    //             CARAPI OnCancel(
-    //                 /* [in] */ IDialogInterface* dialog)
-    //             {
-    //                 CancelDialog(oldSettingsValue);
-    //             }
-    //         }).Create();
-    // mDialog->Show();
+    AutoPtr<CZenModeConditionSelection> zenModeConditionSelection;
+    CZenModeConditionSelection::NewByFriend(mContext, (CZenModeConditionSelection**)&zenModeConditionSelection);
+
+    AutoPtr<IDialogInterfaceOnClickListener> positiveListener = new ShowConditionSelectionOnClickListener(this, 0, zenModeConditionSelection, 0);
+
+    const Int32 oldSettingsValue = PREF_ZEN_MODE->GetValue(mContext);
+    AutoPtr<IScrollView> scrollView;
+    CScrollView::New(mContext, (IScrollView**)&scrollView);
+    IViewGroup::Probe(scrollView)->AddView(zenModeConditionSelection);
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    AutoPtr<IAlertDialogBuilder> builder;
+    CAlertDialogBuilder::New(IContext::Probe(activity), (IAlertDialogBuilder**)&builder);
+    AutoPtr<IResources> resources;
+    GetResources((IResources**)&resources);
+    String title;
+    PREF_ZEN_MODE->GetCaption(resources, newSettingsValue, &title);
+    builder->SetTitle(CoreUtils::Convert(title));
+    builder->SetView(IView::Probe(scrollView));
+    builder->SetPositiveButton(R::string::okay, positiveListener);
+    AutoPtr<IDialogInterfaceOnClickListener> negativeListener = new ShowConditionSelectionOnClickListener(this, 1, NULL, oldSettingsValue);
+    builder->SetNegativeButton(R::string::cancel_all_caps, negativeListener);
+    AutoPtr<ShowConditionSelectionOnCancelListener> cancelListener = new ShowConditionSelectionOnCancelListener(this, oldSettingsValue);
+    builder->SetOnCancelListener(cancelListener);
+    mDialog = NULL;
+    builder->Create((IAlertDialog**)&mDialog);
+    IDialog::Probe(mDialog)->Show();
 }
 
 void CZenModeSettings::CancelDialog(

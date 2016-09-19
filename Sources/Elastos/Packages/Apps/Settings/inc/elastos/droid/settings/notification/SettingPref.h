@@ -99,6 +99,7 @@ public:
         /* [in] */ IContext* context);
 
 protected:
+    friend class CZenModeSettings;
     virtual CARAPI GetCaption(
         /* [in] */ IResources* res,
         /* [in] */ Int32 value,

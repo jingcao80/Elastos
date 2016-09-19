@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CDSAPUBLICKEYSPEC_H__
 
 #include "_Elastos_Security_Spec_CDSAPublicKeySpec.h"
+#include "core/Object.h"
 
 using Elastos::Math::IBigInteger;
 

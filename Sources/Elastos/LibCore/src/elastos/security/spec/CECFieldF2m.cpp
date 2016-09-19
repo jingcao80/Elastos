@@ -1,9 +1,11 @@
 
 #include "CECFieldF2m.h"
-#include "CBigIntegerHelper.h"
+#include "elastos/math/CBigIntegerHelper.h"
+#include <elastos/utility/Arrays.h>
 
 using Elastos::Math::IBigIntegerHelper;
 using Elastos::Math::CBigIntegerHelper;
+using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace Security {
@@ -20,11 +22,10 @@ ECode CECFieldF2m::GetFieldSize(
 }
 
 ECode CECFieldF2m::GetM(
-    /* [out] */ IBigInteger **m)
+    /* [out] */ Int32* m)
 {
     VALIDATE_NOT_NULL(m)
     *m = mM;
-    REFCOUNT_ADD(*m)
     return NOERROR;
 }
 
@@ -54,7 +55,7 @@ ECode CECFieldF2m::Equals(
                 // at least this field with polynomial basis
                 // check that rp match
                 // return this.rp.equals(o.rp);
-                *result = mKs->Equals(((CECFieldF2m*)o.Get())->mKs);
+                *result = Arrays::Equals(mKs, ((CECFieldF2m*)o.Get())->mKs);
                 return NOERROR;
             }
         }
@@ -96,7 +97,7 @@ ECode CECFieldF2m::GetHashCode(
     /* [out] */ Int32 *hashCode)
 {
     VALIDATE_NOT_NULL(hashCode)
-    *hashCode = (mRp == NULL) ? mM : (mM + (mRp->GetHashCode(hashCode), *hashCode));
+    *hashCode = (mRp == NULL) ? mM : (mM + (IObject::Probe(mRp)->GetHashCode(hashCode), *hashCode));
     return NOERROR;
 }
 

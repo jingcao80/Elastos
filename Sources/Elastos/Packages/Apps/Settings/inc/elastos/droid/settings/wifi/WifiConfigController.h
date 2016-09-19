@@ -44,13 +44,13 @@ class WifiConfigController
     : public Object
     , public IWifiConfigController
     , public INoCopySpan
-    , public ICompoundButtonOnCheckedChangeListener
 {
 private:
     class InnerListener
         : public Object
         , public ITextWatcher
         , public IAdapterViewOnItemSelectedListener
+        , public ICompoundButtonOnCheckedChangeListener
     {
     public:
         CAR_INTERFACE_DECL()
@@ -88,6 +88,11 @@ private:
         // @Override
         CARAPI OnNothingSelected(
             /* [in] */ IAdapterView* parent);
+
+        // @Override
+        CARAPI OnCheckedChanged(
+            /* [in] */ ICompoundButton* view,
+            /* [in] */ Boolean isChecked);
 
     private:
         WifiConfigController* mHost;

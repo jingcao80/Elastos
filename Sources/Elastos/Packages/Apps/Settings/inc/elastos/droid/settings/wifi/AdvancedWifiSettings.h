@@ -28,9 +28,30 @@ namespace Wifi {
 
 class AdvancedWifiSettings
     : public SettingsPreferenceFragment
-    , public IPreferenceOnPreferenceChangeListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("AdvancedWifiSettings::InnerListener")
+
+        InnerListener(
+            /* [in] */ AdvancedWifiSettings* host);
+
+        //@Override
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* newValue,
+            /* [out] */ Boolean* result);
+
+    private:
+        AdvancedWifiSettings* mHost;
+    };
+
     /* Wrapper class for the WPS dialog to properly handle life cycle events like rotation. */
     class WpsFragment
         : public DialogFragment
@@ -101,8 +122,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     AdvancedWifiSettings();
 
     ~AdvancedWifiSettings();

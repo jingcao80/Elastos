@@ -68,9 +68,9 @@ ECode CECPoint::GetHashCode(
     VALIDATE_NOT_NULL(hashCode)
     if (mAffineX != NULL) {
         Int32 tmp;
-        mAffineX->GetHashCode(hashCode);
+        IObject::Probe(mAffineX)->GetHashCode(hashCode);
         *hashCode *= 31;
-        mAffineY->GetHashCode(&tmp);
+        IObject::Probe(mAffineY)->GetHashCode(&tmp);
         *hashCode += tmp;
         return NOERROR;
     }

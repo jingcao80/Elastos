@@ -94,8 +94,31 @@ public:
     class TabInfo
         : public Object
         , public IManageApplicationsTabInfo
-        , public IAdapterViewOnItemClickListener
     {
+    public:
+        class InnerOnItemClickListener
+            : public Object
+            , public IAdapterViewOnItemClickListener
+        {
+        public:
+            CAR_INTERFACE_DECL()
+
+            TO_STRING_IMPL("ManageApplications::TabInfo::InnerOnItemClickListener")
+
+            InnerOnItemClickListener(
+                /* [in] */ TabInfo* host);
+
+            //@Override
+            CARAPI OnItemClick(
+                /* [in] */ IAdapterView* parent,
+                /* [in] */ IView* view,
+                /* [in] */ Int32 position,
+                /* [in] */ Int64 id);
+
+        private:
+            TabInfo* mHost;
+        };
+
     public:
         CAR_INTERFACE_DECL()
 

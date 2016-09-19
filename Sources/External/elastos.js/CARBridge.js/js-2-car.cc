@@ -137,18 +137,31 @@ Local<Value> ToValue(_ELASTOS Int32 i32)
     return New<::v8::Int32>(i32);
 }
 
-bool IsInt64(Local<Value> value)
+static bool _IsInteger(Local<Number> number, double *integer)
 {
     double d;
+
+    d = To<double>(number).FromJust();
+    if (nearbyint(d) != d)
+        return false;
+
+    if (integer != nullptr)
+        *integer = d;
+
+    return true;
+}
+
+bool IsInt64(Local<Value> value)
+{
+    double integer;
 
     if (!value->IsNumber())
         return false;
 
-    d = To<double>(value).FromJust();
-    if (nearbyint(d) != d)
+    if (!_IsInteger(value.As<Number>(), &integer))
         return false;
 
-    return d >= INT64_MIN && d <= INT64_MAX;
+    return integer >= INT64_MIN && integer <= INT64_MAX;
 }
 
 bool CanBeUsedAsInt64(Local<Value> value, int *priority)
@@ -751,18 +764,53 @@ bool IsLocalPtr(Local<Value> value)
 
 bool CanBeUsedAsLocalPtr(Local<Value> value, int *priority)
 {
-    if (!IsLocalPtr(value))
+    ::Nan::HandleScope scope;
+
+    int _priority;
+
+    Local<Number> number;
+
+    double integer;
+
+    if (IsLocalPtr(value)) {
+        _priority = 0;
+
+        goto exit;
+    }
+
+    if (!To<Number>(value).ToLocal(&number))
         return false;
 
+    if (!_IsInteger(number, &integer))
+        return false;
+
+    if (integer < 0 || integer > UINTPTR_MAX)
+        return false;
+
+    if (value->IsNumber())
+        _priority = 1;
+    else if (value->IsNumberObject())
+        _priority = 2;
+    else if (value->IsString())
+        _priority = 3;
+    else if (value->IsStringObject())
+        _priority = 4;
+    else
+        _priority = 5;
+
+exit:
     if (priority != nullptr)
-        *priority = 0;
+        *priority = _priority;
 
     return true;
 }
 
 void *ToLocalPtr(Local<Value> value)
 {
-    return value.As<External>()->Value();
+    if (value->IsExternal())
+        return value.As<External>()->Value();
+
+    return reinterpret_cast<void *>(To<double>(value).FromJust());
 }
 
 Local<Value> ToValue(void *localPtr)

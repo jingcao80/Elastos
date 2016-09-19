@@ -1,0 +1,41 @@
+TARGET_NAME= spec
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security/spec;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/math;
+
+SOURCES += CDSAParameterSpec.cpp
+SOURCES += CDSAPrivateKeySpec.cpp
+SOURCES += CDSAPublicKeySpec.cpp
+SOURCES += CECFieldF2m.cpp
+SOURCES += CECFieldFp.cpp
+SOURCES += CECGenParameterSpec.cpp
+SOURCES += CECParameterSpec.cpp
+SOURCES += CECPoint.cpp
+SOURCES += CECPrivateKeySpec.cpp
+SOURCES += CECPublicKeySpec.cpp
+SOURCES += CEllipticCurve.cpp
+SOURCES += EncodedKeySpec.cpp
+SOURCES += CMGF1ParameterSpec.cpp
+SOURCES += CPKCS8EncodedKeySpec.cpp
+SOURCES += CPSSParameterSpec.cpp
+SOURCES += CRSAKeyGenParameterSpec.cpp
+SOURCES += RSAPrivateKeySpec.cpp
+SOURCES += CRSAMultiPrimePrivateCrtKeySpec.cpp
+SOURCES += CRSAPublicKeySpec.cpp
+SOURCES += CX509EncodedKeySpec.cpp
+SOURCES += CRSAOtherPrimeInfo.cpp
+SOURCES += CRSAPrivateCrtKeySpec.cpp
+SOURCES += CRSAPrivateKeySpec.cpp

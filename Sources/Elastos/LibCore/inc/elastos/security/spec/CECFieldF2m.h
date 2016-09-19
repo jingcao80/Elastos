@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CECFIELDF2M_H__
 
 #include "_Elastos_Security_Spec_CECFieldF2m.h"
+#include "core/Object.h"
 
 using Elastos::Math::IBigInteger;
 
@@ -24,7 +25,7 @@ public:
         /* [out] */ Int32 *size);
 
     CARAPI GetM(
-        /* [out] */ IBigInteger **m);
+        /* [out] */ Int32* m);
 
     CARAPI Equals(
         /* [in] */ IInterface *obj,

@@ -24,9 +24,29 @@ class WifiConfigUiForSetupWizardXL
     : public Object
     , public IWifiConfigUiForSetupWizardXL
     , public IWifiConfigUiBase
-    , public IViewOnFocusChangeListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IViewOnFocusChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("WifiConfigUiForSetupWizardXL::InnerListener")
+
+        InnerListener(
+            /* [in] */ WifiConfigUiForSetupWizardXL* host);
+
+        //@Override
+        CARAPI OnFocusChange(
+            /* [in] */ IView* view,
+            /* [in] */ Boolean hasFocus);
+
+    private:
+        WifiConfigUiForSetupWizardXL* mHost;
+    };
+
     class FocusRunnable
         : public Runnable
     {

@@ -1,5 +1,9 @@
 
 #include "CEllipticCurve.h"
+#include <elastos/utility/Arrays.h>
+
+using Elastos::Core::IComparable;
+using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace Security {
@@ -71,7 +75,7 @@ ECode CEllipticCurve::Equals(
     mA->Equals(((CEllipticCurve*)otherEc.Get())->mA.Get(), &equal2);
     mB->Equals(((CEllipticCurve*)otherEc.Get())->mB.Get(), &equal3);
     *result = equal1 && equal2 && equal3
-        && mSeed->Equals(((CEllipticCurve*)otherEc.Get())->mSeed.Get());
+        && Arrays::Equals(mSeed, ((CEllipticCurve*)otherEc.Get())->mSeed);
     return NOERROR;
 }
 
@@ -135,12 +139,12 @@ ECode CEllipticCurve::constructor(
         IECFieldFp::Probe(mField.Get())->GetP((IBigInteger**)&p);
         Int32 num, equal;
         mA->GetSignum(&num);
-        mA->CompareTo(p.Get(), &equal);
+        IComparable::Probe(mA)->CompareTo(p.Get(), &equal);
         if (num < 0 || equal >= 0) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         mB->GetSignum(&num);
-        mB->CompareTo(p.Get(), &equal);
+        IComparable::Probe(mB)->CompareTo(p.Get(), &equal);
         if (num < 0 || equal >= 0) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }

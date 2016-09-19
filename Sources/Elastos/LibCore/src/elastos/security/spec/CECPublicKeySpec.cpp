@@ -38,7 +38,7 @@ ECode CECPublicKeySpec::constructor(
     }
     // throw IllegalArgumentException if w is point at infinity
     Boolean equal;
-    mW->Equals(CECPoint::POINT_INFINITY.Get(), &equal);
+    IObject::Probe(mW)->Equals(CECPoint::POINT_INFINITY.Get(), &equal);
     if (equal) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

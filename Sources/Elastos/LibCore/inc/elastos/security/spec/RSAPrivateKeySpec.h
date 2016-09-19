@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_SECURITY_SPEC_RSAPRIVATEKEYSPEC_H__
 #define __ELASTOS_SECURITY_SPEC_RSAPRIVATEKEYSPEC_H__
 
-#include "Elastos.CoreLibrary_server.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "Object.h"
 
 using Elastos::Math::IBigInteger;
 
@@ -24,7 +25,7 @@ public:
     CARAPI GetPrivateExponent(
         /* [out] */ IBigInteger **exponent);
 
-    CARAPI Init(
+    CARAPI constructor(
         /* [in] */IBigInteger *modulus,
         /* [in] */ IBigInteger *privateExponent);
 

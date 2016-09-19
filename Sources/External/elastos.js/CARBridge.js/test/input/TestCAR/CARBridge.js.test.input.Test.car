@@ -27,7 +27,7 @@ module {
         ECode ecode;
         PVoid ptr;
         /**
-         * Do not test it temporarily.
+         * Maybe test it later.
          */
         //LocalType object;
         ETest etest;
@@ -45,7 +45,7 @@ module {
         ECode vecode[2];
         PVoid vptr[2];
         /**
-         * Do not test it temporarily.
+         * Maybe test it later.
          */
         //LocalType vobject[2];
         ETest vetest[2];
@@ -63,7 +63,7 @@ module {
         ECode vvecode[2][2];
         PVoid vvptr[2][2];
         /**
-         * Do not test it temporarily.
+         * Maybe test it later.
          */
         //LocalType vvobject[2][2];
         ETest vvetest[2][2];
@@ -116,7 +116,7 @@ module {
                 [in] PVoid ptr);
 
         /**
-         * Do not test it temporarily.
+         * Maybe test it later.
          */
         //TestLocalType(
                 //[in] LocalType object);
@@ -164,7 +164,7 @@ module {
                 [in] ArrayOf<ECode> ecodes);
 
         /**
-         * Do not test it temporarily.
+         * Maybe test it later.
          */
         //TestCARArray(
                 //[in] ArrayOf<LocalType> objects);

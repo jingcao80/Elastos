@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CECGENPARAMETERSPEC_H__
 
 #include "_Elastos_Security_Spec_CECGenParameterSpec.h"
+#include "core/Object.h"
 
 namespace Elastos {
 namespace Security {
@@ -27,7 +28,7 @@ public:
 private:
     // Standard (or predefined) name for EC domain
     // parameters to be generated
-    const String mName;
+    String mName;
 };
 
 }

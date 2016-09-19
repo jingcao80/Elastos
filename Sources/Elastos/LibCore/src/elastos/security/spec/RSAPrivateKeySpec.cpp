@@ -24,7 +24,7 @@ ECode RSAPrivateKeySpec::GetPrivateExponent(
     return NOERROR;
 }
 
-ECode RSAPrivateKeySpec::Init(
+ECode RSAPrivateKeySpec::constructor(
     /* [in] */ IBigInteger *modulus,
     /* [in] */ IBigInteger *privateExponent)
 {

@@ -22,7 +22,7 @@ module
          * @return the prime value {@code p} for this finite field.
          */
         GetM(
-            [out] IBigInteger** m);
+            [out] Int32* m);
 
         /**
          * Returns whether the specified object is equal to this finite field.

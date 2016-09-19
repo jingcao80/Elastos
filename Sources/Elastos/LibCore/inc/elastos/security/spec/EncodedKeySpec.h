@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_SECURITY_SPEC_ENCODEDKEYSPEC_H__
 #define __ELASTOS_SECURITY_SPEC_ENCODEDKEYSPEC_H__
 
-#include "_Elastos_Security_Spec_CX509EncodedKeySpec.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "Object.h"
 
 namespace Elastos {
 namespace Security {
@@ -34,9 +35,10 @@ public:
 
     CARAPI constructor(
         /* [in] */ ArrayOf<Byte> *encodedKey);
+
 private:
     // Encoded key
-    const AutoPtr<ArrayOf<Byte> > mEncodedKey;
+    AutoPtr<ArrayOf<Byte> > mEncodedKey;
 };
 
 }

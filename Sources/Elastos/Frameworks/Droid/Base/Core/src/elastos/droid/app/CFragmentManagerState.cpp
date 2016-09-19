@@ -2,6 +2,7 @@
 #include "elastos/droid/app/CFragmentManagerState.h"
 #include "elastos/droid/app/CFragmentState.h"
 #include "elastos/droid/app/CBackStackState.h"
+#include "elastos/droid/app/CFragmentState.h"
 
 namespace Elastos {
 namespace Droid {

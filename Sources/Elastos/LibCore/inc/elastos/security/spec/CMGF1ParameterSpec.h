@@ -3,6 +3,7 @@
 #define __ELASTOS_SECURITY_SPEC_CMGF1PARAMETERSPEC_H__
 
 #include "_Elastos_Security_Spec_CMGF1ParameterSpec.h"
+#include "core/Object.h"
 
 namespace Elastos {
 namespace Security {
@@ -18,7 +19,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
-    static CARAPI_(AutoPtr<IMGF1ParameterSpec>) InitStatic();
+    static CARAPI_(AutoPtr<IMGF1ParameterSpec>) InitStatic(
+        /* [in] */ const String& type);
 
     CARAPI GetDigestAlgorithm(
         /* [out] */ String *algorithm);

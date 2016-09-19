@@ -244,6 +244,7 @@ EXPORT_HEADERS += elastos/droid/widget/Button.h
 EXPORT_HEADERS += elastos/droid/widget/CompoundButton.h
 EXPORT_HEADERS += elastos/droid/widget/RemoteViews.h
 EXPORT_HEADERS += elastos/droid/widget/TextView.h
+EXPORT_HEADERS += elastos/droid/widget/RadioGroup.h
 EXPORT_HEADERS += elastos/droid/widget/RelativeLayout.h
 EXPORT_HEADERS += elastos/droid/widget/ScrollView.h
 EXPORT_HEADERS += elastos/droid/widget/SeekBar.h

@@ -39,3 +39,4 @@ SOURCES += SignatureSpi.cpp
 #SOURCES += AlgorithmParameterGeneratorSpi.cpp
 
 ELASTOS_LIBS += cert/cert.lib
+ELASTOS_LIBS += spec/spec.lib

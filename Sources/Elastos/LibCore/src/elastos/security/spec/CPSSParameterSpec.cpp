@@ -67,7 +67,7 @@ ECode CPSSParameterSpec::constructor(
     mSaltLen = saltLen;
     mMdName = String("SHA-1");
     mMgfName = String("MGF1");
-    mMgfSpec = CMGF1ParameterSpec::SHA1.Get();
+    mMgfSpec = IAlgorithmParameterSpec::Probe(CMGF1ParameterSpec::SHA1);
     mTrailerField = 1;
     return NOERROR;
 }
