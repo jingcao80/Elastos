@@ -194,6 +194,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::constructor(
 
     mDelegator = delegator;
     mContext = context;
+    IView* delegatorView = IView::Probe(delegator);
 
     // initialization based on locale
     AutoPtr<ILocaleHelper> hlp;
@@ -235,19 +236,19 @@ ECode DatePicker::DatePickerSpinnerDelegate::constructor(
     AutoPtr<DatePickerOnChangeListener> onChangeListener = new DatePickerOnChangeListener(this);
 
     AutoPtr<IView> vPic;
-    IView::Probe(mDelegator)->FindViewById(R::id::pickers, (IView**)&vPic);
+    delegatorView->FindViewById(R::id::pickers, (IView**)&vPic);
     mSpinners = ILinearLayout::Probe(vPic);
 
     // calendar view day-picker
     AutoPtr<IView> vView;
-    IView::Probe(mDelegator)->FindViewById(R::id::calendar_view, (IView**)&vView);
+    delegatorView->FindViewById(R::id::calendar_view, (IView**)&vView);
     mCalendarView = ICalendarView::Probe(vView);
     AutoPtr<DatePickerOnDateChangeListener> p = new DatePickerOnDateChangeListener(this);
     mCalendarView->SetOnDateChangeListener(p);
 
     // day
     AutoPtr<IView> vD;
-    IView::Probe(mDelegator)->FindViewById(R::id::day, (IView**)&vD);
+    delegatorView->FindViewById(R::id::day, (IView**)&vD);
     mDaySpinner = INumberPicker::Probe(vD);
     AutoPtr<INumberPickerHelper> hlper;
     CNumberPickerHelper::AcquireSingleton((INumberPickerHelper**)&hlper);
@@ -262,7 +263,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::constructor(
 
     // month
     AutoPtr<IView> vMonth;
-    IView::Probe(mDelegator)->FindViewById(R::id::month, (IView**)&vMonth);
+    delegatorView->FindViewById(R::id::month, (IView**)&vMonth);
     mMonthSpinner = INumberPicker::Probe(vMonth);
     mMonthSpinner->SetMinValue(0);
     mMonthSpinner->SetMaxValue(mNumberOfMonths - 1);
@@ -275,7 +276,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::constructor(
 
     // year
     AutoPtr<IView> v;
-    IView::Probe(mDelegator)->FindViewById(R::id::year, (IView**)&v);
+    delegatorView->FindViewById(R::id::year, (IView**)&v);
     mYearSpinner = INumberPicker::Probe(v);
     mYearSpinner->SetOnLongPressUpdateInterval(100);
     mYearSpinner->SetOnValueChangedListener(onChangeListener);
@@ -341,9 +342,9 @@ ECode DatePicker::DatePickerSpinnerDelegate::constructor(
 
     // If not explicitly specified this view is important for accessibility.
     Int32 acc = 0;
-    IView::Probe(mDelegator)->GetImportantForAccessibility(&acc);
+    delegatorView->GetImportantForAccessibility(&acc);
     if (acc == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-        IView::Probe(mDelegator)->SetImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        delegatorView->SetImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
     return NOERROR;
 }
@@ -1113,7 +1114,7 @@ AutoPtr<IDatePickerDelegate> DatePicker::CreateSpinnerUIDelegate(
 {
     AutoPtr<DatePickerSpinnerDelegate> res = new DatePickerSpinnerDelegate();
     res->constructor(this, context, attrs, defStyleAttr, defStyleRes);
-    return IDatePickerDelegate::Probe(res);
+    return (IDatePickerDelegate*)res.Get();
 }
 
 AutoPtr<IDatePickerDelegate> DatePicker::CreateCalendarUIDelegate(
@@ -1122,10 +1123,10 @@ AutoPtr<IDatePickerDelegate> DatePicker::CreateCalendarUIDelegate(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    AutoPtr<IDatePickerCalendarDelegate> res;
-    CDatePickerCalendarDelegate::New((IDatePicker*)this, context, attrs, defStyleAttr, defStyleRes,
-            (IDatePickerCalendarDelegate**)&res);
-    return IDatePickerDelegate::Probe(res);
+    AutoPtr<IDatePickerDelegate> res;
+    CDatePickerCalendarDelegate::New(this, context, attrs, defStyleAttr, defStyleRes,
+            (IDatePickerDelegate**)&res);
+    return res;
 }
 
 ECode DatePicker::Init(

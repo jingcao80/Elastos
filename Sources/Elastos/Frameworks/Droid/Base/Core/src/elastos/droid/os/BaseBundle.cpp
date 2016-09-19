@@ -7,7 +7,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/utility/CSparseArray.h"
-
+#include <utils/CallStack.h>
 #include <binder/Parcel.h>
 
 using Elastos::Core::CoreUtils;
@@ -594,6 +594,9 @@ void BaseBundle::TypeWarning(
     sb.Append(", className: ");
     sb.Append(className);
     Logger::W(TAG, sb.ToString());
+    android::CallStack stack;
+    stack.update();
+    Logger::W(TAG, "backtrace:%s\n", stack.toString("").string());
     assert(0 && "Please fix error!");
 }
 
@@ -1557,7 +1560,9 @@ ECode BaseBundle::WriteValue(
     // }
     else {
         Logger::D(TAG, "Unable to marshal value %p, obj=[%s]", obj, TO_CSTR(obj));
-
+        android::CallStack stack;
+        stack.update();
+        Logger::W(TAG, "backtrace:%s\n", stack.toString("").string());
         assert(0);
         return E_RUNTIME_EXCEPTION;
     }
@@ -1565,7 +1570,8 @@ ECode BaseBundle::WriteValue(
 }
 
 AutoPtr<IInterface> BaseBundle::ReadValue(
-    /* [in] */ IParcel* source)
+    /* [in] */ IParcel* source,
+    /* [in] */ const String& keyStr)
 {
     Int32 type;
     source->ReadInt32(&type);
@@ -1646,7 +1652,7 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
         AutoPtr<IList> list;
         CArrayList::New(N, (IList**)&list);
         while (N > 0) {
-            AutoPtr<IInterface> value = ReadValue(source);
+            AutoPtr<IInterface> value = ReadValue(source, keyStr);
             list->Add(value);
             N--;
         }
@@ -1694,7 +1700,7 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
         AutoPtr<IArrayOf> array;
         CArrayOf::New(iid, size, (IArrayOf**)&array);
         for (Int32 i = 0; i < size; ++i) {
-            AutoPtr<IInterface> elem = ReadValue(source);
+            AutoPtr<IInterface> elem = ReadValue(source, keyStr);
             array->Set(i, elem);
         }
         return array;
@@ -1712,7 +1718,7 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
         while (N > 0) {
             Int32 key = 0;
             source->ReadInt32(&key);
-            AutoPtr<IInterface> value = ReadValue(source);
+            AutoPtr<IInterface> value = ReadValue(source, keyStr);
             //Log.i(TAG, "Unmarshalling key=" + key + " value=" + value);
             sa->Append(key, value);
             N--;
@@ -1731,10 +1737,10 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
         return obj;
     }
     default:
-        Logger::D(TAG, "- Unmarshalling unknown type code %d", type);
-        // int off = dataPosition() - 4;
-        // throw new RuntimeException(
-        //     "Parcel " + this + ": Unmarshalling unknown type code " + type + " at offset " + off);
+        Logger::D(TAG, "- Unmarshalling unknown type code %d for key: %s", type, keyStr.string());
+        android::CallStack stack;
+        stack.update();
+        Logger::W(TAG, "backtrace:%s\n", stack.toString("").string());
         assert(0);
     }
     return NULL;
@@ -1754,7 +1760,7 @@ ECode BaseBundle::ReadArrayMapInternal(
         source->ReadString(&key);
         //Logger::E(TAG, "line:%d, func:%s, key:%s\n", __LINE__, __func__, key.string());
         keyObj = CoreUtils::Convert(key);
-        valueObj = ReadValue(source);
+        valueObj = ReadValue(source, key);
 
         arrayMap->Put(keyObj.Get(), valueObj.Get());
         size--;

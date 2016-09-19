@@ -63,7 +63,8 @@ ECode DatePickerCalendarDelegate::InnerListener::OnClick(
 //                DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::
 // ==================================================================
 
-CAR_INTERFACE_IMPL(DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState, View::BaseSavedState, IDatePickerCalendarDelegateSavedState)
+CAR_INTERFACE_IMPL(DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState,
+    View::BaseSavedState, IDatePickerCalendarDelegateSavedState)
 
 DatePickerCalendarDelegate::DatePickerCalendarDelegateSavedState::DatePickerCalendarDelegateSavedState()
     : mSelectedYear(0)
@@ -195,7 +196,8 @@ const Int32 DatePickerCalendarDelegate::MONTH_INDEX = 0;
 const Int32 DatePickerCalendarDelegate::DAY_INDEX = 1;
 const Int32 DatePickerCalendarDelegate::YEAR_INDEX = 2;
 
-CAR_INTERFACE_IMPL_2(DatePickerCalendarDelegate, DatePicker::AbstractDatePickerDelegate, IDatePickerCalendarDelegate, IDatePickerController)
+CAR_INTERFACE_IMPL_2(DatePickerCalendarDelegate, DatePicker::AbstractDatePickerDelegate,
+    IDatePickerCalendarDelegate, IDatePickerController)
 
 DatePickerCalendarDelegate::DatePickerCalendarDelegate()
     : mIsEnabled(TRUE)

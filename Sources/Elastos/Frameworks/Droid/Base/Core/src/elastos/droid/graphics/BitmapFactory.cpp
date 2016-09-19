@@ -625,9 +625,11 @@ static AutoPtr<IBitmap> DoDecode(
     if (!decoder->decode(stream, &decodingBitmap, prefColorType, decodeMode)) {
         // return nullObjectReturn("decoder->decode returned false");
         Logger::W("BitmapFactory", String("decoder->decode returned false"));
+        decoder->setAllocator(NULL);
         return NULL;
     }
 
+    decoder->setAllocator(NULL);
     Int32 scaledWidth = decodingBitmap.width();
     Int32 scaledHeight = decodingBitmap.height();
 

@@ -54,10 +54,10 @@ public:
 
     protected:
         // The delegator
-        AutoPtr<IDatePicker> mDelegator;
+        IDatePicker* mDelegator;
 
         // The context
-        AutoPtr<IContext> mContext;
+        IContext* mContext;
 
         // The current locale
         AutoPtr<ILocale> mCurrentLocale;

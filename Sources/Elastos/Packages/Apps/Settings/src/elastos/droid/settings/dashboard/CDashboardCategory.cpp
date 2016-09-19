@@ -21,7 +21,6 @@ CDashboardCategory::CDashboardCategory()
     : mId(CAT_ID_UNDEFINED)
     , mTitleRes(0)
 {
-    CArrayList::New((IList**)&mTiles);
 }
 
 CDashboardCategory::~CDashboardCategory()
@@ -29,6 +28,7 @@ CDashboardCategory::~CDashboardCategory()
 
 ECode CDashboardCategory::constructor()
 {
+    CArrayList::New((IList**)&mTiles);
     return NOERROR;
 }
 

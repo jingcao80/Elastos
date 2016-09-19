@@ -1373,19 +1373,19 @@ void Index::IndexOneResource(
     AutoPtr<IList> nonIndexableKeys;
     CArrayList::New((IList**)&nonIndexableKeys);
 
-    Int32 xmlResId;
+    String packageName, className;
+    Int32 xmlResId, iconResId, rank;
     _sir->GetXmlResId(&xmlResId);
-    String packageName;
     AutoPtr<ISearchIndexableData> sir = ISearchIndexableData::Probe(_sir);
-    sir->GetPackageName(&packageName);
     AutoPtr<IContext> context;
     sir->GetContext((IContext**)&context);
-    String className;
+    sir->GetPackageName(&packageName);
     sir->GetClassName(&className);
-    Int32 iconResId;
     sir->GetIconResId(&iconResId);
-    Int32 rank;
     sir->GetRank(&rank);
+
+    // Logger::I(TAG, " >> IndexOneResource: localeStr: %s, packageName: %s, className: %s, xmlResId: %08x, iconResId: %08x",
+    //     localeStr.string(), packageName.string(), className.string(), xmlResId, iconResId);
 
     if (xmlResId > SearchIndexableResources::NO_DATA_RES_ID) {
         AutoPtr<IInterface> obj;
@@ -1404,9 +1404,9 @@ void Index::IndexOneResource(
         sir->GetIntentTargetClass(&intentTargetClass);
 
         IndexFromResource(context, database, localeStr,
-                xmlResId, className, iconResId, rank,
-                intentAction, intentTargetPackage, intentTargetClass,
-                nonIndexableKeys);
+            xmlResId, className, iconResId, rank,
+            intentAction, intentTargetPackage, intentTargetClass,
+            nonIndexableKeys);
     }
     else {
         if (TextUtils::IsEmpty(className)) {
@@ -1437,40 +1437,41 @@ void Index::IndexOneResource(
             sir->GetEnabled(&enabled);
 
             IndexFromProvider(mContext, database, localeStr, provider, className,
-                    iconResId, rank, enabled, nonIndexableKeys);
+                iconResId, rank, enabled, nonIndexableKeys);
         }
     }
 }
 
 AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(const String& className)
 {
-    if (className.Equals("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings")) {
-        return CInputMethodAndLanguageSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+    static HashMap<String, AutoPtr<IIndexableSearchIndexProvider> > providerMap;
+    if (providerMap.IsEmpty()) {
+        providerMap[String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings")]
+            = CInputMethodAndLanguageSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.Notification.CNotificationSettings")]
+            = CNotificationSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.Notification.COtherSoundSettings")]
+            = COtherSoundSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.Notification.CZenModeSettings")]
+            = CZenModeSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.Wifi.CWifiSettings")]
+            = CWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")]
+            = CSavedAccessPointsWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.CWirelessSettings")]
+            = CWirelessSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.CSecuritySettings")]
+            = CSecuritySettings::GetSEARCH_INDEX_DATA_PROVIDER();
     }
-    else if (className.Equals("Elastos.Droid.Settings.Notification.CNotificationSettings")) {
-        return CNotificationSettings::GetSEARCH_INDEX_DATA_PROVIDER();
-    }
-    else if (className.Equals("Elastos.Droid.Settings.Notification.COtherSoundSettings")) {
-        return COtherSoundSettings::GetSEARCH_INDEX_DATA_PROVIDER();
-    }
-    else if (className.Equals("Elastos.Droid.Settings.Notification.CZenModeSettings")) {
-        return CZenModeSettings::GetSEARCH_INDEX_DATA_PROVIDER();
-    }
-    else if (className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")) {
-        return CWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
-    }
-    else if (className.Equals("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")) {
-        return CSavedAccessPointsWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
-    }
-    else if (className.Equals("Elastos.Droid.Settings.CWirelessSettings")) {
-        return CWirelessSettings::GetSEARCH_INDEX_DATA_PROVIDER();
-    }
-    else if (className.Equals("Elastos.Droid.Settings.CSecuritySettings")) {
-        return CSecuritySettings::GetSEARCH_INDEX_DATA_PROVIDER();
-    }
-    // TODO
-    // else if ()....  other  class implements Indexable
 
+    HashMap<String, AutoPtr<IIndexableSearchIndexProvider> >::Iterator it = providerMap.Find(className);
+    if (it != providerMap.End()) {
+        return it->mSecond;
+    }
+
+    // TODO
+    // other  class implements Indexable
+    Logger::W(TAG, " >> TODO: other class [%s] implements Indexable", className.string());
     return NULL;
 }
 
@@ -1683,10 +1684,15 @@ void Index::IndexFromProvider(
             Int32 xmlResId;
             item->GetXmlResId(&xmlResId);
 
-            IndexFromResource(context, database, localeStr,
+            if (xmlResId != 0) {
+                IndexFromResource(context, database, localeStr,
                     xmlResId, itemClassName, itemIconResId, itemRank,
                     siData->mIntentAction, siData->mIntentTargetPackage,
                     siData->mIntentTargetClass, nonIndexableKeys);
+            }
+            else {
+                Logger::W(TAG, " >> IndexFromProvider: %s, xmlResId:%08x", itemClassName.string(), xmlResId);
+            }
         }
     }
 }

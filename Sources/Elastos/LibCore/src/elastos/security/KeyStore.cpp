@@ -21,6 +21,7 @@ extern "C" const InterfaceID EIID_KeyStore =
         { 0xF3CC4E70, 0xAAB6, 0x20F8, { 0xB7, 0x39, 0xCD, 0xD7, 0x6D, 0xAE, 0x58, 0x72 } };
 
 CAR_INTERFACE_IMPL(KeyStore, Object, IKeyStore)
+
 KeyStore::KeyStore(
     /* [in] */ IKeyStoreSpi *keyStoreSpi,
     /* [in] */ IProvider *provider,

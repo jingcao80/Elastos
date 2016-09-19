@@ -1429,9 +1429,11 @@ ECode ICUUtil::GetDateFormatOrder(
     Boolean sawDay = FALSE;
     Boolean sawMonth = FALSE;
     Boolean sawYear = FALSE;
+    Int32 length = pattern.GetLength();
+    AutoPtr<ArrayOf<Char32> > chars = pattern.GetChars();
 
-    for (Int32 i = 0; i < pattern.GetLength(); ++i) {
-        Char32 ch = pattern.GetChar(i);
+    for (Int32 i = 0; i < length; ++i) {
+        Char32 ch = (*chars)[i];
         if ('d' == ch || 'L' == ch || 'M' == ch || 'y' == ch) {
             if ('d' == ch && !sawDay) {
                 (*result)[resultIndex++] = 'd';
@@ -1448,13 +1450,13 @@ ECode ICUUtil::GetDateFormatOrder(
         } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
             Logger::E(TAG, "ICUUtil: Bad pattern character %c in %s", ch, pattern.string());
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        } else if ('\'') {
-            if (i < pattern.GetLength() - 1 && '\'' == pattern.GetChar(i + 1)) {
+        } else if ('\''== ch) {
+            if (i < length - 1 && '\'' == (*chars)[i + 1]) {
                 ++i;
             } else {
                 i = pattern.IndexOf('\'', i + 1);
                 if (-1 == i) {
-                    Logger::E(TAG, "ICUUtil: Bad quoting in  %s", ch, pattern.string());
+                    Logger::E(TAG, "ICUUtil: Bad quoting in %s", pattern.string());
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
                 }
                 ++i;

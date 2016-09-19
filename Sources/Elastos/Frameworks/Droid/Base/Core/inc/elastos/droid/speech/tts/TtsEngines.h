@@ -5,6 +5,7 @@
 #include "elastos/core/Object.h"
 #include "elastos/droid/speech/tts/TextToSpeech.h"
 #include <elastos/utility/etl/List.h>
+#include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Core::IComparator;
 using Elastos::Droid::Content::IIntent;
@@ -12,6 +13,8 @@ using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::IContext;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {
@@ -63,15 +66,6 @@ private:
             /* [in] */ IInterface* object2,
             /* [out] */ Int32* result);
 
-        CARAPI Equals(
-            /* [in] */ IInterface* object,
-            /* [out] */ Boolean* isEqual);
-
-    public:
-        static Int32 Comparator(
-            /* [in] */ AutoPtr<TextToSpeech::TextToSpeechEngineInfo> lhs,
-            /* [in] */ AutoPtr<TextToSpeech::TextToSpeechEngineInfo> rhs);
-
     public:
         static AutoPtr<EngineInfoComparator> INSTANCE;      // = new EngineInfoComparator();
     };
@@ -83,9 +77,7 @@ public:
 
     virtual ~TtsEngines();
 
-    constructor();
-
-    constructor(
+    CARAPI constructor(
         /* [in] */ IContext* ctx);
 
     /**
@@ -260,7 +252,7 @@ private:
      * This method tries to convert three-letter language and country codes into their two-letter
      * equivalents. If it fails to do so, it keeps the value from the TTS locale.
      */
-    static CARAPI_(ILocale*) NormalizeTTSLocale(
+    static CARAPI_(AutoPtr<ILocale>) NormalizeTTSLocale(
         /* [in] */ ILocale* ttsLocale);
 
     /**
@@ -291,10 +283,10 @@ private:
     static const String LOCALE_DELIMITER_NEW;   // = "-";
 
     /** Mapping of various language strings to the normalized Locale form */
-    static Map<String, String> sNormalizeLanguage;
+    static AutoPtr<HashMap<String, String> > sNormalizeLanguage;
 
     /** Mapping of various country strings to the normalized Locale form */
-    static Map<String, String> sNormalizeCountry;
+    static AutoPtr<HashMap<String, String> > sNormalizeCountry;
 
     //private final
     AutoPtr<IContext> mContext;

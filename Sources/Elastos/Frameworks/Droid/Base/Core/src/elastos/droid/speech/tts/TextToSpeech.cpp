@@ -38,15 +38,10 @@ namespace Tts {
 CAR_INTERFACE_IMPL(TextToSpeech::TextToSpeechEngineInfo, Object, ITextToSpeechEngineInfo)
 
 TextToSpeech::TextToSpeechEngineInfo::TextToSpeechEngineInfo()
+    : icon(0)
+    , system(FALSE)
+    , priority(0)
 {}
-
-TextToSpeech::TextToSpeechEngineInfo::~TextToSpeechEngineInfo()
-{}
-
-ECode TextToSpeech::TextToSpeechEngineInfo::constructor()
-{
-    return NOERROR;
-}
 
 ECode TextToSpeech::TextToSpeechEngineInfo::ToString(
     /* [out] */ String* ret)

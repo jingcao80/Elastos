@@ -66,14 +66,8 @@ public:
 
         TextToSpeechEngineInfo();
 
-        virtual ~TextToSpeechEngineInfo();
-
-        CARAPI constructor();
-
-    public:
         CARAPI ToString(
             /* [out] */ String* ret);
-
     public:
         /**
          * Engine package name..

@@ -30,8 +30,10 @@ ECode CActivityOne::OnCreate(
     Logger::I(DBG_TAG, " >> OnCreate");
     SetContentView(R::layout::main);
 
+    Logger::I(DBG_TAG, " >> OnCreate 1");
     AutoPtr<IView> view = FindViewById(R::id::datePicker);
     mDatePicker = IDatePicker::Probe(view);
+    Logger::I(DBG_TAG, " >> OnCreate 2");
 
     return NOERROR;
 }

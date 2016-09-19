@@ -390,10 +390,8 @@ ECode SettingsActivity::OnResumeOnSharedPreferenceChangeListener::OnSharedPrefer
 //                  SettingsActivity
 //===============================================================================
 
-CAR_INTERFACE_IMPL_8(SettingsActivity, Activity, ISettingsActivity, IPreferenceManagerOnPreferenceTreeClickListener,
-        IPreferenceFragmentOnPreferenceStartFragmentCallback, IButtonBarHandler,
-        IFragmentManagerOnBackStackChangedListener, ISearchViewOnQueryTextListener,
-        ISearchViewOnCloseListener, IOnActionExpandListener);
+CAR_INTERFACE_IMPL_3(SettingsActivity, Activity, ISettingsActivity,
+    IButtonBarHandler, IPreferenceFragmentOnPreferenceStartFragmentCallback)
 
 SettingsActivity::SettingsActivity()
     : mInitialTitleResId(0)
@@ -1253,27 +1251,28 @@ ECode SettingsActivity::LoadCategoriesFromResource(
     /* [in] */ Int32 resid,
     /* [in] */ IList* target)
 {
-    AutoPtr<IXmlResourceParser> parser;
+    AutoPtr<IXmlResourceParser> resParser;
     // try {
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
-    res->GetXml(resid, (IXmlResourceParser**)&parser);
-    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
+    res->GetXml(resid, (IXmlResourceParser**)&resParser);
+    IXmlPullParser* parser = IXmlPullParser::Probe(resParser);
+    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
 
     Int32 type;
-    while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_DOCUMENT
+    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
             && type != IXmlPullParser::START_TAG) {
         // Parse next until start tag is found
     }
 
     String nodeName;
-    IXmlPullParser::Probe(parser)->GetName(&nodeName);
+    parser->GetName(&nodeName);
     if (!nodeName.Equals("dashboard-categories")) {
         String desc;
-        IXmlPullParser::Probe(parser)->GetPositionDescription(&desc);
+        parser->GetPositionDescription(&desc);
         Slogger::E(TAG, "XML document must start with <preference-categories> tag; found %s at %s",
                 nodeName.string(), desc.string());
-        if (parser != NULL) parser->Close();
+        resParser->Close();
         return E_RUNTIME_EXCEPTION;
         // throw new RuntimeException(
         //         "XML document must start with <preference-categories> tag; found"
@@ -1283,24 +1282,22 @@ ECode SettingsActivity::LoadCategoriesFromResource(
     AutoPtr<IBundle> curBundle;
 
     Int32 outerDepth;
-    IXmlPullParser::Probe(parser)->GetDepth(&outerDepth);
+    parser->GetDepth(&outerDepth);
     Int32 depth;
-    while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_DOCUMENT
+    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
             && (type != IXmlPullParser::END_TAG
-                || (IXmlPullParser::Probe(parser)->GetDepth(&depth), depth) > outerDepth)) {
+                || (parser->GetDepth(&depth), depth) > outerDepth)) {
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
             continue;
         }
 
         nodeName = String(NULL);
-        IXmlPullParser::Probe(parser)->GetName(&nodeName);
+        parser->GetName(&nodeName);
         if (nodeName.Equals("dashboard-category")) {
             AutoPtr<CDashboardCategory> category;
             CDashboardCategory::NewByFriend((CDashboardCategory**)&category);
 
-            AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                    const_cast<Int32 *>(Elastos::Droid::R::styleable::PreferenceHeader),
-                    ArraySize(Elastos::Droid::R::styleable::PreferenceHeader));
+            AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(Elastos::Droid::R::styleable::PreferenceHeader);
             AutoPtr<ITypedArray> sa;
             ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&sa);
             Int32 id;
@@ -1325,30 +1322,27 @@ ECode SettingsActivity::LoadCategoriesFromResource(
             sa->Recycle();
 
             Int32 innerDepth;
-            IXmlPullParser::Probe(parser)->GetDepth(&innerDepth);
-            while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_DOCUMENT
+            parser->GetDepth(&innerDepth);
+            while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
                     && (type != IXmlPullParser::END_TAG
-                        || (IXmlPullParser::Probe(parser)->GetDepth(&depth), depth) > innerDepth)) {
+                        || (parser->GetDepth(&depth), depth) > innerDepth)) {
                 if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
                     continue;
                 }
 
                 String innerNodeName;
-                IXmlPullParser::Probe(parser)->GetName(&innerNodeName);
+                parser->GetName(&innerNodeName);
                 if (innerNodeName.Equals("dashboard-tile")) {
                     AutoPtr<CDashboardTile> tile;
                     CDashboardTile::NewByFriend((CDashboardTile**)&tile);
 
                     sa = NULL;
-                    ObtainStyledAttributes(
-                            attrs, attrIds, (ITypedArray**)&sa);
-                    sa->GetResourceId(
-                            Elastos::Droid::R::styleable::PreferenceHeader_id,
-                            (Int32)CDashboardTile::TILE_ID_UNDEFINED, &id);
+                    ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&sa);
+                    sa->GetResourceId(Elastos::Droid::R::styleable::PreferenceHeader_id,
+                        (Int32)CDashboardTile::TILE_ID_UNDEFINED, &id);
                     tile->mId = id;
                     tv = NULL;
-                    sa->PeekValue(
-                            Elastos::Droid::R::styleable::PreferenceHeader_title, (ITypedValue**)&tv);
+                    sa->PeekValue(Elastos::Droid::R::styleable::PreferenceHeader_title, (ITypedValue**)&tv);
                     if (tv != NULL && (tv->GetType(&type), type) == ITypedValue::TYPE_STRING) {
                         if ((tv->GetResourceId(&resourceId), resourceId) != 0) {
                             tile->mTitleRes = resourceId;
@@ -1358,8 +1352,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
                         }
                     }
                     tv = NULL;
-                    sa->PeekValue(
-                            Elastos::Droid::R::styleable::PreferenceHeader_summary, (ITypedValue**)&tv);
+                    sa->PeekValue(Elastos::Droid::R::styleable::PreferenceHeader_summary, (ITypedValue**)&tv);
                     if (tv != NULL && (tv->GetType(&type), type) == ITypedValue::TYPE_STRING) {
                         if ((tv->GetResourceId(&resourceId), resourceId) != 0) {
                             tile->mSummaryRes = resourceId;
@@ -1368,10 +1361,8 @@ ECode SettingsActivity::LoadCategoriesFromResource(
                             tv->GetString((ICharSequence**)&tile->mSummary);
                         }
                     }
-                    sa->GetResourceId(
-                            Elastos::Droid::R::styleable::PreferenceHeader_icon, 0, &tile->mIconRes);
-                    sa->GetString(
-                            Elastos::Droid::R::styleable::PreferenceHeader_fragment, &tile->mFragment);
+                    sa->GetResourceId(Elastos::Droid::R::styleable::PreferenceHeader_icon, 0, &tile->mIconRes);
+                    sa->GetString(Elastos::Droid::R::styleable::PreferenceHeader_fragment, &tile->mFragment);
                     sa->Recycle();
 
                     if (curBundle == NULL) {
@@ -1379,21 +1370,21 @@ ECode SettingsActivity::LoadCategoriesFromResource(
                     }
 
                     Int32 innerDepth2;
-                    IXmlPullParser::Probe(parser)->GetDepth(&innerDepth2);
-                    while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_DOCUMENT
+                    parser->GetDepth(&innerDepth2);
+                    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
                             && (type != IXmlPullParser::END_TAG ||
-                                (IXmlPullParser::Probe(parser)->GetDepth(&depth), depth) > innerDepth2)) {
+                                (parser->GetDepth(&depth), depth) > innerDepth2)) {
                         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
                             continue;
                         }
 
                         String innerNodeName2;
-                        IXmlPullParser::Probe(parser)->GetName(&innerNodeName2);
+                        parser->GetName(&innerNodeName2);
                         if (innerNodeName2.Equals("extra")) {
                             AutoPtr<IResources> res;
                             GetResources((IResources**)&res);
                             res->ParseBundleExtra(String("extra"), attrs, curBundle);
-                            XmlUtils::SkipCurrentTag(IXmlPullParser::Probe(parser));
+                            XmlUtils::SkipCurrentTag(parser);
 
                         }
                         else if (innerNodeName2.Equals("intent")) {
@@ -1401,10 +1392,10 @@ ECode SettingsActivity::LoadCategoriesFromResource(
                             GetResources((IResources**)&res);
                             AutoPtr<IIntentHelper> helper;
                             CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
-                            helper->ParseIntent(res, IXmlPullParser::Probe(parser), attrs, (IIntent**)&tile->mIntent);
+                            helper->ParseIntent(res, parser, attrs, (IIntent**)&tile->mIntent);
                         }
                         else {
-                            XmlUtils::SkipCurrentTag(IXmlPullParser::Probe(parser));
+                            XmlUtils::SkipCurrentTag(parser);
                         }
                     }
 
@@ -1421,14 +1412,14 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 
                 }
                 else {
-                    XmlUtils::SkipCurrentTag(IXmlPullParser::Probe(parser));
+                    XmlUtils::SkipCurrentTag(parser);
                 }
             }
 
-            target->Add((IObject*)category);
+            target->Add((IObject*)category.Get());
         }
         else {
-            XmlUtils::SkipCurrentTag(IXmlPullParser::Probe(parser));
+            XmlUtils::SkipCurrentTag(parser);
         }
     }
 
@@ -1437,7 +1428,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
     // } catch (IOException e) {
     //     throw new RuntimeException("Error parsing categories", e);
     // } finally {
-    if (parser != NULL) parser->Close();
+    if (resParser != NULL) resParser->Close();
     // }
     return NOERROR;
 }
