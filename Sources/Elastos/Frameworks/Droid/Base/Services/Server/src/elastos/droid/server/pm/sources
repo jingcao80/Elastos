@@ -43,3 +43,4 @@ SOURCES += PersistentPreferredIntentResolver.cpp
 SOURCES += PreferredComponent.cpp
 SOURCES += PreferredIntentResolver.cpp
 SOURCES += SELinuxMMAC.cpp
+SOURCES += DexFile.cpp

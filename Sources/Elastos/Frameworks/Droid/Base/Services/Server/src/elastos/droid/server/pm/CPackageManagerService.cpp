@@ -4,6 +4,7 @@
 #include "elastos/droid/server/pm/SELinuxMMAC.h"
 #include "elastos/droid/server/pm/CParcelFileDescriptorFactory.h"
 #include "elastos/droid/server/pm/CPackageInstallObserver2.h"
+#include "elastos/droid/server/pm/DexFile.h"
 #include "elastos/droid/server/SystemConfig.h"
 #include "elastos/droid/server/ServiceThread.h"
 #include "elastos/droid/Manifest.h"
@@ -9980,10 +9981,9 @@ Int32 CPackageManagerService::PerformDexOptLI(
             // compiled against an old image). It will return PATCHOAT_NEEDED if we can find a
             // odex file and it matches the checksum of the image but not its base address,
             // meaning we need to move it.
-            // TODO:
-            // Byte isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
-            //         pkg.packageName, dexCodeInstructionSet, defer);
-            if (forceDex /*|| (!defer && isDexOptNeeded == DexFile.DEXOPT_NEEDED)*/) {
+            Byte isDexOptNeeded = DexFile::IsDexOptNeededInternal(path,
+                    pkg->mPackageName, dexCodeInstructionSet, defer);
+            if (forceDex || (!defer && isDexOptNeeded == DexFile::DEXOPT_NEEDED)) {
                 String packageName;
                 IPackageItemInfo::Probe(pkg->mApplicationInfo)->GetPackageName(&packageName);
                 Logger::I(TAG, "Running dexopt on: %s pkg=%s isa=%s vmSafeMode=%d"
@@ -10003,7 +10003,7 @@ Int32 CPackageManagerService::PerformDexOptLI(
 
                 performedDexOpt = TRUE;
             }
-            else if (!defer /*&& isDexOptNeeded == DexFile.PATCHOAT_NEEDED*/) {
+            else if (!defer && isDexOptNeeded == DexFile::PATCHOAT_NEEDED) {
                 String packageName;
                 IPackageItemInfo::Probe(pkg->mApplicationInfo)->GetPackageName(&packageName);
                 Logger::I(TAG, "Running patchoat on: %s", packageName.string());
@@ -10026,7 +10026,7 @@ Int32 CPackageManagerService::PerformDexOptLI(
             // We're deciding to defer a needed dexopt. Don't bother dexopting for other
             // paths and instruction sets. We'll deal with them all together when we process
             // our list of deferred dexopts.
-            if (defer /*&& isDexOptNeeded != DexFile.UP_TO_DATE*/) {
+            if (defer && isDexOptNeeded != DexFile::UP_TO_DATE) {
                 if (mDeferredDexOpt == NULL) {
                     mDeferredDexOpt = new HashSet<AutoPtr<PackageParser::Package> >();
                 }
