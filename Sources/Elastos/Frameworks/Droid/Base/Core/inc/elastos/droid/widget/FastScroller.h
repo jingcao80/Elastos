@@ -132,7 +132,9 @@ public:
     };
 
 public:
-    FastScroller(
+    FastScroller();
+
+    CARAPI constructor(
         /* [in] */ IAbsListView* listView,
         /* [in] */ Int32 styleResId);
 
@@ -471,7 +473,7 @@ private:
     AutoPtr<IRect> mTempMargins; // = new Rect();
     AutoPtr<IRect> mContainerRect; // = new Rect();
 
-    AutoPtr<IAbsListView> mList; //
+    IAbsListView* mList; //
     AutoPtr<IViewGroupOverlay> mOverlay; //
     AutoPtr<ITextView> mPrimaryText; //
     AutoPtr<ITextView> mSecondaryText; //

@@ -3351,7 +3351,8 @@ void AbsListView::SetFastScrollerEnabledUiThread(
         mFastScroll->SetEnabled(enabled);
     }
     else if (enabled) {
-        mFastScroll = new FastScroller(this, mFastScrollStyle);
+        mFastScroll = new FastScroller();
+        mFastScroll->constructor(this, mFastScrollStyle);
         mFastScroll->SetEnabled(TRUE);
     }
 

@@ -764,6 +764,9 @@ ECode ObjectAnimator::AnimateValue(
         Cancel();
         return NOERROR;
     }
+    else if (mTarget == NULL && target == NULL) {
+        return NOERROR;
+    }
 
     ValueAnimator::AnimateValue(fraction);
     Int32 numValues = mValues->GetLength();

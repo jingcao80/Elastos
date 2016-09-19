@@ -264,9 +264,7 @@ AutoPtr<IProperty> FastScroller::TOP = new FastScroller::TopProperty(String("top
 AutoPtr<IProperty> FastScroller::RIGHT = new FastScroller::RightProperty(String("right"));
 AutoPtr<IProperty> FastScroller::BOTTOM = new FastScroller::BottomProperty(String("bottom"));
 
-FastScroller::FastScroller(
-    /* [in] */ IAbsListView* listView,
-    /* [in] */ Int32 styleResId)
+FastScroller::FastScroller()
     : mPreviewPadding(0)
     , mPreviewMinWidth(0)
     , mPreviewMinHeight(0)
@@ -295,6 +293,12 @@ FastScroller::FastScroller(
     , mPendingDrag(-1)
     , mOldItemCount(0)
     , mOldChildCount(0)
+{
+}
+
+ECode FastScroller::constructor(
+    /* [in] */ IAbsListView* listView,
+    /* [in] */ Int32 styleResId)
 {
     CRect::New((IRect**)&mTempBounds);
     CRect::New((IRect**)&mTempMargins);
@@ -348,6 +352,7 @@ FastScroller::FastScroller(
     IView::Probe(listView)->GetVerticalScrollbarPosition(&position);
     SetScrollbarPosition(position);
     PostAutoHide();
+    return NOERROR;
 }
 
 void FastScroller::SetStyle(
@@ -750,7 +755,7 @@ Boolean FastScroller::OnTouchEvent(
                     // be other classes that don't properly reset on touch-up,
                     // so do this explicitly just in case.
                     IViewParent::Probe(mList)->RequestDisallowInterceptTouchEvent(FALSE);
-                    ((AbsListView*)mList.Get())->ReportScrollStateChange(IAbsListViewOnScrollListener::SCROLL_STATE_IDLE);
+                    ((AbsListView*)mList)->ReportScrollStateChange(IAbsListViewOnScrollListener::SCROLL_STATE_IDLE);
                 }
 
                 SetState(STATE_VISIBLE);
@@ -1280,6 +1285,8 @@ void FastScroller::TransitionToVisible()
     if (mDecorAnimation != NULL) {
         IAnimator::Probe(mDecorAnimation)->Cancel();
     }
+
+    assert(mThumbImage && mTrackImage && mPreviewImage && mPrimaryText && mSecondaryText);
 
     AutoPtr<ArrayOf<IView*> > params1 = ArrayOf<IView*>::Alloc(2);
     params1->Set(0, IView::Probe(mThumbImage));
@@ -1837,7 +1844,7 @@ void FastScroller::BeginDrag()
 
     if (mList != NULL) {
        IViewParent::Probe(mList)->RequestDisallowInterceptTouchEvent(TRUE);
-       ((AbsListView*)mList.Get())->ReportScrollStateChange(IAbsListViewOnScrollListener::SCROLL_STATE_TOUCH_SCROLL);
+       ((AbsListView*)mList)->ReportScrollStateChange(IAbsListViewOnScrollListener::SCROLL_STATE_TOUCH_SCROLL);
     }
 
     CancelFling();
