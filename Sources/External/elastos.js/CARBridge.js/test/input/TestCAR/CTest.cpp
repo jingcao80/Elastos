@@ -9,7 +9,7 @@
 
 #include "CTest.h"
 
-#include "TypeTraits.h"
+#include "../../type-traits.h"
 
 
 
@@ -63,7 +63,7 @@ inline ECode CTest::Output(ITest *itest, size_t indent = 0)
 
 ECode CTest::TestSelf(void)
 {
-    return TestNonarray<ITest *, &Output>(this, "ITest");
+    return TestNonarray<ITest *, &Output>(this, "Interface (ITest *)");
 }
 
 ECode CTest::TestVoid(void)
@@ -121,7 +121,7 @@ ECode CTest::TestInt64(
 
 inline ECode CTest::Output(Byte byte, size_t indent = 0)
 {
-    if (fprintf(_output, "\'%c\'", byte) < 0)
+    if (fprintf(_output, "%u", byte) < 0)
         return E_FAIL;
 
     return NOERROR;
@@ -267,7 +267,7 @@ ECode CTest::Output(EGuid const &id, size_t indent = 0)
     if (fprintf(_output, "%*c  \"mUunm\": \"%s\",\n", indent, ' ', id.mUunm) < 0)
         return E_FAIL;
 
-    if (fprintf(_output, "%*c  \"mCarcode\": %u,\n", indent, ' ', id.mCarcode) < 0)
+    if (fprintf(_output, "%*c  \"mCarcode\": %u\n", indent, ' ', id.mCarcode) < 0)
         return E_FAIL;
 
     if (fprintf(_output, "%*c}", indent, ' ') < 0)
@@ -314,13 +314,13 @@ ECode CTest::OutputETest(ETest etest, size_t indent = 0)
 {
     switch (etest) {
     case ETest_0:
-        if (fprintf(_output, "ETest_0") < 0)
+        if (fprintf(_output, "\"ETest_0\"") < 0)
             return E_FAIL;
 
         break;
 
     case ETest_1:
-        if (fprintf(_output, "ETest_1") < 0)
+        if (fprintf(_output, "\"ETest_1\"") < 0)
             return E_FAIL;
 
         break;
@@ -1032,7 +1032,7 @@ ECode CTest::TestStruct(
 ECode CTest::TestInterface(
         /* [in] */ ITest *itest)
 {
-    return TestNonarray<ITest *, &Output>(itest, "Interface (ITest)");
+    return TestNonarray<ITest *, &Output>(itest, "Interface (ITest *)");
 }
 
 ECode CTest::Lock()
