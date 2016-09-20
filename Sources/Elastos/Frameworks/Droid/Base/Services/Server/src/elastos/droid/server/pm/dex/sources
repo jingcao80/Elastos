@@ -1,0 +1,13 @@
+
+TARGET_NAME= dex
+TARGET_TYPE= lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../../Core/inc/
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = OatFile.cpp

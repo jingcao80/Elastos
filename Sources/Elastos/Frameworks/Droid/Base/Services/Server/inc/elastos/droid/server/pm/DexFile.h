@@ -109,9 +109,29 @@ public:
     static CARAPI_(Boolean) IsMagicValid(
         /* [in] */ const Byte* magic);
 
+    // Returns true if the byte string after the magic is the correct value.
+    static CARAPI_(Boolean) IsVersionValid(
+        /* [in] */ const Byte* magic);
+
     CARAPI_(Byte*) Begin() const;
 
     CARAPI_(size_t) Size() const;
+
+    // Returns the canonical form of the given dex location.
+    //
+    // There are different flavors of "dex locations" as follows:
+    // the file name of a dex file:
+    //     The actual file path that the dex file has on disk.
+    // dex_location:
+    //     This acts as a key for the class linker to know which dex file to load.
+    //     It may correspond to either an old odex file or a particular dex file
+    //     inside an oat file. In the first case it will also match the file name
+    //     of the dex file. In the second case (oat) it will include the file name
+    //     and possibly some multidex annotation to uniquely identify it.
+    // canonical_dex_location:
+    //     the dex_location where it's file name part has been made canonical.
+    static CARAPI_(String) GetDexCanonicalLocation(
+        /* [in] */ const char* dex_location);
 
     // from class_linker.h in art
 

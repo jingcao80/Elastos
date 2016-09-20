@@ -44,4 +44,5 @@ SOURCES += PreferredComponent.cpp
 SOURCES += PreferredIntentResolver.cpp
 SOURCES += SELinuxMMAC.cpp
 SOURCES += DexFile.cpp
-#SOURCES += $(MAKEDIR)/OatFile.cpp
+
+ELASTOS_LIBS += dex/dex.lib

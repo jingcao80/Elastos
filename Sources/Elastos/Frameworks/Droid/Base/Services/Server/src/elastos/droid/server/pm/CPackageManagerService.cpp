@@ -8046,7 +8046,7 @@ ECode CPackageManagerService::QueryIntentActivityOptions(
         if (actions == NULL) {
             continue;
         }
-        for (Int32 j; j < actions->GetLength(); ++j) {
+        for (Int32 j = 0; j < actions->GetLength(); ++j) {
             const String& action = (*actions)[j];
             if (!resultsAction.IsNull() && resultsAction.Equals(action)) {
                 // If this action was explicitly requested, then don't

@@ -1,8 +1,12 @@
 
+#include "elastos/droid/server/pm/DexFile.h"
 #include "elastos/droid/server/pm/dex/OatFile.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <dlfcn.h>
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
 
@@ -10,6 +14,27 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Pm {
+namespace Dex {
+
+Boolean ReadFileToString(const String& file_name, String* result);
+// {
+//   std::unique_ptr<File> file(new File);
+//   if (!file->Open(file_name, O_RDONLY)) {
+//     return false;
+//   }
+
+//   std::vector<char> buf(8 * KB);
+//   while (true) {
+//     int64_t n = TEMP_FAILURE_RETRY(read(file->Fd(), &buf[0], buf.size()));
+//     if (n == -1) {
+//       return false;
+//     }
+//     if (n == 0) {
+//       return true;
+//     }
+//     result->append(&buf[0], n);
+//   }
+// }
 
 void OatFile::CheckLocation(
     /* [in] */ const String& location)
@@ -22,38 +47,45 @@ void OatFile::CheckLocation(
 AutoPtr<OatFile> OatFile::Open(
     /* [in] */ const String& filename,
     /* [in] */ const String& location,
-    /* [in] */ byte* requested_base,
+    /* [in] */ Byte* requested_base,
     /* [in] */ Boolean executable,
-    /* [in] */ const String& error_msg)
+    /* [out] */ String* error_msg)
 {
     CheckLocation(filename);
     AutoPtr<OatFile> ret;
-    if (kUsePortableCompiler && executable) {
-      // If we are using PORTABLE, use dlopen to deal with relocations.
-      //
-      // We use our own ELF loader for Quick to deal with legacy apps that
-      // open a generated dex file by name, remove the file, then open
-      // another generated dex file with the same name. http://b/10614658
-      ret = OpenDlopen(filename, location, requested_base, error_msg);
+    if (sUsePortableCompiler && executable) {
+        // If we are using PORTABLE, use dlopen to deal with relocations.
+        //
+        // We use our own ELF loader for Quick to deal with legacy apps that
+        // open a generated dex file by name, remove the file, then open
+        // another generated dex file with the same name. http://b/10614658
+        ret = OpenDlopen(filename, location, requested_base, error_msg);
     }
     else {
-      // If we aren't trying to execute, we just use our own ElfFile loader for a couple reasons:
-      //
-      // On target, dlopen may fail when compiling due to selinux restrictions on installd.
-      //
-      // On host, dlopen is expected to fail when cross compiling, so fall back to OpenElfFile.
-      // This won't work for portable runtime execution because it doesn't process relocations.
-      std::unique_ptr<File> file(OS::OpenFileForReading(filename.c_str()));
-      if (file.get() == NULL) {
-        *error_msg = StringPrintf("Failed to open oat filename for reading: %s", strerror(errno));
-        return nullptr;
-      }
-      ret.reset(OpenElfFile(file.get(), location, requested_base, false, executable, error_msg));
-      // It would be nice to unlink here. But we might have opened the file created by the
-      // ScopedLock, which we better not delete to avoid races. TODO: Investigate how to fix the API
-      // to allow removal when we know the ELF must be borked.
+//        // If we aren't trying to execute, we just use our own ElfFile loader for a couple reasons:
+//        //
+//        // On target, dlopen may fail when compiling due to selinux restrictions on installd.
+//        //
+//        // On host, dlopen is expected to fail when cross compiling, so fall back to OpenElfFile.
+//        // This won't work for portable runtime execution because it doesn't process relocations.
+//        std::unique_ptr<File> file(OS::OpenFileForReading(filename.c_str()));
+//        if (file.get() == NULL) {
+//          String msg("");
+//          msg.AppendFormat("Failed to open oat filename for reading: %s", strerror(errno));
+//          *error_msg = msg;
+//          return NULL;
+//        }
+//        ret.reset(OpenElfFile(file.get(), location, requested_base, false, executable, error_msg));
+//        // It would be nice to unlink here. But we might have opened the file created by the
+//        // ScopedLock, which we better not delete to avoid races. TODO: Investigate how to fix the API
+//        // to allow removal when we know the ELF must be borked.
     }
     return ret;
+}
+
+String OatFile::GetLocation() const
+{
+    return mLocation;
 }
 
 AutoPtr<OatFile> OatFile::OpenDlopen(
@@ -78,7 +110,7 @@ OatFile::OatFile(
     , mEnd(NULL)
     , mIsExecutable(is_executable)
     , mDlopenHandle(NULL)
-    , secondary_lookup_lock_("OatFile secondary lookup lock", kOatFileSecondaryLookupLock)
+    // , secondary_lookup_lock_("OatFile secondary lookup lock", kOatFileSecondaryLookupLock)
 {
     CheckLocation(mLocation);
 }
@@ -90,53 +122,42 @@ Boolean OatFile::Dlopen(
 {
     char* absolute_path = realpath(elf_filename.string(), NULL);
     if (absolute_path == NULL) {
-        StringBuilder sb(512);
-        sb += "Failed to find absolute path for '";
-        sb += elf_filename;
-        sb += "'";
-        *error_msg = sb.ToString();
+        String msg("");
+        msg.AppendFormat("Failed to find absolute path for '%s'", elf_filename.string());
+        *error_msg = msg;
         return FALSE;
     }
     mDlopenHandle = dlopen(absolute_path, RTLD_NOW);
     free(absolute_path);
     if (mDlopenHandle == NULL) {
-        StringBuilder sb(512);
-        sb += "Failed to dlopen '";
-        sb += elf_filename;
-        sb += "': ";
-        sb += dlerror();
-        *error_msg = sb.ToString();
+        String msg("");
+        msg.AppendFormat("Failed to dlopen '%s': %s", elf_filename.string(), dlerror());
+        *error_msg = msg;
         return FALSE;
     }
     mBegin = reinterpret_cast<Byte*>(dlsym(mDlopenHandle, "oatdata"));
     if (mBegin == NULL) {
-        StringBuilder sb(512);
-        sb += "Failed to find oatdata symbol in '";
-        sb += elf_filename;
-        sb += "': ";
-        sb += dlerror();
-        *error_msg = sb.ToString();
+        String msg("");
+        msg.AppendFormat("Failed to find oatdata symbol in '%s': %s", elf_filename.string(),
+                dlerror());
+        *error_msg = msg;
         return FALSE;
     }
     if (requested_base != NULL && mBegin != requested_base) {
-        StringBuilder sb(512);
-        sb += "Failed to find oatdata symbol at expected address: oatdata=";
-        sb += mBegin;
-        sb += " != expected=";
-        sb += requested_base;
-        sb += " /proc/self/maps:\n"
-        *error_msg = sb.ToString();
-        ReadFileToString("/proc/self/maps", error_msg);
+        String msg("");
+        msg.AppendFormat("Failed to find oatdata symbol at expected address: "
+                "oatdata=%p != expected=%p /proc/self/maps:\n",
+                mBegin, requested_base);
+        *error_msg = msg;
+        ReadFileToString(String("/proc/self/maps"), error_msg);
         return FALSE;
     }
     mEnd = reinterpret_cast<byte*>(dlsym(mDlopenHandle, "oatlastword"));
     if (mEnd == NULL) {
-        StringBuilder sb(512);
-        sb += "Failed to find oatlastword symbol in '";
-        sb += elf_filename;
-        sb += "': ";
-        sb += dlerror();
-        *error_msg = sb.ToString();
+        String msg("");
+        msg.AppendFormat("Failed to find oatlastword symbol in '%s': %s", elf_filename.string(),
+                dlerror());
+        *error_msg = msg;
         return FALSE;
     }
     // Readjust to be non-inclusive upper bound.
@@ -279,20 +300,18 @@ Boolean OatFile::Setup(
         String canonicalLocation = DexFile::GetDexCanonicalLocation(dexFileLocation.string());
 
         // Create the OatDexFile and add it to the owning container.
-        OatDexFile* oat_dex_file = new OatDexFile(this,
-                                                  dex_file_location,
-                                                  canonical_location,
-                                                  dex_file_checksum,
-                                                  dex_file_pointer,
-                                                  methods_offsets_pointer);
-        oat_dex_files_storage_.push_back(oat_dex_file);
+        AutoPtr<OatDexFile> oatDexFile = new OatDexFile(this,
+                                                  dexFileLocation,
+                                                  canonicalLocation,
+                                                  dexFileChecksum,
+                                                  dexFilePointer,
+                                                  methodsOffsetsPointer);
+        mOatDexFilesStorage.PushBack(oatDexFile);
 
         // Add the location and canonical location (if different) to the oat_dex_files_ table.
-        StringPiece key(oat_dex_file->GetDexFileLocation());
-        oat_dex_files_.Put(key, oat_dex_file);
-        if (canonical_location != dex_file_location) {
-          StringPiece canonical_key(oat_dex_file->GetCanonicalDexFileLocation());
-          oat_dex_files_.Put(canonical_key, oat_dex_file);
+        mOatDexFiles[oatDexFile->GetDexFileLocation()] = oatDexFile;
+        if (!canonicalLocation.Equals(dexFileLocation)) {
+            mOatDexFiles[oatDexFile->GetCanonicalDexFileLocation()] = oatDexFile;
         }
     }
     return TRUE;
@@ -303,6 +322,80 @@ const OatHeader& OatFile::GetOatHeader() const
     return *reinterpret_cast<const OatHeader*>(Begin());
 }
 
+AutoPtr<OatFile::OatDexFile> OatFile::GetOatDexFile(
+    /* [in] */ const char* dex_location,
+    /* [in] */ const uint32_t* const dex_location_checksum,
+    /* [in] */ Boolean exception_if_not_found) const
+{
+    // NOTE: We assume here that the canonical location for a given dex_location never
+    // changes. If it does (i.e. some symlink used by the filename changes) we may return
+    // an incorrect OatDexFile. As long as we have a checksum to check, we shall return
+    // an identical file or fail; otherwise we may see some unpredictable failures.
+
+    // TODO: Additional analysis of usage patterns to see if this can be simplified
+    // without any performance loss, for example by not doing the first lock-free lookup.
+
+    AutoPtr<OatDexFile> oat_dex_file;
+    String key(dex_location);
+    // Try to find the key cheaply in the oat_dex_files_ map which holds dex locations
+    // directly mentioned in the oat file and doesn't require locking.
+    HashMap<String, AutoPtr<OatDexFile> >::ConstIterator primary_it = mOatDexFiles.Find(key);
+    if (primary_it != mOatDexFiles.End()) {
+        oat_dex_file = primary_it->mSecond;
+        assert(oat_dex_file != NULL);
+    }
+    else {
+        // This dex_location is not one of the dex locations directly mentioned in the
+        // oat file. The correct lookup is via the canonical location but first see in
+        // the secondary_oat_dex_files_ whether we've looked up this location before.
+        AutoLock lock(mSecondaryLookupLock);
+        HashMap<String, AutoPtr<OatDexFile> >::Iterator secondary_lb = mSecondaryOatDexFiles.Find(key);
+        if (secondary_lb != mSecondaryOatDexFiles.End()) {
+            oat_dex_file = secondary_lb->mSecond;  // May be nullptr.
+        }
+        else {
+            // We haven't seen this dex_location before, we must check the canonical location.
+            String dex_canonical_location = DexFile::GetDexCanonicalLocation(dex_location);
+            if (!dex_canonical_location.Equals(dex_location)) {
+                HashMap<String, AutoPtr<OatDexFile> >::ConstIterator canonical_it = mOatDexFiles.Find(dex_canonical_location);
+                if (canonical_it != mOatDexFiles.End()) {
+                    oat_dex_file = canonical_it->mSecond;
+                }  // else keep nullptr.
+            }  // else keep nullptr.
+
+            mSecondaryOatDexFiles[key] = oat_dex_file;
+        }
+    }
+    if (oat_dex_file != NULL &&
+            (dex_location_checksum == NULL ||
+            oat_dex_file->GetDexFileLocationChecksum() == *dex_location_checksum)) {
+        return oat_dex_file;
+    }
+
+    if (exception_if_not_found) {
+        String dex_canonical_location = DexFile::GetDexCanonicalLocation(dex_location);
+        String checksum("<unspecified>");
+        if (dex_location_checksum != NULL) {
+            checksum = "";
+            checksum.AppendFormat("0x%08x", *dex_location_checksum);
+        }
+        Slogger::W("OatFile", "Failed to find OatDexFile for DexFile %s ( canonical path %s) with checksum %s in OatFile %s",
+                dex_location, dex_canonical_location.string(), checksum.string(), GetLocation().string());
+        if (sIsDebug) {
+            Vector< AutoPtr<OatDexFile> >::ConstIterator it;
+            for (it = mOatDexFilesStorage.Begin(); it != mOatDexFilesStorage.End(); ++it) {
+                OatDexFile* odf = *it;
+                Slogger::W("OatFile", "OatFile %s contains OatDexFile %s (canonical path %s) with checksum 0x%08x",
+                        GetLocation().string(), odf->GetDexFileLocation().string(),
+                        odf->GetCanonicalDexFileLocation().string(), odf->GetDexFileLocationChecksum());
+            }
+        }
+    }
+
+    return NULL;
+}
+
+} // namespace Dex
 } // namespace Pm
 } // namespace Server
 } // namespace Droid

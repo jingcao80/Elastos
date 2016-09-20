@@ -226,6 +226,16 @@ static Byte IsDexOptNeededForFile(
     /* [in] */ const char* filename,
     /* [in] */ DexFile::InstructionSet target_instruction_set)
 {
+    Slogger::D("chenxihao", "IsDexOptNeededForFile oat_filename = %s, filename = %s", oat_filename.string(), filename);
+    AutoPtr<IFile> file;
+    CFile::New(oat_filename, (IFile**)&file);
+    Boolean isExists;
+    file->Exists(&isExists);
+    if (isExists) {
+        return DexFile::UP_TO_DATE;
+    }
+    return DexFile::DEXOPT_NEEDED;
+
     String error_msg;
     AutoPtr<OatFile> oat_file = OatFile::Open(oat_filename, oat_filename, NULL, FALSE, &error_msg);
     if (oat_file == NULL) {
@@ -595,7 +605,6 @@ AutoPtr<DexFile> DexFile::OpenFile(
     assert(location != NULL);
     AutoPtr<MemMap> map;
 
-    Int32 delayed_close = fd;
     struct stat sbuf;
     memset(&sbuf, 0, sizeof(sbuf));
     if (fstat(fd, &sbuf) == -1) {

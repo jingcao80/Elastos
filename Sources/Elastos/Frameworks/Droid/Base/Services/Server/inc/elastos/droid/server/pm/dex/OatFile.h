@@ -2,10 +2,13 @@
 #ifndef __ELASTOS_DROID_SERVER_PM_DEX_OATFILE_H__
 #define __ELASTOS_DROID_SERVER_PM_DEX_OATFILE_H__
 
+#include <elastos/droid/server/pm/dex/Oat.h>
 #include <elastos/core/Object.h>
+#include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/Vector.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::Vector;
 
 namespace Elastos {
@@ -23,8 +26,22 @@ public:
         // Returns original path of DexFile that was the source of this OatDexFile.
         CARAPI_(String) GetDexFileLocation() const;
 
+        // Returns the canonical location of DexFile that was the source of this OatDexFile.
+        CARAPI_(String) GetCanonicalDexFileLocation() const;
+
         // Returns checksum of original DexFile that was the source of this OatDexFile;
         CARAPI_(uint32_t) GetDexFileLocationChecksum() const;
+
+    private:
+        OatDexFile(
+            /* [in] */ const OatFile* oat_file,
+            /* [in] */ const String& dex_file_location,
+            /* [in] */ const String& canonical_dex_file_location,
+            /* [in] */ uint32_t dex_file_checksum,
+            /* [in] */ const Byte* dex_file_pointer,
+            /* [in] */ const uint32_t* oat_class_offsets_pointer);
+
+        friend class OatFile;
     };
 
 public:
@@ -39,7 +56,7 @@ public:
 
     CARAPI_(String) GetLocation() const;
 
-    // const CARAPI_(OatHeader&) GetOatHeader() const;
+    CARAPI_(const OatHeader&) GetOatHeader() const;
 
     CARAPI_(AutoPtr<OatDexFile>) GetOatDexFile(
         /* [in] */ const char* dex_location,
@@ -47,6 +64,8 @@ public:
         /* [in] */ Boolean exception_if_not_found = TRUE) const;
 
     CARAPI_(Vector< AutoPtr<OatDexFile> >&) GetOatDexFiles() const;
+
+    CARAPI_(size_t) Size() const;
 
     CARAPI_(Byte*) Begin() const;
 
@@ -95,8 +114,29 @@ private:
     // Owning storage for the OatDexFile objects.
     Vector< AutoPtr<OatDexFile> > mOatDexFilesStorage;
 
+    // Map each location and canonical location (if different) retrieved from the
+    // oat file to its OatDexFile. This map doesn't change after it's constructed in Setup()
+    // and therefore doesn't need any locking and provides the cheapest dex file lookup
+    // for GetOatDexFile() for a very frequent use case. Never contains a nullptr value.
+    HashMap<String, AutoPtr<OatDexFile> > mOatDexFiles;
+
     // Lock guarding all members needed for secondary lookup in GetOatDexFile().
-    // mutable Mutex secondary_lookup_lock_ DEFAULT_MUTEX_ACQUIRED_AFTER;
+    mutable Object mSecondaryLookupLock;
+
+    // If the primary oat_dex_files_ lookup fails, use a secondary map. This map stores
+    // the results of all previous secondary lookups, whether successful (non-null) or
+    // failed (null). If it doesn't contain an entry we need to calculate the canonical
+    // location and use oat_dex_files_by_canonical_location_.
+    mutable HashMap<String, AutoPtr<OatDexFile> > mSecondaryOatDexFiles;
+
+    // from globals.h in art
+#if defined(ART_USE_PORTABLE_COMPILER)
+    static const Boolean sUsePortableCompiler = TRUE;
+#else
+    static const Boolean sUsePortableCompiler = FALSE;
+#endif
+
+    static const Boolean sIsDebug;
 };
 
 } // namespace Dex
