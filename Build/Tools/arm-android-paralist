@@ -46,6 +46,7 @@
 > Elastos/LibCore/src/elastos/io
   Elastos/LibCore/src/elastos/math
   Elastos/LibCore/src/elastos/security/cert
+  Elastos/LibCore/src/elastos/security/spec
 > Elastos/LibCore/src/elastos/security
   Elastos/LibCore/src/elastos/sql/sqlite/jdbc
 > Elastos/LibCore/src/elastos/sql/sqlite

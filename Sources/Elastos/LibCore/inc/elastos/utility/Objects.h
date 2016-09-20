@@ -13,7 +13,7 @@ namespace Utility {
  * Utility methods for objects.
  * @since 1.7
  */
-class ECO_PUBLIC Objects {
+class Objects {
 public:
     /**
      * Returns 0 if {@code a == b}, or {@code c.compare(a, b)} otherwise.
