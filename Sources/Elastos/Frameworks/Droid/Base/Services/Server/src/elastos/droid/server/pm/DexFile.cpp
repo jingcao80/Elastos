@@ -1,16 +1,24 @@
 
 #include "elastos/droid/server/pm/DexFile.h"
+#include "elastos/droid/server/pm/dex/DexFileVerifier.h"
+#include "elastos/droid/server/pm/dex/ZipArchive.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
 #include <Elastos.CoreLibrary.IO.h>
+#include <fcntl.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
+using Elastos::Droid::Server::Pm::Dex::DexFileVerifier;
+using Elastos::Droid::Server::Pm::Dex::MemMap;
+using Elastos::Droid::Server::Pm::Dex::ZipArchive;
+using Elastos::Droid::Server::Pm::Dex::ZipEntry;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
-using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -31,69 +39,58 @@ const Byte DexFile::DEXOPT_NEEDED;
 static const String TAG("DexFile");
 static const AutoPtr<ArrayOf<String> > sBootClassPath = InitBootClassPath();
 
-// Spammy logging for kUpToDate
+// Spammy logging for DexFile::UP_TO_DATE
 static const Boolean kVerboseLogging = FALSE;
-// Logging of reason for returning kDexoptNeeded or kPatchoatNeeded.
+// Logging of reason for returning DEXOPT_NEEDED or kPatchoatNeeded.
 static const Boolean kReasonLogging = TRUE;
 
-enum InstructionSet {
-  kNone,
-  kArm,
-  kArm64,
-  kThumb2,
-  kX86,
-  kX86_64,
-  kMips,
-  kMips64
-};
-
 static const char* GetInstructionSetString(
-    /* [in] */ const InstructionSet isa)
+    /* [in] */ const DexFile::InstructionSet isa)
 {
     switch (isa) {
-        case kArm:
-        case kThumb2:
+        case DexFile::kArm:
+        case DexFile::kThumb2:
             return "arm";
-        case kArm64:
+        case DexFile::kArm64:
             return "arm64";
-        case kX86:
+        case DexFile::kX86:
             return "x86";
-        case kX86_64:
+        case DexFile::kX86_64:
             return "x86_64";
-        case kMips:
+        case DexFile::kMips:
             return "mips";
-        case kNone:
+        case DexFile::kNone:
             return "none";
         default:
-            Logger::D(TAG, "Unknown ISA %d", isa);
+            Slogger::D(TAG, "Unknown ISA %d", isa);
             return NULL;
     }
 }
 
-static InstructionSet GetInstructionSetFromString(
+static DexFile::InstructionSet GetInstructionSetFromString(
     /* [in] */ const char* isa_str)
 {
     if (strcmp("arm", isa_str) == 0) {
-        return kArm;
+        return DexFile::kArm;
     }
     else if (strcmp("arm64", isa_str) == 0) {
-        return kArm64;
+        return DexFile::kArm64;
     }
     else if (strcmp("x86", isa_str) == 0) {
-        return kX86;
+        return DexFile::kX86;
     }
     else if (strcmp("x86_64", isa_str) == 0) {
-        return kX86_64;
+        return DexFile::kX86_64;
     }
     else if (strcmp("mips", isa_str) == 0) {
-        return kMips;
+        return DexFile::kMips;
     }
 
-    return kNone;
+    return DexFile::kNone;
 }
 
 static void InsertIsaDirectory(
-    /* [in] */ const InstructionSet isa,
+    /* [in] */ const DexFile::InstructionSet isa,
     /* [in, out] */ String* filename)
 {
     // in = /foo/bar/baz
@@ -111,7 +108,7 @@ static void InsertIsaDirectory(
 
 static String DexFilenameToOdexFilename(
     /* [in] */ const String& location,
-    /* [in] */ const InstructionSet isa)
+    /* [in] */ const DexFile::InstructionSet isa)
 {
     // location = /foo/bar/baz.jar
     // odex_location = /foo/bar/<isa>/baz.odex
@@ -227,92 +224,86 @@ static Boolean GetDalvikCacheFilename(
 static Byte IsDexOptNeededForFile(
     /* [in] */ const String& oat_filename,
     /* [in] */ const char* filename,
-    /* [in] */ InstructionSet target_instruction_set)
+    /* [in] */ DexFile::InstructionSet target_instruction_set)
 {
-    Logger::D("chenxihao", "IsDexOptNeededForFile oat_filename = %s, filename = %s", oat_filename.string(), filename);
-    AutoPtr<IFile> file;
-    CFile::New(oat_filename, (IFile**)&file);
-    Boolean isExists;
-    file->Exists(&isExists);
-    if (isExists) {
-        return DexFile::UP_TO_DATE;
+    String error_msg;
+    AutoPtr<OatFile> oat_file = OatFile::Open(oat_filename, oat_filename, NULL, FALSE, &error_msg);
+    if (oat_file == NULL) {
+        if (kReasonLogging) {
+            Slogger::D("DexFile", "DexFile_isDexOptNeeded failed to open oat file '%s' for file location '%s: %s",
+                    oat_filename.string(), filename, error_msg.string());
+        }
+        return DexFile::DEXOPT_NEEDED;
     }
-    return DexFile::DEXOPT_NEEDED;
-    // String error_msg;
-    // std::unique_ptr<const OatFile> oat_file(OatFile::Open(oat_filename, oat_filename, nullptr,
-    //                                                         false, &error_msg));
-    // if (oat_file.get() == nullptr) {
-    //     if (kReasonLogging) {
-    //     LOG(INFO) << "DexFile_isDexOptNeeded failed to open oat file '" << oat_filename
-    //         << "' for file location '" << filename << "': " << error_msg;
-    //     }
-    //     error_msg.clear();
-    //     return kDexoptNeeded;
-    // }
-    // bool should_relocate_if_possible = Runtime::Current()->ShouldRelocate();
-    // uint32_t location_checksum = 0;
-    // const art::OatFile::OatDexFile* oat_dex_file = oat_file->GetOatDexFile(filename, nullptr,
-    //                                                                         kReasonLogging);
-    // if (oat_dex_file != nullptr) {
-    //     // If its not possible to read the classes.dex assume up-to-date as we won't be able to
-    //     // compile it anyway.
-    //     if (!DexFile::GetChecksum(filename, &location_checksum, &error_msg)) {
-    //     if (kVerboseLogging) {
-    //         LOG(INFO) << "DexFile_isDexOptNeeded found precompiled stripped file: "
-    //             << filename << " for " << oat_filename << ": " << error_msg;
-    //     }
-    //     if (ClassLinker::VerifyOatChecksums(oat_file.get(), target_instruction_set, &error_msg)) {
-    //         if (kVerboseLogging) {
-    //         LOG(INFO) << "DexFile_isDexOptNeeded file " << oat_filename
-    //                     << " is up-to-date for " << filename;
-    //         }
-    //         return kUpToDate;
-    //     } else if (should_relocate_if_possible &&
-    //                 ClassLinker::VerifyOatImageChecksum(oat_file.get(), target_instruction_set)) {
-    //         if (kReasonLogging) {
-    //         LOG(INFO) << "DexFile_isDexOptNeeded file " << oat_filename
-    //                     << " needs to be relocated for " << filename;
-    //         }
-    //         return kPatchoatNeeded;
-    //     } else {
-    //         if (kReasonLogging) {
-    //         LOG(INFO) << "DexFile_isDexOptNeeded file " << oat_filename
-    //                     << " is out of date for " << filename;
-    //         }
-    //         return kDexoptNeeded;
-    //     }
-    //     // If we get here the file is out of date and we should use the system one to relocate.
-    //     } else {
-    //     if (ClassLinker::VerifyOatAndDexFileChecksums(oat_file.get(), filename, location_checksum,
-    //                                                     target_instruction_set, &error_msg)) {
-    //         if (kVerboseLogging) {
-    //         LOG(INFO) << "DexFile_isDexOptNeeded file " << oat_filename
-    //                     << " is up-to-date for " << filename;
-    //         }
-    //         return kUpToDate;
-    //     } else if (location_checksum == oat_dex_file->GetDexFileLocationChecksum()
-    //                 && should_relocate_if_possible
-    //                 && ClassLinker::VerifyOatImageChecksum(oat_file.get(), target_instruction_set)) {
-    //         if (kReasonLogging) {
-    //         LOG(INFO) << "DexFile_isDexOptNeeded file " << oat_filename
-    //                     << " needs to be relocated for " << filename;
-    //         }
-    //         return kPatchoatNeeded;
-    //     } else {
-    //         if (kReasonLogging) {
-    //         LOG(INFO) << "DexFile_isDexOptNeeded file " << oat_filename
-    //                     << " is out of date for " << filename;
-    //         }
-    //         return kDexoptNeeded;
-    //     }
-    //     }
-    // } else {
-    //     if (kReasonLogging) {
-    //     LOG(INFO) << "DexFile_isDexOptNeeded file " << oat_filename
-    //                 << " does not contain " << filename;
-    //     }
-    //     return kDexoptNeeded;
-    // }
+    // Boolean should_relocate_if_possible = Runtime::Current()->ShouldRelocate();
+    uint32_t location_checksum = 0;
+    AutoPtr<OatFile::OatDexFile> oat_dex_file = oat_file->GetOatDexFile(filename, NULL, kReasonLogging);
+    if (oat_dex_file != NULL) {
+        // If its not possible to read the classes.dex assume up-to-date as we won't be able to
+        // compile it anyway.
+        if (!DexFile::GetChecksum(filename, &location_checksum, &error_msg)) {
+            if (kVerboseLogging) {
+                Slogger::D("DexFile", "DexFile_isDexOptNeeded found precompiled stripped file: %s for %s: %s",
+                        filename, oat_filename.string(), error_msg.string());
+            }
+            // if (ClassLinker::VerifyOatChecksums(oat_file, target_instruction_set, &error_msg)) {
+            //     if (kVerboseLogging) {
+            //         Slogger::D("DexFile", "DexFile_isDexOptNeeded file %s is up-to-date for %s",
+            //                 oat_filename.string(), filename);
+            //     }
+            //     return DexFile::UP_TO_DATE;
+            // }
+            // else if (should_relocate_if_possible &&
+            //         ClassLinker::VerifyOatImageChecksum(oat_file, target_instruction_set)) {
+            //     if (kReasonLogging) {
+            //         Slogger::D("DexFile", "DexFile_isDexOptNeeded file %s needs to be relocated for %s",
+            //                 oat_filename.string(), filename);
+            //     }
+            //     return kPatchoatNeeded;
+            // }
+            // else {
+                if (kReasonLogging) {
+                    Slogger::D("DexFile", "DexFile_isDexOptNeeded file %s is out of date for %s",
+                            oat_filename.string(), filename);
+                }
+                return DexFile::DEXOPT_NEEDED;
+            // }
+        // If we get here the file is out of date and we should use the system one to relocate.
+        }
+        else {
+            if (DexFile::VerifyOatAndDexFileChecksums(oat_file, filename, location_checksum,
+                    target_instruction_set, &error_msg)) {
+                if (kVerboseLogging) {
+                    Slogger::D("DexFile", "DexFile_isDexOptNeeded file %s is up-to-date for %s",
+                            oat_filename.string(), filename);
+                }
+                return DexFile::UP_TO_DATE;
+            }
+            // else if (location_checksum == oat_dex_file->GetDexFileLocationChecksum()
+            //             && should_relocate_if_possible
+            //             && ClassLinker::VerifyOatImageChecksum(oat_file, target_instruction_set)) {
+            //     if (kReasonLogging) {
+            //         Slogger::D("DexFile", "DexFile_isDexOptNeeded file %s needs to be relocated for %s",
+            //                 oat_filename.string(), filename);
+            //     }
+            //     return kPatchoatNeeded;
+            // }
+            else {
+                if (kReasonLogging) {
+                    Slogger::D("DexFile", "DexFile_isDexOptNeeded file %s is out of date for %s",
+                            oat_filename.string(), filename);
+                }
+                return DexFile::DEXOPT_NEEDED;
+            }
+        }
+    }
+    else {
+        if (kReasonLogging) {
+            Slogger::D("DexFile", "DexFile_isDexOptNeeded file %s does not contain %s",
+                    oat_filename.string(), filename);
+        }
+        return DexFile::DEXOPT_NEEDED;
+    }
 }
 
 Byte DexFile::IsDexOptNeededInternal(
@@ -328,7 +319,7 @@ Byte DexFile::IsDexOptNeededInternal(
         file->Exists(&isExists);
     }
     if (!isExists) {
-        Logger::E(TAG, "DexFile_isDexOptNeeded file '%s' does not exist", filename.string());
+        Slogger::E(TAG, "DexFile_isDexOptNeeded file '%s' does not exist", filename.string());
         // ScopedLocalRef<jclass> fnfe(env, env->FindClass("java/io/FileNotFoundException"));
         // const char* message = (filename == nullptr) ? "<empty file name>" : filename;
         // env->ThrowNew(fnfe.get(), message);
@@ -338,7 +329,7 @@ Byte DexFile::IsDexOptNeededInternal(
     for (Int32 i = 0; i < sBootClassPath->GetLength(); i++) {
         if ((*sBootClassPath)[i].Equals(filename)) {
             if (kVerboseLogging) {
-                Logger::D(TAG, "DexFile_isDexOptNeeded ignoring boot class path file: %s", filename.string());
+                Slogger::D(TAG, "DexFile_isDexOptNeeded ignoring boot class path file: %s", filename.string());
             }
             return UP_TO_DATE;
         }
@@ -462,7 +453,7 @@ Byte DexFile::IsDexOptNeededInternal(
         have_cache_filename = GetDalvikCacheFilename(filename, cache_dir.string(), &cache_filename,
                                                     &error_msg);
         if (!have_cache_filename && kVerboseLogging) {
-            Logger::I(TAG, "DexFile_isDexOptNeededInternal failed to find cache file for dex file %s: %s",
+            Slogger::I(TAG, "DexFile_isDexOptNeededInternal failed to find cache file for dex file %s: %s",
                 filename.string(), error_msg.string());
         }
     }
@@ -499,6 +490,243 @@ Byte DexFile::IsDexOptNeededInternal(
     // }
 
     return system_decision;
+}
+
+// from dex_file.cc from art
+
+static Int32 OpenAndReadMagic(const char* filename, uint32_t* magic, String* error_msg)
+{
+    assert(magic != NULL);
+    Int32 fd = open(filename, O_RDONLY, 0);
+    if (fd == -1) {
+        String msg("");
+        msg.AppendFormat("Unable to open '%s' : %s", filename, strerror(errno));
+        *error_msg = msg;
+        return -1;
+    }
+    Int32 n = TEMP_FAILURE_RETRY(read(fd, magic, sizeof(*magic)));
+    if (n != sizeof(*magic)) {
+        TEMP_FAILURE_RETRY(close(fd));
+        String msg("");
+        msg.AppendFormat("Failed to find magic in '%s'", filename);
+        *error_msg = msg;
+        return -1;
+    }
+    if (lseek(fd, 0, SEEK_SET) != 0) {
+        TEMP_FAILURE_RETRY(close(fd));
+        String msg("");
+        msg.AppendFormat("Failed to seek to beginning of file '%s' : %s", filename,
+                strerror(errno));
+        *error_msg = msg;
+        return -1;
+    }
+    return fd;
+}
+
+const byte DexFile::sDexMagic[] = { 'd', 'e', 'x', '\n' };
+const char* DexFile::sClassesDex = "classes.dex";
+const char DexFile::sMultiDexSeparator = ':';
+
+Boolean DexFile::GetChecksum(
+    /* [in] */ const char* filename,
+    /* [in] */ uint32_t* checksum,
+    /* [in] */ String* error_msg)
+{
+    assert(checksum != NULL);
+    uint32_t magic;
+
+    // Strip ":...", which is the location
+    const char* zip_entry_name = sClassesDex;
+    const char* file_part = filename;
+    String file_part_storage;
+
+    if (DexFile::IsMultiDexLocation(filename)) {
+        file_part_storage = GetBaseLocation(filename);
+        file_part = file_part_storage.string();
+        zip_entry_name = filename + file_part_storage.GetByteLength() + 1;
+        assert(zip_entry_name[-1] == sMultiDexSeparator);
+    }
+
+    Int32 fd = OpenAndReadMagic(file_part, &magic, error_msg);
+    if (fd == -1) {
+        assert(!error_msg->IsNullOrEmpty());
+        return FALSE;
+    }
+    if (IsZipMagic(magic)) {
+        AutoPtr<ZipArchive> zip_archive = ZipArchive::OpenFromFd(fd, filename, error_msg);
+        if (zip_archive == NULL) {
+            String msg("");
+            msg.AppendFormat("Failed to open zip archive '%s'", file_part);
+            *error_msg = msg;
+            return FALSE;
+        }
+        AutoPtr<ZipEntry> zip_entry = zip_archive->Find(zip_entry_name, error_msg);
+        if (zip_entry == NULL) {
+            String msg("");
+            msg.AppendFormat("Zip archive '%s' doesn't contain %s (error msg: %s)", file_part,
+                    zip_entry_name, error_msg->string());
+            *error_msg = msg;
+            return FALSE;
+        }
+        *checksum = zip_entry->GetCrc32();
+        return TRUE;
+    }
+    if (IsDexMagic(magic)) {
+        AutoPtr<DexFile> dex_file = DexFile::OpenFile(fd, filename, FALSE, error_msg);
+        if (dex_file == NULL) {
+            return FALSE;
+        }
+        *checksum = dex_file->GetHeader().mChecksum;
+        return TRUE;
+    }
+    TEMP_FAILURE_RETRY(close(fd));
+    String msg("");
+    msg.AppendFormat("Expected valid zip or dex file: '%s'", filename);
+    *error_msg = msg;
+    return FALSE;
+}
+
+AutoPtr<DexFile> DexFile::OpenFile(
+    /* [in] */ Int32 fd,
+    /* [in] */ const char* location,
+    /* [in] */ Boolean verify,
+    /* [in] */ String* error_msg)
+{
+    assert(location != NULL);
+    AutoPtr<MemMap> map;
+
+    Int32 delayed_close = fd;
+    struct stat sbuf;
+    memset(&sbuf, 0, sizeof(sbuf));
+    if (fstat(fd, &sbuf) == -1) {
+        if (fd != -1) TEMP_FAILURE_RETRY(close(fd));
+        String msg("");
+        msg.AppendFormat("DexFile: fstat '%s' failed: %s", location, strerror(errno));
+        *error_msg = msg;
+        return NULL;
+    }
+    if (S_ISDIR(sbuf.st_mode)) {
+        TEMP_FAILURE_RETRY(close(fd));
+        String msg("");
+        msg.AppendFormat("Attempt to mmap directory '%s'", location);
+        *error_msg = msg;
+        return NULL;
+    }
+    size_t length = sbuf.st_size;
+    map = MemMap::MapFile(length, PROT_READ, MAP_PRIVATE, fd, 0, location, error_msg);
+    if (map == NULL) {
+        TEMP_FAILURE_RETRY(close(fd));
+        assert(!error_msg->IsNullOrEmpty());
+        return NULL;
+    }
+
+    if (map->Size() < sizeof(DexFile::Header)) {
+        String msg("");
+        msg.AppendFormat("DexFile: failed to open dex file '%s' that is too short to have a header", location);
+        *error_msg = msg;
+        return NULL;
+    }
+
+    const Header* dex_header = reinterpret_cast<const Header*>(map->Begin());
+
+    AutoPtr<DexFile> dex_file = OpenMemory(String(location), dex_header->mChecksum, map, error_msg);
+    if (dex_file == NULL) {
+        String msg("");
+        msg.AppendFormat("Failed to open dex file '%s' from memory: %s", location,
+                error_msg->string());
+        *error_msg = msg;
+        return NULL;
+    }
+
+    if (verify && !DexFileVerifier::Verify(dex_file, dex_file->Begin(), dex_file->Size(), location,
+                                         error_msg)) {
+        return NULL;
+    }
+
+    return dex_file;
+}
+
+String DexFile::GetBaseLocation(
+    /* [in] */ const char* location)
+{
+    const char* pos = strrchr(location, sMultiDexSeparator);
+    if (pos == NULL) {
+        return String(location);
+    }
+    else {
+        return String(location, pos - location);
+    }
+}
+
+Boolean DexFile::IsMagicValid(
+    /* [in] */ const byte* magic)
+{
+    return (memcmp(magic, sDexMagic, sizeof(sDexMagic)) == 0);
+}
+
+Boolean DexFile::IsMultiDexLocation(
+    /* [in] */ const char* location)
+{
+    return strrchr(location, sMultiDexSeparator) != NULL;
+}
+
+// from class_linker.cc in art
+
+Boolean DexFile::VerifyOatAndDexFileChecksums(
+    /* [in] */ const OatFile* oat_file,
+    /* [in] */ const char* dex_location,
+    /* [in] */ uint32_t dex_location_checksum,
+    /* [in] */ InstructionSet instruction_set,
+    /* [in] */ String* error_msg)
+{
+    // if (!VerifyOatChecksums(oat_file, instruction_set, error_msg)) {
+    //     return false;
+    // }
+
+    AutoPtr<OatFile::OatDexFile> oat_dex_file = oat_file->GetOatDexFile(dex_location,
+            &dex_location_checksum);
+    if (oat_dex_file == NULL) {
+        String msg("");
+        msg.AppendFormat("oat file '%s' does not contain contents for '%s' with checksum 0x%x",
+                oat_file->GetLocation().string(), dex_location, dex_location_checksum);
+        *error_msg = msg;
+        Vector< AutoPtr<OatFile::OatDexFile> >& oat_dex_files = oat_file->GetOatDexFiles();
+        Vector< AutoPtr<OatFile::OatDexFile> >::Iterator it;
+        for (it = oat_dex_files.Begin(); it != oat_dex_files.End(); ++it) {
+            AutoPtr<OatFile::OatDexFile> oat_dex_file = *it;
+            String msg("");
+            msg.AppendFormat("\noat file '%s' contains contents for '%s' with checksum 0x%x",
+                                oat_file->GetLocation().string(),
+                                oat_dex_file->GetDexFileLocation().string(),
+                                oat_dex_file->GetDexFileLocationChecksum());
+            *error_msg += msg;
+        }
+        return FALSE;
+    }
+
+    if (dex_location_checksum != oat_dex_file->GetDexFileLocationChecksum()) {
+        String msg("");
+        msg.AppendFormat("oat file '%s' mismatch (0x%x) with '%s' (0x%x)",
+                            oat_file->GetLocation().string(),
+                            oat_dex_file->GetDexFileLocationChecksum(),
+                            dex_location, dex_location_checksum);
+        *error_msg = msg;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+Boolean DexFile::IsZipMagic(
+    /* [in] */ uint32_t magic)
+{
+    return (('P' == ((magic >> 0) & 0xff)) &&
+          ('K' == ((magic >> 8) & 0xff)));
+}
+
+Boolean DexFile::IsDexMagic(
+    /* [in] */ uint32_t magic)
+{
+    return IsMagicValid(reinterpret_cast<const byte*>(&magic));
 }
 
 } // namespace Pm
