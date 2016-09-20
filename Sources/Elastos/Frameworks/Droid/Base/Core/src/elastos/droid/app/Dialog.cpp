@@ -83,12 +83,9 @@ ECode Dialog::ViewCreateContextMenuListener::OnCreateContextMenu(
 // Dialog::ListenersHandler
 //==============================================================================
 Dialog::ListenersHandler::ListenersHandler(
-    /* [in] */ IDialog* dialog)
+    /* [in] */ IWeakReference* dialog)
+    : mWeakHost(dialog)
 {
-    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(dialog);
-    if (wrs) {
-        wrs->GetWeakReference((IWeakReference**)&mDialog);
-    }
 }
 
 ECode Dialog::ListenersHandler::HandleMessage(
@@ -100,7 +97,7 @@ ECode Dialog::ListenersHandler::HandleMessage(
     msg->GetObj((IInterface**)&obj);
 
     AutoPtr<IDialogInterface> dialog;
-    mDialog->Resolve(EIID_IDialogInterface, (IInterface**)&dialog);
+    mWeakHost->Resolve(EIID_IDialogInterface, (IInterface**)&dialog);
 
     switch (what) {
         case Dialog::DISMISS: {
@@ -134,14 +131,18 @@ ECode Dialog::ListenersHandler::HandleMessage(
 //==============================================================================
 
 Dialog::DismissAction::DismissAction(
-    /* [in] */ Dialog* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 ECode Dialog::DismissAction::Run()
 {
-    mHost->DismissDialog();
-
+    AutoPtr<IDialog> dialog;
+    mWeakHost->Resolve(EIID_IDialog, (IInterface**)&dialog);
+    if (dialog) {
+        Dialog* d = (Dialog*)dialog.Get();
+        d->DismissDialog();
+    }
     return NOERROR;
 }
 
@@ -159,7 +160,6 @@ Dialog::Dialog()
     , mCreated(FALSE)
     , mShowing(FALSE)
     , mCanceled(FALSE)
-    , mDismissAction(new DismissAction(this))
 {}
 
 Dialog::~Dialog()
@@ -211,12 +211,15 @@ ECode Dialog::constructor(
     mWindow->SetWindowManager(mWindowManager, NULL, String(NULL));
     mWindow->SetGravity(IGravity::CENTER);
 
-    mListenersHandler = new ListenersHandler(this);
+    AutoPtr<IWeakReference> wr;
+    GetWeakReference((IWeakReference**)&wr);
+    mListenersHandler = new ListenersHandler(wr);
     mListenersHandler->constructor();
     CHandler::New((IHandler**)&mHandler);
     assert(mHandler != NULL);
 
     mViewCreateContextMenuListener = new ViewCreateContextMenuListener(this);
+    mDismissAction = new DismissAction(wr);
     return NOERROR;
 }
 
@@ -347,6 +350,7 @@ ECode Dialog::Show()
         IPackageItemInfo::Probe(info)->GetLogo(&logo);
         mWindow->SetDefaultIcon(icon);
         mWindow->SetDefaultLogo(logo);
+        mActionBar = NULL;
         CWindowDecorActionBar::New(this, (IActionBar**)&mActionBar);
     }
 

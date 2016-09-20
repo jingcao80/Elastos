@@ -143,8 +143,8 @@ TypefaceImpl* TypefaceImpl_createFromFamilies(const Int64* families, size_t size
 void TypefaceImpl_unref(TypefaceImpl* face) {
     if (face != NULL) {
         face->fFontCollection->Unref();
+        delete face;
     }
-    delete face;
 }
 
 int TypefaceImpl_getStyle(TypefaceImpl* face) {

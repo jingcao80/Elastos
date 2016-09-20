@@ -70,12 +70,12 @@ private:
     {
     public:
         DismissAction(
-            /* [in] */ Dialog* host);
+            /* [in] */ IWeakReference* host);
 
         CARAPI Run();
 
     private:
-        Dialog* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class ECO_LOCAL ListenersHandler
@@ -85,12 +85,12 @@ private:
         TO_STRING_IMPL("Dialog::ListenersHandler")
 
         ListenersHandler(
-            /* [in] */ IDialog* host);
+            /* [in] */ IWeakReference* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
     private:
-        AutoPtr<IWeakReference> mDialog; //WeakReference<DialogInterface> mDialog;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class ECO_LOCAL ViewCreateContextMenuListener
