@@ -50,6 +50,7 @@ using Elastos::Droid::Provider::IContactsContract;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::EIID_IOnMenuItemClickListener;
+using Elastos::Droid::View::EIID_IViewOnCreateContextMenuListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::ICheckBox;
 using Elastos::Droid::Widget::ICheckable;
@@ -752,6 +753,41 @@ ECode CCustomContactListFilterActivity::AddSyncClickListener::OnMenuItemClick(
 }
 
 
+CAR_INTERFACE_IMPL_3(CCustomContactListFilterActivity::InnerListener, Object,
+    IViewOnClickListener, IExpandableListViewOnChildClickListener,
+    IViewOnCreateContextMenuListener)
+
+CCustomContactListFilterActivity::InnerListener::InnerListener(
+    /* [in] */ CCustomContactListFilterActivity* host)
+    : mHost(host)
+{}
+
+
+ECode CCustomContactListFilterActivity::InnerListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+ECode CCustomContactListFilterActivity::InnerListener::OnChildClick(
+    /* [in] */ IExpandableListView* parent,
+    /* [in] */ IView* v,
+    /* [in] */ Int32 groupPosition,
+    /* [in] */ Int32 childPosition,
+    /* [in] */ Int64 id,
+    /* [out] */ Boolean* handle)
+{
+    return mHost->OnChildClick(parent, v, groupPosition, childPosition, id, handle);
+}
+
+ECode CCustomContactListFilterActivity::InnerListener::OnCreateContextMenu(
+    /* [in] */ IContextMenu* menu,
+    /* [in] */ IView* v,
+    /* [in] */ IContextMenuInfo* menuInfo)
+{
+    return mHost->OnCreateContextMenu(menu, v, menuInfo);
+}
+
 //=================================================================
 // CCustomContactListFilterActivity
 //=================================================================
@@ -763,18 +799,11 @@ const Int32 CCustomContactListFilterActivity::SYNC_MODE_UNSUPPORTED;
 const Int32 CCustomContactListFilterActivity::SYNC_MODE_UNGROUPED;
 const Int32 CCustomContactListFilterActivity::SYNC_MODE_EVERYTHING;
 
-AutoPtr<IComparator> CCustomContactListFilterActivity::InitIdComparator()
-{
-    AutoPtr<IComparator> comp = (IComparator*)new IdComparator();
-    return comp;
-}
-AutoPtr<IComparator> CCustomContactListFilterActivity::sIdComparator = CCustomContactListFilterActivity::InitIdComparator();
+AutoPtr<IComparator> CCustomContactListFilterActivity::sIdComparator = new IdComparator();
 
-CAR_INTERFACE_IMPL_4(CCustomContactListFilterActivity, Activity
-        , ICustomContactListFilterActivity
-        , IViewOnClickListener
-        , IExpandableListViewOnChildClickListener
-        , ILoaderManagerLoaderCallbacks)
+CAR_INTERFACE_IMPL_2(CCustomContactListFilterActivity, Activity,
+    ICustomContactListFilterActivity,
+    ILoaderManagerLoaderCallbacks)
 
 CAR_OBJECT_IMPL(CCustomContactListFilterActivity)
 
@@ -784,23 +813,24 @@ ECode CCustomContactListFilterActivity::OnCreate(
     FAIL_RETURN(Activity::OnCreate(icicle))
     SetContentView(Elastos::Droid::Dialer::R::layout::contact_list_filter_custom);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     mList = IExpandableListView::Probe(FindViewById(Elastos::Droid::R::id::list));
-    mList->SetOnChildClickListener(IExpandableListViewOnChildClickListener::Probe(this));
+    mList->SetOnChildClickListener(listener);
     IListView::Probe(mList)->SetHeaderDividersEnabled(TRUE);
     AutoPtr<IPreferenceManagerHelper> helper;
     CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
     AutoPtr<ISharedPreferences> temp;
-    helper->GetDefaultSharedPreferences(IContext::Probe(this), (ISharedPreferences**)&temp);
+    helper->GetDefaultSharedPreferences(this, (ISharedPreferences**)&temp);
     mPrefs = temp;
-    mAdapter = new DisplayAdapter(IContext::Probe(this));
+    mAdapter = new DisplayAdapter(this);
 
     AutoPtr<ILayoutInflater> inflater;
     GetLayoutInflater((ILayoutInflater**)&inflater);
 
-    FindViewById(Elastos::Droid::Dialer::R::id::btn_done)->SetOnClickListener(this);
-    FindViewById(Elastos::Droid::Dialer::R::id::btn_discard)->SetOnClickListener(this);
+    FindViewById(Elastos::Droid::Dialer::R::id::btn_done)->SetOnClickListener(listener);
+    FindViewById(Elastos::Droid::Dialer::R::id::btn_discard)->SetOnClickListener(listener);
 
-    IView::Probe(mList)->SetOnCreateContextMenuListener(this);
+    IView::Probe(mList)->SetOnCreateContextMenuListener(listener);
 
     mList->SetAdapter(mAdapter);
 
@@ -828,7 +858,7 @@ ECode CCustomContactListFilterActivity::OnCreateLoader(
     /* [out] */ ILoader** loader)
 {
     VALIDATE_NOT_NULL(loader)
-    AutoPtr<CustomFilterConfigurationLoader> customLoader = new CustomFilterConfigurationLoader(IContext::Probe(this));
+    AutoPtr<CustomFilterConfigurationLoader> customLoader = new CustomFilterConfigurationLoader(this);
     *loader = ILoader::Probe(customLoader);
     REFCOUNT_ADD(*loader)
     return NOERROR;
@@ -973,7 +1003,7 @@ void CCustomContactListFilterActivity::ShowRemoveSync(
     /* [in] */ Int32 syncMode)
 {
     AutoPtr<ICharSequence> title;
-    child->GetTitle(IContext::Probe(this), (ICharSequence**)&title);
+    child->GetTitle(this, (ICharSequence**)&title);
 
     menu->SetHeaderTitle(title);
     AutoPtr<IMenuItem> item;
@@ -995,7 +1025,7 @@ void CCustomContactListFilterActivity::HandleRemoveSync(
             && (IObject::Probe(child)->Equals(account->mUngrouped, &equals), !equals)) {
         // Warn before removing this group when it would cause ungrouped to stop syncing
         AutoPtr<IAlertDialogBuilder> builder;
-        CAlertDialogBuilder::New(IContext::Probe(this), (IAlertDialogBuilder**)&builder);
+        CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
         AutoPtr<ArrayOf<IInterface*> > attrs = ArrayOf<IInterface*>::Alloc(1);
         attrs->Set(0, title);
         String str;
@@ -1035,7 +1065,7 @@ void CCustomContactListFilterActivity::ShowAddSync(
         Boolean sync;
         if (child->GetShouldSync(&sync), !sync) {
             AutoPtr<ICharSequence> title;
-            child->GetTitle(IContext::Probe(this), (ICharSequence**)&title);
+            child->GetTitle(this, (ICharSequence**)&title);
             AutoPtr<IMenuItem> item;
             IMenu::Probe(menu)->Add(title, (IMenuItem**)&item);
             AutoPtr<IOnMenuItemClickListener> listener

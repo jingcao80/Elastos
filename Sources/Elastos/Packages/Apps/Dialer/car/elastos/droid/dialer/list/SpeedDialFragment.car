@@ -15,7 +15,6 @@ module
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.Apps.IFragment
      * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsInterface
-     * interface IAdapterViewOnItemClickListener
      * interface IOnDataSetChangedForAnimationListener
      */
     [local]

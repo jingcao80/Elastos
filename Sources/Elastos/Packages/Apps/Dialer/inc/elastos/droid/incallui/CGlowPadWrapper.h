@@ -22,6 +22,42 @@ CarClass(CGlowPadWrapper)
     , public IGlowPadViewOnTriggerListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IGlowPadViewOnTriggerListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CGlowPadWrapper* host);
+
+        // @Override
+        CARAPI OnGrabbed(
+            /* [in] */ IView* v,
+            /* [in] */ Int32 handle);
+
+        // @Override
+        CARAPI OnReleased(
+            /* [in] */ IView* v,
+            /* [in] */ Int32 handle);
+
+        // @Override
+        CARAPI OnTrigger(
+            /* [in] */ IView* v,
+            /* [in] */ Int32 target);
+
+        // @Override
+        CARAPI OnGrabbedStateChange(
+            /* [in] */ IView* v,
+            /* [in] */ Int32 handle);
+
+        CARAPI OnFinishFinalAnimation();
+
+    private:
+        CGlowPadWrapper* mHost;
+    };
+
     class PingHandler
         : public Handler
     {

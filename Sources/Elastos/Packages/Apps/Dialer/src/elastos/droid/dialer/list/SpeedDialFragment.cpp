@@ -27,6 +27,26 @@ namespace Dialer {
 namespace List {
 
 //=================================================================
+// SpeedDialFragment::InnerListener
+//=================================================================
+CAR_INTERFACE_IMPL(SpeedDialFragment::InnerListener, Object, IAdapterViewOnItemClickListener);
+
+SpeedDialFragment::InnerListener::InnerListener(
+    /* [in] */ SpeedDialFragment* host)
+    : mHost(host)
+{}
+
+
+ECode SpeedDialFragment::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+//=================================================================
 // SpeedDialFragment::ContactTileLoaderListener
 //=================================================================
 CAR_INTERFACE_IMPL(SpeedDialFragment::ContactTileLoaderListener, Object, ILoaderManagerLoaderCallbacks);
@@ -265,18 +285,11 @@ const Boolean SpeedDialFragment::DEBUG = FALSE;
 Int32 SpeedDialFragment::LOADER_ID_CONTACT_TILE = 1;
 
 // TODO:
-CAR_INTERFACE_IMPL_3(SpeedDialFragment, /*AnalyticsFragment*/Fragment, ISpeedDialFragment,
-        IAdapterViewOnItemClickListener, IOnDataSetChangedForAnimationListener)
+CAR_INTERFACE_IMPL_2(SpeedDialFragment, /*AnalyticsFragment*/Fragment, ISpeedDialFragment,
+    IOnDataSetChangedForAnimationListener)
 
 SpeedDialFragment::SpeedDialFragment()
 {
-    CHashMap::New((IHashMap**)&mItemIdTopMap);
-    CHashMap::New((IHashMap**)&mItemIdLeftMap);
-
-    assert(0 && "TODO");
-    // mContactTileAdapterListener = (IContactTileViewListener*)new ContactTileAdapterListener(this);
-    mContactTileLoaderListener = (ILoaderManagerLoaderCallbacks*)new ContactTileLoaderListener(this);
-    mScrollListener = new ScrollListener(this);
 }
 
 ECode SpeedDialFragment::OnAttach(
@@ -306,6 +319,14 @@ ECode SpeedDialFragment::OnCreate(
     }
     assert(0 && "TODO");
     // AnalyticsFragment::OnCreate(savedState);
+
+    CHashMap::New((IHashMap**)&mItemIdTopMap);
+    CHashMap::New((IHashMap**)&mItemIdLeftMap);
+
+    assert(0 && "TODO");
+    // mContactTileAdapterListener = (IContactTileViewListener*)new ContactTileAdapterListener(this);
+    mContactTileLoaderListener = (ILoaderManagerLoaderCallbacks*)new ContactTileLoaderListener(this);
+    mScrollListener = new ScrollListener(this);
 
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
@@ -337,10 +358,12 @@ ECode SpeedDialFragment::OnCreateView(
     inflater->Inflate(R::layout::speed_dial_fragment,
             container, FALSE, (IView**)&mParentView);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
     AutoPtr<IView> listView;
     mParentView->FindViewById(R::id::contact_tile_list, (IView**)&listView);
     mListView = IPhoneFavoriteListView::Probe(listView);
-    mListView->SetOnItemClickListener(this);
+    mListView->SetOnItemClickListener(listener);
     mListView->SetVerticalScrollBarEnabled(FALSE);
     mListView->SetVerticalScrollbarPosition(IView::SCROLLBAR_POSITION_RIGHT);
     mListView->SetScrollBarStyle(IListView::SCROLLBARS_OUTSIDE_OVERLAY);

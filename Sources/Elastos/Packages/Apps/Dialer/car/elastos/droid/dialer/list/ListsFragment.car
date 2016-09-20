@@ -29,7 +29,6 @@ module
      * interface Elastos.Droid.DailerBind.Analytics.IAnalyticsInterface
      * interface ICallLogQueryHandlerListener
      * interface ICallLogAdapterCallFetcher
-     * interface IViewPagerOnPageChangeListener
      */
     [local]
     interface IListsFragment {

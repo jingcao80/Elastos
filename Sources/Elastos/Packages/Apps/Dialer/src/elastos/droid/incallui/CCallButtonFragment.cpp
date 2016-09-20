@@ -32,9 +32,45 @@ namespace Elastos {
 namespace Droid {
 namespace InCallUI {
 
-CAR_INTERFACE_IMPL(CCallButtonFragment::OverflowPopupOnMenuItemClickListener, Object, IPopupMenuOnMenuItemClickListener);
+CAR_INTERFACE_IMPL(CCallButtonFragment::InnerListener, Object, IViewOnClickListener)
 
-ECode CCallButtonFragment::OverflowPopupOnMenuItemClickListener::OnMenuItemClick(
+CCallButtonFragment::InnerListener::InnerListener(
+    /* [in] */ CCallButtonFragment* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode CCallButtonFragment::InnerListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+CAR_INTERFACE_IMPL_2(CCallButtonFragment::AudioModePopupMenuListener, Object,
+    IPopupMenuOnMenuItemClickListener, IPopupMenuOnDismissListener);
+
+CCallButtonFragment::AudioModePopupMenuListener::AudioModePopupMenuListener(
+    /* [in] */ CCallButtonFragment* host)
+    : mHost(host)
+{}
+
+ECode CCallButtonFragment::AudioModePopupMenuListener::OnMenuItemClick(
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnMenuItemClick(item, result);
+}
+
+ECode CCallButtonFragment::AudioModePopupMenuListener::OnDismiss(
+    /* [in] */ IPopupMenu* popupMenu)
+{
+    return mHost->OnDismiss(popupMenu);
+}
+
+CAR_INTERFACE_IMPL_2(CCallButtonFragment::OverflowPopupMenuListener, Object,
+    IPopupMenuOnMenuItemClickListener, IPopupMenuOnDismissListener);
+
+ECode CCallButtonFragment::OverflowPopupMenuListener::OnMenuItemClick(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* result)
 {
@@ -74,10 +110,7 @@ ECode CCallButtonFragment::OverflowPopupOnMenuItemClickListener::OnMenuItemClick
     return NOERROR;
 }
 
-
-CAR_INTERFACE_IMPL(CCallButtonFragment::OverflowPopupOnDismissListener, Object, IPopupMenuOnDismissListener);
-
-ECode CCallButtonFragment::OverflowPopupOnDismissListener::OnDismiss(
+ECode CCallButtonFragment::OverflowPopupMenuListener::OnDismiss(
     /* [in] */ IPopupMenu* popupMenu)
 {
     popupMenu->Dismiss();
@@ -130,57 +163,59 @@ ECode CCallButtonFragment::OnCreateView(
 {
     VALIDATE_NOT_NULL(view);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
     AutoPtr<IView> parent;
     inflater->Inflate(R::layout::call_button_fragment, container, FALSE, (IView**)&parent);
 
     AutoPtr<IView> v;
     parent->FindViewById(R::id::audioButton, (IView**)&v);
     mAudioButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::changeToVoiceButton, (IView**)&v);
     mChangeToVoiceButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::muteButton, (IView**)&v);
     mMuteButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::dialpadButton, (IView**)&v);
     mShowDialpadButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::holdButton, (IView**)&v);
     mHoldButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::swapButton, (IView**)&v);
     mSwapButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::changeToVideoButton, (IView**)&v);
     mChangeToVideoButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::switchCameraButton, (IView**)&v);
     mSwitchCameraButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::addButton, (IView**)&v);
     mAddCallButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::mergeButton, (IView**)&v);
     mMergeButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::pauseVideoButton, (IView**)&v);
     mPauseVideoButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
     v = NULL;
     parent->FindViewById(R::id::overflowButton, (IView**)&v);
     mOverflowButton = IImageButton::Probe(v);
-    v->SetOnClickListener(this);
+    v->SetOnClickListener(listener);
 
     *view = parent;
     REFCOUNT_ADD(*view);
@@ -476,8 +511,9 @@ ECode CCallButtonFragment::ConfigureOverflowMenu(
         AutoPtr<IMenu> menu;
         mOverflowPopup->GetMenu((IMenu**)&menu);
         inflater->Inflate(R::menu::incall_overflow_menu, menu);
-        mOverflowPopup->SetOnMenuItemClickListener(new OverflowPopupOnMenuItemClickListener(this));
-        mOverflowPopup->SetOnDismissListener(new OverflowPopupOnDismissListener(this));
+        AutoPtr<OverflowPopupMenuListener> listener = new OverflowPopupMenuListener(this);
+        mOverflowPopup->SetOnMenuItemClickListener(listener);
+        mOverflowPopup->SetOnDismissListener(listener);
     }
 
     AutoPtr<IMenu> menu;
@@ -742,8 +778,10 @@ void CCallButtonFragment::ShowAudioModePopup()
     AutoPtr<IMenu> menu;
     mAudioModePopup->GetMenu((IMenu**)&menu);
     inflater->Inflate(R::menu::incall_audio_mode_menu, menu);
-    mAudioModePopup->SetOnMenuItemClickListener(this);
-    mAudioModePopup->SetOnDismissListener(this);
+
+    AutoPtr<AudioModePopupMenuListener> listener = new AudioModePopupMenuListener(this);
+    mAudioModePopup->SetOnMenuItemClickListener(listener);
+    mAudioModePopup->SetOnDismissListener(listener);
 
     // TODO: Still need to have the "currently active" audio mode come
     // up pre-selected (or focused?) with a blue highlight.  Still

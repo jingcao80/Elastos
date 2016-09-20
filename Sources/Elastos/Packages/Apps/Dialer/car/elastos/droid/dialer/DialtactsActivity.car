@@ -18,15 +18,11 @@ module
      * interface IComponentCallbacks2
      * interface IOnWindowDismissedCallback
      * interface ITransactionSafeActivity
-     * interface IViewOnClickListener
      * interface IOnDialpadQueryChangedListener
      * interface ISpeedDialFragmentHostInterface
      * interface IListsFragmentHostInterface
      * interface ISearchFragmentHostInterface
      * interface IOnDragDropListener
-     * interface IOnPhoneNumberPickerActionListener
-     * interface IPopupMenuOnMenuItemClickListener
-     * interface IViewPagerOnPageChangeListener
      * interface IActionBarControllerActivityUi
      */
     interface IDialtactsActivity {

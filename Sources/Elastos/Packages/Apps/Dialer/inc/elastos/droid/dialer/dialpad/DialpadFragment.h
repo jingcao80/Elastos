@@ -82,15 +82,73 @@ namespace Dialpad {
 class DialpadFragment
     : public AnalyticsFragment
     , public IDialpadFragment
-    , public IViewOnClickListener
-    , public IViewOnLongClickListener
-    , public IViewOnKeyListener
-    , public IAdapterViewOnItemClickListener
-    , public ITextWatcher
-    , public IPopupMenuOnMenuItemClickListener
-    , public IDialpadKeyButtonOnPressedListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public IViewOnLongClickListener
+        , public IViewOnKeyListener
+        , public IAdapterViewOnItemClickListener
+        , public IPopupMenuOnMenuItemClickListener
+        , public ITextWatcher
+        , public IDialpadKeyButtonOnPressedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ DialpadFragment* host);
+
+        virtual CARAPI OnKey(
+            /* [in] */ IView* view,
+            /* [in] */ Int32 keyCode,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+        virtual CARAPI OnPressed(
+            /* [in] */ IView* view,
+            /* [in] */ Boolean pressed);
+
+        virtual CARAPI OnClick(
+            /* [in] */ IView* view);
+
+        virtual CARAPI OnLongClick(
+            /* [in] */ IView* view,
+            /* [out] */ Boolean* result);
+
+        virtual CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* v,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        virtual CARAPI OnMenuItemClick(
+            /* [in] */ IMenuItem* item,
+            /* [out] */ Boolean* result);
+
+        // @Override
+        virtual CARAPI BeforeTextChanged(
+            /* [in] */ ICharSequence* s,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [in] */ Int32 after);
+
+        // @Override
+        virtual CARAPI OnTextChanged(
+            /* [in] */ ICharSequence* input,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 before,
+            /* [in] */ Int32 changeCount);
+
+        // @Override
+        virtual CARAPI AfterTextChanged(
+            /* [in] */ IEditable* input);
+
+    private:
+        DialpadFragment* mHost;
+    };
+
     /**
      * LinearLayout with getter and setter methods for the translationY property using floats,
      * for animation purposes.
@@ -286,21 +344,21 @@ public:
     CARAPI constructor();
 
     // @Override
-    CARAPI BeforeTextChanged(
+    virtual CARAPI BeforeTextChanged(
         /* [in] */ ICharSequence* s,
         /* [in] */ Int32 start,
         /* [in] */ Int32 count,
         /* [in] */ Int32 after);
 
     // @Override
-    CARAPI OnTextChanged(
+    virtual CARAPI OnTextChanged(
         /* [in] */ ICharSequence* input,
         /* [in] */ Int32 start,
         /* [in] */ Int32 before,
         /* [in] */ Int32 changeCount);
 
     // @Override
-    CARAPI AfterTextChanged(
+    virtual CARAPI AfterTextChanged(
         /* [in] */ IEditable* input);
 
     // @Override
@@ -334,7 +392,7 @@ public:
         /* [in] */ IBundle* outState);
 
     // @Override
-    CARAPI OnKey(
+    virtual CARAPI OnKey(
         /* [in] */ IView* view,
         /* [in] */ Int32 keyCode,
         /* [in] */ IKeyEvent* event,
@@ -347,16 +405,16 @@ public:
      * actual "touch-down" behavior.
      */
     // @Override
-    CARAPI OnPressed(
+    virtual CARAPI OnPressed(
         /* [in] */ IView* view,
         /* [in] */ Boolean pressed);
 
     // @Override
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* view);
 
     // @Override
-    CARAPI OnLongClick(
+    virtual CARAPI OnLongClick(
         /* [in] */ IView* view,
         /* [out] */ Boolean* result);
 
@@ -368,7 +426,7 @@ public:
      * Handle clicks from the dialpad chooser.
      */
     // @Override
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* v,
         /* [in] */ Int32 position,
@@ -382,7 +440,7 @@ public:
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI OnMenuItemClick(
+    virtual CARAPI OnMenuItemClick(
         /* [in] */ IMenuItem* item,
         /* [out] */ Boolean* result);
 
@@ -401,7 +459,7 @@ public:
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI OnHiddenChanged(
+    virtual CARAPI OnHiddenChanged(
         /* [in] */ Boolean hidden);
 
     CARAPI SetAnimate(
@@ -712,6 +770,7 @@ private:
     AutoPtr<IComponentName> mSmsPackageComponentName;
 
     static const String PREF_DIGITS_FILLED_BY_INTENT;
+    AutoPtr<InnerListener> mInnerListener;
 };
 
 } // Dialpad

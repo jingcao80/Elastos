@@ -46,13 +46,58 @@ namespace List {
 class ContactEntryListFragment
     : public AnalyticsFragment
     , public IContactEntryListFragment
-    , public IAdapterViewOnItemClickListener
-    , public IAbsListViewOnScrollListener
-    , public IViewOnFocusChangeListener
-    , public IViewOnTouchListener
     , public ILoaderManagerLoaderCallbacks
 {
 private:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+        , public IAbsListViewOnScrollListener
+        , public IViewOnFocusChangeListener
+        , public IViewOnTouchListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ ContactEntryListFragment* host);
+
+        // @Override
+        virtual CARAPI OnScroll(
+            /* [in] */ IAbsListView* view,
+            /* [in] */ Int32 firstVisibleItem,
+            /* [in] */ Int32 visibleItemCount,
+            /* [in] */ Int32 totalItemCount);
+
+        // @Override
+        virtual CARAPI OnScrollStateChanged(
+            /* [in] */ IAbsListView* view,
+            /* [in] */ Int32 scrollState);
+
+        // @Override
+        virtual CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        // @Override
+        virtual CARAPI OnFocusChange(
+            /* [in] */ IView* v,
+            /* [in] */ Boolean hasFocus);
+
+        /**
+         * Dismisses the soft keyboard when the list is touched.
+         */
+        // @Override
+        virtual CARAPI OnTouch(
+            /* [in] */ IView* view,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
+    private:
+        ContactEntryListFragment* mHost;
+    };
+
     class SIMStateReceiver : public BroadcastReceiver
     {
     public:
@@ -159,21 +204,21 @@ public:
     CARAPI OnStart();
 
     // @Override
-    CARAPI OnCreateLoader(
+    virtual CARAPI OnCreateLoader(
         /* [in] */ Int32 id,
         /* [in] */ IBundle* args,
         /* [out] */ ILoader** loader);
 
-    CARAPI CreateCursorLoader(
+    virtual CARAPI CreateCursorLoader(
         /* [in] */ IContext* context,
         /* [out] */ ICursorLoader** loader);
 
     // @Override
-    CARAPI OnLoadFinished(
+    virtual CARAPI OnLoadFinished(
         /* [in] */ ILoader* loader,
         /* [in] */ IInterface* data);
 
-    CARAPI OnLoaderReset(
+   virtual CARAPI OnLoaderReset(
         /* [in] */ ILoader* loader);
 
     CARAPI IsLoading(
@@ -275,30 +320,30 @@ public:
         /* [out] */ IView** view);
 
     // @Override
-    CARAPI OnHiddenChanged(
+    virtual CARAPI OnHiddenChanged(
         /* [in] */ Boolean hidden);
 
     // @Override
-    CARAPI OnScroll(
+    virtual CARAPI OnScroll(
         /* [in] */ IAbsListView* view,
         /* [in] */ Int32 firstVisibleItem,
         /* [in] */ Int32 visibleItemCount,
         /* [in] */ Int32 totalItemCount);
 
     // @Override
-    CARAPI OnScrollStateChanged(
+    virtual CARAPI OnScrollStateChanged(
         /* [in] */ IAbsListView* view,
         /* [in] */ Int32 scrollState);
 
     // @Override
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,
         /* [in] */ Int64 id);
 
     // @Override
-    CARAPI OnFocusChange(
+    virtual CARAPI OnFocusChange(
         /* [in] */ IView* v,
         /* [in] */ Boolean hasFocus);
 
@@ -306,7 +351,7 @@ public:
      * Dismisses the soft keyboard when the list is touched.
      */
     // @Override
-    CARAPI OnTouch(
+    virtual CARAPI OnTouch(
         /* [in] */ IView* view,
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);

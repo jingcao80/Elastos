@@ -304,9 +304,7 @@ ECode VoiceInputHelper::BuildUi()
             return E_XML_PULL_PARSER_EXCEPTION;
         }
 
-        AutoPtr< ArrayOf<Int32> > attrsId = ArrayOf<Int32>::Alloc(
-                const_cast<Int32*>(Elastos::Droid::R::styleable::RecognitionService),
-                ArraySize(Elastos::Droid::R::styleable::RecognitionService));
+        AutoPtr<ArrayOf<Int32> > attrsId = TO_ATTRS_ARRAYOF(Elastos::Droid::R::styleable::RecognitionService);
         AutoPtr<ITypedArray> array;
         res->ObtainAttributes(attrs, attrsId, (ITypedArray**)&array);
         array->GetString(

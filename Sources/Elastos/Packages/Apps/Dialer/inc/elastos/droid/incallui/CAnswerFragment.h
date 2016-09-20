@@ -35,11 +35,37 @@ namespace InCallUI {
 CarClass(CAnswerFragment)
     , public BaseFragment
     , public IAnswerFragment
-    , public IAnswerListener
     , public IAnswerUi
     , public IUi
 {
 public:
+    class InnerListener
+        : public Object
+        , public IAnswerListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        InnerListener(
+            /* [in] */ CAnswerFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        virtual CARAPI OnAnswer(
+            /* [in] */ Int32 videoState,
+            /* [in] */ IContext* context);
+
+        // @Override
+        virtual CARAPI OnDecline();
+
+        // @Override
+        virtual CARAPI OnText();
+
+    private:
+        CAnswerFragment* mHost;
+    };
+
     /**
      * OnItemClickListener for the "Respond via SMS" popup.
      */
@@ -218,15 +244,15 @@ public:
         /* [out] */ IContext** context);
 
     // @Override
-    CARAPI OnAnswer(
+    virtual CARAPI OnAnswer(
         /* [in] */ Int32 videoState,
         /* [in] */ IContext* context);
 
     // @Override
-    CARAPI OnDecline();
+    virtual CARAPI OnDecline();
 
     // @Override
-    CARAPI OnText();
+    virtual CARAPI OnText();
 
 private:
     CARAPI_(Boolean) IsCannedResponsePopupShowing();

@@ -35,13 +35,55 @@ ECode CGlowPadWrapper::PingHandler::ToString(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CGlowPadWrapper::InnerListener, Object, IGlowPadViewOnTriggerListener)
 
+CGlowPadWrapper::InnerListener::InnerListener(
+    /* [in] */ CGlowPadWrapper* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode CGlowPadWrapper::InnerListener::OnGrabbed(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 handle)
+{
+    return mHost->OnGrabbed(v, handle);
+}
+
+// @Override
+ECode CGlowPadWrapper::InnerListener::OnReleased(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 handle)
+{
+    return mHost->OnReleased(v, handle);
+}
+
+// @Override
+ECode CGlowPadWrapper::InnerListener::OnTrigger(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 target)
+{
+    return mHost->OnTrigger(v, target);
+}
+
+// @Override
+ECode CGlowPadWrapper::InnerListener::OnGrabbedStateChange(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 handle)
+{
+    return mHost->OnGrabbedStateChange(v, handle);
+}
+
+ECode CGlowPadWrapper::InnerListener::OnFinishFinalAnimation()
+{
+    return mHost->OnFinishFinalAnimation();
+}
 
 const Int32 CGlowPadWrapper::PING_MESSAGE_WHAT;
 const Boolean CGlowPadWrapper::ENABLE_PING_AUTO_REPEAT;
 const Int64 CGlowPadWrapper::PING_REPEAT_DELAY_MS;
 
-CAR_INTERFACE_IMPL_2(CGlowPadWrapper, GlowPadView, IGlowPadWrapper, IGlowPadViewOnTriggerListener)
+CAR_INTERFACE_IMPL(CGlowPadWrapper, GlowPadView, IGlowPadWrapper)
 
 CAR_OBJECT_IMPL(CGlowPadWrapper)
 
@@ -73,7 +115,8 @@ ECode CGlowPadWrapper::OnFinishInflate()
 {
     Logger::D("CGlowPadWrapper", "onFinishInflate()");
     FAIL_RETURN(GlowPadView::OnFinishInflate());
-    SetOnTriggerListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    SetOnTriggerListener(listener);
     return NOERROR;
 }
 

@@ -12,7 +12,6 @@ module
      * interface IComponentCallbacks
      * interface IComponentCallbacks2
      * interface IViewOnCreateContextMenuListener
-     * interface IAnswerListener
      * interface IAnswerUi
      * interface IUi
      */

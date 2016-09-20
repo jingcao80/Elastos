@@ -55,14 +55,43 @@ class CGroupDelta;
 CarClass(CCustomContactListFilterActivity)
     , public Activity
     , public ICustomContactListFilterActivity
-    , public IViewOnClickListener
-    , public IExpandableListViewOnChildClickListener
     , public ILoaderManagerLoaderCallbacks
 {
 public:
     class CustomFilterConfigurationLoader;
 
 protected:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public IExpandableListViewOnChildClickListener
+        , public IViewOnCreateContextMenuListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CCustomContactListFilterActivity* host);
+
+        virtual CARAPI OnClick(
+            /* [in] */ IView* view);
+
+        virtual CARAPI OnChildClick(
+            /* [in] */ IExpandableListView* parent,
+            /* [in] */ IView* v,
+            /* [in] */ Int32 groupPosition,
+            /* [in] */ Int32 childPosition,
+            /* [in] */ Int64 id,
+            /* [out] */ Boolean* handle);
+
+        CARAPI OnCreateContextMenu(
+            /* [in] */ IContextMenu* menu,
+            /* [in] */ IView* v,
+            /* [in] */ IContextMenuInfo* menuInfo);
+    private:
+        CCustomContactListFilterActivity* mHost;
+    };
+
     /**
      * Set of all {@link AccountDisplay} entries, one for each source.
      */
@@ -400,25 +429,25 @@ public:
     CAR_OBJECT_DECL()
 
     // @Override
-    CARAPI OnCreateLoader(
+    virtual CARAPI OnCreateLoader(
         /* [in] */ Int32 id,
         /* [in] */ IBundle* args,
         /* [out] */ ILoader** loader);
 
     // @Override
-    CARAPI OnLoadFinished(
+    virtual CARAPI OnLoadFinished(
         /* [in] */ ILoader* loader,
         /* [in] */ IInterface* data);
 
     // @Override
-    CARAPI OnLoaderReset(
+    virtual CARAPI OnLoaderReset(
         /* [in] */ ILoader* loader);
 
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* view);
 
     // @Override
-    CARAPI OnChildClick(
+    virtual CARAPI OnChildClick(
         /* [in] */ IExpandableListView* parent,
         /* [in] */ IView* v,
         /* [in] */ Int32 groupPosition,

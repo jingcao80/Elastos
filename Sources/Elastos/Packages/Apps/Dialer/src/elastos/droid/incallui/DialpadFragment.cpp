@@ -252,6 +252,50 @@ ECode DialpadFragment::StopDtmfRunnable::Run()
     return NOERROR;
 }
 
+//==========================================================
+// DialpadFragment
+//==========================================================
+CAR_INTERFACE_IMPL_4(DialpadFragment::InnerListener, Object
+    , IViewOnTouchListener
+    , IViewOnKeyListener
+    , IViewOnHoverListener
+    , IViewOnClickListener)
+
+DialpadFragment::InnerListener::InnerListener(
+    /* [in] */ DialpadFragment* host)
+    : mHost(host)
+{}
+
+ECode DialpadFragment::InnerListener::OnClick(
+    /* [in] */ IView* v)
+{
+    return mHost->OnClick(v);
+}
+
+ECode DialpadFragment::InnerListener::OnHover(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* comsumed)
+{
+    return mHost->OnHover(v, event, comsumed);
+}
+
+ECode DialpadFragment::InnerListener::OnKey(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnKey(v, keyCode, event, result);
+}
+
+ECode DialpadFragment::InnerListener::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnTouch(v, event, result);
+}
 
 //==========================================================
 // DialpadFragment
@@ -268,13 +312,7 @@ static AutoPtr<IHandler> InitHandler()
 }
 const AutoPtr<IHandler> DialpadFragment::sHandler = InitHandler();
 
-CAR_INTERFACE_IMPL_6(DialpadFragment, BaseFragment
-        , IUi
-        , IDialpadUi
-        , IViewOnTouchListener
-        , IViewOnKeyListener
-        , IViewOnHoverListener
-        , IViewOnClickListener)
+CAR_INTERFACE_IMPL_2(DialpadFragment, BaseFragment, IUi, IDialpadUi)
 
 DialpadFragment::DialpadFragment()
 {
@@ -601,6 +639,8 @@ Boolean DialpadFragment::OnDialerKeyUp(
 void DialpadFragment::ConfigureKeypadListeners(
     /* [in] */ IView* fragmentView)
 {
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+
     AutoPtr<ArrayOf<Int32> > buttonIds = ArrayOf<Int32>::Alloc(12);
     (*buttonIds)[0] = Elastos::Droid::Dialer::R::id::zero;
     (*buttonIds)[1] = Elastos::Droid::Dialer::R::id::one;
@@ -617,10 +657,10 @@ void DialpadFragment::ConfigureKeypadListeners(
     for (Int32 i = 0; i < buttonIds->GetLength(); i++) {
         AutoPtr<IView> view;
         fragmentView->FindViewById((*buttonIds)[i], (IView**)&view);
-        view->SetOnTouchListener(this);
-        view->SetOnKeyListener(this);
-        view->SetOnHoverListener(this);
-        view->SetOnClickListener(this);
+        view->SetOnTouchListener(listener);
+        view->SetOnKeyListener(listener);
+        view->SetOnHoverListener(listener);
+        view->SetOnClickListener(listener);
     }
 }
 

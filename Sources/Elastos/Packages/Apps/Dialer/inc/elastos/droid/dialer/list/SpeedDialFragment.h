@@ -43,10 +43,28 @@ class SpeedDialFragment
     /*: public AnalyticsFragment*/
     : public Fragment
     , public ISpeedDialFragment
-    , public IAdapterViewOnItemClickListener
     , public IOnDataSetChangedForAnimationListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        InnerListener(
+            /* [in] */ SpeedDialFragment* host);
+
+        CARAPI OnItemClick(
+                /* [in] */ IAdapterView* parent,
+                /* [in] */ IView* view,
+                /* [in] */ Int32 position,
+                /* [in] */ Int64 id);
+    private:
+        SpeedDialFragment* mHost;
+    };
+
     class ContactTileLoaderListener
         : public Object
         , public ILoaderManagerLoaderCallbacks
@@ -192,7 +210,7 @@ public:
      * {@link #mContactTileAdapter} has its own logic for click events.
      */
     // @Override
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,

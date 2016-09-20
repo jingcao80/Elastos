@@ -39,9 +39,27 @@ namespace List {
 CarClass(CAccountFilterActivity)
     , public Activity
     , public IAccountFilterActivity
-    , public IAdapterViewOnItemClickListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IAdapterViewOnItemClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CAccountFilterActivity* host);
+
+        CARAPI OnItemClick(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+    private:
+        CAccountFilterActivity* mHost;
+    };
+
     class FilterLoader
         : public AsyncTaskLoader
     {
@@ -141,7 +159,7 @@ public:
     CAR_OBJECT_DECL()
 
     // @Override
-    CARAPI OnItemClick(
+    virtual CARAPI OnItemClick(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,

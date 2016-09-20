@@ -76,7 +76,7 @@ class ECO_PUBLIC Activity
     , public IComponentCallbacks2
     , public IOnWindowDismissedCallback
 {
-private:
+protected:
     class ECO_LOCAL FragmentContainerLocal
         : public Object
         , public IFragmentContainer

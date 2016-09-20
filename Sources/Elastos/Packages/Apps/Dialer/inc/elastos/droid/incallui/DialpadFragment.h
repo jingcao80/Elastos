@@ -31,12 +31,48 @@ class DialpadFragment
     : public BaseFragment
     , public IUi
     , public IDialpadUi
-    , public IViewOnTouchListener
-    , public IViewOnKeyListener
-    , public IViewOnHoverListener
-    , public IViewOnClickListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IViewOnTouchListener
+        , public IViewOnKeyListener
+        , public IViewOnHoverListener
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ DialpadFragment* host);
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+        // @Override
+        CARAPI OnHover(
+            /* [in] */ IView* v,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* comsumed);
+
+        // @Override
+        CARAPI OnKey(
+            /* [in] */ IView* v,
+            /* [in] */ Int32 keyCode,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+        // @Override
+        CARAPI OnTouch(
+            /* [in] */ IView* v,
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
+
+    private:
+        DialpadFragment* mHost;
+    };
+
     /**
      * Our own key listener, specialized for dealing with DTMF codes.
      *   1. Ignore the backspace since it is irrelevant.

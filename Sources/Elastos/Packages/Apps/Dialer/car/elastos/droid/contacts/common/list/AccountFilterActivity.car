@@ -19,7 +19,6 @@ module
      * interface IViewOnCreateContextMenuListener
      * interface IComponentCallbacks
      * interface IComponentCallbacks2
-     * interface IAdapterViewOnItemClickListener
      */
     interface IAccountFilterActivity {
 

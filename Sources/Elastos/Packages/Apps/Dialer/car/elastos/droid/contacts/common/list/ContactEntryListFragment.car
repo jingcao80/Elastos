@@ -22,12 +22,8 @@ module
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.App.IFragment
      * interface Elastos.Droid.Os.IParcelable
-     * interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener
-     * interface Elastos.Droid.Widget.IAdapterViewOnScrollListener
-     * interface Elastos.Droid.View.IViewOnFocusChangeListener
-     * interface Elastos.Droid.View.IViewOnTouchListener
-     * interface Elastos.Droid.App.ILoaderManagerLoaderCallbacks
      * interface Elastos.DialerBind.Analytics.IAnalyticsFragment
+     * interface ILoaderManagerLoaderCallbacks
      */
     [local]
     interface IContactEntryListFragment {

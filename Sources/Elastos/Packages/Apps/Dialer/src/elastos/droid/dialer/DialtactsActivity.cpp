@@ -344,6 +344,80 @@ ECode DialtactsActivity::MyOnTouchListener::OnTouch(
     return NOERROR;
 }
 
+//================================================================
+// DialtactsActivity
+//================================================================
+CAR_INTERFACE_IMPL_4(DialtactsActivity::InnerListener, Object,
+    IViewOnClickListener, IOnPhoneNumberPickerActionListener,
+    IPopupMenuOnMenuItemClickListener, IViewPagerOnPageChangeListener)
+
+DialtactsActivity::InnerListener::InnerListener(
+    /* [in] */ DialtactsActivity* host)
+    : mHost(host)
+{}
+
+ECode DialtactsActivity::InnerListener::OnPickPhoneNumberAction(
+    /* [in] */ IUri* dataUri)
+{
+    return mHost->OnPickPhoneNumberAction(dataUri);
+}
+
+ECode DialtactsActivity::InnerListener::OnCallNumberDirectly(
+    /* [in] */ const String& phoneNumber)
+{
+    return mHost->OnCallNumberDirectly(phoneNumber);
+}
+
+ECode DialtactsActivity::InnerListener::OnCallNumberDirectly(
+    /* [in] */ const String& phoneNumber,
+    /* [in] */ Boolean isVideoCall)
+{
+    return mHost->OnCallNumberDirectly(phoneNumber, isVideoCall);
+}
+
+ECode DialtactsActivity::InnerListener::OnShortcutIntentCreated(
+    /* [in] */ IIntent* intent)
+{
+    return mHost->OnShortcutIntentCreated(intent);
+}
+
+ECode DialtactsActivity::InnerListener::OnHomeInActionBarSelected()
+{
+    return mHost->OnHomeInActionBarSelected();
+}
+
+ECode DialtactsActivity::InnerListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+ECode DialtactsActivity::InnerListener::OnMenuItemClick(
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnMenuItemClick(item, result);
+}
+
+ECode DialtactsActivity::InnerListener::OnPageScrolled(
+    /* [in] */ Int32 position,
+    /* [in] */ Float positionOffset,
+    /* [in] */ Int32 positionOffsetPixels)
+{
+    return mHost->OnPageScrolled(position, positionOffset, positionOffsetPixels);
+}
+
+ECode DialtactsActivity::InnerListener::OnPageSelected(
+    /* [in] */ Int32 position)
+{
+    return mHost->OnPageSelected(position);
+}
+
+ECode DialtactsActivity::InnerListener::OnPageScrollStateChanged(
+    /* [in] */ Int32 state)
+{
+    return mHost->OnPageScrollStateChanged(state);
+}
 
 //================================================================
 // DialtactsActivity
@@ -368,11 +442,10 @@ const String DialtactsActivity::ACTION_TOUCH_DIALER("com.android.phone.action.TO
 
 const Int32 DialtactsActivity::ACTIVITY_REQUEST_CODE_VOICE_SEARCH = 1;
 
-CAR_INTERFACE_IMPL_11(DialtactsActivity, TransactionSafeActivity, IDialtactsActivity,
-        IViewOnClickListener, IOnDialpadQueryChangedListener, IListsFragmentHostInterface,
+CAR_INTERFACE_IMPL_7(DialtactsActivity, TransactionSafeActivity, IDialtactsActivity,
+        IOnDialpadQueryChangedListener, IListsFragmentHostInterface,
         ISpeedDialFragmentHostInterface, ISearchFragmentHostInterface, IOnDragDropListener,
-        IOnPhoneNumberPickerActionListener, IPopupMenuOnMenuItemClickListener,
-        IViewPagerOnPageChangeListener, IActionBarControllerActivityUi);
+        IActionBarControllerActivityUi);
 
 DialtactsActivity::DialtactsActivity()
     : mInDialpadSearch(FALSE)
@@ -386,13 +459,14 @@ DialtactsActivity::DialtactsActivity()
     , mFirstLaunch(FALSE)
     , mActionBarHeight(0)
 {
-    mPhoneSearchQueryTextListener = new PhoneSearchQueryTextListener(this);
-    mSearchViewOnClickListener = new SearchViewOnClickListener(this);
-    mSearchEditTextLayoutListener = new SearchEditTextLayoutListener(this);
 }
 
 ECode DialtactsActivity::constructor()
 {
+    mPhoneSearchQueryTextListener = new PhoneSearchQueryTextListener(this);
+    mSearchViewOnClickListener = new SearchViewOnClickListener(this);
+    mSearchEditTextLayoutListener = new SearchEditTextLayoutListener(this);
+    mInnerListener = new InnerListener(this);
     return TransactionSafeActivity::constructor();
 }
 
@@ -471,14 +545,14 @@ ECode DialtactsActivity::OnCreate(
             (IView**)&floatingActionButtonContainer);
     view = NULL;
     FindViewById(R::id::floating_action_button, (IView**)&view);
-    view->SetOnClickListener(this);
+    view->SetOnClickListener(mInnerListener);
     mFloatingActionButtonController = new FloatingActionButtonController();
     mFloatingActionButtonController->constructor(this,
             floatingActionButtonContainer, view);
 
     view = NULL;
     customView->FindViewById(R::id::dialtacts_options_menu_button, (IView**)&view);
-    view->SetOnClickListener(this);
+    view->SetOnClickListener(mInnerListener);
     mOverflowMenu = BuildOptionsMenu(customView);
     AutoPtr<IViewOnTouchListener> touchListener;
     mOverflowMenu->GetDragToOpenListener((IViewOnTouchListener**)&touchListener);
@@ -618,15 +692,15 @@ ECode DialtactsActivity::OnAttachFragment(
     }
     else if (ISmartDialSearchFragment::Probe(fragment) != NULL) {
         mSmartDialSearchFragment = (SmartDialSearchFragment*)ISmartDialSearchFragment::Probe(fragment);
-        mSmartDialSearchFragment->SetOnPhoneNumberPickerActionListener(this);
+        mSmartDialSearchFragment->SetOnPhoneNumberPickerActionListener(mInnerListener);
     }
     else if (ISearchFragment::Probe(fragment) != NULL) {
         mRegularSearchFragment = (RegularSearchFragment*)IRegularSearchFragment::Probe(fragment);
-        mRegularSearchFragment->SetOnPhoneNumberPickerActionListener(this);
+        mRegularSearchFragment->SetOnPhoneNumberPickerActionListener(mInnerListener);
     }
     else if (IListsFragment::Probe(fragment) != NULL) {
         mListsFragment = (CListsFragment*)IListsFragment::Probe(fragment);
-        mListsFragment->AddOnPageChangeListener(this);
+        mListsFragment->AddOnPageChangeListener(mInnerListener);
     }
     return NOERROR;
 }
@@ -939,7 +1013,7 @@ void DialtactsActivity::PrepareVoiceSearchButton()
     CIntent::New(IRecognizerIntent::ACTION_RECOGNIZE_SPEECH, (IIntent**)&voiceIntent);
     if (CanIntentBeHandled(voiceIntent)) {
         mVoiceSearchButton->SetVisibility(IView::VISIBLE);
-        mVoiceSearchButton->SetOnClickListener(this);
+        mVoiceSearchButton->SetOnClickListener(mInnerListener);
     }
     else {
         mVoiceSearchButton->SetVisibility(IView::GONE);
@@ -954,7 +1028,7 @@ AutoPtr<DialtactsActivity::OptionsPopupMenu> DialtactsActivity::BuildOptionsMenu
     popupMenu->Inflate(R::menu::dialtacts_options);
     AutoPtr<IMenu> menu;
     popupMenu->GetMenu((IMenu**)&menu);
-    popupMenu->SetOnMenuItemClickListener(this);
+    popupMenu->SetOnMenuItemClickListener(mInnerListener);
     return popupMenu;
 }
 
