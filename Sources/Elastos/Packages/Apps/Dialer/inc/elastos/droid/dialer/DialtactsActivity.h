@@ -80,18 +80,73 @@ namespace Dialer {
 class DialtactsActivity
     : public TransactionSafeActivity
     , public IDialtactsActivity
-    , public IViewOnClickListener
-    , public IOnDialpadQueryChangedListener
     , public IListsFragmentHostInterface
     , public ISpeedDialFragmentHostInterface
     , public ISearchFragmentHostInterface
-    , public IOnDragDropListener
-    , public IOnPhoneNumberPickerActionListener
-    , public IPopupMenuOnMenuItemClickListener
-    , public IViewPagerOnPageChangeListener
     , public IActionBarControllerActivityUi
+    , public IOnDialpadQueryChangedListener
+    , public IOnDragDropListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IViewOnClickListener
+        , public IOnPhoneNumberPickerActionListener
+        , public IPopupMenuOnMenuItemClickListener
+        , public IViewPagerOnPageChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ DialtactsActivity* host);
+
+        virtual CARAPI OnPickPhoneNumberAction(
+            /* [in] */ IUri* dataUri);
+
+        // @Override
+        virtual CARAPI OnCallNumberDirectly(
+            /* [in] */ const String& phoneNumber);
+
+        // @Override
+        virtual CARAPI OnCallNumberDirectly(
+            /* [in] */ const String& phoneNumber,
+            /* [in] */ Boolean isVideoCall);
+
+        // @Override
+        virtual CARAPI OnShortcutIntentCreated(
+            /* [in] */ IIntent* intent);
+
+        // @Override
+        virtual CARAPI OnHomeInActionBarSelected();
+
+        // @Override
+        virtual CARAPI OnClick(
+            /* [in] */ IView* view);
+
+        // @Override
+        virtual CARAPI OnMenuItemClick(
+            /* [in] */ IMenuItem* item,
+            /* [out] */ Boolean* result);
+
+        // @Override
+        virtual CARAPI OnPageScrolled(
+            /* [in] */ Int32 position,
+            /* [in] */ Float positionOffset,
+            /* [in] */ Int32 positionOffsetPixels);
+
+        // @Override
+        virtual CARAPI OnPageSelected(
+            /* [in] */ Int32 position);
+
+        // @Override
+        virtual CARAPI OnPageScrollStateChanged(
+            /* [in] */ Int32 state);
+
+    private:
+        DialtactsActivity* mHost;
+    };
+
     // TODO:
     // class SlideOutListener
     //     : public AnimationListenerAdapter
@@ -294,18 +349,18 @@ public:
         /* [in] */ IFragment* fragment);
 
     // @Override
-    CARAPI OnClick(
+    virtual CARAPI OnClick(
         /* [in] */ IView* view);
 
     // @Override
-    CARAPI OnMenuItemClick(
+    virtual CARAPI OnMenuItemClick(
         /* [in] */ IMenuItem* item,
         /* [out] */ Boolean* result);
 
     /**
      * Callback from child DialpadFragment when the dialpad is shown.
      */
-    CARAPI OnDialpadShown();
+    virtual CARAPI OnDialpadShown();
 
     /**
      * Initiates animations and other visual updates to hide the dialpad. The fragment is hidden in
@@ -350,18 +405,18 @@ public:
     static CARAPI_(AutoPtr<IIntent>) GetCallSettingsIntent();
 
     // @Override
-    CARAPI OnBackPressed();
+    virtual CARAPI OnBackPressed();
 
     // @Override
-    CARAPI OnDialpadQueryChanged(
+    virtual CARAPI OnDialpadQueryChanged(
         /* [in] */ const String& query);
 
     // @Override
-    CARAPI OnListFragmentScrollStateChange(
+    virtual CARAPI OnListFragmentScrollStateChange(
         /* [in] */ Int32 scrollState);
 
     // @Override
-    CARAPI OnListFragmentScroll(
+    virtual CARAPI OnListFragmentScroll(
         /* [in] */ Int32 firstVisibleItem,
         /* [in] */ Int32 visibleItemCount,
         /* [in] */ Int32 totalItemCount);
@@ -376,13 +431,13 @@ public:
      * Called when the user has long-pressed a contact tile to start a drag operation.
      */
     // @Override
-    CARAPI OnDragStarted(
+    virtual CARAPI OnDragStarted(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ IPhoneFavoriteSquareTileView* view);
 
     // @Override
-    CARAPI OnDragHovered(
+    virtual CARAPI OnDragHovered(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ IPhoneFavoriteSquareTileView* view);
@@ -391,12 +446,12 @@ public:
      * Called when the user has released a contact tile after long-pressing it.
      */
     // @Override
-    CARAPI OnDragFinished(
+    virtual CARAPI OnDragFinished(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
     // @Override
-    CARAPI OnDroppedOnRemove();
+    virtual CARAPI OnDroppedOnRemove();
 
     /**
      * Allows the SpeedDialFragment to attach the drag controller to mRemoveViewContainer
@@ -407,37 +462,37 @@ public:
         /* [in] */ IDragDropController* dragController);
 
     // @Override
-    CARAPI OnPickPhoneNumberAction(
+    virtual CARAPI OnPickPhoneNumberAction(
         /* [in] */ IUri* dataUri);
 
     // @Override
-    CARAPI OnCallNumberDirectly(
+    virtual CARAPI OnCallNumberDirectly(
         /* [in] */ const String& phoneNumber);
 
     // @Override
-    CARAPI OnCallNumberDirectly(
+    virtual CARAPI OnCallNumberDirectly(
         /* [in] */ const String& phoneNumber,
         /* [in] */ Boolean isVideoCall);
 
     // @Override
-    CARAPI OnShortcutIntentCreated(
+    virtual CARAPI OnShortcutIntentCreated(
         /* [in] */ IIntent* intent);
 
     // @Override
-    CARAPI OnHomeInActionBarSelected();
+    virtual CARAPI OnHomeInActionBarSelected();
 
     // @Override
-    CARAPI OnPageScrolled(
+    virtual CARAPI OnPageScrolled(
         /* [in] */ Int32 position,
         /* [in] */ Float positionOffset,
         /* [in] */ Int32 positionOffsetPixels);
 
     // @Override
-    CARAPI OnPageSelected(
+    virtual CARAPI OnPageSelected(
         /* [in] */ Int32 position);
 
     // @Override
-    CARAPI OnPageScrollStateChanged(
+    virtual CARAPI OnPageScrollStateChanged(
         /* [in] */ Int32 state);
 
     // @Override
@@ -692,6 +747,7 @@ private:
      * If the search term is empty and the user closes the soft keyboard, close the search UI.
      */
     AutoPtr<IViewOnKeyListener> mSearchEditTextLayoutListener;
+    AutoPtr<InnerListener> mInnerListener;
 };
 
 } // Dialer

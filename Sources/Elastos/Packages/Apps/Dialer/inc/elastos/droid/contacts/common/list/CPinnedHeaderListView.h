@@ -29,10 +29,50 @@ namespace List {
 CarClass(CPinnedHeaderListView)
     , public AutoScrollListView
     , public IPinnedHeaderListView
-    , public IAbsListViewOnScrollListener
-    , public IAdapterViewOnItemSelectedListener
 {
 private:
+    class InnerListener
+        : public Object
+        , public IAbsListViewOnScrollListener
+        , public IAdapterViewOnItemSelectedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ CPinnedHeaderListView* host);
+
+        // @Override
+        virtual CARAPI OnScroll(
+            /* [in] */ IAbsListView* view,
+            /* [in] */ Int32 firstVisibleItem,
+            /* [in] */ Int32 visibleItemCount,
+            /* [in] */ Int32 totalItemCount);
+
+        // @Override
+        virtual CARAPI OnScrollStateChanged(
+            /* [in] */ IAbsListView* view,
+            /* [in] */ Int32 scrollState);
+
+        /**
+         * Ensures that the selected item is positioned below the top-pinned headers
+         * and above the bottom-pinned ones.
+         */
+        // @Override
+        virtual CARAPI OnItemSelected(
+            /* [in] */ IAdapterView* parent,
+            /* [in] */ IView* view,
+            /* [in] */ Int32 position,
+            /* [in] */ Int64 id);
+
+        // @Override
+        virtual CARAPI OnNothingSelected(
+            /* [in] */ IAdapterView* parent);
+
+    private:
+        CPinnedHeaderListView* mHost;
+    };
+
     class PinnedHeader : public Object
     {
     public:
@@ -98,14 +138,14 @@ public:
         /* [in] */ Boolean value);
 
     // @Override
-    CARAPI OnScroll(
+    virtual CARAPI OnScroll(
         /* [in] */ IAbsListView* view,
         /* [in] */ Int32 firstVisibleItem,
         /* [in] */ Int32 visibleItemCount,
         /* [in] */ Int32 totalItemCount);
 
     // @Override
-    CARAPI OnScrollStateChanged(
+    virtual CARAPI OnScrollStateChanged(
         /* [in] */ IAbsListView* view,
         /* [in] */ Int32 scrollState);
 
@@ -114,14 +154,14 @@ public:
      * and above the bottom-pinned ones.
      */
     // @Override
-    CARAPI OnItemSelected(
+    virtual CARAPI OnItemSelected(
         /* [in] */ IAdapterView* parent,
         /* [in] */ IView* view,
         /* [in] */ Int32 position,
         /* [in] */ Int64 id);
 
     // @Override
-    CARAPI OnNothingSelected(
+    virtual CARAPI OnNothingSelected(
         /* [in] */ IAdapterView* parent);
 
     CARAPI GetPinnedHeaderHeight(

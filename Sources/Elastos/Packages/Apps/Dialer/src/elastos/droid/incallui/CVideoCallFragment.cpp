@@ -59,8 +59,8 @@ void CVideoCallFragment::VideoCallSurface::RecreateView(
     /* [in] */ ITextureView* view)
 {
     mTextureView = view;
-    mTextureView->SetSurfaceTextureListener(this);
-    IView::Probe(mTextureView)->SetOnClickListener(this);
+    mTextureView->SetSurfaceTextureListener(this);          // no memory-leak
+    IView::Probe(mTextureView)->SetOnClickListener(this);   // no memory-leak
 
     if (mSavedSurfaceTexture != NULL) {
         mTextureView->SetSurfaceTexture(mSavedSurfaceTexture);
@@ -455,6 +455,7 @@ ECode CVideoCallFragment::SetPreviewSize(
 
 void CVideoCallFragment::InflateVideoCallViews()
 {
+    assert(0 && "TODO");
     // if (mVideoViews == NULL) {
     //     mVideoViews = mVideoViewsStub.inflate();
     // }

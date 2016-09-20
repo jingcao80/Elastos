@@ -26,6 +26,49 @@ const Int32 CPinnedHeaderListView::FADING;
 const Int32 CPinnedHeaderListView::DEFAULT_ANIMATION_DURATION;
 const Int32 CPinnedHeaderListView::DEFAULT_SMOOTH_SCROLL_DURATION;
 
+CAR_INTERFACE_IMPL_2(CPinnedHeaderListView::InnerListener, Object,
+    IAbsListViewOnScrollListener, IAdapterViewOnItemSelectedListener)
+
+CPinnedHeaderListView::InnerListener::InnerListener(
+    /* [in] */ CPinnedHeaderListView* host)
+    : mHost(host)
+{}
+
+ECode CPinnedHeaderListView::InnerListener::OnScroll(
+    /* [in] */ IAbsListView* view,
+    /* [in] */ Int32 firstVisibleItem,
+    /* [in] */ Int32 visibleItemCount,
+    /* [in] */ Int32 totalItemCount)
+{
+    return mHost->OnScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+}
+
+ECode CPinnedHeaderListView::InnerListener::OnScrollStateChanged(
+    /* [in] */ IAbsListView* view,
+    /* [in] */ Int32 scrollState)
+{
+    return mHost->OnScrollStateChanged(view, scrollState);
+}
+
+ECode CPinnedHeaderListView::InnerListener::OnItemSelected(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemSelected(parent, view, position, id);
+}
+
+ECode CPinnedHeaderListView::InnerListener::OnNothingSelected(
+    /* [in] */ IAdapterView* parent)
+{
+    return mHost->OnNothingSelected(parent);
+}
+
+CAR_INTERFACE_IMPL(CPinnedHeaderListView, AutoScrollListView, IPinnedHeaderListView)
+
+CAR_OBJECT_IMPL(CPinnedHeaderListView)
+
 CPinnedHeaderListView::CPinnedHeaderListView()
     : mSize(0)
     , mScrollState(0)
@@ -40,24 +83,17 @@ CPinnedHeaderListView::CPinnedHeaderListView()
     CRectF::New((IRectF**)&mBounds);
 }
 
-CAR_INTERFACE_IMPL_3(CPinnedHeaderListView, AutoScrollListView
-        , IPinnedHeaderListView
-        , IAbsListViewOnScrollListener
-        , IAdapterViewOnItemSelectedListener)
-
-CAR_OBJECT_IMPL(CPinnedHeaderListView)
-
 ECode CPinnedHeaderListView::constructor(
     /* [in] */ IContext* context)
 {
-    return AutoScrollListView::constructor(context, NULL, Elastos::Droid::R::attr::listViewStyle);
+    return constructor(context, NULL, Elastos::Droid::R::attr::listViewStyle);
 }
 
 ECode CPinnedHeaderListView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return AutoScrollListView::constructor(context, attrs, Elastos::Droid::R::attr::listViewStyle);
+    return constructor(context, attrs, Elastos::Droid::R::attr::listViewStyle);
 }
 
 ECode CPinnedHeaderListView::constructor(
@@ -66,8 +102,9 @@ ECode CPinnedHeaderListView::constructor(
     /* [in] */ Int32 defStyle)
 {
     FAIL_RETURN(AutoScrollListView::constructor(context, attrs, defStyle))
-    AutoScrollListView::SetOnScrollListener(this);
-    AutoScrollListView::SetOnItemSelectedListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    AutoScrollListView::SetOnScrollListener(listener);
+    AutoScrollListView::SetOnItemSelectedListener(listener);
     return NOERROR;
 }
 
@@ -97,14 +134,16 @@ ECode CPinnedHeaderListView::SetOnScrollListener(
     /* [in] */ IAbsListViewOnScrollListener* onScrollListener)
 {
     mOnScrollListener = onScrollListener;
-    return AutoScrollListView::SetOnScrollListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    return AutoScrollListView::SetOnScrollListener(listener);
 }
 
 ECode CPinnedHeaderListView::SetOnItemSelectedListener(
     /* [in] */ IAdapterViewOnItemSelectedListener* listener)
 {
     mOnItemSelectedListener = listener;
-    return AutoScrollListView::SetOnItemSelectedListener(this);
+    AutoPtr<InnerListener> l = new InnerListener(this);
+    return AutoScrollListView::SetOnItemSelectedListener(l);
 }
 
 ECode CPinnedHeaderListView::SetScrollToSectionOnHeaderTouch(
@@ -428,7 +467,7 @@ ECode CPinnedHeaderListView::OnInterceptTouchEvent(
         return NOERROR;
     }
 
-    if (mScrollState == SCROLL_STATE_IDLE) {
+    if (mScrollState == IAbsListViewOnScrollListener::SCROLL_STATE_IDLE) {
         Int32 y;
         ev->GetY((Float*)&y);
         Int32 x;

@@ -75,10 +75,10 @@ using Elastos::Droid::Contacts::Common::GeoUtil;
 using Elastos::Droid::Contacts::Common::Util::PhoneNumberFormatter;
 using Elastos::Droid::Dialer::Util::DialerUtils;
 using Elastos::Droid::Dialer::DialtactsActivity;
-// using Elastos::Droid::Dialer::SpecialCharSequenceMgr;
 using Elastos::Droid::Phone::Common::Animation::AnimUtils;
 using Elastos::Droid::Phone::Common::Dialpad::IDialpadView;
 using Elastos::Droid::Phone::Common::Dialpad::IDialpadKeyButton;
+using Elastos::Droid::Phone::Common::Dialpad::EIID_IDialpadKeyButtonOnPressedListener;
 
 namespace Elastos {
 namespace Droid {
@@ -423,6 +423,88 @@ ECode DialpadFragment::DialpadChooserAdapter::GetView(
 
 
 //=================================================================
+// DialpadFragment::InnerListener
+//=================================================================
+
+CAR_INTERFACE_IMPL_7(DialpadFragment::InnerListener, Object, IViewOnClickListener,
+        IViewOnLongClickListener, IViewOnKeyListener, IAdapterViewOnItemClickListener,
+        IPopupMenuOnMenuItemClickListener, ITextWatcher, IDialpadKeyButtonOnPressedListener)
+
+DialpadFragment::InnerListener::InnerListener(
+    /* [in] */ DialpadFragment* host)
+    : mHost(host)
+{}
+
+ECode DialpadFragment::InnerListener::OnKey(
+    /* [in] */ IView* view,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnKey(view, keyCode, event, result);
+}
+
+ECode DialpadFragment::InnerListener::OnPressed(
+    /* [in] */ IView* view,
+    /* [in] */ Boolean pressed)
+{
+    return mHost->OnPressed(view, pressed);
+}
+
+ECode DialpadFragment::InnerListener::OnClick(
+    /* [in] */ IView* view)
+{
+    return mHost->OnClick(view);
+}
+
+ECode DialpadFragment::InnerListener::OnLongClick(
+    /* [in] */ IView* view,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnLongClick(view, result);
+}
+
+ECode DialpadFragment::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* v,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, v, position, id);
+}
+
+ECode DialpadFragment::InnerListener::OnMenuItemClick(
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnMenuItemClick(item, result);
+}
+
+ECode DialpadFragment::InnerListener::BeforeTextChanged(
+    /* [in] */ ICharSequence* s,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 count,
+    /* [in] */ Int32 after)
+{
+    return mHost->BeforeTextChanged(s, start, count, after);
+}
+
+ECode DialpadFragment::InnerListener::OnTextChanged(
+    /* [in] */ ICharSequence* input,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 before,
+    /* [in] */ Int32 changeCount)
+{
+    return mHost->OnTextChanged(input, start, before, changeCount);
+}
+
+ECode DialpadFragment::InnerListener::AfterTextChanged(
+    /* [in] */ IEditable* input)
+{
+    return mHost->AfterTextChanged(input);
+}
+
+//=================================================================
 // DialpadFragment
 //=================================================================
 const String DialpadFragment::TAG("DialpadFragment");
@@ -448,9 +530,7 @@ const String DialpadFragment::EXTRA_SEND_EMPTY_FLASH("com.android.phone.extra.SE
 
 const String DialpadFragment::PREF_DIGITS_FILLED_BY_INTENT("pref_digits_filled_by_intent");
 
-CAR_INTERFACE_IMPL_7(DialpadFragment, AnalyticsFragment, IDialpadFragment, IViewOnClickListener,
-        IViewOnLongClickListener, IViewOnKeyListener, IAdapterViewOnItemClickListener, ITextWatcher,
-        IPopupMenuOnMenuItemClickListener/*, IDialpadKeyButtonOnPressedListener*/);
+CAR_INTERFACE_IMPL(DialpadFragment, AnalyticsFragment, IDialpadFragment);
 
 DialpadFragment::DialpadFragment()
     : mDialpadSlideInDuration(0)
@@ -463,16 +543,17 @@ DialpadFragment::DialpadFragment()
     , mFirstLaunch(FALSE)
     , mAnimate(FALSE)
 {
+}
+
+ECode DialpadFragment::constructor()
+{
     CHashSet::New(12, (IHashSet**)&mPressedDialpadKeys);
     // TODO:
     // CCallLogAsync::New((ICallLogAsync**)&mCallLog);
     mHaptic = new HapticFeedback();
     mPhoneStateListener = new DialpadPhoneStateListener();
     mPhoneStateListener->constructor(this);
-}
-
-ECode DialpadFragment::constructor()
-{
+    mInnerListener = new InnerListener(this);
     return Fragment::constructor();
 }
 
@@ -632,10 +713,10 @@ ECode DialpadFragment::OnCreateView(
     mDialpadView->GetDigits((IEditText**)&mDigits);
     ITextView::Probe(mDigits)->SetKeyListener(
             IKeyListener::Probe(UnicodeDialerKeyListener::INSTANCE));
-    IView::Probe(mDigits)->SetOnClickListener(this);
-    IView::Probe(mDigits)->SetOnKeyListener(this);
-    IView::Probe(mDigits)->SetOnLongClickListener(this);
-    ITextView::Probe(mDigits)->AddTextChangedListener(this);
+    IView::Probe(mDigits)->SetOnClickListener(mInnerListener);
+    IView::Probe(mDigits)->SetOnKeyListener(mInnerListener);
+    IView::Probe(mDigits)->SetOnLongClickListener(mInnerListener);
+    ITextView::Probe(mDigits)->AddTextChangedListener(mInnerListener);
     ITextView::Probe(mDigits)->SetElegantTextHeight(FALSE);
 
     AutoPtr<IActivity> activity;
@@ -654,8 +735,8 @@ ECode DialpadFragment::OnCreateView(
     mDelete = IView::Probe(button);
 
     if (mDelete != NULL) {
-        mDelete->SetOnClickListener(this);
-        mDelete->SetOnLongClickListener(this);
+        mDelete->SetOnClickListener(mInnerListener);
+        mDelete->SetOnLongClickListener(mInnerListener);
     }
 
     fragmentView->FindViewById(R::id::spacer, (IView**)&mSpacer);
@@ -668,7 +749,7 @@ ECode DialpadFragment::OnCreateView(
     AutoPtr<IView> chooser;
     fragmentView->FindViewById(R::id::dialpadChooser, (IView**)&chooser);
     mDialpadChooser = IListView::Probe(chooser);
-    IAdapterView::Probe(mDialpadChooser)->SetOnItemClickListener(this);
+    IAdapterView::Probe(mDialpadChooser)->SetOnItemClickListener(mInnerListener);
 
     AutoPtr<IView> floatingActionButtonContainer;
     fragmentView->FindViewById(R::id::dialpad_floating_action_button_container,
@@ -676,7 +757,7 @@ ECode DialpadFragment::OnCreateView(
     AutoPtr<IView> floatingActionButton;
     fragmentView->FindViewById(R::id::dialpad_floating_action_button,
             (IView**)&floatingActionButton);
-    floatingActionButton->SetOnClickListener(this);
+    floatingActionButton->SetOnClickListener(mInnerListener);
     mFloatingActionButtonController = new FloatingActionButtonController();
     mFloatingActionButtonController->constructor(activity, floatingActionButtonContainer, floatingActionButton);
 
@@ -891,18 +972,18 @@ void DialpadFragment::ConfigureKeypadListeners(
         AutoPtr<IView> view;
         fragmentView->FindViewById((*buttonIds)[i], (IView**)&view);
         IDialpadKeyButton* dialpadKey = IDialpadKeyButton::Probe(view);
-        dialpadKey->SetOnPressedListener(this);
+        dialpadKey->SetOnPressedListener(mInnerListener);
     }
 
     // Long-pressing one button will initiate Voicemail.
     AutoPtr<IView> one;
     fragmentView->FindViewById(R::id::one, (IView**)&one);
-    one->SetOnLongClickListener(this);
+    one->SetOnLongClickListener(mInnerListener);
 
     // Long-pressing zero button will enter '+' instead.
     AutoPtr<IView> zero;
     fragmentView->FindViewById(R::id::zero, (IView**)&zero);
-    zero->SetOnLongClickListener(this);
+    zero->SetOnLongClickListener(mInnerListener);
 }
 
 ECode DialpadFragment::OnResume()
@@ -1022,7 +1103,7 @@ ECode DialpadFragment::OnResume()
     AutoPtr<IViewOnTouchListener> listener;
     mOverflowPopupMenu->GetDragToOpenListener((IViewOnTouchListener**)&listener);
     mOverflowMenuButton->SetOnTouchListener(listener);
-    mOverflowMenuButton->SetOnClickListener(this);
+    mOverflowMenuButton->SetOnClickListener(mInnerListener);
     mOverflowMenuButton->SetVisibility(IsDigitsEmpty() ? IView::INVISIBLE : IView::VISIBLE);
     return NOERROR;
 }
@@ -1251,7 +1332,7 @@ AutoPtr<IPopupMenu> DialpadFragment::BuildOptionsMenu(
     AutoPtr<DialpadPopupMenu> popupMenu = new DialpadPopupMenu(this);
     popupMenu->constructor(IContext::Probe(activity), invoker);
     popupMenu->Inflate(R::menu::dialpad_options);
-    popupMenu->SetOnMenuItemClickListener(this);
+    popupMenu->SetOnMenuItemClickListener(mInnerListener);
     return (IPopupMenu*)popupMenu;
 }
 

@@ -31,6 +31,7 @@ using Elastos::Droid::Dialer::CallLog::EIID_ICallLogAdapterCallFetcher;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogQueryHandlerListener;
 using Elastos::Droid::Dialer::Widget::EIID_IPanelSlideCallbacks;
 using Elastos::Droid::Support::V4::View::IViewPager;
+using Elastos::Droid::Support::V4::View::EIID_IViewPagerOnPageChangeListener;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::CoreUtils;
@@ -41,6 +42,38 @@ namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace List {
+
+//=================================================================
+// ListsFragment::InnerListener
+//=================================================================
+
+CAR_INTERFACE_IMPL(ListsFragment::InnerListener, Object, IViewPagerOnPageChangeListener)
+
+ListsFragment::InnerListener::InnerListener(
+    /* [in] */ ListsFragment* host)
+    : mHost(host)
+{
+}
+
+ECode ListsFragment::InnerListener::OnPageScrolled(
+    /* [in] */ Int32 position,
+    /* [in] */ Float positionOffset,
+    /* [in] */ Int32 positionOffsetPixels)
+{
+    return mHost->OnPageScrolled(position, positionOffset, positionOffsetPixels);
+}
+
+ECode ListsFragment::InnerListener::OnPageSelected(
+    /* [in] */ Int32 position)
+{
+    return mHost->OnPageSelected(position);
+}
+
+ECode ListsFragment::InnerListener::OnPageScrollStateChanged(
+    /* [in] */ Int32 state)
+{
+    return mHost->OnPageScrollStateChanged(state);
+}
 
 //=================================================================
 // ListsFragment::ViewPagerAdapter
@@ -379,6 +412,7 @@ ECode ListsFragment::OnCreateView(
 {
     VALIDATE_NOT_NULL(view);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IView> parentView;
     inflater->Inflate(R::layout::lists_fragment,
             container, FALSE, (IView**)&parentView);
@@ -392,7 +426,7 @@ ECode ListsFragment::OnCreateView(
     mViewPagerAdapter = new ViewPagerAdapter(manager, this);
     mViewPager->SetAdapter(mViewPagerAdapter);
     mViewPager->SetOffscreenPageLimit(2);
-    mViewPager->SetOnPageChangeListener(this);
+    mViewPager->SetOnPageChangeListener(listener);
     Int32 rtl;
     GetRtlPosition(TAB_INDEX_SPEED_DIAL, &rtl);
     mViewPager->SetCurrentItem(rtl);
@@ -487,6 +521,8 @@ ECode ListsFragment::DismissShortcut(
 ECode ListsFragment::AddOnPageChangeListener(
     /* [in] */ IViewPagerOnPageChangeListener* onPageChangeListener)
 {
+    assert(onPageChangeListener != NULL);
+    assert(IViewPagerOnPageChangeListener::Probe(onPageChangeListener));
     Boolean contains;
     if (mOnPageChangeListeners->Contains(onPageChangeListener, &contains), !contains) {
         mOnPageChangeListeners->Add(onPageChangeListener);

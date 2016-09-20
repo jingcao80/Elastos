@@ -169,7 +169,7 @@ private:
 
     private:
         Int32 mSurfaceId;
-        AutoPtr<ITextureView> mTextureView;
+        ITextureView* mTextureView; // weak-ref
         AutoPtr<ISurfaceTexture> mSavedSurfaceTexture;
         AutoPtr<ISurface> mSavedSurface;
 

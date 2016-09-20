@@ -185,6 +185,21 @@ ECode CAccountFilterActivity::FilterListAdapter::GetView(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CAccountFilterActivity::InnerListener, Object, IAdapterViewOnItemClickListener)
+
+CAccountFilterActivity::InnerListener::InnerListener(
+    /* [in] */ CAccountFilterActivity* host)
+    : mHost(host)
+{}
+
+ECode CAccountFilterActivity::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
 
 //=================================================================
 // CAccountFilterActivity
@@ -193,7 +208,7 @@ const String CAccountFilterActivity::TAG;
 const Int32 CAccountFilterActivity::SUBACTIVITY_CUSTOMIZE_FILTER;
 const Int32 CAccountFilterActivity::FILTER_LOADER_ID;
 
-CAR_INTERFACE_IMPL_2(CAccountFilterActivity, Activity, IAccountFilterActivity, IAdapterViewOnItemClickListener)
+CAR_INTERFACE_IMPL(CAccountFilterActivity, Activity, IAccountFilterActivity)
 
 CAR_OBJECT_IMPL(CAccountFilterActivity)
 
@@ -203,9 +218,10 @@ ECode CAccountFilterActivity::OnCreate(
     FAIL_RETURN(Activity::OnCreate(icicle))
     SetContentView(Elastos::Droid::Dialer::R::layout::contact_list_filter);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IView> temp = FindViewById(Elastos::Droid::R::id::list);
     mListView = IListView::Probe(temp);
-    IAdapterView::Probe(mListView)->SetOnItemClickListener(this);
+    IAdapterView::Probe(mListView)->SetOnItemClickListener(listener);
 
     AutoPtr<IActionBar> actionBar;
     GetActionBar((IActionBar**)&actionBar);

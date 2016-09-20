@@ -57,9 +57,36 @@ class ListsFragment
     , public IListsFragment
     , public ICallLogQueryHandlerListener
     , public ICallLogAdapterCallFetcher
-    , public IViewPagerOnPageChangeListener
 {
 public:
+    class InnerListener
+        : public Object
+        , public IViewPagerOnPageChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ ListsFragment* host);
+
+        // @Override
+        virtual CARAPI OnPageScrolled(
+            /* [in] */ Int32 position,
+            /* [in] */ Float positionOffset,
+            /* [in] */ Int32 positionOffsetPixels);
+
+        // @Override
+       virtual  CARAPI OnPageSelected(
+            /* [in] */ Int32 position);
+
+        // @Override
+        virtual CARAPI OnPageScrollStateChanged(
+            /* [in] */ Int32 state);
+
+    private:
+        ListsFragment* mHost;
+    };
+
     class ViewPagerAdapter
         : public FragmentPagerAdapter
     {
@@ -181,17 +208,17 @@ public:
         /* [in] */ IViewPagerOnPageChangeListener* onPageChangeListener);
 
     // @Override
-    CARAPI OnPageScrolled(
+    virtual CARAPI OnPageScrolled(
         /* [in] */ Int32 position,
         /* [in] */ Float positionOffset,
         /* [in] */ Int32 positionOffsetPixels);
 
     // @Override
-    CARAPI OnPageSelected(
+   virtual  CARAPI OnPageSelected(
         /* [in] */ Int32 position);
 
     // @Override
-    CARAPI OnPageScrollStateChanged(
+    virtual CARAPI OnPageScrollStateChanged(
         /* [in] */ Int32 state);
 
     CARAPI ShowRemoveView(

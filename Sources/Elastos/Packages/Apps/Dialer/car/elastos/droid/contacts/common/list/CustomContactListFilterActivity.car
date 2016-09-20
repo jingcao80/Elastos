@@ -24,8 +24,6 @@ module
      * interface IViewOnCreateContextMenuListener
      * interface IComponentCallbacks
      * interface IComponentCallbacks2
-     * interface IViewOnClickListener
-     * interface IExpandableListViewOnChildClickListener
      * interface ILoaderManagerLoaderCallbacks
      */
     interface ICustomContactListFilterActivity {

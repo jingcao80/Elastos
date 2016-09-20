@@ -29,8 +29,6 @@ namespace InCallUI {
 
 CarClass(CCallButtonFragment)
     , public BaseFragment
-    , public IPopupMenuOnMenuItemClickListener
-    , public IPopupMenuOnDismissListener
     , public IViewOnClickListener
     , public ICompoundButtonOnCheckedChangeListener
     , public IUi
@@ -38,38 +36,65 @@ CarClass(CCallButtonFragment)
     , public ICallButtonFragment
 {
 private:
-    class OverflowPopupOnMenuItemClickListener
+    class InnerListener
         : public Object
-        , public IPopupMenuOnMenuItemClickListener
+        , public IViewOnClickListener
     {
     public:
-        OverflowPopupOnMenuItemClickListener(
+        CAR_INTERFACE_DECL();
+
+        InnerListener(
+            /* [in] */ CCallButtonFragment* host);
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IView* view);
+
+    private:
+        CCallButtonFragment* mHost;
+    };
+
+    class OverflowPopupMenuListener
+        : public Object
+        , public IPopupMenuOnMenuItemClickListener
+        , public IPopupMenuOnDismissListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        OverflowPopupMenuListener(
             /* [in] */ CCallButtonFragment* host)
             : mHost(host)
         {}
-
-        CAR_INTERFACE_DECL();
 
         // @Override
         CARAPI OnMenuItemClick(
             /* [in] */ IMenuItem* item,
             /* [out] */ Boolean* result);
 
+        // @Override
+        CARAPI OnDismiss(
+            /* [in] */ IPopupMenu* popupMenu);
+
     private:
         CCallButtonFragment* mHost;
     };
 
-    class OverflowPopupOnDismissListener
+    class AudioModePopupMenuListener
         : public Object
+        , public IPopupMenuOnMenuItemClickListener
         , public IPopupMenuOnDismissListener
     {
     public:
-        OverflowPopupOnDismissListener(
-            /* [in] */ CCallButtonFragment* host)
-            : mHost(host)
-        {}
-
         CAR_INTERFACE_DECL();
+
+        AudioModePopupMenuListener(
+            /* [in] */ CCallButtonFragment* host);
+
+        // @Override
+        CARAPI OnMenuItemClick(
+            /* [in] */ IMenuItem* item,
+            /* [out] */ Boolean* result);
 
         // @Override
         CARAPI OnDismiss(

@@ -15,12 +15,7 @@ module
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.App.IFragment
      * interface Elastos.Droid.DailerBind.Analytics.IAnalyticsInterface
-     * interface IViewOnClickListener
-     * interface IViewOnLongClickListener
-     * interface IViewOnKeyListener
-     * interface IAdapterViewOnItemClickListener
      * interface ITextWatcher
-     * interface IPopupMenuOnMenuItemClickListener
      * interface IDialpadKeyButtonOnPressedListener
      */
     interface IDialpadFragment {

@@ -160,6 +160,25 @@ ECode CAnswerFragment::MyTextWatcher::AfterTextChanged(
 }
 
 
+CAR_INTERFACE_IMPL(CAnswerFragment::InnerListener, Object, IAnswerListener);
+
+ECode CAnswerFragment::InnerListener::OnAnswer(
+    /* [in] */ Int32 videoState,
+    /* [in] */ IContext* context)
+{
+    return mHost->OnAnswer(videoState, context);
+}
+
+ECode CAnswerFragment::InnerListener::OnDecline()
+{
+    return mHost->OnDecline();
+}
+
+ECode CAnswerFragment::InnerListener::OnText()
+{
+    return mHost->OnText();
+}
+
 //================================================================
 // CAnswerFragment
 //================================================================
@@ -169,7 +188,7 @@ const Int32 CAnswerFragment::TARGET_SET_FOR_VIDEO_WITHOUT_SMS;
 const Int32 CAnswerFragment::TARGET_SET_FOR_VIDEO_WITH_SMS;
 const Int32 CAnswerFragment::TARGET_SET_FOR_VIDEO_UPGRADE_REQUEST;
 
-CAR_INTERFACE_IMPL_4(CAnswerFragment, BaseFragment, IAnswerFragment, IAnswerListener, IAnswerUi, IUi);
+CAR_INTERFACE_IMPL_3(CAnswerFragment, BaseFragment, IAnswerFragment, IAnswerUi, IUi);
 
 CAR_OBJECT_IMPL(CAnswerFragment);
 
@@ -202,6 +221,7 @@ ECode CAnswerFragment::OnCreateView(
 {
     VALIDATE_NOT_NULL(view);
 
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IView> v;
     inflater->Inflate(Elastos::Droid::Dialer::R::layout::answer_fragment, container, FALSE, (IView**)&v);
     mGlowpad = (CGlowPadWrapper*)IGlowPadWrapper::Probe(v);
@@ -210,7 +230,7 @@ ECode CAnswerFragment::OnCreateView(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     Logger::D("CAnswerFragment", "Created from activity %s", TO_CSTR(activity));
-    mGlowpad->SetAnswerListener(this);
+    mGlowpad->SetAnswerListener(listener);
 
     *view = v;
     REFCOUNT_ADD(*view);

@@ -93,6 +93,60 @@ ECode ContactEntryListFragment::PreferencesChangeListener::OnChange()
 // ContactEntryListFragment
 //=================================================================
 
+CAR_INTERFACE_IMPL_4(ContactEntryListFragment::InnerListener, Object
+    , IAdapterViewOnItemClickListener
+    , IAbsListViewOnScrollListener
+    , IViewOnFocusChangeListener
+    , IViewOnTouchListener)
+
+ContactEntryListFragment::InnerListener::InnerListener(
+    /* [in] */ ContactEntryListFragment* host)
+{}
+
+ECode ContactEntryListFragment::InnerListener::OnScroll(
+    /* [in] */ IAbsListView* view,
+    /* [in] */ Int32 firstVisibleItem,
+    /* [in] */ Int32 visibleItemCount,
+    /* [in] */ Int32 totalItemCount)
+{
+    return mHost->OnScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+}
+
+ECode ContactEntryListFragment::InnerListener::OnScrollStateChanged(
+    /* [in] */ IAbsListView* view,
+    /* [in] */ Int32 scrollState)
+{
+    return mHost->OnScrollStateChanged(view, scrollState);
+}
+
+ECode ContactEntryListFragment::InnerListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    return mHost->OnItemClick(parent, view, position, id);
+}
+
+ECode ContactEntryListFragment::InnerListener::OnFocusChange(
+    /* [in] */ IView* v,
+    /* [in] */ Boolean hasFocus)
+{
+    return mHost->OnFocusChange(v, hasFocus);
+}
+
+ECode ContactEntryListFragment::InnerListener::OnTouch(
+    /* [in] */ IView* view,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnTouch(view, event, result);
+}
+
+//=================================================================
+// ContactEntryListFragment
+//=================================================================
+
 const String ContactEntryListFragment::KEY_LIST_STATE("liststate");
 const String ContactEntryListFragment::KEY_SECTION_HEADER_DISPLAY_ENABLED("sectionHeaderDisplayEnabled");
 const String ContactEntryListFragment::KEY_PHOTO_LOADER_ENABLED("photoLoaderEnabled");
@@ -118,6 +172,10 @@ const Int32 ContactEntryListFragment::DEFAULT_DIRECTORY_RESULT_LIMIT;
 const Int32 ContactEntryListFragment::STATUS_NOT_LOADED;
 const Int32 ContactEntryListFragment::STATUS_LOADING;
 const Int32 ContactEntryListFragment::STATUS_LOADED;
+
+
+CAR_INTERFACE_IMPL_2(ContactEntryListFragment, AnalyticsFragment,
+    IContactEntryListFragment, ILoaderManagerLoaderCallbacks)
 
 ContactEntryListFragment::ContactEntryListFragment()
     : mUserProfileExists(FALSE)
@@ -149,14 +207,6 @@ ContactEntryListFragment::ContactEntryListFragment()
     // TODO: no PreferencesChangeListener
     // mPreferencesChangeListener  = new PreferencesChangeListener(this);
 }
-
-CAR_INTERFACE_IMPL_6(ContactEntryListFragment, AnalyticsFragment
-        , IContactEntryListFragment
-        , IAdapterViewOnItemClickListener
-        , IAbsListViewOnScrollListener
-        , IViewOnFocusChangeListener
-        , IViewOnTouchListener
-        , ILoaderManagerLoaderCallbacks)
 
 ECode ContactEntryListFragment::OnAttach(
     /* [in] */ IActivity* activity)
@@ -976,10 +1026,11 @@ ECode ContactEntryListFragment::OnCreateView(
         adapterV->SetEmptyView(emptyView);
     }
 
-    adapterV->SetOnItemClickListener(this);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    adapterV->SetOnItemClickListener(listener);
     AutoPtr<IView> v = IView::Probe(mListView);
-    v->SetOnFocusChangeListener(this);
-    v->SetOnTouchListener(this);
+    v->SetOnFocusChangeListener(listener);
+    v->SetOnTouchListener(listener);
     Boolean isSearchMode;
     IsSearchMode(&isSearchMode);
     IAbsListView::Probe(mListView)->SetFastScrollEnabled(!isSearchMode);
@@ -1030,7 +1081,8 @@ void ContactEntryListFragment::ConfigurePhotoLoader()
         //     mPhotoManager = ContactPhotoManager::GetInstance(mContext);
         // }
         if (mListView != NULL) {
-            IAbsListView::Probe(mListView)->SetOnScrollListener(this);
+            AutoPtr<InnerListener> listener = new InnerListener(this);
+            IAbsListView::Probe(mListView)->SetOnScrollListener(listener);
         }
         if (mAdapter != NULL) {
             // TODO: no ContactPhotoManager
