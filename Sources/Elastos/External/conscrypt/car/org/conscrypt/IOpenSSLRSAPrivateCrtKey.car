@@ -4,9 +4,7 @@ module
     namespace Org {
     namespace Conscrypt {
 
-    interface IOpenSSLKeyHolder {
-        GetOpenSSLKey(
-            [out] IOpenSSLKey** result);
+    interface IOpenSSLRSAPrivateCrtKey {
     }
 
     } // namespace Conscrypt

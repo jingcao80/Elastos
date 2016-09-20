@@ -1,0 +1,49 @@
+
+module
+{
+    using interface Elastos.Security.IPublicKey;
+    using interface Elastos.Security.IPrivateKey;
+    using interface Elastosx.Crypto.ISecretKey;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLKey {
+        /**
+         * Returns the raw pointer to the EVP_PKEY context for use in JNI calls. The
+         * life cycle of this native pointer is managed by the {@code OpenSSLKey}
+         * instance and must not be destroyed or freed by users of this API.
+         */
+        GetPkeyContext(
+            [out] Int64* result);
+
+        GetEngine(
+            [out] IOpenSSLEngine** result);
+
+        GetAlias(
+            [out] String* result);
+
+        GetPublicKey(
+            [out] IPublicKey** result);
+
+        GetPrivateKey(
+            [out] IPrivateKey** result);
+
+        GetSecretKey(
+            [in] String algorithm,
+            [out] ISecretKey** result);
+    }
+
+    interface IOpenSSLKeyHelper {
+        FromPrivateKey(
+            [in] IPrivateKey* key,
+            [out] IOpenSSLKey** result);
+
+        FromPublicKey(
+            [in] IPublicKey* key,
+            [out] IOpenSSLKey** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

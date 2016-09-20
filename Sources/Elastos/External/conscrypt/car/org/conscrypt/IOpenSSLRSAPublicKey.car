@@ -1,0 +1,21 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IRSAPublicKey
+     * interface IOpenSSLKeyHolder
+     * interface IPublicKey
+     * interface IRSAKey
+     * interface IKey
+     * interface ISerializable
+     */
+    interface IOpenSSLRSAPublicKey {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

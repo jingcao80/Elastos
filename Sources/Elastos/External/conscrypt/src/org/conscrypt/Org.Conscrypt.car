@@ -38,9 +38,14 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLECPrivateKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLECPublicKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLEngine.car");
-
+    merge("../../../car/org/conscrypt/IOpenSSLKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLKeyHolder.car");
+    merge("../../../car/org/conscrypt/IOpenSSLMac.car");
+    merge("../../../car/org/conscrypt/IOpenSSLMessageDigestJDK.car");
+    merge("../../../car/org/conscrypt/IOpenSSLProvider.car");
     merge("../../../car/org/conscrypt/IOpenSSLNativeReference.car");
+    merge("../../../car/org/conscrypt/IOpenSSLRSAKeyFactory.car");
+    merge("../../../car/org/conscrypt/IOpenSSLRSAKeyPairGenerator.car");
     merge("../../../car/org/conscrypt/IOpenSSLRandom.car");
     merge("../../../car/org/conscrypt/IOpenSSLSecretKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLServerSocketImpl.car");
@@ -55,20 +60,32 @@ module
     merge("../../../car/org/conscrypt/ISSLRecordProtocol.car");
     merge("../../../car/org/conscrypt/ISSLServerSessionCache.car");
     merge("../../../car/org/conscrypt/IServerSessionContext.car");
+    merge("../../../car/org/conscrypt/IOpenSSLRSAPrivateKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLRSAPublicKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLRSAPrivateCrtKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLServerSocketFactoryImpl.car");
+    merge("../../../car/org/conscrypt/IOpenSSLSessionImpl.car");
+    merge("../../../car/org/conscrypt/IOpenSSLSignature.car");
+    merge("../../../car/org/conscrypt/IOpenSSLSignatureRawRSA.car");
+    merge("../../../car/org/conscrypt/IOpenSSLSocketFactoryImpl.car");
+    merge("../../../car/org/conscrypt/IOpenSSLSocketImplWrapper.car");
+    merge("../../../car/org/conscrypt/IOpenSSLX509CRLEntry.car");
+    merge("../../../car/org/conscrypt/IOpenSSLX509CertificateFactory.car");
+    merge("../../../car/org/conscrypt/IX509PublicKey.car");
 
-    // using interface Elastos.Security.IProvider;
+    using interface Elastos.Security.IProvider;
 
     namespace Org {
     namespace Conscrypt {
 
-    // class COpenSSLProvider {
-    //     constructor();
+    class COpenSSLProvider {
+        constructor();
 
-    //     constructor(
-    //         [in] String providerName);
+        constructor(
+            [in] String providerName);
 
-    //     interface IProvider;
-    // }
+        interface IProvider;
+    }
 
     singleton class CPlatform {
         interface IPlatform;

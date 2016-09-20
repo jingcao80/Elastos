@@ -3,82 +3,19 @@
 #define __ORG_CONSCRYPT_OPENSSLMAC_H__
 
 #include "Org.Conscrypt.h"
+// #include "elastosx/crypto/MacSpi.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Security::Provider;
+// using Elastosx::Crypto::MacSpi;
+using Elastos::Security::IKey;
+using Elastos::Security::Spec::IAlgorithmParameterSpec;
 
 namespace Org {
 namespace Conscrypt {
 
 class OpenSSLMac
-    : public MacSpi
+    : public Object  //    : public MacSpi
 {
-public:
-    class HmacMD5
-        : public OpenSSLMac
-    {
-    public:
-        HmacMD5();
-
-    private:
-        static Int64 EVP_MD;
-        static Int32 SIZE;
-    };
-
-    class HmacSHA1
-        : public OpenSSLMac
-    {
-    public:
-        HmacSHA1();
-
-    private:
-        static Int64 EVP_MD;
-        static Int32 SIZE;
-    };
-
-    class HmacSHA224
-        : public OpenSSLMac
-    {
-    public:
-        HmacSHA224();
-
-    private:
-        static Int64 EVP_MD;
-        static Int32 SIZE;
-    };
-
-    class HmacSHA256
-        : public OpenSSLMac
-    {
-    public:
-        HmacSHA256();
-
-    private:
-        static Int64 EVP_MD;
-        static Int32 SIZE;
-    };
-
-    class HmacSHA384
-        : public OpenSSLMac
-    {
-    public:
-        HmacSHA384();
-
-    private:
-        static Int64 EVP_MD;
-        static Int32 SIZE;
-    };
-
-    class HmacSHA512
-        : public OpenSSLMac
-    {
-    public:
-        HmacSHA512();
-
-    private:
-        static Int64 EVP_MD;
-        static Int32 SIZE;
-    };
-
 protected:
     Int32 EngineGetMacLength();
 
@@ -98,7 +35,7 @@ protected:
 
     void EngineReset();
 
-private:
+protected:
     OpenSSLMac(
         /* [in] */ Int64 evp_md,
         /* [in] */ Int32 size,
@@ -107,7 +44,7 @@ private:
     void ResetContext();
 
 private:
-    AutoPtr<IOpenSSLDigestContext> ctx;
+    AutoPtr<IOpenSSLDigestContext> mCtx;
 
     /**
      * Holds the EVP_MD for the hashing algorithm, e.g.
@@ -134,6 +71,72 @@ private:
      * Holds a dummy buffer for writing single bytes to the digest.
      */
     AutoPtr<ArrayOf<Byte> > mSingleByte;
+};
+
+class HmacMD5
+    : public OpenSSLMac
+{
+public:
+    HmacMD5();
+
+public:
+    static Int64 EVP_MD;
+    static Int32 SIZE;
+};
+
+class HmacSHA1
+    : public OpenSSLMac
+{
+public:
+    HmacSHA1();
+
+public:
+    static Int64 EVP_MD;
+    static Int32 SIZE;
+};
+
+class HmacSHA224
+    : public OpenSSLMac
+{
+public:
+    HmacSHA224();
+
+public:
+    static Int64 EVP_MD;
+    static Int32 SIZE;
+};
+
+class HmacSHA256
+    : public OpenSSLMac
+{
+public:
+    HmacSHA256();
+
+public:
+    static Int64 EVP_MD;
+    static Int32 SIZE;
+};
+
+class HmacSHA384
+    : public OpenSSLMac
+{
+public:
+    HmacSHA384();
+
+public:
+    static Int64 EVP_MD;
+    static Int32 SIZE;
+};
+
+class HmacSHA512
+    : public OpenSSLMac
+{
+public:
+    HmacSHA512();
+
+public:
+    static Int64 EVP_MD;
+    static Int32 SIZE;
 };
 
 } // namespace Conscrypt

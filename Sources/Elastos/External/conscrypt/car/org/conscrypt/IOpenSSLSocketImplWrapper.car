@@ -4,9 +4,11 @@ module
     namespace Org {
     namespace Conscrypt {
 
-    interface IOpenSSLKeyHolder {
-        GetOpenSSLKey(
-            [out] IOpenSSLKey** result);
+    /*
+     * @Involve
+     * interface IOpenSSLSocketImpl
+     */
+    interface IOpenSSLSocketImplWrapper {
     }
 
     } // namespace Conscrypt

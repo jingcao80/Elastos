@@ -1,149 +1,157 @@
 
+#include "_Org.Conscrypt.h"
+#include "Elastos.CoreLibrary.Security.h"
 #include "OpenSSLMac.h"
+#include "NativeCrypto.h"
+// #include "OpenSSLKey.h"
+#include "Elastos.CoreLibrary.Extensions.h"
+
+using Elastosx::Crypto::ISecretKey;
+using Org::Conscrypt::NativeCrypto;
 
 namespace Org {
 namespace Conscrypt {
 
 //=========================================
-// OpenSSLMac::HmacMD5::
+// HmacMD5::
 //=========================================
 static Int64 GetHmacMD5_EVP_MD()
 {
     Int64 md = 0;
-    NativeCrypto::EVP_get_digestbyname("md5", &md);
+    NativeCrypto::EVP_get_digestbyname(String("md5"), &md);
     return md;
 }
-Int64 OpenSSLMac::HmacMD5::EVP_MD = GetHmacMD5_EVP_MD();
+Int64 HmacMD5::EVP_MD = GetHmacMD5_EVP_MD();
 
 static Int32 GetHmacMD5_SIZE()
 {
-    Int64 size = 0;
+    Int32 size = 0;
     NativeCrypto::EVP_MD_size(HmacMD5::EVP_MD, &size);
     return size;
 }
-Int32 OpenSSLMac::HmacMD5::SIZE = GetHmacMD5_SIZE();
+Int32 HmacMD5::SIZE = GetHmacMD5_SIZE();
 
-OpenSSLMac::HmacMD5::HmacMD5()
+HmacMD5::HmacMD5()
     : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
 }
 
 //=========================================
-// OpenSSLMac::HmacSHA1::
+// HmacSHA1::
 //=========================================
 static Int64 GetHmacSHA1_EVP_MD()
 {
     Int64 md = 0;
-    NativeCrypto::EVP_get_digestbyname("sha1", &md);
+    NativeCrypto::EVP_get_digestbyname(String("sha1"), &md);
     return md;
 }
-Int64 OpenSSLMac::HmacSHA1::EVP_MD = GetHmacSHA1_EVP_MD();
+Int64 HmacSHA1::EVP_MD = GetHmacSHA1_EVP_MD();
 
 static Int32 GetHmacSHA1_SIZE()
 {
-    Int64 size = 0;
+    Int32 size = 0;
     NativeCrypto::EVP_MD_size(HmacSHA1::EVP_MD, &size);
     return size;
 }
-Int32 OpenSSLMac::HmacSHA1::SIZE = GetHmacSHA1_SIZE();
+Int32 HmacSHA1::SIZE = GetHmacSHA1_SIZE();
 
-OpenSSLMac::HmacSHA1::HmacSHA1()
+HmacSHA1::HmacSHA1()
     : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
 }
 
 //=========================================
-// OpenSSLMac::HmacSHA224::
+// HmacSHA224::
 //=========================================
 static Int64 GetHmacSHA224_EVP_MD()
 {
     Int64 md = 0;
-    NativeCrypto::EVP_get_digestbyname("sha224", &md);
+    NativeCrypto::EVP_get_digestbyname(String("sha224"), &md);
     return md;
 }
-Int64 OpenSSLMac::HmacSHA224::EVP_MD = GetHmacSHA224_EVP_MD();
+Int64 HmacSHA224::EVP_MD = GetHmacSHA224_EVP_MD();
 
 static Int32 GetHmacSHA224_SIZE()
 {
-    Int64 size = 0;
+    Int32 size = 0;
     NativeCrypto::EVP_MD_size(HmacSHA224::EVP_MD, &size);
     return size;
 }
-Int32 OpenSSLMac::HmacSHA224::SIZE = GetHmacSHA224_SIZE();
+Int32 HmacSHA224::SIZE = GetHmacSHA224_SIZE();
 
-OpenSSLMac::HmacSHA224::HmacSHA224()
+HmacSHA224::HmacSHA224()
     : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
 }
 
 //=========================================
-// OpenSSLMac::HmacSHA256::
+// HmacSHA256::
 //=========================================
 static Int64 GetHmacSHA256_EVP_MD()
 {
     Int64 md = 0;
-    NativeCrypto::EVP_get_digestbyname("sha256", &md);
+    NativeCrypto::EVP_get_digestbyname(String("sha256"), &md);
     return md;
 }
-Int64 OpenSSLMac::HmacSHA256::EVP_MD = GetHmacSHA256_EVP_MD();
+Int64 HmacSHA256::EVP_MD = GetHmacSHA256_EVP_MD();
 
 static Int32 GetHmacSHA256_SIZE()
 {
-    Int64 size = 0;
+    Int32 size = 0;
     NativeCrypto::EVP_MD_size(HmacSHA256::EVP_MD, &size);
     return size;
 }
-Int32 OpenSSLMac::HmacSHA256::SIZE = GetHmacSHA256_SIZE();
+Int32 HmacSHA256::SIZE = GetHmacSHA256_SIZE();
 
-OpenSSLMac::HmacSHA256::HmacSHA256()
+HmacSHA256::HmacSHA256()
     : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
 }
 
 //=========================================
-// OpenSSLMac::HmacSHA384::
+// HmacSHA384::
 //=========================================
 static Int64 GetHmacSHA384_EVP_MD()
 {
     Int64 md = 0;
-    NativeCrypto::EVP_get_digestbyname("sha384", &md);
+    NativeCrypto::EVP_get_digestbyname(String("sha384"), &md);
     return md;
 }
-Int64 OpenSSLMac::HmacSHA384::EVP_MD = GetHmacSHA384_EVP_MD();
+Int64 HmacSHA384::EVP_MD = GetHmacSHA384_EVP_MD();
 
 static Int32 GetHmacSHA384_SIZE()
 {
-    Int64 size = 0;
+    Int32 size = 0;
     NativeCrypto::EVP_MD_size(HmacSHA384::EVP_MD, &size);
     return size;
 }
-Int32 OpenSSLMac::HmacSHA384::SIZE = GetHmacSHA384_SIZE();
+Int32 HmacSHA384::SIZE = GetHmacSHA384_SIZE();
 
-OpenSSLMac::HmacSHA384::HmacSHA384()
+HmacSHA384::HmacSHA384()
     : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
 }
 
 //=========================================
-// OpenSSLMac::HmacSHA512::
+// HmacSHA512::
 //=========================================
 static Int64 GetHmacSHA512_EVP_MD()
 {
     Int64 md = 0;
-    NativeCrypto::EVP_get_digestbyname("sha512", &md);
+    NativeCrypto::EVP_get_digestbyname(String("sha512"), &md);
     return md;
 }
-Int64 OpenSSLMac::HmacSHA512::EVP_MD = GetHmacSHA512_EVP_MD();
+Int64 HmacSHA512::EVP_MD = GetHmacSHA512_EVP_MD();
 
 static Int32 GetHmacSHA512_SIZE()
 {
-    Int64 size = 0;
+    Int32 size = 0;
     NativeCrypto::EVP_MD_size(HmacSHA512::EVP_MD, &size);
     return size;
 }
-Int32 OpenSSLMac::HmacSHA512::SIZE = GetHmacSHA512_SIZE();
+Int32 HmacSHA512::SIZE = GetHmacSHA512_SIZE();
 
-OpenSSLMac::HmacSHA512::HmacSHA512()
+HmacSHA512::HmacSHA512()
     : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
 }
@@ -193,8 +201,9 @@ void OpenSSLMac::EngineInit(
         }
 
         Int64 new_mac_key = 0;
-        NativeCrypto::EVP_PKEY_new_mac_key(evp_pkey_type, keyBytes, &new_mac_key);
-        macKey = new OpenSSLKey(new_mac_key);
+        NativeCrypto::EVP_PKEY_new_mac_key(mEvp_pkey_type, keyBytes, &new_mac_key);
+        assert(0 && "TODO");
+        // mMacKey = new OpenSSLKey(new_mac_key);
     }
 
     ResetContext();
@@ -204,12 +213,15 @@ void OpenSSLMac::ResetContext()
 {
     Int64 cxt = 0;
     NativeCrypto::EVP_MD_CTX_create(&cxt);
-    AutoPtr<IOpenSSLDigestContext> ctxLocal = new OpenSSLDigestContext(cxt);
+    assert(0 && "TODO");
+    AutoPtr<IOpenSSLDigestContext> ctxLocal;// = new OpenSSLDigestContext(cxt);
     NativeCrypto::EVP_MD_CTX_init(ctxLocal);
 
     AutoPtr<IOpenSSLKey> macKey = mMacKey;
     if (macKey != NULL) {
-        NativeCrypto::EVP_DigestSignInit(ctxLocal, evp_md, macKey->GetPkeyContext());
+        Int64 context = 0;
+        macKey->GetPkeyContext(&context);
+        NativeCrypto::EVP_DigestSignInit(ctxLocal, mEvp_md, context);
     }
 
     mCtx = ctxLocal;
@@ -219,7 +231,7 @@ void OpenSSLMac::EngineUpdate(
     /* [in] */ Byte input)
 {
     (*mSingleByte)[0] = input;
-    EngineUpdate(singleByte, 0, 1);
+    EngineUpdate(mSingleByte, 0, 1);
 }
 
 void OpenSSLMac::EngineUpdate(

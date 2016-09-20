@@ -1,0 +1,17 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface IMessageDigestSpi
+     * interface ICloneable
+     */
+    interface IOpenSSLMessageDigestJDK {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

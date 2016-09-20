@@ -1,0 +1,16 @@
+
+module
+{
+    namespace Org {
+    namespace Conscrypt {
+
+    /*
+     * @Involve
+     * interface ISSLServerSocketFactory
+     */
+    interface IOpenSSLServerSocketFactoryImpl {
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}
