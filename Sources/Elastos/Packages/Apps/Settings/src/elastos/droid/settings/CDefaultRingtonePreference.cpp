@@ -33,7 +33,7 @@ ECode CDefaultRingtonePreference::OnPrepareRingtonePickerIntent(
      * Since this preference is for choosing the default ringtone, it
      * doesn't make sense to show a 'Default' item.
      */
-    return ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_SHOW_DEFAULT, FALSE);
+    return ringtonePickerIntent->PutBooleanExtra(IRingtoneManager::EXTRA_RINGTONE_SHOW_DEFAULT, FALSE);
 }
 
 ECode CDefaultRingtonePreference::OnSaveRingtone(

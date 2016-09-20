@@ -77,8 +77,9 @@ ECode SeekBarVolumizer::SeekBarVolumizerH::HandleMessage(
         if (mHost->mSeekBar != NULL) {
             Int32 arg1;
             msg->GetArg1(&arg1);
-            IProgressBar::Probe(mHost->mSeekBar)->SetProgress(arg1);
-            IProgressBar::Probe(mHost->mSeekBar)->GetProgress(&(mHost->mLastProgress));
+            IProgressBar* seekBar = IProgressBar::Probe(mHost->mSeekBar);
+            seekBar->SetProgress(arg1);
+            seekBar->GetProgress(&(mHost->mLastProgress));
         }
     }
     return NOERROR;
@@ -132,7 +133,8 @@ void SeekBarVolumizer::SeekBarVolumizerReceiver::SetListening(
         CIntentFilter::New(IAudioManager::VOLUME_CHANGED_ACTION, (IIntentFilter**)&filter);
         AutoPtr<IIntent> intent;
         mHost->mContext->RegisterReceiver(this, filter, (IIntent**)&intent);
-    } else {
+    }
+    else {
         mHost->mContext->UnregisterReceiver(this);
     }
 }
@@ -145,7 +147,7 @@ ECode SeekBarVolumizer::SeekBarVolumizerReceiver::OnReceive(
     intent->GetAction(&action);
 
     if (!IAudioManager::VOLUME_CHANGED_ACTION.Equals(action)) {
-        return E_NULL_POINTER_EXCEPTION;
+        return NOERROR;
     }
     Int32 streamType;
     intent->GetInt32Extra(IAudioManager::EXTRA_VOLUME_STREAM_TYPE, -1, &streamType);
@@ -220,9 +222,11 @@ ECode SeekBarVolumizer::constructor(
     if (defaultUri == NULL) {
         if (mStreamType == IAudioManager::STREAM_RING) {
             defaultUri = Settings::System::DEFAULT_RINGTONE_URI;
-        } else if (mStreamType == IAudioManager::STREAM_NOTIFICATION) {
+        }
+        else if (mStreamType == IAudioManager::STREAM_NOTIFICATION) {
             defaultUri = Settings::System::DEFAULT_NOTIFICATION_URI;
-        } else {
+        }
+        else {
             defaultUri = Settings::System::DEFAULT_ALARM_ALERT_URI;
         }
     }
@@ -240,10 +244,11 @@ ECode SeekBarVolumizer::SetSeekBar(
     }
     mSeekBar = seekBar;
     mSeekBar->SetOnSeekBarChangeListener(NULL);
-    IProgressBar::Probe(mSeekBar)->SetMax(mMaxStreamVolume);
-    IProgressBar::Probe(mSeekBar)->SetProgress(mLastProgress > -1 ? mLastProgress : mOriginalStreamVolume);
+    IProgressBar* _seekBar = IProgressBar::Probe(mSeekBar);
+    _seekBar->SetMax(mMaxStreamVolume);
+    _seekBar->SetProgress(mLastProgress > -1 ? mLastProgress : mOriginalStreamVolume);
     AutoPtr<InnerListener> listener = new InnerListener(this);
-    mSeekBar->SetOnSeekBarChangeListener(listener.Get());
+    mSeekBar->SetOnSeekBarChangeListener(listener);
     return NOERROR;
 }
 
@@ -281,8 +286,8 @@ void SeekBarVolumizer::OnInitSample()
 {
     AutoPtr<IRingtoneManagerHelper> helper;
     CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&helper);
-    AutoPtr<IRingtone> ringtone;
-    helper->GetRingtone(mContext, mDefaultUri,(IRingtone**)&mRingtone);
+    mRingtone = NULL;
+    helper->GetRingtone(mContext, mDefaultUri, (IRingtone**)&mRingtone);
     if (mRingtone != NULL) {
         mRingtone->SetStreamType(mStreamType);
     }
@@ -316,7 +321,8 @@ void SeekBarVolumizer::OnStartSample()
     }
 }
 
-ECode SeekBarVolumizer::PostStopSample() {
+ECode SeekBarVolumizer::PostStopSample()
+{
     // remove pending delayed start messages
     mHandler->RemoveMessages(MSG_START_SAMPLE);
     mHandler->RemoveMessages(MSG_STOP_SAMPLE);
@@ -327,7 +333,8 @@ ECode SeekBarVolumizer::PostStopSample() {
     return NOERROR;
 }
 
-void SeekBarVolumizer::OnStopSample() {
+void SeekBarVolumizer::OnStopSample()
+{
     if (mRingtone != NULL) {
         mRingtone->Stop();
     }
@@ -360,7 +367,7 @@ ECode SeekBarVolumizer::OnProgressChanged(
     /* [in] */ Boolean fromTouch)
 {
     if (!fromTouch) {
-        return E_NULL_POINTER_EXCEPTION;
+        return NOERROR;
     }
 
     PostSetVolume(progress);
@@ -397,8 +404,10 @@ ECode SeekBarVolumizer::IsSamplePlaying(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    mRingtone->IsPlaying(result);
-    *result = mRingtone != NULL && *result;
+    *result = FALSE;
+
+    Boolean res;
+    *result = mRingtone != NULL && (mRingtone->IsPlaying(&res), res);
     return NOERROR;
 }
 
@@ -410,8 +419,7 @@ ECode SeekBarVolumizer::StartSample()
 
 ECode SeekBarVolumizer::StopSample()
 {
-    PostStopSample();
-    return NOERROR;
+    return PostStopSample();
 }
 
 ECode SeekBarVolumizer::GetSeekBar(
@@ -426,9 +434,10 @@ ECode SeekBarVolumizer::GetSeekBar(
 ECode SeekBarVolumizer::ChangeVolumeBy(
     /* [in] */ Int32 amount)
 {
-    IProgressBar::Probe(mSeekBar)->IncrementProgressBy(amount);
+    IProgressBar* seekBar = IProgressBar::Probe(mSeekBar);
+    seekBar->IncrementProgressBy(amount);
     Int32 progress;
-    IProgressBar::Probe(mSeekBar)->GetProgress(&progress);
+    seekBar->GetProgress(&progress);
     PostSetVolume(progress);
     PostStartSample();
     mVolumeBeforeMute = -1;
@@ -444,8 +453,9 @@ ECode SeekBarVolumizer::MuteVolume()
         mVolumeBeforeMute = -1;
     }
     else {
-        IProgressBar::Probe(mSeekBar)->GetProgress(&mVolumeBeforeMute);
-        IProgressBar::Probe(mSeekBar)->SetProgress(0);
+        IProgressBar* seekBar = IProgressBar::Probe(mSeekBar);
+        seekBar->GetProgress(&mVolumeBeforeMute);
+        seekBar->SetProgress(0);
         PostStopSample();
         PostSetVolume(0);
     }

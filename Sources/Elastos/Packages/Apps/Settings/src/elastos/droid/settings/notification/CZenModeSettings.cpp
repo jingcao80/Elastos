@@ -108,12 +108,12 @@ ECode CZenModeSettings::MyBaseSearchIndexProvider::GetNonIndexableKeys(
     VALIDATE_NOT_NULL(list)
     *list = NULL;
 
-    AutoPtr<IArrayList> rt;
-    CArrayList::New((IArrayList**)&rt);
+    AutoPtr<IList> rt;
+    CArrayList::New((IList**)&rt);
     if (!Utils::IsVoiceCapable(context)) {
         rt->Add(CoreUtils::Convert(KEY_CALLS));
     }
-    *list = IList::Probe(rt);
+    *list = rt;
     REFCOUNT_ADD(*list);
     return NOERROR;
 }
@@ -268,7 +268,7 @@ ECode CZenModeSettings::OnCreateZenModeDowntimeDaysSelection::OnChanged(
     String sleepMode;
     mHost->mConfig->GetSleepMode(&sleepMode);
     if (Objects::Equals(CoreUtils::Convert(mode), CoreUtils::Convert(sleepMode))) return NOERROR;
-    if (DEBUG) Logger::D(TAG, "days.onChanged sleepMode=%s", mode.string());
+    if (DEBUG) Logger::D("CZenModeSettings", "days.onChanged sleepMode=%s", mode.string());
     AutoPtr<IZenModeConfig> newConfig;
     mHost->mConfig->Copy((IZenModeConfig**)&newConfig);
     newConfig->SetSleepMode(mode);
@@ -429,7 +429,7 @@ ECode CZenModeSettings::TimePickerOnPreferenceClickListener::OnPreferenceClick(
     CZenModeSettingsTimePickerFragment::NewByFriend((CZenModeSettingsTimePickerFragment**)&frag);
     frag->mPref = mHost;
     frag->Show(mMgr,
-            String("Elastos::Droid::Settings::Notification::CZenModeSettingsTimePickerPreference"));
+            String("Elastos.Droid.Settings.Notification.CZenModeSettingsTimePickerPreference"));
     *result = TRUE;
     return NOERROR;
 }
@@ -762,7 +762,7 @@ ECode CZenModeSettings::OnCreateOnPreferenceClickListener::OnPreferenceClick(
             builder->Show((IAlertDialog**)&dialog);
 
             *result = TRUE;
-            return TRUE;
+            return NOERROR;
         }
     }
     return NOERROR;

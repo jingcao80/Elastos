@@ -61,7 +61,7 @@ using Elastos::Droid::Settings::Dashboard::NoHomeDialogFragment;
 using Elastos::Droid::Settings::Search::Index;
 using Elastos::Droid::Settings::EIID_IButtonBarHandler;
 using Elastos::Droid::Transition::ITransitionManagerHelper;
-// using Elastos::Droid::Transition::CTransitionManagerHelper;
+using Elastos::Droid::Transition::CTransitionManagerHelper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::ITypedValue;
@@ -144,7 +144,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[18] = "Elastos.Droid.Settings.DeviceInfoSettings";
     (*args)[19] = "Elastos.Droid.Settings.Applications.CManageApplications";
     (*args)[20] = "Elastos.Droid.Settings.Applications.ProcessStatsUi";
-    (*args)[21] = "Elastos.Droid.Settings.Notification.NotificationStation";
+    (*args)[21] = "Elastos.Droid.Settings.Notification.CNotificationStation";
     (*args)[22] = "Elastos.Droid.Settings.Location.LocationSettings";
     (*args)[23] = "Elastos.Droid.Settings.CSecuritySettings";
     (*args)[24] = "Elastos.Droid.Settings.UsageAccessSettings";
@@ -1215,8 +1215,7 @@ ECode SettingsActivity::SwitchToFragment(
     transaction->Replace(R::id::main_content, f);
     if (withTransition) {
         AutoPtr<ITransitionManagerHelper> helper;
-        assert(0 && "TODO");
-        // CTransitionManagerHelper::AcquireSingleton((ITransitionManagerHelper**)&helper);
+        CTransitionManagerHelper::AcquireSingleton((ITransitionManagerHelper**)&helper);
         helper->BeginDelayedTransition(IViewGroup::Probe(mContent));
     }
     if (addToBackStack) {

@@ -433,7 +433,7 @@ public class ChooseLockPassword extends SettingsActivity {
                     GetActivity()->SetResult(RESULT_FINISHED);
                     GetActivity()->Finish();
                     mDone = TRUE;
-                    StartActivity(RedactionInterstitial->CreateStartIntent(GetActivity()));
+                    StartActivity(CRedactionInterstitial::CreateStartIntent(GetActivity()));
                 } else {
                     CharSequence tmp = mPasswordEntry->GetText();
                     if (tmp != NULL) {

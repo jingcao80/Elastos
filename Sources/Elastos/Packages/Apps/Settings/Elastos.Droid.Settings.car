@@ -592,6 +592,72 @@ module
         interface IIndexable;
     }
 
+    class CNotificationStation {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+    }
+
+    class CRedactionInterstitial {
+        constructor();
+
+        interface Elastos.Droid.Settings.ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface Elastos.Droid.Settings.IButtonBarHandler;
+    }
+
+    class CRedactionInterstitialFragment {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+    }
+
+    class CRedactionSettingsStandalone {
+        constructor();
+
+        interface Elastos.Droid.Settings.ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface Elastos.Droid.Settings.IButtonBarHandler;
+    }
+
     [local]
     class CVolumeSeekBarPreference {
         constructor(

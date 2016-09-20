@@ -90,13 +90,13 @@ ECode SeekBarPreference::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return constructor(context, attrs, R::attr::seekBarPreferenceStyle, 0);
+    return constructor(context, attrs, R::attr::seekBarPreferenceStyle);
 }
 
 ECode SeekBarPreference::constructor(
     /* [in] */ IContext* context)
 {
-    return constructor(context, NULL, R::attr::seekBarPreferenceStyle, 0);
+    return constructor(context, NULL);
 }
 
 ECode SeekBarPreference::OnBindView(
@@ -104,13 +104,15 @@ ECode SeekBarPreference::OnBindView(
 {
     FAIL_RETURN(Preference::OnBindView(view))
 
-    AutoPtr<InnerListener> listener = new InnerListener(this);
     AutoPtr<IView> tempView;
     view->FindViewById(R::id::seekbar, (IView**)&tempView);
     ISeekBar* seekBar = ISeekBar::Probe(tempView);
+
+    AutoPtr<InnerListener> listener = new InnerListener(this);
     seekBar->SetOnSeekBarChangeListener(listener);
-    IProgressBar::Probe(seekBar)->SetMax(mMax);
-    IProgressBar::Probe(seekBar)->SetProgress(mProgress);
+    IProgressBar* progressBar = IProgressBar::Probe(seekBar);
+    progressBar->SetMax(mMax);
+    progressBar->SetProgress(mProgress);
     Boolean isEnabled;
     IsEnabled(&isEnabled);
     tempView->SetEnabled(isEnabled);
@@ -286,7 +288,7 @@ ECode SeekBarPreference::OnSaveInstanceState(
      */
 
     AutoPtr<IParcelable> superState;
-    Preference::OnSaveInstanceState(state);
+    Preference::OnSaveInstanceState((IParcelable**)&superState);
     Boolean isPersistent;
     if (IsPersistent(&isPersistent), isPersistent) {
         // No need to save instance state since it's persistent
@@ -310,7 +312,7 @@ ECode SeekBarPreference::OnRestoreInstanceState(
 {
     if (ISeekBarPreferenceSavedState::Probe(state) == NULL) {
         // Didn't save state for us in onSaveInstanceState
-        return OnRestoreInstanceState(state);
+        return Preference::OnRestoreInstanceState(state);
     }
 
     // Restore the instance state
@@ -328,4 +330,3 @@ ECode SeekBarPreference::OnRestoreInstanceState(
 }
 }
 }
-

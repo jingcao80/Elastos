@@ -568,7 +568,7 @@ private:
     AutoPtr<IAlertDialog> mDialog;
 };
 
-} // namespace Applications
+} // namespace Notification
 } // namespace Settings
 } // namespace Droid
 } // namespace Elastos

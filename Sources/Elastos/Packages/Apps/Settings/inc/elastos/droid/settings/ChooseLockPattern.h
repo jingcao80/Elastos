@@ -553,7 +553,7 @@ public class ChooseLockPattern extends SettingsActivity {
             GetActivity()->SetResult(RESULT_FINISHED);
             GetActivity()->Finish();
             mDone = TRUE;
-            StartActivity(RedactionInterstitial->CreateStartIntent(GetActivity()));
+            StartActivity(CRedactionInterstitial::CreateStartIntent(GetActivity()));
         }
     }
 }

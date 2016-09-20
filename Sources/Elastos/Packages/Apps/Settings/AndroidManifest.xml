@@ -1119,9 +1119,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Notification.RedactionInterstitial"/>
+        <activity android:name="Elastos.Droid.Settings.Notification.CRedactionInterstitial"/>
 
-        <activity android:name=".Notification.RedactionSettingsStandalone"
+        <activity android:name="Elastos.Droid.Settings.Notification.CRedactionSettingsStandalone"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.settings.ACTION_APP_NOTIFICATION_REDACTION" />

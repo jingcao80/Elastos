@@ -12,14 +12,12 @@
 #include "Elastos.Droid.View.h"
 #include "R.h"
 #include "elastos/droid/R.h"
-#include <elastos/droid/app/Activity.h>
 #include <elastos/droid/widget/AbsListView.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::CActivity;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::CIntent;
@@ -179,14 +177,14 @@ RingtonePickerActivity::~RingtonePickerActivity()
 
 ECode RingtonePickerActivity::constructor()
 {
-    return Activity::constructor();
+    return AlertActivity::constructor();
 }
 
 ECode RingtonePickerActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     Logger::I(TAG, " >> OnCreate");
-    Activity::OnCreate(savedInstanceState);
+    AlertActivity::OnCreate(savedInstanceState);
 
     mInnerRunnable = new InnerRunnable(this);
     mInnerListener = new InnerListener(this);
@@ -271,8 +269,9 @@ ECode RingtonePickerActivity::OnCreate(
 ECode RingtonePickerActivity::OnSaveInstanceState(
     /* [in] */ IBundle* outState)
 {
+    AlertActivity::OnSaveInstanceState(outState);
     outState->PutInt32(SAVE_CLICKED_POS, mClickedPos);
-    return Activity::OnSaveInstanceState(outState);
+    return NOERROR;
 }
 
 ECode RingtonePickerActivity::OnPrepareListView(
@@ -451,22 +450,24 @@ ECode RingtonePickerActivity::Run()
 
 ECode RingtonePickerActivity::OnStop()
 {
+    AlertActivity::OnStop();
     Boolean flag = FALSE;
     if (!(IsChangingConfigurations(&flag), flag)) {
         StopAnyPlayingRingtone();
     } else {
         SaveAnyPlayingRingtone();
     }
-    return Activity::OnStop();
+    return NOERROR;
 }
 
 ECode RingtonePickerActivity::OnPause()
 {
+    AlertActivity::OnPause();
     Boolean flag = FALSE;
     if (!(IsChangingConfigurations(&flag), flag)) {
         StopAnyPlayingRingtone();
     }
-    return Activity::OnPause();
+    return NOERROR;
 }
 
 void RingtonePickerActivity::SaveAnyPlayingRingtone()
