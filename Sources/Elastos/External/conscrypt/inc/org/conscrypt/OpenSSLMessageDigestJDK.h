@@ -14,13 +14,13 @@ namespace Conscrypt {
 /**
  * Implements the JDK MessageDigest interface using OpenSSL's EVP API.
  */
-class OpenSSLMessageDigestJDK 
-    : public Object // public MessageDigestSpi 
-    , public ICloneable 
+class OpenSSLMessageDigestJDK
+    : public Object // public MessageDigestSpi
+    , public ICloneable
 {
 public:
     CAR_INTERFACE_DECL()
-    
+
     CARAPI Clone(
         /* [out] */ IInterface** object);
 
@@ -32,8 +32,8 @@ public:
         /* [in] */ Byte input);
 
     void EngineUpdate(
-        /* [in] */ ArrayOf<Byte>* input, 
-        /* [in] */ Int32 offset, 
+        /* [in] */ ArrayOf<Byte>* input,
+        /* [in] */ Int32 offset,
         /* [in] */ Int32 len);
 
     AutoPtr<ArrayOf<Byte> > EngineDigest();
@@ -43,12 +43,12 @@ protected:
      * Creates a new OpenSSLMessageDigest instance for the given algorithm name.
      */
     OpenSSLMessageDigestJDK(
-        /* [in] */ Int64 evp_md, 
+        /* [in] */ Int64 evp_md,
         /* [in] */ Int32 size);
 
     OpenSSLMessageDigestJDK(
-        /* [in] */ Int64 evp_md, 
-        /* [in] */ Int32 size, 
+        /* [in] */ Int64 evp_md,
+        /* [in] */ Int32 size,
         /* [in] */ IOpenSSLDigestContext* ctx);
 
     void ResetContext();
@@ -72,8 +72,8 @@ private:
     AutoPtr<ArrayOf<Byte> > mSingleByte;
 };
 
-class MD5 
-    : public OpenSSLMessageDigestJDK 
+class MD5
+    : public OpenSSLMessageDigestJDK
 {
 public:
     MD5();
@@ -83,8 +83,8 @@ public:
     static Int32 SIZE;
 };
 
-class SHA1 
-    : public OpenSSLMessageDigestJDK 
+class SHA1
+    : public OpenSSLMessageDigestJDK
 {
 public:
     SHA1();
@@ -94,8 +94,8 @@ public:
     static Int32 SIZE;
 };
 
-class SHA224 
-    : public OpenSSLMessageDigestJDK 
+class SHA224
+    : public OpenSSLMessageDigestJDK
 {
 public:
     SHA224();
@@ -105,8 +105,8 @@ public:
     static Int32 SIZE;
 };
 
-class SHA256 
-    : public OpenSSLMessageDigestJDK 
+class SHA256
+    : public OpenSSLMessageDigestJDK
 {
 public:
     SHA256();
@@ -116,8 +116,8 @@ public:
     static Int32 SIZE;
 };
 
-class SHA384 
-    : public OpenSSLMessageDigestJDK 
+class SHA384
+    : public OpenSSLMessageDigestJDK
 {
 public:
     SHA384();
@@ -127,8 +127,8 @@ public:
     static Int32 SIZE;
 };
 
-class SHA512 
-    : public OpenSSLMessageDigestJDK 
+class SHA512
+    : public OpenSSLMessageDigestJDK
 {
 public:
     SHA512();

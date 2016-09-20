@@ -20,8 +20,8 @@ namespace Conscrypt {
  * <li><a href="http://csrc.nist.gov/groups/ST/crypto_apps_infra/csor/algorithms.html">NIST cryptographic algorithms</a></li>
  * </ul>
  */
-class OpenSSLProvider 
-    : public Provider 
+class OpenSSLProvider
+    : public Provider
 {
 public:
     OpenSSLProvider();

@@ -14,16 +14,16 @@ using Elastos::Security::Spec::IRSAPrivateCrtKeySpec;
 namespace Org {
 namespace Conscrypt {
 
-class OpenSSLRSAPrivateCrtKey 
-    : public Object // public OpenSSLRSAPrivateKey 
-    , public IRSAPrivateCrtKey 
+class OpenSSLRSAPrivateCrtKey
+    : public Object // public OpenSSLRSAPrivateKey
+    , public IRSAPrivateCrtKey
 {
 public:
     OpenSSLRSAPrivateCrtKey(
         /* [in] */ IOpenSSLKey* key);
 
     OpenSSLRSAPrivateCrtKey(
-        /* [in] */ IOpenSSLKey* key, 
+        /* [in] */ IOpenSSLKey* key,
         /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > >* params);
 
     OpenSSLRSAPrivateCrtKey(

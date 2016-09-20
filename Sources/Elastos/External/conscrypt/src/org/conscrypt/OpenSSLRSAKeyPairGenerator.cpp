@@ -18,7 +18,7 @@ OpenSSLRSAKeyPairGenerator::OpenSSLRSAKeyPairGenerator()
 }
 
 ECode OpenSSLRSAKeyPairGenerator::GenerateKeyPair(
-    /* [out] */ IKeyPair** result) 
+    /* [out] */ IKeyPair** result)
 {
     VALIDATE_NOT_NULL(result)
     assert(0 && "TODO");
@@ -37,7 +37,7 @@ ECode OpenSSLRSAKeyPairGenerator::GenerateKeyPair(
 }
 
 ECode OpenSSLRSAKeyPairGenerator::Initialize(
-    /* [in] */ Int32 keysize, 
+    /* [in] */ Int32 keysize,
     /* [in] */ ISecureRandom* random)
 {
     mModulusBits = keysize;
@@ -45,7 +45,7 @@ ECode OpenSSLRSAKeyPairGenerator::Initialize(
 }
 
 ECode OpenSSLRSAKeyPairGenerator::Initialize(
-    /* [in] */ IAlgorithmParameterSpec* params, 
+    /* [in] */ IAlgorithmParameterSpec* params,
     /* [in] */ ISecureRandom* random)
 {
     assert(0 && "TODO");

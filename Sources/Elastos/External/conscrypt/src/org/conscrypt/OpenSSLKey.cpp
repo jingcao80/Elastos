@@ -16,7 +16,7 @@ namespace Conscrypt {
 // OpenSSLKey::
 //=========================================
 OpenSSLKey::OpenSSLKey(
-    /* [in] */ Int64 ctx) 
+    /* [in] */ Int64 ctx)
 {
     mCtx = ctx;
     mEngine = NULL;
@@ -24,9 +24,9 @@ OpenSSLKey::OpenSSLKey(
 }
 
 OpenSSLKey::OpenSSLKey(
-    /* [in] */ Int64 ctx, 
-    /* [in] */ IOpenSSLEngine* engine, 
-    /* [in] */ String alias) 
+    /* [in] */ Int64 ctx,
+    /* [in] */ IOpenSSLEngine* engine,
+    /* [in] */ String alias)
 {
     mCtx = ctx;
     mEngine = engine;
@@ -67,7 +67,7 @@ ECode OpenSSLKey::GetAlias(
 }
 
 AutoPtr<IOpenSSLKey> OpenSSLKey::FromPrivateKey(
-    /* [in] */ IPrivateKey* key) 
+    /* [in] */ IPrivateKey* key)
 {
     if (IOpenSSLKeyHolder::Probe(key) != NULL) {
         AutoPtr<IOpenSSLKey> res;
@@ -79,7 +79,7 @@ AutoPtr<IOpenSSLKey> OpenSSLKey::FromPrivateKey(
     IKey::Probe(key)->GetFormat(&keyFormat);
     if (keyFormat.IsNull()) {
         return WrapPrivateKey(key);
-    } 
+    }
     else if (!keyFormat.Equals("PKCS#8")) {
         // throw new InvalidKeyException("Unknown key format " + keyFormat);
         return NULL;
@@ -101,17 +101,17 @@ AutoPtr<IOpenSSLKey> OpenSSLKey::FromPrivateKey(
 }
 
 AutoPtr<IOpenSSLKey> OpenSSLKey::WrapPrivateKey(
-    /* [in] */ IPrivateKey* key) 
+    /* [in] */ IPrivateKey* key)
 {
     // if (IRSAPrivateKey::Probe(key) != NULL) {
     //     return OpenSSLRSAPrivateKey::WrapPlatformKey(IRSAPrivateKey::Probe(key));
-    // } 
+    // }
     // else if (IDSAPrivateKey::Probe(key) != NULL) {
     //     return OpenSSLDSAPrivateKey::WrapPlatformKey(IDSAPrivateKey::Probe(key));
-    // } 
+    // }
     // else if (IECPrivateKey::Probe(key) != NULL) {
     //     return OpenSSLECPrivateKey::WrapPlatformKey(IECPrivateKey::Probe(key));
-    // } 
+    // }
     // else {
     //     // throw new InvalidKeyException("Unknown key type: " + key.toString());
     //     return NULL;
@@ -119,7 +119,7 @@ AutoPtr<IOpenSSLKey> OpenSSLKey::WrapPrivateKey(
     assert(0 && "TODO");
     return NULL;
 }
- 
+
 AutoPtr<IOpenSSLKey> OpenSSLKey::FromPublicKey(
     /* [in] */ IPublicKey* key)
 {
@@ -199,7 +199,7 @@ ECode OpenSSLKey::GetPublicKey(
 }
 
 AutoPtr<IPublicKey> OpenSSLKey::GetPublicKey(
-    /* [in] */ IX509EncodedKeySpec* keySpec, 
+    /* [in] */ IX509EncodedKeySpec* keySpec,
     /* [in] */ Int32 type)
 {
     AutoPtr<IX509EncodedKeySpec> x509KeySpec = keySpec;
@@ -273,8 +273,8 @@ ECode OpenSSLKey::GetPrivateKey(
 }
 
 AutoPtr<IPrivateKey> OpenSSLKey::GetPrivateKey(
-    /* [in] */ IPKCS8EncodedKeySpec* keySpec, 
-    /* [in] */ Int32 type) 
+    /* [in] */ IPKCS8EncodedKeySpec* keySpec,
+    /* [in] */ Int32 type)
 {
     AutoPtr<IPKCS8EncodedKeySpec> pkcs8KeySpec = keySpec;
 
@@ -368,18 +368,18 @@ ECode OpenSSLKey::Equals(
             *result = FALSE;
             return NOERROR;
         }
-    } 
+    }
     // else if (!(mEngine->Equals(otherEngine, &bEquals), bEquals)) {
     //     *result = FALSE;
     //     return NOERROR;
-    // } 
+    // }
     else {
         String otherAlias;
         other->GetAlias(&otherAlias);
         if (mAlias != NULL) {
             *result = mAlias.Equals(otherAlias);
             return NOERROR;
-        } 
+        }
         else if (!otherAlias.IsNull()) {
             *result = FALSE;
             return NOERROR;
@@ -393,7 +393,7 @@ ECode OpenSSLKey::Equals(
 }
 
 ECode OpenSSLKey::GetHashCode(
-    /* [out] */ Int32* result) 
+    /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
     Int32 hash = 1;

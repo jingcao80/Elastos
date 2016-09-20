@@ -12,21 +12,21 @@ using Elastos::Security::Spec::IAlgorithmParameterSpec;
 namespace Org {
 namespace Conscrypt {
 
-class OpenSSLRSAKeyPairGenerator 
-    :  public Object // public KeyPairGeneratorSpi 
+class OpenSSLRSAKeyPairGenerator
+    :  public Object // public KeyPairGeneratorSpi
 {
 public:
     OpenSSLRSAKeyPairGenerator();
-    
+
     CARAPI GenerateKeyPair(
         /* [out] */ IKeyPair** result);
 
     CARAPI Initialize(
-        /* [in] */ Int32 keysize, 
+        /* [in] */ Int32 keysize,
         /* [in] */ ISecureRandom* random);
 
     CARAPI Initialize(
-        /* [in] */ IAlgorithmParameterSpec* params, 
+        /* [in] */ IAlgorithmParameterSpec* params,
         /* [in] */ ISecureRandom* random);
 
 private:

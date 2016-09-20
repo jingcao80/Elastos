@@ -75,7 +75,7 @@ static Int32 GetSHA224_SIZE()
 }
 Int32 SHA224::SIZE = GetSHA224_SIZE();
 
-SHA224::SHA224() 
+SHA224::SHA224()
     : OpenSSLMessageDigestJDK(EVP_MD, SIZE)
 {
 }
@@ -158,8 +158,8 @@ SHA512::SHA512()
 CAR_INTERFACE_IMPL(OpenSSLMessageDigestJDK, Object, ICloneable)
 
 OpenSSLMessageDigestJDK::OpenSSLMessageDigestJDK(
-    /* [in] */ Int64 evp_md, 
-    /* [in] */ Int32 size) 
+    /* [in] */ Int64 evp_md,
+    /* [in] */ Int32 size)
 {
     mEvp_md = evp_md;
     mSize = size;
@@ -169,9 +169,9 @@ OpenSSLMessageDigestJDK::OpenSSLMessageDigestJDK(
 }
 
 OpenSSLMessageDigestJDK::OpenSSLMessageDigestJDK(
-    /* [in] */ Int64 evp_md, 
-    /* [in] */ Int32 size, 
-    /* [in] */ IOpenSSLDigestContext* ctx) 
+    /* [in] */ Int64 evp_md,
+    /* [in] */ Int32 size,
+    /* [in] */ IOpenSSLDigestContext* ctx)
 {
     mEvp_md = evp_md;
     mSize = size;
@@ -179,7 +179,7 @@ OpenSSLMessageDigestJDK::OpenSSLMessageDigestJDK(
     mSingleByte = ArrayOf<Byte>::Alloc(1);
 }
 
-void OpenSSLMessageDigestJDK::ResetContext() 
+void OpenSSLMessageDigestJDK::ResetContext()
 {
     Int64 ctx = 0;
     NativeCrypto::EVP_MD_CTX_create(&ctx);
@@ -191,12 +191,12 @@ void OpenSSLMessageDigestJDK::ResetContext()
     mCtx = ctxLocal;
 }
 
-void OpenSSLMessageDigestJDK::EngineReset() 
+void OpenSSLMessageDigestJDK::EngineReset()
 {
     ResetContext();
 }
 
-Int32 OpenSSLMessageDigestJDK::EngineGetDigestLength() 
+Int32 OpenSSLMessageDigestJDK::EngineGetDigestLength()
 {
     return mSize;
 }
@@ -209,8 +209,8 @@ void OpenSSLMessageDigestJDK::EngineUpdate(
 }
 
 void OpenSSLMessageDigestJDK::EngineUpdate(
-    /* [in] */ ArrayOf<Byte>* input, 
-    /* [in] */ Int32 offset, 
+    /* [in] */ ArrayOf<Byte>* input,
+    /* [in] */ Int32 offset,
     /* [in] */ Int32 len)
 {
     NativeCrypto::EVP_DigestUpdate(mCtx, input, offset, len);

@@ -20,22 +20,22 @@ OpenSSLRSAPrivateCrtKey::OpenSSLRSAPrivateCrtKey(
 }
 
 OpenSSLRSAPrivateCrtKey::OpenSSLRSAPrivateCrtKey(
-    /* [in] */ IOpenSSLKey* key, 
-    /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > >* params) 
+    /* [in] */ IOpenSSLKey* key,
+    /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > >* params)
 {
     assert(0 && "TODO");
     // OpenSSLRSAPrivateKey(key, params);
 }
 
 OpenSSLRSAPrivateCrtKey::OpenSSLRSAPrivateCrtKey(
-    /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec) 
+    /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec)
 {
     assert(0 && "TODO");
     // OpenSSLRSAPrivateKey(Init(rsaKeySpec));
 }
 
 AutoPtr<IOpenSSLKey> OpenSSLRSAPrivateCrtKey::Init(
-    /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec) 
+    /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec)
 {
     // AutoPtr<IBigInteger> modulus;
     // IRSAPrivateKeySpec::Probe(rsaKeySpec)->GetModulus((IBigInteger**)&modulus);
@@ -45,7 +45,7 @@ AutoPtr<IOpenSSLKey> OpenSSLRSAPrivateCrtKey::Init(
     // if (modulus == NULL) {
     //     // throw new InvalidKeySpecException("modulus == null");
     //     return NULL;
-    // } 
+    // }
     // else if (privateExponent == NULL) {
     //     // throw new InvalidKeySpecException("privateExponent == null");
     //     return NULL;
@@ -116,7 +116,7 @@ AutoPtr<IOpenSSLKey> OpenSSLRSAPrivateCrtKey::Init(
     //     throw new InvalidKeySpecException(e);
     // }
 }
- 
+
 ECode OpenSSLRSAPrivateCrtKey::GetInstance(
     /* [in] */ IRSAPrivateCrtKey* rsaPrivateKey,
     /* [out] */ IOpenSSLKey** result)
@@ -139,7 +139,7 @@ ECode OpenSSLRSAPrivateCrtKey::GetInstance(
     // if (modulus == NULL) {
     //     // throw new InvalidKeyException("modulus == NULL");
     //     return NOERROR;
-    // } 
+    // }
     // else if (privateExponent == NULL) {
     //     // throw new InvalidKeyException("privateExponent == NULL");
     //     return NOERROR;
@@ -333,7 +333,7 @@ ECode OpenSSLRSAPrivateCrtKey::Equals(
     //         other->GetPublicExponent((IBigInteger**)&otherPublicExponent);
     //         mPublicExponent->Equals(otherPublicExponent, &bPublicExponent);
     //         return bModulus && bPublicExponent;
-    //     } 
+    //     }
     //     else {
     //         Boolean bModulus = FALSE, bPublicExponent = FALSE;
     //         Boolean bPrivateExponent = FALSE, bPrimeP = FALSE;
@@ -361,10 +361,10 @@ ECode OpenSSLRSAPrivateCrtKey::Equals(
     //         AutoPtr<IBigInteger> otherCrtCoefficient;
     //         other->GetCrtCoefficient((IBigInteger**)&otherCrtCoefficient);
     //         mCrtCoefficient->Equals(otherCrtCoefficient, &bCrtCoefficient);
-    //         return bModulus && bPublicExponent && bPrivateExponent &&  
+    //         return bModulus && bPublicExponent && bPrivateExponent &&
     //              bPrimeP && bPrimeQ && bPrimeExponentP && bPrimeExponentQ && bCrtCoefficient;
     //     }
-    // } 
+    // }
     // else if (IRSAPrivateKey::Probe(o) != NULL) {
     //     EnsureReadParams();
     //     AutoPtr<IRSAPrivateKey> other = IRSAPrivateKey::Probe(o);
@@ -372,7 +372,7 @@ ECode OpenSSLRSAPrivateCrtKey::Equals(
     //     assert(0 && "TODO");
     //     // if (GetOpenSSLKey()->IsEngineBased()) {
     //     //     return GetModulus()->Equals(other->GetModulus());
-    //     // } 
+    //     // }
     //     // else {
     //     //     Boolean bPrivateExponent = FALSE;
     //     //     AutoPtr<IBigInteger> otherPrivateExponent;
@@ -405,7 +405,7 @@ ECode OpenSSLRSAPrivateCrtKey::GetHashCode(
 }
 
 ECode OpenSSLRSAPrivateCrtKey::ToString(
-    /* [out] */ String* result) 
+    /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
     assert(0 && "TODO");
@@ -535,7 +535,7 @@ void OpenSSLRSAPrivateCrtKey::ReadObject(
 }
 
 void OpenSSLRSAPrivateCrtKey::WriteObject(
-    /* [in] */ IObjectOutputStream* stream) 
+    /* [in] */ IObjectOutputStream* stream)
 {
     assert(0 && "TODO");
     // if (GetOpenSSLKey()->IsEngineBased()) {

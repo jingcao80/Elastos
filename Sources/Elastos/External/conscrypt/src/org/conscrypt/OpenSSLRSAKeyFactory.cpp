@@ -49,7 +49,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePublic(
         *pubKey = IPublicKey::Probe(result);
         REFCOUNT_ADD(*pubKey)
         return NOERROR;
-    } 
+    }
     else if (IX509EncodedKeySpec::Probe(keySpec) != NULL) {
         assert(0 && "TODO");
         // *pubKey = OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec), INativeCrypto::EVP_PKEY_RSA);
@@ -60,7 +60,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePublic(
     //         + keySpec.getClass().getName());
     return NOERROR;
 }
- 
+
 ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(
     /* [in] */ IKeySpec* keySpec,
     /* [out] */ IPrivateKey** priKey)
@@ -78,7 +78,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(
         *priKey = IPrivateKey::Probe(result);
         REFCOUNT_ADD(*priKey)
         return NOERROR;
-    } 
+    }
     else if (IRSAPrivateKeySpec::Probe(keySpec) != NULL) {
         AutoPtr<IOpenSSLRSAPrivateKey> result;
         assert(0 && "TODO");
@@ -86,7 +86,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(
         *priKey = IPrivateKey::Probe(result);
         REFCOUNT_ADD(*priKey)
         return NOERROR;
-    } 
+    }
     else if (IPKCS8EncodedKeySpec::Probe(keySpec) != NULL) {
         assert(0 && "TODO");
         // *priKey = OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
@@ -134,7 +134,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
         *retkeySpec = IKeySpec::Probe(p);
         REFCOUNT_ADD(*retkeySpec)
         return NOERROR;
-    } 
+    }
     else if ((IPublicKey::Probe(key) != NULL) && (keySpec == EIID_IRSAPublicKeySpec)) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
@@ -158,7 +158,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
         *retkeySpec = IKeySpec::Probe(p);
         REFCOUNT_ADD(*retkeySpec)
         return NOERROR;
-    } 
+    }
     else if ((IRSAPrivateCrtKey::Probe(key) != NULL)
             && (keySpec == EIID_IRSAPrivateCrtKeySpec)) {
         AutoPtr<IRSAPrivateCrtKey> rsaKey = IRSAPrivateCrtKey::Probe(key);
@@ -186,7 +186,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
         *retkeySpec = IKeySpec::Probe(p);
         REFCOUNT_ADD(*retkeySpec)
         return NOERROR;
-    } 
+    }
     else if (IRSAPrivateCrtKey::Probe(key) != NULL
             && keySpec == EIID_IRSAPrivateKeySpec) {
         AutoPtr<IRSAPrivateCrtKey> rsaKey = IRSAPrivateCrtKey::Probe(key);
@@ -199,7 +199,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
         *retkeySpec = IKeySpec::Probe(p);
         REFCOUNT_ADD(*retkeySpec)
         return NOERROR;
-    } 
+    }
     else if (IRSAPrivateKey::Probe(key) != NULL
             && keySpec == EIID_IRSAPrivateKeySpec) {
         AutoPtr<IRSAPrivateKey> rsaKey = IRSAPrivateKey::Probe(key);
@@ -212,7 +212,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
         *retkeySpec = IKeySpec::Probe(p);
         REFCOUNT_ADD(*retkeySpec)
         return NOERROR;
-    } 
+    }
     else if (IPrivateKey::Probe(key) != NULL
             && keySpec == EIID_IRSAPrivateCrtKeySpec) {
         AutoPtr<ArrayOf<Byte> > encoded;
@@ -250,17 +250,17 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
             CRSAPrivateCrtKeySpec::New(modulus,
                     publicExponent, privateExponent,
                     primeP, primeQ, primeExponentP,
-                    primeExponentQ, crtCoefficient, 
+                    primeExponentQ, crtCoefficient,
                     (IRSAPrivateCrtKeySpec**)&p);
             *retkeySpec = IKeySpec::Probe(p);
             REFCOUNT_ADD(*retkeySpec)
             return NOERROR;
-        } 
+        }
         else {
             // throw new InvalidKeySpecException("Encoded key is not an RSAPrivateCrtKey");
             return NOERROR;
         }
-    } 
+    }
     else if (IPrivateKey::Probe(key) != NULL && keySpec == EIID_IRSAPrivateKeySpec) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
@@ -284,7 +284,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
         *retkeySpec = IKeySpec::Probe(p);
         REFCOUNT_ADD(*retkeySpec)
         return NOERROR;
-    } 
+    }
     else if (IPrivateKey::Probe(key) != NULL
             && keySpec == EIID_IPKCS8EncodedKeySpec) {
         AutoPtr<ArrayOf<Byte> > encoded;
@@ -295,7 +295,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
             // throw new InvalidKeySpecException("Encoding type must be PKCS#8; was "
             //         + key.getFormat());
             return NOERROR;
-        } 
+        }
         else if (encoded == NULL) {
             // throw new InvalidKeySpecException("Key is not encodable");
             return NOERROR;
@@ -305,7 +305,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
         *retkeySpec = IKeySpec::Probe(p);
         REFCOUNT_ADD(*retkeySpec)
         return NOERROR;
-    } 
+    }
     else if (IPublicKey::Probe(key) != NULL && keySpec == EIID_IX509EncodedKeySpec) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
@@ -315,7 +315,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
             // throw new InvalidKeySpecException("Encoding type must be X.509; was "
             //         + key.getFormat());
             return NOERROR;
-        } 
+        }
         else if (encoded == NULL) {
             // throw new InvalidKeySpecException("Key is not encodable");
             return NOERROR;
@@ -325,7 +325,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
         *retkeySpec = IKeySpec::Probe(p);
         REFCOUNT_ADD(*retkeySpec)
         return NOERROR;
-    } 
+    }
     else {
         // throw new InvalidKeySpecException("Unsupported key type and key spec combination; key="
         //         + key.getClass().getName() + ", keySpec=" + keySpec.getName());
@@ -335,7 +335,7 @@ ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
 
 ECode OpenSSLRSAKeyFactory::EngineTranslateKey(
     /* [in] */ IKey* key,
-    /* [out] */ IKey** translatedKey) 
+    /* [out] */ IKey** translatedKey)
 {
     VALIDATE_NOT_NULL(translatedKey)
     if (key == NULL) {
@@ -349,7 +349,7 @@ ECode OpenSSLRSAKeyFactory::EngineTranslateKey(
         *translatedKey = key;
         REFCOUNT_ADD(*translatedKey)
         return NOERROR;
-    } 
+    }
     else if (IRSAPublicKey::Probe(key) != NULL) {
         AutoPtr<IRSAPublicKey> rsaKey = IRSAPublicKey::Probe(key);
 
@@ -369,7 +369,7 @@ ECode OpenSSLRSAKeyFactory::EngineTranslateKey(
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
-    } 
+    }
     else if (IRSAPrivateCrtKey::Probe(key) != NULL) {
         AutoPtr<IRSAPrivateCrtKey> rsaKey = IRSAPrivateCrtKey::Probe(key);
         AutoPtr<IBigInteger> modulus;
@@ -402,7 +402,7 @@ ECode OpenSSLRSAKeyFactory::EngineTranslateKey(
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
-    } 
+    }
     else if (IRSAPrivateKey::Probe(key) != NULL) {
         AutoPtr<IRSAPrivateKey> rsaKey = IRSAPrivateKey::Probe(key);
         AutoPtr<IBigInteger> modulus;
@@ -421,7 +421,7 @@ ECode OpenSSLRSAKeyFactory::EngineTranslateKey(
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
-    } 
+    }
     else if ((IPrivateKey::Probe(key) != NULL) && (fm.Equals("PKCS#8"))) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
@@ -440,7 +440,7 @@ ECode OpenSSLRSAKeyFactory::EngineTranslateKey(
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
-    } 
+    }
     else if ((IPublicKey::Probe(key) != NULL) && (fm.Equals("X.509"))) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
@@ -459,7 +459,7 @@ ECode OpenSSLRSAKeyFactory::EngineTranslateKey(
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
-    } 
+    }
     else {
         // throw new InvalidKeyException("Key must be an RSA public or private key; was "
         //         + key.getClass().getName());

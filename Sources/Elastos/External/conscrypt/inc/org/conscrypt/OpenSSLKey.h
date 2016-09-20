@@ -14,7 +14,7 @@ using Elastosx::Crypto::ISecretKey;
 namespace Org {
 namespace Conscrypt {
 
-class OpenSSLKey 
+class OpenSSLKey
     : public Object
 {
 public:
@@ -22,8 +22,8 @@ public:
         /* [in] */ Int64 ctx);
 
     OpenSSLKey(
-        /* [in] */ Int64 ctx, 
-        /* [in] */ IOpenSSLEngine* engine, 
+        /* [in] */ Int64 ctx,
+        /* [in] */ IOpenSSLEngine* engine,
         /* [in] */ String alias);
 
     /**
@@ -53,14 +53,14 @@ public:
         /* [out] */ IPublicKey** result);
 
     static AutoPtr<IPublicKey> GetPublicKey(
-        /* [in] */ IX509EncodedKeySpec* keySpec, 
+        /* [in] */ IX509EncodedKeySpec* keySpec,
         /* [in] */ Int32 type);
 
     CARAPI GetPrivateKey(
         /* [out] */ IPrivateKey** result);
 
     static AutoPtr<IPrivateKey> GetPrivateKey(
-        /* [in] */ IPKCS8EncodedKeySpec* keySpec, 
+        /* [in] */ IPKCS8EncodedKeySpec* keySpec,
         /* [in] */ Int32 type);
 
     CARAPI GetSecretKey(

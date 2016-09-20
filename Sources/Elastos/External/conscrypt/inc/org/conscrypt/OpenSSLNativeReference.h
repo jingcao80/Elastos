@@ -11,7 +11,7 @@ namespace Conscrypt {
  * Used to hold onto native OpenSSL references and run finalization on those
  * objects. Individual types must subclass this and implement finalizer.
  */
-class OpenSSLNativeReference 
+class OpenSSLNativeReference
 {
 public:
     OpenSSLNativeReference(

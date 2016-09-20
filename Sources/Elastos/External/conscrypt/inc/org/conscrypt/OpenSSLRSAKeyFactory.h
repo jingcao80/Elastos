@@ -13,8 +13,8 @@ using Elastos::Security::Spec::IKeySpec;
 namespace Org {
 namespace Conscrypt {
 
-class OpenSSLRSAKeyFactory 
-    : public Object    // : public KeyFactorySpi 
+class OpenSSLRSAKeyFactory
+    : public Object    // : public KeyFactorySpi
 {
 public:
     CARAPI EngineGeneratePublic(
