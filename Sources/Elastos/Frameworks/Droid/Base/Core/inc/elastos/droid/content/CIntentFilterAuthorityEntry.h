@@ -14,6 +14,7 @@ namespace Content {
 CarClass(CIntentFilterAuthorityEntry)
     , public Object
     , public IIntentFilterAuthorityEntry
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()

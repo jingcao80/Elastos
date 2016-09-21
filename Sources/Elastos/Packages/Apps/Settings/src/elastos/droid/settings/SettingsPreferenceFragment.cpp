@@ -60,6 +60,7 @@ ECode SettingsPreferenceFragment::SettingsDialogFragment::constructor(
     /* [in] */ IDialogCreatable* fragment,
     /* [in] */ Int32 dialogId)
 {
+    DialogFragment::constructor();
     mDialogId = dialogId;
     if (IFragment::Probe(fragment) == NULL) {
         Logger::E(TAG, "fragment argument must be an instance of %s", TO_CSTR(fragment));
