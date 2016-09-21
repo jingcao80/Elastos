@@ -4,10 +4,15 @@ TARGET_TYPE = eco
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
+C_FLAGS += -std=c++11
+#C_FLAGS += -std=c++0x
+C_FLAGS += -Wall
+C_FLAGS += -O0
+
 include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += $(MAKEDIR)
 INCLUDES += $(MAKEDIR)/../../../../
-INCLUDES += $(MAKEDIR)/../../../../../Common/inc
+INCLUDES += $(MAKEDIR)/../../../../../Common/inc/node
 
 SOURCES = Elastos.DevSamples.Node.JSCalculator.car
 SOURCES += R.cpp

@@ -6,15 +6,23 @@
 #include "config.h"
 #endif  //PLATFORM
 
+#include "wtf/CryptographicallyRandomNumber.h"
+#include "wtf/MainThread.h"
+#include "wtf/WTF.h"
+
+#include "npruntime.h"
+
+#include "V8Initializer.h"
+
 #include <unistd.h>
 #include "V8NPObject.h"
 #include <node.h>
 #include <uv.h>
-//#include "elastos/HashSet.h"
-#include "etl/HashSet.h"
+
 #include "elastos.h"
 #include "CarValueV8.h"
 #include "CarUtilityPrivate.h"
+
 #include <utils/Log.h>
 
 enum NodeMessage_Status {

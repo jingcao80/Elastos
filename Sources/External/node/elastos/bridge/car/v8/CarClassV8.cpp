@@ -51,7 +51,6 @@ CarClassV8::CarClassV8(CobjectWrapper* objectWrapper, bool requireAnnotation)
     }
     if (FAILED(ec)) {
         ALOGD("CarClassV8::CarClassV8 unable to find methods on instance");
-        LOG_ERROR("CarClassV8::CarClassV8 unable to find methods on instance");
         return;
     }
 
@@ -135,15 +134,15 @@ CarClassV8::CarClassV8(CobjectWrapper* objectWrapper, bool requireAnnotation)
 
 CarClassV8::~CarClassV8()
 {
-    deleteAllValues(mFields);
+    //deleteAllValues(mFields);
     mFields.clear();
 
-    MethodListMap::const_iterator end = mMethods.end();
-    for (MethodListMap::const_iterator it = mMethods.begin(); it != end; ++it) {
-        const MethodList* methodList = it->second;
-        deleteAllValues(*methodList);
-        delete methodList;
-    }
+    // MethodListMap::const_iterator end = mMethods.end();
+    // for (MethodListMap::const_iterator it = mMethods.begin(); it != end; ++it) {
+    //     const MethodList* methodList = it->second;
+    //     deleteAllValues(*methodList);
+    //     delete methodList;
+    // }
     mMethods.clear();
 }
 

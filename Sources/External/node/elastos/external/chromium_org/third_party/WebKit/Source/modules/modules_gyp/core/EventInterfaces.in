@@ -1,0 +1,35 @@
+namespace="Event"
+
+core/css/CSSFontFaceLoadEvent RuntimeEnabled=FontLoadEventsEnabled
+core/events/AnimationPlayerEvent RuntimeEnabled=WebAnimationsAPIEnabled
+core/events/ApplicationCacheErrorEvent 
+core/events/AutocompleteErrorEvent 
+core/events/BeforeUnloadEvent 
+core/events/CompositionEvent 
+core/events/CustomEvent 
+core/events/ErrorEvent 
+core/events/Event 
+core/events/FocusEvent 
+core/events/HashChangeEvent 
+core/events/KeyboardEvent 
+core/events/MessageEvent 
+core/events/MouseEvent 
+core/events/MutationEvent 
+core/events/OverflowEvent 
+core/events/PageTransitionEvent 
+core/events/PopStateEvent 
+core/events/ProgressEvent 
+core/events/ResourceProgressEvent 
+core/events/SecurityPolicyViolationEvent RuntimeEnabled=ExperimentalContentSecurityPolicyFeaturesEnabled
+core/events/TextEvent 
+core/events/TouchEvent 
+core/events/TransitionEvent 
+core/events/UIEvent 
+core/events/WebKitAnimationEvent 
+core/events/WheelEvent 
+core/html/MediaKeyEvent RuntimeEnabled=PrefixedEncryptedMediaEnabled
+core/html/canvas/WebGLContextEvent 
+core/html/track/TrackEvent 
+core/storage/StorageEvent 
+core/svg/SVGZoomEvent 
+core/xml/XMLHttpRequestProgressEvent 

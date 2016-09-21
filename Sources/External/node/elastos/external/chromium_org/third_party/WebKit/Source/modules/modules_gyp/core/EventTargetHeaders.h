@@ -1,0 +1,53 @@
+// Copyright (c) 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EventTargetHeaders_h
+#define EventTargetHeaders_h
+
+#include "core/xml/XMLHttpRequest.h"
+#include "V8XMLHttpRequest.h"
+#include "core/workers/SharedWorker.h"
+#include "V8SharedWorker.h"
+#include "core/timing/Performance.h"
+#include "V8Performance.h"
+#include "core/dom/Node.h"
+#include "V8Node.h"
+#include "core/animation/AnimationPlayer.h"
+#include "V8AnimationPlayer.h"
+#include "core/workers/Worker.h"
+#include "V8Worker.h"
+#include "core/html/ime/InputMethodContext.h"
+#include "V8InputMethodContext.h"
+#include "core/page/EventSource.h"
+#include "V8EventSource.h"
+#include "core/html/MediaController.h"
+#include "V8MediaController.h"
+#include "core/loader/appcache/ApplicationCache.h"
+#include "V8ApplicationCache.h"
+#include "core/frame/LocalDOMWindow.h"
+#include "V8Window.h"
+#include "core/html/track/TextTrackCue.h"
+#include "V8TextTrackCue.h"
+#include "core/html/track/TextTrack.h"
+#include "V8TextTrack.h"
+#include "core/xml/XMLHttpRequestUpload.h"
+#include "V8XMLHttpRequestUpload.h"
+#include "core/html/track/AudioTrackList.h"
+#include "V8AudioTrackList.h"
+#include "core/fileapi/FileReader.h"
+#include "V8FileReader.h"
+#include "core/css/FontFaceSet.h"
+#include "V8FontFaceSet.h"
+#include "core/html/track/VideoTrackList.h"
+#include "V8VideoTrackList.h"
+#include "core/workers/DedicatedWorkerGlobalScope.h"
+#include "V8DedicatedWorkerGlobalScope.h"
+#include "core/workers/SharedWorkerGlobalScope.h"
+#include "V8SharedWorkerGlobalScope.h"
+#include "core/html/track/TextTrackList.h"
+#include "V8TextTrackList.h"
+#include "core/dom/MessagePort.h"
+#include "V8MessagePort.h"
+
+#endif // EventTargetHeaders_h

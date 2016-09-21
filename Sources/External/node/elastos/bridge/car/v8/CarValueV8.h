@@ -34,8 +34,6 @@ struct CarValue
 
     ~CarValue()
     {
-        ALOGD("========~CarValue========begin========");
-
         bool bRet = false;
         CarDataType elementType;
         AutoPtr<IDataTypeInfo> elementTypeInfo;

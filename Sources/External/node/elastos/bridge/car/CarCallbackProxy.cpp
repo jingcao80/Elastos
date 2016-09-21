@@ -6,8 +6,7 @@
 
 #include "NPV8Object.h"
 #include "V8NPUtils.h"
-#include "V8Proxy.h"
-#include "node_JavaSharedClient.h"
+#include "CarSharedClient.h"
 
 #include "CarNPObjectV8.h"
 #include "CarInstanceV8.h"
@@ -102,7 +101,7 @@ static int InitCarCallbackProxyEntry()
                           PROT_READ | PROT_WRITE | PROT_EXEC,
                           MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (s_proxyEntryAddress == 0) {
-        LOG_ERROR("InitCarCallbackProxyEntry: out of memory");
+        ALOGD("InitCarCallbackProxyEntry: out of memory");
         return -1;
     }
     char * p = (char *)s_proxyEntryAddress;
@@ -178,6 +177,8 @@ ECode CarCallbackInterfaceProxy::ReadParam(
     methodInfo->GetAllParamInfos(paramInfos);
 
     for (Int32 i = 0; i < paramCount; i++) {
+        //ALOGD("CarCallbackInterfaceProxy::ReadParam=======i:%d====", i);
+
         IParamInfo* paramInfo = (*paramInfos)[i];
         ParamIOAttribute paramIOAttr;
         paramInfo->GetIOAttribute(&paramIOAttr);
@@ -332,8 +333,12 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                         ALOGD("CarCallbackInterfaceProxy::ReadParam====CarInstanceToNPObject finish====");
                     }
                     else {
-                        Int32 iii = 1/0;
-                        assert(0);
+                        //Int32 iii = 1/0;
+                        //assert(0);
+
+                        npArgs[i].type = NPVariantType_Object;
+                        npArgs[i].value.objectValue = CarInstanceToNPObject(new CarInstanceV8(new CobjectWrapper(obj, paramTypeInfo), true));
+                        ALOGD("CarCallbackInterfaceProxy::ReadParam====CarInstanceToNPObject finish====CarCallbackObject====");
                     }
 
                     puArgs++;
@@ -552,6 +557,11 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                                     v8::Isolate* isolate = mOwner->mIsolate;
                                     isolate->Enter();
 
+                                    v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
+
+                                    v8::Isolate::Scope isolateScope(isolate);
+                                    v8::Context::Scope contextScope(context);
+
                                     ArrayOf<Int32>* pArray = reinterpret_cast< ArrayOf<Int32>* >(carArray);
 
                                     Int32 length;
@@ -567,8 +577,10 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                                         pV8Array->Set(i, v8::Int32::New(isolate,(*pArray)[i]));
                                     }
 
-                                    WebCore::V8NPObject* pV8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                                    pV8NPObject->v8Object.Reset(isolate,pV8Array);
+                                    WebCore::V8NPObject* pV8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                                    new (&pV8NPObject->v8Object) v8::Persistent<v8::Object>();
+                                    pV8NPObject->v8Object.Reset(isolate, pV8Array);
+
                                     pV8NPObject->rootObject = getRootObject();
 
                                     npArgs[i].type = NPVariantType_Object;
@@ -590,6 +602,11 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                                     v8::Isolate* isolate = mOwner->mIsolate;
                                     isolate->Enter();
 
+                                    v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
+
+                                    v8::Isolate::Scope isolateScope(isolate);
+                                    v8::Context::Scope contextScope(context);
+
                                     ArrayOf<Elastos::String>* pArray = reinterpret_cast< ArrayOf<Elastos::String>* >(carArray);
 
                                     Int32 length;
@@ -607,8 +624,10 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                                         pV8Array->Set(i, v8::String::NewFromUtf8(isolate,utf8String));
                                     }
 
-                                    WebCore::V8NPObject* pV8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                                    pV8NPObject->v8Object.Reset(isolate,pV8Array);
+                                    WebCore::V8NPObject* pV8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                                    new (&pV8NPObject->v8Object) v8::Persistent<v8::Object>();
+                                    pV8NPObject->v8Object.Reset(isolate, pV8Array);
+
                                     pV8NPObject->rootObject = getRootObject();
 
                                     npArgs[i].type = NPVariantType_Object;
@@ -665,8 +684,7 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                 }
                 default:
                 {
-                    ALOGD("CarCallbackInterfaceProxy::ReadParam======in======other======");
-                    LOG_ERROR("CarCallbackInterfaceProxy::ReadParam: Invalid [in] type(%08x), param index: %d",
+                    ALOGD("CarCallbackInterfaceProxy::ReadParam: Invalid [in] type(%08x), param index: %d",
                             paramDataType, i);
                     //break;
                     return E_INVALID_ARGUMENT;
@@ -697,9 +715,10 @@ ECode CarCallbackInterfaceProxy::ReadParam(
             v8::Local<v8::String> v8Name(v8::String::NewFromUtf8(isolate,"data"));
             v8Object->Set(v8Name, v8::String::NewFromUtf8(isolate,"Callback output parameters"));
 
-            WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+            WebCore::V8NPObject* v8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+            new (&v8NPObject->v8Object) v8::Persistent<v8::Object>();
+            v8NPObject->v8Object.Reset(isolate, v8Object);
 
-            v8NPObject->v8Object.Reset(isolate,v8Object);
             v8NPObject->rootObject = getRootObject();
 
             npArgs[i].type = NPVariantType_Object;
@@ -741,6 +760,7 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                     //use v8 from node.js thread in EPK UI main thread
 
                     v8::Isolate* isolate = mOwner->mIsolate;
+
                     isolate->Enter();
 
                     v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
@@ -753,9 +773,10 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                     v8::Local<v8::String> v8Name(v8::String::NewFromUtf8(isolate,"data"));
                     v8Object->Set(v8Name, v8::String::NewFromUtf8(isolate,"Callback output parameters"));
 
-                    WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+                    WebCore::V8NPObject* v8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&v8NPObject->v8Object) v8::Persistent<v8::Object>();
+                    v8NPObject->v8Object.Reset(isolate, v8Object);
 
-                    v8NPObject->v8Object.Reset(isolate,v8Object);
                     v8NPObject->rootObject = getRootObject();
 
                     npArgs[i].type = NPVariantType_Object;
@@ -788,7 +809,7 @@ ECode CarCallbackInterfaceProxy::ReadParam(
         }
 
         //else {  // [out]
-        //    LOG_ERROR("CarCallbackInterfaceProxy::ReadParam: Don't support [out] type in callback");
+        //    ALOGD("CarCallbackInterfaceProxy::ReadParam: Don't support [out] type in callback");
 
         //    ALOGD("CarCallbackInterfaceProxy::ReadParam======out param======");
 
@@ -979,13 +1000,13 @@ ECode CarCallbackInterfaceProxy::ReadParam_bak(
                 }
                 default:
                 {
-                    LOG_ERROR("CarCallbackInterfaceProxy::ReadParam: Invalid [in] type(%08x), param index: %d", paramDataType, i);
+                    ALOGD("CarCallbackInterfaceProxy::ReadParam: Invalid [in] type(%08x), param index: %d", paramDataType, i);
                     return E_INVALID_ARGUMENT;
                 }
             }
         }
         else {  // [out]
-            LOG_ERROR("CarCallbackInterfaceProxy::ReadParam: Don't support [out] type in callback");
+            ALOGD("CarCallbackInterfaceProxy::ReadParam: Don't support [out] type in callback");
             puArgs++;
         }
 
@@ -1045,7 +1066,7 @@ ECode CarCallbackInterfaceProxy::ProxyEntry(
     ECode ec = pThis->ReadParam(methodInfo, puArgs, paramCount, npArgs, outParamPtrs, outParamTypes, outParamElementTypes, &pCarArgs, &hasOutParams);
 
     if (FAILED(ec)) {
-        LOG_ERROR("CarCallbackInterfaceProxy::ProxyEntry reads parameters failed");
+        ALOGD("CarCallbackInterfaceProxy::ProxyEntry reads parameters failed");
         return ec;
     }
 
@@ -1057,7 +1078,7 @@ ECode CarCallbackInterfaceProxy::ProxyEntry(
         FireCallback((void*)callback);
     }
     else {
-        JavaSharedClient::EnqueueFunctionPtr(FireCallback, (void*)callback);
+        CarSharedClient::EnqueueFunctionPtr(FireCallback, (void*)callback);
     }
 
     return NOERROR;
@@ -1117,11 +1138,11 @@ void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
 
 void CarCallbackInterfaceProxy::Callback::Call()
 {
-    ALOGD("====CarCallbackInterfaceProxy::Callback::Call======begin======");
+    //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======begin======");
 
     Elastos::String methodName;
     mMethodInfo->GetName(&methodName);
-    ALOGD("====CarCallbackInterfaceProxy::Callback::Call======name:%s", methodName.string());
+    //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======name:%s", methodName.string());
 
     Int32 paramCount;
     mMethodInfo->GetParamCount(&paramCount);
@@ -1134,21 +1155,25 @@ void CarCallbackInterfaceProxy::Callback::Call()
     //ALOGD("====CarCallbackInterfaceProxy::Callback::Call============thread id:%x",pthread_self());
 
     v8::Isolate* isolate = mObject->mIsolate;
-    v8::Handle<v8::Context> context = isolate->GetCurrentContext();
+
+    isolate->Enter();
+
     v8::HandleScope scope(isolate);
+    v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
+
+    v8::Isolate::Scope isolateScope(isolate);
+    v8::Context::Scope contextScope(context);
 
     NPObject* obj = mObject->mObject;
     if (obj->_class == WebCore::npScriptObjectClass) {
-        //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======npScriptObjectClass======");
+        //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======npScriptObjectClass======methodName:%s", (const char*)methodName);
 
         NPVariant npvValue;
         _NPN_GetProperty(0, obj, _NPN_GetStringIdentifier((const char*)methodName), &npvValue);
 
         if (npvValue.type == NPVariantType_Object) {
-            //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object======");
             WebCore::V8NPObject* v8NPFuncObject = (WebCore::V8NPObject*)(NPVARIANT_TO_OBJECT(npvValue));
 
-            //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===1===");
             v8::Local<v8::Object> jsObject;
             v8::Local<v8::Function> jsFunc;
             if (v8NPFuncObject->v8Object.IsWeak()) {
@@ -1160,10 +1185,8 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 jsFunc = v8::Local<v8::Function>::Cast(jsObject);
             }
 
-            ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===ConvertParams===");
             v8::Handle<v8::Value>* argv = ConvertParams();
 
-            //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===3===");
             v8::TryCatch try_catch;
             jsFunc->Call(context->Global(), mParamCount, argv);
             if (try_catch.HasCaught()) {
@@ -1171,18 +1194,21 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 //FatalException(try_catch);
                 ReportException(isolate, &try_catch);
             }
-            //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===5===");
 
             //get out params
             for (Int32 i = 0; i < mParamCount; i++) {
+                //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===cnt:%d===begin====", i);
+
                 if (!mOutParamPtrs[i]) continue;
 
                 v8::Handle<v8::Value> outV8Handle = argv[i];
 
                 v8::Local<v8::Object> outV8Object(v8::Handle<v8::Object>::Cast(outV8Handle));
 
-                WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                v8NPObject->v8Object.Reset(isolate,outV8Object);
+                WebCore::V8NPObject* v8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                new (&v8NPObject->v8Object) v8::Persistent<v8::Object>();
+                v8NPObject->v8Object.Reset(isolate, outV8Object);
+
                 v8NPObject->rootObject = getRootObject();
 
                 NPVariant npvOutValue;
@@ -1436,9 +1462,8 @@ void CarCallbackInterfaceProxy::Callback::Call()
                     }
                 }   //switch (mOutParamTypes[i])
 
-                //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===2===");
+                //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===cnt:%d===end====", i);
             }
-
             delete[] argv;
         }
         else {
@@ -1448,17 +1473,20 @@ void CarCallbackInterfaceProxy::Callback::Call()
     else {
         ALOGD("CarCallbackInterfaceProxy::Callback::Call object is not js object");
     }
-    //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======end======");
+
+    isolate->Exit();
 }
 
 v8::Handle<v8::Value>* CarCallbackInterfaceProxy::Callback::ConvertParams()
 {
     if (mParamCount == 0) return NULL;
 
+    v8::Isolate* isolate = mObject->mIsolate;
+
     v8::Handle<v8::Value>* params = new v8::Handle<v8::Value>[mParamCount];
     for (Int32 i = 0; i < mParamCount; i++) {
-        ALOGD("CarCallbackInterfaceProxy::Callback::ConvertParams========%d/%d====np type:%d", i, mParamCount, mNPParams[i].type);
-        params[i] = WebCore::convertNPVariantToV8Object(&mNPParams[i], NULL);
+        //ALOGD("CarCallbackInterfaceProxy::Callback::ConvertParams========%d/%d====np type:%d", i, mParamCount, mNPParams[i].type);
+        params[i] = WebCore::convertNPVariantToV8Object(&mNPParams[i], NULL, isolate);
     }
 
     return params;
@@ -1473,7 +1501,7 @@ static void ReleaseNPObject(void* object)
 CarCallbackObject::~CarCallbackObject()
 {
     delete mInterface;
-    JavaSharedClient::EnqueueFunctionPtr(ReleaseNPObject, reinterpret_cast<void*>(mObject));
+    CarSharedClient::EnqueueFunctionPtr(ReleaseNPObject, reinterpret_cast<void*>(mObject));
     mObject = NULL;
 }
 
@@ -1590,7 +1618,7 @@ CarCallbackObject* CarCallbackObject::S_CreateObject(
     /* [in] */ NPObject* object)
 {
     if (InitCarCallbackProxyEntry() != 0) {
-        LOG_ERROR("CarCallbackObject::S_CreateObject failed");
+        ALOGD("CarCallbackObject::S_CreateObject failed");
         return NULL;
     }
 
@@ -1605,11 +1633,9 @@ CarCallbackObject* CarCallbackObject::S_CreateObject(
     cbObject->mMainThread = pthread_self();     //webview/node.js main thread
     cbObject->mObject = _NPN_RetainObject(object);
     cbObject->mIsolate = v8::Isolate::GetCurrent();
-
     cbObject->mContext = v8::Isolate::GetCurrent()->GetCurrentContext();
 
     itfProxy->mOwner = cbObject;
-
     return cbObject;
 }
 

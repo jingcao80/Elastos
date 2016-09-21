@@ -28,13 +28,10 @@
 
 #if ENABLE(CAR_BRIDGE)
 
-#include <wtf/OwnArrayPtr.h>
 #include <wtf/PassOwnPtr.h>
 #include <wtf/text/CString.h>
 #include <wtf/text/StringBuilder.h>
 
-//#include "elastos/HashSet.h"
-#include "etl/HashSet.h"
 #include "elastos.h"
 
 #include "CarInstanceV8.h"
@@ -53,20 +50,30 @@
 
 #include <utils/Log.h>
 
+#define _NPN_GetProperty(a,b,c,d) TRUE
+
 namespace JSC {
 namespace Bindings {
 
-WebCore::DOMWindow* getRootObject()
+WebCore::LocalDOMWindow* getRootObject()
 {
-    static WebCore::DOMWindow* rootObject = NULL;
+    static WebCore::LocalDOMWindow* rootObject = NULL;
     if (!rootObject) {
-        rootObject = WebCore::V8Proxy::retrieveWindow(WebCore::V8Proxy::currentContext());
+        // For Android 4.2.2
+        //rootObject = WebCore::V8Proxy::retrieveWindow(WebCore::V8Proxy::currentContext());
+
+        // For Android 5.0.1
+        v8::Isolate* isolate = v8::Isolate::GetCurrent();
+        rootObject = WebCore::currentDOMWindow(isolate);
+
+        // For Node: do nothing, to be finished: binding to app/activity
     }
     return rootObject;
 }
 
 void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 {
+    //ALOGD("convertNPVariantToCarValue========begin====");
     CarDataType carDataType = 0;
 
     AutoPtr<IDataTypeInfo> dataTypeInfo;
@@ -780,6 +787,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
         }
         case CarDataType_Interface:
         {
+            //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========begin====");
             switch (type) {
                 case NPVariantType_Void:    //js undefined
                 case NPVariantType_Null:    //js null
@@ -806,13 +814,16 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 }
                 case NPVariantType_Object:
                 {
+                    //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========js object to car interface");
                     NPObject* obj = NPVARIANT_TO_OBJECT(value);
                     if (obj->_class == WebCore::npScriptObjectClass) {
+                        //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========js object to car interface====js object wrapper");
                         //js object, normaly, should be callback proxy
                         CarCallbackObject* cb = CarCallbackObject::S_CreateObject(IInterfaceInfo::Probe(result->mObjectWrapper->getDataTypeInfo()), obj);
                         result->mObjectWrapper->setInstance((IObject*)cb);
                     }
                     else {
+                        //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========js object to car interface====car object wrapper");
                         //car object wrapper
                         CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
                         CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
@@ -824,12 +835,14 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                     ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:the value is not a car wrapper or js type, type:%d", type);
                     break;
             }
+            //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========end====");
 
             break;
         }
         default :
             break;
     }
+    //ALOGD("convertNPVariantToCarValue========end====");
 }
 
 void convertCarValuesToNPVariant_bak(const CarMethod* method, CarValue* values, ArrayOf<Int32>* outParamsPosBuf, NPVariant* result)
@@ -885,7 +898,9 @@ void convertCarValuesToNPVariant_bak(const CarMethod* method, CarValue* values, 
             }
         }
 
-        WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+        //WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+        WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+        new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
 
         pV8NPObject_ret->v8Object.Reset(isolate,pV8Object);
         pV8NPObject_ret->rootObject = getRootObject();
@@ -949,7 +964,9 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
             }
         }
 
-        WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+        //WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+        WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+        new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
 
         pV8NPObject_ret->v8Object.Reset(isolate,pV8Object);
         pV8NPObject_ret->rootObject = getRootObject();
@@ -960,8 +977,6 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
 
 void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 {
-    ALOGD("========convertCarValueToNPVariant========1==");
-
     CarDataType carDataType = 0;
     //carDataType = value.mType;
 
@@ -988,6 +1003,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
     VOID_TO_NPVARIANT(*result);
 
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    //ALOGD("========convertCarValueToNPVariant========carDataType:%d", carDataType);
 
     switch (carDataType) {
         case CarDataType_Int16:
@@ -1060,7 +1076,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
             }
             v8Array->Set(3, v8Array1);
 
-            WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+            //WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+            WebCore::V8NPObject* v8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+            new (&v8NPObject->v8Object) v8::Persistent<v8::Object>();
+
             v8NPObject->v8Object.Reset(isolate,v8Array);
             v8NPObject->rootObject = getRootObject();
 
@@ -1088,7 +1107,9 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
             v8Object->Set(v8::String::NewFromUtf8(isolate,"mUunm"), v8::String::NewFromUtf8(isolate,value.value.mCid.mUunm));
             v8Object->Set(v8::String::NewFromUtf8(isolate,"mCarcode"), v8::Number::New(isolate,value.value.mCid.mCarcode));
 
-            WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+            WebCore::V8NPObject* v8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+            new (&v8NPObject->v8Object) v8::Persistent<v8::Object>();
+
             v8NPObject->v8Object.Reset(isolate,v8Object);
             v8NPObject->rootObject = getRootObject();
             result->type = NPVariantType_Object;
@@ -1122,7 +1143,9 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Int32::New(isolate,(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+
                     pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
                     pV8NPObject_ret->rootObject = getRootObject();
 
@@ -1141,8 +1164,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Int32::New(isolate,(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1160,8 +1185,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Number::New(isolate,(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1179,8 +1206,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Int32::New(isolate,(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1201,8 +1230,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::String::NewFromUtf8(isolate,utf8String));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1220,8 +1251,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Number::New(isolate,(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1239,8 +1272,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Number::New(isolate,(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1259,8 +1294,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::String::NewFromUtf8(isolate,utf8String));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1278,8 +1315,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Boolean::New(isolate,(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1303,8 +1342,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Number::New(isolate,(UInt32)(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1322,8 +1363,10 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         pV8Array->Set(i, v8::Int32::New(isolate,(*pArray)[i]));
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1348,13 +1391,15 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 
                         (*pNPVariantArray)[i].value.objectValue = CarInstanceToNPObject(new CarInstanceV8(new CobjectWrapper(tempClassinfo, aElementDataTypeInfo), true));
 
-                        v8::Handle<v8::Value> tempV8Object = WebCore::convertNPVariantToV8Object(tempNPVariant, NULL);
+                        v8::Handle<v8::Value> tempV8Object = WebCore::convertNPVariantToV8Object(tempNPVariant, NULL, isolate);
 
                         pV8Array->Set(i, tempV8Object);
                     }
 
-                    WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
-                    pV8NPObject_ret->v8Object.Reset(isolate,pV8Array);
+                    WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+                    new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
+                    pV8NPObject_ret->v8Object.Reset(isolate, pV8Array);
+
                     pV8NPObject_ret->rootObject = getRootObject();
 
                     result->type = NPVariantType_Object;
@@ -1381,7 +1426,8 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         {
             result->type = NPVariantType_Object;
             value.mObjectWrapper->setInstance(value.value.mObjectValue);
-            result->value.objectValue = CarInstanceToNPObject(new CarInstanceV8(value.mObjectWrapper, true));
+            CarInstanceV8* _instance = new CarInstanceV8(value.mObjectWrapper, true);
+            result->value.objectValue = CarInstanceToNPObject(_instance);
             break;
         }
         default :

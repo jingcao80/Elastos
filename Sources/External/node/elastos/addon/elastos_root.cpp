@@ -363,15 +363,15 @@ TestCallbackBuf::~TestCallbackBuf()
 extern const char* ToCString(const v8::String::Utf8Value& value);
 extern void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch);
 
-void Receive_(int input,Local<Function> callback);
+void Receive_(int input, v8::Local<v8::Function> callback);
 
-void Observe_bak(uv_work_t* r) {
-    async_req* req = reinterpret_cast<async_req*>(r->data);
-    NodeMessageQueue* mq = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
-    while ( mq->mTop < 2 || mq->mMessages[1]->mStatus > NodeMessage_Status_Ready ) {
-        sleep(1);
-    }
-}
+// void Observe_bak(uv_work_t* r) {
+//     async_req* req = reinterpret_cast<async_req*>(r->data);
+//     NodeMessageQueue* mq = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
+//     while ( mq->mTop < 2 || mq->mMessages[1]->mStatus > NodeMessage_Status_Ready ) {
+//         sleep(1);
+//     }
+// }
 void Observe(uv_work_t* r) {
     ALOGD("Observe =======begin==========");
 
@@ -403,26 +403,56 @@ void Back(uv_work_t* r) {
 
     NodeMessage_Invoke(msg);
 
+    //ALOGD("Back========js begin========0===");
+
     //call the back function, no use
     Isolate* isolate = Isolate::GetCurrent();
-    v8::Handle<v8::Context> context = isolate->GetCurrentContext();
+    //v8::Handle<v8::Context> context = isolate->GetCurrentContext();
 
+    //ALOGD("Back========js begin========1.1===");
     HandleScope scope(isolate);
+    //ALOGD("Back========js begin========1.2===");
+
+
+            //v8::Isolate* isolate = mOwner->mIsolate;
+            isolate->Enter();
+    //ALOGD("Back========js begin========2===");
+
+            v8::Isolate::Scope isolateScope(isolate);
+
+    //ALOGD("Back========js begin========4===");
+            v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
+    //ALOGD("Back========js begin========3===");
+
+            v8::Context::Scope contextScope(context);
+    //ALOGD("Back========js begin========5===");
+
+
+
     async_req* req = reinterpret_cast<async_req*>(r->data);
+    //ALOGD("Back========js begin========6===");
 
     Handle<Value> argv[2] = {
         Null(isolate),
         Integer::New(isolate, req->output)
     };
+    //ALOGD("Back========js begin========7===");
 
-    Local<Function> callback = Local<Function>::New(isolate, req->callback);
+    v8::Local<v8::Function> callback = v8::Local<v8::Function>::New(isolate, req->callback);
+    //ALOGD("Back========js begin========8===");
 
     TryCatch try_catch;
     callback->Call(context->Global(), 2, argv);
+    //ALOGD("Back========js begin========9===");
     if (try_catch.HasCaught()) {
         //FatalException(try_catch);
         ReportException(isolate, &try_catch);
     }
+    //ALOGD("Back========js begin========10===");
+
+            isolate->Exit();
+
+    //ALOGD("Back========js end========");
 
     Receive_(req->input,callback);
 
@@ -431,7 +461,7 @@ void Back(uv_work_t* r) {
     delete req;
 }
 
-void Receive_(int input,Local<Function> callback) {
+void Receive_(int input,v8::Local<v8::Function> callback) {
     Isolate* isolate = Isolate::GetCurrent();
     HandleScope scope(isolate);
 
@@ -450,7 +480,7 @@ void Receive_(int input,Local<Function> callback) {
 
 void Receive(const FunctionCallbackInfo<Value>& args) {
     int input = args[0]->IntegerValue();
-    Local<Function> callback = Local<Function>::Cast(args[1]);
+    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[1]);
     Receive_(input,callback);
 }
 
@@ -592,8 +622,10 @@ void Require(const FunctionCallbackInfo<Value>& info) {
 
         v8::Local<v8::Object> v8Object = WebCore::createV8ObjectForNPObject(
             NPVARIANT_TO_OBJECT(result),
-            /* NPVariant root */ NULL
+            /* NPVariant root */ NULL,
+            isolate
         );
+
         info.GetReturnValue().Set(v8Object);
     }
 
@@ -614,21 +646,59 @@ void SetEnqueueUIMessagePtr(const FunctionCallbackInfo<Value>& info) {
     return;
 }
 
-
 void GetNodeBridge(const FunctionCallbackInfo<Value>& info) {
     void* p = _GetNodeBridge();
     info.GetReturnValue().Set((int)p);
     return;
 }
 
+void GetVersion(const FunctionCallbackInfo<Value>& info) {
+    void* p = _GetNodeBridge();
+    info.GetReturnValue().Set(0.04);
+    return;
+}
+
 }   //JSC
 }   //Bindings
 
+//--------WTF init function--------begin--------
+static double CurrentTime()
+{
+    return 0.0;
+}
+
+static void AlwaysZeroNumberSource(unsigned char* buf, size_t len)
+{
+    memset(buf, '\0', len);
+}
+//--------WTF init function--------end--------
+
 void init(v8::Handle<v8::Object> exports, v8::Handle<v8::Object> module) {
+    ALOGD("========elastos_root.cpp====init====begin====");
+
+    ALOGD("========elastos_root.cpp====init WTF====begin====");
+
+    WTF::setRandomSource(AlwaysZeroNumberSource);
+    ALOGD("========elastos_root.cpp====init WTF====1====");
+    WTF::initialize(CurrentTime, 0);
+    ALOGD("========elastos_root.cpp====init WTF====2====");
+    WTF::initializeMainThread(0);
+
+    ALOGD("========elastos_root.cpp====init WTF====end====");
+
+    ALOGD("========elastos_root.cpp====V8 initialize====begin====");
+    Isolate* isolate = Isolate::GetCurrent();
+    WebCore::V8Initializer::initializeMainThreadIfNeeded(isolate);
+    ALOGD("========elastos_root.cpp====V8 initialize====end====");
+
     NODE_SET_METHOD(exports, "require", JSC::Bindings::Require);
     NODE_SET_METHOD(exports, "receive", JSC::Bindings::Receive);
     NODE_SET_METHOD(exports, "SetEnqueueUIMessagePtr", JSC::Bindings::SetEnqueueUIMessagePtr);
     NODE_SET_METHOD(exports, "GetNodeBridge", JSC::Bindings::GetNodeBridge);
+
+    NODE_SET_METHOD(exports, "GetVersion", JSC::Bindings::GetVersion);
+
+    ALOGD("========elastos_root.cpp====init====end====");
 }
 
 NODE_MODULE(binding, init);

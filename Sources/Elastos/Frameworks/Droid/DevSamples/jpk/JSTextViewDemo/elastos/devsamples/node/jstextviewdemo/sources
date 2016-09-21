@@ -4,10 +4,19 @@ TARGET_TYPE = eco
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
+#C_FLAGS += -std=c++11
+#C_FLAGS += -std=c++0x
+#C_FLAGS += -Wall
+#C_FLAGS += -O0
+
 include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += $(MAKEDIR)
 INCLUDES += $(MAKEDIR)/../../../../
-INCLUDES += $(MAKEDIR)/../../../../../Common/inc
+INCLUDES += $(MAKEDIR)/../../../../../Common/inc/node
+
+#INCLUDES += /home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Sources/External/node-v650-arm/android-toolchain/include/c++/4.8
+
+#INCLUDES += /home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Sources/External/node-v650-arm/android-toolchain/include/c++/4.8/arm-linux-androideabi
 
 SOURCES = Elastos.DevSamples.Node.JSTextViewDemo.car
 SOURCES += R.cpp

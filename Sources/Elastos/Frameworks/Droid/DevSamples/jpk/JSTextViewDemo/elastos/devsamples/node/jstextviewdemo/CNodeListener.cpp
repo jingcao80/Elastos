@@ -2,10 +2,73 @@
 
 #include <elastos/utility/logging/Logger.h>
 
-#include "node.h"
-#include "uv.h"
+// #include "node.h"
+// #include "uv.h"
+
+#include <poll.h>
+#include <dlfcn.h>
+#include <fcntl.h>
 
 using Elastos::Utility::Logging::Logger;
+
+# define NODE_EXTERN /* nothing */
+
+//NODE_EXTERN int Start(int argc, char *argv[]);
+namespace node {
+    // node::Start(argc,argv);
+
+    NODE_EXTERN int Start(int argc, char *argv[]);
+
+    int Start_bak(int argc, char *argv[]) {
+        ALOGD("====test====node::Start====begin====");
+
+        char ecoName[] = "/system/lib/libnode.so";
+        char funcName[] = "Start";
+
+        void* handle = NULL;
+        handle = dlopen(ecoName, RTLD_LAZY);
+        if (handle == NULL) {
+            ALOGD("====test====node::Start====open libnode.so fail====");
+            return 0;
+        }
+        else {
+            ALOGD("====test====node::Start====open libnode.so success====");
+
+        }
+        ALOGD("====test====node::Start====handl ptr====%p", handle);
+
+        void* funcPtr = NULL;
+        funcPtr = dlsym(handle, funcName);
+        ALOGD("====test====node::Start====func ptr====%p", funcPtr);
+
+        ALOGD("====test====node::Start====end====");
+
+//--------begin--------
+    // void* handle = dlopen(pathStr, RTLD_LAZY);
+    // if (handle == NULL) {
+    //     if (android::NativeBridgeIsSupported(pathStr)) {
+    //         handle = android::NativeBridgeLoadLibrary(pathStr, RTLD_LAZY);
+    //         needNativeBridge = true;
+    //     }
+    // }
+
+    // if (handle != NULL) {
+    //     void* funcPtr = NULL;
+    //     const char* funcStr = funcName.string();
+    //     if (needNativeBridge) {
+    //         funcPtr = android::NativeBridgeGetTrampoline(handle, funcStr, NULL, 0);
+    //     } else {
+    //         funcPtr = dlsym(handle, funcStr);
+    //     }
+
+
+//--------end--------
+
+
+        return 0;
+    }
+}
+
 
 namespace Elastos {
 namespace DevSamples {

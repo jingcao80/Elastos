@@ -32,11 +32,13 @@
 
 #include "npruntime.h"
 
-#include <wtf/text/WTFString.h>
+//#include <wtf/text/WTFString.h>
 
 #include "NPV8Object.h"
 #include "V8NPUtils.h"
-#include "V8Proxy.h"
+
+//#include "V8Proxy.h"
+#include "V8Binding.h"
 
 #include "CarString.h"
 #include "CarMethod.h"
@@ -49,7 +51,7 @@ namespace Bindings {
 
 class CarValue;
 
-WebCore::DOMWindow* getRootObject();
+WebCore::LocalDOMWindow* getRootObject();
 
 void convertNPVariantToCarValue(NPVariant, CarValue*);
 void convertCarValuesToNPVariant(const CarMethod*, CarValue*, ArrayOf<Int32>*, NPVariant*);

@@ -81,7 +81,7 @@ module
 
     [deprecated]
     interface INodeBridgeListener {
-        OnRegistActivity(
+        OnRegisterActivity(
             [in] String packageName,
             [in] String activityName,
             [in] IInterface* activityInstance,

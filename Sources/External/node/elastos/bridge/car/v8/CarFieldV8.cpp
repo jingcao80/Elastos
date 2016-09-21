@@ -43,7 +43,7 @@ CarFieldV8::CarFieldV8(CarString inName, int inAttr)
 
 CarFieldV8::~CarFieldV8()
 {
-    deleteAllValues(mFieldMethodList);
+    //deleteAllValues(mFieldMethodList);
     mFieldMethodList.clear();
 }
 

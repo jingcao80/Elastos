@@ -18,6 +18,8 @@
 
 #include <utils/Log.h>
 
+#define LOG_ERROR ALOGD
+
 namespace JSC {
 namespace Bindings {
 
@@ -34,7 +36,10 @@ static NPObject* AllocCarNPObject(NPP, NPClass*)
 static void FreeCarNPObject(NPObject* npobj)
 {
     CarNPObject* obj = reinterpret_cast<CarNPObject*>(npobj);
-    obj->mInstance = 0; // free does not call the destructor
+    //obj->mInstance = 0; // free does not call the destructor
+    std::nullptr_t _nullptr;
+    obj->mInstance = _nullptr; // free does not call the destructor
+
     free(obj);
 }
 
@@ -59,9 +64,10 @@ NPObject* CarInstanceToNPObject(CarInstance* instance)
 {
     CarNPObject* object;
     object = reinterpret_cast<CarNPObject*>(_NPN_CreateObject(0, &CarNPObjectClass));
+    WTF::adopted(instance);
     object->mInstance = instance;
-
-    return reinterpret_cast<NPObject*>(object);
+    NPObject* _obj = reinterpret_cast<NPObject*>(object);
+    return _obj;
 }
 
 // Returns null if obj is not a wrapper of JavaInstance
@@ -416,7 +422,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         return false;
     }
 
-    ALOGD("CarNPObjectInvoke====method name: %s====",name);
+    //ALOGD("CarNPObjectInvoke====method name: %s====",name);
 
     instance->begin();
 
@@ -450,14 +456,14 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     //else if (numMethods > 1) {
     else {
         //overload
-        ALOGD("CarNPObjectInvoke====numMethods: %d====",numMethods);
+        //ALOGD("CarNPObjectInvoke====numMethods: %d====",numMethods);
         for (size_t methodIndex = 0; methodIndex < numMethods; methodIndex++) {
-            ALOGD("CarNPObjectInvoke====numMethods: %d/%d====",methodIndex, numMethods);
+            //ALOGD("CarNPObjectInvoke====numMethods: %d/%d====",methodIndex, numMethods);
             tmpCarMethod = methodList[methodIndex];
             //TODO: shuld compare with only input parameters count.
             //NOTE: different from callback output parms.
             Int32 numParams = tmpCarMethod->numParameters();
-            ALOGD("CarNPObjectInvoke====numParams: %d====",numParams);
+            //ALOGD("CarNPObjectInvoke====numParams: %d====",numParams);
             Int32 numIn = 0;
             Int32 numOut = 0;
 
@@ -472,7 +478,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
             Int32 i;
             for (i = 0; i < numParams; i++) {
-                ALOGD("CarNPObjectInvoke====numParams: %d/%d====",i,numParams);
+                //ALOGD("CarNPObjectInvoke====numParams: %d/%d====",i,numParams);
                 AutoPtr<IParamInfo> paramInfo = (*paramInfos)[i];
                 ParamIOAttribute paramIOAttribute;
                 paramInfo->GetIOAttribute(&paramIOAttribute);
@@ -779,15 +785,15 @@ bool CarNPObjectGetProperty(NPObject* npobj, NPIdentifier identifier, NPVariant*
         return false;
     }
 
-#if PLATFORM(ANDROID)
+//#if PLATFORM(ANDROID)
     // JSC does not seem to support returning object properties so we emulate that
     // behaviour here.
     CarValue value;
-#else
-    CarValue value;
+//#else
+//    CarValue value;
     //TODO:
     //CarValue value = instance->getField(field);
-#endif // PLATFORM(ANDROID)
+//#endif // PLATFORM(ANDROID)
     instance->end();
 
     returnValue = true;
@@ -823,7 +829,9 @@ bool CarNPObjectEnumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count
     AutoPtr<IInterfaceInfo> interfaceInfo;
     bool bClass = true;
 
-    ec = CObject::ReflectClassInfo(objectWrapper->getInstance(), (IClassInfo**)&classInfo);
+    PInterface obj = objectWrapper->getInstance().Get();
+    ALOGD("CarNPObjectEnumerate object address : %p", obj);
+    ec = CObject::ReflectClassInfo(obj, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
         bClass = false;
         interfaceInfo = IInterfaceInfo::Probe(objectWrapper->getDataTypeInfo());
@@ -862,7 +870,8 @@ bool CarNPObjectEnumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count
 
     *count = N;
     NPIdentifier* outList(NULL);
-    outList = (NPIdentifier*)NPN_MemAlloc((uint32_t)(sizeof(NPIdentifier)*N));
+    //outList = (NPIdentifier*)NPN_MemAlloc((uint32_t)(sizeof(NPIdentifier)*N));
+    outList = (NPIdentifier*)malloc((uint32_t)(sizeof(NPIdentifier)*N));
 
     //Get method and property names
     Elastos::String nameBuf;

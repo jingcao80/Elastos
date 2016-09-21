@@ -6,6 +6,11 @@ IMPORTS = Elastos.CoreLibrary.eco
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
+#C_FLAGS += -std=c++11
+#C_FLAGS += -std=c++0x
+#C_FLAGS += -Wall
+#C_FLAGS += -O0
+
 include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += $(MAKEDIR)
 INCLUDES += $(MAKEDIR)/inc

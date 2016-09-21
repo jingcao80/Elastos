@@ -4,7 +4,6 @@
 
 #if ENABLE(CAR_BRIDGE)
 
-#include <wtf/OwnArrayPtr.h>
 #include <wtf/PassOwnPtr.h>
 #include <wtf/text/CString.h>
 #include <wtf/text/StringBuilder.h>
@@ -12,10 +11,10 @@
 #include "etl/HashSet.h"
 #include "elastos.h"
 
-#if PLATFORM(ANDROID)
+//#if PLATFORM(ANDROID)
 #include "npruntime_impl.h"
 #include "npruntime_priv.h"
-#endif // PLATFORM(ANDROID)
+//#endif // PLATFORM(ANDROID)
 
 #include "CarUtilityPrivate.h"
 #include "CarInstanceV8.h"
@@ -62,7 +61,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
 {
     *didRaiseUncaughtException = false;
 
-    ASSERT(getClass()->methodsNamed(method->name().utf8().data()).find(method) != notFound);
+    ASSERT(getClass()->methodsNamed(method->name().utf8().data()).find(method) != kNotFound);
 
     Int32 numParams = method->numParameters();
     AutoPtr<IInterface> object = carInstance();
@@ -76,7 +75,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
 
     Elastos::String temp_name;
     aMethod->GetName(&temp_name);
-    ALOGD("CarInstanceV8::invokeMethod====name:%s", temp_name.string());
+    //ALOGD("CarInstanceV8::invokeMethod====name:%s", temp_name.string());
 
     AutoPtr<IArgumentList> argumentList = NULL;
     if (numParams > 0) {
@@ -87,12 +86,12 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
             return;
         }
         else {
-           ALOGD("CarInstanceV8::invokeMethod create argumentList on method %p success!", method);
+           //ALOGD("CarInstanceV8::invokeMethod create argumentList on method %p success!", method);
         }
 
         ArrayOf<IParamInfo*>* paramInfos = ArrayOf<IParamInfo*>::Alloc(numParams);
         aMethod->GetAllParamInfos(paramInfos);
-        ALOGD("CarInstanceV8::invokeMethod========1========");
+        //ALOGD("CarInstanceV8::invokeMethod========1========");
 
         for (Int32 i = 0; i < numParams; ++i) {
             CarDataType _type = 0;
@@ -117,7 +116,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
             }
 
             const char* tmpType = ClassNameFromCarDataType((CarDataType)(_type));
-            ALOGD("CarInstanceV8::invokeMethod========%d/%d========type:%d/%s", i, numParams, _type, tmpType);
+            //ALOGD("CarInstanceV8::invokeMethod========%d/%d========type:%d/%s", i, numParams, _type, tmpType);
 
             AutoPtr<IParamInfo> aParameter = (*paramInfos)[i];
             switch (args[i].mIOAttribute) {

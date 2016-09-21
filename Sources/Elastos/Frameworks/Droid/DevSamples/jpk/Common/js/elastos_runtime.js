@@ -1,3 +1,5 @@
+elog("========elastos_runtime.js========begin========");
+
 //module.exports = function (api) {
 module.exports = function (aoElastos) {
 
@@ -228,7 +230,6 @@ function __getConstructorProto(ao_ConstructorInfo){
 
     var len = ao_ConstructorInfo.GetParamCount();
     if (len > 0) {
-
         var bProto = [];
         var aParamInfos = ao_ConstructorInfo.GetAllParamInfos();
         for (var i=0,im=aParamInfos.length;i<im;i++) {
@@ -245,8 +246,6 @@ function __getConstructorProto(ao_ConstructorInfo){
 
 //return: ClassName{ConstructorProtos};
 function _getConstructorProtos(ao_ClassInfo){
-    elog("====__getConstructorProtos====begin");
-
     var aProto = [];
 
     aProto.push(ao_ClassInfo.GetName());
@@ -269,7 +268,7 @@ function _getConstructorProtos(ao_ClassInfo){
 function getConstructorProtos(as_EcoName, as_ClassName){
     var oModuleInfo = _getModuleInfo(as_EcoName);
     var oClassInfo = oModuleInfo.GetClassInfo(as_ClassName);
-    _getConstructorProtos(oClassInfo);
+    return _getConstructorProtos(oClassInfo);
 }
 
 function _getMethodInfosByClassInfo(ao_ClassInfo, as_MethodName){
@@ -294,73 +293,27 @@ function _getMethodInfosByClassInfo(ao_ClassInfo, as_MethodName){
 function _getMethodInfos(as_EcoName, as_ClassName, as_MethodName){
     var oModuleInfo = _getModuleInfo(as_EcoName);
     var oClassInfo = oModuleInfo.GetClassInfo(as_ClassName);
-
     return _getMethodInfosByClassInfo(oClassInfo, as_MethodName);
-
-    // var aAllMethodInfos = oClassInfo.GetAllMethodInfos();
-    // var aMethodInfos;
-    // if (arguments.length == 2) {
-    //     aMethodInfos = aAllMethodInfos;
-    // }
-    // else {
-    //     aMethodInfos = [];
-    //     for(var i=0,im=aAllMethodInfos.length;i<im;i++) {
-    //         var oMethodInfo = aAllMethodInfos[i];
-    //         var sMethodName = oMethodInfo.GetName();
-    //         if (sMethodName == as_MethodName) {
-    //             aMethodInfos.push(oMethodInfo);
-    //         }
-    //     }
-    // }
-    // return aMethodInfos;
 }
 
 function __getMethodProtos(ao_MethodInfos){
     var aProto = [];
-
-    //aProto.push(as_ClassName);
-    //aProto.push("{");
-
     for (var i=0,im=ao_MethodInfos.length;i<im;i++) {
         aProto.push("=="+i+"==");
         var sMethodProto = __getConstructorProto(ao_MethodInfos[i]);
         aProto.push(sMethodProto);
     }
-
-    //aProto.push("}");
-
     return aProto.join("");
 }
 
 function _getMethodProtos(as_EcoName, as_ClassName, as_MethodName){
     var aMethodInfos = _getMethodInfos(as_EcoName, as_ClassName, as_MethodName);
-
     var aProto = [];
-
     aProto.push(as_ClassName);
     aProto.push("{");
-
     aProto.push(__getMethodProtos(aMethodInfos));
-
     aProto.push("}");
-
     return aProto.join("");
-
-
-    // var aProto = [];
-
-    // aProto.push(as_ClassName);
-    // aProto.push("{");
-
-    // for (var i=0,im=aMethodInfos.length;i<im;i++) {
-    //     aProto.push("=="+i+"==");
-    //     var sMethodProto = __getConstructorProto(aMethodInfos[i]);
-    //     aProto.push(sMethodProto);
-    // }
-
-    // aProto.push("}");
-
-    // return aProto.join("");
 }
 
 CObject.getConstructorProtos = getConstructorProtos;
@@ -374,37 +327,93 @@ CObject.getObjectMethodProtos = function(ao_Car, as_MethodName) {
 
 //--------proto info end--------
 
+//return: constructorInfo
+function _getConstructorInfo(oClassInfo, args){
+    var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
+    var paramCount = args.length;
+
+    var oConstructorInfo;
+    var bSameArgs = false;
+    for(var i=0, im=aConstructorInfos.length; i<im; i++){
+        oConstructorInfo = aConstructorInfos[i];
+
+        var _paramCount = oConstructorInfo.GetParamCount();
+        if (_paramCount != paramCount) continue;
+
+        bSameArgs = true;
+        var aParamInfos = oConstructorInfo.GetAllParamInfos();
+        for(var j = 0, jm = paramCount; j<jm; j++) {
+            var paramInfo = aParamInfos[j];
+            var oTypeInfo = paramInfo.GetTypeInfo();
+            var iDataType = oTypeInfo.GetDataType();
+            var sJsDataType = getDataTypeJavascriptString(iDataType);
+
+            var arg_in = args[j];
+            var type_in = typeof(arg_in);
+            if (type_in=="function") type_in = "object";
+
+            if (sJsDataType != type_in) {
+                bSameArgs = false;
+                break;
+            }
+
+            switch (iDataType) {
+                case CarDataType.IInterface:
+                    var sInterfaceName = oTypeInfo.GetName();
+                    bSameArgs = CObject.hasInterface(arg_in, sInterfaceName);
+                    break;
+                case CarDataType.LocalPtr:
+                    var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();
+                    var iElementDataType = oElementTypeInfo.GetDataType();
+
+                    elog('==============classinfo__createObject ======find method====LocalPtr====element type:'+iElementDataType);
+
+                    switch (iElementDataType) {
+                        case CarDataType.IInterface:
+                            //TODO:
+                            break;
+                        case CarDataType.ArrayOf:
+                            //TODO:
+                            if (typeof arg_in.GetClassID == 'function') bSameArgs = false;
+                            break;
+                        default:
+                            //TODO
+                            break;
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+            if (!bSameArgs) break;
+        }
+        if (bSameArgs) break;
+    }
+    return bSameArgs?oConstructorInfo:null;
+}
+
 function classinfo__createObject(oModuleInfo,oClassInfo){
-try {
     var newObject;
 
-elog("classinfo__createObject======00======");
-    if(typeof(oModuleInfo)=='string') {
+    if(typeof oModuleInfo == 'string') {
         oModuleInfo = _getModuleInfo(oModuleInfo);
     }
 
-elog("classinfo__createObject======01======");
-    var sClassName = "null";
-    if(typeof(oClassInfo)=='string') {
+    var sClassName;
+    if(typeof oClassInfo == 'string') {
         sClassName = oClassInfo;
         oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
         if (!oClassInfo) {
             elog("classinfo__createObject======can't find class: " + sClassName);
             return;
         }
-        sClassName = oClassInfo.GetName();
     }
-    else {
-        sClassName = oClassInfo.GetName();
-    }
+    sClassName = oClassInfo.GetName();
 
-elog("classinfo__createObject======02======");
     var bCreateOnUIThread = getCreateOnUIThread(sClassName);
 
-elog("classinfo__createObject======03======");
     var length = arguments.length;
     if(length==2){
-elog("classinfo__createObject======04.1======");
         if (bCreateOnUIThread) {
             newObject = oClassInfo.RemoteCreateObject();
         }
@@ -413,92 +422,27 @@ elog("classinfo__createObject======04.1======");
         }
     }
     else {
-elog("classinfo__createObject======04.2======");
-        var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
+        var args = [];
+        for (var i=2,im=length;i<im;i++)args.push(arguments[i]);
+        var paramCount = args.length;
 
-        var oConstructorInfo;
-        var paramCount = length - 2;
-        var bSameArgs = false;
-        for(var i=0, im=aConstructorInfos.length; i<im; i++){
-elog("classinfo__createObject======05======");
-            oConstructorInfo = aConstructorInfos[i];
-
-            var _paramCount = oConstructorInfo.GetParamCount();
-
-            bSameArgs = false;
-            if (_paramCount == paramCount) {
-                bSameArgs = true;
-                var aParamInfos = oConstructorInfo.GetAllParamInfos();
-                for(var j = 0, jm = paramCount; j<jm; j++) {
-                    var paramInfo = aParamInfos[j];
-                    var oTypeInfo = paramInfo.GetTypeInfo();
-
-                    var iDataType = oTypeInfo.GetDataType();
-                    var sJsDataType = getDataTypeJavascriptString(iDataType);
-
-                    var arg_in = arguments[j+2];
-                    var type_in = typeof(arg_in);
-
-                    if (sJsDataType == type_in) {
-                        if (iDataType == CarDataType.IInterface) {
-                            var sInterfaceName = oTypeInfo.GetName();
-                            bSameArgs = CObject.hasInterface(arg_in, sInterfaceName);
-                        }
-                        else if (iDataType == CarDataType.LocalPtr) {
-                            //TODO:compare the localptr element type
-                            //continue;
-
-                            var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();
-                            var iElementDataType = oElementTypeInfo.GetDataType();
-
-                            elog('==============classinfo__createObject ======find method====LocalPtr====element type:'+iElementDataType);
-
-                            switch (iElementDataType) {
-                                case CarDataType.IInterface:
-                                    //TODO:
-                                    break;
-                                case CarDataType.ArrayOf:
-                                    //TODO:
-                                    if (typeof arg_in.GetClassID == 'function') bSameArgs = false;
-                                    break;
-                                default:
-                                    //TODO
-                                    break;
-                            }
-                        }
-                        else {
-                            //continue;
-                        }
-                    }
-                    else {
-                        bSameArgs = false
-                    }
-                    if (!bSameArgs) break;
-                }
-                if (bSameArgs) break;
-            }
-elog("classinfo__createObject======06======");
-        }
-
-        if (!bSameArgs) {
+        var oConstructorInfo = _getConstructorInfo(oClassInfo, args);
+        if(!oConstructorInfo){
             elog("====classinfo__createObject====can not find constructor : " + sClassName);
             return null;
         }
-elog("classinfo__createObject======07======");
 
         var aParamInfos = oConstructorInfo.GetAllParamInfos();
         var oArgumentList = oConstructorInfo.CreateArgumentList();
-elog("classinfo__createObject======08======");
 
         for(var i = 0, im = paramCount; i<im; i++) {
-elog("classinfo__createObject======09======");
             var paramInfo = aParamInfos[i];
             var oTypeInfo = paramInfo.GetTypeInfo();
 
             var iDataType = oTypeInfo.GetDataType();
             var sJsDataType = getDataTypeJavascriptString(iDataType);
 
-            var arg = arguments[i+2];
+            var arg = args[i];
             switch (iDataType) {
                 case CarDataType.Int16:
                     oArgumentList.SetInputArgumentOfInt16(i,arg);
@@ -570,27 +514,19 @@ elog("classinfo__createObject======09======");
                     elog('==============classinfo__createObject ===========argument type: to be finished===========rc:'+ i +'======datatype:'+iDataType);
                     break;
             }
-elog("classinfo__createObject======10======");
         }
-elog("classinfo__createObject======11======");
 
         //var sAnnotation = oConstructorInfo.GetAnnotation();
 
-        //newObject = oConstructorInfo.CreateObject(oArgumentList);
         if (bCreateOnUIThread) {
             newObject = oConstructorInfo.RemoteCreateObject(oArgumentList);
         }
         else {
             newObject = oConstructorInfo.LocalCreateObject(oArgumentList);
         }
-elog("classinfo__createObject======12======");
     }
-elog("classinfo__createObject======13======");
 
     return newObject;
-} catch(e) {
-    elog("classinfo__createObject Error:====" + JSON.stringify(e));
-}   //try
 }   //classinfo__createObject
 
 return {
@@ -599,3 +535,5 @@ return {
 };
 
 };  //exports
+
+elog("========elastos_runtime.js========end========");

@@ -22,7 +22,7 @@ CobjectWrapper::CobjectWrapper(IInterface* instance, IDataTypeInfo* dataTypeInfo
     : mDataTypeInfo(0),
     mRefCount(0)
 {
-    assert(instance);
+    //assert(instance);
 
     // Cache the JNIEnv used to get the global ref for this java instanace.
     // It'll be used to delete the reference.

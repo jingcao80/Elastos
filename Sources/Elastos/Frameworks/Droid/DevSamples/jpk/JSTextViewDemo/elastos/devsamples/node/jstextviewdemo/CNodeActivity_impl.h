@@ -44,6 +44,8 @@ ECode JSActName::OnCreate(
     Logger::D(TAG, "OnCreate()-----");
     Activity::OnCreate(savedInstanceState);
 
+    ECode ec;
+
     mHandler = new MyHandler(this);
 
     myHandler = mHandler;
@@ -59,7 +61,7 @@ ECode JSActName::OnCreate(
     String _helperClsName = mPackageName + String(".") + mActivityName + String("Helper");
 
     AutoPtr<IInterface> helper;
-    ECode ec = JSEvtName::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
+    ec = JSEvtName::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
 
     if (FAILED(ec)) {
         ALOGD("OnCreate========create Helper failed!======nodejs module will be used");
@@ -71,7 +73,17 @@ ECode JSActName::OnCreate(
         mListener = IActivityListener::Probe(helper);
     }
 
-    return mListener->OnCreate(this, savedInstanceState);
+    if (mListener) {
+        ALOGD("OnCreate========mListener OnCreate====begin====");
+        ec = mListener->OnCreate(this, savedInstanceState);
+        ALOGD("OnCreate========mListener OnCreate====end====");
+    }
+    else {
+        ALOGD("OnCreate========ERROR:mListener is NULL======");
+
+    }
+
+    return ec;
 }
 
 ECode JSActName::OnStart()

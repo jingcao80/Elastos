@@ -213,7 +213,7 @@ public:
 
         Boolean result = false;
         if(JSEvtName::mNodeBridgeListener) {
-            JSEvtName::mNodeBridgeListener->OnRegistActivity(
+            JSEvtName::mNodeBridgeListener->OnRegisterActivity(
                 packageName, activityName, activityInstance, (Int32)activityListener, activityHandler, &result);
         }
         else {

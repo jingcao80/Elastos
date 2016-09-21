@@ -1,9 +1,12 @@
+elog("========elastos_node.js========begin========");
+
 var sPackageName = process.argv[2];
 //var sActivityName = process.argv[3];
 
 var root = global||window;
 
 root.Elastos = ( function () {
+//elog("========elastos_node.js========begin====1====");
     var _Elastos = {
         CObject: {},
 
@@ -91,6 +94,7 @@ root.Elastos = ( function () {
             },
         },
     };   //Elastos
+//elog("========elastos_node.js========begin====2====");
 
     var _bindArgs = function (aaArgs, aoArgs) {
         for (var i = 0, im = aoArgs.length; i < im; i++) aaArgs.push(aoArgs[i]);
@@ -99,15 +103,22 @@ root.Elastos = ( function () {
 
     var _api = require('../../bin/elastos.node');
 
+//elog("========elastos_node.js========begin====3====");
     var _Runtime_Native = _api.require("/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco", "Elastos.DevSamples.Node.CarRuntime.CCarRuntime");
+//elog("========elastos_node.js========begin====4====");
 
     _Elastos.Runtime_Native = _Runtime_Native;
 
+//elog("========elastos_node.js========begin====5====");
     var _Runtime = require('./elastos_runtime.js')(_Elastos);
+//elog("========elastos_node.js========begin====6====");
 
     var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.CoreLibrary.eco");
+//elog("========elastos_node.js========begin====7====");
     var _Module_Droid = _Runtime.getModuleInfo("/system/lib/Elastos.Droid.Core.eco");
+//elog("========elastos_node.js========begin====8====");
     var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", sPackageName + ".CNodeListener");
+//elog("========elastos_node.js========begin====9====");
 
     var _Bridge = {
         init : function (aoNodeBridgeListener) {
@@ -120,6 +131,7 @@ root.Elastos = ( function () {
             //_Bridge_Native.Unlock();
         },
     };
+//elog("========elastos_node.js========begin====10====");
 
     _Elastos.Test = _Bridge_Native;
 
@@ -163,6 +175,7 @@ root.Application = Elastos.Application;
 
 Application.NodeBridgeListener = {
     OnRegisterActivity : function(asPackageName, asActivityName, aoActivityInstance, aoActivityListener, aoActivityHandler, out_abResult) {
+        elog("========OnRegisterActivity====begin====");
         var _this = Elastos.Application;
 
         _this.R = require(_this.RootPath + "/R.js");
@@ -181,6 +194,7 @@ Application.NodeBridgeListener = {
         Elastos.Test.SetActivityListener(aoActivityListener, oActivityListener);
 
         out_abResult.data = true;
+        elog("========OnRegisterActivity====end====");
     },
 
     OnRegisterCalculatorEditText : function(aoContext, aoControl, aoListener, out_abResult) {
@@ -228,3 +242,5 @@ Application.NodeBridgeListener = {
 };
 
 Application.Ready();
+
+elog("========elastos_node.js========end========");
