@@ -1610,10 +1610,11 @@ ECode WifiServiceImpl::AcquireWifiLock(
     /* [in] */ IBinder* binder,
     /* [in] */ Int32 lockMode,
     /* [in] */ const String& tag,
-    /* [in] */ IWorkSource* ws,
+    /* [in] */ IWorkSource* _ws,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    AutoPtr<IWorkSource> ws = _ws;
     mContext->EnforceCallingOrSelfPermission(Manifest::permission::WAKE_LOCK, String(NULL));
     if (lockMode != IWifiManager::WIFI_MODE_FULL &&
             lockMode != IWifiManager::WIFI_MODE_SCAN_ONLY &&
@@ -1640,9 +1641,7 @@ ECode WifiServiceImpl::AcquireWifiLock(
         EnforceWakeSourcePermission(uid, pid);
     }
     if (ws == NULL) {
-        AutoPtr<IWorkSource> nws;
-        CWorkSource::New(uid, (IWorkSource**)&nws);
-        ws = nws;
+        CWorkSource::New(uid, (IWorkSource**)&ws);
     }
     AutoPtr<WifiLock> wifiLock = new WifiLock(this, lockMode, tag, binder, ws);
     {    AutoLock syncLock(mLocks);

@@ -36,7 +36,7 @@ private:
         CARAPI Run();
 
     private:
-        CPagedViewIcon* mHost;
+        AutoPtr<CPagedViewIcon> mHost;
     };
 
 public:
