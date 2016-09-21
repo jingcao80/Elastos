@@ -4,6 +4,7 @@
 
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Phone.Common.h"
 #include "elastos/droid/incallui/BaseFragment.h"
 #include "elastos/droid/incallui/DialpadPresenter.h"
 #include "elastos/droid/os/Runnable.h"

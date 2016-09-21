@@ -2,6 +2,8 @@
 #include "elastos/droid/teleservice/phone/CEmergencyDialer.h"
 #include "elastos/droid/teleservice/phone/CEmergencyDialerBroadcastReceiver.h"
 #include "elastos/droid/teleservice/phone/SpecialCharSequenceMgr.h"
+#include "elastos/droid/phone/common/CHapticFeedback.h"
+#include "elastos/droid/phone/common/util/ViewUtil.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Net.h"
@@ -48,21 +50,23 @@ using Elastos::Droid::View::EIID_IViewOnKeyListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Phone::Common::CHapticFeedback;
+using Elastos::Droid::Phone::Common::Dialpad::IDialpadKeyButton;
+using Elastos::Droid::Phone::Common::Dialpad::EIID_IDialpadKeyButtonOnPressedListener;
+using Elastos::Droid::Phone::Common::Util::ViewUtil;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Utility::Logging::Logger;
-
-// using Elastos::Apps::Contacts::Common::Util::IViewUtil;
-// using Elastos::Apps::Contacts::Common::Util::CViewUtil;
 
 namespace Elastos {
 namespace Droid {
 namespace TeleService {
 namespace Phone {
 
-CAR_INTERFACE_IMPL_4(CEmergencyDialer::InnerListener, Object, IViewOnClickListener, \
+CAR_INTERFACE_IMPL_5(CEmergencyDialer::InnerListener, Object, IViewOnClickListener, \
     IViewOnLongClickListener, IViewOnKeyListener, \
-    ITextWatcher/*IDialpadKeyButtonOnPressedListener*/)
+    ITextWatcher, IDialpadKeyButtonOnPressedListener)
 
 CEmergencyDialer::InnerListener::InnerListener(
     /* [in] */ CEmergencyDialer* host)
@@ -185,8 +189,7 @@ CEmergencyDialer::CEmergencyDialer()
     : mDTMFToneEnabled(FALSE)
     , mLastNumber(NULL)
 {
-    assert(0);
-    //mHaptic = new HapticFeedback();
+    CHapticFeedback::New((IHapticFeedback**)&mHaptic);
 
     CEmergencyDialerBroadcastReceiver::New(this, (IBroadcastReceiver**)&mBroadcastReceiver);
 }
@@ -232,10 +235,9 @@ ECode CEmergencyDialer::AfterTextChanged(
     IObject::Probe(input)->ToString(&str);
     if (SpecialCharSequenceMgr::HandleCharsForLockedDevice(this, str, this)) {
         // A special sequence was entered, clear the digits
-        AutoPtr<ICharSequence> str;
-        ITextView::Probe(mDigits)->GetText((ICharSequence**)&str);
-        assert(0);
-        //str->Clear();
+        AutoPtr<IEditable> chars;
+        ITextView::Probe(mDigits)->GetEditableText((IEditable**)&chars);
+        if (chars != NULL) chars->Clear();
     }
 
     return UpdateDialAndDeleteButtonStateEnabledAttr();
@@ -267,7 +269,6 @@ ECode CEmergencyDialer::OnCreate(
     // lp.userActivityTimeout = USER_ACTIVITY_TIMEOUT_WHEN_NO_PROX_SENSOR;
 
     window->SetAttributes(lp);
-
     SetContentView(Elastos::Droid::TeleService::R::layout::emergency_dialer);
 
     AutoPtr<IView> _view;
@@ -320,8 +321,7 @@ ECode CEmergencyDialer::OnCreate(
             (IView**)&floatingActionButtonContainer);
     AutoPtr<IResources> tmp;
     GetResources((IResources**)&tmp);
-    assert(0);
-    //ViewUtil::SetupFloatingActionButton(floatingActionButtonContainer, tmp);
+    ViewUtil::SetupFloatingActionButton(floatingActionButtonContainer, tmp);
 
     if (icicle != NULL) {
         Activity::OnRestoreInstanceState(icicle);
@@ -372,12 +372,12 @@ ECode CEmergencyDialer::OnCreate(
     RegisterReceiver(mBroadcastReceiver, intentFilter, (IIntent**)&tmpintent);
 
     //try {
-    assert(0);
-    // ECode ec = mHaptic->Init(this, (res->GetBoolean(R.bool.config_enable_dialer_key_vibration, &result), result));
+    res->GetBoolean(R::bool_::config_enable_dialer_key_vibration, &result);
     // //} catch (Resources.NotFoundException nfe) {
-    // if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION) {
-    //     Logger::E(TAG, "Vibrate control bool missing. %d", ec);
-    // }
+    ECode ec = mHaptic->Init(this, result);
+    if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION) {
+        Logger::E(TAG, "Vibrate control bool missing. %d", ec);
+    }
     //}
     return NOERROR;
 }
@@ -435,9 +435,8 @@ void CEmergencyDialer::SetupKeypad()
 
         AutoPtr<IView> _view;
         FindViewById(id, (IView**)&_view);
-        assert(0);
-        // AutoPtr<IDialpadKeyButton> key = IDialpadKeyButton::(_view);
-        // key->SetOnPressedListener(mListener);
+        AutoPtr<IDialpadKeyButton> key = IDialpadKeyButton::Probe(_view);
+        key->SetOnPressedListener(mListener);
     }
 
     AutoPtr<IView> view;
@@ -480,8 +479,7 @@ ECode CEmergencyDialer::OnKeyDown(
 void CEmergencyDialer::KeyPressed(
         /* [in] */ Int32 keyCode)
 {
-    assert(0);
-    //mHaptic->Vibrate();
+    mHaptic->Vibrate();
     AutoPtr<IKeyEvent> event;
     CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&event);
     Boolean res;
@@ -530,8 +528,7 @@ ECode CEmergencyDialer::OnClick(
         }
         case Elastos::Droid::TeleService::R::id::floating_action_button:
         {
-            assert(0);
-            //mHaptic->Vibrate();  // Vibrate here too, just like we do for the regular keys
+            mHaptic->Vibrate();  // Vibrate here too, just like we do for the regular keys
             PlaceCall();
             return NOERROR;
         }
@@ -634,10 +631,10 @@ ECode CEmergencyDialer::OnLongClick(
     switch (id) {
         case Elastos::Droid::TeleService::R::id::deleteButton:
         {
-            AutoPtr<ICharSequence> text;
-            ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
-            assert(0);
-            //text->Clear();
+            AutoPtr<IEditable> text;
+            ITextView::Probe(mDigits)->GetEditableText((IEditable**)&text);
+            if (text != NULL) text->Clear();
+
             // TODO: The framework forgets to clear the pressed
             // status of disabled button. Until this is fixed,
             // clear manually the pressed status. b/2133127
@@ -671,8 +668,7 @@ ECode CEmergencyDialer::OnResume()
     mDTMFToneEnabled = (tmp == 1);
 
     // Retrieve the haptic feedback setting.
-    assert(0);
-    //mHaptic->CheckSystemSetting();
+    mHaptic->CheckSystemSetting();
 
     // if the mToneGenerator creation fails, just continue without it.  It is
     // a local audio signal, and is not as important as the dtmf tone itself.
@@ -763,11 +759,11 @@ void CEmergencyDialer::PlaceCall()
         }
 
         // erase the number and throw up an alert dialog.
-        AutoPtr<ICharSequence> text;
-        ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
-        //Int32 length;
-        assert(0);
-        //text->Delete(0, (text->GetLength(&length), length));
+        AutoPtr<IEditable> text;
+        ITextView::Probe(mDigits)->GetEditableText((IEditable**)&text);
+        Int32 length;
+        ICharSequence::Probe(text)->GetLength(&length);
+        if (text != NULL) text->Delete(0, length);
         ShowDialog(BAD_EMERGENCY_NUMBER_DIALOG);
     }
 }

@@ -5,6 +5,8 @@ module
     importlib("Elastos.Droid.Core.eco");
     importlib("Elastos.Droid.Server.Telecom.eco");
 
+    merge("../../Apps/PhoneCommon/Elastos.Droid.Phone.Common.car");
+
     merge("car/elastos/droid/phone/AccelerometerListener.car");
     merge("car/elastos/droid/phone/BluetoothManager.car");
     merge("car/elastos/droid/phone/CallFeaturesSetting.car");
@@ -96,8 +98,10 @@ module
     using interface Elastos.Droid.Preference.IPreferenceScreen;
     using interface Elastos.Droid.Preference.ITwoStatePreference;
     using interface Elastos.Droid.Widget.IOnEditorActionListener;
+    using interface Elastos.Droid.Phone.Common.Dialpad.IDialpadKeyButtonOnPressedListener;
     using interface Elastos.Core.IComparable;
     using interface Elastos.Droid.Utility.IAttributeSet;
+
 
     namespace Elastos {
     namespace Droid {
@@ -293,7 +297,7 @@ module
 
     class CCellBroadcastSms {
         constructor();
-        
+
         interface IPreferenceActivity;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IListActivity;

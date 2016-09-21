@@ -1,0 +1,143 @@
+
+module
+{
+    submodule Elastos.Droid.Phone.Common {
+        importlib("Elastos.CoreLibrary.eco");
+        importlib("Elastos.Droid.Core.eco");
+
+        merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
+        merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
+        merge("car/elastos/droid/phone/common/dialpad/DialpadView.car");
+        merge("car/elastos/droid/phone/common/HapticFeedback.car");
+
+        using interface Elastos.Droid.Content.IContext;
+        using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+        using interface Elastos.Droid.View.IView;
+        using interface Elastos.Droid.View.IViewGroup;
+        using interface Elastos.Droid.View.IViewParent;
+        using interface Elastos.Droid.View.IViewManager;
+        using interface Elastos.Droid.View.IKeyEventCallback;
+        using interface Elastos.Droid.View.IOnPreDrawListener;
+        using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+        using interface Elastos.Droid.Utility.IAttributeSet;
+        using interface Elastos.Droid.Widget.IEditText;
+        using interface Elastos.Droid.Widget.ITextView;
+        using interface Elastos.Droid.Widget.IFrameLayout;
+        using interface Elastos.Droid.Widget.ILinearLayout;
+
+        namespace Elastos {
+        namespace Droid {
+        namespace Phone {
+        namespace Common {
+        namespace Dialpad {
+
+        [local]
+        class CDialpadKeyButton {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IDialpadKeyButton;
+            interface IFrameLayout;
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+        }
+
+        [local]
+        class CDialpadView {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyle);
+
+            interface IDialpadView;
+            interface ILinearLayout;
+            interface IView;
+            interface IViewGroup;
+            interface IViewParent;
+            interface IViewManager;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+            interface IDrawableCallback;
+        }
+
+        [local]
+        class CDigitsEditText {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IEditText;
+            interface ITextView;
+            interface IView;
+            interface IOnPreDrawListener;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CDialpadTextView {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface ITextView;
+            interface IView;
+            interface IOnPreDrawListener;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        } // namespace Dialpad
+
+        namespace Widget {
+
+        [local]
+        class CResizingTextTextView {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface ITextView;
+            interface IView;
+            interface IOnPreDrawListener;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        } // namespace Widget
+
+        class CHapticFeedback {
+            constructor();
+
+            interface IHapticFeedback;
+        }
+
+        } // Common
+        } // Phone
+        } // Droid
+        } // Elastos
+
+    } // submodule
+
+}

@@ -5,6 +5,7 @@ TARGET_TYPE= lib
 INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../PhoneCommon/inc/
 
 SOURCES += CallUtil.cpp
 SOURCES += GeoUtil.cpp

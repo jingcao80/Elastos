@@ -38,9 +38,7 @@ CAR_INTERFACE_IMPL(CEmergencyButton::MyOnClickListener, Object, IViewOnClickList
 ECode CEmergencyButton::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
-    //return mHost->TakeEmergencyCallAction();
-    Logger::D("CEmergencyButton", "===[snow]===do not call TakeEmergencyCallAction() for testting until Setting APP works!");
-    return NOERROR;
+    return mHost->TakeEmergencyCallAction();
 }
 
 const Int32 CEmergencyButton::EMERGENCY_CALL_TIMEOUT = 10000; // screen timeout after starting e.d.
@@ -93,11 +91,10 @@ ECode CEmergencyButton::OnFinishInflate()
     AutoPtr<IViewOnClickListener> lis = new MyOnClickListener(this);
     SetOnClickListener(lis);
 
-    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Int32 phoneState;
-    monitor->GetPhoneState(&phoneState);
+    KeyguardUpdateMonitor::GetInstance(mContext)->GetPhoneState(&phoneState);
     IccCardConstantsState simState;
-    monitor->GetSimState(&simState);
+    KeyguardUpdateMonitor::GetInstance(mContext)->GetSimState(&simState);
     UpdateEmergencyCallButton(simState, phoneState);
     return NOERROR;
 }
@@ -114,8 +111,7 @@ ECode CEmergencyButton::TakeEmergencyCallAction()
     }
     else {
         const Boolean bypassHandler = TRUE;
-        AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-        monitor->ReportEmergencyCallAction(bypassHandler);
+        KeyguardUpdateMonitor::GetInstance(mContext)->ReportEmergencyCallAction(bypassHandler);
         AutoPtr<IIntent> intent;
         CIntent::New(ACTION_EMERGENCY_DIAL, (IIntent**)&intent);
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK

@@ -2,6 +2,8 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
+    merge("../PhoneCommon/Elastos.Droid.Phone.Common.car");
+
     merge("../../../Frameworks/Droid/Ex/Common/car/elastos/droid/common/widget/CompositeCursorAdapter.car");
 
     merge("car/elastos/droid/contacts/common/ContactsUtils.car");
@@ -147,9 +149,6 @@ module
     merge("car/elastos/droid/incallui/widget/multiwaveview/GlowPadView.car");
     merge("car/elastos/droid/incallui/widget/multiwaveview/PointCloud.car");
     merge("car/elastos/droid/incallui/widget/multiwaveview/TargetDrawable.car");
-    merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
-    merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
-    merge("car/elastos/droid/phone/common/dialpad/DialpadView.car");
 
     merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
     merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
@@ -251,7 +250,7 @@ module
     using interface Elastos.Droid.Widget.IExpandableListViewOnChildClickListener;
     using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
-
+    using interface Elastos.Droid.Phone.Common.Dialpad.IDialpadKeyButtonOnPressedListener;
     using interface Elastos.Droid.Support.V4.View.IViewPagerOnPageChangeListener;
 
     using interface Elastos.Core.IComparable;
@@ -1569,113 +1568,6 @@ module
     } //namespace InCallUI
     } //namespace Droid
     } //namespace Elastos
-
-    namespace Elastos {
-    namespace Droid {
-    namespace Phone {
-    namespace Common {
-    namespace Dialpad {
-
-    [local]
-    class CDialpadKeyButton {
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs,
-            [in] Int32 defStyle);
-
-        interface IDialpadKeyButton;
-        interface IFrameLayout;
-        interface IView;
-        interface IViewGroup;
-        interface IViewParent;
-        interface IViewManager;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
-        interface IDrawableCallback;
-    }
-
-    [local]
-    class CDialpadView {
-        constructor(
-            [in] IContext* ctx);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs,
-            [in] Int32 defStyle);
-
-        interface IDialpadView;
-        interface ILinearLayout;
-        interface IView;
-        interface IViewGroup;
-        interface IViewParent;
-        interface IViewManager;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
-        interface IDrawableCallback;
-    }
-
-    [local]
-    class CDigitsEditText {
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        interface IEditText;
-        interface ITextView;
-        interface IView;
-        interface IOnPreDrawListener;
-        interface IDrawableCallback;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
-    }
-
-    [local]
-    class CDialpadTextView {
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        interface ITextView;
-        interface IView;
-        interface IOnPreDrawListener;
-        interface IDrawableCallback;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
-    }
-
-    } // namespace Dialpad
-
-    namespace Widget {
-
-    [local]
-    class CResizingTextTextView {
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        interface ITextView;
-        interface IView;
-        interface IOnPreDrawListener;
-        interface IDrawableCallback;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
-    }
-
-    } // namespace Widget
-
-    } // Common
-    } // Phone
-    } // Droid
-    } // Elastos
 
     namespace Elastos {
     namespace Droid {

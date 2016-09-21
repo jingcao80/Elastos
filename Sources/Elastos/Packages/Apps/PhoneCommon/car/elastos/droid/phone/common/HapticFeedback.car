@@ -1,0 +1,44 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Phone {
+    namespace Common {
+
+    [local]
+    interface IHapticFeedback {
+        /**
+         * Initialize this instance using the app and system
+         * configs. Since these don't change, init is typically called
+         * once in 'onCreate'.
+         * checkSettings is not called during init.
+         * @param context To look up the resources and system settings.
+         * @param enabled If false, vibrate will be a no-op regardless of
+         * the system settings.
+         */
+        Init(
+            [in] IContext* context,
+            [in] Boolean enabled);
+
+        /**
+         * Reload the system settings to check if the user enabled the
+         * haptic feedback.
+         */
+        CheckSystemSetting();
+
+        /**
+         * Generate the haptic feedback vibration. Only one thread can
+         * request it. If the phone is already in a middle of an haptic
+         * feedback sequence, the request is ignored.
+         */
+        Vibrate();
+    }
+
+    } // namespace Common
+    } // namespace Phone
+    } // namespace Droid
+    } // namespace Elastos
+}
