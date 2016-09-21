@@ -11,11 +11,11 @@
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Internal::App::AlertActivity;
+using Elastos::Droid::Internal::App::IAlertControllerAlertParamsOnPrepareListViewListener;
 using Elastos::Droid::Media::IRingtone;
 using Elastos::Droid::Media::IRingtoneManager;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Internal::App::AlertActivity;
-using Elastos::Droid::Internal::App::IAlertControllerAlertParamsOnPrepareListViewListener;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Runnable;
@@ -35,24 +35,6 @@ class RingtonePickerActivity
     , public IRingtonePickerActivity
 {
 private:
-    class RingtoneClickListener
-        : public Object
-        , public IDialogInterfaceOnClickListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        RingtoneClickListener(
-            /* [in] */ RingtonePickerActivity* owner);
-
-        CARAPI OnClick(
-            /* [in] */ IDialogInterface* dialog,
-            /* [in] */ Int32 which);
-
-    private:
-        RingtonePickerActivity* mOwner;
-    };
-
     class InnerListener
         : public Object
         , public IDialogInterfaceOnClickListener
@@ -63,7 +45,7 @@ private:
         CAR_INTERFACE_DECL()
 
         InnerListener(
-            /* [in] */ RingtonePickerActivity* owner);
+            /* [in] */ RingtonePickerActivity* host);
 
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
@@ -81,7 +63,41 @@ private:
         CARAPI OnNothingSelected(
             /* [in] */ IAdapterView* parent);
     private:
-        RingtonePickerActivity* mOwner;
+        RingtonePickerActivity* mHost;
+    };
+
+    class InnerRunnable
+        : public Runnable
+    {
+    public:
+        InnerRunnable(
+            /* [in] */ RingtonePickerActivity* host);
+
+        CARAPI Run();
+
+    private:
+        RingtonePickerActivity* mHost;
+    };
+
+    class RingtoneClickListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        RingtoneClickListener(
+            /* [in] */ RingtonePickerActivity* host);
+
+        /*
+         * On item clicked
+         */
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+    private:
+        RingtonePickerActivity* mHost;
     };
 
     class MyRunnable
@@ -90,27 +106,13 @@ private:
         friend class RingtonePickerActivity;
     public:
         MyRunnable(
-            /* [in] */ RingtonePickerActivity* owner);
+            /* [in] */ RingtonePickerActivity* host);
 
         CARAPI Run();
 
     private:
-        RingtonePickerActivity* mOwner;
+        RingtonePickerActivity* mHost;
     };
-
-    class InnerRunnable
-        : public Runnable
-    {
-    public:
-        InnerRunnable(
-            /* [in] */ RingtonePickerActivity* owner);
-
-        CARAPI Run();
-
-    private:
-        RingtonePickerActivity* mOwner;
-    };
-
 
 public:
     CAR_INTERFACE_DECL()
@@ -147,6 +149,8 @@ protected:
         /* [in] */ IBundle* savedInstanceState);
 
     CARAPI OnStop();
+
+    CARAPI OnDestroy();
 
     CARAPI OnPause();
 
@@ -186,6 +190,7 @@ private:
 
     AutoPtr<IRingtoneManager> mRingtoneManager;
     Int32 mType;
+
     AutoPtr<ICursor> mCursor;
     AutoPtr<IHandler> mHandler;
 
@@ -234,6 +239,9 @@ private:
      * can be stopped later, after the activity is recreated.
      */
     static AutoPtr<IRingtone> sPlayingRingtone;
+
+    // Whether we have tap the "OK" or "Cancel" button.
+    Boolean mIsHasClick;// = false;
 
     AutoPtr<InnerRunnable> mInnerRunnable;
     AutoPtr<InnerListener> mInnerListener;

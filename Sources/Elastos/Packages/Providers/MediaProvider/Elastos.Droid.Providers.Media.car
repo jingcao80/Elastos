@@ -107,7 +107,7 @@ module
 
     class CMtpReceiver {
         constructor();
-        
+
         interface IBroadcastReceiver;
         interface IMtpReceiver;
     }
@@ -134,6 +134,7 @@ module
     class CRingtonePickerActivity {
         constructor();
 
+        interface IRingtonePickerActivity;
         interface IAlertActivity;
         interface IActivity;
         interface IContext;
@@ -148,7 +149,6 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IDialogInterface;
-        interface IRunnable;
     }
 
     class CMediaThumbRequest {

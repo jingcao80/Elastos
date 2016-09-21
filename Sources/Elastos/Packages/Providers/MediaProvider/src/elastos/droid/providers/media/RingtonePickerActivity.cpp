@@ -12,7 +12,7 @@
 #include "Elastos.Droid.View.h"
 #include "R.h"
 #include "elastos/droid/R.h"
-#include <elastos/droid/widget/AbsListView.h>
+#include <elastos/droid/widget/ListView.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
@@ -43,8 +43,7 @@ using Elastos::Droid::View::IContextThemeWrapper;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::Widget::AbsListView;
-using Elastos::Droid::Widget::IAbsListView;
+using Elastos::Droid::Widget::ListView;
 using Elastos::Droid::Widget::CListView;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemSelectedListener;
 using Elastos::Droid::Widget::IAdapterViewOnItemSelectedListener;
@@ -61,52 +60,30 @@ namespace Providers {
 namespace Media {
 
 //===========================================================
-//  RingtonePickerActivity::RingtoneClickListener
-//===========================================================
-CAR_INTERFACE_IMPL(RingtonePickerActivity::RingtoneClickListener, Object, \
-    IDialogInterfaceOnClickListener)
-
-RingtonePickerActivity::RingtoneClickListener::RingtoneClickListener(
-    /* [in] */ RingtonePickerActivity* owner)
-    : mOwner(owner)
-{}
-
-ECode RingtonePickerActivity::RingtoneClickListener::OnClick(
-    /* [in] */ IDialogInterface* dialog,
-    /* [in] */ Int32 which)
-{
-    // Save the position of most recently clicked item
-    mOwner->mClickedPos = which;
-
-    // Play clip
-    mOwner->PlayRingtone(which, 0);
-    return NOERROR;
-}
-
-//===========================================================
 //  RingtonePickerActivity::InnerListener
 //===========================================================
+
 CAR_INTERFACE_IMPL_3(RingtonePickerActivity::InnerListener, Object, \
-    IDialogInterfaceOnClickListener,
-    IAdapterViewOnItemSelectedListener,
-    IAlertControllerAlertParamsOnPrepareListViewListener)
+        IDialogInterfaceOnClickListener,
+        IAdapterViewOnItemSelectedListener,
+        IAlertControllerAlertParamsOnPrepareListViewListener)
 
 RingtonePickerActivity::InnerListener::InnerListener(
-    /* [in] */ RingtonePickerActivity* owner)
-    : mOwner(owner)
+    /* [in] */ RingtonePickerActivity* host)
+    : mHost(host)
 {}
 
 ECode RingtonePickerActivity::InnerListener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
-    return mOwner->OnClick(dialog, which);
+    return mHost->OnClick(dialog, which);
 }
 
 ECode RingtonePickerActivity::InnerListener::OnPrepareListView(
     /* [in] */ IListView* listView)
 {
-    return mOwner->OnPrepareListView(listView);
+    return mHost->OnPrepareListView(listView);
 }
 
 ECode RingtonePickerActivity::InnerListener::OnItemSelected(
@@ -115,40 +92,70 @@ ECode RingtonePickerActivity::InnerListener::OnItemSelected(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
-    return mOwner->OnItemSelected(parent, view, position, id);
+    return mHost->OnItemSelected(parent, view, position, id);
 }
 
 ECode RingtonePickerActivity::InnerListener::OnNothingSelected(
     /* [in] */ IAdapterView* parent)
 {
-    return mOwner->OnNothingSelected(parent);
-}
-
-//===========================================================
-//  RingtonePickerActivity::MyRunnable
-//===========================================================
-RingtonePickerActivity::MyRunnable::MyRunnable(
-    /* [in] */ RingtonePickerActivity* owner)
-    : mOwner(owner)
-{}
-
-ECode RingtonePickerActivity::MyRunnable::Run()
-{
-    return mOwner->mCursor->Deactivate();
+    return mHost->OnNothingSelected(parent);
 }
 
 //===========================================================
 //  RingtonePickerActivity::InnerRunnable
 //===========================================================
+
 RingtonePickerActivity::InnerRunnable::InnerRunnable(
-    /* [in] */ RingtonePickerActivity* owner)
-    : mOwner(owner)
+    /* [in] */ RingtonePickerActivity* host)
+    : mHost(host)
 {}
 
 ECode RingtonePickerActivity::InnerRunnable::Run()
 {
-    return mOwner->Run();
+    return mHost->Run();
 }
+
+//===========================================================
+//  RingtonePickerActivity::RingtoneClickListener
+//===========================================================
+
+CAR_INTERFACE_IMPL(RingtonePickerActivity::RingtoneClickListener, Object, \
+    IDialogInterfaceOnClickListener)
+
+RingtonePickerActivity::RingtoneClickListener::RingtoneClickListener(
+    /* [in] */ RingtonePickerActivity* host)
+    : mHost(host)
+{}
+
+ECode RingtonePickerActivity::RingtoneClickListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    // Save the position of most recently clicked item
+    mHost->mClickedPos = which;
+
+    // Play clip
+    mHost->PlayRingtone(which, 0);
+    return NOERROR;
+}
+
+//===========================================================
+//  RingtonePickerActivity::MyRunnable
+//===========================================================
+
+RingtonePickerActivity::MyRunnable::MyRunnable(
+    /* [in] */ RingtonePickerActivity* host)
+    : mHost(host)
+{}
+
+ECode RingtonePickerActivity::MyRunnable::Run()
+{
+    return mHost->mCursor->Deactivate();
+}
+
+//===========================================================
+//  RingtonePickerActivity
+//===========================================================
 
 const Int32 RingtonePickerActivity::POS_UNKNOWN = -1;
 const String RingtonePickerActivity::TAG("RingtonePickerActivity");
@@ -157,17 +164,18 @@ const String RingtonePickerActivity::SAVE_CLICKED_POS("clicked_pos");
 
 AutoPtr<IRingtone> RingtonePickerActivity::sPlayingRingtone;
 
-CAR_INTERFACE_IMPL_2(RingtonePickerActivity, AlertActivity, IRunnable, IRingtonePickerActivity);
+CAR_INTERFACE_IMPL(RingtonePickerActivity, AlertActivity, IRingtonePickerActivity);
 
 RingtonePickerActivity::RingtonePickerActivity()
     : mType(0)
-    , mSilentPos(0)
+    , mSilentPos(POS_UNKNOWN)
     , mDefaultRingtonePos(POS_UNKNOWN)
     , mClickedPos(POS_UNKNOWN)
     , mSampleRingtonePos(POS_UNKNOWN)
     , mHasSilentItem(FALSE)
     , mStaticItemCount(0)
     , mHasDefaultItem(FALSE)
+    , mIsHasClick(FALSE)
 {
 }
 
@@ -194,6 +202,30 @@ ECode RingtonePickerActivity::OnCreate(
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
 
+    // Set custom theme
+    Int32 themeExtra;
+    intent->GetInt32Extra(IRingtoneManager::EXTRA_RINGTONE_DIALOG_THEME, 0, &themeExtra);
+    ECode ec = NOERROR;
+    if (themeExtra != 0) {
+        AutoPtr<IPackageManager> pm;
+        GetPackageManager((IPackageManager**)&pm);
+        String package;
+        GetCallingPackage(&package);
+        AutoPtr<IResources> resources;
+        ec = pm->GetResourcesForApplication(package, (IResources**)&resources);
+        if (SUCCEEDED(ec)) {
+            AutoPtr<IResourcesTheme> theme;
+            resources->NewTheme((IResourcesTheme**)&theme);
+            theme->ApplyStyle(themeExtra, TRUE);
+            AutoPtr<IResourcesTheme> tmp;
+            GetTheme((IResourcesTheme**)&tmp);
+            tmp->SetTo(theme);
+        }
+        else { // NameNotFoundException
+            // Resource not available. Fall-through default theme
+        }
+    }
+
     /*
      * Get whether to show the 'Default' item, and the URI to play when the
      * default is clicked
@@ -205,7 +237,6 @@ ECode RingtonePickerActivity::OnCreate(
     if (mUriForDefaultItem == NULL) {
         AutoPtr<ISettingsSystem> ssy;
         CSettingsSystem::AcquireSingleton((ISettingsSystem**)&ssy);
-        mUriForDefaultItem = NULL;
         ssy->GetDEFAULT_RINGTONE_URI((IUri**)&mUriForDefaultItem);
     }
 
@@ -250,14 +281,15 @@ ECode RingtonePickerActivity::OnCreate(
     p->SetPositiveButtonListener(mInnerListener);
     GetString(Elastos::Droid::R::string::cancel, &tmp);
     p->SetNegativeButtonText(CoreUtils::Convert(tmp));
-    p->SetPositiveButtonListener(mInnerListener);
+    p->SetNegativeButtonListener(mInnerListener);
     p->SetOnPrepareListViewListener(mInnerListener);
+
     AutoPtr<ICharSequence> cs;
     intent->GetCharSequenceExtra(IRingtoneManager::EXTRA_RINGTONE_TITLE, (ICharSequence**)&cs);
-    p->SetTitle(cs);
-    cs = NULL;
-    p->GetTitle((ICharSequence**)&cs);
-    if (cs == NULL) {
+    if (cs != NULL) {
+        p->SetTitle(cs);
+    }
+    else {
         GetString(Elastos::Droid::R::string::ringtone_picker_title, &tmp);
         p->SetTitle(CoreUtils::Convert(tmp));
     }
@@ -279,12 +311,14 @@ ECode RingtonePickerActivity::OnPrepareListView(
 {
     if (mHasDefaultItem) {
         mDefaultRingtonePos = AddDefaultRingtoneItem(listView);
-        AutoPtr<IRingtoneManagerHelper> rmh;
-        CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&rmh);
-        Boolean flag = FALSE;
-        rmh->IsDefault(mExistingUri, &flag);
-        if (mClickedPos == POS_UNKNOWN && flag) {
-            mClickedPos = mDefaultRingtonePos;
+        if (mClickedPos == POS_UNKNOWN) {
+            AutoPtr<IRingtoneManagerHelper> rmh;
+            CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&rmh);
+            Boolean flag = FALSE;
+            rmh->IsDefault(mExistingUri, &flag);
+            if (flag) {
+                mClickedPos = mDefaultRingtonePos;
+            }
         }
     }
 
@@ -320,8 +354,7 @@ Int32 RingtonePickerActivity::AddStaticItem(
     textView->SetText(textResId);
     listView->AddHeaderView(IView::Probe(textView));
     mStaticItemCount++;
-    assert(0 && "TODO");
-    // return ((AbsListView*)(IAbsListView::Probe(listView)))->GetHeaderViewsCount() - 1;
+    return ((ListView*)listView)->GetHeaderViewsCount() - 1;
 }
 
 Int32 RingtonePickerActivity::AddDefaultRingtoneItem(
@@ -329,7 +362,8 @@ Int32 RingtonePickerActivity::AddDefaultRingtoneItem(
 {
     if (mType == IRingtoneManager::TYPE_NOTIFICATION) {
         return AddStaticItem(listView, R::string::notification_sound_default);
-    } else if (mType == IRingtoneManager::TYPE_ALARM) {
+    }
+    else if (mType == IRingtoneManager::TYPE_ALARM) {
         return AddStaticItem(listView, R::string::alarm_sound_default);
     }
 
@@ -348,6 +382,13 @@ ECode RingtonePickerActivity::OnClick(
 {
     Boolean positiveResult = which == IDialogInterface::BUTTON_POSITIVE;
 
+    // Should't response the "OK" and "Cancel" button's click event at the
+    // same time.
+    if (mIsHasClick || (mCursor == NULL)) {
+        return NOERROR;
+    }
+    mIsHasClick = TRUE;
+
     // Stop playing the previous ringtone
     mRingtoneManager->StopPreviousRingtone();
 
@@ -359,16 +400,19 @@ ECode RingtonePickerActivity::OnClick(
         if (mClickedPos == mDefaultRingtonePos) {
             // Set it to the default Uri that they originally gave us
             uri = mUriForDefaultItem;
-        } else if (mClickedPos == mSilentPos) {
+        }
+        else if (mClickedPos == mSilentPos) {
             // A null Uri is for the 'Silent' item
             uri = NULL;
-        } else {
-            uri = NULL;
+        }
+        else {
             mRingtoneManager->GetRingtoneUri(GetRingtoneManagerPosition(mClickedPos), (IUri**)&uri);
         }
+
         resultIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_PICKED_URI, IParcelable::Probe(uri));
         SetResult(IActivity::RESULT_OK, resultIntent);
-    } else {
+    }
+    else {
         SetResult(IActivity::RESULT_CANCELED);
     }
 
@@ -378,7 +422,7 @@ ECode RingtonePickerActivity::OnClick(
     window->GetDecorView((IView**)&view);
     AutoPtr<MyRunnable> mr = new MyRunnable(this);
     Boolean flag = FALSE;
-    view->Post(IRunnable::Probe(mr), &flag);
+    view->Post(mr, &flag);
 
     Finish();
     return NOERROR;
@@ -417,12 +461,11 @@ ECode RingtonePickerActivity::Run()
         return NOERROR;
     }
 
-    AutoPtr<IRingtone> ringtone;
     AutoPtr<IRingtoneManagerHelper> rmh;
     CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&rmh);
+    AutoPtr<IRingtone> ringtone;
     if (mSampleRingtonePos == mDefaultRingtonePos) {
         if (mDefaultRingtone == NULL) {
-            mDefaultRingtone = NULL;
             rmh->GetRingtone(this, mUriForDefaultItem, (IRingtone**)&mDefaultRingtone);
         }
        /*
@@ -436,8 +479,8 @@ ECode RingtonePickerActivity::Run()
         }
         ringtone = mDefaultRingtone;
         mCurrentRingtone = NULL;
-    } else {
-        ringtone = NULL;
+    }
+    else {
         mRingtoneManager->GetRingtone(GetRingtoneManagerPosition(mSampleRingtonePos), (IRingtone**)&ringtone);
         mCurrentRingtone = ringtone;
     }
@@ -452,11 +495,20 @@ ECode RingtonePickerActivity::OnStop()
 {
     AlertActivity::OnStop();
     Boolean flag = FALSE;
-    if (!(IsChangingConfigurations(&flag), flag)) {
+    if (IsChangingConfigurations(&flag), !flag) {
         StopAnyPlayingRingtone();
-    } else {
+    }
+    else {
         SaveAnyPlayingRingtone();
     }
+    return NOERROR;
+}
+
+ECode RingtonePickerActivity::OnDestroy()
+{
+    AlertActivity::OnDestroy();
+    mIsHasClick = FALSE;
+
     return NOERROR;
 }
 
@@ -464,7 +516,7 @@ ECode RingtonePickerActivity::OnPause()
 {
     AlertActivity::OnPause();
     Boolean flag = FALSE;
-    if (!(IsChangingConfigurations(&flag), flag)) {
+    if (IsChangingConfigurations(&flag), !flag) {
         StopAnyPlayingRingtone();
     }
     return NOERROR;
@@ -475,7 +527,8 @@ void RingtonePickerActivity::SaveAnyPlayingRingtone()
     Boolean flag = FALSE;
     if (mDefaultRingtone != NULL && (mDefaultRingtone->IsPlaying(&flag), flag)) {
         sPlayingRingtone = mDefaultRingtone;
-    } else if (mCurrentRingtone != NULL && (mCurrentRingtone->IsPlaying(&flag), flag)) {
+    }
+    else if (mCurrentRingtone != NULL && (mCurrentRingtone->IsPlaying(&flag), flag)) {
         sPlayingRingtone = mCurrentRingtone;
     }
 }
