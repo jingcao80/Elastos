@@ -1,4 +1,3 @@
-
 #include "elastos_root.h"
 
 using namespace v8;
@@ -365,16 +364,7 @@ extern void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch);
 
 void Receive_(int input, v8::Local<v8::Function> callback);
 
-// void Observe_bak(uv_work_t* r) {
-//     async_req* req = reinterpret_cast<async_req*>(r->data);
-//     NodeMessageQueue* mq = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
-//     while ( mq->mTop < 2 || mq->mMessages[1]->mStatus > NodeMessage_Status_Ready ) {
-//         sleep(1);
-//     }
-// }
 void Observe(uv_work_t* r) {
-    ALOGD("Observe =======begin==========");
-
     async_req* req = reinterpret_cast<async_req*>(r->data);
 
     NodeMessageQueue* mq_node = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
@@ -403,56 +393,31 @@ void Back(uv_work_t* r) {
 
     NodeMessage_Invoke(msg);
 
-    //ALOGD("Back========js begin========0===");
-
     //call the back function, no use
     Isolate* isolate = Isolate::GetCurrent();
-    //v8::Handle<v8::Context> context = isolate->GetCurrentContext();
-
-    //ALOGD("Back========js begin========1.1===");
     HandleScope scope(isolate);
-    //ALOGD("Back========js begin========1.2===");
-
-
-            //v8::Isolate* isolate = mOwner->mIsolate;
-            isolate->Enter();
-    //ALOGD("Back========js begin========2===");
-
-            v8::Isolate::Scope isolateScope(isolate);
-
-    //ALOGD("Back========js begin========4===");
-            v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
-    //ALOGD("Back========js begin========3===");
-
-            v8::Context::Scope contextScope(context);
-    //ALOGD("Back========js begin========5===");
-
-
+    isolate->Enter();
+    v8::Isolate::Scope isolateScope(isolate);
+    v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
+    v8::Context::Scope contextScope(context);
 
     async_req* req = reinterpret_cast<async_req*>(r->data);
-    //ALOGD("Back========js begin========6===");
 
     Handle<Value> argv[2] = {
         Null(isolate),
         Integer::New(isolate, req->output)
     };
-    //ALOGD("Back========js begin========7===");
 
     v8::Local<v8::Function> callback = v8::Local<v8::Function>::New(isolate, req->callback);
-    //ALOGD("Back========js begin========8===");
 
     TryCatch try_catch;
     callback->Call(context->Global(), 2, argv);
-    //ALOGD("Back========js begin========9===");
     if (try_catch.HasCaught()) {
         //FatalException(try_catch);
         ReportException(isolate, &try_catch);
     }
-    //ALOGD("Back========js begin========10===");
 
-            isolate->Exit();
-
-    //ALOGD("Back========js end========");
+    isolate->Exit();
 
     Receive_(req->input,callback);
 
@@ -674,31 +639,18 @@ static void AlwaysZeroNumberSource(unsigned char* buf, size_t len)
 //--------WTF init function--------end--------
 
 void init(v8::Handle<v8::Object> exports, v8::Handle<v8::Object> module) {
-    ALOGD("========elastos_root.cpp====init====begin====");
-
-    ALOGD("========elastos_root.cpp====init WTF====begin====");
-
     WTF::setRandomSource(AlwaysZeroNumberSource);
-    ALOGD("========elastos_root.cpp====init WTF====1====");
     WTF::initialize(CurrentTime, 0);
-    ALOGD("========elastos_root.cpp====init WTF====2====");
     WTF::initializeMainThread(0);
 
-    ALOGD("========elastos_root.cpp====init WTF====end====");
-
-    ALOGD("========elastos_root.cpp====V8 initialize====begin====");
     Isolate* isolate = Isolate::GetCurrent();
     WebCore::V8Initializer::initializeMainThreadIfNeeded(isolate);
-    ALOGD("========elastos_root.cpp====V8 initialize====end====");
 
     NODE_SET_METHOD(exports, "require", JSC::Bindings::Require);
     NODE_SET_METHOD(exports, "receive", JSC::Bindings::Receive);
     NODE_SET_METHOD(exports, "SetEnqueueUIMessagePtr", JSC::Bindings::SetEnqueueUIMessagePtr);
     NODE_SET_METHOD(exports, "GetNodeBridge", JSC::Bindings::GetNodeBridge);
-
     NODE_SET_METHOD(exports, "GetVersion", JSC::Bindings::GetVersion);
-
-    ALOGD("========elastos_root.cpp====init====end====");
 }
 
 NODE_MODULE(binding, init);

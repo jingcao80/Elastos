@@ -74,13 +74,10 @@ ECode JSActName::OnCreate(
     }
 
     if (mListener) {
-        ALOGD("OnCreate========mListener OnCreate====begin====");
         ec = mListener->OnCreate(this, savedInstanceState);
-        ALOGD("OnCreate========mListener OnCreate====end====");
     }
     else {
         ALOGD("OnCreate========ERROR:mListener is NULL======");
-
     }
 
     return ec;

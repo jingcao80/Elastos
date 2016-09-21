@@ -50,8 +50,6 @@
 
 #include <utils/Log.h>
 
-#define _NPN_GetProperty(a,b,c,d) TRUE
-
 namespace JSC {
 namespace Bindings {
 
@@ -73,7 +71,6 @@ WebCore::LocalDOMWindow* getRootObject()
 
 void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 {
-    //ALOGD("convertNPVariantToCarValue========begin====");
     CarDataType carDataType = 0;
 
     AutoPtr<IDataTypeInfo> dataTypeInfo;
@@ -94,7 +91,6 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
         ALOGD("convertNPVariantToCarValue========mObjectWrapper not exist!");
     }
 
-    //carDataType = result->mType;
     NPVariantType type = value.type;
 
     const char* tmpType = ClassNameFromCarDataType((CarDataType)(carDataType));
@@ -365,7 +361,6 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             aElementDataTypeInfo->GetDataType(&elementType);
 
             CarQuintet* carArray = NULL;
-            //switch (result->mElementType) {
             switch (elementType) {
                 case CarDataType_Int16:
                 {
@@ -567,13 +562,11 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             (*(ILocalPtrInfo **)&dataTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
             aElementDataTypeInfo->GetDataType(&elementType);
 
-            //switch (result->mElementType) {
             switch (elementType) {
                 case CarDataType_Int16:
                 {
                     CarValue* aCarValue = new CarValue();
                     aCarValue->mTypeInfo = aElementDataTypeInfo;
-                    //aCarValue->mInt16Value = (Elastos::Int16)(NPVARIANT_TO_DOUBLE(value));
                     aCarValue->value.mInt16Value = (Elastos::Int16)(NPVARIANT_TO_DOUBLE(value));
                     result->value.mLocalPtr = aCarValue;
                     break;
@@ -787,7 +780,6 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
         }
         case CarDataType_Interface:
         {
-            //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========begin====");
             switch (type) {
                 case NPVariantType_Void:    //js undefined
                 case NPVariantType_Null:    //js null
@@ -814,16 +806,13 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 }
                 case NPVariantType_Object:
                 {
-                    //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========js object to car interface");
                     NPObject* obj = NPVARIANT_TO_OBJECT(value);
                     if (obj->_class == WebCore::npScriptObjectClass) {
-                        //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========js object to car interface====js object wrapper");
                         //js object, normaly, should be callback proxy
                         CarCallbackObject* cb = CarCallbackObject::S_CreateObject(IInterfaceInfo::Probe(result->mObjectWrapper->getDataTypeInfo()), obj);
                         result->mObjectWrapper->setInstance((IObject*)cb);
                     }
                     else {
-                        //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========js object to car interface====car object wrapper");
                         //car object wrapper
                         CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
                         CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
@@ -835,14 +824,11 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                     ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:the value is not a car wrapper or js type, type:%d", type);
                     break;
             }
-            //ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========end====");
-
             break;
         }
         default :
             break;
     }
-    //ALOGD("convertNPVariantToCarValue========end====");
 }
 
 void convertCarValuesToNPVariant_bak(const CarMethod* method, CarValue* values, ArrayOf<Int32>* outParamsPosBuf, NPVariant* result)
@@ -898,7 +884,6 @@ void convertCarValuesToNPVariant_bak(const CarMethod* method, CarValue* values, 
             }
         }
 
-        //WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
         WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
         new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
 
@@ -964,7 +949,6 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
             }
         }
 
-        //WebCore::V8NPObject* pV8NPObject_ret = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
         WebCore::V8NPObject* pV8NPObject_ret = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
         new (&pV8NPObject_ret->v8Object) v8::Persistent<v8::Object>();
 
@@ -1003,7 +987,6 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
     VOID_TO_NPVARIANT(*result);
 
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    //ALOGD("========convertCarValueToNPVariant========carDataType:%d", carDataType);
 
     switch (carDataType) {
         case CarDataType_Int16:
@@ -1076,7 +1059,6 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
             }
             v8Array->Set(3, v8Array1);
 
-            //WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
             WebCore::V8NPObject* v8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
             new (&v8NPObject->v8Object) v8::Persistent<v8::Object>();
 

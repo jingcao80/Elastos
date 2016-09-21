@@ -25,7 +25,6 @@
 
 #include "ElNode.h"
 #include "config.h"
-//#include "elastos/HashSet.h"
 #include "etl/HashSet.h"
 #include "elastos.h"
 #include "CarFieldV8.h"

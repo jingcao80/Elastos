@@ -36,7 +36,6 @@ static NPObject* AllocCarNPObject(NPP, NPClass*)
 static void FreeCarNPObject(NPObject* npobj)
 {
     CarNPObject* obj = reinterpret_cast<CarNPObject*>(npobj);
-    //obj->mInstance = 0; // free does not call the destructor
     std::nullptr_t _nullptr;
     obj->mInstance = _nullptr; // free does not call the destructor
 

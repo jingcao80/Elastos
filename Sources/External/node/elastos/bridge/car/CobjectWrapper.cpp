@@ -2,13 +2,9 @@
 #include "ElNode.h"
 #include "config.h"
 
-//#include "elastos/HashSet.h"
 #include "etl/HashSet.h"
-//#include "elastos.h"
 
 #include "CobjectWrapper.h"
-
-//#include "ext/frameworkdef.h"
 
 #include <utils/Log.h>
 

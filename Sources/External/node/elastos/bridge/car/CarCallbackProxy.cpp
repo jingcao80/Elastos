@@ -1138,11 +1138,8 @@ void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
 
 void CarCallbackInterfaceProxy::Callback::Call()
 {
-    //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======begin======");
-
     Elastos::String methodName;
     mMethodInfo->GetName(&methodName);
-    //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======name:%s", methodName.string());
 
     Int32 paramCount;
     mMethodInfo->GetParamCount(&paramCount);
@@ -1151,8 +1148,6 @@ void CarCallbackInterfaceProxy::Callback::Call()
         ALOGD("CarCallbackInterfaceProxy::Callback::Call paramCount is wrong");
         return;
     }
-
-    //ALOGD("====CarCallbackInterfaceProxy::Callback::Call============thread id:%x",pthread_self());
 
     v8::Isolate* isolate = mObject->mIsolate;
 
@@ -1166,8 +1161,6 @@ void CarCallbackInterfaceProxy::Callback::Call()
 
     NPObject* obj = mObject->mObject;
     if (obj->_class == WebCore::npScriptObjectClass) {
-        //ALOGD("====CarCallbackInterfaceProxy::Callback::Call======npScriptObjectClass======methodName:%s", (const char*)methodName);
-
         NPVariant npvValue;
         _NPN_GetProperty(0, obj, _NPN_GetStringIdentifier((const char*)methodName), &npvValue);
 
@@ -1197,8 +1190,6 @@ void CarCallbackInterfaceProxy::Callback::Call()
 
             //get out params
             for (Int32 i = 0; i < mParamCount; i++) {
-                //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===cnt:%d===begin====", i);
-
                 if (!mOutParamPtrs[i]) continue;
 
                 v8::Handle<v8::Value> outV8Handle = argv[i];
@@ -1461,8 +1452,6 @@ void CarCallbackInterfaceProxy::Callback::Call()
                         break;
                     }
                 }   //switch (mOutParamTypes[i])
-
-                //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===cnt:%d===end====", i);
             }
             delete[] argv;
         }
@@ -1485,7 +1474,6 @@ v8::Handle<v8::Value>* CarCallbackInterfaceProxy::Callback::ConvertParams()
 
     v8::Handle<v8::Value>* params = new v8::Handle<v8::Value>[mParamCount];
     for (Int32 i = 0; i < mParamCount; i++) {
-        //ALOGD("CarCallbackInterfaceProxy::Callback::ConvertParams========%d/%d====np type:%d", i, mParamCount, mNPParams[i].type);
         params[i] = WebCore::convertNPVariantToV8Object(&mNPParams[i], NULL, isolate);
     }
 

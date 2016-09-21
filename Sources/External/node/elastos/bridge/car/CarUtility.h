@@ -22,10 +22,6 @@ CarDataType CarDataTypeFromSignature(const char* name);
 } // namespace Bindings
 } // namespace JSC
 
-#else
-
-gggg
-
 #endif // ENABLE(CAR_BRIDGE)
 
 #endif //__COBJECTWRAPPER_H__

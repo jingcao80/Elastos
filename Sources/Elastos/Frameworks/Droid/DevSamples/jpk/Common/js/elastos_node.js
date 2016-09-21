@@ -1,12 +1,9 @@
-elog("========elastos_node.js========begin========");
-
 var sPackageName = process.argv[2];
 //var sActivityName = process.argv[3];
 
 var root = global||window;
 
 root.Elastos = ( function () {
-//elog("========elastos_node.js========begin====1====");
     var _Elastos = {
         CObject: {},
 
@@ -62,8 +59,6 @@ root.Elastos = ( function () {
             //Uses-libraries : [],  ECO/NPM
 
             Run : function () {
-                elog("========Run.begin========");
-
                 var assert = require('assert');
                 var called = false;
 
@@ -82,15 +77,11 @@ root.Elastos = ( function () {
                         called = true;
                     });
                 });
-                elog("========Run.end========nonononono!");
             },
 
             Ready : function () {
-                elog("========Ready.begin========");
                 _Bridge.init(this.NodeBridgeListener);
-                elog("========Ready.1========");
                 this.Run();
-                elog("========Ready.end========");
             },
         },
     };   //Elastos
@@ -103,22 +94,15 @@ root.Elastos = ( function () {
 
     var _api = require('../../bin/elastos.node');
 
-//elog("========elastos_node.js========begin====3====");
     var _Runtime_Native = _api.require("/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco", "Elastos.DevSamples.Node.CarRuntime.CCarRuntime");
-//elog("========elastos_node.js========begin====4====");
 
     _Elastos.Runtime_Native = _Runtime_Native;
 
-//elog("========elastos_node.js========begin====5====");
     var _Runtime = require('./elastos_runtime.js')(_Elastos);
-//elog("========elastos_node.js========begin====6====");
 
     var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.CoreLibrary.eco");
-//elog("========elastos_node.js========begin====7====");
     var _Module_Droid = _Runtime.getModuleInfo("/system/lib/Elastos.Droid.Core.eco");
-//elog("========elastos_node.js========begin====8====");
     var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", sPackageName + ".CNodeListener");
-//elog("========elastos_node.js========begin====9====");
 
     var _Bridge = {
         init : function (aoNodeBridgeListener) {
@@ -131,7 +115,6 @@ root.Elastos = ( function () {
             //_Bridge_Native.Unlock();
         },
     };
-//elog("========elastos_node.js========begin====10====");
 
     _Elastos.Test = _Bridge_Native;
 
@@ -175,7 +158,6 @@ root.Application = Elastos.Application;
 
 Application.NodeBridgeListener = {
     OnRegisterActivity : function(asPackageName, asActivityName, aoActivityInstance, aoActivityListener, aoActivityHandler, out_abResult) {
-        elog("========OnRegisterActivity====begin====");
         var _this = Elastos.Application;
 
         _this.R = require(_this.RootPath + "/R.js");
@@ -194,30 +176,15 @@ Application.NodeBridgeListener = {
         Elastos.Test.SetActivityListener(aoActivityListener, oActivityListener);
 
         out_abResult.data = true;
-        elog("========OnRegisterActivity====end====");
     },
 
     OnRegisterCalculatorEditText : function(aoContext, aoControl, aoListener, out_abResult) {
-        elog("========OnRegisterCalculatorEditText====begin====");
-
-        // var sName;
-        // Elastos.CObject.showMethods(aoContext,"GetPackage");
-        // sName = Elastos.CObject.getClassInfo(aoContext).GetName();
-        // elog("========OnRegisterCustomControl====1====aoContext:" + sName);
-        // Elastos.CObject.showMethods(aoControl,"GetPackage");
-        // sName = Elastos.CObject.getClassInfo(aoControl).GetName();
-        // elog("========OnRegisterCustomControl====2====aoControl:" + sName);
-        // elog("========OnRegisterCustomControl====3====Package:" + aoContext.GetPackageName());
-
         var sPkgName = aoContext.GetPackageName();
-        elog("========OnRegisterCalculatorEditText========sPkgName:" + sPkgName);
         var sClsName = Elastos.CObject.getClassInfo(aoControl).GetName();
         sClsName = sClsName.slice(-sClsName.length+1);
-        elog("========OnRegisterCalculatorEditText========sClsName:" + sClsName);
 
         var sFileName = sPkgName.split(".").join("/");
         sFileName = "/data/temp/node/Common/js/" + sFileName + "/" + sClsName + ".js";
-        elog("========OnRegisterCalculatorEditText========sFileName:" + sFileName);
 
         var aPath = sPkgName.split(".");
         var sPath;
@@ -227,20 +194,14 @@ Application.NodeBridgeListener = {
             oPath = oPath[sPath] || (oPath[sPath] = {});
         }
 
-        elog("========OnRegisterCalculatorEditText====1====");
         //var oListener = require(sFileName)(Elastos, oActivity);
         var oListener = require(sFileName)(Elastos, aoContext);
-        elog("========OnRegisterCalculatorEditText====2====");
         oPath[sClsName] = oListener;
-        elog("========OnRegistCalculatorEditText====3====");
 
         Elastos.Test.SetCalculatorEditTextListener(aoListener, oListener);
-        elog("========OnRegisterCalculatorEditText====4====");
 
         out_abResult.data = true;
     },
 };
 
 Application.Ready();
-
-elog("========elastos_node.js========end========");

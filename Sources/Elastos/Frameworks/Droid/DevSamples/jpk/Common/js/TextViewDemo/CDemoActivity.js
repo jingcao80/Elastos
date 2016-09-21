@@ -1,5 +1,3 @@
-elog("========CActivityOne.js========begin========");
-
 module.exports = function(aoElastos, aoActivity){
     //common definition
     var CString = aoElastos.Core.CString;
@@ -33,8 +31,6 @@ module.exports = function(aoElastos, aoActivity){
     return {
         //OnCreate:function(aoContext){
         OnCreate:function(aoContext, aoSavedInstanceState){
-            elog("========CActivityOne.js====OnCreate====begin========000");
-
             //----------------SetContentView begin----------------
             oActivity.SetContentView(R.layout.main);
             //----------------SetContentView end----------------
@@ -84,7 +80,6 @@ module.exports = function(aoElastos, aoActivity){
             })();
             oMyTextView.SetOnKeyListener(jso_button_MyEditText_OnKeyListener);
             //----------------myEditText end----------------
-            elog("========CActivityOne.js====OnCreate====begin========001");
 
             //----------------chkAndroid/chkIos begin----------------
             var oChkAndroid = oActivity.FindViewById(R.id.chkAndroid);
@@ -105,7 +100,6 @@ module.exports = function(aoElastos, aoActivity){
             oChkIos.SetOnClickListener(jso_button_group_cb);
             oChkUbuntu.SetOnClickListener(jso_button_group_cb);
             //----------------chkAndroid/chkIos/chkUbuntu end----------------
-            elog("========CActivityOne.js====OnCreate====begin========002");
 
             //----------------AnamtionButton begin----------------
             oActivity.FindViewById(R.id.AnamtionButton).SetOnClickListener( (function(){
@@ -137,7 +131,6 @@ module.exports = function(aoElastos, aoActivity){
                 }
             })() );
             //----------------AnamtionButton end----------------
-            elog("========CActivityOne.js====OnCreate====begin========003");
 
             //----------------PopupWindowButton begin----------------
             function OnCreatePopupWindow(){
@@ -188,7 +181,6 @@ module.exports = function(aoElastos, aoActivity){
             })();
             oPopupWindowButton.SetOnClickListener(jso_button_PopupWindowButton_cb);
             //----------------PopupWindowButton end----------------
-            elog("========CActivityOne.js====OnCreate====begin========004");
 
             //----------------DialogButton begin----------------
             var oDialogButton = oActivity.FindViewById(R.id.DialogButton);
@@ -202,7 +194,6 @@ module.exports = function(aoElastos, aoActivity){
             })();
             oDialogButton.SetOnClickListener(jso_button_DialogButton_cb);
             //----------------DialogButton end----------------
-            elog("========CActivityOne.js====OnCreate====begin========005");
 
             //----------------ConnectivityManagerButton begin----------------
             function OnTestConnectivityManager(){
@@ -220,7 +211,6 @@ module.exports = function(aoElastos, aoActivity){
             })();
             oConnectivityManagerButton.SetOnClickListener(jso_button_ConnectivityManagerButton_cb);
             //----------------ConnectivityManagerButton end----------------
-            elog("========CActivityOne.js====OnCreate====begin========006");
 
             //----------------PowerManagerButton begin----------------
             function OnTestPowerManager(){
@@ -238,30 +228,23 @@ module.exports = function(aoElastos, aoActivity){
             })();
             oPowerManagerButton.SetOnClickListener(jso_button_PowerManagerButton_cb);
             //----------------PowerManagerButton end----------------
-            elog("========CActivityOne.js====OnCreate====begin========007");
 
             //----------------myListView begin----------------
             var oListView = oActivity.FindViewById(R.id.myListView);
             var oDataList = Core_New("Elastos.Utility.CArrayList");
-            elog("========CActivityOne.js====OnCreate====begin========007===1");
 
             for (var i=0; i< 15; i++) {
                 var s = CString("Item " + i);
                 oDataList.Add(s);
             }
-            elog("========CActivityOne.js====OnCreate====begin========007===2");
 
             var oAdapter = Droid_New("Elastos.Droid.Widget.CArrayAdapter", oActivity, R.layout.list_item, oDataList);
             oListView.SetAdapter(oAdapter);
-            elog("========CActivityOne.js====OnCreate====begin========007===3");
 
             var oDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CColorDrawable", 0xFF0000FF);
-            elog("========CActivityOne.js====OnCreate====begin========007===4");
             oListView.SetDivider(oDrawable);
-            elog("========CActivityOne.js====OnCreate====begin========007===5");
 
             oListView.SetDividerHeight(1);
-            elog("========CActivityOne.js====OnCreate====begin========007===6");
 
             var jso_ListView_cb = (function(){
                 var iPosition = 0;
@@ -329,11 +312,9 @@ module.exports = function(aoElastos, aoActivity){
                     }
                 }
             })();
-            elog("========CActivityOne.js====OnCreate====begin========007===7");
 
             oListView.SetOnItemClickListener(jso_ListView_cb);
             //----------------myListView end----------------
-            elog("========CActivityOne.js====OnCreate====begin========008");
 
             //----------------NavigationBar begin----------------
 
@@ -341,8 +322,6 @@ module.exports = function(aoElastos, aoActivity){
             //ECode CActivityOne::CreateNavigationBar(){...}
 
             //----------------NavigationBar end----------------
-
-            elog("========CActivityOne.js====OnCreate====end========111");
 
             return;
         },  //OnCreate
@@ -396,10 +375,6 @@ module.exports = function(aoElastos, aoActivity){
                 }
             })();
 
-            //builder.SetPositiveButtonEx(CString("确定EPK"), clickListener);
-            //builder.SetNeutralButtonEx(CString("中立NODE"), clickListener);
-            //builder.SetNegativeButtonEx(CString("取消JS"), clickListener);
-
             builder.SetPositiveButton(CString("确定EPK"), clickListener);
             builder.SetNeutralButton(CString("中立NODE"), clickListener);
             builder.SetNegativeButton(CString("取消JS"), clickListener);
@@ -417,5 +392,3 @@ module.exports = function(aoElastos, aoActivity){
         },
     }
 };
-
-elog("========CActivityOne.js========end========");

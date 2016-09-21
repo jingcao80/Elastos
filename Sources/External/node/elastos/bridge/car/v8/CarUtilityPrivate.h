@@ -32,12 +32,8 @@
 
 #include "npruntime.h"
 
-//#include <wtf/text/WTFString.h>
-
 #include "NPV8Object.h"
 #include "V8NPUtils.h"
-
-//#include "V8Proxy.h"
 #include "V8Binding.h"
 
 #include "CarString.h"

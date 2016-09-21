@@ -4,7 +4,6 @@
 
 #if ENABLE(CAR_BRIDGE)
 
-//#include "elastos/HashSet.h"
 #include "etl/HashSet.h"
 #include "elastos.h"
 
