@@ -49,23 +49,20 @@ namespace App {
 CAR_INTERFACE_IMPL(CAlertController::ButtonViewOnClickListener, Object, IViewOnClickListener);
 
 CAlertController::ButtonViewOnClickListener::ButtonViewOnClickListener(
-    /* [in] */ IWeakReference* host)
-    : mWeakHost(host)
+    /* [in] */ CAlertController* host)
+    : mHost(host)
+    , mTag(FALSE)
 {
+}
+
+CAlertController::ButtonViewOnClickListener::~ButtonViewOnClickListener()
+{
+    if (mTag) mHost->Release();
 }
 
 ECode CAlertController::ButtonViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
-    AutoPtr<IAlertController> ac;
-    mWeakHost->Resolve(EIID_IAlertController, (IInterface**)&ac);
-    if (ac == NULL) {
-        Slogger::E("CAlertController", "ButtonViewOnClickListener::OnClick, CAlertController has been destoryed!");
-        return NOERROR;
-    }
-
-    CAlertController* mHost = (CAlertController*)ac.Get();
-
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> m;
@@ -254,6 +251,12 @@ CAlertController::~CAlertController()
     // Slogger::V("CAlertController", " >> Destroy ~CAlertController(): %p", this);
 }
 
+void CAlertController::OnLastStrongRef(const void* id)
+{
+    mButtonHandler->mTag = TRUE;
+    mButtonHandler->mHost->AddRef();
+}
+
 Boolean CAlertController::ShouldCenterSingleButton(
     /* [in] */ IContext* context)
 {
@@ -278,9 +281,7 @@ ECode CAlertController::constructor(
     mWindow = window;
     mHandler = new ButtonHandler(di);
     mHandler->constructor();
-    AutoPtr<IWeakReference> wr;
-    GetWeakReference((IWeakReference**)&wr);
-    mButtonHandler = new ButtonViewOnClickListener(wr);
+    mButtonHandler = new ButtonViewOnClickListener(this);
 
     AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AlertDialog);
     AutoPtr<ITypedArray> a;

@@ -84,17 +84,21 @@ private:
         : public Object
         , public IViewOnClickListener
     {
+        friend class CAlertController;
     public:
         CAR_INTERFACE_DECL()
 
         ButtonViewOnClickListener(
-            /* [in] */ IWeakReference* host);
+            /* [in] */ CAlertController* host);
+
+        ~ButtonViewOnClickListener();
 
         CARAPI OnClick(
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<IWeakReference> mWeakHost;
+        CAlertController* mHost;
+        Boolean mTag;
     };
 
     class ButtonHandler
@@ -265,6 +269,9 @@ public:
     static CARAPI_(Boolean) CanTextInput(
         /* [in] */ IView* v);
 
+protected:
+    CARAPI_(void) OnLastStrongRef(const void* id);
+
 private:
     static CARAPI_(Boolean) ShouldCenterSingleButton(
         /* [in] */ IContext* context);
@@ -298,7 +305,8 @@ private:
 
 private:
     IContext* mContext; // mContext is Activity, that usually hold this's reference
-    IDialogInterface* mDialogInterface;// mDialogInterface usually is XXXActivity too
+    // TODO: check memory leak
+    AutoPtr<IDialogInterface> mDialogInterface;// mDialogInterface usually is XXXActivity too
     AutoPtr<IWindow> mWindow;
 
     AutoPtr<ICharSequence> mTitle;
