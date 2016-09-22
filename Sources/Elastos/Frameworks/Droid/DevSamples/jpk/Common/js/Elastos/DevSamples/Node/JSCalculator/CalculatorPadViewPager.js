@@ -1,3 +1,5 @@
+elog("====CalculatorPadViewPager.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
 //--------common definition----begin----
     var CObject = aoElastos.CObject;
@@ -178,3 +180,5 @@ module.exports = function(aoElastos, aoActivity){
 
     return CalculatorPadViewPager;
 };  //module.exports
+
+elog("====CalculatorPadViewPager.js====end====");

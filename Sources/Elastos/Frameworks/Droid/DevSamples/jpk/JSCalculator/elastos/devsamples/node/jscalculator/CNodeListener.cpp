@@ -2,10 +2,16 @@
 
 #include <elastos/utility/logging/Logger.h>
 
-#include "node.h"
-#include "uv.h"
+//#include "node.h"
+//#include "uv.h"
 
 using Elastos::Utility::Logging::Logger;
+
+# define NODE_EXTERN /* nothing */
+
+namespace node {
+    NODE_EXTERN int Start(int argc, char *argv[]);
+}
 
 namespace Elastos {
 namespace DevSamples {

@@ -179,12 +179,16 @@ Application.NodeBridgeListener = {
     },
 
     OnRegisterCalculatorEditText : function(aoContext, aoControl, aoListener, out_abResult) {
+        elog("OnRegisterCalculatorEditText======begin======");
+
         var sPkgName = aoContext.GetPackageName();
         var sClsName = Elastos.CObject.getClassInfo(aoControl).GetName();
         sClsName = sClsName.slice(-sClsName.length+1);
 
         var sFileName = sPkgName.split(".").join("/");
         sFileName = "/data/temp/node/Common/js/" + sFileName + "/" + sClsName + ".js";
+
+        elog("OnRegisterCalculatorEditText======filename======"+sFileName);
 
         var aPath = sPkgName.split(".");
         var sPath;
@@ -201,7 +205,41 @@ Application.NodeBridgeListener = {
         Elastos.Test.SetCalculatorEditTextListener(aoListener, oListener);
 
         out_abResult.data = true;
+
+        elog("OnRegisterCalculatorEditText======end======");
     },
+
+
+    OnRegisterCalculatorPadViewPager : function(aoContext, aoControl, aoListener, out_abResult) {
+        elog("OnRegisterCalculatorPadViewPager======begin======");
+
+        var sPkgName = aoContext.GetPackageName();
+        var sClsName = Elastos.CObject.getClassInfo(aoControl).GetName();
+        sClsName = sClsName.slice(-sClsName.length+1);
+
+        var sFileName = sPkgName.split(".").join("/");
+        sFileName = "/data/temp/node/Common/js/" + sFileName + "/" + sClsName + ".js";
+
+        elog("OnRegisterCalculatorPadViewPager======filename======"+sFileName);
+
+        var aPath = sPkgName.split(".");
+        var sPath;
+        var oPath = root;
+        for (var i=0,im=aPath.length; i<im; i++) {
+            sPath = aPath[i];
+            oPath = oPath[sPath] || (oPath[sPath] = {});
+        }
+
+        //var oListener = require(sFileName)(Elastos, oActivity);
+        var oListener = require(sFileName)(Elastos, aoContext);
+        oPath[sClsName] = oListener;
+
+        Elastos.Test.SetCalculatorPadViewPagerListener(aoListener, oListener);
+
+        out_abResult.data = true;
+        elog("OnRegisterCalculatorPadViewPager======end======");
+    },
+
 };
 
 Application.Ready();
