@@ -1,20 +1,26 @@
 
-#include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
-#include "elastos/droid/dialer/calllog/CContactInfo.h"
-#include "elastos/droid/dialer/calllog/CPhoneQuery.h"
-#include "elastos/droid/dialerbind/CObjectFactory.h"
-#include "elastos/droid/text/TextUtils.h"
-#include "elastos/core/CoreUtils.h"
-#include "elastos/core/StringUtils.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Telephony.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.External.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/contacts/common/util/PhoneNumberHelper.h"
+#include "elastos/droid/contacts/common/util/UriUtils.h"
+#include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
+#include "elastos/droid/dialer/calllog/PhoneQuery.h"
+#include "elastos/droid/dialerbind/ObjectFactory.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/core/StringUtils.h"
 
+using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
+using Elastos::Droid::Contacts::Common::Util::UriUtils;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Dialer::Service::ICachedContactInfo;
+using Elastos::Droid::DialerBind::ObjectFactory;
 using Elastos::Droid::Net::IUriBuilder;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
@@ -33,213 +39,172 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Core::ICharSequence;
-using Elastos::Core::CoreUtils;
+using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::IList;
 using Elastos::IO::ICloseable;
 using Org::Json::IJSONObject;
 using Org::Json::CJSONObject;
-using Elastos::Apps::Dialer::Service::ICachedContactInfo;
-using Elastos::Apps::DialerBind::CObjectFactory;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace CallLog {
 
-const AutoPtr<ICachedNumberLookupService> ContactInfoHelper::mCachedNumberLookupService
-        = CObjectFactory::NewCachedNumberLookupService();
+const AutoPtr<ICachedNumberLookupService> ContactInfoHelper::sCachedNumberLookupService
+        = ObjectFactory::NewCachedNumberLookupService();
 
-CAR_INTERFACE_IMPL(ContactInfoHelper, Object, IContactInfoHelper);
-
-ECode ContactInfoHelper::constructor(
+ContactInfoHelper::ContactInfoHelper(
     /* [in] */ IContext* context,
     /* [in] */ const String& currentCountryIso)
-{
-    mContext = context;
-    mCurrentCountryIso = currentCountryIso;
-    return NOERROR;
-}
+    : mContext(context)
+    , mCurrentCountryIso(currentCountryIso)
+{}
 
-ECode ContactInfoHelper::LookupNumber(
+AutoPtr<ContactInfo> ContactInfoHelper::LookupNumber(
     /* [in] */ const String& number,
-    /* [in] */ const String& countryIso,
-    /* [out] */ IContactInfo** result)
+    /* [in] */ const String& countryIso)
 {
-    VALIDATE_NOT_NULL(result);
-
-    AutoPtr<IContactInfo> info;
+    AutoPtr<ContactInfo> info;
 
     // Determine the contact info.
-    Boolean isUriNumber;
-    assert(0 && "TODO");
-    // isUriNumber = PhoneNumberHelper::IsUriNumber(number)
-    if (isUriNumber) {
+    if (PhoneNumberHelper::IsUriNumber(number)) {
         // This "number" is really a SIP address.
-        AutoPtr<IContactInfo> sipInfo = QueryContactInfoForSipAddress(number);
-        if (sipInfo == NULL || sipInfo.Get() == CContactInfo::EMPTY.Get()) {
+        AutoPtr<ContactInfo> sipInfo = QueryContactInfoForSipAddress(number);
+        if (sipInfo == NULL || sipInfo == ContactInfo::EMPTY) {
             // Check whether the "username" part of the SIP address is
             // actually the phone number of a contact.
-            assert(0 && "TODO");
-            // String username = PhoneNumberHelper::GetUsernameFromUriNumber(number);
-            // if (PhoneNumberUtils::IsGlobalPhoneNumber(username)) {
-            //     sipInfo = QueryContactInfoForPhoneNumber(username, countryIso);
-            // }
+            String username = PhoneNumberHelper::GetUsernameFromUriNumber(number);
+            if (PhoneNumberUtils::IsGlobalPhoneNumber(username)) {
+                sipInfo = QueryContactInfoForPhoneNumber(username, countryIso);
+            }
         }
         info = sipInfo;
     }
     else {
         // Look for a contact that has the given phone number.
-        AutoPtr<IContactInfo> phoneInfo = QueryContactInfoForPhoneNumber(number, countryIso);
+        AutoPtr<ContactInfo> phoneInfo = QueryContactInfoForPhoneNumber(number, countryIso);
 
-        Boolean equals;
-        if (phoneInfo == NULL || IObject::Probe(phoneInfo)->Equals(
-                IObject::Probe(CContactInfo::EMPTY.Get()), &equals), equals) {
+        if (phoneInfo == NULL || phoneInfo == ContactInfo::EMPTY) {
             // Check whether the phone number has been saved as an "Internet call" number.
             phoneInfo = QueryContactInfoForSipAddress(number);
         }
         info = phoneInfo;
     }
 
-    AutoPtr<IContactInfo> updatedInfo;
+    AutoPtr<ContactInfo> updatedInfo;
     if (info == NULL) {
         // The lookup failed.
         updatedInfo = NULL;
     }
     else {
-        Boolean equals;
         // If we did not find a matching contact, generate an empty contact info for the number.
-        if (IObject::Probe(info)->Equals(IObject::Probe(CContactInfo::EMPTY.Get()), &equals), equals) {
+        if (info == ContactInfo::EMPTY) {
             // Did not find a matching contact.
-            AutoPtr<CContactInfo> contactInfo;
-            CContactInfo::NewByFriend((CContactInfo**)&contactInfo);
-            contactInfo->mNumber = number;
-            contactInfo->mFormattedNumber = FormatPhoneNumber(number, String(NULL), countryIso);
-
-            AutoPtr<IPhoneNumberUtils> utils;
-            CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
-            utils->FormatNumberToE164(number, countryIso, &contactInfo->mNormalizedNumber);
-            contactInfo->mLookupUri = CreateTemporaryContactUri(contactInfo->mFormattedNumber);
-            updatedInfo = IContactInfo::Probe(contactInfo);
+            updatedInfo = new ContactInfo();
+            updatedInfo->mNumber = number;
+            updatedInfo->mFormattedNumber = FormatPhoneNumber(number, String(NULL), countryIso);
+            updatedInfo->mNormalizedNumber = PhoneNumberUtils::FormatNumberToE164(
+                    number, countryIso);
+            updatedInfo->mLookupUri = CreateTemporaryContactUri(updatedInfo->mFormattedNumber);
         }
         else {
             updatedInfo = info;
         }
     }
-    *result = updatedInfo;
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    return updatedInfo;
 }
 
 AutoPtr<IUri> ContactInfoHelper::CreateTemporaryContactUri(
     /* [in] */ const String& number)
 {
-    // try {
+    AutoPtr<ICharSequence> numberCS;
+    CString::New(number, (ICharSequence**)&numberCS);
     AutoPtr<IJSONObject> obj;
-    AutoPtr<IJSONObject> contactRows;
-    AutoPtr<IJSONObject> json;
-    AutoPtr<IContactsContractContacts> contacts;
-    AutoPtr<IUri> uri;
-    AutoPtr<IUriBuilder> builder;
-    AutoPtr<IUri> result;
-    String jsonString;
-
     CJSONObject::New((IJSONObject**)&obj);
-    ECode ec = obj->Put(IContactsContractCommonDataKindsCommonColumns::TYPE,
-            IContactsContractCommonDataKindsBaseTypes::TYPE_CUSTOM);
-    if (ec == (ECode)E_JSON_EXCEPTION) goto exit;
-    CJSONObject::New((IJSONObject**)&contactRows);
-    ec = contactRows->Put(IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE, obj);
-    if (ec == (ECode)E_JSON_EXCEPTION) goto exit;
+    if (FAILED(obj->Put(IContactsContractCommonDataKindsPhone::NUMBER, numberCS))) {
+        return NULL;
+    }
+    if (FAILED(obj->Put(IContactsContractCommonDataKindsCommonColumns::TYPE,
+            IContactsContractCommonDataKindsBaseTypes::TYPE_CUSTOM))) {
+        return NULL;
+    }
 
+    AutoPtr<IJSONObject> contactRows;
+    CJSONObject::New((IJSONObject**)&contactRows);
+    if (FAILED(contactRows->Put(IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE, obj))) {
+        return NULL;
+    }
+
+    AutoPtr<IJSONObject> json;
     CJSONObject::New((IJSONObject**)&json);
-    ec = json->Put(IContactsContractContactsColumns::DISPLAY_NAME, CoreUtils::Convert(number));
-    if (ec == (ECode)E_JSON_EXCEPTION) goto exit;
-    ec = json->Put(IContactsContractContactNameColumns::DISPLAY_NAME_SOURCE,
-            IContactsContractDisplayNameSources::PHONE);
-    if (ec == (ECode)E_JSON_EXCEPTION) goto exit;
-    ec = json->Put(IContactsContractContacts::CONTENT_ITEM_TYPE, contactRows);
-    if (ec == (ECode)E_JSON_EXCEPTION) goto exit;
+    if (FAILED(json->Put(IContactsContractContactsColumns::DISPLAY_NAME, numberCS))) {
+        return NULL;
+    }
+    if (FAILED(json->Put(IContactsContractContactNameColumns::DISPLAY_NAME_SOURCE,
+            IContactsContractDisplayNameSources::PHONE))) {
+        return NULL;
+    }
+    if (FAILED(json->Put(IContactsContractContacts::CONTENT_ITEM_TYPE, contactRows))) {
+        return NULL;
+    }
+    String jsonString;
     IObject::Probe(json)->ToString(&jsonString);
 
+    AutoPtr<IContactsContractContacts> contacts;
     CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&contacts);
+    AutoPtr<IUri> uri;
     contacts->GetCONTENT_LOOKUP_URI((IUri**)&uri);
+    AutoPtr<IUriBuilder> builder;
     uri->BuildUpon((IUriBuilder**)&builder);
-    assert(0 && "TODO");
-    // builder->AppendPath(IConstants::LOOKUP_URI_ENCODED);
+    builder->AppendPath(IConstants::LOOKUP_URI_ENCODED);
     builder->AppendQueryParameter(IContactsContract::DIRECTORY_PARAM_KEY,
-            StringUtils::ToString(0x7FFFFFFFFFFFFFFFL) /*String.valueOf(Long.MAX_VALUE)*/);
+            StringUtils::ToString(Elastos::Core::Math::INT64_MAX_VALUE));
     builder->EncodedFragment(jsonString);
-
+    AutoPtr<IUri> result;
     builder->Build((IUri**)&result);
 
     return result;
-    // } catch (JSONException e) {
-    //     return null;
-    // }
-exit:
-    return NULL;
 }
 
-AutoPtr<IContactInfo> ContactInfoHelper::LookupContactFromUri(
+AutoPtr<ContactInfo> ContactInfoHelper::LookupContactFromUri(
     /* [in] */ IUri* uri)
 {
-    AutoPtr<IContactInfo> info;
+    AutoPtr<ContactInfo> info;
 
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
-    AutoPtr<IPhoneQuery> query;
-    CPhoneQuery::AcquireSingleton((IPhoneQuery**)&query);
-    AutoPtr<ArrayOf<String> > args;
-    query->Get_PROJECTION((ArrayOf<String>**)&args);
     AutoPtr<ICursor> phonesCursor;
-    resolver->Query(uri, args,
-            String(NULL), NULL, String(NULL), (ICursor**)&phonesCursor);
+    resolver->Query(uri, PhoneQuery::_PROJECTION, String(NULL), NULL, String(NULL), (ICursor**)&phonesCursor);
 
     if (phonesCursor != NULL) {
         // try {
         Boolean result;
         if (phonesCursor->MoveToFirst(&result), result) {
-            AutoPtr<CContactInfo> cInfo;
-            AutoPtr<IContactsContractContacts> contatcts;
+            info = new ContactInfo();
             Int64 contactId;
+            phonesCursor->GetInt64(PhoneQuery::PERSON_ID, &contactId);
             String lookupKey;
-            String photoUri;
-
-            FAIL_GOTO(CContactInfo::NewByFriend((CContactInfo**)&cInfo), next);
-
-            FAIL_GOTO(phonesCursor->GetInt64(
-                    IPhoneQuery::PERSON_ID, &contactId), next);
-            FAIL_GOTO(phonesCursor->GetString(
-                    IPhoneQuery::LOOKUP_KEY, &lookupKey), next);
-            cInfo->mLookupKey = lookupKey;
+            phonesCursor->GetString(PhoneQuery::LOOKUP_KEY, &lookupKey);
+            info->mLookupKey = lookupKey;
+            AutoPtr<IContactsContractContacts> contatcts;
             CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&contatcts);
-            FAIL_GOTO(contatcts->GetLookupUri(
-                    contactId, lookupKey, (IUri**)&cInfo->mLookupUri), next);
-            FAIL_GOTO(phonesCursor->GetString(
-                    IPhoneQuery::NAME, &cInfo->mName), next);
-            FAIL_GOTO(phonesCursor->GetInt32(
-                    IPhoneQuery::PHONE_TYPE, &cInfo->mType), next);
-            FAIL_GOTO(phonesCursor->GetString(
-                    IPhoneQuery::LABEL, &cInfo->mLabel), next);
-            FAIL_GOTO(phonesCursor->GetString(
-                    IPhoneQuery::MATCHED_NUMBER, &cInfo->mNumber), next);
-            FAIL_GOTO(phonesCursor->GetString(
-                    IPhoneQuery::NORMALIZED_NUMBER, &cInfo->mNormalizedNumber), next);
-            FAIL_GOTO(phonesCursor->GetInt64(
-                    IPhoneQuery::PHOTO_ID, &cInfo->mPhotoId), next);
-
-            FAIL_GOTO(phonesCursor->GetString(
-                    IPhoneQuery::PHOTO_URI, &photoUri), next);
-            assert(0 && "TODO");
-            // cInfo->mPhotoUri = UriUtils::ParseUriOrNull(photoUri);
-            cInfo->mFormattedNumber = NULL;
-            info = IContactInfo::Probe(cInfo);
+            contatcts->GetLookupUri(contactId, lookupKey, (IUri**)&info->mLookupUri);
+            phonesCursor->GetString(PhoneQuery::NAME, &info->mName);
+            phonesCursor->GetInt32(PhoneQuery::PHONE_TYPE, &info->mType);
+            phonesCursor->GetString(PhoneQuery::LABEL, &info->mLabel);
+            phonesCursor->GetString(PhoneQuery::MATCHED_NUMBER, &info->mNumber);
+            phonesCursor->GetString(PhoneQuery::NORMALIZED_NUMBER, &info->mNormalizedNumber);
+            phonesCursor->GetInt64(PhoneQuery::PHOTO_ID, &info->mPhotoId);
+            String photoUri;
+            phonesCursor->GetString(PhoneQuery::PHOTO_URI, &photoUri);
+            info->mPhotoUri = UriUtils::ParseUriOrNull();
+            info->mFormattedNumber = NULL;
         }
         else {
-            info = CContactInfo::EMPTY;
+            info = ContactInfo::EMPTY;
         }
-next:
+
         ICloseable::Probe(phonesCursor)->Close();
         // } finally {
         //     phonesCursor.close();
@@ -252,15 +217,14 @@ next:
     return info;
 }
 
-AutoPtr<IContactInfo> ContactInfoHelper::QueryContactInfoForSipAddress(
+AutoPtr<ContactInfo> ContactInfoHelper::QueryContactInfoForSipAddress(
     /* [in] */ const String& sipAddress)
 {
-    AutoPtr<IContactInfo> info;
+    AutoPtr<ContactInfo> info;
 
     // "contactNumber" is a SIP address, so use the PhoneLookup table with the SIP parameter.
     AutoPtr<IContactsContractPhoneLookup> phoneLookup;
-    CContactsContractPhoneLookup::AcquireSingleton(
-            (IContactsContractPhoneLookup**)&phoneLookup);
+    CContactsContractPhoneLookup::AcquireSingleton((IContactsContractPhoneLookup**)&phoneLookup);
     AutoPtr<IUri> uri;
     phoneLookup->GetCONTENT_FILTER_URI((IUri**)&uri);
     AutoPtr<IUriBuilder> uriBuilder;
@@ -270,15 +234,13 @@ AutoPtr<IContactInfo> ContactInfoHelper::QueryContactInfoForSipAddress(
     String encodeAddress;
     helper->Encode(sipAddress, &encodeAddress);
     uriBuilder->AppendPath(encodeAddress);
-    uriBuilder->AppendQueryParameter(
-            IContactsContractPhoneLookup::QUERY_PARAMETER_SIP_ADDRESS, String("1"));
-
-    AutoPtr<IUri> obj;
-    uriBuilder->Build((IUri**)&obj);
-    return LookupContactFromUri(obj);
+    uriBuilder->AppendQueryParameter(IContactsContractPhoneLookup::QUERY_PARAMETER_SIP_ADDRESS, String("1"));
+    AutoPtr<IUri> result;
+    uriBuilder->Build((IUri**)&result);
+    return LookupContactFromUri(result);
 }
 
-AutoPtr<IContactInfo> ContactInfoHelper::QueryContactInfoForPhoneNumber(
+AutoPtr<ContactInfo> ContactInfoHelper::QueryContactInfoForPhoneNumber(
     /* [in] */ const String& number,
     /* [in] */ const String& countryIso)
 {
@@ -302,27 +264,23 @@ AutoPtr<IContactInfo> ContactInfoHelper::QueryContactInfoForPhoneNumber(
     String encodeNumber;
     helper->Encode(contactNumber, &encodeNumber);
     AutoPtr<IContactsContractPhoneLookup> phoneLookup;
-    CContactsContractPhoneLookup::AcquireSingleton(
-            (IContactsContractPhoneLookup**)&phoneLookup);
+    CContactsContractPhoneLookup::AcquireSingleton((IContactsContractPhoneLookup**)&phoneLookup);
     AutoPtr<IUri> filterUri;
     phoneLookup->GetCONTENT_FILTER_URI((IUri**)&filterUri);
     AutoPtr<IUri> uri;
     helper->WithAppendedPath(filterUri, encodeNumber, (IUri**)&uri);
 
-    AutoPtr<IContactInfo> info = LookupContactFromUri(uri);
-    Boolean equals;
-    if (info != NULL && !IObject::Probe(info)->Equals(CContactInfo::EMPTY, &equals), equals) {
-        ((CContactInfo*)IObject::Probe(info))->mFormattedNumber = FormatPhoneNumber(
-                number, String(NULL), countryIso);
+    AutoPtr<ContactInfo> info = LookupContactFromUri(uri);
+    if (info != NULL && info != ContactInfo::EMPTY) {
+        info->mFormattedNumber = FormatPhoneNumber(number, String(NULL), countryIso);
     }
-    else if (mCachedNumberLookupService != NULL) {
+    else if (sCachedNumberLookupService != NULL) {
         AutoPtr<ICachedContactInfo> cacheInfo;
-        mCachedNumberLookupService->LookupCachedContactFromNumber(
-                mContext, number, (ICachedContactInfo**)&cacheInfo);
+        sCachedNumberLookupService->LookupCachedContactFromNumber(mContext, number, (ICachedContactInfo**)&cacheInfo);
         if (cacheInfo != NULL) {
             AutoPtr<IContactInfo> contactInfo;
             cacheInfo->GetContactInfo((IContactInfo**)&contactInfo);
-            info = ((CContactInfo*)IObject::Probe(contactInfo))->mIsBadData ? NULL : contactInfo;
+            info = ((ContactInfo*)contactInfo.Get())->mIsBadData ? NULL : (ContactInfo*)contactInfo.Get();
         }
         else {
             info = NULL;
@@ -334,18 +292,18 @@ AutoPtr<IContactInfo> ContactInfoHelper::QueryContactInfoForPhoneNumber(
 String ContactInfoHelper::FormatPhoneNumber(
     /* [in] */ const String& number,
     /* [in] */ const String& normalizedNumber,
-    /* [in] */ const String& countryIso)
+    /* [in] */ const String& _countryIso)
 {
+    String countryIso = _countryIso;
     if (TextUtils::IsEmpty(number)) {
         return String("");
     }
     // If "number" is really a SIP address, don't try to do any formatting at all.
-    assert(0 && "TODO");
-    // if (PhoneNumberHelper::IsUriNumber(number)) {
-    //     return number;
-    // }
+    if (PhoneNumberHelper::IsUriNumber(number)) {
+        return number;
+    }
     if (TextUtils::IsEmpty(countryIso)) {
-        (String)countryIso = mCurrentCountryIso;
+        countryIso = mCurrentCountryIso;
     }
 
     AutoPtr<IPhoneNumberUtils> utils;
@@ -362,58 +320,46 @@ String ContactInfoHelper::GetLookupKeyFromUri(
     // the uri entirely just to retrieve the lookup key, but every uri is already parsed
     // once anyway to check if it is an encoded JSON uri, so this has negligible effect
     // on performance.
-    assert(0 && "TODO");
-    // if (lookupUri != NULL && !UriUtils::IsEncodedContactUri(lookupUri)) {
-    //     AutoPtr<IList> segments;
-    //     lookupUri->GetPathSegments((IList**)&segments);
-    //     // This returns the third path segment of the uri, where the lookup key is located.
-    //     // See {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
-    //     Int32 size;
-    //     segments->GetSize(&size);
-    //     if (size < 3) {
-    //         return String(NULL);
-    //     }
-    //     else {
-    //         AutoPtr<IUriHelper> helper;
-    //         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-    //         AutoPtr<IInterface> value;
-    //         segments->Get(2, (IInterface**)&value);
-    //         String encode;
-    //         helper->Encode(CoreUtils::Unbox(ICharSequence::Probe(value)), &encode);
-    //         return encode;
-    //     }
-    // }
-    // else {
-    //     return String(NULL);
-    // }
+    if (lookupUri != NULL && !UriUtils::IsEncodedContactUri(lookupUri)) {
+        AutoPtr<IList> segments;
+        lookupUri->GetPathSegments((IList**)&segments);
+        // This returns the third path segment of the uri, where the lookup key is located.
+        // See {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
+        Int32 size;
+        segments->GetSize(&size);
+        if (size < 3) {
+            return String(NULL);
+        }
+        else {
+            AutoPtr<IInterface> value;
+            segments->Get(2, (IInterface**)&value);
+            String segment;
+            ICharSequence::Probe(value)->ToString(&segment);
+            AutoPtr<IUriHelper> helper;
+            CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+            String encode;
+            helper->Encode(segment, &encode);
+            return encode;
+        }
+    }
     return String(NULL);
 }
 
-ECode ContactInfoHelper::IsBusiness(
-    /* [in] */ Int32 sourceType,
-    /* [out] */ Boolean* result)
+Boolean ContactInfoHelper::IsBusiness(
+    /* [in] */ Int32 sourceType)
 {
-    VALIDATE_NOT_NULL(result);
-
-    Boolean isBusiness = FALSE;
-    *result = mCachedNumberLookupService != NULL
-            && (mCachedNumberLookupService->IsBusiness(
-            sourceType, &isBusiness), isBusiness);
-    return NOERROR;
+    Boolean isBusiness;
+    return sCachedNumberLookupService != NULL
+            && (sCachedNumberLookupService->IsBusiness(sourceType, &isBusiness), isBusiness);
 }
 
-ECode ContactInfoHelper::ContactInfoHelper::CanReportAsInvalid(
+Boolean ContactInfoHelper::ContactInfoHelper::CanReportAsInvalid(
     /* [in] */ Int32 sourceType,
-    /* [in] */ const String& objectId,
-    /* [out] */ Boolean* result)
+    /* [in] */ const String& objectId)
 {
-    VALIDATE_NOT_NULL(result);
-
-    Boolean canReport = FALSE;
-    *result = mCachedNumberLookupService != NULL
-            && (mCachedNumberLookupService->CanReportAsInvalid(
-            sourceType, objectId, &canReport), canReport);
-    return NOERROR;
+    Boolean canReport;
+    return sCachedNumberLookupService != NULL
+            && (sCachedNumberLookupService->CanReportAsInvalid(sourceType, objectId, &canReport), canReport);
 }
 
 } // CallLog
