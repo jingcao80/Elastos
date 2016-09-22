@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_SERVER_PM_DEX_ZIPARCHIVE_H__
 
 #include <elastos/core/Object.h>
+#include <ziparchive/zip_archive.h>
 
 using Elastos::Core::Object;
 
@@ -16,6 +17,22 @@ class ZipEntry : public Object
 {
 public:
     CARAPI_(uint32_t) GetCrc32();
+
+private:
+    ZipEntry(
+        /* [in] */ ZipArchiveHandle handle,
+        /* [in] */ ::ZipEntry* zip_entry)
+        : mHandle(handle)
+        , mZipEntry(zip_entry)
+    {}
+
+    virtual ~ZipEntry();
+
+private:
+    ZipArchiveHandle mHandle;
+    ::ZipEntry* const mZipEntry;
+
+    friend class ZipArchive;
 };
 
 class ZipArchive : public Object
@@ -29,6 +46,15 @@ public:
     CARAPI_(AutoPtr<ZipEntry>) Find(
         /* [in] */ const char* name,
         /* [in] */ String* error_msg);
+
+private:
+    explicit ZipArchive(
+        /* [in] */ ZipArchiveHandle handle)
+        : mHandle(handle)
+    {}
+
+private:
+    ZipArchiveHandle mHandle;
 };
 
 } // namespace Dex

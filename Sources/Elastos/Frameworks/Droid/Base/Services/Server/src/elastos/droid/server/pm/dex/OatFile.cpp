@@ -36,6 +36,8 @@ Boolean ReadFileToString(const String& file_name, String* result);
 //   }
 // }
 
+const Boolean OatFile::sIsDebug = FALSE;
+
 void OatFile::CheckLocation(
     /* [in] */ const String& location)
 {
@@ -393,6 +395,11 @@ AutoPtr<OatFile::OatDexFile> OatFile::GetOatDexFile(
     }
 
     return NULL;
+}
+
+const Vector< AutoPtr<OatFile::OatDexFile> >& OatFile::GetOatDexFiles() const
+{
+    return mOatDexFilesStorage;
 }
 
 } // namespace Dex

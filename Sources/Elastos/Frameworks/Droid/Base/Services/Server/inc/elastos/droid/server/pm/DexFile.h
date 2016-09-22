@@ -47,6 +47,40 @@ public:
         uint32_t mDataOff;  // unused
     };
 
+    // Map item type codes.
+    enum {
+        kDexTypeHeaderItem               = 0x0000,
+        kDexTypeStringIdItem             = 0x0001,
+        kDexTypeTypeIdItem               = 0x0002,
+        kDexTypeProtoIdItem              = 0x0003,
+        kDexTypeFieldIdItem              = 0x0004,
+        kDexTypeMethodIdItem             = 0x0005,
+        kDexTypeClassDefItem             = 0x0006,
+        kDexTypeMapList                  = 0x1000,
+        kDexTypeTypeList                 = 0x1001,
+        kDexTypeAnnotationSetRefList     = 0x1002,
+        kDexTypeAnnotationSetItem        = 0x1003,
+        kDexTypeClassDataItem            = 0x2000,
+        kDexTypeCodeItem                 = 0x2001,
+        kDexTypeStringDataItem           = 0x2002,
+        kDexTypeDebugInfoItem            = 0x2003,
+        kDexTypeAnnotationItem           = 0x2004,
+        kDexTypeEncodedArrayItem         = 0x2005,
+        kDexTypeAnnotationsDirectoryItem = 0x2006,
+    };
+
+    struct MapItem {
+        uint16_t mType;
+        uint16_t mUnused;
+        uint32_t mSize;
+        uint32_t mOffset;
+    };
+
+    struct MapList {
+        uint32_t mSize;
+        MapItem mList[1];
+    };
+
     enum InstructionSet {
         kNone,
         kArm,
@@ -97,13 +131,18 @@ public:
         /* [in] */ uint32_t* checksum,
         /* [out] */ String* error_msg);
 
+    // Closes a .dex file.
+    virtual ~DexFile();
+
+    CARAPI_(String) GetLocation() const;
+
     // For normal dex files, location and base location coincide. If a dex file is part of a multidex
     // archive, the base location is the name of the originating jar/apk, stripped of any internal
     // classes*.dex path.
     static CARAPI_(String) GetBaseLocation(
         /* [in] */ const char* location);
 
-    CARAPI_(Header&) GetHeader();
+    CARAPI_(const Header&) GetHeader() const;
 
     // Returns true if the Byte string points to the magic value.
     static CARAPI_(Boolean) IsMagicValid(
@@ -113,9 +152,9 @@ public:
     static CARAPI_(Boolean) IsVersionValid(
         /* [in] */ const Byte* magic);
 
-    CARAPI_(Byte*) Begin() const;
+    CARAPI_(const Byte*) Begin() const;
 
-    CARAPI_(size_t) Size() const;
+    CARAPI_(const size_t) Size() const;
 
     // Returns the canonical form of the given dex location.
     //
@@ -152,6 +191,13 @@ public:
         /* [in] */ uint32_t magic);
 
 private:
+    DexFile(
+        /* [in] */ const Byte* base,
+        /* [in] */ size_t size,
+        /* [in] */ const String& location,
+        /* [in] */ uint32_t location_checksum,
+        /* [in] */ MemMap* mem_map);
+
     // Opens a .dex file
     static CARAPI_(AutoPtr<DexFile>) OpenFile(
         /* [in] */ Int32 fd,
@@ -165,6 +211,23 @@ private:
         /* [in] */ uint32_t location_checksum,
         /* [in] */ MemMap* mem_map,
         /* [out] */ String* error_msg);
+
+    // Opens a .dex file at the given address, optionally backed by a MemMap
+    static CARAPI_(AutoPtr<DexFile>) OpenMemory(
+        /* [in] */ const Byte* dex_file,
+        /* [in] */ size_t size,
+        /* [in] */ const String& location,
+        /* [in] */ uint32_t location_checksum,
+        /* [in] */ MemMap* mem_map,
+        /* [out] */ String* error_msg);
+
+    // Top-level initializer that calls other Init methods.
+    CARAPI_(Boolean) Init(
+        /* [out] */ String* error_msg);
+
+    // Returns true if the header magic and version numbers are of the expected values.
+    CARAPI_(Boolean) CheckMagicAndVersion(
+        /* [out] */ String* error_msg) const;
 
     // Check whether a location denotes a multidex dex file. This is a very simple check: returns
     // whether the string contains the separator character.
@@ -195,12 +258,29 @@ public:
 
     // from dex_file.h in art
     static const Byte sDexMagic[];
+    static const Byte sDexMagicVersion[];
+    static const uint32_t sDexEndianConstant = 0x12345678;
 
     // name of the DexFile entry within a zip archive
     static const char* sClassesDex;
 
     // The separator charactor in MultiDex locations.
     static const char sMultiDexSeparator;
+
+    // The base address of the memory mapping.
+    const Byte* const mBegin;
+
+    // The size of the underlying memory allocation in bytes.
+    const size_t mSize;
+
+    // Typically the dex file name when available, alternatively some identifying string.
+    //
+    // The ClassLinker will use this to match DexFiles the boot class
+    // path to DexCache::GetLocation when loading from an image.
+    const String mLocation;
+
+    // Points to the header section.
+    const Header* const mHeader;
 };
 
 } // namespace Pm

@@ -24,13 +24,22 @@ public:
     {
     public:
         // Returns original path of DexFile that was the source of this OatDexFile.
-        CARAPI_(String) GetDexFileLocation() const;
+        CARAPI_(String) GetDexFileLocation() const
+        {
+            return mDexFileLocation;
+        }
 
         // Returns the canonical location of DexFile that was the source of this OatDexFile.
-        CARAPI_(String) GetCanonicalDexFileLocation() const;
+        CARAPI_(String) GetCanonicalDexFileLocation() const
+        {
+            return mCanonicalDexFileLocation;
+        }
 
         // Returns checksum of original DexFile that was the source of this OatDexFile;
-        CARAPI_(uint32_t) GetDexFileLocationChecksum() const;
+        CARAPI_(uint32_t) GetDexFileLocationChecksum() const
+        {
+            return mDexFileLocationChecksum;
+        }
 
     private:
         OatDexFile(
@@ -42,6 +51,11 @@ public:
             /* [in] */ const uint32_t* oat_class_offsets_pointer);
 
         friend class OatFile;
+
+    private:
+        String mDexFileLocation;
+        String mCanonicalDexFileLocation;
+        const uint32_t mDexFileLocationChecksum;
     };
 
 public:
@@ -63,7 +77,7 @@ public:
         /* [in] */ const uint32_t* const dex_location_checksum,
         /* [in] */ Boolean exception_if_not_found = TRUE) const;
 
-    CARAPI_(Vector< AutoPtr<OatDexFile> >&) GetOatDexFiles() const;
+    CARAPI_(const Vector< AutoPtr<OatDexFile> >&) GetOatDexFiles() const;
 
     CARAPI_(size_t) Size() const;
 

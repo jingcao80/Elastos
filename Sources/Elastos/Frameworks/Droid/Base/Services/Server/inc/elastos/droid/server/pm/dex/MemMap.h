@@ -28,9 +28,6 @@ public:
         /* [in] */ off_t start,
         /* [in] */ const char* filename,
         /* [out] */ String* error_msg);
-    // {
-    //     return MapFileAtAddress(NULL, byte_count, prot, flags, fd, start, FALSE, filename, error_msg);
-    // }
 
     // Map part of a file, taking care of non-page aligned offsets.  The
     // "start" offset is absolute, not relative. This version allows
@@ -41,7 +38,7 @@ public:
     // On success, returns returns a MemMap instance.  On failure, returns a
     // nullptr;
     static CARAPI_(AutoPtr<MemMap>) MapFileAtAddress(
-        /* [in] */ byte* addr,
+        /* [in] */ Byte* addr,
         /* [in] */ size_t byte_count,
         /* [in] */ int prot,
         /* [in] */ int flags,
@@ -54,6 +51,30 @@ public:
     CARAPI_(Byte*) Begin();
 
     CARAPI_(size_t) Size();
+
+private:
+    MemMap(
+        /* [in] */ const String& name,
+        /* [in] */ Byte* begin,
+        /* [in] */ size_t size,
+        /* [in] */ void* base_begin,
+        /* [in] */ size_t base_size,
+        /* [in] */ int prot,
+        /* [in] */ Boolean reuse);
+
+private:
+    const String mName;
+    Byte* const mBegin;  // Start of data.
+    size_t mSize;  // Length of data.
+
+    void* const mBaseBegin;  // Page-aligned base address.
+    size_t mBaseSize;  // Length of mapping. May be changed by RemapAtEnd (ie Zygote).
+    int mProt;  // Protection of the map.
+
+    // When reuse_ is true, this is just a view of an existing mapping
+    // and we do not take ownership and are not responsible for
+    // unmapping.
+    const Boolean mReuse;
 };
 
 } // namespace Dex

@@ -13,7 +13,6 @@
 using Elastos::Droid::Server::Pm::Dex::DexFileVerifier;
 using Elastos::Droid::Server::Pm::Dex::MemMap;
 using Elastos::Droid::Server::Pm::Dex::ZipArchive;
-using Elastos::Droid::Server::Pm::Dex::ZipEntry;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::IO::CFile;
@@ -533,7 +532,8 @@ static Int32 OpenAndReadMagic(const char* filename, uint32_t* magic, String* err
     return fd;
 }
 
-const byte DexFile::sDexMagic[] = { 'd', 'e', 'x', '\n' };
+const Byte DexFile::sDexMagic[] = { 'd', 'e', 'x', '\n' };
+const Byte DexFile::sDexMagicVersion[] = { '0', '3', '5', '\0' };
 const char* DexFile::sClassesDex = "classes.dex";
 const char DexFile::sMultiDexSeparator = ':';
 
@@ -570,7 +570,7 @@ Boolean DexFile::GetChecksum(
             *error_msg = msg;
             return FALSE;
         }
-        AutoPtr<ZipEntry> zip_entry = zip_archive->Find(zip_entry_name, error_msg);
+        AutoPtr<Elastos::Droid::Server::Pm::Dex::ZipEntry> zip_entry = zip_archive->Find(zip_entry_name, error_msg);
         if (zip_entry == NULL) {
             String msg("");
             msg.AppendFormat("Zip archive '%s' doesn't contain %s (error msg: %s)", file_part,
@@ -655,6 +655,93 @@ AutoPtr<DexFile> DexFile::OpenFile(
     return dex_file;
 }
 
+AutoPtr<DexFile> DexFile::OpenMemory(
+    /* [in] */ const String& location,
+    /* [in] */ uint32_t location_checksum,
+    /* [in] */ MemMap* mem_map,
+    /* [out] */ String* error_msg)
+{
+    return OpenMemory(mem_map->Begin(),
+                    mem_map->Size(),
+                    location,
+                    location_checksum,
+                    mem_map,
+                    error_msg);
+}
+
+AutoPtr<DexFile> DexFile::OpenMemory(
+    /* [in] */ const Byte* base,
+    /* [in] */ size_t size,
+    /* [in] */ const String& location,
+    /* [in] */ uint32_t location_checksum,
+    /* [in] */ MemMap* mem_map,
+    /* [out] */ String* error_msg)
+{
+    assert((reinterpret_cast<const uintptr_t>(base) & 3) == 0); // various dex file structures must be word aligned
+    AutoPtr<DexFile> dex_file = new DexFile(base, size, location, location_checksum, mem_map);
+    if (!dex_file->Init(error_msg)) {
+       return NULL;
+    }
+    else {
+       return dex_file;
+    }
+}
+
+DexFile::DexFile(
+    /* [in] */ const Byte* base,
+    /* [in] */ size_t size,
+    /* [in] */ const String& location,
+    /* [in] */ uint32_t location_checksum,
+    /* [in] */ MemMap* mem_map)
+    : mBegin(base)
+    , mSize(size)
+    , mLocation(location)
+    , mHeader(reinterpret_cast<const Header*>(base))
+{
+
+}
+
+Boolean DexFile::Init(
+    /* [out] */ String* error_msg)
+{
+    if (!CheckMagicAndVersion(error_msg)) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+Boolean DexFile::CheckMagicAndVersion(
+    /* [out] */ String* error_msg) const
+{
+    if (!IsMagicValid(mHeader->mMagic)) {
+        String msg("");
+        msg.AppendFormat("Unrecognized magic number in %s: %d %d %d %d",
+                GetLocation().string(), mHeader->mMagic[0],
+                mHeader->mMagic[1], mHeader->mMagic[2], mHeader->mMagic[3]);
+        *error_msg = msg;
+        return FALSE;
+    }
+    if (!IsVersionValid(mHeader->mMagic)) {
+        String msg("");
+        msg.AppendFormat("Unrecognized version number in %s: %d %d %d %d",
+                GetLocation().string(), mHeader->mMagic[4],
+                mHeader->mMagic[5], mHeader->mMagic[6], mHeader->mMagic[7]);
+        *error_msg = msg;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+DexFile::~DexFile()
+{
+
+}
+
+String DexFile::GetLocation() const
+{
+    return mLocation;
+}
+
 String DexFile::GetBaseLocation(
     /* [in] */ const char* location)
 {
@@ -667,16 +754,60 @@ String DexFile::GetBaseLocation(
     }
 }
 
+const DexFile::Header& DexFile::GetHeader() const
+{
+    assert(mHeader != NULL);
+    return *mHeader;
+}
+
 Boolean DexFile::IsMagicValid(
     /* [in] */ const byte* magic)
 {
     return (memcmp(magic, sDexMagic, sizeof(sDexMagic)) == 0);
 }
 
+Boolean DexFile::IsVersionValid(
+    /* [in] */ const Byte* magic)
+{
+    const byte* version = &magic[sizeof(sDexMagic)];
+    return (memcmp(version, sDexMagicVersion, sizeof(sDexMagicVersion)) == 0);
+}
+
+const Byte* DexFile::Begin() const
+{
+    return mBegin;
+}
+
+const size_t DexFile::Size() const
+{
+    return mSize;
+}
+
 Boolean DexFile::IsMultiDexLocation(
     /* [in] */ const char* location)
 {
     return strrchr(location, sMultiDexSeparator) != NULL;
+}
+
+String DexFile::GetDexCanonicalLocation(
+    /* [in] */ const char* dex_location)
+{
+    assert(dex_location != NULL);
+    String base_location = GetBaseLocation(dex_location);
+    const char* suffix = dex_location + base_location.GetByteLength();
+    assert(suffix[0] == 0 || suffix[0] == sMultiDexSeparator);
+    char* path = realpath(base_location.string(), NULL);
+    if (path != NULL && path != base_location.string()) {
+        String ret = String(path) + String(suffix);
+        free(path);
+        return ret;
+    }
+    else if (suffix[0] == 0) {
+        return base_location;
+    }
+    else {
+        return String(dex_location);
+    }
 }
 
 // from class_linker.cc in art
@@ -699,8 +830,8 @@ Boolean DexFile::VerifyOatAndDexFileChecksums(
         msg.AppendFormat("oat file '%s' does not contain contents for '%s' with checksum 0x%x",
                 oat_file->GetLocation().string(), dex_location, dex_location_checksum);
         *error_msg = msg;
-        Vector< AutoPtr<OatFile::OatDexFile> >& oat_dex_files = oat_file->GetOatDexFiles();
-        Vector< AutoPtr<OatFile::OatDexFile> >::Iterator it;
+        const Vector< AutoPtr<OatFile::OatDexFile> >& oat_dex_files = oat_file->GetOatDexFiles();
+        Vector< AutoPtr<OatFile::OatDexFile> >::ConstIterator it;
         for (it = oat_dex_files.Begin(); it != oat_dex_files.End(); ++it) {
             AutoPtr<OatFile::OatDexFile> oat_dex_file = *it;
             String msg("");
