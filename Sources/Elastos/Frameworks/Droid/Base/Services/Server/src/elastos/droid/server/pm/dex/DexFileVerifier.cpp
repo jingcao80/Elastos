@@ -286,7 +286,7 @@ Boolean DexFileVerifier::CheckPadding(
 
 Boolean DexFileVerifier::CheckIntraSectionIterate(
     /* [in] */ size_t offset,
-    /* [in] */ uint32_t count,
+    /* [in] */ uint32_t section_count,
     /* [in] */ uint16_t type)
 {
     // Get the right alignment mask for the type of section.
@@ -304,136 +304,136 @@ Boolean DexFileVerifier::CheckIntraSectionIterate(
             break;
     }
 
-//    // Iterate through the items in the section.
-//    for (uint32_t i = 0; i < section_count; i++) {
-//        size_t aligned_offset = (offset + alignment_mask) & ~alignment_mask;
-//
-//        // Check the padding between items.
-//        if (!CheckPadding(offset, aligned_offset)) {
-//            return FALSE;
-//        }
-//
-//        // Check depending on the section type.
-//        switch (type) {
-//          case DexFile::kDexTypeStringIdItem: {
-//            if (!CheckListSize(ptr_, 1, sizeof(DexFile::StringId), "string_ids")) {
-//              return FALSE;
-//            }
-//            ptr_ += sizeof(DexFile::StringId);
-//            break;
-//          }
-//          case DexFile::kDexTypeTypeIdItem: {
-//            if (!CheckListSize(ptr_, 1, sizeof(DexFile::TypeId), "type_ids")) {
-//              return FALSE;
-//            }
-//            ptr_ += sizeof(DexFile::TypeId);
-//            break;
-//          }
-//          case DexFile::kDexTypeProtoIdItem: {
-//            if (!CheckListSize(ptr_, 1, sizeof(DexFile::ProtoId), "proto_ids")) {
-//              return FALSE;
-//            }
-//            ptr_ += sizeof(DexFile::ProtoId);
-//            break;
-//          }
-//          case DexFile::kDexTypeFieldIdItem: {
-//            if (!CheckListSize(ptr_, 1, sizeof(DexFile::FieldId), "field_ids")) {
-//              return FALSE;
-//            }
-//            ptr_ += sizeof(DexFile::FieldId);
-//            break;
-//          }
-//          case DexFile::kDexTypeMethodIdItem: {
-//            if (!CheckListSize(ptr_, 1, sizeof(DexFile::MethodId), "method_ids")) {
-//              return FALSE;
-//            }
-//            ptr_ += sizeof(DexFile::MethodId);
-//            break;
-//          }
-//          case DexFile::kDexTypeClassDefItem: {
-//            if (!CheckListSize(ptr_, 1, sizeof(DexFile::ClassDef), "class_defs")) {
-//              return FALSE;
-//            }
-//            ptr_ += sizeof(DexFile::ClassDef);
-//            break;
-//          }
-//          case DexFile::kDexTypeTypeList: {
-//            if (!CheckList(sizeof(DexFile::TypeItem), "type_list", &ptr_)) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeAnnotationSetRefList: {
-//            if (!CheckList(sizeof(DexFile::AnnotationSetRefItem), "annotation_set_ref_list", &ptr_)) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeAnnotationSetItem: {
-//            if (!CheckList(sizeof(uint32_t), "annotation_set_item", &ptr_)) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeClassDataItem: {
-//            if (!CheckIntraClassDataItem()) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeCodeItem: {
-//            if (!CheckIntraCodeItem()) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeStringDataItem: {
-//            if (!CheckIntraStringDataItem()) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeDebugInfoItem: {
-//            if (!CheckIntraDebugInfoItem()) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeAnnotationItem: {
-//            if (!CheckIntraAnnotationItem()) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeEncodedArrayItem: {
-//            if (!CheckEncodedArray()) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          case DexFile::kDexTypeAnnotationsDirectoryItem: {
-//            if (!CheckIntraAnnotationsDirectoryItem()) {
-//              return FALSE;
-//            }
-//            break;
-//          }
-//          default:
-//            ErrorStringPrintf("Unknown map item type %x", type);
-//            return FALSE;
-//        }
-//
-//        if (IsDataSectionType(type)) {
-//          offset_to_type_map_.Put(aligned_offset, type);
-//        }
-//
-//        aligned_offset = ptr_ - begin_;
-//        if (UNLIKELY(aligned_offset > size_)) {
-//          ErrorStringPrintf("Item %d at ends out of bounds", i);
-//          return FALSE;
-//        }
-//
-//        offset = aligned_offset;
-//    }
+    // // Iterate through the items in the section.
+    // for (uint32_t i = 0; i < section_count; i++) {
+    //     size_t aligned_offset = (offset + alignment_mask) & ~alignment_mask;
+
+    //     // Check the padding between items.
+    //     if (!CheckPadding(offset, aligned_offset)) {
+    //         return FALSE;
+    //     }
+
+    //     // Check depending on the section type.
+    //     switch (type) {
+    //         case DexFile::kDexTypeStringIdItem: {
+    //             if (!CheckListSize(mPtr, 1, sizeof(DexFile::StringId), "string_ids")) {
+    //                 return FALSE;
+    //             }
+    //             mPtr += sizeof(DexFile::StringId);
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeTypeIdItem: {
+    //             if (!CheckListSize(mPtr, 1, sizeof(DexFile::TypeId), "type_ids")) {
+    //                 return FALSE;
+    //             }
+    //             mPtr += sizeof(DexFile::TypeId);
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeProtoIdItem: {
+    //             if (!CheckListSize(mPtr, 1, sizeof(DexFile::ProtoId), "proto_ids")) {
+    //                 return FALSE;
+    //             }
+    //             mPtr += sizeof(DexFile::ProtoId);
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeFieldIdItem: {
+    //             if (!CheckListSize(mPtr, 1, sizeof(DexFile::FieldId), "field_ids")) {
+    //                 return FALSE;
+    //             }
+    //             mPtr += sizeof(DexFile::FieldId);
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeMethodIdItem: {
+    //             if (!CheckListSize(mPtr, 1, sizeof(DexFile::MethodId), "method_ids")) {
+    //                 return FALSE;
+    //             }
+    //             mPtr += sizeof(DexFile::MethodId);
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeClassDefItem: {
+    //             if (!CheckListSize(mPtr, 1, sizeof(DexFile::ClassDef), "class_defs")) {
+    //                 return FALSE;
+    //             }
+    //             mPtr += sizeof(DexFile::ClassDef);
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeTypeList: {
+    //             if (!CheckList(sizeof(DexFile::TypeItem), "type_list", &mPtr)) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeAnnotationSetRefList: {
+    //             if (!CheckList(sizeof(DexFile::AnnotationSetRefItem), "annotation_set_ref_list", &mPtr)) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeAnnotationSetItem: {
+    //             if (!CheckList(sizeof(uint32_t), "annotation_set_item", &mPtr)) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeClassDataItem: {
+    //             if (!CheckIntraClassDataItem()) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeCodeItem: {
+    //             if (!CheckIntraCodeItem()) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeStringDataItem: {
+    //             if (!CheckIntraStringDataItem()) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeDebugInfoItem: {
+    //             if (!CheckIntraDebugInfoItem()) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeAnnotationItem: {
+    //             if (!CheckIntraAnnotationItem()) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeEncodedArrayItem: {
+    //             if (!CheckEncodedArray()) {
+    //                 return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         case DexFile::kDexTypeAnnotationsDirectoryItem: {
+    //             if (!CheckIntraAnnotationsDirectoryItem()) {
+    //             return FALSE;
+    //             }
+    //             break;
+    //         }
+    //         default:
+    //         ErrorStringPrintf("Unknown map item type %x", type);
+    //         return FALSE;
+    //     }
+
+    //     if (IsDataSectionType(type)) {
+    //         offset_to_type_map_.Put(aligned_offset, type);
+    //     }
+
+    //     aligned_offset = mPtr - begin_;
+    //     if (aligned_offset > size_) {
+    //         ErrorStringPrintf("Item %d at ends out of bounds", i);
+    //         return FALSE;
+    //     }
+
+    //     offset = aligned_offset;
+    // }
 
     return TRUE;
 }
@@ -488,6 +488,33 @@ Boolean DexFileVerifier::CheckIntraIdSection(
     }
 
     return CheckIntraSectionIterate(offset, count, type);
+}
+
+Boolean DexFileVerifier::CheckIntraDataSection(
+    /* [in] */ size_t offset,
+    /* [in] */ uint32_t count,
+    /* [in] */ uint16_t type)
+{
+    size_t data_start = mHeader->mDataOff;
+    size_t data_end = data_start + mHeader->mDataSize;
+
+    // Sanity check the offset of the section.
+    if ((offset < data_start) || (offset > data_end)) {
+        ErrorStringPrintf("Bad offset for data subsection: %zx", offset);
+        return false;
+    }
+
+    if (!CheckIntraSectionIterate(offset, count, type)) {
+        return FALSE;
+    }
+
+    size_t next_offset = mPtr - mBegin;
+    if (next_offset > data_end) {
+        ErrorStringPrintf("Out-of-bounds end of data subsection: %zx", next_offset);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 Boolean DexFileVerifier::CheckIntraSection()
@@ -575,7 +602,7 @@ Boolean DexFileVerifier::CheckIntraSection()
         item++;
     }
 
-    return true;
+    return TRUE;
 }
 
 Boolean DexFileVerifier::Verify()

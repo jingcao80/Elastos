@@ -16,25 +16,25 @@ namespace Server {
 namespace Pm {
 namespace Dex {
 
-Boolean ReadFileToString(const String& file_name, String* result);
-// {
-//   std::unique_ptr<File> file(new File);
-//   if (!file->Open(file_name, O_RDONLY)) {
-//     return false;
-//   }
+Boolean ReadFileToString(const String& file_name, String* result)
+{
+    FILE* fp = fopen(file_name.string(), "r");
+    if (fp == NULL) return FALSE;
 
-//   std::vector<char> buf(8 * KB);
-//   while (true) {
-//     int64_t n = TEMP_FAILURE_RETRY(read(file->Fd(), &buf[0], buf.size()));
-//     if (n == -1) {
-//       return false;
-//     }
-//     if (n == 0) {
-//       return true;
-//     }
-//     result->append(&buf[0], n);
-//   }
-// }
+    char buf[8192];
+    while (TRUE) {
+        size_t n = fread(buf, 1, 8192, fp);
+        if (n == -1) {
+            fclose(fp);
+            return FALSE;
+        }
+        if (n == 0) {
+            fclose(fp);
+            return TRUE;
+        }
+        result->Append(String(buf, n));
+    }
+}
 
 const Boolean OatFile::sIsDebug = FALSE;
 
