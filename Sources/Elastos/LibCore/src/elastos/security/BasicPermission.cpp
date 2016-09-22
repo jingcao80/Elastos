@@ -4,16 +4,7 @@
 namespace Elastos {
 namespace Security {
 
-BasicPermission::BasicPermission(
-    /* [in] */ const String& name)
-    : Permission(String(""))
-{
-}
-
-BasicPermission::BasicPermission(
-    /* [in] */ const String& name,
-    /* [in] */ const String& action)
-    : Permission(String(""))
+BasicPermission::BasicPermission()
 {
 }
 

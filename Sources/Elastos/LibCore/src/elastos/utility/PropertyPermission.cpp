@@ -5,11 +5,15 @@ namespace Utility {
 
 CAR_INTERFACE_IMPL(PropertyPermission, BasicPermission, IPropertyPermission)
 
-PropertyPermission::PropertyPermission(
+PropertyPermission::PropertyPermission()
+{}
+
+ECode PropertyPermission::constructor(
     /* [in] */ const String& name,
     /* [in] */ const String& actions)
-    : BasicPermission(String(""))
-{}
+{
+    return BasicPermission::constructor(String(""));
+}
 
 ECode PropertyPermission::GetName(
     /* [out] */ String* name)

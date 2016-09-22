@@ -6,6 +6,7 @@
 #include "Object.h"
 
 using Elastos::Core::Object;
+using Elastos::IO::ISerializable;
 
 namespace Elastos {
 namespace Security {
@@ -13,18 +14,19 @@ namespace Security {
 class Permission
     : public Object
     , public IPermission
+    , public IGuard
+    , public ISerializable
 {
 public:
     CAR_INTERFACE_DECL()
 
-    Permission(
-        /* [in] */ const String& name);
+    Permission();
 
     CARAPI constructor(
         /* [in] */ const String& name);
 
     CARAPI GetName(
-        /* [out] */ String *name) const;
+        /* [out] */ String *name);
 
     CARAPI CheckGuard(
         /* [in] */ IInterface *obj);

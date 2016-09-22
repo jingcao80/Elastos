@@ -94,6 +94,7 @@ module
     merge("security/spec/IX509EncodedKeySpec.car");
 
     merge("security/IAccessControlContext.car");
+    merge("security/AlgorithmParameterGeneratorSpi.car");
     merge("security/IAccessController.car");
     merge("security/IAlgorithmParameterGenerator.car");
     merge("security/IAlgorithmParameters.car");
@@ -134,16 +135,28 @@ module
     merge("security/ISigner.car");
     merge("security/IUnresolvedPermission.car");
 
+    interface Elastos.Core.ICloneable;
+    interface Elastos.IO.ICloseable;
+    interface Elastos.IO.IFilterInputStream;
+    interface Elastos.IO.IFilterOutputStream;
+    interface Elastos.IO.IFlushable;
+    interface Elastos.IO.IInputStream;
+    interface Elastos.IO.IOutputStream;
+    interface Elastos.IO.ISerializable;
+    interface Elastos.Math.IBigInteger;
+    interface Elastos.Net.IURL;
     interface Elastos.Security.IKeyStore;
     interface Elastos.Security.IPublicKey;
+    interface Elastos.Security.Cert.ICertPath;
     interface Elastos.Security.Interfaces.IDSAParams;
-    interface Elastosx.Security.Auth.X500.IX500Principal;
-    interface Elastos.Core.ICloneable;
-    interface Elastos.Math.IBigInteger;
     interface Elastos.Utility.ICollection;
+    interface Elastos.Utility.IDate;
     interface Elastos.Utility.IMap;
     interface Elastos.Utility.IList;
+    interface Elastos.Utility.IRandom;
     interface Elastos.Utility.ISet;
+    interface Elastosx.Crypto.ISecretKey;
+    interface Elastosx.Security.Auth.X500.IX500Principal;
 
     namespace Elastos {
     namespace Security {
@@ -189,6 +202,220 @@ module
 
     singleton class CMessageDigestHelper {
         interface IMessageDigestHelper;
+    }
+
+    [local, deprecated]
+    class CAccessControlContext {
+        constructor(
+            [in] IAccessControlContext *acc,
+            [in] IDomainCombiner *combiner);
+
+        constructor(
+            [in] ArrayOf<IProtectionDomain*> *context);
+
+        interface IAccessControlContext;
+    }
+
+    singleton class CAccessController {
+        interface IAccessController;
+    }
+
+    class CAlgorithmParameterGenerator {
+        constructor(
+            [in] IAlgorithmParameterGeneratorSpi* paramGenSpi,
+            [in] IProvider* provider,
+            [in] String algorithm);
+
+        interface IAlgorithmParameterGenerator;
+    }
+
+    [deprecated]
+    class CSecureRandom {
+        constructor();
+
+        constructor(
+            [in] ArrayOf<Byte>* seed);
+
+        constructor(
+            [in] ISecureRandomSpi* secureRandomSpi,
+            [in] IProvider* provider,
+            [in] String algorithm);
+
+        constructor(
+            [in] ISecureRandomSpi* secureRandomSpi,
+            [in] IProvider* provider);
+
+        interface IRandom;
+        interface ISecureRandom;
+    }
+
+    singleton class CSecureRandomHelper {
+        interface ISecureRandomHelper;
+    }
+
+    class CAllPermission {
+        constructor();
+
+        constructor(
+            [in] String name,
+            [in] String actions);
+
+        interface IPermission;
+    }
+
+    class CCodeSigner {
+        constructor();
+
+        constructor(
+            [in] ICertPath* signerCertPath,
+            [in] ITimestamp* timestamp);
+
+        interface ICodeSigner;
+        interface ISerializable;
+    }
+
+    [deprecated]
+    class CCodeSource {
+        constructor(
+            [in] IURL* location,
+            [in] ArrayOf<ICertificate*>* certs);
+
+        constructor(
+            [in] IURL* location,
+            [in] ArrayOf<ICodeSigner*>* signers);
+
+        interface ICodeSource;
+        interface ISerializable;
+    }
+
+    class CDigestInputStream {
+        constructor(
+            [in] IInputStream* stream,
+            [in] IMessageDigest* digest);
+
+        interface IDigestInputStream;
+        interface IFilterInputStream;
+        interface ICloseable;
+        interface IInputStream;
+    }
+
+    class CDigestOutputStream {
+        interface IDigestOutputStream;
+        interface IFilterOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+        interface IOutputStream;
+    }
+
+    class CGuardedObject {
+        constructor(
+            [in] IInterface* object,
+            [in] IGuard* guard);
+
+        interface IGuardedObject;
+        interface ISerializable;
+    }
+
+    class CKeyFactory {
+        constructor(
+            [in] IKeyFactorySpi* keyFacSpi,
+            [in] IProvider* provider,
+            [in] String algorithm);
+
+        interface IKeyFactory;
+    }
+
+    singleton class CKeyFactoryHelper {
+        interface IKeyFactoryHelper;
+    }
+
+    class CKeyPair {
+        constructor(
+            [in] IPublicKey* publicKey,
+            [in] IPrivateKey* privateKey);
+
+        interface IKeyPair;
+        interface ISerializable;
+    }
+
+    [deprecated]
+    class CKeyRep {
+        constructor(
+        [in] KeyRepType type,
+        [in] String algorithm,
+        [in] String format,
+        [in] ArrayOf<Byte>* encoded);
+
+        interface ISerializable;
+    }
+
+    [deprecated]
+    class CKeyStorePrivateKeyEntry {
+        constructor(
+            [in] IPrivateKey *privateKey,
+            [in] ArrayOf<Elastos.Security.Cert.ICertificate*> *chain);
+
+        interface IKeyStorePrivateKeyEntry;
+        interface IKeyStoreEntry;
+    }
+
+    class CKeyStoreSecretKeyEntry {
+        constructor(
+            [in] ISecretKey *secretKey);
+
+        interface IKeyStoreSecretKeyEntry;
+        interface IKeyStoreEntry;
+    }
+
+    class CKeyStoreTrustedCertificateEntry {
+        constructor(
+            [in] Elastos.Security.Cert.ICertificate* trustCertificate);
+
+        interface IKeyStoreTrustedCertificateEntry;
+        interface IKeyStoreEntry;
+    }
+
+    class CPermissions {
+        interface IPermissionCollection;
+        interface ISerializable;
+    }
+
+    class CPermissionsHash {
+        interface IPermissionCollection;
+        interface ISerializable;
+    }
+
+    [deprecated]
+    class CUnresolvedPermission {
+        constructor(
+            [in] String type,
+            [in] String name,
+            [in] String actions,
+            [in] ArrayOf<Elastos.Security.Cert.ICertificate*>* certs);
+
+        interface IUnresolvedPermission;
+        interface IPermission;
+        interface IGuard;
+        interface ISerializable;
+    }
+
+    class CTimestamp {
+        constructor(
+            [in] IDate* timestamp,
+            [in] ICertPath* signerCertPath);
+
+        interface ITimestamp;
+        interface ISerializable;
+    }
+
+    class CSignedObject {
+        constructor(
+            [in] ISerializable* object,
+            [in] IPrivateKey* signingKey,
+            [in] ISignature* signingEngine);
+
+        interface ISignedObject;
+        interface ISerializable;
     }
 
     namespace Cert {

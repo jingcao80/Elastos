@@ -2,13 +2,13 @@
 #include "Permission.h"
 #include "AllPermissionCollection.h"
 
+using Elastos::IO::EIID_ISerializable;
+
 namespace Elastos {
 namespace Security {
 
-CAR_INTERFACE_IMPL(Permission, Object, IPermission)
-
-Permission::Permission(
-    /* [in] */ const String& name)
+CAR_INTERFACE_IMPL_3(Permission, Object, IPermission, IGuard, ISerializable)
+Permission::Permission()
 {}
 
 ECode Permission::constructor(
@@ -18,7 +18,7 @@ ECode Permission::constructor(
 }
 
 ECode Permission::GetName(
-    /* [out] */ String *name) const
+    /* [out] */ String *name)
 {
     VALIDATE_NOT_NULL(name)
     *name = String();

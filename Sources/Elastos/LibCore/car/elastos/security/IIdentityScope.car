@@ -45,7 +45,7 @@ module
          * @return the {@code Identity} with the specified name or {@code null} if
          *         not present.
          */
-        GetIdentityEx(
+        GetIdentity(
             [in] IPrincipal* principal,
             [out] IIdentity** identity);
 
@@ -59,7 +59,7 @@ module
          * @return the {@code Identity} associated with the specified key or {@code
          *         null} if not present.
          */
-        GetIdentityEx2(
+        GetIdentity(
             [in] IPublicKey* key,
             [out] IIdentity** identity);
 

@@ -1,32 +1,44 @@
 
 #include "CAlgorithmParameterGenerator.h"
+#include "CSecurity.h"
+#include "CSecureRandom.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
+
+using Org::Apache::Harmony::Security::Fortress::CEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastos {
 namespace Security {
 
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("AlgorithmParameterGenerator")/*SERVICE*/, (CEngine**)&e);
+    return e;
+}
+
+static AutoPtr<ISecureRandom> InitSecureRandom()
+{
+    AutoPtr<CSecureRandom> r;
+    CSecureRandom::NewByFriend((CSecureRandom**)&r);
+    return r;
+}
+
 const String CAlgorithmParameterGenerator::SERVICE = String("AlgorithmParameterGenerator");
-AutoPtr<IEngine> CAlgorithmParameterGenerator::ENGINE;
-AutoPtr<ISecureRandom> CAlgorithmParameterGenerator::RANDOM;
-Boolean CAlgorithmParameterGenerator::sInit = sInitStatic();
+AutoPtr<IEngine> CAlgorithmParameterGenerator::ENGINE = InitEngine();
+AutoPtr<ISecureRandom> CAlgorithmParameterGenerator::RANDOM = InitSecureRandom();
 
 CAR_OBJECT_IMPL(CAlgorithmParameterGenerator)
 CAR_INTERFACE_IMPL(CAlgorithmParameterGenerator, Object, IAlgorithmParameterGenerator)
-
-Boolean CAlgorithmParameterGenerator::sInitStatic()
-{
-    CEngine::New(SERVICE, (IEngine**)&ENGINE);
-    CSecureRandom((ISecureRandom**)&RANDOM);
-    return TRUE;
-}
-
 ECode CAlgorithmParameterGenerator::constructor(
-    /* [in] */ AlgorithmParameterGeneratorSpi* paramGenSpi,
+    /* [in] */ IAlgorithmParameterGeneratorSpi* paramGenSpi,
     /* [in] */ IProvider* provider,
     /* [in] */ const String& algorithm)
 {
     mProvider = provider;
     mAlgorithm = algorithm;
-    mSpiImpl = paramGenSpi;
+    mSpiImpl = (AlgorithmParameterGeneratorSpi*)paramGenSpi;
+    return NOERROR;
 }
 
 ECode CAlgorithmParameterGenerator::GetAlgorithm(
@@ -49,12 +61,13 @@ ECode CAlgorithmParameterGenerator::GetInstance(
     }
     AutoPtr<ISpiAndProvider> sap;
     ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
-    AutoPtr<IAlgorithmParameterGeneratorSpi> spi;
-    sap->GetSpi((IAlgorithmParameterGeneratorSpi**)&spi);
+    AutoPtr<IInterface> spi;
+    sap->GetSpi((IInterface**)&spi);
 
     AutoPtr<IProvider> provider;
     sap->GetProvider((IProvider**)&provider);
-    return CAlgorithmParameterGenerator::New(spi, provider, algorithm, generator);
+    return CAlgorithmParameterGenerator::New(IAlgorithmParameterGeneratorSpi::Probe(spi)
+        , provider, algorithm, generator);
 }
 
 ECode CAlgorithmParameterGenerator::GetInstance(
@@ -69,7 +82,9 @@ ECode CAlgorithmParameterGenerator::GetInstance(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<IProvider> impProvider;
-    Security::GetProvider(provider, (IProvider**)&impProvider);
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    security->GetProvider(provider, (IProvider**)&impProvider);
     if (impProvider == NULL) {
         // throw new NoSuchProviderException(provider);
         return E_NO_SUCH_PROVIDER_EXCEPTION;
@@ -137,7 +152,10 @@ ECode CAlgorithmParameterGenerator::GenerateParameters(
     /* [out] */ IAlgorithmParameters** param)
 {
     VALIDATE_NOT_NULL(param);
-    return mSpiImpl->EngineGenerateParameters(param);
+    AutoPtr<IAlgorithmParameters> ap = mSpiImpl->EngineGenerateParameters();
+    *param = ap;
+    REFCOUNT_ADD(*param);
+    return NOERROR;
 }
 
 } // namespace Security

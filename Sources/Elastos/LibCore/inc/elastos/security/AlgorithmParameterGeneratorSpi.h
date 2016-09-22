@@ -2,9 +2,11 @@
 #ifndef __ELASTOS_SECURITY_ALGORITHMPARAMETERGENERATORSPI_H__
 #define __ELASTOS_SECURITY_ALGORITHMPARAMETERGENERATORSPI_H__
 
+#include "Elastos.CoreLibrary.Security.h"
 #include "elastos/core/Object.h"
 
 using Elastos::Core::Object;
+using Elastos::Security::Spec::IAlgorithmParameterSpec;
 
 namespace Elastos {
 namespace Security {

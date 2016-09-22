@@ -1,7 +1,7 @@
 
 #include "Elastos.CoreLibrary.Security.h"
 #include "CEngine.h"
-#include "CServices.h"
+#include "Services.h"
 #include "core/CString.h"
 #include "utility/logging/Logger.h"
 
@@ -119,10 +119,8 @@ ECode CEngine::GetServices(
     /* [out] */ IArrayList** services)
 {
     VALIDATE_NOT_NULL(services)
-    AutoPtr<IServices> cservices;
-    CServices::AcquireSingleton((IServices**)&cservices);
     Int32 newCacheVersion;
-    cservices->GetCacheVersion(&newCacheVersion);
+    Services::GetCacheVersion(&newCacheVersion);
     AutoPtr<ServiceCacheEntry> cacheEntry = mServiceCache;
     String algoUC = algorithm.ToUpperCase();
     if (cacheEntry != NULL
@@ -134,7 +132,7 @@ ECode CEngine::GetServices(
     }
     String name = mServiceName + "." + algoUC;
     AutoPtr<IArrayList> allServices;
-    cservices->GetServices(name, (IArrayList**)&allServices);
+    Services::GetServices(name, (IArrayList**)&allServices);
     mServiceCache = new ServiceCacheEntry(algoUC, newCacheVersion, allServices);
     *services = allServices;
     REFCOUNT_ADD(*services);

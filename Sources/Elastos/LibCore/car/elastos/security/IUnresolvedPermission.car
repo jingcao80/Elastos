@@ -1,8 +1,6 @@
 
 module
 {
-    interface Elastos.Security.ICertificate;
-
     namespace Elastos {
     namespace Security {
 
@@ -21,7 +19,7 @@ module
             [out] String* unresolvedType);
 
         GetUnresolvedCerts(
-            [out, callee] ArrayOf<ICertificate*>* certs);
+            [out, callee] ArrayOf<Elastos.Security.Cert.ICertificate*>* certs);
     }
 
     } // end namespace Security

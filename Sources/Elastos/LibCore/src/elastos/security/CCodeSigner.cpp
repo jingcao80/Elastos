@@ -1,8 +1,10 @@
 
 #include "CCodeSigner.h"
 #include "StringBuilder.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Core::StringBuilder;
+using Elastos::IO::EIID_ISerializable;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -28,7 +30,7 @@ ECode CCodeSigner::Equals(
     if (ICodeSigner::Probe(obj)) {
         AutoPtr<ICodeSigner> that = ICodeSigner::Probe(obj);
         Boolean isEqual;
-        if ((mSignerCertPath->Equals(((CCodeSigner*)that.Get())->mSignerCertPath, &isEqual), !isEqual)) {
+        if ((IObject::Probe(mSignerCertPath)->Equals(((CCodeSigner*)that.Get())->mSignerCertPath, &isEqual), !isEqual)) {
             *result = FALSE;
             return NOERROR;
         }
@@ -67,7 +69,7 @@ ECode CCodeSigner::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode)
     if (mHash == 0) {
-        mSignerCertPath->GetHashCode(&mHash);
+        IObject::Probe(mSignerCertPath)->GetHashCode(&mHash);
         Int32 hash = mTimestamp == NULL ? 0 : mTimestamp->GetHashCode(&hash);
         mHash ^= hash;
     }
@@ -80,22 +82,20 @@ ECode CCodeSigner::ToString(
 {
     VALIDATE_NOT_NULL(str)
     // There is no any special reason for '256' here, it's taken abruptly
-    StringBuilder* buf = new StringBuilder(256);
+    StringBuilder buf("CodeSigner [");
     // The javadoc says nothing, and the others implementations behavior seems as
     // dumping only the first certificate. Well, let's do the same.
-    buf->AppendCStr("CodeSigner [");
     AutoPtr<IList> certificates;
     mSignerCertPath->GetCertificates((IList**)&certificates);
     AutoPtr<IInterface> cert;
     certificates->Get(0, (IInterface**)&cert);
-    buf->AppendObject(cert);
+    buf.Append(cert);
     if (mTimestamp != NULL) {
-        buf->AppendCStr("; ");
-        buf->AppendObject(mTimestamp.Get());
+        buf.Append("; ");
+        buf.Append(mTimestamp);
     }
-    buf->AppendCStr("]");
-    buf->ToString(str);
-    delete buf;
+    buf.Append("]");
+    buf.ToString(str);
     return NOERROR;
 }
 

@@ -2,13 +2,7 @@ module
 {
     merge("io/Errors.car");
     merge("io/Exceptions.car");
-    merge("io/ICloseable.car");
-    merge("io/IFlushable.car");
-    merge("io/IInputStream.car");
-    merge("io/IFilterInputStream.car");
     merge("io/IBufferedInputStream.car");
-    merge("io/IOutputStream.car");
-    merge("io/IFilterOutputStream.car");
     merge("io/IBufferedOutputStream.car");
     merge("io/IReadable.car");
     merge("io/IReader.car");

@@ -369,8 +369,8 @@ ECode MessageDigest::SetAlgorithm(
 
 AutoPtr<IEngine> MessageDigest::Init_ENGINE()
 {
-    AutoPtr<IEngine> engine;
-    CEngine::New(String("MessageDigest"), (IEngine**)&engine);
+    AutoPtr<CEngine> engine;
+    CEngine::NewByFriend(String("MessageDigest"), (CEngine**)&engine);
     return engine;
 }
 

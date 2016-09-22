@@ -1,5 +1,5 @@
 
-#include "CServices.h"
+#include "Services.h"
 #include "CEngine.h"
 #include "core/CString.h"
 #include "core/ClassLoader.h"
@@ -21,42 +21,33 @@ namespace Harmony {
 namespace Security {
 namespace Fortress {
 
-HashMap< String, AutoPtr<IArrayList> > CServices::sServices;
-Mutex CServices::sServicesLock;
-AutoPtr<IProviderService> CServices::sCachedSecureRandomService;
-Boolean CServices::sNeedRefresh;
-Int32 CServices::sCacheVersion = 1;
-const AutoPtr<IArrayList> CServices::sProviders = Init_sProviders();
-HashMap< String, AutoPtr<IProvider> > CServices::sProvidersNames;
-Boolean CServices::sIsInitialized = FALSE;
+INIT_PROI_5 HashMap< String, AutoPtr<IArrayList> > Services::sServices;
+INIT_PROI_5 Mutex Services::sServicesLock;
+INIT_PROI_5 AutoPtr<IProviderService> Services::sCachedSecureRandomService;
+Boolean Services::sNeedRefresh;
+Int32 Services::sCacheVersion = 1;
+INIT_PROI_5 const AutoPtr<IArrayList> Services::sProviders = Init_sProviders();
+INIT_PROI_5 HashMap< String, AutoPtr<IProvider> > Services::sProvidersNames;
+INIT_PROI_6 AutoPtr<Object> Services::sIsInitialized = Initialize();
+INIT_PROI_5 Object Services::LOCK;
 
-CAR_INTERFACE_IMPL(CServices, Singleton, IServices)
+Services::Services()
+{}
 
-CAR_SINGLETON_IMPL(CServices)
-
-CServices::CServices()
-{
-    Initialize();
-}
-
-AutoPtr<IArrayList> CServices::Init_sProviders()
+AutoPtr<IArrayList> Services::Init_sProviders()
 {
     AutoPtr<CArrayList> list;
     CArrayList::NewByFriend((CArrayList**)&list);
     return list.Get();
 }
 
-void CServices::Initialize()
+AutoPtr<Object> Services::Initialize()
 {
-    if (sIsInitialized) return;
-
     String providerClassName;
     Int32 i = 1;
     AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
-
     AutoPtr<CSecurity> security;
     CSecurity::AcquireSingletonByFriend((CSecurity**)&security);
-
     String key("");
     key.AppendFormat("security.provider.%d", i);
     while (security->GetProperty(key, &providerClassName), !providerClassName.IsNull()) {
@@ -80,26 +71,25 @@ void CServices::Initialize()
         key.AppendFormat("security.provider.%d", ++i);
     }
     CEngine::sDoor->RenumProviders();
-
-    sIsInitialized = TRUE;
+    return NULL;
 }
 
-ECode CServices::GetProviders(
+ECode Services::GetProviders(
     /* [out] */ IArrayList** providers)
 {
     VALIDATE_NOT_NULL(providers)
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     *providers = sProviders;
     REFCOUNT_ADD(*providers);
     return NOERROR;
 }
 
-ECode CServices::GetProvider(
+ECode Services::GetProvider(
     /* [in] */ const String& name,
     /* [out] */ IProvider** provider)
 {
     VALIDATE_NOT_NULL(provider);
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
 
     if (name.IsNull()) {
         *provider = NULL;
@@ -113,13 +103,13 @@ ECode CServices::GetProvider(
     return NOERROR;
 }
 
-ECode CServices::InsertProviderAt(
+ECode Services::InsertProviderAt(
     /* [in] */ IProvider* provider,
     /* [in] */ Int32 position,
     /* [out] */ Int32* pos)
 {
     VALIDATE_NOT_NULL(pos)
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     Int32 size;
     sProviders->GetSize(&size);
     if ((position < 1) || (position > size)) {
@@ -134,10 +124,10 @@ ECode CServices::InsertProviderAt(
     return NOERROR;
 }
 
-ECode CServices::RemoveProvider(
+ECode Services::RemoveProvider(
     /* [in] */ Int32 providerNumber)
 {
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     AutoPtr<IInterface> value;
     sProviders->Remove(providerNumber - 1, (IInterface**)&value);
     AutoPtr<IProvider> p = IProvider::Probe(value);
@@ -148,10 +138,10 @@ ECode CServices::RemoveProvider(
     return NOERROR;
 }
 
-ECode CServices::InitServiceInfo(
+ECode Services::InitServiceInfo(
     /* [in] */ IProvider* p)
 {
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     AutoPtr<ISet> set;
     p->GetServices((ISet**)&set);
     AutoPtr<IIterator> it;
@@ -187,7 +177,7 @@ ECode CServices::InitServiceInfo(
     return NOERROR;
 }
 
-void CServices::AppendServiceLocked(
+void Services::AppendServiceLocked(
     /* [in] */ const String& key,
     /* [in] */ IProviderService* service)
 {
@@ -200,20 +190,20 @@ void CServices::AppendServiceLocked(
     serviceList->Add(service, &result);
 }
 
-ECode CServices::IsEmpty(
+ECode Services::IsEmpty(
     /* [out] */ Boolean* empty)
 {
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     *empty = sServices.IsEmpty();
     return NOERROR;
 }
 
-ECode CServices::GetServices(
+ECode Services::GetServices(
     /* [in] */ const String& key,
     /* [out] */ IArrayList** services)
 {
     VALIDATE_NOT_NULL(services)
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     HashMap< String, AutoPtr<IArrayList> >::Iterator it = sServices.Find(key);
     if (it != sServices.End()) {
         *services = it->mSecond;
@@ -222,11 +212,11 @@ ECode CServices::GetServices(
     return NOERROR;
 }
 
-ECode CServices::GetSecureRandomService(
+ECode Services::GetSecureRandomService(
     /* [out] */ IProviderService** service)
 {
     VALIDATE_NOT_NULL(service)
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     Int32 version;
     GetCacheVersion(&version); // used for side effect of updating cache if needed
     *service = sCachedSecureRandomService;
@@ -234,18 +224,18 @@ ECode CServices::GetSecureRandomService(
     return NOERROR;
 }
 
-ECode CServices::SetNeedRefresh()
+ECode Services::SetNeedRefresh()
 {
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     sNeedRefresh = TRUE;
     return NOERROR;
 }
 
-ECode CServices::GetCacheVersion(
+ECode Services::GetCacheVersion(
     /* [out] */ Int32* cacheVersion)
 {
     VALIDATE_NOT_NULL(cacheVersion)
-    AutoLock lock(this);
+    AutoLock lock(LOCK);
     if (sNeedRefresh) {
         sCacheVersion++;
         {

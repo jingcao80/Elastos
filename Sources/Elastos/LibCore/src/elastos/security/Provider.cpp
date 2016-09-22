@@ -13,7 +13,7 @@
 #include "utility/CLinkedHashSet.h"
 #include "utility/CProperties.h"
 #include "utility/logging/Logger.h"
-#include "org/apache/harmony/security/fortress/CServices.h"
+#include "org/apache/harmony/security/fortress/Services.h"
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
@@ -32,8 +32,7 @@ using Elastos::Utility::CLinkedHashMap;
 using Elastos::Utility::CLinkedHashSet;
 using Elastos::Utility::IEnumeration;
 using Elastos::Utility::Logging::Logger;
-using Org::Apache::Harmony::Security::Fortress::IServices;
-using Org::Apache::Harmony::Security::Fortress::CServices;
+using Org::Apache::Harmony::Security::Fortress::Services;
 
 namespace Elastos {
 namespace Security {
@@ -106,9 +105,7 @@ ECode Provider::Clear()
     PutProviderInfo();
     if (mProviderNumber != -1) {
         // if registered then refresh Services
-        AutoPtr<IServices> services;
-        CServices::AcquireSingleton((IServices**)&services);
-        services->SetNeedRefresh();
+        Services::SetNeedRefresh();
     }
     ServicesChanged();
 
@@ -174,9 +171,7 @@ void Provider::MyPutAll(
     }
     if (mProviderNumber != -1) {
         // if registered then refresh Services
-        AutoPtr<IServices> services;
-        CServices::AcquireSingleton((IServices**)&services);
-        services->SetNeedRefresh();
+        Services::SetNeedRefresh();
     }
 }
 
@@ -236,9 +231,7 @@ ECode Provider::Put(
     }
     if (mProviderNumber != -1) {
         // if registered then refresh Services
-        AutoPtr<IServices> services;
-        CServices::AcquireSingleton((IServices**)&services);
-        services->SetNeedRefresh();
+        Services::SetNeedRefresh();
     }
     AutoPtr<IInterface> obj;
     if (mChangedProperties != NULL && (mChangedProperties->Remove(key, (IInterface**)&obj), obj == NULL)) {
@@ -268,9 +261,7 @@ ECode Provider::Remove(
     }
     if (mProviderNumber != -1) {
         // if registered then refresh Services
-        AutoPtr<IServices> services;
-        CServices::AcquireSingleton((IServices**)&services);
-        services->SetNeedRefresh();
+        Services::SetNeedRefresh();
     }
     AutoPtr<IInterface> obj;
     if (mChangedProperties != NULL && (mChangedProperties->Remove(key, (IInterface**)&obj), obj == NULL)) {
@@ -608,9 +599,7 @@ void Provider::ServiceInfoToProperties(
     }
     if (mProviderNumber != -1) {
         // if registered then refresh Services
-        AutoPtr<IServices> services;
-        CServices::AcquireSingleton((IServices**)&services);
-        services->SetNeedRefresh();
+        Services::SetNeedRefresh();
     }
 }
 
@@ -661,9 +650,7 @@ void Provider::ServiceInfoFromProperties(
     }
     if (mProviderNumber != -1) {
         // if registered then refresh Services
-        AutoPtr<IServices> services;
-        CServices::AcquireSingleton((IServices**)&services);
-        services->SetNeedRefresh();
+        Services::SetNeedRefresh();
     }
 }
 

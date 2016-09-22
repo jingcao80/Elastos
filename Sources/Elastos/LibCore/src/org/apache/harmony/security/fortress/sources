@@ -15,4 +15,4 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/fortres
 
 SOURCES = CEngine.cpp
 #SOURCES += CEngineHelper.cpp
-SOURCES += CServices.cpp
+SOURCES += Services.cpp

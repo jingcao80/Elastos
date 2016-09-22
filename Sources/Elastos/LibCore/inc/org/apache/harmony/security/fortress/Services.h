@@ -1,15 +1,14 @@
 
-#ifndef __ORG_APACHE_HARMONY_SECURITY_FORTRESS_CSERVICES_H__
-#define __ORG_APACHE_HARMONY_SECURITY_FORTRESS_CSERVICES_H__
+#ifndef __ORG_APACHE_HARMONY_SECURITY_FORTRESS_SERVICES_H__
+#define __ORG_APACHE_HARMONY_SECURITY_FORTRESS_SERVICES_H__
 
-#include "_Org_Apache_Harmony_Security_Fortress_CServices.h"
-#include "core/Singleton.h"
+#include "Elastos.CoreLibrary.Apache.h"
 #include "core/Mutex.h"
+#include "elastos/coredef.h"
+#include "Object.h"
 #include "utility/etl/HashMap.h"
 
-using Elastos::Core::Singleton;
 using Elastos::Core::Mutex;
-using Elastos::Core::Singleton;
 using Elastos::Security::IProvider;
 using Elastos::Security::IProviderService;
 using Elastos::Utility::IList;
@@ -22,51 +21,45 @@ namespace Harmony {
 namespace Security {
 namespace Fortress {
 
-CarClass(CServices)
-    , public Singleton
-    , public IServices
+class Services
 {
 public:
-    CServices();
-
-    CAR_INTERFACE_DECL()
-
-    CAR_SINGLETON_DECL()
-
-    CARAPI GetProviders(
+    static CARAPI GetProviders(
         /* [out] */ IArrayList** providers);
 
-    CARAPI GetProvider(
+    static CARAPI GetProvider(
         /* [in] */ const String& name,
         /* [out] */ IProvider** provider);
 
-    CARAPI InsertProviderAt(
+    static CARAPI InsertProviderAt(
         /* [in] */ IProvider* provider,
         /* [in] */ Int32 position,
         /* [out] */ Int32* pos);
 
-    CARAPI RemoveProvider(
+    static CARAPI RemoveProvider(
         /* [in] */ Int32 providerNumber);
 
-    CARAPI InitServiceInfo(
+    static CARAPI InitServiceInfo(
         /* [in] */ IProvider* p);
 
-    CARAPI IsEmpty(
+    static CARAPI IsEmpty(
         /* [out] */ Boolean* empty);
 
-    CARAPI GetServices(
+    static CARAPI GetServices(
         /* [in] */ const String& key,
         /* [out] */ IArrayList** services);
 
-    CARAPI GetSecureRandomService(
+    static CARAPI GetSecureRandomService(
         /* [out] */ IProviderService** service);
 
-    CARAPI SetNeedRefresh();
+    static CARAPI SetNeedRefresh();
 
-    CARAPI GetCacheVersion(
+    static CARAPI GetCacheVersion(
         /* [out] */ Int32* cacheVersion);
 
 private:
+    Services();
+
     /**
      * Add or append the service to the key.
      */
@@ -76,7 +69,7 @@ private:
 
     static CARAPI_(AutoPtr<IArrayList>) Init_sProviders();
 
-    CARAPI_(void) Initialize();
+    static CARAPI_(AutoPtr<Object>) Initialize();
 
 private:
     /**
@@ -116,7 +109,8 @@ private:
      */
     static HashMap< String, AutoPtr<IProvider> > sProvidersNames;
 
-    static Boolean sIsInitialized;
+    static AutoPtr<Object> sIsInitialized;
+    static Object LOCK;
 };
 
 } // namespace Fortress
@@ -125,4 +119,4 @@ private:
 } // namespace Apache
 } // namespace Org
 
-#endif // __ORG_APACHE_HARMONY_SECURITY_FORTRESS_CSERVICES_H__
+#endif // __ORG_APACHE_HARMONY_SECURITY_FORTRESS_SERVICES_H__

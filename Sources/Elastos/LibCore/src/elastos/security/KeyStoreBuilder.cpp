@@ -14,8 +14,6 @@ using Elastos::IO::CIoUtils;
 namespace Elastos {
 namespace Security {
 
-extern "C" const InterfaceID EIID_KeyStore;
-
 CAR_INTERFACE_IMPL(KeyStoreBuilder, Object, IKeyStoreBuilder)
 KeyStoreBuilder::KeyStoreBuilder()
 {}

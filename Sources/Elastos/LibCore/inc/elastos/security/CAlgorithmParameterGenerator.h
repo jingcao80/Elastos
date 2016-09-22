@@ -2,9 +2,12 @@
 #ifndef __ELASTOS_SECURITY_CALGORITHMPARAMETERGENERATOR_H__
 #define __ELASTOS_SECURITY_CALGORITHMPARAMETERGENERATOR_H__
 
-#include "elastos/core/Object.h"
+#include "_Elastos_Security_CAlgorithmParameterGenerator.h"
+#include "AlgorithmParameterGeneratorSpi.h"
 
 using Elastos::Core::Object;
+using Elastos::Security::Spec::IAlgorithmParameterSpec;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
 
 namespace Elastos {
 namespace Security {
@@ -182,24 +185,20 @@ public:
         /* [out] */ IAlgorithmParameters** param);
 
 private:
-    static CARAPI_(Boolean) sInitStatic();
-
-private:
     // Store spi service name
     static const String SERVICE;
 
     // Used to access common engine functionality
-    static AutoPtr<IEngine> ENGINE = new Engine(SERVICE);
+    static AutoPtr<IEngine> ENGINE;
 
     // Store SecureRandom
-    static AutoPtr<ISecureRandom> RANDOM = new SecureRandom();
-    static Boolean sInit;
+    static AutoPtr<ISecureRandom> RANDOM;
 
     // Store used provider
     AutoPtr<IProvider> mProvider;
 
     // Store used AlgorithmParameterGeneratorSpi implementation
-    AutoPtr<IAlgorithmParameterGeneratorSpi> mSpiImpl;
+    AutoPtr<AlgorithmParameterGeneratorSpi> mSpiImpl;
 
     //Store used algorithm
     String mAlgorithm;

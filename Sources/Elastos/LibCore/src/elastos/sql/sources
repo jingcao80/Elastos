@@ -14,10 +14,10 @@ INCLUDES += $(MAKEDIR)/../../../inc/elastos/core
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/io
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/net
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/text
+INCLUDES += $(MAKEDIR)/../../../inc/elastos/sql
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/security
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/utility/regex
-INCLUDES += $(MAKEDIR)/../../../inc/elastos/sql
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/sql/sqlite
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/sql/sqlite/jdbc
 

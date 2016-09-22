@@ -30,7 +30,7 @@ public:
     CARAPI Certificates(
         /* [out, callee] */ ArrayOf<Elastos::Security::ICertificate *> ** ppCerts);
 
-    CARAPI ToStringEx(
+    CARAPI ToString(
         /* [in] */ Boolean detailed,
         /* [out] */ String * pStr);
 
@@ -56,11 +56,11 @@ public:
         /* [in] */ const String& name,
         /* [out] */ Elastos::Security::IIdentity ** ppIdentity);
 
-    CARAPI GetIdentityEx(
+    CARAPI GetIdentity(
         /* [in] */ Elastos::Security::IPrincipal * pPrincipal,
         /* [out] */ Elastos::Security::IIdentity ** ppIdentity);
 
-    CARAPI GetIdentityEx2(
+    CARAPI GetIdentity(
         /* [in] */ Elastos::Security::IPublicKey * pKey,
         /* [out] */ Elastos::Security::IIdentity ** ppIdentity);
 

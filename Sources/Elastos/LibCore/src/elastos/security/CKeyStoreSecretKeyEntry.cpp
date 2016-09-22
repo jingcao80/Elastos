@@ -23,8 +23,8 @@ ECode CKeyStoreSecretKeyEntry::ToString(
 {
     StringBuilder sb("SecretKeyEntry: algorithm - ");
     String algo;
-    mSecretKey->GetAlgorithm(&algo);
-    sb.AppendString(algo);
+    IKey::Probe(mSecretKey)->GetAlgorithm(&algo);
+    sb.Append(algo);
     return sb.ToString(str);
 }
 

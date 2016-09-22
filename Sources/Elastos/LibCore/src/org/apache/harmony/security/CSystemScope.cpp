@@ -31,7 +31,7 @@ ECode CSystemScope::Certificates(
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CSystemScope::ToStringEx(
+ECode CSystemScope::ToString(
     /* [in] */ Boolean detailed,
     /* [out] */ String * pStr)
 {
@@ -89,7 +89,7 @@ ECode CSystemScope::GetIdentity(
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CSystemScope::GetIdentityEx(
+ECode CSystemScope::GetIdentity(
     /* [in] */ Elastos::Security::IPrincipal * pPrincipal,
     /* [out] */ Elastos::Security::IIdentity ** ppIdentity)
 {
@@ -97,7 +97,7 @@ ECode CSystemScope::GetIdentityEx(
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CSystemScope::GetIdentityEx2(
+ECode CSystemScope::GetIdentity(
     /* [in] */ Elastos::Security::IPublicKey * pKey,
     /* [out] */ Elastos::Security::IIdentity ** ppIdentity)
 {

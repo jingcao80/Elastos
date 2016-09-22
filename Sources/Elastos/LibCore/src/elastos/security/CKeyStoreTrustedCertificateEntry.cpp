@@ -21,7 +21,7 @@ ECode CKeyStoreTrustedCertificateEntry::ToString(
     VALIDATE_NOT_NULL(str)
     *str = String("Trusted certificate entry:\n");
     String cert;
-    mTrustCertificate->ToString(&cert);
+    IObject::Probe(mTrustCertificate)->ToString(&cert);
     (*str) += cert;
     return NOERROR;
 }

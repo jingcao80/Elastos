@@ -47,7 +47,7 @@ module
          * @throws InvalidAlgorithmParameterException
          *             if the specified parameters are not supported
          */
-        InitializeEx(
+        Initialize(
             [in] IAlgorithmParameterSpec* param);
 
         /**
@@ -81,7 +81,7 @@ module
          * @param random
          *            the source of randomness
          */
-        InitializeEx2(
+        Initialize(
             [in] Int32 keysize,
             [in] ISecureRandom* random);
 
@@ -96,7 +96,7 @@ module
          * @throws InvalidAlgorithmParameterException
          *             if the specified parameters are not supported
          */
-        InitializeEx3(
+        Initialize(
             [in] IAlgorithmParameterSpec* param,
             [in] ISecureRandom* random);
     }
@@ -134,7 +134,7 @@ module
          *             if {@code algorithm} is {@code null}
          * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
          */
-        GetInstanceEx(
+        GetInstance(
             [in] String algorithm,
             [in] String provider,
             [out] IKeyPairGenerator** instance);
@@ -154,7 +154,7 @@ module
          *             if {@code algorithm} is {@code null}
          * @throws IllegalArgumentException if {@code provider == null}
          */
-        GetInstanceEx2(
+        GetInstance(
             [in] String algorithm,
             [in] IProvider* provider,
             [out] IKeyPairGenerator** instance);

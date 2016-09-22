@@ -17,7 +17,9 @@ class PropertyPermission
 public:
     CAR_INTERFACE_DECL()
 
-    PropertyPermission(
+    PropertyPermission();
+
+    CARAPI constructor(
         /* [in] */ const String& name,
         /* [in] */ const String& actions);
 

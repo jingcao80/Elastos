@@ -7,6 +7,7 @@ module
     namespace Elastos {
     namespace Security {
 
+    [deprecated]
     interface IAlgorithmParameters {
         /**
          * Returns the provider associated with this {@code AlgorithmParameters}.
@@ -50,7 +51,7 @@ module
          *             initialized, or the parameter could not be encoded.
          */
         Init(
-            [in] ArrayOf<Byte> params);
+            [in] ArrayOf<Byte>* params);
 
         /**
          * Initializes this {@code AlgorithmParameters} with the specified {@code
@@ -65,7 +66,7 @@ module
          *             initialized, or the parameter could not be encoded.
          */
         Init(
-            [in] ArrayOf<Byte> params,
+            [in] ArrayOf<Byte>* params,
             [in] String format);
 
         /**

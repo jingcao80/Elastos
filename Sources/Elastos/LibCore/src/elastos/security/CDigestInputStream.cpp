@@ -1,5 +1,8 @@
 
 #include "CDigestInputStream.h"
+#include "StringBuilder.h"
+
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Security {
@@ -61,11 +64,11 @@ ECode CDigestInputStream::Read(
 {
     VALIDATE_NOT_NULL(bytesRead)
 
-    FAIL_RETURN(in->Read(buffer, byteOffset, byteCount, bytesRead))
+    FAIL_RETURN(mIn->Read(buffer, byteOffset, byteCount, bytesRead))
     // update digest only if
     // - digest functionality is on
     // - eos has not been reached
-    if (isOn && (*bytesRead != -1)) {
+    if (mIsOn && (*bytesRead != -1)) {
         mDigest->Update(buffer, byteOffset, *bytesRead);
     }
     // return number of bytes read

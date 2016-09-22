@@ -4,6 +4,7 @@
 #include "CKeyStoreSecretKeyEntry.h"
 #include "CKeyStorePrivateKeyEntry.h"
 #include "CKeyStoreTrustedCertificateEntry.h"
+#include "Elastos.CoreLibrary.Extensions.h"
 
 namespace Elastos {
 namespace Security {
@@ -53,6 +54,7 @@ ECode KeyStoreSpi::EngineGetEntry(
     /* [out] */ IKeyStoreEntry **entry)
 {
     VALIDATE_NOT_NULL(entry)
+    *entry = NULL;
     Boolean tag;
     if ((EngineContainsAlias(alias, &tag), !tag)) {
         return NOERROR;
@@ -62,7 +64,7 @@ ECode KeyStoreSpi::EngineGetEntry(
         EngineGetCertificate(alias, (Elastos::Security::Cert::ICertificate**)&cert);
         AutoPtr<IKeyStoreTrustedCertificateEntry> tce;
         CKeyStoreTrustedCertificateEntry::New(cert, (IKeyStoreTrustedCertificateEntry**)&tce);
-        *entry = tce.Get();
+        *entry = IKeyStoreEntry::Probe(tce);
         REFCOUNT_ADD(*entry)
         return NOERROR;
     }
@@ -93,14 +95,14 @@ ERROR_PROCESS:
             EngineGetCertificateChain(alias, (ArrayOf<Elastos::Security::Cert::ICertificate*>**)&cert);
             AutoPtr<IKeyStorePrivateKeyEntry> pke;
             CKeyStorePrivateKeyEntry::New(IPrivateKey::Probe(key.Get()), cert, (IKeyStorePrivateKeyEntry**)&pke);
-            *entry = pke.Get();
+            *entry = IKeyStoreEntry::Probe(pke);
             REFCOUNT_ADD(*entry)
             return NOERROR;
         }
         if (ISecretKey::Probe(key.Get())) {
             AutoPtr<IKeyStoreSecretKeyEntry> ske;
             CKeyStoreSecretKeyEntry::New(ISecretKey::Probe(key.Get()), (IKeyStoreSecretKeyEntry**)&ske);
-            *entry = ske.Get();
+            *entry = IKeyStoreEntry::Probe(ske);
             REFCOUNT_ADD(*entry)
             return NOERROR;
         }
@@ -152,19 +154,19 @@ ERROR_PROCESS:
     }
 
     if (IKeyStorePrivateKeyEntry::Probe(entry)) {
-        AutoPtr<IKeyStorePrivateKeyEntry> prE = entry;
+        AutoPtr<IKeyStorePrivateKeyEntry> prE = IKeyStorePrivateKeyEntry::Probe(entry);
         AutoPtr<ArrayOf<Elastos::Security::Cert::ICertificate*> > cert;
         prE->GetCertificateChain((ArrayOf<Elastos::Security::Cert::ICertificate*>**)&cert);
         AutoPtr<IPrivateKey> pk;
         prE->GetPrivateKey((IPrivateKey**)&pk);
-        return EngineSetKeyEntry(alias, pk, passW, cert);
+        return EngineSetKeyEntry(alias, IKey::Probe(pk), passW, cert);
     }
 
     if (IKeyStoreSecretKeyEntry::Probe(entry)) {
-        AutoPtr<IKeyStoreSecretKeyEntry> sKE = entry;
+        AutoPtr<IKeyStoreSecretKeyEntry> sKE = IKeyStoreSecretKeyEntry::Probe(entry);
         AutoPtr<ISecretKey> sk;
         sKE->GetSecretKey((ISecretKey**)&sk);
-        return EngineSetKeyEntry(alias, sk, passW, NULL);
+        return EngineSetKeyEntry(alias, IKey::Probe(sk), passW, NULL);
     }
 
     return E_KEY_STORE_EXCEPTION;

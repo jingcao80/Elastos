@@ -7,6 +7,14 @@ module
     merge("../../car/elastos/system.car");
     }
 
+    submodule Elastos.CoreLibrary.Utility {
+    merge("../../car/elastos/utility2.car");
+    }
+
+    submodule Elastos.CoreLibrary.IO {
+    merge("../../car/elastos/io2.car");
+    }
+
     submodule Elastos.CoreLibrary.Security {
     merge("../../car/elastos/security.car");
     }

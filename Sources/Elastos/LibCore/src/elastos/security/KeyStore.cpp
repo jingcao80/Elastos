@@ -16,10 +16,6 @@ const String KeyStore::PROPERTYNAME("keystore.type");
 //  Store default KeyStore type
 const String KeyStore::DEFAULT_KEYSTORE_TYPE("jks");
 
-// {F3CC4E70-AAB6-20F8-B739-CDD76DAE5872}
-extern "C" const InterfaceID EIID_KeyStore =
-        { 0xF3CC4E70, 0xAAB6, 0x20F8, { 0xB7, 0x39, 0xCD, 0xD7, 0x6D, 0xAE, 0x58, 0x72 } };
-
 CAR_INTERFACE_IMPL(KeyStore, Object, IKeyStore)
 
 KeyStore::KeyStore(
@@ -195,7 +191,7 @@ ECode KeyStore::SetKeyEntryEx(
     if (!mIsInit) {
         return E_KEY_STORE_EXCEPTION;
     }
-    return mImplSpi->EngineSetKeyEntryEx(alias, key, chain);
+    return mImplSpi->EngineSetKeyEntry(alias, key, chain);
 }
 
 ECode KeyStore::SetCertificateEntry(
@@ -293,7 +289,7 @@ ECode KeyStore::StoreEx(
     if (!mIsInit) {
         return E_KEY_STORE_EXCEPTION;
     }
-    return mImplSpi->EngineStoreEx(param);
+    return mImplSpi->EngineStore(param);
 }
 
 ECode KeyStore::Load(
@@ -308,7 +304,7 @@ ECode KeyStore::Load(
 ECode KeyStore::LoadEx(
     /* [in] */ IKeyStoreLoadStoreParameter *param)
 {
-    FAIL_RETURN(mImplSpi->EngineLoadEx(param))
+    FAIL_RETURN(mImplSpi->EngineLoad(param))
     mIsInit = TRUE;
     return NOERROR;
 }

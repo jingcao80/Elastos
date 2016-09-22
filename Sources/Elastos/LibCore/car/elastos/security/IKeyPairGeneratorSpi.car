@@ -42,7 +42,7 @@ module
         * @throws InvalidAlgorithmParameterException
         *             if the specified parameters are not supported.
         */
-        InitializeEx(
+        Initialize(
             [in] IAlgorithmParameterSpec* params,
             [in] ISecureRandom* random);
     }

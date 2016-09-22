@@ -43,13 +43,13 @@ ECode CKeyStorePrivateKeyEntry::ToString(
     /* [out] */ String *str)
 {
     StringBuilder sb("PrivateKeyEntry: number of elements in certificate chain is ");
-    sb.AppendString(StringUtils::Int32ToString(mChain->GetLength()));
-    sb.AppendCStr("\n");
+    sb.Append(StringUtils::ToString(mChain->GetLength()));
+    sb.Append("\n");
     for (Int32 i = 0; i < mChain->GetLength(); i++) {
         String cert;
-        (*mChain)[i]->ToString(&cert);
-        sb.AppendString(cert);
-        sb.AppendCStr("\n");
+        IObject::Probe((*mChain)[i])->ToString(&cert);
+        sb.Append(cert);
+        sb.Append("\n");
     }
     return sb.ToString(str);
 }
@@ -74,8 +74,8 @@ ECode CKeyStorePrivateKeyEntry::constructor(
     (*chain)[0]->GetType(&s);
     AutoPtr<IPublicKey> pubKey;
     (*chain)[0]->GetPublicKey((IPublicKey**)&pubKey);
-    pubKey->GetAlgorithm(&pubAlgo);
-    privateKey->GetAlgorithm(&priAlgo);
+    IKey::Probe(pubKey)->GetAlgorithm(&pubAlgo);
+    IKey::Probe(privateKey)->GetAlgorithm(&priAlgo);
     if (!pubAlgo.Equals(priAlgo)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -99,9 +99,9 @@ ECode CKeyStorePrivateKeyEntry::constructor(
 
     if (isAllX509Certificates) {
        AutoPtr<ArrayOf<IX509Certificate*> > tmp = ArrayOf<IX509Certificate*>::Alloc(chain->GetLength());
-       mChain =ArrayOf<Elastos::Security::Cert::ICertificate*>::Alloc(chain->GetLength());
+       mChain = ArrayOf<Elastos::Security::Cert::ICertificate*>::Alloc(chain->GetLength());
        for (Int32 i = 0; i < mChain->GetLength(); i++) {
-            mChain->Set(i, (*tmp)[i]);
+            mChain->Set(i, Elastos::Security::Cert::ICertificate::Probe((*tmp)[i]));
        }
     }
     else {

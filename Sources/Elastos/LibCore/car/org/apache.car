@@ -377,9 +377,9 @@ module
         interface IEngine;
     }
 
-    singleton class CServices {
-        interface IServices;
-    }
+    // singleton class CServices {
+    //     interface IServices;
+    // }
 
     } // namespace Fortress
 

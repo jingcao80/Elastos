@@ -5,7 +5,6 @@ module
     // Elastos.Utility
     //======================================================
     merge("utility/Exceptions.car");
-    merge("utility/IRandom.car");
     merge("utility/IBitSet.car");
     merge("utility/IDate.car");
     merge("utility/ICalendar.car");

@@ -121,7 +121,7 @@ module
          *             if the requested provider is not available.
          * @throws IllegalArgumentException if {@code provider == null || provider.isEmpty()}
          */
-        GetInstanceEx(
+        GetInstance(
             [in] String algorithm,
             [in] String provider,
             [out] IKeyFactory** instance);
@@ -140,7 +140,7 @@ module
          *             if the provider does not provide the requested algorithm.
          * @throws IllegalArgumentException if {@code provider == null}
          */
-        GetInstanceEx2(
+        GetInstance(
             [in] String algorithm,
             [in] IProvider* provider,
             [out] IKeyFactory** instance);

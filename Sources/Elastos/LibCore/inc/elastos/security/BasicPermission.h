@@ -11,12 +11,7 @@ class BasicPermission
     : public Permission
 {
 public:
-    BasicPermission(
-        /* [in] */ const String& name);
-
-    BasicPermission(
-        /* [in] */ const String& name,
-        /* [in] */ const String& action);
+    BasicPermission();
 
     CARAPI GetActions(
         /* [out] */ String *actions);

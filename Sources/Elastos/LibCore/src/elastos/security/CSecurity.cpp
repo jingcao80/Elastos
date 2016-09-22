@@ -8,7 +8,7 @@
 #include "utility/CArrayList.h"
 #include "utility/logging/Logger.h"
 #include "org/apache/harmony/security/fortress/CEngine.h"
-#include "org/apache/harmony/security/fortress/CServices.h"
+#include "org/apache/harmony/security/fortress/Services.h"
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
@@ -24,8 +24,7 @@ using Elastos::Utility::CHashMap;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::Logging::Logger;
 using Org::Apache::Harmony::Security::Fortress::CEngine;
-using Org::Apache::Harmony::Security::Fortress::IServices;
-using Org::Apache::Harmony::Security::Fortress::CServices;
+using Org::Apache::Harmony::Security::Fortress::Services;
 using Org::Apache::Harmony::Security::Fortress::EIID_ISecurityAccess;
 
 namespace Elastos {
@@ -210,10 +209,8 @@ ECode CSecurity::InsertProviderAt(
         *pos = -1;
         return NOERROR;
     }
-    AutoPtr<IServices> services;
-    CServices::AcquireSingleton((IServices**)&services);
     Int32 result;
-    services->InsertProviderAt(provider, position, &result);
+    Services::InsertProviderAt(provider, position, &result);
     RenumProviders();
     *pos = result;
     return NOERROR;
@@ -267,9 +264,7 @@ ECode CSecurity::RemoveProvider(
     }
     Int32 number;
     p->GetProviderNumber(&number);
-    AutoPtr<IServices> services;
-    CServices::AcquireSingleton((IServices**)&services);
-    services->RemoveProvider(number);
+    Services::RemoveProvider(number);
     RenumProviders();
     p->SetProviderNumber(-1);
     return NOERROR;
@@ -286,10 +281,8 @@ ECode CSecurity::GetProviders(
 {
     VALIDATE_NOT_NULL(providers)
     AutoLock lock(this);
-    AutoPtr<IServices> services;
-    CServices::AcquireSingleton((IServices**)&services);
     AutoPtr<IArrayList> pros;
-    services->GetProviders((IArrayList**)&pros);
+    Services::GetProviders((IArrayList**)&pros);
     return pros->ToArray((ArrayOf<IInterface*>**)providers);
 }
 
@@ -299,9 +292,7 @@ ECode CSecurity::GetProvider(
 {
     VALIDATE_NOT_NULL(provider)
     AutoLock lock(this);
-    AutoPtr<IServices> services;
-    CServices::AcquireSingleton((IServices**)&services);
-    return services->GetProvider(name, provider);
+    return Services::GetProvider(name, provider);
 }
 
 /**
@@ -403,10 +394,8 @@ ECode CSecurity::GetProviders(
         return NOERROR;
     }
 
-    AutoPtr<IServices> services;
-    CServices::AcquireSingleton((IServices**)&services);
     AutoPtr<IArrayList> pros;
-    services->GetProviders((IArrayList**)&pros);
+    Services::GetProviders((IArrayList**)&pros);
     AutoPtr<IArrayList> result;
     CArrayList::New(ICollection::Probe(pros), (IArrayList**)&result);
     AutoPtr<ISet> keys;
@@ -516,9 +505,7 @@ ECode CSecurity::SetProperty(
     /* [in] */ const String& key,
     /* [in] */ const String& value)
 {
-    AutoPtr<IServices> services;
-    CServices::AcquireSingleton((IServices**)&services);
-    services->SetNeedRefresh();
+    Services::SetNeedRefresh();
     String old;
     return sSecprops->SetProperty(key, value, &old);
 }
@@ -583,10 +570,8 @@ ECode CSecurity::GetAlgorithms(
  */
 ECode CSecurity::RenumProviders()
 {
-    AutoPtr<IServices> services;
-    CServices::AcquireSingleton((IServices**)&services);
     AutoPtr<IArrayList> providers;
-    FAIL_RETURN(services->GetProviders((IArrayList**)&providers));
+    FAIL_RETURN(Services::GetProviders((IArrayList**)&providers));
     Int32 size;
     providers->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {

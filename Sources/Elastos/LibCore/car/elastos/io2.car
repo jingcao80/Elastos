@@ -1,0 +1,9 @@
+module
+{
+    merge("io/IFlushable.car");
+    merge("io/ICloseable.car");
+    merge("io/IInputStream.car");
+    merge("io/IOutputStream.car");
+    merge("io/IFilterInputStream.car");
+    merge("io/IFilterOutputStream.car");
+}

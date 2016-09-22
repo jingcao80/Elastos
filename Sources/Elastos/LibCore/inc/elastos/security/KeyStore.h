@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_SECURITY_KEYSTORE_H__
 #define __ELASTOS_SECURITY_KEYSTORE_H__
 
+#include "Elastos.CoreLibrary.Security.h"
 #include "core/Object.h"
 
 using Elastos::Core::Object;
@@ -12,8 +13,6 @@ using Elastos::IO::IOutputStream;
 
 namespace Elastos {
 namespace Security {
-
-extern "C" const InterfaceID EIID_KeyStore;
 
 class KeyStore
     : public Object

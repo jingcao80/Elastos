@@ -3,6 +3,8 @@
 #define __ELASTOS_SECURITY_CKEYSTORESECRETKEYENTRY_H__
 
 #include "_Elastos_Security_CKeyStoreSecretKeyEntry.h"
+#include "Elastos.CoreLibrary.Extensions.h"
+#include "Object.h"
 
 using Elastosx::Crypto::ISecretKey;
 
