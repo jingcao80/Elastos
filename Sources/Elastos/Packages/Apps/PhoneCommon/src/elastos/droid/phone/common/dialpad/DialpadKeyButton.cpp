@@ -20,7 +20,6 @@ ECode DialpadKeyButton::MyRunnable::Run()
     return NOERROR;
 }
 
-
 const Int32 DialpadKeyButton::LONG_HOVER_TIMEOUT = DialpadKeyButton::Init_LONG_HOVER_TIMEOUT();
 
 CAR_INTERFACE_IMPL(DialpadKeyButton, FrameLayout, IDialpadKeyButton);
@@ -30,13 +29,7 @@ DialpadKeyButton::DialpadKeyButton()
     , mWasClickable(FALSE)
     , mWasLongClickable(FALSE)
 {
-    Logger::E("DialpadKeyButton", "====[snow]===== DialpadKeyButton::DialpadKeyButton");
     CRect::New((IRect**)&mHoverBounds);
-}
-
-DialpadKeyButton::~DialpadKeyButton()
-{
-    Logger::E("DialpadKeyButton", "====[snow]===== DialpadKeyButton::~DialpadKeyButton");
 }
 
 ECode DialpadKeyButton::constructor(
@@ -55,14 +48,6 @@ ECode DialpadKeyButton::constructor(
 {
     FAIL_RETURN(FrameLayout::constructor(ctx, attrs, defStyle));
     InitForAccessibility(ctx);
-    return NOERROR;
-}
-
-ECode DialpadKeyButton::OnFinishInflate()
-{
-    Int32 id;
-    GetId(&id);
-    Logger::E("DialpadKeyButton", "====[snow]===== DialpadKeyButton::OnFinishInflate id=%x", id);
     return NOERROR;
 }
 

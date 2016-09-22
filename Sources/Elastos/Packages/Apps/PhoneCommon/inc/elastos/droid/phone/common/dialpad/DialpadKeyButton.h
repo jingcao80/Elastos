@@ -48,8 +48,6 @@ public:
 
     DialpadKeyButton();
 
-    ~DialpadKeyButton();
-
     CARAPI constructor(
         /* [in] */ IContext* ctx,
         /* [in] */ IAttributeSet* attrs);
@@ -90,10 +88,6 @@ public:
     CARAPI OnHoverEvent(
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
-
-
-protected:
-    CARAPI OnFinishInflate();
 
 private:
     CARAPI_(void) InitForAccessibility(

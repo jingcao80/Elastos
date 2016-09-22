@@ -163,9 +163,7 @@ void DialpadView::SetupKeypad()
 
     for (Int32 i = 0; i < mButtonIds->GetLength(); i++) {
         AutoPtr<IView> dialpadKeyV;
-        Logger::E(TAG, "====[snow]===== DialpadView::SetupKeypad,(*mButtonIds)[%d]=%x",i, (*mButtonIds)[i]);
-        ECode ec = FindViewById((*mButtonIds)[i], (IView**)&dialpadKeyV);
-        Logger::E(TAG, "====[snow]===== DialpadView::SetupKeypad,dialpadKeyV=%s, ec = %d", TO_CSTR(dialpadKeyV), ec);
+        FindViewById((*mButtonIds)[i], (IView**)&dialpadKeyV);
         dialpadKey = IDialpadKeyButton::Probe(dialpadKeyV);
         AutoPtr<IView> v;
         dialpadKeyV->FindViewById(R::id::dialpad_key_number, (IView**)&v);
