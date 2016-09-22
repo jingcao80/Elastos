@@ -1,3 +1,5 @@
+elog("====ViewPager.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
 //--------common definition----begin----
     var CObject = aoElastos.CObject;
@@ -41,7 +43,7 @@ module.exports = function(aoElastos, aoActivity){
 // import android.database.DataSetObserver;
 // import android.graphics.Canvas;
 // import android.graphics.Rect;
-    var Rect = Elastos.Droid.Graphics.CRect;
+    var Rect = function(){};   // = Elastos.Droid.Graphics.CRect;
 // import android.graphics.drawable.Drawable;
 // import android.os.Build;
 // import android.os.Bundle;
@@ -69,15 +71,20 @@ module.exports = function(aoElastos, aoActivity){
 // import android.view.ViewParent;
 // import android.view.accessibility.AccessibilityEvent;
 // import android.view.animation.Interpolator;
-    var Interpolator = Elastos.Droid.View.Animation.IInterpolator;
+    var Interpolator = function(){};   // = Elastos.Droid.View.Animation.IInterpolator;
 // import android.widget.Scroller;
 
 // import java.lang.reflect.Method;
 // import java.util.ArrayList;
-    var ArrayList = Elastos.Utility.IArrayList;
+    var ArrayList = function(){};  // = Elastos.Utility.IArrayList;
 // import java.util.Collections;
 // import java.util.Comparator;
-    var Comparator = Elastos.Core.IComparator;
+    var Comparator = function(){}; // = Elastos.Core.IComparator;
+
+
+    var Runnable = function(){};
+    var AccessibilityDelegateCompat = function(){};
+
 
 // /**
 //  * Layout manager that allows the user to flip left and right
@@ -156,7 +163,7 @@ module.exports = function(aoElastos, aoActivity){
         }
 
 //     private static final Comparator<ItemInfo> COMPARATOR = new Comparator<ItemInfo>(){
-        var COMPARATOR = new Comparator().extend({
+        var COMPARATOR = {
 //         @Override
 //         public int compare(ItemInfo lhs, ItemInfo rhs) {
             Compare : function(lhs, rhs, result) {
@@ -165,10 +172,10 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             }
 //     };
-        });
+        };
 
 //     private static final Interpolator sInterpolator = new Interpolator() {
-        var sInterpolator = new Interpolator().extend({
+        var sInterpolator = {
 //         public float getInterpolation(float t) {
             GetInterpolation : function(t, result) {
 //             t -= 1.0f;
@@ -178,7 +185,7 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             }
 //     };
-        });
+        };
 
 //     private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
         var mItems = new ArrayList();
@@ -216,9 +223,9 @@ module.exports = function(aoElastos, aoActivity){
 //     // Set during population, used to determine if we are at the beginning
 //     // or end of the pager data set during touch scrolling.
 //     private float mFirstOffset = -Float.MAX_VALUE;
-        var mFirstOffset = -Elastos.Core.Math.FLOAT_MAX_VALUE;
+        var mFirstOffset = 0;   //Elastos.Core.Math.FLOAT_MAX_VALUE;
 //     private float mLastOffset = Float.MAX_VALUE;
-        var mLastOffset = Elastos.Core.Math.FLOAT_MAX_VALUE;
+        var mLastOffset = 0;    //Elastos.Core.Math.FLOAT_MAX_VALUE;
 
 //     private int mChildWidthMeasureSpec;
         var mChildWidthMeasureSpec;
@@ -332,7 +339,7 @@ module.exports = function(aoElastos, aoActivity){
 //     private ArrayList<View> mDrawingOrderedChildren;
         var mDrawingOrderedChildren;
 //     private static final ViewPositionComparator sPositionComparator = new ViewPositionComparator();
-        var sPositionComparator = new ViewPositionComparator();
+        var sPositionComparator;    // = new ViewPositionComparator();
 
 //     /**
 //      * Indicates that the pager is in an idle, settled state. The current page
@@ -354,7 +361,7 @@ module.exports = function(aoElastos, aoActivity){
         var SCROLL_STATE_SETTLING = 2;
 
 //     private final Runnable mEndScrollRunnable = new Runnable() {
-        var mEndScrollRunnable = new Runnable().extend({
+        var mEndScrollRunnable = {
 //         public void run() {
             run : function() {
 //             setScrollState(SCROLL_STATE_IDLE);
@@ -362,7 +369,7 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             }
 //     };
-        });
+        };
 
 //     private int mScrollState = SCROLL_STATE_IDLE;
         var mScrollState = SCROLL_STATE_IDLE;
@@ -1415,7 +1422,7 @@ module.exports = function(aoElastos, aoActivity){
 //      * contains that state.
 //      */
 //     public static class SavedState extends BaseSavedState {
-        function saveState() {
+        var SavedState = {
 //         int position;
 //         Parcelable adapterState;
 //         ClassLoader loader;
@@ -3062,7 +3069,7 @@ module.exports = function(aoElastos, aoActivity){
         }
 
 //     class MyAccessibilityDelegate extends AccessibilityDelegateCompat {
-        var MyAccessibilityDelegate = AccessibilityDelegateCompat.extend({
+        var MyAccessibilityDelegate = {
 //         @Override
 //         public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
             OnInitializeAccessibilityEvent : function(host, event) {
@@ -3124,10 +3131,10 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             },
 //     }
-        });
+        };
 
 //     private class PagerObserver extends DataSetObserver {
-        var PagerObserver = DataSetObserver.extend({
+        var PagerObserver = {
 //         @Override
 //         public void onChanged() {
             OnChanged : function() {
@@ -3141,14 +3148,14 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             },
 //     }
-        });
+        };
 
 //     /**
 //      * Layout parameters that should be supplied for views added to a
 //      * ViewPager.
 //      */
 //     public static class LayoutParams extends ViewGroup.LayoutParams {
-        var LayoutParams = ViewGroup.LayoutParams.extend({
+        var LayoutParams = {
 //         /**
 //          * true if this view is a decoration on the pager itself and not
 //          * a view supplied by the adapter.
@@ -3199,13 +3206,13 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             },
 //     }
-        });
+        };
 
 //     static class ViewPositionComparator implements Comparator<View> {
-        var ViewPositionComparator = Comparator.extend({
+        class ViewPositionComparator {
 //         @Override
 //         public int compare(View lhs, View rhs) {
-            compare : function(View lhs, View rhs) {
+            compare(lhs, rhs) {
 //             final LayoutParams llp = (LayoutParams) lhs.getLayoutParams();
 //             final LayoutParams rlp = (LayoutParams) rhs.getLayoutParams();
 //             if (llp.isDecor != rlp.isDecor) {
@@ -3215,10 +3222,15 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             }
 //     }
-        });
+        }
+
+        sPositionComparator = new ViewPositionComparator();
+
 // }
 
 //--------.java----end----
 
     return ViewPager;
 };  //module.exports
+
+elog("====ViewPager.js====end====");

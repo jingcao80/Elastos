@@ -1,3 +1,5 @@
+elog("====CalculatorEditText.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
     var FullClassName = "Elastos.DevSamples.Node.JSCalculator.CalculatorEditText";
     var ShortClassName = FullClassName.split(".").pop();
@@ -448,3 +450,5 @@ CObject.showMethods(_this, "etText");
 
     return oCallback;
  };  //module.exports
+
+ elog("====CalculatorEditText.js====end====");

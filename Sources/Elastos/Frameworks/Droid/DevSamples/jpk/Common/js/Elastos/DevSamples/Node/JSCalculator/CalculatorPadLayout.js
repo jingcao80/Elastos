@@ -1,3 +1,5 @@
+elog("====CalculatorPadLayout.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
 //--------common definition----begin----
     var CObject = aoElastos.CObject;
@@ -41,9 +43,9 @@ module.exports = function(aoElastos, aoActivity){
 // import android.content.res.TypedArray;
 // import android.util.AttributeSet;
 // import android.view.View;
-    var View = Elastos.Droid.View.IView;
+    var View;   // = Elastos.Droid.View.IView;
 // import android.view.ViewGroup;
-    var ViewGroup = Elastos.Droid.View.IViewGroup;
+    var ViewGroup;  // = Elastos.Droid.View.IViewGroup;
 
 // /**
 //  * A layout that places children in an evenly distributed grid based on the specified
@@ -207,3 +209,5 @@ module.exports = function(aoElastos, aoActivity){
 
     return CalculatorPadLayout;
 };  //module.exports
+
+elog("====CalculatorPadLayout.js====end====");

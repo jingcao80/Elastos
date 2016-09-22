@@ -1,3 +1,5 @@
+elog("====CalculatorExpressionEvaluator.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
 //--------common definition----begin----
     var CObject = aoElastos.CObject;
@@ -121,3 +123,5 @@ var Util = require("./arity/Util.js")(aoElastos, aoActivity);
 
     return CalculatorExpressionEvaluator;
 };  //module.exports
+
+elog("====CalculatorExpressionEvaluator.js====end====");

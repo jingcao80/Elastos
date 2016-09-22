@@ -1,3 +1,5 @@
+elog("====Calculator.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
 //--------common definition----begin----
     var CObject = aoElastos.CObject;
@@ -202,81 +204,81 @@ module.exports = function(aoElastos, aoActivity){
 //     @Override
 //     protected void onCreate(Bundle savedInstanceState) {
         _apt.OnCreate = function(context, savedInstanceState){
-            elog('====jso_activity_cb====OnCreate.begin====');
+            elog('====Calculator.js====OnCreate.begin====');
 
 //         super.onCreate(savedInstanceState);
 //         setContentView(R.layout.activity_calculator);
             oActivity.SetContentView(R.layout.activity_calculator);
 
 //         mDisplayView = findViewById(R.id.display);
-            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.display');
+            elog('====Calculator.js====OnCreate====FindViewById====R.id.display');
             mDisplayView = oActivity.FindViewById(R.id.display);
 //         mFormulaEditText = (CalculatorEditText) findViewById(R.id.formula);
-            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.formula');
+            elog('====Calculator.js====OnCreate====FindViewById====R.id.formula');
             mFormulaEditText = oActivity.FindViewById(R.id.formula);
 
 elog("====showMethod===mFormulaEditText==0==");
 CObject.showMethods(mFormulaEditText, "etText");
 
 //         mResultEditText = (CalculatorEditText) findViewById(R.id.result);
-            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.result');
+            elog('====Calculator.js====OnCreate====FindViewById====R.id.result');
             mResultEditText = oActivity.FindViewById(R.id.result);
 
 elog("====showMethod===mResultEditText==0==");
 CObject.showMethods(mResultEditText, "etText");
 
 //         mPadViewPager = (ViewPager) findViewById(R.id.pad_pager);
-            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.pad_pager');
+            elog('====Calculator.js====OnCreate====FindViewById====R.id.pad_pager');
             mPadViewPager = oActivity.FindViewById(R.id.pad_pager);
 //         mDeleteButton = findViewById(R.id.del);
-            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.del');
+            elog('====Calculator.js====OnCreate====FindViewById====R.id.del');
             mDeleteButton = oActivity.FindViewById(R.id.del);
 //         mClearButton = findViewById(R.id.clr);
-            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.clr');
+            elog('====Calculator.js====OnCreate====FindViewById====R.id.clr');
             mClearButton = oActivity.FindViewById(R.id.clr);
 
 //         mEqualButton = findViewById(R.id.pad_numeric).findViewById(R.id.eq);
             //mEqualButton = oActivity.FindViewById(R.id.pad_numeric).FindViewById(R.id.eq);
-            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.numeric');
+            elog('====Calculator.js====OnCreate====FindViewById====R.id.numeric');
             var oNumeric = oActivity.FindViewById(R.id.pad_numeric);
-            elog('====jso_activity_cb====OnCreate====FindViewById====R.id.eq==1==');
+            elog('====Calculator.js====OnCreate====FindViewById====R.id.eq==1==');
             mEqualButton = oNumeric.FindViewById(R.id.eq);
 //         if (mEqualButton == null || mEqualButton.getVisibility() != View.VISIBLE) {
             if (mEqualButton == null || mEqualButton.GetVisibility() != IView__VISIBLE) {
 //             mEqualButton = findViewById(R.id.pad_operator).findViewById(R.id.eq);
                 //mEqualButton = oActivity.FindViewById(R.id.pad_operator).FindViewById(R.id.eq);
-                elog('====jso_activity_cb====OnCreate====FindViewById====R.id.pad_operator==');
+                elog('====Calculator.js====OnCreate====FindViewById====R.id.pad_operator==');
                 var oOperator = oActivity.FindViewById(R.id.pad_operator);
-                elog('====jso_activity_cb====OnCreate====FindViewById====R.id.eq==2==');
+                elog('====Calculator.js====OnCreate====FindViewById====R.id.eq==2==');
                 mEqualButton = oOperator.FindViewById(R.id.eq);
 //         }
             }
 
-            elog('====jso_activity_cb====OnCreate==1888==');
+            elog('====Calculator.js====OnCreate==1888==');
 
 //         mTokenizer = new CalculatorExpressionTokenizer(this);
             mTokenizer = new CalculatorExpressionTokenizer(this);
 
-            elog('====jso_activity_cb====OnCreate==2==');
+            elog('====Calculator.js====OnCreate==2==');
 
 //         mEvaluator = new CalculatorExpressionEvaluator(mTokenizer);
             mEvaluator = new CalculatorExpressionEvaluator(mTokenizer);
 
-            elog('====jso_activity_cb====OnCreate==3==');
+            elog('====Calculator.js====OnCreate==3==');
 
 //         savedInstanceState = savedInstanceState == null ? Bundle.EMPTY : savedInstanceState;
             var bhl = Droid_New("Elastos.Droid.Os.CBundleHelper");
             var empty = bhl.GetEMPTY();
             savedInstanceState = savedInstanceState == null ? empty : savedInstanceState;
 
-            elog('====jso_activity_cb====OnCreate==4==');
+            elog('====Calculator.js====OnCreate==4==');
 
 //         setState(CalculatorState.values()[
 //                 savedInstanceState.getInt(KEY_CURRENT_STATE, CalculatorState.INPUT.ordinal())]);
             setState(
                     savedInstanceState.GetInt32(KEY_CURRENT_STATE, CalculatorState.INPUT));
 
-            elog('====jso_activity_cb====OnCreate==5==');
+            elog('====Calculator.js====OnCreate==5==');
 
 //         mFormulaEditText.setText(mTokenizer.getLocalizedExpression(
 //                 savedInstanceState.getString(KEY_CURRENT_EXPRESSION, "")));
@@ -295,14 +297,14 @@ CObject.showMethods(mFormulaEditText, "etText");
             mFormulaEditText.SetText(mTokenizer.getLocalizedExpression(
                     savedInstanceState.GetString(KEY_CURRENT_EXPRESSION, "")));
 
-            elog('====jso_activity_cb====OnCreate==6==');
+            elog('====Calculator.js====OnCreate==6==');
 
 //         mEvaluator.evaluate(mFormulaEditText.getText(), this);
             //TODO:this shoud be convert to IEvaluateCallback automatically
             //TODO:just as: IEvaluateCallback::Probe(this)
             mEvaluator.Evaluate(mFormulaEditText.GetText(), this);
 
-            elog('====jso_activity_cb====OnCreate==7==');
+            elog('====Calculator.js====OnCreate==7==');
 
 
 //         mFormulaEditText.setEditableFactory(mFormulaEditableFactory);
@@ -316,7 +318,7 @@ CObject.showMethods(mFormulaEditText, "etText");
 //         mDeleteButton.setOnLongClickListener(this);
             mDeleteButton.DetOnLongClickListener(this);
 
-            elog('====jso_activity_cb====OnCreate.end====');
+            elog('====Calculator.js====OnCreate.end====');
 //     }
         }
 
@@ -730,3 +732,5 @@ CObject.showMethods(mFormulaEditText, "etText");
     var oListener = new CActivityListener(oActivity);
     return oListener;
 };  //module.exports
+
+elog("====Calculator.js====end====");

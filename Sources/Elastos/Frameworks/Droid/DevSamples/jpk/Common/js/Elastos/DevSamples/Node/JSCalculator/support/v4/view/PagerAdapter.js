@@ -1,3 +1,5 @@
+elog("====PagerAdapter.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
 //--------common definition----begin----
     var CObject = aoElastos.CObject;
@@ -97,7 +99,7 @@ module.exports = function(aoElastos, aoActivity){
 // public abstract class PagerAdapter {
     function PagerAdapter(){_init.apply(this);};
     var _pt = PagerAdapter.prototype;
-    _init(){
+    function _init(){
 //     private DataSetObservable mObservable = new DataSetObservable();
         this.mObservable = Droid_New("Elastos.Droid.Database.CDataSetObservable");
     }
@@ -401,3 +403,5 @@ module.exports = function(aoElastos, aoActivity){
 
     return PagerAdapter;
 };  //module.exports
+
+elog("====PagerAdapter.js====end====");

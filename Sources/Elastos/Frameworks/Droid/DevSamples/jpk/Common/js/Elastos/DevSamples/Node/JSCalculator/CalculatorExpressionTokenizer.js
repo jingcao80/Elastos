@@ -1,3 +1,5 @@
+elog("====CalculatorExpressionTokenizer.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
 //--------common definition----begin----
     var CObject = aoElastos.CObject;
@@ -108,3 +110,5 @@ module.exports = function(aoElastos, aoActivity){
 
     return CalculatorExpressionTokenizer;
 };  //module.exports
+
+elog("====CalculatorExpressionTokenizer.js====end====");

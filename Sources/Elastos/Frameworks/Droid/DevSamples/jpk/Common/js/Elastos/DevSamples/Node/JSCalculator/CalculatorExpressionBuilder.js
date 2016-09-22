@@ -1,3 +1,5 @@
+elog("====CalculatorExpressionBuilder.js====begin====");
+
 module.exports = function(aoElastos, aoActivity){
 //--------common definition----begin----
     var CObject = aoElastos.CObject;
@@ -126,3 +128,5 @@ module.exports = function(aoElastos, aoActivity){
 
     return CalculatorExpressionBuilder;
 };  //module.exports
+
+elog("====CalculatorExpressionBuilder.js====end====");

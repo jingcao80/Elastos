@@ -39,18 +39,21 @@ module.exports = function(aoElastos, aoActivity){
 
 // import android.content.Context;
 // import android.support.v4.view.PagerAdapter;
-    var PagerAdapter = require("./support/v4/view/PagerAdapter.js");
+    var PagerAdapter = require("./support/v4/view/PagerAdapter.js")(aoElastos, aoActivity);
 // import android.support.v4.view.ViewPager;
-    var ViewPager = require("./support/v4/view/ViewPager.js");
+    var ViewPager = require("./support/v4/view/ViewPager.js")(aoElastos, aoActivity);
 // import android.util.AttributeSet;
 // import android.view.View;
 // import android.view.ViewGroup;
 
 // public class CalculatorPadViewPager extends ViewPager {
-    var _this;
+    function JSClass(host) {
+        this.mHost = host;
+    }
+    var _pt = JSClass.prototype;
 
 //     private final PagerAdapter mStaticPagerAdapter = new PagerAdapter() {
-        var mStaticPagerAdapter = new PagerAdapter().extend({
+        var mStaticPagerAdapter = {
 //         @Override
 //         public int getCount() {
             getCount : function(result) {
@@ -91,7 +94,7 @@ module.exports = function(aoElastos, aoActivity){
 //         }
             },
 //     };
-        });
+        };
 
 //     private final OnPageChangeListener mOnPageChangeListener = new SimpleOnPageChangeListener() {
         var mOnPageChangeListener = {
@@ -146,7 +149,9 @@ module.exports = function(aoElastos, aoActivity){
 //     }
 
 //     public CalculatorPadViewPager(Context context, AttributeSet attrs) {
-        function CalculatorPadViewPager(_this, context, attrs) {
+        _pt.OnCreate = function(_this, context, attrs) {
+            elog("====CalculatorPadViewPager====OnCreate====begin====");
+
             attrs = attrs || null;
 //         super(context, attrs);
 
@@ -156,8 +161,9 @@ module.exports = function(aoElastos, aoActivity){
 //         setPageMargin(getResources().getDimensionPixelSize(R.dimen.pad_page_margin));
 //         setPageTransformer(false, mPageTransformer);
 //     }
+
+            elog("====CalculatorPadViewPager====OnCreate====end====");
         }
-        var _pt = CalculatorPadViewPager.prototype;
 
 //     @Override
 //     protected void onFinishInflate() {
@@ -178,7 +184,71 @@ module.exports = function(aoElastos, aoActivity){
 
 //--------.java----end----
 
-    return CalculatorPadViewPager;
+
+    //_super = aoCustomControl;
+    //var _super = aoActivity;
+    var Super = function(aoSuper) {
+        this._super = aoSuper;
+    }
+    var _spt = Super.prototype;
+    _spt.OnCreate = function(_this, context, attrs){
+        this._super._constructor(_this, context, attrs);
+    }
+    // _spt.OnTouchEvent = function(event, result) {
+    //         this._super._OnTouchEvent(event, result);
+    // }
+    // _spt.OnSaveInstanceState = function(result) {
+    //         this._super._OnTouchEvent(result);
+    // }
+    // _spt.SetTextSize = function(unit, size) {
+    //         this._super._SetTextSize(unit, size);
+    // }
+    // _spt.GetCompoundPaddingTop = function(result) {
+    //         this._super._GetCompoundPaddingTop(result);
+    // }
+    // _spt.GetCompoundPaddingBottom = function(result) {
+    //         this._super._GetCompoundPaddingBottom(result);
+    // }
+    // _spt.OnMeasure = function(widthMeasureSpec, heightMeasureSpec) {
+    //         this._super._OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    // }
+    // _spt.OnTextChanged = function(text, start, lengthBefore, lengthAfter) {
+    //         this._super._OnTextChanged(text, start, lengthBefore, lengthAfter);
+    // }
+
+    var _super;
+
+    var oThis = new JSClass(aoActivity);
+
+    var oCallback = {
+        OnCreate : function(_this, context, attrs) {
+            _super = new Super(_this);
+            oThis.OnCreate(_this, context, attrs);
+        },
+        // OnTouchEvent : function(_this, event, result) {
+        //     oThis.OnTouchEvent(_this, event, result);
+        // },
+        // OnSaveInstanceState : function(_this, result) {
+        //     oThis.OnSaveInstanceState(_this, result);
+        // },
+        // SetTextSize : function(_this, unit, size) {
+        //     oThis.SetTextSize(_this, unit, size);
+        // },
+        // GetCompoundPaddingTop : function(_this, result) {
+        //     oThis.GetCompoundPaddingTop(_this, result);
+        // },
+        // GetCompoundPaddingBottom : function(_this, result) {
+        //     oThis.GetCompoundPaddingBottom(_this, result);
+        // },
+        // OnMeasure : function(_this, widthMeasureSpec, heightMeasureSpec) {
+        //     oThis.OnMeasure(_this, widthMeasureSpec, heightMeasureSpec);
+        // },
+        // OnTextChanged : function(_this, text, start, lengthBefore, lengthAfter) {
+        //     oThis.OnTextChanged(_this, text, start, lengthBefore, lengthAfter);
+        // },
+    }
+
+    return oCallback;
 };  //module.exports
 
 elog("====CalculatorPadViewPager.js====end====");
