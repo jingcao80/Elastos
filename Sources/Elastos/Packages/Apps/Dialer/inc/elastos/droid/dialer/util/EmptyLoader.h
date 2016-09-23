@@ -2,7 +2,6 @@
 #define __ELASTOS_DROID_DIALER_UTIL_EMPTYLOADER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
 #include "elastos/droid/content/Loader.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
@@ -41,7 +40,7 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
-        CARAPI constructor(
+        Callback(
             /* [in] */ IContext* context);
 
         // @Override

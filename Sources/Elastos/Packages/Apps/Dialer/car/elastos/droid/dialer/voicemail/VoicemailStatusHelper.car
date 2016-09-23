@@ -8,16 +8,6 @@ module
     namespace Dialer {
     namespace Voicemail {
 
-    interface IVoicemailStatusHelperStatusMessage {
-        /** Whether this message should be shown in the call log page. */
-        ShowInCallLog(
-            [out] Boolean* result);
-
-        /** Whether this message should be shown in the call details page. */
-        ShowInCallDetails(
-            [out] Boolean* result);
-    }
-
     /**
      * Interface used by the call log UI to determine what user message, if any, related to voicemail
      * source status needs to be shown. The messages are returned in the order of importance.

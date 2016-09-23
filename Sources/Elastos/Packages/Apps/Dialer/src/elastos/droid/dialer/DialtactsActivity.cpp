@@ -1334,7 +1334,6 @@ ECode DialtactsActivity::OnListFragmentScroll(
 
 Boolean DialtactsActivity::PhoneIsInUse()
 {
-    // TODO:
     // Boolean inCall;
     // GetTelecomManager()->IsInCall(&inCall);
     // return inCall;

@@ -29,6 +29,8 @@ module
     merge("car/elastos/droid/contacts/common/list/ContactListFilterView.car");
     merge("car/elastos/droid/contacts/common/list/CustomContactListFilterActivity.car");
     merge("car/elastos/droid/contacts/common/list/ViewPagerTabs.car");
+    merge("car/elastos/droid/contacts/common/list/ContactTileView.car");
+    merge("car/elastos/droid/contacts/common/list/ContactEntry.car");
     merge("car/elastos/droid/contacts/common/model/AccountTypeManager.car");
     merge("car/elastos/droid/contacts/common/model/ValuesDelta.car");
     merge("car/elastos/droid/contacts/common/model/account/AccountTypeWithDataSet.car");
@@ -53,13 +55,11 @@ module
 //    merge("car/elastos/droid/dialer/calllog/CallTypeIconsView.car");
 //    merge("car/elastos/droid/dialer/calllog/ClearCallLogDialog.car");
     merge("car/elastos/droid/dialer/calllog/ContactInfo.car");
-//    merge("car/elastos/droid/dialer/calllog/ContactInfoHelper.car");
 //    merge("car/elastos/droid/dialer/calllog/DefaultVoicemailNotifier.car");
 //    merge("car/elastos/droid/dialer/calllog/IntentProvider.car");
 //    merge("car/elastos/droid/dialer/calllog/PhoneAccountUtils.car");
 //    merge("car/elastos/droid/dialer/calllog/PhoneNumberDisplayHelper.car");
 //    merge("car/elastos/droid/dialer/calllog/PhoneNumberUtilsWrapper.car");
-//    merge("car/elastos/droid/dialer/calllog/PhoneQuery.car");
 //    merge("car/elastos/droid/dialer/calllog/VoicemailNotifier.car");
 //    merge("car/elastos/droid/dialer/contact/ContactUpdateService.car");
     merge("car/elastos/droid/dialer/database/DialerDatabaseHelper.car");
@@ -78,7 +78,7 @@ module
     merge("car/elastos/droid/dialer/list/OnListFragmentScrolledListener.car");
     merge("car/elastos/droid/dialer/list/PhoneFavoriteListView.car");
     merge("car/elastos/droid/dialer/list/PhoneFavoriteSquareTileView.car");
-//    merge("car/elastos/droid/dialer/list/PhoneFavoritesTileAdapter.car");
+    merge("car/elastos/droid/dialer/list/PhoneFavoritesTileAdapter.car");
 //    merge("car/elastos/droid/dialer/list/PhoneFavoriteTileView.car");
     merge("car/elastos/droid/dialer/list/RegularSearchFragment.car");
     merge("car/elastos/droid/dialer/list/RegularSearchListAdapter.car");
@@ -101,7 +101,7 @@ module
 //    merge("car/elastos/droid/dialer/util/OrientationUtil.car");
 //    merge("car/elastos/droid/dialer/voicemail/VoicemailPlaybackFragment.car");
 //    merge("car/elastos/droid/dialer/voicemail/VoicemailPlaybackPresenter.car");
-//    merge("car/elastos/droid/dialer/voicemail/VoicemailStatusHelper.car");
+    merge("car/elastos/droid/dialer/voicemail/VoicemailStatusHelper.car");
 //    merge("car/elastos/droid/dialer/voicemail/VoicemailStatusHelperImpl.car");
     merge("car/elastos/droid/dialer/widget/ActionBarController.car");
     merge("car/elastos/droid/dialer/widget/OverlappingPaneLayout.car");
@@ -113,7 +113,6 @@ module
     merge("car/elastos/droid/dialer/DialtactsActivity.car");
 //    merge("car/elastos/droid/dialer/PhoneCallDetails.car");
 //    merge("car/elastos/droid/dialer/PhoneCallDetailsHelper.car");
-//    merge("car/elastos/droid/dialer/PhoneCallDetailsViews.car");
 //    merge("car/elastos/droid/dialer/ProximitySensorAware.car");
 //    merge("car/elastos/droid/dialer/ProximitySensorManager.car");
 //    merge("car/elastos/droid/dialer/SpecialCharSequenceMgr.car");
@@ -285,7 +284,6 @@ module
 //    interface Elastos.Droid.Dialer.CallLog.IPhoneNumberUtilsWrapper;
 //    interface Elastos.Droid.Dialer.CallLog.IPhoneNumberUtilsWrapperHelper;
 //    interface Elastos.Droid.Dialer.CallLog.IPhoneNumberDisplayHelper;
-//    interface Elastos.Droid.Dialer.CallLog.IPhoneQuery;
 //    interface Elastos.Droid.Dialer.Contact.IContactUpdateService;
 //    interface Elastos.Droid.Dialer.Contact.IContactUpdateServiceHelper;
     interface Elastos.Droid.Dialer.Dialpad.IDialpadFragment;
@@ -349,7 +347,6 @@ module
     interface Elastos.Droid.Dialer.IDialtactsActivity;
 //    interface Elastos.Droid.Dialer.IDialtactsActivityHelper;
 //    interface Elastos.Droid.Dialer.IPhoneCallDetailsHelper;
-//    interface Elastos.Droid.Dialer.IPhoneCallDetailsViewsHelper;
 //    interface Elastos.Droid.Dialer.IProximitySensorManager;
 //    interface Elastos.Droid.Dialer.IProximitySensorManagerListener;
 //    interface Elastos.Droid.Dialer.ISpecialCharSequenceMgr;
@@ -361,7 +358,7 @@ module
 //    namespace Droid {
 //    namespace Dialer {
 //    namespace CallLog {
-//
+
 //    [deprecated, local]
 //    class CCallDetailHistoryAdapter {
 //        constructor(
@@ -415,34 +412,6 @@ module
 //
 //    singleton class CCallLogAdapterHelper {
 //        interface ICallLogAdapterHelper;
-//    }
-//
-//    class CCallLogFragment {
-//        constructor();
-//
-//        constructor(
-//            [in] Int32 filterType);
-//
-//        constructor(
-//            [in] Int32 filterType,
-//            [in] Int32 logLimit);
-//
-//        constructor(
-//            [in] Int32 filterType,
-//            [in] Int64 dateLimit);
-//
-//        constructor(
-//            [in] Int32 filterType,
-//            [in] Int32 logLimit,
-//            [in] Int64 dateLimit);
-//
-//        interface IListFragment;
-//        // TODO:
-//        // interface IAnalyticsListFragment;
-//        interface ICallLogFragment;
-//        interface ICallLogQueryHandlerListener;
-//        interface ICallLogAdapterOnReportButtonClickListener;
-//        interface ICallLogAdapterCallItemExpandedListener;
 //    }
 //
 //    class CCallLogGroupBuilder {
@@ -549,15 +518,6 @@ module
 //        interface IContactInfo;
 //    }
 //
-//    [local]
-//    class CContactInfoHelper {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] String currentCountryIso);
-//
-//        interface IContactInfoHelper;
-//    }
-//
 //    singleton class CDefaultVoicemailNotifierHelper {
 //        interface IDefaultVoicemailNotifierHelper;
 //    }
@@ -588,16 +548,11 @@ module
 //    singleton class CPhoneNumberUtilsWrapperHelper {
 //        interface IPhoneNumberUtilsWrapperHelper;
 //    }
-//
-//    singleton class CPhoneQuery {
-//        interface IPhoneQuery;
-//    }
-//
 //    } // CallLog
 //    } // Dialer
 //    } // Droid
 //    } // Elastos
-//
+
 //    namespace Elastos {
 //    namespace Droid {
 //    namespace Dialer {
@@ -951,18 +906,6 @@ module
 //        // interface IPhoneNumberPickerFragment;
 //        interface ISearchFragment;
 //        interface ISmartDialSearchFragment;
-//    }
-//
-//    class CSpeedDialFragment {
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IFragment;
-//        // TODO:
-//        // interface IAnalyticsFragment;
-//        interface ISpeedDialFragment;
-//        interface IAdapterViewOnItemClickListener;
-//        interface IOnDataSetChangedForAnimationListener;
 //    }
 //
 //    [local]
@@ -1337,10 +1280,6 @@ module
 //            [in] IPhoneNumberUtilsWrapper* phoneUtils);
 //
 //        interface IPhoneCallDetailsHelper;
-//    }
-//
-//    singleton class CPhoneCallDetailsViewsHelper {
-//        interface IPhoneCallDetailsViewsHelper;
 //    }
 //
 //    [local]

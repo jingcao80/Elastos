@@ -1,24 +1,40 @@
 
 #include "elastos/droid/dialer/list/SpeedDialFragment.h"
-#include "elastos/utility/logging/Logger.h"
+#include "elastos/droid/dialer/util/DialerUtils.h"
+#include "elastos/droid/contacts/common/ContactTileLoaderFactory.h"
+#include "elastos/droid/contacts/common/ContactPhotoManager.h"
 #include "Elastos.Droid.Animation.h"
-#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/utility/etl/List.h>
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/R.h"
+#include "R.h"
 
-using Elastos::Droid::App::ILoader;
-using Elastos::Droid::App::ILoaderManager;
 using Elastos::Droid::Animation::CAnimatorSet;
-using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
+using Elastos::Droid::App::ILoader;
+using Elastos::Droid::App::ILoaderManager;
+using Elastos::Droid::Contacts::Common::ContactTileLoaderFactory;
+using Elastos::Droid::Contacts::Common::ContactPhotoManager;
+using Elastos::Droid::Contacts::Common::List::EIID_IContactTileViewListener;
+using Elastos::Droid::Dialer::List::EIID_ISpeedDialFragment;
+using Elastos::Droid::Dialer::List::EIID_IOnDataSetChangedForAnimationListener;
+using Elastos::Droid::Dialer::Util::DialerUtils;
 using Elastos::Droid::View::Animation::IAnimationUtils;
 using Elastos::Droid::View::Animation::CAnimationUtils;
 using Elastos::Droid::View::Animation::ILayoutAnimationController;
 using Elastos::Droid::View::Animation::CLayoutAnimationController;
-using Elastos::Droid::View::Animation::IViewGroupLayoutParams;
-using Elastos::Droid::Widget::IListView;
-using Elastos::Core::CoreUtils;
-using Elastos::Utility::CArrayList;
-using Elastos::Utility::CHashMap;
+// using Elastos::Droid::View::Animation::IViewGroupLayoutParams;
+using Elastos::Droid::View::EIID_IOnPreDrawListener;
+// using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Widget::EIID_IAbsListViewOnScrollListener;
+using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
+using Elastos::Core::CInteger32;
+using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -51,29 +67,17 @@ ECode SpeedDialFragment::InnerListener::OnItemClick(
 //=================================================================
 CAR_INTERFACE_IMPL(SpeedDialFragment::ContactTileLoaderListener, Object, ILoaderManagerLoaderCallbacks);
 
-SpeedDialFragment::ContactTileLoaderListener::ContactTileLoaderListener(
-    /* [in] */ SpeedDialFragment* host)
-    : mHost(host)
-{}
-
 ECode SpeedDialFragment::ContactTileLoaderListener::OnCreateLoader(
     /* [in] */ Int32 id,
     /* [in] */ IBundle* args,
     /* [out] */ ICursorLoader** loader)
 {
-    VALIDATE_NOT_NULL(loader);
-    if (DEBUG) {
-        Logger::D(TAG, "ContactTileLoaderListener#onCreateLoader.");
-    }
-
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
-    assert(0 && "TODO");
-    // AutoPtr<ICursorLoader> cursorLoader;
-    // ContactTileLoaderFactory::CreateStrequentPhoneOnlyLoader(
-    //         activity, (ICursorLoader**)&cursorLoader);
-    // *loader = cursorLoader;
-    // REFCOUNT_ADD(*loader);
+    VALIDATE_NOT_NULL(loader)
+    if (DEBUG) Logger::D(TAG, "ContactTileLoaderListener#onCreateLoader.");
+    AutoPtr<IActivity> a;
+    mHost->GetActivity((IActivity**)&a);
+    *loader = ContactTileLoaderFactory::CreateStrequentPhoneOnlyLoader(a);
+    REFCOUNT_ADD(*loader)
     return NOERROR;
 }
 
@@ -100,54 +104,44 @@ ECode SpeedDialFragment::ContactTileLoaderListener::OnLoaderReset(
     return NOERROR;
 }
 
-//=================================================================
+// =================================================================
 // SpeedDialFragment::ContactTileAdapterListener
-//=================================================================
-// TODO:
-// CAR_INTERFACE_IMPL(SpeedDialFragment::ContactTileAdapterListener, Object, IContactTileViewListener)
+// =================================================================
+CAR_INTERFACE_IMPL(SpeedDialFragment::ContactTileAdapterListener, Object, IContactTileViewListener)
 
-// SpeedDialFragment::ContactTileAdapterListener::ContactTileAdapterListener(
-//     /* [in] */ SpeedDialFragment* host)
-//     : mHost(host)
-// {}
+ECode SpeedDialFragment::ContactTileAdapterListener::OnContactSelected(
+    /* [in] */ IUri* contactUri,
+    /* [in] */ IRect* targetRect)
+{
+    if (mHost->mPhoneNumberPickerActionListener != NULL) {
+        mHost->mPhoneNumberPickerActionListener->OnPickPhoneNumberAction(contactUri);
+    }
+    return NOERROR;
+}
 
-// ECode SpeedDialFragment::ContactTileAdapterListener::OnContactSelected(
-//     /* [in] */ IUri* contactUri,
-//     /* [in] */ IRect* targetRect)
-// {
-//     if (mHost->mPhoneNumberPickerActionListener != NULL) {
-//         mHost->mPhoneNumberPickerActionListener->OnPickPhoneNumberAction(contactUri);
-//     }
-//     return NOERROR;
-// }
+ECode SpeedDialFragment::ContactTileAdapterListener::OnCallNumberDirectly(
+    /* [in] */ const String& phoneNumber)
+{
+    if (mHost->mPhoneNumberPickerActionListener != NULL) {
+        mHost->mPhoneNumberPickerActionListener->OnCallNumberDirectly(phoneNumber);
+    }
+    return NOERROR;
+}
 
-// ECode SpeedDialFragment::ContactTileAdapterListener::OnCallNumberDirectly(
-//     /* [in] */ const String& phoneNumber)
-// {
-//     if (mHost->mPhoneNumberPickerActionListener != NULL) {
-//         mHost->mPhoneNumberPickerActionListener->OnCallNumberDirectly(phoneNumber);
-//     }
-//     return NOERROR;
-// }
+ECode SpeedDialFragment::ContactTileAdapterListener::GetApproximateTileWidth(
+    /* [out] */ Int32* width)
+{
+    VALIDATE_NOT_NULL(width);
+    AutoPtr<IView> view;
+    mHost->GetView((IView**)&view);
+    return view->GetWidth(width);
+}
 
-// ECode SpeedDialFragment::ContactTileAdapterListener::GetApproximateTileWidth(
-//     /* [out] */ Int32* width)
-// {
-//     VALIDATE_NOT_NULL(width);
-//     AutoPtr<IView> view;
-//     mHost->GetView((IView**)&view);
-//     return view->GetWidth(width);
-// }
 
 //=================================================================
 // SpeedDialFragment::ScrollListener
 //=================================================================
-CAR_INTERFACE_IMPL(SpeedDialFragment::ScrollListener, Object, IListViewOnScrollListener)
-
-SpeedDialFragment::ScrollListener::ScrollListener(
-    /* [in] */ SpeedDialFragment* host)
-    : mHost(host)
-{}
+CAR_INTERFACE_IMPL(SpeedDialFragment::ScrollListener, Object, IAbsListViewOnScrollListener)
 
 ECode SpeedDialFragment::ScrollListener::OnScroll(
     /* [in] */ IAbsListView* view,
@@ -172,56 +166,53 @@ ECode SpeedDialFragment::ScrollListener::OnScrollStateChanged(
 //=================================================================
 // SpeedDialFragment::MyViewTreeObserverOnPreDrawListener
 //=================================================================
-CAR_INTERFACE_IMPL(SpeedDialFragment::MyViewTreeObserverOnPreDrawListener,
-            Object, IOnPreDrawListener)
-
-SpeedDialFragment::MyViewTreeObserverOnPreDrawListener::MyViewTreeObserverOnPreDrawListener(
-    /* [in] */ SpeedDialFragment* host,
-    /* [in] */ IViewTreeObserver* observer,
-    /* [in] */ ArrayOf<Int64>* idsInPlace)
-    : mHost(host)
-    , mObserver(observer)
-    , mIdsInPlace(idsInPlace)
-{}
+CAR_INTERFACE_IMPL(SpeedDialFragment::MyViewTreeObserverOnPreDrawListener, Object, IOnPreDrawListener)
 
 ECode SpeedDialFragment::MyViewTreeObserverOnPreDrawListener::OnPreDraw(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     mObserver->RemoveOnPreDrawListener(this);
     Int32 firstVisiblePosition;
     mHost->mListView->GetFirstVisiblePosition(&firstVisiblePosition);
 
     AutoPtr<IAnimatorSet> animSet;
     CAnimatorSet::New((IAnimatorSet**)&animSet);
-    AutoPtr<IArrayList> animators;
-    CArrayList::New((IArrayList**)&animators);
-
-    Int32 count;
-    mHost->mListView->GetChildCount(&count);
-    AutoPtr<IObjectAnimatorHelper> helper;
-    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-    for (Int32 i = 0; i < count; i++) {
+    List<AutoPtr<IAnimator> > animators;
+    Int32 childCount;
+    AutoPtr<IViewGroup> listView = IViewGroup::Probe(mHost->mListView);
+    listView->GetChildCount(&childCount);
+    for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        mListView->GetChildAt(i, (IView**)&child);
+        listView->GetChildAt(i, (IView*)&child);
         Int32 position = firstVisiblePosition + i;
 
         Int64 itemId;
-        mContactTileAdapter->GetItemId(position, &itemId);
+        IAdapter::Probe(mHost->mContactTileAdapter)->GetItemId(position, &itemId);
 
-        if (mHost->ContainsId(mIdsInPlace, itemId)) {
+        if (mHost->ContainsId(idsInPlace, itemId)) {
+            AutoPtr<IObjectAnimatorHelper> helper;
+            CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
             AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
-            values->Set(0, 0.0);
-            values->Set(1, 1.0);
+            (*values)[0] = 0.0;
+            (*values)[1] = 1.0;
             AutoPtr<IObjectAnimator> animator;
             helper->OfFloat(child, String("alpha"), values, (IObjectAnimator**)&animator);
-            animators->Add(animator);
+            animators.PushBack(IAnimator::Probe(animator));
             break;
         }
         else {
-            AutoPtr<IInterface> startTop;
-            mItemIdTopMap->Get(itemId, (IInterface**)&startTop);
-            AutoPtr<IInterface> startLeft;
-            mItemIdLeftMap->Get(itemId, (IInterface**)&startLeft);
+            AutoPtr<IInteger32> startTop;
+            HashMap<Int64, AutoPtr<IInteger32> >::Iterator topIt = mHost->mItemIdTopMap.Find(itemId);
+            if (topIt != mHost->mItemIdTopMap.End()) {
+                startTop = topIt->mSecond;
+            }
+            AutoPtr<IInteger32> startLeft;
+            HashMap<Int64, AutoPtr<IInteger32> >::Iterator leftIt = mHost->mItemIdLeftMap.Find(itemId);
+            if (leftIt != mHost->mItemIdLeftMap.End()) {
+                startLeft = leftIt->mSecond;
+            }
             Int32 top;
             child->GetTop(&top);
             Int32 left;
@@ -230,47 +221,57 @@ ECode SpeedDialFragment::MyViewTreeObserverOnPreDrawListener::OnPreDraw(
             Int32 deltaY = 0;
 
             if (startLeft != NULL) {
-                if (CoreUtils::Unbox(IInteger32::Probe(startLeft)) != left) {
-                    deltaX = CoreUtils::Unbox(startLeft) - left;
+                Int32 leftValue;
+                startLeft->GetValue(&leftValue);
+                if (leftValue != left) {
+                    deltaX = leftValue - left;
+                    AutoPtr<IObjectAnimatorHelper> helper;
+                    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
                     AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
-                    values->Set(0, deltaX);
-                    values->Set(1, 0.0);
+                    (*values)[0] = (Float)deltaX;
+                    (*values)[1] = 0.0;
                     AutoPtr<IObjectAnimator> animator;
-                    helper->OfFloat(child, String("translationX"),
-                            values, (IObjectAnimator**)&animator);
-                    animators->Add(animator);
+                    helper->OfFloat(child, String("translationX"), values, (IObjectAnimator**)&animator);
+                    animators.PushBack(IAnimator::Probe(animator));
                 }
             }
 
             if (startTop != NULL) {
-                if (CoreUtils::Unbox(startTop) != top) {
-                    deltaY = CoreUtils::Unbox(startTop) - top;
+                Int32 topValue;
+                startTop->GetValue(&topValue);
+                if (topValue != top) {
+                    deltaY = topValue - top;
+                    AutoPtr<IObjectAnimatorHelper> helper;
+                    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
                     AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
-                    values->Set(0, deltaY);
-                    values->Set(1, 0.0f);
+                    (*values)[0] = (Float)deltaY;
+                    (*values)[1] = 0.0;
                     AutoPtr<IObjectAnimator> animator;
-                    helper->OfFloat(child, String("translationY"),
-                            values, (IObjectAnimator**)&animator);
-                    animators->Add(animator);
+                    helper->OfFloat(child, String("translationY"), values, (IObjectAnimator**)&animator);
+                    animators.PushBack(IAnimator::Probe(animator));
                 }
             }
 
             if (DEBUG) {
-                Logger::D(TAG, "Found itemId: %d  for listview child %d Top: %d Delta: ",
+                Logger::D(TAG, "Found itemId: %d for listview child %d Top: %d Delta: %f",
                         itemId, i, top, deltaY);
             }
         }
     }
 
-    Int32 size;
-    if (animators->GetSize(&size), size > 0) {
-        IAnimator::Probe(animSet)->SetDuration(mAnimationDuration)
-        animSet->PlayTogether(animators);
+    if (animators.Begin() != animators.End()) {
+        IAnimator::Probe(animSet)->SetDuration(mAnimationDuration);
+        AutoPtr<ArrayOf<IAnimator*> > attrs = ArrayOf<IAnimator*>::Alloc(animators.GetSize());
+        List<AutoPtr<IAnimator> >::Iterator it = animators.Begin();
+        for (Int32 i = 0; it != animators.End(); ++it, ++i) {
+            attrs->Set(i, *it);
+        }
+        animSet->PlayTogether(attrs);
         IAnimator::Probe(animSet)->Start();
     }
 
-    mHost->mItemIdTopMap->Clear();
-    mHost->mItemIdLeftMap->Clear();
+    mHost->mItemIdTopMap.Clear();
+    mHost->mItemIdLeftMap.Clear();
     *result = TRUE;
     return NOERROR;
 }
@@ -278,18 +279,20 @@ ECode SpeedDialFragment::MyViewTreeObserverOnPreDrawListener::OnPreDraw(
 //=================================================================
 // SpeedDialFragment
 //=================================================================
-const Int64 KEY_REMOVED_ITEM_HEIGHT; // = Long.MAX_VALUE;
-
+const Int64 SpeedDialFragment::KEY_REMOVED_ITEM_HEIGHT = Elastos::Core::Math::INT64_MAX_VALUE;
 const String SpeedDialFragment::TAG("SpeedDialFragment");
-const Boolean SpeedDialFragment::DEBUG = FALSE;
-Int32 SpeedDialFragment::LOADER_ID_CONTACT_TILE = 1;
+const Boolean SpeedDialFragment::DEBUG;
+const Int32 SpeedDialFragment::LOADER_ID_CONTACT_TILE;
 
-// TODO:
-CAR_INTERFACE_IMPL_2(SpeedDialFragment, /*AnalyticsFragment*/Fragment, ISpeedDialFragment,
-    IOnDataSetChangedForAnimationListener)
+CAR_INTERFACE_IMPL_2(SpeedDialFragment, AnalyticsFragment
+        , ISpeedDialFragment
+        , IOnDataSetChangedForAnimationListener)
 
 SpeedDialFragment::SpeedDialFragment()
 {
+    mContactTileAdapterListener = (IContactTileViewListener*)new ContactTileAdapterListener(this);
+    mContactTileLoaderListener = (ILoaderManagerLoaderCallbacks*)new ContactTileLoaderListener(this);
+    mScrollListener = new ScrollListener(this);
 }
 
 ECode SpeedDialFragment::OnAttach(
@@ -298,16 +301,15 @@ ECode SpeedDialFragment::OnAttach(
     if (DEBUG) {
         Logger::D(TAG, "onAttach()");
     }
-    assert(0 && "TODO");
-    // AnalyticsFragment::OnAttach(activity);
+    FAIL_RETURN(AnalyticsFragment::OnAttach(activity))
 
     // Construct two base adapters which will become part of PhoneFavoriteMergedAdapter.
     // We don't construct the resultant adapter at this moment since it requires LayoutInflater
     // that will be available on onCreateView().
-    assert(0 && "TODO");
-    // CPhoneFavoritesTileAdapter::New(activity, mContactTileAdapterListener,
-    //         this, (IPhoneFavoritesTileAdapter**)&mContactTileAdapter);
-    // mContactTileAdapter->SetPhotoLoader(ContactPhotoManager::GetInstance(activity));
+    mContactTileAdapter = new PhoneFavoritesTileAdapter(activity, mContactTileAdapterListener,
+            IOnDataSetChangedForAnimationListener::Probe(this));
+    AutoPtr<IContactPhotoManager> cpm = ContactPhotoManager::GetInstance(activity);
+    mContactTileAdapter->SetPhotoLoader(cpm);
     return NOERROR;
 }
 
@@ -317,8 +319,7 @@ ECode SpeedDialFragment::OnCreate(
     if (DEBUG) {
         Logger::D(TAG, "onCreate()");
     }
-    assert(0 && "TODO");
-    // AnalyticsFragment::OnCreate(savedState);
+    FAIL_RETURN(AnalyticsFragment::OnCreate(savedState))
 
     CHashMap::New((IHashMap**)&mItemIdTopMap);
     CHashMap::New((IHashMap**)&mItemIdLeftMap);
@@ -336,8 +337,7 @@ ECode SpeedDialFragment::OnCreate(
 
 ECode SpeedDialFragment::OnResume()
 {
-    // assert(0 && "TODO");
-    // AnalyticsFragment::OnResume();
+    FAIL_RETURN(AnalyticsFragment::OnResume())
 
     AutoPtr<ILoaderManager> manager;
     GetLoaderManager((ILoaderManager**)&manager);
@@ -353,20 +353,23 @@ ECode SpeedDialFragment::OnCreateView(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view)
 
-    inflater->Inflate(R::layout::speed_dial_fragment,
+    mParentView = NULL;
+    inflater->Inflate(Elastos::Droid::Dialer::R::layout::speed_dial_fragment,
             container, FALSE, (IView**)&mParentView);
 
     AutoPtr<InnerListener> listener = new InnerListener(this);
 
     AutoPtr<IView> listView;
-    mParentView->FindViewById(R::id::contact_tile_list, (IView**)&listView);
+    mParentView->FindViewById(Elastos::Droid::Dialer::R::id::contact_tile_list, (IView**)&listView);
     mListView = IPhoneFavoriteListView::Probe(listView);
-    mListView->SetOnItemClickListener(listener);
+    AutoPtr<IAdapterView> av = IAdapterView::Probe(mListView);
+    av->SetOnItemClickListener(listener);
     mListView->SetVerticalScrollBarEnabled(FALSE);
-    mListView->SetVerticalScrollbarPosition(IView::SCROLLBAR_POSITION_RIGHT);
-    mListView->SetScrollBarStyle(IListView::SCROLLBARS_OUTSIDE_OVERLAY);
+    AutoPtr<IView> lv = IView::Probe(mListView);
+    lv->SetVerticalScrollbarPosition(IView::SCROLLBAR_POSITION_RIGHT);
+    lv->SetScrollBarStyle(IListView::SCROLLBARS_OUTSIDE_OVERLAY);
     AutoPtr<IDragDropController> controller;
     mListView->GetDragDropController((IDragDropController**)&controller);
     controller->AddOnDragDropListener(mContactTileAdapter);
@@ -374,47 +377,49 @@ ECode SpeedDialFragment::OnCreateView(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     AutoPtr<IView> dragShadowOverlay;
-    activity->FindViewById(R::id::contact_tile_drag_shadow_overlay, (IView**)&dragShadowOverlay);
+    activity->FindViewById(Elastos::Droid::Dialer::R::id::contact_tile_drag_shadow_overlay, (IView**)&dragShadowOverlay);
     mListView->SetDragShadowOverlay(IImageView::Probe(dragShadowOverlay));
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    mParentView->FindViewById(R::id::empty_list_view, (IView**)&mEmptyView);
-    DialerUtils::ConfigureEmptyListView(
-            mEmptyView, R::drawable::empty_speed_dial,
-            R::string::speed_dial_empty, resources);
+    mEmptyView = NULL;
+    mParentView->FindViewById(Elastos::Droid::Dialer::R::id::empty_list_view, (IView**)&mEmptyView);
+    DialerUtils::ConfigureEmptyListView(mEmptyView, Elastos::Droid::Dialer::R::drawable::empty_speed_dial,
+            Elastos::Droid::Dialer::R::string::speed_dial_empty, resources);
 
-    mParentView->FindViewById(R::id::contact_tile_frame, (IView**)&mContactTileFrame);
+    mContactTileFrame = NULL
+    mParentView->FindViewById(Elastos::Droid::Dialer::R::id::contact_tile_frame, (IView**)&mContactTileFrame);
 
     AutoPtr<IView> teaserView;
-    inflater->Inflate(R::layout::tile_interactions_teaser_view,
-            mListView, FALSE, (IView**)&teaserView);
+    inflater->Inflate(Elastos::Droid::Dialer::R::layout::tile_interactions_teaser_view,
+            IViewGroup::Probe(mListView), FALSE, (IView**)&teaserView);
     mTileInteractionTeaserView = ITileInteractionTeaserView::Probe(teaserView);
 
     AutoPtr<IAnimationUtils> utils;
     CAnimationUtils::AcquireSingleton((IAnimationUtils**)&utils);
     AutoPtr<IAnimation> animation;
     utils->LoadAnimation(IContext::Probe(activity),
-            Elastos::Droid::R::anim.fade_in, (IAnimation**)&animation);
+            Elastos::Droid::R::anim::fade_in, (IAnimation**)&animation);
     AutoPtr<ILayoutAnimationController> controller;
     CLayoutAnimationController::New(animation, (ILayoutAnimationController**)&controller);
     controller->SetDelay(0);
-    mListView->SetLayoutAnimation(controller);
-    mListView->SetAdapter(mContactTileAdapter);
+    IViewGroup::Probe(mListView)->SetLayoutAnimation(controller);
+    av->SetAdapter(IAdapter::ProbemContactTileAdapter));
 
     mListView->SetOnScrollListener(mScrollListener);
-    mListView->SetFastScrollEnabled(FALSE);
-    mListView->SetFastScrollAlwaysVisible(FALSE);
+    AutoPtr<IAbsListView> absLV = IAbsListView::Probe(mListView);
+    absLV->SetFastScrollEnabled(FALSE);
+    absLV->SetFastScrollAlwaysVisible(FALSE);
 
     *view = mParentView;
-    REFCOUNT_ADD(*view);
+    REFCOUNT_ADD(*view)
     return NOERROR;
 }
 
 ECode SpeedDialFragment::HasFrequents(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     if (mContactTileAdapter == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -445,8 +450,7 @@ void SpeedDialFragment::SetEmptyViewVisibility(
 
 ECode SpeedDialFragment::OnStart()
 {
-    assert(0 && "TODO");
-    // AnalyticsFragment::OnStart();
+    FAIL_RETURN(AnalyticsFragment::OnStart())
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
@@ -454,9 +458,7 @@ ECode SpeedDialFragment::OnStart()
     // try {
     mActivityScrollListener = IOnListFragmentScrolledListener::Probe(activity);
     if (mActivityScrollListener == NULL) {
-        String str;
-        IObject::Probe(activity)->ToString(&str);
-        Logger::E(TAG, "%s must implement OnListFragmentScrolledListener", str.string());
+        Logger::E(TAG, "%s must implement OnListFragmentScrolledListener", TO_CSTR(activity));
         return E_CLASS_CAST_EXCEPTION;
     }
     // } catch (ClassCastException e) {
@@ -465,22 +467,17 @@ ECode SpeedDialFragment::OnStart()
     // }
 
     // try {
-    IOnDragDropListener* listener = IOnDragDropListener::Probe(activity);
+    AutoPtr<IOnDragDropListener> listener = IOnDragDropListener::Probe(activity);
     if (listener == NULL) {
-        String str;
-        activity->ToString(&str);
-        Logger::E(TAG, "%s must implement OnDragDropListener", str.string());
+        Logger::E(TAG, "%s must implement OnDragDropListener", TO_CSTR(activity));
         return E_CLASS_CAST_EXCEPTION;
     }
     AutoPtr<IDragDropController> controller;
     mListView->GetDragDropController((IDragDropController**)&controller);
     controller->AddOnDragDropListener(listener);
-
-    IHostInterface* hostInterface = IHostInterface::Probe(activity);
+    AutoPtr<IHostInterface> hostInterface = IHostInterface::Probe(activity);
     if (hostInterface == NULL) {
-        String str;
-        IObject::Probe(activity)->ToString(&str);
-        Logger::E(TAG, "%s must implement HostInterface", str.string());
+        Logger::E(TAG, "%s must implement HostInterface", TO_CSTR(activity));
         return E_CLASS_CAST_EXCEPTION;
     }
     hostInterface->SetDragDropController(controller);
@@ -490,14 +487,11 @@ ECode SpeedDialFragment::OnStart()
     // }
 
     // try {
-    assert(0 && "TODO");
-    // mPhoneNumberPickerActionListener = IOnPhoneNumberPickerActionListener::Probe(activity);
-    // if (mPhoneNumberPickerActionListener == NULL) {
-    //     String str;
-    //     activity->ToString(&str);
-    //     Logger::E(TAG, "%s must implement PhoneFavoritesFragment.listener", str.string());
-    //     return E_CLASS_CAST_EXCEPTION;
-    // }
+    mPhoneNumberPickerActionListener = IOnPhoneNumberPickerActionListener::Probe(activity);
+    if (mPhoneNumberPickerActionListener == NULL) {
+        Logger::E(TAG, "%s must implement PhoneFavoritesFragment.listener", TO_CSTR(activity));
+        return E_CLASS_CAST_EXCEPTION;
+    }
     // } catch (ClassCastException e) {
     //     throw new ClassCastException(activity.toString()
     //             + " must implement PhoneFavoritesFragment.listener");
@@ -532,15 +526,16 @@ void SpeedDialFragment::SaveOffsets(
     /* [in] */ Int32 removedItemHeight)
 {
     Int32 firstVisiblePosition;
-    mListView->GetFirstVisiblePosition(&firstVisiblePosition);
+    IAdapterView::Probe(mListView)->GetFirstVisiblePosition(&firstVisiblePosition);
+    AutoPtr<IViewGroup> listView = IViewGroup::Probe(mListView);
     Int32 count;
-    mListView->GetChildCount(&count);
+    listView->GetChildCount(&count);
     if (DEBUG) {
         Logger::D(TAG, "Child count : %d", count);
     }
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        mListView->GetChildAt(i, &child);
+        listView->GetChildAt(i, &child);
         Int32 position = firstVisiblePosition + i;
         Int64 itemId;
         mContactTileAdapter->GetItemId(position, &itemId);
@@ -550,12 +545,17 @@ void SpeedDialFragment::SaveOffsets(
         if (DEBUG) {
             Logger::D(TAG, "Saving itemId: %d for listview child %d Top: ", itemId, i, top);
         }
-        mItemIdTopMap->Put(CoreUtils::Convert(itemId), CoreUtils::Convert(top));
-        mItemIdLeftMap->Put(CoreUtils::Convert(itemId), CoreUtils::Convert(left));
+        AutoPtr<IInteger32> integerT;
+        CInteger32::New(top, (IInteger32**)&integerT);
+        mItemIdTopMap[itemId] = integerT;
+        AutoPtr<IInteger32> integerL;
+        CInteger32::New(left, (IInteger32**)&integerL);
+        mItemIdLeftMap[itemId] = integerL;
     }
 
-    mItemIdTopMap->Put(CoreUtils::Convert(KEY_REMOVED_ITEM_HEIGHT),
-            CoreUtils::Convert(removedItemHeight));
+    AutoPtr<IInteger32> integer;
+    CInteger32::New(removedItemHeight, (IInteger32**)&integer);
+    mItemIdTopMap[KEY_REMOVED_ITEM_HEIGHT] = integer;
 }
 
 void SpeedDialFragment::AnimateGridView(
@@ -571,9 +571,9 @@ void SpeedDialFragment::AnimateGridView(
 
     AutoPtr<IViewTreeObserver> observer;
     mListView->GetViewTreeObserver((IViewTreeObserver**)observer);
-    AutoPtr<MyViewTreeObserverOnPreDrawListener> listener =
-            new MyViewTreeObserverOnPreDrawListener(this, observer, idsInPlace);
-    observer->AddOnPreDrawListener((IOnPreDrawListener*)listener);
+    AutoPtr<IOnPreDrawListener> listener =
+            (IOnPreDrawListener*)new MyViewTreeObserverOnPreDrawListener(this, observer, idsInPlace);
+    observer->AddOnPreDrawListener(listener);
 }
 
 Boolean SpeedDialFragment::ContainsId(
@@ -582,7 +582,7 @@ Boolean SpeedDialFragment::ContainsId(
 {
     // Linear search on array is fine because this is typically only 0-1 elements long
     for (Int32 i = 0; i < ids->GetLength(); i++) {
-        if (ids[i] == target) {
+        if ((*ids)[i] == target) {
             return TRUE;
         }
     }
@@ -605,9 +605,9 @@ ECode SpeedDialFragment::CacheOffsetsForDatasetChange()
 ECode SpeedDialFragment::GetListView(
     /* [out] */ IAbsListView** listView)
 {
-    VALIDATE_NOT_NULL(listview);
-    *listView = mListView;
-    REFCOUNT_ADD(*listView);
+    VALIDATE_NOT_NULL(listview)
+    *listView = IAbsListView::Probe(mListView);
+    REFCOUNT_ADD(*listView)
     return NOERROR;
 }
 

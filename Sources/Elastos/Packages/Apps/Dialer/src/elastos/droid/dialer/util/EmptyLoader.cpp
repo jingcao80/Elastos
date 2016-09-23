@@ -12,10 +12,10 @@ namespace Util {
 //=================================================================
 CAR_INTERFACE_IMPL(EmptyLoader::Callback, Object, IEmptyLoaderCallback, ILoaderManagerLoaderCallbacks);
 
-ECode EmptyLoader::Callback::constructor(
+EmptyLoader::Callback::Callback(
     /* [in] */ IContext* context)
 {
-    return context->GetApplicationContext((IContext**)&mContext);
+    context->GetApplicationContext((IContext**)&mContext);
 }
 
 ECode EmptyLoader::Callback::OnCreateLoader(

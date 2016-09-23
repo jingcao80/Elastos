@@ -49,6 +49,7 @@ module
      * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
+    [local]
     interface IContactTileView {
 
         SetPhotoManager(

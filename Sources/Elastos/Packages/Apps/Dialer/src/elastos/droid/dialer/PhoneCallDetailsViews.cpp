@@ -1,11 +1,16 @@
 
 #include "elastos/droid/dialer/PhoneCallDetailsViews.h"
+#include "elastos/droid/dialer/calllog/CCallTypeIconsView.h"
+#include "R.h"
+
+using Elastos::Droid::Dialer::Calllog::CCallTypeIconsView;
+using Elastos::Droid::View::CView;
+using Elastos::Droid::Widget::CTextView;
+using Elastos::Droid::Widget::CImageView;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
-
-CAR_INTERFACE_IMPL(PhoneCallDetailsViews, Object, IPhoneCallDetailsViews);
 
 PhoneCallDetailsViews::PhoneCallDetailsViews(
     /* [in] */ ITextView* nameView,
@@ -26,28 +31,29 @@ AutoPtr<IPhoneCallDetailsViews> PhoneCallDetailsViews::FromView(
     /* [in] */ IView* view)
 {
     AutoPtr<IView> nameView;
-    view->FindViewById(R::id::name, (IView**)&nameView);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::name, (IView**)&nameView);
     AutoPtr<IView> callTypeView;
-    view->FindViewById(R::id::call_type, (IView**)&callTypeView);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::call_type, (IView**)&callTypeView);
     AutoPtr<IView> callTypeIcons;
-    view->FindViewById(R::id::call_type_icons, (IView**)&callTypeIcons);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::call_type_icons, (IView**)&callTypeIcons);
     AutoPtr<IView> callAccountIcon;
-    view->FindViewById(R::id::call_account_icon, (IView**)&callAccountIcon);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::call_account_icon, (IView**)&callAccountIcon);
     AutoPtr<IView> callLocationAndDate;
-    view->FindViewById(R::id::call_location_and_date, (IView**)&callLocationAndDate);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::call_location_and_date, (IView**)&callLocationAndDate);
     AutoPtr<IView> voicemailTranscriptionView;
-    view->FindViewById(R::id::voicemail_transcription, (IView**)&voicemailTranscriptionView);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::voicemail_transcription, (IView**)&voicemailTranscriptionView);
 
     AutoPtr<PhoneCallDetailsViews> views = new PhoneCallDetailsViews(
-                ITextView::Probe(nameView), callTypeView,
+                ITextView::Probe(nameView),
+                callTypeView,
                 ICallTypeIconsView::Probe(callTypeIcons),
                 IImageView::Probe(callAccountIcon),
                 ITextView::Probe(callLocationAndDate),
                 ITextView::Probe(voicemailTranscriptionView));
-    return (IPhoneCallDetailsViews*)views;
+    return views;
 }
 
-AutoPtr<IPhoneCallDetailsViews> PhoneCallDetailsViews::CreateForTest(
+AutoPtr<PhoneCallDetailsViews> PhoneCallDetailsViews::CreateForTest(
     /* [in] */ IContext* context)
 {
     AutoPtr<ITextView> nameView;
@@ -66,7 +72,7 @@ AutoPtr<IPhoneCallDetailsViews> PhoneCallDetailsViews::CreateForTest(
     AutoPtr<PhoneCallDetailsViews> views = PhoneCallDetailsViews(
                 nameView, callTypeView, callTypeIcons, callAccountIcon,
                 callLocationAndDate, voicemailTranscriptionView);
-    return (IPhoneCallDetailsViews*)views;
+    return views;
 }
 
 

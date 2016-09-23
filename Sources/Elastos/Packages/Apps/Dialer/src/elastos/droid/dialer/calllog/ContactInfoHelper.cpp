@@ -9,6 +9,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/contacts/common/util/PhoneNumberHelper.h"
 #include "elastos/droid/contacts/common/util/UriUtils.h"
+#include "elastos/droid/contacts/common/util/Constants.h"
 #include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
 #include "elastos/droid/dialer/calllog/PhoneQuery.h"
 #include "elastos/droid/dialerbind/ObjectFactory.h"
@@ -17,6 +18,7 @@
 
 using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
 using Elastos::Droid::Contacts::Common::Util::UriUtils;
+using Elastos::Droid::Contacts::Common::Util::Constants;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Dialer::Service::ICachedContactInfo;
@@ -157,7 +159,7 @@ AutoPtr<IUri> ContactInfoHelper::CreateTemporaryContactUri(
     contacts->GetCONTENT_LOOKUP_URI((IUri**)&uri);
     AutoPtr<IUriBuilder> builder;
     uri->BuildUpon((IUriBuilder**)&builder);
-    builder->AppendPath(IConstants::LOOKUP_URI_ENCODED);
+    builder->AppendPath(Constants::LOOKUP_URI_ENCODED);
     builder->AppendQueryParameter(IContactsContract::DIRECTORY_PARAM_KEY,
             StringUtils::ToString(Elastos::Core::Math::INT64_MAX_VALUE));
     builder->EncodedFragment(jsonString);

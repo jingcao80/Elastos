@@ -1,13 +1,12 @@
 #ifndef __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGLISTITEMVIEWS_H__
 #define __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGLISTITEMVIEWS_H__
 
-#include "_Elastos.Droid.Dialer.h"
+#include "elastos/droid/dialer/calllog/PhoneCallDetailsViews.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/core/Object.h"
-
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IView;
@@ -22,22 +21,19 @@ namespace CallLog {
 
 class CallLogListItemViews
     : public Object
-    , public ICallLogListItemViews
 {
 public:
-    CAR_INTERFACE_DECL()
-
-    static CARAPI_(AutoPtr<ICallLogListItemViews>) FromView(
+    static CARAPI_(AutoPtr<CallLogListItemViews>) FromView(
         /* [in] */ IView* view);
 
-    static CARAPI_(AutoPtr<ICallLogListItemViews>) CreateForTest(
+    static CARAPI_(AutoPtr<CallLogListItemViews>) CreateForTest(
         /* [in] */ IContext* context);
 
 private:
     CallLogListItemViews(
         /* [in] */ IQuickContactBadge* quickContactView,
         /* [in] */ IView* primaryActionView,
-        /* [in] */ IPhoneCallDetailsViews* phoneCallDetailsViews,
+        /* [in] */ PhoneCallDetailsViews* phoneCallDetailsViews,
         /* [in] */ IView* callLogEntryView,
         /* [in] */ ITextView* dayGroupHeader);
 
@@ -47,7 +43,7 @@ public:
     /** The primary action view of the entry. */
     AutoPtr<IView> mPrimaryActionView;
     /** The details of the phone call. */
-    AutoPtr<IPhoneCallDetailsViews> mPhoneCallDetailsViews;
+    AutoPtr<PhoneCallDetailsViews> mPhoneCallDetailsViews;
     /** The text of the header for a day grouping. */
     AutoPtr<ITextView> mDayGroupHeader;
     /** The view containing the details for the call log row, including the action buttons. */

@@ -1,8 +1,11 @@
 
 #include "elastos/droid/contacts/common/ContactTileLoaderFactory.h"
+#include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
 
 using Elastos::Droid::Content::CCursorLoader;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriBuilder;
 using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Provider::IContactsContractContactsColumns;
 using Elastos::Droid::Provider::IContactsContractContactOptionsColumns;
@@ -13,6 +16,7 @@ using Elastos::Droid::Provider::IContactsContractRawContactsColumns;
 using Elastos::Droid::Provider::IContactsContractContactStatusColumns;
 using Elastos::Droid::Provider::CContactsContractContacts;
 using Elastos::Droid::Provider::IContactsContract;
+using Elastos::Droid::Provider::IContactsContractContacts;
 
 namespace Elastos {
 namespace Droid {
@@ -47,6 +51,7 @@ static AutoPtr<ArrayOf<String> > InitColumnsPhoneOnly()
     (*columns)[8] = IContactsContractDataColumns::IS_SUPER_PRIMARY;
     (*columns)[9] = IContactsContractContactOptionsColumns::PINNED;
     (*columns)[10] = IContactsContractRawContactsColumns::CONTACT_ID;
+    return columns;
 }
 const AutoPtr<ArrayOf<String> > ContactTileLoaderFactory::COLUMNS_PHONE_ONLY = InitColumnsPhoneOnly();
 
@@ -60,6 +65,7 @@ static AutoPtr<ArrayOf<String> > InitColumns()
     (*columns)[4] = IContactsContractContactsColumns::LOOKUP_KEY;
     (*columns)[5] = IContactsContractContactStatusColumns::CONTACT_PRESENCE;
     (*columns)[6] = IContactsContractContactStatusColumns::CONTACT_STATUS;
+    return columns;
 }
 const AutoPtr<ArrayOf<String> > ContactTileLoaderFactory::COLUMNS = InitColumns();
 
@@ -72,7 +78,7 @@ AutoPtr<ICursorLoader> ContactTileLoaderFactory::CreateStrequentLoader(
     AutoPtr<IContactsContractContacts> contacts;
     CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&contacts);
     AutoPtr<IUri> uri;
-    Contacts->GetCONTENT_STREQUENT_URI((IUri**)&uri);
+    contacts->GetCONTENT_STREQUENT_URI((IUri**)&uri);
     AutoPtr<ICursorLoader> cl;
     CCursorLoader::New(context, uri, COLUMNS, String(NULL), NULL, STARRED_ORDER, (ICursorLoader**)&cl);
     return cl;
@@ -101,7 +107,7 @@ AutoPtr<ICursorLoader> ContactTileLoaderFactory::CreateStarredLoader(
     AutoPtr<IContactsContractContacts> contacts;
     CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&contacts);
     AutoPtr<IUri> uri;
-    Contacts->GetCONTENT_URI((IUri**)&uri);
+    contacts->GetCONTENT_URI((IUri**)&uri);
     AutoPtr<ArrayOf<String> > attrs = ArrayOf<String>::Alloc(1);
     (*attrs)[0] = String("1");
     AutoPtr<ICursorLoader> cl;
@@ -116,7 +122,7 @@ AutoPtr<ICursorLoader> ContactTileLoaderFactory::CreateFrequentLoader(
     AutoPtr<IContactsContractContacts> contacts;
     CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&contacts);
     AutoPtr<IUri> uri;
-    Contacts->GetCONTENT_FREQUENT_URI((IUri**)&uri);
+    contacts->GetCONTENT_FREQUENT_URI((IUri**)&uri);
     AutoPtr<ArrayOf<String> > attrs = ArrayOf<String>::Alloc(1);
     (*attrs)[0] = String("0");
     AutoPtr<ICursorLoader> cl;

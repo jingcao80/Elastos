@@ -1,6 +1,5 @@
 
 #include "elastos/droid/dialer/calllog/CallLogListItemViews.h"
-#include "elastos/droid/dialer/PhoneCallDetailsViews.h"
 #include "R.h"
 
 using Elastos::Droid::View::CView;
@@ -12,12 +11,10 @@ namespace Droid {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CallLogListItemViews, Object, ICallLogListItemViews);
-
 CallLogListItemViews::CallLogListItemViews(
     /* [in] */ IQuickContactBadge* quickContactView,
     /* [in] */ IView* primaryActionView,
-    /* [in] */ IPhoneCallDetailsViews* phoneCallDetailsViews,
+    /* [in] */ PhoneCallDetailsViews* phoneCallDetailsViews,
     /* [in] */ IView* callLogEntryView,
     /* [in] */ ITextView* dayGroupHeader)
     : mQuickContactView(quickContactView)
@@ -25,19 +22,24 @@ CallLogListItemViews::CallLogListItemViews(
     , mPhoneCallDetailsViews(phoneCallDetailsViews)
     , mDayGroupHeader(dayGroupHeader)
     , mCallLogEntryView(callLogEntryView)
+    , mRowId(0)
+    , mNumberPresentation(0)
+    , mCallType(0)
+    , mReported(FALSE)
+    , mCanBeReportedAsInvalid(FALSE)
 {}
 
-AutoPtr<ICallLogListItemViews> CallLogListItemViews::FromView(
+AutoPtr<CallLogListItemViews> CallLogListItemViews::FromView(
     /* [in] */ IView* view)
 {
     AutoPtr<IView> contactPhoto;
-    view->FindViewById(R::id::quick_contact_photo, (IView**)&contactPhoto);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::quick_contact_photo, (IView**)&contactPhoto);
     AutoPtr<IView> actionView;
-    view->FindViewById(R::id::primary_action_view, (IView**)&actionView);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::primary_action_view, (IView**)&actionView);
     AutoPtr<IView> logRow;
-    view->FindViewById(R::id::call_log_row, (IView**)&logRow);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::call_log_row, (IView**)&logRow);
     AutoPtr<IView> groupLable;
-    view->FindViewById(R::id::call_log_day_group_label, (IView**)&groupLable);
+    view->FindViewById(Elastos::Droid::Dialer::R::id::call_log_day_group_label, (IView**)&groupLable);
     AutoPtr<CallLogListItemViews> views = new CallLogListItemViews(
                 IQuickContactBadge::Probe(contactPhoto),
                 actionView,
@@ -45,10 +47,10 @@ AutoPtr<ICallLogListItemViews> CallLogListItemViews::FromView(
                 logRow,
                 ITextView::Probe(groupLable));
 
-    return (ICallLogListItemViews*)views;
+    return views;
 }
 
-AutoPtr<ICallLogListItemViews> CallLogListItemViews::CreateForTest(
+AutoPtr<CallLogListItemViews> CallLogListItemViews::CreateForTest(
     /* [in] */ IContext* context)
 {
     AutoPtr<IQuickContactBadge> badge;
@@ -70,7 +72,7 @@ AutoPtr<ICallLogListItemViews> CallLogListItemViews::CreateForTest(
     CTextView::New(context, (ITextView**)&views->mReportButtonView);
     CView::New(context, (IView**)&views->mActionsView);
 
-    return (ICallLogListItemViews*)views;
+    return views;
 }
 
 } // CallLog

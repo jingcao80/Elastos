@@ -64,7 +64,7 @@ public:
 private:
     static const AutoPtr<ArrayOf<String> > COLUMNS;
 
-    static const String STARRED_ORDER = Contacts.DISPLAY_NAME+" COLLATE NOCASE ASC";
+    static const String STARRED_ORDER;
 };
 
 } // namespace Common

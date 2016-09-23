@@ -16,3 +16,5 @@ SOURCES += AccountFilterUtil.cpp
 SOURCES += WeakAsyncTask.cpp
 SOURCES += CEmptyService.cpp
 SOURCES += LocalizedNameResolver.cpp
+SOURCES += UriUtils.cpp
+SOURCES += Constants.cpp

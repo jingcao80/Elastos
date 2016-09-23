@@ -5,10 +5,12 @@
 #include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+// #include "elastos/droid/dialer/calllog/CallLogAdapter.h"
+// #include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
 
 using Elastos::Droid::App::IDialogFragment;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Dialer::CallLog::ICallLogAdapter;
+// using Elastos::Droid::Dialer::CallLog::CallLogAdapter;
 using Elastos::Droid::Dialer::CallLog::ICallLogAdapterCallFetcher;
 using Elastos::Droid::Dialer::CallLog::ICallLogAdapterCallItemExpandedListener;
 using Elastos::Droid::Dialer::CallLog::ICallLogAdapterOnReportButtonClickListener;

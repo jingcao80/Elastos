@@ -26,7 +26,7 @@ public:
         /* [in] */ const String& labelId);
 
     // @Override
-    CARAPI SendScreenView()
+    CARAPI SendScreenView();
 
 };
 

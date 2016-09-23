@@ -5,10 +5,10 @@
 #include "elastos/droid/contacts/common/list/PhoneNumberListAdapter.h"
 #include "elastos/droid/contacts/common/list/ContactListItemView.h"
 #include "elastos/droid/contacts/common/list/DirectoryPartition.h"
-#include "elastos/droid/contacts/common/list/Constants.h"
 #include "elastos/droid/contacts/common/list/DirectoryListLoader.h"
 #include "elastos/droid/contacts/common/extensions/ExtensionsFactory.h"
 #include "elastos/droid/contacts/common/preference/ContactsPreferences.h"
+#include "elastos/droid/contacts/common/util/Constants.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
@@ -25,6 +25,7 @@ using Elastos::Droid::Contacts::Common::ContactPhotoManager;
 using Elastos::Droid::Contacts::Common::Extensions::ExtensionsFactory;
 using Elastos::Droid::Contacts::Common::List::EIID_IPhoneNumberListAdapter;
 using Elastos::Droid::Contacts::Common::Preference::ContactsPreferences;
+using Elastos::Droid::Contacts::Common::Util::Constants;
 using Elastos::Droid::Common::Widget::ICompositeCursorAdapterPartition;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;

@@ -1,6 +1,6 @@
 
-#ifndef __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONSTANTS_H__
-#define __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONSTANTS_H__
+#ifndef __ELASTOS_DROID_CONTACTS_COMMON_UTIL_CONSTANTS_H__
+#define __ELASTOS_DROID_CONTACTS_COMMON_UTIL_CONSTANTS_H__
 
 #include <elastos.h>
 
@@ -8,7 +8,7 @@ namespace Elastos {
 namespace Droid {
 namespace Contacts {
 namespace Common {
-namespace List {
+namespace Util {
 
 class Constants
 {
@@ -23,10 +23,10 @@ public:
     static const String LOOKUP_URI_ENCODED;
 };
 
-} // List
+} // Util
 } // Common
 } // Contacts
 } // Droid
 } // Elastos
 
-#endif //__ELASTOS_DROID_CONTACTS_COMMON_LIST_CONSTANTS_H__
+#endif //__ELASTOS_DROID_CONTACTS_COMMON_UTIL_CONSTANTS_H__

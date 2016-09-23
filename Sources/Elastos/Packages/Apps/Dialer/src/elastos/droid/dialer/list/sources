@@ -40,7 +40,6 @@ SOURCES += SmartDialNumberListAdapter.cpp
 SOURCES += SmartDialSearchFragment.cpp
 #SOURCES += CSmartDialSearchFragment.cpp
 #SOURCES += SpeedDialFragment.cpp
-#SOURCES += CSpeedDialFragment.cpp
 #SOURCES += SwipeHelper.cpp
 #SOURCES += CSwipeHelper.cpp
 #SOURCES += CSwipeHelperHelper.cpp

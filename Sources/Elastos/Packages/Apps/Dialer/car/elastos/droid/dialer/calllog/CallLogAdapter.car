@@ -8,14 +8,9 @@ module
     namespace Dialer {
     namespace CallLog {
 
-//    interface ICallLogAdapterNumberWithCountryIso {
-//    }
-//
-//    interface ICallLogAdapterContactInfoRequest {
-//    }
-//
     /** Interface used to inform a parent UI element that a list item has been expanded. */
     interface ICallLogAdapterCallItemExpandedListener {
+
         /**
          * @param view The {@link CallLogListItemView} that represents the item that was clicked
          *         on.
@@ -33,22 +28,29 @@ module
         GetViewForCallId(
             [in] Int64 callId,
             [out] ICallLogListItemView** view);
+
     }
 
     /** Interface used to initiate a refresh of the content. */
     interface ICallLogAdapterCallFetcher {
+
         FetchCalls();
+
     }
 
     /** Implements onClickListener for the report button. */
     interface ICallLogAdapterOnReportButtonClickListener {
+
         OnReportButtonClick(
             [in] String number);
+
     }
 
     /** The enumeration of {@link android.os.AsyncTask} objects used in this class. */
     enum CallLogAdapterTasks {
+
         CallLogAdapterTasks_REMOVE_CALL_LOG_ENTRIES = 0
+
     }
 
     /**
@@ -58,6 +60,7 @@ module
      * interface ICallLogGroupBuilderGroupCreator
      */
     interface ICallLogAdapter {
+
         SetLoading(
             [in] Boolean loading);
 
@@ -85,6 +88,7 @@ module
 
         OnBadDataReported(
             [in] String number);
+
     }
 
     } //CallLog
