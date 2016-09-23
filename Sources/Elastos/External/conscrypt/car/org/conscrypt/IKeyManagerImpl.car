@@ -18,6 +18,8 @@ module
     /*
      * @Involve
      * interface IX509ExtendedKeyManager
+     * interface IX509KeyManager
+     * interface IKeyManager
      */
     interface IKeyManagerImpl {
     }

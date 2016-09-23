@@ -11,9 +11,25 @@ INCLUDES += $(MAKEDIR)/../../../../../LibCore/inc/corelibrary
 SOURCES = Org.Conscrypt.car
 SOURCES += AbstractSessionContext.cpp
 SOURCES += ByteArray.cpp
-SOURCES += COpenSSLProvider.cpp
+SOURCES += ChainStrengthAnalyzer.cpp
+SOURCES += CChainStrengthAnalyzer.cpp
+SOURCES += CClientSessionContext.cpp
 SOURCES += CryptoUpcalls.cpp
+SOURCES += CCryptoUpcalls.cpp
+SOURCES += CDefaultSSLContextImpl.cpp
+SOURCES += FileClientSessionCache.cpp
+SOURCES += KeyManagerFactoryImpl.cpp
+SOURCES += KeyManagerImpl.cpp
 SOURCES += NativeCrypto.cpp
+SOURCES += OpenSSLBIOInputStream.cpp
+SOURCES += OpenSSLBIOSink.cpp
+SOURCES += OpenSSLBIOSource.cpp
+
+SOURCES += OpenSSLCipherContext.cpp
+SOURCES += OpenSSLCipherRSA.cpp
+SOURCES += OpenSSLContextImpl.cpp
+
+SOURCES += COpenSSLProvider.cpp
 SOURCES += OpenSSLKey.cpp
 SOURCES += OpenSSLMac.cpp
 SOURCES += OpenSSLMessageDigestJDK.cpp
@@ -22,14 +38,10 @@ SOURCES += OpenSSLProvider.cpp
 SOURCES += OpenSSLRSAKeyFactory.cpp
 SOURCES += OpenSSLRSAKeyPairGenerator.cpp
 SOURCES += OpenSSLRSAPrivateCrtKey.cpp
+
 SOURCES += Platform.cpp
 SOURCES += CPlatform.cpp
-SOURCES += ChainStrengthAnalyzer.cpp
-SOURCES += CChainStrengthAnalyzer.cpp
 
-#SOURCES += COpenSSLProvider.cpp
-#SOURCES += CryptoUpcalls.cpp
-#SOURCES += NativeCrypto.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib

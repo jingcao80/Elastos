@@ -74,6 +74,8 @@ module
     merge("../../../car/org/conscrypt/IX509PublicKey.car");
 
     using interface Elastos.Security.IProvider;
+    using interface Elastosx.Net.Ssl.ISSLContextSpi;
+    using interface Elastosx.Net.Ssl.ISSLSessionContext;
 
     namespace Org {
     namespace Conscrypt {
@@ -93,6 +95,26 @@ module
 
     singleton class CChainStrengthAnalyzer {
         interface IChainStrengthAnalyzer;
+    }
+
+    class CClientSessionContext {
+        constructor();
+
+        interface IClientSessionContext;
+        interface IAbstractSessionContext;
+        interface ISSLSessionContext;
+    }
+
+    singleton class CCryptoUpcalls {
+        interface ICryptoUpcalls;
+    }
+
+    class CDefaultSSLContextImpl {
+        constructor();
+
+        interface IDefaultSSLContextImpl;
+        interface IOpenSSLContextImpl;
+        interface ISSLContextSpi;
     }
 
     } // namespace Conscrypt

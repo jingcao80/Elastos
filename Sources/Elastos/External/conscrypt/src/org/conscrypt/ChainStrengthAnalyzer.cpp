@@ -72,7 +72,5 @@ ECode ChainStrengthAnalyzer::CheckNotMD5(
     return NOERROR;
 }
 
-
-
 } // namespace Conscrypt
 } // namespace Org

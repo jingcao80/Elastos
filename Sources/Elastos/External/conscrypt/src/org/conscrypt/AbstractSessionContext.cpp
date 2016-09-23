@@ -76,6 +76,7 @@ ECode AbstractSessionContext::_Enumeration::GetNextElement(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
     Boolean b;
     if (HasMoreElements(&b), b) {
         AutoPtr<ArrayOf<Byte> > id;
@@ -165,6 +166,7 @@ ECode AbstractSessionContext::GetIds(
     AutoPtr<IIterator> i = SessionIterator();
     AutoPtr<_Enumeration> ret = new _Enumeration(i, this);
     *result = IEnumeration::Probe(ret);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -287,7 +289,7 @@ ECode AbstractSessionContext::ToBytes(
 
 ECode AbstractSessionContext::ToSession(
     /* [in] */ ArrayOf<Byte>* data,
-    /* [in] */ String host,
+    /* [in] */ const String& host,
     /* [in] */ Int32 port,
     /* [out] */ ISSLSession** result)
 {

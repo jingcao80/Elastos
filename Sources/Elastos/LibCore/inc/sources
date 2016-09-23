@@ -101,6 +101,7 @@ EXPORT_HEADERS += elastos/net/ResponseCache.h
 
 EXPORT_HEADERS += elastos/io/InputStream.h
 EXPORT_HEADERS += elastos/io/OutputStream.h
+EXPORT_HEADERS += elastos/io/File.h
 EXPORT_HEADERS += elastos/io/FilterInputStream.h
 EXPORT_HEADERS += elastos/io/FilterOutputStream.h
 EXPORT_HEADERS += elastos/io/FileInputStream.h
@@ -117,9 +118,12 @@ EXPORT_HEADERS += libcore/utility/EmptyArray.h
 EXPORT_HEADERS += elastos/droid/system/Os.h
 EXPORT_HEADERS += elastos/droid/system/OsConstants.h
 
+EXPORT_HEADERS += elastosx/crypto/CipherSpi.h
 
 EXPORT_HEADERS += elastosx/net/SocketFactory.h
+EXPORT_HEADERS += elastosx/net/ssl/SSLContextSpi.h
 EXPORT_HEADERS += elastosx/net/ssl/SSLSocketFactory.h
+EXPORT_HEADERS += elastosx/net/ssl/X509ExtendedKeyManager.h
 
 EXPORT_HEADERS += org/apache/http/entity/AbstractHttpEntity.h
 EXPORT_HEADERS += org/apache/http/impl/client/DefaultHttpClient.h

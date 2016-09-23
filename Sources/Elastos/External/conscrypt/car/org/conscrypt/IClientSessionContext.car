@@ -37,6 +37,9 @@ module
             [out] ISSLSession** result);
     }
 
+    interface IClientSessionContextHostAndPort {
+    }
+
     } // namespace Conscrypt
     } // namespace Org
 }

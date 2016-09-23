@@ -24,6 +24,11 @@ module
             [out] Int32* result);
     }
 
+    interface IOpenSSLBIOSinkHelper {
+        Create(
+            [out] IOpenSSLBIOSink** result);
+    }
+
     } // namespace Conscrypt
     } // namespace Org
 }

@@ -3,7 +3,7 @@
 #define __ELASTOSX_NET_SSL_SSLCONTEXSPI_H__
 
 #include "Elastos.CoreLibrary.Extensions.h"
-#include "Object.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
 using Elastos::Security::IKeyStore;
@@ -23,7 +23,7 @@ namespace Ssl {
 /**
  * The <i>Service Provider Interface</i> (SPI) for the {@code SSLContext} class.
  */
-class SSLContextSpi
+class ECO_PUBLIC SSLContextSpi
     : public Object
     , public ISSLContextSpi
 {
@@ -47,7 +47,7 @@ public:
     virtual CARAPI EngineInit(
         /* [in] */ ArrayOf<IKeyManager*>* km,
         /* [in] */ ArrayOf<ITrustManager*>* tm,
-        /* [in] */ ArrayOf<ISecureRandom*>* sr) = 0;
+        /* [in] */ ISecureRandom* sr) = 0;
 
     /**
      * Returns a socket factory for this instance.

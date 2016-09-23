@@ -79,28 +79,28 @@ public:
      * @param maximumSize of cache
      * @param timeout for cache entries
      */
-    CARAPI constructor(
+    virtual CARAPI constructor(
         /* [in] */ Int32 maximumSize,
         /* [in] */ Int32 timeout);
 
     // @Override
-    CARAPI GetIds(
+    virtual CARAPI GetIds(
         /* [out] */ IEnumeration** ids);
 
     // @Override
-    CARAPI GetSessionCacheSize(
+    virtual CARAPI GetSessionCacheSize(
         /* [out] */ Int32* result);
 
     // @Override
-    CARAPI GetSessionTimeout(
+    virtual CARAPI GetSessionTimeout(
         /* [out] */ Int32* result);
 
     // @Override
-    CARAPI SetSessionTimeout(
+    virtual CARAPI SetSessionTimeout(
         /* [in] */ Int32 seconds);
 
     // @Override
-    CARAPI SetSessionCacheSize(
+    virtual CARAPI SetSessionCacheSize(
         /* [in] */ Int32 size);
 
     /**
@@ -108,7 +108,7 @@ public:
      *
      * @return session data as bytes or null if the session can't be converted
      */
-    CARAPI ToBytes(
+    virtual CARAPI ToBytes(
         /* [in] */ ISSLSession* session,
         /* [out] */ ArrayOf<Byte>** result);
 
@@ -117,18 +117,18 @@ public:
      *
      * @return a session or null if the session can't be converted
      */
-    CARAPI ToSession(
+    virtual CARAPI ToSession(
         /* [in] */ ArrayOf<Byte>* data,
-        /* [in] */ String host,
+        /* [in] */ const String& host,
         /* [in] */ Int32 port,
         /* [out] */ ISSLSession** result);
 
     // @Override
-    CARAPI GetSession(
+    virtual CARAPI GetSession(
         /* [in] */ ArrayOf<Byte>* sessionId,
         /* [out] */ ISSLSession** result);
 
-    CARAPI PutSession(
+    virtual CARAPI PutSession(
         /* [in] */ ISSLSession* session);
 
 protected:

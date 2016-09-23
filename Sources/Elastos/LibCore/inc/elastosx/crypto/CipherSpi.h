@@ -15,7 +15,7 @@ using Elastos::Security::Spec::IAlgorithmParameterSpec;
 namespace Elastosx {
 namespace Crypto {
 
-class CipherSpi
+class ECO_PUBLIC CipherSpi
     : public Object
     , public ICipherSpi
 {

@@ -3,7 +3,7 @@
 #define __ELASTOSX_NET_SSL_X509EXTENDEDKEYMANAGER_H__
 
 #include "Elastos.CoreLibrary.Extensions.h"
-#include "Object.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
 using Elastos::Security::IPrincipal;
@@ -18,7 +18,7 @@ namespace Ssl {
 /**
  * The abstract extension for the {@code X509KeyManager} interface.
  */
-class X509ExtendedKeyManager
+class ECO_PUBLIC X509ExtendedKeyManager
     : public Object
     , public IX509ExtendedKeyManager
     , public IX509KeyManager

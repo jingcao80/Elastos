@@ -14,7 +14,7 @@ using Elastos::Utility::IRandom;
 namespace Elastos {
 namespace IO {
 
-class File
+class ECO_PUBLIC File
     : public Object
     , public IFile
     , public IComparable

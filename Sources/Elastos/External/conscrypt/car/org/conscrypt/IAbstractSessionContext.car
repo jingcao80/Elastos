@@ -15,7 +15,7 @@ module
         /** Identifies OpenSSL sessions. */
         const Int32 OPEN_SSL = 1;
 
-        /**
+        /**j
          * Converts the given session to bytes.
          *
          * @return session data as bytes or null if the session can't be converted
