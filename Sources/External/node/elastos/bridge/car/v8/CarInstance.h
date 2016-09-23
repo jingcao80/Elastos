@@ -35,6 +35,8 @@ public:
     virtual IInterface* carInstance() const = 0;
 
     virtual CobjectWrapper* getInstance() const = 0;
+
+    virtual bool hasInterface(IInterfaceInfo* interfaceInfo) = 0;
 };
 
 } // namespace Bindings

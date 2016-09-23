@@ -331,28 +331,25 @@ bool _BeRunOnUiThread(
 }   //_BeRunOnUiThread
 
 //TODO URGENT : compare the type in deep
-bool _compatible(NPVariantType jt, CarDataType ct)
-//bool _compatible(NPVariant* npv, IParamInfo* paramInfo)
+bool _compatible(NPVariant npv, IParamInfo* paramInfo)
 {
-    //NPVariantType jt = npv->type;
+    bool result = false;
+
+    NPVariantType jt = npv.type;
 
     //NPVariantType_Int32 is not used in v8
     if (jt == NPVariantType_Void || jt == NPVariantType_Null) {
         ALOGD("====_compatible====NPVariantType_Void/Null====");
-        return true;
+        result = true;
+        return result;
     }
 
-    // ParamIOAttribute paramIOAttribute;
-    // paramInfo->GetIOAttribute(&paramIOAttribute);
-    // AutoPtr<IDataTypeInfo> dataTypeInfo;
-    // paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-    // CarDataType dataType;
-    // dataTypeInfo->GetDataType(&dataType);
-    // CarDataType ct = dataType;
+    AutoPtr<IDataTypeInfo> dataTypeInfo;
+    paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
+    CarDataType dataType;
+    dataTypeInfo->GetDataType(&dataType);
 
-    bool result = false;
-
-    switch (ct) {
+    switch (dataType) {
         case CarDataType_Boolean:
             result = (jt == NPVariantType_Bool);
             break;
@@ -394,6 +391,27 @@ bool _compatible(NPVariantType jt, CarDataType ct)
         {
             //TODO:js object with compatible car object wrapper
             result = (jt == NPVariantType_Object);
+            if (!result) break;
+
+            NPObject* npobj = NPVARIANT_TO_OBJECT(npv);
+            if (npobj->_class == WebCore::npScriptObjectClass) {
+                Elastos::String interfaceName;
+                dataTypeInfo->GetName(&interfaceName);
+
+                ALOGD("====_compatible====CarDataType_Interface==1==TODO:compatible between js object and %s!", interfaceName.string());
+                return false;
+            }
+            else {
+                CarInstance* instance = ExtractCarInstance(npobj);
+                if (!instance) {
+                    ALOGD("====_compatible====unable to extract car instance from NPObject %p", npobj);
+                    return false;
+                }
+
+                AutoPtr<IInterfaceInfo> interfaceInfo;
+                interfaceInfo = IInterfaceInfo::Probe(dataTypeInfo);
+                result = instance->hasInterface(interfaceInfo);
+            }
             break;
         }
         default:
@@ -494,8 +512,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                         break;
                     }
 
-                    if (_compatible(args[numIn - 1].type, dataType)) {
-                    //if (_compatible((NPVariant*)(args + (numIn - 1)*sizeof(NPVariant)), paramInfo)) {
+                    if (_compatible(args[numIn - 1], paramInfo)) {
                         //same type
                     }
                     else {

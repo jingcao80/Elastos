@@ -351,4 +351,29 @@ CarValue CarInstanceV8::getField(const CarField* field)
      return CarValue();
 }
 
+bool CarInstanceV8::hasInterface(IInterfaceInfo* interfaceInfo)
+{
+    Boolean result = false;
+
+    AutoPtr<IInterfaceInfo> _interfaceInfo;
+    _interfaceInfo = IInterfaceInfo::Probe(this->getInstance()->getDataTypeInfo());
+
+    if (interfaceInfo == _interfaceInfo) {
+        result = true;
+    }
+    else {
+        AutoPtr<IInterface> object = this->carInstance();
+        AutoPtr<IClassInfo> classInfo;
+        ECode ec = CObject::ReflectClassInfo(object, (IClassInfo**)&classInfo);
+        if (FAILED(ec)) {
+            result = false;
+        }
+        else {
+            classInfo->HasInterfaceInfo(interfaceInfo, &result);
+        }
+    }
+
+    return result;
+}
+
 #endif // ENABLE(CAR_BRIDGE)

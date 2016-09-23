@@ -705,7 +705,12 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 
                     for (Int32 i = 0; i < length; i++) {
                         NPVariant npvValue;
-                        _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
+                        bool success = _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
+                        if (!success) {
+                            ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====%d/%d====error: can not get element value", i, length);
+                            continue;
+                        }
+
                         Int32 iVal = 0;
 
                         switch (npvValue.type) {

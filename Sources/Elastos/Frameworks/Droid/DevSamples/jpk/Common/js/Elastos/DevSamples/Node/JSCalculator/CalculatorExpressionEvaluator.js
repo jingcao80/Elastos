@@ -121,7 +121,13 @@ var Util = require("./arity/Util.js")(aoElastos, aoActivity);
 
 //--------.java----end----
 
-    return CalculatorExpressionEvaluator;
+    //return CalculatorExpressionEvaluator;
+
+    class __CalculatorExpressionEvaluator {
+    }
+
+    return new __CalculatorExpressionEvaluator();
+
 };  //module.exports
 
 elog("====CalculatorExpressionEvaluator.js====end====");

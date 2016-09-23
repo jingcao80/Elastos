@@ -207,7 +207,18 @@ module.exports = function(aoElastos, aoActivity){
 
 //--------.java----end----
 
-    return CalculatorPadLayout;
+    //return CalculatorPadLayout;
+
+    class __CalculatorPadLayout {
+        // OnCreate(_this, context, attrs) {
+        //     elog("====CalculatorPadViewPager.js====::OnCreate====begin");
+        //     _this._constructor(context, attrs);
+        //     elog("====CalculatorPadViewPager.js====::OnCreate====end");
+        // }
+    }
+
+    return new __CalculatorPadLayout();
+
 };  //module.exports
 
 elog("====CalculatorPadLayout.js====end====");

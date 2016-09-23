@@ -448,7 +448,23 @@ CObject.showMethods(_this, "etText");
         },
     }
 
-    return oCallback;
+    //return oCallback;
+
+    class CalculatorEditText {
+        OnCreate(_this, context, attrs, defStyle) {
+            elog('====CalculatorEditText.js====CalculatorEditText::OnCreate.begin====');
+            _this._constructor(context, attrs, defStyle);
+            elog('====CalculatorEditText.js====CalculatorEditText::OnCreate.end====');
+        }
+        OnTextChanged(_this, text, start, lengthBefore, lengthAfter) {
+            elog('====CalculatorEditText.js====CalculatorEditText::OnTextChanged.begin====');
+            _this._OnTextChanged(text, start, lengthBefore, lengthAfter);
+            elog('====CalculatorEditText.js====CalculatorEditText::OnTextChanged.end====');
+        }
+    }
+
+    return new CalculatorEditText();
+
  };  //module.exports
 
- elog("====CalculatorEditText.js====end====");
+ elog("====CalculatorEditText.js====end======");

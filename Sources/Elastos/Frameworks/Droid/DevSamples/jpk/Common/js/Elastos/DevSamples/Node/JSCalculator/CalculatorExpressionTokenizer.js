@@ -108,7 +108,13 @@ module.exports = function(aoElastos, aoActivity){
 
 //--------.java----end----
 
-    return CalculatorExpressionTokenizer;
+    //return CalculatorExpressionTokenizer;
+
+    class __CalculatorExpressionTokenizer {
+    }
+
+    return new __CalculatorExpressionTokenizer();
+
 };  //module.exports
 
 elog("====CalculatorExpressionTokenizer.js====end====");

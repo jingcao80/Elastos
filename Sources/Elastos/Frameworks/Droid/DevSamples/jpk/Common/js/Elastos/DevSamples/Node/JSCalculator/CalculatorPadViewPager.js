@@ -248,7 +248,28 @@ module.exports = function(aoElastos, aoActivity){
         // },
     }
 
-    return oCallback;
+    //return oCallback;
+
+
+    class __CalculatorPadViewPager {
+        OnCreate(_this, context, attrs) {
+            elog("====CalculatorPadViewPager.js====::OnCreate====begin");
+            _this._constructor(context, attrs);
+            elog("====CalculatorPadViewPager.js====::OnCreate====end");
+        }
+
+//     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+
+        GenerateLayoutParams(_this, attrs, result){
+            elog("====CalculatorPadViewPager.js====::GenerateLayoutParams====begin");
+            result.data = _this._GenerateLayoutParams(attrs);
+            elog("====CalculatorPadViewPager.js====::GenerateLayoutParams====end");
+        }
+
+    }
+
+    return new __CalculatorPadViewPager();
+
 };  //module.exports
 
 elog("====CalculatorPadViewPager.js====end====");

@@ -28,6 +28,8 @@ public:
 
     CobjectWrapper* getInstance() const { return mInstance->get(); }
 
+    virtual bool hasInterface(IInterfaceInfo* interfaceInfo);
+
 protected:
     RefPtr<CobjectWrapper> mInstance;
     mutable OwnPtr<CarKlass> mClass;

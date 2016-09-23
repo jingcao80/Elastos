@@ -126,7 +126,13 @@ module.exports = function(aoElastos, aoActivity){
 
 //--------.java----end----
 
-    return CalculatorExpressionBuilder;
+    //return CalculatorExpressionBuilder;
+
+    class __CalculatorExpressionBuilder {
+    }
+
+    return new __CalculatorExpressionBuilder();
+
 };  //module.exports
 
 elog("====CalculatorExpressionBuilder.js====end====");

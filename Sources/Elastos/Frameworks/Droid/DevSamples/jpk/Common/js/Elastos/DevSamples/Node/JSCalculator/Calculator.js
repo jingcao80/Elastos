@@ -776,7 +776,10 @@ CObject.showMethods(mFormulaEditText, "etText");
 
         OnCreate(context, savedInstanceState){
             super.OnCreate(context, savedInstanceState);
+
             elog('====Calculator.js====Calculator::OnCreate.begin====');
+            oActivity.SetContentView(R.layout.activity_calculator);
+            elog('====Calculator.js====Calculator::OnCreate.end====');
         }
     }
 
