@@ -657,7 +657,7 @@ ECode LockPatternView::SetInStealthMode(
 {
     //mInStealthMode = inStealthMode;
     mInStealthMode = FALSE;
-    Logger::D("LockPatternView", "===[snow]===make 'mInStealthMode = FALSE' temporarily for testting until Setting APP works!");
+    //Logger::D("LockPatternView", "===[snow]===make 'mInStealthMode = FALSE' temporarily for testting until Setting APP works!");
     return NOERROR;
 }
 

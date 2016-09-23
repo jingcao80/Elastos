@@ -13,7 +13,6 @@ namespace Dialpad {
 
 DialpadTextView::DialpadTextView()
 {
-    Logger::E("DialpadTextView", "====[snow]===== DialpadTextView::DialpadTextView");
     CRect::New((IRect**)&mTextBounds);
 }
 
