@@ -11,6 +11,7 @@ include $(MAKEDIR)/../../../../../../../../../sources.inc
 C_DEFINES += -DDROID_SERVER
 
 SOURCES = DexFileVerifier.cpp
+SOURCES += ElfFile.cpp
 SOURCES += MemMap.cpp
 SOURCES += OatFile.cpp
 SOURCES += ZipArchive.cpp

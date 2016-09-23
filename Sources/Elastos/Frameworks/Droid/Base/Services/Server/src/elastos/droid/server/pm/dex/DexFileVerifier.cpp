@@ -605,6 +605,55 @@ Boolean DexFileVerifier::CheckIntraSection()
     return TRUE;
 }
 
+Boolean DexFileVerifier::CheckInterSection()
+{
+    const DexFile::MapList* map = reinterpret_cast<const DexFile::MapList*>(mBegin + mHeader->mMapOff);
+    const DexFile::MapItem* item = map->mList;
+    uint32_t count = map->mSize;
+
+    // Cross check the items listed in the map.
+    while (count--) {
+        uint32_t section_offset = item->mOffset;
+        uint32_t section_count = item->mSize;
+        uint16_t type = item->mType;
+
+        switch (type) {
+            case DexFile::kDexTypeHeaderItem:
+            case DexFile::kDexTypeMapList:
+            case DexFile::kDexTypeTypeList:
+            case DexFile::kDexTypeCodeItem:
+            case DexFile::kDexTypeStringDataItem:
+            case DexFile::kDexTypeDebugInfoItem:
+            case DexFile::kDexTypeAnnotationItem:
+            case DexFile::kDexTypeEncodedArrayItem:
+                break;
+            case DexFile::kDexTypeStringIdItem:
+            case DexFile::kDexTypeTypeIdItem:
+            case DexFile::kDexTypeProtoIdItem:
+            case DexFile::kDexTypeFieldIdItem:
+            case DexFile::kDexTypeMethodIdItem:
+            case DexFile::kDexTypeClassDefItem:
+            case DexFile::kDexTypeAnnotationSetRefList:
+            case DexFile::kDexTypeAnnotationSetItem:
+            case DexFile::kDexTypeClassDataItem:
+            case DexFile::kDexTypeAnnotationsDirectoryItem: {
+                // TODO:
+                // if (!CheckInterSectionIterate(section_offset, section_count, type)) {
+                //     return FALSE;
+                // }
+                break;
+            }
+            default:
+                ErrorStringPrintf("Unknown map item type %x", type);
+                return FALSE;
+        }
+
+        item++;
+    }
+
+    return TRUE;
+}
+
 Boolean DexFileVerifier::Verify()
 {
     // Check the header.

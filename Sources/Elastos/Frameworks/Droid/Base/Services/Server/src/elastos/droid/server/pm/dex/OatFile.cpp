@@ -64,23 +64,23 @@ AutoPtr<OatFile> OatFile::Open(
         ret = OpenDlopen(filename, location, requested_base, error_msg);
     }
     else {
-//        // If we aren't trying to execute, we just use our own ElfFile loader for a couple reasons:
-//        //
-//        // On target, dlopen may fail when compiling due to selinux restrictions on installd.
-//        //
-//        // On host, dlopen is expected to fail when cross compiling, so fall back to OpenElfFile.
-//        // This won't work for portable runtime execution because it doesn't process relocations.
-//        std::unique_ptr<File> file(OS::OpenFileForReading(filename.c_str()));
-//        if (file.get() == NULL) {
-//          String msg("");
-//          msg.AppendFormat("Failed to open oat filename for reading: %s", strerror(errno));
-//          *error_msg = msg;
-//          return NULL;
-//        }
-//        ret.reset(OpenElfFile(file.get(), location, requested_base, false, executable, error_msg));
-//        // It would be nice to unlink here. But we might have opened the file created by the
-//        // ScopedLock, which we better not delete to avoid races. TODO: Investigate how to fix the API
-//        // to allow removal when we know the ELF must be borked.
+        // If we aren't trying to execute, we just use our own ElfFile loader for a couple reasons:
+        //
+        // On target, dlopen may fail when compiling due to selinux restrictions on installd.
+        //
+        // On host, dlopen is expected to fail when cross compiling, so fall back to OpenElfFile.
+        // This won't work for portable runtime execution because it doesn't process relocations.
+        std::unique_ptr<File> file(OS::OpenFileForReading(filename.c_str()));
+        if (file.get() == NULL) {
+          String msg("");
+          msg.AppendFormat("Failed to open oat filename for reading: %s", strerror(errno));
+          *error_msg = msg;
+          return NULL;
+        }
+        ret.reset(OpenElfFile(file.get(), location, requested_base, false, executable, error_msg));
+        // It would be nice to unlink here. But we might have opened the file created by the
+        // ScopedLock, which we better not delete to avoid races. TODO: Investigate how to fix the API
+        // to allow removal when we know the ELF must be borked.
     }
     return ret;
 }
@@ -164,6 +164,45 @@ Boolean OatFile::Dlopen(
     }
     // Readjust to be non-inclusive upper bound.
     mEnd += sizeof(uint32_t);
+    return Setup(error_msg);
+}
+
+Boolean OatFile::ElfFileOpen(
+    /* [in] */ File* file,
+    /* [in] */ Byte* requested_base,
+    /* [in] */ Boolean writable,
+    /* [in] */ Boolean executable,
+    /* [in] */ String* error_msg)
+{
+    elf_file_.reset(ElfFile::Open(file, writable, true, error_msg));
+    if (elf_file_.get() == nullptr) {
+      DCHECK(!error_msg->empty());
+      return false;
+    }
+    bool loaded = elf_file_->Load(executable, error_msg);
+    if (!loaded) {
+      DCHECK(!error_msg->empty());
+      return false;
+    }
+    begin_ = elf_file_->FindDynamicSymbolAddress("oatdata");
+    if (begin_ == NULL) {
+      *error_msg = StringPrintf("Failed to find oatdata symbol in '%s'", file->GetPath().c_str());
+      return false;
+    }
+    if (requested_base != NULL && begin_ != requested_base) {
+      *error_msg = StringPrintf("Failed to find oatdata symbol at expected address: "
+                                "oatdata=%p != expected=%p /proc/self/maps:\n",
+                                begin_, requested_base);
+      ReadFileToString("/proc/self/maps", error_msg);
+      return false;
+    }
+    end_ = elf_file_->FindDynamicSymbolAddress("oatlastword");
+    if (end_ == NULL) {
+      *error_msg = StringPrintf("Failed to find oatlastword symbol in '%s'", file->GetPath().c_str());
+      return false;
+    }
+    // Readjust to be non-inclusive upper bound.
+    end_ += sizeof(uint32_t);
     return Setup(error_msg);
 }
 

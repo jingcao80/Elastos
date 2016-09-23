@@ -225,15 +225,15 @@ static Byte IsDexOptNeededForFile(
     /* [in] */ const char* filename,
     /* [in] */ DexFile::InstructionSet target_instruction_set)
 {
-    Slogger::D("chenxihao", "IsDexOptNeededForFile oat_filename = %s, filename = %s", oat_filename.string(), filename);
-    AutoPtr<IFile> file;
-    CFile::New(oat_filename, (IFile**)&file);
-    Boolean isExists;
-    file->Exists(&isExists);
-    if (isExists) {
-        return DexFile::UP_TO_DATE;
-    }
-    return DexFile::DEXOPT_NEEDED;
+    // Slogger::D("chenxihao", "IsDexOptNeededForFile oat_filename = %s, filename = %s", oat_filename.string(), filename);
+    // AutoPtr<IFile> file;
+    // CFile::New(oat_filename, (IFile**)&file);
+    // Boolean isExists;
+    // file->Exists(&isExists);
+    // if (isExists) {
+    //     return DexFile::UP_TO_DATE;
+    // }
+    // return DexFile::DEXOPT_NEEDED;
 
     String error_msg;
     AutoPtr<OatFile> oat_file = OatFile::Open(oat_filename, oat_filename, NULL, FALSE, &error_msg);

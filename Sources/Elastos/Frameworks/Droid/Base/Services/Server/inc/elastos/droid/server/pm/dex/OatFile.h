@@ -104,6 +104,13 @@ private:
         /* [in] */ Byte* requested_base,
         /* [out] */ String* error_msg);
 
+    CARAPI_(Boolean) ElfFileOpen(
+        /* [in] */ File* file,
+        /* [in] */ Byte* requested_base,
+        /* [in] */ Boolean writable,
+        /* [in] */ Boolean executable,
+        /* [in] */ String* error_msg);
+
     CARAPI_(Boolean) Setup(
         /* [out] */ String* error_msg);
 
