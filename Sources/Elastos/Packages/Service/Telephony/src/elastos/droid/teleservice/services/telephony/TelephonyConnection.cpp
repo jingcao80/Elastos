@@ -599,7 +599,6 @@ Boolean TelephonyConnection::IsValidRingingCall()
     ICallState state;
     ringingCall->GetState(&state);
 
-    Boolean res;
     if (!(state == ICallState_INCOMING || state == ICallState_WAITING)) {
         Logger::V("TelephonyConnection", "isValidRingingCall, ringing call is not in ringing state");
         return FALSE;

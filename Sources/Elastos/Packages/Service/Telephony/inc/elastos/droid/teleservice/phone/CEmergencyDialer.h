@@ -2,6 +2,7 @@
 #define  __ELASTOS_DROID_PHONE_CEMERGENCYDIALER_H__
 
 #include "_Elastos_Droid_TeleService_Phone_CEmergencyDialer.h"
+#include "Elastos.Droid.Phone.Common.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
@@ -29,6 +30,8 @@ using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Phone::Common::IHapticFeedback;
+using Elastos::Droid::Phone::Common::Dialpad::IDialpadKeyButtonOnPressedListener;
 
 namespace Elastos {
 namespace Droid {
@@ -49,7 +52,7 @@ public:
         , public IViewOnLongClickListener
         , public IViewOnKeyListener
         , public ITextWatcher
-        //, public IDialpadKeyButtonOnPressedListener
+        , public IDialpadKeyButtonOnPressedListener
     {
     public:
         CAR_INTERFACE_DECL()
@@ -287,7 +290,7 @@ private:
     Boolean mDTMFToneEnabled;
 
     // Haptic feedback (vibration) for dialer key presses.
-    //AutoPtr<IHapticFeedback> mHaptic;
+    AutoPtr<IHapticFeedback> mHaptic;
 
     // close activity when screen turns off
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;

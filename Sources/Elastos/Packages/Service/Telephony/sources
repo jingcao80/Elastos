@@ -3,9 +3,18 @@ TARGET_TYPE= eco
 
 EXPORT_ALL_SYMBOLS = 1
 
+C_DEFINES += -DTELESERVICE_USE_PHONECOMMON
+
 INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/src
 INCLUDES += $(MAKEDIR)
+INCLUDES += $(MAKEDIR)/../../Apps/PhoneCommon/inc/
+
+VPATH += $(MAKEDIR)/../../Apps/PhoneCommon/src/elastos/droid/phone/common
+VPATH += $(MAKEDIR)/../../Apps/PhoneCommon/src/elastos/droid/phone/common/animation
+VPATH += $(MAKEDIR)/../../Apps/PhoneCommon/src/elastos/droid/phone/common/dialpad
+VPATH += $(MAKEDIR)/../../Apps/PhoneCommon/src/elastos/droid/phone/common/util
+VPATH += $(MAKEDIR)/../../Apps/PhoneCommon/src/elastos/droid/phone/common/widget
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
@@ -14,6 +23,22 @@ SOURCES += Elastos.Droid.TeleService.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
+
+#######from PhoneCommon
+SOURCES += AnimUtils.cpp
+SOURCES += AnimationListenerAdapter.cpp
+SOURCES += DialpadView.cpp
+SOURCES += DialpadKeyButton.cpp
+SOURCES += DigitsEditText.cpp
+SOURCES += DialpadTextView.cpp
+SOURCES += dialpad.cpp
+SOURCES += ViewUtil.cpp
+SOURCES += ResizingTextEditText.cpp
+SOURCES += CResizingTextTextView.cpp
+SOURCES += HapticFeedback.cpp
+SOURCES += PhoneConstants.cpp
+SOURCES += common.cpp
+####### PhoneCommon
 
 ELASTOS_LIBS += src/elastos/droid/teleservice/services/telephony/common/common.lib
 ELASTOS_LIBS += src/elastos/droid/teleservice/services/telephony/sip/sip.lib

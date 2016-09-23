@@ -1,5 +1,6 @@
 
 #include "elastos/droid/incallui/DialpadFragment.h"
+#include "Elastos.Droid.Phone.Common.h"
 #include "elastos/droid/os/Looper.h"
 #include "R.h"
 #include <elastos/utility/logging/Logger.h>

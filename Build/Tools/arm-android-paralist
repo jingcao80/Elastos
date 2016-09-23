@@ -535,11 +535,6 @@
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/dialerbind
   Elastos/Packages/Apps/Dialer/src/elastos/droid/incallui
   Elastos/Packages/Apps/Dialer/src/elastos/droid/incalluibind
-  Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/animation
-  Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/dialpad
-  Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/util
-  Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/widget
-< Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common
 < Elastos/Packages/Apps/Dialer
 
 # ==== buid Packages/Apps/Calculator ====

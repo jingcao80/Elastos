@@ -4,4 +4,3 @@ DIRS += dialer
 DIRS += dialerbind
 DIRS += incallui
 DIRS += incalluibind
-DIRS += phone/common

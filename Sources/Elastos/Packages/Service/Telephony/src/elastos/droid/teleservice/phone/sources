@@ -4,6 +4,7 @@ TARGET_TYPE= lib
 INCLUDES += ../../../../..
 INCLUDES += $(MAKEDIR)/../../../../..
 INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../../../Apps/PhoneCommon/inc/
 
 SOURCES  = CInCallScreen.cpp
 SOURCES += CDeleteFdnContactScreen.cpp

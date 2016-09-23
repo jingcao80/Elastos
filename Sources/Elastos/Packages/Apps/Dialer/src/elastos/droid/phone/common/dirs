@@ -1,5 +1,0 @@
-
-DIRS += animation
-DIRS += dialpad
-DIRS += util
-DIRS += widget
