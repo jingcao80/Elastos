@@ -3,9 +3,7 @@
 #define __ELASTOS_DROID_DIALER_CALLLOG_CONTACTINFOHELPER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/dialer/calllog/ContactInfo.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IUri;
@@ -19,14 +17,10 @@ namespace CallLog {
 /**
  * Utility class to look up the contact information for a given number.
  */
-class ContactInfoHelper
-    : public Object
-    , public IContactInfoHelper
+class ContactInfoHelper : public Object
 {
 public:
-    CAR_INTERFACE_DECL();
-
-    CARAPI constructor(
+    ContactInfoHelper(
         /* [in] */ IContext* context,
         /* [in] */ const String& currentCountryIso);
 
@@ -41,10 +35,9 @@ public:
      * @param number the number to look up
      * @param countryIso the country associated with this number
      */
-    CARAPI LookupNumber(
+    CARAPI_(AutoPtr<ContactInfo>) LookupNumber(
         /* [in] */ const String& number,
-        /* [in] */ const String& countryIso,
-        /* [out] */ IContactInfo** result);
+        /* [in] */ const String& countryIso);
 
     /**
      * Parses the given URI to determine the original lookup key of the contact.
@@ -58,9 +51,8 @@ public:
      * @param sourceType sourceType of the contact. This is usually populated by
      *        {@link #mCachedNumberLookupService}.
      */
-    CARAPI IsBusiness(
-        /* [in] */ Int32 sourceType,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsBusiness(
+        /* [in] */ Int32 sourceType);
 
      /**
      * This function looks at a contact's source and determines if the user can
@@ -70,10 +62,9 @@ public:
      * @param objectId The ID of the Contact object.
      * @return true if contacts from this source can be marked with an invalid caller id
      */
-    CARAPI CanReportAsInvalid(
+    CARAPI_(Boolean) CanReportAsInvalid(
         /* [in] */ Int32 sourceType,
-        /* [in] */ const String& objectId,
-        /* [out] */ Boolean* result);
+        /* [in] */ const String& objectId);
 
 private:
     /**
@@ -95,7 +86,7 @@ private:
      * The {@link ContactInfo#formattedNumber} field is always set to {@code null} in the returned
      * value.
      */
-    CARAPI_(AutoPtr<IContactInfo>) LookupContactFromUri(
+    CARAPI_(AutoPtr<ContactInfo>) LookupContactFromUri(
         /* [in] */ IUri* uri);
 
     /**
@@ -107,7 +98,7 @@ private:
      * <p>
      * If the lookup fails for some other reason, it returns null.
      */
-    CARAPI_(AutoPtr<IContactInfo>) QueryContactInfoForSipAddress(
+    CARAPI_(AutoPtr<ContactInfo>) QueryContactInfoForSipAddress(
         /* [in] */ const String& sipAddress);
 
      /**
@@ -119,7 +110,7 @@ private:
      * <p>
      * If the lookup fails for some other reason, it returns null.
      */
-    CARAPI_(AutoPtr<IContactInfo>) QueryContactInfoForPhoneNumber(
+    CARAPI_(AutoPtr<ContactInfo>) QueryContactInfoForPhoneNumber(
         /* [in] */ const String& number,
         /* [in] */ const String& countryIso);
 
@@ -142,7 +133,7 @@ private:
     AutoPtr<IContext> mContext;
     String mCurrentCountryIso;
 
-    static const AutoPtr<ICachedNumberLookupService> mCachedNumberLookupService;
+    static const AutoPtr<ICachedNumberLookupService> sCachedNumberLookupService;
             // = ObjectFactory.newCachedNumberLookupService();
 };
 

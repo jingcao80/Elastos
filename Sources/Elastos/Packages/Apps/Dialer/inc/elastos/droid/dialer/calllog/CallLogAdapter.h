@@ -1,11 +1,8 @@
+
 #ifndef __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGADAPTER_H__
 #define __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGADAPTER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include "elastos/core/Object.h"
-#include "elastos/droid/view/View.h"
-#include "elastos/droid/os/Handler.h"
-#include "elastos/core/Thread.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Content.h"
@@ -13,7 +10,9 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Utility.h"
-
+#include "elastos/droid/view/View.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/core/Thread.h"
 #include "elastos/apps/dialer/calllog/CallLogListItemHelper.h"
 
 using Elastos::Droid::Content::IContext;
