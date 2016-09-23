@@ -4,6 +4,7 @@
 
 #include "Elastos.Droid.View.h"
 #include "_Elastos_Droid_Internal_App_CAlertController.h"
+#include "elastos/droid/app/AlertDialog.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/widget/ListView.h"
 
@@ -39,6 +40,7 @@ CarClass(CAlertController)
     , public Object
     , public IAlertController
 {
+    friend class Elastos::Droid::App::AlertDialog;
     friend class CAlertControllerAlertParams;
 public:
     class RecycleListView
@@ -98,7 +100,7 @@ private:
 
     private:
         CAlertController* mHost;
-        Boolean mTag;
+        Boolean mHoldHost;
     };
 
     class ButtonHandler
@@ -269,9 +271,6 @@ public:
     static CARAPI_(Boolean) CanTextInput(
         /* [in] */ IView* v);
 
-protected:
-    CARAPI_(void) OnLastStrongRef(const void* id);
-
 private:
     static CARAPI_(Boolean) ShouldCenterSingleButton(
         /* [in] */ IContext* context);
@@ -303,10 +302,14 @@ private:
         /* [in] */ Boolean hasCustomView,
         /* [in] */ Boolean hasButtons);
 
+    CARAPI_(Boolean) IsHoldedByListener();
+
+    CARAPI_(void) HoldDialogInterface();
+
 private:
     IContext* mContext; // mContext is Activity, that usually hold this's reference
-    // TODO: check memory leak
-    AutoPtr<IDialogInterface> mDialogInterface;// mDialogInterface usually is XXXActivity too
+    IDialogInterface* mDialogInterface;// mDialogInterface usually is XXXActivity too
+    Boolean mHoldDialogInterface;
     AutoPtr<IWindow> mWindow;
 
     AutoPtr<ICharSequence> mTitle;

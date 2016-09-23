@@ -189,6 +189,13 @@ protected:
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
 
+    CARAPI_(void) OnLastStrongRef(
+        /* [in] */ const void* id);
+
+    CARAPI_(Boolean) OnIncStrongAttempted(
+        /* [in] */ UInt32 flags,
+        /* [in] */ const void* id);
+
 private:
     AutoPtr<IAlertController> mAlert;
 };

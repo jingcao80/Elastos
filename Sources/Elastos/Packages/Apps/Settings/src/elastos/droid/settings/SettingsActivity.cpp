@@ -764,9 +764,34 @@ ECode SettingsActivity::OnCreate(
             AutoPtr<IBundle> initialArguments;
             intent->GetBundleExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS,
                     (IBundle**)&initialArguments);
-            AutoPtr<IFragment> fragment;
-            SwitchToFragment(initialFragmentName, initialArguments, TRUE, FALSE,
-                    mInitialTitleResId, mInitialTitle, FALSE, (IFragment**)&fragment);
+
+            /*****************************************************/
+            // to delete if {} after All modules is finished
+
+            if (initialFragmentName.Equals("Elastos.Droid.Settings.Bluetooth.BluetoothSettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.CWirelessSettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.DisplaySettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Deviceinfo.Memory") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Users.UserSettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Nfc.PaymentSettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Location.LocationSettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.CSecuritySettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Accounts.AccountSettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.PrivacySettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Accessibility.AccessibilitySettings") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Print.PrintSettingsFragment") ||
+                    initialFragmentName.Equals("Elastos.Droid.Settings.DeviceInfoSettings")){
+                // nothing to do
+                return NOERROR;
+            }
+            else {
+                AutoPtr<IFragment> fragment;
+                SwitchToFragment(initialFragmentName, initialArguments, TRUE, FALSE,
+                        mInitialTitleResId, mInitialTitle, FALSE, (IFragment**)&fragment);
+            }
+
+            /*****************************************************/
         }
         else {
             // No UP affordance if we are displaying the main Dashboard

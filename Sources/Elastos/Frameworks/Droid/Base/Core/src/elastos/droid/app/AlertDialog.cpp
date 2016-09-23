@@ -247,6 +247,28 @@ ECode AlertDialog::SetAlertController(
     return NOERROR;
 }
 
+void AlertDialog::OnLastStrongRef(
+    /* [in] */ const void* id)
+{
+    CAlertController* ac = (CAlertController*)mAlert.Get();
+    if (!ac->IsHoldedByListener()) return;
+
+    // if mAlert is holded by it's listener, then should
+    // let mAlert holds this dialog
+    ExtendObjectLifetime(OBJECT_LIFETIME_WEAK);
+    GetWeakRefs()->AttemptIncStrong(NULL);
+    ac->HoldDialogInterface();
+    ExtendObjectLifetime(OBJECT_LIFETIME_STRONG);
+    mAlert = NULL;
+}
+
+Boolean AlertDialog::OnIncStrongAttempted(
+    /* [in] */ UInt32 flags,
+    /* [in] */ const void* id)
+{
+    return TRUE;
+}
+
 } // namespace App
 } // namespace Droid
 } // namespace Elastos
