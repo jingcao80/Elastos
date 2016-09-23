@@ -51,13 +51,13 @@ CAR_INTERFACE_IMPL(CAlertController::ButtonViewOnClickListener, Object, IViewOnC
 CAlertController::ButtonViewOnClickListener::ButtonViewOnClickListener(
     /* [in] */ CAlertController* host)
     : mHost(host)
-    , mTag(FALSE)
+    , mHoldHost(FALSE)
 {
 }
 
 CAlertController::ButtonViewOnClickListener::~ButtonViewOnClickListener()
 {
-    if (mTag) mHost->Release();
+    if (mHoldHost) mHost->Release();
 }
 
 ECode CAlertController::ButtonViewOnClickListener::OnClick(
@@ -226,7 +226,10 @@ CAR_INTERFACE_IMPL(CAlertController, Object, IAlertController)
 CAR_OBJECT_IMPL(CAlertController)
 
 CAlertController::CAlertController()
-    : mViewLayoutResId(0)
+    : mContext(NULL)
+    , mDialogInterface(NULL)
+    , mHoldDialogInterface(FALSE)
+    , mViewLayoutResId(0)
     , mViewSpacingLeft(0)
     , mViewSpacingTop(0)
     , mViewSpacingRight(0)
@@ -249,12 +252,7 @@ CAlertController::CAlertController()
 CAlertController::~CAlertController()
 {
     // Slogger::V("CAlertController", " >> Destroy ~CAlertController(): %p", this);
-}
-
-void CAlertController::OnLastStrongRef(const void* id)
-{
-    mButtonHandler->mTag = TRUE;
-    mButtonHandler->mHost->AddRef();
+    if (mHoldDialogInterface) mDialogInterface->Release();
 }
 
 Boolean CAlertController::ShouldCenterSingleButton(
@@ -1045,6 +1043,24 @@ void CAlertController::SetBackground(
             listView->SetSelection(mCheckedItem);
         }
     }
+}
+
+Boolean CAlertController::IsHoldedByListener()
+{
+    // if the refcount of mButtonHandler is bigger than 1,
+    // this object should be holded by mButtonHandler
+    if (mButtonHandler->GetStrongCount() > 1) {
+        mButtonHandler->mHost->AddRef();
+        mButtonHandler->mHoldHost = TRUE;
+        mButtonHandler = NULL;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+void CAlertController::HoldDialogInterface()
+{
+    mHoldDialogInterface = TRUE;
 }
 
 } // namespace App
