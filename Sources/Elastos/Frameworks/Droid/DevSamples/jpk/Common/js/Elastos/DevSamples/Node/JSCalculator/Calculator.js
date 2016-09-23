@@ -729,8 +729,59 @@ CObject.showMethods(mFormulaEditText, "etText");
 
 //--------Listener----default end----
 
-    var oListener = new CActivityListener(oActivity);
-    return oListener;
+    // var oListener = new CActivityListener(oActivity);
+    // return oListener;
+
+    //public class Calculator extends Activity
+    class _Calculator {
+//     private static final String NAME = Calculator.class.getName();
+        //NAME : oActivity.ToString()
+
+        constructor(){
+            elog('====Calculator.js====_Calculator::constructor.begin====');
+            this.abc = "AABBCC";
+            elog('====Calculator.js====_Calculator::constructor.end===='+this.abc);
+        }
+
+        // get abc(){
+        //     elog('====Calculator.js====_Calculator::get abc.begin====');
+        //     return this._abc;
+        // }
+
+        // set abc(v){
+        //     elog('====Calculator.js====_Calculator::set abc.begin===='+v);
+        //     this._abc = v;
+        //     elog('====Calculator.js====_Calculator::set abc.end====');
+        // }
+
+        OnCreate(context, savedInstanceState){
+            elog('====Calculator.js====_Calculator::OnCreate.begin===='+this.abc);
+        }
+
+        OnStart(context){
+            elog('====Calculator.js====_Calculator::OnStart.begin====');
+        }
+
+        //delete this to crash
+        // OnResume(context){
+        //     elog('====Calculator.js====_Calculator::OnResume.begin====');
+        // }
+    }
+
+    class Calculator extends _Calculator {
+        constructor(){
+            super();
+            elog('====Calculator.js====Calculator::constructor.begin====');
+        }
+
+        OnCreate(context, savedInstanceState){
+            super.OnCreate(context, savedInstanceState);
+            elog('====Calculator.js====Calculator::OnCreate.begin====');
+        }
+    }
+
+    return new Calculator();
+
 };  //module.exports
 
 elog("====Calculator.js====end====");

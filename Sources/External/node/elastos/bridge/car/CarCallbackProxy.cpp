@@ -1161,6 +1161,10 @@ void CarCallbackInterfaceProxy::Callback::Call()
 
     NPObject* obj = mObject->mObject;
     if (obj->_class == WebCore::npScriptObjectClass) {
+
+        WebCore::V8NPObject* v8NPThisObject = (WebCore::V8NPObject*)(obj);
+        v8::Local<v8::Object> thisObject = v8::Local<v8::Object>::New(isolate,v8NPThisObject->v8Object);;
+
         NPVariant npvValue;
         _NPN_GetProperty(0, obj, _NPN_GetStringIdentifier((const char*)methodName), &npvValue);
 
@@ -1181,7 +1185,8 @@ void CarCallbackInterfaceProxy::Callback::Call()
             v8::Handle<v8::Value>* argv = ConvertParams();
 
             v8::TryCatch try_catch;
-            jsFunc->Call(context->Global(), mParamCount, argv);
+            //jsFunc->Call(context->Global(), mParamCount, argv);
+            jsFunc->Call(thisObject, mParamCount, argv);
             if (try_catch.HasCaught()) {
                 ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===run js error===");
                 //FatalException(try_catch);
@@ -1208,37 +1213,37 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 switch (mOutParamTypes[i]) {
                     case CarDataType_Int16:
                     {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Int16====CarDataType:%d", mOutParamTypes[i]);
+                        //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Int16====CarDataType:%d", mOutParamTypes[i]);
                         *(Int16*)(mOutParamPtrs[i]) = (Int16)NPVARIANT_TO_DOUBLE(npvOutValue);
                         break;
                     }
                     case CarDataType_Int32:
                     {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Int32====CarDataType:%d", mOutParamTypes[i]);
+                        //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Int32====CarDataType:%d", mOutParamTypes[i]);
                         *(Int32*)(mOutParamPtrs[i]) = (Int32)NPVARIANT_TO_DOUBLE(npvOutValue);
                         break;
                     }
                     case CarDataType_Int64:
                     {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Int64====CarDataType:%d", mOutParamTypes[i]);
+                        //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Int64====CarDataType:%d", mOutParamTypes[i]);
                         *(Int64*)(mOutParamPtrs[i]) = (Int64)NPVARIANT_TO_DOUBLE(npvOutValue);
                         break;
                     }
                     case CarDataType_Byte:
                     {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Byte====CarDataType:%d", mOutParamTypes[i]);
+                        //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Byte====CarDataType:%d", mOutParamTypes[i]);
                         *(Byte*)(mOutParamPtrs[i]) = (Byte)NPVARIANT_TO_DOUBLE(npvOutValue);
                         break;
                     }
                     case CarDataType_Float:
                     {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Float====CarDataType:%d", mOutParamTypes[i]);
+                        //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Float====CarDataType:%d", mOutParamTypes[i]);
                         *(Float*)(mOutParamPtrs[i]) = (Float)NPVARIANT_TO_DOUBLE(npvOutValue);
                         break;
                     }
                     case CarDataType_Double:
                     {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Double====CarDataType:%d", mOutParamTypes[i]);
+                        //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Double====CarDataType:%d", mOutParamTypes[i]);
                         *(Double*)(mOutParamPtrs[i]) = (Double)NPVARIANT_TO_DOUBLE(npvOutValue);
                         break;
                     }
@@ -1254,7 +1259,7 @@ void CarCallbackInterfaceProxy::Callback::Call()
                     // }
                     case CarDataType_Char32:
                     {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Char32====CarDataType:%d", mOutParamTypes[i]);
+                        //ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Char32====CarDataType:%d", mOutParamTypes[i]);
                         *(Char32*)(mOutParamPtrs[i]) = (Char32)NPVARIANT_TO_DOUBLE(npvOutValue);
                         break;
                     }
