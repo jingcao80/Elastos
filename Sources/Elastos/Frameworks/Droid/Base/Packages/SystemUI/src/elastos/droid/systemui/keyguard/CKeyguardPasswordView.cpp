@@ -466,17 +466,21 @@ ECode CKeyguardPasswordView::OnEditorAction(
             || actionId == IEditorInfo::IME_ACTION_DONE
             || actionId == IEditorInfo::IME_ACTION_NEXT);
 
-    Int32 keyCode;
-    event->GetKeyCode(&keyCode);
-    AutoPtr<IKeyEventHelper> helper;
-    CKeyEventHelper::AcquireSingleton((IKeyEventHelper**)&helper);
-    Boolean res;
-    helper->IsConfirmKey(keyCode, &res);
-    Int32 action;
-    event->GetAction(&action);
-    Boolean isKeyboardEnterKey = event != NULL
-            && res
-            && action == IKeyEvent::ACTION_DOWN;
+    Boolean isKeyboardEnterKey = FALSE;
+    if (event != NULL) {
+        Int32 keyCode;
+        event->GetKeyCode(&keyCode);
+        AutoPtr<IKeyEventHelper> helper;
+        CKeyEventHelper::AcquireSingleton((IKeyEventHelper**)&helper);
+        Boolean res;
+        helper->IsConfirmKey(keyCode, &res);
+
+        Int32 action;
+        event->GetAction(&action);
+
+        isKeyboardEnterKey = res && action == IKeyEvent::ACTION_DOWN;
+    }
+
     if (isSoftImeEvent || isKeyboardEnterKey) {
         VerifyPasswordAndUnlock();
         *result = TRUE;
