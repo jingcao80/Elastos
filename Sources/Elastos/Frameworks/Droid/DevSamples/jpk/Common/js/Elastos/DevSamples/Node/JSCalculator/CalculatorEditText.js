@@ -452,14 +452,21 @@ CObject.showMethods(_this, "etText");
 
     class CalculatorEditText {
         OnCreate(_this, context, attrs, defStyle) {
-            elog('====CalculatorEditText.js====CalculatorEditText::OnCreate.begin====');
+            elog('====CalculatorEditText.js====::OnCreate.begin====');
             _this._constructor(context, attrs, defStyle);
-            elog('====CalculatorEditText.js====CalculatorEditText::OnCreate.end====');
+            elog('====CalculatorEditText.js====::OnCreate.end====');
         }
+
         OnTextChanged(_this, text, start, lengthBefore, lengthAfter) {
-            elog('====CalculatorEditText.js====CalculatorEditText::OnTextChanged.begin====');
+            elog('====CalculatorEditText.js====::OnTextChanged.begin====');
             _this._OnTextChanged(text, start, lengthBefore, lengthAfter);
-            elog('====CalculatorEditText.js====CalculatorEditText::OnTextChanged.end====');
+            elog('====CalculatorEditText.js====::OnTextChanged.end====');
+        }
+
+        OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
+            elog('====CalculatorEditText.js====::OnMeasure.begin====');
+            _this._OnMeasure(widthMeasureSpec, heightMeasureSpec);
+            elog('====CalculatorEditText.js====::OnMeasure.end====');
         }
     }
 

@@ -295,6 +295,35 @@ module.exports = function(aoElastos, aoActivity){
             _this._OnFinishInflate();
             elog("====CalculatorPadViewPager.js====::OnFinishInflate====end");
         }
+
+        OnAttachedToWindow(_this) {
+            elog("====CalculatorPadViewPager.js====::OnAttachedToWindow====begin");
+            _this._OnAttachedToWindow();
+            elog("====CalculatorPadViewPager.js====::OnAttachedToWindow====end");
+        }
+
+        DrawableStateChanged(_this) {
+            elog("====CalculatorPadViewPager.js====::DrawableStateChanged====begin");
+            _this._DrawableStateChanged();
+            elog("====CalculatorPadViewPager.js====::DrawableStateChanged====end");
+        }
+
+        OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
+            elog('====CalculatorPadViewPager.js====::OnMeasure.begin====');
+            _this._OnMeasure(widthMeasureSpec, heightMeasureSpec);
+            elog('====CalculatorPadViewPager.js====::OnMeasure.end====');
+        }
+
+        OnSizeChanged(_this, w, h, oldw, oldh) {
+            elog('====CalculatorPadViewPager.js====::OnSizeChanged.begin====');
+            _this._OnSizeChanged(w, h, oldw, oldh);
+            elog('====CalculatorPadViewPager.js====::OnSizeChanged.end====');
+        }
+
+        OnLayout(_this, changed, left, top, right, bottom) {
+            elog('====CalculatorPadViewPager.js====::OnSizeChanged.begin====');
+            elog('====CalculatorPadViewPager.js====::OnSizeChanged.end====');
+        }
     }
 
     return new __CalculatorPadViewPager();

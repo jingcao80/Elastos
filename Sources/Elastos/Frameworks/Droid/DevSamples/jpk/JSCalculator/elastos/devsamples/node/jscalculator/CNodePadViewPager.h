@@ -86,7 +86,7 @@ protected:
         /* [out] */ Int32* result);
     CARAPI_(Int32) GetChildDrawingOrder(
         /* [in] */ Int32 childCount,
-        /* [in] */ Int32);
+        /* [in] */ Int32 i);
 
     CARAPI _VerifyDrawable(
         /* [in] */ IDrawable* who,

@@ -721,7 +721,10 @@ ECode JSActName::_CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p,
         /* [out] */ Boolean* result)
 {
+    ALOGD("CCalculatorPadViewPager::_CheckLayoutParams========begin========");
+
     *result = ViewGroup::CheckLayoutParams(p);
+    ALOGD("CCalculatorPadViewPager::_CheckLayoutParams========end========");
 }
 Boolean JSActName::CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p)
@@ -740,6 +743,7 @@ Boolean JSActName::CheckLayoutParams(
         result = ViewGroup::CheckLayoutParams(p);
     }
 
+    ALOGD("CCalculatorPadViewPager::CheckLayoutParams========end========");
     return result;
 }
 
