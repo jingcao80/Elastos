@@ -112,12 +112,16 @@ ECode JSActName::GenerateLayoutParams(
     AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
 
     if (mListener) {
+        ALOGD("CCalculatorPadLayout::GenerateLayoutParams========begin====0.0====");
         ec = mListener->GenerateLayoutParams(_this, attrs, result);
+        ALOGD("CCalculatorPadLayout::GenerateLayoutParams========begin====0.1====");
     }
     else {
+        ALOGD("CCalculatorPadLayout::GenerateLayoutParams========begin====1====");
         ec = ViewGroup::GenerateLayoutParams(attrs, result);
     }
 
+    ALOGD("CCalculatorPadLayout::GenerateLayoutParams========end========");
     return ec;
 }
 
@@ -212,7 +216,7 @@ ECode JSActName::_CheckLayoutParams(
     //return ViewGroup::CheckLayoutParams(p, result);
     return NOERROR;
 }
-ECode JSActName::CheckLayoutParams(
+ECode  JSActName::CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p,
         /* [out] */ Boolean* result)
 {

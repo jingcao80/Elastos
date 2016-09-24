@@ -763,9 +763,9 @@ CObject.showMethods(mFormulaEditText, "etText");
         }
 
         //delete this to crash
-        // OnResume(context){
-        //     elog('====Calculator.js====_Calculator::OnResume.begin====');
-        // }
+        OnResume(context){
+            elog('====Calculator.js====_Calculator::OnResume.begin====');
+        }
     }
 
     class Calculator extends _Calculator {

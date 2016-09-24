@@ -82,10 +82,11 @@ protected:
 
     CARAPI _GetChildDrawingOrder(
         /* [in] */ Int32 childCount,
-        /* [in] */ Int32 i);
-    CARAPI GetChildDrawingOrder(
+        /* [in] */ Int32 i,
+        /* [out] */ Int32* result);
+    CARAPI_(Int32) GetChildDrawingOrder(
         /* [in] */ Int32 childCount,
-        /* [in] */ Int32 i);
+        /* [in] */ Int32);
 
     CARAPI _VerifyDrawable(
         /* [in] */ IDrawable* who,

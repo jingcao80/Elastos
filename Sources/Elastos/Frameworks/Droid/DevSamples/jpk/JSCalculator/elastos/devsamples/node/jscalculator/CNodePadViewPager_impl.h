@@ -109,28 +109,32 @@ ECode JSActName::OnDetachedFromWindow()
 
 ECode JSActName::_GetChildDrawingOrder(
         /* [in] */ Int32 childCount,
-        /* [in] */ Int32 i)
+        /* [in] */ Int32 i,
+        /* [out] */ Int32* result)
 {
-    return ViewGroup::GetChildDrawingOrder(childCount, i);
+    *result = ViewGroup::GetChildDrawingOrder(childCount, i);
+    return NOERROR;
 }
-ECode JSActName::GetChildDrawingOrder(
+Int32 JSActName::GetChildDrawingOrder(
         /* [in] */ Int32 childCount,
         /* [in] */ Int32 i)
 {
     ALOGD("CCalculatorPadViewPager::GetChildDrawingOrder========begin========");
 
+    Int32 result;
     ECode ec = NOERROR;
 
     AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
 
     if (mListener) {
-        ec = mListener->GetChildDrawingOrder(_this, childCount, i);
+        ec = mListener->GetChildDrawingOrder(_this, childCount, i, &result);
     }
     else {
-        ec = ViewGroup::GetChildDrawingOrder(childCount, i);
+        result = ViewGroup::GetChildDrawingOrder(childCount, i);
     }
 
-    return ec;
+    ALOGD("CCalculatorPadViewPager::GetChildDrawingOrder========end========");
+    return result;
 }
 
 ECode JSActName::_VerifyDrawable(

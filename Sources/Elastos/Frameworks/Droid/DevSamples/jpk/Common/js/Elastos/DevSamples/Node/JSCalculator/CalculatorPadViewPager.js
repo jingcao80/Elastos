@@ -266,6 +266,35 @@ module.exports = function(aoElastos, aoActivity){
             elog("====CalculatorPadViewPager.js====::GenerateLayoutParams====end");
         }
 
+        GetChildDrawingOrder(_this, childCount, i, result) {
+            elog("====CalculatorPadViewPager.js====::GetChildDrawingOrder====begin");
+            result.data = _this._GetChildDrawingOrder(childCount, i);
+            elog("====CalculatorPadViewPager.js====::GetChildDrawingOrder====end");
+        }
+
+        AddView(_this, child, index, params) {
+            elog("====CalculatorPadViewPager.js====::AddView====begin");
+            _this._AddView(child, index, params);
+            elog("====CalculatorPadViewPager.js====::AddView====end");
+        }
+
+        CheckLayoutParams(_this, p, result) {
+            elog("====CalculatorPadViewPager.js====::CheckLayoutParams====begin");
+            result.data = _this._CheckLayoutParams(p);
+            elog("====CalculatorPadViewPager.js====::CheckLayoutParams====end");
+        }
+
+        GenerateDefaultLayoutParams(_this, result) {
+            elog("====CalculatorPadViewPager.js====::GenerateDefaultLayoutParams====begin");
+            result.data = _this._GenerateDefaultLayoutParams();
+            elog("====CalculatorPadViewPager.js====::GenerateDefaultLayoutParams====end");
+        }
+
+        OnFinishInflate(_this) {
+            elog("====CalculatorPadViewPager.js====::OnFinishInflate====begin");
+            _this._OnFinishInflate();
+            elog("====CalculatorPadViewPager.js====::OnFinishInflate====end");
+        }
     }
 
     return new __CalculatorPadViewPager();

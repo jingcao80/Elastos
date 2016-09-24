@@ -400,7 +400,8 @@ module
         _OnDetachedFromWindow();
         _GetChildDrawingOrder(
             [in] Int32 childCount,
-            [in] Int32 i);
+            [in] Int32 i,
+            [out] Int32* result);
         _VerifyDrawable(
             [in] IDrawable* who,
             [out] Boolean* result);
@@ -502,7 +503,8 @@ module
         GetChildDrawingOrder(
             [in] IInterface* _this,
             [in] Int32 childCount,
-            [in] Int32 i);
+            [in] Int32 i,
+            [out] Int32* result);
         VerifyDrawable(
             [in] IInterface* _this,
             [in] IDrawable* who,

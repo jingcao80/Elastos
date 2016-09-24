@@ -264,7 +264,7 @@ Application.NodeBridgeListener = {
         var oListener = require(sFileName)(Elastos, aoContext);
         oPath[sClsName] = oListener;
 
-        Elastos.Test.SetCalculatorPadViewPagerListener(aoListener, oListener);
+        Elastos.Test.SetCalculatorPadLayoutListener(aoListener, oListener);
 
         out_abResult.data = true;
 

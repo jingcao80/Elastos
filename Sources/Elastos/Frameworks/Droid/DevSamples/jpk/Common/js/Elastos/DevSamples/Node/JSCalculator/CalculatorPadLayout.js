@@ -175,6 +175,7 @@ module.exports = function(aoElastos, aoActivity){
 //     @Override
 //     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         _pt.GenerateLayoutParams = function(attrs, result) {
+            elog("====CalculatorPadLayout.js====GenerateLayoutParams====0000====");
 //         return new MarginLayoutParams(getContext(), attrs);
             result.data = new MarginLayoutParams(_this.GetContext(), attrs);
 //     }
@@ -191,6 +192,7 @@ module.exports = function(aoElastos, aoActivity){
 //     @Override
 //     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         _pt.GenerateLayoutParams = function(p, result) {
+            elog("====CalculatorPadLayout.js====GenerateLayoutParams====1111====");
 //         return new MarginLayoutParams(p);
             result.data = new MarginLayoutParams(p);
 //     }
@@ -210,11 +212,28 @@ module.exports = function(aoElastos, aoActivity){
     //return CalculatorPadLayout;
 
     class __CalculatorPadLayout {
-        // OnCreate(_this, context, attrs) {
-        //     elog("====CalculatorPadViewPager.js====::OnCreate====begin");
-        //     _this._constructor(context, attrs);
-        //     elog("====CalculatorPadViewPager.js====::OnCreate====end");
-        // }
+        OnCreate(_this, context, attrs, defStyle) {
+            elog("====CalculatorPadLayout.js====::OnCreate====begin");
+            _this._constructor(context, attrs, defStyle);
+            elog("====CalculatorPadLayout.js====::OnCreate====end");
+        }
+
+        GenerateLayoutParams(_this, attrs, result){
+            elog("====CalculatorPadLayout.js====::GenerateLayoutParams====begin");
+            result.data = _this._GenerateLayoutParams(attrs);
+            elog("====CalculatorPadLayout.js====::GenerateLayoutParams====end");
+        }
+
+        GetChildDrawingOrder(childCount, i, result) {
+            elog("====CalculatorPadLayout.js====::GetChildDrawingOrder====begin");
+            ssss;
+        }
+
+        GenerateDefaultLayoutParams(_this, result) {
+            elog("====CalculatorPadLayout.js====::GenerateDefaultLayoutParams====begin");
+            result.data = _this._GenerateDefaultLayoutParams();
+            elog("====CalculatorPadLayout.js====::GenerateDefaultLayoutParams====end");
+        }
     }
 
     return new __CalculatorPadLayout();
