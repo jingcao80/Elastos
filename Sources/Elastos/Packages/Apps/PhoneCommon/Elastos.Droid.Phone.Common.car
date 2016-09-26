@@ -1,9 +1,10 @@
 
 module
 {
+    importlib("Elastos.CoreLibrary.eco");
+    importlib("Elastos.Droid.Core.eco");
+
     submodule Elastos.Droid.Phone.Common {
-        importlib("Elastos.CoreLibrary.eco");
-        importlib("Elastos.Droid.Core.eco");
 
         merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
         merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
