@@ -1,4 +1,5 @@
 #include "CCipherInputStream.h"
+#include "CNullCipher.h"
 #include "CStreams.h"
 #include "Math.h"
 
@@ -39,11 +40,9 @@ ECode CCipherInputStream::constructor(
 ECode CCipherInputStream::constructor(
     /* [in] */ IInputStream* is)
 {
-//TODO: Need INullCipher
-    // AutoPtr<INullCipher> c;
-    // CNullCipher::New((INullCipher**)&c);
-    // return constructor(is, c);
-    return NOERROR;
+    AutoPtr<INullCipher> c;
+    CNullCipher::New((INullCipher**)&c);
+    return constructor(is, ICipher::Probe(c));
 }
 
 ECode CCipherInputStream::Read(

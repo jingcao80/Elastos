@@ -2,26 +2,42 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "CKeyGenerator.h"
 #include "AutoLock.h"
+#include "CSecurity.h"
+#include "CSecureRandom.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
 
+using Elastos::Security::CSecureRandom;
+using Elastos::Security::CSecurity;
 using Elastos::Security::ISecurity;
+using Org::Apache::Harmony::Security::Fortress::CEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastosx {
 namespace Crypto {
 
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("KeyGenerator"), (CEngine**)&e);
+    return e;
+}
+
+static AutoPtr<ISecureRandom> InitSecureRandom()
+{
+    AutoPtr<CSecureRandom> r;
+    CSecureRandom::NewByFriend((CSecureRandom**)&r);
+    return r;
+}
+
 CAR_OBJECT_IMPL(CKeyGenerator)
 CAR_INTERFACE_IMPL(CKeyGenerator, Object, IKeyGenerator)
 
-AutoPtr<ISecureRandom> CKeyGenerator::mRANDOM;
-//TODO: Need IEngine
-//AutoPtr<IEngine> CKeyGenerator::mENGINE;
+AutoPtr<ISecureRandom> CKeyGenerator::RANDOM = InitSecureRandom();
+AutoPtr<IEngine> CKeyGenerator::ENGINE = InitEngine();
 
 CKeyGenerator::CKeyGenerator()
     : mAlgorithm(String(NULL))
 {
-//TODO: Need IEngine
-    // CEngine::New(mSERVICE, (IEngine**)&mEngine);
-//TODO: Need CSecureRandom
-    // CSecureRandom::New((ISecureRandom**)&mRANDOM);
 }
 
 ECode CKeyGenerator::constructor(
@@ -62,7 +78,7 @@ ECode CKeyGenerator::GenerateKey(
 ECode CKeyGenerator::Init(
     /* [in] */ IAlgorithmParameterSpec * params)
 {
-    return mSpiImpl->EngineInit(params, mRANDOM);//new SecureRandom());
+    return mSpiImpl->EngineInit(params, RANDOM);//new SecureRandom());
 }
 
 ECode CKeyGenerator::Init(
@@ -75,7 +91,7 @@ ECode CKeyGenerator::Init(
 ECode CKeyGenerator::Init(
     /* [in] */ Int32 keysize)
 {
-    return mSpiImpl->EngineInit(keysize, mRANDOM);//new SecureRandom());
+    return mSpiImpl->EngineInit(keysize, RANDOM);//new SecureRandom());
 }
 
 ECode CKeyGenerator::Init(
@@ -101,10 +117,13 @@ ECode CKeyGenerator::GetInstance(
         // throw new NULLPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
-//TODO: Need IEngine
-    // Engine.SpiAndProvider sap = ENGINE.getInstance(algorithm, NULL);
-    // return new KeyGenerator((KeyGeneratorSpi) sap.spi, sap.provider, algorithm);
-    return NOERROR;
+    AutoPtr<ISpiAndProvider> sap;
+    ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
+    AutoPtr<IInterface> spi;
+    sap->GetSpi((IInterface**)&spi);
+    AutoPtr<IProvider> provider;
+    sap->GetProvider((IProvider**)&provider);
+    return CKeyGenerator::New(IKeyGeneratorSpi::Probe(spi), provider, algorithm, ka);
 }
 
 ECode CKeyGenerator::GetInstance(
@@ -120,8 +139,7 @@ ECode CKeyGenerator::GetInstance(
     }
     AutoPtr<IProvider> impProvider;
     AutoPtr<ISecurity> security;
-//TODO: Need CSecurity
-    // CSecurity::AcquireSingleton((ISecurity**)&security);
+    CSecurity::AcquireSingleton((ISecurity**)&security);
     security->GetProvider(provider, (IProvider**)&impProvider);
 
     if (impProvider == NULL) {
@@ -134,7 +152,7 @@ ECode CKeyGenerator::GetInstance(
 ECode CKeyGenerator::GetInstance(
     /* [in] */ const String& algorithm,
     /* [in] */ IProvider * provider,
-    /* [out] */ IKeyGenerator ** ka)
+    /* [out] */ IKeyGenerator** ka)
 {
     VALIDATE_NOT_NULL(ka)
     *ka = NULL;
@@ -146,10 +164,9 @@ ECode CKeyGenerator::GetInstance(
         // throw new NULLPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
-//TODO: Need IEngine
-    // Object spi = ENGINE.getInstance(algorithm, provider, NULL);
-    // return new KeyGenerator((KeyGeneratorSpi) spi, provider, algorithm);
-    return NOERROR;
+    AutoPtr<IInterface> spi;
+    ENGINE->GetInstance(algorithm, provider, NULL, (IInterface**)&spi);
+    return CKeyGenerator::New(IKeyGeneratorSpi::Probe(spi), provider, algorithm, ka);
 }
 
 } // Crypto

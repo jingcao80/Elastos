@@ -10,11 +10,13 @@ INCLUDES += $(MAKEDIR)/../../../../inc;
 INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/net
 INCLUDES += $(MAKEDIR)/../../../../inc/elastosx/net/ssl
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/net
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/security
 INCLUDES += $(MAKEDIR)/../../../../inc/libcore/utility
 INCLUDES += $(MAKEDIR)/../../../../inc/src/elastos
 INCLUDES += $(MAKEDIR)/../../../../../LibCore/inc/elastos/core/
+INCLUDES += $(MAKEDIR)/../../../../inc/org/apache/harmony/security/fortress
 
 SOURCES =  CDefaultHostnameVerifier.cpp
 SOURCES += CDistinguishedNameParser.cpp

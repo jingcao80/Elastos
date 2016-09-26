@@ -64,6 +64,7 @@ ECode CProviderService::Initialize(
     sSupportsParameterTypes[String("Mac")] = TRUE;
     sSupportsParameterTypes[String("Signature")] = TRUE;
 
+    assert(0 && "TODO: java.security.cert.CertStoreParameters");
     //TODO
 //    // Types that take a parameter to newInstance
 //    AutoPtr<IClassInfo> clsInfo;

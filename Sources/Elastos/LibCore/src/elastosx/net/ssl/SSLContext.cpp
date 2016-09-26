@@ -1,19 +1,32 @@
 
 #include "Elastos.CoreLibrary.Security.h"
-#include "SSLContext.h"
 #include "AutoLock.h"
+#include "SSLContext.h"
+#include "CSSLContext.h"
+#include "CSecurity.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
+using Elastos::Security::CSecurity;
+using Elastos::Security::ISecurity;
+using Org::Apache::Harmony::Security::Fortress::CEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastosx {
 namespace Net {
 namespace Ssl {
 
-const String SSLContext::sSERVICE = String("SSLContext");
-//TODO :const AutoPtr<IEngine> SSLContext::sENGINE;// = new Engine(SERVICE);
-AutoPtr<ISSLContext> SSLContext::sDEFAULT;
-Object SSLContext::mLock;;
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("SSLContext")/*SERVICE*/, (CEngine**)&e);
+    return e;
+}
+
+INIT_PROI_5 const String SSLContext::sSERVICE = String("SSLContext");
+INIT_PROI_5 const AutoPtr<IEngine> SSLContext::ENGINE = InitEngine();
+INIT_PROI_5 AutoPtr<ISSLContext> SSLContext::sDEFAULT;
+INIT_PROI_5 Object SSLContext::mLock;
 
 CAR_INTERFACE_IMPL(SSLContext, Object, ISSLContext)
 
@@ -51,15 +64,20 @@ ECode SSLContext::GetInstance(
     /* [out] */ ISSLContext** instance)
 {
     VALIDATE_NOT_NULL(instance)
+    *instance = NULL;
 
     if (protocol == NULL) {
         //throw new NullPointerException("protocol == null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    assert(0 && "TODO");
-    // Engine.SpiAndProvider sap = ENGINE.getInstance(protocol, null);
-    // return new SSLContext((SSLContextSpi) sap.spi, sap.provider, protocol);
-    return NOERROR;
+
+    AutoPtr<ISpiAndProvider> sap;
+    FAIL_RETURN(ENGINE->GetInstance(protocol, NULL, (ISpiAndProvider**)&sap));
+    AutoPtr<IInterface> spi;
+    FAIL_RETURN(sap->GetSpi((IInterface**)&spi));
+    AutoPtr<IProvider> provider;
+    FAIL_RETURN(sap->GetProvider((IProvider**)&provider));
+    return CSSLContext::New(ISSLContextSpi::Probe(spi), provider, protocol, instance);
 }
 
 ECode SSLContext::GetInstance(
@@ -78,8 +96,9 @@ ECode SSLContext::GetInstance(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<IProvider> impProvider;
-    assert(0 && "TODO");
-    //TODO: Security::GetProvider(provider, (IProvider**)&impProvider);
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    security->GetProvider(provider, (IProvider**)&impProvider);
     if (impProvider == NULL) {
         //throw new NoSuchProviderException(provider);
         return E_NO_SUCH_PROVIDER_EXCEPTION;
@@ -102,10 +121,9 @@ ECode SSLContext::GetInstance(
         //throw new NullPointerException("protocol == null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    assert(0 && "TODO");
-    // Object spi = ENGINE.getInstance(protocol, provider, null);
-    // return new SSLContext((SSLContextSpi) spi, provider, protocol);
-    return NOERROR;
+    AutoPtr<IInterface> spi;
+    ENGINE->GetInstance(protocol, provider, NULL, (IInterface**)&spi);
+    return CSSLContext::New(ISSLContextSpi::Probe(spi), provider, protocol, context);
 }
 
 ECode SSLContext::constructor(

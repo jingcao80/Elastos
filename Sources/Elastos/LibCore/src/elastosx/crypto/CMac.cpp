@@ -1,28 +1,37 @@
 
 #include "Elastos.CoreLibrary.Security.h"
 #include "CMac.h"
+#include "MacSpi.h"
+#include "CSecurity.h"
 #include "AutoLock.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
+using Elastos::Security::CSecurity;
 using Elastos::Security::ISecurity;
+using Elastos::Utility::IIterator;
+using Org::Apache::Harmony::Security::Fortress::CEngine;
 
 namespace Elastosx {
 namespace Crypto {
 
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("Mac")/*SERVICE*/, (CEngine**)&e);
+    return e;
+}
+
 CAR_OBJECT_IMPL(CMac)
 CAR_INTERFACE_IMPL(CMac, Object, IMac)
 
-String CMac::mSERVICE = String("Mac");
-//TODO: Need IEngine
-//AutoPtr<IEngine> CMac::mENGINE;
+String CMac::SERVICE("Mac");
+AutoPtr<IEngine> CMac::ENGINE = InitEngine();
 
 CMac::CMac()
     : mAlgorithm(String(NULL))
     , mIsInitMac(FALSE)
 {
-//TODO: Need IEngine
-    // CEngine::New(mSERVICE, (IEngine**)&mEngine);
 }
 
 ECode CMac::constructor(
@@ -157,8 +166,7 @@ ECode CMac::Update(
     if (input != NULL) {
         AutoPtr<IMacSpi> spi;
         GetSpi((IMacSpi**)&spi);
-        // TODO:
-        // spi->EngineUpdate(input);
+        ((MacSpi*)spi.Get())->EngineUpdate(input);
     } else {
         // throw new IllegalArgumentException("input == NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -258,8 +266,7 @@ ECode CMac::GetInstance(
     }
     AutoPtr<IProvider> impProvider;
     AutoPtr<ISecurity> security;
-//TODO: Need CSecurity
-    // CSecurity::AcquireSingleton((ISecurity**)&security);
+    CSecurity::AcquireSingleton((ISecurity**)&security);
     security->GetProvider(provider, (IProvider**)&impProvider);
 
     if (impProvider == NULL) {
@@ -277,7 +284,7 @@ ECode CMac::GetInstance(
     VALIDATE_NOT_NULL(mac)
     *mac = NULL;
     if (provider == NULL) {
-        // throw new IllegalArgumentException("provider == null");
+        // throw new IllegalArgumentException("provider == NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return GetMac(algorithm, provider, mac);
@@ -312,72 +319,91 @@ ECode CMac::GetMac(
     VALIDATE_NOT_NULL(mac)
     *mac = NULL;
     if (algorithm == NULL) {
-        // throw new NullPointerException("algorithm == null");
+        // throw new NullPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
 
-//TODO: Need IEngine
-    // if (TryAlgorithm(NULL, provider, algorithm) == NULL) {
-    //     if (provider == NULL) {
-    //         // throw new NoSuchAlgorithmException("No provider found for " + algorithm);
-    //         return E_NO_SUCH_ALGORITHM_EXCEPTION;
-    //     } else {
-    //         // throw new NoSuchAlgorithmException("Provider " + provider.getName()
-    //         //         + " does not provide " + algorithm);
-    //         return E_NO_SUCH_ALGORITHM_EXCEPTION;
-    //     }
-    // }
+    if (TryAlgorithm(NULL, provider, algorithm) == NULL) {
+        if (provider == NULL) {
+            // throw new NoSuchAlgorithmException("No provider found for " + algorithm);
+            return E_NO_SUCH_ALGORITHM_EXCEPTION;
+        } else {
+            // throw new NoSuchAlgorithmException("Provider " + provider.getName()
+            //         + " does not provide " + algorithm);
+            return E_NO_SUCH_ALGORITHM_EXCEPTION;
+        }
+    }
 
     return CMac::New(NULL, provider, algorithm, mac);
 }
 
-//TODO: Need IEngine
-// CARAPI(Autoptr<IEngine.SpiAndProvider>) TryAlgorithm(
-//     /* [in] */ IKey * key,
-//     /* [in] */ IProvider * provider,
-//     /* [in] */ const String& algorithm)
-// {
-//         if (provider != null) {
-//             Provider.Service service = provider.getService(SERVICE, algorithm);
-//             if (service == null) {
-//                 return null;
-//             }
-//             return tryAlgorithmWithProvider(key, service);
-//         }
-//         ArrayList<Provider.Service> services = ENGINE.getServices(algorithm);
-//         if (services == null) {
-//             return null;
-//         }
-//         for (Provider.Service service : services) {
-//             Engine.SpiAndProvider sap = tryAlgorithmWithProvider(key, service);
-//             if (sap != null) {
-//                 return sap;
-//             }
-//         }
-//         return null;
-// }
+AutoPtr<ISpiAndProvider> CMac::TryAlgorithm(
+    /* [in] */ IKey * key,
+    /* [in] */ IProvider * provider,
+    /* [in] */ const String& algorithm)
+{
+        if (provider != NULL) {
+            AutoPtr<IProviderService> service;
+            provider->GetService(SERVICE, algorithm, (IProviderService**)&service);
+            if (service == NULL) {
+                return NULL;
+            }
+            return TryAlgorithmWithProvider(key, service);
+        }
+        AutoPtr<IArrayList/*<Provider.Service*/> services;
+        ENGINE->GetServices(algorithm, (IArrayList**)&services);
+        if (services == NULL) {
+            return NULL;
+        }
 
-// CARAPI(Autoptr<IEngine.SpiAndProvider>) TryAlgorithmWithProvider(
-//     /* [in] */ IKey * key,
-//     /* [in] */ IProvider.Service service)
-// {
-//     try {
-//         if (key != null && !service.supportsParameter(key)) {
-//             return null;
-//         }
+        AutoPtr<IIterator> it;
+        services->GetIterator((IIterator**)&it);
+        Boolean has = FALSE;
+        while(it->HasNext(&has), has) {
+            AutoPtr<IInterface> service;
+            it->GetNext((IInterface**)&service);
 
-//         Engine.SpiAndProvider sap = ENGINE.getInstance(service, null);
-//         if (sap.spi == null || sap.provider == null) {
-//             return null;
-//         }
-//         if (!(sap.spi instanceof MacSpi)) {
-//             return null;
-//         }
-//         return sap;
-//     } catch (NoSuchAlgorithmException ignored) {
-//     }
-//     return null;
-// }
+            AutoPtr<ISpiAndProvider> sap = TryAlgorithmWithProvider(key, IProviderService::Probe(service));
+            if (sap != NULL) {
+                return sap;
+            }
+        }
+        return NULL;
+}
+
+AutoPtr<ISpiAndProvider> CMac::TryAlgorithmWithProvider(
+    /* [in] */ IKey * key,
+    /* [in] */ IProviderService* service)
+{
+    // try {
+    if (key != NULL) {
+        Boolean tmp = FALSE;
+        if (FAILED(service->SupportsParameter(key, &tmp))) {
+            return NULL;
+        }
+        if (!tmp) {
+            return NULL;
+        }
+    }
+
+    AutoPtr<ISpiAndProvider> sap;
+    if (FAILED(ENGINE->GetInstance(service, String(NULL), (ISpiAndProvider**)&sap))) {
+        return NULL;
+    }
+    AutoPtr<IInterface> spi;
+    sap->GetSpi((IInterface**)&spi);
+    AutoPtr<IProvider> provider;
+    if (spi.Get() == NULL || (sap->GetProvider((IProvider**)&provider), provider.Get()) == NULL) {
+        return NULL;
+    }
+    if (IMacSpi::Probe(spi) == NULL) {
+        return NULL;
+    }
+    return sap;
+    // } catch (NoSuchAlgorithmException ignored) {
+    // }
+    // return NULL;
+}
 
 /**
  * Makes sure a MacSpi that matches this type is selected.
@@ -400,21 +426,22 @@ ECode CMac::GetSpi(
             return NOERROR;
         }
 
-//TODO: Need IEngine
-        // AutoPtr<IEngine.SpiAndProvider> sap = TryAlgorithm(key, specifiedProvider, algorithm);
-        // if (sap == NULL) {
-        //     // throw new ProviderException("No provider for " + getAlgorithm());
-        //     return E_PROVIDER_EXCEPTION;
-        // }
+        AutoPtr<ISpiAndProvider> sap = TryAlgorithm(key, mSpecifiedProvider, mAlgorithm);
+        if (sap == NULL) {
+            // throw new ProviderException("No provider for " + getAlgorithm());
+            return E_PROVIDER_EXCEPTION;
+        }
 
-        // /*
-        //  * Set our Spi if we've never been initialized or if we have the Spi
-        //  * specified and have a NULL provider.
-        //  */
-        // if (mSpiImpl == NULL || provider != NULL) {
-        //     mSpiImpl = (MacSpi) sap.spi;
-        // }
-        // mProvider = sap.provider;
+        /*
+         * Set our Spi if we've never been initialized or if we have the Spi
+         * specified and have a NULL provider.
+         */
+        if (mSpiImpl == NULL || mProvider != NULL) {
+            AutoPtr<IInterface> spi;
+            sap->GetSpi((IInterface**)&spi);
+            mSpiImpl = IMacSpi::Probe(spi);
+        }
+        sap->GetProvider((IProvider**)&mProvider);
 
         *spi = mSpiImpl;
         REFCOUNT_ADD(*spi)

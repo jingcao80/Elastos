@@ -5,8 +5,7 @@
 #include "CByteArrayOutputStream.h"
 #include "CByteArrayInputStream.h"
 #include "CCipherHelper.h"
-//TODO: Need CAlgorithmParametersHelper
-// #include "CAlgorithmParametersHelper.h"
+#include "AlgorithmParameters.h"
 //TODO: Need CObjectOutputStream
 // #include "CObjectOutputStream.h"
 //TODO: Need CObjectInputStream
@@ -25,8 +24,7 @@ using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::CByteArrayInputStream;
 using Elastos::Security::IAlgorithmParameters;
 using Elastos::Security::IAlgorithmParametersHelper;
-//TODO: Need CAlgorithmParametersHelper
-// using Elastos::Security::CAlgorithmParametersHelper;
+using Elastos::Security::AlgorithmParameters;
 
 namespace Elastosx {
 namespace Crypto {
@@ -52,7 +50,7 @@ ECode CSealedObject::constructor(
     // try {
         AutoPtr<IByteArrayOutputStream> bos;
         CByteArrayOutputStream::New((IByteArrayOutputStream**)&bos);
-//TODO: Need CObjectOutputStream
+        assert(0 && "TODO");
         // CObjectOutputStream::New(bos, (IObjectOutputStream**)&oos);
         IObjectOutput::Probe(oos)->WriteObject(object);
         IObjectOutput::Probe(oos)->Flush();
@@ -132,9 +130,7 @@ ECode CSealedObject::GetObject(
         if ((mParamsAlg != NULL) && (mParamsAlg.GetLength() != 0)) {
             AutoPtr<IAlgorithmParameters> params;
             AutoPtr<IAlgorithmParametersHelper> apHelper;
-//TODO: Need CAlgorithmParametersHelper
-            // CAlgorithmParametersHelper::AcquireSingleton((IAlgorithmParametersHelper**)&apHelper);
-            apHelper->GetInstance(mParamsAlg, (IAlgorithmParameters**)&params);
+            AlgorithmParameters::GetInstance(mParamsAlg, (IAlgorithmParameters**)&params);
             params->Init(*mEncodedParams);
             cipher->Init(ICipher::DECRYPT_MODE, key, params);
         } else {
@@ -204,13 +200,12 @@ ECode CSealedObject::GetObject(
         if ((mParamsAlg != NULL) && (mParamsAlg.GetLength() != 0)) {
             AutoPtr<IAlgorithmParameters> params;
             AutoPtr<IAlgorithmParametersHelper> apHelper;
-//TODO: Need CAlgorithmParametersHelper
-            // CAlgorithmParametersHelper::AcquireSingleton((IAlgorithmParametersHelper**)&apHelper);
-            apHelper->GetInstance(mParamsAlg, (IAlgorithmParameters**)&params);
+            AlgorithmParameters::GetInstance(mParamsAlg, (IAlgorithmParameters**)&params);
 
             params->Init(*mEncodedParams);
             cipher->Init(ICipher::DECRYPT_MODE, key, params);
-        } else {
+        }
+        else {
             cipher->Init(ICipher::DECRYPT_MODE, key);
         }
         AutoPtr<ArrayOf<Byte> > serialized;
@@ -291,7 +286,7 @@ ECode CSealedObject::ReadSerialized(
     // try {
         AutoPtr<IByteArrayInputStream> stream;
         CByteArrayInputStream::New(serialized, (IByteArrayInputStream**)&stream);
-//TODO: Need CObjectInputStream
+        assert(0 && "TODO");
         // CObjectInputStream::New(stream, (IObjectInputStream**)&ois);
         IObjectInput::Probe(ois)->ReadObject(result);
     // } finally {

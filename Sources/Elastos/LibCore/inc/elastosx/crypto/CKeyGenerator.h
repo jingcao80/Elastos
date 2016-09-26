@@ -9,8 +9,7 @@
 using Elastos::Security::IProvider;
 using Elastos::Security::ISecureRandom;
 using Elastos::Security::Spec::IAlgorithmParameterSpec;
-//TODO: Need IEngine
-//using Org::Apache::Harmony::Security::Fortress::IEngine;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
 
 namespace Elastosx {
 namespace Crypto {
@@ -194,11 +193,10 @@ public:
 
 private:
     // Used to access common engine functionality
-//TODO: Need IEngine
-    // static AutoPtr<IEngine> mENGINE; // = new Engine("KeyGenerator");
+    static AutoPtr<IEngine> ENGINE; // = new Engine("KeyGenerator");
 
     // Store SecureRandom
-    static AutoPtr<ISecureRandom> mRANDOM; // = new SecureRandom();
+    static AutoPtr<ISecureRandom> RANDOM; // = new SecureRandom();
 
     // Store used provider
     AutoPtr<IProvider> mProvider;

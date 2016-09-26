@@ -8,10 +8,11 @@
 
 using Elastos::Security::IKey;
 using Elastos::Security::IProvider;
+using Elastos::Security::IProviderService;
 using Elastos::Security::ISecureRandom;
 using Elastos::Security::Spec::IAlgorithmParameterSpec;
-//TODO: Need IEngine
-//using Org::Apache::Harmony::Security::Fortress::IEngine;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastosx {
 namespace Crypto {
@@ -265,15 +266,14 @@ private:
         /* [in] */ IProvider * provider,
         /* [out] */ IKeyAgreement ** keyAgreement);
 
-//TODO: Need IEngine
-    // static Engine.SpiAndProvider TryAlgorithm(
-    //     /* [in] */ IKey* key,
-    //     /* [in] */ IProvider * provider,
-    //     /* [in] */ const String& algorithm);
+    static CARAPI_(AutoPtr<ISpiAndProvider>) TryAlgorithm(
+        /* [in] */ IKey* key,
+        /* [in] */ IProvider * provider,
+        /* [in] */ const String& algorithm);
 
-    // static Engine.SpiAndProvider TryAlgorithmWithProvider(
-    //     /* [in] */ IKey* key,
-    //     /* [in] */ Provider.Service service);
+    static CARAPI_(AutoPtr<ISpiAndProvider>) TryAlgorithmWithProvider(
+        /* [in] */ IKey* key,
+        /* [in] */ IProviderService* service);
 
     /**
      * Makes sure a KeyAgreementSpi that matches this type is selected.
@@ -290,14 +290,13 @@ private:
 
 private:
     // The service name.
-    static String mSERVICE; // = "KeyAgreement";
+    static String SERVICE; // = "KeyAgreement";
 
     // Used to access common engine functionality
-//TODO: Need IEngine
-    // static AutoPtr<IEngine> mENGINE; // = new Engine(SERVICE);
+    static AutoPtr<IEngine> ENGINE; // = new Engine(SERVICE);
 
     // Store SecureRandom
-    static AutoPtr<ISecureRandom> mRANDOM; // = new SecureRandom();
+    static AutoPtr<ISecureRandom> RANDOM; // = new SecureRandom();
 
     // Store used provider
     AutoPtr<IProvider> mProvider;
@@ -314,7 +313,7 @@ private:
     /**
      * Lock held while the SPI is initializing.
      */
-    AutoPtr<Object> mInitLock; // = new Object();
+    Object mInitLock; // = new Object();
 };
 
 }

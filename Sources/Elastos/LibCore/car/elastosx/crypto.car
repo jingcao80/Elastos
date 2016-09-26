@@ -5,6 +5,7 @@ module
     merge("crypto/ICipherInputStream.car");
     merge("crypto/ICipherOutputStream.car");
     merge("crypto/ICipherSpi.car");
+    merge("crypto/INullCipherSpi.car");
     merge("crypto/IEncryptedPrivateKeyInfo.car");
     merge("crypto/IExemptionMechanism.car");
     merge("crypto/IExemptionMechanismSpi.car");

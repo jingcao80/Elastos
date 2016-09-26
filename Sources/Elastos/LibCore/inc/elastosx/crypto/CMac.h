@@ -10,9 +10,10 @@ using Elastos::IO::IByteBuffer;
 using Elastos::Core::ICloneable;
 using Elastos::Security::IKey;
 using Elastos::Security::IProvider;
+using Elastos::Security::IProviderService;
 using Elastos::Security::Spec::IAlgorithmParameterSpec;
-//TODO: Need IEngine
-//using Org::Apache::Harmony::Security::Fortress::IEngine;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastosx {
 namespace Crypto {
@@ -301,15 +302,14 @@ private:
         /* [in] */ IProvider * provider,
         /* [out] */ IMac ** mac);
 
-//TODO: Need IEngine
-    // static CARAPI(Autoptr<IEngine.SpiAndProvider>) TryAlgorithm(
-    //     /* [in] */ IKey * key,
-    //     /* [in] */ IProvider * provider,
-    //     /* [in] */ const String& algorithm);
+    static CARAPI_(AutoPtr<ISpiAndProvider>) TryAlgorithm(
+        /* [in] */ IKey * key,
+        /* [in] */ IProvider * provider,
+        /* [in] */ const String& algorithm);
 
-    // static CARAPI(Autoptr<IEngine.SpiAndProvider>) TryAlgorithmWithProvider(
-    //     /* [in] */ IKey * key,
-    //     /* [in] */ IProvider.Service service);
+    static CARAPI_(AutoPtr<ISpiAndProvider>) TryAlgorithmWithProvider(
+        /* [in] */ IKey * key,
+        /* [in] */ IProviderService* service);
 
     /**
      * Makes sure a MacSpi that matches this type is selected.
@@ -326,11 +326,10 @@ private:
 
 private:
     // The service name.
-    static String mSERVICE; // = "Mac";
+    static String SERVICE; // = "Mac";
 
     // Used to access common engine functionality
-//TODO: Need IEngine
-    // static AutoPtr<IEngine> mENGINE; // = new Engine(mSERVICE);
+    static AutoPtr<IEngine> ENGINE; // = new Engine(mSERVICE);
 
     // Store used provider
     AutoPtr<IProvider> mProvider;

@@ -14,6 +14,8 @@ using Elastos::Security::Spec::IAlgorithmParameterSpec;
 namespace Elastosx {
 namespace Crypto {
 
+class CMac;
+
 class MacSpi
     : public Object
     , public IMacSpi
@@ -115,6 +117,7 @@ protected:
     CARAPI CloneImpl(
         /* [in] */ IMacSpi* spi);
 
+    friend class CMac;
 };
 
 }

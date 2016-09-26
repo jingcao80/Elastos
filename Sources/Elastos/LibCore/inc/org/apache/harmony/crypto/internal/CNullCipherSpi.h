@@ -18,6 +18,7 @@ namespace Internal {
 
 CarClass(CNullCipherSpi)
     , public CipherSpi
+    , public INullCipherSpi
 {
 public:
     CAR_OBJECT_DECL()

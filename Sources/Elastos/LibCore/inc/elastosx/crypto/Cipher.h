@@ -14,8 +14,8 @@ using Elastos::Security::ISecureRandom;
 using Elastos::Security::IAlgorithmParameters;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::Spec::IAlgorithmParameterSpec;
-//TODO: Need IEngine
-//using Org::Apache::Harmony::Security::Fortress::IEngine;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastosx {
 namespace Crypto {
@@ -1040,24 +1040,26 @@ private:
      *   [cipher]
      * </pre>
      */
-//TODO: Need IEngine
-//    static CARAPI_(AutoPtr<IEngine.SpiAndProvider>) TryCombinations(
-//        /* [in] */ IKey* key,
-//        /* [in] */ IProvider* provider,
-//        /* [in] */ ArrayOf<String> * transformParts);
-//
-//    static CARAPI_(AutoPtr<IEngine.SpiAndProvider>) TryTransform(
-//        /* [in] */ IKey* key,
-//        /* [in] */ IProvider* provider,
-//        /* [in] */ const String& transform,
-//        /* [in] */ ArrayOf<String> * transformParts,
-//        /* [in] */ NeedToSet type);
-//
-//    static CARAPI_(AutoPtr<IEngine.SpiAndProvider>) TryTransformWithProvider(
-//        /* [in] */ IKey* key,
-//        /* [in] */ ArrayOf<String> * transformParts,
-//        /* [in] */ NeedToSet type,
-//        /* [in] */ IProviderService * service);
+   static CARAPI TryCombinations(
+        /* [in] */ IKey* key,
+        /* [in] */ IProvider* provider,
+        /* [in] */ ArrayOf<String> * transformParts,
+        /* [out] */ ISpiAndProvider** result);
+
+   static CARAPI TryTransform(
+        /* [in] */ IKey* key,
+        /* [in] */ IProvider* provider,
+        /* [in] */ const String& transform,
+        /* [in] */ ArrayOf<String> * transformParts,
+        /* [in] */ NeedToSet type,
+        /* [out] */ ISpiAndProvider** result);
+
+   static CARAPI TryTransformWithProvider(
+        /* [in] */ IKey* key,
+        /* [in] */ ArrayOf<String> * transformParts,
+        /* [in] */ NeedToSet type,
+        /* [in] */ IProviderService * service,
+        /* [out] */ ISpiAndProvider** result);
 
     /**
      * If the attribute listed exists, check that it matches the regular
@@ -1087,8 +1089,7 @@ private:
     /**
      * Used to access common engine functionality.
      */
-//TODO: Need IEngine
-//    static AutoPtr<IEngine> mENGINE; // = new Engine(SERVICE);
+    static AutoPtr<IEngine> ENGINE; // = new Engine(SERVICE);
 
     /** The attribute used for supported paddings. */
     static const String ATTRIBUTE_PADDINGS; // = "SupportedPaddings";

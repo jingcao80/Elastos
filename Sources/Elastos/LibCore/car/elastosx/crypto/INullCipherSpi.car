@@ -1,0 +1,20 @@
+
+module
+{
+    namespace Elastosx {
+    namespace Crypto {
+
+    /**
+     * CipherSpi implementation for javax.crypto.NullCipher
+     *
+     */
+    /**
+     * @Involve
+     * interface Elastosx.Crypto.ICipherSpi
+     */
+    interface INullCipherSpi {
+    }
+
+    } // namespace Crypto
+    } // namespace Elastosx
+}

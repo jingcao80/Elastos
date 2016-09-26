@@ -18,6 +18,7 @@ static AutoPtr<IEngine> InitEngine()
 
 const String AlgorithmParameters::SEVICE("AlgorithmParameters");
 AutoPtr<IEngine> AlgorithmParameters::ENGINE = InitEngine();
+CAR_INTERFACE_IMPL(AlgorithmParameters, Object, IAlgorithmParameters)
 AlgorithmParameters::AlgorithmParameters(
     /* [in] */ AlgorithmParametersSpi* algPramSpi,
     /* [in] */ IProvider* provider,

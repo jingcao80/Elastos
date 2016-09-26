@@ -1,13 +1,28 @@
 
 #include "Elastos.CoreLibrary.Security.h"
 #include "KeyManagerFactory.h"
+#include "CKeyManagerFactory.h"
+#include "CSecurity.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
+
+using Elastos::Security::CSecurity;
+using Elastos::Security::ISecurity;
+using Org::Apache::Harmony::Security::Fortress::CEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastosx {
 namespace Net {
 namespace Ssl {
 
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("KeyManagerFactory")/*SERVICE*/, (CEngine**)&e);
+    return e;
+}
+
 const String KeyManagerFactory::SERVICE = String("KeyManagerFactory");
-//TODO Engine KeyManagerFactory::ENGINE = new Engine(SERVICE);
+AutoPtr<IEngine> KeyManagerFactory::ENGINE = InitEngine();
 const String KeyManagerFactory::PROPERTY_NAME = String("ssl.KeyManagerFactory.algorithm");
 const String KeyManagerFactory::DEFAULT_PROPERTY = String("PKIX");
 
@@ -19,8 +34,9 @@ ECode KeyManagerFactory::GetDefaultAlgorithm(
     VALIDATE_NOT_NULL(algorithm)
 
     String _algorithm;
-    assert(0 && "TODO");
-    // TODO Security::GetProperty(PROPERTY_NAME);
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    security->GetProperty(PROPERTY_NAME, &_algorithm);
     *algorithm = (!_algorithm.IsNull() ? _algorithm : DEFAULT_PROPERTY);
     return NOERROR;
 }
@@ -35,10 +51,13 @@ ECode KeyManagerFactory::GetInstance(
         //throw new NullPointerException("algorithm == null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    assert(0 && "TODO");
-    // TODO Engine.SpiAndProvider sap = ENGINE.getInstance(algorithm, null);
-    // return new KeyManagerFactory((KeyManagerFactorySpi) sap.spi, sap.provider, algorithm);
-    return NOERROR;
+    AutoPtr<ISpiAndProvider> sap;
+    ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
+    AutoPtr<IInterface> spi;
+    sap->GetSpi((IInterface**)&spi);
+    AutoPtr<IProvider> provider;
+    sap->GetProvider((IProvider**)&provider);
+    return CKeyManagerFactory::New(IKeyManagerFactorySpi::Probe(spi), provider, algorithm, factory);
 }
 
 ECode KeyManagerFactory::GetInstance(
@@ -53,8 +72,9 @@ ECode KeyManagerFactory::GetInstance(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<IProvider> impProvider;
-    assert(0 && "TODO");
-    // TODO Security::GetProvider(provider);
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    security->GetProvider(provider, (IProvider**)&impProvider);
     if (impProvider == NULL) {
         //throw new NoSuchProviderException(provider);
         return E_NO_SUCH_PROVIDER_EXCEPTION;
@@ -77,10 +97,9 @@ ECode KeyManagerFactory::GetInstance(
         //throw new NullPointerException("algorithm == null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    assert(0 && "TODO");
-    // TODO Object spi = ENGINE.getInstance(algorithm, provider, null);
-    // return new KeyManagerFactory((KeyManagerFactorySpi) spi, provider, algorithm);
-    return NOERROR;
+    AutoPtr<IInterface> spi;
+    ENGINE->GetInstance(algorithm, provider, NULL, (IInterface**)&spi);
+    return CKeyManagerFactory::New(IKeyManagerFactorySpi::Probe(spi), provider, algorithm, factory);
 }
 
 KeyManagerFactory::KeyManagerFactory()

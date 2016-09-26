@@ -31,9 +31,9 @@ static AutoPtr<ISSLSocketFactory> InitDefaultSSLSocketFactory()
     return ISSLSocketFactory::Probe(factory);
 }
 
-AutoPtr<IHostnameVerifier> HttpsURLConnection::NoPreloadHolder::sDefaultHostnameVerifier;// = InitDefaultHostnameVerifier();
+AutoPtr<IHostnameVerifier> HttpsURLConnection::NoPreloadHolder::sDefaultHostnameVerifier = InitDefaultHostnameVerifier();
 
-AutoPtr<ISSLSocketFactory> HttpsURLConnection::NoPreloadHolder::sDefaultSSLSocketFactory;// = InitDefaultSSLSocketFactory();
+AutoPtr<ISSLSocketFactory> HttpsURLConnection::NoPreloadHolder::sDefaultSSLSocketFactory = InitDefaultSSLSocketFactory();
 
 CAR_INTERFACE_IMPL(HttpsURLConnection, HttpURLConnection, IHttpsURLConnection)
 

@@ -1,13 +1,28 @@
 
 #include "Elastos.CoreLibrary.Security.h"
 #include "TrustManagerFactory.h"
+#include "CTrustManagerFactory.h"
+#include "CSecurity.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
+
+using Elastos::Security::CSecurity;
+using Elastos::Security::ISecurity;
+using Org::Apache::Harmony::Security::Fortress::CEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastosx {
 namespace Net {
 namespace Ssl {
 
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("TrustManagerFactory")/*SERVICE*/, (CEngine**)&e);
+    return e;
+}
+
 const String TrustManagerFactory::SERVICE = String("TrustManagerFactory");
-//TODO Engine TrustManagerFactory::ENGINE = new Engine(SERVICE);
+AutoPtr<IEngine> TrustManagerFactory::ENGINE = InitEngine();
 const String TrustManagerFactory::PROPERTY_NAME = String("ssl.TrustManagerFactory.algorithm");
 const String TrustManagerFactory::DEFAULT_PROPERTY = String("PKIX");
 
@@ -19,8 +34,9 @@ ECode TrustManagerFactory::GetDefaultAlgorithm(
     VALIDATE_NOT_NULL(algorithm)
 
     String _algorithm;
-    assert(0 && "TODO");
-    // TODO Security::GetProperty(PROPERTY_NAME, &_algorithm);
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    security->GetProperty(PROPERTY_NAME, &_algorithm);
     *algorithm = (!_algorithm.IsNull() ? _algorithm : DEFAULT_PROPERTY);
     return NOERROR;
 }
@@ -35,10 +51,13 @@ ECode TrustManagerFactory::GetInstance(
         //throw new NullPointerException("algorithm == null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    assert(0 && "TODO");
-    // TODO Engine.SpiAndProvider sap = ENGINE.getInstance(algorithm, null);
-    // return new TrustManagerFactory((TrustManagerFactorySpi) sap.spi, sap.provider, algorithm);
-    return NOERROR;
+    AutoPtr<ISpiAndProvider> sap;
+    ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
+    AutoPtr<IInterface> spi;
+    sap->GetSpi((IInterface**)&spi);
+    AutoPtr<IProvider> provider;
+    sap->GetProvider((IProvider**)&provider);
+    return CTrustManagerFactory::New(ITrustManagerFactorySpi::Probe(spi), provider, algorithm, factory);
 }
 
 ECode TrustManagerFactory::GetInstance(
@@ -53,7 +72,9 @@ ECode TrustManagerFactory::GetInstance(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<IProvider> impProvider;
-    // TODO Security::GetProvider(provider);
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    security->GetProvider(provider, (IProvider**)&impProvider);
     if (impProvider == NULL) {
         //throw new NoSuchProviderException(provider);
         return E_NO_SUCH_PROVIDER_EXCEPTION;
@@ -76,9 +97,9 @@ ECode TrustManagerFactory::GetInstance(
         //throw new NullPointerException("algorithm == null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    // TODO Object spi = ENGINE.getInstance(algorithm, provider, null);
-    // return new TrustManagerFactory((TrustManagerFactorySpi) spi, provider, algorithm);
-    return NOERROR;
+    AutoPtr<IInterface> spi;
+    ENGINE->GetInstance(algorithm, provider, NULL, (IInterface**)&spi);
+    return CTrustManagerFactory::New(ITrustManagerFactorySpi::Probe(spi), provider, algorithm, factory);
 }
 
 ECode TrustManagerFactory::constructor(

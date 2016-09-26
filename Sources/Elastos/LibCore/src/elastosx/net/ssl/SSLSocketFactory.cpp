@@ -1,24 +1,28 @@
 
 #include "SSLSocketFactory.h"
-#include "AutoLock.h"
-#include <elastos/core/Thread.h>
 #include "CDefaultSSLSocketFactory.h"
+#include "AutoLock.h"
+#include "Thread.h"
+#include "CSecurity.h"
 #include "SSLContext.h"
+#include "org/apache/harmony/security/fortress/Services.h"
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
 using Elastos::Core::IThread;
 using Elastos::Core::IClassLoader;
+using Elastos::Security::CSecurity;
+using Elastos::Security::ISecurity;
 using Elastosx::Net::Ssl::CDefaultSSLSocketFactory;
+using Org::Apache::Harmony::Security::Fortress::Services;
 
 namespace Elastosx {
 namespace Net {
 namespace Ssl {
 
-AutoPtr<ISocketFactory> SSLSocketFactory::sDefaultSocketFactory;
+INIT_PROI_6 AutoPtr<ISocketFactory> SSLSocketFactory::sDefaultSocketFactory;
 Int32 SSLSocketFactory::sLastCacheVersion = -1;
-Object SSLSocketFactory::sLock;
+INIT_PROI_6 Object SSLSocketFactory::sLock;
 
 CAR_INTERFACE_IMPL(SSLSocketFactory, SocketFactory, ISSLSocketFactory)
 
@@ -29,14 +33,14 @@ SSLSocketFactory::~SSLSocketFactory()
 {}
 
 ECode SSLSocketFactory::GetDefault(
-        /* [out] */ ISocketFactory** factory)
+    /* [out] */ ISocketFactory** factory)
 {
     VALIDATE_NOT_NULL(factory)
 
     {    AutoLock syncLock(sLock);
+        assert(sLastCacheVersion == -1);
         Int32 newCacheVersion;
-        assert(0 && "TODO");
-        //TODO: FAIL_RETURN(Services::GetCacheVersion(&newCacheVersion))
+        FAIL_RETURN(Services::GetCacheVersion(&newCacheVersion));
         if (sDefaultSocketFactory != NULL && sLastCacheVersion == newCacheVersion) {
             *factory = sDefaultSocketFactory;
             REFCOUNT_ADD(*factory);
@@ -45,8 +49,9 @@ ECode SSLSocketFactory::GetDefault(
         sLastCacheVersion = newCacheVersion;
 
         String newName;
-        assert(0 && "TODO");
-        //TODO: FAIL_RETURN(Security::GetProperty(String("ssl.SocketFactory.provider"), &newName))
+        AutoPtr<ISecurity> security;
+        CSecurity::AcquireSingleton((ISecurity**)&security);
+        FAIL_RETURN(security->GetProperty(String("ssl.SocketFactory.provider"), &newName));
         if (!newName.IsNull()) {
             /* The cache could have been invalidated, but the provider name didn't change. This
              * will be the most common state, so check for it early without resetting the default
@@ -108,7 +113,6 @@ ECode SSLSocketFactory::GetDefault(
         REFCOUNT_ADD(*factory);
         return NOERROR;
     }
-    return NOERROR;
 }
 
 

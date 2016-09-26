@@ -12,6 +12,7 @@ using Elastos::Security::IKeyStore;
 using Elastosx::Net::Ssl::ITrustManager;
 using Elastosx::Net::Ssl::ITrustManagerFactorySpi;
 using Elastosx::Net::Ssl::IManagerFactoryParameters;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
 
 namespace Elastosx {
 namespace Net {
@@ -171,7 +172,7 @@ private:
     static const String SERVICE;
 
     // Used to access common engine functionality
-    //TUDO static const Engine ENGINE;
+    static AutoPtr<IEngine> ENGINE;
 
     // Store default property name
     static const String PROPERTY_NAME;

@@ -4,44 +4,44 @@
 #include "CCipher.h"
 #include "AutoLock.h"
 #include "StringUtils.h"
-//TODO: Need CSecurity
-//#include "CSecurity.h"
-
+#include "CSecurity.h"
+#include "CSecureRandom.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
 #include <elastos/core/AutoLock.h>
+
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
+using Elastos::Security::CSecurity;
+using Elastos::Security::CSecureRandom;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::ISecurity;
-//TODO: Need CSecurity
-// using Elastos::Security::CSecurity;
 using Elastos::Security::Cert::IX509Certificate;
 using Elastos::Security::Cert::IX509Extension;
+using Org::Apache::Harmony::Security::Fortress::CEngine;
 
 namespace Elastosx {
 namespace Crypto {
 
-CAR_INTERFACE_IMPL(Cipher, Object, ICipher)
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("Cipher")/*SERVICE*/, (CEngine**)&e);
+    return e;
+}
 
 const String Cipher::SERVICE = String("Cipher");
-
-//TODO: Need IEngine
-//AutoPtr<IEngine> Cipher::mENGINE;
-
+AutoPtr<IEngine> Cipher::ENGINE = InitEngine();
 const String Cipher::ATTRIBUTE_PADDINGS = String("SupportedPaddings");
-
 const String Cipher::ATTRIBUTE_MODES = String("SupportedModes");
-
 AutoPtr<ISecureRandom> Cipher::mSecureRandom;
-
+CAR_INTERFACE_IMPL(Cipher, Object, ICipher)
 Cipher::Cipher()
     : mMode(0)
     , mTransformation(String(NULL))
 {
-//TODO: Need IEngine
-    // CEngine::New(SERVICE, (IEngine**)&mEngine);
 }
 
 ECode Cipher::constructor(
@@ -50,15 +50,14 @@ ECode Cipher::constructor(
     /* [in] */ const String& transformation)
 {
     if (cipherSpi == NULL) {
-        // throw new NullPointerException("cipherSpi == null");
+        // throw new NullPointerException("cipherSpi == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
-//TODO: Need INullCipherSpi
-    // AutoPtr<INullCipherSpi> spi = INullCipherSpi::Probe(cipherSpi);
-    // if (spi == NULL && provider == NULL) {
-    //     // throw new NullPointerException("provider == null");
-    //     return E_NULL_POINTER_EXCEPTION;
-    // }
+    AutoPtr<INullCipherSpi> spi = INullCipherSpi::Probe(cipherSpi);
+    if (spi == NULL && provider == NULL) {
+        // throw new NullPointerException("provider == NULL");
+        return E_NULL_POINTER_EXCEPTION;
+    }
     mSpecifiedProvider = provider;
     mSpecifiedSpi = cipherSpi;
     mTransformation = transformation;
@@ -157,8 +156,7 @@ ECode Cipher::Init(
         // In theory it might be thread-unsafe but in the given case it's OK
         // since it does not matter which SecureRandom instance is passed
         // to the init()
-//TODO: Need CSecureRandom
-        // CSecureRandom::New((ISecureRandom**)&mSecureRandom);
+        CSecureRandom::New((ISecureRandom**)&mSecureRandom);
     }
     return Init(opmode, key, mSecureRandom);
 }
@@ -185,8 +183,7 @@ ECode Cipher::Init(
     /* [in] */ IAlgorithmParameterSpec * params)
 {
     if (mSecureRandom == NULL) {
-//TODO: Need CSecureRandom
-        // CSecureRandom::New((ISecureRandom**)&mSecureRandom);
+        CSecureRandom::New((ISecureRandom**)&mSecureRandom);
     }
     return Init(opmode, key, params, mSecureRandom);
 }
@@ -217,8 +214,7 @@ ECode Cipher::Init(
     /* [in] */ IAlgorithmParameters * params)
 {
     if (mSecureRandom == NULL) {
-//TODO: Need CSecureRandom
-        // CSecureRandom::New((ISecureRandom**)&mSecureRandom);
+        CSecureRandom::New((ISecureRandom**)&mSecureRandom);
     }
     return Init(opmode, key, params, mSecureRandom);
 }
@@ -248,8 +244,7 @@ ECode Cipher::Init(
     /* [in] */ ICertificate * certificate)
 {
     if (mSecureRandom == NULL) {
-//TODO: Need CSecureRandom
-        // CSecureRandom::New((ISecureRandom**)&mSecureRandom);
+        CSecureRandom::New((ISecureRandom**)&mSecureRandom);
     }
     return Init(opmode, certificate, mSecureRandom);
 }
@@ -465,9 +460,7 @@ ECode Cipher::UpdateAAD(
     }
     AutoPtr<ICipherSpi> spi;
     GetSpi((ICipherSpi**)&spi);
-//TODO: Need ICipherSpi::EngineUpdateAAD
-   // return spi->EngineUpdateAAD(input, 0, input->GetLength());
-    return NOERROR;
+    return spi->EngineUpdateAAD(input, 0, input->GetLength());
 }
 
 ECode Cipher::UpdateAAD(
@@ -489,9 +482,7 @@ ECode Cipher::UpdateAAD(
     }
     AutoPtr<ICipherSpi> spi;
     GetSpi((ICipherSpi**)&spi);
-//TODO: Need ICipherSpi::EngineUpdateAAD
-    // return spi->EngineUpdateAAD(input, inputOffset, inputLen);
-    return NOERROR;
+    return spi->EngineUpdateAAD(input, inputOffset, inputLen);
 }
 
 ECode Cipher::UpdateAAD(
@@ -507,9 +498,7 @@ ECode Cipher::UpdateAAD(
     }
     AutoPtr<ICipherSpi> spi;
     GetSpi((ICipherSpi**)&spi);
-//TODO: Need ICipherSpi::EngineUpdateAAD
-    // return spi->EngineUpdateAAD(input);
-    return NOERROR;
+    return spi->EngineUpdateAAD(input);
 }
 
 ECode Cipher::DoFinal(
@@ -693,8 +682,7 @@ ECode Cipher::GetInstance(
 
     AutoPtr<IProvider> p;
     AutoPtr<ISecurity> security;
-//TODO: Need CSecurity
-    // CSecurity::AcquireSingleton((ISecurity**)&security);
+    CSecurity::AcquireSingleton((ISecurity**)&security);
     security->GetProvider(provider, (IProvider**)&p);
     if (p == NULL) {
         // throw new NoSuchProviderException("Provider not available: " + provider);
@@ -725,7 +713,7 @@ ECode Cipher::GetMaxAllowedKeyLength(
     *value = 0;
 
     if (transformation == NULL) {
-        // throw new NullPointerException("transformation == null");
+        // throw new NullPointerException("transformation == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ArrayOf<String> > transformParts;
@@ -743,7 +731,7 @@ ECode Cipher::GetMaxAllowedParameterSpec(
     *value = NULL;
 
     if (transformation == NULL) {
-        // throw new NullPointerException("transformation == null");
+        // throw new NullPointerException("transformation == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ArrayOf<String> > transformParts;
@@ -768,17 +756,18 @@ ECode Cipher::GetCipher(
 
     AutoPtr<ArrayOf<String> > transformParts;
     CheckTransformation(transformation, (ArrayOf<String>**)&transformParts);
-//TODO: Need IEngine
-    // if (TryCombinations(NULL, provider, transformParts) == NULL) {
-    //     if (provider == NULL) {
-    //         // throw new NoSuchAlgorithmException("No provider found for " + transformation);
-    //         return E_NO_SUCH_ALGORITHM_EXCEPTION;
-    //     } else {
-    //         // throw new NoSuchAlgorithmException("Provider " + provider.getName()
-    //         //         + " does not provide " + transformation);
-    //         return E_NO_SUCH_ALGORITHM_EXCEPTION;
-    //     }
-    // }
+    AutoPtr<ISpiAndProvider> sp;
+    FAIL_RETURN(TryCombinations(NULL, provider, transformParts, (ISpiAndProvider**)&sp));
+    if (sp.Get() == NULL) {
+        if (provider == NULL) {
+            // throw new NoSuchAlgorithmException("No provider found for " + transformation);
+            return E_NO_SUCH_ALGORITHM_EXCEPTION;
+        } else {
+            // throw new NoSuchAlgorithmException("Provider " + provider.getName()
+            //         + " does not provide " + transformation);
+            return E_NO_SUCH_ALGORITHM_EXCEPTION;
+        }
+    }
     CCipher::New(transformation, transformParts, provider, out);
     return NOERROR;
 }
@@ -843,15 +832,17 @@ ECode Cipher::GetSpi(
             return NOERROR;
         }
 
-//TODO: Need IEngine
-        // AutoPtr<Engine.SpiAndProvider> sap = TryCombinations(key, specifiedProvider, mTransformParts);
-        // if (sap == NULL) {
-        //     // throw new ProviderException("No provider for " + transformation);
-        //     return E_PROVIDER_EXCEPTION;
-        // }
+        AutoPtr<ISpiAndProvider> sap;
+        TryCombinations(key, mSpecifiedProvider, mTransformParts, (ISpiAndProvider**)&sap);
+        if (sap == NULL) {
+            // throw new ProviderException("No provider for " + transformation);
+            return E_PROVIDER_EXCEPTION;
+        }
 
-        // mSpiImpl = ICipherSpi::Probe(sap.spi);
-        // mProvider = sap.provider;
+        AutoPtr<IInterface> obj;
+        sap->GetSpi((IInterface**)&obj);
+        mSpiImpl = ICipherSpi::Probe(obj);
+        sap->GetProvider((IProvider**)&mProvider);
 
         *spi = mSpiImpl;
         REFCOUNT_ADD(*spi);
@@ -866,110 +857,160 @@ ECode Cipher::GetSpi(
     return GetSpi(spi);
 }
 
-//TODO: Need IEngine
-// AutoPtr<Engine.SpiAndProvider> Cipher::TryCombinations(
-//     /* [in] */ IKey* key,
-//     /* [in] */ IProvider* provider,
-//     /* [in] */ ArrayOf<String> * transformParts)
-// {
-//     Engine.SpiAndProvider sap = null;
+ECode Cipher::TryCombinations(
+    /* [in] */ IKey* key,
+    /* [in] */ IProvider* provider,
+    /* [in] */ ArrayOf<String> * transformParts,
+    /* [out] */ ISpiAndProvider** result)
+{
+    VALIDATE_NOT_NULL(*result);
+    *result = NULL;
 
-//     if (transformParts[1] != null && transformParts[2] != null) {
-//         sap = tryTransform(key, provider, transformParts[0] + "/" + transformParts[1] + "/"
-//                 + transformParts[2], transformParts, NeedToSet.NONE);
-//         if (sap != null) {
-//             return sap;
-//         }
-//     }
+    AutoPtr<ISpiAndProvider> sap;
 
-//     if (transformParts[1] != null) {
-//         sap = tryTransform(key, provider, transformParts[0] + "/" + transformParts[1],
-//                 transformParts, NeedToSet.PADDING);
-//         if (sap != null) {
-//             return sap;
-//         }
-//     }
+    if ((*transformParts)[1] != NULL && (*transformParts)[2] != NULL) {
+        FAIL_RETURN(TryTransform(key, provider, (*transformParts)[0] + "/" + (*transformParts)[1] + "/"
+                + (*transformParts)[2], transformParts, NeedToSet_NONE, (ISpiAndProvider**)&sap));
+        if (sap != NULL) {
+            *result = sap;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+    }
 
-//     if (transformParts[2] != null) {
-//         sap = tryTransform(key, provider, transformParts[0] + "//" + transformParts[2],
-//                 transformParts, NeedToSet.MODE);
-//         if (sap != null) {
-//             return sap;
-//         }
-//     }
+    if (transformParts[1] != NULL) {
+        FAIL_RETURN(TryTransform(key, provider, (*transformParts)[0] + "/" + (*transformParts)[1],
+                transformParts, NeedToSet_PADDING, (ISpiAndProvider**)&sap));
+        if (sap != NULL) {
+            *result = sap;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+    }
 
-//     return tryTransform(key, provider, transformParts[0], transformParts, NeedToSet.BOTH);
-// }
+    if ((*transformParts)[2] != NULL) {
+        FAIL_RETURN(TryTransform(key, provider, (*transformParts)[0] + "//" + (*transformParts)[2],
+                transformParts, NeedToSet_MODE, (ISpiAndProvider**)&sap));
+        if (sap != NULL) {
+            *result = sap;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+    }
 
-// AutoPtr<Engine.SpiAndProvider> Cipher::TryTransform(
-//     /* [in] */ IKey* key,
-//     /* [in] */ IProvider* provider,
-//     /* [in] */ const String& transform,
-//     /* [in] */ ArrayOf<String> * transformParts,
-//     /* [in] */ NeedToSet type)
-// {
-//     if (provider != null) {
-//         Provider.Service service = provider.getService(SERVICE, transform);
-//         if (service == null) {
-//             return null;
-//         }
-//         return tryTransformWithProvider(key, transformParts, type, service);
-//     }
-//     ArrayList<Provider.Service> services = ENGINE.getServices(transform);
-//     if (services == null) {
-//         return null;
-//     }
-//     for (Provider.Service service : services) {
-//         Engine.SpiAndProvider sap = tryTransformWithProvider(key, transformParts, type, service);
-//         if (sap != null) {
-//             return sap;
-//         }
-//     }
-//     return null;
-// }
+    return TryTransform(key, provider, (*transformParts)[0], transformParts, NeedToSet_BOTH, result);
+}
 
-// AutoPtr<Engine.SpiAndProvider> Cipher::TryTransformWithProvider(
-//     /* [in] */ IKey* key,
-//     /* [in] */ ArrayOf<String> * transformParts,
-//     /* [in] */ NeedToSet type,
-//     /* [in] */ IProvider.Service * service)
-// {
-//     try {
-//         if (key != null && !service.supportsParameter(key)) {
-//             return null;
-//         }
+ECode Cipher::TryTransform(
+    /* [in] */ IKey* key,
+    /* [in] */ IProvider* provider,
+    /* [in] */ const String& transform,
+    /* [in] */ ArrayOf<String> * transformParts,
+    /* [in] */ NeedToSet type,
+    /* [out] */ ISpiAndProvider** result)
+{
+    VALIDATE_NOT_NULL(*result);
+    *result = NULL;
 
-//         /*
-//          * Check to see if the Cipher even supports the attributes before
-//          * trying to instantiate it.
-//          */
-//         if (!matchAttribute(service, ATTRIBUTE_MODES, transformParts[1])
-//                 || !matchAttribute(service, ATTRIBUTE_PADDINGS, transformParts[2])) {
-//             return null;
-//         }
+    if (provider != NULL) {
+        AutoPtr<IProviderService> service;
+        provider->GetService(SERVICE, transform, (IProviderService**)&service);
+        if (service == NULL) {
+            return NOERROR;
+        }
+        return TryTransformWithProvider(key, transformParts, type, service, result);
+    }
+    AutoPtr<IArrayList/*<IProviderService*/> services;
+    ENGINE->GetServices(transform, (IArrayList**)&services);
+    if (services == NULL) {
+        return NOERROR;
+    }
 
-//         Engine.SpiAndProvider sap = ENGINE.getInstance(service, null);
-//         if (sap.spi == null || sap.provider == null) {
-//             return null;
-//         }
-//         if (!(sap.spi instanceof CipherSpi)) {
-//             return null;
-//         }
-//         CipherSpi spi = (CipherSpi) sap.spi;
-//         if (((type == NeedToSet.MODE) || (type == NeedToSet.BOTH))
-//                 && (transformParts[1] != null)) {
-//             spi.engineSetMode(transformParts[1]);
-//         }
-//         if (((type == NeedToSet.PADDING) || (type == NeedToSet.BOTH))
-//                 && (transformParts[2] != null)) {
-//             spi.engineSetPadding(transformParts[2]);
-//         }
-//         return sap;
-//     } catch (NoSuchAlgorithmException ignored) {
-//     } catch (NoSuchPaddingException ignored) {
-//     }
-//     return null;
-// }
+    AutoPtr<IIterator> ator;
+    services->GetIterator((IIterator**)&ator);
+    Boolean has = FALSE;
+    while (ator->HasNext(&has), has) {
+        AutoPtr<IInterface> service;
+        ator->GetNext((IInterface**)&service);
+
+        AutoPtr<ISpiAndProvider> sap;
+        TryTransformWithProvider(key, transformParts, type , IProviderService::Probe(service)
+                    , (ISpiAndProvider**)&sap);
+        if (sap != NULL) {
+            *result = sap;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+    }
+    return NOERROR;
+}
+
+ECode Cipher::TryTransformWithProvider(
+    /* [in] */ IKey* key,
+    /* [in] */ ArrayOf<String>* transformParts,
+    /* [in] */ NeedToSet type,
+    /* [in] */ IProviderService* service,
+    /* [out] */ ISpiAndProvider** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    ECode ec = NOERROR;
+    do {
+        Boolean tmp = FALSE;
+        if (key != NULL) {
+            ec = service->SupportsParameter(key, &tmp);
+            if (FAILED(ec)) {
+                break;
+            }
+            if (!tmp) {
+                return NOERROR;
+            }
+        }
+
+        /*
+         * Check to see if the Cipher even supports the attributes before
+         * trying to instantiate it.
+         */
+        if (!MatchAttribute(service, ATTRIBUTE_MODES, (*transformParts)[1])
+                || !MatchAttribute(service, ATTRIBUTE_PADDINGS, (*transformParts)[2])) {
+            return NOERROR;
+        }
+
+        AutoPtr<ISpiAndProvider> sap;
+        ec = ENGINE->GetInstance(service, String(NULL), (ISpiAndProvider**)&sap);
+        if (FAILED(ec)) {
+            break;
+        }
+
+        AutoPtr<IInterface> obj;
+        sap->GetSpi((IInterface**)&obj);
+        AutoPtr<IProvider> provider;
+        if (obj == NULL || (sap->GetProvider((IProvider**)&provider), provider.Get()) == NULL) {
+            return NOERROR;
+        }
+        if (ICipherSpi::Probe(obj) == NULL) {
+            return NOERROR;
+        }
+        AutoPtr<ICipherSpi> spi = ICipherSpi::Probe(obj);
+        if (((type == NeedToSet_MODE) || (type == NeedToSet_BOTH))
+                && ((*transformParts)[1] != NULL)) {
+            spi->EngineSetMode((*transformParts)[1]);
+        }
+        if (((type == NeedToSet_PADDING) || (type == NeedToSet_BOTH))
+                && ((*transformParts)[2] != NULL)) {
+            spi->EngineSetPadding((*transformParts)[2]);
+        }
+        *result = sap;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    } while (0);
+
+    if (ec != (ECode)E_NO_SUCH_ALGORITHM_EXCEPTION && ec != (ECode)E_NO_SUCH_PADDING_EXCEPTION) {
+        return ec;
+    }
+
+    return NOERROR;
+}
 
 Boolean Cipher::MatchAttribute(
     /* [in] */ IProviderService* service,

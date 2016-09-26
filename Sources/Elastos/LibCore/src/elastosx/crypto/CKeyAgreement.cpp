@@ -2,29 +2,44 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "CKeyAgreement.h"
 #include "AutoLock.h"
+#include "CSecureRandom.h"
+#include "CSecurity.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
+using Elastos::Security::CSecureRandom;
+using Elastos::Security::CSecurity;
 using Elastos::Security::ISecurity;
+using Elastos::Utility::IIterator;
+using Org::Apache::Harmony::Security::Fortress::CEngine;
 
 namespace Elastosx {
 namespace Crypto {
 
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("KeyAgreement")/*SERVICE*/, (CEngine**)&e);
+    return e;
+}
+
+static AutoPtr<ISecureRandom> InitSecureRandom()
+{
+    AutoPtr<CSecureRandom> r;
+    CSecureRandom::NewByFriend((CSecureRandom**)&r);
+    return r;
+}
+
 CAR_OBJECT_IMPL(CKeyAgreement)
 CAR_INTERFACE_IMPL(CKeyAgreement, Object, IKeyAgreement)
 
-String CKeyAgreement::mSERVICE = String("KeyAgreement");
-AutoPtr<ISecureRandom> CKeyAgreement::mRANDOM;
-//TODO: Need IEngine
-//AutoPtr<IEngine> CKeyAgreement::mENGINE;
+String CKeyAgreement::SERVICE("KeyAgreement");
+AutoPtr<ISecureRandom> CKeyAgreement::RANDOM = InitSecureRandom();
+AutoPtr<IEngine> CKeyAgreement::ENGINE = InitEngine();
 
 CKeyAgreement::CKeyAgreement()
     : mAlgorithm(String(NULL))
 {
-//TODO: Need IEngine
-    // CEngine::New(mSERVICE, (IEngine**)&mEngine);
-//TODO: Need CSecureRandom
-    // CSecureRandom::New((ISecureRandom**)&mRANDOM);
 }
 
 ECode CKeyAgreement::constructor(
@@ -62,7 +77,7 @@ ECode CKeyAgreement::Init(
 {
     AutoPtr<IKeyAgreementSpi> spi;
     GetSpi((IKeyAgreementSpi**)&spi);
-    spi->EngineInit(key, mRANDOM);//new SecureRandom());
+    spi->EngineInit(key, RANDOM);//new SecureRandom());
     return NOERROR;
 }
 
@@ -81,7 +96,7 @@ ECode CKeyAgreement::Init(
 {
     AutoPtr<IKeyAgreementSpi> spi;
     GetSpi((IKeyAgreementSpi**)&spi);
-    return spi->EngineInit(key, params, mRANDOM);//new SecureRandom());
+    return spi->EngineInit(key, params, RANDOM);//new SecureRandom());
 }
 
 ECode CKeyAgreement::Init(
@@ -151,8 +166,7 @@ ECode CKeyAgreement::GetInstance(
     }
     AutoPtr<IProvider> impProvider;
     AutoPtr<ISecurity> security;
-//TODO: Need CSecurity
-    // CSecurity::AcquireSingleton((ISecurity**)&security);
+    CSecurity::AcquireSingleton((ISecurity**)&security);
     security->GetProvider(provider, (IProvider**)&impProvider);
     if (impProvider == NULL) {
         // throw new NoSuchProviderException(provider);
@@ -187,29 +201,87 @@ ECode CKeyAgreement::GetKeyAgreement(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-//TODO: Need IEngine
-    // if (TryAlgorithm(NULL, provider, algorithm) == NULL) {
-    //     if (provider == NULL) {
-    //         // throw new NoSuchAlgorithmException("No provider found for " + algorithm);
-    //         return E_NO_SUCH_ALGORITHM_EXCEPTION;
-    //     } else {
-    //         // throw new NoSuchAlgorithmException("Provider " + provider.getName()
-    //         //         + " does not provide " + algorithm);
-    //         return E_NO_SUCH_ALGORITHM_EXCEPTION;
-    //     }
-    // }
+    if (TryAlgorithm(NULL, provider, algorithm) == NULL) {
+        if (provider == NULL) {
+            // throw new NoSuchAlgorithmException("No provider found for " + algorithm);
+            return E_NO_SUCH_ALGORITHM_EXCEPTION;
+        }
+        else {
+            // throw new NoSuchAlgorithmException("Provider " + provider.getName()
+            //         + " does not provide " + algorithm);
+            return E_NO_SUCH_ALGORITHM_EXCEPTION;
+        }
+    }
     return CKeyAgreement::New(NULL, provider, algorithm, keyAgreement);
 }
 
-//TODO: Need IEngine
-// static Engine.SpiAndProvider TryAlgorithm(
-//     /* [in] */ IKey* key,
-//     /* [in] */ IProvider * provider,
-//     /* [in] */ const String& algorithm);
+AutoPtr<ISpiAndProvider> CKeyAgreement::TryAlgorithm(
+    /* [in] */ IKey* key,
+    /* [in] */ IProvider * provider,
+    /* [in] */ const String& algorithm)
+{
+    if (provider != NULL) {
+        AutoPtr<IProviderService> service;
+        provider->GetService(SERVICE, algorithm, (IProviderService**)&service);
+        if (service == NULL) {
+            return NULL;
+        }
+        return TryAlgorithmWithProvider(key, service);
+    }
+    AutoPtr<IArrayList/*<Provider.Service*/> services;
+    ENGINE->GetServices(algorithm, (IArrayList**)&services);
+    if (services == NULL) {
+        return NULL;
+    }
 
-// static Engine.SpiAndProvider TryAlgorithmWithProvider(
-//     /* [in] */ IKey* key,
-//     /* [in] */ Provider.Service service);
+    AutoPtr<IIterator> it;
+    services->GetIterator((IIterator**)&it);
+    Boolean has = FALSE;
+    while(it->HasNext(&has), has) {
+        AutoPtr<IInterface> service;
+        it->GetNext((IInterface**)&service);
+        AutoPtr<ISpiAndProvider> sap = TryAlgorithmWithProvider(key, IProviderService::Probe(service));
+        if (sap != NULL) {
+            return sap;
+        }
+    }
+    return NULL;
+}
+
+AutoPtr<ISpiAndProvider> CKeyAgreement::TryAlgorithmWithProvider(
+    /* [in] */ IKey* key,
+    /* [in] */ IProviderService* service)
+{
+    // try {
+    if (key != NULL) {
+        Boolean tmp = FALSE;
+        if (FAILED(service->SupportsParameter(key, &tmp))) {
+            return NULL;
+        }
+        if (!tmp) {
+            return NULL;
+        }
+    }
+
+    AutoPtr<ISpiAndProvider> sap;
+    if (FAILED(ENGINE->GetInstance(service, String(NULL), (ISpiAndProvider**)&sap))) {
+        return NULL;
+    }
+
+    AutoPtr<IInterface> spi;
+    sap->GetSpi((IInterface**)&spi);
+    AutoPtr<IProvider> provider;
+    if (spi.Get() == NULL || (sap->GetProvider((IProvider**)&provider), provider.Get()) == NULL) {
+        return NULL;
+    }
+    if (IKeyAgreementSpi::Probe(spi) == NULL) {
+        return NULL;
+    }
+    return sap;
+    // } catch (NoSuchAlgorithmException ignored) {
+    // }
+    // return NULL;
+}
 
 ECode CKeyAgreement::GetSpi(
     /* [in] */ IKey* key,
@@ -224,15 +296,16 @@ ECode CKeyAgreement::GetSpi(
             return NOERROR;
         }
 
-//TODO: Need IEngine
-        // Engine.SpiAndProvider sap = TryAlgorithm(key, specifiedProvider, algorithm);
-        // if (sap == NULL) {
-        //     // throw new ProviderException("No provider for " + getAlgorithm());
-        //     return E_PROVIDER_EXCEPTION;
-        // }
+        AutoPtr<ISpiAndProvider> sap = TryAlgorithm(key, mSpecifiedProvider, mAlgorithm);
+        if (sap == NULL) {
+            // throw new ProviderException("No provider for " + getAlgorithm());
+            return E_PROVIDER_EXCEPTION;
+        }
 
-        // spiImpl = (KeyAgreementSpi) sap.spi;
-        // provider = sap.provider;
+        AutoPtr<IInterface> obj;
+        sap->GetSpi((IInterface**)&obj);
+        mSpiImpl = IKeyAgreementSpi::Probe(obj);
+        sap->GetProvider((IProvider**)&mProvider);
 
         *spi = mSpiImpl;
         REFCOUNT_ADD(*spi)

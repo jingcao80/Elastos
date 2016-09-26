@@ -9,6 +9,7 @@
 using Elastos::Core::Object;
 using Elastos::Security::IProvider;
 using Elastos::Security::ISecureRandom;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
 
 namespace Elastosx {
 namespace Net {
@@ -380,7 +381,7 @@ private:
     static const String sSERVICE;// = "SSLContext";
 
     // Used to access common engine functionality
-    //TODO :static const AutoPtr<IEngine> sENGINE;// = new Engine(SERVICE);
+    static const AutoPtr<IEngine> ENGINE;// = new Engine(SERVICE);
 
     /**
      * Default SSLContext that can be replaced with SSLContext.setDefault()

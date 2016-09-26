@@ -2,15 +2,20 @@
 #include "SSLServerSocketFactory.h"
 #include "CDefaultSSLServerSocketFactory.h"
 #include "AutoLock.h"
+#include "CSecurity.h"
+#include "Thread.h"
 #include "SSLContext.h"
-#include <elastos/core/Thread.h>
+#include "Services.h"
+#include "org/apache/harmony/security/fortress/Services.h"
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
 using Elastos::Core::IThread;
 using Elastos::Core::IClassLoader;
+using Elastos::Security::CSecurity;
+using Elastos::Security::ISecurity;
 using Elastosx::Net::Ssl::CDefaultSSLServerSocketFactory;
+using Org::Apache::Harmony::Security::Fortress::Services;
 
 namespace Elastosx {
 namespace Net {
@@ -30,8 +35,7 @@ ECode SSLServerSocketFactory::GetDefault(
 
     {    AutoLock syncLock(sLock);
         Int32 newCacheVersion;
-        assert(0 && "TODO");
-        //TODO: Services::GetCacheVersion(&newCacheVersion);
+        Services::GetCacheVersion(&newCacheVersion);
         if (sLastCacheVersion != newCacheVersion) {
             sDefaultServerSocketFactory = NULL;
             sDefaultName = String(NULL);
@@ -43,8 +47,9 @@ ECode SSLServerSocketFactory::GetDefault(
             return NOERROR;
         }
         if (sDefaultName.IsNull()) {
-            assert(0 && "TODO");
-            //TODO: Security::GetProperty(String("ssl.ServerSocketFactory.provider"), &sDefaultName);
+            AutoPtr<ISecurity> security;
+            CSecurity::AcquireSingleton((ISecurity**)&security);
+            security->GetProperty(String("ssl.ServerSocketFactory.provider"), &sDefaultName);
             if (!sDefaultName.IsNull()) {
                 AutoPtr<IThread> thread = Thread::GetCurrentThread();
                 AutoPtr<IClassLoader> cl;
