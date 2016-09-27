@@ -13,7 +13,7 @@ module
      * interface IAnalyticsListFragment
      * interface ICallLogQueryHandlerListener
      * interface ICallLogAdapterOnReportButtonClickListener
-     * interface ICallLogAdapterCallItemExpandedListener
+     * interface ICallItemExpandedListener
      */
     interface ICallLogFragment {
         /**

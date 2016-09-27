@@ -41,38 +41,6 @@ module
 
     }
 
-    interface ICallLogGroupBuilder {
-        /**
-         * Day grouping for call log entries used to represent no associated day group.  Used primarily
-         * when retrieving the previous day group, but there is no previous day group (i.e. we are at
-         * the start of the list).
-         */
-        const Int32 DAY_GROUP_NONE = -1;
-
-        /** Day grouping for calls which occurred today. */
-        const Int32 DAY_GROUP_TODAY = 0;
-
-        /** Day grouping for calls which occurred yesterday. */
-        const Int32 DAY_GROUP_YESTERDAY = 1;
-
-        /** Day grouping for calls which occurred before last week. */
-        const Int32 DAY_GROUP_OTHER = 2;
-
-        /**
-         * Finds all groups of adjacent entries in the call log which should be grouped together and
-         * calls {@link GroupCreator#addGroup(int, int, boolean)} on {@link #mGroupCreator} for each of
-         * them.
-         * <p>
-         * For entries that are not grouped with others, we do not need to create a group of size one.
-         * <p>
-         * It assumes that the cursor will not change during its execution.
-         *
-         * @see GroupingListAdapter#addGroups(Cursor)
-         */
-        AddGroups(
-            [in] ICursor* cursor);
-    }
-
     } //CallLog
     } //Dialer
     } //Droid

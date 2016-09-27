@@ -2,21 +2,25 @@
 #ifndef __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGADAPTER_H__
 #define __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGADAPTER_H__
 
-#include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.View.h"
-#include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Database.h"
-#include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/dialer/PhoneCallDetails.h"
+#include "elastos/droid/dialer/calllog/ContactInfo.h"
+#include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
+#include "elastos/droid/dialer/calllog/CallLogListItemHelper.h"
+#include "elastos/droid/dialer/calllog/PhoneNumberDisplayHelper.h"
+#include "elastos/droid/dialer/calllog/CallLogGroupBuilder.h"
+#include "elastos/droid/dialer/calllog/CallLogListItemViews.h"
+#include "elastos/droid/common/widget/GroupingListAdapter.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/core/Thread.h"
-#include "elastos/apps/dialer/calllog/CallLogListItemHelper.h"
+#include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Contacts::Common::IContactPhotoManager;
+using Elastos::Droid::Common::Widget::GroupingListAdapter;
+using Elastos::Droid::Dialer::PhoneCallDetails;
+using Elastos::Droid::Dialer::Util::IExpirableCache;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Net::IUri;
@@ -24,17 +28,14 @@ using Elastos::Droid::View::IOnPreDrawListener;
 using Elastos::Droid::View::View;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
-using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Core::Thread;
-using Elastos::Utility::IHashMap;
+using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::ILinkedList;
-
-using Elastos::Droid::Dialer::Util::IExpirableCache;
 
 namespace Elastos {
 namespace Droid {
@@ -42,23 +43,31 @@ namespace Dialer {
 namespace CallLog {
 
 class CallLogAdapter
-    // : public GroupingListAdapter
-    : public Object
+    : public GroupingListAdapter
     , public ICallLogAdapter
     , public IOnPreDrawListener
     , public ICallLogGroupBuilderGroupCreator
 {
 private:
+    /**
+     * Stores a phone number of a call with the country code where it originally occurred.
+     * <p>
+     * Note the country does not necessarily specifies the country of the phone number itself, but
+     * it is the country in which the user was in when the call was placed or received.
+     */
     class NumberWithCountryIso
         : public Object
-        , public ICallLogAdapterNumberWithCountryIso
+        , public INumberWithCountryIso
     {
     public:
-        CAR_INTERFACE_DECL();
-
         NumberWithCountryIso(
             /* [in] */ const String& number,
-            /* [in] */ const String& countryIso);
+            /* [in] */ const String& countryIso)
+            : mNumber(number)
+            , mCountryIso(countryIso)
+        {}
+
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI Equals(
@@ -79,15 +88,19 @@ private:
      */
     class ContactInfoRequest
         : public Object
-        , public ICallLogAdapterContactInfoRequest
+        , public IContactInfoRequest
     {
     public:
-        CAR_INTERFACE_DECL();
-
         ContactInfoRequest(
             /* [in] */ const String& number,
             /* [in] */ const String& countryIso,
-            /* [in] */ IContactInfo* callLogInfo);
+            /* [in] */ ContactInfo* callLogInfo)
+            : mNumber(number)
+            , mCountryIso(countryIso)
+            , mCallLogInfo(callLogInfo)
+        {}
+
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI Equals(
@@ -104,7 +117,7 @@ private:
         /** The country in which a call to or from this number was placed or received. */
         String mCountryIso;
         /** The cached contact information stored in the call log. */
-        AutoPtr<IContactInfo> mCallLogInfo;
+        AutoPtr<ContactInfo> mCallLogInfo;
     };
 
     /** Listener for the primary or secondary actions in the list.
@@ -116,13 +129,16 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ActionListener(
-            /* [in] */ CallLogAdapter* host);
+            /* [in] */ CallLogAdapter* host)
+            : mHost(host)
+        {}
 
         CARAPI OnClick(
             /* [in] */ IView* view);
+
     private:
         CallLogAdapter* mHost;
     };
@@ -136,13 +152,16 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ExpandCollapseListener(
-            /* [in] */ CallLogAdapter* host);
+            /* [in] */ CallLogAdapter* host)
+            : mHost(host)
+        {}
 
         CARAPI OnClick(
             /* [in] */ IView* v);
+
     private:
         CallLogAdapter* mHost;
     };
@@ -152,7 +171,9 @@ private:
     {
     public:
         AccessibilityDelegate(
-            /* [in] */ CallLogAdapter* host);
+            /* [in] */ CallLogAdapter* host)
+            : mHost(host)
+        {}
 
         // @Override
         CARAPI OnRequestSendAccessibilityEvent(
@@ -160,6 +181,7 @@ private:
             /* [in] */ IView* child,
             /* [in] */ IAccessibilityEvent* event,
             /* [out] */ Boolean* res);
+
     private:
         CallLogAdapter* mHost;
     };
@@ -169,7 +191,9 @@ private:
     {
     public:
         CallLogAdapterHandler(
-            /* [in] */ CallLogAdapter* host);
+            /* [in] */ CallLogAdapter* host)
+            : mHost(host)
+        {}
 
         // @Override
         CARAPI HandleMessage(
@@ -185,11 +209,9 @@ private:
     class QueryThread
         : public Thread
     {
-     public:
+    public:
         QueryThread(
             /* [in] */ CallLogAdapter* host);
-
-        CARAPI constructor();
 
         CARAPI_(void) StopProcessing();
 
@@ -206,16 +228,20 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ReportButtonClickListener(
-            /* [in] */ ICallLogListItemViews* views,
-            /* [in] */ CallLogAdapter* host);
+            /* [in] */ CallLogListItemViews* views,
+            /* [in] */ CallLogAdapter* host)
+            : mViews(views)
+            , mHost(host)
+        {}
 
         CARAPI OnClick(
             /* [in] */ IView* view);
+
     private:
-        AutoPtr<ICallLogListItemViews> mViews;
+        AutoPtr<CallLogListItemViews> mViews;
         CallLogAdapter* mHost;
     };
 
@@ -227,13 +253,17 @@ private:
         CAR_INTERFACE_DECL()
 
         BadgeContainerClickListener(
-            /* [in] */ IPhoneCallDetails* details,
-            /* [in] */ CallLogAdapter* host);
+            /* [in] */ PhoneCallDetails* details,
+            /* [in] */ CallLogAdapter* host)
+            : mDetails(details)
+            , mHost(host)
+        {}
 
         CARAPI OnClick(
             /* [in] */ IView* view);
+
     private:
-        AutoPtr<IPhoneCallDetails> mDetails;
+        AutoPtr<PhoneCallDetails> mDetails;
         CallLogAdapter* mHost;
     };
 
@@ -244,9 +274,9 @@ public:
 
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
-        /* [in] */ IContactInfoHelper* contactInfoHelper,
-        /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
+        /* [in] */ ICallFetcher* callFetcher,
+        /* [in] */ ContactInfoHelper* contactInfoHelper,
+        /* [in] */ ICallItemExpandedListener* callItemExpandedListener,
         /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
         /* [in] */ Boolean isCallLog);
 
@@ -270,7 +300,7 @@ public:
     CARAPI InvalidateCache();
 
     static CARAPI_(void) ExpandVoicemailTranscriptionView(
-        /* [in] */ ICallLogListItemViews* views,
+        /* [in] */ CallLogListItemViews* views,
         /* [in] */ Boolean isExpanded);
 
     /**
@@ -300,7 +330,7 @@ public:
     CARAPI_(void) InjectContactInfoForTest(
         /* [in] */ const String& number,
         /* [in] */ const String& countryIso,
-        /* [in] */ IContactInfo* contactInfo);
+        /* [in] */ ContactInfo* contactInfo);
 
     // @Override
     CARAPI AddGroup(
@@ -317,7 +347,7 @@ public:
     // @Override
     CARAPI SetDayGroup(
         /* [in] */ Int64 rowId,
-        /* [in] */ Int64 dayGroup);
+        /* [in] */ Int32 dayGroup);
 
     /**
      * Clears the day group associations on re-bind of the call log.
@@ -341,6 +371,7 @@ public:
 
     CARAPI OnBadDataReported(
         /* [in] */ const String& number);
+
 protected:
     /**
      * Requery on background thread when {@link Cursor} changes.
@@ -360,45 +391,42 @@ protected:
     CARAPI_(void) EnqueueRequest(
         /* [in] */ const String& number,
         /* [in] */ const String& countryIso,
-        /* [in] */ IContactInfo* callLogInfo,
+        /* [in] */ ContactInfo* callLogInfo,
         /* [in] */ Boolean immediate);
 
     // @Override
-    CARAPI AddGroups(
+    CARAPI_(void) AddGroups(
         /* [in] */ ICursor* cursor);
 
     // @Override
-    CARAPI NewStandAloneView(
+    CARAPI_(AutoPtr<IView>) NewStandAloneView(
         /* [in] */ IContext* context,
-        /* [in] */ IViewGroup* parent,
-        /* [out] */ IView** view);
+        /* [in] */ IViewGroup* parent);
 
     // @Override
-    CARAPI NewGroupView(
+    CARAPI_(AutoPtr<IView>) NewGroupView(
         /* [in] */ IContext* context,
-        /* [in] */ IViewGroup* parent,
-        /* [out] */ IView** view);
+        /* [in] */ IViewGroup* parent);
 
     // @Override
-    CARAPI NewChildView(
+    CARAPI_(AutoPtr<IView>) NewChildView(
         /* [in] */ IContext* context,
-        /* [in] */ IViewGroup* parent,
-        /* [out] */ IView** result);
+        /* [in] */ IViewGroup* parent);
 
     // @Override
-    CARAPI BindStandAloneView(
+    CARAPI_(void) BindStandAloneView(
         /* [in] */ IView* view,
         /* [in] */ IContext* context,
         /* [in] */ ICursor* cursor);
 
     // @Override
-    CARAPI BindChildView(
+    CARAPI_(void) BindChildView(
         /* [in] */ IView* view,
         /* [in] */ IContext* context,
         /* [in] */ ICursor* cursor);
 
     // @Override
-    CARAPI BindGroupView(
+    CARAPI_(void) BindGroupView(
         /* [in] */ IView* view,
         /* [in] */ IContext* context,
         /* [in] */ ICursor* cursor,
@@ -407,8 +435,8 @@ protected:
 
     CARAPI_(void) BindBadge(
         /* [in] */ IView* view,
-        /* [in] */ IContactInfo* info,
-        /* [in] */ IPhoneCallDetails* details,
+        /* [in] */ ContactInfo* info,
+        /* [in] */ PhoneCallDetails* details,
         /* [in] */ Int32 callType);
 
 private:
@@ -440,7 +468,7 @@ private:
     CARAPI_(Boolean) QueryContactInfo(
         /* [in] */ const String& number,
         /* [in] */ const String& countryIso,
-        /* [in] */ IContactInfo* callLogInfo);
+        /* [in] */ ContactInfo* callLogInfo);
 
     CARAPI_(void) FindAndCacheViews(
         /* [in] */ IView* view);
@@ -522,22 +550,22 @@ private:
      * @param views  The call log item views.
      */
     CARAPI_(void) BindActionButtons(
-        /* [in] */ ICallLogListItemViews* views);
+        /* [in] */ CallLogListItemViews* views);
 
     /** Checks whether the contact info from the call log matches the one from the contacts db. */
     CARAPI_(Boolean) CallLogInfoMatches(
-        /* [in] */ IContactInfo* callLogInfo,
-        /* [in] */ IContactInfo* info);
+        /* [in] */ ContactInfo* callLogInfo,
+        /* [in] */ ContactInfo* info);
 
     /** Stores the updated contact info in the call log if it is different from the current one. */
     CARAPI_(void) UpdateCallLogContactInfoCache(
         /* [in] */ const String& number,
         /* [in] */ const String& countryIso,
-        /* [in] */ IContactInfo* updatedInfo,
-        /* [in] */ IContactInfo* callLogInfo);
+        /* [in] */ ContactInfo* updatedInfo,
+        /* [in] */ ContactInfo* callLogInfo);
 
     /** Returns the contact information as stored in the call log. */
-    CARAPI_(AutoPtr<IContactInfo>) GetContactInfoFromCallLog(
+    CARAPI_(AutoPtr<ContactInfo>) GetContactInfoFromCallLog(
         /* [in] */ ICursor* c);
 
     /**
@@ -564,7 +592,7 @@ private:
         /* [in] */ Int32 count);
 
     CARAPI_(void) SetPhoto(
-        /* [in] */ ICallLogListItemViews* views,
+        /* [in] */ CallLogListItemViews* views,
         /* [in] */ Int64 photoId,
         /* [in] */ IUri* contactUri,
         /* [in] */ const String& displayName,
@@ -572,7 +600,7 @@ private:
         /* [in] */ Int32 contactType);
 
     CARAPI_(void) SetPhoto(
-        /* [in] */ ICallLogListItemViews* views,
+        /* [in] */ CallLogListItemViews* views,
         /* [in] */ IUri* photoUri,
         /* [in] */ IUri* contactUri,
         /* [in] */ const String& displayName,
@@ -616,22 +644,22 @@ protected:
     AutoPtr<IContext> mContext;
 
 private:
-    static const Int32 VOICEMAIL_TRANSCRIPTION_MAX_LINES; // = 10;
+    static const Int32 VOICEMAIL_TRANSCRIPTION_MAX_LINES = 10;
 
     /** The time in millis to delay starting the thread processing requests. */
-    static const Int32 START_PROCESSING_REQUESTS_DELAY_MILLIS; // = 1000;
+    static const Int32 START_PROCESSING_REQUESTS_DELAY_MILLIS = 1000;
 
     /** The size of the cache of contact info. */
-    static const Int32 CONTACT_INFO_CACHE_SIZE; // = 100;
+    static const Int32 CONTACT_INFO_CACHE_SIZE = 100;
 
     /** Constant used to indicate no row is expanded. */
-    static const Int64 NONE_EXPANDED; // = -1;
+    static const Int64 NONE_EXPANDED = -1;
 
-    static const Int32 REDRAW; // = 1;
-    static const Int32 START_THREAD; // = 2;
+    static const Int32 REDRAW = 1;
+    static const Int32 START_THREAD = 2;
 
-    AutoPtr<IContactInfoHelper> mContactInfoHelper;
-    AutoPtr<ICallLogAdapterCallFetcher> mCallFetcher;
+    AutoPtr<ContactInfoHelper> mContactInfoHelper;
+    AutoPtr<ICallFetcher> mCallFetcher;
     AutoPtr<IToast> mReportedToast;
     AutoPtr<ICallLogAdapterOnReportButtonClickListener> mOnReportButtonClickListener;
     AutoPtr<IViewTreeObserver> mViewTreeObserver;
@@ -644,7 +672,6 @@ private:
      * <p>
      * The key is number with the country in which the call was placed or received.
      */
-    // private ExpirableCache<NumberWithCountryIso, ContactInfo> mContactInfoCache;
     AutoPtr<IExpirableCache> mContactInfoCache;
 
     /**
@@ -670,8 +697,7 @@ private:
      *  its day group.  This hashmap provides a means of determining the previous day group without
      *  having to reverse the cursor to the start of the previous day call log entry.
      */
-    // private HashMap<Long,Integer> mDayGroups = new HashMap<Long, Integer>();
-    AutoPtr<IHashMap> mDayGroups;
+    HashMap<Int64, AutoPtr<IInteger32> > mDayGroups;
 
     /**
      * List of requests to update contact details.
@@ -682,9 +708,7 @@ private:
      * The requests are added when displaying the contacts and are processed by a background
      * thread.
      */
-    // private final LinkedList<ContactInfoRequest> mRequests;
     AutoPtr<ILinkedList> mRequests;
-    Object mRequestsLock;
 
     Boolean mLoading;
 
@@ -693,20 +717,19 @@ private:
     /** Instance of helper class for managing views. */
     AutoPtr<CallLogListItemHelper> mCallLogViewsHelper;
 
-    /** Helper to set up contact photos. */
-    // TODO:
-    // AutoPtr<IContactPhotoManager> mContactPhotoManager;
+    // /** Helper to set up contact photos. *//
+    AutoPtr<IContactPhotoManager> mContactPhotoManager;
     /** Helper to parse and process phone numbers. */
-    AutoPtr<IPhoneNumberDisplayHelper> mPhoneNumberHelper;
+    AutoPtr<PhoneNumberDisplayHelper> mPhoneNumberHelper;
     /** Helper to group call log entries. */
-    AutoPtr<ICallLogGroupBuilder> mCallLogGroupBuilder;
+    AutoPtr<CallLogGroupBuilder> mCallLogGroupBuilder;
 
-    AutoPtr<ICallLogAdapterCallItemExpandedListener> mCallItemExpandedListener;
+    AutoPtr<ICallItemExpandedListener> mCallItemExpandedListener;
 
     /** Can be set to true by tests to disable processing of requests. */
     /*volatile*/ Boolean mRequestProcessingDisabled;
 
-    Boolean mIsCallLog;
+    Boolean mIsCallLog = true;
 
     AutoPtr<IView> mBadgeContainer;
     AutoPtr<IImageView> mBadgeImageView;

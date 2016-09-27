@@ -1,0 +1,64 @@
+
+module
+{
+
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Database.ICursor;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Common {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IBaseAdapter
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     */
+    [local]
+    interface IGroupingListAdapter {
+
+        const Int32 ITEM_TYPE_STANDALONE = 0;
+        const Int32 ITEM_TYPE_GROUP_HEADER = 1;
+        const Int32 ITEM_TYPE_IN_GROUP = 2;
+
+        ChangeCursor(
+            [in] ICursor* cursor);
+
+        GetCursor(
+            [out] ICursor** cursor);
+
+        /**
+         * Returns true if the specified position in the list corresponds to a
+         * group header.
+         */
+        IsGroupHeader(
+            [in] Int32 position,
+            [out] Boolean* isHeader);
+
+        /**
+         * Given a position of a groups header in the list, returns the size of
+         * the corresponding group.
+         */
+        GetGroupSize(
+            [in] Int32 position,
+            [out] Int32* size);
+
+        /**
+         * Mark group as expanded if it is collapsed and vice versa.
+         */
+        ToggleGroup(
+            [in] Int32 position);
+
+    }
+
+    } // Widget
+    } // Common
+    } // Droid
+    } // Elastos
+
+}

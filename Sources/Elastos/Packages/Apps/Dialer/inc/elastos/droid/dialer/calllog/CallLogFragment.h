@@ -43,8 +43,8 @@ class CallLogFragment
     , public ICallLogFragment
     , public ICallLogQueryHandlerListener
     , public ICallLogAdapterOnReportButtonClickListener
-    , public ICallLogAdapterCallFetcher
-    , public ICallLogAdapterCallItemExpandedListener
+    , public ICallFetcher
+    , public ICallItemExpandedListener
 {
 private:
     class CustomContentObserver

@@ -5,20 +5,14 @@ namespace Elastos {
 namespace Droid {
 namespace Dialer {
 
-const Int32 PhoneCallDetailsHelper::MAX_CALL_TYPE_ICONS = 3;
+const Int32 PhoneCallDetailsHelper::MAX_CALL_TYPE_ICONS;
 
-CAR_INTERFACE_IMPL(PhoneCallDetailsHelper, Object, IPhoneCallDetailsHelper);
-
-PhoneCallDetailsHelper::PhoneCallDetailsHelper()
+PhoneCallDetailsHelper::PhoneCallDetailsHelper(
+    /* [in] */ IResources* resources,
+    /* [in] */ CallTypeHelper* callTypeHelper,
+    /* [in] */ PhoneNumberUtilsWrapper* phoneUtils)
 {
     CArrayList::New((ArrayList**)&mDescriptionItems);
-}
-
-ECode PhoneCallDetailsHelper::construtor(
-    /* [in] */ IResources* resources,
-    /* [in] */ ICallTypeHelper* callTypeHelper,
-    /* [in] */ IPhoneNumberUtilsWrapper* phoneUtils)
-{
     mResources = resources;
     mPhoneNumberUtilsWrapper = phoneUtils;
     CPhoneNumberDisplayHelper::New(mPhoneNumberUtilsWrapper, resources,
@@ -27,8 +21,8 @@ ECode PhoneCallDetailsHelper::construtor(
 }
 
 ECode PhoneCallDetailsHelper::SetPhoneCallDetails(
-    /* [in] */ IPhoneCallDetailsViews* views,
-    /* [in] */ IPhoneCallDetails* details)
+    /* [in] */ PhoneCallDetailsViews* views,
+    /* [in] */ PhoneCallDetails* details)
 {
     PhoneCallDetailsViews* pcViews = (PhoneCallDetailsViews*)views;
     CPhoneCallDetails* cpcDetails = (CPhoneCallDetails*)details;
@@ -102,7 +96,7 @@ ECode PhoneCallDetailsHelper::SetPhoneCallDetails(
 }
 
 AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallLocationAndDate(
-    /* [in] */ IPhoneCallDetails* details)
+    /* [in] */ PhoneCallDetails* details)
 {
     mDescriptionItems->Clear();
 
@@ -125,7 +119,7 @@ AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallLocationAndDate(
 }
 
 ECode PhoneCallDetailsHelper::GetCallTypeOrLocation(
-    /* [in] */ IPhoneCallDetails* details,
+    /* [in] */ PhoneCallDetails* details,
     /* [out] */ ICharSequence* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -165,7 +159,7 @@ ECode PhoneCallDetailsHelper::GetCallTypeOrLocation(
 }
 
 ECode PhoneCallDetailsHelper::GetCallDate(
-    /* [in] */ IPhoneCallDetails* details,
+    /* [in] */ PhoneCallDetails* details,
     /* [out] */ ICharSequence** result)
 {
     VALIDATE_NOT_NULL(result);
@@ -180,7 +174,7 @@ ECode PhoneCallDetailsHelper::GetCallDate(
 
 ECode PhoneCallDetailsHelper::SetCallDetailsHeader(
     /* [in] */ ITextView* nameView,
-    /* [in] */ IPhoneCallDetails* details)
+    /* [in] */ PhoneCallDetails* details)
 {
     AutoPtr<ICharSequence> nameText;
     AutoPtr<ICharSequence> displayNumber;
@@ -222,7 +216,7 @@ Int64 PhoneCallDetailsHelper::GetCurrentTimeMillis()
 }
 
 void PhoneCallDetailsHelper::SetCallCountAndDate(
-    /* [in] */ IPhoneCallDetailsViews* views,
+    /* [in] */ PhoneCallDetailsViews* views,
     /* [in] */ IInteger32* callCount,
     /* [in] */ ICharSequence* dateText)
 {

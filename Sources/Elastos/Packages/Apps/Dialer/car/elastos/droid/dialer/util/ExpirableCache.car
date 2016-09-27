@@ -13,7 +13,7 @@ module
      *
      * @param <V> the type of value stored in the cache
      */
-    interface IExpirableCacheCachedValue{
+    interface IExpirableCacheCachedValue {
         /** Returns the value stored in the cache for a given key. */
         GetValue(
             [out] IInterface** value);
@@ -104,34 +104,6 @@ module
         NewCachedValue(
             [in] IInterface* value,
             [out] IExpirableCacheCachedValue** cached);
-    }
-
-    interface IExpirableCacheHelper {
-        /**
-         * Creates a new {@link ExpirableCache} that wraps the given {@link LruCache}.
-         * <p>
-         * The created cache takes ownership of the cache passed in as an argument.
-         *
-         * @param <K> the type of the keys
-         * @param <V> the type of the values
-         * @param cache the cache to store the value in
-         * @return the newly created expirable cache
-         * @throws IllegalArgumentException if the cache is not empty
-         */
-        Create(
-            [in] IInterface* lruCache,
-            [out] IExpirableCache** result);
-
-        /**
-         * Creates a new {@link ExpirableCache} with the given maximum size.
-         *
-         * @param <K> the type of the keys
-         * @param <V> the type of the values
-         * @return the newly created expirable cache
-         */
-        Create(
-            [in] Int32 maxSize,
-            [out] IExpirableCache** result);
     }
 
     } // Util

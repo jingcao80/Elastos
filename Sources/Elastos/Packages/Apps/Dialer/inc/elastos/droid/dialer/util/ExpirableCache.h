@@ -3,8 +3,10 @@
 
 #include "_Elastos.Droid.Dialer.h"
 #include <elastos/core/Object.h>
-#include "Elastos.CoreLibrary.Utility.h"
+#include <Elastos.Droid.Utility.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
+using Elastos::Droid::Utility::ILruCache;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
 
 namespace Elastos {
@@ -85,7 +87,7 @@ private:
         , public IExpirableCacheCachedValue
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         GenerationalCachedValue(
             /* [in] */ IInterface* value,
@@ -111,7 +113,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns the cached value for the given key, or null if no value exists.
@@ -216,11 +218,11 @@ public:
 
 private:
     ExpirableCache(
-        /* [in] */ IInterface* cache);
+        /* [in] */ ILruCache* cache);
 
 private:
     /** The underlying cache used to stored the cached values. */
-    AutoPtr<IInterface> mCache;
+    AutoPtr<ILruCache> mCache;
 
     /**
      * The current generation of items added to the cache.

@@ -1,10 +1,10 @@
 
-#ifndef __ELASTOS_DROID_DIALER_CALLLOG_CCONTACTINFO_H__
-#define __ELASTOS_DROID_DIALER_CALLLOG_CCONTACTINFO_H__
+#ifndef __ELASTOS_DROID_DIALER_CALLLOG_CONTACTINFO_H__
+#define __ELASTOS_DROID_DIALER_CALLLOG_CONTACTINFO_H__
 
-#include "_Elastos_Droid_Dialer_CallLog_CContactInfo.h"
-#include <elastos/core/Object.h>
+#include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.Net.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Net::IUri;
 
@@ -16,16 +16,14 @@ namespace CallLog {
 /**
  * Information for a contact as needed by the Call Log.
  */
-CarClass(CContactInfo)
-    , public Object
+class ContactInfo
+    : public Object
     , public IContactInfo
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
-
-    CContactInfo();
+    ContactInfo();
 
     // @Override
     CARAPI GetHashCode(
@@ -41,6 +39,10 @@ public:
         /* [out] */ String* info);
 
 public:
+    static const AutoPtr<ContactInfo> EMPTY; // = new ContactInfo();
+
+    static const String GEOCODE_AS_LABEL; // = "";
+
     AutoPtr<IUri> mLookupUri;
     String mLookupKey;
     String mName;
@@ -56,11 +58,7 @@ public:
     Boolean mIsBadData;
     String mObjectId;
 
-    static AutoPtr<IContactInfo> EMPTY; // = new ContactInfo();
-
-    static String GEOCODE_AS_LABEL; // = "";
-
-    Int32 mSourceType; // = 0;
+    Int32 mSourceType;
 };
 
 } // CallLog
@@ -68,4 +66,4 @@ public:
 } // Droid
 } // Elastos
 
-#endif //__ELASTOS_DROID_DIALER_CALLLOG_CCONTACTINFO_H__
+#endif //__ELASTOS_DROID_DIALER_CALLLOG_CONTACTINFO_H__

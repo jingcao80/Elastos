@@ -2,21 +2,24 @@
 #ifndef __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGLISTITEMHELPER_H__
 #define __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGLISTITEMHELPER_H__
 
-#include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/dialer/PhoneCallDetailsHelper.h"
+#include "elastos/droid/dialer/PhoneCallDetails.h"
+#include "elastos/droid/dialer/calllog/PhoneNumberDisplayHelper.h"
+#include "elastos/droid/dialer/calllog/CallLogListItemViews.h"
 #include "Elastos.Droid.Content.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
-
+using Elastos::Droid::Dialer::PhoneCallDetails;
+using Elastos::Droid::Dialer::PhoneCallDetailsHelper;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace CallLog {
 
-class CallLogListItemHelper
-    : public Object
+class CallLogListItemHelper : public Object
 {
 public:
     /**
@@ -26,8 +29,8 @@ public:
     * @param phoneNumberHelper used to process phone number
     */
      CallLogListItemHelper(
-        /* [in] */ IPhoneCallDetailsHelper* phoneCallDetailsHelper,
-        /* [in] */ IPhoneNumberDisplayHelper* phoneNumberHelper,
+        /* [in] */ PhoneCallDetailsHelper* phoneCallDetailsHelper,
+        /* [in] */ PhoneNumberDisplayHelper* phoneNumberHelper,
         /* [in] */ IResources* resources);
 
     /**
@@ -39,8 +42,8 @@ public:
      */
     CARAPI_(void) SetPhoneCallDetails(
         /* [in] */ IContext* context,
-        /* [in] */ ICallLogListItemViews* views,
-        /* [in] */ IPhoneCallDetails* details);
+        /* [in] */ CallLogListItemViews* views,
+        /* [in] */ PhoneCallDetails* details);
 
     /**
      * Sets the accessibility descriptions for the action buttons in the action button ViewStub.
@@ -48,7 +51,7 @@ public:
      * @param views The views associated with the current call log entry.
      */
     CARAPI_(void) SetActionContentDescriptions(
-        /* [in] */ ICallLogListItemViews* views);
+        /* [in] */ CallLogListItemViews* views);
 
     /**
      * Returns the accessibility description of the "return call/call" action for a call log
@@ -83,7 +86,7 @@ public:
      */
     CARAPI_(AutoPtr<ICharSequence>) GetCallDescription(
         /* [in] */ IContext* context,
-        /* [in] */ IPhoneCallDetails* details);
+        /* [in] */ PhoneCallDetails* details);
 
     /**
      * Determine the appropriate string ID to describe a call for accessibility purposes.
@@ -92,7 +95,7 @@ public:
      * @return String resource ID to use.
      */
     CARAPI_(Int32) GetCallDescriptionStringID(
-        /* [in] */ IPhoneCallDetails* details);
+        /* [in] */ PhoneCallDetails* details);
 
 private:
     /**
@@ -102,7 +105,7 @@ private:
      * @return Accessibility description.
      */
     CARAPI_(AutoPtr<ICharSequence>) GetContactBadgeDescription(
-        /* [in] */ IPhoneCallDetails* details);
+        /* [in] */ PhoneCallDetails* details);
 
     /**
      * Determine the call type for the most recent call.
@@ -118,13 +121,13 @@ private:
      * @return the name (if known) of the caller, otherwise the formatted number.
      */
     CARAPI_(AutoPtr<ICharSequence>) GetNameOrNumber(
-        /* [in] */ IPhoneCallDetails* details);
+        /* [in] */ PhoneCallDetails* details);
 
 private:
     /** Helper for populating the details of a phone call. */
-    AutoPtr<IPhoneCallDetailsHelper> mPhoneCallDetailsHelper;
+    AutoPtr<PhoneCallDetailsHelper> mPhoneCallDetailsHelper;
     /** Helper for handling phone numbers. */
-    AutoPtr<IPhoneNumberDisplayHelper> mPhoneNumberHelper;
+    AutoPtr<PhoneNumberDisplayHelper> mPhoneNumberHelper;
     /** Resources to look up strings. */
     AutoPtr<IResources> mResources;
 };

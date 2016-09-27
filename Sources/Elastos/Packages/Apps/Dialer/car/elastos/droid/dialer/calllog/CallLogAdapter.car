@@ -8,8 +8,15 @@ module
     namespace Dialer {
     namespace CallLog {
 
+    /** The enumeration of {@link android.os.AsyncTask} objects used in this class. */
+    enum CallLogAdapterTasks {
+
+        CallLogAdapterTasks_REMOVE_CALL_LOG_ENTRIES = 0
+
+    }
+
     /** Interface used to inform a parent UI element that a list item has been expanded. */
-    interface ICallLogAdapterCallItemExpandedListener {
+    interface ICallItemExpandedListener {
 
         /**
          * @param view The {@link CallLogListItemView} that represents the item that was clicked
@@ -32,7 +39,7 @@ module
     }
 
     /** Interface used to initiate a refresh of the content. */
-    interface ICallLogAdapterCallFetcher {
+    interface ICallFetcher {
 
         FetchCalls();
 
@@ -46,11 +53,10 @@ module
 
     }
 
-    /** The enumeration of {@link android.os.AsyncTask} objects used in this class. */
-    enum CallLogAdapterTasks {
+    interface INumberWithCountryIso {
+    }
 
-        CallLogAdapterTasks_REMOVE_CALL_LOG_ENTRIES = 0
-
+    interface IContactInfoRequest {
     }
 
     /**

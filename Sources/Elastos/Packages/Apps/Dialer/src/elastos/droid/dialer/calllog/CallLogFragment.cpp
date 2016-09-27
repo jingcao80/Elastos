@@ -39,8 +39,8 @@ using Elastos::Droid::Dialer::Voicemail::VoicemailStatusHelperImpl;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogFragment;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogQueryHandlerListener;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogAdapterOnReportButtonClickListener;
-using Elastos::Droid::Dialer::CallLog::EIID_ICallLogAdapterCallFetcher;
-using Elastos::Droid::Dialer::CallLog::EIID_ICallLogAdapterCallItemExpandedListener;
+using Elastos::Droid::Dialer::CallLog::EIID_ICallFetcher;
+using Elastos::Droid::Dialer::CallLog::EIID_ICallItemExpandedListener;
 using Elastos::Droid::DialerBind::ObjectFactory;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::CRect;
@@ -317,7 +317,7 @@ const String CallLogFragment::KEY_IS_REPORT_DIALOG_SHOWING("is_report_dialog_sho
 const String CallLogFragment::KEY_REPORT_DIALOG_NUMBER("report_dialog_number");
 
 CAR_INTERFACE_IMPL_5(CallLogFragment, AnalyticsListFragment, ICallLogFragment, ICallLogQueryHandlerListener,
-        ICallLogAdapterOnReportButtonClickListener, ICallLogAdapterCallFetcher, ICallLogAdapterCallItemExpandedListener)
+        ICallLogAdapterOnReportButtonClickListener, ICallFetcher, ICallItemExpandedListener)
 
 CallLogFragment::CallLogFragment()
     : mIsReportDialogShowing(FALSE)
@@ -400,8 +400,8 @@ ECode CallLogFragment::OnCreate(
     GetActivity((IActivity**)&activity);
     String currentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
     AutoPtr<ContactInfoHelper> ciHelper  = new ContactInfoHelper(activity, currentCountryIso);
-    mAdapter = ObjectFactory::NewCallLogAdapter(activity, ICallLogAdapterCallFetcher::Probe(this),
-            ciHelper, ICallLogAdapterCallItemExpandedListener::Probe(this),
+    mAdapter = ObjectFactory::NewCallLogAdapter(activity, ICallFetcher::Probe(this),
+            ciHelper, ICallItemExpandedListener::Probe(this),
             ICallLogAdapterOnReportButtonClickListener::Probe(this), TRUE);
     SetListAdapter(IListAdapter::Probe(mAdapter));
 

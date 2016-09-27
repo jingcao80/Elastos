@@ -21,7 +21,6 @@ namespace CallLog {
  * Methods to help extract {@code PhoneAccount} information from database and Telecomm sources
  */
 class PhoneAccountUtils
-    : public Object
 {
 public:
     /**

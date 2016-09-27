@@ -1,22 +1,20 @@
 #ifndef __ELASTOS_DROID_DIALER_PHONECALLDETAILSHELPER_H__
 #define __ELASTOS_DROID_DIALER_PHONECALLDETAILSHELPER_H__
 
-#include "_Elastos.Droid.Dialer.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Widget.h"
-#include "Elastos.CoreLibrary.Core.h"
+#include "elastos/droid/dialer/PhoneCallDetails.h"
+#include "elastos/droid/dialer/PhoneCallDetailsViews.h"
+#include "elastos/droid/dialer/calllog/PhoneNumberUtilsWrapper.h"
+#include "elastos/droid/dialer/calllog/PhoneNumberDisplayHelper.h"
+#include "elastos/droid/dialer/calllog/CallTypeHelper.h"
 #include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Dialer::CallLog::CallTypeHelper;
+using Elastos::Droid::Dialer::CallLog::PhoneNumberUtilsWrapper;
+using Elastos::Droid::Dialer::CallLog::PhoneNumberDisplayHelper;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::ICharSequence;
-using Elastos::Core::IInteger32;
-using Elastos::Core::IInteger64;
 using Elastos::Utility::IArrayList;
-using Elastos::Droid::Dialer::CallLog::ICallTypeHelper;
-using Elastos::Droid::Dialer::CallLog::IPhoneNumberUtilsWrapper;
-using Elastos::Droid::Dialer::CallLog::IPhoneNumberDisplayHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -25,14 +23,9 @@ namespace Dialer {
 /**
  * Helper class to fill in the views in {@link PhoneCallDetailsViews}.
  */
-class PhoneCallDetailsHelper
-    : public Object
-    , public IPhoneCallDetailsHelper
+class PhoneCallDetailsHelper : public Object
 {
 public:
-    CAR_INTERFACE_DECL();
-
-    PhoneCallDetailsHelper();
 
     /**
      * Creates a new instance of the helper.
@@ -41,15 +34,15 @@ public:
      *
      * @param resources used to look up strings
      */
-    CARAPI construtor(
+    PhoneCallDetailsHelper(
         /* [in] */ IResources* resources,
-        /* [in] */ ICallTypeHelper* callTypeHelper,
-        /* [in] */ IPhoneNumberUtilsWrapper* phoneUtils);
+        /* [in] */ CallTypeHelper* callTypeHelper,
+        /* [in] */ PhoneNumberUtilsWrapper* phoneUtils);
 
     /** Fills the call details views with content. */
-    CARAPI SetPhoneCallDetails(
-        /* [in] */ IPhoneCallDetailsViews* views,
-        /* [in] */ IPhoneCallDetails* details);
+    CARAPI_(void) SetPhoneCallDetails(
+        /* [in] */ PhoneCallDetailsViews* views,
+        /* [in] */ PhoneCallDetails* details);
 
     /**
      * For a call, if there is an associated contact for the caller, return the known call type
@@ -58,9 +51,8 @@ public:
      * @param details Call details to use.
      * @return Type of call (mobile/home) if known, or the location of the caller (if known).
      */
-    CARAPI GetCallTypeOrLocation(
-        /* [in] */ IPhoneCallDetails* details,
-        /* [out] */ ICharSequence* result);
+    CARAPI_(AutoPtr<ICharSequence>) GetCallTypeOrLocation(
+        /* [in] */ PhoneCallDetails* details);
 
     /**
      * Get the call date/time of the call, relative to the current time.
@@ -68,18 +60,17 @@ public:
      * @param details Call details to use.
      * @return String representing when the call occurred.
      */
-    CARAPI GetCallDate(
-        /* [in] */ IPhoneCallDetails* details,
-        /* [out] */ ICharSequence** result);
+    CARAPI_(AutoPtr<ICharSequence>) GetCallDate(
+        /* [in] */ PhoneCallDetails* details);
 
     /** Sets the text of the header view for the details page of a phone call. */
     // @NeededForTesting
-    CARAPI SetCallDetailsHeader(
+    CARAPI_(void) SetCallDetailsHeader(
         /* [in] */ ITextView* nameView,
-        /* [in] */ IPhoneCallDetails* details);
+        /* [in] */ PhoneCallDetails* details);
 
     // @NeededForTesting
-    CARAPI SetCurrentTimeForTest(
+    CARAPI_(void) SetCurrentTimeForTest(
         /* [in] */ Int64 currentTimeMillis);
 
 private:
@@ -90,7 +81,7 @@ private:
      * @return The call location and date string.
      */
     CARAPI_(AutoPtr<ICharSequence>) GetCallLocationAndDate(
-        /* [in] */ IPhoneCallDetails* details);
+        /* [in] */ PhoneCallDetails* details);
 
     /**
      * Returns the current time in milliseconds since the epoch.
@@ -101,25 +92,25 @@ private:
 
     /** Sets the call count and date. */
     CARAPI_(void) SetCallCountAndDate(
-        /* [in] */ IPhoneCallDetailsViews* views,
+        /* [in] */ PhoneCallDetailsViews* views,
         /* [in] */ IInteger32* callCount,
         /* [in] */ ICharSequence* dateText);
 
 private:
     /** The maximum number of icons will be shown to represent the call types in a group. */
-    static const Int32 MAX_CALL_TYPE_ICONS; // = 3;
+    static const Int32 MAX_CALL_TYPE_ICONS = 3;
 
     AutoPtr<IResources> mResources;
     /** The injected current time in milliseconds since the epoch. Used only by tests. */
-    AutoPtr<IInteger64> mCurrentTimeMillisForTest;
+    Int64 mCurrentTimeMillisForTest;
     // Helper classes.
-    AutoPtr<IPhoneNumberDisplayHelper> mPhoneNumberHelper;
-    AutoPtr<IPhoneNumberUtilsWrapper> mPhoneNumberUtilsWrapper;
+    AutoPtr<PhoneNumberDisplayHelper> mPhoneNumberHelper;
+    AutoPtr<PhoneNumberUtilsWrapper> mPhoneNumberUtilsWrapper;
 
     /**
      * List of items to be concatenated together for accessibility descriptions
      */
-    AutoPtr<IArrayList> mDescriptionItems; // = Lists.newArrayList();
+    AutoPtr<IArrayList> mDescriptionItems;
 };
 
 } // Dialer

@@ -17,49 +17,11 @@ module
      */
     [local]
     interface IIntentProvider {
+
         GetIntent(
             [in] IContext* ctx,
             [out] IIntent** intent);
-    }
 
-    [deprecated, local]
-    interface IIntentProviderHelper {
-        GetReturnCallIntentProvider(
-            [in] String number,
-            [out] IIntentProvider** provider);
-
-        GetReturnCallIntentProvider(
-            [in] String number,
-            [in] IPhoneAccountHandle* accountHandle,
-            [out] IIntentProvider** provider);
-
-        GetReturnVideoCallIntentProvider(
-            [in] String number,
-            [out] IIntentProvider** provider);
-
-        GetReturnVideoCallIntentProvider(
-            [in] String number,
-            [in] IPhoneAccountHandle* accountHandle,
-            [out] IIntentProvider** provider);
-
-        GetPlayVoicemailIntentProvider(
-            [in] Int64 rowId,
-            [in] String voicemailUri,
-            [out] IIntentProvider** provider);
-
-        /**
-         * Retrieves the call details intent provider for an entry in the call log.
-         *
-         * @param id The call ID of the first call in the call group.
-         * @param extraIds The call ID of the other calls grouped together with the call.
-         * @param voicemailUri If call log entry is for a voicemail, the voicemail URI.
-         * @return The call details intent provider.
-         */
-        GetCallDetailIntentProvider(
-            [in] Int64 id,
-            [in] ArrayOf<Int64>* extraIds,
-            [in] String voicemailUri,
-            [out] IIntentProvider** provider);
     }
 
     } //CallLog

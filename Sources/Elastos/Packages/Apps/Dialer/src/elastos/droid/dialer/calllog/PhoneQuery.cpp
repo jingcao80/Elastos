@@ -16,14 +16,15 @@ static AutoPtr<ArrayOf<String> > InitProjection()
 {
     AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(9);
     (*projection)[0] = IBaseColumns::ID;
-    (*projection)[0] = IContactsContractContactsColumns::DISPLAY_NAME;
-    (*projection)[0] = IContactsContractPhoneLookupColumns::TYPE;
-    (*projection)[0] = IContactsContractPhoneLookupColumns::LABEL;
-    (*projection)[0] = IContactsContractPhoneLookupColumns::NUMBER;
-    (*projection)[0] = IContactsContractPhoneLookupColumns::NORMALIZED_NUMBER;
-    (*projection)[0] = IContactsContractContactsColumns::PHOTO_ID;
-    (*projection)[0] = IContactsContractContactsColumns::LOOKUP_KEY;
-    (*projection)[0] = IContactsContractContactsColumns::PHOTO_URI;
+    (*projection)[1] = IContactsContractContactsColumns::DISPLAY_NAME;
+    (*projection)[2] = IContactsContractPhoneLookupColumns::TYPE;
+    (*projection)[3] = IContactsContractPhoneLookupColumns::LABEL;
+    (*projection)[4] = IContactsContractPhoneLookupColumns::NUMBER;
+    (*projection)[5] = IContactsContractPhoneLookupColumns::NORMALIZED_NUMBER;
+    (*projection)[6] = IContactsContractContactsColumns::PHOTO_ID;
+    (*projection)[7] = IContactsContractContactsColumns::LOOKUP_KEY;
+    (*projection)[8] = IContactsContractContactsColumns::PHOTO_URI;
+    return projection;
 }
 const AutoPtr<ArrayOf<String> > PhoneQuery::_PROJECTION = InitProjection();
 const Int32 PhoneQuery::PERSON_ID;
