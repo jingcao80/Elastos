@@ -8,6 +8,7 @@
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
+using Elastos::IO::CFile;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -35,6 +36,23 @@ Boolean ReadFileToString(const String& file_name, String* result)
         result->Append(String(buf, n));
     }
 }
+
+
+OatFile::OatDexFile::OatDexFile(
+    /* [in] */ const OatFile* oat_file,
+    /* [in] */ const String& dex_file_location,
+    /* [in] */ const String& canonical_dex_file_location,
+    /* [in] */ uint32_t dex_file_location_checksum,
+    /* [in] */ const Byte* dex_file_pointer,
+    /* [in] */ const uint32_t* oat_class_offsets_pointer)
+    : mOatFile(oat_file)
+    , mDexFileLocation(dex_file_location)
+    , mCanonicalDexFileLocation(canonical_dex_file_location)
+    , mDexFileLocationChecksum(dex_file_location_checksum)
+    , mDexFilePointer(dex_file_pointer)
+    , mOatClassOffsetsPointer(oat_class_offsets_pointer)
+{}
+
 
 const Boolean OatFile::sIsDebug = FALSE;
 
@@ -70,14 +88,17 @@ AutoPtr<OatFile> OatFile::Open(
         //
         // On host, dlopen is expected to fail when cross compiling, so fall back to OpenElfFile.
         // This won't work for portable runtime execution because it doesn't process relocations.
-        std::unique_ptr<File> file(OS::OpenFileForReading(filename.c_str()));
-        if (file.get() == NULL) {
-          String msg("");
-          msg.AppendFormat("Failed to open oat filename for reading: %s", strerror(errno));
-          *error_msg = msg;
-          return NULL;
+        AutoPtr<IFile> file;
+        CFile::New(filename, (IFile**)&file);
+        Boolean res;
+        file->SetReadOnly(&res);
+        if (file == NULL) {
+            String msg("");
+            msg.AppendFormat("Failed to open oat filename for reading: %s", strerror(errno));
+            *error_msg = msg;
+            return NULL;
         }
-        ret.reset(OpenElfFile(file.get(), location, requested_base, false, executable, error_msg));
+        ret = OpenElfFile(file, location, requested_base, FALSE, executable, error_msg);
         // It would be nice to unlink here. But we might have opened the file created by the
         // ScopedLock, which we better not delete to avoid races. TODO: Investigate how to fix the API
         // to allow removal when we know the ELF must be borked.
@@ -99,6 +120,23 @@ AutoPtr<OatFile> OatFile::OpenDlopen(
     AutoPtr<OatFile> oat_file = new OatFile(location, TRUE);
     Boolean success = oat_file->Dlopen(elf_filename, requested_base, error_msg);
     if (!success) {
+        return NULL;
+    }
+    return oat_file;
+}
+
+AutoPtr<OatFile> OatFile::OpenElfFile(
+    /* [in] */ IFile* file,
+    /* [in] */ const String& location,
+    /* [in] */ Byte* requested_base,
+    /* [in] */ Boolean writable,
+    /* [in] */ Boolean executable,
+    /* [in] */ String* error_msg)
+{
+    AutoPtr<OatFile> oat_file = new OatFile(location, executable);
+    Boolean success = oat_file->ElfFileOpen(file, requested_base, writable, executable, error_msg);
+    if (!success) {
+        assert(!error_msg->IsEmpty());
         return NULL;
     }
     return oat_file;
@@ -168,41 +206,51 @@ Boolean OatFile::Dlopen(
 }
 
 Boolean OatFile::ElfFileOpen(
-    /* [in] */ File* file,
+    /* [in] */ IFile* file,
     /* [in] */ Byte* requested_base,
     /* [in] */ Boolean writable,
     /* [in] */ Boolean executable,
     /* [in] */ String* error_msg)
 {
-    elf_file_.reset(ElfFile::Open(file, writable, true, error_msg));
-    if (elf_file_.get() == nullptr) {
-      DCHECK(!error_msg->empty());
-      return false;
+    mElfFile = ElfFile::Open(file, writable, TRUE, error_msg);
+    if (mElfFile == NULL) {
+        assert(!error_msg->IsEmpty());
+        return FALSE;
     }
-    bool loaded = elf_file_->Load(executable, error_msg);
+    Boolean loaded = mElfFile->Load(executable, error_msg);
     if (!loaded) {
-      DCHECK(!error_msg->empty());
-      return false;
+        assert(!error_msg->IsEmpty());
+        return FALSE;
     }
-    begin_ = elf_file_->FindDynamicSymbolAddress("oatdata");
-    if (begin_ == NULL) {
-      *error_msg = StringPrintf("Failed to find oatdata symbol in '%s'", file->GetPath().c_str());
-      return false;
+    mBegin = mElfFile->FindDynamicSymbolAddress(String("oatdata"));
+    if (mBegin == NULL) {
+        String path;
+        file->GetPath(&path);
+        String msg("");
+        msg.AppendFormat("Failed to find oatdata symbol in '%s'", path.string());
+        *error_msg = msg;
+        return FALSE;
     }
-    if (requested_base != NULL && begin_ != requested_base) {
-      *error_msg = StringPrintf("Failed to find oatdata symbol at expected address: "
-                                "oatdata=%p != expected=%p /proc/self/maps:\n",
-                                begin_, requested_base);
-      ReadFileToString("/proc/self/maps", error_msg);
-      return false;
+    if (requested_base != NULL && mBegin != requested_base) {
+        String msg("");
+        msg.AppendFormat("Failed to find oatdata symbol at expected address: "
+                "oatdata=%p != expected=%p /proc/self/maps:\n",
+                mBegin, requested_base);
+        *error_msg = msg;
+        ReadFileToString(String("/proc/self/maps"), error_msg);
+        return FALSE;
     }
-    end_ = elf_file_->FindDynamicSymbolAddress("oatlastword");
-    if (end_ == NULL) {
-      *error_msg = StringPrintf("Failed to find oatlastword symbol in '%s'", file->GetPath().c_str());
-      return false;
+    mEnd = mElfFile->FindDynamicSymbolAddress(String("oatlastword"));
+    if (mEnd == NULL) {
+        String path;
+        file->GetPath(&path);
+        String msg("");
+        msg.AppendFormat("Failed to find oatlastword symbol in '%s'", path.string());
+        *error_msg = msg;
+        return FALSE;
     }
     // Readjust to be non-inclusive upper bound.
-    end_ += sizeof(uint32_t);
+    mEnd += sizeof(uint32_t);
     return Setup(error_msg);
 }
 
@@ -361,6 +409,18 @@ Boolean OatFile::Setup(
 const OatHeader& OatFile::GetOatHeader() const
 {
     return *reinterpret_cast<const OatHeader*>(Begin());
+}
+
+const Byte* OatFile::Begin() const
+{
+    assert(mBegin != NULL);
+    return mBegin;
+}
+
+const Byte* OatFile::End() const
+{
+    assert(mEnd != NULL);
+    return mEnd;
 }
 
 AutoPtr<OatFile::OatDexFile> OatFile::GetOatDexFile(

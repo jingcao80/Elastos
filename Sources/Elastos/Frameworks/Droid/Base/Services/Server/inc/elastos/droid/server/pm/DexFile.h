@@ -3,9 +3,11 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/server/pm/dex/MemMap.h"
+#include <elastos/droid/server/pm/dex/Oat.h>
 #include "elastos/droid/server/pm/dex/OatFile.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Server::Pm::Dex::InstructionSet;
 using Elastos::Droid::Server::Pm::Dex::MemMap;
 using Elastos::Droid::Server::Pm::Dex::OatFile;
 using Elastos::Core::Object;
@@ -79,17 +81,6 @@ public:
     struct MapList {
         uint32_t mSize;
         MapItem mList[1];
-    };
-
-    enum InstructionSet {
-        kNone,
-        kArm,
-        kArm64,
-        kThumb2,
-        kX86,
-        kX86_64,
-        kMips,
-        kMips64
     };
 
 public:

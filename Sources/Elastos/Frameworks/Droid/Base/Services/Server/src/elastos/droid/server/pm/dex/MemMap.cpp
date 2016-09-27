@@ -2,6 +2,15 @@
 #include "elastos/droid/server/pm/dex/MemMap.h"
 #include <elastos/utility/logging/Slogger.h>
 
+#define USE_ASHMEM 1
+
+#ifdef USE_ASHMEM
+#include <cutils/ashmem.h>
+// #ifndef ANDROID_OS
+// #include <sys/resource.h>
+// #endif
+#endif
+
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -69,6 +78,169 @@ static Boolean CheckMapRequest(Byte* expected_ptr, void* actual_ptr, size_t byte
     return FALSE;
 }
 
+AutoPtr<MemMap> MemMap::MapAnonymous(
+    /* [in] */ const char* name,
+    /* [in] */ Byte* expected_ptr,
+    /* [in] */ size_t byte_count,
+    /* [in] */ int prot,
+    /* [in] */ Boolean low_4gb, String* error_msg)
+{
+    if (byte_count == 0) {
+        return new MemMap(String(name), NULL, 0, NULL, 0, prot, FALSE);
+    }
+    size_t page_aligned_byte_count = RoundUp(byte_count, kPageSize);
+
+    int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+    int fd = -1;
+
+#ifdef USE_ASHMEM
+#ifdef HAVE_ANDROID_OS
+    const Boolean use_ashmem = TRUE;
+#else
+    // When not on Android ashmem is faked using files in /tmp. Ensure that such files won't
+    // fail due to ulimit restrictions. If they will then use a regular mmap.
+    struct rlimit rlimit_fsize;
+    int res = getrlimit(RLIMIT_FSIZE, &rlimit_fsize);
+    assert(res == 0);
+    const Boolean use_ashmem = (rlimit_fsize.rlim_cur == RLIM_INFINITY) ||
+            (page_aligned_byte_count < rlimit_fsize.rlim_cur);
+#endif
+    if (use_ashmem) {
+        // android_os_Debug.cpp read_mapinfo assumes all ashmem regions associated with the VM are
+        // prefixed "dalvik-".
+        String debug_friendly_name("dalvik-");
+        debug_friendly_name += name;
+        fd = ashmem_create_region(debug_friendly_name.string(), page_aligned_byte_count);
+        if (fd == -1) {
+            String msg("");
+            msg.AppendFormat("ashmem_create_region failed for '%s': %s", name, strerror(errno));
+            *error_msg = msg;
+            return NULL;
+        }
+        flags = MAP_PRIVATE;
+    }
+#endif
+
+    // We need to store and potentially set an error number for pretty printing of errors
+    int saved_errno = 0;
+
+#ifdef __LP64__
+    // When requesting low_4g memory and having an expectation, the requested range should fit into
+    // 4GB.
+    if (low_4gb && (
+        // Start out of bounds.
+        (reinterpret_cast<uintptr_t>(expected_ptr) >> 32) != 0 ||
+        // End out of bounds. For simplicity, this will fail for the last page of memory.
+        (reinterpret_cast<uintptr_t>(expected_ptr + page_aligned_byte_count) >> 32) != 0)) {
+        String msg("");
+        msg.AppendFormat("The requested address space (%p, %p) cannot fit in low_4gb",
+                expected_ptr, expected_ptr + page_aligned_byte_count);
+        *error_msg = msg;
+        close(fd);
+        return NULL;
+    }
+#endif
+
+    // TODO:
+    // A page allocator would be a useful abstraction here, as
+    // 1) It is doubtful that MAP_32BIT on x86_64 is doing the right job for us
+    // 2) The linear scheme, even with simple saving of the last known position, is very crude
+#if USE_ART_LOW_4G_ALLOCATOR
+    // MAP_32BIT only available on x86_64.
+    void* actual = MAP_FAILED;
+    if (low_4gb && expected_ptr == NULL) {
+        Boolean first_run = TRUE;
+
+        for (uintptr_t ptr = next_mem_pos_; ptr < 4 * GB; ptr += kPageSize) {
+            if (4U * GB - ptr < page_aligned_byte_count) {
+                // Not enough memory until 4GB.
+                if (first_run) {
+                    // Try another time from the bottom;
+                    ptr = LOW_MEM_START - kPageSize;
+                    first_run = FALSE;
+                    continue;
+                }
+                else {
+                    // Second try failed.
+                    break;
+                }
+            }
+
+            uintptr_t tail_ptr;
+
+            // Check pages are free.
+            Boolean safe = TRUE;
+            for (tail_ptr = ptr; tail_ptr < ptr + page_aligned_byte_count; tail_ptr += kPageSize) {
+                if (msync(reinterpret_cast<void*>(tail_ptr), kPageSize, 0) == 0) {
+                    safe = FALSE;
+                    break;
+                }
+                else {
+                    assert(errno == ENOMEM);
+                }
+            }
+
+            next_mem_pos_ = tail_ptr;  // update early, as we break out when we found and mapped a region
+
+            if (safe == TRUE) {
+                actual = mmap(reinterpret_cast<void*>(ptr), page_aligned_byte_count, prot, flags, fd,
+                        0);
+                if (actual != MAP_FAILED) {
+                    // Since we didn't use MAP_FIXED the kernel may have mapped it somewhere not in the low
+                    // 4GB. If this is the case, unmap and retry.
+                    if (reinterpret_cast<uintptr_t>(actual) + page_aligned_byte_count < 4 * GB) {
+                        break;
+                    }
+                    else {
+                        munmap(actual, page_aligned_byte_count);
+                        actual = MAP_FAILED;
+                    }
+                }
+            }
+            else {
+                // Skip over last page.
+                ptr = tail_ptr;
+            }
+        }
+
+        if (actual == MAP_FAILED) {
+            Slogger::E("MemMap", "Could not find contiguous low-memory space.");
+            saved_errno = ENOMEM;
+        }
+    }
+    else {
+        actual = mmap(expected_ptr, page_aligned_byte_count, prot, flags, fd, 0);
+        saved_errno = errno;
+    }
+
+#else
+#if defined(__LP64__)
+    if (low_4gb && expected_ptr == NULL) {
+        flags |= MAP_32BIT;
+    }
+#endif
+
+    void* actual = mmap(expected_ptr, page_aligned_byte_count, prot, flags, fd, 0);
+    saved_errno = errno;
+#endif
+
+    if (actual == MAP_FAILED) {
+        String maps;
+        ReadFileToString(String("/proc/self/maps"), &maps);
+        String msg("");
+        msg.AppendFormat("Failed anonymous mmap(%p, %zd, 0x%x, 0x%x, %d, 0): %s\n%s",
+                    expected_ptr, page_aligned_byte_count, prot, flags, fd,
+                    strerror(saved_errno), maps.string());
+        *error_msg = msg;
+        return NULL;
+    }
+    if (!CheckMapRequest(expected_ptr, actual, page_aligned_byte_count, error_msg)) {
+        return NULL;
+    }
+    return new MemMap(String(name), reinterpret_cast<byte*>(actual), byte_count, actual,
+                    page_aligned_byte_count, prot, FALSE);
+}
+
 AutoPtr<MemMap> MemMap::MapFile(
     /* [in] */ size_t byte_count,
     /* [in] */ int prot,
@@ -79,16 +251,6 @@ AutoPtr<MemMap> MemMap::MapFile(
     /* [out] */ String* error_msg)
 {
     return MapFileAtAddress(NULL, byte_count, prot, flags, fd, start, FALSE, filename, error_msg);
-}
-
-Byte* MemMap::Begin()
-{
-    return mBegin;
-}
-
-size_t MemMap::Size()
-{
-    return mSize;
 }
 
 MemMap::MemMap(

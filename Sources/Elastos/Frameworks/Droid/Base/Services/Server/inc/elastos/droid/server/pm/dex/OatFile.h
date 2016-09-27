@@ -2,12 +2,15 @@
 #ifndef __ELASTOS_DROID_SERVER_PM_DEX_OATFILE_H__
 #define __ELASTOS_DROID_SERVER_PM_DEX_OATFILE_H__
 
+#include <elastos/droid/server/pm/dex/ElfFile.h>
 #include <elastos/droid/server/pm/dex/Oat.h>
+#include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/Vector.h>
 
 using Elastos::Core::Object;
+using Elastos::IO::IFile;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::Vector;
 
@@ -16,6 +19,8 @@ namespace Droid {
 namespace Server {
 namespace Pm {
 namespace Dex {
+
+class OatHeader;
 
 class OatFile : public Object
 {
@@ -53,9 +58,12 @@ public:
         friend class OatFile;
 
     private:
+        const OatFile* const mOatFile;
         String mDexFileLocation;
         String mCanonicalDexFileLocation;
         const uint32_t mDexFileLocationChecksum;
+        const Byte* const mDexFilePointer;
+        const uint32_t* const mOatClassOffsetsPointer;
     };
 
 public:
@@ -79,11 +87,14 @@ public:
 
     CARAPI_(const Vector< AutoPtr<OatDexFile> >&) GetOatDexFiles() const;
 
-    CARAPI_(size_t) Size() const;
+    CARAPI_(size_t) Size() const
+    {
+        return End() - Begin();
+    }
 
-    CARAPI_(Byte*) Begin() const;
+    CARAPI_(const Byte*) Begin() const;
 
-    CARAPI_(Byte*) End() const;
+    CARAPI_(const Byte*) End() const;
 
 private:
     static CARAPI_(void) CheckLocation(
@@ -95,6 +106,14 @@ private:
         /* [in] */ Byte* requested_base,
         /* [out] */ String* error_msg);
 
+    static CARAPI_(AutoPtr<OatFile>) OpenElfFile(
+        /* [in] */ IFile* file,
+        /* [in] */ const String& location,
+        /* [in] */ Byte* requested_base,
+        /* [in] */ Boolean writable,
+        /* [in] */ Boolean executable,
+        /* [in] */ String* error_msg);
+
     explicit OatFile(
         /* [in] */ const String& filename,
         /* [in] */ Boolean executable);
@@ -105,7 +124,7 @@ private:
         /* [out] */ String* error_msg);
 
     CARAPI_(Boolean) ElfFileOpen(
-        /* [in] */ File* file,
+        /* [in] */ IFile* file,
         /* [in] */ Byte* requested_base,
         /* [in] */ Boolean writable,
         /* [in] */ Boolean executable,
@@ -128,6 +147,9 @@ private:
 
     // Was this oat_file loaded executable?
     const Boolean mIsExecutable;
+
+    // Backing memory map for oat file during cross compilation.
+    AutoPtr<ElfFile> mElfFile;
 
     // dlopen handle during runtime.
     void* mDlopenHandle;

@@ -10,6 +10,15 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+using Elastos::Droid::Server::Pm::Dex::kArm;
+using Elastos::Droid::Server::Pm::Dex::kNone;
+using Elastos::Droid::Server::Pm::Dex::kArm;
+using Elastos::Droid::Server::Pm::Dex::kArm64;
+using Elastos::Droid::Server::Pm::Dex::kThumb2;
+using Elastos::Droid::Server::Pm::Dex::kX86;
+using Elastos::Droid::Server::Pm::Dex::kX86_64;
+using Elastos::Droid::Server::Pm::Dex::kMips;
+using Elastos::Droid::Server::Pm::Dex::kMips64;
 using Elastos::Droid::Server::Pm::Dex::DexFileVerifier;
 using Elastos::Droid::Server::Pm::Dex::MemMap;
 using Elastos::Droid::Server::Pm::Dex::ZipArchive;
@@ -44,21 +53,21 @@ static const Boolean kVerboseLogging = FALSE;
 static const Boolean kReasonLogging = TRUE;
 
 static const char* GetInstructionSetString(
-    /* [in] */ const DexFile::InstructionSet isa)
+    /* [in] */ const InstructionSet isa)
 {
     switch (isa) {
-        case DexFile::kArm:
-        case DexFile::kThumb2:
+        case kArm:
+        case kThumb2:
             return "arm";
-        case DexFile::kArm64:
+        case kArm64:
             return "arm64";
-        case DexFile::kX86:
+        case kX86:
             return "x86";
-        case DexFile::kX86_64:
+        case kX86_64:
             return "x86_64";
-        case DexFile::kMips:
+        case kMips:
             return "mips";
-        case DexFile::kNone:
+        case kNone:
             return "none";
         default:
             Slogger::D(TAG, "Unknown ISA %d", isa);
@@ -66,30 +75,30 @@ static const char* GetInstructionSetString(
     }
 }
 
-static DexFile::InstructionSet GetInstructionSetFromString(
+static InstructionSet GetInstructionSetFromString(
     /* [in] */ const char* isa_str)
 {
     if (strcmp("arm", isa_str) == 0) {
-        return DexFile::kArm;
+        return kArm;
     }
     else if (strcmp("arm64", isa_str) == 0) {
-        return DexFile::kArm64;
+        return kArm64;
     }
     else if (strcmp("x86", isa_str) == 0) {
-        return DexFile::kX86;
+        return kX86;
     }
     else if (strcmp("x86_64", isa_str) == 0) {
-        return DexFile::kX86_64;
+        return kX86_64;
     }
     else if (strcmp("mips", isa_str) == 0) {
-        return DexFile::kMips;
+        return kMips;
     }
 
-    return DexFile::kNone;
+    return kNone;
 }
 
 static void InsertIsaDirectory(
-    /* [in] */ const DexFile::InstructionSet isa,
+    /* [in] */ const InstructionSet isa,
     /* [in, out] */ String* filename)
 {
     // in = /foo/bar/baz
@@ -107,7 +116,7 @@ static void InsertIsaDirectory(
 
 static String DexFilenameToOdexFilename(
     /* [in] */ const String& location,
-    /* [in] */ const DexFile::InstructionSet isa)
+    /* [in] */ const InstructionSet isa)
 {
     // location = /foo/bar/baz.jar
     // odex_location = /foo/bar/<isa>/baz.odex
@@ -223,17 +232,17 @@ static Boolean GetDalvikCacheFilename(
 static Byte IsDexOptNeededForFile(
     /* [in] */ const String& oat_filename,
     /* [in] */ const char* filename,
-    /* [in] */ DexFile::InstructionSet target_instruction_set)
+    /* [in] */ InstructionSet target_instruction_set)
 {
-    // Slogger::D("chenxihao", "IsDexOptNeededForFile oat_filename = %s, filename = %s", oat_filename.string(), filename);
-    // AutoPtr<IFile> file;
-    // CFile::New(oat_filename, (IFile**)&file);
-    // Boolean isExists;
-    // file->Exists(&isExists);
-    // if (isExists) {
-    //     return DexFile::UP_TO_DATE;
-    // }
-    // return DexFile::DEXOPT_NEEDED;
+    Slogger::D("chenxihao", "IsDexOptNeededForFile oat_filename = %s, filename = %s", oat_filename.string(), filename);
+    AutoPtr<IFile> file;
+    CFile::New(oat_filename, (IFile**)&file);
+    Boolean isExists;
+    file->Exists(&isExists);
+    if (isExists) {
+        return DexFile::UP_TO_DATE;
+    }
+    return DexFile::DEXOPT_NEEDED;
 
     String error_msg;
     AutoPtr<OatFile> oat_file = OatFile::Open(oat_filename, oat_filename, NULL, FALSE, &error_msg);

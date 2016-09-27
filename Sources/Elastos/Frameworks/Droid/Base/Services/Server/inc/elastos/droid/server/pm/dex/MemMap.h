@@ -16,6 +16,21 @@ namespace Dex {
 class MemMap : public Object
 {
 public:
+    // Request an anonymous region of length 'byte_count' and a requested base address.
+    // Use NULL as the requested base address if you don't care.
+    //
+    // The word "anonymous" in this context means "not backed by a file". The supplied
+    // 'ashmem_name' will be used -- on systems that support it -- to give the mapping
+    // a name.
+    //
+    // On success, returns returns a MemMap instance.  On failure, returns a NULL;
+    static CARAPI_(AutoPtr<MemMap>) MapAnonymous(
+        /* [in] */ const char* ashmem_name,
+        /* [in] */ Byte* addr,
+        /* [in] */ size_t byte_count,
+        /* [in] */ int prot,
+        /* [in] */ Boolean low_4gb, String* error_msg);
+
     // Map part of a file, taking care of non-page aligned offsets.  The
     // "start" offset is absolute, not relative.
     //
@@ -48,9 +63,20 @@ public:
         /* [in] */ const char* filename,
         /* [out] */ String* error_msg);
 
-    CARAPI_(Byte*) Begin();
+    CARAPI_(Byte*) Begin()
+    {
+        return mBegin;
+    }
 
-    CARAPI_(size_t) Size();
+    CARAPI_(size_t) Size()
+    {
+        return mSize;
+    }
+
+    CARAPI_(Byte*) End()
+    {
+        return Begin() + Size();
+    }
 
 private:
     MemMap(
