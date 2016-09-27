@@ -267,7 +267,7 @@ module
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogGroupBuilderGroupCreator;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapter;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterHelper;
-    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterCallFetcher;
+    interface Elastos.Droid.Dialer.CallLog.ICallFetcher;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogQuery;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandler;
     interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandlerListener;
@@ -397,7 +397,7 @@ module
 //    class CCallLogAdapter {
 //        constructor(
 //            [in] IContext* ctx,
-//            [in] ICallLogAdapterCallFetcher* callFetcher,
+//            [in] ICallFetcher* callFetcher,
 //            [in] IContactInfoHelper* contactInfoHelper,
 //            [in] ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
 //            [in] ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
@@ -709,7 +709,7 @@ module
         interface IFragment;
         interface IAnalyticsInterface;
         interface ICallLogQueryHandlerListener;
-        interface ICallLogAdapterCallFetcher;
+        interface ICallFetcher;
         interface IListsFragment;
     }
 

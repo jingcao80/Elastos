@@ -28,7 +28,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;
 using Elastos::Droid::Contacts::Common::List::IViewPagerTabs;
 // using Elastos::Droid::Dialer::CallLog::ICallLogAdapter;
-using Elastos::Droid::Dialer::CallLog::ICallLogAdapterCallFetcher;
+using Elastos::Droid::Dialer::CallLog::ICallFetcher;
 using Elastos::Droid::Dialer::CallLog::ICallLogFragment;
 // using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandler;
 using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandlerListener;
@@ -56,7 +56,7 @@ class ListsFragment
     : public AnalyticsFragment
     , public IListsFragment
     , public ICallLogQueryHandlerListener
-    , public ICallLogAdapterCallFetcher
+    , public ICallFetcher
 {
 public:
     class InnerListener

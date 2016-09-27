@@ -27,7 +27,7 @@ using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Dialer::Util::DialerUtils;
 // using Elastos::Droid::Dialer::IDialtactsActivity;
 using Elastos::Droid::DialerBind::ObjectFactory;
-using Elastos::Droid::Dialer::CallLog::EIID_ICallLogAdapterCallFetcher;
+using Elastos::Droid::Dialer::CallLog::EIID_ICallFetcher;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogQueryHandlerListener;
 using Elastos::Droid::Dialer::Widget::EIID_IPanelSlideCallbacks;
 using Elastos::Droid::Support::V4::View::IViewPager;
@@ -301,7 +301,7 @@ const Int64 ListsFragment::OLDEST_RECENTS_DATE = 1000LL * 60 * 60 * 24 * 14;
 const String ListsFragment::KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE("key_last_dismissed_call_shortcut_date");
 
 CAR_INTERFACE_IMPL_3(ListsFragment, AnalyticsFragment, IListsFragment,
-        ICallLogQueryHandlerListener, ICallLogAdapterCallFetcher)
+        ICallLogQueryHandlerListener, ICallFetcher)
 
 ListsFragment::ListsFragment()
     : mIsPanelOpen(TRUE)

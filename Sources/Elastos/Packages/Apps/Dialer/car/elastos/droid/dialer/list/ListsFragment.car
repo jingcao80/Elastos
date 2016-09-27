@@ -28,7 +28,7 @@ module
      * interface Elastos.Droid.App.IFragment
      * interface Elastos.Droid.DailerBind.Analytics.IAnalyticsInterface
      * interface ICallLogQueryHandlerListener
-     * interface ICallLogAdapterCallFetcher
+     * interface ICallFetcher
      */
     [local]
     interface IListsFragment {

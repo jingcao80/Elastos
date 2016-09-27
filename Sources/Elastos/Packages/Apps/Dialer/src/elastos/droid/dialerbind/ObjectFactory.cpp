@@ -16,7 +16,7 @@ AutoPtr<ICachedNumberLookupService> ObjectFactory::NewCachedNumberLookupService(
 
 // AutoPtr<CallLogAdapter> ObjectFactory::NewCallLogAdapter(
 //     /* [in] */ IContext* context,
-//     /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
+//     /* [in] */ ICallFetcher* callFetcher,
 //     /* [in] */ IContactInfoHelper* contactInfoHelper,
 //     /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
 //     /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,

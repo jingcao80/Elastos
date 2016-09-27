@@ -3,7 +3,7 @@ module
     using interface Elastos.Droid.App.IDialogFragment;
     using interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Dialer.CallLog.ICallLogAdapter;
-    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterCallFetcher;
+    interface Elastos.Droid.Dialer.CallLog.ICallFetcher;
     interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterCallItemExpandedListener;
     interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterOnReportButtonClickListener;
     interface Elastos.Droid.Dialer.CallLog.IContactInfoHelper;
@@ -29,7 +29,7 @@ module
          */
         NewCallLogAdapter(
             [in] IContext* ctx,
-            [in] ICallLogAdapterCallFetcher* callFetcher,
+            [in] ICallFetcher* callFetcher,
             [in] IContactInfoHelper* contactInfoHelper,
             [in] ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
             [in] ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,

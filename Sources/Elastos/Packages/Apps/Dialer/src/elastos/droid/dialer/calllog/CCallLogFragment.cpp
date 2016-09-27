@@ -474,7 +474,7 @@ ECode CCallLogFragment::OnCreate(
     CContactInfoHelper::New(IContext::Probe(activity),
             currentCountryIso, (IContactInfoHelper**)&contactinfoHelper);
     mAdapter = CObjectFactory::NewCallLogAdapter(IContext::Probe(activity),
-            (ICallLogAdapterCallFetcher*)this, contactinfoHelper,
+            (ICallFetcher*)this, contactinfoHelper,
             (ICallLogAdapterCallItemExpandedListener*)this,
             (ICallLogAdapterOnReportButtonClickListener*)this, TRUE);
     assert(0 && "TODO");

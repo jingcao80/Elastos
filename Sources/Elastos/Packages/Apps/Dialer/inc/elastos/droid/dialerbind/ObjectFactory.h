@@ -11,8 +11,8 @@
 using Elastos::Droid::App::IDialogFragment;
 using Elastos::Droid::Content::IContext;
 // using Elastos::Droid::Dialer::CallLog::CallLogAdapter;
-using Elastos::Droid::Dialer::CallLog::ICallLogAdapterCallFetcher;
-using Elastos::Droid::Dialer::CallLog::ICallLogAdapterCallItemExpandedListener;
+using Elastos::Droid::Dialer::CallLog::ICallFetcher;
+using Elastos::Droid::Dialer::CallLog::ICallItemExpandedListener;
 using Elastos::Droid::Dialer::CallLog::ICallLogAdapterOnReportButtonClickListener;
 // using Elastos::Droid::Dialer::CallLog::ContactInfoHelper;
 using Elastos::Droid::Dialer::Service::ICachedNumberLookupService;
@@ -31,7 +31,7 @@ public:
 
     // static CARAPI_(AutoPtr<CallLogAdapter>) NewCallLogAdapter(
     //     /* [in] */ IContext* context,
-    //     /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
+    //     /* [in] */ ICallFetcher* callFetcher,
     //     /* [in] */ ContactInfoHelper* contactInfoHelper,
     //     /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
     //     /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,

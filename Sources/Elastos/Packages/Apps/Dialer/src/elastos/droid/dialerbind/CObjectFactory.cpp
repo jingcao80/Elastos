@@ -23,7 +23,7 @@ ECode CObjectFactory::NewCachedNumberLookupService(
 
 ECode CObjectFactory::NewCallLogAdapter(
     /* [in] */ IContext* context,
-    /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
+    /* [in] */ ICallFetcher* callFetcher,
     /* [in] */ IContactInfoHelper* contactInfoHelper,
     /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
     /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
@@ -60,7 +60,7 @@ AutoPtr<ICachedNumberLookupService> CObjectFactory::NewCachedNumberLookupService
 
 AutoPtr<ICallLogAdapter> CObjectFactory::NewCallLogAdapter(
     /* [in] */ IContext* context,
-    /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
+    /* [in] */ ICallFetcher* callFetcher,
     /* [in] */ IContactInfoHelper* contactInfoHelper,
     /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
     /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
