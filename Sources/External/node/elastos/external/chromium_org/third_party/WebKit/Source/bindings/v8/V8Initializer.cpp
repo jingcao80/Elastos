@@ -219,37 +219,28 @@ static void initializeV8Common(v8::Isolate* isolate)
 
 void V8Initializer::initializeMainThreadIfNeeded(v8::Isolate* isolate)
 {
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded========begin====0====");
+    // ALOGD("V8Initializer::initializeMainThreadIfNeeded====begin====");
+
     ASSERT(isMainThread());
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====0====");
 
     static bool initialized = false;
     if (initialized)
         return;
     initialized = true;
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====1====");
 
     initializeV8Common(isolate);
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====2====");
 
     v8::V8::SetFatalErrorHandler(reportFatalErrorInMainThread);
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====3====");
     V8PerIsolateData::ensureInitialized(isolate);
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====4====");
     v8::V8::AddMessageListener(messageHandlerInMainThread);
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====5====");
     v8::V8::SetFailedAccessCheckCallbackFunction(failedAccessCheckCallbackInMainThread);
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====6====");
     v8::V8::SetAllowCodeGenerationFromStringsCallback(codeGenerationCheckCallbackInMainThread);
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====7====");
 
     isolate->SetEventLogger(timerTraceProfilerInMainThread);
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded====8====");
 
     // ScriptProfiler::initialize();
 
-    ALOGD("V8Initializer::initializeMainThreadIfNeeded========end========");
-    //ASSERT(0);
+    // ALOGD("V8Initializer::initializeMainThreadIfNeeded====end====");
 }
 
 static void reportFatalErrorInWorker(const char* location, const char* message)

@@ -59,6 +59,8 @@ IInterface* CarInstanceV8::carInstance() const
 
 void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* didRaiseUncaughtException)
 {
+    // ALOGD("====CarInstanceV8::invokeMethod====begin====");
+
     *didRaiseUncaughtException = false;
 
     ASSERT(getClass()->methodsNamed(method->name().utf8().data()).find(method) != kNotFound);
@@ -301,9 +303,11 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
     }
 
     if(method->isRunOnUiThread()) {
+        // ALOGD("====CarInstanceV8::invokeMethod====ROMOTE====");
         cbEnqueueUIMessage(object, aMethod, argumentList);
     }
     else {
+        // ALOGD("====CarInstanceV8::invokeMethod====LOCAL====");
         ec = aMethod->Invoke(object, argumentList);
         if (FAILED(ec)) {
             ALOGD("CarInstanceV8::invokeMethod========invoke failed========");
@@ -313,6 +317,8 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
             return;
         }
     }
+
+    // ALOGD("====CarInstanceV8::invokeMethod====end====");
 
     return;
 }
@@ -369,7 +375,22 @@ bool CarInstanceV8::hasInterface(IInterfaceInfo* interfaceInfo)
             result = false;
         }
         else {
-            classInfo->HasInterfaceInfo(interfaceInfo, &result);
+            //TODO:replace with ClassInfo::HasInterfaceInfo,atfer the bug fixed
+            Int32 count;
+            classInfo->GetInterfaceCount(&count);
+
+            ArrayOf<IInterfaceInfo *>* interfaceInfos = ArrayOf<IInterfaceInfo *>::Alloc(count);
+            classInfo->GetAllInterfaceInfos(interfaceInfos);
+
+            for (Int32 i = 0; i < count; i++) {
+                if ( (*interfaceInfos)[i] == interfaceInfo ) {
+                    result = true;
+                    break;
+                }
+            }
+
+            //TODO:collapse in Runtime::Reflection
+            // classInfo->HasInterfaceInfo(interfaceInfo, &result);
         }
     }
 

@@ -142,6 +142,7 @@ ECode JSActName::_VerifyDrawable(
         /* [out] */Boolean* result)
 {
     *result = ViewGroup::VerifyDrawable(who);
+    return NOERROR;
 }
 //ECode JSActName::VerifyDrawable(
 Boolean JSActName::VerifyDrawable(
@@ -191,6 +192,7 @@ ECode JSActName::_OnSaveInstanceState(
         /* [out] */ IParcelable** result)
 {
     *result = ViewGroup::OnSaveInstanceState();
+    return NOERROR;
 }
 //ECode JSActName::OnSaveInstanceState(
 //        /* [out] */ IParcelable** result)
@@ -616,6 +618,7 @@ ECode JSActName::_OnRequestFocusInDescendants(
         /* [out] */ Boolean* result)
 {
     *result = ViewGroup::OnRequestFocusInDescendants(direction, previouslyFocusedRect);
+    return NOERROR;
 }
 Boolean JSActName::OnRequestFocusInDescendants(
         /* [in] */ Int32 direction,
@@ -695,6 +698,8 @@ ECode JSActName::_GenerateLayoutParams(
         /* [out] */ IViewGroupLayoutParams** params)
 {
     *params = ViewGroup::GenerateLayoutParams(p);
+
+    return NOERROR;
 }
 //ECode JSActName::GenerateLayoutParams(
 AutoPtr<IViewGroupLayoutParams> JSActName::GenerateLayoutParams(
@@ -725,6 +730,8 @@ ECode JSActName::_CheckLayoutParams(
 
     *result = ViewGroup::CheckLayoutParams(p);
     ALOGD("CCalculatorPadViewPager::_CheckLayoutParams========end========");
+
+    return NOERROR;
 }
 Boolean JSActName::CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p)

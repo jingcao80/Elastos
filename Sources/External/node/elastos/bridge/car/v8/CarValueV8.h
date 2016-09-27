@@ -100,23 +100,23 @@ struct CarValue
         Elastos::ECode mECodeValue;
         Elastos::Int32 mEnumValue;
         Elastos::CarQuintet* mCarQuintet;
-        Elastos::EMuid mIid;
-        Elastos::EGuid mCid;
+        Elastos::EMuid mIid;    //to be replaced with ptr
+        Elastos::EGuid mCid;    //to be replaced with ptr
 
         //char mUUnm[256];
         LocalPtr mLocalPtr;
         IInterface* mObjectValue;
     } value;
 
-    Elastos::String mStringValue;
+    Elastos::String mStringValue;   //to be replaced with ptr, string wrapper, really trouble in stack position
 
-    char mUUnm[256];
+    char mUUnm[256];    //to be deleted
 
     Elastos::Boolean mTagSetLocalPtr;   //just for test of TestArgumentList::SetInputArgumentOfLocalPtr
 
-    Elastos::AutoPtr<CobjectWrapper> mObjectWrapper;
+    Elastos::AutoPtr<CobjectWrapper> mObjectWrapper;    //to be deleted
 
-    AutoPtr<IDataTypeInfo> mTypeInfo;
+    AutoPtr<IDataTypeInfo> mTypeInfo;   //to be deleted after quintet resolved
 };
 
 } // namespace Bindings

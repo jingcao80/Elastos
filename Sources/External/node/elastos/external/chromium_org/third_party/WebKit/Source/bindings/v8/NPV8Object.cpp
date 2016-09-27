@@ -374,13 +374,34 @@ bool _NPN_EvaluateHelper(NPP npp, bool popupsAllowed, NPObject* npObject, NPStri
 
 bool _NPN_GetProperty(NPP npp, NPObject* npObject, NPIdentifier propertyName, NPVariant* result)
 {
-    ALOGD("====_NPN_GetProperty======begin====");
     if (!npObject)
         return false;
+
+    //--------whm test begin--------
+    //v8::Local<v8::String>
+    //static v8::Local<v8::String> npIdentifierToV8Identifier(NPIdentifier name, v8::Isolate* isolate)
+
+    NPUTF8* name;
+    name = _NPN_UTF8FromIdentifier(propertyName);
+    if (!name) {
+        ALOGD("====_NPN_GetProperty======can not found name====");
+        return false;
+    }
+    ALOGD("====_NPN_GetProperty======name====%s", name);
+
+    //--------whm test end--------
 
     if (V8NPObject* object = npObjectToV8NPObject(npObject)) {
         ALOGD("====_NPN_GetProperty======TODO====TODO====TODO====TODO====");
         v8::Isolate* isolate = v8::Isolate::GetCurrent();
+
+        //--------whm by whm begin--------
+        v8::Isolate::Scope isolateScope(isolate);
+        v8::HandleScope scope(isolate);
+        v8::Handle<v8::Context> context = isolate->GetCurrentContext();
+        v8::Context::Scope contextScope(context);
+        //--------whm by whm end--------
+
         // ScriptState* scriptState = mainWorldScriptState(isolate, npp, npObject);
         // if (!scriptState)
         //     return false;
@@ -397,16 +418,13 @@ bool _NPN_GetProperty(NPP npp, NPObject* npObject, NPIdentifier propertyName, NP
         convertV8ObjectToNPVariant(v8result, npObject, result, isolate);
         return true;
     }
-    ALOGD("====_NPN_GetProperty======1====");
 
     if (npObject->_class->hasProperty && npObject->_class->getProperty) {
         if (npObject->_class->hasProperty(npObject, propertyName))
             return npObject->_class->getProperty(npObject, propertyName, result);
     }
-    ALOGD("====_NPN_GetProperty======2====");
 
     VOID_TO_NPVARIANT(*result);
-    ALOGD("====_NPN_GetProperty======3====");
     return false;
 }
 

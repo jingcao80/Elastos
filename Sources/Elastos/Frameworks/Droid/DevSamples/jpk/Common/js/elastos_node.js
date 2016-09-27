@@ -1,3 +1,5 @@
+elog("====elastos_node.js====begin====");
+
 var sPackageName = process.argv[2];
 //var sActivityName = process.argv[3];
 
@@ -158,6 +160,8 @@ root.Application = Elastos.Application;
 
 Application.NodeBridgeListener = {
     OnRegisterActivity : function(asPackageName, asActivityName, aoActivityInstance, aoActivityListener, aoActivityHandler, out_abResult) {
+        elog("OnRegisterActivity======begin======");
+
         var _this = Elastos.Application;
 
         _this.R = require(_this.RootPath + "/R.js");
@@ -176,6 +180,8 @@ Application.NodeBridgeListener = {
         Elastos.Test.SetActivityListener(aoActivityListener, oActivityListener);
 
         out_abResult.data = true;
+
+        elog("OnRegisterActivity======end======");
     },
 
     OnRegisterCalculatorEditText : function(aoContext, aoControl, aoListener, out_abResult) {
@@ -273,3 +279,5 @@ Application.NodeBridgeListener = {
 };
 
 Application.Ready();
+
+elog("====elastos_node.js====end====");

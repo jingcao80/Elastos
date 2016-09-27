@@ -281,7 +281,7 @@ module.exports = function(aoElastos, aoActivity){
         CheckLayoutParams(_this, p, result) {
             elog("====CalculatorPadViewPager.js====::CheckLayoutParams====begin");
             result.data = _this._CheckLayoutParams(p);
-            elog("====CalculatorPadViewPager.js====::CheckLayoutParams====end");
+            elog("====CalculatorPadViewPager.js====::CheckLayoutParams====end==result:" + result.data);
         }
 
         GenerateDefaultLayoutParams(_this, result) {

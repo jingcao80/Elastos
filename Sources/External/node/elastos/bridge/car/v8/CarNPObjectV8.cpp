@@ -366,8 +366,10 @@ bool _compatible(NPVariant npv, IParamInfo* paramInfo)
             break;
         case CarDataType_Char32:
         case CarDataType_String:
+        {
             result = (jt == NPVariantType_String);
             break;
+        }
         case CarDataType_ArrayOf:
         {
             //TODO:js instance of Array
@@ -397,9 +399,11 @@ bool _compatible(NPVariant npv, IParamInfo* paramInfo)
             if (npobj->_class == WebCore::npScriptObjectClass) {
                 Elastos::String interfaceName;
                 dataTypeInfo->GetName(&interfaceName);
-
                 ALOGD("====_compatible====CarDataType_Interface==1==TODO:compatible between js object and %s!", interfaceName.string());
-                return false;
+                //return false;
+
+                //normally callback js object
+                return true;
             }
             else {
                 CarInstance* instance = ExtractCarInstance(npobj);
@@ -439,7 +443,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         return false;
     }
 
-    //ALOGD("CarNPObjectInvoke====method name: %s====",name);
+    // ALOGD("CarNPObjectInvoke====method name: %s====",name);
 
     instance->begin();
 
@@ -470,10 +474,9 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         //unique
         carMethod = methodList[0];
     }
-    //else if (numMethods > 1) {
     else {
-        //overload
-        //ALOGD("CarNPObjectInvoke====numMethods: %d====",numMethods);
+        //overloaded
+        // ALOGD("CarNPObjectInvoke====numMethods: %d====",numMethods);
         for (size_t methodIndex = 0; methodIndex < numMethods; methodIndex++) {
             //ALOGD("CarNPObjectInvoke====numMethods: %d/%d====",methodIndex, numMethods);
             tmpCarMethod = methodList[methodIndex];
@@ -496,6 +499,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
             Int32 i;
             for (i = 0; i < numParams; i++) {
                 //ALOGD("CarNPObjectInvoke====numParams: %d/%d====",i,numParams);
+
                 AutoPtr<IParamInfo> paramInfo = (*paramInfos)[i];
                 ParamIOAttribute paramIOAttribute;
                 paramInfo->GetIOAttribute(&paramIOAttribute);
@@ -565,8 +569,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
     methodInfo = carMethod->methodInfo();
 
-    Elastos::String temp_name;
-    methodInfo->GetName(&temp_name);
+    //Elastos::String temp_name;
+    //methodInfo->GetName(&temp_name);
 
     //-----------------bRunOnUiThread begin-------------------
     bool bRunOnUiThread;
@@ -644,7 +648,6 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         }
 
         jArgs[i].mTypeInfo = aDataTypeInfo;
-
         jArgs[i].mIOAttribute = paramIOAttribute;
         jArgs[i].mType = dataType;
         jArgs[i].mObjectWrapper = new CobjectWrapper(NULL,aDataTypeInfo);
@@ -686,7 +689,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         //TODO
         //(*paramInfos)[i]->Release();
         //(*paramInfos)[i] = NULL;
-    }
+    }   //for
+
     ArrayOf<IParamInfo*>::Free(paramInfos);
 
     bool exceptionOccurred = false;

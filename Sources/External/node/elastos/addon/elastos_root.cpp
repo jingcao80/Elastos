@@ -77,10 +77,14 @@ void NodeMessage_Finish(NodeMessage* _this) {
 
 //Run in local thread
 void NodeMessage_Invoke(NodeMessage* _this) {
+    ALOGD("NodeMessage_Invoke ========begin========");
+
     _this->mStatus = NodeMessage_Status_Running;
     _this->mProc(_this->mPayload);
     _this->mStatus = NodeMessage_Status_Finish;
     _this->mQueue->mTop--;
+
+    ALOGD("NodeMessage_Invoke ========end========");
     return;
 }
 
@@ -196,6 +200,8 @@ int _ttt = 0;
 
 void NodeMessageQueue_Enqueue(NodeMessageQueue* _this, void* obj, void (*send)(void*), void (*proc)(void*), void* payload)
 {
+    ALOGD("NodeMessageQueue_Enqueue ========begin========");
+
     NodeMessage* msg = NodeMessageQueue_Push(_this, obj, send, proc, payload);
     NodeMessageQueue* mq = _NodeBridge_GetThreadMessageQueue(_this->mBridge);
     msg->mFromIdx = mq->mIndex;
@@ -246,17 +252,22 @@ void NodeMessageQueue_Enqueue(NodeMessageQueue* _this, void* obj, void (*send)(v
         }
     }
 
+    ALOGD("NodeMessageQueue_Enqueue ========end========");
     return;
 }
 
 void NodeBridge_Enqueue(NodeBridge* _this, void* obj, void (*send)(void*), void (*proc)(void*), void* payload)   //to add parameter: RemoteInvoke
 {
+    ALOGD("NodeBridge_Enqueue ========begin========");
+
     NodeMessageQueue* mq;
     mq = _NodeBridge_GetThreadMessageQueue(_this);
     int toIdx = (mq->mIndex == _this->mNODE) ? _this->mEPK : _this->mNODE;    //to fix:shoud be an input parameter
     NodeMessageQueue* _mq;
     _mq = (NodeMessageQueue*)(_this->mQueues)[toIdx];
     NodeMessageQueue_Enqueue(_mq, obj, send, proc, payload);
+
+    ALOGD("NodeBridge_Enqueue ========end========");
     return;
 }
 
@@ -395,10 +406,11 @@ void Back(uv_work_t* r) {
 
     //call the back function, no use
     Isolate* isolate = Isolate::GetCurrent();
-    HandleScope scope(isolate);
-    isolate->Enter();
     v8::Isolate::Scope isolateScope(isolate);
-    v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
+
+    HandleScope scope(isolate);
+
+    v8::Handle<v8::Context> context = isolate->GetCurrentContext();
     v8::Context::Scope contextScope(context);
 
     async_req* req = reinterpret_cast<async_req*>(r->data);
@@ -416,8 +428,6 @@ void Back(uv_work_t* r) {
         //FatalException(try_catch);
         ReportException(isolate, &try_catch);
     }
-
-    isolate->Exit();
 
     Receive_(req->input,callback);
 
@@ -639,6 +649,9 @@ static void AlwaysZeroNumberSource(unsigned char* buf, size_t len)
 //--------WTF init function--------end--------
 
 void init(v8::Handle<v8::Object> exports, v8::Handle<v8::Object> module) {
+    pthread_t ctid = pthread_self();
+    ALOGD("addon======init======THREAD_JS:%d", ctid);
+
     WTF::setRandomSource(AlwaysZeroNumberSource);
     WTF::initialize(CurrentTime, 0);
     WTF::initializeMainThread(0);

@@ -47,11 +47,18 @@ namespace Bindings {
 
 class CarValue;
 
+void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch);
+
 WebCore::LocalDOMWindow* getRootObject();
 
 void convertNPVariantToCarValue(NPVariant, CarValue*);
+void convertCarValuesToNPVariants(CarValue*, Int32, NPVariant**);
 void convertCarValuesToNPVariant(const CarMethod*, CarValue*, ArrayOf<Int32>*, NPVariant*);
+void _convertCarValueToNPVariant(CarValue&, NPVariant*);
 void convertCarValueToNPVariant(CarValue&, NPVariant*);
+
+void convertV8ValueToCarValue(v8::Handle<v8::Value>& v8Arg, CarValue& carArg);
+void convertV8ValuesToCarValues(v8::Handle<v8::Value>* v8Args, Int32 count, CarValue** carArgs);
 
 } // namespace Bindings
 

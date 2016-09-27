@@ -179,6 +179,9 @@ public:
             /* [in] */ const String& packageName)
             : mPackageName(packageName)
         {
+            pthread_t ctid = pthread_self();
+            ALOGD("CNodeListener::_Thread============THREAD_MAIN:%d", ctid);
+
             Thread::constructor(String("CNodeListener::_Thread"));
         }
 

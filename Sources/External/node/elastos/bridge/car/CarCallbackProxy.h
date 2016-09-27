@@ -22,20 +22,10 @@ public:
         Callback(
             /* [in] */ CarCallbackObject* object,
             /* [in] */ IMethodInfo* methodInfo,
-            /* [in] */ Int32 paramCount,
-            /* [in] */ NPVariant* params,
-            /* [in] */ Int32* outParamPtrs,
-            /* [in] */ Int32* outParamTypes,
-            /* [in] */ Int32* outParamElementTypes,
-            /* [in] */ v8::Isolate* isolate)
+            /* [in] */ CarValue* carArgs)
             : mObject(object)
             , mMethodInfo(methodInfo)
-            , mParamCount(paramCount)
-            , mNPParams(params)
-            , mOutParamPtrs(outParamPtrs)
-            , mOutParamTypes(outParamTypes)
-            , mOutParamElementTypes(outParamElementTypes)
-            , mIsolate(isolate)
+            , mCarArgs(carArgs)
         {}
 
         ~Callback();
@@ -48,13 +38,10 @@ public:
     private:
         AutoPtr<CarCallbackObject> mObject;
         IMethodInfo* mMethodInfo;
+        CarValue* mCarArgs;
+
         Int32 mParamCount;
         NPVariant* mNPParams;
-
-        Int32* mOutParamPtrs;
-
-        Int32* mOutParamTypes;
-        Int32* mOutParamElementTypes;
 
     public:
         v8::Isolate* mIsolate;
@@ -85,18 +72,11 @@ public:
     CARAPI ReadParam(
         /* [in] */ IMethodInfo* methodInfo,
         /* [in] */ UInt32 *puArgs,
-        /* [in] */ Int32 paramCount,
-        /* [in] */ NPVariant* jsArgs,
-        /* [in] */ Int32* outParamPtrs,
-        /* [in] */ Int32* outParamTypes,
-        /* [in] */ Int32* outParamElementTypes,
-        /* [out] */ CarValue** ppCarArgs,
-        /* [in] */ bool* hasOutParams);
-
-    CARAPI ReadParam_bak(
-        /* [in] */ IMethodInfo* methodInfo,
-        /* [in] */ UInt32 *puArgs,
         /* [out] */ CarValue** ppCarArgs);
+
+    CARAPI GetMethodInfoByIndex(
+        /* [in] */ UInt32 index,
+        /* [out] */ IMethodInfo** methodInfo);
 
     static CARAPI ProxyEntry(
         /* [in] */ UInt32 *puArgs);

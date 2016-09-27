@@ -1,3 +1,5 @@
+elog("====elastos_runtime.js====begin====");
+
 module.exports = function (aoElastos) {
 
 var _Runtime_Native = aoElastos.Runtime_Native;
@@ -532,3 +534,5 @@ return {
 };
 
 };  //exports
+
+elog("====elastos_runtime.js====end====");
