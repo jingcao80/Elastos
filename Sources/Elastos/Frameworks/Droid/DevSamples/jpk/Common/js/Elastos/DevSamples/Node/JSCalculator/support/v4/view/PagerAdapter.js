@@ -38,10 +38,15 @@ module.exports = function(aoElastos, aoActivity){
 // package android.support.v4.view;
 
 // import android.database.DataSetObservable;
+    class DataSetObservable {}
 // import android.database.DataSetObserver;
+    class DataSetObserver {}
 // import android.os.Parcelable;
+    class Parcelable {}
 // import android.view.View;
+    class View {}
 // import android.view.ViewGroup;
+    class ViewGroup {}
 
 // /**
 //  * Base class providing the adapter to populate pages inside of
@@ -97,21 +102,32 @@ module.exports = function(aoElastos, aoActivity){
 //  * the method {@link #getItemPosition(Object)}.</p>
 //  */
 // public abstract class PagerAdapter {
-    class PagerAdapter() {
+    class PagerAdapter {
+        constructor() {
+            elog("====PagerAdapter::constructor====begin====");
+        }
 
 //     private DataSetObservable mObservable = new DataSetObservable();
-
+        get mObservable() {
+            if (this._mObservable_) return this._mObservable;
+            this._mObservable_ = true;
+            this._mObservable = new DataSetObservable();
+            return this._mObservable;
+        }
 
 //     public static final int POSITION_UNCHANGED = -1;
+        static get POSITION_UNCHANGED() {return -1;}
 
 //     public static final int POSITION_NONE = -2;
-
+        static get POSITION_NONE() {return -2;}
 
 //     /**
 //      * Return the number of views available.
 //      */
 //     public abstract int getCount();
-        GetCount(){};
+        GetCount(){
+            elog("====PagerAdapter::GetCount====TODO====");
+        };
 
 //     /**
 //      * Called when a change in the shown pages is going to start being made.

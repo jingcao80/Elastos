@@ -41,8 +41,8 @@ module.exports = function(aoElastos, aoActivity){
 // import android.support.v4.view.PagerAdapter;
     var PagerAdapter = require("./support/v4/view/PagerAdapter.js")(aoElastos, aoActivity);
 // import android.support.v4.view.ViewPager;
-    //var ViewPager = require("./support/v4/view/ViewPager.js")(aoElastos, aoActivity);
-    var ViewPager = class _ViewPager {};
+    var ViewPager = require("./support/v4/view/ViewPager.js")(aoElastos, aoActivity);
+    //var ViewPager = class _ViewPager {};
 
 // import android.util.AttributeSet;
 // import android.view.View;
@@ -58,8 +58,12 @@ module.exports = function(aoElastos, aoActivity){
         get mStaticPagerAdapter() {
             if (this._mStaticPagerAdapter) return this._mStaticPagerAdapter;
 
-            //class _StaticPagerAdapter extends PagerAdapter {
-            class _StaticPagerAdapter {
+            class _StaticPagerAdapter extends PagerAdapter {
+            //class _StaticPagerAdapter {
+                constructor() {
+                    super();
+                }
+
 //         @Override
 //         public int getCount() {
             getCount(result) {
@@ -160,7 +164,7 @@ module.exports = function(aoElastos, aoActivity){
 
 //     public CalculatorPadViewPager(Context context, AttributeSet attrs) {
         OnCreate(_this, context, attrs) {
-            elog("====CalculatorPadViewPager====OnCreate====begin====");
+            elog("====CalculatorPadViewPager====OnCreate====begin==8888==");
 
             attrs = attrs || null;
 //         super(context, attrs);
