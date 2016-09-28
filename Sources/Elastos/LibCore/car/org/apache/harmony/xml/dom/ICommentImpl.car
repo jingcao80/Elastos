@@ -18,7 +18,11 @@ module
      * structure.
      */
 
-    interface ICommentImpl extends ICharacterDataImpl {
+    /**
+      * @Involve
+      * interface ICharacterDataImpl
+      */
+    interface ICommentImpl {
        /**
          * Returns true if this comment contains the illegal character sequence
          * "--". Such nodes may not be serialized.

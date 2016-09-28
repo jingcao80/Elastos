@@ -3,7 +3,7 @@
 #define __ELASTOS_NET_CURL_H__
 
 #include "_Elastos_Net_CURL.h"
-#include "Object.h"
+#include "elastos/core/Object.h"
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Core::Object;

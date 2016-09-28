@@ -1,5 +1,17 @@
 
-#include "CSAXParserFactoryImpl.h"
+#include "Elastos.CoreLibrary.External.h"
+#include "org/apache/harmony/xml/parsers/CSAXParserFactoryImpl.h"
+#include "org/apache/harmony/xml/parsers/CSAXParserImpl.h"
+#include "elastos/core/CoreUtils.h"
+#include "elastos/utility/CHashMap.h"
+#include "elastos/utility/CHashMap.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastosx::Xml::Parsers::ISAXParser;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::IMap;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Apache {
@@ -7,85 +19,138 @@ namespace Harmony {
 namespace Xml {
 namespace Parsers {
 
-CAR_OBJECT_IMPL(CSAXParserFactoryImpl)
+const String CSAXParserFactoryImpl::NAMESPACES("http://xml.org/sax/features/namespaces");
+const String CSAXParserFactoryImpl::VALIDATION("http://xml.org/sax/features/validation");
+
+CSAXParserFactoryImpl::CSAXParserFactoryImpl()
+{
+    CHashMap::New((IMap**)&features);
+}
 
 ECode CSAXParserFactoryImpl::NewSAXParser(
     /* [out] */ Elastosx::Xml::Parsers::ISAXParser ** ppParser)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppParser);
+    *ppParser = NULL;
+
+    Boolean isValidating;
+    if (IsValidating(&isValidating), isValidating) {
+        //throw new ParserConfigurationException("No validating SAXParser implementation available");
+        Logger::E("CSAXParserFactoryImpl", "No validating SAXParser implementation available");
+        assert(0);
+        return E_UNSUPPORTED_OPERATION_EXCEPTION;
+    }
+
+    AutoPtr<ISAXParser> saxParser;
+    //try {
+    CSAXParserImpl::New(features, (ISAXParser**)&saxParser);
+    *ppParser = saxParser;
+    REFCOUNT_ADD(*ppParser);
+    //} catch (Exception ex) {
+    //    throw new ParserConfigurationException(ex.toString());
+    //}
+    return NOERROR;
 }
 
 ECode CSAXParserFactoryImpl::SetNamespaceAware(
     /* [in] */ Boolean awareness)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    //try {
+    return SetFeature(NAMESPACES, awareness);
+    //} catch (SAXNotRecognizedException ex) {
+    //    throw new AssertionError(ex);
+    //}
 }
 
 ECode CSAXParserFactoryImpl::SetValidating(
     /* [in] */ Boolean validating)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    //try {
+    return SetFeature(VALIDATION, validating);
+    //} catch (SAXNotRecognizedException ex) {
+    //    throw new AssertionError(ex);
+    //}
 }
 
 ECode CSAXParserFactoryImpl::IsNamespaceAware(
     /* [out] */ Boolean * pIsAware)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    //try {
+    return GetFeature(NAMESPACES, pIsAware);
+    //} catch (SAXNotRecognizedException ex) {
+    //    throw new AssertionError(ex);
+    //}
 }
 
 ECode CSAXParserFactoryImpl::IsValidating(
     /* [out] */ Boolean * pIsValidating)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    //try {
+    return GetFeature(VALIDATION, pIsValidating);
+    //} catch (SAXNotRecognizedException ex) {
+    //    throw new AssertionError(ex);
+    //}
 }
 
 ECode CSAXParserFactoryImpl::SetFeature(
     /* [in] */ const String& name,
     /* [in] */ Boolean value)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    if (name.IsNull()) {
+        //throw new NullPointerException("name == null");
+        Logger::E("CSAXParserFactoryImpl", "name == null");
+        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    if (!name.StartWith("http://xml.org/sax/features/")) {
+        //throw new SAXNotRecognizedException(name);
+        Logger::E("CSAXParserFactoryImpl", "SAXNotRecognizedException, name:%s", name.string());
+        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    if (value) {
+        features->Put(CoreUtils::Convert(name), CoreUtils::Convert(TRUE));
+    } else {
+        // This is needed to disable features that are enabled by default.
+        features->Put(CoreUtils::Convert(name), CoreUtils::Convert(FALSE));
+    }
+    return NOERROR;
 }
 
 ECode CSAXParserFactoryImpl::GetFeature(
     /* [in] */ const String& name,
     /* [out] */ Boolean * pFeature)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    VALIDATE_NOT_NULL(pFeature);
+    pFeature = FALSE;
 
-ECode CSAXParserFactoryImpl::GetSchema(
-    /* [out] */ Elastosx::Xml::Validation::ISchema ** ppSchema)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    if (name.IsNull()) {
+        //throw new NullPointerException("name == null");
+        Logger::E("CSAXParserFactoryImpl", "name == null");
+        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
+    }
 
-ECode CSAXParserFactoryImpl::SetSchema(
-    /* [in] */ Elastosx::Xml::Validation::ISchema * pSchema)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    if (!name.StartWith("http://xml.org/sax/features/")) {
+        //throw new SAXNotRecognizedException(name);
+        Logger::E("CSAXParserFactoryImpl", "Get SAXNotRecognizedException, name:%s", name.string());
+        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
+    }
 
-ECode CSAXParserFactoryImpl::SetXIncludeAware(
-    /* [in] */ Boolean state)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserFactoryImpl::IsXIncludeAware(
-    /* [out] */ Boolean * pIsAware)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<IInterface> value;
+    features->Get(CoreUtils::Convert(name), (IInterface**)&value);
+    IBoolean* result = IBoolean::Probe(value);
+    if (result == NULL) {
+        Logger::E("CSAXParserFactoryImpl", "Get result is null");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    else {
+        result->GetValue(pFeature);
+    }
+    return NOERROR;
 }
 
 }

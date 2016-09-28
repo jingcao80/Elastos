@@ -2,10 +2,12 @@
 #ifndef __ORG_APACHE_HARMONY_XML_PARSERS_CSAXPARSERFACTORYIMPL_H__
 #define __ORG_APACHE_HARMONY_XML_PARSERS_CSAXPARSERFACTORYIMPL_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "_Org_Apache_Harmony_Xml_Parsers_CSAXParserFactoryImpl.h"
-#include <elastos/core/Object.h>
+#include "elastosx/xml/parsers/SAXParserFactory.h"
 
-using Elastos::Core::Object;
+using Elastosx::Xml::Parsers::SAXParserFactory;
+using Elastos::Utility::IMap;
 
 namespace Org {
 namespace Apache {
@@ -14,19 +16,14 @@ namespace Xml {
 namespace Parsers {
 
 CarClass(CSAXParserFactoryImpl)
-    , public Object
+    , public SAXParserFactory
 {
 public:
-    CAR_OBJECT_DECL()
+
+    CSAXParserFactoryImpl();
 
     CARAPI NewSAXParser(
         /* [out] */ Elastosx::Xml::Parsers::ISAXParser ** ppParser);
-
-    CARAPI SetNamespaceAware(
-        /* [in] */ Boolean awareness);
-
-    CARAPI SetValidating(
-        /* [in] */ Boolean validating);
 
     CARAPI IsNamespaceAware(
         /* [out] */ Boolean * pIsAware);
@@ -42,20 +39,17 @@ public:
         /* [in] */ const String& name,
         /* [out] */ Boolean * pFeature);
 
-    CARAPI GetSchema(
-        /* [out] */ Elastosx::Xml::Validation::ISchema ** ppSchema);
+    CARAPI SetNamespaceAware(
+        /* [in] */ Boolean awareness);
 
-    CARAPI SetSchema(
-        /* [in] */ Elastosx::Xml::Validation::ISchema * pSchema);
-
-    CARAPI SetXIncludeAware(
-        /* [in] */ Boolean state);
-
-    CARAPI IsXIncludeAware(
-        /* [out] */ Boolean * pIsAware);
+    CARAPI SetValidating(
+        /* [in] */ Boolean validating);
 
 private:
-    // TODO: Add your private member variables here.
+    static const String NAMESPACES;// = "http://xml.org/sax/features/namespaces";
+    static const String VALIDATION;// = "http://xml.org/sax/features/validation";
+    //Map<String, Boolean> features = new HashMap<String, Boolean>();
+    AutoPtr<IMap> features;
 };
 
 }

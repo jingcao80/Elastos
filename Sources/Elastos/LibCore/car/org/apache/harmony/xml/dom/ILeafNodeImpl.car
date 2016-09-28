@@ -21,7 +21,11 @@ module
      * <p>
      * This class represents a Node that has a parent Node, but no children.
      */
-    interface ILeafNodeImpl extends Org.W3c.Dom.INode {
+    /**
+      * @Involve
+      * interface INode
+      */
+    interface ILeafNodeImpl {
         IsParentOf(
             [in] INode* node,
             [out] Boolean* isParentOf);

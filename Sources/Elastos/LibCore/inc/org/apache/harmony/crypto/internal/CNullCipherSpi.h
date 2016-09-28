@@ -3,11 +3,14 @@
 #define __ORG_APACHE_HARMONY_CRYPTO_INTERNAL_CNULLCIPHERSPI_H__
 
 #include "_Org_Apache_Harmony_Crypto_Internal_CNullCipherSpi.h"
+#include "elastosx/crypto/CipherSpi.h"
 
 using Elastos::Security::IAlgorithmParameters;
 using Elastos::Security::IKey;
 using Elastos::Security::ISecureRandom;
 using Elastos::Security::Spec::IAlgorithmParameterSpec;
+using Elastosx::Crypto::CipherSpi;
+using Elastosx::Crypto::INullCipherSpi;
 using Elastos::IO::IByteBuffer;
 
 namespace Org {
@@ -21,7 +24,8 @@ CarClass(CNullCipherSpi)
     , public INullCipherSpi
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
+    CAR_INTERFACE_DECL();
 
     CARAPI EngineSetMode(
         /* [in] */ const String& mode);
@@ -47,13 +51,13 @@ public:
         /* [in] */ IKey* key,
         /* [in] */ ISecureRandom* random);
 
-    CARAPI EngineInitEx(
+    CARAPI EngineInit(
         /* [in] */ Int32 opmode,
         /* [in] */ IKey* key,
         /* [in] */ IAlgorithmParameterSpec* params,
         /* [in] */ ISecureRandom* random);
 
-    CARAPI EngineInitEx2(
+    CARAPI EngineInit(
         /* [in] */ Int32 opmode,
         /* [in] */ IKey* key,
         /* [in] */ IAlgorithmParameters* params,
@@ -65,7 +69,7 @@ public:
         /* [in] */ Int32 inputLen,
         /* [out, callee] */ ArrayOf<Byte>** op);
 
-    CARAPI EngineUpdateEx(
+    CARAPI EngineUpdate(
         /* [in] */ ArrayOf<Byte>* ip,
         /* [in] */ Int32 inputOffset,
         /* [in] */ Int32 inputLen,
@@ -73,7 +77,7 @@ public:
         /* [in] */ Int32 outputOffset,
         /* [out] */ Int32* number);
 
-    CARAPI EngineUpdateEx2(
+    CARAPI EngineUpdate(
         /* [in] */ IByteBuffer* ip,
         /* [in] */ IByteBuffer* op,
         /* [out] */ Int32* number);
@@ -84,7 +88,7 @@ public:
         /* [in] */ Int32 inputLen,
         /* [out, callee] */ ArrayOf<Byte>** bytes);
 
-    CARAPI EngineDoFinalEx(
+    CARAPI EngineDoFinal(
         /* [in] */ ArrayOf<Byte>* ip,
         /* [in] */ Int32 inputOffset,
         /* [in] */ Int32 inputLen,
@@ -92,7 +96,7 @@ public:
         /* [in] */ Int32 outputOffset,
         /* [out] */ Int32* number);
 
-    CARAPI EngineDoFinalEx2(
+    CARAPI EngineDoFinal(
         /* [in] */ IByteBuffer* ip,
         /* [in] */ IByteBuffer* op,
         /* [out] */ Int32* number);

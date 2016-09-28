@@ -1,5 +1,8 @@
+#include "Elastos.CoreLibrary.External.h"
+#include "org/apache/harmony/xml/dom/CAttrImpl.h"
+#include "org/apache/harmony/xml/dom/CDocumentImpl.h"
 
-#include "CAttrImpl.h"
+using Org::W3c::Dom::INode;
 
 namespace Org {
 namespace Apache {
@@ -7,20 +10,45 @@ namespace Harmony {
 namespace Xml {
 namespace Dom {
 
-CAR_OBJECT_IMPL(CAttrImpl)
+CAR_OBJECT_IMPL(CAttrImpl);
+CAR_INTERFACE_IMPL(CAttrImpl, NodeImpl, IAttr);
+
+CAttrImpl::CAttrImpl()
+    : isId(FALSE)
+    , namespaceAware(FALSE)
+    , value("")
+{
+}
+
+ECode CAttrImpl::constructor(
+    /* [in] */ IDocument* document,
+    /* [in] */ const String& namespaceURI,
+    /* [in] */ const String& qualifiedName)
+{
+    NodeImpl::constructor(document);
+    SetNameNS(this, namespaceURI, qualifiedName);
+    return NOERROR;
+}
+
+ECode CAttrImpl::constructor(
+    /* [in] */ IDocument* document,
+    /* [in] */ const String& name)
+{
+    NodeImpl::constructor(document);
+    SetName(this, name);
+    return NOERROR;
+}
 
 ECode CAttrImpl::GetNodeName(
     /* [out] */ String * pStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return GetName(pStr);;
 }
 
 ECode CAttrImpl::GetNodeValue(
     /* [out] */ String * pStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return GetValue(pStr);
 }
 
 ECode CAttrImpl::SetNodeValue(
@@ -33,8 +61,9 @@ ECode CAttrImpl::SetNodeValue(
 ECode CAttrImpl::GetNodeType(
     /* [out] */ Int16 * pValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pValue);
+    *pValue = INode::ATTRIBUTE_NODE;
+    return NOERROR;
 }
 
 ECode CAttrImpl::GetParentNode(
@@ -160,29 +189,35 @@ ECode CAttrImpl::IsSupported(
 ECode CAttrImpl::GetNamespaceURI(
     /* [out] */ String * pStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pStr);
+    *pStr = namespaceURI;
+    return NOERROR;
 }
 
 ECode CAttrImpl::GetPrefix(
     /* [out] */ String * pStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pStr);
+    *pStr = prefix;
+    return NOERROR;
 }
 
 ECode CAttrImpl::SetPrefix(
-    /* [in] */ const String& prefix)
+    /* [in] */ const String& _prefix)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    prefix = ValidatePrefix(_prefix, namespaceAware, namespaceURI);
+    return NOERROR;
 }
 
 ECode CAttrImpl::GetLocalName(
     /* [out] */ String * pStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pStr);
+    *pStr = String(NULL);
+    if (namespaceAware) {
+        *pStr = localName;
+    }
+    return NOERROR;
 }
 
 ECode CAttrImpl::HasAttributes(
@@ -291,50 +326,64 @@ ECode CAttrImpl::GetUserData(
 ECode CAttrImpl::GetName(
     /* [out] */ String * pStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pStr);
+    *pStr = String(NULL);
+    if (!prefix.IsNull()) {
+        *pStr = prefix + ":" + localName;
+    }
+    else {
+        *pStr = localName;
+    }
+    return NOERROR;
 }
 
 ECode CAttrImpl::GetSpecified(
     /* [out] */ Boolean * pValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pValue);
+    *pValue = !value.IsNull();
+    return NOERROR;
 }
 
 ECode CAttrImpl::GetValue(
     /* [out] */ String * pStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pStr);
+    *pStr = value;
+    return NOERROR;
 }
 
 ECode CAttrImpl::SetValue(
-    /* [in] */ const String& value)
+    /* [in] */ const String& _value)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    value = _value;
+    return NOERROR;
 }
 
 ECode CAttrImpl::GetOwnerElement(
     /* [out] */ Org::W3c::Dom::IElement ** ppElement)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppElement);
+    *ppElement = ownerElement;
+    REFCOUNT_ADD(*ppElement);
+    return NOERROR;
 }
 
 ECode CAttrImpl::GetSchemaTypeInfo(
     /* [out] */ Org::W3c::Dom::ITypeInfo ** ppInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppInfo);
+    *ppInfo = NULL_TYPE_INFO;
+    REFCOUNT_ADD(*ppInfo);
+    return NOERROR;
 }
 
 ECode CAttrImpl::IsId(
     /* [out] */ Boolean * pValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pValue);
+    *pValue = isId;
+    return NOERROR;
 }
 
 }

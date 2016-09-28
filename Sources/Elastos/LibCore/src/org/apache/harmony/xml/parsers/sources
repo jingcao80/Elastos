@@ -1,9 +1,14 @@
 
-TARGET_NAME= parsers
+TARGET_NAME= org.apache.harmony.xml.parsers
 TARGET_TYPE= lib
 
-INCLUDES += ../../
-INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Xml/Parsers
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
 
 SOURCES = CDocumentBuilderFactoryImpl.cpp
 SOURCES += CSAXParserFactoryImpl.cpp

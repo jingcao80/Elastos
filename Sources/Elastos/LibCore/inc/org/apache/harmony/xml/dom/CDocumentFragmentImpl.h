@@ -3,9 +3,13 @@
 #define __ORG_APACHE_HARMONY_XML_DOM_CDOCUMENTFRAGMENTIMPL_H__
 
 #include "_Org_Apache_Harmony_Xml_Dom_CDocumentFragmentImpl.h"
+#include "org/apache/harmony/xml/dom/InnerNodeImpl.h"
 #include <elastos/core/Object.h>
 
+using Org::W3c::Dom::IDocumentFragment;
+using Org::W3c::Dom::IDOMErrorHandler;
 using Elastos::Core::Object;
+using Elastos::Utility::IMap;
 
 namespace Org {
 namespace Apache {
@@ -14,145 +18,153 @@ namespace Xml {
 namespace Dom {
 
 CarClass(CDocumentFragmentImpl)
-    , public Object
+    , public InnerNodeImpl
+    , public IDocumentFragment
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
+
+    CAR_INTERFACE_DECL();
+
+    CDocumentFragmentImpl();
+
+    CARAPI constructor(
+        /* [in] */ IDocument* document);
 
     CARAPI GetNodeName(
         /* [out] */ String * pStr);
 
-    CARAPI GetNodeValue(
-        /* [out] */ String * pStr);
-
-    CARAPI SetNodeValue(
-        /* [in] */ const String& nodeValue);
-
     CARAPI GetNodeType(
         /* [out] */ Int16 * pValue);
 
-    CARAPI GetParentNode(
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI GetNodeValue(
+    //    /* [out] */ String * pStr);
 
-    CARAPI GetChildNodes(
-        /* [out] */ Org::W3c::Dom::INodeList ** ppNodelist);
+    //CARAPI SetNodeValue(
+    //    /* [in] */ const String& nodeValue);
 
-    CARAPI GetFirstChild(
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI GetParentNode(
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI GetLastChild(
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI GetChildNodes(
+    //    /* [out] */ Org::W3c::Dom::INodeList ** ppNodelist);
 
-    CARAPI GetPreviousSibling(
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI GetFirstChild(
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI GetNextSibling(
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI GetLastChild(
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI GetAttributes(
-        /* [out] */ Org::W3c::Dom::INamedNodeMap ** ppNodemap);
+    //CARAPI GetPreviousSibling(
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI GetOwnerDocument(
-        /* [out] */ Org::W3c::Dom::IDocument ** ppDoc);
+    //CARAPI GetNextSibling(
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI InsertBefore(
-        /* [in] */ Org::W3c::Dom::INode * pNewChild,
-        /* [in] */ Org::W3c::Dom::INode * pRefChild,
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI GetAttributes(
+    //    /* [out] */ Org::W3c::Dom::INamedNodeMap ** ppNodemap);
 
-    CARAPI ReplaceChild(
-        /* [in] */ Org::W3c::Dom::INode * pNewChild,
-        /* [in] */ Org::W3c::Dom::INode * pOldChild,
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI GetOwnerDocument(
+    //    /* [out] */ Org::W3c::Dom::IDocument ** ppDoc);
 
-    CARAPI RemoveChild(
-        /* [in] */ Org::W3c::Dom::INode * pOldChild,
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI InsertBefore(
+    //    /* [in] */ Org::W3c::Dom::INode * pNewChild,
+    //    /* [in] */ Org::W3c::Dom::INode * pRefChild,
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI AppendChild(
-        /* [in] */ Org::W3c::Dom::INode * pNewChild,
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI ReplaceChild(
+    //    /* [in] */ Org::W3c::Dom::INode * pNewChild,
+    //    /* [in] */ Org::W3c::Dom::INode * pOldChild,
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI HasChildNodes(
-        /* [out] */ Boolean * pValue);
+    //CARAPI RemoveChild(
+    //    /* [in] */ Org::W3c::Dom::INode * pOldChild,
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI CloneNode(
-        /* [in] */ Boolean deep,
-        /* [out] */ Org::W3c::Dom::INode ** ppNode);
+    //CARAPI AppendChild(
+    //    /* [in] */ Org::W3c::Dom::INode * pNewChild,
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI Normalize();
+    //CARAPI HasChildNodes(
+    //    /* [out] */ Boolean * pValue);
 
-    CARAPI IsSupported(
-        /* [in] */ const String& feature,
-        /* [in] */ const String& ver,
-        /* [out] */ Boolean * pValue);
+    //CARAPI CloneNode(
+    //    /* [in] */ Boolean deep,
+    //    /* [out] */ Org::W3c::Dom::INode ** ppNode);
 
-    CARAPI GetNamespaceURI(
-        /* [out] */ String * pStr);
+    //CARAPI Normalize();
 
-    CARAPI GetPrefix(
-        /* [out] */ String * pStr);
+    //CARAPI IsSupported(
+    //    /* [in] */ const String& feature,
+    //    /* [in] */ const String& ver,
+    //    /* [out] */ Boolean * pValue);
 
-    CARAPI SetPrefix(
-        /* [in] */ const String& prefix);
+    //CARAPI GetNamespaceURI(
+    //    /* [out] */ String * pStr);
 
-    CARAPI GetLocalName(
-        /* [out] */ String * pStr);
+    //CARAPI GetPrefix(
+    //    /* [out] */ String * pStr);
 
-    CARAPI HasAttributes(
-        /* [out] */ Boolean * pValue);
+    //CARAPI SetPrefix(
+    //    /* [in] */ const String& prefix);
 
-    CARAPI GetBaseURI(
-        /* [out] */ String * pStr);
+    //CARAPI GetLocalName(
+    //    /* [out] */ String * pStr);
 
-    CARAPI CompareDocumentPosition(
-        /* [in] */ Org::W3c::Dom::INode * pOther,
-        /* [out] */ Int16 * pValue);
+    //CARAPI HasAttributes(
+    //    /* [out] */ Boolean * pValue);
 
-    CARAPI GetTextContent(
-        /* [out] */ String * pStr);
+    //CARAPI GetBaseURI(
+    //    /* [out] */ String * pStr);
 
-    CARAPI SetTextContent(
-        /* [in] */ const String& textContent);
+    //CARAPI CompareDocumentPosition(
+    //    /* [in] */ Org::W3c::Dom::INode * pOther,
+    //    /* [out] */ Int16 * pValue);
 
-    CARAPI IsSameNode(
-        /* [in] */ Org::W3c::Dom::INode * pOther,
-        /* [out] */ Boolean * pValue);
+    //CARAPI GetTextContent(
+    //    /* [out] */ String * pStr);
 
-    CARAPI LookupPrefix(
-        /* [in] */ const String& namespaceURI,
-        /* [out] */ String * pStr);
+    //CARAPI SetTextContent(
+    //    /* [in] */ const String& textContent);
 
-    CARAPI IsDefaultNamespace(
-        /* [in] */ const String& namespaceURI,
-        /* [out] */ Boolean * pValue);
+    //CARAPI IsSameNode(
+    //    /* [in] */ Org::W3c::Dom::INode * pOther,
+    //    /* [out] */ Boolean * pValue);
 
-    CARAPI LookupNamespaceURI(
-        /* [in] */ const String& prefix,
-        /* [out] */ String * pStr);
+    //CARAPI LookupPrefix(
+    //    /* [in] */ const String& namespaceURI,
+    //    /* [out] */ String * pStr);
 
-    CARAPI IsEqualNode(
-        /* [in] */ Org::W3c::Dom::INode * pArg,
-        /* [out] */ Boolean * pValue);
+    //CARAPI IsDefaultNamespace(
+    //    /* [in] */ const String& namespaceURI,
+    //    /* [out] */ Boolean * pValue);
 
-    CARAPI GetFeature(
-        /* [in] */ const String& feature,
-        /* [in] */ const String& ver,
-        /* [out] */ IObject ** ppObj);
+    //CARAPI LookupNamespaceURI(
+    //    /* [in] */ const String& prefix,
+    //    /* [out] */ String * pStr);
 
-    CARAPI SetUserData(
-        /* [in] */ const String& key,
-        /* [in] */ IObject * pData,
-        /* [in] */ Org::W3c::Dom::IUserDataHandler * pHandler,
-        /* [out] */ IObject ** ppObj);
+    //CARAPI IsEqualNode(
+    //    /* [in] */ Org::W3c::Dom::INode * pArg,
+    //    /* [out] */ Boolean * pValue);
 
-    CARAPI GetUserData(
-        /* [in] */ const String& key,
-        /* [out] */ IObject ** ppObj);
+    //CARAPI GetFeature(
+    //    /* [in] */ const String& feature,
+    //    /* [in] */ const String& ver,
+    //    /* [out] */ IObject ** ppObj);
 
-    CARAPI IsParentOf(
-        /* [in] */ Org::W3c::Dom::INode * pNode,
-        /* [out] */ Boolean * pIsParentOf);
+    //CARAPI SetUserData(
+    //    /* [in] */ const String& key,
+    //    /* [in] */ IObject * pData,
+    //    /* [in] */ Org::W3c::Dom::IUserDataHandler * pHandler,
+    //    /* [out] */ IObject ** ppObj);
+
+    //CARAPI GetUserData(
+    //    /* [in] */ const String& key,
+    //    /* [out] */ IObject ** ppObj);
+
+    //CARAPI IsParentOf(
+    //    /* [in] */ Org::W3c::Dom::INode * pNode,
+    //    /* [out] */ Boolean * pIsParentOf);
 private:
     // TODO: Add your private member variables here.
 };

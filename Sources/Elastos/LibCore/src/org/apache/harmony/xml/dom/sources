@@ -1,15 +1,21 @@
 
-TARGET_NAME= dom
+TARGET_NAME= org.apache.harmony.xml.dom
 TARGET_TYPE= lib
 
-INCLUDES += ../../
-INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Xml/Dom
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
 
 SOURCES = CAttrImpl.cpp
 SOURCES += CCDATASectionImpl.cpp
 SOURCES += CCommentImpl.cpp
 SOURCES += CDOMConfigurationImpl.cpp
 SOURCES += CDOMErrorImpl.cpp
+SOURCES += CDOMImplementationImpl.cpp
 SOURCES += CDOMImplementationImplHelper.cpp
 SOURCES += CDocumentFragmentImpl.cpp
 SOURCES += CDocumentImpl.cpp
@@ -27,4 +33,5 @@ SOURCES += CharacterDataImpl.cpp
 SOURCES += InnerNodeImpl.cpp
 SOURCES += LeafNodeImpl.cpp
 SOURCES += NodeImpl.cpp
+SOURCES += TextImpl.cpp
 

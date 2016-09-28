@@ -1,0 +1,52 @@
+
+module
+{
+    //using interface Org.Xml.Sax.Ext.ILexicalHandler;
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Luni {
+    namespace Internal {
+    namespace Util {
+
+    /**
+     * This class provides a way to add an implementation specific way to
+     * access the current timezone.
+     */
+    interface ITimezoneGetter {
+        /**
+         * Retrieves the ID of the current time zone.
+         *
+         * @return String the ID of the current time zone.
+         */
+        GetId(
+            [out] String* result);
+    }
+
+    interface ITimezoneGetterHelper {
+        /**
+         * Retrieves the singleton instance of this class.
+         *
+         * @return TimezoneGetter the single instance of this class.
+         */
+        GetInstance(
+            [out] ITimezoneGetter** result);
+
+        /**
+         * Sets the singleton instance of this class.
+         *
+         * @param instance
+         *            TimezoneGetter the single instance of this class.
+         */
+        SetInstance(
+            [in] ITimezoneGetter* getter);
+    }
+
+    } // namespace Util
+    } // namespace Internal
+    } // namespace Luni
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

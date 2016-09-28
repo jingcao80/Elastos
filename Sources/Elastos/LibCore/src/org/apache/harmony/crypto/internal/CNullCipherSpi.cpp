@@ -1,6 +1,10 @@
 
 #include "CNullCipherSpi.h"
-#include <cmdef.h>
+#include "Elastos.CoreLibrary.IO.h"
+//#include <cmdef.h>
+
+using Elastos::IO::IBuffer;
+using Elastosx::Crypto::EIID_INullCipherSpi;
 
 namespace Org {
 namespace Apache {
@@ -9,6 +13,7 @@ namespace Crypto {
 namespace Internal {
 
 CAR_OBJECT_IMPL(CNullCipherSpi)
+CAR_INTERFACE_IMPL(CNullCipherSpi, CipherSpi, INullCipherSpi);
 
 ECode CNullCipherSpi::EngineSetMode(
     /* [in] */ const String& mode)
@@ -67,7 +72,7 @@ ECode CNullCipherSpi::EngineInit(
     return NOERROR;
 }
 
-ECode CNullCipherSpi::EngineInitEx(
+ECode CNullCipherSpi::EngineInit(
     /* [in] */ Int32 opmode,
     /* [in] */ IKey* key,
     /* [in] */ IAlgorithmParameterSpec* params,
@@ -77,7 +82,7 @@ ECode CNullCipherSpi::EngineInitEx(
     return NOERROR;
 }
 
-ECode CNullCipherSpi::EngineInitEx2(
+ECode CNullCipherSpi::EngineInit(
     /* [in] */ Int32 opmode,
     /* [in] */ IKey* key,
     /* [in] */ IAlgorithmParameters* params,
@@ -104,7 +109,7 @@ ECode CNullCipherSpi::EngineUpdate(
     return NOERROR;
 }
 
-ECode CNullCipherSpi::EngineUpdateEx(
+ECode CNullCipherSpi::EngineUpdate(
     /* [in] */ ArrayOf<Byte>* input,
     /* [in] */ Int32 inputOffset,
     /* [in] */ Int32 inputLen,
@@ -122,7 +127,7 @@ ECode CNullCipherSpi::EngineUpdateEx(
     return NOERROR;
 }
 
-ECode CNullCipherSpi::EngineUpdateEx2(
+ECode CNullCipherSpi::EngineUpdate(
     /* [in] */ IByteBuffer* input,
     /* [out] */ IByteBuffer * output,
     /* [out] */ Int32* number)
@@ -135,10 +140,10 @@ ECode CNullCipherSpi::EngineUpdateEx2(
         return E_NULL_POINTER_EXCEPTION;
     }
     Int32 limit, position;
-    input->GetLimit(&limit);
-    input->GetPosition(&position);
+    IBuffer::Probe(input)->GetLimit(&limit);
+    IBuffer::Probe(input)->GetPosition(&position);
     Int32 result = limit - position;
-    FAIL_RETURN(output->PutByteBuffer(input))
+    FAIL_RETURN(output->Put(input))
     *number = result;
     return NOERROR;
 }
@@ -158,7 +163,7 @@ ECode CNullCipherSpi::EngineDoFinal(
     return EngineUpdate(input, inputOffset, inputLen, bytes);
 }
 
-ECode CNullCipherSpi::EngineDoFinalEx(
+ECode CNullCipherSpi::EngineDoFinal(
     /* [in] */ ArrayOf<Byte>* input,
     /* [in] */ Int32 inputOffset,
     /* [in] */ Int32 inputLen,
@@ -166,16 +171,16 @@ ECode CNullCipherSpi::EngineDoFinalEx(
     /* [in] */ Int32 outputOffset,
     /* [out] */ Int32* number)
 {
-    return EngineUpdateEx(input, inputOffset, inputLen, output,
+    return EngineUpdate(input, inputOffset, inputLen, output,
         outputOffset, number);
 }
 
-ECode CNullCipherSpi::EngineDoFinalEx2(
+ECode CNullCipherSpi::EngineDoFinal(
     /* [in] */ IByteBuffer* input,
     /* [out] */ IByteBuffer* output,
     /* [out] */ Int32* number)
 {
-    return EngineUpdateEx2(input, output, number);
+    return EngineUpdate(input, output, number);
 }
 
 ECode CNullCipherSpi::EngineWrap(

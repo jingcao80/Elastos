@@ -1,10 +1,18 @@
 
-TARGET_NAME= xml
+TARGET_NAME= org.apache.harmony.xml
 TARGET_TYPE= lib
 
-INCLUDES += ../
-INCLUDES += $(MAKEDIR)/../../../../../inc/Org/Apache/Harmony/Xml
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../sources.inc
+
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc
+#INCLUDES += $(MAKEDIR)/../../../../../inc/org/apache/harmony/crypto/internal
 
 SOURCES = CExpatReader.cpp
 SOURCES += ExpatAttributes.cpp
 SOURCES += ExpatParser.cpp
+
+ELASTOS_LIBS += parsers/org.apache.harmony.xml.parsers.lib
+ELASTOS_LIBS += dom/org.apache.harmony.xml.dom.lib

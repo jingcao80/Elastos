@@ -34,7 +34,7 @@ ECode DocumentBuilder::Parse(
 
 ECode DocumentBuilder::Parse(
     /* [in]*/ IInputStream* is,
-    /* [in]*/ String systemId,
+    /* [in]*/ const String& systemId,
     /* [out]*/ IDocument** doc)
 {
     if (is == NULL) {
@@ -49,7 +49,7 @@ ECode DocumentBuilder::Parse(
 }
 
 ECode DocumentBuilder::Parse(
-    /* [in]*/ String uri,
+    /* [in]*/ const String& uri,
     /* [out]*/ IDocument** doc)
 {
     if (uri == NULL) {

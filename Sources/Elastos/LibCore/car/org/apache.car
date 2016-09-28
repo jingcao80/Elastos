@@ -1,6 +1,18 @@
 
 module
 {
+    merge("apache/harmony/luni/internal/util/ITimerzoneGetter.car");
+    merge("apache/harmony/xml/IExpatReader.car");
+    merge("apache/harmony/xml/IExpatAttributes.car");
+
+    merge("apache/harmony/xml/dom/ILeafNodeImpl.car");
+    merge("apache/harmony/xml/dom/ICharacterDataImpl.car");
+    merge("apache/harmony/xml/dom/ICDATASectionImpl.car");
+    merge("apache/harmony/xml/dom/ICommentImpl.car");
+    merge("apache/harmony/xml/dom/IDOMConfigurationImpl.car");
+    merge("apache/harmony/xml/dom/IDOMImplementationImpl.car");
+    merge("apache/harmony/xml/dom/IDocumentImpl.car");
+
     merge("apache/harmony/security/asn1/Exceptions.car");
     merge("apache/harmony/security/asn1/IASN1BitString.car");
     merge("apache/harmony/security/asn1/IASN1Constants.car");
@@ -306,7 +318,12 @@ module
     interface Elastos.Utility.IIterator;
     interface Elastos.Utility.ILocale;
     interface Elastos.Utility.IDate;
+    interface Elastos.Utility.IMap;
     interface Elastosx.Net.Ssl.IHostnameVerifier;
+    interface Elastosx.Crypto.ICipherSpi;
+    interface Elastosx.Xml.Parsers.ISAXParser;
+    interface Elastosx.Xml.Parsers.ISAXParserFactory;
+    interface Elastosx.Xml.Parsers.IDocumentBuilderFactory;
     interface Org.Apache.Http.IHttpEntity;
     interface Org.Apache.Http.IHttpMessage;
     interface Org.Apache.Http.IHttpEntityEnclosingRequest;
@@ -336,6 +353,276 @@ module
     interface Org.Apache.Http.Params.IHttpParams;
     interface Org.Apache.Http.Protocol.IHttpContext;
     interface Org.Apache.Http.Utility.ICharArrayBuffer;
+
+    interface Org.Xml.Sax.IXMLReader;
+
+    interface Org.W3c.Dom.INode;
+    interface Org.W3c.Dom.IAttr;
+    interface Org.W3c.Dom.IDocument;
+    interface Org.W3c.Dom.ICharacterData;
+    interface Org.W3c.Dom.IDocumentFragment;
+    interface Org.W3c.Dom.IDOMConfiguration;
+    interface Org.W3c.Dom.IText;
+    interface Org.W3c.Dom.IComment;
+    interface Org.W3c.Dom.IDOMError;
+    interface Org.W3c.Dom.ICDATASection;
+    interface Org.W3c.Dom.IDOMImplementation;
+    interface Org.W3c.Dom.IDocumentType;
+    interface Org.W3c.Dom.INamedNodeMap;
+    interface Org.W3c.Dom.IEntity;
+    interface Org.W3c.Dom.IEntityReference;
+    interface Org.W3c.Dom.INodeList;
+    interface Org.W3c.Dom.INotation;
+    interface Org.W3c.Dom.IProcessingInstruction;
+    interface Org.W3c.Dom.IElement;
+
+
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+
+    namespace Luni {
+    namespace Internal {
+    namespace Util {
+
+        //class CTimezoneGetter {
+        //    interface ITimezoneGetter;
+        //}
+
+        singleton class CTimezoneGetterHelper {
+            interface ITimezoneGetterHelper;
+        }
+
+    } // Util
+    } // Internal
+    } // Luni
+
+    namespace Crypto {
+    namespace Internal {
+
+    class CNullCipherSpi {
+        interface ICipherSpi;
+    }
+
+    } // namespace Internal
+    } // namespace Crypto
+
+    namespace Xml {
+
+    class CExpatReader {
+        interface IExpatReader;
+        interface IXMLReader;
+    }
+
+    namespace Parsers {
+        class CSAXParserImpl {
+            constructor(
+                [in] IMap* features);
+
+            interface ISAXParser;
+        }
+
+        class CSAXParserFactoryImpl {
+            interface ISAXParserFactory;
+        }
+
+        class CDocumentBuilderFactoryImpl {
+            interface IDocumentBuilderFactory;
+        }
+    } // Parsers
+
+    namespace Dom {
+        class CAttrImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String namespaceURI,
+                [in] String qualifiedName);
+
+            constructor(
+                [in] IDocument* document,
+                [in] String name);
+
+            interface IAttr;
+            interface INode;
+        }
+
+        class CCDATASectionImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String data);
+
+            interface ICDATASection;
+            interface ICDATASectionImpl;
+            interface ICharacterData;
+            interface ICharacterDataImpl;
+            interface ILeafNodeImpl;
+            interface INode;
+            interface IText;
+        }
+
+        class CCommentImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String data);
+
+            interface ICommentImpl;
+            interface IComment;
+            interface ICharacterData;
+            interface ICharacterDataImpl;
+            interface ILeafNodeImpl;
+            interface INode;
+        }
+
+        class CDocumentFragmentImpl {
+            constructor(
+                [in] IDocument* document);
+
+            interface IDocumentFragment;
+            interface ILeafNodeImpl;
+            interface INode;
+        }
+
+        class CDocumentImpl {
+            constructor(
+                [in] IDOMImplementation* impl,
+                [in] String namespaceURI,
+                [in] String qualifiedName,
+                [in] IDocumentType* doctype,
+                [in] String inputEncoding);
+
+            interface ILeafNodeImpl;
+            interface IDocument;
+            interface INode;
+        }
+
+        singleton class CDocumentImplHelper {
+            interface IDocumentImplHelper;
+        }
+
+        class CDOMConfigurationImpl {
+            interface IDOMConfiguration;
+            interface IDOMConfigurationImpl;
+        }
+
+        class CDOMErrorImpl {
+            constructor(
+                [in] Int16 severity,
+                [in] String type);
+
+            interface IDOMError;
+        }
+
+        class CDOMImplementationImpl {
+
+            interface IDOMImplementation;
+        }
+
+        singleton class CDOMImplementationImplHelper {
+            interface IDOMImplementationImplHelper;
+        }
+
+        class CDocumentTypeImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String qualifiedName,
+                [in] String publicId,
+                [in] String systemId);
+
+            interface IDocumentType;
+            interface ILeafNodeImpl;
+            interface INode;
+        }
+
+        class CElementImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String namespaceURI,
+                [in] String qualifiedName);
+
+            constructor(
+                [in] IDocument* document,
+                [in] String name);
+
+            interface ILeafNodeImpl;
+            interface INode;
+            interface IElement;
+        }
+
+        class CElementAttrNamedNodeMapImpl {
+            constructor(
+                [in] IElement* ele);
+
+            interface INamedNodeMap;
+        }
+
+        class CEntityImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String notationName,
+                [in] String publicID,
+                [in] String systemID);
+
+            interface IEntity;
+            interface INode;
+        }
+
+        class CEntityReferenceImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String name);
+
+            interface IEntityReference;
+            interface ILeafNodeImpl;
+            interface INode;
+        }
+
+        class CNodeListImpl {
+            constructor();
+
+            constructor(
+                [in] IList* list);
+
+            interface INodeList;
+        }
+
+        class CNotationImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String notationName,
+                [in] String publicID,
+                [in] String systemID);
+
+            interface ILeafNodeImpl;
+            interface INode;
+            interface INotation;
+        }
+
+        class CProcessingInstructionImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String target,
+                [in] String data);
+
+            interface ILeafNodeImpl;
+            interface INode;
+            interface IProcessingInstruction;
+        }
+
+        class CTextImpl {
+            constructor(
+                [in] IDocument* document,
+                [in] String data);
+
+            interface ICharacterDataImpl;
+            interface ICharacterData;
+            interface IText;
+        }
+    } // Dom
+
+    } // namespace Xml
+    } // Harmony
+    } // Apache
+    } // Org
 
     namespace Org {
     namespace Apache {

@@ -11,8 +11,10 @@ module
     /**
      * SAX wrapper around Expat. Interns strings. Does not support validation.
      * Does not support {@link DTDHandler}.
+     * @Involve
+     * interface IXMLReader
      */
-    interface IExpatReader extends Org.Xml.Sax.IXMLReader {
+    interface IExpatReader {
         /**
          * Returns the current lexical handler.
          *

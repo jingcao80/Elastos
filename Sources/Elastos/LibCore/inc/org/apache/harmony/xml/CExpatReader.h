@@ -5,6 +5,14 @@
 #include "_Org_Apache_Harmony_Xml_CExpatReader.h"
 #include <elastos/core/Object.h>
 
+using Org::Xml::Sax::IXMLReader;
+using Org::Xml::Sax::IContentHandler;
+using Org::Xml::Sax::IDTDHandler;
+using Org::Xml::Sax::IEntityResolver;
+using Org::Xml::Sax::IErrorHandler;
+using Org::Xml::Sax::Ext::ILexicalHandler;
+using Elastos::IO::IReader;
+using Elastos::IO::IInputStream;
 using Elastos::Core::Object;
 
 namespace Org {
@@ -15,11 +23,25 @@ namespace Xml {
 CarClass(CExpatReader)
     , public Object
     , public IExpatReader
+    , public IXMLReader
 {
+private:
+    class Feature
+    {
+    public:
+        static const String BASE_URI;// = "http://xml.org/sax/features/";
+        static const String VALIDATION;// = BASE_URI + "validation";
+        static const String NAMESPACES;// = BASE_URI + "namespaces";
+        static const String NAMESPACE_PREFIXES;// = BASE_URI + "namespace-prefixes";
+        static const String STRING_INTERNING;// = BASE_URI + "string-interning";
+        static const String EXTERNAL_GENERAL_ENTITIES;// = BASE_URI + "external-general-entities";
+        static const String EXTERNAL_PARAMETER_ENTITIES;// = BASE_URI + "external-parameter-entities";
+    };
 public:
-    CAR_OBJECT_DECL()
 
     CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
     CARAPI GetFeature(
         /* [in] */ const String& name,
@@ -38,40 +60,51 @@ public:
         /* [in] */ IInterface * pValue);
 
     CARAPI SetEntityResolver(
-        /* [in] */ Org::Xml::Sax::IEntityResolver * pResolver);
+        /* [in] */ IEntityResolver * pResolver);
 
     CARAPI GetEntityResolver(
-        /* [out] */ Org::Xml::Sax::IEntityResolver ** ppResolver);
+        /* [out] */ IEntityResolver ** ppResolver);
 
     CARAPI SetDTDHandler(
-        /* [in] */ Org::Xml::Sax::IDTDHandler * pHandler);
+        /* [in] */ IDTDHandler * pHandler);
 
     CARAPI GetDTDHandler(
-        /* [out] */ Org::Xml::Sax::IDTDHandler ** ppHandler);
+        /* [out] */ IDTDHandler ** ppHandler);
 
     CARAPI SetContentHandler(
-        /* [in] */ Org::Xml::Sax::IContentHandler * pHandler);
+        /* [in] */ IContentHandler * pHandler);
 
     CARAPI GetContentHandler(
-        /* [out] */ Org::Xml::Sax::IContentHandler ** ppHandler);
+        /* [out] */ IContentHandler ** ppHandler);
 
     CARAPI SetErrorHandler(
-        /* [in] */ Org::Xml::Sax::IErrorHandler * pHandler);
+        /* [in] */ IErrorHandler * pHandler);
 
     CARAPI GetErrorHandler(
-        /* [out] */ Org::Xml::Sax::IErrorHandler ** ppHandler);
+        /* [out] */ IErrorHandler ** ppHandler);
 
     CARAPI Parse(
         /* [in] */ Org::Xml::Sax::IInputSource * pInput);
 
-    CARAPI ParseEx(
+    CARAPI Parse(
+        /* [in] */ IReader* in,
+        /* [in] */ const String& publicId,
+        /* [in] */ const String& systemId);
+
+    CARAPI Parse(
+        /* [in] */ IInputStream* in,
+        /* [in] */ const String& charsetName,
+        /* [in] */ const String& publicId,
+        /* [in] */ const String& systemId);
+
+    CARAPI Parse(
         /* [in] */ const String& systemId);
 
     CARAPI GetLexicalHandler(
-        /* [out] */ Org::Xml::Sax::Ext::ILexicalHandler ** ppHandler);
+        /* [out] */ ILexicalHandler ** ppHandler);
 
     CARAPI SetLexicalHandler(
-        /* [in] */ Org::Xml::Sax::Ext::ILexicalHandler * pLexicalHandler);
+        /* [in] */ ILexicalHandler * pLexicalHandler);
 
     CARAPI IsNamespaceProcessingEnabled(
         /* [out] */ Boolean * pEnabled);
@@ -81,6 +114,20 @@ public:
 
 private:
     // TODO: Add your private member variables here.
+    /*
+     * ExpatParser accesses these fields directly during parsing. The user
+     * should be able to safely change them during parsing.
+     */
+    /*package*/ AutoPtr<IContentHandler> contentHandler;
+    /*package*/ AutoPtr<IDTDHandler> dtdHandler;
+    /*package*/ AutoPtr<IEntityResolver> entityResolver;
+    /*package*/ AutoPtr<IErrorHandler> errorHandler;
+    /*package*/ AutoPtr<ILexicalHandler> lexicalHandler;
+
+    Boolean processNamespaces;// = true;
+    Boolean processNamespacePrefixes;// = false;
+
+    static const String LEXICAL_HANDLER_PROPERTY;// = "http://xml.org/sax/properties/lexical-handler";
 };
 
 }

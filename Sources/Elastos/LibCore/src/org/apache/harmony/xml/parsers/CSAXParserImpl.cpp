@@ -1,5 +1,14 @@
+#include "org/apache/harmony/xml/parsers/CSAXParserImpl.h"
+#include "org/xml/sax/helpers/CXMLReaderAdapter.h"
+#include "org/apache/harmony/xml/CExpatReader.h"
+#include "elastos/utility/CHashMap.h"
+#include "elastos/utility/Collections.h"
 
-#include "CSAXParserImpl.h"
+using Org::Xml::Sax::Helpers::CXMLReaderAdapter;
+using Elastos::Core::IBoolean;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::Collections;
 
 namespace Org {
 namespace Apache {
@@ -7,152 +16,125 @@ namespace Harmony {
 namespace Xml {
 namespace Parsers {
 
-CAR_OBJECT_IMPL(CSAXParserImpl)
+ECode CSAXParserImpl::constructor(
+    /* [in] */ IMap* features)
+{
+    Boolean isEmpty;
+    features->IsEmpty(&isEmpty);
+    //this.initialFeatures = initialFeatures.isEmpty()
+    //    ? Collections.<String, Boolean>emptyMap()
+    //    : new HashMap<String, Boolean>(initialFeatures);
+    if (isEmpty) {
+        initialFeatures = new Collections::EmptyMap();
+    }
+    else {
+        CHashMap::New(features, (IMap**)&initialFeatures);
+    }
+    ResetInternal();
+    return NOERROR;
+}
 
 ECode CSAXParserImpl::Reset()
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    /*
+     * The exceptions are impossible. If any features are unrecognized or
+     * unsupported, construction of this instance would have failed.
+     */
+    //try {
+    return ResetInternal();
+    //} catch (SAXNotRecognizedException e) {
+    //    throw new AssertionError();
+    //} catch (SAXNotSupportedException e) {
+    //    throw new AssertionError();
+    //}
 }
 
-ECode CSAXParserImpl::Parse(
-    /* [in] */ Elastos::IO::IInputStream * pIs,
-    /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb)
+ECode CSAXParserImpl::ResetInternal()
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    CExpatReader::New((IXMLReader**)&reader);
+    AutoPtr<ISet> entrySet;
+    initialFeatures->GetEntrySet((ISet**)&entrySet);
+    AutoPtr<IIterator> it;
+    entrySet->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(p);
+        AutoPtr<IInterface> v;
+        entry->GetValue((IInterface**)&v);
+        AutoPtr<IInterface> k;
+        entry->GetKey((IInterface**)&k);
 
-ECode CSAXParserImpl::ParseEx(
-    /* [in] */ Elastos::IO::IInputStream * pIs,
-    /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb,
-    /* [in] */ const String& systemId)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+        AutoPtr<ICharSequence> ics = ICharSequence::Probe(k);
+        String keyStr;
+        ics->ToString(&keyStr);
 
-ECode CSAXParserImpl::ParseEx2(
-    /* [in] */ Elastos::IO::IInputStream * pIs,
-    /* [in] */ Org::Xml::Sax::IDTDHandler * pDh)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+        IBoolean* ib = IBoolean::Probe(v);
+        Boolean value;
+        ib->GetValue(&value);
 
-ECode CSAXParserImpl::ParseEx3(
-    /* [in] */ Elastos::IO::IInputStream * pIs,
-    /* [in] */ Org::Xml::Sax::IDTDHandler * pDh,
-    /* [in] */ const String& systemId)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserImpl::ParseEx4(
-    /* [in] */ const String& uri,
-    /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserImpl::ParseEx5(
-    /* [in] */ const String& uri,
-    /* [in] */ Org::Xml::Sax::IDTDHandler * pDh)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserImpl::ParseEx6(
-    /* [in] */ Elastos::IO::IFile * pF,
-    /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserImpl::ParseEx7(
-    /* [in] */ Elastos::IO::IFile * pF,
-    /* [in] */ Org::Xml::Sax::IDTDHandler * pDh)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserImpl::ParseEx8(
-    /* [in] */ Org::Xml::Sax::IInputSource * pIs,
-    /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserImpl::ParseEx9(
-    /* [in] */ Org::Xml::Sax::IInputSource * pIs,
-    /* [in] */ Org::Xml::Sax::IDTDHandler * pDh)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+        reader->SetFeature(keyStr, value);
+    }
+    return NOERROR;
 }
 
 ECode CSAXParserImpl::GetParser(
     /* [out] */ Org::Xml::Sax::IParser ** ppParser)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppParser);
+    *ppParser = NULL;
+    if (parser == NULL) {
+        //parser = new XMLReaderAdapter(reader);
+        CXMLReaderAdapter::New(reader, (IParser**)&parser);
+    }
+
+    *ppParser = parser;
+    REFCOUNT_ADD(*ppParser);
+    return NOERROR;
 }
 
 ECode CSAXParserImpl::GetXMLReader(
     /* [out] */ Org::Xml::Sax::IXMLReader ** ppReader)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppReader);
+    *ppReader = reader;
+    REFCOUNT_ADD(*ppReader);
+    return NOERROR;
 }
 
 ECode CSAXParserImpl::IsNamespaceAware(
     /* [out] */ Boolean * pIsAware)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pIsAware);
+    *pIsAware = FALSE;
+    //try {
+    return reader->GetFeature(String("http://xml.org/sax/features/namespaces"), pIsAware);
+    //} catch (SAXException ex) {
+    //    return false;
+    //}
 }
 
 ECode CSAXParserImpl::IsValidating(
     /* [out] */ Boolean * pIsValidating)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pIsValidating);
+    *pIsValidating = FALSE;
+    return NOERROR;
 }
 
 ECode CSAXParserImpl::SetProperty(
     /* [in] */ const String& name,
     /* [in] */ IInterface * pValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return reader->SetProperty(name, pValue);
 }
 
 ECode CSAXParserImpl::GetProperty(
     /* [in] */ const String& name,
     /* [out] */ IInterface ** ppProperty)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserImpl::GetSchema(
-    /* [out] */ Elastosx::Xml::Validation::ISchema ** ppSchema)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSAXParserImpl::IsXIncludeAware(
-    /* [out] */ Boolean * pIsAware)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return reader->GetProperty(name, ppProperty);
 }
 
 }
