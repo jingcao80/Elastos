@@ -30,9 +30,6 @@ module
      *  TSAPolicyId ::= OBJECT IDENTIFIER
      */
     interface ITimeStampReq {
-        ToString(
-            [out] String* str);
-
         /**
          * Returns ASN.1 encoded form of this TimeStampReq.
          * @return a byte array containing ASN.1 encoded form.

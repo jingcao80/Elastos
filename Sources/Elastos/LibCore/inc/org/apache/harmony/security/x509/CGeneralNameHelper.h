@@ -5,6 +5,7 @@
 #include "_Org_Apache_Harmony_Security_X509_CGeneralNameHelper.h"
 #include <elastos/core/Singleton.h>
 
+using Org::Apache::Harmony::Security::Asn1::IASN1Choice;
 using Elastos::Core::Singleton;
 
 namespace Org {
@@ -30,27 +31,27 @@ public:
 
     CARAPI OidStrToInts(
         /* [in] */ const String& oid,
-        /* [out, callee] */ ArrayOf<Int32> ** ppInts);
+        /* [out, callee] */ ArrayOf<Int32>** ppInts);
 
     CARAPI IpStrToBytes(
         /* [in] */ const String& ip,
-        /* [out, callee] */ ArrayOf<Byte> ** ppBytes);
+        /* [out, callee] */ ArrayOf<Byte>** ppBytes);
 
     CARAPI IpBytesToStr(
-        /* [in] */ ArrayOf<Byte> * pIp,
-        /* [out] */ String * pStr);
+        /* [in] */ ArrayOf<Byte>* pIp,
+        /* [out] */ String* pStr);
 
     CARAPI GetASN1(
-        /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Choice ** ppAsn1);
+        /* [out] */ IASN1Choice** ppAsn1);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CGENERALNAMEHELPER_H__

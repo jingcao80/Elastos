@@ -28,10 +28,10 @@ module
      *      accessMethod          OBJECT IDENTIFIER,
      *      accessLocation        GeneralName  }
      *
+     * @ invoke interface IExtensionValue
+     *
      */
-    interface IInfoAccessSyntax extends IExtensionValue {
-        ToString(
-            [out] String* str);
+    interface IInfoAccessSyntax {
     }
 
     [deprecated]

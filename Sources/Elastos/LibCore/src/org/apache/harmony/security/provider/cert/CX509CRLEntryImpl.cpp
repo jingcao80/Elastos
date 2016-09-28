@@ -26,8 +26,8 @@ ECode CX509CRLEntryImpl::GetExtensionValue(
     if (mExtensions == NULL) {
             return NOERROR;
     }
-    AutoPtr<IExtension> ext;
-    mExtensions->GetExtensionByOID(oid, (IExtension**)&ext);
+    AutoPtr<IX509Extension> ext;
+    mExtensions->GetExtensionByOID(oid, (IX509Extension**)&ext);
     if (ext == NULL) {
         return NOERROR;
     }

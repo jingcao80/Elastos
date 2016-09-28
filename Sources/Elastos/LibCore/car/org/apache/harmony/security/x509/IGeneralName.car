@@ -146,9 +146,6 @@ module
         GetAsList(
             [out] IList** list);
 
-        ToString(
-            [out] String* str);
-
         /**
         * Returns ASN.1 encoded form of this X.509 GeneralName value.
         */

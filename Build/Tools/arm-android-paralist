@@ -87,6 +87,8 @@
   Elastos/LibCore/src/org/apache/harmony/security/fortress
   Elastos/LibCore/src/org/apache/harmony/security/pkcs7
   Elastos/LibCore/src/org/apache/harmony/security/utils
+  Elastos/LibCore/src/org/apache/harmony/security/x509/tsp/
+  Elastos/LibCore/src/org/apache/harmony/security/x509
 > Elastos/LibCore/src/org/apache/harmony/security
   Elastos/LibCore/src/org/apache/http/auth/params
 > Elastos/LibCore/src/org/apache/http/auth

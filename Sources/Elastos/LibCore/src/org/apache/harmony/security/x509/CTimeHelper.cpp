@@ -1,5 +1,5 @@
 
-#include "CTimeHelper.h"
+#include "org/apache/harmony/security/x509/CTimeHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -12,15 +12,14 @@ CAR_SINGLETON_IMPL(CTimeHelper)
 CAR_INTERFACE_IMPL(CTimeHelper, Singleton, ITimeHelper)
 
 ECode CTimeHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Choice ** ppAsn1)
+    /* [out] */ IASN1Choice** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

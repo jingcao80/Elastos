@@ -6,5 +6,5 @@ DIRS += pkcs7
 #DIRS += Pkcs8
 #DIRS += Provider
 DIRS += utils
-#DIRS += X501
-#DIRS += X509
+#DIRS += x501
+DIRS += x509

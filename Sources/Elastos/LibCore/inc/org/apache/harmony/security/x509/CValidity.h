@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::IDate;
 
 namespace Org {
 namespace Apache {
@@ -23,26 +24,26 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetNotBefore(
-        /* [out] */ Elastos::Utility::IDate ** ppDate);
+        /* [out] */ IDate** ppDate);
 
     CARAPI GetNotAfter(
-        /* [out] */ Elastos::Utility::IDate ** ppDate);
+        /* [out] */ IDate** ppDate);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI constructor(
-        /* [in] */ Elastos::Utility::IDate * pNotBefore,
-        /* [in] */ Elastos::Utility::IDate * pNotAfter);
+        /* [in] */ IDate* pNotBefore,
+        /* [in] */ IDate* pNotAfter);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CVALIDITY_H__

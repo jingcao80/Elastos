@@ -1,5 +1,5 @@
 
-#include "CTimeStampReq.h"
+#include "org/apache/harmony/security/x509/tsp/CTimeStampReq.h"
 
 namespace Org {
 namespace Apache {
@@ -13,56 +13,56 @@ CAR_OBJECT_IMPL(CTimeStampReq)
 CAR_INTERFACE_IMPL(CTimeStampReq, Object, ITimeStampReq)
 
 ECode CTimeStampReq::ToString(
-    /* [out] */ String * pStr)
+    /* [out] */ String* pStr)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTimeStampReq::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTimeStampReq::GetCertReq(
-    /* [out] */ Boolean * pCertReq)
+    /* [out] */ Boolean* pCertReq)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTimeStampReq::GetExtensions(
-    /* [out] */ Org::Apache::Harmony::Security::X509::IExtensions ** ppExtensions)
+    /* [out] */ IExtensions** ppExtensions)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTimeStampReq::GetMessageImprint(
-    /* [out] */ Org::Apache::Harmony::Security::X509::Tsp::IMessageImprint ** ppMessageImprint)
+    /* [out] */ IMessageImprint** ppMessageImprint)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTimeStampReq::GetNonce(
-    /* [out] */ Elastos::Math::IBigInteger ** ppNonce)
+    /* [out] */ IBigInteger** ppNonce)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTimeStampReq::GetReqPolicy(
-    /* [out] */ String * pReqPolicy)
+    /* [out] */ String* pReqPolicy)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTimeStampReq::GetVersion(
-    /* [out] */ Int32 * pVer)
+    /* [out] */ Int32* pVer)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -70,20 +70,19 @@ ECode CTimeStampReq::GetVersion(
 
 ECode CTimeStampReq::constructor(
     /* [in] */ Int32 ver,
-    /* [in] */ Org::Apache::Harmony::Security::X509::Tsp::IMessageImprint * pMessageImprint,
+    /* [in] */ IMessageImprint* pMessageImprint,
     /* [in] */ const String& reqPolicy,
-    /* [in] */ Elastos::Math::IBigInteger * pNonce,
+    /* [in] */ IBigInteger* pNonce,
     /* [in] */ Boolean certReq,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IExtensions * pExtensions)
+    /* [in] */ IExtensions* pExtensions)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-}
-
+} // namespace Tsp
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

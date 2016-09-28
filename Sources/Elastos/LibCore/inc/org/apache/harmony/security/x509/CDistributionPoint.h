@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
 
 namespace Org {
 namespace Apache {
@@ -23,22 +24,22 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb,
+        /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
     CARAPI constructor(
-        /* [in] */ Org::Apache::Harmony::Security::X509::IDistributionPointName * pDistributionPoint,
-        /* [in] */ Org::Apache::Harmony::Security::X509::IReasonFlags * pReasons,
-        /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralNames * pCRLIssuer);
+        /* [in] */ IDistributionPointName* pDistributionPoint,
+        /* [in] */ IReasonFlags* pReasons,
+        /* [in] */ IGeneralNames* pCRLIssuer);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CDISTRIBUTIONPOINT_H__

@@ -7,7 +7,7 @@ module
     interface Elastos.Core.IStringBuilder;
     interface Elastosx.Security.Auth.X500.IX500Principal;
     interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
-    interface Org.Apache.Harmony.Security.X509.IExtension;
+    interface Org.Apache.Harmony.Security.X509.IX509Extension;
 
     namespace Org {
     namespace Apache {
@@ -51,7 +51,7 @@ module
          */
         GetExtensionByOID(
             [in] String oid,
-            [out] IExtension** extensionByOID);
+            [out] IX509Extension** extensionByOID);
 
         /**
          * Returns the value of Key Usage extension (OID == 2.5.29.15).

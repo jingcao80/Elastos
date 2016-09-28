@@ -1,5 +1,5 @@
 
-#include "CPolicyInformation.h"
+#include "org/apache/harmony/security/x509/CPolicyInformation.h"
 
 namespace Org {
 namespace Apache {
@@ -12,21 +12,21 @@ CAR_OBJECT_IMPL(CPolicyInformation)
 CAR_INTERFACE_IMPL(CPolicyInformation, Object, IPolicyInformation)
 
 ECode CPolicyInformation::GetPolicyIdentifier(
-    /* [out] */ String * pPolicyIdentifier)
+    /* [out] */ String* pPolicyIdentifier)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CPolicyInformation::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CPolicyInformation::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -39,9 +39,8 @@ ECode CPolicyInformation::constructor(
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

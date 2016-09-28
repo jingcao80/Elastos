@@ -6,6 +6,12 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::IEnumeration;
+using Elastos::Security::IIdentityScope;
+using Elastos::Security::ICertificate;
+using Elastos::Security::IPublicKey;
+using Elastos::Security::IIdentity;
+using Elastos::Security::IPrincipal;
 
 namespace Org {
 namespace Apache {
@@ -14,6 +20,7 @@ namespace Security {
 
 CarClass(CSystemScope)
     , public Object
+    , public ISystemScope
     , public IIdentityScope
 {
 public:
@@ -22,56 +29,56 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI AddCertificate(
-        /* [in] */ Elastos::Security::ICertificate * pCertificate);
+        /* [in] */ ICertificate* pCertificate);
 
     CARAPI RemoveCertificate(
-        /* [in] */ Elastos::Security::ICertificate * pCertificate);
+        /* [in] */ ICertificate* pCertificate);
 
     CARAPI Certificates(
-        /* [out, callee] */ ArrayOf<Elastos::Security::ICertificate *> ** ppCerts);
+        /* [out, callee] */ ArrayOf<ICertificate*>** ppCerts);
 
     CARAPI ToString(
         /* [in] */ Boolean detailed,
-        /* [out] */ String * pStr);
+        /* [out] */ String* pStr);
 
     CARAPI GetScope(
-        /* [out] */ Elastos::Security::IIdentityScope ** ppScope);
+        /* [out] */ IIdentityScope** ppScope);
 
     CARAPI SetPublicKey(
-        /* [in] */ Elastos::Security::IPublicKey * pKey);
+        /* [in] */ IPublicKey* pKey);
 
     CARAPI GetPublicKey(
-        /* [out] */ Elastos::Security::IPublicKey ** ppPubKey);
+        /* [out] */ IPublicKey** ppPubKey);
 
     CARAPI SetInfo(
         /* [in] */ const String& info);
 
     CARAPI GetInfo(
-        /* [out] */ String * pStr);
+        /* [out] */ String* pStr);
 
     CARAPI GetSize(
-        /* [out] */ Int32 * pSize);
+        /* [out] */ Int32* pSize);
 
     CARAPI GetIdentity(
         /* [in] */ const String& name,
-        /* [out] */ Elastos::Security::IIdentity ** ppIdentity);
+        /* [out] */ IIdentity** ppIdentity);
 
     CARAPI GetIdentity(
-        /* [in] */ Elastos::Security::IPrincipal * pPrincipal,
-        /* [out] */ Elastos::Security::IIdentity ** ppIdentity);
+        /* [in] */ IPrincipal* pPrincipal,
+        /* [out] */ IIdentity** ppIdentity);
 
     CARAPI GetIdentity(
-        /* [in] */ Elastos::Security::IPublicKey * pKey,
-        /* [out] */ Elastos::Security::IIdentity ** ppIdentity);
+        /* [in] */ IPublicKey* pKey,
+        /* [out] */ IIdentity** ppIdentity);
 
     CARAPI AddIdentity(
-        /* [in] */ Elastos::Security::IIdentity * pIdentity);
+        /* [in] */ IIdentity* pIdentity);
 
     CARAPI RemoveIdentity(
-        /* [in] */ Elastos::Security::IIdentity * pIdentity);
+        /* [in] */ IIdentity* pIdentity);
 
     CARAPI Identities(
-        /* [out] */ Elastos::Utility::IEnumeration ** ppIds);
+        /* [out] */ IEnumeration** ppIds);
 
     CARAPI constructor();
 
@@ -80,15 +87,15 @@ public:
 
     CARAPI constructor(
         /* [in] */ const String& name,
-        /* [in] */ Elastos::Security::IIdentityScope * pScope);
+        /* [in] */ IIdentityScope* pScope);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_CSYSTEMSCOPE_H__

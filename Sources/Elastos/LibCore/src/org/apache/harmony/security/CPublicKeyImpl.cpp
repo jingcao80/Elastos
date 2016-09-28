@@ -1,6 +1,8 @@
 
 #include "CPublicKeyImpl.h"
 
+using Elastos::Security::EIID_IPublicKey;
+
 namespace Org {
 namespace Apache {
 namespace Harmony {
@@ -8,7 +10,7 @@ namespace Security {
 
 CAR_OBJECT_IMPL(CPublicKeyImpl)
 
-CAR_INTERFACE_IMPL(CPublicKeyImpl, Object, IPublicKeyImpl)
+CAR_INTERFACE_IMPL_2(CPublicKeyImpl, Object, IPublicKeyImpl, IPublicKey)
 
 ECode CPublicKeyImpl::GetAlgorithm(
     /* [out] */ String * pAlgorithm)
@@ -52,8 +54,7 @@ ECode CPublicKeyImpl::constructor(
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

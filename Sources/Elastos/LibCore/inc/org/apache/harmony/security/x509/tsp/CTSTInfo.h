@@ -5,7 +5,11 @@
 #include "_Org_Apache_Harmony_Security_X509_Tsp_CTSTInfo.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::X509::IExtensions;
+using Org::Apache::Harmony::Security::X509::IGeneralName;
 using Elastos::Core::Object;
+using Elastos::Math::IBigInteger;
+using Elastos::Utility::IDate;
 
 namespace Org {
 namespace Apache {
@@ -24,59 +28,59 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI ToString(
-        /* [out] */ String * pStr);
+        /* [out] */ String* pStr);
 
     CARAPI GetAccuracy(
-        /* [out, callee] */ ArrayOf<Int32> ** ppAccuracy);
+        /* [out, callee] */ ArrayOf<Int32>** ppAccuracy);
 
     CARAPI GetExtensions(
-        /* [out] */ Org::Apache::Harmony::Security::X509::IExtensions ** ppExtensions);
+        /* [out] */ IExtensions** ppExtensions);
 
     CARAPI GetGenTime(
-        /* [out] */ Elastos::Utility::IDate ** ppDate);
+        /* [out] */ IDate** ppDate);
 
     CARAPI GetMessageImprint(
-        /* [out] */ Org::Apache::Harmony::Security::X509::Tsp::IMessageImprint ** ppMessageImprint);
+        /* [out] */ IMessageImprint** ppMessageImprint);
 
     CARAPI GetNonce(
-        /* [out] */ Elastos::Math::IBigInteger ** ppNonce);
+        /* [out] */ IBigInteger** ppNonce);
 
     CARAPI GetOrdering(
-        /* [out] */ Boolean * pOrdering);
+        /* [out] */ Boolean* pOrdering);
 
     CARAPI GetPolicy(
-        /* [out] */ String * pPolicy);
+        /* [out] */ String* pPolicy);
 
     CARAPI GetSerialNumber(
-        /* [out] */ Elastos::Math::IBigInteger ** ppSerialNumber);
+        /* [out] */ IBigInteger** ppSerialNumber);
 
     CARAPI GetTsa(
-        /* [out] */ Org::Apache::Harmony::Security::X509::IGeneralName ** ppTsa);
+        /* [out] */ IGeneralName** ppTsa);
 
     CARAPI GetVersion(
-        /* [out] */ Int32 * pVer);
+        /* [out] */ Int32* pVer);
 
     CARAPI constructor(
         /* [in] */ Int32 ver,
         /* [in] */ const String& policy,
-        /* [in] */ Org::Apache::Harmony::Security::X509::Tsp::IMessageImprint * pMessageImprint,
-        /* [in] */ Elastos::Math::IBigInteger * pSerialNumber,
-        /* [in] */ Elastos::Utility::IDate * pGenTime,
-        /* [in] */ ArrayOf<Int32> * pAccuracy,
+        /* [in] */ IMessageImprint* pMessageImprint,
+        /* [in] */ IBigInteger* pSerialNumber,
+        /* [in] */ IDate* pGenTime,
+        /* [in] */ ArrayOf<Int32>* pAccuracy,
         /* [in] */ Boolean ordering,
-        /* [in] */ Elastos::Math::IBigInteger * pNonce,
-        /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralName * pTsa,
-        /* [in] */ Org::Apache::Harmony::Security::X509::IExtensions * pExtensions);
+        /* [in] */ IBigInteger* pNonce,
+        /* [in] */ IGeneralName* pTsa,
+        /* [in] */ IExtensions* pExtensions);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
-}
+} //namespace Tsp
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_TSP_CTSTINFO_H__

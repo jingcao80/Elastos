@@ -1,5 +1,5 @@
 
-#include "CIssuingDistributionPointHelper.h"
+#include "org/apache/harmony/security/x509/CIssuingDistributionPointHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -12,23 +12,22 @@ CAR_SINGLETON_IMPL(CIssuingDistributionPointHelper)
 CAR_INTERFACE_IMPL(CIssuingDistributionPointHelper, Singleton, IIssuingDistributionPointHelper)
 
 ECode CIssuingDistributionPointHelper::Decode(
-    /* [in] */ ArrayOf<Byte> * pEncoding,
-    /* [out] */ Org::Apache::Harmony::Security::X509::IIssuingDistributionPoint ** ppObject)
+    /* [in] */ ArrayOf<Byte>* pEncoding,
+    /* [out] */ IIssuingDistributionPoint** ppObject)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CIssuingDistributionPointHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)
+    /* [out] */ IASN1Type** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

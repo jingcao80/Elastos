@@ -32,7 +32,7 @@ module
      * @ Involve
      * interface Elastos.Security.Cert.IExtension
      */
-    interface IExtension {
+    interface IX509Extension {
         // critical constants
         const Boolean CRITICAL = TRUE;
         const Boolean NON_CRITICAL = FALSE;

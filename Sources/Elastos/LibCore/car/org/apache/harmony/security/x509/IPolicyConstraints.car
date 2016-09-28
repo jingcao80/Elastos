@@ -31,7 +31,12 @@ module
      *
      * @see org.apache.harmony.security.x509.GeneralSubtree
      * @see org.apache.harmony.security.x509.GeneralName
+     *
+     * @ invoke interface IExtensionValue
      */
+
+    interface IPolicyConstraints {
+    }
 
     interface IPolicyConstraintsHelper {
         /**

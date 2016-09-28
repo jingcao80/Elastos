@@ -1,5 +1,5 @@
 
-#include "CDistributionPointName.h"
+#include "org/apache/harmony/security/x509/CDistributionPointName.h"
 
 namespace Org {
 namespace Apache {
@@ -12,7 +12,7 @@ CAR_OBJECT_IMPL(CDistributionPointName)
 CAR_INTERFACE_IMPL(CDistributionPointName, Object, IDistributionPointName)
 
 ECode CDistributionPointName::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
@@ -20,22 +20,21 @@ ECode CDistributionPointName::DumpValue(
 }
 
 ECode CDistributionPointName::constructor(
-    /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralNames * pFullName)
+    /* [in] */ IGeneralNames* pFullName)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CDistributionPointName::constructor(
-    /* [in] */ Org::Apache::Harmony::Security::X501::IName * pNameRelativeToCRLIssuer)
+    /* [in] */ IName* pNameRelativeToCRLIssuer)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

@@ -3,7 +3,12 @@ TARGET_NAME= x509
 TARGET_TYPE= lib
 
 INCLUDES += ../../
-INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Security/X509
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security
 
 SOURCES = CAccessDescription.cpp
 SOURCES += CAccessDescriptionHelper.cpp
@@ -73,8 +78,8 @@ SOURCES += CReasonCode.cpp
 SOURCES += CReasonCodeHelper.cpp
 SOURCES += CReasonFlags.cpp
 SOURCES += CReasonFlagsHelper.cpp
-SOURCES += CRevokedCertificate.cpp
-SOURCES += CRevokedCertificateHelper.cpp
+#SOURCES += CRevokedCertificate.cpp
+#SOURCES += CRevokedCertificateHelper.cpp
 SOURCES += CSubjectKeyIdentifier.cpp
 SOURCES += CSubjectKeyIdentifierHelper.cpp
 SOURCES += CSubjectPublicKeyInfo.cpp

@@ -6,6 +6,10 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
+using Elastos::Math::IBigInteger;
+using Elastos::Utility::IDate;
+using Elastosx::Security::Auth::X500::IX500Principal;
 
 namespace Org {
 namespace Apache {
@@ -23,44 +27,44 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetCrlEntryExtensions(
-        /* [out] */ Org::Apache::Harmony::Security::X509::IExtensions ** ppExtensions);
+        /* [out] */ IExtensions** ppExtensions);
 
     CARAPI GetUserCertificate(
-        /* [out] */ Elastos::Math::IBigInteger ** ppCertificate);
+        /* [out] */ IBigInteger** ppCertificate);
 
     CARAPI GetRevocationDate(
-        /* [out] */ Elastos::Utility::IDate ** ppDate);
+        /* [out] */ IDate** ppDate);
 
     CARAPI GetIssuer(
-        /* [out] */ Elastosx::Security::Auth::X500::IX500Principal ** ppIssuer);
+        /* [out] */ IX500Principal** ppIssuer);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI Equals(
-        /* [in] */ IInterface * pRc,
-        /* [out] */ Boolean * pResult);
+        /* [in] */ IInterface* pRc,
+        /* [out] */ Boolean* pResult);
 
     CARAPI GetHashCode(
-        /* [out] */ Int32 * pHashCode);
+        /* [out] */ Int32* pHashCode);
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb,
+        /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
     CARAPI constructor(
-        /* [in] */ Elastos::Math::IBigInteger * pUserCertificate,
-        /* [in] */ Elastos::Utility::IDate * pRevocationDate,
-        /* [in] */ Org::Apache::Harmony::Security::X509::IExtensions * pCrlEntryExtensions);
+        /* [in] */ IBigInteger* pUserCertificate,
+        /* [in] */ IDate* pRevocationDate,
+        /* [in] */ IExtensions* pCrlEntryExtensions);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CREVOKEDCERTIFICATE_H__

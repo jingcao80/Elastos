@@ -6,10 +6,22 @@ module
     namespace Harmony {
     namespace Security {
     namespace Asn1 {
-s
+
+    /**
+     * This class represents ASN.1 Bitstring type.
+     *
+     * @see <a href="http://asn1.elibel.tm.fr/en/standards/index.htm">ASN.1</a>
+     *
+     * @ invoke interface IASN1StringType
+     * @ invoke interface IASN1Type
+     * @ invoke interface IASN1Constants
+     */
+    interface IASN1BitString {
+    }
+
     interface IASN1BitStringHelper {
         GetInstance(
-            [out] IASN1Type** instance);
+            [out] IASN1BitString** instance);
     }
 
     } // namespace Asn1

@@ -1,5 +1,5 @@
 
-#include "CCertificatePolicies.h"
+#include "org/apache/harmony/security/x509/CCertificatePolicies.h"
 
 namespace Org {
 namespace Apache {
@@ -9,40 +9,40 @@ namespace X509 {
 
 CAR_OBJECT_IMPL(CCertificatePolicies)
 
-CAR_INTERFACE_IMPL(CCertificatePolicies, Object, ICertificatePolicies)
+CAR_INTERFACE_IMPL_2(CCertificatePolicies, Object, ICertificatePolicies, IExtensionValue)
 
 ECode CCertificatePolicies::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncode)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CCertificatePolicies::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CCertificatePolicies::DumpValueEx(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+ECode CCertificatePolicies::DumpValue(
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CCertificatePolicies::GetPolicyInformations(
-    /* [out] */ Elastos::Utility::IList ** ppInfomations)
+    /* [out] */ IList** ppInfomations)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CCertificatePolicies::AddPolicyInformation(
-    /* [in] */ Org::Apache::Harmony::Security::X509::IPolicyInformation * pPolicyInformation,
-    /* [out] */ Org::Apache::Harmony::Security::X509::ICertificatePolicies ** ppPolicies)
+    /* [in] */ IPolicyInformation* pPolicyInformation,
+    /* [out] */ ICertificatePolicies** ppPolicies)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -54,9 +54,8 @@ ECode CCertificatePolicies::constructor()
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

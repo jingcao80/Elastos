@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
 
 namespace Org {
 namespace Apache {
@@ -23,42 +24,42 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetAlgorithm(
-        /* [out] */ String * pAlgorithm);
+        /* [out] */ String* pAlgorithm);
 
     CARAPI GetAlgorithmName(
-        /* [out] */ String * pAlgorithmName);
+        /* [out] */ String* pAlgorithmName);
 
     CARAPI GetParameters(
-        /* [out, callee] */ ArrayOf<Byte> ** ppParameters);
+        /* [out, callee] */ ArrayOf<Byte>** ppParameters);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI Equals(
-        /* [in] */ IInterface * pAi,
-        /* [out] */ Boolean * pResult);
+        /* [in] */ IInterface* pAi,
+        /* [out] */ Boolean* pResult);
 
     CARAPI GetHashCode(
-        /* [out] */ Int32 * pResult);
+        /* [out] */ Int32* pResult);
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb);
+        /* [in] */ IStringBuilder* pSb);
 
     CARAPI constructor(
         /* [in] */ const String& algorithm);
 
     CARAPI constructor(
         /* [in] */ const String& algorithm,
-        /* [in] */ ArrayOf<Byte> * pParameters);
+        /* [in] */ ArrayOf<Byte>* pParameters);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CALGORITHMIDENTIFIER_H__

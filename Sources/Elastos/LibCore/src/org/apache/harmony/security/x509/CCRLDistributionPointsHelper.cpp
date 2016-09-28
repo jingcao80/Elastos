@@ -1,5 +1,5 @@
 
-#include "CCRLDistributionPointsHelper.h"
+#include "org/apache/harmony/security/x509/CCRLDistributionPointsHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -13,29 +13,28 @@ CAR_INTERFACE_IMPL(CCRLDistributionPointsHelper, Singleton, ICRLDistributionPoin
 
 ECode CCRLDistributionPointsHelper::Decode(
     /* [in] */ ArrayOf<Byte> * pEncoding,
-    /* [out] */ Org::Apache::Harmony::Security::X509::ICRLDistributionPoints ** ppCrlDistributionPoints)
+    /* [out] */ ICRLDistributionPoints** ppCrlDistributionPoints)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CCRLDistributionPointsHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)
+    /* [out] */ IASN1Type** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CCRLDistributionPointsHelper::SetASN1(
-    /* [in] */ Org::Apache::Harmony::Security::Asn1::IASN1Type * pAsn1)
+    /* [in] */ IASN1Type* pAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

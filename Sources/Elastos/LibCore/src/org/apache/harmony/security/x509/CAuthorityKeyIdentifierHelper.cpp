@@ -1,5 +1,5 @@
 
-#include "CAuthorityKeyIdentifierHelper.h"
+#include "org/apache/harmony/security/x509/CAuthorityKeyIdentifierHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -13,29 +13,28 @@ CAR_INTERFACE_IMPL(CAuthorityKeyIdentifierHelper, Singleton, IAuthorityKeyIdenti
 
 ECode CAuthorityKeyIdentifierHelper::Decode(
     /* [in] */ ArrayOf<Byte> * pEncoding,
-    /* [out] */ Org::Apache::Harmony::Security::X509::IAuthorityKeyIdentifier ** ppKeyIdentifier)
+    /* [out] */ IAuthorityKeyIdentifier** ppKeyIdentifier)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CAuthorityKeyIdentifierHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)
+    /* [out] */ IASN1Type** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CAuthorityKeyIdentifierHelper::SetASN1(
-    /* [in] */ Org::Apache::Harmony::Security::Asn1::IASN1Type * pAsn1)
+    /* [in] */ IASN1Type* pAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

@@ -1,5 +1,5 @@
 
-#include "CRevokedCertificate.h"
+#include "org/apache/harmony/security/x509/CRevokedCertificate.h"
 
 namespace Org {
 namespace Apache {
@@ -12,57 +12,57 @@ CAR_OBJECT_IMPL(CRevokedCertificate)
 CAR_INTERFACE_IMPL(CRevokedCertificate, Object, IRevokedCertificate)
 
 ECode CRevokedCertificate::GetCrlEntryExtensions(
-    /* [out] */ Org::Apache::Harmony::Security::X509::IExtensions ** ppExtensions)
+    /* [out] */ IExtensions** ppExtensions)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CRevokedCertificate::GetUserCertificate(
-    /* [out] */ Elastos::Math::IBigInteger ** ppCertificate)
+    /* [out] */ IBigInteger** ppCertificate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CRevokedCertificate::GetRevocationDate(
-    /* [out] */ Elastos::Utility::IDate ** ppDate)
+    /* [out] */ IDate** ppDate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CRevokedCertificate::GetIssuer(
-    /* [out] */ Elastosx::Security::Auth::X500::IX500Principal ** ppIssuer)
+    /* [out] */ IX500Principal** ppIssuer)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CRevokedCertificate::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CRevokedCertificate::Equals(
-    /* [in] */ IInterface * pRc,
-    /* [out] */ Boolean * pResult)
+    /* [in] */ IInterface* pRc,
+    /* [out] */ Boolean* pResult)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CRevokedCertificate::GetHashCode(
-    /* [out] */ Int32 * pHashCode)
+    /* [out] */ Int32* pHashCode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CRevokedCertificate::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
@@ -70,17 +70,16 @@ ECode CRevokedCertificate::DumpValue(
 }
 
 ECode CRevokedCertificate::constructor(
-    /* [in] */ Elastos::Math::IBigInteger * pUserCertificate,
-    /* [in] */ Elastos::Utility::IDate * pRevocationDate,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IExtensions * pCrlEntryExtensions)
+    /* [in] */ EIBigInteger* pUserCertificate,
+    /* [in] */ IDate* pRevocationDate,
+    /* [in] */ IExtensions* pCrlEntryExtensions)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

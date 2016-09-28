@@ -1,5 +1,5 @@
 
-#include "CExtendedKeyUsage.h"
+#include "org/apache/harmony/security/x509/CExtendedKeyUsage.h"
 
 namespace Org {
 namespace Apache {
@@ -9,47 +9,46 @@ namespace X509 {
 
 CAR_OBJECT_IMPL(CExtendedKeyUsage)
 
-CAR_INTERFACE_IMPL(CExtendedKeyUsage, Object, IExtendedKeyUsage)
+CAR_INTERFACE_IMPL_2(CExtendedKeyUsage, Object, IExtendedKeyUsage, IExtensionValue)
 
 ECode CExtendedKeyUsage::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncode)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CExtendedKeyUsage::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CExtendedKeyUsage::DumpValueEx(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+ECode CExtendedKeyUsage::DumpValue(
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CExtendedKeyUsage::GetExtendedKeyUsage(
-    /* [out] */ Elastos::Utility::IList ** ppExtendedKeyUsage)
+    /* [out] */ IList** ppExtendedKeyUsage)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CExtendedKeyUsage::constructor(
-    /* [in] */ ArrayOf<Byte> * pEncoding)
+    /* [in] */ ArrayOf<Byte>* pEncoding)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

@@ -13,8 +13,10 @@ module
      * (OID is 2.5.29.18).<br>
      * For more information about these extensions see RFC 3280
      * at http://www.ietf.org/rfc/rfc3280.txt
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface IAlternativeName extends Org.Apache.Harmony.Security.X509.IExtensionValue {
+    interface IAlternativeName {
         // constants indicating which alternative name is presented
         // by this object
         const Boolean ISSUER = FALSE;

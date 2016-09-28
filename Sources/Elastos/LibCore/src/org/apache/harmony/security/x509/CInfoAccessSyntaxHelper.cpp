@@ -1,5 +1,5 @@
 
-#include "CInfoAccessSyntaxHelper.h"
+#include "org/apache/harmony/security/x509/CInfoAccessSyntaxHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -12,23 +12,22 @@ CAR_SINGLETON_IMPL(CInfoAccessSyntaxHelper)
 CAR_INTERFACE_IMPL(CInfoAccessSyntaxHelper, Singleton, IInfoAccessSyntaxHelper)
 
 ECode CInfoAccessSyntaxHelper::Decode(
-    /* [in] */ ArrayOf<Byte> * pEncoding,
-    /* [out] */ Org::Apache::Harmony::Security::X509::IInfoAccessSyntax ** ppSyntax)
+    /* [in] */ ArrayOf<Byte>* pEncoding,
+    /* [out] */ IInfoAccessSyntax** ppSyntax)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CInfoAccessSyntaxHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)
+    /* [out] */ IASN1Type** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

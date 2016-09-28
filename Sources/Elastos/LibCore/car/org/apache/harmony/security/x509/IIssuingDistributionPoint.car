@@ -24,8 +24,10 @@ module
      *   }
      * </pre>
      * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface IIssuingDistributionPoint extends IExtensionValue {
+    interface IIssuingDistributionPoint {
         /**
          * Sets the value of onlyContainsUserCerts field of the structure.
          */

@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::IList;
 
 namespace Org {
 namespace Apache {
@@ -23,22 +24,22 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetSubtrees(
-        /* [out] */ Elastos::Utility::IList ** ppSubtrees);
+        /* [out] */ IList** ppSubtrees);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI constructor(
-        /* [in] */ Elastos::Utility::IList * pGeneralSubtrees);
+        /* [in] */ IList* pGeneralSubtrees);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CGENERALSUBTREES_H__

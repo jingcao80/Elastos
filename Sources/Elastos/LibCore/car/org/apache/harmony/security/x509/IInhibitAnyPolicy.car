@@ -18,8 +18,10 @@ module
      *  SkipCerts ::= INTEGER (0..MAX)
      * </pre>
      * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt).
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface IInhibitAnyPolicy extends IExtensionValue {}
+    interface IInhibitAnyPolicy {}
 
     } // namespace X509
     } // namespace Security

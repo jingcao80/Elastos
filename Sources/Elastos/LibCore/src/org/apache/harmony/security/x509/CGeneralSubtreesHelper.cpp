@@ -1,5 +1,5 @@
 
-#include "CGeneralSubtreesHelper.h"
+#include "org/apache/harmony/security/x509/CGeneralSubtreesHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -12,15 +12,14 @@ CAR_SINGLETON_IMPL(CGeneralSubtreesHelper)
 CAR_INTERFACE_IMPL(CGeneralSubtreesHelper, Singleton, IGeneralSubtreesHelper)
 
 ECode CGeneralSubtreesHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)
+    /* [out] */ IASN1Type** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

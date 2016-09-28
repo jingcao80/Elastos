@@ -1,5 +1,5 @@
 
-#include "CIssuingDistributionPoint.h"
+#include "org/apache/harmony/security/x509/CIssuingDistributionPoint.h"
 
 namespace Org {
 namespace Apache {
@@ -9,25 +9,25 @@ namespace X509 {
 
 CAR_OBJECT_IMPL(CIssuingDistributionPoint)
 
-CAR_INTERFACE_IMPL(CIssuingDistributionPoint, Object, IIssuingDistributionPoint)
+CAR_INTERFACE_IMPL_2(CIssuingDistributionPoint, Object, IIssuingDistributionPoint, IExtensionValue)
 
 ECode CIssuingDistributionPoint::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncode)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CIssuingDistributionPoint::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CIssuingDistributionPoint::DumpValueEx(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+ECode CIssuingDistributionPoint::DumpValue(
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -62,16 +62,15 @@ ECode CIssuingDistributionPoint::SetOnlyContainsAttributeCerts(
 }
 
 ECode CIssuingDistributionPoint::constructor(
-    /* [in] */ Org::Apache::Harmony::Security::X509::IDistributionPointName * pDistributionPoint,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IReasonFlags * pOnlySomeReasons)
+    /* [in] */ IDistributionPointName* pDistributionPoint,
+    /* [in] */ IReasonFlags* pOnlySomeReasons)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

@@ -18,8 +18,10 @@ module
      *   invalidityDate ::=  GeneralizedTime
      * </pre>
      * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface IInvalidityDate extends IExtensionValue {
+    interface IInvalidityDate {
         /**
          * Returns the invalidity date.
          */

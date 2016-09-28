@@ -8,15 +8,9 @@ module
 
     /**
      *
-     * @ invoke interface IPrivateKey
+     * @ invoke interface IIdentityScope
      */
-    [deprecated]
-    interface IPrivateKeyImpl {
-        SetAlgorithm(
-            [in] String algorithm);
-
-        SetEncoding(
-            [in] ArrayOf<Byte>* encoding);
+    interface ISystemScope {
     }
 
     } // namespace Security

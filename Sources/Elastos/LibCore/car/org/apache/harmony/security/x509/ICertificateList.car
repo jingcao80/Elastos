@@ -39,9 +39,6 @@ module
         GetSignatureValue(
             [out, callee] ArrayOf<Byte>* signatureValue);
 
-        ToString(
-            [out] String* str);
-
         /**
          * Returns ASN.1 encoded form of this X.509 TBSCertList value.
          */

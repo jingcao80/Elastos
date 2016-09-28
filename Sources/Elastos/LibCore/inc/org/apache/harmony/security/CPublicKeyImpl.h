@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Security::IPublicKey;
 
 namespace Org {
 namespace Apache {
@@ -15,6 +16,7 @@ namespace Security {
 CarClass(CPublicKeyImpl)
     , public Object
     , public IPublicKeyImpl
+    , public IPublicKey
 {
 public:
     CAR_OBJECT_DECL()
@@ -22,19 +24,19 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetAlgorithm(
-        /* [out] */ String * pAlgorithm);
+        /* [out] */ String* pAlgorithm);
 
     CARAPI GetFormat(
-        /* [out] */ String * pFormat);
+        /* [out] */ String* pFormat);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI SetAlgorithm(
         /* [in] */ const String& algorithm);
 
     CARAPI SetEncoding(
-        /* [in] */ ArrayOf<Byte> * pEncoding);
+        /* [in] */ ArrayOf<Byte>* pEncoding);
 
     CARAPI constructor(
         /* [in] */ const String& algorithm);
@@ -43,9 +45,9 @@ private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_CPUBLICKEYIMPL_H__

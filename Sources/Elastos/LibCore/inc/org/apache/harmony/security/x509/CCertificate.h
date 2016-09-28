@@ -23,30 +23,30 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetTbsCertificate(
-        /* [out] */ Org::Apache::Harmony::Security::X509::ITBSCertificate ** ppTbsCertificate);
+        /* [out] */ ITBSCertificate** ppTbsCertificate);
 
     CARAPI GetSignatureValue(
-        /* [out, callee] */ ArrayOf<Byte> ** ppSignatureValue);
+        /* [out, callee] */ ArrayOf<Byte>** ppSignatureValue);
 
     CARAPI ToString(
-        /* [out] */ String * pStr);
+        /* [out] */ String* pStr);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncode);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncode);
 
     CARAPI constructor(
-        /* [in] */ Org::Apache::Harmony::Security::X509::ITBSCertificate * pTbsCertificate,
-        /* [in] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier * pSignatureAlgorithm,
-        /* [in] */ ArrayOf<Byte> * pSignatureValue);
+        /* [in] */ ITBSCertificate* pTbsCertificate,
+        /* [in] */ IAlgorithmIdentifier* pSignatureAlgorithm,
+        /* [in] */ ArrayOf<Byte>* pSignatureValue);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CCERTIFICATE_H__

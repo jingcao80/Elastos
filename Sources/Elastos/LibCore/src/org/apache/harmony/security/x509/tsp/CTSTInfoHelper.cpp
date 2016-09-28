@@ -1,5 +1,5 @@
 
-#include "CTSTInfoHelper.h"
+#include "org/apache/harmony/security/x509/tsp/CTSTInfoHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -13,37 +13,36 @@ CAR_SINGLETON_IMPL(CTSTInfoHelper)
 CAR_INTERFACE_IMPL(CTSTInfoHelper, Singleton, ITSTInfoHelper)
 
 ECode CTSTInfoHelper::GetACCURACY(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAccuracy)
+    /* [out] */ IASN1Sequence** ppAccuracy)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfoHelper::SetACCURACY(
-    /* [in] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence * pAccuracy)
+    /* [in] */ IASN1Sequence* pAccuracy)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfoHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1)
+    /* [out] */ IASN1Sequence** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfoHelper::SetASN1(
-    /* [in] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence * pAsn1)
+    /* [in] */ IASN1Sequence* pAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-}
-
+} // namespace Tsp
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

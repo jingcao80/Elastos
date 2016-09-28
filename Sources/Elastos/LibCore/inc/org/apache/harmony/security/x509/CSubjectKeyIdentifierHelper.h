@@ -23,17 +23,17 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI Decode(
-        /* [in] */ ArrayOf<Byte> * pEncoding,
-        /* [out] */ Org::Apache::Harmony::Security::X509::ISubjectKeyIdentifier ** ppIdentifier);
+        /* [in] */ ArrayOf<Byte>* pEncoding,
+        /* [out] */ ISubjectKeyIdentifier** ppIdentifier);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CSUBJECTKEYIDENTIFIERHELPER_H__

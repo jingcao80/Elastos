@@ -6,6 +6,8 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
+using Elastos::Utility::IList;
 
 namespace Org {
 namespace Apache {
@@ -16,6 +18,7 @@ namespace X509 {
 CarClass(CCertificatePolicies)
     , public Object
     , public ICertificatePolicies
+    , public IExtensionValue
 {
 public:
     CAR_OBJECT_DECL()
@@ -23,21 +26,21 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncode);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncode);
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb,
+        /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
-    CARAPI DumpValueEx(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb);
+    CARAPI DumpValue(
+        /* [in] */ IStringBuilder* pSb);
 
     CARAPI GetPolicyInformations(
-        /* [out] */ Elastos::Utility::IList ** ppInfomations);
+        /* [out] */ IList** ppInfomations);
 
     CARAPI AddPolicyInformation(
-        /* [in] */ Org::Apache::Harmony::Security::X509::IPolicyInformation * pPolicyInformation,
-        /* [out] */ Org::Apache::Harmony::Security::X509::ICertificatePolicies ** ppPolicies);
+        /* [in] */ IPolicyInformation* pPolicyInformation,
+        /* [out] */ ICertificatePolicies** ppPolicies);
 
     CARAPI constructor();
 
@@ -45,10 +48,10 @@ private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CCERTIFICATEPOLICIES_H__

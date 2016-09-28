@@ -1,5 +1,5 @@
 
-#include "CBasicConstraintsHelper.h"
+#include "org/apache/harmony/security/x509/CBasicConstraintsHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -12,22 +12,21 @@ CAR_SINGLETON_IMPL(CBasicConstraintsHelper)
 CAR_INTERFACE_IMPL(CBasicConstraintsHelper, Singleton, IBasicConstraintsHelper)
 
 ECode CBasicConstraintsHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)
+    /* [out] */ IASN1Type** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CBasicConstraintsHelper::SetASN1(
-    /* [in] */ Org::Apache::Harmony::Security::Asn1::IASN1Type * pAsn1)
+    /* [in] */ IASN1Type* pAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

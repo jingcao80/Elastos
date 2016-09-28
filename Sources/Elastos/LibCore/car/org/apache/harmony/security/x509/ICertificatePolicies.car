@@ -23,8 +23,10 @@ module
      * <pre>
      *   certificatePolicies ::= SEQUENCE SIZE (1..MAX) OF PolicyInformation
      * </pre>
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface ICertificatePolicies extends IExtensionValue {
+    interface ICertificatePolicies {
         /**
          * Returns the values of policyInformation field of the structure.
          */

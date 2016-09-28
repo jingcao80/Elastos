@@ -1,6 +1,8 @@
 
 #include "CPrivateKeyImpl.h"
 
+using Elastos::Security::EIID_IPrivateKey;
+
 namespace Org {
 namespace Apache {
 namespace Harmony {
@@ -8,7 +10,7 @@ namespace Security {
 
 CAR_OBJECT_IMPL(CPrivateKeyImpl)
 
-CAR_INTERFACE_IMPL(CPrivateKeyImpl, Object, IPrivateKeyImpl)
+CAR_INTERFACE_IMPL_2(CPrivateKeyImpl, Object, IPrivateKeyImpl, IPrivateKey)
 
 ECode CPrivateKeyImpl::GetAlgorithm(
     /* [out] */ String * pAlgorithm)
@@ -52,8 +54,7 @@ ECode CPrivateKeyImpl::constructor(
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

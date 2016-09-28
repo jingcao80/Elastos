@@ -43,8 +43,10 @@ module
      *        aACompromise            (8)
      *  }
      * </pre>
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface ICRLDistributionPoints extends IExtensionValue {}
+    interface ICRLDistributionPoints {}
 
     [deprecated]
     interface ICRLDistributionPointsHelper {

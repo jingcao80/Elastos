@@ -1,5 +1,5 @@
 
-#include "CPrivateKeyUsagePeriod.h"
+#include "org/apache/harmony/security/x509/CPrivateKeyUsagePeriod.h"
 
 namespace Org {
 namespace Apache {
@@ -12,37 +12,36 @@ CAR_OBJECT_IMPL(CPrivateKeyUsagePeriod)
 CAR_INTERFACE_IMPL(CPrivateKeyUsagePeriod, Object, IPrivateKeyUsagePeriod)
 
 ECode CPrivateKeyUsagePeriod::GetNotBefore(
-    /* [out] */ Elastos::Utility::IDate ** ppNotBefore)
+    /* [out] */ IDate** ppNotBefore)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CPrivateKeyUsagePeriod::GetNotAfter(
-    /* [out] */ Elastos::Utility::IDate ** ppNotAfter)
+    /* [out] */ IDate** ppNotAfter)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CPrivateKeyUsagePeriod::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CPrivateKeyUsagePeriod::constructor(
-    /* [in] */ Elastos::Utility::IDate * pNotBeforeDate,
-    /* [in] */ Elastos::Utility::IDate * pNotAfterDate)
+    /* [in] */ IDate* pNotBeforeDate,
+    /* [in] */ IDate* pNotAfterDate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

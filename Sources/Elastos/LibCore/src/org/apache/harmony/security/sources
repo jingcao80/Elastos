@@ -3,13 +3,20 @@ TARGET_NAME= org.apache.harmony.security
 TARGET_TYPE= lib
 
 INCLUDES += ../
-INCLUDES += $(MAKEDIR)/../../../../../inc/Org/Apache/Harmony/Security
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../inc/org/apache/harmony/security
 
-#SOURCES = CPrivateKeyImpl.cpp
-#SOURCES += CPublicKeyImpl.cpp
-#SOURCES += CSystemScope.cpp
+SOURCES = CPrivateKeyImpl.cpp
+SOURCES += CPublicKeyImpl.cpp
+SOURCES += CSystemScope.cpp
 
 ELASTOS_LIBS += asn1/asn1.lib
 ELASTOS_LIBS += fortress/fortress.lib
 ELASTOS_LIBS += pkcs7/pkcs7.lib
 ELASTOS_LIBS += utils/utils.lib
+ELASTOS_LIBS += x509/tsp/tsp.lib
+ELASTOS_LIBS += x509/x509.lib

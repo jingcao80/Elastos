@@ -97,7 +97,7 @@ module
         /**
          * Returns the value of issuer field of the structure.
          */
-        GetIssuerEx(
+        GetIssuer(
             [out] IName** issuer);
 
         /**

@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Security::IPublicKey;
 
 namespace Org {
 namespace Apache {
@@ -23,34 +24,34 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetAlgorithmIdentifier(
-        /* [out] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier ** ppAlgorithmIdentifier);
+        /* [out] */ IAlgorithmIdentifier** ppAlgorithmIdentifier);
 
     CARAPI GetSubjectPublicKey(
-        /* [out, callee] */ ArrayOf<Byte> ** ppPublicKey);
+        /* [out, callee] */ ArrayOf<Byte>** ppPublicKey);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI GetPublicKey(
-        /* [out] */ Elastos::Security::IPublicKey ** ppPublicKey);
+        /* [out] */ IPublicKey** ppPublicKey);
 
     CARAPI constructor(
-        /* [in] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier * pAlgID,
-        /* [in] */ ArrayOf<Byte> * pSubjectPublicKey);
+        /* [in] */ IAlgorithmIdentifier* pAlgID,
+        /* [in] */ ArrayOf<Byte>* pSubjectPublicKey);
 
     CARAPI constructor(
-        /* [in] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier * pAlgID,
-        /* [in] */ ArrayOf<Byte> * pSubjectPublicKey,
+        /* [in] */ IAlgorithmIdentifier* pAlgID,
+        /* [in] */ ArrayOf<Byte>* pSubjectPublicKey,
         /* [in] */ Int32 unused);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CSUBJECTPUBLICKEYINFO_H__

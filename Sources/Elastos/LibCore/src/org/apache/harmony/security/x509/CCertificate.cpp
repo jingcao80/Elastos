@@ -1,5 +1,5 @@
 
-#include "CCertificate.h"
+#include "org/apache/harmony/security/x509/CCertificate.h"
 
 namespace Org {
 namespace Apache {
@@ -12,14 +12,14 @@ CAR_OBJECT_IMPL(CCertificate)
 CAR_INTERFACE_IMPL(CCertificate, Object, ICertificate)
 
 ECode CCertificate::GetTbsCertificate(
-    /* [out] */ Org::Apache::Harmony::Security::X509::ITBSCertificate ** ppTbsCertificate)
+    /* [out] */ ITBSCertificate** ppTbsCertificate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CCertificate::GetSignatureValue(
-    /* [out, callee] */ ArrayOf<Byte> ** ppSignatureValue)
+    /* [out, callee] */ ArrayOf<Byte>** ppSignatureValue)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -33,24 +33,23 @@ ECode CCertificate::ToString(
 }
 
 ECode CCertificate::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncode)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CCertificate::constructor(
-    /* [in] */ Org::Apache::Harmony::Security::X509::ITBSCertificate * pTbsCertificate,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier * pSignatureAlgorithm,
-    /* [in] */ ArrayOf<Byte> * pSignatureValue)
+    /* [in] */ ITBSCertificate* pTbsCertificate,
+    /* [in] */ IAlgorithmIdentifier* pSignatureAlgorithm,
+    /* [in] */ ArrayOf<Byte>* pSignatureValue)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

@@ -1,5 +1,5 @@
 
-#include "CAlgorithmIdentifier.h"
+#include "org/apache/harmony/security/x509/CAlgorithmIdentifier.h"
 
 namespace Org {
 namespace Apache {
@@ -12,50 +12,50 @@ CAR_OBJECT_IMPL(CAlgorithmIdentifier)
 CAR_INTERFACE_IMPL(CAlgorithmIdentifier, Object, IAlgorithmIdentifier)
 
 ECode CAlgorithmIdentifier::GetAlgorithm(
-    /* [out] */ String * pAlgorithm)
+    /* [out] */ String* pAlgorithm)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CAlgorithmIdentifier::GetAlgorithmName(
-    /* [out] */ String * pAlgorithmName)
+    /* [out] */ String* pAlgorithmName)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CAlgorithmIdentifier::GetParameters(
-    /* [out, callee] */ ArrayOf<Byte> ** ppParameters)
+    /* [out, callee] */ ArrayOf<Byte>** ppParameters)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CAlgorithmIdentifier::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CAlgorithmIdentifier::Equals(
-    /* [in] */ IInterface * pAi,
-    /* [out] */ Boolean * pResult)
+    /* [in] */ IInterface* pAi,
+    /* [out] */ Boolean* pResult)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CAlgorithmIdentifier::GetHashCode(
-    /* [out] */ Int32 * pResult)
+    /* [out] */ Int32* pResult)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CAlgorithmIdentifier::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -70,15 +70,14 @@ ECode CAlgorithmIdentifier::constructor(
 
 ECode CAlgorithmIdentifier::constructor(
     /* [in] */ const String& algorithm,
-    /* [in] */ ArrayOf<Byte> * pParameters)
+    /* [in] */ ArrayOf<Byte>* pParameters)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

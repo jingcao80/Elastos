@@ -7,10 +7,11 @@ module
     namespace Security {
 
     /**
-     * PublicKeyImpl
+     *
+     * @ invoke interface IPublicKey
      */
     [deprecated]
-    interface IPublicKeyImpl extends Elastos.Security.IPublicKey {
+    interface IPublicKeyImpl {
         SetAlgorithm(
             [in] String algorithm);
 

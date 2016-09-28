@@ -6,6 +6,11 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IList;
+using Elastos::Utility::ICollection;
+using Elastosx::Security::Auth::X500::IX500Principal;
 
 namespace Org {
 namespace Apache {
@@ -23,66 +28,66 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetSize(
-        /* [out] */ Int32 * pSize);
+        /* [out] */ Int32* pSize);
 
     CARAPI GetCriticalExtensions(
-        /* [out] */ Elastos::Utility::ISet ** ppExtensions);
+        /* [out] */ ISet** ppExtensions);
 
     CARAPI GetNonCriticalExtensions(
-        /* [out] */ Elastos::Utility::ISet ** ppExtensions);
+        /* [out] */ ISet** ppExtensions);
 
     CARAPI HasUnsupportedCritical(
-        /* [out] */ Boolean * pHasUnsupportedCritical);
+        /* [out] */ Boolean* pHasUnsupportedCritical);
 
     CARAPI GetExtensionByOID(
         /* [in] */ const String& oid,
-        /* [out] */ Org::Apache::Harmony::Security::X509::IExtension ** ppExtensionByOID);
+        /* [out] */ IX509Extension** ppExtensionByOID);
 
     CARAPI ValueOfKeyUsage(
-        /* [out, callee] */ ArrayOf<Boolean> ** ppValueOfKeyUsage);
+        /* [out, callee] */ ArrayOf<Boolean>** ppValueOfKeyUsage);
 
     CARAPI ValueOfExtendedKeyUsage(
-        /* [out] */ Elastos::Utility::IList ** ppValueOfExtendedKeyUsage);
+        /* [out] */ IList** ppValueOfExtendedKeyUsage);
 
     CARAPI ValueOfBasicConstrains(
-        /* [out] */ Int32 * pValueOfBasicConstrains);
+        /* [out] */ Int32* pValueOfBasicConstrains);
 
     CARAPI ValueOfSubjectAlternativeName(
-        /* [out] */ Elastos::Utility::ICollection ** ppValueOfSubjectAlternativeName);
+        /* [out] */ ICollection** ppValueOfSubjectAlternativeName);
 
     CARAPI ValueOfIssuerAlternativeName(
-        /* [out] */ Elastos::Utility::ICollection ** ppValueOfIssuerAlternativeName);
+        /* [out] */ ICollection** ppValueOfIssuerAlternativeName);
 
     CARAPI ValueOfCertificateIssuerExtension(
-        /* [out] */ Elastosx::Security::Auth::X500::IX500Principal ** ppValueOfCertificateIssuerExtension);
+        /* [out] */ IX500Principal** ppValueOfCertificateIssuerExtension);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI Equals(
-        /* [in] */ IInterface * pAi,
-        /* [out] */ Boolean * pResult);
+        /* [in] */ IInterface* pAi,
+        /* [out] */ Boolean* pResult);
 
     CARAPI GetHashCode(
-        /* [out] */ Int32 * pResult);
+        /* [out] */ Int32* pResult);
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb,
+        /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
     CARAPI constructor();
 
     CARAPI constructor(
-        /* [in] */ Elastos::Utility::IList * pExtensions);
+        /* [in] */ IList* pExtensions);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CEXTENSIONS_H__

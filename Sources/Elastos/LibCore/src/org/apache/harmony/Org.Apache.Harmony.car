@@ -1248,7 +1248,7 @@ module
             [in] ArrayOf<Int32>* extnID,
             [in] ArrayOf<Byte>* extnValue2);
 
-        interface IExtension;
+        interface IX509Extension;
     }
 
     singleton class CExtensionHelper {

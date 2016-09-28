@@ -42,9 +42,6 @@ module
      * "tsa [0] GeneralName OPTIONAL" is EXPLICIT and the word EXPLICIT is omitted.
      */
     interface ITSTInfo {
-        ToString(
-            [out] String* str);
-
         /**
          * @return Returns the accuracy.
          */

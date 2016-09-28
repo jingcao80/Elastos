@@ -20,8 +20,10 @@ module
      *  KeyIdentifier ::= OCTET STRING
      * </pre>
      * (as specified in RFC 3280 http://www.ietf.org/rfc/rfc3280.txt)
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface ISubjectKeyIdentifier extends IExtensionValue {
+    interface ISubjectKeyIdentifier {
         /**
          * The key identifier for this subject.
          */

@@ -1,5 +1,5 @@
 
-#include "CTSTInfo.h"
+#include "org/apache/harmony/security/x509/tsp/CTSTInfo.h"
 
 namespace Org {
 namespace Apache {
@@ -13,77 +13,77 @@ CAR_OBJECT_IMPL(CTSTInfo)
 CAR_INTERFACE_IMPL(CTSTInfo, Object, ITSTInfo)
 
 ECode CTSTInfo::ToString(
-    /* [out] */ String * pStr)
+    /* [out] */ String* pStr)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetAccuracy(
-    /* [out, callee] */ ArrayOf<Int32> ** ppAccuracy)
+    /* [out, callee] */ ArrayOf<Int32>** ppAccuracy)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetExtensions(
-    /* [out] */ Org::Apache::Harmony::Security::X509::IExtensions ** ppExtensions)
+    /* [out] */ IExtensions** ppExtensions)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetGenTime(
-    /* [out] */ Elastos::Utility::IDate ** ppDate)
+    /* [out] */ IDate** ppDate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetMessageImprint(
-    /* [out] */ Org::Apache::Harmony::Security::X509::Tsp::IMessageImprint ** ppMessageImprint)
+    /* [out] */ IMessageImprint** ppMessageImprint)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetNonce(
-    /* [out] */ Elastos::Math::IBigInteger ** ppNonce)
+    /* [out] */ IBigInteger** ppNonce)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetOrdering(
-    /* [out] */ Boolean * pOrdering)
+    /* [out] */ Boolean* pOrdering)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetPolicy(
-    /* [out] */ String * pPolicy)
+    /* [out] */ String* pPolicy)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetSerialNumber(
-    /* [out] */ Elastos::Math::IBigInteger ** ppSerialNumber)
+    /* [out] */ IBigInteger** ppSerialNumber)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetTsa(
-    /* [out] */ Org::Apache::Harmony::Security::X509::IGeneralName ** ppTsa)
+    /* [out] */ IGeneralName** ppTsa)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTSTInfo::GetVersion(
-    /* [out] */ Int32 * pVer)
+    /* [out] */ Int32* pVer)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -92,23 +92,22 @@ ECode CTSTInfo::GetVersion(
 ECode CTSTInfo::constructor(
     /* [in] */ Int32 ver,
     /* [in] */ const String& policy,
-    /* [in] */ Org::Apache::Harmony::Security::X509::Tsp::IMessageImprint * pMessageImprint,
-    /* [in] */ Elastos::Math::IBigInteger * pSerialNumber,
-    /* [in] */ Elastos::Utility::IDate * pGenTime,
-    /* [in] */ ArrayOf<Int32> * pAccuracy,
+    /* [in] */ IMessageImprint* pMessageImprint,
+    /* [in] */ IBigInteger* pSerialNumber,
+    /* [in] */ IDate* pGenTime,
+    /* [in] */ ArrayOf<Int32>* pAccuracy,
     /* [in] */ Boolean ordering,
-    /* [in] */ Elastos::Math::IBigInteger * pNonce,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralName * pTsa,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IExtensions * pExtensions)
+    /* [in] */ IBigInteger* pNonce,
+    /* [in] */ IGeneralName* pTsa,
+    /* [in] */ IExtensions* pExtensions)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-}
-
+} // namespace Tsp
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

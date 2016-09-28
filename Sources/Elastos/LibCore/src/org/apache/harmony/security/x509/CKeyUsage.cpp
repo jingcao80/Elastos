@@ -1,5 +1,5 @@
 
-#include "CKeyUsage.h"
+#include "org/apache/harmony/security/x509/CKeyUsage.h"
 
 namespace Org {
 namespace Apache {
@@ -9,47 +9,46 @@ namespace X509 {
 
 CAR_OBJECT_IMPL(CKeyUsage)
 
-CAR_INTERFACE_IMPL(CKeyUsage, Object, IKeyUsage)
+CAR_INTERFACE_IMPL_2(CKeyUsage, Object, IKeyUsage, IExtensionValue)
 
 ECode CKeyUsage::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncode)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CKeyUsage::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CKeyUsage::DumpValueEx(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+ECode CKeyUsage::DumpValue(
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CKeyUsage::GetKeyUsage(
-    /* [out, callee] */ ArrayOf<Boolean> ** ppKeyUsage)
+    /* [out, callee] */ ArrayOf<Boolean>** ppKeyUsage)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CKeyUsage::constructor(
-    /* [in] */ ArrayOf<Byte> * pEncoding)
+    /* [in] */ ArrayOf<Byte>* pEncoding)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

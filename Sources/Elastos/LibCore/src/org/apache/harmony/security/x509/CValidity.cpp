@@ -1,5 +1,5 @@
 
-#include "CValidity.h"
+#include "org/apache/harmony/security/x509/CValidity.h"
 
 namespace Org {
 namespace Apache {
@@ -12,37 +12,36 @@ CAR_OBJECT_IMPL(CValidity)
 CAR_INTERFACE_IMPL(CValidity, Object, IValidity)
 
 ECode CValidity::GetNotBefore(
-    /* [out] */ Elastos::Utility::IDate ** ppDate)
+    /* [out] */ IDate** ppDate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CValidity::GetNotAfter(
-    /* [out] */ Elastos::Utility::IDate ** ppDate)
+    /* [out] */ IDate** ppDate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CValidity::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CValidity::constructor(
-    /* [in] */ Elastos::Utility::IDate * pNotBefore,
-    /* [in] */ Elastos::Utility::IDate * pNotAfter)
+    /* [in] */ IDate* pNotBefore,
+    /* [in] */ IDate* pNotAfter)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

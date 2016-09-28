@@ -22,9 +22,6 @@ module
      *
      */
     interface ITimeStampResp {
-        ToString(
-            [out] String* str);
-
         /**
          * @return Returns the status.
          */

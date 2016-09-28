@@ -1,5 +1,5 @@
 
-#include "CNameConstraints.h"
+#include "org/apache/harmony/security/x509/CNameConstraints.h"
 
 namespace Org {
 namespace Apache {
@@ -9,57 +9,56 @@ namespace X509 {
 
 CAR_OBJECT_IMPL(CNameConstraints)
 
-CAR_INTERFACE_IMPL(CNameConstraints, Object, INameConstraints)
+CAR_INTERFACE_IMPL_2(CNameConstraints, Object, INameConstraints, IExtensionValue)
 
 ECode CNameConstraints::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncode)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CNameConstraints::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CNameConstraints::DumpValueEx(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+ECode CNameConstraints::DumpValue(
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CNameConstraints::IsAcceptable(
-    /* [in] */ Elastos::Security::Cert::IX509Certificate * pCert,
-    /* [out] */ Boolean * pIsAcceptable)
+    /* [in] */ IX509Certificate* pCert,
+    /* [out] */ Boolean* pIsAcceptable)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CNameConstraints::IsAcceptableEx(
-    /* [in] */ Elastos::Utility::IList * pNames,
-    /* [out] */ Boolean * pIsAcceptable)
+    /* [in] */ IList* pNames,
+    /* [out] */ Boolean* pIsAcceptable)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CNameConstraints::constructor(
-    /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralSubtrees * pPermittedSubtrees,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralSubtrees * pExcludedSubtrees)
+    /* [in] */ IGeneralSubtrees* pPermittedSubtrees,
+    /* [in] */ IGeneralSubtrees* pExcludedSubtrees)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

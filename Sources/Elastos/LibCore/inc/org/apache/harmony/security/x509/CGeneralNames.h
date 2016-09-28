@@ -6,6 +6,9 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
+using Elastos::Utility::IList;
+using Elastos::Utility::ICollection;
 
 namespace Org {
 namespace Apache {
@@ -23,34 +26,34 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetNames(
-        /* [out] */ Elastos::Utility::IList ** ppNames);
+        /* [out] */ IList** ppNames);
 
     CARAPI GetPairsList(
-        /* [out] */ Elastos::Utility::ICollection ** ppPairslist);
+        /* [out] */ ICollection** ppPairslist);
 
     CARAPI AddName(
-        /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralName * pName);
+        /* [in] */ IGeneralName* pName);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb,
+        /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
     CARAPI constructor();
 
     CARAPI constructor(
-        /* [in] */ Elastos::Utility::IList * pGeneralNames);
+        /* [in] */ IList* pGeneralNames);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CGENERALNAMES_H__

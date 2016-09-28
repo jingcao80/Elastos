@@ -1,5 +1,5 @@
 
-#include "CPolicyConstraints.h"
+#include "org/apache/harmony/security/x509/CPolicyConstraints.h"
 
 namespace Org {
 namespace Apache {
@@ -9,48 +9,47 @@ namespace X509 {
 
 CAR_OBJECT_IMPL(CPolicyConstraints)
 
-CAR_INTERFACE_IMPL(CPolicyConstraints, Object, IPolicyConstraints)
+CAR_INTERFACE_IMPL_2(CPolicyConstraints, Object, IPolicyConstraints, IExtensionValue)
 
 ECode CPolicyConstraints::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncode)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CPolicyConstraints::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CPolicyConstraints::DumpValueEx(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+ECode CPolicyConstraints::DumpValue(
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CPolicyConstraints::constructor(
-    /* [in] */ Elastos::Math::IBigInteger * pRequireExplicitPolicy,
-    /* [in] */ Elastos::Math::IBigInteger * pInhibitPolicyMapping)
+    /* [in] */ IBigInteger* pRequireExplicitPolicy,
+    /* [in] */ IBigInteger* pInhibitPolicyMapping)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CPolicyConstraints::constructor(
-    /* [in] */ ArrayOf<Byte> * pEncoding)
+    /* [in] */ ArrayOf<Byte>* pEncoding)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

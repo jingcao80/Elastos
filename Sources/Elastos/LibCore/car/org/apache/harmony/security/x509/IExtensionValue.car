@@ -22,7 +22,7 @@ module
             [in] IStringBuilder* sb,
             [in] String prefix);
 
-        DumpValueEx(
+        DumpValue(
             [in] IStringBuilder* sb);
     }
 

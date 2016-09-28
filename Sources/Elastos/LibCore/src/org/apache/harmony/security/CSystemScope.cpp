@@ -1,6 +1,8 @@
 
 #include "CSystemScope.h"
 
+using Elastos::Security::EIID_IIdentityScope;
+
 namespace Org {
 namespace Apache {
 namespace Harmony {
@@ -8,24 +10,24 @@ namespace Security {
 
 CAR_OBJECT_IMPL(CSystemScope)
 
-CAR_INTERFACE_IMPL(CSystemScope, Object, IIdentityScope)
+CAR_INTERFACE_IMPL_2(CSystemScope, Object, ISystemScope, IIdentityScope)
 
 ECode CSystemScope::AddCertificate(
-    /* [in] */ Elastos::Security::ICertificate * pCertificate)
+    /* [in] */ ICertificate * pCertificate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::RemoveCertificate(
-    /* [in] */ Elastos::Security::ICertificate * pCertificate)
+    /* [in] */ ICertificate * pCertificate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::Certificates(
-    /* [out, callee] */ ArrayOf<Elastos::Security::ICertificate *> ** ppCerts)
+    /* [out, callee] */ ArrayOf<ICertificate *> ** ppCerts)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -40,21 +42,21 @@ ECode CSystemScope::ToString(
 }
 
 ECode CSystemScope::GetScope(
-    /* [out] */ Elastos::Security::IIdentityScope ** ppScope)
+    /* [out] */ IIdentityScope ** ppScope)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::SetPublicKey(
-    /* [in] */ Elastos::Security::IPublicKey * pKey)
+    /* [in] */ IPublicKey * pKey)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::GetPublicKey(
-    /* [out] */ Elastos::Security::IPublicKey ** ppPubKey)
+    /* [out] */ IPublicKey ** ppPubKey)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -83,44 +85,44 @@ ECode CSystemScope::GetSize(
 
 ECode CSystemScope::GetIdentity(
     /* [in] */ const String& name,
-    /* [out] */ Elastos::Security::IIdentity ** ppIdentity)
+    /* [out] */ IIdentity ** ppIdentity)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::GetIdentity(
-    /* [in] */ Elastos::Security::IPrincipal * pPrincipal,
-    /* [out] */ Elastos::Security::IIdentity ** ppIdentity)
+    /* [in] */ IPrincipal * pPrincipal,
+    /* [out] */ IIdentity ** ppIdentity)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::GetIdentity(
-    /* [in] */ Elastos::Security::IPublicKey * pKey,
-    /* [out] */ Elastos::Security::IIdentity ** ppIdentity)
+    /* [in] */ IPublicKey * pKey,
+    /* [out] */ IIdentity ** ppIdentity)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::AddIdentity(
-    /* [in] */ Elastos::Security::IIdentity * pIdentity)
+    /* [in] */ IIdentity * pIdentity)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::RemoveIdentity(
-    /* [in] */ Elastos::Security::IIdentity * pIdentity)
+    /* [in] */ IIdentity * pIdentity)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CSystemScope::Identities(
-    /* [out] */ Elastos::Utility::IEnumeration ** ppIds)
+    /* [out] */ IEnumeration ** ppIds)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -141,14 +143,13 @@ ECode CSystemScope::constructor(
 
 ECode CSystemScope::constructor(
     /* [in] */ const String& name,
-    /* [in] */ Elastos::Security::IIdentityScope * pScope)
+    /* [in] */ IIdentityScope * pScope)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

@@ -1,5 +1,5 @@
 
-#include "CTBSCertificate.h"
+#include "org/apache/harmony/security/x509/CTBSCertificate.h"
 
 namespace Org {
 namespace Apache {
@@ -19,77 +19,77 @@ ECode CTBSCertificate::GetVersion(
 }
 
 ECode CTBSCertificate::GetSerialNumber(
-    /* [out] */ Elastos::Math::IBigInteger ** ppSerialNumber)
+    /* [out] */ IBigInteger** ppSerialNumber)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetSignature(
-    /* [out] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier ** ppSignature)
+    /* [out] */ IAlgorithmIdentifier** ppSignature)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetIssuer(
-    /* [out] */ Org::Apache::Harmony::Security::X501::IName ** ppIssuer)
+    /* [out] */ IName** ppIssuer)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetValidity(
-    /* [out] */ Org::Apache::Harmony::Security::X509::IValidity ** ppValidity)
+    /* [out] */ IValidity** ppValidity)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetSubject(
-    /* [out] */ Org::Apache::Harmony::Security::X501::IName ** ppSubject)
+    /* [out] */ IName** ppSubject)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetSubjectPublicKeyInfo(
-    /* [out] */ Org::Apache::Harmony::Security::X509::ISubjectPublicKeyInfo ** ppInfo)
+    /* [out] */ ISubjectPublicKeyInfo** ppInfo)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetIssuerUniqueID(
-    /* [out, callee] */ ArrayOf<Boolean> ** ppUniqueId)
+    /* [out, callee] */ ArrayOf<Boolean>** ppUniqueId)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetSubjectUniqueID(
-    /* [out, callee] */ ArrayOf<Boolean> ** ppUniqueId)
+    /* [out, callee] */ ArrayOf<Boolean>** ppUniqueId)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetExtensions(
-    /* [out] */ Org::Apache::Harmony::Security::X509::IExtensions ** ppExtensions)
+    /* [out] */ IExtensions** ppExtensions)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTBSCertificate::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -97,23 +97,22 @@ ECode CTBSCertificate::DumpValue(
 
 ECode CTBSCertificate::constructor(
     /* [in] */ Int32 ver,
-    /* [in] */ Elastos::Math::IBigInteger * pSerialNumber,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier * pSignature,
-    /* [in] */ Org::Apache::Harmony::Security::X501::IName * pIssuer,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IValidity * pValidity,
-    /* [in] */ Org::Apache::Harmony::Security::X501::IName * pSubject,
-    /* [in] */ Org::Apache::Harmony::Security::X509::ISubjectPublicKeyInfo * pSubjectPublicKeyInfo,
-    /* [in] */ ArrayOf<Boolean> * pIssuerUniqueID,
-    /* [in] */ ArrayOf<Boolean> * pSubjectUniqueID,
-    /* [in] */ Org::Apache::Harmony::Security::X509::IExtensions * pExtensions)
+    /* [in] */ IBigInteger* pSerialNumber,
+    /* [in] */ IAlgorithmIdentifier* pSignature,
+    /* [in] */ IName* pIssuer,
+    /* [in] */ IValidity* pValidity,
+    /* [in] */ IName* pSubject,
+    /* [in] */ ISubjectPublicKeyInfo* pSubjectPublicKeyInfo,
+    /* [in] */ ArrayOf<Boolean>* pIssuerUniqueID,
+    /* [in] */ ArrayOf<Boolean>* pSubjectUniqueID,
+    /* [in] */ IExtensions* pExtensions)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

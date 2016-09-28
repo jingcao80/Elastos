@@ -22,8 +22,10 @@ module
      * (as specified in RFC 3280)
      * In java implementation it is presumed that GeneralNames consist of
      * one element and its type is directoryName.
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface ICertificateIssuer extends IExtensionValue {
+    interface ICertificateIssuer {
         GetIssuer(
             [out] IX500Principal** x500Principal);
     }

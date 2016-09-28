@@ -5,6 +5,8 @@
 #include "_Org_Apache_Harmony_Security_X509_Tsp_CMessageImprint.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier;
 using Elastos::Core::Object;
 
 namespace Org {
@@ -24,24 +26,24 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetASN1(
-        /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1);
+        /* [out] */ IASN1Sequence** ppAsn1);
 
     CARAPI SetASN1(
-        /* [in] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence * pAsn1);
+        /* [in] */ IASN1Sequence* pAsn1);
 
     CARAPI constructor(
-        /* [in] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier * pAlgId,
-        /* [in] */ ArrayOf<Byte> * pHashedMessage);
+        /* [in] */ IAlgorithmIdentifier* pAlgId,
+        /* [in] */ ArrayOf<Byte>* pHashedMessage);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
-}
+} //namespace Tsp
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_TSP_CMESSAGEIMPRINT_H__

@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::IList;
 
 namespace Org {
 namespace Apache {
@@ -24,31 +25,31 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI ToString(
-        /* [out] */ String * pStr);
+        /* [out] */ String* pStr);
 
     CARAPI GetFailInfo(
-        /* [out] */ Int32 * pFailInfo);
+        /* [out] */ Int32* pFailInfo);
 
     CARAPI GetStatus(
-        /* [out] */ Org::Apache::Harmony::Security::X509::Tsp::PKIStatus * pStatus);
+        /* [out] */ PKIStatus* pStatus);
 
     CARAPI GetStatusString(
-        /* [out] */ Elastos::Utility::IList ** ppList);
+        /* [out] */ IList** ppList);
 
     CARAPI constructor(
         /* [in] */ Int32 pkiStatus,
-        /* [in] */ Elastos::Utility::IList * pStatusString,
+        /* [in] */ IList* pStatusString,
         /* [in] */ Int32 failInfo);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
-}
+} //namespace Tsp
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_TSP_CPKISTATUSINFO_H__

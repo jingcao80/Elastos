@@ -6,6 +6,9 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
+using Elastos::Security::Cert::IX509Certificate;
+using Elastos::Utility::IList;
 
 namespace Org {
 namespace Apache {
@@ -16,6 +19,7 @@ namespace X509 {
 CarClass(CNameConstraints)
     , public Object
     , public INameConstraints
+    , public IExtensionValue
 {
 public:
     CAR_OBJECT_DECL()
@@ -23,35 +27,35 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncode);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncode);
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb,
+        /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
-    CARAPI DumpValueEx(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb);
+    CARAPI DumpValue(
+        /* [in] */ IStringBuilder* pSb);
 
     CARAPI IsAcceptable(
-        /* [in] */ Elastos::Security::Cert::IX509Certificate * pCert,
-        /* [out] */ Boolean * pIsAcceptable);
+        /* [in] */ IX509Certificate* pCert,
+        /* [out] */ Boolean* pIsAcceptable);
 
     CARAPI IsAcceptableEx(
-        /* [in] */ Elastos::Utility::IList * pNames,
-        /* [out] */ Boolean * pIsAcceptable);
+        /* [in] */ IList* pNames,
+        /* [out] */ Boolean* pIsAcceptable);
 
     CARAPI constructor(
-        /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralSubtrees * pPermittedSubtrees,
-        /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralSubtrees * pExcludedSubtrees);
+        /* [in] */ IGeneralSubtrees* pPermittedSubtrees,
+        /* [in] */ IGeneralSubtrees* pExcludedSubtrees);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CNAMECONSTRAINTS_H__

@@ -512,8 +512,8 @@ ECode CX509CertImpl::GetExtensionValue(
         return NOERROR;
     }
     // retrieve the info from the cached extensions object
-    AutoPtr<IExtension> ext;
-    mExtensions->GetExtensionByOID(oid, (IExtension**)&ext);
+    AutoPtr<IX509Extension> ext;
+    mExtensions->GetExtensionByOID(oid, (IX509Extension**)&ext);
     if (ext == NULL) {
         return NOERROR;
     }

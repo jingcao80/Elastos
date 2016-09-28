@@ -5,7 +5,9 @@
 #include "_Org_Apache_Harmony_Security_X509_Tsp_CTimeStampReq.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::X509::IExtensions;
 using Elastos::Core::Object;
+using Elastos::Math::IBigInteger;
 
 namespace Org {
 namespace Apache {
@@ -24,46 +26,46 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI ToString(
-        /* [out] */ String * pStr);
+        /* [out] */ String* pStr);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI GetCertReq(
-        /* [out] */ Boolean * pCertReq);
+        /* [out] */ Boolean* pCertReq);
 
     CARAPI GetExtensions(
-        /* [out] */ Org::Apache::Harmony::Security::X509::IExtensions ** ppExtensions);
+        /* [out] */ IExtensions** ppExtensions);
 
     CARAPI GetMessageImprint(
-        /* [out] */ Org::Apache::Harmony::Security::X509::Tsp::IMessageImprint ** ppMessageImprint);
+        /* [out] */ IMessageImprint** ppMessageImprint);
 
     CARAPI GetNonce(
-        /* [out] */ Elastos::Math::IBigInteger ** ppNonce);
+        /* [out] */ IBigInteger** ppNonce);
 
     CARAPI GetReqPolicy(
-        /* [out] */ String * pReqPolicy);
+        /* [out] */ String* pReqPolicy);
 
     CARAPI GetVersion(
-        /* [out] */ Int32 * pVer);
+        /* [out] */ Int32* pVer);
 
     CARAPI constructor(
         /* [in] */ Int32 ver,
-        /* [in] */ Org::Apache::Harmony::Security::X509::Tsp::IMessageImprint * pMessageImprint,
+        /* [in] */ IMessageImprint* pMessageImprint,
         /* [in] */ const String& reqPolicy,
-        /* [in] */ Elastos::Math::IBigInteger * pNonce,
+        /* [in] */ IBigInteger* pNonce,
         /* [in] */ Boolean certReq,
-        /* [in] */ Org::Apache::Harmony::Security::X509::IExtensions * pExtensions);
+        /* [in] */ IExtensions* pExtensions);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
-}
+} //namespace Tsp
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_TSP_CTIMESTAMPREQ_H__

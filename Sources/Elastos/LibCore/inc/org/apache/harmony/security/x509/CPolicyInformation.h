@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
 
 namespace Org {
 namespace Apache {
@@ -23,13 +24,13 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetPolicyIdentifier(
-        /* [out] */ String * pPolicyIdentifier);
+        /* [out] */ String* pPolicyIdentifier);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb);
+        /* [in] */ IStringBuilder* pSb);
 
     CARAPI constructor(
         /* [in] */ const String& policyIdentifier);
@@ -38,10 +39,10 @@ private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CPOLICYINFORMATION_H__

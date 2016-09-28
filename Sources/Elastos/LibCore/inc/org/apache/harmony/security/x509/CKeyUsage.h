@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
 
 namespace Org {
 namespace Apache {
@@ -16,6 +17,7 @@ namespace X509 {
 CarClass(CKeyUsage)
     , public Object
     , public IKeyUsage
+    , public IExtensionValue
 {
 public:
     CAR_OBJECT_DECL()
@@ -23,29 +25,29 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncode);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncode);
 
     CARAPI DumpValue(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb,
+        /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
-    CARAPI DumpValueEx(
-        /* [in] */ Elastos::Core::IStringBuilder * pSb);
+    CARAPI DumpValue(
+        /* [in] */ IStringBuilder* pSb);
 
     CARAPI GetKeyUsage(
-        /* [out, callee] */ ArrayOf<Boolean> ** ppKeyUsage);
+        /* [out, callee] */ ArrayOf<Boolean>** ppKeyUsage);
 
     CARAPI constructor(
-        /* [in] */ ArrayOf<Byte> * pEncoding);
+        /* [in] */ ArrayOf<Byte>* pEncoding);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_CKEYUSAGE_H__

@@ -1,5 +1,5 @@
 
-#include "CGeneralNames.h"
+#include "org/apache/harmony/security/x509/CGeneralNames.h"
 
 namespace Org {
 namespace Apache {
@@ -12,35 +12,35 @@ CAR_OBJECT_IMPL(CGeneralNames)
 CAR_INTERFACE_IMPL(CGeneralNames, Object, IGeneralNames)
 
 ECode CGeneralNames::GetNames(
-    /* [out] */ Elastos::Utility::IList ** ppNames)
+    /* [out] */ IList** ppNames)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CGeneralNames::GetPairsList(
-    /* [out] */ Elastos::Utility::ICollection ** ppPairslist)
+    /* [out] */ ICollection** ppPairslist)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CGeneralNames::AddName(
-    /* [in] */ Org::Apache::Harmony::Security::X509::IGeneralName * pName)
+    /* [in] */ IGeneralName* pName)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CGeneralNames::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CGeneralNames::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
@@ -54,15 +54,14 @@ ECode CGeneralNames::constructor()
 }
 
 ECode CGeneralNames::constructor(
-    /* [in] */ Elastos::Utility::IList * pGeneralNames)
+    /* [in] */ IList* pGeneralNames)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

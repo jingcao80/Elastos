@@ -23,23 +23,23 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetValue(
-        /* [out, callee] */ ArrayOf<Byte> ** ppValue);
+        /* [out, callee] */ ArrayOf<Byte>** ppValue);
 
     CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte> ** ppEncoded);
+        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
 
     CARAPI constructor(
         /* [in] */ const String& typeID,
-        /* [in] */ ArrayOf<Byte> * pValue);
+        /* [in] */ ArrayOf<Byte>* pValue);
 
 private:
     // TODO: Add your private member variables here.
 };
 
-}
-}
-}
-}
-}
+} //namespace X509
+} //namespace Security
+} //namespace Harmony
+} //namespace Apache
+} //namespace Org
 
 #endif // __ORG_APACHE_HARMONY_SECURITY_X509_COTHERNAME_H__

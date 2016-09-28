@@ -7,9 +7,12 @@ module
     namespace Security {
     namespace X509 {
 
-    interface IX509PublicKey extends Elastos.Security.IPublicKey {
-        ToString(
-            [out] String* str);
+    /**
+     *
+     * @ invoke interface IPublicKey
+     */
+
+    interface IX509PublicKey {
     }
 
     } // namespace X509

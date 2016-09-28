@@ -1,5 +1,5 @@
 
-#include "CGeneralNameHelper.h"
+#include "org/apache/harmony/security/x509/CGeneralNameHelper.h"
 
 namespace Org {
 namespace Apache {
@@ -27,7 +27,7 @@ ECode CGeneralNameHelper::CheckURI(
 
 ECode CGeneralNameHelper::OidStrToInts(
     /* [in] */ const String& oid,
-    /* [out, callee] */ ArrayOf<Int32> ** ppInts)
+    /* [out, callee] */ ArrayOf<Int32>** ppInts)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -35,30 +35,29 @@ ECode CGeneralNameHelper::OidStrToInts(
 
 ECode CGeneralNameHelper::IpStrToBytes(
     /* [in] */ const String& ip,
-    /* [out, callee] */ ArrayOf<Byte> ** ppBytes)
+    /* [out, callee] */ ArrayOf<Byte>** ppBytes)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CGeneralNameHelper::IpBytesToStr(
-    /* [in] */ ArrayOf<Byte> * pIp,
-    /* [out] */ String * pStr)
+    /* [in] */ ArrayOf<Byte>* pIp,
+    /* [out] */ String* pStr)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CGeneralNameHelper::GetASN1(
-    /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Choice ** ppAsn1)
+    /* [out] */ IASN1Choice** ppAsn1)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

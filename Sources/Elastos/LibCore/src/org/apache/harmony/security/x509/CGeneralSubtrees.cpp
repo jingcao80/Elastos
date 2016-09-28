@@ -1,5 +1,5 @@
 
-#include "CGeneralSubtrees.h"
+#include "org/apache/harmony/security/x509/CGeneralSubtrees.h"
 
 namespace Org {
 namespace Apache {
@@ -12,29 +12,28 @@ CAR_OBJECT_IMPL(CGeneralSubtrees)
 CAR_INTERFACE_IMPL(CGeneralSubtrees, Object, IGeneralSubtrees)
 
 ECode CGeneralSubtrees::GetSubtrees(
-    /* [out] */ Elastos::Utility::IList ** ppSubtrees)
+    /* [out] */ IList** ppSubtrees)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CGeneralSubtrees::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncoded)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CGeneralSubtrees::constructor(
-    /* [in] */ Elastos::Utility::IList * pGeneralSubtrees)
+    /* [in] */ IList* pGeneralSubtrees)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

@@ -29,8 +29,10 @@ module
      *
      *   KeyIdentifier ::= OCTET STRING
      * </pre>
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface IAuthorityKeyIdentifier extends Org.Apache.Harmony.Security.X509.IExtensionValue {
+    interface IAuthorityKeyIdentifier {
        /**
          * The key identifier for the authority.
          *

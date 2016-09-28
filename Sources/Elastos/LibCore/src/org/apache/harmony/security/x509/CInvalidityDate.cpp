@@ -1,5 +1,5 @@
 
-#include "CInvalidityDate.h"
+#include "org/apache/harmony/security/x509/CInvalidityDate.h"
 
 namespace Org {
 namespace Apache {
@@ -9,47 +9,46 @@ namespace X509 {
 
 CAR_OBJECT_IMPL(CInvalidityDate)
 
-CAR_INTERFACE_IMPL(CInvalidityDate, Object, IInvalidityDate)
+CAR_INTERFACE_IMPL_2(CInvalidityDate, Object, IInvalidityDate, IExtensionValue)
 
 ECode CInvalidityDate::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte> ** ppEncode)
+    /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CInvalidityDate::DumpValue(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb,
+    /* [in] */ IStringBuilder* pSb,
     /* [in] */ const String& prefix)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CInvalidityDate::DumpValueEx(
-    /* [in] */ Elastos::Core::IStringBuilder * pSb)
+ECode CInvalidityDate::DumpValue(
+    /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CInvalidityDate::GetDate(
-    /* [out] */ Elastos::Utility::IDate ** ppDate)
+    /* [out] */ IDate** ppDate)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CInvalidityDate::constructor(
-    /* [in] */ ArrayOf<Byte> * pEncoding)
+    /* [in] */ ArrayOf<Byte>* pEncoding)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-}
-}
-}
-}
-}
-
+} // namespace X509
+} // namespace Security
+} // namespace Harmony
+} // namespace Apache
+} // namespace Org

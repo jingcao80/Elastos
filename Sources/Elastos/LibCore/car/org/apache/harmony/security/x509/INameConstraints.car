@@ -31,8 +31,10 @@ module
      *
      * @see org.apache.harmony.security.x509.GeneralSubtree
      * @see org.apache.harmony.security.x509.GeneralName
+     *
+     * @ invoke interface IExtensionValue
      */
-    interface INameConstraints extends IExtensionValue {
+    interface INameConstraints {
         /**
          * Apply the name restrictions specified by this NameConstraints
          * instance to the subject distinguished name and subject alternative

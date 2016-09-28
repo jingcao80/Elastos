@@ -23,9 +23,6 @@ module
      *
      */
     interface IPKIStatusInfo {
-        ToString(
-            [out] String* str);
-
         /**
          * @return Returns the failInfo.
          */
