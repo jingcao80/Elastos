@@ -1,5 +1,6 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Provider.h"
+#include "elastos/droid/content/CContentUris.h"
 #include "elastos/droid/media/CRingtoneManager.h"
 #include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/net/Uri.h"
@@ -20,6 +21,7 @@ using Elastos::Droid::App::ProfileGroupMode_SUPPRESS;
 using Elastos::Droid::App::ProfileGroupMode_OVERRIDE;
 using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::Content::IContentUris;
+using Elastos::Droid::Content::CContentUris;
 using Elastos::Droid::Internal::Database::CSortCursor;
 using Elastos::Droid::Internal::Database::ISortCursor;
 using Elastos::Droid::Net::CUriHelper;
@@ -285,8 +287,10 @@ ECode CRingtoneManager::GetRingtonePosition(
     }
 
     // Only create Uri objects when the actual URI changes
-    AutoPtr<IUri> currentUri = NULL;
-    String previousUriString; // = NULL;
+    AutoPtr<IUri> currentUri;
+    String previousUriString;
+    AutoPtr<IContentUris> contentUris;
+    CContentUris::AcquireSingleton((IContentUris**)&contentUris);
     for (Int32 i = 0; i < cursorCount; i++) {
         String uriString;
         cursor->GetString(URI_COLUMN_INDEX, &uriString);
@@ -297,7 +301,7 @@ ECode CRingtoneManager::GetRingtonePosition(
             uriHelper->Parse(uriString, (IUri**)&currentUri);
         }
 
-        AutoPtr<IContentUris> contentUris;
+
         Int64 tempValue;
         cursor->GetInt64(ID_COLUMN_INDEX, &tempValue);
         AutoPtr<IUri> uri;
@@ -662,9 +666,9 @@ AutoPtr<IUri> CRingtoneManager::GetUriFromCursor(
     Int64 tempValue;
     cursor->GetInt64(ID_COLUMN_INDEX, &tempValue);
     AutoPtr<IContentUris> contentUris;
+    CContentUris::AcquireSingleton((IContentUris**)&contentUris);
     AutoPtr<IUri> tempUri;
     contentUris->WithAppendedId(uri, tempValue, (IUri**)&tempUri);
-
     return tempUri;
 }
 
