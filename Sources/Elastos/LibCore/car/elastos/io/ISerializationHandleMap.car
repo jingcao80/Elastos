@@ -1,0 +1,32 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * A specialization of IdentityHashMap<Object, int> for use when serializing objects.
+     * We need to assign each object we write an int 'handle' (densely packed but not starting
+     * at zero), and use the same handle any time we write the same object again.
+     */
+    interface ISerializationHandleMap {
+        Get(
+            [in] IInterface* key,
+            [out] Int32* result);
+
+        Put(
+            [in] IInterface* key,
+            [in] Int32 value,
+            [out] Int32* result);
+
+        Remove(
+            [in] IInterface* key,
+            [out] Int32* result);
+
+        IsEmpty(
+            [out] Boolean* empty);
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}

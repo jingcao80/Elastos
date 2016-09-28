@@ -58,6 +58,36 @@ module
          */
         GetSerialVersionUID(
             [out] Int64* uid);
+
+        /**
+         * Returns the class (java.lang.Class) for this descriptor.
+         *
+         * @return the class in the local VM that this descriptor represents;
+         *         {@code null} if there is no corresponding class.
+         */
+        ForClass(
+            [out] ClassID* id);
+
+        IsSerializable(
+            [out] Boolean* result);
+
+        IsExternalizable(
+            [out] Boolean* result);
+
+        IsProxy(
+            [out] Boolean* result);
+
+        IsEnum(
+            [out] Boolean* result);
+
+        Fields(
+            [out, callee] ArrayOf<IObjectStreamField*>* fields);
+
+        SetFlags(
+            [in] Byte b);
+
+        GetFlags(
+            [out] Byte* b);
     }
 
     interface IObjectStreamClassHelper {

@@ -6,8 +6,7 @@
 #include "CByteArrayInputStream.h"
 #include "CCipherHelper.h"
 #include "AlgorithmParameters.h"
-//TODO: Need CObjectOutputStream
-// #include "CObjectOutputStream.h"
+#include "CObjectOutputStream.h"
 //TODO: Need CObjectInputStream
 // #include "CObjectInputStream.h"
 
@@ -15,13 +14,15 @@ using Libcore::IO::IoUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IByte;
 using Elastos::Core::IArrayOf;
+using Elastos::IO::CByteArrayOutputStream;
+using Elastos::IO::CByteArrayInputStream;
+using Elastos::IO::CObjectOutputStream;
 using Elastos::IO::EIID_ISerializable;
+using Elastos::IO::IByteArrayOutputStream;
+using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::IObjectOutput;
 using Elastos::IO::IObjectInput;
-using Elastos::IO::IByteArrayOutputStream;
-using Elastos::IO::CByteArrayOutputStream;
-using Elastos::IO::IByteArrayInputStream;
-using Elastos::IO::CByteArrayInputStream;
+using Elastos::IO::IOutputStream;
 using Elastos::Security::IAlgorithmParameters;
 using Elastos::Security::IAlgorithmParametersHelper;
 using Elastos::Security::AlgorithmParameters;
@@ -50,8 +51,7 @@ ECode CSealedObject::constructor(
     // try {
         AutoPtr<IByteArrayOutputStream> bos;
         CByteArrayOutputStream::New((IByteArrayOutputStream**)&bos);
-        assert(0 && "TODO");
-        // CObjectOutputStream::New(bos, (IObjectOutputStream**)&oos);
+        CObjectOutputStream::New(IOutputStream::Probe(bos), (IObjectOutputStream**)&oos);
         IObjectOutput::Probe(oos)->WriteObject(object);
         IObjectOutput::Probe(oos)->Flush();
         AutoPtr<IAlgorithmParameters> ap;
@@ -131,7 +131,7 @@ ECode CSealedObject::GetObject(
             AutoPtr<IAlgorithmParameters> params;
             AutoPtr<IAlgorithmParametersHelper> apHelper;
             AlgorithmParameters::GetInstance(mParamsAlg, (IAlgorithmParameters**)&params);
-            params->Init(*mEncodedParams);
+            params->Init(mEncodedParams);
             cipher->Init(ICipher::DECRYPT_MODE, key, params);
         } else {
             cipher->Init(ICipher::DECRYPT_MODE, key);
@@ -202,7 +202,7 @@ ECode CSealedObject::GetObject(
             AutoPtr<IAlgorithmParametersHelper> apHelper;
             AlgorithmParameters::GetInstance(mParamsAlg, (IAlgorithmParameters**)&params);
 
-            params->Init(*mEncodedParams);
+            params->Init(mEncodedParams);
             cipher->Init(ICipher::DECRYPT_MODE, key, params);
         }
         else {
