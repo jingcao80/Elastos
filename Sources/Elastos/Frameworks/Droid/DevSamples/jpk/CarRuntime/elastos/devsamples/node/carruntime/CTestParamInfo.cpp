@@ -102,9 +102,10 @@ ECode CTestParamInfo::GetTypeInfo(
         // case CarDataType_Struct:
         //     ec = CTestStructInfo::New(*(IStructInfo**)&dataTypeInfo,(ITestStructInfo**)&testDataTypeInfo);
         //     break;
-        // case CarDataType_Interface:
-        //     ec = CTestInterfaceInfo::New(*(IInterfaceInfo**)&dataTypeInfo,(ITestInterfaceInfo**)&testDataTypeInfo);
-        //     break;
+        case CarDataType_Interface:
+            ALOGD("CTestParamInfo::GetTypeInfo====CarDataType_Interface====");
+            ec = CTestInterfaceInfo::New(*(IInterfaceInfo**)&dataTypeInfo,(ITestInterfaceInfo**)&testDataTypeInfo);
+            break;
         case CarDataType_LocalPtr:
             ec = CTestLocalPtrInfo::New(*(ILocalPtrInfo**)&dataTypeInfo,(ITestLocalPtrInfo**)&testDataTypeInfo);
             break;

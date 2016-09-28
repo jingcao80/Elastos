@@ -97,23 +97,21 @@ module.exports = function(aoElastos, aoActivity){
 //  * the method {@link #getItemPosition(Object)}.</p>
 //  */
 // public abstract class PagerAdapter {
-    function PagerAdapter(){_init.apply(this);};
-    var _pt = PagerAdapter.prototype;
-    function _init(){
+    class PagerAdapter() {
+
 //     private DataSetObservable mObservable = new DataSetObservable();
-        this.mObservable = Droid_New("Elastos.Droid.Database.CDataSetObservable");
-    }
+
 
 //     public static final int POSITION_UNCHANGED = -1;
-        PagerAdapter.POSITION_UNCHANGED = -1;
+
 //     public static final int POSITION_NONE = -2;
-        PagerAdapter.POSITION_NONE = -2;
+
 
 //     /**
 //      * Return the number of views available.
 //      */
 //     public abstract int getCount();
-        _pt.getCount = function(){};
+        GetCount(){};
 
 //     /**
 //      * Called when a change in the shown pages is going to start being made.
@@ -121,9 +119,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * page views.
 //      */
 //     public void startUpdate(ViewGroup container) {
-        _pt.startUpdate = function(container) {
+        StartUpdate(container) {
+            elog("====PagerAdapter::StartUpdate====");
 //         startUpdate((View) container);
-            this.startUpdate(container);
 //     }
         }
 
@@ -139,9 +137,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * need to be a View, but can be some other container of the page.
 //      */
 //     public Object instantiateItem(ViewGroup container, int position) {
-        _pt.instantiateItem = function(container, position) {
+        InstantiateItem(container, position) {
+            elog("====PagerAdapter::InstantiateItem====");
 //         return instantiateItem((View) container, position);
-            return this.instantiateItem(container, position);
 //     }
         }
 
@@ -156,9 +154,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * {@link #instantiateItem(View, int)}.
 //      */
 //     public void destroyItem(ViewGroup container, int position, Object object) {
-        _pt.destroyItem = function(container, position, object) {
+        DestroyItem(container, position, object) {
+            elog("====PagerAdapter::DestroyItem====");
 //         destroyItem((View) container, position, object);
-            this.destroyItem(container, position, object);
 //     }
         }
 
@@ -172,9 +170,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * {@link #instantiateItem(View, int)}.
 //      */
 //     public void setPrimaryItem(ViewGroup container, int position, Object object) {
-        _pt.setPrimaryItem = function(container, position, object) {
+        SetPrimaryItem(container, position, object) {
+            elog("====PagerAdapter::SetPrimaryItem====");
 //         setPrimaryItem((View) container, position, object);
-            this.setPrimaryItem(container, position, object);
 //     }
         }
 
@@ -186,9 +184,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * page views.
 //      */
 //     public void finishUpdate(ViewGroup container) {
-        _pt.finishUpdate = function(container) {
+        FinishUpdate(container) {
+            elog("====PagerAdapter::FinishUpdate====");
 //         finishUpdate((View) container);
-            this.finishUpdate(container);
 //     }
         }
 
@@ -200,7 +198,8 @@ module.exports = function(aoElastos, aoActivity){
 //      * @deprecated Use {@link #startUpdate(ViewGroup)}
 //      */
 //     public void startUpdate(View container) {
-        _pt.startUpdate = function(container) {
+        StartUpdate(container) {
+            elog("====PagerAdapter::StartUpdate====");
 //     }
         }
 
@@ -218,10 +217,10 @@ module.exports = function(aoElastos, aoActivity){
 //      * @deprecated Use {@link #instantiateItem(ViewGroup, int)}
 //      */
 //     public Object instantiateItem(View container, int position) {
-        _pt.instantiateItem = function(container, position) {
+        InstantiateItem(container, position) {
+            elog("====PagerAdapter::InstantiateItem====");
 //         throw new UnsupportedOperationException(
 //                 "Required method instantiateItem was not overridden");
-            throw "Required method instantiateItem was not overridden";
 //     }
         }
 
@@ -238,9 +237,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * @deprecated Use {@link #destroyItem(ViewGroup, int, Object)}
 //      */
 //     public void destroyItem(View container, int position, Object object) {
-        _pt.destroyItem = function(container, position, object) {
+        DestroyItem(container, position, object) {
+            elog("====PagerAdapter::DestroyItem====");
 //         throw new UnsupportedOperationException("Required method destroyItem was not overridden");
-            throw "Required method destroyItem was not overridden";
 //     }
         }
 
@@ -256,7 +255,8 @@ module.exports = function(aoElastos, aoActivity){
 //      * @deprecated Use {@link #setPrimaryItem(ViewGroup, int, Object)}
 //      */
 //     public void setPrimaryItem(View container, int position, Object object) {
-        _pt.setPrimaryItem = function(container, position, object) {
+        SetPrimaryItem(container, position, object) {
+            elog("====PagerAdapter::SetPrimaryItem====");
 //     }
         }
 
@@ -270,7 +270,8 @@ module.exports = function(aoElastos, aoActivity){
 //      * @deprecated Use {@link #finishUpdate(ViewGroup)}
 //      */
 //     public void finishUpdate(View container) {
-        _pt.finishUpdate = function(container) {
+        FinishUpdate(container) {
+            elog("====PagerAdapter::FinishUpdate====");
 //     }
         }
 
@@ -284,7 +285,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return true if <code>view</code> is associated with the key object <code>object</code>
 //      */
 //     public abstract boolean isViewFromObject(View view, Object object);
-        _pt.isViewFromObject = function(view, object){};
+        IsViewFromObject(view, object){
+            elog("====PagerAdapter::IsViewFromObject====");
+        }
 
 //     /**
 //      * Save any instance state associated with this adapter and its pages that should be
@@ -293,9 +296,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return Saved state for this adapter
 //      */
 //     public Parcelable
-        _pt.saveState = function() {
+        SaveState() {
+            elog("====PagerAdapter::SaveState====");
 //         return null;
-            return null;
 //     }
         }
 
@@ -307,7 +310,8 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param loader A ClassLoader that should be used to instantiate any restored objects
 //      */
 //     public void restoreState(Parcelable state, ClassLoader loader) {
-        _pt.restoreState = function(state, loader) {
+        RestoreState(state, loader) {
+            elog("====PagerAdapter::RestoreState====");
 //     }
         }
 
@@ -327,9 +331,9 @@ module.exports = function(aoElastos, aoActivity){
 //      *         or {@link #POSITION_NONE} if the item is no longer present.
 //      */
 //     public int getItemPosition(Object object) {
-        _pt.getItemPosition = function(object) {
+        GetItemPosition(object) {
+            elog("====PagerAdapter::GetItemPosition====");
 //         return POSITION_UNCHANGED;
-            return PagerAdapter.POSITION_UNCHANGED;
 //     }
         }
 
@@ -338,9 +342,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * and associated views should update.
 //      */
 //     public void notifyDataSetChanged() {
-        _pt.notifyDataSetChanged = function() {
+        NotifyDataSetChanged() {
+            elog("====PagerAdapter::NotifyDataSetChanged====");
 //         mObservable.notifyChanged();
-            this.mObservable.notifyChanged();
 //     }
         }
 
@@ -350,9 +354,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param observer The {@link android.database.DataSetObserver} which will receive callbacks.
 //      */
 //     public void registerDataSetObserver(DataSetObserver observer) {
-        _pt.registerDataSetObserver = function(observer) {
+        RegisterDataSetObserver(observer) {
+            elog("====PagerAdapter::RegisterDataSetObserver====");
 //         mObservable.registerObserver(observer);
-            this.mObservable.registerObserver(observer);
 //     }
         }
 
@@ -362,9 +366,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param observer The {@link android.database.DataSetObserver} which will be unregistered.
 //      */
 //     public void unregisterDataSetObserver(DataSetObserver observer) {
-        _pt.unregisterDataSetObserver = function(observer) {
+        UnregisterDataSetObserver(observer) {
+            elog("====PagerAdapter::UnregisterDataSetObserver====");
 //         mObservable.unregisterObserver(observer);
-            this.mObservable.unregisterObserver(observer);
 //     }
         }
 
@@ -378,9 +382,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return A title for the requested page
 //      */
 //     public CharSequence getPageTitle(int position) {
-        _pt.getPageTitle = function(position) {
+        GetPageTitle(position) {
+            elog("====PagerAdapter::GetPageTitle====");
 //         return null;
-            return null;
 //     }
         }
 
@@ -392,13 +396,13 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return Proportional width for the given page position
 //      */
 //     public float getPageWidth(int position) {
-        _pt.getPageWidth = function(position) {
+        GetPageWidth(position) {
+            elog("====PagerAdapter::GetPageWidth====");
 //         return 1.f;
-            return 1;
 //     }
         }
 // }
-
+    }   //class PagerAdapter
 //--------.java----end----
 
     return PagerAdapter;

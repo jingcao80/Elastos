@@ -358,8 +358,12 @@ function _getConstructorInfo(oClassInfo, args){
 
             switch (iDataType) {
                 case CarDataType.IInterface:
-                    var sInterfaceName = oTypeInfo.GetName();
-                    bSameArgs = CObject.hasInterface(arg_in, sInterfaceName);
+                    // var sInterfaceName = oTypeInfo.GetName();
+                    // bSameArgs = CObject.hasInterface(arg_in, sInterfaceName);
+
+                    CObject.showMethods(oTypeInfo);
+
+                    bSameArgs = arg_in.hasInterface(oTypeInfo.GetInternalObject());
                     break;
                 case CarDataType.LocalPtr:
                     var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();

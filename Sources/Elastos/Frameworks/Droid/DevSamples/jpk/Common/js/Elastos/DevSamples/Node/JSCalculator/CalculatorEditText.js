@@ -468,6 +468,18 @@ CObject.showMethods(_this, "etText");
             _this._OnMeasure(widthMeasureSpec, heightMeasureSpec);
             elog('====CalculatorEditText.js====::OnMeasure.end====');
         }
+
+        GetCompoundPaddingTop(_this, result) {
+            elog('====CalculatorEditText.js====::GetCompoundPaddingTop.begin====');
+            result.data = _this._GetCompoundPaddingTop();
+            elog('====CalculatorEditText.js====::GetCompoundPaddingTop.end====');
+        }
+
+        GetCompoundPaddingBottom(_this, result) {
+            elog('====CalculatorEditText.js====::GetCompoundPaddingBottom.begin====');
+            result.data = _this._GetCompoundPaddingBottom();
+            elog('====CalculatorEditText.js====::GetCompoundPaddingBottom.end====');
+        }
     }
 
     return new CalculatorEditText();

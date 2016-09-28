@@ -138,18 +138,25 @@ root.Elastos = ( function () {
     _Elastos.CObject.getClassInfo = function(aoCar) {
         return _Runtime_Native.Test_CObject_ReflectClassInfo(aoCar);
     }
-    _Elastos.CObject.hasInterface = function(aoCar, asName) {
+    _Elastos.CObject.hasInterface_bak = function(aoCar, asName) {
         var hasInterface = false;
 
         var oClassInfo = this.getClassInfo(aoCar);
-        var oInterfaces = oClassInfo.GetAllInterfaceInfos();
-        for (var i=0,im=oInterfaces.length;i<im;i++){
-            var sName = oInterfaces[i].GetName();
-            if (sName == asName) {
-                hasInterface = true;
-                break;
+        if (oClassInfo) {
+            var oInterfaces = oClassInfo.GetAllInterfaceInfos();
+            for (var i=0,im=oInterfaces.length;i<im;i++){
+                var sName = oInterfaces[i].GetName();
+                if (sName == asName) {
+                    hasInterface = true;
+                    break;
+                }
             }
         }
+        else {
+            elog("can not find classname, CObject.hasInterface failed");
+            hasInterface = aoCar.hasInterface(asName);
+        }
+
         return hasInterface;
     }
 

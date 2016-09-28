@@ -540,6 +540,9 @@ module
             [in] String name,
             [in] String signature,
             [out] ITestMethodInfo** methodInfo);
+
+        GetInternalObject(
+            [out] PInterface* object);
     }
 
     [deprecated]

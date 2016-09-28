@@ -41,159 +41,189 @@ module.exports = function(aoElastos, aoActivity){
 // import android.support.v4.view.PagerAdapter;
     var PagerAdapter = require("./support/v4/view/PagerAdapter.js")(aoElastos, aoActivity);
 // import android.support.v4.view.ViewPager;
-    var ViewPager = require("./support/v4/view/ViewPager.js")(aoElastos, aoActivity);
+    //var ViewPager = require("./support/v4/view/ViewPager.js")(aoElastos, aoActivity);
+    var ViewPager = class _ViewPager {};
+
 // import android.util.AttributeSet;
 // import android.view.View;
 // import android.view.ViewGroup;
 
 // public class CalculatorPadViewPager extends ViewPager {
-    function JSClass(host) {
-        this.mHost = host;
-    }
-    var _pt = JSClass.prototype;
+    class _CalculatorPadViewPager extends ViewPager {
+        constructor() {
+            super();
+        }
 
 //     private final PagerAdapter mStaticPagerAdapter = new PagerAdapter() {
-        var mStaticPagerAdapter = {
+        get mStaticPagerAdapter() {
+            if (this._mStaticPagerAdapter) return this._mStaticPagerAdapter;
+
+            //class _StaticPagerAdapter extends PagerAdapter {
+            class _StaticPagerAdapter {
 //         @Override
 //         public int getCount() {
-            getCount : function(result) {
+            getCount(result) {
 //             return getChildCount();
-                result.data = _this.getChildCount();
+                result.data = getChildCount();
 //         }
-            },
+            }
 
 //         @Override
 //         public Object instantiateItem(ViewGroup container, int position) {
-            instantiateItem : function(container, position, result) {
+            instantiateItem(container, position, result) {
 //             return getChildAt(position);
                 result.data = getChildAt(position);
 //         }
-            },
+            }
 
 //         @Override
 //         public void destroyItem(ViewGroup container, int position, Object object) {
-            destroyItem : function(container, position, object) {
+            destroyItem(container, position, object) {
 //             removeViewAt(position);
-                _this.removeViewAt(position);
+                removeViewAt(position);
 //         }
-            },
+            }
 
 //         @Override
 //         public boolean isViewFromObject(View view, Object object) {
-            isViewFromObject : function(view, object, result) {
+            isViewFromObject(view, object, result) {
 //             return view == object;
                 result.data = (view == object);
 //         }
-            },
+            }
 
 //         @Override
 //         public float getPageWidth(int position) {
-            getPageWidth : function(position, result) {
+            getPageWidth(position, result) {
 //             return position == 1 ? 7.0f / 9.0f : 1.0f;
-                result.data = position == 1 ? 7.0 / 9.0 : 1.0;
+                result.data = (position == 1) ? 7.0 / 9.0 : 1.0;
 //         }
-            },
+            }
+
+            }   //class _StaticPagerAdapter
+
+            this._mStaticPagerAdapter = new _StaticPagerAdapter();
 //     };
-        };
+        }   //get mStaticPagerAdapter
 
-//     private final OnPageChangeListener mOnPageChangeListener = new SimpleOnPageChangeListener() {
-        var mOnPageChangeListener = {
-//         private void recursivelySetEnabled(View view, boolean enabled) {
-            recursivelySetEnabled : function(view, enabled) {
-//             if (view instanceof ViewGroup) {
-//                 final ViewGroup viewGroup = (ViewGroup) view;
-//                 for (int childIndex = 0; childIndex < viewGroup.getChildCount(); ++childIndex) {
-//                     recursivelySetEnabled(viewGroup.getChildAt(childIndex), enabled);
-//                 }
-//             } else {
-//                 view.setEnabled(enabled);
-//             }
-//         }
-            },
+// //     private final OnPageChangeListener mOnPageChangeListener = new SimpleOnPageChangeListener() {
+//         var mOnPageChangeListener = {
+// //         private void recursivelySetEnabled(View view, boolean enabled) {
+//             recursivelySetEnabled : function(view, enabled) {
+// //             if (view instanceof ViewGroup) {
+// //                 final ViewGroup viewGroup = (ViewGroup) view;
+// //                 for (int childIndex = 0; childIndex < viewGroup.getChildCount(); ++childIndex) {
+// //                     recursivelySetEnabled(viewGroup.getChildAt(childIndex), enabled);
+// //                 }
+// //             } else {
+// //                 view.setEnabled(enabled);
+// //             }
+// //         }
+//             },
 
-//         @Override
-//         public void onPageSelected(int position) {
-            onPageSelected : function(position) {
-//             if (getAdapter() == mStaticPagerAdapter) {
-//                 for (int childIndex = 0; childIndex < getChildCount(); ++childIndex) {
-//                     // Only enable subviews of the current page.
-//                     recursivelySetEnabled(getChildAt(childIndex), childIndex == position);
-//                 }
-//             }
-//         }
-            },
-//     };
-        };
+// //         @Override
+// //         public void onPageSelected(int position) {
+//             onPageSelected : function(position) {
+// //             if (getAdapter() == mStaticPagerAdapter) {
+// //                 for (int childIndex = 0; childIndex < getChildCount(); ++childIndex) {
+// //                     // Only enable subviews of the current page.
+// //                     recursivelySetEnabled(getChildAt(childIndex), childIndex == position);
+// //                 }
+// //             }
+// //         }
+//             },
+// //     };
+//         };
 
-//     private final PageTransformer mPageTransformer = new PageTransformer() {
-        var mPageTransformer = {
-//         @Override
-//         public void transformPage(View view, float position) {
-            transformPage : function(view, position) {
-//             if (position < 0.0f) {
-//                 // Pin the left page to the left side.
-//                 view.setTranslationX(getWidth() * -position);
-//                 view.setAlpha(Math.max(1.0f + position, 0.0f));
-//             } else {
-//                 // Use the default slide transition when moving to the next page.
-//                 view.setTranslationX(0.0f);
-//                 view.setAlpha(1.0f);
-//             }
-//         }
-            },
-//     };
-        };
+// //     private final PageTransformer mPageTransformer = new PageTransformer() {
+//         var mPageTransformer = {
+// //         @Override
+// //         public void transformPage(View view, float position) {
+//             transformPage : function(view, position) {
+// //             if (position < 0.0f) {
+// //                 // Pin the left page to the left side.
+// //                 view.setTranslationX(getWidth() * -position);
+// //                 view.setAlpha(Math.max(1.0f + position, 0.0f));
+// //             } else {
+// //                 // Use the default slide transition when moving to the next page.
+// //                 view.setTranslationX(0.0f);
+// //                 view.setAlpha(1.0f);
+// //             }
+// //         }
+//             },
+// //     };
+//         };
 
-//     public CalculatorPadViewPager(Context context) {
-//         this(context, null);
-//     }
+// //     public CalculatorPadViewPager(Context context) {
+// //         this(context, null);
+// //     }
 
 //     public CalculatorPadViewPager(Context context, AttributeSet attrs) {
-        _pt.OnCreate = function(_this, context, attrs) {
+        OnCreate(_this, context, attrs) {
             elog("====CalculatorPadViewPager====OnCreate====begin====");
 
             attrs = attrs || null;
 //         super(context, attrs);
+            _this._constructor(context, attrs);
+            elog("====CalculatorPadViewPager====OnCreate====0====");
 
 //         setAdapter(mStaticPagerAdapter);
-//         setBackgroundColor(getResources().getColor(android.R.color.black));
-//         setOnPageChangeListener(mOnPageChangeListener);
-//         setPageMargin(getResources().getDimensionPixelSize(R.dimen.pad_page_margin));
-//         setPageTransformer(false, mPageTransformer);
-//     }
+            _this.SetAdapter(this.mStaticPagerAdapter);
+            elog("====CalculatorPadViewPager====OnCreate====1====");
+// //         setBackgroundColor(getResources().getColor(android.R.color.black));
+//             setBackgroundColor(getResources().getColor(android.R.color.black));
+//             elog("====CalculatorPadViewPager====OnCreate====2====");
+// //         setOnPageChangeListener(mOnPageChangeListener);
+//             setOnPageChangeListener(mOnPageChangeListener);
+//             elog("====CalculatorPadViewPager====OnCreate====3====");
+// //         setPageMargin(getResources().getDimensionPixelSize(R.dimen.pad_page_margin));
+//             setPageMargin(getResources().getDimensionPixelSize(R.dimen.pad_page_margin));
+//             elog("====CalculatorPadViewPager====OnCreate====4====");
+// //         setPageTransformer(false, mPageTransformer);
+//             setPageTransformer(false, mPageTransformer);
 
             elog("====CalculatorPadViewPager====OnCreate====end====");
+// //     }
         }
 
-//     @Override
-//     protected void onFinishInflate() {
-        _pt.OnFinishInflate = function() {
-//         super.onFinishInflate();
-            _super.OnFinishInflate();
+        // OnCreate(_this, context, attrs) {
+        //     elog("====CalculatorPadViewPager.js====::OnCreate====begin");
+        //     _this._constructor(context, attrs);
+        //     elog("====CalculatorPadViewPager.js====::OnCreate====end");
+        // }
 
-//         // Invalidate the adapter's data set since children may have been added during inflation.
-//         if (getAdapter() == mStaticPagerAdapter) {
-            if (_this.GetAdapter() == mStaticPagerAdapter) {
-//             mStaticPagerAdapter.notifyDataSetChanged();
-                mStaticPagerAdapter.notifyDataSetChanged();
+
+
+// //     @Override
+// //     protected void onFinishInflate() {
+//         _pt.OnFinishInflate = function() {
+// //         super.onFinishInflate();
+//             _super.OnFinishInflate();
+
+// //         // Invalidate the adapter's data set since children may have been added during inflation.
+// //         if (getAdapter() == mStaticPagerAdapter) {
+//             if (_this.GetAdapter() == mStaticPagerAdapter) {
+// //             mStaticPagerAdapter.notifyDataSetChanged();
+//                 mStaticPagerAdapter.notifyDataSetChanged();
+// //         }
+//             }
+// //     }
 //         }
-            }
-//     }
-        }
 // }
+    }   //class _CalculatorPadViewPager
 
 //--------.java----end----
 
 
     //_super = aoCustomControl;
     //var _super = aoActivity;
-    var Super = function(aoSuper) {
-        this._super = aoSuper;
-    }
-    var _spt = Super.prototype;
-    _spt.OnCreate = function(_this, context, attrs){
-        this._super._constructor(_this, context, attrs);
-    }
+    // var Super = function(aoSuper) {
+    //     this._super = aoSuper;
+    // }
+    // var _spt = Super.prototype;
+    // _spt.OnCreate = function(_this, context, attrs){
+    //     this._super._constructor(_this, context, attrs);
+    // }
     // _spt.OnTouchEvent = function(event, result) {
     //         this._super._OnTouchEvent(event, result);
     // }
@@ -216,49 +246,50 @@ module.exports = function(aoElastos, aoActivity){
     //         this._super._OnTextChanged(text, start, lengthBefore, lengthAfter);
     // }
 
-    var _super;
+    // var _super;
 
-    var oThis = new JSClass(aoActivity);
+    // var oThis = new JSClass(aoActivity);
 
-    var oCallback = {
-        OnCreate : function(_this, context, attrs) {
-            _super = new Super(_this);
-            oThis.OnCreate(_this, context, attrs);
-        },
-        // OnTouchEvent : function(_this, event, result) {
-        //     oThis.OnTouchEvent(_this, event, result);
-        // },
-        // OnSaveInstanceState : function(_this, result) {
-        //     oThis.OnSaveInstanceState(_this, result);
-        // },
-        // SetTextSize : function(_this, unit, size) {
-        //     oThis.SetTextSize(_this, unit, size);
-        // },
-        // GetCompoundPaddingTop : function(_this, result) {
-        //     oThis.GetCompoundPaddingTop(_this, result);
-        // },
-        // GetCompoundPaddingBottom : function(_this, result) {
-        //     oThis.GetCompoundPaddingBottom(_this, result);
-        // },
-        // OnMeasure : function(_this, widthMeasureSpec, heightMeasureSpec) {
-        //     oThis.OnMeasure(_this, widthMeasureSpec, heightMeasureSpec);
-        // },
-        // OnTextChanged : function(_this, text, start, lengthBefore, lengthAfter) {
-        //     oThis.OnTextChanged(_this, text, start, lengthBefore, lengthAfter);
-        // },
-    }
+    // var oCallback = {
+    //     OnCreate : function(_this, context, attrs) {
+    //         _super = new Super(_this);
+    //         oThis.OnCreate(_this, context, attrs);
+    //     },
+    //     // OnTouchEvent : function(_this, event, result) {
+    //     //     oThis.OnTouchEvent(_this, event, result);
+    //     // },
+    //     // OnSaveInstanceState : function(_this, result) {
+    //     //     oThis.OnSaveInstanceState(_this, result);
+    //     // },
+    //     // SetTextSize : function(_this, unit, size) {
+    //     //     oThis.SetTextSize(_this, unit, size);
+    //     // },
+    //     // GetCompoundPaddingTop : function(_this, result) {
+    //     //     oThis.GetCompoundPaddingTop(_this, result);
+    //     // },
+    //     // GetCompoundPaddingBottom : function(_this, result) {
+    //     //     oThis.GetCompoundPaddingBottom(_this, result);
+    //     // },
+    //     // OnMeasure : function(_this, widthMeasureSpec, heightMeasureSpec) {
+    //     //     oThis.OnMeasure(_this, widthMeasureSpec, heightMeasureSpec);
+    //     // },
+    //     // OnTextChanged : function(_this, text, start, lengthBefore, lengthAfter) {
+    //     //     oThis.OnTextChanged(_this, text, start, lengthBefore, lengthAfter);
+    //     // },
+    // }
 
     //return oCallback;
 
-
-    class __CalculatorPadViewPager {
-        OnCreate(_this, context, attrs) {
-            elog("====CalculatorPadViewPager.js====::OnCreate====begin");
-            _this._constructor(context, attrs);
-            elog("====CalculatorPadViewPager.js====::OnCreate====end");
+    class CalculatorPadViewPager extends _CalculatorPadViewPager {
+        constructor() {
+            super();
         }
 
-//     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        // OnCreate(_this, context, attrs) {
+        //     elog("====CalculatorPadViewPager.js====::OnCreate====begin");
+        //     _this._constructor(context, attrs);
+        //     elog("====CalculatorPadViewPager.js====::OnCreate====end");
+        // }
 
         GenerateLayoutParams(_this, attrs, result){
             elog("====CalculatorPadViewPager.js====::GenerateLayoutParams====begin");
@@ -324,9 +355,16 @@ module.exports = function(aoElastos, aoActivity){
             elog('====CalculatorPadViewPager.js====::OnSizeChanged.begin====');
             elog('====CalculatorPadViewPager.js====::OnSizeChanged.end====');
         }
+
+        ComputeScroll(_this) {
+            elog('====CalculatorPadViewPager.js====::ComputeScroll.begin====');
+            _this._ComputeScroll();
+            elog('====CalculatorPadViewPager.js====::ComputeScroll.end====');
+        }
+
     }
 
-    return new __CalculatorPadViewPager();
+    return new CalculatorPadViewPager();
 
 };  //module.exports
 

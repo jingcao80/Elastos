@@ -292,23 +292,16 @@ module.exports = function(aoElastos, aoActivity){
 
                 return {
                     OnItemClick:function(aoParent, aoView, aiPosition, aiId){
-elog("====OnItemClick====0====");
-
                         iPosition = aiPosition;
-elog("====OnItemClick====1====");
 
                         _showInfo("====CActivityOne::OnItemClick position = "+ iPosition  + ", id = " + aiId);
-elog("====OnItemClick====2====");
 
                         ShowAlert("Choosed item " + iPosition + " with NodeJS");
-elog("====OnItemClick====3====");
 
                         if (iPosition == 0) {
-elog("====OnItemClick====4====");
                             _showInfo("confirm to start ImageViewDemo EPK!");
                         }
                         else if (iPosition == 0) {
-elog("====OnItemClick====5====");
                             _showInfo("confirm to start Gallery EPK!");
                         }
                     },
