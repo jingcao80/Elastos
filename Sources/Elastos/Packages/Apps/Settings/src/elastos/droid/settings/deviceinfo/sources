@@ -5,4 +5,5 @@ INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 INCLUDES += $(MAKEDIR)/../../../../../
 
-SOURCES = StorageMeasurement.cpp
+SOURCES += CStatus.cpp
+SOURCES += StorageMeasurement.cpp

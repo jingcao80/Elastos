@@ -407,6 +407,8 @@ public:
 
     PreferenceActivity();
 
+    CARAPI constructor();
+
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
 

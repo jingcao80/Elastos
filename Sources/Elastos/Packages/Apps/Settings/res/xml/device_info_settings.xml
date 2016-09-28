@@ -14,35 +14,35 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/about_settings">
 
         <!-- System update settings - launches activity -->
-        <PreferenceScreen android:key="system_update_settings"
+        <Elastos.Droid.Preference.CPreferenceScreen android:key="system_update_settings"
                 android:title="@string/system_update_settings_list_item_title"
                 android:summary="@string/system_update_settings_list_item_summary">
             <intent android:action="android.settings.SYSTEM_UPDATE_SETTINGS" />
-        </PreferenceScreen>
+        </Elastos.Droid.Preference.CPreferenceScreen>
 
 
-        <PreferenceScreen android:key="additional_system_update_settings"
+        <Elastos.Droid.Preference.CPreferenceScreen android:key="additional_system_update_settings"
                           android:title="@string/additional_system_update_settings_list_item_title">
             <intent android:action="android.intent.action.MAIN"
                     android:targetPackage="@string/additional_system_update"
                     android:targetClass="@string/additional_system_update_menu" />
-        </PreferenceScreen>
+        </Elastos.Droid.Preference.CPreferenceScreen>
 
         <!-- Device status - launches activity -->
-        <PreferenceScreen android:key="status_info"
+        <Elastos.Droid.Preference.CPreferenceScreen android:key="status_info"
                 android:title="@string/device_status"
                 android:summary="@string/device_status_summary">
             <intent android:action="android.intent.action.MAIN"
                     android:targetPackage="Elastos.Droid.Settings"
-                    android:targetClass="Elastos.Droid.Settings.deviceinfo.Status" />
-        </PreferenceScreen>
+                    android:targetClass="Elastos.Droid.Settings.Deviceinfo.CStatus" />
+        </Elastos.Droid.Preference.CPreferenceScreen>
 
         <!-- Legal Information -->
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
                 android:key="container"
                 android:title="@string/legal_information">
 
@@ -52,91 +52,91 @@
                        list. -->
 
             <!-- Copyright information -->
-            <PreferenceScreen
+            <Elastos.Droid.Preference.CPreferenceScreen
                     android:key="copyright"
                     android:title="@string/copyright_title">
                 <intent android:action="android.settings.COPYRIGHT" />
-            </PreferenceScreen>
+            </Elastos.Droid.Preference.CPreferenceScreen>
 
             <!-- License information -->
-            <PreferenceScreen
+            <Elastos.Droid.Preference.CPreferenceScreen
                     android:key="license"
                     android:title="@string/license_title">
                 <intent android:action="android.settings.LICENSE" />
-            </PreferenceScreen>
+            </Elastos.Droid.Preference.CPreferenceScreen>
 
             <!-- Terms and conditions -->
-            <PreferenceScreen
+            <Elastos.Droid.Preference.CPreferenceScreen
                     android:key="terms"
                     android:title="@string/terms_title">
                 <intent android:action="android.settings.TERMS" />
-            </PreferenceScreen>
+            </Elastos.Droid.Preference.CPreferenceScreen>
 
-            <Preference
+            <Elastos.Droid.Preference.CPreference
                     android:key="wallpaper_attributions"
                     android:title="@string/wallpaper_attributions"
                     android:summary="@string/wallpaper_attributions_values"
                     />
 
-        </PreferenceScreen>
+        </Elastos.Droid.Preference.CPreferenceScreen>
 
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
                 android:key="safetylegal"
                 android:title="@string/settings_safetylegal_title">
             <intent android:action="android.settings.SAFETY" />
-        </PreferenceScreen>
+        </Elastos.Droid.Preference.CPreferenceScreen>
 
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
                 android:key="regulatory_info"
                 android:title="@string/regulatory_information">
             <intent android:action="android.settings.SHOW_REGULATORY_INFO" />
-        </PreferenceScreen>
+        </Elastos.Droid.Preference.CPreferenceScreen>
 
         <!-- Feedback on the device -->
-        <PreferenceScreen android:key="device_feedback"
+        <Elastos.Droid.Preference.CPreferenceScreen android:key="device_feedback"
                 android:title="@string/device_feedback">
-        </PreferenceScreen>
+        </Elastos.Droid.Preference.CPreferenceScreen>
 
         <!-- Device hardware model -->
-        <Preference android:key="device_model"
+        <Elastos.Droid.Preference.CPreference android:key="device_model"
                 style="?android:preferenceInformationStyle"
                 android:title="@string/model_number"
                 android:summary="@string/device_info_default"/>
 
         <!-- Device firmware version -->
-        <Preference android:key="firmware_version"
+        <Elastos.Droid.Preference.CPreference android:key="firmware_version"
                 style="?android:preferenceInformationStyle"
                 android:title="@string/firmware_version"
                 android:summary="@string/device_info_default"/>
 
         <!-- Device FCC equipment id -->
-        <Preference android:key="fcc_equipment_id"
+        <Elastos.Droid.Preference.CPreference android:key="fcc_equipment_id"
                 style="?android:preferenceInformationStyle"
                 android:title="@string/fcc_equipment_id"
                 android:summary="@string/device_info_default"/>
 
         <!-- Device Baseband version -->
-        <Preference android:key="baseband_version"
+        <Elastos.Droid.Preference.CPreference android:key="baseband_version"
                 style="?android:preferenceInformationStyle"
                 android:title="@string/baseband_version"
                 android:summary="@string/device_info_default"/>
 
         <!-- Device Kernel version -->
-        <Preference android:key="kernel_version"
+        <Elastos.Droid.Preference.CPreference android:key="kernel_version"
                 style="?android:preferenceInformationStyle"
                 android:title="@string/kernel_version"
                 android:summary="@string/device_info_default"/>
 
         <!-- Detailed build version -->
-        <Preference android:key="build_number"
+        <Elastos.Droid.Preference.CPreference android:key="build_number"
                 style="?android:preferenceInformationStyle"
                 android:title="@string/build_number"
                 android:summary="@string/device_info_default"/>
 
         <!-- SELinux status information -->
-        <Preference android:key="selinux_status"
+        <Elastos.Droid.Preference.CPreference android:key="selinux_status"
                 style="?android:preferenceInformationStyle"
                 android:title="@string/selinux_status"
                 android:summary="@string/selinux_status_enforcing"/>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

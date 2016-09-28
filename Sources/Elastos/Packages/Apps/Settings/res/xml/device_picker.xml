@@ -14,12 +14,12 @@
      limitations under the License.
 -->
 
-<PreferenceScreen
+<Elastos.Droid.Preference.CPreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Elastos.Droid.Settings.bluetooth.BluetoothProgressCategory
+    <Elastos.Droid.Settings.Bluetooth.CBluetoothProgressCategory
         android:key="bt_device_list"
         android:orderingFromXml="false" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>
 

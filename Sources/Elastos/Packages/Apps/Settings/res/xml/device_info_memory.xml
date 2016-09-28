@@ -14,11 +14,11 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/storage_settings"
         settings:keywords="@string/keywords_storage">
 
 <!-- Preference categories are dynamically created based on the list of available storage volumes -->
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

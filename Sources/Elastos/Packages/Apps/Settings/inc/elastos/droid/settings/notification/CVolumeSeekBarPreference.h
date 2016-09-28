@@ -35,6 +35,8 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("CVolumeSeekBarPreference::InnerListener")
+
         InnerListener(
             /* [in] */ CVolumeSeekBarPreference* host);
 

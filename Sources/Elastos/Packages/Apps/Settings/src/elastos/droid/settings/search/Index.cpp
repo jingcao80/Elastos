@@ -17,6 +17,8 @@
 #include "elastos/droid/settings/search/SearchIndexableRaw.h"
 #include "elastos/droid/settings/wifi/CSavedAccessPointsWifiSettings.h"
 #include "elastos/droid/settings/wifi/CWifiSettings.h"
+#include "elastos/droid/settings/CDevelopmentSettings.h"
+#include "elastos/droid/settings/CDeviceInfoSettings.h"
 #include "elastos/droid/settings/CSecuritySettings.h"
 #include "elastos/droid/settings/CWirelessSettings.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -31,6 +33,8 @@
 #include "../R.h"
 #include "elastos/droid/R.h"
 
+using Elastos::Droid::Settings::CDevelopmentSettings;
+using Elastos::Droid::Settings::CDeviceInfoSettings;
 using Elastos::Droid::Settings::CSecuritySettings;
 using Elastos::Droid::Settings::CWirelessSettings;
 using Elastos::Droid::Settings::Inputmethod::CInputMethodAndLanguageSettings;
@@ -1351,6 +1355,8 @@ Boolean Index::IsIndexableClass(
             || className.Equals("Elastos.Droid.Settings.Notification.CZenModeSettings")
             || className.Equals("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")
             || className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")
+            || className.Equals("Elastos.Droid.Settings.CDevelopmentSettings")
+            || className.Equals("Elastos.Droid.Settings.CDeviceInfoSettings")
             || className.Equals("Elastos.Droid.Settings.CSecuritySettings")
             || className.Equals("Elastos.Droid.Settings.CWirelessSettings")) {
         return TRUE;
@@ -1459,6 +1465,10 @@ AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(const Strin
             = CWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
         providerMap[String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")]
             = CSavedAccessPointsWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.CDevelopmentSettings")]
+            = CDevelopmentSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.CDeviceInfoSettings")]
+            = CDeviceInfoSettings::GetSEARCH_INDEX_DATA_PROVIDER();
         providerMap[String("Elastos.Droid.Settings.CWirelessSettings")]
             = CWirelessSettings::GetSEARCH_INDEX_DATA_PROVIDER();
         providerMap[String("Elastos.Droid.Settings.CSecuritySettings")]
