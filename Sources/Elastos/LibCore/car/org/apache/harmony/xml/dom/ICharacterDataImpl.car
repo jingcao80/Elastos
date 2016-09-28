@@ -20,7 +20,11 @@ module
      * structure.
      */
 
-    interface ICharacterDataImpl extends ILeafNodeImpl {
+    /**
+      * @Involve
+      * interface ILeafNodeImpl
+     */
+    interface ICharacterDataImpl {
         /**
          * Appends this node's text content to the given builder.
          */

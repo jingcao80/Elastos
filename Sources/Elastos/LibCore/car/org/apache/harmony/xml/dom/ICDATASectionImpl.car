@@ -19,7 +19,11 @@ module
      * the DOM implementation can easily access them while maintaining the DOM tree
      * structure.
      */
-    interface ICDATASectionImpl extends Org.Apache.Harmony.Xml.Dom.ICharacterDataImpl {
+    /**
+       * @Involve
+        * interface ICharacterDataImpl
+         */
+    interface ICDATASectionImpl {
         /**
          * Splits this CDATA node into parts that do not contain a "]]>" sequence.
          * Any newly created nodes will be inserted before this node.

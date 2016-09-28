@@ -2,6 +2,7 @@
 module
 {
     using interface Org.W3c.Dom.INode;
+    using interface Org.W3c.Dom.IDOMConfiguration;
 
     namespace Org {
     namespace Apache {
@@ -14,9 +15,28 @@ module
      * parameter instances to centralize each parameter's behavior.
      */
 
-    interface IDOMConfigurationImpl extends Org.W3c.Dom.IDOMConfiguration {
+    /**
+      * @Involve
+      * interface IDOMConfiguration
+      */
+    interface IDOMConfigurationImpl {
         Normalize(
             [in] INode* node);
+    }
+
+    interface IParameter {
+        Get(
+            [in] IDOMConfigurationImpl* config,
+            [out] IObject** result);
+
+        Set(
+            [in] IDOMConfigurationImpl* config,
+            [in] IObject* value);
+
+        CanSet(
+            [in] IDOMConfigurationImpl* config,
+            [in] IObject* value,
+            [out] Boolean* result);
     }
 
     } // namespace Dom

@@ -6,285 +6,298 @@ module
     importlib("Org.Xml.Sax.eco");
     importlib("Elastosx.Xml.eco");
 
-    merge("../../../../car/Org/Apache/Harmony/Kernel/Vm/IStringUtils.car");
-    //merge("../../../../car/Org/Apache/Harmony/Lang/Annotation/IAnnotationFactory.car");
-    //merge("../../../../car/Org/Apache/Harmony/Lang/Annotation/IAnnotationMember.car");
-/*
-    merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IGenericSignatureParser.car");
-    merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IImplForArray.car");
-    merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IImplForType.car");
-    merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IImplForVariable.car");
-    merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IImplForWildcard.car");
-    merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IListOfTypes.car");
-    merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/ITypes.car");
-*/
-    merge("../../../../car/Org/Apache/Harmony/Luni/Util/IDeleteOnExit.car");
+    merge("../../../../car/org/apache/harmony/luni/internal/util/ITimerzoneGetter.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Kernel/Vm/IStringUtils.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Lang/Annotation/IAnnotationFactory.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Lang/Annotation/IAnnotationMember.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/IPublicKeyImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/IPrivateKeyImpl.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IGenericSignatureParser.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IImplForArray.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IImplForType.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IImplForVariable.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IImplForWildcard.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/IListOfTypes.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Luni/Lang/Reflect/ITypes.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Constants.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IBerInputStream.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IBerOutputStream.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Type.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Explicit.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Choice.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Any.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1StringType.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1BitString.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Boolean.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Enumerated.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/Exceptions.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1GeneralizedTime.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Implicit.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Integer.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1OctetString.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Oid.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1ValueCollection.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1TypeCollection.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Sequence.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1SequenceOf.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Set.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1SetOf.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1UTCTime.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IBitString.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IObjectIdentifier.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Luni/Util/IDeleteOnExit.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/Fortress/IEngine.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Fortress/ISecurityAccess.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Fortress/IServices.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/IPublicKeyImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/IPrivateKeyImpl.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/Pkcs10/ICertificationRequest.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Pkcs10/ICertificationRequestInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Constants.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IBerInputStream.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IBerOutputStream.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Type.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Explicit.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Choice.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Any.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1StringType.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1BitString.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Boolean.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Enumerated.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/Exceptions.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1GeneralizedTime.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Implicit.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Integer.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1OctetString.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Oid.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1ValueCollection.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1TypeCollection.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Sequence.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1SequenceOf.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1Set.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1SetOf.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IASN1UTCTime.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IBitString.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Asn1/IObjectIdentifier.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/Pkcs7/IContentInfo.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Pkcs7/ISignedData.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Pkcs7/ISignerInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Fortress/IEngine.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Fortress/ISecurityAccess.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Fortress/IServices.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/Pkcs8/IPrivateKeyInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Pkcs10/ICertificationRequest.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Pkcs10/ICertificationRequestInfo.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/ICache.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/IDRLCertFactory.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/IX509CertFactoryImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/IX509CertImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/IX509CertPathImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Pkcs7/IContentInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Pkcs7/ISignedData.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Pkcs7/ISignerInfo.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ICryptoProvider.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/IDSAKeyFactoryImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1_Data.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/IRandomBitsSupplier.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1Impl.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1PRNG_SecureRandomImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1_MessageDigestImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1withDSA_SignatureImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Utils/IAlgNameMapper.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Utils/IArray.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Utils/IObjectIdentifierInUtils.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/Utils/IJarUtils.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X501/IAttributeTypeAndValue.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X501/IAttributeValue.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X501/IDirectoryString.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X501/IName.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/IMessageImprint.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/IPKIFailureInfo.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/IPKIStatus.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/IPKIStatusInfo.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/ITSTInfo.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/ITimeStampReq.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/ITimeStampResp.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Pkcs8/IPrivateKeyInfo.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IExtensionValue.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IAccessDescription.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IAlgorithmIdentifier.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IAlternativeName.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IAuthorityKeyIdentifier.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IBasicConstraints.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ICRLDistributionPoints.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ICRLNumber.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ICertificate.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ICertificateIssuer.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ICertificateList.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ICertificatePolicies.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IDNParser.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IDistributionPoint.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IDistributionPointName.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IEDIPartyName.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IExtendedKeyUsage.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IExtension.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IExtensions.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IGeneralName.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IGeneralNames.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IGeneralSubtree.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IGeneralSubtrees.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IInfoAccessSyntax.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IInhibitAnyPolicy.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IInvalidityDate.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IIssuingDistributionPoint.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IKeyUsage.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/INameConstraints.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IORAddress.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IOtherName.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IPolicyConstraints.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IPolicyInformation.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IPolicyQualifierInfo.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IPrivateKeyUsagePeriod.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IReasonCode.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IReasonFlags.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ISubjectKeyIdentifier.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ISubjectPublicKeyInfo.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ITBSCertList.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ITBSCertificate.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/ITime.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IValidity.car");
-    merge("../../../../car/Org/Apache/Harmony/Security/X509/IX509PublicKey.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/ICache.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/IDRLCertFactory.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/IX509CertFactoryImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/IX509CertImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Cert/IX509CertPathImpl.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Xml/Dom/ILeafNodeImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xml/Dom/ICharacterDataImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xml/Dom/ICDATASectionImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xml/Dom/ICommentImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xml/Dom/IDOMConfigurationImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xml/Dom/IDOMImplementationImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xml/Dom/IDocumentImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ICryptoProvider.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/IDSAKeyFactoryImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1_Data.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/IRandomBitsSupplier.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1Impl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1PRNG_SecureRandomImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1_MessageDigestImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Provider/Crypto/ISHA1withDSA_SignatureImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Utils/IAlgNameMapper.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Utils/IArray.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Utils/IObjectIdentifierInUtils.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/Utils/IJarUtils.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X501/IAttributeTypeAndValue.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X501/IAttributeValue.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X501/IDirectoryString.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X501/IName.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/IMessageImprint.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/IPKIFailureInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/IPKIStatus.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/IPKIStatusInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/ITSTInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/ITimeStampReq.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/Tsp/ITimeStampResp.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Xml/Exceptions.car");
-    merge("../../../../car/Org/Apache/Harmony/Xml/IExpatAttributes.car");
-    merge("../../../../car/Org/Apache/Harmony/Xml/IExpatReader.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IExtensionValue.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IAccessDescription.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IAlgorithmIdentifier.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IAlternativeName.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IAuthorityKeyIdentifier.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IBasicConstraints.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ICRLDistributionPoints.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ICRLNumber.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ICertificate.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ICertificateIssuer.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ICertificateList.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ICertificatePolicies.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IDNParser.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IDistributionPoint.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IDistributionPointName.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IEDIPartyName.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IExtendedKeyUsage.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IExtension.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IExtensions.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IGeneralName.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IGeneralNames.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IGeneralSubtree.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IGeneralSubtrees.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IInfoAccessSyntax.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IInhibitAnyPolicy.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IInvalidityDate.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IIssuingDistributionPoint.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IKeyUsage.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/INameConstraints.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IORAddress.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IOtherName.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IPolicyConstraints.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IPolicyInformation.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IPolicyQualifierInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IPrivateKeyUsagePeriod.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IReasonCode.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IReasonFlags.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ISubjectKeyIdentifier.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ISubjectPublicKeyInfo.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ITBSCertList.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ITBSCertificate.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/ITime.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IValidity.car");
+    //merge("../../../../car/Org/Apache/Harmony/Security/X509/IX509PublicKey.car");
 
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IMessage.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/Exceptions.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IAppendable.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ICertPinManager.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ICertificateMessage.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ICertificateRequest.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ICipherSuite.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IClientHello.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IClientKeyExchange.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IClientSessionContext.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IDHParameters.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IDataStream.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IDigitalSignature.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IFileClientSessionCache.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IFinished.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IHandshake.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IHandshakeIODataStream.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IHandshakeProtocol.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ILogger.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/INativeCrypto.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLDSAParams.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLEngine.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLProvider.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLRSAPublicKey.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLSocketImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IPinFailureLogger.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IPinListEntry.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IProtocolVersion.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLClientSessionCache.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLEngineDataStream.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLParametersImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLServerSessionCache.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLSessionImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IServerHello.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IServerKeyExchange.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IServerSessionContext.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ITrustManagerImpl.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ITrustedCertificateIndex.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ITrustedCertificateStore.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLRecordProtocol.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLRSAPrivateKey.car");
-    merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLInputStream.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/Dom/ILeafNodeImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/Dom/ICharacterDataImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/Dom/ICDATASectionImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/Dom/ICommentImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/Dom/IDOMConfigurationImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/Dom/IDOMImplementationImpl.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/Dom/IDocumentImpl.car");
 
-    using interface Elastos.Security.Interfaces.IDSAPrivateKey;
-    using interface Elastos.Security.Interfaces.IDSAPublicKey;
-    using interface Elastos.Security.Interfaces.IRSAPrivateKey;
-    using interface Elastos.Security.Interfaces.IRSAPublicKey;
-    using interface Elastos.Security.Interfaces.IRSAPrivateCrtKey;
-    using interface Elastosx.Crypto.ICipherSpi;
-    //interface Org.Apache.Harmony.Lang.Annotation.IAnnotationFactory;
-    using interface Elastos.Core.IClassLoader;
-    using interface Elastos.Core.ICloneable;
-    using interface Elastos.Core.IComparator;
-    using interface Elastos.Core.IRunnable;
-    using interface Elastos.IO.IInputStream;
-    using interface Elastos.IO.IOutputStream;
-    using interface Elastos.IO.IFile;
-    using interface Elastos.IO.IFlushable;
-    interface Org.Apache.Harmony.Security.X509.IAlgorithmIdentifier;
-    interface Org.Apache.Harmony.Security.X509.IRevokedCertificate;
-    using interface Elastosx.Security.Auth.X500.IX500Principal;
-    using interface Elastos.Security.Cert.IX509CRLEntry;
-    using interface Elastos.Security.Cert.IX509Extension;
-    using interface Elastos.Security.Cert.IX509Certificate;
-    interface Org.Apache.Harmony.Security.X509.ICertificateList;
-    interface Org.Apache.Harmony.Security.X509.ICertificate;
-    using interface Elastos.Utility.IList;
-    using interface Elastos.Utility.ISet;
-    using interface Elastos.Security.Spec.IDSAPrivateKeySpec;
-    using interface Elastos.Security.Spec.IPKCS8EncodedKeySpec;
-    using interface Elastos.Security.Spec.IDSAPublicKeySpec;
-    using interface Elastos.Security.Spec.IX509EncodedKeySpec;
-    using interface Elastos.Security.Spec.IAlgorithmParameterSpec;
-    using interface Elastos.Security.Spec.IRSAPrivateCrtKeySpec;
-    using interface Elastos.Security.Spec.IRSAPrivateKeySpec;
-    using interface Elastos.IO.ISerializable;
-    using interface Elastos.Math.IBigInteger;
-    using interface Elastos.Utility.IDate;
-    using interface Elastos.Security.IIdentityScope;
-    using interface Elastos.Security.ISecureRandom;
-    using interface Elastos.Security.IProvider;
-    using interface Elastos.Security.IKeyFactorySpi;
-    using interface Elastos.Security.IKeyPairGeneratorSpi;
-    using interface Elastos.Security.IMessageDigest;
-    using interface Elastos.Security.IKeyStore;
-    using interface Elastos.Security.IKeyStoreSpi;
-    using interface Elastos.Security.ISignature;
-    interface Org.Apache.Harmony.Security.X509.IGeneralName;
-    interface Org.Apache.Harmony.Security.X509.IExtensions;
-    interface Org.Apache.Harmony.Security.X509.IAuthorityKeyIdentifier;
-    interface Org.Apache.Harmony.Security.X509.IAccessDescription;
-    interface Org.Apache.Harmony.Security.X509.IBasicConstraintsHelper;
-    interface Org.Apache.Harmony.Security.X509.IAlternativeName;
-    interface Org.Apache.Harmony.Security.X509.ICRLDistributionPoints;
-    interface Org.Apache.Harmony.Security.X509.ICRLNumber;
-    interface Org.Apache.Harmony.Security.X509.ICRLNumberHelper;
-    interface Org.Apache.Harmony.Security.X509.ICRLDistributionPointsHelper;
-    interface Org.Apache.Harmony.Security.Pkcs7.IContentInfo;
-    interface Org.Apache.Harmony.Security.X501.IName;
-    interface Org.Apache.Harmony.Security.IPrivateKeyImpl;
-    interface Org.Apache.Harmony.Security.IPublicKeyImpl;
-    using interface Org.W3c.Dom.INode;
-    using interface Org.W3c.Dom.IAttr;
-    using interface Org.W3c.Dom.IDocument;
-    using interface Org.W3c.Dom.IText;
-    using interface Org.W3c.Dom.IComment;
-    using interface Org.W3c.Dom.IDOMError;
-    using interface Org.W3c.Dom.ICDATASection;
-    using interface Org.W3c.Dom.IDOMImplementation;
-    using interface Org.W3c.Dom.IDocumentType;
-    using interface Org.W3c.Dom.INamedNodeMap;
-    using interface Org.W3c.Dom.IEntity;
-    using interface Org.W3c.Dom.IEntityReference;
-    using interface Org.W3c.Dom.INodeList;
-    using interface Org.W3c.Dom.INotation;
-    using interface Org.W3c.Dom.IProcessingInstruction;
-    using interface Org.W3c.Dom.IElement;
-    using interface Elastosx.Xml.Parsers.IDocumentBuilderFactory;
-    using interface Elastosx.Xml.Parsers.ISAXParserFactory;
-    using interface Elastosx.Xml.Parsers.ISAXParser;
-    using interface Elastosx.Net.Ssl.ISSLContextSpi;
-    using interface Elastosx.Net.Ssl.IKeyManagerFactorySpi;
-    using interface Elastosx.Net.Ssl.IX509ExtendedKeyManager;
-    using interface Elastosx.Net.Ssl.ISSLParameters;
-    using interface Elastosx.Net.Ssl.ISSLServerSocketFactory;
-    using interface Elastosx.Net.Ssl.ISSLServerSocket;
-    using interface Elastosx.Net.Ssl.ISSLSession;
-    using interface Elastosx.Net.Ssl.ISSLSocketFactory;
-    using interface Elastosx.Net.Ssl.ISSLEngine;
-    using interface Elastosx.Net.Ssl.ISSLSocket;
-    using interface Elastosx.Net.Ssl.ITrustManagerFactorySpi;
+    //merge("../../../../car/Org/Apache/Harmony/Xml/Exceptions.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/IExpatAttributes.car");
+    //merge("../../../../car/Org/Apache/Harmony/Xml/IExpatReader.car");
+
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IMessage.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/Exceptions.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IAppendable.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ICertPinManager.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ICertificateMessage.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ICertificateRequest.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ICipherSuite.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IClientHello.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IClientKeyExchange.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IClientSessionContext.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IDHParameters.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IDataStream.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IDigitalSignature.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IFileClientSessionCache.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IFinished.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IHandshake.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IHandshakeIODataStream.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IHandshakeProtocol.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ILogger.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/INativeCrypto.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLDSAParams.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLEngine.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLProvider.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLRSAPublicKey.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLSocketImpl.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IPinFailureLogger.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IPinListEntry.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IProtocolVersion.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLClientSessionCache.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLEngineDataStream.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLParametersImpl.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLServerSessionCache.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLSessionImpl.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IServerHello.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IServerKeyExchange.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IServerSessionContext.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ITrustManagerImpl.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ITrustedCertificateIndex.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ITrustedCertificateStore.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLRecordProtocol.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/IOpenSSLRSAPrivateKey.car");
+    ////merge("../../../../car/Org/Apache/Harmony/Xnet/Provider/Jsse/ISSLInputStream.car");
+
+    //using interface Elastos.Security.Interfaces.IDSAPrivateKey;
+    //using interface Elastos.Security.Interfaces.IDSAPublicKey;
+    //using interface Elastos.Security.Interfaces.IRSAPrivateKey;
+    //using interface Elastos.Security.Interfaces.IRSAPublicKey;
+    //using interface Elastos.Security.Interfaces.IRSAPrivateCrtKey;
+    //using interface Elastosx.Crypto.ICipherSpi;
+    //////interface Org.Apache.Harmony.Lang.Annotation.IAnnotationFactory;
+    //using interface Elastos.Core.IClassLoader;
+    //using interface Elastos.Core.ICloneable;
+    //using interface Elastos.Core.IComparator;
+    //using interface Elastos.Core.IRunnable;
+    //using interface Elastos.IO.IInputStream;
+    //using interface Elastos.IO.IOutputStream;
+    //using interface Elastos.IO.IFile;
+    //using interface Elastos.IO.IFlushable;
+    //interface Org.Apache.Harmony.Security.X509.IAlgorithmIdentifier;
+    //interface Org.Apache.Harmony.Security.X509.IRevokedCertificate;
+    //using interface Elastosx.Security.Auth.X500.IX500Principal;
+    //using interface Elastos.Security.Cert.IX509CRLEntry;
+    //using interface Elastos.Security.Cert.IX509Extension;
+    //using interface Elastos.Security.Cert.IX509Certificate;
+    //interface Org.Apache.Harmony.Security.X509.ICertificateList;
+    //interface Org.Apache.Harmony.Security.X509.ICertificate;
+    //using interface Elastos.Utility.IList;
+    //using interface Elastos.Utility.ISet;
+    //using interface Elastos.Security.Spec.IDSAPrivateKeySpec;
+    //using interface Elastos.Security.Spec.IPKCS8EncodedKeySpec;
+    //using interface Elastos.Security.Spec.IDSAPublicKeySpec;
+    //using interface Elastos.Security.Spec.IX509EncodedKeySpec;
+    //using interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+    //using interface Elastos.Security.Spec.IRSAPrivateCrtKeySpec;
+    //using interface Elastos.Security.Spec.IRSAPrivateKeySpec;
+    //using interface Elastos.IO.ISerializable;
+    //using interface Elastos.Math.IBigInteger;
+    //using interface Elastos.Utility.IDate;
+    //using interface Elastos.Security.IIdentityScope;
+    //using interface Elastos.Security.ISecureRandom;
+    //using interface Elastos.Security.IProvider;
+    //using interface Elastos.Security.IKeyFactorySpi;
+    //using interface Elastos.Security.IKeyPairGeneratorSpi;
+    //using interface Elastos.Security.IMessageDigest;
+    //using interface Elastos.Security.IKeyStore;
+    //using interface Elastos.Security.IKeyStoreSpi;
+    //using interface Elastos.Security.ISignature;
+    //interface Org.Apache.Harmony.Security.X509.IGeneralName;
+    //interface Org.Apache.Harmony.Security.X509.IExtensions;
+    //interface Org.Apache.Harmony.Security.X509.IAuthorityKeyIdentifier;
+    //interface Org.Apache.Harmony.Security.X509.IAccessDescription;
+    //interface Org.Apache.Harmony.Security.X509.IBasicConstraintsHelper;
+    //interface Org.Apache.Harmony.Security.X509.IAlternativeName;
+    //interface Org.Apache.Harmony.Security.X509.ICRLDistributionPoints;
+    //interface Org.Apache.Harmony.Security.X509.ICRLNumber;
+    //interface Org.Apache.Harmony.Security.X509.ICRLNumberHelper;
+    //interface Org.Apache.Harmony.Security.X509.ICRLDistributionPointsHelper;
+    //interface Org.Apache.Harmony.Security.Pkcs7.IContentInfo;
+    //interface Org.Apache.Harmony.Security.X501.IName;
+    //interface Org.Apache.Harmony.Security.IPrivateKeyImpl;
+    //interface Org.Apache.Harmony.Security.IPublicKeyImpl;
+    //using interface Org.W3c.Dom.INode;
+    //using interface Org.W3c.Dom.IAttr;
+    //using interface Org.W3c.Dom.IDocument;
+    //using interface Org.W3c.Dom.IText;
+    //using interface Org.W3c.Dom.IComment;
+    //using interface Org.W3c.Dom.IDOMError;
+    //using interface Org.W3c.Dom.ICDATASection;
+    //using interface Org.W3c.Dom.IDOMImplementation;
+    //using interface Org.W3c.Dom.IDocumentType;
+    //using interface Org.W3c.Dom.INamedNodeMap;
+    //using interface Org.W3c.Dom.IEntity;
+    //using interface Org.W3c.Dom.IEntityReference;
+    //using interface Org.W3c.Dom.INodeList;
+    //using interface Org.W3c.Dom.INotation;
+    //using interface Org.W3c.Dom.IProcessingInstruction;
+    //using interface Org.W3c.Dom.IElement;
+    //using interface Elastosx.Xml.Parsers.IDocumentBuilderFactory;
+    //using interface Elastosx.Xml.Parsers.ISAXParserFactory;
+    //using interface Elastosx.Xml.Parsers.ISAXParser;
+    //using interface Elastosx.Net.Ssl.ISSLContextSpi;
+    //using interface Elastosx.Net.Ssl.IKeyManagerFactorySpi;
+    //using interface Elastosx.Net.Ssl.IX509ExtendedKeyManager;
+    //using interface Elastosx.Net.Ssl.ISSLParameters;
+    //using interface Elastosx.Net.Ssl.ISSLServerSocketFactory;
+    //using interface Elastosx.Net.Ssl.ISSLServerSocket;
+    //using interface Elastosx.Net.Ssl.ISSLSession;
+    //using interface Elastosx.Net.Ssl.ISSLSocketFactory;
+    //using interface Elastosx.Net.Ssl.ISSLEngine;
+    //using interface Elastosx.Net.Ssl.ISSLSocket;
+    //using interface Elastosx.Net.Ssl.ITrustManagerFactorySpi;
 
     namespace Org {
     namespace Apache {
     namespace Harmony {
+
+    namespace Luni {
+    namespace Internal {
+    namespace Util {
+
+    class CTimezoneGetter {
+        interface ITimezoneGetter;
+    }
+
+    } // Util
+    } // Internal
+    } // Luni
 
     namespace Crypto {
     namespace Internal {
@@ -297,2023 +310,2024 @@ module
     } // namespace Internal
     } // namespace Crypto
 
-    namespace Kernel {
-    namespace Vm {
-
-    singleton class CStringUtils {
-        interface IStringUtils;
-    }
-
-    } // namespace Vm
-    } // namespace Kernel
-/*
-    namespace Lang {
-    namespace Annotation {
-
-    class CAnnotationFactory {
-        interface IAnnotationFactory;
-        interface IInvocationHandler;
-        interface ISerializable;
-    }
-
-    singleton class CAnnotationFactoryHelper {
-        interface IAnnotationFactoryHelper;
-    }
-
-    class CAnnotationMember {
-        constructor(
-            [in] String name,
-            [in] IInterface* val);
-
-        constructor(
-            [in] String name,
-            [in] IInterface* val,
-            [in] ClassID type);
-            // [in] Method m;)
-
-        interface IAnnotationMember;
-        interface ISerializable;
-    }
-
-    } // namespace Annotation
-    } // namespace Lang
-*/
-
-    namespace Luni {
-/*
-    namespace Lang {
-    namespace Reflect {
-
-    [local]
-    class CGenericSignatureParser {
-        constructor(
-            [in] IClassLoader* loader);
-
-        interface IGenericSignatureParser;
-    }
-
-    class CImplForArray {
-        constructor(
-            [in] IType* componentType);
-
-        interface IImplForArray;
-    }
-
-    class CImplForType {
-        constructor(
-            [in] IImplForType* ownerType,
-            [in] String rawTypeName,
-            [in] IListOfTypes* args,
-            [in] IClassLoader* loader);
+    ////namespace Kernel {
+    ////namespace Vm {
 
-        interface IImplForType;
-    }
-
-    class CImplForVariable {
-        interface IImplForVariable;
-    }
-
-    class CImplForWildcard {
-        constructor(
-            [in] IListOfTypes* extendsBound,
-            [in] IListOfTypes* superBound);
-
-        interface IImplForWildcard;
-    }
-
-    class CListOfTypes {
-        interface IListOfTypes;
-    }
-
-    singleton class CTypes {
-        interface ITypes;
-    }
-
-    } // namespace Reflect
-    } // namespace Lang
-*/
-    namespace Util {
-
-    class CDeleteOnExit {
-        interface IDeleteOnExit;
-    }
+    ////singleton class CStringUtils {
+    ////    interface IStringUtils;
+    ////}
 
-    singleton class CDeleteOnExitHelper {
-        interface IDeleteOnExitHelper;
-    }
+    ////} // namespace Vm
+    ////} // namespace Kernel
 
-    } // namespace Util
-    } // namespace Luni
+    ////namespace Lang {
+    ////namespace Annotation {
 
-    namespace Security {
-    namespace Asn1 {
+    ////class CAnnotationFactory {
+    ////    interface IAnnotationFactory;
+    ////    interface IInvocationHandler;
+    ////    interface ISerializable;
+    ////}
 
-    class CASN1Any {
-        constructor();
+    ////singleton class CAnnotationFactoryHelper {
+    ////    interface IAnnotationFactoryHelper;
+    ////}
 
-        interface IASN1Any;
-    }
+    ////class CAnnotationMember {
+    ////    constructor(
+    ////        [in] String name,
+    ////        [in] IInterface* val);
 
-    singleton class CASN1AnyHelper {
-        interface IASN1AnyHelper;
-    }
+    ////    constructor(
+    ////        [in] String name,
+    ////        [in] IInterface* val,
+    ////        [in] ClassID type);
+    ////        // [in] Method m;)
 
-    class CASN1BitString {
-        constructor();
+    ////    interface IAnnotationMember;
+    ////    interface ISerializable;
+    ////}
 
-        interface IASN1BitString;
-    }
+    ////} // namespace Annotation
+    ////} // namespace Lang
 
-    singleton class CASN1BitStringHelper {
-        interface IASN1BitStringHelper;
-    }
 
-    class CASN1NamedBitList {
-        constructor(
-            [in] Int32 minBits);
+    ////namespace Luni {
 
-        interface IASN1NamedBitList;
-    }
+    ////namespace Lang {
+    ////namespace Reflect {
 
-    class CASN1Boolean {
-        constructor();
+    ////[local]
+    ////class CGenericSignatureParser {
+    ////    constructor(
+    ////        [in] IClassLoader* loader);
 
-        interface IASN1Boolean;
-    }
+    ////    interface IGenericSignatureParser;
+    ////}
 
-    singleton class CASN1BooleanHelper {
-        interface IASN1BooleanHelper;
-    }
+    ////class CImplForArray {
+    ////    constructor(
+    ////        [in] IType* componentType);
 
-    [deprecated]
-    class CASN1Choice {
-        constructor(
-            [in] ArrayOf<IASN1Type*>* asn1Type);
+    ////    interface IImplForArray;
+    ////}
 
-        interface IASN1Choice;
-    }
+    ////class CImplForType {
+    ////    constructor(
+    ////        [in] IImplForType* ownerType,
+    ////        [in] String rawTypeName,
+    ////        [in] IListOfTypes* args,
+    ////        [in] IClassLoader* loader);
 
-    class CASN1Enumerated {
-        constructor();
+    ////    interface IImplForType;
+    ////}
 
-        interface IASN1Enumerated;
-        interface IASN1Primitive;
-    }
+    ////class CImplForVariable {
+    ////    interface IImplForVariable;
+    ////}
 
-    singleton class CASN1EnumeratedHelper {
-        interface IASN1EnumeratedHelper;
-    }
+    ////class CImplForWildcard {
+    ////    constructor(
+    ////        [in] IListOfTypes* extendsBound,
+    ////        [in] IListOfTypes* superBound);
 
-    class CASN1Explicit {
-        constructor(
-            [in] Int32 tagNumber,
-            [in] IASN1Type* type);
+    ////    interface IImplForWildcard;
+    ////}
 
-        constructor(
-            [in] Int32 tagClass,
-            [in] Int32 tagNumber,
-            [in] IASN1Type* type);
+    ////class CListOfTypes {
+    ////    interface IListOfTypes;
+    ////}
 
-        interface IASN1Explicit;
-        interface IASN1Type;
-        interface IASN1Constants;
-    }
+    ////singleton class CTypes {
+    ////    interface ITypes;
+    ////}
 
-    class CASN1GeneralizedTime {
-        constructor();
+    ////} // namespace Reflect
+    ////} // namespace Lang
 
-        interface IASN1GeneralizedTime;
-    }
+    ////namespace Util {
 
-    singleton class CASN1GeneralizedTimeHelper {
-        interface IASN1GeneralizedTimeHelper;
-    }
+    ////class CDeleteOnExit {
+    ////    interface IDeleteOnExit;
+    ////}
 
-    class CASN1Implicit {
-        constructor(
-            [in] Int32 tagNumber,
-            [in] IASN1Type* type);
+    ////singleton class CDeleteOnExitHelper {
+    ////    interface IDeleteOnExitHelper;
+    ////}
 
-        interface IASN1Implicit;
-    }
+    ////} // namespace Util
+    ////} // namespace Luni
 
-    class CASN1Integer {
-        constructor();
+    //namespace Security {
+    //namespace Asn1 {
 
-        interface IASN1Integer;
-    }
+    //class CASN1Any {
+    //    constructor();
 
-    singleton class CASN1IntegerHelper {
-        interface IASN1IntegerHelper;
-    }
+    //    interface IASN1Any;
+    //}
 
-    class CASN1OctetString {
-        constructor();
+    //singleton class CASN1AnyHelper {
+    //    interface IASN1AnyHelper;
+    //}
 
-        interface IASN1OctetString;
-    }
+    //class CASN1BitString {
+    //    constructor();
 
-    singleton class CASN1OctetStringHelper {
-        interface IASN1OctetStringHelper;
-    }
+    //    interface IASN1BitString;
+    //}
 
-    class CASN1Oid {
-        constructor();
+    //singleton class CASN1BitStringHelper {
+    //    interface IASN1BitStringHelper;
+    //}
 
-        interface IASN1Oid;
-    }
+    //class CASN1NamedBitList {
+    //    constructor(
+    //        [in] Int32 minBits);
 
-    singleton class CASN1OidHelper {
-        interface IASN1OidHelper;
-    }
+    //    interface IASN1NamedBitList;
+    //}
 
-    [deprecated]
-    class CASN1Sequence {
-        constructor(
-            [in] ArrayOf<IASN1Type*>* type);
+    //class CASN1Boolean {
+    //    constructor();
 
-        interface IASN1Sequence;
-    }
+    //    interface IASN1Boolean;
+    //}
 
-    [deprecated]
-    class CASN1SequenceOf {
-        constructor(
-            [in] IASN1Type* asn1Type);
+    //singleton class CASN1BooleanHelper {
+    //    interface IASN1BooleanHelper;
+    //}
 
-        interface IASN1SequenceOf;
-    }
+    //[deprecated]
+    //class CASN1Choice {
+    //    constructor(
+    //        [in] ArrayOf<IASN1Type*>* asn1Type);
 
-    [deprecated]
-    class CASN1Set {
-        constructor(
-            [in] ArrayOf<IASN1Type*>* type);
+    //    interface IASN1Choice;
+    //}
 
-        interface IASN1Set;
-    }
+    //class CASN1Enumerated {
+    //    constructor();
 
-    class CASN1SetOf {
-        constructor(
-            [in] IASN1Type* type);
+    //    interface IASN1Enumerated;
+    //    interface IASN1Primitive;
+    //}
 
-        interface IASN1SetOf;
-    }
+    //singleton class CASN1EnumeratedHelper {
+    //    interface IASN1EnumeratedHelper;
+    //}
 
-    singleton class CASN1StringTypeHelper {
-        interface IASN1StringTypeHelper;
-    }
+    //class CASN1Explicit {
+    //    constructor(
+    //        [in] Int32 tagNumber,
+    //        [in] IASN1Type* type);
 
-    class CASN1UTCTime {
-        constructor();
+    //    constructor(
+    //        [in] Int32 tagClass,
+    //        [in] Int32 tagNumber,
+    //        [in] IASN1Type* type);
 
-        interface IASN1UTCTime;
-    }
+    //    interface IASN1Explicit;
+    //    interface IASN1Type;
+    //    interface IASN1Constants;
+    //}
 
-    singleton class CASN1UTCTimeHelper {
-        interface IASN1UTCTimeHelper;
-    }
+    //class CASN1GeneralizedTime {
+    //    constructor();
 
-    [deprecated]
-    class CBerInputStream {
-        constructor(
-            [in] ArrayOf<Byte>* encoded);
-        constructor(
-            [in] ArrayOf<Byte>* encoded,
-            [in] Int32 offset,
-            [in] Int32 expectedLength);
-        constructor(
-            [in] IInputStream* is);
-        constructor(
-            [in] IInputStream* is,
-            [in] Int32 initialSize);
+    //    interface IASN1GeneralizedTime;
+    //}
 
-        interface IBerInputStream;
-    }
+    //singleton class CASN1GeneralizedTimeHelper {
+    //    interface IASN1GeneralizedTimeHelper;
+    //}
 
-    singleton class CBerInputStreamHelper {
-        interface IBerInputStreamHelper;
-    }
+    //class CASN1Implicit {
+    //    constructor(
+    //        [in] Int32 tagNumber,
+    //        [in] IASN1Type* type);
 
-    class CBerOutputStream {
-        interface IBerOutputStream;
-    }
+    //    interface IASN1Implicit;
+    //}
 
-    [deprecated]
-    class CBitString {
-        constructor(
-            [in] ArrayOf<Byte>* bytes,
-            [in] Int32 unusedBits);
+    //class CASN1Integer {
+    //    constructor();
 
-        constructor(
-            [in] ArrayOf<Boolean>* values);
+    //    interface IASN1Integer;
+    //}
 
-        interface IBitString;
-    }
+    //singleton class CASN1IntegerHelper {
+    //    interface IASN1IntegerHelper;
+    //}
 
-    [deprecated]
-    class CDerInputStream {
-        constructor(
-            [in] ArrayOf<Byte>* encoded);
-        constructor(
-            [in] ArrayOf<Byte>* encoded,
-            [in] Int32 offset,
-            [in] Int32 encodingLen);
-        constructor(
-            [in] IInputStream* is);
+    //class CASN1OctetString {
+    //    constructor();
 
-        interface IBerInputStream;
-    }
+    //    interface IASN1OctetString;
+    //}
 
-    class CDerOutputStream {
-        constructor(
-            [in] IASN1Type* asn1,
-            [in] IInterface* object);
+    //singleton class CASN1OctetStringHelper {
+    //    interface IASN1OctetStringHelper;
+    //}
 
-        interface IBerOutputStream;
-    }
+    //class CASN1Oid {
+    //    constructor();
 
-    [deprecated]
-    class CObjectIdentifier {
-        constructor(
-            [in] ArrayOf<Int32>* oid);
-        constructor(
-            [in] String strOid);
+    //    interface IASN1Oid;
+    //}
 
-        interface IObjectIdentifier;
-    }
+    //singleton class CASN1OidHelper {
+    //    interface IASN1OidHelper;
+    //}
 
-    class CObjectIdentifierHelper {
-        interface IObjectIdentifierHelper;
-    }
+    //[deprecated]
+    //class CASN1Sequence {
+    //    constructor(
+    //        [in] ArrayOf<IASN1Type*>* type);
 
-    } // namespace Asn1
+    //    interface IASN1Sequence;
+    //}
 
-    namespace Fortress {
+    //[deprecated]
+    //class CASN1SequenceOf {
+    //    constructor(
+    //        [in] IASN1Type* asn1Type);
 
-    class CSpiAndProvider {
-        interface ISpiAndProvider;
-    }
+    //    interface IASN1SequenceOf;
+    //}
 
-    class CEngine {
-        constructor(
-            [in] String service);
+    //[deprecated]
+    //class CASN1Set {
+    //    constructor(
+    //        [in] ArrayOf<IASN1Type*>* type);
 
-        interface IEngine;
-    }
+    //    interface IASN1Set;
+    //}
 
-    singleton class CEngineHelper {
-        interface IEngineHelper;
-    }
+    //class CASN1SetOf {
+    //    constructor(
+    //        [in] IASN1Type* type);
 
-    class CServicesHelper {
-        interface IServicesHelper;
-    }
+    //    interface IASN1SetOf;
+    //}
 
-    } // namespace Fortress
+    //singleton class CASN1StringTypeHelper {
+    //    interface IASN1StringTypeHelper;
+    //}
 
-    namespace Pkcs10 {
+    //class CASN1UTCTime {
+    //    constructor();
 
-    [deprecated]
-    class CCertificationRequest {
-        constructor(
-            [in] ICertificationRequestInfo* info,
-            [in] IAlgorithmIdentifier* algId,
-            [in] ArrayOf<Byte>* signature);
+    //    interface IASN1UTCTime;
+    //}
 
-        interface ICertificationRequest;
-    }
+    //singleton class CASN1UTCTimeHelper {
+    //    interface IASN1UTCTimeHelper;
+    //}
 
-    singleton class CCertificationRequestHelper {
-        interface ICertificationRequestHelper;
-    }
+    //[deprecated]
+    //class CBerInputStream {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoded);
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoded,
+    //        [in] Int32 offset,
+    //        [in] Int32 expectedLength);
+    //    constructor(
+    //        [in] IInputStream* is);
+    //    constructor(
+    //        [in] IInputStream* is,
+    //        [in] Int32 initialSize);
 
-    class CCertificationRequestInfo {
-        interface ICertificationRequestInfo;
-    }
+    //    interface IBerInputStream;
+    //}
 
-    singleton class CCertificationRequestInfoHelper {
-        interface ICertificationRequestInfoHelper;
-    }
+    //singleton class CBerInputStreamHelper {
+    //    interface IBerInputStreamHelper;
+    //}
 
-    } // namespace Pkcs10
+    //class CBerOutputStream {
+    //    interface IBerOutputStream;
+    //}
 
-    namespace Pkcs7 {
+    //[deprecated]
+    //class CBitString {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* bytes,
+    //        [in] Int32 unusedBits);
 
-    singleton class CAuthenticatedAttributesHelper {
-        interface IAuthenticatedAttributesHelper;
-    }
+    //    constructor(
+    //        [in] ArrayOf<Boolean>* values);
 
-    class CContentInfo {
-        interface IContentInfo;
-    }
+    //    interface IBitString;
+    //}
 
-    singleton class CContentInfoHelper {
-        interface IContentInfoHelper;
-    }
+    //[deprecated]
+    //class CDerInputStream {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoded);
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoded,
+    //        [in] Int32 offset,
+    //        [in] Int32 encodingLen);
+    //    constructor(
+    //        [in] IInputStream* is);
 
-    class CSignedData {
-        interface ISignedData;
-    }
+    //    interface IBerInputStream;
+    //}
 
-    singleton class CSignedDataHelper {
-        interface ISignedDataHelper;
-    }
+    //class CDerOutputStream {
+    //    constructor(
+    //        [in] IASN1Type* asn1,
+    //        [in] IInterface* object);
 
-    class CSignerInfo {
-        interface ISignerInfo;
-    }
+    //    interface IBerOutputStream;
+    //}
 
-    singleton class CSignerInfoHelper {
-        interface ISignerInfoHelper;
-    }
+    //[deprecated]
+    //class CObjectIdentifier {
+    //    constructor(
+    //        [in] ArrayOf<Int32>* oid);
+    //    constructor(
+    //        [in] String strOid);
 
-    } // namespace Pkcs7
+    //    interface IObjectIdentifier;
+    //}
 
-    namespace Pkcs8 {
+    //class CObjectIdentifierHelper {
+    //    interface IObjectIdentifierHelper;
+    //}
 
-    [deprecated]
-    class CPrivateKeyInfo {
-        constructor(
-            [in] Int32 version,
-            [in] IAlgorithmIdentifier* privateKeyAlgorithm,
-            [in] ArrayOf<Byte>* privateKey,
-            [in] IList* attributes);
+    //} // namespace Asn1
 
-        interface IPrivateKeyInfo;
-    }
+    //namespace Fortress {
 
-    class CPrivateKeyInfoHelper {
-        interface IPrivateKeyInfoHelper;
-    }
+    //class CSpiAndProvider {
+    //    interface ISpiAndProvider;
+    //}
 
-    } // namespace Pkcs8
+    //class CEngine {
+    //    constructor(
+    //        [in] String service);
 
-    namespace Provider {
-    namespace Cert {
+    //    interface IEngine;
+    //}
 
-    class CCache {
-        constructor(
-            [in] Int32 pref_size,
-            [in] Int32 size);
+    //singleton class CEngineHelper {
+    //    interface IEngineHelper;
+    //}
 
-        constructor(
-            [in] Int32 pref_size);
+    //class CServicesHelper {
+    //    interface IServicesHelper;
+    //}
 
-        constructor();
+    //} // namespace Fortress
 
-        interface ICache;
-    }
+    //namespace Pkcs10 {
 
-    class CDRLCertFactory {
-        constructor();
+    //[deprecated]
+    //class CCertificationRequest {
+    //    constructor(
+    //        [in] ICertificationRequestInfo* info,
+    //        [in] IAlgorithmIdentifier* algId,
+    //        [in] ArrayOf<Byte>* signature);
 
-        interface IDRLCertFactory;
-    }
+    //    interface ICertificationRequest;
+    //}
 
-    class CX509CRLEntryImpl {
-        constructor(
-            [in] IRevokedCertificate* rcert,
-            [in] IX500Principal* issuer);
+    //singleton class CCertificationRequestHelper {
+    //    interface ICertificationRequestHelper;
+    //}
 
-        interface IX509CRLEntry;
-    }
+    //class CCertificationRequestInfo {
+    //    interface ICertificationRequestInfo;
+    //}
 
-    [deprecated]
-    class CX509CRLImpl {
-        constructor(
-            [in] ICertificateList* crl);
-        constructor(
-            [in] IInputStream* is);
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
+    //singleton class CCertificationRequestInfoHelper {
+    //    interface ICertificationRequestInfoHelper;
+    //}
 
-        interface IX509CRLImpl;
-    }
+    //} // namespace Pkcs10
 
-    class CX509CertFactoryImpl {
-        constructor();
+    //namespace Pkcs7 {
 
-        interface IX509CertFactoryImpl;
-    }
+    //singleton class CAuthenticatedAttributesHelper {
+    //    interface IAuthenticatedAttributesHelper;
+    //}
 
-    [deprecated]
-    class CX509CertImpl {
-        constructor(
-            [in] IInputStream* is);
-        constructor(
-            [in] ICertificate* certificate);
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
+    //class CContentInfo {
+    //    interface IContentInfo;
+    //}
 
-        interface IX509CertImpl;
-        interface IX509Extension;
-    }
+    //singleton class CContentInfoHelper {
+    //    interface IContentInfoHelper;
+    //}
 
-    class CX509CertPathImpl {
-        constructor(
-            [in] IList* certs);
+    //class CSignedData {
+    //    interface ISignedData;
+    //}
 
-        interface IX509CertPathImpl;
-    }
+    //singleton class CSignedDataHelper {
+    //    interface ISignedDataHelper;
+    //}
 
-    singleton class CX509CertPathImplHelper {
-        interface IX509CertPathImplHelper;
-    }
+    //class CSignerInfo {
+    //    interface ISignerInfo;
+    //}
 
-    } // namespace Cert
+    //singleton class CSignerInfoHelper {
+    //    interface ISignerInfoHelper;
+    //}
 
-    namespace Crypto {
+    //} // namespace Pkcs7
 
-    class CCryptoProvider {
-        constructor();
+    //namespace Pkcs8 {
 
-        interface ICryptoProvider;
-    }
+    //[deprecated]
+    //class CPrivateKeyInfo {
+    //    constructor(
+    //        [in] Int32 version,
+    //        [in] IAlgorithmIdentifier* privateKeyAlgorithm,
+    //        [in] ArrayOf<Byte>* privateKey,
+    //        [in] IList* attributes);
 
-    class CDSAKeyFactoryImpl {
-        interface IDSAKeyFactoryImpl;
-    }
+    //    interface IPrivateKeyInfo;
+    //}
 
-    class CDSAPrivateKeyImpl {
-        constructor(
-            [in] IDSAPrivateKeySpec* keySpec);
-        constructor(
-            [in] IPKCS8EncodedKeySpec* keySpec);
+    //class CPrivateKeyInfoHelper {
+    //    interface IPrivateKeyInfoHelper;
+    //}
 
-        interface IPrivateKeyImpl;
-        interface IDSAPrivateKey;
-    }
+    //} // namespace Pkcs8
 
-    class CDSAPublicKeyImpl {
-        constructor(
-            [in] IDSAPublicKeySpec* keySpec);
-        constructor(
-            [in] IX509EncodedKeySpec* keySpec);
+    //namespace Provider {
+    //namespace Cert {
 
-        interface IPublicKeyImpl;
-        interface IDSAPublicKey;
-    }
+    //class CCache {
+    //    constructor(
+    //        [in] Int32 pref_size,
+    //        [in] Int32 size);
 
-    class CRandomBitsSupplierHelper {
-        interface IRandomBitsSupplierHelper;
-    }
+    //    constructor(
+    //        [in] Int32 pref_size);
 
-    class CSHA1PRNG_SecureRandomImpl {
-        interface ISHA1PRNG_SecureRandomImpl;
-        interface ISHA1_Data;
-    }
+    //    constructor();
 
-    class CSHA1_MessageDigestImpl {
-        constructor();
+    //    interface ICache;
+    //}
 
-        interface ISHA1_MessageDigestImpl;
-        interface ISHA1_Data;
-    }
+    //class CDRLCertFactory {
+    //    constructor();
 
-    class CSHA1withDSA_SignatureImpl {
-        constructor();
+    //    interface IDRLCertFactory;
+    //}
 
-        interface ISHA1withDSA_SignatureImpl;
-    }
+    //class CX509CRLEntryImpl {
+    //    constructor(
+    //        [in] IRevokedCertificate* rcert,
+    //        [in] IX500Principal* issuer);
 
-    } // namespace Crypto
+    //    interface IX509CRLEntry;
+    //}
 
-    } // namespace Provider
+    //[deprecated]
+    //class CX509CRLImpl {
+    //    constructor(
+    //        [in] ICertificateList* crl);
+    //    constructor(
+    //        [in] IInputStream* is);
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
 
-    namespace Utils {
+    //    interface IX509CRLImpl;
+    //}
 
-    singleton class CAlgNameMapperHelper {
-        interface IAlgNameMapperHelper;
-    }
+    //class CX509CertFactoryImpl {
+    //    constructor();
 
-    singleton class CArrayHelper {
-        interface IArrayHelper;
-    }
+    //    interface IX509CertFactoryImpl;
+    //}
 
-    [deprecated]
-    class CObjectIdentifierInUtils {
-        constructor(
-            [in] ArrayOf<Int32>* oid);
-        constructor(
-            [in] ArrayOf<Int32>* oid,
-            [in] String name,
-            [in] IObject* oidGroup);
+    //[deprecated]
+    //class CX509CertImpl {
+    //    constructor(
+    //        [in] IInputStream* is);
+    //    constructor(
+    //        [in] ICertificate* certificate);
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
 
-        interface IObjectIdentifierInUtils;
-    }
+    //    interface IX509CertImpl;
+    //    interface IX509Extension;
+    //}
 
-    singleton class CObjectIdentifierInUtilsHelper {
-        interface IObjectIdentifierInUtilsHelper;
-    }
+    //class CX509CertPathImpl {
+    //    constructor(
+    //        [in] IList* certs);
 
-    singleton class CJarUtils {
-        interface IJarUtils;
-    }
+    //    interface IX509CertPathImpl;
+    //}
 
-    } // namespace Utils
+    //singleton class CX509CertPathImplHelper {
+    //    interface IX509CertPathImplHelper;
+    //}
 
-    namespace X501 {
+    //} // namespace Cert
 
-    class CAttributeTypeAndValue {
-        constructor(
-            [in] String sOid,
-            [in] IAttributeValue* value);
+    //namespace Crypto {
 
-        interface IAttributeTypeAndValue;
-    }
+    //class CCryptoProvider {
+    //    constructor();
 
-    singleton class CAttributeTypeAndValueHelper {
-        interface IAttributeTypeAndValueHelper;
-    }
+    //    interface ICryptoProvider;
+    //}
 
-    class CAttributeTypeAndValueComparator {
-        interface IComparator;
-        interface ISerializable;
-    }
+    //class CDSAKeyFactoryImpl {
+    //    interface IDSAKeyFactoryImpl;
+    //}
 
-    [deprecated]
-    class CAttributeValue {
-        constructor(
-            [in] String parsedString,
-            [in] Boolean hasQorE);
+    //class CDSAPrivateKeyImpl {
+    //    constructor(
+    //        [in] IDSAPrivateKeySpec* keySpec);
+    //    constructor(
+    //        [in] IPKCS8EncodedKeySpec* keySpec);
 
-        constructor(
-            [in] String hexString,
-            [in] ArrayOf<Byte>* encoded);
+    //    interface IPrivateKeyImpl;
+    //    interface IDSAPrivateKey;
+    //}
 
-        constructor(
-            [in] String rawString,
-            [in] ArrayOf<Byte>* encoded,
-            [in] Int32 tag);
+    //class CDSAPublicKeyImpl {
+    //    constructor(
+    //        [in] IDSAPublicKeySpec* keySpec);
+    //    constructor(
+    //        [in] IX509EncodedKeySpec* keySpec);
 
-        interface IAttributeValue;
-    }
+    //    interface IPublicKeyImpl;
+    //    interface IDSAPublicKey;
+    //}
 
-    singleton class CDirectoryString {
-        interface IDirectoryString;
-    }
+    //class CRandomBitsSupplierHelper {
+    //    interface IRandomBitsSupplierHelper;
+    //}
 
-    [deprecated]
-    class CName {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-        constructor(
-            [in] String name);
-        constructor(
-            [in] IList* rdn);
+    //class CSHA1PRNG_SecureRandomImpl {
+    //    interface ISHA1PRNG_SecureRandomImpl;
+    //    interface ISHA1_Data;
+    //}
 
-        interface IName;
-    }
+    //class CSHA1_MessageDigestImpl {
+    //    constructor();
 
-    singleton class CNameHelper {
-        interface INameHelper;
-    }
+    //    interface ISHA1_MessageDigestImpl;
+    //    interface ISHA1_Data;
+    //}
 
-    } // namespace X501
+    //class CSHA1withDSA_SignatureImpl {
+    //    constructor();
 
-    namespace X509 {
-    namespace Tsp {
+    //    interface ISHA1withDSA_SignatureImpl;
+    //}
 
-    [deprecated]
-    class CMessageImprint {
-        constructor(
-            [in] IAlgorithmIdentifier* algId,
-            [in] ArrayOf<Byte>* hashedMessage);
+    //} // namespace Crypto
 
-        interface IMessageImprint;
-    }
+    //} // namespace Provider
 
-    class CPKIStatusInfo {
-        constructor(
-            [in] Int32 pkiStatus,
-            [in] IList* statusString,
-            [in] Int32 failInfo);
+    //namespace Utils {
 
-        interface IPKIStatusInfo;
-    }
+    //singleton class CAlgNameMapperHelper {
+    //    interface IAlgNameMapperHelper;
+    //}
 
-    singleton class CPKIStatusInfoHelper {
-        interface IPKIStatusInfoHelper;
-    }
+    //singleton class CArrayHelper {
+    //    interface IArrayHelper;
+    //}
 
-    [deprecated]
-    class CTSTInfo {
-        constructor(
-            [in] Int32 ver,
-            [in] String policy,
-            [in] IMessageImprint* messageImprint,
-            [in] IBigInteger* serialNumber,
-            [in] IDate* genTime,
-            [in] ArrayOf<Int32>* accuracy,
-            [in] Boolean ordering,
-            [in] IBigInteger* nonce,
-            [in] IGeneralName* tsa,
-            [in] IExtensions* extensions);
+    //[deprecated]
+    //class CObjectIdentifierInUtils {
+    //    constructor(
+    //        [in] ArrayOf<Int32>* oid);
+    //    constructor(
+    //        [in] ArrayOf<Int32>* oid,
+    //        [in] String name,
+    //        [in] IObject* oidGroup);
 
-        interface ITSTInfo;
-    }
+    //    interface IObjectIdentifierInUtils;
+    //}
 
-    singleton class CTSTInfoHelper {
-        interface ITSTInfoHelper;
-    }
+    //singleton class CObjectIdentifierInUtilsHelper {
+    //    interface IObjectIdentifierInUtilsHelper;
+    //}
 
-    class CTimeStampReq {
-        constructor(
-            [in] Int32 ver,
-            [in] IMessageImprint* messageImprint,
-            [in] String reqPolicy,
-            [in] IBigInteger* nonce,
-            [in] Boolean certReq,
-            [in] IExtensions* extensions);
+    //singleton class CJarUtils {
+    //    interface IJarUtils;
+    //}
 
-        interface ITimeStampReq;
-    }
+    //} // namespace Utils
 
-    singleton class CTimeStampReqHelper {
-        interface ITimeStampReqHelper;
-    }
+    //namespace X501 {
 
-    class CTimeStampResp {
-        constructor(
-            [in] IPKIStatusInfo* status,
-            [in] IContentInfo* timeStampToken);
+    //class CAttributeTypeAndValue {
+    //    constructor(
+    //        [in] String sOid,
+    //        [in] IAttributeValue* value);
 
-        interface ITimeStampResp;
-    }
+    //    interface IAttributeTypeAndValue;
+    //}
 
-    singleton class CTimeStampRespHelper {
-        interface ITimeStampRespHelper;
-    }
+    //singleton class CAttributeTypeAndValueHelper {
+    //    interface IAttributeTypeAndValueHelper;
+    //}
 
-    } // namespace Tsp
+    //class CAttributeTypeAndValueComparator {
+    //    interface IComparator;
+    //    interface ISerializable;
+    //}
 
-    class CAccessDescription {
-        interface IAccessDescription;
-    }
+    //[deprecated]
+    //class CAttributeValue {
+    //    constructor(
+    //        [in] String parsedString,
+    //        [in] Boolean hasQorE);
 
-    singleton class CAccessDescriptionHelper {
-        interface IAccessDescriptionHelper;
-    }
+    //    constructor(
+    //        [in] String hexString,
+    //        [in] ArrayOf<Byte>* encoded);
 
-    [deprecated]
-    class CAlgorithmIdentifier {
-        constructor(
-            [in] String algorithm);
-        constructor(
-            [in] String algorithm,
-            [in] ArrayOf<Byte>* parameters);
+    //    constructor(
+    //        [in] String rawString,
+    //        [in] ArrayOf<Byte>* encoded,
+    //        [in] Int32 tag);
 
-        interface IAlgorithmIdentifier;
-    }
+    //    interface IAttributeValue;
+    //}
 
-    singleton class CAlgorithmIdentifierHelper {
-        interface IAlgorithmIdentifierHelper;
-    }
+    //singleton class CDirectoryString {
+    //    interface IDirectoryString;
+    //}
 
-    [deprecated]
-    class CAlternativeName {
-        constructor(
-            [in] Boolean which,
-            [in] ArrayOf<Byte>* encoding);
+    //[deprecated]
+    //class CName {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+    //    constructor(
+    //        [in] String name);
+    //    constructor(
+    //        [in] IList* rdn);
 
-        interface IAlternativeName;
-    }
+    //    interface IName;
+    //}
 
-    [deprecated]
-    class CAuthorityKeyIdentifier {
-        constructor(
-            [in] ArrayOf<Byte>* keyIdentifier,
-            [in] IGeneralNames* authorityCertIssuer,
-            [in] IBigInteger* authorityCertSerialNumber);
+    //singleton class CNameHelper {
+    //    interface INameHelper;
+    //}
 
-        interface IAuthorityKeyIdentifier;
-    }
+    //} // namespace X501
 
-    singleton class CAuthorityKeyIdentifierHelper {
-        interface IAuthorityKeyIdentifierHelper;
-    }
+    //namespace X509 {
+    //namespace Tsp {
 
-    [deprecated]
-    class CBasicConstraints {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
+    //[deprecated]
+    //class CMessageImprint {
+    //    constructor(
+    //        [in] IAlgorithmIdentifier* algId,
+    //        [in] ArrayOf<Byte>* hashedMessage);
 
-        interface IBasicConstraints;
-    }
-
-    singleton class CBasicConstraintsHelper {
-        interface IBasicConstraintsHelper;
-    }
+    //    interface IMessageImprint;
+    //}
 
-    class CCRLDistributionPoints {
-        interface ICRLDistributionPoints;
-    }
+    //class CPKIStatusInfo {
+    //    constructor(
+    //        [in] Int32 pkiStatus,
+    //        [in] IList* statusString,
+    //        [in] Int32 failInfo);
 
-    singleton class CCRLDistributionPointsHelper {
-        interface ICRLDistributionPointsHelper;
-    }
+    //    interface IPKIStatusInfo;
+    //}
 
-    [deprecated]
-    class CCRLNumber {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
+    //singleton class CPKIStatusInfoHelper {
+    //    interface IPKIStatusInfoHelper;
+    //}
 
-        interface ICRLNumber;
-    }
-
-    singleton class CCRLNumberHelper {
-        interface ICRLNumberHelper;
-    }
+    //[deprecated]
+    //class CTSTInfo {
+    //    constructor(
+    //        [in] Int32 ver,
+    //        [in] String policy,
+    //        [in] IMessageImprint* messageImprint,
+    //        [in] IBigInteger* serialNumber,
+    //        [in] IDate* genTime,
+    //        [in] ArrayOf<Int32>* accuracy,
+    //        [in] Boolean ordering,
+    //        [in] IBigInteger* nonce,
+    //        [in] IGeneralName* tsa,
+    //        [in] IExtensions* extensions);
 
-    [deprecated]
-    class CCertificate {
-        constructor(
-            [in] ITBSCertificate* tbsCertificate,
-            [in] IAlgorithmIdentifier* signatureAlgorithm,
-            [in] ArrayOf<Byte>* signatureValue);
-
-        interface ICertificate;
-    }
-
-    singleton class CCertificateHelper {
-        interface ICertificateHelper;
-    }
-
-    [deprecated]
-    class CCertificateIssuer {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-
-        interface ICertificateIssuer;
-    }
-
-    singleton class CCertificateIssuerHelper {
-        interface ICertificateIssuerHelper;
-    }
-
-    [deprecated]
-    class CCertificateList {
-        constructor(
-            [in] ITBSCertList* tbsCertList,
-            [in] IAlgorithmIdentifier* signatureAlgorithm,
-            [in] ArrayOf<Byte>* signatureValue);
-
-        interface ICertificateList;
-    }
-
-    singleton class CCertificateListHelper {
-        interface ICertificateListHelper;
-    }
-
-    class CCertificatePolicies {
-        constructor();
-
-        interface ICertificatePolicies;
-    }
-
-    singleton class CCertificatePoliciesHelper {
-        interface ICertificatePoliciesHelper;
-    }
-
-    class CDNParser {
-        constructor(
-            [in] String dn);
-
-        interface IDNParser;
-    }
-
-    class CDistributionPoint {
-        constructor(
-            [in] IDistributionPointName* distributionPoint,
-            [in] IReasonFlags* reasons,
-            [in] IGeneralNames* cRLIssuer);
-
-        interface IDistributionPoint;
-    }
-
-    singleton class CDistributionPointHelper {
-        interface IDistributionPointHelper;
-    }
-
-    class CDistributionPointName {
-        constructor(
-            [in] IGeneralNames* fullName);
-        constructor(
-            [in] IName* nameRelativeToCRLIssuer);
-
-        interface IDistributionPointName;
-    }
-
-    singleton class CDistributionPointNameHelper {
-        interface IDistributionPointNameHelper;
-    }
-
-    class CEDIPartyName {
-        interface IEDIPartyName;
-    }
-
-    singleton class CEDIPartyNameHelper {
-        interface IEDIPartyNameHelper;
-    }
-
-    [deprecated]
-    class CExtendedKeyUsage {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-
-        interface IExtendedKeyUsage;
-    }
-
-    singleton class CExtendedKeyUsageHelper {
-        interface IExtendedKeyUsageHelper;
-    }
-
-    [deprecated]
-    class CExtension {
-        constructor(
-            [in] String extnID,
-            [in] Boolean critical,
-            [in] IExtensionValue* extnValueObject);
-        constructor(
-            [in] String extnID,
-            [in] Boolean critical,
-            [in] ArrayOf<Byte>* extnValue);
-        constructor(
-            [in] ArrayOf<Int32>* extnID,
-            [in] Boolean critical,
-            [in] ArrayOf<Byte>* extnValue2);
-        constructor(
-            [in] String extnID,
-            [in] ArrayOf<Byte>* extnValue);
-        constructor(
-            [in] ArrayOf<Int32>* extnID,
-            [in] ArrayOf<Byte>* extnValue2);
-
-        interface IX509Extension;
-    }
-
-    singleton class CExtensionHelper {
-        interface IExtensionHelper;
-    }
-
-    [deprecated]
-    class CExtensionValue {
-        constructor();
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-
-        interface IExtensionValue;
-    }
-
-    class CExtensions {
-        constructor();
-        constructor(
-            [in] IList* extensions);
-
-        interface IExtensions;
-    }
-
-    singleton class CExtensionsHelper {
-        interface IExtensionsHelper;
-    }
-
-    [deprecated]
-    class CGeneralName {
-        constructor(
-            [in] Int32 tag,
-            [in] String name);
-        constructor(
-            [in] IOtherName* name);
-        constructor(
-            [in] IORAddress* name1);
-        constructor(
-            [in] IName* name2);
-        constructor(
-            [in] IEDIPartyName* name3);
-        constructor(
-            [in] ArrayOf<Byte>* name4);
-        constructor(
-            [in] Int32 tag,
-            [in] ArrayOf<Byte>* name1);
-
-        interface IGeneralName;
-    }
-
-    singleton class CGeneralNameHelper {
-        interface IGeneralNameHelper;
-    }
-
-    class CGeneralNames {
-        constructor();
-        constructor(
-            [in] IList* generalNames);
-
-        interface IGeneralNames;
-    }
-
-    singleton class CGeneralNamesHelper {
-        interface IGeneralNamesHelper;
-    }
-
-    class CGeneralSubtree {
-        constructor(
-            [in] IGeneralName* base,
-            [in] Int32 minimum,
-            [in] Int32 maximum);
-
-        interface IGeneralSubtree;
-    }
-
-    singleton class CGeneralSubtreeHelper {
-        interface IGeneralSubtreeHelper;
-    }
-
-    class CGeneralSubtrees {
-        constructor(
-            [in] IList* generalSubtrees);
-
-        interface IGeneralSubtrees;
-    }
-
-    singleton class CGeneralSubtreesHelper {
-        interface IGeneralSubtreesHelper;
-    }
-
-    class CInfoAccessSyntax {
-        interface IInfoAccessSyntax;
-    }
-
-    singleton class CInfoAccessSyntaxHelper {
-        interface IInfoAccessSyntaxHelper;
-    }
-
-    [deprecated]
-    class CInhibitAnyPolicy {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-
-        interface IInhibitAnyPolicy;
-    }
-
-    [deprecated]
-    class CInvalidityDate {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-
-        interface IInvalidityDate;
-    }
-
-    singleton class CInvalidityDateHelper {
-        interface IInvalidityDateHelper;
-    }
-
-    class CIssuingDistributionPoint {
-        constructor(
-            [in] IDistributionPointName* distributionPoint,
-            [in] IReasonFlags* onlySomeReasons);
-
-        interface IIssuingDistributionPoint;
-    }
-
-    singleton class CIssuingDistributionPointHelper {
-        interface IIssuingDistributionPointHelper;
-    }
-
-    [deprecated]
-    class CKeyUsage {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-
-        interface IKeyUsage;
-    }
-
-    class CNameConstraints {
-        constructor(
-            [in] IGeneralSubtrees* permittedSubtrees,
-            [in] IGeneralSubtrees* excludedSubtrees);
-
-        interface INameConstraints;
-    }
-
-    singleton class CNameConstraintsHelper {
-        interface INameConstraintsHelper;
-    }
-
-    class CORAddress {
-        interface IORAddress;
-    }
-
-    singleton class CORAddressHelper {
-        interface IORAddressHelper;
-    }
-
-    [deprecated]
-    class COtherName {
-        constructor(
-            [in] String typeID,
-            [in] ArrayOf<Byte>* value);
-
-        interface IOtherName;
-    }
-
-    singleton class COtherNameHelper {
-        interface IOtherNameHelper;
-    }
-
-    [deprecated]
-    class CPolicyConstraints {
-        constructor(
-            [in] IBigInteger* requireExplicitPolicy,
-            [in] IBigInteger* inhibitPolicyMapping);
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-
-        interface IExtensionValue;
-    }
-
-    singleton class CPolicyConstraintsHelper {
-        interface IPolicyConstraintsHelper;
-    }
-
-    class CPolicyInformation {
-        constructor(
-            [in] String policyIdentifier);
-
-        interface IPolicyInformation;
-    }
-
-    singleton class CPolicyInformationHelper {
-        interface IPolicyInformationHelper;
-    }
-
-    singleton class CPolicyQualifierInfoHelper {
-        interface IPolicyQualifierInfoHelper;
-    }
-
-    class CPrivateKeyUsagePeriod {
-        constructor(
-            [in] IDate* notBeforeDate,
-            [in] IDate* notAfterDate);
-
-        interface IPrivateKeyUsagePeriod;
-    }
-
-    singleton class CPrivateKeyUsagePeriodHelper {
-        interface IPrivateKeyUsagePeriodHelper;
-    }
-
-    [deprecated]
-    class CReasonCode {
-        constructor(
-            [in] ArrayOf<Byte>* encoding);
-
-        interface IReasonCode;
-    }
-
-    singleton class CReasonCodeHelper {
-        interface IReasonCodeHelper;
-    }
-
-    [deprecated]
-    class CReasonFlags {
-        constructor(
-            [in] ArrayOf<Boolean>* flags);
-
-        interface IReasonFlags;
-    }
-
-    singleton class CReasonFlagsHelper {
-        interface IReasonFlagsHelper;
-    }
-
-    [deprecated]
-    class CSubjectKeyIdentifier {
-        constructor(
-            [in] ArrayOf<Byte>* keyIdentifier);
-
-        interface ISubjectKeyIdentifier;
-    }
-
-    singleton class CSubjectKeyIdentifierHelper {
-        interface ISubjectKeyIdentifierHelper;
-    }
-
-    [deprecated]
-    class CSubjectPublicKeyInfo {
-        constructor(
-            [in] IAlgorithmIdentifier* algID,
-            [in] ArrayOf<Byte>* subjectPublicKey);
-        constructor(
-            [in] IAlgorithmIdentifier* algID,
-            [in] ArrayOf<Byte>* subjectPublicKey,
-            [in] Int32 unused);
-
-        interface ISubjectPublicKeyInfo;
-    }
-
-    singleton class CSubjectPublicKeyInfoHelper {
-        interface ISubjectPublicKeyInfoHelper;
-    }
-
-    class CRevokedCertificate {
-        constructor(
-            [in] IBigInteger* userCertificate,
-            [in] IDate* revocationDate,
-            [in] IExtensions* crlEntryExtensions);
-
-        interface IRevokedCertificate;
-    }
-
-    singleton class CRevokedCertificateHelper {
-        interface IRevokedCertificateHelper;
-    }
-
-    class CTBSCertList {
-        interface ITBSCertList;
-    }
-
-    singleton class CTBSCertListHelper {
-        interface ITBSCertListHelper;
-    }
-
-    [deprecated]
-    class CTBSCertificate {
-        constructor(
-            [in] Int32 ver,
-            [in] IBigInteger* serialNumber,
-            [in] IAlgorithmIdentifier* signature,
-            [in] IName* issuer,
-            [in] IValidity* validity,
-            [in] IName* subject,
-            [in] ISubjectPublicKeyInfo* subjectPublicKeyInfo,
-            [in] ArrayOf<Boolean>* issuerUniqueID,
-            [in] ArrayOf<Boolean>* subjectUniqueID,
-            [in] IExtensions* extensions);
-
-        interface ITBSCertificate;
-    }
-
-    singleton class CTBSCertificateHelper {
-        interface ITBSCertificateHelper;
-    }
-
-    singleton class CTimeHelper {
-        interface ITimeHelper;
-    }
-
-    class CValidity {
-        constructor(
-            [in] IDate* notBefore,
-            [in] IDate* notAfter);
-
-        interface IValidity;
-    }
-
-    singleton class CValidityHelper {
-        interface IValidityHelper;
-    }
-
-    [deprecated]
-    class CX509PublicKey {
-        constructor(
-            [in] String algorithm,
-            [in] ArrayOf<Byte>* encoded,
-            [in] ArrayOf<Byte>* keyBytes);
-
-        interface IX509PublicKey;
-    }
-
-    } // namespace X509
-
-
-    class CPrivateKeyImpl {
-        constructor(
-            [in] String algorithm);
-
-        interface IPrivateKeyImpl;
-    }
-
-    class CPublicKeyImpl {
-        constructor(
-            [in] String algorithm);
-
-        interface IPublicKeyImpl;
-    }
-
-    class CSystemScope {
-        constructor();
-        constructor(
-            [in] String name);
-        constructor(
-            [in] String name,
-            [in] IIdentityScope* scope);
-
-        interface IIdentityScope;
-    }
-
-    } // namespace Security
-
-    namespace Xml {
-    namespace Dom {
-
-    class CAttrImpl {
-        interface IAttr;
-    }
-
-    class CCDATASectionImpl {
-        constructor(
-            [in] IDocument* document,
-            [in] String data);
-
-        interface ICDATASectionImpl;
-    }
-
-    class CCommentImpl {
-        interface ICommentImpl;
-    }
-
-    class CDOMConfigurationImpl {
-        interface IDOMConfigurationImpl;
-    }
-
-    class CDOMErrorImpl {
-        constructor(
-            [in] Int32 severity,
-            [in] String type);
-
-        interface IDOMError;
-    }
-
-    singleton class CDOMImplementationImplHelper {
-        interface IDOMImplementationImplHelper;
-    }
-
-    class CDocumentFragmentImpl {
-        interface ILeafNodeImpl;
-    }
-
-    class CDocumentImpl {
-        constructor(
-            [in] IDOMImplementation* impl,
-            [in] String namespaceURI,
-            [in] String qualifiedName,
-            [in] IDocumentType* doctype,
-            [in] String inputEncoding);
-
-        interface ILeafNodeImpl;
-        interface IDocument;
-    }
-
-    singleton class CDocumentImplHelper {
-        interface IDocumentImplHelper;
-    }
-
-    class CDocumentTypeImpl {
-        constructor(
-            [in] IDocument* document,
-            [in] String qualifiedName,
-            [in] String publicId,
-            [in] String systemId);
-
-        interface ILeafNodeImpl;
-        interface IDocumentType;
-    }
-
-    class CElementImpl {
-        interface ILeafNodeImpl;
-        interface IElement;
-    }
-
-    class CElementAttrNamedNodeMapImpl {
-        interface INamedNodeMap;
-    }
-
-    class CEntityImpl {
-        interface IEntity;
-    }
-
-    class CEntityReferenceImpl {
-        interface ILeafNodeImpl;
-    }
-
-    class CNodeListImpl {
-        interface INodeList;
-    }
-
-    class CNotationImpl {
-        interface ILeafNodeImpl;
-        interface INotation;
-    }
-
-    class CProcessingInstructionImpl {
-        interface ILeafNodeImpl;
-        interface IProcessingInstruction;
-    }
-
-    class CTextImpl {
-        interface ICharacterDataImpl;
-        interface IText;
-    }
-
-    } // namespace Dom
-
-    namespace Parsers {
-
-    class CDocumentBuilderFactoryImpl {
-        interface IDocumentBuilderFactory;
-    }
-
-    class CSAXParserFactoryImpl {
-        interface ISAXParserFactory;
-    }
-
-    class CSAXParserImpl {
-        interface ISAXParser;
-    }
-
-    } // namespace Parsers
-
-    class CExpatReader {
-        interface IExpatReader;
-    }
-
-    } // namespace Xml
-
-    namespace Xnet {
-    namespace Provider {
-    namespace Jsse {
-
-    class CCertPinManager {
-        constructor(
-            [in] ITrustedCertificateStore* store);
-        constructor(
-            [in] String path,
-            [in] ITrustedCertificateStore* store);
-
-        interface ICertPinManager;
-    }
-
-    [deprecated]
-    class CCertificateMessage {
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length);
-        constructor(
-            [in] ArrayOf<IX509Certificate*>* certs);
-
-        interface ICertificateMessage;
-    }
-
-    [deprecated]
-    class CCertificateRequest {
-        constructor(
-            [in] ArrayOf<Byte>* certificate_types,
-            [in] ArrayOf<IX509Certificate*>* accepted);
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length);
-
-        interface ICertificateRequest;
-    }
-
-    [deprecated]
-    class CCertificateVerify {
-        constructor(
-            [in] ArrayOf<Byte>* hash);
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length);
-
-        interface IMessage;
-    }
-
-    class CCipherSuite {
-        interface ICipherSuite;
-    }
-
-    singleton class CCipherSuiteHelper {
-        interface ICipherSuiteHelper;
-    }
-
-    class CClientHandshakeImpl {
-        interface IHandshakeProtocol;
-    }
-
-    [deprecated]
-    class CClientHello {
-        constructor(
-            [in] ISecureRandom* sr,
-            [in] ArrayOf<Byte>* ver,
-            [in] ArrayOf<Byte>* ses_id,
-            [in] ArrayOf<ICipherSuite*>* cipher_suite);
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length);
-        constructor(
-            [in] IHandshakeIODataStream* ids);
-
-        interface IClientHello;
-    }
-
-    [deprecated]
-    class CClientKeyExchange {
-        constructor(
-            [in] ArrayOf<Byte>* encrypted_pre_master_secret,
-            [in] Boolean isTLS);
-        constructor(
-            [in] IBigInteger* dh_Yc);
-        constructor();
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length,
-            [in] Boolean isTLS,
-            [in] Boolean isRSA);
-
-        interface IClientKeyExchange;
-    }
-
-    class CClientSessionContext {
-        constructor();
-
-        interface IClientSessionContext;
-    }
-
-    singleton class CDHParametersHelper {
-        interface IDHParametersHelper;
-    }
-
-    class CDefaultSSLContextImpl {
-        interface ISSLContextSpi;
-    }
-
-    class CDelegatedTask {
-        constructor(
-            [in] IRunnable* action,
-            [in] IHandshakeProtocol* handshaker);
-
-        interface IRunnable;
-    }
-
-    class CDigitalSignature {
-        constructor(
-            [in] String authType);
-
-        interface IDigitalSignature;
-    }
-
-    class CFileClientSessionCache {
-        interface IFileClientSessionCache;
-    }
-
-    singleton class CFileClientSessionCacheHelper {
-        interface IFileClientSessionCacheHelper;
-    }
-
-    [deprecated]
-    class CFinished {
-        constructor(
-            [in] ArrayOf<Byte>* bytes);
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length);
-
-        interface IFinished;
-    }
-
-    class CHandshakeIODataStream {
-        constructor();
-
-        interface IHandshakeIODataStream;
-        interface IAppendable;
-        interface IDataStream;
-    }
-
-    class CHelloRequest {
-        constructor();
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length);
-
-        interface IMessage;
-    }
-
-    class CJSSEProvider {
-        interface IProvider;
-    }
-
-    class CKeyManagerFactoryImpl {
-        interface IKeyManagerFactorySpi;
-    }
-
-    [deprecated]
-    class CKeyManagerImpl {
-        constructor(
-            [in] IKeyStore* keyStore,
-            [in] ArrayOf<Char32>* pwd);
-
-        interface IX509ExtendedKeyManager;
-    }
-
-    class CLoggerStream {
-        constructor(
-            [in] String name);
-
-        interface ILoggerStream;
-    }
-
-    singleton class CLoggerHelper {
-        interface ILoggerHelper;
-    }
-
-    singleton class CNativeCrypto {
-        interface INativeCrypto;
-    }
-
-    class COpenSSLCipherRSA_PKCS1 {
-        interface ICipherSpi;
-    }
-
-    class COpenSSLCipherRSA_Raw {
-        interface ICipherSpi;
-    }
-
-    class COpenSSLContextImpl {
-        interface ISSLContextSpi;
-    }
-
-    class COpenSSLDSAKeyFactory {
-        interface IKeyFactorySpi;
-    }
-
-    class COpenSSLDSAKeyPairGenerator {
-        interface IKeyPairGeneratorSpi;
-    }
-
-    class COpenSSLDSAParams {
-        interface IOpenSSLDSAParams;
-        interface IAlgorithmParameterSpec;
-    }
-
-    class COpenSSLDSAPrivateKey {
-        constructor();
-
-        interface IDSAPrivateKey;
-    }
-
-    class COpenSSLDSAPublicKey {
-        interface IDSAPublicKey;
-    }
-
-    class COpenSSLEngine {
-        interface IOpenSSLEngine;
-    }
-
-    singleton class COpenSSLEngineHelper {
-        interface IOpenSSLEngineHelper;
-    }
-
-    class COpenSSLMessageDigestJDK {
-        interface IMessageDigest;
-    }
-
-    class COpenSSLMessageDigestJDK_MD5 {
-        constructor();
-
-        interface IMessageDigest;
-    }
-
-    class COpenSSLMessageDigestJDK_SHA1 {
-        constructor();
-
-        interface IMessageDigest;
-    }
-
-    class COpenSSLMessageDigestJDK_SHA256 {
-        constructor();
-
-        interface IMessageDigest;
-    }
-
-    class COpenSSLMessageDigestJDK_SHA384 {
-        constructor();
-
-        interface IMessageDigest;
-    }
-
-    class COpenSSLMessageDigestJDK_SHA512 {
-        constructor();
-
-        interface IMessageDigest;
-    }
-
-    class COpenSSLProvider {
-        constructor();
-
-        interface IOpenSSLProvider;
-    }
-
-    class COpenSSLRSAKeyPairGenerator {
-        interface IKeyPairGeneratorSpi;
-    }
-
-    class COpenSSLRSAPrivateCrtKey {
-        constructor(
-            [in] IRSAPrivateCrtKeySpec* rsaKeySpec);
-
-        interface IOpenSSLRSAPrivateKey;
-        interface IRSAPrivateCrtKey;
-    }
-
-    class COpenSSLRSAPrivateKey {
-        constructor(
-            [in] IRSAPrivateKeySpec* rsaKeySpec);
-
-        interface IOpenSSLRSAPrivateKey;
-    }
-
-    class COpenSSLRSAPublicKey {
-        interface IOpenSSLRSAPublicKey;
-    }
-
-    class COpenSSLServerSocketFactoryImpl {
-        constructor();
-        constructor(
-            [in] ISSLParameters* sslParameters);
-
-        interface ISSLServerSocketFactory;
-    }
-
-    class COpenSSLServerSocketImpl {
-        interface ISSLServerSocket;
-    }
-
-    class COpenSSLSessionImpl {
-        interface ISSLSession;
-    }
-
-    class COpenSSLSignature {
-        interface ISignature;
-    }
-
-    class COpenSSLSignature_MD5RSA {
-        constructor();
-
-        interface ISignature;
-    }
-
-    class COpenSSLSignature_SHA1RSA {
-        constructor();
-
-        interface ISignature;
-    }
-
-    class COpenSSLSignature_SHA256RSA {
-        constructor();
-
-        interface ISignature;
-    }
-
-    class COpenSSLSignature_SHA384RSA {
-        constructor();
-
-        interface ISignature;
-    }
-
-    class COpenSSLSignature_SHA512RSA {
-        constructor();
-
-        interface ISignature;
-    }
-
-    class COpenSSLSignature_SHA1DSA {
-        constructor();
-
-        interface ISignature;
-    }
-
-    class COpenSSLSignatureRawRSA {
-        constructor();
-
-        interface ISignature;
-    }
-
-    class COpenSSLSocketFactoryImpl {
-        constructor();
-        constructor(
-            [in] ISSLParameters* sslParameters);
-
-        interface ISSLSocketFactory;
-    }
-
-    class COpenSSLSocketImpl {
-        interface IOpenSSLSocketImpl;
-        interface ISSLHandshakeCallbacks;
-    }
-
-    class COpenSSLSocketImplWrapper {
-        interface IOpenSSLSocketImpl;
-    }
-
-    singleton class CPinFailureLoggerHelper {
-        interface IPinFailureLoggerHelper;
-    }
-
-    class CPinListEntry {
-        constructor(
-            [in] String entry,
-            [in] ITrustedCertificateStore* store);
-
-        interface IPinListEntry;
-    }
-
-    class CProtocolVersion {
-        interface IProtocolVersion;
-    }
-
-    singleton class CProtocolVersionHelper {
-        interface IProtocolVersionHelper;
-    }
-
-    class CSSLBufferedInput {
-        interface Elastos.IO.IInputStream;
-    }
-
-    class CSSLContextImpl {
-        constructor();
-
-        interface ISSLContextSpi;
-    }
-
-    class CSSLEngineAppData {
-        interface IAppendable;
-    }
-
-    class CSSLEngineDataStream {
-        interface ISSLEngineDataStream;
-    }
-
-    class CSSLEngineImpl {
-        interface ISSLEngine;
-    }
-
-    singleton class CSSLParametersImplHelper {
-        interface ISSLParametersImplHelper;
-    }
-
-    class CSSLServerSocketFactoryImpl {
-        constructor();
-
-        interface ISSLServerSocketFactory;
-    }
-
-    class CSSLServerSocketImpl {
-        interface ISSLServerSocket;
-    }
-
-    class CSSLSessionImpl {
-        constructor(
-            [in] ICipherSuite* cipher_suite,
-            [in] ISecureRandom* secureRandom);
-        constructor(
-            [in] ISecureRandom* secureRandom);
-
-        interface ISSLSession;
-        interface ICloneable;
-    }
-
-    singleton class CSSLSessionImplHelper {
-        interface ISSLSessionImplHelper;
-    }
-
-    class CSSLSocketFactoryImpl {
-        constructor();
-
-        interface ISSLSocketFactory;
-    }
-
-    class CSSLSocketImpl {
-        interface ISSLSocket;
-    }
-
-    class CSSLSocketInputStream {
-        interface IInputStream;
-    }
-
-    class CSSLSocketOutputStream {
-        interface IOutputStream;
-        interface IFlushable;
-    }
-
-    class CSSLSocketWrapper {
-        interface ISSLSocket;
-    }
-
-    class CSSLStreamedInput {
-        constructor(
-            [in] IInputStream* is);
-
-        interface ISSLInputStream;
-    }
-
-    class CServerHandshakeImpl {
-        constructor(
-            [in] IInterface* owner);
-
-        interface IHandshakeProtocol;
-    }
-
-    [deprecated]
-    class CServerHello {
-        constructor(
-            [in] ISecureRandom* sr,
-            [in] ArrayOf<Byte>* server_version,
-            [in] ArrayOf<Byte>* session_id,
-            [in] ICipherSuite* cipher_suite,
-            [in] Byte compression_method);
-
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length);
-
-        interface IServerHello;
-    }
-
-    class CServerHelloDone {
-        constructor();
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length);
-
-        interface IMessage;
-    }
-
-    [deprecated]
-    class CServerKeyExchange {
-        constructor(
-            [in] IBigInteger* par1,
-            [in] IBigInteger* par2,
-            [in] IBigInteger* par3,
-            [in] ArrayOf<Byte>* hash);
-        constructor(
-            [in] IHandshakeIODataStream* ids,
-            [in] Int32 length,
-            [in] Int32 keyExchange);
-
-        interface IServerKeyExchange;
-    }
-
-    singleton class CServerKeyExchangeHelper {
-        interface IServerKeyExchangeHelper;
-    }
-
-    class CServerSessionContext {
-        constructor();
-
-        interface IServerSessionContext;
-    }
-
-    class CTrustManagerFactoryImpl {
-        interface ITrustManagerFactorySpi;
-    }
-
-    class CTrustManagerImpl {
-        constructor(
-            [in] IKeyStore* keyStore);
-        constructor(
-            [in] IKeyStore* keyStore,
-            [in] ICertPinManager* manager);
-
-        interface ITrustManagerImpl;
-    }
-
-    class CTrustedCertificateIndex {
-        constructor();
-        constructor(
-            [in] ISet* anchors);
-
-        interface ITrustedCertificateIndex;
-    }
-
-    class CTrustedCertificateKeyStoreSpi {
-        interface IKeyStoreSpi;
-    }
-
-    class CTrustedCertificateStore {
-        constructor();
-        constructor(
-            [in] IFile* systemDir,
-            [in] IFile* addedDir,
-            [in] IFile* deletedDir);
-
-        interface ITrustedCertificateStore;
-    }
-
-    singleton class CTrustedCertificateStoreHelper {
-        interface ITrustedCertificateStoreHelper;
-    }
-
-    } // namespace Jsse
-    } // namespace Provider
-    } // namespace Xnet
+    //    interface ITSTInfo;
+    //}
+
+    //singleton class CTSTInfoHelper {
+    //    interface ITSTInfoHelper;
+    //}
+
+    //class CTimeStampReq {
+    //    constructor(
+    //        [in] Int32 ver,
+    //        [in] IMessageImprint* messageImprint,
+    //        [in] String reqPolicy,
+    //        [in] IBigInteger* nonce,
+    //        [in] Boolean certReq,
+    //        [in] IExtensions* extensions);
+
+    //    interface ITimeStampReq;
+    //}
+
+    //singleton class CTimeStampReqHelper {
+    //    interface ITimeStampReqHelper;
+    //}
+
+    //class CTimeStampResp {
+    //    constructor(
+    //        [in] IPKIStatusInfo* status,
+    //        [in] IContentInfo* timeStampToken);
+
+    //    interface ITimeStampResp;
+    //}
+
+    //singleton class CTimeStampRespHelper {
+    //    interface ITimeStampRespHelper;
+    //}
+
+    //} // namespace Tsp
+
+    //class CAccessDescription {
+    //    interface IAccessDescription;
+    //}
+
+    //singleton class CAccessDescriptionHelper {
+    //    interface IAccessDescriptionHelper;
+    //}
+
+    //[deprecated]
+    //class CAlgorithmIdentifier {
+    //    constructor(
+    //        [in] String algorithm);
+    //    constructor(
+    //        [in] String algorithm,
+    //        [in] ArrayOf<Byte>* parameters);
+
+    //    interface IAlgorithmIdentifier;
+    //}
+
+    //singleton class CAlgorithmIdentifierHelper {
+    //    interface IAlgorithmIdentifierHelper;
+    //}
+
+    //[deprecated]
+    //class CAlternativeName {
+    //    constructor(
+    //        [in] Boolean which,
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IAlternativeName;
+    //}
+
+    //[deprecated]
+    //class CAuthorityKeyIdentifier {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* keyIdentifier,
+    //        [in] IGeneralNames* authorityCertIssuer,
+    //        [in] IBigInteger* authorityCertSerialNumber);
+
+    //    interface IAuthorityKeyIdentifier;
+    //}
+
+    //singleton class CAuthorityKeyIdentifierHelper {
+    //    interface IAuthorityKeyIdentifierHelper;
+    //}
+
+    //[deprecated]
+    //class CBasicConstraints {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IBasicConstraints;
+    //}
+
+    //singleton class CBasicConstraintsHelper {
+    //    interface IBasicConstraintsHelper;
+    //}
+
+    //class CCRLDistributionPoints {
+    //    interface ICRLDistributionPoints;
+    //}
+
+    //singleton class CCRLDistributionPointsHelper {
+    //    interface ICRLDistributionPointsHelper;
+    //}
+
+    //[deprecated]
+    //class CCRLNumber {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface ICRLNumber;
+    //}
+
+    //singleton class CCRLNumberHelper {
+    //    interface ICRLNumberHelper;
+    //}
+
+    //[deprecated]
+    //class CCertificate {
+    //    constructor(
+    //        [in] ITBSCertificate* tbsCertificate,
+    //        [in] IAlgorithmIdentifier* signatureAlgorithm,
+    //        [in] ArrayOf<Byte>* signatureValue);
+
+    //    interface ICertificate;
+    //}
+
+    //singleton class CCertificateHelper {
+    //    interface ICertificateHelper;
+    //}
+
+    //[deprecated]
+    //class CCertificateIssuer {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface ICertificateIssuer;
+    //}
+
+    //singleton class CCertificateIssuerHelper {
+    //    interface ICertificateIssuerHelper;
+    //}
+
+    //[deprecated]
+    //class CCertificateList {
+    //    constructor(
+    //        [in] ITBSCertList* tbsCertList,
+    //        [in] IAlgorithmIdentifier* signatureAlgorithm,
+    //        [in] ArrayOf<Byte>* signatureValue);
+
+    //    interface ICertificateList;
+    //}
+
+    //singleton class CCertificateListHelper {
+    //    interface ICertificateListHelper;
+    //}
+
+    //class CCertificatePolicies {
+    //    constructor();
+
+    //    interface ICertificatePolicies;
+    //}
+
+    //singleton class CCertificatePoliciesHelper {
+    //    interface ICertificatePoliciesHelper;
+    //}
+
+    //class CDNParser {
+    //    constructor(
+    //        [in] String dn);
+
+    //    interface IDNParser;
+    //}
+
+    //class CDistributionPoint {
+    //    constructor(
+    //        [in] IDistributionPointName* distributionPoint,
+    //        [in] IReasonFlags* reasons,
+    //        [in] IGeneralNames* cRLIssuer);
+
+    //    interface IDistributionPoint;
+    //}
+
+    //singleton class CDistributionPointHelper {
+    //    interface IDistributionPointHelper;
+    //}
+
+    //class CDistributionPointName {
+    //    constructor(
+    //        [in] IGeneralNames* fullName);
+    //    constructor(
+    //        [in] IName* nameRelativeToCRLIssuer);
+
+    //    interface IDistributionPointName;
+    //}
+
+    //singleton class CDistributionPointNameHelper {
+    //    interface IDistributionPointNameHelper;
+    //}
+
+    //class CEDIPartyName {
+    //    interface IEDIPartyName;
+    //}
+
+    //singleton class CEDIPartyNameHelper {
+    //    interface IEDIPartyNameHelper;
+    //}
+
+    //[deprecated]
+    //class CExtendedKeyUsage {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IExtendedKeyUsage;
+    //}
+
+    //singleton class CExtendedKeyUsageHelper {
+    //    interface IExtendedKeyUsageHelper;
+    //}
+
+    //[deprecated]
+    //class CExtension {
+    //    constructor(
+    //        [in] String extnID,
+    //        [in] Boolean critical,
+    //        [in] IExtensionValue* extnValueObject);
+    //    constructor(
+    //        [in] String extnID,
+    //        [in] Boolean critical,
+    //        [in] ArrayOf<Byte>* extnValue);
+    //    constructor(
+    //        [in] ArrayOf<Int32>* extnID,
+    //        [in] Boolean critical,
+    //        [in] ArrayOf<Byte>* extnValue2);
+    //    constructor(
+    //        [in] String extnID,
+    //        [in] ArrayOf<Byte>* extnValue);
+    //    constructor(
+    //        [in] ArrayOf<Int32>* extnID,
+    //        [in] ArrayOf<Byte>* extnValue2);
+
+    //    interface IExtension;
+    //    interface IX509Extension;
+    //}
+
+    //singleton class CExtensionHelper {
+    //    interface IExtensionHelper;
+    //}
+
+    //[deprecated]
+    //class CExtensionValue {
+    //    constructor();
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IExtensionValue;
+    //}
+
+    //class CExtensions {
+    //    constructor();
+    //    constructor(
+    //        [in] IList* extensions);
+
+    //    interface IExtensions;
+    //}
+
+    //singleton class CExtensionsHelper {
+    //    interface IExtensionsHelper;
+    //}
+
+    //[deprecated]
+    //class CGeneralName {
+    //    constructor(
+    //        [in] Int32 tag,
+    //        [in] String name);
+    //    constructor(
+    //        [in] IOtherName* name);
+    //    constructor(
+    //        [in] IORAddress* name1);
+    //    constructor(
+    //        [in] IName* name2);
+    //    constructor(
+    //        [in] IEDIPartyName* name3);
+    //    constructor(
+    //        [in] ArrayOf<Byte>* name4);
+    //    constructor(
+    //        [in] Int32 tag,
+    //        [in] ArrayOf<Byte>* name1);
+
+    //    interface IGeneralName;
+    //}
+
+    //singleton class CGeneralNameHelper {
+    //    interface IGeneralNameHelper;
+    //}
+
+    //class CGeneralNames {
+    //    constructor();
+    //    constructor(
+    //        [in] IList* generalNames);
+
+    //    interface IGeneralNames;
+    //}
+
+    //singleton class CGeneralNamesHelper {
+    //    interface IGeneralNamesHelper;
+    //}
+
+    //class CGeneralSubtree {
+    //    constructor(
+    //        [in] IGeneralName* base,
+    //        [in] Int32 minimum,
+    //        [in] Int32 maximum);
+
+    //    interface IGeneralSubtree;
+    //}
+
+    //singleton class CGeneralSubtreeHelper {
+    //    interface IGeneralSubtreeHelper;
+    //}
+
+    //class CGeneralSubtrees {
+    //    constructor(
+    //        [in] IList* generalSubtrees);
+
+    //    interface IGeneralSubtrees;
+    //}
+
+    //singleton class CGeneralSubtreesHelper {
+    //    interface IGeneralSubtreesHelper;
+    //}
+
+    //class CInfoAccessSyntax {
+    //    interface IInfoAccessSyntax;
+    //}
+
+    //singleton class CInfoAccessSyntaxHelper {
+    //    interface IInfoAccessSyntaxHelper;
+    //}
+
+    //[deprecated]
+    //class CInhibitAnyPolicy {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IInhibitAnyPolicy;
+    //}
+
+    //[deprecated]
+    //class CInvalidityDate {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IInvalidityDate;
+    //}
+
+    //singleton class CInvalidityDateHelper {
+    //    interface IInvalidityDateHelper;
+    //}
+
+    //class CIssuingDistributionPoint {
+    //    constructor(
+    //        [in] IDistributionPointName* distributionPoint,
+    //        [in] IReasonFlags* onlySomeReasons);
+
+    //    interface IIssuingDistributionPoint;
+    //}
+
+    //singleton class CIssuingDistributionPointHelper {
+    //    interface IIssuingDistributionPointHelper;
+    //}
+
+    //[deprecated]
+    //class CKeyUsage {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IKeyUsage;
+    //}
+
+    //class CNameConstraints {
+    //    constructor(
+    //        [in] IGeneralSubtrees* permittedSubtrees,
+    //        [in] IGeneralSubtrees* excludedSubtrees);
+
+    //    interface INameConstraints;
+    //}
+
+    //singleton class CNameConstraintsHelper {
+    //    interface INameConstraintsHelper;
+    //}
+
+    //class CORAddress {
+    //    interface IORAddress;
+    //}
+
+    //singleton class CORAddressHelper {
+    //    interface IORAddressHelper;
+    //}
+
+    //[deprecated]
+    //class COtherName {
+    //    constructor(
+    //        [in] String typeID,
+    //        [in] ArrayOf<Byte>* value);
+
+    //    interface IOtherName;
+    //}
+
+    //singleton class COtherNameHelper {
+    //    interface IOtherNameHelper;
+    //}
+
+    //[deprecated]
+    //class CPolicyConstraints {
+    //    constructor(
+    //        [in] IBigInteger* requireExplicitPolicy,
+    //        [in] IBigInteger* inhibitPolicyMapping);
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IExtensionValue;
+    //}
+
+    //singleton class CPolicyConstraintsHelper {
+    //    interface IPolicyConstraintsHelper;
+    //}
+
+    //class CPolicyInformation {
+    //    constructor(
+    //        [in] String policyIdentifier);
+
+    //    interface IPolicyInformation;
+    //}
+
+    //singleton class CPolicyInformationHelper {
+    //    interface IPolicyInformationHelper;
+    //}
+
+    //singleton class CPolicyQualifierInfoHelper {
+    //    interface IPolicyQualifierInfoHelper;
+    //}
+
+    //class CPrivateKeyUsagePeriod {
+    //    constructor(
+    //        [in] IDate* notBeforeDate,
+    //        [in] IDate* notAfterDate);
+
+    //    interface IPrivateKeyUsagePeriod;
+    //}
+
+    //singleton class CPrivateKeyUsagePeriodHelper {
+    //    interface IPrivateKeyUsagePeriodHelper;
+    //}
+
+    //[deprecated]
+    //class CReasonCode {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    interface IReasonCode;
+    //}
+
+    //singleton class CReasonCodeHelper {
+    //    interface IReasonCodeHelper;
+    //}
+
+    //[deprecated]
+    //class CReasonFlags {
+    //    constructor(
+    //        [in] ArrayOf<Boolean>* flags);
+
+    //    interface IReasonFlags;
+    //}
+
+    //singleton class CReasonFlagsHelper {
+    //    interface IReasonFlagsHelper;
+    //}
+
+    //[deprecated]
+    //class CSubjectKeyIdentifier {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* keyIdentifier);
+
+    //    interface ISubjectKeyIdentifier;
+    //}
+
+    //singleton class CSubjectKeyIdentifierHelper {
+    //    interface ISubjectKeyIdentifierHelper;
+    //}
+
+    //[deprecated]
+    //class CSubjectPublicKeyInfo {
+    //    constructor(
+    //        [in] IAlgorithmIdentifier* algID,
+    //        [in] ArrayOf<Byte>* subjectPublicKey);
+    //    constructor(
+    //        [in] IAlgorithmIdentifier* algID,
+    //        [in] ArrayOf<Byte>* subjectPublicKey,
+    //        [in] Int32 unused);
+
+    //    interface ISubjectPublicKeyInfo;
+    //}
+
+    //singleton class CSubjectPublicKeyInfoHelper {
+    //    interface ISubjectPublicKeyInfoHelper;
+    //}
+
+    //class CRevokedCertificate {
+    //    constructor(
+    //        [in] IBigInteger* userCertificate,
+    //        [in] IDate* revocationDate,
+    //        [in] IExtensions* crlEntryExtensions);
+
+    //    interface IRevokedCertificate;
+    //}
+
+    //singleton class CRevokedCertificateHelper {
+    //    interface IRevokedCertificateHelper;
+    //}
+
+    //class CTBSCertList {
+    //    interface ITBSCertList;
+    //}
+
+    //singleton class CTBSCertListHelper {
+    //    interface ITBSCertListHelper;
+    //}
+
+    //[deprecated]
+    //class CTBSCertificate {
+    //    constructor(
+    //        [in] Int32 ver,
+    //        [in] IBigInteger* serialNumber,
+    //        [in] IAlgorithmIdentifier* signature,
+    //        [in] IName* issuer,
+    //        [in] IValidity* validity,
+    //        [in] IName* subject,
+    //        [in] ISubjectPublicKeyInfo* subjectPublicKeyInfo,
+    //        [in] ArrayOf<Boolean>* issuerUniqueID,
+    //        [in] ArrayOf<Boolean>* subjectUniqueID,
+    //        [in] IExtensions* extensions);
+
+    //    interface ITBSCertificate;
+    //}
+
+    //singleton class CTBSCertificateHelper {
+    //    interface ITBSCertificateHelper;
+    //}
+
+    //singleton class CTimeHelper {
+    //    interface ITimeHelper;
+    //}
+
+    //class CValidity {
+    //    constructor(
+    //        [in] IDate* notBefore,
+    //        [in] IDate* notAfter);
+
+    //    interface IValidity;
+    //}
+
+    //singleton class CValidityHelper {
+    //    interface IValidityHelper;
+    //}
+
+    //[deprecated]
+    //class CX509PublicKey {
+    //    constructor(
+    //        [in] String algorithm,
+    //        [in] ArrayOf<Byte>* encoded,
+    //        [in] ArrayOf<Byte>* keyBytes);
+
+    //    interface IX509PublicKey;
+    //}
+
+    //} // namespace X509
+
+
+    //class CPrivateKeyImpl {
+    //    constructor(
+    //        [in] String algorithm);
+
+    //    interface IPrivateKeyImpl;
+    //}
+
+    //class CPublicKeyImpl {
+    //    constructor(
+    //        [in] String algorithm);
+
+    //    interface IPublicKeyImpl;
+    //}
+
+    //class CSystemScope {
+    //    constructor();
+    //    constructor(
+    //        [in] String name);
+    //    constructor(
+    //        [in] String name,
+    //        [in] IIdentityScope* scope);
+
+    //    interface IIdentityScope;
+    //}
+
+    //} // namespace Security
+
+    //namespace Xml {
+    //namespace Dom {
+
+    //class CAttrImpl {
+    //    interface IAttr;
+    //}
+
+    //class CCDATASectionImpl {
+    //    constructor(
+    //        [in] IDocument* document,
+    //        [in] String data);
+
+    //    interface ICDATASectionImpl;
+    //}
+
+    //class CCommentImpl {
+    //    interface ICommentImpl;
+    //}
+
+    //class CDOMConfigurationImpl {
+    //    interface IDOMConfigurationImpl;
+    //}
+
+    //class CDOMErrorImpl {
+    //    constructor(
+    //        [in] Int32 severity,
+    //        [in] String type);
+
+    //    interface IDOMError;
+    //}
+
+    //singleton class CDOMImplementationImplHelper {
+    //    interface IDOMImplementationImplHelper;
+    //}
+
+    //class CDocumentFragmentImpl {
+    //    interface ILeafNodeImpl;
+    //}
+
+    //class CDocumentImpl {
+    //    constructor(
+    //        [in] IDOMImplementation* impl,
+    //        [in] String namespaceURI,
+    //        [in] String qualifiedName,
+    //        [in] IDocumentType* doctype,
+    //        [in] String inputEncoding);
+
+    //    interface ILeafNodeImpl;
+    //    interface IDocument;
+    //}
+
+    //singleton class CDocumentImplHelper {
+    //    interface IDocumentImplHelper;
+    //}
+
+    //class CDocumentTypeImpl {
+    //    constructor(
+    //        [in] IDocument* document,
+    //        [in] String qualifiedName,
+    //        [in] String publicId,
+    //        [in] String systemId);
+
+    //    interface ILeafNodeImpl;
+    //    interface IDocumentType;
+    //}
+
+    //class CElementImpl {
+    //    interface ILeafNodeImpl;
+    //    interface IElement;
+    //}
+
+    //class CElementAttrNamedNodeMapImpl {
+    //    interface INamedNodeMap;
+    //}
+
+    //class CEntityImpl {
+    //    interface IEntity;
+    //}
+
+    //class CEntityReferenceImpl {
+    //    interface ILeafNodeImpl;
+    //}
+
+    //class CNodeListImpl {
+    //    interface INodeList;
+    //}
+
+    //class CNotationImpl {
+    //    interface ILeafNodeImpl;
+    //    interface INotation;
+    //}
+
+    //class CProcessingInstructionImpl {
+    //    interface ILeafNodeImpl;
+    //    interface IProcessingInstruction;
+    //}
+
+    //class CTextImpl {
+    //    interface ICharacterDataImpl;
+    //    interface IText;
+    //}
+
+    //} // namespace Dom
+
+    //namespace Parsers {
+
+    //class CDocumentBuilderFactoryImpl {
+    //    interface IDocumentBuilderFactory;
+    //}
+
+    //class CSAXParserFactoryImpl {
+    //    interface ISAXParserFactory;
+    //}
+
+    //class CSAXParserImpl {
+    //    interface ISAXParser;
+    //}
+
+    //} // namespace Parsers
+
+    //class CExpatReader {
+    //    interface IExpatReader;
+    //}
+
+    //} // namespace Xml
+
+    //////namespace Xnet {
+    //////namespace Provider {
+    //////namespace Jsse {
+
+    //////class CCertPinManager {
+    //////    constructor(
+    //////        [in] ITrustedCertificateStore* store);
+    //////    constructor(
+    //////        [in] String path,
+    //////        [in] ITrustedCertificateStore* store);
+
+    //////    interface ICertPinManager;
+    //////}
+
+    //////[deprecated]
+    //////class CCertificateMessage {
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length);
+    //////    constructor(
+    //////        [in] ArrayOf<IX509Certificate*>* certs);
+
+    //////    interface ICertificateMessage;
+    //////}
+
+    //////[deprecated]
+    //////class CCertificateRequest {
+    //////    constructor(
+    //////        [in] ArrayOf<Byte>* certificate_types,
+    //////        [in] ArrayOf<IX509Certificate*>* accepted);
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length);
+
+    //////    interface ICertificateRequest;
+    //////}
+
+    //////[deprecated]
+    //////class CCertificateVerify {
+    //////    constructor(
+    //////        [in] ArrayOf<Byte>* hash);
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length);
+
+    //////    interface IMessage;
+    //////}
+
+    //////class CCipherSuite {
+    //////    interface ICipherSuite;
+    //////}
+
+    //////singleton class CCipherSuiteHelper {
+    //////    interface ICipherSuiteHelper;
+    //////}
+
+    //////class CClientHandshakeImpl {
+    //////    interface IHandshakeProtocol;
+    //////}
+
+    //////[deprecated]
+    //////class CClientHello {
+    //////    constructor(
+    //////        [in] ISecureRandom* sr,
+    //////        [in] ArrayOf<Byte>* ver,
+    //////        [in] ArrayOf<Byte>* ses_id,
+    //////        [in] ArrayOf<ICipherSuite*>* cipher_suite);
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length);
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids);
+
+    //////    interface IClientHello;
+    //////}
+
+    //////[deprecated]
+    //////class CClientKeyExchange {
+    //////    constructor(
+    //////        [in] ArrayOf<Byte>* encrypted_pre_master_secret,
+    //////        [in] Boolean isTLS);
+    //////    constructor(
+    //////        [in] IBigInteger* dh_Yc);
+    //////    constructor();
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length,
+    //////        [in] Boolean isTLS,
+    //////        [in] Boolean isRSA);
+
+    //////    interface IClientKeyExchange;
+    //////}
+
+    //////class CClientSessionContext {
+    //////    constructor();
+
+    //////    interface IClientSessionContext;
+    //////}
+
+    //////singleton class CDHParametersHelper {
+    //////    interface IDHParametersHelper;
+    //////}
+
+    //////class CDefaultSSLContextImpl {
+    //////    interface ISSLContextSpi;
+    //////}
+
+    //////class CDelegatedTask {
+    //////    constructor(
+    //////        [in] IRunnable* action,
+    //////        [in] IHandshakeProtocol* handshaker);
+
+    //////    interface IRunnable;
+    //////}
+
+    //////class CDigitalSignature {
+    //////    constructor(
+    //////        [in] String authType);
+
+    //////    interface IDigitalSignature;
+    //////}
+
+    //////class CFileClientSessionCache {
+    //////    interface IFileClientSessionCache;
+    //////}
+
+    //////singleton class CFileClientSessionCacheHelper {
+    //////    interface IFileClientSessionCacheHelper;
+    //////}
+
+    //////[deprecated]
+    //////class CFinished {
+    //////    constructor(
+    //////        [in] ArrayOf<Byte>* bytes);
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length);
+
+    //////    interface IFinished;
+    //////}
+
+    //////class CHandshakeIODataStream {
+    //////    constructor();
+
+    //////    interface IHandshakeIODataStream;
+    //////    interface IAppendable;
+    //////    interface IDataStream;
+    //////}
+
+    //////class CHelloRequest {
+    //////    constructor();
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length);
+
+    //////    interface IMessage;
+    //////}
+
+    //////class CJSSEProvider {
+    //////    interface IProvider;
+    //////}
+
+    //////class CKeyManagerFactoryImpl {
+    //////    interface IKeyManagerFactorySpi;
+    //////}
+
+    //////[deprecated]
+    //////class CKeyManagerImpl {
+    //////    constructor(
+    //////        [in] IKeyStore* keyStore,
+    //////        [in] ArrayOf<Char32>* pwd);
+
+    //////    interface IX509ExtendedKeyManager;
+    //////}
+
+    //////class CLoggerStream {
+    //////    constructor(
+    //////        [in] String name);
+
+    //////    interface ILoggerStream;
+    //////}
+
+    //////singleton class CLoggerHelper {
+    //////    interface ILoggerHelper;
+    //////}
+
+    //////singleton class CNativeCrypto {
+    //////    interface INativeCrypto;
+    //////}
+
+    //////class COpenSSLCipherRSA_PKCS1 {
+    //////    interface ICipherSpi;
+    //////}
+
+    //////class COpenSSLCipherRSA_Raw {
+    //////    interface ICipherSpi;
+    //////}
+
+    //////class COpenSSLContextImpl {
+    //////    interface ISSLContextSpi;
+    //////}
+
+    //////class COpenSSLDSAKeyFactory {
+    //////    interface IKeyFactorySpi;
+    //////}
+
+    //////class COpenSSLDSAKeyPairGenerator {
+    //////    interface IKeyPairGeneratorSpi;
+    //////}
+
+    //////class COpenSSLDSAParams {
+    //////    interface IOpenSSLDSAParams;
+    //////    interface IAlgorithmParameterSpec;
+    //////}
+
+    //////class COpenSSLDSAPrivateKey {
+    //////    constructor();
+
+    //////    interface IDSAPrivateKey;
+    //////}
+
+    //////class COpenSSLDSAPublicKey {
+    //////    interface IDSAPublicKey;
+    //////}
+
+    //////class COpenSSLEngine {
+    //////    interface IOpenSSLEngine;
+    //////}
+
+    //////singleton class COpenSSLEngineHelper {
+    //////    interface IOpenSSLEngineHelper;
+    //////}
+
+    //////class COpenSSLMessageDigestJDK {
+    //////    interface IMessageDigest;
+    //////}
+
+    //////class COpenSSLMessageDigestJDK_MD5 {
+    //////    constructor();
+
+    //////    interface IMessageDigest;
+    //////}
+
+    //////class COpenSSLMessageDigestJDK_SHA1 {
+    //////    constructor();
+
+    //////    interface IMessageDigest;
+    //////}
+
+    //////class COpenSSLMessageDigestJDK_SHA256 {
+    //////    constructor();
+
+    //////    interface IMessageDigest;
+    //////}
+
+    //////class COpenSSLMessageDigestJDK_SHA384 {
+    //////    constructor();
+
+    //////    interface IMessageDigest;
+    //////}
+
+    //////class COpenSSLMessageDigestJDK_SHA512 {
+    //////    constructor();
+
+    //////    interface IMessageDigest;
+    //////}
+
+    //////class COpenSSLProvider {
+    //////    constructor();
+
+    //////    interface IOpenSSLProvider;
+    //////}
+
+    //////class COpenSSLRSAKeyPairGenerator {
+    //////    interface IKeyPairGeneratorSpi;
+    //////}
+
+    //////class COpenSSLRSAPrivateCrtKey {
+    //////    constructor(
+    //////        [in] IRSAPrivateCrtKeySpec* rsaKeySpec);
+
+    //////    interface IOpenSSLRSAPrivateKey;
+    //////    interface IRSAPrivateCrtKey;
+    //////}
+
+    //////class COpenSSLRSAPrivateKey {
+    //////    constructor(
+    //////        [in] IRSAPrivateKeySpec* rsaKeySpec);
+
+    //////    interface IOpenSSLRSAPrivateKey;
+    //////}
+
+    //////class COpenSSLRSAPublicKey {
+    //////    interface IOpenSSLRSAPublicKey;
+    //////}
+
+    //////class COpenSSLServerSocketFactoryImpl {
+    //////    constructor();
+    //////    constructor(
+    //////        [in] ISSLParameters* sslParameters);
+
+    //////    interface ISSLServerSocketFactory;
+    //////}
+
+    //////class COpenSSLServerSocketImpl {
+    //////    interface ISSLServerSocket;
+    //////}
+
+    //////class COpenSSLSessionImpl {
+    //////    interface ISSLSession;
+    //////}
+
+    //////class COpenSSLSignature {
+    //////    interface ISignature;
+    //////}
+
+    //////class COpenSSLSignature_MD5RSA {
+    //////    constructor();
+
+    //////    interface ISignature;
+    //////}
+
+    //////class COpenSSLSignature_SHA1RSA {
+    //////    constructor();
+
+    //////    interface ISignature;
+    //////}
+
+    //////class COpenSSLSignature_SHA256RSA {
+    //////    constructor();
+
+    //////    interface ISignature;
+    //////}
+
+    //////class COpenSSLSignature_SHA384RSA {
+    //////    constructor();
+
+    //////    interface ISignature;
+    //////}
+
+    //////class COpenSSLSignature_SHA512RSA {
+    //////    constructor();
+
+    //////    interface ISignature;
+    //////}
+
+    //////class COpenSSLSignature_SHA1DSA {
+    //////    constructor();
+
+    //////    interface ISignature;
+    //////}
+
+    //////class COpenSSLSignatureRawRSA {
+    //////    constructor();
+
+    //////    interface ISignature;
+    //////}
+
+    //////class COpenSSLSocketFactoryImpl {
+    //////    constructor();
+    //////    constructor(
+    //////        [in] ISSLParameters* sslParameters);
+
+    //////    interface ISSLSocketFactory;
+    //////}
+
+    //////class COpenSSLSocketImpl {
+    //////    interface IOpenSSLSocketImpl;
+    //////    interface ISSLHandshakeCallbacks;
+    //////}
+
+    //////class COpenSSLSocketImplWrapper {
+    //////    interface IOpenSSLSocketImpl;
+    //////}
+
+    //////singleton class CPinFailureLoggerHelper {
+    //////    interface IPinFailureLoggerHelper;
+    //////}
+
+    //////class CPinListEntry {
+    //////    constructor(
+    //////        [in] String entry,
+    //////        [in] ITrustedCertificateStore* store);
+
+    //////    interface IPinListEntry;
+    //////}
+
+    //////class CProtocolVersion {
+    //////    interface IProtocolVersion;
+    //////}
+
+    //////singleton class CProtocolVersionHelper {
+    //////    interface IProtocolVersionHelper;
+    //////}
+
+    //////class CSSLBufferedInput {
+    //////    interface Elastos.IO.IInputStream;
+    //////}
+
+    //////class CSSLContextImpl {
+    //////    constructor();
+
+    //////    interface ISSLContextSpi;
+    //////}
+
+    //////class CSSLEngineAppData {
+    //////    interface IAppendable;
+    //////}
+
+    //////class CSSLEngineDataStream {
+    //////    interface ISSLEngineDataStream;
+    //////}
+
+    //////class CSSLEngineImpl {
+    //////    interface ISSLEngine;
+    //////}
+
+    //////singleton class CSSLParametersImplHelper {
+    //////    interface ISSLParametersImplHelper;
+    //////}
+
+    //////class CSSLServerSocketFactoryImpl {
+    //////    constructor();
+
+    //////    interface ISSLServerSocketFactory;
+    //////}
+
+    //////class CSSLServerSocketImpl {
+    //////    interface ISSLServerSocket;
+    //////}
+
+    //////class CSSLSessionImpl {
+    //////    constructor(
+    //////        [in] ICipherSuite* cipher_suite,
+    //////        [in] ISecureRandom* secureRandom);
+    //////    constructor(
+    //////        [in] ISecureRandom* secureRandom);
+
+    //////    interface ISSLSession;
+    //////    interface ICloneable;
+    //////}
+
+    //////singleton class CSSLSessionImplHelper {
+    //////    interface ISSLSessionImplHelper;
+    //////}
+
+    //////class CSSLSocketFactoryImpl {
+    //////    constructor();
+
+    //////    interface ISSLSocketFactory;
+    //////}
+
+    //////class CSSLSocketImpl {
+    //////    interface ISSLSocket;
+    //////}
+
+    //////class CSSLSocketInputStream {
+    //////    interface IInputStream;
+    //////}
+
+    //////class CSSLSocketOutputStream {
+    //////    interface IOutputStream;
+    //////    interface IFlushable;
+    //////}
+
+    //////class CSSLSocketWrapper {
+    //////    interface ISSLSocket;
+    //////}
+
+    //////class CSSLStreamedInput {
+    //////    constructor(
+    //////        [in] IInputStream* is);
+
+    //////    interface ISSLInputStream;
+    //////}
+
+    //////class CServerHandshakeImpl {
+    //////    constructor(
+    //////        [in] IInterface* owner);
+
+    //////    interface IHandshakeProtocol;
+    //////}
+
+    //////[deprecated]
+    //////class CServerHello {
+    //////    constructor(
+    //////        [in] ISecureRandom* sr,
+    //////        [in] ArrayOf<Byte>* server_version,
+    //////        [in] ArrayOf<Byte>* session_id,
+    //////        [in] ICipherSuite* cipher_suite,
+    //////        [in] Byte compression_method);
+
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length);
+
+    //////    interface IServerHello;
+    //////}
+
+    //////class CServerHelloDone {
+    //////    constructor();
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length);
+
+    //////    interface IMessage;
+    //////}
+
+    //////[deprecated]
+    //////class CServerKeyExchange {
+    //////    constructor(
+    //////        [in] IBigInteger* par1,
+    //////        [in] IBigInteger* par2,
+    //////        [in] IBigInteger* par3,
+    //////        [in] ArrayOf<Byte>* hash);
+    //////    constructor(
+    //////        [in] IHandshakeIODataStream* ids,
+    //////        [in] Int32 length,
+    //////        [in] Int32 keyExchange);
+
+    //////    interface IServerKeyExchange;
+    //////}
+
+    //////singleton class CServerKeyExchangeHelper {
+    //////    interface IServerKeyExchangeHelper;
+    //////}
+
+    //////class CServerSessionContext {
+    //////    constructor();
+
+    //////    interface IServerSessionContext;
+    //////}
+
+    //////class CTrustManagerFactoryImpl {
+    //////    interface ITrustManagerFactorySpi;
+    //////}
+
+    //////class CTrustManagerImpl {
+    //////    constructor(
+    //////        [in] IKeyStore* keyStore);
+    //////    constructor(
+    //////        [in] IKeyStore* keyStore,
+    //////        [in] ICertPinManager* manager);
+
+    //////    interface ITrustManagerImpl;
+    //////}
+
+    //////class CTrustedCertificateIndex {
+    //////    constructor();
+    //////    constructor(
+    //////        [in] ISet* anchors);
+
+    //////    interface ITrustedCertificateIndex;
+    //////}
+
+    //////class CTrustedCertificateKeyStoreSpi {
+    //////    interface IKeyStoreSpi;
+    //////}
+
+    //////class CTrustedCertificateStore {
+    //////    constructor();
+    //////    constructor(
+    //////        [in] IFile* systemDir,
+    //////        [in] IFile* addedDir,
+    //////        [in] IFile* deletedDir);
+
+    //////    interface ITrustedCertificateStore;
+    //////}
+
+    //////singleton class CTrustedCertificateStoreHelper {
+    //////    interface ITrustedCertificateStoreHelper;
+    //////}
+
+    //////} // namespace Jsse
+    //////} // namespace Provider
+    //////} // namespace Xnet
 
     } // namespace Harmony
     } // namespace Apache

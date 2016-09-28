@@ -6,6 +6,9 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Org::W3c::Dom::IDOMLocator;
+using Org::W3c::Dom::IDOMError;
+using Org::W3c::Dom::INode;
 
 namespace Org {
 namespace Apache {
@@ -15,9 +18,38 @@ namespace Dom {
 
 CarClass(CDOMErrorImpl)
     , public Object
+    , public IDOMError
 {
+private:
+    class InnerDOMLocator
+        : public Object
+        , public IDOMLocator
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        CARAPI GetLineNumber(
+            /* [out] */ Int32* result);
+
+        CARAPI GetColumnNumber(
+            /* [out] */ Int32* result);
+
+        CARAPI GetByteOffset(
+            /* [out] */ Int32* result);
+
+        CARAPI GetUtf16Offset(
+            /* [out] */ Int32* result);
+
+        CARAPI GetRelatedNode(
+            /* [out] */ INode** result);
+
+        CARAPI GetUri(
+            /* [out] */ String* result);
+    };
+
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
+    CAR_INTERFACE_DECL();
 
     CARAPI GetSeverity(
         /* [out] */ Int16 * pValue);
@@ -42,7 +74,10 @@ public:
         /* [in] */ const String& type);
 
 private:
-    // TODO: Add your private member variables here.
+    static AutoPtr<IDOMLocator> NULL_DOM_LOCATOR;
+
+    Int16 severity;
+    String type;
 };
 
 }

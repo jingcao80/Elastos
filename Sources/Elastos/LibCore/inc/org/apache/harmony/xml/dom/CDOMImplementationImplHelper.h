@@ -5,6 +5,7 @@
 #include "_Org_Apache_Harmony_Xml_Dom_CDOMImplementationImplHelper.h"
 #include <elastos/core/Singleton.h>
 
+using Org::W3c::Dom::IDOMImplementation;
 using Elastos::Core::Singleton;
 
 namespace Org {
@@ -26,7 +27,7 @@ public:
         /* [out] */ Org::W3c::Dom::IDOMImplementation ** ppInstance);
 
 private:
-    // TODO: Add your private member variables here.
+    static AutoPtr<IDOMImplementation> instance;
 };
 
 }

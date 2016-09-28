@@ -1,5 +1,10 @@
+#include "Elastos.CoreLibrary.External.h"
+#include "org/apache/harmony/xml/parsers/CDocumentBuilderFactoryImpl.h"
+#include "org/apache/harmony/xml/parsers/DocumentBuilderImpl.h"
+#include <elastos/utility/logging/Logger.h>
 
-#include "CDocumentBuilderFactoryImpl.h"
+using Elastosx::Xml::Parsers::IDocumentBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Apache {
@@ -7,157 +12,109 @@ namespace Harmony {
 namespace Xml {
 namespace Parsers {
 
-CAR_OBJECT_IMPL(CDocumentBuilderFactoryImpl)
+const String CDocumentBuilderFactoryImpl::NAMESPACES("http://xml.org/sax/features/namespaces");
+const String CDocumentBuilderFactoryImpl::VALIDATION("http://xml.org/sax/features/validation");
 
 ECode CDocumentBuilderFactoryImpl::NewDocumentBuilder(
     /* [out] */ Elastosx::Xml::Parsers::IDocumentBuilder ** ppBuilder)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    VALIDATE_NOT_NULL(ppBuilder);
+    ppBuilder = NULL;
 
-ECode CDocumentBuilderFactoryImpl::SetNamespaceAware(
-    /* [in] */ Boolean awareness)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    Boolean isValidating;
+    if (IsValidating(&isValidating), isValidating) {
+        //throw new ParserConfigurationException("No validating DocumentBuilder implementation available");
+        Logger::E("CDocumentBuilderFactoryImpl", "New ParserConfigurationException");
+        assert(0);
+        return E_UNSUPPORTED_OPERATION_EXCEPTION;
+    }
 
-ECode CDocumentBuilderFactoryImpl::SetValidating(
-    /* [in] */ Boolean validating)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    /**
+     * TODO If Android is going to support a different DocumentBuilder
+     * implementations, this should be wired here. If we wanted to
+     * allow different implementations, these could be distinguished by
+     * a special feature (like http://www.org.apache.harmony.com/xml/expat)
+     * or by throwing the full SPI monty at it.
+     */
+    AutoPtr<DocumentBuilderImpl> builder = new DocumentBuilderImpl();
+    Boolean result;
+    builder->SetCoalescing((IsCoalescing(&result), result));
+    builder->SetIgnoreComments((IsIgnoringComments(&result), result));
+    builder->SetIgnoreElementContentWhitespace((IsIgnoringElementContentWhitespace(&result), result));
+    builder->SetNamespaceAware((IsNamespaceAware(&result), result));
 
-ECode CDocumentBuilderFactoryImpl::SetIgnoringElementContentWhitespace(
-    /* [in] */ Boolean whitespace)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    // TODO What about expandEntityReferences?
 
-ECode CDocumentBuilderFactoryImpl::SetExpandEntityReferences(
-    /* [in] */ Boolean expandEntityRef)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::SetIgnoringComments(
-    /* [in] */ Boolean ignoreComments)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::SetCoalescing(
-    /* [in] */ Boolean coalescing)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::IsNamespaceAware(
-    /* [out] */ Boolean * pIsAware)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::IsValidating(
-    /* [out] */ Boolean * pIsValidating)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::IsIgnoringElementContentWhitespace(
-    /* [out] */ Boolean * pIsIgnoringElementContentWhiteSpace)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::IsExpandEntityReferences(
-    /* [out] */ Boolean * pIsExpandEntityReferences)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::IsIgnoringComments(
-    /* [out] */ Boolean * pComments)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::IsCoalescing(
-    /* [out] */ Boolean * pIsCoalescing)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    *ppBuilder = builder;
+    REFCOUNT_ADD(*ppBuilder);
+    return NOERROR;
 }
 
 ECode CDocumentBuilderFactoryImpl::SetAttribute(
     /* [in] */ const String& name,
     /* [in] */ IObject * pValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    Logger::E("CDocumentBuilderFactoryImpl", "SetAttribute not support, name:%s", name.string());
+    assert(0);
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
 ECode CDocumentBuilderFactoryImpl::GetAttribute(
     /* [in] */ const String& name,
     /* [out] */ IInterface ** ppAttri)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    Logger::E("CDocumentBuilderFactoryImpl", "GetAttribute not support, name:%s", name.string());
+    assert(0);
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
 ECode CDocumentBuilderFactoryImpl::SetFeature(
     /* [in] */ const String& name,
     /* [in] */ Boolean value)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    if (name.IsNull()) {
+        //throw new NullPointerException("name == null");
+        Logger::E("CDocumentBuilderFactoryImpl", "SetFeature,name is null");
+        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    if (NAMESPACES.Equals(name)) {
+        SetNamespaceAware(value);
+    } else if (VALIDATION.Equals(name)) {
+        SetValidating(value);
+    } else {
+        //throw new ParserConfigurationException(name);
+        Logger::E("CDocumentBuilderFactoryImpl", "Set ParserConfigurationException name: %s", name.string());
+        assert(0);
+        return E_UNSUPPORTED_OPERATION_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 ECode CDocumentBuilderFactoryImpl::GetFeature(
     /* [in] */ const String& name,
     /* [out] */ Boolean * pFeature)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
+    VALIDATE_NOT_NULL(pFeature);
+    pFeature = FALSE;
+    if (name.IsNull()) {
+        //throw new NullPointerException("name == null");
+        Logger::E("CDocumentBuilderFactoryImpl", "name is null");
+        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
+    }
 
-ECode CDocumentBuilderFactoryImpl::GetSchema(
-    /* [out] */ Elastosx::Xml::Validation::ISchema ** ppSchema)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::SetSchema(
-    /* [in] */ Elastosx::Xml::Validation::ISchema * pSchema)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::SetXIncludeAware(
-    /* [in] */ Boolean state)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CDocumentBuilderFactoryImpl::IsXIncludeAware(
-    /* [out] */ Boolean * pIsXIncludeAware)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    if (NAMESPACES.Equals(name)) {
+        return IsNamespaceAware(pFeature);
+    } else if (VALIDATION.Equals(name)) {
+        return IsValidating(pFeature);
+    } else {
+        //throw new ParserConfigurationException(name);
+        Logger::E("CDocumentBuilderFactoryImpl", "ParserConfigurationException name: %s", name.string());
+        assert(0);
+        return E_UNSUPPORTED_OPERATION_EXCEPTION;
+    }
 }
 
 }
@@ -165,4 +122,3 @@ ECode CDocumentBuilderFactoryImpl::IsXIncludeAware(
 }
 }
 }
-

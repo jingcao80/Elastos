@@ -2,10 +2,14 @@
 #ifndef __ORG_APACHE_HARMONY_XML_DOM_CNODELISTIMPL_H__
 #define __ORG_APACHE_HARMONY_XML_DOM_CNODELISTIMPL_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "_Org_Apache_Harmony_Xml_Dom_CNodeListImpl.h"
 #include <elastos/core/Object.h>
 
+using Org::W3c::Dom::INode;
+using Org::W3c::Dom::INodeList;
 using Elastos::Core::Object;
+using Elastos::Utility::IList;
 
 namespace Org {
 namespace Apache {
@@ -15,9 +19,18 @@ namespace Dom {
 
 CarClass(CNodeListImpl)
     , public Object
+    , public INodeList
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
+    CAR_INTERFACE_DECL();
+
+    CNodeListImpl();
+
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IList* list);
 
     CARAPI Item(
         /* [in] */ Int32 index,
@@ -26,8 +39,12 @@ public:
     CARAPI GetLength(
         /* [out] */ Int32 * pValue);
 
+    CARAPI Add(
+        /* [in] */ INode* node);
+
 private:
-    // TODO: Add your private member variables here.
+    // <NodeImpl>
+    AutoPtr<IList> children;
 };
 
 }

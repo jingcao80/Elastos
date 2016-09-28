@@ -4,8 +4,13 @@
 
 #include "_Org_Apache_Harmony_Xml_Dom_CAttrImpl.h"
 #include <elastos/core/Object.h>
+#include "org/apache/harmony/xml/dom/NodeImpl.h"
+#include "org/apache/harmony/xml/dom/CElementImpl.h"
 
 using Elastos::Core::Object;
+using Org::W3c::Dom::IDocument;
+using Org::W3c::Dom::IAttr;
+using Org::W3c::Dom::EIID_IAttr;
 
 namespace Org {
 namespace Apache {
@@ -14,10 +19,24 @@ namespace Xml {
 namespace Dom {
 
 CarClass(CAttrImpl)
-    , public Object
+    , public NodeImpl
+    , public IAttr
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
+
+    CAR_INTERFACE_DECL();
+
+    CAttrImpl();
+
+    CARAPI constructor(
+        /* [in] */ IDocument* document,
+        /* [in] */ const String& namespaceURI,
+        /* [in] */ const String& qualifiedName);
+
+    CARAPI constructor(
+        /* [in] */ IDocument* document,
+        /* [in] */ const String& name);
 
     CARAPI GetNodeName(
         /* [out] */ String * pStr);
@@ -171,8 +190,17 @@ public:
     CARAPI IsId(
         /* [out] */ Boolean * pValue);
 
+public:
+    // Maintained by ElementImpl.
+    AutoPtr<CElementImpl> ownerElement;
+    Boolean isId;
+    Boolean namespaceAware;
+    String namespaceURI;
+    String prefix;
+    String localName;
+
 private:
-    // TODO: Add your private member variables here.
+    String value;// = "";
 };
 
 }

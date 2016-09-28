@@ -2,7 +2,7 @@
 #define __ELASTOSX_XML_PARSERS_DOCUMENTBUILDER_H__
 
 #include "Elastos.CoreLibrary.Extensions.h"
-#include "Object.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::IO::IInputStream;
@@ -30,11 +30,11 @@ public:
 
     CARAPI Parse(
         /* [in]*/ IInputStream* is,
-        /* [in]*/ String systemId,
+        /* [in]*/ const String& systemId,
         /* [out]*/ IDocument** doc);
 
     CARAPI Parse(
-        /* [in]*/ String uri,
+        /* [in]*/ const String& uri,
         /* [out]*/ IDocument** doc);
 
     CARAPI Parse(

@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_XML_DOM_CDOCUMENTIMPLHELPER_H__
 
 #include "_Org_Apache_Harmony_Xml_Dom_CDocumentImplHelper.h"
+#include "elastos/core/Singleton.h"
 
 using Elastos::Core::Singleton;
 
@@ -17,16 +18,19 @@ CarClass(CDocumentImplHelper)
     , public IDocumentImplHelper
 {
 public:
-    CAR_SINGLETON_DECL()
-
-    CAR_INTERFACE_DECL()
+    CAR_SINGLETON_DECL();
+    CAR_INTERFACE_DECL();
 
     CARAPI IsXMLIdentifier(
         /* [in] */ const String& s,
         /* [out] */ Boolean * pResult);
 
 private:
-    // TODO: Add your private member variables here.
+    CARAPI_(Boolean) IsXMLIdentifierStart(
+        /* [in] */ Char32 c);
+
+    CARAPI_(Boolean) IsXMLIdentifierPart(
+        /* [in] */ Char32 c);
 };
 
 }

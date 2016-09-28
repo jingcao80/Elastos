@@ -2,10 +2,17 @@
 #ifndef __ORG_APACHE_HARMONY_XML_PARSERS_CSAXPARSERIMPL_H__
 #define __ORG_APACHE_HARMONY_XML_PARSERS_CSAXPARSERIMPL_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.CoreLibrary.External.h"
 #include "_Org_Apache_Harmony_Xml_Parsers_CSAXParserImpl.h"
+#include "elastosx/xml/parsers/SAXParser.h"
 #include <elastos/core/Object.h>
 
+using Org::Xml::Sax::IParser;
+using Org::Xml::Sax::IXMLReader;
 using Elastos::Core::Object;
+using Elastos::Utility::IMap;
+using Elastosx::Xml::Parsers::SAXParser;
 
 namespace Org {
 namespace Apache {
@@ -14,57 +21,14 @@ namespace Xml {
 namespace Parsers {
 
 CarClass(CSAXParserImpl)
-    , public Object
+    , public SAXParser
 {
 public:
-    CAR_OBJECT_DECL()
+
+    CARAPI constructor(
+        /* [in] */ IMap* features);
 
     CARAPI Reset();
-
-    CARAPI Parse(
-        /* [in] */ Elastos::IO::IInputStream * pIs,
-        /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb);
-
-    CARAPI ParseEx(
-        /* [in] */ Elastos::IO::IInputStream * pIs,
-        /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb,
-        /* [in] */ const String& systemId);
-
-    CARAPI ParseEx2(
-        /* [in] */ Elastos::IO::IInputStream * pIs,
-        /* [in] */ Org::Xml::Sax::IDTDHandler * pDh);
-
-    CARAPI ParseEx3(
-        /* [in] */ Elastos::IO::IInputStream * pIs,
-        /* [in] */ Org::Xml::Sax::IDTDHandler * pDh,
-        /* [in] */ const String& systemId);
-
-    CARAPI ParseEx4(
-        /* [in] */ const String& uri,
-        /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb);
-
-    CARAPI ParseEx5(
-        /* [in] */ const String& uri,
-        /* [in] */ Org::Xml::Sax::IDTDHandler * pDh);
-
-    CARAPI ParseEx6(
-        /* [in] */ Elastos::IO::IFile * pF,
-        /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb);
-
-    CARAPI ParseEx7(
-        /* [in] */ Elastos::IO::IFile * pF,
-        /* [in] */ Org::Xml::Sax::IDTDHandler * pDh);
-
-    CARAPI ParseEx8(
-        /* [in] */ Org::Xml::Sax::IInputSource * pIs,
-        /* [in] */ Org::Xml::Sax::IDocumentHandler * pHb);
-
-    CARAPI ParseEx9(
-        /* [in] */ Org::Xml::Sax::IInputSource * pIs,
-        /* [in] */ Org::Xml::Sax::IDTDHandler * pDh);
-
-    CARAPI GetParser(
-        /* [out] */ Org::Xml::Sax::IParser ** ppParser);
 
     CARAPI GetXMLReader(
         /* [out] */ Org::Xml::Sax::IXMLReader ** ppReader);
@@ -83,14 +47,17 @@ public:
         /* [in] */ const String& name,
         /* [out] */ IInterface ** ppProperty);
 
-    CARAPI GetSchema(
-        /* [out] */ Elastosx::Xml::Validation::ISchema ** ppSchema);
-
-    CARAPI IsXIncludeAware(
-        /* [out] */ Boolean * pIsAware);
+    CARAPI GetParser(
+        /* [out] */ IParser** parser);
 
 private:
-    // TODO: Add your private member variables here.
+    CARAPI ResetInternal();
+
+private:
+    //Map<String, Boolean> initialFeatures;
+    AutoPtr<IMap> initialFeatures;
+    AutoPtr<IXMLReader> reader;
+    AutoPtr<IParser> parser;
 };
 
 }

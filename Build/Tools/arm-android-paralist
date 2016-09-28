@@ -83,6 +83,11 @@
   Elastos/LibCore/src/elastosx/xml/transform/stream
 > Elastos/LibCore/src/elastosx/xml/transform
 > Elastos/LibCore/src/elastosx/xml
+  Elastos/LibCore/src/org/apache/harmony/crypto/internal
+  Elastos/LibCore/src/org/apache/harmony/luni/internal/util
+  Elastos/LibCore/src/org/apache/harmony/xml/dom
+  Elastos/LibCore/src/org/apache/harmony/xml/parsers
+> Elastos/LibCore/src/org/apache/harmony/xml
   Elastos/LibCore/src/org/apache/harmony/security/asn1
   Elastos/LibCore/src/org/apache/harmony/security/fortress
   Elastos/LibCore/src/org/apache/harmony/security/pkcs7

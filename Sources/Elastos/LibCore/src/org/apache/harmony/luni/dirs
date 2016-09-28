@@ -1,4 +1,4 @@
 
-DIRS = Internal/Util
-DIRS += Lang/Reflect
-DIRS += Util
+DIRS = internal/util
+#DIRS += Lang/Reflect
+#DIRS += Util

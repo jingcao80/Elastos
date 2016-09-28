@@ -63,10 +63,6 @@ module
     merge("../../car/elastosx/xml.car");
     }
 
-    submodule Elastos.CoreLibrary.Apache {
-    merge("../../car/org/apache.car");
-    }
-
     submodule Elastos.CoreLibrary.External {
     merge("../../car/org/w3c.car");
     merge("../../car/org/xml.car");
@@ -74,4 +70,9 @@ module
     merge("../../car/org/kxml2.car");
     merge("../../car/org/json.car");
     }
+
+    submodule Elastos.CoreLibrary.Apache {
+    merge("../../car/org/apache.car");
+    }
+
 }

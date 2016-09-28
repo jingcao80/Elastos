@@ -1,8 +1,13 @@
 
-TARGET_NAME= internal
+TARGET_NAME= org.apache.harmony.crypto.internal
 TARGET_TYPE= lib
 
-INCLUDES += ../../
-INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Crypto/Internal
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/crypto/internal
 
 SOURCES = CNullCipherSpi.cpp

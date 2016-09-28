@@ -2,7 +2,7 @@
 #define __ELASTOSX_XML_PARSERS_DOCUMENTBUILDERFACTORY_H__
 
 #include "Elastos.CoreLibrary.Extensions.h"
-#include "Object.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::Core::IClassLoader;
