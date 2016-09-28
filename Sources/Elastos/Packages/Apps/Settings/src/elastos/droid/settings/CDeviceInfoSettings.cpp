@@ -260,7 +260,7 @@ ECode CDeviceInfoSettings::OnCreate(
     FindPreference(CoreUtils::Convert(KEY_FIRMWARE_VERSION), (IPreference**)&pref);
     pref->SetEnabled(TRUE);
     SetValueSummary(KEY_BASEBAND_VERSION, String("gsm.version.baseband"));
-    Logger::I("CDeviceInfoSettings::OnCreate", "================ GetMsvSuffix() is TODO ================")
+    Logger::I("CDeviceInfoSettings::OnCreate", "================ GetMsvSuffix() is TODO ================");
     // SetStringSummary(KEY_DEVICE_MODEL, Build::MODEL + GetMsvSuffix());
     SetValueSummary(KEY_EQUIPMENT_ID, PROPERTY_EQUIPMENT_ID);
     SetStringSummary(KEY_DEVICE_MODEL, Build::MODEL);

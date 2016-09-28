@@ -145,6 +145,7 @@ ECode AbstractStringBuilder::SetLength(
             mByteCount -= cutByteCount;
             mIsCounted = FALSE;
         }
+        else mByteCount = nextByteIndex;
     }
 
     return NOERROR;
@@ -307,7 +308,8 @@ ECode AbstractStringBuilder::Append(
     Int32 length = str.GetByteLength();
     Break(length);
 
-    strncat(mString, (const char*)str, length);
+    memcpy(mString + mByteCount, (const char*)str, length);
+    memset(mString + mByteCount + length, 0, 1);
     mByteCount += length;
     mIsCounted = FALSE;
 

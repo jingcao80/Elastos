@@ -287,6 +287,7 @@ ECode SortCursor::GetColumnNames(
     /* [out,callee]*/ ArrayOf<String>** columnNames)
 {
     VALIDATE_NOT_NULL(columnNames)
+    *columnNames = NULL;
     if (mCursor != NULL) {
         return mCursor->GetColumnNames(columnNames);
     }

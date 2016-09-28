@@ -83,6 +83,7 @@ CarClass(CAudioService)
     , public Object
     , public IAudioService
     , public IIAudioService
+    , public IBinder
 {
 public:
     // StreamVolumeCommand contains the information needed to defer the process of
@@ -1260,6 +1261,9 @@ public:
     static CARAPI GetMaxStreamVolume(
         /* [in] */ Int32 streamType,
         /* [out] */ Int32* result);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 protected:
     CARAPI Dump(

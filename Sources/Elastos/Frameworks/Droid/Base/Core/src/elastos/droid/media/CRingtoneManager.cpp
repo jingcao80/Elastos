@@ -693,7 +693,7 @@ AutoPtr<ICursor> CRingtoneManager::GetInternalRingtones()
     AutoPtr<IUri> uri;
     am->GetINTERNAL_CONTENT_URI((IUri**)&uri);
     return Query(uri, INTERNAL_COLUMNS,
-        ConstructBooleanTrueWhereClause(&mFilterColumns),
+        ConstructBooleanTrueWhereClause(mFilterColumns),
         NULL, IMediaStoreAudioMedia::DEFAULT_SORT_ORDER);
 }
 
@@ -708,7 +708,7 @@ AutoPtr<ICursor> CRingtoneManager::GetMediaRingtones()
 
     return (status.Equals(IEnvironment::MEDIA_MOUNTED) || status.Equals(IEnvironment::MEDIA_MOUNTED_READ_ONLY))
         ? Query(uri, MEDIA_COLUMNS,
-            ConstructBooleanTrueWhereClause(&mFilterColumns), NULL,
+            ConstructBooleanTrueWhereClause(mFilterColumns), NULL,
             IMediaStoreAudioMedia::DEFAULT_SORT_ORDER)
         : NULL;
 }
@@ -716,8 +716,8 @@ AutoPtr<ICursor> CRingtoneManager::GetMediaRingtones()
 void CRingtoneManager::SetFilterColumnsList(
     /* [in] */ Int32 type)
 {
-    List<String> columns(mFilterColumns);
-    mFilterColumns.Clear();
+    List<String>& columns = mFilterColumns;
+    columns.Clear();
 
     if ((type & TYPE_RINGTONE) != 0) {
         columns.PushBack(IMediaStoreAudioAudioColumns::IS_RINGTONE);
@@ -732,37 +732,27 @@ void CRingtoneManager::SetFilterColumnsList(
     }
 }
 
-/*static*/
 String CRingtoneManager::ConstructBooleanTrueWhereClause(
-    /* [in] */ List<String>* columns)
+    /* [in] */ List<String>& columns)
 {
-    String tempNull;
-    if (columns == NULL) {
-        return tempNull;
-    }
-
     StringBuilder sb;
     sb += "(";
 
-    for (Int32 i = columns->GetSize() - 1; i >= 0; i--) {
-        sb += (*columns)[i];
+    List<String>::ReverseIterator rit;
+    for (rit = columns.RBegin(); rit != columns.REnd(); ++rit) {
+        sb += *rit;
         sb += "=1 or ";
     }
 
-    if (columns->IsEmpty() == FALSE) {
+    if (!columns.IsEmpty()) {
         // Remove last ' or '
-        Int32 tempValue;
-        sb.GetLength(&tempValue);
-        String tempText;
-        sb.Substring(tempValue - 4, &tempText);
-        sb.Reset();
-        sb += tempText;
+        Int32 size;
+        sb.GetLength(&size);
+        sb.SetLength(size - 4);
     }
 
     sb += ")";
-    String tempText;
-    sb.ToString(&tempText);
-    return tempText;
+    return sb.ToString();
 }
 
 AutoPtr<ICursor> CRingtoneManager::Query(

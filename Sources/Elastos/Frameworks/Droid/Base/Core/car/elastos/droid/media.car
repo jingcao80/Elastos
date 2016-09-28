@@ -473,6 +473,7 @@ module
 
         interface IAudioService;
         interface IIAudioService;
+        interface IBinder;
     }
 
     singleton class CAudioServiceHelper {

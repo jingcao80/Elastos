@@ -12,13 +12,10 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Database.h"
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <elastos/core/StringUtils.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Os::CBinder;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
@@ -29,8 +26,9 @@ using Elastos::Droid::Provider::IMediaStoreAudioMedia;
 using Elastos::Droid::Provider::IMediaStoreAudioPlaylistsMembers;
 using Elastos::Droid::Provider::IMediaStoreMediaColumns;
 using Elastos::Droid::R;
-using Elastos::IO::ICloseable;
 using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -111,7 +109,7 @@ ECode CRingtone::SetAudioAttributes(
     /* [in] */ IAudioAttributes* attributes)
 {
     if (attributes == NULL) {
-        Slogger::E(TAG, "Invalid NULL AudioAttributes for Ringtone");
+        Logger::E(TAG, "Invalid NULL AudioAttributes for Ringtone");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mAudioAttributes = attributes;
@@ -323,7 +321,7 @@ ECode CRingtone::Stop()
     if (mLocalPlayer != NULL) {
         DestroyLocalPlayer();
     }
-    else if (mAllowRemote && (mRemotePlayer != NULL)) {
+    else if (mAllowRemote && mRemotePlayer != NULL) {
         //try {
         ECode ec = mRemotePlayer->Stop(mRemoteToken);
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
@@ -371,7 +369,7 @@ ECode CRingtone::IsPlaying(
     if (mLocalPlayer != NULL) {
         return mLocalPlayer->IsPlaying(playing);
     }
-    else if (mAllowRemote && (mRemotePlayer != NULL)) {
+    else if (mAllowRemote && mRemotePlayer != NULL) {
         //try {
         return mRemotePlayer->IsPlaying(mRemoteToken, playing);
         //} catch (RemoteException e) {
@@ -424,16 +422,18 @@ Boolean CRingtone::PlayFallbackRingtone()
                 mLocalPlayer->Start();
                 ICloseable::Probe(afd)->Close();
                 return TRUE;
-            } else {
+            }
+            else {
                 Logger::E(TAG, "Could not load fallback ringtone");
             }
             // } catch (IOException ioe) {
-                DestroyLocalPlayer();
-                Logger::E(TAG, "Failed to open fallback ringtone");
+            //     DestroyLocalPlayer();
+            //     Logger::E(TAG, "Failed to open fallback ringtone");
             // } catch (NotFoundException nfe) {
-                Logger::E(TAG, "Fallback ringtone does not exist");
+            //     Logger::E(TAG, "Fallback ringtone does not exist");
             // }
-        } else {
+        }
+        else {
             Logger::W(TAG, "not playing fallback for %p", mUri.Get());
         }
     }

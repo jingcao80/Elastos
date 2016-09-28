@@ -121,8 +121,9 @@ ECode AbstractCursor::GetColumnCount(
     /* [out] */ Int32* columnCount)
 {
     VALIDATE_NOT_NULL(columnCount)
+    *columnCount = -1;
     AutoPtr< ArrayOf<String> > names;
-    GetColumnNames((ArrayOf<String>**)&names);
+    FAIL_RETURN(GetColumnNames((ArrayOf<String>**)&names));
     *columnCount = names->GetLength();
     return NOERROR;
 }
@@ -354,6 +355,7 @@ ECode AbstractCursor::GetColumnIndex(
     /* [out] */ Int32* columnIndex)
 {
     VALIDATE_NOT_NULL(columnIndex)
+    *columnIndex = -1;
     String columnName = _columnName;
     Int32 periodIndex = columnName.LastIndexOf('.');
     if (periodIndex != -1) {
@@ -363,7 +365,7 @@ ECode AbstractCursor::GetColumnIndex(
     }
 
     AutoPtr< ArrayOf<String> > columnNames;
-    GetColumnNames((ArrayOf<String>**)&columnNames);
+    FAIL_RETURN(GetColumnNames((ArrayOf<String>**)&columnNames));
     Int32 length = columnNames->GetLength();
     for(Int32 i = 0; i < length; i++) {
         if((*columnNames)[i].EqualsIgnoreCase(columnName)) {
@@ -405,8 +407,9 @@ ECode AbstractCursor::GetColumnName(
     /* [out] */ String* columnName)
 {
     VALIDATE_NOT_NULL(columnName)
+    *columnName = NULL;
     AutoPtr< ArrayOf<String> > columnNames;
-    GetColumnNames((ArrayOf<String>**)&columnNames);
+    FAIL_RETURN(GetColumnNames((ArrayOf<String>**)&columnNames));
     *columnName = (*columnNames)[columnIndex];
     return NOERROR;
 }

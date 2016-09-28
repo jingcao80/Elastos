@@ -63,6 +63,7 @@ using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ISettingsSystem;
@@ -3023,7 +3024,7 @@ ECode CAudioService::BluetoothProfileServiceListener::OnServiceDisconnected(
 //  CAudioService
 //==============================================================================
 
-CAR_INTERFACE_IMPL_2(CAudioService, Object, IAudioService, IIAudioService)
+CAR_INTERFACE_IMPL_3(CAudioService, Object, IAudioService, IIAudioService, IBinder)
 
 CAR_OBJECT_IMPL(CAudioService)
 
@@ -7335,6 +7336,14 @@ ECode CAudioService::EnforceSelfOrSystemUI(
 {
     return mContext->EnforceCallingOrSelfPermission(Manifest::permission::STATUS_BAR_SERVICE,
             String("Only SystemUI can ") + action);
+}
+
+ECode CAudioService::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CAudioService";
+    return NOERROR;
 }
 
 } // namespace Media

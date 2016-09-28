@@ -76,8 +76,8 @@ public:
 
     AutoPtr<IIAudioService> mAudioService;
 
-    AutoPtr<NotificationPlayer> mAsyncPlayer; // = new NotificationPlayer(TAG);
-    AutoPtr<IHashMap> mClients; // = Maps.newHashMap();
+    AutoPtr<NotificationPlayer> mAsyncPlayer;
+    AutoPtr<IHashMap> mClients;
 
     AutoPtr<IIRingtonePlayer> mCallback;
 };

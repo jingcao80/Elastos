@@ -355,7 +355,7 @@ private:
      * @return The where clause.
      */
     static CARAPI_(String) ConstructBooleanTrueWhereClause(
-        /* [in] */ List<String>* columns);
+        /* [in] */ List<String>& columns);
 
     CARAPI_(AutoPtr<ICursor>) Query(
         /* [in] */ IUri* uri,

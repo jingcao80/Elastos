@@ -1,16 +1,16 @@
+
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/systemui/media/CRingtonePlayer.h"
 #include "elastos/droid/systemui/media/CMyRingtonePlayer.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Media::CRingtone;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -39,7 +39,8 @@ CRingtonePlayer::Client::Client(
 ECode CRingtonePlayer::Client::ProxyDied()
 {
     if (LOGD) Logger::D(TAG, "binderDied() token = %p", mToken.Get());
-    {    AutoLock syncLock(mHost->mClients);
+    {
+        AutoLock syncLock(mHost->mClients);
         mHost->mClients->Remove(mToken);
     }
     return mRingtone->Stop();
@@ -55,6 +56,7 @@ CAR_OBJECT_IMPL(CRingtonePlayer)
 
 CRingtonePlayer::CRingtonePlayer()
 {
+    CHashMap::New((IHashMap**)&mClients);
     mAsyncPlayer = new NotificationPlayer(TAG);
     CMyRingtonePlayer::New(this, (IIRingtonePlayer**)&mCallback);
 }
@@ -62,14 +64,12 @@ CRingtonePlayer::CRingtonePlayer()
 ECode CRingtonePlayer::Start()
 {
     mAsyncPlayer->SetUsesWakeLock(mContext);
-    Slogger::I(TAG, "TODO: Not Debug: AudioService");
-    // mAudioService = IIAudioService::Probe(ServiceManager::GetService(IContext::AUDIO_SERVICE));
-
-    // ECode ec = mAudioService->SetRingtonePlayer(mCallback);
-    // if (FAILED(ec)) {
-    //     Slogger::E(TAG, "Problem registering RingtonePlayer: %08x", ec);
-    //     return E_REMOTE_EXCEPTION;
-    // }
+    mAudioService = IIAudioService::Probe(ServiceManager::GetService(IContext::AUDIO_SERVICE));
+    ECode ec = mAudioService->SetRingtonePlayer(mCallback);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Problem registering RingtonePlayer: %08x", ec);
+        return E_REMOTE_EXCEPTION;
+    }
     return NOERROR;
 }
 
