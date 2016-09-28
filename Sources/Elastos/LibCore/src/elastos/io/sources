@@ -118,6 +118,9 @@ SOURCES += ByteBufferAsInt64Buffer.cpp
 SOURCES += ServerSocketChannelImpl.cpp
 SOURCES += CNioUtils.cpp
 SOURCES += DatagramChannelImpl.cpp
+SOURCES += SerializablePermission.cpp
+SOURCES += ObjectStreamConstants.cpp
+SOURCES += CObjectOutputStream.cpp
 
 # For Serializable(not surport now)
 # EmulatedFields

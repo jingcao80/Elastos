@@ -17,6 +17,8 @@ module
     merge("io/IDataInputStream.car");
     merge("io/IDataOutput.car");
     merge("io/IDataOutputStream.car");
+    merge("io/IEmulatedFieldsForDumping.car");
+    merge("io/ISerializationHandleMap.car");
     merge("io/IFile.car");
     merge("io/IFileDescriptor.car");
     merge("io/IFileFilter.car");
@@ -774,6 +776,22 @@ module
             [in] IReader* r);
 
         interface IStreamTokenizer;
+    }
+
+    class CObjectOutputStream {
+        constructor();
+
+        constructor(
+            [in] IOutputStream* r);
+
+        interface IObjectOutputStream;
+        interface IOutputStream;
+        interface ICloseable;
+        interface IFlushable;
+        interface IObjectOutput;
+        interface IDataOutput;
+        // TODO: Need IAutoCloseable
+        // interface IAutoCloseable;
     }
 
     namespace Channels {

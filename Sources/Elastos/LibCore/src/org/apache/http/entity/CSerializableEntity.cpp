@@ -2,12 +2,16 @@
 #include "org/apache/http/entity/CSerializableEntity.h"
 #include "elastos/io/CByteArrayInputStream.h"
 #include "elastos/io/CByteArrayOutputStream.h"
+#include "elastos/io/CObjectOutputStream.h"
 #include "elastos/utility/logging/Logger.h"
 
-using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::CByteArrayInputStream;
-using Elastos::IO::IByteArrayOutputStream;
 using Elastos::IO::CByteArrayOutputStream;
+using Elastos::IO::CObjectOutputStream;
+using Elastos::IO::IByteArrayInputStream;
+using Elastos::IO::IByteArrayOutputStream;
+using Elastos::IO::IObjectOutput;
+using Elastos::IO::IObjectOutputStream;
 using Elastos::IO::IFlushable;
 using Elastos::Utility::Logging::Logger;
 
@@ -23,12 +27,10 @@ ECode CSerializableEntity::CreateBytes(
 {
     AutoPtr<IByteArrayOutputStream> baos;
     CByteArrayOutputStream::New((IByteArrayOutputStream**)&baos);
-    Logger::E("CSerializableEntity", "CObjectOutputStream has not been implemented");
-    assert(0);
-    // AutoPtr<IObjectOutputStream> out;
-    // CObjectOutputStream::New(IOutputStream::Probe(baos), (IObjectOutputStream**)&out);
-    // out->WriteObject(IObject::Probe(ser));
-    // IFlushable::Probe(out)->Flush();
+    AutoPtr<IObjectOutputStream> out;
+    CObjectOutputStream::New(IOutputStream::Probe(baos), (IObjectOutputStream**)&out);
+    IObjectOutput::Probe(out)->WriteObject(IObject::Probe(ser));
+    IFlushable::Probe(out)->Flush();
     return baos->ToByteArray((ArrayOf<Byte>**)&mObjSer);
 }
 
@@ -84,12 +86,10 @@ ECode CSerializableEntity::WriteTo(
     }
 
     if (mObjSer == NULL) {
-        Logger::E("CSerializableEntity", "CObjectOutputStream has not been implemented");
-        assert(0);
-        // AutoPtr<IObjectOutputStream> out;
-        // CObjectOutputStream::New(outstream, (IObjectOutputStream**)&out);
-        // out->WriteObject(IObject::Probe(mObjRef));
-        // IFlushable::Probe(out)->Flush();
+        AutoPtr<IObjectOutputStream> out;
+        CObjectOutputStream::New(outstream, (IObjectOutputStream**)&out);
+        IObjectOutput::Probe(out)->WriteObject(IObject::Probe(mObjRef));
+        IFlushable::Probe(out)->Flush();
     }
     else {
         outstream->Write(mObjSer);

@@ -2,17 +2,19 @@
 #include "CSignedObject.h"
 #include "CByteArrayInputStream.h"
 #include "CByteArrayOutputStream.h"
-// #include "CObjectOutputStream.h"
+#include "CObjectOutputStream.h"
 
 using Elastos::IO::CByteArrayInputStream;
 using Elastos::IO::CByteArrayOutputStream;
-// using Elastos::IO::CObjectOutputStream;
+using Elastos::IO::CObjectOutputStream;
 using Elastos::IO::EIID_ISerializable;
 using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::IByteArrayOutputStream;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFlushable;
+using Elastos::IO::IObjectOutput;
 using Elastos::IO::IObjectOutputStream;
+using Elastos::IO::IOutputStream;
 
 namespace Elastos {
 namespace Security {
@@ -27,13 +29,11 @@ ECode CSignedObject::constructor(
     AutoPtr<IByteArrayOutputStream> baos;
     CByteArrayOutputStream::New((IByteArrayOutputStream**)&baos);
     AutoPtr<IObjectOutputStream> oos;
-    assert(0 && "TODO");
-    // CObjectOutputStream::New(baos, (IObjectOutputStream**)&oos);
+    CObjectOutputStream::New(IOutputStream::Probe(baos), (IObjectOutputStream**)&oos);
     ECode ec = NOERROR;
     do {
         // Serialize
-        assert(0 && "TODO");
-        // ec = oos->WriteObject(object);
+        ec = IObjectOutput::Probe(oos)->WriteObject(object);
         if (FAILED(ec)) {
             break;
         }

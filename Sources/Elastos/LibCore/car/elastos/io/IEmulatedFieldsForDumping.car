@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Elastos {
+    namespace IO {
+
+    /**
+     * An EmulatedFieldsForDumping is an object that represents a set of emulated
+     * fields for an object being dumped. It is a concrete implementation for
+     * ObjectOutputStream.PutField
+     *
+     *
+     * @see ObjectOutputStream.PutField
+     * @see EmulatedFieldsForLoading
+     */
+    /**
+    * @Involve
+    * interface IObjectOutputStreamPutField;
+    */
+    interface IEmulatedFieldsForDumping {
+    }
+
+    } // namespace IO
+    } // namespace Elastos
+}
