@@ -7380,8 +7380,7 @@ void AbsListView::ConfirmCheckedPositionsById()
     Boolean found = FALSE;
     Boolean checkedCountChanged = FALSE;
     Int32 size;
-    mCheckedIdStates->GetSize(&size);
-    for (Int32 checkedIndex = 0; checkedIndex < size; checkedIndex++) {
+    for (Int32 checkedIndex = 0; mCheckedIdStates->GetSize(&size), checkedIndex < size; checkedIndex++) {
         Int64 id;
         mCheckedIdStates->KeyAt(checkedIndex, &id);
         AutoPtr<IInterface> obj;
