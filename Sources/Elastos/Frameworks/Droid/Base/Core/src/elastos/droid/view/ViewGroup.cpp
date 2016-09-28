@@ -1135,7 +1135,16 @@ ViewGroup::~ViewGroup()
     mDragNotifiedChildren.Clear();
     mFirstTouchTarget = NULL;
     mFirstHoverTarget = NULL;
-    mChildren = NULL;
+    if (mChildren != NULL) {
+        for (Int32 i = 0; i < mChildren->GetLength(); ++i) {
+            AutoPtr<IView> child = (*mChildren)[i];
+            if (child != NULL) {
+                VIEW_PROBE(child)->AssignParent(NULL);
+                mChildren->Set(i, NULL);
+            }
+        }
+        mChildren = NULL;
+    }
     mTransitioningViews.Clear();
     mVisibilityChangingChildren.Clear();
     mPreSortedChildren = NULL;

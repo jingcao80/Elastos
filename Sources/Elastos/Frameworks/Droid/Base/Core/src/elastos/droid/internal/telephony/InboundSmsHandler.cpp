@@ -1184,7 +1184,7 @@ void InboundSmsHandler::DispatchIntent(
         for (Int32 i = users->GetLength() - 1; i >= 0; i--) {
             AutoPtr<IUserHandle> targetUser;
             CUserHandle::New((*users)[i], (IUserHandle**)&targetUser);
-            if (users[i] != UserHandle::USER_OWNER) {
+            if ((*users)[i] != UserHandle::USER_OWNER) {
                 // Is the user not allowed to use SMS?
                 if (mUserManager->HasUserRestriction(IUserManager::DISALLOW_SMS, targetUser, &tmp), tmp) {
                     continue;
