@@ -65,7 +65,7 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_WIFI);
 
     // BT
-    InitPut(map, String("Elastos.Droid.Settings.Bluetooth.BluetoothSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Bluetooth.CBluetoothSettings"),
             Ranking::RANK_BT);
 
     // SIM Cards
@@ -160,11 +160,11 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_PRINTING);
 
     // Development
-    InitPut(map, String("Elastos.Droid.Settings.DevelopmentSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CDevelopmentSettings"),
             Ranking::RANK_DEVELOPEMENT);
 
     // Device infos
-    InitPut(map, String("Elastos.Droid.Settings.DeviceInfoSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CDeviceInfoSettings"),
             Ranking::RANK_DEVICE_INFO);
 
     return map;

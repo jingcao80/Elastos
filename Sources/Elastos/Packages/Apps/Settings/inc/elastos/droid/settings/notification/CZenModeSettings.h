@@ -347,7 +347,7 @@ private:
         , public IPreferenceOnPreferenceClickListener
     {
     public:
-        TO_STRING_IMPL("CZenModeSettings::OnCreateOnDismissListener")
+        TO_STRING_IMPL("CZenModeSettings::OnCreateOnPreferenceClickListener")
 
         CAR_INTERFACE_DECL()
 

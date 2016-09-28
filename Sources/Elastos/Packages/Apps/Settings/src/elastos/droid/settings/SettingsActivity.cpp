@@ -1,7 +1,7 @@
 
 #include "Elastos.Droid.Transition.h"
 #include "elastos/droid/settings/SettingsActivity.h"
-#include "elastos/droid/settings/DevelopmentSettings.h"
+#include "elastos/droid/settings/CDevelopmentSettings.h"
 #include "elastos/droid/settings/HomeSettings.h"
 #include "elastos/droid/settings/dashboard/CDashboardCategory.h"
 #include "elastos/droid/settings/dashboard/NoHomeDialogFragment.h"
@@ -127,7 +127,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[1] = "Elastos.Droid.Settings.Wifi.CWifiSettings";
     (*args)[2] = "Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings";
     (*args)[3] = "Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings";
-    (*args)[4] = "Elastos.Droid.Settings.Bluetooth.BluetoothSettings";
+    (*args)[4] = "Elastos.Droid.Settings.Bluetooth.CBluetoothSettings";
     (*args)[5] = "Elastos.Droid.Settings.Sim.SimSettings";
     (*args)[6] = "Elastos.Droid.Settings.TetherSettings";
     (*args)[7] = "Elastos.Droid.Settings.Wifi.P2p.CWifiP2pSettings";
@@ -141,7 +141,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[15] = "Elastos.Droid.Settings.CUserDictionarySettings";
     (*args)[16] = "Elastos.Droid.Settings.HomeSettings";
     (*args)[17] = "Elastos.Droid.Settings.DisplaySettings";
-    (*args)[18] = "Elastos.Droid.Settings.DeviceInfoSettings";
+    (*args)[18] = "Elastos.Droid.Settings.CDeviceInfoSettings";
     (*args)[19] = "Elastos.Droid.Settings.Applications.CManageApplications";
     (*args)[20] = "Elastos.Droid.Settings.Applications.ProcessStatsUi";
     (*args)[21] = "Elastos.Droid.Settings.Notification.CNotificationStation";
@@ -149,13 +149,13 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[23] = "Elastos.Droid.Settings.CSecuritySettings";
     (*args)[24] = "Elastos.Droid.Settings.UsageAccessSettings";
     (*args)[25] = "Elastos.Droid.Settings.PrivacySettings";
-    (*args)[26] = "Elastos.Droid.Settings.DeviceAdminSettings";
+    (*args)[26] = "Elastos.Droid.Settings.CDeviceAdminSettings";
     (*args)[27] = "Elastos.Droid.Settings.Accessibility.AccessibilitySettings";
     (*args)[28] = "Elastos.Droid.Settings.Accessibility.CaptionPropertiesFragment";
     (*args)[29] = "Elastos.Droid.Settings.Accessibility.ToggleDaltonizerPreferenceFragment";
     (*args)[30] = "Elastos.Droid.Settings.Tts.TextToSpeechSettings";
     (*args)[31] = "Elastos.Droid.Settings.Deviceinfo.Memory";
-    (*args)[32] = "Elastos.Droid.Settings.DevelopmentSettings";
+    (*args)[32] = "Elastos.Droid.Settings.CDevelopmentSettings";
     (*args)[33] = "Elastos.Droid.Settings.Deviceinfo.UsbSettings";
     (*args)[34] = "Elastos.Droid.Settings.Nfc.AndroidBeam";
     (*args)[35] = "Elastos.Droid.Settings.Wfd.WifiDisplaySettings";
@@ -671,7 +671,7 @@ ECode SettingsActivity::OnCreate(
     }
 
     mDevelopmentPreferences = NULL;
-    GetSharedPreferences(DevelopmentSettings::PREF_FILE,
+    GetSharedPreferences(CDevelopmentSettings::PREF_FILE,
             IContext::MODE_PRIVATE, (ISharedPreferences**)&mDevelopmentPreferences);
 
     // Getting Intent properties can only be done after the super.OnCreate(...)
@@ -780,8 +780,7 @@ ECode SettingsActivity::OnCreate(
                     initialFragmentName.Equals("Elastos.Droid.Settings.Accounts.AccountSettings") ||
                     initialFragmentName.Equals("Elastos.Droid.Settings.PrivacySettings") ||
                     initialFragmentName.Equals("Elastos.Droid.Settings.Accessibility.AccessibilitySettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Print.PrintSettingsFragment") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.DeviceInfoSettings")){
+                    initialFragmentName.Equals("Elastos.Droid.Settings.Print.PrintSettingsFragment")){
                 // nothing to do
                 return NOERROR;
             }
@@ -1462,7 +1461,7 @@ ECode SettingsActivity::UpdateTilesList(
 {
     Boolean showDev;
     mDevelopmentPreferences->GetBoolean(
-            DevelopmentSettings::PREF_SHOW,
+            CDevelopmentSettings::PREF_SHOW,
             Build::TYPE.Equals("eng"), &showDev);
 
     AutoPtr<IInterface> obj;

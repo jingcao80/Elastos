@@ -48,7 +48,7 @@ static AutoPtr<IHashMap> InitsResMap()
             R::xml::wifi_display_saved_access_points,
             R::drawable::ic_settings_wireless);
 
-    InitPut(map, String("Elastos.Droid.Settings.Bluetooth.BluetoothSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Bluetooth.CBluetoothSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_bluetooth2);
 
@@ -138,11 +138,11 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_print);
 
-    InitPut(map, String("Elastos.Droid.Settings.DevelopmentSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CDevelopmentSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_development);
 
-    InitPut(map, String("Elastos.Droid.Settings.DeviceInfoSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CDeviceInfoSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_about);
 

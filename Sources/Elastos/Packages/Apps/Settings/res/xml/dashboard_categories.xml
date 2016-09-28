@@ -34,7 +34,7 @@
         <dashboard-tile
                 android:id="@+id/bluetooth_settings"
                 android:title="@string/bluetooth_settings_title"
-                android:fragment="Elastos.Droid.Settings.Bluetooth.BluetoothSettings"
+                android:fragment="Elastos.Droid.Settings.Bluetooth.CBluetoothSettings"
                 android:icon="@drawable/ic_settings_bluetooth2"
                 />
 
@@ -229,7 +229,7 @@
         <dashboard-tile
                 android:id="@+id/development_settings"
                 android:title="@string/development_settings_title"
-                android:fragment="Elastos.Droid.Settings.DevelopmentSettings"
+                android:fragment="Elastos.Droid.Settings.CDevelopmentSettings"
                 android:icon="@drawable/ic_settings_development"
                 />
 
@@ -237,7 +237,7 @@
         <dashboard-tile
                 android:id="@+id/about_settings"
                 android:title="@string/about_settings"
-                android:fragment="Elastos.Droid.Settings.DeviceInfoSettings"
+                android:fragment="Elastos.Droid.Settings.CDeviceInfoSettings"
                 android:icon="@drawable/ic_settings_about"
                 />
 

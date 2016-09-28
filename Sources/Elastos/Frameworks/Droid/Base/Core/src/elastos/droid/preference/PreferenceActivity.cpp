@@ -660,13 +660,20 @@ PreferenceActivity::PreferenceActivity()
 {
 }
 
+ECode PreferenceActivity::constructor()
+{
+    CArrayList::New((IList**)&mHeaders);
+
+    mHandler = new MHandler(this);
+    mHandler->constructor();
+
+    return ListActivity::constructor();
+}
+
 ECode PreferenceActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     ListActivity::OnCreate(savedInstanceState);
-
-    mHandler = new MHandler(this);
-    mHandler->constructor();
 
     // Theming for the PreferenceActivity layout and for the Preference Header(s) layout
     AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PreferenceActivity);
