@@ -1,11 +1,12 @@
+
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Net.h"
 #include "elastos/droid/dialer/calllog/CCallLogNotificationsService.h"
-#include "elastos/droid/dialer/calllog/CCallLogQueryHandler.h"
 #include "elastos/droid/dialer/calllog/DefaultVoicemailNotifier.h"
 #include "elastos/utility/logging/Logger.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "Elastos.Droid.Net.h"
 
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Dialer::CallLog::EIID_ICallLogNotificationsService;
 using Elastos::Droid::Net::IUri;
 using Elastos::Utility::Logging::Logger;
 
@@ -16,9 +17,9 @@ namespace CallLog {
 
 const String CCallLogNotificationsService::TAG("CallLogNotificationsService");
 
-CAR_INTERFACE_IMPL(CCallLogNotificationsService, IntentService, ICallLogNotificationsService);
+CAR_INTERFACE_IMPL(CCallLogNotificationsService, IntentService, ICallLogNotificationsService)
 
-CAR_OBJECT_IMPL(CCallLogNotificationsService);
+CAR_OBJECT_IMPL(CCallLogNotificationsService)
 
 ECode CCallLogNotificationsService::constructor()
 {
@@ -31,8 +32,8 @@ ECode CCallLogNotificationsService::OnCreate()
 
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
-    return CCallLogQueryHandler::New(resolver, NULL /*listener*/,
-            (ICallLogQueryHandler**)&mCallLogQueryHandler);
+    mCallLogQueryHandler = new CallLogQueryHandler(resolver, NULL /*listener*/);
+    return NOERROR;
 }
 
 ECode CCallLogNotificationsService::OnHandleIntent(
@@ -52,13 +53,11 @@ ECode CCallLogNotificationsService::OnHandleIntent(
         AutoPtr<IParcelable> parcelable;
         intent->GetParcelableExtra(
                 ICallLogNotificationsService::EXTRA_NEW_VOICEMAIL_URI, (IParcelable**)&parcelable);
-        IUri* voicemailUri = IUri::Probe(parcelable);
-        IVoicemailNotifier::Probe(DefaultVoicemailNotifier::GetInstance(this))->UpdateNotification(voicemailUri);
+        AutoPtr<IUri> voicemailUri = IUri::Probe(parcelable);
+        DefaultVoicemailNotifier::GetInstance(this)->UpdateNotification(voicemailUri);
     }
     else {
-        String str;
-        intent->ToString(&str);
-        Logger::D(TAG, "onHandleIntent: could not handle: %s", str.string());
+        Logger::D(TAG, "onHandleIntent: could not handle: %s", TO_CSTR(intent));
     }
 
     return NOERROR;

@@ -49,7 +49,7 @@ private:
      * Retrieve the account metadata, but if the account does not exist or the device has only a
      * single registered and enabled account, return null.
      */
-    static CARAPI_  (AutoPtr<IPhoneAccount>) GetAccountOrNull(
+    static CARAPI_(AutoPtr<IPhoneAccount>) GetAccountOrNull(
         /* [in] */ IContext* context,
         /* [in] */ IPhoneAccountHandle* phoneAccount);
 };

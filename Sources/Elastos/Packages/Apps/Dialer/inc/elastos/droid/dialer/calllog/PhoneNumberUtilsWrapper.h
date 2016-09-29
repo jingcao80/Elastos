@@ -5,21 +5,18 @@
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/core/Object.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/utility/etl/Set.h>
 
-using Elastos::Utility::ISet;
+using Elastos::Utility::Etl::Set;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace CallLog {
 
-class PhoneNumberUtilsWrapper
-    : public Object
-    , public IPhoneNumberUtilsWrapper
+class PhoneNumberUtilsWrapper : public Object
 {
 public:
-    CAR_INTERFACE_DECL()
-
     /** Returns true if it is possible to place a call to the given number. */
     static CARAPI_(Boolean) CanPlaceCallsTo(
         /* [in] */ ICharSequence* number,
@@ -28,26 +25,23 @@ public:
     /**
      * Returns true if it is possible to send an SMS to the given number.
      */
-    CARAPI CanSendSmsTo(
+    CARAPI_(Boolean) CanSendSmsTo(
         /* [in] */ ICharSequence* number,
-        /* [in] */ Int32 presentation,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 presentation);
 
     /**
      * Returns true if the given number is the number of the configured voicemail. To be able to
      * mock-out this, it is not a static method.
      */
-    CARAPI IsVoicemailNumber(
-        /* [in] */ ICharSequence* number,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsVoicemailNumber(
+        /* [in] */ ICharSequence* number);
 
     /**
      * Returns true if the given number is a SIP address. To be able to mock-out this, it is not a
      * static method.
      */
-    CARAPI IsSipNumber(
-        /* [in] */ ICharSequence* number,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsSipNumber(
+        /* [in] */ ICharSequence* number);
 
     static CARAPI_(Boolean) IsUnknownNumberThatCanBeLookedUp(
         /* [in] */ ICharSequence* number,
@@ -58,10 +52,10 @@ public:
         /* [in] */ ICharSequence* number);
 
 public:
-    static AutoPtr<IPhoneNumberUtilsWrapper> INSTANCE; // = new PhoneNumberUtilsWrapper();
+    static const AutoPtr<PhoneNumberUtilsWrapper> INSTANCE; // = new PhoneNumberUtilsWrapper();
 
 private:
-    static AutoPtr<ISet> LEGACY_UNKNOWN_NUMBERS; // = Sets.newHashSet("-1", "-2", "-3");
+    static const Set<String> LEGACY_UNKNOWN_NUMBERS; // = Sets.newHashSet("-1", "-2", "-3");
 };
 
 } // CallLog

@@ -1,6 +1,9 @@
 
 #include "elastos/droid/dialer/util/EmptyLoader.h"
-#include "elastos/droid/dialer/util/CEmptyLoader.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +13,7 @@ namespace Util {
 //=================================================================
 // EmptyLoader::Callback
 //=================================================================
-CAR_INTERFACE_IMPL(EmptyLoader::Callback, Object, IEmptyLoaderCallback, ILoaderManagerLoaderCallbacks);
+CAR_INTERFACE_IMPL(EmptyLoader::Callback, Object, ILoaderManagerLoaderCallbacks);
 
 EmptyLoader::Callback::Callback(
     /* [in] */ IContext* context)
@@ -23,7 +26,12 @@ ECode EmptyLoader::Callback::OnCreateLoader(
     /* [in] */ IBundle* args,
     /* [out] */ ILoader** loader)
 {
-    return CEmptyLoader::New(loader);
+    VALIDATE_NOT_NULL(loader)
+    AutoPtr<EmptyLoader> emptyLoader = new EmptyLoader();
+    emptyLoader->constructor(mContext);
+    *loader = ILoader::Probe(emptyLoader);
+    REFCOUNT_ADD(*loader);
+    return NOERROR;
 }
 
 ECode EmptyLoader::Callback::OnLoadFinished(
@@ -42,8 +50,6 @@ ECode EmptyLoader::Callback::OnLoaderReset(
 //=================================================================
 // EmptyLoader
 //=================================================================
-CAR_INTERFACE_IMPL(EmptyLoader, Loader, IEmptyLoader);
-
 ECode EmptyLoader::constructor(
     /* [in] */ IContext* context)
 {

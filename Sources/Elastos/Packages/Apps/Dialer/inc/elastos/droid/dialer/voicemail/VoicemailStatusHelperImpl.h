@@ -2,9 +2,7 @@
 #define __ELASTOS_DROID_DIALER_VOICEMAIL_VOICEMAILSTATUSHELPERIMPL_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
-#include "Elastos.Droid.Database.h"
-#include "Elastos.CoreLibrary.Core.h"
+#include "elastos/droid/dialer/voicemail/VoicemailStatusHelperStatusMessage.h"
 #include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::Database::ICursor;
@@ -19,23 +17,20 @@ namespace Voicemail {
 /** Implementation of {@link VoicemailStatusHelper}. */
 class VoicemailStatusHelperImpl
     : public Object
-    , public IVoicemailStatusHelperImpl
+    , public IVoicemailStatusHelper
 {
 public:
     /** Possible user actions. */
-    class Action
-        : public Object
-        , public IVoicemailStatusHelperImplAction
+    class Action : public Object
     {
     public:
-        CAR_INTERFACE_DECL();
-
-        CARAPI GetMessageId(
-            /* [out] */ Int32* id);
+        CARAPI_(Int32) GetMessageId();
 
     private:
         Action(
-            /* [in] */ Int32 messageId);
+            /* [in] */ Int32 messageId)
+            : mMessageId(messageId)
+        {}
 
     public:
         static Action NONE;
@@ -46,13 +41,13 @@ public:
         Int32 mMessageId;
     };
 
+private:
     /**
      * Overall state of the source status. Each state is associated with the corresponding display
      * string and the corrective action. The states are also assigned a relative priority which is
      * used to order the messages from different sources.
      */
-    class OverallState
-        : public Object
+    class OverallState : public Object
     {
     public:
         CARAPI_(AutoPtr<Action>) GetAction();
@@ -107,18 +102,20 @@ public:
         Int32 mCallDetailsMessageId;
     };
 
-private:
+
     /** A wrapper on {@link StatusMessage} which additionally stores the priority of the message. */
-    class MessageStatusWithPriority
-        : public Object
+    class MessageStatusWithPriority : public Object
     {
     public:
         MessageStatusWithPriority(
-            /* [in] */ IVoicemailStatusHelperStatusMessage* message,
-            /* [in] */ Int32 priority);
+            /* [in] */ VoicemailStatusHelperStatusMessage* message,
+            /* [in] */ Int32 priority)
+            : mMessage(message)
+            , mPriority(priority)
+        {}
 
     private:
-        AutoPtr<IVoicemailStatusHelperStatusMessage> mMessage;
+        AutoPtr<VoicemailStatusHelperStatusMessage> mMessage;
         Int32 mPriority;
     };
 
@@ -127,10 +124,12 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyComparator(
-            /* [in] */ VoicemailStatusHelperImpl* host);
+            /* [in] */ VoicemailStatusHelperImpl* host)
+            : mHost(host)
+        {}
 
         // @Override
         CARAPI Compare(
@@ -179,13 +178,13 @@ public:
     static const AutoPtr<ArrayOf<String> > PROJECTION;
 
 private:
-    static const Int32 SOURCE_PACKAGE_INDEX; // = 0;
-    static const Int32 CONFIGURATION_STATE_INDEX; // = 1;
-    static const Int32 DATA_CHANNEL_STATE_INDEX; // = 2;
-    static const Int32 NOTIFICATION_CHANNEL_STATE_INDEX; // = 3;
-    static const Int32 SETTINGS_URI_INDEX; // = 4;
-    static const Int32 VOICEMAIL_ACCESS_URI_INDEX; // = 5;
-    static const Int32 NUM_COLUMNS; // = 6;
+    static const Int32 SOURCE_PACKAGE_INDEX = 0;
+    static const Int32 CONFIGURATION_STATE_INDEX = 1;
+    static const Int32 DATA_CHANNEL_STATE_INDEX = 2;
+    static const Int32 NOTIFICATION_CHANNEL_STATE_INDEX = 3;
+    static const Int32 SETTINGS_URI_INDEX = 4;
+    static const Int32 VOICEMAIL_ACCESS_URI_INDEX = 5;
+    static const Int32 NUM_COLUMNS = 6;
 };
 
 } // Voicemail

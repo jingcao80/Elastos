@@ -1,3 +1,4 @@
+
 #ifndef __ELASTOS_DROID_DIALER_VOICEMAIL_VOICEMAILSTATUSHELPERSTATUSMESSAGE_H__
 #define __ELASTOS_DROID_DIALER_VOICEMAIL_VOICEMAILSTATUSHELPERSTATUSMESSAGE_H__
 
@@ -12,13 +13,9 @@ namespace Droid {
 namespace Dialer {
 namespace Voicemail {
 
-class VoicemailStatusHelperStatusMessage
-    : public Object
-    , public IVoicemailStatusHelperStatusMessage
+class VoicemailStatusHelperStatusMessage : public Object
 {
 public:
-    CAR_INTERFACE_DECL();
-
     CARAPI constructor(
         /* [in] */ const String& sourcePackage,
         /* [in] */ Int32 callLogMessageId,
@@ -27,12 +24,10 @@ public:
         /* [in] */ IUri* actionUri);
 
     /** Whether this message should be shown in the call log page. */
-    CARAPI ShowInCallLog(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) ShowInCallLog();
 
     /** Whether this message should be shown in the call details page. */
-    CARAPI ShowInCallDetails(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) ShowInCallDetails();
 
 public:
 /** Package of the source on behalf of which this message has to be shown.*/

@@ -31,7 +31,7 @@ private:
         , public IIntentProvider
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ReturnCallIntentProvider(
             /* [in] */ const String& number,
@@ -51,7 +51,7 @@ private:
         , public IIntentProvider
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ReturnVideoCallIntentProvider(
             /* [in] */ const String& number,
@@ -71,7 +71,7 @@ private:
         , public IIntentProvider
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         PlayVoicemailIntentProvider(
             /* [in] */ Int64 rowId,
@@ -90,7 +90,7 @@ private:
         , public IIntentProvider
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         CallDetailIntentProvider(
             /* [in] */ Int64 id,
@@ -107,7 +107,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI_(AutoPtr<IIntentProvider>) GetReturnCallIntentProvider(
         /* [in] */ const String& number);
@@ -141,7 +141,7 @@ public:
         /* [in] */ const String& voicemailUri);
 
 private:
-    static const String TAG; // = IntentProvider.class.getSimpleName();
+    static const String TAG;
 };
 
 } // CallLog

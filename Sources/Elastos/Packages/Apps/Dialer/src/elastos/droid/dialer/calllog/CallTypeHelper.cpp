@@ -1,8 +1,8 @@
 
 #include "elastos/droid/dialer/calllog/CallTypeHelper.h"
-#include "R.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/core/CoreUtils.h"
+#include "R.h"
 
 using Elastos::Droid::Provider::ICalls;
 using Elastos::Core::CoreUtils;
@@ -14,30 +14,27 @@ namespace CallLog {
 
 CAR_INTERFACE_IMPL(CallTypeHelper, Object, ICallTypeHelper);
 
-ECode CallTypeHelper::constructor(
+CallTypeHelper::CallTypeHelper(
     /* [in] */ IResources* resources)
+    : mNewMissedColor(0)
+    , mNewVoicemailColor(0)
 {
     // Cache these values so that we do not need to look them up each time.
-    resources->GetString(R::string::type_incoming, &mIncomingName);
-    resources->GetString(R::string::type_outgoing, &mOutgoingName);
-    resources->GetString(R::string::type_missed, &mMissedName);
-    resources->GetString(R::string::type_incoming_video, &mIncomingVideoName);
-    resources->GetString(R::string::type_outgoing_video, &mOutgoingVideoName);
-    resources->GetString(R::string::type_missed_video, &mMissedVideoName);
-    resources->GetString(R::string::type_voicemail, &mVoicemailName);
-    resources->GetColor(R::color::call_log_missed_call_highlight_color, &mNewMissedColor);
-    resources->GetColor(R::color::call_log_voicemail_highlight_color, &mNewVoicemailColor);
-
-    return NOERROR;
+    resources->GetString(Elastos::Droid::Dialer::R::string::type_incoming, &mIncomingName);
+    resources->GetString(Elastos::Droid::Dialer::R::string::type_outgoing, &mOutgoingName);
+    resources->GetString(Elastos::Droid::Dialer::R::string::type_missed, &mMissedName);
+    resources->GetString(Elastos::Droid::Dialer::R::string::type_incoming_video, &mIncomingVideoName);
+    resources->GetString(Elastos::Droid::Dialer::R::string::type_outgoing_video, &mOutgoingVideoName);
+    resources->GetString(Elastos::Droid::Dialer::R::string::type_missed_video, &mMissedVideoName);
+    resources->GetString(Elastos::Droid::Dialer::R::string::type_voicemail, &mVoicemailName);
+    resources->GetColor(Elastos::Droid::Dialer::R::color::call_log_missed_call_highlight_color, &mNewMissedColor);
+    resources->GetColor(Elastos::Droid::Dialer::R::color::call_log_voicemail_highlight_color, &mNewVoicemailColor);
 }
 
-ECode CallTypeHelper::GetCallTypeText(
+AutoPtr<ICharSequence> CallTypeHelper::GetCallTypeText(
     /* [in] */ Int32 callType,
-    /* [in] */ Boolean isVideoCall,
-    /* [out] */ ICharSequence** text)
+    /* [in] */ Boolean isVideoCall)
 {
-    VALIDATE_NOT_NULL(text);
-
     String result;
     switch (callType) {
         case ICalls::INCOMING_TYPE:
@@ -76,46 +73,34 @@ ECode CallTypeHelper::GetCallTypeText(
             break;
     }
 
-    AutoPtr<ICharSequence> csq = CoreUtils::Convert(result);
-    *text = csq;
-    REFCOUNT_ADD(*text);
-    return NOERROR;
+    return CoreUtils::Convert(result);
 }
 
-ECode CallTypeHelper::GetHighlightedColor(
-    /* [in] */ Int32 callType,
-    /* [out] */ IInteger32** result)
+AutoPtr<IInteger32> CallTypeHelper::GetHighlightedColor(
+    /* [in] */ Int32 callType)
 {
-    VALIDATE_NOT_NULL(result);
-
     AutoPtr<IInteger32> obj;
     switch (callType) {
         case ICalls::INCOMING_TYPE:
             // New incoming calls are not highlighted.
-            break;
+            return NULL;
 
         case ICalls::OUTGOING_TYPE:
             // New outgoing calls are not highlighted.
-            break;
+            return NULL;
 
         case ICalls::MISSED_TYPE:
-            obj = CoreUtils::Convert(mNewMissedColor);
-            break;
+            return CoreUtils::Convert(mNewMissedColor);
 
         case ICalls::VOICEMAIL_TYPE:
-            obj = CoreUtils::Convert(mNewVoicemailColor);
-            break;
+            return CoreUtils::Convert(mNewVoicemailColor);
 
         default:
             // Don't highlight calls of unknown types. They are treated as missed calls by
             // the rest of the UI, but since they will never be marked as read by
             // {@link CallLogQueryHandler}, just don't ever highlight them anyway.
-            break;
+            return NULL;
     }
-
-    *result = obj;
-    REFCOUNT_ADD(*result)
-    return NOERROR;
 }
 
 Boolean CallTypeHelper::IsMissedCallType(

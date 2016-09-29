@@ -67,7 +67,7 @@ AutoPtr<IPhoneAccount> PhoneAccountUtils::GetAccountOrNull(
 {
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
-    ITelecomManager* telecomManager = ITelecomManager::Probe(service);
+    AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
     AutoPtr<IPhoneAccount> account;
     telecomManager->GetPhoneAccount(phoneAccount, (IPhoneAccount**)&account);
     Boolean result;

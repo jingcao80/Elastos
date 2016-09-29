@@ -4,6 +4,7 @@
 
 #include "_Elastos_Droid_Dialer_CallLog_CCallLogNotificationsService.h"
 #include "elastos/droid/app/IntentService.h"
+#include "elastos/droid/dialer/calllog/CallLogQueryHandler.h"
 
 using Elastos::Droid::App::IntentService;
 
@@ -44,9 +45,9 @@ protected:
         /* [in] */ IIntent* intent);
 
 private:
-    static const String TAG; // = "CallLogNotificationsService";
+    static const String TAG;
 
-    AutoPtr<ICallLogQueryHandler> mCallLogQueryHandler;
+    AutoPtr<CallLogQueryHandler> mCallLogQueryHandler;
 };
 
 } // CallLog

@@ -3,13 +3,12 @@
 
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/content/Loader.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
 
 using Elastos::Droid::App::ILoaderManagerLoaderCallbacks;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::ILoader;
 using Elastos::Droid::Content::Loader;
+using Elastos::Droid::Os::IBundle;
 
 namespace Elastos{
 namespace Droid{
@@ -23,9 +22,7 @@ namespace Util {
  * This loader never delivers results.  A caller fragment must destroy it when deferred fragments
  * should be started.
  */
-class EmptyLoader
-    : public Loader
-    , public IEmptyLoader
+class EmptyLoader : public Loader
 {
 public:
     /**
@@ -34,11 +31,10 @@ public:
      */
     class Callback
         : public Object
-        , public IEmptyLoaderCallback
         , public ILoaderManagerLoaderCallbacks
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         Callback(
             /* [in] */ IContext* context);
@@ -63,8 +59,6 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL();
-
     CARAPI constructor(
         /* [in] */ IContext* context);
 };
