@@ -14,18 +14,18 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/user_settings_title">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="user_list"
             android:title="@string/user_list_title">
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
             android:key="user_add"
             android:title="@string/user_add_user_or_profile_menu"
             android:icon="@drawable/ic_menu_add_dark" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

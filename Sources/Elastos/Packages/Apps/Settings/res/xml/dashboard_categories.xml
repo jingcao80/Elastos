@@ -88,7 +88,7 @@
         <dashboard-tile
                 android:id="@+id/display_settings"
                 android:title="@string/display_settings"
-                android:fragment="Elastos.Droid.Settings.DisplaySettings"
+                android:fragment="Elastos.Droid.Settings.CDisplaySettings"
                 android:icon="@drawable/ic_settings_display"
                 />
 

@@ -35,6 +35,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI Accept(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IInetSocketAddress* peerAddress,

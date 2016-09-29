@@ -14,16 +14,16 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/accessibility_display_daltonizer_preference_title" >
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:summary="@string/accessibility_display_daltonizer_preference_subtitle"
         android:layout="@layout/text_description_preference"
         android:persistent="false"
         android:selectable="false" />
 
-    <ListPreference
+    <Elastos.Droid.Preference.CListPreference
         android:entries="@array/daltonizer_type_entries"
         android:entryValues="@array/daltonizer_type_values"
         android:key="type"
@@ -31,4 +31,4 @@
         android:summary="%s"
         android:title="@string/daltonizer_type" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

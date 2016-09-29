@@ -15,22 +15,22 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
-    android:fragment="Elastos.Droid.Settings.accessibility.CaptionPropertiesFragment"
+    android:fragment="Elastos.Droid.Settings.Accessibility.CCaptionPropertiesFragment"
     android:key="captioning_preference_screen"
     android:title="@string/accessibility_captioning_title" >
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
         android:key="standard"
         android:title="@string/captioning_standard_options_title" >
-        <Elastos.Droid.Settings.accessibility.LocalePreference
+        <Elastos.Droid.Settings.Accessibility.CLocalePreference
             android:key="captioning_locale"
             android:persistent="false"
             android:summary="%s"
             android:title="@string/captioning_locale" />
 
-        <ListPreference
+        <Elastos.Droid.Preference.CListPreference
             android:entries="@array/captioning_font_size_selector_titles"
             android:entryValues="@array/captioning_font_size_selector_values"
             android:key="captioning_font_size"
@@ -38,15 +38,15 @@
             android:summary="%s"
             android:title="@string/captioning_text_size" />
 
-        <Elastos.Droid.Settings.accessibility.PresetPreference
+        <Elastos.Droid.Settings.Accessibility.CPresetPreference
             android:key="captioning_preset"
             android:persistent="false"
             android:title="@string/captioning_preset" />
-    </PreferenceCategory>
-    <PreferenceCategory
+    </Elastos.Droid.Preference.CPreferenceCategory>
+    <Elastos.Droid.Preference.CPreferenceCategory
         android:key="custom"
         android:title="@string/captioning_custom_options_title" >
-        <ListPreference
+        <Elastos.Droid.Preference.CListPreference
             android:entries="@array/captioning_typeface_selector_titles"
             android:entryValues="@array/captioning_typeface_selector_values"
             android:key="captioning_typeface"
@@ -54,43 +54,43 @@
             android:summary="%s"
             android:title="@string/captioning_typeface" />
 
-        <Elastos.Droid.Settings.accessibility.ColorPreference
+        <Elastos.Droid.Settings.Accessibility.CColorPreference
             android:key="captioning_foreground_color"
             android:persistent="false"
             android:title="@string/captioning_foreground_color" />
-        <Elastos.Droid.Settings.accessibility.ColorPreference
+        <Elastos.Droid.Settings.Accessibility.CColorPreference
             android:key="captioning_foreground_opacity"
             android:persistent="false"
             android:title="@string/captioning_foreground_opacity" />
 
-        <Elastos.Droid.Settings.accessibility.EdgeTypePreference
+        <Elastos.Droid.Settings.Accessibility.CEdgeTypePreference
             android:key="captioning_edge_type"
             android:persistent="false"
             android:title="@string/captioning_edge_type" />
 
-        <Elastos.Droid.Settings.accessibility.ColorPreference
+        <Elastos.Droid.Settings.Accessibility.CColorPreference
             android:dependency="captioning_edge_type"
             android:key="captioning_edge_color"
             android:persistent="false"
             android:title="@string/captioning_edge_color" />
-        <Elastos.Droid.Settings.accessibility.ColorPreference
+        <Elastos.Droid.Settings.Accessibility.CColorPreference
             android:key="captioning_background_color"
             android:persistent="false"
             android:title="@string/captioning_background_color" />
-        <Elastos.Droid.Settings.accessibility.ColorPreference
+        <Elastos.Droid.Settings.Accessibility.CColorPreference
             android:dependency="captioning_background_color"
             android:key="captioning_background_opacity"
             android:persistent="false"
             android:title="@string/captioning_background_opacity" />
-        <Elastos.Droid.Settings.accessibility.ColorPreference
+        <Elastos.Droid.Settings.Accessibility.CColorPreference
             android:key="captioning_window_color"
             android:persistent="false"
             android:title="@string/captioning_window_color" />
-        <Elastos.Droid.Settings.accessibility.ColorPreference
+        <Elastos.Droid.Settings.Accessibility.CColorPreference
             android:dependency="captioning_window_color"
             android:key="captioning_window_opacity"
             android:persistent="false"
             android:title="@string/captioning_window_opacity" />
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

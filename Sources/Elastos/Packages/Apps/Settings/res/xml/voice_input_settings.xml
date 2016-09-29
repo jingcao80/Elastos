@@ -14,12 +14,12 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/voice_input_settings_title">
 
     <!-- The contents of this category are filled in by the Java code
          based on the list of available voice interaction and recognition services. -->
-    <PreferenceCategory android:key="voice_service_preference_section"
+    <Elastos.Droid.Preference.CPreferenceCategory android:key="voice_service_preference_section"
         android:title="@string/voice_service_preference_section_title" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

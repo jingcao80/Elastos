@@ -1,20 +1,7 @@
-/*
- * Copyright (C) 2012 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_CWALLPAPERTYPESETTINGS_H__
+#define __ELASTOS_DROID_SETTINGS_CWALLPAPERTYPESETTINGS_H__
 
-package com.android.settings;
+#include "_Elastos_Droid_Settings_CWallpaperTypeSettings.h"
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IAlertDialog;
@@ -48,8 +35,15 @@ using Elastos::Droid::Settings::Widget::ISwitchBar;
 
 using Elastos::Utility::IList;
 
-public class DreamSettings extends SettingsPreferenceFragment implements
-        SwitchBar.OnSwitchChangeListener {
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+
+CarClass(CDreamSettings)
+    , public SettingsPreferenceFragment
+    , public SwitchBar.OnSwitchChangeListener
+{
+public:
     private static const String TAG = DreamSettings.class->GetSimpleName();
     static const Boolean DEBUG = FALSE;
     private static const Int32 DIALOG_WHEN_TO_DREAM = 1;
@@ -368,4 +362,10 @@ public class DreamSettings extends SettingsPreferenceFragment implements
             RefreshFromBackend();
         }
     }
-}
+};
+
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_CWALLPAPERTYPESETTINGS_H__

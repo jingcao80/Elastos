@@ -14,84 +14,84 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/accessibility_settings">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="services_category"
             android:title="@string/accessibility_services_title">
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="system_category"
             android:title="@string/accessibility_system_title">
 
-        <PreferenceScreen
-            android:fragment="Elastos.Droid.Settings.accessibility.CaptionPropertiesFragment"
+        <Elastos.Droid.Preference.CPreferenceScreen
+            android:fragment="Elastos.Droid.Settings.Accessibility.CCaptionPropertiesFragment"
             android:key="captioning_preference_screen"
             android:title="@string/accessibility_captioning_title" />
 
-        <PreferenceScreen
-            android:fragment="Elastos.Droid.Settings.accessibility.ToggleScreenMagnificationPreferenceFragment"
+        <Elastos.Droid.Preference.CPreferenceScreen
+            android:fragment="Elastos.Droid.Settings.Accessibility.CToggleScreenMagnificationPreferenceFragment"
             android:key="screen_magnification_preference_screen"
             android:title="@string/accessibility_screen_magnification_title"/>
 
-        <CheckBoxPreference
+        <Elastos.Droid.Preference.CCheckBoxPreference
                 android:key="toggle_large_text_preference"
                 android:title="@string/accessibility_toggle_large_text_preference_title"
                 android:persistent="false"/>
 
-        <CheckBoxPreference
+        <Elastos.Droid.Preference.CCheckBoxPreference
                 android:key="toggle_high_text_contrast_preference"
                 android:title="@string/accessibility_toggle_high_text_contrast_preference_title"
                 android:summary="@string/experimental_preference"
                 android:persistent="false"/>
 
-        <CheckBoxPreference
+        <Elastos.Droid.Preference.CCheckBoxPreference
                 android:key="toggle_power_button_ends_call_preference"
                 android:title="@string/accessibility_power_button_ends_call_prerefence_title"
                 android:persistent="false"/>
 
-        <CheckBoxPreference
+        <Elastos.Droid.Preference.CCheckBoxPreference
                 android:key="toggle_lock_screen_rotation_preference"
                 android:title="@string/accelerometer_title"
                 android:persistent="false"/>
 
-        <CheckBoxPreference
+        <Elastos.Droid.Preference.CCheckBoxPreference
                 android:key="toggle_speak_password_preference"
                 android:title="@string/accessibility_toggle_speak_password_preference_title"
                 android:persistent="false"/>
 
-        <PreferenceScreen
-                android:fragment="Elastos.Droid.Settings.accessibility.ToggleGlobalGesturePreferenceFragment"
+        <Elastos.Droid.Preference.CPreferenceScreen
+                android:fragment="Elastos.Droid.Settings.Accessibility.CToggleGlobalGesturePreferenceFragment"
                 android:key="enable_global_gesture_preference_screen"
                 android:title="@string/accessibility_global_gesture_preference_title"/>
 
-        <PreferenceScreen android:key="tts_settings_preference"
-                android:fragment="Elastos.Droid.Settings.tts.TextToSpeechSettings"
+        <Elastos.Droid.Preference.CPreferenceScreen android:key="tts_settings_preference"
+                android:fragment="Elastos.Droid.Settings.Tts.CTextToSpeechSettings"
                 android:title="@string/tts_settings_title"/>
 
-        <ListPreference android:key="select_long_press_timeout_preference"
+        <Elastos.Droid.Preference.CListPreference android:key="select_long_press_timeout_preference"
                 android:title="@string/accessibility_long_press_timeout_preference_title"
                 android:entries="@array/long_press_timeout_selector_titles"
                 android:entryValues="@array/long_press_timeout_selector_values"
                 android:persistent="false"/>
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
         android:key="display_category"
         android:title="@string/accessibility_display_title" >
-        <SwitchPreference
+        <Elastos.Droid.Preference.CSwitchPreference
             android:key="toggle_inversion_preference"
             android:title="@string/accessibility_display_inversion_preference_title"
             android:summary="@string/accessibility_display_inversion_preference_subtitle"
             android:persistent="false" />
-        <PreferenceScreen
-            android:fragment="Elastos.Droid.Settings.accessibility.ToggleDaltonizerPreferenceFragment"
+        <Elastos.Droid.Preference.CPreferenceScreen
+            android:fragment="Elastos.Droid.Settings.Accessibility.CToggleDaltonizerPreferenceFragment"
             android:key="daltonizer_preference_screen"
             android:title="@string/accessibility_display_daltonizer_preference_title" />
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

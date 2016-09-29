@@ -14,45 +14,45 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/radio_controls_title">
 
-    <SwitchPreference
+    <Elastos.Droid.Preference.CSwitchPreference
         android:key="toggle_airplane"
         android:title="@string/airplane_mode"
         android:persistent="false"
         android:disableDependentsState="true" />
 
-    <Elastos.Droid.Settings.AppListPreference
+    <Elastos.Droid.Settings.CAppListPreference
         android:key="sms_application"
         android:title="@string/sms_application_title"
         settings:keywords="@string/keywords_more_default_sms_app"
         android:summary="%s"
         android:persistent="false" />
 
-    <SwitchPreference
+    <Elastos.Droid.Preference.CSwitchPreference
         android:key="toggle_nfc"
         android:title="@string/nfc_quick_toggle_title"
         android:summary="@string/nfc_quick_toggle_summary"
         android:persistent="false" />
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
         android:fragment="Elastos.Droid.Settings.nfc.AndroidBeam"
         android:key="android_beam_settings"
         android:title="@string/android_beam_settings_title" />
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
         android:fragment="Elastos.Droid.Settings.TetherSettings"
         android:key="tether_settings"
         android:title="@string/tether_settings_title_all" />
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
         android:fragment="Elastos.Droid.Settings.vpn2.VpnSettings"
         android:key="vpn_settings"
         android:title="@string/vpn_settings_title" />
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
         android:key="mobile_network_settings"
         android:title="@string/network_settings_title"
         settings:keywords="@string/keywords_more_mobile_networks"
@@ -61,40 +61,40 @@
             android:action="android.intent.action.MAIN"
             android:targetPackage="com.android.phone"
             android:targetClass="com.android.phone.MobileNetworkSettings" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:key="manage_mobile_plan"
         android:title="@string/manage_mobile_plan_title"
         android:persistent="false" />
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
         android:key="wimax_settings"
         android:title="@string/wimax_settings" >
         <intent
             android:action="android.intent.action.MAIN"
             android:targetPackage="Elastos.Droid.Settings.wimax"
             android:targetClass="Elastos.Droid.Settings.wimax.WimaxSettings" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
-    <CheckBoxPreference
+    <Elastos.Droid.Preference.CCheckBoxPreference
         android:key="toggle_nsd"
         android:title="@string/nsd_quick_toggle_title"
         android:summary="@string/nsd_quick_toggle_summary"
         android:persistent="false" />
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
         android:fragment="Elastos.Droid.Settings.CProxySelector"
         android:key="proxy_settings"
         android:title="@string/proxy_settings_title" />
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
         android:key="cell_broadcast_settings"
         android:title="@string/cell_broadcast_settings" >
         <intent
             android:action="android.intent.action.MAIN"
             android:targetPackage="com.android.cellbroadcastreceiver"
             android:targetClass="com.android.cellbroadcastreceiver.CellBroadcastSettings" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

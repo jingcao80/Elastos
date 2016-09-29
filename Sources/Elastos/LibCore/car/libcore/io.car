@@ -95,6 +95,8 @@ module
             interface ICloseable;
         }
         class CPosix {
+            constructor();
+
             interface IOs;
         }
     }

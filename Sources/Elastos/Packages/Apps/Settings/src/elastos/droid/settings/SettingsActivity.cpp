@@ -140,7 +140,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[14] = "Elastos.Droid.Settings.Inputmethod.CUserDictionaryList";
     (*args)[15] = "Elastos.Droid.Settings.CUserDictionarySettings";
     (*args)[16] = "Elastos.Droid.Settings.HomeSettings";
-    (*args)[17] = "Elastos.Droid.Settings.DisplaySettings";
+    (*args)[17] = "Elastos.Droid.Settings.CDisplaySettings";
     (*args)[18] = "Elastos.Droid.Settings.CDeviceInfoSettings";
     (*args)[19] = "Elastos.Droid.Settings.Applications.CManageApplications";
     (*args)[20] = "Elastos.Droid.Settings.Applications.ProcessStatsUi";
@@ -158,13 +158,13 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[32] = "Elastos.Droid.Settings.CDevelopmentSettings";
     (*args)[33] = "Elastos.Droid.Settings.Deviceinfo.UsbSettings";
     (*args)[34] = "Elastos.Droid.Settings.Nfc.AndroidBeam";
-    (*args)[35] = "Elastos.Droid.Settings.Wfd.WifiDisplaySettings";
+    (*args)[35] = "Elastos.Droid.Settings.Wfd.CWifiDisplaySettings";
     (*args)[36] = "Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary";
     (*args)[37] = "Elastos.Droid.Settings.Accounts.AccountSyncSettings";
     (*args)[38] = "Elastos.Droid.Settings.Accounts.AccountSettings";
     (*args)[39] = "Elastos.Droid.Settings.CCryptKeeperSettings";
     (*args)[40] = "Elastos.Droid.Settings.DataUsageSummary";
-    (*args)[41] = "Elastos.Droid.Settings.DreamSettings";
+    (*args)[41] = "Elastos.Droid.Settings.CDreamSettings";
     (*args)[42] = "Elastos.Droid.Settings.Users.UserSettings";
     (*args)[43] = "Elastos.Droid.Settings.Notification.CNotificationAccessSettings";
     (*args)[44] = "Elastos.Droid.Settings.Notification.CConditionProviderSettings";
@@ -497,7 +497,7 @@ ECode SettingsActivity::OnPreferenceStartFragment(
     pref->GetTitleRes(&titleRes);
     String str;
     pref->GetFragment(&str);
-    if (str.Equals("Elastos.Droid.Settings.WallpaperTypeSettings")) {
+    if (str.Equals("Elastos.Droid.Settings.CWallpaperTypeSettings")) {
         titleRes = R::string::wallpaper_settings_fragment_title;
     }
     else if (str.Equals("Elastos.Droid.Settings.COwnerInfoSettings")
@@ -768,19 +768,19 @@ ECode SettingsActivity::OnCreate(
             /*****************************************************/
             // to delete if {} after All modules is finished
 
-            if (initialFragmentName.Equals("Elastos.Droid.Settings.Bluetooth.BluetoothSettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.CWirelessSettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.DisplaySettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Deviceinfo.Memory") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Users.UserSettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Nfc.PaymentSettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Location.LocationSettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.CSecuritySettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Accounts.AccountSettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.PrivacySettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Accessibility.AccessibilitySettings") ||
-                    initialFragmentName.Equals("Elastos.Droid.Settings.Print.PrintSettingsFragment")){
+            if (initialFragmentName.Equals("Elastos.Droid.Settings.Bluetooth.CBluetoothSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.CWirelessSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.CDisplaySettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Deviceinfo.Memory")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Users.UserSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Nfc.PaymentSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Location.LocationSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.CSecuritySettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Accounts.AccountSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.PrivacySettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Accessibility.AccessibilitySettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Print.PrintSettingsFragment")) {
                 // nothing to do
                 return NOERROR;
             }

@@ -110,7 +110,7 @@ public:
         : public BaseSearchIndexProvider
     {
     public:
-        TO_STRING_IMPL("CDeviceInfoSettings::MyBaseSearchIndexProvider")
+        TO_STRING_IMPL("CDevelopmentSettings::MyBaseSearchIndexProvider")
 
         MyBaseSearchIndexProvider();
 

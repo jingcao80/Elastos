@@ -14,30 +14,30 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   android:title="@string/display_settings">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
         android:key="mobile"
         android:title="@string/data_usage_metered_mobile"
         android:persistent="false" />
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
         android:key="wifi"
         android:title="@string/data_usage_metered_wifi"
         android:persistent="false">
 
-        <Preference
+        <Elastos.Droid.Preference.CPreference
             android:key="wifi_disabled"
             android:summary="@string/data_usage_metered_wifi_disabled"
             android:persistent="false"
             android:selectable="false" />
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:summary="@string/data_usage_metered_body"
         android:persistent="false"
         android:selectable="false" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

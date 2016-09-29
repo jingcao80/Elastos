@@ -414,6 +414,11 @@ CAR_OBJECT_IMPL(CPosix)
 
 CAR_INTERFACE_IMPL(CPosix, Object, IOs)
 
+ECode CPosix::constructor()
+{
+    return Object::constructor();
+}
+
 ECode CPosix::Accept(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IInetSocketAddress* peerAddress,

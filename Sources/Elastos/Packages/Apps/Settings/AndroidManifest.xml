@@ -643,7 +643,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.DisplaySettings" />
+                android:value="Elastos.Droid.Settings.CDisplaySettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/display_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -651,12 +651,12 @@
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name="DisplaySettings"
+        <activity-alias android:name="CDisplaySettings"
                 android:label="@string/display_settings"
                 android:exported="true"
                 android:targetActivity="CSettings$DisplaySettingsActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.DisplaySettings" />
+                android:value="Elastos.Droid.Settings.CDisplaySettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/display_settings" />
         </activity-alias>
@@ -950,7 +950,7 @@
                 android:value="true" />
         </activity>
 
-        <activity android:name="SetFullBackupPassword"
+        <activity android:name="CSetFullBackupPassword"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
                 android:exported="false">
         </activity>
@@ -1465,7 +1465,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.wfd.WifiDisplaySettings" />
+                android:value="Elastos.Droid.Settings.Wfd.CWifiDisplaySettings" />
         </activity>
 
 
@@ -1732,7 +1732,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.DreamSettings" />
+                android:value="Elastos.Droid.Settings.CDreamSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/display_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"

@@ -71,11 +71,11 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_home);
 
-    InitPut(map, String("Elastos.Droid.Settings.DisplaySettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CDisplaySettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_display);
 
-    InitPut(map, String("Elastos.Droid.Settings.WallpaperTypeSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CWallpaperTypeSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_display);
 

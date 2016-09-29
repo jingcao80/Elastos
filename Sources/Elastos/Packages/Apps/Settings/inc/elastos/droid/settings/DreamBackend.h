@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.settings;
-
-using static android::Provider::Settings::Secure::ISCREENSAVER_ACTIVATE_ON_DOCK;
-using static android::Provider::Settings::Secure::ISCREENSAVER_ACTIVATE_ON_SLEEP;
-using static android::Provider::Settings::Secure::ISCREENSAVER_ENABLED;
-
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -141,30 +135,30 @@ public class DreamBackend {
     }
 
     public Boolean IsEnabled() {
-        return GetBoolean(SCREENSAVER_ENABLED, mDreamsEnabledByDefault);
+        return GetBoolean(ISettingsSecure::SCREENSAVER_ENABLED, mDreamsEnabledByDefault);
     }
 
     CARAPI SetEnabled(Boolean value) {
         Logd("SetEnabled(%s)", value);
-        SetBoolean(SCREENSAVER_ENABLED, value);
+        SetBoolean(ISettingsSecure::SCREENSAVER_ENABLED, value);
     }
 
     public Boolean IsActivatedOnDock() {
-        return GetBoolean(SCREENSAVER_ACTIVATE_ON_DOCK, mDreamsActivatedOnDockByDefault);
+        return GetBoolean(ISettingsSecure::SCREENSAVER_ACTIVATE_ON_DOCK, mDreamsActivatedOnDockByDefault);
     }
 
     CARAPI SetActivatedOnDock(Boolean value) {
         Logd("SetActivatedOnDock(%s)", value);
-        SetBoolean(SCREENSAVER_ACTIVATE_ON_DOCK, value);
+        SetBoolean(ISettingsSecure::SCREENSAVER_ACTIVATE_ON_DOCK, value);
     }
 
     public Boolean IsActivatedOnSleep() {
-        return GetBoolean(SCREENSAVER_ACTIVATE_ON_SLEEP, mDreamsActivatedOnSleepByDefault);
+        return GetBoolean(ISettingsSecure::SCREENSAVER_ACTIVATE_ON_SLEEP, mDreamsActivatedOnSleepByDefault);
     }
 
     CARAPI SetActivatedOnSleep(Boolean value) {
         Logd("SetActivatedOnSleep(%s)", value);
-        SetBoolean(SCREENSAVER_ACTIVATE_ON_SLEEP, value);
+        SetBoolean(ISettingsSecure::SCREENSAVER_ACTIVATE_ON_SLEEP, value);
     }
 
     private Boolean GetBoolean(String key, Boolean def) {

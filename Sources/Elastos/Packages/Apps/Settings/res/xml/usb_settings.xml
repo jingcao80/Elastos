@@ -14,22 +14,22 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/location_settings_title">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:title="@string/usb_connection_category" />
 
-    <CheckBoxPreference
+    <Elastos.Droid.Preference.CCheckBoxPreference
         android:key="usb_mtp"
         android:title="@string/usb_mtp_title"
         android:summary="@string/usb_mtp_summary"
         />
 
-    <CheckBoxPreference
+    <Elastos.Droid.Preference.CCheckBoxPreference
         android:key="usb_ptp"
         android:title="@string/usb_ptp_title"
         android:summary="@string/usb_ptp_summary"
         />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

@@ -5,7 +5,7 @@
 #include "elastos/droid/view/CViewConfiguration.h"
 #include "elastos/droid/view/CKeyEvent.h"
 #include "elastos/droid/view/CInputDevice.h"
-// #include "elastos/droid/view/CInputDeviceHelper.h"
+#include "elastos/droid/view/CInputDeviceHelper.h"
 #include "elastos/droid/view/CPointerCoords.h"
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/CPaintFontMetricsInt.h"
@@ -26,7 +26,7 @@ using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IInputDevice;
 using Elastos::Droid::View::CInputDevice;
 using Elastos::Droid::View::IInputDeviceHelper;
-// using Elastos::Droid::View::CInputDeviceHelper;
+using Elastos::Droid::View::CInputDeviceHelper;
 using Elastos::Droid::View::CViewConfiguration;
 using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::View::CPointerCoords;
@@ -782,7 +782,7 @@ ECode PointerLocationView::OnPointerEvent(
         AutoPtr<PointerState> ps = (PointerState*)(IObject*)pID.Get();
         ps->mCurDown = TRUE;
         AutoPtr<IInputDeviceHelper> hlp;
-//         CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&hlp);
+        CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&hlp);
         Int32 Did = 0;
         IInputEvent::Probe(event)->GetDeviceId(&Did);
         AutoPtr<IInputDevice> device;
@@ -1041,7 +1041,7 @@ ECode PointerLocationView::OnInputDeviceRemoved(
 void PointerLocationView::LogInputDevices()
 {
     AutoPtr<IInputDeviceHelper> hlp;
-//     CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&hlp);
+    CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&hlp);
     AutoPtr<ArrayOf<Int32> > deviceIds;
     hlp->GetDeviceIds((ArrayOf<Int32>**)&deviceIds);
     for (Int32 i = 0; i < deviceIds->GetLength(); i++) {

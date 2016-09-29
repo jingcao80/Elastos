@@ -14,17 +14,17 @@
      limitations under the License.
 -->
 
-<PreferenceScreen
+<Elastos.Droid.Preference.CPreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/bluetooth_device_advanced_title">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="profile_container"
             android:order="100"
             android:title="@string/bluetooth_device_advanced_profile_header_title">
 
         <!-- Profile checkboxes will be added here programmatically. -->
-        
-    </PreferenceCategory>
 
-</PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceCategory>
+
+</Elastos.Droid.Preference.CPreferenceScreen>

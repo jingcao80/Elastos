@@ -14,6 +14,6 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/vpn_title">
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

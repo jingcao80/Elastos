@@ -14,23 +14,23 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/location_mode_screen_title">
 
-        <Elastos.Droid.Settings.location.RadioButtonPreference
+        <Elastos.Droid.Settings.Location.CRadioButtonPreference
             android:key="high_accuracy"
             android:title="@string/location_mode_high_accuracy_title"
             android:summary="@string/location_mode_high_accuracy_description"
             android:persistent="false" />
-        <Elastos.Droid.Settings.location.RadioButtonPreference
+        <Elastos.Droid.Settings.Location.CRadioButtonPreference
             android:key="battery_saving"
             android:title="@string/location_mode_battery_saving_title"
             android:summary="@string/location_mode_battery_saving_description"
             android:persistent="false" />
-        <Elastos.Droid.Settings.location.RadioButtonPreference
+        <Elastos.Droid.Settings.Location.CRadioButtonPreference
             android:key="sensors_only"
             android:title="@string/location_mode_sensors_only_title"
             android:summary="@string/location_mode_sensors_only_description"
             android:persistent="false" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

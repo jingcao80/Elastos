@@ -14,24 +14,24 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:title="">
-    <ListPreference
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:title="">
+    <Elastos.Droid.Preference.CListPreference
         android:key="tts_default_lang"
         android:title="@string/tts_default_lang_title"
         android:summary="@string/tts_default_lang_summary"
         android:persistent="false"
         android:order="100" />
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:key="tts_engine_settings"
         android:persistent="false"
         android:title="@string/tts_engine_settings_title"
         android:order="200" />
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:key="tts_install_data"
         android:persistent="false"
         android:title="@string/tts_install_data_title"
         android:summary="@string/tts_install_data_summary"
         android:order="300" />
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

@@ -1,6 +1,8 @@
-// Copyright 2011 Google Inc. All Rights Reserved.
 
-package com.android.settings.deviceinfo;
+#ifndef __ELASTOS_DROID_SETTINGS_DEVICEINFO_CFILEITEMINFOLAYOUT_H__
+#define __ELASTOS_DROID_SETTINGS_DEVICEINFO_CFILEITEMINFOLAYOUT_H__
+
+#include "_Elastos_Droid_Settings_Deviceinfo_CFileItemInfoLayout.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Environment::IUserEnvironment;
@@ -12,12 +14,17 @@ using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::IRelativeLayout;
 using Elastos::Droid::Widget::ITextView;
 
-using Elastos::Droid::Settings::IR;
+using Elastos::Droid::Settings::R;
+
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Deviceinfo {
 
 /**
  * Handles display of a single row entry on Settings --> Storage --> Misc Files screen
  */
-public class FileItemInfoLayout extends RelativeLayout implements Checkable {
+CarClass(CFileItemInfoLayout) extends RelativeLayout implements Checkable {
     private TextView mFileNameView;
     private TextView mFileSizeView;
     private CheckBox mCheckbox;
@@ -37,7 +44,8 @@ public class FileItemInfoLayout extends RelativeLayout implements Checkable {
         Super(context, attrs, defStyle);
     }
 
-    CARAPI Toggle() {
+    CARAPI Toggle()
+    {
         SetChecked(!mCheckbox->IsChecked());
     }
 
@@ -45,27 +53,32 @@ public class FileItemInfoLayout extends RelativeLayout implements Checkable {
      * @see android.view.View#OnFinishInflate()
      */
     //@Override
-    protected void OnFinishInflate() {
+    protected void OnFinishInflate()
+    {
         super->OnFinishInflate();
         mFileNameView = (TextView) FindViewById(R.id.misc_filename);
         mFileSizeView = (TextView) FindViewById(R.id.misc_filesize);
         mCheckbox = (CheckBox) FindViewById(R.id.misc_checkbox);
     }
 
-    CARAPI SetFileName(String fileName) {
+    CARAPI SetFileName(String fileName)
+    {
         mFileNameView->SetText(fileName->Substring(sLengthExternalStorageDirPrefix));
     }
 
-    CARAPI SetFileSize(String filesize) {
+    CARAPI SetFileSize(String filesize)
+    {
         mFileSizeView->SetText(filesize);
     }
 
-    @ViewDebug.ExportedProperty
-    public Boolean IsChecked() {
+    // @ViewDebug.ExportedProperty
+    public Boolean IsChecked()
+    {
         return mCheckbox->IsChecked();
     }
 
-    public CheckBox GetCheckBox() {
+    public CheckBox GetCheckBox()
+    {
         return mCheckbox;
     }
 
@@ -74,7 +87,15 @@ public class FileItemInfoLayout extends RelativeLayout implements Checkable {
      *
      * @param checked TRUE to check the text, FALSE to uncheck it
      */
-    CARAPI SetChecked(Boolean checked) {
+    CARAPI SetChecked(Boolean checked)
+    {
         mCheckbox->SetChecked(checked);
     }
-}
+};
+
+} // namespace Deviceinfo
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_DEVICEINFO_CFILEITEMINFOLAYOUT_H__

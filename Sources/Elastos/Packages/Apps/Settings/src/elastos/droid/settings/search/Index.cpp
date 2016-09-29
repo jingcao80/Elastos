@@ -20,6 +20,7 @@
 #include "elastos/droid/settings/CDevelopmentSettings.h"
 #include "elastos/droid/settings/CDeviceInfoSettings.h"
 #include "elastos/droid/settings/CSecuritySettings.h"
+#include "elastos/droid/settings/CWallpaperTypeSettings.h"
 #include "elastos/droid/settings/CWirelessSettings.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/droid/utility/Xml.h>
@@ -36,6 +37,7 @@
 using Elastos::Droid::Settings::CDevelopmentSettings;
 using Elastos::Droid::Settings::CDeviceInfoSettings;
 using Elastos::Droid::Settings::CSecuritySettings;
+using Elastos::Droid::Settings::CWallpaperTypeSettings;
 using Elastos::Droid::Settings::CWirelessSettings;
 using Elastos::Droid::Settings::Inputmethod::CInputMethodAndLanguageSettings;
 using Elastos::Droid::Settings::Notification::CNotificationSettings;
@@ -1358,6 +1360,7 @@ Boolean Index::IsIndexableClass(
             || className.Equals("Elastos.Droid.Settings.CDevelopmentSettings")
             || className.Equals("Elastos.Droid.Settings.CDeviceInfoSettings")
             || className.Equals("Elastos.Droid.Settings.CSecuritySettings")
+            || className.Equals("Elastos.Droid.Settings.CWallpaperTypeSettings")
             || className.Equals("Elastos.Droid.Settings.CWirelessSettings")) {
         return TRUE;
     }
@@ -1469,6 +1472,8 @@ AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(const Strin
             = CDevelopmentSettings::GetSEARCH_INDEX_DATA_PROVIDER();
         providerMap[String("Elastos.Droid.Settings.CDeviceInfoSettings")]
             = CDeviceInfoSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+        providerMap[String("Elastos.Droid.Settings.CWallpaperTypeSettings")]
+            = CWallpaperTypeSettings::GetSEARCH_INDEX_DATA_PROVIDER();
         providerMap[String("Elastos.Droid.Settings.CWirelessSettings")]
             = CWirelessSettings::GetSEARCH_INDEX_DATA_PROVIDER();
         providerMap[String("Elastos.Droid.Settings.CSecuritySettings")]

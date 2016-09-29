@@ -14,47 +14,47 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/privacy_settings_title">
 
-    <PreferenceCategory android:key="backup_category"
+    <Elastos.Droid.Preference.CPreferenceCategory android:key="backup_category"
             android:title="@string/backup_section_title">
 
         <!-- Backup settings -->
-        <SwitchPreference
+        <Elastos.Droid.Preference.CSwitchPreference
                 android:key="backup_data"
                 android:title="@string/backup_data_title"
                 android:summary="@string/backup_data_summary"
                 android:persistent="false" />
 
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
                 android:key="configure_account"
                 android:title="@string/backup_configure_account_title"
                 android:summary="@string/backup_configure_account_default_summary"
                 android:persistent="false">
             <!-- the Intent declared here is always overwritten by a real one -->
             <intent android:action="dummy" />
-        </PreferenceScreen>
+        </Elastos.Droid.Preference.CPreferenceScreen>
 
-        <SwitchPreference
+        <Elastos.Droid.Preference.CSwitchPreference
                 android:key="auto_restore"
                 android:title="@string/auto_restore_title"
                 android:summary="@string/auto_restore_summary"
                 android:persistent="false" />
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <PreferenceCategory android:key="personal_data_category"
+    <Elastos.Droid.Preference.CPreferenceCategory android:key="personal_data_category"
             android:title="@string/personal_data_section_title">
 
         <!-- Factory reset -->
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
             android:title="@string/master_clear_title"
             android:summary="@string/master_clear_summary"
             settings:keywords="@string/keywords_factory_data_reset"
             android:fragment="Elastos.Droid.Settings.MasterClear" />
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

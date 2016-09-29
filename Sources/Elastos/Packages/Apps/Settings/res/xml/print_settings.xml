@@ -14,21 +14,21 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/print_settings_title"
         settings:keywords="@string/keywords_printing">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="print_jobs_category"
             android:title="@string/print_print_jobs"
             android:order="0">
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="print_services_category"
             android:title="@string/print_settings_title"
             android:order="1">
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

@@ -87,11 +87,11 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_HOME);
 
     // Display
-    InitPut(map, String("Elastos.Droid.Settings.DisplaySettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CDisplaySettings"),
             Ranking::RANK_DISPLAY);
 
     // Wallpapers
-    InitPut(map, String("Elastos.Droid.Settings.WallpaperTypeSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CWallpaperTypeSettings"),
             Ranking::RANK_WALLPAPER);
 
     // Notifications

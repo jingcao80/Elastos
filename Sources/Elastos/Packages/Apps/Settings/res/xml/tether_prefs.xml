@@ -14,26 +14,26 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SwitchPreference
+    <Elastos.Droid.Preference.CSwitchPreference
         android:key="usb_tether_settings"
         android:title="@string/usb_tethering_button_text"
         android:persistent="false" />
 
-    <SwitchPreference
+    <Elastos.Droid.Preference.CSwitchPreference
         android:key="enable_wifi_ap"
         android:title="@string/wifi_tether_checkbox_text"
         android:persistent="false" />
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:key="wifi_ap_ssid_and_security"
         android:title="@string/wifi_tether_configure_ap_text"
         android:persistent="false" />
 
-    <SwitchPreference
+    <Elastos.Droid.Preference.CSwitchPreference
         android:key="enable_bluetooth_tethering"
         android:title="@string/bluetooth_tether_checkbox_text"
         android:persistent="false" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

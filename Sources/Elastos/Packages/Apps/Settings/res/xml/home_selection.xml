@@ -14,10 +14,10 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/home_settings"
         xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:key="home"
         android:order="0">
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

@@ -1,20 +1,7 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_APPLICATIONS_CPROCESSSTATSUI_H__
+#define __ELASTOS_DROID_SETTINGS_APPLICATIONS_CPROCESSSTATSUI_H__
 
-package com.android.settings.applications;
+#include "_Elastos_Droid_Settings_Applications_CProcessStatsUi.h"
 
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::Content::IContext;
@@ -48,6 +35,11 @@ using Elastos::IO::IInputStream;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::IComparator;
+
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Applications {
 
 public class ProcessStatsUi extends PreferenceFragment
         implements LinearColorBar.OnRegionTappedListener {
@@ -113,8 +105,8 @@ public class ProcessStatsUi extends PreferenceFragment
     Int64 mMaxWeight;
     Int64 mTotalTime;
 
-    Int64[] mMemTimes = new Int64[ProcessStats.ADJ_MEM_FACTOR_COUNT];
-    Double[] mMemStateWeights = new Double[ProcessStats.STATE_COUNT];
+    Int64[] mMemTimes = new Int64[IProcessStats::ADJ_MEM_FACTOR_COUNT];
+    Double[] mMemStateWeights = new Double[IProcessStats::STATE_COUNT];
     Double mMemCachedWeight;
     Double mMemFreeWeight;
     Double mMemZRamWeight;
@@ -127,7 +119,7 @@ public class ProcessStatsUi extends PreferenceFragment
     // batches of 3 hours so we want to allow the time we use to be slightly
     // smaller than the actual time selected instead of bumping up to 3 hours
     // beyond it.
-    private static const Int64 DURATION_QUANTUM = ProcessStats.COMMIT_PERIOD;
+    private static const Int64 DURATION_QUANTUM = IProcessStats::COMMIT_PERIOD;
     private static Int64[] sDurations = new Int64[] {
         3*60*60*1000 - DURATION_QUANTUM/2, 6*60*60*1000 - DURATION_QUANTUM/2,
         12*60*60*1000 - DURATION_QUANTUM/2, 24*60*60*1000 - DURATION_QUANTUM/2
@@ -139,15 +131,15 @@ public class ProcessStatsUi extends PreferenceFragment
 
     //@Override
     CARAPI OnCreate(Bundle icicle) {
-        super->OnCreate(icicle);
+        PreferenceFragment::OnCreate(icicle);
 
         if (icicle != NULL) {
             mStats = sStatsXfer;
         }
 
-        AddPreferencesFromResource(R.xml.process_stats_summary);
+        AddPreferencesFromResource(R::xml::process_stats_summary);
         mProcessStats = IProcessStats.Stub->AsInterface(
-                ServiceManager->GetService(ProcessStats.SERVICE_NAME));
+                ServiceManager->GetService(IProcessStats::SERVICE_NAME));
         mUm = (UserManager)GetActivity()->GetSystemService(Context.USER_SERVICE);
         mAppListGroup = (PreferenceGroup) FindPreference(KEY_APP_LIST);
         mMemStatusPref = mAppListGroup->FindPreference(KEY_MEM_STATUS);
@@ -163,18 +155,18 @@ public class ProcessStatsUi extends PreferenceFragment
 
     //@Override
     CARAPI OnResume() {
-        super->OnResume();
+        PreferenceFragment::OnResume();
         RefreshStats();
     }
 
     //@Override
     CARAPI OnPause() {
-        super->OnPause();
+        PreferenceFragment::OnPause();
     }
 
     //@Override
     CARAPI OnSaveInstanceState(Bundle outState) {
-        super->OnSaveInstanceState(outState);
+        PreferenceFragment::OnSaveInstanceState(outState);
         outState->PutLong("duration", mDuration);
         outState->PutBoolean("show_system", mShowSystem);
         outState->PutBoolean("use_uss", mUseUss);
@@ -184,7 +176,7 @@ public class ProcessStatsUi extends PreferenceFragment
 
     //@Override
     CARAPI OnDestroy() {
-        super->OnDestroy();
+        PreferenceFragment::OnDestroy();
         if (GetActivity()->IsChangingConfigurations()) {
             sStatsXfer = mStats;
         }
@@ -223,7 +215,7 @@ public class ProcessStatsUi extends PreferenceFragment
         ((SettingsActivity) GetActivity()).StartPreferencePanel(
                 ProcessStatsDetail.class->GetName(), args, R::string::details_title, NULL, NULL, 0);
 
-        return super->OnPreferenceTreeClick(preferenceScreen, preference);
+        return PreferenceFragment::OnPreferenceTreeClick(preferenceScreen, preference);
     }
 
     //@Override
@@ -348,28 +340,28 @@ public class ProcessStatsUi extends PreferenceFragment
     }
 
     public static const Int32[] BACKGROUND_AND_SYSTEM_PROC_STATES = new Int32[] {
-            ProcessStats.STATE_PERSISTENT, ProcessStats.STATE_IMPORTANT_FOREGROUND,
-            ProcessStats.STATE_IMPORTANT_BACKGROUND, ProcessStats.STATE_BACKUP,
-            ProcessStats.STATE_HEAVY_WEIGHT, ProcessStats.STATE_SERVICE,
-            ProcessStats.STATE_SERVICE_RESTARTING, ProcessStats.STATE_RECEIVER
+            IProcessStats::STATE_PERSISTENT, IProcessStats::STATE_IMPORTANT_FOREGROUND,
+            IProcessStats::STATE_IMPORTANT_BACKGROUND, IProcessStats::STATE_BACKUP,
+            IProcessStats::STATE_HEAVY_WEIGHT, IProcessStats::STATE_SERVICE,
+            IProcessStats::STATE_SERVICE_RESTARTING, IProcessStats::STATE_RECEIVER
     };
 
     public static const Int32[] FOREGROUND_PROC_STATES = new Int32[] {
-            ProcessStats.STATE_TOP
+            IProcessStats::STATE_TOP
     };
 
     public static const Int32[] CACHED_PROC_STATES = new Int32[] {
-            ProcessStats.STATE_CACHED_ACTIVITY, ProcessStats.STATE_CACHED_ACTIVITY_CLIENT,
-            ProcessStats.STATE_CACHED_EMPTY
+            IProcessStats::STATE_CACHED_ACTIVITY, IProcessStats::STATE_CACHED_ACTIVITY_CLIENT,
+            IProcessStats::STATE_CACHED_EMPTY
     };
 
     public static const Int32[] RED_MEM_STATES = new Int32[] {
-            ProcessStats.ADJ_MEM_FACTOR_CRITICAL
+            IProcessStats::ADJ_MEM_FACTOR_CRITICAL
     };
 
     public static const Int32[] YELLOW_MEM_STATES = new Int32[] {
-            ProcessStats.ADJ_MEM_FACTOR_CRITICAL, ProcessStats.ADJ_MEM_FACTOR_LOW,
-            ProcessStats.ADJ_MEM_FACTOR_MODERATE
+            IProcessStats::ADJ_MEM_FACTOR_CRITICAL, IProcessStats::ADJ_MEM_FACTOR_LOW,
+            IProcessStats::ADJ_MEM_FACTOR_MODERATE
     };
 
     private String MakeDuration(Int64 time) {
@@ -395,7 +387,7 @@ public class ProcessStatsUi extends PreferenceFragment
             statsLabel = R::string::process_stats_type_cached;
         } else {
             stats = mShowSystem ? BACKGROUND_AND_SYSTEM_PROC_STATES
-                    : ProcessStats.BACKGROUND_PROC_STATES;
+                    : IProcessStats::BACKGROUND_PROC_STATES;
             statsLabel = R::string::process_stats_type_background;
         }
 
@@ -440,8 +432,8 @@ public class ProcessStatsUi extends PreferenceFragment
         for (Int32 i=0; i<mMemTimes.length; i++) {
             mMemTimes[i] = 0;
         }
-        for (Int32 iscreen=0; iscreen<ProcessStats.ADJ_COUNT; iscreen+=ProcessStats.ADJ_SCREEN_MOD) {
-            for (Int32 imem=0; imem<ProcessStats.ADJ_MEM_FACTOR_COUNT; imem++) {
+        for (Int32 iscreen=0; iscreen<IProcessStats::ADJ_COUNT; iscreen+=IProcessStats::ADJ_SCREEN_MOD) {
+            for (Int32 imem=0; imem<IProcessStats::ADJ_MEM_FACTOR_COUNT; imem++) {
                 Int32 state = imem+iscreen;
                 mMemTimes[imem] += mStats.mMemFactorDurations[state];
             }
@@ -454,27 +446,27 @@ public class ProcessStatsUi extends PreferenceFragment
         colors->SetOrder(-1);
         switch (mMemRegion) {
             case LinearColorBar.REGION_RED:
-                memTotalTime = mMemTimes[ProcessStats.ADJ_MEM_FACTOR_CRITICAL];
+                memTotalTime = mMemTimes[IProcessStats::ADJ_MEM_FACTOR_CRITICAL];
                 memStates = RED_MEM_STATES;
                 break;
             case LinearColorBar.REGION_YELLOW:
-                memTotalTime = mMemTimes[ProcessStats.ADJ_MEM_FACTOR_CRITICAL]
-                        + mMemTimes[ProcessStats.ADJ_MEM_FACTOR_LOW]
-                        + mMemTimes[ProcessStats.ADJ_MEM_FACTOR_MODERATE];
+                memTotalTime = mMemTimes[IProcessStats::ADJ_MEM_FACTOR_CRITICAL]
+                        + mMemTimes[IProcessStats::ADJ_MEM_FACTOR_LOW]
+                        + mMemTimes[IProcessStats::ADJ_MEM_FACTOR_MODERATE];
                 memStates = YELLOW_MEM_STATES;
                 break;
             default:
                 memTotalTime = mTotalTime;
-                memStates = ProcessStats.ALL_MEM_ADJ;
+                memStates = IProcessStats::ALL_MEM_ADJ;
                 break;
         }
         colors->SetColoredRegions(LinearColorBar.REGION_RED);
 
         // Compute memory badness for chart color.
         Int32[] badColors = com.android.settings.Utils.BADNESS_COLORS;
-        Int64 timeGood = mMemTimes[ProcessStats.ADJ_MEM_FACTOR_NORMAL];
-        timeGood += (mMemTimes[ProcessStats.ADJ_MEM_FACTOR_MODERATE]*2)/3;
-        timeGood += mMemTimes[ProcessStats.ADJ_MEM_FACTOR_LOW]/3;
+        Int64 timeGood = mMemTimes[IProcessStats::ADJ_MEM_FACTOR_NORMAL];
+        timeGood += (mMemTimes[IProcessStats::ADJ_MEM_FACTOR_MODERATE]*2)/3;
+        timeGood += mMemTimes[IProcessStats::ADJ_MEM_FACTOR_LOW]/3;
         Float memBadness = ((Float)timeGood)/mTotalTime;
         Int32 badnessColor = badColors[1 + Math->Round(memBadness*(badColors.length-2))];
         colors->SetColors(badnessColor, badnessColor, badnessColor);
@@ -484,12 +476,12 @@ public class ProcessStatsUi extends PreferenceFragment
         // but if the user taps on the bar we want to show the times to them.  It is confusing
         // to see them be smaller than what we told them the measured duration is, so just
         // scaling them up with make things look reasonable with them none the wiser.
-        for (Int32 i=0; i<ProcessStats.ADJ_MEM_FACTOR_COUNT; i++) {
+        for (Int32 i=0; i<IProcessStats::ADJ_MEM_FACTOR_COUNT; i++) {
             mMemTimes[i] = (Int64)((mMemTimes[i]*(Double)elapsedTime)/mTotalTime);
         }
 
         ProcessStats.TotalMemoryUseCollection totalMem = new ProcessStats->TotalMemoryUseCollection(
-                ProcessStats.ALL_SCREEN_ADJ, memStates);
+                IProcessStats::ALL_SCREEN_ADJ, memStates);
         mStats->ComputeTotalMemoryUse(totalMem, now);
         Double freeWeight = totalMem.sysMemFreeWeight + totalMem.sysMemCachedWeight;
         Double usedWeight = totalMem.sysMemKernelWeight + totalMem.sysMemNativeWeight
@@ -500,22 +492,22 @@ public class ProcessStatsUi extends PreferenceFragment
         mMemZRamWeight = totalMem.sysMemZRamWeight;
         mMemKernelWeight = totalMem.sysMemKernelWeight;
         mMemNativeWeight = totalMem.sysMemNativeWeight;
-        for (Int32 i=0; i<ProcessStats.STATE_COUNT; i++) {
-            if (i == ProcessStats.STATE_SERVICE_RESTARTING) {
+        for (Int32 i=0; i<IProcessStats::STATE_COUNT; i++) {
+            if (i == IProcessStats::STATE_SERVICE_RESTARTING) {
                 // These don't really run.
                 mMemStateWeights[i] = 0;
             } else {
                 mMemStateWeights[i] = totalMem.processStateWeight[i];
-                if (i >= ProcessStats.STATE_HOME) {
+                if (i >= IProcessStats::STATE_HOME) {
                     freeWeight += totalMem.processStateWeight[i];
                 } else {
                     usedWeight += totalMem.processStateWeight[i];
                 }
-                if (i >= ProcessStats.STATE_IMPORTANT_FOREGROUND) {
+                if (i >= IProcessStats::STATE_IMPORTANT_FOREGROUND) {
                     backgroundWeight += totalMem.processStateWeight[i];
                     persBackgroundWeight += totalMem.processStateWeight[i];
                 }
-                if (i == ProcessStats.STATE_PERSISTENT) {
+                if (i == IProcessStats::STATE_PERSISTENT) {
                     persBackgroundWeight += totalMem.processStateWeight[i];
                 }
             }
@@ -578,33 +570,33 @@ public class ProcessStatsUi extends PreferenceFragment
             switch (mMemRegion) {
                 case LinearColorBar.REGION_RED:
                     colors->SetColoredRegions(LinearColorBar.REGION_RED);
-                    memTotalTime = mMemTimes[ProcessStats.ADJ_MEM_FACTOR_CRITICAL];
+                    memTotalTime = mMemTimes[IProcessStats::ADJ_MEM_FACTOR_CRITICAL];
                     memStates = RED_MEM_STATES;
                     break;
                 case LinearColorBar.REGION_YELLOW:
                     colors->SetColoredRegions(LinearColorBar.REGION_RED
                             | LinearColorBar.REGION_YELLOW);
-                    memTotalTime = mMemTimes[ProcessStats.ADJ_MEM_FACTOR_CRITICAL]
-                            + mMemTimes[ProcessStats.ADJ_MEM_FACTOR_LOW]
-                            + mMemTimes[ProcessStats.ADJ_MEM_FACTOR_MODERATE];
+                    memTotalTime = mMemTimes[IProcessStats::ADJ_MEM_FACTOR_CRITICAL]
+                            + mMemTimes[IProcessStats::ADJ_MEM_FACTOR_LOW]
+                            + mMemTimes[IProcessStats::ADJ_MEM_FACTOR_MODERATE];
                     memStates = YELLOW_MEM_STATES;
                     break;
                 default:
                     colors->SetColoredRegions(LinearColorBar.REGION_ALL);
                     memTotalTime = mTotalTime;
-                    memStates = ProcessStats.ALL_MEM_ADJ;
+                    memStates = IProcessStats::ALL_MEM_ADJ;
                     break;
             }
-            colors->SetRatios(mMemTimes[ProcessStats.ADJ_MEM_FACTOR_CRITICAL] / (Float)mTotalTime,
-                    (mMemTimes[ProcessStats.ADJ_MEM_FACTOR_LOW]
-                            + mMemTimes[ProcessStats.ADJ_MEM_FACTOR_MODERATE]) / (Float)mTotalTime,
-                    mMemTimes[ProcessStats.ADJ_MEM_FACTOR_NORMAL] / (Float)mTotalTime);
+            colors->SetRatios(mMemTimes[IProcessStats::ADJ_MEM_FACTOR_CRITICAL] / (Float)mTotalTime,
+                    (mMemTimes[IProcessStats::ADJ_MEM_FACTOR_LOW]
+                            + mMemTimes[IProcessStats::ADJ_MEM_FACTOR_MODERATE]) / (Float)mTotalTime,
+                    mMemTimes[IProcessStats::ADJ_MEM_FACTOR_NORMAL] / (Float)mTotalTime);
         }
 
         mAppListGroup->AddPreference(colors);
 
         ProcessStats.ProcessDataCollection totals = new ProcessStats->ProcessDataCollection(
-                ProcessStats.ALL_SCREEN_ADJ, memStates, stats);
+                IProcessStats::ALL_SCREEN_ADJ, memStates, stats);
 
         ArrayList<ProcStatsEntry> entries = new ArrayList<ProcStatsEntry>();
 
@@ -800,4 +792,11 @@ public class ProcessStatsUi extends PreferenceFragment
             Logger::E(TAG, "RemoteException:", e);
         }
     }
-}
+};
+
+} // namespace Applications
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_APPLICATIONS_CPROCESSSTATSUI_H__

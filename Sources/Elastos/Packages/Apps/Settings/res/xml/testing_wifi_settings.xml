@@ -13,33 +13,33 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<PreferenceScreen
+<Elastos.Droid.Preference.CPreferenceScreen
 xmlns:android="http://schemas.android.com/apk/res/android"
 android:title="@string/testing_wifi_info"
 android:key="parent">
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:title="@string/wifi_api_test" >
                 <intent
                 android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
                 android:targetClass="Elastos.Droid.Settings.wifi.WifiAPITest" />
-    </Preference>
+    </Elastos.Droid.Preference.CPreference>
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:title="@string/wifi_config_info" >
         <intent
                 android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
                 android:targetClass="Elastos.Droid.Settings.wifi.WifiConfigInfo" />
-    </Preference>
+    </Elastos.Droid.Preference.CPreference>
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:title="@string/wifi_status_test" >
         <intent
                 android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
                 android:targetClass="Elastos.Droid.Settings.wifi.WifiStatusTest" />
-    </Preference>
+    </Elastos.Droid.Preference.CPreference>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

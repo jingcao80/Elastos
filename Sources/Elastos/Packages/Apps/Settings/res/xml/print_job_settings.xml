@@ -14,17 +14,17 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/print_print_job">
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
             android:key="print_job_preference">
-    </Preference>
+    </Elastos.Droid.Preference.CPreference>
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
             android:key="print_job_message_preference"
             android:layout="@layout/print_job_summary">
-    </Preference>
+    </Elastos.Droid.Preference.CPreference>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

@@ -14,6 +14,6 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="@string/account_settings" />
-</PreferenceScreen>
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Elastos.Droid.Preference.CPreferenceCategory android:title="@string/account_settings" />
+</Elastos.Droid.Preference.CPreferenceScreen>

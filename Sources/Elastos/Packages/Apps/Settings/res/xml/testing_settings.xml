@@ -14,38 +14,38 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/testing" >
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:title="@string/testing_phone_info">
         <intent android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
                 android:targetClass="Elastos.Droid.Settings.RadioInfo" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:title="@string/testing_battery_info">
         <intent android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
                 android:targetClass="Elastos.Droid.Settings.BatteryInfo" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:title="@string/testing_usage_stats">
         <intent android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
                 android:targetClass="Elastos.Droid.Settings.UsageStats" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:title="@string/testing_wifi_info" >
         <intent
                 android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
                 android:targetClass="Elastos.Droid.Settings.wifi.WifiInfo" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
     <!--
     <PreferenceScreen
@@ -56,5 +56,5 @@
     </PreferenceScreen>
     -->
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>
 

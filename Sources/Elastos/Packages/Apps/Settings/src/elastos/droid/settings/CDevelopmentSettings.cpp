@@ -726,7 +726,8 @@ void CDevelopmentSettings::UpdateAllOptions()
     global->GetInt32(cr, ISettingsGlobal::DEBUG_VIEW_ATTRIBUTES, 0, &data);
     UpdateCheckBox(mDebugViewAttributes, data != 0);
     UpdateHdcpValues();
-    UpdatePasswordSummary();
+    Logger::D("CDevelopmentSettings::UpdatePasswordSummary", "=============== TODO wait for BackupManager ================");
+    // UpdatePasswordSummary();
     UpdateDebuggerOptions();
     UpdateStrictModeVisualOptions();
     UpdatePointerLocationOptions();
@@ -825,12 +826,14 @@ void CDevelopmentSettings::UpdatePasswordSummary()
 {
     // try {
     Boolean res;
+    assert(0 && "TODO");
     if (mBackupManager->HasBackupPassword(&res), res) {
         IPreference::Probe(mPassword)->SetSummary(R::string::local_backup_password_summary_change);
     }
     else {
         IPreference::Probe(mPassword)->SetSummary(R::string::local_backup_password_summary_none);
     }
+
     // } catch (RemoteException e) {
     //     // Not much we can do here
     // }

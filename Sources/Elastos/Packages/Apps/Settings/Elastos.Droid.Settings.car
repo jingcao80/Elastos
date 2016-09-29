@@ -12,6 +12,7 @@ module
     merge("car/elastos/droid/applications/LinearColorBar.car");
     merge("car/elastos/droid/applications/ManageApplications.car");
     merge("car/elastos/droid/applications/RunningState.car");
+    merge("car/elastos/droid/applications/ProcessStatsPreference.car");
     merge("car/elastos/droid/dashboard/SearchResultsSummary.car");
     merge("car/elastos/droid/deviceinfo/StorageMeasurement.car");
     merge("car/elastos/droid/inputmethod/InputMethodPreference.car");
@@ -81,6 +82,8 @@ module
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Preference.IPreference;
+    using interface Elastos.Droid.Preference.IDialogPreference;
+    using interface Elastos.Droid.Preference.IListPreference;
     using interface Elastos.Droid.Preference.IPreferenceActivity;
     using interface Elastos.Droid.Preference.IRingtonePreference;
     using interface Elastos.Droid.Preference.ISeekBarPreference;
@@ -1181,6 +1184,19 @@ module
         interface IOnWindowDismissedCallback;
     }
 
+    [local]
+    class CBugreportPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IDialogPreference;
+        interface IPreference;
+        interface IComparable;
+        interface IDialogInterfaceOnClickListener;
+        interface IDialogInterfaceOnDismissListener;
+    }
+
     class CDateTimeSettings {
         constructor();
 
@@ -1224,6 +1240,20 @@ module
         interface IRingtonePreference;
         interface IPreference;
         interface IComparable;
+    }
+
+    class CDisplaySettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface IIndexable;
     }
 
     class CDevelopmentSettings {
@@ -1365,6 +1395,22 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
+    }
+
+    class CSetFullBackupPassword {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
     }
 
     class COwnerInfoSettings {
@@ -1535,6 +1581,20 @@ module
         interface IAdapter;
     }
 
+    class CWallpaperTypeSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface IIndexable;
+    }
+
     class CWirelessSettings {
         constructor();
 
@@ -1547,6 +1607,20 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
         interface IPreferenceOnPreferenceChangeListener;
+    }
+
+    [local]
+    class CWarnedListPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IListPreference;
+        interface IDialogPreference;
+        interface IPreference;
+        interface IComparable;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogInterfaceOnClickListener;
     }
 
     class CZonePicker {

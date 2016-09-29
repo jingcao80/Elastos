@@ -14,17 +14,17 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/sim_lock_settings">
 
-    <CheckBoxPreference
+    <Elastos.Droid.Preference.CCheckBoxPreference
             android:key="sim_toggle"
             android:title="@string/sim_pin_toggle"
             android:summaryOn="@string/sim_lock_on"
             android:summaryOff="@string/sim_lock_off"/>
 
-    <Elastos.Droid.Settings.EditPinPreference
+    <Elastos.Droid.Settings.CEditPinPreference
             android:key="sim_pin"
             android:dependency="sim_toggle"
             android:title="@string/sim_pin_change"
@@ -33,4 +33,4 @@
             android:positiveButtonText="@string/sim_enter_ok"
             android:negativeButtonText="@string/sim_enter_cancel"/>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>
