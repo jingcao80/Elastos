@@ -7,6 +7,14 @@ module
     namespace Security {
     namespace Asn1 {
 
+    /**
+     * @Involve
+     * class ASN1Primitive;
+     * interface IASN1Type;
+     * interface IASN1Constants;
+     */
+    interface IASN1Boolean {}
+
     interface IASN1BooleanHelper {
         /**
          * Returns ASN.1 Boolean type default implementation

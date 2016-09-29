@@ -1,6 +1,9 @@
 
 #include "CASN1Any.h"
-#include <cmdef.h>
+#include "CBerInputStream.h"
+#include "CoreUtils.h"
+
+using Elastos::Core::CoreUtils;
 
 namespace Org {
 namespace Apache {
@@ -11,6 +14,7 @@ namespace Asn1 {
 AutoPtr<IASN1Any> CASN1Any::sASN1 = Init();
 
 CAR_OBJECT_IMPL(CASN1Any)
+CAR_INTERFACE_IMPL(CASN1Any, ASN1Type, IASN1Any)
 
 AutoPtr<IASN1Any> CASN1Any::Init()
 {
@@ -45,20 +49,20 @@ ECode CASN1Any::Decode(
     return ASN1Type::Decode(encoded, object);
 }
 
-ECode CASN1Any::DecodeEx(
+ECode CASN1Any::Decode(
     /* [in] */ ArrayOf<Byte> *encoded,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 encodingLen,
     /* [out] */ IInterface **object)
 {
-    return ASN1Type::DecodeEx(encoded, offset, encodingLen, object);
+    return ASN1Type::Decode(encoded, offset, encodingLen, object);
 }
 
-ECode CASN1Any::DecodeEx2(
+ECode CASN1Any::Decode(
     /* [in] */ IInputStream* is,
     /* [out] */ IInterface** object)
 {
-    return ASN1Type::DecodeEx2(is, object);
+    return ASN1Type::Decode(is, object);
 }
 
 ECode CASN1Any::Verify(
@@ -67,10 +71,10 @@ ECode CASN1Any::Verify(
     return ASN1Type::Verify(encoded);
 }
 
-ECode CASN1Any::VerifyEx(
+ECode CASN1Any::Verify(
     /* [in] */ IInputStream* is)
 {
-    return ASN1Type::VerifyEx(is);
+    return ASN1Type::Verify(is);
 }
 
 ECode CASN1Any::Encode(
@@ -80,7 +84,7 @@ ECode CASN1Any::Encode(
     return ASN1Type::Encode(object, encode);
 }
 
-ECode CASN1Any::DecodeEx3(
+ECode CASN1Any::Decode(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
@@ -105,15 +109,15 @@ ECode CASN1Any::CheckTag(
 
 ECode CASN1Any::GetDecodedObject(
     /* [in] */ IBerInputStream* bis,
-    /* [out, callee] */ ArrayOf<Byte>** object)
+    /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object)
     Int32 offset, tagOffset;
     bis->GetOffset(&offset);
-    bis->GetTagOffset(tagOffset);
+    bis->GetTagOffset(&tagOffset);
     AutoPtr<ArrayOf<Byte> > bytesEncoded = ArrayOf<Byte>::Alloc(offset- tagOffset);
-    bytesEncoded->Copy(0, bis, tagOffset, bytesEncoded->GetLength());
-    *object = bytesEncoded;
+    bytesEncoded->Copy(0, ((BerInputStream*)bis)->mBuffer, tagOffset, bytesEncoded->GetLength());
+    *object = CoreUtils::ConvertByteArray(bytesEncoded);
     REFCOUNT_ADD(*object)
     return NOERROR;
 }
@@ -121,21 +125,24 @@ ECode CASN1Any::GetDecodedObject(
 ECode CASN1Any::EncodeASN(
     /* [in] */ IBerOutputStream* bos)
 {
-    return bos->EncodeAny();
+    return bos->EncodeANY();
 }
 
 ECode CASN1Any::EncodeContent(
     /* [in] */ IBerOutputStream* bos)
 {
-    return bos->EncodeAny();
+    return bos->EncodeANY();
 }
 
 ECode CASN1Any::SetEncodingContent(
     /* [in] */ IBerOutputStream* bos)
 {
-    AutoPtr<ArrayOf<Byte> > content;
-    bos->GetContent((ArrayOf<Byte>**)&content);
-    return bos->SetLength(content->GetLength());
+    AutoPtr<IInterface> content;
+    bos->GetContent((IInterface**)&content);
+    assert(IArrayOf::Probe(content));
+    Int32 len = 0;
+    IArrayOf::Probe(content)->GetLength(&len);
+    return bos->SetLength(len);
 }
 
 ECode CASN1Any::GetEncodedLength(
@@ -153,7 +160,7 @@ ECode CASN1Any::ToString(
 
 ECode CASN1Any::constructor()
 {
-    return ASN1Type::Init(IASN1Constants::TAG_ANY);
+    return ASN1Type::constructor(IASN1Constants::TAG_ANY);
 }
 
 } // namespace Asn1

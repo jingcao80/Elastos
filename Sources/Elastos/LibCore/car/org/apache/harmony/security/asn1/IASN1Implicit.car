@@ -7,7 +7,12 @@ module
     namespace Security {
     namespace Asn1 {
 
-    interface IASN1Implicit extends IASN1Type {}
+    /**
+     * @Involve
+     * interface IASN1Type;
+     * interface IASN1Constants;
+     */
+    interface IASN1Implicit {}
 
     } // namespace Asn1
     } // namespace Security

@@ -13,42 +13,16 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-CarClass(CASN1Implicit), public ASN1Type
+CarClass(CASN1Implicit)
+    , public ASN1Type
+    , public IASN1Implicit
 {
 public:
     CAR_OBJECT_DECL()
 
-    CARAPI GetId(
-        /* [out] */ Int32* id);
-
-    CARAPI GetConstrId(
-        /* [out] */ Int32* constrId);
+    CAR_INTERFACE_DECL()
 
     CARAPI Decode(
-        /* [in] */ ArrayOf<Byte>* encoded,
-        /* [out] */ IInterface** object);
-
-    CARAPI DecodeEx(
-        /* [in] */ ArrayOf<Byte>* encoded,
-        /* [in] */ Int32 offset,
-        /* [in] */ Int32 encodingLen,
-        /* [out] */ IInterface** object);
-
-    CARAPI DecodeEx2(
-        /* [in] */ IInputStream* is,
-        /* [out] */ IInterface** object);
-
-    CARAPI Verify(
-        /* [in] */ ArrayOf<Byte>* encoded);
-
-    CARAPI VerifyEx(
-        /* [in] */ IInputStream* is);
-
-    CARAPI Encode(
-        /* [in] */ IInterface* object,
-        /* [out, callee] */ ArrayOf<Byte>** encode);
-
-    CARAPI DecodeEx3(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);
 
@@ -56,25 +30,14 @@ public:
         /* [in] */ Int32 identifier,
         /* [out] */ Boolean* checkTag);
 
-    CARAPI GetDecodedObject(
-        /* [in] */ IBerInputStream* bis,
-        /* [out] */ IInterface** object);
-
     CARAPI EncodeASN(
         /* [in] */ IBerOutputStream* bos);
 
     CARAPI EncodeContent(
-        /* [in] */ IBerOutputStream* bos);
+        /* [in] */ IBerOutputStream* out);
 
     CARAPI SetEncodingContent(
-        /* [in] */ IBerOutputStream* bos);
-
-    CARAPI GetEncodedLength(
-        /* [in] */ IBerOutputStream* bos,
-        /* [out] */ Int32* length);
-
-    CARAPI ToString(
-        /* [out] */ String* result);
+        /* [in] */ IBerOutputStream* out);
 
     CARAPI constructor(
         /* [in] */ Int32 tagNumber,
@@ -82,13 +45,13 @@ public:
 
 private:
     /** primitive type of tagging */
-    static const Int32 TAGGING_PRIMITIVE = 0;
+    static const Int32 TAGGING_PRIMITIVE;
 
     /** constructed type of tagging */
-    static const Int32 TAGGING_CONSTRUCTED = 1;
+    static const Int32 TAGGING_CONSTRUCTED;
 
     /** string type of tagging */
-    static const TAGGING_STRING = 2;
+    static const Int32 TAGGING_STRING;
 
     /** tagged ASN.1 type */
     AutoPtr<IASN1Type> mType;

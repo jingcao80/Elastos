@@ -1,6 +1,8 @@
 
 #include "CObjectIdentifier.h"
-#include <cmdef.h>
+#include "Arrays.h"
+
+using Elastos::Utility::Arrays;
 
 namespace Org {
 namespace Apache {
@@ -10,13 +12,13 @@ namespace Asn1 {
 
 
 CAR_OBJECT_IMPL(CObjectIdentifier)
-
+CAR_INTERFACE_IMPL(CObjectIdentifier, Object, IObjectIdentifier)
 ECode CObjectIdentifier::Equals(
     /* [in] */ PInterface obj,
     /* [out] */ Boolean* isEqual)
 {
     VALIDATE_NOT_NULL(isEqual)
-    if (this == (CObjectIdentifier*)obj) {
+    if (this == (CObjectIdentifier*)IObjectIdentifier::Probe(obj)) {
         *isEqual =TRUE;
         return NOERROR;
     }
@@ -25,13 +27,13 @@ ECode CObjectIdentifier::Equals(
         return NOERROR;
     }
     ClassID id1, id2;
-    IObject::Get(obj)->GetClassID(&id1);
+    IObject::Probe(obj)->GetClassID(&id1);
     this->GetClassID(&id2);
-    if (obj == null || id1 != id2) {
+    if (obj == NULL || id1 != id2) {
         *isEqual = FALSE;
         return NOERROR;
     }
-    *isEqual = mOid->Equals(((CObjectIdentifier*)obj)->GetOid());
+    *isEqual = Arrays::Equals(mOid, ((CObjectIdentifier*)IObjectIdentifier::Probe(obj))->mOid);
     return NOERROR;
 }
 
@@ -58,14 +60,14 @@ ECode CObjectIdentifier::ToString(
 {
     VALIDATE_NOT_NULL(result)
     if (mSoid.IsNull()) {
-        ToString(oid, &mSoid);
+        ToString(mOid, &mSoid);
     }
     *result = mSoid;
     return NOERROR;
 }
 
 ECode CObjectIdentifier::constructor(
-    /* [in] */ ArrayOf<Int32>* pOid)
+    /* [in] */ ArrayOf<Int32>* oid)
 {
     Validate(oid);
     mOid = oid;
@@ -119,10 +121,10 @@ ECode CObjectIdentifier::ToString(
     StringBuilder sb(3 * oid->GetLength());
 
     for (int i = 0; i < oid->GetLength() - 1; ++i) {
-        sb.AppendInt32((*oid)[i]);
-        sb.AppendChar32('.');
+        sb.Append((*oid)[i]);
+        sb.AppendChar('.');
     }
-    sb.AppendInt32((*oid)[oid->GetLength() - 1]);
+    sb.Append((*oid)[oid->GetLength() - 1]);
     return sb.ToString(str);
 }
 

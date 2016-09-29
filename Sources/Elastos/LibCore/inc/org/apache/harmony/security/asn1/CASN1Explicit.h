@@ -15,7 +15,7 @@ namespace Asn1 {
 
 CarClass(CASN1Explicit)
     , public ASN1Constructed
-    , public ICASN1Explicit
+    , public IASN1Explicit
 {
 public:
     CAR_OBJECT_DECL()
@@ -25,50 +25,9 @@ public:
     CARAPI GetType(
         /* [out] */ IASN1Type** type);
 
-    CARAPI GetId(
-        /* [out] */ Int32* id);
-
-    CARAPI GetConstrId(
-        /* [out] */ Int32* constrId);
-
     CARAPI Decode(
-        /* [in] */ ArrayOf<Byte>* encoded,
-        /* [out] */ IInterface** object);
-
-    CARAPI DecodeEx(
-        /* [in] */ ArrayOf<Byte>* encoded,
-        /* [in] */ Int32 offset,
-        /* [in] */ Int32 encodingLen,
-        /* [out] */ IInterface** object);
-
-    CARAPI DecodeEx2(
-        /* [in] */ IInputStream* is,
-        /* [out] */ IInterface** object);
-
-    CARAPI Verify(
-        /* [in] */ ArrayOf<Byte>* encoded);
-
-    CARAPI VerifyEx(
-        /* [in] */ IInputStream* is);
-
-    CARAPI Encode(
-        /* [in] */ IInterface* object,
-        /* [out, callee] */ ArrayOf<Byte>** encode);
-
-    CARAPI DecodeEx3(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);
-
-    CARAPI CheckTag(
-        /* [in] */ Int32 identifier,
-        /* [out] */ Boolean* checkTag);
-
-    CARAPI GetDecodedObject(
-        /* [in] */ IBerInputStream* bis,
-        /* [out] */ IInterface** object);
-
-    CARAPI EncodeASN(
-        /* [in] */ IBerOutputStream* bos);
 
     CARAPI EncodeContent(
         /* [in] */ IBerOutputStream* bos);
@@ -92,7 +51,7 @@ public:
         /* [in] */ Int32 tagNumber,
         /* [in] */ IASN1Type* type);
 
-public
+public:
      /** Tagged type */
     AutoPtr<IASN1Type> mType;
 };

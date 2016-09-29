@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_COBJECTIDENTIFIER_H__
 
 #include "_Org_Apache_Harmony_Security_Asn1_CObjectIdentifier.h"
+#include "Object.h"
 
 namespace Org {
 namespace Apache {
@@ -11,9 +12,13 @@ namespace Security {
 namespace Asn1 {
 
 CarClass(CObjectIdentifier)
+    , public Object
+    , public IObjectIdentifier
 {
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     static CARAPI Validate(
         /* [in] */ ArrayOf<Int32>* oid);

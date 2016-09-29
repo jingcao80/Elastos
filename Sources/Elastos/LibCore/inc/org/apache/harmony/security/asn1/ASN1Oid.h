@@ -12,11 +12,13 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-class ASN1Oid : public ASN1Primitive
+class ASN1Oid
+    : public ASN1Primitive
+    , public IASN1Oid
 {
-private:
-    class DerivedASN1Oid;
 public:
+    CAR_INTERFACE_DECL()
+
     static CARAPI_(AutoPtr<IASN1Type>) InitStatic();
 
     static CARAPI GetInstance(
@@ -25,7 +27,7 @@ public:
     static CARAPI GetInstanceForString(
         /* [out] */ IASN1Type** instance);
 
-    CARAPI DecodeEx3(
+    CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);
 
@@ -39,12 +41,26 @@ public:
     CARAPI SetEncodingContent(
         /* [in] */ IBerOutputStream* bos);
 
-    CARAPI Init();
+    CARAPI constructor();
+
 private:
     /** default implementation */
     static AutoPtr<IASN1Type> ASN1;
     static AutoPtr<IASN1Type> STRING_OID;
 };
+
+class DerivedASN1Oid
+    : public ASN1Oid
+{
+public:
+    CARAPI GetDecodedObject(
+        /* [in] */ IBerInputStream* bis,
+        /* [out] */ IInterface** object);
+
+    CARAPI SetEncodingContent(
+        /* [in] */ IBerOutputStream* bos);
+};
+
 
 } // namespace Asn1
 } // namespace Security

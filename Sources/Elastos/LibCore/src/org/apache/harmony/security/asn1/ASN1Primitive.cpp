@@ -1,6 +1,5 @@
 
 #include "ASN1Primitive.h"
-#include <cmdef.h>
 
 namespace Org {
 namespace Apache {
@@ -8,15 +7,13 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-ASN1Primitive::ASN1Primitive(
-    /* [in] */ Int32 tagNumber)
-    : ASN1Type(tagNumber)
+ASN1Primitive::ASN1Primitive()
 {}
 
-ECode ASN1Primitive::Init(
+ECode ASN1Primitive::constructor(
     /* [in] */ Int32 tagNumber)
 {
-    ASN1Type::Init(tagNumber);
+    return ASN1Type::constructor(tagNumber);
 }
 
 /**
@@ -40,15 +37,6 @@ ECode ASN1Primitive::EncodeASN(
 {
     out->EncodeTag(mId);
     return EncodeContent(out);
-}
-
-PInterface ASN1Primitive::Probe(
-    /* [in] */ REIID riid)
-{
-    if ( riid == EIID_IASN1Type ) {
-        return reinterpret_cast<IInterface*>(this);
-    }
-    return NULL;
 }
 
 } // namespace Asn1

@@ -1,6 +1,5 @@
 
 #include "CBitString.h"
-#include <cmdef.h>
 
 namespace Org {
 namespace Apache {
@@ -8,9 +7,8 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-static AutoPtr<ArrayOf<Byte> > SET_MASK;
-
-static AutoPtr<ArrayOf<Byte> > RESET_MASK = InitStatic();
+AutoPtr<ArrayOf<Byte> > CBitString::SET_MASK;
+AutoPtr<ArrayOf<Byte> > CBitString::RESET_MASK = InitStatic();
 
 CAR_OBJECT_IMPL(CBitString)
 
@@ -19,14 +17,16 @@ CAR_INTERFACE_IMPL(CBitString, Object, IBitString)
 AutoPtr<ArrayOf<Byte> > CBitString::InitStatic()
 {
     SET_MASK = ArrayOf<Byte>::Alloc(8);
-    Byte[] tmp1 = { (Byte) 128, 64, 32, 16, 8, 4, 2, 1 };
-    for (Int32 i = 0; i < sizeof(tmp1) / sizeof(tmp1[0]); i++) {
+    Byte tmp1[] = { (Byte) 128, 64, 32, 16, 8, 4, 2, 1 };
+    Int32 size = sizeof(tmp1) / sizeof(tmp1[0]);
+    for (Int32 i = 0; i < size; i++) {
         (*SET_MASK)[i] = tmp1[i];
     }
     AutoPtr<ArrayOf<Byte> > ret = ArrayOf<Byte>::Alloc(8);
-    Byte[] tmp2 = { 0x7f, (Byte) 0xbf, (Byte) 0xdf,
+    Byte tmp2[] = { 0x7f, (Byte) 0xbf, (Byte) 0xdf,
         (Byte) 0xef, (Byte) 0xf7, (Byte) 0xfb, (Byte) 0xfd, (Byte) 0xfe};
-    for (Int32 i =0; i < sizeof(tmp2)/sizeof(tmp2[0]); i++) {
+    size = sizeof(tmp2)/sizeof(tmp2[0]);
+    for (Int32 i =0; i < size; i++) {
         (*ret)[i] = tmp2[i];
     }
     return ret;

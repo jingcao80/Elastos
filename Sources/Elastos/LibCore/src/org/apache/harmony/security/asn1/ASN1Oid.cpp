@@ -1,10 +1,12 @@
 
 #include "ASN1Oid.h"
-#include <cmdef.h>
-#include <elastos/StringBuilder.h>
-#ifndef FOR_DERIVED
-#define FOR_DERIVED
-#include <Asn1TypeMacro.h>
+#include "CASN1Oid.h"
+#include "CBerInputStream.h"
+#include "CObjectIdentifier.h"
+#include "CArrayOf.h"
+#include "CInteger32.h"
+#include "CString.h"
+#include "StringBuilder.h"
 
 using Elastos::Core::EIID_IInteger32;
 using Elastos::Core::IArrayOf;
@@ -21,20 +23,7 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-class DerivedASN1Oid
-    : public ASN1Oid
-    , public IASN1Type
-    , public ElRefBase
-{
-public:
-    ASN1TYPE_METHODS_DECL()
-    CAR_INTERFACE_IMPL()
-};
-
-ASN1TYPE_METHODS_IMPL(ASN1Oid::DerivedASN1Oid, ASN1Oid)
-CAR_INTERFACE_IMPL(ASN1Oid::DerivedASN1Oid, IASN1Type)
-
-ECode ASN1Oid::DerivedASN1Oid::GetDecodedObject(
+ECode DerivedASN1Oid::GetDecodedObject(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
@@ -58,16 +47,15 @@ ECode ASN1Oid::DerivedASN1Oid::GetDecodedObject(
     if (element > 79) {
         buf.AppendChar('2');
         buf.AppendChar('.');
-        buf.AppendInt32(element - 80);
+        buf.Append(element - 80);
     } else {
-        buf.AppendInt32(element / 40);
+        buf.Append(element / 40);
         buf.AppendChar('.');
-        buf.AppendInt32(element % 40);
+        buf.Append(element % 40);
     }
 
     // the rest of subidentifiers
-    Int32 oidElement;
-    bis->GetOidElement(&oidElement);
+    Int32 oidElement = ((CBerInputStream*)bis)->mOidElement;
     for (Int32 j = 2; j < oidElement; j++) {
         buf.AppendChar('.');
 
@@ -77,11 +65,11 @@ ECode ASN1Oid::DerivedASN1Oid::GetDecodedObject(
 
         while ((octet & 0x80) != 0) {
             index++;
-            octet = in.buffer[in.contentOffset + index];
+            octet = (*((CBerInputStream*)bis)->mBuffer)[((CBerInputStream*)bis)->mContentOffset + index];
             element = element << 7 | (octet & 0x7f);
         }
 
-        buf.AppendInt32(element);
+        buf.Append(element);
     }
 
     String str;
@@ -93,41 +81,40 @@ ECode ASN1Oid::DerivedASN1Oid::GetDecodedObject(
     return NOERROR;
 }
 
-ECode ASN1Oid::DerivedASN1Oid::SetEncodingContent(
+ECode DerivedASN1Oid::SetEncodingContent(
     /* [in] */ IBerOutputStream* bos)
 {
     //FIXME this is a stub for a while
-    AutoPtr<IObjectIdentifierHelper> hlp;
-    CObjectIdentifierHelper::AcquireSingleton((IObjectIdentifierHelper**)&hlp);
     AutoPtr<IInterface> content;
     String str;
     AutoPtr<ArrayOf<Int32> > arr;
     bos->GetContent((IInterface**)&content);
     ICharSequence::Probe(content)->ToString(&str);
-    hlp->ToIntArray(str, (ArrayOf<Int32>**)&arr);
+    CObjectIdentifier::ToIntArray(str, (ArrayOf<Int32>**)&arr);
     AutoPtr<IArrayOf> arrayOf;
-    CArrayOf::New(EIID_IInteger32, oid->GetLength(), (IArrayOf**)&arrayOf);
-    for (Int32 i = 0; i < oid->GetLength(); i++) {
+    CArrayOf::New(EIID_IInteger32, arr->GetLength(), (IArrayOf**)&arrayOf);
+    for (Int32 i = 0; i < arr->GetLength(); i++) {
         AutoPtr<IInteger32> i32;
-        CInteger32::New((*oid)[i], (IInteger32**)&i32);
+        CInteger32::New((*arr)[i], (IInteger32**)&i32);
         arrayOf->Set(i, i32.Get());
     }
-    *object = arrayOf.Get();
-    REFCOUNT_ADD(*object)
     bos->SetContent(arrayOf.Get());
     return ASN1Oid::SetEncodingContent(bos);
 }
 
-AutoPtr<IASN1Type> STRING_OID;
+AutoPtr<IASN1Type> ASN1Oid::STRING_OID;
 AutoPtr<IASN1Type> ASN1Oid::ASN1 = InitStatic();
 
-AutoPtr<IASN1Type> CASN1Oid::InitStatic()
+CAR_INTERFACE_IMPL(ASN1Oid, ASN1Primitive, IASN1Oid)
+AutoPtr<IASN1Type> ASN1Oid::InitStatic()
 {
     STRING_OID = new DerivedASN1Oid();
-    return new CASN1Oid();
+    AutoPtr<IASN1Type> at;
+    CASN1Oid::New((IASN1Type**)&at);
+    return at;
 }
 
-ECode CASN1Oid::GetInstance(
+ECode ASN1Oid::GetInstance(
     /* [out] */ IASN1Type** instance)
 {
     VALIDATE_NOT_NULL(instance)
@@ -145,7 +132,7 @@ ECode ASN1Oid::GetInstanceForString(
     return NOERROR;
 }
 
-ECode ASN1Oid::DecodeEx3(
+ECode ASN1Oid::Decode(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
@@ -162,8 +149,7 @@ ECode ASN1Oid::GetDecodedObject(
     /* [out] */ IInterface** object)
 {
     // Allocate and decode
-    Int32 oidElement;
-    bis->GetOidElement(&oidElement);
+    Int32 oidElement = ((CBerInputStream*)bis)->mOidElement;
     AutoPtr<ArrayOf<Int32> > oid = ArrayOf<Int32>::Alloc(oidElement);
     AutoPtr<ArrayOf<Byte> > buffer;
     Int32 contentOffset;
@@ -248,9 +234,9 @@ ECode ASN1Oid::SetEncodingContent(
     return bos->SetLength(length);
 }
 
-ECode ASN1Oid::Init()
+ECode ASN1Oid::constructor()
 {
-    return ASN1Primitive::Init(IASN1Constants::TAG_OID);
+    return ASN1Primitive::constructor(IASN1Constants::TAG_OID);
 }
 
 } // namespace Asn1
@@ -258,6 +244,3 @@ ECode ASN1Oid::Init()
 } // namespace Harmony
 } // namespace Apache
 } // namespace Org
-
-#undef FOR_DERIVED
-#endif

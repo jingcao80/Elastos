@@ -19,9 +19,12 @@ namespace Asn1 {
  * @see <a href="http://asn1.elibel.tm.fr/en/standards/index.htm">ASN.1</a>
  */
 class ASN1Time
-    : public ASN1StringType {
+    : public ASN1StringType
+{
 public:
-    ASN1Time(
+    ASN1Time();
+
+    CARAPI constructor(
         /* [in] */ Int32 tagNumber);
 
     CARAPI GetDecodedObject(

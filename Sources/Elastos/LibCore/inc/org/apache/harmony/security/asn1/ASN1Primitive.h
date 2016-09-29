@@ -19,12 +19,12 @@ namespace Asn1 {
  * @see <a href="http://asn1.elibel.tm.fr/en/standards/index.htm">ASN.1</a>
  */
 class ASN1Primitive
-    : public ASN1Type {
+    : public ASN1Type
+{
 public:
-    ASN1Primitive(
-        /* [in] */ Int32 tagNumber);
+    ASN1Primitive();
 
-    CARAPI Init(
+    CARAPI constructor(
         /* [in] */ Int32 tagNumber);
 
     /**
@@ -40,9 +40,6 @@ public:
 
     virtual CARAPI EncodeASN(
         /* [in] */ IBerOutputStream* out);
-
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
 };
 
 } // namespace Asn1

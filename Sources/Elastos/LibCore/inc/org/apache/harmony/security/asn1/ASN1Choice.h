@@ -5,7 +5,6 @@
 #include "ASN1Type.h"
 
 using Elastos::Core::IArrayOf;
-using Elastos::Core::CArrayOf;
 using Elastos::Utility::INavigableMap;
 
 namespace Org {
@@ -14,9 +13,13 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-class ASN1Choice : public ASN1Type
+class ASN1Choice
+    : public ASN1Type
+    , public IASN1Choice
 {
 public:
+    CAR_INTERFACE_DECL()
+
     CARAPI constructor(
         /* [in] */ ArrayOf<IASN1Type*>* asn1Type);
 

@@ -29,11 +29,19 @@ module
     merge("apache/harmony/security/asn1/IASN1SequenceOf.car");
     merge("apache/harmony/security/asn1/IASN1Set.car");
     merge("apache/harmony/security/asn1/IASN1SetOf.car");
+    merge("apache/harmony/security/asn1/IASN1Any.car");
+    merge("apache/harmony/security/asn1/IASN1Boolean.car");
+    merge("apache/harmony/security/asn1/IASN1Enumerated.car");
+    merge("apache/harmony/security/asn1/IASN1GeneralizedTime.car");
+    merge("apache/harmony/security/asn1/IASN1Implicit.car");
+    merge("apache/harmony/security/asn1/IASN1Integer.car");
+    merge("apache/harmony/security/asn1/IASN1Oid.car");
     merge("apache/harmony/security/asn1/IBitString.car");
     merge("apache/harmony/security/asn1/IBerInputStream.car");
     merge("apache/harmony/security/asn1/IBerOutputStream.car");
     merge("apache/harmony/security/asn1/IDerInputStream.car");
     merge("apache/harmony/security/asn1/IDerOutputStream.car");
+    merge("apache/harmony/security/asn1/IObjectIdentifier.car");
 
     merge("apache/harmony/security/fortress/IEngine.car");
     merge("apache/harmony/security/fortress/ISecurityAccess.car");
@@ -324,6 +332,10 @@ module
     interface Elastosx.Xml.Parsers.ISAXParser;
     interface Elastosx.Xml.Parsers.ISAXParserFactory;
     interface Elastosx.Xml.Parsers.IDocumentBuilderFactory;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Any;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Boolean;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Enumerated;
+    interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
     interface Org.Apache.Http.IHttpEntity;
     interface Org.Apache.Http.IHttpMessage;
     interface Org.Apache.Http.IHttpEntityEnclosingRequest;
@@ -694,7 +706,114 @@ module
         interface IBerOutputStream;
     }
 
+    class CASN1Any {
+        constructor();
+
+        interface IASN1Any;
+        interface IASN1Type;
+        interface IASN1Constants;
     }
+
+    class CASN1BitString {
+        constructor();
+
+        interface IASN1BitString;
+        interface IASN1StringType;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    [deprecated]
+    class CBitString {
+        constructor(
+            [in] ArrayOf<Byte>* bytes,
+            [in] Int32 unusedBits);
+
+        constructor(
+            [in] ArrayOf<Boolean>* values);
+
+        interface IBitString;
+    }
+
+    class CASN1Boolean {
+        constructor();
+
+        interface IASN1Boolean;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    class CASN1Enumerated {
+        constructor();
+
+        interface IASN1Enumerated;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    class CASN1Explicit {
+        constructor(
+            [in] Int32 tagNumber,
+            [in] IASN1Type* type);
+
+        constructor(
+            [in] Int32 tagClass,
+            [in] Int32 tagNumber,
+            [in] IASN1Type* type);
+
+        interface IASN1Explicit;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    class CASN1GeneralizedTime {
+        constructor();
+
+        interface IASN1GeneralizedTime;
+        interface IASN1Time;
+        interface IASN1StringType;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    class CASN1Implicit {
+        constructor(
+            [in] Int32 tagNumber,
+            [in] IASN1Type* type);
+
+        interface IASN1Implicit;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    class CASN1Integer {
+        constructor();
+
+        interface IASN1Integer;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    [deprecated]
+    class CObjectIdentifier {
+        constructor(
+            [in] ArrayOf<Int32>* oid);
+
+        constructor(
+            [in] String strOid);
+
+        interface IObjectIdentifier;
+    }
+
+    class CASN1Oid {
+        constructor();
+
+        interface IASN1Oid;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    } // Asn1
 
     namespace Fortress {
 

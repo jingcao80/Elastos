@@ -1,7 +1,7 @@
 
 #include "CASN1Implicit.h"
-#include <elastos/Slogger.h>
-#include <cmdef.h>
+#include "CBerInputStream.h"
+#include "elastos/utility/logging/Slogger.h"
 
 using Elastos::Utility::Logging::Slogger;
 
@@ -13,68 +13,17 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+const Int32 CASN1Implicit::TAGGING_PRIMITIVE = 0;
+const Int32 CASN1Implicit::TAGGING_CONSTRUCTED = 1;
+const Int32 CASN1Implicit::TAGGING_STRING = 2;
+
 CAR_OBJECT_IMPL(CASN1Implicit)
-
-ECode CASN1Implicit::GetId(
-    /* [out] */ Int32* id)
-{
-    return ASN1Type::GetId(id);
-}
-
-ECode CASN1Implicit::GetConstrId(
-    /* [out] */ Int32* constrId)
-{
-    return ASN1Type::GetConstrId(constrId);
-}
-
+CAR_INTERFACE_IMPL(CASN1Implicit, ASN1Type, IASN1Implicit)
 ECode CASN1Implicit::Decode(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Type::Decode(encoded, object);
-}
-
-ECode CASN1Implicit::DecodeEx(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [in] */ Int32 offset,
-    /* [in] */ Int32 encodingLen,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Type::DecodeEx(encoded, offset, encodingLen, object);
-}
-
-ECode CASN1Implicit::DecodeEx2(
-    /* [in] */ IInputStream* is,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Type::DecodeEx2(is, object);
-}
-
-ECode CASN1Implicit::Verify(
-    /* [in] */ ArrayOf<Byte>* encoded)
-{
-    return ASN1Type::Verify(encoded);
-}
-
-ECode CASN1Implicit::VerifyEx(
-    /* [in] */ IInputStream* is)
-{
-    return ASN1Type::VerifyEx(is);
-}
-
-ECode CASN1Implicit::Encode(
-    /* [in] */ IInterface* object,
-    /* [out, callee] */ ArrayOf<Byte>** encode)
-{
-    return ASN1Type::Encode(object, encode);
-}
-
-ECode CASN1Implicit::DecodeEx3(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
-    Int32 tag;
-    bis->GetTag(&tag);
+    Int32 tag = ((CBerInputStream*)bis)->mTag;
     Boolean chk;
     if (CheckTag(tag, &chk), !chk) {
         // FIXME need look for tagging type
@@ -92,13 +41,14 @@ ECode CASN1Implicit::DecodeEx3(
     mType->GetId(&id);
     mType->GetConstrId(&constrId);
     if (mId == tag) {
-        bis->SetTag(id);
-    } else {
-        bis->SetTag(constrId);
+        ((CBerInputStream*)bis)->mTag = id;
+    }
+    else {
+        ((CBerInputStream*)bis)->mTag = constrId;
     }
     AutoPtr<IInterface> content;
-    mType->DecodeEx3(bis, (IInterface**)&content);
-    bis->SetContent(content);
+    mType->Decode(bis, (IInterface**)&content);
+    ((CBerInputStream*)bis)->mContent = content;
 
     if (((CBerInputStream*)bis)->mIsVerify) {
         return NOERROR;
@@ -124,13 +74,6 @@ ECode CASN1Implicit::CheckTag(
     return NOERROR;
 }
 
-ECode CASN1Implicit::GetDecodedObject(
-    /* [in] */ IBerInputStream* bis,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Type::GetDecodedObject(bis, object);
-}
-
 ECode CASN1Implicit::EncodeASN(
     /* [in] */ IBerOutputStream* bos)
 {
@@ -143,36 +86,11 @@ ECode CASN1Implicit::EncodeASN(
     return EncodeContent(bos);
 }
 
-ECode CASN1Implicit::EncodeContent(
-    /* [in] */ IBerOutputStream* bos)
-{
-   return mType->EncodeContent(bos);
-}
-
-ECode CASN1Implicit::SetEncodingContent(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return mType->SetEncodingContent(bos);
-}
-
-ECode CASN1Implicit::GetEncodedLength(
-    /* [in] */ IBerOutputStream* bos,
-    /* [out] */ Int32* length)
-{
-    return ASN1Type::GetEncodedLength(bos, length);
-}
-
-ECode CASN1Implicit::ToString(
-    /* [out] */ String* result)
-{
-    return ASN1Type::ToString(result);
-}
-
 ECode CASN1Implicit::constructor(
     /* [in] */ Int32 tagNumber,
     /* [in] */ IASN1Type* type)
 {
-    ASN1Type::Init(IASN1Constants::CLASS_CONTEXTSPECIFIC, tagNumber);
+    ASN1Type::constructor(IASN1Constants::CLASS_CONTEXTSPECIFIC, tagNumber);
 
     if ((IASN1Choice::Probe(type)) || (IASN1Any::Probe(type))) {
         // According to X.680:
@@ -202,6 +120,18 @@ ECode CASN1Implicit::constructor(
         mTaggingType = TAGGING_CONSTRUCTED;
     }
     return NOERROR;
+}
+
+ECode CASN1Implicit::EncodeContent(
+    /* [in] */ IBerOutputStream* out)
+{
+    return mType->EncodeContent(out);
+}
+
+ECode CASN1Implicit::SetEncodingContent(
+    /* [in] */ IBerOutputStream* out)
+{
+    return mType->SetEncodingContent(out);
 }
 
 } // namespace Asn1

@@ -1,16 +1,17 @@
 
 #include "CASN1Integer.h"
-#include <cmdef.h>
+#include "CBerInputStream.h"
+#include "CArrayOf.h"
+#include "CBigInteger.h"
+#include "CByte.h"
 
-using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
-using Elastos::Core::IByte;
 using Elastos::Core::CByte;
 using Elastos::Core::EIID_IByte;
-using Elastos::Math::IBigInteger;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IByte;
+using Elastos::Core::INumber;
 using Elastos::Math::CBigInteger;
-using Elastos::Math::IBigIntegerHelper;
-using Elastos::Math::CBigIntegerHelper;
 
 namespace Org {
 namespace Apache {
@@ -23,7 +24,9 @@ AutoPtr<IASN1Integer> CASN1Integer::ASN1 = InitStatic();
 CAR_OBJECT_IMPL(CASN1Integer)
 AutoPtr<IASN1Integer> CASN1Integer::InitStatic()
 {
-    return new CASN1Integer();
+    AutoPtr<IASN1Integer> ai;
+    CASN1Integer::New((IASN1Integer**)&ai);
+    return ai;
 }
 
 ECode CASN1Integer::GetInstance(
@@ -50,8 +53,8 @@ ECode CASN1Integer::ToIntValue(
         (*dec)[i] = elem;
     }
     AutoPtr<IBigInteger> bi;
-    CBigInteger::New(dec, (IBigInteger**)&bi);
-    return bi->Int32Value(intValue);
+    CBigInteger::New(*dec, (IBigInteger**)&bi);
+    return INumber::Probe(bi)->Int32Value(intValue);
 }
 
 ECode CASN1Integer::ToBigIntegerValue(
@@ -68,7 +71,7 @@ ECode CASN1Integer::ToBigIntegerValue(
         IByte::Probe(bt)->GetValue(&elem);
         (*dec)[i] = elem;
     }
-    return CBigInteger::New(dec, bigInteger);
+    return CBigInteger::New(*dec, bigInteger);
 }
 
 ECode CASN1Integer::FromIntValue(
@@ -76,10 +79,8 @@ ECode CASN1Integer::FromIntValue(
     /* [out] */ IInterface** fromIntValue)
 {
     VALIDATE_NOT_NULL(fromIntValue)
-    AutoPtr<IBigIntegerHelper> helper;
     AutoPtr<IBigInteger> bi;
-    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&helper);
-    helper->ValueOf(value, (IBigInteger**)&bi);
+    CBigInteger::ValueOf(value, (IBigInteger**)&bi);
     AutoPtr<ArrayOf<Byte> > bytesArray;
     bi->ToByteArray((ArrayOf<Byte>**)&bytesArray);
     AutoPtr<IArrayOf> arr;
@@ -87,69 +88,14 @@ ECode CASN1Integer::FromIntValue(
     for (Int32 i = 0; i < bytesArray->GetLength(); i++) {
         AutoPtr<IByte> bt;
         CByte::New((*bytesArray)[i], (IByte**)&bt);
-        arr->Put(i, bt.Get());
+        arr->Set(i, bt.Get());
     }
     *fromIntValue = arr.Get();
     REFCOUNT_ADD(*fromIntValue)
     return NOERROR;
 }
 
-
-ECode CASN1Integer::GetId(
-    /* [out] */ Int32* id)
-{
-    return ASN1Primitive::GetId(id);
-}
-
-ECode CASN1Integer::GetConstrId(
-    /* [out] */ Int32* constrId)
-{
-    return ASN1Primitive::GetConstrId(constrId);
-}
-
 ECode CASN1Integer::Decode(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Primitive::Decode(encoded, object);
-}
-
-ECode CASN1Integer::DecodeEx(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [in] */ Int32 offset,
-    /* [in] */ Int32 encodingLen,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Primitive::DecodeEx(encoded, offset, encodingLen, object);
-}
-
-ECode CASN1Integer::DecodeEx2(
-    /* [in] */ IInputStream* is,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Primitive::DecodeEx2(is, object);
-}
-
-ECode CASN1Integer::Verify(
-    /* [in] */ ArrayOf<Byte>* encoded)
-{
-    return ASN1Primitive::Verify(encoded);
-}
-
-ECode CASN1Integer::VerifyEx(
-    /* [in] */ IInputStream* is)
-{
-    return ASN1Primitive::VerifyEx(is);
-}
-
-ECode CASN1Integer::Encode(
-    /* [in] */ IInterface* object,
-    /* [out, callee] */ ArrayOf<Byte>** encode)
-{
-    return ASN1Primitive::Encode(object, encode);
-}
-
-ECode CASN1Integer::DecodeEx3(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
@@ -159,13 +105,6 @@ ECode CASN1Integer::DecodeEx3(
         return NOERROR;
     }
     return GetDecodedObject(bis, object);
-}
-
-ECode CASN1Integer::CheckTag(
-    /* [in] */ Int32 identifier,
-    /* [out] */ Boolean* checkTag)
-{
-    return ASN1Primitive::CheckTag(identifier, checkTag);
 }
 
 ECode CASN1Integer::GetDecodedObject(
@@ -183,17 +122,11 @@ ECode CASN1Integer::GetDecodedObject(
     for (Int32 i = 0; i < length; i++) {
         AutoPtr<IByte> bt;
         CByte::New((*bytesEncoded)[i], (IByte**)&bt);
-        arr->Put(i, bt.Get());
+        arr->Set(i, bt.Get());
     }
     *object = arr.Get();
     REFCOUNT_ADD(*object);
     return NOERROR;
-}
-
-ECode CASN1Integer::EncodeASN(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return ASN1Primitive::EncodeASN(bos);
 }
 
 ECode CASN1Integer::EncodeContent(
@@ -212,22 +145,9 @@ ECode CASN1Integer::SetEncodingContent(
     return bos->SetLength(size);
 }
 
-ECode CASN1Integer::GetEncodedLength(
-    /* [in] */ IBerOutputStream* bos,
-    /* [out] */ Int32* length)
-{
-    return ASN1Primitive::GetEncodedLength(bos, length);
-}
-
-ECode CASN1Integer::ToString(
-    /* [out] */ String* result)
-{
-    return ASN1Primitive::ToString(result);
-}
-
 ECode CASN1Integer::constructor()
 {
-    return ASN1Primitive::Init(IASN1Constants::TAG_INTEGER);
+    return ASN1Primitive::constructor(IASN1Constants::TAG_INTEGER);
 }
 
 } // namespace Asn1
