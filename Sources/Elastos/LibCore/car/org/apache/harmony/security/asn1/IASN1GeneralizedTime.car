@@ -7,6 +7,15 @@ module
     namespace Security {
     namespace Asn1 {
 
+    /**
+     * @Involve
+     * interface IASN1Time;
+     * interface IASN1StringType
+     * interface IASN1Type;
+     * interface IASN1Constants;
+     */
+    interface IASN1GeneralizedTime {}
+
     interface IASN1GeneralizedTimeHelper {
         GetInstance(
             [out] IASN1GeneralizedTime** instance);

@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_CBITSTRING_H__
 
 #include "_Org_Apache_Harmony_Security_Asn1_CBitString.h"
+#include "Object.h"
 
 namespace Org {
 namespace Apache {
@@ -19,7 +20,7 @@ public:
 
     CAR_INTERFACE_DECL()
 
-    CARAPI_(AutoPtr<ArrayOf<Byte> >) InitStatic();
+    static CARAPI_(AutoPtr<ArrayOf<Byte> >) InitStatic();
 
     CARAPI SetBytes(
         /* [in] */ ArrayOf<Byte>* bytes);

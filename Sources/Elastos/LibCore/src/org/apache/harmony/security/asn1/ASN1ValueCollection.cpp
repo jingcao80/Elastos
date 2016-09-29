@@ -1,7 +1,8 @@
 
 #include "ASN1ValueCollection.h"
-#include <Org.Apache.Harmony_server.h>
-#include <cmdef.h>
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Utility::ICollection;
 
 namespace Org {
 namespace Apache {
@@ -9,19 +10,14 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-ASN1ValueCollection::ASN1ValueCollection(
-    /* [in] */ Int32 tagNumber,
-    /* [in] */ IASN1Type* type)
-    : ASN1Constructed(tagNumber)
-{
-    mType = type;
-}
+ASN1ValueCollection::ASN1ValueCollection()
+{}
 
-ECode ASN1ValueCollection::Init(
+ECode ASN1ValueCollection::constructor(
     /* [in] */ Int32 tagNumber,
     /* [in] */ IASN1Type* type)
 {
-    ASN1Constructed::Init(tagNumber);
+    ASN1Constructed::constructor(tagNumber);
     mType = type;
     return NOERROR;
 }

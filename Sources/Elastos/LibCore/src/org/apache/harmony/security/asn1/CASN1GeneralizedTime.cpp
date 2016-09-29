@@ -1,9 +1,17 @@
 
 #include "CASN1GeneralizedTime.h"
-#include <cmdef.h>
+#include "CBerInputStream.h"
+#include "CoreUtils.h"
+#include "TimeZone.h"
+#include "elastos/utility/Locale.h"
+#include "CSimpleDateFormat.h"
 
-using Elastos::Text::ISimpleDateFormat;
+using Elastos::Core::CoreUtils;
 using Elastos::Text::CSimpleDateFormat;
+using Elastos::Text::IDateFormat;
+using Elastos::Text::ISimpleDateFormat;
+using Elastos::Utility::Locale;
+using Elastos::Utility::TimeZone;
 
 namespace Org {
 namespace Apache {
@@ -26,66 +34,12 @@ ECode CASN1GeneralizedTime::GetInstance(
     /* [out] */ IASN1GeneralizedTime** instance)
 {
     VALIDATE_NOT_NULL(instance)
-    *instance = sASN1;
+    *instance = IASN1GeneralizedTime::Probe(sASN1);
     REFCOUNT_ADD(*instance)
     return NOERROR;
 }
 
-ECode CASN1GeneralizedTime::GetId(
-    /* [out] */ Int32* id)
-{
-    return ASN1Time::GetId(id);
-}
-
-ECode CASN1GeneralizedTime::GetConstrId(
-    /* [out] */ Int32* constrId)
-{
-    return ASN1Time::GetConstrId(constrId);
-}
-
 ECode CASN1GeneralizedTime::Decode(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Time::Decode(encoded, object);
-}
-
-ECode CASN1GeneralizedTime::DecodeEx(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [in] */ Int32 offset,
-    /* [in] */ Int32 encodingLen,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Time::DecodeEx(encoded, offset, encodingLen, object);
-}
-
-ECode CASN1GeneralizedTime::DecodeEx2(
-    /* [in] */ IInputStream* is,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Time::DecodeEx2(is, object);
-}
-
-ECode CASN1GeneralizedTime::Verify(
-    /* [in] */ ArrayOf<Byte>* encoded)
-{
-    return ASN1Time::Verify(encoded);
-}
-
-ECode CASN1GeneralizedTime::VerifyEx(
-    /* [in] */ IInputStream* is)
-{
-    return ASN1Time::VerifyEx(is);
-}
-
-ECode CASN1GeneralizedTime::Encode(
-    /* [in] */ IInterface* object,
-    /* [out, callee] */ ArrayOf<Byte>** encode)
-{
-    return ASN1Time::Encode(object, encode);
-}
-
-ECode CASN1GeneralizedTime::DecodeEx3(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
@@ -94,27 +48,7 @@ ECode CASN1GeneralizedTime::DecodeEx3(
     if (((CBerInputStream*)bis)->mIsVerify) {
         return NOERROR;
     }
-    return GetDecodedObject(bis);
-}
-
-ECode CASN1GeneralizedTime::CheckTag(
-    /* [in] */ Int32 identifier,
-    /* [out] */ Boolean* checkTag)
-{
-    return ASN1Time::CheckTag(identifier, checkTag);
-}
-
-ECode CASN1GeneralizedTime::GetDecodedObject(
-    /* [in] */ IBerInputStream* bis,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Time::GetDecodedObject(bis, object);
-}
-
-ECode CASN1GeneralizedTime::EncodeASN(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return ASN1Time::EncodeASN(bos);
+    return GetDecodedObject(bis, object);
 }
 
 ECode CASN1GeneralizedTime::EncodeContent(
@@ -127,16 +61,14 @@ ECode CASN1GeneralizedTime::SetEncodingContent(
     /* [in] */ IBerOutputStream* bos)
 {
     AutoPtr<ISimpleDateFormat> sdf;
-    CSimpleDateFormat::New(GEN_PATTERN, (ISimpleDateFormat**)&sdf);
-    AutoPtr<ITimeZoneHelper> tzh;
+    CSimpleDateFormat::New(GEN_PATTERN, Locale::US, (ISimpleDateFormat**)&sdf);
     AutoPtr<ITimeZone> tz;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&tzh);
-    tzh->GetTimeZone(String("UTC"), (ITimeZone**)&tz);
-    sdf->SetTimeZone(tz);
+    TimeZone::GetTimeZone(String("UTC"), (ITimeZone**)&tz);
+    IDateFormat::Probe(sdf)->SetTimeZone(tz);
     AutoPtr<IInterface> content;
     bos->GetContent((IInterface**)&content);
     String temp;
-    sdf->FormatDate(IDate::Probe(content), &temp);
+    IDateFormat::Probe(sdf)->Format(IDate::Probe(content), &temp);
 
     // cut off trailing 0s
     Int32 nullId;
@@ -151,28 +83,14 @@ ECode CASN1GeneralizedTime::SetEncodingContent(
     }
 
     temp += "Z";
-    AutoPtr<ArrayOf<Byte> > ct;
-    temp.GetBytes((ArrayOf<Byte>**)&ct);
-    bos->SetContent(ct);
+    AutoPtr<ArrayOf<Byte> > ct = temp.GetBytes();
+    ((CBerInputStream*)bos)->mContent = CoreUtils::ConvertByteArray(ct);
     return bos->SetLength(ct->GetLength());
-}
-
-ECode CASN1GeneralizedTime::GetEncodedLength(
-    /* [in] */ IBerOutputStream* bos,
-    /* [out] */ Int32* length)
-{
-    return ASN1Time::GetEncodedLength(bos, length);
-}
-
-ECode CASN1GeneralizedTime::ToString(
-    /* [out] */ String* result)
-{
-    return ASN1Time::ToString(result);
 }
 
 ECode CASN1GeneralizedTime::constructor()
 {
-    return ASN1Time::Init(IASN1Constants::TAG_GENERALIZEDTIME);
+    return ASN1Time::constructor(IASN1Constants::TAG_GENERALIZEDTIME);
 }
 
 } // namespace Asn1

@@ -9,7 +9,13 @@ module
     namespace Security {
     namespace Asn1 {
 
-    interface IASN1Integer extends IASN1Primitive {}
+    /**
+     * @Involve
+     * class ASN1Primitive;
+     * interface IASN1Type;
+     * interface IASN1Constants;
+     */
+    interface IASN1Integer {}
 
     interface IASN1IntegerHelper {
         GetInstance(

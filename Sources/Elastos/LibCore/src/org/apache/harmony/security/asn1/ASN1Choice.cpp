@@ -1,11 +1,27 @@
 
-#include "CASN1Choice.h"
-#include <cmdef.h>
-#include <elastos/Slogger.h>
+#include "ASN1Choice.h"
+#include "CBerInputStream.h"
+#include "Arrays.h"
+#include "CArrayOf.h"
+#include "CBigInteger.h"
+#include "CTreeMap.h"
+#include "CoreUtils.h"
+#include "elastos/utility/logging/Slogger.h"
 
+using Elastos::Core::CArrayOf;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::INumber;
+using Elastos::Math::CBigInteger;
+using Elastos::Math::IBigInteger;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::CTreeMap;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::INavigableMap;
 using Elastos::Utility::Logging::Slogger;
 
-static const String TAG("CASN1Choice");
+static const String TAG("ASN1Choice");
 
 namespace Org {
 namespace Apache {
@@ -13,10 +29,11 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-ECode CASN1Choice::constructor(
+CAR_INTERFACE_IMPL(ASN1Choice, ASN1Type, IASN1Choice)
+ECode ASN1Choice::constructor(
     /* [in] */ ArrayOf<IASN1Type*>* asn1Type)
 {
-    ASN1Type(IASN1Constants::TAG_CHOICE); // has not tag number
+    ASN1Type::constructor(IASN1Constants::TAG_CHOICE); // has not tag number
 
     if (mType->GetLength() == 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -38,13 +55,13 @@ ECode CASN1Choice::constructor(
             // add all choice's identifiers
             //int[][] choiceToAdd = ((ASN1Choice) t).identifiers;
             AutoPtr<ArrayOf<IArrayOf*> > choiceToAdd =
-                ((CASN1Choice*)IASN1Choice::Probe(t.Get()))->mIdentifiers;
+                ((ASN1Choice*)IASN1Choice::Probe(t.Get()))->mIdentifiers;
             Int32 length;
             for (Int32 j = 0; j < ((*choiceToAdd)[0]->GetLength(&length), length); j++) {
                 Int32 identifier;
                 AutoPtr<IInterface> tmp;
                 (*choiceToAdd)[0]->Get(j, (IInterface**)&tmp);
-                IBigInteger::Probe(tmp)->Int32Value(&identifier);
+                INumber::Probe(tmp)->Int32Value(&identifier);
                 AddIdentifier(map, identifier, index);
             }
             continue;
@@ -72,7 +89,7 @@ ECode CASN1Choice::constructor(
     mIdentifiers = ArrayOf<IArrayOf*>::Alloc(2);
     CArrayOf::New(EIID_IInteger32, size, (IArrayOf**)&(*mIdentifiers)[0]);
     AutoPtr<ISet> set;
-    map->EntrySet((ISet**)&set);
+    map->GetEntrySet((ISet**)&set);
     AutoPtr<IIterator> it;
     set->GetIterator((IIterator**)&it);
 
@@ -80,59 +97,48 @@ ECode CASN1Choice::constructor(
         AutoPtr<IInterface> tmp;
         it->GetNext((IInterface**)&tmp);
         AutoPtr<IMapEntry> entry = IMapEntry::Probe(tmp);
-        AutoPtr<IBigInteger> identifier = entry.getKey();
+        AutoPtr<IInterface> identifier;
+        entry->GetKey((IInterface**)&identifier);
         Int32 val;
-        identifier->Int32Value(&val);
-        (*mIdentifiers)[0]->Set(i, val);
+        INumber::Probe(identifier)->Int32Value(&val);
+        (*mIdentifiers)[0]->Set(i, CoreUtils::Convert(val));
         tmp = NULL;
         entry->GetValue((IInterface**)&tmp);
-        IBigInteger::Probe(tmp)->Int32Value(&val);
-        (*mIdentifiers)[1]->Set(i, val);
+        INumber::Probe(tmp)->Int32Value(&val);
+        (*mIdentifiers)[1]->Set(i, CoreUtils::Convert(val));
     }
     mType = asn1Type;
     return NOERROR;
 }
 
 
-ECode CASN1Choice::CheckTag(
+ECode ASN1Choice::CheckTag(
     /* [in] */ Int32 identifier,
     /* [out] */ Boolean* checkTag)
 {
     VALIDATE_NOT_NULL(checkTag)
-    AutoPtr<IArrays> arr;
-    CArrays::AcquireSingleton((IArrays**)&arr);
-    Int32 length, index;
+    Int32 length = 0, index = 0;
     (*mIdentifiers)[0]->GetLength(&length);
     AutoPtr<ArrayOf<Int32> > tmp = ArrayOf<Int32>::Alloc(length);
-    for (Int32 i =0; i < length; i++) {
+    for (Int32 i = 0; i < length; i++) {
         AutoPtr<IInterface> elem;
         Int32 elemValue;
         (*mIdentifiers)[0]->Get(i, (IInterface**)&elem);
-        IBigInteger::Probe(elem)->Int32Value(&elemValue);
+        INumber::Probe(elem)->Int32Value(&elemValue);
         (*tmp)[i] = elemValue;
     }
-    arr->BinarySearchInt32(tmp, identifier, &index);
+    Arrays::BinarySearch(tmp, identifier, &index);
     *checkTag = index >= 0;
     return NOERROR;
 }
 
-ECode CASN1Choice::Decode(
+ECode ASN1Choice::Decode(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object)
-    Int32 index;
-    AutoPtr<IArrays> arr;
-    CArrays::AcquireSingleton((IArrays**)&arr);
-    Int32 length, index;
-    (*mIdentifiers)[0]->GetLength(&length);
-    AutoPtr<ArrayOf<Int32> > tmp = ArrayOf<Int32>::Alloc(length);
-    arr->BinarySearchInt32(tmp, identifier, &index);
-
-    Int32 tag;
-    bis->GetTag(&tag);
-    AutoPtr<IArrays> arr;
-    CArrays::AcquireSingleton((IArrays**)&arr);
+    *object = NULL;
+    Int32 tag = ((CBerInputStream*)bis)->mTag;
     Int32 length, index;
     (*mIdentifiers)[0]->GetLength(&length);
     AutoPtr<ArrayOf<Int32> > tmp = ArrayOf<Int32>::Alloc(length);
@@ -140,10 +146,10 @@ ECode CASN1Choice::Decode(
         AutoPtr<IInterface> elem;
         Int32 elemValue;
         (*mIdentifiers)[0]->Get(i, (IInterface**)&elem);
-        IBigInteger::Probe(elem)->Int32Value(&elemValue);
+        INumber::Probe(elem)->Int32Value(&elemValue);
         (*tmp)[i] = elemValue;
     }
-    arr->BinarySearchInt32(tmp, tag, &index);
+    Arrays::BinarySearch(tmp, tag, &index);
     if (index < 0) {
         Slogger::E(TAG, "Failed to decode ASN.1 choice type.  No alternatives "
             "were found for"/* + getClass().getName()*/);
@@ -152,52 +158,53 @@ ECode CASN1Choice::Decode(
 
     AutoPtr<IInterface> elem;
     (*mIdentifiers)[1]->Get(index, (IInterface**)&elem);
-    IBigInteger::Probe(elem)->Int32Value(&index);
+    INumber::Probe(elem)->Int32Value(&index);
 
     AutoPtr<IInterface> content;
-    (*mType)[index]->DecodeEx3(bis, (IInterface**)&content);
-    bis->SetContent(content);
+    (*mType)[index]->Decode(bis, (IInterface**)&content);
+    ((CBerInputStream*)bis)->mContent = content;
 
     // set index for getDecodedObject method
-    bis->SetChoiceIndex(index);
+    ((CBerInputStream*)bis)->mChoiceIndex = index;
 
     if (((CBerInputStream*)bis)->mIsVerify) {
         return NOERROR;
     }
-    return GetDecodedObject(bis);
+    return GetDecodedObject(bis, object);
 }
 
-ECode CASN1Choice::EncodeASN(
+ECode ASN1Choice::EncodeASN(
     /* [in] */ IBerOutputStream* bos)
 {
     return EncodeContent(bos);
 }
 
-ECode CASN1Choice::EncodeContent(
+ECode ASN1Choice::EncodeContent(
     /* [in] */ IBerOutputStream* bos)
 {
-    bos->EncodeChoice(this);
+    return bos->EncodeChoice(this);
 }
 
-ECode CASN1Choice::SetEncodingContent(
+ECode ASN1Choice::SetEncodingContent(
     /* [in] */ IBerOutputStream* bos)
 {
     return bos->GetChoiceLength(this);
 }
 
-ECode CASN1Choice::AddIdentifier(
+ECode ASN1Choice::AddIdentifier(
     /* [in] */ INavigableMap* map,
     /* [in] */ Int32 identifier,
     /* [in] */ Int32 index)
 {
     AutoPtr<IBigInteger> id, idx;
     AutoPtr<IInterface> ret;
-    CBigInteger::New(identifier, (IBigInteger**)&id);
-    CBigInteger::New(index, (IBigInteger**)&idx);
+    CBigInteger::ValueOf(identifier, (IBigInteger**)&id);
+    CBigInteger::ValueOf(index, (IBigInteger**)&idx);
     map->Put(id.Get(), idx.Get(), (IInterface**)&ret);
     if (NULL != ret) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+    return NOERROR;
 }
 
 } // namespace Asn1

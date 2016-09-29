@@ -13,15 +13,19 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-CarClass(CASN1Any), public ASN1Type
+CarClass(CASN1Any)
+    , public ASN1Type
+    , public IASN1Any
 {
 public:
     CAR_OBJECT_DECL()
 
+    CAR_INTERFACE_DECL()
+
     static CARAPI GetInstance(
         /* [out] */ IASN1Any** instance);
 
-    AutoPtr<IASN1Any> Init();
+    static CARAPI_(AutoPtr<IASN1Any>) Init();
 
     CARAPI GetId(
         /* [out] */ Int32* id);
@@ -33,27 +37,27 @@ public:
         /* [in] */ ArrayOf<Byte>* encoded,
         /* [out] */ IInterface** object);
 
-    CARAPI DecodeEx(
+    CARAPI Decode(
         /* [in] */ ArrayOf<Byte>* encoded,
         /* [in] */ Int32 offset,
         /* [in] */ Int32 encodingLen,
         /* [out] */ IInterface** object);
 
-    CARAPI DecodeEx2(
+    CARAPI Decode(
         /* [in] */ IInputStream* is,
         /* [out] */ IInterface** object);
 
     CARAPI Verify(
         /* [in] */ ArrayOf<Byte>* encoded);
 
-    CARAPI VerifyEx(
+    CARAPI Verify(
         /* [in] */ IO::IInputStream* is);
 
     CARAPI Encode(
         /* [in] */ IInterface* object,
         /* [out, callee] */ ArrayOf<Byte>** encode);
 
-    CARAPI DecodeEx3(
+    CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);
 
@@ -63,7 +67,7 @@ public:
 
     CARAPI GetDecodedObject(
         /* [in] */ IBerInputStream* bis,
-        /* [out, callee] */ ArrayOf<Byte>** object);
+        /* [out] */ IInterface** object);
 
     CARAPI EncodeASN(
         /* [in] */ IBerOutputStream* bos);

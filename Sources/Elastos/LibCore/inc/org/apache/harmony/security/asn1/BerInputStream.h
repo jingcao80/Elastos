@@ -202,7 +202,6 @@ public:
 
     Int32 mOidElement;
 
-protected:
     AutoPtr< ArrayOf<Byte> > mBuffer;
 
     /**

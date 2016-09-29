@@ -7,7 +7,7 @@ module
     namespace Security {
     namespace Asn1 {
 
-    interface IASN1Any extends IASN1Type {}
+    interface IASN1Any {}
 
     interface IASN1AnyHelper {
         GetInstance(

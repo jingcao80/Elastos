@@ -1,6 +1,9 @@
 
 #include "CASN1UTCTime.h"
+#include "elastos/utility/Locale.h"
 #include <cmdef.h>
+
+using Elastos::Utility::Locale;
 
 // FIXME support only one format for encoding, do we need others?
 //
@@ -129,7 +132,7 @@ ECode CASN1UTCTime::SetEncodingContent(
     /* [in] */ IBerOutputStream* bos)
 {
     AutoPtr<ISimpleDateFormat> sdf;
-    CSimpleDateFormat::New(UTC_PATTERN, (ISimpleDateFormat**)&sdf);
+    CSimpleDateFormat::New(UTC_PATTERN, Locale::US, (ISimpleDateFormat**)&sdf);
     AutoPtr<ITimeZoneHelper> tzh;
     AutoPtr<ITimeZone> tz;
     CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&tzh);

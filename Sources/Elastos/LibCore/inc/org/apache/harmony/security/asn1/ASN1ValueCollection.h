@@ -21,15 +21,15 @@ namespace Asn1 {
  * @see <a href="http://asn1.elibel.tm.fr/en/standards/index.htm">ASN.1</a>
  */
 class ASN1ValueCollection
-    : public ASN1Constructed {
+    : public ASN1Constructed
+{
 public:
-    ASN1ValueCollection(
+    ASN1ValueCollection();
+
+    CARAPI constructor(
         /* [in] */ Int32 tagNumber,
         /* [in] */ IASN1Type* type);
 
-    CARAPI Init(
-        /* [in] */ Int32 tagNumber,
-        /* [in] */ IASN1Type* type);
     /**
      * Provides an object's values to be encoded
      *

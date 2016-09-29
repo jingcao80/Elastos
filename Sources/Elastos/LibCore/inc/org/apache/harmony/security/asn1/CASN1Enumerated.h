@@ -27,63 +27,19 @@ public:
     static CARAPI GetInstance(
         /* [out] */ IASN1Enumerated** instance);
 
-    CARAPI DecodeEx3(
+    CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);
 
     CARAPI GetDecodedObject(
         /* [in] */ IBerInputStream* bis,
-        /* [out, callee] */ ArrayOf<Byte>** object);
+        /* [out, callee] */ IInterface** object);
 
     CARAPI EncodeContent(
         /* [in] */ IBerOutputStream* bos);
 
     CARAPI SetEncodingContent(
         /* [in] */ IBerOutputStream* bos);
-
-    CARAPI GetId(
-        /* [out] */ Int32* id);
-
-    CARAPI GetConstrId(
-        /* [out] */ Int32* constrId);
-
-    CARAPI Decode(
-        /* [in] */ ArrayOf<Byte>* encoded,
-        /* [out] */ IInterface** object);
-
-    CARAPI DecodeEx(
-        /* [in] */ ArrayOf<Byte>* encoded,
-        /* [in] */ Int32 offset,
-        /* [in] */ Int32 encodingLen,
-        /* [out] */ IInterface** object);
-
-    CARAPI DecodeEx2(
-        /* [in] */ IInputStream* is,
-        /* [out] */ IInterface** object);
-
-    CARAPI Verify(
-        /* [in] */ ArrayOf<Byte>* encoded);
-
-    CARAPI VerifyEx(
-        /* [in] */ IInputStream* is);
-
-    CARAPI Encode(
-        /* [in] */ IInterface* object,
-        /* [out, callee] */ ArrayOf<Byte>** encode);
-
-    CARAPI CheckTag(
-        /* [in] */ Int32 identifier,
-        /* [out] */ Boolean* checkTag);
-
-    CARAPI EncodeASN(
-        /* [in] */ IBerOutputStream* bos);
-
-    CARAPI GetEncodedLength(
-        /* [in] */ IBerOutputStream* bos,
-        /* [out] */ Int32* length);
-
-    CARAPI ToString(
-        /* [out] */ String* result);
 
     CARAPI constructor();
 
