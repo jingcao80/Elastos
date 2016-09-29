@@ -112,6 +112,9 @@ protected:
         /* [in] */ IViewGroupLayoutParams* p,
         /* [out] */ Boolean* result);
 
+    CARAPI _SetChildrenDrawingOrderEnabled(
+        /* [in] */ Boolean enabled);
+
 public:
     CARAPI GetSuperObject(
         /* [out] */ ICalculatorPadLayoutSuperObject** ppSuperObject);

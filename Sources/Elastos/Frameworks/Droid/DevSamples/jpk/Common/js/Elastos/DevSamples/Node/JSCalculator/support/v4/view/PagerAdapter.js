@@ -136,9 +136,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void startUpdate(ViewGroup container) {
         StartUpdate(container) {
-            elog("====PagerAdapter::StartUpdate====");
+            elog("====PagerAdapter::StartUpdate====TODO====");
 //         startUpdate((View) container);
-//     }
         }
 
 //     /**
@@ -154,9 +153,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public Object instantiateItem(ViewGroup container, int position) {
         InstantiateItem(container, position) {
-            elog("====PagerAdapter::InstantiateItem====");
+            elog("====PagerAdapter::InstantiateItem====TODO====");
 //         return instantiateItem((View) container, position);
-//     }
         }
 
 //     /**
@@ -171,9 +169,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void destroyItem(ViewGroup container, int position, Object object) {
         DestroyItem(container, position, object) {
-            elog("====PagerAdapter::DestroyItem====");
+            elog("====PagerAdapter::DestroyItem====TODO====");
 //         destroyItem((View) container, position, object);
-//     }
         }
 
 //     /**
@@ -187,9 +184,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void setPrimaryItem(ViewGroup container, int position, Object object) {
         SetPrimaryItem(container, position, object) {
-            elog("====PagerAdapter::SetPrimaryItem====");
+            elog("====PagerAdapter::SetPrimaryItem====TODO====");
 //         setPrimaryItem((View) container, position, object);
-//     }
         }
 
 //     /**
@@ -201,9 +197,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void finishUpdate(ViewGroup container) {
         FinishUpdate(container) {
-            elog("====PagerAdapter::FinishUpdate====");
+            elog("====PagerAdapter::FinishUpdate====TODO====");
 //         finishUpdate((View) container);
-//     }
         }
 
 //     /**
@@ -215,8 +210,7 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void startUpdate(View container) {
         StartUpdate(container) {
-            elog("====PagerAdapter::StartUpdate====");
-//     }
+            elog("====PagerAdapter::StartUpdate====TODO====");
         }
 
 //     /**
@@ -234,10 +228,9 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public Object instantiateItem(View container, int position) {
         InstantiateItem(container, position) {
-            elog("====PagerAdapter::InstantiateItem====");
+            elog("====PagerAdapter::InstantiateItem====TODO====");
 //         throw new UnsupportedOperationException(
 //                 "Required method instantiateItem was not overridden");
-//     }
         }
 
 //     /**
@@ -254,9 +247,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void destroyItem(View container, int position, Object object) {
         DestroyItem(container, position, object) {
-            elog("====PagerAdapter::DestroyItem====");
+            elog("====PagerAdapter::DestroyItem====TODO====");
 //         throw new UnsupportedOperationException("Required method destroyItem was not overridden");
-//     }
         }
 
 //     /**
@@ -272,8 +264,7 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void setPrimaryItem(View container, int position, Object object) {
         SetPrimaryItem(container, position, object) {
-            elog("====PagerAdapter::SetPrimaryItem====");
-//     }
+            elog("====PagerAdapter::SetPrimaryItem====TODO====");
         }
 
 //     /**
@@ -287,8 +278,7 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void finishUpdate(View container) {
         FinishUpdate(container) {
-            elog("====PagerAdapter::FinishUpdate====");
-//     }
+            elog("====PagerAdapter::FinishUpdate====TODO====");
         }
 
 //     /**
@@ -302,7 +292,7 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public abstract boolean isViewFromObject(View view, Object object);
         IsViewFromObject(view, object){
-            elog("====PagerAdapter::IsViewFromObject====");
+            elog("====PagerAdapter::IsViewFromObject====TODO====");
         }
 
 //     /**
@@ -313,9 +303,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public Parcelable
         SaveState() {
-            elog("====PagerAdapter::SaveState====");
+            elog("====PagerAdapter::SaveState====TODO====");
 //         return null;
-//     }
         }
 
 //     /**
@@ -327,8 +316,7 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void restoreState(Parcelable state, ClassLoader loader) {
         RestoreState(state, loader) {
-            elog("====PagerAdapter::RestoreState====");
-//     }
+            elog("====PagerAdapter::RestoreState====TODO====");
         }
 
 //     /**
@@ -348,9 +336,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public int getItemPosition(Object object) {
         GetItemPosition(object) {
-            elog("====PagerAdapter::GetItemPosition====");
+            elog("====PagerAdapter::GetItemPosition====TODO====");
 //         return POSITION_UNCHANGED;
-//     }
         }
 
 //     /**
@@ -359,9 +346,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void notifyDataSetChanged() {
         NotifyDataSetChanged() {
-            elog("====PagerAdapter::NotifyDataSetChanged====");
+            elog("====PagerAdapter::NotifyDataSetChanged====TODO====");
 //         mObservable.notifyChanged();
-//     }
         }
 
 //     /**
@@ -371,9 +357,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void registerDataSetObserver(DataSetObserver observer) {
         RegisterDataSetObserver(observer) {
-            elog("====PagerAdapter::RegisterDataSetObserver====");
+            elog("====PagerAdapter::RegisterDataSetObserver====TODO====");
 //         mObservable.registerObserver(observer);
-//     }
         }
 
 //     /**
@@ -383,9 +368,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public void unregisterDataSetObserver(DataSetObserver observer) {
         UnregisterDataSetObserver(observer) {
-            elog("====PagerAdapter::UnregisterDataSetObserver====");
+            elog("====PagerAdapter::UnregisterDataSetObserver====TODO====");
 //         mObservable.unregisterObserver(observer);
-//     }
         }
 
 //     /**
@@ -399,9 +383,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public CharSequence getPageTitle(int position) {
         GetPageTitle(position) {
-            elog("====PagerAdapter::GetPageTitle====");
+            elog("====PagerAdapter::GetPageTitle====TODO====");
 //         return null;
-//     }
         }
 
 //     /**
@@ -413,9 +396,8 @@ module.exports = function(aoElastos, aoActivity){
 //      */
 //     public float getPageWidth(int position) {
         GetPageWidth(position) {
-            elog("====PagerAdapter::GetPageWidth====");
+            elog("====PagerAdapter::GetPageWidth====TODO====");
 //         return 1.f;
-//     }
         }
 // }
     }   //class PagerAdapter

@@ -60,65 +60,73 @@ module.exports = function(aoElastos, aoActivity){
 // import android.view.MenuItem;
 // import android.view.MotionEvent;
 // import android.widget.EditText;
+class EditText {}
 // import android.widget.TextView;
 
 // public class CalculatorEditText extends EditText {
-    function JSClass(host) {
-        this.mHost = host;
-    }
-    var _pt = JSClass.prototype;
+class _CalculatorEditText extends EditText {
 
 //     private final static ActionMode.Callback NO_SELECTION_ACTION_MODE_CALLBACK =
 //             new ActionMode.Callback() {
-        JSClass.NO_SELECTION_ACTION_MODE_CALLBACK = {
+    static get NO_SELECTION_ACTION_MODE_CALLBACK() {
+        if (CalculatorEditText._NO_SELECTION_ACTION_MODE_CALLBACK_) return CalculatorEditText._NO_SELECTION_ACTION_MODE_CALLBACK;
+        CalculatorEditText._NO_SELECTION_ACTION_MODE_CALLBACK = new class _temp {
+
 //         @Override
 //         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            onActionItemClicked : function(mode, item) {
+            onActionItemClicked(mode, item) {
 //             return false;
                 return false;
-//         }
-            },
+            }
 
 //         @Override
 //         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            onCreateActionMode : function (mode, menu) {
+            onCreateActionMode(mode, menu) {
 //             // Prevents the selection action mode on double tap.
 //             return false;
                 return false;
-//         }
-            },
+            }
 
 //         @Override
 //         public void onDestroyActionMode(ActionMode mode) {
-            onDestroyActionMode : function(mode) {
-//         }
-            },
+            onDestroyActionMode(mode) {
+            }
 
 //         @Override
 //         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            onPrepareActionMode : function(mode, menu) {
+            onPrepareActionMode(mode, menu) {
 //             return false;
                 return false;
-//         }
             }
-//     };
-        }
+        }();
+
+        return CalculatorEditText._NO_SELECTION_ACTION_MODE_CALLBACK;
+    }   //NO_SELECTION_ACTION_MODE_CALLBACK
 
 //     private final float mMaximumTextSize;
-        var mMaximumTextSize;
 //     private final float mMinimumTextSize;
-        var mMinimumTextSize;
 //     private final float mStepTextSize;
-        var mStepTextSize;
 
 //     // Temporary objects for use in layout methods.
 //     private final Paint mTempPaint = new TextPaint();
-        var mTempPaint = Droid_New("Elastos.Droid.Text.CTextPaint");
+    get mTempPaint() {
+        if (this._mTempPaint_) return this._mTempPaint;
+        this._mTempPaint_ = true;
+        this._mTempPaint = Droid_New("Elastos.Droid.Text.CTextPaint");
+        return this._mTempPaint;
+    }
+
 //     private final Rect mTempRect = new Rect();
-        var mTempRect = Droid_New("Elastos.Droid.Graphics.CRect");
+    get mTempRect() {
+        if (this._mTempRect_) return this._mTempRect;
+        this._mTempRect_ = true;
+        this._mTempRect = Droid_New("Elastos.Droid.Graphics.CRect");
+        return this._mTempRect;
+    }
 
 //     private int mWidthConstraint = -1;
-        var mWidthConstraint = -1;
+    get mWidthConstraint() {return -1;}
+
 //     private OnTextSizeChangeListener mOnTextSizeChangeListener;
 
 //     public CalculatorEditText(Context context) {
@@ -130,11 +138,11 @@ module.exports = function(aoElastos, aoActivity){
 //     }
 
 //     public CalculatorEditText(Context context, AttributeSet attrs, int defStyle) {
-        _pt.OnCreate = function(_this, context, attrs, defStyle) {
+    OnCreate(_this, context, attrs, defStyle) {
             elog(FullClassName + "========OnCreate begin========");
 
-elog("========test000========");
-CObject.showMethods(_this, "etText");
+            attrs = attrs || null;
+            defStyle = defStyle || 0;
 
             //_super = _this.GetSuperObject();
 
@@ -181,12 +189,11 @@ CObject.showMethods(_this, "etText");
             _this.SetMinHeight(_this.GetLineHeight() + _this.GetCompoundPaddingBottom() + _this.GetCompoundPaddingTop());
 
             elog(FullClassName + "========OnCreate end========");
-//     }
-        }
+    }
 
 //     @Override
 //     public boolean onTouchEvent(MotionEvent event) {
-        _pt.OnTouchEvent = function(_this, event, result) {
+    OnTouchEvent(_this, event, result) {
             elog(FullClassName + "========OnTouchEvent begin========");
 
 //         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -200,12 +207,11 @@ CObject.showMethods(_this, "etText");
             result.data = _super.OnTouchEvent(event);
 
             elog(FullClassName + "========OnTouchEvent end========");
-//     }
-        }
+    }
 
 //     @Override
 //     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        _pt.OnMeasure = function(_this, widthMeasureSpec, heightMeasureSpec) {
+    OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
             elog(FullClassName + "========OnMeasure begin========");
 
 //         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -220,12 +226,11 @@ CObject.showMethods(_this, "etText");
             this.SetTextSize(_this, TypedValue__COMPLEX_UNIT_PX, this.GetVariableTextSize(_this, getText().toString()));
 
             elog(FullClassName + "========OnMeasure end========");
-//     }
-        }
+    }
 
 //     @Override
 //     public Parcelable onSaveInstanceState() {
-        _pt.OnSaveInstanceState = function(_this, result) {
+    OnSaveInstanceState(_this, result) {
             elog(FullClassName + "========OnSaveInstanceState begin========");
 
 //         super.onSaveInstanceState();
@@ -237,12 +242,11 @@ CObject.showMethods(_this, "etText");
             result.data = null;
 
             elog(FullClassName + "========OnSaveInstanceState end========");
-//     }
-        }
+    }
 
 //     @Override
 //     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
-        _pt.OnTextChanged = function(_this, text, start, lengthBefore, lengthAfter) {
+    OnTextChanged(_this, text, start, lengthBefore, lengthAfter) {
             elog(FullClassName + "========OnTextChanged begin========");
 
 //         super.onTextChanged(text, start, lengthBefore, lengthAfter);
@@ -264,12 +268,11 @@ CObject.showMethods(_this, "etText");
             this.SetTextSize(_this, TypedValue__COMPLEX_UNIT_PX, this.GetVariableTextSize(_this, text.ToString()));
 
             elog(FullClassName + "========OnTextChanged end========");
-//     }
-        }
+    }
 
 //     @Override
 //     public void setTextSize(int unit, float size) {
-        _pt.SetTextSize = function(_this, unit, size) {
+    SetTextSize(_this, unit, size) {
             elog(FullClassName + "========SetTextSize begin========");
 
 //         final float oldTextSize = getTextSize();
@@ -285,18 +288,16 @@ CObject.showMethods(_this, "etText");
 //         }
             }
             elog(FullClassName + "========SetTextSize end========");
-//     }
-        }
+    }
 
 //     public void setOnTextSizeChangeListener(OnTextSizeChangeListener listener) {
-        _pt.SetOnTextSizeChangeListener = function(listener) {
+    SetOnTextSizeChangeListener(listener) {
 //         mOnTextSizeChangeListener = listener;
             this.mOnTextSizeChangeListener = listener;
-//     }
-        }
+    }
 
 //     public float getVariableTextSize(String text) {
-        _pt.GetVariableTextSize = function(_this, text) {
+    GetVariableTextSize(_this, text) {
             elog(FullClassName + "========GetVariableTextSize begin========");
 
 //         if (mWidthConstraint < 0 || mMaximumTextSize <= mMinimumTextSize) {
@@ -337,12 +338,11 @@ CObject.showMethods(_this, "etText");
 
 //         return lastFitTextSize;
             return lastFitTextSize;
-//     }
-        }
+    }
 
 //     @Override
 //     public int getCompoundPaddingTop() {
-        _pt.GetCompoundPaddingTop = function(_this, result) {
+    GetCompoundPaddingTop(_this, result) {
             elog(FullClassName + "========GetCompoundPaddingTop begin========");
 
 //         // Measure the top padding from the capital letter height of the text instead of the top,
@@ -358,12 +358,11 @@ CObject.showMethods(_this, "etText");
             result.data = _super.GetCompoundPaddingTop() - Math.min(_this.GetPaddingTop(), paddingOffset);
 
             elog(FullClassName + "========GetCompoundPaddingTop end========");
-//     }
-        }
+    }
 
 //     @Override
 //     public int getCompoundPaddingBottom() {
-        _pt.GetCompoundPaddingBottom = function(_this, result) {
+    GetCompoundPaddingBottom(_this, result) {
             elog(FullClassName + "========GetCompoundPaddingBottom begin========");
 
 //         // Measure the bottom padding from the baseline of the text instead of the bottom, but don't
@@ -376,114 +375,49 @@ CObject.showMethods(_this, "etText");
             result.data = _super.GetCompoundPaddingBottom() - Math.min(_this.GetPaddingBottom(), fontMetrics.GetDescent());
 
             elog(FullClassName + "========GetCompoundPaddingBottom end========");
-//     }
-        }
+    }
 
 //     public interface OnTextSizeChangeListener {
 //         void onTextSizeChanged(TextView textView, float oldSize);
 //     }
-// }
+}   //class _CalculatorEditText
 
 //--------.java----end----
 
-    //_super = aoCustomControl;
-    //var _super = aoActivity;
-    var Super = function(aoSuper) {
-        this._super = aoSuper;
-    }
-    var _spt = Super.prototype;
-    _spt.OnCreate = function(context, attrs, defStyle){
-        this._super._constructor(context, attrs, defStyle);
-    }
-    _spt.OnTouchEvent = function(event, result) {
-            this._super._OnTouchEvent(event, result);
-    }
-    _spt.OnSaveInstanceState = function(result) {
-            this._super._OnTouchEvent(result);
-    }
-    _spt.SetTextSize = function(unit, size) {
-            this._super._SetTextSize(unit, size);
-    }
-    _spt.GetCompoundPaddingTop = function(result) {
-            this._super._GetCompoundPaddingTop(result);
-    }
-    _spt.GetCompoundPaddingBottom = function(result) {
-            this._super._GetCompoundPaddingBottom(result);
-    }
-    _spt.OnMeasure = function(widthMeasureSpec, heightMeasureSpec) {
-            this._super._OnMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-    _spt.OnTextChanged = function(text, start, lengthBefore, lengthAfter) {
-            this._super._OnTextChanged(text, start, lengthBefore, lengthAfter);
-    }
-    var _super;
-
-    var oThis = new JSClass(aoActivity);
-
-    var oCallback = {
-        OnCreate : function(_this, context, attrs, defStyle) {
-            _super = new Super(_this);
-            oThis.OnCreate(_this, context, attrs, defStyle);
-        },
-        OnTouchEvent : function(_this, event, result) {
-            oThis.OnTouchEvent(_this, event, result);
-        },
-        OnSaveInstanceState : function(_this, result) {
-            oThis.OnSaveInstanceState(_this, result);
-        },
-        SetTextSize : function(_this, unit, size) {
-            oThis.SetTextSize(_this, unit, size);
-        },
-        GetCompoundPaddingTop : function(_this, result) {
-            oThis.GetCompoundPaddingTop(_this, result);
-        },
-        GetCompoundPaddingBottom : function(_this, result) {
-            oThis.GetCompoundPaddingBottom(_this, result);
-        },
-        OnMeasure : function(_this, widthMeasureSpec, heightMeasureSpec) {
-            oThis.OnMeasure(_this, widthMeasureSpec, heightMeasureSpec);
-        },
-        OnTextChanged : function(_this, text, start, lengthBefore, lengthAfter) {
-            oThis.OnTextChanged(_this, text, start, lengthBefore, lengthAfter);
-        },
+class CalculatorEditText extends _CalculatorEditText {
+    OnCreate(_this, context, attrs, defStyle) {
+        elog('====CalculatorEditText.js====::OnCreate.begin====');
+        _this._constructor(context, attrs, defStyle);
+        elog('====CalculatorEditText.js====::OnCreate.end====');
     }
 
-    //return oCallback;
-
-    class CalculatorEditText {
-        OnCreate(_this, context, attrs, defStyle) {
-            elog('====CalculatorEditText.js====::OnCreate.begin====');
-            _this._constructor(context, attrs, defStyle);
-            elog('====CalculatorEditText.js====::OnCreate.end====');
-        }
-
-        OnTextChanged(_this, text, start, lengthBefore, lengthAfter) {
-            elog('====CalculatorEditText.js====::OnTextChanged.begin====');
-            _this._OnTextChanged(text, start, lengthBefore, lengthAfter);
-            elog('====CalculatorEditText.js====::OnTextChanged.end====');
-        }
-
-        OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
-            elog('====CalculatorEditText.js====::OnMeasure.begin====');
-            _this._OnMeasure(widthMeasureSpec, heightMeasureSpec);
-            elog('====CalculatorEditText.js====::OnMeasure.end====');
-        }
-
-        GetCompoundPaddingTop(_this, result) {
-            elog('====CalculatorEditText.js====::GetCompoundPaddingTop.begin====');
-            result.data = _this._GetCompoundPaddingTop();
-            elog('====CalculatorEditText.js====::GetCompoundPaddingTop.end====');
-        }
-
-        GetCompoundPaddingBottom(_this, result) {
-            elog('====CalculatorEditText.js====::GetCompoundPaddingBottom.begin====');
-            result.data = _this._GetCompoundPaddingBottom();
-            elog('====CalculatorEditText.js====::GetCompoundPaddingBottom.end====');
-        }
+    OnTextChanged(_this, text, start, lengthBefore, lengthAfter) {
+        elog('====CalculatorEditText.js====::OnTextChanged.begin====');
+        _this._OnTextChanged(text, start, lengthBefore, lengthAfter);
+        elog('====CalculatorEditText.js====::OnTextChanged.end====');
     }
 
-    return new CalculatorEditText();
+    OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
+        elog('====CalculatorEditText.js====::OnMeasure.begin====');
+        _this._OnMeasure(widthMeasureSpec, heightMeasureSpec);
+        elog('====CalculatorEditText.js====::OnMeasure.end====');
+    }
 
- };  //module.exports
+    GetCompoundPaddingTop(_this, result) {
+        elog('====CalculatorEditText.js====::GetCompoundPaddingTop.begin====');
+        result.data = _this._GetCompoundPaddingTop();
+        elog('====CalculatorEditText.js====::GetCompoundPaddingTop.end====');
+    }
 
- elog("====CalculatorEditText.js====end======");
+    GetCompoundPaddingBottom(_this, result) {
+        elog('====CalculatorEditText.js====::GetCompoundPaddingBottom.begin====');
+        result.data = _this._GetCompoundPaddingBottom();
+        elog('====CalculatorEditText.js====::GetCompoundPaddingBottom.end====');
+    }
+}   //class CalculatorEditText
+
+return new CalculatorEditText();
+
+};  //module.exports
+
+elog("====CalculatorEditText.js====end======");

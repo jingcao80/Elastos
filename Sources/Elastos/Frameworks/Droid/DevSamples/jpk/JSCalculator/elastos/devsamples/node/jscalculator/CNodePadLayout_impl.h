@@ -209,7 +209,7 @@ ECode JSActName::_CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p,
         /* [out] */ Boolean* result)
 {
-    //return ViewGroup::CheckLayoutParams(p, result);
+    *result = ViewGroup::CheckLayoutParams(p);
     return NOERROR;
 }
 ECode  JSActName::CheckLayoutParams(
@@ -226,10 +226,17 @@ ECode  JSActName::CheckLayoutParams(
         ec = mListener->CheckLayoutParams(_this, p, result);
     }
     else {
-        //ec = ViewGroup::CheckLayoutParams(p, result);
+        *result = ViewGroup::CheckLayoutParams(p);
     }
 
     return ec;
+}
+
+ECode JSActName::_SetChildrenDrawingOrderEnabled(
+        /* [in] */ Boolean enabled)
+{
+    ViewGroup::SetChildrenDrawingOrderEnabled(enabled);
+    return NOERROR;
 }
 
 //----------------------------------------------

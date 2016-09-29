@@ -329,6 +329,9 @@ module
         _CheckLayoutParams(
             [in] IViewGroupLayoutParams* p,
             [out] Boolean* result);
+
+        _SetChildrenDrawingOrderEnabled(
+            [in] Boolean enabled);
     }
 
     [local]
@@ -483,6 +486,9 @@ module
         _GenerateLayoutParams(
             [in] IAttributeSet* attrs,
             [out] IViewGroupLayoutParams** params);
+
+        _SetChildrenDrawingOrderEnabled(
+            [in] Boolean enabled);
     }
 
     [local]

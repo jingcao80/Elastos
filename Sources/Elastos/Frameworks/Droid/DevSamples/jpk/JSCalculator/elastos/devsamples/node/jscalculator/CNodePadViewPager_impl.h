@@ -781,6 +781,13 @@ ECode JSActName::GenerateLayoutParams(
     return ec;
 }
 
+ECode JSActName::_SetChildrenDrawingOrderEnabled(
+        /* [in] */ Boolean enabled)
+{
+    ViewGroup::SetChildrenDrawingOrderEnabled(enabled);
+    return NOERROR;
+}
+
 //------------------------------------------
 
 ECode JSActName::GetSuperObject(

@@ -257,6 +257,9 @@ public:
         /* [in] */ IAttributeSet* attrs,
         /* [out] */ IViewGroupLayoutParams** params);
 
+    CARAPI _SetChildrenDrawingOrderEnabled(
+        /* [in] */ Boolean enabled);
+
 //------------------------------------------
 
 public:
