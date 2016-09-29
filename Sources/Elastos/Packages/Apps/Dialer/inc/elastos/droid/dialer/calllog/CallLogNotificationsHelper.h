@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGNOTIFICATIONSHELPER_H__
 #define __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGNOTIFICATIONSHELPER_H__
 
-#include "Elastos.Droid.Content.h"
+#include "_Elastos.Droid.Dialer.h"
 #include "elastos/core/Object.h"
 
 using Elastos::Droid::Content::IContext;

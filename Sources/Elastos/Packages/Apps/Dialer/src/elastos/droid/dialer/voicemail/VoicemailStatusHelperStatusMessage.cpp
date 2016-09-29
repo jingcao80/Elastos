@@ -6,38 +6,27 @@ namespace Droid {
 namespace Dialer {
 namespace Voicemail {
 
-CAR_INTERFACE_IMPL(VoicemailStatusHelperStatusMessage, Object, IVoicemailStatusHelperStatusMessage);
-
-ECode VoicemailStatusHelperStatusMessage::constructor(
+VoicemailStatusHelperStatusMessage::VoicemailStatusHelperStatusMessage(
     /* [in] */ const String& sourcePackage,
     /* [in] */ Int32 callLogMessageId,
     /* [in] */ Int32 callDetailsMessageId,
     /* [in] */ Int32 actionMessageId,
     /* [in] */ IUri* actionUri)
+    : mSourcePackage(sourcePackage)
+    , mCallLogMessageId(callLogMessageId)
+    , mCallDetailsMessageId(callDetailsMessageId)
+    , mActionMessageId(actionMessageId)
+    , mActionUri(actionUri)
+{}
+
+Boolean VoicemailStatusHelperStatusMessage::ShowInCallLog()
 {
-    mSourcePackage = sourcePackage;
-    mCallLogMessageId = callLogMessageId;
-    mCallDetailsMessageId = callDetailsMessageId;
-    mActionMessageId = actionMessageId;
-    mActionUri = actionUri;
-    return NOERROR;
+    return mCallLogMessageId != -1;
 }
 
-ECode VoicemailStatusHelperStatusMessage::ShowInCallLog(
-    /* [out] */ Boolean* result)
+Boolean VoicemailStatusHelperStatusMessage::ShowInCallDetails()
 {
-    VALIDATE_NOT_NULL(result);
-    *result = mCallLogMessageId != -1;
-    return NOERROR;
-}
-
-/** Whether this message should be shown in the call details page. */
-ECode VoicemailStatusHelperStatusMessage::ShowInCallDetails(
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result);
-    *result = mCallDetailsMessageId != -1;
-    return NOERROR;
+    return mCallDetailsMessageId != -1;
 }
 
 } // Voicemail

@@ -1,0 +1,32 @@
+module
+{
+
+    using interface Elastos.Droid.Net.ICursor;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace Database {
+
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IAsyncQueryHandler
+     */
+    interface INoNullCursorAsyncQueryHandler {
+
+        OnNotNullableQueryComplete(
+            [in] Int32 token,
+            [in] IInterface* cookie,
+            [in] ICursor* cursor);
+
+    }
+
+    } // Database
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}

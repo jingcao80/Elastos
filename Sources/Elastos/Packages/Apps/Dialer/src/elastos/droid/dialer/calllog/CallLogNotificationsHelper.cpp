@@ -1,13 +1,13 @@
 
-#include "elastos/droid/dialer/calllog/CallLogNotificationsHelper.h"
-#include "_Elastos.Apps.Dialer.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Telecom.h"
+#include "elastos/droid/dialer/calllog/CallLogNotificationsHelper.h"
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Dialer::CallLog::ECLSID_CCallLogNotificationsService;
 using Elastos::Droid::Telecom::ITelecomManager;
-using Elastos::Apps::Dialer::CallLog::ECLSID_CCallLogNotificationsService;
 
 namespace Elastos {
 namespace Droid {
@@ -19,7 +19,7 @@ void CallLogNotificationsHelper::RemoveMissedCallNotifications(
 {
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
-    ITelecomManager* telecomManager = ITelecomManager::Probe(service);
+    AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
     telecomManager->CancelMissedCallsNotification();
 }
 

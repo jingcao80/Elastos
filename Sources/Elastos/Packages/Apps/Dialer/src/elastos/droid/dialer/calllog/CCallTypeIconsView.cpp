@@ -1,13 +1,16 @@
 
-#include "elastos/droid/dialer/calllog/CCallTypeIconsView.h"
-#include "R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/dialer/calllog/CCallTypeIconsView.h"
+#include "elastos/droid/contacts/common/util/BitmapUtil.h"
 #include "elastos/core/CoreUtils.h"
 #include "elastos/core/Math.h"
+#include "R.h"
 
+using Elastos::Droid::Contacts::Common::Util::BitmapUtil;
+using Elastos::Droid::Dialer::CallLog::EIID_ICallTypeIconsView
 using Elastos::Droid::Graphics::IBitmapHelper;
 using Elastos::Droid::Graphics::CBitmapHelper;
 using Elastos::Droid::Graphics::IBitmapFactory;
@@ -35,24 +38,23 @@ CCallTypeIconsView::Resources::Resources(
     AutoPtr<IResources> r;
     context->GetResources((IResources**)&r);
 
-    r->GetDrawable(R::drawable::ic_call_arrow, (IDrawable**)&mIncoming);
+    r->GetDrawable(Elastos::Droid::Dialer::R::drawable::ic_call_arrow, (IDrawable**)&mIncoming);
     Int32 color;
-    r->GetColor(R::color::answered_call, &color);
+    r->GetColor(Elastos::Droid::Dialer::R::color::answered_call, &color);
     mIncoming->SetColorFilter(color, Elastos::Droid::Graphics::PorterDuffMode_MULTIPLY);
 
-    // Create a rotated instance of the call arrow for outgoing ICalls::
-    assert(0 && "TODO");
-    // mOutgoing = BitmapUtil::GetRotatedDrawable(r, R::drawable::ic_call_arrow, 180);
+    // Create a rotated instance of the call arrow for outgoing calls.
+    mOutgoing = BitmapUtil::GetRotatedDrawable(r, Elastos::Droid::Dialer::R::drawable::ic_call_arrow, 180);
     mOutgoing->SetColorFilter(color, Elastos::Droid::Graphics::PorterDuffMode_MULTIPLY);
 
     // Need to make a copy of the arrow drawable, otherwise the same instance colored
     // above will be recolored here.
-    r->GetDrawable(R::drawable::ic_call_arrow, (IDrawable**)&mMissed);
+    r->GetDrawable(Elastos::Droid::Dialer::R::drawable::ic_call_arrow, (IDrawable**)&mMissed);
     mMissed->Mutate();
-    r->GetColor(R::color::missed_call, &color);
+    r->GetColor(Elastos::Droid::Dialer::R::color::missed_call, &color);
     mMissed->SetColorFilter(color, Elastos::Droid::Graphics::PorterDuffMode_MULTIPLY);
 
-    r->GetDrawable(R::drawable::ic_call_voicemail_holo_dark, (IDrawable**)&mVoicemail);
+    r->GetDrawable(Elastos::Droid::Dialer::R::drawable::ic_call_voicemail_holo_dark, (IDrawable**)&mVoicemail);
 
     // Get the video call icon, scaled to match the height of the call arrows.
     // We want the video call icon to be the same height as the call arrows, while keeping
@@ -61,7 +63,7 @@ CCallTypeIconsView::Resources::Resources(
     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&bitmapFactory);
     AutoPtr<IBitmap> videoIcon;
     bitmapFactory->DecodeResource(r,
-            R::drawable::ic_videocam_wht_24dp, (IBitmap**)&videoIcon);
+            Elastos::Droid::Dialer::R::drawable::ic_videocam_wht_24dp, (IBitmap**)&videoIcon);
     Int32 scaledHeight;
     mMissed->GetIntrinsicHeight(&scaledHeight);
     Int32 width, height;
@@ -78,21 +80,23 @@ CCallTypeIconsView::Resources::Resources(
     AutoPtr<IBitmapDrawable> bitmapDrawable;
     CBitmapDrawable::New(r, scaled, (IBitmapDrawable**)&bitmapDrawable);
     mVideoCall = IDrawable::Probe(bitmapDrawable);
-    r->GetColor(R::color::dialtacts_secondary_text_color, &color);
+    r->GetColor(Elastos::Droid::Dialer::R::color::dialtacts_secondary_text_color, &color);
     mVideoCall->SetColorFilter(color, Elastos::Droid::Graphics::PorterDuffMode_MULTIPLY);
 
-    r->GetDimensionPixelSize(R::dimen::call_log_icon_margin, &mIconMargin);
+    r->GetDimensionPixelSize(Elastos::Droid::Dialer::R::dimen::call_log_icon_margin, &mIconMargin);
 }
 
 //=================================================================
 // CCallTypeIconsView
 //=================================================================
-CAR_INTERFACE_IMPL(CCallTypeIconsView, View, ICallTypeIconsView);
+CAR_INTERFACE_IMPL(CCallTypeIconsView, View, ICallTypeIconsView)
 
-CAR_OBJECT_IMPL(CCallTypeIconsView);
+CAR_OBJECT_IMPL(CCallTypeIconsView)
 
 CCallTypeIconsView::CCallTypeIconsView()
     : mShowVideo(FALSE)
+    , mWidth(0)
+    , mHeight(0)
 {
     AutoPtr<IArrayList> list;
     CArrayList::New(3, (IArrayList**)&list);
@@ -161,7 +165,7 @@ ECode CCallTypeIconsView::SetShowVideo(
 ECode CCallTypeIconsView::IsVideoShown(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     *result = mShowVideo;
     return NOERROR;
 }
@@ -169,7 +173,7 @@ ECode CCallTypeIconsView::IsVideoShown(
 ECode CCallTypeIconsView::GetCount(
     /* [out] */ Int32* count)
 {
-    VALIDATE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count)
     mCallTypes->GetSize(count);
     return NOERROR;
 }
@@ -178,7 +182,7 @@ ECode CCallTypeIconsView::GetCallType(
     /* [in] */ Int32 index,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IInterface> type;
     mCallTypes->Get(index, (IInterface**)&type);
     *result = CoreUtils::Unbox(IInteger32::Probe(type));

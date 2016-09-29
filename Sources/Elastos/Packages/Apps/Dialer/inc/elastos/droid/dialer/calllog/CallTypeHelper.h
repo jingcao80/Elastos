@@ -4,10 +4,10 @@
 
 #include "_Elastos.Droid.Dialer.h"
 #include <elastos/core/Object.h>
-#include "Elastos.Droid.Content.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Core::IInteger32;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -17,26 +17,21 @@ namespace CallLog {
 /**
  * Helper class to perform operations related to call types.
  */
-class CallTypeHelper
-    : public Object
-    , public ICallTypeHelper
+class CallTypeHelper : public Object
 {
 public:
-    CAR_INTERFACE_DECL();
-
-    CARAPI constructor(
+    CallTypeHelper(
         /* [in] */ IResources* resources);
 
     /** Returns the text used to represent the given call type. */
-    CARAPI GetCallTypeText(
+    CARAPI_(AutoPtr<ICharSequence>) GetCallTypeText(
         /* [in] */ Int32 callType,
         /* [in] */ Boolean isVideoCall,
         /* [out] */ ICharSequence** text);
 
     /** Returns the color used to highlight the given call type, null if not highlight is needed. */
-    CARAPI GetHighlightedColor(
-        /* [in] */ Int32 callType,
-        /* [out] */ IInteger32** result);
+    CARAPI_(AutoPtr<IInteger32>) GetHighlightedColor(
+        /* [in] */ Int32 callType);
 
     static CARAPI_(Boolean) IsMissedCallType(
         /* [in] */ Int32 callType);

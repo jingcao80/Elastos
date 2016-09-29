@@ -20,7 +20,7 @@ namespace Database {
  * This is an abstract cursor class that handles a lot of the common code
  * that all cursors need to deal with and is provided for convenience reasons.
  */
-class AbstractCursor
+class ECO_PUBLIC AbstractCursor
     : public Object
     , public IAbstractCursor
     , public ICrossProcessCursor
@@ -28,7 +28,7 @@ class AbstractCursor
     , public ICloseable
 {
 protected:
-    class SelfContentObserver : public ContentObserver
+    class ECO_LOCAL SelfContentObserver : public ContentObserver
     {
     public:
         SelfContentObserver();

@@ -21,8 +21,7 @@ namespace Dialer {
 /**
  * Encapsulates the views that are used to display the details of a phone call in the call log.
  */
-class PhoneCallDetailsViews
-    : public Object
+class PhoneCallDetailsViews : public Object
 {
 public:
     /**

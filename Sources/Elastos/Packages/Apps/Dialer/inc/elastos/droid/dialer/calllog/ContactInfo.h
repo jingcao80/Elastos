@@ -39,9 +39,9 @@ public:
         /* [out] */ String* info);
 
 public:
-    static const AutoPtr<ContactInfo> EMPTY; // = new ContactInfo();
+    static const AutoPtr<ContactInfo> EMPTY;
 
-    static const String GEOCODE_AS_LABEL; // = "";
+    static const String GEOCODE_AS_LABEL;
 
     AutoPtr<IUri> mLookupUri;
     String mLookupKey;

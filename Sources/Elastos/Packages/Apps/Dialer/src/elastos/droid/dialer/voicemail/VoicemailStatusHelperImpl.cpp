@@ -1,8 +1,15 @@
 
-#include "elastos/droid/dialer/voicemail/VoicemailStatusHelperImpl.h"
 #include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "elastos/droid/contacts/common/util/UriUtils.h"
+#include "elastos/droid/dialer/voicemail/VoicemailStatusHelperImpl.h"
+#include "R.h"
 
+using Elastos::Droid::Contacts::Common::Util::UriUtils;
+using Elastos::Droid::Dialer::Voicemail::EIID_IVoicemailStatusHelper;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Provider::IVoicemailContractStatus;
+using Elastos::Core::EIID_IComparator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
@@ -17,40 +24,31 @@ namespace Voicemail {
 // VoicemailStatusHelperImpl::Action
 //================================================================
 Action VoicemailStatusHelperImpl::Action::NONE(-1);
-Action VoicemailStatusHelperImpl::Action::CALL_VOICEMAIL(R::string::voicemail_status_action_call_server);
-Action VoicemailStatusHelperImpl::Action::CONFIGURE_VOICEMAIL(R::string::voicemail_status_action_configure);
+Action VoicemailStatusHelperImpl::Action::CALL_VOICEMAIL(Elastos::Droid::Dialer::R::string::voicemail_status_action_call_server);
+Action VoicemailStatusHelperImpl::Action::CONFIGURE_VOICEMAIL(Elastos::Droid::Dialer::R::string::voicemail_status_action_configure);
 
-CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl::Action, Object, IVoicemailStatusHelperImplAction);
-
-VoicemailStatusHelperImpl::Action::Action(
-    /* [in] */ Int32 messageId)
-    : mMessageId(messageId)
-{}
-
-ECode VoicemailStatusHelperImpl::Action::GetMessageId(
-    /* [out] */ Int32* id)
+Int32 VoicemailStatusHelperImpl::Action::GetMessageId()
 {
-    VALIDATE_NOT_NULL(id);
-    *id = mMessageId;
-    return NOERROR;
+    return mMessageId;
 }
+
 
 //================================================================
 // VoicemailStatusHelperImpl::OverallState
 //================================================================
 OverallState VoicemailStatusHelperImpl::OverallState::NO_CONNECTION(0,
-        &Action::CALL_VOICEMAIL, R::string::voicemail_status_voicemail_not_available,
-        R::string::voicemail_status_audio_not_available);
+        &Action::CALL_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_voicemail_not_available,
+        Elastos::Droid::Dialer::R::string::voicemail_status_audio_not_available);
 OverallState VoicemailStatusHelperImpl::OverallState::NO_DATA(1,
-        &Action::CALL_VOICEMAIL, R::string::voicemail_status_voicemail_not_available,
-        R::string::voicemail_status_audio_not_available);
+        &Action::CALL_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_voicemail_not_available,
+        Elastos::Droid::Dialer::R::string::voicemail_status_audio_not_available);
 OverallState VoicemailStatusHelperImpl::OverallState::MESSAGE_WAITING(2,
-        &Action::CALL_VOICEMAIL, R::string::voicemail_status_messages_waiting,
-        R::string::voicemail_status_audio_not_available);
+        &Action::CALL_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_messages_waiting,
+        Elastos::Droid::Dialer::R::string::voicemail_status_audio_not_available);
 OverallState VoicemailStatusHelperImpl::OverallState::NO_NOTIFICATIONS(3,
-        &Action::CALL_VOICEMAIL, R::string::voicemail_status_voicemail_not_available);
+        &Action::CALL_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_voicemail_not_available);
 OverallState VoicemailStatusHelperImpl::OverallState::INVITE_FOR_CONFIGURATION(4,
-        &Action::CONFIGURE_VOICEMAIL, R::string::voicemail_status_configure_voicemail);
+        &Action::CONFIGURE_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_configure_voicemail);
 OverallState VoicemailStatusHelperImpl::OverallState::NO_DETAILED_NOTIFICATION(
         5, &Action::NONE, -1);
 OverallState VoicemailStatusHelperImpl::OverallState::NOT_CONFIGURED(
@@ -64,9 +62,11 @@ VoicemailStatusHelperImpl::OverallState::OverallState(
     /* [in] */ Int32 priority,
     /* [in] */ Action* action,
     /* [in] */ Int32 callLogMessageId)
-{
-    OverallState(priority, action, callLogMessageId, -1);
-}
+    : mPriority(priority)
+    , mAction(action)
+    , mCallLogMessageId(callLogMessageId)
+    , mCallDetailsMessageId(-1)
+{}
 
 VoicemailStatusHelperImpl::OverallState::OverallState(
     /* [in] */ Int32 priority,
@@ -99,62 +99,49 @@ Int32 VoicemailStatusHelperImpl::OverallState::GetCallDetailsMessageId()
     return mCallDetailsMessageId;
 }
 
-//================================================================
-// VoicemailStatusHelperImpl::MessageStatusWithPriority
-//================================================================
-VoicemailStatusHelperImpl::MessageStatusWithPriority::MessageStatusWithPriority(
-    /* [in] */ IVoicemailStatusHelperStatusMessage* message,
-    /* [in] */ Int32 priority)
-    : mMessage(message)
-    , mPriority(priority)
-{}
 
 //================================================================
 // VoicemailStatusHelperImpl::MyComparator
 //================================================================
-CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl::MyComparator, Object, IComparator);
-
-VoicemailStatusHelperImpl::MyComparator::MyComparator(
-    /* [in] */ VoicemailStatusHelperImpl* host)
-    : mHost(host)
-{}
+CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl::MyComparator, Object, IComparator)
 
 ECode VoicemailStatusHelperImpl::MyComparator::Compare(
     /* [in] */ IInterface* msg1,
     /* [in] */ IInterface* msg2,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
 
     *result = ((MessageStatusWithPriority*)msg1)->mPriority
             - ((MessageStatusWithPriority*)msg2)->mPriority;
     return NOERROR;
 }
 
+
 //================================================================
 // VoicemailStatusHelperImpl
 //================================================================
 
-const Int32 VoicemailStatusHelperImpl::SOURCE_PACKAGE_INDEX = 0;
-const Int32 VoicemailStatusHelperImpl::CONFIGURATION_STATE_INDEX = 1;
-const Int32 VoicemailStatusHelperImpl::DATA_CHANNEL_STATE_INDEX = 2;
-const Int32 VoicemailStatusHelperImpl::NOTIFICATION_CHANNEL_STATE_INDEX = 3;
-const Int32 VoicemailStatusHelperImpl::SETTINGS_URI_INDEX = 4;
-const Int32 VoicemailStatusHelperImpl::VOICEMAIL_ACCESS_URI_INDEX = 5;
-const Int32 VoicemailStatusHelperImpl::NUM_COLUMNS = 6;
-
-AutoPtr<ArrayOf<String> > CreatePROJECTION()
+static AutoPtr<ArrayOf<String> > CreatePROJECTION()
 {
     AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(NUM_COLUMNS);
-    projection->Set(SOURCE_PACKAGE_INDEX, IVoicemailContractStatus::SOURCE_PACKAGE);
-    projection->Set(CONFIGURATION_STATE_INDEX, IVoicemailContractStatus::CONFIGURATION_STATE);
-    projection->Set(DATA_CHANNEL_STATE_INDEX, IVoicemailContractStatus::DATA_CHANNEL_STATE);
-    projection->Set(NOTIFICATION_CHANNEL_STATE_INDEX, IVoicemailContractStatus::NOTIFICATION_CHANNEL_STATE);
-    projection->Set(SETTINGS_URI_INDEX, IVoicemailContractStatus::SETTINGS_URI);
-    projection->Set(VOICEMAIL_ACCESS_URI_INDEX, IVoicemailContractStatus::VOICEMAIL_ACCESS_URI);
+    (*projection)[SOURCE_PACKAGE_INDEX] = IVoicemailContractStatus::SOURCE_PACKAGE;
+    (*projection)[CONFIGURATION_STATE_INDEX] = IVoicemailContractStatus::CONFIGURATION_STATE;
+    (*projection)[DATA_CHANNEL_STATE_INDEX] = IVoicemailContractStatus::DATA_CHANNEL_STATE;
+    (*projection)[NOTIFICATION_CHANNEL_STATE_INDEX] = IVoicemailContractStatus::NOTIFICATION_CHANNEL_STATE;
+    (*projection)[SETTINGS_URI_INDEX] = IVoicemailContractStatus::SETTINGS_URI;
+    (*projection)[VOICEMAIL_ACCESS_URI_INDEX] = IVoicemailContractStatus::VOICEMAIL_ACCESS_URI;
+    return projection;
 }
-
 const AutoPtr<ArrayOf<String> > VoicemailStatusHelperImpl::PROJECTION = CreatePROJECTION();
+
+const Int32 VoicemailStatusHelperImpl::SOURCE_PACKAGE_INDEX;
+const Int32 VoicemailStatusHelperImpl::CONFIGURATION_STATE_INDEX;
+const Int32 VoicemailStatusHelperImpl::DATA_CHANNEL_STATE_INDEX;
+const Int32 VoicemailStatusHelperImpl::NOTIFICATION_CHANNEL_STATE_INDEX;
+const Int32 VoicemailStatusHelperImpl::SETTINGS_URI_INDEX;
+const Int32 VoicemailStatusHelperImpl::VOICEMAIL_ACCESS_URI_INDEX;
+const Int32 VoicemailStatusHelperImpl::NUM_COLUMNS;
 
 CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl, Object, IVoicemailStatusHelperImpl);
 
@@ -162,22 +149,22 @@ ECode VoicemailStatusHelperImpl::GetStatusMessages(
     /* [in] */ ICursor* cursor,
     /* [out] */ IList** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
 
     AutoPtr<IList> messages;
     CArrayList::New((IList**)&messages);
-    cursor->MoveToPosition(-1);
     Boolean succeeded;
+    cursor->MoveToPosition(-1, &succeeded);
     while(cursor->MoveToNext(&succeeded), succeeded) {
         AutoPtr<MessageStatusWithPriority> message = GetMessageForStatusEntry(cursor);
         if (message != NULL) {
-            messages->Add((IInterface*)message);
+            messages->Add((IInterface*)(IObject*)message);
         }
     }
     // Finally reorder the messages by their priority.
     AutoPtr<IList> list = ReorderMessages(messages);
     *result = list;
-    REFCOUNT_ADD(*result);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -185,10 +172,10 @@ ECode VoicemailStatusHelperImpl::GetNumberActivityVoicemailSources(
     /* [in] */ ICursor* cursor,
     /* [out] */ Int32* number)
 {
-    VALIDATE_NOT_NULL(number);
+    VALIDATE_NOT_NULL(number)
     Int32 count = 0;
-    cursor->MoveToPosition(-1);
     Boolean succeeded;
+    cursor->MoveToPosition(-1, &succeeded);
     while(cursor->MoveToNext(&succeeded), succeeded) {
         if (IsVoicemailSourceActive(cursor)) {
             ++count;
@@ -202,19 +189,18 @@ Boolean VoicemailStatusHelperImpl::IsVoicemailSourceActive(
     /* [in] */ ICursor* cursor)
 {
     String str;
-    cursor->GetString(SOURCE_PACKAGE_INDEX, &str);
     Int32 index;
-    cursor->GetInt32(CONFIGURATION_STATE_INDEX, &index);
-    return !str.IsNull()
-            && index == IVoicemailContractStatus::CONFIGURATION_STATE_OK;
+    return (cursor->GetString(SOURCE_PACKAGE_INDEX, &str), !str.IsNull())
+            && (cursor->GetInt32(CONFIGURATION_STATE_INDEX, &index), index == IVoicemailContractStatus::CONFIGURATION_STATE_OK);
 }
 
 AutoPtr<IList> VoicemailStatusHelperImpl::ReorderMessages(
     /* [in] */ IList* messageWrappers)
 {
+    AutoPtr<IComparator> com = (IComparator*)new MyComparator(this);
     AutoPtr<ICollections> collections;
     CCollections::AcquireSingleton((ICollections**)&collections);
-    collections->Sort(messageWrappers, new MyComparator(this))
+    collections->Sort(messageWrappers, com);
     AutoPtr<IList> reorderMessages;
     CArrayList::New((IList**)&reorderMessages);
     // Copy the ordered message objects into the final list.
@@ -224,7 +210,8 @@ AutoPtr<IList> VoicemailStatusHelperImpl::ReorderMessages(
     while (it->HasNext(&result), result) {
         AutoPtr<IInterface> messageWrapper;
         it->GetNext((IInterface**)&messageWrapper);
-        reorderMessages->Add(((MessageStatusWithPriority*)messageWrapper)->mMessage);
+        AutoPtr<MessageStatusWithPriority> priority = (MessageStatusWithPriority*)(IObject*)messageWrapper.Get();
+        reorderMessages->Add((IObject*)priority->mMessage);
     }
     return reorderMessages;
 }
@@ -260,25 +247,19 @@ AutoPtr<MessageStatusWithPriority> VoicemailStatusHelperImpl::GetMessageForStatu
     else if (action == &Action::CONFIGURE_VOICEMAIL) {
         String str;
         cursor->GetString(SETTINGS_URI_INDEX, &str);
-        assert(0 && "TODO");
-        // actionUri = UriUtils::ParseUriOrNull(str);
+        actionUri = UriUtils::ParseUriOrNull(str);
         // If there is no settings URI, there is no point in showing the notification.
         if (actionUri == NULL) {
             return NULL;
         }
     }
 
-    Int32 callLogMessageId, callLogDetailsMessageId;
-    overallState->GetCallLogMessageId(&callLogMessageId);
-    overallState->GetCallDetailsMessageId(&callLogDetailsMessageId);
-    Int32 messageId;
-    action->GetMessageId(&messageId);
-    AutoPtr<IVoicemailStatusHelperStatusMessage> statusMessage = new StatusMessage(
-            sourcePackage, callLogMessageId, callLogDetailsMessageId, messageId, actionUri);
-    Int32 priority;
-    overallState->GetPriority(&priority);
-    return new MessageStatusWithPriority(
-            (IVoicemailStatusHelperStatusMessage*)statusMessage, priority);
+    AutoPtr<VoicemailStatusHelperStatusMessage> statusMessage
+            = new VoicemailStatusHelperStatusMessage(sourcePackage,
+                    overallState->GetCallLogMessageId(),
+                    overallState->GetCallDetailsMessageId(), action->GetMessageId(),
+                    actionUri);
+    return new MessageStatusWithPriority(statusMessage, overallState->GetPriority());
 }
 
 AutoPtr<OverallState> VoicemailStatusHelperImpl::GetOverallState(

@@ -1,5 +1,26 @@
 
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Text.h"
 #include "elastos/droid/dialer/PhoneCallDetailsHelper.h"
+#include "elastos/droid/dialer/calllog/ContactInfo.h"
+#include "elastos/droid/dialer/util/DialerUtils.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "R.h"
+
+using Elastos::Droid::Dialer::Calllog::ContactInfo;
+using Elastos::Droid::Dialer::Util::DialerUtils;
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Provider::CContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::Format::IDateUtils;
+using Elastos::Droid::Text::Format::CDateUtils;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::CString;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -11,46 +32,39 @@ PhoneCallDetailsHelper::PhoneCallDetailsHelper(
     /* [in] */ IResources* resources,
     /* [in] */ CallTypeHelper* callTypeHelper,
     /* [in] */ PhoneNumberUtilsWrapper* phoneUtils)
+    : mCurrentTimeMillisForTest(0)
 {
     CArrayList::New((ArrayList**)&mDescriptionItems);
     mResources = resources;
     mPhoneNumberUtilsWrapper = phoneUtils;
-    CPhoneNumberDisplayHelper::New(mPhoneNumberUtilsWrapper, resources,
-            (IPhoneNumberDisplayHelper**)&mPhoneNumberHelper);
-    return NOERROR;
+    mPhoneNumberHelper = new PhoneNumberDisplayHelper(mPhoneNumberUtilsWrapper, resources);
 }
 
-ECode PhoneCallDetailsHelper::SetPhoneCallDetails(
+void PhoneCallDetailsHelper::SetPhoneCallDetails(
     /* [in] */ PhoneCallDetailsViews* views,
     /* [in] */ PhoneCallDetails* details)
 {
-    PhoneCallDetailsViews* pcViews = (PhoneCallDetailsViews*)views;
-    CPhoneCallDetails* cpcDetails = (CPhoneCallDetails*)details;
-
     // Display up to a given number of icons.
-    pcViews->mCallTypeIcons->Clear();
-    Int32 count = details.callTypes.length;
+    views->mCallTypeIcons->Clear();
+    Int32 count = details->mCallTypes->GetLength();
     Boolean isVoicemail = FALSE;
     for (Int32 index = 0; index < count && index < MAX_CALL_TYPE_ICONS; ++index) {
-        pcViews->mCallTypeIcons->Add(cpcDetails->mCallTypes[index]);
+        views->mCallTypeIcons->Add((*details->mCallTypes)[index]);
         if (index == 0) {
-            isVoicemail = cpcDetails->mCallTypes[index] == ICalls::VOICEMAIL_TYPE;
+            isVoicemail = (*details->mCallTypes)[index] == ICalls::VOICEMAIL_TYPE;
         }
     }
 
     // Show the video icon if the call had video enabled.
-    pcViews->mCallTypeIcons->SetShowVideo(
-            (cpcDetails->mFeatures & ICalls::FEATURES_VIDEO) == ICalls::FEATURES_VIDEO);
-    pcViews->mCallTypeIcons->RequestLayout();
-    pcViews->mCallTypeIcons->SetVisibility(IView::VISIBLE);
+    views->mCallTypeIcons->SetShowVideo(
+            (details->mFeatures & ICalls::FEATURES_VIDEO) == ICalls::FEATURES_VIDEO);
+    views->mCallTypeIcons->RequestLayout();
+    views->mCallTypeIcons->SetVisibility(IView::VISIBLE);
 
     // Show the total call count only if there are more than the maximum number of icons.
     AutoPtr<IInteger32> callCount;
     if (count > MAX_CALL_TYPE_ICONS) {
         CInteger32::New(count, (IInteger32**)&callCount);
-    }
-    else {
-        callCount = NULL;
     }
 
     AutoPtr<ICharSequence> callLocationAndDate = GetCallLocationAndDate(details);
@@ -59,37 +73,36 @@ ECode PhoneCallDetailsHelper::SetPhoneCallDetails(
     SetCallCountAndDate(views, callCount, callLocationAndDate);
 
     // set the account icon if it exists
-    if (cpcDetails->mAccountIcon != null) {
-        pcViews->mCallAccountIcon->SetVisibility(IView::VISIBLE);
-        pcViews->mCallAccountIcon->SetImageDrawable(cpcDetails->mAccountIcon);
+    AutoPtr<IView> callAccountIcon = IView::Probe(views->mCallAccountIcon);
+    if (details->mAccountIcon != NULL) {
+        callAccountIcon->SetVisibility(IView::VISIBLE);
+        callAccountIcon->SetImageDrawable(details->mAccountIcon);
     }
     else {
-        pcViews->mCallAccountIcon->SetVisibility(IView::GONE);
+        callAccountIcon->SetVisibility(IView::GONE);
     }
 
     AutoPtr<ICharSequence> nameText;
-    AutoPtr<ICharSequence> displayNumber;
-    mPhoneNumberHelper->GetDisplayNumber(cpcDetails->mNumber,
-                cpcDetails->mNumberPresentation, cpcDetails->mFormattedNumber,
-                (ICharSequence**)&displayNumber);
-    if (TextUtils::IsEmpty(cpcDetails->mName)) {
+    AutoPtr<ICharSequence> displayNumber = mPhoneNumberHelper->GetDisplayNumber(details->mNumber,
+                details->mNumberPresentation, details->mFormattedNumber);
+    if (TextUtils::IsEmpty(details->mName)) {
         nameText = displayNumber;
         // We have a real phone number as "nameView" so make it always LTR
-        pcViews->mNameView->SetTextDirection(IView::TEXT_DIRECTION_LTR);
+        views->mNameView->SetTextDirection(IView::TEXT_DIRECTION_LTR);
     }
     else {
-        nameText = cpcDetails->mName;
+        nameText = details->mName;
     }
 
-    pcViews->mNameView->SetText(nameText);
+    viewsviews->mNameView->SetText(nameText);
 
-    if (isVoicemail && !TextUtils::isEmpty(cpcDetails->mTranscription)) {
-        pcViews->mVoicemailTranscriptionView->SetText(cpcDetails->mTranscription);
-        pcViews->mVoicemailTranscriptionView->SetVisibility(IView::VISIBLE);
+    if (isVoicemail && !TextUtils::isEmpty(details->mTranscription)) {
+        views->mVoicemailTranscriptionView->SetText(details->mTranscription);
+        IView::Probe(views->mVoicemailTranscriptionView)->SetVisibility(IView::VISIBLE);
     }
     else {
-        pcViews->mVoicemailTranscriptionView->SetText(NULL);
-        pcViews->mVoicemailTranscriptionView->SetVisibility(IView::GONE);
+        views->mVoicemailTranscriptionView->SetText(NULL);
+        IView::Probe(views->mVoicemailTranscriptionView)->SetVisibility(IView::GONE);
     }
 
     return NOERROR;
@@ -101,8 +114,7 @@ AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallLocationAndDate(
     mDescriptionItems->Clear();
 
     // Get type of call (ie mobile, home, etc) if known, or the caller's location.
-    AutoPtr<ICharSequence> callTypeOrLocation;
-    GetCallTypeOrLocation(details, (ICharSequence**)&callTypeOrLocation);
+    AutoPtr<ICharSequence> callTypeOrLocation = GetCallTypeOrLocation(details);
 
     // Only add the call type or location if its not empty.  It will be empty for unknown
     // callers.
@@ -110,109 +122,91 @@ AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallLocationAndDate(
         mDescriptionItems->Add(callTypeOrLocation);
     }
     // The date of this call, relative to the current time.
-    AutoPtr<ICharSequence> callDate;
-    GetCallDate(details, (ICharSequence**)&callDate);
+    AutoPtr<ICharSequence> callDate = GetCallDate(details);
     mDescriptionItems->Add(callDate);
 
     // Create a comma separated list from the call type or location, and call date.
     return DialerUtils::Join(mResources, mDescriptionItems);
 }
 
-ECode PhoneCallDetailsHelper::GetCallTypeOrLocation(
-    /* [in] */ PhoneCallDetails* details,
-    /* [out] */ ICharSequence* result)
+AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallTypeOrLocation(
+    /* [in] */ PhoneCallDetails* details)
 {
-    VALIDATE_NOT_NULL(result);
-
-    CPhoneCallDetails* cpcDetails = (CPhoneCallDetails*)details;
     AutoPtr<ICharSequence> numberFormattedLabel;
     // Only show a label if the number is shown and it is not a SIP address.
     String number;
-    Boolean isVoicemailNumber;
-    if (!TextUtils::IsEmpty(cpcDetails->mNumber)
-            && !PhoneNumberHelper::IsUriNumber(cpcDetails->mNumber->ToString(&number), number)
-            && mPhoneNumberUtilsWrapper->IsVoicemailNumber(
-                    cpcDetails->mNumber, &isVoicemailNumber), !isVoicemailNumber) {
+    if (!TextUtils::IsEmpty(details->mNumber)
+            && !PhoneNumberHelper::IsUriNumber(details->mNumber->ToString(&number), number)
+            && mPhoneNumberUtilsWrapper->IsVoicemailNumber(details->mNumber)) {
 
-        if (cpcDetails->mNumberLabel == IContactInfo::GEOCODE_AS_LABEL) {
-            numberFormattedLabel = cpcDetails->mGeocode;
+        if (details->mNumberLabel == ContactInfo::GEOCODE_AS_LABEL) {
+            numberFormattedLabel = details->mGeocode;
         }
         else {
             AutoPtr<IContactsContractCommonDataKindsPhone> phone;
-            CContactsContractCommonDataKindsPhone::AcquireSingleton(
-                    (IContactsContractCommonDataKindsPhone**)&phone);
-            phone->GetTypeLabel(mResources, cpcDetails->mNumberType,
-                    cpcDetails->mNumberLabel, (ICharSequence**)&numberFormattedLabel);
+            CContactsContractCommonDataKindsPhone::AcquireSingleton((IContactsContractCommonDataKindsPhone**)&phone);
+            phone->GetTypeLabel(mResources, details->mNumberType,
+                    details->mNumberLabel, (ICharSequence**)&numberFormattedLabel);
         }
     }
 
-    if (!TextUtils::IsEmpty(cpcDetails->mName) && TextUtils::IsEmpty(numberFormattedLabel)) {
-        mPhoneNumberHelper->GetDisplayNumber(cpcDetails->mNumber,
-                cpcDetails->mNumberPresentation, cpcDetails->mFormattedNumber,
-                (ICharSequence**)&numberFormattedLabel);
+    if (!TextUtils::IsEmpty(details->mName) && TextUtils::IsEmpty(numberFormattedLabel)) {
+        numberFormattedLabel = mPhoneNumberHelper->GetDisplayNumber(details->mNumber,
+                details->mNumberPresentation, details->mFormattedNumber);
     }
-    *result = numberFormattedLabel;
-    if (numberFormattedLabel != NULL) {
-        REFCOUNT_ADD(*result);
-    }
-    return NOERROR;
+    return numberFormattedLabel;
 }
 
-ECode PhoneCallDetailsHelper::GetCallDate(
-    /* [in] */ PhoneCallDetails* details,
-    /* [out] */ ICharSequence** result)
+AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallDate(
+    /* [in] */ PhoneCallDetails* details)
 {
-    VALIDATE_NOT_NULL(result);
-
     AutoPtr<IDateUtils> utils;
     CDateUtils::AcquireSingleton((IDateUtils**)&utils);
-    utils->GetRelativeTimeSpanString(((CPhoneCallDetails*)details)->mDate,
+    AutoPtr<ICharSequence> cs;
+    utils->GetRelativeTimeSpanString(details->mDate,
             GetCurrentTimeMillis(), IDateUtils::MINUTE_IN_MILLIS,
-            IDateUtils::FORMAT_ABBREV_RELATIVE, result);
-    return NOERROR;
+            IDateUtils::FORMAT_ABBREV_RELATIVE, (ICharSequence**)&cs);
+    return cs;
 }
 
-ECode PhoneCallDetailsHelper::SetCallDetailsHeader(
+void PhoneCallDetailsHelper::SetCallDetailsHeader(
     /* [in] */ ITextView* nameView,
     /* [in] */ PhoneCallDetails* details)
 {
     AutoPtr<ICharSequence> nameText;
-    AutoPtr<ICharSequence> displayNumber;
     String str;
-    mResources->GetString(R::string::recentCalls_addToContact, &str)
-    mPhoneNumberHelper->GetDisplayNumber(((CPhoneCallDetails*)details)->mNumber,
-            ((CPhoneCallDetails*)details)->mNumberPresentation,
-            str, (ICharSequence**)&displayNumber);
-    if (TextUtils::IsEmpty(((CPhoneCallDetails*)details)->mName)) {
+    mResources->GetString(Elastos::Droid::Dialer::R::string::recentCalls_addToContact, &str)
+    AutoPtr<ICharSequence> displayNumber = mPhoneNumberHelper->GetDisplayNumber(
+            details->mNumber, details->mNumberPresentation, str);
+    if (TextUtils::IsEmpty(details->mName)) {
         nameText = displayNumber;
     }
     else {
-        nameText = ((CPhoneCallDetails*)details)->mName;
+        nameText = details->mName;
     }
 
     nameView->SetText(nameText);
     return NOERROR;
 }
 
-ECode PhoneCallDetailsHelper::SetCurrentTimeForTest(
+void PhoneCallDetailsHelper::SetCurrentTimeForTest(
     /* [in] */ Int64 currentTimeMillis)
 {
-    CInteger64::New(currentTimeMillis, (IInteger64**)&mCurrentTimeMillisForTest);
-    return NOERROR;
+    mCurrentTimeMillisForTest = currentTimeMillis;
 }
 
 Int64 PhoneCallDetailsHelper::GetCurrentTimeMillis()
 {
-    Int64 value;
-    if (mCurrentTimeMillisForTest == NULL) {
+    if (mCurrentTimeMillisForTest == 0) {
         AutoPtr<ISystem> system;
         CSystem::AcquireSingleton((ISystem**)&system);
+        Int64 value;
         system->GetCurrentTimeMillis(&value);
+        return value;
     }
     else {
-        mCurrentTimeMillisForTest->GetValue(&value);
+        return mCurrentTimeMillisForTest;
     }
-    return value;
 }
 
 void PhoneCallDetailsHelper::SetCallCountAndDate(
@@ -225,14 +219,19 @@ void PhoneCallDetailsHelper::SetCallCountAndDate(
     if (callCount != NULL) {
         Int32 value;
         callCount->GetValue(&value);
-        mResources->getString(R::string::call_log_item_count_and_date,
-                 value, dateText, (ICharSequence**)&text);
+        AutoPtr<ArrayOf<IInterface*> > attrs = ArrayOf<IInterface*>::Alloc(2);
+        attrs->Set(0, callCount);
+        attrs->Set(1, dateText);
+        String str;
+        mResources->GetString(Elastos::Droid::Dialer::R::string::call_log_item_count_and_date,
+                 attrs, &str);
+        CString::New(str, (ICharSequence**)&text);
     }
     else {
         text = dateText;
     }
 
-    ((PhoneCallDetailsViews*)views)->mCallLocationAndDate->SetText(text);
+    views->mCallLocationAndDate->SetText(text);
 }
 
 } // Dialer

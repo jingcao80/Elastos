@@ -1,0 +1,9 @@
+TARGET_NAME= database_common
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../
+INCLUDES += ../../../../../../
+
+SOURCES += NoNullCursorAsyncQueryHandler.cpp
+SOURCES += EmptyCursor.cpp

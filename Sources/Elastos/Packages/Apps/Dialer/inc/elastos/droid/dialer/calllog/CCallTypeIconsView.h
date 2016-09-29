@@ -4,7 +4,12 @@
 #include "_Elastos_Droid_Dialer_CallLog_CCallTypeIconsView.h"
 #include "elastos/droid/view/View.h"
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::View;
+using Elastos::Utility::IList;
 
 namespace Elastos{
 namespace Droid{
