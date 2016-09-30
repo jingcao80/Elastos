@@ -2,6 +2,10 @@
 TARGET_NAME= tsp
 TARGET_TYPE= lib
 
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
 INCLUDES += ../../../
 INCLUDES += $(PREBUILD_INC)/sys;
 INCLUDES += ../../../../../../corelibrary
@@ -11,11 +15,14 @@ INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos/core
 INCLUDES += $(MAKEDIR)/../../../../../../../inc/org/apache/harmony/security
 
 SOURCES = CMessageImprint.cpp
-SOURCES += CPKIStatusInfo.cpp
+SOURCES += PKIStatus.cpp
+SOURCES += PKIFailureInfo.cpp
+SOURCES += PKIStatusInfo.cpp
 SOURCES += CPKIStatusInfoHelper.cpp
-SOURCES += CTSTInfo.cpp
+SOURCES += TSTInfo.cpp
 SOURCES += CTSTInfoHelper.cpp
-SOURCES += CTimeStampReq.cpp
+SOURCES += TimeStampReq.cpp
 SOURCES += CTimeStampReqHelper.cpp
-SOURCES += CTimeStampResp.cpp
+SOURCES += TimeStampResp.cpp
 SOURCES += CTimeStampRespHelper.cpp
+SOURCES += tsp.cpp

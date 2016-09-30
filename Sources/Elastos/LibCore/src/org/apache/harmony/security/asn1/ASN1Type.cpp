@@ -131,6 +131,43 @@ ECode ASN1Type::GetDecodedObject(
     return bis->GetContent(object);
 }
 
+ECode ASN1Type::Decode(
+    /* [in] */ IBerInputStream* bis,
+    /* [out] */ IInterface** object)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ASN1Type::CheckTag(
+    /* [in] */ Int32 identifier,
+    /* [out] */ Boolean* checkTag)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ASN1Type::EncodeASN(
+    /* [in] */ IBerOutputStream* bos)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ASN1Type::EncodeContent(
+    /* [in] */ IBerOutputStream* bos)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ASN1Type::SetEncodingContent(
+    /* [in] */ IBerOutputStream* bos)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode ASN1Type::GetEncodedLength(
     /* [in] */ IBerOutputStream* bos,
     /* [out] */ Int32* length)

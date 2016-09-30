@@ -1,5 +1,5 @@
 
-#include "org/apache/harmony/security/x509/CAlgorithmIdentifier.h"
+#include "org/apache/harmony/security/x509/AlgorithmIdentifier.h"
 
 namespace Org {
 namespace Apache {
@@ -7,39 +7,37 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
-CAR_OBJECT_IMPL(CAlgorithmIdentifier)
+CAR_INTERFACE_IMPL(AlgorithmIdentifier, Object, IAlgorithmIdentifier)
 
-CAR_INTERFACE_IMPL(CAlgorithmIdentifier, Object, IAlgorithmIdentifier)
-
-ECode CAlgorithmIdentifier::GetAlgorithm(
+ECode AlgorithmIdentifier::GetAlgorithm(
     /* [out] */ String* pAlgorithm)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CAlgorithmIdentifier::GetAlgorithmName(
+ECode AlgorithmIdentifier::GetAlgorithmName(
     /* [out] */ String* pAlgorithmName)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CAlgorithmIdentifier::GetParameters(
+ECode AlgorithmIdentifier::GetParameters(
     /* [out, callee] */ ArrayOf<Byte>** ppParameters)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CAlgorithmIdentifier::GetEncoded(
+ECode AlgorithmIdentifier::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte>** ppEncoded)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CAlgorithmIdentifier::Equals(
+ECode AlgorithmIdentifier::Equals(
     /* [in] */ IInterface* pAi,
     /* [out] */ Boolean* pResult)
 {
@@ -47,34 +45,49 @@ ECode CAlgorithmIdentifier::Equals(
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CAlgorithmIdentifier::GetHashCode(
+ECode AlgorithmIdentifier::GetHashCode(
     /* [out] */ Int32* pResult)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CAlgorithmIdentifier::DumpValue(
+ECode AlgorithmIdentifier::DumpValue(
     /* [in] */ IStringBuilder* pSb)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CAlgorithmIdentifier::constructor(
+ECode AlgorithmIdentifier::constructor(
     /* [in] */ const String& algorithm)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CAlgorithmIdentifier::constructor(
+ECode AlgorithmIdentifier::constructor(
     /* [in] */ const String& algorithm,
     /* [in] */ ArrayOf<Byte>* pParameters)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
+
+ECode AlgorithmIdentifier::GetASN1(
+    /* [out] */ IASN1Sequence** ppAsn1)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode AlgorithmIdentifier::SetASN1(
+    /* [in] */ IASN1Sequence* pAsn1)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
 
 } // namespace X509
 } // namespace Security

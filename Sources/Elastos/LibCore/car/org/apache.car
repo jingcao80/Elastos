@@ -865,9 +865,9 @@ module
 
     class CPKIStatusInfo {
         constructor(
-            [in] Int32 pkiStatus,
+            [in] IPKIStatus* pkiStatus,
             [in] IList* pStatusString,
-            [in] Int32 failInfo);
+            [in] IPKIFailureInfo* failInfo);
 
         interface IPKIStatusInfo;
     }

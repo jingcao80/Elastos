@@ -3,9 +3,12 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_TSP_CMESSAGEIMPRINT_H__
 
 #include "_Org_Apache_Harmony_Security_X509_Tsp_CMessageImprint.h"
+#include "org/apache/harmony/security/asn1/ASN1Sequence.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
 using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
 using Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier;
 using Elastos::Core::Object;
 
@@ -20,6 +23,20 @@ CarClass(CMessageImprint)
     , public Object
     , public IMessageImprint
 {
+private:
+    class MyASN1Sequence
+        : public ASN1Sequence
+    {
+    protected:
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
+
+        CARAPI GetValues(
+        /* [in] */ IInterface* object,
+        /* [in] */ ArrayOf<IInterface*>* values);
+    };
+
 public:
     CAR_OBJECT_DECL()
 
@@ -36,7 +53,14 @@ public:
         /* [in] */ ArrayOf<Byte>* pHashedMessage);
 
 private:
-    // TODO: Add your private member variables here.
+    static CARAPI_(AutoPtr<IASN1Sequence>) initASN1();
+
+public:
+    static AutoPtr<IASN1Sequence> ASN1;
+
+private:
+    AutoPtr<IAlgorithmIdentifier> mAlgId;
+    AutoPtr<ArrayOf<Byte> > mHashedMessage;
 };
 
 } //namespace Tsp

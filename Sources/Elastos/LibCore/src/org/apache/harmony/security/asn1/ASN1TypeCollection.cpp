@@ -48,6 +48,37 @@ ECode ASN1TypeCollection::GetValues(
     return E_RUNTIME_EXCEPTION;
 }
 
+ECode ASN1TypeCollection::GetType(
+    /* [out, callee] */ ArrayOf<IASN1Type*>** value)
+{
+    VALIDATE_NOT_NULL(value)
+
+    *value = mType;
+    REFCOUNT_ADD(*value);
+    return NOERROR;
+
+}
+
+ECode ASN1TypeCollection::GetOPTIONAL(
+    /* [out, callee] */ ArrayOf<Boolean>** value)
+{
+    VALIDATE_NOT_NULL(value)
+
+    *value = mOPTIONAL;
+    REFCOUNT_ADD(*value);
+    return NOERROR;
+}
+
+ECode ASN1TypeCollection::GetDEFAULT(
+    /* [out, callee] */ ArrayOf<IInterface*>** value)
+{
+    VALIDATE_NOT_NULL(value)
+
+    *value = mDEFAULT;
+    REFCOUNT_ADD(*value);
+    return NOERROR;
+}
+
 } // namespace Asn1
 } // namespace Security
 } // namespace Harmony

@@ -61,15 +61,22 @@ public:
         /* [in] */ IInterface* object,
         /* [out, callee] */ ArrayOf<Byte>** encode);
 
-    using IASN1Type::Decode;
+    CARAPI Decode(
+        /* [in] */ IBerInputStream* bis,
+        /* [out] */ IInterface** object);
 
-    using IASN1Type::CheckTag;
+    CARAPI CheckTag(
+        /* [in] */ Int32 identifier,
+        /* [out] */ Boolean* checkTag);
 
-    using IASN1Type::EncodeASN;
+    CARAPI EncodeASN(
+        /* [in] */ IBerOutputStream* bos);
 
-    using IASN1Type::EncodeContent;
+    CARAPI EncodeContent(
+        /* [in] */ IBerOutputStream* bos);
 
-    using IASN1Type::SetEncodingContent;
+    CARAPI SetEncodingContent(
+        /* [in] */ IBerOutputStream* bos);
 
     CARAPI GetEncodedLength(
         /* [in] */ IBerOutputStream* bos,

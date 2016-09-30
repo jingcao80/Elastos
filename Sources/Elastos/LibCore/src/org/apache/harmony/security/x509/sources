@@ -12,7 +12,7 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security
 
 SOURCES = CAccessDescription.cpp
 SOURCES += CAccessDescriptionHelper.cpp
-SOURCES += CAlgorithmIdentifier.cpp
+SOURCES += AlgorithmIdentifier.cpp
 SOURCES += CAlgorithmIdentifierHelper.cpp
 SOURCES += CAlternativeName.cpp
 SOURCES += CAuthorityKeyIdentifier.cpp
@@ -92,3 +92,4 @@ SOURCES += CTimeHelper.cpp
 SOURCES += CValidity.cpp
 SOURCES += CValidityHelper.cpp
 SOURCES += CX509PublicKey.cpp
+SOURCES += x509.cpp

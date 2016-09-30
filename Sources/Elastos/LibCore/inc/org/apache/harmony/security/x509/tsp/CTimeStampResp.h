@@ -3,10 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_TSP_CTIMESTAMPRESP_H__
 
 #include "_Org_Apache_Harmony_Security_X509_Tsp_CTimeStampResp.h"
-#include <elastos/core/Object.h>
+#include "org/apache/harmony/security/x509/tsp/TimeStampResp.h"
 
-using Org::Apache::Harmony::Security::Pkcs7::IContentInfo;
-using Elastos::Core::Object;
+using Org::Apache::Harmony::Security::X509::Tsp::TimeStampResp;
 
 namespace Org {
 namespace Apache {
@@ -16,29 +15,10 @@ namespace X509 {
 namespace Tsp {
 
 CarClass(CTimeStampResp)
-    , public Object
-    , public ITimeStampResp
+    , public TimeStampResp
 {
 public:
     CAR_OBJECT_DECL()
-
-    CAR_INTERFACE_DECL()
-
-    CARAPI ToString(
-        /* [out] */ String* pStr);
-
-    CARAPI GetStatus(
-        /* [out] */ IPKIStatusInfo** ppStatus);
-
-    CARAPI GetTimeStampToken(
-        /* [out] */ IContentInfo** ppTimeStampToken);
-
-    CARAPI constructor(
-        /* [in] */ IPKIStatusInfo* pStatus,
-        /* [in] */ IContentInfo* pTimeStampToken);
-
-private:
-    // TODO: Add your private member variables here.
 };
 
 } //namespace Tsp

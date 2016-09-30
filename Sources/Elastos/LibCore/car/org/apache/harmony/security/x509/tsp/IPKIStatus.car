@@ -30,36 +30,48 @@ module
         revocationNotification (5)
          -- notification that a revocation has occurred  }
      */
-    enum PKIStatus {
+    interface IPKIStatus {
         /**
          * TimeStampToken is present as requested
          */
-        PKIStatus_GRANTED = 0,
+        const Int32 PKIStatus_GRANTED = 0;
 
         /**
         * TimeStampToken is present with modifications
         */
-        PKIStatus_GRANTED_WITH_MODS = 1,
+        const Int32 PKIStatus_GRANTED_WITH_MODS = 1;
 
         /**
          * rejected
          */
-        PKIStatus_REJECTION = 2,
+        const Int32 PKIStatus_REJECTION = 2;
 
         /**
          * waiting
          */
-        PKIStatus_WAITING = 3,
+        const Int32 PKIStatus_WAITING = 3;
 
         /**
          * revocation time comes soon
          */
-        PKIStatus_REVOCATION_WARNING = 4,
+        const Int32 PKIStatus_REVOCATION_WARNING = 4;
 
         /**
          * revoked
          */
-        PKIStatus_REVOCATION_NOTIFICATION = 5,
+        const Int32 PKIStatus_REVOCATION_NOTIFICATION = 5;
+
+        /**
+         * @return int value of the status
+         */
+        GetStatus(
+            [out] Int32* status);
+    }
+
+    interface IPKIStatusHelper {
+        GetInstance(
+            [in] Int32 status,
+            [out] IPKIStatus** result);
     }
 
     } // namespace Tsp

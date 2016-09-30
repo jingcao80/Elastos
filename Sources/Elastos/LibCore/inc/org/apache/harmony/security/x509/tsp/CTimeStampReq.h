@@ -3,11 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_TSP_CTIMESTAMPREQ_H__
 
 #include "_Org_Apache_Harmony_Security_X509_Tsp_CTimeStampReq.h"
-#include <elastos/core/Object.h>
+#include "org/apache/harmony/security/x509/tsp/TimeStampReq.h"
 
-using Org::Apache::Harmony::Security::X509::IExtensions;
-using Elastos::Core::Object;
-using Elastos::Math::IBigInteger;
+using Org::Apache::Harmony::Security::X509::Tsp::TimeStampReq;
 
 namespace Org {
 namespace Apache {
@@ -17,48 +15,10 @@ namespace X509 {
 namespace Tsp {
 
 CarClass(CTimeStampReq)
-    , public Object
-    , public ITimeStampReq
+    , public TimeStampReq
 {
 public:
     CAR_OBJECT_DECL()
-
-    CAR_INTERFACE_DECL()
-
-    CARAPI ToString(
-        /* [out] */ String* pStr);
-
-    CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte>** ppEncoded);
-
-    CARAPI GetCertReq(
-        /* [out] */ Boolean* pCertReq);
-
-    CARAPI GetExtensions(
-        /* [out] */ IExtensions** ppExtensions);
-
-    CARAPI GetMessageImprint(
-        /* [out] */ IMessageImprint** ppMessageImprint);
-
-    CARAPI GetNonce(
-        /* [out] */ IBigInteger** ppNonce);
-
-    CARAPI GetReqPolicy(
-        /* [out] */ String* pReqPolicy);
-
-    CARAPI GetVersion(
-        /* [out] */ Int32* pVer);
-
-    CARAPI constructor(
-        /* [in] */ Int32 ver,
-        /* [in] */ IMessageImprint* pMessageImprint,
-        /* [in] */ const String& reqPolicy,
-        /* [in] */ IBigInteger* pNonce,
-        /* [in] */ Boolean certReq,
-        /* [in] */ IExtensions* pExtensions);
-
-private:
-    // TODO: Add your private member variables here.
 };
 
 } //namespace Tsp

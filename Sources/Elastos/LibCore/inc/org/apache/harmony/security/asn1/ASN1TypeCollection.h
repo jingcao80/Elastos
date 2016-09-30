@@ -22,7 +22,6 @@ class ASN1TypeCollection
 public:
     CAR_INTERFACE_DECL()
 
-protected:
     /**
      * Constructs ASN.1 collection type.
      *
@@ -39,7 +38,7 @@ protected:
      *
      * @param index an index of a component
      */
-    virtual CARAPI SetOptional(
+    CARAPI SetOptional(
         /* [in] */ Int32 index);
 
     /**
@@ -49,7 +48,7 @@ protected:
      * @param object a component's default value
      * @param index an index of a component
      */
-    virtual CARAPI SetDefault(
+    CARAPI SetDefault(
         /* [in] */ IInterface* object,
         /* [in] */ Int32 index);
 
@@ -64,16 +63,25 @@ protected:
      * @param object an object to be encoded
      * @param values an array to store an object's values to be encoded
      */
-    virtual CARAPI GetValues(
+    CARAPI GetValues(
         /* [in] */ IInterface* object,
         /* [in] */ ArrayOf<IInterface*>* values);
 
+    CARAPI GetType(
+        /* [out, callee] */ ArrayOf<IASN1Type*>** value);
+
+    CARAPI GetOPTIONAL(
+        /* [out, callee] */ ArrayOf<Boolean>** value);
+
+    CARAPI GetDEFAULT(
+        /* [out, callee] */ ArrayOf<IInterface*>** value);
+
 public:
-    AutoPtr< ArrayOf<IASN1Type*> > mType;
+    AutoPtr<ArrayOf<IASN1Type*> > mType;
 
-    AutoPtr< ArrayOf<Boolean> > mOPTIONAL;
+    AutoPtr<ArrayOf<Boolean> > mOPTIONAL;
 
-    AutoPtr< ArrayOf<IInterface*> > mDEFAULT;
+    AutoPtr<ArrayOf<IInterface*> > mDEFAULT;
 };
 
 } // namespace Asn1

@@ -27,13 +27,13 @@ module
          * @return Returns the failInfo.
          */
         GetFailInfo(
-            [out] Int32* failInfo);
+            [out] IPKIFailureInfo** failInfo);
 
         /**
          * @return Returns the pKIStatus.
          */
         GetStatus(
-            [out] PKIStatus* status);
+            [out] IPKIStatus** status);
 
         /**
          * @return Returns the statusString.

@@ -37,46 +37,68 @@ module
         The value of PKIFailureInfo can take only one of the values,
         so it is represented by an integer here.
      */
-    enum PKIFailureInfo {
+    interface IPKIFailureInfo {
         /**
          *  Unrecognized algorithm ID
          */
-        PKIFailureInfo_BAD_ALG = 0,
+        const Int32 PKIFailureInfo_BAD_ALG = 0;
 
         /**
          *  Transaction is not supported
          */
-        PKIFailureInfo_BAD_REQUEST = 2,
+        const Int32 PKIFailureInfo_BAD_REQUEST = 2;
 
         /**
          *  Data format is wrong
          */
-        PKIFailureInfo_BAD_DATA_FORMAT = 5,
+        const Int32 PKIFailureInfo_BAD_DATA_FORMAT = 5;
 
         /**
          *  TSA cannot use the time source
          */
-        PKIFailureInfo_TIME_NOT_AVAILABLE = 14,
+        const Int32 PKIFailureInfo_TIME_NOT_AVAILABLE = 14;
 
         /**
          *  The policy is not supported
          */
-        PKIFailureInfo_UNACCEPTED_POLICY = 15,
+        const Int32 PKIFailureInfo_UNACCEPTED_POLICY = 15;
 
         /**
          *  The extension is not supported
          */
-        PKIFailureInfo_UNACCEPTED_EXTENSION = 16,
+        const Int32 PKIFailureInfo_UNACCEPTED_EXTENSION = 16;
 
         /**
          *  The requested additional info is not available
          */
-        PKIFailureInfo_ADD_INFO_NOT_AVAILABLE = 17,
+        const Int32 PKIFailureInfo_ADD_INFO_NOT_AVAILABLE = 17;
 
         /**
          *  System failure has occured
          */
-        PKIFailureInfo_SYSTEM_FAILURE = 25,
+        const Int32 PKIFailureInfo_SYSTEM_FAILURE = 25;
+
+        /**
+         * @return int value of the failure
+         */
+        GetValue(
+            [out] Int32* value);
+    }
+
+    interface IPKIFailureInfoHelper {
+        /**
+         * @return maximum of values in the enum
+         */
+        GetMaxValue(
+            [out] Int32* value);
+
+        /**
+         * @param value
+         * @return
+         */
+        GetInstance(
+            [in] Int32 value,
+            [out] IPKIFailureInfo** instance);
     }
 
     } // namespace Tsp
