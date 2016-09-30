@@ -116,7 +116,7 @@ ECode CCloseGuard::WarnIfOpen()
     StringBuilder sb("CCloseGuard: A resource was acquired but never released.");
     sb += "See ICloseable for information on avoiding resource leaks.";
     REPORTER->Report(sb.ToString(), mAllocationSite);
-    // assert(0 && "Please review code!!");
+    assert(0 && "Please review code!!");
     return NOERROR;
 }
 

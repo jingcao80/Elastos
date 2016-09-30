@@ -26,6 +26,9 @@
 #include <suspend/autosuspend.h>
 #include <utils/Log.h>
 #include <utils/Errors.h>
+#include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
+#include <utils/String8.h>
 
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerRunningAppProcessInfo;
@@ -1589,6 +1592,101 @@ ECode PowerManagerService::CrashThread::Run()
 }
 
 //==============================================================================
+//          NativePowerManagerService
+//==============================================================================
+
+// must be kept in sync with IPowerManager.aidl
+enum {
+    ACQUIRE_WAKE_LOCK = IBinder::FIRST_CALL_TRANSACTION,
+    ACQUIRE_WAKE_LOCK_UID = IBinder::FIRST_CALL_TRANSACTION + 1,
+    RELEASE_WAKE_LOCK = IBinder::FIRST_CALL_TRANSACTION + 2,
+    UPDATE_WAKE_LOCK_UIDS = IBinder::FIRST_CALL_TRANSACTION + 3,
+    POWER_HINT = IBinder::FIRST_CALL_TRANSACTION + 4,
+};
+
+CAR_INTERFACE_IMPL(PowerManagerService::NativePowerManagerService::ElLock, Object, IBinder)
+
+android::status_t PowerManagerService::NativePowerManagerService::onTransact(
+    /* [in] */ uint32_t code,
+    /* [in] */ const android::Parcel& data,
+    /* [in] */ android::Parcel* reply,
+    /* [in] */ uint32_t flags)
+{
+    android::String16 interfaceName("android.os.IPowerManager");
+    switch(code) {
+        case ACQUIRE_WAKE_LOCK: {
+            data.enforceInterface(interfaceName);
+            android::sp<IBinder> lock = data.readStrongBinder();
+            Int32 flags = data.readInt32();
+            android::String8 tag = android::String8(data.readString16());
+            android::String8 packageName = android::String8(data.readString16());
+            Int32 workSource = data.readInt32();
+            android::String8 historyTag = android::String8(data.readString16());
+            AutoPtr<ElLock> elLock = new ElLock(lock);
+            mLockMap[reinterpret_cast<Int64>(lock.get())] = elLock;
+            mHost->AcquireWakeLock(elLock, flags, String(tag.string()), String(packageName.string()),
+                NULL, String(NULL));
+            reply->writeNoException();
+            return android::NO_ERROR;
+        } break;
+        case ACQUIRE_WAKE_LOCK_UID: {
+            data.enforceInterface(interfaceName);
+            android::sp<IBinder> lock = data.readStrongBinder();
+            Int32 flags = data.readInt32();
+            android::String8 tag = android::String8(data.readString16());
+            android::String8 packageName = android::String8(data.readString16());
+            Int32 uid = data.readInt32();
+            AutoPtr<ElLock> elLock = new ElLock(lock);
+            mLockMap[reinterpret_cast<Int64>(lock.get())] = elLock;
+            mHost->AcquireWakeLockWithUid(elLock, flags, String(tag.string()), String(packageName.string()), uid);
+            reply->writeNoException();
+            return android::NO_ERROR;
+        } break;
+        case RELEASE_WAKE_LOCK: {
+            data.enforceInterface(interfaceName);
+            android::sp<IBinder> lock = data.readStrongBinder();
+            Int32 flags = data.readInt32();
+            HashMap<Int64, AutoPtr<ElLock> >::Iterator it = mLockMap.Find(reinterpret_cast<Int64>(lock.get()));
+            if (it != mLockMap.End()) {
+                mHost->ReleaseWakeLock(it->mSecond, flags);
+                mLockMap.Erase(it);
+            }
+            reply->writeNoException();
+            return android::NO_ERROR;
+        } break;
+        case UPDATE_WAKE_LOCK_UIDS: {
+            data.enforceInterface(interfaceName);
+            android::sp<IBinder> lock = data.readStrongBinder();
+            Int32 len = data.readInt32();
+            AutoPtr<ArrayOf<Int32> > uids;
+            if (len > 0) {
+                uids = ArrayOf<Int32>::Alloc(len);
+                for (Int32 i = 0; i < len; i++)
+                    (*uids)[i] = data.readInt32();
+            }
+
+            HashMap<Int64, AutoPtr<ElLock> >::Iterator it = mLockMap.Find(reinterpret_cast<Int64>(lock.get()));
+            if (it != mLockMap.End()) {
+                mHost->UpdateWakeLockUids(it->mSecond, uids);
+            }
+            reply->writeNoException();
+            return android::NO_ERROR;
+        } break;
+        case POWER_HINT: {
+            data.enforceInterface(interfaceName);
+            Int32 hintId = data.readInt32();
+            Int32 param = data.readInt32();
+            mHost->PowerHint(hintId, param);
+            reply->writeNoException();
+            return android::NO_ERROR;
+        } break;
+        default:
+            return BBinder::onTransact(code, data, reply, flags);
+    }
+    return android::NO_ERROR;
+}
+
+//==============================================================================
 //          PowerManagerService
 //==============================================================================
 
@@ -1737,6 +1835,16 @@ ECode PowerManagerService::OnStart()
     AutoPtr<Watchdog> watchdog = Watchdog::GetInstance();
     watchdog->AddMonitor(this);
     watchdog->AddThread(mHandler);
+
+    if (mNative == NULL) {
+        mNative = new NativePowerManagerService((BinderService*)binderServide.Get());
+        android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+        int res = sm->addService(android::String16("power"), mNative);
+        if (res != 0) {
+            Slogger::E(TAG, "add service power failed");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
 
     return NOERROR;
 }
