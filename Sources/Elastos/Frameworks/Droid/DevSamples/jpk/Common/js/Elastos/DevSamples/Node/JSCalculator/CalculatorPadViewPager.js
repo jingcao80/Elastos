@@ -179,7 +179,8 @@ class _CalculatorPadViewPager extends ViewPager {
         this._obj = _this;
 
 //         super(context, attrs);
-        _this._constructor(context, attrs);
+        //_this._constructor(context, attrs);
+        super.OnCreate(_this, context, attrs);
         elog("====CalculatorPadViewPager====OnCreate====0====");
 
 //         setAdapter(mStaticPagerAdapter);

@@ -62,6 +62,7 @@ module.exports = function(aoElastos, aoActivity){
 // import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 // import android.support.v4.view.accessibility.AccessibilityRecordCompat;
 // import android.support.v4.widget.EdgeEffectCompat;
+
 // import android.util.AttributeSet;
 // import android.util.Log;
 // import android.view.FocusFinder;
@@ -72,13 +73,43 @@ module.exports = function(aoElastos, aoActivity){
 // import android.view.VelocityTracker;
 // import android.view.View;
 // import android.view.ViewConfiguration;
+    var ViewConfiguration = new Proxy(
+        Droid_New("Elastos.Droid.View.CViewConfigurationHelper"),
+        {
+            get: function(target, property){
+                var ret = null;
+                if (property == "Get") {
+                    ret = function(o) {
+                        return target[property](o);
+                    }
+                }
+                return ret;
+            }
+        }
+    );
+
 // import android.view.ViewGroup;
     class ViewGroup {}
 // import android.view.ViewParent;
 // import android.view.accessibility.AccessibilityEvent;
 // import android.view.animation.Interpolator;
-    class Interpolator {};   // = Elastos.Droid.View.Animation.IInterpolator;
+    class Interpolator {
+        constructor() {
+            elog("====Interpolator::constructor====");
+
+            // return Droid_New("Elastos.Droid.Graphics.CInterpolator");
+        }
+    }
 // import android.widget.Scroller;
+    class Scroller {
+        constructor(context, sInterpolator) {
+            elog("====Scroller::constructor====");
+            var s = CObject.getConstructorProtos("/system/lib/Elastos.Droid.Core.eco", "Elastos.Droid.Widget.CScroller");
+            elog("====PROTO: " + s);
+
+            return Droid_New("Elastos.Droid.Widget.CScroller", context, sInterpolator);
+        }
+    }
 
 // import java.lang.reflect.Method;
 // import java.util.ArrayList;
@@ -93,6 +124,38 @@ module.exports = function(aoElastos, aoActivity){
 
     class Runnable {};
     class AccessibilityDelegateCompat {};
+
+    var ViewConfigurationCompat = require("./ViewConfigurationCompat.js")(aoElastos, aoActivity);
+
+    class EdgeEffectCompat {
+        constructor(context) {
+            // var s = CObject.getConstructorProtos("/system/lib/Elastos.Droid.Core.eco", "Elastos.Droid.Widget.CEdgeEffect");
+            // elog("====PROTO: " + s);
+
+            return Droid_New("Elastos.Droid.Widget.CEdgeEffect", context);
+        }
+    }
+
+    var ViewCompat = new Proxy(
+        {view : null},
+        {
+            set : function(target, property, value) {
+                elog("====ViewCompat::Proxy::set====" + property);
+                if (property == "view") target.view = value;
+            },
+            get : function(target, property){
+                elog("====ViewCompat::Proxy::get====" + property);
+                var ret = function() {
+                    elog("====typeof:" + property + typeof target[property]);
+                    var r = target[property].apply(target, arguments);
+                    elog("====proxy ok!====");
+                    return r;
+                }
+
+                return ret;
+            }
+        }
+    );
 
 /**
  * Layout manager that allows the user to flip left and right
@@ -227,12 +290,13 @@ module.exports = function(aoElastos, aoActivity){
         static get sInterpolator() {
             if (ViewPager._sInterpolator_) return ViewPager._sInterpolator;
 
+            ViewPager._sInterpolator_ = true;
             ViewPager._sInterpolator = new class _tmp extends Interpolator {
-                getInterpolation(t) {
+                GetInterpolation(t) {
                     t -= 1.0;
                     return t * t * t * t * t + 1.0;
                 }
-            }
+            }();
             return ViewPager._sInterpolator;
         };
 
@@ -510,89 +574,179 @@ module.exports = function(aoElastos, aoActivity){
         };
     }
 
-// //     /**
-// //      * Used internally to monitor when adapters are switched.
-// //      */
-// //     interface OnAdapterChangeListener {
-//         function OnAdapterChangeListener() {
-// //         public void onAdapterChanged(PagerAdapter oldAdapter, PagerAdapter newAdapter);
-// //     }
+    /**
+     * Used internally to monitor when adapters are switched.
+     */
+//     interface OnAdapterChangeListener {
+//         public void onAdapterChanged(PagerAdapter oldAdapter, PagerAdapter newAdapter);
+//     }
+
+    /**
+     * Used internally to tag special types of child views that should be added as
+     * pager decorations by default.
+     */
+//     interface Decor {}
+
+//     public ViewPager(Context context) {
+//         super(context);
+//         initViewPager();
+//     }
+
+//     public ViewPager(Context context, AttributeSet attrs) {
+    OnCreate(_this, context, attrs) {
+        elog("====ViewPager::ViewPager====");
+
+        attrs = attrs || null;
+
+//         super(context, attrs);
+//         initViewPager();
+        _this._constructor(context, attrs);
+        this.InitViewPager();
+    }
+
+//     void initViewPager() {
+    InitViewPager() {
+        elog("====ViewPager::InitViewPager====begin====");
+        var _this = this._obj;
+
+        var FOCUS_AFTER_DESCENDANTS = 0x40000;
+
+//         setWillNotDraw(false);
+//         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
+//         setFocusable(true);
+//         final Context context = getContext();
+//         mScroller = new Scroller(context, sInterpolator);
+//         final ViewConfiguration configuration = ViewConfiguration.get(context);
+//         final float density = context.getResources().getDisplayMetrics().density;
+        _this.SetWillNotDraw(false);
+elog("====ViewPager::InitViewPager====0====");
+        _this.SetDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
+elog("====ViewPager::InitViewPager====1====");
+        _this.SetFocusable(true);
+elog("====ViewPager::InitViewPager====2====");
+        var context = _this.GetContext();
+elog("====ViewPager::InitViewPager====3====");
+        this.mScroller = new Scroller(context, ViewPager.sInterpolator);
+elog("====ViewPager::InitViewPager====4====");
+CObject.showMethods(ViewConfiguration);
+        var configuration = ViewConfiguration.Get(context);
+        CObject.showMethods(configuration);
+elog("====ViewPager::InitViewPager====5====");
+        var density = context.GetResources().GetDisplayMetrics().GetDensity();
+elog("====ViewPager::InitViewPager====6====");
+
+        var SDK_INT = this.GetInt32Property("ro.build.version.sdk");
+elog("====ViewPager::InitViewPager====7====SDK_INT:" + SDK_INT);
+
+
+//         mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
+//         mMinimumVelocity = (int) (MIN_FLING_VELOCITY * density);
+//         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
+//         mLeftEdge = new EdgeEffectCompat(context);
+//         mRightEdge = new EdgeEffectCompat(context);
+        this.mTouchSlop = ViewConfigurationCompat.GetScaledPagingTouchSlop(configuration);
+        this.mMinimumVelocity = this.MIN_FLING_VELOCITY * density;
+        this.mMaximumVelocity = configuration.GetScaledMaximumFlingVelocity();
+elog("====ViewPager::InitViewPager====8====");
+        this.mLeftEdge = new EdgeEffectCompat(context);
+elog("====ViewPager::InitViewPager====9====");
+        this.mRightEdge = new EdgeEffectCompat(context);
+elog("====ViewPager::InitViewPager====10====");
+
+//         mFlingDistance = (int) (MIN_DISTANCE_FOR_FLING * density);
+//         mCloseEnough = (int) (CLOSE_ENOUGH * density);
+//         mDefaultGutterSize = (int) (DEFAULT_GUTTER_SIZE * density);
+        this.mFlingDistance = this.MIN_DISTANCE_FOR_FLING * density;
+        this.mCloseEnough = this.CLOSE_ENOUGH * density;
+        this.mDefaultGutterSize = this.DEFAULT_GUTTER_SIZE * density;
+
+elog("====ViewPager::InitViewPager====11====");
+//         ViewCompat.setAccessibilityDelegate(this, new MyAccessibilityDelegate());
+        ViewCompat.SetAccessibilityDelegate(_this, new MyAccessibilityDelegate());
+
+//         if (ViewCompat.getImportantForAccessibility(this)
+//                 == ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+//             ViewCompat.setImportantForAccessibility(this,
+//                     ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
+//         }
+elog("====ViewPager::InitViewPager====12====");
+        if (ViewCompat.GetImportantForAccessibility(_this)
+                == ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+elog("====ViewPager::InitViewPager====13====");
+            ViewCompat.SetImportantForAccessibility(_this,
+                    ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
+        elog("====ViewPager::InitViewPager====end====");
+    }
+
+//-------------test begin--------------------
+
+// void ViewPager::InitViewPager()
+// {
+//     SetWillNotDraw(FALSE);
+//     SetDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
+//     SetFocusable(TRUE);
+//     AutoPtr<IContext> context;
+//     GetContext((IContext**)&context);
+//     mScroller = NULL;
+//     CScroller::New(context, sInterpolator, (IScroller**)&mScroller);
+//     AutoPtr<IViewConfigurationHelper> helper;
+//     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+//     AutoPtr<IViewConfiguration> configuration;
+//     helper->Get(context, (IViewConfiguration**)&configuration);
+//     AutoPtr<IResources> res;
+//     context->GetResources((IResources**)&res);
+//     AutoPtr<IDisplayMetrics> dm;
+//     res->GetDisplayMetrics((IDisplayMetrics**)&dm);
+//     Float density;
+//     dm->GetDensity(&density);
+
+//     configuration->GetScaledPagingTouchSlop(&mTouchSlop);
+//     mMinimumVelocity = (Int32)(MIN_FLING_VELOCITY * density);
+//     configuration->GetScaledMaximumFlingVelocity(&mMaximumVelocity);
+//     CEdgeEffect::New(context, (IEdgeEffect**)&mLeftEdge);
+//     CEdgeEffect::New(context, (IEdgeEffect**)&mRightEdge);
+
+//     mFlingDistance = (Int32)(MIN_DISTANCE_FOR_FLING * density);
+//     mCloseEnough = (Int32)(CLOSE_ENOUGH * density);
+//     mDefaultGutterSize = (Int32)(DEFAULT_GUTTER_SIZE * density);
+
+//     AutoPtr<IAccessibilityDelegate> delegate = (IAccessibilityDelegate*)new MyAccessibilityDelegate(this);
+//     AutoPtr<IView> v = IView::Probe(this);
+//     v->SetAccessibilityDelegate(delegate);
+
+//     Int32 result;
+//     if (v->GetImportantForAccessibility(&result), result == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+//         v->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
+//     }
+// }
+
+//-------------test enc----------------------
+
+//     @Override
+//     protected void onDetachedFromWindow() {
+    OnDetachedFromWindow() {
+        elog("====ViewPager::OnDetachedFromWindow====TODO====");
+//         removeCallbacks(mEndScrollRunnable);
+//         super.onDetachedFromWindow();
+    }
+
+//     private void setScrollState(int newState) {
+    SetScrollState(newState) {
+        elog("====ViewPager::SetScrollState====TODO====");
+//         if (mScrollState == newState) {
+//             return;
 //         }
 
-// //     /**
-// //      * Used internally to tag special types of child views that should be added as
-// //      * pager decorations by default.
-// //      */
-// //     interface Decor {}
-//         function Decor() {}
-
-// //     public ViewPager(Context context) {
-// //         super(context);
-// //         initViewPager();
-// //     }
-
-// //     public ViewPager(Context context, AttributeSet attrs) {
-//         function ViewPager(context, attrs) {
-// //         super(context, attrs);
-// //         initViewPager();
-// //     }
+//         mScrollState = newState;
+//         if (mPageTransformer != null) {
+//             // PageTransformers can do complex things that benefit from hardware layers.
+//             enableLayers(newState != SCROLL_STATE_IDLE);
 //         }
-//         var _pt = ViewPager.prototype;
-
-// //     void initViewPager() {
-//         function initViewPager() {
-// //         setWillNotDraw(false);
-// //         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
-// //         setFocusable(true);
-// //         final Context context = getContext();
-// //         mScroller = new Scroller(context, sInterpolator);
-// //         final ViewConfiguration configuration = ViewConfiguration.get(context);
-// //         final float density = context.getResources().getDisplayMetrics().density;
-
-// //         mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
-// //         mMinimumVelocity = (int) (MIN_FLING_VELOCITY * density);
-// //         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
-// //         mLeftEdge = new EdgeEffectCompat(context);
-// //         mRightEdge = new EdgeEffectCompat(context);
-
-// //         mFlingDistance = (int) (MIN_DISTANCE_FOR_FLING * density);
-// //         mCloseEnough = (int) (CLOSE_ENOUGH * density);
-// //         mDefaultGutterSize = (int) (DEFAULT_GUTTER_SIZE * density);
-
-// //         ViewCompat.setAccessibilityDelegate(this, new MyAccessibilityDelegate());
-
-// //         if (ViewCompat.getImportantForAccessibility(this)
-// //                 == ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-// //             ViewCompat.setImportantForAccessibility(this,
-// //                     ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
-// //         }
-// //     }
+//         if (mOnPageChangeListener != null) {
+//             mOnPageChangeListener.onPageScrollStateChanged(newState);
 //         }
-
-// //     @Override
-// //     protected void onDetachedFromWindow() {
-//         _pt.OnDetachedFromWindow = function() {
-// //         removeCallbacks(mEndScrollRunnable);
-// //         super.onDetachedFromWindow();
-// //     }
-//         }
-
-// //     private void setScrollState(int newState) {
-//         function setScrollState(newState) {
-// //         if (mScrollState == newState) {
-// //             return;
-// //         }
-
-// //         mScrollState = newState;
-// //         if (mPageTransformer != null) {
-// //             // PageTransformers can do complex things that benefit from hardware layers.
-// //             enableLayers(newState != SCROLL_STATE_IDLE);
-// //         }
-// //         if (mOnPageChangeListener != null) {
-// //             mOnPageChangeListener.onPageScrollStateChanged(newState);
-// //         }
-// //     }
-//         }
+    }
 
 //     /**
 //      * Set a PagerAdapter that will supply views for this pager as needed.
@@ -619,9 +773,6 @@ module.exports = function(aoElastos, aoActivity){
         if (this.mAdapter != null) {
             this.unregisterDataSetObserver(this.mObserver);
             this.mAdapter.startUpdate(this);
-
-CObject.showMethods(this.mItems);
-
             for (var i = 0; i < this.mItems.size(); i++) {
                 var ii = this.mItems.get(i);
                 this.mAdapter.destroyItem(this, ii.position, ii.object);
@@ -869,15 +1020,6 @@ CObject.showMethods(this.mItems);
      * @param transformer PageTransformer that will modify each page's animation properties
      */
 
-// static Int32 GetInt32Property(
-//     /* [in] */ const String& property)
-// {
-//     AutoPtr<ISystemProperties> sysProp;
-//     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-//     Int32 value;
-//     sysProp->GetInt32(property, 0, &value);
-//     return value;
-// }
     GetInt32Property(property) {
         var sysProp = Droid_New("Elastos.Droid.Os.CSystemProperties");
         var value = sysProp.GetInt32(property, 0);

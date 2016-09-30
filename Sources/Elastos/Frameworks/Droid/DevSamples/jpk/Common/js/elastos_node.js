@@ -95,6 +95,7 @@ root.Elastos = ( function () {
     };
 
     var _api = require('../../bin/elastos.node');
+    global.Assert = function(){_api.Assert();};
 
     var _Runtime_Native = _api.require("/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco", "Elastos.DevSamples.Node.CarRuntime.CCarRuntime");
 

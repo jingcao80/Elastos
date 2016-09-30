@@ -113,6 +113,7 @@ function getDataTypeJavascriptString(ai_datatype){
 }
 
 function getCreateOnUIThread(as_ClassName) {
+    elog("====getCreateOnUIThread====" + as_ClassName);
     var bRet = false;
 
     if (as_ClassName == "Elastos.Droid.Widget.CPopupWindow") {
@@ -122,6 +123,11 @@ function getCreateOnUIThread(as_ClassName) {
     if (as_ClassName == "Elastos.Droid.Webkit.CWebView") {
         bRet = true;
     }
+
+    //if (as_ClassName == "Elastos.Droid.Widget.CEdgeEffect") {
+    // if (as_ClassName == "CEdgeEffect") {
+    //     bRet = true;
+    // }
 
     return bRet;
 }
@@ -361,15 +367,22 @@ function _getConstructorInfo(oClassInfo, args){
                     // var sInterfaceName = oTypeInfo.GetName();
                     // bSameArgs = CObject.hasInterface(arg_in, sInterfaceName);
 
-                    CObject.showMethods(oTypeInfo);
+                    // CObject.showMethods(oTypeInfo);
 
-                    bSameArgs = arg_in.hasInterface(oTypeInfo.GetInternalObject());
+                    if (arg_in.hasInterface) {
+                        bSameArgs = arg_in.hasInterface(oTypeInfo.GetInternalObject());
+                    }
+                    else {
+                        elog('====_getConstructorInfo====IInterface=====no hasInterface method!====TODO: generate car proxy for js object');
+                        //return null;
+                        bSameArgs = true;
+                    }
                     break;
                 case CarDataType.LocalPtr:
                     var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();
                     var iElementDataType = oElementTypeInfo.GetDataType();
 
-                    elog('==============classinfo__createObject ======find method====LocalPtr====element type:'+iElementDataType);
+                    elog('====_getConstructorInfo====LocalPtr====find method====element type:'+iElementDataType);
 
                     switch (iElementDataType) {
                         case CarDataType.IInterface:
@@ -491,7 +504,15 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                 //case CarDataType.StructPtr:
                 case CarDataType.IInterface:
                     //oArgumentList.SetInputArgumentOfObjectPtr(i,arguments[i+2]);
-                    oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
+
+                    if (arg.hasInterface) {
+                        oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
+                    }
+                    else {
+                        elog('====classinfo__createObject====IInterface=====no hasInterface method!====TODO: generate car proxy for js object');
+                        oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
+                    }
+
                     break;
                 case CarDataType.LocalPtr:
                     var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();
