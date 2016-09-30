@@ -4,7 +4,7 @@
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/settings/CDisplaySettings.h"
 #include "elastos/droid/settings/Utils.h"
-// #include "elastos/droid/settings/CDreamSettings.h"
+#include "elastos/droid/settings/CDreamSettings.h"
 #include "elastos/droid/settings/notification/CDropDownPreference.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/os/Build.h"
@@ -632,9 +632,8 @@ void CDisplaySettings::UpdateScreenSaverSummary()
     if (mScreenSaverPreference != NULL) {
         AutoPtr<IActivity> activity;
         GetActivity((IActivity**)&activity);
-        assert(0 && "TODO");
-        // mScreenSaverPreference->SetSummary(
-        //         CDreamSettings::GetSummaryTextWithDreamName(IContext::Probe(activity)));
+        mScreenSaverPreference->SetSummary(
+                CDreamSettings::GetSummaryTextWithDreamName(IContext::Probe(activity)));
     }
 }
 

@@ -600,10 +600,8 @@ ECode CDeviceInfoSettings::ReadLine(
 
     AutoPtr<IReader> fr;
     CFileReader::New(filename, (IReader**)&fr);
-Logger::D("CDeviceInfoSettings::ReadLine", "========= fr:%p =========", fr.Get());
     AutoPtr<IBufferedReader> reader;
     CBufferedReader::New(fr, 256, (IBufferedReader**)&reader);
-Logger::D("CDeviceInfoSettings::ReadLine", "========= reader:%p =========", reader.Get());
     // try {
     String str;
     ECode ec = reader->ReadLine(&str);

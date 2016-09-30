@@ -1256,6 +1256,18 @@ module
         interface IIndexable;
     }
 
+    class CDreamSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+    }
+
     class CDevelopmentSettings {
         constructor();
 
