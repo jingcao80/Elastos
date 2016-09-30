@@ -19,7 +19,9 @@
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
+#include <elastos/utility/etl/HashMap.h>
 #include <utils/Timers.h>
+#include <binder/Binder.h>
 
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IIntent;
@@ -53,6 +55,7 @@ using Elastos::Core::Thread;
 using Elastos::IO::IPrintWriter;
 using Elastos::IO::IFileDescriptor;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -688,6 +691,44 @@ private:
 
         // @Override
         CARAPI Run();
+    };
+
+    class NativePowerManagerService : public android::BBinder
+    {
+    private:
+        class ElLock
+            : public Object
+            , public Elastos::Droid::Os::IBinder
+        {
+        public:
+            ElLock(
+                /* [in] */ android::sp<android::IBinder> lock)
+                : mLock(lock)
+            {}
+
+            CAR_INTERFACE_DECL()
+
+            TO_STRING_IMPL("NativePowerManagerService::ElLock")
+
+        private:
+            android::sp<android::IBinder> mLock;
+        };
+
+    public:
+        NativePowerManagerService(
+            /* [in] */ BinderService* host)
+            : mHost(host)
+        {}
+
+        android::status_t onTransact(
+            /* [in] */ uint32_t code,
+            /* [in] */ const android::Parcel& data,
+            /* [in] */ android::Parcel* reply,
+            /* [in] */ uint32_t flags = 0);
+
+    private:
+        BinderService* mHost;
+        HashMap<Int64, AutoPtr<ElLock> > mLockMap;
     };
 
 public:
@@ -1533,6 +1574,8 @@ private:
     AutoPtr<ISensorEventListener> mProximityListener;
 
     AutoPtr<PerformanceManager> mPerformanceManager;
+
+    android::sp<NativePowerManagerService> mNative;
 
     friend class MyDisplayPowerCallbacks;
     friend class WakeLock;

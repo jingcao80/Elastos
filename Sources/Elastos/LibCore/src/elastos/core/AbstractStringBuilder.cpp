@@ -305,7 +305,7 @@ ECode AbstractStringBuilder::Append(
         return AppendNULL();
     }
 
-    Int32 length = str.GetByteLength();
+    Int32 length = strlen(str.string());
     Break(length);
 
     memcpy(mString + mByteCount, (const char*)str, length);

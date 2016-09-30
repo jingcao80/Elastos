@@ -198,6 +198,7 @@ Boolean ColorFade::Prepare(
     Boolean createEglSurface = CreateEglSurface();
     Boolean cstasv = CaptureScreenshotTextureAndSetViewport();
     if (!(createSurface && createEglContext && createEglSurface && cstasv)) {
+        mPrepared = TRUE;
         Dismiss();
         return FALSE;
     }
@@ -209,6 +210,7 @@ Boolean ColorFade::Prepare(
     // try {
         if(!InitGLShaders(context) || !InitGLBuffers() || CheckGlErrors(String("prepare"))) {
             DetachEglContext();
+            mPrepared = TRUE;
             Dismiss();
             DetachEglContext();
             return FALSE;
