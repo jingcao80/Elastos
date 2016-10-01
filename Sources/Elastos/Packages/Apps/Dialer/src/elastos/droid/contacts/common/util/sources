@@ -18,3 +18,6 @@ SOURCES += CEmptyService.cpp
 SOURCES += LocalizedNameResolver.cpp
 SOURCES += UriUtils.cpp
 SOURCES += Constants.cpp
+SOURCES += BitmapUtil.cpp
+SOURCES += DateUtils.cpp
+SOURCES += CommonDateUtils.cpp

@@ -1,44 +1,13 @@
 
 module
 {
-    using interface Elastos.Droid.Content.IContext;
-    using interface Elastos.Droid.Content.IContentResolver;
-    interface Elastos.Droid.Dialer.CallLog.IDefaultVoicemailNotifierNewCallsQuery;
-    interface Elastos.Droid.Dialer.CallLog.IPhoneNumberDisplayHelper;
 
     namespace Elastos {
     namespace Droid {
     namespace Dialer {
     namespace CallLog {
 
-    interface IDefaultVoicemailNotifier {
-    }
-
-    [deprecated, local]
-    interface IDefaultVoicemailNotifierHelper {
-        /** Returns the singleton instance of the {@link DefaultVoicemailNotifier}. */
-        GetInstance(
-            [in] IContext* ctx,
-            [out] IDefaultVoicemailNotifier** notifier);
-
-        /** Create a new instance of {@link NewCallsQuery}. */
-        CreateNewCallsQuery(
-            [in] IContentResolver* contentResolver,
-            [out] IDefaultVoicemailNotifierNewCallsQuery** query);
-
-        /**
-         * Create a new PhoneNumberHelper.
-         * <p>
-         * This will cause some Disk I/O, at least the first time it is created, so it should not be
-         * called from the main thread.
-         */
-        CreatePhoneNumberHelper(
-            [in] IContext* ctx,
-            [out] IPhoneNumberDisplayHelper** helper);
-    }
-
-    interface IDefaultVoicemailNotifierNewCall {
-    }
+    interface IDefaultVoicemailNotifierNewCall {}
 
     /** Allows determining the new calls for which a notification should be generated. */
     interface IDefaultVoicemailNotifierNewCallsQuery {

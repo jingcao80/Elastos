@@ -1,7 +1,7 @@
 module
 {
 
-    using interface Elastos.Droid.Net.ICursor;
+    using interface Elastos.Droid.Database.ICursor;
 
     namespace Elastos{
     namespace Droid {
