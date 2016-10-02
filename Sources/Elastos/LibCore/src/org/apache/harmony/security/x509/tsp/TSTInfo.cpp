@@ -341,9 +341,9 @@ AutoPtr<IASN1Sequence> TSTInfo::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> TSTInfo::ACCURACY = initACCURACY();
+AutoPtr<IASN1Sequence> TSTInfo::ACCURACY;// = initACCURACY();
 
-AutoPtr<IASN1Sequence> TSTInfo::ASN1 = initASN1();
+AutoPtr<IASN1Sequence> TSTInfo::ASN1;// = initASN1();
 
 CAR_INTERFACE_IMPL(TSTInfo, Object, ITSTInfo)
 

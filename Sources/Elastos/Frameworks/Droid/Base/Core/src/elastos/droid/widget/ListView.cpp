@@ -1926,7 +1926,7 @@ void ListView::SetupChild(
         child->SetPressed(isPressed);
     }
 
-    if (mChoiceMode == IAbsListView::CHOICE_MODE_NONE && mCheckStates != NULL) {
+    if (mChoiceMode != IAbsListView::CHOICE_MODE_NONE && mCheckStates != NULL) {
         AutoPtr<ICheckable> checkable = ICheckable::Probe(child);
         if (checkable != NULL) {
             Boolean value;
