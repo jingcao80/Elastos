@@ -137,7 +137,7 @@ void CDateView::UpdateClock()
     mCurrentTime->SetTime(t);
 
     String text;
-    IDateFormat::Probe(mDateFormat)->Format(mCurrentTime, &text);
+    Elastos::Text::IDateFormat::Probe(mDateFormat)->Format(mCurrentTime, &text);
     if (!text.Equals(mLastText)) {
         AutoPtr<ICharSequence> cs;
         CString::New(text, (ICharSequence**)&cs);

@@ -654,7 +654,7 @@ String DateTimeSettings::GetTimeZoneText(
     // Use SimpleDateFormat to format the GMT+00:00 string.
     AutoPtr<ISimpleDateFormat> gmtFormatter;
     CSimpleDateFormat::New(String("ZZZZ"), (ISimpleDateFormat**)&gmtFormatter);
-    IDateFormat* _gmtFormatter = IDateFormat::Probe(gmtFormatter);
+    Elastos::Text::IDateFormat* _gmtFormatter = Elastos::Text::IDateFormat::Probe(gmtFormatter);
     _gmtFormatter->SetTimeZone(tz);
     String gmtString;
     _gmtFormatter->Format(now, &gmtString);
@@ -687,7 +687,7 @@ String DateTimeSettings::GetTimeZoneText(
     // Optionally append the time zone name.
     AutoPtr<ISimpleDateFormat> zoneNameFormatter;
     CSimpleDateFormat::New(String("zzzz"), (ISimpleDateFormat**)&zoneNameFormatter);
-    IDateFormat* _zoneNameFormatter = IDateFormat::Probe(zoneNameFormatter);
+    Elastos::Text::IDateFormat* _zoneNameFormatter = Elastos::Text::IDateFormat::Probe(zoneNameFormatter);
     _zoneNameFormatter->SetTimeZone(tz);
     String zoneNameString;
     _zoneNameFormatter->Format(now, &zoneNameString);

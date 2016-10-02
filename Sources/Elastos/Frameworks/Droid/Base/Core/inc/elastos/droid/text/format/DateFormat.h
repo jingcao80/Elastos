@@ -8,7 +8,6 @@
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Text::ISpannableStringBuilder;
 using Elastos::Core::ICharSequence;
-using Elastos::Text::IDateFormat;
 using Elastos::Utility::ICalendar;
 using Elastos::Utility::IDate;
 using Elastos::Utility::ILocale;
