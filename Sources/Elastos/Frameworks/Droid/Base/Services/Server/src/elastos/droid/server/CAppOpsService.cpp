@@ -1372,7 +1372,8 @@ ECode CAppOpsService::CheckAudioOperation(
 {
     VALIDATE_NOT_NULL(result)
     *result = IAppOpsManager::MODE_ERRORED;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         Int32 mode = CheckRestrictionLocked(code, usage, uid, packageName);
         if (mode != IAppOpsManager::MODE_ALLOWED) {
             *result = mode;
@@ -1396,12 +1397,8 @@ Int32 CAppOpsService::CheckRestrictionLocked(
         obj = NULL;
         usageRestrictions->Get(usage, (IInterface**)&obj);
         Restriction* r = (Restriction*)IObject::Probe(obj);
-        if (r != NULL) {
-            HashSet<String>::Iterator it = r->mExceptionPackages->Find(packageName);
-            Boolean contains = (it != r->mExceptionPackages->End());
-            if (!contains) {
-                mode = r->mMode;
-            }
+        if (r != NULL && (r->mExceptionPackages->Find(packageName) == r->mExceptionPackages->End())) {
+            mode = r->mMode;
         }
     }
 
@@ -1422,7 +1419,8 @@ ECode CAppOpsService::SetAudioRestriction(
 {
     FAIL_RETURN(VerifyIncomingUid(uid))
     FAIL_RETURN(VerifyIncomingOp(code))
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mAudioRestrictions->Get(code, (IInterface**)&obj);
         AutoPtr<ISparseArray> usageRestrictions = ISparseArray::Probe(obj);
@@ -1439,7 +1437,7 @@ ECode CAppOpsService::SetAudioRestriction(
                 r->mExceptionPackages = new HashSet<String>();
                 for (Int32 i = 0; i < N; i++) {
                     String pkg = (*exceptionPackages)[i];
-                    if (pkg != NULL) {
+                    if (!pkg.IsNull()) {
                         r->mExceptionPackages->Insert(pkg.Trim());
                     }
                 }

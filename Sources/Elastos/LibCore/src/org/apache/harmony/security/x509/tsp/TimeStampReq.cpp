@@ -82,7 +82,7 @@ AutoPtr<IASN1Sequence> TimeStampReq::initASN1()
     return NULL;
 }
 
-AutoPtr<IASN1Sequence> TimeStampReq::ASN1 = initASN1();
+AutoPtr<IASN1Sequence> TimeStampReq::ASN1;// = initASN1();
 
 CAR_INTERFACE_IMPL(TimeStampReq, Object, ITimeStampReq)
 

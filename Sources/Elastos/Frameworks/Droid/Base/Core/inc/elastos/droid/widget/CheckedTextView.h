@@ -20,6 +20,7 @@ namespace Widget {
  */
 class CheckedTextView
     : public TextView
+    , public ICheckable
     , public ICheckedTextView
 {
 public:
