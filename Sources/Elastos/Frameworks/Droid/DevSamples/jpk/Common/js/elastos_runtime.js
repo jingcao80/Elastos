@@ -330,6 +330,33 @@ CObject.getObjectMethodProtos = function(ao_Car, as_MethodName) {
     return __getMethodProtos(aMethodInfos);
 }
 
+CObject.test = function() {
+    elog("========test========");
+
+    var om = Elastos.Droid.Get();
+    this.showMethods(om);
+
+    var im = om.GetConstantCount();
+    elog("========test========im:" + im);
+
+    var ac = om.GetAllConstantInfos();
+    var an = [];
+    var j = 0;
+    for (var i=0; i<im; i++) {
+        j++;
+        an.push(ac[i].GetName());
+        if (j>=20) {
+            elog("====" + i + "====[" + an.join("==") + "]");
+            an = [];
+            j=0;
+        }
+    }
+
+
+    Assert(0);
+}
+
+
 //--------proto info end--------
 
 //return: constructorInfo

@@ -382,11 +382,16 @@ module
         Test();
     }
 
+    interface IViewMeasureSpec;
+
     [local]
     interface ICalculatorPadViewPager
     {
         GetSuperObject(
             [out] ICalculatorPadViewPagerSuperObject** superObject);
+
+        GetMeasureSpec(
+            [out] IViewMeasureSpec** measureSpec);
 
         _constructor(
             [in] IContext* context,
@@ -394,7 +399,16 @@ module
 
         //protected:
         _OnFinishInflate();
-    }
+
+        _SetMeasuredDimension(
+            [in] Int32 measuredWidth,
+            [in] Int32 measuredHeight);
+
+        _GetDefaultSize(
+            [in] Int32 size,
+            [in] Int32 measureSpec,
+            [out] Int32* res);
+     }
 
     [local]
     interface IViewPager
@@ -616,6 +630,40 @@ module
             [in] IInterface* _this,
             [in] IAttributeSet* attrs,
             [out] IViewGroupLayoutParams** params);
+    }
+
+    [local]
+    interface IViewMeasureSpec
+    {
+        GetMODE_SHIFT(
+            [out] Int32* result);
+        GetMODE_MASK(
+            [out] Int32* result);
+
+        GetUNSPECIFIED(
+            [out] Int32* result);
+        GetEXACTLY(
+            [out] Int32* result);
+        GetAT_MOST(
+            [out] Int32* result);
+
+        MakeMeasureSpec(
+            [in] Int32 size,
+            [in] Int32 mode,
+            [out] Int32* result);
+        GetMode(
+            [in] Int32 measureSpec,
+            [out] Int32* result);
+        GetSize(
+            [in] Int32 measureSpec,
+            [out] Int32* result);
+        Adjust(
+            [in] Int32 measureSpec,
+            [in] Int32 delta,
+            [out] Int32* result);
+        GetDescription(
+            [in] Int32 measureSpec,
+            [out] String* description);
     }
 
     class CCalculator {

@@ -147,8 +147,7 @@ class _CalculatorEditText extends EditText {
             //_super = _this.GetSuperObject();
 
 //         super(context, attrs, defStyle);
-            //_this._constructor(context, attrs, defStyle);
-            _super.OnCreate(context, attrs, defStyle);
+            _this._constructor(context, attrs, defStyle);
 
 //         final TypedArray a = context.obtainStyledAttributes(
 //                 attrs, R.styleable.CalculatorEditText, defStyle, 0);
@@ -173,7 +172,7 @@ class _CalculatorEditText extends EditText {
             a.Recycle();
 
 //         setCustomSelectionActionModeCallback(NO_SELECTION_ACTION_MODE_CALLBACK);
-            _this.SetCustomSelectionActionModeCallback(JSClass.NO_SELECTION_ACTION_MODE_CALLBACK);
+            _this.SetCustomSelectionActionModeCallback(this.NO_SELECTION_ACTION_MODE_CALLBACK);
 
 //         if (isFocusable()) {
             if (_this.IsFocusable()) {
@@ -250,7 +249,7 @@ class _CalculatorEditText extends EditText {
             elog(FullClassName + "========OnTextChanged begin========");
 
 //         super.onTextChanged(text, start, lengthBefore, lengthAfter);
-            _super.OnTextChanged(text, start, lengthBefore, lengthAfter);
+            _this._OnTextChanged(text, start, lengthBefore, lengthAfter);
 
 //         final int textLength = text.length();
             var textLength = text.GetLength();
@@ -279,7 +278,7 @@ class _CalculatorEditText extends EditText {
             var oldTextSize = _this.GetTextSize();
 
 //         super.setTextSize(unit, size);
-            _super.SetTextSize(unit, size);
+            _this._SetTextSize(unit, size);
 
 //         if (mOnTextSizeChangeListener != null && getTextSize() != oldTextSize) {
             if (this.mOnTextSizeChangeListener != null && _this.GetTextSize() != oldTextSize) {
@@ -304,7 +303,7 @@ class _CalculatorEditText extends EditText {
             if (this.mWidthConstraint < 0 || this.mMaximumTextSize <= this.mMinimumTextSize) {
 //             // Not measured, bail early.
 //             return getTextSize();
-                return this.GetTextSize();
+                return _this.GetTextSize();
 //         }
             }
 
@@ -348,14 +347,14 @@ class _CalculatorEditText extends EditText {
 //         // Measure the top padding from the capital letter height of the text instead of the top,
 //         // but don't remove more than the available top padding otherwise clipping may occur.
 //         getPaint().getTextBounds("H", 0, 1, mTempRect);
-            _this.GetPaint().GetTextBounds("H", 0, 1, mTempRect);
+            _this.GetPaint().GetTextBounds("H", 0, 1, this.mTempRect);
 
 //         final FontMetricsInt fontMetrics = getPaint().getFontMetricsInt();
             var fontMetrics = _this.GetPaint().GetFontMetricsInt();
 //         final int paddingOffset = -(fontMetrics.ascent + mTempRect.height());
-            var paddingOffset = -(fontMetrics.GetDescent() + mTempRect.GetHeight());
+            var paddingOffset = -(fontMetrics.GetDescent() + this.mTempRect.GetHeight());
 //         return super.getCompoundPaddingTop() - Math.min(getPaddingTop(), paddingOffset);
-            result.data = _super.GetCompoundPaddingTop() - Math.min(_this.GetPaddingTop(), paddingOffset);
+            result.data = _this._GetCompoundPaddingTop() - Math.min(_this.GetPaddingTop(), paddingOffset);
 
             elog(FullClassName + "========GetCompoundPaddingTop end========");
     }
@@ -372,7 +371,7 @@ class _CalculatorEditText extends EditText {
 
 //         return super.getCompoundPaddingBottom() - Math.min(getPaddingBottom(), fontMetrics.descent);
             //return _super.getCompoundPaddingBottom() - Math.min(getPaddingBottom(), fontMetrics.descent);
-            result.data = _super.GetCompoundPaddingBottom() - Math.min(_this.GetPaddingBottom(), fontMetrics.GetDescent());
+            result.data = _this._GetCompoundPaddingBottom() - Math.min(_this.GetPaddingBottom(), fontMetrics.GetDescent());
 
             elog(FullClassName + "========GetCompoundPaddingBottom end========");
     }

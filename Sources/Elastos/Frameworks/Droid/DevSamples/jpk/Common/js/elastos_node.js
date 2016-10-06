@@ -125,14 +125,30 @@ root.Elastos = ( function () {
 
     _Elastos.CObject.showMethods = function(aoCar,asTag) {
         var a = [];
+        var b = [];
+        var i = 0;
+        var j = 0;
         for (var p in aoCar){
+            i++;
             var bAdd = true;
             if (typeof asTag == "string") {
                 if (p.indexOf(asTag) < 0) bAdd = false;
             }
-            if (bAdd) a.push(p);
+            if (!bAdd) continue;
+            a.push(p);
+
+            b.push(p);
+
+            j++;
+            if (j>39) {
+                var s = "====methods===="+i+"====[" + b.join("][") + "]";
+                elog(s);
+                b = [];
+                j = 0;
+            }
         }
-        var s = "====methods====[" + a.join("][") + "]";
+
+        var s = "====methods==== ===="+i+"====[" + b.join("][") + "]";
         elog(s);
     }
 

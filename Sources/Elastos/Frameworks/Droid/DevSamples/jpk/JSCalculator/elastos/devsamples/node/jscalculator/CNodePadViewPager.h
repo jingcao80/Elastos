@@ -37,6 +37,50 @@ public:
     CAR_INTERFACE_DECL()
     CAR_OBJECT_DECL()
 
+public:
+    class _MeasureSpec
+        : public Object
+        , public IViewMeasureSpec
+    {
+    public:
+        _MeasureSpec(){};
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI GetMODE_SHIFT(
+            /* [out] */ Int32* result);
+        CARAPI GetMODE_MASK(
+            /* [out] */ Int32* result);
+
+        CARAPI GetUNSPECIFIED(
+            /* [out] */ Int32* result);
+        CARAPI GetEXACTLY(
+            /* [out] */ Int32* result);
+        CARAPI GetAT_MOST(
+            /* [out] */ Int32* result);
+
+        CARAPI MakeMeasureSpec(
+            /* [in] */ Int32 size,
+            /* [in] */ Int32 mode,
+            /* [out] */ Int32* result);
+        CARAPI GetMode(
+            /* [in] */ Int32 measureSpec,
+            /* [out] */ Int32* result);
+        CARAPI GetSize(
+            /* [in] */ Int32 measureSpec,
+            /* [out] */ Int32* result);
+        CARAPI Adjust(
+            /* [in] */ Int32 measureSpec,
+            /* [in] */ Int32 delta,
+            /* [out] */ Int32* result);
+        CARAPI GetDescription(
+            /* [in] */ Int32 measureSpec,
+            /* [out] */ String* description);
+    };
+
+    CARAPI GetMeasureSpec(
+            /* [out] */ IViewMeasureSpec** measureSpec);
+
 private:
     class SuperObject
         : public Object
@@ -70,6 +114,15 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
+
+    CARAPI _SetMeasuredDimension(
+        /* [in] */ Int32 measuredWidth,
+        /* [in] */ Int32 measuredHeight);
+
+    CARAPI _GetDefaultSize(
+        /* [in] */ Int32 size,
+        /* [in] */ Int32 measureSpec,
+        /* [out] */ Int32* res);
 
 //------------------------------------------
 protected:
@@ -267,8 +320,10 @@ public:
         /* [out] */ ICalculatorPadViewPagerSuperObject** ppSuperObject);
 
 private:
-        AutoPtr<ICalculatorPadViewPagerListener> mListener;
-        AutoPtr<ICalculatorPadViewPagerSuperObject> mSuperObject;
+    AutoPtr<ICalculatorPadViewPagerListener> mListener;
+    AutoPtr<ICalculatorPadViewPagerSuperObject> mSuperObject;
+
+    AutoPtr<IViewMeasureSpec> mMeasureSpec;
 };
 
 } // namespace JSPkgName

@@ -20,6 +20,8 @@ JS_CAR_OBJECT_IMPL(JSActName)
 
 CAR_INTERFACE_IMPL(JSActName::SuperObject, Object, ICalculatorPadViewPagerSuperObject)
 
+CAR_INTERFACE_IMPL(JSActName::_MeasureSpec, Object, IViewMeasureSpec)
+
 JSActName::CCalculatorPadViewPager(){}
 JSActName::~CCalculatorPadViewPager(){}
 
@@ -60,6 +62,22 @@ ECode JSActName::constructor(
     return ec;
 }
 
+ECode JSActName::_SetMeasuredDimension(
+        /* [in] */ Int32 measuredWidth,
+        /* [in] */ Int32 measuredHeight)
+{
+    ViewGroup::SetMeasuredDimension(measuredWidth, measuredHeight);
+    return NOERROR;
+}
+
+ECode JSActName::_GetDefaultSize(
+        /* [in] */ Int32 size,
+        /* [in] */ Int32 measureSpec,
+        /* [out] */ Int32* res){
+    *res = ViewGroup::GetDefaultSize(size, measureSpec);
+    return NOERROR;
+}
+
 //------------------------------------------
 //protected:
 ECode JSActName::_OnFinishInflate()
@@ -83,6 +101,7 @@ ECode JSActName::OnFinishInflate()
 
     return ec;
 }
+
 
 //protected:
 ECode JSActName::_OnDetachedFromWindow()
@@ -777,6 +796,7 @@ ECode JSActName::GenerateLayoutParams(
     else {
         ec = ViewGroup::GenerateLayoutParams(attrs, params);
     }
+    ALOGD("CCalculatorPadViewPager::GenerateLayoutParams========end========");
 
     return ec;
 }
@@ -809,6 +829,96 @@ ECode JSActName::SuperObject::Test()
 
     return NOERROR;
 }
+
+//--------_MeasureSpec----begin--------
+
+ECode JSActName::_MeasureSpec::GetMODE_SHIFT(
+            /* [out] */ Int32* result)
+{
+    //*result = View::MeasureSpec::MODE_SHIFT;
+    return NOERROR;
+}
+ECode JSActName::_MeasureSpec::GetMODE_MASK(
+            /* [out] */ Int32* result)
+{
+    //*result = View::MeasureSpec::MODE_MASK;
+    return NOERROR;
+}
+
+ECode JSActName::_MeasureSpec::GetUNSPECIFIED(
+            /* [out] */ Int32* result)
+{
+    *result = View::MeasureSpec::UNSPECIFIED;
+    return NOERROR;
+}
+ECode JSActName::_MeasureSpec::GetEXACTLY(
+            /* [out] */ Int32* result)
+{
+    *result = View::MeasureSpec::EXACTLY;
+    return NOERROR;
+}
+ECode JSActName::_MeasureSpec::GetAT_MOST(
+            /* [out] */ Int32* result)
+{
+    *result = View::MeasureSpec::AT_MOST;
+    return NOERROR;
+}
+
+ECode JSActName::_MeasureSpec::MakeMeasureSpec(
+            /* [in] */ Int32 size,
+            /* [in] */ Int32 mode,
+            /* [out] */ Int32* result)
+{
+    *result = View::MeasureSpec::MakeMeasureSpec(size, mode);
+    return NOERROR;
+}
+ECode JSActName::_MeasureSpec::GetMode(
+            /* [in] */ Int32 measureSpec,
+            /* [out] */ Int32* result)
+{
+    *result = View::MeasureSpec::GetMode(measureSpec);
+    return NOERROR;
+}
+ECode JSActName::_MeasureSpec::GetSize(
+            /* [in] */ Int32 measureSpec,
+            /* [out] */ Int32* result)
+{
+    *result = View::MeasureSpec::GetSize(measureSpec);
+    return NOERROR;
+}
+ECode JSActName::_MeasureSpec::Adjust(
+            /* [in] */ Int32 measureSpec,
+            /* [in] */ Int32 delta,
+            /* [out] */ Int32* result)
+{
+    *result = View::MeasureSpec::Adjust(measureSpec, delta);
+    return NOERROR;
+}
+ECode JSActName::_MeasureSpec::GetDescription(
+            /* [in] */ Int32 measureSpec,
+            /* [out] */ String* description)
+{
+    return View::MeasureSpec::GetDescription(measureSpec, description);
+}
+
+ECode JSActName::GetMeasureSpec(
+            /* [out] */ IViewMeasureSpec** measureSpec)
+{
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    assert(measureSpec != NULL);
+
+    if (!mMeasureSpec) {
+        _MeasureSpec* _measureSpec = new _MeasureSpec();
+        mMeasureSpec = (IViewMeasureSpec*)_measureSpec->Probe(EIID_IViewMeasureSpec);
+    }
+
+    *measureSpec = mMeasureSpec;
+
+    REFCOUNT_ADD(*measureSpec);
+    return NOERROR;
+}
+
+//--------_MeasureSpec----end--------
 
 } // namespace JSPkgName
 } // namespace Node

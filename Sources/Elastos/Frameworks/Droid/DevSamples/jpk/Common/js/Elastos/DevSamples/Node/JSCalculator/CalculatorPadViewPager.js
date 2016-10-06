@@ -204,14 +204,20 @@ class _CalculatorPadViewPager extends ViewPager {
 
 //     @Override
 //     protected void onFinishInflate() {
-    OnFinishInflate() {
-        elog("====OnFinishInflate====TODO====");
+    OnFinishInflate(_this) {
+        elog("====OnFinishInflate====begin====");
+
 //         super.onFinishInflate();
+        _this._OnFinishInflate();
 
 //         // Invalidate the adapter's data set since children may have been added during inflation.
 //         if (getAdapter() == mStaticPagerAdapter) {
 //             mStaticPagerAdapter.notifyDataSetChanged();
 //         }
+        if (this.GetAdapter() == this.mStaticPagerAdapter) {
+            this.mStaticPagerAdapter.NotifyDataSetChanged();
+        }
+        elog("====OnFinishInflate====end====");
     }
 
 }   //class _CalculatorPadViewPager
@@ -223,82 +229,112 @@ class CalculatorPadViewPager extends _CalculatorPadViewPager {
         super();
     }
 
+    //--------
     // OnCreate(_this, context, attrs) {
+    //     Assert(0);
+
     //     elog("====CalculatorPadViewPager.js====::OnCreate====begin");
     //     _this._constructor(context, attrs);
     //     elog("====CalculatorPadViewPager.js====::OnCreate====end");
     // }
 
-    GenerateLayoutParams(_this, attrs, result){
-        elog("====CalculatorPadViewPager.js====::GenerateLayoutParams====begin");
-        result.data = _this._GenerateLayoutParams(attrs);
-        elog("====CalculatorPadViewPager.js====::GenerateLayoutParams====end");
-    }
+    //--------
+    // GenerateLayoutParams(_this, attrs, result){
+    //     Assert(0);
+
+    //     elog("====CalculatorPadViewPager.js====::GenerateLayoutParams====begin");
+    //     result.data = _this._GenerateLayoutParams(attrs);
+    //     elog("====CalculatorPadViewPager.js====::GenerateLayoutParams====end");
+    // }
 
     GetChildDrawingOrder(_this, childCount, i, result) {
+        Assert(0);
+
         elog("====CalculatorPadViewPager.js====::GetChildDrawingOrder====begin");
         result.data = _this._GetChildDrawingOrder(childCount, i);
         elog("====CalculatorPadViewPager.js====::GetChildDrawingOrder====end");
     }
 
-    AddView(_this, child, index, params) {
-        elog("====CalculatorPadViewPager.js====::AddView====begin");
-        _this._AddView(child, index, params);
-        elog("====CalculatorPadViewPager.js====::AddView====end");
-    }
+    //--------
+    // AddView(_this, child, index, params) {
+    //     Assert(0);
 
-    CheckLayoutParams(_this, p, result) {
-        elog("====CalculatorPadViewPager.js====::CheckLayoutParams====begin");
-        result.data = _this._CheckLayoutParams(p);
-        elog("====CalculatorPadViewPager.js====::CheckLayoutParams====end==result:" + result.data);
-    }
+    //     elog("====CalculatorPadViewPager.js====::AddView====begin");
+    //     _this._AddView(child, index, params);
+    //     elog("====CalculatorPadViewPager.js====::AddView====end");
+    // }
 
-    GenerateDefaultLayoutParams(_this, result) {
-        elog("====CalculatorPadViewPager.js====::GenerateDefaultLayoutParams====begin");
-        result.data = _this._GenerateDefaultLayoutParams();
-        elog("====CalculatorPadViewPager.js====::GenerateDefaultLayoutParams====end");
-    }
+    //--------
+    // CheckLayoutParams(_this, p, result) {
+    //     //Assert(0);
 
-    OnFinishInflate(_this) {
-        elog("====CalculatorPadViewPager.js====::OnFinishInflate====begin");
-        _this._OnFinishInflate();
-        elog("====CalculatorPadViewPager.js====::OnFinishInflate====end");
-    }
+    //     elog("====CalculatorPadViewPager.js====::CheckLayoutParams====begin");
+    //     result.data = _this._CheckLayoutParams(p);
+    //     elog("====CalculatorPadViewPager.js====::CheckLayoutParams====end==result:" + result.data);
+    // }
 
-    OnAttachedToWindow(_this) {
-        elog("====CalculatorPadViewPager.js====::OnAttachedToWindow====begin");
-        _this._OnAttachedToWindow();
-        elog("====CalculatorPadViewPager.js====::OnAttachedToWindow====end");
-    }
+    // GenerateDefaultLayoutParams(_this, result) {
+    //     Assert(0);
 
-    DrawableStateChanged(_this) {
-        elog("====CalculatorPadViewPager.js====::DrawableStateChanged====begin");
-        _this._DrawableStateChanged();
-        elog("====CalculatorPadViewPager.js====::DrawableStateChanged====end");
-    }
+    //     elog("====CalculatorPadViewPager.js====::GenerateDefaultLayoutParams====begin");
+    //     result.data = _this._GenerateDefaultLayoutParams();
+    //     elog("====CalculatorPadViewPager.js====::GenerateDefaultLayoutParams====end");
+    // }
 
-    OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
-        elog('====CalculatorPadViewPager.js====::OnMeasure.begin====');
-        _this._OnMeasure(widthMeasureSpec, heightMeasureSpec);
-        elog('====CalculatorPadViewPager.js====::OnMeasure.end====');
-    }
+    // OnFinishInflate(_this) {
+    //     Assert(0);
 
-    OnSizeChanged(_this, w, h, oldw, oldh) {
-        elog('====CalculatorPadViewPager.js====::OnSizeChanged.begin====');
-        _this._OnSizeChanged(w, h, oldw, oldh);
-        elog('====CalculatorPadViewPager.js====::OnSizeChanged.end====');
-    }
+    //     elog("====CalculatorPadViewPager.js====::OnFinishInflate====begin");
+    //     _this._OnFinishInflate();
+    //     elog("====CalculatorPadViewPager.js====::OnFinishInflate====end");
+    // }
 
-    OnLayout(_this, changed, left, top, right, bottom) {
-        elog('====CalculatorPadViewPager.js====::OnSizeChanged.begin====');
-        elog('====CalculatorPadViewPager.js====::OnSizeChanged.end====');
-    }
+    // OnAttachedToWindow(_this) {
+    //     Assert(0);
 
-    ComputeScroll(_this) {
-        elog('====CalculatorPadViewPager.js====::ComputeScroll.begin====');
-        _this._ComputeScroll();
-        elog('====CalculatorPadViewPager.js====::ComputeScroll.end====');
-    }
+    //     elog("====CalculatorPadViewPager.js====::OnAttachedToWindow====begin");
+    //     _this._OnAttachedToWindow();
+    //     elog("====CalculatorPadViewPager.js====::OnAttachedToWindow====end");
+    // }
+
+    // DrawableStateChanged(_this) {
+    //     Assert(0);
+
+    //     elog("====CalculatorPadViewPager.js====::DrawableStateChanged====begin");
+    //     _this._DrawableStateChanged();
+    //     elog("====CalculatorPadViewPager.js====::DrawableStateChanged====end");
+    // }
+
+    // OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
+    //     Assert(0);
+
+    //     elog('====CalculatorPadViewPager.js====::OnMeasure.begin====');
+    //     _this._OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    //     elog('====CalculatorPadViewPager.js====::OnMeasure.end====');
+    // }
+
+    // OnSizeChanged(_this, w, h, oldw, oldh) {
+    //     Assert(0);
+
+    //     elog('====CalculatorPadViewPager.js====::OnSizeChanged.begin====');
+    //     _this._OnSizeChanged(w, h, oldw, oldh);
+    //     elog('====CalculatorPadViewPager.js====::OnSizeChanged.end====');
+    // }
+
+    // OnLayout(_this, changed, left, top, right, bottom) {
+    //     Assert(0);
+
+    //     elog('====CalculatorPadViewPager.js====::OnLayout.begin====');
+    //     elog('====CalculatorPadViewPager.js====::OnLayout.end====');
+    // }
+
+    // ComputeScroll(_this) {
+    //     Assert(0);
+
+    //     elog('====CalculatorPadViewPager.js====::ComputeScroll.begin====');
+    //     _this._ComputeScroll();
+    //     elog('====CalculatorPadViewPager.js====::ComputeScroll.end====');
+    // }
 
 }   //class CalculatorPadViewPager
 

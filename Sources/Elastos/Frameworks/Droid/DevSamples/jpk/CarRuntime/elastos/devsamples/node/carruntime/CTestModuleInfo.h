@@ -38,7 +38,7 @@ public:
         /* [out] */ Int32 * pCount);
 
     CARAPI GetAllClassInfos(
-        /* [out, callee] */ ArrayOf<ITestClassInfo *> ** ppClassInfos);
+        /* [out] */ ArrayOf<ITestClassInfo *> ** ppClassInfos);
 
     CARAPI GetClassInfo(
         /* [in] */ const String& fullName,

@@ -17,6 +17,8 @@ module.exports = function(aoElastos, aoActivity){
 
 //--------common definition----end----
 
+    var GONE = 0x00000008;  //IVew::GONE
+
 //--------.java----begin----
 
 // /*
@@ -67,6 +69,38 @@ module.exports = function(aoElastos, aoActivity){
 // import android.util.Log;
 // import android.view.FocusFinder;
 // import android.view.Gravity;
+    var __Gravity = {};    //Elastos::Droid::View::IGravity
+
+
+        __Gravity.NO_GRAVITY = 0x0000;
+        __Gravity.AXIS_SPECIFIED = 0x0001;
+        __Gravity.AXIS_PULL_BEFORE = 0x0002;
+        __Gravity.AXIS_PULL_AFTER = 0x0004;
+        __Gravity.AXIS_CLIP = 0x0008;
+        __Gravity.AXIS_X_SHIFT = 0;
+        __Gravity.AXIS_Y_SHIFT = 4;
+        __Gravity.TOP = 0x0003 << __Gravity.AXIS_Y_SHIFT;
+        __Gravity.BOTTOM = 0x0005 << __Gravity.AXIS_Y_SHIFT;
+        __Gravity.LEFT = 0x0003 << __Gravity.AXIS_X_SHIFT;
+        __Gravity.RIGHT = 0x0005 << __Gravity.AXIS_X_SHIFT;
+        __Gravity.CENTER_VERTICAL = __Gravity.AXIS_SPECIFIED<<__Gravity.AXIS_Y_SHIFT;
+        __Gravity.FILL_VERTICAL = __Gravity.TOP|__Gravity.BOTTOM;
+        __Gravity.CENTER_HORIZONTAL = __Gravity.AXIS_SPECIFIED<<__Gravity.AXIS_X_SHIFT;
+        __Gravity.FILL_HORIZONTAL = __Gravity.LEFT|__Gravity.RIGHT;
+        __Gravity.CENTER = __Gravity.CENTER_VERTICAL|__Gravity.CENTER_HORIZONTAL;
+        __Gravity.FILL = __Gravity.FILL_VERTICAL|__Gravity.FILL_HORIZONTAL;
+        __Gravity.CLIP_VERTICAL = __Gravity.AXIS_CLIP<<__Gravity.AXIS_Y_SHIFT;
+        __Gravity.CLIP_HORIZONTAL = __Gravity.AXIS_CLIP<<__Gravity.AXIS_X_SHIFT;
+        __Gravity.RELATIVE_LAYOUT_DIRECTION = 0x00800000;
+        __Gravity.HORIZONTAL_GRAVITY_MASK = 0x0007 << __Gravity.AXIS_X_SHIFT;
+        __Gravity.VERTICAL_GRAVITY_MASK = 0x0007 << __Gravity.AXIS_Y_SHIFT;
+        __Gravity.DISPLAY_CLIP_VERTICAL = 0x10000000;
+        __Gravity.DISPLAY_CLIP_HORIZONTAL = 0x01000000;
+        __Gravity.START = __Gravity.RELATIVE_LAYOUT_DIRECTION | __Gravity.LEFT;
+        __Gravity.END = __Gravity.RELATIVE_LAYOUT_DIRECTION | __Gravity.RIGHT;
+
+    var Gravity = __Gravity;
+
 // import android.view.KeyEvent;
 // import android.view.MotionEvent;
 // import android.view.SoundEffectConstants;
@@ -89,7 +123,130 @@ module.exports = function(aoElastos, aoActivity){
     );
 
 // import android.view.ViewGroup;
-    class ViewGroup {}
+    class ViewGroup {
+        constructor() {
+            elog("====ViewGroup::constructor====begin==9999==");
+        }
+
+        OnCreate(_this, context, attrs) {
+            elog("====ViewGroup::OnCreate====begin====");
+
+            _this._constructor(context, attrs);
+        }
+
+        static get LayoutParams() {
+            if (this._LayoutParams_) return this._LayoutParams;
+            this._LayoutParams_ = true;
+            this._LayoutParams = class {
+                constructor(_this, context, attrs) {
+                    // elog("====ViewGroup::LayoutParams::constructor====begin====");
+                    // var s = CObject.getConstructorProtos("/system/lib/Elastos.Droid.Core.eco","Elastos.Droid.View.CViewGroupLayoutParams")
+                    // elog("====PROTO:===="+s);
+                    // elog("====ViewGroup::LayoutParams::constructor====0====");
+                    // CObject.showMethods(context);
+                    // elog("====ViewGroup::LayoutParams::constructor====1====");
+                    // CObject.showMethods(attrs);
+                    // elog("====ViewGroup::LayoutParams::constructor====2====");
+
+                    //return _this._GenerateLayoutParams(attrs);
+
+                    var oRet;
+
+
+// class ECO_PUBLIC ViewGroup
+//     : public View
+//     , public IViewGroup
+//     , public IViewParent
+//     , public IViewManager
+// {
+//     friend class View;
+//     friend class COverlayViewGroup;
+
+// public:
+//     class LayoutParams
+//         : public Object
+//         , public IViewGroupLayoutParams
+//     {
+//     public:
+//         CAR_INTERFACE_DECL()
+
+//         LayoutParams();
+
+//         virtual ~LayoutParams();
+
+//         CARAPI constructor();
+
+//         CARAPI constructor(
+//             /* [in] */ IContext* c,
+//             /* [in] */ IAttributeSet* attrs);
+
+//         CARAPI constructor(
+//             /* [in] */ Int32 width,
+//             /* [in] */ Int32 height);
+
+//         CARAPI constructor(
+//             /* [in] */ IViewGroupLayoutParams* source);
+
+
+
+
+
+                    elog("====LayoutParams::constructor====begin====arguments length:"+arguments.length);
+                    //Assert(0);
+
+
+
+                    var typeName = attrs.getClass?attrs.getClass().GetName():typeof attrs;
+                    // CObject.showMethods(oClass);
+
+
+                    // var className = oClass.GetName();
+                     elog("====class/interface Name:====" + typeName);
+
+
+                    if (typeName == "number") {
+                        //CObject.showMethods(_this);
+                        //show the constructor methods fo
+                        //Assert(0);
+
+                        oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
+                        return oRet;
+                    }
+
+                    if (typeName == "IAttributeSet") {
+                        elog("====ViewGroup::LayoutParams::constructor====1====classname:"+typeName);
+
+
+                        //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
+                        //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams");
+                        oRet = _this._GenerateLayoutParams(attrs);
+
+
+                        elog("====ViewGroup::LayoutParams::constructor====2====");
+                    }
+                    else {
+                        //Assert(0);
+                        elog("====ViewGroup::LayoutParams::constructor====3====classname:"+typeName);
+                        //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams");
+                        oRet = _this._GenerateLayoutParams(attrs);
+                        elog("====ViewGroup::LayoutParams::constructor====4====");
+                    }
+                    // elog("====ViewGroup::LayoutParams::constructor====3====");
+                    // CObject.showMethods(oRet);
+
+                    elog("====ViewGroup::LayoutParams::constructor====end====");
+                    //TODO:wrapped with proxy
+
+                    return oRet;
+                    //Asert(0);
+                }
+            }
+            return this._LayoutParams;
+        }
+    }
+
+
+
 // import android.view.ViewParent;
 // import android.view.accessibility.AccessibilityEvent;
 // import android.view.animation.Interpolator;
@@ -119,6 +276,9 @@ module.exports = function(aoElastos, aoActivity){
         }
     };  // = Elastos.Utility.IArrayList;
 // import java.util.Collections;
+
+    var Collections = Core_New("Elastos.Utility.CCollections");
+
 // import java.util.Comparator;
     class Comparator {}; // = Elastos.Core.IComparator;
 
@@ -137,7 +297,16 @@ module.exports = function(aoElastos, aoActivity){
     }
 
     var ViewCompat = new Proxy(
-        {view : null},
+        {
+            view : null,
+            //TODO: IView::static propery
+            IMPORTANT_FOR_ACCESSIBILITY_AUTO : 0x00000000,
+            IMPORTANT_FOR_ACCESSIBILITY_YES : 0x00000001,
+            IMPORTANT_FOR_ACCESSIBILITY_NO : 0x00000002,
+
+            OVER_SCROLL_ALWAYS : 0,
+            OVER_SCROLL_IF_CONTENT_SCROLLS : 1,
+        },
         {
             set : function(target, property, value) {
                 elog("====ViewCompat::Proxy::set====" + property);
@@ -145,14 +314,60 @@ module.exports = function(aoElastos, aoActivity){
             },
             get : function(target, property){
                 elog("====ViewCompat::Proxy::get====" + property);
-                var ret = function() {
-                    elog("====typeof:" + property + typeof target[property]);
-                    var r = target[property].apply(target, arguments);
-                    elog("====proxy ok!====");
-                    return r;
-                }
 
-                return ret;
+                if (target.hasOwnProperty(property)) {
+                    return target[property];
+                }
+                else {
+                    var ret = function() {
+                        //elog("====typeof:" + property + " " + typeof target[property]);
+                        var args = [...arguments];
+                        var _this = args.shift();
+                        //var r = target[property].apply(target, arguments);
+                        var r = _this[property].apply(_this, args);
+                        elog("====proxy ok!====");
+                        return r;
+                    }
+                    return ret;
+                }
+            }
+        }
+    );
+
+    var tempData = {};
+
+    var MeasureSpec = new Proxy(
+        {
+            _obj:null,
+        },
+        {
+            set : function(target, property, value) {
+                elog("====MeasureSpec::Proxy::set====" + property);
+                if (property == "_obj") {
+                    elog("======================oooo=====0======");
+                    target._obj = value;
+                    elog("======================oooo=====1======");
+                    return value;
+                }
+            },
+            get : function(target, property){
+                elog("====MeasureSpec::Proxy::get====" + property);
+
+                if (target.hasOwnProperty(property)) {
+                    return target[property];
+                }
+                else {
+                    var ret = function() {
+                        elog("====MeasureSpec::Proxy::get====typeof:" + property + " " + typeof target[property]);
+                        var args = [...arguments];
+                        //var _this = args.shift();
+                        //var r = target[property].apply(target, arguments);
+                        var r = target._obj[property].apply(target._obj, args);
+                        elog("====proxy ok!====");
+                        return r;
+                    }
+                    return ret;
+                }
             }
         }
     );
@@ -221,7 +436,7 @@ module.exports = function(aoElastos, aoActivity){
 //         android.R.attr.layout_gravity
 //     };
         static get LAYOUT_ATTRS() {return [
-                R.attr.layout_gravity ];}
+                0x010100b3 ];}
 
     /**
      * Used to track what the expected number of items in the adapter should be.
@@ -289,7 +504,6 @@ module.exports = function(aoElastos, aoActivity){
 //     };
         static get sInterpolator() {
             if (ViewPager._sInterpolator_) return ViewPager._sInterpolator;
-
             ViewPager._sInterpolator_ = true;
             ViewPager._sInterpolator = new class _tmp extends Interpolator {
                 GetInterpolation(t) {
@@ -303,12 +517,14 @@ module.exports = function(aoElastos, aoActivity){
 //     private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
         get mItems() {
             if (this._mItems_) return this._mItems;
+            this._mItems_ = true;
             this._mItems = new ArrayList();
             return this._mItems;
         }
 //     private final ItemInfo mTempItem = new ItemInfo();
         get mTempItem() {
             if (this._mTempItem_) return this._mTempItem;
+            this._mTempItem_ = true;
             this._mTempItem = new ViewPager.ItemInfo();
             return this._mTempItem;
         }
@@ -316,6 +532,7 @@ module.exports = function(aoElastos, aoActivity){
 //     private final Rect mTempRect = new Rect();
         get mTempRect() {
             if (this._mTempRect_) return this._mTempRect;
+            this._mTempRect_ = true;
             this._mTempRect = new Rect();
             return this._mTempRect;
         }
@@ -404,7 +621,8 @@ module.exports = function(aoElastos, aoActivity){
 //     private EdgeEffectCompat mRightEdge;
 
 //     private boolean mFirstLayout = true;
-        get mFirstLayout() {return true;}
+        get mFirstLayout() {return this._mFirstLayout || true;}
+        set mFirstLayout(v) {this._mFirstLayout = v;}
 //     private boolean mNeedCalculatePageOffsets = false;
         get mNeedCalculatePageOffsets() {return false;}
  //     private boolean mCalledSuper;
@@ -427,6 +645,13 @@ module.exports = function(aoElastos, aoActivity){
 //     private int mDrawingOrder;
 //     private ArrayList<View> mDrawingOrderedChildren;
 //     private static final ViewPositionComparator sPositionComparator = new ViewPositionComparator();
+        static get sPositionComparator() {
+            elog("====get sPositionComparator====");
+            if (this._sPositionComparator_) return this._sPositionComparator;
+            this._sPositionComparator_ = true;
+            this._sPositionComparator = new this.ViewPositionComparator();
+            return this._sPositionComparator;
+        }
 
 //     /**
 //      * Indicates that the pager is in an idle, settled state. The current page
@@ -586,6 +811,9 @@ module.exports = function(aoElastos, aoActivity){
      * pager decorations by default.
      */
 //     interface Decor {}
+    get Decor() {
+        return class _ {};
+    }
 
 //     public ViewPager(Context context) {
 //         super(context);
@@ -600,7 +828,8 @@ module.exports = function(aoElastos, aoActivity){
 
 //         super(context, attrs);
 //         initViewPager();
-        _this._constructor(context, attrs);
+        //_this._constructor(context, attrs);
+        super.OnCreate(_this, context, attrs);
         this.InitViewPager();
     }
 
@@ -609,7 +838,7 @@ module.exports = function(aoElastos, aoActivity){
         elog("====ViewPager::InitViewPager====begin====");
         var _this = this._obj;
 
-        var FOCUS_AFTER_DESCENDANTS = 0x40000;
+        var FOCUS_AFTER_DESCENDANTS = 0x40000;  //TODO
 
 //         setWillNotDraw(false);
 //         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
@@ -619,25 +848,12 @@ module.exports = function(aoElastos, aoActivity){
 //         final ViewConfiguration configuration = ViewConfiguration.get(context);
 //         final float density = context.getResources().getDisplayMetrics().density;
         _this.SetWillNotDraw(false);
-elog("====ViewPager::InitViewPager====0====");
         _this.SetDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
-elog("====ViewPager::InitViewPager====1====");
         _this.SetFocusable(true);
-elog("====ViewPager::InitViewPager====2====");
         var context = _this.GetContext();
-elog("====ViewPager::InitViewPager====3====");
-        this.mScroller = new Scroller(context, ViewPager.sInterpolator);
-elog("====ViewPager::InitViewPager====4====");
-CObject.showMethods(ViewConfiguration);
+        this.mScroller = new Scroller(context, this.sInterpolator);
         var configuration = ViewConfiguration.Get(context);
-        CObject.showMethods(configuration);
-elog("====ViewPager::InitViewPager====5====");
         var density = context.GetResources().GetDisplayMetrics().GetDensity();
-elog("====ViewPager::InitViewPager====6====");
-
-        var SDK_INT = this.GetInt32Property("ro.build.version.sdk");
-elog("====ViewPager::InitViewPager====7====SDK_INT:" + SDK_INT);
-
 
 //         mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
 //         mMinimumVelocity = (int) (MIN_FLING_VELOCITY * density);
@@ -647,11 +863,8 @@ elog("====ViewPager::InitViewPager====7====SDK_INT:" + SDK_INT);
         this.mTouchSlop = ViewConfigurationCompat.GetScaledPagingTouchSlop(configuration);
         this.mMinimumVelocity = this.MIN_FLING_VELOCITY * density;
         this.mMaximumVelocity = configuration.GetScaledMaximumFlingVelocity();
-elog("====ViewPager::InitViewPager====8====");
         this.mLeftEdge = new EdgeEffectCompat(context);
-elog("====ViewPager::InitViewPager====9====");
         this.mRightEdge = new EdgeEffectCompat(context);
-elog("====ViewPager::InitViewPager====10====");
 
 //         mFlingDistance = (int) (MIN_DISTANCE_FOR_FLING * density);
 //         mCloseEnough = (int) (CLOSE_ENOUGH * density);
@@ -660,73 +873,27 @@ elog("====ViewPager::InitViewPager====10====");
         this.mCloseEnough = this.CLOSE_ENOUGH * density;
         this.mDefaultGutterSize = this.DEFAULT_GUTTER_SIZE * density;
 
-elog("====ViewPager::InitViewPager====11====");
 //         ViewCompat.setAccessibilityDelegate(this, new MyAccessibilityDelegate());
-        ViewCompat.SetAccessibilityDelegate(_this, new MyAccessibilityDelegate());
+        ViewCompat.SetAccessibilityDelegate(_this, new this.MyAccessibilityDelegate());
 
 //         if (ViewCompat.getImportantForAccessibility(this)
 //                 == ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
 //             ViewCompat.setImportantForAccessibility(this,
 //                     ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
 //         }
-elog("====ViewPager::InitViewPager====12====");
         if (ViewCompat.GetImportantForAccessibility(_this)
                 == ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-elog("====ViewPager::InitViewPager====13====");
             ViewCompat.SetImportantForAccessibility(_this,
                     ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
         elog("====ViewPager::InitViewPager====end====");
     }
 
-//-------------test begin--------------------
-
-// void ViewPager::InitViewPager()
-// {
-//     SetWillNotDraw(FALSE);
-//     SetDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
-//     SetFocusable(TRUE);
-//     AutoPtr<IContext> context;
-//     GetContext((IContext**)&context);
-//     mScroller = NULL;
-//     CScroller::New(context, sInterpolator, (IScroller**)&mScroller);
-//     AutoPtr<IViewConfigurationHelper> helper;
-//     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
-//     AutoPtr<IViewConfiguration> configuration;
-//     helper->Get(context, (IViewConfiguration**)&configuration);
-//     AutoPtr<IResources> res;
-//     context->GetResources((IResources**)&res);
-//     AutoPtr<IDisplayMetrics> dm;
-//     res->GetDisplayMetrics((IDisplayMetrics**)&dm);
-//     Float density;
-//     dm->GetDensity(&density);
-
-//     configuration->GetScaledPagingTouchSlop(&mTouchSlop);
-//     mMinimumVelocity = (Int32)(MIN_FLING_VELOCITY * density);
-//     configuration->GetScaledMaximumFlingVelocity(&mMaximumVelocity);
-//     CEdgeEffect::New(context, (IEdgeEffect**)&mLeftEdge);
-//     CEdgeEffect::New(context, (IEdgeEffect**)&mRightEdge);
-
-//     mFlingDistance = (Int32)(MIN_DISTANCE_FOR_FLING * density);
-//     mCloseEnough = (Int32)(CLOSE_ENOUGH * density);
-//     mDefaultGutterSize = (Int32)(DEFAULT_GUTTER_SIZE * density);
-
-//     AutoPtr<IAccessibilityDelegate> delegate = (IAccessibilityDelegate*)new MyAccessibilityDelegate(this);
-//     AutoPtr<IView> v = IView::Probe(this);
-//     v->SetAccessibilityDelegate(delegate);
-
-//     Int32 result;
-//     if (v->GetImportantForAccessibility(&result), result == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-//         v->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
-//     }
-// }
-
-//-------------test enc----------------------
-
 //     @Override
 //     protected void onDetachedFromWindow() {
     OnDetachedFromWindow() {
         elog("====ViewPager::OnDetachedFromWindow====TODO====");
+        Assert(0);
 //         removeCallbacks(mEndScrollRunnable);
 //         super.onDetachedFromWindow();
     }
@@ -734,6 +901,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     private void setScrollState(int newState) {
     SetScrollState(newState) {
         elog("====ViewPager::SetScrollState====TODO====");
+        Assert(0);
 //         if (mScrollState == newState) {
 //             return;
 //         }
@@ -844,157 +1012,237 @@ elog("====ViewPager::InitViewPager====13====");
         elog("====ViewPager::SetAdapter====end====");
     }   //SetAdapter
 
-// //     private void removeNonDecorViews() {
-//         function removeNonDecorViews() {
-// //         for (int i = 0; i < getChildCount(); i++) {
-// //             final View child = getChildAt(i);
-// //             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-// //             if (!lp.isDecor) {
-// //                 removeViewAt(i);
-// //                 i--;
-// //             }
-// //         }
-// //     }
+//     private void removeNonDecorViews() {
+    RemoveNonDecorViews() {
+        elog("====ViewPager::RemoveNonDecorViews====begin====");
+        Assert(0);
+
+//         for (int i = 0; i < getChildCount(); i++) {
+//             final View child = getChildAt(i);
+//             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+//             if (!lp.isDecor) {
+//                 removeViewAt(i);
+//                 i--;
+//             }
+//         }
+    }
+
+//     /**
+//      * Retrieve the current adapter supplying pages.
+//      *
+//      * @return The currently registered PagerAdapter
+//      */
+//     public PagerAdapter getAdapter() {
+    GetAdapter() {
+//         return mAdapter;
+        return this.mAdapter;
+    }
+
+//     void setOnAdapterChangeListener(OnAdapterChangeListener listener) {
+//         mAdapterChangeListener = listener;
+//     }
+    SetOnAdapterChangeListener(listener) {
+        this.mAdapterChangeListener = listener;
+    }
+
+//     private int getClientWidth() {
+//         return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+//     }
+    GetClientWidth() {
+        return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+    }
+
+//     /**
+//      * Set the currently selected page. If the ViewPager has already been through its first
+//      * layout with its current adapter there will be a smooth animated transition between
+//      * the current item and the specified item.
+//      *
+//      * @param item Item index to select
+//      */
+//     public void setCurrentItem(int item) {
+//         mPopulatePending = false;
+//         setCurrentItemInternal(item, !mFirstLayout, false);
+//     }
+    SetCurrentItem(item) {
+        this.mPopulatePending = false;
+        this.SetCurrentItemInternal(item, !this.mFirstLayout, false);
+    }
+
+//     /**
+//      * Set the currently selected page.
+//      *
+//      * @param item Item index to select
+//      * @param smoothScroll True to smoothly scroll to the new item, false to transition immediately
+//      */
+//     public void setCurrentItem(int item, boolean smoothScroll) {
+//         mPopulatePending = false;
+//         setCurrentItemInternal(item, smoothScroll, false);
+//     }
+    SetCurrentItem(item, smoothScroll) {
+        this.mPopulatePending = false;
+        this.SetCurrentItemInternal(item, smoothScroll, false);
+    }
+
+//     public int getCurrentItem() {
+//         return mCurItem;
+//     }
+    GetCurrentItem() {
+        return this.mCurItem;
+    }
+
+//     void setCurrentItemInternal(int item, boolean smoothScroll, boolean always) {
+//         setCurrentItemInternal(item, smoothScroll, always, 0);
+//     }
+    SetCurrentItemInternal(item, smoothScroll, always) {
+        this.SetCurrentItemInternal(item, smoothScroll, always, 0);
+    }
+
+//     void setCurrentItemInternal(int item, boolean smoothScroll, boolean always, int velocity) {
+//         if (mAdapter == null || mAdapter.getCount() <= 0) {
+//             setScrollingCacheEnabled(false);
+//             return;
+//         }
+//         if (!always && mCurItem == item && mItems.size() != 0) {
+//             setScrollingCacheEnabled(false);
+//             return;
 //         }
 
-// //     /**
-// //      * Retrieve the current adapter supplying pages.
-// //      *
-// //      * @return The currently registered PagerAdapter
-// //      */
-// //     public PagerAdapter getAdapter() {
-//         function getAdapter() {
-// //         return mAdapter;
-// //     }
+//         if (item < 0) {
+//             item = 0;
+//         } else if (item >= mAdapter.getCount()) {
+//             item = mAdapter.getCount() - 1;
 //         }
-
-// //     void setOnAdapterChangeListener(OnAdapterChangeListener listener) {
-//         function setOnAdapterChangeListener(listener) {
-// //         mAdapterChangeListener = listener;
-// //     }
+//         final int pageLimit = mOffscreenPageLimit;
+//         if (item > (mCurItem + pageLimit) || item < (mCurItem - pageLimit)) {
+//             // We are doing a jump by more than one page.  To avoid
+//             // glitches, we want to keep all current pages in the view
+//             // until the scroll ends.
+//             for (int i=0; i<mItems.size(); i++) {
+//                 mItems.get(i).scrolling = true;
+//             }
 //         }
+//         final boolean dispatchSelected = mCurItem != item;
 
-// //     private int getClientWidth() {
-//         function getClientWidth() {
-// //         return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
-// //     }
+//         if (mFirstLayout) {
+//             // We don't have any idea how big we are yet and shouldn't have any pages either.
+//             // Just set things up and let the pending layout handle things.
+//             mCurItem = item;
+//             if (dispatchSelected && mOnPageChangeListener != null) {
+//                 mOnPageChangeListener.onPageSelected(item);
+//             }
+//             if (dispatchSelected && mInternalPageChangeListener != null) {
+//                 mInternalPageChangeListener.onPageSelected(item);
+//             }
+//             requestLayout();
+//         } else {
+//             populate(item);
+//             scrollToItem(item, smoothScroll, velocity, dispatchSelected);
 //         }
+//     }
+    SetCurrentItemInternal(item, smoothScroll, always, velocity) {
+        if (this.mAdapter == null || this.mAdapter.GetCount() <= 0) {
+            setScrollingCacheEnabled(false);
+            return;
+        }
+        if (!always && mCurItem == item && mItems.size() != 0) {
+            setScrollingCacheEnabled(false);
+            return;
+        }
 
-// //     /**
-// //      * Set the currently selected page. If the ViewPager has already been through its first
-// //      * layout with its current adapter there will be a smooth animated transition between
-// //      * the current item and the specified item.
-// //      *
-// //      * @param item Item index to select
-// //      */
-// //     public void setCurrentItem(int item) {
-//         function setCurrentItem(item) {
-// //         mPopulatePending = false;
-// //         setCurrentItemInternal(item, !mFirstLayout, false);
-// //     }
+        if (item < 0) {
+            item = 0;
+        } else if (item >= mAdapter.getCount()) {
+            item = mAdapter.getCount() - 1;
+        }
+        var pageLimit = mOffscreenPageLimit;
+        if (item > (mCurItem + pageLimit) || item < (mCurItem - pageLimit)) {
+            // We are doing a jump by more than one page.  To avoid
+            // glitches, we want to keep all current pages in the view
+            // until the scroll ends.
+            for (var i=0; i<mItems.size(); i++) {
+                mItems.get(i).scrolling = true;
+            }
+        }
+        var dispatchSelected = mCurItem != item;
+
+        if (mFirstLayout) {
+            // We don't have any idea how big we are yet and shouldn't have any pages either.
+            // Just set things up and let the pending layout handle things.
+            mCurItem = item;
+            if (dispatchSelected && mOnPageChangeListener != null) {
+                mOnPageChangeListener.onPageSelected(item);
+            }
+            if (dispatchSelected && mInternalPageChangeListener != null) {
+                mInternalPageChangeListener.onPageSelected(item);
+            }
+            requestLayout();
+        } else {
+            populate(item);
+            scrollToItem(item, smoothScroll, velocity, dispatchSelected);
+        }
+    }
+
+//     private void scrollToItem(int item, boolean smoothScroll, int velocity,
+//             boolean dispatchSelected) {
+//         final ItemInfo curInfo = infoForPosition(item);
+//         int destX = 0;
+//         if (curInfo != null) {
+//             final int width = getClientWidth();
+//             destX = (int) (width * Math.max(mFirstOffset,
+//                     Math.min(curInfo.offset, mLastOffset)));
 //         }
-
-// //     /**
-// //      * Set the currently selected page.
-// //      *
-// //      * @param item Item index to select
-// //      * @param smoothScroll True to smoothly scroll to the new item, false to transition immediately
-// //      */
-// //     public void setCurrentItem(int item, boolean smoothScroll) {
-//         function setCurrentItem(item, smoothScroll) {
-// //         mPopulatePending = false;
-// //         setCurrentItemInternal(item, smoothScroll, false);
-// //     }
+//         if (smoothScroll) {
+//             smoothScrollTo(destX, 0, velocity);
+//             if (dispatchSelected && mOnPageChangeListener != null) {
+//                 mOnPageChangeListener.onPageSelected(item);
+//             }
+//             if (dispatchSelected && mInternalPageChangeListener != null) {
+//                 mInternalPageChangeListener.onPageSelected(item);
+//             }
+//         } else {
+//             if (dispatchSelected && mOnPageChangeListener != null) {
+//                 mOnPageChangeListener.onPageSelected(item);
+//             }
+//             if (dispatchSelected && mInternalPageChangeListener != null) {
+//                 mInternalPageChangeListener.onPageSelected(item);
+//             }
+//             completeScroll(false);
+//             scrollTo(destX, 0);
+//             pageScrolled(destX);
 //         }
+//     }
+    ScrollToItem(item, smoothScroll, velocity, dispatchSelected) {
+        elog("====ViewPager::ScrollToItem====begin====");
 
-// //     public int getCurrentItem() {
-//         function getCurrentItem() {
-// //         return mCurItem;
-// //     }
-//         }
+        var curInfo = infoForPosition(item);
+        var destX = 0;
+        if (curInfo != null) {
+            var width = getClientWidth();
+            destX = width * Math.max(mFirstOffset,
+                    Math.min(curInfo.offset, mLastOffset));
+        }
+        if (smoothScroll) {
+            smoothScrollTo(destX, 0, velocity);
+            if (dispatchSelected && mOnPageChangeListener != null) {
+                mOnPageChangeListener.onPageSelected(item);
+            }
+            if (dispatchSelected && mInternalPageChangeListener != null) {
+                mInternalPageChangeListener.onPageSelected(item);
+            }
+        } else {
+            if (dispatchSelected && mOnPageChangeListener != null) {
+                mOnPageChangeListener.onPageSelected(item);
+            }
+            if (dispatchSelected && mInternalPageChangeListener != null) {
+                mInternalPageChangeListener.onPageSelected(item);
+            }
+            completeScroll(false);
+            scrollTo(destX, 0);
+            pageScrolled(destX);
+        }
 
-// //     void setCurrentItemInternal(int item, boolean smoothScroll, boolean always) {
-//         function setCurrentItemInternal(item, smoothScroll, always) {
-// //         setCurrentItemInternal(item, smoothScroll, always, 0);
-// //     }
-//         }
-
-// //     void setCurrentItemInternal(int item, boolean smoothScroll, boolean always, int velocity) {
-//         function setCurrentItemInternal(item, smoothScroll, always, velocity) {
-// //         if (mAdapter == null || mAdapter.getCount() <= 0) {
-// //             setScrollingCacheEnabled(false);
-// //             return;
-// //         }
-// //         if (!always && mCurItem == item && mItems.size() != 0) {
-// //             setScrollingCacheEnabled(false);
-// //             return;
-// //         }
-
-// //         if (item < 0) {
-// //             item = 0;
-// //         } else if (item >= mAdapter.getCount()) {
-// //             item = mAdapter.getCount() - 1;
-// //         }
-// //         final int pageLimit = mOffscreenPageLimit;
-// //         if (item > (mCurItem + pageLimit) || item < (mCurItem - pageLimit)) {
-// //             // We are doing a jump by more than one page.  To avoid
-// //             // glitches, we want to keep all current pages in the view
-// //             // until the scroll ends.
-// //             for (int i=0; i<mItems.size(); i++) {
-// //                 mItems.get(i).scrolling = true;
-// //             }
-// //         }
-// //         final boolean dispatchSelected = mCurItem != item;
-
-// //         if (mFirstLayout) {
-// //             // We don't have any idea how big we are yet and shouldn't have any pages either.
-// //             // Just set things up and let the pending layout handle things.
-// //             mCurItem = item;
-// //             if (dispatchSelected && mOnPageChangeListener != null) {
-// //                 mOnPageChangeListener.onPageSelected(item);
-// //             }
-// //             if (dispatchSelected && mInternalPageChangeListener != null) {
-// //                 mInternalPageChangeListener.onPageSelected(item);
-// //             }
-// //             requestLayout();
-// //         } else {
-// //             populate(item);
-// //             scrollToItem(item, smoothScroll, velocity, dispatchSelected);
-// //         }
-// //     }
-//         }
-
-// //     private void scrollToItem(int item, boolean smoothScroll, int velocity,
-// //             boolean dispatchSelected) {
-//         function scrollToItem(item, smoothScroll, velocity, dispatchSelected) {
-// //         final ItemInfo curInfo = infoForPosition(item);
-// //         int destX = 0;
-// //         if (curInfo != null) {
-// //             final int width = getClientWidth();
-// //             destX = (int) (width * Math.max(mFirstOffset,
-// //                     Math.min(curInfo.offset, mLastOffset)));
-// //         }
-// //         if (smoothScroll) {
-// //             smoothScrollTo(destX, 0, velocity);
-// //             if (dispatchSelected && mOnPageChangeListener != null) {
-// //                 mOnPageChangeListener.onPageSelected(item);
-// //             }
-// //             if (dispatchSelected && mInternalPageChangeListener != null) {
-// //                 mInternalPageChangeListener.onPageSelected(item);
-// //             }
-// //         } else {
-// //             if (dispatchSelected && mOnPageChangeListener != null) {
-// //                 mOnPageChangeListener.onPageSelected(item);
-// //             }
-// //             if (dispatchSelected && mInternalPageChangeListener != null) {
-// //                 mInternalPageChangeListener.onPageSelected(item);
-// //             }
-// //             completeScroll(false);
-// //             scrollTo(destX, 0);
-// //             pageScrolled(destX);
-// //         }
-// //     }
-//         }
+        elog("====ViewPager::ScrollToItem====end====");
+    }
 
     /**
      * Set a listener that will be invoked whenever the page changes or is incrementally
@@ -1050,7 +1298,7 @@ elog("====ViewPager::InitViewPager====13====");
             if (hasTransformer) {
                 this.mDrawingOrder = reverseDrawingOrder ? ViewPager.DRAW_ORDER_REVERSE : ViewPager.DRAW_ORDER_FORWARD;
             } else {
-                this.mDrawingOrder = ViewPager.DRAW_ORDER_DEFAULT;
+                this.mDrawingOrder = this.DRAW_ORDER_DEFAULT;
             }
             if (needsPopulate) this.Populate();
         }
@@ -1077,6 +1325,8 @@ elog("====ViewPager::InitViewPager====13====");
 //         }
         var SDK_INT = this.GetInt32Property("ro.build.version.sdk");
         if (SDK_INT >= 7) {
+            elog("====ViewPager::SetChildrenDrawingOrderEnabledCompat====todo====");
+            Assert(0);
             // if (this.mSetChildrenDrawingOrderEnabled == null) {
             //     try {
             //         this.mSetChildrenDrawingOrderEnabled = ViewGroup.class.getDeclaredMethod(
@@ -1090,18 +1340,21 @@ elog("====ViewPager::InitViewPager====13====");
             // } catch (e) {
             //     elog(TAG + "Error changing children drawing order" + JSON.stringify(e));
             // }
-            this._obj._SetChildrenDrawingOrderEnabled(enable);
+            // this._obj._SetChildrenDrawingOrderEnabled(enable);
         }
         elog("====ViewPager::SetChildrenDrawingOrderEnabledCompat====end====");
     }
 
 //     @Override
 //     protected int getChildDrawingOrder(int childCount, int i) {
-    GetChildDrawingOrder(childCount, i, result) {
-        elog("====ViewPager::GetChildDrawingOrder====TODO====");
 //         final int index = mDrawingOrder == DRAW_ORDER_REVERSE ? childCount - 1 - i : i;
 //         final int result = ((LayoutParams) mDrawingOrderedChildren.get(index).getLayoutParams()).childIndex;
 //         return result;
+//     }
+    GetChildDrawingOrder(childCount, i) {
+        var index = mDrawingOrder == DRAW_ORDER_REVERSE ? childCount - 1 - i : i;
+        var result = mDrawingOrderedChildren.get(index).getLayoutParams().childIndex;
+        return result;
     }
 
     /**
@@ -1111,11 +1364,14 @@ elog("====ViewPager::InitViewPager====13====");
      * @return The old listener that was set, if any.
      */
 //     OnPageChangeListener setInternalPageChangeListener(OnPageChangeListener listener) {
-    SetInternalPageChangeListener(listener) {
-        elog("====ViewPager::SetInternalPageChangeListener====TODO====");
 //         OnPageChangeListener oldListener = mInternalPageChangeListener;
 //         mInternalPageChangeListener = listener;
 //         return oldListener;
+//     }
+    SetInternalPageChangeListener(listener) {
+        var oldListener = mInternalPageChangeListener;
+        this.mInternalPageChangeListener = listener;
+        return oldListener;
     }
 
     /**
@@ -1151,6 +1407,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public void setOffscreenPageLimit(int limit) {
     SetOffscreenPageLimit(limit) {
         elog("====ViewPager::SetOffscreenPageLimit====TODO====");
+        Assert(0);
 //         if (limit < DEFAULT_OFFSCREEN_PAGES) {
 //             Log.w(TAG, "Requested offscreen page limit " + limit + " too small; defaulting to " +
 //                     DEFAULT_OFFSCREEN_PAGES);
@@ -1186,16 +1443,17 @@ elog("====ViewPager::InitViewPager====13====");
         this._obj.RequestLayout();
     }
 
-// //     /**
-// //      * Return the margin between pages.
-// //      *
-// //      * @return The size of the margin in pixels
-// //      */
-// //     public int getPageMargin() {
-//         function getPageMargin() {
-// //         return mPageMargin;
-// //     }
-//         }
+//     /**
+//      * Return the margin between pages.
+//      *
+//      * @return The size of the margin in pixels
+//      */
+//     public int getPageMargin() {
+//         return mPageMargin;
+//     }
+    GetPageMargin() {
+        return this.mPageMargin;
+    }
 
     /**
      * Set a drawable that will be used to fill the margin between pages.
@@ -1203,12 +1461,16 @@ elog("====ViewPager::InitViewPager====13====");
      * @param d Drawable to display between pages
      */
 //     public void setPageMarginDrawable(Drawable d) {
-    _SetPageMarginDrawable(d) {
-        elog("====ViewPager::_SetPageMarginDrawable====TODO====");
 //         mMarginDrawable = d;
 //         if (d != null) refreshDrawableState();
 //         setWillNotDraw(d == null);
 //         invalidate();
+//     }
+    _SetPageMarginDrawable(d) {
+        this.mMarginDrawable = d;
+        if (d != null) this.RefreshDrawableState();
+        this.SetWillNotDraw(d == null);
+        this.Invalidate();
     }
 
     /**
@@ -1218,25 +1480,33 @@ elog("====ViewPager::InitViewPager====13====");
      */
 //     public void setPageMarginDrawable(@DrawableRes int resId) {
     SetPageMarginDrawable(resId) {
-        _SetPageMarginDrawable(getContext().getResources().getDrawable(resId));
+        this._SetPageMarginDrawable(getContext().getResources().getDrawable(resId));
     }
 
 //     @Override
 //     protected boolean verifyDrawable(Drawable who) {
-    VerifyDrawable(who, result) {
 //         return super.verifyDrawable(who) || who == mMarginDrawable;
+//    }
+    VerifyDrawable(who, result) {
         return this._obj.VerifyDrawable(who) || who == this.mMarginDrawable;
     }
 
 //     @Override
 //     protected void drawableStateChanged() {
-    DrawableStateChanged() {
-        elog("====ViewPager::DrawableStateChanged====TODO====");
 //         super.drawableStateChanged();
 //         final Drawable d = mMarginDrawable;
 //         if (d != null && d.isStateful()) {
 //             d.setState(getDrawableState());
 //         }
+//     }
+    DrawableStateChanged(_this) {
+        elog("====ViewPager::DrawableStateChanged====begin====");
+        _this._DrawableStateChanged();
+        var d = this.mMarginDrawable;
+        if (d != null && d.IsStateful()) {
+            d.SetState(_this.GetDrawableState());
+        }
+        elog("====ViewPager::DrawableStateChanged====end====");
     }
 
     // We want the duration of the page snap animation to be influenced by the distance that
@@ -1244,11 +1514,11 @@ elog("====ViewPager::InitViewPager====13====");
     // purely linear fashion. Instead, we use this method to moderate the effect that the distance
     // of travel has on the overall snap duration.
 //     float distanceInfluenceForSnapDuration(float f) {
-    DistanceInfluenceForSnapDuration(f) {
 //         f -= 0.5f; // center the values about 0.
 //         f *= 0.3f * Math.PI / 2.0f;
 //         return (float) Math.sin(f);
-
+//     }
+    DistanceInfluenceForSnapDuration(f) {
         f -= 0.5; // center the values about 0.
         f *= 0.3 * Math.PI / 2.0;
         return Math.sin(f);
@@ -1261,8 +1531,9 @@ elog("====ViewPager::InitViewPager====13====");
      * @param y the number of pixels to scroll by on the Y axis
      */
 //     void smoothScrollTo(int x, int y) {
-    SmoothScrollTo(x, y) {
 //         smoothScrollTo(x, y, 0);
+//     }
+    SmoothScrollTo(x, y) {
         this.SmoothScrollTo(x, y, 0);
     }
 
@@ -1274,8 +1545,6 @@ elog("====ViewPager::InitViewPager====13====");
      * @param velocity the velocity associated with a fling, if applicable. (0 otherwise)
      */
 //     void smoothScrollTo(int x, int y, int velocity) {
-    SmoothScrollTo(x, y, velocity) {
-        elog("====ViewPager::SmoothScrollTo====TODO====");
 //         if (getChildCount() == 0) {
 //             // Nothing to do.
 //             setScrollingCacheEnabled(false);
@@ -1314,11 +1583,49 @@ elog("====ViewPager::InitViewPager====13====");
 
 //         mScroller.startScroll(sx, sy, dx, dy, duration);
 //         ViewCompat.postInvalidateOnAnimation(this);
+//     }
+    SmoothScrollTo(x, y, velocity) {
+        if (getChildCount() == 0) {
+            // Nothing to do.
+            setScrollingCacheEnabled(false);
+            return;
+        }
+        var sx = getScrollX();
+        var sy = getScrollY();
+        var dx = x - sx;
+        var dy = y - sy;
+        if (dx == 0 && dy == 0) {
+            completeScroll(false);
+            populate();
+            setScrollState(SCROLL_STATE_IDLE);
+            return;
+        }
+
+        setScrollingCacheEnabled(true);
+        setScrollState(SCROLL_STATE_SETTLING);
+
+        var width = getClientWidth();
+        var halfWidth = width / 2;
+        var distanceRatio = Math.min(1, 1.0 * Math.abs(dx) / width);
+        var distance = halfWidth + halfWidth *
+                distanceInfluenceForSnapDuration(distanceRatio);
+
+        var duration = 0;
+        velocity = Math.abs(velocity);
+        if (velocity > 0) {
+            duration = 4 * Math.round(1000 * Math.abs(distance / velocity));
+        } else {
+            var pageWidth = width * mAdapter.getPageWidth(mCurItem);
+            var pageDelta = Math.abs(dx) / (pageWidth + mPageMargin);
+            duration = (pageDelta + 1) * 100;
+        }
+        duration = Math.min(duration, MAX_SETTLE_DURATION);
+
+        mScroller.startScroll(sx, sy, dx, dy, duration);
+        ViewCompat.postInvalidateOnAnimation(this);
     }
 
 //     ItemInfo addNewItem(int position, int index) {
-    AddNewItem(position, index) {
-        elog("====ViewPager::AddNewItem====TODO====");
 //         ItemInfo ii = new ItemInfo();
 //         ii.position = position;
 //         ii.object = mAdapter.instantiateItem(this, position);
@@ -1329,12 +1636,21 @@ elog("====ViewPager::InitViewPager====13====");
 //             mItems.add(index, ii);
 //         }
 //         return ii;
+//     }
+    AddNewItem(position, index) {
+        var ii = new ItemInfo();
+        ii.position = position;
+        ii.object = mAdapter.instantiateItem(this, position);
+        ii.widthFactor = mAdapter.getPageWidth(position);
+        if (index < 0 || index >= mItems.size()) {
+            mItems.add(ii);
+        } else {
+            mItems.add(index, ii);
+        }
+        return ii;
     }
 
 //     void dataSetChanged() {
-    DataSetChanged() {
-        elog("====ViewPager::DataSetChanged====begin====TODO====");
-
 //         // This method only gets called if our observer is attached, so mAdapter is non-null.
 
 //         final int adapterCount = mAdapter.getCount();
@@ -1403,8 +1719,76 @@ elog("====ViewPager::InitViewPager====13====");
 //             setCurrentItemInternal(newCurrItem, false, true);
 //             requestLayout();
 //         }
+//     }   //function dataSetChanged
+    DataSetChanged() {
+        // This method only gets called if our observer is attached, so mAdapter is non-null.
 
-        elog("====ViewPager::DataSetChanged====end====");
+        var adapterCount = mAdapter.getCount();
+        mExpectedAdapterCount = adapterCount;
+        var needPopulate = mItems.size() < mOffscreenPageLimit * 2 + 1 &&
+                mItems.size() < adapterCount;
+        var newCurrItem = mCurItem;
+
+        var isUpdating = false;
+        for (var i = 0; i < mItems.size(); i++) {
+            var ii = mItems.get(i);
+            var newPos = mAdapter.getItemPosition(ii.object);
+
+            if (newPos == PagerAdapter.POSITION_UNCHANGED) {
+                continue;
+            }
+
+            if (newPos == PagerAdapter.POSITION_NONE) {
+                mItems.remove(i);
+                i--;
+
+                if (!isUpdating) {
+                    mAdapter.startUpdate(this);
+                    isUpdating = true;
+                }
+
+                mAdapter.destroyItem(this, ii.position, ii.object);
+                needPopulate = true;
+
+                if (mCurItem == ii.position) {
+                    // Keep the current item in the valid range
+                    newCurrItem = Math.max(0, Math.min(mCurItem, adapterCount - 1));
+                    needPopulate = true;
+                }
+                continue;
+            }
+
+            if (ii.position != newPos) {
+                if (ii.position == mCurItem) {
+                    // Our current item changed position. Follow it.
+                    newCurrItem = newPos;
+                }
+
+                ii.position = newPos;
+                needPopulate = true;
+            }
+        }
+
+        if (isUpdating) {
+            mAdapter.finishUpdate(this);
+        }
+
+        Collections.sort(mItems, COMPARATOR);
+
+        if (needPopulate) {
+            // Reset our known page widths; populate will recompute them.
+            var childCount = getChildCount();
+            for (var i = 0; i < childCount; i++) {
+                var child = getChildAt(i);
+                var lp = child.getLayoutParams();
+                if (!lp.isDecor) {
+                    lp.widthFactor = 0;
+                }
+            }
+
+            setCurrentItemInternal(newCurrItem, false, true);
+            requestLayout();
+        }
     }   //function dataSetChanged
 
 //     void populate() {
@@ -1417,6 +1801,10 @@ elog("====ViewPager::InitViewPager====13====");
 
         newCurrentItem = newCurrentItem || this.mCurItem;
 
+        var _this = this._obj;
+
+        newCurrentItem = newCurrentItem || this.mCurItem;
+
 //         ItemInfo oldCurInfo = null;
 //         int focusDirection = View.FOCUS_FORWARD;
 //         if (mCurItem != newCurrentItem) {
@@ -1425,34 +1813,68 @@ elog("====ViewPager::InitViewPager====13====");
 //             mCurItem = newCurrentItem;
 //         }
 
+        var View__FOCUS_FORWARD = 0x00000002;
+        var View__FOCUS_LEFT = 0x00000011;
+        var View__FOCUS_RIGHT = 0x00000042;
+
+        var oldCurInfo = null;
+        var focusDirection = View__FOCUS_FORWARD;
+        if (this.mCurItem != newCurrentItem) {
+            focusDirection = this.mCurItem < newCurrentItem ? View__FOCUS_RIGHT : View__FOCUS_LEFT;
+            oldCurInfo = this.InfoForPosition(this.mCurItem);
+            this.mCurItem = newCurrentItem;
+        }
+        elog("====ViewPager::Populate====begin====1====");
+
 //         if (mAdapter == null) {
 //             sortChildDrawingOrder();
 //             return;
 //         }
+        if (this.mAdapter == null) {
+            this.SortChildDrawingOrder();
+            return;
+        }
+        elog("====ViewPager::Populate====begin====2====");
 
-//         // Bail now if we are waiting to populate.  This is to hold off
-//         // on creating views from the time the user releases their finger to
-//         // fling to a new position until we have finished the scroll to
-//         // that position, avoiding glitches from happening at that point.
+        // Bail now if we are waiting to populate.  This is to hold off
+        // on creating views from the time the user releases their finger to
+        // fling to a new position until we have finished the scroll to
+        // that position, avoiding glitches from happening at that point.
 //         if (mPopulatePending) {
 //             if (DEBUG) Log.i(TAG, "populate is pending, skipping for now...");
 //             sortChildDrawingOrder();
 //             return;
 //         }
+        if (this.mPopulatePending) {
+            if (DEBUG) Log.i(TAG, "populate is pending, skipping for now...");
+            this.SortChildDrawingOrder();
+            return;
+        }
+        elog("====ViewPager::Populate====begin====3====");
 
-//         // Also, don't populate until we are attached to a window.  This is to
-//         // avoid trying to populate before we have restored our view hierarchy
-//         // state and conflicting with what is restored.
+        // Also, don't populate until we are attached to a window.  This is to
+        // avoid trying to populate before we have restored our view hierarchy
+        // state and conflicting with what is restored.
 //         if (getWindowToken() == null) {
 //             return;
 //         }
+        if (this.GetWindowToken() == null) {
+            return;
+        }
+        elog("====ViewPager::Populate====begin====4====");
 
 //         mAdapter.startUpdate(this);
+        this.mAdapter.StartUpdate(_this);
 
 //         final int pageLimit = mOffscreenPageLimit;
 //         final int startPos = Math.max(0, mCurItem - pageLimit);
 //         final int N = mAdapter.getCount();
 //         final int endPos = Math.min(N-1, mCurItem + pageLimit);
+        var pageLimit = mOffscreenPageLimit;
+        var startPos = Math.max(0, mCurItem - pageLimit);
+        var N = mAdapter.getCount();
+        var endPos = Math.min(N-1, mCurItem + pageLimit);
+        elog("====ViewPager::Populate====begin====5====");
 
 //         if (N != mExpectedAdapterCount) {
 //             String resName;
@@ -1468,8 +1890,23 @@ elog("====ViewPager::InitViewPager====13====");
 //                     " Pager class: " + getClass() +
 //                     " Problematic adapter: " + mAdapter.getClass());
 //         }
+        if (N != mExpectedAdapterCount) {
+            var resName;
+            try {
+                resName = getResources().getResourceName(getId());
+            } catch (e) {
+                resName = Integer.toHexString(getId());
+            }
+            throw new IllegalStateException("The application's PagerAdapter changed the adapter's" +
+                    " contents without calling PagerAdapter#notifyDataSetChanged!" +
+                    " Expected adapter item count: " + mExpectedAdapterCount + ", found: " + N +
+                    " Pager id: " + resName +
+                    " Pager class: " + getClass() +
+                    " Problematic adapter: " + mAdapter.getClass());
+        }
+        elog("====ViewPager::Populate====begin====6====");
 
-//         // Locate the currently focused item or add it if needed.
+        // Locate the currently focused item or add it if needed.
 //         int curIndex = -1;
 //         ItemInfo curItem = null;
 //         for (curIndex = 0; curIndex < mItems.size(); curIndex++) {
@@ -1479,21 +1916,44 @@ elog("====ViewPager::InitViewPager====13====");
 //                 break;
 //             }
 //         }
+        var curIndex = -1;
+        var curItem = null;
+        for (curIndex = 0; curIndex < mItems.size(); curIndex++) {
+            var ii = mItems.get(curIndex);
+            if (ii.position >= mCurItem) {
+                if (ii.position == mCurItem) curItem = ii;
+                break;
+            }
+        }
+        elog("====ViewPager::Populate====begin====7====");
 
 //         if (curItem == null && N > 0) {
 //             curItem = addNewItem(mCurItem, curIndex);
 //         }
+        if (curItem == null && N > 0) {
+            curItem = addNewItem(mCurItem, curIndex);
+        }
+        elog("====ViewPager::Populate====begin====8====");
 
-//         // Fill 3x the available width or up to the number of offscreen
-//         // pages requested to either side, whichever is larger.
-//         // If we have no current item we have no work to do.
+        // Fill 3x the available width or up to the number of offscreen
+        // pages requested to either side, whichever is larger.
+        // If we have no current item we have no work to do.
 //         if (curItem != null) {
+        if (curItem != null) {
 //             float extraWidthLeft = 0.f;
 //             int itemIndex = curIndex - 1;
 //             ItemInfo ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
 //             final int clientWidth = getClientWidth();
 //             final float leftWidthNeeded = clientWidth <= 0 ? 0 :
 //                     2.f - curItem.widthFactor + (float) getPaddingLeft() / (float) clientWidth;
+            var extraWidthLeft = 0;
+            var itemIndex = curIndex - 1;
+            var ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
+            var clientWidth = getClientWidth();
+            var leftWidthNeeded = clientWidth <= 0 ? 0 :
+                    2 - curItem.widthFactor + getPaddingLeft() / clientWidth;
+            elog("====ViewPager::Populate====begin====9====");
+
 //             for (int pos = mCurItem - 1; pos >= 0; pos--) {
 //                 if (extraWidthLeft >= leftWidthNeeded && pos < startPos) {
 //                     if (ii == null) {
@@ -1521,9 +1981,40 @@ elog("====ViewPager::InitViewPager====13====");
 //                     ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
 //                 }
 //             }
+            for (var pos = mCurItem - 1; pos >= 0; pos--) {
+                if (extraWidthLeft >= leftWidthNeeded && pos < startPos) {
+                    if (ii == null) {
+                        break;
+                    }
+                    if (pos == ii.position && !ii.scrolling) {
+                        mItems.remove(itemIndex);
+                        mAdapter.destroyItem(this, pos, ii.object);
+                        if (DEBUG) {
+                            elog(TAG + "populate() - destroyItem() with pos: " + pos +
+                                    " view: " + ii.object);
+                        }
+                        itemIndex--;
+                        curIndex--;
+                        ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
+                    }
+                } else if (ii != null && pos == ii.position) {
+                    extraWidthLeft += ii.widthFactor;
+                    itemIndex--;
+                    ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
+                } else {
+                    ii = addNewItem(pos, itemIndex + 1);
+                    extraWidthLeft += ii.widthFactor;
+                    curIndex++;
+                    ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
+                }
+            }
+            elog("====ViewPager::Populate====begin====10====");
 
 //             float extraWidthRight = curItem.widthFactor;
 //             itemIndex = curIndex + 1;
+            var extraWidthRight = curItem.widthFactor;
+            itemIndex = curIndex + 1;
+
 //             if (extraWidthRight < 2.f) {
 //                 ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
 //                 final float rightWidthNeeded = clientWidth <= 0 ? 0 :
@@ -1554,9 +2045,43 @@ elog("====ViewPager::InitViewPager====13====");
 //                     }
 //                 }
 //             }
+            if (extraWidthRight < 2) {
+                ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
+                var rightWidthNeeded = clientWidth <= 0 ? 0 :
+                        getPaddingRight() / clientWidth + 2.0;
+                for (var pos = mCurItem + 1; pos < N; pos++) {
+                    if (extraWidthRight >= rightWidthNeeded && pos > endPos) {
+                        if (ii == null) {
+                            break;
+                        }
+                        if (pos == ii.position && !ii.scrolling) {
+                            mItems.remove(itemIndex);
+                            mAdapter.destroyItem(this, pos, ii.object);
+                            if (DEBUG) {
+                                elog(TAG + "populate() - destroyItem() with pos: " + pos +
+                                        " view: " + ii.object);
+                            }
+                            ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
+                        }
+                    } else if (ii != null && pos == ii.position) {
+                        extraWidthRight += ii.widthFactor;
+                        itemIndex++;
+                        ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
+                    } else {
+                        ii = addNewItem(pos, itemIndex);
+                        itemIndex++;
+                        extraWidthRight += ii.widthFactor;
+                        ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
+                    }
+                }
+            }
+            elog("====ViewPager::Populate====begin====11====");
 
 //             calculatePageOffsets(curItem, curIndex, oldCurInfo);
+            calculatePageOffsets(curItem, curIndex, oldCurInfo);
 //         }
+        }
+        elog("====ViewPager::Populate====begin====12====");
 
 //         if (DEBUG) {
 //             Log.i(TAG, "Current page list:");
@@ -1564,13 +2089,22 @@ elog("====ViewPager::InitViewPager====13====");
 //                 Log.i(TAG, "#" + i + ": page " + mItems.get(i).position);
 //             }
 //         }
+        if (DEBUG) {
+            elog(TAG + "Current page list:");
+            for (var i=0; i<mItems.size(); i++) {
+                elog(TAG + "#" + i + ": page " + mItems.get(i).position);
+            }
+        }
 
 //         mAdapter.setPrimaryItem(this, mCurItem, curItem != null ? curItem.object : null);
+        mAdapter.setPrimaryItem(this, mCurItem, curItem != null ? curItem.object : null);
 
 //         mAdapter.finishUpdate(this);
+        mAdapter.finishUpdate(this);
+        elog("====ViewPager::Populate====begin====13====");
 
-//         // Check width measurement of current pages and drawing sort order.
-//         // Update LayoutParams as needed.
+        // Check width measurement of current pages and drawing sort order.
+        // Update LayoutParams as needed.
 //         final int childCount = getChildCount();
 //         for (int i = 0; i < childCount; i++) {
 //             final View child = getChildAt(i);
@@ -1586,6 +2120,22 @@ elog("====ViewPager::InitViewPager====13====");
 //             }
 //         }
 //         sortChildDrawingOrder();
+        var childCount = getChildCount();
+        for (var i = 0; i < childCount; i++) {
+            var child = getChildAt(i);
+            var lp = child.getLayoutParams();
+            lp.childIndex = i;
+            if (!lp.isDecor && lp.widthFactor == 0) {
+                // 0 means requery the adapter for this, it doesn't have a valid width.
+                var ii = infoForChild(child);
+                if (ii != null) {
+                    lp.widthFactor = ii.widthFactor;
+                    lp.position = ii.position;
+                }
+            }
+        }
+        sortChildDrawingOrder();
+        elog("====ViewPager::Populate====begin====14====");
 
 //         if (hasFocus()) {
 //             View currentFocused = findFocus();
@@ -1602,13 +2152,30 @@ elog("====ViewPager::InitViewPager====13====");
 //                 }
 //             }
 //         }
+        if (hasFocus()) {
+            var currentFocused = findFocus();
+            var ii = currentFocused != null ? infoForAnyChild(currentFocused) : null;
+            if (ii == null || ii.position != mCurItem) {
+                for (var i=0; i<getChildCount(); i++) {
+                    var child = getChildAt(i);
+                    ii = infoForChild(child);
+                    if (ii != null && ii.position == mCurItem) {
+                        if (child.requestFocus(focusDirection)) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         elog("====ViewPager::Populate====end====");
     }   //Populate
 
 //     private void sortChildDrawingOrder() {
     SortChildDrawingOrder() {
-        elog("====ViewPager::SortChildDrawingOrder====begin====TODO====");
+        elog("====ViewPager::SortChildDrawingOrder====begin====");
+
+        var _this = this._obj;
 
 //         if (mDrawingOrder != DRAW_ORDER_DEFAULT) {
 //             if (mDrawingOrderedChildren == null) {
@@ -1623,6 +2190,21 @@ elog("====ViewPager::InitViewPager====13====");
 //             }
 //             Collections.sort(mDrawingOrderedChildren, sPositionComparator);
 //         }
+        if (this.mDrawingOrder != this.DRAW_ORDER_DEFAULT) {
+            if (this.mDrawingOrderedChildren == null) {
+                this.mDrawingOrderedChildren = Core_New("Elastos.Utility.CArrayList");
+            } else {
+                this.mDrawingOrderedChildren.Clear();
+            }
+            var childCount = _this.GetChildCount();
+
+            elog("====ViewPager::SortChildDrawingOrder====1====childCount:"+childCount);
+            for (var i = 0; i < childCount; i++) {
+                var child = _this.GetChildAt(i);
+                this.mDrawingOrderedChildren.Add(child);
+            }
+            Collections.Sort(this.mDrawingOrderedChildren, ViewPager.sPositionComparator);
+        }
 
         elog("====ViewPager::SortChildDrawingOrder====end====");
     }   //sortChildDrawingOrder
@@ -1630,6 +2212,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     private void calculatePageOffsets(ItemInfo curItem, int curIndex, ItemInfo oldCurInfo) {
     CalculatePageOffsets(curItem, curIndex, oldCurInfo) {
         elog("====ViewPager::CalculatePageOffsets====begin====TODO====");
+        Assert(0);
 
 //         final int N = mAdapter.getCount();
 //         final int width = getClientWidth();
@@ -1819,8 +2402,6 @@ elog("====ViewPager::InitViewPager====13====");
 
 //     @Override
 //     public void addView(View child, int index, ViewGroup.LayoutParams params) {
-    AddView(child, index, params) {
-        elog("====ViewPager::AddView====TODO====");
 //         if (!checkLayoutParams(params)) {
 //             params = generateLayoutParams(params);
 //         }
@@ -1844,22 +2425,62 @@ elog("====ViewPager::InitViewPager====13====");
 //             }
 //         }
 //     }
+    AddView(_this, child, index, params) {
+        elog("====ViewPager::AddView====begin====");
+
+        if (!this.CheckLayoutParams(params)) {
+            var o = {};
+            this.GenerateLayoutParams(_this, params, o);
+            params = o.data;
+        }
+
+        elog("====ViewPager::AddView====1====");
+
+        var lp = params;
+        lp.isDecor |= child instanceof this.Decor;
+
+        elog("====ViewPager::AddView====2====");
+
+        if (this.mInLayout) {
+            if (lp != null && lp.isDecor) {
+                throw new IllegalStateException("Cannot add pager decor view during layout");
+            }
+            lp.needsMeasure = true;
+            _this.AddViewInLayout(child, index, params);
+        } else {
+            _this._AddView(child, index, params);
+        }
+
+        elog("====ViewPager::AddView====3====");
+
+        if (ViewPager.USE_CACHE) {
+            if (child.GetVisibility() != GONE) {
+                child.SetDrawingCacheEnabled(this.mScrollingCacheEnabled);
+            } else {
+                child.SetDrawingCacheEnabled(false);
+            }
+        }
+
+        elog("====ViewPager::AddView====end====");
     }
 
 //     @Override
 //     public void removeView(View view) {
-    RemoveView(view) {
-        elog("====ViewPager::RemoveView====TODO====");
 //         if (mInLayout) {
 //             removeViewInLayout(view);
 //         } else {
 //             super.removeView(view);
 //         }
+//     }
+    RemoveView(view) {
+        if (mInLayout) {
+            removeViewInLayout(view);
+        } else {
+            super.removeView(view);
+        }
     }
 
 //     ItemInfo infoForChild(View child) {
-    InfoForChild(child) {
-        elog("====ViewPager::InfoForChild====TODO====");
 //         for (int i=0; i<mItems.size(); i++) {
 //             ItemInfo ii = mItems.get(i);
 //             if (mAdapter.isViewFromObject(child, ii.object)) {
@@ -1867,11 +2488,25 @@ elog("====ViewPager::InitViewPager====13====");
 //             }
 //         }
 //         return null;
+//     }
+    InfoForChild(child) {
+        elog("====ViewPager::InfoForChild====begin====");
+
+        for (var i=0; i<this.mItems.GetSize(); i++) {
+            var ii = this.mItems.Get(i);
+
+            //CObject.showMethods(ii);
+
+            if (this.mAdapter.IsViewFromObject(child, ii.object)) {
+                elog("====ViewPager::InfoForChild====end====0====");
+                return ii;
+            }
+        }
+        elog("====ViewPager::InfoForChild====end====1====");
+        return null;
     }
 
 //     ItemInfo infoForAnyChild(View child) {
-    InfoForAnyChild(child) {
-        elog("====ViewPager::InfoForAnyChild====TODO====");
 //         ViewParent parent;
 //         while ((parent=child.getParent()) != this) {
 //             if (parent == null || !(parent instanceof View)) {
@@ -1880,11 +2515,19 @@ elog("====ViewPager::InitViewPager====13====");
 //             child = (View)parent;
 //         }
 //         return infoForChild(child);
+//     }
+    InfoForAnyChild(child) {
+        var parent;
+        while ((parent=child.getParent()) != this) {
+            if (parent == null || !(parent instanceof View)) {
+                return null;
+            }
+            child = parent;
+        }
+        return infoForChild(child);
     }
 
 //     ItemInfo infoForPosition(int position) {
-    InfoForPosition(position) {
-        elog("====ViewPager::InfoForPosition====");
 //         for (int i = 0; i < mItems.size(); i++) {
 //             ItemInfo ii = mItems.get(i);
 //             if (ii.position == position) {
@@ -1892,7 +2535,8 @@ elog("====ViewPager::InitViewPager====13====");
 //             }
 //         }
 //         return null;
-
+//     }
+    InfoForPosition(position) {
         for (var i = 0; i < this.mItems.GetSize(); i++) {
             var ii = this.mItems.Get(i);
             if (ii.position == position) {
@@ -1904,16 +2548,19 @@ elog("====ViewPager::InitViewPager====13====");
 
 //     @Override
 //     protected void onAttachedToWindow() {
-    OnAttachedToWindow() {
-        elog("====ViewPager::OnAttachedToWindow====TODO====");
 //         super.onAttachedToWindow();
 //         mFirstLayout = true;
+//     }
+    OnAttachedToWindow(_this) {
+        _this._OnAttachedToWindow();
+        this.mFirstLayout = true;
     }
 
 //     @Override
 //     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    OnMeasure(widthMeasureSpec, heightMeasureSpec) {
-        elog("====ViewPager::OnMeasure====TODO====");
+    OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
+        elog("====ViewPager::OnMeasure====begin====");
+
 //         // For simple implementation, our internal size is always 0.
 //         // We depend on the container to specify the layout size of
 //         // our view.  We can't really know what it is since we will be
@@ -1921,14 +2568,21 @@ elog("====ViewPager::InitViewPager====13====");
 //         // want the layout to change as this happens.
 //         setMeasuredDimension(getDefaultSize(0, widthMeasureSpec),
 //                 getDefaultSize(0, heightMeasureSpec));
+        _this._SetMeasuredDimension(_this._GetDefaultSize(0, widthMeasureSpec),
+                _this._GetDefaultSize(0, heightMeasureSpec));
 
 //         final int measuredWidth = getMeasuredWidth();
 //         final int maxGutterSize = measuredWidth / 10;
 //         mGutterSize = Math.min(maxGutterSize, mDefaultGutterSize);
+        var measuredWidth = _this.GetMeasuredWidth();
+        var maxGutterSize = measuredWidth / 10;
+        this.mGutterSize = Math.min(maxGutterSize, this.mDefaultGutterSize);
 
 //         // Children are just made to fill our space.
 //         int childWidthSize = measuredWidth - getPaddingLeft() - getPaddingRight();
 //         int childHeightSize = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+        var childWidthSize = measuredWidth - _this.GetPaddingLeft() - _this.GetPaddingRight();
+        var childHeightSize = _this.GetMeasuredHeight() - _this.GetPaddingTop() - _this.GetPaddingBottom();
 
 //         /*
 //          * Make sure all children have been properly measured. Decor views first.
@@ -1980,14 +2634,72 @@ elog("====ViewPager::InitViewPager====13====");
 //                 }
 //             }
 //         }
+        var size = _this.GetChildCount();
+        for (var i = 0; i < size; ++i) {
+            var child = _this.GetChildAt(i);
+            if (child.GetVisibility() != GONE) {
+                var lp = child.GetLayoutParams();
+                if (lp != null && lp.isDecor) {
+                    elog("====crash====::OnMeasure====");
+                    Assert(0);
+                    var hgrav = lp.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+                    var vgrav = lp.gravity & Gravity.VERTICAL_GRAVITY_MASK;
+                    var widthMode = MeasureSpec.AT_MOST;
+                    var heightMode = MeasureSpec.AT_MOST;
+                    var consumeVertical = vgrav == Gravity.TOP || vgrav == Gravity.BOTTOM;
+                    var consumeHorizontal = hgrav == Gravity.LEFT || hgrav == Gravity.RIGHT;
+
+                    if (consumeVertical) {
+                        widthMode = MeasureSpec.EXACTLY;
+                    } else if (consumeHorizontal) {
+                        heightMode = MeasureSpec.EXACTLY;
+                    }
+
+                    var widthSize = childWidthSize;
+                    var heightSize = childHeightSize;
+                    if (lp.width != LayoutParams.WRAP_CONTENT) {
+                        widthMode = MeasureSpec.EXACTLY;
+                        if (lp.width != LayoutParams.FILL_PARENT) {
+                            widthSize = lp.width;
+                        }
+                    }
+                    if (lp.height != LayoutParams.WRAP_CONTENT) {
+                        heightMode = MeasureSpec.EXACTLY;
+                        if (lp.height != LayoutParams.FILL_PARENT) {
+                            heightSize = lp.height;
+                        }
+                    }
+                    var widthSpec = MeasureSpec.makeMeasureSpec(widthSize, widthMode);
+                    var heightSpec = MeasureSpec.makeMeasureSpec(heightSize, heightMode);
+                    child.measure(widthSpec, heightSpec);
+
+                    if (consumeVertical) {
+                        childHeightSize -= child.getMeasuredHeight();
+                    } else if (consumeHorizontal) {
+                        childWidthSize -= child.getMeasuredWidth();
+                    }
+                }
+            }
+        }
+
+        // var ms = _this.GetMeasureSpec();
+        // var ee = ms.GetEXACTLY();
+        // elog("====ee:"+ee);
+        // Assert(0);
+        MeasureSpec._obj = _this.GetMeasureSpec();
 
 //         mChildWidthMeasureSpec = MeasureSpec.makeMeasureSpec(childWidthSize, MeasureSpec.EXACTLY);
 //         mChildHeightMeasureSpec = MeasureSpec.makeMeasureSpec(childHeightSize, MeasureSpec.EXACTLY);
+        this.mChildWidthMeasureSpec = MeasureSpec.MakeMeasureSpec(childWidthSize, MeasureSpec.GetEXACTLY());
+        this.mChildHeightMeasureSpec = MeasureSpec.MakeMeasureSpec(childHeightSize, MeasureSpec.GetEXACTLY());
 
 //         // Make sure we have created all fragments that we need to have shown.
 //         mInLayout = true;
 //         populate();
 //         mInLayout = false;
+        this.mInLayout = true;
+        this.Populate();
+        this.mInLayout = false;
 
 //         // Page views next.
 //         size = getChildCount();
@@ -2005,18 +2717,39 @@ elog("====ViewPager::InitViewPager====13====");
 //                 }
 //             }
 //         }
+        size = _this.GetChildCount();
+        for (var i = 0; i < size; ++i) {
+            var child = _this.GetChildAt(i);
+            if (child.GetVisibility() != GONE) {
+                if (this.DEBUG) elog(this.TAG + "Measuring #" + i + " " + child
+                        + ": " + this.mChildWidthMeasureSpec);
+
+                var lp = child.GetLayoutParams();
+                if (lp == null || !lp.isDecor) {
+                    var widthSpec = MeasureSpec.MakeMeasureSpec(
+                            childWidthSize * lp.widthFactor, MeasureSpec.GetEXACTLY());
+                    child.Measure(widthSpec, this.mChildHeightMeasureSpec);
+                }
+            }
+        }
+
+        elog("====ViewPager::OnMeasure====end====");
     }
 
 //     @Override
 //     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-    OnSizeChanged(w, h, oldw, oldh) {
+    OnSizeChanged(_this, w, h, oldw, oldh) {
         elog("====ViewPager::OnSizeChanged====TODO====");
 //         super.onSizeChanged(w, h, oldw, oldh);
+            _this._OnSizeChanged(w, h, oldw, oldh);
 
 //         // Make sure scroll position is set correctly.
 //         if (w != oldw) {
 //             recomputeScrollPosition(w, oldw, mPageMargin, mPageMargin);
 //         }
+        if (w != oldw) {
+            this.RecomputeScrollPosition(w, oldw, this.mPageMargin, this.mPageMargin);
+        }
     }
 
 //     private void recomputeScrollPosition(int width, int oldWidth, int margin, int oldMargin) {
@@ -2081,8 +2814,9 @@ elog("====ViewPager::InitViewPager====13====");
 
 //     @Override
 //     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-    OnLayout(changed, l, t, r, b) {
-        elog("====ViewPager::OnLayout====TODO====");
+    OnLayout(_this, changed, l, t, r, b) {
+        elog("====ViewPager::OnLayout====begin====");
+
 //         final int count = getChildCount();
 //         int width = r - l;
 //         int height = b - t;
@@ -2091,8 +2825,17 @@ elog("====ViewPager::InitViewPager====13====");
 //         int paddingRight = getPaddingRight();
 //         int paddingBottom = getPaddingBottom();
 //         final int scrollX = getScrollX();
+        var count = _this.GetChildCount();
+        var width = r - l;
+        var height = b - t;
+        var paddingLeft = _this.GetPaddingLeft();
+        var paddingTop = _this.GetPaddingTop();
+        var paddingRight = _this.GetPaddingRight();
+        var paddingBottom = _this.GetPaddingBottom();
+        var scrollX = _this.GetScrollX();
 
 //         int decorCount = 0;
+        var decorCount = 0;
 
 //         // First pass - decor views. We need to do this in two passes so that
 //         // we have the proper offsets for non-decor views later.
@@ -2103,6 +2846,17 @@ elog("====ViewPager::InitViewPager====13====");
 //                 int childLeft = 0;
 //                 int childTop = 0;
 //                 if (lp.isDecor) {
+        for (var i = 0; i < count; i++) {
+            var child = _this.GetChildAt(i);
+            if (child.GetVisibility() != GONE) {
+                var lp = child.GetLayoutParams();
+                var childLeft = 0;
+                var childTop = 0;
+                if (lp.isDecor) {
+
+elog("====ViewPager::OnLayout====crash====0====");
+Assert(0);
+
 //                     final int hgrav = lp.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
 //                     final int vgrav = lp.gravity & Gravity.VERTICAL_GRAVITY_MASK;
 //                     switch (hgrav) {
@@ -2144,11 +2898,13 @@ elog("====ViewPager::InitViewPager====13====");
 //                             childLeft + child.getMeasuredWidth(),
 //                             childTop + child.getMeasuredHeight());
 //                     decorCount++;
-//                 }
-//             }
-//         }
+                }
+            }
+        }
 
 //         final int childWidth = width - paddingLeft - paddingRight;
+        var childWidth = width - paddingLeft - paddingRight;
+
 //         // Page views. Do this once we have the right padding offsets from above.
 //         for (int i = 0; i < count; i++) {
 //             final View child = getChildAt(i);
@@ -2180,21 +2936,66 @@ elog("====ViewPager::InitViewPager====13====");
 //                 }
 //             }
 //         }
+        for (var i = 0; i < count; i++) {
+            var child = _this.GetChildAt(i);
+            if (child.GetVisibility() != GONE) {
+                var lp = child.GetLayoutParams();
+                var ii;
+                if (!lp.isDecor && (ii = this.InfoForChild(child)) != null) {
+                    var loff = childWidth * ii.offset;
+                    var childLeft = paddingLeft + loff;
+                    var childTop = paddingTop;
+                    if (lp.needsMeasure) {
+                        // This was added during layout and needs measurement.
+                        // Do it now that we know what we're working with.
+                        lp.needsMeasure = false;
+                        var widthSpec = MeasureSpec.makeMeasureSpec(
+                                childWidth * lp.widthFactor,
+                                MeasureSpec.GetEXACTLY());
+                        var heightSpec = MeasureSpec.makeMeasureSpec(
+                                height - paddingTop - paddingBottom,
+                                MeasureSpec.GetEXACTLY());
+                        child.Measure(widthSpec, heightSpec);
+                    }
+                    if (DEBUG) elog(TAG + "Positioning #" + i + " " + child + " f=" + ii.object
+                            + ":" + childLeft + "," + childTop + " " + child.GetMeasuredWidth()
+                            + "x" + child.GetMeasuredHeight());
+                    child.Layout(childLeft, childTop,
+                            childLeft + child.GetMeasuredWidth(),
+                            childTop + child.GetMeasuredHeight());
+                }
+            }
+        }
+
 //         mTopPageBounds = paddingTop;
 //         mBottomPageBounds = height - paddingBottom;
 //         mDecorChildCount = decorCount;
+        this.mTopPageBounds = paddingTop;
+        this.mBottomPageBounds = height - paddingBottom;
+        this.mDecorChildCount = decorCount;
 
 //         if (mFirstLayout) {
 //             scrollToItem(mCurItem, false, 0, false);
 //         }
 //         mFirstLayout = false;
+        if (this.mFirstLayout) {
+            this.ScrollToItem(this.mCurItem, false, 0, false);
+        }
+        this.mFirstLayout = false;
+
+// elog("====ViewPager::OnLayout====crash====1====");
+// Assert(0);
+
+        elog("====ViewPager::OnLayout====end====");
     }
 
 //     @Override
 //     public void computeScroll() {
-    ComputeScroll() {
-        elog("====ViewPager::ComputeScroll====TODO====");
+    ComputeScroll(_this) {
+        elog("====ViewPager::ComputeScroll====begin====");
+
 //         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
+        if (!this.mScroller.IsFinished() && this.mScroller.ComputeScrollOffset()) {
 //             int oldX = getScrollX();
 //             int oldY = getScrollY();
 //             int x = mScroller.getCurrX();
@@ -2211,15 +3012,19 @@ elog("====ViewPager::InitViewPager====13====");
 //             // Keep on drawing until the animation has finished.
 //             ViewCompat.postInvalidateOnAnimation(this);
 //             return;
-//         }
+        }
 
 //         // Done with scroll, clean up state.
 //         completeScroll(true);
+        this.CompleteScroll(true);
+
+        elog("====ViewPager::ComputeScroll====crash====");
+        Assert(0);
+
+        elog("====ViewPager::ComputeScroll====end====");
     }
 
 //     private boolean pageScrolled(int xpos) {
-    PageScrolled(xpos) {
-        elog("====ViewPager::PageScrolled====TODO====");
 //         if (mItems.size() == 0) {
 //             mCalledSuper = false;
 //             onPageScrolled(0, 0, 0);
@@ -2245,6 +3050,33 @@ elog("====ViewPager::InitViewPager====13====");
 //                     "onPageScrolled did not call superclass implementation");
 //         }
 //         return true;
+//     }
+    PageScrolled(xpos) {
+        if (mItems.size() == 0) {
+            mCalledSuper = false;
+            onPageScrolled(0, 0, 0);
+            if (!mCalledSuper) {
+                throw new IllegalStateException(
+                        "onPageScrolled did not call superclass implementation");
+            }
+            return false;
+        }
+        var ii = infoForCurrentScrollPosition();
+        var width = getClientWidth();
+        var widthWithMargin = width + mPageMargin;
+        var marginOffset = mPageMargin / width;
+        var currentPage = ii.position;
+        var pageOffset = ((xpos / width) - ii.offset) /
+                (ii.widthFactor + marginOffset);
+        var offsetPixels = pageOffset * widthWithMargin;
+
+        mCalledSuper = false;
+        onPageScrolled(currentPage, pageOffset, offsetPixels);
+        if (!mCalledSuper) {
+            throw new IllegalStateException(
+                    "onPageScrolled did not call superclass implementation");
+        }
+        return true;
     }
 
     /**
@@ -2262,6 +3094,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     protected void onPageScrolled(int position, float offset, int offsetPixels) {
     OnPageScrolled(position, offset, offsetPixels) {
         elog("====ViewPager::OnPageScrolled====TODO====");
+        Assert(0);
 //         // Offset any decor views if needed - keep them on-screen at all times.
 //         if (mDecorChildCount > 0) {
 //             final int scrollX = getScrollX();
@@ -2329,6 +3162,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     private void completeScroll(boolean postEvents) {
     CompleteScroll(postEvents) {
         elog("====ViewPager::CompleteScroll====TODO====");
+        Assert(0);
 //         boolean needPopulate = mScrollState == SCROLL_STATE_SETTLING;
 //         if (needPopulate) {
 //             // Done with scroll, no longer want to cache view drawing.
@@ -2360,26 +3194,34 @@ elog("====ViewPager::InitViewPager====13====");
     }
 
 //     private boolean isGutterDrag(float x, float dx) {
-    IsGutterDrag(x, dx) {
-        elog("====ViewPager::IsGutterDrag====TODO====");
 //         return (x < mGutterSize && dx > 0) || (x > getWidth() - mGutterSize && dx < 0);
+//     }
+    IsGutterDrag(x, dx) {
+        return (x < mGutterSize && dx > 0) || (x > getWidth() - mGutterSize && dx < 0);
     }
 
 //     private void enableLayers(boolean enable) {
-    EnableLayers(enable) {
-        elog("====ViewPager::EnableLayers====TODO====");
 //         final int childCount = getChildCount();
 //         for (int i = 0; i < childCount; i++) {
 //             final int layerType = enable ?
 //                     ViewCompat.LAYER_TYPE_HARDWARE : ViewCompat.LAYER_TYPE_NONE;
 //             ViewCompat.setLayerType(getChildAt(i), layerType, null);
 //         }
+//     }
+    EnableLayers(enable) {
+        var childCount = getChildCount();
+        for (var i = 0; i < childCount; i++) {
+            var layerType = enable ?
+                    ViewCompat.LAYER_TYPE_HARDWARE : ViewCompat.LAYER_TYPE_NONE;
+            ViewCompat.setLayerType(getChildAt(i), layerType, null);
+        }
     }
 
 //     @Override
 //     public boolean onInterceptTouchEvent(MotionEvent ev) {
     OnInterceptTouchEvent(ev, result) {
         elog("====ViewPager::OnInterceptTouchEvent====TODO====");
+        Assert(0);
 //         /*
 //          * This method JUST determines whether we want to intercept the motion.
 //          * If we return true, onMotionEvent will be called and we do the actual
@@ -2526,6 +3368,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public boolean onTouchEvent(MotionEvent ev) {
     OnTouchEvent(ev, result) {
         elog("====ViewPager::OnTouchEvent====TODO====");
+        Assert(0);
 //         if (mFakeDragging) {
 //             // A fake drag is in progress already, ignore this real one
 //             // but still eat the touch events.
@@ -2651,17 +3494,22 @@ elog("====ViewPager::InitViewPager====13====");
     }
 
 //     private void requestParentDisallowInterceptTouchEvent(boolean disallowIntercept) {
-    RequestParentDisallowInterceptTouchEvent(disallowIntercept) {
-        elog("====ViewPager::RequestParentDisallowInterceptTouchEvent====TODO====");
 //         final ViewParent parent = getParent();
 //         if (parent != null) {
 //             parent.requestDisallowInterceptTouchEvent(disallowIntercept);
 //         }
+//     }
+    RequestParentDisallowInterceptTouchEvent(disallowIntercept) {
+        var parent = getParent();
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(disallowIntercept);
+        }
     }
 
 //     private boolean performDrag(float x) {
     PerformDrag(x) {
         elog("====ViewPager::PerformDrag====TODO====");
+        Assert(0);
 //         boolean needsInvalidate = false;
 
 //         final float deltaX = mLastMotionX - x;
@@ -2715,6 +3563,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     private ItemInfo infoForCurrentScrollPosition() {
     InfoForCurrentScrollPosition() {
         elog("====ViewPager::InfoForCurrentScrollPosition====TODO====");
+        Assert(0);
 //         final int width = getClientWidth();
 //         final float scrollOffset = width > 0 ? (float) getScrollX() / width : 0;
 //         final float marginOffset = width > 0 ? (float) mPageMargin / width : 0;
@@ -2759,6 +3608,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     private int determineTargetPage(int currentPage, float pageOffset, int velocity, int deltaX) {
     DetermineTargetPage(currentPage, pageOffset, velocity, deltaX) {
         elog("====ViewPager::DetermineTargetPage====TODO====");
+        Assert(0);
 //         int targetPage;
 //         if (Math.abs(deltaX) > mFlingDistance && Math.abs(velocity) > mMinimumVelocity) {
 //             targetPage = velocity > 0 ? currentPage : currentPage + 1;
@@ -2780,10 +3630,18 @@ elog("====ViewPager::InitViewPager====13====");
 
 //     @Override
 //     public void draw(Canvas canvas) {
-    Draw(canvas) {
+    Draw(_this, canvas) {
         elog("====ViewPager::Draw====TODO====");
+
+        //var _this = this._obj;
+
+        //CObject.showMethods(canvas);
+        //CObject.showMethods(_this);
+
 //         super.draw(canvas);
 //         boolean needsInvalidate = false;
+        _this._Draw(canvas);
+        var needsInvalidate = false;
 
 //         final int overScrollMode = ViewCompat.getOverScrollMode(this);
 //         if (overScrollMode == ViewCompat.OVER_SCROLL_ALWAYS ||
@@ -2815,17 +3673,52 @@ elog("====ViewPager::InitViewPager====13====");
 //             mLeftEdge.finish();
 //             mRightEdge.finish();
 //         }
+        var overScrollMode = ViewCompat.GetOverScrollMode(_this);
+        if (overScrollMode == ViewCompat.OVER_SCROLL_ALWAYS ||
+                (overScrollMode == ViewCompat.OVER_SCROLL_IF_CONTENT_SCROLLS &&
+                        this.mAdapter != null && this.mAdapter.GetCount() > 1)) {
+            if (!this.mLeftEdge.IsFinished()) {
+                var restoreCount = canvas.Save();
+                var height = this.GetHeight() - this.GetPaddingTop() - this.GetPaddingBottom();
+                var width = this.GetWidth();
+
+                canvas.Rotate(270);
+                canvas.Translate(-height + this.GetPaddingTop(), this.mFirstOffset * width);
+                this.mLeftEdge.SetSize(height, width);
+                needsInvalidate |= this.mLeftEdge.Draw(canvas);
+                canvas.RestoreToCount(restoreCount);
+            }
+            if (!this.mRightEdge.IsFinished()) {
+                var restoreCount = canvas.Save();
+                var width = this.GetWidth();
+                var height = this.GetHeight() - this.GetPaddingTop() - this.GetPaddingBottom();
+
+                canvas.Rotate(90);
+                canvas.Translate(-this.GetPaddingTop(), -(this.mLastOffset + 1) * width);
+                this.mRightEdge.SetSize(height, width);
+                needsInvalidate |= this.mRightEdge.Draw(canvas);
+                canvas.RestoreToCount(restoreCount);
+            }
+        } else {
+            this.mLeftEdge.Finish();
+            this.mRightEdge.Finish();
+        }
 
 //         if (needsInvalidate) {
 //             // Keep animating
 //             ViewCompat.postInvalidateOnAnimation(this);
 //         }
+        if (needsInvalidate) {
+            // Keep animating
+            ViewCompat.PostInvalidateOnAnimation(_this);
+        }
     }
 
 //     @Override
 //     protected void onDraw(Canvas canvas) {
     OnDraw(canvas) {
         elog("====ViewPager::OnDraw====TODO====");
+        Assert(0);
 //         super.onDraw(canvas);
 
 //         // Draw the margin drawable between pages if needed.
@@ -2888,6 +3781,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public boolean beginFakeDrag() {
     BeginFakeDrag() {
         elog("====ViewPager::BeginFakeDrag====TODO====");
+        Assert(0);
 //         if (mIsBeingDragged) {
 //             return false;
 //         }
@@ -2916,6 +3810,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public void endFakeDrag() {
     EndFakeDrag() {
         elog("====ViewPager::EndFakeDrag====TODO====");
+        Assert(0);
 //         if (!mFakeDragging) {
 //             throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
 //         }
@@ -2949,6 +3844,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public void fakeDragBy(float xOffset) {
     FakeDragBy(xOffset) {
         elog("====ViewPager::FakeDragBy====TODO====");
+        Assert(0);
 //         if (!mFakeDragging) {
 //             throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
 //         }
@@ -2999,14 +3895,16 @@ elog("====ViewPager::InitViewPager====13====");
      * @see #endFakeDrag()
      */
 //     public boolean isFakeDragging() {
-    IsFakeDragging() {
-        elog("====ViewPager::IsFakeDragging====TODO====");
 //         return mFakeDragging;
+//     }
+    IsFakeDragging() {
+        return mFakeDragging;
     }
 
 //     private void onSecondaryPointerUp(MotionEvent ev) {
     OnSecondaryPointerUp(ev) {
         elog("====ViewPager::OnSecondaryPointerUp====TODO====");
+        Assert(0);
 //         final int pointerIndex = MotionEventCompat.getActionIndex(ev);
 //         final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
 //         if (pointerId == mActivePointerId) {
@@ -3024,6 +3922,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     private void endDrag() {
     EndDrag() {
         elog("====ViewPager::EndDrag====TODO====");
+        Assert(0);
 //         mIsBeingDragged = false;
 //         mIsUnableToDrag = false;
 
@@ -3036,6 +3935,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     private void setScrollingCacheEnabled(boolean enabled) {
     SetScrollingCacheEnabled(enabled) {
         elog("====ViewPager::SetScrollingCacheEnabled====TODO====");
+        Assert(0);
 //         if (mScrollingCacheEnabled != enabled) {
 //             mScrollingCacheEnabled = enabled;
 //             if (USE_CACHE) {
@@ -3053,6 +3953,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public boolean canScrollHorizontally(int direction) {
     CanScrollHorizontally(direction) {
         elog("====ViewPager::CanScrollHorizontally====TODO====");
+        Assert(0);
 //         if (mAdapter == null) {
 //             return false;
 //         }
@@ -3082,6 +3983,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
     CanScroll(v, checkV, dx, x, y) {
         elog("====ViewPager::CanScroll====TODO====");
+        Assert(0);
 //         if (v instanceof ViewGroup) {
 //             final ViewGroup group = (ViewGroup) v;
 //             final int scrollX = v.getScrollX();
@@ -3106,10 +4008,12 @@ elog("====ViewPager::InitViewPager====13====");
 
 //     @Override
 //     public boolean dispatchKeyEvent(KeyEvent event) {
-    DispatchKeyEvent(event, result) {
-        elog("====ViewPager::DispatchKeyEvent====TODO====");
 //         // Let the focused view and/or our descendants get the key first
 //         return super.dispatchKeyEvent(event) || executeKeyEvent(event);
+//     }
+    DispatchKeyEvent(event) {
+        // Let the focused view and/or our descendants get the key first
+        return super.dispatchKeyEvent(event) || executeKeyEvent(event);
     }
 
     /**
@@ -3123,6 +4027,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public boolean executeKeyEvent(KeyEvent event) {
     ExecuteKeyEvent(event) {
         elog("====ViewPager::ExecuteKeyEvent====TODO====");
+        Assert(0);
 //         boolean handled = false;
 //         if (event.getAction() == KeyEvent.ACTION_DOWN) {
 //             switch (event.getKeyCode()) {
@@ -3151,6 +4056,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public boolean arrowScroll(int direction) {
     ArrowScroll(direction) {
         elog("====ViewPager::ArrowScroll====TODO====");
+        Assert(0);
 //         View currentFocused = findFocus();
 //         if (currentFocused == this) {
 //             currentFocused = null;
@@ -3219,6 +4125,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     private Rect getChildRectInPagerCoordinates(Rect outRect, View child) {
     GetChildRectInPagerCoordinates(outRect, child) {
         elog("====ViewPager::GetChildRectInPagerCoordinates====TODO====");
+        Assert(0);
 //         if (outRect == null) {
 //             outRect = new Rect();
 //         }
@@ -3245,23 +4152,33 @@ elog("====ViewPager::InitViewPager====13====");
     }
 
 //     boolean pageLeft() {
-    PageLeft() {
-        elog("====ViewPager::PageLeft====TODO====");
 //         if (mCurItem > 0) {
 //             setCurrentItem(mCurItem-1, true);
 //             return true;
 //         }
 //         return false;
+//     }
+    PageLeft() {
+        if (mCurItem > 0) {
+            setCurrentItem(mCurItem-1, true);
+            return true;
+        }
+        return false;
     }
 
 //     boolean pageRight() {
-    PageRight() {
-        elog("====ViewPager::PageRight====TODO====");
 //         if (mAdapter != null && mCurItem < (mAdapter.getCount()-1)) {
 //             setCurrentItem(mCurItem+1, true);
 //             return true;
 //         }
 //         return false;
+//     }
+    PageRight() {
+        if (mAdapter != null && mCurItem < (mAdapter.getCount()-1)) {
+            setCurrentItem(mCurItem+1, true);
+            return true;
+        }
+        return false;
     }
 
 //     /**
@@ -3271,6 +4188,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
     AddFocusables(views, direction, focusableMode) {
         elog("====ViewPager::AddFocusables====TODO====");
+        Assert(0);
 //         final int focusableCount = views.size();
 
 //         final int descendantFocusability = getDescendantFocusability();
@@ -3317,6 +4235,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public void addTouchables(ArrayList<View> views) {
     AddTouchables(views) {
         elog("====ViewPager::AddTouchables====TODO====");
+        Assert(0);
 //         // Note that we don't call super.addTouchables(), which means that
 //         // we don't call View.addTouchables().  This is okay because a ViewPager
 //         // is itself not touchable.
@@ -3339,6 +4258,7 @@ elog("====ViewPager::InitViewPager====13====");
 //             Rect previouslyFocusedRect) {
     OnRequestFocusInDescendants(direction, previouslyFocusedRect, result) {
         elog("====ViewPager::OnRequestFocusInDescendants====TODO====");
+        Assert(0);
 //         int index;
 //         int increment;
 //         int end;
@@ -3370,6 +4290,7 @@ elog("====ViewPager::InitViewPager====13====");
 //     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
     DispatchPopulateAccessibilityEvent(event, result) {
         elog("====ViewPager::DispatchPopulateAccessibilityEvent====TODO====");
+        Assert(0);
 //         // Dispatch scroll events from this ViewPager.
 //         if (event.getEventType() == AccessibilityEventCompat.TYPE_VIEW_SCROLLED) {
 //             return super.dispatchPopulateAccessibilityEvent(event);
@@ -3393,36 +4314,41 @@ elog("====ViewPager::InitViewPager====13====");
 
 //     @Override
 //     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
-    GenerateDefaultLayoutParams(result) {
-        elog("====ViewPager::GenerateDefaultLayoutParams====TODO====");
 //         return new LayoutParams();
+//     }
+    GenerateDefaultLayoutParams(_this, result) {
+        elog("====ViewPager::GenerateDefaultLayoutParams====begin====");
+        result.data = new ViewPager.LayoutParams(_this);
+        elog("====ViewPager::GenerateDefaultLayoutParams====end====");
     }
 
 //     @Override
 //     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
-    GenerateLayoutParams(p, result) {
-        elog("====ViewPager::GenerateLayoutParams====TODO====");
 //         return generateDefaultLayoutParams();
-    }
+//     }
 
 //     @Override
 //     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-    CheckLayoutParams(p, result) {
-        elog("====ViewPager::CheckLayoutParams====TODO====");
 //         return p instanceof LayoutParams && super.checkLayoutParams(p);
+//     }
+    CheckLayoutParams(_this, p, result) {
+        elog("====ViewPager::CheckLayoutParams====TODO====");
+        return p instanceof ViewPager.LayoutParams && super.CheckLayoutParams(p);
     }
 
 //     @Override
 //     public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
-    GenerateLayoutParams(attrs, result) {
-        elog("====ViewPager::GenerateLayoutParams====TODO====");
 //         return new LayoutParams(getContext(), attrs);
+//     }
+    GenerateLayoutParams(_this, attrs, result) {
+        result.data = new ViewPager.LayoutParams(_this, _this.GetContext(), attrs);
     }
 
 //     class MyAccessibilityDelegate extends AccessibilityDelegateCompat {
     get MyAccessibilityDelegate() {
         elog("====ViewPager::MyAccessibilityDelegate====TODO====");
         if (this._MyAccessibilityDelegate_) return this._MyAccessibilityDelegate;
+        this._MyAccessibilityDelegate_ = true;
         this._MyAccessibilityDelegate = class _tmp extends AccessibilityDelegateCompat {
 
 //         @Override
@@ -3517,7 +4443,8 @@ elog("====ViewPager::InitViewPager====13====");
     static get LayoutParams() {
         elog("====ViewPager::LayoutParams====TODO====");
         if (ViewPager._LayoutParams_) return ViewPager._LayoutParams;
-        ViewPager._LayoutParams = class _tmp {
+        ViewPager._LayoutParams_ = true;
+        ViewPager._LayoutParams = class _ extends ViewGroup.LayoutParams {
 
 //         /**
 //          * true if this view is a decoration on the pager itself and not
@@ -3564,16 +4491,49 @@ elog("====ViewPager::InitViewPager====13====");
 //             gravity = a.getInteger(0, Gravity.TOP);
 //             a.recycle();
 //         }
+            constructor(_this, context, attrs) {
+                elog("====ViewPager::LayoutParams::constructor====begin====");
+
+                var FILL_PARENT = -1;
+                var MATCH_PARENT = -1;
+                var WRAP_CONTENT = -2;
+
+                if (arguments.length == 1) {
+                    super(_this, FILL_PARENT, FILL_PARENT);
+                }
+                else {
+                    var typeName = attrs.getClass?attrs.getClass().GetName():typeof attrs;
+                    if (typeName == "IAttributeSet") {
+                        super(_this, context, attrs);
+
+                        elog("====ViewPager::LayoutParams::constructor====begin====0====" + typeName);
+                        var a = context.ObtainStyledAttributes(attrs, ViewPager.LAYOUT_ATTRS);
+                        elog("====ViewPager::LayoutParams::constructor====begin====1====");
+                        this.gravity = a.GetInteger(0, Gravity.TOP);
+                        elog("====ViewPager::LayoutParams::constructor====begin====2====");
+                        a.Recycle();
+                        elog("====ViewPager::LayoutParams::constructor====begin====3====");
+                    }
+                    else {
+                        elog("====ViewPager::LayoutParams::constructor====begin====4====" + typeName);
+                        super(_this, context, attrs);
+                        elog("====ViewPager::LayoutParams::constructor====begin====5====");
+                    }
+                }   //else
+
+                elog("====ViewPager::LayoutParams::constructor====end====");
+            }
 
         };
-        return ViewPager._LayoutParams;
+        return this._LayoutParams;
     }
 
 //     static class ViewPositionComparator implements Comparator<View> {
     static get ViewPositionComparator() {
-        elog("====ViewPager::ViewPositionComparator====TODO====");
-        if (ViewPager._ViewPositionComparator_) return ViewPager._ViewPositionComparator;
-        ViewPager._ViewPositionComparator = class _tmp {
+        elog("====ViewPager::ViewPositionComparator====");
+        if (this._ViewPositionComparator_) return this._ViewPositionComparator;
+        this._ViewPositionComparator_ = true;
+        this._ViewPositionComparator = class _ {
 
 //         @Override
 //         public int compare(View lhs, View rhs) {
@@ -3584,9 +4544,17 @@ elog("====ViewPager::InitViewPager====13====");
 //             }
 //             return llp.position - rlp.position;
 //         }
+        Compare(lhs, rhs) {
+            var llp = lhs.GetLayoutParams();
+            var rlp = rhs.GetLayoutParams();
+            if (llp.isDecor != rlp.isDecor) {
+                return llp.isDecor ? 1 : -1;
+            }
+            return llp.position - rlp.position;
+        }
 
         };
-        return ViewPager._ViewPositionComparator;
+        return this._ViewPositionComparator;
     }
 
 }   //class ViewPager

@@ -70,7 +70,7 @@ ECode CTestModuleInfo::GetClassCount(
 }
 
 ECode CTestModuleInfo::GetAllClassInfos(
-    /* [out, callee] */ ArrayOf<ITestClassInfo *> ** ppClassInfos)
+    /* [out] */ ArrayOf<ITestClassInfo *> ** ppClassInfos)
 {
     ECode ec = NOERROR;
 
