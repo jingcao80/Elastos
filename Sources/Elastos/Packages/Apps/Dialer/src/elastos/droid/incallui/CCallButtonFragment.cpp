@@ -121,7 +121,7 @@ ECode CCallButtonFragment::OverflowPopupMenuListener::OnDismiss(
 const Int32 CCallButtonFragment::HIDDEN = 0;
 const Int32 CCallButtonFragment::VISIBLE = 255;
 
-CAR_INTERFACE_IMPL_7(CCallButtonFragment, BaseFragment, IPopupMenuOnMenuItemClickListener, IPopupMenuOnDismissListener,
+CAR_INTERFACE_IMPL_5(CCallButtonFragment, BaseFragment,
         IViewOnClickListener, ICompoundButtonOnCheckedChangeListener, IUi, ICallButtonUi, ICallButtonFragment);
 
 CAR_OBJECT_IMPL(CCallButtonFragment);

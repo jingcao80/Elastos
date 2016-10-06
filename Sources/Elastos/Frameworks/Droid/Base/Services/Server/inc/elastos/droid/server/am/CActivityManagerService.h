@@ -3397,7 +3397,7 @@ private:
     static CARAPI_(Int32) DumpProcessList(
         /* [in] */ IPrintWriter* pw,
         /* [in] */ CActivityManagerService* service,
-        /* [in] */ List< AutoPtr<ProcessRecord> >* list,
+        /* [in] */ IArrayList* list,
         /* [in] */ const String& prefix,
         /* [in] */ const String& normalLabel,
         /* [in] */ const String& persistentLabel,
@@ -3936,7 +3936,7 @@ public:
      * system was ready.  We don't start them at that point, but ensure they
      * are started by the time booting is complete.
      */
-    List< AutoPtr<ProcessRecord> > mProcessesOnHold;
+    AutoPtr<IArrayList> mProcessesOnHold;
 
     /**
      * List of records for processes that we have started and are waiting
@@ -3950,12 +3950,12 @@ public:
      * List of persistent applications that are in the process
      * of being started.
      */
-    List< AutoPtr<ProcessRecord> > mPersistentStartingProcesses;
+    AutoPtr<IArrayList> mPersistentStartingProcesses;
 
     /**
      * Processes that are being forcibly torn down.
      */
-    List< AutoPtr<ProcessRecord> > mRemovedProcesses;
+    AutoPtr<IArrayList> mRemovedProcesses;
 
     /**
      * List of running applications, sorted by recent usage.

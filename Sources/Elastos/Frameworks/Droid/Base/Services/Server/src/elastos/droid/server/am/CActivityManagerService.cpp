@@ -278,6 +278,7 @@ using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollections;
+using Elastos::Utility::ICollection;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
@@ -2710,6 +2711,9 @@ CActivityManagerService::CActivityManagerService()
     , mLockScreenShown(FALSE)
     , mCurResumedUid(-1)
 {
+    CArrayList::New((IArrayList**)&mProcessesOnHold);
+    CArrayList::New((IArrayList**)&mPersistentStartingProcesses);
+    CArrayList::New((IArrayList**)&mRemovedProcesses);
     CAtomicInteger64::New(0, (IAtomicInteger64**)&mLastCpuTime);
     CAtomicBoolean::New(TRUE, (IAtomicBoolean**)&mProcessCpuMutexFree);
     mProcessList = new ProcessList();
@@ -2763,10 +2767,7 @@ CActivityManagerService::~CActivityManagerService()
     mIsolatedProcesses.Clear();
     mPidsSelfLocked.Clear();
     mForegroundProcesses.Clear();
-    mProcessesOnHold.Clear();
     mStartingProcesses.Clear();
-    mPersistentStartingProcesses.Clear();
-    mRemovedProcesses.Clear();
     mLruProcesses.Clear();
     mProcessesToGc.Clear();
     mStartedUsers.Clear();
@@ -3988,8 +3989,9 @@ AutoPtr<ProcessRecord> CActivityManagerService::StartProcessLocked(
     if (!mProcessesReady
             && !IsAllowedWhileBooting(info)
             && !allowWhileBooting) {
-        if (Find(mProcessesOnHold.Begin(), mProcessesOnHold.End(), app) == mProcessesOnHold.End()) {
-            mProcessesOnHold.PushBack(app);
+        Boolean contains;
+        if (mProcessesOnHold->Contains((IProcessRecord*)app.Get(), &contains), !contains) {
+            mProcessesOnHold->Add((IProcessRecord*)app.Get());
         }
         if (DEBUG_PROCESSES) {
             String appDes = app->ToString();
@@ -4051,11 +4053,12 @@ ECode CActivityManagerService::StartProcessLocked(
     }
 
     AutoPtr<ProcessRecord> temp = app;
+    Boolean contains;
     if (DEBUG_PROCESSES &&
-            Find(mProcessesOnHold.Begin(), mProcessesOnHold.End(), temp) != mProcessesOnHold.End()) {
+            (mProcessesOnHold->Contains((IProcessRecord*)app, &contains), contains)) {
         Slogger::V(TAG, "startProcessLocked removing on hold: ", TO_CSTR(app));
     }
-    mProcessesOnHold.Remove(app);
+    mProcessesOnHold->Remove((IProcessRecord*)app);
 
     CheckTime(startTime, String("startProcess: starting to update cpu stats"));
     UpdateCpuStats();
@@ -7840,7 +7843,7 @@ Boolean CActivityManagerService::RemoveProcessLocked(
         }
     }
     else {
-        mRemovedProcesses.PushBack(app);
+        mRemovedProcesses->Add((IProcessRecord*)app);
     }
 
     return needRestart;
@@ -8093,12 +8096,12 @@ Boolean CActivityManagerService::AttachApplicationLocked(
     app->mLastRequestedGc = app->mLastLowMemory = SystemClock::GetUptimeMillis();
 
     // Remove this record from the list of starting applications.
-    mPersistentStartingProcesses.Remove(app);
-    if (DEBUG_PROCESSES && (Find(mProcessesOnHold.Begin(),
-            mProcessesOnHold.End(), app) != mProcessesOnHold.End())) {
+    mPersistentStartingProcesses->Remove((IProcessRecord*)app.Get());
+    Boolean contains;
+    if (DEBUG_PROCESSES && (mProcessesOnHold->Contains((IProcessRecord*)app.Get(), &contains), contains)) {
         Slogger::V(TAG, "Attach application locked removing on hold: %s", TO_CSTR(app));
     }
-    mProcessesOnHold.Remove(app);
+    mProcessesOnHold->Remove((IProcessRecord*)app.Get());
 
     Boolean badApp = FALSE, didSomething = FALSE, bval = FALSE;
 
@@ -8280,12 +8283,17 @@ ECode CActivityManagerService::FinishBooting()
 
         // Ensure that any processes we had put on hold are now started
         // up.
-        if (!mProcessesOnHold.IsEmpty()) {
-            List< AutoPtr<ProcessRecord> > procs = mProcessesOnHold;
-            List< AutoPtr<ProcessRecord> >::Iterator it;
-            for (it = procs.Begin(); it != procs.End(); ++it) {
-                if (DEBUG_PROCESSES) Slogger::V(TAG, "Starting process on hold: %p", (*it).Get());
-                StartProcessLocked(*it, String("onHold"), nullStr);
+        Int32 NP;
+        mProcessesOnHold->GetSize(&NP);
+        if (NP > 0) {
+            AutoPtr<IArrayList> proces;
+            CArrayList::New(ICollection::Probe(mProcessesOnHold), (IArrayList**)&proces);
+            for (Int32 ip = 0; ip < NP; ip++) {
+                AutoPtr<IInterface> obj;
+                proces->Get(ip, (IInterface**)&obj);
+                ProcessRecord* app = (ProcessRecord*)IProcessRecord::Probe(obj);
+                if (DEBUG_PROCESSES) Slogger::V(TAG, "Starting process on hold: %s", TO_CSTR(app));
+                StartProcessLocked(app, String("onHold"), nullStr);
             }
         }
 
@@ -12968,10 +12976,10 @@ AutoPtr<ProcessRecord> CActivityManagerService::AddAppLocked(
         }
     }
 
+    Int32 index;
     if (app->mThread == NULL &&
-        (Find(mPersistentStartingProcesses.Begin(),
-                mPersistentStartingProcesses.End(), app) == mPersistentStartingProcesses.End())) {
-        mPersistentStartingProcesses.PushBack(app);
+        (mPersistentStartingProcesses->IndexOf((IProcessRecord*)app.Get(), &index), index < 0)) {
+        mPersistentStartingProcesses->Add((IProcessRecord*)app.Get());
         StartProcessLocked(app, String("added application"), app->mProcessName, abiOverride,
                 String(NULL) /* entryPoint */, NULL /* entryPointArgs */);
     }
@@ -16430,30 +16438,31 @@ void CActivityManagerService::DumpProcessesLocked(
         }
     }
 
-    if (mPersistentStartingProcesses.IsEmpty() == FALSE) {
+    Int32 size;
+    if (mPersistentStartingProcesses->GetSize(&size), size > 0) {
         if (needSep) pw->Println();
         needSep = TRUE;
         printedAnything = TRUE;
         pw->Println(String("  Persisent processes that are starting:"));
-        DumpProcessList(pw, this, &mPersistentStartingProcesses, String("    "),
+        DumpProcessList(pw, this, mPersistentStartingProcesses, String("    "),
                 String("Starting Norm"), String("Restarting PERS"), dumpPackage);
     }
 
-    if (mRemovedProcesses.IsEmpty() == FALSE) {
+    if (mRemovedProcesses->GetSize(&size), size > 0) {
         if (needSep) pw->Println();
         needSep = TRUE;
         printedAnything = TRUE;
         pw->Println(String("  Processes that are being removed:"));
-        DumpProcessList(pw, this, &mRemovedProcesses, String("    "),
+        DumpProcessList(pw, this, mRemovedProcesses, String("    "),
                 String("Removed Norm"), String("Removed PERS"), dumpPackage);
     }
 
-    if (!mProcessesOnHold.IsEmpty()) {
+    if (mProcessesOnHold->GetSize(&size), size > 0) {
         if (needSep) pw->Println();
         needSep = TRUE;
         printedAnything = TRUE;
         pw->Println(String("  Processes that are on old until the system is ready:"));
-        DumpProcessList(pw, this, &mProcessesOnHold, String("    "),
+        DumpProcessList(pw, this, mProcessesOnHold, String("    "),
                 String("OnHold Norm"), String("OnHold PERS"), dumpPackage);
     }
 
@@ -17299,17 +17308,20 @@ void CActivityManagerService::DumpPendingIntentsLocked(
 Int32 CActivityManagerService::DumpProcessList(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ CActivityManagerService* service,
-    /* [in] */ List< AutoPtr<ProcessRecord> >* list,
+    /* [in] */ IArrayList* list,
     /* [in] */ const String& prefix,
     /* [in] */ const String& normalLabel,
     /* [in] */ const String& persistentLabel,
     /* [in] */ const String& dumpPackage)
 {
     Int32 numPers = 0;
-    Int32 i = list->GetSize()-1;
-    List< AutoPtr<ProcessRecord> >::ReverseIterator rit;
-    for (rit = list->RBegin(); rit != list->REnd(); ++rit, --i) {
-        AutoPtr<ProcessRecord> r = *rit;
+    Int32 N;
+    list->GetSize(&N);
+    N = N - 1;
+    for (Int32 i = N; i >= 0; i--) {
+        AutoPtr<IInterface> obj;
+        list->Get(i, (IInterface**)&obj);
+        ProcessRecord* r = (ProcessRecord*)IProcessRecord::Probe(obj);
         String rPkgName;
         IPackageItemInfo::Probe(r->mInfo)->GetPackageName(&rPkgName);
         if (dumpPackage != NULL && !dumpPackage.Equals(rPkgName)) {
@@ -18612,18 +18624,19 @@ Boolean CActivityManagerService::CleanUpApplicationRecordLocked(
         // This app is persistent, so we need to keep its record around.
         // If it is not already on the pending app list, add it there
         // and start a new process for it.
-        if (Find(mPersistentStartingProcesses.Begin(), mPersistentStartingProcesses.End(), app)
-                == mPersistentStartingProcesses.End()) {
-            mPersistentStartingProcesses.PushBack(app);
+        Int32 index;
+        if (mPersistentStartingProcesses->IndexOf((IProcessRecord*)app.Get(), &index), index < 0) {
+            mPersistentStartingProcesses->Add((IProcessRecord*)app.Get());
             restart = TRUE;
         }
     }
+    Boolean contains;
     if ((DEBUG_PROCESSES || DEBUG_CLEANUP)
-            && (Find(mProcessesOnHold.Begin(), mProcessesOnHold.End(), app) != mProcessesOnHold.End())) {
+            && (mProcessesOnHold->Contains((IProcessRecord*)app, &contains), contains)) {
         String appDes = app->ToString();
         Slogger::V(TAG, "Clean-up removing on hold: %s", appDes.string());
     }
-    mProcessesOnHold.Remove(app);
+    mProcessesOnHold->Remove((IProcessRecord*)app);
 
     if (app == mHomeProcess) {
         mHomeProcess = NULL;
@@ -23003,13 +23016,15 @@ ECode CActivityManagerService::TrimApplications()
 {
     {
         AutoLock lock(this);
+        Int32 i = 0;
 
         // First remove any unused application processes whose package
         // has been removed.
-        // for (i = mRemovedProcesses.GetSize() - 1; i >= 0; i--)
-        List< AutoPtr<ProcessRecord> >::ReverseIterator rit = mRemovedProcesses.RBegin();
-        while(rit != mRemovedProcesses.REnd()) {
-            AutoPtr<ProcessRecord> app = *rit;
+        mRemovedProcesses->GetSize(&i);
+        for (i = i - 1; i >= 0; i--) {
+            AutoPtr<IInterface> obj;
+            mRemovedProcesses->Get(i, (IInterface**)&obj);
+            ProcessRecord* app = (ProcessRecord*)IProcessRecord::Probe(obj);
             if (app->mActivities.IsEmpty()
                 && app->mCurReceiver == NULL && app->mServices.IsEmpty()) {
                 // Slogger::I(
@@ -23031,15 +23046,12 @@ ECode CActivityManagerService::TrimApplications()
                     // }
                 }
                 CleanUpApplicationRecordLocked(app, FALSE, TRUE, -1);
-
-                rit = List< AutoPtr<ProcessRecord> >::ReverseIterator(mRemovedProcesses.Erase(--(rit.GetBase())));
+                mRemovedProcesses->Remove(i);
 
                 if (app->mPersistent) {
                     AddAppLocked(app->mInfo, FALSE, String(NULL) /* ABI override */);
                 }
-                continue;
             }
-            ++rit;
         }
 
         // Now update the oom adj for all processes.
