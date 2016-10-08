@@ -81,8 +81,6 @@
 #include "elastos/droid/service/persistentdata/CPersistentDataBlockManager.h"
 #include "elastos/droid/database/sqlite/SQLiteDatabase.h"
 #include "elastos/droid/accounts/CAccountManager.h"
-// #include "elastos/droid/privacy/CPrivacySettingsManager.h"
-// #include "elastos/droid/privacy/surrogate/CPrivacyLocationManager.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/ClassLoader.h>
@@ -90,9 +88,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <utils/CallStack.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 // using Elastos::Droid::Accounts::CAccountManager;
 using Elastos::Droid::Accounts::IIAccountManager;
@@ -206,9 +203,6 @@ using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::Storage::CStorageManager;
 using Elastos::Droid::Privacy::IIPrivacySettingsManager;
 using Elastos::Droid::Privacy::IPrivacySettingsManager;
-// using Elastos::Droid::Privacy::CPrivacySettingsManager;
-// using Elastos::Droid::Privacy::Surrogate::IPrivacyLocationManager;
-// using Elastos::Droid::Privacy::Surrogate::CPrivacyLocationManager;
 using Elastos::Droid::Service::Persistentdata::IIPersistentDataBlockService;
 using Elastos::Droid::Service::Persistentdata::IPersistentDataBlockManager;
 using Elastos::Droid::Service::Persistentdata::CPersistentDataBlockManager;
@@ -236,6 +230,7 @@ using Elastos::Droid::Wifi::P2p::CWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::IIWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::EIID_IIWifiP2pManager;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::ClassLoader;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
@@ -3354,8 +3349,10 @@ ECode CContextImpl::EnforceUriPermission(
 void CContextImpl::WarnIfCallingFromSystemProcess()
 {
     if (Process::MyUid() == IProcess::SYSTEM_UID) {
-        Slogger::W(TAG, "Calling a method in the system process without a qualified user: "
-                /*+ Debug.getCallers(5)*/);
+        android::CallStack stack;
+        stack.update();
+        Slogger::W(TAG, "Calling a method in the system process without a qualified user, backtrace:\n%s",
+            stack.toString("").string());
     }
 }
 

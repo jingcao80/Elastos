@@ -12,16 +12,15 @@ CAR_OBJECT_IMPL(CCloseGuard)
 
 static AutoPtr<ICloseGuard> InitNOOP()
 {
-    AutoPtr<CCloseGuard> cg;
-    CCloseGuard::NewByFriend((CCloseGuard**)&cg);
-    return (ICloseGuard*)cg.Get();
+    AutoPtr<ICloseGuard> cg;
+    CCloseGuard::New((ICloseGuard**)&cg);
+    return cg;
 }
 
 static AutoPtr<ICloseGuardReporter> InitREPORTER()
 {
-    AutoPtr<ICloseGuardReporter> report;
-    report = new CCloseGuard::DefaultReporter();
-    return (ICloseGuardReporter*)report.Get();
+    AutoPtr<ICloseGuardReporter> report = new CCloseGuard::DefaultReporter();
+    return report;
 }
 
 Boolean CCloseGuard::ENABLED = TRUE;
@@ -51,9 +50,9 @@ AutoPtr<ICloseGuard> CCloseGuard::Get()
     if (!ENABLED) {
         return NOOP;
     }
-    AutoPtr<CCloseGuard> res;
-    CCloseGuard::NewByFriend((CCloseGuard**)&res);
-    return (ICloseGuard*)res.Get();
+    AutoPtr<ICloseGuard> res;
+    CCloseGuard::New((ICloseGuard**)&res);
+    return res;
 }
 
 ECode CCloseGuard::SetEnabled(
@@ -67,7 +66,7 @@ ECode CCloseGuard::SetReporter(
     /* [in] */ ICloseGuardReporter* reporter)
 {
     if (reporter == NULL) {
-        //throw new NullPointerException("reporter == null");
+        ALOGE("CCloseGuard::SetReporter: reporter == null");
         return E_NULL_POINTER_EXCEPTION;
     }
     REPORTER = reporter;
@@ -84,7 +83,7 @@ ECode CCloseGuard::Open(
 {
     // always perform the check for valid API usage...
     if (closer.IsNull()) {
-        //throw new NullPointerException("closer == null");
+        ALOGE("CCloseGuard::Open: closer == null");
         return E_NULL_POINTER_EXCEPTION;
     }
     // ...but avoid allocating an allocationSite if disabled

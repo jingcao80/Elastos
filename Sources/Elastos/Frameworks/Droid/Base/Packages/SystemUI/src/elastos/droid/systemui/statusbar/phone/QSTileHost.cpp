@@ -406,7 +406,9 @@ ECode QSTileHost::CreateTile(
         qs = new CellularTile(this);
     }
     else if (tileSpec.Equals("airplane")) {
-        qs = new AirplaneModeTile(this);
+        AutoPtr<AirplaneModeTile> amt = new AirplaneModeTile();
+        amt->constructor(this);
+        qs = amt.Get();
     }
     else if (tileSpec.Equals("rotation")) {
         qs = new RotationLockTile(this);
@@ -431,7 +433,7 @@ ECode QSTileHost::CreateTile(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    *values = (IQSTile*)qs->Probe(EIID_IQSTile);
+    *values = (IQSTile*)qs.Get();
     REFCOUNT_ADD(*values);
     return NOERROR;
 }

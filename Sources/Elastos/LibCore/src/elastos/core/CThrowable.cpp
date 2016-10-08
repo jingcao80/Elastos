@@ -7,6 +7,7 @@
 #include "CoreUtils.h"
 #include "CArrayList.h"
 #include "Arrays.h"
+#include <utils/CallStack.h>
 
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Collections;
@@ -92,6 +93,10 @@ ECode CThrowable::constructor(
     }
     else {
         mStackTrace = NULL;
+
+        android::CallStack stack;
+        stack.update();
+        mBacktrace = String(stack.toString("").string());
     }
     return NOERROR;
 }
@@ -105,6 +110,10 @@ ECode CThrowable::FillInStackTrace()
     mStackState = NativeFillInStackTrace();
     // Mark the full representation as in need of update.
     mStackTrace = EmptyArray::STACK_TRACE_ELEMENT;
+
+    android::CallStack stack;
+    stack.update();
+    mBacktrace = String(stack.toString("").string());
     return NOERROR;
 }
 
@@ -276,18 +285,14 @@ ECode CThrowable::PrintStackTrace(
 ECode CThrowable::ToString(
     /* [out] */ String * info)
 {
+    VALIDATE_NOT_NULL(info)
     String msg;
     GetLocalizedMessage(&msg);
-    String name("CThrowable");
-    if (msg.IsNull()) {
-        *info = name;
-        return NOERROR;
-    }
 
-    StringBuilder sb(name);
-    sb += ": [";
+    StringBuilder sb("CThrowable: [");
     sb += msg;
-    sb += "]";
+    sb += "], backtrace:\n";
+    sb += mBacktrace;
     *info = sb.ToString();
     return NOERROR;
 }

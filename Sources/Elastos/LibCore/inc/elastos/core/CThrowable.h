@@ -230,6 +230,7 @@ private:
      * The message provided when the exception was created.
      */
     String mDetailMessage;
+    String mBacktrace;
 
     /**
      * The cause of this Throwable. Null when there is no cause.

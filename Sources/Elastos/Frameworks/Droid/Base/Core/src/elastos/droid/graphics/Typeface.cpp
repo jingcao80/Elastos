@@ -68,7 +68,7 @@ AutoPtr<ITypeface> Typeface::SANS_SERIF;
 AutoPtr<ITypeface> Typeface::SERIF;
 AutoPtr<ITypeface> Typeface::MONOSPACE;
 AutoPtr< ArrayOf<ITypeface*> > Typeface::sDefaults;
-HashMap<Int32, AutoPtr<Typeface::TypefaceMap> > Typeface::sTypefaceCache(3);
+HashMap<Int64, AutoPtr<Typeface::TypefaceMap> > Typeface::sTypefaceCache(3);
 AutoPtr<ITypeface> Typeface::sDefaultTypeface;
 HashMap<String, AutoPtr<ITypeface> > Typeface::sSystemFontMap;
 AutoPtr<ArrayOf<IFontFamily*> > Typeface::sFallbackFonts;
@@ -197,7 +197,7 @@ ECode Typeface::Create(
 
     AutoPtr<ITypeface> tmpTypeface;
     AutoPtr<TypefaceMap> styles;
-    HashMap<Int32, AutoPtr<TypefaceMap> >::Iterator it = sTypefaceCache.Find(ni);
+    typename TypefaceCacheMap::Iterator it = sTypefaceCache.Find(ni);
     if (it != sTypefaceCache.End()) {
         styles = it->mSecond;
     }
@@ -206,24 +206,23 @@ ECode Typeface::Create(
         typename TypefaceMap::Iterator sit = styles->Find(style);
         if (sit != styles->End()) {
             tmpTypeface = sit->mSecond;
-        }
-        if (tmpTypeface != NULL) {
-            *typeface = tmpTypeface;
-            REFCOUNT_ADD(*typeface);
-            return NOERROR;
+            if (tmpTypeface != NULL) {
+                *typeface = tmpTypeface;
+                REFCOUNT_ADD(*typeface);
+                return NOERROR;
+            }
         }
     }
 
-    AutoPtr<ITypeface> tmpType;
-    CTypeface::New(NativeCreateFromTypeface(ni, style), (ITypeface**)&tmpType);
-    *typeface = tmpType;
+    CTypeface::New(NativeCreateFromTypeface(ni, style), (ITypeface**)&tmpTypeface);
+    *typeface = tmpTypeface;
     REFCOUNT_ADD(*typeface);
 
     if (styles == NULL) {
         styles = new TypefaceMap(4);
         sTypefaceCache[ni] = styles;
     }
-    (*styles)[style] = tmpType;
+    (*styles)[style] = tmpTypeface;
 
     return NOERROR;
 }
@@ -361,8 +360,10 @@ Int64 Typeface::NativeCreateWeightAlias(
 void Typeface::NativeUnref(
     /* [in] */ Int64 faceHandle)
 {
-    TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
-    TypefaceImpl_unref(face);
+    if (faceHandle) {
+        TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
+        TypefaceImpl_unref(face);
+    }
 }
 
 Int32 Typeface::NativeGetStyle(
