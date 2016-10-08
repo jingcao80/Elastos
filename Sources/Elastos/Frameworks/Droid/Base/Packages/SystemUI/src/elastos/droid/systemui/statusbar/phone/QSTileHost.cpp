@@ -120,7 +120,7 @@ void QSTileHost::UserTracker::OnUserSwitched(
 
 CAR_INTERFACE_IMPL_2(QSTileHost, Object, IPhoneQSTileHost, IQSTileHost);
 
-QSTileHost::QSTileHost(
+ECode QSTileHost::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IPhoneStatusBar* statusBar,
     /* [in] */ IBluetoothController* bluetooth,
@@ -165,6 +165,7 @@ QSTileHost::QSTileHost(
 
     mUserTracker->StartTracking();
     mObserver->Register();
+    return NOERROR;
 }
 
 ECode QSTileHost::SetCallback(
@@ -411,7 +412,9 @@ ECode QSTileHost::CreateTile(
         qs = amt.Get();
     }
     else if (tileSpec.Equals("rotation")) {
-        qs = new RotationLockTile(this);
+        AutoPtr<RotationLockTile> rlt = new RotationLockTile();
+        rlt->constructor(this);
+        qs = rlt.Get();
     }
     else if (tileSpec.Equals("flashlight")) {
         qs = new FlashlightTile(this);

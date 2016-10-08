@@ -1882,8 +1882,12 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     mHotspotController = new HotspotControllerImpl(mContext);
     mBluetoothController = new BluetoothControllerImpl(mContext);
     mSecurityController = new SecurityControllerImpl(mContext);
-    if (res->GetBoolean(R::bool_::config_showRotationLock, &tmp), tmp) {
-        mRotationLockController = new RotationLockControllerImpl(mContext);
+
+    res->GetBoolean(R::bool_::config_showRotationLock, &tmp);
+    if (tmp) {
+        AutoPtr<RotationLockControllerImpl> rlci = new RotationLockControllerImpl();
+        rlci->constructor(mContext);
+        mRotationLockController = rlci.Get();
     }
     mUserInfoController = new UserInfoController(mContext);
     mVolumeComponent = IVolumeComponent::Probe(GetComponent(String("EIID_IVolumeComponent")/*.class*/));
@@ -1966,13 +1970,14 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     statusBarWindow->FindViewById(R::id::quick_settings_panel, (IView**)&view);
     mQSPanel = IQSPanel::Probe(view);
     if (mQSPanel != NULL) {
-        AutoPtr<IQSTileHost> qsh = new QSTileHost(mContext, this,
+        AutoPtr<QSTileHost> qsh = new QSTileHost();
+        qsh->constructor(mContext, this,
                 mBluetoothController, mLocationController, mRotationLockController,
                 mNetworkController, mZenModeController, mHotspotController,
                 mCastController, mFlashlightController,
                 mUserSwitcherController, mKeyguardMonitor,
                 mSecurityController);
-        mQSPanel->SetHost((IPhoneQSTileHost*)qsh->Probe(EIID_IPhoneQSTileHost));
+        mQSPanel->SetHost(qsh.Get());
 
         AutoPtr<ICollection> c;
         qsh->GetTiles((ICollection**)&c);
@@ -1983,7 +1988,7 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
         mQSPanel->SetBrightnessMirror(mBrightnessMirrorController);
         mHeader->SetQSPanel(mQSPanel);
 
-        AutoPtr<HostCallback> hc = new HostCallback(this, qsh);
+        AutoPtr<HostCallback> hc = new HostCallback(this, qsh.Get());
         qsh->SetCallback(hc);
     }
 

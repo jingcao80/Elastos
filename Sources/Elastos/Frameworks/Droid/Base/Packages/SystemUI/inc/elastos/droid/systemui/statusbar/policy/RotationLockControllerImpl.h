@@ -44,7 +44,7 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    RotationLockControllerImpl(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     CARAPI AddRotationLockControllerCallback(

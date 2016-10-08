@@ -46,9 +46,9 @@ ECode CTaskStackBuilder::constructor(
 AutoPtr<ITaskStackBuilder> CTaskStackBuilder::Create(
     /* [in] */ IContext* context)
 {
-    AutoPtr<CTaskStackBuilder> cb;
-    CTaskStackBuilder::NewByFriend(context, (CTaskStackBuilder**)&cb);
-    return (ITaskStackBuilder*)cb.Get();
+    AutoPtr<ITaskStackBuilder> cb;
+    CTaskStackBuilder::New(context, (ITaskStackBuilder**)&cb);
+    return cb;
 }
 
 ECode CTaskStackBuilder::AddNextIntent(

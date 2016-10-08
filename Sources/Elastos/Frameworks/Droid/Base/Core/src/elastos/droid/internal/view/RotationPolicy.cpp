@@ -48,15 +48,6 @@ ECode RotationPolicy::RotationPolicyListener::RotationContentObserver::OnChange(
 {
     return mOwner->OnChange();
 }
-
-RotationPolicy::RotationRunnable::RotationRunnable(
-    /* [in] */ Boolean enabled,
-    /* [in] */ Int32 rotation)
-    : mEnabled(enabled)
-    , mRotation(rotation)
-{
-}
-
 CAR_INTERFACE_IMPL(RotationPolicy::RotationPolicyListener, Object, IRotationPolicyListener)
 
 RotationPolicy::RotationPolicyListener::RotationPolicyListener()
@@ -65,6 +56,14 @@ RotationPolicy::RotationPolicyListener::RotationPolicyListener()
     CHandler::New((IHandler**)&handler);
     mObserver = new RotationContentObserver(this);
     mObserver->constructor(handler);
+}
+
+RotationPolicy::RotationRunnable::RotationRunnable(
+    /* [in] */ Boolean enabled,
+    /* [in] */ Int32 rotation)
+    : mEnabled(enabled)
+    , mRotation(rotation)
+{
 }
 
 ECode RotationPolicy::RotationRunnable::Run()

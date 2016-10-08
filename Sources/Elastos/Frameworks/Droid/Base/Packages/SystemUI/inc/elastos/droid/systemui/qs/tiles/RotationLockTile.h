@@ -37,7 +37,7 @@ private:
     };
 
 public:
-    RotationLockTile(
+    CARAPI constructor(
         /* [in] */ IQSTileHost* host);
 
     CARAPI SetListening(

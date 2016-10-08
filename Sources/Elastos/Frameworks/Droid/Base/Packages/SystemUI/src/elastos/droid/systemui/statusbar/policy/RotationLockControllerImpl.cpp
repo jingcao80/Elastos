@@ -26,13 +26,15 @@ ECode RotationLockControllerImpl::LocalRotationPolicyListener::OnChange()
 }
 
 CAR_INTERFACE_IMPL_2(RotationLockControllerImpl, Object, IRotationLockController, IListenable);
-RotationLockControllerImpl::RotationLockControllerImpl(
+
+ECode RotationLockControllerImpl::constructor(
     /* [in] */ IContext* context)
 {
     mRotationPolicyListener = new LocalRotationPolicyListener(this);
     CCopyOnWriteArrayList::New((ICopyOnWriteArrayList**)&mCallbacks);
     mContext = context;
     SetListening(TRUE);
+    return NOERROR;
 }
 
 ECode RotationLockControllerImpl::AddRotationLockControllerCallback(

@@ -7775,11 +7775,11 @@ ECode PhoneWindowManager::RotationForOrientationLw(
     }
 
     else if ((mUserRotationMode == IWindowManagerPolicy::USER_ROTATION_FREE
-        && (orientation == IActivityInfo::SCREEN_ORIENTATION_USER
-            || orientation == IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED
-            || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_LANDSCAPE
-            || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_PORTRAIT
-            || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_USER))
+            && (orientation == IActivityInfo::SCREEN_ORIENTATION_USER
+                || orientation == IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED
+                || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_LANDSCAPE
+                || orientation == IActivityInfo::SCREEN_ORIENTATION_USER_PORTRAIT
+                || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_USER))
         || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR
         || orientation == IActivityInfo::SCREEN_ORIENTATION_FULL_SENSOR
         || orientation == IActivityInfo::SCREEN_ORIENTATION_SENSOR_LANDSCAPE
@@ -7924,7 +7924,7 @@ ECode PhoneWindowManager::RotationHasCompatibleMetricsLw(
     /* [in] */ Int32 rotation,
     /* [out] */ Boolean* result)
 {
-    assert(result != NULL);
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
 
     switch (orientation) {

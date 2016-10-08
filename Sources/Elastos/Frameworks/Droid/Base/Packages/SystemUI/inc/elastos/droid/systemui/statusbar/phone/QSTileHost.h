@@ -82,7 +82,7 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    QSTileHost(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IPhoneStatusBar* statusBar,
         /* [in] */ IBluetoothController* bluetooth,

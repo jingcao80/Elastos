@@ -1248,7 +1248,7 @@ Int32 CWindowManagerService::AddAppWindowToListLocked(
             AutoPtr<IInterface> obj;
             tokenWindowList->Get(windowListPos - 1, (IInterface**)&obj);
             AutoPtr<WindowState> lastWindow = To_WindowState(obj);
-            if (atoken != NULL && lastWindow == atoken->mStartingWindow) {
+            if (atoken != NULL && lastWindow.Get() == atoken->mStartingWindow) {
                 PlaceWindowBefore(lastWindow, win);
                 tokenWindowsPos = IndexOfWinInWindowList(lastWindow, token->mWindows);
             }
@@ -4674,7 +4674,7 @@ Int32 CWindowManagerService::GetOrientationFromWindowsLocked()
             continue;
         }
 
-        // if (DEBUG_ORIENTATION) Slogger::V(TAG, win + " forcing orientation to " + req);
+        if (DEBUG_ORIENTATION) Slogger::V(TAG, "%s forcing orientation to %d", TO_CSTR(wtoken), req);
         return (mLastWindowForcedOrientation = req);
     }
     return (mLastWindowForcedOrientation = IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED);
@@ -4702,13 +4702,13 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
             tokens->Get(tokenNdx, (IInterface**)&value);
             AutoPtr<AppWindowToken> atoken = (AppWindowToken*)(IObject*)value.Get();
 
-            if (DEBUG_APP_ORIENTATION) Slogger::V(TAG, "Checking app orientation: %p", atoken.Get());
+            if (DEBUG_APP_ORIENTATION) Slogger::V(TAG, "Checking app orientation: %s", TO_CSTR(atoken));
 
             // if we're about to tear down this window and not seek for
             // the behind activity, don't use it for orientation
             if (!findingBehind
                     && (!atoken->mHidden && atoken->mHiddenRequested)) {
-                if (DEBUG_ORIENTATION) Slogger::V(TAG, "Skipping %p -- going to hide", atoken.Get());
+                if (DEBUG_ORIENTATION) Slogger::V(TAG, "Skipping %s -- going to hide", TO_CSTR(atoken));
                 continue;
             }
 
@@ -4721,7 +4721,7 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
                 if (lastOrientation != IActivityInfo::SCREEN_ORIENTATION_BEHIND
                         && lastFullscreen) {
                     if (DEBUG_ORIENTATION) {
-                        Slogger::V(TAG, "Done at %p -- end of group, return %d", atoken.Get(), lastOrientation);
+                        Slogger::V(TAG, "Done at %s -- end of group, return %d", TO_CSTR(atoken), lastOrientation);
                     }
                     return lastOrientation;
                 }
@@ -4729,7 +4729,7 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
 
             // We ignore any hidden applications on the top.
             if (atoken->mHiddenRequested || atoken->mWillBeHidden) {
-                if (DEBUG_ORIENTATION) Slogger::V(TAG, "Skipping %p -- hidden on top", atoken.Get());
+                if (DEBUG_ORIENTATION) Slogger::V(TAG, "Skipping %s -- hidden on top", TO_CSTR(atoken));
                 continue;
             }
 
@@ -4745,7 +4745,7 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
             lastFullscreen = atoken->mAppFullscreen;
             if (lastFullscreen && orientation != IActivityInfo::SCREEN_ORIENTATION_BEHIND) {
                 if (DEBUG_ORIENTATION) {
-                    Slogger::V(TAG, "Done at %p -- full screen, return %d", atoken.Get(), orientation);
+                    Slogger::V(TAG, "Done at %s -- full screen, return %d", TO_CSTR(atoken), orientation);
                 }
                 return orientation;
             }
@@ -4753,7 +4753,7 @@ Int32 CWindowManagerService::GetOrientationFromAppTokensLocked()
             // then use it.
             if (orientation != IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED
                     && orientation != IActivityInfo::SCREEN_ORIENTATION_BEHIND) {
-                if (DEBUG_ORIENTATION) Slogger::V(TAG, "Done at %p -- explicitly set, return %d", atoken.Get(), orientation);
+                if (DEBUG_ORIENTATION) Slogger::V(TAG, "Done at %s -- explicitly set, return %d", TO_CSTR(atoken), orientation);
                 return orientation;
             }
             findingBehind |= (orientation == IActivityInfo::SCREEN_ORIENTATION_BEHIND);
@@ -5551,7 +5551,7 @@ Boolean CWindowManagerService::SetTokenVisibilityLocked(
             AutoPtr<IInterface> obj;
             wtoken->mAllAppWindows->Get(i, (IInterface**)&obj);
             AutoPtr<WindowState> win = To_WindowState(obj);
-            if (win == wtoken->mStartingWindow) {
+            if (win.Get() == wtoken->mStartingWindow) {
                 continue;
             }
 
@@ -5751,8 +5751,8 @@ void CWindowManagerService::UnsetAppFreezingScreenLocked(
     /* [in] */ Boolean force)
 {
     if (wtoken->mAppAnimator->mFreezingScreen) {
-        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Clear freezing of " + wtoken
-        //         + " force=" + force);
+        if (DEBUG_ORIENTATION)
+            Slogger::V(TAG, "Clear freezing of %s force=%d", TO_CSTR(wtoken), force);
         Int32 N;
         wtoken->mAllAppWindows->GetSize(&N);
         Boolean unfrozeWindows = FALSE;
@@ -5763,7 +5763,7 @@ void CWindowManagerService::UnsetAppFreezingScreenLocked(
             if (w->mAppFreezing) {
                 w->mAppFreezing = FALSE;
                 if (w->mHasSurface && !w->mOrientationChanging) {
-                    // if (DEBUG_ORIENTATION) Slogger::V(TAG, "set mOrientationChanging of " + w);
+                    if (DEBUG_ORIENTATION) Slogger::V(TAG, "set mOrientationChanging of %s", TO_CSTR(w));
                     w->mOrientationChanging = TRUE;
                     mInnerFields->mOrientationChangeComplete = FALSE;
                 }
@@ -5776,7 +5776,7 @@ void CWindowManagerService::UnsetAppFreezingScreenLocked(
             }
         }
         if (force || unfrozeWindows) {
-            if (DEBUG_ORIENTATION) Slogger::V(TAG, "No longer freezing: %p", wtoken);
+            if (DEBUG_ORIENTATION) Slogger::V(TAG, "No longer freezing: %s", TO_CSTR(wtoken));
             wtoken->mAppAnimator->mFreezingScreen = FALSE;
             wtoken->mAppAnimator->mLastFreezeDuration = (Int32)(SystemClock::GetElapsedRealtime()
                     - mDisplayFreezeTime);
@@ -5795,16 +5795,9 @@ void CWindowManagerService::UnsetAppFreezingScreenLocked(
 void CWindowManagerService::StartAppFreezingScreenLocked(
     /* [in] */ AppWindowToken* wtoken)
 {
-    // if (DEBUG_ORIENTATION) {
-    //     RuntimeException e = null;
-    //     if (!HIDE_STACK_CRAWLS) {
-    //         e = new RuntimeException();
-    //         e.fillInStackTrace();
-    //     }
-    //     Slogger::I(TAG, "Set freezing of " + wtoken.appToken
-    //             + ": hidden=" + wtoken.hidden + " freezing="
-    //             + wtoken.mAppAnimator.freezingScreen, e);
-    // }
+    if (DEBUG_ORIENTATION) {
+        Slogger::I(TAG, "Set freezing of %s", TO_CSTR(wtoken));
+    }
     if (!wtoken->mHiddenRequested) {
         if (!wtoken->mAppAnimator->mFreezingScreen) {
             wtoken->mAppAnimator->mFreezingScreen = TRUE;
@@ -5839,16 +5832,16 @@ ECode CWindowManagerService::StartAppFreezingScreen(
         return E_SECURITY_EXCEPTION;
     }
 
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         if (configChanges == 0 && OkToDisplay()) {
-            // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Skipping set freeze of " + token);
+            if (DEBUG_ORIENTATION) Slogger::V(TAG, "Skipping set freeze of %s", TO_CSTR(token));
             return NOERROR;
         }
 
         AutoPtr<AppWindowToken> wtoken = FindAppWindowToken(token);
         if (wtoken == NULL || wtoken->mAppToken == NULL) {
-            Slogger::W(TAG, "Attempted to freeze screen with non-existing app token: %p"
-                    , wtoken.Get());
+            Slogger::W(TAG, "Attempted to freeze screen with non-existing app token: %s", TO_CSTR(wtoken));
             return NOERROR;
         }
         Int64 origId = Binder::ClearCallingIdentity();
@@ -5877,7 +5870,8 @@ ECode CWindowManagerService::StopAppFreezingScreen(
             return NOERROR;
         }
         Int64 origId = Binder::ClearCallingIdentity();
-        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Clear freezing of " + token
+        if (DEBUG_ORIENTATION)
+            Slogger::V(TAG, "Clear freezing of %s", TO_CSTR(token));
         //         + ": hidden=" + wtoken.hidden + " freezing=" + wtoken.mAppAnimator.freezingScreen);
         UnsetAppFreezingScreenLocked(wtoken, TRUE, force);
         Binder::RestoreCallingIdentity(origId);
@@ -7895,6 +7889,12 @@ ECode CWindowManagerService::ScreenshotApplications(
     return NOERROR;
 }
 
+/**
+ * Freeze rotation changes.  (Enable "rotation lock".)
+ * Persists across reboots.
+ * @param rotation The desired rotation to freeze to, or -1 to use the
+ * current rotation.
+ */
 ECode CWindowManagerService::FreezeRotation(
     /* [in] */ Int32 rotation)
 {
@@ -7903,24 +7903,17 @@ ECode CWindowManagerService::FreezeRotation(
             String("freezeRotation()"))) {
         Slogger::E(TAG, "Requires SET_ORIENTATION permission");
         return E_SECURITY_EXCEPTION;
-        // throw new SecurityException("Requires SET_ORIENTATION permission");
     }
     if (rotation < -1 || rotation > ISurface::ROTATION_270) {
         Slogger::E(TAG, "Rotation argument must be -1 or a valid rotation constant.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("Rotation argument must be -1 or a valid "
-        //         + "rotation constant.");
     }
 
     if (DEBUG_ORIENTATION) Slogger::V(TAG, "freezeRotation: mRotation=%d", mRotation);
 
     Int64 origId = Binder::ClearCallingIdentity();
-    // try {
     mPolicy->SetUserRotationMode(IWindowManagerPolicy::USER_ROTATION_LOCKED,
             rotation == -1 ? mRotation : rotation);
-    // } finally {
-    //     Binder.restoreCallingIdentity(origId);
-    // }
     Binder::RestoreCallingIdentity(origId);
 
     UpdateRotationUnchecked(FALSE, FALSE);
@@ -7928,6 +7921,10 @@ ECode CWindowManagerService::FreezeRotation(
     return NOERROR;
 }
 
+/**
+ * Thaw rotation changes.  (Disable "rotation lock".)
+ * Persists across reboots.
+ */
 ECode CWindowManagerService::ThawRotation()
 {
     if (!CheckCallingPermission(
@@ -7935,17 +7932,12 @@ ECode CWindowManagerService::ThawRotation()
             String("thawRotation()"))) {
         Slogger::E(TAG, "Requires SET_ORIENTATION permission");
         return E_SECURITY_EXCEPTION;
-        // throw new SecurityException("Requires SET_ORIENTATION permission");
     }
 
     if (DEBUG_ORIENTATION) Slogger::V(TAG, "thawRotation: mRotation=%d", mRotation);
 
     Int64 origId = Binder::ClearCallingIdentity();
-    // try {
     mPolicy->SetUserRotationMode(IWindowManagerPolicy::USER_ROTATION_FREE, 777); // rot not used
-    // } finally {
-    //     Binder.restoreCallingIdentity(origId);
-    // }
     Binder::RestoreCallingIdentity(origId);
 
     UpdateRotationUnchecked(FALSE, FALSE);
@@ -8045,8 +8037,8 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
 
     if (DEBUG_ORIENTATION) {
         Slogger::V(TAG,
-            "Application requested orientation %d, got rotation %d which has %s metrics",
-            mForcedAppOrientation, rotation, (altOrientation ? "incompatible" : "compatible"));
+            "Application requested orientation %d, mRotation %d, got rotation %d which has %s metrics",
+            mForcedAppOrientation, mRotation, rotation, (altOrientation ? "incompatible" : "compatible"));
     }
 
     if (mRotation == rotation && mAltOrientation == altOrientation) {
@@ -12244,7 +12236,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
 
                 AutoPtr<AppWindowToken> atoken = w->mAppToken;
                 if (DEBUG_STARTING_WINDOW && atoken != NULL
-                        && w == atoken->mStartingWindow) {
+                        && w.Get() == atoken->mStartingWindow) {
                     Slogger::D(TAG, "updateWindows: starting %p isOnScreen=%d allDrawn=%d freezingScreen=%p",
                         w.Get(), w->IsOnScreen(), atoken->mAllDrawn, atoken->mAppAnimator->mFreezingScreen);
                 }
@@ -12267,7 +12259,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                                         , atoken->mHiddenRequested, winAnimator->mAnimating);
                             }
                         }
-                        if (w != atoken->mStartingWindow) {
+                        if (w.Get() != atoken->mStartingWindow) {
                             if (!atoken->mAppAnimator->mFreezingScreen || !w->mAppFreezing) {
                                 atoken->mNumInterestingWindows++;
                                 if (w->IsDrawnLw()) {

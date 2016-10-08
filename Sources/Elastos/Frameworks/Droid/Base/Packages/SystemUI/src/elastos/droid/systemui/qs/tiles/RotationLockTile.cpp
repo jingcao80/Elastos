@@ -26,12 +26,13 @@ ECode RotationLockTile::Callback::OnRotationLockStateChanged(
     return NOERROR;
 }
 
-RotationLockTile::RotationLockTile(
+RotationLockTile::constructor(
     /* [in] */ IQSTileHost* host)
 {
     QSTile::constructor(host);
     mCallback = new Callback(this);
     host->GetRotationLockController((IRotationLockController**)&mController);
+    return NOERROR;
 }
 
 AutoPtr<QSTile::State> RotationLockTile::NewTileState()
