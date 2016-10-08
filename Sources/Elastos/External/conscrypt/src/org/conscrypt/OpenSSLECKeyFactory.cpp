@@ -1,0 +1,241 @@
+#include "org/conscrypt/OpenSSLECKeyFactory.h"
+#include "org/conscrypt/COpenSSLECPrivateKey.h"
+#include "org/conscrypt/COpenSSLECPublicKey.h"
+#include "org/conscrypt/NativeCrypto.h"
+#include "org/conscrypt/OpenSSLKey.h"
+
+using Elastos::Security::Interfaces::IECPublicKey;
+using Elastos::Security::Spec::CECPrivateKeySpec;
+using Elastos::Security::Spec::CECPublicKeySpec;
+using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
+using Elastos::Security::Spec::CX509EncodedKeySpec;
+using Elastos::Security::Spec::IECParameterSpec;
+using Elastos::Security::Spec::IECPoint;
+using Elastos::Security::Spec::IECPrivateKeySpec;
+using Elastos::Security::Spec::IECPublicKeySpec;
+using Elastos::Security::Spec::IPKCS8EncodedKeySpec;
+using Elastos::Security::Spec::IX509EncodedKeySpec;
+
+namespace Org {
+namespace Conscrypt {
+
+CAR_INTERFACE_IMPL(OpenSSLECKeyFactory, KeyFactorySpi, IOpenSSLECKeyFactory)
+
+ECode OpenSSLECKeyFactory::EngineGeneratePublic(
+   /* [in] */ IKeySpec* keySpec,
+   /* [out] */ IPublicKey** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+    if (keySpec == NULL) {
+        // throw new InvalidKeySpecException("keySpec == NULL");
+        return E_INVALID_KEY_SPEC_EXCEPTION;
+    }
+
+    if (IECPublicKeySpec::Probe(keySpec) != NULL) {
+        return COpenSSLECPublicKey::New(IECPublicKeySpec::Probe(keySpec), result);
+    }
+    else if (IX509EncodedKeySpec::Probe(keySpec) != NULL) {
+        return OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec), NativeCrypto::EVP_PKEY_EC, result);
+    }
+    // throw new InvalidKeySpecException("Must use ECPublicKeySpec or X509EncodedKeySpec; was "
+    //         + keySpec.getClass().getName());
+    return E_INVALID_KEY_SPEC_EXCEPTION;
+}
+
+ECode OpenSSLECKeyFactory::EngineGeneratePrivate(
+    /* [in] */ IKeySpec* keySpec,
+    /* [out] */ IPrivateKey** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+    if (keySpec == NULL) {
+        // throw new InvalidKeySpecException("keySpec == NULL");
+        return E_INVALID_KEY_SPEC_EXCEPTION;
+    }
+
+    if (IECPrivateKeySpec::Probe(keySpec) != NULL) {
+        return COpenSSLECPrivateKey::New(IECPrivateKeySpec::Probe(keySpec), result);
+    }
+    else if (IPKCS8EncodedKeySpec::Probe(keySpec) != NULL) {
+        return OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
+                NativeCrypto::EVP_PKEY_EC, result);
+    }
+    // throw new InvalidKeySpecException("Must use ECPrivateKeySpec or PKCS8EncodedKeySpec; was "
+    //         + keySpec.getClass().getName());
+    return E_INVALID_KEY_SPEC_EXCEPTION;
+}
+
+ECode OpenSSLECKeyFactory::EngineGetKeySpec(
+    /* [in] */ IKey* key,
+    /* [in] */ ClassID keySpec,
+    /* [out] */ IKeySpec** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+    if (key == NULL) {
+        // throw new InvalidKeySpecException("key == NULL");
+        return E_INVALID_KEY_SPEC_EXCEPTION;
+    }
+
+    if (keySpec == NULL) {
+        // throw new InvalidKeySpecException("keySpec == NULL");
+        return E_INVALID_KEY_SPEC_EXCEPTION;
+    }
+
+    String str;
+    key->GetAlgorithm(&str);
+    if (!str.Equals("EC")) {
+        // throw new InvalidKeySpecException("Key must be an EC key");
+        return E_INVALID_KEY_SPEC_EXCEPTION;
+    }
+
+// TODO: Need
+    // if (key instanceof ECPublicKey && ECPublicKeySpec.class.isAssignableFrom(keySpec)) {
+    //     ECPublicKey ecKey = (ECPublicKey) key;
+    //     return (T) new ECPublicKeySpec(ecKey.getW(), ecKey.getParams());
+    // } else if (key instanceof PublicKey && ECPublicKeySpec.class.isAssignableFrom(keySpec)) {
+    //     final byte[] encoded = key.getEncoded();
+    //     if (!"X.509".equals(key.getFormat()) || encoded == NULL) {
+    //         // throw new InvalidKeySpecException("Not a valid X.509 encoding");
+    //         return E_INVALID_KEY_SPEC_EXCEPTION;
+    //     }
+    //     ECPublicKey ecKey = (ECPublicKey) engineGeneratePublic(new X509EncodedKeySpec(encoded));
+    //     return (T) new ECPublicKeySpec(ecKey.getW(), ecKey.getParams());
+    // } else if (key instanceof ECPrivateKey
+    //         && ECPrivateKeySpec.class.isAssignableFrom(keySpec)) {
+    //     ECPrivateKey ecKey = (ECPrivateKey) key;
+    //     return (T) new ECPrivateKeySpec(ecKey.getS(), ecKey.getParams());
+    // } else if (key instanceof PrivateKey && ECPrivateKeySpec.class.isAssignableFrom(keySpec)) {
+    //     final byte[] encoded = key.getEncoded();
+    //     if (!"PKCS#8".equals(key.getFormat()) || encoded == NULL) {
+    //         // throw new InvalidKeySpecException("Not a valid PKCS#8 encoding");
+    //         return E_INVALID_KEY_SPEC_EXCEPTION;
+    //     }
+    //     ECPrivateKey ecKey =
+    //             (ECPrivateKey) engineGeneratePrivate(new PKCS8EncodedKeySpec(encoded));
+    //     return (T) new ECPrivateKeySpec(ecKey.getS(), ecKey.getParams());
+    // } else if (key instanceof PrivateKey
+    //         && PKCS8EncodedKeySpec.class.isAssignableFrom(keySpec)) {
+    //     final byte[] encoded = key.getEncoded();
+    //     if (!"PKCS#8".equals(key.getFormat())) {
+    //         // throw new InvalidKeySpecException("Encoding type must be PKCS#8; was " + key.getFormat());
+    //         return E_INVALID_KEY_SPEC_EXCEPTION;
+    //     } else if (encoded == NULL) {
+    //         // throw new InvalidKeySpecException("Key is not encodable");
+    //         return E_INVALID_KEY_SPEC_EXCEPTION;
+    //     }
+    //     return (T) new PKCS8EncodedKeySpec(encoded);
+    // } else if (key instanceof PublicKey && X509EncodedKeySpec.class.isAssignableFrom(keySpec)) {
+    //     final byte[] encoded = key.getEncoded();
+    //     if (!"X.509".equals(key.getFormat())) {
+    //         // throw new InvalidKeySpecException("Encoding type must be X.509; was " + key.getFormat());
+    //         return E_INVALID_KEY_SPEC_EXCEPTION;
+    //     } else if (encoded == NULL) {
+    //         // throw new InvalidKeySpecException("Key is not encodable");
+    //         return E_INVALID_KEY_SPEC_EXCEPTION;
+    //     }
+    //     return (T) new X509EncodedKeySpec(encoded);
+    // } else {
+    //     // throw new InvalidKeySpecException("Unsupported key type and key spec combination; key="
+    //     //         + key.getClass().getName() + ", keySpec=" + keySpec.getName());
+    //     return E_INVALID_KEY_SPEC_EXCEPTION;
+    // }
+    return NOERROR;
+}
+
+ECode OpenSSLECKeyFactory::EngineTranslateKey(
+    /* [in] */ IKey* key,
+    /* [out] */ IKey** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+    if (key == NULL) {
+        // throw new InvalidKeyException("key == NULL");
+        return E_INVALID_KEY_SPEC_EXCEPTION;
+    }
+
+    String format;
+    if ((IOpenSSLECPublicKey::Probe(key) != NULL) || (IOpenSSLECPrivateKey::Probe(key) != NULL)) {
+        *result = key;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    else if (IECPublicKey::Probe(key) != NULL) {
+        AutoPtr<IECPublicKey> ecKey = IECPublicKey::Probe(key);
+
+        AutoPtr<IECPoint> w;
+        ecKey->GetW((IECPoint**)&w);
+
+        AutoPtr<IECParameterSpec> params;
+        ecKey->GetParams((IECParameterSpec**)&params);
+
+        // try {
+        AutoPtr<IECPublicKeySpec> spec;
+        CECPublicKeySpec::New(w, params, (IECPublicKeySpec**)&spec);
+        return EngineGeneratePublic(spec, result);
+        // } catch (InvalidKeySpecException e) {
+        //     // throw new InvalidKeyException(e);
+        //     return E_INVALID_KEY_SPEC_EXCEPTION;
+        // }
+    }
+    else if (IECPrivateKey::Probe(key) != NULL) {
+        AutoPtr<IECPrivateKey> ecKey = IECPrivateKey::Probe(key);
+
+        AutoPtr<IBigInteger> s;
+        ecKey->GetS((IBigInteger**)&s);
+
+        AutoPtr<IECParameterSpec> params;
+        ecKey->GetParams((IECParameterSpec**)&params);
+
+        // try {
+        AutoPtr<IECPrivateKeySpec> spec;
+        CECPrivateKeySpec::New(s, params, (ECPrivateKeySpec**)&spec);
+        return EngineGeneratePrivate(spec, result);
+        // } catch (InvalidKeySpecException e) {
+        //     // throw new InvalidKeyException(e);
+        //     return E_INVALID_KEY_SPEC_EXCEPTION;
+        // }
+    }
+    else if ((IPrivateKey::Probe(key) != NULL) && ((key->GetFormat(&format), format).Equals("PKCS#8"))) {
+        AutoPtr<ArrayOf<Byte> > encoded;
+        key->GetEncoded((ArrayOf<Byte>**)&encoded);
+        if (encoded == NULL) {
+            // throw new InvalidKeyException("Key does not support encoding");
+            return E_INVALID_KEY_SPEC_EXCEPTION;
+        }
+        // try {
+        AutoPtr<IPKCS8EncodedKeySpec> spec;
+        CPKCS8EncodedKeySpec::New(encoded, (IPKCS8EncodedKeySpec**)&spec);
+        return EngineGeneratePrivate(spec, result);
+        // } catch (InvalidKeySpecException e) {
+        //     // throw new InvalidKeyException(e);
+        //     return E_INVALID_KEY_SPEC_EXCEPTION;
+        // }
+    }
+    else if ((IPublicKey::Probe(key) != NULL) && ((key->GetFormat(&format), format).Equals("X.509"))) {
+        AutoPtr<ArrayOf<Byte> > encoded;
+        key->GetEncoded((ArrayOf<Byte>**)&encoded);
+        if (encoded == NULL) {
+            // throw new InvalidKeyException("Key does not support encoding");
+            return E_INVALID_KEY_SPEC_EXCEPTION;
+        }
+        // try {
+        AutoPtr<IX509EncodedKeySpec> spec;
+        CX509EncodedKeySpec::New(encoded, (IX509EncodedKeySpec**)&spec);
+        return EngineGeneratePrivate(spec, result);
+        // } catch (InvalidKeySpecException e) {
+        //     // throw new InvalidKeyException(e);
+        //     return E_INVALID_KEY_SPEC_EXCEPTION;
+        // }
+    }
+    else {
+        // throw new InvalidKeyException("Key must be EC public or private key; was "
+        //         + key.getClass().getName());
+        return E_INVALID_KEY_SPEC_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+} // namespace Conscrypt
+} // namespace Org

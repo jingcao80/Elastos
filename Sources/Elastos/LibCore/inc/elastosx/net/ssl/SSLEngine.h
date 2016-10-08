@@ -4,7 +4,7 @@
 
 #include "Elastos.CoreLibrary.Extensions.h"
 #include "Elastos.CoreLibrary.IO.h"
-#include "Object.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
 using Elastos::Core::IRunnable;
@@ -648,7 +648,7 @@ namespace Ssl {
  *
  * @since 1.5
  */
-class SSLEngine
+class ECO_PUBLIC SSLEngine
     : public Object
     , public ISSLEngine
 {

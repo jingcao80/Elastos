@@ -12,6 +12,7 @@ namespace Conscrypt {
  * objects. Individual types must subclass this and implement finalizer.
  */
 class OpenSSLNativeReference
+    : public Object
 {
 public:
     OpenSSLNativeReference(

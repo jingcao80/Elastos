@@ -8,9 +8,8 @@ module
     using interface Elastos.Security.Spec.IECParameterSpec;
     using interface Elastosx.Net.Ssl.ISSLParameters;
     using interface Elastosx.Net.Ssl.IX509TrustManager;
-// TODO:
-    // interface Org.Conscrypt.IOpenSSLKey;
-    // interface Org.Conscrypt.IOpenSSLSocketImpl;
+    interface Org.Conscrypt.IOpenSSLKey;
+    interface Org.Conscrypt.IOpenSSLSocketImpl;
 
     namespace Org {
     namespace Conscrypt {
@@ -23,10 +22,9 @@ module
             [in] ISocket* s,
             [out] IFileDescriptor** result);
 
-// TODO:
-        // GetFileDescriptorFromSSLSocket(
-        //     [in] IOpenSSLSocketImpl* openSSLSocketImpl,
-        //     [out] IFileDescriptor** result);
+        GetFileDescriptorFromSSLSocket(
+            [in] IOpenSSLSocketImpl* openSSLSocketImpl,
+            [out] IFileDescriptor** result);
 
         GetCurveName(
             [in] IECParameterSpec* spec,
@@ -59,10 +57,9 @@ module
          * builds since we didn't backport, so return null. This code is from
          * Chromium's net/android/java/src/org/chromium/net/DefaultAndroidKeyStore.java
          */
-// TODO:
-        // WrapRsaKey(
-        //     [in] IPrivateKey* javaKey,
-        //     [out] IOpenSSLKey** result);
+        WrapRsaKey(
+            [in] IPrivateKey* javaKey,
+            [out] IOpenSSLKey** result);
 
         /**
          * Logs to the system EventLog system.

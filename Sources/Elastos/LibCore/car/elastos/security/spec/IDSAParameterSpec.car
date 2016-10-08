@@ -1,0 +1,22 @@
+
+module
+{
+    namespace Elastos {
+    namespace Security {
+    namespace Spec {
+
+    /**
+     * The parameter specification used with the Digital Signature Algorithm (DSA).
+     */
+    /**
+     * @Involve
+     * interface IAlgorithmParameterSpec
+     * interface IDSAParams
+     */
+    interface IDSAParameterSpec {
+    }
+
+    } // namespace Spec
+    } // namespace Security
+    } // namespace Elastos
+}

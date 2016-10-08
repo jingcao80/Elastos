@@ -71,13 +71,12 @@ ECode CPlatform::CheckServerTrusted(
     return Platform::CheckServerTrusted(x509tm, chain, authType, host);
 }
 
-// TODO:
-// ECode CPlatform::WrapRsaKey(
-//     /* [in] */ IPrivateKey* javaKey,
-//     /* [out] */ IOpenSSLKey** result)
-// {
-//     return Platform::WrapRsaKey(javaKey, result);
-// }
+ECode CPlatform::WrapRsaKey(
+    /* [in] */ IPrivateKey* javaKey,
+    /* [out] */ IOpenSSLKey** result)
+{
+    return Platform::WrapRsaKey(javaKey, result);
+}
 
 ECode CPlatform::LogEvent(
     /* [in] */ const String& message)

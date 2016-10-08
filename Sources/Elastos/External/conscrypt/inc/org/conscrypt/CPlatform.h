@@ -12,9 +12,6 @@ using Elastos::Security::IPrivateKey;
 using Elastos::Security::Spec::IECParameterSpec;
 using Elastosx::Net::Ssl::ISSLParameters;
 using Elastosx::Net::Ssl::IX509TrustManager;
-// TODO:
-// using Org::Conscrypt::IOpenSSLKey;
-using Org::Conscrypt::IOpenSSLSocketImpl;
 
 namespace Org {
 namespace Conscrypt {
@@ -69,10 +66,9 @@ public:
      * builds since we didn't backport, so return null. This code is from
      * Chromium's net/android/java/src/org/chromium/net/DefaultAndroidKeyStore.java
      */
-// TODO:
-    // CARAPI WrapRsaKey(
-    //     /* [in] */ IPrivateKey* javaKey,
-    //     /* [out] */ IOpenSSLKey** result);
+    CARAPI WrapRsaKey(
+        /* [in] */ IPrivateKey* javaKey,
+        /* [out] */ IOpenSSLKey** result);
 
     /**
      * Logs to the system EventLog system.

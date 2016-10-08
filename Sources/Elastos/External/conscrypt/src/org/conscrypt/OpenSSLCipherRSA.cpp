@@ -3,8 +3,7 @@
 #include <libcore/utility/EmptyArray.h>
 #include <elastos/utility/Arrays.h>
 
-// TODO: Need CKeyFactoryHelper
-// using Elastos::Security::CKeyFactoryHelper;
+using Elastos::Security::CKeyFactoryHelper;
 using Elastos::Security::IKeyFactory;
 using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::Interfaces::IRSAPrivateCrtKey;
@@ -334,8 +333,7 @@ ECode OpenSSLCipherRSA::EngineUnwrap(
     EngineDoFinal(wrappedKey, 0, wrappedKey->GetLength(), (ArrayOf<Byte>**)&encoded);
 
     AutoPtr<IKeyFactoryHelper> kfHelper;
-// TODO: Need CKeyFactoryHelper
-    // CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
+    CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
     AutoPtr<IKeyFactory> keyFactory;
     kfHelper->GetInstance(wrappedKeyAlgorithm, (IKeyFactory**)&keyFactory);
     AutoPtr<IX509EncodedKeySpec> spec;

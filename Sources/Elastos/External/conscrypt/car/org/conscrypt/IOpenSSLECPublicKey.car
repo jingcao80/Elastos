@@ -15,10 +15,9 @@ module
     }
 
     interface IOpenSSLECPublicKeyHelper {
-// TODO: Need IOpenSSLKey
-        // GetInstance(
-        //     [in] IECPublicKey* ecPublicKey,
-        //     [out] IOpenSSLKey** result);
+        GetInstance(
+            [in] IECPublicKey* ecPublicKey,
+            [out] IOpenSSLKey** result);
     }
 
     } // namespace Conscrypt

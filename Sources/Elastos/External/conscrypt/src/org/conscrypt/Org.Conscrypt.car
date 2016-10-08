@@ -29,12 +29,14 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLDSAKeyFactory.car");
     merge("../../../car/org/conscrypt/IOpenSSLDSAKeyPairGenerator.car");
     merge("../../../car/org/conscrypt/IOpenSSLDSAParams.car");
+    merge("../../../car/org/conscrypt/IOpenSSLDSAPrivateKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLDSAPublicKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLDigestContext.car");
     merge("../../../car/org/conscrypt/IOpenSSLECDHKeyAgreement.car");
     merge("../../../car/org/conscrypt/IOpenSSLECGroupContext.car");
     merge("../../../car/org/conscrypt/IOpenSSLECKeyFactory.car");
     merge("../../../car/org/conscrypt/IOpenSSLECKeyPairGenerator.car");
+    merge("../../../car/org/conscrypt/IOpenSSLECPointContext.car");
     merge("../../../car/org/conscrypt/IOpenSSLECPrivateKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLECPublicKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLEngine.car");
@@ -74,6 +76,12 @@ module
     merge("../../../car/org/conscrypt/IX509PublicKey.car");
 
     using interface Elastos.Security.IProvider;
+    using interface Elastos.Security.IKeyPairGenerator;
+    using interface Elastos.Security.Interfaces.IECPrivateKey;
+    using interface Elastos.Security.Interfaces.IECPublicKey;
+    using interface Elastos.Security.Spec.IECPrivateKeySpec;
+    using interface Elastos.Security.Spec.IECPublicKeySpec;
+    using interface Elastosx.Crypto.IKeyAgreementSpi;
     using interface Elastosx.Net.Ssl.ISSLContextSpi;
     using interface Elastosx.Net.Ssl.ISSLSessionContext;
 
@@ -115,6 +123,68 @@ module
         interface IDefaultSSLContextImpl;
         interface IOpenSSLContextImpl;
         interface ISSLContextSpi;
+    }
+
+    class COpenSSLECDHKeyAgreement {
+        constructor();
+
+        interface IOpenSSLECDHKeyAgreement;
+        interface IKeyAgreementSpi;
+        interface ISSLContextSpi;
+    }
+
+    class COpenSSLECGroupContext {
+        constructor(
+            [in] Int64 groupCtx);
+
+        interface IOpenSSLECGroupContext;
+    }
+
+    singleton class COpenSSLECGroupContextHelper {
+        interface IOpenSSLECGroupContextHelper;
+    }
+
+    class COpenSSLECKeyPairGenerator {
+        constructor();
+
+        interface IOpenSSLECKeyPairGenerator;
+        interface IKeyPairGenerator;
+    }
+
+    class COpenSSLECPrivateKey {
+        constructor();
+
+        constructor(
+            [in] IOpenSSLECGroupContext* group,
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IECPrivateKeySpec* ecKeySpec);
+
+        interface IOpenSSLECPrivateKey;
+        interface IECPrivateKey;
+        interface IOpenSSLKeyHolder;
+    }
+
+    class COpenSSLECPublicKey {
+        constructor();
+
+        constructor(
+            [in] IOpenSSLECGroupContext* group,
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IECPublicKeySpec* ecKeySpec);
+
+        interface IOpenSSLECPublicKey;
+        interface IECPublicKey;
+        interface IOpenSSLKeyHolder;
     }
 
     } // namespace Conscrypt
