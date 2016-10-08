@@ -14,7 +14,6 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/utility/etl/List.h>
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Provider.h>
@@ -59,7 +58,8 @@ using Elastos::Droid::Service::Dreams::EIID_IDreamManagerInternal;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::AutoLock;
-using Elastos::Utility::Etl::List;
+using Elastos::Utility::IList;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -641,38 +641,44 @@ AutoPtr< ArrayOf<IComponentName*> > CDreamManagerService::GetDreamComponentsForU
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     String names;
     settingsSecure->GetStringForUser(cResolver,
-            ISettingsSecure::SCREENSAVER_COMPONENTS,
-            userId, &names);
+            ISettingsSecure::SCREENSAVER_COMPONENTS, userId, &names);
 
    AutoPtr<ArrayOf< IComponentName*> > components = ComponentsFromString(names);
 
     // first, ensure components point to valid services
-    List<IComponentName*> validComponents;// = new ArrayList<ComponentName>();
+    AutoPtr<IList> validComponents;//List<ComponentName>
+    CArrayList::New((IList**)&validComponents);
     if (components != NULL) {
         for (Int32 i = 0; i < components->GetLength(); ++i) {
             AutoPtr<IComponentName> component = (*components)[i];
             if (ValidateDream(component)) {
-                validComponents.PushBack(component);
+                validComponents->Add(component);
             }
         }
     }
 
     // fallback to the default dream component if necessary
-    if (validComponents.IsEmpty()) {
+    Boolean res;
+    if (validComponents->IsEmpty(&res), res) {
         AutoPtr<IComponentName> defaultDream = GetDefaultDreamComponentForUser(userId);
         if (defaultDream != NULL) {
             Slogger::W(TAG, "Falling back to default dream %p", defaultDream.Get());
-            validComponents.PushBack(defaultDream);
+            validComponents->Add(defaultDream);
         }
     }
-    AutoPtr<ArrayOf<IComponentName*> > validComponentsArray;
-    validComponentsArray = ArrayOf<IComponentName*>::Alloc(validComponents.GetSize());
-    List<IComponentName*>::Iterator it;
-    Int32 index = 0;
-    for (it = validComponents.Begin(); it != validComponents.End(); ++it) {
-        validComponentsArray->Set(index, *it);
-        index++;
+
+    Int32 size;
+    validComponents->GetSize(&size);
+    AutoPtr<ArrayOf<IInterface*> > inArray = ArrayOf<IInterface*>::Alloc(size);
+
+    AutoPtr<ArrayOf<IInterface*> > outArray;
+    validComponents->ToArray(inArray, (ArrayOf<IInterface*>**)&outArray);
+
+    AutoPtr<ArrayOf<IComponentName*> > validComponentsArray = ArrayOf<IComponentName*>::Alloc(outArray->GetLength());
+    for(Int32 i = 0; i < outArray->GetLength(); i++) {
+        validComponentsArray->Set(i, IComponentName::Probe((*outArray)[i]));
     }
+
     return validComponentsArray;
 }
 
