@@ -247,7 +247,7 @@ private:
 
     private:
         BaseStatusBar* mHost;
-        NotificationGutsOnDismissAction* mAction;
+        AutoPtr<NotificationGutsOnDismissAction> mAction;
     };
 
     class NotificationGutsOnDismissAction
