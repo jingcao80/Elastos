@@ -58,7 +58,9 @@ private:
     };
 
 public:
-    AirplaneModeTile(
+    AirplaneModeTile();
+
+    CARAPI constructor(
         /* [in] */ IQSTileHost* host);
 
     // @Override

@@ -52,13 +52,19 @@ ECode AirplaneModeTile::Receiver::OnReceive(
     return NOERROR;
 }
 
-AirplaneModeTile::AirplaneModeTile(
+
+AirplaneModeTile::AirplaneModeTile()
+    : mListening(FALSE)
+{}
+
+ECode AirplaneModeTile::constructor(
     /* [in] */ IQSTileHost* host)
 {
     QSTile::constructor(host);
     mSetting = new Setting();
     mSetting->constructor(mContext, mHandler, ISettingsGlobal::AIRPLANE_MODE_ON, this);
     mReceiver = new Receiver(this);
+    return NOERROR;
 }
 
 AutoPtr<QSTile::State> AirplaneModeTile::NewTileState()
@@ -68,7 +74,8 @@ AutoPtr<QSTile::State> AirplaneModeTile::NewTileState()
 
 void AirplaneModeTile::HandleClick()
 {
-    SetEnabled(!((BooleanState*)mState.Get())->mValue);
+    Boolean prev = ((BooleanState*)mState.Get())->mValue;
+    SetEnabled(!prev);
 }
 
 void AirplaneModeTile::SetEnabled(
@@ -93,7 +100,7 @@ void AirplaneModeTile::HandleUpdateState(
         mSetting->GetValue(&value);
     }
     const Boolean airplaneMode = value != 0;
-    ((BooleanState*)mState.Get())->mValue = airplaneMode;
+    ((BooleanState*)state)->mValue = airplaneMode;
     state->mVisible = TRUE;
     mContext->GetString(R::string::quick_settings_airplane_mode_label, &state->mLabel);
     if (airplaneMode) {

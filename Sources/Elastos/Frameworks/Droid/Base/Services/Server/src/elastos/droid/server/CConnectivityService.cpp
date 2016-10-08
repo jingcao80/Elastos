@@ -4223,6 +4223,7 @@ ECode CConnectivityService::SetProvisioningNotificationVisible(
 ECode CConnectivityService::SetAirplaneMode(
     /* [in] */ Boolean enable)
 {
+    Slogger::I(TAG, " >> SetAirplaneMode: %d", enable);
     FAIL_RETURN(EnforceConnectivityInternalPermission())
     Int64 ident = Binder::ClearCallingIdentity();
 

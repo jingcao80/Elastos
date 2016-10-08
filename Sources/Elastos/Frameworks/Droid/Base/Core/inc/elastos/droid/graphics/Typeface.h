@@ -258,8 +258,9 @@ public:
 
     static AutoPtr< ArrayOf<ITypeface*> > sDefaults;
 
-    typedef HashMap<Int32, AutoPtr<ITypeface> > TypefaceMap;
-    static HashMap<Int32, AutoPtr<TypefaceMap> > sTypefaceCache;
+    typedef HashMap<Int64, AutoPtr<ITypeface> > TypefaceMap;
+    typedef HashMap<Int64, AutoPtr<TypefaceMap> > TypefaceCacheMap;
+    static TypefaceCacheMap sTypefaceCache;
 
     static AutoPtr<ITypeface> sDefaultTypeface;
     static HashMap<String, AutoPtr<ITypeface> > sSystemFontMap;

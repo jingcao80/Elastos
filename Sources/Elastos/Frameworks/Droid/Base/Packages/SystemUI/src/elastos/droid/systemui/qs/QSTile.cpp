@@ -124,7 +124,8 @@ AutoPtr<StringBuilder> QSTile::BooleanState::ToStringBuilder()
 {
     AutoPtr<StringBuilder> rt = State::ToStringBuilder();
     Int32 len = 0;
-    rt->Insert((rt->GetLength(&len), len) - 1, String(",value=") + StringUtils::ToString(mValue));
+    rt->GetLength(&len);
+    rt->Insert(len - 1, mValue ? String(", value=TRUE") : String(", value=FALSE"));
     return rt;
 }
 
