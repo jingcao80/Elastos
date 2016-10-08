@@ -15,14 +15,13 @@ module
     }
 
     interface IOpenSSLECPrivateKeyHelper {
-// TODO: Need IOpenSSLKey
-        // WrapPlatformKey(
-        //     [in] IECPrivateKey* ecPrivateKey,
-        //     [out] IOpenSSLKey** result);
+        WrapPlatformKey(
+            [in] IECPrivateKey* ecPrivateKey,
+            [out] IOpenSSLKey** result);
 
-        // GetInstance(
-        //     [in] IECPrivateKey* ecPrivateKey,
-        //     [out] IOpenSSLKey** result);
+        GetInstance(
+            [in] IECPrivateKey* ecPrivateKey,
+            [out] IOpenSSLKey** result);
     }
 
     } // namespace Conscrypt

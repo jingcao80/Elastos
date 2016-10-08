@@ -1,7 +1,6 @@
 #include "org/conscrypt/AbstractSessionContext.h"
 #include "org/conscrypt/ByteArray.h"
-// TODO: Need NativeCrypto
-// #include "org/conscrypt/NativeCrypto.h"
+#include "org/conscrypt/NativeCrypto.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/Arrays.h>
 
@@ -135,8 +134,7 @@ AbstractSessionContext::AbstractSessionContext()
     : mMaximumSize(0)
     , mTimeout(0)
 {
-// TODO: Need NativeCrypto
-    // NativeCrypto::SSL_CTX_new(&mSslCtxNativePointer);
+    NativeCrypto::SSL_CTX_new(&mSslCtxNativePointer);
 
     mSessions = new CustomLinkedHashMap(this);
 }
@@ -144,8 +142,7 @@ AbstractSessionContext::AbstractSessionContext()
 AbstractSessionContext::~AbstractSessionContext()
 {
     // try {
-// TODO: Need NativeCrypto
-    // NativeCrypto::SSL_CTX_free(mSslCtxNativePointer);
+    NativeCrypto::SSL_CTX_free(mSslCtxNativePointer);
     // } finally {
     // super.finalize();
     // }

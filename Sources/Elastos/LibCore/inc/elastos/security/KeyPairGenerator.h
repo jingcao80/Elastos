@@ -16,7 +16,7 @@ namespace Security {
  *
  * @see KeyPairGeneratorSpi
  */
-class KeyPairGenerator
+class ECO_PUBLIC KeyPairGenerator
     : public KeyPairGeneratorSpi
     , public IKeyPairGenerator
 {

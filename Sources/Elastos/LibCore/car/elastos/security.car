@@ -69,6 +69,7 @@ module
 
     merge("security/spec/Exceptions.car");
     merge("security/spec/IAlgorithmParameterSpec.car");
+    merge("security/spec/IDSAParameterSpec.car");
     merge("security/spec/IKeySpec.car");
     merge("security/spec/IDSAPrivateKeySpec.car");
     merge("security/spec/IDSAPublicKeySpec.car");
@@ -559,6 +560,7 @@ module
             [in] IBigInteger *q,
             [in] IBigInteger *g);
 
+        interface IDSAParameterSpec;
         interface IAlgorithmParameterSpec;
         interface IDSAParams;
     }

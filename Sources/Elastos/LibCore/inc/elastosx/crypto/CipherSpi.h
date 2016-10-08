@@ -449,7 +449,7 @@ public:
      */
     virtual CARAPI EngineWrap(
         /* [in] */ IKey* keyToWrap,
-        /* [out, callee] */ ArrayOf<Byte>** wrappedKey) = 0;
+        /* [out, callee] */ ArrayOf<Byte>** wrappedKey);
 
     /**
      * Unwraps a key using this cipher instance.
@@ -478,7 +478,7 @@ public:
         /* [in] */ ArrayOf<Byte>* wrappedKey,
         /* [in] */ const String& wrappedKeyAlgorithm,
         /* [in] */ Int32 wrappedKeyType,
-        /* [out] */ IKey** key) = 0;
+        /* [out] */ IKey** key);
 
     /**
      * Returns the size of a specified key object in bits. This method has been
@@ -495,7 +495,7 @@ public:
      */
     virtual CARAPI EngineGetKeySize(
         /* [in] */ IKey* key,
-        /* [out] */ Int32* size) = 0;
+        /* [out] */ Int32* size);
 
 };
 

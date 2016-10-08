@@ -1,0 +1,24 @@
+
+module
+{
+    using interface Elastos.Security.Spec.IECPoint;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLECPointContext {
+        GetContext(
+            [out] Int64* result);
+    }
+
+    interface IOpenSSLECPointContextHelper {
+        GetInstance(
+            [in] Int32 curveType,
+            [in] IOpenSSLECGroupContext* group,
+            [in] IECPoint* javaPoint,
+            [out] IOpenSSLECPointContext** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

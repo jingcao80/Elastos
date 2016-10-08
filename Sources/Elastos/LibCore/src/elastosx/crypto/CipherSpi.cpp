@@ -175,5 +175,27 @@ ECode CipherSpi::EngineDoFinal(
     return NOERROR;
 }
 
+ECode CipherSpi::EngineWrap(
+    /* [in] */ IKey* keyToWrap,
+    /* [out, callee] */ ArrayOf<Byte>** wrappedKey)
+{
+    return E_UNSUPPORTED_OPERATION_EXCEPTION;
+}
+
+ECode CipherSpi::EngineUnwrap(
+    /* [in] */ ArrayOf<Byte>* wrappedKey,
+    /* [in] */ const String& wrappedKeyAlgorithm,
+    /* [in] */ Int32 wrappedKeyType,
+    /* [out] */ IKey** key)
+{
+    return E_UNSUPPORTED_OPERATION_EXCEPTION;
+}
+
+ECode CipherSpi::EngineGetKeySize(
+    /* [in] */ IKey* key,
+    /* [out] */ Int32* size)
+{
+    return E_UNSUPPORTED_OPERATION_EXCEPTION;
+}
 } // Crypto
 } // Elastosx

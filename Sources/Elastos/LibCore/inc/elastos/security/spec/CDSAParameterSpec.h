@@ -14,6 +14,7 @@ namespace Spec {
 
 CarClass(CDSAParameterSpec)
     , public Object
+    , public IDSAParameterSpec
     , public IAlgorithmParameterSpec
     , public IDSAParams
 {

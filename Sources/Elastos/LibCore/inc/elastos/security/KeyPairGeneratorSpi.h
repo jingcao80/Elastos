@@ -3,7 +3,7 @@
 #define __ELASTOS_SECURITY_KEYPAIRGENERATORSPI_H__
 
 #include "Elastos.CoreLibrary.Security.h"
-#include "Object.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Security::Spec::IAlgorithmParameterSpec;
 
@@ -16,7 +16,7 @@ namespace Security {
  *
  * @see KeyPairGenerator
  */
-class KeyPairGeneratorSpi
+class ECO_PUBLIC KeyPairGeneratorSpi
     : public Object
     , public IKeyPairGeneratorSpi
 {

@@ -8,7 +8,7 @@ namespace Security {
 namespace Spec {
 
 CAR_OBJECT_IMPL(CDSAParameterSpec)
-CAR_INTERFACE_IMPL_2(CDSAParameterSpec, Object, IDSAParams, IAlgorithmParameterSpec)
+CAR_INTERFACE_IMPL_3(CDSAParameterSpec, Object, IDSAParameterSpec, IDSAParams, IAlgorithmParameterSpec)
 ECode CDSAParameterSpec::GetG(
     /* [out] */ IBigInteger **base)
 {

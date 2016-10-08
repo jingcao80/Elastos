@@ -13,7 +13,7 @@ using Elastos::Security::Spec::IAlgorithmParameterSpec;
 namespace Elastosx {
 namespace Crypto {
 
-class KeyAgreementSpi
+class ECO_PUBLIC KeyAgreementSpi
     : public Object
     , public IKeyAgreementSpi
 {

@@ -110,6 +110,8 @@ EXPORT_HEADERS += elastos/io/PrintStream.h
 EXPORT_HEADERS += elastos/io/PrintWriter.h
 EXPORT_HEADERS += elastos/io/Writer.h
 
+EXPORT_HEADERS += elastos/security/KeyPairGenerator.h
+EXPORT_HEADERS += elastos/security/KeyPairGeneratorSpi.h
 EXPORT_HEADERS += elastos/security/Provider.h
 
 EXPORT_HEADERS += libcore/io/SocketTagger.h
@@ -119,9 +121,11 @@ EXPORT_HEADERS += elastos/droid/system/Os.h
 EXPORT_HEADERS += elastos/droid/system/OsConstants.h
 
 EXPORT_HEADERS += elastosx/crypto/CipherSpi.h
+EXPORT_HEADERS += elastosx/crypto/KeyAgreementSpi.h
 
 EXPORT_HEADERS += elastosx/net/SocketFactory.h
 EXPORT_HEADERS += elastosx/net/ssl/SSLContextSpi.h
+EXPORT_HEADERS += elastosx/net/ssl/SSLEngine.h
 EXPORT_HEADERS += elastosx/net/ssl/SSLSocketFactory.h
 EXPORT_HEADERS += elastosx/net/ssl/X509ExtendedKeyManager.h
 
