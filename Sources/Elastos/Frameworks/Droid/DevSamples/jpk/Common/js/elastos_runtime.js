@@ -7,7 +7,11 @@ var _Runtime_Native = aoElastos.Runtime_Native;
 var CObject = aoElastos.CObject;
 
 var _getModuleInfo = function (asEcoName) {
-    return _Runtime_Native.Test_Require_ModuleInfo(asEcoName);
+    var oRet = asEcoName;
+    if (typeof asEcoName == "string") {
+        oRet = _Runtime_Native.Test_Require_ModuleInfo(asEcoName);
+    }
+    return oRet;
 };
 
 var CarDataType = {
@@ -272,7 +276,13 @@ function _getConstructorProtos(ao_ClassInfo){
 
 function getConstructorProtos(as_EcoName, as_ClassName){
     var oModuleInfo = _getModuleInfo(as_EcoName);
-    var oClassInfo = oModuleInfo.GetClassInfo(as_ClassName);
+
+    var oClassInfo = as_ClassName;
+
+    if (typeof oClassInfo == "string") {
+        oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
+    }
+
     return _getConstructorProtos(oClassInfo);
 }
 
@@ -361,13 +371,18 @@ CObject.test = function() {
 
 //return: constructorInfo
 function _getConstructorInfo(oClassInfo, args){
+    elog("====_getConstructorInfo====begin====");
+
     var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
     var paramCount = args.length;
 
     var oConstructorInfo;
     var bSameArgs = false;
-    for(var i=0, im=aConstructorInfos.length; i<im; i++){
+    var constructorCount = aConstructorInfos.length;
+    for(var i=0, im=constructorCount; i<im; i++){
         oConstructorInfo = aConstructorInfos[i];
+
+        elog("====_getConstructorInfo========constructor:"+i+"/"+constructorCount);
 
         var _paramCount = oConstructorInfo.GetParamCount();
         if (_paramCount != paramCount) continue;
@@ -375,6 +390,8 @@ function _getConstructorInfo(oClassInfo, args){
         bSameArgs = true;
         var aParamInfos = oConstructorInfo.GetAllParamInfos();
         for(var j = 0, jm = paramCount; j<jm; j++) {
+            elog("====_getConstructorInfo========param:"+j+"/"+paramCount);
+
             var paramInfo = aParamInfos[j];
             var oTypeInfo = paramInfo.GetTypeInfo();
             var iDataType = oTypeInfo.GetDataType();
@@ -384,10 +401,15 @@ function _getConstructorInfo(oClassInfo, args){
             var type_in = typeof(arg_in);
             if (type_in=="function") type_in = "object";
 
+            elog("====_getConstructorInfo========param:"+j+"/"+paramCount+"====0===="+sJsDataType+":"+type_in);
+
             if (sJsDataType != type_in) {
                 bSameArgs = false;
                 break;
             }
+
+            elog("====_getConstructorInfo========param:"+j+"/"+paramCount+"====1====");
+
 
             switch (iDataType) {
                 case CarDataType.IInterface:
@@ -398,6 +420,7 @@ function _getConstructorInfo(oClassInfo, args){
 
                     if (arg_in.hasInterface) {
                         bSameArgs = arg_in.hasInterface(oTypeInfo.GetInternalObject());
+                        elog('====_getConstructorInfo====IInterface=====hasInterface result:'+bSameArgs);
                     }
                     else {
                         elog('====_getConstructorInfo====IInterface=====no hasInterface method!====TODO: generate car proxy for js object');
@@ -433,21 +456,23 @@ function _getConstructorInfo(oClassInfo, args){
         if (bSameArgs) break;
     }
     return bSameArgs?oConstructorInfo:null;
+
+    elog("====_getConstructorInfo====end====");
 }
 
 function classinfo__createObject(oModuleInfo,oClassInfo){
     var newObject;
 
-    if(typeof oModuleInfo == 'string') {
+    // if(typeof oModuleInfo == 'string') {
         oModuleInfo = _getModuleInfo(oModuleInfo);
-    }
+    // }
 
-    var sClassName;
+    var sClassName,sFullClassName;
     if(typeof oClassInfo == 'string') {
-        sClassName = oClassInfo;
+        sFullClassName = oClassInfo;
         oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
         if (!oClassInfo) {
-            elog("classinfo__createObject======can't find class: " + sClassName);
+            elog("classinfo__createObject======can't find class: " + sFullClassName);
             return;
         }
     }
@@ -471,7 +496,12 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
         var oConstructorInfo = _getConstructorInfo(oClassInfo, args);
         if(!oConstructorInfo){
-            elog("====classinfo__createObject====can not find constructor : " + sClassName);
+            elog("====classinfo__createObject====can not find constructor : " + sFullClassName);
+
+            var s = CObject.getConstructorProtos(oModuleInfo, oClassInfo);
+            elog("====PROTO: " + s);
+
+            Assert(0);
             return null;
         }
 
