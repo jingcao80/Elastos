@@ -45,7 +45,14 @@ module.exports = function(aoElastos, aoActivity){
 // import android.database.DataSetObserver;
     class DataSetObserver {
         constructor() {
-            elog("====DataSetObserver::constructor====begin====");
+            // elog("====DataSetObserver::constructor====begin====");
+            // var oRet = Droid_New("Elastos.Droid.Database.IDataSetObserver");
+            // elog("====DataSetObserver::constructor====end====");
+            // return oRet;
+        }
+
+        static set CallbackInterfaceName() {
+            return "Elastos.Droid.Database.IDataSetObserver";
         }
     };
 // import android.graphics.Canvas;
@@ -129,8 +136,6 @@ module.exports = function(aoElastos, aoActivity){
         }
 
         OnCreate(_this, context, attrs) {
-            elog("====ViewGroup::OnCreate====begin====");
-
             _this._constructor(context, attrs);
         }
 
@@ -139,76 +144,12 @@ module.exports = function(aoElastos, aoActivity){
             this._LayoutParams_ = true;
             this._LayoutParams = class {
                 constructor(_this, context, attrs) {
-                    // elog("====ViewGroup::LayoutParams::constructor====begin====");
-                    // var s = CObject.getConstructorProtos("/system/lib/Elastos.Droid.Core.eco","Elastos.Droid.View.CViewGroupLayoutParams")
-                    // elog("====PROTO:===="+s);
-                    // elog("====ViewGroup::LayoutParams::constructor====0====");
-                    // CObject.showMethods(context);
-                    // elog("====ViewGroup::LayoutParams::constructor====1====");
-                    // CObject.showMethods(attrs);
-                    // elog("====ViewGroup::LayoutParams::constructor====2====");
-
-                    //return _this._GenerateLayoutParams(attrs);
-
                     var oRet;
 
-
-// class ECO_PUBLIC ViewGroup
-//     : public View
-//     , public IViewGroup
-//     , public IViewParent
-//     , public IViewManager
-// {
-//     friend class View;
-//     friend class COverlayViewGroup;
-
-// public:
-//     class LayoutParams
-//         : public Object
-//         , public IViewGroupLayoutParams
-//     {
-//     public:
-//         CAR_INTERFACE_DECL()
-
-//         LayoutParams();
-
-//         virtual ~LayoutParams();
-
-//         CARAPI constructor();
-
-//         CARAPI constructor(
-//             /* [in] */ IContext* c,
-//             /* [in] */ IAttributeSet* attrs);
-
-//         CARAPI constructor(
-//             /* [in] */ Int32 width,
-//             /* [in] */ Int32 height);
-
-//         CARAPI constructor(
-//             /* [in] */ IViewGroupLayoutParams* source);
-
-
-
-
-
-                    elog("====LayoutParams::constructor====begin====arguments length:"+arguments.length);
-                    //Assert(0);
-
-
-
                     var typeName = attrs.getClass?attrs.getClass().GetName():typeof attrs;
-                    // CObject.showMethods(oClass);
-
-
-                    // var className = oClass.GetName();
                      elog("====class/interface Name:====" + typeName);
 
-
                     if (typeName == "number") {
-                        //CObject.showMethods(_this);
-                        //show the constructor methods fo
-                        //Assert(0);
-
                         oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
                         return oRet;
                     }
@@ -216,11 +157,9 @@ module.exports = function(aoElastos, aoActivity){
                     if (typeName == "IAttributeSet") {
                         elog("====ViewGroup::LayoutParams::constructor====1====classname:"+typeName);
 
-
                         //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
                         //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams");
                         oRet = _this._GenerateLayoutParams(attrs);
-
 
                         elog("====ViewGroup::LayoutParams::constructor====2====");
                     }
@@ -231,21 +170,16 @@ module.exports = function(aoElastos, aoActivity){
                         oRet = _this._GenerateLayoutParams(attrs);
                         elog("====ViewGroup::LayoutParams::constructor====4====");
                     }
-                    // elog("====ViewGroup::LayoutParams::constructor====3====");
-                    // CObject.showMethods(oRet);
 
                     elog("====ViewGroup::LayoutParams::constructor====end====");
                     //TODO:wrapped with proxy
 
                     return oRet;
-                    //Asert(0);
                 }
             }
             return this._LayoutParams;
         }
     }
-
-
 
 // import android.view.ViewParent;
 // import android.view.accessibility.AccessibilityEvent;
@@ -431,38 +365,38 @@ module.exports = function(aoElastos, aoActivity){
  */
 
 // public class ViewPager extends ViewGroup {
-    class ViewPager extends ViewGroup {
-        constructor() {
-            elog("====ViewPager::constructor====begin==9999==");
-            super();
-        }
+class ViewPager extends ViewGroup {
+    constructor() {
+        elog("====ViewPager::constructor====begin==9999==");
+        super();
+    }
 
 //     private static final String TAG = "ViewPager";
-        static get TAG() {return "ViewPager";}
+    static get TAG() {return "ViewPager";}
 
 //     private static final boolean DEBUG = false;
-        static get DEBUG() {return false;}
+    static get DEBUG() {return false;}
 
 //     private static final boolean USE_CACHE = false;
-        static get USE_CACHE() {return false;}
+    static get USE_CACHE() {return false;}
 
 //     private static final int DEFAULT_OFFSCREEN_PAGES = 1;
-        static get DEFAULT_OFFSCREEN_PAGES() {return 1;}
+    static get DEFAULT_OFFSCREEN_PAGES() {return 1;}
 //     private static final int MAX_SETTLE_DURATION = 600; // ms
-        static get MAX_SETTLE_DURATION() {return 600;} // ms
+    static get MAX_SETTLE_DURATION() {return 600;} // ms
 //     private static final int MIN_DISTANCE_FOR_FLING = 25; // dips
-        static get MIN_DISTANCE_FOR_FLING() {return 25;} // dips
+    static get MIN_DISTANCE_FOR_FLING() {return 25;} // dips
 
 //     private static final int DEFAULT_GUTTER_SIZE = 16; // dips
-        static get DEFAULT_GUTTER_SIZE() {return 16;} // dips
+    static get DEFAULT_GUTTER_SIZE() {return 16;} // dips
 
 //     private static final int MIN_FLING_VELOCITY = 400; // dips
-        static get MIN_FLING_VELOCITY() {return 400;} // dips
+    static get MIN_FLING_VELOCITY() {return 400;} // dips
 
 //     private static final int[] LAYOUT_ATTRS = new int[] {
 //         android.R.attr.layout_gravity
 //     };
-        static get LAYOUT_ATTRS() {return [
+    static get LAYOUT_ATTRS() {return [
                 0x010100b3 ];}
 
     /**
@@ -470,12 +404,12 @@ module.exports = function(aoElastos, aoActivity){
      * If the app changes this when we don't expect it, we'll throw a big obnoxious exception.
      */
 //     private int mExpectedAdapterCount;
-        get mExpectedAdapterCount() {
-            return this._mExpectedAdapterCount || 0;
-        }
-        set mExpectedAdapterCount(value) {
-            return this._mExpectedAdapterCount = value;
-        }
+    get mExpectedAdapterCount() {
+        return this._mExpectedAdapterCount || 0;
+    }
+    set mExpectedAdapterCount(value) {
+        return this._mExpectedAdapterCount = value;
+    }
 
 //     static class ItemInfo {
 //         Object object;
@@ -484,27 +418,27 @@ module.exports = function(aoElastos, aoActivity){
 //         float widthFactor;
 //         float offset;
 //     }
-        static get ItemInfo() {
-            if (ViewPager._ItemInfo_) return ViewPager._ItemInfo;
-            ViewPager._ItemInfo_ = true;
-            ViewPager._ItemInfo = class {
-                get object() {return this._object};
-                set object(v) {this._object = v;};
+    static get ItemInfo() {
+        if (ViewPager._ItemInfo_) return ViewPager._ItemInfo;
+        ViewPager._ItemInfo_ = true;
+        ViewPager._ItemInfo = class {
+            get object() {return this._object};
+            set object(v) {this._object = v;};
 
-                get position() {return this._position};
-                set position(v) {this._position = v;};
+            get position() {return this._position};
+            set position(v) {this._position = v;};
 
-                get scrolling() {return this._scrolling};
-                set scrolling(v) {this._scrolling = v;};
+            get scrolling() {return this._scrolling};
+            set scrolling(v) {this._scrolling = v;};
 
-                get widthFactor() {return this._widthFactor};
-                set widthFactor(v) {this._widthFactor = v;};
+            get widthFactor() {return this._widthFactor};
+            set widthFactor(v) {this._widthFactor = v;};
 
-                get offset() {return this._offset};
-                set offset(v) {this._offset = v;};
-            }
-            return ViewPager._ItemInfo;
+            get offset() {return this._offset};
+            set offset(v) {this._offset = v;};
         }
+        return ViewPager._ItemInfo;
+    }
 
 //     private static final Comparator<ItemInfo> COMPARATOR = new Comparator<ItemInfo>(){
 //         @Override
@@ -512,16 +446,16 @@ module.exports = function(aoElastos, aoActivity){
 //             return lhs.position - rhs.position;
 //         }
 //     };
-        static get COMPARATOR() {
-            if (ViewPager._COMPARATOR_) return ViewPager._COMPARATOR;
+    static get COMPARATOR() {
+        if (ViewPager._COMPARATOR_) return ViewPager._COMPARATOR;
 
-            ViewPager._COMPARATOR = new class _tmp extends Comparator {
-                compare(lhs, rhs) {
-                    return lhs.position - rhs.position;
-                }
+        ViewPager._COMPARATOR = new class _tmp extends Comparator {
+            compare(lhs, rhs) {
+                return lhs.position - rhs.position;
             }
-            return ViewPager._COMPARATOR;
         }
+        return ViewPager._COMPARATOR;
+    }
 
 //     private static final Interpolator sInterpolator = new Interpolator() {
 //         public float getInterpolation(float t) {
@@ -529,44 +463,44 @@ module.exports = function(aoElastos, aoActivity){
 //             return t * t * t * t * t + 1.0f;
 //         }
 //     };
-        static get sInterpolator() {
-            if (ViewPager._sInterpolator_) return ViewPager._sInterpolator;
-            ViewPager._sInterpolator_ = true;
-            ViewPager._sInterpolator = new class _tmp extends Interpolator {
-                GetInterpolation(t) {
-                    t -= 1.0;
-                    return t * t * t * t * t + 1.0;
-                }
-            }();
-            return ViewPager._sInterpolator;
-        };
+    static get sInterpolator() {
+        if (ViewPager._sInterpolator_) return ViewPager._sInterpolator;
+        ViewPager._sInterpolator_ = true;
+        ViewPager._sInterpolator = new class _tmp extends Interpolator {
+            GetInterpolation(t) {
+                t -= 1.0;
+                return t * t * t * t * t + 1.0;
+            }
+        }();
+        return ViewPager._sInterpolator;
+    };
 
 //     private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
-        get mItems() {
-            if (this._mItems_) return this._mItems;
-            this._mItems_ = true;
-            this._mItems = new ArrayList();
-            return this._mItems;
-        }
+    get mItems() {
+        if (this._mItems_) return this._mItems;
+        this._mItems_ = true;
+        this._mItems = new ArrayList();
+        return this._mItems;
+    }
 //     private final ItemInfo mTempItem = new ItemInfo();
-        get mTempItem() {
-            if (this._mTempItem_) return this._mTempItem;
-            this._mTempItem_ = true;
-            this._mTempItem = new ViewPager.ItemInfo();
-            return this._mTempItem;
-        }
+    get mTempItem() {
+        if (this._mTempItem_) return this._mTempItem;
+        this._mTempItem_ = true;
+        this._mTempItem = new ViewPager.ItemInfo();
+        return this._mTempItem;
+    }
 
 //     private final Rect mTempRect = new Rect();
-        get mTempRect() {
-            if (this._mTempRect_) return this._mTempRect;
-            this._mTempRect_ = true;
-            this._mTempRect = new Rect();
-            return this._mTempRect;
-        }
+    get mTempRect() {
+        if (this._mTempRect_) return this._mTempRect;
+        this._mTempRect_ = true;
+        this._mTempRect = new Rect();
+        return this._mTempRect;
+    }
 
 //     private PagerAdapter mAdapter;
-        get mAdapter() {return this._mAdapter || null;}
-        set mAdapter(v) {this._mAdapter = v;}
+    get mAdapter() {return this._mAdapter || null;}
+    set mAdapter(v) {this._mAdapter = v;}
 
 //     private int mCurItem;   // Index of currently displayed page.
 //     private int mRestoredCurItem = -1;
@@ -575,8 +509,8 @@ module.exports = function(aoElastos, aoActivity){
 //     private Scroller mScroller;
 
 //     private PagerObserver mObserver;
-        get mObserver() {return this._mObserver || null;}
-        set mObserver(v) {this._mObserver = v;}
+    get mObserver() {return this._mObserver || null;}
+    set mObserver(v) {this._mObserver = v;}
 
 //     private int mPageMargin;
 //     private Drawable mMarginDrawable;
@@ -599,6 +533,7 @@ module.exports = function(aoElastos, aoActivity){
 
 //     private boolean mPopulatePending;
 //     private int mOffscreenPageLimit = DEFAULT_OFFSCREEN_PAGES;
+    get mOffscreenPageLimit() {return ViewPager.DEFAULT_OFFSCREEN_PAGES;}
 
 //     private boolean mIsBeingDragged;
 //     private boolean mIsUnableToDrag;
@@ -624,7 +559,7 @@ module.exports = function(aoElastos, aoActivity){
      * Used by {@link #mActivePointerId}.
      */
 //     private static final int INVALID_POINTER = -1;
-        static get INVALID_POINTER() {return -1;}
+    static get INVALID_POINTER() {return -1;}
 
 //     /**
 //      * Determines speed during touch scrolling
@@ -639,7 +574,7 @@ module.exports = function(aoElastos, aoActivity){
     // on touch down and let the user interact with the content inside instead of
     // "catching" the flinging pager.
 //     private static final int CLOSE_ENOUGH = 2; // dp
-        static get CLOSE_ENOUGH() {return 2;}
+    static get CLOSE_ENOUGH() {return 2;}
 
 //     private boolean mFakeDragging;
 //     private long mFakeDragBeginTime;
@@ -648,56 +583,56 @@ module.exports = function(aoElastos, aoActivity){
 //     private EdgeEffectCompat mRightEdge;
 
 //     private boolean mFirstLayout = true;
-        get mFirstLayout() {return this._mFirstLayout || true;}
-        set mFirstLayout(v) {this._mFirstLayout = v;}
+    get mFirstLayout() {return this._mFirstLayout || true;}
+    set mFirstLayout(v) {this._mFirstLayout = v;}
 //     private boolean mNeedCalculatePageOffsets = false;
-        get mNeedCalculatePageOffsets() {return false;}
+    get mNeedCalculatePageOffsets() {return false;}
  //     private boolean mCalledSuper;
 //     private int mDecorChildCount;
 
 //     private OnPageChangeListener mOnPageChangeListener;
-        get mOnPageChangeListener() {return this._mOnPageChangeListener;}
-        set mOnPageChangeListener(v) {this._mOnPageChangeListener = v;}
+    get mOnPageChangeListener() {return this._mOnPageChangeListener;}
+    set mOnPageChangeListener(v) {this._mOnPageChangeListener = v;}
 //     private OnPageChangeListener mInternalPageChangeListener;
 //     private OnAdapterChangeListener mAdapterChangeListener;
 //     private PageTransformer mPageTransformer;
 //     private Method mSetChildrenDrawingOrderEnabled;
 
 //     private static final int DRAW_ORDER_DEFAULT = 0;
-        static get DRAW_ORDER_DEFAULT() {return 0;}
+    static get DRAW_ORDER_DEFAULT() {return 0;}
 //     private static final int DRAW_ORDER_FORWARD = 1;
-        static get DRAW_ORDER_FORWARD() {return 1;}
+    static get DRAW_ORDER_FORWARD() {return 1;}
 //     private static final int DRAW_ORDER_REVERSE = 2;
-        static get DRAW_ORDER_REVERSE() {return 2;}
+    static get DRAW_ORDER_REVERSE() {return 2;}
 //     private int mDrawingOrder;
 //     private ArrayList<View> mDrawingOrderedChildren;
 //     private static final ViewPositionComparator sPositionComparator = new ViewPositionComparator();
-        static get sPositionComparator() {
-            elog("====get sPositionComparator====");
-            if (this._sPositionComparator_) return this._sPositionComparator;
-            this._sPositionComparator_ = true;
-            this._sPositionComparator = new this.ViewPositionComparator();
-            return this._sPositionComparator;
-        }
+    static get sPositionComparator() {
+        elog("====get sPositionComparator====");
+        if (this._sPositionComparator_) return this._sPositionComparator;
+        this._sPositionComparator_ = true;
+        this._sPositionComparator = new this.ViewPositionComparator();
+        return this._sPositionComparator;
+    }
 
 //     /**
 //      * Indicates that the pager is in an idle, settled state. The current page
 //      * is fully in view and no animation is in progress.
 //      */
 //     public static final int SCROLL_STATE_IDLE = 0;
-        static get SCROLL_STATE_IDLE() {return 0;}
+    static get SCROLL_STATE_IDLE() {return 0;}
 
 //     /**
 //      * Indicates that the pager is currently being dragged by the user.
 //      */
 //     public static final int SCROLL_STATE_DRAGGING = 1;
-        static get SCROLL_STATE_DRAGGING() {return 1;}
+    static get SCROLL_STATE_DRAGGING() {return 1;}
 
 //     /**
 //      * Indicates that the pager is in the process of settling to a final position.
 //      */
 //     public static final int SCROLL_STATE_SETTLING = 2;
-        static get SCROLL_STATE_SETTLING() {return 2;}
+    static get SCROLL_STATE_SETTLING() {return 2;}
 
 //     private final Runnable mEndScrollRunnable = new Runnable() {
 //         public void run() {
@@ -705,22 +640,22 @@ module.exports = function(aoElastos, aoActivity){
 //             populate();
 //         }
 //     };
-        get mEndScrollRunnable() {
-            if (this._mEndScrollRunnable_) return this._mEndScrollRunnable;
+    get mEndScrollRunnable() {
+        if (this._mEndScrollRunnable_) return this._mEndScrollRunnable;
 
-            this._mEndScrollRunnable_ = true;
-            this._mEndScrollRunnable = new class _tmp extends Runnable {
-                Run() {
-                    this.SetScrollState(ViewPager.SCROLL_STATE_IDLE);
-                    this.Populate();
-                }
+        this._mEndScrollRunnable_ = true;
+        this._mEndScrollRunnable = new class _tmp extends Runnable {
+            Run() {
+                this.SetScrollState(ViewPager.SCROLL_STATE_IDLE);
+                this.Populate();
             }
-
-            return this._mEndScrollRunnable;
         }
 
+        return this._mEndScrollRunnable;
+    }
+
 //     private int mScrollState = SCROLL_STATE_IDLE;
-        static get mScrollState() {return ViewPager.SCROLL_STATE_IDLE;}
+    static get mScrollState() {return ViewPager.SCROLL_STATE_IDLE;}
 
     /**
      * Callback interface for responding to changing state of the selected page.
@@ -774,8 +709,8 @@ module.exports = function(aoElastos, aoActivity){
 //     public static class SimpleOnPageChangeListener implements OnPageChangeListener {
     static get SimpleOnPageChangeListener() {
         if (ViewPager._SimpleOnPageChangeListener_) return ViewPager._SimpleOnPageChangeListener;
-        ViewPager._SimpleOnPageChangeListener_ = true;
 
+        ViewPager._SimpleOnPageChangeListener_ = true;
         ViewPager._SimpleOnPageChangeListener = class _tmp {
 //         @Override
 //         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -848,25 +783,20 @@ module.exports = function(aoElastos, aoActivity){
 //     }
 
 //     public ViewPager(Context context, AttributeSet attrs) {
+//         super(context, attrs);
+//         initViewPager();
+        //_this._constructor(context, attrs);
+//     }
     OnCreate(_this, context, attrs) {
         elog("====ViewPager::ViewPager====");
 
         attrs = attrs || null;
 
-//         super(context, attrs);
-//         initViewPager();
-        //_this._constructor(context, attrs);
         super.OnCreate(_this, context, attrs);
         this.InitViewPager();
     }
 
 //     void initViewPager() {
-    InitViewPager() {
-        elog("====ViewPager::InitViewPager====begin====");
-        var _this = this._obj;
-
-        var FOCUS_AFTER_DESCENDANTS = 0x40000;  //TODO
-
 //         setWillNotDraw(false);
 //         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 //         setFocusable(true);
@@ -874,6 +804,30 @@ module.exports = function(aoElastos, aoActivity){
 //         mScroller = new Scroller(context, sInterpolator);
 //         final ViewConfiguration configuration = ViewConfiguration.get(context);
 //         final float density = context.getResources().getDisplayMetrics().density;
+
+//         mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
+//         mMinimumVelocity = (int) (MIN_FLING_VELOCITY * density);
+//         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
+//         mLeftEdge = new EdgeEffectCompat(context);
+//         mRightEdge = new EdgeEffectCompat(context);
+
+//         mFlingDistance = (int) (MIN_DISTANCE_FOR_FLING * density);
+//         mCloseEnough = (int) (CLOSE_ENOUGH * density);
+//         mDefaultGutterSize = (int) (DEFAULT_GUTTER_SIZE * density);
+
+//         ViewCompat.setAccessibilityDelegate(this, new MyAccessibilityDelegate());
+
+//         if (ViewCompat.getImportantForAccessibility(this)
+//                 == ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+//             ViewCompat.setImportantForAccessibility(this,
+//                     ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
+//         }
+//     }
+    InitViewPager() {
+        elog("====ViewPager::InitViewPager====begin====");
+        var _this = this._obj;
+
+        var FOCUS_AFTER_DESCENDANTS = 0x40000;  //TODO
         _this.SetWillNotDraw(false);
         _this.SetDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         _this.SetFocusable(true);
@@ -882,32 +836,18 @@ module.exports = function(aoElastos, aoActivity){
         var configuration = ViewConfiguration.Get(context);
         var density = context.GetResources().GetDisplayMetrics().GetDensity();
 
-//         mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
-//         mMinimumVelocity = (int) (MIN_FLING_VELOCITY * density);
-//         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
-//         mLeftEdge = new EdgeEffectCompat(context);
-//         mRightEdge = new EdgeEffectCompat(context);
         this.mTouchSlop = ViewConfigurationCompat.GetScaledPagingTouchSlop(configuration);
         this.mMinimumVelocity = this.MIN_FLING_VELOCITY * density;
         this.mMaximumVelocity = configuration.GetScaledMaximumFlingVelocity();
         this.mLeftEdge = new EdgeEffectCompat(context);
         this.mRightEdge = new EdgeEffectCompat(context);
 
-//         mFlingDistance = (int) (MIN_DISTANCE_FOR_FLING * density);
-//         mCloseEnough = (int) (CLOSE_ENOUGH * density);
-//         mDefaultGutterSize = (int) (DEFAULT_GUTTER_SIZE * density);
         this.mFlingDistance = this.MIN_DISTANCE_FOR_FLING * density;
         this.mCloseEnough = this.CLOSE_ENOUGH * density;
         this.mDefaultGutterSize = this.DEFAULT_GUTTER_SIZE * density;
 
-//         ViewCompat.setAccessibilityDelegate(this, new MyAccessibilityDelegate());
         ViewCompat.SetAccessibilityDelegate(_this, new this.MyAccessibilityDelegate());
 
-//         if (ViewCompat.getImportantForAccessibility(this)
-//                 == ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-//             ViewCompat.setImportantForAccessibility(this,
-//                     ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
-//         }
         if (ViewCompat.GetImportantForAccessibility(_this)
                 == ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             ViewCompat.SetImportantForAccessibility(_this,
@@ -918,17 +858,16 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     protected void onDetachedFromWindow() {
-    OnDetachedFromWindow() {
-        elog("====ViewPager::OnDetachedFromWindow====TODO====");
-        Assert(0);
 //         removeCallbacks(mEndScrollRunnable);
 //         super.onDetachedFromWindow();
+//     }
+    OnDetachedFromWindow() {
+        elog("====ViewPager::OnDetachedFromWindow====TODO====");
+        removeCallbacks(mEndScrollRunnable);
+        super.onDetachedFromWindow();
     }
 
 //     private void setScrollState(int newState) {
-    SetScrollState(newState) {
-        elog("====ViewPager::SetScrollState====TODO====");
-        Assert(0);
 //         if (mScrollState == newState) {
 //             return;
 //         }
@@ -941,7 +880,21 @@ module.exports = function(aoElastos, aoActivity){
 //         if (mOnPageChangeListener != null) {
 //             mOnPageChangeListener.onPageScrollStateChanged(newState);
 //         }
-    }
+//      }
+    SetScrollState(newState) {
+        if (mScrollState == newState) {
+            return;
+        }
+
+        mScrollState = newState;
+        if (mPageTransformer != null) {
+            // PageTransformers can do complex things that benefit from hardware layers.
+            enableLayers(newState != SCROLL_STATE_IDLE);
+        }
+        if (mOnPageChangeListener != null) {
+            mOnPageChangeListener.onPageScrollStateChanged(newState);
+        }
+     }
 
 //     /**
 //      * Set a PagerAdapter that will supply views for this pager as needed.
@@ -949,9 +902,6 @@ module.exports = function(aoElastos, aoActivity){
 //      * @param adapter Adapter to use
 //      */
 //     public void setAdapter(PagerAdapter adapter) {
-    SetAdapter(adapter) {
-        elog("====ViewPager::SetAdapter====begin====");
-
 //         if (mAdapter != null) {
 //             mAdapter.unregisterDataSetObserver(mObserver);
 //             mAdapter.startUpdate(this);
@@ -965,45 +915,21 @@ module.exports = function(aoElastos, aoActivity){
 //             mCurItem = 0;
 //             scrollTo(0, 0);
 //         }
-        if (this.mAdapter != null) {
-            this.unregisterDataSetObserver(this.mObserver);
-            this.mAdapter.startUpdate(this);
-            for (var i = 0; i < this.mItems.GetSize(); i++) {
-                var ii = this.mItems.Get(i);
-                this.mAdapter.destroyItem(this, ii.position, ii.object);
-            }
-            this.mAdapter.FinishUpdate(this);
-            this.mItems.Clear();
-            removeNonDecorViews();
-            mCurItem = 0;
-            scrollTo(0, 0);
-        }
 
 //         final PagerAdapter oldAdapter = mAdapter;
 //         mAdapter = adapter;
 //         mExpectedAdapterCount = 0;
-        var oldAdapter = this.mAdapter;
-        this.mAdapter = adapter;
-        this.mExpectedAdapterCount = 0;
 
 //         if (mAdapter != null) {
-        if (this.mAdapter != null) {
 //             if (mObserver == null) {
 //                 mObserver = new PagerObserver();
 //             }
-            if (this.mObserver == null) {
-                this.mObserver = new PagerObserver();
-            }
+
 //             mAdapter.registerDataSetObserver(mObserver);
 //             mPopulatePending = false;
 //             final boolean wasFirstLayout = mFirstLayout;
 //             mFirstLayout = true;
 //             mExpectedAdapterCount = mAdapter.getCount();
-            this.mAdapter.RegisterDataSetObserver(this.mObserver);
-            this.mPopulatePending = false;
-            var wasFirstLayout = this.mFirstLayout;
-            this.mFirstLayout = true;
-            this.mExpectedAdapterCount = this.mAdapter.GetCount();
 
 //             if (mRestoredCurItem >= 0) {
 //                 mAdapter.restoreState(mRestoredAdapterState, mRestoredClassLoader);
@@ -1016,6 +942,100 @@ module.exports = function(aoElastos, aoActivity){
 //             } else {
 //                 requestLayout();
 //             }
+
+//         if (mAdapterChangeListener != null && oldAdapter != adapter) {
+//             mAdapterChangeListener.onAdapterChanged(oldAdapter, adapter);
+//         }
+//     }
+    SetAdapter(adapter) {
+        elog("====ViewPager::SetAdapter====begin====");
+
+        var _this = this._obj;
+
+        if (this.mAdapter != null) {
+            elog("====ViewPager::SetAdapter====begin====0====");
+
+            this.UnregisterDataSetObserver(this.mObserver);
+            this.mAdapter.startUpdate(this);
+            for (var i = 0; i < this.mItems.GetSize(); i++) {
+                var ii = this.mItems.Get(i);
+                this.mAdapter.destroyItem(this, ii.position, ii.object);
+            }
+            this.mAdapter.FinishUpdate(this);
+            this.mItems.Clear();
+            removeNonDecorViews();
+            mCurItem = 0;
+            scrollTo(0, 0);
+        }
+
+        var oldAdapter = this.mAdapter;
+        this.mAdapter = adapter;
+        this.mExpectedAdapterCount = 0;
+
+        elog("====ViewPager::SetAdapter====begin====1====");
+
+        if (this.mAdapter != null) {
+            elog("====ViewPager::SetAdapter====begin====2====");
+
+            if (this.mObserver == null) {
+                elog("====ViewPager::SetAdapter====begin====2.1====");
+                this.mObserver = new this.PagerObserver();
+            }
+
+
+// ECode DataSetObservable::NotifyChanged()
+// {
+//     AutoLock syncLock(mObserversLock);
+//     List< AutoPtr<IInterface> >::ReverseIterator rit = mObservers.RBegin();
+//     List< AutoPtr<IInterface> >::ReverseIterator end = mObservers.REnd();
+//     IDataSetObserver* observer;
+//     for (; rit != end; ++rit) {
+//         observer = IDataSetObserver::Probe(*rit);
+//         observer->OnChanged();
+//     }
+
+//     return NOERROR;
+// }
+
+// ECode Observable::RegisterObserver(
+//     /* [in] */ IInterface* observer)
+// {
+//     if (observer == NULL) {
+//         Slogger::E("Observable", "The observer is NULL.");
+//         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+//     }
+
+//     {
+//         AutoLock syncLock(mObserversLock);
+//         AutoPtr<IInterface> obj = observer;
+//         List< AutoPtr<IInterface> >::Iterator it = Find(mObservers.Begin(), mObservers.End(), obj);
+//         if (it != mObservers.End()) {
+//             Slogger::E(String("Observable"), "Observer %s is already registered.", TO_CSTR(observer));
+//             return E_ILLEGAL_STATE_EXCEPTION;
+//         }
+//         mObservers.PushBack(observer);
+//     }
+
+//     return NOERROR;
+// }
+
+
+
+elog("======sssssssssssssssssssssss===");
+//var ss = CObject.getObjectMethodProtos(this.mAdapter, "RegisterDataSetObserver");
+//elog("====PROTO:"+ss);
+elog("====type===="+typeof(this.mAdapter.RegisterDataSetObserver));
+            this.mAdapter.RegisterDataSetObserver(this.mObserver);
+
+elog("====TODO: check listener interface type, it should be IDataSetObserver!!!");
+//Assert(0);
+
+
+            this.mPopulatePending = false;
+            var wasFirstLayout = this.mFirstLayout;
+            this.mFirstLayout = true;
+            this.mExpectedAdapterCount = this.mAdapter.GetCount();
+
             if (this.mRestoredCurItem >= 0) {
                 this.mAdapter.RestoreState(this.mRestoredAdapterState, this.mRestoredClassLoader);
                 SetCurrentItemInternal(this.mRestoredCurItem, false, true);
@@ -1023,16 +1043,16 @@ module.exports = function(aoElastos, aoActivity){
                 this.mRestoredAdapterState = null;
                 this.mRestoredClassLoader = null;
             } else if (!wasFirstLayout) {
-                Populate();
+                this.Populate();
             } else {
-                RequestLayout();
+                _this.RequestLayout();
             }
         }
 
-//         if (mAdapterChangeListener != null && oldAdapter != adapter) {
-//             mAdapterChangeListener.onAdapterChanged(oldAdapter, adapter);
-//         }
+        elog("====ViewPager::SetAdapter====begin====3====");
+
         if (this.mAdapterChangeListener != null && oldAdapter != adapter) {
+            elog("====ViewPager::SetAdapter====begin====4====");
             this.mAdapterChangeListener.OnAdapterChanged(oldAdapter, adapter);
         }
 
@@ -1040,10 +1060,6 @@ module.exports = function(aoElastos, aoActivity){
     }   //SetAdapter
 
 //     private void removeNonDecorViews() {
-    RemoveNonDecorViews() {
-        elog("====ViewPager::RemoveNonDecorViews====begin====");
-        Assert(0);
-
 //         for (int i = 0; i < getChildCount(); i++) {
 //             final View child = getChildAt(i);
 //             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -1052,6 +1068,16 @@ module.exports = function(aoElastos, aoActivity){
 //                 i--;
 //             }
 //         }
+//     }
+    RemoveNonDecorViews() {
+        for (var i = 0; i < getChildCount(); i++) {
+            var child = getChildAt(i);
+            var lp = child.getLayoutParams();
+            if (!lp.isDecor) {
+                removeViewAt(i);
+                i--;
+            }
+        }
     }
 
 //     /**
@@ -1060,8 +1086,9 @@ module.exports = function(aoElastos, aoActivity){
 //      * @return The currently registered PagerAdapter
 //      */
 //     public PagerAdapter getAdapter() {
-    GetAdapter() {
 //         return mAdapter;
+//     }
+    GetAdapter() {
         return this.mAdapter;
     }
 
@@ -1304,8 +1331,6 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 //     public void setPageTransformer(boolean reverseDrawingOrder, PageTransformer transformer) {
-    SetPageTransformer(reverseDrawingOrder, transformer) {
-        elog("====ViewPager::SetPageTransformer====begin====");
 //         if (Build.VERSION.SDK_INT >= 11) {
 //             final boolean hasTransformer = transformer != null;
 //             final boolean needsPopulate = hasTransformer != (mPageTransformer != null);
@@ -1318,6 +1343,9 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //             if (needsPopulate) populate();
 //         }
+//     }
+    SetPageTransformer(reverseDrawingOrder, transformer) {
+        elog("====ViewPager::SetPageTransformer====begin====");
         var SDK_INT = this.GetInt32Property("ro.build.version.sdk");
         if (SDK_INT >= 11) {
             var hasTransformer = transformer != null;
@@ -1335,8 +1363,6 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 //     void setChildrenDrawingOrderEnabledCompat(boolean enable) {
-    SetChildrenDrawingOrderEnabledCompat(enable) {
-        elog("====ViewPager::SetChildrenDrawingOrderEnabledCompat====begin====");
 //         if (Build.VERSION.SDK_INT >= 7) {
 //             if (mSetChildrenDrawingOrderEnabled == null) {
 //                 try {
@@ -1352,6 +1378,9 @@ module.exports = function(aoElastos, aoActivity){
 //                 Log.e(TAG, "Error changing children drawing order", e);
 //             }
 //         }
+//     }
+    SetChildrenDrawingOrderEnabledCompat(enable) {
+        elog("====ViewPager::SetChildrenDrawingOrderEnabledCompat====begin====");
         var SDK_INT = this.GetInt32Property("ro.build.version.sdk");
         if (SDK_INT >= 7) {
             // elog("====ViewPager::SetChildrenDrawingOrderEnabledCompat====todo====");
@@ -1412,8 +1441,9 @@ module.exports = function(aoElastos, aoActivity){
      * @see #setOffscreenPageLimit(int)
      */
 //     public int getOffscreenPageLimit() {
-    GetOffscreenPageLimit() {
 //         return mOffscreenPageLimit;
+//     }
+    GetOffscreenPageLimit() {
         return this.mOffscreenPageLimit;
     }
 
@@ -1435,9 +1465,6 @@ module.exports = function(aoElastos, aoActivity){
      * @param limit How many pages will be kept offscreen in an idle state.
      */
 //     public void setOffscreenPageLimit(int limit) {
-    SetOffscreenPageLimit(limit) {
-        elog("====ViewPager::SetOffscreenPageLimit====TODO====");
-        Assert(0);
 //         if (limit < DEFAULT_OFFSCREEN_PAGES) {
 //             Log.w(TAG, "Requested offscreen page limit " + limit + " too small; defaulting to " +
 //                     DEFAULT_OFFSCREEN_PAGES);
@@ -1447,6 +1474,17 @@ module.exports = function(aoElastos, aoActivity){
 //             mOffscreenPageLimit = limit;
 //             populate();
 //         }
+//     }
+    SetOffscreenPageLimit(limit) {
+        if (limit < DEFAULT_OFFSCREEN_PAGES) {
+            Log.w(TAG, "Requested offscreen page limit " + limit + " too small; defaulting to " +
+                    ViewPager.DEFAULT_OFFSCREEN_PAGES);
+            limit = ViewPager.DEFAULT_OFFSCREEN_PAGES;
+        }
+        if (limit != mOffscreenPageLimit) {
+            mOffscreenPageLimit = limit;
+            populate();
+        }
     }
 
     /**
@@ -1458,18 +1496,21 @@ module.exports = function(aoElastos, aoActivity){
      * @see #setPageMarginDrawable(int)
      */
 //     public void setPageMargin(int marginPixels) {
-    SetPageMargin(marginPixels) {
 //         final int oldMargin = mPageMargin;
 //         mPageMargin = marginPixels;
-        var oldMargin = this.mPageMargin;
-        this.mPageMargin = marginPixels;
 
 //         final int width = getWidth();
 //         recomputeScrollPosition(width, width, marginPixels, oldMargin);
+
+//         requestLayout();
+//     }
+    SetPageMargin(marginPixels) {
+        var oldMargin = this.mPageMargin;
+        this.mPageMargin = marginPixels;
+
         var width = this._obj.GetWidth();
         this.RecomputeScrollPosition(width, width, marginPixels, oldMargin);
 
-//         requestLayout();
         this._obj.RequestLayout();
     }
 
@@ -1754,7 +1795,7 @@ module.exports = function(aoElastos, aoActivity){
         // This method only gets called if our observer is attached, so mAdapter is non-null.
 
         var adapterCount = this.mAdapter.GetCount();
-        mExpectedAdapterCount = adapterCount;
+        this.mExpectedAdapterCount = adapterCount;
         var needPopulate = this.mItems.GetSize() < mOffscreenPageLimit * 2 + 1 &&
                 this.mItems.GetSize() < adapterCount;
         var newCurrItem = mCurItem;
@@ -1826,14 +1867,6 @@ module.exports = function(aoElastos, aoActivity){
 //     }
 
 //     void populate(int newCurrentItem) {
-    Populate(newCurrentItem) {
-        elog("====ViewPager::Populate====begin====TODO====");
-
-        newCurrentItem = newCurrentItem || this.mCurItem;
-
-        var _this = this._obj;
-
-        newCurrentItem = newCurrentItem || this.mCurItem;
 
 //         ItemInfo oldCurInfo = null;
 //         int focusDirection = View.FOCUS_FORWARD;
@@ -1843,28 +1876,10 @@ module.exports = function(aoElastos, aoActivity){
 //             mCurItem = newCurrentItem;
 //         }
 
-        var View__FOCUS_FORWARD = 0x00000002;
-        var View__FOCUS_LEFT = 0x00000011;
-        var View__FOCUS_RIGHT = 0x00000042;
-
-        var oldCurInfo = null;
-        var focusDirection = View__FOCUS_FORWARD;
-        if (this.mCurItem != newCurrentItem) {
-            focusDirection = this.mCurItem < newCurrentItem ? View__FOCUS_RIGHT : View__FOCUS_LEFT;
-            oldCurInfo = this.InfoForPosition(this.mCurItem);
-            this.mCurItem = newCurrentItem;
-        }
-        elog("====ViewPager::Populate====begin====1====");
-
 //         if (mAdapter == null) {
 //             sortChildDrawingOrder();
 //             return;
 //         }
-        if (this.mAdapter == null) {
-            this.SortChildDrawingOrder();
-            return;
-        }
-        elog("====ViewPager::Populate====begin====2====");
 
         // Bail now if we are waiting to populate.  This is to hold off
         // on creating views from the time the user releases their finger to
@@ -1875,12 +1890,6 @@ module.exports = function(aoElastos, aoActivity){
 //             sortChildDrawingOrder();
 //             return;
 //         }
-        if (this.mPopulatePending) {
-            if (DEBUG) Log.i(TAG, "populate is pending, skipping for now...");
-            this.SortChildDrawingOrder();
-            return;
-        }
-        elog("====ViewPager::Populate====begin====3====");
 
         // Also, don't populate until we are attached to a window.  This is to
         // avoid trying to populate before we have restored our view hierarchy
@@ -1888,23 +1897,13 @@ module.exports = function(aoElastos, aoActivity){
 //         if (getWindowToken() == null) {
 //             return;
 //         }
-        if (this.GetWindowToken() == null) {
-            return;
-        }
-        elog("====ViewPager::Populate====begin====4====");
 
 //         mAdapter.startUpdate(this);
-        this.mAdapter.StartUpdate(_this);
 
 //         final int pageLimit = mOffscreenPageLimit;
 //         final int startPos = Math.max(0, mCurItem - pageLimit);
 //         final int N = mAdapter.getCount();
 //         final int endPos = Math.min(N-1, mCurItem + pageLimit);
-        var pageLimit = mOffscreenPageLimit;
-        var startPos = Math.max(0, mCurItem - pageLimit);
-        var N = this.mAdapter.GetCount();
-        var endPos = Math.min(N-1, mCurItem + pageLimit);
-        elog("====ViewPager::Populate====begin====5====");
 
 //         if (N != mExpectedAdapterCount) {
 //             String resName;
@@ -1920,21 +1919,6 @@ module.exports = function(aoElastos, aoActivity){
 //                     " Pager class: " + getClass() +
 //                     " Problematic adapter: " + mAdapter.getClass());
 //         }
-        if (N != mExpectedAdapterCount) {
-            var resName;
-            try {
-                resName = getResources().getResourceName(getId());
-            } catch (e) {
-                resName = Integer.toHexString(getId());
-            }
-            throw new IllegalStateException("The application's PagerAdapter changed the adapter's" +
-                    " contents without calling PagerAdapter#notifyDataSetChanged!" +
-                    " Expected adapter item count: " + mExpectedAdapterCount + ", found: " + N +
-                    " Pager id: " + resName +
-                    " Pager class: " + getClass() +
-                    " Problematic adapter: " + this.mAdapter.getClass());
-        }
-        elog("====ViewPager::Populate====begin====6====");
 
         // Locate the currently focused item or add it if needed.
 //         int curIndex = -1;
@@ -1946,43 +1930,21 @@ module.exports = function(aoElastos, aoActivity){
 //                 break;
 //             }
 //         }
-        var curIndex = -1;
-        var curItem = null;
-        for (curIndex = 0; curIndex < this.mItems.GetSize(); curIndex++) {
-            var ii = this.mItems.Get(curIndex);
-            if (ii.position >= mCurItem) {
-                if (ii.position == mCurItem) curItem = ii;
-                break;
-            }
-        }
-        elog("====ViewPager::Populate====begin====7====");
 
 //         if (curItem == null && N > 0) {
 //             curItem = addNewItem(mCurItem, curIndex);
 //         }
-        if (curItem == null && N > 0) {
-            curItem = addNewItem(mCurItem, curIndex);
-        }
-        elog("====ViewPager::Populate====begin====8====");
 
         // Fill 3x the available width or up to the number of offscreen
         // pages requested to either side, whichever is larger.
         // If we have no current item we have no work to do.
 //         if (curItem != null) {
-        if (curItem != null) {
 //             float extraWidthLeft = 0.f;
 //             int itemIndex = curIndex - 1;
 //             ItemInfo ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
 //             final int clientWidth = getClientWidth();
 //             final float leftWidthNeeded = clientWidth <= 0 ? 0 :
 //                     2.f - curItem.widthFactor + (float) getPaddingLeft() / (float) clientWidth;
-            var extraWidthLeft = 0;
-            var itemIndex = curIndex - 1;
-            var ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
-            var clientWidth = getClientWidth();
-            var leftWidthNeeded = clientWidth <= 0 ? 0 :
-                    2 - curItem.widthFactor + getPaddingLeft() / clientWidth;
-            elog("====ViewPager::Populate====begin====9====");
 
 //             for (int pos = mCurItem - 1; pos >= 0; pos--) {
 //                 if (extraWidthLeft >= leftWidthNeeded && pos < startPos) {
@@ -2011,39 +1973,9 @@ module.exports = function(aoElastos, aoActivity){
 //                     ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
 //                 }
 //             }
-            for (var pos = mCurItem - 1; pos >= 0; pos--) {
-                if (extraWidthLeft >= leftWidthNeeded && pos < startPos) {
-                    if (ii == null) {
-                        break;
-                    }
-                    if (pos == ii.position && !ii.scrolling) {
-                        this.mItems.Remove(itemIndex);
-                        this.mAdapter.DestroyItem(this, pos, ii.object);
-                        if (DEBUG) {
-                            elog(TAG + "populate() - destroyItem() with pos: " + pos +
-                                    " view: " + ii.object);
-                        }
-                        itemIndex--;
-                        curIndex--;
-                        ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
-                    }
-                } else if (ii != null && pos == ii.position) {
-                    extraWidthLeft += ii.widthFactor;
-                    itemIndex--;
-                    ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
-                } else {
-                    ii = addNewItem(pos, itemIndex + 1);
-                    extraWidthLeft += ii.widthFactor;
-                    curIndex++;
-                    ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
-                }
-            }
-            elog("====ViewPager::Populate====begin====10====");
 
 //             float extraWidthRight = curItem.widthFactor;
 //             itemIndex = curIndex + 1;
-            var extraWidthRight = curItem.widthFactor;
-            itemIndex = curIndex + 1;
 
 //             if (extraWidthRight < 2.f) {
 //                 ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
@@ -2075,11 +2007,183 @@ module.exports = function(aoElastos, aoActivity){
 //                     }
 //                 }
 //             }
+
+//             calculatePageOffsets(curItem, curIndex, oldCurInfo);
+
+//         if (DEBUG) {
+//             Log.i(TAG, "Current page list:");
+//             for (int i=0; i<mItems.size(); i++) {
+//                 Log.i(TAG, "#" + i + ": page " + mItems.get(i).position);
+//             }
+//         }
+
+//         mAdapter.setPrimaryItem(this, mCurItem, curItem != null ? curItem.object : null);
+
+//         mAdapter.finishUpdate(this);
+
+        // Check width measurement of current pages and drawing sort order.
+        // Update LayoutParams as needed.
+//         final int childCount = getChildCount();
+//         for (int i = 0; i < childCount; i++) {
+//             final View child = getChildAt(i);
+//             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+//             lp.childIndex = i;
+//             if (!lp.isDecor && lp.widthFactor == 0.f) {
+//                 // 0 means requery the adapter for this, it doesn't have a valid width.
+//                 final ItemInfo ii = infoForChild(child);
+//                 if (ii != null) {
+//                     lp.widthFactor = ii.widthFactor;
+//                     lp.position = ii.position;
+//                 }
+//             }
+//         }
+//         sortChildDrawingOrder();
+
+//         if (hasFocus()) {
+//             View currentFocused = findFocus();
+//             ItemInfo ii = currentFocused != null ? infoForAnyChild(currentFocused) : null;
+//             if (ii == null || ii.position != mCurItem) {
+//                 for (int i=0; i<getChildCount(); i++) {
+//                     View child = getChildAt(i);
+//                     ii = infoForChild(child);
+//                     if (ii != null && ii.position == mCurItem) {
+//                         if (child.requestFocus(focusDirection)) {
+//                             break;
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+    Populate(newCurrentItem) {
+        elog("====ViewPager::Populate====begin====TODO====");
+
+        newCurrentItem = newCurrentItem || this.mCurItem;
+
+        var _this = this._obj;
+
+        newCurrentItem = newCurrentItem || this.mCurItem;
+
+        var View__FOCUS_FORWARD = 0x00000002;
+        var View__FOCUS_LEFT = 0x00000011;
+        var View__FOCUS_RIGHT = 0x00000042;
+
+        var oldCurInfo = null;
+        var focusDirection = View__FOCUS_FORWARD;
+        if (this.mCurItem != newCurrentItem) {
+            focusDirection = this.mCurItem < newCurrentItem ? View__FOCUS_RIGHT : View__FOCUS_LEFT;
+            oldCurInfo = this.InfoForPosition(this.mCurItem);
+            this.mCurItem = newCurrentItem;
+        }
+        elog("====ViewPager::Populate====begin====1====");
+
+        if (this.mAdapter == null) {
+            this.SortChildDrawingOrder();
+            return;
+        }
+        elog("====ViewPager::Populate====begin====2====");
+
+        if (this.mPopulatePending) {
+            if (ViewPager.DEBUG) Log.i(TAG, "populate is pending, skipping for now...");
+            this.SortChildDrawingOrder();
+            return;
+        }
+        elog("====ViewPager::Populate====begin====3====");
+
+        if (_this.GetWindowToken() == null) {
+            return;
+        }
+        elog("====ViewPager::Populate====begin====4====");
+
+        this.mAdapter.StartUpdate(_this);
+
+        var pageLimit = this.mOffscreenPageLimit;
+        var startPos = Math.max(0, this.mCurItem - pageLimit);
+        var N = this.mAdapter.GetCount();
+        var endPos = Math.min(N-1, this.mCurItem + pageLimit);
+        elog("====ViewPager::Populate====begin====5====");
+
+        elog(`====ViewPager::Populate====begin====5.0====N:${N}====Cnt:${this.mExpectedAdapterCount}`);
+        //Assert(0);
+
+        if (N != this.mExpectedAdapterCount) {
+            var resName;
+            try {
+                resName = _this.GetResources().GetResourceName(_this.GetId());
+            } catch (e) {
+                resName = Integer.toHexString(_this.GetId());
+            }
+            throw new IllegalStateException("The application's PagerAdapter changed the adapter's" +
+                    " contents without calling PagerAdapter#notifyDataSetChanged!" +
+                    " Expected adapter item count: " + this.mExpectedAdapterCount + ", found: " + N +
+                    " Pager id: " + resName +
+                    " Pager class: " + getClass() +
+                    " Problematic adapter: " + this.mAdapter.getClass());
+        }
+        elog("====ViewPager::Populate====begin====6====");
+
+        var curIndex = -1;
+        var curItem = null;
+        for (curIndex = 0; curIndex < this.mItems.GetSize(); curIndex++) {
+            var ii = this.mItems.Get(curIndex);
+            if (ii.position >= this.mCurItem) {
+                if (ii.position == this.mCurItem) curItem = ii;
+                break;
+            }
+        }
+        elog("====ViewPager::Populate====begin====7====");
+
+        if (curItem == null && N > 0) {
+            curItem = addNewItem(this.mCurItem, curIndex);
+        }
+        elog("====ViewPager::Populate====begin====8====");
+
+        if (curItem != null) {
+            var extraWidthLeft = 0;
+            var itemIndex = curIndex - 1;
+            var ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
+            var clientWidth = getClientWidth();
+            var leftWidthNeeded = clientWidth <= 0 ? 0 :
+                    2 - curItem.widthFactor + getPaddingLeft() / clientWidth;
+            elog("====ViewPager::Populate====begin====9====");
+
+            for (var pos = this.mCurItem - 1; pos >= 0; pos--) {
+                if (extraWidthLeft >= leftWidthNeeded && pos < startPos) {
+                    if (ii == null) {
+                        break;
+                    }
+                    if (pos == ii.position && !ii.scrolling) {
+                        this.mItems.Remove(itemIndex);
+                        this.mAdapter.DestroyItem(this, pos, ii.object);
+                        if (ViewPager.DEBUG) {
+                            elog(TAG + "populate() - destroyItem() with pos: " + pos +
+                                    " view: " + ii.object);
+                        }
+                        itemIndex--;
+                        curIndex--;
+                        ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
+                    }
+                } else if (ii != null && pos == ii.position) {
+                    extraWidthLeft += ii.widthFactor;
+                    itemIndex--;
+                    ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
+                } else {
+                    ii = addNewItem(pos, itemIndex + 1);
+                    extraWidthLeft += ii.widthFactor;
+                    curIndex++;
+                    ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
+                }
+            }
+            elog("====ViewPager::Populate====begin====10====");
+
+            var extraWidthRight = curItem.widthFactor;
+            itemIndex = curIndex + 1;
+
             if (extraWidthRight < 2) {
                 ii = itemIndex < this.mItems.GetSize() ? this.mItems.Get(itemIndex) : null;
                 var rightWidthNeeded = clientWidth <= 0 ? 0 :
                         getPaddingRight() / clientWidth + 2.0;
-                for (var pos = mCurItem + 1; pos < N; pos++) {
+                for (var pos = this.mCurItem + 1; pos < N; pos++) {
                     if (extraWidthRight >= rightWidthNeeded && pos > endPos) {
                         if (ii == null) {
                             break;
@@ -2087,7 +2191,7 @@ module.exports = function(aoElastos, aoActivity){
                         if (pos == ii.position && !ii.scrolling) {
                             this.mItems.Remove(itemIndex);
                             this.mAdapter.DestroyItem(this, pos, ii.object);
-                            if (DEBUG) {
+                            if (ViewPager.DEBUG) {
                                 elog(TAG + "populate() - destroyItem() with pos: " + pos +
                                         " view: " + ii.object);
                             }
@@ -2107,90 +2211,49 @@ module.exports = function(aoElastos, aoActivity){
             }
             elog("====ViewPager::Populate====begin====11====");
 
-//             calculatePageOffsets(curItem, curIndex, oldCurInfo);
             calculatePageOffsets(curItem, curIndex, oldCurInfo);
 //         }
         }
         elog("====ViewPager::Populate====begin====12====");
 
-//         if (DEBUG) {
-//             Log.i(TAG, "Current page list:");
-//             for (int i=0; i<mItems.size(); i++) {
-//                 Log.i(TAG, "#" + i + ": page " + mItems.get(i).position);
-//             }
-//         }
-        if (DEBUG) {
+        if (ViewPager.DEBUG) {
             elog(TAG + "Current page list:");
             for (var i=0; i<this.mItems.GetSize(); i++) {
                 elog(TAG + "#" + i + ": page " + this.mItems.Get(i).position);
             }
         }
 
-//         mAdapter.setPrimaryItem(this, mCurItem, curItem != null ? curItem.object : null);
-        this.mAdapter.SetPrimaryItem(this, mCurItem, curItem != null ? curItem.object : null);
+        this.mAdapter.SetPrimaryItem(this, this.mCurItem, curItem != null ? curItem.object : null);
 
-//         mAdapter.finishUpdate(this);
         this.mAdapter.FinishUpdate(this);
         elog("====ViewPager::Populate====begin====13====");
 
-        // Check width measurement of current pages and drawing sort order.
-        // Update LayoutParams as needed.
-//         final int childCount = getChildCount();
-//         for (int i = 0; i < childCount; i++) {
-//             final View child = getChildAt(i);
-//             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-//             lp.childIndex = i;
-//             if (!lp.isDecor && lp.widthFactor == 0.f) {
-//                 // 0 means requery the adapter for this, it doesn't have a valid width.
-//                 final ItemInfo ii = infoForChild(child);
-//                 if (ii != null) {
-//                     lp.widthFactor = ii.widthFactor;
-//                     lp.position = ii.position;
-//                 }
-//             }
-//         }
-//         sortChildDrawingOrder();
-        var childCount = getChildCount();
-        for (var i = 0; i < childCount; i++) {
-            var child = getChildAt(i);
+        var childCount = _this.GetChildCount();
+        for (var i = 0; i < _this.ChildCount; i++) {
+            var child = _this.GetChildAt(i);
             var lp = child.getLayoutParams();
             lp.childIndex = i;
             if (!lp.isDecor && lp.widthFactor == 0) {
                 // 0 means requery the adapter for this, it doesn't have a valid width.
-                var ii = infoForChild(child);
+                var ii = this.InfoForChild(child);
                 if (ii != null) {
                     lp.widthFactor = ii.widthFactor;
                     lp.position = ii.position;
                 }
             }
         }
-        sortChildDrawingOrder();
+        this.SortChildDrawingOrder();
         elog("====ViewPager::Populate====begin====14====");
 
-//         if (hasFocus()) {
-//             View currentFocused = findFocus();
-//             ItemInfo ii = currentFocused != null ? infoForAnyChild(currentFocused) : null;
-//             if (ii == null || ii.position != mCurItem) {
-//                 for (int i=0; i<getChildCount(); i++) {
-//                     View child = getChildAt(i);
-//                     ii = infoForChild(child);
-//                     if (ii != null && ii.position == mCurItem) {
-//                         if (child.requestFocus(focusDirection)) {
-//                             break;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-        if (hasFocus()) {
-            var currentFocused = findFocus();
-            var ii = currentFocused != null ? infoForAnyChild(currentFocused) : null;
-            if (ii == null || ii.position != mCurItem) {
-                for (var i=0; i<getChildCount(); i++) {
-                    var child = getChildAt(i);
-                    ii = infoForChild(child);
-                    if (ii != null && ii.position == mCurItem) {
-                        if (child.requestFocus(focusDirection)) {
+        if (_this.HasFocus()) {
+            var currentFocused = _this.FindFocus();
+            var ii = currentFocused != null ? this.InfoForAnyChild(currentFocused) : null;
+            if (ii == null || ii.position != this.mCurItem) {
+                for (var i=0; i<_this.GetChildCount(); i++) {
+                    var child = _this.GetChildAt(i);
+                    ii = this.InfoForChild(child);
+                    if (ii != null && ii.position == this.mCurItem) {
+                        if (child.RequestFocus(focusDirection)) {
                             break;
                         }
                     }
@@ -2202,11 +2265,6 @@ module.exports = function(aoElastos, aoActivity){
     }   //Populate
 
 //     private void sortChildDrawingOrder() {
-    SortChildDrawingOrder() {
-        elog("====ViewPager::SortChildDrawingOrder====begin====");
-
-        var _this = this._obj;
-
 //         if (mDrawingOrder != DRAW_ORDER_DEFAULT) {
 //             if (mDrawingOrderedChildren == null) {
 //                 mDrawingOrderedChildren = new ArrayList<View>();
@@ -2220,6 +2278,12 @@ module.exports = function(aoElastos, aoActivity){
 //             }
 //             Collections.sort(mDrawingOrderedChildren, sPositionComparator);
 //         }
+//     }
+    SortChildDrawingOrder() {
+        elog("====ViewPager::SortChildDrawingOrder====begin====");
+
+        var _this = this._obj;
+
         if (this.mDrawingOrder != this.DRAW_ORDER_DEFAULT) {
             if (this.mDrawingOrderedChildren == null) {
                 this.mDrawingOrderedChildren = Core_New("Elastos.Utility.CArrayList");
@@ -2240,10 +2304,6 @@ module.exports = function(aoElastos, aoActivity){
     }   //sortChildDrawingOrder
 
 //     private void calculatePageOffsets(ItemInfo curItem, int curIndex, ItemInfo oldCurInfo) {
-    CalculatePageOffsets(curItem, curIndex, oldCurInfo) {
-        elog("====ViewPager::CalculatePageOffsets====begin====TODO====");
-        Assert(0);
-
 //         final int N = mAdapter.getCount();
 //         final int width = getClientWidth();
 //         final float marginOffset = width > 0 ? (float) mPageMargin / width : 0;
@@ -2327,6 +2387,95 @@ module.exports = function(aoElastos, aoActivity){
 //         }
 
 //         mNeedCalculatePageOffsets = false;
+//     }   //CalculatePageOffsets
+
+    CalculatePageOffsets(curItem, curIndex, oldCurInfo) {
+        elog("====ViewPager::CalculatePageOffsets====begin====TODO====");
+
+        var N = mAdapter.getCount();
+        var width = getClientWidth();
+        var marginOffset = width > 0 ? mPageMargin / width : 0;
+        // Fix up offsets for later layout.
+        if (oldCurInfo != null) {
+            var oldCurPosition = oldCurInfo.position;
+            // Base offsets off of oldCurInfo.
+            if (oldCurPosition < curItem.position) {
+                var itemIndex = 0;
+                var ii = null;
+                var offset = oldCurInfo.offset + oldCurInfo.widthFactor + marginOffset;
+                for (var pos = oldCurPosition + 1;
+                        pos <= curItem.position && itemIndex < mItems.size(); pos++) {
+                    ii = mItems.get(itemIndex);
+                    while (pos > ii.position && itemIndex < mItems.size() - 1) {
+                        itemIndex++;
+                        ii = mItems.get(itemIndex);
+                    }
+                    while (pos < ii.position) {
+                        // We don't have an item populated for this,
+                        // ask the adapter for an offset.
+                        offset += mAdapter.getPageWidth(pos) + marginOffset;
+                        pos++;
+                    }
+                    ii.offset = offset;
+                    offset += ii.widthFactor + marginOffset;
+                }
+            } else if (oldCurPosition > curItem.position) {
+                var itemIndex = mItems.size() - 1;
+                var ii = null;
+                var offset = oldCurInfo.offset;
+                for (var pos = oldCurPosition - 1;
+                        pos >= curItem.position && itemIndex >= 0; pos--) {
+                    ii = mItems.get(itemIndex);
+                    while (pos < ii.position && itemIndex > 0) {
+                        itemIndex--;
+                        ii = mItems.get(itemIndex);
+                    }
+                    while (pos > ii.position) {
+                        // We don't have an item populated for this,
+                        // ask the adapter for an offset.
+                        offset -= mAdapter.getPageWidth(pos) + marginOffset;
+                        pos--;
+                    }
+                    offset -= ii.widthFactor + marginOffset;
+                    ii.offset = offset;
+                }
+            }
+        }
+
+        // Base all offsets off of curItem.
+        var itemCount = mItems.size();
+        var offset = curItem.offset;
+        var pos = curItem.position - 1;
+        mFirstOffset = curItem.position == 0 ? curItem.offset : -Float.MAX_VALUE;
+        mLastOffset = curItem.position == N - 1 ?
+                curItem.offset + curItem.widthFactor - 1 : Float.MAX_VALUE;
+        // Previous pages
+        for (var i = curIndex - 1; i >= 0; i--, pos--) {
+            var ii = mItems.get(i);
+            while (pos > ii.position) {
+                offset -= mAdapter.getPageWidth(pos--) + marginOffset;
+            }
+            offset -= ii.widthFactor + marginOffset;
+            ii.offset = offset;
+            if (ii.position == 0) mFirstOffset = offset;
+        }
+        offset = curItem.offset + curItem.widthFactor + marginOffset;
+        pos = curItem.position + 1;
+        // Next pages
+        for (var i = curIndex + 1; i < itemCount; i++, pos++) {
+            var ii = mItems.get(i);
+            while (pos < ii.position) {
+                offset += mAdapter.getPageWidth(pos++) + marginOffset;
+            }
+            if (ii.position == N - 1) {
+                mLastOffset = offset + ii.widthFactor - 1;
+            }
+            ii.offset = offset;
+            offset += ii.widthFactor + marginOffset;
+        }
+
+        mNeedCalculatePageOffsets = false;
+
         elog("====ViewPager::CalculatePageOffsets====end====");
     }   //CalculatePageOffsets
 
@@ -2342,7 +2491,7 @@ module.exports = function(aoElastos, aoActivity){
 
         elog("====ViewPager::SavedState====begin====TODO====");
 
-        ViewPager._SavedState = new class _tmp extends BaseSavedState {
+        ViewPager._SavedState = new class _ extends BaseSavedState {
 
 //         int position;
 //         Parcelable adapterState;
@@ -2351,6 +2500,9 @@ module.exports = function(aoElastos, aoActivity){
 //         public SavedState(Parcelable superState) {
 //             super(superState);
 //         }
+            SavedState(superState) {
+                _super(superState);
+            }
 
 //         @Override
 //         public void writeToParcel(Parcel out, int flags) {
@@ -2358,6 +2510,11 @@ module.exports = function(aoElastos, aoActivity){
 //             out.writeInt(position);
 //             out.writeParcelable(adapterState, flags);
 //         }
+            WriteToParcel(out, flags) {
+                super.writeToParcel(out, flags);
+                out.writeInt(position);
+                out.writeParcelable(adapterState, flags);
+            }
 
 //         @Override
 //         public String toString() {
@@ -2365,6 +2522,11 @@ module.exports = function(aoElastos, aoActivity){
 //                     + Integer.toHexString(System.identityHashCode(this))
 //                     + " position=" + position + "}";
 //         }
+            ToString() {
+                return "FragmentPager.SavedState{"
+                        + Integer.toHexString(System.identityHashCode(this))
+                        + " position=" + position + "}";
+            }
 
 //         public static final Parcelable.Creator<SavedState> CREATOR
 //                 = ParcelableCompat.newCreator(new ParcelableCompatCreatorCallbacks<SavedState>() {
@@ -2377,6 +2539,23 @@ module.exports = function(aoElastos, aoActivity){
 //                         return new SavedState[size];
 //                     }
 //                 });
+            static get CREATOR() {
+                if (_._CREATOR_) return _._CREATOR_;
+                _._CREATOR_ = true;
+                _._CREATOR = ParcelableCompat.newCreator(
+                    new class _ extends ParcelableCompatCreatorCallbacks {
+                        //@Override
+                        CreateFromParcel(_in, loader) {
+                            return new SavedState(_in, loader);
+                        }
+                        //@Override
+                        NewArray(size) {
+                            return new SavedState[size];
+                        }
+                    }()
+                );
+                return _._CREATOR;
+            }
 
 //         SavedState(Parcel in, ClassLoader loader) {
 //             super(in);
@@ -2387,7 +2566,15 @@ module.exports = function(aoElastos, aoActivity){
 //             adapterState = in.readParcelable(loader);
 //             this.loader = loader;
 //         }
-
+            SavedState(_in, loader) {
+                _super(_in);
+                if (loader == null) {
+                    loader = getClass().getClassLoader();
+                }
+                position = _in.readInt();
+                adapterState = _in.readParcelable(loader);
+                this.loader = loader;
+            }
         }
 
         elog("====ViewPager::SavedState====end====");
@@ -2397,8 +2584,6 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     public Parcelable onSaveInstanceState() {
-    OnSaveInstanceState(result) {
-        elog("====ViewPager::OnSaveInstanceState====TODO====");
 //         Parcelable superState = super.onSaveInstanceState();
 //         SavedState ss = new SavedState(superState);
 //         ss.position = mCurItem;
@@ -2406,12 +2591,19 @@ module.exports = function(aoElastos, aoActivity){
 //             ss.adapterState = mAdapter.saveState();
 //         }
 //         return ss;
+//     }
+    OnSaveInstanceState() {
+        var superState = _super.onSaveInstanceState();
+        var ss = new SavedState(superState);
+        ss.position = this.mCurItem;
+        if (mAdapter != null) {
+            ss.adapterState = mAdapter.saveState();
+        }
+        return ss;
     }
 
 //     @Override
 //     public void onRestoreInstanceState(Parcelable state) {
-    OnRestoreInstanceState(state) {
-        elog("====ViewPager::OnRestoreInstanceState====TODO====");
 //         if (!(state instanceof SavedState)) {
 //             super.onRestoreInstanceState(state);
 //             return;
@@ -2428,6 +2620,24 @@ module.exports = function(aoElastos, aoActivity){
 //             mRestoredAdapterState = ss.adapterState;
 //             mRestoredClassLoader = ss.loader;
 //         }
+//     }
+    OnRestoreInstanceState(state) {
+        if (!(state instanceof SavedState)) {
+            _super.onRestoreInstanceState(state);
+            return;
+        }
+
+        var ss = state;
+        super.onRestoreInstanceState(ss.getSuperState());
+
+        if (mAdapter != null) {
+            mAdapter.restoreState(ss.adapterState, ss.loader);
+            setCurrentItemInternal(ss.position, false, true);
+        } else {
+            mRestoredCurItem = ss.position;
+            mRestoredAdapterState = ss.adapterState;
+            mRestoredClassLoader = ss.loader;
+        }
     }
 
 //     @Override
@@ -2554,7 +2764,7 @@ module.exports = function(aoElastos, aoActivity){
             }
             child = parent;
         }
-        return infoForChild(child);
+        return this.InfoForChild(child);
     }
 
 //     ItemInfo infoForPosition(int position) {
@@ -2588,9 +2798,6 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
-        elog("====ViewPager::OnMeasure====begin====");
-
 //         // For simple implementation, our internal size is always 0.
 //         // We depend on the container to specify the layout size of
 //         // our view.  We can't really know what it is since we will be
@@ -2598,21 +2805,14 @@ module.exports = function(aoElastos, aoActivity){
 //         // want the layout to change as this happens.
 //         setMeasuredDimension(getDefaultSize(0, widthMeasureSpec),
 //                 getDefaultSize(0, heightMeasureSpec));
-        _this._SetMeasuredDimension(_this._GetDefaultSize(0, widthMeasureSpec),
-                _this._GetDefaultSize(0, heightMeasureSpec));
 
 //         final int measuredWidth = getMeasuredWidth();
 //         final int maxGutterSize = measuredWidth / 10;
 //         mGutterSize = Math.min(maxGutterSize, mDefaultGutterSize);
-        var measuredWidth = _this.GetMeasuredWidth();
-        var maxGutterSize = measuredWidth / 10;
-        this.mGutterSize = Math.min(maxGutterSize, this.mDefaultGutterSize);
 
 //         // Children are just made to fill our space.
 //         int childWidthSize = measuredWidth - getPaddingLeft() - getPaddingRight();
 //         int childHeightSize = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
-        var childWidthSize = measuredWidth - _this.GetPaddingLeft() - _this.GetPaddingRight();
-        var childHeightSize = _this.GetMeasuredHeight() - _this.GetPaddingTop() - _this.GetPaddingBottom();
 
 //         /*
 //          * Make sure all children have been properly measured. Decor views first.
@@ -2664,6 +2864,50 @@ module.exports = function(aoElastos, aoActivity){
 //                 }
 //             }
 //         }
+
+        // var ms = _this.GetMeasureSpec();
+        // var ee = ms.GetEXACTLY();
+        // elog("====ee:"+ee);
+        // Assert(0);
+
+//         mChildWidthMeasureSpec = MeasureSpec.makeMeasureSpec(childWidthSize, MeasureSpec.EXACTLY);
+//         mChildHeightMeasureSpec = MeasureSpec.makeMeasureSpec(childHeightSize, MeasureSpec.EXACTLY);
+
+//         // Make sure we have created all fragments that we need to have shown.
+//         mInLayout = true;
+//         populate();
+//         mInLayout = false;
+
+//         // Page views next.
+//         size = getChildCount();
+//         for (int i = 0; i < size; ++i) {
+//             final View child = getChildAt(i);
+//             if (child.getVisibility() != GONE) {
+//                 if (DEBUG) Log.v(TAG, "Measuring #" + i + " " + child
+//                         + ": " + mChildWidthMeasureSpec);
+
+//                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+//                 if (lp == null || !lp.isDecor) {
+//                     final int widthSpec = MeasureSpec.makeMeasureSpec(
+//                             (int) (childWidthSize * lp.widthFactor), MeasureSpec.EXACTLY);
+//                     child.measure(widthSpec, mChildHeightMeasureSpec);
+//                 }
+//             }
+//         }
+//     }
+    OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
+        elog("====ViewPager::OnMeasure====begin====");
+
+        _this._SetMeasuredDimension(_this._GetDefaultSize(0, widthMeasureSpec),
+                _this._GetDefaultSize(0, heightMeasureSpec));
+
+        var measuredWidth = _this.GetMeasuredWidth();
+        var maxGutterSize = measuredWidth / 10;
+        this.mGutterSize = Math.min(maxGutterSize, this.mDefaultGutterSize);
+
+        var childWidthSize = measuredWidth - _this.GetPaddingLeft() - _this.GetPaddingRight();
+        var childHeightSize = _this.GetMeasuredHeight() - _this.GetPaddingTop() - _this.GetPaddingBottom();
+
         var size = _this.GetChildCount();
         for (var i = 0; i < size; ++i) {
             var child = _this.GetChildAt(i);
@@ -2712,41 +2956,15 @@ module.exports = function(aoElastos, aoActivity){
             }
         }
 
-        // var ms = _this.GetMeasureSpec();
-        // var ee = ms.GetEXACTLY();
-        // elog("====ee:"+ee);
-        // Assert(0);
         MeasureSpec._obj = _this.GetMeasureSpec();
 
-//         mChildWidthMeasureSpec = MeasureSpec.makeMeasureSpec(childWidthSize, MeasureSpec.EXACTLY);
-//         mChildHeightMeasureSpec = MeasureSpec.makeMeasureSpec(childHeightSize, MeasureSpec.EXACTLY);
         this.mChildWidthMeasureSpec = MeasureSpec.MakeMeasureSpec(childWidthSize, MeasureSpec.GetEXACTLY());
         this.mChildHeightMeasureSpec = MeasureSpec.MakeMeasureSpec(childHeightSize, MeasureSpec.GetEXACTLY());
 
-//         // Make sure we have created all fragments that we need to have shown.
-//         mInLayout = true;
-//         populate();
-//         mInLayout = false;
         this.mInLayout = true;
         this.Populate();
         this.mInLayout = false;
 
-//         // Page views next.
-//         size = getChildCount();
-//         for (int i = 0; i < size; ++i) {
-//             final View child = getChildAt(i);
-//             if (child.getVisibility() != GONE) {
-//                 if (DEBUG) Log.v(TAG, "Measuring #" + i + " " + child
-//                         + ": " + mChildWidthMeasureSpec);
-
-//                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-//                 if (lp == null || !lp.isDecor) {
-//                     final int widthSpec = MeasureSpec.makeMeasureSpec(
-//                             (int) (childWidthSize * lp.widthFactor), MeasureSpec.EXACTLY);
-//                     child.measure(widthSpec, mChildHeightMeasureSpec);
-//                 }
-//             }
-//         }
         size = _this.GetChildCount();
         for (var i = 0; i < size; ++i) {
             var child = _this.GetChildAt(i);
@@ -2768,24 +2986,23 @@ module.exports = function(aoElastos, aoActivity){
 
 //     @Override
 //     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-    OnSizeChanged(_this, w, h, oldw, oldh) {
-        elog("====ViewPager::OnSizeChanged====TODO====");
 //         super.onSizeChanged(w, h, oldw, oldh);
-            _this._OnSizeChanged(w, h, oldw, oldh);
 
 //         // Make sure scroll position is set correctly.
 //         if (w != oldw) {
 //             recomputeScrollPosition(w, oldw, mPageMargin, mPageMargin);
 //         }
+//     }
+    OnSizeChanged(_this, w, h, oldw, oldh) {
+        elog("====ViewPager::OnSizeChanged====TODO====");
+
+        _this._OnSizeChanged(w, h, oldw, oldh);
         if (w != oldw) {
             this.RecomputeScrollPosition(w, oldw, this.mPageMargin, this.mPageMargin);
         }
     }
 
 //     private void recomputeScrollPosition(int width, int oldWidth, int margin, int oldMargin) {
-    RecomputeScrollPosition(width, oldWidth, margin, oldMargin) {
-        elog("====ViewPager::RecomputeScrollPosition====begin====");
-
 //         if (oldWidth > 0 && !mItems.isEmpty()) {
 //             final int widthWithMargin = width - getPaddingLeft() - getPaddingRight() + margin;
 //             final int oldWidthWithMargin = oldWidth - getPaddingLeft() - getPaddingRight()
@@ -2812,6 +3029,10 @@ module.exports = function(aoElastos, aoActivity){
 //                 scrollTo(scrollPos, getScrollY());
 //             }
 //         }
+//     }
+    RecomputeScrollPosition(width, oldWidth, margin, oldMargin) {
+        elog("====ViewPager::RecomputeScrollPosition====begin====");
+
         if (oldWidth > 0 && !this.mItems.IsEmpty()) {
             var widthWithMargin = width - this._obj.GetPaddingLeft() - this._obj.GetPaddingRight() + margin;
             var oldWidthWithMargin = oldWidth - this._obj.GetPaddingLeft() - this._obj.GetPaddingRight()
@@ -2987,7 +3208,7 @@ Assert(0);
                                 MeasureSpec.GetEXACTLY());
                         child.Measure(widthSpec, heightSpec);
                     }
-                    if (DEBUG) elog(TAG + "Positioning #" + i + " " + child + " f=" + ii.object
+                    if (ViewPager.DEBUG) elog(TAG + "Positioning #" + i + " " + child + " f=" + ii.object
                             + ":" + childLeft + "," + childTop + " " + child.GetMeasuredWidth()
                             + "x" + child.GetMeasuredHeight());
                     child.Layout(childLeft, childTop,
@@ -3789,9 +4010,7 @@ CObject.showMethods(this.mScroller);
 //     @Override
 //     public void draw(Canvas canvas) {
     Draw(_this, canvas) {
-        elog("====ViewPager::Draw====TODO====");
-
-        //var _this = this._obj;
+        elog("====ViewPager::Draw====begin====");
 
         //CObject.showMethods(canvas);
         //CObject.showMethods(_this);
@@ -3870,6 +4089,8 @@ CObject.showMethods(this.mScroller);
             // Keep animating
             ViewCompat.PostInvalidateOnAnimation(_this);
         }
+
+        elog("====ViewPager::Draw====end====");
     }
 
 //     @Override
@@ -4377,8 +4598,8 @@ CObject.showMethods(this.mScroller);
 //         return false;
 //     }
     PageLeft() {
-        if (mCurItem > 0) {
-            setCurrentItem(mCurItem-1, true);
+        if (this.mCurItem > 0) {
+            setCurrentItem(this.mCurItem-1, true);
             return true;
         }
         return false;
@@ -4392,8 +4613,8 @@ CObject.showMethods(this.mScroller);
 //         return false;
 //     }
     PageRight() {
-        if (this.mAdapter != null && mCurItem < (this.mAdapter.GetCount()-1)) {
-            setCurrentItem(mCurItem+1, true);
+        if (this.mAdapter != null && this.mCurItem < (this.mAdapter.GetCount()-1)) {
+            setCurrentItem(this.mCurItem+1, true);
             return true;
         }
         return false;
@@ -4451,9 +4672,6 @@ CObject.showMethods(this.mScroller);
 //      */
 //     @Override
 //     public void addTouchables(ArrayList<View> views) {
-    AddTouchables(views) {
-        elog("====ViewPager::AddTouchables====TODO====");
-        Assert(0);
 //         // Note that we don't call super.addTouchables(), which means that
 //         // we don't call View.addTouchables().  This is okay because a ViewPager
 //         // is itself not touchable.
@@ -4466,6 +4684,20 @@ CObject.showMethods(this.mScroller);
 //                 }
 //             }
 //         }
+//     }
+    AddTouchables(views) {
+        // Note that we don't call super.addTouchables(), which means that
+        // we don't call View.addTouchables().  This is okay because a ViewPager
+        // is itself not touchable.
+        for (var i = 0; i < getChildCount(); i++) {
+            var child = getChildAt(i);
+            if (child.getVisibility() == VISIBLE) {
+                var ii = this.InfoForChild(child);
+                if (ii != null && ii.position == this.mCurItem) {
+                    child.addTouchables(views);
+                }
+            }
+        }
     }
 
 //     /**
@@ -4474,9 +4706,6 @@ CObject.showMethods(this.mScroller);
 //     @Override
 //     protected boolean onRequestFocusInDescendants(int direction,
 //             Rect previouslyFocusedRect) {
-    OnRequestFocusInDescendants(direction, previouslyFocusedRect, result) {
-        elog("====ViewPager::OnRequestFocusInDescendants====TODO====");
-        Assert(0);
 //         int index;
 //         int increment;
 //         int end;
@@ -4502,13 +4731,38 @@ CObject.showMethods(this.mScroller);
 //             }
 //         }
 //         return false;
+//     }
+    OnRequestFocusInDescendants(direction,
+            previouslyFocusedRect) {
+        var index;
+        var increment;
+        var end;
+        var count = getChildCount();
+        if ((direction & FOCUS_FORWARD) != 0) {
+            index = 0;
+            increment = 1;
+            end = count;
+        } else {
+            index = count - 1;
+            increment = -1;
+            end = -1;
+        }
+        for (var i = index; i != end; i += increment) {
+            var child = getChildAt(i);
+            if (child.getVisibility() == VISIBLE) {
+                var ii = this.InfoForChild(child);
+                if (ii != null && ii.position == mCurItem) {
+                    if (child.requestFocus(direction, previouslyFocusedRect)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 //     @Override
 //     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-    DispatchPopulateAccessibilityEvent(event, result) {
-        elog("====ViewPager::DispatchPopulateAccessibilityEvent====TODO====");
-        Assert(0);
 //         // Dispatch scroll events from this ViewPager.
 //         if (event.getEventType() == AccessibilityEventCompat.TYPE_VIEW_SCROLLED) {
 //             return super.dispatchPopulateAccessibilityEvent(event);
@@ -4528,6 +4782,27 @@ CObject.showMethods(this.mScroller);
 //         }
 
 //         return false;
+//     }
+    DispatchPopulateAccessibilityEvent(event) {
+        // Dispatch scroll events from this ViewPager.
+        if (event.getEventType() == AccessibilityEventCompat.TYPE_VIEW_SCROLLED) {
+            return _super.dispatchPopulateAccessibilityEvent(event);
+        }
+
+        // Dispatch all other accessibility events from the current page.
+        var childCount = getChildCount();
+        for (var i = 0; i < childCount; i++) {
+            var child = getChildAt(i);
+            if (child.getVisibility() == VISIBLE) {
+                var ii = this.InfoForChild(child);
+                if (ii != null && ii.position == mCurItem &&
+                        child.dispatchPopulateAccessibilityEvent(event)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 //     @Override
@@ -4564,7 +4839,7 @@ CObject.showMethods(this.mScroller);
 
 //     class MyAccessibilityDelegate extends AccessibilityDelegateCompat {
     get MyAccessibilityDelegate() {
-        elog("====ViewPager::MyAccessibilityDelegate====TODO====");
+        elog("====ViewPager::MyAccessibilityDelegate====begin====");
         if (this._MyAccessibilityDelegate_) return this._MyAccessibilityDelegate;
         this._MyAccessibilityDelegate_ = true;
         this._MyAccessibilityDelegate = class _tmp extends AccessibilityDelegateCompat {
@@ -4573,6 +4848,7 @@ CObject.showMethods(this.mScroller);
 //         public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
             OnInitializeAccessibilityEvent(host, event) {
                 elog("====ViewPager::MyAccessibilityDelegate::OnInitializeAccessibilityEvent====TODO====");
+                Assert(0);
 //             super.onInitializeAccessibilityEvent(host, event);
 //             event.setClassName(ViewPager.class.getName());
 //             final AccessibilityRecordCompat recordCompat = AccessibilityRecordCompat.obtain();
@@ -4589,6 +4865,7 @@ CObject.showMethods(this.mScroller);
 //         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
             OnInitializeAccessibilityNodeInfo(host, info) {
                 elog("====ViewPager::MyAccessibilityDelegate::OnInitializeAccessibilityNodeInfo====TODO====");
+                Assert(0);
 //             super.onInitializeAccessibilityNodeInfo(host, info);
 //             info.setClassName(ViewPager.class.getName());
 //             info.setScrollable(canScroll());
@@ -4604,6 +4881,7 @@ CObject.showMethods(this.mScroller);
 //         public boolean performAccessibilityAction(View host, int action, Bundle args) {
             PerformAccessibilityAction(host, action, args, result) {
                 elog("====ViewPager::MyAccessibilityDelegate::PerformAccessibilityAction====TODO====");
+                Assert(0);
 //             if (super.performAccessibilityAction(host, action, args)) {
 //                 return true;
 //             }
@@ -4627,6 +4905,7 @@ CObject.showMethods(this.mScroller);
 //         private boolean canScroll() {
             CanScroll(result) {
                 elog("====ViewPager::MyAccessibilityDelegate::CanScroll====TODO====");
+                Assert(0);
 //             return (mAdapter != null) && (mAdapter.getCount() > 1);
                 return (this.mAdapter != null) && (this.mAdapter.GetCount() > 1);
             }
@@ -4636,19 +4915,23 @@ CObject.showMethods(this.mScroller);
     }
 
 //     private class PagerObserver extends DataSetObserver {
-    get PagerObserver() {
-        elog("====ViewPager::PagerObserver====TODO====");
-        if (this._PagerObserver) return this._PagerObserver;
-        this._PagerObserver = class PagerObserver extends DataSetObserver {
 //         @Override
 //         public void onChanged() {
-            onChanged() {
 //             dataSetChanged();
-            }
+//         }
 //         @Override
 //         public void onInvalidated() {
-            onInvalidated() {
 //             dataSetChanged();
+//         }
+//     }
+    get PagerObserver() {
+        if (this._PagerObserver) return this._PagerObserver;
+        this._PagerObserver = class PagerObserver extends DataSetObserver {
+            onChanged() {
+                dataSetChanged();
+            }
+            onInvalidated() {
+                dataSetChanged();
             }
         };
         return this._PagerObserver;

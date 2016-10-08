@@ -56,7 +56,13 @@ class _CalculatorPadViewPager extends ViewPager {
 
 //     private final PagerAdapter mStaticPagerAdapter = new PagerAdapter() {
     get mStaticPagerAdapter() {
+        elog("====mStaticPagerAdapter::get====0====");
+
         if (this._mStaticPagerAdapter) return this._mStaticPagerAdapter;
+
+        elog("====mStaticPagerAdapter::get====1====");
+
+        var _this = this._obj;
 
         class _StaticPagerAdapter extends PagerAdapter {
             //class _StaticPagerAdapter {
@@ -66,53 +72,61 @@ class _CalculatorPadViewPager extends ViewPager {
 
 //         @Override
 //         public int getCount() {
-            getCount(result) {
+            GetCount() {
 //             return getChildCount();
-                result.data = getChildCount();
+                return _this.GetChildCount();
             }
 
 //         @Override
 //         public Object instantiateItem(ViewGroup container, int position) {
-            instantiateItem(container, position, result) {
+            InstantiateItem(container, position) {
 //             return getChildAt(position);
-                result.data = getChildAt(position);
+                return _this.GetChildAt(position);
             }
 
 //         @Override
 //         public void destroyItem(ViewGroup container, int position, Object object) {
-            destroyItem(container, position, object) {
+            DestroyItem(container, position, object) {
 //             removeViewAt(position);
-                removeViewAt(position);
+                _this.RemoveViewAt(position);
             }
 
 //         @Override
 //         public boolean isViewFromObject(View view, Object object) {
-            isViewFromObject(view, object, result) {
+            IsViewFromObject(view, object) {
 //             return view == object;
-                result.data = (view == object);
+                return (view == object);
             }
 
 //         @Override
 //         public float getPageWidth(int position) {
-            getPageWidth(position, result) {
+            GetPageWidth(position, result) {
 //             return position == 1 ? 7.0f / 9.0f : 1.0f;
-                result.data = (position == 1) ? 7.0 / 9.0 : 1.0;
+                return (position == 1) ? 7.0 / 9.0 : 1.0;
             }
 
         }   //class _StaticPagerAdapter
 
+        elog("====mStaticPagerAdapter::get====2====");
+
         this._mStaticPagerAdapter = new _StaticPagerAdapter();
+
+        elog("====mStaticPagerAdapter::get====3====");
+
+        return this._mStaticPagerAdapter;
     }   //get mStaticPagerAdapter
 
 //     private final OnPageChangeListener mOnPageChangeListener = new SimpleOnPageChangeListener() {
     get mOnPageChangeListener() {
         if (this._mOnPageChangeListener_) return this._mOnPageChangeListener;
+
         this._mOnPageChangeListener_ = true;
         this._mOnPageChangeListener = new class _tmp extends ViewPager.SimpleOnPageChangeListener {
 
 //         private void recursivelySetEnabled(View view, boolean enabled) {
             RecursivelySetEnabled(view, enabled) {
                 elog("====RecursivelySetEnabled====TODO====");
+                Assert(0);
 //             if (view instanceof ViewGroup) {
 //                 final ViewGroup viewGroup = (ViewGroup) view;
 //                 for (int childIndex = 0; childIndex < viewGroup.getChildCount(); ++childIndex) {
@@ -127,6 +141,7 @@ class _CalculatorPadViewPager extends ViewPager {
 //         public void onPageSelected(int position) {
             OnPageSelected(position) {
                 elog("====OnPageSelected====TODO====");
+                Assert(0);
 //             if (getAdapter() == mStaticPagerAdapter) {
 //                 for (int childIndex = 0; childIndex < getChildCount(); ++childIndex) {
 //                     // Only enable subviews of the current page.
@@ -204,18 +219,23 @@ class _CalculatorPadViewPager extends ViewPager {
 
 //     @Override
 //     protected void onFinishInflate() {
-    OnFinishInflate(_this) {
-        elog("====OnFinishInflate====begin====");
-
 //         super.onFinishInflate();
-        _this._OnFinishInflate();
 
 //         // Invalidate the adapter's data set since children may have been added during inflation.
 //         if (getAdapter() == mStaticPagerAdapter) {
 //             mStaticPagerAdapter.notifyDataSetChanged();
 //         }
+//     }
+    OnFinishInflate(_this) {
+        elog("====OnFinishInflate====begin====");
+
+        _this._OnFinishInflate();
+        elog("====OnFinishInflate====0====");
+
         if (this.GetAdapter() == this.mStaticPagerAdapter) {
+        elog("====OnFinishInflate====1====");
             this.mStaticPagerAdapter.NotifyDataSetChanged();
+        elog("====OnFinishInflate====2====");
         }
         elog("====OnFinishInflate====end====");
     }
