@@ -1135,6 +1135,9 @@ AutoPtr<IActivityInfo> ActivityStackSupervisor::ResolveActivity(
     if (rInfo != NULL) {
         rInfo->GetActivityInfo((IActivityInfo**)&aInfo);
     }
+    else {
+        Slogger::W(TAG, "failed to reolve intent %s", TO_CSTR(intent));
+    }
 
     if (aInfo != NULL) {
         // Store the found target back into the intent, because now that
@@ -1235,7 +1238,6 @@ ECode ActivityStackSupervisor::StartActivityMayWait(
     AutoPtr<IIntent> tmpIntent;
     CIntent::New(intent, (IIntent**)&tmpIntent);
     intent = tmpIntent;
-
 
     // Collect information about the target of the Intent.
     AutoPtr<IActivityInfo> aInfo = ResolveActivity(intent, resolvedType, startFlags,
@@ -1360,9 +1362,10 @@ ECode ActivityStackSupervisor::StartActivityMayWait(
                                             | CActivityManagerService::STOCK_PM_FLAGS, userId,
                                             (IResolveInfo**)&rInfo);
                             if (!FAILED(ec)) {
-                                //aInfo = rInfo != NULL ? rInfo.activityInfo : NULL;
-                                if (rInfo != NULL)
+                                aInfo = NULL;
+                                if (rInfo != NULL) {
                                     rInfo->GetActivityInfo((IActivityInfo**)&aInfo);
+                                }
                                 aInfo = mService->GetActivityInfoForUser(aInfo, userId);
                             } else {
                             //} catch (RemoteException e) {
@@ -1906,12 +1909,8 @@ ECode ActivityStackSupervisor::StartActivityLocked(
             callerApp->mInfo->GetUid(&callingUid);
         }
         else {
-            // String appApDes, intDes;
-            // caller->GetDescription(&appApDes);
-            // intent->GetDescription(&intDes);
-            // Slogger::W(TAG, StringBuffer("Unable to find app for caller ")
-            //         + appApDes + " (pid=" + callingPid + ") when starting: "
-            //         + intDes);
+            Slogger::W(TAG, "Unable to find app for caller %s (pid=%d) when starting:%s",
+                TO_CSTR(caller), callingPid, TO_CSTR(intent));
             err = IActivityManager::START_PERMISSION_DENIED;
         }
     }
@@ -1923,14 +1922,8 @@ ECode ActivityStackSupervisor::StartActivityLocked(
             IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
             appInfo->GetUid(&userId);
         }
-        //String intDes;
-        //intent->ToShortString(TRUE, TRUE, TRUE, FALSE, &intDes);
-        //Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
-        //        + "} from uid " + callingUid
-        //        + " on display " + (container == null ? (mFocusedStack == null ?
-        //                Display.DEFAULT_DISPLAY : mFocusedStack.mDisplayId) :
-        //            (container.mActivityDisplay == null ? Display.DEFAULT_DISPLAY :
-        //             container.mActivityDisplay.mDisplayId)));
+
+        // Slogger::I(TAG, "START u%d {%s} from uid %d", userId, TO_CSTR(intent), callingPid);
     }
 
     AutoPtr<ActivityRecord> sourceRecord;
@@ -1938,10 +1931,7 @@ ECode ActivityStackSupervisor::StartActivityLocked(
     if (resultTo != NULL) {
         sourceRecord = IsInAnyStackLocked(resultTo);
         if (CActivityManagerService::DEBUG_RESULTS) {
-            // String ibDes;
-            // resultTo->GetDescription(&ibDes);
-            // Slogger::V(TAG, StringBuffer("Will send result to ") + ibDes
-            //         + " (index " + index + ")");
+            Slogger::V(TAG, "Will send result to %s", TO_CSTR(resultTo));
         }
         if (sourceRecord != NULL) {
             if (requestCode >= 0 && !sourceRecord->mFinishing) {
@@ -2814,6 +2804,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         }
         AutoPtr<IActivityOptionsHelper> helper;
         CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&helper);
+        helper->Abort(options);
         *result = IActivityManager::START_CLASS_NOT_FOUND;
         return NOERROR;
     }

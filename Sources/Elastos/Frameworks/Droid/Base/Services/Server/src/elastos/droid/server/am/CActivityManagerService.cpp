@@ -571,8 +571,8 @@ const AutoPtr<ArrayOf<Int32> > CActivityManagerService::DUMP_MEM_OOM_ADJ = InitD
 const AutoPtr<ArrayOf<String> > CActivityManagerService::DUMP_MEM_OOM_LABEL = InitDumpMemOomLabel();
 const AutoPtr<ArrayOf<String> > CActivityManagerService::DUMP_MEM_OOM_COMPACT_LABEL = InitDumpMemOomCompactLabel();
 
-const String CActivityManagerService::USER_DATA_DIR = String("/data/user/");
-const String CActivityManagerService::SYSTEM_DEBUGGABLE = String("ro.debuggable");
+const String CActivityManagerService::USER_DATA_DIR("/data/user/");
+const String CActivityManagerService::SYSTEM_DEBUGGABLE("ro.debuggable");
 
 const Int32 CActivityManagerService::MAX_DUP_SUPPRESSED_STACKS = 5000;
 

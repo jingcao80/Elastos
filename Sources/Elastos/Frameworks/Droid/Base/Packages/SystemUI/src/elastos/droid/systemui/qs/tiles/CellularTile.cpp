@@ -22,7 +22,21 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
-AutoPtr<IIntent> CellularTile::CELLULAR_SETTINGS = InitStatic();
+static AutoPtr<IIntent> InitCELLULAR_SETTINGS()
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New((IIntent**)&intent);
+
+    AutoPtr<IComponentName> cn;
+    CComponentName::New(
+        String("Elastos.Droid.Settings"),
+        String("Elastos.Droid.Settings.CSettingsDataUsageSummaryActivity"), (IComponentName**)&cn);
+    intent->SetComponent(cn);
+    return intent;
+}
+
+AutoPtr<IIntent> CellularTile::CELLULAR_SETTINGS = InitCELLULAR_SETTINGS();
+
 CellularTile::CallbackInfo::CallbackInfo()
     : mEnabled(FALSE)
     , mWifiEnabled(FALSE)
@@ -37,6 +51,7 @@ CellularTile::CallbackInfo::CallbackInfo()
 {}
 
 CAR_INTERFACE_IMPL(CellularTile::NetworkSignalChangedCallback, Object, INetworkSignalChangedCallback)
+
 CellularTile::NetworkSignalChangedCallback::NetworkSignalChangedCallback(
     /* [in] */ CellularTile* host)
     : mHost(host)
@@ -189,24 +204,14 @@ ECode CellularTile::CellularDetailAdapter::SetMobileDataEnabled(
     return NOERROR;
 }
 
-CellularTile::CellularTile(
+ECode CellularTile::constructor(
     /* [in] */ IQSTileHost* host)
 {
     QSTile::constructor(host);
     mCallback = new NetworkSignalChangedCallback(this);
     host->GetNetworkController((INetworkController**)&mController);
     mDetailAdapter = new CellularDetailAdapter(this);
-}
-
-AutoPtr<IIntent> CellularTile::InitStatic()
-{
-    CIntent::New((IIntent**)&CELLULAR_SETTINGS);
-
-    AutoPtr<IComponentName> cn;
-    CComponentName::New(String("com.android.settings"),
-            String("com.android.settings.Settings$DataUsageSummaryActivity"), (IComponentName**)&cn);
-    CELLULAR_SETTINGS->SetComponent(cn);
-    return CELLULAR_SETTINGS;
+    return NOERROR;
 }
 
 AutoPtr<QSTile::State> CellularTile::NewTileState()
