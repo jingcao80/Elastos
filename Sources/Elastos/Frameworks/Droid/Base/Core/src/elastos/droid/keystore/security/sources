@@ -1,0 +1,33 @@
+TARGET_NAME= security
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = Credentials.cpp
+SOURCES += ElastosKeyPairGenerator.cpp
+SOURCES += ElastosKeyStore.cpp
+SOURCES += ElastosKeyStoreProvider.cpp
+SOURCES += KeyChain.cpp
+#SOURCES += KeyChainException.cpp
+SOURCES += KeyPairGeneratorSpec.cpp
+SOURCES += KeyStore.cpp
+SOURCES += KeyStoreParameter.cpp
+SOURCES += SystemKeyStore.cpp
+SOURCES += CCredentials.cpp
+SOURCES += CCredentialsHelper.cpp
+SOURCES += CElastosKeyPairGenerator.cpp
+SOURCES += CElastosKeyStore.cpp
+SOURCES += CElastosKeyStoreProvider.cpp
+SOURCES += CKeyChain.cpp
+SOURCES += CKeyPairGeneratorSpec.cpp
+SOURCES += CKeyPairGeneratorSpecBuilder.cpp
+SOURCES += CKeyStore.cpp
+SOURCES += CKeyStoreHelper.cpp
+SOURCES += CKeyStoreParameter.cpp
+SOURCES += CKeyStoreParameterBuilder.cpp
+SOURCES += CSystemKeyStore.cpp
+SOURCES += CSystemKeyStoreHelper.cpp
+

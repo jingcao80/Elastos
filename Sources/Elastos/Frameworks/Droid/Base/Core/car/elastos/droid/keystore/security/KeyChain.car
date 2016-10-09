@@ -2,6 +2,7 @@
 module
 {
     using interface Elastos.Security.IPrincipal;
+    using interface Elastos.Security.IPrivateKey;
     using interface Elastos.Security.Cert.IX509Certificate;
 
     interface Elastos.Droid.Content.IIntent;
@@ -211,7 +212,7 @@ module
      */
         ChoosePrivateKeyAlias(
             [in] IActivity* activity,
-            [in] IIKeyChainAliasCallback* response,
+            [in] IKeyChainAliasCallback* response,
             [in] ArrayOf<String>* keyTypes,
             [in] ArrayOf<IPrincipal*>* issuers,
             [in] String host,
@@ -228,7 +229,8 @@ module
      */
         GetPrivateKey(
             [in] IContext* ctx,
-            [in] String alias);
+            [in] String alias,
+            [out] IPrivateKey** result);
 
     /**
      * Returns the {@code X509Certificate} chain for the requested

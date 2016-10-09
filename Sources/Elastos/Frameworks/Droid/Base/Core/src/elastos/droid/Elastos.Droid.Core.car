@@ -186,6 +186,10 @@ module
     merge("../../../car/elastos/droid/keystore.car");
     }
 
+    submodule Elastos.Droid.Security {
+    merge("../../../car/elastos/droid/security.car");
+    }
+
     submodule Elastos.Droid.Bluetooth {
     merge("../../../car/elastos/droid/bluetooth.car");
     }

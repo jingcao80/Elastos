@@ -64,7 +64,7 @@ module
          * {@link java.security.spec.DSAParameterSpec}.
          */
             SetAlgorithmParameterSpec(
-                [out] IAlgorithmParameterSpec** spec);
+                [in] IAlgorithmParameterSpec* spec);
 
         /**
          * Sets the subject used for the self-signed certificate of the
@@ -78,7 +78,7 @@ module
          * generated key pair.
          */
             SetSerialNumber(
-                [out] IBigInteger** serialNumber);
+                [in] IBigInteger* serialNumber);
 
         /**
          * Sets the start of the validity period for the self-signed certificate
