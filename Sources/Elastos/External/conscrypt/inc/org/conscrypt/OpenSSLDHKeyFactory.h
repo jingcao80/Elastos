@@ -4,13 +4,17 @@
 
 #include <elastos/coredef.h>
 #include <Elastos.CoreLibrary.Security.h>
-#include <elastos/security/KeyFactorySpi.h>
+#include <Elastos.CoreLibrary.Extensions.h>
+// TODO: Need KeyFactorySpi
+// #include <elastos/security/KeyFactorySpi.h>
+#include <elastos/core/Object.h>
 #include "_Org.Conscrypt.h"
 
 using Elastos::Security::IKey;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
-using Elastos::Security::KeyFactorySpi;
+// TODO: Need KeyFactorySpi
+// using Elastos::Security::KeyFactorySpi;
 using Elastos::Security::Spec::IKeySpec;
 
 namespace Org {
@@ -18,7 +22,9 @@ namespace Conscrypt {
 
 class OpenSSLDHKeyFactory
     : public IOpenSSLDHKeyFactory
-    , public KeyFactorySpi
+    , public Object
+// TODO: Need KeyFactorySpi
+    // , public KeyFactorySpi
 {
 public:
     CAR_INTERFACE_DECL()

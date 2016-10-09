@@ -1,7 +1,23 @@
 #include "org/conscrypt/OpenSSLEngineImpl.h"
 #include "org/conscrypt/AbstractSessionContext.h"
 #include "org/conscrypt/NativeCrypto.h"
+#include "org/conscrypt/OpenSSLBIOSink.h"
+#include "org/conscrypt/OpenSSLBIOSource.h"
+#include "org/conscrypt/Platform.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/Math.h>
+
+using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::IBuffer;
+using Elastos::IO::IByteBufferHelper;
+using Elastos::Security::Cert::ICertificate;
+using Elastos::Security::IKey;
+using Elastos::Security::IPrincipal;
+using Elastos::Security::IPublicKey;
+using Elastos::Security::Cert::IX509Certificate;
+using Elastosx::Net::Ssl::CSSLEngineResult;
+using Elastosx::Net::Ssl::IX509TrustManager;
+using Elastosx::Net::Ssl::IX509ExtendedKeyManager;
 
 namespace Org {
 namespace Conscrypt {
@@ -13,8 +29,13 @@ OpenSSLEngineImpl::OpenSSLEngineImpl()
     : mEngineState(EngineState_NEW)
     , mSslNativePointer(0)
 {
-    sNullSource; // = OpenSSLBIOSource.wrap(ByteBuffer.allocate(0));
-    mLocalToRemoteSink; // = OpenSSLBIOSink.create();
+    AutoPtr<IByteBufferHelper> helper;
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+    AutoPtr<IByteBuffer> bb;
+    helper->Allocate(0, (IByteBuffer**)&bb);
+    OpenSSLBIOSource::Wrap(bb, (IOpenSSLBIOSource**)&sNullSource);
+
+    OpenSSLBIOSink::Create((IOpenSSLBIOSink**)&mLocalToRemoteSink);
 }
 
 OpenSSLEngineImpl::~OpenSSLEngineImpl()
@@ -29,7 +50,8 @@ OpenSSLEngineImpl::~OpenSSLEngineImpl()
 ECode OpenSSLEngineImpl::constructor(
     /* [in] */ ISSLParametersImpl* sslParameters)
 {
-    mSslParameters = sslParameters;
+// TODO: Need SSLParametersImpl
+    // mSslParameters = (SSLParametersImpl*)sslParameters;
     return NOERROR;
 }
 
@@ -39,7 +61,8 @@ ECode OpenSSLEngineImpl::constructor(
     /* [in] */ ISSLParametersImpl* sslParameters)
 {
     SSLEngine::constructor(host, port);
-    mSslParameters = sslParameters;
+// TODO: Need SSLParametersImpl
+    // mSslParameters = (SSLParametersImpl*)sslParameters;
     return NOERROR;
 }
 
@@ -72,14 +95,19 @@ ECode OpenSSLEngineImpl::BeginHandshake()
     Boolean releaseResources = TRUE;
     // try {
     AutoPtr<IAbstractSessionContext> sessionContext;
-    mSslParameters->GetSessionContext((IAbstractSessionContext**)&sessionContext);
-    Int64 sslCtxNativePointer = (AbstractSessionContext*)sessionContext->mSslCtxNativePointer;
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetSessionContext((IAbstractSessionContext**)&sessionContext);
+    Int64 sslCtxNativePointer =
+            ((AbstractSessionContext*)sessionContext.Get())->mSslCtxNativePointer;
     NativeCrypto::SSL_new(sslCtxNativePointer, &mSslNativePointer);
     String host;
     GetPeerHost(&host);
-    mSslParameters->SetSSLParameters(sslCtxNativePointer, mSslNativePointer, this, this, host);
-    mSslParameters->SetCertificateValidation(mSslNativePointer);
-    mSslParameters->SetTlsChannelId(mSslNativePointer, channelIdPrivateKey);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetSSLParameters(sslCtxNativePointer, mSslNativePointer, this, this, host);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetCertificateValidation(mSslNativePointer);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetTlsChannelId(mSslNativePointer, mChannelIdPrivateKey);
 
     Boolean b;
     if (GetUseClientMode(&b), b) {
@@ -101,6 +129,7 @@ ECode OpenSSLEngineImpl::BeginHandshake()
     //     throw new SSLException(e);
     // } finally {
     if (releaseResources) {
+        {
             AutoLock lock(mStateLock);
             mEngineState = EngineState_CLOSED;
         }
@@ -162,21 +191,27 @@ ECode OpenSSLEngineImpl::GetEnabledCipherSuites(
     /* [out, callee] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result)
-    return mSslParameters->GetEnabledCipherSuites(result);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetEnabledCipherSuites(result);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::GetEnabledProtocols(
     /* [out, callee] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result)
-    return mSslParameters->GetEnabledProtocols(result);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetEnabledProtocols(result);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::GetEnableSessionCreation(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    return mSslParameters->GetEnableSessionCreation(result);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetEnableSessionCreation(result);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::GetHandshakeStatus(
@@ -188,43 +223,43 @@ ECode OpenSSLEngineImpl::GetHandshakeStatus(
         Boolean b;
         Int32 val;
         switch (mEngineState) {
-            case HANDSHAKE_WANTED:
+            case EngineState_HANDSHAKE_WANTED:
                 if (GetUseClientMode(&b), b) {
-                    *result = SSLEngineResult_HandshakeStatus_NEED_WRAP;
+                    *result = Elastosx::Net::Ssl::NEED_WRAP;
                     return NOERROR;
                 }
                 else {
-                    *result = SSLEngineResult_HandshakeStatus_NEED_UNWRAP;
+                    *result = Elastosx::Net::Ssl::NEED_UNWRAP;
                     return NOERROR;
                 }
-            case HANDSHAKE_STARTED:
+            case EngineState_HANDSHAKE_STARTED:
                 if ((mHandshakeSink->Available(&val), val) > 0) {
-                    *result = SSLEngineResult_HandshakeStatus_NEED_WRAP;
+                    *result = Elastosx::Net::Ssl::NEED_WRAP;
                     return NOERROR;
                 }
                 else {
-                    *result = SSLEngineResult_HandshakeStatus_NEED_UNWRAP;
+                    *result = Elastosx::Net::Ssl::NEED_UNWRAP;
                     return NOERROR;
                 }
-            case HANDSHAKE_COMPLETED:
+            case EngineState_HANDSHAKE_COMPLETED:
                 if ((mHandshakeSink->Available(&val), val) == 0) {
                     mHandshakeSink = NULL;
                     mEngineState = EngineState_READY;
-                    *result = SSLEngineResult_HandshakeStatus_FINISHED;
+                    *result = Elastosx::Net::Ssl::FINISHED;
                     return NOERROR;
                 }
                 else {
-                    *result = SSLEngineResult_HandshakeStatus_NEED_WRAP;
+                    *result = Elastosx::Net::Ssl::NEED_WRAP;
                     return NOERROR;
                 }
-            case NEW:
-            case MODE_SET:
-            case CLOSED:
-            case CLOSED_INBOUND:
-            case CLOSED_OUTBOUND:
-            case READY:
-            case READY_HANDSHAKE_CUT_THROUGH:
-                *result = SSLEngineResult_HandshakeStatus_NOT_HANDSHAKING;
+            case EngineState_NEW:
+            case EngineState_MODE_SET:
+            case EngineState_CLOSED:
+            case EngineState_CLOSED_INBOUND:
+            case EngineState_CLOSED_OUTBOUND:
+            case EngineState_READY:
+            case EngineState_READY_HANDSHAKE_CUT_THROUGH:
+                *result = Elastosx::Net::Ssl::NOT_HANDSHAKING;
                 return NOERROR;
             default:
                 break;
@@ -239,7 +274,9 @@ ECode OpenSSLEngineImpl::GetNeedClientAuth(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    return mSslParameters->GetNeedClientAuth(result);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetNeedClientAuth(result);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::GetSession(
@@ -247,9 +284,11 @@ ECode OpenSSLEngineImpl::GetSession(
 {
     VALIDATE_NOT_NULL(result)
     if (mSslSession == NULL) {
-        return SSLNullSession::GetNULLSession(result);
+// TODO: Need SSLNullSession
+        // SSLNullSession::GetNULLSession(result);
+        return NOERROR;
     }
-    *result = mSslSession;
+    *result = ISSLSession::Probe(mSslSession);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -272,14 +311,18 @@ ECode OpenSSLEngineImpl::GetUseClientMode(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    return mSslParameters->GetUseClientMode(result);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetUseClientMode(result);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::GetWantClientAuth(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    return mSslParameters->GetWantClientAuth(result);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetWantClientAuth(result);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::IsInboundDone(
@@ -293,7 +336,7 @@ ECode OpenSSLEngineImpl::IsInboundDone(
     }
     Int32 val;
     NativeCrypto::SSL_get_shutdown(mSslNativePointer, &val);
-    *result = (val & NativeCrypto::SSL_RECEIVED_SHUTDOWN) != 0;
+    *result = (val & INativeCrypto::SSL_RECEIVED_SHUTDOWN) != 0;
     return NOERROR;
 }
 
@@ -308,32 +351,40 @@ ECode OpenSSLEngineImpl::IsOutboundDone(
     }
     Int32 val;
     NativeCrypto::SSL_get_shutdown(mSslNativePointer, &val);
-    *result = (val & NativeCrypto::SSL_SENT_SHUTDOWN) != 0;
+    *result = (val & INativeCrypto::SSL_SENT_SHUTDOWN) != 0;
     return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::SetEnabledCipherSuites(
     /* [in] */ ArrayOf<String>* suites)
 {
-    return mSslParameters->SetEnabledCipherSuites(suites);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetEnabledCipherSuites(suites);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::SetEnabledProtocols(
     /* [in] */ ArrayOf<String>* protocols)
 {
-    return mSslParameters->SetEnabledProtocols(protocols);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetEnabledProtocols(protocols);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::SetEnableSessionCreation(
     /* [in] */ Boolean flag)
 {
-    return mSslParameters->SetEnableSessionCreation(flag);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetEnableSessionCreation(flag);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::SetNeedClientAuth(
     /* [in] */ Boolean need)
 {
-    return mSslParameters->SetNeedClientAuth(need);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetNeedClientAuth(need);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::SetUseClientMode(
@@ -348,14 +399,17 @@ ECode OpenSSLEngineImpl::SetUseClientMode(
         }
         mEngineState = EngineState_MODE_SET;
     }
-    mSslParameters->SetUseClientMode(mode);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetUseClientMode(mode);
     return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::SetWantClientAuth(
     /* [in] */ Boolean want)
 {
-    return mSslParameters->SetWantClientAuth(want);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->SetWantClientAuth(want);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::Unwrap(
@@ -376,7 +430,7 @@ ECode OpenSSLEngineImpl::Unwrap(
         // throw new IllegalArgumentException("dsts == NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    checkIndex(dsts.length, offset, length);
+    CheckIndex(dsts->GetLength(), offset, length);
     Int32 dstRemaining = 0;
     for (Int32 i = 0; i < dsts->GetLength(); i++) {
         AutoPtr<IByteBuffer> dst = (*dsts)[i];
@@ -385,13 +439,13 @@ ECode OpenSSLEngineImpl::Unwrap(
             // throw new IllegalArgumentException("one of the dst == NULL");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        else if (dst->IsReadOnly(&b), b) {
+        else if (IBuffer::Probe(dst)->IsReadOnly(&b), b) {
             // throw new ReadOnlyBufferException();
             return E_READ_ONLY_BUFFER_EXCEPTION;
         }
         if (i >= offset && i < offset + length) {
             Int32 val;
-            dst->Remaining(&val);
+            IBuffer::Probe(dst)->GetRemaining(&val);
             dstRemaining += val;
         }
     }
@@ -402,8 +456,9 @@ ECode OpenSSLEngineImpl::Unwrap(
         if (mEngineState == EngineState_CLOSED || mEngineState == EngineState_CLOSED_INBOUND) {
             SSLEngineResult_HandshakeStatus handshakeStatus;
             GetHandshakeStatus(&handshakeStatus);
-            AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
-            ssler->constructor(Elastosx::Net::Ssl::CLOSED, handshakeStatus, 0, 0);
+            AutoPtr<ISSLEngineResult> ssler;
+            CSSLEngineResult::New(Elastosx::Net::Ssl::CLOSED,
+                    handshakeStatus, 0, 0, (ISSLEngineResult**)&ssler);
             *result = ssler;
             REFCOUNT_ADD(*result)
             return NOERROR;
@@ -416,7 +471,7 @@ ECode OpenSSLEngineImpl::Unwrap(
     // If we haven't completed the handshake yet, just let the caller know.
     SSLEngineResult_HandshakeStatus handshakeStatus;
     GetHandshakeStatus(&handshakeStatus);
-    if (handshakeStatus == SSLEngineResult_HandshakeStatus_NEED_UNWRAP) {
+    if (handshakeStatus == Elastosx::Net::Ssl::NEED_UNWRAP) {
         AutoPtr<IOpenSSLBIOSource> source;
         OpenSSLBIOSource::Wrap(src, (IOpenSSLBIOSource**)&source);
         Int64 sslSessionCtx = 0;
@@ -427,26 +482,30 @@ ECode OpenSSLEngineImpl::Unwrap(
         mHandshakeSink->GetContext(&sinkBioRef);
         Boolean client_mode;
         GetUseClientMode(&client_mode);
-        NativeCrypto::SSL_do_handshake_bio(mSslNativePointer,
-                sourceBioRef, sinkBioRef, ISSLHandshakeCallbacks::Probe(this), client_mode,
-                mSslParameters->npnProtocols, mSslParameters->alpnProtocols, &sslSessionCtx);
+// TODO: Need SSLParametersImpl
+        // NativeCrypto::SSL_do_handshake_bio(mSslNativePointer,
+        //         sourceBioRef, sinkBioRef, ISSLHandshakeCallbacks::Probe(this), client_mode,
+        //         mSslParameters->npnProtocols, mSslParameters->alpnProtocols, &sslSessionCtx);
         if (sslSessionCtx != 0) {
-            if (sslSession != NULL && mEngineState == EngineState_HANDSHAKE_STARTED) {
+            if (mSslSession != NULL && mEngineState == EngineState_HANDSHAKE_STARTED) {
                 mEngineState = EngineState_READY_HANDSHAKE_CUT_THROUGH;
             }
             String host;
             GetPeerHost(&host);
             Int32 port;
             GetPeerPort(&port);
-            sslSession = mSslParameters->SetupSession(sslSessionCtx, mSslNativePointer, sslSession,
-                    host, port, TRUE);
+// TODO: Need SSLParametersImpl
+            // mSslParameters->SetupSession(
+            //         sslSessionCtx, mSslNativePointer, mSslSession, host, port,
+            //         TRUE, (IOpenSSLSessionImpl**)&mSslSession);
         }
         Int32 bytesWritten;
         mHandshakeSink->Position(&bytesWritten);
         SSLEngineResult_HandshakeStatus status;
         GetHandshakeStatus(&status);
-        AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
-        ssler->constructor(Elastosx::Net::Ssl::OK, status, 0, bytesWritten);
+        AutoPtr<ISSLEngineResult> ssler;
+        CSSLEngineResult::New(Elastosx::Net::Ssl::OK,
+                status, 0, bytesWritten, (ISSLEngineResult**)&ssler);
         *result = ssler;
         REFCOUNT_ADD(*result)
         return NOERROR;
@@ -454,15 +513,16 @@ ECode OpenSSLEngineImpl::Unwrap(
         //     throw (SSLHandshakeException) new SSLHandshakeException("Handshake failed")
         //             .initCause(e);
         // } finally {
-        if (sslSession == NULL && sslSessionCtx != 0) {
+        if (mSslSession == NULL && sslSessionCtx != 0) {
             NativeCrypto::SSL_SESSION_free(sslSessionCtx);
         }
-        source->releaseResources();
+        source->ReleaseResources();
         // }
     }
-    else if (handshakeStatus != SSLEngineResult_HandshakeStatus_NOT_HANDSHAKING) {
-        AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
-        ssler->constructor(Elastosx::Net::Ssl::OK, handshakeStatus, 0, 0);
+    else if (handshakeStatus != Elastosx::Net::Ssl::NOT_HANDSHAKING) {
+        AutoPtr<ISSLEngineResult> ssler;
+        CSSLEngineResult::New(Elastosx::Net::Ssl::OK,
+                handshakeStatus, 0, 0, (ISSLEngineResult**)&ssler);
         *result = ssler;
         REFCOUNT_ADD(*result)
         return NOERROR;
@@ -471,8 +531,9 @@ ECode OpenSSLEngineImpl::Unwrap(
     if (dstRemaining == 0) {
         SSLEngineResult_HandshakeStatus status;
         GetHandshakeStatus(&status);
-        AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
-        ssler->constructor(Elastosx::Net::Ssl::BUFFER_OVERFLOW, status, 0, 0);
+        AutoPtr<ISSLEngineResult> ssler;
+        CSSLEngineResult::New(Elastosx::Net::Ssl::BUFFER_OVERFLOW,
+                status, 0, 0, (ISSLEngineResult**)&ssler);
         *result = ssler;
         REFCOUNT_ADD(*result)
         return NOERROR;
@@ -485,7 +546,7 @@ ECode OpenSSLEngineImpl::Unwrap(
 
     // try {
     Int32 positionBeforeRead;
-    srcDuplicate->GetPosition(&positionBeforeRead);
+    IBuffer::Probe(srcDuplicate)->GetPosition(&positionBeforeRead);
     Int32 produced = 0;
     Boolean shouldStop = FALSE;
 
@@ -497,42 +558,62 @@ ECode OpenSSLEngineImpl::Unwrap(
         }
         AutoPtr<IByteBuffer> arrayDst = dst;
         Boolean b;
-        if (dst->IsDirect(&b), b) {
-            arrayDst = ByteBuffer.allocate(dst.remaining());
+        if (IBuffer::Probe(dst)->IsDirect(&b), b) {
+            Int32 val;
+            IBuffer::Probe(dst)->GetRemaining(&val);
+            AutoPtr<IByteBufferHelper> helper;
+            CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+            helper->Allocate(val, (IByteBuffer**)&arrayDst);
         }
 
-        Int32 dstOffset = arrayDst.arrayOffset() + arrayDst.position();
+        Int32 offset;
+        IBuffer::Probe(arrayDst)->GetArrayOffset(&offset);
+        Int32 position;
+        IBuffer::Probe(arrayDst)->GetPosition(&position);
+        Int32 dstOffset = offset + position;
 
+        AutoPtr<ArrayOf<Byte> > array;
+        arrayDst->GetArray((ArrayOf<Byte>**)&array);
+        Int32 remaining;
+        IBuffer::Probe(dst)->GetRemaining(&remaining);
+        Int64 sourceBioRef;
+        source->GetContext(&sourceBioRef);
+        Int64 sinkBioRef;
+        mLocalToRemoteSink->GetContext(&sinkBioRef);
         Int32 internalProduced;
         NativeCrypto::SSL_read_BIO(mSslNativePointer,
-                arrayDst.array(), dstOffset, dst.remaining(), source.getContext(),
-                localToRemoteSink.getContext(), this, &internalProduced);
+                array, dstOffset, remaining, sourceBioRef,
+                sinkBioRef, this, &internalProduced);
         if (internalProduced <= 0) {
             shouldStop = TRUE;
             continue;
         }
-        arrayDst.position(arrayDst.position() + internalProduced);
+
+        Int32 pos;
+        IBuffer::Probe(arrayDst)->GetPosition(&pos);
+        IBuffer::Probe(arrayDst)->SetPosition(pos + internalProduced);
         produced += internalProduced;
         if (dst != arrayDst) {
-            arrayDst.flip();
-            dst.put(arrayDst);
+            IBuffer::Probe(arrayDst)->Flip();
+            dst->Put(arrayDst);
         }
     }
 
     Int32 position;
-    srcDuplicate->GetPosition(&position);
+    IBuffer::Probe(srcDuplicate)->GetPosition(&position);
     Int32 consumed = position - positionBeforeRead;
-    src->SetPosition(position);
+    IBuffer::Probe(src)->SetPosition(position);
     SSLEngineResult_HandshakeStatus status;
     GetHandshakeStatus(&status);
-    AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
-    ssler->constructor(Elastosx::Net::Ssl::OK, status, consumed, produced);
+    AutoPtr<ISSLEngineResult> ssler;
+    CSSLEngineResult::New(Elastosx::Net::Ssl::OK,
+            status, consumed, produced, (ISSLEngineResult**)&ssler);
     *result = ssler;
     REFCOUNT_ADD(*result)
     // } catch (IOException e) {
     //     throw new SSLException(e);
     // } finally {
-    source->releaseResources();
+    source->ReleaseResources();
     // }
     return NOERROR;
 }
@@ -556,7 +637,7 @@ ECode OpenSSLEngineImpl::Wrap(
         // throw new IllegalArgumentException("dst == NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    else if (dst->IsReadOnly(&b), b) {
+    else if (IBuffer::Probe(dst)->IsReadOnly(&b), b) {
         // throw new ReadOnlyBufferException();
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
@@ -571,12 +652,13 @@ ECode OpenSSLEngineImpl::Wrap(
     CheckIndex(srcs->GetLength(), offset, length);
 
     Int32 remaining;
-    dst->GetRemaining(&remaining);
+    IBuffer::Probe(dst)->GetRemaining(&remaining);
     if (remaining < INativeCrypto::SSL3_RT_MAX_PACKET_SIZE) {
-        AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
         SSLEngineResult_HandshakeStatus status;
         GetHandshakeStatus(&status);
-        ssler->constructor(Elastosx::Net::Ssl::BUFFER_OVERFLOW, status, 0, 0);
+        AutoPtr<ISSLEngineResult> ssler;
+        CSSLEngineResult::New(Elastosx::Net::Ssl::BUFFER_OVERFLOW,
+                status, 0, 0, (ISSLEngineResult**)&ssler);
         *result = ssler;
         REFCOUNT_ADD(*result)
         return NOERROR;
@@ -586,10 +668,11 @@ ECode OpenSSLEngineImpl::Wrap(
         AutoLock lock(mStateLock);
         // If the outbound direction is closed. we can't send anymore.
         if (mEngineState == EngineState_CLOSED || mEngineState == EngineState_CLOSED_OUTBOUND) {
-            AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
             SSLEngineResult_HandshakeStatus status;
             GetHandshakeStatus(&status);
-            ssler->constructor(Elastosx::Net::Ssl::CLOSED, status, 0, 0);
+            AutoPtr<ISSLEngineResult> ssler;
+            CSSLEngineResult::New(Elastosx::Net::Ssl::CLOSED,
+                    status, 0, 0, (ISSLEngineResult**)&ssler);
             *result = ssler;
             REFCOUNT_ADD(*result)
             return NOERROR;
@@ -602,22 +685,23 @@ ECode OpenSSLEngineImpl::Wrap(
     // If we haven't completed the handshake yet, just let the caller know.
     SSLEngineResult_HandshakeStatus handshakeStatus;
     GetHandshakeStatus(&handshakeStatus);
-    if (handshakeStatus == SSLEngineResult_HandshakeStatus_NEED_WRAP) {
+    if (handshakeStatus == Elastosx::Net::Ssl::NEED_WRAP) {
         Int32 available;
         mHandshakeSink->Available(&available);
         if (available == 0) {
             Int64 sslSessionCtx = 0L;
             // try {
             Int64 sourceBioRef;
-            NULLSource->GetContext(&sourceBioRef);
+            sNullSource->GetContext(&sourceBioRef);
             Int64 sinkBioRef;
             mHandshakeSink->GetContext(&sinkBioRef);
             Boolean client_mode;
             GetUseClientMode(&client_mode);
-            NativeCrypto::SSL_do_handshake_bio(mSslNativePointer,
-                    sourceBioRef, sinkBioRef, ISSLHandshakeCallbacks::Probe(this),
-                    client_mode, mSslParameters->npnProtocols,
-                    mSslParameters->alpnProtocols, &sslSessionCtx);
+// TODO: Need SSLParametersImpl
+            // NativeCrypto::SSL_do_handshake_bio(mSslNativePointer,
+            //         sourceBioRef, sinkBioRef, ISSLHandshakeCallbacks::Probe(this),
+            //         client_mode, mSslParameters->npnProtocols,
+            //         mSslParameters->alpnProtocols, &sslSessionCtx);
             if (sslSessionCtx != 0) {
                 if (mSslSession != NULL && mEngineState == EngineState_HANDSHAKE_STARTED) {
                     mEngineState = EngineState_READY_HANDSHAKE_CUT_THROUGH;
@@ -626,8 +710,9 @@ ECode OpenSSLEngineImpl::Wrap(
                 GetPeerHost(&host);
                 Int32 port;
                 GetPeerPort(&port);
-                mSslSession = mSslParameters->SetupSession(sslSessionCtx, mSslNativePointer, mSslSession,
-                        host, port, TRUE);
+// TODO: Need SSLParametersImpl
+                // mSslParameters->SetupSession(sslSessionCtx, mSslNativePointer, mSslSession,
+                //         host, port, TRUE, (IOpenSSLSessionImpl**)&mSslSession);
             }
             // } catch (Exception e) {
             //     throw (SSLHandshakeException) new SSLHandshakeException("Handshake failed")
@@ -639,19 +724,21 @@ ECode OpenSSLEngineImpl::Wrap(
             // }
         }
         Int32 bytesWritten = WriteSinkToByteBuffer(mHandshakeSink, dst);
-        AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
         SSLEngineResult_HandshakeStatus status;
         GetHandshakeStatus(&status);
-        ssler->constructor(Elastosx::Net::Ssl::OK, status, 0, bytesWritten);
+        AutoPtr<ISSLEngineResult> ssler;
+        CSSLEngineResult::New(Elastosx::Net::Ssl::OK,
+                status, 0, bytesWritten, (ISSLEngineResult**)&ssler);
         *result = ssler;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
-    else if (handshakeStatus != SSLEngineResult_HandshakeStatus_NOT_HANDSHAKING) {
-        AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
+    else if (handshakeStatus != Elastosx::Net::Ssl::NOT_HANDSHAKING) {
         SSLEngineResult_HandshakeStatus status;
         GetHandshakeStatus(&status);
-        ssler->constructor(Elastosx::Net::Ssl::OK, handshakeStatus, 0, 0);
+        AutoPtr<ISSLEngineResult> ssler;
+        CSSLEngineResult::New(Elastosx::Net::Ssl::OK,
+                handshakeStatus, 0, 0, (ISSLEngineResult**)&ssler);
         *result = ssler;
         REFCOUNT_ADD(*result)
         return NOERROR;
@@ -664,7 +751,7 @@ ECode OpenSSLEngineImpl::Wrap(
     for (Int32 i = 0; i < srcs->GetLength(); ++i) {
         AutoPtr<IByteBuffer> src = (*srcs)[i];
         Int32 toRead;
-        src->GetRemaining(&toRead);
+        IBuffer::Probe(src)->GetRemaining(&toRead);
         if (buffer == NULL || toRead > buffer->GetLength()) {
             buffer = ArrayOf<Byte>::Alloc(toRead);
         }
@@ -676,23 +763,23 @@ ECode OpenSSLEngineImpl::Wrap(
         src->Duplicate((IByteBuffer**)&bb);
         bb->Get(buffer, 0, toRead);
         Int64 ctx;
-        localToRemoteSink->GetContext(&ctx);
+        mLocalToRemoteSink->GetContext(&ctx);
         Int32 numRead;
         NativeCrypto::SSL_write_BIO(mSslNativePointer, buffer, toRead,
                 ctx, this, &numRead);
         if (numRead > 0) {
             Int32 position;
-            src->GetPosition(&position);
-            src->SetPosition(position + numRead);
+            IBuffer::Probe(src)->GetPosition(&position);
+            IBuffer::Probe(src)->SetPosition(position + numRead);
             totalRead += numRead;
         }
     }
 
-    AutoPtr<SSLEngineResult> ssler = new SSLEngineResult();
     SSLEngineResult_HandshakeStatus status;
     GetHandshakeStatus(&status);
-    ssler->constructor(Elastosx::Net::Ssl::OK, status,
-            totalRead, WriteSinkToByteBuffer(localToRemoteSink, dst));
+    AutoPtr<ISSLEngineResult> ssler;
+    CSSLEngineResult::New(Elastosx::Net::Ssl::OK, status, totalRead,
+            WriteSinkToByteBuffer(mLocalToRemoteSink, dst), (ISSLEngineResult**)&ssler);
     *result = ssler;
     REFCOUNT_ADD(*result)
     // } catch (IOException e) {
@@ -708,7 +795,9 @@ ECode OpenSSLEngineImpl::ClientPSKKeyRequested(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    return mSslParameters->ClientPSKKeyRequested(identityHint, identity, key, this);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->ClientPSKKeyRequested(identityHint, identity, key, this);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::ServerPSKKeyRequested(
@@ -718,7 +807,9 @@ ECode OpenSSLEngineImpl::ServerPSKKeyRequested(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    return mSslParameters->ServerPSKKeyRequested(identityHint, identity, key, this);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->ServerPSKKeyRequested(identityHint, identity, key, this);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::OnSSLStateChange(
@@ -729,7 +820,7 @@ ECode OpenSSLEngineImpl::OnSSLStateChange(
     {
         AutoLock lock(mStateLock);
         switch (type) {
-            case NativeCrypto::SSL_CB_HANDSHAKE_DONE:
+            case INativeCrypto::SSL_CB_HANDSHAKE_DONE:
                 if (mEngineState != EngineState_HANDSHAKE_STARTED &&
                     mEngineState != EngineState_READY_HANDSHAKE_CUT_THROUGH) {
                     // throw new IllegalStateException("Completed handshake while in mode "
@@ -738,7 +829,7 @@ ECode OpenSSLEngineImpl::OnSSLStateChange(
                 }
                 mEngineState = EngineState_HANDSHAKE_COMPLETED;
                 break;
-            case NativeCrypto::SSL_CB_HANDSHAKE_START:
+            case INativeCrypto::SSL_CB_HANDSHAKE_START:
                 // For clients, this will allow the NEED_UNWRAP status to be
                 // returned.
                 mEngineState = EngineState_HANDSHAKE_STARTED;
@@ -755,7 +846,8 @@ ECode OpenSSLEngineImpl::VerifyCertificateChain(
 {
     // try {
     AutoPtr<IX509TrustManager> x509tm;
-    mSslParameters->GetX509TrustManager((IX509TrustManager**)&x509tm);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetX509TrustManager((IX509TrustManager**)&x509tm);
     if (x509tm == NULL) {
         // throw new CertificateException("No X.509 TrustManager");
         return E_CERTIFICATE_EXCEPTION;
@@ -764,11 +856,15 @@ ECode OpenSSLEngineImpl::VerifyCertificateChain(
         // throw new SSLException("Peer sent no certificate");
         return E_SSL_EXCEPTION;
     }
-    AutoPtr<ArrayOf<IOpenSSLX509Certificate*> > peerCertChain =
-            ArrayOf<IOpenSSLX509Certificate*>::Alloc(certRefs->GetLength());
+    AutoPtr<ArrayOf<IX509Certificate*> > peerCertChain =
+            ArrayOf<IX509Certificate*>::Alloc(certRefs->GetLength());
 
     for (Int32 i = 0; i < certRefs->GetLength(); i++) {
-        COpenSSLX509Certificate::New((*certRefs)[i], (IOpenSSLX509Certificate**)&(*peerCertChain)[i]);
+        AutoPtr<IOpenSSLX509Certificate> cert;
+// TODO: Need COpenSSLX509Certificate
+        // COpenSSLX509Certificate::New((*certRefs)[i],
+        //         (IOpenSSLX509Certificate**)&cert);
+        peerCertChain->Set(i, IX509Certificate::Probe(cert));
     }
 
     // Used for verifyCertificateChain callback
@@ -776,11 +872,13 @@ ECode OpenSSLEngineImpl::VerifyCertificateChain(
     GetPeerHost(&host);
     Int32 port;
     GetPeerPort(&port);
-    mHandshakeSession = new OpenSSLSessionImpl(sslSessionNativePtr, NULL, peerCertChain,
-            host, port, NULL);
+// TODO: Need OpenSSLSessionImpl
+    // mHandshakeSession = new OpenSSLSessionImpl(sslSessionNativePtr, NULL, peerCertChain,
+    //         host, port, NULL);
 
     Boolean client;
-    mSslParameters->GetUseClientMode(&client);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->GetUseClientMode(&client);
     if (client) {
         Platform::CheckServerTrusted(x509tm, peerCertChain, authMethod, host);
     }
@@ -788,7 +886,7 @@ ECode OpenSSLEngineImpl::VerifyCertificateChain(
         AutoPtr<IPublicKey> pk;
         ICertificate::Probe((*peerCertChain)[0])->GetPublicKey((IPublicKey**)&pk);
         String authType;
-        pk->GetAlgorithm(&authType);
+        IKey::Probe(pk)->GetAlgorithm(&authType);
         x509tm->CheckClientTrusted(peerCertChain, authType);
     }
     // } catch (CertificateException e) {
@@ -803,11 +901,13 @@ ECode OpenSSLEngineImpl::VerifyCertificateChain(
 }
 
 ECode OpenSSLEngineImpl::ClientCertificateRequested(
-    /* [in] */ ArrayOf<Byte>* keyTypes,
-    /* [in] */ ArrayOf<Handle32>* asn1DerEncodedX500Principals)
+    /* [in] */ ArrayOf<Byte>* keyTypeBytes,
+    /* [in] */ ArrayOf<Handle32>* asn1DerEncodedPrincipals)
 {
-    return mSslParameters->ChooseClientCertificate(keyTypeBytes, asn1DerEncodedPrincipals,
-            mSslNativePointer, this);
+// TODO: Need SSLParametersImpl
+    // mSslParameters->ChooseClientCertificate(keyTypeBytes, asn1DerEncodedPrincipals,
+    //         mSslNativePointer, this);
+    return NOERROR;
 }
 
 ECode OpenSSLEngineImpl::ChooseServerAlias(
@@ -828,12 +928,26 @@ ECode OpenSSLEngineImpl::ChooseServerAlias(
 
 ECode OpenSSLEngineImpl::ChooseClientAlias(
     /* [in] */ IX509KeyManager* keyManager,
-    /* [in] */ ArrayOf<IX500Principal*>* issuer,
+    /* [in] */ ArrayOf<IX500Principal*>* issuers,
     /* [in] */ ArrayOf<String>* keyTypes,
-    /* [out] */ String* results)
+    /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    return keyManager->ChooseServerKeyIdentityHint(this, reuslt);
+
+    AutoPtr<ArrayOf<IPrincipal*> > array;
+    if(issuers != NULL) {
+        array = ArrayOf<IPrincipal*>::Alloc(issuers->GetLength());
+        for(Int32 i = 0; i < issuers->GetLength(); i++) {
+            array->Set(i, IPrincipal::Probe((*issuers)[i]));
+        }
+    }
+    if (IX509ExtendedKeyManager::Probe(keyManager) != NULL) {
+        AutoPtr<IX509ExtendedKeyManager> ekm = IX509ExtendedKeyManager::Probe(keyManager);
+        return ekm->ChooseEngineClientAlias(keyTypes, array, this, result);
+    }
+    else {
+        return keyManager->ChooseClientAlias(keyTypes, array, NULL, result);
+    }
 }
 
 ECode OpenSSLEngineImpl::ChooseServerPSKIdentityHint(
@@ -841,7 +955,7 @@ ECode OpenSSLEngineImpl::ChooseServerPSKIdentityHint(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    return keyManager->ChooseServerKeyIdentityHint(this, reuslt);
+    return keyManager->ChooseServerKeyIdentityHint(this, result);
 }
 
 ECode OpenSSLEngineImpl::ChooseClientPSKIdentity(
@@ -895,7 +1009,7 @@ AutoPtr<IByteBuffer> OpenSSLEngineImpl::GetNextAvailableByteBuffer(
 {
     for (Int32 i = offset; i < length; ++i) {
         Int32 remaining;
-        (*buffers)[i]->GetRemaining(&remaining);
+        IBuffer::Probe((*buffers)[i])->GetRemaining(&remaining);
         if (remaining > 0) {
             return (*buffers)[i];
         }
@@ -911,16 +1025,16 @@ Int32 OpenSSLEngineImpl::WriteSinkToByteBuffer(
     Int32 available;
     sink->Available(&available);
     Int32 remaining;
-    dst->GetRemaining(&remaining);
-    Int32 toWrite = Math::Min(available, remaining);
+    IBuffer::Probe(dst)->GetRemaining(&remaining);
+    Int32 toWrite = Elastos::Core::Math::Min(available, remaining);
     Int32 position;
-    sink->GetPosition(&position);
+    sink->Position(&position);
     AutoPtr<ArrayOf<Byte> > array;
-    sink.toByteArray((ArrayOf<Byte>**)&array);
+    sink->ToByteArray((ArrayOf<Byte>**)&array);
     dst->Put(array, position, toWrite);
-    Int32 val;
+    Int64 val;
     sink->Skip(toWrite, &val);
-    return val;
+    return (Int32)val;
 }
 
 void OpenSSLEngineImpl::Shutdown()

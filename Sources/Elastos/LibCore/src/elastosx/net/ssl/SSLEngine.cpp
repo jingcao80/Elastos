@@ -16,12 +16,14 @@ SSLEngine::SSLEngine()
     , mPeerPort(-1)
 {}
 
-SSLEngine::SSLEngine(
+ECode SSLEngine::constructor(
     /* [in] */ const String& host,
     /* [in] */ Int32 port)
-    : mPeerHost(host)
-    , mPeerPort(port)
-{}
+{
+    mPeerHost = host;
+    mPeerPort = port;
+    return NOERROR;
+}
 
 ECode SSLEngine::GetPeerHost(
     /* [out] */ String* host)

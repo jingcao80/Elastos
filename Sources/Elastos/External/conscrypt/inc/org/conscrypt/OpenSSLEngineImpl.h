@@ -3,9 +3,15 @@
 #define __ORG_CONSCRYPT_OPENSSLENGINEIMPL_H__
 
 #include <elastos/coredef.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.Extensions.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Security.h>
 #include <elastos/core/Object.h>
 #include "_Org.Conscrypt.h"
 #include "elastosx/net/ssl/SSLEngine.h"
+// TODO: Need SSLParametersImpl
+// #include "org/conscrypt/SSLParametersImpl.h"
 
 using Elastos::Core::IRunnable;
 using Elastos::IO::IByteBuffer;
@@ -238,7 +244,8 @@ public:
     AutoPtr<IOpenSSLKey> mChannelIdPrivateKey;
 
 private:
-    AutoPtr<ISSLParametersImpl> mSslParameters;
+// TODO: Need SSLParametersImpl
+    // AutoPtr<SSLParametersImpl> mSslParameters;
 
     /**
      * Protects handshakeStarted and handshakeCompleted.
