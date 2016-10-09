@@ -1,4 +1,3 @@
-
 #ifndef __CARCALLBACKPROXY_H__
 #define __CARCALLBACKPROXY_H__
 
@@ -26,6 +25,21 @@ public:
             : mObject(object)
             , mMethodInfo(methodInfo)
             , mCarArgs(carArgs)
+            , mParamCount(0)
+        {
+            mMethodInfo->GetName(&mMethodName);
+            mMethodInfo->GetParamCount(&mParamCount);
+        }
+
+        Callback(
+            /* [in] */ CarCallbackObject* object,
+            /* [in] */ Elastos::String methodName,
+            /* [in] */ CarValue* carArgs,
+            /* [in] */ Int32 paramCount)
+            : mObject(object)
+            , mMethodName(methodName)
+            , mCarArgs(carArgs)
+            , mParamCount(paramCount)
         {}
 
         ~Callback();
@@ -38,9 +52,11 @@ public:
     private:
         AutoPtr<CarCallbackObject> mObject;
         IMethodInfo* mMethodInfo;
-        CarValue* mCarArgs;
 
+        Elastos::String mMethodName;
         Int32 mParamCount;
+
+        CarValue* mCarArgs;
         NPVariant* mNPParams;
 
     public:

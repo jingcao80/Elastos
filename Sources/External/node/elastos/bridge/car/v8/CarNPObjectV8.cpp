@@ -1,4 +1,3 @@
-
 #include "ElNode.h"
 #include "config.h"
 
@@ -85,6 +84,17 @@ void CarNPObjectInvalidate(NPObject *npobj)
     ALOGD("CarNPObjectInvalidate.begin");
 }
 
+bool CarNPObjectHasHelperMethod(NPUTF8* name)
+{
+    if (!strcmp(name,"hasInterface")) {
+        return true;
+    }
+    if (!strcmp(name,"getClass")) {
+        return true;
+    }
+    return false;
+}
+
 bool CarNPObjectHasMethod(NPObject* npobj, NPIdentifier identifier) //TODO
 {
     bool retValue = false;
@@ -95,6 +105,8 @@ bool CarNPObjectHasMethod(NPObject* npobj, NPIdentifier identifier) //TODO
     NPUTF8* name;
     name = _NPN_UTF8FromIdentifier(identifier);
     if (!name) return false;
+
+    if (CarNPObjectHasHelperMethod(name)) return true;
 
     instance->begin();
     retValue = (instance->getClass()->methodsNamed(name).size() > 0);
@@ -426,8 +438,60 @@ bool _compatible(NPVariant npv, IParamInfo* paramInfo)
     return result;
 }
 
+bool CarNPObjectHelperInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant* args, uint32_t argCount, NPVariant* result)
+{
+    NPUTF8* name;
+    name = _NPN_UTF8FromIdentifier(identifier);
+    if (!name) {
+        LOG_ERROR("CarNPObjectInvoke: unable to get method name from NPIdentifier");
+        return false;
+    }
+
+    if (!strcmp(name,"hasInterface")) {
+        ALOGD("CarNPObjectInvoke====Heper API====method name: %s====",name);
+
+        CarInstance* instance = ExtractCarInstance(npobj);
+        if (!instance) {
+            ALOGD("====_compatible====unable to extract car instance from NPObject %p", npobj);
+            return false;
+        }
+
+        NPObject* _npobj = NPVARIANT_TO_OBJECT(args[0]);
+        CarInstance* _instance = ExtractCarInstance(_npobj);
+        AutoPtr<IInterface> _object = _instance->carInstance();
+        AutoPtr<IInterfaceInfo> _interfaceInfo = *(IInterfaceInfo**)&_object;
+
+        bool bRet = instance->hasInterface(_interfaceInfo);
+
+        BOOLEAN_TO_NPVARIANT(bRet, *result);
+
+        return true;
+    }
+    else if (!strcmp(name,"getClass")) {
+        ALOGD("CarNPObjectInvoke====Heper API====method name: %s====",name);
+
+        CarInstance* instance = ExtractCarInstance(npobj);
+        if (!instance) {
+            ALOGD("====_compatible====unable to extract car instance from NPObject %p", npobj);
+            return false;
+        }
+
+        CarInstance* _instance = instance->getClassInstance();
+
+        result->type = NPVariantType_Object;
+        result->value.objectValue = CarInstanceToNPObject(_instance);
+
+        return true;
+    }
+
+    return false;
+}
+
 bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant* args, uint32_t argCount, NPVariant* result)
 {
+    bool bRet = CarNPObjectHelperInvoke(npobj, identifier, args, argCount, result);
+    if (bRet) return bRet;
+
     ECode ec = NOERROR;
 
     CarInstance* instance = ExtractCarInstance(npobj);
@@ -443,7 +507,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         return false;
     }
 
-    // ALOGD("CarNPObjectInvoke====method name: %s====",name);
+    ALOGD("CarNPObjectInvoke====method name: %s====",name);
 
     instance->begin();
 
@@ -667,7 +731,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                     free(name);
                     return false;
                 }
-                convertNPVariantToCarValue(args[inParamsPos], &jArgs[i]);
+                convertNPVariantToCarValue_In(args[inParamsPos], &jArgs[i]);
                 inParamsPos++;
                 break;
             }
@@ -699,9 +763,11 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
     if (exceptionOccurred) {
         LOG_ERROR("CarNPObjectInvoke: exception occurred!");
+        VOID_TO_NPVARIANT(*result);
         free(name);
         delete[] jArgs;
-        return false;
+        //return false;
+        return true;
     }
 
     convertCarValuesToNPVariant(carMethod, jArgs, outParamsPosBuf, result);

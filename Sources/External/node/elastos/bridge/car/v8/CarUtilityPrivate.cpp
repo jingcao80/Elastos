@@ -93,6 +93,8 @@ void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
             const char* stack_trace_string = ToCString(stack_trace);
             ALOGD("%s\n", stack_trace_string);
         }
+
+        ASSERT(0);
     }
 }
 //--------exception----end----
@@ -113,7 +115,7 @@ WebCore::LocalDOMWindow* getRootObject()
     return rootObject;
 }
 
-void convertNPVariantToCarValue(NPVariant value, CarValue* result)
+void convertNPVariantToCarValue_In(NPVariant value, CarValue* result)
 {
     CarDataType carDataType = 0;
 
@@ -126,19 +128,19 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
         else {
             //TODO:Shoud not reach here: all CObjectWrapper must have typeInfo
             carDataType = CarDataType_Interface;
-            ALOGD("convertNPVariantToCarValue========dataTypeInfo not exist!");
+            ALOGD("convertNPVariantToCarValue_In========dataTypeInfo not exist!");
         }
     }
     else {
         //TODO:Shoud not reach here: all CObjectWrapper must exist
         carDataType = CarDataType_Interface;
-        ALOGD("convertNPVariantToCarValue========mObjectWrapper not exist!");
+        ALOGD("convertNPVariantToCarValue_In========mObjectWrapper not exist!");
     }
 
     NPVariantType type = value.type;
 
     // const char* tmpType = ClassNameFromCarDataType((CarDataType)(carDataType));
-    // ALOGD("====convertNPVariantToCarValue====begin====carDataTypeClassName:%s", tmpType);
+    // ALOGD("====convertNPVariantToCarValue_In====begin====carDataTypeClassName:%s", tmpType);
 
     switch (carDataType) {
         case CarDataType_Int16:
@@ -160,7 +162,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             }
 
             if (result->mTagSetLocalPtr) {
-                ALOGD("convertNPVariantToCarValue========mTagSetLocalPtr====begin====");
+                ALOGD("convertNPVariantToCarValue_In========mTagSetLocalPtr====begin====");
 
                 CarQuintet* carArray;
 
@@ -375,7 +377,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             NPObject* object = NPVARIANT_IS_OBJECT(value) ? NPVARIANT_TO_OBJECT(value) : 0;
 
             if (!object) {
-                ALOGD("convertNPVariantToCarValue CarDataType_ArrayOf 1 error: no input object parameter");
+                ALOGD("convertNPVariantToCarValue_In CarDataType_ArrayOf 1 error: no input object parameter");
                 return;
             }
 
@@ -600,7 +602,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 //#endif // PLATFORM(ANDROID)
         case CarDataType_LocalPtr:  //deprecated
         {
-            ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr====");
+            ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr====");
 
             CarDataType elementType = 0;
             AutoPtr<IDataTypeInfo> aElementDataTypeInfo;
@@ -617,7 +619,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                     break;
                 }
                 case CarDataType_Int32:
-                    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_Int32>====");
+                    ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_Int32>====");
                 /*
                 //to be used after, as a test, all the Int32 input now is Arrayof, and should translate to Array according to the element type of input js array.
                 {
@@ -630,7 +632,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 */
                 case CarDataType_ArrayOf:
                 {
-                    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====");
+                    ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====");
 
                     CarDataType localPtrElementDataType = 0;
                     AutoPtr<IDataTypeInfo> aLocalPtrElementDataTypeInfo;
@@ -641,12 +643,12 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                     }
                     else {
                         //TODO:just for test, to be finished
-                        ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====element type not found, default is INT32 for LocalPtr test flag!");
+                        ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====element type not found, default is INT32 for LocalPtr test flag!");
 
                         localPtrElementDataType = CarDataType_Int32;
                     }
 
-                    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====type:%d", localPtrElementDataType);
+                    ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====type:%d", localPtrElementDataType);
 
                     CarValue* aCarValue = new CarValue();
                     CarQuintet* carArray = NULL;
@@ -655,6 +657,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                     NPVariant npvLength;
                     bool success = _NPN_GetProperty(0, object, _NPN_GetStringIdentifier("length"), &npvLength);
                     if (!success) {
+                        ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====type:%d====error: can not get length!", localPtrElementDataType);
                         // No length property so we don't know how many elements to put into the array.
                         // Treat this as an error.
                         // JSC sends null for an array that is not an array of strings or basic types,
@@ -663,8 +666,10 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                     }
 
                     // Convert to null if the length property is not a number.
-                    if (!NPVARIANT_IS_INT32(npvLength) && !NPVARIANT_IS_DOUBLE(npvLength))
+                    if (!NPVARIANT_IS_INT32(npvLength) && !NPVARIANT_IS_DOUBLE(npvLength)) {
+                        ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====type:%d====error: type of length!", localPtrElementDataType);
                         break;
+                    }
 
                     // Convert to null if the length property is out of bounds.
                     double doubleLength = NPVARIANT_IS_INT32(npvLength) ? NPVARIANT_TO_INT32(npvLength) : NPVARIANT_TO_DOUBLE(npvLength);
@@ -673,10 +678,10 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
 
                     Int32 length = static_cast<Int32>(doubleLength);
 
-                    ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====length:%d", length);
+                    ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====length:%d", length);
 
                     if (localPtrElementDataType <= 0) {
-                        ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====Error: LocalPtrElementDataType");
+                        ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====Error: LocalPtrElementDataType");
                         return;
                     }
 
@@ -744,7 +749,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                             carArray = ArrayOf< AutoPtr<IInterface> >::Alloc(length);
                             break;
                         default:
-                            ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====error: other type:%d", localPtrElementDataType);
+                            ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====error: other type:%d", localPtrElementDataType);
                             break;
                     }
 
@@ -752,7 +757,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                         NPVariant npvValue;
                         bool success = _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
                         if (!success) {
-                            ALOGD("convertNPVariantToCarValue=====CarDataType_LocalPtr<CarDataType_ArrayOf>====%d/%d====error: can not get element value", i, length);
+                            ALOGD("convertNPVariantToCarValue_In=====CarDataType_LocalPtr<CarDataType_ArrayOf>====%d/%d====error: can not get element value", i, length);
                             continue;
                         }
 
@@ -791,7 +796,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                                 //TODO:object
                             default:
                                 //error
-                                ALOGD("convertNPVariantToCarValue=====TODO: NPVariantType:%d", npvValue.type);
+                                ALOGD("convertNPVariantToCarValue_In=====TODO: NPVariantType:%d", npvValue.type);
                                 break;
                         }   //switch
 
@@ -821,7 +826,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 }
                 default:
                 {
-                    ALOGD("=================convertNPVariantToCarValue CarDataType_LocalPtr=========other==============ElementType:%d", elementType);
+                    ALOGD("=================convertNPVariantToCarValue_In CarDataType_LocalPtr=========other==============ElementType:%d", elementType);
                     break;
                 }
             }
@@ -834,35 +839,37 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 case NPVariantType_Void:    //js undefined
                 case NPVariantType_Null:    //js null
                     result->mObjectWrapper = NULL;
-                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:null/undefined js type to car interface");
+                    ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========TODO:null/undefined js type to car interface");
                     break;
                 case NPVariantType_Bool:
                     //Illegal parameter
                     result->mObjectWrapper = NULL;
-                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:js bool to car interface");
+                    ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========TODO:js bool to car interface");
                     break;
                 case NPVariantType_Int32:   //not used in v8
                 case NPVariantType_Double:
                     //Illegal parameter
                     result->mObjectWrapper = NULL;
-                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:js number to car interface");
+                    ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========TODO:js number to car interface");
                     break;
                 case NPVariantType_String:
                 {
                     //Illegal parameter
                     result->mObjectWrapper = NULL;
-                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:js string to car interface");
+                    ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========TODO:js string to car interface");
                     break;
                 }
                 case NPVariantType_Object:
                 {
                     NPObject* obj = NPVARIANT_TO_OBJECT(value);
                     if (obj->_class == WebCore::npScriptObjectClass) {
+                        ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========js object to car interface");
                         //js object, normaly, should be callback proxy
                         CarCallbackObject* cb = CarCallbackObject::S_CreateObject(IInterfaceInfo::Probe(result->mObjectWrapper->getDataTypeInfo()), obj);
                         result->mObjectWrapper->setInstance((IObject*)cb);
                     }
                     else {
+                        ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========car wrapper");
                         //car object wrapper
                         CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
                         CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
@@ -871,7 +878,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                     break;
                 }
                 default :
-                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:the value is not a car wrapper or js type, type:%d", type);
+                    ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========TODO:the value is not a car wrapper or js type, type:%d", type);
                     break;
             }
             break;
@@ -879,7 +886,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
         default :
             break;
     }
-}   //void convertNPVariantToCarValue
+}   //void convertNPVariantToCarValue_In
 
 void convertCarValuesToNPVariant_bak(const CarMethod* method, CarValue* values, ArrayOf<Int32>* outParamsPosBuf, NPVariant* result)
 {
@@ -967,7 +974,7 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
     }
     else if (!alwaysObject && length == 1) {
         pos = (*outParamsPosBuf)[0];
-        _convertCarValueToNPVariant(values[pos], result);
+        _convertCarValueToNPVariant_In(values[pos], result);
     }
     else {
         v8::Isolate* isolate = v8::Isolate::GetCurrent();
@@ -979,7 +986,7 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
 
             //convert CarValue to NPVariant
             NPVariant* npvalue = &(*npvalues)[i];
-            _convertCarValueToNPVariant(values[pos], npvalue);
+            _convertCarValueToNPVariant_In(values[pos], npvalue);
 
             //get output parameter name
             const char* paramName = method->parameterAt(pos).utf8().data();
@@ -1017,7 +1024,7 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
     }
 }   //void convertCarValuesToNPVariant
 
-void _convertCarValueToNPVariant(CarValue& value, NPVariant* result)
+void _convertCarValueToNPVariant_In(CarValue& value, NPVariant* result)
 {
     AutoPtr<IDataTypeInfo> dataTypeInfo;
 
@@ -1032,13 +1039,13 @@ void _convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         else {
             //TODO:Shoud not reach here: all CObjectWrapper must have typeInfo
             carDataType = CarDataType_Interface;
-            ALOGD("_convertCarValueToNPVariant========dataTypeInfo not exist!");
+            ALOGD("_convertCarValueToNPVariant_In========dataTypeInfo not exist!");
         }
     }
     else {
         //TODO:Shoud not reach here: all CObjectWrapper must exist
         carDataType = CarDataType_Interface;
-        ALOGD("_convertCarValueToNPVariant========mObjectWrapper not exist!");
+        ALOGD("_convertCarValueToNPVariant_In========mObjectWrapper not exist!");
     }
 
     //const char* tmpType = ClassNameFromCarDataType((CarDataType)(carDataType));
@@ -1081,10 +1088,10 @@ void _convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         {
             Int32 ttt=123456;
 
-            ALOGD("_convertCarValueToNPVariant========CarDataType_Float====value:%d====%lf====%x====%x", value.value.mFloatValue, value.value.mFloatValue, value.value.mFloatValue, ttt);
+            ALOGD("_convertCarValueToNPVariant_In========CarDataType_Float====value:%d====%lf====%x====%x", value.value.mFloatValue, value.value.mFloatValue, value.value.mFloatValue, ttt);
             result->type = NPVariantType_Double;
             result->value.doubleValue = value.value.mFloatValue;
-            ALOGD("_convertCarValueToNPVariant========CarDataType_Float====doubleValue:%d====%lf====%x====%x", result->value.doubleValue, result->value.doubleValue, result->value.doubleValue, ttt);
+            ALOGD("_convertCarValueToNPVariant_In========CarDataType_Float====doubleValue:%d====%lf====%x====%x", result->value.doubleValue, result->value.doubleValue, result->value.doubleValue, ttt);
             break;
         }
         case CarDataType_Double:
@@ -1484,7 +1491,7 @@ void _convertCarValueToNPVariant(CarValue& value, NPVariant* result)
             break;
         }
     }   //switch (carDataType)
-}   //void _convertCarValueToNPVariant
+}   //void _convertCarValueToNPVariant_In
 
 void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 {
@@ -1500,7 +1507,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
     ParamIOAttribute carIOAttr = value.mIOAttribute;
     switch (carIOAttr) {
     case ParamIOAttribute_In: {
-        _convertCarValueToNPVariant(value, result);
+        _convertCarValueToNPVariant_In(value, result);
         break;
     }   //case ParamIOAttribute_In
     case ParamIOAttribute_CalleeAllocOut:
@@ -1595,295 +1602,296 @@ void convertV8ValuesToCarValues(v8::Handle<v8::Value>* v8Args, Int32 count, CarV
 
 void convertV8ValueToCarValue(v8::Handle<v8::Value>& v8Arg, CarValue& carArg) {
 
+    switch (carArg.mIOAttribute) {
+    case ParamIOAttribute_In:
+        //TODO:
+        break;
+    case ParamIOAttribute_CalleeAllocOut:
+        //TODO:
+    case ParamIOAttribute_CallerAllocOut:
+    {
+        convertV8ValueToCarValue_CallerAllocOut(v8Arg, carArg);
+    }
+    }   //switch
+}
+
+void convertV8ValueToCarValue_CallerAllocOut(v8::Handle<v8::Value>& v8Arg, CarValue& carArg) {
+
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
-            CarDataType ctype = 0;
-            LocalPtr cptr = NULL;
+    CarDataType ctype = carArg.mType;
+    LocalPtr cptr = carArg.value.mLocalPtr;
 
-switch (carArg.mIOAttribute) {
-case ParamIOAttribute_In:
-    //TODO:
-    break;
-case ParamIOAttribute_CalleeAllocOut:
-case ParamIOAttribute_CallerAllocOut:
-{
-                // ctype = mCarArgs[i].mType;
-                // cptr = mCarArgs[i].value.mLocalPtr;
-                ctype = carArg.mType;
-                cptr = carArg.value.mLocalPtr;
+    if (!cptr) {
+        //Info
+        ASSERT(0);
+    }
 
+    v8::Handle<v8::Value> outV8Handle = v8Arg;
 
-                // if (!cptr) continue;
+    v8::Local<v8::Object> outV8Object(v8::Handle<v8::Object>::Cast(outV8Handle));
 
-                // v8::Handle<v8::Value> outV8Handle = argv[i];
-                v8::Handle<v8::Value> outV8Handle = v8Arg;
+    WebCore::V8NPObject* v8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
+    new (&v8NPObject->v8Object) v8::Persistent<v8::Object>();
+    v8NPObject->v8Object.Reset(isolate, outV8Object);
+    v8NPObject->rootObject = getRootObject();
 
-                v8::Local<v8::Object> outV8Object(v8::Handle<v8::Object>::Cast(outV8Handle));
+    NPVariant npvOutValue;
+    _NPN_GetProperty(0, (NPObject*)v8NPObject, _NPN_GetStringIdentifier("data"), &npvOutValue);
 
-                WebCore::V8NPObject* v8NPObject = reinterpret_cast<WebCore::V8NPObject*>(_NPN_CreateObject(NULL, WebCore::npScriptObjectClass));
-                new (&v8NPObject->v8Object) v8::Persistent<v8::Object>();
-                v8NPObject->v8Object.Reset(isolate, outV8Object);
-                v8NPObject->rootObject = getRootObject();
+    switch (ctype) {
+        case CarDataType_Int16:
+        {
+            *(Int16*)cptr = (Int16)NPVARIANT_TO_DOUBLE(npvOutValue);
+            break;
+        }
+        case CarDataType_Int32:
+        {
+            *(Int32*)cptr = (Int32)NPVARIANT_TO_DOUBLE(npvOutValue);
+            break;
+        }
+        case CarDataType_Int64:
+        {
+            *(Int64*)cptr = (Int64)NPVARIANT_TO_DOUBLE(npvOutValue);
+            break;
+        }
+        case CarDataType_Byte:
+        {
+            *(Byte*)cptr = (Byte)NPVARIANT_TO_DOUBLE(npvOutValue);
+            break;
+        }
+        case CarDataType_Float:
+        {
+            *(Float*)cptr = (Float)NPVARIANT_TO_DOUBLE(npvOutValue);
+            break;
+        }
+        case CarDataType_Double:
+        {
+            *(Double*)cptr = (Double)NPVARIANT_TO_DOUBLE(npvOutValue);
+            break;
+        }
+        // case CarDataType_Char8:
+        // {
+        //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Char8====CarDataType:%d", ctype);
+        //     break;
+        // }
+        // case CarDataType_Char16:
+        // {
+        //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Char16====CarDataType:%d", ctype);
+        //     break;
+        // }
+        case CarDataType_Char32:
+        {
+            *(Char32*)cptr = (Char32)NPVARIANT_TO_DOUBLE(npvOutValue);
+            break;
+        }
+        // case CarDataType_CString:
+        // {
+        //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====CString====CarDataType:%d", ctype);
+        //     break;
+        // }
+        case CarDataType_String:
+        {
+            NPString src = NPVARIANT_TO_STRING(npvOutValue);
+            *(Elastos::String*)cptr = Elastos::String(src.UTF8Characters);
+            break;
+        }
+        case CarDataType_Boolean:
+        {
+            *(Boolean*)cptr = (Boolean)NPVARIANT_TO_BOOLEAN(npvOutValue);
+            break;
+        }
+        case CarDataType_EMuid:
+        {
+            ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value===to do====EMuid====CarDataType:%d", ctype);
+            break;
+        }
+        case CarDataType_EGuid:
+        {
+            ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value===to do====EGuid====CarDataType:%d", ctype);
+            break;
+        }
+        case CarDataType_ECode:
+        {
+            ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value===to do====ECode====CarDataType:%d", ctype);
+            break;
+        }
+        case CarDataType_LocalPtr:
+        {
+            ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value===to do====LocalPtr====CarDataType:%d", ctype);
+            break;
+        }
+        case CarDataType_LocalType:
+        {
+            ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value===to do====LocalType====CarDataType:%d", ctype);
+            break;
+        }
+        case CarDataType_Enum:
+        {
+            *(Int32*)cptr = (Int32)NPVARIANT_TO_DOUBLE(npvOutValue);
+            break;
+        }
+        // case CarDataType_StringBuf:
+        // {
+        //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====StringBuf====CarDataType:%d", ctype);
+        //     break;
+        // }
+        case CarDataType_ArrayOf:
+        {
+            NPObject* object = NPVARIANT_IS_OBJECT(npvOutValue) ? NPVARIANT_TO_OBJECT(npvOutValue) : 0;
 
-                //NPObject* v8NPObject = WebCore::convertV8ObjectToNPVariant(outV8Object, NULL, isolate);
+            if (!object) {
+                ALOGD("convertV8ValueToCarValue_CallerAllocOut====CarDataType_ArrayOf==== 1 error: no return object parameter");
+                return;
+            }
 
-                // NPObject* v8NPObject = WebCore::v8ObjectToNPObject(outV8Object);
+            NPVariant npvLength;
+            bool success = _NPN_GetProperty(0, object, _NPN_GetStringIdentifier("length"), &npvLength);
+            if (!success) {
+                // No length property so we don't know how many elements to put into the array.
+                // Treat this as an error.
+                // JSC sends null for an array that is not an array of strings or basic types,
+                // do this also in the unknown length case.
+                break;
+            }
 
-                NPVariant npvOutValue;
-                _NPN_GetProperty(0, (NPObject*)v8NPObject, _NPN_GetStringIdentifier("data"), &npvOutValue);
+            // Convert to null if the length property is not a number.
+            if (!NPVARIANT_IS_INT32(npvLength) && !NPVARIANT_IS_DOUBLE(npvLength)) {
+                break;
+            }
 
-                switch (ctype) {
-                    case CarDataType_Int16:
-                    {
-                        *(Int16*)cptr = (Int16)NPVARIANT_TO_DOUBLE(npvOutValue);
-                        break;
+            // Convert to null if the length property is out of bounds.
+            Int32 length = NPVARIANT_IS_INT32(npvLength) ? NPVARIANT_TO_INT32(npvLength) : (Int32)NPVARIANT_TO_DOUBLE(npvLength);
+            if (length < 0 || length > INT32_MAX) {
+                break;
+            }
+
+            CarQuintet* carArray = NULL;
+
+            AutoPtr<IDataTypeInfo> paramTypeInfo = carArg.mTypeInfo;
+            AutoPtr<IDataTypeInfo> elementDataTypeInfo;
+            (*(ICarArrayInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            CarDataType elementDataType;
+            elementDataTypeInfo->GetDataType(&elementDataType);
+
+            switch(elementDataType) {
+                // case CarDataType_Int16:
+                case CarDataType_Int32:
+                {
+                    ALOGD("convertV8ValueToCarValue_CallerAllocOut====output====ArrayOf======Int32====0");
+
+                    carArray = ArrayOf<Int32>::Alloc(length);
+
+                    // Now iterate over each element and add to the array.
+                    for (Int32 i = 0; i < length; i++) {
+                        NPVariant npvValue;
+                        _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
+                        Int32 iVal = (Int32)NPVARIANT_TO_DOUBLE(npvValue);
+                        reinterpret_cast< ArrayOf<Int32>* >(carArray)->Set(i, iVal);
                     }
-                    case CarDataType_Int32:
-                    {
-                        *(Int32*)cptr = (Int32)NPVARIANT_TO_DOUBLE(npvOutValue);
-                        break;
+
+                    *(ArrayOf<Int32>**)cptr = (ArrayOf<Int32>*)carArray;
+                    _CarQuintet_AddRef(carArray);
+
+                    break;
+                }
+                // case CarDataType_Int64:
+                // case CarDataType_Byte:
+                // case CarDataType_Float:
+                // case CarDataType_Double:
+                // case CarDataType_Char8:
+                // case CarDataType_Char16:
+                // case CarDataType_Char32:
+                // case CarDataType_CString:
+                case CarDataType_String:
+                {
+                    ALOGD("convertV8ValueToCarValue_CallerAllocOut====output====ArrayOf======String====0");
+
+                    carArray = ArrayOf<Elastos::String>::Alloc(length);
+
+                    for (Int32 i = 0; i < length; i++) {
+                        NPVariant npvValue;
+                        _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
+                        NPString src = NPVARIANT_TO_STRING(npvValue);
+                        reinterpret_cast< ArrayOf<Elastos::String>* >(carArray)->Set(i, Elastos::String(src.UTF8Characters));
                     }
-                    case CarDataType_Int64:
-                    {
-                        *(Int64*)cptr = (Int64)NPVARIANT_TO_DOUBLE(npvOutValue);
-                        break;
-                    }
-                    case CarDataType_Byte:
-                    {
-                        *(Byte*)cptr = (Byte)NPVARIANT_TO_DOUBLE(npvOutValue);
-                        break;
-                    }
-                    case CarDataType_Float:
-                    {
-                        *(Float*)cptr = (Float)NPVARIANT_TO_DOUBLE(npvOutValue);
-                        break;
-                    }
-                    case CarDataType_Double:
-                    {
-                        *(Double*)cptr = (Double)NPVARIANT_TO_DOUBLE(npvOutValue);
-                        break;
-                    }
-                    // case CarDataType_Char8:
-                    // {
-                    //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Char8====CarDataType:%d", ctype);
-                    //     break;
-                    // }
-                    // case CarDataType_Char16:
-                    // {
-                    //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Char16====CarDataType:%d", ctype);
-                    //     break;
-                    // }
-                    case CarDataType_Char32:
-                    {
-                        *(Char32*)cptr = (Char32)NPVARIANT_TO_DOUBLE(npvOutValue);
-                        break;
-                    }
-                    // case CarDataType_CString:
-                    // {
-                    //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====CString====CarDataType:%d", ctype);
-                    //     break;
-                    // }
-                    case CarDataType_String:
-                    {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====String====CarDataType:%d", ctype);
-                        break;
-                    }
-                    case CarDataType_Boolean:
-                    {
-                        *(Boolean*)cptr = (Boolean)NPVARIANT_TO_BOOLEAN(npvOutValue);
-                        break;
-                    }
-                    case CarDataType_EMuid:
-                    {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====EMuid====CarDataType:%d", ctype);
-                        break;
-                    }
-                    case CarDataType_EGuid:
-                    {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====EGuid====CarDataType:%d", ctype);
-                        break;
-                    }
-                    case CarDataType_ECode:
-                    {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====ECode====CarDataType:%d", ctype);
-                        break;
-                    }
-                    case CarDataType_LocalPtr:
-                    {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====LocalPtr====CarDataType:%d", ctype);
-                        break;
-                    }
-                    case CarDataType_LocalType:
-                    {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====LocalType====CarDataType:%d", ctype);
-                        break;
-                    }
-                    case CarDataType_Enum:
-                    {
-                        *(Int32*)cptr = (Int32)NPVARIANT_TO_DOUBLE(npvOutValue);
-                        break;
-                    }
-                    // case CarDataType_StringBuf:
-                    // {
-                    //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====StringBuf====CarDataType:%d", ctype);
-                    //     break;
-                    // }
-                    case CarDataType_ArrayOf:
-                    {
-                        NPObject* object = NPVARIANT_IS_OBJECT(npvOutValue) ? NPVARIANT_TO_OBJECT(npvOutValue) : 0;
 
-                        if (!object) {
-                            ALOGD("CarCallbackInterfaceProxy::Callback::Call CarDataType_ArrayOf 1 error: no return object parameter");
-                            return;
-                        }
+                    *(ArrayOf<Elastos::String>**)cptr = (ArrayOf<Elastos::String>*)carArray;
+                    _CarQuintet_AddRef(carArray);
 
-                        NPVariant npvLength;
-                        bool success = _NPN_GetProperty(0, object, _NPN_GetStringIdentifier("length"), &npvLength);
-                        if (!success) {
-                            // No length property so we don't know how many elements to put into the array.
-                            // Treat this as an error.
-                            // JSC sends null for an array that is not an array of strings or basic types,
-                            // do this also in the unknown length case.
-                            break;
-                        }
+                    break;
+                }
+                // case CarDataType_Boolean:
+                // case CarDataType_EMuid:
+                // case CarDataType_EGuid:
+                // case CarDataType_ECode:
+                // case CarDataType_LocalPtr:
+                // case CarDataType_LocalType:
+                // case CarDataType_Enum:
+                // case CarDataType_StringBuf:
+                // case CarDataType_ArrayOf:
+                // case CarDataType_BufferOf:
+                // case CarDataType_MemoryOf:
+                // case CarDataType_CppVector:
+                // case CarDataType_Struct:
+                // case CarDataType_Interface:
+                default:
+                {
+                    ALOGD("convertV8ValueToCarValue_CallerAllocOut====LocalPtr======ArrayOf======other");
+                    break;
+                }
+            }  //switch
 
-                        // Convert to null if the length property is not a number.
-                        if (!NPVARIANT_IS_INT32(npvLength) && !NPVARIANT_IS_DOUBLE(npvLength)) {
-                            break;
-                        }
+            break;
+        }   //case CarDataType_ArrayOf
+        // case CarDataType_BufferOf:
+        // {
+        //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====BufferOf====CarDataType:%d", ctype);
+        //     break;
+        // }
+        // case CarDataType_MemoryBuf:
+        // {
+        //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====MemoryBuf====CarDataType:%d", ctype);
+        //     break;
+        // }
+        case CarDataType_CppVector:
+        {
+            ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value===to do====CppVector====CarDataType:%d", ctype);
+            break;
+        }
+        case CarDataType_Struct:
+        {
+            ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value===to do====Struct====CarDataType:%d", ctype);
+            break;
+        }
+        case CarDataType_Interface:
+        {
+            if (cptr) {
+                ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value====Interface====CarDataType:%d", ctype);
+                if(NPVARIANT_IS_OBJECT(npvOutValue)) {
+                    NPObject* obj = NPVARIANT_TO_OBJECT(npvOutValue);
+                    CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
+                    CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
+                    *(IInterface**)cptr = objectWrapper->getInstance();
+                }
+                else {
+                    ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value====Error:No Valid Return Data!===");
+                    *(IInterface**)cptr = NULL;
+                    //ASSERT(0);
+                }
+            }
+            else {
+                ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value====Interface null====CarDataType:%d", ctype);
+            }
 
-                        // Convert to null if the length property is out of bounds.
-                        Int32 length = NPVARIANT_IS_INT32(npvLength) ? NPVARIANT_TO_INT32(npvLength) : (Int32)NPVARIANT_TO_DOUBLE(npvLength);
-                        if (length < 0 || length > INT32_MAX) {
-                            break;
-                        }
-
-                        CarQuintet* carArray = NULL;
-
-
-                        AutoPtr<IDataTypeInfo> paramTypeInfo = carArg.mTypeInfo;
-                        AutoPtr<IDataTypeInfo> elementDataTypeInfo;
-                        (*(ICarArrayInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
-                        CarDataType elementDataType;
-                        elementDataTypeInfo->GetDataType(&elementDataType);
-
-                        switch(elementDataType) {
-                            // case CarDataType_Int16:
-                            case CarDataType_Int32:
-                            {
-                                ALOGD("CarCallbackInterfaceProxy::Callback::Call======output====ArrayOf======Int32====0");
-
-                                carArray = ArrayOf<Int32>::Alloc(length);
-
-                                // Now iterate over each element and add to the array.
-                                for (Int32 i = 0; i < length; i++) {
-                                    NPVariant npvValue;
-                                    _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
-                                    Int32 iVal = (Int32)NPVARIANT_TO_DOUBLE(npvValue);
-                                    reinterpret_cast< ArrayOf<Int32>* >(carArray)->Set(i, iVal);
-                                }
-
-                                *(ArrayOf<Int32>**)cptr = (ArrayOf<Int32>*)carArray;
-                                _CarQuintet_AddRef(carArray);
-
-                                break;
-                            }
-                            // case CarDataType_Int64:
-                            // case CarDataType_Byte:
-                            // case CarDataType_Float:
-                            // case CarDataType_Double:
-                            // case CarDataType_Char8:
-                            // case CarDataType_Char16:
-                            // case CarDataType_Char32:
-                            // case CarDataType_CString:
-                            case CarDataType_String:
-                            {
-                                ALOGD("CarCallbackInterfaceProxy::Callback::Call======output====ArrayOf======String====0");
-
-                                carArray = ArrayOf<Elastos::String>::Alloc(length);
-
-                                for (Int32 i = 0; i < length; i++) {
-                                    NPVariant npvValue;
-                                    _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
-                                    NPString src = NPVARIANT_TO_STRING(npvValue);
-                                    reinterpret_cast< ArrayOf<Elastos::String>* >(carArray)->Set(i, Elastos::String(src.UTF8Characters));
-                                }
-
-                                *(ArrayOf<Elastos::String>**)cptr = (ArrayOf<Elastos::String>*)carArray;
-                                _CarQuintet_AddRef(carArray);
-
-                                break;
-                            }
-                            // case CarDataType_Boolean:
-                            // case CarDataType_EMuid:
-                            // case CarDataType_EGuid:
-                            // case CarDataType_ECode:
-                            // case CarDataType_LocalPtr:
-                            // case CarDataType_LocalType:
-                            // case CarDataType_Enum:
-                            // case CarDataType_StringBuf:
-                            // case CarDataType_ArrayOf:
-                            // case CarDataType_BufferOf:
-                            // case CarDataType_MemoryOf:
-                            // case CarDataType_CppVector:
-                            // case CarDataType_Struct:
-                            // case CarDataType_Interface:
-                            default:
-                            {
-                                ALOGD("CarCallbackInterfaceProxy::ReadParam======LocalPtr======ArrayOf======other");
-                                break;
-                            }
-                        }  //switch
-
-                        break;
-                    }   //case CarDataType_ArrayOf
-                    // case CarDataType_BufferOf:
-                    // {
-                    //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====BufferOf====CarDataType:%d", ctype);
-                    //     break;
-                    // }
-                    // case CarDataType_MemoryBuf:
-                    // {
-                    //     ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====MemoryBuf====CarDataType:%d", ctype);
-                    //     break;
-                    // }
-                    case CarDataType_CppVector:
-                    {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====CppVector====CarDataType:%d", ctype);
-                        break;
-                    }
-                    case CarDataType_Struct:
-                    {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Struct====CarDataType:%d", ctype);
-                        break;
-                    }
-                    case CarDataType_Interface:
-                    {
-                        if (cptr) {
-                            ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value====Interface====CarDataType:%d", ctype);
-                            NPObject* obj = NPVARIANT_TO_OBJECT(npvOutValue);
-                            CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
-                            CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
-
-                            *(IInterface**)cptr = objectWrapper->getInstance();
-                        }
-                        else {
-                            ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value====Interface null====CarDataType:%d", ctype);
-                        }
-
-                        break;
-                    }
-                    default: {
-                        ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do===other====CarDataType:%d", ctype);
-                        break;
-                    }
-                }   //switch (ctype)
-    break;
-}   //case ParamIOAttribute_CalleeAllocOut||ParamIOAttribute_CallerAllocOut
-
-}   //switch (carArg.mIOAttribute)
-
-}   //void convertV8ValueToCarValue
+            break;
+        }
+        default: {
+            ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do===other====CarDataType:%d", ctype);
+            break;
+        }
+    }   //switch (ctype)
+}   //void convertV8ValueToCarValue_CallerAllocOut
 
 } // namespace Bindings
 } // namespace JSC

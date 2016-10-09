@@ -47,7 +47,7 @@ module.exports = function(aoElastos, aoActivity){
         }
     }
 // import android.database.DataSetObserver;
-    class DataSetObserver {}
+    //class DataSetObserver {}
 // import android.os.Parcelable;
     class Parcelable {}
 // import android.view.View;

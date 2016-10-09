@@ -1,4 +1,3 @@
-
 #include "ElNode.h"
 #include "config.h"
 
@@ -75,9 +74,9 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
     AutoPtr<IMethodInfo> aMethod;
     aMethod = method->methodInfo();
 
-    Elastos::String temp_name;
-    aMethod->GetName(&temp_name);
-    //ALOGD("CarInstanceV8::invokeMethod====name:%s", temp_name.string());
+    Elastos::String methodName;
+    aMethod->GetName(&methodName);
+    //ALOGD("CarInstanceV8::invokeMethod====name:%s", methodName.string());
 
     AutoPtr<IArgumentList> argumentList = NULL;
     if (numParams > 0) {
@@ -175,10 +174,12 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                         case CarDataType_Interface:
                         {
                             if (args[i].mObjectWrapper) {
+                                ALOGD("CarInstanceV8::invokeMethod====ParamIOAttribute_In====CarDataType_Interface====Wrapper====");
                                 AutoPtr<IInterface> tmpInstance = args[i].mObjectWrapper->getInstance();
                                 ec = argumentList->SetInputArgumentOfObjectPtr(i, tmpInstance.Get());
                             }
                             else {
+                                ALOGD("CarInstanceV8::invokeMethod====ParamIOAttribute_In====CarDataType_Interface====no Wrapper====");
                                 ec = argumentList->SetInputArgumentOfObjectPtr(i, NULL);
                             }
                             break;
@@ -290,7 +291,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
             if ( FAILED(ec) || *didRaiseUncaughtException) {
                 Elastos::String nameBuf;
                 aParameter->GetName(&nameBuf);
-                ALOGD("CarInstanceV8::invokeMethod SetArgument error %s", (const char*)nameBuf);
+                ALOGD("CarInstanceV8::invokeMethod====SetArgument error====%s", (const char*)nameBuf);
                 return;
             }
 
@@ -310,9 +311,9 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
         // ALOGD("====CarInstanceV8::invokeMethod====LOCAL====");
         ec = aMethod->Invoke(object, argumentList);
         if (FAILED(ec)) {
-            ALOGD("CarInstanceV8::invokeMethod========invoke failed========");
-            Elastos::String methodNameBuf;
-            aMethod->GetName(&methodNameBuf);
+            //Elastos::String methodNameBuf;
+            //aMethod->GetName(&methodNameBuf);
+            ALOGD("CarInstanceV8::invokeMethod====invoke failed====%s", methodName.string());
             *didRaiseUncaughtException = true;
             return;
         }
@@ -395,6 +396,55 @@ bool CarInstanceV8::hasInterface(IInterfaceInfo* interfaceInfo)
     }
 
     return result;
+}
+
+CarInstance* CarInstanceV8::getClassInstance() {
+    ALOGD("CarInstanceV8::getClassInstance====begin====");
+
+    CarInstance* ret = NULL;
+
+    ECode ec = NOERROR;
+
+    CobjectWrapper* wrap;
+
+    AutoPtr<IInterface> object = this->carInstance();
+
+    AutoPtr<IModuleInfo> moduleInfo;
+    ec = _CReflector_AcquireModuleInfo(Elastos::String("/system/lib/Elastos.Runtime.eco"), (IModuleInfo**)&moduleInfo);
+    if (FAILED(ec)) {
+        ALOGD("====CarInstanceV8::getClassInstance====Acquire module info failed!");
+        return ret;
+    }
+
+    AutoPtr<IClassInfo> classInfo;
+    ec = CObject::ReflectClassInfo(object, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        AutoPtr<IInterfaceInfo> interfaceInfo;
+        interfaceInfo = IInterfaceInfo::Probe(this->getInstance()->getDataTypeInfo());
+        // if (FAILED(ec)) {
+        //     ALOGD("CarInstanceV8::getClassInstance====failed====");
+        //     //return ret;
+        // }
+        // else {
+            ALOGD("====CarInstanceV8::getClassInstance====return interface info!");
+            AutoPtr<IInterfaceInfo> interfaceInfo_1;
+            moduleInfo->GetInterfaceInfo(Elastos::String("IInterfaceInfo"), (IInterfaceInfo**)&interfaceInfo_1);
+            wrap = new CobjectWrapper(interfaceInfo, interfaceInfo_1);
+        // }
+    }
+    else {
+        ALOGD("====CarInstanceV8::getClassInstance====return class info!");
+        AutoPtr<IInterfaceInfo> interfaceInfo_1;
+        moduleInfo->GetInterfaceInfo(Elastos::String("IClassInfo"), (IInterfaceInfo**)&interfaceInfo_1);
+        wrap = new CobjectWrapper(classInfo, interfaceInfo_1);
+    }
+
+    //CobjectWrapper(IInterface*, IDataTypeInfo*);
+    ret = new CarInstanceV8(wrap, false);
+
+    ALOGD("CarInstanceV8::getClassInstance====end====");
+
+    return ret;
 }
 
 #endif // ENABLE(CAR_BRIDGE)

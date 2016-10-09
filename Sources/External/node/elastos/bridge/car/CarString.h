@@ -1,4 +1,3 @@
-
 #ifndef __CARSTRING_H__
 #define __CARSTRING_H__
 

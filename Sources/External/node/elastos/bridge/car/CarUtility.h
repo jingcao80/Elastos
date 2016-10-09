@@ -1,4 +1,3 @@
-
 #ifndef __CARUTILITY_H__
 #define __CARUTILITY_H__
 

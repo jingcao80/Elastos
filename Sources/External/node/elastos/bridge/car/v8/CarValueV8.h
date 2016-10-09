@@ -119,6 +119,12 @@ struct CarValue
     AutoPtr<IDataTypeInfo> mTypeInfo;   //to be deleted after quintet resolved
 };
 
+struct DispParams
+{
+    CarValue* rgvarg;
+    Elastos::Int32 cArgs;
+};
+
 } // namespace Bindings
 } // namespace JSC
 

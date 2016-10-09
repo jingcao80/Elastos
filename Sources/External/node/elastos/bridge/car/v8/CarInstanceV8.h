@@ -1,4 +1,3 @@
-
 #ifndef __CARINSTANCEV8_H__
 #define __CARINSTANCEV8_H__
 
@@ -26,9 +25,14 @@ public:
 
     IInterface* carInstance() const;
 
-    CobjectWrapper* getInstance() const { return mInstance->get(); }
+    CobjectWrapper* getInstance() const {
+        ASSERT(mInstance);
+        return mInstance->get();
+    }
 
     virtual bool hasInterface(IInterfaceInfo* interfaceInfo);
+
+    virtual CarInstance* getClassInstance();
 
 protected:
     RefPtr<CobjectWrapper> mInstance;

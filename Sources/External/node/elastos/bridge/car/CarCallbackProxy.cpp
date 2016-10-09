@@ -195,7 +195,6 @@ ECode CarCallbackInterfaceProxy::ReadParam(
 
         switch (paramIOAttr) {
         case ParamIOAttribute_In: {
-        //if (paramIOAttr == ParamIOAttribute_In) { // [in]
             switch (paramDataType) {
                 case CarDataType_Int16:
                 {
@@ -362,6 +361,14 @@ ECode CarCallbackInterfaceProxy::ReadParam(
     return NOERROR;
 }
 
+// Callback in the main(webview/node.js) thread.
+static void FireCallback(void* payload)
+{
+    CarCallbackInterfaceProxy::Callback* callback = (CarCallbackInterfaceProxy::Callback*)payload;
+    callback->Call();
+    delete callback;
+}
+
 ECode CarCallbackInterfaceProxy::GetMethodInfoByIndex(
     /* [in] */ UInt32 index,
     /* [out] */ IMethodInfo** methodInfo)
@@ -369,6 +376,38 @@ ECode CarCallbackInterfaceProxy::GetMethodInfoByIndex(
     if (mMethodInfos == NULL) {
         Int32 count;
         mInterfaceInfo->GetMethodCount(&count);
+
+        if (count == 0) {
+            Int32 paramCount = 1;
+            CarValue* pCarArgs = new CarValue[paramCount];
+
+            pCarArgs[0].mTypeInfo = mInterfaceInfo;
+            pCarArgs[0].mType = CarDataType_Interface;
+            pCarArgs[0].mIOAttribute = ParamIOAttribute_CallerAllocOut;
+            pCarArgs[0].mObjectWrapper = new CobjectWrapper(NULL,mInterfaceInfo);
+
+            pCarArgs[0].value.mLocalPtr = &mInterfaceInfo;
+
+            Callback* callback = new Callback(mOwner, Elastos::String("GetCallbackInterfaceInfo"), pCarArgs, paramCount);
+
+            if (mOwner->mMainThread == pthread_self()) {
+                FireCallback((void*)callback);
+            }
+            else {
+                CarSharedClient::EnqueueFunctionPtr(FireCallback, (void*)callback);
+            }
+
+            Elastos::String interfaceName;
+            mInterfaceInfo->GetName(&interfaceName);
+            ALOGD("CarCallbackInterfaceProxy::GetMethodInfoByIndex====JS interfaceName:%s====", interfaceName.string());
+
+            mInterfaceInfo->GetMethodCount(&count);
+            if (count == 0) {
+                ALOGD("CarCallbackInterfaceProxy::GetMethodInfoByIndex====error:no valid interface!");
+                ASSERT(0);
+            }
+        }
+
         mMethodInfos = ArrayOf<IMethodInfo*>::Alloc(count);
         mInterfaceInfo->GetAllMethodInfos(mMethodInfos);
     }
@@ -376,14 +415,6 @@ ECode CarCallbackInterfaceProxy::GetMethodInfoByIndex(
     *methodInfo = (*mMethodInfos)[index];
 
     return NOERROR;
-}
-
-// Callback in the main(webview/node.js) thread.
-static void FireCallback(void* payload)
-{
-    CarCallbackInterfaceProxy::Callback* callback = (CarCallbackInterfaceProxy::Callback*)payload;
-    callback->Call();
-    delete callback;
 }
 
 //Run in Elastos UI thread
@@ -403,10 +434,10 @@ ECode CarCallbackInterfaceProxy::ProxyEntry(
     CarValue* pCarArgs;
     ECode ec = pThis->ReadParam(methodInfo, puArgs, &pCarArgs);
 
-    // if (FAILED(ec)) {
-    //     ALOGD("CarCallbackInterfaceProxy::ProxyEntry reads parameters failed");
-    //     return ec;
-    // }
+    if (FAILED(ec)) {
+        ALOGD("CarCallbackInterfaceProxy::ProxyEntry reads parameters failed");
+        return ec;
+    }
 
     Callback* callback = new Callback(pThis->mOwner, methodInfo, pCarArgs);
 
@@ -436,19 +467,13 @@ CarCallbackInterfaceProxy::Callback::~Callback()
 
 void CarCallbackInterfaceProxy::Callback::Call()
 {
-    ALOGD("CarCallbackInterfaceProxy::Callback::Call====begin====tid:%d", pthread_self());
+    ALOGD("CarCallbackInterfaceProxy::Callback::Call====begin====methodName:%s====paramCount:%d", mMethodName.string(), mParamCount);
 
     v8::Isolate* isolate = mObject->mIsolate;
     v8::Isolate::Scope isolateScope(isolate);
     v8::HandleScope scope(isolate);
     v8::Handle<v8::Context> context = isolate->GetCurrentContext();
     v8::Context::Scope contextScope(context);
-
-    Elastos::String methodName;
-    mMethodInfo->GetName(&methodName);
-    ALOGD("CarCallbackInterfaceProxy::Callback::Call====name:%s====", methodName.string());
-
-    mMethodInfo->GetParamCount(&mParamCount);
 
     convertCarValuesToNPVariants(mCarArgs, mParamCount, &mNPParams);
 
@@ -458,7 +483,7 @@ void CarCallbackInterfaceProxy::Callback::Call()
         v8::Local<v8::Object> thisObject = v8::Local<v8::Object>::New(isolate,v8NPThisObject->v8Object);;
 
         NPVariant npvValue;
-        _NPN_GetProperty(0, obj, _NPN_GetStringIdentifier((const char*)methodName), &npvValue);
+        _NPN_GetProperty(0, obj, _NPN_GetStringIdentifier((const char*)mMethodName), &npvValue);
 
         if (npvValue.type == NPVariantType_Object) {
             WebCore::V8NPObject* v8NPFuncObject = (WebCore::V8NPObject*)(NPVARIANT_TO_OBJECT(npvValue));
@@ -498,7 +523,7 @@ void CarCallbackInterfaceProxy::Callback::Call()
         ALOGD("CarCallbackInterfaceProxy::Callback::Call object is not js object");
     }
 
-    ALOGD("CarCallbackInterfaceProxy::Callback::Call====end====");
+    //ALOGD("CarCallbackInterfaceProxy::Callback::Call====end====");
 }
 
 v8::Handle<v8::Value>* CarCallbackInterfaceProxy::Callback::ConvertParams()
@@ -546,7 +571,12 @@ PInterface CarCallbackObject::Probe(
     else if (riid == EIID_CarCallbackObject) {
         return (IObject*)this;
     }
+    else {
+        ALOGD("====CarCallbackObject::Probe==begin==error: no interface found!====return mVptr");
+        return (IInterface*)&mInterface->mVptr;
+    }
 
+    ALOGD("====CarCallbackObject::Probe==begin==error: no interface found!");
     return NULL;
 }
 

@@ -51,8 +51,22 @@ module.exports = function(aoElastos, aoActivity){
             // return oRet;
         }
 
-        static set CallbackInterfaceName() {
-            return "Elastos.Droid.Database.IDataSetObserver";
+        GetCallbackInterfaceInfo(result) {
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====begin====");
+            var oMuduleInfo = aoElastos.Droid.Get();
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====0====");
+            var oInterfaceInfo = oMuduleInfo.GetInterfaceInfo("Elastos.Droid.Database.IDataSetObserver");
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====1===="+oInterfaceInfo.GetName());
+            var oRet = oInterfaceInfo.GetInternalObject();
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====2====");
+            result.data = oRet;
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====end====");
+        }
+        GetCallbackInterfaceName(result) {
+            elog("====DataSetObserver::GetCallbackInterfaceName====begin====");
+            result.data = "Elastos.Droid.Database.IDataSetObserver";
+            //result.data = 345;
+            elog("====DataSetObserver::GetCallbackInterfaceName====end====");
         }
     };
 // import android.graphics.Canvas;
@@ -449,6 +463,7 @@ class ViewPager extends ViewGroup {
     static get COMPARATOR() {
         if (ViewPager._COMPARATOR_) return ViewPager._COMPARATOR;
 
+        ViewPager._COMPARATOR_ = true;
         ViewPager._COMPARATOR = new class _tmp extends Comparator {
             compare(lhs, rhs) {
                 return lhs.position - rhs.position;
@@ -1794,6 +1809,8 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
     DataSetChanged() {
         // This method only gets called if our observer is attached, so mAdapter is non-null.
 
+        elog("====ViewPager::DataSetChanged====begin====");
+
         var adapterCount = this.mAdapter.GetCount();
         this.mExpectedAdapterCount = adapterCount;
         var needPopulate = this.mItems.GetSize() < mOffscreenPageLimit * 2 + 1 &&
@@ -1860,6 +1877,8 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
             setCurrentItemInternal(newCurrItem, false, true);
             requestLayout();
         }
+
+        elog("====ViewPager::DataSetChanged====end====");
     }   //function dataSetChanged
 
 //     void populate() {
@@ -4927,11 +4946,13 @@ CObject.showMethods(this.mScroller);
     get PagerObserver() {
         if (this._PagerObserver) return this._PagerObserver;
         this._PagerObserver = class PagerObserver extends DataSetObserver {
-            onChanged() {
-                dataSetChanged();
+            OnChanged() {
+                elog("====PagerObserver::OnChanged====");
+                this.DataSetChanged();
             }
-            onInvalidated() {
-                dataSetChanged();
+            OnInvalidated() {
+                elog("====PagerObserver::OnInvalidated====");
+                this.DataSetChanged();
             }
         };
         return this._PagerObserver;

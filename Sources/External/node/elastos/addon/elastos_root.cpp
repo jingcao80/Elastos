@@ -633,6 +633,11 @@ void GetVersion(const FunctionCallbackInfo<Value>& info) {
     return;
 }
 
+void Assert(const FunctionCallbackInfo<Value>& info) {
+    ASSERT(0);
+    return;
+}
+
 }   //JSC
 }   //Bindings
 
@@ -664,6 +669,7 @@ void init(v8::Handle<v8::Object> exports, v8::Handle<v8::Object> module) {
     NODE_SET_METHOD(exports, "SetEnqueueUIMessagePtr", JSC::Bindings::SetEnqueueUIMessagePtr);
     NODE_SET_METHOD(exports, "GetNodeBridge", JSC::Bindings::GetNodeBridge);
     NODE_SET_METHOD(exports, "GetVersion", JSC::Bindings::GetVersion);
+    NODE_SET_METHOD(exports, "Assert", JSC::Bindings::Assert);
 }
 
 NODE_MODULE(binding, init);

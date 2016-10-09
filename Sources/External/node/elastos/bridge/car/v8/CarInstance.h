@@ -1,4 +1,3 @@
-
 #ifndef __CARINSTANCE_H__
 #define __CARINSTANCE_H__
 
@@ -37,6 +36,8 @@ public:
     virtual CobjectWrapper* getInstance() const = 0;
 
     virtual bool hasInterface(IInterfaceInfo* interfaceInfo) = 0;
+
+    virtual CarInstance* getClassInstance() = 0;
 };
 
 } // namespace Bindings

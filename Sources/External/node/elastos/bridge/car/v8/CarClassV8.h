@@ -1,4 +1,3 @@
-
 #ifndef __CARCLASSV8_H__
 #define __CARCLASSV8_H__
 

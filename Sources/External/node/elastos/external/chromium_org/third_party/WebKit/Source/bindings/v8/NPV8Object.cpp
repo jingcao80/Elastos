@@ -381,18 +381,24 @@ bool _NPN_GetProperty(NPP npp, NPObject* npObject, NPIdentifier propertyName, NP
     //v8::Local<v8::String>
     //static v8::Local<v8::String> npIdentifierToV8Identifier(NPIdentifier name, v8::Isolate* isolate)
 
-    NPUTF8* name;
-    name = _NPN_UTF8FromIdentifier(propertyName);
-    if (!name) {
-        ALOGD("====_NPN_GetProperty======can not found name====");
-        return false;
+    NPUTF8* sName = _NPN_UTF8FromIdentifier(propertyName);
+    if (!sName) {
+        int32_t iName = _NPN_IntFromIdentifier(propertyName);
+        if (iName > -1) {
+            ALOGD("====_NPN_GetProperty======iName====%d", iName);
+        }
+        else {
+            ALOGD("====_NPN_GetProperty======can not found name====");
+            return false;
+        }
     }
-    ALOGD("====_NPN_GetProperty======name====%s", name);
+    else {
+        ALOGD("====_NPN_GetProperty======sName====%s", sName);
+    }
 
     //--------whm test end--------
 
     if (V8NPObject* object = npObjectToV8NPObject(npObject)) {
-        ALOGD("====_NPN_GetProperty======TODO====TODO====TODO====TODO====");
         v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
         //--------whm by whm begin--------
