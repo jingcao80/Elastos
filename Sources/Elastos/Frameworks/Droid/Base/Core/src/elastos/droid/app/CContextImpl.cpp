@@ -1315,8 +1315,7 @@ ECode CContextImpl::StartActivity(
     VALIDATE_NOT_NULL(intent);
 
     WarnIfCallingFromSystemProcess();
-    StartActivity(intent, NULL);
-    return NOERROR;
+    return StartActivity(intent, NULL);
 }
 
 ECode CContextImpl::StartActivity(
@@ -1342,10 +1341,9 @@ ECode CContextImpl::StartActivity(
     AutoPtr<IContext> ctx = GetOuterContext();
     AutoPtr<IInstrumentationActivityResult> instrumentationResult;
     AutoPtr<IActivity> actvity;
-    instrumentation->ExecStartActivity(
+    return instrumentation->ExecStartActivity(
         ctx, IBinder::Probe(appThread), NULL,
         actvity, intent, -1, options, (IInstrumentationActivityResult**)&instrumentationResult);
-    return NOERROR;
 }
 
 ECode CContextImpl::StartActivityAsUser(
@@ -1373,11 +1371,10 @@ ECode CContextImpl::StartActivityAsUser(
     intent->ResolveTypeIfNeeded(resolver, &type);
     Int32 id, result;
     user->GetIdentifier(&id);
-    ActivityManagerNative::GetDefault()->StartActivityAsUser(
+    return ActivityManagerNative::GetDefault()->StartActivityAsUser(
         appThread, packageName, intent, type,
         NULL, String(NULL), 0, IIntent::FLAG_ACTIVITY_NEW_TASK, NULL, options,
         id, &result);
-    return NOERROR;
 //    } catch (RemoteException re) {
 //    }
 }
@@ -1388,8 +1385,7 @@ ECode CContextImpl::StartActivities(
     VALIDATE_NOT_NULL(intents);
 
     WarnIfCallingFromSystemProcess();
-    StartActivities(intents, NULL);
-    return NOERROR;
+    return StartActivities(intents, NULL);
 }
 
 ECode CContextImpl::StartActivities(
@@ -1414,9 +1410,8 @@ ECode CContextImpl::StartActivities(
     AutoPtr<IApplicationThread> appThread;
     mMainThread->GetApplicationThread((IApplicationThread**)&appThread);
     AutoPtr<IContext> ctx = GetOuterContext();
-    instrumentation->ExecStartActivities(
+    return instrumentation->ExecStartActivities(
         ctx, IBinder::Probe(appThread.Get()), NULL, NULL, intents, options);
-    return NOERROR;
 }
 
 ECode CContextImpl::StartActivitiesAsUser(
@@ -1440,10 +1435,9 @@ ECode CContextImpl::StartActivitiesAsUser(
     Int32 id;
     userHandle->GetIdentifier(&id);
     AutoPtr<IContext> ctx = GetOuterContext();
-    instrumentation->ExecStartActivitiesAsUser(
+    return instrumentation->ExecStartActivitiesAsUser(
         ctx, IBinder::Probe(appThread.Get()), NULL,
         NULL, intents, options, id);
-    return NOERROR;
 }
 
 ECode CContextImpl::StartIntentSender(
@@ -1506,13 +1500,12 @@ ECode CContextImpl::SendBroadcast(
     Int32 id;
     GetUserId(&id);
     Int32 result;
-    ActivityManagerNative::GetDefault()->BroadcastIntent(
+    return ActivityManagerNative::GetDefault()->BroadcastIntent(
         appThread, intent, resolvedType, NULL, IActivity::RESULT_OK,
         String(NULL), NULL, String(NULL),
         IAppOpsManager::OP_NONE, FALSE, FALSE, id, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendBroadcast(
@@ -1531,13 +1524,12 @@ ECode CContextImpl::SendBroadcast(
     Int32 id;
     GetUserId(&id);
     Int32 result;
-    ActivityManagerNative::GetDefault()->BroadcastIntent(
+    return ActivityManagerNative::GetDefault()->BroadcastIntent(
         appThread, intent, resolvedType, NULL, IActivity::RESULT_OK,
         String(NULL), NULL, receiverPermission,
         IAppOpsManager::OP_NONE, FALSE, FALSE, id, &result);
 //     } catch (RemoteException e) {
 //     }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendOrderedBroadcast(
@@ -1556,13 +1548,12 @@ ECode CContextImpl::SendOrderedBroadcast(
     Int32 id;
     GetUserId(&id);
     Int32 result;
-    ActivityManagerNative::GetDefault()->BroadcastIntent(
+    return ActivityManagerNative::GetDefault()->BroadcastIntent(
         appThread, intent, resolvedType, NULL, IActivity::RESULT_OK,
         String(NULL), NULL, receiverPermission,
         IAppOpsManager::OP_NONE, TRUE, FALSE, id, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendOrderedBroadcast(
@@ -1622,13 +1613,12 @@ ECode CContextImpl::SendOrderedBroadcast(
     Int32 id;
     GetUserId(&id);
     Int32 result;
-    ActivityManagerNative::GetDefault()->BroadcastIntent(
+    return ActivityManagerNative::GetDefault()->BroadcastIntent(
         appThread, intent, resolvedType, rd,
         initialCode, initialData, initialExtras, receiverPermission, appOp,
         TRUE, FALSE, id, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendBroadcastAsUser(
@@ -1646,12 +1636,11 @@ ECode CContextImpl::SendBroadcastAsUser(
         Int32 identifier;
         user->GetIdentifier(&identifier);
         Int32 result;
-        ActivityManagerNative::GetDefault()->BroadcastIntent(appThread,
+        return ActivityManagerNative::GetDefault()->BroadcastIntent(appThread,
             intent, resolvedType, NULL, IActivity::RESULT_OK, String(NULL),
             NULL, String(NULL), IAppOpsManager::OP_NONE, FALSE, FALSE, identifier, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendBroadcastAsUser(
@@ -1670,13 +1659,12 @@ ECode CContextImpl::SendBroadcastAsUser(
         Int32 identifier = 0;
         user->GetIdentifier(&identifier);
         Int32 result;
-        ActivityManagerNative::GetDefault()->BroadcastIntent(
+        return ActivityManagerNative::GetDefault()->BroadcastIntent(
             appThread, intent, resolvedType, NULL,
             IActivity::RESULT_OK, String(NULL), NULL, receiverPermission,
             IAppOpsManager::OP_NONE, FALSE, FALSE, identifier, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendOrderedBroadcastAsUser(
@@ -1738,13 +1726,12 @@ ECode CContextImpl::SendOrderedBroadcastAsUser(
     Int32 identifier = 0;
     user->GetIdentifier(&identifier);
     Int32 result;
-    ActivityManagerNative::GetDefault()->BroadcastIntent(
+    return ActivityManagerNative::GetDefault()->BroadcastIntent(
         appThread, intent, resolvedType, rd,
         initialCode, initialData, initialExtras, receiverPermission,
         appOp, TRUE, FALSE, identifier, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendStickyBroadcast(
@@ -1762,13 +1749,12 @@ ECode CContextImpl::SendStickyBroadcast(
     Int32 id = 0;
     GetUserId(&id);
     Int32 result;
-    ActivityManagerNative::GetDefault()->BroadcastIntent(
+    return ActivityManagerNative::GetDefault()->BroadcastIntent(
         appThread, intent, resolvedType, NULL,
         IActivity::RESULT_OK, String(NULL), NULL, String(NULL),
         IAppOpsManager::OP_NONE, FALSE, TRUE, id, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendStickyOrderedBroadcast(
@@ -1813,13 +1799,12 @@ ECode CContextImpl::SendStickyOrderedBroadcast(
     Int32 id;
     GetUserId(&id);
     Int32 result;
-    ActivityManagerNative::GetDefault()->BroadcastIntent(
+    return ActivityManagerNative::GetDefault()->BroadcastIntent(
         appThread, intent, resolvedType, rd,
         initialCode, initialData, initialExtras, String(NULL),
         IAppOpsManager::OP_NONE, TRUE, TRUE, id, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::RemoveStickyBroadcast(
@@ -1843,11 +1828,10 @@ ECode CContextImpl::RemoveStickyBroadcast(
     mMainThread->GetApplicationThread((IApplicationThread**)&appThread);
     Int32 id;
     GetUserId(&id);
-    ActivityManagerNative::GetDefault()->UnbroadcastIntent(
+    return ActivityManagerNative::GetDefault()->UnbroadcastIntent(
             appThread, intent, id);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendStickyBroadcastAsUser(
@@ -1865,13 +1849,12 @@ ECode CContextImpl::SendStickyBroadcastAsUser(
         Int32 identifier;
         user->GetIdentifier(&identifier);
         Int32 result;
-        ActivityManagerNative::GetDefault()->BroadcastIntent(
+        return ActivityManagerNative::GetDefault()->BroadcastIntent(
             appThread, intent, resolvedType, NULL,
             IActivity::RESULT_OK, String(NULL), NULL, String(NULL),
             IAppOpsManager::OP_NONE, FALSE, TRUE, identifier, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::SendStickyOrderedBroadcastAsUser(
@@ -1916,13 +1899,12 @@ ECode CContextImpl::SendStickyOrderedBroadcastAsUser(
     Int32 identifier;
     user->GetIdentifier(&identifier);
     Int32 result;
-    ActivityManagerNative::GetDefault()->BroadcastIntent(
+    return ActivityManagerNative::GetDefault()->BroadcastIntent(
         appThread, intent, resolvedType, rd,
         initialCode, initialData, initialExtras, String(NULL),
         IAppOpsManager::OP_NONE, TRUE, TRUE, identifier, &result);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::RemoveStickyBroadcastAsUser(
@@ -1947,11 +1929,10 @@ ECode CContextImpl::RemoveStickyBroadcastAsUser(
         mMainThread->GetApplicationThread((IApplicationThread**)&appThread);
         Int32 identifier;
         user->GetIdentifier(&identifier);
-        ActivityManagerNative::GetDefault()->UnbroadcastIntent(
+        return ActivityManagerNative::GetDefault()->UnbroadcastIntent(
                 appThread, intent, identifier);
 //    } catch (RemoteException e) {
 //    }
-    return NOERROR;
 }
 
 ECode CContextImpl::RegisterReceiver(
@@ -2027,13 +2008,12 @@ ECode CContextImpl::RegisterReceiverInternal(
 //     try {
     AutoPtr<IApplicationThread> appThread;
     mMainThread->GetApplicationThread((IApplicationThread**)&appThread);
-    ActivityManagerNative::GetDefault()->RegisterReceiver(
+    return ActivityManagerNative::GetDefault()->RegisterReceiver(
             appThread, mBasePackageName,
             rd, filter, broadcastPermission, userId, intent);
 //     } catch (RemoteException e) {
 //         return NULL;
 //     }
-    return NOERROR;
 }
 
 ECode CContextImpl::UnregisterReceiver(

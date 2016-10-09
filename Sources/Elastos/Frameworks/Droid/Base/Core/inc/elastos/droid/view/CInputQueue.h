@@ -54,6 +54,8 @@ public:
 
     ~CInputQueue();
 
+    CARAPI constructor();
+
     /** @hide */
     CARAPI Dispose();
 

@@ -29,20 +29,26 @@ CAR_INTERFACE_IMPL(CInputQueue, Object, IInputQueue);
 CInputQueue::CInputQueue()
     : mPtr(0)
 {
-    CInt64SparseArray::New((IInt64SparseArray**)&mActiveEventArray);
-    mActiveInputEventPool = new Pools::SimplePool<ActiveInputEvent>(20);
-    AutoPtr<ICloseGuardHelper> helper;
-    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
-    helper->Get((ICloseGuard**)&mCloseGuard);
-    AutoPtr<IWeakReference> wr;
-    GetWeakReference((IWeakReference**)&wr);
-    ASSERT_SUCCEEDED(NativeInit(wr, Looper::GetMyQueue(), &mPtr));
-    mCloseGuard->Open(String("CInputQueue::Dispose"));
 }
 
 CInputQueue::~CInputQueue()
 {
     Dispose(TRUE);
+}
+
+ECode CInputQueue::constructor()
+{
+    CInt64SparseArray::New((IInt64SparseArray**)&mActiveEventArray);
+    mActiveInputEventPool = new Pools::SimplePool<ActiveInputEvent>(20);
+    AutoPtr<IWeakReference> wr;
+    GetWeakReference((IWeakReference**)&wr);
+    ASSERT_SUCCEEDED(NativeInit(wr, Looper::GetMyQueue(), &mPtr));
+
+    AutoPtr<ICloseGuardHelper> helper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
+    helper->Get((ICloseGuard**)&mCloseGuard);
+    mCloseGuard->Open(String("CInputQueue::Dispose"));
+    return NOERROR;
 }
 
 ECode CInputQueue::Dispose()

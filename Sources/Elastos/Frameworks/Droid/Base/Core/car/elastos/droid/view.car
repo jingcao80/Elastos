@@ -454,6 +454,8 @@ module
     }
 
     class CInputQueue {
+        constructor();
+        
         interface IInputQueue;
     }
 

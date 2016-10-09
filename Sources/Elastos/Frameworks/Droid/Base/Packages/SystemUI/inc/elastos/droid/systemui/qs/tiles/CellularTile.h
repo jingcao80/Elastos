@@ -128,8 +128,9 @@ private:
     private:
         CellularTile* mHost;
     };
+
 public:
-    CellularTile(
+    CARAPI constructor(
         /* [in] */ IQSTileHost* host);
 
     // @Override
@@ -162,9 +163,6 @@ protected:
 
     // @Override
     CARAPI_(AutoPtr<QSTile::State>) NewTileState();
-
-private:
-    static CARAPI_(AutoPtr<IIntent>) InitStatic();
 
 private:
     static AutoPtr<IIntent> CELLULAR_SETTINGS;

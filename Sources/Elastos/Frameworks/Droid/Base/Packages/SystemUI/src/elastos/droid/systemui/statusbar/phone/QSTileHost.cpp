@@ -404,7 +404,9 @@ ECode QSTileHost::CreateTile(
         qs = new ColorInversionTile(this);
     }
     else if (tileSpec.Equals("cell")) {
-        qs = new CellularTile(this);
+        AutoPtr<CellularTile> ct = new CellularTile();
+        ct->constructor(this);
+        qs = ct.Get();
     }
     else if (tileSpec.Equals("airplane")) {
         AutoPtr<AirplaneModeTile> amt = new AirplaneModeTile();

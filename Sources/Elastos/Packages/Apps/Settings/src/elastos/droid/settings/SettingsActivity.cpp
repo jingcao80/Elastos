@@ -454,6 +454,11 @@ ECode SettingsActivity::constructor()
     mHandler->constructor();
 
     mListener = new InnerListener(this);
+
+#ifdef _DEBUG
+    String className = Object::GetFullClassName((IActivity*)this);
+    Slogger::V(TAG, " >> constructor %s", className.string());
+#endif
     return NOERROR;
 }
 
