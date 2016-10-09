@@ -1455,6 +1455,1518 @@ module
         interface IButtonBarHandler;
     }
 
+    class CSettingsBluetoothSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsWirelessSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsSimSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsTetherSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsVpnSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsDateTimeSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsStorageSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsWifiSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsWifiP2pSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsInputMethodAndLanguageSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsKeyboardLayoutPickerActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsInputMethodAndSubtypeEnablerActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsVoiceInputSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsSpellCheckersSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsLocalePickerActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsUserDictionarySettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsHomeSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsDisplaySettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsDeviceInfoSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsApplicationSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsManageApplicationsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAppOpsSummaryActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsStorageUseActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsDevelopmentSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAccessibilitySettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsCaptioningSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAccessibilityInversionSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAccessibilityContrastSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAccessibilityDaltonizerSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsSecuritySettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsUsageAccessSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsLocationSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsPrivacySettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsRunningServicesActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsManageAccountsSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsPowerUsageSummaryActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAccountSyncSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAccountSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAccountSyncSettingsInAddAccountActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsCryptKeeperSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsDeviceAdminSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsDataUsageSummaryActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAdvancedWifiSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsSavedAccessPointsSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsTextToSpeechSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAndroidBeamSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsWifiDisplaySettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsDreamSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsNotificationStationActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsUserSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsNotificationAccessSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsConditionProviderSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsUsbSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsTrustedCredentialsSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsPaymentSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsPrintSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsPrintJobSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsZenModeSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsNotificationSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsNotificationAppListActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsAppNotificationSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsOtherSoundSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsQuickLaunchSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsTopLevelSettings {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsApnSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    // class CSettingsBlacklistSettingsActivity {
+    //     constructor();
+
+    //     interface ISettingsActivity;
+    //     interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+    //     interface IActivity;
+    //     interface IContext;
+    //     interface IContextThemeWrapper;
+    //     interface ILayoutInflaterFactory;
+    //     interface ILayoutInflaterFactory2;
+    //     interface IWindowCallback;
+    //     interface IKeyEventCallback;
+    //     interface IViewOnCreateContextMenuListener;
+    //     interface IComponentCallbacks;
+    //     interface IComponentCallbacks2;
+    //     interface IOnWindowDismissedCallback;
+
+    //     interface IButtonBarHandler;
+    // }
+
+    // class CSettingsProfilesSettingsActivity {
+    //     constructor();
+
+    //     interface ISettingsActivity;
+    //     interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+    //     interface IActivity;
+    //     interface IContext;
+    //     interface IContextThemeWrapper;
+    //     interface ILayoutInflaterFactory;
+    //     interface ILayoutInflaterFactory2;
+    //     interface IWindowCallback;
+    //     interface IKeyEventCallback;
+    //     interface IViewOnCreateContextMenuListener;
+    //     interface IComponentCallbacks;
+    //     interface IComponentCallbacks2;
+    //     interface IOnWindowDismissedCallback;
+
+    //     interface IButtonBarHandler;
+    // }
+
+    class CSettingsSoundSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CSettingsLockScreenSettingsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    // class CSettingsLiveDisplayActivity {
+    //     constructor();
+
+    //     interface ISettingsActivity;
+    //     interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+    //     interface IActivity;
+    //     interface IContext;
+    //     interface IContextThemeWrapper;
+    //     interface ILayoutInflaterFactory;
+    //     interface ILayoutInflaterFactory2;
+    //     interface IWindowCallback;
+    //     interface IKeyEventCallback;
+    //     interface IViewOnCreateContextMenuListener;
+    //     interface IComponentCallbacks;
+    //     interface IComponentCallbacks2;
+    //     interface IOnWindowDismissedCallback;
+
+    //     interface IButtonBarHandler;
+    // }
+
+    // class CSettingsDisplayRotationActivity {
+    //     constructor();
+
+    //     interface ISettingsActivity;
+    //     interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+    //     interface IActivity;
+    //     interface IContext;
+    //     interface IContextThemeWrapper;
+    //     interface ILayoutInflaterFactory;
+    //     interface ILayoutInflaterFactory2;
+    //     interface IWindowCallback;
+    //     interface IKeyEventCallback;
+    //     interface IViewOnCreateContextMenuListener;
+    //     interface IComponentCallbacks;
+    //     interface IComponentCallbacks2;
+    //     interface IOnWindowDismissedCallback;
+
+    //     interface IButtonBarHandler;
+    // }
+
+    class CSettingsAnonymousStatsActivity {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
     class CSecuritySettings {
         constructor();
 
@@ -1508,48 +3020,6 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
-    }
-
-    class CSettingsKeyboardLayoutPickerActivity {
-        constructor();
-
-        interface ISettingsActivity;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
-
-        interface IActivity;
-        interface IContext;
-        interface IContextThemeWrapper;
-        interface ILayoutInflaterFactory;
-        interface ILayoutInflaterFactory2;
-        interface IWindowCallback;
-        interface IKeyEventCallback;
-        interface IViewOnCreateContextMenuListener;
-        interface IComponentCallbacks;
-        interface IComponentCallbacks2;
-        interface IOnWindowDismissedCallback;
-
-        interface IButtonBarHandler;
-    }
-
-    class CSettingsNotificationAppListActivity {
-        constructor();
-
-        interface ISettingsActivity;
-        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
-
-        interface IActivity;
-        interface IContext;
-        interface IContextThemeWrapper;
-        interface ILayoutInflaterFactory;
-        interface ILayoutInflaterFactory2;
-        interface IWindowCallback;
-        interface IKeyEventCallback;
-        interface IViewOnCreateContextMenuListener;
-        interface IComponentCallbacks;
-        interface IComponentCallbacks2;
-        interface IOnWindowDismissedCallback;
-
-        interface IButtonBarHandler;
     }
 
     class CSubSettings {

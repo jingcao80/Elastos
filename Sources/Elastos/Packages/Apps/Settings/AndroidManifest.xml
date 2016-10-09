@@ -1694,6 +1694,131 @@
             android:theme="@style/CryptKeeperBlankTheme"
         />
 
+        <!-- CyanogenMod activities Start -->
+<!--
+        <activity android:name="Settings$ProfilesSettingsActivity"
+                android:label="@string/profile_settings"
+                android:taskAffinity=""
+                android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.settings.PROFILES_SETTINGS" />
+                <action android:name="com.android.settings.PROFILES_SETTINGS" />
+                <category android:name="android.intent.category.VOICE_LAUNCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.SHORTCUT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                android:value="com.android.settings.profiles.ProfilesSettings" />
+            <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
+                android:resource="@id/profiles_settings" />
+        </activity>
+-->
+        <!-- Keep compatibility with old shortcuts. -->
+<!--
+        <activity-alias android:name="ProfileSettings"
+                android:label="@string/profile_settings"
+                android:exported="true"
+                android:targetActivity="Settings$ProfilesSettingsActivity">
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                android:value="com.android.settings.profiles.ProfilesSettings" />
+            <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
+                android:resource="@id/profiles_settings" />
+        </activity-alias>
+
+        <activity android:name=".profiles.NFCProfileSelect" />
+
+        <activity android:name=".profiles.NFCProfile"
+                android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="cm/profile" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".cyanogenmod.ContributorsCloud" />
+
+        <activity android:name=".cyanogenmod.SpamList" />
+-->
+        <!-- "Blacklist settings" UI, used only on voice-capable phone devices. -->
+<!--
+        <activity android:name="Settings$BlacklistSettingsActivity"
+                android:uiOptions="splitActionBarWhenNarrow"
+                android:label="@string/blacklist_title"
+                android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                android:value="com.android.settings.blacklist.BlacklistSettings" />
+            <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
+                android:resource="@id/security_settings" />
+        </activity>
+
+        <activity-alias android:name=".blacklist.BlacklistSettings"
+                android:taskAffinity="com.android.settings"
+                android:label="@string/blacklist_title"
+                android:targetActivity="Settings$BlacklistSettingsActivity"
+                android:configChanges="orientation|keyboardHidden|screenSize"
+                android:exported="true">
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                       android:value="com.android.settings.blacklist.BlacklistSettings" />
+            <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
+                       android:resource="@id/security_settings" />
+        </activity-alias>
+-->
+        <!-- Display rotation -->
+<!--
+        <activity android:name="Settings$DisplayRotationActivity"
+                android:label="@string/display_rotation_title"
+                android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.settings.DISPLAY_ROTATION_SETTINGS" />
+                <action android:name="com.android.settings.DISPLAY_ROTATION_SETTINGS" />
+                <category android:name="android.intent.category.VOICE_LAUNCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.SHORTCUT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                android:value="com.android.settings.cyanogenmod.DisplayRotation" />
+            <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
+                android:resource="@id/display_and_lights_settings" />
+        </activity>
+-->
+        <!-- LiveDisplay settings -->
+<!--
+        <activity android:name="Settings$LiveDisplayActivity"
+                android:label="@string/live_display_title"
+                android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.settings.LIVEDISPLAY_SETTINGS" />
+                <action android:name="com.android.settings.LIVEDISPLAY_SETTINGS" />
+                <category android:name="android.intent.category.VOICE_LAUNCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.SHORTCUT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                android:value="com.android.settings.livedisplay.LiveDisplay" />
+            <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
+                android:resource="@id/display_and_lights_settings" />
+        </activity>
+
+        <activity-alias android:name=".livedisplay.LiveDisplay"
+                android:taskAffinity="com.android.settings"
+                android:label="@string/live_display_title"
+                android:targetActivity="Settings$LiveDisplayActivity"
+                android:configChanges="orientation|keyboardHidden|screenSize"
+                android:exported="true">
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
+                       android:value="com.android.settings.livedisplay.LiveDisplay" />
+            <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
+                       android:resource="@id/display_and_lights_settings" />
+        </activity-alias>
+-->
         <!-- Pseudo-activity used to provide an intent-filter entry point to encryption settings -->
         <activity android:name="CSettings$CryptKeeperSettingsActivity"
                 android:label="@string/crypt_keeper_encrypt_title">

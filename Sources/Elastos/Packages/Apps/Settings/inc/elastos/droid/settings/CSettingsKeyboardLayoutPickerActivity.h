@@ -11,11 +11,11 @@ namespace Elastos {
 namespace Droid {
 namespace Settings {
 
-CarClass(CSettingsKeyboardLayoutPickerActivity) , public CSettings::KeyboardLayoutPickerActivity
+CarClass(CSettingsKeyboardLayoutPickerActivity)
+    , public CSettings::KeyboardLayoutPickerActivity
 {
 public:
     CAR_OBJECT_DECL()
-
 };
 
 } // namespace Settings

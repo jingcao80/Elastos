@@ -67,7 +67,6 @@ public:
     class RunningServicesActivity : public SettingsActivity { /* empty */ };
     class ManageAccountsSettingsActivity : public SettingsActivity { /* empty */ };
     class PowerUsageSummaryActivity : public SettingsActivity { /* empty */ };
-    class BatterySaverSettingsActivity : public SettingsActivity { /* empty */ };
     class AccountSyncSettingsActivity : public SettingsActivity { /* empty */ };
     class AccountSettingsActivity : public SettingsActivity { /* empty */ };
     class AccountSyncSettingsInAddAccountActivity : public SettingsActivity { /* empty */ };
@@ -98,6 +97,13 @@ public:
 
     class TopLevelSettings : public SettingsActivity { /* empty */ };
     class ApnSettingsActivity : public SettingsActivity { /* empty */ };
+    class BlacklistSettingsActivity : public SettingsActivity { /* empty */ };
+    class ProfilesSettingsActivity : public SettingsActivity { /* empty */ };
+    class SoundSettingsActivity : public SettingsActivity { /* empty */ };
+    class LockScreenSettingsActivity : public SettingsActivity { /* empty */ };
+    class LiveDisplayActivity : public SettingsActivity { /* empty */ };
+    class DisplayRotationActivity : public SettingsActivity { /* empty */ };
+    class AnonymousStatsActivity : public SettingsActivity { /* empty */ };
 };
 
 } // namespace Settings
