@@ -11,7 +11,8 @@ namespace Elastos {
 namespace Droid {
 namespace Settings {
 
-CarClass(CSettingsNotificationAppListActivity) , public CSettings::NotificationAppListActivity
+CarClass(CSettingsNotificationAppListActivity)
+    , public CSettings::NotificationAppListActivity
 {
 public:
     CAR_OBJECT_DECL()
