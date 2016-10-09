@@ -74,6 +74,7 @@ ELASTOS_LIBS += src/elastos/droid/settings/inputmethod/inputmethod.lib
 ELASTOS_LIBS += src/elastos/droid/settings/notification/notification.lib
 ELASTOS_LIBS += src/elastos/droid/settings/search/search.lib
 ELASTOS_LIBS += src/elastos/droid/settings/voice/voice.lib
+ELASTOS_LIBS += src/elastos/droid/settings/wfd/wfd.lib
 ELASTOS_LIBS += src/elastos/droid/settings/widget/widget.lib
 ELASTOS_LIBS += src/elastos/droid/settings/wifi/wifi.lib
 

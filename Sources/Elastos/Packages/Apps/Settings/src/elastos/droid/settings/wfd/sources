@@ -1,0 +1,10 @@
+TARGET_NAME = wfd
+TARGET_TYPE = lib
+
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../
+
+SOURCES = CWifiDisplaySettings.cpp
+SOURCES += wfd.cpp
+

@@ -415,8 +415,7 @@ ECode CMediaRouter::Static::UpdateDiscoveryRequest()
     // TODO: All of this should be managed by the media router service.
     if (mCanConfigureWifiDisplays) {
        Boolean bmathes = FALSE;
-       mSelectedRoute->MatchesTypes(ROUTE_TYPE_REMOTE_DISPLAY, &bmathes);
-       if (mSelectedRoute != NULL && bmathes) {
+       if (mSelectedRoute != NULL && (mSelectedRoute->MatchesTypes(ROUTE_TYPE_REMOTE_DISPLAY, &bmathes), bmathes)) {
           // Don't scan while already connected to a remote display since
           // it may interfere with the ongoing transmission.
           activeScanWifiDisplay = FALSE;
@@ -634,9 +633,8 @@ void CMediaRouter::Static::UpdatePresentationDisplays(
         route_->UpdatePresentationDisplay(&updated);
         route = NULL;
         route = (MediaRouterRouteInfo*)(route_.Get());
-        route->mPresentationDisplay->GetDisplayId(&displayId);
         if (updated || (route->mPresentationDisplay != NULL
-                && displayId == changedDisplayId)) {
+                && (route->mPresentationDisplay->GetDisplayId(&displayId), displayId) == changedDisplayId)) {
             DispatchRoutePresentationDisplayChanged(route_);
         }
     }
@@ -1156,7 +1154,7 @@ ECode CMediaRouter::GetSelectedRoute(
     VALIDATE_NOT_NULL(result);
     Static* s = (Static*)sStatic.Get();
     Int32 temp;
-    if (s->mSelectedRoute != NULL && (s->mSelectedRoute->GetSupportedTypes(&temp) & type) != 0) {
+    if (s->mSelectedRoute != NULL && ((s->mSelectedRoute->GetSupportedTypes(&temp), temp) & type) != 0) {
         // If the selected route supports any of the types supplied, it's still considered
         // 'selected' for that type.
         *result = s->mSelectedRoute;
@@ -1484,8 +1482,8 @@ ECode CMediaRouter::SelectRouteStatic(
     wifiDisplayStatus->GetActiveDisplay((IWifiDisplay**)&activeDisplay);//
 
     String tempText1, tempText2;
-    Boolean oldRouteHasAddress = oldRoute != NULL && (oldRoute->GetDeviceAddress(&tempText1), tempText1) != NULL;
-    Boolean newRouteHasAddress = route != NULL && (route->GetDeviceAddress(&tempText2), tempText2) != NULL;//
+    Boolean oldRouteHasAddress = oldRoute != NULL && (oldRoute->GetDeviceAddress(&tempText1), !tempText1.IsNull());
+    Boolean newRouteHasAddress = route != NULL && (route->GetDeviceAddress(&tempText2), !tempText2.IsNull());
 
     if (activeDisplay != NULL || oldRouteHasAddress || newRouteHasAddress) {
         Boolean flag = FALSE;
@@ -1537,7 +1535,7 @@ ECode CMediaRouter::MatchesDeviceAddress(
     /* [out] */ Boolean* result)
 {
     String tempText1;
-    Boolean routeHasAddress = info != NULL && (info->GetDeviceAddress(&tempText1), tempText1) != NULL;
+    Boolean routeHasAddress = info != NULL && (info->GetDeviceAddress(&tempText1), !tempText1.IsNull());
     if (display == NULL && !routeHasAddress) {
        *result = TRUE;
        return NOERROR;
@@ -1884,20 +1882,21 @@ ECode CMediaRouter::UpdateWifiDisplayStatus(
             if (activeDisplay != NULL) {
               displays = NULL;
               displays = ArrayOf<IWifiDisplay*>::Alloc(1);
-              (*displays)[0] = activeDisplay.Get();
-            } else {
-              displays = NULL;
-              displays = WifiDisplay::EMPTY_ARRAY;
+              displays->Set(0, activeDisplay);
+            }
+            else {
+                displays = NULL;
+                displays = WifiDisplay::EMPTY_ARRAY;
             }
         }
-    } else {
+    }
+    else {
         displays = WifiDisplay::EMPTY_ARRAY;
         activeDisplay = NULL;
     }
     String adAddress;
-    activeDisplay->GetDeviceAddress(&adAddress);
     String activeDisplayAddress = activeDisplay != NULL ?
-            adAddress : String(NULL);
+            (activeDisplay->GetDeviceAddress(&adAddress), adAddress) : String(NULL);
 
     // Add or update routes.
     Int32 length = displays->GetLength();
@@ -1917,7 +1916,7 @@ ECode CMediaRouter::UpdateWifiDisplayStatus(
                   && address.Equals(((Static*)(sStatic.Get()))->mPreviousActiveWifiDisplayAddress);
           UpdateWifiDisplayRoute(route.Get(), d.Get(), status, disconnected);
         }
-        if (d == activeDisplay) {
+        if (Object::Equals(d, activeDisplay)) {
           Int32 types;
           route->GetSupportedTypes(&types);
           SelectRouteStatic(types, route.Get(), FALSE);

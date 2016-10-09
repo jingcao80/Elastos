@@ -74,10 +74,12 @@ module
     using interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
     using interface Elastos.Droid.Content.Pm.IIPackageStatsObserver;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Hardware.Display.IWifiDisplay;
     using interface Elastos.Droid.Hardware.Input.IInputDeviceListener;
     using interface Elastos.Droid.Hardware.Input.IInputDeviceIdentifier;
     using interface Elastos.Droid.Internal.App.ILocalePicker;
     using interface Elastos.Droid.Internal.App.ILocaleSelectionListener;
+    using interface Elastos.Droid.Media.IMediaRouterRouteInfo;
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.Os.IHandler;
@@ -840,6 +842,62 @@ module
     }
 
     } // namespace Search
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Wfd {
+
+    class CWifiDisplaySettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+    }
+
+    [local]
+    class CWifiDisplaySettingsRoutePreference {
+        constructor(
+            [in] ISettingsPreferenceFragment* host,
+            [in] IContext* ctx,
+            [in] IMediaRouterRouteInfo* route);
+
+        interface IPreference;
+        interface IComparable;
+    }
+
+    [local]
+    class CWifiDisplaySettingsWifiDisplayRoutePreference {
+        constructor(
+            [in] ISettingsPreferenceFragment* host,
+            [in] IContext* ctx,
+            [in] IMediaRouterRouteInfo* route,
+            [in] IWifiDisplay* display);
+
+        interface IPreference;
+        interface IComparable;
+    }
+
+    [local]
+    class CWifiDisplaySettingsUnpairedWifiDisplayPreference {
+        constructor(
+            [in] ISettingsPreferenceFragment* host,
+            [in] IContext* ctx,
+            [in] IWifiDisplay* display);
+
+        interface IPreference;
+        interface IComparable;
+    }
+
+    } // namespace Wfd
     } // namespace Settings
     } // namespace Droid
     } // namespace Elastos

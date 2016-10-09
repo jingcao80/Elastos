@@ -115,7 +115,7 @@ class ECO_PUBLIC DreamService
     , public IDreamService
     , public IWindowCallback
 {
-private:
+public:
     class DreamServiceWrapper
         : public Object
         , public IIDreamService
@@ -168,8 +168,10 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        DreamServiceWrapper(
-            /* [in] */ DreamService* host);
+        DreamServiceWrapper();
+
+        CARAPI constructor(
+            /* [in] */ IDreamService* host);
 
         // @Override
         CARAPI Attach(
@@ -196,6 +198,7 @@ private:
         Boolean mCanDoze;
     };
 
+private:
     class DreamService_Attach_Runnable
         : public Runnable
     {

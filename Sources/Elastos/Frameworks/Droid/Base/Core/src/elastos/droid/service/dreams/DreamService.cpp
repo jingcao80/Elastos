@@ -1,10 +1,11 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.CoreLibrary.Core.h"
+#include "elastos/droid/service/dreams/DreamService.h"
+#include "elastos/droid/service/dreams/CDreamServiceWrapper.h"
 #include "elastos/droid/graphics/drawable/CColorDrawable.h"
 #include "elastos/droid/internal/policy/CPolicyManager.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/ServiceManager.h"
-#include "elastos/droid/service/dreams/DreamService.h"
 #include "elastos/droid/utility/MathUtils.h"
 #include "elastos/droid/view/CWindowManagerGlobalHelper.h"
 #include "elastos/droid/R.h"
@@ -78,11 +79,15 @@ ECode DreamService::DreamServiceWrapper::WakeUpRunnable::Run()
 
 CAR_INTERFACE_IMPL_2(DreamService::DreamServiceWrapper, Object, IIDreamService, IBinder)
 
-DreamService::DreamServiceWrapper::DreamServiceWrapper(
-    /* [in] */ DreamService* host)
-    : mHost(host)
-    , mCanDoze(FALSE)
+DreamService::DreamServiceWrapper::DreamServiceWrapper()
+    : mCanDoze(FALSE)
+{}
+
+ECode DreamService::DreamServiceWrapper::constructor(
+    /* [in] */ IDreamService* host)
 {
+    mHost = (DreamService*)host;
+    return NOERROR;
 }
 
 ECode DreamService::DreamServiceWrapper::Attach(
@@ -655,10 +660,7 @@ ECode DreamService::OnBind(
         intent->ToString(&str);
         Slogger::V(TAG, "onBind() intent = %s", str.string());
     }
-    AutoPtr<DreamServiceWrapper> wrapper = new DreamServiceWrapper(this);
-    *result = IBinder::Probe(wrapper.Get());
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return CDreamServiceWrapper::New(this, result);
 }
 
 ECode DreamService::Finish()

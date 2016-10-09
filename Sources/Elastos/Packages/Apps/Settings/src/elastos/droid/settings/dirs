@@ -7,5 +7,6 @@ DIRS += inputmethod
 DIRS += notification
 DIRS += search
 DIRS += voice
+DIRS += wfd
 DIRS += widget
 DIRS += wifi

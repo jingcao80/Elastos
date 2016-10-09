@@ -775,7 +775,6 @@ ECode SettingsActivity::OnCreate(
 
             if (initialFragmentName.Equals("Elastos.Droid.Settings.Bluetooth.CBluetoothSettings")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.CWirelessSettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.CDisplaySettings")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.Deviceinfo.Memory")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.Users.UserSettings")

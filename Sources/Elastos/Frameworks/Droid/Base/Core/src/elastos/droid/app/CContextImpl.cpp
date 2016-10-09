@@ -76,6 +76,7 @@
 #include "elastos/droid/view/WindowManagerImpl.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
 #include "elastos/droid/media/CAudioManager.h"
+#include "elastos/droid/media/CMediaRouter.h"
 #include "elastos/droid/media/session/CMediaSessionManager.h"
 #include "elastos/droid/media/projection/CMediaProjectionManager.h"
 #include "elastos/droid/service/persistentdata/CPersistentDataBlockManager.h"
@@ -166,6 +167,8 @@ using Elastos::Droid::Location::IILocationManager;
 using Elastos::Droid::Location::EIID_IILocationManager;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::CAudioManager;
+using Elastos::Droid::Media::IMediaRouter;
+using Elastos::Droid::Media::CMediaRouter;
 using Elastos::Droid::Media::Session::IMediaSessionManager;
 using Elastos::Droid::Media::Session::CMediaSessionManager;
 using Elastos::Droid::Media::Projection::IMediaProjectionManager;
@@ -2372,12 +2375,11 @@ ECode CContextImpl::GetSystemService(
 
     else if (IContext::MEDIA_ROUTER_SERVICE.Equals(name)) {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        // assert(0 && "TODO");
-    //     AutoPtr<IMediaRouter> obj;
-    //     CMediaRouter::New(this, (IMediaRouter**)&obj);
-    //     *object = obj.Get();
-    //     REFCOUNT_ADD(*object);
-    //     return NOERROR;
+        // AutoPtr<IMediaRouter> obj;
+        // CMediaRouter::New(this, (IMediaRouter**)&obj);
+        // *object = obj.Get();
+        // REFCOUNT_ADD(*object);
+        return NOERROR;
     }
     else if (IContext::BLUETOOTH_SERVICE.Equals(name)) {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());

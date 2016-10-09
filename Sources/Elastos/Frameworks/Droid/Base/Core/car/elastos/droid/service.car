@@ -119,6 +119,15 @@ module
             interface IWindowCallback;
         }
 
+        [local]
+        class CDreamServiceWrapper {
+            constructor(
+                [in] IDreamService* ds);
+
+            interface IIDreamService;
+            interface IBinder;
+        }
+
         singleton class CSandman {
             interface ISandman;
         }
