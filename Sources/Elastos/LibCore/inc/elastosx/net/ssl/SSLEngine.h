@@ -669,7 +669,7 @@ public:
      * @param port
      *            the port of the host.
      */
-    SSLEngine(
+    CARAPI constructor(
         /* [in] */ const String& host,
         /* [in] */ Int32 port);
 
@@ -1127,8 +1127,8 @@ public:
         /* [in] */ ISSLParameters* p);
 
 private:
-    const String mPeerHost;
-    const Int32 mPeerPort;
+    /*const*/ String mPeerHost;
+    /*const*/ Int32 mPeerPort;
 };
 
 } // namespace Ssl

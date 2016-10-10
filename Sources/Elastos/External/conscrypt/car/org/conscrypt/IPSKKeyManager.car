@@ -2,7 +2,7 @@
 module
 {
     using interface Elastos.Net.ISocket;
-    // using interface Elastos.Net.Ssl.ISSLEngine;
+    using interface Elastosx.Net.Ssl.ISSLEngine;
     using interface Elastosx.Crypto.ISecretKey;
 
     namespace Org {
@@ -40,9 +40,9 @@ module
          *
          * @return PSK identity hint to be provided to the client or {@code null} to provide no hint.
          */
-        // ChooseServerKeyIdentityHint(
-        //     [in] ISSLEngine* engine,
-        //     [out] String* result);
+        ChooseServerKeyIdentityHint(
+            [in] ISSLEngine* engine,
+            [out] String* result);
 
         /**
          * Gets the PSK identity to report to the server to help agree on the PSK for the provided
@@ -67,10 +67,10 @@ module
          * @return PSK identity to provide to the server. {@code null} is permitted but will be
          *         converted into an empty string.
          */
-        // ChooseClientKeyIdentity(
-        //     [in] String identityHint,
-        //     [in] ISSLEngine* engine,
-        //     [out] String* result);
+        ChooseClientKeyIdentity(
+            [in] String identityHint,
+            [in] ISSLEngine* engine,
+            [out] String* result);
 
         /**
          * Gets the PSK to use for the provided socket.
@@ -98,11 +98,11 @@ module
          * @return key or {@code null} to signal to peer that no suitable key is available and to abort
          *         the handshake.
          */
-        // GetKey(
-        //     [in] String identityHint,
-        //     [in] String identity,
-        //     [in] ISSLEngine* engine,
-        //     [out] ISecretKey** result);
+        GetKey(
+            [in] String identityHint,
+            [in] String identity,
+            [in] ISSLEngine* engine,
+            [out] ISecretKey** result);
     }
 
     } // namespace Conscrypt

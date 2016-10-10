@@ -4,6 +4,7 @@
 #include "org/conscrypt/NativeCrypto.h"
 #include "org/conscrypt/OpenSSLKey.h"
 
+using Elastos::Security::Interfaces::IECKey;
 using Elastos::Security::Interfaces::IECPublicKey;
 using Elastos::Security::Spec::CECPrivateKeySpec;
 using Elastos::Security::Spec::CECPublicKeySpec;
@@ -19,7 +20,9 @@ using Elastos::Security::Spec::IX509EncodedKeySpec;
 namespace Org {
 namespace Conscrypt {
 
-CAR_INTERFACE_IMPL(OpenSSLECKeyFactory, KeyFactorySpi, IOpenSSLECKeyFactory)
+CAR_INTERFACE_IMPL(OpenSSLECKeyFactory, Object, IOpenSSLECKeyFactory)
+// TODO: Need KeyFactorySpi
+// CAR_INTERFACE_IMPL(OpenSSLECKeyFactory, KeyFactorySpi, IOpenSSLECKeyFactory)
 
 ECode OpenSSLECKeyFactory::EngineGeneratePublic(
    /* [in] */ IKeySpec* keySpec,
@@ -33,10 +36,17 @@ ECode OpenSSLECKeyFactory::EngineGeneratePublic(
     }
 
     if (IECPublicKeySpec::Probe(keySpec) != NULL) {
-        return COpenSSLECPublicKey::New(IECPublicKeySpec::Probe(keySpec), result);
+        AutoPtr<IOpenSSLECPublicKey> key;
+        COpenSSLECPublicKey::New(IECPublicKeySpec::Probe(keySpec), (IOpenSSLECPublicKey**)&key);
+        *result = IPublicKey::Probe(key);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
     else if (IX509EncodedKeySpec::Probe(keySpec) != NULL) {
-        return OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec), NativeCrypto::EVP_PKEY_EC, result);
+        *result = OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec),
+                INativeCrypto::EVP_PKEY_EC);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
     // throw new InvalidKeySpecException("Must use ECPublicKeySpec or X509EncodedKeySpec; was "
     //         + keySpec.getClass().getName());
@@ -55,11 +65,17 @@ ECode OpenSSLECKeyFactory::EngineGeneratePrivate(
     }
 
     if (IECPrivateKeySpec::Probe(keySpec) != NULL) {
-        return COpenSSLECPrivateKey::New(IECPrivateKeySpec::Probe(keySpec), result);
+        AutoPtr<IOpenSSLECPrivateKey> key;
+        COpenSSLECPrivateKey::New(IECPrivateKeySpec::Probe(keySpec), (IOpenSSLECPrivateKey**)&key);
+        *result = IPrivateKey::Probe(key);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
     else if (IPKCS8EncodedKeySpec::Probe(keySpec) != NULL) {
-        return OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
-                NativeCrypto::EVP_PKEY_EC, result);
+        *result = OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
+                INativeCrypto::EVP_PKEY_EC);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
     // throw new InvalidKeySpecException("Must use ECPrivateKeySpec or PKCS8EncodedKeySpec; was "
     //         + keySpec.getClass().getName());
@@ -78,10 +94,11 @@ ECode OpenSSLECKeyFactory::EngineGetKeySpec(
         return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
-    if (keySpec == NULL) {
-        // throw new InvalidKeySpecException("keySpec == NULL");
-        return E_INVALID_KEY_SPEC_EXCEPTION;
-    }
+// TODO:
+    // if (keySpec == NULL) {
+    //     // throw new InvalidKeySpecException("keySpec == NULL");
+    //     return E_INVALID_KEY_SPEC_EXCEPTION;
+    // }
 
     String str;
     key->GetAlgorithm(&str);
@@ -90,57 +107,107 @@ ECode OpenSSLECKeyFactory::EngineGetKeySpec(
         return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
-// TODO: Need
-    // if (key instanceof ECPublicKey && ECPublicKeySpec.class.isAssignableFrom(keySpec)) {
-    //     ECPublicKey ecKey = (ECPublicKey) key;
-    //     return (T) new ECPublicKeySpec(ecKey.getW(), ecKey.getParams());
-    // } else if (key instanceof PublicKey && ECPublicKeySpec.class.isAssignableFrom(keySpec)) {
-    //     final byte[] encoded = key.getEncoded();
-    //     if (!"X.509".equals(key.getFormat()) || encoded == NULL) {
-    //         // throw new InvalidKeySpecException("Not a valid X.509 encoding");
-    //         return E_INVALID_KEY_SPEC_EXCEPTION;
-    //     }
-    //     ECPublicKey ecKey = (ECPublicKey) engineGeneratePublic(new X509EncodedKeySpec(encoded));
-    //     return (T) new ECPublicKeySpec(ecKey.getW(), ecKey.getParams());
-    // } else if (key instanceof ECPrivateKey
-    //         && ECPrivateKeySpec.class.isAssignableFrom(keySpec)) {
-    //     ECPrivateKey ecKey = (ECPrivateKey) key;
-    //     return (T) new ECPrivateKeySpec(ecKey.getS(), ecKey.getParams());
-    // } else if (key instanceof PrivateKey && ECPrivateKeySpec.class.isAssignableFrom(keySpec)) {
-    //     final byte[] encoded = key.getEncoded();
-    //     if (!"PKCS#8".equals(key.getFormat()) || encoded == NULL) {
-    //         // throw new InvalidKeySpecException("Not a valid PKCS#8 encoding");
-    //         return E_INVALID_KEY_SPEC_EXCEPTION;
-    //     }
-    //     ECPrivateKey ecKey =
-    //             (ECPrivateKey) engineGeneratePrivate(new PKCS8EncodedKeySpec(encoded));
-    //     return (T) new ECPrivateKeySpec(ecKey.getS(), ecKey.getParams());
-    // } else if (key instanceof PrivateKey
-    //         && PKCS8EncodedKeySpec.class.isAssignableFrom(keySpec)) {
-    //     final byte[] encoded = key.getEncoded();
-    //     if (!"PKCS#8".equals(key.getFormat())) {
-    //         // throw new InvalidKeySpecException("Encoding type must be PKCS#8; was " + key.getFormat());
-    //         return E_INVALID_KEY_SPEC_EXCEPTION;
-    //     } else if (encoded == NULL) {
-    //         // throw new InvalidKeySpecException("Key is not encodable");
-    //         return E_INVALID_KEY_SPEC_EXCEPTION;
-    //     }
-    //     return (T) new PKCS8EncodedKeySpec(encoded);
-    // } else if (key instanceof PublicKey && X509EncodedKeySpec.class.isAssignableFrom(keySpec)) {
-    //     final byte[] encoded = key.getEncoded();
-    //     if (!"X.509".equals(key.getFormat())) {
-    //         // throw new InvalidKeySpecException("Encoding type must be X.509; was " + key.getFormat());
-    //         return E_INVALID_KEY_SPEC_EXCEPTION;
-    //     } else if (encoded == NULL) {
-    //         // throw new InvalidKeySpecException("Key is not encodable");
-    //         return E_INVALID_KEY_SPEC_EXCEPTION;
-    //     }
-    //     return (T) new X509EncodedKeySpec(encoded);
-    // } else {
-    //     // throw new InvalidKeySpecException("Unsupported key type and key spec combination; key="
-    //     //         + key.getClass().getName() + ", keySpec=" + keySpec.getName());
-    //     return E_INVALID_KEY_SPEC_EXCEPTION;
-    // }
+    assert(0 && "TODO");
+    if (IECPublicKey::Probe(key) != NULL
+            /*TODO: && ECPublicKeySpec.class.isAssignableFrom(keySpec)*/) {
+        AutoPtr<IECPublicKey> ecKey = IECPublicKey::Probe(key);
+        AutoPtr<IECPoint> point;
+        ecKey->GetW((IECPoint**)&point);
+        AutoPtr<IECParameterSpec> params;
+        IECKey::Probe(ecKey)->GetParams((IECParameterSpec**)&params);
+        return CECPublicKeySpec::New(point, params, result);
+    }
+    else if (IPublicKey::Probe(key) != NULL
+            /*TODO: && ECPublicKeySpec.class.isAssignableFrom(keySpec)*/) {
+        AutoPtr<ArrayOf<Byte> > encoded;
+        key->GetEncoded((ArrayOf<Byte>**)&encoded);
+        String format;
+        key->GetFormat(&format);
+        if (!format.Equals("X.509") || encoded == NULL) {
+            // throw new InvalidKeySpecException("Not a valid X.509 encoding");
+            return E_INVALID_KEY_SPEC_EXCEPTION;
+        }
+        AutoPtr<IX509EncodedKeySpec> spec;
+        CX509EncodedKeySpec::New(encoded, (IX509EncodedKeySpec**)&spec);
+        AutoPtr<IPublicKey> pk;
+        EngineGeneratePublic(IKeySpec::Probe(spec), (IPublicKey**)&pk);
+        AutoPtr<IECPublicKey> ecKey = IECPublicKey::Probe(pk);
+
+        AutoPtr<IECPoint> point;
+        ecKey->GetW((IECPoint**)&point);
+        AutoPtr<IECParameterSpec> params;
+        IECKey::Probe(ecKey)->GetParams((IECParameterSpec**)&params);
+        return CECPublicKeySpec::New(point, params, result);
+    }
+    else if (IECPrivateKey::Probe(key) != NULL
+            /*TODO: && ECPrivateKeySpec.class.isAssignableFrom(keySpec)*/) {
+        AutoPtr<IECPrivateKey> ecKey = IECPrivateKey::Probe(key);
+        AutoPtr<IBigInteger> bi;
+        ecKey->GetS((IBigInteger**)&bi);
+        AutoPtr<IECParameterSpec> params;
+        IECKey::Probe(ecKey)->GetParams((IECParameterSpec**)&params);
+        return CECPrivateKeySpec::New(bi, params, result);
+    }
+    else if (IPrivateKey::Probe(key) != NULL
+        /*TODO: && ECPrivateKeySpec.class.isAssignableFrom(keySpec)*/) {
+        AutoPtr<ArrayOf<Byte> > encoded;
+        key->GetEncoded((ArrayOf<Byte>**)&encoded);
+        String format;
+        key->GetFormat(&format);
+        if (!format.Equals("PKCS#8") || encoded == NULL) {
+            // throw new InvalidKeySpecException("Not a valid PKCS#8 encoding");
+            return E_INVALID_KEY_SPEC_EXCEPTION;
+        }
+
+        AutoPtr<IPKCS8EncodedKeySpec> spec;
+        CPKCS8EncodedKeySpec::New(encoded, (IPKCS8EncodedKeySpec**)&spec);
+        AutoPtr<IPrivateKey> pk;
+        EngineGeneratePrivate(IKeySpec::Probe(spec), (IPrivateKey**)&pk);
+        AutoPtr<IECPrivateKey> ecKey = IECPrivateKey::Probe(pk);
+
+        AutoPtr<IBigInteger> bi;
+        ecKey->GetS((IBigInteger**)&bi);
+        AutoPtr<IECParameterSpec> params;
+        IECKey::Probe(ecKey)->GetParams((IECParameterSpec**)&params);
+        return CECPrivateKeySpec::New(bi, params, result);
+    }
+    else if (IPrivateKey::Probe(key) != NULL
+            /*TODO: && PKCS8EncodedKeySpec.class.isAssignableFrom(keySpec)*/) {
+        AutoPtr<ArrayOf<Byte> > encoded;
+        key->GetEncoded((ArrayOf<Byte>**)&encoded);
+        String format;
+        key->GetFormat(&format);
+        if (!format.Equals("PKCS#8")) {
+            // throw new InvalidKeySpecException("Encoding type must be PKCS#8; was " + key.getFormat());
+            return E_INVALID_KEY_SPEC_EXCEPTION;
+        }
+        else if (encoded == NULL) {
+            // throw new InvalidKeySpecException("Key is not encodable");
+            return E_INVALID_KEY_SPEC_EXCEPTION;
+        }
+        return CPKCS8EncodedKeySpec::New(encoded, result);
+    }
+    else if (IPublicKey::Probe(key) != NULL
+        /*TODO: && X509EncodedKeySpec.class.isAssignableFrom(keySpec)*/) {
+        AutoPtr<ArrayOf<Byte> > encoded;
+        key->GetEncoded((ArrayOf<Byte>**)&encoded);
+        String format;
+        key->GetFormat(&format);
+        if (!format.Equals("X.509")) {
+            // throw new InvalidKeySpecException("Encoding type must be X.509; was " + key.getFormat());
+            return E_INVALID_KEY_SPEC_EXCEPTION;
+        }
+        else if (encoded == NULL) {
+            // throw new InvalidKeySpecException("Key is not encodable");
+            return E_INVALID_KEY_SPEC_EXCEPTION;
+        }
+        return CX509EncodedKeySpec::New(encoded, result);
+    }
+    else {
+        // throw new InvalidKeySpecException("Unsupported key type and key spec combination; key="
+        //         + key.getClass().getName() + ", keySpec=" + keySpec.getName());
+        return E_INVALID_KEY_SPEC_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -168,12 +235,16 @@ ECode OpenSSLECKeyFactory::EngineTranslateKey(
         ecKey->GetW((IECPoint**)&w);
 
         AutoPtr<IECParameterSpec> params;
-        ecKey->GetParams((IECParameterSpec**)&params);
+        IECKey::Probe(ecKey)->GetParams((IECParameterSpec**)&params);
 
         // try {
         AutoPtr<IECPublicKeySpec> spec;
         CECPublicKeySpec::New(w, params, (IECPublicKeySpec**)&spec);
-        return EngineGeneratePublic(spec, result);
+        AutoPtr<IPublicKey> publicKey;
+        EngineGeneratePublic(IKeySpec::Probe(spec), (IPublicKey**)&publicKey);
+        *result = IKey::Probe(publicKey);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
         // } catch (InvalidKeySpecException e) {
         //     // throw new InvalidKeyException(e);
         //     return E_INVALID_KEY_SPEC_EXCEPTION;
@@ -186,12 +257,16 @@ ECode OpenSSLECKeyFactory::EngineTranslateKey(
         ecKey->GetS((IBigInteger**)&s);
 
         AutoPtr<IECParameterSpec> params;
-        ecKey->GetParams((IECParameterSpec**)&params);
+        IECKey::Probe(ecKey)->GetParams((IECParameterSpec**)&params);
 
         // try {
         AutoPtr<IECPrivateKeySpec> spec;
-        CECPrivateKeySpec::New(s, params, (ECPrivateKeySpec**)&spec);
-        return EngineGeneratePrivate(spec, result);
+        CECPrivateKeySpec::New(s, params, (IECPrivateKeySpec**)&spec);
+        AutoPtr<IPrivateKey> privateKey;
+        EngineGeneratePrivate(IKeySpec::Probe(spec), (IPrivateKey**)&privateKey);
+        *result = IKey::Probe(privateKey);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
         // } catch (InvalidKeySpecException e) {
         //     // throw new InvalidKeyException(e);
         //     return E_INVALID_KEY_SPEC_EXCEPTION;
@@ -207,7 +282,11 @@ ECode OpenSSLECKeyFactory::EngineTranslateKey(
         // try {
         AutoPtr<IPKCS8EncodedKeySpec> spec;
         CPKCS8EncodedKeySpec::New(encoded, (IPKCS8EncodedKeySpec**)&spec);
-        return EngineGeneratePrivate(spec, result);
+        AutoPtr<IPrivateKey> privateKey;
+        EngineGeneratePrivate(IKeySpec::Probe(spec), (IPrivateKey**)&privateKey);
+        *result = IKey::Probe(privateKey);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
         // } catch (InvalidKeySpecException e) {
         //     // throw new InvalidKeyException(e);
         //     return E_INVALID_KEY_SPEC_EXCEPTION;
@@ -223,7 +302,11 @@ ECode OpenSSLECKeyFactory::EngineTranslateKey(
         // try {
         AutoPtr<IX509EncodedKeySpec> spec;
         CX509EncodedKeySpec::New(encoded, (IX509EncodedKeySpec**)&spec);
-        return EngineGeneratePrivate(spec, result);
+        AutoPtr<IPrivateKey> privateKey;
+        EngineGeneratePrivate(IKeySpec::Probe(spec), (IPrivateKey**)&privateKey);
+        *result = IKey::Probe(privateKey);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
         // } catch (InvalidKeySpecException e) {
         //     // throw new InvalidKeyException(e);
         //     return E_INVALID_KEY_SPEC_EXCEPTION;

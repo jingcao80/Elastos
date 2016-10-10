@@ -3,15 +3,18 @@
 #include "org/conscrypt/OpenSSLDHPublicKey.h"
 #include "org/conscrypt/OpenSSLKey.h"
 
-using Elastos::Security::Spec::CDHPrivateKeySpec;
 using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::CX509EncodedKeySpec;
+using Elastosx::Crypto::Interfaces::IDHKey;
+using Elastosx::Crypto::Spec::CDHPrivateKeySpec;
 using Elastosx::Crypto::Spec::CDHPublicKeySpec;
 
 namespace Org {
 namespace Conscrypt {
 
-CAR_INTERFACE_IMPL(OpenSSLDHKeyFactory, KeyFactorySpi, IOpenSSLDHKeyFactory)
+CAR_INTERFACE_IMPL(OpenSSLDHKeyFactory, Object, IOpenSSLDHKeyFactory)
+// TODO: Need KeyFactorySpi
+// CAR_INTERFACE_IMPL(OpenSSLDHKeyFactory, KeyFactorySpi, IOpenSSLDHKeyFactory)
 
 ECode OpenSSLDHKeyFactory::EngineGeneratePublic(
    /* [in] */ IKeySpec* keySpec,
@@ -25,13 +28,17 @@ ECode OpenSSLDHKeyFactory::EngineGeneratePublic(
     }
 
     if (IDHPublicKeySpec::Probe(keySpec) != NULL) {
-        *result = new OpenSSLDHPublicKey(IDHPublicKeySpec::Probe(keySpec));
+        AutoPtr<OpenSSLDHPublicKey> key = new OpenSSLDHPublicKey();
+        key->constructor(IDHPublicKeySpec::Probe(keySpec));
+        *result = IPublicKey::Probe(key);
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
     else if (IX509EncodedKeySpec::Probe(keySpec) != NULL) {
-        return OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec),
-                INativeCrypto::EVP_PKEY_DH, result);
+        *result = OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec),
+                INativeCrypto::EVP_PKEY_DH);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
     // throw new InvalidKeySpecException("Must use DHPublicKeySpec or X509EncodedKeySpec; was "
     //          + keySpec.getClass().getName());
@@ -50,13 +57,17 @@ ECode OpenSSLDHKeyFactory::EngineGeneratePrivate(
     }
 
     if (IDHPrivateKeySpec::Probe(keySpec) != NULL) {
-        *result = new OpenSSLDHPrivateKey(IDHPrivateKeySpec::Probe(keySpec));
+        AutoPtr<OpenSSLDHPrivateKey> key = new OpenSSLDHPrivateKey();
+        key->constructor(IDHPrivateKeySpec::Probe(keySpec));
+        *result = IPrivateKey::Probe(key);
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
     else if (IPKCS8EncodedKeySpec::Probe(keySpec) != NULL) {
-        return OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
-                INativeCrypto::EVP_PKEY_DH, result);
+        *result = OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
+                INativeCrypto::EVP_PKEY_DH);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
     // throw new InvalidKeySpecException("Must use DHPrivateKeySpec or PKCS8EncodedKeySpec; was "
     //          + keySpec.getClass().getName());
@@ -75,10 +86,11 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
         return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
-    if (keySpec == NULL) {
-        // throw new InvalidKeySpecException("keySpec == NULL");
-        return E_INVALID_KEY_SPEC_EXCEPTION;
-    }
+// TODO:
+    // if (keySpec == NULL) {
+    //     // throw new InvalidKeySpecException("keySpec == NULL");
+    //     return E_INVALID_KEY_SPEC_EXCEPTION;
+    // }
 
     String str;
     key->GetAlgorithm(&str);
@@ -87,11 +99,12 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
         return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
+    assert(0 && "TODO");
     if ((IDHPublicKey::Probe(key) != NULL)
-            && DHPublicKeySpec.class.isAssignableFrom(keySpec)) {
+            /*TODO: && DHPublicKeySpec.class.isAssignableFrom(keySpec)*/) {
         AutoPtr<IDHPublicKey> dhKey = IDHPublicKey::Probe(key);
         AutoPtr<IDHParameterSpec> params;
-        dhKey->GetParams((IDHParameterSpec**)&params);
+        IDHKey::Probe(dhKey)->GetParams((IDHParameterSpec**)&params);
         AutoPtr<IBigInteger> bY;
         AutoPtr<IBigInteger> bP;
         AutoPtr<IBigInteger> bG;
@@ -101,7 +114,7 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
         return CDHPublicKeySpec::New(bY, bP, bG, result);
     }
     else if ((IPublicKey::Probe(key) != NULL)
-            && DHPublicKeySpec.class.isAssignableFrom(keySpec)) {
+            /*TODO: && DHPublicKeySpec.class.isAssignableFrom(keySpec)*/) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
         String format;
@@ -112,12 +125,12 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
         }
         AutoPtr<IX509EncodedKeySpec> spec;
         CX509EncodedKeySpec::New(encoded, (IX509EncodedKeySpec**)&spec);
-        AutoPtr<IIPublicKey> pk;
-        EngineGeneratePublic(spec, (IIPublicKey**)&pk);
-
+        AutoPtr<IPublicKey> pk;
+        EngineGeneratePublic(IKeySpec::Probe(spec), (IPublicKey**)&pk);
         AutoPtr<IDHPublicKey> dhKey = IDHPublicKey::Probe(pk);
+
         AutoPtr<IDHParameterSpec> params;
-        dhKey->GetParams((IDHParameterSpec**)&params);
+        IDHKey::Probe(dhKey)->GetParams((IDHParameterSpec**)&params);
         AutoPtr<IBigInteger> bY;
         AutoPtr<IBigInteger> bP;
         AutoPtr<IBigInteger> bG;
@@ -127,10 +140,10 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
         return CDHPublicKeySpec::New(bY, bP, bG, result);
     }
     else if ((IDHPrivateKey::Probe(key) != NULL)
-            && DHPrivateKeySpec.class.isAssignableFrom(keySpec)) {
+            /*TODO: && DHPrivateKeySpec.class.isAssignableFrom(keySpec)*/) {
         AutoPtr<IDHPrivateKey> dhKey = IDHPrivateKey::Probe(key);
         AutoPtr<IDHParameterSpec> params;
-        dhKey->GetParams((IDHParameterSpec**)&prarms);
+        IDHKey::Probe(dhKey)->GetParams((IDHParameterSpec**)&params);
         AutoPtr<IBigInteger> bX;
         AutoPtr<IBigInteger> bP;
         AutoPtr<IBigInteger> bG;
@@ -140,7 +153,7 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
         return CDHPrivateKeySpec::New(bX, bP, bG, result);
     }
     else if ((IPrivateKey::Probe(key) != NULL)
-            && DHPrivateKeySpec.class.isAssignableFrom(keySpec)) {
+            /*TODO: && DHPrivateKeySpec.class.isAssignableFrom(keySpec)*/) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
         String format;
@@ -152,11 +165,11 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
 
         AutoPtr<IPKCS8EncodedKeySpec> spec;
         CPKCS8EncodedKeySpec::New(encoded, (IPKCS8EncodedKeySpec**)&spec);
-        AutoPtr<IIPublicKey> pk;
-        EngineGeneratePrivate(spec, (IIPublicKey**)&pk);
+        AutoPtr<IPrivateKey> pk;
+        EngineGeneratePrivate(IKeySpec::Probe(spec), (IPrivateKey**)&pk);
         AutoPtr<IDHPrivateKey> dhKey = IDHPrivateKey::Probe(pk);
         AutoPtr<IDHParameterSpec> params;
-        dhKey->GetParams((IDHParameterSpec**)&params);
+        IDHKey::Probe(dhKey)->GetParams((IDHParameterSpec**)&params);
         AutoPtr<IBigInteger> bX;
         AutoPtr<IBigInteger> bP;
         AutoPtr<IBigInteger> bG;
@@ -166,7 +179,7 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
         return CDHPrivateKeySpec::New(bX, bP, bG, result);
     }
     else if ((IPrivateKey::Probe(key) != NULL)
-            && PKCS8EncodedKeySpec.class.isAssignableFrom(keySpec)) {
+            /*TODO: && PKCS8EncodedKeySpec.class.isAssignableFrom(keySpec)*/) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
         String format;
@@ -183,7 +196,7 @@ ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
         return CPKCS8EncodedKeySpec::New(encoded, result);
     }
     else if ((IPublicKey::Probe(key) != NULL)
-            && X509EncodedKeySpec.class.isAssignableFrom(keySpec)) {
+            /*TODO: && X509EncodedKeySpec.class.isAssignableFrom(keySpec)*/) {
         AutoPtr<ArrayOf<Byte> > encoded;
         key->GetEncoded((ArrayOf<Byte>**)&encoded);
         String format;
@@ -233,7 +246,7 @@ ECode OpenSSLDHKeyFactory::EngineTranslateKey(
         dhKey->GetY((IBigInteger**)&y);
 
         AutoPtr<IDHParameterSpec> params;
-        dhKey->GetParams((IDHParameterSpec**)&params);
+        IDHKey::Probe(dhKey)->GetParams((IDHParameterSpec**)&params);
         AutoPtr<IBigInteger> p;
         params->GetP((IBigInteger**)&p);
         AutoPtr<IBigInteger> g;
@@ -242,7 +255,11 @@ ECode OpenSSLDHKeyFactory::EngineTranslateKey(
         // try {
         AutoPtr<IDHPublicKeySpec> spec;
         CDHPublicKeySpec::New(y, p, g, (IDHPublicKeySpec**)&spec);
-        return EngineGeneratePublic(spec, result);
+        AutoPtr<IPublicKey> publicKey;
+        EngineGeneratePublic(IKeySpec::Probe(spec), (IPublicKey**)&publicKey);
+        *result = IKey::Probe(publicKey);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
@@ -254,7 +271,7 @@ ECode OpenSSLDHKeyFactory::EngineTranslateKey(
         dhKey->GetX((IBigInteger**)&x);
 
         AutoPtr<IDHParameterSpec> params;
-        dhKey->GetParams((IDHParameterSpec**)&params);
+        IDHKey::Probe(dhKey)->GetParams((IDHParameterSpec**)&params);
         AutoPtr<IBigInteger> p;
         params->GetP((IBigInteger**)&p);
         AutoPtr<IBigInteger> g;
@@ -263,7 +280,11 @@ ECode OpenSSLDHKeyFactory::EngineTranslateKey(
         // try {
         AutoPtr<IDHPrivateKeySpec> spec;
         CDHPrivateKeySpec::New(x, p, g, (IDHPrivateKeySpec**)&spec);
-        return EngineGeneratePrivate(spec, result);
+        AutoPtr<IPrivateKey> privateKey;
+        EngineGeneratePrivate(IKeySpec::Probe(spec), (IPrivateKey**)&privateKey);
+        *result = IKey::Probe(privateKey);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
@@ -278,7 +299,11 @@ ECode OpenSSLDHKeyFactory::EngineTranslateKey(
         // try {
         AutoPtr<IPKCS8EncodedKeySpec> spec;
         CPKCS8EncodedKeySpec::New(encoded, (IPKCS8EncodedKeySpec**)&spec);
-        return EngineGeneratePrivate(spec, result);
+        AutoPtr<IPrivateKey> privateKey;
+        EngineGeneratePrivate(IKeySpec::Probe(spec), (IPrivateKey**)&privateKey);
+        *result = IKey::Probe(privateKey);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
@@ -293,7 +318,11 @@ ECode OpenSSLDHKeyFactory::EngineTranslateKey(
         // try {
         AutoPtr<IX509EncodedKeySpec> spec;
         CX509EncodedKeySpec::New(encoded, (IX509EncodedKeySpec**)&spec);
-        return EngineGeneratePublic(spec, result);
+        AutoPtr<IPublicKey> publicKey;
+        EngineGeneratePublic(IKeySpec::Probe(spec), (IPublicKey**)&publicKey);
+        *result = IKey::Probe(publicKey);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
         // } catch (InvalidKeySpecException e) {
         //     throw new InvalidKeyException(e);
         // }
