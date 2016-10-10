@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/os/CBinder.h"
+#include "elastos/droid/os/CCancellationSignalTransport.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/os/CRegistrantList.h"
@@ -16,6 +17,8 @@ namespace Droid {
 namespace Os {
 
 CAR_OBJECT_IMPL(CBinder)
+
+CAR_OBJECT_IMPL(CCancellationSignalTransport)
 
 CAR_OBJECT_IMPL(CHandler)
 

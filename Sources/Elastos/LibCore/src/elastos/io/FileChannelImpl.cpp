@@ -118,7 +118,7 @@ ECode FileChannelImpl::FileLockComparator::Compare(
 
 AutoPtr<IComparator> FileChannelImpl::LOCK_COMPARATOR = (IComparator*) new FileChannelImpl::FileLockComparator();
 
-CAR_INTERFACE_IMPL(FileChannelImpl, Object, IFileChannelImpl)
+CAR_INTERFACE_IMPL(FileChannelImpl, FileChannel, IFileChannelImpl)
 
 FileChannelImpl::FileChannelImpl(
     /* [in] */ ICloseable* stream,

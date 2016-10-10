@@ -7,7 +7,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/CBitmapFactory.h"
 #include "elastos/droid/net/CUriHelper.h"
-// #include "elastos/droid/media/CMiniThumbFile.h"
+#include "elastos/droid/media/CMiniThumbFile.h"
 #include "elastos/droid/media/ThumbnailUtils.h"
 #include "elastos/droid/provider/CMediaStoreImagesMedia.h"
 #include "elastos/droid/provider/CMediaStoreInternalThumbnails.h"
@@ -22,7 +22,7 @@ using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Content::CContentUris;
 using Elastos::Droid::Graphics::CBitmapFactory;
 using Elastos::Droid::Graphics::IBitmapFactory;
-// using Elastos::Droid::Media::CMiniThumbFile;
+using Elastos::Droid::Media::CMiniThumbFile;
 using Elastos::Droid::Media::ThumbnailUtils;
 using Elastos::Droid::Media::IMiniThumbFile;
 using Elastos::Droid::Net::CUriHelper;
@@ -56,7 +56,7 @@ static const AutoPtr<ArrayOf<String> > InitPROJECTION()
 
 const AutoPtr<ArrayOf<String> > CMediaStoreInternalThumbnails::PROJECTION = InitPROJECTION();
 
-const Object CMediaStoreInternalThumbnails::sThumbBufLock;
+Object CMediaStoreInternalThumbnails::sThumbBufLock;
 
 AutoPtr<ArrayOf<Byte> > CMediaStoreInternalThumbnails::sThumbBuf;
 
@@ -160,7 +160,7 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
         CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&media);
         media->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
     }
-    // CMiniThumbFile::New(uri, (IMiniThumbFile**)&thumbFile);
+    CMiniThumbFile::New(uri, (IMiniThumbFile**)&thumbFile);
 
     AutoPtr<ICursor> c;
     // try {
@@ -168,26 +168,22 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
         thumbFile->GetMagic(origId, &magic);
         if (magic != 0) {
             if (kind == MICRO_KIND) {
-                //TODO
-                // ISynchronized* sync = ISynchronized::Probe(sThumbBufLock);
-                // synchronized(sync)
-                // {
-                    if (sThumbBuf == NULL) {
-                        sThumbBuf = ArrayOf<Byte>::Alloc(IMiniThumbFile::BYTES_PER_MINTHUMB);
-                    }
-                    AutoPtr<ArrayOf<Byte> > miniThumb;
-                    thumbFile->GetMiniThumbFromFile(origId, sThumbBuf.Get(), (ArrayOf<Byte>**)&miniThumb);
-                    if (miniThumb != NULL) {
-                        AutoPtr<IBitmapFactory> factory;
-                        ASSERT_SUCCEEDED(CBitmapFactory::AcquireSingleton(
-                            (IBitmapFactory**)&factory));
+                AutoLock lock(sThumbBufLock);
+                if (sThumbBuf == NULL) {
+                    sThumbBuf = ArrayOf<Byte>::Alloc(IMiniThumbFile::BYTES_PER_MINTHUMB);
+                }
+                AutoPtr<ArrayOf<Byte> > miniThumb;
+                thumbFile->GetMiniThumbFromFile(origId, sThumbBuf.Get(), (ArrayOf<Byte>**)&miniThumb);
+                if (miniThumb != NULL) {
+                    AutoPtr<IBitmapFactory> factory;
+                    ASSERT_SUCCEEDED(CBitmapFactory::AcquireSingleton(
+                        (IBitmapFactory**)&factory));
 
-                        factory->DecodeByteArray(sThumbBuf.Get(), 0, sThumbBuf->GetLength(), (IBitmap**)&bitmap);
-                        if (bitmap == NULL) {
-                            // Logger::W(TAG, "couldn't decode byte array.");
-                        }
+                    factory->DecodeByteArray(sThumbBuf.Get(), 0, sThumbBuf->GetLength(), (IBitmap**)&bitmap);
+                    if (bitmap == NULL) {
+                        // Logger::W(TAG, "couldn't decode byte array.");
                     }
-                // }
+                }
             }
 
             *outBitmap = bitmap;
@@ -233,31 +229,26 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
         // Assuming thumbnail has been generated, at least original image exists.
         if (kind == MICRO_KIND) {
             {
-                //TODO
-                // ISynchronized* sync = ISynchronized::Probe(sThumbBufLock);
-                // synchronized(sync)
-                // {
-                    if (sThumbBuf == NULL) {
-                        sThumbBuf = ArrayOf<Byte>::Alloc(IMiniThumbFile::BYTES_PER_MINTHUMB);
+                AutoLock lock(sThumbBufLock);
+                if (sThumbBuf == NULL) {
+                    sThumbBuf = ArrayOf<Byte>::Alloc(IMiniThumbFile::BYTES_PER_MINTHUMB);
+                }
+                Arrays::Fill(sThumbBuf.Get(), (Byte)0);
+                AutoPtr<ArrayOf<Byte> > miniThumb;
+                thumbFile->GetMiniThumbFromFile(origId, sThumbBuf.Get(), (ArrayOf<Byte>**)&miniThumb);
+
+                if (miniThumb != NULL) {
+                    AutoPtr<IBitmapFactory> factory;
+                    ASSERT_SUCCEEDED(CBitmapFactory::AcquireSingleton(
+                        (IBitmapFactory**)&factory));
+
+                    bitmap = NULL;
+                    factory->DecodeByteArray(sThumbBuf.Get(), 0, sThumbBuf->GetLength(), (IBitmap**)&bitmap);
+
+                    if (bitmap == NULL) {
+                        //Log.w(TAG, "couldn't decode byte array.");
                     }
-                    Arrays::Fill(sThumbBuf.Get(), (Byte)0);
-                    AutoPtr<ArrayOf<Byte> > miniThumb;
-                    thumbFile->GetMiniThumbFromFile(origId, sThumbBuf.Get(), (ArrayOf<Byte>**)&miniThumb);
-
-                    if (miniThumb != NULL) {
-                        AutoPtr<IBitmapFactory> factory;
-                        ASSERT_SUCCEEDED(CBitmapFactory::AcquireSingleton(
-                            (IBitmapFactory**)&factory));
-
-                        bitmap = NULL;
-                        factory->DecodeByteArray(sThumbBuf.Get(), 0, sThumbBuf->GetLength(), (IBitmap**)&bitmap);
-
-                        if (bitmap == NULL) {
-                            //Log.w(TAG, "couldn't decode byte array.");
-                        }
-                    }
-
-                // }
+                }
             }
         } else if (kind == MINI_KIND) {
             Boolean bSucceeded;

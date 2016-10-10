@@ -238,7 +238,8 @@ ECode CContentProviderNative::OpenTypedAssetFile(
         "(Ljava/lang/String;"\
         "Landroid/net/Uri;"\
         "Ljava/lang/String;"\
-        "Landroid/os/Bundle;)Landroid/content/res/AssetFileDescriptor;");
+        "Landroid/os/Bundle;"\
+        "Landroid/os/ICancellationSignal;)Landroid/content/res/AssetFileDescriptor;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: openTypedAssetFile Line: %d", __LINE__);
 
     ECode ec = NOERROR;
@@ -656,7 +657,8 @@ ECode CContentProviderNative::OpenAssetFile(
     Util::CheckErrorAndLog(env, TAG, "FindClass: IContentProvider %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "openAssetFile",
-        "(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;)Landroid/content/res/AssetFileDescriptor;");
+        "(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;Landroid/os/ICancellationSignal;)"
+        "Landroid/content/res/AssetFileDescriptor;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: openAssetFile Line: %d", __LINE__);
 
     jobject jfileDescriptor = env->CallObjectMethod(mJInstance, m, jcallingPkg, juri, jmode, jcancellationSignal);

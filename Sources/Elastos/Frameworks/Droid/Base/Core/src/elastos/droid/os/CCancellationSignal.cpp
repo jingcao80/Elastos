@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/os/CCancellationSignal.h"
+#include "elastos/droid/os/CCancellationSignalTransport.h"
 #include <elastos/core/AutoLock.h>
 
 namespace Elastos {
@@ -10,16 +11,22 @@ namespace Os {
 //===============================================================================
 //                  CCancellationSignal::Transport
 //===============================================================================
-CAR_INTERFACE_IMPL(CCancellationSignal::Transport, Object, IICancellationSignal)
+CAR_INTERFACE_IMPL_2(CCancellationSignal::Transport, Object, IICancellationSignal, IBinder)
 
-CCancellationSignal::Transport::Transport()
+ECode CCancellationSignal::Transport::constructor()
 {
-    CCancellationSignal::New((ICancellationSignal**)&mCancellationSignal);
+    return CCancellationSignal::New((ICancellationSignal**)&mCancellationSignal);
 }
 
 ECode CCancellationSignal::Transport::Cancel()
 {
     return mCancellationSignal->Cancel();;
+}
+
+ECode CCancellationSignal::Transport::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
 }
 
 //===============================================================================
@@ -154,7 +161,8 @@ void CCancellationSignal::WaitForCancelFinishedLocked()
 
 AutoPtr<IICancellationSignal> CCancellationSignal::CreateTransport()
 {
-    AutoPtr<IICancellationSignal> transport = new Transport();
+    AutoPtr<IICancellationSignal> transport;
+    CCancellationSignalTransport::New((IICancellationSignal**)&transport);
     return transport;
 }
 

@@ -9,7 +9,9 @@
 #endif
 
 #include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
+#include "elastos/utility/CArrayList.h"
+
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Core {
@@ -47,6 +49,7 @@ Thread::Thread()
 #if defined(_DEBUG)
     mIsConstructed = FALSE;
 #endif
+    CArrayList::New((IList**)&mInterruptActions);
 }
 
 Thread::~Thread()
@@ -424,15 +427,20 @@ ECode Thread::GetUncaughtExceptionHandler(
 
 ECode Thread::Interrupt()
 {
-    FAIL_RETURN(CheckAccess());
+    // Interrupt this thread before running actions so that other
+    // threads that observe the interrupt as a result of an action
+    // will see that this thread is in the interrupted state.
+    NativeInterrupt();
 
-    if (mInterruptAction != NULL) {
-        mInterruptAction->Run();
+    AutoLock lock(mInterruptActions);
+    Int32 size;
+    mInterruptActions->GetSize(&size);
+    for (Int32 i = size - 1; i >= 0; i--) {
+        AutoPtr<IInterface> item;
+        mInterruptActions->Get(i, (IInterface**)&item);
+        IRunnable::Probe(item)->Run();
     }
 
-    if (mNativeThread != NULL) {
-        NativeInterrupt();
-    }
     return NOERROR;
 }
 
@@ -622,12 +630,6 @@ void Thread::SetDefaultUncaughtExceptionHandler(
     /* [in] */ IThreadUncaughtExceptionHandler* handler)
 {
     sDefaultUncaughtHandler = handler;
-}
-
-void Thread::SetInterruptAction(
-    /* [in] */ IRunnable* action)
-{
-    mInterruptAction = action;
 }
 
 ECode Thread::SetName(
@@ -1094,10 +1096,10 @@ ECode Thread::SetContextClassLoader(
 ECode Thread::PushInterruptAction(
     /* [in] */ IRunnable* interruptAction)
 {
-    assert(0 && "TODO");
-    // {    AutoLock syncLock(mLock);
-    //     interruptActions.add(interruptAction);
-    // }
+    {
+        AutoLock syncLock(mInterruptActions);
+        mInterruptActions->Add(interruptAction);
+    }
 
     Boolean isflag = FALSE;
     if (interruptAction != NULL && (IsInterrupted(&isflag), isflag)) {
@@ -1109,14 +1111,16 @@ ECode Thread::PushInterruptAction(
 ECode Thread::PopInterruptAction(
     /* [in] */ IRunnable* interruptAction)
 {
-    assert(0 && "TODO");
-    // {    AutoLock syncLock(interruptActions);
-    //     Runnable removed = interruptActions.remove(interruptActions.size() - 1);
-    //     if (interruptAction != removed) {
-    //         throw new IllegalArgumentException(
-    //                 "Expected " + interruptAction + " but was " + removed);
-    //     }
-    // }
+    AutoLock syncLock(mInterruptActions);
+    Int32 size = 0;
+    mInterruptActions->GetSize(&size);
+    AutoPtr<IInterface> removed;
+    mInterruptActions->Remove(size - 1, (IInterface**)&removed);
+    if (interruptAction != IRunnable::Probe(removed)) {
+        ALOGE("Expected %s but was %s", TO_CSTR(interruptAction), TO_CSTR(removed));
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     return NOERROR;
 }
 

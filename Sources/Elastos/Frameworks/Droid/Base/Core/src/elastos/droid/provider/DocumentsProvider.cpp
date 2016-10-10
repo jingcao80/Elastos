@@ -493,7 +493,7 @@ ECode DocumentsProvider::Call(
 
     if (!method.StartWith("android:")) {
         // Ignore non-platform methods
-        return Call(method, arg, extras, bundle);
+        return ContentProvider::Call(method, arg, extras, bundle);
     }
 
     AutoPtr<IContext> context;
@@ -695,8 +695,7 @@ ECode DocumentsProvider::OpenTypedAssetFile(
 
     FAIL_RETURN(EnforceTree(uri))
     Boolean flag = FALSE;
-    opts->ContainsKey(IContentResolver::EXTRA_SIZE, &flag);
-    if (opts != NULL && flag) {
+    if (opts != NULL && (opts->ContainsKey(IContentResolver::EXTRA_SIZE, &flag), flag)) {
         String docID;
         DocumentsContract::GetDocumentId(uri, &docID);
         AutoPtr<IParcelable> pla;
@@ -705,12 +704,12 @@ ECode DocumentsProvider::OpenTypedAssetFile(
         return OpenDocumentThumbnail(docID, sizeHint, NULL, fileDescriptor);
     }
     else {
-        return OpenTypedAssetFile(uri, mimeTypeFilter, opts, fileDescriptor);
+        return ContentProvider::OpenTypedAssetFile(uri, mimeTypeFilter, opts, fileDescriptor);
     }
 }
 
 //@Override
-ECode DocumentsProvider:: OpenTypedAssetFile(
+ECode DocumentsProvider::OpenTypedAssetFile(
     /* [in] */ IUri* uri,
     /* [in] */ const String& mimeTypeFilter,
     /* [in] */ IBundle* opts,
@@ -722,8 +721,7 @@ ECode DocumentsProvider:: OpenTypedAssetFile(
 
     FAIL_RETURN(EnforceTree(uri))
     Boolean flag = FALSE;
-    opts->ContainsKey(IContentResolver::EXTRA_SIZE, &flag);
-    if (opts != NULL && flag) {
+    if (opts != NULL && (opts->ContainsKey(IContentResolver::EXTRA_SIZE, &flag), flag)) {
         String docID;
         DocumentsContract::GetDocumentId(uri, &docID);
         AutoPtr<IParcelable> pla;
@@ -732,7 +730,7 @@ ECode DocumentsProvider:: OpenTypedAssetFile(
         return OpenDocumentThumbnail(docID, sizeHint, signal, fileDescriptor);
     }
     else {
-        return OpenTypedAssetFile(uri, mimeTypeFilter, opts, signal, fileDescriptor);
+        return ContentProvider::OpenTypedAssetFile(uri, mimeTypeFilter, opts, signal, fileDescriptor);
     }
 }
 

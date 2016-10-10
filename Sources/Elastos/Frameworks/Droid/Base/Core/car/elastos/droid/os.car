@@ -344,6 +344,13 @@ module
         interface ICancellationSignal;
     }
 
+    class CCancellationSignalTransport {
+        constructor();
+
+        interface IICancellationSignal;
+        interface IBinder;
+    }
+
     singleton class CCancellationSignalHelper {
         interface ICancellationSignalHelper;
     }

@@ -17,16 +17,21 @@ CarClass(CCancellationSignal)
     , public Object
     , public ICancellationSignal
 {
-private:
+public:
     class Transport
         : public Object
-        , public IICancellationSignal {
+        , public IICancellationSignal
+        , public IBinder
+    {
     public:
         CAR_INTERFACE_DECL()
 
-        Transport();
+        constructor();
 
         CARAPI Cancel();
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         friend class CCancellationSignal;

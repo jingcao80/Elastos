@@ -5,6 +5,8 @@
 #include <elastos/core/Object.h>
 #include <elastos/core/NativeThread.h>
 
+using Elastos::Utility::IList;
+
 namespace Elastos {
 namespace Core {
 
@@ -924,21 +926,6 @@ private:
 
     ECO_LOCAL CARAPI_(Boolean) NativeIsInterrupted();
 
-    /**
-     * Set the action to be executed when interruption, which is probably be
-     * used to implement the interruptible channel. The action is null by
-     * default. And if this method is invoked by passing in a non-null value,
-     * this action's run() method will be invoked in <code>interrupt()</code>.
-     * <p>
-     * This is required internally by NIO, so even if it looks like it's
-     * useless, don't delete it!
-     *
-     * @param action the action to be executed when interruption
-     */
-    //@SuppressWarnings("unused")
-    ECO_LOCAL CARAPI_(void) SetInterruptAction(
-        /* [in] */ IRunnable* action);
-
     /*
      * void nameChanged(String newName)
      *
@@ -1018,13 +1005,8 @@ private:
      */
     Int64 mId;
 
-    /**
-     * Holds the interrupt action for this Thread, if any.
-     * <p>
-     * This is required internally by NIO, so even if it looks like it's
-     * useless, don't delete it!
-     */
-    AutoPtr<IRunnable> mInterruptAction;
+    /** Callbacks to run on interruption. */
+    AutoPtr<IList> mInterruptActions;
 
     /**
      * Holds the handler for uncaught exceptions in this Thread,

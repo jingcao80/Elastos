@@ -23,6 +23,7 @@ namespace Media {
 
 class MediaDocumentsProvider
     : public DocumentsProvider
+    , public IMediaDocumentsProvider
 {
 public:
     class Ident

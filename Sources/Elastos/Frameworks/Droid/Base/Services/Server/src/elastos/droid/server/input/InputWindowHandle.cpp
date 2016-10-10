@@ -42,8 +42,10 @@ InputWindowHandle::InputWindowHandle(
     , mPtr(0)
 {
     CRegion::New((IRegion**)&mTouchableRegion);
-    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(windowState);
-    wrs->GetWeakReference((IWeakReference**)&mWeakWindowState);
+    if (windowState != NULL ) {
+        IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(windowState);
+        wrs->GetWeakReference((IWeakReference**)&mWeakWindowState);
+    }
 }
 
 InputWindowHandle::~InputWindowHandle()

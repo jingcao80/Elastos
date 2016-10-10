@@ -482,7 +482,7 @@ ECode CContentProviderTransport::OpenTypedAssetFile(
     ContentProvider::GetUriWithoutUserId(inUri, (IUri**)&uri);
 
     Int32 ival;
-    FAIL_RETURN(EnforceWritePermission(callingPkg, uri, &ival))
+    FAIL_RETURN(EnforceReadPermission(callingPkg, uri, &ival))
 
     AutoPtr<ICancellationSignalHelper> helper;
     CCancellationSignalHelper::AcquireSingleton((ICancellationSignalHelper**)&helper);

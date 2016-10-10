@@ -8738,12 +8738,12 @@ Boolean Util::GetElParcelFileDescriptor(
     jclass pfdKlass = env->FindClass("android/os/ParcelFileDescriptor");
     Util::CheckErrorAndLog(env, "GetElParcelFileDescriptor", "FindClass: ParcelFileDescriptor %d", __LINE__);
 
-    jfieldID f = env->GetFieldID(pfdKlass, "mFileDescriptor", "Ljava/io/FileDescriptor;");
+    jfieldID f = env->GetFieldID(pfdKlass, "mFd", "Ljava/io/FileDescriptor;");
     Util::CheckErrorAndLog(env, "GetElParcelFileDescriptor", "GetFieldID: mData  %d", __LINE__);
     env->DeleteLocalRef(pfdKlass);
 
     jobject jfd = env->GetObjectField(jpFDescptor, f);
-    Util::CheckErrorAndLog(env, "GetElParcelFileDescriptor", "GetObjectField: mFileDescriptor  %d", __LINE__);
+    Util::CheckErrorAndLog(env, "GetElParcelFileDescriptor", "GetObjectField: mFd  %d", __LINE__);
 
     AutoPtr<IFileDescriptor> fd;
     if (!GetElFileDescriptor(env, jfd, (IFileDescriptor**)&fd)) {

@@ -76,7 +76,7 @@ private:
     static const Int32 FULL_SCREEN_KIND;
     static const Int32 MICRO_KIND;
     static const AutoPtr<ArrayOf<String> > PROJECTION;
-    static const Object sThumbBufLock;
+    static Object sThumbBufLock;
     static AutoPtr<ArrayOf<Byte> > sThumbBuf;
 };
 
