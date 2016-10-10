@@ -88,10 +88,14 @@ using Elastos::Utility::Concurrent::Atomic::CAtomicReference;
 using Elastos::Utility::Zip::IZipFile;
 using Elastos::Utility::Zip::CZipFile;
 using Elastos::Security::Cert::ICertificate;
+using Elastos::Security::CKeyFactoryHelper;
+using Elastos::Security::IKeyFactory;
+using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::Spec::IEncodedKeySpec;
+using Elastos::Security::Spec::IKeySpec;
 using Elastos::Security::Spec::IX509EncodedKeySpec;
-// using Elastos::Security::Spec::CX509EncodedKeySpec;
+using Elastos::Security::Spec::CX509EncodedKeySpec;
 using Libcore::IO::IIoUtils;
 using Libcore::IO::CIoUtils;
 
@@ -1460,7 +1464,6 @@ ECode PackageParser::ParsePackage(
 {
     VALIDATE_NOT_NULL(pkgLite)
 
-    ECode ec = NOERROR;
     Boolean isDir;
     packageFile->IsDirectory(&isDir);
     if (isDir) {
@@ -6214,9 +6217,6 @@ ECode PackageParser::ParsePublicKey(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "TODO: PackageParser::ParsePublicKey is not implemented!");
-    return NOERROR;
-
     AutoPtr<IEncodedKeySpec> keySpec;
     // try {
     AutoPtr<IBase64> base64;
@@ -6228,8 +6228,7 @@ ECode PackageParser::ParsePublicKey(
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    // ec = CX509EncodedKeySpec::New(encoded, (IEncodedKeySpec**)&keySpec);
+    ec = CX509EncodedKeySpec::New(encoded, (IEncodedKeySpec**)&keySpec);
     if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
         Slogger::I(TAG, "Could not parse verifier public key; invalid Base64");
         return NOERROR;
@@ -6239,11 +6238,24 @@ ECode PackageParser::ParsePublicKey(
         // return NOERROR;
     // }
 
-    assert(0 && "TODO");
-    // /* First try the key as an RSA key. */
+    /* First try the key as an RSA key. */
     // try {
-    //     KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-    //     return keyFactory.generatePublic(keySpec);
+    AutoPtr<IKeyFactoryHelper> helper;
+    CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&helper);
+    AutoPtr<IKeyFactory> keyFactory;
+    ec = helper->GetInstance(String("RSA"), (IKeyFactory**)&keyFactory);
+    if (ec == (ECode)E_NO_SUCH_ALGORITHM_EXCEPTION) {
+        Slogger::I(TAG, "Could not parse public key because RSA isn't included in build");
+        return NOERROR;
+    }
+    ec = keyFactory->GeneratePublic(IKeySpec::Probe(keySpec), key);
+    if (ec != (ECode)E_INVALID_KEY_SPEC_EXCEPTION) {
+        if (ec == (ECode)E_NO_SUCH_ALGORITHM_EXCEPTION) {
+            Slogger::I(TAG, "Could not parse public key because RSA isn't included in build");
+            return NOERROR;
+        }
+        return NOERROR;
+    }
     // } catch (NoSuchAlgorithmException e) {
     //     Log.wtf(TAG, "Could not parse public key because RSA isn't included in build");
     //     return NOERROR;
@@ -6251,10 +6263,23 @@ ECode PackageParser::ParsePublicKey(
     //     // Not a RSA public key.
     // }
 
-    // /* Now try it as a DSA key. */
+    /* Now try it as a DSA key. */
     // try {
-    //     KeyFactory keyFactory = KeyFactory.getInstance("DSA");
-    //     return keyFactory.generatePublic(keySpec);
+    keyFactory = NULL;
+    ec = helper->GetInstance(String("DSA"), (IKeyFactory**)&keyFactory);
+    if (ec == (ECode)E_NO_SUCH_ALGORITHM_EXCEPTION) {
+        Slogger::I(TAG, "Could not parse public key because DSA isn't included in build");
+        return NOERROR;
+    }
+
+    ec = keyFactory->GeneratePublic(IKeySpec::Probe(keySpec), key);
+    if (ec != (ECode)E_INVALID_KEY_SPEC_EXCEPTION) {
+        if (ec == (ECode)E_NO_SUCH_ALGORITHM_EXCEPTION) {
+            Slogger::I(TAG, "Could not parse public key because DSA isn't included in build");
+            return NOERROR;
+        }
+        return NOERROR;
+    }
     // } catch (NoSuchAlgorithmException e) {
     //     Log.wtf(TAG, "Could not parse public key because DSA isn't included in build");
     //     return NULL;

@@ -90,6 +90,7 @@
 > Elastos/LibCore/src/org/apache/harmony/xml
   Elastos/LibCore/src/org/apache/harmony/security/asn1
   Elastos/LibCore/src/org/apache/harmony/security/fortress
+  Elastos/LibCore/src/org/apache/harmony/security/pkcs10
   Elastos/LibCore/src/org/apache/harmony/security/pkcs7
   Elastos/LibCore/src/org/apache/harmony/security/utils
   Elastos/LibCore/src/org/apache/harmony/security/x509/tsp/

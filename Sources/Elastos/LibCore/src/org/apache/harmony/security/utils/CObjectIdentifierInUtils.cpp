@@ -1,5 +1,8 @@
 
 #include "CObjectIdentifierInUtils.h"
+#include "elastos/utility/Arrays.h"
+
+using Elastos::Utility::Arrays;
 
 namespace Org {
 namespace Apache {
@@ -8,73 +11,159 @@ namespace Security {
 namespace Utils {
 
 CAR_OBJECT_IMPL(CObjectIdentifierInUtils)
+CAR_INTERFACE_IMPL(CObjectIdentifierInUtils, Object, IObjectIdentifier)
 
-CAR_INTERFACE_IMPL(CObjectIdentifierInUtils, Object, IObjectIdentifierInUtils)
+CObjectIdentifierInUtils::CObjectIdentifierInUtils()
+    : mHash(-1)
+{}
 
 ECode CObjectIdentifierInUtils::GetOid(
-    /* [out, callee] */ ArrayOf<Int32> ** ppOid)
+    /* [out, callee] */ ArrayOf<Int32> ** result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(*result);
+    *result = mOid;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode CObjectIdentifierInUtils::GetName(
-    /* [out] */ String * pName)
+    /* [out] */ String * result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(*result);
+    *result = mName;
+    return NOERROR;
 }
 
 ECode CObjectIdentifierInUtils::GetGroup(
-    /* [out] */ IObject ** ppGroup)
+    /* [out] */ IInterface ** result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(*result);
+    *result = mGroup;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode CObjectIdentifierInUtils::Equals(
-    /* [in] */ IInterface * pO,
-    /* [out] */ Boolean * pResult)
+    /* [in] */ IInterface * o,
+    /* [out] */ Boolean * result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    if (this->Probe(EIID_IInterface) == o) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    ClassID id1, id2;
+    if (o == NULL || (GetClassID(&id1), id1) != (IObject::Probe(o)->GetClassID(&id2), id2)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = Arrays::Equals(mOid, ((CObjectIdentifierInUtils*) IObjectIdentifier::Probe(o))->mOid);
+    return NOERROR;
 }
 
 ECode CObjectIdentifierInUtils::ToOIDString(
-    /* [out] */ String * pStr)
+    /* [out] */ String * result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    if (mSOID == NULL) {
+        String s;
+        ToString(&s);
+        mSOID = String("OID.") + s;
+    }
+    *result = mSOID;
+    return NOERROR;
 }
 
 ECode CObjectIdentifierInUtils::ToString(
-    /* [out] */ String * pStr)
+    /* [out] */ String * result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(*result);
+    if (mSoid == NULL) {
+        StringBuilder sb(4 * mOid->GetLength());
+
+        for (Int32 i = 0; i < mOid->GetLength() - 1; ++i) {
+            sb.Append((*mOid)[i]);
+            sb.AppendChar('.');
+        }
+        sb.Append((*mOid)[mOid->GetLength() - 1]);
+        mSoid = sb.ToString();
+    }
+    *result = mSoid;
+    return NOERROR;
 }
 
 ECode CObjectIdentifierInUtils::GetHashCode(
-    /* [out] */ Int32 * pHashCode)
+    /* [out] */ Int32 * result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(*result);
+    if (mHash == -1) {
+        mHash = HashIntArray(mOid);
+    }
+    *result = mHash;
+    return NOERROR;
 }
 
 ECode CObjectIdentifierInUtils::constructor(
-    /* [in] */ ArrayOf<Int32> * pOid)
+    /* [in] */ ArrayOf<Int32> * oid)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    FAIL_RETURN(ValidateOid(oid));
+
+    mOid = oid;
+    return NOERROR;
 }
 
 ECode CObjectIdentifierInUtils::constructor(
-    /* [in] */ ArrayOf<Int32> * pOid,
+    /* [in] */ ArrayOf<Int32> * oid,
     /* [in] */ const String& name,
-    /* [in] */ IObject * pOidGroup)
+    /* [in] */ IInterface * oidGroup)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    constructor(oid);
+
+    if (oidGroup == NULL) {
+        // throw new NullPointerException("oidGroup == null");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    mGroup = oidGroup;
+
+    mName = name;
+    String s;
+    ToOIDString(&s); // init soid & sOID
+    return NOERROR;
+}
+
+ECode CObjectIdentifierInUtils::ValidateOid(
+    /* [in] */ ArrayOf<Int32>* oid)
+{
+    if (oid == NULL) {
+        // throw new NullPointerException("oid == null");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    if (oid->GetLength() < 2) {
+        // throw new IllegalArgumentException("OID MUST have at least 2 subidentifiers");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if ((*oid)[0] > 2) {
+        // throw new IllegalArgumentException("Valid values for first subidentifier are 0, 1 and 2");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if ((*oid)[0] != 2 && (*oid)[1] > 39) {
+        // throw new IllegalArgumentException("If the first subidentifier has 0 or 1 value the second subidentifier value MUST be less than 40");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+Int32 CObjectIdentifierInUtils::HashIntArray(
+    /* [in] */ ArrayOf<Int32>* array)
+{
+    Int32 intHash = 0;
+    for (Int32 i = 0; i < array->GetLength() && i < 4; i++) {
+        intHash += (*array)[i] << (8 * i); //TODO what about to find better one?
+    }
+    return intHash & 0x7FFFFFFF; // only positive
 }
 
 }
@@ -82,4 +171,3 @@ ECode CObjectIdentifierInUtils::constructor(
 }
 }
 }
-

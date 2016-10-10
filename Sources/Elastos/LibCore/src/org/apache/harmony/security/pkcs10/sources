@@ -2,10 +2,18 @@
 TARGET_NAME= pkcs10
 TARGET_TYPE= lib
 
-INCLUDES += ../../
-INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Security/Pkcs10
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/asn1
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/pkcs10
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/x501
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/x509
 
 SOURCES = CCertificationRequest.cpp
-SOURCES += CCertificationRequestHelper.cpp
+#SOURCES += CCertificationRequestHelper.cpp
 SOURCES += CCertificationRequestInfo.cpp
-SOURCES += CCertificationRequestInfoHelper.cpp
+#SOURCES += CCertificationRequestInfoHelper.cpp

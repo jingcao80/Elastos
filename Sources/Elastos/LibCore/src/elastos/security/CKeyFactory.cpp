@@ -36,12 +36,14 @@ ECode CKeyFactory::GetInstance(
     /* [out] */ IKeyFactory** result) /*throws NoSuchAlgorithmException*/
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (algorithm == NULL) {
         // throw new NullPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ISpiAndProvider> sap;
-    ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
+    FAIL_RETURN(ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap));
     AutoPtr<IInterface> spi;
     sap->GetSpi((IInterface**)&spi);
     AutoPtr<IProvider> provider;
