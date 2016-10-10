@@ -537,8 +537,19 @@ class ViewPager extends ViewGroup {
 //     // or end of the pager data set during touch scrolling.
 //     private float mFirstOffset = -Float.MAX_VALUE;
         //var mFirstOffset = 0;   //Elastos.Core.Math.FLOAT_MAX_VALUE;
+    get mFirstOffset() {return this._mFirstOffset || 0xEFFFFFFF;}
+    set mFirstOffset(v) {this._mFirstOffset = v;}
+
+
+//const Float Math::FLOAT_MAX_VALUE           = 3.40282346638528860e+38F;
+//const Float Math::FLOAT_MIN_VALUE           = 1.40129846432481707e-45F;
+//const Float Math::FLOAT_ZERO                = 0.0F;
+
+
 //     private float mLastOffset = Float.MAX_VALUE;
         //var mLastOffset = 0;    //Elastos.Core.Math.FLOAT_MAX_VALUE;
+    get mLastOffset() {return this._mLastOffset || 0xEFFFFFFF;}
+    set mLastOffset(v) {this._mLastOffset = v;}
 
 //     private int mChildWidthMeasureSpec;
 //     private int mChildHeightMeasureSpec;
@@ -601,7 +612,8 @@ class ViewPager extends ViewGroup {
     get mFirstLayout() {return this._mFirstLayout || true;}
     set mFirstLayout(v) {this._mFirstLayout = v;}
 //     private boolean mNeedCalculatePageOffsets = false;
-    get mNeedCalculatePageOffsets() {return false;}
+    get mNeedCalculatePageOffsets() {return this._mNeedCalculatePageOffsets || false;}
+    set mNeedCalculatePageOffsets(v) {this._mNeedCalculatePageOffsets = v;return v;}
  //     private boolean mCalledSuper;
 //     private int mDecorChildCount;
 
@@ -963,13 +975,9 @@ class ViewPager extends ViewGroup {
 //         }
 //     }
     SetAdapter(adapter) {
-        elog("====ViewPager::SetAdapter====begin====");
-
         var _this = this._obj;
 
         if (this.mAdapter != null) {
-            elog("====ViewPager::SetAdapter====begin====0====");
-
             this.UnregisterDataSetObserver(this.mObserver);
             this.mAdapter.startUpdate(this);
             for (var i = 0; i < this.mItems.GetSize(); i++) {
@@ -979,72 +987,20 @@ class ViewPager extends ViewGroup {
             this.mAdapter.FinishUpdate(this);
             this.mItems.Clear();
             removeNonDecorViews();
-            mCurItem = 0;
-            scrollTo(0, 0);
+            this.mCurItem = 0;
+            _this.ScrollTo(0, 0);
         }
 
         var oldAdapter = this.mAdapter;
         this.mAdapter = adapter;
         this.mExpectedAdapterCount = 0;
 
-        elog("====ViewPager::SetAdapter====begin====1====");
-
         if (this.mAdapter != null) {
-            elog("====ViewPager::SetAdapter====begin====2====");
-
             if (this.mObserver == null) {
-                elog("====ViewPager::SetAdapter====begin====2.1====");
                 this.mObserver = new this.PagerObserver();
             }
 
-
-// ECode DataSetObservable::NotifyChanged()
-// {
-//     AutoLock syncLock(mObserversLock);
-//     List< AutoPtr<IInterface> >::ReverseIterator rit = mObservers.RBegin();
-//     List< AutoPtr<IInterface> >::ReverseIterator end = mObservers.REnd();
-//     IDataSetObserver* observer;
-//     for (; rit != end; ++rit) {
-//         observer = IDataSetObserver::Probe(*rit);
-//         observer->OnChanged();
-//     }
-
-//     return NOERROR;
-// }
-
-// ECode Observable::RegisterObserver(
-//     /* [in] */ IInterface* observer)
-// {
-//     if (observer == NULL) {
-//         Slogger::E("Observable", "The observer is NULL.");
-//         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//     }
-
-//     {
-//         AutoLock syncLock(mObserversLock);
-//         AutoPtr<IInterface> obj = observer;
-//         List< AutoPtr<IInterface> >::Iterator it = Find(mObservers.Begin(), mObservers.End(), obj);
-//         if (it != mObservers.End()) {
-//             Slogger::E(String("Observable"), "Observer %s is already registered.", TO_CSTR(observer));
-//             return E_ILLEGAL_STATE_EXCEPTION;
-//         }
-//         mObservers.PushBack(observer);
-//     }
-
-//     return NOERROR;
-// }
-
-
-
-elog("======sssssssssssssssssssssss===");
-//var ss = CObject.getObjectMethodProtos(this.mAdapter, "RegisterDataSetObserver");
-//elog("====PROTO:"+ss);
-elog("====type===="+typeof(this.mAdapter.RegisterDataSetObserver));
             this.mAdapter.RegisterDataSetObserver(this.mObserver);
-
-elog("====TODO: check listener interface type, it should be IDataSetObserver!!!");
-//Assert(0);
-
 
             this.mPopulatePending = false;
             var wasFirstLayout = this.mFirstLayout;
@@ -1064,14 +1020,9 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
             }
         }
 
-        elog("====ViewPager::SetAdapter====begin====3====");
-
         if (this.mAdapterChangeListener != null && oldAdapter != adapter) {
-            elog("====ViewPager::SetAdapter====begin====4====");
             this.mAdapterChangeListener.OnAdapterChanged(oldAdapter, adapter);
         }
-
-        elog("====ViewPager::SetAdapter====end====");
     }   //SetAdapter
 
 //     private void removeNonDecorViews() {
@@ -1118,7 +1069,8 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
 //         return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
 //     }
     GetClientWidth() {
-        return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+        var _this = this._obj;
+        return _this.GetMeasuredWidth() - _this.GetPaddingLeft() - _this.GetPaddingRight();
     }
 
 //     /**
@@ -1209,11 +1161,13 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
 //         }
 //     }
     SetCurrentItemInternal(item, smoothScroll, always, velocity) {
+        var _this = this._obj;
+
         if (this.mAdapter == null || this.mAdapter.GetCount() <= 0) {
             setScrollingCacheEnabled(false);
             return;
         }
-        if (!always && mCurItem == item && this.mItems.GetSize() != 0) {
+        if (!always && this.mCurItem == item && this.mItems.GetSize() != 0) {
             setScrollingCacheEnabled(false);
             return;
         }
@@ -1223,8 +1177,8 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
         } else if (item >= this.mAdapter.GetCount()) {
             item = this.mAdapter.GetCount() - 1;
         }
-        var pageLimit = mOffscreenPageLimit;
-        if (item > (mCurItem + pageLimit) || item < (mCurItem - pageLimit)) {
+        var pageLimit = this.mOffscreenPageLimit;
+        if (item > (this.mCurItem + pageLimit) || item < (this.mCurItem - pageLimit)) {
             // We are doing a jump by more than one page.  To avoid
             // glitches, we want to keep all current pages in the view
             // until the scroll ends.
@@ -1232,19 +1186,19 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
                 this.mItems.Get(i).scrolling = true;
             }
         }
-        var dispatchSelected = mCurItem != item;
+        var dispatchSelected = this.mCurItem != item;
 
-        if (mFirstLayout) {
+        if (this.mFirstLayout) {
             // We don't have any idea how big we are yet and shouldn't have any pages either.
             // Just set things up and let the pending layout handle things.
-            mCurItem = item;
+            this.mCurItem = item;
             if (dispatchSelected && this.mOnPageChangeListener != null) {
                 this.mOnPageChangeListener.onPageSelected(item);
             }
             if (dispatchSelected && this.mInternalPageChangeListener != null) {
                 this.mInternalPageChangeListener.onPageSelected(item);
             }
-            requestLayout();
+            _this.RequestLayout();
         } else {
             populate(item);
             scrollToItem(item, smoothScroll, velocity, dispatchSelected);
@@ -1288,7 +1242,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
         var curInfo = this.InfoForPosition(item);
         var destX = 0;
         if (curInfo != null) {
-            var width = _this.GetClientWidth();
+            var width = this.GetClientWidth();
             destX = width * Math.max(this.mFirstOffset,
                     Math.min(curInfo.offset, this.mLastOffset));
         }
@@ -1496,8 +1450,8 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
                     ViewPager.DEFAULT_OFFSCREEN_PAGES);
             limit = ViewPager.DEFAULT_OFFSCREEN_PAGES;
         }
-        if (limit != mOffscreenPageLimit) {
-            mOffscreenPageLimit = limit;
+        if (limit != this.mOffscreenPageLimit) {
+            this.mOffscreenPageLimit = limit;
             populate();
         }
     }
@@ -1520,13 +1474,15 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
 //         requestLayout();
 //     }
     SetPageMargin(marginPixels) {
+        var _this = this._obj;
+
         var oldMargin = this.mPageMargin;
         this.mPageMargin = marginPixels;
 
         var width = this._obj.GetWidth();
         this.RecomputeScrollPosition(width, width, marginPixels, oldMargin);
 
-        this._obj.RequestLayout();
+        _this.RequestLayout();
     }
 
 //     /**
@@ -1701,7 +1657,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
         if (velocity > 0) {
             duration = 4 * Math.round(1000 * Math.abs(distance / velocity));
         } else {
-            var pageWidth = width * this.mAdapter.GetPageWidth(mCurItem);
+            var pageWidth = width * this.mAdapter.GetPageWidth(this.mCurItem);
             var pageDelta = Math.abs(dx) / (pageWidth + this.mPageMargin);
             duration = (pageDelta + 1) * 100;
         }
@@ -1724,7 +1680,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
 //         return ii;
 //     }
     AddNewItem(position, index) {
-        var ii = new ItemInfo();
+        var ii = new ViewPager.ItemInfo();
         ii.position = position;
         ii.object = this.mAdapter.InstantiateItem(this, position);
         ii.widthFactor = this.mAdapter.GetPageWidth(position);
@@ -1811,11 +1767,13 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
 
         elog("====ViewPager::DataSetChanged====begin====");
 
+        var _this = this._obj;
+
         var adapterCount = this.mAdapter.GetCount();
         this.mExpectedAdapterCount = adapterCount;
-        var needPopulate = this.mItems.GetSize() < mOffscreenPageLimit * 2 + 1 &&
+        var needPopulate = this.mItems.GetSize() < this.mOffscreenPageLimit * 2 + 1 &&
                 this.mItems.GetSize() < adapterCount;
-        var newCurrItem = mCurItem;
+        var newCurrItem = this.mCurItem;
 
         var isUpdating = false;
         for (var i = 0; i < this.mItems.GetSize(); i++) {
@@ -1838,16 +1796,16 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
                 this.mAdapter.DestroyItem(this, ii.position, ii.object);
                 needPopulate = true;
 
-                if (mCurItem == ii.position) {
+                if (this.mCurItem == ii.position) {
                     // Keep the current item in the valid range
-                    newCurrItem = Math.max(0, Math.min(mCurItem, adapterCount - 1));
+                    newCurrItem = Math.max(0, Math.min(this.mCurItem, adapterCount - 1));
                     needPopulate = true;
                 }
                 continue;
             }
 
             if (ii.position != newPos) {
-                if (ii.position == mCurItem) {
+                if (ii.position == this.mCurItem) {
                     // Our current item changed position. Follow it.
                     newCurrItem = newPos;
                 }
@@ -1861,21 +1819,21 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
             this.mAdapter.FinishUpdate(this);
         }
 
-        Collections.sort(this.mItems, ViewPager.COMPARATOR);
+        Collections.Sort(this.mItems, ViewPager.COMPARATOR);
 
         if (needPopulate) {
             // Reset our known page widths; populate will recompute them.
-            var childCount = getChildCount();
+            var childCount = _this.GetChildCount();
             for (var i = 0; i < childCount; i++) {
-                var child = getChildAt(i);
-                var lp = child.getLayoutParams();
+                var child = _this.GetChildAt(i);
+                var lp = child.GetLayoutParams();
                 if (!lp.isDecor) {
                     lp.widthFactor = 0;
                 }
             }
 
-            setCurrentItemInternal(newCurrItem, false, true);
-            requestLayout();
+            this.SetCurrentItemInternal(newCurrItem, false, true);
+            _this.RequestLayout();
         }
 
         elog("====ViewPager::DataSetChanged====end====");
@@ -2153,7 +2111,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
         elog("====ViewPager::Populate====begin====7====");
 
         if (curItem == null && N > 0) {
-            curItem = addNewItem(this.mCurItem, curIndex);
+            curItem = this.AddNewItem(this.mCurItem, curIndex);
         }
         elog("====ViewPager::Populate====begin====8====");
 
@@ -2161,9 +2119,9 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
             var extraWidthLeft = 0;
             var itemIndex = curIndex - 1;
             var ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
-            var clientWidth = getClientWidth();
+            var clientWidth = this.GetClientWidth();
             var leftWidthNeeded = clientWidth <= 0 ? 0 :
-                    2 - curItem.widthFactor + getPaddingLeft() / clientWidth;
+                    2 - curItem.widthFactor + _this.GetPaddingLeft() / clientWidth;
             elog("====ViewPager::Populate====begin====9====");
 
             for (var pos = this.mCurItem - 1; pos >= 0; pos--) {
@@ -2187,7 +2145,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
                     itemIndex--;
                     ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
                 } else {
-                    ii = addNewItem(pos, itemIndex + 1);
+                    ii = this.AddNewItem(pos, itemIndex + 1);
                     extraWidthLeft += ii.widthFactor;
                     curIndex++;
                     ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
@@ -2201,7 +2159,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
             if (extraWidthRight < 2) {
                 ii = itemIndex < this.mItems.GetSize() ? this.mItems.Get(itemIndex) : null;
                 var rightWidthNeeded = clientWidth <= 0 ? 0 :
-                        getPaddingRight() / clientWidth + 2.0;
+                        _this.GetPaddingRight() / clientWidth + 2.0;
                 for (var pos = this.mCurItem + 1; pos < N; pos++) {
                     if (extraWidthRight >= rightWidthNeeded && pos > endPos) {
                         if (ii == null) {
@@ -2221,7 +2179,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
                         itemIndex++;
                         ii = itemIndex < this.mItems.GetSize() ? this.mItems.Get(itemIndex) : null;
                     } else {
-                        ii = addNewItem(pos, itemIndex);
+                        ii = this.AddNewItem(pos, itemIndex);
                         itemIndex++;
                         extraWidthRight += ii.widthFactor;
                         ii = itemIndex < this.mItems.GetSize() ? this.mItems.Get(itemIndex) : null;
@@ -2230,7 +2188,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
             }
             elog("====ViewPager::Populate====begin====11====");
 
-            calculatePageOffsets(curItem, curIndex, oldCurInfo);
+            this.CalculatePageOffsets(curItem, curIndex, oldCurInfo);
 //         }
         }
         elog("====ViewPager::Populate====begin====12====");
@@ -2411,9 +2369,11 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
     CalculatePageOffsets(curItem, curIndex, oldCurInfo) {
         elog("====ViewPager::CalculatePageOffsets====begin====TODO====");
 
-        var N = mAdapter.getCount();
-        var width = getClientWidth();
-        var marginOffset = width > 0 ? mPageMargin / width : 0;
+
+
+        var N = this.mAdapter.GetCount();
+        var width = this.GetClientWidth();
+        var marginOffset = width > 0 ? this.mPageMargin / width : 0;
         // Fix up offsets for later layout.
         if (oldCurInfo != null) {
             var oldCurPosition = oldCurInfo.position;
@@ -2423,36 +2383,36 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
                 var ii = null;
                 var offset = oldCurInfo.offset + oldCurInfo.widthFactor + marginOffset;
                 for (var pos = oldCurPosition + 1;
-                        pos <= curItem.position && itemIndex < mItems.size(); pos++) {
-                    ii = mItems.get(itemIndex);
-                    while (pos > ii.position && itemIndex < mItems.size() - 1) {
+                        pos <= curItem.position && itemIndex < mItems.GetSize(); pos++) {
+                    ii = mItems.Get(itemIndex);
+                    while (pos > ii.position && itemIndex < mItems.GetSize() - 1) {
                         itemIndex++;
-                        ii = mItems.get(itemIndex);
+                        ii = mItems.Get(itemIndex);
                     }
                     while (pos < ii.position) {
                         // We don't have an item populated for this,
                         // ask the adapter for an offset.
-                        offset += mAdapter.getPageWidth(pos) + marginOffset;
+                        offset += this.mAdapter.GetPageWidth(pos) + marginOffset;
                         pos++;
                     }
                     ii.offset = offset;
                     offset += ii.widthFactor + marginOffset;
                 }
             } else if (oldCurPosition > curItem.position) {
-                var itemIndex = mItems.size() - 1;
+                var itemIndex = mItems.GetSize() - 1;
                 var ii = null;
                 var offset = oldCurInfo.offset;
                 for (var pos = oldCurPosition - 1;
                         pos >= curItem.position && itemIndex >= 0; pos--) {
-                    ii = mItems.get(itemIndex);
+                    ii = mItems.Get(itemIndex);
                     while (pos < ii.position && itemIndex > 0) {
                         itemIndex--;
-                        ii = mItems.get(itemIndex);
+                        ii = mItems.Get(itemIndex);
                     }
                     while (pos > ii.position) {
                         // We don't have an item populated for this,
                         // ask the adapter for an offset.
-                        offset -= mAdapter.getPageWidth(pos) + marginOffset;
+                        offset -= this.mAdapter.GetPageWidth(pos) + marginOffset;
                         pos--;
                     }
                     offset -= ii.widthFactor + marginOffset;
@@ -2462,21 +2422,25 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
         }
 
         // Base all offsets off of curItem.
-        var itemCount = mItems.size();
+        var itemCount = this.mItems.GetSize();
         var offset = curItem.offset;
         var pos = curItem.position - 1;
-        mFirstOffset = curItem.position == 0 ? curItem.offset : -Float.MAX_VALUE;
-        mLastOffset = curItem.position == N - 1 ?
-                curItem.offset + curItem.widthFactor - 1 : Float.MAX_VALUE;
+
+        //TODO
+        var Float__MAX_VALUE = 0xEFFFFFFF;
+
+        this.mFirstOffset = curItem.position == 0 ? curItem.offset : -Float__MAX_VALUE;
+        this.mLastOffset = curItem.position == N - 1 ?
+                curItem.offset + curItem.widthFactor - 1 : Float__MAX_VALUE;
         // Previous pages
         for (var i = curIndex - 1; i >= 0; i--, pos--) {
-            var ii = mItems.get(i);
+            var ii = this.mItems.Get(i);
             while (pos > ii.position) {
-                offset -= mAdapter.getPageWidth(pos--) + marginOffset;
+                offset -= this.mAdapter.GetPageWidth(pos--) + marginOffset;
             }
             offset -= ii.widthFactor + marginOffset;
             ii.offset = offset;
-            if (ii.position == 0) mFirstOffset = offset;
+            if (ii.position == 0) this.mFirstOffset = offset;
         }
         offset = curItem.offset + curItem.widthFactor + marginOffset;
         pos = curItem.position + 1;
@@ -2484,7 +2448,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
         for (var i = curIndex + 1; i < itemCount; i++, pos++) {
             var ii = mItems.get(i);
             while (pos < ii.position) {
-                offset += mAdapter.getPageWidth(pos++) + marginOffset;
+                offset += this.mAdapter.GetPageWidth(pos++) + marginOffset;
             }
             if (ii.position == N - 1) {
                 mLastOffset = offset + ii.widthFactor - 1;
@@ -2493,7 +2457,7 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
             offset += ii.widthFactor + marginOffset;
         }
 
-        mNeedCalculatePageOffsets = false;
+        this.mNeedCalculatePageOffsets = false;
 
         elog("====ViewPager::CalculatePageOffsets====end====");
     }   //CalculatePageOffsets
@@ -2615,8 +2579,8 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
         var superState = _super.onSaveInstanceState();
         var ss = new SavedState(superState);
         ss.position = this.mCurItem;
-        if (mAdapter != null) {
-            ss.adapterState = mAdapter.saveState();
+        if (this.mAdapter != null) {
+            ss.adapterState = this.mAdapter.saveState();
         }
         return ss;
     }
@@ -2649,8 +2613,8 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
         var ss = state;
         super.onRestoreInstanceState(ss.getSuperState());
 
-        if (mAdapter != null) {
-            mAdapter.restoreState(ss.adapterState, ss.loader);
+        if (this.mAdapter != null) {
+            this.mAdapter.restoreState(ss.adapterState, ss.loader);
             setCurrentItemInternal(ss.position, false, true);
         } else {
             mRestoredCurItem = ss.position;
@@ -3052,15 +3016,17 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
     RecomputeScrollPosition(width, oldWidth, margin, oldMargin) {
         elog("====ViewPager::RecomputeScrollPosition====begin====");
 
+        var _this = this._obj;
+
         if (oldWidth > 0 && !this.mItems.IsEmpty()) {
-            var widthWithMargin = width - this._obj.GetPaddingLeft() - this._obj.GetPaddingRight() + margin;
-            var oldWidthWithMargin = oldWidth - this._obj.GetPaddingLeft() - this._obj.GetPaddingRight()
+            var widthWithMargin = width - this._obj.GetPaddingLeft() - _this.GetPaddingRight() + margin;
+            var oldWidthWithMargin = oldWidth - this._obj.GetPaddingLeft() - _this.GetPaddingRight()
                                     + oldMargin;
-            var xpos = this._obj.GetScrollX();
+            var xpos = _this.GetScrollX();
             var pageOffset = xpos / oldWidthWithMargin;
             var newOffsetPixels = pageOffset * widthWithMargin;
 
-            scrollTo(newOffsetPixels, this._obj.GetScrollY());
+            _this.ScrollTo(newOffsetPixels, _this.GetScrollY());
             if (!this.mScroller.IsFinished()) {
                 // We now return to your regularly scheduled scroll, already in progress.
                 newDuration = this.mScroller.GetDuration() - this.mScroller.TimePassed();
@@ -3070,23 +3036,19 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
             }
         } else {
             var ii = this.InfoForPosition(this.mCurItem);
-            var scrollOffset = ii != null ? Math.min(ii.offset, mLastOffset) : 0;
+            var scrollOffset = ii != null ? Math.min(ii.offset, this.mLastOffset) : 0;
             var scrollPos = scrollOffset *
-                                         (width - this._obj.GetPaddingLeft() - this._obj.GetPaddingRight());
-            if (scrollPos != this._obj.GetScrollX()) {
+                                         (width - _this.GetPaddingLeft() - _this.GetPaddingRight());
+            if (scrollPos != _this.GetScrollX()) {
                 this.CompleteScroll(false);
-                scrollTo(scrollPos, this._obj.GetScrollY());
+                _this.ScrollTo(scrollPos, _this.GetScrollY());
             }
         }
 
         elog("====ViewPager::RecomputeScrollPosition====end====");
     }
 
-//     @Override
 //     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-    OnLayout(_this, changed, l, t, r, b) {
-        elog("====ViewPager::OnLayout====begin====");
-
 //         final int count = getChildCount();
 //         int width = r - l;
 //         int height = b - t;
@@ -3095,17 +3057,8 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
 //         int paddingRight = getPaddingRight();
 //         int paddingBottom = getPaddingBottom();
 //         final int scrollX = getScrollX();
-        var count = _this.GetChildCount();
-        var width = r - l;
-        var height = b - t;
-        var paddingLeft = _this.GetPaddingLeft();
-        var paddingTop = _this.GetPaddingTop();
-        var paddingRight = _this.GetPaddingRight();
-        var paddingBottom = _this.GetPaddingBottom();
-        var scrollX = _this.GetScrollX();
 
 //         int decorCount = 0;
-        var decorCount = 0;
 
 //         // First pass - decor views. We need to do this in two passes so that
 //         // we have the proper offsets for non-decor views later.
@@ -3116,17 +3069,6 @@ elog("====TODO: check listener interface type, it should be IDataSetObserver!!!"
 //                 int childLeft = 0;
 //                 int childTop = 0;
 //                 if (lp.isDecor) {
-        for (var i = 0; i < count; i++) {
-            var child = _this.GetChildAt(i);
-            if (child.GetVisibility() != GONE) {
-                var lp = child.GetLayoutParams();
-                var childLeft = 0;
-                var childTop = 0;
-                if (lp.isDecor) {
-
-elog("====ViewPager::OnLayout====crash====0====");
-Assert(0);
-
 //                     final int hgrav = lp.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
 //                     final int vgrav = lp.gravity & Gravity.VERTICAL_GRAVITY_MASK;
 //                     switch (hgrav) {
@@ -3168,12 +3110,11 @@ Assert(0);
 //                             childLeft + child.getMeasuredWidth(),
 //                             childTop + child.getMeasuredHeight());
 //                     decorCount++;
-                }
-            }
-        }
+//                 }
+//             }
+//         }
 
 //         final int childWidth = width - paddingLeft - paddingRight;
-        var childWidth = width - paddingLeft - paddingRight;
 
 //         // Page views. Do this once we have the right padding offsets from above.
 //         for (int i = 0; i < count; i++) {
@@ -3206,6 +3147,87 @@ Assert(0);
 //                 }
 //             }
 //         }
+
+//         mTopPageBounds = paddingTop;
+//         mBottomPageBounds = height - paddingBottom;
+//         mDecorChildCount = decorCount;
+
+//         if (mFirstLayout) {
+//             scrollToItem(mCurItem, false, 0, false);
+//         }
+//         mFirstLayout = false;
+//     }
+    OnLayout(_this, changed, l, t, r, b) {
+        elog("====ViewPager::OnLayout====begin====");
+
+        var count = _this.GetChildCount();
+        var width = r - l;
+        var height = b - t;
+        var paddingLeft = _this.GetPaddingLeft();
+        var paddingTop = _this.GetPaddingTop();
+        var paddingRight = _this.GetPaddingRight();
+        var paddingBottom = _this.GetPaddingBottom();
+        var scrollX = _this.GetScrollX();
+
+        var decorCount = 0;
+
+//         // First pass - decor views. We need to do this in two passes so that
+//         // we have the proper offsets for non-decor views later.
+        for (var i = 0; i < count; i++) {
+            var child = _this.GetChildAt(i);
+            if (child.GetVisibility() != GONE) {
+                var lp = child.GetLayoutParams();
+                var childLeft = 0;
+                var childTop = 0;
+                if (lp.isDecor) {
+                    var hgrav = lp.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+                    var vgrav = lp.gravity & Gravity.VERTICAL_GRAVITY_MASK;
+                    switch (hgrav) {
+                        default:
+                            childLeft = paddingLeft;
+                            break;
+                        case Gravity.LEFT:
+                            childLeft = paddingLeft;
+                            paddingLeft += child.getMeasuredWidth();
+                            break;
+                        case Gravity.CENTER_HORIZONTAL:
+                            childLeft = Math.max((width - child.getMeasuredWidth()) / 2,
+                                    paddingLeft);
+                            break;
+                        case Gravity.RIGHT:
+                            childLeft = width - paddingRight - child.getMeasuredWidth();
+                            paddingRight += child.getMeasuredWidth();
+                            break;
+                    }
+                    switch (vgrav) {
+                        default:
+                            childTop = paddingTop;
+                            break;
+                        case Gravity.TOP:
+                            childTop = paddingTop;
+                            paddingTop += child.getMeasuredHeight();
+                            break;
+                        case Gravity.CENTER_VERTICAL:
+                            childTop = Math.max((height - child.getMeasuredHeight()) / 2,
+                                    paddingTop);
+                            break;
+                        case Gravity.BOTTOM:
+                            childTop = height - paddingBottom - child.getMeasuredHeight();
+                            paddingBottom += child.getMeasuredHeight();
+                            break;
+                    }
+                    childLeft += scrollX;
+                    child.layout(childLeft, childTop,
+                            childLeft + child.getMeasuredWidth(),
+                            childTop + child.getMeasuredHeight());
+                    decorCount++;
+                }
+            }
+        }
+
+        var childWidth = width - paddingLeft - paddingRight;
+
+//         // Page views. Do this once we have the right padding offsets from above.
         for (var i = 0; i < count; i++) {
             var child = _this.GetChildAt(i);
             if (child.GetVisibility() != GONE) {
@@ -3237,52 +3259,19 @@ Assert(0);
             }
         }
 
-//         mTopPageBounds = paddingTop;
-//         mBottomPageBounds = height - paddingBottom;
-//         mDecorChildCount = decorCount;
         this.mTopPageBounds = paddingTop;
         this.mBottomPageBounds = height - paddingBottom;
         this.mDecorChildCount = decorCount;
 
-//         if (mFirstLayout) {
-//             scrollToItem(mCurItem, false, 0, false);
-//         }
-//         mFirstLayout = false;
         if (this.mFirstLayout) {
             this.ScrollToItem(this.mCurItem, false, 0, false);
         }
         this.mFirstLayout = false;
 
-// elog("====ViewPager::OnLayout====crash====1====");
-// Assert(0);
-
         elog("====ViewPager::OnLayout====end====");
     }
 
-//     @Override
-//     public void computeScroll() {
-//         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
-//             int oldX = getScrollX();
-//             int oldY = getScrollY();
-//             int x = mScroller.getCurrX();
-//             int y = mScroller.getCurrY();
-
-//             if (oldX != x || oldY != y) {
-//                 scrollTo(x, y);
-//                 if (!pageScrolled(x)) {
-//                     mScroller.abortAnimation();
-//                     scrollTo(0, y);
-//                 }
-//             }
-
-//             // Keep on drawing until the animation has finished.
-//             ViewCompat.postInvalidateOnAnimation(this);
-//             return;
-//         }
-
-//         // Done with scroll, clean up state.
-//         completeScroll(true);
-//     }
+//TODO: java code was deleted, should copy back from v4
     ComputeScroll(_this) {
         elog("====ViewPager::ComputeScroll====begin====");
 
@@ -3353,8 +3342,8 @@ Assert(0);
             }
             return false;
         }
-        var ii = infoForCurrentScrollPosition();
-        var width = getClientWidth();
+        var ii = this.InfoForCurrentScrollPosition();
+        var width = _this.GetClientWidth();
         var widthWithMargin = width + this.mPageMargin;
         var marginOffset = this.mPageMargin / width;
         var currentPage = ii.position;
@@ -3363,7 +3352,7 @@ Assert(0);
         var offsetPixels = pageOffset * widthWithMargin;
 
         this.mCalledSuper = false;
-        onPageScrolled(currentPage, pageOffset, offsetPixels);
+        this.OnPageScrolled(currentPage, pageOffset, offsetPixels);
         if (!this.mCalledSuper) {
             throw new IllegalStateException(
                     "onPageScrolled did not call superclass implementation");
@@ -3447,7 +3436,6 @@ Assert(0);
 
 //         mCalledSuper = true;
 //     }
-
     OnPageScrolled(position, offset, offsetPixels) {
         // Offset any decor views if needed - keep them on-screen at all times.
 
@@ -3510,7 +3498,7 @@ Assert(0);
 
                 if (lp.isDecor) continue;
 
-                var transformPos = (child.GetLeft() - scrollX) / _this.GetClientWidth();
+                var transformPos = (child.GetLeft() - scrollX) / this.GetClientWidth();
                 this.mPageTransformer.TransformPage(child, transformPos);
             }
         }
@@ -3617,9 +3605,6 @@ CObject.showMethods(this.mScroller);
 
 //     @Override
 //     public boolean onInterceptTouchEvent(MotionEvent ev) {
-    OnInterceptTouchEvent(ev, result) {
-        elog("====ViewPager::OnInterceptTouchEvent====TODO====");
-        Assert(0);
 //         /*
 //          * This method JUST determines whether we want to intercept the motion.
 //          * If we return true, onMotionEvent will be called and we do the actual
@@ -3760,13 +3745,152 @@ CObject.showMethods(this.mScroller);
 //          * drag mode.
 //          */
 //         return mIsBeingDragged;
+//     }
+    OnInterceptTouchEvent(ev) {
+        /*
+         * This method JUST determines whether we want to intercept the motion.
+         * If we return true, onMotionEvent will be called and we do the actual
+         * scrolling there.
+         */
+
+        var action = ev.getAction() & MotionEventCompat.ACTION_MASK;
+
+        // Always take care of the touch gesture being complete.
+        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
+            // Release the drag.
+            if (DEBUG) Log.v(TAG, "Intercept done!");
+            mIsBeingDragged = false;
+            mIsUnableToDrag = false;
+            mActivePointerId = INVALID_POINTER;
+            if (mVelocityTracker != null) {
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
+            }
+            return false;
+        }
+
+        // Nothing more to do here if we have decided whether or not we
+        // are dragging.
+        if (action != MotionEvent.ACTION_DOWN) {
+            if (mIsBeingDragged) {
+                if (DEBUG) Log.v(TAG, "Intercept returning true!");
+                return true;
+            }
+            if (mIsUnableToDrag) {
+                if (DEBUG) Log.v(TAG, "Intercept returning false!");
+                return false;
+            }
+        }
+
+        switch (action) {
+            case MotionEvent.ACTION_MOVE: {
+                /*
+                 * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
+                 * whether the user has moved far enough from his original down touch.
+                 */
+
+                /*
+                * Locally do absolute value. mLastMotionY is set to the y value
+                * of the down event.
+                */
+                var activePointerId = mActivePointerId;
+                if (activePointerId == INVALID_POINTER) {
+                    // If we don't have a valid id, the touch down wasn't on content.
+                    break;
+                }
+
+                var pointerIndex = MotionEventCompat.findPointerIndex(ev, activePointerId);
+                var x = MotionEventCompat.getX(ev, pointerIndex);
+                var dx = x - mLastMotionX;
+                var xDiff = Math.abs(dx);
+                var y = MotionEventCompat.getY(ev, pointerIndex);
+                var yDiff = Math.abs(y - mInitialMotionY);
+                if (DEBUG) Log.v(TAG, "Moved x to " + x + "," + y + " diff=" + xDiff + "," + yDiff);
+
+                if (dx != 0 && !isGutterDrag(mLastMotionX, dx) &&
+                        canScroll(this, false, dx, x, y)) {
+                    // Nested view has scrollable area under this point. Let it be handled there.
+                    mLastMotionX = x;
+                    mLastMotionY = y;
+                    mIsUnableToDrag = true;
+                    return false;
+                }
+                if (xDiff > mTouchSlop && xDiff * 0.5 > yDiff) {
+                    if (DEBUG) Log.v(TAG, "Starting drag!");
+                    mIsBeingDragged = true;
+                    requestParentDisallowInterceptTouchEvent(true);
+                    setScrollState(SCROLL_STATE_DRAGGING);
+                    mLastMotionX = dx > 0 ? mInitialMotionX + mTouchSlop :
+                            mInitialMotionX - mTouchSlop;
+                    mLastMotionY = y;
+                    setScrollingCacheEnabled(true);
+                } else if (yDiff > mTouchSlop) {
+                    // The finger has moved enough in the vertical
+                    // direction to be counted as a drag...  abort
+                    // any attempt to drag horizontally, to work correctly
+                    // with children that have scrolling containers.
+                    if (DEBUG) Log.v(TAG, "Starting unable to drag!");
+                    mIsUnableToDrag = true;
+                }
+                if (mIsBeingDragged) {
+                    // Scroll to follow the motion event
+                    if (performDrag(x)) {
+                        ViewCompat.postInvalidateOnAnimation(this);
+                    }
+                }
+                break;
+            }
+
+            case MotionEvent.ACTION_DOWN: {
+                /*
+                 * Remember location of down touch.
+                 * ACTION_DOWN always refers to pointer index 0.
+                 */
+                mLastMotionX = mInitialMotionX = ev.getX();
+                mLastMotionY = mInitialMotionY = ev.getY();
+                mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+                mIsUnableToDrag = false;
+
+                mScroller.computeScrollOffset();
+                if (mScrollState == SCROLL_STATE_SETTLING &&
+                        Math.abs(mScroller.getFinalX() - mScroller.getCurrX()) > mCloseEnough) {
+                    // Let the user 'catch' the pager as it animates.
+                    mScroller.abortAnimation();
+                    mPopulatePending = false;
+                    populate();
+                    mIsBeingDragged = true;
+                    requestParentDisallowInterceptTouchEvent(true);
+                    setScrollState(SCROLL_STATE_DRAGGING);
+                } else {
+                    completeScroll(false);
+                    mIsBeingDragged = false;
+                }
+
+                if (DEBUG) Log.v(TAG, "Down at " + mLastMotionX + "," + mLastMotionY
+                        + " mIsBeingDragged=" + mIsBeingDragged
+                        + "mIsUnableToDrag=" + mIsUnableToDrag);
+                break;
+            }
+
+            case MotionEventCompat.ACTION_POINTER_UP:
+                onSecondaryPointerUp(ev);
+                break;
+        }
+
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(ev);
+
+        /*
+         * The only time we want to intercept motion events is if we are in the
+         * drag mode.
+         */
+        return mIsBeingDragged;
     }
 
 //     @Override
 //     public boolean onTouchEvent(MotionEvent ev) {
-    OnTouchEvent(ev, result) {
-        elog("====ViewPager::OnTouchEvent====TODO====");
-        Assert(0);
 //         if (mFakeDragging) {
 //             // A fake drag is in progress already, ignore this real one
 //             // but still eat the touch events.
@@ -3889,6 +4013,130 @@ CObject.showMethods(this.mScroller);
 //             ViewCompat.postInvalidateOnAnimation(this);
 //         }
 //         return true;
+//     }
+    OnTouchEvent(ev) {
+        if (mFakeDragging) {
+            // A fake drag is in progress already, ignore this real one
+            // but still eat the touch events.
+            // (It is likely that the user is multi-touching the screen.)
+            return true;
+        }
+
+        if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
+            // Don't handle edge touches immediately -- they may actually belong to one of our
+            // descendants.
+            return false;
+        }
+
+        if (mAdapter == null || mAdapter.getCount() == 0) {
+            // Nothing to present or scroll; nothing to touch.
+            return false;
+        }
+
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(ev);
+
+        var action = ev.getAction();
+        var needsInvalidate = false;
+
+        switch (action & MotionEventCompat.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN: {
+                mScroller.abortAnimation();
+                mPopulatePending = false;
+                populate();
+
+                // Remember where the motion event started
+                mLastMotionX = mInitialMotionX = ev.getX();
+                mLastMotionY = mInitialMotionY = ev.getY();
+                mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+                break;
+            }
+            case MotionEvent.ACTION_MOVE:
+                if (!mIsBeingDragged) {
+                    var pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+                    var x = MotionEventCompat.getX(ev, pointerIndex);
+                    var xDiff = Math.abs(x - mLastMotionX);
+                    var y = MotionEventCompat.getY(ev, pointerIndex);
+                    var yDiff = Math.abs(y - mLastMotionY);
+                    if (DEBUG) Log.v(TAG, "Moved x to " + x + "," + y + " diff=" + xDiff + "," + yDiff);
+                    if (xDiff > mTouchSlop && xDiff > yDiff) {
+                        if (DEBUG) Log.v(TAG, "Starting drag!");
+                        mIsBeingDragged = true;
+                        requestParentDisallowInterceptTouchEvent(true);
+                        mLastMotionX = x - mInitialMotionX > 0 ? mInitialMotionX + mTouchSlop :
+                                mInitialMotionX - mTouchSlop;
+                        mLastMotionY = y;
+                        setScrollState(SCROLL_STATE_DRAGGING);
+                        setScrollingCacheEnabled(true);
+
+                        // Disallow Parent Intercept, just in case
+                        var parent = getParent();
+                        if (parent != null) {
+                            parent.requestDisallowInterceptTouchEvent(true);
+                        }
+                    }
+                }
+                // Not else! Note that mIsBeingDragged can be set above.
+                if (mIsBeingDragged) {
+                    // Scroll to follow the motion event
+                    var activePointerIndex = MotionEventCompat.findPointerIndex(
+                            ev, mActivePointerId);
+                    var x = MotionEventCompat.getX(ev, activePointerIndex);
+                    needsInvalidate |= performDrag(x);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (mIsBeingDragged) {
+                    var velocityTracker = mVelocityTracker;
+                    velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                    var initialVelocity = VelocityTrackerCompat.getXVelocity(
+                            velocityTracker, mActivePointerId);
+                    mPopulatePending = true;
+                    var width = getClientWidth();
+                    var scrollX = getScrollX();
+                    var ii = infoForCurrentScrollPosition();
+                    var currentPage = ii.position;
+                    var pageOffset = ((scrollX / width) - ii.offset) / ii.widthFactor;
+                    var activePointerIndex =
+                            MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+                    var x = MotionEventCompat.getX(ev, activePointerIndex);
+                    var totalDelta = x - mInitialMotionX;
+                    var nextPage = determineTargetPage(currentPage, pageOffset, initialVelocity,
+                            totalDelta);
+                    setCurrentItemInternal(nextPage, true, true, initialVelocity);
+
+                    mActivePointerId = INVALID_POINTER;
+                    endDrag();
+                    needsInvalidate = mLeftEdge.onRelease() | mRightEdge.onRelease();
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                if (mIsBeingDragged) {
+                    scrollToItem(mCurItem, true, 0, false);
+                    mActivePointerId = INVALID_POINTER;
+                    endDrag();
+                    needsInvalidate = mLeftEdge.onRelease() | mRightEdge.onRelease();
+                }
+                break;
+            case MotionEventCompat.ACTION_POINTER_DOWN: {
+                var index = MotionEventCompat.getActionIndex(ev);
+                var x = MotionEventCompat.getX(ev, index);
+                mLastMotionX = x;
+                mActivePointerId = MotionEventCompat.getPointerId(ev, index);
+                break;
+            }
+            case MotionEventCompat.ACTION_POINTER_UP:
+                onSecondaryPointerUp(ev);
+                mLastMotionX = MotionEventCompat.getX(ev,
+                        MotionEventCompat.findPointerIndex(ev, mActivePointerId));
+                break;
+        }
+        if (needsInvalidate) {
+            ViewCompat.postInvalidateOnAnimation(this);
+        }
+        return true;
     }
 
 //     private void requestParentDisallowInterceptTouchEvent(boolean disallowIntercept) {
@@ -3905,9 +4153,6 @@ CObject.showMethods(this.mScroller);
     }
 
 //     private boolean performDrag(float x) {
-    PerformDrag(x) {
-        elog("====ViewPager::PerformDrag====TODO====");
-        Assert(0);
 //         boolean needsInvalidate = false;
 
 //         final float deltaX = mLastMotionX - x;
@@ -3952,16 +4197,59 @@ CObject.showMethods(this.mScroller);
 //         pageScrolled((int) scrollX);
 
 //         return needsInvalidate;
-    }
+//    }
+    PerformDrag(x) {
+        var needsInvalidate = false;
+
+        var deltaX = mLastMotionX - x;
+        mLastMotionX = x;
+
+        var oldScrollX = getScrollX();
+        var scrollX = oldScrollX + deltaX;
+        var width = getClientWidth();
+
+        var leftBound = width * mFirstOffset;
+        var rightBound = width * mLastOffset;
+        var leftAbsolute = true;
+        var rightAbsolute = true;
+
+        var firstItem = mItems.get(0);
+        var lastItem = mItems.get(mItems.size() - 1);
+        if (firstItem.position != 0) {
+            leftAbsolute = false;
+            leftBound = firstItem.offset * width;
+        }
+        if (lastItem.position != mAdapter.getCount() - 1) {
+            rightAbsolute = false;
+            rightBound = lastItem.offset * width;
+        }
+
+        if (scrollX < leftBound) {
+            if (leftAbsolute) {
+                var over = leftBound - scrollX;
+                needsInvalidate = mLeftEdge.onPull(Math.abs(over) / width);
+            }
+            scrollX = leftBound;
+        } else if (scrollX > rightBound) {
+            if (rightAbsolute) {
+                var over = scrollX - rightBound;
+                needsInvalidate = mRightEdge.onPull(Math.abs(over) / width);
+            }
+            scrollX = rightBound;
+        }
+        // Don't lose the rounded component
+        mLastMotionX += scrollX - scrollX;
+        scrollTo(scrollX, getScrollY());
+        pageScrolled(scrollX);
+
+        return needsInvalidate;
+   }
 
     /**
      * @return Info about the page at the current scroll position.
      *         This can be synthetic for a missing middle page; the 'object' field can be null.
      */
 //     private ItemInfo infoForCurrentScrollPosition() {
-    InfoForCurrentScrollPosition() {
-        elog("====ViewPager::InfoForCurrentScrollPosition====TODO====");
-        Assert(0);
 //         final int width = getClientWidth();
 //         final float scrollOffset = width > 0 ? (float) getScrollX() / width : 0;
 //         final float marginOffset = width > 0 ? (float) mPageMargin / width : 0;
@@ -4001,12 +4289,52 @@ CObject.showMethods(this.mScroller);
 //         }
 
 //         return lastItem;
+//     }
+    InfoForCurrentScrollPosition() {
+        var _this = this._obj;
+
+        var width = this.GetClientWidth();
+        var scrollOffset = width > 0 ? _this.GetScrollX() / width : 0;
+        var marginOffset = width > 0 ? this.mPageMargin / width : 0;
+        var lastPos = -1;
+        var lastOffset = 0.0;
+        var lastWidth = 0.0;
+        var first = true;
+
+        var lastItem = null;
+        for (var i = 0; i < mItems.GetSize(); i++) {
+            var ii = mItems.Get(i);
+            var offset;
+            if (!first && ii.position != lastPos + 1) {
+                // Create a synthetic item for a missing page.
+                ii = mTempItem;
+                ii.offset = lastOffset + lastWidth + marginOffset;
+                ii.position = lastPos + 1;
+                ii.widthFactor = this.mAdapter.GetPageWidth(ii.position);
+                i--;
+            }
+            offset = ii.offset;
+
+            var leftBound = offset;
+            var rightBound = offset + ii.widthFactor + marginOffset;
+            if (first || scrollOffset >= leftBound) {
+                if (scrollOffset < rightBound || i == this.mItems.GetSize() - 1) {
+                    return ii;
+                }
+            } else {
+                return lastItem;
+            }
+            first = false;
+            lastPos = ii.position;
+            lastOffset = offset;
+            lastWidth = ii.widthFactor;
+            lastItem = ii;
+        }
+
+        return lastItem;
     }
 
 //     private int determineTargetPage(int currentPage, float pageOffset, int velocity, int deltaX) {
-    DetermineTargetPage(currentPage, pageOffset, velocity, deltaX) {
-        elog("====ViewPager::DetermineTargetPage====TODO====");
-        Assert(0);
 //         int targetPage;
 //         if (Math.abs(deltaX) > mFlingDistance && Math.abs(velocity) > mMinimumVelocity) {
 //             targetPage = velocity > 0 ? currentPage : currentPage + 1;
@@ -4024,20 +4352,34 @@ CObject.showMethods(this.mScroller);
 //         }
 
 //         return targetPage;
+//     }
+    DetermineTargetPage(currentPage, pageOffset, velocity, deltaX) {
+        var targetPage;
+        if (Math.abs(deltaX) > mFlingDistance && Math.abs(velocity) > mMinimumVelocity) {
+            targetPage = velocity > 0 ? currentPage : currentPage + 1;
+        } else {
+            var truncator = currentPage >= this.mCurItem ? 0.4 : 0.6;
+            targetPage = currentPage + pageOffset + truncator;
+        }
+
+        if (this.mItems.GetSize() > 0) {
+            var firstItem = mItems.get(0);
+            var lastItem = mItems.get(mItems.size() - 1);
+
+            // Only let the user target pages we have items for
+            targetPage = Math.max(firstItem.position, Math.min(targetPage, lastItem.position));
+        }
+
+        return targetPage;
     }
 
 //     @Override
 //     public void draw(Canvas canvas) {
-    Draw(_this, canvas) {
-        elog("====ViewPager::Draw====begin====");
-
         //CObject.showMethods(canvas);
         //CObject.showMethods(_this);
 
 //         super.draw(canvas);
 //         boolean needsInvalidate = false;
-        _this._Draw(canvas);
-        var needsInvalidate = false;
 
 //         final int overScrollMode = ViewCompat.getOverScrollMode(this);
 //         if (overScrollMode == ViewCompat.OVER_SCROLL_ALWAYS ||
@@ -4069,6 +4411,18 @@ CObject.showMethods(this.mScroller);
 //             mLeftEdge.finish();
 //             mRightEdge.finish();
 //         }
+
+//         if (needsInvalidate) {
+//             // Keep animating
+//             ViewCompat.postInvalidateOnAnimation(this);
+//         }
+//     }
+    Draw(_this, canvas) {
+        elog("====ViewPager::Draw====begin====");
+
+        _this._Draw(canvas);
+        var needsInvalidate = false;
+
         var overScrollMode = ViewCompat.GetOverScrollMode(_this);
         if (overScrollMode == ViewCompat.OVER_SCROLL_ALWAYS ||
                 (overScrollMode == ViewCompat.OVER_SCROLL_IF_CONTENT_SCROLLS &&
@@ -4100,10 +4454,6 @@ CObject.showMethods(this.mScroller);
             this.mRightEdge.Finish();
         }
 
-//         if (needsInvalidate) {
-//             // Keep animating
-//             ViewCompat.postInvalidateOnAnimation(this);
-//         }
         if (needsInvalidate) {
             // Keep animating
             ViewCompat.PostInvalidateOnAnimation(_this);
@@ -4220,9 +4570,6 @@ CObject.showMethods(this.mScroller);
      * @see #endFakeDrag()
      */
 //     public boolean beginFakeDrag() {
-    BeginFakeDrag() {
-        elog("====ViewPager::BeginFakeDrag====TODO====");
-        Assert(0);
 //         if (mIsBeingDragged) {
 //             return false;
 //         }
@@ -4240,6 +4587,25 @@ CObject.showMethods(this.mScroller);
 //         ev.recycle();
 //         mFakeDragBeginTime = time;
 //         return true;
+//     }
+    BeginFakeDrag() {
+        if (mIsBeingDragged) {
+            return false;
+        }
+        mFakeDragging = true;
+        setScrollState(SCROLL_STATE_DRAGGING);
+        mInitialMotionX = mLastMotionX = 0;
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        } else {
+            mVelocityTracker.clear();
+        }
+        var time = SystemClock.uptimeMillis();
+        var ev = MotionEvent.obtain(time, time, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        mVelocityTracker.addMovement(ev);
+        ev.recycle();
+        mFakeDragBeginTime = time;
+        return true;
     }
 
     /**
@@ -4249,9 +4615,6 @@ CObject.showMethods(this.mScroller);
      * @see #fakeDragBy(float)
      */
 //     public void endFakeDrag() {
-    EndFakeDrag() {
-        elog("====ViewPager::EndFakeDrag====TODO====");
-        Assert(0);
 //         if (!mFakeDragging) {
 //             throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
 //         }
@@ -4273,6 +4636,29 @@ CObject.showMethods(this.mScroller);
 //         endDrag();
 
 //         mFakeDragging = false;
+//     }
+    EndFakeDrag() {
+        if (!mFakeDragging) {
+            throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
+        }
+
+        var velocityTracker = mVelocityTracker;
+        velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+        var initialVelocity = VelocityTrackerCompat.getXVelocity(
+                velocityTracker, mActivePointerId);
+        mPopulatePending = true;
+        var width = getClientWidth();
+        var scrollX = getScrollX();
+        var ii = infoForCurrentScrollPosition();
+        var currentPage = ii.position;
+        var pageOffset = ((scrollX / width) - ii.offset) / ii.widthFactor;
+        var totalDelta = mLastMotionX - mInitialMotionX;
+        var nextPage = determineTargetPage(currentPage, pageOffset, initialVelocity,
+                totalDelta);
+        setCurrentItemInternal(nextPage, true, true, initialVelocity);
+        endDrag();
+
+        mFakeDragging = false;
     }
 
     /**
@@ -4283,9 +4669,6 @@ CObject.showMethods(this.mScroller);
      * @see #endFakeDrag()
      */
 //     public void fakeDragBy(float xOffset) {
-    FakeDragBy(xOffset) {
-        elog("====ViewPager::FakeDragBy====TODO====");
-        Assert(0);
 //         if (!mFakeDragging) {
 //             throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
 //         }
@@ -4324,6 +4707,46 @@ CObject.showMethods(this.mScroller);
 //                 mLastMotionX, 0, 0);
 //         mVelocityTracker.addMovement(ev);
 //         ev.recycle();
+//     }
+    FakeDragBy(xOffset) {
+        if (!mFakeDragging) {
+            throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
+        }
+
+        mLastMotionX += xOffset;
+
+        var oldScrollX = getScrollX();
+        var scrollX = oldScrollX - xOffset;
+        var width = getClientWidth();
+
+        var leftBound = width * mFirstOffset;
+        var rightBound = width * mLastOffset;
+
+        var firstItem = mItems.get(0);
+        var lastItem = mItems.get(mItems.size() - 1);
+        if (firstItem.position != 0) {
+            leftBound = firstItem.offset * width;
+        }
+        if (lastItem.position != mAdapter.getCount() - 1) {
+            rightBound = lastItem.offset * width;
+        }
+
+        if (scrollX < leftBound) {
+            scrollX = leftBound;
+        } else if (scrollX > rightBound) {
+            scrollX = rightBound;
+        }
+        // Don't lose the rounded component
+        mLastMotionX += scrollX - scrollX;
+        scrollTo(scrollX, getScrollY());
+        pageScrolled(scrollX);
+
+        // Synthesize an event for the VelocityTracker.
+        var time = SystemClock.uptimeMillis();
+        var ev = MotionEvent.obtain(mFakeDragBeginTime, time, MotionEvent.ACTION_MOVE,
+                mLastMotionX, 0, 0);
+        mVelocityTracker.addMovement(ev);
+        ev.recycle();
     }
 
     /**
@@ -4343,9 +4766,6 @@ CObject.showMethods(this.mScroller);
     }
 
 //     private void onSecondaryPointerUp(MotionEvent ev) {
-    OnSecondaryPointerUp(ev) {
-        elog("====ViewPager::OnSecondaryPointerUp====TODO====");
-        Assert(0);
 //         final int pointerIndex = MotionEventCompat.getActionIndex(ev);
 //         final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
 //         if (pointerId == mActivePointerId) {
@@ -4358,12 +4778,23 @@ CObject.showMethods(this.mScroller);
 //                 mVelocityTracker.clear();
 //             }
 //         }
+//     }
+    OnSecondaryPointerUp(ev) {
+        var pointerIndex = MotionEventCompat.getActionIndex(ev);
+        var pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
+        if (pointerId == mActivePointerId) {
+            // This was our active pointer going up. Choose a new
+            // active pointer and adjust accordingly.
+            var newPointerIndex = pointerIndex == 0 ? 1 : 0;
+            mLastMotionX = MotionEventCompat.getX(ev, newPointerIndex);
+            mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+            if (mVelocityTracker != null) {
+                mVelocityTracker.clear();
+            }
+        }
     }
 
 //     private void endDrag() {
-    EndDrag() {
-        elog("====ViewPager::EndDrag====TODO====");
-        Assert(0);
 //         mIsBeingDragged = false;
 //         mIsUnableToDrag = false;
 
@@ -4371,6 +4802,15 @@ CObject.showMethods(this.mScroller);
 //             mVelocityTracker.recycle();
 //             mVelocityTracker = null;
 //         }
+//     }
+    endDrag() {
+        mIsBeingDragged = false;
+        mIsUnableToDrag = false;
+
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
     }
 
 //     private void setScrollingCacheEnabled(boolean enabled) {
@@ -4409,9 +4849,6 @@ CObject.showMethods(this.mScroller);
     }
 
 //     public boolean canScrollHorizontally(int direction) {
-    CanScrollHorizontally(direction) {
-        elog("====ViewPager::CanScrollHorizontally====TODO====");
-        Assert(0);
 //         if (mAdapter == null) {
 //             return false;
 //         }
@@ -4425,6 +4862,21 @@ CObject.showMethods(this.mScroller);
 //         } else {
 //             return false;
 //         }
+//     }
+    CanScrollHorizontally(direction) {
+        if (mAdapter == null) {
+            return false;
+        }
+
+        var width = getClientWidth();
+        var scrollX = getScrollX();
+        if (direction < 0) {
+            return (scrollX > width * mFirstOffset);
+        } else if (direction > 0) {
+            return (scrollX < width * mLastOffset);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -4439,9 +4891,6 @@ CObject.showMethods(this.mScroller);
      * @return true if child views of v can be scrolled by delta of dx.
      */
 //     protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
-    CanScroll(v, checkV, dx, x, y) {
-        elog("====ViewPager::CanScroll====TODO====");
-        Assert(0);
 //         if (v instanceof ViewGroup) {
 //             final ViewGroup group = (ViewGroup) v;
 //             final int scrollX = v.getScrollX();
@@ -4462,6 +4911,28 @@ CObject.showMethods(this.mScroller);
 //         }
 
 //         return checkV && ViewCompat.canScrollHorizontally(v, -dx);
+//     }
+    CanScroll(v, checkV, dx, x, y) {
+        if (v instanceof ViewGroup) {
+            var group = v;
+            var scrollX = v.getScrollX();
+            var scrollY = v.getScrollY();
+            var count = group.getChildCount();
+            // Count backwards - let topmost views consume scroll distance first.
+            for (var i = count - 1; i >= 0; i--) {
+                // TODO: Add versioned support here for transformed views.
+                // This will not work for transformed views in Honeycomb+
+                var child = group.getChildAt(i);
+                if (x + scrollX >= child.getLeft() && x + scrollX < child.getRight() &&
+                        y + scrollY >= child.getTop() && y + scrollY < child.getBottom() &&
+                        canScroll(child, true, dx, x + scrollX - child.getLeft(),
+                                y + scrollY - child.getTop())) {
+                    return true;
+                }
+            }
+        }
+
+        return checkV && ViewCompat.canScrollHorizontally(v, -dx);
     }
 
 //     @Override
@@ -4483,9 +4954,6 @@ CObject.showMethods(this.mScroller);
      * @return Return true if the event was handled, else false.
      */
 //     public boolean executeKeyEvent(KeyEvent event) {
-    ExecuteKeyEvent(event) {
-        elog("====ViewPager::ExecuteKeyEvent====TODO====");
-        Assert(0);
 //         boolean handled = false;
 //         if (event.getAction() == KeyEvent.ACTION_DOWN) {
 //             switch (event.getKeyCode()) {
@@ -4509,12 +4977,34 @@ CObject.showMethods(this.mScroller);
 //             }
 //         }
 //         return handled;
+//     }
+    ExecuteKeyEvent(event) {
+        var handled = false;
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                    handled = arrowScroll(FOCUS_LEFT);
+                    break;
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    handled = arrowScroll(FOCUS_RIGHT);
+                    break;
+                case KeyEvent.KEYCODE_TAB:
+                    if (Build.VERSION.SDK_INT >= 11) {
+                        // The focus finder had a bug handling FOCUS_FORWARD and FOCUS_BACKWARD
+                        // before Android 3.0. Ignore the tab key on those devices.
+                        if (KeyEventCompat.hasNoModifiers(event)) {
+                            handled = arrowScroll(FOCUS_FORWARD);
+                        } else if (KeyEventCompat.hasModifiers(event, KeyEvent.META_SHIFT_ON)) {
+                            handled = arrowScroll(FOCUS_BACKWARD);
+                        }
+                    }
+                    break;
+            }
+        }
+        return handled;
     }
 
 //     public boolean arrowScroll(int direction) {
-    ArrowScroll(direction) {
-        elog("====ViewPager::ArrowScroll====TODO====");
-        Assert(0);
 //         View currentFocused = findFocus();
 //         if (currentFocused == this) {
 //             currentFocused = null;
@@ -4578,12 +5068,74 @@ CObject.showMethods(this.mScroller);
 //             playSoundEffect(SoundEffectConstants.getContantForFocusDirection(direction));
 //         }
 //         return handled;
+//     }
+    ArrowScroll(direction) {
+        var currentFocused = findFocus();
+        if (currentFocused == this) {
+            currentFocused = null;
+        } else if (currentFocused != null) {
+            var isChild = false;
+            for (var parent = currentFocused.getParent(); parent instanceof ViewGroup;
+                    parent = parent.getParent()) {
+                if (parent == this) {
+                    isChild = true;
+                    break;
+                }
+            }
+            if (!isChild) {
+                // This would cause the focus search down below to fail in fun ways.
+                var sb = new StringBuilder();
+                sb.append(currentFocused.getClass().getSimpleName());
+                for (var parent = currentFocused.getParent(); parent instanceof ViewGroup;
+                        parent = parent.getParent()) {
+                    sb.append(" => ").append(parent.getClass().getSimpleName());
+                }
+                Log.e(TAG, "arrowScroll tried to find focus based on non-child " +
+                        "current focused view " + sb.toString());
+                currentFocused = null;
+            }
+        }
+
+        var handled = false;
+
+        var nextFocused = FocusFinder.getInstance().findNextFocus(this, currentFocused,
+                direction);
+        if (nextFocused != null && nextFocused != currentFocused) {
+            if (direction == View.FOCUS_LEFT) {
+                // If there is nothing to the left, or this is causing us to
+                // jump to the right, then what we really want to do is page left.
+                var nextLeft = getChildRectInPagerCoordinates(mTempRect, nextFocused).left;
+                var currLeft = getChildRectInPagerCoordinates(mTempRect, currentFocused).left;
+                if (currentFocused != null && nextLeft >= currLeft) {
+                    handled = pageLeft();
+                } else {
+                    handled = nextFocused.requestFocus();
+                }
+            } else if (direction == View.FOCUS_RIGHT) {
+                // If there is nothing to the right, or this is causing us to
+                // jump to the left, then what we really want to do is page right.
+                var nextLeft = getChildRectInPagerCoordinates(mTempRect, nextFocused).left;
+                var currLeft = getChildRectInPagerCoordinates(mTempRect, currentFocused).left;
+                if (currentFocused != null && nextLeft <= currLeft) {
+                    handled = pageRight();
+                } else {
+                    handled = nextFocused.requestFocus();
+                }
+            }
+        } else if (direction == FOCUS_LEFT || direction == FOCUS_BACKWARD) {
+            // Trying to move left and nothing there; try to page.
+            handled = pageLeft();
+        } else if (direction == FOCUS_RIGHT || direction == FOCUS_FORWARD) {
+            // Trying to move right and nothing there; try to page.
+            handled = pageRight();
+        }
+        if (handled) {
+            playSoundEffect(SoundEffectConstants.getContantForFocusDirection(direction));
+        }
+        return handled;
     }
 
 //     private Rect getChildRectInPagerCoordinates(Rect outRect, View child) {
-    GetChildRectInPagerCoordinates(outRect, child) {
-        elog("====ViewPager::GetChildRectInPagerCoordinates====TODO====");
-        Assert(0);
 //         if (outRect == null) {
 //             outRect = new Rect();
 //         }
@@ -4607,6 +5159,31 @@ CObject.showMethods(this.mScroller);
 //             parent = group.getParent();
 //         }
 //         return outRect;
+//     }
+    GetChildRectInPagerCoordinates(outRect, child) {
+        if (outRect == null) {
+            outRect = new Rect();
+        }
+        if (child == null) {
+            outRect.set(0, 0, 0, 0);
+            return outRect;
+        }
+        outRect.left = child.getLeft();
+        outRect.right = child.getRight();
+        outRect.top = child.getTop();
+        outRect.bottom = child.getBottom();
+
+        var parent = child.getParent();
+        while (parent instanceof ViewGroup && parent != this) {
+            var group = parent;
+            outRect.left += group.getLeft();
+            outRect.right += group.getRight();
+            outRect.top += group.getTop();
+            outRect.bottom += group.getBottom();
+
+            parent = group.getParent();
+        }
+        return outRect;
     }
 
 //     boolean pageLeft() {
@@ -4644,9 +5221,6 @@ CObject.showMethods(this.mScroller);
 //      */
 //     @Override
 //     public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
-    AddFocusables(views, direction, focusableMode) {
-        elog("====ViewPager::AddFocusables====TODO====");
-        Assert(0);
 //         final int focusableCount = views.size();
 
 //         final int descendantFocusability = getDescendantFocusability();
@@ -4684,6 +5258,45 @@ CObject.showMethods(this.mScroller);
 //                 views.add(this);
 //             }
 //         }
+//     }
+    AddFocusables(views, direction, focusableMode) {
+        var focusableCount = views.size();
+
+        var descendantFocusability = getDescendantFocusability();
+
+        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
+            for (var i = 0; i < getChildCount(); i++) {
+                var child = getChildAt(i);
+                if (child.getVisibility() == VISIBLE) {
+                    var ii = infoForChild(child);
+                    if (ii != null && ii.position == mCurItem) {
+                        child.addFocusables(views, direction, focusableMode);
+                    }
+                }
+            }
+        }
+
+        // we add ourselves (if focusable) in all cases except for when we are
+        // FOCUS_AFTER_DESCENDANTS and there are some descendants focusable.  this is
+        // to avoid the focus search finding layouts when a more precise search
+        // among the focusable children would be more interesting.
+        if (
+            descendantFocusability != FOCUS_AFTER_DESCENDANTS ||
+                // No focusable descendants
+                (focusableCount == views.size())) {
+            // Note that we can't call the superclass here, because it will
+            // add all views in.  So we need to do the same thing View does.
+            if (!isFocusable()) {
+                return;
+            }
+            if ((focusableMode & FOCUSABLES_TOUCH_MODE) == FOCUSABLES_TOUCH_MODE &&
+                    isInTouchMode() && !isFocusableInTouchMode()) {
+                return;
+            }
+            if (views != null) {
+                views.add(this);
+            }
+        }
     }
 
 //     /**
@@ -4770,7 +5383,7 @@ CObject.showMethods(this.mScroller);
             var child = getChildAt(i);
             if (child.getVisibility() == VISIBLE) {
                 var ii = this.InfoForChild(child);
-                if (ii != null && ii.position == mCurItem) {
+                if (ii != null && ii.position == this.mCurItem) {
                     if (child.requestFocus(direction, previouslyFocusedRect)) {
                         return true;
                     }
@@ -4814,7 +5427,7 @@ CObject.showMethods(this.mScroller);
             var child = getChildAt(i);
             if (child.getVisibility() == VISIBLE) {
                 var ii = this.InfoForChild(child);
-                if (ii != null && ii.position == mCurItem &&
+                if (ii != null && ii.position == this.mCurItem &&
                         child.dispatchPopulateAccessibilityEvent(event)) {
                     return true;
                 }
@@ -4945,14 +5558,16 @@ CObject.showMethods(this.mScroller);
 //     }
     get PagerObserver() {
         if (this._PagerObserver) return this._PagerObserver;
+
+        var _this = this;
         this._PagerObserver = class PagerObserver extends DataSetObserver {
             OnChanged() {
                 elog("====PagerObserver::OnChanged====");
-                this.DataSetChanged();
+                _this.DataSetChanged();
             }
             OnInvalidated() {
                 elog("====PagerObserver::OnInvalidated====");
-                this.DataSetChanged();
+                _this.DataSetChanged();
             }
         };
         return this._PagerObserver;
