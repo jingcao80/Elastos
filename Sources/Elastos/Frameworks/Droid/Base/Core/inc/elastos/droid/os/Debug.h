@@ -65,6 +65,8 @@ public:
         /* [in] */ Int32 pid,
         /* [in] */ const String& file);
 
+    static CARAPI DumpBacktrace();
+
 private:
     static CARAPI DoDumpHeap(
         /* [in] */ FILE* fp);

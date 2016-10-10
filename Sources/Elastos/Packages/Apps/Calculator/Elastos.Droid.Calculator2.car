@@ -77,9 +77,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
 
-        interface IOnTextSizeChangeListener;
         interface IEvaluateCallback;
-        interface IViewOnLongClickListener;
         interface ICalculator;
     }
 

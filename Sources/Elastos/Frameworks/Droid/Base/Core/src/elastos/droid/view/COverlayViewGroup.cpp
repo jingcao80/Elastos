@@ -8,8 +8,10 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-CAR_OBJECT_IMPL(COverlayViewGroup);
-CAR_INTERFACE_IMPL(COverlayViewGroup, ViewGroup, IOverlayViewGroup);
+CAR_OBJECT_IMPL(COverlayViewGroup)
+
+CAR_INTERFACE_IMPL(COverlayViewGroup, ViewGroup, IOverlayViewGroup)
+
 ECode COverlayViewGroup::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IView* hostView)
@@ -17,6 +19,7 @@ ECode COverlayViewGroup::constructor(
     ViewGroup::constructor(context);
     mHostView = hostView;
     mAttachInfo = VIEW_PROBE(mHostView)->mAttachInfo;
+    mAttachInfo->mViewRootImpl->AddRef();   // see View::DispatchAttachedToWindow and View::DispatchDetachedFromWindow
     hostView->GetWidth(&mRight);
     hostView->GetHeight(&mBottom);
     return NOERROR;
@@ -65,11 +68,12 @@ ECode COverlayViewGroup::Add(
 {
     AutoPtr<IViewParent> vp;
     child->GetParent((IViewParent**)&vp);
-    if (IViewGroup::Probe(vp)) {
-        AutoPtr<IViewGroup> parent = IViewGroup::Probe(vp);
-        vp = NULL;
-        IViewParent::Probe(parent)->GetParent((IViewParent**)&vp);
-        if (IView::Probe(parent) != mHostView.Get() && vp.Get() != NULL &&
+    AutoPtr<IViewGroup> parent = IViewGroup::Probe(vp);
+    if (parent) {
+        AutoPtr<IViewParent> temp;
+        vp->GetParent((IViewParent**)&temp);
+        vp = temp;
+        if (IView::Probe(parent) != mHostView && vp.Get() != NULL &&
                 ((ViewGroup*)parent.Get())->mAttachInfo != NULL) {
             // Moving to different container; figure out how to position child such that
             // it is in the same location on the screen
@@ -208,7 +212,7 @@ void COverlayViewGroup::InvalidateViewProperty(
 {
     ViewGroup::InvalidateViewProperty(invalidateParent, forceRedraw);
     if (mHostView != NULL) {
-        ((View*)mHostView.Get())->InvalidateViewProperty(invalidateParent, forceRedraw);
+        VIEW_PROBE(mHostView)->InvalidateViewProperty(invalidateParent, forceRedraw);
     }
 }
 

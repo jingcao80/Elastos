@@ -79,7 +79,10 @@ public:
 
     class StateListener
         : public StateCallback
+        , public ICameraCaptureSessionStateListener
     {
+    public:
+        CAR_INTERFACE_DECL()
     };
 
     class CaptureCallback

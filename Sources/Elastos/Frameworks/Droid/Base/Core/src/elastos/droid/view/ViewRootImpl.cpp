@@ -1399,7 +1399,7 @@ ECode ViewRootImpl::constructor(
 
 ViewRootImpl::~ViewRootImpl()
 {
-    Slogger::I(TAG, " >> Destroy ViewRootImpl: %p", this);
+    Slogger::I(TAG, " >> Destroy ViewRootImpl: %p, IViewRootImpl: %p", this, (IViewRootImpl*)this);
 }
 
 static void RunQueueDestructor(void* st)
@@ -5327,9 +5327,6 @@ ECode ViewRootImpl::Die(
     // Make sure we do execute immediately if we are in the middle of a traversal or the damage
     // done by dispatchDetachedFromWindow will cause havoc on return.
 
-    // For DoDie to release
-    AddRef();
-
     if (immediate && !mIsInTraversal) {
         DoDie();
         *res = FALSE;
@@ -5345,8 +5342,10 @@ ECode ViewRootImpl::Die(
             Logger::E(TAG, "Attempting to destroy the window while drawing %s!\n", TO_CSTR(title));
         }
 
+        AutoPtr<IMessage> msg;
+        mHandler->ObtainMessage(MSG_DIE, (IViewRootImpl*)this, (IMessage**)&msg);
         Boolean result;
-        mHandler->SendEmptyMessage(MSG_DIE, &result);
+        mHandler->SendMessage(msg, &result);
         *res = TRUE;
         return NOERROR;
     }
@@ -5399,9 +5398,6 @@ ECode ViewRootImpl::DoDie()
     AutoPtr<IWindowManagerGlobal> instance = CWindowManagerGlobal::GetInstance();
     CWindowManagerGlobal* obj = (CWindowManagerGlobal*)instance.Get();
     obj->DoRemoveView(this);
-
-    Release();
-    // TODO: stalling tactics for wrong reference count
 
     return NOERROR;
 }

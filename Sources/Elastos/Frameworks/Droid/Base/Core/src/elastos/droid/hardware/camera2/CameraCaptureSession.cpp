@@ -31,6 +31,8 @@ ECode CameraCaptureSession::StateCallback::OnClosed(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CameraCaptureSession::StateListener, StateCallback, ICameraCaptureSessionStateListener)
+
 CAR_INTERFACE_IMPL(CameraCaptureSession::CaptureCallback, Object, ICameraCaptureSessionCaptureCallback)
 
 ECode CameraCaptureSession::CaptureCallback::OnCaptureStarted(
