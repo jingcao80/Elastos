@@ -1,0 +1,9 @@
+
+TARGET_NAME = ethCli
+TARGET_TYPE = ecx
+
+C_DEFINES += -DHAVE_SYS_UIO_H
+
+SOURCES = EthCli.cpp
+
+LIBRARIES += -llog
