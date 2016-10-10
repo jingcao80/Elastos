@@ -23,7 +23,7 @@
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
-    <Elastos.Droid.Settings.deviceinfo.PercentageBarChart
+    <Elastos.Droid.Settings.Deviceinfo.CPercentageBarChart
         android:id="@+id/percentage_bar_chart"
         android:layout_width="match_parent"
         android:layout_height="32dip"
@@ -31,6 +31,6 @@
         android:gravity="center_vertical"
         settings:minTickWidth="6dip"
         settings:emptyColor="@color/material_empty_color_light">
-    </Elastos.Droid.Settings.deviceinfo.PercentageBarChart>
+    </Elastos.Droid.Settings.Deviceinfo.CPercentageBarChart>
 
 </LinearLayout>

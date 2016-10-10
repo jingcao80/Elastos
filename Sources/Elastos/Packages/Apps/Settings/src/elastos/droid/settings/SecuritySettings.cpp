@@ -415,7 +415,6 @@ Int32 SecuritySettings::GetResIdForLockUnlockScreen(
 {
     Int32 resid = 0;
     Boolean res, res1, res2;
-    Int32 quality;
     if (lockPatternUtils->IsSecure(&res), !res) {
         // if there are multiple users, disable "None" setting
         AutoPtr<IInterface> obj;
@@ -439,7 +438,9 @@ Int32 SecuritySettings::GetResIdForLockUnlockScreen(
         resid = R::xml::security_settings_biometric_weak;
     }
     else {
-        switch (lockPatternUtils->GetKeyguardStoredPasswordQuality(&quality), quality) {
+        Int32 quality;
+        lockPatternUtils->GetKeyguardStoredPasswordQuality(&quality);
+        switch (quality) {
             case IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING:
                 resid = R::xml::security_settings_pattern;
                 break;
@@ -471,7 +472,7 @@ AutoPtr<IPreferenceScreen> SecuritySettings::CreatePreferenceHierarchy()
     // Add options for lock/unlock screen
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    const Int32 resid = GetResIdForLockUnlockScreen(IContext::Probe(activity), mLockPatternUtils);
+    Int32 resid = GetResIdForLockUnlockScreen(IContext::Probe(activity), mLockPatternUtils);
     AddPreferencesFromResource(resid);
 
     // Add options for device encryption

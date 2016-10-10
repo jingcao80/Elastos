@@ -244,7 +244,7 @@
                 android:resource="@id/wifi_settings" />
         </activity>
 
-        <activity android:name="Elastos.Droid.Settings.Wifi.WifiInfo"
+        <activity android:name="Elastos.Droid.Settings.Wifi.CWifiInfo"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
                 android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="Elastos.Droid.Settings.CSettingsWifiSettingsActivity">
@@ -255,7 +255,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="Elastos.Droid.Settings.Wifi.WifiConfigInfo"
+        <activity android:name="Elastos.Droid.Settings.Wifi.CWifiConfigInfo"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
                 android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="Elastos.Droid.Settings.CSettingsWifiSettingsActivity">
@@ -266,7 +266,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="Elastos.Droid.Settings.Wifi.WifiAPITest"
+        <activity android:name="Elastos.Droid.Settings.Wifi.CWifiAPITest"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -275,7 +275,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="Elastos.Droid.Settings.Wifi.WifiStatusTest"
+        <activity android:name="Elastos.Droid.Settings.Wifi.CWifiStatusTest"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -309,7 +309,7 @@
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
                 android:value="true" />
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                       android:value="com.android.settings.ApnSettings" />
+                       android:value="Elastos.Droid.Settings.CApnSettings" />
         </activity>
 
         <activity android:name=".CSettingsBluetoothSettingsActivity"
@@ -323,7 +323,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.bluetooth.BluetoothSettings" />
+                android:value="Elastos.Droid.Settings.Bluetooth.CBluetoothSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/bluetooth_settings" />
         </activity>
@@ -335,7 +335,7 @@
                 android:exported="true"
                 android:clearTaskOnLaunch="true">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.bluetooth.BluetoothSettings" />
+                android:value="Elastos.Droid.Settings.Bluetooth.CBluetoothSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/bluetooth_settings" />
         </activity-alias>
@@ -360,19 +360,19 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.TetherSettings" />
+                android:value="Elastos.Droid.Settings.CTetherSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wireless_settings" />
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".TetherSettings"
+        <activity-alias android:name=".CTetherSettings"
                   android:label="@string/tether_settings_title_all"
                   android:clearTaskOnLaunch="true"
                   android:exported="true"
                   android:targetActivity="CSettingsTetherSettingsActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.TetherSettings" />
+                android:value="Elastos.Droid.Settings.CTetherSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wireless_settings" />
         </activity-alias>
@@ -403,7 +403,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.vpn2.VpnSettings" />
+                android:value="Elastos.Droid.Settings.Vpn2.CVpnSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wireless_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -483,7 +483,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.voice.VoiceInputSettings" />
+                android:value="Elastos.Droid.Settings.Voice.CVoiceInputSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/language_settings" />
         </activity>
@@ -624,7 +624,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.HomeSettings" />
+                android:value="Elastos.Droid.Settings.CHomeSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/home_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -846,7 +846,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.applications.AppOpsSummary" />
+                android:value="Elastos.Droid.Settings.Applications.CAppOpsSummary" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/application_settings" />
         </activity>
@@ -864,7 +864,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.location.LocationSettings" />
+                android:value="Elastos.Droid.Settings.Location.CLocationSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/location_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -943,7 +943,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.PrivacySettings" />
+                android:value="Elastos.Droid.Settings.CPrivacySettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/privacy_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1050,7 +1050,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.accessibility.AccessibilitySettings" />
+                android:value="Elastos.Droid.Settings.Accessibility.CAccessibilitySettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/accessibility_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1067,7 +1067,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.accessibility.ToggleDaltonizerPreferenceFragment" />
+                android:value="Elastos.Droid.Settings.Accessibility.CToggleDaltonizerPreferenceFragment" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/accessibility_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1084,7 +1084,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.accessibility.CaptionPropertiesFragment" />
+                android:value="Elastos.Droid.Settings.Accessibility.CCaptionPropertiesFragment" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/accessibility_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1101,7 +1101,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.tts.TextToSpeechSettings" />
+                android:value="Elastos.Droid.Settings.Tts.CTextToSpeechSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/language_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1190,7 +1190,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.deviceinfo.Memory" />
+                android:value="Elastos.Droid.Settings.Deviceinfo.CMemory" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/storage_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1233,7 +1233,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                       android:value="com.android.settings.quicklaunch.QuickLaunchSettings" />
+                       android:value="Elastos.Droid.Settings.Quicklaunch.CQuickLaunchSettings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
                        android:value="true" />
         </activity>
@@ -1276,7 +1276,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.print.PrintSettingsFragment" />
+                android:value="Elastos.Droid.Settings.Print.CPrintSettingsFragment" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/print_settings" />
         </activity>
@@ -1291,7 +1291,7 @@
                 <data android:scheme="printjob" android:pathPattern="*" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.print.PrintJobSettingsFragment" />
+                android:value="Elastos.Droid.Settings.Print.CPrintJobSettingsFragment" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/print_settings" />
         </activity>
@@ -1321,7 +1321,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.deviceinfo.UsbSettings" />
+                android:value="Elastos.Droid.Settings.Deviceinfo.CUsbSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/storage_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1329,12 +1329,12 @@
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name="UsbSettings"
+        <activity-alias android:name="CUsbSettings"
                   android:exported="true"
                   android:label="@string/storage_title_usb"
                   android:targetActivity="CSettingsDevelopmentSettingsActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.deviceinfo.UsbSettings" />
+                android:value="Elastos.Droid.Settings.Deviceinfo.CUsbSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/storage_settings" />
         </activity-alias>
@@ -1450,7 +1450,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.nfc.AndroidBeam" />
+                android:value="Elastos.Droid.Settings.Nfc.CAndroidBeam" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
                 android:value="true" />
         </activity>
@@ -1582,18 +1582,18 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.fuelgauge.PowerUsageSummary" />
+                android:value="Elastos.Droid.Settings.Fuelgauge.CPowerUsageSummary" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/battery_settings" />
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".Fuelgauge.PowerUsageSummary"
+        <activity-alias android:name=".Fuelgauge.CPowerUsageSummary"
                 android:label="@string/power_usage_summary_title"
                 android:exported="true"
                 android:targetActivity="CSettingsPowerUsageSummaryActivity">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.fuelgauge.PowerUsageSummary" />
+                android:value="Elastos.Droid.Settings.Fuelgauge.CPowerUsageSummary" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/battery_settings" />
         </activity-alias>
@@ -1608,7 +1608,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.fuelgauge.BatterySaverSettings" />
+                android:value="Elastos.Droid.Settings.Fuelgauge.CBatterySaverSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/battery_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1625,7 +1625,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.accounts.AccountSettings" />
+                android:value="Elastos.Droid.Settings.Accounts.CAccountSettings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
                 android:value="true" />
         </activity>
@@ -1640,14 +1640,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.accounts.AccountSyncSettings" />
+                android:value="Elastos.Droid.Settings.Accounts.CAccountSyncSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/account_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
                 android:value="true" />
         </activity>
 
-        <activity android:name="com.android.settings.accounts.AddAccountSettings"
+        <activity android:name="Elastos.Droid.Settings.Accounts.CAddAccountSettings"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/header_add_an_account"
@@ -1662,7 +1662,7 @@
                 android:value="true" />
         </activity>
 
-        <activity android:name="com.android.settings.accounts.ChooseAccountActivity"
+        <activity android:name="Elastos.Droid.Settings.Accounts.CChooseAccountActivity"
             android:label="@string/header_add_an_account"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/Theme.SubSettingsDialogWhenLarge"/>
@@ -1842,7 +1842,7 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.DataUsageSummary" />
+                android:value="Elastos.Droid.Settings.CDataUsageSummary" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wireless_settings" />
         </activity>
@@ -1873,7 +1873,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.users.UserSettings" />
+                android:value="Elastos.Droid.Settings.Users.CUserSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/user_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -1889,7 +1889,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.nfc.PaymentSettings" />
+                android:value="Elastos.Droid.Settings.Nfc.CPaymentSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/nfc_payment_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
@@ -2108,7 +2108,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.sim.SimSettings" />
+                android:value="Elastos.Droid.Settings.Sim.CSimSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/sim_settings" />
         </activity>

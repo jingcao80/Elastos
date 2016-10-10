@@ -101,7 +101,9 @@ private:
     public:
         TO_STRING_IMPL("BluetoothHandler::BluetoothHandler")
 
-        BluetoothHandler(
+        BluetoothHandler();
+
+        CARAPI constructor(
             /* [in] */ ILooper* looper,
             /* [in] */ CBluetoothManagerService* host);
 
@@ -110,7 +112,7 @@ private:
 
     private:
         CBluetoothManagerService* mHost;
-         AutoPtr<IHandler> mHandler;
+        AutoPtr<IHandler> mHandler;
     };
 
     class MyBroadcastReceiver
@@ -354,8 +356,6 @@ private:
     AutoPtr<BluetoothServiceConnection> mConnection;// = new BluetoothServiceConnection();
     AutoPtr<IIBluetoothCallback> mBluetoothCallback;
     AutoPtr<MyBroadcastReceiver> mReceiver;
-
-
 };
 
 } // namespace Server

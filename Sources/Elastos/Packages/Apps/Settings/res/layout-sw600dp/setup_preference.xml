@@ -20,7 +20,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <Elastos.Droid.Settings.Widget.SetupWizardIllustration
+    <Elastos.Droid.Settings.Widget.CSetupWizardIllustration
         android:id="@+id/title_area"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -75,7 +75,7 @@
 
         </LinearLayout>
 
-    </Elastos.Droid.Settings.Widget.SetupWizardIllustration>
+    </Elastos.Droid.Settings.Widget.CSetupWizardIllustration>
 
 <!--     <fragment
         android:id="@+id/navigation_bar"

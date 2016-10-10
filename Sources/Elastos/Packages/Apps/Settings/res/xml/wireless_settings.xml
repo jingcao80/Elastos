@@ -38,17 +38,17 @@
         android:persistent="false" />
 
     <Elastos.Droid.Preference.CPreferenceScreen
-        android:fragment="Elastos.Droid.Settings.nfc.AndroidBeam"
+        android:fragment="Elastos.Droid.Settings.Nfc.CAndroidBeam"
         android:key="android_beam_settings"
         android:title="@string/android_beam_settings_title" />
 
     <Elastos.Droid.Preference.CPreferenceScreen
-        android:fragment="Elastos.Droid.Settings.TetherSettings"
+        android:fragment="Elastos.Droid.Settings.CTetherSettings"
         android:key="tether_settings"
         android:title="@string/tether_settings_title_all" />
 
     <Elastos.Droid.Preference.CPreferenceScreen
-        android:fragment="Elastos.Droid.Settings.vpn2.VpnSettings"
+        android:fragment="Elastos.Droid.Settings.Vpn2.CVpnSettings"
         android:key="vpn_settings"
         android:title="@string/vpn_settings_title" />
 
@@ -73,8 +73,8 @@
         android:title="@string/wimax_settings" >
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetPackage="Elastos.Droid.Settings.wimax"
-            android:targetClass="Elastos.Droid.Settings.wimax.WimaxSettings" />
+            android:targetPackage="Elastos.Droid.Settings.Wimax"
+            android:targetClass="Elastos.Droid.Settings.Wimax.WimaxSettings" />
     </Elastos.Droid.Preference.CPreferenceScreen>
 
     <Elastos.Droid.Preference.CCheckBoxPreference

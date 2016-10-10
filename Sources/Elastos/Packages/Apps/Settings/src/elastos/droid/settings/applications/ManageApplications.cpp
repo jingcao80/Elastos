@@ -1235,11 +1235,11 @@ ECode ManageApplications::OnCreate(
         intent->GetComponent((IComponentName**)&comp);
         comp->GetClassName(&className);
     }
-    if (className.Equals("Elastos.Droid.Settings.CSettings.RunningServicesActivity")
+    if (className.Equals("Elastos.Droid.Settings.CSettingsRunningServicesActivity")
             || className.EndWith(".RunningServices")) {
         defaultListType = LIST_TYPE_RUNNING;
     }
-    else if (className.Equals("Elastos.Droid.Settings.CSettings.StorageUseActivity")
+    else if (className.Equals("Elastos.Droid.Settings.CSettingsStorageUseActivity")
             || IIntent::ACTION_MANAGE_PACKAGE_STORAGE.Equals(action)
             || className.EndWith(".StorageUse")) {
         mSortOrder = SORT_ORDER_SIZE;

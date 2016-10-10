@@ -368,7 +368,7 @@ void DynamicIndexableContentMonitor::HandlePackageAvailable(
         if (list->IsEmpty(&res), !res) {
             mAccessibilityServices->Add(CoreUtils::Convert(packageName));
             Index::GetInstance(mContext)->UpdateFromClassNameResource(
-                    String("Elastos.Droid.Settings.Accessibility.AccessibilitySettings"), FALSE, TRUE);
+                    String("Elastos.Droid.Settings.Accessibility.CAccessibilitySettings"), FALSE, TRUE);
         }
     }
 
@@ -409,7 +409,7 @@ void DynamicIndexableContentMonitor::HandlePackageUnavailable(
     if (accessibilityIndex >= 0) {
         mAccessibilityServices->Remove(accessibilityIndex);
         Index::GetInstance(mContext)->UpdateFromClassNameResource(
-                String("Elastos.Droid.Settings.Accessibility.AccessibilitySettings"), TRUE, TRUE);
+                String("Elastos.Droid.Settings.Accessibility.CAccessibilitySettings"), TRUE, TRUE);
     }
 
     if (mHasFeaturePrinting) {

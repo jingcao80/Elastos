@@ -91,11 +91,15 @@ ECode RemoteCallbackList::Unregister(
         if (it != mCallbacks.End()) {
             AutoPtr<Callback> cb = it->mSecond;
             mCallbacks.Erase(it);
-            IProxy* proxy = (IProxy*)cb->mCallback->Probe(EIID_IProxy);
-            assert(proxy != NULL);
-            proxy->UnlinkToDeath(cb, 0, result);
-            *result = TRUE;
-            return NOERROR;
+            if (cb != NULL) {
+                IProxy* proxy = (IProxy*)cb->mCallback->Probe(EIID_IProxy);
+                if (proxy != NULL) {
+                    Boolean res;
+                    proxy->UnlinkToDeath(cb, 0, &res);
+                    *result = TRUE;
+                    return NOERROR;
+                }
+            }
         }
         *result = FALSE;
         return NOERROR;

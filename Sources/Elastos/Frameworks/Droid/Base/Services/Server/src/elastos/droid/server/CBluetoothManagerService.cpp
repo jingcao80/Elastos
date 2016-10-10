@@ -193,11 +193,15 @@ ECode CBluetoothManagerService::BluetoothServiceConnection::OnServiceDisconnecte
 //========================================================================
 // CBluetoothManagerService::BluetoothHandler
 //========================================================================
-CBluetoothManagerService::BluetoothHandler::BluetoothHandler(
+CBluetoothManagerService::BluetoothHandler::BluetoothHandler()
+{}
+
+ECode CBluetoothManagerService::BluetoothHandler::constructor(
     /* [in] */ ILooper* looper,
     /* [in] */ CBluetoothManagerService* host)
-    : mHost(host)
 {
+    mHost = host;
+    return Handler::constructor(looper);
 }
 
 ECode CBluetoothManagerService::BluetoothHandler::HandleMessage(
@@ -779,12 +783,15 @@ CBluetoothManagerService::CBluetoothManagerService()
 ECode CBluetoothManagerService::constructor(
     /* [in] */ IContext* context)
 {
+    mConnection = new BluetoothServiceConnection(this);
+
     CBluetoothManagerServiceBluetoothCallback::New(this, (IIBluetoothCallback**)&mBluetoothCallback);
     mReceiver = new MyBroadcastReceiver(this);
 
     AutoPtr<ILooper> looper;
     IoThread::Get()->GetLooper((ILooper**)&looper);
-    mHandler = new BluetoothHandler(looper, this);
+    mHandler = new BluetoothHandler();
+    mHandler->constructor(looper, this);
 
     mContext = context;
     mState = IBluetoothAdapter::STATE_OFF;

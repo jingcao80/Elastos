@@ -53,7 +53,7 @@
             android:title="@string/master_clear_title"
             android:summary="@string/master_clear_summary"
             settings:keywords="@string/keywords_factory_data_reset"
-            android:fragment="Elastos.Droid.Settings.MasterClear" />
+            android:fragment="Elastos.Droid.Settings.CMasterClear" />
 
     </Elastos.Droid.Preference.CPreferenceCategory>
 

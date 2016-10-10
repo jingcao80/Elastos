@@ -37,6 +37,7 @@
 #include "elastos/droid/server/wm/InputMonitor.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "elastos/droid/server/dreams/CDreamManagerService.h"
+#include "elastos/droid/server/CBluetoothManagerService.h"
 
 
 #include <Elastos.Droid.Os.h>
@@ -86,6 +87,8 @@ using Elastos::Droid::App::IActivityThread;
 using Elastos::Droid::App::IActivityThreadHelper;
 using Elastos::Droid::App::CActivityThreadHelper;
 using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::Bluetooth::IBluetoothAdapter;
+using Elastos::Droid::Bluetooth::IIBluetoothManager;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::IIntent;
@@ -123,6 +126,7 @@ using Elastos::Droid::Server::Webkit::WebViewUpdateService;
 using Elastos::Droid::Server::Wm::InputMonitor;
 using Elastos::Droid::Server::DevicePolicy::CDevicePolicyManagerService;
 using Elastos::Droid::Server::Dreams::CDreamManagerService;
+using Elastos::Droid::Server::CBluetoothManagerService;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -492,7 +496,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<CNetworkScoreService> networkScore;
     AutoPtr<CNsdService> serviceDiscovery;
     AutoPtr<CWindowManagerService> wm;
-    // AutoPtr<CBluetoothManagerService> bluetooth;
+    AutoPtr<IIBluetoothManager> bluetooth; //AutoPtr<CBluetoothManagerService> ;
     // AutoPtr<CUsbService> usb;
     // AutoPtr<CSerialService> serial;
     AutoPtr<NetworkTimeUpdateService> networkTimeUpdater;
@@ -537,7 +541,7 @@ ECode SystemServer::StartOtherServices()
     systemProperties->GetBoolean(String("config.disable_atlas"), FALSE, &disableAtlas);
     String str;
     systemProperties->Get(String("ro.kernel.qemu"), &str);
-    // Boolean isEmulator = str.Equals("1");
+    Boolean isEmulator = str.Equals("1");
 
     // try {
     Slogger::I(TAG, "Reading configuration...");
@@ -627,27 +631,33 @@ ECode SystemServer::StartOtherServices()
     // TODO: Use service dependencies instead.
     mDisplayManagerService->WindowManagerAndInputReady();
 
-//     // Skip Bluetooth if we have an emulator kernel
-//     // TODO: Use a more reliable check to see if this product should
-//     // support Bluetooth - see bug 988521
-//     if (isEmulator) {
-//         Slogger::I(TAG, "No Bluetooh Service (emulator)");
-//     } else if (mFactoryTestMode == FactoryTest::FACTORY_TEST_LOW_LEVEL) {
-//         Slogger::I(TAG, "No Bluetooth Service (factory test)");
-//     } else if (!context.getPackageManager().hasSystemFeature
-//                (PackageManager.FEATURE_BLUETOOTH)) {
-//         Slogger::I(TAG, "No Bluetooth Service (Bluetooth Hardware Not Present)");
-//     } else if (disableBluetooth) {
-//         Slogger::I(TAG, "Bluetooth Service disabled by config");
-//     } else {
-//         Slogger::I(TAG, "Bluetooth Manager Service");
-//         bluetooth = new BluetoothManagerService(context);
-//         ServiceManager::AddService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE, bluetooth);
-//     }
-// } catch (RuntimeException e) {
-//     Slog.e("System", "******************************************");
-//     Slog.e("System", "************ Failure starting core service", ec);
-// }
+    // // Skip Bluetooth if we have an emulator kernel
+    // // TODO: Use a more reliable check to see if this product should
+    // // support Bluetooth - see bug 988521
+    // AutoPtr<IPackageManager> pm;
+    // context->GetPackageManager((IPackageManager**)&pm);
+    // Boolean result;
+    // if (isEmulator) {
+    //     Slogger::I(TAG, "No Bluetooh Service (emulator)");
+    // }
+    // else if (mFactoryTestMode == FactoryTest::FACTORY_TEST_LOW_LEVEL) {
+    //     Slogger::I(TAG, "No Bluetooth Service (factory test)");
+    // }
+    // else if (pm->HasSystemFeature(IPackageManager::FEATURE_BLUETOOTH, &result), !result) {
+    //     Slogger::I(TAG, "No Bluetooth Service (Bluetooth Hardware Not Present)");
+    // }
+    // else if (disableBluetooth) {
+    //     Slogger::I(TAG, "Bluetooth Service disabled by config");
+    // }
+    // else {
+    //     Slogger::I(TAG, "Bluetooth Manager Service");
+    //     CBluetoothManagerService::New(context, (IIBluetoothManager**)&bluetooth);
+    //     ServiceManager::AddService(IBluetoothAdapter::BLUETOOTH_MANAGER_SERVICE, bluetooth);
+    // }
+    // } catch (RuntimeException e) {
+    //     Slog.e("System", "******************************************");
+    //     Slog.e("System", "************ Failure starting core service", ec);
+    // }
 
 
     // Bring up services needed for UI.

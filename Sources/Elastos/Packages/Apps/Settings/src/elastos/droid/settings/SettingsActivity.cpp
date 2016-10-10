@@ -128,62 +128,62 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[2] = "Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings";
     (*args)[3] = "Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings";
     (*args)[4] = "Elastos.Droid.Settings.Bluetooth.CBluetoothSettings";
-    (*args)[5] = "Elastos.Droid.Settings.Sim.SimSettings";
-    (*args)[6] = "Elastos.Droid.Settings.TetherSettings";
+    (*args)[5] = "Elastos.Droid.Settings.Sim.CSimSettings";
+    (*args)[6] = "Elastos.Droid.Settings.CTetherSettings";
     (*args)[7] = "Elastos.Droid.Settings.Wifi.P2p.CWifiP2pSettings";
-    (*args)[8] = "Elastos.Droid.Settings.Vpn2.VpnSettings";
+    (*args)[8] = "Elastos.Droid.Settings.Vpn2.CVpnSettings";
     (*args)[9] = "Elastos.Droid.Settings.CDateTimeSettings";
     (*args)[10] = "Elastos.Droid.Settings.CLocalePicker";
     (*args)[11] = "Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings";
-    (*args)[12] = "Elastos.Droid.Settings.Voice.VoiceInputSettings";
+    (*args)[12] = "Elastos.Droid.Settings.Voice.CVoiceInputSettings";
     (*args)[13] = "Elastos.Droid.Settings.Inputmethod.CSpellCheckersSettings";
     (*args)[14] = "Elastos.Droid.Settings.Inputmethod.CUserDictionaryList";
     (*args)[15] = "Elastos.Droid.Settings.CUserDictionarySettings";
-    (*args)[16] = "Elastos.Droid.Settings.HomeSettings";
+    (*args)[16] = "Elastos.Droid.Settings.CHomeSettings";
     (*args)[17] = "Elastos.Droid.Settings.CDisplaySettings";
     (*args)[18] = "Elastos.Droid.Settings.CDeviceInfoSettings";
     (*args)[19] = "Elastos.Droid.Settings.Applications.CManageApplications";
-    (*args)[20] = "Elastos.Droid.Settings.Applications.ProcessStatsUi";
+    (*args)[20] = "Elastos.Droid.Settings.Applications.CProcessStatsUi";
     (*args)[21] = "Elastos.Droid.Settings.Notification.CNotificationStation";
-    (*args)[22] = "Elastos.Droid.Settings.Location.LocationSettings";
+    (*args)[22] = "Elastos.Droid.Settings.Location.CLocationSettings";
     (*args)[23] = "Elastos.Droid.Settings.CSecuritySettings";
-    (*args)[24] = "Elastos.Droid.Settings.UsageAccessSettings";
-    (*args)[25] = "Elastos.Droid.Settings.PrivacySettings";
+    (*args)[24] = "Elastos.Droid.Settings.CUsageAccessSettings";
+    (*args)[25] = "Elastos.Droid.Settings.CPrivacySettings";
     (*args)[26] = "Elastos.Droid.Settings.CDeviceAdminSettings";
-    (*args)[27] = "Elastos.Droid.Settings.Accessibility.AccessibilitySettings";
-    (*args)[28] = "Elastos.Droid.Settings.Accessibility.CaptionPropertiesFragment";
-    (*args)[29] = "Elastos.Droid.Settings.Accessibility.ToggleDaltonizerPreferenceFragment";
-    (*args)[30] = "Elastos.Droid.Settings.Tts.TextToSpeechSettings";
-    (*args)[31] = "Elastos.Droid.Settings.Deviceinfo.Memory";
+    (*args)[27] = "Elastos.Droid.Settings.Accessibility.CAccessibilitySettings";
+    (*args)[28] = "Elastos.Droid.Settings.Accessibility.CCaptionPropertiesFragment";
+    (*args)[29] = "Elastos.Droid.Settings.Accessibility.CToggleDaltonizerPreferenceFragment";
+    (*args)[30] = "Elastos.Droid.Settings.Tts.CTextToSpeechSettings";
+    (*args)[31] = "Elastos.Droid.Settings.Deviceinfo.CMemory";
     (*args)[32] = "Elastos.Droid.Settings.CDevelopmentSettings";
-    (*args)[33] = "Elastos.Droid.Settings.Deviceinfo.UsbSettings";
-    (*args)[34] = "Elastos.Droid.Settings.Nfc.AndroidBeam";
+    (*args)[33] = "Elastos.Droid.Settings.Deviceinfo.CUsbSettings";
+    (*args)[34] = "Elastos.Droid.Settings.Nfc.CAndroidBeam";
     (*args)[35] = "Elastos.Droid.Settings.Wfd.CWifiDisplaySettings";
-    (*args)[36] = "Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary";
-    (*args)[37] = "Elastos.Droid.Settings.Accounts.AccountSyncSettings";
-    (*args)[38] = "Elastos.Droid.Settings.Accounts.AccountSettings";
+    (*args)[36] = "Elastos.Droid.Settings.Fuelgauge.CPowerUsageSummary";
+    (*args)[37] = "Elastos.Droid.Settings.Accounts.CAccountSyncSettings";
+    (*args)[38] = "Elastos.Droid.Settings.Accounts.CAccountSettings";
     (*args)[39] = "Elastos.Droid.Settings.CCryptKeeperSettings";
-    (*args)[40] = "Elastos.Droid.Settings.DataUsageSummary";
+    (*args)[40] = "Elastos.Droid.Settings.CDataUsageSummary";
     (*args)[41] = "Elastos.Droid.Settings.CDreamSettings";
-    (*args)[42] = "Elastos.Droid.Settings.Users.UserSettings";
+    (*args)[42] = "Elastos.Droid.Settings.Users.CUserSettings";
     (*args)[43] = "Elastos.Droid.Settings.Notification.CNotificationAccessSettings";
     (*args)[44] = "Elastos.Droid.Settings.Notification.CConditionProviderSettings";
-    (*args)[45] = "Elastos.Droid.Settings.Print.PrintSettingsFragment";
-    (*args)[46] = "Elastos.Droid.Settings.Print.PrintJobSettingsFragment";
-    (*args)[47] = "Elastos.Droid.Settings.TrustedCredentialsSettings";
-    (*args)[48] = "Elastos.Droid.Settings.Nfc.PaymentSettings";
-    (*args)[49] = "Elastos.Droid.Settings.Inputmethod.KeyboardLayoutPickerFragment";
+    (*args)[45] = "Elastos.Droid.Settings.Print.CPrintSettingsFragment";
+    (*args)[46] = "Elastos.Droid.Settings.Print.CPrintJobSettingsFragment";
+    (*args)[47] = "Elastos.Droid.Settings.CTrustedCredentialsSettings";
+    (*args)[48] = "Elastos.Droid.Settings.Nfc.CPaymentSettings";
+    (*args)[49] = "Elastos.Droid.Settings.Inputmethod.CKeyboardLayoutPickerFragment";
     (*args)[50] = "Elastos.Droid.Settings.Notification.CZenModeSettings";
     (*args)[51] = "Elastos.Droid.Settings.Notification.CNotificationSettings";
-    (*args)[52] = "Elastos.Droid.Settings.ChooseLockPassword.ChooseLockPasswordFragment";
-    (*args)[53] = "Elastos.Droid.Settings.ChooseLockPattern.ChooseLockPatternFragment";
+    (*args)[52] = "Elastos.Droid.Settings.ChooseLockPassword.CChooseLockPasswordFragment";
+    (*args)[53] = "Elastos.Droid.Settings.ChooseLockPattern.CChooseLockPatternFragment";
     (*args)[54] = "Elastos.Droid.Settings.Applications.CInstalledAppDetails";
-    (*args)[55] = "Elastos.Droid.Settings.Fuelgauge.BatterySaverSettings";
+    (*args)[55] = "Elastos.Droid.Settings.Fuelgauge.CBatterySaverSettings";
     (*args)[56] = "Elastos.Droid.Settings.Notification.CNotificationAppList";
     (*args)[57] = "Elastos.Droid.Settings.Notification.CAppNotificationSettings";
     (*args)[58] = "Elastos.Droid.Settings.Notification.COtherSoundSettings";
-    (*args)[59] = "Elastos.Droid.Settings.Quicklaunch.QuickLaunchSettings";
-    (*args)[60] = "Elastos.Droid.Settings.ApnSettings";
+    (*args)[59] = "Elastos.Droid.Settings.Quicklaunch.CQuickLaunchSettings";
+    (*args)[60] = "Elastos.Droid.Settings.CApnSettings";
 
     return args;
 }
@@ -775,16 +775,15 @@ ECode SettingsActivity::OnCreate(
 
             if (initialFragmentName.Equals("Elastos.Droid.Settings.Bluetooth.CBluetoothSettings")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.CWirelessSettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Deviceinfo.Memory")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Users.UserSettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Nfc.PaymentSettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Location.LocationSettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.CSecuritySettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Accounts.AccountSettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.PrivacySettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Accessibility.AccessibilitySettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Print.PrintSettingsFragment")) {
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Deviceinfo.CMemory")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Fuelgauge.CPowerUsageSummary")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Users.CUserSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Nfc.CPaymentSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Location.CLocationSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Accounts.CAccountSettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.CPrivacySettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Accessibility.CAccessibilitySettings")
+                    || initialFragmentName.Equals("Elastos.Droid.Settings.Print.CPrintSettingsFragment")) {
                 // nothing to do
                 return NOERROR;
             }

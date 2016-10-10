@@ -324,20 +324,14 @@ ECode LockPatternUtils::CheckPattern(
 {
     VALIDATE_NOT_NULL(result);
 
-    // Int32 userId = GetCurrentOrCallingUserId();
-    // Boolean matched = FALSE;
-    // String str;
-    // PatternToString(pattern, &str);
-    // ECode ec = GetLockSettings()->CheckPattern(str, userId, &matched);
-    // if (FAILED(ec)) {
-    //     *result = TRUE;
-    //     return NOERROR;
-    // }
-    // *result = matched;
-    // return NOERROR;
-
-    // Slogger::D("LockPatternUtils", "TODO ===[snow]===return TRUE or FALSE for testting until Setting APP works!");
-    *result = TRUE;
+    Int32 userId = GetCurrentOrCallingUserId();
+    String str;
+    PatternToString(pattern, &str);
+    ECode ec = GetLockSettings()->CheckPattern(str, userId, result);
+    if (FAILED(ec)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -346,17 +340,12 @@ ECode LockPatternUtils::CheckPassword(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // Int32 userId = GetCurrentOrCallingUserId();
-    // Boolean matched = FALSE;
-    // ECode ec = GetLockSettings()->CheckPassword(password, userId, &matched);
-    // if (FAILED(ec)) {
-    //     *result = TRUE;
-    //     return NOERROR;
-    // }
-    // *result = matched;
-    // return NOERROR;
-    // Slogger::D("LockPatternUtils", "TODO ===[snow]===return TRUE or FALSE for testting until Setting APP works!");
-    *result = TRUE;
+    Int32 userId = GetCurrentOrCallingUserId();
+    ECode ec = GetLockSettings()->CheckPassword(password, userId, result);
+    if (FAILED(ec)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -1752,23 +1741,24 @@ ECode LockPatternUtils::IsSecure(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // Int32 m = 0;
-    // GetKeyguardStoredPasswordQuality(&m);
-    // Int64 mode = m;
-    // Boolean isPattern = mode == IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING;
-    // Boolean isPassword = mode == IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC
-    //         || mode == IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC_COMPLEX
-    //         || mode == IDevicePolicyManager::PASSWORD_QUALITY_ALPHABETIC
-    //         || mode == IDevicePolicyManager::PASSWORD_QUALITY_ALPHANUMERIC
-    //         || mode == IDevicePolicyManager::PASSWORD_QUALITY_COMPLEX;
+    *result = FALSE;
 
-    // Boolean tmp = FALSE;
-    // Boolean secure = (isPattern && (IsLockPatternEnabled(&tmp), tmp) && (SavedPatternExists(&tmp), tmp))
-    //         || (isPassword && (SavedPasswordExists(&tmp), tmp));
-    // *result = secure;
+    Int32 m = 0;
+    GetKeyguardStoredPasswordQuality(&m);
+    Int64 mode = (Int64)m;
+    Boolean isPattern = mode == IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING;
+    Boolean isPassword = mode == IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC
+            || mode == IDevicePolicyManager::PASSWORD_QUALITY_NUMERIC_COMPLEX
+            || mode == IDevicePolicyManager::PASSWORD_QUALITY_ALPHABETIC
+            || mode == IDevicePolicyManager::PASSWORD_QUALITY_ALPHANUMERIC
+            || mode == IDevicePolicyManager::PASSWORD_QUALITY_COMPLEX;
 
-    // Slogger::D("LockPatternUtils", "TODO===[snow]===return TRUE for testting until Setting APP works!");
-    *result = TRUE;
+    Boolean tmp = FALSE;
+    Boolean secure = (isPattern && (IsLockPatternEnabled(&tmp), tmp) && (SavedPatternExists(&tmp), tmp))
+            || (isPassword && (SavedPasswordExists(&tmp), tmp));
+
+    Int32 data = 0;
+    *result = secure && (GetActiveProfileLockMode(&data), data) == IProfileLockMode::DEFAULT;
     return NOERROR;
 }
 

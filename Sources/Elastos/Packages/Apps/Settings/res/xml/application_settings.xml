@@ -36,7 +36,7 @@
             android:fragment="Elastos.Droid.Settings.Applications.CManageApplications"
             android:title="@string/runningservices_settings_title"
             android:summary="@string/runningservices_settings_summary">
-        <extra android:name="classname" android:value="Elastos.Droid.Settings.Settings$RunningServicesActivity" />
+        <extra android:name="classname" android:value="Elastos.Droid.Settings.CSettingsRunningServicesActivity" />
     </Elastos.Droid.Preference.CPreferenceScreen>
 
     <Elastos.Droid.Preference.CPreferenceScreen
@@ -44,7 +44,7 @@
             android:title="@string/storageuse_settings_title"
             android:summary="@string/storageuse_settings_summary">
         <extra android:name="classname"
-                android:value="Elastos.Droid.Settings.Settings$StorageUseActivity" />
+                android:value="Elastos.Droid.Settings.CSettingsStorageUseActivity" />
     </Elastos.Droid.Preference.CPreferenceScreen>
 
     <Elastos.Droid.Preference.CCheckBoxPreference
@@ -69,7 +69,7 @@
             android:summary="@string/quick_launch_summary">
         <intent android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
-                android:targetClass="Elastos.Droid.Settings.quicklaunch.QuickLaunchSettings" />
+                android:targetClass="Elastos.Droid.Settings.Quicklaunch.CQuickLaunchSettings" />
     </PreferenceScreen>
     -->
 

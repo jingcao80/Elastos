@@ -52,14 +52,14 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_bluetooth2);
 
-    InitPut(map, String("Elastos.Droid.Settings.Sim.SimSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Sim.CSimSettings"),
             SearchIndexableResources::NO_DATA_RES_ID, R::drawable::ic_sim_sd);
 
-    InitPut(map, String("Elastos.Droid.Settings.DataUsageSummary"),
+    InitPut(map, String("Elastos.Droid.Settings.CDataUsageSummary"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_data_usage);
 
-    InitPut(map, String("Elastos.Droid.Settings.Net.DataUsageMeteredSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Net.CDataUsageMeteredSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_data_usage);
 
@@ -67,7 +67,7 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_more);
 
-    InitPut(map, String("Elastos.Droid.Settings.HomeSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CHomeSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_home);
 
@@ -91,27 +91,27 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_notifications);
 
-    InitPut(map, String("Elastos.Droid.Settings.Deviceinfo.Memory"),
+    InitPut(map, String("Elastos.Droid.Settings.Deviceinfo.CMemory"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_storage);
 
-    InitPut(map, String("Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary"),
+    InitPut(map, String("Elastos.Droid.Settings.Fuelgauge.CPowerUsageSummary"),
             R::xml::power_usage_summary, R::drawable::ic_settings_battery);
 
-    InitPut(map, String("Elastos.Droid.Settings.Fuelgauge.BatterySaverSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Fuelgauge.CBatterySaverSettings"),
             R::xml::battery_saver_settings, R::drawable::ic_settings_battery);
 
-    InitPut(map, String("Elastos.Droid.Settings.Users.UserSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Users.CUserSettings"),
             R::xml::user_settings, R::drawable::ic_settings_multiuser);
 
-    InitPut(map, String("Elastos.Droid.Settings.Location.LocationSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Location.CLocationSettings"),
             R::xml::location_settings, R::drawable::ic_settings_location);
 
     InitPut(map, String("Elastos.Droid.Settings.CSecuritySettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_security);
 
-    InitPut(map, String("Elastos.Droid.Settings.ScreenPinningSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CScreenPinningSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_security);
 
@@ -119,22 +119,22 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_language);
 
-    InitPut(map, String("Elastos.Droid.Settings.Voice.VoiceInputSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Voice.CVoiceInputSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_language);
 
-    InitPut(map, String("Elastos.Droid.Settings.PrivacySettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CPrivacySettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_backup);
 
     InitPut(map, String("Elastos.Droid.Settings.CDateTimeSettings"),
             R::xml::date_time_prefs, R::drawable::ic_settings_date_time);
 
-    InitPut(map, String("Elastos.Droid.Settings.Accessibility.AccessibilitySettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Accessibility.CAccessibilitySettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_accessibility);
 
-    InitPut(map, String("Elastos.Droid.Settings.Print.PrintSettingsFragment"),
+    InitPut(map, String("Elastos.Droid.Settings.Print.CPrintSettingsFragment"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_print);
 

@@ -69,13 +69,13 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_BT);
 
     // SIM Cards
-    InitPut(map, String("Elastos.Droid.Settings.Sim.SimSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Sim.CSimSettings"),
             Ranking::RANK_SIM);
 
     // DataUsage
-    InitPut(map, String("Elastos.Droid.Settings.DataUsageSummary"),
+    InitPut(map, String("Elastos.Droid.Settings.CDataUsageSummary"),
             Ranking::RANK_DATA_USAGE);
-    InitPut(map, String("Elastos.Droid.Settings.Net.DataUsageMeteredSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Net.CDataUsageMeteredSettings"),
             Ranking::RANK_DATA_USAGE);
 
     // Other wireless settinfs
@@ -83,7 +83,7 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_WIRELESS);
 
     // Home
-    InitPut(map, String("Elastos.Droid.Settings.HomeSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CHomeSettings"),
             Ranking::RANK_HOME);
 
     // Display
@@ -106,24 +106,24 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_NOTIFICATIONS);
 
     // Memory
-    InitPut(map, String("Elastos.Droid.Settings.Deviceinfo.Memory"),
+    InitPut(map, String("Elastos.Droid.Settings.Deviceinfo.CMemory"),
             Ranking::RANK_MEMORY);
 
     // Battery
     InitPut(map,
-            String("Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary"),
+            String("Elastos.Droid.Settings.Fuelgauge.CPowerUsageSummary"),
             Ranking::RANK_POWER_USAGE);
     InitPut(map,
-            String("Elastos.Droid.Settings.Fuelgauge.BatterySaverSettings"),
+            String("Elastos.Droid.Settings.Fuelgauge.CBatterySaverSettings"),
             Ranking::RANK_POWER_USAGE);
 
     // Users
-    InitPut(map, String("Elastos.Droid.Settings.Users.UserSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Users.CUserSettings"),
             Ranking::RANK_USERS);
 
     // Location
     InitPut(map,
-            String("Elastos.Droid.Settings.Location.LocationSettings"),
+            String("Elastos.Droid.Settings.Location.CLocationSettings"),
             Ranking::RANK_LOCATION);
 
     // Security
@@ -132,18 +132,18 @@ static AutoPtr<IHashMap> InitsRankMap()
     InitPut(map,
             String("Elastos.Droid.Settings.CChooseLockGenericFragment"),
             Ranking::RANK_SECURITY);
-    InitPut(map, String("Elastos.Droid.Settings.ScreenPinningSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CScreenPinningSettings"),
             Ranking::RANK_SECURITY);
 
     // IMEs
     InitPut(map,
             String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"),
             Ranking::RANK_IME);
-    InitPut(map, String("Elastos.Droid.Settings.Voice.VoiceInputSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Voice.CVoiceInputSettings"),
             Ranking::RANK_IME);
 
     // Privacy
-    InitPut(map, String("Elastos.Droid.Settings.PrivacySettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CPrivacySettings"),
             Ranking::RANK_PRIVACY);
 
     // Date / Time
@@ -152,11 +152,11 @@ static AutoPtr<IHashMap> InitsRankMap()
 
     // Accessibility
     InitPut(map,
-            String("Elastos.Droid.Settings.Accessibility.AccessibilitySettings"),
+            String("Elastos.Droid.Settings.Accessibility.CAccessibilitySettings"),
             Ranking::RANK_ACCESSIBILITY);
 
     // Print
-    InitPut(map, String("Elastos.Droid.Settings.Print.PrintSettingsFragment"),
+    InitPut(map, String("Elastos.Droid.Settings.Print.CPrintSettingsFragment"),
             Ranking::RANK_PRINTING);
 
     // Development

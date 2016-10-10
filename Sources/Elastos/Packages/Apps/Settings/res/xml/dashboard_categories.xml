@@ -42,7 +42,7 @@
         <dashboard-tile
                 android:id="@+id/sim_settings"
                 android:title="@string/sim_settings_title"
-                android:fragment="Elastos.Droid.Settings.Sim.SimSettings"
+                android:fragment="Elastos.Droid.Settings.Sim.CSimSettings"
                 android:icon="@drawable/ic_sim_sd"
                 />
 
@@ -50,7 +50,7 @@
         <dashboard-tile
                 android:id="@+id/data_usage_settings"
                 android:title="@string/data_usage_summary_title"
-                android:fragment="Elastos.Droid.Settings.DataUsageSummary"
+                android:fragment="Elastos.Droid.Settings.CDataUsageSummary"
                 android:icon="@drawable/ic_settings_data_usage"
                 />
 
@@ -80,7 +80,7 @@
         <dashboard-tile
                 android:id="@+id/home_settings"
                 android:title="@string/home_settings"
-                android:fragment="Elastos.Droid.Settings.HomeSettings"
+                android:fragment="Elastos.Droid.Settings.CHomeSettings"
                 android:icon="@drawable/ic_settings_home"
                 />
 
@@ -104,7 +104,7 @@
         <dashboard-tile
                 android:id="@+id/storage_settings"
                 android:title="@string/storage_settings"
-                android:fragment="Elastos.Droid.Settings.Deviceinfo.Memory"
+                android:fragment="Elastos.Droid.Settings.Deviceinfo.CMemory"
                 android:icon="@drawable/ic_settings_storage"
                 />
 
@@ -112,7 +112,7 @@
         <dashboard-tile
                 android:id="@+id/battery_settings"
                 android:title="@string/power_usage_summary_title"
-                android:fragment="Elastos.Droid.Settings.Fuelgauge.PowerUsageSummary"
+                android:fragment="Elastos.Droid.Settings.Fuelgauge.CPowerUsageSummary"
                 android:icon="@drawable/ic_settings_battery"
                 />
 
@@ -128,7 +128,7 @@
         <dashboard-tile
                 android:id="@+id/user_settings"
                 android:title="@string/user_settings_title"
-                android:fragment="Elastos.Droid.Settings.Users.UserSettings"
+                android:fragment="Elastos.Droid.Settings.Users.CUserSettings"
                 android:icon="@drawable/ic_settings_multiuser"
                 />
 
@@ -136,7 +136,7 @@
         <dashboard-tile
                 android:id="@+id/nfc_payment_settings"
                 android:title="@string/nfc_payment_settings_title"
-                android:fragment="Elastos.Droid.Settings.Nfc.PaymentSettings"
+                android:fragment="Elastos.Droid.Settings.Nfc.CPaymentSettings"
                 android:icon="@drawable/ic_settings_nfc_payment"
                 />
 
@@ -158,7 +158,7 @@
         <dashboard-tile
                 android:id="@+id/location_settings"
                 android:title="@string/location_settings_title"
-                android:fragment="Elastos.Droid.Settings.Location.LocationSettings"
+                android:fragment="Elastos.Droid.Settings.Location.CLocationSettings"
                 android:icon="@drawable/ic_settings_location"
                 />
 
@@ -174,7 +174,7 @@
         <dashboard-tile
                 android:id="@+id/account_settings"
                 android:title="@string/account_settings_title"
-                android:fragment="Elastos.Droid.Settings.Accounts.AccountSettings"
+                android:fragment="Elastos.Droid.Settings.Accounts.CAccountSettings"
                 android:icon="@drawable/ic_settings_accounts"
                 />
 
@@ -190,7 +190,7 @@
         <dashboard-tile
                 android:id="@+id/privacy_settings"
                 android:title="@string/privacy_settings"
-                android:fragment="Elastos.Droid.Settings.PrivacySettings"
+                android:fragment="Elastos.Droid.Settings.CPrivacySettings"
                 android:icon="@drawable/ic_settings_backup"
                 />
 
@@ -213,7 +213,7 @@
         <dashboard-tile
                 android:id="@+id/accessibility_settings"
                 android:title="@string/accessibility_settings"
-                android:fragment="Elastos.Droid.Settings.Accessibility.AccessibilitySettings"
+                android:fragment="Elastos.Droid.Settings.Accessibility.CAccessibilitySettings"
                 android:icon="@drawable/ic_settings_accessibility"
                 />
 
@@ -221,7 +221,7 @@
         <dashboard-tile
                 android:id="@+id/print_settings"
                 android:title="@string/print_settings"
-                android:fragment="Elastos.Droid.Settings.Print.PrintSettingsFragment"
+                android:fragment="Elastos.Droid.Settings.Print.CPrintSettingsFragment"
                 android:icon="@drawable/ic_settings_print"
                 />
 

@@ -20,7 +20,7 @@
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
-    <Elastos.Droid.Settings.fuelgauge.BatteryHistoryChart
+    <Elastos.Droid.Settings.Fuelgauge.CBatteryHistoryChart
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:layout_width="match_parent"
@@ -37,6 +37,6 @@
         app:barPrimaryColor="?android:attr/colorControlActivated"
         app:barPredictionColor="@color/material_empty_color_light"
         app:chartMinHeight="@dimen/battery_history_chart_height">
-    </Elastos.Droid.Settings.fuelgauge.BatteryHistoryChart>
+    </Elastos.Droid.Settings.Fuelgauge.CBatteryHistoryChart>
 
 </FrameLayout>

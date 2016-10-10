@@ -91,10 +91,12 @@ ECode ChooseLockGeneric::ChooseLockGenericFragment::OnCreate(
     SettingsPreferenceFragment::OnCreate(savedInstanceState);
 
     mDPM = IDevicePolicyManager::Probe(GetSystemService(IContext::DEVICE_POLICY_SERVICE));
-    AutoPtr<IKeyStoreHelper> helper;
-    assert(0 && "TODO");
-    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
-    helper->GetInstance((IKeyStore**)&mKeyStore);
+
+    Slogger::I("ChooseLockGeneric", " >> TODO wait for CKeyStoreHelper");
+    // AutoPtr<IKeyStoreHelper> helper;
+    // assert(0 && "TODO");
+    // // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    // helper->GetInstance((IKeyStore**)&mKeyStore);
     AutoPtr<IActivity> thisActivity;
     this->GetActivity((IActivity**)&thisActivity);
     mChooseLockSettingsHelper = new ChooseLockSettingsHelper();
@@ -360,12 +362,13 @@ Int32 ChooseLockGeneric::ChooseLockGenericFragment::UpgradeQualityForKeyStore(
     /* [in] */ Int32 quality)
 {
     Boolean res;
-    mKeyStore->IsEmpty(&res);
-    if (!res) {
-        if (quality < IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING/*CredentialStorage::MIN_PASSWORD_QUALITY*/) {
-            quality = IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING/*CredentialStorage::MIN_PASSWORD_QUALITY*/;
-        }
-    }
+    Slogger::I("ChooseLockGeneric", " >> TODO wait for CKeyStoreHelper");
+    //mKeyStore->IsEmpty(&res);
+    //if (!res) {
+    //    if (quality < IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING/*CredentialStorage::MIN_PASSWORD_QUALITY*/) {
+    //        quality = IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING/*CredentialStorage::MIN_PASSWORD_QUALITY*/;
+    //    }
+    //}
     return quality;
 }
 

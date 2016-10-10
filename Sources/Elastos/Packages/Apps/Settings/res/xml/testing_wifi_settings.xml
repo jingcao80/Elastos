@@ -23,7 +23,7 @@ android:key="parent">
                 <intent
                 android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
-                android:targetClass="Elastos.Droid.Settings.wifi.WifiAPITest" />
+                android:targetClass="Elastos.Droid.Settings.Wifi.CWifiAPITest" />
     </Elastos.Droid.Preference.CPreference>
 
     <Elastos.Droid.Preference.CPreference
@@ -31,7 +31,7 @@ android:key="parent">
         <intent
                 android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
-                android:targetClass="Elastos.Droid.Settings.wifi.WifiConfigInfo" />
+                android:targetClass="Elastos.Droid.Settings.Wifi.CWifiConfigInfo" />
     </Elastos.Droid.Preference.CPreference>
 
     <Elastos.Droid.Preference.CPreference
@@ -39,7 +39,7 @@ android:key="parent">
         <intent
                 android:action="android.intent.action.MAIN"
                 android:targetPackage="Elastos.Droid.Settings"
-                android:targetClass="Elastos.Droid.Settings.wifi.WifiStatusTest" />
+                android:targetClass="Elastos.Droid.Settings.Wifi.CWifiStatusTest" />
     </Elastos.Droid.Preference.CPreference>
 
 </Elastos.Droid.Preference.CPreferenceScreen>
