@@ -44,76 +44,106 @@ module.exports = function(aoElastos, aoActivity){
 // import java.util.Map.Entry;
 
 // public class CalculatorExpressionTokenizer {
+class _CalculatorExpressionTokenizer {
 
 //     private final Map<String, String> mReplacementMap;
-        var mReplacementMap;
 
 //     public CalculatorExpressionTokenizer(Context context) {
-        function CalculatorExpressionTokenizer(context) {
-            elog("CalculatorExpressionTokenizer.js====CalculatorExpressionTokenizer====");
-
 //         mReplacementMap = new HashMap<>();
-            mReplacementMap = [];
 
-//         mReplacementMap.put(".", context.getString(R.string.dec_point));
+//         mReplacementMap.set(".", context.GetString(R.string.dec_point));
 
-//         mReplacementMap.put("0", context.getString(R.string.digit_0));
-//         mReplacementMap.put("1", context.getString(R.string.digit_1));
-//         mReplacementMap.put("2", context.getString(R.string.digit_2));
-//         mReplacementMap.put("3", context.getString(R.string.digit_3));
-//         mReplacementMap.put("4", context.getString(R.string.digit_4));
-//         mReplacementMap.put("5", context.getString(R.string.digit_5));
-//         mReplacementMap.put("6", context.getString(R.string.digit_6));
-//         mReplacementMap.put("7", context.getString(R.string.digit_7));
-//         mReplacementMap.put("8", context.getString(R.string.digit_8));
-//         mReplacementMap.put("9", context.getString(R.string.digit_9));
+//         mReplacementMap.set("0", context.GetString(R.string.digit_0));
+//         mReplacementMap.set("1", context.GetString(R.string.digit_1));
+//         mReplacementMap.set("2", context.GetString(R.string.digit_2));
+//         mReplacementMap.set("3", context.GetString(R.string.digit_3));
+//         mReplacementMap.set("4", context.GetString(R.string.digit_4));
+//         mReplacementMap.set("5", context.GetString(R.string.digit_5));
+//         mReplacementMap.set("6", context.GetString(R.string.digit_6));
+//         mReplacementMap.set("7", context.GetString(R.string.digit_7));
+//         mReplacementMap.set("8", context.GetString(R.string.digit_8));
+//         mReplacementMap.set("9", context.GetString(R.string.digit_9));
 
-//         mReplacementMap.put("/", context.getString(R.string.op_div));
-//         mReplacementMap.put("*", context.getString(R.string.op_mul));
-//         mReplacementMap.put("-", context.getString(R.string.op_sub));
+//         mReplacementMap.set("/", context.GetString(R.string.op_div));
+//         mReplacementMap.set("*", context.GetString(R.string.op_mul));
+//         mReplacementMap.set("-", context.GetString(R.string.op_sub));
 
-//         mReplacementMap.put("cos", context.getString(R.string.fun_cos));
-//         mReplacementMap.put("ln", context.getString(R.string.fun_ln));
-//         mReplacementMap.put("log", context.getString(R.string.fun_log));
-//         mReplacementMap.put("sin", context.getString(R.string.fun_sin));
-//         mReplacementMap.put("tan", context.getString(R.string.fun_tan));
+//         mReplacementMap.set("cos", context.GetString(R.string.fun_cos));
+//         mReplacementMap.set("ln", context.GetString(R.string.fun_ln));
+//         mReplacementMap.set("log", context.GetString(R.string.fun_log));
+//         mReplacementMap.set("sin", context.GetString(R.string.fun_sin));
+//         mReplacementMap.set("tan", context.GetString(R.string.fun_tan));
 
-//         mReplacementMap.put("Infinity", context.getString(R.string.inf));
+//         mReplacementMap.set("Infinity", context.GetString(R.string.inf));
 //     }
-        }
-        var _pt = CalculatorExpressionTokenizer.prototype;
+    constructor(context) {
+        this.mReplacementMap = new Map();
+
+        this.mReplacementMap.set(".", context.GetString(R.string.dec_point));
+
+        this.mReplacementMap.set("0", context.GetString(R.string.digit_0));
+        this.mReplacementMap.set("1", context.GetString(R.string.digit_1));
+        this.mReplacementMap.set("2", context.GetString(R.string.digit_2));
+        this.mReplacementMap.set("3", context.GetString(R.string.digit_3));
+        this.mReplacementMap.set("4", context.GetString(R.string.digit_4));
+        this.mReplacementMap.set("5", context.GetString(R.string.digit_5));
+        this.mReplacementMap.set("6", context.GetString(R.string.digit_6));
+        this.mReplacementMap.set("7", context.GetString(R.string.digit_7));
+        this.mReplacementMap.set("8", context.GetString(R.string.digit_8));
+        this.mReplacementMap.set("9", context.GetString(R.string.digit_9));
+
+        this.mReplacementMap.set("/", context.GetString(R.string.op_div));
+        this.mReplacementMap.set("*", context.GetString(R.string.op_mul));
+        this.mReplacementMap.set("-", context.GetString(R.string.op_sub));
+
+        this.mReplacementMap.set("cos", context.GetString(R.string.fun_cos));
+        this.mReplacementMap.set("ln", context.GetString(R.string.fun_ln));
+        this.mReplacementMap.set("log", context.GetString(R.string.fun_log));
+        this.mReplacementMap.set("sin", context.GetString(R.string.fun_sin));
+        this.mReplacementMap.set("tan", context.GetString(R.string.fun_tan));
+
+        this.mReplacementMap.set("Infinity", context.GetString(R.string.inf));
+    }
 
 //     public String getNormalizedExpression(String expr) {
-        _pt.getNormalizedExpression = function(expr) {
-            elog("CalculatorExpressionTokenizer.js====getNormalizedExpression====");
-
 //         for (Entry<String, String> replacementEntry : mReplacementMap.entrySet()) {
 //             expr = expr.replace(replacementEntry.getValue(), replacementEntry.getKey());
 //         }
 //         return expr;
 //     }
+    GetNormalizedExpression(expr) {
+        for (let [key, value] of this.mReplacementMap.entries()) {
+            expr = expr.replace(value, key);
         }
+        return expr;
+    }
 
 //     public String getLocalizedExpression(String expr) {
-        _pt.getLocalizedExpression = function(expr) {
-            elog("CalculatorExpressionTokenizer.js====getLocalizedExpression====");
-
 //         for (Entry<String, String> replacementEntry : mReplacementMap.entrySet()) {
 //             expr = expr.replace(replacementEntry.getKey(), replacementEntry.getValue());
 //         }
 //         return expr;
 //     }
+    GetLocalizedExpression(expr) {
+        for (let [key, value] of this.mReplacementMap.entries()) {
+            expr = expr.replace(key, value);
         }
-// }
+        return expr;
+    }
+
+}   //class _CalculatorExpressionTokenizer
 
 //--------.java----end----
 
-    //return CalculatorExpressionTokenizer;
-
-    class __CalculatorExpressionTokenizer {
+    class CalculatorExpressionTokenizer extends _CalculatorExpressionTokenizer{
+        constructor(context) {
+            elog("====CalculatorExpressionTokenizer::constructor====");
+            super(context);
+            //Assert(0);
+        }
     }
 
-    return new __CalculatorExpressionTokenizer();
+    return CalculatorExpressionTokenizer;
 
 };  //module.exports
 

@@ -45,39 +45,33 @@ var SyntaxException = require("./arity/SyntaxException.js")(aoElastos, aoActivit
 var Util = require("./arity/Util.js")(aoElastos, aoActivity);
 
 // public class CalculatorExpressionEvaluator {
+class CalculatorExpressionEvaluator {
 
 //     private static final int MAX_DIGITS = 12;
-        var MAX_DIGITS = 12;
+    static get MAX_DIGITS() {return 12;}
 //     private static final int ROUNDING_DIGITS = 2;
-        var ROUNDING_DIGITS = 2;
+    static get ROUNDING_DIGITS() {return 2;}
 
 //     private final Symbols mSymbols;
-        var mSymbols;
 //     private final CalculatorExpressionTokenizer mTokenizer;
-        var mTokenizer;
 
 //     public CalculatorExpressionEvaluator(CalculatorExpressionTokenizer tokenizer) {
-        function CalculatorExpressionEvaluator(tokenizer) {
-            elog("CalculatorExpressionEvaluator.js====CalculatorExpressionEvaluator====");
-
 //         mSymbols = new Symbols();
-            mSymbols = new Symbols();
 //         mTokenizer = tokenizer;
-            mTokenizer = tokenizer;
 //     }
-        }
-        var _pt = CalculatorExpressionEvaluator.prototype;
+    constructor(tokenizer) {
+        this.mSymbols = new Symbols();
+        this.mTokenizer = tokenizer;
+    }
 
 //     public void evaluate(CharSequence expr, EvaluateCallback callback) {
 //         evaluate(expr.toString(), callback);
 //     }
+    Evaluate_0(expr, callback) {
+        evaluate(expr.ToString(), callback);
+    }
 
 //     public void evaluate(String expr, EvaluateCallback callback) {
-        _pt.evaluate = function(expr, callback) {
-            elog("CalculatorExpressionEvaluator.js====evaluate====");
-
-            if (typeof expr != "string") expr = expr.ToString();
-
 //         expr = mTokenizer.getNormalizedExpression(expr);
 
 //         // remove any trailing operators
@@ -110,23 +104,59 @@ var Util = require("./arity/Util.js")(aoElastos, aoActivity);
 //             callback.onEvaluate(expr, null, R.string.error_syntax);
 //         }
 //     }
+    Evaluate(expr, callback) {
+        if (typeof expr != "string") expr = expr.ToString();
+
+        expr = this.mTokenizer.GetNormalizedExpression(expr);
+
+        // remove any trailing operators
+        while (expr.length() > 0 && "+-/*".indexOf(expr.charAt(expr.length() - 1)) != -1) {
+            expr = expr.substring(0, expr.length() - 1);
         }
 
+        try {
+            if (expr.length() == 0 || Double.valueOf(expr) != null) {
+                callback.onEvaluate(expr, null, Calculator.INVALID_RES_ID);
+                return;
+            }
+        } catch (e) {
+            // expr is not a simple number
+        }
+
+        try {
+            var result = mSymbols.eval(expr);
+            if (Double.isNaN(result)) {
+                callback.onEvaluate(expr, null, R.string.error_nan);
+            } else {
+                // The arity library uses floating point arithmetic when evaluating the expression
+                // leading to precision errors in the result. The method doubleToString hides these
+                // errors; rounding the result by dropping N digits of precision.
+                var resultString = this.mTokenizer.getLocalizedExpression(
+                        Util.doubleToString(result, MAX_DIGITS, ROUNDING_DIGITS));
+                callback.onEvaluate(expr, resultString, Calculator.INVALID_RES_ID);
+            }
+        } catch (e) {
+            callback.onEvaluate(expr, null, R.string.error_syntax);
+        }
+    }
+
 //     public interface EvaluateCallback {
-        function EvaluateCallback() {
 //         public void onEvaluate(String expr, String result, int errorResourceId);
 //     }
+    static get EvaluateCallback() {
+        return class _ {
+            OnEvaluate(expr, result, errorResourceId) {
+                elog("====EvaluateCallback::OnEvaluate====virtual====");
+                Assert(0);
+            }
         }
-// }
+    }
+
+}   //class CalculatorExpressionEvaluator
 
 //--------.java----end----
 
-    //return CalculatorExpressionEvaluator;
-
-    class __CalculatorExpressionEvaluator {
-    }
-
-    return new __CalculatorExpressionEvaluator();
+return CalculatorExpressionEvaluator;
 
 };  //module.exports
 

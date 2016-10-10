@@ -3271,7 +3271,30 @@ class ViewPager extends ViewGroup {
         elog("====ViewPager::OnLayout====end====");
     }
 
-//TODO: java code was deleted, should copy back from v4
+//     @Override
+//     public void computeScroll() {
+//         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
+//             int oldX = getScrollX();
+//             int oldY = getScrollY();
+//             int x = mScroller.getCurrX();
+//             int y = mScroller.getCurrY();
+
+//             if (oldX != x || oldY != y) {
+//                 scrollTo(x, y);
+//                 if (!pageScrolled(x)) {
+//                     mScroller.abortAnimation();
+//                     scrollTo(0, y);
+//                 }
+//             }
+
+//             // Keep on drawing until the animation has finished.
+//             ViewCompat.postInvalidateOnAnimation(this);
+//             return;
+//         }
+
+//         // Done with scroll, clean up state.
+//         completeScroll(true);
+//     }
     ComputeScroll(_this) {
         elog("====ViewPager::ComputeScroll====begin====");
 
@@ -3343,7 +3366,7 @@ class ViewPager extends ViewGroup {
             return false;
         }
         var ii = this.InfoForCurrentScrollPosition();
-        var width = _this.GetClientWidth();
+        var width = this.GetClientWidth();
         var widthWithMargin = width + this.mPageMargin;
         var marginOffset = this.mPageMargin / width;
         var currentPage = ii.position;
@@ -4302,12 +4325,12 @@ CObject.showMethods(this.mScroller);
         var first = true;
 
         var lastItem = null;
-        for (var i = 0; i < mItems.GetSize(); i++) {
-            var ii = mItems.Get(i);
+        for (var i = 0; i < this.mItems.GetSize(); i++) {
+            var ii = this.mItems.Get(i);
             var offset;
             if (!first && ii.position != lastPos + 1) {
                 // Create a synthetic item for a missing page.
-                ii = mTempItem;
+                ii = this.mTempItem;
                 ii.offset = lastOffset + lastWidth + marginOffset;
                 ii.position = lastPos + 1;
                 ii.widthFactor = this.mAdapter.GetPageWidth(ii.position);
