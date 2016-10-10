@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Org {
+    namespace Apache {
+    namespace Harmony {
+    namespace Security {
+    namespace Utils {
+
+    /**
+     * Provides a mapping source that the {@link AlgNameMapper} can query for
+     * mapping between algorithm names and OIDs.
+     */
+    interface IAlgNameMapperSource {
+        MapNameToOid(
+            [in] String algName,
+            [out] String* result);
+
+        MapOidToName(
+            [in] String oid,
+            [out] String* result);
+    }
+
+    } // namespace Utils
+    } // namespace Security
+    } // namespace Harmony
+    } // namespace Apache
+    } // namespace Org
+}

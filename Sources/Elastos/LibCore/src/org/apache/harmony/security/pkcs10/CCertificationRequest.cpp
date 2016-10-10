@@ -1,158 +1,23 @@
 
 #include "CCertificationRequest.h"
-#include <cmdef.h>
-#include <CBitString.h>
+#include "CCertificationRequestInfo.h"
+#include "CAlgorithmIdentifierHelper.h"
+#include "CBitString.h"
+#include "ASN1BitString.h"
 
+using Elastos::Core::IArrayOf;
+using Org::Apache::Harmony::Security::Asn1::ASN1BitString;
 using Org::Apache::Harmony::Security::Asn1::CBitString;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IBitString;
+using Org::Apache::Harmony::Security::X509::CAlgorithmIdentifierHelper;
+using Org::Apache::Harmony::Security::X509::IAlgorithmIdentifierHelper;
 
 namespace Org {
 namespace Apache {
 namespace Harmony {
 namespace Security {
 namespace Pkcs10 {
-
-CAR_INTERFACE_IMPL(CCertificationRequest::ASN1SequenceDerived, IASN1Sequence)
-
-ECode CCertificationRequest::ASN1SequenceDerived::GetId(
-    /* [out] */ Int32* id)
-{
-    return ASN1Sequence::GetId(id);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::GetConstrId(
-    /* [out] */ Int32* constrId)
-{
-    return ASN1Sequence::GetConstrId(constrId);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::Decode(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Sequence::Decode(encoded, object);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::DecodeEx(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [in] */ Int32 offset,
-    /* [in] */ Int32 encodingLen,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Sequence::DecodeEx(encoded, offset, encodingLen, object);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::DecodeEx2(
-    /* [in] */ IInputStream* is,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Sequence::DecodeEx2(is, object);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::Verify(
-    /* [in] */ ArrayOf<Byte>* encoded)
-{
-    return ASN1Sequence::Verify(encoded);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::VerifyEx(
-    /* [in] */ IInputStream* is)
-{
-    return ASN1Sequence::VerifyEx(is);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::Encode(
-    /* [in] */ IInterface* object,
-    /* [out, callee] */ ArrayOf<Byte>** encode)
-{
-    return ASN1Sequence::Encode(object, encode);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::DecodeEx3(
-    /* [in] */ IBerInputStream* bis,
-    /* [out] */ IInterface** object)
-{
-    bis->ReadSequence(this);
-
-    if (((CBerInputStream*)bis)->mIsVerify) {
-        return NOERROR;
-    }
-    return GetDecodedObject(bis, object);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::CheckTag(
-    /* [in] */ Int32 identifier,
-    /* [out] */ Boolean* checkTag)
-{
-    return ASN1Sequence::CheckTag(identifier, checkTag);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::EncodeASN(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return ASN1Sequence::EncodeASN(bos);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::EncodeContent(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return bos->EncodeSequence(this);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::SetEncodingContent(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return bos->GetSequenceLength(this);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::GetEncodedLength(
-    /* [in] */ IBerOutputStream* bos,
-    /* [out] */ Int32* length)
-{
-    return ASN1Sequence::GetEncodedLength(bos, length);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::ToString(
-    /* [out] */ String* result)
-{
-    return ASN1Sequence::ToString(result);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::SetType(
-/* [in] */ ArrayOf<IASN1Type *>* type)
-{
-    return ASN1Sequence::SetType(type);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::GetType(
-    /* [out, callee] */ ArrayOf<IASN1Type *>** type)
-{
-    return ASN1Sequence::GetType(type);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::SetOptional(
-    /* [in] */ ArrayOf<Boolean>* optional)
-{
-    return ASN1Sequence::SetOptional(optional);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::GetOptional(
-    /* [out, callee] */ ArrayOf<Boolean>** optional)
-{
-    return ASN1Sequence::GetOptional(optional);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::SetDefault(
-    /* [in] */ ArrayOf<IInterface *>* def)
-{
-    return ASN1Sequence::SetDefault(def);
-}
-
-ECode CCertificationRequest::ASN1SequenceDerived::GetDefault(
-    /* [out, callee] */ ArrayOf<IInterface *>** def)
-{
-    return ASN1Sequence::GetDefault(def);
-}
 
 ECode CCertificationRequest::ASN1SequenceDerived::GetDecodedObject(
     /* [in] */ IBerInputStream* bis,
@@ -175,8 +40,10 @@ ECode CCertificationRequest::ASN1SequenceDerived::GetDecodedObject(
     arg3->GetBytes((ArrayOf<Byte>**)&bytes);
     AutoPtr<ArrayOf<Byte> > arg4;
     bis->GetEncoded((ArrayOf<Byte>**)&arg4);
-    *object = new CCertificationRequest(arg1, arg2, bytes, arg4);
-    REFCOUNT_ADD(*object)
+    AutoPtr<ICertificationRequest> cr;
+    CCertificationRequest::New(arg1, arg2, bytes, arg4, (ICertificationRequest**)&cr);
+    *object = cr;
+    REFCOUNT_ADD(*object);
     return NOERROR;
 }
 
@@ -195,49 +62,46 @@ ECode CCertificationRequest::ASN1SequenceDerived::GetValues(
     certReq->GetSignature((ArrayOf<Byte>**)&sig);
     AutoPtr<IBitString> bs;
     CBitString::New(sig, 0, (IBitString**)&bs);
-    return values->Set(2, bs.Get());
+    values->Set(2, bs.Get());
+    return NOERROR;
 }
 
-CCertificationRequest::ASN1SequenceDerived::ASN1SequenceDerived(
+CCertificationRequest::ASN1SequenceDerived::ASN1SequenceDerived()
+{}
+
+ECode CCertificationRequest::ASN1SequenceDerived::constructor(
     /* [in] */ ArrayOf<IASN1Type *>* type)
 {
-    ASN1Sequence::Init(type);
+    return ASN1Sequence::constructor(type);
 }
 
 AutoPtr<IASN1Sequence> CCertificationRequest::ASN1 = InitStatic();
 
 AutoPtr<IASN1Sequence> CCertificationRequest::InitStatic()
 {
-    AutoPtr<IASN1Sequence> ret;
     AutoPtr<ArrayOf<IASN1Type*> > arg = ArrayOf<IASN1Type*>::Alloc(3);
-    AutoPtr<ICertificationRequestInfoHelper> hlp;
-    CCertificationRequestInfoHelper::AcquireSingleton((ICertificationRequestInfoHelper**)&hlp);
-    AutoPtr<IASN1Sequence> as;
-    hlp->GetASN1((IASN1Sequence**)&as);
-    arg->Set(0, as.Get());
+    AutoPtr<IASN1Sequence> as = CCertificationRequestInfo::ASN1;
+    arg->Set(0, IASN1Type::Probe(as));
     AutoPtr<IAlgorithmIdentifier> ai;
     AutoPtr<IAlgorithmIdentifierHelper> aih;
     CAlgorithmIdentifierHelper::AcquireSingleton((IAlgorithmIdentifierHelper**)&aih);
     as = NULL;
     aih->GetASN1((IASN1Sequence**)&as);
-    arg->Set(1, as.Get());
-    AutoPtr<IASN1BitStringHelper> absh;
-    CASN1BitStringHelper::AcquireSingleton((IASN1BitStringHelper**)&absh);
+    arg->Set(1, IASN1Type::Probe(as));
     AutoPtr<IASN1Type> at;
-    absh->GetInstance((IASN1Type**)&at);
+    ASN1BitString::GetInstance((IASN1Type**)&at);
     arg->Set(2, at.Get());
-    ret = new ASN1SequenceDerived(arg);
+    AutoPtr<ASN1SequenceDerived> ret = new ASN1SequenceDerived();
+    ret->constructor(arg);
     return ret;
 }
 
 CAR_OBJECT_IMPL(CCertificationRequest)
-
-CAR_INTERFACE_IMPL(CCertificationRequest, Singleton, ICertificationRequest)
-
+CAR_INTERFACE_IMPL(CCertificationRequest, Object, ICertificationRequest)
 CCertificationRequest::CCertificationRequest()
 {}
 
-CCertificationRequest::CCertificationRequest(
+ECode CCertificationRequest::constructor(
     /* [in] */ ICertificationRequestInfo* info,
     /* [in] */ IAlgorithmIdentifier* algId,
     /* [in] */ ArrayOf<Byte>* signature,
@@ -245,6 +109,7 @@ CCertificationRequest::CCertificationRequest(
 {
     constructor(info, algId, signature);
     mEncoding = encoding;
+    return NOERROR;
 }
 
 ECode CCertificationRequest::GetInfo(
@@ -272,11 +137,8 @@ ECode CCertificationRequest::GetEncoded(
 {
     VALIDATE_NOT_NULL(encoded)
     if (mEncoding == NULL) {
-        AutoPtr<ICertificationRequestHelper> helper;
-        CCertificationRequestHelper::AcquireSingleton((ICertificationRequestHelper**)*helper);
-        AutoPtr<IASN1Sequence> seq;
-        helper->GetASN1((IASN1Sequence**)&seq);
-        seq->Encode(this, (ArrayOf<Byte>**)&mEncoding);
+        AutoPtr<IASN1Sequence> seq = ASN1;
+        IASN1Type::Probe(seq)->Encode(this->Probe(EIID_IInterface), (ArrayOf<Byte>**)&mEncoding);
     }
     *encoded = mEncoding;
     REFCOUNT_ADD(*encoded)

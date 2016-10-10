@@ -1,170 +1,42 @@
 
 #include "CCertificationRequestInfo.h"
-#include <cmdef.h>
-#include <elastos/StringBuilder.h>
+#include "Elastos.CoreLibrary.Extensions.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "CASN1Integer.h"
+#include "CASN1SetOf.h"
+#include "CASN1Implicit.h"
+// #include "CName.h"
+#include "CSubjectPublicKeyInfoHelper.h"
+// #include "CAttributeTypeAndValueHelper.h"
+#include "StringBuilder.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::IArrayOf;
 using Elastos::Core::StringBuilder;
-using Org::Apache::Harmony::Security::Asn1::CASN1IntegerHelper;
-using Org::Apache::Harmony::Security::Asn1::IASN1IntegerHelper;
-using Org::Apache::Harmony::Security::Asn1::IASN1SetOf;
+using Elastos::Security::IPublicKey;
+using Elastos::Utility::Logging::Logger;
+using Elastosx::Security::Auth::X500::IX500Principal;
+using Org::Apache::Harmony::Security::Asn1::CASN1Integer;
 using Org::Apache::Harmony::Security::Asn1::CASN1SetOf;
-using Org::Apache::Harmony::Security::Asn1::IASN1Implicit;
 using Org::Apache::Harmony::Security::Asn1::CASN1Implicit;
-using Org::Apache::Harmony::Security::X501::CNameHelper;
-using Org::Apache::Harmony::Security::X501::INameHelper;
+using Org::Apache::Harmony::Security::Asn1::IASN1SetOf;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::Asn1::IASN1SequenceOf;
+using Org::Apache::Harmony::Security::Asn1::IASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::IASN1Implicit;
+// using Org::Apache::Harmony::Security::X501::CName;
+// using Org::Apache::Harmony::Security::X501::CAttributeTypeAndValueHelper;
+using Org::Apache::Harmony::Security::X501::IAttributeTypeAndValueHelper;
+using Org::Apache::Harmony::Security::X501::IName;
 using Org::Apache::Harmony::Security::X509::CSubjectPublicKeyInfoHelper;
 using Org::Apache::Harmony::Security::X509::ISubjectPublicKeyInfoHelper;
-using Org::Apache::Harmony::Security::X501::CAttributeTypeAndValueHelper;
-using Org::Apache::Harmony::Security::X501::IAttributeTypeAndValueHelper;
-using Elastos::Core::IArrayOf;
+using Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier;
 
 namespace Org {
 namespace Apache {
 namespace Harmony {
 namespace Security {
 namespace Pkcs10 {
-
-CAR_INTERFACE_IMPL(CCertificationRequestInfo::ASN1SequenceDerived, IASN1Sequence)
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::GetId(
-    /* [out] */ Int32* id)
-{
-    return ASN1Sequence::GetId(id);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::GetConstrId(
-    /* [out] */ Int32* constrId)
-{
-    return ASN1Sequence::GetConstrId(constrId);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::Decode(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Sequence::Decode(encoded, object);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::DecodeEx(
-    /* [in] */ ArrayOf<Byte>* encoded,
-    /* [in] */ Int32 offset,
-    /* [in] */ Int32 encodingLen,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Sequence::DecodeEx(encoded, offset, encodingLen, object);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::DecodeEx2(
-    /* [in] */ IInputStream* is,
-    /* [out] */ IInterface** object)
-{
-    return ASN1Sequence::DecodeEx2(is, object);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::Verify(
-    /* [in] */ ArrayOf<Byte>* encoded)
-{
-    return ASN1Sequence::Verify(encoded);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::VerifyEx(
-    /* [in] */ IInputStream* is)
-{
-    return ASN1Sequence::VerifyEx(is);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::Encode(
-    /* [in] */ IInterface* object,
-    /* [out, callee] */ ArrayOf<Byte>** encode)
-{
-    return ASN1Sequence::Encode(object, encode);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::DecodeEx3(
-    /* [in] */ IBerInputStream* bis,
-    /* [out] */ IInterface** object)
-{
-    bis->ReadSequence(this);
-
-    if (((CBerInputStream*)bis)->mIsVerify) {
-        return NOERROR;
-    }
-    return GetDecodedObject(bis, object);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::CheckTag(
-    /* [in] */ Int32 identifier,
-    /* [out] */ Boolean* checkTag)
-{
-    return ASN1Sequence::CheckTag(identifier, checkTag);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::EncodeASN(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return ASN1Sequence::EncodeASN(bos);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::EncodeContent(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return bos->EncodeSequence(this);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::SetEncodingContent(
-    /* [in] */ IBerOutputStream* bos)
-{
-    return bos->GetSequenceLength(this);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::GetEncodedLength(
-    /* [in] */ IBerOutputStream* bos,
-    /* [out] */ Int32* length)
-{
-    return ASN1Sequence::GetEncodedLength(bos, length);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::ToString(
-    /* [out] */ String* result)
-{
-    return ASN1Sequence::ToString(result);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::SetType(
-/* [in] */ ArrayOf<IASN1Type *>* type)
-{
-    return ASN1Sequence::SetType(type);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::GetType(
-    /* [out, callee] */ ArrayOf<IASN1Type *>** type)
-{
-    return ASN1Sequence::GetType(type);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::SetOptional(
-    /* [in] */ ArrayOf<Boolean>* optional)
-{
-    return ASN1Sequence::SetOptional(optional);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::GetOptional(
-    /* [out, callee] */ ArrayOf<Boolean>** optional)
-{
-    return ASN1Sequence::GetOptional(optional);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::SetDefault(
-    /* [in] */ ArrayOf<IInterface *>* def)
-{
-    return ASN1Sequence::SetDefault(def);
-}
-
-ECode CCertificationRequestInfo::ASN1SequenceDerived::GetDefault(
-    /* [out, callee] */ ArrayOf<IInterface *>** def)
-{
-    return ASN1Sequence::GetDefault(def);
-}
 
 ECode CCertificationRequestInfo::ASN1SequenceDerived::GetDecodedObject(
     /* [in] */ IBerInputStream* bis,
@@ -174,12 +46,10 @@ ECode CCertificationRequestInfo::ASN1SequenceDerived::GetDecodedObject(
     AutoPtr<IInterface> content;
     bis->GetContent((IInterface**)&content);
     AutoPtr<IArrayOf> values = IArrayOf::Probe(content);
-    AutoPtr<IASN1IntegerHelper> helper;
-    CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
     AutoPtr<IInterface> tmp;
     values->Get(0, (IInterface**)&tmp);
     Int32 arg1;
-    helper->ToIntValue(tmp, &val);
+    CASN1Integer::ToIntValue(tmp, &arg1);
     tmp = NULL;
     values->Get(1, (IInterface**)&tmp);
     AutoPtr<IName> arg2 = IName::Probe(tmp);
@@ -191,8 +61,11 @@ ECode CCertificationRequestInfo::ASN1SequenceDerived::GetDecodedObject(
     AutoPtr<IList> arg4 = IList::Probe(tmp);
     AutoPtr<ArrayOf<Byte> > arg5;
     bis->GetEncoded((ArrayOf<Byte>**)&arg5);
-    *object = new CCertificationRequestInfo(arg1, arg2, arg3, arg4, arg5);
-    REFCOUNT_ADD(*object)
+
+    AutoPtr<ICertificationRequestInfo> cri;
+    CCertificationRequestInfo::New(arg1, arg2, arg3, arg4, arg5, (ICertificationRequestInfo**)&cri);
+    *object = cri;
+    REFCOUNT_ADD(*object);
     return NOERROR;
 }
 
@@ -203,67 +76,69 @@ ECode CCertificationRequestInfo::ASN1SequenceDerived::GetValues(
     AutoPtr<ICertificationRequestInfo> certReqInfo = ICertificationRequestInfo::Probe(object);
     Int32 ver;
     certReqInfo->GetVersion(&ver);
-    AutoPtr<IASN1IntegerHelper> helper;
-    CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
     AutoPtr<IInterface> val;
-    helper->FromIntValue(ver, (IInterface**)&val);
+    CASN1Integer::FromIntValue(ver, (IInterface**)&val);
     values->Set(0, val);
     AutoPtr<IName> name;
     certReqInfo->GetSubject((IName**)&name);
     values->Set(1, name.Get());
-    AutoPtr<ISubjectPublicKeyInfo> info;
-    certReqInfo->GetSubjectPublicKeyInfo((ISubjectPublicKeyInfo**)&info);
+    AutoPtr<ISubjectPublicKeyInfo> info = ((CCertificationRequestInfo*)certReqInfo.Get())->mSubjectPublicKeyInfo;
     values->Set(2, info.Get());
-    AutoPtr<IList> attributes;
-    certReqInfo->GetAttributes((IList**)&attributes);
-    return values->Set(3, attributes.Get());
+    AutoPtr<IList> attributes = ((CCertificationRequestInfo*)certReqInfo.Get())->mAttributes;
+    values->Set(3, attributes.Get());
+    return NOERROR;
 }
 
-CCertificationRequestInfo::ASN1SequenceDerived::ASN1SequenceDerived(
+ECode CCertificationRequestInfo::ASN1SequenceDerived::constructor(
     /* [in] */ ArrayOf<IASN1Type *>* type)
 {
-    ASN1Sequence::Init(type);
+    return ASN1Sequence::constructor(type);
 }
+
+CCertificationRequestInfo::ASN1SequenceDerived::ASN1SequenceDerived()
+{}
 
 AutoPtr<IASN1Sequence> CCertificationRequestInfo::ASN1 = InitStatic();
 
 AutoPtr<IASN1Sequence> CCertificationRequestInfo::InitStatic()
 {
-    AutoPtr<IASN1Sequence> ret;
-    AutoPtr<IASN1IntegerHelper> helper;
-    CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
     AutoPtr<IASN1Integer> instance;
-    helper->GetInstance((IASN1Integer**)&instance);
-    AutoPtr<INameHelper> nh;
-    CNameHelper::AcquireSingleton((INameHelper**)&nh);
-    AutoPtr<IASN1SequenceOf> aso;
-    nh->GetASN1((IASN1SequenceOf**)&aso);
+    CASN1Integer::GetInstance((IASN1Integer**)&instance);
+
+    Logger::D("CCertificationRequestInfo", "TODO: Need CName");
+    AutoPtr<IASN1SequenceOf> aso/* = CName::ASN1*/;
     AutoPtr<ISubjectPublicKeyInfoHelper> spih;
     CSubjectPublicKeyInfoHelper::AcquireSingleton((ISubjectPublicKeyInfoHelper**)&spih);
     AutoPtr<IASN1Sequence> as;
     spih->GetASN1((IASN1Sequence**)&as);
     AutoPtr<IAttributeTypeAndValueHelper> atvh;
-    CAttributeTypeAndValueHelper::AcquireSingleton((IAttributeTypeAndValueHelper**)&atvh);
+    Logger::D("CCertificationRequestInfo", "TODO: Need CAttributeTypeAndValueHelper");
+    // CAttributeTypeAndValueHelper::AcquireSingleton((IAttributeTypeAndValueHelper**)&atvh);
     AutoPtr<IASN1Sequence> asn1Seq;
-    atvh->GetASN1Sequence((IASN1Sequence**)&asn1Seq);
+    if (atvh != NULL) {
+        atvh->GetASN1((IASN1Sequence**)&asn1Seq);
+    }
     AutoPtr<IASN1SetOf> asn1SetOf;
-    CASN1SetOf::New(asn1Seq.Get(), (IASN1SetOf**)&asn1SetOf);
+    CASN1SetOf::New(IASN1Type::Probe(asn1Seq), (IASN1SetOf**)&asn1SetOf);
     AutoPtr<IASN1Implicit> asn1Imp;
-    CASN1Implicit::New(0, asn1SetOf.Get(), (IASN1Implicit**)&asn1Imp);
+    CASN1Implicit::New(0, IASN1Type::Probe(asn1SetOf), (IASN1Implicit**)&asn1Imp);
     AutoPtr<ArrayOf<IASN1Type*> > seq = ArrayOf<IASN1Type*>::Alloc(4);
-    seq->Set(0, instance.Get());
-    seq->Set(1, aso.Get());
-    seq->Set(2, as.Get());
-    seq->Set(3, asn1Imp.Get());
-    ret = new ASN1SequenceDerived(seq);
+    seq->Set(0, IASN1Type::Probe(instance));
+    seq->Set(1, IASN1Type::Probe(aso));
+    seq->Set(2, IASN1Type::Probe(as));
+    seq->Set(3, IASN1Type::Probe(asn1Imp));
+    AutoPtr<ASN1SequenceDerived> ret = new ASN1SequenceDerived();
+    ret->constructor(seq);
     return ret;
 }
 
-CAR_OBJECT_IMPL(CCertificationRequestInfo)
+CAR_OBJECT_IMPL(CCertificationRequestInfo);
+CAR_INTERFACE_IMPL(CCertificationRequestInfo, Object, ICertificationRequestInfo);
+CCertificationRequestInfo::CCertificationRequestInfo()
+    : mVersion(0)
+{}
 
-CAR_INTERFACE_IMPL(CCertificationRequestInfo, Object, ICertificationRequestInfo)
-
-CCertificationRequestInfo::CCertificationRequestInfo(
+ECode CCertificationRequestInfo::constructor(
     /*[in] */ Int32 version,
     /*[in] */ IName* subject,
     /*[in] */ ISubjectPublicKeyInfo* subjectPublicKeyInfo,
@@ -275,6 +150,7 @@ CCertificationRequestInfo::CCertificationRequestInfo(
     mSubjectPublicKeyInfo = subjectPublicKeyInfo;
     mAttributes = attributes;
     mEncoding = encoding;
+    return NOERROR;
 }
 
 ECode CCertificationRequestInfo::GetSubject(
@@ -299,7 +175,7 @@ ECode CCertificationRequestInfo::GetEncoded(
 {
     VALIDATE_NOT_NULL(encoded)
     if (mEncoding == NULL) {
-        ASN1->Encode(this, (ArrayOf<Byte>**)&mEncoding);
+        IASN1Type::Probe(ASN1)->Encode(this->Probe(EIID_IInterface), (ArrayOf<Byte>**)&mEncoding);
     }
     *encoded = mEncoding;
     REFCOUNT_ADD(*encoded)
@@ -311,34 +187,34 @@ ECode CCertificationRequestInfo::ToString(
 {
     VALIDATE_NOT_NULL(str)
     StringBuilder res;
-    res.AppendCStr("-- CertificationRequestInfo:");
-    res.AppendCStr("\n version: ");
-    res.AppendInt32(mVersion);
-    res.AppendCStr("\n subject: ");
+    res.Append("-- CertificationRequestInfo:");
+    res.Append("\n version: ");
+    res.Append(mVersion);
+    res.Append("\n subject: ");
     String name;
     mSubject->GetName(IX500Principal::CANONICAL, &name);
-    res.AppendString(name);
+    res.Append(name);
 
-    res.AppendCStr("\n subjectPublicKeyInfo: ");
-    res.AppendCStr("\n\t algorithm: ");
+    res.Append("\n subjectPublicKeyInfo: ");
+    res.Append("\n\t algorithm: ");
     AutoPtr<IAlgorithmIdentifier> ai;
     mSubjectPublicKeyInfo->GetAlgorithmIdentifier((IAlgorithmIdentifier**)&ai);
     String algo;
     ai->GetAlgorithm(&algo);
-    res.AppendString(algo);
-    res.AppendCStr("\n\t public key: ");
+    res.Append(algo);
+    res.Append("\n\t public key: ");
     AutoPtr<IPublicKey> pk;
     mSubjectPublicKeyInfo->GetPublicKey((IPublicKey**)&pk);
-    res.AppendObject(pk.Get());
-    res.AppendCStr("\n attributes: ");
+    res.Append(IObject::Probe(pk));
+    res.Append("\n attributes: ");
     if (mAttributes != NULL) {
         String strTmp;
         IObject::Probe(mAttributes.Get())->ToString(&strTmp);
-        res.AppendString(strTmp);
+        res.Append(strTmp);
     } else {
-        res.AppendCStr("none");
+        res.Append("none");
     }
-    res.AppendCStr("\n-- CertificationRequestInfo End\n");
+    res.Append("\n-- CertificationRequestInfo End\n");
     return res.ToString(str);
 }
 
@@ -351,7 +227,7 @@ ECode CCertificationRequestInfo::GetAttributes(
     return NOERROR;
 }
 
-CARAPI GetSubjectPublicKeyInfo(
+ECode CCertificationRequestInfo::GetSubjectPublicKeyInfo(
     /* [out] */ ISubjectPublicKeyInfo** info)
 {
     VALIDATE_NOT_NULL(info)

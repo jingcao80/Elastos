@@ -10,13 +10,15 @@ INCLUDES += $(PREBUILD_INC)/sys;
 INCLUDES += ../../../../../corelibrary
 INCLUDES += $(MAKEDIR)/../../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/security
 INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security
 INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/asn1
 INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/utils
 
-#SOURCES = AlgNameMapper.cpp
+SOURCES = AlgNameMapper.cpp
 #SOURCES += CAlgNameMapperHelper.cpp
 #SOURCES += CArrayHelper.cpp
 SOURCES += CJarUtils.cpp
-#SOURCES += CObjectIdentifierInUtils.cpp
+SOURCES += CObjectIdentifierInUtils.cpp
 #SOURCES += CObjectIdentifierInUtilsHelper.cpp

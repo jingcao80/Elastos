@@ -3,10 +3,15 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PKCS10_CCERTIFICATIONREQUESTINFO_H__
 
 #include "_Org_Apache_Harmony_Security_Pkcs10_CCertificationRequestInfo.h"
-#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include "ASN1Sequence.h"
 
-using Elastos::Core::Object;
+using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
 using Org::Apache::Harmony::Security::X501::IName;
+using Org::Apache::Harmony::Security::X509::ISubjectPublicKeyInfo;
+using Elastos::Utility::IList;
 
 namespace Org {
 namespace Apache {
@@ -18,46 +23,33 @@ CarClass(CCertificationRequestInfo)
     , public Object
     , public ICertificationRequestInfo
 {
-public:
+private:
     class ASN1SequenceDerived
         : public ASN1Sequence
-        , public IASN1Sequence
-        , public ElRefBase
     {
     public:
-        CAR_INTERFACE_DECL()
-        ASN1TYPE_METHODS_DECL()
-        CARAPI SetType(
-        /* [in] */ ArrayOf<IASN1Type *>* type);
+        ASN1SequenceDerived();
 
-        CARAPI GetType(
-            /* [out, callee] */ ArrayOf<IASN1Type *>** type);
-
-        CARAPI SetOptional(
-            /* [in] */ ArrayOf<Boolean>* optional);
-
-        CARAPI GetOptional(
-            /* [out, callee] */ ArrayOf<Boolean>** optional);
-
-        CARAPI SetDefault(
-            /* [in] */ ArrayOf<IInterface *>* def);
-
-        CARAPI GetDefault(
-            /* [out, callee] */ ArrayOf<IInterface *>** def);
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
 
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [in] */ ArrayOf<IInterface*>* values);
 
-        ASN1SequenceDerived(
+        CARAPI constructor(
             /* [in] */ ArrayOf<IASN1Type *>* type);
     };
 
+public:
     CAR_OBJECT_DECL()
 
     CAR_INTERFACE_DECL()
 
-    static AutoPtr<IASN1Sequence> InitStatic();
+    CCertificationRequestInfo();
+
+    static CARAPI_(AutoPtr<IASN1Sequence>) InitStatic();
 
     CARAPI GetSubject(
         /* [out] */ IName** name);
@@ -77,8 +69,7 @@ public:
     CARAPI GetSubjectPublicKeyInfo(
         /* [out] */ ISubjectPublicKeyInfo** info);
 
-private:
-    CCertificationRequestInfo(
+    CARAPI constructor(
         /*[in] */ Int32 version,
         /*[in] */ IName* subject,
         /*[in] */ ISubjectPublicKeyInfo* subjectPublicKeyInfo,

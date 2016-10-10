@@ -17,6 +17,7 @@ SOURCES += CSystemScope.cpp
 ELASTOS_LIBS += asn1/asn1.lib
 ELASTOS_LIBS += fortress/fortress.lib
 ELASTOS_LIBS += pkcs7/pkcs7.lib
+ELASTOS_LIBS += pkcs10/pkcs10.lib
 ELASTOS_LIBS += utils/utils.lib
 ELASTOS_LIBS += x509/tsp/tsp.lib
 ELASTOS_LIBS += x509/x509.lib

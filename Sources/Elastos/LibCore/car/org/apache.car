@@ -47,12 +47,16 @@ module
     merge("apache/harmony/security/fortress/ISecurityAccess.car");
     merge("apache/harmony/security/fortress/IServices.car");
 
+    merge("apache/harmony/security/pkcs10/ICertificationRequestInfo.car");
+    merge("apache/harmony/security/pkcs10/ICertificationRequest.car");
+
     merge("apache/harmony/security/pkcs7/IContentInfo.car");
     merge("apache/harmony/security/pkcs7/ISignedData.car");
     merge("apache/harmony/security/pkcs7/ISignerInfo.car");
 
     merge("apache/harmony/security/utils/IObjectIdentifier.car");
     merge("apache/harmony/security/utils/IJarUtils.car");
+    merge("apache/harmony/security/utils/IAlgNameMapperSource.car");
 
     merge("apache/harmony/security/x501/IAttributeValue.car");
     merge("apache/harmony/security/x501/IAttributeTypeAndValue.car");
@@ -336,6 +340,9 @@ module
     interface Org.Apache.Harmony.Security.Asn1.IASN1Boolean;
     interface Org.Apache.Harmony.Security.Asn1.IASN1Enumerated;
     interface Org.Apache.Harmony.Security.Asn1.IASN1Type;
+    interface Org.Apache.Harmony.Security.X501.IName;
+    interface Org.Apache.Harmony.Security.X509.IAlgorithmIdentifier;
+    interface Org.Apache.Harmony.Security.X509.ISubjectPublicKeyInfo;
     interface Org.Apache.Http.IHttpEntity;
     interface Org.Apache.Http.IHttpMessage;
     interface Org.Apache.Http.IHttpEntityEnclosingRequest;
@@ -813,6 +820,37 @@ module
         interface IASN1Constants;
     }
 
+    [deprecated]
+    class CASN1Set {
+        constructor(
+            [in] ArrayOf<IASN1Type*>* type);
+
+        interface IASN1Set;
+        interface IASN1TypeCollection;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    class CASN1SetOf {
+        constructor(
+            [in] IASN1Type* type);
+
+        interface IASN1SetOf;
+        interface IASN1ValueCollection;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
+    class CASN1UTCTime {
+        constructor();
+
+        interface IASN1UTCTime;
+        interface IASN1Time;
+        interface IASN1StringType;
+        interface IASN1Type;
+        interface IASN1Constants;
+    }
+
     } // Asn1
 
     namespace Fortress {
@@ -835,6 +873,38 @@ module
 
     } // namespace Fortress
 
+    namespace Pkcs10 {
+
+    [deprecated]
+    class CCertificationRequest {
+        constructor(
+            [in] ICertificationRequestInfo* info,
+            [in] IAlgorithmIdentifier* algId,
+            [in] ArrayOf<Byte>* signature);
+
+        constructor(
+            [in] ICertificationRequestInfo* info,
+            [in] IAlgorithmIdentifier* algId,
+            [in] ArrayOf<Byte>* signature,
+            [in] ArrayOf<Byte>* encoding);
+
+        interface ICertificationRequest;
+    }
+
+    [deprecated]
+    class CCertificationRequestInfo {
+        constructor(
+            [in] Int32 v,
+            [in] IName* subject,
+            [in] ISubjectPublicKeyInfo* subjectPublicKeyInfo,
+            [in] IList* attributes,
+            [in] ArrayOf<Byte>* encoding);
+
+        interface ICertificationRequestInfo;
+    }
+
+    } // namespace Pkcs10
+
     namespace Pkcs7 {
 
     singleton class CContentInfoHelper {
@@ -847,6 +917,19 @@ module
 
     singleton class CJarUtils {
         interface IJarUtils;
+    }
+
+    [deprecated]
+    class CObjectIdentifierInUtils {
+        constructor(
+            [in] ArrayOf<Int32>* oid);
+
+        constructor(
+            [in] ArrayOf<Int32>* oid,
+            [in] String name,
+            [in] IInterface* oidGroup);
+
+        interface Org.Apache.Harmony.Security.Utils.IObjectIdentifier;
     }
 
     } // namespace Utils
@@ -1497,6 +1580,27 @@ module
     }
 
     } // namespace X509
+
+    //namespace X501 {
+    //[deprecated]
+    //class CName {
+    //    constructor(
+    //        [in] ArrayOf<Byte>* encoding);
+
+    //    constructor(
+    //        [in] String name);
+
+    //    constructor(
+    //        [in] IList* rdn);
+
+    //    interface IName;
+    //}
+
+    //singleton class CAttributeTypeAndValueHelper {
+    //    interface IAttributeTypeAndValueHelper;
+    //}
+
+    //} // namespace X501
 
     class CPrivateKeyImpl {
         constructor(

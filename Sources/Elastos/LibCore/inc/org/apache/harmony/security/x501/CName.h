@@ -3,9 +3,11 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X501_CNAME_H__
 
 #include "_Org_Apache_Harmony_Security_X501_CName.h"
-#include <elastos/core/Object.h>
+#include "ASN1SequenceOf.h"
 
-using Elastos::Core::Object;
+using Org::Apache::Harmony::Security::Asn1::ASN1SequenceOf;
+using Org::Apache::Harmony::Security::Asn1::IASN1SequenceOf;
+using Org::Apache::Harmony::Security::Asn1::IASN1SetOf;
 
 namespace Org {
 namespace Apache {
@@ -17,6 +19,25 @@ CarClass(CName)
     , public Object
     , public IName
 {
+private:
+    class ASN1SequenceOfDerived
+        : public ASN1SequenceOf
+    {
+    public:
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* in,
+            /* [out] */ IInterface** object);
+
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [out] */ ICollection** values);
+
+        CARAPI constructor(
+            /* [in] */ IASN1SetOf* set);
+
+        ASN1SequenceOfDerived();
+    };
+
 public:
     CAR_OBJECT_DECL()
 
@@ -41,8 +62,28 @@ public:
     CARAPI constructor(
         /* [in] */ Elastos::Utility::IList * pRdn);
 
+public:
+    /**
+     * According to RFC 3280 (http://www.ietf.org/rfc/rfc3280.txt)
+     * X.501 Name structure is defined as follows:
+     *
+     * Name ::= CHOICE {
+     *     RDNSequence }
+     *
+     * RDNSequence ::= SEQUENCE OF RelativeDistinguishedName
+     *
+     * RelativeDistinguishedName ::=
+     *     SET OF AttributeTypeAndValue
+     *
+     */
+    static AutoPtr<IASN1SetOf> ASN1_RDN;
+
+    static AutoPtr<IASN1SequenceOf> ASN1;
+
 private:
-    // TODO: Add your private member variables here.
+    static CARAPI_(AutoPtr<IASN1SetOf>) InitASN1_RDN();
+
+    static CARAPI_(AutoPtr<IASN1SequenceOf>) InitASN1();
 };
 
 }

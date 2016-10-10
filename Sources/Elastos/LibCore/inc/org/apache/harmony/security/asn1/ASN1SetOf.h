@@ -2,9 +2,7 @@
 #ifndef __ORG_APACHE_HARMONY_SECURITY_ASN1_ASN1SETOF_H__
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_ASN1SETOF_H__
 
-#include <ASN1ValueCollection.h>
-
-using Elastos::Utility::ICollection;
+#include "ASN1ValueCollection.h"
 
 namespace Org {
 namespace Apache {
@@ -12,9 +10,13 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-class ASN1SetOf : public ASN1ValueCollection
+class ASN1SetOf
+    : public ASN1ValueCollection
+    , public IASN1SetOf
 {
 public:
+    CAR_INTERFACE_DECL()
+
     virtual CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** ret);
@@ -25,7 +27,7 @@ public:
     virtual CARAPI SetEncodingContent(
         /* [in] */ IBerOutputStream* bos);
 
-    CARAPI Init(
+    CARAPI constructor(
         /* [in] */ IASN1Type* type);
 };
 
