@@ -59,24 +59,49 @@ public:
   {
   friend class CMediaRouter;
 
-  private:
+  public:
       class MyAudioRoutesObserver
           : public Object
           , public IIAudioRoutesObserver
+          , public IBinder
       {
       public:
         CAR_INTERFACE_DECL()
 
-        MyAudioRoutesObserver(
-          /* [in] */ Static* owner);
+        CARAPI constructor(
+          /* [in] */ IMediaRouterStatic* owner);
 
         CARAPI DispatchAudioRoutesChanged(
           /* [in] */ IAudioRoutesInfo* newRoutes);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
       private:
         Static* mOwner;
       };
 
+      class MyStaticClient
+          : public Object
+          , public IIMediaRouterClient
+          , public IBinder
+      {
+      public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IMediaRouterStatic* owner);
+
+        CARAPI OnStateChanged();
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+      private:
+        Static* mOwner;
+      };
+
+  private:
       class MyRunnable
           : public Object
           , public IRunnable
@@ -93,22 +118,6 @@ public:
       private:
           Static* mOwner;
           AutoPtr<IAudioRoutesInfo> mNewRoutes;
-      };
-
-      class MyStaticClient
-          : public Object
-          , public IIMediaRouterClient
-      {
-      public:
-        CAR_INTERFACE_DECL()
-
-        MyStaticClient(
-            /* [in] */ Static* owner);
-
-        CARAPI OnStateChanged();
-
-      private:
-        Static* mOwner;
       };
 
   public:

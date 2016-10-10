@@ -2375,10 +2375,10 @@ ECode CContextImpl::GetSystemService(
 
     else if (IContext::MEDIA_ROUTER_SERVICE.Equals(name)) {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        // AutoPtr<IMediaRouter> obj;
-        // CMediaRouter::New(this, (IMediaRouter**)&obj);
-        // *object = obj.Get();
-        // REFCOUNT_ADD(*object);
+        AutoPtr<IMediaRouter> obj;
+        CMediaRouter::New(this, (IMediaRouter**)&obj);
+        *object = obj.Get();
+        REFCOUNT_ADD(*object);
         return NOERROR;
     }
     else if (IContext::BLUETOOTH_SERVICE.Equals(name)) {

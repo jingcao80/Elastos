@@ -9,6 +9,8 @@
 #include "elastos/droid/media/CRouteCategory.h"
 #include "elastos/droid/media/CMediaRouterRouteGroup.h"
 #include "elastos/droid/media/CMediaRouterRouteInfo.h"
+#include "elastos/droid/media/CMediaRouterStaticAudioRoutesObserver.h"
+#include "elastos/droid/media/CMediaRouterStaticClient.h"
 #include "elastos/droid/media/VolumeProvider.h"
 #include "elastos/droid/media/CMediaRouterUserRouteInfo.h"
 #include "elastos/droid/media/MediaRouterClientState.h"
@@ -44,6 +46,7 @@ using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Logger;
@@ -79,12 +82,14 @@ AutoPtr<IHandler> CMediaRouter::Static::mHandler;
 AutoPtr<IIMediaRouterClient> CMediaRouter::Static::mClient;
 CMediaRouter* CMediaRouter::Static::mOwner;
 
-CAR_INTERFACE_IMPL(CMediaRouter::Static::MyAudioRoutesObserver, Object, IIAudioRoutesObserver);
+CAR_INTERFACE_IMPL_2(CMediaRouter::Static::MyAudioRoutesObserver, Object, IIAudioRoutesObserver, IBinder);
 
-CMediaRouter::Static::MyAudioRoutesObserver::MyAudioRoutesObserver(
-    /* [in] */ Static* owner)
-    : mOwner(owner)
-{}
+ECode CMediaRouter::Static::MyAudioRoutesObserver::constructor(
+    /* [in] */ IMediaRouterStatic* owner)
+{
+    mOwner = (Static*)owner;
+    return NOERROR;
+}
 
 ECode CMediaRouter::Static::MyAudioRoutesObserver::DispatchAudioRoutesChanged(
     /* [in] */ IAudioRoutesInfo* newRoutes)
@@ -92,6 +97,14 @@ ECode CMediaRouter::Static::MyAudioRoutesObserver::DispatchAudioRoutesChanged(
     AutoPtr<MyRunnable> myRunnable = new MyRunnable(newRoutes, mOwner);
     Boolean tempState;
     return mOwner->mHandler->Post(myRunnable.Get(), &tempState);
+}
+
+ECode CMediaRouter::Static::MyAudioRoutesObserver::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMediaRouter::Static::MyAudioRoutesObserver";
+    return NOERROR;
 }
 
 //------------------------------------
@@ -117,18 +130,28 @@ ECode CMediaRouter::Static::MyRunnable::Run()
 //    CMediaRouter::Static::MyStaticClient
 //------------------------------------
 
-CAR_INTERFACE_IMPL(CMediaRouter::Static::MyStaticClient, Object, IIMediaRouterClient);
+CAR_INTERFACE_IMPL_2(CMediaRouter::Static::MyStaticClient, Object, IIMediaRouterClient, IBinder);
 
-CMediaRouter::Static::MyStaticClient::MyStaticClient(
-    /* [in] */ Static* owner)
-    : mOwner(owner)
-{}
+ECode CMediaRouter::Static::MyStaticClient::constructor(
+    /* [in] */ IMediaRouterStatic* owner)
+{
+    mOwner = (Static*)owner;
+    return NOERROR;
+}
 
 ECode CMediaRouter::Static::MyStaticClient::OnStateChanged()
 {
     AutoPtr<MyRunnable> mr = new MyRunnable(NULL, mOwner);
     Boolean flag = FALSE;
     return mHandler->Post(IRunnable::Probe(mr), &flag);
+}
+
+ECode CMediaRouter::Static::MyStaticClient::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMediaRouter::Static::MyStaticClient";
+    return NOERROR;
 }
 
 //------------------------
@@ -148,7 +171,7 @@ CMediaRouter::Static::Static(
     mOwner = (CMediaRouter*)owner;
     mAppContext = appContext;
     CAudioRoutesInfo::New((IAudioRoutesInfo**)&mCurAudioRoutesInfo);
-    mAudioRoutesObserver = new MyAudioRoutesObserver(this);
+    CMediaRouterStaticAudioRoutesObserver::New(this, (IIAudioRoutesObserver**)&mAudioRoutesObserver);
 
     AutoPtr<IResourcesHelper> resourcesHelper;
     CResourcesHelper::AcquireSingleton((IResourcesHelper**)&resourcesHelper);
@@ -471,14 +494,15 @@ ECode CMediaRouter::Static::RebindAsUser(
         mCurrentUserId = userId;
 
         // try {
-        AutoPtr<MyStaticClient> client = new MyStaticClient(this);
+        AutoPtr<IIMediaRouterClient> client;
+        CMediaRouterStaticClient::New(this, (IIMediaRouterClient**)&client);
         String packageName;
         mAppContext->GetPackageName(&packageName);
-        ECode ec = mMediaRouterService->RegisterClientAsUser(IIMediaRouterClient::Probe(client), packageName, userId);
+        ECode ec = mMediaRouterService->RegisterClientAsUser(client, packageName, userId);
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
             Slogger::E(TAG, "Unable to register media router client.");
         }
-        mClient = IIMediaRouterClient::Probe(client);
+        mClient = client;
         // } catch (RemoteException ex) {
             // Log.e(TAG, "Unable to register media router client.", ex);
         // }

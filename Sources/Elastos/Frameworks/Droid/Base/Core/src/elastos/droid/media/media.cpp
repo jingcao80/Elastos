@@ -4,6 +4,8 @@
 #include "elastos/droid/media/CMediaFocusControl.h"
 #include "elastos/droid/media/CMediaRouterClientState.h"
 #include "elastos/droid/media/CMediaRouterClientStateRouteInfo.h"
+#include "elastos/droid/media/CMediaRouterStaticAudioRoutesObserver.h"
+#include "elastos/droid/media/CMediaRouterStaticClient.h"
 #include "elastos/droid/media/CMediaSyncEvent.h"
 #include "elastos/droid/media/CPlayerRecord.h"
 #include "elastos/droid/media/CPlayerRecordRccPlaybackState.h"
@@ -63,6 +65,8 @@ CAR_OBJECT_IMPL(CTtmlRenderer)
 CAR_OBJECT_IMPL(CMediaRouterRouteInfo)
 CAR_OBJECT_IMPL(CMediaRouterUserRouteInfo)
 CAR_OBJECT_IMPL(CMediaRouterRouteGroup)
+CAR_OBJECT_IMPL(CMediaRouterStaticAudioRoutesObserver)
+CAR_OBJECT_IMPL(CMediaRouterStaticClient)
 CAR_OBJECT_IMPL(CRouteCategory)
 CAR_OBJECT_IMPL(CMediaRouterSimpleCallback)
 CAR_OBJECT_IMPL(CPlayerRecordRccPlaybackState)

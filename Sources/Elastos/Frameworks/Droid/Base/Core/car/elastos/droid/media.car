@@ -1378,6 +1378,24 @@ module
     }
 
     [local]
+    class CMediaRouterStaticAudioRoutesObserver {
+        constructor(
+            [in] IMediaRouterStatic* host);
+
+        interface IIAudioRoutesObserver;
+        interface IBinder;
+    }
+
+    [local]
+    class CMediaRouterStaticClient {
+        constructor(
+            [in] IMediaRouterStatic* host);
+
+        interface IIMediaRouterClient;
+        interface IBinder;
+    }
+
+    [local]
     class CRouteCategory {
         constructor(
             [in] ICharSequence* name,
