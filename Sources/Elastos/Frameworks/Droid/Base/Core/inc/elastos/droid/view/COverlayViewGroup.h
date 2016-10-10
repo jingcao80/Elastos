@@ -150,7 +150,7 @@ private:
      * The View for which this is an overlay. Invalidations of the overlay are redirected to
      * this host view.
      */
-    AutoPtr<IView> mHostView;
+    IView* mHostView;   // weak-ref
 
     /**
      * The set of drawables to draw when the overlay is rendered.

@@ -269,14 +269,49 @@ ECode Calculator::OnResultAnimatorListenerAdapter::OnAnimationEnd(
     mHost->mCurrentAnimator = NULL;
     return NOERROR;
 }
+
+//----------------------------------------------------------------
+//           Calculator::InnerListener
+//----------------------------------------------------------------
+
+CAR_INTERFACE_IMPL_2(Calculator::InnerListener, Object, IOnTextSizeChangeListener, IViewOnLongClickListener)
+
+Calculator::InnerListener::InnerListener(
+    /* [in] */ Calculator* host)
+    : mHost(host)
+{
+}
+
+ECode Calculator::InnerListener::OnLongClick(
+    /* [in] */ IView* iview,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnLongClick(iview, result);
+}
+
+ECode Calculator::InnerListener::OnEvaluate(
+    /* [in] */ const String& expr,
+    /* [in] */ const String& result,
+    /* [in] */ Int32 errorResourceId)
+{
+    return mHost->OnEvaluate(expr, result, errorResourceId);
+}
+
+ECode Calculator::InnerListener::OnTextSizeChanged(
+    /* [in] */ ITextView* textView,
+    /* [in] */ Float oldSize)
+{
+    return mHost->OnTextSizeChanged(textView, oldSize);
+}
+
+
 //----------------------------------------------------------------
 //           Calculator
 //----------------------------------------------------------------
+CAR_INTERFACE_IMPL_2(Calculator, Activity, IEvaluateCallback, ICalculator)
+
 Calculator::Calculator()
 {
-    mFormulaTextWatcher = new MyTextWatcher(this);
-    mFormulaOnKeyListener = new MyOnKeyListener(this);
-    mFormulaEditableFactory = new MyEditableFactory(this);
 }
 
 Calculator::~Calculator()
@@ -284,10 +319,11 @@ Calculator::~Calculator()
 
 ECode Calculator::constructor()
 {
+    mFormulaTextWatcher = new MyTextWatcher(this);
+    mFormulaOnKeyListener = new MyOnKeyListener(this);
+    mFormulaEditableFactory = new MyEditableFactory(this);
     return Activity::constructor();
 }
-
-CAR_INTERFACE_IMPL_4(Calculator, Activity, IOnTextSizeChangeListener, IEvaluateCallback, IViewOnLongClickListener, ICalculator)
 
 ECode Calculator::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
@@ -315,11 +351,11 @@ ECode Calculator::OnCreate(
 
     AutoPtr<CalculatorExpressionTokenizer> cet = new CalculatorExpressionTokenizer();
     cet->constructor(IContext::Probe(this));
-    mTokenizer = ICalculatorExpressionTokenizer::Probe(cet);
+    mTokenizer = cet.Get();
 
     AutoPtr<CalculatorExpressionEvaluator> elr = new CalculatorExpressionEvaluator();
-    elr->constructor(ICalculatorExpressionTokenizer::Probe(mTokenizer));
-    mEvaluator = ICalculatorExpressionEvaluator::Probe(elr);
+    elr->constructor(cet.Get());
+    mEvaluator = elr.Get();
 
     AutoPtr<IBundleHelper> bhl;
     CBundleHelper::AcquireSingleton((IBundleHelper**)&bhl);
@@ -341,9 +377,10 @@ ECode Calculator::OnCreate(
 
     textView->SetEditableFactory(mFormulaEditableFactory);
     textView->AddTextChangedListener(mFormulaTextWatcher);
-    IView::Probe(mFormulaEditText)->SetOnKeyListener(IViewOnKeyListener::Probe(mFormulaOnKeyListener));
-    mFormulaEditText->SetOnTextSizeChangeListener(this);
-    return mDeleteButton->SetOnLongClickListener(this);
+    IView::Probe(mFormulaEditText)->SetOnKeyListener(mFormulaOnKeyListener);
+    AutoPtr<InnerListener> listener = new InnerListener(this);
+    mFormulaEditText->SetOnTextSizeChangeListener(listener);
+    return mDeleteButton->SetOnLongClickListener(listener);
 }
 
 ECode Calculator::OnSaveInstanceState(
@@ -595,7 +632,7 @@ void Calculator::OnEquals()
         SetState(EVALUATE);
         AutoPtr<ICharSequence> cs;
         ITextView::Probe(mFormulaEditText)->GetText((ICharSequence**)&cs);
-        mEvaluator->Evaluate(cs, IEvaluateCallback::Probe(this));
+        mEvaluator->Evaluate(cs, this);
     }
 }
 
@@ -631,16 +668,16 @@ void Calculator::Reveal(
 
     // Make reveal cover the display and status bar.
     AutoPtr<IView> revealView;
-    CView::New(IContext::Probe(this), (IView**)&revealView);
-    Int32 bottom;
+    CView::New(this, (IView**)&revealView);
+    Int32 left, right, top, bottom;
     displayRect->GetBottom(&bottom);
-    revealView->SetBottom(bottom);
-    Int32 left;
     displayRect->GetLeft(&left);
-    revealView->SetLeft(left);
-    Int32 right;
     displayRect->GetRight(&right);
+
+    revealView->SetBottom(bottom);
+    revealView->SetLeft(left);
     revealView->SetRight(right);
+
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     Int32 color;
@@ -650,17 +687,15 @@ void Calculator::Reveal(
 
     AutoPtr<ArrayOf<Int32> > clearLocation = ArrayOf<Int32>::Alloc(2);
     sourceView->GetLocationInWindow(clearLocation);
-    Int32 width;
+    Int32 width, height;
     sourceView->GetWidth(&width);
-    Int32 height;
     sourceView->GetHeight(&height);
     (*clearLocation)[0] += width / 2;
     (*clearLocation)[1] += height / 2;
 
     revealView->GetLeft(&left);
-    Int32 revealCenterX = (*clearLocation)[0] - left;
-    Int32 top;
     revealView->GetTop(&top);
+    Int32 revealCenterX = (*clearLocation)[0] - left;
     Int32 revealCenterY = (*clearLocation)[1] - top;
 
     Double x1_2 = Elastos::Core::Math::Pow((Double)(left - revealCenterX), (Double)2);
@@ -703,7 +738,7 @@ void Calculator::Reveal(
     as->SetInterpolator(tip);
 
     AutoPtr<RevealAnimatorListenerAdapter> adapter = new RevealAnimatorListenerAdapter(this, groupOverlay, revealView);
-    as->AddListener(IAnimatorListener::Probe(adapter));
+    as->AddListener(adapter);
 
     mCurrentAnimator = as;
     as->Start();
@@ -717,8 +752,8 @@ void Calculator::OnClear()
         return;
     }
 
-    AutoPtr<OnClearAnimatorListenerAdapter> msal = new OnClearAnimatorListenerAdapter(this);
-    Reveal(mCurrentButton, R::color::calculator_accent_color, IAnimatorListener::Probe(msal));
+    AutoPtr<IAnimatorListener> msal = new OnClearAnimatorListenerAdapter(this);
+    Reveal(mCurrentButton, R::color::calculator_accent_color, msal);
 }
 
 void Calculator::OnError(
@@ -777,7 +812,7 @@ void Calculator::OnResult(
     AutoPtr<IValueAnimator> textColorAnimator;
     vah->OfObject(te, arr, (IValueAnimator**)&textColorAnimator);
 
-    AutoPtr<IAnimatorUpdateListener> maul = (IAnimatorUpdateListener*)new MyAnimatorUpdateListener(this);
+    AutoPtr<IAnimatorUpdateListener> maul = new MyAnimatorUpdateListener(this);
     textColorAnimator->AddUpdateListener(maul);
 
     AutoPtr<IAnimatorSet> animatorSet;
@@ -827,7 +862,7 @@ void Calculator::OnResult(
     CAccelerateDecelerateInterpolator::New((ITimeInterpolator**)&tip);
     as->SetInterpolator(tip);
     AutoPtr<OnResultAnimatorListenerAdapter> adapter = new OnResultAnimatorListenerAdapter(this, result, resultTextColor);
-    as->AddListener(IAnimatorListener::Probe(adapter));
+    as->AddListener(adapter);
 
     mCurrentAnimator = as;
     as->Start();

@@ -37,12 +37,37 @@ namespace Calculator2 {
 
 class Calculator
     : public Activity
-    , public IOnTextSizeChangeListener
     , public IEvaluateCallback
-    , public IViewOnLongClickListener
     , public ICalculator
 {
 private:
+    class InnerListener
+        : public Object
+        , public IOnTextSizeChangeListener
+        , public IViewOnLongClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerListener(
+            /* [in] */ Calculator* host);
+
+        CARAPI OnLongClick(
+            /* [in] */ IView* iview,
+            /* [out] */ Boolean* result);
+
+        CARAPI OnEvaluate(
+            /* [in] */ const String& expr,
+            /* [in] */ const String& result,
+            /* [in] */ Int32 errorResourceId);
+
+        CARAPI OnTextSizeChanged(
+            /* [in] */ ITextView* textView,
+            /* [in] */ Float oldSize);
+    private:
+        Calculator* mHost;
+    };
+
     class MyTextWatcher
         : public Object
         , public ITextWatcher

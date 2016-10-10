@@ -417,8 +417,8 @@ ECode CWindowManagerGlobal::RemoveView(
         return NOERROR;
     }
 
-    Logger::E(TAG, "Calling with view 0x%08x but the ViewAncestor"
-        " is attached to 0x%08x", view, curView.Get());
+    Logger::E(TAG, "Calling with view %s but the ViewAncestor"
+        " is attached to %s", TO_CSTR(view), TO_CSTR(curView));
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 
@@ -445,7 +445,7 @@ ECode CWindowManagerGlobal::CloseAll(
             mRoots->Get(i, (IInterface**)&temp);
             IViewRootImpl* root = IViewRootImpl::Probe(temp);
 
-            Logger::I("foo", "Force closing %d", (Int32)root);
+            Logger::I("CWindowManagerGlobal", "Force closing %p", root);
             if (who != NULL) {
                 // WindowLeaked leak = new WindowLeaked(
                 //         what + " " + who + " has leaked window "
@@ -467,16 +467,16 @@ void CWindowManagerGlobal::RemoveViewLocked(
 {
     AutoPtr<IInterface> temp;
     mRoots->Get(index, (IInterface**)&temp);
-    AutoPtr<IViewRootImpl> root = IViewRootImpl::Probe(temp);
+    IViewRootImpl* root = IViewRootImpl::Probe(temp);
     AutoPtr<IView> view;
     root->GetView((IView**)&view);
 
     if (view != NULL) {
         AutoPtr<IInputMethodManager> imm = CInputMethodManager::GetInstance();
         if (imm != NULL) {
-            temp = NULL;
-            mViews->Get(index, (IInterface**)&temp);
-            IView* v = IView::Probe(temp);
+            AutoPtr<IInterface> tempView;
+            mViews->Get(index, (IInterface**)&tempView);
+            IView* v = IView::Probe(tempView);
             AutoPtr<IBinder> binder;
             v->GetWindowToken((IBinder**)&binder);
             imm->WindowDismissed(binder);

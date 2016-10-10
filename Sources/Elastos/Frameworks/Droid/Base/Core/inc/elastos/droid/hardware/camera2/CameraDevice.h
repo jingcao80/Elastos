@@ -34,7 +34,10 @@ public:
 
     class StateListener
         : public StateCallback
+        , public ICameraDeviceStateListener
     {
+    public:
+        CAR_INTERFACE_DECL()
     };
 
 public:

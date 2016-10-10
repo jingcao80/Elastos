@@ -4,6 +4,7 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <cutils/debugger.h>
+#include <utils/CallStack.h>
 
 #include "utils/misc.h"
 #include "cutils/debugger.h"
@@ -652,6 +653,14 @@ ECode Debug::DumpNativeBacktraceToFile(
     }
 
     close(fd);
+    return NOERROR;
+}
+
+ECode Debug::DumpBacktrace()
+{
+    android::CallStack stack;
+    stack.update();
+    Slogger::I("Debug", ">> backtrace:\n%s", stack.toString("").string());
     return NOERROR;
 }
 
