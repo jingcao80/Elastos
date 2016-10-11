@@ -3,7 +3,7 @@
 #define __ELASTOS_SECURITY_KEYSTORESPI_H__
 
 #include "Elastos.CoreLibrary.Security.h"
-#include "core/Object.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::IO::IInputStream;
@@ -14,7 +14,7 @@ using Elastos::Utility::IDate;
 namespace Elastos {
 namespace Security {
 
-class KeyStoreSpi
+class ECO_PUBLIC KeyStoreSpi
     : public Object
     , public IKeyStoreSpi
 {
