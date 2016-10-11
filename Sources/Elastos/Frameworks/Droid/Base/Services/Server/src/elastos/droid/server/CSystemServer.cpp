@@ -13,6 +13,7 @@
 #include "elastos/droid/server/CLockSettingsService.h"
 #include "elastos/droid/server/CPersistentDataBlockService.h"
 #include "elastos/droid/server/CTelephonyRegistry.h"
+#include "elastos/droid/server/CTorchService.h"
 #include "elastos/droid/server/CVibratorService.h"
 #include "elastos/droid/server/CUiModeManagerService.h"
 #include "elastos/droid/server/CNsdService.h"
@@ -103,8 +104,9 @@ using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IIAssetAtlas;
 using Elastos::Droid::View::Accessibility::IIAccessibilityManager;
 using Elastos::Droid::Accounts::IIAccountManager;
-using Elastos::Droid::Hardware::Input::IIInputManager;
+using Elastos::Droid::Hardware::IITorchService;
 using Elastos::Droid::Hardware::IICmHardwareService;
+using Elastos::Droid::Hardware::Input::IIInputManager;
 using Elastos::Droid::Webkit::IWebViewFactory;
 using Elastos::Droid::Webkit::CWebViewFactory;
 using Elastos::Droid::Utility::CDisplayMetrics;
@@ -747,14 +749,13 @@ ECode SystemServer::StartOtherServices()
             ServiceManager::AddService(IContext::CLIPBOARD_SERVICE, cb.Get());
         }
 
-        // if (!disableNonCoreServices) {
-        //     try {
-        //         Slogger::I(TAG, "TorchService");
-        //         ServiceManager.addService(Context.TORCH_SERVICE, new TorchService(context));
-        //     } catch (Throwable e) {
-        //         reportWtf("starting Torch Service", e);
-        //     }
-        // }
+        if (!disableNonCoreServices) {
+            Slogger::I(TAG, "Torch Service");
+            AutoPtr<IITorchService> service;
+            ec = CTorchService::New(context, (IITorchService**)&service);
+            if (FAILED(ec)) ReportWtf("starting Torch Service", ec);
+            ServiceManager::AddService(IContext::TORCH_SERVICE, service.Get());
+        }
 
         if (!disableNetwork) {
             Slogger::I(TAG, "Network manager Service");

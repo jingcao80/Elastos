@@ -10,13 +10,20 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/core/Object.h>
+#include <camera/ICameraService.h>
 
-using Elastos::Droid::Hardware::IICameraService;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Utility::IArrayMap;
+using Elastos::Droid::Hardware::ICameraInfo;
+using Elastos::Droid::Hardware::IICameraClient;
+using Elastos::Droid::Hardware::IIProCameraCallbacks;
+using Elastos::Droid::Hardware::IICameraService;
+using Elastos::Droid::Hardware::IICameraServiceListener;
+using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
+using Elastos::Droid::Hardware::Camera2::Utils::IBinderHolder;
 using Elastos::Core::Object;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::IArrayList;
@@ -30,6 +37,135 @@ class ECO_PUBLIC CameraManager
     : public Object
     , public ICameraManager
 {
+private:
+    /**
+     * Listener for camera service death.
+     *
+     * <p>The camera service isn't supposed to die under any normal circumstances, but can be turned
+     * off during debug, or crash due to bugs.  So detect that and null out the interface object, so
+     * that the next calls to the manager can try to reconnect.</p>
+     */
+    class CameraServiceDeathRecipient
+        : public android::IBinder::DeathRecipient
+    {
+    public:
+        CameraServiceDeathRecipient(
+            /* [in] */ CameraManager* host);
+
+        virtual void binderDied(
+            /* [in] */const android::wp<android::IBinder>& who);
+
+    private:
+        CameraManager* mHost;
+    };
+
+    class CameraServiceWrapper
+        : public Object
+        , public IBinder
+        , public IICameraService
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CameraManager::CameraServiceWrapper")
+
+        ~CameraServiceWrapper();
+
+        CARAPI Init(
+            /* [in] */ android::sp<android::ICameraService>& service,
+            /* [in] */ CameraManager* host);
+
+        /**
+         * Keep up-to-date with frameworks/av/include/camera/ICameraService.h
+         */
+        CARAPI GetNumberOfCameras(
+            /* [out] */ Int32* num);
+
+        // rest of 'int' return values in this file are actually status_t
+
+        CARAPI GetCameraInfo(
+            /* [in] */ Int32 cameraId,
+            /* [in] */ ICameraInfo* info,
+            /* [out] */ Int32* result);
+
+        CARAPI Connect(
+            /* [in] */ IICameraClient* client,
+            /* [in] */ Int32 cameraId,
+            /* [in] */ const String& clientPackageName,
+            /* [in] */ Int32 clientUid,
+            // Container for an ICamera object
+            /* [in] */ IBinderHolder* device,
+            /* [out] */ Int32* result);
+
+        CARAPI ConnectPro(
+            /* [in] */ IIProCameraCallbacks* _callbacks,
+            /* [in] */ Int32 cameraId,
+            /* [in] */ const String& clientPackageName,
+            /* [in] */ Int32 clientUid,
+            // Container for an IProCameraUser object
+            /* [in] */ IBinderHolder* device,
+            /* [out] */ Int32* result);
+
+        CARAPI ConnectDevice(
+            /* [in] */ IICameraDeviceCallbacks* _callbacks,
+            /* [in] */ Int32 cameraId,
+            /* [in] */ const String& clientPackageName,
+            /* [in] */ Int32 clientUid,
+            // Container for an ICameraDeviceUser object
+            /* [in] */ IBinderHolder* device,
+            /* [out] */ Int32* result);
+
+        CARAPI AddListener(
+            /* [in] */ IICameraServiceListener* listener,
+            /* [out] */ Int32* result);
+
+        CARAPI RemoveListener(
+            /* [in] */ IICameraServiceListener* listener,
+            /* [out] */ Int32* result);
+
+        CARAPI GetCameraCharacteristics(
+            /* [in] */ Int32 cameraId,
+            /* [in] */ ICameraMetadataNative* info,
+            /* [out] */ Int32* result);
+
+        /**
+         * The java stubs for this method are not intended to be used.  Please use
+         * the native stub in frameworks/av/include/camera/ICameraService.h instead.
+         * The BinderHolder output is being used as a placeholder, and will not be
+         * well-formatted in the generated java method.
+         */
+        CARAPI GetCameraVendorTagDescriptor(
+            /* [in] */ IBinderHolder* desc,
+            /* [out] */ Int32* result);
+
+        // Writes the camera1 parameters into a single-element array.
+        CARAPI GetLegacyParameters(
+            /* [in] */ Int32 cameraId,
+            /* [in] */ ArrayOf<String>* parameters,
+            /* [out] */ Int32* result);
+
+        // Determines if a particular API version is supported; see ICameraService.h for version defines
+        CARAPI SupportsCameraApi(
+            /* [in] */ Int32 cameraId,
+            /* [in] */ Int32 apiVersion,
+            /* [out] */ Int32* result);
+
+        CARAPI ConnectLegacy(
+            /* [in] */ IICameraClient* client,
+            /* [in] */ Int32 cameraId,
+            /* [in] */ Int32 halVersion,
+            /* [in] */ const String& clientPackageName,
+            /* [in] */ Int32 clientUid,
+            // Container for an ICamera object
+            /* [in] */ IBinderHolder* device,
+            /* [out] */ Int32* result);
+
+    private:
+        CameraManager* mHost;
+        android::sp<android::ICameraService> mCameraService;
+        android::sp<android::IBinder::DeathRecipient> mDeathRecipient;
+    };
+
 public:
     class AvailabilityCallback
         : public Object
@@ -103,28 +239,6 @@ private:
         String mId;
     };
 
-    /**
-     * Listener for camera service death.
-     *
-     * <p>The camera service isn't supposed to die under any normal circumstances, but can be turned
-     * off during debug, or crash due to bugs.  So detect that and null out the interface object, so
-     * that the next calls to the manager can try to reconnect.</p>
-     */
-    class CameraServiceDeathListener
-        : public Object
-        , public IProxyDeathRecipient
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        CameraServiceDeathListener(
-            /* [in] */ CameraManager* host);
-
-        CARAPI ProxyDied();
-
-    private:
-        CameraManager* mHost;
-    };
 
     // TODO: this class needs unit tests
     // TODO: extract class into top level
@@ -195,9 +309,6 @@ private:
     private:
         // Camera ID -> Status map
         AutoPtr<IArrayMap> mDeviceStatus;
-
-        static const String TAG;
-
         CameraManager* mHost;
     };
 
@@ -205,8 +316,6 @@ public:
     CAR_INTERFACE_DECL()
 
     CameraManager();
-
-    CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -407,7 +516,7 @@ private:
 
 private:
     static const String TAG;
-    const Boolean DEBUG;
+    static const Boolean DEBUG;
 
     /**
      * This should match the ICameraService definition

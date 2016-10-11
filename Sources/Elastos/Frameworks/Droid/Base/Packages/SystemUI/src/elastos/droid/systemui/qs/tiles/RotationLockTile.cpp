@@ -26,7 +26,7 @@ ECode RotationLockTile::Callback::OnRotationLockStateChanged(
     return NOERROR;
 }
 
-RotationLockTile::constructor(
+ECode RotationLockTile::constructor(
     /* [in] */ IQSTileHost* host)
 {
     QSTile::constructor(host);

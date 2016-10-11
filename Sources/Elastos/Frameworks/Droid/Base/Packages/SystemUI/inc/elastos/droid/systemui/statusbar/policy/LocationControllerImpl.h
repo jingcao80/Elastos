@@ -34,6 +34,8 @@ public:
 
     LocationControllerImpl();
 
+    ~LocationControllerImpl();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -109,6 +111,8 @@ private:
     Boolean mAreActiveLocationRequests;
 
     AutoPtr<IArrayList> mSettingsChangeCallbacks;  /*<LocationSettingsChangeCallback*/
+    AutoPtr<IBroadcastReceiver> mLocationModeChagedReceiver;
+    AutoPtr<IBroadcastReceiver> mHighPowerRequestChagedReceiver;
 };
 
 } // namespace Policy

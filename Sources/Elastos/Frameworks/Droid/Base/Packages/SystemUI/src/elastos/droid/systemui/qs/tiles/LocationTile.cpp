@@ -1,9 +1,11 @@
 
 #include "elastos/droid/systemui/qs/tiles/LocationTile.h"
 #include "../R.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IKeyguardMonitorCallback;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_ILocationSettingsChangeCallback;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -62,6 +64,7 @@ void LocationTile::HandleClick()
 {
     Boolean wasEnabled = ((BooleanState*)mState.Get())->mValue;
     Boolean tmp = FALSE;
+    Logger::I("LocationTile", " >> SetLocationEnabled: %d", !wasEnabled);
     mController->SetLocationEnabled(!wasEnabled, &tmp);
 }
 

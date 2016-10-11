@@ -20,6 +20,7 @@
 #include "elastos/droid/database/ContentObserver.h"
 
 using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IAppOpsManagerOnOpChangedListener;
 using Elastos::Droid::App::IAppOpsManagerOnOpChangedInternalListener;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Database::IContentObserver;
@@ -66,6 +67,7 @@ CarClass(CLocationManagerService)
 private:
     class AppOpsManagerOnOpChangedInternalListener
         : public Object
+        , public IAppOpsManagerOnOpChangedListener
         , public IAppOpsManagerOnOpChangedInternalListener
     {
     public:

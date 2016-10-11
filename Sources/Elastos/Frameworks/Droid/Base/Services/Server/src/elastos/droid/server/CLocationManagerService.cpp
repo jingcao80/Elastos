@@ -27,6 +27,7 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::EIID_IAppOpsManagerOnOpChangedListener;
 using Elastos::Droid::App::EIID_IAppOpsManagerOnOpChangedInternalListener;
 using Elastos::Droid::App::EIID_IPendingIntentOnFinished;
 using Elastos::Droid::App::IAppOpsManagerOnOpChangedListener;
@@ -143,8 +144,8 @@ const AutoPtr<ILocationRequest> CLocationManagerService::DEFAULT_LOCATION_REQUES
 // CLocationManagerService::AppOpsManagerOnOpChangedInternalListener
 //=================================================================
 
-CAR_INTERFACE_IMPL(CLocationManagerService::AppOpsManagerOnOpChangedInternalListener, Object,
-                    IAppOpsManagerOnOpChangedInternalListener)
+CAR_INTERFACE_IMPL_2(CLocationManagerService::AppOpsManagerOnOpChangedInternalListener, Object,
+    IAppOpsManagerOnOpChangedInternalListener, IAppOpsManagerOnOpChangedListener)
 
 CLocationManagerService::AppOpsManagerOnOpChangedInternalListener::AppOpsManagerOnOpChangedInternalListener(
     /* [in] */ CLocationManagerService* host)
@@ -198,6 +199,7 @@ ECode CLocationManagerService::MyContentObserver::constructor(
 ECode CLocationManagerService::MyContentObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
+    Slogger::I(TAG, " >> MyContentObserver: OnChange LOCATION_PROVIDERS_ALLOWED");
     {    AutoLock syncLock(mLock);
         mHost->UpdateProvidersLocked();
     }
@@ -893,9 +895,9 @@ ECode CLocationManagerService::SystemRunning()
         mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
 
         // Monitor for app ops mode changes.
-        AutoPtr<AppOpsManagerOnOpChangedInternalListener> callback
+        AutoPtr<IAppOpsManagerOnOpChangedListener> callback
                 = new AppOpsManagerOnOpChangedInternalListener(this);
-        mAppOps->StartWatchingMode(IAppOpsManager::OP_COARSE_LOCATION, String(NULL), IAppOpsManagerOnOpChangedListener::Probe(callback));
+        mAppOps->StartWatchingMode(IAppOpsManager::OP_COARSE_LOCATION, String(NULL), callback);
 
         AutoPtr<IInterface> ss;
         mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&ss);
@@ -916,9 +918,7 @@ ECode CLocationManagerService::SystemRunning()
     sSecure->GetUriFor(ISettingsSecure::LOCATION_PROVIDERS_ALLOWED, (IUri**)&uri);
     AutoPtr<MyContentObserver> co = new MyContentObserver(this);
     co->constructor(mLocationHandler);
-    cr->RegisterContentObserver(
-            uri, TRUE,
-            co, IUserHandle::USER_ALL);
+    cr->RegisterContentObserver(uri, TRUE, co, IUserHandle::USER_ALL);
     AutoPtr<ILooper> lp;
     mLocationHandler->GetLooper((ILooper**)&lp);
     mPackageMonitor->Register(mContext, lp, TRUE);
@@ -1793,6 +1793,7 @@ void CLocationManagerService::UpdateProvidersLocked()
             changesMade = TRUE;
         }
     }
+    Logger::I(TAG, " >> UpdateProvidersLocked. changesMade: %d", changesMade);
     if (changesMade) {
         AutoPtr<IIntent> intent;
         CIntent::New(ILocationManager::PROVIDERS_CHANGED_ACTION, (IIntent**)&intent);

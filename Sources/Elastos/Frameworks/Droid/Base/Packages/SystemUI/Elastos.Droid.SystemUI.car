@@ -2825,7 +2825,7 @@ module
             interface IBroadcastReceiver;
         }
 
-        class CLocationControllerLocalBroadcastReceiver {
+        class CLocationControllerLocationModeChangedReceiver {
             constructor(
                 [in] ILocationController* controller);
 

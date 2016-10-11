@@ -554,6 +554,8 @@ public:
      */
     CARAPI DumpToLog();
 
+    android::CameraMetadata* GetNative();
+
 private:
     static CARAPI_(Boolean) InitStaticBlock();
 

@@ -536,7 +536,9 @@ status_t JMediaCodec::getImage(
 
     AutoPtr<IRect> cropRect;
     int32_t left, top, right, bottom;
-    CRect::New(left, top, right + 1, bottom + 1, (IRect**)&cropRect);
+    if (buffer->meta()->findRect("crop-rect", &left, &top, &right, &bottom)) {
+        CRect::New(left, top, right + 1, bottom + 1, (IRect**)&cropRect);
+    }
 
     AutoPtr<IMediaCodecMediaImage> image;
     CMediaCodecMediaImage::New(

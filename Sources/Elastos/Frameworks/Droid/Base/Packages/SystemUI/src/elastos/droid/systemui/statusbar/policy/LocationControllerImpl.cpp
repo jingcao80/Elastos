@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/policy/LocationControllerImpl.h"
 #include "elastos/droid/systemui/statusbar/policy/CLocationControllerBroadcastReceiver.h"
-#include "elastos/droid/systemui/statusbar/policy/CLocationControllerLocalBroadcastReceiver.h"
+#include "elastos/droid/systemui/statusbar/policy/CLocationControllerLocationModeChangedReceiver.h"
 #include "../R.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Os.h"
@@ -44,9 +44,16 @@ const Int32 LocationControllerImpl::LOCATION_STATUS_ICON_ID = R::drawable::stat_
 AutoPtr<ArrayOf<Int32> > LocationControllerImpl::mHighPowerRequestAppOpArray = InitStatic();
 
 CAR_INTERFACE_IMPL(LocationControllerImpl, Object, ILocationController)
+
 LocationControllerImpl::LocationControllerImpl()
     : mAreActiveLocationRequests(FALSE)
 {
+}
+
+LocationControllerImpl::~LocationControllerImpl()
+{
+    mContext->UnregisterReceiver(mLocationModeChagedReceiver);
+    mContext->UnregisterReceiver(mHighPowerRequestChagedReceiver);
 }
 
 ECode LocationControllerImpl::constructor(
@@ -55,19 +62,19 @@ ECode LocationControllerImpl::constructor(
     CArrayList::New((IArrayList**)&mSettingsChangeCallbacks);
     mContext = context;
 
-    AutoPtr<IIntentFilter> filter;
-    CIntentFilter::New((IIntentFilter**)&filter);
-    filter->AddAction(ILocationManager::HIGH_POWER_REQUEST_CHANGE_ACTION);
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     AutoPtr<IUserHandle> ALL;
     helper->GetALL((IUserHandle**)&ALL);
-    AutoPtr<IBroadcastReceiver> b;
-    CLocationControllerBroadcastReceiver::New(this, (IBroadcastReceiver**)&b);
 
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New((IIntentFilter**)&filter);
+    filter->AddAction(ILocationManager::HIGH_POWER_REQUEST_CHANGE_ACTION);
+    CLocationControllerBroadcastReceiver::New(this, (IBroadcastReceiver**)&mHighPowerRequestChagedReceiver);
     AutoPtr<IIntent> i;
-    context->RegisterReceiverAsUser(b, ALL, filter, String(NULL), NULL, (IIntent**)&i);
+    context->RegisterReceiverAsUser(mHighPowerRequestChagedReceiver, ALL,
+        filter, String(NULL), NULL, (IIntent**)&i);
 
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
@@ -79,14 +86,14 @@ ECode LocationControllerImpl::constructor(
 
     // Register to listen for changes in location settings.
     i = NULL;
-    AutoPtr<IIntentFilter> intentFilter;
-    CIntentFilter::New((IIntentFilter**)&intentFilter);
-    intentFilter->AddAction(ILocationManager::MODE_CHANGED_ACTION);
+    filter = NULL;
+    CIntentFilter::New((IIntentFilter**)&filter);
+    filter->AddAction(ILocationManager::MODE_CHANGED_ACTION);
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    b = NULL;
-    CLocationControllerLocalBroadcastReceiver::New(this, (IBroadcastReceiver**)&b);
-    context->RegisterReceiverAsUser(b, ALL, intentFilter, String(NULL), handler, (IIntent**)&i);
+    CLocationControllerLocationModeChangedReceiver::New(this, (IBroadcastReceiver**)&mLocationModeChagedReceiver);
+    context->RegisterReceiverAsUser(mLocationModeChagedReceiver, ALL,
+        filter, String(NULL), handler, (IIntent**)&i);
 
     // Examine the current location state and initialize the status view.
     UpdateActiveLocationRequests();
@@ -120,12 +127,14 @@ ECode LocationControllerImpl::SetLocationEnabled(
     /* [in] */ Boolean enabled,
     /* [out] */ Boolean* result)
 {
+    Slogger::I("LocationControllerImpl", " SetLocationEnabled %d", enabled);
     VALIDATE_NOT_NULL(result);
     Int32 currentUserId = 0;
     AutoPtr<IActivityManagerHelper> amHelper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
     amHelper->GetCurrentUser(&currentUserId);
     if (IsUserLocationRestricted(currentUserId)) {
+        Slogger::I("LocationControllerImpl", " location restricted for %d", currentUserId);
         *result = FALSE;
         return NOERROR;
     }

@@ -24,6 +24,7 @@ using Elastos::Droid::Hardware::Camera2::ICameraManager;
 using Elastos::Droid::Hardware::Camera2::ICameraDevice;
 using Elastos::Droid::Hardware::Camera2::ICaptureRequest;
 using Elastos::Droid::Hardware::Camera2::ICameraCaptureSession;
+using Elastos::Droid::Hardware::Camera2::ICameraCaptureSessionStateCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraCaptureSessionStateListener;
 using Elastos::Droid::Hardware::Camera2::ICameraManagerAvailabilityCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateListener;
@@ -114,6 +115,7 @@ private:
 
     class CameraCaptureSessionStateListener
         : public Object
+        , public ICameraCaptureSessionStateCallback
         , public ICameraCaptureSessionStateListener
     {
     public:
@@ -127,6 +129,15 @@ private:
 
         CARAPI OnConfigureFailed(
             /* [in] */ ICameraCaptureSession* session);
+
+        CARAPI OnReady(
+            /* [in] */ ICameraCaptureSession* session) { return NOERROR; }
+
+        CARAPI OnActive(
+            /* [in] */ ICameraCaptureSession* session) { return NOERROR; }
+
+        CARAPI OnClosed(
+            /* [in] */ ICameraCaptureSession* session) { return NOERROR; }
 
     public:
         CTorchService* mHost;
@@ -290,7 +301,7 @@ private:
 
     AutoPtr<ICameraDeviceStateListener> mTorchCameraListener;
 
-    AutoPtr<ICameraCaptureSessionStateListener> mTorchSessionListener;
+    AutoPtr<ICameraCaptureSessionStateCallback> mTorchSessionListener;
 
     AutoPtr<ICameraManagerAvailabilityCallback> mAvailabilityCallback;
 };

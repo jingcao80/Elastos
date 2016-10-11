@@ -136,10 +136,10 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    FlashlightController(
-        /* [in] */ IContext* mContext);
+    FlashlightController();
 
-    CARAPI Initialize();
+    CARAPI constructor(
+        /* [in] */ IContext* mContext);
 
     /*synchronized*/ CARAPI SetFlashlight(
         /* [in] */ Boolean enabled);

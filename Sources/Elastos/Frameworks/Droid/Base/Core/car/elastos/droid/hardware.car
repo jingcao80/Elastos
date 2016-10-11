@@ -548,8 +548,6 @@ module
 
         [local]
         class CCameraManager {
-            constructor();
-
             constructor(
                 [in] IContext* context);
 

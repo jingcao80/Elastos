@@ -134,7 +134,8 @@ void FlashlightTile::HandleUpdateState(
 
     // Always show the tile when the flashlight is or was recently on. This is needed because
     // the camera is not available while it is being used for the flashlight.
-    state->mVisible = mWasLastOn != 0 || (mFlashlightController->IsAvailable(&tmp), tmp);
+    //TODO state->mVisible = mWasLastOn != 0 || (mFlashlightController->IsAvailable(&tmp), tmp);
+    state->mVisible = 1;
 
     AutoPtr<IContext> ctx;
     mHost->GetContext((IContext**)&ctx);

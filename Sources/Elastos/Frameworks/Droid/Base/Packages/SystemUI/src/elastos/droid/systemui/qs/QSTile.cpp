@@ -462,7 +462,6 @@ String QSTile::ComposeChangeAnnouncement()
 void QSTile::HandleShowDetail(
     /* [in] */ Boolean show)
 {
-    Logger::I(TAG, " >> HandleShowDetail: %d", show);
     if (mCallback != NULL) {
         mCallback->OnShowDetail(show);
     }
@@ -471,7 +470,6 @@ void QSTile::HandleShowDetail(
 void QSTile::HandleToggleStateChanged(
     /* [in] */ Boolean state)
 {
-    Logger::I(TAG, " >> HandleToggleStateChanged: %d", state);
     if (mCallback != NULL) {
         mCallback->OnToggleStateChanged(state);
     }

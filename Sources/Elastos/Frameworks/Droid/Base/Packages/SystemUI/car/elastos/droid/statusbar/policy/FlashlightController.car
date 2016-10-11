@@ -31,7 +31,6 @@ module
      */
     [local]
     interface IFlashlightController {
-        Initialize();
 
         SetFlashlight(
             [in] Boolean enabled);

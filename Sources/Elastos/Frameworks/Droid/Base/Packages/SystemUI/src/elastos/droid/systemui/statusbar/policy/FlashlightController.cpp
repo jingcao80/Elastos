@@ -10,8 +10,6 @@
 #include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Hardware::Camera2::CameraCharacteristics;
 using Elastos::Droid::Hardware::Camera2::CaptureRequest;
@@ -50,7 +48,7 @@ namespace StatusBar {
 namespace Policy {
 
 const String FlashlightController::TAG("FlashlightController");
-const Boolean FlashlightController::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean FlashlightController::DEBUG = TRUE;
 const Int32 FlashlightController::DISPATCH_ERROR = 0;
 const Int32 FlashlightController::DISPATCH_OFF = 1;
 const Int32 FlashlightController::DISPATCH_AVAILABILITY_CHANGED = 2;
@@ -178,13 +176,19 @@ void FlashlightController::AvailabilityCallback::SetCameraAvailable(
 }
 
 CAR_INTERFACE_IMPL(FlashlightController, Object, IFlashlightController)
-FlashlightController::FlashlightController(
+
+FlashlightController::FlashlightController()
+    : mFlashlightEnabled(FALSE)
+    , mCameraAvailable(FALSE)
+{
+}
+
+ECode FlashlightController::constructor(
     /* [in] */ IContext* mContext)
 {
     CArrayList::New(1, (IArrayList**)&mListeners);
-    mCameraListener = (ICameraDeviceStateListener*)(new CameraListener(this))->Probe(EIID_ICameraDeviceStateListener);
-    mSessionListener = (ICameraCaptureSessionStateListener*)
-        (new SessionListener(this))->Probe(EIID_ICameraCaptureSessionStateListener);
+    mCameraListener = new CameraListener(this);
+    mSessionListener = new SessionListener(this);
     mUpdateFlashlightRunnable = new UpdateFlashlightRunnable(this);
     mKillFlashlightRunnable = new KillFlashlightRunnable(this);
     mAvailabilityCallback = new AvailabilityCallback(this);
@@ -192,13 +196,9 @@ FlashlightController::FlashlightController(
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::CAMERA_SERVICE, (IInterface**)&obj);
     mCameraManager = ICameraManager::Probe(obj);
-    Initialize();
-}
 
-ECode FlashlightController::Initialize()
-{
-    if(FAILED(GetCameraId(&mCameraId))) {
-        Logger::E(TAG, "Couldn't initialize.");
+    if (FAILED(GetCameraId(&mCameraId))) {
+        Logger::E(TAG, "Error: Couldn't initialize FlashlightController.");
         return NOERROR;
     }
 
@@ -212,6 +212,7 @@ ECode FlashlightController::Initialize()
 ECode FlashlightController::SetFlashlight(
     /* [in] */ Boolean enabled)
 {
+    Logger::I(TAG, " >> SetFlashlight: %d, mFlashlightEnabled: %d", enabled,  mFlashlightEnabled);
     AutoLock lock(this);
     if (mFlashlightEnabled != enabled) {
         mFlashlightEnabled = enabled;
@@ -385,20 +386,24 @@ void FlashlightController::UpdateFlashlight(
 {
     ECode ec = NOERROR;
     do {
-        Boolean enabled;
-        {    AutoLock syncLock(this);
+        Boolean enabled = FALSE;
+        {
+            AutoLock syncLock(this);
             enabled = mFlashlightEnabled && !forceDisable;
         }
+
         if (enabled) {
             if (mCameraDevice == NULL) {
                 ec = StartDevice();
                 if (FAILED(ec)) {
+                    Logger::I(TAG, " >> failed to StartDevice");
                     break;
                 }
             }
             if (mSession == NULL) {
                 ec = StartSession();
                 if (FAILED(ec)) {
+                    Logger::I(TAG, " >> failed to StartSession");
                     break;
                 }
             }
@@ -413,11 +418,13 @@ void FlashlightController::UpdateFlashlight(
                 AutoPtr<ICaptureRequest> request;
                 ec = builder->Build((ICaptureRequest**)&request);
                 if (FAILED(ec)) {
+                    Logger::I(TAG, " >> failed to Build request");
                     break;
                 }
                 Int32 v = 0;
                 ec = mSession->Capture(request, NULL, mHandler, &v);
                 if (FAILED(ec)) {
+                    Logger::I(TAG, " >> failed to Capture");
                     break;
                 }
                 mFlashlightRequest = request;
@@ -433,7 +440,7 @@ void FlashlightController::UpdateFlashlight(
     } while (0);
 
     if (FAILED(ec)) {
-        Logger::E(TAG, "Error in updateFlashlight");
+        Logger::E(TAG, "Error in updateFlashlight, ec=%08x", ec);
         HandleError();
         return;
     }

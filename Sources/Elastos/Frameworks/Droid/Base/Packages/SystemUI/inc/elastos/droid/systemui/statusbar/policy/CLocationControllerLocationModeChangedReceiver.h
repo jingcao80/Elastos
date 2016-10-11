@@ -1,7 +1,7 @@
-#ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_CLOCATIONCONTROLLERLOCALBROADCASTRECEIVER_H__
-#define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_CLOCATIONCONTROLLERLOCALBROADCASTRECEIVER_H__
+#ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_CLOCATIONMODECHANGEDRECEIVER_H__
+#define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_CLOCATIONMODECHANGEDRECEIVER_H__
 
-#include "_Elastos_Droid_SystemUI_StatusBar_Policy_CLocationControllerLocalBroadcastReceiver.h"
+#include "_Elastos_Droid_SystemUI_StatusBar_Policy_CLocationControllerLocationModeChangedReceiver.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -14,7 +14,7 @@ namespace Policy {
 
 class LocationControllerImpl;
 
-CarClass(CLocationControllerLocalBroadcastReceiver)
+CarClass(CLocationControllerLocationModeChangedReceiver)
     , public BroadcastReceiver
 {
 public:
@@ -38,4 +38,4 @@ private:
 }// namespace Droid
 }// namespace Elastos
 
-#endif //__ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_CLOCATIONCONTROLLERLOCALBROADCASTRECEIVER_H__
+#endif //__ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_CLOCATIONMODECHANGEDRECEIVER_H__

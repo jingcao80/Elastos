@@ -26,6 +26,7 @@ using Elastos::Droid::Hardware::Camera2::ICameraCharacteristics;
 using Elastos::Droid::Hardware::Camera2::EIID_ICameraDeviceStateListener;
 using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraCaptureSessionStateCallback;
+using Elastos::Droid::Hardware::Camera2::EIID_ICameraCaptureSessionStateCallback;
 using Elastos::Droid::Hardware::Camera2::CameraCharacteristics;
 using Elastos::Droid::Hardware::Camera2::ICaptureRequestBuilder;
 using Elastos::Droid::Hardware::Camera2::ICameraMetadata;
@@ -49,7 +50,7 @@ namespace Droid {
 namespace Server {
 
 const String CTorchService::TAG("CTorchService");
-const Boolean CTorchService::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean CTorchService::DEBUG = TRUE;
 
 const Int32 CTorchService::DISPATCH_ERROR = 0;
 const Int32 CTorchService::DISPATCH_STATE_CHANGE = 1;
@@ -147,7 +148,8 @@ ECode CTorchService::CameraDeviceStateListener::OnError(
 //==========================================================================================
 // CTorchService::CameraCaptureSessionStateListener::
 //==========================================================================================
-CAR_INTERFACE_IMPL(CTorchService::CameraCaptureSessionStateListener, Object, ICameraCaptureSessionStateListener)
+CAR_INTERFACE_IMPL_2(CTorchService::CameraCaptureSessionStateListener,
+    Object, ICameraCaptureSessionStateListener, ICameraCaptureSessionStateCallback)
 
 CTorchService::CameraCaptureSessionStateListener::CameraCaptureSessionStateListener(
     /* [in] */ CTorchService* host)
@@ -209,7 +211,8 @@ ECode CTorchService::CameraManagerAvailabilityCallback::SetTorchAvailable(
     /* [in] */ Boolean available)
 {
     Boolean oldAvailable;
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         oldAvailable = mHost->mTorchAvailable;
         mHost->mTorchAvailable = available;
     }
@@ -257,18 +260,16 @@ CTorchService::CTorchService()
     , mTorchCameraId(-1)
     , mOpeningCamera(FALSE)
 {
-    CRemoteCallbackList::New((IRemoteCallbackList**)&mListeners);
-
-    mTorchCameraListener = new CameraDeviceStateListener(this);
-
-    mTorchSessionListener = new CameraCaptureSessionStateListener(this);
-
-    mAvailabilityCallback = new CameraManagerAvailabilityCallback(this);
 }
 
 ECode CTorchService::constructor(
     /* [in] */ IContext* context)
 {
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mListeners);
+    mTorchCameraListener = new CameraDeviceStateListener(this);
+    mTorchSessionListener = new CameraCaptureSessionStateListener(this);
+    mAvailabilityCallback = new CameraManagerAvailabilityCallback(this);
+
     mContext = context;
     CSparseArray::New((ISparseArray**)&mCamerasInUse);
     AutoPtr<IInterface> cm;
@@ -280,11 +281,18 @@ ECode CTorchService::constructor(
 
 ECode CTorchService::Initialize()
 {
-    mTorchCameraId = StringUtils::ParseInt32(GetCameraId());
+    String cameraId = GetCameraId();
+    if (DEBUG) Logger::D(TAG, "get torch camera id %s.", cameraId.string());
 
-    if (mTorchCameraId != -1) {
-        EnsureHandler();
-        mCameraManager->RegisterAvailabilityCallback(mAvailabilityCallback, mHandler);
+    if (!cameraId.IsNull()) {
+        mTorchCameraId = StringUtils::ParseInt32(cameraId);
+        if (mTorchCameraId != -1) {
+            EnsureHandler();
+            mCameraManager->RegisterAvailabilityCallback(mAvailabilityCallback, mHandler);
+        }
+    }
+    else {
+        Logger::W(TAG, "failed to get torch camera id.");
     }
     return NOERROR;
 }
@@ -325,7 +333,8 @@ ECode CTorchService::OnCameraOpened(
         AutoPtr<BinderDeathRecipient> p = new BinderDeathRecipient(token, cameraId, this);
         proxy->LinkToDeath(p, 0);
     }
-    {    AutoLock syncLock(mCamerasInUse);
+    {
+        AutoLock syncLock(mCamerasInUse);
         AutoPtr<CameraUserRecord> p = new CameraUserRecord(token);
         mCamerasInUse->Put(cameraId, (IInterface*)(IObject*)p.Get());
     }
@@ -337,7 +346,8 @@ ECode CTorchService::OnCameraClosed(
     /* [in] */ Int32 cameraId)
 {
     if (DEBUG) Logger::D(TAG, "onCameraClosed(token=%p, cameraId=%d)", token, cameraId);
-    {    AutoLock syncLock(mCamerasInUse);
+    {
+        AutoLock syncLock(mCamerasInUse);
         RemoveCameraUserLocked(token, cameraId);
     }
     return NOERROR;
@@ -435,12 +445,11 @@ void CTorchService::StartSession()
     size->GetWidth(&width);
     size->GetHeight(&height);
     mSurfaceTexture->SetDefaultBufferSize(width, height);
-    // CSurface::New(mSurfaceTexture, (ISurface**)&mSurface);
-    AutoPtr<IArrayList> outputs;
-    CArrayList::New(1, (IArrayList**)&outputs);
+    CSurface::New(mSurfaceTexture, (ISurface**)&mSurface);
+    AutoPtr<IList> outputs;
+    CArrayList::New(1, (IList**)&outputs);
     outputs->Add(IInterface::Probe(mSurface));
-    mCameraDevice->CreateCaptureSession(IList::Probe(outputs),
-        ICameraCaptureSessionStateCallback::Probe(mTorchSessionListener), mHandler);
+    mCameraDevice->CreateCaptureSession(outputs, mTorchSessionListener, mHandler);
 }
 
 AutoPtr<ISize> CTorchService::GetSmallestSize(
@@ -450,6 +459,7 @@ AutoPtr<ISize> CTorchService::GetSmallestSize(
     mCameraManager->GetCameraCharacteristics(cameraId, (ICameraCharacteristics**)&cc);
     AutoPtr<IInterface> p;
     cc->Get(CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP, (IInterface**)&p);
+    assert(0);
     AutoPtr<ArrayOf<ISize*> > outputSizes;// = p->GetOutputSizes(SurfaceTexture.class);
     if (outputSizes == NULL || outputSizes->GetLength() == 0) {
         // throw new IllegalStateException(
@@ -490,13 +500,14 @@ String CTorchService::GetCameraId()
         c->Get(CameraCharacteristics::FLASH_INFO_AVAILABLE, (IInterface**)&p);
         Boolean flashAvailable = FALSE;
         IBoolean::Probe(p)->GetValue(&flashAvailable);
-        p = NULL;
-        c->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&p);
-        Int32 lensFacing = 0;
-        IInteger32::Probe(p)->GetValue(&lensFacing);
-        if (flashAvailable
-            && lensFacing == CameraCharacteristics::LENS_FACING_BACK) {
-            return id;
+        if (flashAvailable) {
+            p = NULL;
+            c->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&p);
+            Int32 lensFacing = 0;
+            IInteger32::Probe(p)->GetValue(&lensFacing);
+            if (lensFacing == CameraCharacteristics::LENS_FACING_BACK) {
+                return id;
+            }
         }
     }
     return String(NULL);

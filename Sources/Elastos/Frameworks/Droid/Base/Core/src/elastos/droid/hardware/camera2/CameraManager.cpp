@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/hardware/CameraInfo.h"
+#include "elastos/droid/hardware/HardwareCamera.h"
 #include "elastos/droid/hardware/camera2/CameraManager.h"
 #include "elastos/droid/hardware/camera2/CCameraCharacteristics.h"
 #include "elastos/droid/hardware/camera2/legacy/LegacyMetadataMapper.h"
@@ -22,13 +23,18 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <binder/Parcel.h>
+#include <binder/IServiceManager.h>
+#include <camera/Camera.h>
+#include <camera/CameraMetadata.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
+using Elastos::Droid::Hardware::CameraInfo;
+using Elastos::Droid::Hardware::HardwareCamera;
 using Elastos::Droid::Hardware::Camera2::CCameraCharacteristics;
 using Elastos::Droid::Hardware::Camera2::Legacy::CameraDeviceUserShim;
 using Elastos::Droid::Hardware::Camera2::Legacy::LegacyMetadataMapper;
 using Elastos::Droid::Hardware::Camera2::Legacy::ICameraDeviceUserShim;
+using Elastos::Droid::Hardware::Camera2::Impl::CameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Impl::CCameraDeviceImpl;
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraDeviceImpl;
@@ -49,6 +55,7 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::Math;
 using Elastos::Core::StringUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
@@ -56,6 +63,213 @@ namespace Elastos {
 namespace Droid {
 namespace Hardware {
 namespace Camera2 {
+
+CameraManager::CameraServiceDeathRecipient::CameraServiceDeathRecipient(
+    /* [in] */ CameraManager* host)
+    : mHost(host)
+{
+}
+
+void CameraManager::CameraServiceDeathRecipient::binderDied(
+    /* [in] */ const android::wp<android::IBinder>& who)
+{
+    AutoLock lock(mHost->mLock);
+
+    mHost->mCameraService = NULL;
+
+    // Tell listeners that the cameras are _available_, because any existing clients
+    // will have gotten disconnected. This is optimistic under the assumption that the
+    // service will be back shortly.
+    //
+    // Without this, a camera service crash while a camera is open will never signal to
+    // listeners that previously in-use cameras are now available.
+    Int32 size;
+    mHost->mDeviceIdList->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mHost->mDeviceIdList->Get(i, (IInterface**)&obj);
+        String cameraId = TO_STR(obj);
+        mHost->mServiceListener->OnStatusChangedLocked(
+                CameraManager::CameraServiceListener::STATUS_PRESENT, cameraId);
+    }
+}
+
+CAR_INTERFACE_IMPL_2(CameraManager::CameraServiceWrapper, Object, IBinder, IICameraService)
+
+CameraManager::CameraServiceWrapper::~CameraServiceWrapper()
+{
+    android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+    android::sp<android::IBinder> binder = sm->getService(android::String16(CAMERA_SERVICE_BINDER_NAME));
+    if (binder != NULL) {
+        binder->unlinkToDeath(mDeathRecipient);
+    }
+}
+
+ECode CameraManager::CameraServiceWrapper::Init(
+    /* [in] */ android::sp<android::ICameraService>& service,
+    /* [in] */ CameraManager* host)
+{
+    mDeathRecipient = new CameraServiceDeathRecipient(host);
+    mCameraService = service;
+    mCameraService->asBinder()->linkToDeath(mDeathRecipient, NULL, 0);
+    return NOERROR;
+}
+
+ECode CameraManager::CameraServiceWrapper::GetNumberOfCameras(
+    /* [out] */ Int32* num)
+{
+    VALIDATE_NOT_NULL(num)
+    *num = 0;
+
+    if (mCameraService.get() != NULL) {
+        *num = mCameraService->getNumberOfCameras();
+        return NOERROR;
+    }
+
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::GetCameraInfo(
+    /* [in] */ Int32 cameraId,
+    /* [in] */ ICameraInfo* info,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = android::BAD_VALUE;
+
+    if (mCameraService.get() != NULL) {
+        android::CameraInfo cameraInfo;
+        *result = mCameraService->getCameraInfo(cameraId, &cameraInfo);
+        if (*result == android::OK) {
+            AutoPtr<IHardwareCameraInfo> hci = new HardwareCamera::CameraInfo();
+            hci->SetFacing(cameraInfo.facing);
+            hci->SetOrientation(cameraInfo.orientation);
+            info->SetInfo(hci);
+            return NOERROR;
+        }
+    }
+
+    Slogger::E("CameraManager", "Failed to GetCameraInfo for cameraId: %d", cameraId);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::Connect(
+    /* [in] */ IICameraClient* client,
+    /* [in] */ Int32 cameraId,
+    /* [in] */ const String& clientPackageName,
+    /* [in] */ Int32 clientUid,
+    // Container for an ICamera object
+    /* [in] */ IBinderHolder* device,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::ConnectPro(
+    /* [in] */ IIProCameraCallbacks* _callbacks,
+    /* [in] */ Int32 cameraId,
+    /* [in] */ const String& clientPackageName,
+    /* [in] */ Int32 clientUid,
+    // Container for an IProCameraUser object
+    /* [in] */ IBinderHolder* device,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::ConnectDevice(
+    /* [in] */ IICameraDeviceCallbacks* _callbacks,
+    /* [in] */ Int32 cameraId,
+    /* [in] */ const String& clientPackageName,
+    /* [in] */ Int32 clientUid,
+    // Container for an ICameraDeviceUser object
+    /* [in] */ IBinderHolder* device,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::AddListener(
+    /* [in] */ IICameraServiceListener* listener,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::RemoveListener(
+    /* [in] */ IICameraServiceListener* listener,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::GetCameraCharacteristics(
+    /* [in] */ Int32 cameraId,
+    /* [in] */ ICameraMetadataNative* info,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = android::BAD_VALUE;
+
+    if (mCameraService.get() != NULL) {
+        CameraMetadataNative* wrapper = (CameraMetadataNative*)info;
+
+        *result = mCameraService->getCameraCharacteristics(cameraId, wrapper->GetNative());
+        if (*result == android::OK) {
+            return NOERROR;
+        }
+    }
+
+    Slogger::E("CameraManager", "Failed to GetCameraCharacteristics for cameraId: %d", cameraId);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::GetCameraVendorTagDescriptor(
+    /* [in] */ IBinderHolder* desc,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+// Writes the camera1 parameters into a single-element array.
+ECode CameraManager::CameraServiceWrapper::GetLegacyParameters(
+    /* [in] */ Int32 cameraId,
+    /* [in] */ ArrayOf<String>* parameters,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+// Determines if a particular API version is supported; see ICameraService.h for version defines
+ECode CameraManager::CameraServiceWrapper::SupportsCameraApi(
+    /* [in] */ Int32 cameraId,
+    /* [in] */ Int32 apiVersion,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
+
+ECode CameraManager::CameraServiceWrapper::ConnectLegacy(
+    /* [in] */ IICameraClient* client,
+    /* [in] */ Int32 cameraId,
+    /* [in] */ Int32 halVersion,
+    /* [in] */ const String& clientPackageName,
+    /* [in] */ Int32 clientUid,
+    // Container for an ICamera object
+    /* [in] */ IBinderHolder* device,
+    /* [out] */ Int32* result)
+{
+    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    return E_CAMERA_RUNTIME_EXCEPTION;
+}
 
 CAR_INTERFACE_IMPL(CameraManager::AvailabilityCallback, Object, ICameraManagerAvailabilityCallback)
 
@@ -99,49 +313,12 @@ ECode CameraManager::MyRunnableUnavailable::MyRunnableUnavailable::Run()
     return mCallback->OnCameraUnavailable(mId);
 }
 
-CameraManager::CameraServiceDeathListener::CameraServiceDeathListener(
-    /* [in] */ CameraManager* host)
-    : mHost(host)
-{
-}
-
-CAR_INTERFACE_IMPL(CameraManager::CameraServiceDeathListener, Object, IProxyDeathRecipient)
-
-ECode CameraManager::CameraServiceDeathListener::ProxyDied()
-{
-    Object& lock = mHost->mLock;
-    {    AutoLock syncLock(lock);
-        mHost->mCameraService = NULL;
-        // Tell listeners that the cameras are _available_, because any existing clients
-        // will have gotten disconnected. This is optimistic under the assumption that the
-        // service will be back shortly.
-        //
-        // Without this, a camera service crash while a camera is open will never signal to
-        // listeners that previously in-use cameras are now available.
-        Int32 size;
-        mHost->mDeviceIdList->GetSize(&size);
-        for (Int32 i = 0; i < size; i++) {
-            AutoPtr<IInterface> obj;
-            mHost->mDeviceIdList->Get(i, (IInterface**)&obj);
-            AutoPtr<ICharSequence> charObj = ICharSequence::Probe(obj);
-            String cameraId;
-            charObj->ToString(&cameraId);
-
-            mHost->mServiceListener->OnStatusChangedLocked(
-                    CameraManager::CameraServiceListener::STATUS_PRESENT, cameraId);
-        }
-    }
-    return NOERROR;
-}
-
 CAR_INTERFACE_IMPL_2(CameraManager::CameraServiceListener, Object, IICameraServiceListener, IBinder)
 
 const Int32 CameraManager::CameraServiceListener::STATUS_NOT_PRESENT = 0;
 const Int32 CameraManager::CameraServiceListener::STATUS_PRESENT = 1;
 const Int32 CameraManager::CameraServiceListener::STATUS_ENUMERATING = 2;
 const Int32 CameraManager::CameraServiceListener::STATUS_NOT_AVAILABLE = 0x80000000;
-
-const String CameraManager::CameraServiceListener::TAG("CameraServiceListener");
 
 CameraManager::CameraServiceListener::CameraServiceListener(
     /* [in] */ CameraManager* host)
@@ -249,7 +426,7 @@ ECode CameraManager::CameraServiceListener::OnStatusChangedLocked(
     }
 
     if (!ValidStatus(status)) {
-        Slogger::E(mHost->TAG, "Ignoring invalid device %s status 0x%x", id.string(), status);
+        Slogger::E(TAG, "Ignoring invalid device %s status 0x%x", id.string(), status);
         return NOERROR;
     }
 
@@ -264,7 +441,7 @@ ECode CameraManager::CameraServiceListener::OnStatusChangedLocked(
         obj->GetValue(&value);
         if(value == status) {
             if (mHost->DEBUG) {
-                Slogger::V(mHost->TAG, "Device status changed to 0x%x, which is what it already was",
+                Slogger::V(TAG, "Device status changed to 0x%x, which is what it already was",
                     status);
             }
             return NOERROR;
@@ -290,7 +467,7 @@ ECode CameraManager::CameraServiceListener::OnStatusChangedLocked(
         obj->GetValue(&value);
         if (IsAvailable(status) == IsAvailable(value)) {
             if (mHost->DEBUG) {
-                Slogger::V(mHost->TAG,
+                Slogger::V(TAG,
                         "Device status was previously available (%d), "
                         " and is now again available (%d)"
                         "so no new client visible update will be sent",
@@ -327,6 +504,7 @@ ECode CameraManager::CameraServiceListener::ToString(
 }
 
 const String CameraManager::TAG("CameraManager");
+const Boolean CameraManager::DEBUG = TRUE;
 
 const String CameraManager::CAMERA_SERVICE_BINDER_NAME("media.camera");
 const Int32 CameraManager::USE_CALLING_UID = -1;
@@ -338,21 +516,17 @@ const Int32 CameraManager::API_VERSION_2 = 2;
 CAR_INTERFACE_IMPL(CameraManager, Object, ICameraManager)
 
 CameraManager::CameraManager()
-    : DEBUG(FALSE) //Log.isLoggable(TAG, Log.DEBUG);
 {
-    CArrayMap::New((IArrayMap**)&mCallbackMap);
-    mServiceListener = new CameraServiceListener(this);
-}
-
-ECode CameraManager::constructor()
-{
-    return NOERROR;
 }
 
 ECode CameraManager::constructor(
     /* [in] */ IContext* context)
 {
-    {    AutoLock syncLock(mLock);
+    CArrayMap::New((IArrayMap**)&mCallbackMap);
+    mServiceListener = new CameraServiceListener(this);
+
+    {
+        AutoLock syncLock(mLock);
         mContext = context;
 
         ConnectCameraServiceLocked();
@@ -366,20 +540,29 @@ ECode CameraManager::GetCameraIdList(
     VALIDATE_NOT_NULL(outarr);
     *outarr = NULL;
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // ID list creation handles various known failures in device enumeration, so only
         // exceptions it'll throw are unexpected, and should be propagated upward.
         AutoPtr<IArrayList> list;
         GetOrCreateDeviceIdListLocked((IArrayList**)&list);
-        AutoPtr<ArrayOf<IInterface*> > array;
-        list->ToArray((ArrayOf<IInterface*>**)&array);
-        AutoPtr<ArrayOf<String> > outArray = ArrayOf<String>::Alloc(array->GetLength());
-        for (Int32 i = 0; i < array->GetLength(); i ++) {
-            AutoPtr<ICharSequence> cchar = ICharSequence::Probe((*array)[i]);
-            String str;
-            cchar->ToString(&str);
-            outArray->Set(i, str);
+
+        AutoPtr<ArrayOf<String> > outArray;
+        if (list != NULL) {
+            Int32 size;
+            list->GetSize(&size);
+            outArray = ArrayOf<String>::Alloc(size);
+
+            for (Int32 i = 0; i < size; i ++) {
+                AutoPtr<IInterface> obj;
+                list->Get(i, (IInterface**)&obj);
+                outArray->Set(i, Object::ToString(obj));
+            }
         }
+        else {
+            outArray = ArrayOf<String>::Alloc(0);
+        }
+
         *outarr = outArray;
         REFCOUNT_ADD(*outarr );
         return NOERROR;
@@ -417,7 +600,8 @@ ECode CameraManager::RegisterAvailabilityCallback(
 ECode CameraManager::UnregisterAvailabilityCallback(
     /* [in] */ ICameraManagerAvailabilityCallback* ccallback)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mCallbackMap->Remove(TO_IINTERFACE(ccallback));
     }
     return NOERROR;
@@ -432,7 +616,8 @@ ECode CameraManager::GetCameraCharacteristics(
 
     AutoPtr<ICameraCharacteristics> characteristics;
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IArrayList> list;
         GetOrCreateDeviceIdListLocked((IArrayList**)&list);
         Boolean result;
@@ -461,7 +646,7 @@ ECode CameraManager::GetCameraCharacteristics(
             Slogger::E(TAG, "Camera service is currently unavailable");
             return E_CAMERA_ACCESS_EXCEPTION;
         }
-        //try {
+
         ECode ec = SupportsCamera2ApiLocked(cameraId, &result);
         if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
             return ec;
@@ -680,64 +865,58 @@ ECode CameraManager::GetOrCreateDeviceIdListLocked(
             return NOERROR;
         }
 
-        //try {
         ECode ec = cameraService->GetNumberOfCameras(&numCameras);
-        //} catch(CameraRuntimeException e) {
-        if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
-            return ec;
-        }
-        //} catch (RemoteException e) {
-        if (ec == (ECode)E_REMOTE_EXCEPTION) {
-            // camera service just died - if no camera service, then no devices
+        if (FAILED(ec)) {
             *list = deviceIdList;
             REFCOUNT_ADD(*list);
-            return NOERROR;
+            return ec;
         }
-        //}
 
         AutoPtr<ICameraMetadataNative> info;
         CCameraMetadataNative::New((ICameraMetadataNative**)&info);
         for (Int32 i = 0; i < numCameras; ++i) {
             // Non-removable cameras use integers starting at 0 for their
             // identifiers
-            Boolean isDeviceSupported = FALSE;
-            //try {
             Int32 tmp;
-            ECode ec = cameraService->GetCameraCharacteristics(i, info, &tmp);
+            ec = cameraService->GetCameraCharacteristics(i, info, &tmp);
+            if (FAILED(ec)) {
+                Slogger::E(TAG, "Failed to GetCameraCharacteristics for camera %d", i);
+                return ec;
+            }
+
+            Boolean isDeviceSupported = FALSE;
             Boolean res;
-            info->IsEmpty(&res);
-            if (!res) {
+            if (info->IsEmpty(&res), !res) {
                 isDeviceSupported = TRUE;
             }
             else {
-                //throw new AssertionError("Expected to get non-empty characteristics");
-                Slogger::E(TAG, "Expected to get non-empty characteristics");
-                return E_ASSERTION_ERROR;
+                Slogger::E(TAG, "Expected to get non-empty characteristics for cameraId %d", i);
             }
-            //} catch(IllegalArgumentException  e) {
-            if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
-                // Got a BAD_VALUE from service, meaning that this
-                // device is not supported.
-            }
-            //} catch(CameraRuntimeException e) {
-            if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
-                // DISCONNECTED means that the HAL reported an low-level error getting the
-                // device info; skip listing the device.  Other errors,
-                // propagate exception onward
-                assert(0);
-                // if (e.getReason() != CameraAccessException.CAMERA_DISCONNECTED) {
-                //     throw e.asChecked();
-                // }
-            }
-            //} catch(RemoteException e) {
-            if (ec == (ECode)E_REMOTE_EXCEPTION) {
-                // Camera service died - no devices to list
-                deviceIdList->Clear();
-                *list = deviceIdList;
-                REFCOUNT_ADD(*list);
-                return NOERROR;
-            }
-            //}
+
+            // //} catch(IllegalArgumentException  e) {
+            // if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
+            //     // Got a BAD_VALUE from service, meaning that this
+            //     // device is not supported.
+            // }
+            // //} catch(CameraRuntimeException e) {
+            // if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
+            //     // DISCONNECTED means that the HAL reported an low-level error getting the
+            //     // device info; skip listing the device.  Other errors,
+            //     // propagate exception onward
+            //     assert(0);
+            //     // if (e.getReason() != CameraAccessException.CAMERA_DISCONNECTED) {
+            //     //     throw e.asChecked();
+            //     // }
+            // }
+            // //} catch(RemoteException e) {
+            // if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            //     // Camera service died - no devices to list
+            //     deviceIdList->Clear();
+            //     *list = deviceIdList;
+            //     REFCOUNT_ADD(*list);
+            //     return NOERROR;
+            // }
+            // //}
 
             if (isDeviceSupported) {
                 String str = StringUtils::ToString(i);
@@ -747,7 +926,6 @@ ECode CameraManager::GetOrCreateDeviceIdListLocked(
             else {
                 Slogger::W(TAG, "Error querying camera device %d for listing.", i);
             }
-
         }
         mDeviceIdList = deviceIdList;
     }
@@ -841,54 +1019,55 @@ ECode CameraManager::SupportsCameraApiLocked(
 ECode CameraManager::ConnectCameraServiceLocked()
 {
     mCameraService = NULL;
-    AutoPtr<IInterface> service = ServiceManager::GetService(CAMERA_SERVICE_BINDER_NAME);
-    AutoPtr<IBinder> cameraServiceBinder = IBinder::Probe(service);
 
-    if (cameraServiceBinder == NULL) {
+    android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+    android::sp<android::IBinder> binder = sm->getService(android::String16(CAMERA_SERVICE_BINDER_NAME));
+
+    if (binder == NULL) {
         // Camera service is now down, leave mCameraService as null
+        Slogger::W(TAG, "Camera service is now down");
         return NOERROR;
     }
-    //try {
-    AutoPtr<CameraServiceDeathListener> listener = new CameraServiceDeathListener(this);
-    AutoPtr<IProxy> proxy = (IProxy*)cameraServiceBinder->Probe(EIID_IProxy);
-    ECode ec = proxy->LinkToDeath(listener, /*flags*/ 0);
-    //} catch (RemoteException e) {
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        // Camera service is now down, leave mCameraService as null
-        return NOERROR;
+
+    android::sp<android::ICameraService> service = android::ICameraService::asInterface(binder);
+    if (service == NULL) {
+        Slogger::E(TAG, "Failed to get Camera service interface.");
+        return E_CAMERA_RUNTIME_EXCEPTION;
     }
-    //}
 
-    AutoPtr<IICameraService> cameraServiceRaw =IICameraService::Probe(cameraServiceBinder);
+    AutoPtr<CameraServiceWrapper> wrapper = new CameraServiceWrapper();
+    wrapper->Init(service, this);
+    mCameraService = wrapper.Get();
 
-    /**
-     * Wrap the camera service in a decorator which automatically translates return codes
-     * into exceptions.
-     */
-    AutoPtr<IInterface> obj;
-    CameraServiceBinderDecorator::NewInstance(TO_IINTERFACE(cameraServiceRaw), (IInterface**)&obj);
-    AutoPtr<IICameraService> cameraService = IICameraService::Probe(obj);
 
-    assert(0);
-    // try {
-    //     CameraServiceBinderDecorator.throwOnError(
-    //             CameraMetadataNative.nativeSetupGlobalVendorTagDescriptor());
-    // } catch (CameraRuntimeException e) {
-    //     handleRecoverableSetupErrors(e, "Failed to set up vendor tags");
+    // /**
+    //  * Wrap the camera service in a decorator which automatically translates return codes
+    //  * into exceptions.
+    //  */
+    // AutoPtr<IInterface> obj;
+    // CameraServiceBinderDecorator::NewInstance(TO_IINTERFACE(cameraServiceRaw), (IInterface**)&obj);
+    // AutoPtr<IICameraService> cameraService = IICameraService::Probe(obj);
+
+    // assert(0);
+    // // try {
+    // //     CameraServiceBinderDecorator.throwOnError(
+    // //             CameraMetadataNative.nativeSetupGlobalVendorTagDescriptor());
+    // // } catch (CameraRuntimeException e) {
+    // //     handleRecoverableSetupErrors(e, "Failed to set up vendor tags");
+    // // }
+
+    // //try {
+    // Int32 result;
+    // ec = cameraService->AddListener(IICameraServiceListener::Probe(mServiceListener), &result);
+    // mCameraService = cameraService;
+    // //} catch(CameraRuntimeException e) {
+    // if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
+    //     // Unexpected failure
+    //     // throw new IllegalStateException("Failed to register a camera service listener",
+    //     //         e.asChecked());
+    //     Slogger::E(TAG, "Failed to register a camera service listener");
+    //     return E_ILLEGAL_ARGUMENT_EXCEPTION;
     // }
-
-    //try {
-    Int32 result;
-    ec = cameraService->AddListener(IICameraServiceListener::Probe(mServiceListener), &result);
-    mCameraService = cameraService;
-    //} catch(CameraRuntimeException e) {
-    if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
-        // Unexpected failure
-        // throw new IllegalStateException("Failed to register a camera service listener",
-        //         e.asChecked());
-        Slogger::E(TAG, "Failed to register a camera service listener");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
     //} catch (RemoteException e) {
         // Camera service is now down, leave mCameraService as null
     //}

@@ -1950,7 +1950,8 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
 //                    UpdateCarrierLabelVisibility(FALSE);
     }
 
-    mFlashlightController = new FlashlightController(mContext);
+    mFlashlightController = new FlashlightController();
+    mFlashlightController->constructor(mContext);
     mKeyguardBottomArea->SetFlashlightController(mFlashlightController);
     mKeyguardBottomArea->SetPhoneStatusBar(this);
     mAccessibilityController = new AccessibilityController(mContext);

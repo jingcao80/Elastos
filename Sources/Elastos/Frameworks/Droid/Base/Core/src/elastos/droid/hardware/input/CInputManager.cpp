@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/hardware/input/CInputManager.h"
 #include "elastos/droid/hardware/input/TouchCalibration.h"
 #include "elastos/droid/hardware/input/CInputManagerInputDevicesChangedListener.h"
@@ -9,10 +10,10 @@
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/provider/Settings.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Os::CBinder;
@@ -24,7 +25,8 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::IIPowerManager;
-//using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -496,16 +498,12 @@ ECode CInputManager::GetPointerSpeed(
     /* [out] */ Int32* speed)
 {
     VALIDATE_NOT_NULL(speed);
-    assert(context);
-
-    *speed = DEFAULT_POINTER_SPEED;
-
-    // AutoPtr<IContentResolver> cr;
-    // context->GetContentResolver((IContentResolver)&cr);
-    // AutoPtr<ISettingsSystem> ss;
-    // CSettingsSystem::AcquireSingleton((ISettingsSystem**)&ss);
-    // ss->GetInt32(cr, ISettingsSystem::POINTER_SPEED, speed);
-
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    ECode ec = Settings::System::GetInt32(cr, ISettingsSystem::POINTER_SPEED, speed);
+    if (FAILED(ec)) {
+        *speed = DEFAULT_POINTER_SPEED;
+    }
     return NOERROR;
 }
 
@@ -518,12 +516,10 @@ ECode CInputManager::SetPointerSpeed(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    // AutoPtr<IContentResolver> cr;
-    // context->GetContentResolver((IContentResolver)&cr);
-    // AutoPtr<ISettingsSystem> ss;
-    // CSettingsSystem::AcquireSingleton((ISettingsSystem**)&ss);
-    // return ss->PutInt32(cr, ISettingsSystem::POINTER_SPEED, speed);
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    Boolean bval;
+    return Settings::System::PutInt32(cr, ISettingsSystem::POINTER_SPEED, speed, &bval);
 }
 
 ECode CInputManager::TryPointerSpeed(

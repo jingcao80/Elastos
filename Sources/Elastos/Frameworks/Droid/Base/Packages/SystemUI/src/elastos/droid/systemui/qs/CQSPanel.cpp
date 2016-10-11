@@ -576,7 +576,7 @@ void CQSPanel::AddTile(
     r->mTile->GetState((IQSTileState**)&s);
     callback->OnStateChanged(s);
     r->mTile->RefreshState();
-    mRecords->Add(r->Probe(EIID_IQSPanelTileRecord));
+    mRecords->Add((IQSPanelTileRecord*)r.Get());
 
     AddView(IView::Probe(r->mTileView));
 }

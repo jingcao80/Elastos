@@ -31,8 +31,6 @@
 #include <utils/String16.h>
 #include <utils/SortedVector.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::CFace;
 using Elastos::Droid::Hardware::Camera2::Params::CLensShadingMap;
@@ -51,6 +49,7 @@ using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Utility::ISize;
+using Elastos::Core::AutoLock;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
@@ -1936,19 +1935,12 @@ ECode CameraMetadataNative::CameraMetadata_getPointerThrow(
     *data = NULL;
 
     if (thiz == NULL) {
-        ALOGV("%s: Throwing java.lang.NullPointerException for null reference",
-              __FUNCTION__);
-        //jniThrowNullPointerException(env, argName);
-        Slogger::E("CameraMetadataNative::CameraMetadata_getPointerThrow", argName);
+        Slogger::E("CameraMetadataNative::CameraMetadata_getPointerThrow for null reference %s", argName);
         return E_NULL_POINTER_EXCEPTION;
     }
 
     android::CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(thiz);
     if (metadata == NULL) {
-        ALOGV("%s: Throwing java.lang.IllegalStateException for closed object",
-              __FUNCTION__);
-        // jniThrowException(env, "java/lang/IllegalStateException",
-        //                     "Metadata object was already closed");
         Slogger::E("CameraMetadataNative::CameraMetadata_getPointerThrow", "Metadata object was already closed");
         return E_ILLEGAL_STATE_EXCEPTION;;
     }
@@ -1959,9 +1951,14 @@ ECode CameraMetadataNative::CameraMetadata_getPointerThrow(
 
 Int64 CameraMetadataNative::NativeAllocate()
 {
-    ALOGV("%s", __FUNCTION__);
+    ALOGV("CameraMetadataNative::%s", __FUNCTION__);
 
     return reinterpret_cast<Int64>(new android::CameraMetadata());
+}
+
+android::CameraMetadata* CameraMetadataNative::GetNative()
+{
+    reinterpret_cast<android::CameraMetadata*>(mMetadataPtr);
 }
 
 ECode CameraMetadataNative::NativeAllocateCopy(
@@ -1971,7 +1968,7 @@ ECode CameraMetadataNative::NativeAllocateCopy(
     VALIDATE_NOT_NULL(handle);
     *handle = 0;
 
-    ALOGV("%s", __FUNCTION__);
+    ALOGV("CameraMetadataNative::%s", __FUNCTION__);
 
     android::CameraMetadata* otherMetadata;
     FAIL_RETURN(CameraMetadata_getPointerThrow(other, (android::CameraMetadata**)&otherMetadata,"other"))
@@ -1988,7 +1985,7 @@ ECode CameraMetadataNative::NativeWriteToParcel(
     /* [in] */ IParcel* parcel)
 {
     {    AutoLock syncLock(this);
-        ALOGV("%s", __FUNCTION__);
+        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
         if (metadata == NULL) {
@@ -2018,7 +2015,7 @@ ECode CameraMetadataNative::NativeReadFromParcel(
     /* [in] */ IParcel* source)
 {
     {    AutoLock syncLock(this);
-        ALOGV("%s", __FUNCTION__);
+        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
         if (metadata == NULL) {
@@ -2047,8 +2044,9 @@ ECode CameraMetadataNative::NativeReadFromParcel(
 ECode CameraMetadataNative::NativeSwap(
     /* [in] */ ICameraMetadataNative* other)
 {
-    {    AutoLock syncLock(this);
-        ALOGV("%s", __FUNCTION__);
+    {
+        AutoLock syncLock(this);
+        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
 
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
@@ -2069,8 +2067,9 @@ ECode CameraMetadataNative::NativeSwap(
 
 void CameraMetadataNative::NativeClose()
 {
-    {    AutoLock syncLock(this);
-        ALOGV("%s", __FUNCTION__);
+    {
+        AutoLock syncLock(this);
+        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
 
         android::CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(this);
 
@@ -2091,23 +2090,21 @@ ECode CameraMetadataNative::NativeIsEmpty(
     *result = FALSE;
 
     Boolean empty = FALSE;
-    {    AutoLock syncLock(this);
-        ALOGV("%s", __FUNCTION__);
+    {
+        AutoLock syncLock(this);
 
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
 
         if (metadata == NULL) {
-            ALOGW("%s: Returning early due to exception being thrown",
-                   __FUNCTION__);
+            ALOGW("CameraMetadataNative::%s: Returning early due to exception being thrown", __FUNCTION__);
             *result = TRUE; // actually throws java exc.
             return NOERROR;
         }
 
         empty = metadata->isEmpty();
 
-        ALOGV("%s: Empty returned %d, entry count was %d",
-              __FUNCTION__, empty, metadata->entryCount());
+        ALOGV("CameraMetadataNative::%s: IsEmpty returned %d, entry count was %d",__FUNCTION__, empty, metadata->entryCount());
     }
 
     *result = empty;
@@ -2122,7 +2119,7 @@ ECode CameraMetadataNative::NativeGetEntryCount(
 
     Int32 res = 0;
     {    AutoLock syncLock(this);
-        ALOGV("%s", __FUNCTION__);
+        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
 
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
@@ -2347,7 +2344,7 @@ static void* CameraMetadata_writeMetadataThread(
 ECode CameraMetadataNative::NativeDump()
 {
     {    AutoLock syncLock(this);
-        ALOGV("%s", __FUNCTION__);
+        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
         if (metadata == NULL) {
@@ -2600,7 +2597,7 @@ ECode CameraMetadataNative::NativeGetTypeFromTag(
 void CameraMetadataNative::NativeClassInit()
 {
     // // XX: Why do this separately instead of doing it in the register function?
-    // ALOGV("%s", __FUNCTION__);
+    // ALOGV("CameraMetadataNative::%s", __FUNCTION__);
 
     // field fields_to_find[] = {
     //     { CAMERA_METADATA_CLASS_NAME, "mMetadataPtr", "J", &fields.metadata_ptr },
