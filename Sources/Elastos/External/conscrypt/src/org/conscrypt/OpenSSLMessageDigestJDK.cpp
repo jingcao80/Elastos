@@ -1,6 +1,7 @@
 
 #include "_Org.Conscrypt.h"
 #include "OpenSSLMessageDigestJDK.h"
+#include "COpenSSLMessageDigestJDK.h"
 #include "NativeCrypto.h"
 
 using Elastos::Core::EIID_ICloneable;
@@ -28,8 +29,8 @@ static Int32 GetMD5_SIZE()
 Int32 MD5::SIZE = GetMD5_SIZE();
 
 MD5::MD5()
-    : OpenSSLMessageDigestJDK(EVP_MD, SIZE)
 {
+    OpenSSLMessageDigestJDK::constructor(EVP_MD, SIZE);
 }
 
 //=========================================
@@ -52,8 +53,8 @@ static Int32 GetSHA1_SIZE()
 Int32 SHA1::SIZE = GetSHA1_SIZE();
 
 SHA1::SHA1()
-    : OpenSSLMessageDigestJDK(EVP_MD, SIZE)
 {
+    OpenSSLMessageDigestJDK::constructor(EVP_MD, SIZE);
 }
 
 //=========================================
@@ -76,8 +77,8 @@ static Int32 GetSHA224_SIZE()
 Int32 SHA224::SIZE = GetSHA224_SIZE();
 
 SHA224::SHA224()
-    : OpenSSLMessageDigestJDK(EVP_MD, SIZE)
 {
+    OpenSSLMessageDigestJDK::constructor(EVP_MD, SIZE);
 }
 
 //=========================================
@@ -100,8 +101,8 @@ static Int32 GetSHA256_SIZE()
 Int32 SHA256::SIZE = GetSHA256_SIZE();
 
 SHA256::SHA256()
-    : OpenSSLMessageDigestJDK(EVP_MD, SIZE)
 {
+    OpenSSLMessageDigestJDK::constructor(EVP_MD, SIZE);
 }
 
 //=========================================
@@ -124,8 +125,8 @@ static Int32 GetSHA384_SIZE()
 Int32 SHA384::SIZE = GetSHA384_SIZE();
 
 SHA384::SHA384()
-    : OpenSSLMessageDigestJDK(EVP_MD, SIZE)
 {
+    OpenSSLMessageDigestJDK::constructor(EVP_MD, SIZE);
 }
 
 //=========================================
@@ -148,16 +149,16 @@ static Int32 GetSHA512_SIZE()
 Int32 SHA512::SIZE = GetSHA512_SIZE();
 
 SHA512::SHA512()
-    : OpenSSLMessageDigestJDK(EVP_MD, SIZE)
 {
+    OpenSSLMessageDigestJDK::constructor(EVP_MD, SIZE);
 }
 
 //=========================================
 // OpenSSLMessageDigestJDK::
 //=========================================
-CAR_INTERFACE_IMPL(OpenSSLMessageDigestJDK, Object, ICloneable)
+CAR_INTERFACE_IMPL_2(OpenSSLMessageDigestJDK, Object, IOpenSSLMessageDigestJDK, ICloneable)
 
-OpenSSLMessageDigestJDK::OpenSSLMessageDigestJDK(
+ECode OpenSSLMessageDigestJDK::constructor(
     /* [in] */ Int64 evp_md,
     /* [in] */ Int32 size)
 {
@@ -166,9 +167,10 @@ OpenSSLMessageDigestJDK::OpenSSLMessageDigestJDK(
     mSingleByte = ArrayOf<Byte>::Alloc(1);
 
     ResetContext();
+    return NOERROR;
 }
 
-OpenSSLMessageDigestJDK::OpenSSLMessageDigestJDK(
+ECode OpenSSLMessageDigestJDK::constructor(
     /* [in] */ Int64 evp_md,
     /* [in] */ Int32 size,
     /* [in] */ IOpenSSLDigestContext* ctx)
@@ -177,6 +179,7 @@ OpenSSLMessageDigestJDK::OpenSSLMessageDigestJDK(
     mSize = size;
     mCtx = ctx;
     mSingleByte = ArrayOf<Byte>::Alloc(1);
+    return NOERROR;
 }
 
 void OpenSSLMessageDigestJDK::ResetContext()
@@ -191,38 +194,47 @@ void OpenSSLMessageDigestJDK::ResetContext()
     mCtx = ctxLocal;
 }
 
-void OpenSSLMessageDigestJDK::EngineReset()
+ECode OpenSSLMessageDigestJDK::EngineReset()
 {
     ResetContext();
+    return NOERROR;
 }
 
-Int32 OpenSSLMessageDigestJDK::EngineGetDigestLength()
+ECode OpenSSLMessageDigestJDK::EngineGetDigestLength(
+    /* [out] */ Int32* len)
 {
-    return mSize;
+    VALIDATE_NOT_NULL(len)
+    *len = mSize;
+    return NOERROR;
 }
 
-void OpenSSLMessageDigestJDK::EngineUpdate(
+ECode OpenSSLMessageDigestJDK::EngineUpdate(
     /* [in] */ Byte input)
 {
     (*mSingleByte)[0] = input;
     EngineUpdate(mSingleByte, 0, 1);
+    return NOERROR;
 }
 
-void OpenSSLMessageDigestJDK::EngineUpdate(
+ECode OpenSSLMessageDigestJDK::EngineUpdate(
     /* [in] */ ArrayOf<Byte>* input,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 len)
 {
     NativeCrypto::EVP_DigestUpdate(mCtx, input, offset, len);
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<Byte> > OpenSSLMessageDigestJDK::EngineDigest()
+ECode OpenSSLMessageDigestJDK::EngineDigest(
+    /* [out, callee] */ ArrayOf<Byte>** ed)
 {
+    VALIDATE_NOT_NULL(ed)
     AutoPtr<ArrayOf<Byte> > result = ArrayOf<Byte>::Alloc(mSize);
     Int32 final = 0;
     NativeCrypto::EVP_DigestFinal(mCtx, result, 0, &final);
     ResetContext();
-    return result;
+    *ed = result;
+    return NOERROR;
 }
 
 ECode OpenSSLMessageDigestJDK::Clone(
@@ -236,7 +248,8 @@ ECode OpenSSLMessageDigestJDK::Clone(
     NativeCrypto::EVP_MD_CTX_init(ctxCopy);
     Int32 res = 0;
     NativeCrypto::EVP_MD_CTX_copy(ctxCopy, mCtx, &res);
-    AutoPtr<OpenSSLMessageDigestJDK> result = new OpenSSLMessageDigestJDK(mEvp_md, mSize, ctxCopy);
+    AutoPtr<IOpenSSLMessageDigestJDK> result;
+    COpenSSLMessageDigestJDK::New(mEvp_md, mSize, ctxCopy, (IOpenSSLMessageDigestJDK**)&result);
     *object = ICloneable::Probe(result);
     REFCOUNT_ADD(*object)
     return NOERROR;

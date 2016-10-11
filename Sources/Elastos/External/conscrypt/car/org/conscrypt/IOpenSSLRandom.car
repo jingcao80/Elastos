@@ -5,7 +5,6 @@ module
     namespace Conscrypt {
 
     interface IOpenSSLRandom {
-        SeedOpenSSLPRNGFromLinuxRNG();
     }
 
     } // namespace Conscrypt

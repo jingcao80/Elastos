@@ -3,6 +3,7 @@
 #define __ORG_CONSCRYPT_OPENSSLRSAPRIVATECRTKEY_H__
 
 #include "_Org.Conscrypt.h"
+#include "OpenSSLRSAPrivateKey.h"
 #include <elastos/core/Object.h>
 
 using Elastos::IO::IObjectInputStream;
@@ -15,18 +16,21 @@ namespace Org {
 namespace Conscrypt {
 
 class OpenSSLRSAPrivateCrtKey
-    : public Object // public OpenSSLRSAPrivateKey
+    : public OpenSSLRSAPrivateKey
     , public IRSAPrivateCrtKey
+    , public IOpenSSLRSAPrivateCrtKey
 {
 public:
-    OpenSSLRSAPrivateCrtKey(
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor(
         /* [in] */ IOpenSSLKey* key);
 
-    OpenSSLRSAPrivateCrtKey(
+    CARAPI constructor(
         /* [in] */ IOpenSSLKey* key,
         /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > >* params);
 
-    OpenSSLRSAPrivateCrtKey(
+    CARAPI constructor(
         /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec);
 
     static CARAPI GetInstance(

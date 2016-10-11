@@ -16,15 +16,18 @@ namespace Conscrypt {
 
 class OpenSSLKey
     : public Object
+    , public IOpenSSLKey
 {
 public:
-    OpenSSLKey(
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor(
         /* [in] */ Int64 ctx);
 
-    OpenSSLKey(
+    CARAPI constructor(
         /* [in] */ Int64 ctx,
         /* [in] */ IOpenSSLEngine* engine,
-        /* [in] */ String alias);
+        /* [in] */ const String& alias);
 
     /**
      * Returns the raw pointer to the EVP_PKEY context for use in JNI calls. The
@@ -64,7 +67,7 @@ public:
         /* [in] */ Int32 type);
 
     CARAPI GetSecretKey(
-        /* [in] */ String algorithm,
+        /* [in] */ const String& algorithm,
         /* [out] */ ISecretKey** result);
 
     CARAPI Finalize();

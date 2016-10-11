@@ -32,8 +32,8 @@ static Int32 GetHmacMD5_SIZE()
 Int32 HmacMD5::SIZE = GetHmacMD5_SIZE();
 
 HmacMD5::HmacMD5()
-    : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
+    OpenSSLMac::constructor(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC);
 }
 
 //=========================================
@@ -56,8 +56,8 @@ static Int32 GetHmacSHA1_SIZE()
 Int32 HmacSHA1::SIZE = GetHmacSHA1_SIZE();
 
 HmacSHA1::HmacSHA1()
-    : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
+    OpenSSLMac::constructor(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC);
 }
 
 //=========================================
@@ -80,8 +80,8 @@ static Int32 GetHmacSHA224_SIZE()
 Int32 HmacSHA224::SIZE = GetHmacSHA224_SIZE();
 
 HmacSHA224::HmacSHA224()
-    : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
+    OpenSSLMac::constructor(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC);
 }
 
 //=========================================
@@ -104,8 +104,8 @@ static Int32 GetHmacSHA256_SIZE()
 Int32 HmacSHA256::SIZE = GetHmacSHA256_SIZE();
 
 HmacSHA256::HmacSHA256()
-    : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
+    OpenSSLMac::constructor(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC);
 }
 
 //=========================================
@@ -128,8 +128,8 @@ static Int32 GetHmacSHA384_SIZE()
 Int32 HmacSHA384::SIZE = GetHmacSHA384_SIZE();
 
 HmacSHA384::HmacSHA384()
-    : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
+    OpenSSLMac::constructor(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC);
 }
 
 //=========================================
@@ -152,14 +152,16 @@ static Int32 GetHmacSHA512_SIZE()
 Int32 HmacSHA512::SIZE = GetHmacSHA512_SIZE();
 
 HmacSHA512::HmacSHA512()
-    : OpenSSLMac(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC)
 {
+    OpenSSLMac::constructor(EVP_MD, SIZE, INativeCrypto::EVP_PKEY_HMAC);
 }
 
 //=========================================
 // OpenSSLMac::
 //=========================================
-OpenSSLMac::OpenSSLMac(
+CAR_INTERFACE_IMPL(OpenSSLMac, Object, IOpenSSLMac)
+
+ECode OpenSSLMac::constructor(
     /* [in] */ Int64 evp_md,
     /* [in] */ Int32 size,
     /* [in] */ Int32 evp_pkey_type)
@@ -168,25 +170,29 @@ OpenSSLMac::OpenSSLMac(
     mSize = size;
     mEvp_pkey_type = evp_pkey_type;
     mSingleByte = ArrayOf<Byte>::Alloc(1);
+    return NOERROR;
 }
 
-Int32 OpenSSLMac::EngineGetMacLength()
+ECode OpenSSLMac::EngineGetMacLength(
+    /* [out] */ Int32* result)
 {
-    return mSize;
+    VALIDATE_NOT_NULL(result)
+    *result = mSize;
+    return NOERROR;
 }
 
-void OpenSSLMac::EngineInit(
+ECode OpenSSLMac::EngineInit(
     /* [in] */ IKey* key,
     /* [in] */ IAlgorithmParameterSpec* params)
 {
     if (ISecretKey::Probe(key) == NULL) {
         // throw new InvalidKeyException("key must be a SecretKey");
-        return;
+        return E_INVALID_KEY_EXCEPTION;
     }
 
     if (params != NULL) {
         // throw new InvalidAlgorithmParameterException("unknown parameter type");
-        return;
+        return E_INVALID_KEY_EXCEPTION;
     }
 
     if (IOpenSSLKeyHolder::Probe(key) != NULL) {
@@ -197,7 +203,7 @@ void OpenSSLMac::EngineInit(
         key->GetEncoded((ArrayOf<Byte>**)&keyBytes);
         if (keyBytes == NULL) {
             // throw new InvalidKeyException("key cannot be encoded");
-            return;
+            return E_INVALID_KEY_EXCEPTION;
         }
 
         Int64 new_mac_key = 0;
@@ -207,6 +213,7 @@ void OpenSSLMac::EngineInit(
     }
 
     ResetContext();
+    return NOERROR;
 }
 
 void OpenSSLMac::ResetContext()
@@ -227,34 +234,39 @@ void OpenSSLMac::ResetContext()
     mCtx = ctxLocal;
 }
 
-void OpenSSLMac::EngineUpdate(
+ECode OpenSSLMac::EngineUpdate(
     /* [in] */ Byte input)
 {
     (*mSingleByte)[0] = input;
-    EngineUpdate(mSingleByte, 0, 1);
+    return EngineUpdate(mSingleByte, 0, 1);
 }
 
-void OpenSSLMac::EngineUpdate(
+ECode OpenSSLMac::EngineUpdate(
     /* [in] */ ArrayOf<Byte>* input,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 len)
 {
     AutoPtr<IOpenSSLDigestContext> ctxLocal = mCtx;
     NativeCrypto::EVP_DigestUpdate(ctxLocal, input, offset, len);
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<Byte> > OpenSSLMac::EngineDoFinal()
+ECode OpenSSLMac::EngineDoFinal(
+    /* [out, callee] */ ArrayOf<Byte>** input)
 {
+    VALIDATE_NOT_NULL(input)
     AutoPtr<IOpenSSLDigestContext> ctxLocal = mCtx;
     AutoPtr<ArrayOf<Byte> > output;
     NativeCrypto::EVP_DigestSignFinal(ctxLocal, (ArrayOf<Byte>**)&output);
     ResetContext();
-    return output;
+    *input = output;
+    return NOERROR;
 }
 
-void OpenSSLMac::EngineReset()
+ECode OpenSSLMac::EngineReset()
 {
     ResetContext();
+    return NOERROR;
 }
 
 } // namespace Conscrypt

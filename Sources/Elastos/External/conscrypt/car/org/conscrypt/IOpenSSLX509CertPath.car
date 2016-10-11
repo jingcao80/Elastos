@@ -7,6 +7,13 @@ module
     namespace Org {
     namespace Conscrypt {
 
+    /*
+     * @Involve
+     * interface ICertPath
+     */
+    interface IOpenSSLX509CertPath {
+    }
+
     interface IOpenSSLX509CertPathHelper {
         FromEncoding(
             [in] IInputStream* inStream,

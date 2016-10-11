@@ -2,12 +2,16 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "OpenSSLRSAKeyPairGenerator.h"
 
+using Elastos::Security::EIID_IKeyPairGeneratorSpi;
+
 namespace Org {
 namespace Conscrypt {
 
 //=========================================
 // OpenSSLRSAKeyPairGenerator::
 //=========================================
+CAR_INTERFACE_IMPL_2(OpenSSLRSAKeyPairGenerator, Object, IKeyPairGeneratorSpi, IOpenSSLRSAKeyPairGenerator)
+
 OpenSSLRSAKeyPairGenerator::OpenSSLRSAKeyPairGenerator()
     : mModulusBits(2048)
 {

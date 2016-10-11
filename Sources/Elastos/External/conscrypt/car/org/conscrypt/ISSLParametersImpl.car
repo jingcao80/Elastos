@@ -3,8 +3,11 @@ module
 {
     using interface Elastosx.Net.Ssl.IX509KeyManager;
     using interface Elastosx.Net.Ssl.IX509TrustManager;
+    using interface Elastos.Security.ISecureRandom;
     using interface Elastosx.Security.Auth.X500.IX500Principal;
     using interface Elastosx.Crypto.ISecretKey;
+
+    interface IOpenSSLSessionImpl;
 
     namespace Org {
     namespace Conscrypt {
@@ -54,6 +57,7 @@ module
      * @Involve
      * interface ICloneable
      */
+    [local, deprecated]
     interface ISSLParametersImpl {
         /**
          * Returns the appropriate session context.
@@ -66,6 +70,209 @@ module
 
         SetEndpointIdentificationAlgorithm(
             [in] String endpointIdentificationAlgorithm);
+
+        /**
+         * @return server session context
+         */
+        GetServerSessionContext(
+            [out] IServerSessionContext** result);
+
+        /**
+         * @return client session context
+         */
+        GetClientSessionContext(
+            [out] IClientSessionContext** result);
+
+        /**
+         * @return X.509 key manager or {@code null} for none.
+         */
+        GetX509KeyManager(
+            [out] IX509KeyManager** result);
+
+        /**
+         * @return Pre-Shared Key (PSK) key manager or {@code null} for none.
+         */
+        GetPSKKeyManager(
+            [out] IPSKKeyManager** result);
+
+        /**
+         * @return X.509 trust manager or {@code null} for none.
+         */
+        GetX509TrustManager(
+            [out] IX509TrustManager** result);
+
+        /**
+         * @return secure random
+         */
+        GetSecureRandom(
+            [out] ISecureRandom** result);
+
+        /**
+         * @return the secure random member reference, even it is null
+         */
+        GetSecureRandomMember(
+            [out] ISecureRandom** result);
+
+        /**
+         * @return the names of enabled cipher suites
+         */
+        GetEnabledCipherSuites(
+            [out, callee] ArrayOf<String>* result);
+
+        /**
+         * Sets the enabled cipher suites after filtering through OpenSSL.
+         */
+        SetEnabledCipherSuites(
+            [in] ArrayOf<String>* cipherSuites);
+
+        /**
+         * @return the set of enabled protocols
+         */
+        GetEnabledProtocols(
+            [out, callee] ArrayOf<String>* result);
+
+        /**
+         * Sets the set of available protocols for use in SSL connection.
+         * @param protocols String[]
+         */
+        SetEnabledProtocols(
+            [in] ArrayOf<String>* protocols);
+
+        /**
+         * Tunes the peer holding this parameters to work in client mode.
+         * @param   mode if the peer is configured to work in client mode
+         */
+        SetUseClientMode(
+            [in] Boolean mode);
+
+        /**
+         * Returns the value indicating if the parameters configured to work
+         * in client mode.
+         */
+        GetUseClientMode(
+            [out] Boolean* result);
+
+        /**
+         * Tunes the peer holding this parameters to require client authentication
+         */
+        SetNeedClientAuth(
+            [in] Boolean need);
+
+        /**
+         * Returns the value indicating if the peer with this parameters tuned
+         * to require client authentication
+         */
+        GetNeedClientAuth(
+            [out] Boolean* result);
+
+        /**
+         * Tunes the peer holding this parameters to request client authentication
+         */
+        SetWantClientAuth(
+            [in] Boolean want);
+
+        /**
+         * Returns the value indicating if the peer with this parameters
+         * tuned to request client authentication
+         */
+        GetWantClientAuth(
+            [out] Boolean* result);
+
+        /**
+         * Allows/disallows the peer holding this parameters to
+         * create new SSL session
+         */
+        SetEnableSessionCreation(
+            [in] Boolean flag);
+
+        /**
+         * Returns the value indicating if the peer with this parameters
+         * allowed to cteate new SSL session
+         */
+        GetEnableSessionCreation(
+            [out] Boolean* result);
+
+        /**
+         * Whether connections using this SSL connection should use the TLS
+         * extension Server Name Indication (SNI).
+         */
+        SetUseSni(
+            [in] Boolean flag);
+
+        /**
+         * Returns whether connections using this SSL connection should use the TLS
+         * extension Server Name Indication (SNI).
+         */
+        GetUseSni(
+            [out] Boolean* result);
+
+        GetSessionToReuse(
+            [in] Int64 sslNativePointer,
+            [in] String hostname,
+            [in] Int32 port,
+            [out] IOpenSSLSessionImpl** result);
+
+        SetTlsChannelId(
+            [in] Int64 sslNativePointer,
+            [in] IOpenSSLKey* channelIdPrivateKey);
+
+        SetCertificate(
+            [in] Int64 sslNativePointer,
+            [in] String alias);
+
+        SetSSLParameters(
+            [in] Int64 sslCtxNativePointer,
+            [in] Int64 sslNativePointer,
+            [in] ISSLParametersImplAliasChooser* chooser,
+            [in] ISSLParametersImplPSKCallbacks* pskCallbacks,
+            [in] String hostname);
+
+        SetCertificateValidation(
+            [in] Int64 sslNativePointer);
+
+        SetupSession(
+            [in] Int64 sslSessionNativePointer,
+            [in] Int64 sslNativePointer,
+            [in] IOpenSSLSessionImpl* sessionToReuse,
+            [in] String hostname,
+            [in] Int32 port,
+            [in] Boolean handshakeCompleted,
+            [out] IOpenSSLSessionImpl** result);
+
+        // ChooseClientCertificate(
+        //     [in] ArrayOf<Byte>* keyTypeBytes,
+        //     [in] ArrayOf<ArrayOf<Byte>* >* asn1DerEncodedPrincipals,
+        //     [in] Int64 sslNativePointer,
+        //     [in] ISSLParametersImplAliasChooser* chooser);
+
+        /**
+         * @see NativeCrypto.SSLHandshakeCallbacks#clientPSKKeyRequested(String, byte[], byte[])
+         */
+        ClientPSKKeyRequested(
+            [in] String identityHint,
+            [in] ArrayOf<Byte>* identityBytesOut,
+            [in] ArrayOf<Byte>* key,
+            [in] ISSLParametersImplPSKCallbacks* pskCallbacks,
+            [out] Int32* result);
+
+        /**
+         * @see NativeCrypto.SSLHandshakeCallbacks#serverPSKKeyRequested(String, String, byte[])
+         */
+        ServerPSKKeyRequested(
+            [in] String identityHint,
+            [in] String identity,
+            [in] ArrayOf<Byte>* key,
+            [in] ISSLParametersImplPSKCallbacks* pskCallbacks,
+            [out] Int32* result);
+
+        /**
+         * Gets the suitable session reference from the session cache container.
+         */
+        GetCachedClientSession(
+            [in] IClientSessionContext* sessionContext,
+            [in] String hostName,
+            [in] Int32 port,
+            [out] IOpenSSLSessionImpl** result);
     }
 
     [local]

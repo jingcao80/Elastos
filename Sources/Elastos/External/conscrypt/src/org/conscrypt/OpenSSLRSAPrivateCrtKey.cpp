@@ -3,6 +3,7 @@
 #include "OpenSSLRSAPrivateCrtKey.h"
 
 using Elastos::Security::Interfaces::IRSAPrivateKey;
+using Elastos::Security::Interfaces::EIID_IRSAPrivateCrtKey;
 
 namespace Org {
 namespace Conscrypt {
@@ -12,26 +13,31 @@ namespace Conscrypt {
 //=========================================
 Int64 OpenSSLRSAPrivateCrtKey::mSerialVersionUID = 3785291944868707197L;
 
-OpenSSLRSAPrivateCrtKey::OpenSSLRSAPrivateCrtKey(
+CAR_INTERFACE_IMPL_2(OpenSSLRSAPrivateCrtKey, OpenSSLRSAPrivateKey, IRSAPrivateCrtKey, IOpenSSLRSAPrivateCrtKey)
+
+ECode OpenSSLRSAPrivateCrtKey::constructor(
     /* [in] */ IOpenSSLKey* key)
 {
     assert(0 && "TODO");
     // OpenSSLRSAPrivateKey(key);
+    return NOERROR;
 }
 
-OpenSSLRSAPrivateCrtKey::OpenSSLRSAPrivateCrtKey(
+ECode OpenSSLRSAPrivateCrtKey::constructor(
     /* [in] */ IOpenSSLKey* key,
     /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > >* params)
 {
     assert(0 && "TODO");
     // OpenSSLRSAPrivateKey(key, params);
+    return NOERROR;
 }
 
-OpenSSLRSAPrivateCrtKey::OpenSSLRSAPrivateCrtKey(
+ECode OpenSSLRSAPrivateCrtKey::constructor(
     /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec)
 {
     assert(0 && "TODO");
     // OpenSSLRSAPrivateKey(Init(rsaKeySpec));
+    return NOERROR;
 }
 
 AutoPtr<IOpenSSLKey> OpenSSLRSAPrivateCrtKey::Init(

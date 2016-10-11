@@ -4,6 +4,7 @@
 #include "NativeCrypto.h"
 // #include "OpenSSLRSAPrivateCrtKey.h"
 
+using Elastos::Security::EIID_IKeyFactorySpi;
 using Elastos::Security::Interfaces::IRSAPrivateKey;
 using Elastos::Security::Interfaces::IRSAPublicKey;
 using Elastos::Security::Interfaces::IRSAPrivateCrtKey;
@@ -31,6 +32,7 @@ namespace Conscrypt {
 //=========================================
 // OpenSSLRSAKeyFactory::
 //=========================================
+CAR_INTERFACE_IMPL_2(OpenSSLRSAKeyFactory, Object, IKeyFactorySpi, IOpenSSLRSAKeyFactory)
 
 ECode OpenSSLRSAKeyFactory::EngineGeneratePublic(
     /* [in] */ IKeySpec* keySpec,
@@ -101,7 +103,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(
 
 ECode OpenSSLRSAKeyFactory::EngineGetKeySpec(
     /* [in] */ IKey* key,
-    /* [in] */ ClassID keySpec,
+    /* [in] */ const ClassID& keySpec,
     /* [out] */ IKeySpec** retkeySpec)
 {
     VALIDATE_NOT_NULL(retkeySpec)

@@ -16,6 +16,7 @@ namespace Conscrypt {
  */
 class OpenSSLMessageDigestJDK
     : public Object // public MessageDigestSpi
+    , public IOpenSSLMessageDigestJDK
     , public ICloneable
 {
 public:
@@ -24,29 +25,30 @@ public:
     CARAPI Clone(
         /* [out] */ IInterface** object);
 
-    void EngineReset();
+    CARAPI EngineReset();
 
-    Int32 EngineGetDigestLength();
+    CARAPI EngineGetDigestLength(
+        /* [out] */ Int32* len);
 
-    void EngineUpdate(
+    CARAPI EngineUpdate(
         /* [in] */ Byte input);
 
-    void EngineUpdate(
+    CARAPI EngineUpdate(
         /* [in] */ ArrayOf<Byte>* input,
         /* [in] */ Int32 offset,
         /* [in] */ Int32 len);
 
-    AutoPtr<ArrayOf<Byte> > EngineDigest();
+    CARAPI EngineDigest(
+        /* [out, callee] */ ArrayOf<Byte>** ed);
 
-protected:
     /**
      * Creates a new OpenSSLMessageDigest instance for the given algorithm name.
      */
-    OpenSSLMessageDigestJDK(
+    CARAPI constructor(
         /* [in] */ Int64 evp_md,
         /* [in] */ Int32 size);
 
-    OpenSSLMessageDigestJDK(
+    CARAPI constructor(
         /* [in] */ Int64 evp_md,
         /* [in] */ Int32 size,
         /* [in] */ IOpenSSLDigestContext* ctx);

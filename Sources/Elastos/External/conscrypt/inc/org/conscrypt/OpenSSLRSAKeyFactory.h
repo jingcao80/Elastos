@@ -8,15 +8,20 @@
 using Elastos::Security::IKey;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::IPrivateKey;
+using Elastos::Security::IKeyFactorySpi;
 using Elastos::Security::Spec::IKeySpec;
 
 namespace Org {
 namespace Conscrypt {
 
 class OpenSSLRSAKeyFactory
-    : public Object    // : public KeyFactorySpi
+    : public Object
+    , public IKeyFactorySpi
+    , public IOpenSSLRSAKeyFactory
 {
 public:
+    CAR_INTERFACE_DECL()
+
     CARAPI EngineGeneratePublic(
         /* [in] */ IKeySpec* keySpec,
         /* [out] */ IPublicKey** pubKey);
@@ -27,7 +32,7 @@ public:
 
     CARAPI EngineGetKeySpec(
         /* [in] */ IKey* key,
-        /* [in] */ ClassID keySpec,
+        /* [in] */ const ClassID& keySpec,
         /* [out] */ IKeySpec** retkeySpec);
 
     CARAPI EngineTranslateKey(

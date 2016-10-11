@@ -74,7 +74,8 @@ ECode COpenSSLECKeyPairGenerator::GenerateKeyPair(
     mGroup->GetContext(&ctx);
     Int64 val;
     NativeCrypto::EC_KEY_generate_key(ctx, &val);
-    AutoPtr<OpenSSLKey> key = new OpenSSLKey(val);
+    assert(0 && "TODO");
+    AutoPtr<OpenSSLKey> key;// = new OpenSSLKey(val);
     AutoPtr<IOpenSSLECPublicKey> publicKey;
     COpenSSLECPublicKey::New(mGroup, IOpenSSLKey::Probe(key), (IOpenSSLECPublicKey**)&publicKey);
     AutoPtr<IOpenSSLECPrivateKey> privateKey;

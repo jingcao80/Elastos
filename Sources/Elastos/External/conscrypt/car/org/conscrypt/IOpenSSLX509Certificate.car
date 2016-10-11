@@ -8,6 +8,10 @@ module
     namespace Org {
     namespace Conscrypt {
 
+    /*
+     * @Involve
+     * interface IX509Certificate
+     */
     interface IOpenSSLX509Certificate {
         /**
          * Returns the raw pointer to the X509 context for use in JNI calls. The

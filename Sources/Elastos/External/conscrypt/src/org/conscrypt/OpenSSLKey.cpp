@@ -15,22 +15,26 @@ namespace Conscrypt {
 //=========================================
 // OpenSSLKey::
 //=========================================
-OpenSSLKey::OpenSSLKey(
+CAR_INTERFACE_IMPL(OpenSSLKey, Object, IOpenSSLKey)
+
+ECode OpenSSLKey::constructor(
     /* [in] */ Int64 ctx)
 {
     mCtx = ctx;
     mEngine = NULL;
     mAlias = NULL;
+    return NOERROR;
 }
 
-OpenSSLKey::OpenSSLKey(
+ECode OpenSSLKey::constructor(
     /* [in] */ Int64 ctx,
     /* [in] */ IOpenSSLEngine* engine,
-    /* [in] */ String alias)
+    /* [in] */ const String& alias)
 {
     mCtx = ctx;
     mEngine = engine;
     mAlias = alias;
+    return NOERROR;
 }
 
 ECode OpenSSLKey::GetPkeyContext(
@@ -300,7 +304,7 @@ AutoPtr<IPrivateKey> OpenSSLKey::GetPrivateKey(
 }
 
 ECode OpenSSLKey::GetSecretKey(
-    /* [in] */ String algorithm,
+    /* [in] */ const String& algorithm,
     /* [out] */ ISecretKey** result)
 {
     VALIDATE_NOT_NULL(result)

@@ -20,6 +20,9 @@ module
         GetEngine(
             [out] IOpenSSLEngine** result);
 
+        IsEngineBased(
+            [out] Boolean* result);
+
         GetAlias(
             [out] String* result);
 

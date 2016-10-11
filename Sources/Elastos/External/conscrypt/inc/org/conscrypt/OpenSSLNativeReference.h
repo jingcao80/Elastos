@@ -3,6 +3,7 @@
 #define __ORG_CONSCRYPT_OPENSSLNATIVEREFERENCE_H__
 
 #include "Org.Conscrypt.h"
+#include <elastos/core/Object.h>
 
 namespace Org {
 namespace Conscrypt {
@@ -16,10 +17,10 @@ class OpenSSLNativeReference
 {
 public:
     OpenSSLNativeReference(
-    	/* [in] */ Int64 ctx);
+        /* [in] */ Int64 ctx);
 
 public:
-	Int64 mContext;
+    Int64 mContext;
 };
 
 } // namespace Conscrypt

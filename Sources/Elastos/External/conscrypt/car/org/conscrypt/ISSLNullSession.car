@@ -6,6 +6,9 @@ module
     namespace Org {
     namespace Conscrypt {
 
+    interface ISSLNullSession {
+    }
+
     interface ISSLNullSessionHelper {
         GetNullSession(
             [out] ISSLSession** result);

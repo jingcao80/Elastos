@@ -2,20 +2,25 @@
 #ifndef __ORG_CONSCRYPT_OPENSSLRSAKEYPAIRGENERATOR_H__
 #define __ORG_CONSCRYPT_OPENSSLRSAKEYPAIRGENERATOR_H__
 
-#include "Org.Conscrypt.h"
+#include "_Org.Conscrypt.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Security::IKeyPair;
 using Elastos::Security::ISecureRandom;
+using Elastos::Security::IKeyPairGeneratorSpi;
 using Elastos::Security::Spec::IAlgorithmParameterSpec;
 
 namespace Org {
 namespace Conscrypt {
 
 class OpenSSLRSAKeyPairGenerator
-    :  public Object // public KeyPairGeneratorSpi
+    : public Object
+    , public IKeyPairGeneratorSpi
+    , public IOpenSSLRSAKeyPairGenerator
 {
 public:
+    CAR_INTERFACE_DECL()
+
     OpenSSLRSAKeyPairGenerator();
 
     CARAPI GenerateKeyPair(

@@ -4,6 +4,12 @@ module
     namespace Org {
     namespace Conscrypt {
 
+    enum EngineType {
+        EngineType_RSA,
+        EngineType_DSA,
+        EngineType_EC,
+    }
+
     /*
      * @Involve
      * interface ISignatureSpi

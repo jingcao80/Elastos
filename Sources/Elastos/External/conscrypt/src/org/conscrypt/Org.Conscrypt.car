@@ -58,10 +58,10 @@ module
     merge("../../../car/org/conscrypt/IPSKKeyManager.car");
     merge("../../../car/org/conscrypt/ISSLClientSessionCache.car");
     merge("../../../car/org/conscrypt/ISSLNullSession.car");
-    merge("../../../car/org/conscrypt/ISSLParametersImpl.car");
     merge("../../../car/org/conscrypt/ISSLRecordProtocol.car");
     merge("../../../car/org/conscrypt/ISSLServerSessionCache.car");
     merge("../../../car/org/conscrypt/IServerSessionContext.car");
+    merge("../../../car/org/conscrypt/ISSLParametersImpl.car");
     merge("../../../car/org/conscrypt/IOpenSSLRSAPrivateKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLRSAPublicKey.car");
     merge("../../../car/org/conscrypt/IOpenSSLRSAPrivateCrtKey.car");
@@ -75,6 +75,11 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLX509CertificateFactory.car");
     merge("../../../car/org/conscrypt/IX509PublicKey.car");
 
+    using interface Elastos.Core.ICloneable;
+    using interface Elastos.IO.ISerializable;
+    using interface Elastos.Net.IInetAddress;
+    using interface Elastos.Net.ISocket;
+    using interface Elastos.Security.IKey;
     using interface Elastos.Security.IProvider;
     using interface Elastos.Security.IKeyPairGenerator;
     using interface Elastos.Security.Interfaces.IECPrivateKey;
@@ -83,6 +88,32 @@ module
     using interface Elastos.Security.Spec.IECPublicKeySpec;
     using interface Elastosx.Crypto.IKeyAgreementSpi;
     using interface Elastosx.Net.Ssl.ISSLContextSpi;
+    using interface Elastos.Security.IPrivateKey;
+    using interface Elastos.Security.IPublicKey;
+    using interface Elastos.Security.ISecureRandom;
+    using interface Elastos.Security.IKeyFactorySpi;
+    using interface Elastos.Security.IKeyPairGeneratorSpi;
+    using interface Elastos.Security.ISecureRandomSpi;
+    using interface Elastos.Security.Cert.IX509Certificate;
+    using interface Elastos.Security.Cert.IX509CRLEntry;
+    using interface Elastos.Security.Cert.IX509Extension;
+    using interface Elastos.Security.Cert.ICertificateFactorySpi;
+    using interface Elastos.Security.Spec.IRSAPrivateCrtKeySpec;
+    using interface Elastos.Security.Spec.IRSAPrivateKeySpec;
+    using interface Elastos.Security.Spec.IRSAPublicKeySpec;
+    using interface Elastos.Security.Interfaces.IRSAPrivateCrtKey;
+    using interface Elastos.Security.Interfaces.IRSAPrivateKey;
+    using interface Elastos.Security.Interfaces.IRSAPublicKey;
+    using interface Elastos.Security.Interfaces.IRSAKey;
+    using interface Elastos.Utility.IList;
+
+    using interface Elastosx.Crypto.ISecretKey;
+    using interface Elastosx.Net.Ssl.ISSLServerSocketFactory;
+    using interface Elastosx.Net.Ssl.ISSLSession;
+    using interface Elastosx.Net.Ssl.ISSLSocketFactory;
+    using interface Elastosx.Net.Ssl.ISSLSocket;
+    using interface Elastosx.Net.Ssl.IKeyManager;
+    using interface Elastosx.Net.Ssl.ITrustManager;
     using interface Elastosx.Net.Ssl.ISSLSessionContext;
 
     namespace Org {
@@ -185,6 +216,294 @@ module
         interface IOpenSSLECPublicKey;
         interface IECPublicKey;
         interface IOpenSSLKeyHolder;
+    }
+
+    class COpenSSLKey {
+        constructor(
+            [in] Int64 ctx);
+
+        constructor(
+            [in] Int64 ctx,
+            [in] IOpenSSLEngine* engine,
+            [in] String alias);
+
+        interface IOpenSSLKey;
+    }
+
+    class COpenSSLMessageDigestJDK {
+        constructor(
+            [in] Int64 evp_md,
+            [in] Int32 size);
+
+        constructor(
+            [in] Int64 evp_md,
+            [in] Int32 size,
+            [in] IOpenSSLDigestContext* ctx);
+
+        interface IOpenSSLMessageDigestJDK;
+        interface ICloneable;
+    }
+
+    class COpenSSLRSAKeyFactory {
+        interface IKeyFactorySpi;
+        interface IOpenSSLRSAKeyFactory;
+    }
+
+    class COpenSSLRSAKeyPairGenerator {
+        interface IKeyPairGeneratorSpi;
+        interface IOpenSSLRSAKeyPairGenerator;
+    }
+
+    class COpenSSLRSAPrivateCrtKey {
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        // constructor(
+        //     [in] IOpenSSLKey* key,
+        //     [in] ArrayOf<AutoPtr<ArrayOf<Byte> > >* params);
+
+        constructor(
+            [in] IRSAPrivateCrtKeySpec* rsaKeySpec);
+
+        interface IRSAPrivateCrtKey;
+        interface IOpenSSLRSAPrivateCrtKey;
+        interface IOpenSSLRSAPrivateKey;
+        interface IRSAPrivateKey;
+        interface IOpenSSLKeyHolder;
+        interface IPrivateKey;
+        interface IRSAKey;
+        interface IKey;
+    }
+
+    [deprecated]
+    class COpenSSLRSAPrivateKey {
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IOpenSSLKey* key,
+            [in] ArrayOf<Handle32>* params);
+
+        constructor(
+            [in] IRSAPrivateKeySpec* rsaKeySpec);
+
+        interface IOpenSSLRSAPrivateKey;
+        interface IRSAPrivateKey;
+        interface IOpenSSLKeyHolder;
+        interface IPrivateKey;
+        interface IRSAKey;
+        interface IKey;
+        interface ISerializable;
+    }
+
+    class COpenSSLRSAPublicKey {
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IRSAPublicKeySpec* spec);
+
+        interface IRSAPublicKey;
+        interface IOpenSSLKeyHolder;
+        interface IOpenSSLRSAPublicKey;
+    }
+
+    class COpenSSLRandom {
+        interface ISecureRandomSpi;
+        interface IOpenSSLRandom;
+        interface ISerializable;
+    }
+
+    [deprecated]
+    class COpenSSLSecretKey {
+        constructor(
+            [in] String algorithm,
+            [in] ArrayOf<Byte>* encoded);
+
+        constructor(
+            [in] String algorithm,
+            [in] IOpenSSLKey* key);
+
+        interface ISecretKey;
+        interface IOpenSSLSecretKey;
+        interface IOpenSSLKeyHolder;
+    }
+
+    class COpenSSLServerSocketFactoryImpl {
+        constructor();
+
+        // constructor(
+        //     [in] ISSLParametersImpl* sslParameters);
+
+        interface ISSLServerSocketFactory;
+        interface IOpenSSLServerSocketFactoryImpl;
+    }
+
+    [deprecated]
+    class COpenSSLSessionImpl {
+        // constructor(
+        //     [in] Int64 sslSessionNativePointer,
+        //     [in] ArrayOf<IX509Certificate*>* localCertificates,
+        //     [in] ArrayOf<IX509Certificate*>* peerCertificates,
+        //     [in] String peerHost,
+        //     [in] Int32 peerPort,
+        //     [in] IAbstractSessionContext* sessionContext);
+
+        constructor(
+            [in] ArrayOf<Byte>* derData,
+            [in] String peerHost,
+            [in] Int32 peerPort,
+            [in] ArrayOf<IX509Certificate*>* peerCertificates,
+            [in] IAbstractSessionContext* sessionContext);
+
+        interface ISSLSession;
+        interface IOpenSSLSessionImpl;
+    }
+
+    class COpenSSLSignature {
+        interface IOpenSSLSignature;
+    }
+
+    class COpenSSLSignatureRawRSA {
+        interface IOpenSSLSignatureRawRSA;
+    }
+
+    [local]
+    class COpenSSLSocketFactoryImpl {
+        constructor();
+
+        constructor(
+            [in] ISSLParametersImpl* sslParameters);
+
+        interface IOpenSSLSocketFactoryImpl;
+        interface ISSLSocketFactory;
+    }
+
+    [local]
+    class COpenSSLSocketImpl {
+        constructor(
+            [in] ISSLParametersImpl* sslParameters);
+
+        constructor(
+            [in] String host,
+            [in] Int32 port,
+            [in] ISSLParametersImpl* sslParameters);
+
+        constructor(
+            [in] IInetAddress* address,
+            [in] Int32 port,
+            [in] ISSLParametersImpl* sslParameters);
+
+        constructor(
+            [in] String host,
+            [in] Int32 port,
+            [in] IInetAddress* clientAddress,
+            [in] Int32 clientPort,
+            [in] ISSLParametersImpl* sslParameters);
+
+        constructor(
+            [in] IInetAddress* address,
+            [in] Int32 port,
+            [in] IInetAddress* clientAddress,
+            [in] Int32 clientPort,
+            [in] ISSLParametersImpl* sslParameters);
+
+        constructor(
+            [in] ISocket* socket,
+            [in] String host,
+            [in] Int32 port,
+            [in] Boolean autoClose,
+            [in] ISSLParametersImpl* sslParameters);
+
+        interface ISSLHandshakeCallbacks;
+        interface ISSLParametersImplAliasChooser;
+        interface ISSLParametersImplPSKCallbacks;
+        interface IOpenSSLSocketImpl;
+    }
+
+    [local]
+    class COpenSSLSocketImplWrapper {
+        constructor(
+            [in] ISocket* socket,
+            [in] String host,
+            [in] Int32 port,
+            [in] Boolean autoClose,
+            [in] ISSLParametersImpl* sslParameters);
+
+        interface IOpenSSLSocketImplWrapper;
+        interface ISSLHandshakeCallbacks;
+        interface ISSLParametersImplAliasChooser;
+        interface ISSLParametersImplPSKCallbacks;
+        interface IOpenSSLSocketImpl;
+        interface ISSLSocket;
+        interface ISocket;
+    }
+
+    class COpenSSLX509CRLEntry {
+        constructor(
+            [in] Int64 ctx);
+
+        interface IOpenSSLX509CRLEntry;
+        interface IX509CRLEntry;
+        interface IX509Extension;
+    }
+
+    class COpenSSLX509CertPath {
+        constructor(
+            [in] IList* certificates);
+
+        interface IOpenSSLX509CertPath;
+    }
+
+    class COpenSSLX509Certificate {
+        constructor(
+            [in] Int64 ctx);
+
+        interface IOpenSSLX509Certificate;
+    }
+
+    class COpenSSLX509CertificateFactory {
+        interface IOpenSSLX509CertificateFactory;
+        interface ICertificateFactorySpi;
+    }
+
+    class CSSLNullSession {
+        constructor();
+
+        interface ISSLNullSession;
+        interface ISSLSession;
+        interface ICloneable;
+    }
+
+    [deprecated]
+    class CSSLParametersImpl {
+        constructor(
+            [in] ArrayOf<IKeyManager*>* kms,
+            [in] ArrayOf<ITrustManager*>* tms,
+            [in] ISecureRandom* sr,
+            [in] IClientSessionContext* clientSessionContext,
+            [in] IServerSessionContext* serverSessionContext);
+
+        interface ISSLParametersImpl;
+        interface ICloneable;
+    }
+
+    class CServerSessionContext {
+        constructor();
+
+        interface IServerSessionContext;
+        interface IAbstractSessionContext;
+        interface ISSLSessionContext;
+    }
+
+    [deprecated]
+    class CX509PublicKey {
+        constructor(
+            [in] String algorithm,
+            [in] ArrayOf<Byte>* encoded);
+
+        interface IPublicKey;
+        interface IX509PublicKey;
     }
 
     } // namespace Conscrypt

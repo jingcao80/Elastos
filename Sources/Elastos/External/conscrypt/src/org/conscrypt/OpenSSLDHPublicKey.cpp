@@ -54,7 +54,8 @@ ECode OpenSSLDHPublicKey::constructor(
     Int64 val;
     NativeCrypto::EVP_PKEY_new_DH(
             arrayP, arrayG, arrayY, NULL, &val);
-    mKey = new OpenSSLKey(val);
+    assert(0 && "TODO");
+    // mKey = new OpenSSLKey(val);
     // } catch (Exception e) {
     //     throw new InvalidKeySpecException(e);
     // }
@@ -95,7 +96,8 @@ ECode OpenSSLDHPublicKey::GetInstance(
     Int64 val;
     NativeCrypto::EVP_PKEY_new_DH(
                 arrayP, arrayG, arrayY, NULL, &val);
-    AutoPtr<OpenSSLKey> key = new OpenSSLKey(val);
+    assert(0 && "TODO");
+    AutoPtr<OpenSSLKey> key;// = new OpenSSLKey(val);
     *result = IOpenSSLKey::Probe(key);
     REFCOUNT_ADD(*result)
     // } catch (Exception e) {
@@ -298,7 +300,8 @@ void OpenSSLDHPublicKey::ReadObject(
 
     Int64 val;
     NativeCrypto::EVP_PKEY_new_DH(arrayP, arrayG, arrayY, NULL, &val);
-    mKey = new OpenSSLKey(val);
+    assert(0 && "TODO");
+    // mKey = new OpenSSLKey(val);
 }
 
 void OpenSSLDHPublicKey::WriteObject(

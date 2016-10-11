@@ -2,7 +2,8 @@
 #ifndef __ORG_CONSCRYPT_OPENSSLMAC_H__
 #define __ORG_CONSCRYPT_OPENSSLMAC_H__
 
-#include "Org.Conscrypt.h"
+#include "Elastos.CoreLibrary.Extensions.h"
+#include "_Org.Conscrypt.h"
 // #include "elastosx/crypto/MacSpi.h"
 #include <elastos/core/Object.h>
 
@@ -15,28 +16,31 @@ namespace Conscrypt {
 
 class OpenSSLMac
     : public Object  //    : public MacSpi
+    , public IOpenSSLMac
 {
+    CAR_INTERFACE_DECL()
 protected:
-    Int32 EngineGetMacLength();
+    CARAPI EngineGetMacLength(
+        /* [out] */ Int32* result);
 
-    void EngineInit(
+    CARAPI EngineInit(
         /* [in] */ IKey* key,
         /* [in] */ IAlgorithmParameterSpec* params);
 
-    void EngineUpdate(
+    CARAPI EngineUpdate(
         /* [in] */ Byte input);
 
-    void EngineUpdate(
+    CARAPI EngineUpdate(
         /* [in] */ ArrayOf<Byte>* input,
         /* [in] */ Int32 offset,
         /* [in] */ Int32 len);
 
-    AutoPtr<ArrayOf<Byte> > EngineDoFinal();
+    CARAPI EngineDoFinal(
+        /* [out, callee] */ ArrayOf<Byte>** input);
 
-    void EngineReset();
+    CARAPI EngineReset();
 
-protected:
-    OpenSSLMac(
+    CARAPI constructor(
         /* [in] */ Int64 evp_md,
         /* [in] */ Int32 size,
         /* [in] */ Int32 evp_pkey_type);
