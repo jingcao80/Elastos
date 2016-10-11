@@ -3,7 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_CASN1INTEGER_H__
 
 #include "_Org_Apache_Harmony_Security_Asn1_CASN1Integer.h"
-#include <ASN1Primitive.h>
+#include "org/apache/harmony/security/asn1/ASN1Primitive.h"
 
 using Elastos::IO::IInputStream;
 using Elastos::Math::IBigInteger;
@@ -23,6 +23,8 @@ public:
 
     static CARAPI GetInstance(
         /* [out] */ IASN1Integer** instance);
+
+    static CARAPI_(AutoPtr<IASN1Integer>) GetInstance();
 
     static CARAPI ToIntValue(
         /* [in] */ IInterface* decoded,

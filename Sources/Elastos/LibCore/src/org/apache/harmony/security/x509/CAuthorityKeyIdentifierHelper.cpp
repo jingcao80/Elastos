@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CAuthorityKeyIdentifierHelper.h"
+#include "org/apache/harmony/security/x509/CAuthorityKeyIdentifier.h"
 
 namespace Org {
 namespace Apache {
@@ -15,22 +16,23 @@ ECode CAuthorityKeyIdentifierHelper::Decode(
     /* [in] */ ArrayOf<Byte> * pEncoding,
     /* [out] */ IAuthorityKeyIdentifier** ppKeyIdentifier)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppKeyIdentifier);
+
+    return CAuthorityKeyIdentifier::Decode(pEncoding, ppKeyIdentifier);
 }
 
 ECode CAuthorityKeyIdentifierHelper::GetASN1(
     /* [out] */ IASN1Type** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    return CAuthorityKeyIdentifier::GetASN1(ppAsn1);
 }
 
 ECode CAuthorityKeyIdentifierHelper::SetASN1(
     /* [in] */ IASN1Type* pAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return CAuthorityKeyIdentifier::SetASN1(pAsn1);
 }
 
 } // namespace X509

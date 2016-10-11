@@ -38,6 +38,13 @@ ECode CASN1Integer::GetInstance(
     return NOERROR;
 }
 
+AutoPtr<IASN1Integer> CASN1Integer::GetInstance()
+{
+    AutoPtr<IASN1Integer> tmp;
+    GetInstance((IASN1Integer**)&tmp);
+    return tmp;
+}
+
 ECode CASN1Integer::ToIntValue(
     /* [in] */ IInterface* decoded,
     /* [out] */ Int32* intValue)

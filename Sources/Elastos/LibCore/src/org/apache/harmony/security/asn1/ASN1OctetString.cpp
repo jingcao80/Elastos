@@ -1,4 +1,5 @@
 
+#include "ASN1OctetString.h"
 #include "CASN1OctetString.h"
 #include "core/CArrayOf.h"
 #include "core/CByte.h"
@@ -18,22 +19,21 @@ namespace Security {
 namespace Asn1 {
 
 //TODO:
-const AutoPtr<IASN1OctetString> CASN1OctetString::ASN1;// = InitASN1();
+const AutoPtr<IASN1OctetString> ASN1OctetString::ASN1;// = InitASN1();
 
-CAR_OBJECT_IMPL(CASN1OctetString)
-AutoPtr<IASN1OctetString> CASN1OctetString::InitASN1()
+AutoPtr<IASN1OctetString> ASN1OctetString::InitASN1()
 {
     AutoPtr<IASN1OctetString> asn1Obj;
     CASN1OctetString::New((IASN1OctetString**)&asn1Obj);
     return asn1Obj;
 }
 
-ECode CASN1OctetString::constructor()
+ECode ASN1OctetString::constructor()
 {
     return ASN1StringType::constructor(IASN1Constants::TAG_OCTETSTRING);
 }
 
-ECode CASN1OctetString::GetInstance(
+ECode ASN1OctetString::GetInstance(
     /* [out] */ IASN1OctetString** instance)
 {
     VALIDATE_NOT_NULL(instance)
@@ -42,7 +42,7 @@ ECode CASN1OctetString::GetInstance(
     return NOERROR;
 }
 
-ECode CASN1OctetString::Decode(
+ECode ASN1OctetString::Decode(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
@@ -57,7 +57,7 @@ ECode CASN1OctetString::Decode(
     return GetDecodedObject(bis, object);
 }
 
-ECode CASN1OctetString::GetDecodedObject(
+ECode ASN1OctetString::GetDecodedObject(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
@@ -82,13 +82,13 @@ ECode CASN1OctetString::GetDecodedObject(
     return NOERROR;
 }
 
-ECode CASN1OctetString::EncodeContent(
+ECode ASN1OctetString::EncodeContent(
     /* [in] */ IBerOutputStream* bos)
 {
     return bos->EncodeOctetString();
 }
 
-ECode CASN1OctetString::SetEncodingContent(
+ECode ASN1OctetString::SetEncodingContent(
     /* [in] */ IBerOutputStream* bos)
 {
     AutoPtr<IInterface> content;

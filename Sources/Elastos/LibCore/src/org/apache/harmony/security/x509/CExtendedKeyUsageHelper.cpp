@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CExtendedKeyUsageHelper.h"
+#include "org/apache/harmony/security/x509/CExtendedKeyUsage.h"
 
 namespace Org {
 namespace Apache {
@@ -14,15 +15,15 @@ CAR_INTERFACE_IMPL(CExtendedKeyUsageHelper, Singleton, IExtendedKeyUsageHelper)
 ECode CExtendedKeyUsageHelper::GetASN1(
     /* [out] */ IASN1Type** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    return CExtendedKeyUsage::GetASN1(ppAsn1);
 }
 
 ECode CExtendedKeyUsageHelper::SetASN1(
     /* [in] */ IASN1Type* pAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return CExtendedKeyUsage::SetASN1(pAsn1);
 }
 
 } // namespace X509

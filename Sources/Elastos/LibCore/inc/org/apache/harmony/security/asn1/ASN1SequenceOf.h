@@ -2,7 +2,7 @@
 #ifndef __ORG_APACHE_HARMONY_SECURITY_ASN1_ASN1SEQUENCEOF_H__
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_ASN1SEQUENCEOF_H__
 
-#include "ASN1ValueCollection.h"
+#include "org/apache/harmony/security/asn1/ASN1ValueCollection.h"
 
 namespace Org {
 namespace Apache {

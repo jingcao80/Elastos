@@ -2,12 +2,17 @@
 TARGET_NAME= x509
 TARGET_TYPE= lib
 
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
 INCLUDES += ../../
 INCLUDES += $(PREBUILD_INC)/sys;
 INCLUDES += ../../../../../corelibrary
 INCLUDES += $(MAKEDIR)/../../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos
 INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/asn1
 INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security
 
 SOURCES = CAccessDescription.cpp
@@ -42,7 +47,8 @@ SOURCES += CExtendedKeyUsage.cpp
 SOURCES += CExtendedKeyUsageHelper.cpp
 SOURCES += CExtension.cpp
 SOURCES += CExtensionHelper.cpp
-SOURCES += CExtensionValue.cpp
+SOURCES += ExtensionValue.cpp
+
 SOURCES += CExtensions.cpp
 SOURCES += CExtensionsHelper.cpp
 SOURCES += CGeneralName.cpp

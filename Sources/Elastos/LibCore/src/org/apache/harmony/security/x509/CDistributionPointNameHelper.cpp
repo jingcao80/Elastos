@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CDistributionPointNameHelper.h"
+#include "org/apache/harmony/security/x509/CDistributionPointName.h"
 
 namespace Org {
 namespace Apache {
@@ -14,15 +15,15 @@ CAR_INTERFACE_IMPL(CDistributionPointNameHelper, Singleton, IDistributionPointNa
 ECode CDistributionPointNameHelper::GetASN1(
     /* [out] */ IASN1Choice** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    return CDistributionPointName::GetASN1(ppAsn1);
 }
 
 ECode CDistributionPointNameHelper::SetASN1(
     /* [in] */ IASN1Choice* pAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return CDistributionPointName::SetASN1(pAsn1);
 }
 
 } // namespace X509

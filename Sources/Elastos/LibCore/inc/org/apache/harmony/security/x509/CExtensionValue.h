@@ -3,10 +3,10 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CEXTENSIONVALUE_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CExtensionValue.h"
+#include "org/apache/harmony/security/x509/ExtensionValue.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
-using Elastos::Core::IStringBuilder;
 
 namespace Org {
 namespace Apache {
@@ -15,31 +15,10 @@ namespace Security {
 namespace X509 {
 
 CarClass(CExtensionValue)
-    , public Object
-    , public IExtensionValue
+    , public ExtensionValue
 {
 public:
     CAR_OBJECT_DECL()
-
-    CAR_INTERFACE_DECL()
-
-    CARAPI GetEncoded(
-        /* [out, callee] */ ArrayOf<Byte>** ppEncode);
-
-    CARAPI DumpValue(
-        /* [in] */ IStringBuilder* pSb,
-        /* [in] */ const String& prefix);
-
-    CARAPI DumpValue(
-        /* [in] */ IStringBuilder* pSb);
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ ArrayOf<Byte>* pEncoding);
-
-private:
-    // TODO: Add your private member variables here.
 };
 
 } //namespace X509

@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CALTERNATIVENAME_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CAlternativeName.h"
+#include "org/apache/harmony/security/x509/ExtensionValue.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
@@ -15,9 +16,8 @@ namespace Security {
 namespace X509 {
 
 CarClass(CAlternativeName)
-    , public Object
+    , public ExtensionValue
     , public IAlternativeName
-    , public IExtensionValue
 {
 public:
     CAR_OBJECT_DECL()
@@ -31,15 +31,16 @@ public:
         /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
-    CARAPI DumpValue(
-        /* [in] */ IStringBuilder* pSb);
-
     CARAPI constructor(
         /* [in] */ Boolean which,
         /* [in] */ ArrayOf<Byte>* pEncoding);
 
 private:
-    // TODO: Add your private member variables here.
+    /** indicating which alternative name is presented by this object */
+    Boolean mWhich;
+
+    /** the alternative names */
+    AutoPtr<IGeneralNames> mAlternativeNames;
 };
 
 } //namespace X509

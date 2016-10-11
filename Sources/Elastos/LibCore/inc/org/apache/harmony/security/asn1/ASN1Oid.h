@@ -2,7 +2,7 @@
 #ifndef __ORG_APACHE_HARMONY_SECURITY_ASN1_ASN1OID_H__
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_ASN1OID_H__
 
-#include <ASN1Primitive.h>
+#include "org/apache/harmony/security/asn1/ASN1Primitive.h"
 
 using Elastos::IO::IInputStream;
 

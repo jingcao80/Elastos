@@ -1074,8 +1074,13 @@ module
         interface IBasicConstraintsHelper;
     }
 
+    [deprecated]
     class CCRLDistributionPoints {
         constructor();
+
+        constructor(
+            [in] IList* distributionPoints,
+            [in] ArrayOf<Byte>* encoding);
 
         interface ICRLDistributionPoints;
         interface IExtensionValue;
@@ -1105,6 +1110,12 @@ module
             [in] IAlgorithmIdentifier* pSignatureAlgorithm,
             [in] ArrayOf<Byte>* pSignatureValue);
 
+        constructor(
+            [in] ITBSCertificate* tbsCertificate,
+            [in] IAlgorithmIdentifier* signatureAlgorithm,
+            [in] ArrayOf<Byte>* signatureValue,
+            [in] ArrayOf<Byte>* encoding);
+
         interface ICertificate;
     }
 
@@ -1132,6 +1143,12 @@ module
             [in] IAlgorithmIdentifier* pSignatureAlgorithm,
             [in] ArrayOf<Byte>* pSignatureValue);
 
+        constructor(
+            [in] ITBSCertList* pTbsCertList,
+            [in] IAlgorithmIdentifier* pSignatureAlgorithm,
+            [in] ArrayOf<Byte>* pSignatureValue,
+            [in] ArrayOf<Byte>* encoding);
+
         interface ICertificateList;
     }
 
@@ -1139,8 +1156,13 @@ module
         interface ICertificateListHelper;
     }
 
+    [deprecated]
     class CCertificatePolicies {
         constructor();
+
+        constructor(
+            [in] IList* policyInformations,
+            [in] ArrayOf<Byte>* encoding);
 
         interface ICertificatePolicies;
         interface IExtensionValue;
@@ -1184,8 +1206,12 @@ module
         interface IDistributionPointNameHelper;
     }
 
+    [deprecated]
     class CEDIPartyName {
-        constructor();
+        constructor(
+            [in] String nameAssigner,
+            [in] String partyName,
+            [in] ArrayOf<Byte>* encoding);
 
         interface IEDIPartyName;
     }
@@ -1231,6 +1257,14 @@ module
         constructor(
             [in] ArrayOf<Int32>* pExtnID,
             [in] ArrayOf<Byte>* pExtnValue2);
+
+        constructor(
+            [in] ArrayOf<Int32>* extnID,
+            [in] Boolean critical,
+            [in] ArrayOf<Byte>* extnValue,
+            [in] ArrayOf<Byte>* rawExtnValue,
+            [in] ArrayOf<Byte>* encoding,
+            [in] IExtensionValue* decodedExtValue);
 
         interface IX509Extension;
         interface Elastos.Security.Cert.IExtension;

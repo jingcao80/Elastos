@@ -6,6 +6,7 @@
 #include "org/apache/harmony/security/asn1/ASN1Sequence.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
 using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
 using Org::Apache::Harmony::Security::Asn1::IBerInputStream;

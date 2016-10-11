@@ -48,6 +48,9 @@ public:
     virtual CARAPI SetEncodingContent(
         /* [in] */ IBerOutputStream* bos);
 
+    virtual CARAPI GetType(
+        /* [out, callee] */ ArrayOf<IASN1Type*>** type);
+
 private:
     CARAPI AddIdentifier(
         /* [in] */ INavigableMap* map,

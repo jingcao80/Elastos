@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CAccessDescriptionHelper.h"
+#include "org/apache/harmony/security/x509/CAccessDescription.h"
 
 namespace Org {
 namespace Apache {
@@ -14,15 +15,15 @@ CAR_INTERFACE_IMPL(CAccessDescriptionHelper, Singleton, IAccessDescriptionHelper
 ECode CAccessDescriptionHelper::GetASN1(
     /* [out] */ IASN1Sequence** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    return CAccessDescription::GetASN1(ppAsn1);
 }
 
 ECode CAccessDescriptionHelper::SetASN1(
     /* [in] */ IASN1Sequence* pAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return CAccessDescription::SetASN1(pAsn1);
 }
 
 } // namespace X509

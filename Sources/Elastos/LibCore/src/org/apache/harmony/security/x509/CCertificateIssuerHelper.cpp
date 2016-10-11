@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CCertificateIssuerHelper.h"
+#include "org/apache/harmony/security/x509/CCertificateIssuer.h"
 
 namespace Org {
 namespace Apache {
@@ -14,15 +15,15 @@ CAR_INTERFACE_IMPL(CCertificateIssuerHelper, Singleton, ICertificateIssuerHelper
 ECode CCertificateIssuerHelper::GetASN1(
     /* [out] */ IASN1Type** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    return CCertificateIssuer::GetASN1(ppAsn1);
 }
 
 ECode CCertificateIssuerHelper::SetASN1(
     /* [in] */ IASN1Type* pAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return CCertificateIssuer::SetASN1(pAsn1);
 }
 
 } // namespace X509

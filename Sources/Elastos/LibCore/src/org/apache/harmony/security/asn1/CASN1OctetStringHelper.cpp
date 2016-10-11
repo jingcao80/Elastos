@@ -1,6 +1,6 @@
 
 #include "CASN1OctetStringHelper.h"
-#include "CASN1OctetString.h"
+#include "ASN1OctetString.h"
 
 namespace Org {
 namespace Apache {
@@ -15,7 +15,7 @@ CAR_SINGLETON_IMPL(CASN1OctetStringHelper)
 ECode CASN1OctetStringHelper::GetInstance(
     /* [out] */ IASN1OctetString** instance)
 {
-    return CASN1OctetString::GetInstance(instance);
+    return ASN1OctetString::GetInstance(instance);
 }
 
 } // namespace Asn1

@@ -34,8 +34,7 @@ module
             [out] IList** infomations);
 
         AddPolicyInformation(
-            [in] IPolicyInformation* policyInformation,
-            [out] ICertificatePolicies** policies);
+            [in] IPolicyInformation* policyInformation);
     }
 
     [deprecated]

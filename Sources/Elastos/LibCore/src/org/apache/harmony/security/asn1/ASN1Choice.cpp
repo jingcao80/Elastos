@@ -207,6 +207,16 @@ ECode ASN1Choice::AddIdentifier(
     return NOERROR;
 }
 
+ECode ASN1Choice::GetType(
+    /* [out, callee] */ ArrayOf<IASN1Type*>** type)
+{
+    VALIDATE_NOT_NULL(type);
+
+    *type = mType;
+    REFCOUNT_ADD(*type);
+    return NOERROR;
+}
+
 } // namespace Asn1
 } // namespace Security
 } // namespace Harmony

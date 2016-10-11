@@ -3,8 +3,15 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CCERTIFICATEPOLICIES_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CCertificatePolicies.h"
+#include "org/apache/harmony/security/asn1/ASN1SequenceOf.h"
+#include "org/apache/harmony/security/x509/ExtensionValue.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::Asn1::ASN1SequenceOf;
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Elastos::Core::Object;
 using Elastos::Core::IStringBuilder;
 using Elastos::Utility::IList;
@@ -16,10 +23,23 @@ namespace Security {
 namespace X509 {
 
 CarClass(CCertificatePolicies)
-    , public Object
+    , public ExtensionValue
     , public ICertificatePolicies
-    , public IExtensionValue
 {
+private:
+    class MyASN1SequenceOf
+        : public ASN1SequenceOf
+    {
+    protected:
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
+
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [out] */ ICollection** coll);
+    };
+
 public:
     CAR_OBJECT_DECL()
 
@@ -32,20 +52,43 @@ public:
         /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
-    CARAPI DumpValue(
-        /* [in] */ IStringBuilder* pSb);
-
     CARAPI GetPolicyInformations(
         /* [out] */ IList** ppInfomations);
 
     CARAPI AddPolicyInformation(
-        /* [in] */ IPolicyInformation* pPolicyInformation,
-        /* [out] */ ICertificatePolicies** ppPolicies);
+        /* [in] */ IPolicyInformation* pPolicyInformation);
 
     CARAPI constructor();
 
+    CARAPI constructor(
+        /* [in] */ IList* policyInformations,
+        /* [in] */ ArrayOf<Byte>* encoding);
+
+    static CARAPI Decode(
+        /* [in] */ ArrayOf<Byte>* pEncoding,
+        /* [out] */ ICertificatePolicies** ppPolicies);
+
+    static CARAPI GetASN1(
+        /* [out] */ IASN1Type** ppAsn1);
+
+    static CARAPI SetASN1(
+        /* [in] */ IASN1Type* pAsn1);
+
 private:
-    // TODO: Add your private member variables here.
+    static CARAPI_(AutoPtr<IASN1Type>) initASN1();
+
+public:
+    /**
+     * ASN.1 DER X.509 CertificatePolicies encoder/decoder class.
+     */
+    static AutoPtr<IASN1Type> ASN1;
+
+private:
+    /** the values of policyInformation field of the structure */
+    AutoPtr<IList> mPolicyInformations;
+
+    /** the ASN.1 encoded form of CertificatePolicies */
+    AutoPtr<ArrayOf<Byte> > mEncoding;
 };
 
 } //namespace X509

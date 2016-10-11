@@ -3,9 +3,15 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CEXTENSION_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CExtension.h"
-//#include "Elastos.CoreLibrary.Security.h"
+#include "org/apache/harmony/security/asn1/ASN1OctetString.h"
+#include "org/apache/harmony/security/asn1/ASN1Sequence.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::Asn1::ASN1OctetString;
 using Elastos::Core::Object;
 using Elastos::Core::IStringBuilder;
 using Elastos::IO::IOutputStream;
@@ -22,6 +28,29 @@ CarClass(CExtension)
     , public IX509Extension
     , public IExtension
 {
+private:
+    class MyASN1OctetString
+        : public ASN1OctetString
+    {
+    public:
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
+    };
+
+    class MyASN1Sequence
+        : public ASN1Sequence
+    {
+    protected:
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
+
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [in] */ ArrayOf<IInterface*>* values);
+    };
+
 public:
     CAR_OBJECT_DECL()
 
@@ -38,15 +67,6 @@ public:
 
     CARAPI Encode(
         /* [in] */ IOutputStream* outValue);
-
-    CARAPI GetExtnID(
-        /* [out] */ String* pExtnID);
-
-    CARAPI GetCritical(
-        /* [out] */ Boolean* pCritical);
-
-    CARAPI GetExtnValue(
-        /* [out, callee] */ ArrayOf<Byte>** ppExtnValue);
 
     CARAPI GetRawExtnValue(
         /* [out, callee] */ ArrayOf<Byte>** ppRawExtnValue);
@@ -74,6 +94,8 @@ public:
         /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
+    CExtension();
+
     CARAPI constructor(
         /* [in] */ const String& extnID,
         /* [in] */ Boolean critical,
@@ -97,8 +119,84 @@ public:
         /* [in] */ ArrayOf<Int32>* pExtnID,
         /* [in] */ ArrayOf<Byte>* pExtnValue2);
 
+    CARAPI constructor(
+        /* [in] */ ArrayOf<Int32>* extnID,
+        /* [in] */ Boolean critical,
+        /* [in] */ ArrayOf<Byte>* extnValue,
+        /* [in] */ ArrayOf<Byte>* rawExtnValue,
+        /* [in] */ ArrayOf<Byte>* encoding,
+        /* [in] */ IExtensionValue* decodedExtValue);
+
+    static CARAPI GetASN1(
+        /* [out] */ IASN1Sequence** ppAsn1);
+
+    static CARAPI SetASN1(
+        /* [in] */ IASN1Sequence* pAsn1);
+
 private:
-    // TODO: Add your private member variables here.
+    CARAPI DecodeExtensionValue();
+
+    static CARAPI_(AutoPtr<IASN1Sequence>) initASN1();
+
+public:
+    /**
+     * X.509 Extension encoder/decoder.
+     */
+    static AutoPtr<IASN1Sequence> ASN1;
+
+protected:
+    // the decoded extension value
+    AutoPtr<IExtensionValue> mExtnValueObject;
+
+private:
+    // constants: the extension OIDs
+    // certificate extensions:
+    static AutoPtr<ArrayOf<Int32> > SUBJ_DIRECTORY_ATTRS;
+    static AutoPtr<ArrayOf<Int32> > SUBJ_KEY_ID;
+    static AutoPtr<ArrayOf<Int32> > KEY_USAGE;
+    static AutoPtr<ArrayOf<Int32> > PRIVATE_KEY_USAGE_PERIOD;
+    static AutoPtr<ArrayOf<Int32> > SUBJECT_ALT_NAME;
+    static AutoPtr<ArrayOf<Int32> > ISSUER_ALTERNATIVE_NAME;
+    static AutoPtr<ArrayOf<Int32> > BASIC_CONSTRAINTS;
+    static AutoPtr<ArrayOf<Int32> > NAME_CONSTRAINTS;
+    static AutoPtr<ArrayOf<Int32> > CRL_DISTR_POINTS;
+    static AutoPtr<ArrayOf<Int32> > CERTIFICATE_POLICIES;
+    static AutoPtr<ArrayOf<Int32> > POLICY_MAPPINGS;
+    static AutoPtr<ArrayOf<Int32> > AUTH_KEY_ID;
+    static AutoPtr<ArrayOf<Int32> > POLICY_CONSTRAINTS;
+    static AutoPtr<ArrayOf<Int32> > EXTENDED_KEY_USAGE;
+    static AutoPtr<ArrayOf<Int32> > FRESHEST_CRL;
+    static AutoPtr<ArrayOf<Int32> > INHIBIT_ANY_POLICY;
+    static AutoPtr<ArrayOf<Int32> > AUTHORITY_INFO_ACCESS;
+    static AutoPtr<ArrayOf<Int32> > SUBJECT_INFO_ACCESS;
+    // crl extensions:
+    static AutoPtr<ArrayOf<Int32> > ISSUING_DISTR_POINT;
+    // crl entry extensions:
+    static AutoPtr<ArrayOf<Int32> > CRL_NUMBER;
+    static AutoPtr<ArrayOf<Int32> > CERTIFICATE_ISSUER;
+    static AutoPtr<ArrayOf<Int32> > INVALIDITY_DATE;
+    static AutoPtr<ArrayOf<Int32> > REASON_CODE;
+    static AutoPtr<ArrayOf<Int32> > ISSUING_DISTR_POINTS;
+
+    // the value of extnID field of the structure
+    AutoPtr<ArrayOf<Int32> > mExtnID;
+
+    String mExtnID_str;
+
+    // the value of critical field of the structure
+    Boolean mCritical;
+
+    // the value of extnValue field of the structure
+    AutoPtr<ArrayOf<Byte> > mExtnValue;
+
+    // the ASN.1 encoded form of Extension
+    AutoPtr<ArrayOf<Byte> > mEncoding;
+
+    // the raw (not decoded) value of extnValue field of the structure
+    AutoPtr<ArrayOf<Byte> > mRawExtnValue;
+
+    // tells whether extension value has been decoded or not
+    /*volatile*/ Boolean mValueDecoded;
 };
 
 } //namespace X509
