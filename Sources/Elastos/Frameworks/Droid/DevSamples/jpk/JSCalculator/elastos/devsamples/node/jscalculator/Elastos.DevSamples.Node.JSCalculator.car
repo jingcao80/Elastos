@@ -63,47 +63,8 @@ module
             [in] IMessage* msg);
     }
 
-    [deprecated]
-    interface IActivityListener {
-        OnCreate(
-            [in] IContext* ctx,
-            [in] IBundle* savedInstanceState);
-        OnStart(
-            [in] IContext* context);
-        OnResume(
-            [in] IContext* context);
-        OnPause(
-            [in] IContext* context);
-        OnStop(
-            [in] IContext* context);
-        OnDestroy(
-            [in] IContext* context);
-
-        OnBackPressed(
-            [in] IContext* context);
-
-        OnNewIntent(
-            [in] IContext* ctx,
-            [in] IIntent *intent);
-
-        OnCreateDialog(
-            [in] IContext* ctx,
-            [in] Int32 id,
-            [out] IInterface** dlg);
-
-        OnActivityResult(
-            [in] IContext* ctx,
-            [in] Int32 requestCode,
-            [in] Int32 resultCode,
-            [in] IIntent *data);
-
-        OnCreateContextMenu(
-            [in] IContext* ctx,
-            [in] IContextMenu* menu,
-            [in] IView* v,
-            [in] IContextMenuInfo* menuInfo);
-    }
-
+    interface IActivityListener;
+    interface ICalculatorListener;
     interface ICalculatorEditTextListener;
     interface ICalculatorPadLayoutListener;
     interface ICalculatorPadViewPagerListener;
@@ -115,6 +76,14 @@ module
             [in] String activityName,
             [in] IInterface* activityInstance,
             [in] Int32 activityListener,    //IActivityListener**
+            [in] IHandler* activityHandler,
+            [out] Boolean* result);
+
+        OnRegisterCalculator(
+            [in] String packageName,
+            [in] String activityName,
+            [in] IInterface* activityInstance,
+            [in] Int32 activityListener,    //ICalculatorListener**
             [in] IHandler* activityHandler,
             [out] Boolean* result);
 
@@ -156,6 +125,10 @@ module
             [in] Int32 activityListener,    //IActivityListener**
             [in] IActivityListener* jsActivityListener);
 
+        SetCalculatorListener(
+            [in] Int32 calculatorListener,    //ICalculatorListener**
+            [in] ICalculatorListener* jsCalculatorListener);
+
         SetCalculatorEditTextListener(
             [in] Int32 calculatorEditTextListener,    //ICalculatorEditTextListener**
             [in] ICalculatorEditTextListener* jsCalculatorEditTextListener);
@@ -184,8 +157,41 @@ module
 
     [local]
     interface IActivityOne {
-        OnClickPopupWindow(
-            [in] IView* v);
+        Test();
+    }
+
+    [local]
+    interface IActivityListener {
+        OnCreate(
+            [in] IContext* ctx,
+            [in] IBundle* savedInstanceState);
+    }
+
+    [local]
+    interface ICalculator {
+        _OnCreate(
+            [in] IBundle* savedInstanceState);
+
+        _OnSaveInstanceState(
+            [in] IBundle* outState);
+
+        _OnBackPressed();
+
+        _OnUserInteraction();
+    }
+
+    [local]
+    interface ICalculatorListener {
+        OnCreate(
+            [in] IContext* ctx,
+            [in] IBundle* savedInstanceState);
+        OnSaveInstanceState(
+            [in] IContext* ctx,
+            [in] IBundle* outState);
+        OnBackPressed(
+            [in] IContext* ctx);
+        OnUserInteraction(
+            [in] IContext* ctx);
     }
 
     [local]
@@ -365,7 +371,7 @@ module
             [in] IInterface* _this,
             [out] IViewGroupLayoutParams** result);
         //protected
-        GenerateLayoutParams(
+        GenerateLayoutParams_0(
             [in] IInterface* _this,
             [in] IViewGroupLayoutParams* p,
             [out] IViewGroupLayoutParams** result);
@@ -680,7 +686,7 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
-        interface IActivityOne;
+        interface ICalculator;
     }
 
     [local]

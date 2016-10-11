@@ -52,192 +52,197 @@ module.exports = function(aoElastos, aoActivity){
  *  {@link android.R.attr#columnCount} and {@link android.R.attr#rowCount} attributes.
  */
 // public class CalculatorPadLayout extends ViewGroup {
-    class _CalculatorPadLayout extends ViewGroup {
-        constructor() {
-            super();
-        }
+class _CalculatorPadLayout extends ViewGroup {
+    constructor() {
+        super();
+    }
 
 //     private int mRowCount;
-        get mRowCount() {
-            return this._mRowCount || 0;
-        }
-        set mRowCount(value) {
-            this._mRowCount = value;
-        }
 //     private int mColumnCount;
-        get mColumnCount() {
-            return this._mColumnCount || 0;
-        }
-        set mColumnCount(value) {
-            this._mColumnCount = value;
-        }
 
-// //     public CalculatorPadLayout(Context context) {
-// //         this(context, null);
-// //     }
+//     public CalculatorPadLayout(Context context) {
+//         this(context, null);
+//     }
 
-// //     public CalculatorPadLayout(Context context, AttributeSet attrs) {
-// //         this(context, attrs, 0);
-// //     }
+//     public CalculatorPadLayout(Context context, AttributeSet attrs) {
+//         this(context, attrs, 0);
+//     }
 
 //     public CalculatorPadLayout(Context context, AttributeSet attrs, int defStyle) {
-        // function __CalculatorPadLayout(context, attrs, defStyle) {
-        OnCreate(_this, context, attrs, defStyle) {
-            elog("====CalculatorPadLayout.js====super::OnCreate====begin=======");
-
-            attrs = attrs || null;
-            defStyle = defStyle || 0;
-            elog("====CalculatorPadLayout.js====super::OnCreate====1=======");
-
 //         super(context, attrs, defStyle);
-            _this._constructor(context, attrs, defStyle);
-            elog("====CalculatorPadLayout.js====super::OnCreate====2=======");
 
 //         final TypedArray a = context.obtainStyledAttributes(attrs,
 //                 new int[] { android.R.attr.rowCount, android.R.attr.columnCount }, defStyle, 0);
-            var Elastos__Droid__R__attr__rowCount = 0x01010375;
-            var Elastos__Droid__R__attr__columnCount = 0x01010377;
-            elog("====CalculatorPadLayout.js====super::OnCreate====3=======");
-            var a = context.ObtainStyledAttributes(attrs, [Elastos__Droid__R__attr__rowCount, Elastos__Droid__R__attr__columnCount], defStyle, 0);
-            elog("====CalculatorPadLayout.js====super::OnCreate====4=======");
 //         mRowCount = a.getInt(0, 1);
-            this.mRowCount = a.GetInt32(0, 1);
-            elog("====CalculatorPadLayout.js====super::OnCreate====5=======");
 //         mColumnCount = a.getInt(1, 1);
-            this.mColumnCount = a.GetInt32(1, 1);
-            elog("====CalculatorPadLayout.js====super::OnCreate====6=======");
 
 //         a.recycle();
-            a.Recycle();
-
-            elog("====CalculatorPadLayout.js====super::OnCreate====end=======");
 //     }
-        }
+    OnCreate(_this, context, attrs, defStyle) {
+        elog("====CalculatorPadLayout.js====super::OnCreate====begin=======");
+
+        attrs = attrs || null;
+        defStyle = defStyle || 0;
+
+        _this._constructor(context, attrs, defStyle);
+
+        var Elastos__Droid__R__attr__rowCount = 0x01010375;
+        var Elastos__Droid__R__attr__columnCount = 0x01010377;
+        var a = context.ObtainStyledAttributes(attrs, [Elastos__Droid__R__attr__rowCount, Elastos__Droid__R__attr__columnCount], defStyle, 0);
+        this.mRowCount = a.GetInt32(0, 1);
+        this.mColumnCount = a.GetInt32(1, 1);
+
+        a.Recycle();
+
+        elog("====CalculatorPadLayout.js====super::OnCreate====end=======");
+    }
 
 //     @Override
 //     public boolean shouldDelayChildPressedState() {
-        ShouldDelayChildPressedState(result) {
-            elog("====CalculatorPadLayout.js====super::ShouldDelayChildPressedState====begin=======");
 //         return false;
-            result.data = false;
-            elog("====CalculatorPadLayout.js====super::ShouldDelayChildPressedState====end=======");
-        }
+//     }
+    ShouldDelayChildPressedState(result) {
+        result.data = false;
+    }
 
 //     @Override
 //     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        OnLayout(changed, left, top, right, bottom) {
-            elog("====CalculatorPadLayout.js====super::OnLayout====begin=======");
 //         final int paddingLeft = getPaddingLeft();
-            var paddingLeft = _this.GetPaddingLeft();
 //         final int paddingRight = getPaddingRight();
-            var paddingRight = _this.GetPaddingRight();
 //         final int paddingTop = getPaddingTop();
-            var paddingTop = _this.GetPaddingTop();
 //         final int paddingBottom = getPaddingBottom();
-            var paddingBottom = _this.GetPaddingBottom();
 
 //         final boolean isRTL = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-            var isRTL = _this.GetLayoutDirection() == LAYOUT_DIRECTION_RTL;
 //         final int columnWidth =
 //                 Math.round((float) (right - left - paddingLeft - paddingRight)) / mColumnCount;
-            var columnWidth = Math.round(right - left - paddingLeft - paddingRight) / mColumnCount;
 //         final int rowHeight =
 //                 Math.round((float) (bottom - top - paddingTop - paddingBottom)) / mRowCount;
-            var rowHeight = Math.round(bottom - top - paddingTop - paddingBottom) / mRowCount;
 
 //         int rowIndex = 0, columnIndex = 0;
-            var rowIndex = 0, columnIndex = 0;
 //         for (int childIndex = 0; childIndex < getChildCount(); ++childIndex) {
-            for (var childIndex = 0; childIndex < _this.GetChildCount(); ++childIndex) {
 //             final View childView = getChildAt(childIndex);
-                var childView = _this.GetChildAt(childIndex);
 //             if (childView.getVisibility() == View.GONE) {
-                if (childView.GetVisibility() == View.GONE) {
 //                 continue;
-                    continue;
-                }
+//             }
 
 //             final MarginLayoutParams lp = (MarginLayoutParams) childView.getLayoutParams();
-                var lp = childView.GetLayoutParams();
 
 //             final int childTop = paddingTop + lp.topMargin + rowIndex * rowHeight;
-                var childTop = paddingTop + lp.topMargin + rowIndex * rowHeight;
 //             final int childBottom = childTop - lp.topMargin - lp.bottomMargin + rowHeight;
-                var childBottom = childTop - lp.topMargin - lp.bottomMargin + rowHeight;
 //             final int childLeft = paddingLeft + lp.leftMargin +
 //                     (isRTL ? (mColumnCount - 1) - columnIndex : columnIndex) * columnWidth;
-                childLeft = paddingLeft + lp.leftMargin +
-                        (isRTL ? (mColumnCount - 1) - columnIndex : columnIndex) * columnWidth;
 //             final int childRight = childLeft - lp.leftMargin - lp.rightMargin + columnWidth;
-                var childRight = childLeft - lp.leftMargin - lp.rightMargin + columnWidth;
 
 //             final int childWidth = childRight - childLeft;
-                var childWidth = childRight - childLeft;
 //             final int childHeight = childBottom - childTop;
-                var childHeight = childBottom - childTop;
 //             if (childWidth != childView.getMeasuredWidth() ||
 //                     childHeight != childView.getMeasuredHeight()) {
-                if (childWidth != childView.GetMeasuredWidth() ||
-                        childHeight != childView.GetMeasuredHeight()) {
 //                 childView.measure(
 //                         MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
 //                         MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.EXACTLY));
-                    childView.Measure(
-                            MeasureSpec.MakeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
-                            MeasureSpec.MakeMeasureSpec(childHeight, MeasureSpec.EXACTLY));
-                }
+//             }
 //             childView.layout(childLeft, childTop, childRight, childBottom);
-                childView.Layout(childLeft, childTop, childRight, childBottom);
 
 //             rowIndex = (rowIndex + (columnIndex + 1) / mColumnCount) % mRowCount;
-                rowIndex = (rowIndex + (columnIndex + 1) / mColumnCount) % mRowCount;
 //             columnIndex = (columnIndex + 1) % mColumnCount;
-                columnIndex = (columnIndex + 1) % mColumnCount;
+//         }
+//     }
+    OnLayout(changed, left, top, right, bottom) {
+        elog("====CalculatorPadLayout.js====super::OnLayout====begin=======");
+
+        var paddingLeft = _this.GetPaddingLeft();
+        var paddingRight = _this.GetPaddingRight();
+        var paddingTop = _this.GetPaddingTop();
+        var paddingBottom = _this.GetPaddingBottom();
+
+        var isRTL = _this.GetLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        var columnWidth = Math.round(right - left - paddingLeft - paddingRight) / mColumnCount;
+        var rowHeight = Math.round(bottom - top - paddingTop - paddingBottom) / mRowCount;
+
+        var rowIndex = 0, columnIndex = 0;
+        for (var childIndex = 0; childIndex < _this.GetChildCount(); ++childIndex) {
+            var childView = _this.GetChildAt(childIndex);
+            if (childView.GetVisibility() == View.GONE) {
+                continue;
             }
-            elog("====CalculatorPadLayout.js====super::OnLayout====end=======");
+
+            var lp = childView.GetLayoutParams();
+
+            var childTop = paddingTop + lp.topMargin + rowIndex * rowHeight;
+            var childBottom = childTop - lp.topMargin - lp.bottomMargin + rowHeight;
+            childLeft = paddingLeft + lp.leftMargin +
+                    (isRTL ? (mColumnCount - 1) - columnIndex : columnIndex) * columnWidth;
+            var childRight = childLeft - lp.leftMargin - lp.rightMargin + columnWidth;
+
+            var childWidth = childRight - childLeft;
+            var childHeight = childBottom - childTop;
+            if (childWidth != childView.GetMeasuredWidth() ||
+                    childHeight != childView.GetMeasuredHeight()) {
+                childView.Measure(
+                        MeasureSpec.MakeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.MakeMeasureSpec(childHeight, MeasureSpec.EXACTLY));
+            }
+            childView.Layout(childLeft, childTop, childRight, childBottom);
+
+            rowIndex = (rowIndex + (columnIndex + 1) / mColumnCount) % mRowCount;
+            columnIndex = (columnIndex + 1) % mColumnCount;
         }
+        elog("====CalculatorPadLayout.js====super::OnLayout====end=======");
+    }
 
 //     @Override
 //     public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        GenerateLayoutParams(_this, attrs, result) {
-            elog("====CalculatorPadLayout.js====GenerateLayoutParams====begin====");
 //         return new MarginLayoutParams(getContext(), attrs);
-            result.data = Droid_New("Elastos.Droid.View.CViewGroupMarginLayoutParams", _this.GetContext(), attrs);
-            elog("====CalculatorPadLayout.js====GenerateLayoutParams====end====");
 //     }
+    GenerateLayoutParams(_this, attrs, result) {
+        elog("====CalculatorPadLayout.js====super::GenerateLayoutParams====begin=======");
+
+        var attrsClassName = attrs.getClass().GetName();
+
+        elog("====attrs.name:"+attrsClassName);
+
+        if (attrsClassName == "IAttributeSet") {
+            result.data = Droid_New("Elastos.Droid.View.CViewGroupMarginLayoutParams", _this.GetContext(), attrs);
         }
+        else {
+            Assert(0);
+            this.GenerateLayoutParams_0(_this, p, result);
+        }
+
+        elog("====CalculatorPadLayout.js====super::GenerateLayoutParams====end=======");
+    }
+
 
 //     @Override
 //     protected LayoutParams generateDefaultLayoutParams() {
 //         return new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 //     }
-        GenerateDefaultLayoutParams(_this, result) {
-            result.data = new MarginLayoutParams(_this.LayoutParams.WRAP_CONTENT, _this.LayoutParams.WRAP_CONTENT);
-        }
+    GenerateDefaultLayoutParams(_this, result) {
+        result.data = new MarginLayoutParams(_this.LayoutParams.WRAP_CONTENT, _this.LayoutParams.WRAP_CONTENT);
+    }
 
 //     @Override
 //     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
-        GenerateLayoutParams_0(_this, p, result) {
-            elog("====CalculatorPadLayout.js====GenerateLayoutParams_0====begin====");
 //         return new MarginLayoutParams(p);
-            result.data = Droid_New("Elastos.Droid.View.CViewGroupMarginLayoutParams", p);
-            elog("====CalculatorPadLayout.js====GenerateLayoutParams_0====end====");
 //     }
-        }
+    GenerateLayoutParams_0(_this, p, result) {
+        elog("====CalculatorPadLayout.js====super::GenerateLayoutParams_0====begin=======");
+        result.data = Droid_New("Elastos.Droid.View.CViewGroupMarginLayoutParams", p);
+        elog("====CalculatorPadLayout.js====super::GenerateLayoutParams_0====end=======");
+    }
 
-// //     @Override
-// //     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-//         _pt.CheckLayoutParams = function(p, result) {
-// //         return p instanceof MarginLayoutParams;
-//             result.data = p instanceof MarginLayoutParams;
-// //     }
-//         }
-// }
-    }   //class _CalculatorPadLayout
 
-// //--------.java----end----
+//     @Override
+//     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+//         return p instanceof MarginLayoutParams;
+//     }
+    CheckLayoutParams(p, result) {
+        result.data = p instanceof MarginLayoutParams;
+    }
 
-//     //return CalculatorPadLayout;
+}   //class _CalculatorPadLayout
+
+//--------.java----end----
 
     class CalculatorPadLayout extends _CalculatorPadLayout {
         constructor() {

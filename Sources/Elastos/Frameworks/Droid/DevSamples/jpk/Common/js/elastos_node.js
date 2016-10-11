@@ -208,6 +208,31 @@ Application.NodeBridgeListener = {
         elog("OnRegisterActivity======end======");
     },
 
+    OnRegisterCalculator : function(asPackageName, asActivityName, aoActivityInstance, aoActivityListener, aoActivityHandler, out_abResult) {
+        elog("OnRegisterCalculator======begin======");
+
+        var _this = Elastos.Application;
+
+        _this.R = require(_this.RootPath + "/R.js");
+
+        var sFileName = _this.RootPath + "/" + asActivityName + ".js";
+        var oActivity = {
+            Name : asActivityName,
+            ActivityInstance : aoActivityInstance,
+            ActivityHandler : aoActivityHandler,
+        };
+
+        var oActivityListener = require(sFileName)(Elastos, oActivity);
+        oActivity.ActivityListener = oActivityListener;
+        _this.Activities.push(oActivity);
+
+        Elastos.Test.SetCalculatorListener(aoActivityListener, oActivityListener);
+
+        out_abResult.data = true;
+
+        elog("OnRegisterCalculator======end======");
+    },
+
     OnRegisterCalculatorEditText : function(aoContext, aoControl, aoListener, out_abResult) {
         elog("OnRegisterCalculatorEditText======begin======");
 

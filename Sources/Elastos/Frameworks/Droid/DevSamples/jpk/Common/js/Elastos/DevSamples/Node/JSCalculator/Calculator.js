@@ -14,6 +14,10 @@ module.exports = function(aoElastos, aoActivity){
     var oHandler = aoActivity.ActivityHandler;
 
     var IView__VISIBLE = 0x00000000;
+    var IView__INVISIBLE = 0x00000004;
+    var IView__GONE = 0x00000008;
+    var IMotionEvent__ACTION_DOWN = 0;
+    var IMotionEvent__ACTION_UP = 1;
 
 //--------common definition----end----
 
@@ -47,6 +51,11 @@ module.exports = function(aoElastos, aoActivity){
 // import android.animation.ValueAnimator.AnimatorUpdateListener;
 // import android.app.Activity;
 class Activity {
+    constructor() {
+        //TODO return wrapper of native hacked activity compoment
+        //TODO to replace this._obj
+    }
+
     OnCreate(_this, savedInstanceState) {}
 }
 // import android.graphics.Rect;
@@ -75,22 +84,40 @@ var CalculatorExpressionBuilder = require("./CalculatorExpressionBuilder.js")(ao
 
 // public class Calculator extends Activity
 //         implements OnTextSizeChangeListener, EvaluateCallback, OnLongClickListener {
-class _Calculator extends Activity {
+class Calculator extends Activity {
 
 //     private static final String NAME = Calculator.class.getName();
+    static get NAME() {
+        //return Calculator.class.getName();
+        elog("====Calculator::name===="+Calculator.name);
+        return Calculator.name;
+    }
 
 //     // instance state keys
 //     private static final String KEY_CURRENT_STATE = NAME + "_currentState";
+    static get KEY_CURRENT_STATE() {
+        return Calculator.NAME + "_currentState";
+    }
 //     private static final String KEY_CURRENT_EXPRESSION = NAME + "_currentExpression";
+    static get KEY_CURRENT_EXPRESSION() {
+        return Calculator.NAME + "_currentExpression";
+    }
 
 //     /**
 //      * Constant for an invalid resource id.
 //      */
 //     public static final int INVALID_RES_ID = -1;
+    static get INVALID_RES_ID() {return -1;}
 
 //     private enum CalculatorState {
 //         INPUT, EVALUATE, RESULT, ERROR
 //     }
+    static get CalculatorState() {
+        return {
+            INPUT:0, EVALUATE:1, RESULT:2, ERROR:3,
+            values:function(){return [0,1,2,3];}
+        }
+    }
 
 //     private final TextWatcher mFormulaTextWatcher = new TextWatcher() {
 //         @Override
@@ -107,6 +134,25 @@ class _Calculator extends Activity {
 //             mEvaluator.evaluate(editable, Calculator.this);
 //         }
 //     };
+    get mFormulaTextWatcher() {
+        if (this._mFormulaTextWatcher) return this._mFormulaTextWatcher;
+        this._mFormulaTextWatcher = new class _ extends TextWatcher {
+            //@Override
+            BeforeTextChanged(charSequence, start, count, after) {
+            }
+
+            //@Override
+            OnTextChanged(charSequence, start, count, after) {
+            }
+
+            //@Override
+            AfterTextChanged(editable) {
+                this.SetState(Calculator.CalculatorState.INPUT);
+                this.mEvaluator.evaluate(editable, Calculator.this);
+            }
+        }();
+        return this._mFormulaTextWatcher;
+    };
 
 //     private final OnKeyListener mFormulaOnKeyListener = new OnKeyListener() {
 //         @Override
@@ -124,6 +170,26 @@ class _Calculator extends Activity {
 //             return false;
 //         }
 //     };
+    get mFormulaOnKeyListener() {
+        if (this._mFormulaOnKeyListener) return this._mFormulaOnKeyListener;
+        this._mFormulaOnKeyListener = new class _ extends OnKeyListener {
+            //@Override
+            OnKey(view, keyCode, keyEvent) {
+                switch (keyCode) {
+                    case KeyEvent.KEYCODE_NUMPAD_ENTER:
+                    case KeyEvent.KEYCODE_ENTER:
+                        if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                            mCurrentButton = mEqualButton;
+                            onEquals();
+                        }
+                        // ignore all other actions
+                        return true;
+                }
+                return false;
+            }
+        }();
+        return this._mFormulaOnKeyListener;
+    };
 
 //     private final Editable.Factory mFormulaEditableFactory = new Editable.Factory() {
 //         @Override
@@ -133,6 +199,18 @@ class _Calculator extends Activity {
 //             return new CalculatorExpressionBuilder(source, mTokenizer, isEdited);
 //         }
 //     };
+    get mFormulaEditableFactory() {
+        if (this._mFormulaEditableFactory) return this._mFormulaEditableFactory;
+        this._mFormulaEditableFactory = new class _ extends Editable.Factory {
+            // @Override
+            NewEditable(source) {
+                var isEdited = this.mCurrentState == Calculator.CalculatorState.INPUT
+                        || this.mCurrentState == Calculator.CalculatorState.ERROR;
+                return new CalculatorExpressionBuilder(source, mTokenizer, isEdited);
+            }
+        }();
+        return this._mFormulaEditableFactory;
+    };
 
 //     private CalculatorState mCurrentState;
 //     private CalculatorExpressionTokenizer mTokenizer;
@@ -183,8 +261,13 @@ class _Calculator extends Activity {
 //         mDeleteButton.setOnLongClickListener(this);
 //     }
     OnCreate(_this, savedInstanceState) {
+        this._obj = _this;
+elog("====Calculator::OnCreate====0====");
+
         super.OnCreate(_this, savedInstanceState);
         _this.SetContentView(R.layout.activity_calculator);
+
+return;
 
         this.mDisplayView = _this.FindViewById(R.id.display);
         this.mFormulaEditText = _this.FindViewById(R.id.formula);
@@ -197,22 +280,38 @@ class _Calculator extends Activity {
         if (this.mEqualButton == null || this.mEqualButton.GetVisibility() != IView__VISIBLE) {
             this.mEqualButton = _this.FindViewById(R.id.pad_operator).FindViewById(R.id.eq);
         }
+elog("====Calculator::OnCreate====1====");
 
         this.mTokenizer = new CalculatorExpressionTokenizer(_this);
+elog("====Calculator::OnCreate====2====");
         this.mEvaluator = new CalculatorExpressionEvaluator(this.mTokenizer);
+elog("====Calculator::OnCreate====3====");
 
         savedInstanceState = savedInstanceState == null ? Bundle.EMPTY : savedInstanceState;
-        setState(CalculatorState.values()[
-                savedInstanceState.getInt(KEY_CURRENT_STATE, CalculatorState.INPUT.ordinal())]);
-        this.mFormulaEditText.SetText(this.mTokenizer.GetLocalizedExpression(
-                savedInstanceState.GetString(KEY_CURRENT_EXPRESSION, "")));
-        this.mEvaluator.Evaluate(this.mFormulaEditText.GetText(), _this);
 
-        this.mFormulaEditText.setEditableFactory(this.mFormulaEditableFactory);
-        this.this.mFormulaEditText.addTextChangedListener(this.mFormulaTextWatcher);
-        this.mFormulaEditText.setOnKeyListener(this.mFormulaOnKeyListener);
-        this.mFormulaEditText.setOnTextSizeChangeListener(_this);
-        this.mDeleteButton.setOnLongClickListener(_this);
+//CObject.showMethods(savedInstanceState);
+//elog("====interface/class name:"+savedInstanceState.getClass().GetName());
+//var ss = CObject.getObjectMethodProtos(savedInstanceState,"GetInt32")
+//elog("====PROTO:"+ss);
+
+elog("====Calculator::OnCreate====4====state:"+Calculator.KEY_CURRENT_STATE+"===="+Calculator.CalculatorState.INPUT);
+
+        this.SetState(Calculator.CalculatorState.values()[
+                savedInstanceState.GetInt32(Calculator.KEY_CURRENT_STATE, Calculator.CalculatorState.INPUT)]);
+elog("====Calculator::OnCreate====5====");
+
+        this.mFormulaEditText.SetText(this.mTokenizer.GetLocalizedExpression(
+                savedInstanceState.GetString(Calculator.KEY_CURRENT_EXPRESSION, "")));
+elog("====Calculator::OnCreate====6====");
+        this.mEvaluator.Evaluate(this.mFormulaEditText.GetText(), _this);
+elog("====Calculator::OnCreate====7====");
+
+        this.mFormulaEditText.SetEditableFactory(this.mFormulaEditableFactory);
+        this.mFormulaEditText.AddTextChangedListener(this.mFormulaTextWatcher);
+        this.mFormulaEditText.SetOnKeyListener(this.mFormulaOnKeyListener);
+        this.mFormulaEditText.SetOnTextSizeChangeListener(_this);
+        this.mDeleteButton.SetOnLongClickListener(_this);
+elog("====Calculator::OnCreate====8====");
     }
 
 //     @Override
@@ -236,8 +335,8 @@ class _Calculator extends Activity {
 
         super.onSaveInstanceState(outState);
 
-        outState.putInt(KEY_CURRENT_STATE, mCurrentState.ordinal());
-        outState.putString(KEY_CURRENT_EXPRESSION,
+        outState.putInt(Calculator.KEY_CURRENT_STATE, this.mCurrentState.ordinal());
+        outState.putString(Calculator.KEY_CURRENT_EXPRESSION,
                 mTokenizer.getNormalizedExpression(mFormulaEditText.getText().toString()));
     }
 
@@ -269,31 +368,39 @@ class _Calculator extends Activity {
 //         }
 //     }
     SetState(state) {
-        if (mCurrentState != state) {
-            mCurrentState = state;
+        elog("====Calculator::SetState====begin===="+this.mCurrentState+"===="+state);
 
-            if (state == CalculatorState.RESULT || state == CalculatorState.ERROR) {
-                mDeleteButton.setVisibility(View.GONE);
-                mClearButton.setVisibility(View.VISIBLE);
+        var _this = this._obj;
+
+        if (this.mCurrentState != state) {
+            this.mCurrentState = state;
+
+            if (state == Calculator.CalculatorState.RESULT || state == Calculator.CalculatorState.ERROR) {
+                this.mDeleteButton.SetVisibility(IView__GONE);
+                this.mClearButton.SetVisibility(IView__VISIBLE);
             } else {
-                mDeleteButton.setVisibility(View.VISIBLE);
-                mClearButton.setVisibility(View.GONE);
+                this.mDeleteButton.SetVisibility(IView__VISIBLE);
+                this.mClearButton.SetVisibility(IView__GONE);
             }
 
-            if (state == CalculatorState.ERROR) {
-                var errorColor = getResources().getColor(R.color.calculator_error_color);
-                mFormulaEditText.setTextColor(errorColor);
-                mResultEditText.setTextColor(errorColor);
-                getWindow().setStatusBarColor(errorColor);
+            if (state == Calculator.CalculatorState.ERROR) {
+                var errorColor = _this.GetResources().GetColor(R.color.calculator_error_color);
+                this.mFormulaEditText.SetTextColor(errorColor);
+                this.mResultEditText.SetTextColor(errorColor);
+                _this.GetWindow().setStatusBarColor(errorColor);
             } else {
-                mFormulaEditText.setTextColor(
-                        getResources().getColor(R.color.display_formula_text_color));
-                mResultEditText.setTextColor(
-                        getResources().getColor(R.color.display_result_text_color));
-                getWindow().setStatusBarColor(
-                        getResources().getColor(R.color.calculator_accent_color));
+                this.mFormulaEditText.SetTextColor(
+                        _this.GetResources().GetColor(R.color.display_formula_text_color));
+                this.mResultEditText.SetTextColor(
+                        _this.GetResources().GetColor(R.color.display_result_text_color));
+                _this.GetWindow().SetStatusBarColor(
+                        _this.GetResources().GetColor(R.color.calculator_accent_color));
             }
         }
+        else {
+            elog("====Calculator::SetState====no act====");
+        }
+        elog("====Calculator::SetState====end====");
     }
 
 //     @Override
@@ -383,10 +490,10 @@ class _Calculator extends Activity {
             case R.id.fun_sin:
             case R.id.fun_tan:
                 // Add left parenthesis after functions.
-                mFormulaEditText.append(((Button) view).getText() + "(");
+                mFormulaEditText.append(view.GetText() + "(");
                 break;
             default:
-                mFormulaEditText.append(((Button) view).getText());
+                mFormulaEditText.append(view.GetText());
                 break;
         }
     }
@@ -427,15 +534,15 @@ class _Calculator extends Activity {
 //         mFormulaEditText.requestFocus();
 //     }
     OnEvaluate(_this, expr, result, errorResourceId) {
-        if (mCurrentState == CalculatorState.INPUT) {
+        if (this.mCurrentState == Calculator.CalculatorState.INPUT) {
             mResultEditText.setText(result);
-        } else if (errorResourceId != INVALID_RES_ID) {
+        } else if (errorResourceId != Calculator.INVALID_RES_ID) {
             onError(errorResourceId);
         } else if (!TextUtils.isEmpty(result)) {
             onResult(result);
-        } else if (mCurrentState == CalculatorState.EVALUATE) {
+        } else if (this.mCurrentState == Calculator.CalculatorState.EVALUATE) {
             // The current expression cannot be evaluated -> return to the input state.
-            setState(CalculatorState.INPUT);
+            setState(Calculator.CalculatorState.INPUT);
         }
 
         mFormulaEditText.requestFocus();
@@ -467,7 +574,7 @@ class _Calculator extends Activity {
 //         animatorSet.start();
 //     }
     OnTextSizeChanged(_this, textView, oldSize) {
-        if (mCurrentState != CalculatorState.INPUT) {
+        if (this.mCurrentState != Calculator.CalculatorState.INPUT) {
             // Only animate text changes that occur from user input.
             return;
         }
@@ -498,9 +605,10 @@ class _Calculator extends Activity {
 //         }
 //     }
     OnEquals() {
-        if (mCurrentState == CalculatorState.INPUT) {
-            setState(CalculatorState.EVALUATE);
-            mEvaluator.evaluate(mFormulaEditText.getText(), this);
+        var _this = this._obj;
+        if (this.mCurrentState == Calculator.CalculatorState.INPUT) {
+            this.SetState(Calculator.CalculatorState.EVALUATE);
+            this.mEvaluator.Evaluate(this.mFormulaEditText.GetText(), _this);
         }
     }
 
@@ -600,16 +708,16 @@ class _Calculator extends Activity {
         var x1_2 = Math.pow(revealView.getLeft() - revealCenterX, 2);
         var x2_2 = Math.pow(revealView.getRight() - revealCenterX, 2);
         var y_2 = Math.pow(revealView.getTop() - revealCenterY, 2);
-        var revealRadius = (float) Math.max(Math.sqrt(x1_2 + y_2), Math.sqrt(x2_2 + y_2));
+        var revealRadius = Math.max(Math.sqrt(x1_2 + y_2), Math.sqrt(x2_2 + y_2));
 
         var revealAnimator =
                 ViewAnimationUtils.createCircularReveal(revealView,
-                        revealCenterX, revealCenterY, 0.0f, revealRadius);
+                        revealCenterX, revealCenterY, 0.0, revealRadius);
         revealAnimator.setDuration(
                 getResources().getInteger(android.R.integer.config_longAnimTime));
         revealAnimator.addListener(listener);
 
-        var alphaAnimator = ObjectAnimator.ofFloat(revealView, View.ALPHA, 0.0f);
+        var alphaAnimator = ObjectAnimator.ofFloat(revealView, View.ALPHA, 0.0);
         alphaAnimator.setDuration(
                 getResources().getInteger(android.R.integer.config_mediumAnimTime));
 
@@ -669,7 +777,7 @@ class _Calculator extends Activity {
 //         });
 //     }
     OnError(errorResourceId) {
-        if (mCurrentState != CalculatorState.EVALUATE) {
+        if (this.mCurrentState != Calculator.CalculatorState.EVALUATE) {
             // Only animate error on evaluate.
             mResultEditText.setText(errorResourceId);
             return;
@@ -678,7 +786,7 @@ class _Calculator extends Activity {
         reveal(mCurrentButton, R.color.calculator_error_color, new class _ extends AnimatorListenerAdapter {
             // @Override
             OnAnimationEnd(animation) {
-                setState(CalculatorState.ERROR);
+                setState(Calculator.CalculatorState.ERROR);
                 mResultEditText.setText(errorResourceId);
             }
         }());
@@ -766,7 +874,7 @@ class _Calculator extends Activity {
                 ValueAnimator.ofObject(new ArgbEvaluator(), resultTextColor, formulaTextColor);
         textColorAnimator.addUpdateListener(new class _ extends AnimatorUpdateListener() {
             // @Override
-            OnAnimationUpdate(ValueAnimator valueAnimator) {
+            OnAnimationUpdate(valueAnimator) {
                 mResultEditText.setTextColor(valueAnimator.getAnimatedValue());
             }
         }());
@@ -783,23 +891,23 @@ class _Calculator extends Activity {
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
         animatorSet.addListener(new class _ extends AnimatorListenerAdapter() {
             // @Override
-            OnAnimationStart(Animator animation) {
+            OnAnimationStart(animation) {
                 mResultEditText.setText(result);
             }
 
             // @Override
-            OnAnimationEnd(Animator animation) {
+            OnAnimationEnd(animation) {
                 // Reset all of the values modified during the animation.
                 mResultEditText.setTextColor(resultTextColor);
-                mResultEditText.setScaleX(1.0f);
-                mResultEditText.setScaleY(1.0f);
-                mResultEditText.setTranslationX(0.0f);
-                mResultEditText.setTranslationY(0.0f);
-                mFormulaEditText.setTranslationY(0.0f);
+                mResultEditText.setScaleX(1.0);
+                mResultEditText.setScaleY(1.0);
+                mResultEditText.setTranslationX(0.0);
+                mResultEditText.setTranslationY(0.0);
+                mFormulaEditText.setTranslationY(0.0);
 
                 // Finally update the formula to use the current result.
                 mFormulaEditText.setText(result);
-                setState(CalculatorState.RESULT);
+                setState(Calculator.CalculatorState.RESULT);
 
                 mCurrentAnimator = null;
             }
@@ -809,50 +917,47 @@ class _Calculator extends Activity {
         animatorSet.start();
     }
 
-}   //class _Calculator
+}   //class Calculator
 
 //--------.java----end----
 
-    class Calculator extends _Calculator {
+    class Calculator_ extends Calculator {
         constructor(){
+            elog('====Calculator::constructor====begin====');
             super();
-            elog('====Calculator.js====Calculator::constructor.begin====');
+            elog('====Calculator::constructor====end====');
         }
 
-        OnCreate(_this, savedInstanceState){
+        OnBackPressed(_this){
+            elog('====Calculator::OnBackPressed====begin====');
+            super.OnBackPressed(_this);
+            elog('====Calculator::OnBackPressed====end====');
+        }
+        OnUserInteraction(_this){
+            elog('====Calculator::OnUserInteraction====begin====');
+            super.OnUserInteraction(_this);
+            elog('====Calculator::OnBackPreOnUserInteraction====end====');
+        }
+        // OnLongClick(_this, iview, result){}
+        // OnEvaluate(expr, result, errorResourceId){}
+        // OnTextSizeChanged(_this, textView, oldSize) {}
+        OnCreate(_this, savedInstanceState) {
+            elog('====Calculator::OnCreate====begin====');
             super.OnCreate(_this, savedInstanceState);
+            elog('====Calculator::OnCreate====end====');
+        }
+        OnSaveInstanceState(_this, outState) {
+            elog('====Calculator::OnSaveInstanceState====begin====');
+            super.OnSaveInstanceState(_this, outState);
+            elog('====Calculator::OnSaveInstanceState====end====');
         }
 
-        OnStart(_this) {
-            elog('====jso_activity_cb====OnStart.begin==000==');
-        }
-        OnResume(_this) {
-            elog('====jso_activity_cb====OnResume.begin====');
-        }
-        OnPause(_this) {
-            elog('====jso_activity_cb====OnPause.begin====');
-        }
-        OnStop(_this) {
-            elog('====jso_activity_cb====OnStop.begin====');
-        }
-        OnDestroy(_this) {
-            elog('====jso_activity_cb====OnDestroy.begin====');
-        }
-        OnActivityResult(_this, aiRequestCode, aiResultCode, aoIntentData) {
-            elog('====jso_activity_cb====OnActivityResult.begin====');
-        }
-        OnCreateDialog(_this, aiId, out_aoDialog) {
-            elog('====jso_activity_cb====OnCreateDialog.begin====');
-        }   //OnCreateDialog
-        OnCreateContextMenu(_this, aoMenu, aoV, aoMenuInfo){
-            elog('====jso_activity_cb====OnCreateContextMenu.begin====');
-        }
         OnHandleMessage(_this, aoMessage){
-            elog('====jso_activity_cb====OnHandleMessage.begin====');
+            elog('====Calculator::OnHandleMessage====begin====');
         }
     }   //class Calculator
 
-    return new Calculator();
+    return new Calculator_();
 
 };  //module.exports
 

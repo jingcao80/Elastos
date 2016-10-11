@@ -196,7 +196,7 @@ ECode JSActName::GenerateLayoutParams(
     AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
 
     if (mListener) {
-        ec = mListener->GenerateLayoutParams(_this, p, result);
+        ec = mListener->GenerateLayoutParams_0(_this, p, result);
     }
     else {
         //ec = ViewGroup::GenerateLayoutParams(p, result);

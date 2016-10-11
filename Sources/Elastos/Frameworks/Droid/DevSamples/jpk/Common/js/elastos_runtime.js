@@ -335,7 +335,17 @@ CObject.getConstructorProtos = getConstructorProtos;
 CObject.getMethodProtos = _getMethodProtos;
 
 CObject.getObjectMethodProtos = function(ao_Car, as_MethodName) {
+    elog("====CObject.getObjectMethodProtos====method name:"+as_MethodName);
+
     var oClassInfo = this.getClassInfo(ao_Car);
+
+    if(!oClassInfo){
+        elog("====CObject.getObjectMethodProtos====can not find classinfo");
+        var oInterfaceInfo = ao_Car.getClass();
+        this.showMethods(oInterfaceInfo);
+        Assert(0);
+    }
+
     var aMethodInfos = _getMethodInfosByClassInfo(oClassInfo, as_MethodName);
     return __getMethodProtos(aMethodInfos);
 }

@@ -224,6 +224,22 @@ public:
         }
     }
 
+    static void RegisterCalculator(const String& packageName, const String& activityName, IInterface* activityInstance, ICalculatorListener** activityListener, IHandler* activityHandler) {
+        if (!JSEvtName::mNodeInit) {
+            JSEvtName::InitBridge(packageName);
+            JSEvtName::mNodeInit = true;
+        }
+
+        Boolean result = false;
+        if(JSEvtName::mNodeBridgeListener) {
+            JSEvtName::mNodeBridgeListener->OnRegisterCalculator(
+                packageName, activityName, activityInstance, (Int32)activityListener, activityHandler, &result);
+        }
+        else {
+            ALOGD("RegisterCalculator================mNodeBridgeListener is null================");
+        }
+    }
+
     static void RegisterCalculatorEditText(IContext* context, IInterface* control, ICalculatorEditTextListener** listener) {
         ALOGD("RegisterCalculatorEditText========0========");
         Boolean result = false;
@@ -328,6 +344,10 @@ public:
     CARAPI SetActivityListener(
         /* [in] */ Int32 ppActivityListener,    //IActivityListener**
         /* [in] */ IActivityListener* pJsActivityListener);
+
+    CARAPI SetCalculatorListener(
+        /* [in] */ Int32 ppCalculatorListener,    //IActivityListener**
+        /* [in] */ ICalculatorListener* pJsCalculatorListener);
 
     CARAPI SetCalculatorEditTextListener(
         /* [in] */ Int32 ppCalculatorEditTextListener,    //ICalculatorEditTextListener**

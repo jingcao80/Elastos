@@ -387,8 +387,8 @@ class PagerAdapter {
     RegisterDataSetObserver(observer) {
         elog("====PagerAdapter::RegisterDataSetObserver====begin====");
 
-        var ss = CObject.getObjectMethodProtos(this.mObservable, "RegisterObserver");
-        elog("====PROTO:"+ss);
+        //var ss = CObject.getObjectMethodProtos(this.mObservable, "RegisterObserver");
+        //elog("====PROTO:"+ss);
 
         this.mObservable.RegisterObserver(observer);
         elog("====PagerAdapter::RegisterDataSetObserver====end====");

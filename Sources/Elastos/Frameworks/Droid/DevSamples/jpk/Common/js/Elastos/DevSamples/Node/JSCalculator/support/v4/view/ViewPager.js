@@ -229,7 +229,7 @@ module.exports = function(aoElastos, aoActivity){
                         var oo = Droid_New("Elastos.Droid.Widget.CScroller", context, sInterpolator);
                         elog("====Scroll::Proxy::get====1====");
 
-                        CObject.showMethods(oo);
+                        //CObject.showMethods(oo);
 
                         if (target.hasOwnProperty(property)) {
                             return target[property];
@@ -2369,8 +2369,6 @@ class ViewPager extends ViewGroup {
     CalculatePageOffsets(curItem, curIndex, oldCurInfo) {
         elog("====ViewPager::CalculatePageOffsets====begin====TODO====");
 
-
-
         var N = this.mAdapter.GetCount();
         var width = this.GetClientWidth();
         var marginOffset = width > 0 ? this.mPageMargin / width : 0;
@@ -3571,8 +3569,8 @@ class ViewPager extends ViewGroup {
             // Done with scroll, no longer want to cache view drawing.
             this.SetScrollingCacheEnabled(false);
 
-elog("====ViewPager::CompleteScroll====0====");
-CObject.showMethods(this.mScroller);
+//elog("====ViewPager::CompleteScroll====0====");
+//CObject.showMethods(this.mScroller);
 
             this.mScroller.AbortAnimation();
             var oldX = _this.GetScrollX();

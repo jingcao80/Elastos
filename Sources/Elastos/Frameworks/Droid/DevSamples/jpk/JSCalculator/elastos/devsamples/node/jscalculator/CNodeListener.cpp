@@ -161,6 +161,14 @@ ECode JSEvtName::SetActivityListener(
     return NOERROR;
 }
 
+ECode JSEvtName::SetCalculatorListener(
+    /* [in] */ Int32 ppCalculatorListener,    //IActivityListener**
+    /* [in] */ ICalculatorListener* pJsCalculatorListener)
+{
+    *(ICalculatorListener**)ppCalculatorListener = pJsCalculatorListener;
+    return NOERROR;
+}
+
 ECode JSEvtName::SetCalculatorEditTextListener(
     /* [in] */ Int32 ppCalculatorEditTextListener,    //ICalculatorEditTextListener**
     /* [in] */ ICalculatorEditTextListener* pJsCalculatorEditTextListener)

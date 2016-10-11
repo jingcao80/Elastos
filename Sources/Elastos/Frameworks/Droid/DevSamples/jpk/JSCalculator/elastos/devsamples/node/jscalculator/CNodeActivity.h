@@ -27,7 +27,7 @@ namespace JSPkgName {
 
 JSCarClass(JSActName)
     , public Activity
-    , public IActivityOne
+    , public ICalculator
 {
 public:
     class MyHandler : public Handler
@@ -54,17 +54,22 @@ public:
 
     CARAPI constructor();
 
-    virtual CARAPI OnCreateContextMenu(
-        /* [in] */ IContextMenu* menu,
-        /* [in] */ IView* v,
-        /* [in] */ IContextMenuInfo* menuInfo);
+    CARAPI _OnBackPressed();
+    CARAPI OnBackPressed();
 
-    CARAPI OnClickPopupWindow(
-        /* [in] */ IView* v);
+    CARAPI _OnUserInteraction();
+    CARAPI OnUserInteraction();
 
 protected:
+    CARAPI _OnCreate(
+        /* [in] */ IBundle* savedInstanceState);
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
+
+    CARAPI _OnSaveInstanceState(
+        /*[in] */ /*@NonNull */IBundle* outState);
+    CARAPI OnSaveInstanceState(
+        /*[in] */ /*@NonNull */IBundle* outState);
 
     CARAPI OnStart();
 
@@ -76,15 +81,6 @@ protected:
 
     CARAPI OnDestroy();
 
-    CARAPI_(AutoPtr<IDialog>) OnCreateDialog(
-    /* [in] */ Int32 id);
-
-private:
-    CARAPI OnActivityResult(
-        /* [in] */ Int32 requestCode,
-        /* [in] */ Int32 resultCode,
-        /* [in] */ IIntent *data);
-
 private:
     static const String TAG;
 
@@ -92,7 +88,7 @@ private:
     String mActivityName;
 
     AutoPtr<IHandler> mHandler;
-    AutoPtr<IActivityListener> mListener;
+    AutoPtr<ICalculatorListener> mListener;
 };
 
 } // namespace JSPkgName
