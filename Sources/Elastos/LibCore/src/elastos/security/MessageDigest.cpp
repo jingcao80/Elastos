@@ -140,12 +140,14 @@ ECode MessageDigest::GetInstance(
     /* [out] */ IMessageDigest** instance)
 {
     VALIDATE_NOT_NULL(instance)
+    *instance = NULL;
+
     if (algorithm.IsNull()) {
         Logger::E("MessageDigest", "algorithm == null");
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ISpiAndProvider> sap;
-    ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
+    FAIL_RETURN(ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap))
     AutoPtr<IInterface> spi;
     sap->GetSpi((IInterface**)&spi);
     AutoPtr<IProvider> provider;
@@ -169,6 +171,8 @@ ECode MessageDigest::GetInstance(
     /* [out] */ IMessageDigest** instance)
 {
     VALIDATE_NOT_NULL(instance)
+    *instance = NULL;
+
     if (provider.IsNullOrEmpty()) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -188,6 +192,8 @@ ECode MessageDigest::GetInstance(
     /* [out] */ IMessageDigest** instance)
 {
     VALIDATE_NOT_NULL(instance);
+    *instance = NULL;
+
     if (provider == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -196,7 +202,7 @@ ECode MessageDigest::GetInstance(
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<IInterface> spi;
-    ENGINE->GetInstance(algorithm, provider, NULL, (IInterface**)&spi);
+    FAIL_RETURN(ENGINE->GetInstance(algorithm, provider, NULL, (IInterface**)&spi))
     if (IMessageDigest::Probe(spi) != NULL) {
         AutoPtr<IMessageDigest> result = IMessageDigest::Probe(spi);
         result->SetAlgorithm(algorithm);
@@ -259,6 +265,8 @@ ECode MessageDigest::Digest(
     /* [out] */ Int32* number)
 {
     VALIDATE_NOT_NULL(number)
+    *number = 0;
+
     if (buf == NULL ||
         // offset < 0 || len < 0 ||
         // checks for negative values are commented out intentionally
@@ -369,8 +377,8 @@ ECode MessageDigest::SetAlgorithm(
 
 AutoPtr<IEngine> MessageDigest::Init_ENGINE()
 {
-    AutoPtr<CEngine> engine;
-    CEngine::NewByFriend(String("MessageDigest"), (CEngine**)&engine);
+    AutoPtr<IEngine> engine;
+    CEngine::New(String("MessageDigest"), (IEngine**)&engine);
     return engine;
 }
 

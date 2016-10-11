@@ -75,6 +75,8 @@ ECode CEngine::GetInstance(
     /* [out] */ ISpiAndProvider** instance)
 {
     VALIDATE_NOT_NULL(instance)
+    *instance = NULL;
+
     if (algorithm.IsNull()) {
         Logger::E("CEngine", "Null algorithm name");
         return E_NO_SUCH_ALGORITHM_EXCEPTION;
@@ -92,7 +94,8 @@ ECode CEngine::GetInstance(
     service->NewInstance(param, (IInterface**)&obj);
     AutoPtr<IProvider> pro;
     service->GetProvider((IProvider**)&pro);
-    *instance = new SpiAndProvider(obj, pro);
+    AutoPtr<SpiAndProvider> sap = new SpiAndProvider(obj, pro);
+    *instance = sap;
     REFCOUNT_ADD(*instance);
     return NOERROR;
 }
@@ -103,13 +106,16 @@ ECode CEngine::GetInstance(
     /* [out] */ ISpiAndProvider** instance)
 {
     VALIDATE_NOT_NULL(instance)
+    *instance = NULL;
+
     AutoPtr<ICharSequence> strObj;
     CString::New(param, (ICharSequence**)&strObj);
     AutoPtr<IInterface> obj;
     service->NewInstance(strObj, (IInterface**)&obj);
     AutoPtr<IProvider> pro;
     service->GetProvider((IProvider**)&pro);
-    *instance = new SpiAndProvider(obj, pro);
+    AutoPtr<SpiAndProvider> sap =  new SpiAndProvider(obj, pro);
+    *instance = sap;
     REFCOUNT_ADD(*instance);
     return NOERROR;
 }
@@ -119,6 +125,8 @@ ECode CEngine::GetServices(
     /* [out] */ IArrayList** services)
 {
     VALIDATE_NOT_NULL(services)
+    *services = NULL;
+
     Int32 newCacheVersion;
     Services::GetCacheVersion(&newCacheVersion);
     AutoPtr<ServiceCacheEntry> cacheEntry = mServiceCache;
@@ -145,6 +153,9 @@ ECode CEngine::GetInstance(
     /* [in] */ IInterface* param,
     /* [out] */ IInterface** instance)
 {
+    VALIDATE_NOT_NULL(instance)
+    *instance = NULL;
+
     if (algorithm.IsNull()) {
         Logger::E("CEngine", "algorithm == null");
         return E_NO_SUCH_ALGORITHM_EXCEPTION;

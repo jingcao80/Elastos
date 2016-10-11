@@ -339,7 +339,7 @@ ECode CLockSettingsService::UserAddedBroadcastReceiver::OnReceive(
         Int32 userSysUid = UserHandle::GetUid(userHandle, IProcess::SYSTEM_UID);
         intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &userHandle);
 
-        assert(0 && "TODO");
+        Slogger::W(TAG, "TODO CKeyStoreHelper not ready.");
         // AutoPtr<IKeyStoreHelper> helper;
         // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
         // AutoPtr<IKeyStore> ks;
@@ -814,7 +814,7 @@ void CLockSettingsService::MaybeUpdateKeystore(
     mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
     AutoPtr<IUserManager> um = IUserManager::Probe(obj);
 
-    assert(0 && "TODO");
+    Slogger::W(TAG, "TODO CKeyStoreHelper not ready.");
     // AutoPtr<IKeyStoreHelper> helper;
     // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
     // AutoPtr<IKeyStore> ks;
@@ -1082,7 +1082,7 @@ ECode CLockSettingsService::RemoveUser(
         //}
     }
 
-    assert(0 && "TODO");
+    Slogger::W(TAG, "TODO CKeyStoreHelper not ready.");
     // AutoPtr<IKeyStoreHelper> helper;
     // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
     // AutoPtr<IKeyStore> ks;
