@@ -59,7 +59,7 @@ AutoPtr<IASN1Type> CCRLDistributionPoints::initASN1()
     return IASN1Type::Probe(seq);
 }
 
-AutoPtr<IASN1Type> CCRLDistributionPoints::ASN1 = initASN1();
+AutoPtr<IASN1Type> CCRLDistributionPoints::ASN1;// = initASN1();
 
 CAR_OBJECT_IMPL(CCRLDistributionPoints)
 

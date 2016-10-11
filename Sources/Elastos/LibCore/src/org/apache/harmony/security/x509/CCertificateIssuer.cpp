@@ -64,7 +64,7 @@ AutoPtr<IASN1Type> CCertificateIssuer::initASN1()
     return IASN1Type::Probe(tmp);
 }
 
-AutoPtr<IASN1Type> CCertificateIssuer::ASN1 = initASN1();
+AutoPtr<IASN1Type> CCertificateIssuer::ASN1;// = initASN1();
 
 CAR_OBJECT_IMPL(CCertificateIssuer)
 

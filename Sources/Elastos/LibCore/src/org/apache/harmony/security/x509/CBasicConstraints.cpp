@@ -82,7 +82,7 @@ AutoPtr<IASN1Type> CBasicConstraints::initASN1()
     return IASN1Type::Probe(tmp);
 }
 
-AutoPtr<IASN1Type> CBasicConstraints::ASN1 = initASN1();
+AutoPtr<IASN1Type> CBasicConstraints::ASN1;// = initASN1();
 
 CAR_OBJECT_IMPL(CBasicConstraints)
 

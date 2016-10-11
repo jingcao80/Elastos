@@ -85,7 +85,7 @@ AutoPtr<IASN1Sequence> CEDIPartyName::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CEDIPartyName::ASN1 = initASN1();
+AutoPtr<IASN1Sequence> CEDIPartyName::ASN1;// = initASN1();
 
 CAR_OBJECT_IMPL(CEDIPartyName)
 

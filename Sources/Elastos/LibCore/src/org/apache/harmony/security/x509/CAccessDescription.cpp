@@ -96,7 +96,7 @@ AutoPtr<IASN1Sequence> CAccessDescription::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CAccessDescription::ASN1 = initASN1();
+AutoPtr<IASN1Sequence> CAccessDescription::ASN1;// = initASN1();
 
 CAR_OBJECT_IMPL(CAccessDescription)
 

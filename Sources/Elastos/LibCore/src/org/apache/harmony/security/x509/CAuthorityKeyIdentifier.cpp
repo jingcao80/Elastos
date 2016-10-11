@@ -138,7 +138,7 @@ AutoPtr<IASN1Type> CAuthorityKeyIdentifier::initASN1()
     return IASN1Type::Probe(tmp);
 }
 
-AutoPtr<IASN1Type> CAuthorityKeyIdentifier::ASN1 = initASN1();
+AutoPtr<IASN1Type> CAuthorityKeyIdentifier::ASN1;// = initASN1();
 
 CAR_OBJECT_IMPL(CAuthorityKeyIdentifier)
 
