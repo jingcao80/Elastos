@@ -58,16 +58,23 @@ ECode MarshalRegistry::MarshalToken::GetHashCode(
     return NOERROR;
 }
 
-Boolean MarshalRegistry::InitStaticBlock()
+static AutoPtr<IList> InitRegisteredMarshalQueryables()
 {
-    CArrayList::New((IList**)&sRegisteredMarshalQueryables);
-    CHashMap::New((IHashMap**)&sMarshalerMap);
-    return TRUE;
+    AutoPtr<IList> list;
+    CArrayList::New((IList**)&list);
+    return list;
 }
 
-AutoPtr<IList> MarshalRegistry::sRegisteredMarshalQueryables;
-AutoPtr<IHashMap> MarshalRegistry::sMarshalerMap;
-Boolean MarshalRegistry::initStaticBlock = InitStaticBlock();
+static AutoPtr<IHashMap> InitMarshalerMap()
+{
+    AutoPtr<IHashMap> map;
+    CHashMap::New((IHashMap**)&map);
+    return map;
+}
+
+INIT_PROI_3 AutoPtr<IList> MarshalRegistry::sRegisteredMarshalQueryables = InitRegisteredMarshalQueryables();
+INIT_PROI_3 AutoPtr<IHashMap> MarshalRegistry::sMarshalerMap = InitMarshalerMap();
+
 
 ECode MarshalRegistry::RegisterMarshalQueryable(
     /* [in] */ IMarshalQueryable* queryable)

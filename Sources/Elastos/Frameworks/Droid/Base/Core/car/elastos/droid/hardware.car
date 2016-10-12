@@ -364,8 +364,6 @@ module
 
     namespace Camera2 {
         class CCameraCharacteristics {
-            constructor();
-
             /**
              * Takes ownership of the passed-in properties object
              * @hide
@@ -452,8 +450,6 @@ module
         [local]
         class CCameraCharacteristicsKey {
 
-            constructor();
-
             /**
              * Visible for testing and vendor extensions only.
              *
@@ -488,8 +484,6 @@ module
         [local]
         class CCaptureResultKey {
 
-            constructor();
-
             /**
              * Visible for testing and vendor extensions only.
              *
@@ -517,8 +511,6 @@ module
 
         [local]
         class CCaptureRequestKey {
-
-            constructor();
 
             /**
              * Visible for testing and vendor extensions only.

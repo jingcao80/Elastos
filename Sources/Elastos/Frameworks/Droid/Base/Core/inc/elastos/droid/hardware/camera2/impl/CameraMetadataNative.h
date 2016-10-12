@@ -26,325 +26,326 @@ namespace Hardware {
 namespace Camera2 {
 namespace Impl {
 
+class GetCommand_AvailableFormats
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class GetCommand_Faces
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class GetCommand_FaceRectangles
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class GetCommand_StreamConfigurationMap
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class GetCommand_MaxRegions
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class GetCommand_MaxNumOutputs
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class GetCommand_TonemapCurve
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class GetCommand_GpsLocation
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class GetCommand_LensShadingMap
+    : public Object
+    , public IGetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI GetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ ICameraMetadataNativeKey* key,
+        /* [out] */ IInterface** outface);
+};
+
+class SetCommand_AvailableFormats
+    : public Object
+    , public ISetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI SetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ IInterface* value);
+};
+
+class SetCommand_FaceRectangles
+    : public Object
+    , public ISetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI SetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ IInterface* value);
+};
+
+class SetCommand_Faces
+    : public Object
+    , public ISetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI SetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ IInterface* value);
+};
+
+class SetCommand_TonemapCurve
+    : public Object
+    , public ISetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI SetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ IInterface* value);
+};
+
+class SetCommand_GpsLocation
+    : public Object
+    , public ISetCommand
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    // @Override
+    // @SuppressWarnings("unchecked")
+    CARAPI SetValue(
+        /* [in] */ ICameraMetadataNative* metadata,
+        /* [in] */ IInterface* value);
+};
+
+class CameraMetadataNativeKey
+    : public Object
+    , public ICameraMetadataNativeKey
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    /**
+     * Visible for testing only.
+     *
+     * <p>Use the CameraCharacteristics.Key, CaptureResult.Key, or CaptureRequest.Key
+     * for application code or vendor-extended keys.</p>
+     */
+    CameraMetadataNativeKey(
+        /* [in] */ const String& name,
+        /* [in] */ ClassID type);
+
+
+    /**
+     * Visible for testing only.
+     *
+     * <p>Use the CameraCharacteristics.Key, CaptureResult.Key, or CaptureRequest.Key
+     * for application code or vendor-extended keys.</p>
+     */
+    //@SuppressWarnings("unchecked")
+    CameraMetadataNativeKey(
+        /* [in] */ const String& name,
+        /* [in] */ ITypeReference* typeReference);
+
+    /**
+     * Return a camelCase, period separated name formatted like:
+     * {@code "root.section[.subsections].name"}.
+     *
+     * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+     * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+     *
+     * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+     * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+     * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+     *
+     * @return String representation of the key name
+     */
+    CARAPI GetName(
+        /* [out] */ String* name);
+
+    /**
+     * {@inheritDoc}
+     */
+    //@Override
+    CARAPI GetHashCode(
+        /* [out] */ Int32* code);
+
+   /**
+     * Compare this key against other native keys, request keys, result keys, and
+     * characteristics keys.
+     *
+     * <p>Two keys are considered equal if their name and type reference are equal.</p>
+     *
+     * <p>Note that the equality against non-native keys is one-way. A native key may be equal
+     * to a result key; but that same result key will not be equal to a native key.</p>
+     */
+    //@SuppressWarnings("rawtypes")
+    //@Override
+    CARAPI Equals(
+        /* [in] */ IInterface* obj,
+        /* [out] */ Boolean* e);
+
+    /**
+     * <p>
+     * Get the tag corresponding to this key. This enables insertion into the
+     * native metadata.
+     * </p>
+     *
+     * <p>This value is looked up the first time, and cached subsequently.</p>
+     *
+     * @return The tag numeric value corresponding to the string
+     */
+    CARAPI GetTag(
+        /* [out] */ Int32* tag);
+
+    /**
+     * Get the raw class backing the type {@code T} for this key.
+     *
+     * <p>The distinction is only important if {@code T} is a generic, e.g.
+     * {@code Range<Integer>} since the nested type will be erased.</p>
+     */
+    CARAPI GetType(
+        /* [out] */ ClassID* type);
+
+    /**
+     * Get the type reference backing the type {@code T} for this key.
+     *
+     * <p>The distinction is only important if {@code T} is a generic, e.g.
+     * {@code Range<Integer>} since the nested type will be retained.</p>
+     */
+    CARAPI GetTypeReference(
+        /* [out] */ ITypeReference** ref);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+private:
+    Boolean mHasTag;
+    Int32 mTag;
+    ClassID mType;
+    AutoPtr<ITypeReference> mTypeReference;
+    String mName;
+    Int32 mHash;
+};
+
 class CameraMetadataNative
     : public Object
     , public ICameraMetadataNative
     , public IParcelable
 {
-public:
-    class Key
-        : public Object
-        , public ICameraMetadataNativeKey
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        /**
-         * Visible for testing only.
-         *
-         * <p>Use the CameraCharacteristics.Key, CaptureResult.Key, or CaptureRequest.Key
-         * for application code or vendor-extended keys.</p>
-         */
-        Key(
-            /* [in] */ const String& name,
-            /* [in] */ ClassID type);
-
-
-        /**
-         * Visible for testing only.
-         *
-         * <p>Use the CameraCharacteristics.Key, CaptureResult.Key, or CaptureRequest.Key
-         * for application code or vendor-extended keys.</p>
-         */
-        //@SuppressWarnings("unchecked")
-        Key(
-            /* [in] */ const String& name,
-            /* [in] */ ITypeReference* typeReference);
-
-        /**
-         * Return a camelCase, period separated name formatted like:
-         * {@code "root.section[.subsections].name"}.
-         *
-         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
-         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
-         *
-         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
-         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
-         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
-         *
-         * @return String representation of the key name
-         */
-        CARAPI GetName(
-            /* [out] */ String* name);
-
-        /**
-         * {@inheritDoc}
-         */
-        //@Override
-        CARAPI GetHashCode(
-            /* [out] */ Int32* code);
-
-       /**
-         * Compare this key against other native keys, request keys, result keys, and
-         * characteristics keys.
-         *
-         * <p>Two keys are considered equal if their name and type reference are equal.</p>
-         *
-         * <p>Note that the equality against non-native keys is one-way. A native key may be equal
-         * to a result key; but that same result key will not be equal to a native key.</p>
-         */
-        //@SuppressWarnings("rawtypes")
-        //@Override
-        CARAPI Equals(
-            /* [in] */ IInterface* obj,
-            /* [out] */ Boolean* e);
-
-        /**
-         * <p>
-         * Get the tag corresponding to this key. This enables insertion into the
-         * native metadata.
-         * </p>
-         *
-         * <p>This value is looked up the first time, and cached subsequently.</p>
-         *
-         * @return The tag numeric value corresponding to the string
-         */
-        CARAPI GetTag(
-            /* [out] */ Int32* tag);
-
-        /**
-         * Get the raw class backing the type {@code T} for this key.
-         *
-         * <p>The distinction is only important if {@code T} is a generic, e.g.
-         * {@code Range<Integer>} since the nested type will be erased.</p>
-         */
-        CARAPI GetType(
-            /* [out] */ ClassID* type);
-
-        /**
-         * Get the type reference backing the type {@code T} for this key.
-         *
-         * <p>The distinction is only important if {@code T} is a generic, e.g.
-         * {@code Range<Integer>} since the nested type will be retained.</p>
-         */
-        CARAPI GetTypeReference(
-            /* [out] */ ITypeReference** ref);
-
-    private:
-        Boolean mHasTag;
-        Int32 mTag;
-        ClassID mType;
-        AutoPtr<ITypeReference> mTypeReference;
-        String mName;
-        Int32 mHash;
-    };
-
-private:
-    class GetCommand_AvailableFormats
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class GetCommand_Faces
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class GetCommand_FaceRectangles
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class GetCommand_StreamConfigurationMap
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class GetCommand_MaxRegions
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class GetCommand_MaxNumOutputs
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class GetCommand_TonemapCurve
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class GetCommand_GpsLocation
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class GetCommand_LensShadingMap
-        : public Object
-        , public IGetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI GetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ ICameraMetadataNativeKey* key,
-            /* [out] */ IInterface** outface);
-    };
-
-    class SetCommand_AvailableFormats
-        : public Object
-        , public ISetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI SetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ IInterface* value);
-    };
-
-    class SetCommand_FaceRectangles
-        : public Object
-        , public ISetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI SetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ IInterface* value);
-    };
-
-    class SetCommand_Faces
-        : public Object
-        , public ISetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI SetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ IInterface* value);
-    };
-
-    class SetCommand_TonemapCurve
-        : public Object
-        , public ISetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI SetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ IInterface* value);
-    };
-
-    class SetCommand_GpsLocation
-        : public Object
-        , public ISetCommand
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        // @Override
-        // @SuppressWarnings("unchecked")
-        CARAPI SetValue(
-            /* [in] */ ICameraMetadataNative* metadata,
-            /* [in] */ IInterface* value);
-    };
-
 public:
     CAR_INTERFACE_DECL()
 
@@ -557,8 +558,6 @@ public:
     android::CameraMetadata* GetNative();
 
 private:
-    static CARAPI_(Boolean) InitStaticBlock();
-
     static CARAPI_(String) TranslateLocationProviderToProcess(
         /* [in] */ const String& provider);
 
@@ -710,8 +709,6 @@ private:
     static CARAPI_(AutoPtr<IMarshaler>) GetMarshalerForKey(
         /* [in] */ ICameraMetadataNativeKey* key);
 
-    //@SuppressWarnings({ "unchecked", "rawtypes" })
-    static CARAPI_(void) RegisterAllMarshalers();
 
     /** Check if input arguments are all {@code null}.
      *
@@ -722,8 +719,21 @@ private:
         /* [in] */ ArrayOf<IInterface*>* objs);
 
 private:
-    static const String TAG;
-    static const Boolean VERBOSE;
+    friend class GetCommand_AvailableFormats;
+    friend class GetCommand_Faces;
+    friend class GetCommand_FaceRectangles;
+    friend class GetCommand_StreamConfigurationMap;
+    friend class GetCommand_MaxRegions;
+    friend class GetCommand_MaxNumOutputs;
+    friend class GetCommand_TonemapCurve;
+    friend class GetCommand_GpsLocation;
+    friend class GetCommand_LensShadingMap;
+
+    friend class SetCommand_AvailableFormats;
+    friend class SetCommand_FaceRectangles;
+    friend class SetCommand_Faces;
+    friend class SetCommand_TonemapCurve;
+    friend class SetCommand_GpsLocation;
 
     static const String CELLID_PROCESS;
     static const String GPS_PROCESS;

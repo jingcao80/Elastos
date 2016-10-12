@@ -1234,7 +1234,10 @@ ECode SettingsActivity::SwitchToFragment(
     CFragmentHelper::AcquireSingleton((IFragmentHelper**)&helper);
     AutoPtr<IFragment> f;
     helper->Instantiate(this, fragmentName, args, (IFragment**)&f);
-    assert(f != NULL);
+    if (f == NULL) {
+        Slogger::E(TAG, "failed to instantiate fragment %s", fragmentName.string());
+        assert(f != NULL);
+    }
     AutoPtr<IFragmentManager> manager;
     GetFragmentManager((IFragmentManager**)&manager);
     AutoPtr<IFragmentTransaction> transaction;

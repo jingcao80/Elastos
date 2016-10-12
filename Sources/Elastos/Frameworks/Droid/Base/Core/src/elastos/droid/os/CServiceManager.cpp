@@ -6,10 +6,12 @@
 #include <utils/Log.h>
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/Process.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Slogger;
 
@@ -201,18 +203,6 @@ ECode CServiceManager::CheckService(
     return NOERROR;
 }
 
-static String String16ToString(const android::String16& str16)
-{
-    Int32 size = str16.size();
-    const char16_t* p = str16.string();
-    AutoPtr<ArrayOf<Char32> > buf = ArrayOf<Char32>::Alloc(size);
-    for (Int32 i = 0; i < size; ++i) {
-        buf->Set(i, (Char32)(*(p + i)));
-    }
-    String str(*buf);
-    return str;
-}
-
 ECode CServiceManager::ListServices(
     /* [out, callee] */ ArrayOf<String>** services)
 {
@@ -233,7 +223,7 @@ ECode CServiceManager::ListServices(
     array = ArrayOf<String>::Alloc(size);
     for (Int32 i = 0; i < size; ++i) {
         android::String16 str16 = reply.readString16();
-        array->Set(i, String16ToString(str16));
+        array->Set(i, TextUtils::String16ToString(str16));
     }
 
     *services = array;

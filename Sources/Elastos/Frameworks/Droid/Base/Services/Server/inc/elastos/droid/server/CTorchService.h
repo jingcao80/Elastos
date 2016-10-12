@@ -28,6 +28,7 @@ using Elastos::Droid::Hardware::Camera2::ICameraCaptureSessionStateCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraCaptureSessionStateListener;
 using Elastos::Droid::Hardware::Camera2::ICameraManagerAvailabilityCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateListener;
+using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateCallback;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IRemoteCallbackList;
@@ -91,6 +92,7 @@ private:
 
     class CameraDeviceStateListener
         : public Object
+        , public ICameraDeviceStateCallback
         , public ICameraDeviceStateListener
     {
     public:
@@ -104,6 +106,9 @@ private:
 
         CARAPI OnDisconnected(
             /* [in] */ ICameraDevice* camera);
+
+        CARAPI OnClosed(
+            /* [in] */ ICameraDevice* camera) { return NOERROR; }
 
         CARAPI OnError(
             /* [in] */ ICameraDevice* camera,
@@ -296,13 +301,10 @@ private:
     AutoPtr<ISurface> mSurface;
 
     AutoPtr<IRunnable> mUpdateFlashlightRunnable;
-
     AutoPtr<IRunnable> mKillFlashlightRunnable;
 
-    AutoPtr<ICameraDeviceStateListener> mTorchCameraListener;
-
+    AutoPtr<ICameraDeviceStateCallback> mTorchCameraListener;
     AutoPtr<ICameraCaptureSessionStateCallback> mTorchSessionListener;
-
     AutoPtr<ICameraManagerAvailabilityCallback> mAvailabilityCallback;
 };
 

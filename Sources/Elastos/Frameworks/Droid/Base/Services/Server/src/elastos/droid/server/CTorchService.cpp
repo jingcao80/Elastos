@@ -9,8 +9,6 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Hardware::EIID_IITorchService;
 using Elastos::Droid::Os::Binder;
@@ -22,18 +20,20 @@ using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Hardware::Camera2::EIID_ICameraCaptureSessionStateListener;
 using Elastos::Droid::Hardware::Camera2::EIID_ICameraManagerAvailabilityCallback;
-using Elastos::Droid::Hardware::Camera2::ICameraCharacteristics;
 using Elastos::Droid::Hardware::Camera2::EIID_ICameraDeviceStateListener;
+using Elastos::Droid::Hardware::Camera2::EIID_ICameraDeviceStateCallback;
+using Elastos::Droid::Hardware::Camera2::EIID_ICameraCaptureSessionStateCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraCaptureSessionStateCallback;
-using Elastos::Droid::Hardware::Camera2::EIID_ICameraCaptureSessionStateCallback;
 using Elastos::Droid::Hardware::Camera2::CameraCharacteristics;
+using Elastos::Droid::Hardware::Camera2::ICameraCharacteristics;
 using Elastos::Droid::Hardware::Camera2::ICaptureRequestBuilder;
 using Elastos::Droid::Hardware::Camera2::ICameraMetadata;
 using Elastos::Droid::Hardware::Camera2::CaptureRequest;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::View::CSurface;
 using Elastos::Droid::Manifest;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IBoolean;
 using Elastos::Core::IInteger32;
@@ -103,7 +103,8 @@ ECode CTorchService::KillRunnable::Run()
 //==========================================================================================
 // CTorchService::CameraDeviceStateListener::
 //==========================================================================================
-CAR_INTERFACE_IMPL(CTorchService::CameraDeviceStateListener, Object, ICameraDeviceStateListener)
+CAR_INTERFACE_IMPL_2(CTorchService::CameraDeviceStateListener, Object,
+    ICameraDeviceStateListener, ICameraDeviceStateCallback)
 
 CTorchService::CameraDeviceStateListener::CameraDeviceStateListener(
     /* [in] */ CTorchService* host)
@@ -179,7 +180,8 @@ ECode CTorchService::CameraCaptureSessionStateListener::OnConfigureFailed(
 //==========================================================================================
 // CTorchService::CameraManagerAvailabilityCallback::
 //==========================================================================================
-CAR_INTERFACE_IMPL(CTorchService::CameraManagerAvailabilityCallback, Object, ICameraManagerAvailabilityCallback)
+CAR_INTERFACE_IMPL(CTorchService::CameraManagerAvailabilityCallback, Object,
+    ICameraManagerAvailabilityCallback)
 
 CTorchService::CameraManagerAvailabilityCallback::CameraManagerAvailabilityCallback(
     /* [in] */ CTorchService* host)
@@ -217,7 +219,7 @@ ECode CTorchService::CameraManagerAvailabilityCallback::SetTorchAvailable(
         mHost->mTorchAvailable = available;
     }
     if (oldAvailable != available) {
-        if (DEBUG) Logger::D(TAG, "dispatchAvailabilityChanged(%b)", available);
+        if (DEBUG) Logger::D(TAG, "dispatchAvailabilityChanged(%d)", available);
         mHost->DispatchAvailabilityChanged(available);
     }
     return NOERROR;
@@ -336,7 +338,7 @@ ECode CTorchService::OnCameraOpened(
     {
         AutoLock syncLock(mCamerasInUse);
         AutoPtr<CameraUserRecord> p = new CameraUserRecord(token);
-        mCamerasInUse->Put(cameraId, (IInterface*)(IObject*)p.Get());
+        mCamerasInUse->Put(cameraId, (IObject*)p.Get());
     }
     return NOERROR;
 }
@@ -432,7 +434,7 @@ void CTorchService::StartDevice()
     if (DEBUG) Logger::D(TAG, "startDevice(), cameraID: %s", cameraId.string());
     mTorchCameraId = StringUtils::ParseInt32(cameraId);
     mOpeningCamera = TRUE;
-    mCameraManager->OpenCamera(cameraId, ICameraDeviceStateCallback::Probe(mTorchCameraListener), mHandler);
+    mCameraManager->OpenCamera(cameraId, mTorchCameraListener, mHandler);
 }
 
 void CTorchService::StartSession()
@@ -496,10 +498,14 @@ String CTorchService::GetCameraId()
         String id = (*ids)[i];
         AutoPtr<ICameraCharacteristics> c;
         mCameraManager->GetCameraCharacteristics(id, (ICameraCharacteristics**)&c);
+        Logger::I(TAG, " >> ================== Start CTorchService::GetCameraId %s =======================", id.string());
         AutoPtr<IInterface> p;
         c->Get(CameraCharacteristics::FLASH_INFO_AVAILABLE, (IInterface**)&p);
         Boolean flashAvailable = FALSE;
-        IBoolean::Probe(p)->GetValue(&flashAvailable);
+        if (IBoolean::Probe(p)) {
+            IBoolean::Probe(p)->GetValue(&flashAvailable);
+        }
+        Logger::I(TAG, " >> ================== End CTorchService::GetCameraId %s flashAvailable: %d", id.string(), flashAvailable);
         if (flashAvailable) {
             p = NULL;
             c->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&p);

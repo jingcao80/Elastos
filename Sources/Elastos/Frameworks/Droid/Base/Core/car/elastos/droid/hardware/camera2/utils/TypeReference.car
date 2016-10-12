@@ -31,7 +31,8 @@ module
         /**
          * Return the dynamic {@link Type} corresponding to the captured type {@code T}.
          */
-        //Type GetType();
+        GetType(
+            [out] ClassID* clsID);
 
         /**
          * Returns the raw type of T.

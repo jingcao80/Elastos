@@ -82,13 +82,10 @@ public:
 private:
     MarshalRegistry() {}
 
-    static CARAPI_(Boolean) InitStaticBlock();
 
 private:
     static AutoPtr<IList> sRegisteredMarshalQueryables;
     static AutoPtr<IHashMap> sMarshalerMap;
-
-    static Boolean initStaticBlock;
 };
 
 } // namespace Marshal

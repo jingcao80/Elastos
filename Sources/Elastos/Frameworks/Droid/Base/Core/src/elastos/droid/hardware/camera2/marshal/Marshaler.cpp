@@ -21,11 +21,6 @@ Marshaler::Marshaler()
 {
 }
 
-ECode Marshaler::constructor()
-{
-    return NOERROR;
-}
-
 ECode Marshaler::constructor(
     /* [in] */ IMarshalQueryable* query,
     /* [in] */ ITypeReference* typeReference,
@@ -38,16 +33,10 @@ ECode Marshaler::constructor(
     Boolean result;
     query->IsTypeMappingSupported(typeReference, nativeType, &result);
     if (!result) {
-        // throw new UnsupportedOperationException(
-        //         "Unsupported type marshaling for managed type "
-        //                 + typeReference + " and native type "
-        //                 + MarshalHelpers.toStringNativeType(nativeType));
-        String str;
-        IObject::Probe(typeReference)->ToString(&str);
         String type;
         MarshalHelpers::ToStringNativeType(nativeType, &type);
         Slogger::E("Marshaler", "Unsupported type marshaling for managed "
-                "type %s and native type %s", str.string(), type.string());
+            "type %s and native type %s", TO_CSTR(typeReference), type.string());
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     return NOERROR;
@@ -64,7 +53,6 @@ ECode Marshaler::CalculateMarshalSize(
     GetNativeSize(&nativeSize);
 
     if (nativeSize == IMarshaler::NATIVE_SIZE_DYNAMIC) {
-        //throw new AssertionError("Override this function for dynamically-sized objects");
         Slogger::E("Marshaler", "Override this function for dynamically-sized objects");
         return E_ASSERTION_ERROR;
     }

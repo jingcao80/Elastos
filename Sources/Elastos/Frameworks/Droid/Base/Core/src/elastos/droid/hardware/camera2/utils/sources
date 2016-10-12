@@ -25,5 +25,5 @@ SOURCES += UtilsSizeAreaComparator.cpp
 SOURCES += CUtilsSizeAreaComparatorHelper.cpp
 SOURCES += TaskDrainer.cpp
 SOURCES += TaskSingleDrainer.cpp
-#SOURCES += TypeReference.cpp
+SOURCES += TypeReference.cpp
 SOURCES += utils.cpp
