@@ -140,7 +140,8 @@
 
 # ==== buid Framework ====
 > Elastos/Frameworks/Droid/ServiceManager
-- Elastos/Frameworks/Droid/DroidRuntime/lib
+- Elastos/Frameworks/Droid/DroidRuntime Elastos.CoreLibrary.eco
+> Elastos/Frameworks/Droid/DroidRuntime/lib
 > Elastos/Frameworks/Droid/DroidRuntime
 
 # ==== buid Framework Core ====

@@ -20,6 +20,8 @@
 #include "openssl/opensslv.h"
 #include "zlib.h"
 
+#include <cutils/properties.h>
+
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
@@ -44,11 +46,30 @@ using Elastos::Droid::System::IStructPasswd;
 namespace Elastos {
 namespace Core {
 
-String CSystem::sLineSeparator;
-AutoPtr<IProperties> CSystem::sSystemProperties;
-AutoPtr<IInputStream> CSystem::mIn;
-AutoPtr<IPrintStream> CSystem::mOut;
-AutoPtr<IPrintStream> CSystem::mErr;
+/*
+ * Read the persistent locale.
+ */
+static void ReadLocale(String* language, String* region)
+{
+    char propLang[PROPERTY_VALUE_MAX], propRegn[PROPERTY_VALUE_MAX];
+
+    property_get("persist.sys.language", propLang, "");
+    property_get("persist.sys.country", propRegn, "");
+    if (*propLang == 0 && *propRegn == 0) {
+        /* Set to ro properties, default is en_US */
+        property_get("ro.product.locale.language", propLang, "en");
+        property_get("ro.product.locale.region", propRegn, "US");
+    }
+    *language = propLang;
+    *region = propRegn;
+    // ALOGD("language=%s region=%s\n", language.string(), region.string());
+}
+
+INIT_PROI_2 String CSystem::sLineSeparator;
+INIT_PROI_2 AutoPtr<IProperties> CSystem::sSystemProperties;
+INIT_PROI_2 AutoPtr<IInputStream> CSystem::mIn;
+INIT_PROI_2 AutoPtr<IPrintStream> CSystem::mOut;
+INIT_PROI_2 AutoPtr<IPrintStream> CSystem::mErr;
 
 static AutoPtr<HashMap<String, String> > InitAbiMap()
 {
@@ -62,7 +83,7 @@ static AutoPtr<HashMap<String, String> > InitAbiMap()
     (*map)[String("arm64-v8a")] = String("arm64");
     return map;
 }
-const AutoPtr<HashMap<String, String> > CSystem::ABI_TO_INSTRUCTION_SET_MAP = InitAbiMap();
+INIT_PROI_2 const AutoPtr<HashMap<String, String> > CSystem::ABI_TO_INSTRUCTION_SET_MAP = InitAbiMap();
 
 
 CAR_INTERFACE_IMPL(CSystem, Singleton, ISystem)
@@ -338,8 +359,12 @@ ECode CSystem::InitSystemProperties()
     p->SetProperty(String("java.vm.vendor.url"), projectUrl, NULL);
 
     p->SetProperty(String("file.encoding"), String("UTF-8"), NULL);
-    p->SetProperty(String("user.language"), String("en"), NULL);
-    p->SetProperty(String("user.region"), String("US"), NULL);
+
+    /* Set the properties for locale */
+    String langOption, regionOption;
+    ReadLocale(&langOption, &regionOption);
+    p->SetProperty(String("user.language"), !langOption.IsNullOrEmpty() ? langOption : String("en"), NULL);
+    p->SetProperty(String("user.region"), !regionOption.IsNullOrEmpty() ? regionOption : String("US"), NULL);
 
     Int32 uid;
     Os::Getuid(&uid);

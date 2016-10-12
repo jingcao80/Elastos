@@ -102,36 +102,6 @@ void DroidRuntime::SetArgv0(
     strlcpy(mArgBlockStart, argv0.string(), mArgBlockLength);
 }
 
-/*
- * Read the persistent locale.
- */
-static void ReadLocale(String* language, String* region)
-{
-    char propLang[PROPERTY_VALUE_MAX], propRegn[PROPERTY_VALUE_MAX];
-
-    property_get("persist.sys.language", propLang, "");
-    property_get("persist.sys.country", propRegn, "");
-    if (*propLang == 0 && *propRegn == 0) {
-        /* Set to ro properties, default is en_US */
-        property_get("ro.product.locale.language", propLang, "en");
-        property_get("ro.product.locale.region", propRegn, "US");
-    }
-    *language = propLang;
-    *region = propRegn;
-    // ALOGD("language=%s region=%s\n", language.string(), region.string());
-}
-
-static void SetLocale(const String& language, const String& region)
-{
-    AutoPtr<ISystem> cs;
-    CSystem::AcquireSingleton((ISystem**)&cs);
-
-    String oldValue;
-    cs->SetProperty(String("user.language"), language, &oldValue);
-    cs->SetProperty(String("user.region"), region, &oldValue);
-    // cs->SetProperty(String("user.variant"), String(""), &variant);
-}
-
 void DroidRuntime::AddOption(
     /* [in] */ const String& optionString,
     /* [in] */ void* extraInfo)
@@ -331,13 +301,6 @@ void DroidRuntime::Start(
     //ALOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
     // from startVm
-    /* Set the properties for locale */
-    {
-        String langOption, regionOption;
-        ReadLocale(&langOption, &regionOption);
-        SetLocale(langOption, regionOption);
-    }
-
     BlockSignals(); // call from Runtime::Create in JNI_CreateJavaVM
 
     bool inited = InitZygote(); // call from Runtime::Start in JNI_CreateJavaVM
