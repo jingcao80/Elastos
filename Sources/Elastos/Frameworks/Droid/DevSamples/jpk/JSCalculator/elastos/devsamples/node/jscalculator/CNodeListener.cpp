@@ -2,9 +2,6 @@
 
 #include <elastos/utility/logging/Logger.h>
 
-//#include "node.h"
-//#include "uv.h"
-
 using Elastos::Utility::Logging::Logger;
 
 # define NODE_EXTERN /* nothing */

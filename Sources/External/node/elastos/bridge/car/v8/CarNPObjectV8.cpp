@@ -540,7 +540,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     }
     else {
         //overloaded
-        // ALOGD("CarNPObjectInvoke====numMethods: %d====",numMethods);
+        //ALOGD("CarNPObjectInvoke====numMethods: %d====",numMethods);
         for (size_t methodIndex = 0; methodIndex < numMethods; methodIndex++) {
             //ALOGD("CarNPObjectInvoke====numMethods: %d/%d====",methodIndex, numMethods);
             tmpCarMethod = methodList[methodIndex];

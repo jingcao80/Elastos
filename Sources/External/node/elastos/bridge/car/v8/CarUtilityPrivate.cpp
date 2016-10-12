@@ -955,7 +955,9 @@ void convertCarValuesToNPVariants(CarValue* values, Int32 count, NPVariant** res
 {
     *result = new NPVariant[count];
     for (Int32 i = 0; i < count; i++) {
+        ALOGD("====convertCarValuesToNPVariants====%d/%d==begin", i, count);
         convertCarValueToNPVariant(values[i], &(*result)[i]);
+        ALOGD("====convertCarValuesToNPVariants====%d/%d==end", i, count);
     }
 }   //void convertCarValuesToNPVariants
 
@@ -1481,9 +1483,31 @@ void _convertCarValueToNPVariant_In(CarValue& value, NPVariant* result)
         case CarDataType_Interface:
         {
             result->type = NPVariantType_Object;
-            value.mObjectWrapper->setInstance(value.value.mObjectValue);
-            CarInstanceV8* _instance = new CarInstanceV8(value.mObjectWrapper, true);
-            result->value.objectValue = CarInstanceToNPObject(_instance);
+
+            bool bCallbackProxy = false;
+
+            IObject* _obj = IObject::Probe(value.value.mObjectValue);
+            if (_obj) {
+                Elastos::String className;
+                _obj->ToString(&className);
+                if (className == "Class CarCallbackObject") {
+                    ALOGD("_convertCarValueToNPVariant_In======CarDataType_Interface====className:%s====hhh", className.string());
+                    bCallbackProxy = true;
+                }
+            }
+
+            if (bCallbackProxy) {
+                //TODO: just return the v8npobj instead of CarInstanceV8
+                value.mObjectWrapper->setInstance(value.value.mObjectValue);
+                CarInstanceV8* _instance = new CarInstanceV8(value.mObjectWrapper, true);
+                result->value.objectValue = CarInstanceToNPObject(_instance);
+            }
+            else {
+                value.mObjectWrapper->setInstance(value.value.mObjectValue);
+                CarInstanceV8* _instance = new CarInstanceV8(value.mObjectWrapper, true);
+                result->value.objectValue = CarInstanceToNPObject(_instance);
+            }
+
             break;
         }   //case CarDataType_Interface
         default :
@@ -1869,10 +1893,27 @@ void convertV8ValueToCarValue_CallerAllocOut(v8::Handle<v8::Value>& v8Arg, CarVa
             if (cptr) {
                 ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value====Interface====CarDataType:%d", ctype);
                 if(NPVARIANT_IS_OBJECT(npvOutValue)) {
+                    ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value====Interface====Object");
                     NPObject* obj = NPVARIANT_TO_OBJECT(npvOutValue);
-                    CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
-                    CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
-                    *(IInterface**)cptr = objectWrapper->getInstance();
+
+                    if (obj->_class == WebCore::npScriptObjectClass) {
+                        ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========js object====TODO====");
+
+                        //CarCallbackObject* cb = CarCallbackObject::S_CreateObject(IInterfaceInfo::Probe(result->mObjectWrapper->getDataTypeInfo()), obj);
+                        CarCallbackObject* cb = CarCallbackObject::S_CreateObject(IInterfaceInfo::Probe(carArg.mObjectWrapper->getDataTypeInfo()), obj);
+                        //result->mObjectWrapper->setInstance((IObject*)cb);
+                        //*(IInterface**)cptr = *(IInterface**)cb;
+                        Elastos::REIID _iid = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };;
+                        //*(IInterface**)cptr = cb->Probe(EIID_IObject);
+                        //*(IInterface**)cptr = cb->Probe(EIID_IInterface);
+                        *(IInterface**)cptr = cb->Probe(_iid);
+                    }
+                    else {
+                        ALOGD("========convertNPVariantToCarValue_In CarDataType_Interface===========car object========");
+                        CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
+                        CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
+                        *(IInterface**)cptr = objectWrapper->getInstance();
+                    }
                 }
                 else {
                     ALOGD("convertV8ValueToCarValue_CallerAllocOut====get output param value====Error:No Valid Return Data!===");

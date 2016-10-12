@@ -323,9 +323,9 @@ class PagerAdapter {
 //      * @return Saved state for this adapter
 //      */
 //     public Parcelable
+//         return null;
+//     }
     SaveState() {
-        elog("====PagerAdapter::SaveState====TODO====");
-//     return null;
         return null;
     }
 
@@ -337,6 +337,7 @@ class PagerAdapter {
 //      * @param loader A ClassLoader that should be used to instantiate any restored objects
 //      */
 //     public void restoreState(Parcelable state, ClassLoader loader) {
+//     }
     RestoreState(state, loader) {
         elog("====PagerAdapter::RestoreState====TODO====");
     }

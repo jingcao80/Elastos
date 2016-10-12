@@ -1,4 +1,3 @@
-
 #ifndef __CTESTMODULEINFO_H__
 #define __CTESTMODULEINFO_H__
 
@@ -112,9 +111,9 @@ private:
     AutoPtr<IModuleInfo> mModuleInfo;
 };
 
-}
-}
-}
-}
+}   //CarRuntime
+}   //Node
+}   //DevSamples
+}   //Elastos
 
 #endif // __CTESTMODULEINFO_H__

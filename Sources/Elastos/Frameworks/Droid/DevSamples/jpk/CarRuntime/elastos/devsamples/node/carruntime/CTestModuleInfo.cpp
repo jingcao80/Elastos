@@ -1,4 +1,3 @@
-
 #include "CTestModuleInfo.h"
 #include "CTestClassInfo.h"
 #include "CTestInterfaceInfo.h"
@@ -523,8 +522,7 @@ ECode CTestModuleInfo::GetInternalObject(
     return NOERROR;
 }
 
-}
-}
-}
-}
-
+}   //CarRuntime
+}   //Node
+}   //DevSamples
+}   //Elastos

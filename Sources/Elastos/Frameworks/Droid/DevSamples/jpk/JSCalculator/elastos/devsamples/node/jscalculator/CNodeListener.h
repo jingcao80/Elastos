@@ -241,48 +241,36 @@ public:
     }
 
     static void RegisterCalculatorEditText(IContext* context, IInterface* control, ICalculatorEditTextListener** listener) {
-        ALOGD("RegisterCalculatorEditText========0========");
         Boolean result = false;
         if(JSEvtName::mNodeBridgeListener) {
-            ALOGD("RegisterCalculatorEditText========1========");
             JSEvtName::mNodeBridgeListener->OnRegisterCalculatorEditText(
                 context, control, (Int32)listener, &result);
-            ALOGD("RegisterCalculatorEditText========2========");
         }
         else {
             ALOGD("RegisterCalculatorEditText================mNodeBridgeListener is null================");
         }
-        ALOGD("RegisterCalculatorEditText========3========");
     }
 
     static void RegisterCalculatorPadLayout(IContext* context, IInterface* control, ICalculatorPadLayoutListener** listener) {
-        ALOGD("RegisterCalculatorPadLayout========0========");
         Boolean result = false;
         if(JSEvtName::mNodeBridgeListener) {
-            ALOGD("RegisterCalculatorPadLayout========1========");
             JSEvtName::mNodeBridgeListener->OnRegisterCalculatorPadLayout(
                 context, control, (Int32)listener, &result);
-            ALOGD("RegisterCalculatorPadLayout========2========");
         }
         else {
             ALOGD("RegisterCalculatorPadLayout================mNodeBridgeListener is null================");
         }
-        ALOGD("RegisterCalculatorPadLayout========3========");
     }
 
     static void RegisterCalculatorPadViewPager(IContext* context, IInterface* control, ICalculatorPadViewPagerListener** listener) {
-        ALOGD("RegisterCalculatorPadViewPager========0========");
         Boolean result = false;
         if(JSEvtName::mNodeBridgeListener) {
-            ALOGD("RegisterCalculatorPadViewPager========1========");
             JSEvtName::mNodeBridgeListener->OnRegisterCalculatorPadViewPager(
                 context, control, (Int32)listener, &result);
-            ALOGD("RegisterCalculatorPadViewPager========2========");
         }
         else {
             ALOGD("RegisterCalculatorPadViewPager================mNodeBridgeListener is null================");
         }
-        ALOGD("RegisterCalculatorPadViewPager========3========");
     }
 
     static ECode Require(

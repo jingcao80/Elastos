@@ -52,21 +52,13 @@ module.exports = function(aoElastos, aoActivity){
         }
 
         GetCallbackInterfaceInfo(result) {
-            elog("====DataSetObserver::GetCallbackInterfaceInfo====begin====");
             var oMuduleInfo = aoElastos.Droid.Get();
-            elog("====DataSetObserver::GetCallbackInterfaceInfo====0====");
             var oInterfaceInfo = oMuduleInfo.GetInterfaceInfo("Elastos.Droid.Database.IDataSetObserver");
-            elog("====DataSetObserver::GetCallbackInterfaceInfo====1===="+oInterfaceInfo.GetName());
             var oRet = oInterfaceInfo.GetInternalObject();
-            elog("====DataSetObserver::GetCallbackInterfaceInfo====2====");
             result.data = oRet;
-            elog("====DataSetObserver::GetCallbackInterfaceInfo====end====");
         }
         GetCallbackInterfaceName(result) {
-            elog("====DataSetObserver::GetCallbackInterfaceName====begin====");
             result.data = "Elastos.Droid.Database.IDataSetObserver";
-            //result.data = 345;
-            elog("====DataSetObserver::GetCallbackInterfaceName====end====");
         }
     };
 // import android.graphics.Canvas;
@@ -161,34 +153,64 @@ module.exports = function(aoElastos, aoActivity){
                     var oRet;
 
                     var typeName = attrs.getClass?attrs.getClass().GetName():typeof attrs;
-                     elog("====class/interface Name:====" + typeName);
 
                     if (typeName == "number") {
                         oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
-                        return oRet;
                     }
-
-                    if (typeName == "IAttributeSet") {
-                        elog("====ViewGroup::LayoutParams::constructor====1====classname:"+typeName);
-
+                    else if (typeName == "IAttributeSet") {
                         //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
                         //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams");
                         oRet = _this._GenerateLayoutParams(attrs);
-
-                        elog("====ViewGroup::LayoutParams::constructor====2====");
                     }
                     else {
-                        //Assert(0);
-                        elog("====ViewGroup::LayoutParams::constructor====3====classname:"+typeName);
-                        //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams");
                         oRet = _this._GenerateLayoutParams(attrs);
-                        elog("====ViewGroup::LayoutParams::constructor====4====");
                     }
 
-                    elog("====ViewGroup::LayoutParams::constructor====end====");
-                    //TODO:wrapped with proxy
+                    this._obj = oRet;
 
-                    return oRet;
+//TODO:wrapped with proxy
+if(false) {
+    return oRet;
+} else {
+        return new Proxy(this._obj, {
+            set : function(target, property, value) {
+                elog("====ViewGroup::LayoutParams::Proxy::set====" + property);
+                //if (property == "view") target.view = value;
+                //target[property] = value;
+                return Reflect.set(target, property, value);
+            },
+            get : function(target, property){
+                elog("====ViewGroup::LayoutParams::Proxy::get====" + property);
+
+                if (target.hasOwnProperty(property)) {
+                    return target[property];
+                }
+                else {
+                    var ret = function() {
+                        //elog("========Proxy get====begin====");
+                        //elog("====typeof:" + property + " " + typeof target[property]);
+                        //var args = [...arguments];
+                        //var _this = args.shift();
+                        var _this = this._obj;
+                        //var r = target[property].apply(target, arguments);
+                        //elog("========typeof========");
+                        //elog("========typeof0:"+typeof _this.getClass);
+                        //elog("========typeof1:"+typeof _this[property]);
+                        //try {
+                        //    var r = _this[property].apply(_this, args);
+                        //} catch(e) {
+                        //    elog("====proxy error!====");
+                        //}
+                        elog("====proxy ok ok!====");
+                        Assert(0);
+                        //return r;
+                    }
+                    return ret;
+                }
+            }
+        });
+}   //true
+
                 }
             }
             return this._LayoutParams;
@@ -674,6 +696,7 @@ class ViewPager extends ViewGroup {
         this._mEndScrollRunnable = new class _tmp extends Runnable {
             Run() {
                 this.SetScrollState(ViewPager.SCROLL_STATE_IDLE);
+                elog("====ViewPager::mEndScrollRunnable====Populate====call====0====");
                 this.Populate();
             }
         }
@@ -812,7 +835,6 @@ class ViewPager extends ViewGroup {
 //     public ViewPager(Context context, AttributeSet attrs) {
 //         super(context, attrs);
 //         initViewPager();
-        //_this._constructor(context, attrs);
 //     }
     OnCreate(_this, context, attrs) {
         elog("====ViewPager::ViewPager====");
@@ -1014,6 +1036,7 @@ class ViewPager extends ViewGroup {
                 this.mRestoredAdapterState = null;
                 this.mRestoredClassLoader = null;
             } else if (!wasFirstLayout) {
+                elog("====ViewPager::SetAdapter====Populate====call====1====");
                 this.Populate();
             } else {
                 _this.RequestLayout();
@@ -1326,7 +1349,10 @@ class ViewPager extends ViewGroup {
             } else {
                 this.mDrawingOrder = this.DRAW_ORDER_DEFAULT;
             }
-            if (needsPopulate) this.Populate();
+            if (needsPopulate) {
+                elog("====ViewPager::SetPageTransformer====Populate====call====2===");
+                this.Populate();
+            }
         }
         elog("====ViewPager::SetPageTransformer====end====");
     }
@@ -2033,9 +2059,11 @@ class ViewPager extends ViewGroup {
 //         }
 //     }
     Populate(newCurrentItem) {
-        elog("====ViewPager::Populate====begin====TODO====");
+        elog("====ViewPager::Populate====begin====");
 
         newCurrentItem = newCurrentItem || this.mCurItem;
+
+elog("====ViewPager::Populate====newCurrentItem:===="+newCurrentItem);
 
         var _this = this._obj;
 
@@ -2098,6 +2126,10 @@ class ViewPager extends ViewGroup {
                     " Problematic adapter: " + this.mAdapter.getClass());
         }
         elog("====ViewPager::Populate====begin====6====");
+
+CObject.showMethods(this.mItems);
+elog("====ViewPager::Populate====begin====6.1===="+this.mItems.GetSize());
+elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
 
         var curIndex = -1;
         var curItem = null;
@@ -2877,6 +2909,7 @@ class ViewPager extends ViewGroup {
 //         }
 //     }
     OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
+
         elog("====ViewPager::OnMeasure====begin====");
 
         _this._SetMeasuredDimension(_this._GetDefaultSize(0, widthMeasureSpec),
@@ -2889,11 +2922,20 @@ class ViewPager extends ViewGroup {
         var childWidthSize = measuredWidth - _this.GetPaddingLeft() - _this.GetPaddingRight();
         var childHeightSize = _this.GetMeasuredHeight() - _this.GetPaddingTop() - _this.GetPaddingBottom();
 
+elog("====ViewPager::OnMeasure====_this.name:"+_this.getClass().GetName());
         var size = _this.GetChildCount();
+elog("====ViewPager::OnMeasure====size:"+size);
         for (var i = 0; i < size; ++i) {
+elog("====ViewPager::OnMeasure====i:"+i);
             var child = _this.GetChildAt(i);
+elog("====ViewPager::OnMeasure====child.GetVisibility():"+child.GetVisibility());
             if (child.GetVisibility() != GONE) {
                 var lp = child.GetLayoutParams();
+elog("====ViewPager::OnMeasure====child.name:"+child.getClass().GetName());
+CObject.showMethods(lp);
+elog("====ViewPager::OnMeasure====lp.name:"+lp.getClass().GetName());
+elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
+
                 if (lp != null && lp.isDecor) {
                     elog("====crash====::OnMeasure====");
                     Assert(0);
@@ -2943,6 +2985,7 @@ class ViewPager extends ViewGroup {
         this.mChildHeightMeasureSpec = MeasureSpec.MakeMeasureSpec(childHeightSize, MeasureSpec.GetEXACTLY());
 
         this.mInLayout = true;
+        elog("====ViewPager::OnMeasure====Populate====call====3===");
         this.Populate();
         this.mInLayout = false;
 
@@ -5487,7 +5530,16 @@ class ViewPager extends ViewGroup {
 //         return new LayoutParams(getContext(), attrs);
 //     }
     GenerateLayoutParams(_this, attrs, result) {
+        elog("====ViewPager::GenerateLayoutParams====begin====");
         result.data = new ViewPager.LayoutParams(_this, _this.GetContext(), attrs);
+
+        CObject.showMethods(result.data);
+
+        result.data.isDecor = true;
+
+        //elog("====ViewPager::GenerateLayoutParams====name:"+result.data.getClass().GetName());
+
+        elog("====ViewPager::GenerateLayoutParams====end====");
     }
 
 //     class MyAccessibilityDelegate extends AccessibilityDelegateCompat {
@@ -5610,6 +5662,15 @@ class ViewPager extends ViewGroup {
 //          * a view supplied by the adapter.
 //          */
 //         public boolean isDecor;
+            get isDecor() {
+                elog("====get ViewPager::LayoutParams::isDecor====");
+                return this._isDecor;
+            }
+            set isDecor(v) {
+                elog("====set ViewPager::LayoutParams::isDecor====");
+                this._isDecor = v;
+                return v;
+            }
 
 //         /**
 //          * Gravity setting for use on decor views only:
@@ -5617,6 +5678,15 @@ class ViewPager extends ViewGroup {
 //          * container; constants are defined in {@link android.view.Gravity}.
 //          */
 //         public int gravity;
+            get gravity() {
+                elog("====get ViewPager::LayoutParams::gravity====");
+                return this._gravity;
+            }
+            set gravity(v) {
+                elog("====set ViewPager::LayoutParams::gravity====");
+                this._gravity = v;
+                //return v;
+            }
 
 //         /**
 //          * Width as a 0-1 multiplier of the measured pager width
@@ -5679,6 +5749,10 @@ class ViewPager extends ViewGroup {
                         elog("====ViewPager::LayoutParams::constructor====begin====5====");
                     }
                 }   //else
+
+                // return new Proxy(this._obj, {
+                //     set
+                // });
 
                 elog("====ViewPager::LayoutParams::constructor====end====");
             }

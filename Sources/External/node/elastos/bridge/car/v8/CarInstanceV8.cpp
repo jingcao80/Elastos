@@ -116,7 +116,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                 ALOGD("CarInstanceV8::invokeMethod========mObjectWrapper not exist!");
             }
 
-            const char* tmpType = ClassNameFromCarDataType((CarDataType)(_type));
+            //const char* tmpType = ClassNameFromCarDataType((CarDataType)(_type));
             //ALOGD("CarInstanceV8::invokeMethod========%d/%d========type:%d/%s", i, numParams, _type, tmpType);
 
             AutoPtr<IParamInfo> aParameter = (*paramInfos)[i];

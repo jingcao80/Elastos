@@ -52,7 +52,7 @@ module.exports = function(aoElastos, aoActivity){
  *  {@link android.R.attr#columnCount} and {@link android.R.attr#rowCount} attributes.
  */
 // public class CalculatorPadLayout extends ViewGroup {
-class _CalculatorPadLayout extends ViewGroup {
+class CalculatorPadLayout extends ViewGroup {
     constructor() {
         super();
     }
@@ -79,7 +79,7 @@ class _CalculatorPadLayout extends ViewGroup {
 //         a.recycle();
 //     }
     OnCreate(_this, context, attrs, defStyle) {
-        elog("====CalculatorPadLayout.js====super::OnCreate====begin=======");
+        elog("====CalculatorPadLayout::OnCreate====begin=======");
 
         attrs = attrs || null;
         defStyle = defStyle || 0;
@@ -94,7 +94,7 @@ class _CalculatorPadLayout extends ViewGroup {
 
         a.Recycle();
 
-        elog("====CalculatorPadLayout.js====super::OnCreate====end=======");
+        elog("====CalculatorPadLayout::OnCreate====end=======");
     }
 
 //     @Override
@@ -148,7 +148,7 @@ class _CalculatorPadLayout extends ViewGroup {
 //         }
 //     }
     OnLayout(changed, left, top, right, bottom) {
-        elog("====CalculatorPadLayout.js====super::OnLayout====begin=======");
+        elog("====CalculatorPadLayout::OnLayout====begin=======");
 
         var paddingLeft = _this.GetPaddingLeft();
         var paddingRight = _this.GetPaddingRight();
@@ -187,7 +187,7 @@ class _CalculatorPadLayout extends ViewGroup {
             rowIndex = (rowIndex + (columnIndex + 1) / mColumnCount) % mRowCount;
             columnIndex = (columnIndex + 1) % mColumnCount;
         }
-        elog("====CalculatorPadLayout.js====super::OnLayout====end=======");
+        elog("====CalculatorPadLayout::OnLayout====end=======");
     }
 
 //     @Override
@@ -195,7 +195,7 @@ class _CalculatorPadLayout extends ViewGroup {
 //         return new MarginLayoutParams(getContext(), attrs);
 //     }
     GenerateLayoutParams(_this, attrs, result) {
-        elog("====CalculatorPadLayout.js====super::GenerateLayoutParams====begin=======");
+        elog("====CalculatorPadLayout::GenerateLayoutParams====begin=======");
 
         var attrsClassName = attrs.getClass().GetName();
 
@@ -209,7 +209,7 @@ class _CalculatorPadLayout extends ViewGroup {
             this.GenerateLayoutParams_0(_this, p, result);
         }
 
-        elog("====CalculatorPadLayout.js====super::GenerateLayoutParams====end=======");
+        elog("====CalculatorPadLayout::GenerateLayoutParams====end=======");
     }
 
 
@@ -226,9 +226,9 @@ class _CalculatorPadLayout extends ViewGroup {
 //         return new MarginLayoutParams(p);
 //     }
     GenerateLayoutParams_0(_this, p, result) {
-        elog("====CalculatorPadLayout.js====super::GenerateLayoutParams_0====begin=======");
+        elog("====CalculatorPadLayout::GenerateLayoutParams_0====begin=======");
         result.data = Droid_New("Elastos.Droid.View.CViewGroupMarginLayoutParams", p);
-        elog("====CalculatorPadLayout.js====super::GenerateLayoutParams_0====end=======");
+        elog("====CalculatorPadLayout::GenerateLayoutParams_0====end=======");
     }
 
 
@@ -244,37 +244,7 @@ class _CalculatorPadLayout extends ViewGroup {
 
 //--------.java----end----
 
-    class CalculatorPadLayout extends _CalculatorPadLayout {
-        constructor() {
-            super();
-        }
-
-        // OnCreate(_this, context, attrs, defStyle) {
-        //     elog("====CalculatorPadLayout.js====::OnCreate====begin=======");
-        //     super.OnCreate(_this, context, attrs, defStyle);
-        //     // _this._constructor(context, attrs, defStyle);
-        //     elog("====CalculatorPadLayout.js====::OnCreate====end");
-        // }
-
-        // GenerateLayoutParams(_this, attrs, result){
-        //     elog("====CalculatorPadLayout.js====::GenerateLayoutParams====begin");
-        //     result.data = _this._GenerateLayoutParams(attrs);
-        //     elog("====CalculatorPadLayout.js====::GenerateLayoutParams====end");
-        // }
-
-        GetChildDrawingOrder(childCount, i, result) {
-            elog("====CalculatorPadLayout.js====::GetChildDrawingOrder====TODO");
-            ssss;
-        }
-
-        // GenerateDefaultLayoutParams(_this, result) {
-        //     elog("====CalculatorPadLayout.js====::GenerateDefaultLayoutParams====begin");
-        //     result.data = _this._GenerateDefaultLayoutParams();
-        //     elog("====CalculatorPadLayout.js====::GenerateDefaultLayoutParams====end");
-        // }
-    }   //class CalculatorPadLayout
-
-    return new CalculatorPadLayout();
+return new CalculatorPadLayout();
 
 };  //module.exports
 

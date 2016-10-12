@@ -42,7 +42,6 @@
 #include "CarUtility.h"
 
 namespace JSC {
-
 namespace Bindings {
 
 class CarValue;
@@ -66,5 +65,4 @@ void convertV8ValuesToCarValues(v8::Handle<v8::Value>* v8Args, Int32 count, CarV
 } // namespace JSC
 
 #endif // ENABLE(CAR_BRIDGE)
-
 #endif // CarUtilityPrivate_h

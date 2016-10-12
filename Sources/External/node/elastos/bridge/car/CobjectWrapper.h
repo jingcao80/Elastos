@@ -6,6 +6,8 @@
 #include "ext/frameworkdef.h"
 #include <elastos.h>
 
+#include <utils/Log.h>
+
 namespace JSC {
 namespace Bindings {
 

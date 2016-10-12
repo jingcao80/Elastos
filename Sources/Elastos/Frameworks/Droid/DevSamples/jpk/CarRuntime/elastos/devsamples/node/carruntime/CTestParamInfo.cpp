@@ -184,8 +184,7 @@ ECode CTestParamInfo::GetInternalObject(
     return NOERROR;
 }
 
-}
-}
-}
-}
-
+}   //CarRuntime
+}   //Node
+}   //DevSamples
+}   //Elastos

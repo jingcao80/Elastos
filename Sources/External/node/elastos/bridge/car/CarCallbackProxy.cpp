@@ -166,7 +166,7 @@ ECode CarCallbackInterfaceProxy::ReadParam(
     /* [in] */ UInt32 *puArgs,
     /* [out] */ CarValue** ppCarArgs)
 {
-    // ALOGD("CarCallbackInterfaceProxy::ReadParam====begin====");
+    //ALOGD("CarCallbackInterfaceProxy::ReadParam====begin====");
 
     Int32 paramCount;
     methodInfo->GetParamCount(&paramCount);
@@ -186,7 +186,7 @@ ECode CarCallbackInterfaceProxy::ReadParam(
         CarDataType paramDataType;
         paramTypeInfo->GetDataType(&paramDataType);
 
-        // ALOGD("CarCallbackInterfaceProxy::ReadParam====begin====%d/%d====type:%d", i, paramCount, paramDataType);
+        //ALOGD("CarCallbackInterfaceProxy::ReadParam====begin====%d/%d====type:%d", i, paramCount, paramDataType);
 
         carArgs[i].mTypeInfo = paramTypeInfo;
         carArgs[i].mType = paramDataType;
@@ -310,10 +310,15 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                 //case CarDataType_Struct:
                 case CarDataType_Interface:
                 {
+                    //ALOGD("CarCallbackInterfaceProxy::ReadParam====CarDataType_Interface====0====");
                     //carArgs[i].pInterface = (IInterface*)(*puArgs);
                     carArgs[i].value.mObjectValue = (IInterface*)(*puArgs);
-                    //carArgs[i].mObjectWrapper = new CobjectWrapper((IInterface*)(*puArgs), paramTypeInfo);
+                    //ALOGD("CarCallbackInterfaceProxy::ReadParam====CarDataType_Interface====1====");
+                    //carArgs[i].mObjectWrapper = new CobjectWrapper(NULL, paramTypeInfo);
+                    //ALOGD("CarCallbackInterfaceProxy::ReadParam====CarDataType_Interface====2====");
                     //carArgs[i].mObjectWrapper->setInstance((IInterface*)(*puArgs));
+
+                    //ALOGD("CarCallbackInterfaceProxy::ReadParam====CarDataType_Interface====2====");
 
                     puArgs++;
                     break;
@@ -431,6 +436,10 @@ ECode CarCallbackInterfaceProxy::ProxyEntry(
     IMethodInfo* methodInfo;
     pThis->GetMethodInfoByIndex(uMethodIndex, &methodInfo);
 
+    Elastos::String methodName;
+    methodInfo->GetName(&methodName);
+    ALOGD("====CarCallbackInterfaceProxy::ProxyEntry====methodName:%s", methodName.string());
+
     CarValue* pCarArgs;
     ECode ec = pThis->ReadParam(methodInfo, puArgs, &pCarArgs);
 
@@ -488,6 +497,13 @@ void CarCallbackInterfaceProxy::Callback::Call()
         if (npvValue.type == NPVariantType_Object) {
             WebCore::V8NPObject* v8NPFuncObject = (WebCore::V8NPObject*)(NPVARIANT_TO_OBJECT(npvValue));
 
+            //TODO:
+            if (((NPObject*)v8NPFuncObject)->_class == WebCore::npScriptObjectClass) {
+                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===V8 Object===");
+            }else {
+                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======NPVariantType_Object===car Object===");
+            }
+
             v8::Local<v8::Object> jsObject;
             v8::Local<v8::Function> jsFunc;
             if (v8NPFuncObject->v8Object.IsWeak()) {
@@ -498,8 +514,10 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 jsObject = *reinterpret_cast<v8::Local<v8::Object>*>(const_cast<v8::Persistent<v8::Object>*>(&v8NPFuncObject->v8Object));
                 jsFunc = v8::Local<v8::Function>::Cast(jsObject);
             }
+ALOGD("CarCallbackInterfaceProxy::Callback::Call====6====");
 
             v8::Handle<v8::Value>* argv = ConvertParams();
+ALOGD("CarCallbackInterfaceProxy::Callback::Call====7====");
 
             v8::TryCatch try_catch;
             //jsFunc->Call(context->Global(), mParamCount, argv);
@@ -509,9 +527,11 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 //FatalException(try_catch);
                 ReportException(isolate, &try_catch);
             }
+ALOGD("CarCallbackInterfaceProxy::Callback::Call====8====");
 
             //get out params
             convertV8ValuesToCarValues(argv, mParamCount, &mCarArgs);
+ALOGD("CarCallbackInterfaceProxy::Callback::Call====9====");
 
             delete[] argv;
         }
@@ -522,6 +542,7 @@ void CarCallbackInterfaceProxy::Callback::Call()
     else {
         ALOGD("CarCallbackInterfaceProxy::Callback::Call object is not js object");
     }
+ALOGD("CarCallbackInterfaceProxy::Callback::Call====10====");
 
     //ALOGD("CarCallbackInterfaceProxy::Callback::Call====end====");
 }

@@ -1,4 +1,3 @@
-
 #include "CTestClassInfo.h"
 
 #include "CTestModuleInfo.h"
@@ -690,9 +689,6 @@ ECode CTestClassInfo::CreateObject(
 ECode CTestClassInfo::LocalCreateObject(
     /* [out] */ PInterface * ppObject)
 {
-    ALOGD("========CTestClassInfo::LocalCreateObject========begin========");
-
-    //ECode ec =  mClassInfo->CreateObject((IInterface**)&ppObject);
     ECode ec =  mClassInfo->CreateObject(ppObject);
 
     if (FAILED(ec)) {
@@ -708,9 +704,6 @@ ECode CTestClassInfo::LocalCreateObject(
 ECode CTestClassInfo::RemoteCreateObject(
     /* [out] */ PInterface * ppObject)
 {
-    ALOGD("========CTestClassInfo::RemoteCreateObject========begin========");
-
-    //ECode ec =  mClassInfo->CreateObject((IInterface**)&ppObject);
     ECode ec =  mClassInfo->CreateObject(ppObject);
 
     if (FAILED(ec)) {
@@ -749,8 +742,7 @@ ECode CTestClassInfo::GetInternalObject(
     return NOERROR;
 }
 
-}
-}
-}
-}
-
+}   //CarRuntime
+}   //Node
+}   //DevSamples
+}   //Elastos
