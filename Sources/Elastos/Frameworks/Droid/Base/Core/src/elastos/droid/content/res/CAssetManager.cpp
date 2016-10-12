@@ -6,6 +6,7 @@
 #include "elastos/droid/content/res/CAssetManager.h"
 #include "elastos/droid/content/res/XmlBlock.h"
 #include "elastos/droid/content/res/CAssetFileDescriptor.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CTypedValue.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/os/CParcelFileDescriptor.h"
@@ -27,6 +28,8 @@
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
+
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Os::ParcelFileDescriptor;
@@ -2576,15 +2579,9 @@ ECode CAssetManager::GetAssignedPackageIdentifiers(
     CSparseArray::New((ISparseArray**)&sa);
     const size_t N = res.getBasePackageCount();
     for (size_t i = 0; i < N; i++) {
-        const android::String16 name = res.getBasePackageName(i);
         Int32 id = res.getBasePackageId(i);
-        Int32 size = name.size();
-        const char16_t* p = name.string();
-        AutoPtr<ArrayOf<Char32> > buf = ArrayOf<Char32>::Alloc(size);
-        for (Int32 i = 0; i < size; ++i) {
-            buf->Set(i, (Char32)(*(p + i)));
-        }
-        String str(*buf);
+        const android::String16 name = res.getBasePackageName(i);
+        String str = TextUtils::String16ToString(name);
         AutoPtr<ICharSequence> csq = CoreUtils::Convert(str);
         sa->Put(id, csq.Get());
     }

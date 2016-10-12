@@ -12,6 +12,7 @@
 #include "elastos/droid/hardware/camera2/impl/CCameraDeviceImpl.h"
 #include "elastos/droid/hardware/camera2/utils/BinderHolder.h"
 #include "elastos/droid/hardware/camera2/utils/CameraServiceBinderDecorator.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/CHandler.h"
@@ -22,7 +23,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <binder/Parcel.h>
 #include <binder/IServiceManager.h>
 #include <camera/Camera.h>
@@ -48,6 +49,7 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IRunnable;
@@ -57,7 +59,7 @@ using Elastos::Core::Math;
 using Elastos::Core::StringUtils;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -149,7 +151,7 @@ ECode CameraManager::CameraServiceWrapper::GetCameraInfo(
         }
     }
 
-    Slogger::E("CameraManager", "Failed to GetCameraInfo for cameraId: %d", cameraId);
+    Logger::E("CameraManager", "Failed to GetCameraInfo for cameraId: %d", cameraId);
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -162,7 +164,7 @@ ECode CameraManager::CameraServiceWrapper::Connect(
     /* [in] */ IBinderHolder* device,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    Logger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__); assert(0 && "TODO");
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -175,7 +177,7 @@ ECode CameraManager::CameraServiceWrapper::ConnectPro(
     /* [in] */ IBinderHolder* device,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    Logger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__); assert(0 && "TODO");
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -188,7 +190,7 @@ ECode CameraManager::CameraServiceWrapper::ConnectDevice(
     /* [in] */ IBinderHolder* device,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    Logger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__); assert(0 && "TODO");
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -196,7 +198,7 @@ ECode CameraManager::CameraServiceWrapper::AddListener(
     /* [in] */ IICameraServiceListener* listener,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    Logger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__); assert(0 && "TODO");
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -204,7 +206,7 @@ ECode CameraManager::CameraServiceWrapper::RemoveListener(
     /* [in] */ IICameraServiceListener* listener,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    Logger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__); assert(0 && "TODO");
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -218,14 +220,14 @@ ECode CameraManager::CameraServiceWrapper::GetCameraCharacteristics(
 
     if (mCameraService.get() != NULL) {
         CameraMetadataNative* wrapper = (CameraMetadataNative*)info;
-
-        *result = mCameraService->getCameraCharacteristics(cameraId, wrapper->GetNative());
+        android::CameraMetadata* data = wrapper->GetNative();
+        *result = mCameraService->getCameraCharacteristics(cameraId, data);
         if (*result == android::OK) {
             return NOERROR;
         }
     }
 
-    Slogger::E("CameraManager", "Failed to GetCameraCharacteristics for cameraId: %d", cameraId);
+    Logger::E("CameraManager", "Failed to GetCameraCharacteristics for cameraId: %d", cameraId);
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -233,17 +235,36 @@ ECode CameraManager::CameraServiceWrapper::GetCameraVendorTagDescriptor(
     /* [in] */ IBinderHolder* desc,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    Logger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__); assert(0 && "TODO");
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
 // Writes the camera1 parameters into a single-element array.
 ECode CameraManager::CameraServiceWrapper::GetLegacyParameters(
     /* [in] */ Int32 cameraId,
-    /* [in] */ ArrayOf<String>* parameters,
+    /* [out, callee] */ ArrayOf<String>** parameters,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    VALIDATE_NOT_NULL(parameters)
+    VALIDATE_NOT_NULL(result)
+    *result = android::BAD_VALUE;
+    *parameters = NULL;
+
+
+    if (mCameraService.get() != NULL) {
+        android::String16 str16;
+        *result = mCameraService->getLegacyParameters(cameraId, &str16);
+        if (*result == android::OK) {
+            String str = TextUtils::String16ToString(str16);
+            AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
+            array->Set(0, str);
+            *parameters = array;
+            REFCOUNT_ADD(*parameters)
+            return NOERROR;
+        }
+    }
+
+    Logger::E("CameraManager", "Failed to GetLegacyParameters for cameraId: %d", cameraId);
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -253,7 +274,15 @@ ECode CameraManager::CameraServiceWrapper::SupportsCameraApi(
     /* [in] */ Int32 apiVersion,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    VALIDATE_NOT_NULL(result)
+    *result = -EPROTO;
+
+    if (mCameraService.get() != NULL) {
+        *result = mCameraService->supportsCameraApi(cameraId, apiVersion);
+        return NOERROR;
+    }
+
+    Logger::E("CameraManager", "Failed to SupportsCameraApi for cameraId: %d", cameraId);
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -267,7 +296,7 @@ ECode CameraManager::CameraServiceWrapper::ConnectLegacy(
     /* [in] */ IBinderHolder* device,
     /* [out] */ Int32* result)
 {
-    Slogger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__);
+    Logger::I("CameraManager", " TODO: CameraServiceWrapper: %d", __LINE__); assert(0 && "TODO");
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -392,9 +421,7 @@ ECode CameraManager::CameraServiceListener::UpdateCallbackLocked(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> keyObj;
         mDeviceStatus->GetKeyAt(i, (IInterface**)&keyObj);
-        AutoPtr<ICharSequence> cchar = ICharSequence::Probe(keyObj);
-        String id;
-        cchar->ToString(&id);
+        String id = TO_STR(keyObj);
 
         AutoPtr<IInterface> valueObj;
         mDeviceStatus->GetValueAt(i, (IInterface**)&valueObj);
@@ -410,11 +437,8 @@ ECode CameraManager::CameraServiceListener::OnStatusChanged(
     /* [in] */ Int32 status,
     /* [in] */ Int32 cameraId)
 {
-    Object& lock =  mHost->mLock;
-    {    AutoLock syncLock(lock);
-        return OnStatusChangedLocked(status, StringUtils::ToString(cameraId));
-    }
-    return NOERROR;
+    AutoLock syncLock(mHost->mLock);
+    return OnStatusChangedLocked(status, StringUtils::ToString(cameraId));
 }
 
 ECode CameraManager::CameraServiceListener::OnStatusChangedLocked(
@@ -422,11 +446,11 @@ ECode CameraManager::CameraServiceListener::OnStatusChangedLocked(
     /* [in] */ const String& id)
 {
     if (mHost->DEBUG) {
-        Slogger::V(TAG, "Camera id %s has status changed to 0x%x", id.string(), status);
+        Logger::V(TAG, "Camera id %s has status changed to 0x%x", id.string(), status);
     }
 
     if (!ValidStatus(status)) {
-        Slogger::E(TAG, "Ignoring invalid device %s status 0x%x", id.string(), status);
+        Logger::E(TAG, "Ignoring invalid device %s status 0x%x", id.string(), status);
         return NOERROR;
     }
 
@@ -441,7 +465,7 @@ ECode CameraManager::CameraServiceListener::OnStatusChangedLocked(
         obj->GetValue(&value);
         if(value == status) {
             if (mHost->DEBUG) {
-                Slogger::V(TAG, "Device status changed to 0x%x, which is what it already was",
+                Logger::V(TAG, "Device status changed to 0x%x, which is what it already was",
                     status);
             }
             return NOERROR;
@@ -467,7 +491,7 @@ ECode CameraManager::CameraServiceListener::OnStatusChangedLocked(
         obj->GetValue(&value);
         if (IsAvailable(status) == IsAvailable(value)) {
             if (mHost->DEBUG) {
-                Slogger::V(TAG,
+                Logger::V(TAG,
                         "Device status was previously available (%d), "
                         " and is now again available (%d)"
                         "so no new client visible update will be sent",
@@ -564,8 +588,7 @@ ECode CameraManager::GetCameraIdList(
         }
 
         *outarr = outArray;
-        REFCOUNT_ADD(*outarr );
-        return NOERROR;
+        REFCOUNT_ADD(*outarr);
     }
     return NOERROR;
 }
@@ -579,13 +602,14 @@ ECode CameraManager::RegisterAvailabilityCallback(
         if (looper == NULL) {
             // throw new IllegalArgumentException(
             //         "No handler given, and current thread has no looper!");
-            Slogger::E(TAG, "No handler given, and current thread has no looper!");
+            Logger::E(TAG, "No handler given, and current thread has no looper!");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         CHandler::New(looper, (IHandler**)&handler);
     }
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mCallbackMap->Put(TO_IINTERFACE(ccallback), TO_IINTERFACE(handler), (IInterface**)&obj);
         AutoPtr<IHandler> oldHandler = IHandler::Probe(obj);
@@ -624,10 +648,7 @@ ECode CameraManager::GetCameraCharacteristics(
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(cameraId);
         list->Contains(TO_IINTERFACE(cchar), &result);
         if (!result) {
-            // throw new IllegalArgumentException(String.format("Camera id %s does not match any" +
-            //         " currently connected camera device", cameraId));
-            Slogger::E(TAG, "Camera id %s does not match any"
-                    " currently connected camera device", cameraId.string());
+            Logger::E(TAG, "Camera id %s does not match any currently connected camera device", cameraId.string());
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -641,37 +662,33 @@ ECode CameraManager::GetCameraCharacteristics(
         AutoPtr<IICameraService> cameraService;
         GetCameraServiceLocked((IICameraService**)&cameraService);
         if (cameraService == NULL) {
-            // throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
-            //         "Camera service is currently unavailable");
-            Slogger::E(TAG, "Camera service is currently unavailable");
+            Logger::E(TAG, "Camera service is currently unavailable");
             return E_CAMERA_ACCESS_EXCEPTION;
         }
 
         ECode ec = SupportsCamera2ApiLocked(cameraId, &result);
-        if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Camera service is currently unavailable");
             return ec;
         }
-        if (ec == (ECode)E_REMOTE_EXCEPTION) {
-            // Camera service died - act as if the camera was disconnected
-            // throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
-            //         "Camera service is currently unavailable", e);
-            Slogger::E(TAG, "Camera service is currently unavailable");
-            return E_CAMERA_ACCESS_EXCEPTION;
+
+        if (DEBUG) {
+            Logger::I(TAG, "camera %s SupportsCamera2Api %d", cameraId.string(), result);
         }
+
         if (!result) {
             // Legacy backwards compatibility path; build static info from the camera
             // parameters
-            AutoPtr<ArrayOf<String> > outParameters = ArrayOf<String>::Alloc(1);
+            AutoPtr<ArrayOf<String> > outParameters;
 
             Int32 tmp;
-            cameraService->GetLegacyParameters(id, /*out*/outParameters, &tmp);
+            cameraService->GetLegacyParameters(id, (ArrayOf<String>**)&outParameters, &tmp);
             String parameters = (*outParameters)[0];
 
             AutoPtr<ICameraInfo> info = new CameraInfo();
             cameraService->GetCameraInfo(id, /*out*/info, &tmp);
 
-            LegacyMetadataMapper::CreateCharacteristics(parameters, info,
-                    (ICameraCharacteristics**)&characteristics);
+            LegacyMetadataMapper::CreateCharacteristics(parameters, info, (ICameraCharacteristics**)&characteristics);
         }
         else {
             // Normal path: Get the camera characteristics directly from the camera service
@@ -680,23 +697,10 @@ ECode CameraManager::GetCameraCharacteristics(
 
             Int32 tmp;
             cameraService->GetCameraCharacteristics(id, info, &tmp);
-
             CCameraCharacteristics::New(info, (ICameraCharacteristics**)&characteristics);
         }
-        //} catch (CameraRuntimeException e) {
-        // if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
-        //     return ec;
-        // }
-        // //} catch (RemoteException e) {
-        // if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        //     // Camera service died - act as if the camera was disconnected
-        //     // throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
-        //     //         "Camera service is currently unavailable", e);
-        //     Slogger::E(TAG, "Camera service is currently unavailable");
-        //     return E_CAMERA_ACCESS_EXCEPTION;
-        // }
-        //}
     }
+
     *outcc = characteristics;
     REFCOUNT_ADD(*outcc);
     return NOERROR;
@@ -716,7 +720,8 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
     AutoPtr<ICameraDevice> device;
     //try {
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
 
         AutoPtr<IICameraDeviceUser> cameraUser;
         AutoPtr<ICameraDeviceImpl> deviceImpl;
@@ -737,11 +742,8 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
             AutoPtr<IICameraService> cameraService;
             GetCameraServiceLocked((IICameraService**)&cameraService);
             if (cameraService == NULL) {
-                // throw new CameraRuntimeException(
-                //     CameraAccessException.CAMERA_DISCONNECTED,
-                //     "Camera service is currently unavailable");
-                Slogger::E(TAG, "Camera service is currently unavailable");
-                return E_CAMERA_RUNTIME_EXCEPTION;
+                Logger::E(TAG, "Camera service is currently unavailable");
+                return E_CAMERA_ACCESS_EXCEPTION;
             }
             String name;
             mContext->GetPackageName(&name);
@@ -754,7 +756,7 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
         }
         else {
             // Use legacy camera implementation for HAL1 devices
-            Slogger::I(TAG, "Using legacy camera HAL.");
+            Logger::I(TAG, "Using legacy camera HAL.");
             AutoPtr<ICameraDeviceUserShim> shim;
             CameraDeviceUserShim::ConnectBinderShim(callbacks, id,
                     (ICameraDeviceUserShim**)&shim);
@@ -819,13 +821,11 @@ ECode CameraManager::OpenCamera(
     /* [in] */ IHandler* handler)
 {
     if (cameraId.IsNull()) {
-        //throw new IllegalArgumentException("cameraId was null");
-        Slogger::E(TAG, "cameraId was null");
+        Logger::E(TAG, "cameraId was null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (ccallback == NULL) {
-        //throw new IllegalArgumentException("callback was null");
-        Slogger::E(TAG, "callback was null");
+        Logger::E(TAG, "callback was null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (handler == NULL) {
@@ -834,9 +834,7 @@ ECode CameraManager::OpenCamera(
             CHandler::New((IHandler**)&handler);
         }
         else {
-            // throw new IllegalArgumentException(
-            //         "Looper doesn't exist in the calling thread");
-            Slogger::E(TAG, "Looper doesn't exist in the calling thread");
+            Logger::E(TAG, "Looper doesn't exist in the calling thread");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -860,9 +858,10 @@ ECode CameraManager::GetOrCreateDeviceIdListLocked(
 
         // If no camera service, then no devices
         if (cameraService == NULL) {
+            Logger::E(TAG, "Camera service is currently unavailable");
             *list = deviceIdList;
             REFCOUNT_ADD(*list);
-            return NOERROR;
+            return E_CAMERA_ACCESS_EXCEPTION;
         }
 
         ECode ec = cameraService->GetNumberOfCameras(&numCameras);
@@ -880,7 +879,7 @@ ECode CameraManager::GetOrCreateDeviceIdListLocked(
             Int32 tmp;
             ec = cameraService->GetCameraCharacteristics(i, info, &tmp);
             if (FAILED(ec)) {
-                Slogger::E(TAG, "Failed to GetCameraCharacteristics for camera %d", i);
+                Logger::E(TAG, "Failed to GetCameraCharacteristics for camera %d", i);
                 return ec;
             }
 
@@ -890,7 +889,7 @@ ECode CameraManager::GetOrCreateDeviceIdListLocked(
                 isDeviceSupported = TRUE;
             }
             else {
-                Slogger::E(TAG, "Expected to get non-empty characteristics for cameraId %d", i);
+                Logger::E(TAG, "Expected to get non-empty characteristics for cameraId %d", i);
             }
 
             // //} catch(IllegalArgumentException  e) {
@@ -924,29 +923,28 @@ ECode CameraManager::GetOrCreateDeviceIdListLocked(
                 deviceIdList->Add(TO_IINTERFACE(ccahr));
             }
             else {
-                Slogger::W(TAG, "Error querying camera device %d for listing.", i);
+                Logger::W(TAG, "Error querying camera device %d for listing.", i);
             }
         }
         mDeviceIdList = deviceIdList;
     }
+
     *list = mDeviceIdList;
     REFCOUNT_ADD(*list);
     return NOERROR;
 }
 
 ECode CameraManager::HandleRecoverableSetupErrors(
-    /* [in] */ Int32 e,
+    /* [in] */ Int32 problem,
     /* [in] */ const String& msg)
 {
-    Int32 problem = e;
     switch (problem) {
         case ICameraAccessException::CAMERA_DISCONNECTED:
-            // String errorMsg = CameraAccessException.getDefaultMessage(problem);
-            // Log.w(TAG, msg + ": " + errorMsg);
+            Logger::W(TAG, "CAMERA_DISCONNECTED:%s", msg.string());
             break;
         default:
-            //throw new IllegalStateException(msg, e.asChecked());
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            Logger::W(TAG, "E_ILLEGAL_STATE_EXCEPTION: %s", msg.string());
+            return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
 }
@@ -980,40 +978,23 @@ ECode CameraManager::SupportsCameraApiLocked(
      */
     //try {
     AutoPtr<IICameraService> cameraService;
-    ECode ec = GetCameraServiceLocked((IICameraService**)&cameraService);
-    if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
-        assert(0);
-        // if (e.getReason() != CameraAccessException.CAMERA_DEPRECATED_HAL) {
-        //     throw e;
-        // }
-        // API level is not supported
-    }
+    GetCameraServiceLocked((IICameraService**)&cameraService);
+
     // If no camera service, no support
     if (cameraService == NULL) {
-        *result = FALSE;
-        return NOERROR;
+        Logger::E(TAG, "Camera service is currently unavailable");
+        return E_CAMERA_ACCESS_EXCEPTION;
     }
 
     Int32 res;
     cameraService->SupportsCameraApi(id, apiVersion, &res);
-
     if (res != ICameraBinderDecorator::ICameraBinderDecorator_NO_ERROR) {
-        //throw new AssertionError("Unexpected value " + res);
-        Slogger::E(TAG, "Unexpected value %d", res);
+        Logger::E(TAG, "Unexpected value %d", res);
         return E_ASSERTION_ERROR;
     }
+
     *result = TRUE;
     return NOERROR;
-    //} catch (CameraRuntimeException e) {
-    // if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
-    //     // if (e.getReason() != CameraAccessException.CAMERA_DEPRECATED_HAL) {
-    //     //     throw e;
-    //     // }
-    //     // API level is not supported
-    // }
-    //} catch (RemoteException e) {
-        // Camera service is now down, no support for any API level
-    //}
 }
 
 ECode CameraManager::ConnectCameraServiceLocked()
@@ -1025,13 +1006,13 @@ ECode CameraManager::ConnectCameraServiceLocked()
 
     if (binder == NULL) {
         // Camera service is now down, leave mCameraService as null
-        Slogger::W(TAG, "Camera service is now down");
+        Logger::W(TAG, "Camera service is now down");
         return NOERROR;
     }
 
     android::sp<android::ICameraService> service = android::ICameraService::asInterface(binder);
     if (service == NULL) {
-        Slogger::E(TAG, "Failed to get Camera service interface.");
+        Logger::E(TAG, "Failed to get Camera service interface.");
         return E_CAMERA_RUNTIME_EXCEPTION;
     }
 
@@ -1065,7 +1046,7 @@ ECode CameraManager::ConnectCameraServiceLocked()
     //     // Unexpected failure
     //     // throw new IllegalStateException("Failed to register a camera service listener",
     //     //         e.asChecked());
-    //     Slogger::E(TAG, "Failed to register a camera service listener");
+    //     Logger::E(TAG, "Failed to register a camera service listener");
     //     return E_ILLEGAL_ARGUMENT_EXCEPTION;
     // }
     //} catch (RemoteException e) {
@@ -1081,10 +1062,10 @@ ECode CameraManager::GetCameraServiceLocked(
     *service = NULL;
 
     if (mCameraService == NULL) {
-        Slogger::I(TAG, "getCameraServiceLocked: Reconnecting to camera service");
+        Logger::I(TAG, "getCameraServiceLocked: Reconnecting to camera service");
         FAIL_RETURN(ConnectCameraServiceLocked())
         if (mCameraService == NULL) {
-            Slogger::E(TAG, "Camera service is unavailable");
+            Logger::E(TAG, "Camera service is unavailable");
         }
     }
     *service = mCameraService;

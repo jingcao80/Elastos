@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/hardware/camera2/impl/CameraMetadataNative.h"
 #include "elastos/droid/hardware/camera2/impl/CCameraMetadataNative.h"
+#include "elastos/droid/hardware/camera2/utils/TypeReference.h"
 #include "elastos/droid/hardware/camera2/params/CFace.h"
 #include "elastos/droid/hardware/camera2/params/CLensShadingMap.h"
 #include "elastos/droid/hardware/camera2/params/CStreamConfigurationMap.h"
@@ -11,6 +12,27 @@
 #include "elastos/droid/hardware/camera2/CameraCharacteristics.h"
 #include "elastos/droid/hardware/camera2/CaptureResult.h"
 #include "elastos/droid/hardware/camera2/CaptureRequest.h"
+#include "elastos/droid/hardware/camera2/marshal/MarshalRegistry.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryablePrimitive.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableEnum.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableArray.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableBoolean.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableNativeByteToInteger.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableRect.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableSize.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableSizeF.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableString.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableReprocessFormatsMap.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableRange.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryablePair.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableMeteringRectangle.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableColorSpaceTransform.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableStreamConfiguration.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableStreamConfigurationDuration.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableRggbChannelVector.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableBlackLevelPattern.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableHighSpeedVideoConfiguration.h"
+#include "elastos/droid/hardware/camera2/marshal/impl/CMarshalQueryableParcelable.h"
 #include "elastos/droid/graphics/CPoint.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
@@ -19,8 +41,10 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <binder/IServiceManager.h>
 #include <camera/ICameraService.h>
@@ -31,6 +55,7 @@
 #include <utils/String16.h>
 #include <utils/SortedVector.h>
 
+using Elastos::Droid::Hardware::Camera2::Utils::TypeReference;
 using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::CFace;
 using Elastos::Droid::Hardware::Camera2::Params::CLensShadingMap;
@@ -40,6 +65,29 @@ using Elastos::Droid::Hardware::Camera2::Params::IHighSpeedVideoConfiguration;
 using Elastos::Droid::Hardware::Camera2::Params::CStreamConfigurationMap;
 using Elastos::Droid::Hardware::Camera2::Params::ITonemapCurve;
 using Elastos::Droid::Hardware::Camera2::Params::CTonemapCurve;
+using Elastos::Droid::Hardware::Camera2::Marshal::IMarshalQueryable;
+using Elastos::Droid::Hardware::Camera2::Marshal::MarshalRegistry;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryablePrimitive;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableEnum;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableArray;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableBoolean;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableNativeByteToInteger;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableRect;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableSize;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableSizeF;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableString;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableReprocessFormatsMap;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableRange;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryablePair;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableMeteringRectangle;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableColorSpaceTransform;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableStreamConfiguration;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableStreamConfigurationDuration;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableRggbChannelVector;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableBlackLevelPattern;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableHighSpeedVideoConfiguration;
+using Elastos::Droid::Hardware::Camera2::Marshal::Impl::CMarshalQueryableParcelable;
+
 using Elastos::Droid::Location::ILocation;
 using Elastos::Droid::Location::CLocation;
 using Elastos::Droid::Location::ILocationManager;
@@ -49,6 +97,8 @@ using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Utility::ISize;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::AutoLock;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::IInteger32;
@@ -63,7 +113,7 @@ using Elastos::IO::IByteOrderHelper;
 using Elastos::IO::CByteOrderHelper;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -71,161 +121,15 @@ namespace Hardware {
 namespace Camera2 {
 namespace Impl {
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::Key, Object, ICaptureRequestKey)
+const String TAG("CameraMetadataNative");
+const Boolean VERBOSE = TRUE;
 
-CameraMetadataNative::Key::Key(
-    /* [in] */ const String& name,
-    /* [in] */ ClassID type)
-{
-    if (name.IsNull()) {
-        //throw new NullPointerException("Key needs a valid name");
-        Slogger::E("CameraMetadataNative::Key", "Key needs a valid name");
-    }
-    // else if (type == null) {
-    //     throw new NullPointerException("Type needs to be non-null");
-    // }
+//==============================================================================
+// GetCommand
+//==============================================================================
+CAR_INTERFACE_IMPL(GetCommand_AvailableFormats, Object, IGetCommand)
 
-    mName = name;
-    mType = type;
-    // assert(0);
-    // TODO
-    //mTypeReference = TypeReference::CreateSpecializedTypeReference(type);
-    // Int32 code;
-    // IObject::Probe(mTypeReference)->GetHashCode(&code);
-    // mHash = mName.GetHashCode() ^ code;
-}
-
-CameraMetadataNative::Key::Key(
-    /* [in] */ const String& name,
-    /* [in] */ ITypeReference* typeReference)
-{
-    if (name.IsNull()) {
-        //throw new NullPointerException("Key needs a valid name");
-        Slogger::E("CameraMetadataNative::Key", "Key needs a valid name");;
-    }
-    else if (typeReference == NULL) {
-        //throw new NullPointerException("TypeReference needs to be non-null");
-        Slogger::E("CameraMetadataNative::Key", "TypeReference needs to be non-null");
-    }
-    mName = name;
-    ClassID id;
-    AutoPtr<IClassInfo> info;
-    typeReference->GetRawType((IClassInfo**)&info);
-    info->GetId(&id);
-    mType = id;
-    mTypeReference = typeReference;
-    Int32 code;
-    IObject::Probe(mTypeReference)->GetHashCode(&code);
-    mHash = mName.GetHashCode() ^ code;
-}
-
-ECode CameraMetadataNative::Key::GetName(
-    /* [out] */ String* name)
-{
-    VALIDATE_NOT_NULL(name);
-
-    *name = mName;
-    return NOERROR;
-}
-
-ECode CameraMetadataNative::Key::GetHashCode(
-    /* [out] */ Int32* code)
-{
-    VALIDATE_NOT_NULL(code);
-
-    *code = mHash;
-    return NOERROR;
-}
-
-ECode CameraMetadataNative::Key::Equals(
-    /* [in] */ IInterface* obj,
-    /* [out] */ Boolean* equal)
-{
-    VALIDATE_NOT_NULL(equal);
-    *equal = FALSE;
-
-    if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
-        *equal = TRUE;
-        return NOERROR;
-    }
-
-    if (obj == NULL) {
-        *equal = FALSE;
-        return NOERROR;
-    }
-
-    Int32 code;
-    this->GetHashCode(&code);
-    Int32 code2;
-    IObject::Probe(obj)->GetHashCode(&code2);
-    if (code != code2) {
-        *equal = FALSE;
-        return NOERROR;
-    }
-
-    AutoPtr<ICameraMetadataNativeKey> lhs;
-    if (ICaptureResultKey::Probe(obj) != NULL) {
-        ICaptureResultKey::Probe(obj)->GetNativeKey((ICameraMetadataNativeKey**)&lhs);
-    }
-    else if (ICaptureRequestKey::Probe(obj) != NULL) {
-        ICaptureRequestKey::Probe(obj)->GetNativeKey((ICameraMetadataNativeKey**)&lhs);
-    }
-    else if (ICameraCharacteristicsKey::Probe(obj) != NULL) {
-        ICameraCharacteristicsKey::Probe(obj)->GetNativeKey((ICameraMetadataNativeKey**)&lhs);
-    }
-    else if (ICameraMetadataNativeKey::Probe(obj) != NULL) {
-        lhs = ICameraMetadataNativeKey::Probe(obj);
-    }
-    else {
-        *equal = FALSE;
-        return NOERROR;
-    }
-
-    String name;
-    lhs->GetName(&name);
-    AutoPtr<ITypeReference> ref;
-    lhs->GetTypeReference((ITypeReference**)&ref);
-    Boolean result2;
-    IObject::Probe(mTypeReference)->Equals(ref, &result2);
-    *equal = mName.Equals(name) && result2;
-    return NOERROR;
-}
-
-ECode CameraMetadataNative::Key::GetTag(
-    /* [out] */ Int32* tag)
-{
-    VALIDATE_NOT_NULL(tag);
-
-    if (!mHasTag) {
-        CameraMetadataNative::GetTag(mName, &mTag);
-        mHasTag = TRUE;
-    }
-    *tag = mTag;
-    return NOERROR;
-}
-
-ECode CameraMetadataNative::Key::GetType(
-    /* [out] */ ClassID* type)
-{
-    VALIDATE_NOT_NULL(type);
-    // TODO: remove this; other places should use #getTypeReference() instead
-    *type = mType;
-    return NOERROR;
-}
-
-ECode CameraMetadataNative::Key::GetTypeReference(
-    /* [out] */ ITypeReference** ref)
-{
-    VALIDATE_NOT_NULL(ref);
-
-    *ref = mTypeReference;
-    REFCOUNT_ADD(*ref);
-    return NOERROR;
-}
-
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_AvailableFormats, Object, IGetCommand)
-
-ECode CameraMetadataNative::GetCommand_AvailableFormats::GetValue(
+ECode GetCommand_AvailableFormats::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -240,9 +144,9 @@ ECode CameraMetadataNative::GetCommand_AvailableFormats::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_Faces, Object, IGetCommand)
+CAR_INTERFACE_IMPL(GetCommand_Faces, Object, IGetCommand)
 
-ECode CameraMetadataNative::GetCommand_Faces::GetValue(
+ECode GetCommand_Faces::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -257,9 +161,9 @@ ECode CameraMetadataNative::GetCommand_Faces::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_FaceRectangles, Object, IGetCommand)
+CAR_INTERFACE_IMPL(GetCommand_FaceRectangles, Object, IGetCommand)
 
-ECode CameraMetadataNative::GetCommand_FaceRectangles::GetValue(
+ECode GetCommand_FaceRectangles::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -274,9 +178,9 @@ ECode CameraMetadataNative::GetCommand_FaceRectangles::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_StreamConfigurationMap, Object, IGetCommand)
+CAR_INTERFACE_IMPL(GetCommand_StreamConfigurationMap, Object, IGetCommand)
 
-ECode CameraMetadataNative::GetCommand_StreamConfigurationMap::GetValue(
+ECode GetCommand_StreamConfigurationMap::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -290,9 +194,9 @@ ECode CameraMetadataNative::GetCommand_StreamConfigurationMap::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_MaxRegions, Object, IGetCommand)
+CAR_INTERFACE_IMPL(GetCommand_MaxRegions, Object, IGetCommand)
 
-ECode CameraMetadataNative::GetCommand_MaxRegions::GetValue(
+ECode GetCommand_MaxRegions::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -308,9 +212,9 @@ ECode CameraMetadataNative::GetCommand_MaxRegions::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_MaxNumOutputs, Object, IGetCommand)
+CAR_INTERFACE_IMPL(GetCommand_MaxNumOutputs, Object, IGetCommand)
 
-ECode CameraMetadataNative::GetCommand_MaxNumOutputs::GetValue(
+ECode GetCommand_MaxNumOutputs::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -326,9 +230,9 @@ ECode CameraMetadataNative::GetCommand_MaxNumOutputs::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_TonemapCurve, Object, IGetCommand)
+CAR_INTERFACE_IMPL(GetCommand_TonemapCurve, Object, IGetCommand)
 
-ECode CameraMetadataNative::GetCommand_TonemapCurve::GetValue(
+ECode GetCommand_TonemapCurve::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -342,9 +246,9 @@ ECode CameraMetadataNative::GetCommand_TonemapCurve::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_GpsLocation, Object, IGetCommand)
+CAR_INTERFACE_IMPL(GetCommand_GpsLocation, Object, IGetCommand)
 
-ECode CameraMetadataNative::GetCommand_GpsLocation::GetValue(
+ECode GetCommand_GpsLocation::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -358,9 +262,9 @@ ECode CameraMetadataNative::GetCommand_GpsLocation::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::GetCommand_LensShadingMap, Object, IGetCommand)
+CAR_INTERFACE_IMPL(GetCommand_LensShadingMap, Object, IGetCommand)
 
-ECode CameraMetadataNative::GetCommand_LensShadingMap::GetValue(
+ECode GetCommand_LensShadingMap::GetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ ICameraMetadataNativeKey* key,
     /* [out] */ IInterface** outface)
@@ -374,9 +278,13 @@ ECode CameraMetadataNative::GetCommand_LensShadingMap::GetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::SetCommand_AvailableFormats, Object, ISetCommand)
+//==============================================================================
+// SetCommand
+//==============================================================================
 
-ECode CameraMetadataNative::SetCommand_AvailableFormats::SetValue(
+CAR_INTERFACE_IMPL(SetCommand_AvailableFormats, Object, ISetCommand)
+
+ECode SetCommand_AvailableFormats::SetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ IInterface* value)
 {
@@ -398,9 +306,9 @@ ECode CameraMetadataNative::SetCommand_AvailableFormats::SetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::SetCommand_FaceRectangles, Object, ISetCommand)
+CAR_INTERFACE_IMPL(SetCommand_FaceRectangles, Object, ISetCommand)
 
-ECode CameraMetadataNative::SetCommand_FaceRectangles::SetValue(
+ECode SetCommand_FaceRectangles::SetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ IInterface* value)
 {
@@ -420,9 +328,9 @@ ECode CameraMetadataNative::SetCommand_FaceRectangles::SetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::SetCommand_Faces, Object, ISetCommand)
+CAR_INTERFACE_IMPL(SetCommand_Faces, Object, ISetCommand)
 
-ECode CameraMetadataNative::SetCommand_Faces::SetValue(
+ECode SetCommand_Faces::SetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ IInterface* value)
 {
@@ -442,9 +350,9 @@ ECode CameraMetadataNative::SetCommand_Faces::SetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::SetCommand_TonemapCurve, Object, ISetCommand)
+CAR_INTERFACE_IMPL(SetCommand_TonemapCurve, Object, ISetCommand)
 
-ECode CameraMetadataNative::SetCommand_TonemapCurve::SetValue(
+ECode SetCommand_TonemapCurve::SetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ IInterface* value)
 {
@@ -455,9 +363,9 @@ ECode CameraMetadataNative::SetCommand_TonemapCurve::SetValue(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CameraMetadataNative::SetCommand_GpsLocation, Object, ISetCommand)
+CAR_INTERFACE_IMPL(SetCommand_GpsLocation, Object, ISetCommand)
 
-ECode CameraMetadataNative::SetCommand_GpsLocation::SetValue(
+ECode SetCommand_GpsLocation::SetValue(
     /* [in] */ ICameraMetadataNative* metadata,
     /* [in] */ IInterface* value)
 {
@@ -467,121 +375,409 @@ ECode CameraMetadataNative::SetCommand_GpsLocation::SetValue(
     return NOERROR;
 }
 
-AutoPtr<IHashMap> CameraMetadataNative::sGetCommandMap;
+//==============================================================================
+// CameraMetadataNativeKey
+//==============================================================================
+CAR_INTERFACE_IMPL(CameraMetadataNativeKey, Object, ICaptureRequestKey)
 
-AutoPtr<IHashMap> CameraMetadataNative::sSetCommandMap;
-
-Boolean CameraMetadataNative::InitStaticBlock()
+CameraMetadataNativeKey::CameraMetadataNativeKey(
+    /* [in] */ const String& name,
+    /* [in] */ ClassID type)
+    : mHasTag(FALSE)
+    , mTag(0)
+    , mHash(0)
 {
-    // TODO:
-    // CHashMap::New((IHashMap**)&sGetCommandMap);
+    if (name.IsNull()) {
+        Logger::E("CameraMetadataNativeKey", "Key needs a valid name");
+        assert(0 && "Key needs a valid name");
+    }
 
-    // AutoPtr<ICameraMetadataNativeKey> availableFormatsKey;
-    // CameraCharacteristics::SCALER_AVAILABLE_FORMATS->GetNativeKey((ICameraMetadataNativeKey**)&availableFormatsKey);
-    // AutoPtr<GetCommand_AvailableFormats> availableFormats = new GetCommand_AvailableFormats();
-    // sGetCommandMap->Put(TO_IINTERFACE(availableFormatsKey), TO_IINTERFACE(availableFormats));
-
-    // AutoPtr<ICameraMetadataNativeKey> facesKey;
-    // CaptureResult::STATISTICS_FACES->GetNativeKey((ICameraMetadataNativeKey**)&facesKey);
-    // AutoPtr<GetCommand_Faces> faces = new GetCommand_Faces();
-    // sGetCommandMap->Put(TO_IINTERFACE(facesKey), TO_IINTERFACE(faces));
-
-    // AutoPtr<ICameraMetadataNativeKey> faceRectanglesKey;
-    // CaptureResult::STATISTICS_FACE_RECTANGLES->GetNativeKey((ICameraMetadataNativeKey**)&faceRectanglesKey);
-    // AutoPtr<GetCommand_FaceRectangles> faceRectangles = new GetCommand_FaceRectangles();
-    // sGetCommandMap->Put(TO_IINTERFACE(faceRectanglesKey), TO_IINTERFACE(faceRectangles));
-
-    // AutoPtr<ICameraMetadataNativeKey> streamConfigurationMapKey;
-    // CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP->GetNativeKey((ICameraMetadataNativeKey**)&streamConfigurationMapKey);
-    // AutoPtr<GetCommand_StreamConfigurationMap> streamConfigurationMap = new GetCommand_StreamConfigurationMap();
-    // sGetCommandMap->Put(TO_IINTERFACE(streamConfigurationMapKey), TO_IINTERFACE(streamConfigurationMap));
-
-    // AutoPtr<ICameraMetadataNativeKey> maxRegionKey;
-    // CameraCharacteristics::CONTROL_MAX_REGIONS_AE->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey);
-    // AutoPtr<GetCommand_MaxRegions> maxRegion = new GetCommand_MaxRegions();
-    // sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey), TO_IINTERFACE(maxRegion));
-
-    // AutoPtr<ICameraMetadataNativeKey> maxRegionKey2;
-    // CameraCharacteristics::CONTROL_MAX_REGIONS_AWB->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey2);
-    // AutoPtr<GetCommand_MaxRegions> maxRegion2 = new GetCommand_MaxRegions();
-    // sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey2), TO_IINTERFACE(maxRegion2));
-
-    // AutoPtr<ICameraMetadataNativeKey> maxRegionKey3;
-    // CameraCharacteristics::CONTROL_MAX_REGIONS_AF->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey3);
-    // AutoPtr<GetCommand_MaxRegions> maxRegion3 = new GetCommand_MaxRegions();
-    // sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey3), TO_IINTERFACE(maxRegion3));
-
-    // AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey;
-    // CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_RAW->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey);
-    // AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs = new GetCommand_MaxNumOutputs();
-    // sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey), TO_IINTERFACE(maxNumOutputs));
-
-    // AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey2;
-    // CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_PROC->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey2);
-    // AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs2 = new GetCommand_MaxNumOutputs();
-    // sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey2), TO_IINTERFACE(maxNumOutputs2));
-
-    // AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey3;
-    // CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_PROC_STALLING->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey3);
-    // AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs3 = new GetCommand_MaxNumOutputs();
-    // sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey3), TO_IINTERFACE(maxNumOutputs3));
-
-    // AutoPtr<ICameraMetadataNativeKey> tonemapCurveKey;
-    // CaptureRequest::TONEMAP_CURVE->GetNativeKey((ICameraMetadataNativeKey**)&tonemapCurveKey);
-    // AutoPtr<GetCommand_TonemapCurve> tonemapCurve = new GetCommand_TonemapCurve();
-    // sGetCommandMap->Put(TO_IINTERFACE(tonemapCurveKey), TO_IINTERFACE(tonemapCurve));
-
-    // AutoPtr<ICameraMetadataNativeKey> gpsLocationKey;
-    // CaptureResult::JPEG_GPS_LOCATION->GetNativeKey((ICameraMetadataNativeKey**)&gpsLocationKey);
-    // AutoPtr<GetCommand_GpsLocation> gpsLocation = new GetCommand_GpsLocation();
-    // sGetCommandMap->Put(TO_IINTERFACE(gpsLocationKey), TO_IINTERFACE(gpsLocation));
-
-    // AutoPtr<ICameraMetadataNativeKey> lensShadingMapKey;
-    // CaptureResult::STATISTICS_LENS_SHADING_CORRECTION_MAP->GetNativeKey((ICameraMetadataNativeKey**)&lensShadingMapKey);
-    // AutoPtr<GetCommand_LensShadingMap> lensShadingMap = new GetCommand_LensShadingMap();
-    // sGetCommandMap->Put(TO_IINTERFACE(lensShadingMapKey), TO_IINTERFACE(lensShadingMap));
-
-    // CHashMap::New((IHashMap**)&sSetCommandMap);
-
-    // AutoPtr<ICameraMetadataNativeKey> _availableFormatsKey;
-    // CameraCharacteristics::SCALER_AVAILABLE_FORMATS->GetNativeKey((ICameraMetadataNativeKey**)&_availableFormatsKey);
-    // AutoPtr<SetCommand_AvailableFormats> _availableFormats = new SetCommand_AvailableFormats();
-    // sSetCommandMap->Put(TO_IINTERFACE(_availableFormatsKey), TO_IINTERFACE(_availableFormats));
-
-    // AutoPtr<ICameraMetadataNativeKey> _faceRectanglesKey;
-    // CaptureResult::STATISTICS_FACE_RECTANGLES->GetNativeKey((ICameraMetadataNativeKey**)&_faceRectanglesKey);
-    // AutoPtr<SetCommand_FaceRectangles> _faceRectangles = new SetCommand_FaceRectangles();
-    // sSetCommandMap->Put(TO_IINTERFACE(_faceRectanglesKey), TO_IINTERFACE(_faceRectangles));
-
-    // AutoPtr<ICameraMetadataNativeKey> _facesKey;
-    // CaptureResult::STATISTICS_FACES->GetNativeKey((ICameraMetadataNativeKey**)&_facesKey);
-    // AutoPtr<SetCommand_Faces> _faces = new SetCommand_Faces();
-    // sSetCommandMap->Put(TO_IINTERFACE(_facesKey), TO_IINTERFACE(_faces));
-
-    // AutoPtr<ICameraMetadataNativeKey> _tonemapCurveKey;
-    // CaptureRequest::TONEMAP_CURVE->GetNativeKey((ICameraMetadataNativeKey**)&_tonemapCurveKey);
-    // AutoPtr<SetCommand_TonemapCurve> _tonemapCurve = new SetCommand_TonemapCurve();
-    // sSetCommandMap->Put(TO_IINTERFACE(_tonemapCurveKey), TO_IINTERFACE(_tonemapCurve));
-
-    // AutoPtr<ICameraMetadataNativeKey> _gpsLocationKey;
-    // CaptureResult::JPEG_GPS_LOCATION->GetNativeKey((ICameraMetadataNativeKey**)&_gpsLocationKey);
-    // AutoPtr<SetCommand_GpsLocation> _gpsLocation= new SetCommand_GpsLocation();
-    // sSetCommandMap->Put(TO_IINTERFACE(_gpsLocationKey), TO_IINTERFACE(_gpsLocation));
-
-    // NativeClassInit();
-    // RegisterAllMarshalers();
-
-    return TRUE;
+    mName = name;
+    mType = type;
+    mTypeReference = TypeReference::CreateSpecializedTypeReference(type);
+    mHash = mName.GetHashCode() ^ Object::GetHashCode(mTypeReference);
 }
 
-const String CameraMetadataNative::TAG("CameraMetadataJV");
-const Boolean CameraMetadataNative::VERBOSE = FALSE; //Log.isLoggable(TAG, Log.VERBOSE);
+CameraMetadataNativeKey::CameraMetadataNativeKey(
+    /* [in] */ const String& name,
+    /* [in] */ ITypeReference* typeReference)
+    : mHasTag(FALSE)
+    , mTag(0)
+    , mHash(0)
+{
+    if (name.IsNull()) {
+        Logger::E("CameraMetadataNativeKey", "Key needs a valid name");
+        assert(0 && "Key needs a valid name");
+    }
+    else if (typeReference == NULL) {
+        Logger::E("CameraMetadataNativeKey", "TypeReference needs to be non-null");
+        assert(0 && "TypeReference needs to be non-null");
+    }
+
+    mName = name;
+    typeReference->GetType(&mType);
+    mTypeReference = typeReference;
+    mHash = mName.GetHashCode() ^ Object::GetHashCode(mTypeReference);
+}
+
+ECode CameraMetadataNativeKey::GetName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name);
+
+    *name = mName;
+    return NOERROR;
+}
+
+ECode CameraMetadataNativeKey::GetHashCode(
+    /* [out] */ Int32* code)
+{
+    VALIDATE_NOT_NULL(code);
+
+    *code = mHash;
+    return NOERROR;
+}
+
+ECode CameraMetadataNativeKey::Equals(
+    /* [in] */ IInterface* obj,
+    /* [out] */ Boolean* equal)
+{
+    VALIDATE_NOT_NULL(equal);
+    *equal = FALSE;
+
+    if (obj == NULL) {
+        return NOERROR;
+    }
+
+    if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
+        *equal = TRUE;
+        return NOERROR;
+    }
+
+    Int32 code;
+    GetHashCode(&code);
+    Int32 code2 = Object::GetHashCode(obj);
+    if (code != code2) {
+        return NOERROR;
+    }
+
+    AutoPtr<ICameraMetadataNativeKey> lhs;
+    if (ICaptureResultKey::Probe(obj) != NULL) {
+        ICaptureResultKey::Probe(obj)->GetNativeKey((ICameraMetadataNativeKey**)&lhs);
+    }
+    else if (ICaptureRequestKey::Probe(obj) != NULL) {
+        ICaptureRequestKey::Probe(obj)->GetNativeKey((ICameraMetadataNativeKey**)&lhs);
+    }
+    else if (ICameraCharacteristicsKey::Probe(obj) != NULL) {
+        ICameraCharacteristicsKey::Probe(obj)->GetNativeKey((ICameraMetadataNativeKey**)&lhs);
+    }
+    else if (ICameraMetadataNativeKey::Probe(obj) != NULL) {
+        lhs = ICameraMetadataNativeKey::Probe(obj);
+    }
+    else {
+        return NOERROR;
+    }
+
+    String name;
+    lhs->GetName(&name);
+    AutoPtr<ITypeReference> ref;
+    lhs->GetTypeReference((ITypeReference**)&ref);
+    *equal = mName.Equals(name) && Object::Equals(mTypeReference, ref);
+    return NOERROR;
+}
+
+ECode CameraMetadataNativeKey::GetTag(
+    /* [out] */ Int32* tag)
+{
+    VALIDATE_NOT_NULL(tag);
+
+    if (!mHasTag) {
+        CameraMetadataNative::GetTag(mName, &mTag);
+        mHasTag = TRUE;
+    }
+    *tag = mTag;
+    return NOERROR;
+}
+
+ECode CameraMetadataNativeKey::GetType(
+    /* [out] */ ClassID* type)
+{
+    VALIDATE_NOT_NULL(type);
+    // TODO: remove this; other places should use #getTypeReference() instead
+    *type = mType;
+    return NOERROR;
+}
+
+ECode CameraMetadataNativeKey::GetTypeReference(
+    /* [out] */ ITypeReference** ref)
+{
+    VALIDATE_NOT_NULL(ref);
+
+    *ref = mTypeReference;
+    REFCOUNT_ADD(*ref);
+    return NOERROR;
+}
+
+ECode CameraMetadataNativeKey::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CameraMetadataNativeKey:");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += "{name:";
+    sb += mName;
+    sb += ", hasTag:";
+    sb += mHasTag;
+    sb += ", tag:";
+    sb += mTag;
+    sb += ", hash:";
+    sb += mHash;
+    sb += ", classType:";
+    String clsid;
+    // clsid.AppendFormat("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }",
+    clsid.AppendFormat("{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+        mType.mClsid.mData1, mType.mClsid.mData2, mType.mClsid.mData3,
+        mType.mClsid.mData4[0], mType.mClsid.mData4[1],
+        mType.mClsid.mData4[2], mType.mClsid.mData4[3],
+        mType.mClsid.mData4[4], mType.mClsid.mData4[5],
+        mType.mClsid.mData4[6], mType.mClsid.mData4[7]);
+    sb += clsid;
+    sb += ", module:";
+    sb += mType.mUunm;
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
+}
+
+//==============================================================================
+// CameraMetadataNative
+//==============================================================================
+static AutoPtr<IHashMap> InitSetCommandMap()
+{
+    AutoPtr<IHashMap> map;
+    CHashMap::New((IHashMap**)&map);
+
+    AutoPtr<ICameraMetadataNativeKey> key;
+    AutoPtr<ISetCommand> setCmd;
+
+    key = NULL;
+    CameraCharacteristics::SCALER_AVAILABLE_FORMATS->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    setCmd = new SetCommand_AvailableFormats();
+    map->Put(key, setCmd);
+
+    key = NULL;
+    CaptureResult::STATISTICS_FACE_RECTANGLES->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    setCmd = new SetCommand_FaceRectangles();
+    map->Put(key, setCmd);
+
+    key = NULL;
+    CaptureResult::STATISTICS_FACES->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    setCmd = new SetCommand_Faces();
+    map->Put(key, setCmd);
+
+    key = NULL;
+    CaptureRequest::TONEMAP_CURVE->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    setCmd = new SetCommand_TonemapCurve();
+    map->Put(key, setCmd);
+
+    key = NULL;
+    CaptureResult::JPEG_GPS_LOCATION->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    setCmd = new SetCommand_GpsLocation();
+    map->Put(key, setCmd);
+
+    return map;
+}
+
+static AutoPtr<IHashMap> InitGetCommandMap()
+{
+    AutoPtr<IHashMap> map;
+    CHashMap::New((IHashMap**)&map);
+
+    AutoPtr<ICameraMetadataNativeKey> key;
+    AutoPtr<IGetCommand> getCmd;
+
+    key = NULL;
+    CameraCharacteristics::SCALER_AVAILABLE_FORMATS->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_AvailableFormats();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CaptureResult::STATISTICS_FACES->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_Faces();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CaptureResult::STATISTICS_FACE_RECTANGLES->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_FaceRectangles();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_StreamConfigurationMap();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CameraCharacteristics::CONTROL_MAX_REGIONS_AE->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_MaxRegions();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CameraCharacteristics::CONTROL_MAX_REGIONS_AWB->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_MaxRegions();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CameraCharacteristics::CONTROL_MAX_REGIONS_AF->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_MaxRegions();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_RAW->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_MaxNumOutputs();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_PROC->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_MaxNumOutputs();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_PROC_STALLING->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_MaxNumOutputs();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CaptureRequest::TONEMAP_CURVE->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_TonemapCurve();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CaptureResult::JPEG_GPS_LOCATION->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_GpsLocation();
+    map->Put(key, getCmd);
+
+    key = NULL;
+    CaptureResult::STATISTICS_LENS_SHADING_CORRECTION_MAP->GetNativeKey((ICameraMetadataNativeKey**)&key);
+    getCmd = new GetCommand_LensShadingMap();
+    map->Put(key, getCmd);
+
+    return map;
+}
+
+AutoPtr<IHashMap> CameraMetadataNative::sGetCommandMap = InitGetCommandMap();
+AutoPtr<IHashMap> CameraMetadataNative::sSetCommandMap = InitSetCommandMap();
+
+
+static Boolean RegisterAllMarshalers()
+{
+    if (VERBOSE) {
+        Logger::V(TAG, "Shall register metadata marshalers");
+    }
+
+    AutoPtr<ArrayOf<IMarshalQueryable*> > queryList = ArrayOf<IMarshalQueryable*>::Alloc(20);
+
+    AutoPtr<IMarshalQueryable> query;
+
+    // marshalers for standard types
+    query = NULL;
+    CMarshalQueryablePrimitive::New((IMarshalQueryable**)&query);
+    queryList->Set(0, query);
+
+    query = NULL;
+    CMarshalQueryableEnum::New((IMarshalQueryable**)&query);
+    queryList->Set(1, query);
+
+    query = NULL;
+    CMarshalQueryableArray::New((IMarshalQueryable**)&query);
+    queryList->Set(2, query);
+
+    // pseudo standard types, that expand/narrow the native type into a managed type
+    query = NULL;
+    CMarshalQueryableBoolean::New((IMarshalQueryable**)&query);
+    queryList->Set(3, query);
+
+    query = NULL;
+    CMarshalQueryableNativeByteToInteger::New((IMarshalQueryable**)&query);
+    queryList->Set(4, query);
+
+    // marshalers for custom types
+    query = NULL;
+    CMarshalQueryableRect::New((IMarshalQueryable**)&query);
+    queryList->Set(5, query);
+
+    query = NULL;
+    CMarshalQueryableSize::New((IMarshalQueryable**)&query);
+    queryList->Set(6, query);
+
+    query = NULL;
+    CMarshalQueryableSizeF::New((IMarshalQueryable**)&query);
+    queryList->Set(7, query);
+
+    query = NULL;
+    CMarshalQueryableString::New((IMarshalQueryable**)&query);
+    queryList->Set(8, query);
+
+    query = NULL;
+    CMarshalQueryableReprocessFormatsMap::New((IMarshalQueryable**)&query);
+    queryList->Set(9, query);
+
+    query = NULL;
+    CMarshalQueryableRange::New((IMarshalQueryable**)&query);
+    queryList->Set(10, query);
+
+    query = NULL;
+    CMarshalQueryablePair::New((IMarshalQueryable**)&query);
+    queryList->Set(11, query);
+
+    query = NULL;
+    CMarshalQueryableMeteringRectangle::New((IMarshalQueryable**)&query);
+    queryList->Set(12, query);
+
+    query = NULL;
+    CMarshalQueryableColorSpaceTransform::New((IMarshalQueryable**)&query);
+    queryList->Set(13, query);
+
+    query = NULL;
+    CMarshalQueryableStreamConfiguration::New((IMarshalQueryable**)&query);
+    queryList->Set(14, query);
+
+    query = NULL;
+    CMarshalQueryableStreamConfigurationDuration::New((IMarshalQueryable**)&query);
+    queryList->Set(15, query);
+
+    query = NULL;
+    CMarshalQueryableRggbChannelVector::New((IMarshalQueryable**)&query);
+    queryList->Set(16, query);
+
+    query = NULL;
+    CMarshalQueryableBlackLevelPattern::New((IMarshalQueryable**)&query);
+    queryList->Set(17, query);
+
+    query = NULL;
+    CMarshalQueryableHighSpeedVideoConfiguration::New((IMarshalQueryable**)&query);
+    queryList->Set(18, query);
+
+    // generic parcelable marshaler (MUST BE LAST since it has lowest priority)
+    query = NULL;
+    CMarshalQueryableParcelable::New((IMarshalQueryable**)&query);
+    queryList->Set(19, query);
+
+    for (Int32 i = 0; i < queryList->GetLength(); ++i) {
+        query = (*queryList)[i];
+        MarshalRegistry::RegisterMarshalQueryable(query);
+    }
+
+    if (VERBOSE) {
+        Logger::V(TAG, "Registered metadata marshalers");
+    }
+    return TRUE;
+}
 
 const String CameraMetadataNative::CELLID_PROCESS("CELLID");
 const String CameraMetadataNative::GPS_PROCESS("GPS");
 const Int32 CameraMetadataNative::FACE_LANDMARK_SIZE = 6;
 
-Boolean CameraMetadataNative::initStaticBlock = InitStaticBlock();
+Boolean CameraMetadataNative::initStaticBlock = RegisterAllMarshalers();
 
 CAR_INTERFACE_IMPL_2(CameraMetadataNative, Object, ICameraMetadataNative, IParcelable)
 
@@ -605,7 +801,7 @@ ECode CameraMetadataNative::constructor()
     mMetadataPtr = NativeAllocate();
     if (mMetadataPtr == 0) {
         //throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
-        Slogger::E(TAG, "Failed to allocate native CameraMetadata");
+        Logger::E(TAG, "Failed to allocate native CameraMetadata");
         return E_OUT_OF_MEMORY_ERROR;
     }
     return NOERROR;
@@ -618,7 +814,7 @@ ECode CameraMetadataNative::constructor(
     FAIL_RETURN(NativeAllocateCopy(other, &mMetadataPtr))
     if (mMetadataPtr == 0) {
         //throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
-        Slogger::E(TAG, "Failed to allocate native CameraMetadata");
+        Logger::E(TAG, "Failed to allocate native CameraMetadata");
         return E_OUT_OF_MEMORY_ERROR;
     }
     return NOERROR;
@@ -725,6 +921,8 @@ ECode CameraMetadataNative::Get(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
+    if (VERBOSE) Logger::I(TAG, "CameraMetadataNative Get %s", TO_CSTR(key));
+
     FAIL_RETURN(Preconditions::CheckNotNull(key, String("key must not be null")))
 
     // Check if key has been overridden to use a wrapper class on the java side.
@@ -734,9 +932,14 @@ ECode CameraMetadataNative::Get(
     if (g != NULL) {
         return g->GetValue(this, key, result);
     }
-    AutoPtr<IInterface> _result = GetBase(key);
-    *result = _result;
+
+    if (VERBOSE) Logger::I(TAG, "CameraMetadataNative Get %s not in command map.", TO_CSTR(key));
+
+    obj = GetBase(key);
+    *result = obj;
     REFCOUNT_ADD(*result);
+
+    if (VERBOSE) Logger::I(TAG, "CameraMetadataNative Get %s result: %s.", TO_CSTR(key), TO_CSTR(obj));
     return NOERROR;
 }
 
@@ -757,7 +960,7 @@ ECode CameraMetadataNative::NativeSetupGlobalVendorTagDescriptor(
     android::status_t err = getService(NAME, /*out*/&cameraService);
 
     if (err != android::OK) {
-        ALOGE("%s: Failed to get camera service, received error %s (%d)", __FUNCTION__,
+        Logger::E(TAG, "%s: Failed to get camera service, received error %s (%d)", __FUNCTION__,
                 strerror(-err), err);
         *descriptor = err;
         return NOERROR;
@@ -767,14 +970,14 @@ ECode CameraMetadataNative::NativeSetupGlobalVendorTagDescriptor(
     err = cameraService->getCameraVendorTagDescriptor(/*out*/desc);
 
     if (err == -EOPNOTSUPP) {
-        ALOGW("%s: Camera HAL too old; does not support vendor tags", __FUNCTION__);
+        Logger::W(TAG, "%s: Camera HAL too old; does not support vendor tags", __FUNCTION__);
         android::VendorTagDescriptor::clearGlobalVendorTagDescriptor();
 
         *descriptor = android::OK;
         return NOERROR;
     }
     else if (err != android::OK) {
-        ALOGE("%s: Failed to setup vendor tag descriptors, received error %s (%d)",
+        Logger::E(TAG, "%s: Failed to setup vendor tag descriptors, received error %s (%d)",
                 __FUNCTION__, strerror(-err), err);
         *descriptor = err;
         return NOERROR;
@@ -862,11 +1065,16 @@ AutoPtr<IInterface> CameraMetadataNative::GetBase(
 AutoPtr<IInterface> CameraMetadataNative::GetBase(
     /* [in] */ ICameraMetadataNativeKey* key)
 {
+    if (VERBOSE) Logger::V(TAG, " >> GetBase %s", TO_CSTR(key));
     Int32 tag;
     key->GetTag(&tag);
+
+    Logger::V(TAG, " >> GetTag: %d", tag);
+
     AutoPtr<ArrayOf<Byte> > values;
     ReadValues(tag, (ArrayOf<Byte>**)&values);
     if (values == NULL) {
+        if (VERBOSE) Logger::W(TAG, "%p read null value for tag %d in %s", this, tag, TO_CSTR(key));
         return NULL;
     }
 
@@ -883,6 +1091,7 @@ AutoPtr<IInterface> CameraMetadataNative::GetBase(
 
     AutoPtr<IInterface> outface;
     AutoPtr<IMarshaler> marshaler = GetMarshalerForKey(key);
+    Logger::V(TAG, " >> GetMarshalerForKey: %s", TO_CSTR(marshaler));
     marshaler->Unmarshal(buffer, (IInterface**)&outface);
     return outface;
 }
@@ -934,7 +1143,7 @@ Boolean CameraMetadataNative::SetFaces(
 
         if (face == NULL) {
             numFaces--;
-            Slogger::W(TAG, "setFaces - null face detected, skipping");
+            Logger::W(TAG, "setFaces - null face detected, skipping");
             continue;
         }
 
@@ -1061,7 +1270,7 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
 
     Int32 faceDetectMode;
     if (intObj == NULL) {
-        Slogger::W(TAG, "Face detect mode metadata is null, assuming the mode is SIMPLE");
+        Logger::W(TAG, "Face detect mode metadata is null, assuming the mode is SIMPLE");
         faceDetectMode = CameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE;
     }
     else {
@@ -1072,7 +1281,7 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
         }
         if (faceDetectMode != CameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE &&
                 faceDetectMode != CameraMetadata::STATISTICS_FACE_DETECT_MODE_FULL) {
-            Slogger::W(TAG, "Unknown face detect mode: %d", faceDetectMode);
+            Logger::W(TAG, "Unknown face detect mode: %d", faceDetectMode);
             AutoPtr<ArrayOf<IFace*> > res = ArrayOf<IFace*>::Alloc(0);
             return res;
         }
@@ -1082,7 +1291,7 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
     Int32 length = 0;
     Int32 length2 = 0;
     if (faceScoresArrray == NULL || faceRectanglesArrray == NULL) {
-        Slogger::W(TAG, "Expect face scores and rectangles to be non-null");
+        Logger::W(TAG, "Expect face scores and rectangles to be non-null");
         AutoPtr<ArrayOf<IFace*> > res = ArrayOf<IFace*>::Alloc(0);
         return res;
     }
@@ -1090,7 +1299,7 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
         faceScoresArrray->GetLength(&length);
         faceRectanglesArrray->GetLength(&length2);
         if (length != length2) {
-            Slogger::W(TAG, "Face score size(%d) doesn match face rectangle size(%d)!",
+            Logger::W(TAG, "Face score size(%d) doesn match face rectangle size(%d)!",
                     length, length2);
         }
     }
@@ -1100,7 +1309,7 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
     // Face id and landmarks are only required by FULL mode.
     if (faceDetectMode == CameraMetadata::STATISTICS_FACE_DETECT_MODE_FULL) {
         if (faceIdsArrray == NULL || faceLandmarksArrray == NULL) {
-            Slogger::W(TAG, "Expect face ids and landmarks to be non-null for FULL mode,"
+            Logger::W(TAG, "Expect face ids and landmarks to be non-null for FULL mode,"
                     "fallback to SIMPLE mode");
             faceDetectMode = CameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE;
         }
@@ -1110,7 +1319,7 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
             Int32 length4;
             faceLandmarksArrray->GetLength(&length4);
             if (length3 != numFaces || length4 != numFaces * FACE_LANDMARK_SIZE) {
-                Slogger::W(TAG, "Face id size(%d), or face landmark size(%d) don't"
+                Logger::W(TAG, "Face id size(%d), or face landmark size(%d) don't"
                         "match face number(%d)!",
                         length3, length4 * FACE_LANDMARK_SIZE, numFaces);
             }
@@ -1271,7 +1480,7 @@ AutoPtr<ILensShadingMap> CameraMetadataNative::GetLensShadingMap()
     }
 
     if (s == NULL) {
-        Slogger::W(TAG, "getLensShadingMap - Lens shading map size was null.");
+        Logger::W(TAG, "getLensShadingMap - Lens shading map size was null.");
         return NULL;
     }
 
@@ -1330,7 +1539,7 @@ AutoPtr<ILocation> CameraMetadataNative::GetGpsLocation()
         l->SetTime(timeStamp);
     }
     else {
-        Slogger::W(TAG, "getGpsLocation - No timestamp for GPS location.");
+        Logger::W(TAG, "getGpsLocation - No timestamp for GPS location.");
     }
 
     if (coordsArray != NULL) {
@@ -1356,7 +1565,7 @@ AutoPtr<ILocation> CameraMetadataNative::GetGpsLocation()
         l->SetAltitude(value3);
     }
     else {
-        Slogger::W(TAG, "getGpsLocation - No coordinates for GPS location");
+        Logger::W(TAG, "getGpsLocation - No coordinates for GPS location");
     }
 
     return l;
@@ -1396,7 +1605,7 @@ Boolean CameraMetadataNative::SetGpsLocation(
     Set(CaptureRequest::JPEG_GPS_COORDINATES, TO_IINTERFACE(coords));
 
     if (processMethod.IsNull()) {
-        Slogger::W(TAG, "setGpsLocation - No process method, Location is not from a GPS or NETWORK"
+        Logger::W(TAG, "setGpsLocation - No process method, Location is not from a GPS or NETWORK"
                 " provider");
     }
     else {
@@ -1517,7 +1726,7 @@ ECode CameraMetadataNative::GetMaxRegions(
         //throw new AssertionError("Invalid key " + key);
         String str;
         IObject::Probe(key)->ToString(&str);
-        Slogger::E(TAG, "Invalid key %s", str.string());
+        Logger::E(TAG, "Invalid key %s", str.string());
         return E_ASSERTION_ERROR;
     }
     return NOERROR;
@@ -1565,7 +1774,7 @@ ECode CameraMetadataNative::GetMaxNumOutputs(
         //throw new AssertionError("Invalid key " + key);
         String str;
         IObject::Probe(key)->ToString(&str);
-        Slogger::E(TAG, "Invalid key %s", str.string());
+        Logger::E(TAG, "Invalid key %s", str.string());
         return E_ASSERTION_ERROR;
     }
     return NOERROR;
@@ -1630,7 +1839,7 @@ AutoPtr<ITonemapCurve> CameraMetadataNative::GetTonemapCurve()
     }
 
     if (array == NULL || array2 == NULL || array3 == NULL) {
-        Slogger::W(TAG, "getTonemapCurve - missing tone curve components");
+        Logger::W(TAG, "getTonemapCurve - missing tone curve components");
         return NULL;
     }
     AutoPtr<ITonemapCurve> tc;
@@ -1839,7 +2048,7 @@ ECode CameraMetadataNative::DumpToLog()
     ECode ec = NativeDump();
     //} catch (IOException e) {
     if (ec == (ECode)E_IO_EXCEPTION) {
-        Slogger::W(TAG, "Dump logging failed %d", ec);
+        Logger::W(TAG, "Dump logging failed %d", ec);
     }
     //}
     return NOERROR;
@@ -1848,7 +2057,6 @@ ECode CameraMetadataNative::DumpToLog()
 AutoPtr<IMarshaler> CameraMetadataNative::GetMarshalerForKey(
     /* [in] */ ICameraMetadataNativeKey* key)
 {
-
     AutoPtr<ITypeReference> ref;
     key->GetTypeReference((ITypeReference**)&ref);
     Int32 tag;
@@ -1859,51 +2067,6 @@ AutoPtr<IMarshaler> CameraMetadataNative::GetMarshalerForKey(
     assert(0);
     //MarshalRegistry::GetMarshaler(ref, type, (IMarshaler**)&outma);
     return outma;
-}
-
-void CameraMetadataNative::RegisterAllMarshalers()
-{
-    if (VERBOSE) {
-        Slogger::V(TAG, "Shall register metadata marshalers");
-    }
-
-    assert(0);
-    // MarshalQueryable[] queryList = new MarshalQueryable[] {
-    //         // marshalers for standard types
-    //         new MarshalQueryablePrimitive(),
-    //         new MarshalQueryableEnum(),
-    //         new MarshalQueryableArray(),
-
-    //         // pseudo standard types, that expand/narrow the native type into a managed type
-    //         new MarshalQueryableBoolean(),
-    //         new MarshalQueryableNativeByteToInteger(),
-
-    //         // marshalers for custom types
-    //         new MarshalQueryableRect(),
-    //         new MarshalQueryableSize(),
-    //         new MarshalQueryableSizeF(),
-    //         new MarshalQueryableString(),
-    //         new MarshalQueryableReprocessFormatsMap(),
-    //         new MarshalQueryableRange(),
-    //         new MarshalQueryablePair(),
-    //         new MarshalQueryableMeteringRectangle(),
-    //         new MarshalQueryableColorSpaceTransform(),
-    //         new MarshalQueryableStreamConfiguration(),
-    //         new MarshalQueryableStreamConfigurationDuration(),
-    //         new MarshalQueryableRggbChannelVector(),
-    //         new MarshalQueryableBlackLevelPattern(),
-    //         new MarshalQueryableHighSpeedVideoConfiguration(),
-
-    //         // generic parcelable marshaler (MUST BE LAST since it has lowest priority)
-    //         new MarshalQueryableParcelable(),
-    // };
-
-    // for (MarshalQueryable query : queryList) {
-    //     MarshalRegistry.registerMarshalQueryable(query);
-    // }
-    // if (VERBOSE) {
-    //     Log.v(TAG, "Registered metadata marshalers");
-    // }
 }
 
 Boolean CameraMetadataNative::AreValuesAllNull(
@@ -1935,13 +2098,13 @@ ECode CameraMetadataNative::CameraMetadata_getPointerThrow(
     *data = NULL;
 
     if (thiz == NULL) {
-        Slogger::E("CameraMetadataNative::CameraMetadata_getPointerThrow for null reference %s", argName);
+        Logger::E("CameraMetadataNative::CameraMetadata_getPointerThrow for null reference %s", argName);
         return E_NULL_POINTER_EXCEPTION;
     }
 
     android::CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(thiz);
     if (metadata == NULL) {
-        Slogger::E("CameraMetadataNative::CameraMetadata_getPointerThrow", "Metadata object was already closed");
+        Logger::E("CameraMetadataNative::CameraMetadata_getPointerThrow", "Metadata object was already closed");
         return E_ILLEGAL_STATE_EXCEPTION;;
     }
 
@@ -1951,14 +2114,14 @@ ECode CameraMetadataNative::CameraMetadata_getPointerThrow(
 
 Int64 CameraMetadataNative::NativeAllocate()
 {
-    ALOGV("CameraMetadataNative::%s", __FUNCTION__);
+    Logger::V(TAG, "%s", __FUNCTION__);
 
     return reinterpret_cast<Int64>(new android::CameraMetadata());
 }
 
 android::CameraMetadata* CameraMetadataNative::GetNative()
 {
-    reinterpret_cast<android::CameraMetadata*>(mMetadataPtr);
+    return reinterpret_cast<android::CameraMetadata*>(mMetadataPtr);
 }
 
 ECode CameraMetadataNative::NativeAllocateCopy(
@@ -1968,10 +2131,10 @@ ECode CameraMetadataNative::NativeAllocateCopy(
     VALIDATE_NOT_NULL(handle);
     *handle = 0;
 
-    ALOGV("CameraMetadataNative::%s", __FUNCTION__);
+    Logger::V(TAG, "%s", __FUNCTION__);
 
     android::CameraMetadata* otherMetadata;
-    FAIL_RETURN(CameraMetadata_getPointerThrow(other, (android::CameraMetadata**)&otherMetadata,"other"))
+    FAIL_RETURN(CameraMetadata_getPointerThrow(other, &otherMetadata, "other"))
 
     // In case of exception, return
     if (otherMetadata == NULL) return NOERROR;
@@ -1984,103 +2147,92 @@ ECode CameraMetadataNative::NativeAllocateCopy(
 ECode CameraMetadataNative::NativeWriteToParcel(
     /* [in] */ IParcel* parcel)
 {
-    {    AutoLock syncLock(this);
-        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
-        android::CameraMetadata* metadata;
-        FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
-        if (metadata == NULL) {
-            return NOERROR;
-        }
+    AutoLock syncLock(this);
 
-        android::Parcel* parcelNative;
-        parcel->GetElementPayload((Handle32*)&parcelNative);
-        if (parcelNative == NULL) {
-            //jniThrowNullPointerException(env, "parcel");
-            Slogger::E(TAG, "parcel");
-            return E_NULL_POINTER_EXCEPTION;
-        }
-
-        android::status_t err;
-        if ((err = metadata->writeToParcel(parcelNative)) != android::OK) {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-            //                           "Failed to write to parcel (error code %d)", err);
-            Slogger::E(TAG, "Failed to write to parcel (error code %d)", err);
-            return E_ILLEGAL_STATE_EXCEPTION;
-        }
+    android::CameraMetadata* metadata;
+    FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
+    if (metadata == NULL) {
+        return NOERROR;
     }
+
+    android::Parcel* parcelNative;
+    parcel->GetElementPayload((Handle32*)&parcelNative);
+    if (parcelNative == NULL) {
+        //jniThrowNullPointerException(env, "parcel");
+        Logger::E(TAG, "parcel");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    android::status_t err;
+    if ((err = metadata->writeToParcel(parcelNative)) != android::OK) {
+        Logger::E(TAG, "Failed to write to parcel (error code %d)", err);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
     return NOERROR;
 }
 
 ECode CameraMetadataNative::NativeReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    {    AutoLock syncLock(this);
-        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
-        android::CameraMetadata* metadata;
-        FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
-        if (metadata == NULL) {
-            return NOERROR;
-        }
-
-        android::Parcel* parcelNative;
-        source->GetElementPayload((Handle32*)&parcelNative);
-        if (parcelNative == NULL) {
-            //jniThrowNullPointerException(env, "parcel");
-            Slogger::E(TAG, "parcel");
-            return E_NULL_POINTER_EXCEPTION;
-        }
-
-        android::status_t err;
-        if ((err = metadata->readFromParcel(parcelNative)) != android::OK) {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-            //                      "Failed to read from parcel (error code %d)", err);
-            Slogger::E(TAG, "Failed to read from parcel (error code %d)", err);
-            return E_ILLEGAL_STATE_EXCEPTION;
-        }
+    AutoLock syncLock(this);
+    android::CameraMetadata* metadata;
+    FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
+    if (metadata == NULL) {
+        return NOERROR;
     }
+
+    android::Parcel* parcelNative;
+    source->GetElementPayload((Handle32*)&parcelNative);
+    if (parcelNative == NULL) {
+        Logger::E(TAG, "parcel");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    android::status_t err;
+    if ((err = metadata->readFromParcel(parcelNative)) != android::OK) {
+        Logger::E(TAG, "Failed to read from parcel (error code %d)", err);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
     return NOERROR;
 }
 
 ECode CameraMetadataNative::NativeSwap(
     /* [in] */ ICameraMetadataNative* other)
 {
-    {
-        AutoLock syncLock(this);
-        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
+    AutoLock syncLock(this);
 
-        android::CameraMetadata* metadata;
-        FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
+    android::CameraMetadata* metadata;
+    FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
 
-        // order is important: we can't call another JNI method
-        // if there is an exception pending
-        if (metadata == NULL) return NOERROR;
+    // order is important: we can't call another JNI method
+    // if there is an exception pending
+    if (metadata == NULL) return NOERROR;
 
-        android::CameraMetadata* otherMetadata;
-        FAIL_RETURN(CameraMetadata_getPointerThrow(other, (android::CameraMetadata**)&otherMetadata, "other"))
+    android::CameraMetadata* otherMetadata;
+    FAIL_RETURN(CameraMetadata_getPointerThrow(other, (android::CameraMetadata**)&otherMetadata, "other"))
 
-        if (otherMetadata == NULL) return NOERROR;
+    if (otherMetadata == NULL) return NOERROR;
 
-        metadata->swap(*otherMetadata);
-    }
+    metadata->swap(*otherMetadata);
     return NOERROR;
 }
 
 void CameraMetadataNative::NativeClose()
 {
-    {
-        AutoLock syncLock(this);
-        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
+    AutoLock syncLock(this);
+    Logger::V(TAG, "%s", __FUNCTION__);
 
-        android::CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(this);
+    android::CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(this);
 
-        if (metadata != NULL) {
-            delete metadata;
-            mMetadataPtr = 0;
-        }
-
-        LOG_ALWAYS_FATAL_IF(CameraMetadata_getPointerNoThrow(this) != NULL,
-                            "Expected the native ptr to be 0 after #close");
+    if (metadata != NULL) {
+        delete metadata;
+        mMetadataPtr = 0;
     }
+
+    LOG_ALWAYS_FATAL_IF(CameraMetadata_getPointerNoThrow(this) != NULL,
+                        "Expected the native ptr to be 0 after #close");
 }
 
 ECode CameraMetadataNative::NativeIsEmpty(
@@ -2097,14 +2249,34 @@ ECode CameraMetadataNative::NativeIsEmpty(
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
 
         if (metadata == NULL) {
-            ALOGW("CameraMetadataNative::%s: Returning early due to exception being thrown", __FUNCTION__);
+            Logger::W(TAG, "%s: Returning early due to exception being thrown", __FUNCTION__);
             *result = TRUE; // actually throws java exc.
             return NOERROR;
         }
 
         empty = metadata->isEmpty();
 
-        ALOGV("CameraMetadataNative::%s: IsEmpty returned %d, entry count was %d",__FUNCTION__, empty, metadata->entryCount());
+        Logger::V(TAG, "%s: %p IsEmpty returned %d, entry count was %d",
+            __FUNCTION__, this, empty, metadata->entryCount());
+
+        {
+            Logger::V(TAG, "============TEST==================");
+            Int32 tag = 327680;
+            camera_metadata_entry entry = metadata->find(tag);
+            Logger::V(TAG, "%s: %p-%p Tag %d found %d entries", __FUNCTION__, this, metadata, tag, entry.count);
+            if (entry.count == 0 && !metadata->exists(tag)) {
+                Logger::V(TAG, "%s: %p-%p Tag %d does not have any entries", __FUNCTION__, this, metadata, tag);
+            }
+            Logger::V(TAG, "==============TEST===================");
+
+            tag = 524293;
+            entry = metadata->find(tag);
+            Logger::V(TAG, "%s: %p-%p Tag %d found %d entries", __FUNCTION__, this, metadata, tag, entry.count);
+            if (entry.count == 0 && !metadata->exists(tag)) {
+                Logger::V(TAG, "%s: %p-%p Tag %d does not have any entries", __FUNCTION__, this, metadata, tag);
+            }
+            Logger::V(TAG, "==============TEST===================");
+        }
     }
 
     *result = empty;
@@ -2118,8 +2290,9 @@ ECode CameraMetadataNative::NativeGetEntryCount(
     *count = 0;
 
     Int32 res = 0;
-    {    AutoLock syncLock(this);
-        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
+    {
+        AutoLock syncLock(this);
+        Logger::V(TAG, "%s", __FUNCTION__);
 
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
@@ -2139,7 +2312,7 @@ namespace {
 struct Helpers {
     static size_t getTypeSize(uint8_t type) {
         if (type >= NUM_TYPES) {
-            ALOGE("%s: Invalid type specified (%ud)", __FUNCTION__, type);
+            Logger::E(TAG, "%s: Invalid type specified (%ud)", __FUNCTION__, type);
             return static_cast<size_t>(-1);
         }
 
@@ -2153,14 +2326,14 @@ struct Helpers {
                           size_t dataBytes) {
 
         if (type >= NUM_TYPES) {
-            ALOGE("%s: Invalid type specified (%ud)", __FUNCTION__, type);
+            Logger::E(TAG, "%s: Invalid type specified (%ud)", __FUNCTION__, type);
             return android::INVALID_OPERATION;
         }
 
         size_t typeSize = getTypeSize(type);
 
         if (dataBytes % typeSize != 0) {
-            ALOGE("%s: Expected dataBytes (%ud) to be divisible by typeSize "
+            Logger::E(TAG, "%s: Expected dataBytes (%ud) to be divisible by typeSize "
                   "(%ud)", __FUNCTION__, dataBytes, typeSize);
             return android::BAD_VALUE;
         }
@@ -2184,7 +2357,7 @@ struct Helpers {
 
             default: {
                 // unreachable
-                ALOGE("%s: Unreachable", __FUNCTION__);
+                Logger::E(TAG, "%s: Unreachable", __FUNCTION__);
                 return android::INVALID_OPERATION;
             }
         }
@@ -2202,50 +2375,43 @@ ECode CameraMetadataNative::NativeReadValues(
     *values = NULL;
 
     AutoPtr<ArrayOf<Byte> > byteArray;
-    {    AutoLock syncLock(this);
-        ALOGV("%s (tag = %d)", __FUNCTION__, tag);
+    {
+        AutoLock syncLock(this);
+        Logger::V(TAG, "%s (tag = %d)", __FUNCTION__, tag);
 
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
         if (metadata == NULL) {
-            *values = NULL;
             return NOERROR;
         }
-
-        int tagType = get_camera_metadata_tag_type(tag);
-        if (tagType == -1) {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            //                      "Tag (%d) did not have a type", tag);
-            Slogger::E(TAG, "Tag (%d) did not have a type", tag);
-            *values = NULL;
-            return NOERROR;
-        }
-        size_t tagSize = Helpers::getTypeSize(tagType);
 
         camera_metadata_entry entry = metadata->find(tag);
         if (entry.count == 0) {
              if (!metadata->exists(tag)) {
-                ALOGV("%s: Tag %d does not have any entries", __FUNCTION__, tag);
+                Logger::V(TAG, "%s: %p-%p Tag %d does not have any entries", __FUNCTION__, this, metadata, tag);
                 *values = NULL;
                 return NOERROR;
              }
              else {
                  // OK: we will return a 0-sized array.
-                 ALOGV("%s: Tag %d had an entry, but it had 0 data", __FUNCTION__,
-                       tag);
+                 Logger::V(TAG, "%s: Tag %d had an entry, but it had 0 data", __FUNCTION__, tag);
              }
         }
 
+        int tagType = get_camera_metadata_tag_type(tag);
+        if (tagType == -1) {
+            Logger::E(TAG, "Tag (%d) did not have a type", tag);
+            return NOERROR;
+        }
+
+        size_t tagSize = Helpers::getTypeSize(tagType);
         Int32 byteCount = entry.count * tagSize;
         byteArray = ArrayOf<Byte>::Alloc(byteCount);
-        //if (env->ExceptionCheck()) return NULL;
-
-        // Copy into java array from native array
-        //ScopedByteArrayRW arrayWriter(env, byteArray);
-        //memcpy(arrayWriter.get(), entry.data.u8, byteCount);
         memcpy(byteArray->GetPayload(), entry.data.u8, byteCount);
     }
+
     *values = byteArray;
+    REFCOUNT_ADD(*values)
     return NOERROR;
 }
 
@@ -2253,69 +2419,60 @@ ECode CameraMetadataNative::NativeWriteValues(
     /* [in] */ Int32 tag,
     /* [in] */ ArrayOf<Byte>* src)
 {
-    {    AutoLock syncLock(this);
-        ALOGV("%s (tag = %d)", __FUNCTION__, tag);
+    AutoLock syncLock(this);
+    Logger::V(TAG, "%s (tag = %d)", __FUNCTION__, tag);
 
-        android::CameraMetadata* metadata;
-        FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
-        if (metadata == NULL) return NOERROR;
+    android::CameraMetadata* metadata;
+    FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
+    if (metadata == NULL) return NOERROR;
 
-        int tagType = get_camera_metadata_tag_type(tag);
-        if (tagType == -1) {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            //                      "Tag (%d) did not have a type", tag);
-            Slogger::E(TAG, "Tag (%d) did not have a type", tag);
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-        size_t UNUSED(tagSize) = Helpers::getTypeSize(tagType);
+    int tagType = get_camera_metadata_tag_type(tag);
+    if (tagType == -1) {
+        Logger::E(TAG, "Tag (%d) did not have a type", tag);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    size_t UNUSED(tagSize) = Helpers::getTypeSize(tagType);
 
-        android::status_t res;
+    android::status_t res;
 
-        if (src == NULL) {
-            // If array is NULL, delete the entry
-            if (metadata->exists(tag)) {
-                res = metadata->erase(tag);
-                ALOGV("%s: Erase values (res = %d)", __FUNCTION__, res);
-            }
-            else {
-                res = android::OK;
-                ALOGV("%s: Don't need to erase", __FUNCTION__);
-            }
+    if (src == NULL) {
+        // If array is NULL, delete the entry
+        if (metadata->exists(tag)) {
+            res = metadata->erase(tag);
+            Logger::V(TAG, "%s: Erase values (res = %d)", __FUNCTION__, res);
         }
         else {
-            // Copy from java array into native array
-            //ScopedByteArrayRO arrayReader(env, src);
-            if (src == NULL) return NOERROR;
-
-            res = Helpers::updateAny(metadata, static_cast<uint32_t>(tag),
-                                     tagType, src->GetPayload(), src->GetLength());
-
-            ALOGV("%s: Update values (res = %d)", __FUNCTION__, res);
-        }
-
-        if (res == android::OK) {
-            return NOERROR;
-        }
-        else if (res == android::BAD_VALUE) {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            //                      "Src byte array was poorly formed");
-            Slogger::E(TAG, "Src byte array was poorly formed");
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-        else if (res == android::INVALID_OPERATION) {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-            //                      "Internal error while trying to update metadata");
-            Slogger::E(TAG, "Internal error while trying to update metadata");
-            return E_ILLEGAL_STATE_EXCEPTION;
-        }
-        else {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-            //                      "Unknown error (%d) while trying to update "
-            //                     "metadata", res);
-            Slogger::E(TAG,  "Unknown error (%d) while trying to update metadata", res);
-            return E_ILLEGAL_STATE_EXCEPTION;
+            res = android::OK;
+            Logger::V(TAG, "%s: Don't need to erase", __FUNCTION__);
         }
     }
+    else {
+        // Copy from java array into native array
+        //ScopedByteArrayRO arrayReader(env, src);
+        if (src == NULL) return NOERROR;
+
+        res = Helpers::updateAny(metadata, static_cast<uint32_t>(tag),
+                                 tagType, src->GetPayload(), src->GetLength());
+
+        Logger::V(TAG, "%s: Update values (res = %d)", __FUNCTION__, res);
+    }
+
+    if (res == android::OK) {
+        return NOERROR;
+    }
+    else if (res == android::BAD_VALUE) {
+        Logger::E(TAG, "Src byte array was poorly formed");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if (res == android::INVALID_OPERATION) {
+        Logger::E(TAG, "Internal error while trying to update metadata");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    else {
+        Logger::E(TAG,  "Unknown error (%d) while trying to update metadata", res);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
     return NOERROR;
 }
 
@@ -2334,7 +2491,7 @@ static void* CameraMetadata_writeMetadataThread(
     p->metadata->dump(p->writeFd, /*verbosity*/2);
 
     if (close(p->writeFd) < 0) {
-        ALOGE("%s: Failed to close writeFd (errno = %#x, message = '%s')",
+        Logger::E(TAG, "%s: Failed to close writeFd (errno = %#x, message = '%s')",
                 __FUNCTION__, errno, strerror(errno));
     }
 
@@ -2343,8 +2500,9 @@ static void* CameraMetadata_writeMetadataThread(
 
 ECode CameraMetadataNative::NativeDump()
 {
-    {    AutoLock syncLock(this);
-        ALOGV("CameraMetadataNative::%s", __FUNCTION__);
+    {
+        AutoLock syncLock(this);
+        Logger::V(TAG, "%s", __FUNCTION__);
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
         if (metadata == NULL) {
@@ -2366,7 +2524,7 @@ ECode CameraMetadataNative::NativeDump()
                 // jniThrowExceptionFmt(env, "java/io/IOException",
                 //         "Failed to create socketpair (errno = %#x, message = '%s')",
                 //         errno, strerror(errno));
-                Slogger::E(TAG, "Failed to create socketpair (errno = %#x, message = '%s')",
+                Logger::E(TAG, "Failed to create socketpair (errno = %#x, message = '%s')",
                         errno, strerror(errno));
                 return E_IO_EXCEPTION;
             }
@@ -2397,7 +2555,7 @@ ECode CameraMetadataNative::NativeDump()
                 // jniThrowExceptionFmt(env, "java/io/IOException",
                 //         "Failed to create thread for writing (errno = %#x, message = '%s')",
                 //         threadRet, strerror(threadRet));
-                Slogger::E(TAG, "Failed to create thread for writing (errno = %#x, message = '%s')",
+                Logger::E(TAG, "Failed to create thread for writing (errno = %#x, message = '%s')",
                         threadRet, strerror(threadRet));
                 return E_IO_EXCEPTION;
 
@@ -2416,7 +2574,7 @@ ECode CameraMetadataNative::NativeDump()
             ssize_t res;
             while ((res = TEMP_FAILURE_RETRY(read(readFd, &out[0], /*count*/1))) > 0) {
                 if (out[0] == '\n') {
-                    ALOGD("%s", logLine.string());
+                    Logger::D(TAG, "%s", logLine.string());
                     logLine.clear();
                 }
                 else {
@@ -2428,12 +2586,12 @@ ECode CameraMetadataNative::NativeDump()
                 // jniThrowExceptionFmt(env, "java/io/IOException",
                 //         "Failed to read from fd (errno = %#x, message = '%s')",
                 //         errno, strerror(errno));
-                Slogger::E(TAG, "Failed to read from fd (errno = %#x, message = '%s')",
+                Logger::E(TAG, "Failed to read from fd (errno = %#x, message = '%s')",
                         errno, strerror(errno));
                 return E_IO_EXCEPTION;
             }
             else if (!logLine.isEmpty()) {
-                ALOGD("%s", logLine.string());
+                Logger::D(TAG, "%s", logLine.string());
             }
         }
 
@@ -2441,7 +2599,7 @@ ECode CameraMetadataNative::NativeDump()
 
         // Join until thread finishes. Ensures params/metadata is valid until then.
         if ((res = pthread_join(writeThread, /*retval*/NULL)) != 0) {
-            ALOGE("%s: Failed to join thread (errno = %#x, message = '%s')",
+            Logger::E(TAG, "%s: Failed to join thread (errno = %#x, message = '%s')",
                     __FUNCTION__, res, strerror(res));
         }
     }
@@ -2455,16 +2613,17 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
-    //ScopedUtfChars keyScoped(env, keyName);
+    if (VERBOSE) Logger::V(TAG, " >> %s %s", __FUNCTION__, keyName.string());
+
     const char *key = keyName.string();
     if (key == NULL) {
-        // exception thrown by ScopedUtfChars
+        Logger::E(TAG, "NativeGetTagFromKey null keyname.");
         *result = 0;
         return NOERROR;
     }
     size_t keyLength = strlen(key);
 
-    ALOGV("%s (key = '%s')", __FUNCTION__, key);
+    Logger::V(TAG, "%s (key = '%s')", __FUNCTION__, key);
 
     android::sp<android::VendorTagDescriptor> vTags = android::VendorTagDescriptor::getGlobalVendorTagDescriptor();
 
@@ -2485,12 +2644,11 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
 
         const char *str = (i < ANDROID_SECTION_COUNT) ? camera_metadata_section_names[i] :
                 vendorSections[i - ANDROID_SECTION_COUNT].string();
-        ALOGV("%s: Trying to match against section '%s'",
-               __FUNCTION__, str);
+        Logger::V(TAG, "%s: Trying to match against section '%s'", __FUNCTION__, str);
         if (strstr(key, str) == key) { // key begins with the section name
             size_t strLength = strlen(str);
 
-            ALOGV("%s: Key begins with section name", __FUNCTION__);
+            Logger::V(TAG, "%s: Key begins with section name", __FUNCTION__);
 
             // section name is the longest we've found so far
             if (section == NULL || sectionLength < strLength) {
@@ -2498,7 +2656,7 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
                 sectionIndex = i;
                 sectionLength = strLength;
 
-                ALOGV("%s: Found new best section (%s)", __FUNCTION__, section);
+                Logger::V(TAG, "%s: Found new best section (%s)", __FUNCTION__, section);
             }
         }
     }
@@ -2506,24 +2664,19 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
     // TODO: Make above get_camera_metadata_section_from_name ?
 
     if (section == NULL) {
-        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-        //                      "Could not find section name for key '%s')", key);
         *result = 0;
-        Slogger::E(TAG, "Could not find section name for key '%s')", key);
+        Logger::E(TAG, "Could not find section name for key '%s')", key);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else {
-        ALOGV("%s: Found matched section '%s' (%d)",
-              __FUNCTION__, section, sectionIndex);
+        Logger::V(TAG, "%s: Found matched section '%s' (%d)", __FUNCTION__, section, sectionIndex);
     }
 
     // Get the tag name component of the key
     const char *keyTagName = key + sectionLength + 1; // x.y.z -> z
     if (sectionLength + 1 >= keyLength) {
-        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-        //                      "Key length too short for key '%s')", key);
         *result = 0;
-        Slogger::E(TAG, "Key length too short for key '%s')", key);
+        Logger::E(TAG, "Key length too short for key '%s')", key);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2539,17 +2692,15 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
             const char *tagName = get_camera_metadata_tag_name(tag);
 
             if (strcmp(keyTagName, tagName) == 0) {
-                ALOGV("%s: Found matched tag '%s' (%d)",
+                Logger::V(TAG, "%s: Found matched tag '%s' (%d)",
                       __FUNCTION__, tagName, tag);
                 break;
             }
         }
 
         if (tag == tagEnd) {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            //                      "Could not find tag name for key '%s')", key);
             *result = 0;
-            Slogger::E(TAG, "Could not find tag name for key '%s')", key);
+            Logger::E(TAG, "Could not find tag name for key '%s')", key);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -2560,10 +2711,8 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
 
         android::status_t res = android::OK;
         if ((res = vTags->lookupTag(tagName, sectionName, &tag)) != android::OK) {
-            // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            //         "%s: No vendor tag matches key '%s'", __FUNCTION__, key);
             *result = 0;
-            Slogger::E(TAG, "%s: No vendor tag matches key '%s'", __FUNCTION__, key);
+            Logger::E(TAG, "%s: No vendor tag matches key '%s'", __FUNCTION__, key);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -2571,6 +2720,8 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
     // TODO: Make above get_camera_metadata_tag_from_name ?
 
     *result = tag;
+
+    if (VERBOSE) Logger::V(TAG, " >> %s %s, tag: %d", __FUNCTION__, keyName.string(), tag);
     return NOERROR;
 }
 
@@ -2586,7 +2737,7 @@ ECode CameraMetadataNative::NativeGetTypeFromTag(
         // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
         //                      "Tag (%d) did not have a type", tag);
         *type = -1;
-        Slogger::E(TAG, "Tag (%d) did not have a type", tag);
+        Logger::E(TAG, "Tag (%d) did not have a type", tag);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2597,7 +2748,7 @@ ECode CameraMetadataNative::NativeGetTypeFromTag(
 void CameraMetadataNative::NativeClassInit()
 {
     // // XX: Why do this separately instead of doing it in the register function?
-    // ALOGV("CameraMetadataNative::%s", __FUNCTION__);
+    // Logger::V(TAG, "%s", __FUNCTION__);
 
     // field fields_to_find[] = {
     //     { CAMERA_METADATA_CLASS_NAME, "mMetadataPtr", "J", &fields.metadata_ptr },

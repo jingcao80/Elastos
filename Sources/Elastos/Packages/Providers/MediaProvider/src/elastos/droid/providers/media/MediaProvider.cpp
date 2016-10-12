@@ -4868,7 +4868,7 @@ ECode MediaProvider::Update(
     oUri = SafeUncanonicalize(uri);
     uri = oUri;
     Int32 count;
-    Logger::V(TAG, "update for uri=%s, initValues=%s", TO_CSTR(uri), TO_CSTR(initialValues));
+    // Logger::V(TAG, "update for uri=%s, initValues=%s", TO_CSTR(uri), TO_CSTR(initialValues));
     Int32 match;
     GetURI_MATCHER()->Match(uri, &match);
     AutoPtr<IDatabaseHelper> helper;

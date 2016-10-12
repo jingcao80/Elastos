@@ -141,7 +141,7 @@ private:
         // Writes the camera1 parameters into a single-element array.
         CARAPI GetLegacyParameters(
             /* [in] */ Int32 cameraId,
-            /* [in] */ ArrayOf<String>* parameters,
+            /* [out, callee] */ ArrayOf<String>** parameters,
             /* [out] */ Int32* result);
 
         // Determines if a particular API version is supported; see ICameraService.h for version defines

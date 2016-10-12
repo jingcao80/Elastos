@@ -32,10 +32,57 @@ public:
      *
      * @see TypeReference
      */
-    CARAPI constructor();
+    CARAPI constructor(
+        /* [in] */ const ClassID& clsID);
+
+    /**
+     * Return the dynamic {@link Type} corresponding to the captured type {@code T}.
+     */
+    CARAPI GetType(
+        /* [out] */ ClassID* clsID);
+
+    /**
+     * Returns the raw type of T.
+     *
+     * <p><ul>
+     * <li>If T is a Class itself, T itself is returned.
+     * <li>If T is a ParameterizedType, the raw type of the parameterized type is returned.
+     * <li>If T is a GenericArrayType, the returned type is the corresponding array class.
+     * For example: {@code List<Integer>[]} => {@code List[]}.
+     * <li>If T is a type variable or a wildcard type, the raw type of the first upper bound is
+     * returned. For example: {@code <X extends Foo>} => {@code Foo}.
+     * </ul>
+     *
+     * @return the raw type of {@code T}
+     */
+    //@SuppressWarnings("unchecked")
+    CARAPI GetRawType(
+        /* [out] */ IClassInfo** classInfo);
+
+    /**
+     * Get the component type, e.g. {@code T} from {@code T[]}.
+     *
+     * @return component type, or {@code null} if {@code T} is not an array
+     */
+    CARAPI GetComponentType(
+        /* [out] */ ITypeReference** reference);
+
+    CARAPI Equals(
+        /* [in] */ IInterface* obj,
+        /* [out] */ Boolean* result);
+
+    CARAPI GetHashCode(
+        /* [out] */ Int32* hash);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+    static AutoPtr<ITypeReference> CreateSpecializedTypeReference(
+        /* [in] */ const ClassID& clsID);
 
 private:
-    const Int32 mHash;
+    Int32 mHash;
+    ClassID mType;
 };
 
 } // namespace Utils

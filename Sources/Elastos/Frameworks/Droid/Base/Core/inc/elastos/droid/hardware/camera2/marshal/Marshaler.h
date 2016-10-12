@@ -23,7 +23,52 @@ class Marshaler
 public:
     CAR_INTERFACE_DECL()
 
+    Marshaler();
+
     virtual ~Marshaler() {}
+
+    /**
+     * Marshal the specified object instance (value) into a byte buffer.
+     *
+     * <p>Upon completion, the {@link ByteBuffer#position()} will have advanced by
+     * the {@link #calculateMarshalSize marshal size} of {@code value}.</p>
+     *
+     * @param value the value of type T that we wish to write into the byte buffer
+     * @param buffer the byte buffer into which the marshaled object will be written
+     */
+    virtual CARAPI Marshal(
+        /* [in] */ IInterface* value,
+        /* [in] */ IByteBuffer* buffer) = 0;
+
+    /**
+     * Unmarshal a new object instance from the byte buffer into its managed type.
+     *
+     * <p>Upon completion, the {@link ByteBuffer#position()} will have advanced by
+     * the {@link #calculateMarshalSize marshal size} of the returned {@code T} instance.</p>
+     *
+     * @param buffer the byte buffer, from which we will read the object
+     * @return a new instance of type T read from the byte buffer
+     */
+    virtual CARAPI Unmarshal(
+        /* [in] */ IByteBuffer* buffer,
+        /* [out] */ IInterface** outface) = 0;
+
+    /**
+     * How many bytes a single instance of {@code T} will take up if marshalled to/from
+     * {@code nativeType}.
+     *
+     * <p>When unmarshaling data from native to managed, the instance {@code T} is not yet
+     * available. If the native size is always a fixed mapping regardless of the instance of
+     * {@code T} (e.g. if the type is not a container of some sort), it can be used to preallocate
+     * containers for {@code T} to avoid resizing them.</p>
+     *
+     * <p>In particular, the array marshaler takes advantage of this (when size is not dynamic)
+     * to preallocate arrays of the right length when unmarshaling an array {@code T[]}.</p>
+     *
+     * @return a size in bytes, or {@link #NATIVE_SIZE_DYNAMIC} if the size is dynamic
+     */
+    virtual CARAPI GetNativeSize(
+        /* [out] */ Int32* value) = 0;
 
     /**
      * Get the size in bytes for how much space would be required to write this {@code value}
@@ -38,7 +83,7 @@ public:
      * @param value the value of type T that we wish to write into the byte buffer
      * @return the size that would need to be written to the byte buffer
      */
-    CARAPI CalculateMarshalSize(
+    virtual CARAPI CalculateMarshalSize(
         /* [in] */ IInterface* value,
         /* [out] */ Int32* outvalue);
 
@@ -53,10 +98,6 @@ public:
         /* [out] */ Int32* value);
 
 protected:
-    Marshaler();
-
-    CARAPI constructor();
-
     /**
      * Instantiate a marshaler between a single managed/native type combination.
      *

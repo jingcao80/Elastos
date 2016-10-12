@@ -11,7 +11,7 @@ namespace Hardware {
 namespace Camera2 {
 
 CarClass(CCameraCharacteristicsKey)
-    , public CameraCharacteristics::Key
+    , public CameraCharacteristicsKey
 {
 public:
     CAR_OBJECT_DECL()

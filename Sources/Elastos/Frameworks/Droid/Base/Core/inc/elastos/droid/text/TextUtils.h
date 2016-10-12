@@ -5,6 +5,7 @@
 #include "Elastos.Droid.Text.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
+#include <utils/String16.h>
 
 using Elastos::Core::Object;
 using Elastos::Core::ICharSequence;
@@ -583,6 +584,8 @@ public:
      */
     static CARAPI_(Int32) GetLayoutDirectionFromLocale(
         /* [in] */ ILocale* locale);
+
+    static String String16ToString(const android::String16& str16);
 
 public:
 //    /**

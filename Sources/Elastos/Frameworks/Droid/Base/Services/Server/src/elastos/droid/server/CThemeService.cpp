@@ -225,7 +225,7 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
                     if (DEBUG) Logger::D(TAG, "Processing %s", str.string());
                     String name;
                     AutoPtr<IPackageInfo> pi;
-                    ECode ec = mHost->mPM->GetPackageInfo(str, 0, (IPackageInfo**)&pi);
+                    mHost->mPM->GetPackageInfo(str, 0, (IPackageInfo**)&pi);
                     if (pi != NULL) {
                         name = mHost->GetThemeName(pi.Get());
                     }
