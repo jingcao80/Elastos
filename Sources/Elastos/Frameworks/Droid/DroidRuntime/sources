@@ -3,6 +3,8 @@ TARGET_TYPE= lib
 
 C_DEFINES += -DHAVE_ENDIAN_H
 
+IMPORTS = Elastos.CoreLibrary.eco
+
 EXPORT_HEADERS = elastos/droid/DroidRuntime.h
 
 EXPORT_LIBRARY = 1

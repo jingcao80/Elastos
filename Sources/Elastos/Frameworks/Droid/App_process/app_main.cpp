@@ -69,7 +69,7 @@ void AppRuntime::SetClassNameAndArgs(
     mArgs = ArrayOf<String>::Alloc(argc);
     for (int i = 0; i < argc; ++i) {
         String arg(argv[i]);
-         mArgs->Set(i, arg);
+        mArgs->Set(i, arg);
     }
 }
 
