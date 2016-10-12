@@ -354,9 +354,9 @@ AutoPtr<ILocale> Locale::GetDefault()
         cs->GetProperty(String("user.region"), String("US"), &region);
         cs->GetProperty(String("user.variant"), String(""), &variant);
 
-        AutoPtr<CLocale> l;
-        ASSERT_SUCCEEDED(CLocale::NewByFriend(language, region, variant, (CLocale**)&l));
-        sDefaultLocale = ILocale::Probe(l);
+        AutoPtr<ILocale> l;
+        ASSERT_SUCCEEDED(CLocale::New(language, region, variant, (ILocale**)&l));
+        sDefaultLocale = l;
     }
 
     return sDefaultLocale;
