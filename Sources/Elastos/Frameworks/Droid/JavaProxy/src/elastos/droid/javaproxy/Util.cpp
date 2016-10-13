@@ -2319,14 +2319,14 @@ jobject Util::ToJavaLocale(
         env->DeleteLocalRef(jvariant);
 
         return jLocale;
-    // }
+    }
 
-    // jLocale = env->GetStaticObjectField(localKlass, f);
-    // Util::CheckErrorAndLog(env, "ToJavaLocale", "Fail GetStaticObjectField: %d", __LINE__);
+    jLocale = env->GetStaticObjectField(localKlass, f);
+    Util::CheckErrorAndLog(env, "ToJavaLocale", "Fail GetStaticObjectField: %d", __LINE__);
 
-    // env->DeleteLocalRef(localKlass);
+    env->DeleteLocalRef(localKlass);
 
-    // return jLocale;
+    return jLocale;
 }
 
 jobject Util::ToJavaRect(
