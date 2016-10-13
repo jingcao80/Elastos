@@ -3,9 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PROVIDER_CRYPTO_CCRYPTOPROVIDER_H__
 
 #include "_Org_Apache_Harmony_Security_Provider_Crypto_CCryptoProvider.h"
-#include <elastos/core/Object.h>
+#include "Provider.h"
 
-using Elastos::Core::Object;
+using Elastos::Security::Provider;
 
 namespace Org {
 namespace Apache {
@@ -14,92 +14,24 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+/**
+ * Implementation of Provider for SecureRandom. The implementation supports the
+ * "SHA1PRNG" algorithm described in JavaTM Cryptography Architecture, API
+ * Specification & Reference
+ */
 CarClass(CCryptoProvider)
-    , public Object
-    , public ICryptoProvider
+    , public Elastos::Security::Provider
 {
 public:
     CAR_OBJECT_DECL()
 
-    CAR_INTERFACE_DECL()
-
-    CARAPI GetProperty(
-        /* [in] */ const String& name,
-        /* [out] */ String * pStr);
-
-    CARAPI GetPropertyEx(
-        /* [in] */ const String& name,
-        /* [in] */ const String& defaultValue,
-        /* [out] */ String * pStr);
-
-    CARAPI List(
-        /* [in] */ Elastos::IO::IPrintStream * pOutstream);
-
-    CARAPI ListEx(
-        /* [in] */ Elastos::IO::IPrintWriter * pOutwriter);
-
-    CARAPI Load(
-        /* [in] */ Elastos::IO::IInputStream * pInstream);
-
-    CARAPI LoadEx(
-        /* [in] */ Elastos::IO::IReader * pInreader);
-
-    CARAPI PropertyNames(
-        /* [out] */ IInterface ** ppInter);
-
-    CARAPI StringPropertyNames(
-        /* [out] */ Elastos::Utility::IObjectStringMap ** ppStrmap);
-
-    CARAPI Save(
-        /* [in] */ Elastos::IO::IOutputStream * pOutstream,
-        /* [in] */ const String& comment);
-
-    CARAPI SetProperty(
-        /* [in] */ const String& name,
-        /* [in] */ const String& value,
-        /* [out] */ IObject ** ppObj);
-
-    CARAPI Store(
-        /* [in] */ Elastos::IO::IOutputStream * pOutstream,
-        /* [in] */ const String& comment);
-
-    CARAPI StoreEx(
-        /* [in] */ Elastos::IO::IWriter * pWriter,
-        /* [in] */ const String& comment);
-
-    CARAPI LoadFromXML(
-        /* [in] */ Elastos::IO::IInputStream * pInstream);
-
-    CARAPI StoreToXML(
-        /* [in] */ Elastos::IO::IOutputStream * pOs,
-        /* [in] */ const String& comment);
-
-    CARAPI StoreToXMLEx(
-        /* [in] */ Elastos::IO::IOutputStream * pOs,
-        /* [in] */ const String& comment,
-        /* [in] */ const String& encoding);
-
-    CARAPI GetName(
-        /* [out] */ String * pName);
-
-    CARAPI GetVersion(
-        /* [out] */ Double * pVersionNumber);
-
-    CARAPI GetInfo(
-        /* [out] */ String * pInfo);
-
-    CARAPI GetService(
-        /* [in] */ const String& type,
-        /* [in] */ const String& algorithm,
-        /* [out] */ Elastos::Security::IProviderService ** ppService);
-
-    CARAPI GetServices(
-        /* [out] */ Elastos::Utility::ISet ** ppServices);
-
+    /**
+     * Creates a Provider and puts parameters
+     */
     CARAPI constructor();
 
 private:
-    // TODO: Add your private member variables here.
+    // private static final long serialVersionUID = 7991202868423459598L;
 };
 
 }

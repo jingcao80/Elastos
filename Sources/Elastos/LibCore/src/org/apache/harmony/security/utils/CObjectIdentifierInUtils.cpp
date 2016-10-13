@@ -20,8 +20,9 @@ CObjectIdentifierInUtils::CObjectIdentifierInUtils()
 ECode CObjectIdentifierInUtils::GetOid(
     /* [out, callee] */ ArrayOf<Int32> ** result)
 {
-    VALIDATE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(result);
     *result = mOid;
+    assert(mOid != NULL);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -29,7 +30,7 @@ ECode CObjectIdentifierInUtils::GetOid(
 ECode CObjectIdentifierInUtils::GetName(
     /* [out] */ String * result)
 {
-    VALIDATE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(result);
     *result = mName;
     return NOERROR;
 }
@@ -37,7 +38,7 @@ ECode CObjectIdentifierInUtils::GetName(
 ECode CObjectIdentifierInUtils::GetGroup(
     /* [out] */ IInterface ** result)
 {
-    VALIDATE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(result);
     *result = mGroup;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -78,7 +79,7 @@ ECode CObjectIdentifierInUtils::ToOIDString(
 ECode CObjectIdentifierInUtils::ToString(
     /* [out] */ String * result)
 {
-    VALIDATE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(result);
     if (mSoid == NULL) {
         StringBuilder sb(4 * mOid->GetLength());
 
@@ -96,7 +97,7 @@ ECode CObjectIdentifierInUtils::ToString(
 ECode CObjectIdentifierInUtils::GetHashCode(
     /* [out] */ Int32 * result)
 {
-    VALIDATE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(result);
     if (mHash == -1) {
         mHash = HashIntArray(mOid);
     }
@@ -110,6 +111,7 @@ ECode CObjectIdentifierInUtils::constructor(
     FAIL_RETURN(ValidateOid(oid));
 
     mOid = oid;
+    assert(mOid != NULL);
     return NOERROR;
 }
 

@@ -3,9 +3,18 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X501_CATTRIBUTETYPEANDVALUE_H__
 
 #include "_Org_Apache_Harmony_Security_X501_CAttributeTypeAndValue.h"
-#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include "ASN1Type.h"
+#include "ASN1Sequence.h"
 
-using Elastos::Core::Object;
+using Elastos::Core::IStringBuilder;
+using Elastos::Utility::IHashMap;
+using Org::Apache::Harmony::Security::Asn1::ASN1Type;
+using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
+using Org::Apache::Harmony::Security::Asn1::IBerOutputStream;
 using Org::Apache::Harmony::Security::Utils::IObjectIdentifier;
 
 namespace Org {
@@ -18,136 +27,7 @@ CarClass(CAttributeTypeAndValue)
     , public Object
     , public IAttributeTypeAndValue
 {
-public:
-    CAR_OBJECT_DECL()
-
-    CAR_INTERFACE_DECL()
-
-    /**
-     * Parses OID string representation.
-     *
-     * @param sOid
-     *            string representation of OID
-     *
-     * @throws IOException
-     *             if OID can not be created from its string representation
-     */
-    static CARAPI GetObjectIdentifier(
-        /* [in] */ const String& sOid,
-        /* [out] */ IObjectIdentifier** result) /*throws IOException*/
-    {
-        VALIDATE_NOT_NULL(result);
-        if (sOid.GetChar(0) >= '0' && sOid.GetChar(0) <= '9') {
-            AutoPtr<ArrayOf<Int32> > array = Org::Apache::Harmony::Security::Asn1::CObjectIdentifier::ToIntArray(sOid);
-            AutoPtr<IObjectIdentifier> thisOid = GetOID(array);
-            if (thisOid == null) {
-                thisOid = new IObjectIdentifier(array);
-            }
-            return thisOid;
-
-        }
-        IObjectIdentifier thisOid = KNOWN_NAMES.get(sOid.toUpperCase(Locale.US));
-        if (thisOid == null) {
-            throw new IOException("Unrecognizable attribute name: " + sOid);
-        }
-        return thisOid;
-    }
-
-    // for decoder only
-    private AttributeTypeAndValue(ArrayOf<Int32>* oid, AttributeValue value) throws IOException {
-        IObjectIdentifier thisOid = getOID(oid);
-        if (thisOid == null) {
-            thisOid = new IObjectIdentifier(oid);
-        }
-        this.oid = thisOid;
-        this.value = value;
-    }
-
-    /**
-     * Creates AttributeTypeAndValue with OID and AttributeValue.
-     *
-     * @param oid
-     *            object identifier
-     * @param value
-     *            attribute value
-     */
-    public AttributeTypeAndValue(IObjectIdentifier oid, AttributeValue value) throws IOException {
-        this.oid = oid;
-        this.value = value;
-    }
-
-    /**
-     * Appends AttributeTypeAndValue string representation
-     *
-     * @param attrFormat - format of DN
-     */
-    public void appendName(String attrFormat, StringBuilder sb) {
-        boolean hexFormat = false;
-        if (X500Principal.RFC1779.equals(attrFormat)) {
-            if (RFC1779_NAMES == oid.getGroup()) {
-                sb.append(oid.getName());
-            } else {
-                sb.append(oid.toOIDString());
-            }
-
-            sb.append('=');
-            if (value.escapedString == value.getHexString()) {
-                sb.append(value.getHexString().toUpperCase(Locale.US));
-            } else if (value.escapedString.length() != value.rawString.length()) {
-                // was escaped
-                value.appendQEString(sb);
-            } else {
-                sb.append(value.escapedString);
-            }
-        } else {
-            Object group = oid.getGroup();
-            // RFC2253 includes names from RFC1779
-            if (RFC1779_NAMES == group || RFC2253_NAMES == group) {
-                sb.append(oid.getName());
-
-                if (X500Principal.CANONICAL.equals(attrFormat)) {
-                    // only PrintableString and UTF8String in string format
-                    // all others are output in hex format
-                    // no hex for teletex; see http://b/2102191
-                    Int32 tag = value.getTag();
-                    if (!ASN1StringType.UTF8STRING.checkTag(tag)
-                            && !ASN1StringType.PRINTABLESTRING.checkTag(tag)
-                            && !ASN1StringType.TELETEXSTRING.checkTag(tag)) {
-                        hexFormat = true;
-                    }
-                }
-
-            } else {
-                sb.append(oid.toString());
-                hexFormat = true;
-            }
-
-            sb.append('=');
-
-            if (hexFormat) {
-                sb.append(value.getHexString());
-            } else {
-                if (X500Principal.CANONICAL.equals(attrFormat)) {
-                    sb.append(value.makeCanonical());
-                } else if (X500Principal.RFC2253.equals(attrFormat)) {
-                    sb.append(value.getRFC2253String());
-                } else {
-                    sb.append(value.escapedString);
-                }
-            }
-        }
-    }
-
-    /**
-     * Gets type of the AttributeTypeAndValue
-     */
-    CARAPI GetType(
-        /* [out] */ Org::Apache::Harmony::Security::Utils::IObjectIdentifier** ppIdentifier);
-
-    public AttributeValue getValue() {
-        return value;
-    }
-
+private:
     /**
      * According to RFC 3280 (http://www.ietf.org/rfc/rfc3280.txt)
      * X.501 AttributeTypeAndValue structure is defined as follows:
@@ -168,296 +48,229 @@ public:
      *          bmpString               BMPString (SIZE (1..MAX)) }
      *
      */
-    public static final ASN1Type attributeValue = new ASN1Type(ASN1Constants.TAG_PRINTABLESTRING) {
+    class ASN1TypeCls: public ASN1Type
+    {
+    public:
+        ASN1TypeCls();
 
-        public boolean checkTag(Int32 tag) {
-            return true;
-        }
+        CARAPI constructor(
+            /* [in] */ Int32 tag);
 
-        public Object decode(BerInputStream in) throws IOException {
-            // FIXME what about constr???
-            String str = null;
-            if (DirectoryString.ASN1.checkTag(in.tag)) {
-                // has string representation
-                str = (String) DirectoryString.ASN1.decode(in);
-            } else {
-                // gets octets only
-                in.readContent();
-            }
+        CARAPI CheckTag(
+            /* [in] */ Int32 tag,
+            /* [out] */ Boolean* result);
 
-            byte[] bytesEncoded = new byte[in.getOffset() - in.getTagOffset()];
-            System.arraycopy(in.getBuffer(), in.getTagOffset(), bytesEncoded,
-                    0, bytesEncoded.length);
+        CARAPI Decode(
+            /* [in] */ IBerInputStream* in,
+            /* [out] */ IInterface** result) /*throws IOException*/;
 
-            return new AttributeValue(str, bytesEncoded, in.tag);
-        }
-
-        @Override public Object getDecodedObject(BerInputStream in) throws IOException {
-            // stub to avoid wrong decoder usage
-            throw new RuntimeException("AttributeValue getDecodedObject MUST NOT be invoked");
-        }
+        // @Override
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* in,
+            /* [out] */ IInterface** result) /*throws IOException*/;
 
         //
         // Encode
         //
-        public void encodeASN(BerOutputStream out) {
-            AttributeValue av = (AttributeValue) out.content;
+        CARAPI EncodeASN(
+            /* [in] */ IBerOutputStream* out);
 
-            if (av.encoded != null) {
-                out.content = av.encoded;
-                out.encodeANY();
-            } else {
-                out.encodeTag(av.getTag());
-                out.content = av.bytes;
-                out.encodeString();
-            }
-        }
+        CARAPI SetEncodingContent(
+            /* [in] */ IBerOutputStream* out);
 
-        public void setEncodingContent(BerOutputStream out) {
-            AttributeValue av = (AttributeValue) out.content;
+        CARAPI EncodeContent(
+            /* [in] */ IBerOutputStream* out);
 
-            if (av.encoded != null) {
-                out.length = av.encoded.length;
-            } else {
-                if (av.getTag() == ASN1Constants.TAG_UTF8STRING) {
-                    out.content = av.rawString;
-                    ASN1StringType.UTF8STRING.setEncodingContent(out);
-                    av.bytes = (byte[]) out.content;
-                    out.content = av;
-                } else {
-                    av.bytes = av.rawString.getBytes(StandardCharsets.UTF_8);
-                    out.length = av.bytes.length;
-                }
-            }
-        }
-
-        public void encodeContent(BerOutputStream out) {
-            // stub to avoid wrong encoder usage
-            throw new RuntimeException("AttributeValue encodeContent MUST NOT be invoked");
-        }
-
-        @Override public Int32 getEncodedLength(BerOutputStream out) { //FIXME name
-            AttributeValue av = (AttributeValue) out.content;
-            if (av.encoded != null) {
-                return out.length;
-            } else {
-                return super.getEncodedLength(out);
-            }
-        }
+        // @Override
+        CARAPI GetEncodedLength(
+            /* [in] */ IBerOutputStream* out,
+            /* [out] */ Int32* result);
     };
 
-    public static final ASN1Sequence ASN1 = new ASN1Sequence(new ASN1Type[] {
-            ASN1Oid.getInstance(), attributeValue }) {
+    class ASN1SequenceCls: public ASN1Sequence
+    {
+    public:
+        ASN1SequenceCls();
 
-        @Override protected Object getDecodedObject(BerInputStream in) throws IOException {
-            Object[] values = (Object[]) in.content;
-            return new AttributeTypeAndValue((Int32[]) values[0], (AttributeValue) values[1]);
-        }
+        CARAPI constructor(
+            /* [in] */ ArrayOf<IASN1Type*>* types);
 
-        @Override protected void getValues(Object object, Object[] values) {
-            AttributeTypeAndValue atav = (AttributeTypeAndValue) object;
-            values[0] = atav.oid.getOid();
-            values[1] = atav.value;
-        }
+    protected:
+        // @Override
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* in,
+            /* [out] */ IInterface** result) /*throws IOException*/;
+
+        // @Override
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [in] */ ArrayOf<IInterface*>* values);
     };
+
+public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     /**
-     * Returns known OID or null.
+     * Parses OID string representation.
+     *
+     * @param sOid
+     *            string representation of OID
+     *
+     * @throws IOException
+     *             if OID can not be created from its string representation
      */
-    private static IObjectIdentifier getOID(Int32[] oid) {
-        Int32 index = hashIntArray(oid) % CAPACITY;
+    static CARAPI GetObjectIdentifier(
+        /* [in] */ const String& sOid,
+        /* [out] */ IObjectIdentifier** result) /*throws IOException*/;
 
-        // look for OID in the pool
-        IObjectIdentifier[] list = KNOWN_OIDS[index];
-        for (Int32 i = 0; list[i] != null; i++) {
-            if (Arrays.equals(oid, list[i].getOid())) {
-                return list[i];
-            }
-        }
-        return null;
-    }
+    // for decoder only
+    CARAPI constructor(
+        /* [in] */ ArrayOf<Int32>* oid,
+        /* [in] */ IAttributeValue* value) /*throws IOException*/;
+
+    /**
+     * Creates AttributeTypeAndValue with OID and AttributeValue.
+     *
+     * @param oid
+     *            object identifier
+     * @param value
+     *            attribute value
+     */
+    CARAPI constructor(
+        /* [in] */ IObjectIdentifier* oid,
+        /* [in] */ IAttributeValue* value) /*throws IOException*/;
+
+    /**
+     * Appends AttributeTypeAndValue string representation
+     *
+     * @param attrFormat - format of DN
+     */
+    CARAPI AppendName(
+        /* [in] */ const String& attrFormat,
+        /* [in] */ IStringBuilder* sb);
+
+    /**
+     * Gets type of the AttributeTypeAndValue
+     */
+    CARAPI GetType(
+        /* [out] */ Org::Apache::Harmony::Security::Utils::IObjectIdentifier** result);
+
+    CARAPI GetValue(
+        /* [out] */ IAttributeValue** result);
+
+private:
+    /**
+     * Returns known OID or NULL.
+     */
+    static CARAPI_(AutoPtr<IObjectIdentifier>) GetOID(
+        /* [in] */ ArrayOf<Int32>* oid);
 
     /**
      * Adds known OID to pool.
      * for static AttributeTypeAndValue initialization only
      */
-    private static void addOID(IObjectIdentifier oid) {
-        Int32[] newOid = oid.getOid();
-        Int32 index = hashIntArray(newOid) % CAPACITY;
-
-        // look for OID in the pool
-        IObjectIdentifier[] list = KNOWN_OIDS[index];
-        Int32 i = 0;
-        for (; list[i] != null; i++) {
-            // check wrong static initialization: no duplicate OIDs
-            if (Arrays.equals(newOid, list[i].getOid())) {
-                throw new Error("IObjectIdentifier: invalid static initialization; " +
-                        "duplicate OIDs: " + oid.getName() + " " + list[i].getName());
-            }
-        }
-
-        // check : to avoid NPE
-        if (i == (CAPACITY - 1)) {
-            throw new Error("IObjectIdentifier: invalid static initialization; " +
-                    "small OID pool capacity");
-        }
-        list[i] = oid;
-    }
+    static CARAPI AddOID(
+        /* [in] */ IObjectIdentifier* oid);
 
     /**
      * Returns hash for array of integers.
      */
-    private static Int32 hashIntArray(Int32[] oid) {
-        Int32 intHash = 0;
-        for (Int32 i = 0; i < oid.length && i < 4; i++) {
-            intHash += oid[i] << (8 * i); //TODO what about to find better one?
-        }
-        return intHash & 0x7FFFFFFF; // only positive
-    }
+    static CARAPI_(Int32) HashIntArray(
+        /* [in] */ ArrayOf<Int32>* oid);
 
-private:
-    static {
-        RFC1779_NAMES.put(CN.getName(), CN);
-        RFC1779_NAMES.put(L.getName(), L);
-        RFC1779_NAMES.put(ST.getName(), ST);
-        RFC1779_NAMES.put(O.getName(), O);
-        RFC1779_NAMES.put(OU.getName(), OU);
-        RFC1779_NAMES.put(C.getName(), C);
-        RFC1779_NAMES.put(STREET.getName(), STREET);
+    static CARAPI_(AutoPtr<Object>) InitValues();
 
-        RFC2253_NAMES.putAll(RFC1779_NAMES);
-        RFC2253_NAMES.put(DC.getName(), DC);
-        RFC2253_NAMES.put(UID.getName(), UID);
+    static CARAPI_(AutoPtr<IASN1Type>) InitAttributeValue();
 
-        RFC2459_NAMES.put(DNQ.getName(), DNQ);
-        RFC2459_NAMES.put(DNQUALIFIER.getName(), DNQUALIFIER);
-        RFC2459_NAMES.put(EMAILADDRESS.getName(), EMAILADDRESS);
-        RFC2459_NAMES.put(GENERATION.getName(), GENERATION);
-        RFC2459_NAMES.put(GIVENNAME.getName(), GIVENNAME);
-        RFC2459_NAMES.put(INITIALS.getName(), INITIALS);
-        RFC2459_NAMES.put(SERIALNUMBER.getName(), SERIALNUMBER);
-        RFC2459_NAMES.put(SURNAME.getName(), SURNAME);
-        RFC2459_NAMES.put(T.getName(), T);
+    static CARAPI_(AutoPtr<IASN1Sequence>) InitASN1();
 
-        // add from RFC2253 (includes RFC1779)
-        for (IObjectIdentifier objectIdentifier : RFC2253_NAMES.values()) {
-            addOID(objectIdentifier);
-        }
-
-        // add attributes from RFC2459
-        for (IObjectIdentifier o : RFC2459_NAMES.values()) {
-            //don't add DNQUALIFIER because it has the same oid as DNQ
-            if (!(o == DNQUALIFIER)) {
-                addOID(o);
-            }
-        }
-
-        KNOWN_NAMES.putAll(RFC2253_NAMES); // RFC2253 includes RFC1779
-        KNOWN_NAMES.putAll(RFC2459_NAMES);
-    }
-
-private:
-    /** known attribute types for RFC1779 (see Table 1) */
-    private static final HashMap<String, IObjectIdentifier> RFC1779_NAMES
-            = new HashMap<String, IObjectIdentifier>(10);
-
-    /** known keywords attribute */
-    private static final HashMap<String, IObjectIdentifier> KNOWN_NAMES
-            = new HashMap<String, IObjectIdentifier>(30);
-
-    /** known attribute types for RFC2253 (see 2.3.  Converting AttributeTypeAndValue) */
-    private static final HashMap<String, IObjectIdentifier> RFC2253_NAMES
-            = new HashMap<String, IObjectIdentifier>(10);
-
-    /** known attribute types for RFC2459 (see API spec.) */
-    private static final HashMap<String, IObjectIdentifier> RFC2459_NAMES
-            = new HashMap<String, IObjectIdentifier>(10);
-
-    /** Country code attribute (name from RFC 1779) */
-    private static final IObjectIdentifier C
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 6 }, "C", RFC1779_NAMES);
-
-    /** Common name attribute (name from RFC 1779) */
-    private static final IObjectIdentifier CN
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 3 }, "CN", RFC1779_NAMES);
-
+public:
+    static AutoPtr<IASN1Type> sAttributeValue;
+    static AutoPtr<IASN1Sequence> ASN1;
     /** Domain component attribute (name from RFC 2253) */
-    public static final IObjectIdentifier DC = new IObjectIdentifier(
-            new Int32[] { 0, 9, 2342, 19200300, 100, 1, 25 }, "DC", RFC2253_NAMES);
-
-    /** DN qualifier attribute (name from API spec) */
-    private static final IObjectIdentifier DNQ
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 46 }, "DNQ", RFC2459_NAMES);
-
-    private static final IObjectIdentifier DNQUALIFIER
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 46 }, "DNQUALIFIER", RFC2459_NAMES);
+    static AutoPtr<IObjectIdentifier> DC;
 
     /** Email Address attribute (name from API spec) */
-    public static final IObjectIdentifier EMAILADDRESS = new IObjectIdentifier(
-            new Int32[] { 1, 2, 840, 113549, 1, 9, 1}, "EMAILADDRESS", RFC2459_NAMES);
+    static AutoPtr<IObjectIdentifier> EMAILADDRESS;
+
+private:
+    static AutoPtr<Object> sTMP;
+
+    /** known attribute types for RFC1779 (see Table 1) */
+    static AutoPtr<IHashMap> RFC1779_NAMES;
+
+    /** known keywords attribute */
+    static AutoPtr<IHashMap> KNOWN_NAMES;
+
+    /** known attribute types for RFC2253 (see 2.3.  Converting AttributeTypeAndValue) */
+    static AutoPtr<IHashMap> RFC2253_NAMES;
+
+    /** known attribute types for RFC2459 (see API spec.) */
+    static AutoPtr<IHashMap> RFC2459_NAMES;
+
+    /** Country code attribute (name from RFC 1779) */
+    static AutoPtr<IObjectIdentifier> C;
+
+    /** Common name attribute (name from RFC 1779) */
+    static AutoPtr<IObjectIdentifier> CN;
+
+    /** DN qualifier attribute (name from API spec) */
+    static AutoPtr<IObjectIdentifier> DNQ;
+
+    static AutoPtr<IObjectIdentifier> DNQUALIFIER;
 
     /** Generation attribute (qualifies an individual's name) (name from API spec) */
-    private static final IObjectIdentifier GENERATION
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 44 }, "GENERATION", RFC2459_NAMES);
+    static AutoPtr<IObjectIdentifier> GENERATION;
 
     /** Given name attribute (name from API spec) */
-    private static final IObjectIdentifier GIVENNAME
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 42 }, "GIVENNAME", RFC2459_NAMES);
+    static AutoPtr<IObjectIdentifier> GIVENNAME;
 
     /** Initials attribute (initials of an individual's name) (name from API spec) */
-    private static final IObjectIdentifier INITIALS
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 43 }, "INITIALS", RFC2459_NAMES);
+    static AutoPtr<IObjectIdentifier> INITIALS;
 
     /** Name of a locality attribute (name from RFC 1779) */
-    private static final IObjectIdentifier L
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 7 }, "L", RFC1779_NAMES);
+    static AutoPtr<IObjectIdentifier> L;
 
     /** Organization name attribute (name from RFC 1779) */
-    private static final IObjectIdentifier O
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 10 }, "O", RFC1779_NAMES);
+    static AutoPtr<IObjectIdentifier> O;
 
     /** Organizational unit name attribute (name from RFC 1779) */
-    private static final IObjectIdentifier OU
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 11 }, "OU", RFC1779_NAMES);
+    static AutoPtr<IObjectIdentifier> OU;
 
     /** Serial number attribute (serial number of a device) (name from API spec) */
-    private static final IObjectIdentifier SERIALNUMBER
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 5 }, "SERIALNUMBER", RFC2459_NAMES);
+    static AutoPtr<IObjectIdentifier> SERIALNUMBER;
 
     /** Attribute for the full name of a state or province (name from RFC 1779) */
-    private static final IObjectIdentifier ST
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 8 }, "ST", RFC1779_NAMES);
+    static AutoPtr<IObjectIdentifier> ST;
 
     /** Street attribute (name from RFC 1779) */
-    private static final IObjectIdentifier STREET
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 9 }, "STREET", RFC1779_NAMES);
+    static AutoPtr<IObjectIdentifier> STREET;
 
     /** Surname attribute (comes from an individual's parent name) (name from API spec) */
-    private static final IObjectIdentifier SURNAME
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 4 }, "SURNAME", RFC2459_NAMES);
+    static AutoPtr<IObjectIdentifier> SURNAME;
 
     /** Title attribute (object in an organization)(name from API spec) */
-    private static final IObjectIdentifier T
-            = new IObjectIdentifier(new Int32[] { 2, 5, 4, 12 }, "T", RFC2459_NAMES);
+    static AutoPtr<IObjectIdentifier> T;
 
     /** User identifier attribute (name from RFC 2253) */
-    private static final IObjectIdentifier UID = new IObjectIdentifier(
-            new Int32[]{ 0, 9, 2342, 19200300, 100, 1, 1 }, "UID", RFC2253_NAMES);
+    static AutoPtr<IObjectIdentifier> UID;
 
     /** pool's capacity */
-    private static final Int32 CAPACITY = 10;
+    static const Int32 CAPACITY;
 
     /** pool's size */
-    private static final Int32 SIZE = 10;
+    static const Int32 SIZE;
 
     /** pool: contains all recognizable attribute type keywords */
-    private static final IObjectIdentifier[][] KNOWN_OIDS = new IObjectIdentifier[SIZE][CAPACITY];
+    static AutoPtr<ArrayOf<ArrayOf<IObjectIdentifier*>* > > KNOWN_OIDS;
 
     /** Attribute type */
-    private final IObjectIdentifier oid;
+    AutoPtr<IObjectIdentifier> mOid;
 
     /** Attribute value */
-    private final AttributeValue value;
+    AutoPtr<IAttributeValue> mValue;
 };
 
 }

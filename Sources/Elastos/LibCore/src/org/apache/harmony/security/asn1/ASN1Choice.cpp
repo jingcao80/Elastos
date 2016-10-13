@@ -35,33 +35,29 @@ ECode ASN1Choice::constructor(
 {
     ASN1Type::constructor(IASN1Constants::TAG_CHOICE); // has not tag number
 
-    if (mType->GetLength() == 0) {
+    if (asn1Type->GetLength() == 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     // create map of all identifiers
     AutoPtr<INavigableMap> map;
     CTreeMap::New((INavigableMap**)&map);
-    for (Int32 index = 0; index < mType->GetLength(); index++) {
-        AutoPtr<IASN1Type> t = (*mType)[index];
+    for (Int32 index = 0; index < asn1Type->GetLength(); index++) {
+        AutoPtr<IASN1Type> t = (*asn1Type)[index];
 
         if (IASN1Any::Probe(t.Get())) {
             // ASN.1 ANY is not allowed,
             // even it is a single component (not good for nested choices)
             //throw new IllegalArgumentException("ASN.1 choice type MUST have alternatives with distinct tags: " + getClass().getName()); // FIXME name
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        } else if (IASN1Choice::Probe(t.Get())) {
-
+        }
+        else if (IASN1Choice::Probe(t.Get())) {
             // add all choice's identifiers
             //int[][] choiceToAdd = ((ASN1Choice) t).identifiers;
-            AutoPtr<ArrayOf<IArrayOf*> > choiceToAdd =
+            AutoPtr<ArrayOf<AutoPtr<ArrayOf<Int32> > > > choiceToAdd =
                 ((ASN1Choice*)IASN1Choice::Probe(t.Get()))->mIdentifiers;
-            Int32 length;
-            for (Int32 j = 0; j < ((*choiceToAdd)[0]->GetLength(&length), length); j++) {
-                Int32 identifier;
-                AutoPtr<IInterface> tmp;
-                (*choiceToAdd)[0]->Get(j, (IInterface**)&tmp);
-                INumber::Probe(tmp)->Int32Value(&identifier);
+            for (Int32 j = 0; j < (*choiceToAdd)[0]->GetLength(); j++) {
+                Int32 identifier = (*(*choiceToAdd)[0])[j];
                 AddIdentifier(map, identifier, index);
             }
             continue;
@@ -86,8 +82,12 @@ ECode ASN1Choice::constructor(
     // fill identifiers array
     Int32 size;
     map->GetSize(&size);
-    mIdentifiers = ArrayOf<IArrayOf*>::Alloc(2);
-    CArrayOf::New(EIID_IInteger32, size, (IArrayOf**)&(*mIdentifiers)[0]);
+    mIdentifiers = ArrayOf<AutoPtr<ArrayOf<Int32> > >::Alloc(2);
+    AutoPtr<ArrayOf<Int32> > item = ArrayOf<Int32>::Alloc(size);
+    mIdentifiers->Set(0, item);
+    item = ArrayOf<Int32>::Alloc(size);
+    mIdentifiers->Set(1, item);
+
     AutoPtr<ISet> set;
     map->GetEntrySet((ISet**)&set);
     AutoPtr<IIterator> it;
@@ -101,33 +101,23 @@ ECode ASN1Choice::constructor(
         entry->GetKey((IInterface**)&identifier);
         Int32 val;
         INumber::Probe(identifier)->Int32Value(&val);
-        (*mIdentifiers)[0]->Set(i, CoreUtils::Convert(val));
+        (*(*mIdentifiers)[0])[i] = val;
         tmp = NULL;
         entry->GetValue((IInterface**)&tmp);
         INumber::Probe(tmp)->Int32Value(&val);
-        (*mIdentifiers)[1]->Set(i, CoreUtils::Convert(val));
+        (*(*mIdentifiers)[1])[i] = val;
     }
     mType = asn1Type;
     return NOERROR;
 }
-
 
 ECode ASN1Choice::CheckTag(
     /* [in] */ Int32 identifier,
     /* [out] */ Boolean* checkTag)
 {
     VALIDATE_NOT_NULL(checkTag)
-    Int32 length = 0, index = 0;
-    (*mIdentifiers)[0]->GetLength(&length);
-    AutoPtr<ArrayOf<Int32> > tmp = ArrayOf<Int32>::Alloc(length);
-    for (Int32 i = 0; i < length; i++) {
-        AutoPtr<IInterface> elem;
-        Int32 elemValue;
-        (*mIdentifiers)[0]->Get(i, (IInterface**)&elem);
-        INumber::Probe(elem)->Int32Value(&elemValue);
-        (*tmp)[i] = elemValue;
-    }
-    Arrays::BinarySearch(tmp, identifier, &index);
+    Int32 index = 0;
+    Arrays::BinarySearch((*mIdentifiers)[0], identifier, &index);
     *checkTag = index >= 0;
     return NOERROR;
 }
@@ -139,26 +129,15 @@ ECode ASN1Choice::Decode(
     VALIDATE_NOT_NULL(object)
     *object = NULL;
     Int32 tag = ((CBerInputStream*)bis)->mTag;
-    Int32 length, index;
-    (*mIdentifiers)[0]->GetLength(&length);
-    AutoPtr<ArrayOf<Int32> > tmp = ArrayOf<Int32>::Alloc(length);
-    for (Int32 i =0; i < length; i++) {
-        AutoPtr<IInterface> elem;
-        Int32 elemValue;
-        (*mIdentifiers)[0]->Get(i, (IInterface**)&elem);
-        INumber::Probe(elem)->Int32Value(&elemValue);
-        (*tmp)[i] = elemValue;
-    }
-    Arrays::BinarySearch(tmp, tag, &index);
+    Int32 index = 0;
+    Arrays::BinarySearch((*mIdentifiers)[0], tag, &index);
     if (index < 0) {
         Slogger::E(TAG, "Failed to decode ASN.1 choice type.  No alternatives "
             "were found for"/* + getClass().getName()*/);
         return E_ASN1_EXCEPTION;
     }
 
-    AutoPtr<IInterface> elem;
-    (*mIdentifiers)[1]->Get(index, (IInterface**)&elem);
-    INumber::Probe(elem)->Int32Value(&index);
+    index = (*(*mIdentifiers)[1])[index];
 
     AutoPtr<IInterface> content;
     (*mType)[index]->Decode(bis, (IInterface**)&content);

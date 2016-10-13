@@ -25,8 +25,8 @@ module
 //        SetType(
 //            [in] ArrayOf<IASN1Type*>* type);
 //
-        GetType(
-            [out, callee] ArrayOf<IASN1Type*>* type);
+//        GetType(
+//            [out, callee] ArrayOf<IASN1Type*>* type);
     }
 
     } // namespace Asn1

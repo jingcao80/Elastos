@@ -42,6 +42,7 @@ public:
     virtual CARAPI GetValues(
         /* [in] */ IInterface* object,
         /* [out] */ ICollection** values);
+
 public:
     /** A value collection of this ASN.1 type */
     AutoPtr<IASN1Type> mType;

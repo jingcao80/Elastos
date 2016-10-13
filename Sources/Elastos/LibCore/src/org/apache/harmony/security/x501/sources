@@ -2,13 +2,25 @@
 TARGET_NAME= x501
 TARGET_TYPE= lib
 
-INCLUDES += ../../
-INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Security/X501
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastosx/security/auth/x500
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/asn1
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/utils
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/x501
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/x509
 
 SOURCES = CAttributeTypeAndValue.cpp
 SOURCES += CAttributeTypeAndValueComparator.cpp
-#SOURCES += CAttributeTypeAndValueHelper.cpp
 SOURCES += CAttributeValue.cpp
-SOURCES += CDirectoryString.cpp
+SOURCES += DirectoryString.cpp
 SOURCES += CName.cpp
-#SOURCES += CNameHelper.cpp

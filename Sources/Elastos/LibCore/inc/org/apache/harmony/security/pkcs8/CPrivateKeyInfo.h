@@ -3,11 +3,14 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PKCS8_CPRIVATEKEYINFO_H__
 
 #include "_Org_Apache_Harmony_Security_Pkcs8_CPrivateKeyInfo.h"
-#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include "ASN1Sequence.h"
 
-using Elastos::Core::Object;
-using Elastos::Utility::IList;
+using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
 using Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier;
+using Elastos::Utility::IList;
 
 namespace Org {
 namespace Apache {
@@ -20,19 +23,22 @@ CarClass(CPrivateKeyInfo)
     , public IPrivateKeyInfo
 {
 private:
-    friend class ASN1SequenceDerived;
     class ASN1SequenceDerived
         : public ASN1Sequence
-        , public IASN1Sequence
-        , public ElRefBase
     {
     public:
-        CAR_INTERFACE_DECL()
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [in] */ ArrayOf<IInterface*>* values);
 
-        ASN1SEQUENCE_METHODS_DECL()
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
 
-        ASN1SequenceDerived(
+        CARAPI constructor(
             /* [in] */ ArrayOf<IASN1Type *>* type);
+
+        ASN1SequenceDerived();
     };
 
 public:
@@ -65,8 +71,7 @@ public:
         /* [in] */ ArrayOf<Byte>* privateKey,
         /* [in] */ IList* attributes);
 
-private:
-    CPrivateKeyInfo(
+    CARAPI constructor(
         /* [in] */ Int32 version,
         /* [in] */ IAlgorithmIdentifier* privateKeyAlgorithm,
         /* [in] */ ArrayOf<Byte>* privateKey,

@@ -3,9 +3,13 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X501_CATTRIBUTEVALUE_H__
 
 #include "_Org_Apache_Harmony_Security_X501_CAttributeValue.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::ICollection;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::Utils::IObjectIdentifier;
 
 namespace Org {
 namespace Apache {
@@ -13,6 +17,9 @@ namespace Harmony {
 namespace Security {
 namespace X501 {
 
+/**
+ * X.501 Attribute Value
+ */
 CarClass(CAttributeValue)
     , public Object
     , public IAttributeValue
@@ -72,7 +79,8 @@ public:
 
     CARAPI constructor(
         /* [in] */ const String& parsedString,
-        /* [in] */ Boolean hasQorE);
+        /* [in] */ Boolean hasQorE,
+        /* [in] */ IObjectIdentifier* oid);
 
     CARAPI constructor(
         /* [in] */ const String& hexString,
@@ -83,8 +91,54 @@ public:
         /* [in] */ ArrayOf<Byte> * pEncoded,
         /* [in] */ Int32 tag);
 
+    CARAPI GetValues(
+        /* [in] */ IASN1Type* type,
+        /* [out] */ ICollection** result) /*throws IOException*/;
+
+    /**
+     * Removes escape sequences used in RFC1779 escaping but not in RFC2253 and
+     * returns the RFC2253 string to the caller..
+     */
+    CARAPI GetRFC2253String(
+        /* [out] */ String* result);
+
 private:
-    // TODO: Add your private member variables here.
+    /**
+     * Checks if the string is PrintableString (see X.680)
+     */
+    static CARAPI_(Boolean) IsPrintableString(
+        /* [in] */ const String& str);
+
+    /**
+     * Escapes:
+     * 1) chars ",", "+", """, "\", "<", ">", ";" (RFC 2253)
+     * 2) chars "#", "=" (required by RFC 1779)
+     * 3) leading or trailing spaces
+     * 4) consecutive spaces (RFC 1779)
+     * 5) according to the requirement to be RFC 1779 compatible:
+     *    '#' char is escaped in any position
+     */
+    CARAPI_(String) MakeEscaped(
+        /* [in] */ const String& name);
+
+public:
+    Boolean mWasEncoded;
+
+    String mEscapedString;
+
+    AutoPtr<ArrayOf<Byte> > mEncoded;
+
+    AutoPtr<ArrayOf<Byte> > mBytes; //FIXME remove??? bytes to be encoded
+
+    Boolean mHasQE; // raw string contains '"' or '\'
+
+    String mRawString;
+
+private:
+    Boolean mHasConsecutiveSpaces;
+    String mRfc2253String;
+    String mHexString;
+    Int32 mTag;
 };
 
 }

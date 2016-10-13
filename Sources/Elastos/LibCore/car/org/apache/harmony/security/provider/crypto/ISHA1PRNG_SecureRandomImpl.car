@@ -17,7 +17,12 @@ module
      * <BR>
      * The class implements the Serializable interface.
      */
-    interface ISHA1PRNG_SecureRandomImpl extends Elastos.Security.ISecureRandomSpi {}
+    /**
+     * @Involve
+     * interface Elastos.Security.ISecureRandomSpi
+     * interface Elastos.IO.ISerializable;
+     */
+    interface ISHA1PRNG_SecureRandomImpl {}
 
     } // namespace Crypto
     } // namespace Provider

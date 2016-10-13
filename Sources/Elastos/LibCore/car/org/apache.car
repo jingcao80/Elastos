@@ -54,6 +54,9 @@ module
     merge("apache/harmony/security/pkcs7/ISignedData.car");
     merge("apache/harmony/security/pkcs7/ISignerInfo.car");
 
+    merge("apache/harmony/security/pkcs8/IPrivateKeyInfo.car");
+
+    merge("apache/harmony/security/utils/IArray.car");
     merge("apache/harmony/security/utils/IObjectIdentifier.car");
     merge("apache/harmony/security/utils/IJarUtils.car");
     merge("apache/harmony/security/utils/IAlgNameMapperSource.car");
@@ -114,6 +117,8 @@ module
     merge("apache/harmony/security/x509/ITime.car");
     merge("apache/harmony/security/x509/IValidity.car");
     merge("apache/harmony/security/x509/IX509PublicKey.car");
+    merge("apache/harmony/security/provider/crypto/ISHA1Constants.car");
+    merge("apache/harmony/security/provider/crypto/ISHA1PRNG_SecureRandomImpl.car");
 
     merge("apache/harmony/security/IPrivateKeyImpl.car");
     merge("apache/harmony/security/IPublicKeyImpl.car");
@@ -325,12 +330,17 @@ module
     interface Elastos.Net.IInetAddress;
     interface Elastos.Security.IPrincipal;
     interface Elastos.Security.IKeyStore;
+    interface Elastos.Security.IProvider;
     interface Elastos.Security.ISecureRandom;
-    interface Elastos.Utility.IList;
+    interface Elastos.Security.ISecureRandomSpi;
+    interface Elastos.Utility.IDictionary;
+    interface Elastos.Utility.IHashTable;
     interface Elastos.Utility.IIterator;
+    interface Elastos.Utility.IList;
     interface Elastos.Utility.ILocale;
     interface Elastos.Utility.IDate;
     interface Elastos.Utility.IMap;
+    interface Elastos.Utility.IProperties;
     interface Elastosx.Net.Ssl.IHostnameVerifier;
     interface Elastosx.Crypto.ICipherSpi;
     interface Elastosx.Xml.Parsers.ISAXParser;
@@ -372,6 +382,7 @@ module
     interface Org.Apache.Http.Params.IHttpParams;
     interface Org.Apache.Http.Protocol.IHttpContext;
     interface Org.Apache.Http.Utility.ICharArrayBuffer;
+    interface Org.Apache.Harmony.Security.Provider.Crypto.ISHA1PRNG_SecureRandomImpl;
 
     interface Org.Xml.Sax.IXMLReader;
 
@@ -913,10 +924,36 @@ module
 
     } // namespace Pkcs7
 
+    namespace Pkcs8 {
+
+    [deprecated]
+    class CPrivateKeyInfo {
+        constructor(
+            [in] Int32 v,
+            [in] IAlgorithmIdentifier* privateKeyAlgorithm,
+            [in] ArrayOf<Byte>* privateKey,
+            [in] IList* attributes);
+
+        constructor(
+            [in] Int32 v,
+            [in] IAlgorithmIdentifier* privateKeyAlgorithm,
+            [in] ArrayOf<Byte>* privateKey,
+            [in] IList* attributes,
+            [in] ArrayOf<Byte>* encoding);
+
+        interface IPrivateKeyInfo;
+    }
+
+    } // namespace Pkcs8
+
     namespace Utils {
 
     singleton class CJarUtils {
         interface IJarUtils;
+    }
+
+    singleton class CArrayHelper {
+        interface IArrayHelper;
     }
 
     [deprecated]
@@ -1615,26 +1652,59 @@ module
 
     } // namespace X509
 
-    //namespace X501 {
-    //[deprecated]
-    //class CName {
-    //    constructor(
-    //        [in] ArrayOf<Byte>* encoding);
+    namespace X501 {
+    [deprecated]
+    class CName {
+        constructor(
+            [in] ArrayOf<Byte>* encoding);
 
-    //    constructor(
-    //        [in] String name);
+        constructor(
+            [in] String name);
 
-    //    constructor(
-    //        [in] IList* rdn);
+        constructor(
+            [in] IList* rdn);
 
-    //    interface IName;
-    //}
+        interface IName;
+    }
 
-    //singleton class CAttributeTypeAndValueHelper {
-    //    interface IAttributeTypeAndValueHelper;
-    //}
+    [deprecated]
+    class CAttributeTypeAndValue {
+        constructor(
+            [in] Org.Apache.Harmony.Security.Utils.IObjectIdentifier* oidValue,
+            [in] IAttributeValue* value);
 
-    //} // namespace X501
+        constructor(
+            [in] ArrayOf<Int32>* oid,
+            [in] IAttributeValue* value);
+
+        interface IAttributeTypeAndValue;
+    }
+
+    class CAttributeTypeAndValueComparator {
+        interface IComparator;
+        interface ISerializable;
+    }
+
+    [deprecated]
+    class CAttributeValue {
+        constructor(
+            [in] String parsedString,
+            [in] Boolean hasQorE,
+            [in] Org.Apache.Harmony.Security.Utils.IObjectIdentifier* oid);
+
+        constructor(
+            [in] String hexString,
+            [in] ArrayOf<Byte>* encoded);
+
+        constructor(
+            [in] String rawString,
+            [in] ArrayOf<Byte>* encoded,
+            [in] Int32 tag);
+
+        interface IAttributeValue;
+    }
+
+    } // namespace X501
 
     class CPrivateKeyImpl {
         constructor(
@@ -1665,6 +1735,32 @@ module
         interface ISystemScope;
         interface Elastos.Security.IIdentityScope;
     }
+
+    namespace Provider {
+    namespace Crypto {
+
+    class CCryptoProvider {
+        constructor();
+
+        interface IProvider;
+        interface IProperties;
+        interface IHashTable;
+        interface IDictionary;
+        interface IMap;
+        interface ICloneable;
+        interface ISerializable;
+    }
+
+    class CSHA1PRNG_SecureRandomImpl {
+        constructor();
+
+        interface ISHA1PRNG_SecureRandomImpl;
+        interface ISecureRandomSpi;
+        interface ISerializable;
+    }
+
+    } // namespace Crypto
+    } // namespace Provider
 
     } // namespace Security
     } // namespace Harmony

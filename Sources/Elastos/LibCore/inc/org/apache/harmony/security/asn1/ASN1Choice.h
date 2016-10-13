@@ -43,7 +43,7 @@ public:
 
     virtual CARAPI GetObjectToEncode(
         /* [in] */ IInterface* object,
-        /* [out] */ IInterface** obj);
+        /* [out] */ IInterface** obj) = 0;
 
     virtual CARAPI SetEncodingContent(
         /* [in] */ IBerOutputStream* bos);
@@ -66,7 +66,7 @@ private:
      * identifiers[0]: stores identifiers (includes nested choices)
      * identifiers[1]: stores identifiers' indexes in array of types
      */
-    AutoPtr<ArrayOf<IArrayOf*> > mIdentifiers;
+    AutoPtr<ArrayOf<AutoPtr<ArrayOf<Int32> > > > mIdentifiers;
 };
 
 } // namespace Asn1
