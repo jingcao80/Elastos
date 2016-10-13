@@ -3173,6 +3173,7 @@ Editor::Editor(
 
 Editor::~Editor()
 {
+    LOGGERD("xihaoc", "~~Editor this = %p", this);
 }
 
 ECode Editor::OnAttachedToWindow()
@@ -4471,6 +4472,7 @@ Boolean Editor::ReportExtractedText()
 
 void Editor::SendUpdateSelection()
 {
+    LOGGERD("xihaoc", "SendUpdateSelection this = %p, mInputMethodState = %p", this, mInputMethodState.Get());
     if (NULL != mInputMethodState && mInputMethodState->mBatchEditNesting <= 0) {
         AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
         if (NULL != imm) {

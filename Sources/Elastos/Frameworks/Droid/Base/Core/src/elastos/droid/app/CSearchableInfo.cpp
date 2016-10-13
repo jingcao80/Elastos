@@ -545,7 +545,8 @@ ECode CSearchableInfo::CreateActivityContext(
     /* [in] */ IComponentName* activity,
     /* [out] */ IContext** outCtx)
 {
-    outCtx = NULL;
+    VALIDATE_NOT_NULL(outCtx)
+    *outCtx = NULL;
     String pckName;
     activity->GetPackageName(&pckName);
     return ctx->CreatePackageContext(pckName, 0, outCtx);

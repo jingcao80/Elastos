@@ -48,7 +48,7 @@ module {
      * @Involve
      * interface IParcelable
      */
-    [local]
+    [local, parcelable]
     interface ISearchableInfo {
 
         /**

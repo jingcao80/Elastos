@@ -2,36 +2,46 @@
 #define __ELASTOS_DROID_SERVER_SEARCH_SEARCHABLES_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "Elastos.Droid.Core.h"
-#include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
-#include <elastos/utility/etl/HashMap.h>
-#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::App::ISearchableInfo;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::Pm::IIPackageManager;
-using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Core::IComparator;
 using Elastos::Core::Object;
-using Elastos::Core::CObjectContainer;
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IList;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Search {
 
-class Searchables
-    : public Object
-    , public ISearchables
+class Searchables : public Object
 {
-public:
-    CAR_INTERFACE_DECL()
+private:
+    class Comparator
+        : public Object
+        , public IComparator
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
+        CARAPI Compare(
+            /* [in] */ IInterface* lhs,
+            /* [in] */ IInterface* rhs,
+            /* [out] */ Int32* result);
+    };
+
+public:
     Searchables(
         /* [in] */ IContext* ctx,
         /* [in] */ Int32 userId);
@@ -43,13 +53,13 @@ public:
     CARAPI BuildSearchableList();
 
     CARAPI GetSearchablesList(
-        /* [out] */ IObjectContainer** list);
+        /* [out] */ IList** list);
 
     CARAPI GetSearchablesInGlobalSearchList(
-        /* [out] */ IObjectContainer** list);
+        /* [out] */ IList** list);
 
     CARAPI GetGlobalSearchActivities(
-        /* [out] */ IObjectContainer** list);
+        /* [out] */ IList** list);
 
     CARAPI GetGlobalSearchActivity(
         /* [out] */ IComponentName** cName);
@@ -58,40 +68,32 @@ public:
         /* [out] */ IComponentName** cName);
 
 private:
-    CARAPI FindGlobalSearchActivities(
-        /* [out] */ IObjectContainer** container);
+    CARAPI_(AutoPtr<IList>) FindGlobalSearchActivities();
 
-    CARAPI FindGlobalSearchActivity(
-        /* [in] */ IObjectContainer* installed,
-        /* [out] */IComponentName** cName);
+    CARAPI_(AutoPtr<IComponentName>) FindGlobalSearchActivity(
+        /* [in] */ IList* installed);
 
-    CARAPI IsInstalled(
-        /* [in] */ IComponentName* globalSearch,
-        /* [out] */ Boolean* rst);
+    CARAPI_(Boolean) IsInstalled(
+        /* [in] */ IComponentName* globalSearch);
 
     static CARAPI_(Boolean) ComparatorResolveInfo(
         /* [in] */ IResolveInfo* lhs,
         /* [in] */ IResolveInfo* rhs);
 
-    static CARAPI IsSystemApp(
-        /* [in] */ IResolveInfo* res,
-        /* [out] */ Boolean* rst);
+    static CARAPI_(Boolean) IsSystemApp(
+        /* [in] */ IResolveInfo* res);
 
-    CARAPI GetDefaultGlobalSearchProvider(
-        /* [in] */ IObjectContainer* providerList,
-        /* [out] */ IComponentName** cName);
+    CARAPI_(AutoPtr<IComponentName>) GetDefaultGlobalSearchProvider(
+        /* [in] */ IList* providerList);
 
-    CARAPI GetGlobalSearchProviderSetting(
-        /* [out] */ String* settings);
+    CARAPI_(String) GetGlobalSearchProviderSetting();
 
-    CARAPI FindWebSearchActivity(
-        /* [in] */ IComponentName* globalSearchActivity,
-        /* [out] */ IComponentName** cName);
+    CARAPI_(AutoPtr<IComponentName>) FindWebSearchActivity(
+        /* [in] */ IComponentName* globalSearchActivity);
 
-    CARAPI QueryIntentActivities(
+    CARAPI_(AutoPtr<IList>) QueryIntentActivities(
         /* [in] */ IIntent* intent,
-        /* [in] */ Int32 flags,
-        /* [out] */ List** infos);
+        /* [in] */ Int32 flags);
 
 private:
     static const String TAG;
@@ -101,6 +103,8 @@ private:
     // the current long wordy javadoc in SearchManager.java ?
     static const String MD_LABEL_DEFAULT_SEARCHABLE;
     static const String MD_SEARCHABLE_SYSTEM_SEARCH;
+
+    static const AutoPtr<IComparator> GLOBAL_SEARCH_RANKER;
 
     AutoPtr<IContext> mContext;
 

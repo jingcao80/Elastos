@@ -1,14 +1,13 @@
 #ifndef __ELASTOS_DROID_SERVER_SEARCH_CSEARCHMANAGERSERVICE_H__
 #define __ELASTOS_DROID_SERVER_SEARCH_CSEARCHMANAGERSERVICE_H__
 
-#include "Elastos.Droid.Core.h"
-#include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Server_Search_CSearchManagerService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include <elastos/core/Thread.h>
-#include <elastos/droid/internal/content/PackageMonitor.h>
 #include "elastos/droid/database/ContentObserver.h"
-// #include "search/Searchables.h"
+#include "elastos/droid/internal/content/PackageMonitor.h"
+#include "elastos/droid/server/search/Searchables.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/Thread.h>
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::App::IISearchManager;
@@ -21,7 +20,7 @@ using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Internal::Content::IPackageMonitor;
 using Elastos::Droid::Internal::Content::PackageMonitor;
-using Elastos::Utility::Etl::HashMap;
+using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Utility::IList;
 using Elastos::Core::Thread;
 
@@ -53,10 +52,8 @@ public:
         };
 
     public:
-        BootCompletedReceiver();
-
-        CARAPI constructor(
-            /* [in] */ IInterface* host);
+        BootCompletedReceiver(
+            /* [in] */ CSearchManagerService* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
@@ -72,10 +69,8 @@ public:
         : public BroadcastReceiver
     {
     public:
-        UserReceiver();
-
-        CARAPI constructor(
-            /* [in] */ IInterface* host);
+        UserReceiver(
+            /* [in] */ CSearchManagerService* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
@@ -97,13 +92,33 @@ public:
 
         CARAPI constructor(
             /* [in] */ IContentResolver* resolver,
-            /* [in] */ IInterface* host);
+            /* [in] */ CSearchManagerService* host);
 
         CARAPI OnChange(
             /* [in] */ Boolean selfChange);
 
     private:
         AutoPtr<IContentResolver> mResolver;
+        CSearchManagerService* mHost;
+    };
+
+private:
+    class MyPackageMonitor
+        : public PackageMonitor
+    {
+    public:
+        MyPackageMonitor(
+            /* [in] */ CSearchManagerService* host);
+
+        CARAPI OnSomePackagesChanged();
+
+        CARAPI OnPackageModified(
+            /* [in] */ const String& pkg);
+
+    private:
+        CARAPI_(void) UpdateSearchables();
+
+    private:
         CSearchManagerService* mHost;
     };
 
@@ -147,31 +162,11 @@ public:
         /* [out] */ String* str);
 
 private:
-    CARAPI GetSearchables(
-        /* [in] */ Int32 userId,
-        /* [out] */ ISearchables** rst);
+    CARAPI_(AutoPtr<Searchables>) GetSearchables(
+        /* [in] */ Int32 userId);
 
     CARAPI OnUserRemoved(
         /* [in] */ Int32 userId);
-
-    class MyPackageMonitor
-        : public PackageMonitor
-    {
-    public:
-        MyPackageMonitor(
-            /* [in] */ CSearchManagerService* host);
-
-        CARAPI OnSomePackagesChanged();
-
-        CARAPI OnPackageModified(
-            /* [in] */ const String& pkg);
-
-    private:
-        CARAPI_(void) UpdateSearchables();
-
-    private:
-        CSearchManagerService* mHost;
-    };
 
 private:
     // general debugging support
@@ -181,10 +176,7 @@ private:
     AutoPtr<IContext> mContext;
 
     // This field is initialized lazily in getSearchables(), and then never modified.
-    typedef HashMap<Int32, AutoPtr<ISearchables> > IntHashMap;
-    typedef HashMap<Int32, AutoPtr<ISearchables> >::Iterator Iterator;
-    IntHashMap mSearchables;//new SparseArray<Searchables>();
-    Object mLock;
+    AutoPtr<ISparseArray> mSearchables;
 };
 
 }// Search

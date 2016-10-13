@@ -2297,16 +2297,36 @@ jobject Util::ToJavaLocale(
         Util::CheckErrorAndLog(env, "ToJavaLocale", "Fail GetStaticFieldID: TAIWAN : %d", __LINE__);
     }
     else {
-        LOGGERE("ToJavaLocale", "Unknown Locale!");
-        assert(0);
-    }
+        String language;
+        locale->GetLanguage(&language);
+        jstring jlanguage = ToJavaString(env, language);
+        String country;
+        locale->GetCountry(&country);
+        jstring jcountry = ToJavaString(env, country);
+        String variant;
+        locale->GetVariant(&variant);
+        jstring jvariant = ToJavaString(env, variant);
 
-    jLocale = env->GetStaticObjectField(localKlass, f);
-    Util::CheckErrorAndLog(env, "ToJavaConfiguration", "Fail GetStaticObjectField: %d", __LINE__);
+        jmethodID m = env->GetMethodID(localKlass, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+        CheckErrorAndLog(env, "ToJavaLocale", "Fail GetMethodID: Locale %d", __LINE__);
 
-    env->DeleteLocalRef(localKlass);
+        jLocale = env->NewObject(localKlass, m, jlanguage, jcountry, jvariant);
+        CheckErrorAndLog(env, "ToJavaLocale", "Fail NewObject: Locale %d", __LINE__);
 
-    return jLocale;
+        env->DeleteLocalRef(localKlass);
+        env->DeleteLocalRef(jlanguage);
+        env->DeleteLocalRef(jcountry);
+        env->DeleteLocalRef(jvariant);
+
+        return jLocale;
+    // }
+
+    // jLocale = env->GetStaticObjectField(localKlass, f);
+    // Util::CheckErrorAndLog(env, "ToJavaLocale", "Fail GetStaticObjectField: %d", __LINE__);
+
+    // env->DeleteLocalRef(localKlass);
+
+    // return jLocale;
 }
 
 jobject Util::ToJavaRect(

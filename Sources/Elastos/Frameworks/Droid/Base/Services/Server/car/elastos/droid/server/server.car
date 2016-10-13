@@ -114,7 +114,6 @@ module
     // merge("power/ScreenOnBlocker.car");
     // merge("RecognitionManagerService.car");
     // merge("DeviceStorageMonitorService.car");
-    merge("search/Searchables.car");
 
     interface Elastos.Droid.Server.Display.IColorFade;
     interface Elastos.Droid.Server.Display.IDisplayBlanker;
@@ -820,28 +819,6 @@ module
 
             interface IISearchManager;
             interface IBinder;
-        }
-
-        class CSearchManagerServiceBootCompletedReceiver {
-            constructor(
-                [in] IInterface* host);
-
-            interface IBroadcastReceiver;
-        }
-
-        class CSearchManagerServiceUserReceiver {
-            constructor(
-                [in] IInterface* host);
-
-            interface IBroadcastReceiver;
-        }
-
-        class CSearchManagerServiceGlobalSearchProviderObserver {
-            constructor(
-                [in] IContentResolver* resolver,
-                [in] IInterface* host);
-
-            interface IContentObserver;
         }
     }
 
