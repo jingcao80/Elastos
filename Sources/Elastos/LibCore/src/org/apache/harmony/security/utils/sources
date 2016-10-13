@@ -18,7 +18,7 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/utils
 
 SOURCES = AlgNameMapper.cpp
 #SOURCES += CAlgNameMapperHelper.cpp
-#SOURCES += CArrayHelper.cpp
+SOURCES += CArrayHelper.cpp
 SOURCES += CJarUtils.cpp
 SOURCES += CObjectIdentifierInUtils.cpp
 #SOURCES += CObjectIdentifierInUtilsHelper.cpp

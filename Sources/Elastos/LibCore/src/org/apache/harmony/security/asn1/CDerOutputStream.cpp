@@ -1,6 +1,7 @@
 
 #include "Elastos.CoreLibrary.Utility.h"
 #include "CDerOutputStream.h"
+#include "ASN1Choice.h"
 
 using Elastos::Utility::ICollection;
 
@@ -137,8 +138,7 @@ ECode CDerOutputStream::GetChoiceLength(
     mContent = obj;
 
     AutoPtr< ArrayOf<IInterface*> > values = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr< ArrayOf<IASN1Type*> > type;
-    choice->GetType((ArrayOf<IASN1Type*>**)&type);
+    AutoPtr< ArrayOf<IASN1Type*> > type = ((ASN1Choice*)choice)->mType;
     values->Set(0, (*type)[i]);
     values->Set(1, mContent);
 

@@ -3,11 +3,14 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X501_CNAME_H__
 
 #include "_Org_Apache_Harmony_Security_X501_CName.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "ASN1SequenceOf.h"
 
+using Elastos::Utility::IList;
 using Org::Apache::Harmony::Security::Asn1::ASN1SequenceOf;
 using Org::Apache::Harmony::Security::Asn1::IASN1SequenceOf;
 using Org::Apache::Harmony::Security::Asn1::IASN1SetOf;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
 
 namespace Org {
 namespace Apache {
@@ -62,6 +65,18 @@ public:
     CARAPI constructor(
         /* [in] */ Elastos::Utility::IList * pRdn);
 
+private:
+    /**
+     * Returns Relative Distinguished Name as <code>String</code> according
+     * the format requested, format is int value
+     */
+    CARAPI_(String) GetName0(
+        /* [in] */ const String& format);
+
+    static CARAPI_(AutoPtr<IASN1SetOf>) InitASN1_RDN();
+
+    static CARAPI_(AutoPtr<IASN1SequenceOf>) InitASN1();
+
 public:
     /**
      * According to RFC 3280 (http://www.ietf.org/rfc/rfc3280.txt)
@@ -81,9 +96,20 @@ public:
     static AutoPtr<IASN1SequenceOf> ASN1;
 
 private:
-    static CARAPI_(AutoPtr<IASN1SetOf>) InitASN1_RDN();
+    /** ASN.1 DER encoding of Name */
+    volatile AutoPtr<ArrayOf<Byte> > mEncoded;
 
-    static CARAPI_(AutoPtr<IASN1SequenceOf>) InitASN1();
+    /** RFC1779 string */
+    String mRfc1779String;
+
+    /** RFC2253 string */
+    String mRfc2253String;
+
+    /** CANONICAL string */
+    String mCanonicalString;
+
+    /** Collection of RDNs */
+    AutoPtr<IList> mRdn; // List<List<AttributeTypeAndValue>>
 };
 
 }

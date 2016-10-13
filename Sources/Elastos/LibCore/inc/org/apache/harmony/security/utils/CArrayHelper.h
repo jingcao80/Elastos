@@ -13,6 +13,10 @@ namespace Harmony {
 namespace Security {
 namespace Utils {
 
+/**
+ * Utility class for arrays
+ *
+ */
 CarClass(CArrayHelper)
     , public Singleton
     , public IArrayHelper
@@ -30,9 +34,6 @@ public:
         /* [in] */ ArrayOf<Byte> * pArray,
         /* [in] */ const String& prefix,
         /* [out] */ String * pStr);
-
-private:
-    // TODO: Add your private member variables here.
 };
 
 }

@@ -2,17 +2,31 @@
 TARGET_NAME= crypto
 TARGET_TYPE= lib
 
-INCLUDES += ../../../
-INCLUDES += $(MAKEDIR)/../../../../../../../inc/Org/Apache/Harmony/Security/Provider/Crypto
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += $(PREBUILD_INC)/sys;
+INCLUDES += ../../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos/io
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos/security
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/libcore/utility
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/org/apache/harmony/security
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/org/apache/harmony/security/provider
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/org/apache/harmony/security/provider/crypto
 
 SOURCES = CCryptoProvider.cpp
-SOURCES += CDSAKeyFactoryImpl.cpp
-SOURCES += CDSAPrivateKeyImpl.cpp
-SOURCES += CDSAPublicKeyImpl.cpp
-SOURCES += CRandomBitsSupplierHelper.cpp
+#SOURCES += CDSAKeyFactoryImpl.cpp
+#SOURCES += CDSAPrivateKeyImpl.cpp
+#SOURCES += CDSAPublicKeyImpl.cpp
+#SOURCES += CRandomBitsSupplierHelper.cpp
 SOURCES += CSHA1PRNG_SecureRandomImpl.cpp
-SOURCES += CSHA1_MessageDigestImpl.cpp
-SOURCES += CSHA1withDSA_SignatureImpl.cpp
-SOURCES += RandomBitsSupplier.cpp
+#SOURCES += CSHA1_MessageDigestImpl.cpp
+#SOURCES += CSHA1withDSA_SignatureImpl.cpp
+#SOURCES += RandomBitsSupplier.cpp
 SOURCES += SHA1Impl.cpp
-SOURCES += ThreeIntegerSequence.cpp
+#SOURCES += ThreeIntegerSequence.cpp

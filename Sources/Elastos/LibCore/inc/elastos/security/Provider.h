@@ -109,6 +109,8 @@ public:
         /* [in] */ IInterface* value,
         /* [out] */ IInterface** oldValue);
 
+    using Properties::Put;
+
     /**
      * Removes the specified {@code key} and its associated value from this
      * {@code Provider}.

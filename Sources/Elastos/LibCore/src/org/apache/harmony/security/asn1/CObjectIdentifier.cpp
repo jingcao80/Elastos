@@ -10,7 +10,6 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-
 CAR_OBJECT_IMPL(CObjectIdentifier)
 CAR_INTERFACE_IMPL(CObjectIdentifier, Object, IObjectIdentifier)
 ECode CObjectIdentifier::Equals(

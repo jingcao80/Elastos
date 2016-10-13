@@ -2,8 +2,17 @@
 TARGET_NAME= pkcs8
 TARGET_TYPE= lib
 
-INCLUDES += ../../
-INCLUDES += $(MAKEDIR)/../../../../../../inc/Org/Apache/Harmony/Security/Pkcs8
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../../../sources.inc
+
+INCLUDES += ../../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos
+INCLUDES += $(MAKEDIR)/../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/asn1
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/pkcs8
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/x501
+INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/x509
 
 SOURCES = CPrivateKeyInfo.cpp
-SOURCES += CPrivateKeyInfoHelper.cpp

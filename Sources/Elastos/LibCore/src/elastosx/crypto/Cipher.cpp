@@ -863,7 +863,7 @@ ECode Cipher::TryCombinations(
     /* [in] */ ArrayOf<String> * transformParts,
     /* [out] */ ISpiAndProvider** result)
 {
-    VALIDATE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(result);
     *result = NULL;
 
     AutoPtr<ISpiAndProvider> sap;
@@ -909,7 +909,7 @@ ECode Cipher::TryTransform(
     /* [in] */ NeedToSet type,
     /* [out] */ ISpiAndProvider** result)
 {
-    VALIDATE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(result);
     *result = NULL;
 
     if (provider != NULL) {
