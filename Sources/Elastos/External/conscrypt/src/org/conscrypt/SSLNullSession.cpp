@@ -12,6 +12,7 @@ using Elastosx::Net::Ssl::EIID_ISSLSession;
 using Elastosx::Net::Ssl::ISSLSessionBindingListener;
 using Elastosx::Net::Ssl::CSSLSessionBindingEvent;
 using Elastosx::Net::Ssl::ISSLSessionBindingEvent;
+using Elastosx::Security::Cert::IX509Certificate;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::ISet;
 

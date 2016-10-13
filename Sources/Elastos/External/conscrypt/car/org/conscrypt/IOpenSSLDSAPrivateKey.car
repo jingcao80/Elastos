@@ -16,6 +16,10 @@ module
     }
 
     interface IOpenSSLDSAPrivateKeyHelper {
+        GetInstance(
+                [in] IDSAPrivateKey* dsaPrivateKey,
+                [out] IOpenSSLKey** result);
+
         WrapPlatformKey(
             [in] IDSAPrivateKey* dsaPrivateKey,
             [out] IOpenSSLKey** result);

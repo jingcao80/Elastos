@@ -76,18 +76,21 @@ module
     merge("../../../car/org/conscrypt/IX509PublicKey.car");
 
     using interface Elastos.Core.ICloneable;
+    using interface Elastos.IO.IByteArrayOutputStream;
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.IO.IFilterInputStream;
+    using interface Elastos.IO.IInputStream;
     using interface Elastos.IO.ISerializable;
     using interface Elastos.Net.IInetAddress;
     using interface Elastos.Net.ISocket;
     using interface Elastos.Security.IKey;
+    using interface Elastos.Security.IKeyStore;
     using interface Elastos.Security.IProvider;
     using interface Elastos.Security.IKeyPairGenerator;
     using interface Elastos.Security.Interfaces.IECPrivateKey;
     using interface Elastos.Security.Interfaces.IECPublicKey;
     using interface Elastos.Security.Spec.IECPrivateKeySpec;
     using interface Elastos.Security.Spec.IECPublicKeySpec;
-    using interface Elastosx.Crypto.IKeyAgreementSpi;
-    using interface Elastosx.Net.Ssl.ISSLContextSpi;
     using interface Elastos.Security.IPrivateKey;
     using interface Elastos.Security.IPublicKey;
     using interface Elastos.Security.ISecureRandom;
@@ -98,23 +101,41 @@ module
     using interface Elastos.Security.Cert.IX509CRLEntry;
     using interface Elastos.Security.Cert.IX509Extension;
     using interface Elastos.Security.Cert.ICertificateFactorySpi;
+    using interface Elastos.Security.Spec.IAlgorithmParameterSpec;
+    using interface Elastos.Security.Spec.IDSAPrivateKeySpec;
+    using interface Elastos.Security.Spec.IDSAPublicKeySpec;
     using interface Elastos.Security.Spec.IRSAPrivateCrtKeySpec;
     using interface Elastos.Security.Spec.IRSAPrivateKeySpec;
     using interface Elastos.Security.Spec.IRSAPublicKeySpec;
+    using interface Elastos.Security.Interfaces.IDSAKey;
+    using interface Elastos.Security.Interfaces.IDSAParams;
+    using interface Elastos.Security.Interfaces.IDSAPrivateKey;
+    using interface Elastos.Security.Interfaces.IDSAPublicKey;
     using interface Elastos.Security.Interfaces.IRSAPrivateCrtKey;
     using interface Elastos.Security.Interfaces.IRSAPrivateKey;
     using interface Elastos.Security.Interfaces.IRSAPublicKey;
     using interface Elastos.Security.Interfaces.IRSAKey;
     using interface Elastos.Utility.IList;
 
+    using interface Elastosx.Crypto.IKeyAgreementSpi;
+    using interface Elastosx.Crypto.Interfaces.IDHKey;
+    using interface Elastosx.Crypto.Interfaces.IDHPrivateKey;
+    using interface Elastosx.Crypto.Interfaces.IDHPublicKey;
     using interface Elastosx.Crypto.ISecretKey;
+    using interface Elastosx.Crypto.Spec.IDHPrivateKeySpec;
+    using interface Elastosx.Crypto.Spec.IDHPublicKeySpec;
+    using interface Elastosx.Net.Ssl.IKeyManager;
+    using interface Elastosx.Net.Ssl.IKeyManagerFactorySpi;
+    using interface Elastosx.Net.Ssl.ISSLContextSpi;
+    using interface Elastosx.Net.Ssl.ISSLEngine;
     using interface Elastosx.Net.Ssl.ISSLServerSocketFactory;
     using interface Elastosx.Net.Ssl.ISSLSession;
-    using interface Elastosx.Net.Ssl.ISSLSocketFactory;
-    using interface Elastosx.Net.Ssl.ISSLSocket;
-    using interface Elastosx.Net.Ssl.IKeyManager;
-    using interface Elastosx.Net.Ssl.ITrustManager;
     using interface Elastosx.Net.Ssl.ISSLSessionContext;
+    using interface Elastosx.Net.Ssl.ISSLSocket;
+    using interface Elastosx.Net.Ssl.ISSLSocketFactory;
+    using interface Elastosx.Net.Ssl.ITrustManager;
+    using interface Elastosx.Net.Ssl.IX509ExtendedKeyManager;
+    using interface Elastosx.Net.Ssl.IX509KeyManager;
 
     namespace Org {
     namespace Conscrypt {
@@ -130,6 +151,15 @@ module
 
     singleton class CPlatform {
         interface IPlatform;
+    }
+
+    class CAbstractSessionContext {
+        constructor(
+            [in] Int32 maximumSize,
+            [in] Int32 timeout);
+
+        interface IAbstractSessionContext;
+        interface ISSLSessionContext;
     }
 
     singleton class CChainStrengthAnalyzer {
@@ -156,6 +186,172 @@ module
         interface ISSLContextSpi;
     }
 
+    class CKeyManagerFactoryImpl {
+        constructor();
+
+        interface IKeyManagerFactoryImpl;
+        interface IKeyManagerFactorySpi;
+    }
+
+    [deprecated]
+    class CKeyManagerImpl {
+        constructor(
+            [in] IKeyStore* keyStore,
+            [in] ArrayOf<Char32>* pwd);
+
+        interface IKeyManagerImpl;
+        interface IX509ExtendedKeyManager;
+        interface IX509KeyManager;
+        interface IKeyManager;
+    }
+
+    class COpenSSLBIOInputStream {
+        constructor(
+            [in] IInputStream* bytes);
+
+        interface IOpenSSLBIOInputStream;
+        interface IFilterInputStream;
+        interface IInputStream;
+        interface ICloseable;
+    }
+
+    class COpenSSLBIOSink {
+        constructor(
+            [in] IByteArrayOutputStream* buffer);
+
+        interface IOpenSSLBIOSink;
+    }
+
+    singleton class COpenSSLBIOSinkHelper {
+        interface IOpenSSLBIOSinkHelper;
+    }
+
+    class COpenSSLBIOSource {
+        constructor(
+            [in] IOpenSSLBIOInputStream* source);
+
+        interface IOpenSSLBIOSource;
+    }
+
+    singleton class COpenSSLBIOSourceHelper {
+        interface IOpenSSLBIOSourceHelper;
+    }
+
+    class COpenSSLContextImpl {
+        constructor();
+
+        constructor(
+            [in] IDefaultSSLContextImpl* dummy);
+
+        interface IOpenSSLContextImpl;
+        interface ISSLContextSpi;
+    }
+
+    class COpenSSLDHKeyFactory {
+        constructor();
+
+        interface IOpenSSLDHKeyFactory;
+        interface IKeyFactorySpi;
+    }
+
+    class COpenSSLDHKeyPairGenerator {
+        constructor();
+
+        interface IOpenSSLDHKeyPairGenerator;
+        interface IKeyPairGeneratorSpi;
+    }
+
+    class COpenSSLDHPrivateKey {
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IDHPrivateKeySpec* dhKeySpec);
+
+        interface IOpenSSLDHPrivateKey;
+        interface IDHPrivateKey;
+        interface IDHKey;
+        interface IPrivateKey;
+        interface IOpenSSLKeyHolder;
+    }
+
+    class COpenSSLDHPublicKey {
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IDHPublicKeySpec* dhKeySpec);
+
+        interface IOpenSSLDHPublicKey;
+        interface IDHPublicKey;
+        interface IDHKey;
+        interface IPublicKey;
+        interface IOpenSSLKeyHolder;
+    }
+
+    class COpenSSLDigestContext {
+        constructor(
+            [in] Int64 ctx);
+
+        interface IOpenSSLDigestContext;
+        interface IOpenSSLNativeReference;
+    }
+
+    class COpenSSLDSAKeyFactory {
+        constructor();
+
+        interface IOpenSSLDSAKeyFactory;
+        interface IKeyFactorySpi;
+    }
+
+    class COpenSSLDSAKeyPairGenerator {
+        constructor();
+
+        interface IOpenSSLDSAKeyPairGenerator;
+        interface IKeyPairGeneratorSpi;
+    }
+
+    class COpenSSLDSAParams {
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        interface IOpenSSLDSAParams;
+        interface IDSAParams;
+        interface IAlgorithmParameterSpec;
+    }
+
+    class COpenSSLDSAPrivateKey {
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IDSAPrivateKeySpec* dsaKeySpec);
+
+        interface IOpenSSLDSAPrivateKey;
+        interface IDSAPrivateKey;
+        interface IDSAKey;
+        interface IPrivateKey;
+        interface IOpenSSLKeyHolder;
+    }
+
+    singleton class COpenSSLDSAPrivateKeyHelper {
+        interface IOpenSSLDSAPrivateKeyHelper;
+    }
+
+    class COpenSSLDSAPublicKey {
+        constructor(
+            [in] IOpenSSLKey* key);
+
+        constructor(
+            [in] IDSAPublicKeySpec* dsaKeySpec);
+
+        interface IOpenSSLDSAPublicKey;
+        interface IDSAPublicKey;
+        interface IDSAKey;
+        interface IPublicKey;
+        interface IOpenSSLKeyHolder;
+    }
+
     class COpenSSLECDHKeyAgreement {
         constructor();
 
@@ -175,11 +371,22 @@ module
         interface IOpenSSLECGroupContextHelper;
     }
 
+    class COpenSSLECKeyFactory {
+        constructor();
+
+        interface IOpenSSLECKeyFactory;
+        interface IKeyFactorySpi;
+    }
+
     class COpenSSLECKeyPairGenerator {
         constructor();
 
         interface IOpenSSLECKeyPairGenerator;
         interface IKeyPairGenerator;
+    }
+
+    singleton class COpenSSLECPointContextHelper {
+        interface IOpenSSLECPointContextHelper;
     }
 
     class COpenSSLECPrivateKey {
@@ -200,6 +407,10 @@ module
         interface IOpenSSLKeyHolder;
     }
 
+    singleton class COpenSSLECPrivateKeyHelper {
+        interface IOpenSSLECPrivateKeyHelper;
+    }
+
     class COpenSSLECPublicKey {
         constructor();
 
@@ -216,6 +427,37 @@ module
         interface IOpenSSLECPublicKey;
         interface IECPublicKey;
         interface IOpenSSLKeyHolder;
+    }
+
+    singleton class COpenSSLECPublicKeyHelper {
+        interface IOpenSSLECPublicKeyHelper;
+    }
+
+    class COpenSSLEngine {
+        constructor(
+            [in] Int64 engineCtx);
+
+        interface IOpenSSLEngine;
+    }
+
+    singleton class COpenSSLEngineHelper {
+        interface IOpenSSLEngineHelper;
+    }
+
+    [local]
+    class COpenSSLEngineImpl {
+        constructor(
+            [in] ISSLParametersImpl* sslParameters);
+
+        constructor(
+            [in] String host,
+            [in] Int32 port,
+            [in] ISSLParametersImpl* sslParameters);
+
+        interface ISSLHandshakeCallbacks;
+        interface ISSLParametersImplAliasChooser;
+        interface ISSLParametersImplPSKCallbacks;
+        interface ISSLEngine;
     }
 
     class COpenSSLKey {
@@ -329,11 +571,12 @@ module
         interface IOpenSSLKeyHolder;
     }
 
+    [local]
     class COpenSSLServerSocketFactoryImpl {
         constructor();
 
-        // constructor(
-        //     [in] ISSLParametersImpl* sslParameters);
+        constructor(
+            [in] ISSLParametersImpl* sslParameters);
 
         interface ISSLServerSocketFactory;
         interface IOpenSSLServerSocketFactoryImpl;
@@ -341,13 +584,13 @@ module
 
     [deprecated]
     class COpenSSLSessionImpl {
-        // constructor(
-        //     [in] Int64 sslSessionNativePointer,
-        //     [in] ArrayOf<IX509Certificate*>* localCertificates,
-        //     [in] ArrayOf<IX509Certificate*>* peerCertificates,
-        //     [in] String peerHost,
-        //     [in] Int32 peerPort,
-        //     [in] IAbstractSessionContext* sessionContext);
+        constructor(
+            [in] Int64 sslSessionNativePointer,
+            [in] ArrayOf<IX509Certificate*>* localCertificates,
+            [in] ArrayOf<IX509Certificate*>* peerCertificates,
+            [in] String peerHost,
+            [in] Int32 peerPort,
+            [in] IAbstractSessionContext* sessionContext);
 
         constructor(
             [in] ArrayOf<Byte>* derData,

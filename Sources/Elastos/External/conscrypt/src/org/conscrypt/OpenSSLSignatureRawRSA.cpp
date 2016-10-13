@@ -24,7 +24,7 @@ ECode OpenSSLSignatureRawRSA::EngineUpdate(
 
     if (mInputOffset > mInputBuffer->GetLength()) {
         mInputIsTooLong = TRUE;
-        return;
+        return NOERROR;
     }
 
     (*mInputBuffer)[oldOffset] = input;

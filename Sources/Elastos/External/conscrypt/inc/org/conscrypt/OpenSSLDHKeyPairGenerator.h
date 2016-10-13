@@ -25,6 +25,8 @@ public:
 
     OpenSSLDHKeyPairGenerator();
 
+    CARAPI constructor();
+
     virtual CARAPI GenerateKeyPair(
         /* [out] */  IKeyPair** result);
 

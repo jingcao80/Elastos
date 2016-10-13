@@ -28,6 +28,8 @@ class OpenSSLDSAKeyFactory
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI EngineGeneratePublic(
        /* [in] */ IKeySpec* keySpec,
        /* [out] */ IPublicKey** result);

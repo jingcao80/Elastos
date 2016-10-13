@@ -32,6 +32,11 @@ OpenSSLDHKeyPairGenerator::OpenSSLDHKeyPairGenerator()
     mGenerator = DEFAULT_GENERATOR;
 }
 
+ECode OpenSSLDHKeyPairGenerator::constructor()
+{
+    return NOERROR;
+}
+
 ECode OpenSSLDHKeyPairGenerator::GenerateKeyPair(
     /* [out] */  IKeyPair** result)
 {
@@ -44,16 +49,16 @@ ECode OpenSSLDHKeyPairGenerator::GenerateKeyPair(
         mGenerator->ToByteArray((ArrayOf<Byte>**)&gArray);
         Int64 val;
         NativeCrypto::EVP_PKEY_new_DH(pArray, gArray, NULL, NULL, &val);
-        assert(0 && "TODO");
-        // key = new OpenSSLKey(val);
+        key = new OpenSSLKey();
+        key->constructor(val);
     }
     else {
         Int64 gVal;
         INumber::Probe(mGenerator)->Int64Value(&gVal);
         Int64 val;
         NativeCrypto::DH_generate_parameters_ex(mPrimeBits, gVal, &val);
-        assert(0 && "TODO");
-        // key = new OpenSSLKey(val);
+        key = new OpenSSLKey();
+        key->constructor(val);
     }
 
     Int64 ctx;

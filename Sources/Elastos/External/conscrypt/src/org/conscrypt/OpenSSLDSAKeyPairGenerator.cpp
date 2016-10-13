@@ -20,6 +20,11 @@ OpenSSLDSAKeyPairGenerator::OpenSSLDSAKeyPairGenerator()
 {
 }
 
+ECode OpenSSLDSAKeyPairGenerator::constructor()
+{
+    return NOERROR;
+}
+
 ECode OpenSSLDSAKeyPairGenerator::GenerateKeyPair(
     /* [out] */  IKeyPair** result)
 {
@@ -36,8 +41,8 @@ ECode OpenSSLDSAKeyPairGenerator::GenerateKeyPair(
 
     Int64 val;
     NativeCrypto::DSA_generate_key(mPrimeBits, seed, mG, mP, mQ, &val);
-    assert(0 && "TODO");
-    AutoPtr<OpenSSLKey> key;// = new OpenSSLKey(val);
+    AutoPtr<OpenSSLKey> key = new OpenSSLKey();
+    key->constructor(val);
 
     AutoPtr<OpenSSLDSAPrivateKey> privKey = new OpenSSLDSAPrivateKey();
     privKey->constructor(IOpenSSLKey::Probe(key));

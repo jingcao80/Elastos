@@ -16,6 +16,11 @@ CAR_INTERFACE_IMPL(OpenSSLDHKeyFactory, Object, IOpenSSLDHKeyFactory)
 // TODO: Need KeyFactorySpi
 // CAR_INTERFACE_IMPL(OpenSSLDHKeyFactory, KeyFactorySpi, IOpenSSLDHKeyFactory)
 
+ECode OpenSSLDHKeyFactory::constructor()
+{
+    return NOERROR;
+}
+
 ECode OpenSSLDHKeyFactory::EngineGeneratePublic(
    /* [in] */ IKeySpec* keySpec,
    /* [out] */ IPublicKey** result)

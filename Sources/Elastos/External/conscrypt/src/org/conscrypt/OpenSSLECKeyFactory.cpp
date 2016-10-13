@@ -24,6 +24,11 @@ CAR_INTERFACE_IMPL(OpenSSLECKeyFactory, Object, IOpenSSLECKeyFactory)
 // TODO: Need KeyFactorySpi
 // CAR_INTERFACE_IMPL(OpenSSLECKeyFactory, KeyFactorySpi, IOpenSSLECKeyFactory)
 
+ECode OpenSSLECKeyFactory::constructor()
+{
+    return NOERROR;
+}
+
 ECode OpenSSLECKeyFactory::EngineGeneratePublic(
    /* [in] */ IKeySpec* keySpec,
    /* [out] */ IPublicKey** result)

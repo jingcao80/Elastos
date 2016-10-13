@@ -28,7 +28,7 @@ class OpenSSLECKeyFactory
 public:
     CAR_INTERFACE_DECL()
 
-    constructor();
+    CARAPI constructor();
 
     CARAPI EngineGeneratePublic(
        /* [in] */ IKeySpec* keySpec,

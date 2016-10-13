@@ -30,6 +30,8 @@ class KeyManagerFactoryImpl
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     /**
      * @see KeyManagerFactorySpi#engineInit(KeyStore ks, char[] password)
      */

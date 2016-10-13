@@ -1,4 +1,10 @@
 #include "org/conscrypt/OpenSSLContextImpl.h"
+#include "org/conscrypt/CClientSessionContext.h"
+#include "org/conscrypt/COpenSSLEngineImpl.h"
+#include "org/conscrypt/COpenSSLServerSocketFactoryImpl.h"
+#include "org/conscrypt/COpenSSLSocketFactoryImpl.h"
+#include "org/conscrypt/CServerSessionContext.h"
+#include "org/conscrypt/CSSLParametersImpl.h"
 #include <elastos/core/AutoLock.h>
 
 namespace Org {
@@ -10,10 +16,8 @@ AutoPtr<IDefaultSSLContextImpl> OpenSSLContextImpl::DEFAULT_SSL_CONTEXT_IMPL;
 
 ECode OpenSSLContextImpl::constructor()
 {
-// TODO: Need CClientSessionContext
-    // CClientSessionContext::New((IClientSessionContext**)&clientSessionContext);
-// TODO: Need CServerSessionContext
-    // CServerSessionContext::New((IServerSessionContext**)&serverSessionContext);
+    CClientSessionContext::New((IClientSessionContext**)&clientSessionContext);
+    CServerSessionContext::New((IServerSessionContext**)&serverSessionContext);
     return NOERROR;
 }
 
@@ -22,10 +26,8 @@ ECode OpenSSLContextImpl::constructor(
 {
     AutoLock lock(DEFAULT_SSL_CONTEXT_IMPL);    // synchronized (DefaultSSLContextImpl.class);
     if (DEFAULT_SSL_CONTEXT_IMPL == NULL) {
-// TODO: Need CClientSessionContext
-        // CClientSessionContext::New((IClientSessionContext**)&clientSessionContext);
-// TODO: Need CServerSessionContext
-        // CServerSessionContext::New((IServerSessionContext**)&serverSessionContext);
+        CClientSessionContext::New((IClientSessionContext**)&clientSessionContext);
+        CServerSessionContext::New((IServerSessionContext**)&serverSessionContext);
         DEFAULT_SSL_CONTEXT_IMPL = IDefaultSSLContextImpl::Probe(this);
     }
     else {
@@ -42,14 +44,13 @@ ECode OpenSSLContextImpl::constructor(
     DEFAULT_SSL_CONTEXT_IMPL->GetTrustManagers(
             (ArrayOf<ITrustManager*>**)&trustManager);
 
-// TODO: Need CSSLParametersImpl
-    // CSSLParametersImpl::New(
-    //         keyManager,
-    //         trustManager,
-    //         NULL,
-    //         clientSessionContext,
-    //         serverSessionContext,
-    //         (ISSLParametersImpl**)&sslParameters);
+    CSSLParametersImpl::New(
+            keyManager,
+            trustManager,
+            NULL,
+            clientSessionContext,
+            serverSessionContext,
+            (ISSLParametersImpl**)&sslParameters);
     return NOERROR;
 }
 
@@ -58,10 +59,9 @@ ECode OpenSSLContextImpl::EngineInit(
     /* [in] */ ArrayOf<ITrustManager*>* tms,
     /* [in] */ ISecureRandom* sr)
 {
-// TODO: Need CSSLParametersImpl
-    // return CSSLParametersImpl::New(
-    //         kms, tms, sr, clientSessionContext, serverSessionContext,
-    //         (ISSLParametersImpl**)&sslParameters);
+    return CSSLParametersImpl::New(
+            kms, tms, sr, clientSessionContext, serverSessionContext,
+            (ISSLParametersImpl**)&sslParameters);
     return NOERROR;
 }
 
@@ -74,9 +74,7 @@ ECode OpenSSLContextImpl::EngineGetSocketFactory(
         // throw new IllegalStateException("SSLContext is not initialized.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-// TODO: Need COpenSSLSocketFactoryImpl
-    // return COpenSSLSocketFactoryImpl::New(sslParameters, result);
-    return NOERROR;
+    return COpenSSLSocketFactoryImpl::New(sslParameters, result);
 }
 
 ECode OpenSSLContextImpl::EngineGetServerSocketFactory(
@@ -88,9 +86,7 @@ ECode OpenSSLContextImpl::EngineGetServerSocketFactory(
         // throw new IllegalStateException("SSLContext is not initialized.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-// TODO: Need COpenSSLServerSocketFactoryImpl
-    // return COpenSSLServerSocketFactoryImpl::New(sslParameters, result);
-    return NOERROR;
+    return COpenSSLServerSocketFactoryImpl::New(sslParameters, result);
 }
 
 ECode OpenSSLContextImpl::EngineCreateSSLEngine(
@@ -105,10 +101,8 @@ ECode OpenSSLContextImpl::EngineCreateSSLEngine(
     }
     // AutoPtr<ISSLParametersImpl> p = (SSLParametersImpl) sslParameters.clone();
     AutoPtr<ISSLParametersImpl> p = ISSLParametersImpl::Probe(sslParameters);
-// TODO: Need SetUseClientMode
-    // p->SetUseClientMode(FALSE);
-// TODO: Need COpenSSLEngineImpl
-    // COpenSSLEngineImpl::New(host, port, p, result);
+    p->SetUseClientMode(FALSE);
+    COpenSSLEngineImpl::New(host, port, p, result);
     return NOERROR;
 }
 
@@ -122,10 +116,8 @@ ECode OpenSSLContextImpl::EngineCreateSSLEngine(
     }
     // AutoPtr<ISSLParametersImpl> p = (SSLParametersImpl) sslParameters.clone();
     AutoPtr<ISSLParametersImpl> p = ISSLParametersImpl::Probe(sslParameters);
-// TODO: Need SetUseClientMode
-    // p->SetUseClientMode(FALSE);
-// TODO: Need COpenSSLEngineImpl
-    // COpenSSLEngineImpl::New(p, result);
+    p->SetUseClientMode(FALSE);
+    COpenSSLEngineImpl::New(p, result);
     return NOERROR;
 }
 

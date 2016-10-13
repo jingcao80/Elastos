@@ -71,8 +71,8 @@ ECode COpenSSLECPrivateKey::constructor(
     privKey->ToByteArray((ArrayOf<Byte>**)&array);
     Int64 val;
     NativeCrypto::EVP_PKEY_new_EC_KEY(ctx, 0, array, &val);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(val);
+    mKey = new OpenSSLKey();
+    mKey->constructor(val);
     // } catch (Exception e) {
     //     throw new InvalidKeySpecException(e);
     // }
@@ -124,8 +124,8 @@ ECode COpenSSLECPrivateKey::GetInstance(
     privKey->ToByteArray((ArrayOf<Byte>**)&array);
     Int64 val;
     NativeCrypto::EVP_PKEY_new_EC_KEY(ctx, 0, array, &val);
-    assert(0 && "TODO");
-    AutoPtr<OpenSSLKey> key;// = new OpenSSLKey(val);
+    AutoPtr<OpenSSLKey> key = new OpenSSLKey();
+    key->constructor(val);
     *result = IOpenSSLKey::Probe(key);
     REFCOUNT_ADD(*result)
     // } catch (Exception e) {
@@ -311,8 +311,8 @@ ECode COpenSSLECPrivateKey::WrapPlatformKey(
     group->GetContext(&ctx);
     Int64 val;
     NativeCrypto::GetECPrivateKeyWrapper(ecPrivateKey, ctx, &val);
-    assert(0 && "TODO");
-    AutoPtr<OpenSSLKey> key;// = new OpenSSLKey(val);
+    AutoPtr<OpenSSLKey> key = new OpenSSLKey();
+    key->constructor(val);
     *result = IOpenSSLKey::Probe(key);
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -350,8 +350,8 @@ void COpenSSLECPrivateKey::ReadObject(
 
     Int64 val;
     NativeCrypto::D2i_PKCS8_PRIV_KEY_INFO(encoded, &val);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(val);
+    mKey = new OpenSSLKey();
+    mKey->constructor(val);
 
     Int64 ctx;
     mKey->GetPkeyContext(&ctx);

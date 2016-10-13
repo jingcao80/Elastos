@@ -17,6 +17,11 @@ CAR_INTERFACE_IMPL(OpenSSLDSAKeyFactory, Object, IOpenSSLDSAKeyFactory)
 // TODO: Need KeyFactorySpi
 // CAR_INTERFACE_IMPL(OpenSSLDSAKeyFactory, KeyFactorySpi, IOpenSSLDSAKeyFactory)
 
+ECode OpenSSLDSAKeyFactory::constructor()
+{
+    return NOERROR;
+}
+
 ECode OpenSSLDSAKeyFactory::EngineGeneratePublic(
    /* [in] */ IKeySpec* keySpec,
    /* [out] */ IPublicKey** result)

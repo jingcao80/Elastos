@@ -16,7 +16,9 @@ class OpenSSLNativeReference
     : public Object
 {
 public:
-    OpenSSLNativeReference(
+    OpenSSLNativeReference();
+
+    CARAPI constructor(
         /* [in] */ Int64 ctx);
 
 public:
