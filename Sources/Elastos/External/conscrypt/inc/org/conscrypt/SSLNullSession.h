@@ -13,7 +13,6 @@ using Elastos::Security::Cert::ICertificate;
 using Elastos::Utility::IHashMap;
 using Elastosx::Net::Ssl::ISSLSession;
 using Elastosx::Net::Ssl::ISSLSessionContext;
-using Elastosx::Security::Cert::IX509Certificate;
 
 namespace Org {
 namespace Conscrypt {
@@ -67,7 +66,7 @@ public:
         /* [out] */ Int32* result);
 
     CARAPI GetPeerCertificateChain(
-        /* [out] */ ArrayOf<IX509Certificate*>** result);
+        /* [out] */ ArrayOf<Elastosx::Security::Cert::IX509Certificate*>** result);
 
     CARAPI GetPeerCertificates(
         /* [out] */ ArrayOf<ICertificate*>** result);

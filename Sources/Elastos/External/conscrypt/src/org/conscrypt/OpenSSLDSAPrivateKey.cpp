@@ -55,8 +55,8 @@ ECode OpenSSLDSAPrivateKey::constructor(
     Int64 val;
     NativeCrypto::EVP_PKEY_new_DSA(
             arrayP, arrayQ, arrayG, NULL, arrayX, &val);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(val);
+    mKey = new OpenSSLKey();
+    mKey->constructor(val);
     // } catch (Exception e) {
     //     throw new InvalidKeySpecException(e);
     // }
@@ -112,8 +112,8 @@ ECode OpenSSLDSAPrivateKey::GetInstance(
     Int64 val;
     NativeCrypto::EVP_PKEY_new_DSA(
                 arrayP, arrayQ, arrayG, NULL, arrayX, &val);
-    assert(0 && "TODO");
-    AutoPtr<OpenSSLKey> key;// = new OpenSSLKey(val);
+    AutoPtr<OpenSSLKey> key = new OpenSSLKey();
+    key->constructor(val);
     *result = IOpenSSLKey::Probe(key);
     REFCOUNT_ADD(*result)
     // } catch (Exception e) {
@@ -129,8 +129,8 @@ ECode OpenSSLDSAPrivateKey::WrapPlatformKey(
     VALIDATE_NOT_NULL(result)
     Int64 val;
     NativeCrypto::GetDSAPrivateKeyWrapper(dsaPrivateKey, &val);
-    assert(0 && "TODO");
-    AutoPtr<OpenSSLKey> key;// = new OpenSSLKey(val);
+    AutoPtr<OpenSSLKey> key = new OpenSSLKey();
+    key->constructor(val);
     *result = IOpenSSLKey::Probe(key);
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -357,8 +357,8 @@ void OpenSSLDSAPrivateKey::ReadObject(
 
     Int64 val;
     NativeCrypto::EVP_PKEY_new_DSA(arrayP, arrayQ, arrayG, NULL, arrayX, &val);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(val);
+    mKey = new OpenSSLKey();
+    mKey->constructor(val);
 }
 
 ECode OpenSSLDSAPrivateKey::WriteObject(

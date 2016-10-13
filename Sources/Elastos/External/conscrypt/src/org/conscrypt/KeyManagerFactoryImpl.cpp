@@ -22,6 +22,11 @@ namespace Conscrypt {
 CAR_INTERFACE_IMPL_2(KeyManagerFactoryImpl, Object,
         IKeyManagerFactoryImpl, IKeyManagerFactorySpi)
 
+ECode KeyManagerFactoryImpl::constructor()
+{
+    return NOERROR;
+}
+
 ECode KeyManagerFactoryImpl::EngineInit(
     /* [in] */ IKeyStore* ks,
     /* [in] */ ArrayOf<Char32>* password)

@@ -98,8 +98,8 @@ ECode OpenSSLEngine::GetPrivateKeyById(
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    AutoPtr<OpenSSLKey> pkey;// = new OpenSSLKey(keyRef, this, id);
+    AutoPtr<OpenSSLKey> pkey = new OpenSSLKey();
+    pkey->constructor(keyRef, this, id);
     // try {
     return pkey->GetPrivateKey(result);
     // } catch (NoSuchAlgorithmException e) {
@@ -125,8 +125,8 @@ ECode OpenSSLEngine::GetSecretKeyById(
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    AutoPtr<OpenSSLKey> pkey;// = new OpenSSLKey(keyRef, this, id);
+    AutoPtr<OpenSSLKey> pkey = new OpenSSLKey();
+    pkey->constructor(keyRef, this, id);
     // try {
     return pkey->GetSecretKey(algorithm, result);
     // } catch (NoSuchAlgorithmException e) {

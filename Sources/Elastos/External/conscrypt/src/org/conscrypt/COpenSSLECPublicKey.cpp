@@ -76,8 +76,8 @@ ECode COpenSSLECPublicKey::constructor(
     pubKey->GetContext(&pubKeyCtx);
     Int64 val;
     NativeCrypto::EVP_PKEY_new_EC_KEY(ctx, pubKeyCtx, NULL, &val);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(val);
+    mKey = new OpenSSLKey();
+    mKey->constructor(val);
     // } catch (Exception e) {
     //     throw new InvalidKeySpecException(e);
     // }
@@ -107,8 +107,8 @@ ECode COpenSSLECPublicKey::GetInstance(
     pubKey->GetContext(&pubKeyCtx);
     Int64 val;
     NativeCrypto::EVP_PKEY_new_EC_KEY(ctx, pubKeyCtx, NULL, &val);
-    assert(0 && "TODO");
-    AutoPtr<OpenSSLKey> key;// = new OpenSSLKey(val);
+    AutoPtr<OpenSSLKey> key = new OpenSSLKey();
+    key->constructor(val);
     *result = IOpenSSLKey::Probe(key);
     REFCOUNT_ADD(*result)
     // } catch (Exception e) {
@@ -288,8 +288,8 @@ void COpenSSLECPublicKey::ReadObject(
 
     Int64 val;
     NativeCrypto::D2i_PUBKEY(encoded, &val);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(val);
+    mKey = new OpenSSLKey();
+    mKey->constructor(val);
 
     Int64 ctx;
     mKey->GetPkeyContext(&ctx);

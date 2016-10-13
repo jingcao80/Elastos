@@ -10,8 +10,7 @@
 #include <elastos/core/Object.h>
 #include "_Org.Conscrypt.h"
 #include "elastosx/net/ssl/SSLEngine.h"
-// TODO: Need SSLParametersImpl
-// #include "org/conscrypt/SSLParametersImpl.h"
+#include "org/conscrypt/SSLParametersImpl.h"
 
 using Elastos::Core::IRunnable;
 using Elastos::IO::IByteBuffer;
@@ -46,7 +45,7 @@ public:
         /* [in] */ ISSLParametersImpl* sslParameters);
 
     CARAPI constructor(
-        /* [in] */ String host,
+        /* [in] */ const String& host,
         /* [in] */ Int32 port,
         /* [in] */ ISSLParametersImpl* sslParameters);
 
@@ -153,7 +152,7 @@ public:
 
     // @Override
     CARAPI ClientPSKKeyRequested(
-        /* [in] */ String identityHint,
+        /* [in] */ const String& identityHint,
         /* [in] */ ArrayOf<Byte>* identity,
         /* [in] */ ArrayOf<Byte>* key,
         /* [out] */ Int32* result);
@@ -244,8 +243,7 @@ public:
     AutoPtr<IOpenSSLKey> mChannelIdPrivateKey;
 
 private:
-// TODO: Need SSLParametersImpl
-    // AutoPtr<SSLParametersImpl> mSslParameters;
+    AutoPtr<SSLParametersImpl> mSslParameters;
 
     /**
      * Protects handshakeStarted and handshakeCompleted.

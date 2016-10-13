@@ -17,7 +17,9 @@ class OpenSSLDigestContext
 public:
     CAR_INTERFACE_DECL()
 
-    OpenSSLDigestContext(
+    OpenSSLDigestContext();
+
+    CARAPI constructor(
         /* [in] */ Int64 ctx);
 
     ~OpenSSLDigestContext();

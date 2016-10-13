@@ -6,9 +6,7 @@ namespace Conscrypt {
 
 CAR_INTERFACE_IMPL(OpenSSLDigestContext, OpenSSLNativeReference, IOpenSSLDigestContext)
 
-OpenSSLDigestContext::OpenSSLDigestContext(
-    /* [in] */ Int64 ctx)
-    : OpenSSLNativeReference(ctx)
+OpenSSLDigestContext::OpenSSLDigestContext()
 {
 }
 
@@ -19,6 +17,12 @@ OpenSSLDigestContext::~OpenSSLDigestContext()
     // } finally {
     //     super.finalize();
     // }
+}
+
+ECode OpenSSLDigestContext::constructor(
+    /* [in] */ Int64 ctx)
+{
+    return OpenSSLNativeReference::constructor(ctx);
 }
 
 } // namespace Conscrypt

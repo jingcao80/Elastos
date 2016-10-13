@@ -1,6 +1,8 @@
 #include "org/conscrypt/AbstractSessionContext.h"
 #include "org/conscrypt/ByteArray.h"
+#include "org/conscrypt/COpenSSLSessionImpl.h"
 #include "org/conscrypt/NativeCrypto.h"
+#include "org/conscrypt/OpenSSLX509Certificate.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/Arrays.h>
 
@@ -239,12 +241,11 @@ ECode AbstractSessionContext::ToBytes(
 {
     VALIDATE_NOT_NULL(result)
     // TODO: Support SSLSessionImpl, too.
-// TODO: Need IOpenSSLSessionImpl
-    // AutoPtr<IOpenSSLSessionImpl> sslSession = IOpenSSLSessionImpl::Probe(session);
-    // if (sslSession == NULL) {
-    //     *result = NULL;
-    //     return NOERROR;
-    // }
+    AutoPtr<IOpenSSLSessionImpl> sslSession = IOpenSSLSessionImpl::Probe(session);
+    if (sslSession == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
 
     // try {
     AutoPtr<IByteArrayOutputStream> baos;
@@ -256,8 +257,7 @@ ECode AbstractSessionContext::ToBytes(
 
     // Session data.
     AutoPtr<ArrayOf<Byte> > data;
-// TODO: Need IOpenSSLSessionImpl
-    // sslSession->GetEncoded((ArrayOf<Byte>**)&data);
+    ((OpenSSLSessionImpl*)sslSession.Get())->GetEncoded((ArrayOf<Byte>**)&data);
     IOutputStream::Probe(daos)->Write(data->GetLength());
     IOutputStream::Probe(daos)->Write(data);
 
@@ -317,12 +317,13 @@ ECode AbstractSessionContext::ToSession(
         IInputStream::Probe(dais)->Read(&length);
         AutoPtr<ArrayOf<Byte> > certData = ArrayOf<Byte>::Alloc(length);
         IDataInput::Probe(dais)->ReadFully(certData);
-// TODO: Need OpenSSLX509Certificate
-        // certs->Set(i, OpenSSLX509Certificate::FromX509Der(certData));
+        AutoPtr<IOpenSSLX509Certificate> cert;
+        OpenSSLX509Certificate::FromX509Der(certData,
+                (IOpenSSLX509Certificate**)&cert);
+        certs->Set(i, IX509Certificate::Probe(cert));
     }
 
-// TODO: Need COpenSSLSessionImpl
-    // COpenSSLSessionImpl::New(sessionData, host, port, certs, this, result);
+    COpenSSLSessionImpl::New(sessionData, host, port, certs, this, result);
     // } catch (IOException e) {
     //     log(e);
     //     return NULL;

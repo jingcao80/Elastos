@@ -1,5 +1,8 @@
 #include "org/conscrypt/OpenSSLCipherRSA.h"
 #include "org/conscrypt/NativeCrypto.h"
+#include "org/conscrypt/OpenSSLRSAPrivateCrtKey.h"
+#include "org/conscrypt/OpenSSLRSAPrivateKey.h"
+#include "org/conscrypt/OpenSSLRSAPublicKey.h"
 #include <libcore/utility/EmptyArray.h>
 #include <elastos/utility/Arrays.h>
 
@@ -421,14 +424,12 @@ ECode OpenSSLCipherRSA::EngineInitInternal(
     else if (IRSAPrivateCrtKey::Probe(key) != NULL) {
         AutoPtr<IRSAPrivateCrtKey> rsaPrivateKey = IRSAPrivateCrtKey::Probe(key);
         mUsingPrivateKey = TRUE;
-// TODO: Need OpenSSLRSAPrivateCrtKey
-        // OpenSSLRSAPrivateCrtKey::GetInstance(rsaPrivateKey, (IOpenSSLKey**)&mKey);
+        OpenSSLRSAPrivateCrtKey::GetInstance(rsaPrivateKey, (IOpenSSLKey**)&mKey);
     }
     else if (IRSAPrivateKey::Probe(key) != NULL) {
         AutoPtr<IRSAPrivateKey> rsaPrivateKey = IRSAPrivateKey::Probe(key);
         mUsingPrivateKey = TRUE;
-// TODO: Need OpenSSLRSAPrivateKey
-        // OpenSSLRSAPrivateKey::GetInstance(rsaPrivateKey, (IOpenSSLKey**)&mKey);
+        mKey = OpenSSLRSAPrivateKey::GetInstance(rsaPrivateKey);
     }
     else if (IOpenSSLRSAPublicKey::Probe(key) != NULL) {
         AutoPtr<IOpenSSLRSAPublicKey> rsaPublicKey = IOpenSSLRSAPublicKey::Probe(key);
@@ -438,8 +439,7 @@ ECode OpenSSLCipherRSA::EngineInitInternal(
     else if (IRSAPublicKey::Probe(key) != NULL) {
         AutoPtr<IRSAPublicKey> rsaPublicKey = IRSAPublicKey::Probe(key);
         mUsingPrivateKey = FALSE;
-// TODO: Need OpenSSLRSAPublicKey
-        // OpenSSLRSAPublicKey::GetInstance(rsaPublicKey, (IOpenSSLKey**)&mKey);
+        OpenSSLRSAPublicKey::GetInstance(rsaPublicKey, (IOpenSSLKey**)&mKey);
     }
     else {
         // throw new InvalidKeyException("Need RSA private or public key");
