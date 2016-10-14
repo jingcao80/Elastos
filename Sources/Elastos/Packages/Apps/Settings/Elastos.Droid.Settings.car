@@ -1300,6 +1300,32 @@ module
         interface IComparable;
     }
 
+    class CDeviceAdminAdd {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CDeviceAdminSettings {
+        constructor();
+
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
     class CDisplaySettings {
         constructor();
 
@@ -3037,6 +3063,20 @@ module
         interface IDialogCreatable;
 
         interface IDialogInterfaceOnClickListener;
+        interface IIndexable;
+    }
+
+    class CScreenPinningSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
         interface IIndexable;
     }
 

@@ -128,6 +128,7 @@ EXPORT_HEADERS += elastos/droid/os/AsyncTask.h
 EXPORT_HEADERS += elastos/droid/os/FileObserver.h
 //EXPORT_HEADERS += elastos/droid/os/storage/StorageResultCode.h
 EXPORT_HEADERS += elastos/droid/os/FactoryTest.h
+EXPORT_HEADERS += elastos/droid/os/RemoteCallback.h
 EXPORT_HEADERS += elastos/droid/os/RemoteCallbackList.h
 EXPORT_HEADERS += elastos/droid/os/UEventObserver.h
 EXPORT_HEADERS += elastos/droid/os/SELinux.h

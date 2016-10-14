@@ -645,10 +645,8 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         UpdateInputMethodSelectorSummary(LoadInputMethodSelectorVisibility());
     }
 
-    // TODO: Voice is TODO
-    Slogger::I("InputMethodAndLanguageSettings", "Voice is TODO");
-    // AutoPtr<VoiceInputOutputSettings> vios = new VoiceInputOutputSettings((ISettingsPreferenceFragment*)this);
-    // vios->OnCreate();
+    AutoPtr<VoiceInputOutputSettings> vios = new VoiceInputOutputSettings((ISettingsPreferenceFragment*)this);
+    vios->OnCreate();
 
     // Get references to dynamically constructed categories.
     AutoPtr<IPreference> pre;

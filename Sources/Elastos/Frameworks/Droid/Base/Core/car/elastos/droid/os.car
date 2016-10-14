@@ -694,6 +694,14 @@ module
     //     interface IZigbeeManager;
     // }
 
+    class CRemoteCallbackLocalCallback {
+        constructor(
+            [in] IWeakReference* wr);
+
+        interface IIRemoteCallback;
+        interface IBinder;
+    }
+
     } // namespace Os
     } // namespace Droid
     } // namespace Elastos

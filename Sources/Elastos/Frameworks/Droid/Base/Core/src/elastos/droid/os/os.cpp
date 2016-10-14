@@ -11,6 +11,7 @@
 #include "elastos/droid/os/CParcelFileDescriptor.h"
 #include "elastos/droid/os/CParcelFileDescriptorAutoCloseInputStream.h"
 #include "elastos/droid/os/CParcelFileDescriptorAutoCloseOutputStream.h"
+#include "elastos/droid/os/CRemoteCallbackLocalCallback.h"
 
 namespace Elastos {
 namespace Droid {
@@ -37,6 +38,8 @@ CAR_OBJECT_IMPL(CParcelFileDescriptor)
 CAR_OBJECT_IMPL(CParcelFileDescriptorAutoCloseInputStream)
 
 CAR_OBJECT_IMPL(CParcelFileDescriptorAutoCloseOutputStream)
+
+CAR_OBJECT_IMPL(CRemoteCallbackLocalCallback)
 
 } // namespace Os
 } // namespace Droid

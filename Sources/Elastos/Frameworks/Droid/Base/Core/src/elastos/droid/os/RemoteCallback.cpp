@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/os/RemoteCallback.h"
+#include "elastos/droid/os/CRemoteCallbackLocalCallback.h"
 
 namespace Elastos {
 namespace Droid {
@@ -34,19 +35,23 @@ ECode RemoteCallback::DeliverResult::Run()
 //================================================================
 // RemoteCallback::LocalCallback
 //================================================================
-CAR_INTERFACE_IMPL(RemoteCallback::LocalCallback, Object, IIRemoteCallback)
+CAR_INTERFACE_IMPL_2(RemoteCallback::LocalCallback, Object, IIRemoteCallback, IBinder)
 
-RemoteCallback::LocalCallback::LocalCallback(
+RemoteCallback::LocalCallback::LocalCallback()
+{}
+
+ECode RemoteCallback::LocalCallback::constructor(
     /* [in] */ IWeakReference* wr)
-    : mWeakHost(wr)
 {
+    mWeakHost = wr;
+    return NOERROR;
 }
 
 ECode RemoteCallback::LocalCallback::SendResult(
     /* [in] */ IBundle* bundle)
 {
-    AutoPtr<IObject> obj;
-    mWeakHost->Resolve(EIID_IObject, (IInterface**)&obj);
+    AutoPtr<IRemoteCallback> obj;
+    mWeakHost->Resolve(EIID_IRemoteCallback, (IInterface**)&obj);
     if (obj == NULL) {
         return NOERROR;
     }
@@ -71,7 +76,7 @@ void RemoteCallbackProxy::OnResult(
 {
 }
 
-CAR_INTERFACE_IMPL(RemoteCallback, Object, IParcelable)
+CAR_INTERFACE_IMPL_2(RemoteCallback, Object, IParcelable, IRemoteCallback)
 
 RemoteCallback::RemoteCallback()
 {}
@@ -82,7 +87,7 @@ ECode RemoteCallback::constructor(
     mHandler = handler;
     AutoPtr<IWeakReference> wr;
     GetWeakReference((IWeakReference**)&wr);
-    mTarget = new LocalCallback(wr);
+    CRemoteCallbackLocalCallback::New(wr, (IIRemoteCallback**)&mTarget);
     return NOERROR;
 }
 

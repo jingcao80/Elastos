@@ -15,14 +15,40 @@ namespace Os {
  * cases first.
  * @hide
  */
-class RemoteCallback
+class ECO_PUBLIC RemoteCallback
     : public Object
     , public IParcelable
+    , public IRemoteCallback
 {
-private:
-    class DeliverResult
-        : public Runnable {
+public:
+    class ECO_LOCAL LocalCallback
+        : public Object
+        , public IIRemoteCallback
+        , public IBinder
+    {
     public:
+        TO_STRING_IMPL("RemoteCallback::LocalCallback")
+
+        CAR_INTERFACE_DECL()
+
+        LocalCallback();
+
+        CARAPI constructor(
+            /* [in] */ IWeakReference* wr);
+
+        CARAPI SendResult(
+            /* [in] */ IBundle* bundle);
+    private:
+        AutoPtr<IWeakReference> mWeakHost;
+    };
+
+private:
+    class ECO_LOCAL DeliverResult
+        : public Runnable
+    {
+    public:
+        TO_STRING_IMPL("RemoteCallback::DeliverResult")
+
         DeliverResult(
             /* [in] */ IBundle* result,
             /* [in] */ IWeakReference* wr);
@@ -33,23 +59,9 @@ private:
         AutoPtr<IWeakReference> mWeakHost;
     };
 
-    class LocalCallback
-        : public Object
-        , public IIRemoteCallback
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        LocalCallback(
-            /* [in] */ IWeakReference* wr);
-
-        CARAPI SendResult(
-            /* [in] */ IBundle* bundle);
-    private:
-        AutoPtr<IWeakReference> mWeakHost;
-    };
-
 public:
+    TO_STRING_IMPL("RemoteCallback")
+
     CAR_INTERFACE_DECL()
 
     RemoteCallback();
@@ -89,6 +101,8 @@ class RemoteCallbackProxy
     : public RemoteCallback
 {
 public:
+    TO_STRING_IMPL("RemoteCallbackProxy")
+
     CARAPI constructor(
         /* [in] */ IIRemoteCallback* target);
 

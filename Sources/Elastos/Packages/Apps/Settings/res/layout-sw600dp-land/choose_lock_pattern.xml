@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<Elastos.Droid.Internal.Widget.LinearLayoutWithDefaultTouchRecepient
+<Elastos.Droid.Internal.Widget.CLinearLayoutWithDefaultTouchRecepient
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/topLayout"
     android:orientation="vertical"
@@ -43,7 +43,7 @@
         android:layout_weight="0.6"/>
 
     <!-- lock pattern widget -->
-    <Elastos.Droid.Internal.Widget.LockPatternView android:id="@+id/lockPattern"
+    <Elastos.Droid.Internal.Widget.CLockPatternView android:id="@+id/lockPattern"
         android:layout_width="354dip"
         android:layout_height="354dip"
         android:background="@color/lock_pattern_background"
@@ -84,5 +84,5 @@
 
     </LinearLayout>
 
-</Elastos.Droid.Internal.Widget.LinearLayoutWithDefaultTouchRecepient>
+</Elastos.Droid.Internal.Widget.CLinearLayoutWithDefaultTouchRecepient>
 

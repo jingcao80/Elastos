@@ -21,7 +21,7 @@
      switcher, if necessary. Assumed to be in a horizontal LinearLayout. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-   <Elastos.Droid.Internal.Widget.LockPatternView android:id="@+id/lockPattern"
+   <Elastos.Droid.Internal.Widget.CLockPatternView android:id="@+id/lockPattern"
        android:layout_width="match_parent"
        android:layout_height="match_parent"
        android:background="@color/lock_pattern_background" />

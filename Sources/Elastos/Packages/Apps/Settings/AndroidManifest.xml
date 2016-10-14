@@ -528,7 +528,7 @@
                 android:resource="@id/language_settings" />
         </activity>
 
-        <activity android:name=".Inputmethod.InputMethodAndSubtypeEnablerActivity"
+        <activity android:name=".Inputmethod.CInputMethodAndSubtypeEnablerActivity"
                 android:label=""
                 android:clearTaskOnLaunch="true">
             <intent-filter>
@@ -569,7 +569,7 @@
                 android:value="true" />
         </activity>
 
-        <activity android:name=".Inputmethod.UserDictionaryAddWordActivity"
+        <activity android:name=".Inputmethod.CUserDictionaryAddWordActivity"
                   android:label="@string/user_dict_settings_title"
                   android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar"
                   android:windowSoftInputMode="stateVisible"
