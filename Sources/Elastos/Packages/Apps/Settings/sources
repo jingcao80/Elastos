@@ -46,6 +46,7 @@ SOURCES += HomeSettings.cpp
 SOURCES += Utils.cpp
 SOURCES += UserSpinnerAdapter.cpp
 SOURCES += CUserSpinnerAdapter.cpp
+SOURCES += CUsageAccessSettings.cpp
 SOURCES += CUserDictionarySettings.cpp
 SOURCES += CScreenPinningSettings.cpp
 SOURCES += CSettings.cpp

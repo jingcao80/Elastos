@@ -238,11 +238,12 @@ ECode CDeviceAdminSettings::PolicyListAdapter::GetView(
     GetItem(position, (IInterface**)&o);
 
     AutoPtr<IView> convertView = _convertView;
-    if (IDeviceAdminInfo::Probe(o) != NULL) {
+    AutoPtr<IDeviceAdminInfo> info = IDeviceAdminInfo::Probe(o);
+    if (info != NULL) {
         if (convertView == NULL) {
             convertView = NewDeviceAdminView(parent);
         }
-        BindView(convertView, IDeviceAdminInfo::Probe(o));
+        BindView(convertView, info);
     }
     else {
         if (convertView == NULL) {

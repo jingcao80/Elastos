@@ -316,12 +316,14 @@ ECode CDeviceAdminAdd::OnCreate(
             avail->Get(i, (IInterface**)&obj);
             AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(obj);
             String aiPackageName, aiName, riPackageName, riName;
-            IPackageItemInfo::Probe(ai)->GetPackageName(&aiPackageName);
-            IPackageItemInfo::Probe(ai)->GetName(&aiName);
+            IPackageItemInfo* aiPii = IPackageItemInfo::Probe(ai);
+            aiPii->GetPackageName(&aiPackageName);
+            aiPii->GetName(&aiName);
             AutoPtr<IActivityInfo> activityInfo;
             ri->GetActivityInfo((IActivityInfo**)&activityInfo);
-            IPackageItemInfo::Probe(activityInfo)->GetPackageName(&riPackageName);
-            IPackageItemInfo::Probe(activityInfo)->GetName(&riName);
+            IPackageItemInfo* activityInfoPii = IPackageItemInfo::Probe(activityInfo);
+            activityInfoPii->GetPackageName(&riPackageName);
+            activityInfoPii->GetName(&riName);
             if (aiPackageName.Equals(riPackageName) && aiName.Equals(riName)) {
                 // We didn't retrieve the meta data for all possible matches, so
                 // need to use the activity info of this specific one that was retrieved.
