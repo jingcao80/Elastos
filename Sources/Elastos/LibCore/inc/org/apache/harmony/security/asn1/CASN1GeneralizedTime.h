@@ -13,14 +13,19 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-CarClass(CASN1GeneralizedTime), public ASN1Time
+CarClass(CASN1GeneralizedTime)
+    , public ASN1Time
+    , public IASN1GeneralizedTime
 {
 public:
     CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     static AutoPtr<IASN1Type> Init();
 
     static CARAPI GetInstance(
-    /* [out] */ IASN1GeneralizedTime** instance);
+        /* [out] */ IASN1GeneralizedTime** instance);
 
     CARAPI Decode(
         /* [in] */ IBerInputStream* bis,

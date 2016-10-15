@@ -1501,6 +1501,11 @@ module
         constructor(
             [in] ArrayOf<Byte>* pEncoding);
 
+        constructor(
+            [in] IBigInteger* pRequireExplicitPolicy,
+            [in] IBigInteger* pInhibitPolicyMapping,
+            [in] ArrayOf<Byte>* pEncoding);
+
         interface IPolicyConstraints;
         interface IExtensionValue;
     }
@@ -1524,10 +1529,16 @@ module
         interface IPolicyQualifierInfoHelper;
     }
 
+    [deprecated]
     class CPrivateKeyUsagePeriod {
         constructor(
             [in] IDate* pNotBeforeDate,
             [in] IDate* pNotAfterDate);
+
+        constructor(
+            [in] IDate* pNotBeforeDate,
+            [in] IDate* pNotAfterDate,
+            [in] ArrayOf<Byte>* encoding);
 
         interface IPrivateKeyUsagePeriod;
     }
@@ -1585,6 +1596,12 @@ module
             [in] ArrayOf<Byte>* pSubjectPublicKey,
             [in] Int32 unused);
 
+        constructor(
+            [in] IAlgorithmIdentifier* pAlgID,
+            [in] ArrayOf<Byte>* pSubjectPublicKey,
+            [in] Int32 unused,
+            [in] ArrayOf<Byte>* encoding);
+
         interface ISubjectPublicKeyInfo;
     }
 
@@ -1592,8 +1609,17 @@ module
         interface ISubjectPublicKeyInfoHelper;
     }
 
+    [deprecated]
     class CTBSCertList {
-        constructor();
+        constructor(
+            [in] Int32 v,
+            [in] IAlgorithmIdentifier* signature,
+            [in] IName* issuer,
+            [in] IDate* thisUpdate,
+            [in] IDate* nextUpdate,
+            [in] IList* revokedCertificates,
+            [in] IExtensions* crlExtensions,
+            [in] ArrayOf<Byte>* encoding);
 
         interface ITBSCertList;
     }
@@ -1616,15 +1642,24 @@ module
             [in] ArrayOf<Boolean>* pSubjectUniqueID,
             [in] IExtensions* pExtensions);
 
+        constructor(
+            [in] Int32 ver,
+            [in] IBigInteger* pSerialNumber,
+            [in] IAlgorithmIdentifier* pSignature,
+            [in] Org.Apache.Harmony.Security.X501.IName* pIssuer,
+            [in] IValidity* pValidity,
+            [in] Org.Apache.Harmony.Security.X501.IName* pSubject,
+            [in] ISubjectPublicKeyInfo* pSubjectPublicKeyInfo,
+            [in] ArrayOf<Boolean>* pIssuerUniqueID,
+            [in] ArrayOf<Boolean>* pSubjectUniqueID,
+            [in] IExtensions* pExtensions,
+            [in] ArrayOf<Byte>* encoding);
+
         interface ITBSCertificate;
     }
 
     singleton class CTBSCertificateHelper {
         interface ITBSCertificateHelper;
-    }
-
-    singleton class CTimeHelper {
-        interface ITimeHelper;
     }
 
     class CValidity {
@@ -1648,6 +1683,8 @@ module
 
         interface IX509PublicKey;
         interface Elastos.Security.IPublicKey;
+        interface Elastos.Security.IKey;
+        interface ISerializable;
     }
 
     } // namespace X509

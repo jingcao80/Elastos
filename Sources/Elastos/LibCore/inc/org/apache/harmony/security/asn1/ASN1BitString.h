@@ -20,7 +20,7 @@ public:
     CAR_INTERFACE_DECL()
 
     static CARAPI GetInstance(
-    /* [out] */ IASN1Type** instance);
+        /* [out] */ IASN1Type** instance);
 
     static CARAPI_(AutoPtr<IASN1Type>) Init();
 

@@ -1,5 +1,6 @@
 
-#include "org/apache/harmony/security/x509/CValidityHelper.h"
+#include "CValidityHelper.h"
+#include "CValidity.h"
 
 namespace Org {
 namespace Apache {
@@ -12,10 +13,12 @@ CAR_SINGLETON_IMPL(CValidityHelper)
 CAR_INTERFACE_IMPL(CValidityHelper, Singleton, IValidityHelper)
 
 ECode CValidityHelper::GetASN1(
-    /* [out] */ IASN1Sequence** ppAsn1)
+    /* [out] */ IASN1Sequence** result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    *result = CValidity::ASN1;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 } // namespace X509

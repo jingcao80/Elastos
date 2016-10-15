@@ -3,9 +3,8 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CSUBJECTKEYIDENTIFIER_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CSubjectKeyIdentifier.h"
-#include <elastos/core/Object.h>
+#include "ExtensionValue.h"
 
-using Elastos::Core::Object;
 using Elastos::Core::IStringBuilder;
 
 namespace Org {
@@ -15,9 +14,8 @@ namespace Security {
 namespace X509 {
 
 CarClass(CSubjectKeyIdentifier)
-    , public Object
+    , public ExtensionValue
     , public ISubjectKeyIdentifier
-    , public IExtensionValue
 {
 public:
     CAR_OBJECT_DECL()
@@ -31,17 +29,22 @@ public:
         /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
-    CARAPI DumpValue(
-        /* [in] */ IStringBuilder* pSb);
-
     CARAPI GetKeyIdentifier(
         /* [out, callee] */ ArrayOf<Byte>** ppKeyIdentifier);
+
+    /**
+     * Creates an object on the base of its encoded form.
+     */
+    static CARAPI Decode(
+        /* [in] */ ArrayOf<Byte>* encoding,
+        /* [out] */ ISubjectKeyIdentifier** result) /*throws IOException*/;
 
     CARAPI constructor(
         /* [in] */ ArrayOf<Byte>* pKeyIdentifier);
 
 private:
-    // TODO: Add your private member variables here.
+    // the value of key identifier
+    AutoPtr<ArrayOf<Byte> > mKeyIdentifier;
 };
 
 } //namespace X509

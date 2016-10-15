@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CSubjectPublicKeyInfoHelper.h"
+#include "org/apache/harmony/security/x509/CSubjectPublicKeyInfo.h"
 
 namespace Org {
 namespace Apache {
@@ -14,8 +15,10 @@ CAR_INTERFACE_IMPL(CSubjectPublicKeyInfoHelper, Singleton, ISubjectPublicKeyInfo
 ECode CSubjectPublicKeyInfoHelper::GetASN1(
     /* [out] */ IASN1Sequence** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+    *ppAsn1 = CSubjectPublicKeyInfo::ASN1;
+    REFCOUNT_ADD(*ppAsn1);
+    return NOERROR;
 }
 
 } // namespace X509

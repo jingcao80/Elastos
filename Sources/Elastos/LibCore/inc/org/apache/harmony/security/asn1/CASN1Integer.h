@@ -14,12 +14,14 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-CarClass(CASN1Integer), public ASN1Primitive
+CarClass(CASN1Integer)
+    , public ASN1Primitive
+    , public IASN1Integer
 {
 public:
     CAR_OBJECT_DECL()
 
-    static AutoPtr<IASN1Integer> InitStatic();
+    CAR_INTERFACE_DECL()
 
     static CARAPI GetInstance(
         /* [out] */ IASN1Integer** instance);

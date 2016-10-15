@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CSubjectKeyIdentifierHelper.h"
+#include "org/apache/harmony/security/x509/CSubjectKeyIdentifier.h"
 
 namespace Org {
 namespace Apache {
@@ -8,15 +9,14 @@ namespace Security {
 namespace X509 {
 
 CAR_SINGLETON_IMPL(CSubjectKeyIdentifierHelper)
-
 CAR_INTERFACE_IMPL(CSubjectKeyIdentifierHelper, Singleton, ISubjectKeyIdentifierHelper)
 
 ECode CSubjectKeyIdentifierHelper::Decode(
     /* [in] */ ArrayOf<Byte>* pEncoding,
-    /* [out] */ ISubjectKeyIdentifier** ppIdentifier)
+    /* [out] */ ISubjectKeyIdentifier** result)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result);
+    return CSubjectKeyIdentifier::Decode(pEncoding, result);
 }
 
 } // namespace X509

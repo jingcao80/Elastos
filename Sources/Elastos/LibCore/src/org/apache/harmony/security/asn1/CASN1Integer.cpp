@@ -19,21 +19,23 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-AutoPtr<IASN1Integer> CASN1Integer::ASN1 = InitStatic();
-
-CAR_OBJECT_IMPL(CASN1Integer)
-AutoPtr<IASN1Integer> CASN1Integer::InitStatic()
+static AutoPtr<IASN1Integer> InitStatic()
 {
     AutoPtr<IASN1Integer> ai;
     CASN1Integer::New((IASN1Integer**)&ai);
     return ai;
 }
 
+AutoPtr<IASN1Integer> CASN1Integer::ASN1 = InitStatic();
+
+CAR_OBJECT_IMPL(CASN1Integer)
+CAR_INTERFACE_IMPL(CASN1Integer, ASN1Primitive, IASN1Integer)
 ECode CASN1Integer::GetInstance(
     /* [out] */ IASN1Integer** instance)
 {
     VALIDATE_NOT_NULL(instance)
     *instance = ASN1;
+    assert(ASN1 != NULL);
     REFCOUNT_ADD(*instance)
     return NOERROR;
 }

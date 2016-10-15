@@ -3,9 +3,12 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CX509PUBLICKEY_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CX509PublicKey.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::IO::ISerializable;
+using Elastos::Security::IKey;
 using Elastos::Security::IPublicKey;
 
 namespace Org {
@@ -18,6 +21,8 @@ CarClass(CX509PublicKey)
     , public Object
     , public IX509PublicKey
     , public IPublicKey
+    , public IKey
+    , public ISerializable
 {
 public:
     CAR_OBJECT_DECL()
@@ -42,7 +47,9 @@ public:
         /* [in] */ ArrayOf<Byte>* pKeyBytes);
 
 private:
-    // TODO: Add your private member variables here.
+    String mAlgorithm;
+    AutoPtr<ArrayOf<Byte> > mEncoded;
+    AutoPtr<ArrayOf<Byte> > mKeyBytes;
 };
 
 } //namespace X509
