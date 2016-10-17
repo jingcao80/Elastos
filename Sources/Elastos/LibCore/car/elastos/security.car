@@ -201,6 +201,10 @@ module
         interface ISecurity;
     }
 
+    singleton class CSignatureHelper {
+        interface ISignatureHelper;
+    }
+
     singleton class CMessageDigestHelper {
         interface IMessageDigestHelper;
     }
@@ -348,6 +352,10 @@ module
         [in] ArrayOf<Byte>* encoded);
 
         interface ISerializable;
+    }
+
+    singleton class CKeyStoreHelper {
+        interface IKeyStoreHelper;
     }
 
     [deprecated]

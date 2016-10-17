@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_SECURITY_CKEYSTOREHELPER_H__
 #define __ELASTOS_SECURITY_CKEYSTOREHELPER_H__
 
+#include <elastos/core/Singleton.h>
 #include "_Elastos_Security_CKeyStoreHelper.h"
 
 using Elastos::Security::IProvider;
