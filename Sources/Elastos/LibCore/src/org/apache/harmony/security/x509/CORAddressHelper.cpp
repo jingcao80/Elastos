@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CORAddressHelper.h"
+#include "org/apache/harmony/security/x509/CORAddress.h"
 
 namespace Org {
 namespace Apache {
@@ -14,8 +15,15 @@ CAR_INTERFACE_IMPL(CORAddressHelper, Singleton, IORAddressHelper)
 ECode CORAddressHelper::GetASN1(
     /* [out] */ IASN1Sequence** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    return CORAddress::GetASN1(ppAsn1);
+}
+
+ECode CORAddressHelper::SetASN1(
+    /* [in] */ IASN1Sequence* ppAsn1)
+{
+    return CORAddress::SetASN1(ppAsn1);
 }
 
 } // namespace X509

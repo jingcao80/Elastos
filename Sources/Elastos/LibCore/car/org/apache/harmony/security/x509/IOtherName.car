@@ -44,6 +44,9 @@ module
          */
         GetASN1(
             [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
     }
 
     } // namespace X509

@@ -17,6 +17,8 @@
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
 #include "org/apache/harmony/security/asn1/CASN1OctetString.h"
+#include "org/apache/harmony/security/asn1/ASN1Oid.h"
+#include "org/apache/harmony/security/asn1/CASN1Boolean.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
@@ -26,6 +28,8 @@
 
 using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::Asn1::ASN1Oid;
+using Org::Apache::Harmony::Security::Asn1::CASN1Boolean;
 using Org::Apache::Harmony::Security::Asn1::CObjectIdentifier;
 using Org::Apache::Harmony::Security::Asn1::IASN1OctetString;
 using Org::Apache::Harmony::Security::Asn1::CASN1OctetString;
@@ -185,11 +189,9 @@ ECode CExtension::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Sequence> CExtension::initASN1()
 {
     AutoPtr<IASN1Type> instance1;
-    assert(0);
-    //ASN1Oid::GetInstance((IASN1Type**)&instance1);
+    ASN1Oid::GetInstance((IASN1Type**)&instance1);
     AutoPtr<IASN1Type> instance2;
-    assert(0);
-    //ASN1Boolean::GetInstance((IASN1Type**)&instance2)
+    CASN1Boolean::GetInstance((IASN1Type**)&instance2);
 
     AutoPtr<ASN1OctetString> str = new MyASN1OctetString();
 
@@ -204,7 +206,7 @@ AutoPtr<IASN1Sequence> CExtension::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CExtension::ASN1;// = initASN1();
+AutoPtr<IASN1Sequence> CExtension::ASN1 = initASN1();
 
 static AutoPtr<ArrayOf<Int32> > initSUBJ_DIRECTORY_ATTRS()
 {

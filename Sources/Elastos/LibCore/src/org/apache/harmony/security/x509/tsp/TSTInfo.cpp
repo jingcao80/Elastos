@@ -1,16 +1,37 @@
 
 #include "org/apache/harmony/security/x509/tsp/TSTInfo.h"
-//#include "elastos/math/CBigInteger.h"
+#include "org/apache/harmony/security/x509/tsp/CTSTInfo.h"
+#include "org/apache/harmony/security/x509/tsp/CMessageImprint.h"
+#include "org/apache/harmony/security/x509/CGeneralName.h"
+#include "org/apache/harmony/security/x509/CExtensions.h"
+#include "org/apache/harmony/security/asn1/ASN1Oid.h"
+#include "org/apache/harmony/security/asn1/CASN1Explicit.h"
+#include "org/apache/harmony/security/asn1/CASN1Implicit.h"
+#include "org/apache/harmony/security/asn1/CASN1Integer.h"
+#include "org/apache/harmony/security/asn1/CASN1Boolean.h"
+#include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
+#include "org/apache/harmony/security/asn1/CASN1GeneralizedTime.h"
+#include "elastos/math/CBigInteger.h"
 #include "elastos/math/CBigIntegerHelper.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
-//#include "core/CArrayOf.h"
+#include "core/CArrayOf.h"
 #include "core/CByte.h"
 #include "core/CBoolean.h"
 #include "core/CInteger32.h"
 
+using Org::Apache::Harmony::Security::Asn1::ASN1Oid;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
-//using Org::Apache::Harmony::Security::Asn1::IASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::CASN1Explicit;
+using Org::Apache::Harmony::Security::Asn1::IASN1Explicit;
+using Org::Apache::Harmony::Security::Asn1::IASN1Implicit;
+using Org::Apache::Harmony::Security::Asn1::CASN1Implicit;
+using Org::Apache::Harmony::Security::Asn1::IASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::CASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::CASN1Boolean;
+using Org::Apache::Harmony::Security::Asn1::CObjectIdentifier;
+using Org::Apache::Harmony::Security::Asn1::IASN1GeneralizedTime;
+using Org::Apache::Harmony::Security::Asn1::CASN1GeneralizedTime;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
@@ -24,9 +45,7 @@ using Elastos::Core::EIID_IInteger32;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
 using Elastos::Math::IBigInteger;
-//using Elastos::Math::CBigInteger;
-using Elastos::Math::IBigIntegerHelper;
-using Elastos::Math::CBigIntegerHelper;
+using Elastos::Math::CBigInteger;
 using Elastos::Utility::IDate;
 
 namespace Org {
@@ -51,11 +70,8 @@ ECode TSTInfo::MyASN1Sequence1::GetDecodedObject(
         AutoPtr<IInterface> obj;
         values->Get(i, (IInterface**)&obj);
         if (obj != NULL) {
-            assert(0);
-            // AutoPtr<IASN1IntegerHelper> helper;
-            // CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
             Int32 toIntValue;
-            //helper->ToIntValue(obj, &toIntValue);
+            CASN1Integer::ToIntValue(obj, &toIntValue);
             (*accuracy)[i] = toIntValue;
 
             if (i > 0 && ((*accuracy)[i] < 0 || (*accuracy)[i] > 999)) {
@@ -86,10 +102,8 @@ ECode TSTInfo::MyASN1Sequence1::GetValues(
             //throw new RuntimeException("Time-stamp accuracy value is incorrect: " + accuracy[i]);
             return E_RUNTIME_EXCEPTION;
         }
-        AutoPtr<IBigIntegerHelper> helper;
-        CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&helper);
         AutoPtr<IBigInteger> bi;
-        helper->ValueOf((Int64)value, (IBigInteger**)&bi);
+        CBigInteger::ValueOf((Int64)value, (IBigInteger**)&bi);
         AutoPtr<ArrayOf<Byte> > bytes;
         bi->ToByteArray((ArrayOf<Byte>**)&bytes);
         AutoPtr<IArrayOf> array2 = CoreUtils::ConvertByteArray(bytes);
@@ -100,16 +114,13 @@ ECode TSTInfo::MyASN1Sequence1::GetValues(
 
 AutoPtr<IASN1Sequence> TSTInfo::initACCURACY()
 {
-    assert(0);
-    //AutoPtr<IASN1IntegerHelper> helper;
-    //CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
-    //AutoPtr<IASN1Integer> integer;
-    //helper->GetInstance((IASN1Integer**)&integer);
+    AutoPtr<IASN1Integer> integer;
+    CASN1Integer::GetInstance((IASN1Integer**)&integer);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(3);
-    // array->Set(0, IASN1Type::Probe(integer));
-    // array->Set(1, IASN1Type::Probe(integer));
-    // array->Set(2, IASN1Type::Probe(integer));
+    array->Set(0, IASN1Type::Probe(integer));
+    array->Set(1, IASN1Type::Probe(integer));
+    array->Set(2, IASN1Type::Probe(integer));
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence1();
     tmp->constructor(array);
@@ -123,116 +134,111 @@ ECode TSTInfo::MyASN1Sequence2::GetDecodedObject(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)
 {
-    assert(0);
-    // AutoPtr<IInterface> con;
-    // bis->GetContent((IInterface**)&con);
-    // AutoPtr<IArrayOf> values = IArrayOf::Probe(con);
+    AutoPtr<IInterface> con;
+    bis->GetContent((IInterface**)&con);
+    AutoPtr<IArrayOf> values = IArrayOf::Probe(con);
 
-    // AutoPtr<IInterface> obj7;
-    // values->Get(7, (IInterface**)&obj7);
-    // AutoPtr<IBigInteger> nonce;
-    // if (obj7 == NULL) {
-    //     nonce = NULL;
-    // }
-    // else {
-    //     AutoPtr<IArrayOf> array = IArrayOf::Probe(obj7);
-    //     Int32 length;
-    //     array->GetLength(&length);
-    //     AutoPtr<ArrayOf<Byte> > barray = ArrayOf<Byte>::Alloc(length);
-    //     for (Int32 i = 0; i < length; i++) {
-    //         AutoPtr<IInterface> obj;
-    //         array->Get(i, (IInterface**)&obj);
-    //         AutoPtr<IByte> b = IByte::Probe(obj);
-    //         Byte value;
-    //         b->GetValue(&value);
-    //         (*barray)[i] = value;
-    //     }
-    //     CBigInteger::New(barray, (IBigInteger**)&nonce);
-    // }
+    AutoPtr<IInterface> obj7;
+    values->Get(7, (IInterface**)&obj7);
+    AutoPtr<IBigInteger> nonce;
+    if (obj7 == NULL) {
+        nonce = NULL;
+    }
+    else {
+        AutoPtr<IArrayOf> array = IArrayOf::Probe(obj7);
+        Int32 length;
+        array->GetLength(&length);
+        AutoPtr<ArrayOf<Byte> > barray = ArrayOf<Byte>::Alloc(length);
+        for (Int32 i = 0; i < length; i++) {
+            AutoPtr<IInterface> obj;
+            array->Get(i, (IInterface**)&obj);
+            AutoPtr<IByte> b = IByte::Probe(obj);
+            Byte value;
+            b->GetValue(&value);
+            (*barray)[i] = value;
+        }
+        CBigInteger::New(*barray, (IBigInteger**)&nonce);
+    }
 
-    // AutoPtr<IASN1IntegerHelper> helper;
-    // CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
-    // AutoPtr<IInterface> obj0;
-    // values->Get(0, (IInterface**)&obj0);
-    // Int32 toIntValue;
-    // helper->ToIntValue(obj0, &toIntValue);
+    AutoPtr<IInterface> obj0;
+    values->Get(0, (IInterface**)&obj0);
+    Int32 toIntValue;
+    CASN1Integer::ToIntValue(obj0, &toIntValue);
 
-    // AutoPtr<IInterface> obj1;
-    // values->Get(1, (IInterface**)&obj1);
-    // AutoPtr<IArrayOf> array1 = IArrayOf::Probe(obj1);
-    // Int32 length1;
-    // array1->GetLength(&length1);
-    // AutoPtr<ArrayOf<Int32> > intarray1 = ArrayOf<Int32>::Alloc(length1);
-    // for (Int32 i = 0; i < length1; i++) {
-    //     AutoPtr<IInterface> obj;
-    //     array1->Get(i, (IInterface**)&obj);
-    //     AutoPtr<IInteger32> intobj = IInteger32::Probe(obj);
-    //     Int32 value;
-    //     intobj->GetValue(&value);
-    //     (*intarray1)[i] = value;
-    // }
-    // AutoPtr<IObjectIdentifierHelper> helper1;
-    // CObjectIdentifierHelper::AcquireSingleton((IObjectIdentifierHelper**)&helper1)
-    // String str;
-    // helper1->ToString(array1, &str);
+    AutoPtr<IInterface> obj1;
+    values->Get(1, (IInterface**)&obj1);
+    AutoPtr<IArrayOf> array1 = IArrayOf::Probe(obj1);
+    Int32 length1;
+    array1->GetLength(&length1);
+    AutoPtr<ArrayOf<Int32> > intarray1 = ArrayOf<Int32>::Alloc(length1);
+    for (Int32 i = 0; i < length1; i++) {
+        AutoPtr<IInterface> obj;
+        array1->Get(i, (IInterface**)&obj);
+        AutoPtr<IInteger32> intobj = IInteger32::Probe(obj);
+        Int32 value;
+        intobj->GetValue(&value);
+        (*intarray1)[i] = value;
+    }
+    String str;
+    CObjectIdentifier::ToString(intarray1, &str);
 
-    // AutoPtr<IInterface> obj2;
-    // values->Get(2, (IInterface**)&obj2);
+    AutoPtr<IInterface> obj2;
+    values->Get(2, (IInterface**)&obj2);
 
-    // AutoPtr<IInterface> obj3;
-    // values->Get(3, (IInterface**)&obj3);
-    // AutoPtr<IArrayOf> array3 = IArrayOf::Probe(obj3);
-    // Int32 length3;
-    // array3->GetLength(&length3);
-    // AutoPtr<ArrayOf<Byte> > barray3 = ArrayOf<Byte>::Alloc(length3);
-    // for (Int32 i = 0; i < length3; i++) {
-    //     AutoPtr<IInterface> obj;
-    //     array3->Get(i, (IInterface**)&obj);
-    //     AutoPtr<IByte> b = IByte::Probe(obj);
-    //     Byte value;
-    //     b->GetValue(&value);
-    //     (*barray3)[i] = value;
-    // }
-    // AutoPtr<IBigInteger> bi;
-    // CBigInteger::New(barray3, (IBigInteger**)&bi);
+    AutoPtr<IInterface> obj3;
+    values->Get(3, (IInterface**)&obj3);
+    AutoPtr<IArrayOf> array3 = IArrayOf::Probe(obj3);
+    Int32 length3;
+    array3->GetLength(&length3);
+    AutoPtr<ArrayOf<Byte> > barray3 = ArrayOf<Byte>::Alloc(length3);
+    for (Int32 i = 0; i < length3; i++) {
+        AutoPtr<IInterface> obj;
+        array3->Get(i, (IInterface**)&obj);
+        AutoPtr<IByte> b = IByte::Probe(obj);
+        Byte value;
+        b->GetValue(&value);
+        (*barray3)[i] = value;
+    }
+    AutoPtr<IBigInteger> bi;
+    CBigInteger::New(*barray3, (IBigInteger**)&bi);
 
-    // AutoPtr<IInterface> obj4;
-    // values->Get(4, (IInterface**)&obj4);
+    AutoPtr<IInterface> obj4;
+    values->Get(4, (IInterface**)&obj4);
 
-    // AutoPtr<IInterface> obj5;
-    // values->Get(5, (IInterface**)&obj5);
-    // AutoPtr<IArrayOf> array5 = IArrayOf::Probe(obj5);
-    // Int32 length5;
-    // array5->GetLength(&length5);
-    // AutoPtr<ArrayOf<Int32> > intarray5 = ArrayOf<Int32>::Alloc(length5);
-    // for (Int32 i = 0; i < length5; i++) {
-    //     AutoPtr<IInterface> obj;
-    //     array5->Get(i, (IInterface**)&obj);
-    //     AutoPtr<IInteger32> intobj = IInteger32::Probe(obj);
-    //     Int32 value;
-    //     intobj->GetValue(&value);
-    //     (*intarray5)[i] = value;
-    // }
+    AutoPtr<IInterface> obj5;
+    values->Get(5, (IInterface**)&obj5);
+    AutoPtr<IArrayOf> array5 = IArrayOf::Probe(obj5);
+    Int32 length5;
+    array5->GetLength(&length5);
+    AutoPtr<ArrayOf<Int32> > intarray5 = ArrayOf<Int32>::Alloc(length5);
+    for (Int32 i = 0; i < length5; i++) {
+        AutoPtr<IInterface> obj;
+        array5->Get(i, (IInterface**)&obj);
+        AutoPtr<IInteger32> intobj = IInteger32::Probe(obj);
+        Int32 value;
+        intobj->GetValue(&value);
+        (*intarray5)[i] = value;
+    }
 
-    // AutoPtr<IInterface> obj6;
-    // values->Get(6, (IInterface**)&obj6);
-    // AutoPtr<IBoolean> ib = IBoolean::Probe(obj6);
-    // Boolean res;
-    // ib->GetValue(&res);
+    AutoPtr<IInterface> obj6;
+    values->Get(6, (IInterface**)&obj6);
+    AutoPtr<IBoolean> ib = IBoolean::Probe(obj6);
+    Boolean res;
+    ib->GetValue(&res);
 
-    // AutoPtr<IInterface> obj8;
-    // values->Get(8, (IInterface**)&obj8);
+    AutoPtr<IInterface> obj8;
+    values->Get(8, (IInterface**)&obj8);
 
-    // AutoPtr<IInterface> obj9;
-    // values->Get(9, (IInterface**)&obj9);
+    AutoPtr<IInterface> obj9;
+    values->Get(9, (IInterface**)&obj9);
 
-    // AutoPtr<ITSTInfo> info;
-    // TSTInfo::New(toIntValue, str, IMessageImprint::Probe(obj2),
-    //         bi, IDate::Probe(obj4), intarray5, res, nonce,
-    //         IGeneralName::Probe(obj8), IExtensions::Probe(obj9),
-    //         (ITSTInfo**)&info);
-    // *object = TO_IINTERFACE(info);
-    // REFCOUNT_ADD(*object);
+    AutoPtr<ITSTInfo> info;
+    CTSTInfo::New(toIntValue, str, IMessageImprint::Probe(obj2),
+            bi, IDate::Probe(obj4), intarray5, res, nonce,
+            IGeneralName::Probe(obj8), IExtensions::Probe(obj9),
+            (ITSTInfo**)&info);
+    *object = TO_IINTERFACE(info);
+    REFCOUNT_ADD(*object);
     return NOERROR;
 }
 
@@ -240,100 +246,84 @@ ECode TSTInfo::MyASN1Sequence2::GetValues(
     /* [in] */ IInterface* object,
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-    //TSTInfo* info = (TSTInfo*)ITSTInfo::Probe(object);
+    CTSTInfo* info = (CTSTInfo*)ITSTInfo::Probe(object);
 
-    assert(0);
-    // AutoPtr<IASN1IntegerHelper> helper;
-    // CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
-    // AutoPtr<IInterface> fromIntValue;
-    // helper->FromIntValue(info->mVersion, (IInterface**)&fromIntValue);
-    // value->Set(0, fromIntValue);
+    AutoPtr<IInterface> fromIntValue;
+    CASN1Integer::FromIntValue(info->mVersion, (IInterface**)&fromIntValue);
+    values->Set(0, fromIntValue);
 
-    // AutoPtr<ArrayOf<Int32> > intArray;
-    // AutoPtr<IObjectIdentifierHelper> helper2;
-    // CObjectIdentifierHelper::AcquireSingleton((IObjectIdentifierHelper**)&helper2);
-    // helper2->ToIntArray(info->mPolicy, (ArrayOf<Int32>**)&intArray);
-    // AutoPtr<IArrayOf> array = CoreUtils::Convert(intArray);
-    // value->Set(1, TO_IINTERFACE(array));
+    AutoPtr<ArrayOf<Int32> > intArray;
+    CObjectIdentifier::ToIntArray(info->mPolicy, (ArrayOf<Int32>**)&intArray);
+    AutoPtr<IArrayOf> array = CoreUtils::Convert(intArray);
+    values->Set(1, TO_IINTERFACE(array));
 
-    // value->Set(2, TO_IINTERFACE(info->mMessageImprint));
+    values->Set(2, TO_IINTERFACE(info->mMessageImprint));
 
-    // AutoPtr<ArrayOf<Byte> > narray;
-    // info->mSerialNumber->ToByteArray((ArrayOf<Byte>**)&narray);
-    // AutoPtr<IArrayOf> array2 = CoreUtils::ConvertByteArray(narray);
-    // value->Set(3, TO_IINTERFACE(array2));
+    AutoPtr<ArrayOf<Byte> > narray;
+    info->mSerialNumber->ToByteArray((ArrayOf<Byte>**)&narray);
+    AutoPtr<IArrayOf> array2 = CoreUtils::ConvertByteArray(narray);
+    values->Set(3, TO_IINTERFACE(array2));
 
-    // value->Set(4, TO_IINTERFACE(info->mGenTime));
+    values->Set(4, TO_IINTERFACE(info->mGenTime));
 
-    // AutoPtr<IArrayOf> array3 = CoreUtils::Convert(info->mAccuracy);
-    // value->Set(5, TO_IINTERFACE(array3));
+    AutoPtr<IArrayOf> array3 = CoreUtils::Convert(info->mAccuracy);
+    values->Set(5, TO_IINTERFACE(array3));
 
-    // AutoPtr<IBoolean> ib;
-    // CBoolean::New(info->mOrdering, (IBoolean**)&ib);
-    // value->Set(6, TO_IINTERFACE(ib));
+    AutoPtr<IBoolean> ib = CoreUtils::Convert(info->mOrdering);
+    values->Set(6, TO_IINTERFACE(ib));
 
-    // if (info->mNonce == NULL) {
-    //     value->Set(7, NULL);
-    // }
-    // else {
-    //     AutoPtr<ArrayOf<Byte> > barray;
-    //     info->mNonce->ToByteArray((ArrayOf<Byte>**)&barray);
-    //     AutoPtr<IArrayOf> array = CoreUtils::ConvertByteArray(barray);
-    //     value->Set(7, TO_IINTERFACE(array));
-    // }
+    if (info->mNonce == NULL) {
+        values->Set(7, NULL);
+    }
+    else {
+        AutoPtr<ArrayOf<Byte> > barray;
+        info->mNonce->ToByteArray((ArrayOf<Byte>**)&barray);
+        AutoPtr<IArrayOf> array = CoreUtils::ConvertByteArray(barray);
+        values->Set(7, TO_IINTERFACE(array));
+    }
 
-    // value->Set(8, TO_IINTERFACE(info->mTsa));
+    values->Set(8, TO_IINTERFACE(info->mTsa));
 
-    // value->Set(9, TO_IINTERFACE(info->mExtensions));
+    values->Set(9, TO_IINTERFACE(info->mExtensions));
     return NOERROR;
 }
 
 AutoPtr<IASN1Sequence> TSTInfo::initASN1()
 {
-    assert(0);
-    //AutoPtr<IASN1IntegerHelper> helper;
-    //CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
-    //AutoPtr<IASN1Integer> integer;
-    //helper->GetInstance((IASN1Integer**)&integer);
+    AutoPtr<IASN1Integer> integer;
+    CASN1Integer::GetInstance((IASN1Integer**)&integer);
 
-    //AutoPtr<IASN1OidHelper> helper2;
-    //CASN1OidHelper::AcquireSingleton((IASN1OidHelper**)&helper2);
-    //AutoPtr<IASN1Type> instance;
-    //helper2->GetInstance((IASN1Type**)&instance);
+    AutoPtr<IASN1Type> instance;
+    ASN1Oid::GetInstance((IASN1Type**)&instance);
 
-    //AutoPtr<IASN1GeneralizedTimeHelper> helper3;
-    //CASN1GeneralizedTimeHelper::AcquireSingleton((IASN1GeneralizedTimeHelper**)&helper3);
-    //AutoPtr<IASN1GeneralizedTime> instance2;
-    //helper3->GetInstance((IASN1GeneralizedTime**)&instance2);
+    AutoPtr<IASN1GeneralizedTime> instance2;
+    CASN1GeneralizedTime::GetInstance((IASN1GeneralizedTime**)&instance2);
 
-    //AutoPtr<IASN1BooleanHelper> helper4;
-    //CASN1BooleanHelper::AcquireSingleton((IASN1BooleanHelper**)&helper4);
-    //AutoPtr<IASN1Type> instance3;
-    //helper4->GetInstance((IASN1Type**)&instance3);
+    AutoPtr<IASN1Type> instance3;
+    CASN1Boolean::GetInstance((IASN1Type**)&instance3);
 
-    // AutoPtr<IASN1Type> type;
-    // CASN1Explicit::New(0, GeneralName::ASN1, (IASN1Type**)&type);
+    AutoPtr<IASN1Explicit> type;
+    CASN1Explicit::New(0, IASN1Type::Probe(CGeneralName::ASN1), (IASN1Explicit**)&type);
 
-    // AutoPtr<IASN1Type> type2;
-    // CASN1Implicit::New(1, Extensions::ASN1, (IASN1Type**)&type2);
+    AutoPtr<IASN1Implicit> type2;
+    CASN1Implicit::New(1, CExtensions::ASN1, (IASN1Implicit**)&type2);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(10);
-    // array->Set(0, IASN1Type::Probe(integer));
-    // array->Set(1, instance);
-    // array->Set(2, CMessageImprint::ASN1);
-    // array->Set(3, IASN1Type::Probe(integer));
-    // array->Set(4, IASN1Type::Probe(instance2));
-    // array->Set(5, IASN1Type::Probe(ACCURACY));
-    // array->Set(6, IASN1Type::Probe(instance3));
-    // array->Set(7, IASN1Type::Probe(integer));
-    // array->Set(8, type);
-    // array->Set(9, type2);
+    array->Set(0, IASN1Type::Probe(integer));
+    array->Set(1, instance);
+    array->Set(2, IASN1Type::Probe(CMessageImprint::ASN1));
+    array->Set(3, IASN1Type::Probe(integer));
+    array->Set(4, IASN1Type::Probe(instance2));
+    array->Set(5, IASN1Type::Probe(ACCURACY));
+    array->Set(6, IASN1Type::Probe(instance3));
+    array->Set(7, IASN1Type::Probe(integer));
+    array->Set(8, IASN1Type::Probe(type));
+    array->Set(9, IASN1Type::Probe(type2));
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence2();
     tmp->constructor(array);
     tmp->SetOptional(5);
-    AutoPtr<IBoolean> ib;
-    CBoolean::New(FALSE, (IBoolean**)&ib);
+    AutoPtr<IBoolean> ib = CoreUtils::Convert(FALSE);
     tmp->SetDefault(TO_IINTERFACE(ib), 6);
     tmp->SetOptional(7);
     tmp->SetOptional(8);
@@ -341,9 +331,9 @@ AutoPtr<IASN1Sequence> TSTInfo::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> TSTInfo::ACCURACY;// = initACCURACY();
+AutoPtr<IASN1Sequence> TSTInfo::ACCURACY = initACCURACY();
 
-AutoPtr<IASN1Sequence> TSTInfo::ASN1;// = initASN1();
+AutoPtr<IASN1Sequence> TSTInfo::ASN1 = initASN1();
 
 CAR_INTERFACE_IMPL(TSTInfo, Object, ITSTInfo)
 

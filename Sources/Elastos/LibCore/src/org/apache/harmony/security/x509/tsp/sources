@@ -12,6 +12,7 @@ INCLUDES += ../../../../../../corelibrary
 INCLUDES += $(MAKEDIR)/../../../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos
 INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos/core
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/elastos/math;
 INCLUDES += $(MAKEDIR)/../../../../../../../inc/org/apache/harmony/security
 
 SOURCES = CMessageImprint.cpp

@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CCRLDistributionPoints.h"
+#include "org/apache/harmony/security/x509/CDistributionPoint.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
@@ -54,12 +55,12 @@ ECode CCRLDistributionPoints::MyASN1SequenceOf::GetValues(
 
 AutoPtr<IASN1Type> CCRLDistributionPoints::initASN1()
 {
-    assert(0);
-    AutoPtr<ASN1SequenceOf> seq;// = new MyASN1SequenceOf(CDistributionPoint::ASN1);
+    AutoPtr<ASN1SequenceOf> seq = new MyASN1SequenceOf();
+    seq->constructor(IASN1Type::Probe(CDistributionPoint::ASN1));
     return IASN1Type::Probe(seq);
 }
 
-AutoPtr<IASN1Type> CCRLDistributionPoints::ASN1;// = initASN1();
+AutoPtr<IASN1Type> CCRLDistributionPoints::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CCRLDistributionPoints)
 

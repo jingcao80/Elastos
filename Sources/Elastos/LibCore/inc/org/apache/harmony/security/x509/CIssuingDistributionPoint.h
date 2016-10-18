@@ -3,9 +3,16 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CISSUINGDISTRIBUTIONPOINT_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CIssuingDistributionPoint.h"
+#include "org/apache/harmony/security/x509/ExtensionValue.h"
+#include "org/apache/harmony/security/asn1/ASN1Sequence.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Elastos::Core::Object;
+using Elastos::Core::IBoolean;
 using Elastos::Core::IStringBuilder;
 
 namespace Org {
@@ -15,10 +22,23 @@ namespace Security {
 namespace X509 {
 
 CarClass(CIssuingDistributionPoint)
-    , public Object
+    , public ExtensionValue
     , public IIssuingDistributionPoint
-    , public IExtensionValue
 {
+private:
+    class MyASN1Sequence
+        : public ASN1Sequence
+    {
+    public:
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
+
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [in] */ ArrayOf<IInterface*>* values);
+    };
+
 public:
     CAR_OBJECT_DECL()
 
@@ -30,9 +50,6 @@ public:
     CARAPI DumpValue(
         /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
-
-    CARAPI DumpValue(
-        /* [in] */ IStringBuilder* pSb);
 
     CARAPI SetOnlyContainsUserCerts(
         /* [in] */ Boolean onlyContainsUserCerts);
@@ -50,8 +67,33 @@ public:
         /* [in] */ IDistributionPointName* pDistributionPoint,
         /* [in] */ IReasonFlags* pOnlySomeReasons);
 
+    static CARAPI Decode(
+        /* [in] */ ArrayOf<Byte>* pEncoding,
+        /* [out] */ IIssuingDistributionPoint** ppObject);
+
+    static CARAPI GetASN1(
+        /* [out] */ IASN1Type** ppAsn1);
+
+    static CARAPI SetASN1(
+        /* [in] */ IASN1Type* pAsn1);
+
 private:
-    // TODO: Add your private member variables here.
+    static CARAPI_(AutoPtr<IASN1Type>) initASN1();
+
+public:
+    /**
+     * ASN.1 Encoder/Decoder.
+     */
+    static AutoPtr<IASN1Type> ASN1;
+
+private:
+    // values of the fields of the structure
+    AutoPtr<IDistributionPointName> mDistributionPoint;
+    AutoPtr<IBoolean> mOnlyContainsUserCerts;
+    AutoPtr<IBoolean> mOnlyContainsCACerts;
+    AutoPtr<IReasonFlags> mOnlySomeReasons;
+    AutoPtr<IBoolean> mIndirectCRL;
+    AutoPtr<IBoolean> mOnlyContainsAttributeCerts;
 };
 
 } //namespace X509

@@ -3,7 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_ASN1TIME_H__
 
 #include <elastos.h>
-#include <ASN1StringType.h>
+#include "org/apache/harmony/security/asn1/ASN1StringType.h"
 
 _ELASTOS_NAMESPACE_USING
 

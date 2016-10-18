@@ -12,8 +12,11 @@ namespace Asn1 {
 
 class ASN1OctetString
     : public ASN1StringType
+    , public IASN1OctetString
 {
 public:
+    CAR_INTERFACE_DECL()
+
     CARAPI constructor();
 
     static CARAPI GetInstance(

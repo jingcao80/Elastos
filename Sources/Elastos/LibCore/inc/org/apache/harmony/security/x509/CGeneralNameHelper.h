@@ -44,8 +44,8 @@ public:
     CARAPI GetASN1(
         /* [out] */ IASN1Choice** ppAsn1);
 
-private:
-    // TODO: Add your private member variables here.
+    CARAPI SetASN1(
+        /* [in] */ IASN1Choice* ppAsn1);
 };
 
 } //namespace X509

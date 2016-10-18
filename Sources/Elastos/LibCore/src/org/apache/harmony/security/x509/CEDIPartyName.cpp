@@ -2,6 +2,8 @@
 #include "org/apache/harmony/security/x509/CEDIPartyName.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CASN1Explicit.h"
+#include "org/apache/harmony/security/asn1/CASN1Implicit.h"
+#include "org/apache/harmony/security/x501/DirectoryString.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include "core/CArrayOf.h"
@@ -11,6 +13,9 @@ using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Explicit;
 using Org::Apache::Harmony::Security::Asn1::CASN1Explicit;
+using Org::Apache::Harmony::Security::Asn1::IASN1Implicit;
+using Org::Apache::Harmony::Security::Asn1::CASN1Implicit;
+using Org::Apache::Harmony::Security::X501::DirectoryString;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
@@ -69,15 +74,13 @@ ECode CEDIPartyName::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Sequence> CEDIPartyName::initASN1()
 {
     AutoPtr<IASN1Explicit> explicit0;
-    assert(0);
-    //CASN1Explicit::New(0, DirectoryString::ASN1, (IASN1Explicit**)&explicit0);
-    AutoPtr<IASN1Explicit> explicit1;
-    assert(0);
-    //CASN1Implicit::New(1, DirectoryString::ASN1, (IASN1Explicit**)&explicit1);
+    CASN1Explicit::New(0, IASN1Type::Probe(DirectoryString::ASN1), (IASN1Explicit**)&explicit0);
+    AutoPtr<IASN1Implicit> implicit0;
+    CASN1Implicit::New(1, IASN1Type::Probe(DirectoryString::ASN1), (IASN1Implicit**)&implicit0);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(3);
     array->Set(0, IASN1Type::Probe(explicit0));
-    array->Set(1, IASN1Type::Probe(explicit1));
+    array->Set(1, IASN1Type::Probe(implicit0));
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence();
     tmp->constructor(array);
@@ -85,7 +88,7 @@ AutoPtr<IASN1Sequence> CEDIPartyName::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CEDIPartyName::ASN1;// = initASN1();
+INIT_PROI_4 AutoPtr<IASN1Sequence> CEDIPartyName::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CEDIPartyName)
 

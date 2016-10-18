@@ -3,10 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CINHIBITANYPOLICY_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CInhibitAnyPolicy.h"
-#include <elastos/core/Object.h>
-
-using Elastos::Core::Object;
-using Elastos::Core::IStringBuilder;
+#include "org/apache/harmony/security/x509/ExtensionValue.h"
 
 namespace Org {
 namespace Apache {
@@ -15,9 +12,8 @@ namespace Security {
 namespace X509 {
 
 CarClass(CInhibitAnyPolicy)
-    , public Object
+    , public ExtensionValue
     , public IInhibitAnyPolicy
-    , public IExtensionValue
 {
 public:
     CAR_OBJECT_DECL()
@@ -31,14 +27,12 @@ public:
         /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
-    CARAPI DumpValue(
-        /* [in] */ IStringBuilder* pSb);
-
     CARAPI constructor(
         /* [in] */ ArrayOf<Byte>* pEncoding);
 
 private:
-    // TODO: Add your private member variables here.
+    /** the value of the extension */
+    Int32 mSkipCerts;
 };
 
 } //namespace X509

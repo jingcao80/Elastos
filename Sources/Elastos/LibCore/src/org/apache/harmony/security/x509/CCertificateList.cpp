@@ -1,7 +1,10 @@
 
 #include "org/apache/harmony/security/x509/CCertificateList.h"
 #include "org/apache/harmony/security/x509/AlgorithmIdentifier.h"
+#include "org/apache/harmony/security/x509/CTBSCertList.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
+#include "org/apache/harmony/security/asn1/CBitString.h"
+#include "org/apache/harmony/security/asn1/ASN1BitString.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include "core/CArrayOf.h"
@@ -10,6 +13,8 @@
 using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IBitString;
+using Org::Apache::Harmony::Security::Asn1::CBitString;
+using Org::Apache::Harmony::Security::Asn1::ASN1BitString;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
@@ -69,8 +74,7 @@ ECode CCertificateList::MyASN1Sequence::GetValues(
     values->Set(0, TO_IINTERFACE(certificateList->mTbsCertList));
     values->Set(1, TO_IINTERFACE(certificateList->mSignatureAlgorithm));
     AutoPtr<IBitString> bs;
-    assert(0);
-    //CBitString::New(certificateList->mSignatureValue, 0, (IBitString**)&bs)
+    CBitString::New(certificateList->mSignatureValue, 0, (IBitString**)&bs);
     values->Set(2, TO_IINTERFACE(bs));
     return NOERROR;
 }
@@ -78,12 +82,10 @@ ECode CCertificateList::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Sequence> CCertificateList::initASN1()
 {
     AutoPtr<IASN1Type> instance;
-    assert(0);
-    //ASN1BitString::GetInstance((IASN1Type**)&instance);
+    ASN1BitString::GetInstance((IASN1Type**)&instance);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(3);
-    assert(0);
-    //array->Set(0, IASN1Type::Probe(TBSCertList::ASN1));
+    array->Set(0, IASN1Type::Probe(CTBSCertList::ASN1));
     array->Set(1, IASN1Type::Probe(AlgorithmIdentifier::ASN1));
     array->Set(2, instance);
 
@@ -92,7 +94,7 @@ AutoPtr<IASN1Sequence> CCertificateList::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CCertificateList::ASN1;// = initASN1();
+AutoPtr<IASN1Sequence> CCertificateList::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CCertificateList)
 

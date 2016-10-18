@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CGeneralNameHelper.h"
+#include "org/apache/harmony/security/x509/CGeneralName.h"
 
 namespace Org {
 namespace Apache {
@@ -14,46 +15,54 @@ CAR_INTERFACE_IMPL(CGeneralNameHelper, Singleton, IGeneralNameHelper)
 ECode CGeneralNameHelper::CheckDNS(
     /* [in] */ const String& dns)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return CGeneralName::CheckDNS(dns);
 }
 
 ECode CGeneralNameHelper::CheckURI(
     /* [in] */ const String& uri)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return CGeneralName::CheckURI(uri);
 }
 
 ECode CGeneralNameHelper::OidStrToInts(
     /* [in] */ const String& oid,
     /* [out, callee] */ ArrayOf<Int32>** ppInts)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppInts);
+
+    return CGeneralName::OidStrToInts(oid, ppInts);
 }
 
 ECode CGeneralNameHelper::IpStrToBytes(
     /* [in] */ const String& ip,
     /* [out, callee] */ ArrayOf<Byte>** ppBytes)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppBytes);
+
+    return CGeneralName::IpStrToBytes(ip, ppBytes);
 }
 
 ECode CGeneralNameHelper::IpBytesToStr(
     /* [in] */ ArrayOf<Byte>* pIp,
     /* [out] */ String* pStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(pStr);
+
+    return CGeneralName::IpBytesToStr(pIp, pStr);
 }
 
 ECode CGeneralNameHelper::GetASN1(
     /* [out] */ IASN1Choice** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    return CGeneralName::GetASN1(ppAsn1);
+}
+
+ECode CGeneralNameHelper::SetASN1(
+    /* [in] */ IASN1Choice* ppAsn1)
+{
+    return CGeneralName::SetASN1(ppAsn1);
 }
 
 } // namespace X509

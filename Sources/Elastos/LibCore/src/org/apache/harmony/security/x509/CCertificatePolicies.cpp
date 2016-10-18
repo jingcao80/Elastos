@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CCertificatePolicies.h"
+#include "org/apache/harmony/security/x509/CPolicyInformation.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/CoreUtils.h>
@@ -56,12 +57,12 @@ ECode CCertificatePolicies::MyASN1SequenceOf::GetValues(
 
 AutoPtr<IASN1Type> CCertificatePolicies::initASN1()
 {
-    assert(0);
-    AutoPtr<ASN1SequenceOf> seq;// = new MyASN1SequenceOf(CPolicyInformation::ASN1);
+    AutoPtr<ASN1SequenceOf> seq = new MyASN1SequenceOf();
+    seq->constructor(IASN1Type::Probe(CPolicyInformation::ASN1));
     return IASN1Type::Probe(seq);
 }
 
-AutoPtr<IASN1Type> CCertificatePolicies::ASN1;// = initASN1();
+AutoPtr<IASN1Type> CCertificatePolicies::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CCertificatePolicies)
 

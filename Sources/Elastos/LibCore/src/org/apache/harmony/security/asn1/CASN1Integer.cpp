@@ -26,7 +26,7 @@ static AutoPtr<IASN1Integer> InitStatic()
     return ai;
 }
 
-AutoPtr<IASN1Integer> CASN1Integer::ASN1 = InitStatic();
+INIT_PROI_7 AutoPtr<IASN1Integer> CASN1Integer::ASN1 = InitStatic();
 
 CAR_OBJECT_IMPL(CASN1Integer)
 CAR_INTERFACE_IMPL(CASN1Integer, ASN1Primitive, IASN1Integer)

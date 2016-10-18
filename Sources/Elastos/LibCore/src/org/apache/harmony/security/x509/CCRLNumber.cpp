@@ -2,7 +2,7 @@
 #include "org/apache/harmony/security/x509/CCRLNumber.h"
 #include "org/apache/harmony/security/asn1/CASN1Integer.h"
 #include "elastos/core/Math.h"
-//#include "elastos/math/CBigInteger.h"
+#include "elastos/math/CBigInteger.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include "core/CArrayOf.h"
@@ -21,7 +21,7 @@ using Elastos::Core::IBoolean;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Math::IBigInteger;
-//using Elastos::Math::CBigInteger;
+using Elastos::Math::CBigInteger;
 
 namespace Org {
 namespace Apache {
@@ -94,8 +94,7 @@ ECode CCRLNumber::constructor(
         (*array)[i] = num;
     }
 
-    assert(0);
-    //CBigInteger::New(array, (IBigInteger**)&mNumber);
+    CBigInteger::New(*array, (IBigInteger**)&mNumber);
     return NOERROR;
 }
 

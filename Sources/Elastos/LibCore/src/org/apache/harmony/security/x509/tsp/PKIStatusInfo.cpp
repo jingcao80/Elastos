@@ -2,18 +2,25 @@
 #include "org/apache/harmony/security/x509/tsp/PKIStatusInfo.h"
 #include "org/apache/harmony/security/x509/tsp/PKIStatus.h"
 #include "org/apache/harmony/security/x509/tsp/PKIFailureInfo.h"
-//#include "org/apache/harmony/security/asn1/CASN1IntegerHelper.h"
+#include "org/apache/harmony/security/asn1/CASN1Integer.h"
+#include "org/apache/harmony/security/asn1/CBitString.h"
+#include "org/apache/harmony/security/asn1/ASN1SequenceOf.h"
+#include "org/apache/harmony/security/asn1/ASN1StringType.h"
+#include "org/apache/harmony/security/asn1/ASN1BitString.h"
 #include <elastos/core/StringBuilder.h>
 #include "elastos/math/CBigIntegerHelper.h"
 #include <elastos/core/CoreUtils.h>
-//#include "core/CArrayOf.h"
+#include "core/CArrayOf.h"
 #include "core/CByte.h"
 
 using Org::Apache::Harmony::Security::Asn1::IBitString;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
-//using Org::Apache::Harmony::Security::Asn1::IASN1Integer;
-//using Org::Apache::Harmony::Security::Asn1::IASN1IntegerHelper;
-//using Org::Apache::Harmony::Security::Asn1::CASN1IntegerHelper;
+using Org::Apache::Harmony::Security::Asn1::CASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::CBitString;
+using Org::Apache::Harmony::Security::Asn1::ASN1SequenceOf;
+using Org::Apache::Harmony::Security::Asn1::IASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::ASN1StringType;
+using Org::Apache::Harmony::Security::Asn1::ASN1BitString;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
@@ -58,11 +65,8 @@ ECode PKIStatusInfo::MyASN1Sequence::GetDecodedObject(
 
     AutoPtr<IInterface> obj2;
     values->Get(0, (IInterface**)&obj2);
-    //AutoPtr<IASN1IntegerHelper> helper;
-    assert(0);
-    //CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
     Int32 value;
-    //helper->ToIntValue(obj2, &value);
+    CASN1Integer::ToIntValue(obj2, &value);
     AutoPtr<IPKIStatus> status;
     PKIStatus::GetInstance(value, (IPKIStatus**)&status);
 
@@ -104,8 +108,7 @@ ECode PKIStatusInfo::MyASN1Sequence::GetValues(
         psi->mFailInfo->GetValue(&value);
         (*failInfoBoolArray)[value] = TRUE;
         AutoPtr<IBitString> bs;
-        assert(0);
-        //CBitString::New(failInfoBoolArray, (IBitString**)&bs);
+        CBitString::New(failInfoBoolArray, (IBitString**)&bs);
         values->Set(2, TO_IINTERFACE(bs));
     }
     else {
@@ -116,23 +119,18 @@ ECode PKIStatusInfo::MyASN1Sequence::GetValues(
 
 AutoPtr<IASN1Sequence> PKIStatusInfo::initASN1()
 {
-    assert(0);
-    //AutoPtr<IASN1IntegerHelper> helper;
-    //CASN1IntegerHelper::AcquireSingleton((IASN1IntegerHelper**)&helper);
-    //AutoPtr<IASN1Integer> integer;
-    //helper->GetInstance((IASN1Integer**)&integer);
+    AutoPtr<IASN1Integer> integer;
+    CASN1Integer::GetInstance((IASN1Integer**)&integer);
 
-    assert(0);
-    AutoPtr<IASN1Type> so;// = new ASN1SequenceOf(ASN1StringType::UTF8STRING);
+    AutoPtr<ASN1SequenceOf> so = new ASN1SequenceOf();
+    so->constructor(IASN1Type::Probe(ASN1StringType::UTF8STRING));
 
     AutoPtr<IASN1Type> instance;
-    assert(0);
-    //ASN1BitString::GetInstance((IASN1Type**)&instance);
+    ASN1BitString::GetInstance((IASN1Type**)&instance);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(3);
-    assert(0);
-    //array->Set(0, IASN1Type::Probe(integer));
-    array->Set(1, so);
+    array->Set(0, IASN1Type::Probe(integer));
+    array->Set(1, IASN1Type::Probe(so));
     array->Set(2, instance);
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence();
@@ -142,7 +140,7 @@ AutoPtr<IASN1Sequence> PKIStatusInfo::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> PKIStatusInfo::ASN1;// = initASN1();
+AutoPtr<IASN1Sequence> PKIStatusInfo::ASN1 = initASN1();
 
 CAR_INTERFACE_IMPL(PKIStatusInfo, Object, IPKIStatusInfo)
 

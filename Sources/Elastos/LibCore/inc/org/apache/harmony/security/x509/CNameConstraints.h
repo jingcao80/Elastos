@@ -3,12 +3,21 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CNAMECONSTRAINTS_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CNameConstraints.h"
+#include "org/apache/harmony/security/asn1/ASN1Sequence.h"
+#include "org/apache/harmony/security/x509/ExtensionValue.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 
+using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Elastos::Core::Object;
+using Elastos::Core::IArrayOf;
 using Elastos::Core::IStringBuilder;
 using Elastos::Security::Cert::IX509Certificate;
 using Elastos::Utility::IList;
+using Elastos::Utility::IArrayList;
 
 namespace Org {
 namespace Apache {
@@ -17,10 +26,23 @@ namespace Security {
 namespace X509 {
 
 CarClass(CNameConstraints)
-    , public Object
+    , public ExtensionValue
     , public INameConstraints
-    , public IExtensionValue
 {
+private:
+    class MyASN1Sequence
+        : public ASN1Sequence
+    {
+    public:
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
+
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [in] */ ArrayOf<IInterface*>* values);
+    };
+
 public:
     CAR_OBJECT_DECL()
 
@@ -33,23 +55,65 @@ public:
         /* [in] */ IStringBuilder* pSb,
         /* [in] */ const String& prefix);
 
-    CARAPI DumpValue(
-        /* [in] */ IStringBuilder* pSb);
-
     CARAPI IsAcceptable(
         /* [in] */ IX509Certificate* pCert,
         /* [out] */ Boolean* pIsAcceptable);
 
-    CARAPI IsAcceptableEx(
+    CARAPI IsAcceptable(
         /* [in] */ IList* pNames,
         /* [out] */ Boolean* pIsAcceptable);
 
     CARAPI constructor(
-        /* [in] */ IGeneralSubtrees* pPermittedSubtrees,
-        /* [in] */ IGeneralSubtrees* pExcludedSubtrees);
+        /* [in] */ IGeneralSubtrees* permittedSubtrees,
+        /* [in] */ IGeneralSubtrees* excludedSubtrees);
+
+    CARAPI constructor(
+        /* [in] */ IGeneralSubtrees* permittedSubtrees,
+        /* [in] */ IGeneralSubtrees* excludedSubtrees,
+        /* [in] */ ArrayOf<Byte>* encoding);
+
+    static CARAPI Decode(
+        /* [in] */ ArrayOf<Byte>* pEncoding,
+        /* [out] */ INameConstraints** ppObject);
+
+    static CARAPI GetASN1(
+        /* [out] */ IASN1Sequence** ppAsn1);
+
+    static CARAPI SetASN1(
+        /* [in] */ IASN1Sequence* pAsn1);
 
 private:
-    // TODO: Add your private member variables here.
+    /**
+     * Prepare the data structure to speed up the checking process.
+     */
+    CARAPI PrepareNames();
+
+    /**
+     * Returns the value of certificate extension
+     */
+    CARAPI GetExtensionValue(
+        /* [in] */ IX509Certificate* cert,
+        /* [in] */ const String& OID,
+        /* [out] */ ArrayOf<Byte>** values);
+
+    static CARAPI_(AutoPtr<IASN1Sequence>) initASN1();
+
+public:
+    /**
+     * X.509 NameConstraints encoder/decoder.
+     */
+    static AutoPtr<IASN1Sequence> ASN1;
+
+private:
+    /** the value of permittedSubtrees field of the structure */
+    AutoPtr<IGeneralSubtrees> mPermittedSubtrees;
+    /** the value of excludedSubtrees field of the structure */
+    AutoPtr<IGeneralSubtrees> mExcludedSubtrees;
+    /** the ASN.1 encoded form of NameConstraints */
+    AutoPtr<ArrayOf<Byte> > mEncoding;
+
+    AutoPtr<IArrayList> mPermitted_names;
+    AutoPtr<IArrayList> mExcluded_names;
 };
 
 } //namespace X509

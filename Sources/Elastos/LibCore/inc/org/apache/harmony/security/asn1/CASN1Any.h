@@ -3,7 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_CASN1ANY_H__
 
 #include "_Org_Apache_Harmony_Security_Asn1_CASN1Any.h"
-#include <ASN1Type.h>
+#include "org/apache/harmony/security/asn1/ASN1Type.h"
 
 using Elastos::IO::IInputStream;
 

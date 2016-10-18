@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CNameConstraintsHelper.h"
+#include "org/apache/harmony/security/x509/CNameConstraints.h"
 
 namespace Org {
 namespace Apache {
@@ -15,15 +16,23 @@ ECode CNameConstraintsHelper::Decode(
     /* [in] */ ArrayOf<Byte>* pEncoding,
     /* [out] */ INameConstraints** ppObject)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppObject);
+
+    return CNameConstraints::Decode(pEncoding, ppObject);
 }
 
 ECode CNameConstraintsHelper::GetASN1(
     /* [out] */ IASN1Sequence** ppAsn1)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    return CNameConstraints::GetASN1(ppAsn1);
+}
+
+ECode CNameConstraintsHelper::SetASN1(
+    /* [in] */ IASN1Sequence* pAsn1)
+{
+    return CNameConstraints::SetASN1(pAsn1);
 }
 
 } // namespace X509

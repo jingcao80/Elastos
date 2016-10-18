@@ -1,12 +1,15 @@
 
 #include "org/apache/harmony/security/x509/CAuthorityKeyIdentifier.h"
 #include "org/apache/harmony/security/x509/CGeneralNames.h"
+#include "org/apache/harmony/security/x509/CGeneralNames.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
 #include "org/apache/harmony/security/asn1/CASN1Implicit.h"
+#include "org/apache/harmony/security/asn1/ASN1OctetString.h"
+#include "org/apache/harmony/security/asn1/CASN1Integer.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
-//#include "elastos/math/CBigInteger.h"
+#include "elastos/math/CBigInteger.h"
 #include <elastos/utility/Arrays.h>
 #include "core/CArrayOf.h"
 #include "core/CByte.h"
@@ -18,13 +21,15 @@ using Org::Apache::Harmony::Security::Asn1::CASN1Implicit;
 using Org::Apache::Harmony::Security::Asn1::IASN1OctetString;
 using Org::Apache::Harmony::Security::Asn1::CObjectIdentifier;
 using Org::Apache::Harmony::Security::Asn1::IASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::CASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::ASN1OctetString;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
 using Elastos::Core::CByte;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
-//using Elastos::Math::CBigInteger;
+using Elastos::Math::CBigInteger;
 
 namespace Org {
 namespace Apache {
@@ -58,8 +63,7 @@ ECode CAuthorityKeyIdentifier::MyASN1Sequence::GetDecodedObject(
     }
     AutoPtr<IBigInteger> authorityCertSerialNumber;
     if (arrayof2 != NULL) {
-        assert(0);
-        //CBigInteger::New(array2, (IBigInteger**)&authorityCertSerialNumber);
+        CBigInteger::New(*array2, (IBigInteger**)&authorityCertSerialNumber);
     }
 
     AutoPtr<IInterface> obj0;
@@ -110,18 +114,15 @@ ECode CAuthorityKeyIdentifier::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Type> CAuthorityKeyIdentifier::initASN1()
 {
     AutoPtr<IASN1OctetString> instance1;
-    assert(0);
-    //ASN1OctetString::GetInstance((IASN1OctetString**)&instance1);
+    ASN1OctetString::GetInstance((IASN1OctetString**)&instance1);
     AutoPtr<IASN1Implicit> implicit1;
     CASN1Implicit::New(0, IASN1Type::Probe(instance1), (IASN1Implicit**)&implicit1);
 
     AutoPtr<IASN1Implicit> implicit2;
-    assert(0);
-    //CASN1Implicit::New(1, CGeneralNames::ASN1, (IASN1Implicit**)&implicit2);
+    CASN1Implicit::New(1, CGeneralNames::ASN1, (IASN1Implicit**)&implicit2);
 
     AutoPtr<IASN1Integer> instance2;
-    assert(0);
-    //CASN1IntegerHelper::GetInstance((IASN1Integer**)&instance2);
+    CASN1Integer::GetInstance((IASN1Integer**)&instance2);
     AutoPtr<IASN1Implicit> implicit3;
     CASN1Implicit::New(2, IASN1Type::Probe(instance2), (IASN1Implicit**)&implicit3);
 
@@ -138,7 +139,7 @@ AutoPtr<IASN1Type> CAuthorityKeyIdentifier::initASN1()
     return IASN1Type::Probe(tmp);
 }
 
-AutoPtr<IASN1Type> CAuthorityKeyIdentifier::ASN1;// = initASN1();
+AutoPtr<IASN1Type> CAuthorityKeyIdentifier::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CAuthorityKeyIdentifier)
 

@@ -18,8 +18,9 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-//TODO:
-const AutoPtr<IASN1OctetString> ASN1OctetString::ASN1;// = InitASN1();
+INIT_PROI_4 const AutoPtr<IASN1OctetString> ASN1OctetString::ASN1 = InitASN1();
+
+CAR_INTERFACE_IMPL(ASN1OctetString, ASN1StringType, IASN1OctetString)
 
 AutoPtr<IASN1OctetString> ASN1OctetString::InitASN1()
 {

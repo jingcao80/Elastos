@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CAlternativeName.h"
+#include "org/apache/harmony/security/x509/CGeneralNames.h"
 
 namespace Org {
 namespace Apache {
@@ -17,8 +18,7 @@ ECode CAlternativeName::GetEncoded(
     VALIDATE_NOT_NULL(ppEncode);
 
     if (mEncoding == NULL) {
-        assert(0);
-        //mEncoding = GeneralNames.ASN1.encode(alternativeNames);
+        CGeneralNames::ASN1->Encode(mAlternativeNames, (ArrayOf<Byte>**)&mEncoding);
     }
     *ppEncode = mEncoding;
     REFCOUNT_ADD(*ppEncode);
@@ -44,8 +44,10 @@ ECode CAlternativeName::constructor(
 {
     ExtensionValue::constructor(encoding);
     mWhich = which;
-    assert(0);
-    //mAlternativeNames = (GeneralNames) GeneralNames.ASN1.decode(encoding);
+
+    AutoPtr<IInterface> obj;
+    CGeneralNames::ASN1->Decode(encoding, (IInterface**)&obj);
+    mAlternativeNames = IGeneralNames::Probe(obj);
     return NOERROR;
 }
 

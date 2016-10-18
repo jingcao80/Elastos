@@ -4,7 +4,7 @@
 
 #include "_Org_Apache_Harmony_Security_X501_CName.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "ASN1SequenceOf.h"
+#include "org/apache/harmony/security/asn1/ASN1SequenceOf.h"
 
 using Elastos::Utility::IList;
 using Org::Apache::Harmony::Security::Asn1::ASN1SequenceOf;

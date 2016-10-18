@@ -1,8 +1,10 @@
 
 #include "org/apache/harmony/security/x509/CCertificate.h"
 #include "org/apache/harmony/security/x509/AlgorithmIdentifier.h"
+#include "org/apache/harmony/security/x509/CTBSCertificate.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CBitString.h"
+#include "org/apache/harmony/security/asn1/ASN1BitString.h"
 #include <elastos/core/StringBuilder.h>
 #include "core/CArrayOf.h"
 #include "core/CByte.h"
@@ -11,6 +13,7 @@ using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IBitString;
 using Org::Apache::Harmony::Security::Asn1::CBitString;
+using Org::Apache::Harmony::Security::Asn1::ASN1BitString;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
@@ -76,12 +79,10 @@ ECode CCertificate::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Sequence> CCertificate::initASN1()
 {
     AutoPtr<IASN1Type> instance;
-    assert(0);
-    //ASN1BitString::GetInstance((IASN1Type**)&instance);
+    ASN1BitString::GetInstance((IASN1Type**)&instance);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(3);
-    assert(0);
-    //array->Set(0, TBSCertificate::ASN1);
+    array->Set(0, IASN1Type::Probe(CTBSCertificate::ASN1));
     array->Set(1, IASN1Type::Probe(AlgorithmIdentifier::ASN1));
     array->Set(2, IASN1Type::Probe(instance));
 
@@ -90,7 +91,7 @@ AutoPtr<IASN1Sequence> CCertificate::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CCertificate::ASN1;// = initASN1();
+AutoPtr<IASN1Sequence> CCertificate::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CCertificate)
 

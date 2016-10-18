@@ -1,5 +1,23 @@
 
 #include "org/apache/harmony/security/x509/CInvalidityDate.h"
+#include "org/apache/harmony/security/asn1/ASN1Type.h"
+#include "org/apache/harmony/security/asn1/CASN1GeneralizedTime.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include "core/CArrayOf.h"
+#include "core/CByte.h"
+
+using Org::Apache::Harmony::Security::Asn1::ASN1Type;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::Asn1::IASN1GeneralizedTime;
+using Org::Apache::Harmony::Security::Asn1::CASN1GeneralizedTime;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::CArrayOf;
+using Elastos::Core::IByte;
+using Elastos::Core::CByte;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ICloneable;
+using Elastos::Core::StringBuilder;
 
 namespace Org {
 namespace Apache {
@@ -7,44 +25,87 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+AutoPtr<IASN1Type> CInvalidityDate::initASN1()
+{
+    AutoPtr<IASN1GeneralizedTime> time;
+    CASN1GeneralizedTime::GetInstance((IASN1GeneralizedTime**)&time);
+    return IASN1Type::Probe(time);
+}
+
+AutoPtr<IASN1Type> CInvalidityDate::ASN1 = initASN1();
+
 CAR_OBJECT_IMPL(CInvalidityDate)
 
-CAR_INTERFACE_IMPL_2(CInvalidityDate, Object, IInvalidityDate, IExtensionValue)
+CAR_INTERFACE_IMPL(CInvalidityDate, ExtensionValue, IInvalidityDate)
 
 ECode CInvalidityDate::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte>** ppEncode)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppEncode);
+
+    if (mEncoding == NULL) {
+        ASN1->Encode(TO_IINTERFACE(mDate), (ArrayOf<Byte>**)&mEncoding);
+    }
+    *ppEncode = mEncoding;
+    REFCOUNT_ADD(*ppEncode);
+    return NOERROR;
 }
 
 ECode CInvalidityDate::DumpValue(
-    /* [in] */ IStringBuilder* pSb,
+    /* [in] */ IStringBuilder* sb,
     /* [in] */ const String& prefix)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CInvalidityDate::DumpValue(
-    /* [in] */ IStringBuilder* pSb)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    sb->Append(prefix);
+    sb->Append(String("Invalidity Date: [ "));
+    sb->Append(mDate);
+    sb->Append(String(" ]\n"));
+    return NOERROR;
 }
 
 ECode CInvalidityDate::GetDate(
     /* [out] */ IDate** ppDate)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppDate);
+
+    *ppDate = mDate;
+    REFCOUNT_ADD(*ppDate);
+    return NOERROR;
 }
 
 ECode CInvalidityDate::constructor(
-    /* [in] */ ArrayOf<Byte>* pEncoding)
+    /* [in] */ ArrayOf<Byte>* encoding)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ExtensionValue::constructor(encoding);
+    AutoPtr<IInterface> obj;
+    ASN1->Decode(encoding, (IInterface**)&obj);
+    mDate = IDate::Probe(obj);
+    return NOERROR;
+}
+
+ECode CInvalidityDate::constructor(
+    /* [in] */ IDate* date)
+{
+    AutoPtr<IInterface> obj;
+    ICloneable::Probe(date)->Clone((IInterface**)&obj);
+    mDate = IDate::Probe(obj);
+    return NOERROR;
+}
+
+ECode CInvalidityDate::GetASN1(
+    /* [out] */ IASN1Type** ppAsn1)
+{
+    VALIDATE_NOT_NULL(ppAsn1);
+
+    *ppAsn1 = ASN1;
+    REFCOUNT_ADD(*ppAsn1);
+    return NOERROR;
+}
+
+ECode CInvalidityDate::SetASN1(
+    /* [in] */ IASN1Type* pAsn1)
+{
+    ASN1 = pAsn1;
+    return NOERROR;
 }
 
 } // namespace X509

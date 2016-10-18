@@ -1,7 +1,7 @@
 
 #include "org/apache/harmony/security/x509/AlgorithmIdentifier.h"
-//#include "org/apache/harmony/security/asn1/ASN1Oid.h"
-//#include "org/apache/harmony/security/asn1/ASN1Any.h"
+#include "org/apache/harmony/security/asn1/ASN1Oid.h"
+#include "org/apache/harmony/security/asn1/CASN1Any.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
 #include <elastos/core/CoreUtils.h>
@@ -10,6 +10,9 @@
 #include "core/CArrayOf.h"
 #include "core/CByte.h"
 
+using Org::Apache::Harmony::Security::Asn1::ASN1Oid;
+using Org::Apache::Harmony::Security::Asn1::IASN1Any;
+using Org::Apache::Harmony::Security::Asn1::CASN1Any;
 using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::CObjectIdentifier;
@@ -98,14 +101,12 @@ ECode AlgorithmIdentifier::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Sequence> AlgorithmIdentifier::initASN1()
 {
     AutoPtr<IASN1Type> instance1;
-    assert(0);
-    //ASN1Oid::GetInstance((IASN1Type**)&instance1);
-    AutoPtr<IASN1Type> instance2;
-    assert(0);
-    //ASN1Any::GetInstance((IASN1Type**)&instance2)
+    ASN1Oid::GetInstance((IASN1Type**)&instance1);
+    AutoPtr<IASN1Any> instance2;
+    CASN1Any::GetInstance((IASN1Any**)&instance2);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(2);
-    array->Set(0, IASN1Type::Probe(instance1));
+    array->Set(0, instance1);
     array->Set(1, IASN1Type::Probe(instance2));
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence();
@@ -114,7 +115,7 @@ AutoPtr<IASN1Sequence> AlgorithmIdentifier::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> AlgorithmIdentifier::ASN1;// = initASN1();
+AutoPtr<IASN1Sequence> AlgorithmIdentifier::ASN1 = initASN1();
 
 CAR_INTERFACE_IMPL(AlgorithmIdentifier, Object, IAlgorithmIdentifier)
 

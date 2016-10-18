@@ -3,6 +3,7 @@
 #include "org/apache/harmony/security/x509/CGeneralName.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
+#include "org/apache/harmony/security/asn1/ASN1Oid.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include "core/CArrayOf.h"
@@ -10,6 +11,7 @@
 
 using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::Asn1::ASN1Oid;
 using Org::Apache::Harmony::Security::Asn1::CObjectIdentifier;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
@@ -83,20 +85,18 @@ ECode CAccessDescription::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Sequence> CAccessDescription::initASN1()
 {
     AutoPtr<IASN1Type> instance;
-    assert(0);
-    //ASN1Oid::GetInstance((IASN1Type**)&instance);
+    ASN1Oid::GetInstance((IASN1Type**)&instance);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(2);
     array->Set(0, IASN1Type::Probe(instance));
-    assert(0);
-    //array->Set(1, CGeneralName::ASN1);
+    array->Set(1, IASN1Type::Probe(CGeneralName::ASN1));
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence();
     tmp->constructor(array);
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CAccessDescription::ASN1;// = initASN1();
+AutoPtr<IASN1Sequence> CAccessDescription::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CAccessDescription)
 

@@ -103,7 +103,7 @@ ECode DerivedASN1Oid::SetEncodingContent(
 }
 
 AutoPtr<IASN1Type> ASN1Oid::STRING_OID;
-AutoPtr<IASN1Type> ASN1Oid::ASN1 = InitStatic();
+INIT_PROI_3 AutoPtr<IASN1Type> ASN1Oid::ASN1 = InitStatic();
 
 CAR_INTERFACE_IMPL(ASN1Oid, ASN1Primitive, IASN1Oid)
 AutoPtr<IASN1Type> ASN1Oid::InitStatic()

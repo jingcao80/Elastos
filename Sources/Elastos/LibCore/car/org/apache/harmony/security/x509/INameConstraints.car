@@ -58,7 +58,7 @@ module
          * Check if this list of names is acceptable according to this
          * NameConstraints object.
          */
-        IsAcceptableEx(
+        IsAcceptable(
             [in] IList* names,
             [out] Boolean* isAcceptable);
     }
@@ -74,6 +74,9 @@ module
          */
         GetASN1(
             [out] IASN1Sequence** asn1);
+
+        SetASN1(
+            [in] IASN1Sequence* asn1);
     }
 
     } // namespace X509

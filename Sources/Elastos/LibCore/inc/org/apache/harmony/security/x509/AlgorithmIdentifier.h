@@ -27,7 +27,7 @@ private:
     class MyASN1Sequence
         : public ASN1Sequence
     {
-    protected:
+    public:
         CARAPI GetDecodedObject(
             /* [in] */ IBerInputStream* bis,
             /* [out] */ IInterface** object);

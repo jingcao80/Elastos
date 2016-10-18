@@ -1,8 +1,8 @@
 
 #include "org/apache/harmony/security/x509/CDNParser.h"
-//#include "org/apache/harmony/security/x501/CAttributeValue.h"
+#include "org/apache/harmony/security/x501/CAttributeValue.h"
+#include "org/apache/harmony/security/x501/CAttributeTypeAndValue.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
-#include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
@@ -12,11 +12,11 @@
 
 using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
-using Org::Apache::Harmony::Security::Asn1::CObjectIdentifier;
-using Org::Apache::Harmony::Security::Asn1::IObjectIdentifier;
 using Org::Apache::Harmony::Security::X501::IAttributeValue;
-//using Org::Apache::Harmony::Security::X501::CAttributeValue;
+using Org::Apache::Harmony::Security::X501::CAttributeValue;
 using Org::Apache::Harmony::Security::X501::IAttributeTypeAndValue;
+using Org::Apache::Harmony::Security::X501::CAttributeTypeAndValue;
+using Org::Apache::Harmony::Security::Utils::IObjectIdentifier;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
@@ -441,8 +441,7 @@ ECode CDNParser::Parse(
         return NOERROR;
     }
     AutoPtr<IObjectIdentifier> oid;
-    assert(0);
-    //AttributeTypeAndValue::GetObjectIdentifier(attType, (IObjectIdentifier**)&oid);
+    CAttributeTypeAndValue::GetObjectIdentifier(attType, (IObjectIdentifier**)&oid);
 
     AutoPtr<IList> atav;
     CArrayList::New((IList**)&atav);
@@ -450,11 +449,9 @@ ECode CDNParser::Parse(
         if (mPos == mChars->GetLength()) {
             //empty Attribute Value
             AutoPtr<IAttributeValue> av;
-            assert(0);
-            //CAttributeValue::New(String(""), FALSE, oid, (IAttributeValue**)&av);
+            CAttributeValue::New(String(""), FALSE, oid, (IAttributeValue**)&av);
             AutoPtr<IAttributeTypeAndValue> atv;
-            assert(0);
-            //CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
+            CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
             atav->Add(TO_IINTERFACE(atv));
             list->Add(0, TO_IINTERFACE(atav));
             *ppList = list;
@@ -468,11 +465,9 @@ ECode CDNParser::Parse(
                 String str;
                 FAIL_RETURN(QuotedAV(&str))
                 AutoPtr<IAttributeValue> av;
-                assert(0);
-                //CAttributeValue::New(str, mHasQE, oid, (IAttributeValue**)&av);
+                CAttributeValue::New(str, mHasQE, oid, (IAttributeValue**)&av);
                 AutoPtr<IAttributeTypeAndValue> atv;
-                assert(0);
-                //CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
+                CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
                 atav->Add(TO_IINTERFACE(atv));
                 break;
             }
@@ -481,11 +476,9 @@ ECode CDNParser::Parse(
                 String str;
                 FAIL_RETURN(HexAV(&str))
                 AutoPtr<IAttributeValue> av;
-                assert(0);
-                //CAttributeValue::New(str, mEncoded, (IAttributeValue**)&av);
+                CAttributeValue::New(str, mEncoded, (IAttributeValue**)&av);
                 AutoPtr<IAttributeTypeAndValue> atv;
-                assert(0);
-                //CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
+                CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
                 atav->Add(TO_IINTERFACE(atv));
                 break;
             }
@@ -495,11 +488,9 @@ ECode CDNParser::Parse(
             {
                 //empty attribute value
                 AutoPtr<IAttributeValue> av;
-                assert(0);
-                //CAttributeValue::New(String(""), FALSE, oid, (IAttributeValue**)&av);
+                CAttributeValue::New(String(""), FALSE, oid, (IAttributeValue**)&av);
                 AutoPtr<IAttributeTypeAndValue> atv;
-                assert(0);
-                //CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
+                CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
                 atav->Add(TO_IINTERFACE(atv));
                 break;
             }
@@ -508,11 +499,9 @@ ECode CDNParser::Parse(
                 String str;
                 FAIL_RETURN(EscapedAV(&str))
                 AutoPtr<IAttributeValue> av;
-                assert(0);
-                //CAttributeValue::New(str, mHasQE, oid, (IAttributeValue**)&av);
+                CAttributeValue::New(str, mHasQE, oid, (IAttributeValue**)&av);
                 AutoPtr<IAttributeTypeAndValue> atv;
-                assert(0);
-                //CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
+                CAttributeTypeAndValue::New(oid, av, (IAttributeTypeAndValue**)&atv);
                 atav->Add(TO_IINTERFACE(atv));
             }
         }
@@ -539,8 +528,7 @@ ECode CDNParser::Parse(
             //throw new IOException("Invalid distinguished name string");
             return E_IO_EXCEPTION;
         }
-        assert(0);
-        //CAttributeTypeAndValue::GetObjectIdentifier(attType, (IObjectIdentifier**)&oid);
+        CAttributeTypeAndValue::GetObjectIdentifier(attType, (IObjectIdentifier**)&oid);
     }
 
     return NOERROR;

@@ -1,7 +1,9 @@
 
 #include "org/apache/harmony/security/x509/CBasicConstraints.h"
+#include "org/apache/harmony/security/asn1/CASN1Boolean.h"
+#include "org/apache/harmony/security/asn1/CASN1Integer.h"
 #include "elastos/core/Math.h"
-//#include "elastos/math/CBigInteger.h"
+#include "elastos/math/CBigInteger.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
@@ -11,6 +13,8 @@
 using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::CASN1Integer;
+using Org::Apache::Harmony::Security::Asn1::CASN1Boolean;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
@@ -20,7 +24,7 @@ using Elastos::Core::IBoolean;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Math::IBigInteger;
-//using Elastos::Math::CBigInteger;
+using Elastos::Math::CBigInteger;
 using Elastos::Utility::Arrays;
 
 namespace Org {
@@ -65,11 +69,9 @@ ECode CBasicConstraints::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Type> CBasicConstraints::initASN1()
 {
     AutoPtr<IASN1Type> instance1;
-    assert(0);
-    //ASN1Boolean::GetInstance()((IASN1Type**)&instance1);
+    CASN1Boolean::GetInstance((IASN1Type**)&instance1);
     AutoPtr<IASN1Integer> instance2;
-    assert(0);
-    //ASN1Integer::GetInstance((IASN1Integer**)&instance2)
+    CASN1Integer::GetInstance((IASN1Integer**)&instance2);
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(2);
     array->Set(0, instance1);
@@ -82,7 +84,7 @@ AutoPtr<IASN1Type> CBasicConstraints::initASN1()
     return IASN1Type::Probe(tmp);
 }
 
-AutoPtr<IASN1Type> CBasicConstraints::ASN1;// = initASN1();
+AutoPtr<IASN1Type> CBasicConstraints::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CBasicConstraints)
 
@@ -111,8 +113,7 @@ ECode CBasicConstraints::GetEncoded(
     if (mEncoding == NULL) {
         AutoPtr<IBoolean> bobj = CoreUtils::Convert(mCa);
         AutoPtr<IBigInteger> iobj;
-        assert(0);
-        //CBigInteger::ValueOf(pathLenConstraint, (IBigInteger**)&iobj);
+        CBigInteger::ValueOf(mPathLenConstraint, (IBigInteger**)&iobj);
         AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(2);
         array->Set(0, TO_IINTERFACE(bobj));
         array->Set(1, TO_IINTERFACE(iobj));

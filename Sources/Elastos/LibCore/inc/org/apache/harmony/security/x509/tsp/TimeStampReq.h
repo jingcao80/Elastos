@@ -11,6 +11,7 @@ using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
 using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
 using Org::Apache::Harmony::Security::X509::IExtensions;
 using Elastos::Core::Object;
+using Elastos::Core::IBoolean;
 using Elastos::Math::IBigInteger;
 
 namespace Org {
@@ -73,15 +74,6 @@ public:
         /* [in] */ Boolean certReq,
         /* [in] */ IExtensions* pExtensions);
 
-    static CARAPI GetASN1(
-        /* [out] */ IASN1Sequence** ppAsn1);
-
-    static CARAPI SetASN1(
-        /* [in] */ IASN1Sequence* pAsn1);
-
-private:
-    static CARAPI_(AutoPtr<IASN1Sequence>) initASN1();
-
     CARAPI constructor(
         /* [in] */ Int32 version,
         /* [in] */ IMessageImprint* messageImprint,
@@ -90,6 +82,15 @@ private:
         /* [in] */ Boolean certReq,
         /* [in] */ IExtensions* extensions,
         /* [in] */ ArrayOf<Byte>* encoding);
+
+    static CARAPI GetASN1(
+        /* [out] */ IASN1Sequence** ppAsn1);
+
+    static CARAPI SetASN1(
+        /* [in] */ IASN1Sequence* pAsn1);
+
+private:
+    static CARAPI_(AutoPtr<IASN1Sequence>) initASN1();
 
 public:
     static AutoPtr<IASN1Sequence> ASN1;
@@ -103,7 +104,7 @@ private:
 
     AutoPtr<IBigInteger> mNonce;
 
-    Boolean mCertReq;
+    AutoPtr<IBoolean> mCertReq;
 
     AutoPtr<IExtensions> mExtensions;
 

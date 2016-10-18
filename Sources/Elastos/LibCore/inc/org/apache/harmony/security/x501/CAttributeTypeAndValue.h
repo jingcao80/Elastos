@@ -4,8 +4,8 @@
 
 #include "_Org_Apache_Harmony_Security_X501_CAttributeTypeAndValue.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "ASN1Type.h"
-#include "ASN1Sequence.h"
+#include "org/apache/harmony/security/asn1/ASN1Type.h"
+#include "org/apache/harmony/security/asn1/ASN1Sequence.h"
 
 using Elastos::Core::IStringBuilder;
 using Elastos::Utility::IHashMap;

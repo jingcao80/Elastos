@@ -205,6 +205,9 @@ module
 
         GetASN1(
             [out] IASN1Choice** asn1);
+
+        SetASN1(
+            [in] IASN1Choice* asn1);
     }
 
     } // namespace X509

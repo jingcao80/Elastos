@@ -54,7 +54,6 @@ SOURCES += CExtendedKeyUsageHelper.cpp
 SOURCES += CExtension.cpp
 SOURCES += CExtensionHelper.cpp
 SOURCES += ExtensionValue.cpp
-
 SOURCES += CExtensions.cpp
 SOURCES += CExtensionsHelper.cpp
 SOURCES += CGeneralName.cpp
@@ -72,13 +71,16 @@ SOURCES += CInvalidityDate.cpp
 SOURCES += CInvalidityDateHelper.cpp
 SOURCES += CIssuingDistributionPoint.cpp
 SOURCES += CIssuingDistributionPointHelper.cpp
+
 SOURCES += CKeyUsage.cpp
 SOURCES += CNameConstraints.cpp
 SOURCES += CNameConstraintsHelper.cpp
+
 SOURCES += CORAddress.cpp
 SOURCES += CORAddressHelper.cpp
 SOURCES += COtherName.cpp
 SOURCES += COtherNameHelper.cpp
+
 SOURCES += CPolicyConstraints.cpp
 SOURCES += CPolicyConstraintsHelper.cpp
 SOURCES += CPolicyInformation.cpp

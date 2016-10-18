@@ -1,5 +1,6 @@
 
 #include "org/apache/harmony/security/x509/CCertificateIssuer.h"
+#include "org/apache/harmony/security/x509/CGeneralName.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
@@ -56,15 +57,14 @@ ECode CCertificateIssuer::MyASN1Sequence::GetValues(
 AutoPtr<IASN1Type> CCertificateIssuer::initASN1()
 {
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(1);
-    assert(0);
-    //array->Set(0, IASN1Type::Probe(GeneralName::ASN1));
+    array->Set(0, IASN1Type::Probe(CGeneralName::ASN1));
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence();
     tmp->constructor(array);
     return IASN1Type::Probe(tmp);
 }
 
-AutoPtr<IASN1Type> CCertificateIssuer::ASN1;// = initASN1();
+AutoPtr<IASN1Type> CCertificateIssuer::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CCertificateIssuer)
 

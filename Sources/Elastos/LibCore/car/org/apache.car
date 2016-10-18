@@ -1017,6 +1017,7 @@ module
         interface ITSTInfoHelper;
     }
 
+    [deprecated]
     class CTimeStampReq {
         constructor(
             [in] Int32 ver,
@@ -1025,6 +1026,15 @@ module
             [in] IBigInteger* pNonce,
             [in] Boolean certReq,
             [in] Org.Apache.Harmony.Security.X509.IExtensions* pExtensions);
+
+        constructor(
+            [in] Int32 ver,
+            [in] IMessageImprint* messageImprint,
+            [in] String reqPolicy,
+            [in] IBigInteger* nonce,
+            [in] Boolean certReq,
+            [in] Org.Apache.Harmony.Security.X509.IExtensions* extensions,
+            [in] ArrayOf<Byte>* encoding);
 
         interface ITimeStampReq;
     }
@@ -1364,11 +1374,16 @@ module
         interface IGeneralNameHelper;
     }
 
+    [deprecated]
     class CGeneralNames {
         constructor();
 
         constructor(
             [in] IList* pGeneralNames);
+
+        constructor(
+            [in] IList* generalNames,
+            [in] ArrayOf<Byte>* encoding);
 
         interface IGeneralNames;
     }
@@ -1401,8 +1416,11 @@ module
         interface IGeneralSubtreesHelper;
     }
 
+    [deprecated]
     class CInfoAccessSyntax {
-        constructor();
+        constructor(
+            [in] IList* accessDescriptions,
+            [in] ArrayOf<Byte>* encoding);
 
         interface IInfoAccessSyntax;
         interface IExtensionValue;
@@ -1425,6 +1443,9 @@ module
     class CInvalidityDate {
         constructor(
             [in] ArrayOf<Byte>* pEncoding);
+
+        constructor(
+            [in] IDate* date);
 
         interface IInvalidityDate;
         interface IExtensionValue;
@@ -1456,10 +1477,16 @@ module
         interface IExtensionValue;
     }
 
+    [deprecated]
     class CNameConstraints {
         constructor(
             [in] IGeneralSubtrees* pPermittedSubtrees,
             [in] IGeneralSubtrees* pExcludedSubtrees);
+
+        constructor(
+            [in] IGeneralSubtrees* permittedSubtrees,
+            [in] IGeneralSubtrees* excludedSubtrees,
+            [in] ArrayOf<Byte>* encoding);
 
         interface INameConstraints;
         interface IExtensionValue;
@@ -1484,6 +1511,11 @@ module
         constructor(
             [in] String typeID,
             [in] ArrayOf<Byte>* pValue);
+
+        constructor(
+            [in] String typeID,
+            [in] ArrayOf<Byte>* value,
+            [in] ArrayOf<Byte>* encoding);
 
         interface IOtherName;
     }
