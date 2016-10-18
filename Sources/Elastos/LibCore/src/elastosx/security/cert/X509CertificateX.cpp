@@ -2,12 +2,14 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "X509CertificateX.h"
 #include "CByteArrayInputStream.h"
-// #include "CSecurity.h"
-// #include "CCertificateFactoryHelper.h"
+#include "CSecurity.h"
+#include "CCertificateFactoryHelper.h"
 
 using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::CByteArrayInputStream;
-// using Elastos::Security::Security;
+using Elastos::Security::CSecurity;
+using Elastos::Security::ISecurity;
+using Elastos::Security::Cert::CCertificateFactoryHelper;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::ICertificateFactoryHelper;
 
@@ -20,11 +22,9 @@ CAR_INTERFACE_IMPL(X509Certificate, Certificate, IX509Certificate)
 ECode X509Certificate::PrepairConstructor()
 {
     String classname(NULL);
-#if 0 // TODO: Waiting for Elastos::Security::Security
-    FAIL_RETURN(Elastos::Security::Security::GetProperty(String("cert.provider.x509v1"), &classname));
-#else
-    assert(0);
-#endif
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    FAIL_RETURN(security->GetProperty(String("cert.provider.x509v1"), &classname));
     const String moduleName("/data/data/com.elastos.runtime/elastos/Elastos.CoreLibrary.eco");
 
     FAIL_RETURN(_CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&X509Certificate::sModuleInfo));
@@ -42,8 +42,7 @@ ECode X509Certificate::PrepairConstructor()
 // }
 AutoPtr<IModuleInfo> X509Certificate::sModuleInfo = NULL;
 AutoPtr<IClassInfo> X509Certificate::sClassInfo = NULL;
-//TODO:
-const ECode X509Certificate::sConstructorState;// = PrepairConstructor();
+const ECode X509Certificate::sConstructorState = PrepairConstructor();
 
 ECode X509Certificate::GetInstance(
     /* [in] */ IInputStream* inStream,
@@ -77,11 +76,7 @@ ERROR_PROCESS_1:
     AutoPtr<Elastos::Security::Cert::IX509Certificate> cert;
     AutoPtr<ICertificateFactory> cf;
     AutoPtr<ICertificateFactoryHelper> cfh;
-#if 0 // TODO: Waiting for CCertificateFactoryHelper
     CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&cfh);
-#else
-    assert(0);
-#endif
     FAIL_RETURN(cfh->GetInstance(String("X.509"), (ICertificateFactory**)&cf));
     AutoPtr<Elastos::Security::Cert::ICertificate> tmpCert;
     FAIL_RETURN(cf->GenerateCertificate(inStream, (Elastos::Security::Cert::ICertificate**)&tmpCert));
@@ -148,12 +143,7 @@ ERROR_PROCESS_1:
         {
             VALIDATE_NOT_NULL(date)
 
-#if 0 // TODO: Waiting for Elastos::Security::Cert::IX509Certificate
             return mCert->CheckValidity(date);
-#else
-            assert(0);
-            return NOERROR;
-#endif
         }
 
         ECode GetVersion(

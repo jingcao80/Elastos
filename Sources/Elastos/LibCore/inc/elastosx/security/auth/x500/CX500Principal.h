@@ -3,6 +3,7 @@
 #define __ELASTOSX_SECURITY_AUTH_X500_CX500PRINCIPAL_H__
 
 #include "_Elastosx_Security_Auth_X500_CX500Principal.h"
+#include "Elastos.CoreLibrary.Apache.h"
 #include "Object.h"
 
 using Elastos::IO::IInputStream;
@@ -10,7 +11,7 @@ using Elastos::IO::IObjectOutputStream;
 using Elastos::IO::IObjectInputStream;
 using Elastos::Utility::IMap;
 using Elastos::Security::IPrincipal;
-// using Org::Apache::Harmony::Security::X501::IName;
+using Org::Apache::Harmony::Security::X501::IName;
 
 namespace Elastosx {
 namespace Security {
@@ -143,8 +144,7 @@ private:
 
     //Distinguished Name
     // transient
-    // TODO: Waiting for IName
-    // AutoPtr<IName> mDn;
+    AutoPtr<IName> mDn;
 
     String mCanonicalName;
 

@@ -60,6 +60,7 @@ module
     merge("apache/harmony/security/utils/IObjectIdentifier.car");
     merge("apache/harmony/security/utils/IJarUtils.car");
     merge("apache/harmony/security/utils/IAlgNameMapperSource.car");
+    merge("apache/harmony/security/utils/IAlgNameMapper.car");
 
     merge("apache/harmony/security/x501/IAttributeValue.car");
     merge("apache/harmony/security/x501/IAttributeTypeAndValue.car");
@@ -967,6 +968,10 @@ module
             [in] IInterface* oidGroup);
 
         interface Org.Apache.Harmony.Security.Utils.IObjectIdentifier;
+    }
+
+    singleton class CAlgNameMapperHelper {
+        interface IAlgNameMapperHelper;
     }
 
     } // namespace Utils

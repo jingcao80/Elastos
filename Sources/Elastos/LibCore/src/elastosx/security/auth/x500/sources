@@ -7,14 +7,18 @@ C_DEFINES += -DELASTOS_CORELIBRARY
 include $(MAKEDIR)/../../../../sources.inc
 
 INCLUDES += ../../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastosx/security/auth
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastosx/security/auth/callback
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastosx/security/auth/x500
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastosx/security/cert
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/core
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/io
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/security
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/security/cert
 INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/utility
+INCLUDES += $(MAKEDIR)/../../../../../inc/org/apache/harmony/security/asn1
+INCLUDES += $(MAKEDIR)/../../../../../inc/org/apache/harmony/security/x501
 
 SOURCES += CX500Principal.cpp

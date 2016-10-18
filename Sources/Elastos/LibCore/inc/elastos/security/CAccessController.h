@@ -21,16 +21,16 @@ public:
         /* [in] */ IPrivilegedAction *action,
         /* [out] */ IInterface **result);
 
-    CARAPI DoPrivilegedEx(
+    CARAPI DoPrivileged(
         /* [in] */ IPrivilegedAction *action,
         /* [in] */ IAccessControlContext *context,
         /* [out] */ IInterface **result);
 
-    CARAPI DoPrivilegedEx2(
+    CARAPI DoPrivileged(
         /* [in] */ IPrivilegedExceptionAction *action,
         /* [out] */ IInterface **result);
 
-    CARAPI DoPrivilegedEx3(
+    CARAPI DoPrivileged(
         /* [in] */ IPrivilegedExceptionAction *action,
         /* [in] */ IAccessControlContext *context,
         /* [out] */ IInterface **result);
@@ -39,7 +39,7 @@ public:
         /* [in] */ IPrivilegedAction *action,
         /* [out] */ IInterface **result);
 
-    CARAPI DoPrivilegedWithCombinerEx(
+    CARAPI DoPrivilegedWithCombiner(
         /* [in] */ IPrivilegedExceptionAction *action,
         /* [out] */ IInterface **result);
 

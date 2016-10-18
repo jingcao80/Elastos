@@ -1,9 +1,16 @@
 
 #include "X509CRLEntry.h"
 #include <elastos/utility/Arrays.h>
+#include "org/apache/harmony/security/asn1/CASN1OctetString.h"
+#include "org/apache/harmony/security/x509/CReasonCode.h"
 
-using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Elastos::Core::IByte;
 using Elastos::Utility::Arrays;
+using Org::Apache::Harmony::Security::Asn1::CASN1OctetString;
+using Org::Apache::Harmony::Security::Asn1::IASN1OctetString;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::X509::CReasonCode;
+using Org::Apache::Harmony::Security::X509::IReasonCode;
 
 namespace Elastos {
 namespace Security {
@@ -84,28 +91,26 @@ ECode X509CRLEntry::GetRevocationReason(
         return NOERROR;
     }
 
-    assert(0 && "TODO: Need ReasonCode");
-
     // // try {
-    // Int32 count = 0;
-    // AutoPtr<IASN1Type> asn;
-    // AutoPtr<IInterface> obj;
-    // AutoPtr<ArrayOf<Byte> > rawBytes;
-    // AutoPtr<IReasonCode> rc;
-    // FAIL_GOTO(CASN1OctetString::GetInstance((IASN1Type**)&asn), fail);
-    // FAIL_GOTO(asn->Decode(reasonBytes, (IInterface**)&obj), fail);
-    // assert(IArrayOf::Probe(obj) != NULL);
-    // obj->GetLength(&count);
-    // rawBytes = ArrayOf<Byte>::Alloc(count);
-    // for (Int32 i = 0; i < count; i++) {
-    //     AutoPtr<IInterface> item;
-    //     IArrayOf::Probe(obj)->Get(i, (IInterface**)&item);
-    //     assert(IByte::Probe(item) != NULL);
-    //     IByte::Probe(item)->GetValue(&((*rawBytes)[i]));
-    // }
+    Int32 count = 0;
+    AutoPtr<IASN1OctetString> asn;
+    AutoPtr<IInterface> obj;
+    AutoPtr<ArrayOf<Byte> > rawBytes;
+    AutoPtr<IReasonCode> rc;
+    FAIL_GOTO(CASN1OctetString::GetInstance((IASN1OctetString**)&asn), fail);
+    FAIL_GOTO(IASN1Type::Probe(asn)->Decode(reasonBytes, (IInterface**)&obj), fail);
+    assert(IArrayOf::Probe(obj) != NULL);
+    IArrayOf::Probe(obj)->GetLength(&count);
+    rawBytes = ArrayOf<Byte>::Alloc(count);
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IInterface> item;
+        IArrayOf::Probe(obj)->Get(i, (IInterface**)&item);
+        assert(IByte::Probe(item) != NULL);
+        IByte::Probe(item)->GetValue(&((*rawBytes)[i]));
+    }
 
-    // FAIL_GOTO(CReasonCode::New(rawBytes, (IReasonCode**)&rc), fail);
-    // FAIL_GOTO(rc->GetReason(reason), fail);
+    FAIL_GOTO(CReasonCode::New(rawBytes, (IReasonCode**)&rc), fail);
+    *reason = ((CReasonCode*)rc.Get())->GetReason();
     return NOERROR;
     // } catch (IOException e) {
     //     *reason = CRLReason_NULL;

@@ -7,6 +7,7 @@
 #include "Elastos.CoreLibrary.Libcore.h"
 #include "org/apache/harmony/security/fortress/CEngine.h"
 #include "org/apache/harmony/security/fortress/Services.h"
+#include "org/apache/harmony/security/provider/crypto/CSHA1PRNG_SecureRandomImpl.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Libcore::IO::ISizeOf;
@@ -15,6 +16,7 @@ using Org::Apache::Harmony::Security::Fortress::CEngine;
 using Org::Apache::Harmony::Security::Fortress::Services;
 using Org::Apache::Harmony::Security::Fortress::IServices;
 using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
+using Org::Apache::Harmony::Security::Provider::Crypto::CSHA1PRNG_SecureRandomImpl;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -42,8 +44,7 @@ ECode CSecureRandom::constructor()
     Services::GetSecureRandomService((IProviderService**)&service);
     if (service == NULL) {
         mProvider = NULL;
-        Logger::D("CSecureRandom", "TODO: Need SHA1PRNG_SecureRandomImpl");
-        // mSecureRandomSpi = new SHA1PRNG_SecureRandomImpl();
+        CSHA1PRNG_SecureRandomImpl::New((ISecureRandomSpi**)&mSecureRandomSpi);
         mAlgorithm = String("SHA1PRNG");
     }
     else {

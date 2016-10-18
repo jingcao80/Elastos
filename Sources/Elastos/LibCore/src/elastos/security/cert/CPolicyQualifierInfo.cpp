@@ -1,8 +1,17 @@
 
 #include "CPolicyQualifierInfo.h"
 #include "StringBuilder.h"
+#include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
+#include "org/apache/harmony/security/x509/CPolicyQualifierInfoHelper.h"
 
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IByte;
+using Elastos::Core::IInteger32;
 using Elastos::Core::StringBuilder;
+using Org::Apache::Harmony::Security::Asn1::CObjectIdentifier;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::X509::CPolicyQualifierInfoHelper;
+using Org::Apache::Harmony::Security::X509::IPolicyQualifierInfoHelper;
 
 namespace Elastos {
 namespace Security {
@@ -68,19 +77,42 @@ ECode CPolicyQualifierInfo::constructor(
     mEncoded = ArrayOf<Byte>::Alloc(encoded->GetLength());
     mEncoded->Copy(0, encoded, 0, mEncoded->GetLength());
 
-    assert(0 && "TODO");
     // DER Decoding:
-    //Apache...Todo late
-    /*
-    Object[] decoded = (Object[]) org.apache.harmony.security.x509.PolicyQualifierInfo.ASN1
-                .decode(this.encoded);
-    mPolicyQualifierId = ObjectIdentifier.toString((int[]) decoded[0]);
-    mPolicyQualifier = (byte[]) decoded[1];
-    */
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<IPolicyQualifierInfoHelper> helper;
+    CPolicyQualifierInfoHelper::AcquireSingleton((IPolicyQualifierInfoHelper**)&helper);
+    AutoPtr<IASN1Sequence> instance;
+    helper->GetASN1((IASN1Sequence**)&instance);
+    AutoPtr<IInterface> obj;
+    IASN1Type::Probe(instance)->Decode(mEncoded, (IInterface**)&obj);
+    AutoPtr<IArrayOf> decoded = IArrayOf::Probe(obj);
+
+    AutoPtr<IInterface> v0;
+    decoded->Get(0, (IInterface**)&v0);
+    AutoPtr<IArrayOf> ivs = IArrayOf::Probe(v0);
+    Int32 len = 0;
+    ivs->GetLength(&len);
+    AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> o;
+        ivs->Get(i, (IInterface**)&o);
+        IInteger32::Probe(o)->GetValue(&((*array)[i]));
+    }
+    CObjectIdentifier::ToString(array, &mPolicyQualifierId);
+
+    AutoPtr<IInterface> v1;
+    decoded->Get(1, (IInterface**)&v1);
+    ivs = IArrayOf::Probe(v1);
+    ivs->GetLength(&len);
+    mPolicyQualifier = ArrayOf<Byte>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> o;
+        ivs->Get(i, (IInterface**)&o);
+        IByte::Probe(o)->GetValue(&((*mPolicyQualifier)[i]));
+    }
+
+    return NOERROR;
 }
 
 }
 }
 }
-

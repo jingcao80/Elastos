@@ -1,15 +1,24 @@
 
 #include "KeyStore.h"
 #include "CSecurity.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
+
+using Org::Apache::Harmony::Security::Fortress::CEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastos {
 namespace Security {
 
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<CEngine> e;
+    CEngine::NewByFriend(String("KeyStore")/*SERVICE*/, (CEngine**)&e);
+    return e;
+}
+
 const String KeyStore::SERVICE("KeyStore");
 
-//Apache...Todo later
-// Used to access common engine functionality
-//private static final Engine ENGINE = new Engine(SERVICE);
+AutoPtr<IEngine> KeyStore::ENGINE = InitEngine();
 
 const String KeyStore::PROPERTYNAME("keystore.type");
 
@@ -40,16 +49,19 @@ ECode KeyStore::GetInstance(
     if (type.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    //Apache...Todo later
-    /*
-    try {
-        Engine.SpiAndProvider sap = ENGINE.getInstance(type, null);
-        return new KeyStore((KeyStoreSpi) sap.spi, sap.provider, type);
-    } catch (NoSuchAlgorithmException e) {
-        throw new KeyStoreException(e);
-    }
-    */
-    return E_NOT_IMPLEMENTED;
+    // try {
+    AutoPtr<ISpiAndProvider> sap;
+    ENGINE->GetInstance(type, NULL, (ISpiAndProvider**)&sap);
+    AutoPtr<IInterface> spi;
+    sap->GetSpi((IInterface**)&spi);
+    AutoPtr<IProvider> provider;
+    sap->GetProvider((IProvider**)&provider);
+    *instance = new KeyStore(IKeyStoreSpi::Probe(spi), provider, type);
+    REFCOUNT_ADD(*instance);
+    // } catch (NoSuchAlgorithmException e) {
+    //     throw new KeyStoreException(e);
+    // }
+    return NOERROR;
 }
 
 ECode KeyStore::GetInstance(
@@ -109,7 +121,7 @@ ECode KeyStore::GetDefaultType(
 }
 
 ECode KeyStore::GetProvider(
-    /* [out] */ IProvider **provider) const
+    /* [out] */ IProvider **provider)
 {
     VALIDATE_NOT_NULL(provider)
     *provider = mProvider;
@@ -118,7 +130,7 @@ ECode KeyStore::GetProvider(
 }
 
 ECode KeyStore::GetType(
-    /* [out] */ String *type) const
+    /* [out] */ String *type)
 {
     VALIDATE_NOT_NULL(type)
     *type = mType;
@@ -128,7 +140,7 @@ ECode KeyStore::GetType(
 ECode KeyStore::GetKey(
     /* [in] */ const String& alias,
     /* [in] */ ArrayOf<Char32> *password,
-    /* [out] */ IKey **key) const
+    /* [out] */ IKey **key)
 {
     if (!mIsInit) {
         return ThrowNotInitialized();

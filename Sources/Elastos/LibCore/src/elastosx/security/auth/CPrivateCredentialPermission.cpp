@@ -6,13 +6,7 @@ namespace Security {
 namespace Auth {
 
 CAR_OBJECT_IMPL(CPrivateCredentialPermission)
-
-#if 0 // TODO: Waiting for Permission
 CAR_INTERFACE_IMPL(CPrivateCredentialPermission, Permission, IPrivateCredentialPermission)
-#else
-CAR_INTERFACE_IMPL(CPrivateCredentialPermission, Object, IPrivateCredentialPermission)
-#endif
-
 ECode CPrivateCredentialPermission::GetActions(
     /* [out] */ String *actions)
 {
@@ -53,15 +47,9 @@ ECode CPrivateCredentialPermission::constructor(
     /* [in] */ const String& name,
     /* [in] */ const String& action)
 {
-#if 0 // TODO: Waiting for Permission
     return Permission::constructor(String(""));
-#else
-    assert(0);
-    return NOERROR;
-#endif
 }
 
 } // namespace Auth
 } // namespace Security
 } // namespace Elastosx
-

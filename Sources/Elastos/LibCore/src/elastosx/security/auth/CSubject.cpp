@@ -1,30 +1,21 @@
 
 #include "CSubject.h"
 #include "CAuthPermission.h"
-#if 0 // TODO: Waiting for AccessController
 #include "CAccessController.h"
-#endif
-#if 0 // TODO: Waiting for SubjectDomainCombiner
+#include "CAccessControlContext.h"
 #include "CSubjectDomainCombiner.h"
-#endif
 #include "StringBuilder.h"
 #include "CLinkedList.h"
 
 using Elastos::Core::StringBuilder;
-#if 0 // TODO: Waiting for AccessController
 using Elastos::Security::CAccessController;
-#endif
-#if 0 // TODO: Waiting for AccessControlContext
 using Elastos::Security::CAccessControlContext;
-#endif
 using Elastos::Security::IAccessController;
 using Elastos::Security::IProtectionDomain;
 using Elastos::Utility::EIID_IIterator;
 using Elastos::Utility::EIID_ISet;
 using Elastos::Utility::CLinkedList;
-#if 0 // TODO: Waiting for SubjectDomainCombiner
 using Elastosx::Security::Auth::CSubjectDomainCombiner;
-#endif
 using Elastos::Utility::EIID_ICollection;
 using Elastos::Core::IInteger16;
 using Elastos::Core::IInteger32;
@@ -81,11 +72,7 @@ ECode CSubject::DoAs(
 
     AutoPtr<IAccessController> ac;
     AutoPtr<IAccessControlContext> acc;
-#if 0 // TODO: Waiting for CAccessController
     CAccessController::AcquireSingleton((IAccessController**)&ac);
-#else
-    assert(0);
-#endif
     ac->GetContext((IAccessControlContext**)&acc);
     return DoAs_PrivilegedAction(subject, action, acc, obj);
 }
@@ -104,11 +91,7 @@ ECode CSubject::DoAsPrivileged(
     if (NULL == context) {
         AutoPtr<ArrayOf<IProtectionDomain*> > context = ArrayOf<IProtectionDomain*>::Alloc(0);
         AutoPtr<IAccessControlContext> acc;
-#if 0 // TODO: Waiting for CAccessControlContext
         CAccessControlContext::New(context, (IAccessControlContext**)&acc);
-#else
-        assert(0);
-#endif
         return DoAs_PrivilegedAction(subject, action, acc, obj);
     }
     return DoAs_PrivilegedAction(subject, action, context, obj);
@@ -126,11 +109,7 @@ ECode CSubject::DoAs(
 
     AutoPtr<IAccessController> ac;
     AutoPtr<IAccessControlContext> acc;
-#if 0 // TODO: Waiting for CAccessController
     CAccessController::AcquireSingleton((IAccessController**)&ac);
-#else
-    assert(0);
-#endif
     ac->GetContext((IAccessControlContext**)&acc);
     return DoAs_PrivilegedExceptionAction(subject, action, acc, obj);
 }
@@ -149,11 +128,7 @@ ECode CSubject::DoAsPrivileged(
     if (NULL == context) {
         AutoPtr<ArrayOf<IProtectionDomain*> > pd = ArrayOf<IProtectionDomain*>::Alloc(0);
         AutoPtr<IAccessControlContext> acc;
-#if 0 // TODO: Waiting for CAccessControlContext
         CAccessControlContext::New(pd, (IAccessControlContext**)&acc);
-#else
-    assert(0);
-#endif
         return DoAs_PrivilegedExceptionAction(subject, action, acc, obj);
     }
     return DoAs_PrivilegedExceptionAction(subject, action, context, obj);
@@ -197,11 +172,7 @@ ECode CSubject::GetSubject(
     };
     AutoPtr<IPrivilegedAction> action = new InnerSub_PrivilegedAction(context);
     AutoPtr<IAccessController> ac;
-#if 0 // TODO: Waiting for CAccessController
     CAccessController::AcquireSingleton((IAccessController**)&ac);
-#else
-    assert(0);
-#endif
     AutoPtr<IInterface> cmb;
     ac->DoPrivileged(action, (IInterface**)&cmb);
     AutoPtr<IDomainCombiner> combiner = IDomainCombiner::Probe(cmb);
@@ -445,11 +416,7 @@ ECode CSubject::DoAs_PrivilegedAction(
         combiner = NULL;
     }
     else {
-#if 0 // TODO: Waiting for CSubjectDomainCombiner
         CSubjectDomainCombiner::New(subject, (ISubjectDomainCombiner**)&combiner);
-#else
-        assert(0);
-#endif
     }
 
     class InnerSub_PrivilegedAction
@@ -467,12 +434,12 @@ ECode CSubject::DoAs_PrivilegedAction(
             VALIDATE_NOT_NULL(result)
             *result = NULL;
 
-#if 0 // TODO: Waiting for CAccessControlContext
-            return CAccessControlContext::New(mContext, mCombiner, result);
-#else
-            assert(0);
+            AutoPtr<IAccessControlContext> cc;
+            CAccessControlContext::New(mContext, IDomainCombiner::Probe(mCombiner)
+                    , (IAccessControlContext**)&cc);
+            *result = cc;
+            REFCOUNT_ADD(*result);
             return NOERROR;
-#endif
         }
     private:
         AutoPtr<IAccessControlContext> mContext;
@@ -480,20 +447,11 @@ ECode CSubject::DoAs_PrivilegedAction(
     };
     AutoPtr<IPrivilegedAction> dccAction = new InnerSub_PrivilegedAction(context, combiner);
     AutoPtr<IAccessController> ac;
-#if 0 // TODO: Waiting for CAccessController
     CAccessController::AcquireSingleton((IAccessController**)&ac);
-#else
-    assert(0);
-#endif
     AutoPtr<IInterface> priv;
     ac->DoPrivileged(dccAction, (IInterface**)&priv);
     newContext = IAccessControlContext::Probe(priv);
-#if 0 // TODO: Waiting for IAccessController
     return ac->DoPrivileged(action, newContext, ret);
-#else
-    assert(0);
-    return NOERROR;
-#endif
 }
 
 ECode CSubject::DoAs_PrivilegedExceptionAction(
@@ -515,11 +473,7 @@ ECode CSubject::DoAs_PrivilegedExceptionAction(
         combiner = NULL;
     }
     else {
-#if 0 // TODO: Waiting for CSubjectDomainCombiner
         CSubjectDomainCombiner::New(subject, (ISubjectDomainCombiner**)&combiner);
-#else
-        assert(0);
-#endif
     }
 
     class InnerSub_PrivilegedAction
@@ -537,12 +491,12 @@ ECode CSubject::DoAs_PrivilegedExceptionAction(
             VALIDATE_NOT_NULL(result)
             *result = NULL;
 
-#if 0 // TODO: Waiting for CAccessControlContext
-            return CAccessControlContext::New(mContext, mCombiner, result);
-#else
-            assert(0);
+            AutoPtr<IAccessControlContext> cc;
+            CAccessControlContext::New(mContext, IDomainCombiner::Probe(mCombiner)
+                    , (IAccessControlContext**)&cc);
+            *result = cc;
+            REFCOUNT_ADD(*result);
             return NOERROR;
-#endif
         }
     private:
         AutoPtr<IAccessControlContext> mContext;
@@ -551,20 +505,11 @@ ECode CSubject::DoAs_PrivilegedExceptionAction(
 
     AutoPtr<IPrivilegedAction> dccAction = new InnerSub_PrivilegedAction(context, combiner);
     AutoPtr<IAccessController> ac;
-#if 0 // TODO: Waiting for CAccessController
     CAccessController::AcquireSingleton((IAccessController**)&ac);
-#else
-    assert(0);
-#endif
     AutoPtr<IInterface> priv;
     ac->DoPrivileged(dccAction, (IInterface**)&priv);
     newContext = IAccessControlContext::Probe(priv);
-#if 0 // TODO: Waiting for IAccessController
     return ac->DoPrivileged(action, newContext, ret);
-#else
-    assert(0);
-    return NOERROR;
-#endif
 }
 
 ECode CSubject::CheckState()

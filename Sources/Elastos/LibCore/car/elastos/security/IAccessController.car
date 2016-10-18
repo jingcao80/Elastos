@@ -20,7 +20,7 @@ module
         /**
          * Calls {@code action.run()}.
          */
-        DoPrivilegedEx(
+        DoPrivileged(
             [in] IPrivilegedAction* action,
             [in] IAccessControlContext* context,
             [out] IInterface** result);
@@ -28,14 +28,14 @@ module
         /**
          * Calls {@code action.run()}.
          */
-        DoPrivilegedEx2(
+        DoPrivileged(
             [in] IPrivilegedExceptionAction* action,
             [out] IInterface** result);
 
         /**
          * Calls {@code action.run()}.
          */
-        DoPrivilegedEx3(
+        DoPrivileged(
             [in] IPrivilegedExceptionAction* action,
             [in] IAccessControlContext* context,
             [out] IInterface** result);
@@ -50,7 +50,7 @@ module
         /**
          * Calls {@code action.run()}.
          */
-        DoPrivilegedWithCombinerEx(
+        DoPrivilegedWithCombiner(
             [in] IPrivilegedExceptionAction* action,
             [out] IInterface** result);
 

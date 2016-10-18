@@ -3,8 +3,7 @@
 #define __ELASTOS_SECURITY_CERT_CCERTIFICATEFACTORYHELPER_H__
 
 #include "_Elastos_Security_Cert_CCertificateFactoryHelper.h"
-
-#include "core/Singleton.h"
+#include "Singleton.h"
 
 using Elastos::Core::Singleton;
 using Elastos::Security::IProvider;

@@ -10,6 +10,7 @@ using Elastos::Utility::IDate;
 using Elastos::Utility::IEnumeration;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
 
 namespace Elastos {
 namespace Security {
@@ -39,15 +40,15 @@ public:
         /* [out] */ String *defaultType);
 
     CARAPI GetProvider(
-        /* [out] */ IProvider **provider) const;
+        /* [out] */ IProvider **provider);
 
     CARAPI GetType(
-        /* [out] */ String *type) const;
+        /* [out] */ String *type);
 
     CARAPI GetKey(
         /* [in] */ const String& alias,
         /* [in] */ ArrayOf<Char32> *password,
-        /* [out] */ IKey **key) const;
+        /* [out] */ IKey **key);
 
     CARAPI GetCertificateChain(
         /* [in] */ const String& alias,
@@ -160,7 +161,7 @@ private:
 
     //Apache...Todo later
     // Used to access common engine functionality
-    //private static final Engine ENGINE = new Engine(SERVICE);
+    static AutoPtr<IEngine> ENGINE;
 
     //  Store KeyStore property name
     static const String PROPERTYNAME;// = "keystore.type";

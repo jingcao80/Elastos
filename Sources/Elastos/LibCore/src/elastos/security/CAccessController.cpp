@@ -14,7 +14,7 @@ ECode CAccessController::DoPrivileged(
     return action->Run(result);
 }
 
-ECode CAccessController::DoPrivilegedEx(
+ECode CAccessController::DoPrivileged(
     /* [in] */ IPrivilegedAction *action,
     /* [in] */ IAccessControlContext *context,
     /* [out] */ IInterface **result)
@@ -22,7 +22,7 @@ ECode CAccessController::DoPrivilegedEx(
     return action->Run(result);
 }
 
-ECode CAccessController::DoPrivilegedEx2(
+ECode CAccessController::DoPrivileged(
     /* [in] */ IPrivilegedExceptionAction *action,
     /* [out] */ IInterface **result)
 {
@@ -33,12 +33,12 @@ ECode CAccessController::DoPrivilegedEx2(
     return ec;
 }
 
-ECode CAccessController::DoPrivilegedEx3(
+ECode CAccessController::DoPrivileged(
     /* [in] */ IPrivilegedExceptionAction *action,
     /* [in] */ IAccessControlContext *context,
     /* [out] */ IInterface **result)
 {
-    return DoPrivilegedEx2(action, result);
+    return DoPrivileged(action, result);
 }
 
 ECode CAccessController::DoPrivilegedWithCombiner(
@@ -48,11 +48,11 @@ ECode CAccessController::DoPrivilegedWithCombiner(
     return action->Run(result);
 }
 
-ECode CAccessController::DoPrivilegedWithCombinerEx(
+ECode CAccessController::DoPrivilegedWithCombiner(
     /* [in] */ IPrivilegedExceptionAction *action,
     /* [out] */ IInterface **result)
 {
-    return DoPrivilegedEx2(action, result);
+    return DoPrivileged(action, result);
 }
 
 ECode CAccessController::CheckPermission(

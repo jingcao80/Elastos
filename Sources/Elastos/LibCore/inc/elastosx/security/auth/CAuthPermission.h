@@ -3,30 +3,18 @@
 #define __ELASTOSX_SECURITY_AUTH_CAUTHPERMISSION_H__
 
 #include "_Elastosx_Security_Auth_CAuthPermission.h"
-#if 0 // TODO: Waiting for BasicPermission
 #include "BasicPermission.h"
-#else
-#include "Object.h"
-#endif
 
 using Elastos::Security::IPermissionCollection;
 using Elastos::Security::IPermission;
-#if 0 // TODO: Waiting for BasicPermission
 using Elastos::Security::BasicPermission;
-#else
-using Elastos::Core::Object;
-#endif
 
 namespace Elastosx {
 namespace Security {
 namespace Auth {
 
 CarClass(CAuthPermission)
-#if 0 // TODO: Waiting for BasicPermission
     , public BasicPermission
-#else
-    , public Object
-#endif
     , public IAuthPermission
 {
 public:

@@ -4,10 +4,15 @@
 #include "CString.h"
 #include "StringBuilder.h"
 #include "AutoLock.h"
+#include "org/apache/harmony/security/x501/CName.h"
 
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
+using Elastos::Security::EIID_IPrincipal;
+using Elastos::Security::IPrincipal;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::X501::CName;
 
 namespace Elastosx {
 namespace Security {
@@ -15,12 +20,7 @@ namespace Auth {
 namespace X500 {
 
 CAR_OBJECT_IMPL(CX500Principal)
-
-#if 0 // TODO: Waiting for IPrincipal
 CAR_INTERFACE_IMPL_2(CX500Principal, Object, IX500Principal, IPrincipal)
-#else
-CAR_INTERFACE_IMPL(CX500Principal, Object, IX500Principal)
-#endif
 
 const Int64 mSerialVersionUID = -500463348111345721L;
 
@@ -31,11 +31,7 @@ ECode CX500Principal::GetEncoded(
     *encodedName = NULL;
 
     AutoPtr<ArrayOf<Byte> > src;
-#if 0 // TODO: Waiting for IName
     FAIL_RETURN(mDn->GetEncoded((ArrayOf<Byte>**)&src));
-#else
-    assert(0);
-#endif
     AutoPtr<ArrayOf<Byte> > dst = ArrayOf<Byte>::Alloc(src->GetLength());
     dst->Copy(0, src, 0, dst->GetLength());
     *encodedName = dst;
@@ -52,12 +48,7 @@ ECode CX500Principal::GetName(
     if (CANONICAL.Equals(format)) {
         return GetCanonicalName(name);
     }
-#if 0 // TODO: Waiting for Iname
     return mDn->GetName(format, name);
-#else
-    assert(0);
-    return NOERROR;
-#endif
 }
 
 ECode CX500Principal::GetName(
@@ -70,17 +61,9 @@ ECode CX500Principal::GetName(
     VALIDATE_NOT_NULL(oidMap)
 
     String rfc1779Name;
-#if 0 // TODO: Waiting for Iname
     mDn->GetName(RFC1779, &rfc1779Name);
-#else
-    assert(0);
-#endif
     String rfc2253Name;
-#if 0 // TODO: Waiting for Iname
     mDn->GetName(RFC2253, &rfc2253Name);
-#else
-    assert(0);
-#endif
 
     if (format.EqualsIgnoreCase("RFC1779")) {
         AutoPtr<StringBuilder> resultName = new StringBuilder(rfc1779Name);
@@ -192,12 +175,7 @@ ECode CX500Principal::GetName(
     VALIDATE_NOT_NULL(pName);
     *pName = String(NULL);
 
-#if 0 // TODO: Waiting for Iname
     return mDn->GetName(RFC2253, pName);
-#else
-    assert(0);
-    return NOERROR;
-#endif
 }
 
 ECode CX500Principal::GetHashCode(
@@ -218,11 +196,7 @@ ECode CX500Principal::ToString(
     VALIDATE_NOT_NULL(pStr)
     *pStr = String(NULL);
 
-#if 0 // TODO: Waiting for Iname
     mDn->GetName(RFC1779, pStr);
-#else
-    assert(0);
-#endif
     return NOERROR;
 }
 
@@ -236,12 +210,10 @@ ECode CX500Principal::constructor(
     }
     // try {
         // FIXME dn = new Name(name);
-#if 0 // TODO: Waiting for IName
-    return IName::ASN1->Probe(EIID_IASN1Type)->Decode(name, (IName**)&mDn);
-#else
-    assert(0);
+    AutoPtr<IInterface> o;
+    IASN1Type::Probe(CName::ASN1)->Decode(name, (IInterface**)&o);
+    mDn = IName::Probe(o);
     return NOERROR;
-#endif
     // } catch (IOException e) {
         // throw incorrectInputEncoding(e);
     // }
@@ -257,12 +229,10 @@ ECode CX500Principal::constructor(
     }
     // try {
         // FIXME dn = new Name(is);
-#if 0 // TODO: Waiting for IName
-    return IName::ASN1->Probe(EIID_IASN1Type)->Decode(in, (IName**)&mDn);
-#else
-    assert(0);
+    AutoPtr<IInterface> o;
+    return IASN1Type::Probe(CName::ASN1)->Decode(in, (IInterface**)&o);
+    mDn = IName::Probe(o);
     return NOERROR;
-#endif
     // } catch (IOException e) {
         // throw incorrectInputEncoding(e);
     // }
@@ -275,12 +245,7 @@ ECode CX500Principal::constructor(
         return E_NULL_POINTER_EXCEPTION;
     }
     // try {
-#if 0 // TODO: Waiting for IName
-    return IName::New(name, &mDn);
-#else
-    assert(0);
-    return NOERROR;
-#endif
+    return CName::New(name, (IName**)&mDn);
     // } catch (IOException e) {
         // throw incorrectInputName(e, name);
     // }
@@ -298,12 +263,7 @@ ECode CX500Principal::constructor(
     // try {
     String s;
     FAIL_RETURN(SubstituteNameFromMap(name, keywordMap, &s));
-#if 0 // TODO: Waiting for Iname
-    return IName::New(s, &mDn);
-#else
-    assert(0);
-    return NOERROR;
-#endif
+    return CName::New(s, (IName**)&mDn);
     // } catch (IOException e) {
         // throw incorrectInputName(e, name);
     // }
@@ -317,11 +277,7 @@ ECode CX500Principal::GetCanonicalName(
 
     AutoLock lock(mLock);
     if (mCanonicalName.IsNull()) {
-#if 0 // TODO: Waiting for Iname
         mDn->GetName(CANONICAL, &mCanonicalName);
-#else
-    assert(0);
-#endif
     }
     *name = mCanonicalName;
     return NOERROR;
