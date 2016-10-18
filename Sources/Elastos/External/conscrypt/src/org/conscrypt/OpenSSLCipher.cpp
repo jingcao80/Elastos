@@ -5,8 +5,7 @@
 #include <libcore/utility/EmptyArray.h>
 
 using Elastos::Core::StringUtils;
-//TODO: Need CAlgorithmParametersHelper
-// using Elastos::Security::CAlgorithmParametersHelper;
+using Elastos::Security::CAlgorithmParametersHelper;
 using Elastos::Security::CKeyFactoryHelper;
 using Elastos::Security::CSecureRandom;
 using Elastos::Security::IAlgorithmParametersHelper;
@@ -227,8 +226,8 @@ ECode OpenSSLCipher::EngineGetParameters(
         String name;
         GetBaseCipherName(&name);
         AutoPtr<IAlgorithmParametersHelper> helper;
-//TODO: Need CAlgorithmParametersHelper
-        // CAlgorithmParametersHelper::AcquireSingleton((IAlgorithmParametersHelper**)&helper);
+        CAlgorithmParametersHelper::AcquireSingleton(
+                (IAlgorithmParametersHelper**)&helper);
         AutoPtr<IAlgorithmParameters> params;
         helper->GetInstance(name, (IAlgorithmParameters**)&params);
         params->Init(mIv);

@@ -1,7 +1,6 @@
 #include "org/conscrypt/CDefaultSSLContextImpl.h"
 
-// TODO: Need CKeyStoreHelper
-// using Elastos::Security::CKeyStoreHelper;
+using Elastos::Security::CKeyStoreHelper;
 using Elastos::Security::IKeyStore;
 using Elastos::Security::IKeyStoreHelper;
 using Elastos::Core::CSystem;
@@ -59,8 +58,7 @@ ECode CDefaultSSLContextImpl::GetKeyManagers(
     AutoPtr<ArrayOf<Char32> > pwd = (keystorepwd == NULL) ? NULL : keystorepwd.GetChars();
 
     AutoPtr<IKeyStoreHelper> ksHelper;
-// TODO: Need CKeyStoreHelper
-    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
     String type;
     ksHelper->GetDefaultType(&type);
     AutoPtr<IKeyStore> ks;
@@ -118,8 +116,7 @@ ECode CDefaultSSLContextImpl::GetTrustManagers(
 
     // TODO Defaults: jssecacerts; cacerts
     AutoPtr<IKeyStoreHelper> ksHelper;
-// TODO: Need CKeyStoreHelper
-    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
     String type;
     ksHelper->GetDefaultType(&type);
     AutoPtr<IKeyStore> ks;

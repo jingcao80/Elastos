@@ -3,6 +3,7 @@
 #include "org/conscrypt/OpenSSLDHPublicKey.h"
 #include "org/conscrypt/OpenSSLKey.h"
 
+using Elastos::Security::EIID_IKeyFactorySpi;
 using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::CX509EncodedKeySpec;
 using Elastosx::Crypto::Interfaces::IDHKey;
@@ -12,9 +13,8 @@ using Elastosx::Crypto::Spec::CDHPublicKeySpec;
 namespace Org {
 namespace Conscrypt {
 
-CAR_INTERFACE_IMPL(OpenSSLDHKeyFactory, Object, IOpenSSLDHKeyFactory)
-// TODO: Need KeyFactorySpi
-// CAR_INTERFACE_IMPL(OpenSSLDHKeyFactory, KeyFactorySpi, IOpenSSLDHKeyFactory)
+CAR_INTERFACE_IMPL_2(OpenSSLDHKeyFactory, Object,
+        IOpenSSLDHKeyFactory, IKeyFactorySpi)
 
 ECode OpenSSLDHKeyFactory::constructor()
 {
@@ -81,7 +81,7 @@ ECode OpenSSLDHKeyFactory::EngineGeneratePrivate(
 
 ECode OpenSSLDHKeyFactory::EngineGetKeySpec(
     /* [in] */ IKey* key,
-    /* [in] */ ClassID keySpec,
+    /* [in] */ const ClassID& keySpec,
     /* [out] */ IKeySpec** result)
 {
     VALIDATE_NOT_NULL(result)

@@ -4,6 +4,7 @@
 #include "org/conscrypt/NativeCrypto.h"
 #include "org/conscrypt/OpenSSLKey.h"
 
+using Elastos::Security::EIID_IKeyFactorySpi;
 using Elastos::Security::Interfaces::IECKey;
 using Elastos::Security::Interfaces::IECPublicKey;
 using Elastos::Security::Spec::CECPrivateKeySpec;
@@ -20,9 +21,7 @@ using Elastos::Security::Spec::IX509EncodedKeySpec;
 namespace Org {
 namespace Conscrypt {
 
-CAR_INTERFACE_IMPL(OpenSSLECKeyFactory, Object, IOpenSSLECKeyFactory)
-// TODO: Need KeyFactorySpi
-// CAR_INTERFACE_IMPL(OpenSSLECKeyFactory, KeyFactorySpi, IOpenSSLECKeyFactory)
+CAR_INTERFACE_IMPL_2(OpenSSLECKeyFactory, Object, IOpenSSLECKeyFactory, IKeyFactorySpi)
 
 ECode OpenSSLECKeyFactory::constructor()
 {
@@ -89,7 +88,7 @@ ECode OpenSSLECKeyFactory::EngineGeneratePrivate(
 
 ECode OpenSSLECKeyFactory::EngineGetKeySpec(
     /* [in] */ IKey* key,
-    /* [in] */ ClassID keySpec,
+    /* [in] */ const ClassID& keySpec,
     /* [out] */ IKeySpec** result)
 {
     VALIDATE_NOT_NULL(result)

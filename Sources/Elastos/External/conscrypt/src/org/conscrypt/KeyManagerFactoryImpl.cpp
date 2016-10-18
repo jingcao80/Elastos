@@ -7,8 +7,7 @@ using Elastos::IO::CFileInputStream;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::IInputStream;
-// TODO: Need CKeyStoreHelper
-// using Elastos::Security::CKeyStoreHelper;
+using Elastos::Security::CKeyStoreHelper;
 using Elastos::Security::IKeyStore;
 using Elastos::Security::IKeyStoreHelper;
 using Elastos::Core::CSystem;
@@ -45,8 +44,7 @@ ECode KeyManagerFactoryImpl::EngineInit(
     }
     else {
         AutoPtr<IKeyStoreHelper> ksHelper;
-// TODO: Need CKeyStoreHelper
-        // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
+        CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
         String type;
         ksHelper->GetDefaultType(&type);
         ksHelper->GetInstance(type, (IKeyStore**)&mKeyStore);
