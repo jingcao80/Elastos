@@ -26,7 +26,9 @@ public:
 
     virtual ~CaptureResultExtras() {}
 
-    CaptureResultExtras(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ Int32 requestId,
         /* [in] */ Int32 subsequenceId,
         /* [in] */ Int32 afTriggerId,
@@ -59,23 +61,6 @@ public:
 
     CARAPI GetPartialResultCount(
         /* [out] */ Int32* count);
-
-    // public static final Parcelable.Creator<CaptureResultExtras> CREATOR =
-    //         new Parcelable.Creator<CaptureResultExtras>() {
-    //     @Override
-    //     public CaptureResultExtras createFromParcel(Parcel in) {
-    //         return new CaptureResultExtras(in);
-    //     }
-
-    //     @Override
-    //     public CaptureResultExtras[] newArray(int size) {
-    //         return new CaptureResultExtras[size];
-    //     }
-    // };
-
-private:
-    CaptureResultExtras(
-        /* [in] */ IParcel* source);
 
 private:
     Int32 mRequestId;

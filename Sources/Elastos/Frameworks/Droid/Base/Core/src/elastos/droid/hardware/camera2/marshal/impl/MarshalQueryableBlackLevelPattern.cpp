@@ -6,6 +6,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IBlackLevelPattern;
 using Elastos::Droid::Hardware::Camera2::Params::CBlackLevelPattern;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CBlackLevelPattern;
 using Elastos::Droid::Utility::ISize;
 using Elastos::Droid::Utility::CSize;
 
@@ -95,9 +96,15 @@ ECode MarshalQueryableBlackLevelPattern::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    // return nativeType == ICameraMetadataNative::TYPE_INT32 &&
-    //         (BlackLevelPattern.class.equals(managedType.getType()));
+    if (nativeType == ICameraMetadataNative::TYPE_INT32) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CBlackLevelPattern) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
+
     return NOERROR;
 }
 

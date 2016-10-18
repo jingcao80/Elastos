@@ -457,7 +457,7 @@ ECode UserSwitcherController::SettingsObserver::OnChange(
     Logger::I(TAG, " TODO >> UserSwitcherController::SettingsObserver::OnChange:"
         " mSimpleUserSwitcher: %d, mAddUsersWhenLocked: %d",
         mHost->mSimpleUserSwitcher,  mHost->mAddUsersWhenLocked);
-    mHost->mSimpleUserSwitcher = TRUE;
+    // mHost->mSimpleUserSwitcher = TRUE;
 
     mHost->RefreshUsers(IUserHandle::USER_NULL);
 

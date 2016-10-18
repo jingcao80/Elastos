@@ -4,6 +4,7 @@
 
 #include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
+#include "elastos/droid/systemui/keyguard/AppearAnimationUtils.h"
 #include "Elastos.Droid.Animation.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/database/DataSetObserver.h>
@@ -16,6 +17,7 @@ using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::SystemUI::Keyguard::AppearAnimationUtils;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IKeyguardStatusBarView;
 using Elastos::Droid::SystemUI::StatusBar::Phone::INotificationPanelView;
 using Elastos::Droid::View::IViewOnClickListener;
@@ -80,11 +82,11 @@ public:
     };
 
 private:
-    class AnimatorListenerAdapter1
+    class BgAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
-        AnimatorListenerAdapter1(
+        BgAnimatorListenerAdapter(
             /* [in] */ KeyguardUserSwitcher* host);
 
         CARAPI OnAnimationEnd(
@@ -94,10 +96,23 @@ private:
         KeyguardUserSwitcher* mHost;
     };
 
-    class Runnable1: public Runnable
+    class DisappearAnimationRunnable: public Runnable
     {
     public:
-        Runnable1(
+        DisappearAnimationRunnable(
+            /* [in] */ KeyguardUserSwitcher* host);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        KeyguardUserSwitcher* mHost;
+    };
+
+    class AppearAnimationRunnable: public Runnable
+    {
+    public:
+        AppearAnimationRunnable(
             /* [in] */ KeyguardUserSwitcher* host);
 
         // @Override
@@ -149,7 +164,7 @@ private:
     AutoPtr<IViewGroup> mUserSwitcher;
     AutoPtr<IKeyguardStatusBarView> mStatusBarView;
     AutoPtr<Adapter> mAdapter;
-    // AutoPtr<IAppearAnimationUtils> mAppearAnimationUtils;
+    AutoPtr<AppearAnimationUtils> mAppearAnimationUtils;
     AutoPtr<IKeyguardUserSwitcherScrim> mBackground;
     AutoPtr<IObjectAnimator> mBgAnimator;
     AutoPtr<IUserSwitcherController> mUserSwitcherController;

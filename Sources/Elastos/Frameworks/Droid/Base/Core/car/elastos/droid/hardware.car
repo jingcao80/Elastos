@@ -453,11 +453,18 @@ module
             /**
              * Visible for testing and vendor extensions only.
              *
-             * @hide
              */
             constructor(
                 [in] String name,
-                [in] ClassID type);
+                [in] ClassID classType,
+                [in] InterfaceID interfaceType);
+
+            constructor(
+                [in] String name,
+                [in] ClassID classType,
+                [in] InterfaceID interfaceType,
+                [in] ClassID componentClassType,
+                [in] InterfaceID componentInterfaceType);
 
             /**
              * Visible for testing and vendor extensions only.
@@ -491,7 +498,15 @@ module
              */
             constructor(
                 [in] String name,
-                [in] ClassID type);
+                [in] ClassID classType,
+                [in] InterfaceID interfaceType);
+
+            constructor(
+                [in] String name,
+                [in] ClassID classType,
+                [in] InterfaceID interfaceType,
+                [in] ClassID componentClassType,
+                [in] InterfaceID componentInterfaceType);
 
             /**
              * Visible for testing and vendor extensions only.
@@ -519,8 +534,16 @@ module
              */
             constructor(
                 [in] String name,
-                [in] ClassID type);
+                [in] ClassID classType,
+                [in] InterfaceID interfaceType);
 
+            constructor(
+                [in] String name,
+                [in] ClassID classType,
+                [in] InterfaceID interfaceType,
+                [in] ClassID componentClassType,
+                [in] InterfaceID componentInterfaceType);
+                
             /**
              * Visible for testing and vendor extensions only.
              *
@@ -694,8 +717,6 @@ module
 
         [local]
         class CCallbackProxiesDeviceStateCallbackProxy {
-            constructor();
-
             constructor(
                 [in] IDispatchable* dispatchTarget);
 
@@ -706,9 +727,7 @@ module
 
         [local]
         class CCallbackProxiesDeviceCaptureCallbackProxy {
-            constructor();
-
-            constructor(
+              constructor(
                 [in] IDispatchable* dispatchTarget);
 
             interface ICallbackProxiesDeviceCaptureCallbackProxy;
@@ -716,8 +735,6 @@ module
 
         [local]
         class CCallbackProxiesSessionStateCallbackProxy {
-            constructor();
-
             constructor(
                 [in] IDispatchable* dispatchTarget);
 
@@ -725,8 +742,6 @@ module
         }
 
         class CCameraCaptureSessionImpl {
-            constructor();
-
             /**
              * Create a new CameraCaptureSession.
              *
@@ -749,8 +764,6 @@ module
         }
 
         class CCameraDeviceImplCaptureCallbackHolder {
-            constructor();
-
             constructor(
                 [in] ICameraDeviceImplCaptureCallback* _callback,
                 [in] IList* requestList,
@@ -761,7 +774,6 @@ module
         }
 
         class CCameraDeviceImplFrameNumberTracker {
-            constructor();
 
             constructor(
                 [in] ICameraDeviceImpl* host);
@@ -770,8 +782,6 @@ module
         }
 
         class CCameraDeviceImplCameraDeviceCallbacks {
-            constructor();
-
             constructor(
                 [in] ICameraDeviceImpl* host);
 
@@ -781,8 +791,6 @@ module
         }
 
         class CCameraDeviceImpl {
-            constructor();
-
             constructor(
                 [in] String cameraId,
                 [in] ICameraDeviceStateCallback* _callback,
@@ -792,6 +800,21 @@ module
             interface ICameraDeviceImpl;
             interface ICameraDevice;
             interface ICloseable;
+        }
+
+        class CCaptureResultExtras {
+            constructor();
+
+            constructor(
+                [in] Int32 requestId,
+                [in] Int32 subsequenceId,
+                [in] Int32 afTriggerId,
+                [in] Int32 precaptureTriggerId,
+                [in] Int64 frameNumber,
+                [in] Int32 partialResultCount);
+
+            interface ICaptureResultExtras;
+            interface IParcelable;
         }
 
     } //namespace Impl
@@ -1149,8 +1172,6 @@ module
     namespace Params {
         [deprecated]
         class CBlackLevelPattern {
-            constructor();
-
             constructor(
                 [in] ArrayOf<Int32>* offsets);
 
@@ -1159,8 +1180,6 @@ module
 
         [deprecated]
         class CColorSpaceTransform {
-            constructor();
-
             constructor(
                 [in] ArrayOf<IRational*>* elements);
 
@@ -1171,8 +1190,6 @@ module
         }
 
         class CFace {
-            constructor();
-
             constructor(
                 [in] IRect* bounds,
                 [in] Int32 score,
@@ -1189,8 +1206,6 @@ module
         }
 
         class CHighSpeedVideoConfiguration {
-            constructor();
-
             constructor(
                 [in] Int32 width,
                 [in] Int32 height,
@@ -1202,8 +1217,6 @@ module
 
         [deprecated]
         class CLensShadingMap {
-            constructor();
-
             constructor(
                 [in] ArrayOf<Float>* elements,
                 [in] Int32 rows,
@@ -1213,8 +1226,6 @@ module
         }
 
         class CMeteringRectangle {
-            constructor();
-
             constructor(
                 [in] Int32 x,
                 [in] Int32 y,
@@ -1236,8 +1247,6 @@ module
 
         [deprecated]
         class CReprocessFormatsMap {
-            constructor();
-
             constructor(
                 [in] ArrayOf<Int32>* entry);
 
@@ -1245,8 +1254,6 @@ module
         }
 
         class CRggbChannelVector {
-            constructor();
-
             constructor(
                 [in] Float red,
                 [in] Float greenEven,
@@ -1257,8 +1264,6 @@ module
         }
 
         class CStreamConfiguration {
-            constructor();
-
             constructor(
                 [in] Int32 format,
                 [in] Int32 width,
@@ -1269,8 +1274,6 @@ module
         }
 
         class CStreamConfigurationDuration {
-            constructor();
-
             constructor(
                 [in] Int32 format,
                 [in] Int32 width,
@@ -1282,8 +1285,6 @@ module
 
         [deprecated]
         class CTonemapCurve {
-            constructor();
-
             constructor(
                 [in] ArrayOf<Float>* red,
                 [in] ArrayOf<Float>* green,
@@ -1294,8 +1295,6 @@ module
 
         [deprecated]
         class CStreamConfigurationMap {
-            constructor();
-
             constructor(
                 [in] ArrayOf<IStreamConfiguration*>* configurations,
                 [in] ArrayOf<IStreamConfigurationDuration*>* minFrameDurations,

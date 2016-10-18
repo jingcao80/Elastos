@@ -25,6 +25,8 @@ private:
         : public Marshaler
     {
     public:
+        TO_STRING_IMPL("MarshalerStreamConfigurationDuration")
+
         //@Override
         CARAPI Marshal(
             /* [in] */ IInterface* value,

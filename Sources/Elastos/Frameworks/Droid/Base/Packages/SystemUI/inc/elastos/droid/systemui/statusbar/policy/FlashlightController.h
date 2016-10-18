@@ -21,7 +21,7 @@ using Elastos::Droid::Hardware::Camera2::CameraManager;
 using Elastos::Droid::Hardware::Camera2::ICameraCaptureSession;
 using Elastos::Droid::Hardware::Camera2::ICameraCaptureSessionStateListener;
 using Elastos::Droid::Hardware::Camera2::ICameraDevice;
-using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateListener;
+using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraManager;
 using Elastos::Droid::Hardware::Camera2::ICameraManagerAvailabilityCallback;
 using Elastos::Droid::Hardware::Camera2::ICaptureRequest;
@@ -217,7 +217,7 @@ private:
     AutoPtr<ICameraCaptureSession> mSession;
     AutoPtr<ISurfaceTexture> mSurfaceTexture;
     AutoPtr<ISurface> mSurface;
-    AutoPtr<ICameraDeviceStateListener> mCameraListener;
+    AutoPtr<ICameraDeviceStateCallback> mCameraListener;
     AutoPtr<ICameraCaptureSessionStateListener> mSessionListener;
 
     AutoPtr<IRunnable> mUpdateFlashlightRunnable;

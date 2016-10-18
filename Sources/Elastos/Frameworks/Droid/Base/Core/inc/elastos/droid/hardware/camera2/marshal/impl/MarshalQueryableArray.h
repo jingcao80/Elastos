@@ -8,6 +8,7 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <elastos/core/Object.h>
 
+using Elastos::Core::IArrayOf;
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {
@@ -27,6 +28,8 @@ private:
         : public Marshaler
     {
     public:
+        TO_STRING_IMPL("MarshalQueryableArray::MarshalerArray")
+
         //@Override
         CARAPI Marshal(
             /* [in] */ IInterface* value,
@@ -62,8 +65,7 @@ private:
         CARAPI MarshalArrayElement(
             /* [in] */ IMarshaler* marshaler,
             /* [in] */ IByteBuffer* buffer,
-            /* [in] */ IInterface* array,
-            /* [in] */ Int32 index);
+            /* [in] */ IInterface* element);
 
         //@SuppressWarnings("unchecked")
         CARAPI_(AutoPtr<IInterface>) CopyListToArray(
@@ -72,13 +74,12 @@ private:
         //@SuppressWarnings("unchecked")
         CARAPI_(Int32) CalculateElementMarshalSize(
             /* [in] */ IMarshaler* marshaler,
-            /* [in] */ IInterface* array,
-            /* [in] */ Int32 index);
+            /* [in] */ IInterface* element);
 
     private:
         ClassID mClass;
         AutoPtr<IMarshaler> mComponentMarshaler;
-        InterfaceID mComponentClass;
+        AutoPtr<ITypeReference> mComponent;
     };
 
 public:

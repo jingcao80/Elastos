@@ -5,6 +5,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CBoolean;
+using Elastos::Core::ECLSID_CBoolean;
 
 namespace Elastos {
 namespace Droid {
@@ -88,9 +89,15 @@ ECode MarshalQueryableBoolean::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    // return (Boolean.class.equals(managedType.getType())
-    //         || boolean.class.equals(managedType.getType())) && nativeType == ICameraMetadataNative::TYPE_BYTE;
+    if (nativeType == ICameraMetadataNative::TYPE_BYTE) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CBoolean) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
+
     return NOERROR;
 }
 

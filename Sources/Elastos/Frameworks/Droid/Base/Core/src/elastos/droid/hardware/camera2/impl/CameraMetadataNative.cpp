@@ -378,11 +378,12 @@ ECode SetCommand_GpsLocation::SetValue(
 //==============================================================================
 // CameraMetadataNativeKey
 //==============================================================================
-CAR_INTERFACE_IMPL(CameraMetadataNativeKey, Object, ICaptureRequestKey)
+CAR_INTERFACE_IMPL(CameraMetadataNativeKey, Object, ICameraMetadataNativeKey)
 
 CameraMetadataNativeKey::CameraMetadataNativeKey(
     /* [in] */ const String& name,
-    /* [in] */ ClassID type)
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId)
     : mHasTag(FALSE)
     , mTag(0)
     , mHash(0)
@@ -393,8 +394,28 @@ CameraMetadataNativeKey::CameraMetadataNativeKey(
     }
 
     mName = name;
-    mType = type;
-    mTypeReference = TypeReference::CreateSpecializedTypeReference(type);
+    mTypeReference = TypeReference::CreateSpecializedTypeReference(classId, interfaceId);
+    mHash = mName.GetHashCode() ^ Object::GetHashCode(mTypeReference);
+}
+
+CameraMetadataNativeKey::CameraMetadataNativeKey(
+    /* [in] */ const String& name,
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId,
+    /* [in] */ const ClassID& componentClassId,
+    /* [in] */ const InterfaceID& componentInterfaceId)
+    : mHasTag(FALSE)
+    , mTag(0)
+    , mHash(0)
+{
+    if (name.IsNull()) {
+        Logger::E("CameraMetadataNativeKey", "Key needs a valid name");
+        assert(0 && "Key needs a valid name");
+    }
+
+    mName = name;
+    mTypeReference = TypeReference::CreateSpecializedTypeReference(
+        classId, interfaceId, componentClassId, componentInterfaceId);
     mHash = mName.GetHashCode() ^ Object::GetHashCode(mTypeReference);
 }
 
@@ -415,7 +436,6 @@ CameraMetadataNativeKey::CameraMetadataNativeKey(
     }
 
     mName = name;
-    typeReference->GetType(&mType);
     mTypeReference = typeReference;
     mHash = mName.GetHashCode() ^ Object::GetHashCode(mTypeReference);
 }
@@ -424,7 +444,6 @@ ECode CameraMetadataNativeKey::GetName(
     /* [out] */ String* name)
 {
     VALIDATE_NOT_NULL(name);
-
     *name = mName;
     return NOERROR;
 }
@@ -433,7 +452,6 @@ ECode CameraMetadataNativeKey::GetHashCode(
     /* [out] */ Int32* code)
 {
     VALIDATE_NOT_NULL(code);
-
     *code = mHash;
     return NOERROR;
 }
@@ -456,8 +474,7 @@ ECode CameraMetadataNativeKey::Equals(
 
     Int32 code;
     GetHashCode(&code);
-    Int32 code2 = Object::GetHashCode(obj);
-    if (code != code2) {
+    if (code != Object::GetHashCode(obj)) {
         return NOERROR;
     }
 
@@ -499,13 +516,10 @@ ECode CameraMetadataNativeKey::GetTag(
     return NOERROR;
 }
 
-ECode CameraMetadataNativeKey::GetType(
+ECode CameraMetadataNativeKey::GetClassType(
     /* [out] */ ClassID* type)
 {
-    VALIDATE_NOT_NULL(type);
-    // TODO: remove this; other places should use #getTypeReference() instead
-    *type = mType;
-    return NOERROR;
+    return mTypeReference->GetClassType(type);
 }
 
 ECode CameraMetadataNativeKey::GetTypeReference(
@@ -529,21 +543,11 @@ ECode CameraMetadataNativeKey::ToString(
     sb += ", hasTag:";
     sb += mHasTag;
     sb += ", tag:";
-    sb += mTag;
+    sb += StringUtils::ToHexString(mTag);
     sb += ", hash:";
     sb += mHash;
-    sb += ", classType:";
-    String clsid;
-    // clsid.AppendFormat("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }",
-    clsid.AppendFormat("{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
-        mType.mClsid.mData1, mType.mClsid.mData2, mType.mClsid.mData3,
-        mType.mClsid.mData4[0], mType.mClsid.mData4[1],
-        mType.mClsid.mData4[2], mType.mClsid.mData4[3],
-        mType.mClsid.mData4[4], mType.mClsid.mData4[5],
-        mType.mClsid.mData4[6], mType.mClsid.mData4[7]);
-    sb += clsid;
-    sb += ", module:";
-    sb += mType.mUunm;
+    sb += ", type:";
+    sb += TO_CSTR(mTypeReference);
     sb += "}";
     *str = sb.ToString();
     return NOERROR;
@@ -797,10 +801,8 @@ CameraMetadataNative::~CameraMetadataNative()
 
 ECode CameraMetadataNative::constructor()
 {
-    //super();
     mMetadataPtr = NativeAllocate();
     if (mMetadataPtr == 0) {
-        //throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
         Logger::E(TAG, "Failed to allocate native CameraMetadata");
         return E_OUT_OF_MEMORY_ERROR;
     }
@@ -813,7 +815,6 @@ ECode CameraMetadataNative::constructor(
     //super();
     FAIL_RETURN(NativeAllocateCopy(other, &mMetadataPtr))
     if (mMetadataPtr == 0) {
-        //throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
         Logger::E(TAG, "Failed to allocate native CameraMetadata");
         return E_OUT_OF_MEMORY_ERROR;
     }
@@ -921,7 +922,7 @@ ECode CameraMetadataNative::Get(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    if (VERBOSE) Logger::I(TAG, "CameraMetadataNative Get %s", TO_CSTR(key));
+    // if (VERBOSE) Logger::I(TAG, "Get %s", TO_CSTR(key));
 
     FAIL_RETURN(Preconditions::CheckNotNull(key, String("key must not be null")))
 
@@ -933,13 +934,13 @@ ECode CameraMetadataNative::Get(
         return g->GetValue(this, key, result);
     }
 
-    if (VERBOSE) Logger::I(TAG, "CameraMetadataNative Get %s not in command map.", TO_CSTR(key));
+    // if (VERBOSE) Logger::I(TAG, "Get %s not in command map.", TO_CSTR(key));
 
     obj = GetBase(key);
     *result = obj;
     REFCOUNT_ADD(*result);
 
-    if (VERBOSE) Logger::I(TAG, "CameraMetadataNative Get %s result: %s.", TO_CSTR(key), TO_CSTR(obj));
+    if (VERBOSE) Logger::I(TAG, "Get %s result: %s.", TO_CSTR(key), TO_CSTR(obj));
     return NOERROR;
 }
 
@@ -1065,16 +1066,17 @@ AutoPtr<IInterface> CameraMetadataNative::GetBase(
 AutoPtr<IInterface> CameraMetadataNative::GetBase(
     /* [in] */ ICameraMetadataNativeKey* key)
 {
-    if (VERBOSE) Logger::V(TAG, " >> GetBase %s", TO_CSTR(key));
+    // if (VERBOSE) Logger::V(TAG, " >> %s GetBase %s", TO_CSTR(this), TO_CSTR(key));
     Int32 tag;
     key->GetTag(&tag);
 
-    Logger::V(TAG, " >> GetTag: %d", tag);
+    // Logger::V(TAG, " >> GetTag: %d, %x, %s", tag, tag, get_camera_metadata_tag_name(tag));
 
     AutoPtr<ArrayOf<Byte> > values;
     ReadValues(tag, (ArrayOf<Byte>**)&values);
     if (values == NULL) {
-        if (VERBOSE) Logger::W(TAG, "%p read null value for tag %d in %s", this, tag, TO_CSTR(key));
+        if (VERBOSE) Logger::W(TAG, "%s read null value for tag %x(%s) in %s",
+            TO_CSTR(this), tag, get_camera_metadata_tag_name(tag), TO_CSTR(key));
         return NULL;
     }
 
@@ -1091,7 +1093,7 @@ AutoPtr<IInterface> CameraMetadataNative::GetBase(
 
     AutoPtr<IInterface> outface;
     AutoPtr<IMarshaler> marshaler = GetMarshalerForKey(key);
-    Logger::V(TAG, " >> GetMarshalerForKey: %s", TO_CSTR(marshaler));
+    // Logger::V(TAG, " >> GetMarshalerForKey: %s", TO_CSTR(marshaler));
     marshaler->Unmarshal(buffer, (IInterface**)&outface);
     return outface;
 }
@@ -2059,13 +2061,11 @@ AutoPtr<IMarshaler> CameraMetadataNative::GetMarshalerForKey(
 {
     AutoPtr<ITypeReference> ref;
     key->GetTypeReference((ITypeReference**)&ref);
-    Int32 tag;
+    Int32 tag, type;
     key->GetTag(&tag);
-    Int32 type;
     GetNativeType(tag, &type);
     AutoPtr<IMarshaler> outma;
-    assert(0);
-    //MarshalRegistry::GetMarshaler(ref, type, (IMarshaler**)&outma);
+    MarshalRegistry::GetMarshaler(ref, type, (IMarshaler**)&outma);
     return outma;
 }
 
@@ -2086,7 +2086,8 @@ android::CameraMetadata* CameraMetadataNative::CameraMetadata_getPointerNoThrow(
         return NULL;
     }
 
-    return reinterpret_cast<android::CameraMetadata*>(mMetadataPtr);
+    CameraMetadataNative* cmn = (CameraMetadataNative*)thiz;
+    return reinterpret_cast<android::CameraMetadata*>(cmn->mMetadataPtr);
 }
 
 ECode CameraMetadataNative::CameraMetadata_getPointerThrow(
@@ -2114,8 +2115,6 @@ ECode CameraMetadataNative::CameraMetadata_getPointerThrow(
 
 Int64 CameraMetadataNative::NativeAllocate()
 {
-    Logger::V(TAG, "%s", __FUNCTION__);
-
     return reinterpret_cast<Int64>(new android::CameraMetadata());
 }
 
@@ -2130,8 +2129,6 @@ ECode CameraMetadataNative::NativeAllocateCopy(
 {
     VALIDATE_NOT_NULL(handle);
     *handle = 0;
-
-    Logger::V(TAG, "%s", __FUNCTION__);
 
     android::CameraMetadata* otherMetadata;
     FAIL_RETURN(CameraMetadata_getPointerThrow(other, &otherMetadata, "other"))
@@ -2158,8 +2155,7 @@ ECode CameraMetadataNative::NativeWriteToParcel(
     android::Parcel* parcelNative;
     parcel->GetElementPayload((Handle32*)&parcelNative);
     if (parcelNative == NULL) {
-        //jniThrowNullPointerException(env, "parcel");
-        Logger::E(TAG, "parcel");
+        Logger::E(TAG, "NativeWriteToParcel: parcel is null.");
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -2185,7 +2181,7 @@ ECode CameraMetadataNative::NativeReadFromParcel(
     android::Parcel* parcelNative;
     source->GetElementPayload((Handle32*)&parcelNative);
     if (parcelNative == NULL) {
-        Logger::E(TAG, "parcel");
+        Logger::E(TAG, "NativeReadFromParcel: parcel is null.");
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -2212,7 +2208,6 @@ ECode CameraMetadataNative::NativeSwap(
 
     android::CameraMetadata* otherMetadata;
     FAIL_RETURN(CameraMetadata_getPointerThrow(other, (android::CameraMetadata**)&otherMetadata, "other"))
-
     if (otherMetadata == NULL) return NOERROR;
 
     metadata->swap(*otherMetadata);
@@ -2222,7 +2217,6 @@ ECode CameraMetadataNative::NativeSwap(
 void CameraMetadataNative::NativeClose()
 {
     AutoLock syncLock(this);
-    Logger::V(TAG, "%s", __FUNCTION__);
 
     android::CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(this);
 
@@ -2258,25 +2252,6 @@ ECode CameraMetadataNative::NativeIsEmpty(
 
         Logger::V(TAG, "%s: %p IsEmpty returned %d, entry count was %d",
             __FUNCTION__, this, empty, metadata->entryCount());
-
-        {
-            Logger::V(TAG, "============TEST==================");
-            Int32 tag = 327680;
-            camera_metadata_entry entry = metadata->find(tag);
-            Logger::V(TAG, "%s: %p-%p Tag %d found %d entries", __FUNCTION__, this, metadata, tag, entry.count);
-            if (entry.count == 0 && !metadata->exists(tag)) {
-                Logger::V(TAG, "%s: %p-%p Tag %d does not have any entries", __FUNCTION__, this, metadata, tag);
-            }
-            Logger::V(TAG, "==============TEST===================");
-
-            tag = 524293;
-            entry = metadata->find(tag);
-            Logger::V(TAG, "%s: %p-%p Tag %d found %d entries", __FUNCTION__, this, metadata, tag, entry.count);
-            if (entry.count == 0 && !metadata->exists(tag)) {
-                Logger::V(TAG, "%s: %p-%p Tag %d does not have any entries", __FUNCTION__, this, metadata, tag);
-            }
-            Logger::V(TAG, "==============TEST===================");
-        }
     }
 
     *result = empty;
@@ -2377,7 +2352,6 @@ ECode CameraMetadataNative::NativeReadValues(
     AutoPtr<ArrayOf<Byte> > byteArray;
     {
         AutoLock syncLock(this);
-        Logger::V(TAG, "%s (tag = %d)", __FUNCTION__, tag);
 
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
@@ -2388,19 +2362,20 @@ ECode CameraMetadataNative::NativeReadValues(
         camera_metadata_entry entry = metadata->find(tag);
         if (entry.count == 0) {
              if (!metadata->exists(tag)) {
-                Logger::V(TAG, "%s: %p-%p Tag %d does not have any entries", __FUNCTION__, this, metadata, tag);
-                *values = NULL;
+                Logger::V(TAG, "%s: %s, metadata: %p Tag %x(%s) does not have any entries",
+                    __FUNCTION__, TO_CSTR(this), metadata, tag, get_camera_metadata_tag_name(tag));
                 return NOERROR;
              }
              else {
                  // OK: we will return a 0-sized array.
-                 Logger::V(TAG, "%s: Tag %d had an entry, but it had 0 data", __FUNCTION__, tag);
+                 Logger::V(TAG, "%s: Tag %x(%s) had an entry, but it had 0 data",
+                    __FUNCTION__, tag, get_camera_metadata_tag_name(tag));
              }
         }
 
         int tagType = get_camera_metadata_tag_type(tag);
         if (tagType == -1) {
-            Logger::E(TAG, "Tag (%d) did not have a type", tag);
+            Logger::E(TAG, "Tag %x(%s) did not have a type", tag, get_camera_metadata_tag_name(tag));
             return NOERROR;
         }
 
@@ -2420,7 +2395,6 @@ ECode CameraMetadataNative::NativeWriteValues(
     /* [in] */ ArrayOf<Byte>* src)
 {
     AutoLock syncLock(this);
-    Logger::V(TAG, "%s (tag = %d)", __FUNCTION__, tag);
 
     android::CameraMetadata* metadata;
     FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
@@ -2428,7 +2402,7 @@ ECode CameraMetadataNative::NativeWriteValues(
 
     int tagType = get_camera_metadata_tag_type(tag);
     if (tagType == -1) {
-        Logger::E(TAG, "Tag (%d) did not have a type", tag);
+        Logger::E(TAG, "Tag tag %x(%s) did not have a type", tag, get_camera_metadata_tag_name(tag));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     size_t UNUSED(tagSize) = Helpers::getTypeSize(tagType);
@@ -2439,22 +2413,25 @@ ECode CameraMetadataNative::NativeWriteValues(
         // If array is NULL, delete the entry
         if (metadata->exists(tag)) {
             res = metadata->erase(tag);
-            Logger::V(TAG, "%s: Erase values (res = %d)", __FUNCTION__, res);
+
+            // Logger::V(TAG, "%s: %s Erase tag %x(%s) values (res = %d)",
+            //     __FUNCTION__, TO_CSTR(this), tag, get_camera_metadata_tag_name(tag), res);
         }
         else {
             res = android::OK;
-            Logger::V(TAG, "%s: Don't need to erase", __FUNCTION__);
+
+            // Logger::V(TAG, "%s: %s tag %x(%s) Don't need to erase",
+            //     __FUNCTION__, TO_CSTR(this), tag, get_camera_metadata_tag_name(tag));
         }
     }
     else {
-        // Copy from java array into native array
-        //ScopedByteArrayRO arrayReader(env, src);
         if (src == NULL) return NOERROR;
 
         res = Helpers::updateAny(metadata, static_cast<uint32_t>(tag),
                                  tagType, src->GetPayload(), src->GetLength());
 
-        Logger::V(TAG, "%s: Update values (res = %d)", __FUNCTION__, res);
+        // Logger::V(TAG, "%s: %s Update tag %x(%s) values (res = %d)",
+        //     __FUNCTION__, TO_CSTR(this), tag, get_camera_metadata_tag_name(tag), res);
     }
 
     if (res == android::OK) {
@@ -2472,8 +2449,6 @@ ECode CameraMetadataNative::NativeWriteValues(
         Logger::E(TAG,  "Unknown error (%d) while trying to update metadata", res);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-
-    return NOERROR;
 }
 
 struct DumpMetadataParams {
@@ -2500,109 +2475,98 @@ static void* CameraMetadata_writeMetadataThread(
 
 ECode CameraMetadataNative::NativeDump()
 {
+    AutoLock syncLock(this);
+    android::CameraMetadata* metadata;
+    FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
+    if (metadata == NULL) {
+        return NOERROR;
+    }
+
+    /*
+     * Create a socket pair for local streaming read/writes.
+     *
+     * The metadata will be dumped into the write side,
+     * and then read back out (and logged) via the read side.
+     */
+
+    int writeFd, readFd;
     {
-        AutoLock syncLock(this);
-        Logger::V(TAG, "%s", __FUNCTION__);
-        android::CameraMetadata* metadata;
-        FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
-        if (metadata == NULL) {
-            return NOERROR;
+
+        int sv[2];
+        if (socketpair(AF_LOCAL, SOCK_STREAM, /*protocol*/0, &sv[0]) < 0) {
+            Logger::E(TAG, "Failed to create socketpair (errno = %#x, message = '%s')",
+                    errno, strerror(errno));
+            return E_IO_EXCEPTION;
         }
+        writeFd = sv[0];
+        readFd = sv[1];
+    }
 
-        /*
-         * Create a socket pair for local streaming read/writes.
-         *
-         * The metadata will be dumped into the write side,
-         * and then read back out (and logged) via the read side.
-         */
+    /*
+     * Create a thread for doing the writing.
+     *
+     * The reading and writing must be concurrent, otherwise
+     * the write will block forever once it exhausts the capped
+     * buffer size (from getsockopt).
+     */
+    pthread_t writeThread;
+    DumpMetadataParams params = {
+        writeFd,
+        metadata
+    };
 
-        int writeFd, readFd;
-        {
+    {
+        int threadRet = pthread_create(&writeThread, /*attr*/NULL,
+                CameraMetadata_writeMetadataThread, (void*)&params);
 
-            int sv[2];
-            if (socketpair(AF_LOCAL, SOCK_STREAM, /*protocol*/0, &sv[0]) < 0) {
-                // jniThrowExceptionFmt(env, "java/io/IOException",
-                //         "Failed to create socketpair (errno = %#x, message = '%s')",
-                //         errno, strerror(errno));
-                Logger::E(TAG, "Failed to create socketpair (errno = %#x, message = '%s')",
-                        errno, strerror(errno));
-                return E_IO_EXCEPTION;
-            }
-            writeFd = sv[0];
-            readFd = sv[1];
-        }
+        if (threadRet != 0) {
+            close(writeFd);
 
-        /*
-         * Create a thread for doing the writing.
-         *
-         * The reading and writing must be concurrent, otherwise
-         * the write will block forever once it exhausts the capped
-         * buffer size (from getsockopt).
-         */
-        pthread_t writeThread;
-        DumpMetadataParams params = {
-            writeFd,
-            metadata
-        };
+            Logger::E(TAG, "Failed to create thread for writing (errno = %#x, message = '%s')",
+                    threadRet, strerror(threadRet));
+            return E_IO_EXCEPTION;
 
-        {
-            int threadRet = pthread_create(&writeThread, /*attr*/NULL,
-                    CameraMetadata_writeMetadataThread, (void*)&params);
-
-            if (threadRet != 0) {
-                close(writeFd);
-
-                // jniThrowExceptionFmt(env, "java/io/IOException",
-                //         "Failed to create thread for writing (errno = %#x, message = '%s')",
-                //         threadRet, strerror(threadRet));
-                Logger::E(TAG, "Failed to create thread for writing (errno = %#x, message = '%s')",
-                        threadRet, strerror(threadRet));
-                return E_IO_EXCEPTION;
-
-            }
-        }
-
-        /*
-         * Read out a byte until stream is complete. Write completed lines
-         * to ALOG.
-         */
-        {
-            char out[] = {'\0', '\0'}; // large enough to append as a string
-            android::String8 logLine;
-
-            // Read one byte at a time! Very slow but avoids complicated \n scanning.
-            ssize_t res;
-            while ((res = TEMP_FAILURE_RETRY(read(readFd, &out[0], /*count*/1))) > 0) {
-                if (out[0] == '\n') {
-                    Logger::D(TAG, "%s", logLine.string());
-                    logLine.clear();
-                }
-                else {
-                    logLine.append(out);
-                }
-            }
-
-            if (res < 0) {
-                // jniThrowExceptionFmt(env, "java/io/IOException",
-                //         "Failed to read from fd (errno = %#x, message = '%s')",
-                //         errno, strerror(errno));
-                Logger::E(TAG, "Failed to read from fd (errno = %#x, message = '%s')",
-                        errno, strerror(errno));
-                return E_IO_EXCEPTION;
-            }
-            else if (!logLine.isEmpty()) {
-                Logger::D(TAG, "%s", logLine.string());
-            }
-        }
-
-        int res;
-
-        // Join until thread finishes. Ensures params/metadata is valid until then.
-        if ((res = pthread_join(writeThread, /*retval*/NULL)) != 0) {
-            Logger::E(TAG, "%s: Failed to join thread (errno = %#x, message = '%s')",
-                    __FUNCTION__, res, strerror(res));
         }
     }
+
+    /*
+     * Read out a byte until stream is complete. Write completed lines
+     * to ALOG.
+     */
+    {
+        char out[] = {'\0', '\0'}; // large enough to append as a string
+        android::String8 logLine;
+
+        // Read one byte at a time! Very slow but avoids complicated \n scanning.
+        ssize_t res;
+        while ((res = TEMP_FAILURE_RETRY(read(readFd, &out[0], /*count*/1))) > 0) {
+            if (out[0] == '\n') {
+                Logger::D(TAG, "%s", logLine.string());
+                logLine.clear();
+            }
+            else {
+                logLine.append(out);
+            }
+        }
+
+        if (res < 0) {
+            Logger::E(TAG, "Failed to read from fd (errno = %#x, message = '%s')",
+                    errno, strerror(errno));
+            return E_IO_EXCEPTION;
+        }
+        else if (!logLine.isEmpty()) {
+            Logger::D(TAG, "%s", logLine.string());
+        }
+    }
+
+    int res;
+
+    // Join until thread finishes. Ensures params/metadata is valid until then.
+    if ((res = pthread_join(writeThread, /*retval*/NULL)) != 0) {
+        Logger::E(TAG, "%s: Failed to join thread (errno = %#x, message = '%s')",
+                __FUNCTION__, res, strerror(res));
+    }
+
     return NOERROR;
 }
 
@@ -2613,7 +2577,7 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
-    if (VERBOSE) Logger::V(TAG, " >> %s %s", __FUNCTION__, keyName.string());
+    // if (VERBOSE) Logger::V(TAG, " >> %s %s", __FUNCTION__, keyName.string());
 
     const char *key = keyName.string();
     if (key == NULL) {
@@ -2623,7 +2587,7 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
     }
     size_t keyLength = strlen(key);
 
-    Logger::V(TAG, "%s (key = '%s')", __FUNCTION__, key);
+    // Logger::V(TAG, "%s (key = '%s')", __FUNCTION__, key);
 
     android::sp<android::VendorTagDescriptor> vTags = android::VendorTagDescriptor::getGlobalVendorTagDescriptor();
 
@@ -2641,14 +2605,14 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
     size_t sectionLength = 0;
     size_t totalSectionCount = ANDROID_SECTION_COUNT + vendorSectionCount;
     for (size_t i = 0; i < totalSectionCount; ++i) {
-
         const char *str = (i < ANDROID_SECTION_COUNT) ? camera_metadata_section_names[i] :
                 vendorSections[i - ANDROID_SECTION_COUNT].string();
-        Logger::V(TAG, "%s: Trying to match against section '%s'", __FUNCTION__, str);
+        // Logger::V(TAG, "%s: Trying to match against section %s '%s'",
+        //     __FUNCTION__, (i < ANDROID_SECTION_COUNT ? "built-in tags" : "vendor tags"), str);
         if (strstr(key, str) == key) { // key begins with the section name
             size_t strLength = strlen(str);
 
-            Logger::V(TAG, "%s: Key begins with section name", __FUNCTION__);
+            // Logger::V(TAG, "%s: Key begins with section name", __FUNCTION__);
 
             // section name is the longest we've found so far
             if (section == NULL || sectionLength < strLength) {
@@ -2656,7 +2620,8 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
                 sectionIndex = i;
                 sectionLength = strLength;
 
-                Logger::V(TAG, "%s: Found new best section (%s)", __FUNCTION__, section);
+                // Logger::V(TAG, "%s: Found new best %s section (%s)",
+                //     __FUNCTION__, (i < ANDROID_SECTION_COUNT ? "built-in tags" : "vendor tags"), section);
             }
         }
     }
@@ -2669,7 +2634,7 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else {
-        Logger::V(TAG, "%s: Found matched section '%s' (%d)", __FUNCTION__, section, sectionIndex);
+        // Logger::V(TAG, "%s: Found matched section '%s' (%d)", __FUNCTION__, section, sectionIndex);
     }
 
     // Get the tag name component of the key
@@ -2692,8 +2657,8 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
             const char *tagName = get_camera_metadata_tag_name(tag);
 
             if (strcmp(keyTagName, tagName) == 0) {
-                Logger::V(TAG, "%s: Found matched tag '%s' (%d)",
-                      __FUNCTION__, tagName, tag);
+                // if (VERBOSE) Logger::V(TAG, "%s: Found matched tag '%s' (%d, %08x) for %s",
+                //       __FUNCTION__, tagName, tag, tag, keyName.string());
                 break;
             }
         }
@@ -2721,7 +2686,7 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
 
     *result = tag;
 
-    if (VERBOSE) Logger::V(TAG, " >> %s %s, tag: %d", __FUNCTION__, keyName.string(), tag);
+    // if (VERBOSE) Logger::V(TAG, " >> %s %s, tag: %x", __FUNCTION__, keyName.string(), tag);
     return NOERROR;
 }
 
@@ -2734,8 +2699,6 @@ ECode CameraMetadataNative::NativeGetTypeFromTag(
 
     Int32 tagType = get_camera_metadata_tag_type(tag);
     if (tagType == -1) {
-        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-        //                      "Tag (%d) did not have a type", tag);
         *type = -1;
         Logger::E(TAG, "Tag (%d) did not have a type", tag);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

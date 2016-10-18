@@ -1,8 +1,8 @@
 
 #include "elastos/droid/hardware/hdmi/HdmiTimerRecordSources.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -269,15 +269,15 @@ ECode HdmiTimerRecordSources::CheckTimerRecordSourceInputs(
     /* [in] */ IRecordSource* source)
 {
     if (timerInfo == NULL) {
-        Slogger::W(TAG, "TimerInfo should not be null.");
+        Logger::W(TAG, "TimerInfo should not be null.");
         //throw new IllegalArgumentException("TimerInfo should not be null.");
-        Slogger::E(TAG, "TimerInfo should not be null.");
+        Logger::E(TAG, "TimerInfo should not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (source == NULL) {
-        Slogger::W(TAG, "source should not be null.");
+        Logger::W(TAG, "source should not be null.");
         //throw new IllegalArgumentException("source should not be null.");
-        Slogger::E(TAG, "TimerInfo should not be null.");
+        Logger::E(TAG, "TimerInfo should not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -304,12 +304,12 @@ ECode HdmiTimerRecordSources::CheckTimeValue(
 {
     if (hour < 0 || hour > 23) {
         //throw new IllegalArgumentException("Hour should be in rage of [0, 23]:" + hour);
-        Slogger::E(TAG, "Hour should be in rage of [0, 23]:%d", hour);
+        Logger::E(TAG, "Hour should be in rage of [0, 23]:%d", hour);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (minute < 0 || minute > 59) {
         //throw new IllegalArgumentException("Minute should be in rage of [0, 59]:" + minute);
-        Slogger::E(TAG, "Minute should be in rage of [0, 59]:%d", minute);
+        Logger::E(TAG, "Minute should be in rage of [0, 59]:%d", minute);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -336,12 +336,12 @@ ECode HdmiTimerRecordSources::CheckDurationValue(
 {
     if (hour < 0 || hour > 99) {
         //throw new IllegalArgumentException("Hour should be in rage of [0, 99]:" + hour);
-        Slogger::E(TAG, "Hour should be in rage of [0, 23]:%d", hour);
+        Logger::E(TAG, "Hour should be in rage of [0, 23]:%d", hour);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (minute < 0 || minute > 59) {
         //throw new IllegalArgumentException("minute should be in rage of [0, 59]:" + minute);
-        Slogger::E(TAG, "minute should be in rage of [0, 59]:%d", minute);
+        Logger::E(TAG, "minute should be in rage of [0, 59]:%d", minute);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -361,13 +361,13 @@ ECode HdmiTimerRecordSources::TimerInfoOf(
     if (dayOfMonth < 0 || dayOfMonth > 31) {
         // throw new IllegalArgumentException(
         //         "Day of month should be in range of [0, 31]:" + dayOfMonth);
-        Slogger::E(TAG, "Day of month should be in range of [0, 31]:%d", dayOfMonth);
+        Logger::E(TAG, "Day of month should be in range of [0, 31]:%d", dayOfMonth);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (monthOfYear < 1 || monthOfYear > 12) {
         // throw new IllegalArgumentException(
         //         "Month of year should be in range of [1, 12]:" + monthOfYear);
-        Slogger::E(TAG, "Month of year should be in range of [1, 12]:%d", monthOfYear);
+        Logger::E(TAG, "Month of year should be in range of [1, 12]:%d", monthOfYear);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     HdmiTimerRecordSources::Time* _startTime = (HdmiTimerRecordSources::Time*)startTime;
@@ -379,7 +379,7 @@ ECode HdmiTimerRecordSources::TimerInfoOf(
             && ((recordingSequence & ~RECORDING_SEQUENCE_REPEAT_MASK) != 0)) {
         // throw new IllegalArgumentException(
         //         "Invalid reecording sequence value:" + recordingSequence);
-        Slogger::E(TAG, "Invalid reecording sequence value:%d", recordingSequence);
+        Logger::E(TAG, "Invalid reecording sequence value:%d", recordingSequence);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

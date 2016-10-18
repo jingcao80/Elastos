@@ -4,11 +4,11 @@
 #include "elastos/droid/hardware/camera2/marshal/MarshalHelpers.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.IO.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Utility::IPair;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::IO::IBuffer;
 
 namespace Elastos {
@@ -53,7 +53,7 @@ ECode MarshalQueryableParcelable::MarshalerParcelable::Marshal(
     if (VERBOSE) {
         String str;
         IObject::Probe(value)->ToString(&str);
-        Slogger::V("MarshalQueryableParcelable", "marshal %s", str.string());
+        Logger::V("MarshalQueryableParcelable", "marshal %s", str.string());
     }
 
     AutoPtr<IParcel> parcel;
@@ -72,7 +72,7 @@ ECode MarshalQueryableParcelable::MarshalerParcelable::Marshal(
         //         "Parcelable " + value + " must not have file descriptors");
         String str;
         IObject::Probe(value)->ToString(&str);
-        Slogger::E("MarshalQueryableParcelable", "Parcelable %s must not have file descriptors",str.string());
+        Logger::E("MarshalQueryableParcelable", "Parcelable %s must not have file descriptors",str.string());
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
@@ -87,7 +87,7 @@ EXIT:
         //throw new AssertionError("No data marshaled for " + value);
         String str;
         IObject::Probe(value)->ToString(&str);
-        Slogger::E(TAG, "No data marshaled for %s", str.string());
+        Logger::E(TAG, "No data marshaled for %s", str.string());
         return E_ASSERTION_ERROR;
     }
 
@@ -104,7 +104,7 @@ ECode MarshalQueryableParcelable::MarshalerParcelable::Unmarshal(
     if (VERBOSE) {
         Int32 remaining;
         IBuffer::Probe(buffer)->GetRemaining(&remaining);
-        Slogger::V(TAG, "unmarshal, buffer remaining %d", remaining);
+        Logger::V(TAG, "unmarshal, buffer remaining %d", remaining);
     }
 
     /*
@@ -153,7 +153,7 @@ ECode MarshalQueryableParcelable::MarshalerParcelable::Unmarshal(
         //throw new AssertionError("No data marshaled for " + value);
         String str;
         IObject::Probe(value)->ToString(&str);
-        Slogger::E("MarshalQueryableParcelable", "No data marshaled for %s", str.string());
+        Logger::E("MarshalQueryableParcelable", "No data marshaled for %s", str.string());
         return E_ASSERTION_ERROR;
     }
 
@@ -167,10 +167,10 @@ ECode MarshalQueryableParcelable::MarshalerParcelable::Unmarshal(
     FAIL_GOTO(ec, EXIT);
 
     if (VERBOSE) {
-        Slogger::V(TAG, "unmarshal, parcel length was %d", actualLength);
+        Logger::V(TAG, "unmarshal, parcel length was %d", actualLength);
         String str;
         IObject::Probe(value)->ToString(&str);
-        Slogger::V(TAG, "unmarshal, value is %s", str.string());
+        Logger::V(TAG, "unmarshal, value is %s", str.string());
     }
 
     *outface = value;
@@ -213,7 +213,7 @@ ECode MarshalQueryableParcelable::MarshalerParcelable::CalculateMarshalSize(
     if (VERBOSE) {
         String str;
         IObject::Probe(value)->ToString(&str);
-        Slogger::V("MarshalQueryableParcelable", "calculateMarshalSize, length when "
+        Logger::V("MarshalQueryableParcelable", "calculateMarshalSize, length when "
                 "parceling %s is %d", str.string(), length);
     }
 
@@ -254,7 +254,7 @@ ECode MarshalQueryableParcelable::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
+    // assert(0);
     //return Parcelable.class.isAssignableFrom(managedType.getRawType());
     return NOERROR;
 }

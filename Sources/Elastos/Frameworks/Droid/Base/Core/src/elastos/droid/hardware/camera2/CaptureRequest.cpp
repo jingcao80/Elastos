@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/hardware/camera2/CaptureRequest.h"
+#include "elastos/droid/hardware/camera2/CCaptureRequestKey.h"
 #include "elastos/droid/hardware/camera2/impl/CCameraMetadataNative.h"
 #include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include <elastos/utility/Objects.h>
@@ -11,18 +12,41 @@ using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CColorSpaceTransform;
 using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CRggbChannelVector;
 using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CTonemapCurve;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CFace;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CMeteringRectangle;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IColorSpaceTransform;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IRggbChannelVector;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_ITonemapCurve;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IFace;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IMeteringRectangle;
 using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 using Elastos::Droid::Graphics::ECLSID_CRect;
+using Elastos::Droid::Graphics::EIID_IRect;
 using Elastos::Droid::Location::ECLSID_CLocation;
+using Elastos::Droid::Location::EIID_ILocation;
 using Elastos::Droid::Utility::ECLSID_CSize;
-using Elastos::Core::ICloneable;
+using Elastos::Droid::Utility::ECLSID_CRational;
+using Elastos::Droid::Utility::ECLSID_CRange;
+using Elastos::Droid::Utility::EIID_ISize;
+using Elastos::Droid::Utility::EIID_IRational;
+using Elastos::Droid::Utility::EIID_IRange;
 using Elastos::Core::ECLSID_CArrayOf;
 using Elastos::Core::ECLSID_CString;
 using Elastos::Core::ECLSID_CByte;
 using Elastos::Core::ECLSID_CFloat;
+using Elastos::Core::ECLSID_CDouble;
 using Elastos::Core::ECLSID_CInteger32;
 using Elastos::Core::ECLSID_CInteger64;
 using Elastos::Core::ECLSID_CBoolean;
+using Elastos::Core::EIID_IArrayOf;
+using Elastos::Core::EIID_IString;
+using Elastos::Core::EIID_IByte;
+using Elastos::Core::EIID_IFloat;
+using Elastos::Core::EIID_IDouble;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::EIID_IInteger64;
+using Elastos::Core::EIID_IBoolean;
+using Elastos::Core::ICloneable;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::Objects;
 using Elastos::Utility::ICollections;
@@ -33,26 +57,34 @@ namespace Droid {
 namespace Hardware {
 namespace Camera2 {
 
-CAR_INTERFACE_IMPL(CaptureRequest::Key, Object, ICaptureRequestKey)
+CAR_INTERFACE_IMPL(CaptureRequestKey, Object, ICaptureRequestKey)
 
-CaptureRequest::Key::Key()
+CaptureRequestKey::CaptureRequestKey()
 {
 }
 
-ECode CaptureRequest::Key::constructor()
-{
-    return NOERROR;
-}
-
-ECode CaptureRequest::Key::constructor(
+ECode CaptureRequestKey::constructor(
     /* [in] */ const String& name,
-    /* [in] */ ClassID type)
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId)
 {
-    mKey = new CameraMetadataNativeKey(name, type);
+    mKey = new CameraMetadataNativeKey(name,  classId, interfaceId);
     return NOERROR;
 }
 
-ECode CaptureRequest::Key::constructor(
+ECode CaptureRequestKey::constructor(
+    /* [in] */ const String& name,
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId,
+    /* [in] */ const ClassID& componentClassId,
+    /* [in] */ const InterfaceID& componentInterfaceId)
+{
+    mKey = new CameraMetadataNativeKey(name, classId, interfaceId,
+        componentClassId, componentInterfaceId);
+    return NOERROR;
+}
+
+ECode CaptureRequestKey::constructor(
     /* [in] */ const String& name,
     /* [in] */ ITypeReference* typeReference)
 {
@@ -60,27 +92,14 @@ ECode CaptureRequest::Key::constructor(
     return NOERROR;
 }
 
-ECode CaptureRequest::Key::constructor(
+ECode CaptureRequestKey::constructor(
     /* [in] */ ICameraMetadataNativeKey* nativeKey)
 {
     mKey = nativeKey;
     return NOERROR;
 }
 
-CaptureRequest::Key::Key(
-    /* [in] */ ICameraMetadataNativeKey* nativeKey)
-{
-    mKey = nativeKey;
-}
-
-CaptureRequest::Key::Key(
-    /* [in] */ const String& name,
-    /* [in] */ ClassID type)
-{
-    mKey = new CameraMetadataNativeKey(name,  type);
-}
-
-ECode CaptureRequest::Key::GetName(
+ECode CaptureRequestKey::GetName(
     /* [out] */ String* name)
 {
     VALIDATE_NOT_NULL(name);
@@ -88,7 +107,7 @@ ECode CaptureRequest::Key::GetName(
     return mKey->GetName(name);
 }
 
-ECode CaptureRequest::Key::GetHashCode(
+ECode CaptureRequestKey::GetHashCode(
     /* [out] */ Int32* code)
 {
     VALIDATE_NOT_NULL(code);
@@ -96,21 +115,21 @@ ECode CaptureRequest::Key::GetHashCode(
     return IObject::Probe(mKey)->GetHashCode(code);
 }
 
-ECode CaptureRequest::Key::Equals(
+ECode CaptureRequestKey::Equals(
     /* [in] */ IInterface* obj,
     /* [out] */ Boolean* e)
 {
     VALIDATE_NOT_NULL(e);
     *e = FALSE;
 
-    Key* other = (Key*)ICaptureRequestKey::Probe(obj);
+    CaptureRequestKey* other = (CaptureRequestKey*)ICaptureRequestKey::Probe(obj);
     if (other != NULL) {
         *e = Object::Equals(other->mKey, mKey);
     }
     return NOERROR;
 }
 
-ECode CaptureRequest::Key::GetNativeKey(
+ECode CaptureRequestKey::GetNativeKey(
     /* [out] */ ICameraMetadataNativeKey** key)
 {
     VALIDATE_NOT_NULL(key);
@@ -192,185 +211,217 @@ ECode CaptureRequest::Builder::IsEmpty(
     return ((CaptureRequest*)mRequest.Get())->mSettings->IsEmpty(result);
 }
 
+static AutoPtr<ICaptureRequestKey> CreateKey(
+    /* [in] */ const char* name,
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId)
+{
+    AutoPtr<ICaptureRequestKey> key;
+    CCaptureRequestKey::New(String(name), classId, interfaceId, (ICaptureRequestKey**)&key);
+    return key;
+}
+
+static AutoPtr<ICaptureRequestKey> CreateKey(
+    /* [in] */ const char* name,
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId,
+    /* [in] */ const ClassID& componentClassId,
+    /* [in] */ const InterfaceID& componentInterfaceId)
+{
+    AutoPtr<ICaptureRequestKey> key;
+    CCaptureRequestKey::New(String(name), classId, interfaceId,
+        componentClassId, componentInterfaceId, (ICaptureRequestKey**)&key);
+    return key;
+}
+
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::COLOR_CORRECTION_MODE =
-        new Key(String("android.colorCorrection.mode"), ECLSID_CInteger32);
+    CreateKey("android.colorCorrection.mode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::COLOR_CORRECTION_TRANSFORM =
-        new Key(String("android.colorCorrection.transform"), ECLSID_CColorSpaceTransform);
+    CreateKey("android.colorCorrection.transform", ECLSID_CColorSpaceTransform, EIID_IColorSpaceTransform);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::COLOR_CORRECTION_GAINS =
-        new Key(String("android.colorCorrection.gains"), ECLSID_CRggbChannelVector);
+    CreateKey("android.colorCorrection.gains", ECLSID_CRggbChannelVector, EIID_IRggbChannelVector);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::COLOR_CORRECTION_ABERRATION_MODE =
-        new Key(String("android.colorCorrection.aberrationMode"), ECLSID_CInteger32);
+    CreateKey("android.colorCorrection.aberrationMode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AE_ANTIBANDING_MODE =
-        new Key(String("android.control.aeAntibandingMode"), ECLSID_CInteger32);
+    CreateKey("android.control.aeAntibandingMode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AE_EXPOSURE_COMPENSATION =
-        new Key(String("android.control.aeExposureCompensation"), ECLSID_CInteger32);
+    CreateKey("android.control.aeExposureCompensation", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AE_LOCK =
-        new Key(String("android.control.aeLock"), ECLSID_CBoolean);
+    CreateKey("android.control.aeLock", ECLSID_CBoolean, EIID_IBoolean);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AE_MODE =
-        new Key(String("android.control.aeMode"), ECLSID_CInteger32);
+    CreateKey("android.control.aeMode", ECLSID_CInteger32, EIID_IInteger32);
 
 //android.hardware.camera2.params.MeteringRectangle[].class
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AE_REGIONS =
-        new Key(String("android.control.aeRegions"), ECLSID_CArrayOf);
+    CreateKey("android.control.aeRegions", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CMeteringRectangle, EIID_IMeteringRectangle);
 
 //android.util.Range<Integer>
-// INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AE_TARGET_FPS_RANGE =
-//         new Key(String("android.control.aeTargetFpsRange"), ECLSID_CArrayOf);
+INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AE_TARGET_FPS_RANGE =
+    CreateKey("android.control.aeTargetFpsRange", ECLSID_CRange, EIID_IRange,
+        ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AE_PRECAPTURE_TRIGGER =
-        new Key(String("android.control.aePrecaptureTrigger"), ECLSID_CInteger32);
+    CreateKey("android.control.aePrecaptureTrigger", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AF_MODE =
-        new Key(String("android.control.afMode"), ECLSID_CInteger32);
+    CreateKey("android.control.afMode", ECLSID_CInteger32, EIID_IInteger32);
 
 //android.hardware.camera2.params.MeteringRectangle[].class
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AF_REGIONS =
-        new Key(String("android.control.afRegions"), ECLSID_CArrayOf);
+    CreateKey("android.control.afRegions", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CMeteringRectangle, EIID_IMeteringRectangle);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AF_TRIGGER =
-        new Key(String("android.control.afTrigger"), ECLSID_CInteger32);
+    CreateKey("android.control.afTrigger", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AWB_LOCK =
-        new Key(String("android.control.awbLock"), ECLSID_CBoolean);
+    CreateKey("android.control.awbLock", ECLSID_CBoolean, EIID_IBoolean);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AWB_MODE =
-        new Key(String("android.control.awbMode"), ECLSID_CInteger32);
+    CreateKey("android.control.awbMode", ECLSID_CInteger32, EIID_IInteger32);
 
 //android.hardware.camera2.params.MeteringRectangle[].class
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_AWB_REGIONS =
-        new Key(String("android.control.awbRegions"), ECLSID_CArrayOf);
+    CreateKey("android.control.awbRegions", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CMeteringRectangle, EIID_IMeteringRectangle);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_CAPTURE_INTENT =
-        new Key(String("android.control.captureIntent"), ECLSID_CInteger32);
+    CreateKey("android.control.captureIntent", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_EFFECT_MODE =
-        new Key(String("android.control.effectMode"), ECLSID_CInteger32);
+    CreateKey("android.control.effectMode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_MODE =
-        new Key(String("android.control.mode"), ECLSID_CInteger32);
+    CreateKey("android.control.mode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_SCENE_MODE =
-        new Key(String("android.control.sceneMode"), ECLSID_CInteger32);
+    CreateKey("android.control.sceneMode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::CONTROL_VIDEO_STABILIZATION_MODE =
-        new Key(String("android.control.videoStabilizationMode"), ECLSID_CInteger32);
+    CreateKey("android.control.videoStabilizationMode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::EDGE_MODE =
-        new Key(String("android.edge.mode"), ECLSID_CInteger32);
+    CreateKey("android.edge.mode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::FLASH_MODE =
-        new Key(String("android.flash.mode"), ECLSID_CInteger32);
+    CreateKey("android.flash.mode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::HOT_PIXEL_MODE =
-        new Key(String("android.hotPixel.mode"), ECLSID_CInteger32);
+    CreateKey("android.hotPixel.mode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::JPEG_GPS_LOCATION =
-        new Key(String("android.jpeg.gpsLocation"), ECLSID_CLocation);
+    CreateKey("android.jpeg.gpsLocation", ECLSID_CLocation, EIID_ILocation);
 
 //double[].class
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::JPEG_GPS_COORDINATES =
-        new Key(String("android.jpeg.gpsCoordinates"), ECLSID_CArrayOf);
+    CreateKey("android.jpeg.gpsCoordinates", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CDouble, EIID_IDouble);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::JPEG_GPS_PROCESSING_METHOD =
-        new Key(String("android.jpeg.gpsProcessingMethod"), ECLSID_CString);
+    CreateKey("android.jpeg.gpsProcessingMethod", ECLSID_CString, EIID_IString);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::JPEG_GPS_TIMESTAMP =
-        new Key(String("android.jpeg.gpsTimestamp"), ECLSID_CInteger64);
+    CreateKey("android.jpeg.gpsTimestamp", ECLSID_CInteger64, EIID_IInteger64);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::JPEG_ORIENTATION =
-        new Key(String("android.jpeg.orientation"), ECLSID_CInteger32);
+    CreateKey("android.jpeg.orientation", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::JPEG_QUALITY =
-        new Key(String("android.jpeg.quality"), ECLSID_CByte);
+    CreateKey("android.jpeg.quality", ECLSID_CByte, EIID_IByte);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::JPEG_THUMBNAIL_QUALITY =
-        new Key(String("android.jpeg.thumbnailQuality"), ECLSID_CByte);
+    CreateKey("android.jpeg.thumbnailQuality", ECLSID_CByte, EIID_IByte);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::JPEG_THUMBNAIL_SIZE =
-        new Key(String("android.jpeg.thumbnailSize"), ECLSID_CSize);
+    CreateKey("android.jpeg.thumbnailSize", ECLSID_CSize, EIID_ISize);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::LENS_APERTURE =
-        new Key(String("android.lens.aperture"), ECLSID_CFloat);
+    CreateKey("android.lens.aperture", ECLSID_CFloat, EIID_IFloat);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::LENS_FILTER_DENSITY =
-        new Key(String("android.lens.filterDensity"), ECLSID_CFloat);
+    CreateKey("android.lens.filterDensity", ECLSID_CFloat, EIID_IFloat);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::LENS_FOCAL_LENGTH =
-        new Key(String("android.lens.focalLength"), ECLSID_CFloat);
+    CreateKey("android.lens.focalLength", ECLSID_CFloat, EIID_IFloat);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::LENS_FOCUS_DISTANCE =
-        new Key(String("android.lens.focusDistance"), ECLSID_CFloat);
+    CreateKey("android.lens.focusDistance", ECLSID_CFloat, EIID_IFloat);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::LENS_OPTICAL_STABILIZATION_MODE =
-        new Key(String("android.lens.opticalStabilizationMode"), ECLSID_CInteger32);
+    CreateKey("android.lens.opticalStabilizationMode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::NOISE_REDUCTION_MODE =
-        new Key(String("android.noiseReduction.mode"), ECLSID_CInteger32);
+    CreateKey("android.noiseReduction.mode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::REQUEST_ID =
-        new Key(String("android.request.id"), ECLSID_CInteger32);
+    CreateKey("android.request.id", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::SCALER_CROP_REGION =
-        new Key(String("android.scaler.cropRegion"), ECLSID_CRect);
+    CreateKey("android.scaler.cropRegion", ECLSID_CRect, EIID_IRect);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::SENSOR_EXPOSURE_TIME =
-        new Key(String("android.sensor.exposureTime"), ECLSID_CInteger64);
+    CreateKey("android.sensor.exposureTime", ECLSID_CInteger64, EIID_IInteger64);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::SENSOR_FRAME_DURATION =
-        new Key(String("android.sensor.frameDuration"), ECLSID_CInteger64);
+    CreateKey("android.sensor.frameDuration", ECLSID_CInteger64, EIID_IInteger64);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::SENSOR_SENSITIVITY =
-        new Key(String("android.sensor.sensitivity"), ECLSID_CInteger32);
+    CreateKey("android.sensor.sensitivity", ECLSID_CInteger32, EIID_IInteger32);
 
 //int[].class
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::SENSOR_TEST_PATTERN_DATA =
-        new Key(String("android.sensor.testPatternData"), ECLSID_CArrayOf);
+    CreateKey("android.sensor.testPatternData", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::SENSOR_TEST_PATTERN_MODE =
-        new Key(String("android.sensor.testPatternMode"), ECLSID_CInteger32);
+    CreateKey("android.sensor.testPatternMode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::SHADING_MODE =
-        new Key(String("android.shading.mode"), ECLSID_CInteger32);
+    CreateKey("android.shading.mode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::STATISTICS_FACE_DETECT_MODE =
-        new Key(String("android.statistics.faceDetectMode"), ECLSID_CInteger32);
+    CreateKey("android.statistics.faceDetectMode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::STATISTICS_HOT_PIXEL_MAP_MODE =
-        new Key(String("android.statistics.hotPixelMapMode"), ECLSID_CBoolean);
+    CreateKey("android.statistics.hotPixelMapMode", ECLSID_CBoolean, EIID_IBoolean);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::STATISTICS_LENS_SHADING_MAP_MODE =
-        new Key(String("android.statistics.lensShadingMapMode"), ECLSID_CInteger32);
+    CreateKey("android.statistics.lensShadingMapMode", ECLSID_CInteger32, EIID_IInteger32);
 
 //float[].class
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::TONEMAP_CURVE_BLUE =
-        new Key(String("android.tonemap.curveBlue"), ECLSID_CArrayOf);
+    CreateKey("android.tonemap.curveBlue", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CFloat, EIID_IFloat);
 
 //float[].class
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::TONEMAP_CURVE_GREEN =
-        new Key(String("android.tonemap.curveGreen"), ECLSID_CArrayOf);
+    CreateKey("android.tonemap.curveGreen", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CFloat, EIID_IFloat);
 
 //float[].class
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::TONEMAP_CURVE_RED =
-        new Key(String("android.tonemap.curveRed"), ECLSID_CArrayOf);
+    CreateKey("android.tonemap.curveRed", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CFloat, EIID_IFloat);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::TONEMAP_CURVE =
-        new Key(String("android.tonemap.curve"), ECLSID_CTonemapCurve);
+    CreateKey("android.tonemap.curve", ECLSID_CTonemapCurve, EIID_ITonemapCurve);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::TONEMAP_MODE =
-        new Key(String("android.tonemap.mode"), ECLSID_CInteger32);
+    CreateKey("android.tonemap.mode", ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::LED_TRANSMIT =
-        new Key(String("android.led.transmit"), ECLSID_CBoolean);
+    CreateKey("android.led.transmit", ECLSID_CBoolean, EIID_IBoolean);
 
 INIT_PROI_3 const AutoPtr<ICaptureRequestKey> CaptureRequest::BLACK_LEVEL_LOCK =
-        new Key(String("android.blackLevel.lock"), ECLSID_CBoolean);
+    CreateKey("android.blackLevel.lock", ECLSID_CBoolean, EIID_IBoolean);
 
 CAR_INTERFACE_IMPL_2(CaptureRequest, CameraMetadata, ICaptureRequest, IParcelable)
 

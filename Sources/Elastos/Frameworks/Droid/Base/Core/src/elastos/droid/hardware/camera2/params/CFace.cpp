@@ -2,10 +2,10 @@
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/hardware/camera2/params/CFace.h"
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -43,13 +43,11 @@ ECode CFace::constructor(
     FAIL_RETURN(CheckNotNull(String("bounds"), TO_IINTERFACE(bounds)))
 
     if (score < IFace::SCORE_MIN || score > IFace::SCORE_MAX) {
-        //throw new IllegalArgumentException("Confidence out of range");
-        Slogger::E("CFace", "Confidence out of range");
+        Logger::E("CFace", "Confidence out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (id < 0 && id != IFace::ID_UNSUPPORTED) {
-        //throw new IllegalArgumentException("Id out of range");
-        Slogger::E("CFace", "Id out of range");
+        Logger::E("CFace", "Id out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (id == IFace::ID_UNSUPPORTED) {
@@ -162,8 +160,7 @@ ECode CFace::CheckNotNull(
     /* [in] */ IInterface* obj)
 {
     if (obj == NULL) {
-        //throw new IllegalArgumentException(name + " was required, but it was null");
-        Slogger::E("CFace", String(name) + " was required, but it was null");
+        Logger::E("CFace", String(name) + " was required, but it was null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -174,8 +171,7 @@ ECode CFace::CheckNull(
     /* [in] */ IInterface* obj)
 {
     if (obj != NULL) {
-        //throw new IllegalArgumentException(name + " was required to be null, but it wasn't");
-        Slogger::E("CFace", String(name) + " was required to be null, but it wasn't");
+        Logger::E("CFace", String(name) + " was required to be null, but it wasn't");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;

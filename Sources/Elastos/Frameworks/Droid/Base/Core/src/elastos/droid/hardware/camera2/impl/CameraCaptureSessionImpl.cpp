@@ -14,7 +14,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/ClassLoader.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
@@ -40,7 +40,7 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::ClassLoader;
 using Elastos::Core::IClassLoader;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -68,7 +68,7 @@ ECode CameraCaptureSessionImpl::SequenceDrainListener::OnDrained()
      * then the drain immediately finishes.
      */
     if (mHost->VERBOSE) {
-        Slogger::V(mHost->TAG, "%s onSequenceDrained", mHost->mIdString.string());
+        Logger::V(mHost->TAG, "%s onSequenceDrained", mHost->mIdString.string());
     }
     return mHost->mAbortDrainer->BeginDrain();
 }
@@ -84,7 +84,7 @@ CameraCaptureSessionImpl::AbortDrainListener::AbortDrainListener(
 ECode CameraCaptureSessionImpl::AbortDrainListener::OnDrained()
 {
     if (mHost->VERBOSE) {
-        Slogger::V(mHost->TAG, "%s onAbortDrained", mHost->mIdString.string());
+        Logger::V(mHost->TAG, "%s onAbortDrained", mHost->mIdString.string());
     }
     {    AutoLock syncLock(mHost);
         /*
@@ -111,7 +111,7 @@ CameraCaptureSessionImpl::IdleDrainListener::IdleDrainListener(
 ECode CameraCaptureSessionImpl::IdleDrainListener::OnDrained()
 {
     if (mHost->VERBOSE) {
-        Slogger::V(mHost->TAG, "%s onIdleDrained", mHost->mIdString.string());
+        Logger::V(mHost->TAG, "%s onIdleDrained", mHost->mIdString.string());
     }
 
     // Take device lock before session lock so that we can call back into device
@@ -129,7 +129,7 @@ ECode CameraCaptureSessionImpl::IdleDrainListener::OnDrained()
              * This operation is idempotent; a session will not be closed twice.
              */
             if (mHost->VERBOSE)
-                Slogger::V(mHost->TAG, "%s Session drain complete, skip unconfigure: %d"
+                Logger::V(mHost->TAG, "%s Session drain complete, skip unconfigure: %d"
                         , mHost->mIdString.string(), mHost->mSkipUnconfigure);
 
             // Fast path: A new capture session has replaced this one; don't unconfigure.
@@ -146,14 +146,14 @@ ECode CameraCaptureSessionImpl::IdleDrainListener::OnDrained()
             //} catch (CameraAccessException e) {
             if (ec == (ECode)E_CAMERA_ACCESS_EXCEPTION) {
                 // OK: do not throw checked exceptions.
-                Slogger::E(TAG, "%s Exception while configuring outputs: %d", mHost->mIdString.string(), ec);
+                Logger::E(TAG, "%s Exception while configuring outputs: %d", mHost->mIdString.string(), ec);
 
                 // TODO: call onError instead of onClosed if this happens
             }
             //} catch (IllegalStateException e) {
             if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
                 // Camera is already closed, so go straight to the close callback
-                if (mHost->VERBOSE) Slogger::V(mHost->TAG,
+                if (mHost->VERBOSE) Logger::V(mHost->TAG,
                         "%s Camera was already closed or busy, skipping unconfigure", mHost->mIdString.string());
                 mHost->mUnconfigureDrainer->TaskFinished();
             }
@@ -176,7 +176,7 @@ CameraCaptureSessionImpl::UnconfigureDrainListener::UnconfigureDrainListener(
 ECode CameraCaptureSessionImpl::UnconfigureDrainListener::OnDrained()
 {
     if (mHost->VERBOSE) {
-        Slogger::V(TAG, "%s onUnconfigureDrained", mHost->mIdString.string());
+        Logger::V(TAG, "%s onUnconfigureDrained", mHost->mIdString.string());
     }
     {    AutoLock syncLock(mHost);
         // The device has finished unconfiguring. It's now fully closed.
@@ -200,7 +200,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnOpened(
     /* [in] */ ICameraDevice* camera)
 {
     //throw new AssertionError("Camera must already be open before creating a session");
-    Slogger::E(mHost->TAG, "Camera must already be open before creating a session");
+    Logger::E(mHost->TAG, "Camera must already be open before creating a session");
     return E_ASSERTION_ERROR;
 }
 
@@ -209,7 +209,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnDisconnected(
     /* [in] */ ICameraDevice* camera)
 {
     if (mHost->VERBOSE) {
-        Slogger::V(mHost->TAG, "%s, onDisconnected",mHost->mIdString.string());
+        Logger::V(mHost->TAG, "%s, onDisconnected",mHost->mIdString.string());
     }
     return mHost->Close();
 }
@@ -220,7 +220,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnError(
     /* [in] */ Int32 error)
 {
     // Should not be reached, handled by device code
-    Slogger::W(mHost->TAG, "%s Got device error %d", mHost->mIdString.string(), error);
+    Logger::W(mHost->TAG, "%s Got device error %d", mHost->mIdString.string(), error);
     return NOERROR;
 }
 
@@ -232,7 +232,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnActive(
     mActive = TRUE;
 
     if (mHost->VERBOSE) {
-        Slogger::V(mHost->TAG, "%s onActive", mHost->mIdString.string());
+        Logger::V(mHost->TAG, "%s onActive", mHost->mIdString.string());
     }
     return mHost->mStateCallback->OnActive(mSession);
 }
@@ -243,7 +243,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnIdle(
 {
     Boolean isAborting = FALSE;
     if (mHost->VERBOSE) {
-        Slogger::V(TAG, "%s onIdle", mHost->mIdString.string());
+        Logger::V(TAG, "%s onIdle", mHost->mIdString.string());
     }
 
     {    AutoLock syncLock(mSession);
@@ -289,7 +289,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnBusy(
     // since the app won't be able to distinguish the two actives
     // Don't signal the application since there's no clean mapping here
     if (mHost->VERBOSE) {
-        Slogger::V(mHost->TAG, "%s onBusy", mHost->mIdString.string());
+        Logger::V(mHost->TAG, "%s onBusy", mHost->mIdString.string());
     }
     return NOERROR;
 }
@@ -299,7 +299,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnUnconfigured(
     /* [in] */ ICameraDevice* camera)
 {
     if (mHost->VERBOSE) {
-        Slogger::V(mHost->TAG, "%d onUnconfigured", mHost->mIdString.string());
+        Logger::V(mHost->TAG, "%d onUnconfigured", mHost->mIdString.string());
     }
     {    AutoLock syncLock(mSession);
         // Ignore #onUnconfigured before #close is called.
@@ -386,12 +386,12 @@ ECode CameraCaptureSessionImpl::constructor(
     Boolean res;
     if (outputs == NULL || (outputs->IsEmpty(&res), res)) {
         //throw new IllegalArgumentException("outputs must be a non-null, non-empty list");
-        Slogger::E(TAG, "outputs must be a non-null, non-empty list");
+        Logger::E(TAG, "outputs must be a non-null, non-empty list");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (_callback == NULL) {
         //throw new IllegalArgumentException("callback must not be null");
-        Slogger::E(TAG, "callback must not be null");
+        Logger::E(TAG, "callback must not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -437,13 +437,13 @@ ECode CameraCaptureSessionImpl::constructor(
 
     if (configureSuccess) {
         mStateCallback->OnConfigured(this);
-        if (VERBOSE) Slogger::V(TAG, "%s Created session successfully", mIdString.string());
+        if (VERBOSE) Logger::V(TAG, "%s Created session successfully", mIdString.string());
         mConfigureSuccess = TRUE;
     }
     else {
         mStateCallback->OnConfigureFailed(this);
         mClosed = TRUE; // do not fire any other callbacks, do not allow any other work
-        Slogger::E(TAG, "%s Failed to create capture session; configuration failed", mIdString.string());
+        Logger::E(TAG, "%s Failed to create capture session; configuration failed", mIdString.string());
         mConfigureSuccess = FALSE;
     }
     return NOERROR;
@@ -471,7 +471,7 @@ ECode CameraCaptureSessionImpl::Capture(
     {    AutoLock syncLock(this);
         if (request == NULL) {
             //throw new IllegalArgumentException("request must not be null");
-            Slogger::E(TAG, "request must not be null");
+            Logger::E(TAG, "request must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -481,7 +481,7 @@ ECode CameraCaptureSessionImpl::Capture(
         CameraDeviceImpl::CheckHandler(handler, TO_IINTERFACE(_callback), (IHandler**)&newHandler);
 
         if (VERBOSE) {
-            // Slogger::V(TAG, mIdString + "capture - request " + request + ", callback " + _callback +
+            // Logger::V(TAG, mIdString + "capture - request " + request + ", callback " + _callback +
             //         " newHandler " + newHandler);
         }
 
@@ -507,12 +507,12 @@ ECode CameraCaptureSessionImpl::CaptureBurst(
         Boolean res;
         if (requests == NULL) {
             //throw new IllegalArgumentException("requests must not be null");
-            Slogger::E(TAG, "requests must not be null");
+            Logger::E(TAG, "requests must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         else if (requests->IsEmpty(&res), res) {
             //throw new IllegalArgumentException("requests must have at least one element");
-            Slogger::E(TAG, "requests must have at least one element");
+            Logger::E(TAG, "requests must have at least one element");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -548,7 +548,7 @@ ECode CameraCaptureSessionImpl::SetRepeatingRequest(
     {    AutoLock syncLock(this);
         if (request == NULL) {
             //throw new IllegalArgumentException("request must not be null");
-            Slogger::E(TAG, "request must not be null");
+            Logger::E(TAG, "request must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -584,12 +584,12 @@ ECode CameraCaptureSessionImpl::SetRepeatingBurst(
         Boolean res;
         if (requests == NULL) {
             //throw new IllegalArgumentException("requests must not be null");
-            Slogger::E(TAG, "requests must not be null");
+            Logger::E(TAG, "requests must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         else if (requests->IsEmpty(&res), res) {
             //throw new IllegalArgumentException("requests must have at least one element");
-            Slogger::E(TAG, "requests must have at least one element");
+            Logger::E(TAG, "requests must have at least one element");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -619,7 +619,7 @@ ECode CameraCaptureSessionImpl::StopRepeating()
         FAIL_RETURN(CheckNotClosed())
 
         if (VERBOSE) {
-            Slogger::V(TAG, "%s stopRepeating", mIdString.string());
+            Logger::V(TAG, "%s stopRepeating", mIdString.string());
         }
 
         return mDeviceImpl->StopRepeating();
@@ -633,11 +633,11 @@ ECode CameraCaptureSessionImpl::AbortCaptures()
         FAIL_RETURN(CheckNotClosed())
 
         if (VERBOSE) {
-            Slogger::V(TAG, "%s abortCaptures", mIdString.string());
+            Logger::V(TAG, "%s abortCaptures", mIdString.string());
         }
 
         if (mAborting) {
-            Slogger::W(TAG, "%s abortCaptures - Session is already aborting; doing nothing", mIdString.string());
+            Logger::W(TAG, "%s abortCaptures - Session is already aborting; doing nothing", mIdString.string());
             return NOERROR;
         }
 
@@ -666,7 +666,7 @@ ECode CameraCaptureSessionImpl::ReplaceSessionClose()
          */
 
         if (VERBOSE) {
-            Slogger::V(TAG, "%s replaceSessionClose", mIdString.string());
+            Logger::V(TAG, "%s replaceSessionClose", mIdString.string());
         }
 
         // Set up fast shutdown. Possible alternative paths:
@@ -690,13 +690,13 @@ ECode CameraCaptureSessionImpl::Close()
     {    AutoLock syncLock(this);
         if (mClosed) {
             if (VERBOSE) {
-                Slogger::V(TAG, "%s close - reentering", mIdString.string());
+                Logger::V(TAG, "%s close - reentering", mIdString.string());
             }
             return NOERROR;
         }
 
         if (VERBOSE) {
-            Slogger::V(TAG, "%s close - first time", mIdString.string());
+            Logger::V(TAG, "%s close - first time", mIdString.string());
         }
 
         mClosed = TRUE;
@@ -716,7 +716,7 @@ ECode CameraCaptureSessionImpl::Close()
         //} catch (IllegalStateException e) {
         if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
             // OK: Camera device may already be closed, nothing else to do
-            Slogger::W(TAG, "%s The camera device was already closed: %d", mIdString.string(), ec);
+            Logger::W(TAG, "%s The camera device was already closed: %d", mIdString.string(), ec);
 
             // TODO: Fire onClosed anytime we get the device onClosed or the ISE?
             // or just suppress the ISE only and rely onClosed.
@@ -728,7 +728,7 @@ ECode CameraCaptureSessionImpl::Close()
         //} catch (CameraAccessException e) {
         if (ec == (ECode)E_CAMERA_ACCESS_EXCEPTION) {
             // OK: close does not throw checked exceptions.
-            Slogger::E(TAG, "%s Exception while stopping repeating: %d",mIdString.string(), ec);
+            Logger::E(TAG, "%s Exception while stopping repeating: %d",mIdString.string(), ec);
 
             // TODO: call onError instead of onClosed if this happens
         }
@@ -851,7 +851,7 @@ ECode CameraCaptureSessionImpl::CheckNotClosed()
     if (mClosed) {
         // throw new IllegalStateException(
         //         "Session has been closed; further changes are illegal.");
-        Slogger::E(TAG, "Session has been closed; further changes are illegal.");
+        Logger::E(TAG, "Session has been closed; further changes are illegal.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;

@@ -9,6 +9,9 @@
 
 using Elastos::Droid::Utility::CRange;
 using Elastos::Core::CInteger32;
+using Elastos::Core::EIID_IDouble;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::EIID_IInteger64;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
@@ -173,7 +176,7 @@ void CMediaCodecInfoAudioCapabilities::InitWithPlatformLimits()
     CInteger32::New(0, (IInteger32**)&begin);
     AutoPtr<IInteger32> end;
     CInteger32::New(Elastos::Core::Math::INT32_MAX_VALUE, (IInteger32**)&end);
-    CRange::Create(begin, end, (IRange**)&mBitrateRange);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&mBitrateRange);
 
     mMaxInputChannelCount = MAX_INPUT_CHANNEL_COUNT;
     begin = NULL;
@@ -181,7 +184,7 @@ void CMediaCodecInfoAudioCapabilities::InitWithPlatformLimits()
     end = NULL;
     CInteger32::New(96000, (IInteger32**)&end);
     AutoPtr<IRange> r;
-    CRange::Create(begin, end, (IRange**)&r);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&r);
     mSampleRateRanges = ArrayOf<IRange*>::Alloc(1);
     mSampleRateRanges->Set(0, r);
 
@@ -222,7 +225,7 @@ void CMediaCodecInfoAudioCapabilities::LimitSampleRates(
         CInteger32::New(rate, (IInteger32**)&val);
         if (Supports(val, NULL /* channels */)) {
             AutoPtr<IRange> r;
-            CRange::Create(val, val, (IRange**)&r);
+            CRange::Create(EIID_IInteger32, val, val, (IRange**)&r);
             ranges->Add(r);
         }
     }
@@ -296,7 +299,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(8000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(320000, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
 
         maxChannels = 2;
     }
@@ -308,7 +311,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(4750, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(12200, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
 
         maxChannels = 1;
     }
@@ -320,7 +323,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(6600, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(23850, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
 
         maxChannels = 1;
     }
@@ -344,7 +347,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(8000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(510000, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
 
         maxChannels = 48;
     }
@@ -361,7 +364,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(32000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(500000, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
 
         maxChannels = 255;
     }
@@ -377,7 +380,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(6000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(510000, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
 
         maxChannels = 255;
     }
@@ -386,11 +389,11 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(1, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(96000, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&sampleRateRange);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&sampleRateRange);
 
         end = NULL;
         CInteger32::New(10000000, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
 
         maxChannels = 8;
     }
@@ -399,7 +402,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(1, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(655350, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&sampleRateRange);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&sampleRateRange);
 
         // lossless codec, so bitrate is ignored
         maxChannels = 255;
@@ -413,7 +416,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(64000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(64000, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
         // platform allows multiple channels for this format
     }
     else if (mime.EqualsIgnoreCase(IMediaFormat::MIMETYPE_AUDIO_MSGSM)) {
@@ -424,7 +427,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(13000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(13000, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&bitRates);
 
         maxChannels = 1;
     }
@@ -455,7 +458,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLimits(
     AutoPtr<IInteger32> end;
     CInteger32::New(mMaxInputChannelCount, (IInteger32**)&end);
     AutoPtr<IRange> r;
-    CRange::Create(begin, end, (IRange**)&r);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&r);
     AutoPtr<IInteger32> val;
     CInteger32::New(maxInputChannels, (IInteger32**)&val);
     AutoPtr<IInterface> obj;

@@ -13,10 +13,8 @@
 #include "elastos/droid/os/CHandlerThread.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::HardwareCamera;
 using Elastos::Droid::Hardware::Camera2::Legacy::CLegacyCameraDevice;
 using Elastos::Droid::Hardware::Camera2::Legacy::CCameraDeviceUserShim;
@@ -26,13 +24,14 @@ using Elastos::Droid::Os::ConditionVariable;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Core::AutoLock;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::CThread;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::IO::EIID_ICloseable;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -43,15 +42,20 @@ namespace Legacy {
 CAR_INTERFACE_IMPL_3(CameraDeviceUserShim::CameraLooper, Object, ICameraDeviceUserShimCameraLooper,
         IRunnable, ICloseable)
 
-CameraDeviceUserShim::CameraLooper::CameraLooper(
+CameraDeviceUserShim::CameraLooper::CameraLooper()
+    : mCameraId(0)
+{}
+
+ECode CameraDeviceUserShim::CameraLooper::constructor(
     /* [in] */ Int32 cameraId)
-    : mCameraId(cameraId)
 {
+    mCameraId = cameraId;
     mCamera = HardwareCamera::OpenUninitialized();
     mStartDone = new ConditionVariable();
 
     CThread::New(this, (IThread**)&mThread);
     mThread->Start();
+    return NOERROR;
 }
 
 ECode CameraDeviceUserShim::CameraLooper::GetCamera(
@@ -91,36 +95,38 @@ ECode CameraDeviceUserShim::CameraLooper::Close()
     //} catch (InterruptedException e) {
     if (FAILED(ec)) {
         //throw new AssertionError(e);
-        Slogger::E(TAG,"AssertionError : %d", ec);
+        Logger::E(TAG,"AssertionError : %d", ec);
         return E_ASSERTION_ERROR;
     }
     //}
 
     mLooper = NULL;
+    mThread = NULL;
     return NOERROR;
 }
 
 ECode CameraDeviceUserShim::CameraLooper::WaitForOpen(
     /* [in] */ Int32 timeoutMs,
-    /* [out] */ Int32* result)
+    /* [out] */ ECode* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = 0;
+    *result = NOERROR;
 
     // Block until the camera is open asynchronously
     Boolean _result;
     mStartDone->Block(timeoutMs, &_result);
     if (!_result) {
-        Slogger::E(TAG, "waitForOpen - Camera failed to open after timeout of %d ms", OPEN_CAMERA_TIMEOUT_MS);
+        Logger::E(TAG, "waitForOpen - Camera failed to open after timeout of %d ms", OPEN_CAMERA_TIMEOUT_MS);
         //try {
         ECode ec = mCamera->ReleaseResources();
         //} catch (RuntimeException e) {
         if (FAILED(ec)) {
-            Slogger::E(TAG, "connectBinderShim - Failed to release camera after timeout %d", ec);
+            Logger::E(TAG, "connectBinderShim - Failed to release camera after timeout %d", ec);
         }
         //}
         //throw new CameraRuntimeException(CameraAccessException.CAMERA_ERROR);
-        Slogger::E(TAG, "CameraAccessException.CAMERA_ERROR");
+        Logger::E(TAG, "CameraAccessException.CAMERA_ERROR");
+        *result = E_CAMERA_RUNTIME_EXCEPTION;
         return E_CAMERA_RUNTIME_EXCEPTION;
     }
 
@@ -154,7 +160,7 @@ ECode CameraDeviceUserShim::CallbackHandler::HandleMessage(
             if (FAILED(ec)) {
                 // throw new IllegalStateException(
                 //     "Received remote exception during camera callback " + msg.what, e);
-                Slogger::E("CameraDeviceUserShim::CallbackHandler", "Received remote exception "
+                Logger::E("CameraDeviceUserShim::CallbackHandler", "Received remote exception "
                         "during camera callback %d, %d", what, ec);
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
@@ -165,7 +171,7 @@ ECode CameraDeviceUserShim::CallbackHandler::HandleMessage(
             if (FAILED(ec)) {
                 // throw new IllegalStateException(
                 //     "Received remote exception during camera callback " + msg.what, e);
-                Slogger::E("CameraDeviceUserShim::CallbackHandler","Received remote exception "
+                Logger::E("CameraDeviceUserShim::CallbackHandler","Received remote exception "
                         "during camera callback %d, %d", what, ec);
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
@@ -180,7 +186,7 @@ ECode CameraDeviceUserShim::CallbackHandler::HandleMessage(
             if (FAILED(ec)) {
                 // throw new IllegalStateException(
                 //     "Received remote exception during camera callback " + msg.what, e);
-                Slogger::E("CameraDeviceUserShim::CallbackHandler","Received remote exception "
+                Logger::E("CameraDeviceUserShim::CallbackHandler","Received remote exception "
                         "during camera callback %d, %d", what, ec);
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
@@ -203,7 +209,7 @@ ECode CameraDeviceUserShim::CallbackHandler::HandleMessage(
             if (FAILED(ec)) {
                 // throw new IllegalStateException(
                 //     "Received remote exception during camera callback " + msg.what, e);
-                Slogger::E("CameraDeviceUserShim::CallbackHandler","Received remote exception "
+                Logger::E("CameraDeviceUserShim::CallbackHandler","Received remote exception "
                         "during camera callback %d, %d", what, ec);
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
@@ -212,7 +218,7 @@ ECode CameraDeviceUserShim::CallbackHandler::HandleMessage(
         default:
             // throw new IllegalArgumentException(
             //     "Unknown callback message " + msg.what);
-            Slogger::E("CameraDeviceUserShim::CallbackHandler","CameraDeviceUserShim::CallbackHandler",
+            Logger::E("CameraDeviceUserShim::CallbackHandler","CameraDeviceUserShim::CallbackHandler",
                     "Unknown callback message %d",what);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
@@ -220,7 +226,7 @@ ECode CameraDeviceUserShim::CallbackHandler::HandleMessage(
     if (FAILED(ec)) {
         // throw new IllegalStateException(
         //     "Received remote exception during camera callback " + msg.what, e);
-        Slogger::E("CameraDeviceUserShim::CallbackHandler","Received remote exception"
+        Logger::E("CameraDeviceUserShim::CallbackHandler","Received remote exception"
                 "during camera callback %d, %d", what, ec);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -333,13 +339,18 @@ AutoPtr<IHandler> CameraDeviceUserShim::CameraCallbackThread::GetHandler()
 CAR_INTERFACE_IMPL_2(CameraDeviceUserShim, Object, ICameraDeviceUserShim, IICameraDeviceUser)
 
 const String CameraDeviceUserShim::TAG("CameraDeviceUserShim");
-const Boolean CameraDeviceUserShim::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean CameraDeviceUserShim::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
 const Int32 CameraDeviceUserShim::OPEN_CAMERA_TIMEOUT_MS = 5000; // 5 sec (same as api1 cts timeout)
 
 CameraDeviceUserShim::CameraDeviceUserShim()
     : mSurfaceIdCounter(0)
     , mConfiguring(FALSE)
 {
+}
+
+CameraDeviceUserShim::~CameraDeviceUserShim()
+{
+    Logger::I(TAG, " >> Destroy CameraDeviceUserShim %p", this);
 }
 
 ECode CameraDeviceUserShim::constructor()
@@ -365,15 +376,53 @@ ECode CameraDeviceUserShim::constructor(
     return NOERROR;
 }
 
-Int32 CameraDeviceUserShim::TranslateErrorsFromCamera1(
+static const Int32 HardwareCamera_NO_ERROR = 0;
+static const Int32 HardwareCamera_EACCESS = -13;
+static const Int32 HardwareCamera_ENODEV = -19;
+static const Int32 HardwareCamera_EBUSY = -16;
+static const Int32 HardwareCamera_EINVAL = -22;
+static const Int32 HardwareCamera_ENOSYS = -38;
+static const Int32 HardwareCamera_EUSERS = -87;
+static const Int32 HardwareCamera_EOPNOTSUPP = -95;
+
+ECode CameraDeviceUserShim::TranslateErrorsFromCamera1(
     /* [in] */ Int32 errorCode)
 {
-    switch (errorCode) {
-        case ICameraBinderDecorator::ICameraBinderDecorator_EACCES:
-            return ICameraBinderDecorator::ICameraBinderDecorator_PERMISSION_DENIED;
+    switch(errorCode) {
+        case HardwareCamera_EACCESS:
+            Logger::E(TAG, "RuntimeException Fail to connect to camera service");
+            return E_RUNTIME_EXCEPTION;
+        case HardwareCamera_ENODEV:
+            Logger::E(TAG, "RuntimeException Camera initialization failed");
+            return E_RUNTIME_EXCEPTION;
+        case HardwareCamera_ENOSYS:
+            Logger::E(TAG, "RuntimeException Camera initialization failed because some methods"
+                " are not implemented");
+            return E_RUNTIME_EXCEPTION;
+        case HardwareCamera_EOPNOTSUPP:
+            Logger::E(TAG, "RuntimeException Camera initialization failed because the hal"
+                " version is not supported by this device");
+            return E_RUNTIME_EXCEPTION;
+        case HardwareCamera_EINVAL:
+            Logger::E(TAG, "RuntimeException Camera initialization failed because the input"
+                " arugments are invalid");
+            return E_RUNTIME_EXCEPTION;
+        case HardwareCamera_EBUSY:
+            Logger::E(TAG, "RuntimeException Camera initialization failed because the camera"
+                " device was already opened");
+            return E_RUNTIME_EXCEPTION;
+        case HardwareCamera_EUSERS:
+            Logger::E(TAG, "RuntimeException Camera initialization failed because the max"
+                " number of camera devices were already opened");
+            return E_RUNTIME_EXCEPTION;
+        case HardwareCamera_NO_ERROR:
+            return NOERROR;
         default:
-            return errorCode;
+            // Should never hit this.
+            Logger::E(TAG, "RuntimeException Unknown camera error: %d(%08x)", errorCode);
+            return E_RUNTIME_EXCEPTION;
     }
+    return NOERROR;
 }
 
 ECode CameraDeviceUserShim::ConnectBinderShim(
@@ -385,7 +434,7 @@ ECode CameraDeviceUserShim::ConnectBinderShim(
     *shim = NULL;
 
     if (DEBUG) {
-        Slogger::D(TAG, "Opening shim Camera device");
+        Logger::D(TAG, "Opening shim Camera device");
     }
 
     /*
@@ -394,59 +443,72 @@ ECode CameraDeviceUserShim::ConnectBinderShim(
      * (e.g. in CTS which run its own default looper only after tests)
      */
 
-    AutoPtr<ICameraDeviceUserShimCameraLooper> init = new CameraLooper(cameraId);
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
+    AutoPtr<CameraLooper> init = new CameraLooper();
+    init->constructor(cameraId);
 
-    AutoPtr<ICameraDeviceUserShimCameraCallbackThread> threadCallbacks =
-            new CameraCallbackThread(callbacks);
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
+    AutoPtr<CameraCallbackThread> threadCallbacks = new CameraCallbackThread(callbacks);
 
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     // TODO: Make this async instead of blocking
-    Int32 initErrors;
+    ECode initErrors;
     init->WaitForOpen(OPEN_CAMERA_TIMEOUT_MS, &initErrors);
+    if (FAILED(initErrors)) {
+        Logger::E(TAG, "Failed to open Camera %d", cameraId);
+        return NOERROR;
+    }
+
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<IHardwareCamera> legacyCamera;
     init->GetCamera((IHardwareCamera**)&legacyCamera);
+    Logger::I(TAG, " >> legacyCamera 1: %s", TO_CSTR(legacyCamera));
 
-    // Check errors old HAL initialization
-    CameraBinderDecorator::ThrowOnError(initErrors);
-
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     // Disable shutter sounds (this will work unconditionally) for api2 clients
     Boolean result;
     legacyCamera->DisableShutterSound(&result);
 
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<IHardwareCameraInfo> info = new HardwareCamera::CameraInfo();
     HardwareCamera::GetCameraInfo(cameraId, info);
 
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<IParameters> legacyParameters;
     //try {
     ECode ec = legacyCamera->GetParameters((IParameters**)&legacyParameters);
     //} catch (RuntimeException e) {
     if (FAILED(ec)) {
-        // throw new CameraRuntimeException(CameraAccessException.CAMERA_ERROR,
-        //         "Unable to get initial parameters", e);
-        Slogger::E(TAG,  "Unable to get initial parameters");
+        Logger::E(TAG,  "Unable to get initial parameters");
         return E_CAMERA_RUNTIME_EXCEPTION;
     }
     //}
 
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
+    Logger::I(TAG, " >> legacyCamera 2: %s", TO_CSTR(legacyCamera));
+
     AutoPtr<ICameraCharacteristics> characteristics;
-    LegacyMetadataMapper::CreateCharacteristics(legacyParameters, info,
-            (ICameraCharacteristics**)&characteristics);
+    LegacyMetadataMapper::CreateCharacteristics(
+        legacyParameters, info, (ICameraCharacteristics**)&characteristics);
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<ILegacyCameraDevice> device;
     CLegacyCameraDevice::New(cameraId, legacyCamera, characteristics,
-            IICameraDeviceCallbacks::Probe(threadCallbacks), (ILegacyCameraDevice**)&device);
-    return CCameraDeviceUserShim::New(cameraId, device, characteristics,
-            init, threadCallbacks, shim);
+        threadCallbacks, (ILegacyCameraDevice**)&device);
+    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
+    return CCameraDeviceUserShim::New(
+        cameraId, device, characteristics, init, threadCallbacks, shim);
 }
 
 ECode CameraDeviceUserShim::Disconnect()
 {
     if (DEBUG) {
-        Slogger::D(TAG, "disconnect called.");
+        Logger::D(TAG, "disconnect called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::W(TAG, "Cannot disconnect, device has already been closed.");
+        Logger::W(TAG, "Cannot disconnect, device has already been closed.");
     }
 
     //try {
@@ -467,20 +529,20 @@ ECode CameraDeviceUserShim::SubmitRequest(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "submitRequest called.");
+        Logger::D(TAG, "submitRequest called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot submit request, device has been closed.");
+        Logger::E(TAG, "Cannot submit request, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
 
     {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
-            Slogger::E(TAG, "Cannot submit request, configuration change in progress.");
+            Logger::E(TAG, "Cannot submit request, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }
@@ -498,20 +560,20 @@ ECode CameraDeviceUserShim::SubmitRequestList(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "submitRequestList called.");
+        Logger::D(TAG, "submitRequestList called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot submit request list, device has been closed.");
+        Logger::E(TAG, "Cannot submit request list, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
 
     {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
-            Slogger::E(TAG, "Cannot submit request, configuration change in progress.");
+            Logger::E(TAG, "Cannot submit request, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }
@@ -528,20 +590,20 @@ ECode CameraDeviceUserShim::CancelRequest(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "cancelRequest called.");
+        Logger::D(TAG, "cancelRequest called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot cancel request, device has been closed.");
+        Logger::E(TAG, "Cannot cancel request, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
 
     {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
-            Slogger::E(TAG, "Cannot cancel request, configuration change in progress.");
+            Logger::E(TAG, "Cannot cancel request, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }
@@ -560,20 +622,20 @@ ECode CameraDeviceUserShim::BeginConfigure(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "beginConfigure called.");
+        Logger::D(TAG, "beginConfigure called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot begin configure, device has been closed.");
+        Logger::E(TAG, "Cannot begin configure, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
 
     {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
-            Slogger::E(TAG, "Cannot begin configure, configuration change already in progress.");
+            Logger::E(TAG, "Cannot begin configure, configuration change already in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }
@@ -590,13 +652,13 @@ ECode CameraDeviceUserShim::EndConfigure(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "endConfigure called.");
+        Logger::D(TAG, "endConfigure called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot end configure, device has been closed.");
+        Logger::E(TAG, "Cannot end configure, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
@@ -604,7 +666,7 @@ ECode CameraDeviceUserShim::EndConfigure(
     AutoPtr<IArrayList> surfaces;
     {    AutoLock syncLock(mConfigureLock);
         if (!mConfiguring) {
-            Slogger::E(TAG, "Cannot end configure, no configuration change in progress.");
+            Logger::E(TAG, "Cannot end configure, no configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }
@@ -631,27 +693,27 @@ ECode CameraDeviceUserShim::DeleteStream(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "deleteStream called.");
+        Logger::D(TAG, "deleteStream called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot delete stream, device has been closed.");
+        Logger::E(TAG, "Cannot delete stream, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
 
     {    AutoLock syncLock(mConfigureLock);
         if (!mConfiguring) {
-            Slogger::E(TAG, "Cannot delete stream, beginConfigure hasn't been called yet.");
+            Logger::E(TAG, "Cannot delete stream, beginConfigure hasn't been called yet.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }
         Int32 index;
         mSurfaces->IndexOfKey(streamId, &index);
         if (index < 0) {
-            Slogger::E(TAG, "Cannot delete stream, stream id %d doesn't exist.", streamId);
+            Logger::E(TAG, "Cannot delete stream, stream id %d doesn't exist.", streamId);
             *result = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
             return NOERROR;
         }
@@ -672,20 +734,20 @@ ECode CameraDeviceUserShim::CreateStream(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "createStream called.");
+        Logger::D(TAG, "createStream called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot create stream, device has been closed.");
+        Logger::E(TAG, "Cannot create stream, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
 
     {    AutoLock syncLock(mConfigureLock);
         if (!mConfiguring) {
-            Slogger::E(TAG, "Cannot create stream, beginConfigure hasn't been called yet.");
+            Logger::E(TAG, "Cannot create stream, beginConfigure hasn't been called yet.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }
@@ -706,13 +768,13 @@ ECode CameraDeviceUserShim::CreateDefaultRequest(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "createDefaultRequest called.");
+        Logger::D(TAG, "createDefaultRequest called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot create default request, device has been closed.");
+        Logger::E(TAG, "Cannot create default request, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
@@ -723,7 +785,7 @@ ECode CameraDeviceUserShim::CreateDefaultRequest(
             templateId, (ICameraMetadataNative**)&_template);
     //} catch (IllegalArgumentException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "createDefaultRequest - invalid templateId specified");
+        Logger::E(TAG, "createDefaultRequest - invalid templateId specified");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
         return NOERROR;
     }
@@ -742,10 +804,10 @@ ECode CameraDeviceUserShim::GetCameraInfo(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "getCameraInfo called.");
+        Logger::D(TAG, "getCameraInfo called.");
     }
     // TODO: implement getCameraInfo.
-    Slogger::E(TAG, "getCameraInfo unimplemented.");
+    Logger::E(TAG, "getCameraInfo unimplemented.");
     *result = ICameraBinderDecorator::ICameraBinderDecorator_NO_ERROR;
     return NOERROR;
 }
@@ -757,20 +819,20 @@ ECode CameraDeviceUserShim::WaitUntilIdle(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "waitUntilIdle called.");
+        Logger::D(TAG, "waitUntilIdle called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot wait until idle, device has been closed.");
+        Logger::E(TAG, "Cannot wait until idle, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
 
     {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
-            Slogger::E(TAG, "Cannot wait until idle, configuration change in progress.");
+            Logger::E(TAG, "Cannot wait until idle, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }
@@ -788,20 +850,20 @@ ECode CameraDeviceUserShim::Flush(
     *result = 0;
 
     if (DEBUG) {
-        Slogger::D(TAG, "flush called.");
+        Logger::D(TAG, "flush called.");
     }
 
     Boolean res;
     mLegacyDevice->IsClosed(&res);
     if (res) {
-        Slogger::E(TAG, "Cannot flush, device has been closed.");
+        Logger::E(TAG, "Cannot flush, device has been closed.");
         *result = ICameraBinderDecorator::ICameraBinderDecorator_ENODEV;
         return NOERROR;
     }
 
     {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
-            Slogger::E(TAG, "Cannot flush, configuration change in progress.");
+            Logger::E(TAG, "Cannot flush, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
             return NOERROR;
         }

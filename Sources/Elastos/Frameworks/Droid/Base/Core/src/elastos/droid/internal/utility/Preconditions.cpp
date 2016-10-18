@@ -3,12 +3,9 @@
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/Object.h>
-#include <elastos/utility/logging/Logger.h>
-#include <utils/CallStack.h>
 
 using Elastos::Core::Object;
 using Elastos::Utility::IIterator;
-using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -16,19 +13,6 @@ namespace Internal {
 namespace Utility {
 
 const String Preconditions::TAG("Preconditions");
-
-ECode Preconditions::CheckNotNull(
-    /* [in] */ IInterface* reference)
-{
-    if (reference == NULL) {
-        android::CallStack stack;
-        stack.update();
-        Logger::E(TAG, "%s, E_NULL_POINTER_EXCEPTION, backtrace:\n%s",
-            __FUNCTION__, stack.toString("").string());
-        return E_NULL_POINTER_EXCEPTION;
-    }
-    return NOERROR;
-}
 
 ECode Preconditions::CheckNotNull(
     /* [in] */ const String& reference)
@@ -52,20 +36,6 @@ ECode Preconditions::CheckNotNull(
         stack.update();
         Logger::E(TAG, "%s, E_NULL_POINTER_EXCEPTION, msg:%s, backtrace:\n%s",
             __FUNCTION__, TO_CSTR(errorMessage), stack.toString("").string());
-        return E_NULL_POINTER_EXCEPTION;
-    }
-    return NOERROR;
-}
-
-ECode Preconditions::CheckNotNull(
-    /* [in] */ IInterface* reference,
-    /* [in] */ const String& errorMessage)
-{
-    if (reference == NULL) {
-        android::CallStack stack;
-        stack.update();
-        Logger::E(TAG, "%s, E_NULL_POINTER_EXCEPTION, msg:%s, backtrace:\n%s",
-            __FUNCTION__, errorMessage.string(), stack.toString("").string());
         return E_NULL_POINTER_EXCEPTION;
     }
     return NOERROR;

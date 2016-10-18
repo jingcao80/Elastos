@@ -63,46 +63,11 @@ ECode HashCodeHelpers::GetHashCode(
 }
 
 ECode HashCodeHelpers::GetHashCode(
-    /* [in] */ ArrayOf<IInterface*>* array,
-    /* [out] */ Int32* value)
-{
-    VALIDATE_NOT_NULL(value);
-
-    if (array == NULL) {
-        *value = 0;
-        return NOERROR;
-    }
-
-    Int32 h = 1;
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<IInterface> o = (*array)[i];
-        Int32 x;
-        if (o == NULL) {
-            x = 0;
-        }
-        else {
-            IObject::Probe(o)->GetHashCode(&x);
-
-        }
-        h = ((h << 5) - h) ^ x; // (h * 31) XOR x
-    }
-
-    *value = h;
-    return NOERROR;
-}
-
-ECode HashCodeHelpers::GetHashCode(
     /* [in] */ IInterface* a,
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-
-    if (a == NULL) {
-        *value = 0;
-    }
-    else {
-        IObject::Probe(a)->GetHashCode(value);
-    }
+    *value = Object::GetHashCode(a);
     return NOERROR;
 }
 
@@ -116,13 +81,7 @@ ECode HashCodeHelpers::GetHashCode(
     Int32 h;
     GetHashCode(a, &h);
 
-    Int32 x;
-    if (b == NULL) {
-        x = 0;
-    }
-    else {
-        IObject::Probe(b)->GetHashCode(&x);
-    }
+    Int32 x = Object::GetHashCode(b);
     h = ((h << 5) - h) ^ x; // (h * 31) XOR x
 
     *value = h;
@@ -140,13 +99,7 @@ ECode HashCodeHelpers::GetHashCode(
     Int32 h;
     GetHashCode(a, b, &h);
 
-    Int32 x;
-    if (c == NULL) {
-        x = 0;
-    }
-    else {
-        IObject::Probe(c)->GetHashCode(&x);
-    }
+    Int32 x = Object::GetHashCode(c);
     h = ((h << 5) - h) ^ x; // (h * 31) XOR x
 
     *value = h;
@@ -165,13 +118,7 @@ ECode HashCodeHelpers::GetHashCode(
     Int32 h;
     GetHashCode(a, b, c, &h);
 
-    Int32 x;
-    if (d == NULL) {
-        x = 0;
-    }
-    else {
-        IObject::Probe(d)->GetHashCode(&x);
-    }
+    Int32 x = Object::GetHashCode(d);
     h = ((h << 5) - h) ^ x; // (h * 31) XOR x
 
     *value = h;

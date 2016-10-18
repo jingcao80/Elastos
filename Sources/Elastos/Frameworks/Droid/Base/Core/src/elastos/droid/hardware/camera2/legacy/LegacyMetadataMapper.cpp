@@ -20,15 +20,13 @@
 #include "elastos/droid/graphics/CImageFormat.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/utility/CSizeF.h"
+#include "elastos/droid/utility/CRange.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Hardware::Camera2::Legacy::ILegacySizeAreaComparator;
-using Elastos::Droid::Hardware::Camera2::Legacy::CLegacySizeAreaComparator;
-using Elastos::Droid::Hardware::Camera2::Legacy::ParameterUtils;
-using Elastos::Droid::Hardware::Camera2::Legacy::LegacyRequestMapper;
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNativeKey;
+using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IMeteringRectangle;
 using Elastos::Droid::Hardware::Camera2::Params::CMeteringRectangle;
 using Elastos::Droid::Hardware::Camera2::Params::IStreamConfiguration;
@@ -36,26 +34,33 @@ using Elastos::Droid::Hardware::Camera2::Params::CStreamConfiguration;
 using Elastos::Droid::Hardware::Camera2::Params::IMeteringRectangle;
 using Elastos::Droid::Hardware::Camera2::Params::IStreamConfigurationDuration;
 using Elastos::Droid::Hardware::Camera2::Params::CStreamConfigurationDuration;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IStreamConfiguration;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IStreamConfigurationDuration;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IMeteringRectangle;
 using Elastos::Droid::Hardware::Camera2::Utils::ArrayUtils;
 using Elastos::Droid::Hardware::Camera2::Utils::ListUtils;
 using Elastos::Droid::Hardware::Camera2::Utils::ParamsUtils;
 using Elastos::Droid::Hardware::Camera2::Utils::IUtilsSizeAreaComparator;
 using Elastos::Droid::Hardware::Camera2::Utils::CUtilsSizeAreaComparator;
-using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::CCameraCharacteristics;
 using Elastos::Droid::Hardware::HardwareCamera;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Graphics::CImageFormat;
+using Elastos::Droid::Utility::EIID_ISize;
 using Elastos::Droid::Utility::CSizeF;
+using Elastos::Droid::Utility::IRange;
+using Elastos::Droid::Utility::CRange;
+using Elastos::Droid::Utility::EIID_IRange;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::Math;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::EIID_IInteger32;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -75,7 +80,7 @@ const Boolean LegacyMetadataMapper::LIE_ABOUT_AWB_STATE = FALSE;
 const Boolean LegacyMetadataMapper::LIE_ABOUT_AWB = FALSE;
 
 const String LegacyMetadataMapper::TAG("LegacyMetadataMapper");
-const Boolean LegacyMetadataMapper::VERBOSE = FALSE;//Log.isLoggable(TAG, Log.VERBOSE);
+const Boolean LegacyMetadataMapper::VERBOSE = TRUE;//Log.isLoggable(TAG, Log.VERBOSE);
 
 const Int64 LegacyMetadataMapper::NS_PER_MS = 1000000;
 
@@ -126,11 +131,12 @@ ECode LegacyMetadataMapper::CreateCharacteristics(
     VALIDATE_NOT_NULL(outcc)
     *outcc = NULL;
 
+
     FAIL_RETURN(Preconditions::CheckNotNull(parameters))
     FAIL_RETURN(Preconditions::CheckNotNull(info, String("info must not be null")))
     AutoPtr<IHardwareCameraInfo> cinfo;
     info->GetInfo((IHardwareCameraInfo**)&cinfo);
-    FAIL_RETURN(Preconditions::CheckNotNull(cinfo, String("info.info must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(cinfo.Get(), String("info.info must not be null")))
 
     AutoPtr<ICameraMetadataNative> m;
     CCameraMetadataNative::New((ICameraMetadataNative**)&m);
@@ -142,12 +148,13 @@ ECode LegacyMetadataMapper::CreateCharacteristics(
     params->Unflatten(parameters);
     MapCharacteristicsFromParameters(m, params);
 
-    if (VERBOSE) {
-        Slogger::V(TAG, "createCharacteristics metadata:");
-        Slogger::V(TAG, "--------------------------------------------------- (start)");
-        m->DumpToLog();
-        Slogger::V(TAG, "--------------------------------------------------- (end)");
-    }
+    // if (VERBOSE) {
+    //     Logger::V(TAG, "CreateCharacteristics with parameters:\n%s", parameters.string());
+    //     Logger::V(TAG, "CameraMetadataNative %s, metadata:\n", TO_CSTR(m));
+    //     Logger::V(TAG, "--------------------------------------------------- (start)");
+    //     m->DumpToLog();
+    //     Logger::V(TAG, "--------------------------------------------------- (end)");
+    // }
 
     return CCameraCharacteristics::New(m, outcc);
 }
@@ -165,11 +172,11 @@ void LegacyMetadataMapper::MapCharacteristicsFromInfo(
     else {
         intObj = CoreUtils::Convert(ICameraMetadata::LENS_FACING_FRONT);
     }
-    m->Set(CameraCharacteristics::LENS_FACING, TO_IINTERFACE(intObj));
+    m->Set(CameraCharacteristics::LENS_FACING, intObj);
     Int32 orien;
     i->GetOrientation(&orien);
     AutoPtr<IInteger32> intObj2 = CoreUtils::Convert(orien);
-    m->Set(CameraCharacteristics::SENSOR_ORIENTATION, TO_IINTERFACE(intObj2));
+    m->Set(CameraCharacteristics::SENSOR_ORIENTATION, intObj2);
     return;
 }
 
@@ -183,32 +190,39 @@ void LegacyMetadataMapper::MapCharacteristicsFromParameters(
     AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(1);
     (*array)[0] = ICameraMetadata::COLOR_CORRECTION_ABERRATION_MODE_FAST;
     AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(array);
-    m->Set(CameraCharacteristics::COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES, TO_IINTERFACE(arrayObj));
+    m->Set(CameraCharacteristics::COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES, arrayObj);
+
     /*
      * control.ae*
      */
     MapControlAe(m, p);
+
     /*
      * control.af*
      */
     MapControlAf(m, p);
+
     /*
      * control.awb*
      */
     MapControlAwb(m, p);
+
     /*
      * control.*
      * - Anything that doesn't have a set of related fields
      */
     MapControlOther(m, p);
+
     /*
      * lens.*
      */
     MapLens(m, p);
+
     /*
      * flash.*
      */
     MapFlash(m, p);
+
     /*
      * jpeg.*
      */
@@ -220,7 +234,7 @@ void LegacyMetadataMapper::MapCharacteristicsFromParameters(
     AutoPtr<ArrayOf<Int32> > array2 = ArrayOf<Int32>::Alloc(1);
     (*array2)[0] = ICameraMetadata::NOISE_REDUCTION_MODE_FAST;
     AutoPtr<IArrayOf> arrayObj2 = CoreUtils::Convert(array2);
-    m->Set(CameraCharacteristics::NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES, TO_IINTERFACE(arrayObj2));
+    m->Set(CameraCharacteristics::NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES, arrayObj2);
 
     /*
      * scaler.*
@@ -246,7 +260,7 @@ void LegacyMetadataMapper::MapCharacteristicsFromParameters(
      * info.supportedHardwareLevel
      */
     AutoPtr<IInteger32> int32Obj = CoreUtils::Convert(ICameraMetadata::INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY);
-    m->Set(CameraCharacteristics::INFO_SUPPORTED_HARDWARE_LEVEL, TO_IINTERFACE(int32Obj));
+    m->Set(CameraCharacteristics::INFO_SUPPORTED_HARDWARE_LEVEL, int32Obj);
 
     /*
      * scaler.availableStream*, scaler.available*Durations, sensor.info.maxFrameDuration
@@ -259,6 +273,7 @@ void LegacyMetadataMapper::MapCharacteristicsFromParameters(
      * request.*
      */
     MapRequest(m, p);
+
     return;
 }
 
@@ -282,7 +297,7 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
     AutoPtr<IList> previewSizes;
     CArrayList::New((IList**)&previewSizes);
     for (Int32 i = 0; i < sizes->GetLength(); i++) {
-        previewSizes->Add(TO_IINTERFACE((*sizes)[i]));
+        previewSizes->Add((*sizes)[i]);
     }
 
     AutoPtr<ArrayOf<ICameraSize*> > sizes2;
@@ -290,7 +305,7 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
     AutoPtr<IList> jpegSizes;
     CArrayList::New((IList**)&jpegSizes);
     for (Int32 i = 0; i < sizes2->GetLength(); i++) {
-        jpegSizes->Add(TO_IINTERFACE((*sizes2)[i]));
+        jpegSizes->Add((*sizes2)[i]);
     }
 
     /*
@@ -321,8 +336,8 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
         Float jpegAspectRatio = width * 1.0f / height;
 
         if (VERBOSE) {
-            Slogger::V(TAG, "mapScalerStreamConfigs - largest JPEG area %dx%d, AR=%f",
-                    width, height, jpegAspectRatio);
+            Logger::V(TAG, "mapScalerStreamConfigs - largest JPEG area %dx%d, AR=%f",
+                width, height, jpegAspectRatio);
         }
 
         // Now remove preview sizes from the end (largest->smallest) until aspect ratio matches
@@ -335,9 +350,8 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
             previewSizes->Get(index, (IInterface**)&obj);
             AutoPtr<ICameraSize> size = ICameraSize::Probe(obj);
 
-            Int32 width;
+            Int32 width, height;
             size->GetWidth(&width);
-            Int32 height;
             size->GetHeight(&height);
             Float previewAspectRatio = width * 1.0f / height;
 
@@ -346,7 +360,7 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
                 previewSizes->Remove(index); // Assume removing from end is O(1)
 
                 if (VERBOSE) {
-                    Slogger::V(TAG, "mapScalerStreamConfigs - removed preview size %dx%d, AR=%f"
+                    Logger::V(TAG, "mapScalerStreamConfigs - removed preview size %dx%d, AR=%f"
                             "was not the same",width, height, previewAspectRatio);
                 }
             }
@@ -358,10 +372,13 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
         previewSizes->IsEmpty(&result);
         if (result) {
             // Fall-back to the original faulty behavior, but at least work
-            Slogger::W(TAG, "mapScalerStreamConfigs - failed to find any preview size matching "
+            Logger::W(TAG, "mapScalerStreamConfigs - failed to find any preview size matching "
                     "JPEG aspect ratio %f", jpegAspectRatio);
-            assert(0);
-            //p->GetSupportedPreviewSizes(&previewSizes);
+            AutoPtr<ArrayOf<ICameraSize*> > sizes;
+            p->GetSupportedPreviewSizes((ArrayOf<ICameraSize*>**)&sizes);
+            for (Int32 i = 0; i < sizes->GetLength(); ++i) {
+                previewSizes->Add((*sizes)[i]);
+            }
         }
 
         // Sort again, this time in descending order max->min
@@ -370,11 +387,11 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
         coll->Sort(previewSizes, tmp);
     }
 
-    AppendStreamConfig(availableStreamConfigs,
-            HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, previewSizes);
-    AppendStreamConfig(availableStreamConfigs,
-            IImageFormat::YUV_420_888, previewSizes);
+    AppendStreamConfig(availableStreamConfigs, HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, previewSizes);
+    AppendStreamConfig(availableStreamConfigs, IImageFormat::YUV_420_888, previewSizes);
 
+    AutoPtr<IImageFormat> helper;
+    CImageFormat::AcquireSingleton((IImageFormat**)&helper);
     AutoPtr<ArrayOf<IInteger32*> > array;
     p->GetSupportedPreviewFormats((ArrayOf<IInteger32*>**)&array);
     for (Int32 i = 0; i < array->GetLength(); i++) {
@@ -383,8 +400,6 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
         obj->GetValue(&format);
 
         Boolean result;
-        AutoPtr<IImageFormat> helper;
-        CImageFormat::AcquireSingleton((IImageFormat**)&helper);
         helper->IsPublicFormat(format, &result);
         if (result) {
             AppendStreamConfig(availableStreamConfigs, format, previewSizes);
@@ -394,7 +409,7 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
              *  Do not add any formats unknown to us
              * (since it would fail runtime checks in StreamConfigurationMap)
              */
-            Slogger::W(TAG,"mapStreamConfigs - Skipping non-public format %d", format);
+            Logger::W(TAG,"mapStreamConfigs - Skipping non-public format %d", format);
         }
     }
 
@@ -406,24 +421,29 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
     /*
      * scaler.availableStreamConfigurations
      */
-    AutoPtr<ArrayOf<IInterface*> > tmpArray;
-    availableStreamConfigs->ToArray((ArrayOf<IInterface *>**)&tmpArray);
-    AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(tmpArray.Get());
-    m->Set(CameraCharacteristics::SCALER_AVAILABLE_STREAM_CONFIGURATIONS, TO_IINTERFACE(arrayObj));
+    Int32 csize;
+    availableStreamConfigs->GetSize(&csize);
+    AutoPtr<IArrayOf> scArray;
+    CArrayOf::New(EIID_IStreamConfiguration, csize, (IArrayOf**)&scArray);
+    for (Int32 i = 0; i < csize; ++i) {
+        AutoPtr<IInterface> obj;
+        availableStreamConfigs->Get(i, (IInterface**)&obj);
+        scArray->Set(i, obj);
+    }
+    m->Set(CameraCharacteristics::SCALER_AVAILABLE_STREAM_CONFIGURATIONS, scArray);
 
     /*
      * scaler.availableMinFrameDurations
      */
     // No frame durations available
-    AutoPtr<ArrayOf<IStreamConfigurationDuration*> > durationArray =
-            ArrayOf<IStreamConfigurationDuration*>::Alloc(0);
-    AutoPtr<IArrayOf> durationArrayObj = CoreUtils::Convert(durationArray.Get());
-    m->Set(CameraCharacteristics::SCALER_AVAILABLE_MIN_FRAME_DURATIONS, TO_IINTERFACE(durationArrayObj));
+    AutoPtr<IArrayOf> durationArray;
+    CArrayOf::New(EIID_IStreamConfigurationDuration, 0, (IArrayOf**)&durationArray);
+    m->Set(CameraCharacteristics::SCALER_AVAILABLE_MIN_FRAME_DURATIONS, durationArray);
 
     Int32 jsize;
     jpegSizes->GetSize(&jsize);
-    AutoPtr<ArrayOf<IStreamConfigurationDuration*> > jpegStalls =
-            ArrayOf<IStreamConfigurationDuration*>::Alloc(jsize);
+    AutoPtr<IArrayOf> jpegStalls;
+    CArrayOf::New(EIID_IStreamConfigurationDuration, jsize, (IArrayOf**)&jpegStalls);
 
     Int64 longestStallDuration = -1;
     for (Int32 i = 0; i < jsize; i++) {
@@ -432,14 +452,13 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
         AutoPtr<ICameraSize> s = ICameraSize::Probe(obj);
 
         Int64 stallDuration = CalculateJpegStallDuration(s);
-        Int32 width;
+        Int32 width, height;
         s->GetWidth(&width);
-        Int32 height;
         s->GetHeight(&height);
         AutoPtr<IStreamConfigurationDuration> duration;
         CStreamConfigurationDuration::New(HAL_PIXEL_FORMAT_BLOB, width,
                 height, stallDuration, (IStreamConfigurationDuration**)&duration);
-        jpegStalls->Set(i++, duration);
+        jpegStalls->Set(i, duration);
         if (longestStallDuration < stallDuration) {
             longestStallDuration = stallDuration;
         }
@@ -449,14 +468,13 @@ void LegacyMetadataMapper::MapScalerStreamConfigs(
      * scaler.availableStallDurations
      */
     // Set stall durations for jpeg, other formats use default stall duration
-    AutoPtr<IArrayOf> jpegStallsObj = CoreUtils::Convert(jpegStalls.Get());
-    m->Set(CameraCharacteristics::SCALER_AVAILABLE_STALL_DURATIONS, TO_IINTERFACE(jpegStallsObj));
+    m->Set(CameraCharacteristics::SCALER_AVAILABLE_STALL_DURATIONS, jpegStalls);
 
     /*
      * sensor.info.maxFrameDuration
      */
     AutoPtr<IInteger64> Int64Obj = CoreUtils::Convert(longestStallDuration);
-    m->Set(CameraCharacteristics::SENSOR_INFO_MAX_FRAME_DURATION, TO_IINTERFACE(Int64Obj));
+    m->Set(CameraCharacteristics::SENSOR_INFO_MAX_FRAME_DURATION, Int64Obj);
     return;
 }
 
@@ -467,41 +485,34 @@ ECode LegacyMetadataMapper::MapControlAe(
     /*
      * control.aeAvailableAntiBandingModes
      */
-    AutoPtr<IList> antiBandingModes;
-    assert(0);
-    //p->GetSupportedAntibanding((IList**)&antiBandingModes);
-    if (antiBandingModes != NULL) { // antibanding is optional
-        Int32 size;
-        antiBandingModes->GetSize(&size);
-        if (size > 0) {
-            AutoPtr<ArrayOf<Int32> > modes = ArrayOf<Int32>::Alloc(size);
-            Int32 j = 0;
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                antiBandingModes->Get(i, (IInterface**)&obj);
-                AutoPtr<ICharSequence> sque = ICharSequence::Probe(obj);
-                String mode;
-                sque->ToString(&mode);
 
-                Int32 convertedMode = ConvertAntiBandingMode(mode);
-                if (convertedMode == -1) {
-                    Slogger::W(TAG, "Antibanding mode %s not supported, skipping...",
-                            ((mode == NULL) ? String("NULL").string() : mode.string()));
-                }
-                else {
-                    (*modes)[j++] = convertedMode;
-                }
+    AutoPtr<ArrayOf<String> > antiBandingModes;
+    p->GetSupportedAntibanding((ArrayOf<String>**)&antiBandingModes);
+    if (antiBandingModes != NULL && antiBandingModes->GetLength() > 0) { // antibanding is optional
+        Int32 size = antiBandingModes->GetLength();
+        AutoPtr<ArrayOf<Int32> > modes = ArrayOf<Int32>::Alloc(size);
+        Int32 j = 0;
+
+        for (Int32 i = 0; i < size; i++) {
+            String mode = (*antiBandingModes)[i];
+            Int32 convertedMode = ConvertAntiBandingMode(mode);
+            if (convertedMode == -1) {
+                Logger::W(TAG, "Antibanding mode %s not supported, skipping...", mode.string());
             }
-            AutoPtr<ArrayOf<Int32> > newModes;
-            Arrays::CopyOf(modes, j, (ArrayOf<Int32>**)&newModes);
-            AutoPtr<IArrayOf> newModesObj = CoreUtils::Convert(newModes);
-            m->Set(CameraCharacteristics::CONTROL_AE_AVAILABLE_ANTIBANDING_MODES, TO_IINTERFACE(newModesObj));
+            else {
+                (*modes)[j++] = convertedMode;
+            }
         }
+
+        AutoPtr<ArrayOf<Int32> > newModes;
+        Arrays::CopyOf(modes, j, (ArrayOf<Int32>**)&newModes);
+        AutoPtr<IArrayOf> newModesObj = CoreUtils::Convert(newModes);
+        m->Set(CameraCharacteristics::CONTROL_AE_AVAILABLE_ANTIBANDING_MODES, newModesObj);
     }
     else {
         AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(0);
         AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(array);
-        m->Set(CameraCharacteristics::CONTROL_AE_AVAILABLE_ANTIBANDING_MODES, TO_IINTERFACE(arrayObj));
+        m->Set(CameraCharacteristics::CONTROL_AE_AVAILABLE_ANTIBANDING_MODES, arrayObj);
     }
 
     /*
@@ -509,47 +520,42 @@ ECode LegacyMetadataMapper::MapControlAe(
      */
     {
         AutoPtr<IList> fpsRanges;
-        assert(0);
-        //p->GetSupportedPreviewFpsRange((IList**)&fpsRanges);
+        p->GetSupportedPreviewFpsRange((IList**)&fpsRanges);
         if (fpsRanges == NULL) {
-            //throw new AssertionError("Supported FPS ranges cannot be null.");
-            Slogger::E(TAG, "Supported FPS ranges cannot be null.");
+            Logger::E(TAG, "Supported FPS ranges cannot be null.");
             return E_ASSERTION_ERROR;
         }
         Int32 rangesSize;
         fpsRanges->GetSize(&rangesSize);
         if (rangesSize <= 0) {
-            //throw new AssertionError("At least one FPS range must be supported.");
-            Slogger::E(TAG, "At least one FPS range must be supported.");
+            Logger::E(TAG, "At least one FPS range must be supported.");
             return E_ASSERTION_ERROR;
         }
-        assert(0);
-        // AutoPtr<ArrayOf<Range<IInteger32>*> > ranges = ArrayOf<Range<IInteger32>* >::Alloc(rangesSize);
-        // for (Int32 i = 0; i < rangesSize; i++) {
-        //     AutoPtr<IInterface> obj;
-        //     fpsRanges->Get(i, (IInterface**)&obj);
-        //     AutoPtr<IArrayOf> r = IArrayOf::Probe(obj);
-        //     AutoPtr<IInterface> obj2;
-        //     r->Get(IParameters::PREVIEW_FPS_MIN_INDEX, (IInterface**)&obj2);
-        //     AutoPtr<IInterface> obj3;
-        //     r->Get(IParameters::PREVIEW_FPS_MAX_INDEX, (IInterface**)&obj3);
 
-        //     AutoPtr<Range<IInteger32> > tmp = Range<IInteger32>::Create(IInteger32::Probe(obj2),
-        //             IInteger32::Probe(obj3));
-        //     ranges->Set(i++ , tmp);
+        AutoPtr<IArrayOf> ranges;
+        CArrayOf::New(EIID_IRange, rangesSize, (IArrayOf**)&ranges);
+        for (Int32 i = 0; i < rangesSize; i++) {
+            AutoPtr<IInterface> obj;
+            fpsRanges->Get(i, (IInterface**)&obj);
+            IArrayOf* r = IArrayOf::Probe(obj);
+            AutoPtr<IInterface> lower, upper;
+            r->Get(IParameters::PREVIEW_FPS_MIN_INDEX, (IInterface**)&lower);
+            r->Get(IParameters::PREVIEW_FPS_MAX_INDEX, (IInterface**)&upper);
 
-        // }
+            AutoPtr<IRange> range;
+            CRange::New(EIID_IInteger32, lower, upper, (IRange**)&range);
+            ranges->Set(i, range);
+        }
 
-        //m->Set(CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, ranges);
+        m->Set(CameraCharacteristics::CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, ranges);
     }
 
     /*
      * control.aeAvailableModes
      */
     {
-        AutoPtr<IList> flashModes;
-        assert(0);
-        //p->GetSupportedFlashModes((IList**)&flashModes);
+        AutoPtr<ArrayOf<String> > flashModes;
+        p->GetSupportedFlashModes((ArrayOf<String>**)&flashModes);
 
         AutoPtr<ArrayOf<String> > flashModeStrings = ArrayOf<String>::Alloc(5);
         (*flashModeStrings)[0] = IParameters::FLASH_MODE_OFF;
@@ -566,8 +572,8 @@ ECode LegacyMetadataMapper::MapControlAe(
         (*flashModeInts)[3] = ICameraMetadata::CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE;
 
         AutoPtr<ArrayOf<Int32> > aeAvail;
-        ArrayUtils::ConvertStringListToIntArray(
-                flashModes, flashModeStrings, flashModeInts, (ArrayOf<Int32>**)&aeAvail);
+        ArrayUtils::ConvertStringArrayToIntArray(
+            flashModes, flashModeStrings, flashModeInts, (ArrayOf<Int32>**)&aeAvail);
 
         // No flash control -> AE is always on
         if (aeAvail == NULL || aeAvail->GetLength() == 0) {
@@ -577,21 +583,20 @@ ECode LegacyMetadataMapper::MapControlAe(
 
         // Note that AE_MODE_OFF is never available.
         AutoPtr<IArrayOf> aeAvailObj = CoreUtils::Convert(aeAvail);
-        m->Set(CameraCharacteristics::CONTROL_AE_AVAILABLE_MODES, TO_IINTERFACE(aeAvailObj));
+        m->Set(CameraCharacteristics::CONTROL_AE_AVAILABLE_MODES, aeAvailObj);
     }
 
     /*
      * control.aeCompensationRanges
      */
     {
-        Int32 min;
+        Int32 min, max;
         p->GetMinExposureCompensation(&min);
-        Int32 max;
         p->GetMaxExposureCompensation(&max);
 
-        //AutoPtr<Range<Int32> > array = Range<Int32>::Create(&min, &max);
-        assert(0);
-        //m->Set(CameraCharacteristics::CONTROL_AE_COMPENSATION_RANGE, TO_IINTERFACE(arrayObj));
+        AutoPtr<IRange> range;
+        CRange::New(EIID_IInteger32, CoreUtils::Convert(min), CoreUtils::Convert(max), (IRange**)&range);
+        m->Set(CameraCharacteristics::CONTROL_AE_COMPENSATION_RANGE, range.Get());
     }
 
     /*
@@ -602,7 +607,7 @@ ECode LegacyMetadataMapper::MapControlAe(
         p->GetExposureCompensationStep(&step);
         AutoPtr<IRational> rational;
         ParamsUtils::CreateRational(step, (IRational**)&rational);
-        m->Set(CameraCharacteristics::CONTROL_AE_COMPENSATION_STEP, TO_IINTERFACE(rational));
+        m->Set(CameraCharacteristics::CONTROL_AE_COMPENSATION_STEP, rational.Get());
     }
     return NOERROR;
 }
@@ -615,9 +620,8 @@ void LegacyMetadataMapper::MapControlAf(
      * control.afAvailableModes
      */
     {
-        AutoPtr<IList> focusModes;
-        assert(0);
-        //p->GetSupportedFocusModes((IList**)&focusModes);
+        AutoPtr<ArrayOf<String> > focusModes;
+        p->GetSupportedFocusModes((ArrayOf<String>**)&focusModes);
 
         AutoPtr<ArrayOf<String> > focusModeStrings = ArrayOf<String>::Alloc(7);
         (*focusModeStrings)[0] = IParameters::FOCUS_MODE_AUTO;
@@ -637,30 +641,23 @@ void LegacyMetadataMapper::MapControlAf(
         (*focusModeInts)[5] = ICameraMetadata::CONTROL_AF_MODE_MACRO;
         (*focusModeInts)[6] = ICameraMetadata::CONTROL_AF_MODE_OFF;
 
-        AutoPtr<IList> afAvail;
-        ArrayUtils::ConvertStringListToIntList(
-                focusModes, focusModeStrings, focusModeInts, (IList**)&afAvail);
+        AutoPtr<ArrayOf<Int32> > afAvail;
+        ArrayUtils::ConvertStringArrayToIntArray(
+            focusModes, focusModeStrings, focusModeInts, (ArrayOf<Int32>**)&afAvail);
 
         // No AF modes supported? That's unpossible!
-        Int32 size;
-        afAvail->GetSize(&size);
-        if (afAvail == NULL || size == 0) {
-            Slogger::W(TAG, "No AF modes supported (HAL bug); defaulting to AF_MODE_OFF only");
-            CArrayList::New(/*capacity*/1, (IList**)&afAvail);
-            AutoPtr<IInteger32> obj = CoreUtils::Convert(ICameraMetadata::CONTROL_AF_MODE_OFF);
-
-            afAvail->Add(TO_IINTERFACE(obj));
+        if (afAvail == NULL || afAvail->GetLength() == 0) {
+            Logger::W(TAG, "No AF modes supported (HAL bug); defaulting to AF_MODE_OFF only");
+            afAvail = ArrayOf<Int32>::Alloc(1);
+            afAvail->Set(0, ICameraMetadata::CONTROL_AF_MODE_OFF);
         }
 
-        AutoPtr<ArrayOf<Int32> > outar;
-        ArrayUtils::ToIntArray(afAvail, (ArrayOf<Int32>**)&outar);
-        AutoPtr<IArrayOf> outarObj = CoreUtils::Convert(outar);
-        m->Set(CameraCharacteristics::CONTROL_AF_AVAILABLE_MODES, TO_IINTERFACE(outarObj));
+        AutoPtr<IArrayOf> outarObj = CoreUtils::Convert(afAvail);
+        m->Set(CameraCharacteristics::CONTROL_AF_AVAILABLE_MODES, outarObj.Get());
 
         if (VERBOSE) {
-            String str;
-            ListUtils::ListToString(afAvail, &str);
-            Slogger::V(TAG, "mapControlAf - control.afAvailableModes set to %s", str.string());
+            String str = Arrays::ToString(afAvail);
+            Logger::V(TAG, "mapControlAf - control.afAvailableModes set to %s", str.string());
         }
     }
     return;
@@ -675,9 +672,8 @@ void LegacyMetadataMapper::MapControlAwb(
      */
 
     {
-        AutoPtr<IList> wbModes;
-        assert(0);
-        //p->GetSupportedWhiteBalance((IList**)&wbModes);
+        AutoPtr<ArrayOf<String> > wbModes;
+        p->GetSupportedWhiteBalance((ArrayOf<String>**)&wbModes);
 
         AutoPtr<ArrayOf<String> > wbModeStrings = ArrayOf<String>::Alloc(8);
         (*wbModeStrings)[0] = IParameters::WHITE_BALANCE_AUTO;
@@ -700,30 +696,24 @@ void LegacyMetadataMapper::MapControlAwb(
         (*wbModeInts)[7] = ICameraMetadata::CONTROL_AWB_MODE_SHADE;
         // Note that CONTROL_AWB_MODE_OFF is unsupported
 
-        AutoPtr<IList> awbAvail;
-        ArrayUtils::ConvertStringListToIntList(
-                    wbModes, wbModeStrings, wbModeInts, (IList**)&awbAvail);
+        AutoPtr<ArrayOf<Int32> > awbAvail;
+        ArrayUtils::ConvertStringArrayToIntArray(
+            wbModes, wbModeStrings, wbModeInts, (ArrayOf<Int32>**)&awbAvail);
 
 
         // No AWB modes supported? That's unpossible!
-        Int32 size;
-        awbAvail->GetSize(&size);
-        if (awbAvail == NULL || size == 0) {
-            Slogger::W(TAG, "No AWB modes supported (HAL bug); defaulting to AWB_MODE_AUTO only");
-            CArrayList::New(/*capacity*/1, (IList**)&awbAvail);
-            AutoPtr<IInteger32> obj = CoreUtils::Convert(ICameraMetadata::CONTROL_AWB_MODE_AUTO);
-            awbAvail->Add(TO_IINTERFACE(obj));
+        if (awbAvail == NULL || awbAvail->GetLength() == 0) {
+            Logger::W(TAG, "No AWB modes supported (HAL bug); defaulting to AWB_MODE_AUTO only");
+            awbAvail = ArrayOf<Int32>::Alloc(1);
+            awbAvail->Set(0, ICameraMetadata::CONTROL_AWB_MODE_AUTO);
         }
 
-        AutoPtr<ArrayOf<Int32> > outar;
-        ArrayUtils::ToIntArray(awbAvail, (ArrayOf<Int32>**)&outar);
-        AutoPtr<IArrayOf> outarObj = CoreUtils::Convert(outar);
-        m->Set(CameraCharacteristics::CONTROL_AWB_AVAILABLE_MODES, TO_IINTERFACE(outarObj));
+        AutoPtr<IArrayOf> outarObj = CoreUtils::Convert(awbAvail);
+        m->Set(CameraCharacteristics::CONTROL_AWB_AVAILABLE_MODES, outarObj.Get());
 
         if (VERBOSE) {
-            String str;
-            ListUtils::ListToString(awbAvail, &str);
-            Slogger::V(TAG, "mapControlAwb - control.awbAvailableModes set to %s", str.string());
+            String str = Arrays::ToString(awbAvail);
+            Logger::V(TAG, "mapControlAwb - control.awbAvailableModes set to %s", str.string());
         }
     }
     return;
@@ -738,8 +728,7 @@ void LegacyMetadataMapper::MapControlOther(
      */
     {
         Boolean res;
-        assert(0);
-        //p->IsVideoStabilizationSupported(&res);
+        p->IsVideoStabilizationSupported(&res);
         AutoPtr<ArrayOf<Int32> > stabModes;
         if (res) {
             stabModes = ArrayOf<Int32>::Alloc(2);
@@ -752,7 +741,7 @@ void LegacyMetadataMapper::MapControlOther(
         }
 
         AutoPtr<IArrayOf> stabModesrObj = CoreUtils::Convert(stabModes);
-        m->Set(CameraCharacteristics::CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES, TO_IINTERFACE(stabModesrObj));
+        m->Set(CameraCharacteristics::CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES, stabModesrObj.Get());
     }
 
     /*
@@ -775,51 +764,49 @@ void LegacyMetadataMapper::MapControlOther(
     }
 
     AutoPtr<IArrayOf> maxRegionsObj = CoreUtils::Convert(maxRegions);
-    m->Set(CameraCharacteristics::CONTROL_MAX_REGIONS, TO_IINTERFACE(maxRegionsObj));
+    m->Set(CameraCharacteristics::CONTROL_MAX_REGIONS, maxRegionsObj);
 
     /*
      * android.control.availableEffects
      */
-    AutoPtr<IList> effectModes;
-    assert(0);
-    //p->GetSupportedColorEffects((IList**)&effectModes);
+    AutoPtr<ArrayOf<String> > effectModes;
+    p->GetSupportedColorEffects((ArrayOf<String>**)&effectModes);
     AutoPtr<ArrayOf<Int32> > supportedEffectModes;
     if (effectModes == NULL) {
         supportedEffectModes = ArrayOf<Int32>::Alloc(0);
     }
     else {
-        ArrayUtils::ConvertStringListToIntArray(effectModes, sLegacyEffectMode,
-                    sEffectModes, (ArrayOf<Int32>**)&supportedEffectModes);
+        ArrayUtils::ConvertStringArrayToIntArray(effectModes, sLegacyEffectMode,
+            sEffectModes, (ArrayOf<Int32>**)&supportedEffectModes);
     }
 
     AutoPtr<IArrayOf> supportedEffectModesObj = CoreUtils::Convert(supportedEffectModes);
-    m->Set(CameraCharacteristics::CONTROL_AVAILABLE_EFFECTS, TO_IINTERFACE(supportedEffectModesObj));
+    m->Set(CameraCharacteristics::CONTROL_AVAILABLE_EFFECTS, supportedEffectModesObj);
 
     /*
      * android.control.availableSceneModes
      */
-    AutoPtr<IList> sceneModes;
-    assert(0);
-    //p->GetSupportedSceneModes((IList**)&sceneModes);
+    AutoPtr<ArrayOf<String> > sceneModes;
+    p->GetSupportedSceneModes((ArrayOf<String>**)&sceneModes);
     AutoPtr<IList> supportedSceneModes;
-    ArrayUtils::ConvertStringListToIntList(sceneModes, sLegacySceneModes,
+    ArrayUtils::ConvertStringArrayToIntList(sceneModes, sLegacySceneModes,
             sSceneModes, (IList**)&supportedSceneModes);
     if (supportedSceneModes == NULL) { // camera1 doesn't support scene mode settings
         CArrayList::New((IList**)&supportedSceneModes);
         AutoPtr<IInteger32> obj = CoreUtils::Convert(ICameraMetadata::CONTROL_SCENE_MODE_DISABLED);
-        supportedSceneModes->Add(TO_IINTERFACE(obj)); // disabled is always available
+        supportedSceneModes->Add(obj); // disabled is always available
     }
     Int32 max;
     p->GetMaxNumDetectedFaces(&max);
     if (max > 0) { // always supports FACE_PRIORITY when face detecting
         AutoPtr<IInteger32> obj = CoreUtils::Convert(ICameraMetadata::CONTROL_SCENE_MODE_FACE_PRIORITY);
-        supportedSceneModes->Add(TO_IINTERFACE(obj));
+        supportedSceneModes->Add(obj);
     }
 
     AutoPtr<ArrayOf<Int32> > outar;
     ArrayUtils::ToIntArray(supportedSceneModes, (ArrayOf<Int32>**)&outar);
     AutoPtr<IArrayOf> outarObj = CoreUtils::Convert(outar);
-    m->Set(CameraCharacteristics::CONTROL_AVAILABLE_SCENE_MODES, TO_IINTERFACE(outarObj));
+    m->Set(CameraCharacteristics::CONTROL_AVAILABLE_SCENE_MODES, outarObj);
     return;
 }
 
@@ -834,7 +821,7 @@ void LegacyMetadataMapper::MapLens(
     String mode;
     p->GetFocusMode(&mode);
     if (VERBOSE) {
-        Slogger::V(TAG, "mapLens - focus-mode='%s'", mode.string());
+        Logger::V(TAG, "mapLens - focus-mode='%s'", mode.string());
     }
 
     if (IParameters::FOCUS_MODE_FIXED.Equals(mode)) {
@@ -842,15 +829,15 @@ void LegacyMetadataMapper::MapLens(
          * lens.info.minimumFocusDistance
          */
         AutoPtr<IFloat> obj = CoreUtils::Convert(LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS);
-        m->Set(CameraCharacteristics::LENS_INFO_MINIMUM_FOCUS_DISTANCE, TO_IINTERFACE(obj));
+        m->Set(CameraCharacteristics::LENS_INFO_MINIMUM_FOCUS_DISTANCE, obj);
 
         if (VERBOSE) {
-            Slogger::V(TAG, "mapLens - lens.info.minimumFocusDistance = 0");
+            Logger::V(TAG, "mapLens - lens.info.minimumFocusDistance = 0");
         }
     }
     else {
         if (VERBOSE) {
-            Slogger::V(TAG, "mapLens - lens.info.minimumFocusDistance is unknown");
+            Logger::V(TAG, "mapLens - lens.info.minimumFocusDistance is unknown");
         }
     }
 
@@ -859,7 +846,7 @@ void LegacyMetadataMapper::MapLens(
     AutoPtr<ArrayOf<Float> > focalLengths = ArrayOf<Float>::Alloc(1);
     (*focalLengths)[0] = length;
     AutoPtr<IArrayOf> focalLengthsObj = CoreUtils::Convert(focalLengths);
-    m->Set(CameraCharacteristics::LENS_INFO_AVAILABLE_FOCAL_LENGTHS, TO_IINTERFACE(focalLengthsObj));
+    m->Set(CameraCharacteristics::LENS_INFO_AVAILABLE_FOCAL_LENGTHS, focalLengthsObj);
     return;
 }
 
@@ -868,16 +855,13 @@ void LegacyMetadataMapper::MapFlash(
     /* [in] */ IParameters* p)
 {
     Boolean flashAvailable = FALSE;
-    AutoPtr<IList> supportedFlashModes;
-    assert(0);
-    //p->GetSupportedFlashModes((IList**)&supportedFlashModes);
+    AutoPtr<ArrayOf<String> > supportedFlashModes;
+    p->GetSupportedFlashModes((ArrayOf<String>**)&supportedFlashModes);
 
     if (supportedFlashModes != NULL) {
         // If only 'OFF' is available, we don't really have flash support
         Boolean result;
-        AutoPtr<ICharSequence> obj = CoreUtils::Convert(IParameters::FLASH_MODE_OFF);
-        ListUtils::ListElementsEqualTo(
-                supportedFlashModes, TO_IINTERFACE(obj), &result);
+        ArrayUtils::ArrayElementsEqualTo(supportedFlashModes, IParameters::FLASH_MODE_OFF, &result);
         flashAvailable = !result;
     }
 
@@ -885,7 +869,7 @@ void LegacyMetadataMapper::MapFlash(
      * flash.info.available
      */
     AutoPtr<IBoolean> focalLengthsObj = CoreUtils::Convert(flashAvailable);
-    m->Set(CameraCharacteristics::FLASH_INFO_AVAILABLE, TO_IINTERFACE(focalLengthsObj));
+    m->Set(CameraCharacteristics::FLASH_INFO_AVAILABLE, focalLengthsObj.Get());
     return;
 }
 
@@ -893,18 +877,21 @@ void LegacyMetadataMapper::LegacyMetadataMapper::MapJpeg(
     /* [in] */ ICameraMetadataNative* m,
     /* [in] */ IParameters* p)
 {
-    AutoPtr<IList> thumbnailSizes;
-    assert(0);
-    //p->GetSupportedJpegThumbnailSizes((IList**)&thumbnailSizes);
+    AutoPtr<ArrayOf<ICameraSize*> > thumbnailSizes;
+    p->GetSupportedJpegThumbnailSizes((ArrayOf<ICameraSize*>**)&thumbnailSizes);
 
     if (thumbnailSizes != NULL) {
         AutoPtr<ArrayOf<ISize*> > sizes;
-        ParameterUtils::ConvertSizeListToArray(thumbnailSizes, (ArrayOf<ISize*>**)&sizes);
-        AutoPtr<IUtilsSizeAreaComparator> comp;
-        CUtilsSizeAreaComparator::New((IUtilsSizeAreaComparator**)&comp);
-        Arrays::Sort(sizes, IComparator::Probe(comp));
-        AutoPtr<IArrayOf> sizesObj = CoreUtils::Convert(sizes.Get());
-        m->Set(CameraCharacteristics::JPEG_AVAILABLE_THUMBNAIL_SIZES, TO_IINTERFACE(sizesObj));
+        ParameterUtils::ConvertSizeArrayToArray(thumbnailSizes, (ArrayOf<ISize*>**)&sizes);
+        AutoPtr<IComparator> comp;
+        CUtilsSizeAreaComparator::New((IComparator**)&comp);
+        Arrays::Sort(sizes, comp);
+        AutoPtr<IArrayOf> arrayObj;
+        CArrayOf::New(EIID_ISize, sizes->GetLength(), (IArrayOf**)&arrayObj);
+        for (Int32 i = 0; i < sizes->GetLength(); ++i) {
+            arrayObj->Set(i, (*sizes)[i]);
+        }
+        m->Set(CameraCharacteristics::JPEG_AVAILABLE_THUMBNAIL_SIZES, arrayObj);
     }
     return;
 }
@@ -920,7 +907,7 @@ void LegacyMetadataMapper::MapRequest(
     (*capabilities)[0] = ICameraMetadata::REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE;
 
     AutoPtr<IArrayOf> capabilitiesObj = CoreUtils::Convert(capabilities);
-    m->Set(CameraCharacteristics::REQUEST_AVAILABLE_CAPABILITIES, TO_IINTERFACE(capabilitiesObj));
+    m->Set(CameraCharacteristics::REQUEST_AVAILABLE_CAPABILITIES, capabilitiesObj.Get());
 
     /*
      * request.availableCharacteristicsKeys
@@ -930,14 +917,19 @@ void LegacyMetadataMapper::MapRequest(
 
         // Note: We only list public keys. Native HALs should list ALL keys regardless of visibility.
 
-        AutoPtr<ArrayOf<ICameraCharacteristicsKey*> > availableKeys =
-                ArrayOf<ICameraCharacteristicsKey*>::Alloc(33);
+        AutoPtr<IInterface> obj;
+        m->Get(CameraCharacteristics::LENS_INFO_MINIMUM_FOCUS_DISTANCE, (IInterface**)&obj);
+
+        Int32 size = 33;
+        if (obj != NULL) size++;
+        AutoPtr<ArrayOf<ICameraCharacteristicsKey*> > availableKeys
+             = ArrayOf<ICameraCharacteristicsKey*>::Alloc(size);
+
         availableKeys->Set(0, CameraCharacteristics::COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES);
         availableKeys->Set(1, CameraCharacteristics::CONTROL_AE_AVAILABLE_ANTIBANDING_MODES);
         availableKeys->Set(2, CameraCharacteristics::CONTROL_AE_AVAILABLE_MODES);
-        assert(0);
-        //availableKeys->Set(3, CameraCharacteristics::CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
-        //availableKeys->Set(4, CameraCharacteristics::CONTROL_AE_COMPENSATION_RANGE);
+        availableKeys->Set(3, CameraCharacteristics::CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
+        availableKeys->Set(4, CameraCharacteristics::CONTROL_AE_COMPENSATION_RANGE);
         availableKeys->Set(5, CameraCharacteristics::CONTROL_AE_COMPENSATION_STEP);
         availableKeys->Set(6, CameraCharacteristics::CONTROL_AF_AVAILABLE_MODES);
         availableKeys->Set(7, CameraCharacteristics::CONTROL_AVAILABLE_EFFECTS);
@@ -968,40 +960,38 @@ void LegacyMetadataMapper::MapRequest(
         availableKeys->Set(31, CameraCharacteristics::STATISTICS_INFO_MAX_FACE_COUNT);
         availableKeys->Set(32, CameraCharacteristics::SYNC_MAX_LATENCY);
 
-        AutoPtr<IList> tmp;
-        Arrays::AsList(availableKeys, (IList**)&tmp);
-        AutoPtr<IList> characteristicsKeys;
-        CArrayList::New(ICollection::Probe(tmp), (IList**)&characteristicsKeys);
-
         /*
          * Add the conditional keys
          */
-        AutoPtr<IInterface> obj;
-        m->Get(CameraCharacteristics::LENS_INFO_MINIMUM_FOCUS_DISTANCE, (IInterface**)&obj);
         if (obj != NULL) {
-            characteristicsKeys->Add(TO_IINTERFACE(CameraCharacteristics::LENS_INFO_MINIMUM_FOCUS_DISTANCE));
+            availableKeys->Set(33, CameraCharacteristics::LENS_INFO_MINIMUM_FOCUS_DISTANCE);
         }
 
-        AutoPtr<ArrayOf<ICameraCharacteristicsKey*> > keyArray;
-        characteristicsKeys->ToArray((ArrayOf<IInterface*>**)&keyArray);
-        AutoPtr<ArrayOf<Int32> > tagsArray = GetTagsForKeys(keyArray);
+        AutoPtr<ArrayOf<Int32> > tagsArray = GetTagsForKeys(availableKeys);
         AutoPtr<IArrayOf> tagsArrayObj = CoreUtils::Convert(tagsArray);
-        m->Set(CameraCharacteristics::REQUEST_AVAILABLE_CHARACTERISTICS_KEYS, TO_IINTERFACE(tagsArrayObj));
+        m->Set(CameraCharacteristics::REQUEST_AVAILABLE_CHARACTERISTICS_KEYS, tagsArrayObj);
     }
 
     /*
      * request.availableRequestKeys
      */
     {
-        AutoPtr<ArrayOf<ICaptureRequestKey*> > defaultAvailableKeys =
-                ArrayOf<ICaptureRequestKey*>::Alloc(27);
+        Int32 meteArea, focusArea;
+        p->GetMaxNumMeteringAreas(&meteArea);
+        p->GetMaxNumFocusAreas(&focusArea);
+
+        Int32 size = 27;
+        if (meteArea > 0) size++;
+        if (focusArea > 0) size++;
+        AutoPtr<ArrayOf<ICaptureRequestKey*> > defaultAvailableKeys
+            = ArrayOf<ICaptureRequestKey*>::Alloc(size);
+
         defaultAvailableKeys->Set(0, CaptureRequest::COLOR_CORRECTION_ABERRATION_MODE);
         defaultAvailableKeys->Set(1, CaptureRequest::CONTROL_AE_ANTIBANDING_MODE);
         defaultAvailableKeys->Set(2, CaptureRequest::CONTROL_AE_EXPOSURE_COMPENSATION);
         defaultAvailableKeys->Set(3, CaptureRequest::CONTROL_AE_LOCK);
         defaultAvailableKeys->Set(4, CaptureRequest::CONTROL_AE_MODE);
-        assert(0);
-        //defaultAvailableKeys->Set(5, CaptureRequest::CONTROL_AE_TARGET_FPS_RANGE);
+        defaultAvailableKeys->Set(5, CaptureRequest::CONTROL_AE_TARGET_FPS_RANGE);
         defaultAvailableKeys->Set(6, CaptureRequest::CONTROL_AF_MODE);
         defaultAvailableKeys->Set(7, CaptureRequest::CONTROL_AF_TRIGGER);
         defaultAvailableKeys->Set(8, CaptureRequest::CONTROL_AWB_LOCK);
@@ -1024,35 +1014,33 @@ void LegacyMetadataMapper::MapRequest(
         defaultAvailableKeys->Set(25, CaptureRequest::SCALER_CROP_REGION);
         defaultAvailableKeys->Set(26, CaptureRequest::STATISTICS_FACE_DETECT_MODE);
 
-        AutoPtr<IList> tmp;
-        Arrays::AsList(defaultAvailableKeys, (IList**)&tmp);
-        AutoPtr<IArrayList> availableKeys;
-        CArrayList::New(ICollection::Probe(tmp), (IArrayList**)&availableKeys);
-
-        Int32 meteArea;
-        p->GetMaxNumMeteringAreas(&meteArea);
         if (meteArea > 0) {
-            availableKeys->Add(TO_IINTERFACE(CaptureRequest::CONTROL_AE_REGIONS));
-        }
-        Int32 focusArea;
-        p->GetMaxNumFocusAreas(&focusArea);
-        if (focusArea > 0) {
-            availableKeys->Add(TO_IINTERFACE(CaptureRequest::CONTROL_AF_REGIONS));
+            defaultAvailableKeys->Set(27, CaptureRequest::CONTROL_AE_REGIONS);
         }
 
-        AutoPtr<ArrayOf<ICaptureRequestKey*> > availableRequestKeys;
-        IList::Probe(availableKeys)->ToArray((ArrayOf<IInterface*>**)&availableRequestKeys);
-        AutoPtr<ArrayOf<Int32> > array = GetTagsForKeys(availableRequestKeys);
+        if (focusArea > 0) {
+            defaultAvailableKeys->Set(28, CaptureRequest::CONTROL_AF_REGIONS);
+        }
+
+        AutoPtr<ArrayOf<Int32> > array = GetTagsForKeys(defaultAvailableKeys);
         AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(array);
-        m->Set(CameraCharacteristics::REQUEST_AVAILABLE_REQUEST_KEYS, TO_IINTERFACE(arrayObj));
+        m->Set(CameraCharacteristics::REQUEST_AVAILABLE_REQUEST_KEYS, arrayObj);
     }
 
     /*
      * request.availableResultKeys
      */
     {
-        AutoPtr<ArrayOf<ICaptureResultKey*> > defaultAvailableKeys =
-                ArrayOf<ICaptureResultKey*>::Alloc(23);
+        Int32 meteArea, focusArea;
+        p->GetMaxNumMeteringAreas(&meteArea);
+        p->GetMaxNumFocusAreas(&focusArea);
+
+        Int32 size = 23;
+        if (meteArea > 0) size++;
+        if (focusArea > 0) size++;
+        AutoPtr<ArrayOf<ICaptureResultKey*> > defaultAvailableKeys
+            = ArrayOf<ICaptureResultKey*>::Alloc(size);
+
         defaultAvailableKeys->Set(0, CaptureResult::COLOR_CORRECTION_ABERRATION_MODE);
         defaultAvailableKeys->Set(1, CaptureResult::CONTROL_AE_ANTIBANDING_MODE);
         defaultAvailableKeys->Set(2, CaptureResult::CONTROL_AE_EXPOSURE_COMPENSATION);
@@ -1078,27 +1066,17 @@ void LegacyMetadataMapper::MapRequest(
         defaultAvailableKeys->Set(22, CaptureResult::STATISTICS_FACE_DETECT_MODE);
 //      CaptureResult.STATISTICS_FACES;
 
-        AutoPtr<IList> tmp;
-        Arrays::AsList(defaultAvailableKeys, (IList**)&tmp);
-        AutoPtr<IList> availableKeys;
-        CArrayList::New(ICollection::Probe(tmp), (IList**)&availableKeys);
-
-        Int32 meteArea;
-        p->GetMaxNumMeteringAreas(&meteArea);
         if (meteArea > 0) {
-            availableKeys->Add(TO_IINTERFACE(CaptureResult::CONTROL_AE_REGIONS));
-        }
-        Int32 focusArea;
-        p->GetMaxNumFocusAreas(&focusArea);
-        if (focusArea > 0) {
-            availableKeys->Add(TO_IINTERFACE(CaptureResult::CONTROL_AF_REGIONS));
+            defaultAvailableKeys->Set(23, CaptureResult::CONTROL_AE_REGIONS);
         }
 
-        AutoPtr<ArrayOf<ICaptureResultKey*> > availableResultKeys;
-        availableKeys->ToArray((ArrayOf<IInterface*>**)&availableResultKeys);
-        AutoPtr<ArrayOf<Int32> > array = GetTagsForKeys(availableResultKeys);
+        if (focusArea > 0) {
+            defaultAvailableKeys->Set(24, CaptureResult::CONTROL_AF_REGIONS);
+        }
+
+        AutoPtr<ArrayOf<Int32> > array = GetTagsForKeys(defaultAvailableKeys);
         AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(array);
-        m->Set(CameraCharacteristics::REQUEST_AVAILABLE_RESULT_KEYS, TO_IINTERFACE(arrayObj));
+        m->Set(CameraCharacteristics::REQUEST_AVAILABLE_RESULT_KEYS, arrayObj);
     }
 
     /*
@@ -1110,26 +1088,26 @@ void LegacyMetadataMapper::MapRequest(
     (*outputStreams)[2] = REQUEST_MAX_NUM_OUTPUT_STREAMS_COUNT_PROC_STALL; /* Processed & Stalling */
 
     AutoPtr<IArrayOf> outputStreamsObj = CoreUtils::Convert(outputStreams);
-    m->Set(CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_STREAMS, TO_IINTERFACE(outputStreamsObj));
+    m->Set(CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_STREAMS, outputStreamsObj);
 
     /*
      * request.maxNumInputStreams
      */
     AutoPtr<IInteger32> intObj = CoreUtils::Convert(REQUEST_MAX_NUM_INPUT_STREAMS_COUNT);
-    m->Set(CameraCharacteristics::REQUEST_MAX_NUM_INPUT_STREAMS, TO_IINTERFACE(intObj));
+    m->Set(CameraCharacteristics::REQUEST_MAX_NUM_INPUT_STREAMS, intObj);
 
     /*
      * request.partialResultCount
      */
     AutoPtr<IInteger32> intObj2 = CoreUtils::Convert(1);
-    m->Set(CameraCharacteristics::REQUEST_PARTIAL_RESULT_COUNT, TO_IINTERFACE(intObj2)); // No partial results supported
+    m->Set(CameraCharacteristics::REQUEST_PARTIAL_RESULT_COUNT, intObj2); // No partial results supported
 
     /*
      * request.pipelineMaxDepth
      */
     AutoPtr<IByte> byteObj = CoreUtils::ConvertByte((Byte)(REQUEST_PIPELINE_MAX_DEPTH_HAL1 +
             REQUEST_PIPELINE_MAX_DEPTH_OURS));
-    m->Set(CameraCharacteristics::REQUEST_PIPELINE_MAX_DEPTH, TO_IINTERFACE(byteObj));
+    m->Set(CameraCharacteristics::REQUEST_PIPELINE_MAX_DEPTH, byteObj);
     return;
 }
 
@@ -1143,13 +1121,13 @@ void LegacyMetadataMapper::MapScaler(
     Float value;
     ParameterUtils::GetMaxZoomRatio(p, &value);
     AutoPtr<IFloat> valueObj = CoreUtils::Convert(value);
-    m->Set(CameraCharacteristics::SCALER_AVAILABLE_MAX_DIGITAL_ZOOM, TO_IINTERFACE(valueObj));
+    m->Set(CameraCharacteristics::SCALER_AVAILABLE_MAX_DIGITAL_ZOOM, valueObj);
 
     /*
      * scaler.croppingType = CENTER_ONLY
      */
     AutoPtr<IInteger32> intObj = CoreUtils::Convert(ICameraMetadata::SCALER_CROPPING_TYPE_CENTER_ONLY);
-    m->Set(CameraCharacteristics::SCALER_CROPPING_TYPE, TO_IINTERFACE(intObj));
+    m->Set(CameraCharacteristics::SCALER_CROPPING_TYPE, intObj);
     return;
 }
 
@@ -1166,7 +1144,7 @@ void LegacyMetadataMapper::MapSensor(
     {
         AutoPtr<IRect> activeArrayRect;
         ParamsUtils::CreateRect(largestJpegSize, (IRect**)&activeArrayRect);
-        m->Set(CameraCharacteristics::SENSOR_INFO_ACTIVE_ARRAY_SIZE, TO_IINTERFACE(activeArrayRect));
+        m->Set(CameraCharacteristics::SENSOR_INFO_ACTIVE_ARRAY_SIZE, activeArrayRect);
     }
 
     /*
@@ -1177,13 +1155,13 @@ void LegacyMetadataMapper::MapSensor(
         AutoPtr<ArrayOf<Int32> > tmp = ArrayOf<Int32>::Alloc(1);
         (*tmp)[0] = ICameraMetadata::SENSOR_TEST_PATTERN_MODE_OFF;
         AutoPtr<IArrayOf> tmpObj = CoreUtils::Convert(tmp);
-        m->Set(CameraCharacteristics::SENSOR_AVAILABLE_TEST_PATTERN_MODES, TO_IINTERFACE(tmpObj));
+        m->Set(CameraCharacteristics::SENSOR_AVAILABLE_TEST_PATTERN_MODES, tmpObj);
     }
 
     /*
      * sensor.info.pixelArraySize
      */
-    m->Set(CameraCharacteristics::SENSOR_INFO_PIXEL_ARRAY_SIZE, TO_IINTERFACE(largestJpegSize));
+    m->Set(CameraCharacteristics::SENSOR_INFO_PIXEL_ARRAY_SIZE, largestJpegSize);
 
     /*
      * sensor.info.physicalSize
@@ -1206,7 +1184,7 @@ void LegacyMetadataMapper::MapSensor(
 
         AutoPtr<ISizeF> tmp;
         CSizeF::New(width, height, (ISizeF**)&tmp);
-        m->Set(CameraCharacteristics::SENSOR_INFO_PHYSICAL_SIZE, TO_IINTERFACE(tmp)); // in mm
+        m->Set(CameraCharacteristics::SENSOR_INFO_PHYSICAL_SIZE, tmp); // in mm
     }
 
     /*
@@ -1214,7 +1192,7 @@ void LegacyMetadataMapper::MapSensor(
      */
     {
         AutoPtr<IInteger32> intObj = CoreUtils::Convert(ICameraMetadata::SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN);
-        m->Set(CameraCharacteristics::SENSOR_INFO_TIMESTAMP_SOURCE, TO_IINTERFACE(intObj));
+        m->Set(CameraCharacteristics::SENSOR_INFO_TIMESTAMP_SOURCE, intObj);
     }
     return;
 }
@@ -1226,31 +1204,32 @@ void LegacyMetadataMapper::MapStatistics(
     /*
      * statistics.info.availableFaceDetectModes
      */
-    AutoPtr<IArrayList> fdModes;
+
+    AutoPtr<IArrayOf> fdModes;
 
     Int32 maxNum;
     p->GetMaxNumDetectedFaces(&maxNum);
     if (maxNum > 0) {
-        CArrayList::New(2, (IArrayList**)&fdModes);
+        CArrayOf::New(EIID_IInteger32, 2, (IArrayOf**)&fdModes);
         AutoPtr<IInteger32> obj1 = CoreUtils::Convert(ICameraMetadata::STATISTICS_FACE_DETECT_MODE_OFF);
         AutoPtr<IInteger32> obj2 = CoreUtils::Convert(ICameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE);
-        fdModes->Set(0, TO_IINTERFACE(obj1));
-        fdModes->Set(1, TO_IINTERFACE(obj2));
+        fdModes->Set(0, obj1);
+        fdModes->Set(1, obj2);
         // FULL is never-listed, since we have no way to query it statically
     }
     else {
-        CArrayList::New(1, (IArrayList**)&fdModes);
+        CArrayOf::New(EIID_IInteger32, 1, (IArrayOf**)&fdModes);
         AutoPtr<IInteger32> obj = CoreUtils::Convert(ICameraMetadata::STATISTICS_FACE_DETECT_MODE_OFF);
-        fdModes->Set(0, TO_IINTERFACE(obj));
+        fdModes->Set(0, obj);
     }
-    m->Set(CameraCharacteristics::STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES, TO_IINTERFACE(fdModes));
+    m->Set(CameraCharacteristics::STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES, fdModes);
 
     /*
      * statistics.info.maxFaceCount
      */
 
     AutoPtr<IInteger32> obj = CoreUtils::Convert(maxNum);
-    m->Set(CameraCharacteristics::STATISTICS_INFO_MAX_FACE_COUNT, TO_IINTERFACE(obj));
+    m->Set(CameraCharacteristics::STATISTICS_INFO_MAX_FACE_COUNT, obj);
     return;
 }
 
@@ -1262,7 +1241,7 @@ void LegacyMetadataMapper::MapSync(
      * sync.maxLatency
      */
     AutoPtr<IInteger32> obj = CoreUtils::Convert(ICameraMetadata::SYNC_MAX_LATENCY_UNKNOWN);
-    m->Set(CameraCharacteristics::SYNC_MAX_LATENCY, TO_IINTERFACE(obj));
+    m->Set(CameraCharacteristics::SYNC_MAX_LATENCY, obj);
     return;
 }
 
@@ -1277,20 +1256,18 @@ void LegacyMetadataMapper::AppendStreamConfig(
         AutoPtr<IInterface> obj;
         sizes->Get(i, (IInterface**)&obj);
         AutoPtr<ICameraSize> size = ICameraSize::Probe(obj);
-
-        AutoPtr<IStreamConfiguration> config;
-        Int32 width;
+        Int32 width, height;
         size->GetWidth(&width);
-        Int32 height;
         size->GetHeight(&height);
+        AutoPtr<IStreamConfiguration> config;
         CStreamConfiguration::New(format, width, height,
-                /*input*/FALSE, (IStreamConfiguration**)&config);
+            /*input*/FALSE, (IStreamConfiguration**)&config);
         configs->Add(config);
     }
     return;
 }
 
-static AutoPtr<ArrayOf<String> > initLegacySceneModes()
+static AutoPtr<ArrayOf<String> > InitLegacySceneModes()
 {
     AutoPtr<ArrayOf<String> > tmp = ArrayOf<String>::Alloc(17);
 
@@ -1314,9 +1291,9 @@ static AutoPtr<ArrayOf<String> > initLegacySceneModes()
     return tmp;
 }
 
-AutoPtr<ArrayOf<String> > LegacyMetadataMapper::sLegacySceneModes = initLegacySceneModes();
+AutoPtr<ArrayOf<String> > LegacyMetadataMapper::sLegacySceneModes = InitLegacySceneModes();
 
-static AutoPtr<ArrayOf<Int32> > initSceneModes()
+static AutoPtr<ArrayOf<Int32> > InitSceneModes()
 {
     AutoPtr<ArrayOf<Int32> > tmp = ArrayOf<Int32>::Alloc(17);
 
@@ -1340,7 +1317,7 @@ static AutoPtr<ArrayOf<Int32> > initSceneModes()
     return tmp;
 }
 
-AutoPtr<ArrayOf<Int32> > LegacyMetadataMapper::sSceneModes = initSceneModes();
+AutoPtr<ArrayOf<Int32> > LegacyMetadataMapper::sSceneModes = InitSceneModes();
 
 Int32 LegacyMetadataMapper::ConvertSceneModeFromLegacy(
     /* [in] */ const String& mode)
@@ -1349,8 +1326,7 @@ Int32 LegacyMetadataMapper::ConvertSceneModeFromLegacy(
         return ICameraMetadata::CONTROL_SCENE_MODE_DISABLED;
     }
     Int32 index;
-    assert(0);
-    //ArrayUtils::GetArrayIndex(sLegacySceneModes, mode, &index);
+    ArrayUtils::GetArrayIndex(sLegacySceneModes.Get(), mode, &index);
     if (index < 0) {
         return UNKNOWN_MODE;
     }
@@ -1366,14 +1342,14 @@ String LegacyMetadataMapper::ConvertSceneModeToLegacy(
     }
 
     Int32 index;
-    ArrayUtils::GetArrayIndex(sSceneModes, mode, &index);
+    ArrayUtils::GetArrayIndex(sSceneModes.Get(), mode, &index);
     if (index < 0) {
         return String(NULL);
     }
     return (*sLegacySceneModes)[index];
 }
 
-static AutoPtr<ArrayOf<String> > initLegacyEffectMode()
+static AutoPtr<ArrayOf<String> > InitLegacyEffectMode()
 {
     AutoPtr<ArrayOf<String> > tmp = ArrayOf<String>::Alloc(9);
 
@@ -1389,9 +1365,9 @@ static AutoPtr<ArrayOf<String> > initLegacyEffectMode()
     return tmp;
 }
 
-AutoPtr<ArrayOf<String> > LegacyMetadataMapper::sLegacyEffectMode = initLegacyEffectMode();
+AutoPtr<ArrayOf<String> > LegacyMetadataMapper::sLegacyEffectMode = InitLegacyEffectMode();
 
-static AutoPtr<ArrayOf<Int32> > initEffectModes()
+static AutoPtr<ArrayOf<Int32> > InitEffectModes()
 {
     AutoPtr<ArrayOf<Int32> > tmp = ArrayOf<Int32>::Alloc(9);
 
@@ -1407,7 +1383,7 @@ static AutoPtr<ArrayOf<Int32> > initEffectModes()
     return tmp;
 }
 
-AutoPtr<ArrayOf<Int32> > LegacyMetadataMapper::sEffectModes = initEffectModes();
+AutoPtr<ArrayOf<Int32> > LegacyMetadataMapper::sEffectModes = InitEffectModes();
 
 Int32 LegacyMetadataMapper::ConvertEffectModeFromLegacy(
     /* [in] */ const String& mode)
@@ -1416,8 +1392,7 @@ Int32 LegacyMetadataMapper::ConvertEffectModeFromLegacy(
         return ICameraMetadata::CONTROL_EFFECT_MODE_OFF;
     }
     Int32 index;
-    assert(0);
-    //ArrayUtils::GetArrayIndex(sLegacyEffectMode, mode, &index);
+    ArrayUtils::GetArrayIndex(sLegacyEffectMode.Get(), mode, &index);
     if (index < 0) {
         return UNKNOWN_MODE;
     }
@@ -1428,7 +1403,7 @@ String LegacyMetadataMapper::ConvertEffectModeToLegacy(
     /* [in] */ Int32 mode)
 {
     Int32 index;
-    ArrayUtils::GetArrayIndex(sEffectModes, mode, &index);
+    ArrayUtils::GetArrayIndex(sEffectModes.Get(), mode, &index);
     if (index < 0) {
         return String(NULL);
     }
@@ -1455,7 +1430,7 @@ Int32 LegacyMetadataMapper::ConvertAntiBandingMode(
         return ICameraMetadata::CONTROL_AE_ANTIBANDING_MODE_AUTO;
     }
     else {
-        Slogger::W(TAG, "convertAntiBandingMode - Unknown antibanding mode %s", mode.string());
+        Logger::W(TAG, "convertAntiBandingMode - Unknown antibanding mode %s", mode.string());
         return -1;
     }
 }
@@ -1532,10 +1507,10 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
     *outcm = NULL;
 
     Boolean result;
-    ArrayUtils::Contains(sAllowedTemplates, templateId, &result);
+    ArrayUtils::Contains(sAllowedTemplates.Get(), templateId, &result);
     if (!result) {
         //throw new IllegalArgumentException("templateId out of range");
-        Slogger::E(TAG, "templateId out of range");
+        Logger::E(TAG, "templateId out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1554,56 +1529,55 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
 
     // control.awbMode
     AutoPtr<IInteger32> awbModeObj = CoreUtils::Convert(ICameraMetadata::CONTROL_AWB_MODE_AUTO);
-    m->Set(CaptureRequest::CONTROL_AWB_MODE, TO_IINTERFACE(awbModeObj));
+    m->Set(CaptureRequest::CONTROL_AWB_MODE, awbModeObj);
     // AWB is always unconditionally available in API1 devices
 
     // control.aeAntibandingMode
     AutoPtr<IInteger32> aeAntibandingModeObj = CoreUtils::Convert(ICameraMetadata::CONTROL_AE_ANTIBANDING_MODE_AUTO);
-    m->Set(CaptureRequest::CONTROL_AE_ANTIBANDING_MODE, TO_IINTERFACE(aeAntibandingModeObj));
+    m->Set(CaptureRequest::CONTROL_AE_ANTIBANDING_MODE, aeAntibandingModeObj);
 
     // control.aeExposureCompensation
     AutoPtr<IInteger32> aeExposureCompensationeObj = CoreUtils::Convert(0);
-    m->Set(CaptureRequest::CONTROL_AE_EXPOSURE_COMPENSATION, TO_IINTERFACE(aeExposureCompensationeObj));
+    m->Set(CaptureRequest::CONTROL_AE_EXPOSURE_COMPENSATION, aeExposureCompensationeObj);
 
     // control.aeLock
     AutoPtr<IBoolean> aeLockObj = CoreUtils::Convert(FALSE);
-    m->Set(CaptureRequest::CONTROL_AE_LOCK, TO_IINTERFACE(aeLockObj));
+    m->Set(CaptureRequest::CONTROL_AE_LOCK, aeLockObj);
 
     // control.aePrecaptureTrigger
     AutoPtr<IInteger32> aePrecaptureTriggerObj = CoreUtils::Convert(ICameraMetadata::CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
-    m->Set(CaptureRequest::CONTROL_AE_PRECAPTURE_TRIGGER, TO_IINTERFACE(aePrecaptureTriggerObj));
+    m->Set(CaptureRequest::CONTROL_AE_PRECAPTURE_TRIGGER, aePrecaptureTriggerObj);
 
     // control.afTrigger
     AutoPtr<IInteger32> afTriggerObj = CoreUtils::Convert(ICameraMetadata::CONTROL_AF_TRIGGER_IDLE);
-    m->Set(CaptureRequest::CONTROL_AF_TRIGGER, TO_IINTERFACE(afTriggerObj));
+    m->Set(CaptureRequest::CONTROL_AF_TRIGGER, afTriggerObj);
 
     // control.awbMode
     AutoPtr<IInteger32> controlawbModeObj = CoreUtils::Convert(ICameraMetadata::CONTROL_AWB_MODE_AUTO);
-    m->Set(CaptureRequest::CONTROL_AWB_MODE, TO_IINTERFACE(controlawbModeObj));
+    m->Set(CaptureRequest::CONTROL_AWB_MODE, controlawbModeObj);
 
     // control.awbLock
     AutoPtr<IBoolean> awbLockObj = CoreUtils::Convert(FALSE);
-    m->Set(CaptureRequest::CONTROL_AWB_LOCK, TO_IINTERFACE(awbLockObj));
+    m->Set(CaptureRequest::CONTROL_AWB_LOCK, awbLockObj);
 
     // control.aeRegions, control.awbRegions, control.afRegions
     {
         AutoPtr<IInterface> obj;
         c->Get(CameraCharacteristics::SENSOR_INFO_ACTIVE_ARRAY_SIZE, (IInterface**)&obj);
         AutoPtr<IRect> activeArray = IRect::Probe(obj);
-        AutoPtr<ArrayOf<IMeteringRectangle*> > activeRegions =
-                ArrayOf<IMeteringRectangle*>::Alloc(1);
-        AutoPtr<IMeteringRectangle> tmp;
-        Int32 width;
+        Int32 width, height;
         activeArray->GetWidth(&width);
-        Int32 height;
         activeArray->GetHeight(&height);
+        AutoPtr<IMeteringRectangle> tmp;
         CMeteringRectangle::New(/*x*/0, /*y*/0, /*width*/width - 1,
                 /*height*/height - 1,/*weight*/0, (IMeteringRectangle**)&tmp);
+
+        AutoPtr<IArrayOf> activeRegions;
+        CArrayOf::New(EIID_IMeteringRectangle, 1, (IArrayOf**)&activeRegions);
         activeRegions->Set(0, tmp);
-        AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(activeRegions.Get());
-        m->Set(CaptureRequest::CONTROL_AE_REGIONS, TO_IINTERFACE(arrayObj));
-        m->Set(CaptureRequest::CONTROL_AWB_REGIONS, TO_IINTERFACE(arrayObj));
-        m->Set(CaptureRequest::CONTROL_AF_REGIONS, TO_IINTERFACE(arrayObj));
+        m->Set(CaptureRequest::CONTROL_AE_REGIONS, activeRegions);
+        m->Set(CaptureRequest::CONTROL_AWB_REGIONS, activeRegions);
+        m->Set(CaptureRequest::CONTROL_AF_REGIONS, activeRegions);
     }
 
     // control.captureIntent
@@ -1622,21 +1596,21 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
             default:
                 // Can't get anything else since it's guarded by the IAE check
                 //throw new AssertionError("Impossible; keep in sync with sAllowedTemplates");
-                Slogger::E(TAG, "Impossible; keep in sync with sAllowedTemplates");
+                Logger::E(TAG, "Impossible; keep in sync with sAllowedTemplates");
                 return E_ASSERTION_ERROR;
         }
         AutoPtr<IInteger32> intObj = CoreUtils::Convert(captureIntent);
-        m->Set(CaptureRequest::CONTROL_CAPTURE_INTENT, TO_IINTERFACE(intObj));
+        m->Set(CaptureRequest::CONTROL_CAPTURE_INTENT, intObj);
     }
 
     // control.aeMode
     AutoPtr<IInteger32> aeModeObj = CoreUtils::Convert(ICameraMetadata::CONTROL_AE_MODE_ON);
-    m->Set(CaptureRequest::CONTROL_AE_MODE, TO_IINTERFACE(aeModeObj));
+    m->Set(CaptureRequest::CONTROL_AE_MODE, aeModeObj);
     // AE is always unconditionally available in API1 devices
 
     // control.mode
     AutoPtr<IInteger32> modeObj = CoreUtils::Convert(ICameraMetadata::CONTROL_MODE_AUTO);
-    m->Set(CaptureRequest::CONTROL_MODE, TO_IINTERFACE(modeObj));
+    m->Set(CaptureRequest::CONTROL_MODE, modeObj);
 
     // control.afMode
     {
@@ -1661,9 +1635,8 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
                 AutoPtr<IInterface> obj;
                 c->Get(CameraCharacteristics::CONTROL_AF_AVAILABLE_MODES, (IInterface**)&obj);
                 AutoPtr<IArrayOf> arrayObj = IArrayOf::Probe(obj);
-                assert(0);
                 Boolean result;
-                //ArrayUtils::Contains(arrayObj, ICameraMetadata::CONTROL_AF_MODE_CONTINUOUS_VIDEO, &result);
+                ArrayUtils::Contains(arrayObj.Get(), ICameraMetadata::CONTROL_AF_MODE_CONTINUOUS_VIDEO, &result);
                 if (result) {
                     afMode = ICameraMetadata::CONTROL_AF_MODE_CONTINUOUS_VIDEO;
                 }
@@ -1673,9 +1646,8 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
                 AutoPtr<IInterface> obj;
                 c->Get(CameraCharacteristics::CONTROL_AF_AVAILABLE_MODES, (IInterface**)&obj);
                 AutoPtr<IArrayOf> arrayObj = IArrayOf::Probe(obj);
-                assert(0);
                 Boolean result;
-                //ArrayUtils::Contains(arrayObj, ICameraMetadata::CONTROL_AF_MODE_CONTINUOUS_PICTURE, &result);
+                ArrayUtils::Contains(arrayObj.Get(), ICameraMetadata::CONTROL_AF_MODE_CONTINUOUS_PICTURE, &result);
                 if (result) {
                     afMode = ICameraMetadata::CONTROL_AF_MODE_CONTINUOUS_PICTURE;
                 }
@@ -1683,61 +1655,61 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
         }
 
         if (VERBOSE) {
-            Slogger::V(TAG, "createRequestTemplate (templateId=%d), afMode=%d,"
+            Logger::V(TAG, "createRequestTemplate (templateId=%d), afMode=%d,"
                     "minimumFocusDistance=%d", templateId, afMode, minimumFocusDistance);
         }
         AutoPtr<IInteger32> afModeObj = CoreUtils::Convert(afMode);
-        m->Set(CaptureRequest::CONTROL_AF_MODE, TO_IINTERFACE(afModeObj));
+        m->Set(CaptureRequest::CONTROL_AF_MODE, afModeObj);
     }
 
     {
         // control.aeTargetFpsRange
         AutoPtr<IInterface> obj;
-        assert(0);
-        //c->Get(CameraCharacteristics::CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, (IInterface**)&obj);
+        c->Get(CameraCharacteristics::CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, (IInterface**)&obj);
         AutoPtr<IArrayOf> availableFpsRange = IArrayOf::Probe(obj);
+        Int32 size;
+        availableFpsRange->GetLength(&size);
 
         // Pick FPS range with highest max value, tiebreak on higher min value
         AutoPtr<IInterface> tmp;
         availableFpsRange->Get(0, (IInterface**)&tmp);
-        AutoPtr<Range<IInteger32> > bestRange = (Range<IInteger32>*)IObject::Probe(tmp);
-        Int32 size;
-        availableFpsRange->GetLength(&size);
+        AutoPtr<IRange> bestRange = IRange::Probe(tmp);
         for (Int32 i = 0; i < size; i++) {
-            AutoPtr<IInterface> obj;
+                        AutoPtr<IInterface> obj;
             availableFpsRange->Get(i, (IInterface**)&obj);
-            AutoPtr<Range<IInteger32> > r = (Range<IInteger32>*)IObject::Probe(obj);
+            IRange* r = IRange::Probe(obj);
 
-            AutoPtr<IInteger32> bUpper = bestRange->GetUpper();
-            Int32 bUp;
-            bUpper->GetValue(&bUp);
-            AutoPtr<IInteger32> rUpper = r->GetUpper();
-            Int32 rUp;
-            rUpper->GetValue(&rUp);
-            if (bUp < rUp) {
+            Int32 rv, bv;
+            AutoPtr<IInterface> ru, bu;
+            r->GetUpper((IInterface**)&ru);
+            bestRange->GetUpper((IInterface**)&bu);
+            IInteger32::Probe(ru)->GetValue(&rv);
+            IInteger32::Probe(bu)->GetValue(&bv);
+
+            if (bv < rv) {
                 bestRange = r;
             }
             else {
-                if (bUp == rUp) {
-                    AutoPtr<IInteger32> bLower = bestRange->GetLower();
-                    Int32 bLow;
-                    bLower->GetValue(&bLow);
-                    AutoPtr<IInteger32> rLower = r->GetLower();
-                    Int32 rLow;
-                    rLower->GetValue(&rLow);
-                    if (bLow < rLow) {
+                if (bv == rv) {
+                    AutoPtr<IInterface> rl, bl;
+                    r->GetLower((IInterface**)&rl);
+                    bestRange->GetLower((IInterface**)&bl);
+                    IInteger32::Probe(rl)->GetValue(&rv);
+                    IInteger32::Probe(bl)->GetValue(&bv);
+
+                    if (bv < rv) {
                         bestRange = r;
                     }
                 }
             }
         }
-        assert(0);
-        //m->Set(CaptureRequest::CONTROL_AE_TARGET_FPS_RANGE, bestRange);
+
+        m->Set(CaptureRequest::CONTROL_AE_TARGET_FPS_RANGE, bestRange);
     }
 
     // control.sceneMode -- DISABLED is always available
     AutoPtr<IInteger32> sceneModeObj = CoreUtils::Convert(ICameraMetadata::CONTROL_SCENE_MODE_DISABLED);
-    m->Set(CaptureRequest::CONTROL_SCENE_MODE, TO_IINTERFACE(sceneModeObj));
+    m->Set(CaptureRequest::CONTROL_SCENE_MODE, sceneModeObj);
 
     /*
      * statistics.*
@@ -1745,7 +1717,7 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
 
     // statistics.faceDetectMode
     AutoPtr<IInteger32> faceDetectModeObj = CoreUtils::Convert(ICameraMetadata::STATISTICS_FACE_DETECT_MODE_OFF);
-    m->Set(CaptureRequest::STATISTICS_FACE_DETECT_MODE, TO_IINTERFACE(faceDetectModeObj));
+    m->Set(CaptureRequest::STATISTICS_FACE_DETECT_MODE, faceDetectModeObj);
 
     /*
      * flash.*
@@ -1753,13 +1725,13 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
 
     // flash.mode
     AutoPtr<IInteger32> flashModeObj = CoreUtils::Convert(ICameraMetadata::FLASH_MODE_OFF);
-    m->Set(CaptureRequest::FLASH_MODE, TO_IINTERFACE(flashModeObj));
+    m->Set(CaptureRequest::FLASH_MODE, flashModeObj);
 
     /*
      * noiseReduction.*
      */
     AutoPtr<IInteger32> noiseReductionObj = CoreUtils::Convert(ICameraMetadata::NOISE_REDUCTION_MODE_FAST);
-    m->Set(CaptureRequest::NOISE_REDUCTION_MODE, TO_IINTERFACE(noiseReductionObj));
+    m->Set(CaptureRequest::NOISE_REDUCTION_MODE, noiseReductionObj);
 
     /*
      * lens.*
@@ -1846,14 +1818,14 @@ String LegacyMetadataMapper::ConvertAfModeToLegacy(
     /* [in] */ IList* supportedFocusModes)
 {
     if (supportedFocusModes == NULL) {
-        Slogger::W(TAG, "No focus modes supported; API1 bug");
+        Logger::W(TAG, "No focus modes supported; API1 bug");
         return String(NULL);
     }
 
     Boolean result;
     supportedFocusModes->IsEmpty(&result);
     if (result) {
-        Slogger::W(TAG, "No focus modes supported; API1 bug");
+        Logger::W(TAG, "No focus modes supported; API1 bug");
         return String(NULL);
     }
 
@@ -1878,7 +1850,7 @@ String LegacyMetadataMapper::ConvertAfModeToLegacy(
         {
             Boolean result;
             AutoPtr<ICharSequence> obj = CoreUtils::Convert(IParameters::FOCUS_MODE_FIXED);
-            supportedFocusModes->Contains(TO_IINTERFACE(obj), &result);
+            supportedFocusModes->Contains(obj, &result);
             if (result) {
                 param = IParameters::FOCUS_MODE_FIXED;
             }
@@ -1889,7 +1861,7 @@ String LegacyMetadataMapper::ConvertAfModeToLegacy(
     }
 
     AutoPtr<ICharSequence> tmp = CoreUtils::Convert(param);
-    supportedFocusModes->Contains(TO_IINTERFACE(tmp), &result);
+    supportedFocusModes->Contains(tmp, &result);
     if (!result) {
         // Weed out bad user input by setting to the first arbitrary focus mode
         AutoPtr<IInterface> obj;
@@ -1897,7 +1869,7 @@ String LegacyMetadataMapper::ConvertAfModeToLegacy(
         AutoPtr<ICharSequence> sque = ICharSequence::Probe(obj);
         String defaultMode;
         sque->ToString(&defaultMode);
-        Slogger::W(TAG, "convertAfModeToLegacy - ignoring unsupported mode %d,"
+        Logger::W(TAG, "convertAfModeToLegacy - ignoring unsupported mode %d,"
                 "defaulting to %s", mode, defaultMode.string());
         param = defaultMode;
     }

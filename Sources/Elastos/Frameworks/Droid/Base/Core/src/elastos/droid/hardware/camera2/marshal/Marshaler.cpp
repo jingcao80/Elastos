@@ -2,11 +2,11 @@
 #include "elastos/droid/hardware/camera2/marshal/Marshaler.h"
 #include "elastos/droid/hardware/camera2/marshal/MarshalHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Marshal::MarshalHelpers;
 using Elastos::Droid::Internal::Utility::Preconditions;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -35,7 +35,7 @@ ECode Marshaler::constructor(
     if (!result) {
         String type;
         MarshalHelpers::ToStringNativeType(nativeType, &type);
-        Slogger::E("Marshaler", "Unsupported type marshaling for managed "
+        Logger::E("Marshaler", "Unsupported type marshaling for managed "
             "type %s and native type %s", TO_CSTR(typeReference), type.string());
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
@@ -53,7 +53,7 @@ ECode Marshaler::CalculateMarshalSize(
     GetNativeSize(&nativeSize);
 
     if (nativeSize == IMarshaler::NATIVE_SIZE_DYNAMIC) {
-        Slogger::E("Marshaler", "Override this function for dynamically-sized objects");
+        Logger::E("Marshaler", "Override this function for dynamically-sized objects");
         return E_ASSERTION_ERROR;
     }
 

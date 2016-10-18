@@ -12,7 +12,7 @@
 #include "elastos/droid/hardware/camera2/CaptureRequest.h"
 #include "elastos/droid/hardware/camera2/CameraCharacteristics.h"
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Utils::ParamsUtils;
 using Elastos::Droid::Hardware::Camera2::Utils::ListUtils;
@@ -24,7 +24,7 @@ using Elastos::Droid::Hardware::Camera2::Legacy::LegacyMetadataMapper;
 using Elastos::Droid::Utility::ISize;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -84,11 +84,11 @@ ECode LegacyResultMapper::CachedConvertResultMetadata(
     }
 
     if (VERBOSE) {
-        Slogger::V(TAG, "cachedConvertResultMetadata - cached? %d timestamp = %d", cached, timestamp);
+        Logger::V(TAG, "cachedConvertResultMetadata - cached? %d timestamp = %d", cached, timestamp);
 
-        Slogger::V(TAG, "----- beginning of result dump ------");
+        Logger::V(TAG, "----- beginning of result dump ------");
         result->DumpToLog();
-        Slogger::V(TAG, "----- end of result dump ------");
+        Logger::V(TAG, "----- end of result dump ------");
     }
 
     *outcmn = result;
@@ -202,7 +202,7 @@ AutoPtr<ICameraMetadataNative> LegacyResultMapper::ConvertResultMetadata(
             // the result to say SCENE_MODE == FACE_PRIORITY.
         }
         else {
-            Slogger::W(TAG, "Unknown scene mode %s returned by camera HAL,"
+            Logger::W(TAG, "Unknown scene mode %s returned by camera HAL,"
                     "setting to disabled.", legacySceneMode.string());
             AutoPtr<IInteger32> res = CoreUtils::Convert(ICameraMetadata::CONTROL_SCENE_MODE_DISABLED);
             result->Set(CaptureResult::CONTROL_SCENE_MODE, TO_IINTERFACE(res));
@@ -221,7 +221,7 @@ AutoPtr<ICameraMetadataNative> LegacyResultMapper::ConvertResultMetadata(
             result->Set(CaptureResult::CONTROL_EFFECT_MODE, TO_IINTERFACE(res));
         }
         else {
-            Slogger::W(TAG, "Unknown effect mode %s returned by camera HAL, setting"
+            Logger::W(TAG, "Unknown effect mode %s returned by camera HAL, setting"
                     "to off.", legacyEffectMode.string());
             AutoPtr<IInteger32> res = CoreUtils::Convert(ICameraMetadata::CONTROL_EFFECT_MODE_OFF);
             result->Set(CaptureResult::CONTROL_EFFECT_MODE, TO_IINTERFACE(res));
@@ -333,7 +333,7 @@ AutoPtr<ICameraMetadataNative> LegacyResultMapper::ConvertResultMetadata(
         result->Set(CaptureResult::JPEG_THUMBNAIL_SIZE, TO_IINTERFACE(size));
     }
     else {
-        Slogger::W(TAG, "Null thumbnail size received from parameters.");
+        Logger::W(TAG, "Null thumbnail size received from parameters.");
     }
 
     /*
@@ -388,7 +388,7 @@ void LegacyResultMapper::MapAe(
         if (VERBOSE) {
             Boolean result;
             p->IsAutoExposureLockSupported(&result);
-            Slogger::V(TAG,
+            Logger::V(TAG,
                     "mapAe - android.control.aeLock = %d, supported = %d", lock, result);
         }
 
@@ -399,7 +399,7 @@ void LegacyResultMapper::MapAe(
             Boolean requestLock;
             obj2->GetValue(&requestLock);
             if (requestLock != lock) {
-                Slogger::W(TAG,
+                Logger::W(TAG,
                     "mapAe - android.control.aeLock was requested to %d but resulted"
                     "in %d", requestLock, lock);
             }
@@ -424,7 +424,7 @@ void LegacyResultMapper::MapAe(
         if (VERBOSE) {
             String meteringAreas;
             p->Get(String("metering-areas"), &meteringAreas);
-            Slogger::V(TAG, "mapAe - parameter dump; metering-areas: %s", meteringAreas.string());
+            Logger::V(TAG, "mapAe - parameter dump; metering-areas: %s", meteringAreas.string());
         }
 
         AutoPtr<IList> list;
@@ -458,7 +458,7 @@ void LegacyResultMapper::MapAf(
         if (VERBOSE) {
             String focusAreas;
             p->Get(String("focus-areas"), &focusAreas);
-            Slogger::V(TAG, "mapAe - parameter dump; focus-areas: %s", focusAreas.string());
+            Logger::V(TAG, "mapAe - parameter dump; focus-areas: %s", focusAreas.string());
         }
 
         AutoPtr<IList> list;
@@ -533,7 +533,7 @@ AutoPtr<ArrayOf<IMeteringRectangle*> > LegacyResultMapper::GetMeteringRectangles
     if (VERBOSE) {
         String str;
         ListUtils::ListToString(meteringRectList, &str);
-        Slogger::V(TAG,
+        Logger::V(TAG,
                 "Metering rectangles for %s: %s", regionName.string(), str.string());
     }
 
@@ -591,7 +591,7 @@ void LegacyResultMapper::MapAeAndFlashMode(
             else {
                 String mode;
                 p->GetFlashMode(&mode);
-                Slogger::W(TAG,
+                Logger::W(TAG,
                         "mapAeAndFlashMode - Ignoring unknown flash mode %s", mode.string());
             }
         }
@@ -612,7 +612,7 @@ Int32 LegacyResultMapper::ConvertLegacyAfMode(
     /* [in] */ const String& mode)
 {
     if (mode.IsNull()) {
-        Slogger::W(TAG, "convertLegacyAfMode - no AF mode, default to OFF");
+        Logger::W(TAG, "convertLegacyAfMode - no AF mode, default to OFF");
         return ICameraMetadata::CONTROL_AF_MODE_OFF;
     }
 
@@ -638,7 +638,7 @@ Int32 LegacyResultMapper::ConvertLegacyAfMode(
         return ICameraMetadata::CONTROL_AF_MODE_OFF;
     }
     else {
-        Slogger::W(TAG, "convertLegacyAfMode - unknown mode %s , ignoring", mode.string());
+        Logger::W(TAG, "convertLegacyAfMode - unknown mode %s , ignoring", mode.string());
         return ICameraMetadata::CONTROL_AF_MODE_OFF;
     }
 }
@@ -676,7 +676,7 @@ Int32 LegacyResultMapper::ConvertLegacyAwbMode(
         return ICameraMetadata::CONTROL_AWB_MODE_SHADE;
     }
     else {
-        Slogger::W(TAG, "convertAwbMode - unrecognized WB mode %s", mode.string());
+        Logger::W(TAG, "convertAwbMode - unrecognized WB mode %s", mode.string());
         return ICameraMetadata::CONTROL_AWB_MODE_AUTO;
     }
 }

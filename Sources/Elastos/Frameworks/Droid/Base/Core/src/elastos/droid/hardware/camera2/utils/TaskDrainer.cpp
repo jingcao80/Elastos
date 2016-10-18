@@ -5,13 +5,13 @@
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::StringBuilder;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::CHashSet;
 
 namespace Elastos {
@@ -38,7 +38,7 @@ ECode TaskDrainer::MyRunnable::Run()
         sb += "[";
         sb += mHost->mName;
         sb += "]";
-        Slogger::V(sb.ToString(), "onDrained");
+        Logger::V(sb.ToString(), "onDrained");
     }
 
     return mHost->mListener->OnDrained();
@@ -101,12 +101,12 @@ ECode TaskDrainer::TaskStarted(
             sb += "]";
             String str;
             IObject::Probe(task)->ToString(&str);
-            Slogger::V(sb.ToString(), "taskStarted %s", str.string());
+            Logger::V(sb.ToString(), "taskStarted %s", str.string());
         }
 
         if (mDraining) {
             //throw new IllegalStateException("Can't start more tasks after draining has begun");
-            Slogger::E(TAG, "Can't start more tasks after draining has begun");
+            Logger::E(TAG, "Can't start more tasks after draining has begun");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 
@@ -116,7 +116,7 @@ ECode TaskDrainer::TaskStarted(
             //throw new IllegalStateException("Task " + task + " was already started");
             String str;
             IObject::Probe(task)->ToString(&str);
-            Slogger::E(TAG, "Task %s was already started", str.string());
+            Logger::E(TAG, "Task %s was already started", str.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
@@ -135,7 +135,7 @@ ECode TaskDrainer::TaskFinished(
             sb += "]";
             String str;
             IObject::Probe(task)->ToString(&str);
-            Slogger::V(sb.ToString(), "taskFinished %s", str.string());
+            Logger::V(sb.ToString(), "taskFinished %s", str.string());
         }
 
         Boolean result;
@@ -144,7 +144,7 @@ ECode TaskDrainer::TaskFinished(
             //throw new IllegalStateException("Task " + task + " was already finished");
             String str;
             IObject::Probe(task)->ToString(&str);
-            Slogger::E(TAG, "Task %s was already finished", str.string());
+            Logger::E(TAG, "Task %s was already finished", str.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 
@@ -164,7 +164,7 @@ ECode TaskDrainer::BeginDrain()
                 sb += "[";
                 sb += mName;
                 sb += "]";
-                Slogger::V(sb.ToString(), "beginDrain started");
+                Logger::V(sb.ToString(), "beginDrain started");
             }
 
             mDraining = TRUE;
@@ -179,7 +179,7 @@ ECode TaskDrainer::BeginDrain()
                 sb += "[";
                 sb += mName;
                 sb += "]";
-                Slogger::V(sb.ToString(), "beginDrain ignored");
+                Logger::V(sb.ToString(), "beginDrain ignored");
             }
         }
     }

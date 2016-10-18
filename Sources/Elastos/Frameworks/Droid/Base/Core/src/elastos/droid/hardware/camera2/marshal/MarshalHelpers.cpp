@@ -1,7 +1,7 @@
 
 #include "elastos/droid/hardware/camera2/marshal/MarshalHelpers.h"
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Utility::ECLSID_CRational;
@@ -11,7 +11,7 @@ using Elastos::Core::ECLSID_CDouble;
 using Elastos::Core::ECLSID_CInteger32;
 using Elastos::Core::ECLSID_CInteger64;
 using Elastos::Core::StringBuilder;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -47,10 +47,8 @@ ECode MarshalHelpers::GetPrimitiveTypeSize(
             return NOERROR;
     }
 
-    // throw new UnsupportedOperationException("Unknown type, can't get size for "
-    //         + nativeType);
-    Slogger::E("MarshalHelpers", "Unknown type, can't get size for %d"
-            + nativeType);
+
+    Logger::E("MarshalHelpers", "Unknown type, can't get size for %d", nativeType);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -69,9 +67,7 @@ ECode MarshalHelpers::CheckPrimitiveClass(
         return NOERROR;
     }
 
-    // throw new UnsupportedOperationException("Unsupported class '" + klass +
-    //         "'; expected a metadata primitive class");
-    Slogger::E("MarshalHelpers", "Unsupported class '%d'; "
+    Logger::E("MarshalHelpers", "Unsupported class '%d'; "
             "expected a metadata primitive class", klass);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
@@ -82,10 +78,6 @@ ECode MarshalHelpers::IsPrimitiveClass(
 {
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
-
-    // if (klass == null) {
-    //     return false;
-    // }
 
     if (klass == ECLSID_CByte) {
         *value = TRUE;
@@ -178,8 +170,7 @@ ECode MarshalHelpers::CheckNativeType(
             return NOERROR;
     }
 
-    //throw new UnsupportedOperationException("Unknown nativeType " + nativeType);
-    Slogger::E("MarshalHelpers", "Unknown nativeType %d", nativeType);
+    Logger::E("MarshalHelpers", "Unknown nativeType %d", nativeType);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -191,11 +182,8 @@ ECode MarshalHelpers::CheckNativeTypeEquals(
     VALIDATE_NOT_NULL(value);
 
     if (expectedNativeType != actualNativeType) {
-        // throw new UnsupportedOperationException(
-        //         String.format("Expected native type %d, but got %d",
-        //                 expectedNativeType, actualNativeType));
-        Slogger::E("MarshalHelpers", "Expected native type %d, but got %d",
-                        expectedNativeType, actualNativeType);
+        Logger::E("MarshalHelpers", "Expected native type %d, but got %d",
+            expectedNativeType, actualNativeType);
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 

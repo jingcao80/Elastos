@@ -2039,6 +2039,13 @@ String TextUtils::String16ToString(
     return String(*buf);
 }
 
+android::String16 TextUtils::StringToString16(const String& str)
+{
+    AutoPtr<ArrayOf<Char16> > chars = str.GetChar16s();
+    android::String16 str16((char16_t *)(chars->GetPayload()), chars->GetLength());
+    return str16;
+}
+
 } // namespace Text
 } // namepsace Droid
 } // namespace Elastos

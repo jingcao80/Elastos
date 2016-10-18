@@ -1,10 +1,10 @@
 
 #include "elastos/droid/hardware/camera2/dispatch/InvokeDispatcher.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -42,7 +42,7 @@ ECode InvokeDispatcher::Dispatch(
     AutoPtr<IArgumentList> argumentList;
     ECode ec = method->CreateArgumentList((IArgumentList**)&argumentList);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Create method argument list failed!");
+        Logger::E(TAG, "Create method argument list failed!");
         return ec;
     }
 
@@ -50,7 +50,7 @@ ECode InvokeDispatcher::Dispatch(
 
     ec = method->Invoke(mTarget, argumentList);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Invoke method failed!");
+        Logger::E(TAG, "Invoke method failed!");
         return ec;
     }
     // //} catch (InvocationTargetException e) {

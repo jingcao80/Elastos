@@ -29,6 +29,8 @@ private:
         : public Marshaler
     {
     public:
+        TO_STRING_IMPL("MarshalerParcelable")
+
         //@Override
         CARAPI Marshal(
             /* [in] */ IInterface* value,

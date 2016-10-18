@@ -33,39 +33,45 @@ public:
      * @see TypeReference
      */
     CARAPI constructor(
-        /* [in] */ const ClassID& clsID);
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId);
+
+    CARAPI constructor(
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId,
+        /* [in] */ ITypeReference* component);
 
     /**
      * Return the dynamic {@link Type} corresponding to the captured type {@code T}.
      */
-    CARAPI GetType(
-        /* [out] */ ClassID* clsID);
+    CARAPI GetClassType(
+        /* [out] */ ClassID* classId);
 
-    /**
-     * Returns the raw type of T.
-     *
-     * <p><ul>
-     * <li>If T is a Class itself, T itself is returned.
-     * <li>If T is a ParameterizedType, the raw type of the parameterized type is returned.
-     * <li>If T is a GenericArrayType, the returned type is the corresponding array class.
-     * For example: {@code List<Integer>[]} => {@code List[]}.
-     * <li>If T is a type variable or a wildcard type, the raw type of the first upper bound is
-     * returned. For example: {@code <X extends Foo>} => {@code Foo}.
-     * </ul>
-     *
-     * @return the raw type of {@code T}
-     */
-    //@SuppressWarnings("unchecked")
-    CARAPI GetRawType(
-        /* [out] */ IClassInfo** classInfo);
+    CARAPI GetInterfaceType(
+        /* [out] */ InterfaceID* interfaceId);
 
     /**
      * Get the component type, e.g. {@code T} from {@code T[]}.
      *
      * @return component type, or {@code null} if {@code T} is not an array
      */
-    CARAPI GetComponentType(
+    CARAPI GetComponent(
         /* [out] */ ITypeReference** reference);
+
+    static AutoPtr<ITypeReference> CreateSpecializedTypeReference(
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId);
+
+    static AutoPtr<ITypeReference> CreateSpecializedTypeReference(
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId,
+        /* [in] */ const ClassID& componentClassId,
+        /* [in] */ const InterfaceID& componentInterfaceId);
+
+    static AutoPtr<ITypeReference> CreateSpecializedTypeReference(
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId,
+        /* [in] */ ITypeReference* component);
 
     CARAPI Equals(
         /* [in] */ IInterface* obj,
@@ -77,12 +83,12 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
-    static AutoPtr<ITypeReference> CreateSpecializedTypeReference(
-        /* [in] */ const ClassID& clsID);
-
 private:
     Int32 mHash;
-    ClassID mType;
+    ClassID mClassId;
+    InterfaceID mInterfaceId;
+
+    AutoPtr<ITypeReference> mComponent;
 };
 
 } // namespace Utils

@@ -4,12 +4,22 @@
 #include "elastos/droid/hardware/camera2/marshal/MarshalHelpers.h"
 #include "elastos/droid/utility/CRational.h"
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Utility::CRational;
+using Elastos::Droid::Utility::ECLSID_CRational;
 using Elastos::Core::CoreUtils;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::IInteger32;
+using Elastos::Core::ECLSID_CString;
+using Elastos::Core::ECLSID_CByte;
+using Elastos::Core::ECLSID_CFloat;
+using Elastos::Core::ECLSID_CDouble;
+using Elastos::Core::ECLSID_CInteger32;
+using Elastos::Core::ECLSID_CInteger64;
+using Elastos::Core::ECLSID_CBoolean;
+using Elastos::Core::ECLSID_CArrayOf;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -24,11 +34,7 @@ MarshalQueryablePrimitive::MarshalerPrimitive::MarshalerPrimitive(
     /* [in] */ MarshalQueryablePrimitive* host)
 {
     Marshaler::constructor(host, typeReference, nativeType);
-
-    // Turn primitives into wrappers, otherwise int.class.cast(Integer) will fail
-    assert(0);
-    // typeReference->GetRawType();
-    // mClass = WrapClassIfPrimitive((Class<T>)typeReference.getRawType());
+    typeReference->GetClassType(&mClass);
 }
 
 ECode MarshalQueryablePrimitive::MarshalerPrimitive::Unmarshal(
@@ -98,11 +104,7 @@ ECode MarshalQueryablePrimitive::MarshalerPrimitive::Marshal(
         MarshalPrimitive(val, buffer);
     }
     else {
-        // throw new UnsupportedOperationException(
-        //         "Can't marshal managed type " + mTypeReference);
-        String str;
-        IObject::Probe(mTypeReference)->ToString(&str);
-        Slogger::E("MarshalQueryablePrimitive", "Can't marshal managed type %s", str.string());
+        Logger::E("MarshalQueryablePrimitive", "Can't marshal managed type %s", TO_CSTR(mTypeReference));
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     return NOERROR;
@@ -222,9 +224,7 @@ ECode MarshalQueryablePrimitive::MarshalerPrimitive::UnmarshalObject(
             return NOERROR;
         }
         default:
-            // throw new UnsupportedOperationException(
-            //         "Can't unmarshal native type " + mNativeType);
-            Slogger::E("MarshalQueryablePrimitive", "Can't unmarshal native type %d", mNativeType);
+            Logger::E("MarshalQueryablePrimitive", "Can't unmarshal native type %d", mNativeType);
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     return NOERROR;
@@ -262,30 +262,36 @@ ECode MarshalQueryablePrimitive::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    // if (managedType.getType() instanceof Class<?>) {
-    //     Class<?> klass = (Class<?>)managedType.getType();
-
-    //     if (klass == byte.class || klass == Byte.class) {
-    //         return nativeType == TYPE_BYTE;
-    //     }
-    //     else if (klass == int.class || klass == Integer.class) {
-    //         return nativeType == TYPE_INT32;
-    //     }
-    //     else if (klass == float.class || klass == Float.class) {
-    //         return nativeType == TYPE_FLOAT;
-    //     }
-    //     else if (klass == long.class || klass == Long.class) {
-    //         return nativeType == TYPE_INT64;
-    //     }
-    //     else if (klass == double.class || klass == Double.class) {
-    //         return nativeType == TYPE_DOUBLE;
-    //     }
-    //     else if (klass == Rational.class) {
-    //         return nativeType == TYPE_RATIONAL;
-    //     }
-    // }
-    // return false;
+    ClassID cls;
+    managedType->GetClassType(&cls);
+    if (cls == ECLSID_CByte) {
+        *value = nativeType == ICameraMetadataNative::TYPE_BYTE;
+        return NOERROR;
+    }
+    else if (cls == ECLSID_CByte) {
+        *value = nativeType == ICameraMetadataNative::TYPE_BYTE;
+        return NOERROR;
+    }
+    else if (cls == ECLSID_CInteger32) {
+        *value = nativeType == ICameraMetadataNative::TYPE_INT32;
+        return NOERROR;
+    }
+    else if (cls == ECLSID_CFloat) {
+        *value = nativeType == ICameraMetadataNative::TYPE_FLOAT;
+        return NOERROR;
+    }
+    else if (cls == ECLSID_CInteger64) {
+        *value = nativeType == ICameraMetadataNative::TYPE_INT64;
+        return NOERROR;
+    }
+    else if (cls == ECLSID_CDouble) {
+        *value = nativeType == ICameraMetadataNative::TYPE_DOUBLE;
+        return NOERROR;
+    }
+    else if (cls == ECLSID_CRational) {
+        *value = nativeType == ICameraMetadataNative::TYPE_RATIONAL;
+        return NOERROR;
+    }
     return NOERROR;
 }
 

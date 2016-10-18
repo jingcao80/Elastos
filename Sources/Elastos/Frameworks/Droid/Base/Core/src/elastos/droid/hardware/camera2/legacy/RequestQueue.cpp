@@ -5,7 +5,7 @@
 #include "elastos/droid/utility/CPairHelper.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
@@ -16,7 +16,7 @@ using Elastos::Core::IInteger64;
 using Elastos::Utility::IDeque;
 using Elastos::Utility::CArrayDeque;
 using Elastos::Utility::ICollection;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -104,11 +104,11 @@ ECode RequestQueue::StopRepeating(
                 ret = (mCurrentRepeatingFrameNumber == INVALID_FRAME) ? INVALID_FRAME :
                         mCurrentRepeatingFrameNumber - 1;
                 mCurrentRepeatingFrameNumber = INVALID_FRAME;
-                Slogger::I(TAG, "Repeating capture request cancelled.");
+                Logger::I(TAG, "Repeating capture request cancelled.");
             }
         }
         else {
-            Slogger::E(TAG, "cancel failed: no repeating request exists for request id: %d", requestId);
+            Logger::E(TAG, "cancel failed: no repeating request exists for request id: %d", requestId);
         }
         *value = ret;
     }
@@ -123,7 +123,7 @@ ECode RequestQueue::StopRepeating(
 
     {    AutoLock syncLock(this);
         if (mRepeatingRequest == NULL) {
-            Slogger::E(TAG, "cancel failed: no repeating request exists.");
+            Logger::E(TAG, "cancel failed: no repeating request exists.");
             *value = INVALID_FRAME;
             return NOERROR;
         }
@@ -154,7 +154,7 @@ ECode RequestQueue::Submit(
         Boolean result;
         burst->IsRepeating(&result);
         if (result) {
-            Slogger::I(TAG, "Repeating capture request set.");
+            Logger::I(TAG, "Repeating capture request set.");
             if (mRepeatingRequest != NULL) {
                 ret = (mCurrentRepeatingFrameNumber == INVALID_FRAME) ? INVALID_FRAME :
                         mCurrentRepeatingFrameNumber - 1;
@@ -204,7 +204,7 @@ ECode RequestQueue::CalculateLastFrame(
 
     // throw new IllegalStateException(
     //         "At least one request must be in the queue to calculate frame number");
-    Slogger::E(TAG, "At least one request must be in the queue to calculate frame number");
+    Logger::E(TAG, "At least one request must be in the queue to calculate frame number");
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 

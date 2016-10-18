@@ -1,18 +1,20 @@
 
 #include "elastos/droid/hardware/camera2/params/CMeteringRectangle.h"
+#include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/graphics/CPoint.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/utility/CSize.h"
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Utility::CSize;
 using Elastos::Droid::Internal::Utility::Preconditions;
+using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -229,9 +231,7 @@ ECode CMeteringRectangle::GetHashCode(
 {
     VALIDATE_NOT_NULL(value);
 
-    assert(0 && "TODO: weit Hardware/Camera2/Utils/HashCodeHelpers");
-    //*value = HashCodeHelpers::GetHashCode(mX, mY, mWidth, mHeight, mWeight);
-    return NOERROR;
+    return HashCodeHelpers::GetHashCode(mX, mY, mWidth, mHeight, mWeight, value);
 }
 
 ECode CMeteringRectangle::ToString(

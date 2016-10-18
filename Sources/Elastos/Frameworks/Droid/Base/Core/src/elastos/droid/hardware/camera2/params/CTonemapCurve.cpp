@@ -1,15 +1,17 @@
 
 #include "elastos/droid/hardware/camera2/params/CTonemapCurve.h"
+#include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/graphics/CPointF.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::CPointF;
 using Elastos::Droid::Internal::Utility::Preconditions;
+using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -48,21 +50,9 @@ ECode CTonemapCurve::constructor(
 {
     // TODO: maxCurvePoints check?
 
-    //FAIL_RETURN(Preconditions::CheckNotNull(red, String("red must not be null")))
-    if (red == NULL) {
-        Slogger::E("CMeteringRectangle", "red must not be null");
-        return E_NULL_POINTER_EXCEPTION;
-    }
-    //FAIL_RETURN(Preconditions::CheckNotNull(green, String("green must not be null")))
-    if (green == NULL) {
-        Slogger::E("CMeteringRectangle", "green must not be null");
-        return E_NULL_POINTER_EXCEPTION;
-    }
-    //FAIL_RETURN(Preconditions::CheckNotNull(blue, String("blue must not be null")))
-    if (blue == NULL) {
-        Slogger::E("CMeteringRectangle", "blue must not be null");
-        return E_NULL_POINTER_EXCEPTION;
-    }
+    FAIL_RETURN(Preconditions::CheckNotNull(red, String("red must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(green, String("green must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(blue, String("blue must not be null")))
 
     FAIL_RETURN(CheckArgumentArrayLengthDivisibleBy(red, ITonemapCurve::POINT_SIZE, String("red")))
     FAIL_RETURN(CheckArgumentArrayLengthDivisibleBy(green, ITonemapCurve::POINT_SIZE, String("green")))
@@ -92,9 +82,7 @@ ECode CTonemapCurve::CheckArgumentArrayLengthDivisibleBy(
     /* [in] */ const String& arrayName)
 {
     if (array->GetLength() % divisible != 0) {
-        // throw new IllegalArgumentException(arrayName + " size must be divisible by "
-        //         + divisible);
-        Slogger::E("CTonemapCurve", "%s size must be divisible by %d", arrayName.string(), divisible);
+        Logger::E("CTonemapCurve", "%s size must be divisible by %d", arrayName.string(), divisible);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -113,8 +101,7 @@ ECode CTonemapCurve::CheckArgumentColorChannel(
         case ITonemapCurve::CHANNEL_BLUE:
             break;
         default:
-            //throw new IllegalArgumentException("colorChannel out of range");
-            Slogger::E("CTonemapCurve", "colorChannel out of range");
+            Logger::E("CTonemapCurve", "colorChannel out of range");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -128,9 +115,7 @@ ECode CTonemapCurve::CheckArgumentArrayLengthNoLessThan(
     /* [in] */ const String& arrayName)
 {
     if (array->GetLength() < minLength) {
-        // throw new IllegalArgumentException(arrayName + " size must be at least "
-        //         + minLength);
-        Slogger::E("CTonemapCurve", "%s size must be at least %d", arrayName.string(), minLength);
+        Logger::E("CTonemapCurve", "%s size must be at least %d", arrayName.string(), minLength);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -162,16 +147,14 @@ ECode CTonemapCurve::GetPoint(
     Int32 channle;
     FAIL_RETURN(CheckArgumentColorChannel(colorChannel, &channle))
     if (index < 0) {
-        //throw new IllegalArgumentException("index out of range");
-        Slogger::E("CTonemapCurve", "index out of range");
+        Logger::E("CTonemapCurve", "index out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else {
         Int32 count;
         FAIL_RETURN(GetPointCount(colorChannel, &count))
         if (index >= count) {
-            //throw new IllegalArgumentException("index out of range");
-            Slogger::E("CTonemapCurve", "index out of range");
+            Logger::E("CTonemapCurve", "index out of range");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -191,17 +174,16 @@ ECode CTonemapCurve::CopyColorCurve(
     /* [in] */ Int32 offset)
 {
     FAIL_RETURN(Preconditions::CheckArgumentNonnegative(offset, String("offset must not be negative")))
-    //FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
     if (destination == NULL) {
-        Slogger::E("CMeteringRectangle", "destination must not be null");
+        Logger::E("CMeteringRectangle", "destination must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
 
     Int32 count;
     FAIL_RETURN(GetPointCount(colorChannel, &count))
     if (destination->GetLength() + offset < count * ITonemapCurve::POINT_SIZE) {
-        //throw new ArrayIndexOutOfBoundsException("destination too small to fit elements");
-        Slogger::E("CTonemapCurve", "destination too small to fit elements");
+        Logger::E("CTonemapCurve", "destination too small to fit elements");
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
@@ -215,22 +197,17 @@ ECode CTonemapCurve::Equals(
     /* [out] */ Boolean* equal)
 {
     VALIDATE_NOT_NULL(equal);
+    *equal = FALSE;
 
-    if (obj == NULL) {
+    ITonemapCurve* tc = ITonemapCurve::Probe(obj);
+    if (tc == NULL) {
         *equal = FALSE;
         return NOERROR;
     }
-    else if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
-        *equal = TRUE;
-        return NOERROR;
-    }
-    else if (ITonemapCurve::Probe(obj) != NULL) {
-        const AutoPtr<CTonemapCurve> other = (CTonemapCurve*)ITonemapCurve::Probe(obj);
-        *equal = (Arrays::Equals(mRed, other->mRed)) && (Arrays::Equals(mGreen, other->mGreen))
-                &&  (Arrays::Equals(mBlue, other->mBlue));
-        return NOERROR;
-    }
-    *equal = FALSE;
+
+    CTonemapCurve* other = (CTonemapCurve*)tc;
+    *equal = (Arrays::Equals(mRed, other->mRed)) && (Arrays::Equals(mGreen, other->mGreen))
+            &&  (Arrays::Equals(mBlue, other->mBlue));
     return NOERROR;
 }
 
@@ -245,8 +222,11 @@ ECode CTonemapCurve::GetHashCode(
         return NOERROR;
     }
 
-    assert(0 && "TODO: weit Hardware/Camera2/Utils/HashCodeHelpers");
-    //mHashCode = HashCodeHelpers::GetHashCode(mRed, mGreen, mBlue);
+    Int32 h1, h2, h3;
+    HashCodeHelpers::GetHashCode(mRed, &h1);
+    HashCodeHelpers::GetHashCode(mGreen, &h2);
+    HashCodeHelpers::GetHashCode(mBlue, &h3);
+    HashCodeHelpers::GetHashCode(h1, h2, h3, &mHashCode);
     mHashCalculated = TRUE;
 
     *hashCode = mHashCode;
@@ -324,8 +304,7 @@ ECode CTonemapCurve::GetCurve(
             REFCOUNT_ADD(*curve);
             break;
         default:
-            // throw new AssertionError("colorChannel out of range");
-            Slogger::E("CTonemapCurve", "colorChannel out of range");
+            Logger::E("CTonemapCurve", "colorChannel out of range");
         return E_ASSERTION_ERROR;
     }
     return NOERROR;

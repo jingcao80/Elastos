@@ -6,7 +6,7 @@
 #include "elastos/droid/os/SystemClock.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <system/window.h>
 #include <ui/GraphicBuffer.h>
 #include <GLES2/gl2ext.h>
@@ -25,7 +25,7 @@ using Elastos::IO::IFileWriter;
 using Elastos::IO::CFileWriter;
 using Elastos::Utility::CLinkedList;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -69,7 +69,7 @@ ECode PerfMeasurement::constructor(
 {
     if (maxQueries < 1) {
         //throw new IllegalArgumentException("maxQueries is less than 1");
-        Slogger::E(TAG, "maxQueries is less than 1");
+        Logger::E(TAG, "maxQueries is less than 1");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mNativeContext = NativeCreateContext(maxQueries);
@@ -94,13 +94,13 @@ ECode PerfMeasurement::DumpPerformanceData(
     AutoPtr<IBufferedWriter> dump;
     ECode ec = CBufferedWriter::New(IWriter::Probe(fWriter), (IBufferedWriter**)&dump);
     if(FAILED(ec)) {
-        Slogger::E(TAG, "Error writing data dump to %s : %d", path.string(), ec);
+        Logger::E(TAG, "Error writing data dump to %s : %d", path.string(), ec);
         ICloseable::Probe(dump)->Close();
         return NOERROR;
     }
     ec = IWriter::Probe(dump)->Write(String("timestamp gpu_duration cpu_duration\n"));
     if(FAILED(ec)) {
-        Slogger::E(TAG, "Error writing data dump to %s : %d", path.string(), ec);
+        Logger::E(TAG, "Error writing data dump to %s : %d", path.string(), ec);
         ICloseable::Probe(dump)->Close();
         return NOERROR;
     }
@@ -131,7 +131,7 @@ ECode PerfMeasurement::DumpPerformanceData(
         sb += "\n";
         ec = IWriter::Probe(dump)->Write(sb.ToString());
         if(FAILED(ec)) {
-            Slogger::E(TAG, "Error writing data dump to %s : %d", path.string(), ec);
+            Logger::E(TAG, "Error writing data dump to %s : %d", path.string(), ec);
             ICloseable::Probe(dump)->Close();
             return NOERROR;
         }
@@ -141,7 +141,7 @@ ECode PerfMeasurement::DumpPerformanceData(
     mCollectedCpuDurations->Clear();
     //} catch (IOException e) {
     if(FAILED(ec)) {
-        Slogger::E(TAG, "Error writing data dump to %s : %d", path.string(), ec);
+        Logger::E(TAG, "Error writing data dump to %s : %d", path.string(), ec);
         ICloseable::Probe(dump)->Close();
     }
     //}
@@ -409,7 +409,7 @@ ECode PerfMeasurement::NativeStartGlTimer(
             case android::INVALID_OPERATION:
                 // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                 //         "Mismatched start/end GL timing calls");
-                Slogger::E(TAG, "java/lang/IllegalStateException"
+                Logger::E(TAG, "java/lang/IllegalStateException"
                         "Mismatched start/end GL timing calls");
                 return E_ILLEGAL_STATE_EXCEPTION;
             case android::BAD_VALUE:
@@ -417,13 +417,13 @@ ECode PerfMeasurement::NativeStartGlTimer(
                 //         "Too many timing queries in progress, max %d",
                 //         context->getMaxQueryCount());
 
-                Slogger::E(TAG, "java/lang/IllegalStateException"
+                Logger::E(TAG, "java/lang/IllegalStateException"
                         "Too many timing queries in progress, max %d", context->GetMaxQueryCount());
                 return E_ILLEGAL_STATE_EXCEPTION;
             default:
                 // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                 //         "Unknown error starting GL timing");
-                Slogger::E(TAG, "java/lang/IllegalStateException"
+                Logger::E(TAG, "java/lang/IllegalStateException"
                         "Unknown error starting GL timing");
                 return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -442,13 +442,13 @@ ECode PerfMeasurement::NativeStopGlTimer(
             case android::INVALID_OPERATION:
                 // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                 //         "Mismatched start/end GL timing calls");
-                Slogger::E(TAG, "java/lang/IllegalStateException"
+                Logger::E(TAG, "java/lang/IllegalStateException"
                         "Mismatched start/end GL timing calls");
                 return E_ILLEGAL_STATE_EXCEPTION;
             default:
                 // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                 //         "Unknown error ending GL timing");
-                Slogger::E(TAG, "java/lang/IllegalStateException"
+                Logger::E(TAG, "java/lang/IllegalStateException"
                         "Unknown error ending GL timing");
                 return E_ILLEGAL_STATE_EXCEPTION;
         }

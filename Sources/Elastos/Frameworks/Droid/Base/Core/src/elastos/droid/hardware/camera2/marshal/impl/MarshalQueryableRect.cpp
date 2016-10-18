@@ -1,11 +1,12 @@
 
 #include "elastos/droid/hardware/camera2/marshal/impl/MarshalQueryableRect.h"
 #include "elastos/droid/graphics/CRect.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::ECLSID_CRect;
 
 namespace Elastos {
 namespace Droid {
@@ -103,8 +104,14 @@ ECode MarshalQueryableRect::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    //return nativeType == ICameraMetadataNative::TYPE_INT32 && (Rect.class.equals(managedType.getType()));
+    if (nativeType == ICameraMetadataNative::TYPE_INT32) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CRect) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

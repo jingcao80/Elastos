@@ -1,8 +1,8 @@
 
 #include "elastos/droid/hardware/hdmi/HdmiRecordListener.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -82,7 +82,7 @@ ECode HdmiRecordListener::TimerStatusData::GetProgrammedInfo(
     if (!result) {
         // throw new IllegalStateException(
         //         "No programmed info. Call getNotProgammedError() instead.");
-        Slogger::E("HdmiRecordListener::TimerStatusData", "No programmed info. Call getNotProgammedError() instead.");
+        Logger::E("HdmiRecordListener::TimerStatusData", "No programmed info. Call getNotProgammedError() instead.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *info = mProgrammedInfo;
@@ -100,7 +100,7 @@ ECode HdmiRecordListener::TimerStatusData::GetNotProgammedError(
     if (result) {
         // throw new IllegalStateException(
         //         "Has no not-programmed error. Call getProgrammedInfo() instead.");
-        Slogger::E("HdmiRecordListener::TimerStatusData", "Has no not-programmed error. Call getProgrammedInfo() instead.");
+        Logger::E("HdmiRecordListener::TimerStatusData", "Has no not-programmed error. Call getProgrammedInfo() instead.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *error = mNotProgrammedError;

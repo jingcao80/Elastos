@@ -2,11 +2,11 @@
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/hardware/camera2/utils/CloseableLock.h"
 #include <elastos/core/StringBuffer.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuffer;
 using Elastos::IO::EIID_ICloseable;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Concurrent::Locks::CReentrantLock;
 using Elastos::Utility::Concurrent::Locks::ILock;
 
@@ -69,7 +69,7 @@ ECode CloseableLock::Close()
 {
     if (mClosed) {
         if (VERBOSE) {
-            Slogger::D(TAG, "close - already closed; ignoring");
+            Logger::D(TAG, "close - already closed; ignoring");
         }
         return NOERROR;
     }
@@ -89,7 +89,7 @@ ECode CloseableLock::Close()
             // throw new IllegalStateException(
             //         "Cannot close while one or more acquired locks are being held by this " +
             //          "thread; release all other locks first");
-            Slogger::E(TAG, "Cannot close while one or more acquired locks are being held by this thread; release all other locks first");
+            Logger::E(TAG, "Cannot close while one or more acquired locks are being held by this thread; release all other locks first");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
@@ -110,7 +110,7 @@ ECode CloseableLock::Close()
     //}
 
     if (VERBOSE) {
-        Slogger::D(TAG, "close - completed");
+        Logger::D(TAG, "close - completed");
     }
     return NOERROR;
 }
@@ -129,7 +129,7 @@ ECode CloseableLock::AcquireLock(
     // Lock is already closed, all further acquisitions will fail
     if (mClosed) {
         if (VERBOSE) {
-            Slogger::D(TAG, "acquire lock early aborted (already closed)");
+            Logger::D(TAG, "acquire lock early aborted (already closed)");
         }
         *outsl = NULL;
         ILock::Probe(mLock)->UnLock();
@@ -144,7 +144,7 @@ ECode CloseableLock::AcquireLock(
     if (mExclusive && ownedLocks > 0) {
         // throw new IllegalStateException(
         //         "Cannot acquire shared lock while holding exclusive lock");
-        Slogger::E(TAG, "Cannot acquire shared lock while holding exclusive lock");
+        Logger::E(TAG, "Cannot acquire shared lock while holding exclusive lock");
         ILock::Probe(mLock)->UnLock();
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -156,7 +156,7 @@ ECode CloseableLock::AcquireLock(
         // Did another thread #close while we were waiting? Unblock immediately.
         if (mClosed) {
             if (VERBOSE) {
-                Slogger::D(TAG, "acquire lock unblocked aborted (already closed)");
+                Logger::D(TAG, "acquire lock unblocked aborted (already closed)");
             }
             *outsl = NULL;
             ILock::Probe(mLock)->UnLock();
@@ -176,7 +176,7 @@ ECode CloseableLock::AcquireLock(
     //}
 
     if (VERBOSE) {
-        Slogger::D(TAG, "acquired lock (local own count = %d )", ownedLocks);
+        Logger::D(TAG, "acquired lock (local own count = %d )", ownedLocks);
     }
 
     AutoPtr<ICloseableLockScopedLock> _lock = new ScopedLock(this);
@@ -199,7 +199,7 @@ ECode CloseableLock::AcquireExclusiveLock(
     // Lock is already closed, all further acquisitions will fail
     if (mClosed) {
         if (VERBOSE) {
-            Slogger::D(TAG, "acquire exclusive lock early aborted (already closed)");
+            Logger::D(TAG, "acquire exclusive lock early aborted (already closed)");
         }
         *outsl = NULL;
         ILock::Probe(mLock)->UnLock();
@@ -213,7 +213,7 @@ ECode CloseableLock::AcquireExclusiveLock(
     if (!mExclusive && ownedLocks > 0) {
         // throw new IllegalStateException(
         //         "Cannot acquire exclusive lock while holding shared lock");
-        Slogger::E(TAG, "Cannot acquire exclusive lock while holding shared lock");
+        Logger::E(TAG, "Cannot acquire exclusive lock while holding shared lock");
         ILock::Probe(mLock)->UnLock();
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -230,7 +230,7 @@ ECode CloseableLock::AcquireExclusiveLock(
      // Did another thread #close while we were waiting? Unblock immediately.
         if (mClosed) {
             if (VERBOSE) {
-                Slogger::D(TAG, "acquire exclusive lock unblocked aborted (already closed)");
+                Logger::D(TAG, "acquire exclusive lock unblocked aborted (already closed)");
             }
             *outsl = NULL;
             ILock::Probe(mLock)->UnLock();
@@ -249,7 +249,7 @@ ECode CloseableLock::AcquireExclusiveLock(
     //}
 
     if (VERBOSE) {
-        Slogger::D(TAG, "acquired exclusive lock (local own count = %d )", ownedLocks);
+        Logger::D(TAG, "acquired exclusive lock (local own count = %d )", ownedLocks);
     }
 
     AutoPtr<ICloseableLockScopedLock> _lock = new ScopedLock(this);
@@ -266,7 +266,7 @@ ECode CloseableLock::ReleaseLock()
     if (lockCount1 <= 0) {
         // throw new IllegalStateException(
         //         "Cannot release lock that was not acquired by this thread");
-        Slogger::E(TAG, "Cannot release lock that was not acquired by this thread");
+        Logger::E(TAG, "Cannot release lock that was not acquired by this thread");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -278,7 +278,7 @@ ECode CloseableLock::ReleaseLock()
     // Lock is already closed, it couldn't have been acquired in the first place
     if (mClosed) {
         //throw new IllegalStateException("Do not release after the lock has been closed");
-        Slogger::E(TAG, "Do not release after the lock has been closed");
+        Logger::E(TAG, "Do not release after the lock has been closed");
         ILock::Probe(mLock)->UnLock();
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -289,7 +289,7 @@ ECode CloseableLock::ReleaseLock()
     else {
         if (mSharedLocks != 0) {
             //throw new AssertionError("Too many shared locks " + mSharedLocks);
-            Slogger::E(TAG, "Too many shared locks %d", mSharedLocks);
+            Logger::E(TAG, "Too many shared locks %d", mSharedLocks);
             ILock::Probe(mLock)->UnLock();
             return E_ASSERTION_ERROR;;
         }
@@ -315,7 +315,7 @@ ECode CloseableLock::ReleaseLock()
     //}
 
     if (VERBOSE) {
-        Slogger::D(TAG, "released lock (local lock count %d)", ownedLocks);
+        Logger::D(TAG, "released lock (local lock count %d)", ownedLocks);
     }
     return NOERROR;
 }
@@ -328,7 +328,7 @@ ECode CloseableLock::Log(
     sb += "[";
     sb += mName;
     sb += "]";
-    Slogger::V(sb.ToString(), what);
+    Logger::V(sb.ToString(), what);
     return NOERROR;
 }
 

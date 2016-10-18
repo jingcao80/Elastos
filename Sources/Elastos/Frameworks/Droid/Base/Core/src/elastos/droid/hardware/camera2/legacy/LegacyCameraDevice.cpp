@@ -4,6 +4,7 @@
 #include "elastos/droid/hardware/camera2/legacy/CRequestThreadManager.h"
 #include "elastos/droid/hardware/camera2/legacy/LegacyExceptionUtils.h"
 #include "elastos/droid/hardware/camera2/utils/ArrayUtils.h"
+#include "elastos/droid/hardware/camera2/impl/CCaptureResultExtras.h"
 #include "elastos/droid/hardware/camera2/CameraCharacteristics.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/os/ConditionVariable.h"
@@ -13,7 +14,7 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <camera/CameraUtils.h>
 #include <camera/CameraMetadata.h>
 #include <gui/Surface.h>
@@ -34,6 +35,7 @@ using Elastos::Droid::Hardware::Camera2::Legacy::CRequestThreadManager;
 using Elastos::Droid::Hardware::Camera2::Params::IStreamConfigurationMap;
 using Elastos::Droid::Hardware::Camera2::Utils::ICameraBinderDecorator;
 using Elastos::Droid::Hardware::Camera2::Utils::ArrayUtils;
+using Elastos::Droid::Hardware::Camera2::Impl::CCaptureResultExtras;
 using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Droid::Os::ConditionVariable;
@@ -49,7 +51,7 @@ using Elastos::IO::EIID_ICloseable;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -76,7 +78,7 @@ LegacyCameraDevice::MyRunnableOnError::MyRunnableOnError(
 ECode LegacyCameraDevice::MyRunnableOnError::Run()
 {
     if (DEBUG) {
-        Slogger::D(mOwner->TAG, "doing onError callback for request %d, with error code %d", mId, mErrorCode);
+        Logger::D(mOwner->TAG, "doing onError callback for request %d, with error code %d", mId, mErrorCode);
     }
     //try {
     ECode ec = mOwner->mDeviceCallbacks->OnDeviceError(mErrorCode, mExtras);
@@ -84,7 +86,7 @@ ECode LegacyCameraDevice::MyRunnableOnError::Run()
     if (FAILED(ec)) {
         // throw new IllegalStateException(
         //         "Received remote exception during onCameraError callback: ", e);
-        Slogger::E(mOwner->TAG, "Received remote exception during onCameraError callback: %d", ec);
+        Logger::E(mOwner->TAG, "Received remote exception during onCameraError callback: %d", ec);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     //}
@@ -100,7 +102,7 @@ LegacyCameraDevice::MyRunnableOnIdle::MyRunnableOnIdle(
 ECode LegacyCameraDevice::MyRunnableOnIdle::Run()
 {
     if (DEBUG) {
-        Slogger::D(mOwner->TAG, "doing onIdle callback.");
+        Logger::D(mOwner->TAG, "doing onIdle callback.");
     }
     //try {
     ECode ec = mOwner->mDeviceCallbacks->OnDeviceIdle();
@@ -108,7 +110,7 @@ ECode LegacyCameraDevice::MyRunnableOnIdle::Run()
     if (FAILED(ec)) {
         // throw new IllegalStateException(
         //         "Received remote exception during onCameraIdle callback: ", e);
-        Slogger::E(mOwner->TAG, "Received remote exception during onCameraIdle callback: %d", ec);
+        Logger::E(mOwner->TAG, "Received remote exception during onCameraIdle callback: %d", ec);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     //}
@@ -130,7 +132,7 @@ LegacyCameraDevice::MyRunnableOnCaptureStarted::MyRunnableOnCaptureStarted(
 ECode LegacyCameraDevice::MyRunnableOnCaptureStarted::Run()
 {
     if (DEBUG) {
-        Slogger::D(mOwner->TAG, "doing onCaptureStarted callback for request %d", mId);
+        Logger::D(mOwner->TAG, "doing onCaptureStarted callback for request %d", mId);
     }
     //try {
     ECode ec = mOwner->mDeviceCallbacks->OnCaptureStarted(mExtras, mTimestamp);
@@ -138,7 +140,7 @@ ECode LegacyCameraDevice::MyRunnableOnCaptureStarted::Run()
     if (FAILED(ec)) {
         // throw new IllegalStateException(
         //         "Received remote exception during onCameraError callback: ", e);
-        Slogger::E(mOwner->TAG, "Received remote exception during onCameraError callback: %d", ec);
+        Logger::E(mOwner->TAG, "Received remote exception during onCameraError callback: %d", ec);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     //}
@@ -160,7 +162,7 @@ LegacyCameraDevice::MyRunnableonCaptureResult::MyRunnableonCaptureResult(
 ECode LegacyCameraDevice::MyRunnableonCaptureResult::Run()
 {
     if (DEBUG) {
-        Slogger::D(mOwner->TAG, "doing onCaptureResult callback for request %d", mId);
+        Logger::D(mOwner->TAG, "doing onCaptureResult callback for request %d", mId);
     }
     //try {
     ECode ec = mOwner->mDeviceCallbacks->OnResultReceived(mResult, mExtras);
@@ -168,7 +170,7 @@ ECode LegacyCameraDevice::MyRunnableonCaptureResult::Run()
     if (FAILED(ec)) {
         // throw new IllegalStateException(
         //         "Received remote exception during onCameraError callback: ", e);
-        Slogger::E(mOwner->TAG, "Received remote exception during onCameraError callback: %d", ec);
+        Logger::E(mOwner->TAG, "Received remote exception during onCameraError callback: %d", ec);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     //}
@@ -188,7 +190,7 @@ ECode LegacyCameraDevice::MyListener::OnError(
     /* [in] */ IRequestHolder* holder)
 {
     if (DEBUG) {
-        Slogger::D(mHost->TAG, "onError called, errorCode = %d", errorCode);
+        Logger::D(mHost->TAG, "onError called, errorCode = %d", errorCode);
     }
     switch (errorCode) {
         /*
@@ -202,7 +204,7 @@ ECode LegacyCameraDevice::MyListener::OnError(
             mHost->mIdle->Open();
 
             if (DEBUG) {
-                Slogger::D(mHost->TAG, "onError - opening idle");
+                Logger::D(mHost->TAG, "onError - opening idle");
             }
         }
     }
@@ -219,7 +221,7 @@ ECode LegacyCameraDevice::MyListener::OnConfiguring()
 {
     // Do nothing
     if (DEBUG) {
-        Slogger::D(mHost->TAG, "doing onConfiguring callback.");
+        Logger::D(mHost->TAG, "doing onConfiguring callback.");
     }
     return NOERROR;
 }
@@ -227,7 +229,7 @@ ECode LegacyCameraDevice::MyListener::OnConfiguring()
 ECode LegacyCameraDevice::MyListener::OnIdle()
 {
     if (DEBUG) {
-        Slogger::D(mHost->TAG, "onIdle called");
+        Logger::D(mHost->TAG, "onIdle called");
     }
 
     mHost->mIdle->Open();
@@ -242,7 +244,7 @@ ECode LegacyCameraDevice::MyListener::OnBusy()
     mHost->mIdle->Close();
 
     if (DEBUG) {
-        Slogger::D(mHost->TAG, "onBusy called");
+        Logger::D(mHost->TAG, "onBusy called");
     }
     return NOERROR;
 }
@@ -284,13 +286,6 @@ LegacyCameraDevice::LegacyCameraDevice()
     , mCameraId(0)
     , mClosed(FALSE)
 {
-    CCameraDeviceState::New((ICameraDeviceState**)&mDeviceState);
-    mIdle = new ConditionVariable(/*open*/TRUE);
-
-    CHandlerThread::New(String("ResultThread"), (IHandlerThread**)&mResultThread);
-    CHandlerThread::New(String("CallbackThread"), (IHandlerThread**)&mCallbackHandlerThread);
-
-    mStateListener = new MyListener(this);
 }
 
 LegacyCameraDevice::~LegacyCameraDevice()
@@ -299,7 +294,7 @@ LegacyCameraDevice::~LegacyCameraDevice()
     ECode ec = Close();
     //} catch (CameraRuntimeException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Got error while trying to finalize, ignoring: %d", ec);
+        Logger::E(TAG, "Got error while trying to finalize, ignoring: %d", ec);
     }
     //} finally {
     //super.finalize();
@@ -325,6 +320,14 @@ ECode LegacyCameraDevice::constructor(
     sb += "-LE";
     TAG = sb.ToString();
 
+    CCameraDeviceState::New((ICameraDeviceState**)&mDeviceState);
+    mIdle = new ConditionVariable(/*open*/TRUE);
+
+    CHandlerThread::New(String("ResultThread"), (IHandlerThread**)&mResultThread);
+    CHandlerThread::New(String("CallbackThread"), (IHandlerThread**)&mCallbackHandlerThread);
+
+    mStateListener = new MyListener(this);
+
     IThread::Probe(mResultThread)->Start();
     AutoPtr<ILooper> lopper;
     mResultThread->GetLooper((ILooper**)&lopper);
@@ -335,8 +338,9 @@ ECode LegacyCameraDevice::constructor(
     CHandler::New(lopper2, (IHandler**)&mCallbackHandler);
     mDeviceState->SetCameraDeviceCallbacks(mCallbackHandler, mStateListener);
     mStaticCharacteristics = characteristics;
-    CRequestThreadManager::New(cameraId, camera, characteristics, mDeviceState, (IRequestThreadManager**)&mRequestThreadManager);
-    return IThread::Probe(mRequestThreadManager)->Start();
+    CRequestThreadManager::New(cameraId, camera, characteristics, mDeviceState,
+        (IRequestThreadManager**)&mRequestThreadManager);
+    return mRequestThreadManager->Start();
 }
 
 AutoPtr<ICaptureResultExtras> LegacyCameraDevice::GetExtrasFromRequest(
@@ -344,9 +348,8 @@ AutoPtr<ICaptureResultExtras> LegacyCameraDevice::GetExtrasFromRequest(
 {
     AutoPtr<ICaptureResultExtras> extras;
     if (holder == NULL) {
-        assert(0);
-        // CCaptureResultExtras::New(ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE,
-        //         ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE, (ICaptureResultExtras**)&extras);
+        CCaptureResultExtras::New(ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE,
+            ILLEGAL_VALUE, ILLEGAL_VALUE, ILLEGAL_VALUE, (ICaptureResultExtras**)&extras);
         return extras;
     }
     Int32 requestId;
@@ -355,10 +358,9 @@ AutoPtr<ICaptureResultExtras> LegacyCameraDevice::GetExtrasFromRequest(
     holder->GetSubsequeceId(&subsequeceId);
     Int64 frameNumber;
     holder->GetFrameNumber(&frameNumber);
-    assert(0);
-    //CCaptureResultExtras::New(requestId, subsequeceId,
-    //        /*afTriggerId*/0, /*precaptureTriggerId*/0, frameNumber,
-    //        /*partialResultCount*/1, (ICaptureResultExtras**)&extras);
+    CCaptureResultExtras::New(requestId, subsequeceId,
+       /*afTriggerId*/0, /*precaptureTriggerId*/0, frameNumber,
+       /*partialResultCount*/1, (ICaptureResultExtras**)&extras);
     return extras;
 }
 
@@ -387,7 +389,7 @@ ECode LegacyCameraDevice::ConfigureOutputs(
             AutoPtr<ISurface> output = ISurface::Probe(obj);
 
             if (output == NULL) {
-                Slogger::E(TAG, "configureOutputs - null outputs are not allowed");
+                Logger::E(TAG, "configureOutputs - null outputs are not allowed");
                 *value = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
                 return NOERROR;
             }
@@ -402,14 +404,14 @@ ECode LegacyCameraDevice::ConfigureOutputs(
             AutoPtr<ISize> s;
             ECode ec = GetSurfaceSize(output, (ISize**)&s);
             if (FAILED(ec)) {
-                Slogger::E(TAG, "Surface bufferqueue is abandoned, cannot configure as output: %d", ec);
+                Logger::E(TAG, "Surface bufferqueue is abandoned, cannot configure as output: %d", ec);
                 *value = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
                 return NOERROR;
             }
             Int32 surfaceType;
             ec = DetectSurfaceType(output, &surfaceType);
             if (FAILED(ec)) {
-                Slogger::E(TAG, "Surface bufferqueue is abandoned, cannot configure as output: %d", ec);
+                Logger::E(TAG, "Surface bufferqueue is abandoned, cannot configure as output: %d", ec);
                 *value = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
                 return NOERROR;
             }
@@ -436,7 +438,7 @@ ECode LegacyCameraDevice::ConfigureOutputs(
                 array->Set(i, TO_IINTERFACE((*sizes)[i]));
             }
             Boolean result;
-            ArrayUtils::Contains(array, TO_IINTERFACE(s), &result);
+            ArrayUtils::Contains(array.Get(), (IInterface*)s.Get(), &result);
             if (!result) {
                 String reason;
                 if (sizes == NULL) {
@@ -450,7 +452,7 @@ ECode LegacyCameraDevice::ConfigureOutputs(
                 s->GetWidth(&width);
                 Int32 height;
                 s->GetHeight(&height);
-                Slogger::E(TAG, "Surface with size (w=%d, h=%d) and format 0x%x is"
+                Logger::E(TAG, "Surface with size (w=%d, h=%d) and format 0x%x is"
                         " not valid, %s", width, height, surfaceType, reason.string());
                 *value =  ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
                 return NOERROR;
@@ -496,7 +498,7 @@ ECode LegacyCameraDevice::SubmitRequestList(
     *value = 0;
 
     if (requestList == NULL) {
-        Slogger::E(TAG, "submitRequestList - Empty/null requests are not allowed");
+        Logger::E(TAG, "submitRequestList - Empty/null requests are not allowed");
         *value = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
         return NOERROR;
     }
@@ -504,7 +506,7 @@ ECode LegacyCameraDevice::SubmitRequestList(
     Boolean res;
     requestList->IsEmpty(&res);
     if (res) {
-        Slogger::E(TAG, "submitRequestList - Empty/null requests are not allowed");
+        Logger::E(TAG, "submitRequestList - Empty/null requests are not allowed");
         *value = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
         return NOERROR;
     }
@@ -530,7 +532,7 @@ ECode LegacyCameraDevice::SubmitRequestList(
         Boolean result;
         targets->IsEmpty(&result);
         if (result) {
-            Slogger::E(TAG, "submitRequestList - Each request must have at least one Surface target");
+            Logger::E(TAG, "submitRequestList - Each request must have at least one Surface target");
             *value = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
             return NOERROR;
         }
@@ -541,17 +543,17 @@ ECode LegacyCameraDevice::SubmitRequestList(
             AutoPtr<ISurface> surface = ISurface::Probe((*array)[i]);
 
             if (surface == NULL) {
-                Slogger::E(TAG, "submitRequestList - Null Surface targets are not allowed");
+                Logger::E(TAG, "submitRequestList - Null Surface targets are not allowed");
                 *value = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
                 return NOERROR;
             }
             else if (mConfiguredSurfaces == NULL) {
-                Slogger::E(TAG, "submitRequestList - must configure device with valid surfaces before submitting requests");
+                Logger::E(TAG, "submitRequestList - must configure device with valid surfaces before submitting requests");
                 *value = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
                 return NOERROR;
             }
             else if (!ContainsSurfaceId(surface, ICollection::Probe(surfaceIds))) {
-                Slogger::E(TAG, "submitRequestList - cannot use a surface that wasn't configured");
+                Logger::E(TAG, "submitRequestList - cannot use a surface that wasn't configured");
                 *value = ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
                 return NOERROR;
             }
@@ -628,7 +630,7 @@ ECode LegacyCameraDevice::Close()
         IThread::Probe(mCallbackHandlerThread)->GetName(&name);
         Int64 id;
         IThread::Probe(mCallbackHandlerThread)->GetId(&id);
-        Slogger::E(TAG, "Thread %s (%d) interrupted while quitting.", name.string(), id);
+        Logger::E(TAG, "Thread %s (%d) interrupted while quitting.", name.string(), id);
     }
     //}
 
@@ -640,7 +642,7 @@ ECode LegacyCameraDevice::Close()
         IThread::Probe(mResultThread)->GetName(&name);
         Int64 id;
         IThread::Probe(mResultThread)->GetId(&id);
-        Slogger::E(TAG, "Thread %s (%d) interrupted while quitting.", name.string(), id);
+        Logger::E(TAG, "Thread %s (%d) interrupted while quitting.", name.string(), id);
     }
     //}
 
@@ -698,7 +700,6 @@ ECode LegacyCameraDevice::ProduceFrame(
     /* [in] */ Int32 pixelFormat)
 {
     FAIL_RETURN(Preconditions::CheckNotNull(surface))
-    //FAIL_RETURN(Preconditions::CheckNotNull(pixelBuffer))
     if (pixelBuffer == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -750,8 +751,7 @@ ECode LegacyCameraDevice::GetSurfaceIds(
     *ids = NULL;
 
     if (surfaces == NULL) {
-        //throw new NullPointerException("Null argument surfaces");
-        Slogger::E("LegacyCameraDevice", "Null argument surfaces");
+        Logger::E("LegacyCameraDevice", "Null argument surfaces");
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<IList> surfaceIds;
@@ -764,9 +764,7 @@ ECode LegacyCameraDevice::GetSurfaceIds(
 
         Int64 id = GetSurfaceId(s);
         if (id == 0) {
-            // throw new IllegalStateException(
-            //         "Configured surface had null native GraphicBufferProducer pointer!");
-            Slogger::E("LegacyCameraDevice", "Configured surface had null native GraphicBufferProducer pointer!");
+            Logger::E("LegacyCameraDevice", "Configured surface had null native GraphicBufferProducer pointer!");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
@@ -833,25 +831,17 @@ static android::sp<ANativeWindow> getNativeWindow(
 {
     android::sp<ANativeWindow> anw;
     if (surface) {
-        assert(0);
-        // anw = android_view_Surface_getNativeWindow(surface);
-        // if (env->ExceptionCheck()) {
-        //     return NULL;
-        // }
+        Int64 nativeSurf;
+        surface->GetNativeSurface(&nativeSurf);
+        anw = reinterpret_cast<android::Surface*>(nativeSurf);
     }
     else {
-        //jniThrowNullPointerException(env, "surface");
-        Slogger::E("LegacyCameraDevice", "jniThrowNullPointerException: surface");
-        //return E_NULL_POINTER_EXCEPTION;
+        Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: surface");
         return NULL;
-
     }
     if (anw == NULL) {
-        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-        //         "Surface had no valid native window.");
-        Slogger::E("LegacyCameraDevice", "java/lang/IllegalArgumentException"
+        Logger::E("LegacyCameraDevice", "java/lang/IllegalArgumentException"
                 " Surface had no valid native window.");
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
         return NULL;
     }
     return anw;
@@ -860,16 +850,16 @@ static android::sp<ANativeWindow> getNativeWindow(
 Int32 LegacyCameraDevice::NativeDetectSurfaceType(
     /* [in] */ ISurface* surface)
 {
-    Slogger::V("LegacyCameraDevice", "nativeDetectSurfaceType");
+    Logger::V("LegacyCameraDevice", "nativeDetectSurfaceType");
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native window from surface.", __FUNCTION__);
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window from surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
     int32_t fmt = 0;
     android::status_t err = anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &fmt);
     if(err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while querying surface pixel format %s (%d).", __FUNCTION__, strerror(-err),
+        Logger::E("LegacyCameraDevice", "%s: Error while querying surface pixel format %s (%d).", __FUNCTION__, strerror(-err),
                 err);
         return err;
     }
@@ -880,37 +870,37 @@ Int32 LegacyCameraDevice::NativeDetectSurfaceDimens(
     /* [in] */ ISurface* surface,
     /* [in] */ ArrayOf<Int32>* dimens)
 {
-    Slogger::V("LegacyCameraDevice", "nativeGetSurfaceDimens");
+    Logger::V("LegacyCameraDevice", "nativeGetSurfaceDimens");
 
     if (dimens == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Null dimens argument passed"
+        Logger::E("LegacyCameraDevice", "%s: Null dimens argument passed"
                 " to nativeDetectSurfaceDimens", __FUNCTION__);
         return android::BAD_VALUE;
     }
 
     if (dimens->GetLength() < 2) {
-        Slogger::E("LegacyCameraDevice", "%s: Invalid length of dimens "
+        Logger::E("LegacyCameraDevice", "%s: Invalid length of dimens "
                 "argument in nativeDetectSurfaceDimens", __FUNCTION__);
         return android::BAD_VALUE;
     }
 
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native "
                 "window from surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
     int32_t dimenBuf[2];
     android::status_t err = anw->query(anw.get(), NATIVE_WINDOW_WIDTH, dimenBuf);
     if(err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while querying "
+        Logger::E("LegacyCameraDevice", "%s: Error while querying "
                 "surface width %s (%d).", __FUNCTION__, strerror(-err),
                 err);
         return err;
     }
     err = anw->query(anw.get(), NATIVE_WINDOW_HEIGHT, dimenBuf + 1);
     if(err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while querying surface "
+        Logger::E("LegacyCameraDevice", "%s: Error while querying surface "
                 "height %s (%d).", __FUNCTION__, strerror(-err),
                 err);
         return err;
@@ -932,7 +922,7 @@ static android::status_t configureSurface(
     assert(0);
     //err = native_window_set_buffers_dimensions(anw.get(), width, height);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Failed to set native window"
+        Logger::E("LegacyCameraDevice", "%s: Failed to set native window"
             " buffer dimensions, error %s (%d).", __FUNCTION__,
             strerror(-err), err);
         return err;
@@ -941,7 +931,7 @@ static android::status_t configureSurface(
     assert(0);
     //err = native_window_set_buffers_format(anw.get(), pixelFmt);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Failed to set native window"
+        Logger::E("LegacyCameraDevice", "%s: Failed to set native window"
                 " buffer format, error %s (%d).", __FUNCTION__,
                 strerror(-err), err);
         return err;
@@ -950,7 +940,7 @@ static android::status_t configureSurface(
     assert(0);
     //err = native_window_set_usage(anw.get(), GRALLOC_USAGE_SW_WRITE_OFTEN);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Failed to set native window"
+        Logger::E("LegacyCameraDevice", "%s: Failed to set native window"
             " usage flag, error %s (%d).", __FUNCTION__,
             strerror(-err), err);
         return err;
@@ -961,19 +951,19 @@ static android::status_t configureSurface(
             NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS,
             &minUndequeuedBuffers);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Failed to get native window"
+        Logger::E("LegacyCameraDevice", "%s: Failed to get native window"
             " min undequeued buffers, error %s (%d).",
             __FUNCTION__, strerror(-err), err);
         return err;
     }
 
-    Slogger::V("%s: Setting buffer count to %d, size to (%dx%d), fmt (0x%x)", __FUNCTION__,
+    Logger::V("%s: Setting buffer count to %d, size to (%dx%d), fmt (0x%x)", __FUNCTION__,
             maxBufferSlack + 1 + minUndequeuedBuffers,
             width, height, pixelFmt);
     assert(0);
     //err = native_window_set_buffer_count(anw.get(), maxBufferSlack + 1 + minUndequeuedBuffers);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Failed to set native window"
+        Logger::E("LegacyCameraDevice", "%s: Failed to set native window"
             " buffer count, error %s (%d).", __FUNCTION__,
             strerror(-err), err);
         return err;
@@ -987,17 +977,17 @@ Int32 LegacyCameraDevice::NativeConfigureSurface(
     /* [in] */ Int32 height,
     /* [in] */ Int32 pixelFormat)
 {
-    Slogger::V("LegacyCameraDevice", "nativeConfigureSurface");
+    Logger::V("LegacyCameraDevice", "nativeConfigureSurface");
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native "
                 "window from surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
     android::status_t err = configureSurface(anw, width, height, pixelFormat,
             CAMERA_DEVICE_BUFFER_SLACK);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while configuring "
+        Logger::E("LegacyCameraDevice", "%s: Error while configuring "
                 "surface %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
@@ -1092,23 +1082,23 @@ static android::status_t produceFrame(
             __FUNCTION__, anw.get(), bufWidth, bufHeight, pixelFmt, bufSize);
 
     if (anw == 0) {
-        Slogger::E("LegacyCameraDevice", "%s: anw must not be NULL", __FUNCTION__);
+        Logger::E("LegacyCameraDevice", "%s: anw must not be NULL", __FUNCTION__);
         return android::BAD_VALUE;
     }
     else if (pixelBuffer == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: pixelBuffer must not be NULL", __FUNCTION__);
+        Logger::E("LegacyCameraDevice", "%s: pixelBuffer must not be NULL", __FUNCTION__);
         return android::BAD_VALUE;
     }
     else if (bufWidth < 0) {
-        Slogger::E("LegacyCameraDevice", "%s: width must be non-negative", __FUNCTION__);
+        Logger::E("LegacyCameraDevice", "%s: width must be non-negative", __FUNCTION__);
         return android::BAD_VALUE;
     }
     else if (bufHeight < 0) {
-        Slogger::E("LegacyCameraDevice", "%s: height must be non-negative", __FUNCTION__);
+        Logger::E("LegacyCameraDevice", "%s: height must be non-negative", __FUNCTION__);
         return android::BAD_VALUE;
     }
     else if (bufSize < 0) {
-        Slogger::E("LegacyCameraDevice", "%s: bufSize must be non-negative", __FUNCTION__);
+        Logger::E("LegacyCameraDevice", "%s: bufSize must be non-negative", __FUNCTION__);
         return android::BAD_VALUE;
     }
 
@@ -1125,7 +1115,7 @@ static android::status_t produceFrame(
     uint32_t grallocBufHeight = buf->getHeight();
     uint32_t grallocBufStride = buf->getStride();
     if (grallocBufWidth != width || grallocBufHeight != height) {
-        Slogger::E("LegacyCameraDevice", "%s: Received gralloc buffer with bad "
+        Logger::E("LegacyCameraDevice", "%s: Received gralloc buffer with bad "
                 "dimensions %" PRIu32 "x%" PRIu32
                 ", expecting dimensions %zu x %zu",  __FUNCTION__, grallocBufWidth,
                 grallocBufHeight, width, height);
@@ -1135,7 +1125,7 @@ static android::status_t produceFrame(
     int32_t bufFmt = 0;
     err = anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &bufFmt);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while querying surface pixel "
+        Logger::E("LegacyCameraDevice", "%s: Error while querying surface pixel "
                 "format %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
@@ -1144,17 +1134,17 @@ static android::status_t produceFrame(
             4 * grallocBufHeight * grallocBufWidth;
     if (bufFmt != pixelFmt) {
         if (bufFmt == HAL_PIXEL_FORMAT_RGBA_8888 && pixelFmt == HAL_PIXEL_FORMAT_BLOB) {
-            Slogger::V("LegacyCameraDevice", "%s: Using BLOB to RGBA format override.", __FUNCTION__);
+            Logger::V("LegacyCameraDevice", "%s: Using BLOB to RGBA format override.", __FUNCTION__);
             tmpSize = 4 * (grallocBufWidth + grallocBufStride * (grallocBufHeight - 1));
         }
         else {
-            Slogger::W("LegacyCameraDevice", "%s: Format mismatch in produceFrame: expecting format %#" PRIx32
+            Logger::W("LegacyCameraDevice", "%s: Format mismatch in produceFrame: expecting format %#" PRIx32
                     ", but received buffer with format %#" PRIx32, __FUNCTION__, pixelFmt, bufFmt);
         }
     }
 
     if (tmpSize > SIZE_MAX) {
-        Slogger::E("LegacyCameraDevice", "%s: Overflow calculating size, buffer "
+        Logger::E("LegacyCameraDevice", "%s: Overflow calculating size, buffer "
                 "with dimens %zu x %zu is absurdly large...",
                 __FUNCTION__, width, height);
         return android::BAD_VALUE;
@@ -1165,13 +1155,13 @@ static android::status_t produceFrame(
     switch(pixelFmt) {
         case HAL_PIXEL_FORMAT_YCrCb_420_SP: {
             if (bufferLength < totalSizeBytes) {
-                Slogger::E("LegacyCameraDevice", "%s: PixelBuffer size %zu "
+                Logger::E("LegacyCameraDevice", "%s: PixelBuffer size %zu "
                         "too small for given dimensions",
                         __FUNCTION__, bufferLength);
                 return android::BAD_VALUE;
             }
             uint8_t* img = NULL;
-            Slogger::V("LegacyCameraDevice", "%s: Lock buffer from %p for "
+            Logger::V("LegacyCameraDevice", "%s: Lock buffer from %p for "
                     "write", __FUNCTION__, anw.get());
             err = buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
             if (err != android::NO_ERROR) return err;
@@ -1189,24 +1179,24 @@ static android::status_t produceFrame(
         }
         case HAL_PIXEL_FORMAT_YV12: {
             if (bufferLength < totalSizeBytes) {
-                Slogger::E("LegacyCameraDevice", "%s: PixelBuffer size %zu too "
+                Logger::E("LegacyCameraDevice", "%s: PixelBuffer size %zu too "
                         "small for given dimensions",
                         __FUNCTION__, bufferLength);
                 return android::BAD_VALUE;
             }
 
             if ((width & 1) || (height & 1)) {
-                Slogger::E("LegacyCameraDevice", "%s: Dimens %zu x %zu are "
+                Logger::E("LegacyCameraDevice", "%s: Dimens %zu x %zu are "
                         "not divisible by 2.", __FUNCTION__, width, height);
                 return android::BAD_VALUE;
             }
 
             uint8_t* img = NULL;
-            Slogger::V("LegacyCameraDevice", "%s: Lock buffer from %p for "
+            Logger::V("LegacyCameraDevice", "%s: Lock buffer from %p for "
                     "write", __FUNCTION__, anw.get());
             err = buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
             if (err != android::NO_ERROR) {
-                Slogger::E("LegacyCameraDevice", "%s: Error %s (%d) while "
+                Logger::E("LegacyCameraDevice", "%s: Error %s (%d) while "
                         "locking gralloc buffer for write.", __FUNCTION__,
                         strerror(-err), err);
                 return err;
@@ -1230,18 +1220,18 @@ static android::status_t produceFrame(
             // Software writes with YCbCr_420_888 format are unsupported
             // by the gralloc module for now
             if (bufferLength < totalSizeBytes) {
-                Slogger::E("LegacyCameraDevice", "%s: PixelBuffer size %zu too "
+                Logger::E("LegacyCameraDevice", "%s: PixelBuffer size %zu too "
                         "small for given dimensions",
                         __FUNCTION__, bufferLength);
                 return android::BAD_VALUE;
             }
             android_ycbcr ycbcr = android_ycbcr();
-            Slogger::V("LegacyCameraDevice", "%s: Lock buffer from %p for "
+            Logger::V("LegacyCameraDevice", "%s: Lock buffer from %p for "
                     "write", __FUNCTION__, anw.get());
 
             err = buf->lockYCbCr(GRALLOC_USAGE_SW_WRITE_OFTEN, &ycbcr);
             if (err != android::NO_ERROR) {
-                Slogger::E("LegacyCameraDevice", "%s: Failed to lock ycbcr "
+                Logger::E("LegacyCameraDevice", "%s: Failed to lock ycbcr "
                         "buffer, error %s (%d).", __FUNCTION__,
                         strerror(-err), err);
                 return err;
@@ -1260,7 +1250,7 @@ static android::status_t produceFrame(
             totalJpegSize = (totalJpegSize + 3) & ~0x3; // round up to nearest octonibble
 
             if (totalJpegSize > totalSizeBytes) {
-                Slogger::E("LegacyCameraDevice", "%s: Pixel buffer needs size %zu, "
+                Logger::E("LegacyCameraDevice", "%s: Pixel buffer needs size %zu, "
                         "cannot fit in gralloc buffer of size %zu",
                         __FUNCTION__, totalJpegSize, totalSizeBytes);
                 return android::BAD_VALUE;
@@ -1268,7 +1258,7 @@ static android::status_t produceFrame(
 
             err = buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
             if (err != android::NO_ERROR) {
-                Slogger::E("LegacyCameraDevice", "%s: Failed to lock buffer, "
+                Logger::E("LegacyCameraDevice", "%s: Failed to lock buffer, "
                         "error %s (%d).", __FUNCTION__, strerror(-err),
                         err);
                 return err;
@@ -1279,7 +1269,7 @@ static android::status_t produceFrame(
             break;
         }
         default: {
-            Slogger::E("LegacyCameraDevice", "%s: Invalid pixel format in "
+            Logger::E("LegacyCameraDevice", "%s: Invalid pixel format in "
                     "produceFrame: %x", __FUNCTION__, pixelFmt);
             return android::BAD_VALUE;
         }
@@ -1288,7 +1278,7 @@ static android::status_t produceFrame(
     ALOGV("%s: Unlock buffer from %p", __FUNCTION__, anw.get());
     err = buf->unlock();
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Failed to unlock buffer, "
+        Logger::E("LegacyCameraDevice", "%s: Failed to unlock buffer, "
                 "error %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
@@ -1296,7 +1286,7 @@ static android::status_t produceFrame(
     ALOGV("%s: Queue buffer to %p", __FUNCTION__, anw.get());
     err = anw->queueBuffer(anw.get(), buf->getNativeBuffer(), /*fenceFd*/-1);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Failed to queue buffer, "
+        Logger::E("LegacyCameraDevice", "%s: Failed to queue buffer, "
                 "error %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
@@ -1314,11 +1304,11 @@ ECode LegacyCameraDevice::NativeProduceFrame(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
-    Slogger::V("LegacyCameraDevice", "nativeProduceFrame");
+    Logger::V("LegacyCameraDevice", "nativeProduceFrame");
     android::sp<ANativeWindow> anw;
 
     if ((anw = getNativeWindow(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
                 "from surface.", __FUNCTION__);
         *result = android::BAD_VALUE;
         return NOERROR;
@@ -1326,7 +1316,7 @@ ECode LegacyCameraDevice::NativeProduceFrame(
 
     if (pixelBuffer == NULL) {
         //jniThrowNullPointerException(env, "pixelBuffer");
-        Slogger::E("LegacyCameraDevice", "jniThrowNullPointerException: pixelBuffer");
+        Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: pixelBuffer");
         *result = DONT_CARE;
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -1336,7 +1326,7 @@ ECode LegacyCameraDevice::NativeProduceFrame(
 
     if (pixels == NULL) {
         //jniThrowNullPointerException(env, "pixels");
-        Slogger::E("LegacyCameraDevice", "jniThrowNullPointerException: pixels");
+        Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: pixels");
         *result = DONT_CARE;
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -1345,7 +1335,7 @@ ECode LegacyCameraDevice::NativeProduceFrame(
             pixelFormat, bufSize);
 
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while producing "
+        Logger::E("LegacyCameraDevice", "%s: Error while producing "
                 "frame %s (%d).", __FUNCTION__, strerror(-err), err);
         *result = err;
         return NOERROR;
@@ -1358,16 +1348,16 @@ Int32 LegacyCameraDevice::NativeSetSurfaceFormat(
     /* [in] */ ISurface* surface,
     /* [in] */ Int32 pixelFormat)
 {
-    Slogger::V("LegacyCameraDevice", "nativeSetSurfaceType");
+    Logger::V("LegacyCameraDevice", "nativeSetSurfaceType");
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
                 "from surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
     android::status_t err = native_window_set_buffers_format(anw.get(), pixelFormat);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while setting surface "
+        Logger::E("LegacyCameraDevice", "%s: Error while setting surface "
                 "format %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
@@ -1379,16 +1369,16 @@ Int32 LegacyCameraDevice::NativeSetSurfaceDimens(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    Slogger::V("LegacyCameraDevice", "nativeSetSurfaceDimens");
+    Logger::V("LegacyCameraDevice", "nativeSetSurfaceDimens");
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
                 "from surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
     android::status_t err = native_window_set_buffers_dimensions(anw.get(), width, height);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while setting surface "
+        Logger::E("LegacyCameraDevice", "%s: Error while setting surface "
                 "dimens %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
@@ -1397,7 +1387,7 @@ Int32 LegacyCameraDevice::NativeSetSurfaceDimens(
     // change.
     err = native_window_set_buffers_user_dimensions(anw.get(), width, height);
     if (err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while setting surface user "
+        Logger::E("LegacyCameraDevice", "%s: Error while setting surface user "
                 "dimens %s (%d).", __FUNCTION__, strerror(-err),
                 err);
         return err;
@@ -1418,14 +1408,14 @@ static android::sp<android::Surface> getSurface(
     }
     else {
         // jniThrowNullPointerException(env, "surface");
-        Slogger::E("LegacyCameraDevice", "jniThrowNullPointerException: surface");
+        Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: surface");
         //return E_NULL_POINTER_EXCEPTION;
         return NULL;
     }
     if (s == NULL) {
         // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
         //         "Surface had no valid native Surface.");
-        Slogger::E("LegacyCameraDevice", "java/lang/IllegalArgumentException"
+        Logger::E("LegacyCameraDevice", "java/lang/IllegalArgumentException"
                 " Surface had no valid native Surface.");
         //return E_ILLEGAL_ARGUMENT_EXCEPTION;
         return NULL;
@@ -1438,19 +1428,19 @@ Int64 LegacyCameraDevice::NativeGetSurfaceId(
 {
     android::sp<android::Surface> s;
     if ((s = getSurface(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native Surface from "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native Surface from "
                 "surface.", __FUNCTION__);
         return 0;
     }
     android::sp<android::IGraphicBufferProducer> gbp = s->getIGraphicBufferProducer();
     if (gbp == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve IGraphicBufferProducer "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve IGraphicBufferProducer "
                 "from surface.", __FUNCTION__);
         return 0;
     }
     android::sp<android::IBinder> b = gbp->asBinder();
     if (b == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve IBinder from "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve IBinder from "
                 "surface.", __FUNCTION__);
         return 0;
     }
@@ -1466,10 +1456,10 @@ Int32 LegacyCameraDevice::NativeSetSurfaceOrientation(
     /* [in] */ Int32 facing,
     /* [in] */ Int32 sensorOrientation)
 {
-    Slogger::V("LegacyCameraDevice", "nativeSetSurfaceOrientation");
+    Logger::V("LegacyCameraDevice", "nativeSetSurfaceOrientation");
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
                 "from surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
@@ -1486,18 +1476,18 @@ Int32 LegacyCameraDevice::NativeSetSurfaceOrientation(
 
     if ((err = android::CameraUtils::getRotationTransform(staticMetadata,
             /*out*/&transform)) != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Invalid rotation transform %s (%d)",
+        Logger::E("LegacyCameraDevice", "%s: Invalid rotation transform %s (%d)",
                 __FUNCTION__, strerror(-err),
                 err);
         return err;
     }
 
-    Slogger::V("LegacyCameraDevice", "%s: Setting buffer sticky transform to %d",
+    Logger::V("LegacyCameraDevice", "%s: Setting buffer sticky transform to %d",
             __FUNCTION__, transform);
 
     if ((err = native_window_set_buffers_sticky_transform(anw.get(),
             transform)) != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Unable to configure surface transform, "
+        Logger::E("LegacyCameraDevice", "%s: Unable to configure surface transform, "
                 "error %s (%d)", __FUNCTION__,
                 strerror(-err), err);
         return err;
@@ -1519,14 +1509,14 @@ static android::sp<ANativeWindow> getNativeWindowFromTexture(
     }
     else {
         //jniThrowNullPointerException(env, "surfaceTexture");
-        Slogger::E("LegacyCameraDevice", "jniThrowNullPointerException: surfaceTexture");
+        Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: surfaceTexture");
         //return E_NULL_POINTER_EXCEPTION;
         return NULL;
     }
     if (anw == NULL) {
         // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
         //         "SurfaceTexture had no valid native window.");
-        Slogger::E("LegacyCameraDevice", "java/lang/IllegalArgumentException"
+        Logger::E("LegacyCameraDevice", "java/lang/IllegalArgumentException"
                 "SurfaceTexture had no valid native window.");
         return NULL;
     }
@@ -1537,10 +1527,10 @@ Int32 LegacyCameraDevice::NativeDetectTextureDimens(
     /* [in] */ ISurfaceTexture* surfaceTexture,
     /* [in] */ ArrayOf<Int32>* dimens)
 {
-    Slogger::V("LegacyCameraDevice", "nativeDetectTextureDimens");
+    Logger::V("LegacyCameraDevice", "nativeDetectTextureDimens");
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindowFromTexture(surfaceTexture)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
                 "from SurfaceTexture.", __FUNCTION__);
         return android::BAD_VALUE;
     }
@@ -1548,7 +1538,7 @@ Int32 LegacyCameraDevice::NativeDetectTextureDimens(
     int32_t dimenBuf[2];
     android::status_t err = anw->query(anw.get(), NATIVE_WINDOW_WIDTH, dimenBuf);
     if(err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while querying SurfaceTexture "
+        Logger::E("LegacyCameraDevice", "%s: Error while querying SurfaceTexture "
                 "width %s (%d)", __FUNCTION__,
                 strerror(-err), err);
         return err;
@@ -1556,7 +1546,7 @@ Int32 LegacyCameraDevice::NativeDetectTextureDimens(
 
     err = anw->query(anw.get(), NATIVE_WINDOW_HEIGHT, dimenBuf + 1);
     if(err != android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Error while querying SurfaceTexture "
+        Logger::E("LegacyCameraDevice", "%s: Error while querying SurfaceTexture "
                 "height %s (%d)", __FUNCTION__,
                 strerror(-err), err);
         return err;
@@ -1575,10 +1565,10 @@ Int32 LegacyCameraDevice::NativeSetNextTimestamp(
     /* [in] */ ISurface* surface,
     /* [in] */ Int64 timestamp)
 {
-    Slogger::V("LegacyCameraDevice", "nativeSetNextTimestamp");
+    Logger::V("LegacyCameraDevice", "nativeSetNextTimestamp");
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
-        Slogger::E("LegacyCameraDevice", "%s: Could not retrieve native window from "
+        Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window from "
                 "surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
@@ -1587,7 +1577,7 @@ Int32 LegacyCameraDevice::NativeSetNextTimestamp(
 
     if ((err = native_window_set_buffers_timestamp(anw.get(), static_cast<int64_t>(timestamp))) !=
             android::NO_ERROR) {
-        Slogger::E("LegacyCameraDevice", "%s: Unable to set surface timestamp, "
+        Logger::E("LegacyCameraDevice", "%s: Unable to set surface timestamp, "
                 "error %s (%d)", __FUNCTION__, strerror(-err),
                 err);
         return err;
@@ -1597,7 +1587,7 @@ Int32 LegacyCameraDevice::NativeSetNextTimestamp(
 
 Int32 LegacyCameraDevice::NativeGetJpegFooterSize()
 {
-    Slogger::V("LegacyCameraDevice", "nativeGetJpegFooterSize");
+    Logger::V("LegacyCameraDevice", "nativeGetJpegFooterSize");
     return static_cast<Int32>(sizeof(struct camera3_jpeg_blob));
 }
 

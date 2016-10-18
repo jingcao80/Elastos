@@ -3,7 +3,7 @@
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::ICharSequence;
@@ -12,7 +12,7 @@ using Elastos::Utility::Arrays;
 using Elastos::Utility::IMap;
 using Elastos::Utility::Concurrent::IConcurrentHashMap;
 using Elastos::Utility::Concurrent::CConcurrentHashMap;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -75,7 +75,7 @@ ECode MethodNameInvoker::Invoke(
             //         "Method " + methodName + " does not exist on class " + mTargetClass);
             String name;
             mTargetClass->GetName(&name);
-            Slogger::E("MethodNameInvoker", "Method %s does not exist on class %s",
+            Logger::E("MethodNameInvoker", "Method %s does not exist on class %s",
                     methodName.string(), name.string());
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }

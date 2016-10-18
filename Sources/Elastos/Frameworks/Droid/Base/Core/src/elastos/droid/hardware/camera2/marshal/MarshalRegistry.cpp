@@ -2,10 +2,10 @@
 #include "elastos/droid/hardware/camera2/marshal/MarshalRegistry.h"
 #include "elastos/droid/hardware/camera2/marshal/MarshalHelpers.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Marshal::MarshalHelpers;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
 
@@ -23,11 +23,8 @@ MarshalRegistry::MarshalToken::MarshalToken(
     : mTypeReference(typeReference)
     , mNativeType(nativeType)
 {
-    Int32 code;
-    IObject::Probe(typeReference)->GetHashCode(&code);
-    mHash =  code ^ nativeType;
+    mHash =  Object::GetHashCode(typeReference) ^ nativeType;
 }
-
 
 ECode MarshalRegistry::MarshalToken::Equals(
     /* [in] */ IInterface *obj,
@@ -36,24 +33,19 @@ ECode MarshalRegistry::MarshalToken::Equals(
     VALIDATE_NOT_NULL(equal)
     *equal = FALSE;
 
-    if (IMarshalRegistryMarshalToken::Probe(obj) != NULL) {
-        MarshalToken* otherToken =(MarshalToken*)IMarshalRegistryMarshalToken::Probe(obj);
-
-        Boolean tmp;
-        IObject::Probe(mTypeReference)->Equals(otherToken->mTypeReference, &tmp);
+    MarshalToken* otherToken =(MarshalToken*)IMarshalRegistryMarshalToken::Probe(obj);
+    if (otherToken != NULL) {
+        Boolean tmp = Object::Equals(mTypeReference, otherToken->mTypeReference);
         *equal = tmp && (mNativeType == otherToken->mNativeType);
         return NOERROR;
     }
     return NOERROR;
 }
 
-
 ECode MarshalRegistry::MarshalToken::GetHashCode(
     /* [out] */ Int32 *hashCode)
 {
     VALIDATE_NOT_NULL(hashCode)
-    *hashCode = 0;
-
     *hashCode = mHash;
     return NOERROR;
 }
@@ -105,8 +97,7 @@ ECode MarshalRegistry::GetMarshaler(
     Int32 size;
     sRegisteredMarshalQueryables->GetSize(&size);
     if (size == 0) {
-        //throw new AssertionError("No available query marshalers registered");
-        Slogger::E("MarshalRegistry", "No available query marshalers registered");
+        Logger::E("MarshalRegistry", "No available query marshalers registered");
         return E_ASSERTION_ERROR;
     }
 
@@ -123,24 +114,21 @@ ECode MarshalRegistry::GetMarshaler(
                 potentialMarshaler->CreateMarshaler(typeToken, nativeType, (IMarshaler**)&marshaler);
                 break;
             }
-
         }
 
         if (marshaler == NULL) {
-            // throw new UnsupportedOperationException(
-            //         "Could not find marshaler that matches the requested " +
-            //                 "combination of type reference " +
-            //                 typeToken + " and native type " +
-            //                 MarshalHelpers.toStringNativeType(nativeType));
-            String str;
-            IObject::Probe(typeToken)->ToString(&str);
             String type;
             MarshalHelpers::ToStringNativeType(nativeType, &type);
-            Slogger::E("MarshalRegistry", "Could not find marshaler that matches the requested "
-                            "combination of type reference %d and "
-                            "native type %d",str.string(), type.string());
+            Logger::E("MarshalRegistry", "Could not find marshaler that matches the requested "
+                "combination of type reference %s and native type %d, %s",
+                TO_CSTR(typeToken), nativeType, type.string());
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         }
+
+        String type;
+        MarshalHelpers::ToStringNativeType(nativeType, &type);
+        Logger::D("MarshalRegistry", ">> GetMarshaler %s for type:%d(%s), class:%s",
+            TO_CSTR(marshaler), nativeType, type.string(), TO_CSTR(typeToken));
 
         // Only put when no cached version exists to avoid +0.5ms lookup per call.
         sMarshalerMap->Put(TO_IINTERFACE(marshalToken), TO_IINTERFACE(marshaler));

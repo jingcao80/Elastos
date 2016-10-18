@@ -5,6 +5,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Utility::ISize;
 using Elastos::Droid::Utility::CSize;
+using Elastos::Droid::Utility::ECLSID_CSize;
 
 namespace Elastos {
 namespace Droid {
@@ -89,8 +90,14 @@ ECode MarshalQueryableSize::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    //return nativeType == ICameraMetadataNative::TYPE_INT32 && (Size.class.equals(managedType.getType()));
+    if (nativeType == ICameraMetadataNative::TYPE_INT32) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CSize) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

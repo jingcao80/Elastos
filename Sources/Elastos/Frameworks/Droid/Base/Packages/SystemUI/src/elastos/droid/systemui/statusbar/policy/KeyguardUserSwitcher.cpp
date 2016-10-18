@@ -4,7 +4,9 @@
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "../R.h"
+#include <elastos/droid/R.h>
 #include <elastos/droid/view/LayoutInflater.h>
+#include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -18,6 +20,8 @@ using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::Animation::AnimationUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -104,30 +108,42 @@ ECode KeyguardUserSwitcher::_DataSetObserver::OnChanged()
     return NOERROR;
 }
 
-KeyguardUserSwitcher::AnimatorListenerAdapter1::AnimatorListenerAdapter1(
+KeyguardUserSwitcher::BgAnimatorListenerAdapter::BgAnimatorListenerAdapter(
     /* [in] */ KeyguardUserSwitcher* host)
     : mHost(host)
 {}
 
-ECode KeyguardUserSwitcher::AnimatorListenerAdapter1::OnAnimationEnd(
+ECode KeyguardUserSwitcher::BgAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animator)
 {
     mHost->mBgAnimator = NULL;
     return NOERROR;
 }
 
-KeyguardUserSwitcher::Runnable1::Runnable1(
+KeyguardUserSwitcher::DisappearAnimationRunnable::DisappearAnimationRunnable(
     /* [in] */ KeyguardUserSwitcher* host)
     : mHost(host)
 {}
 
-ECode KeyguardUserSwitcher::Runnable1::Run()
+ECode KeyguardUserSwitcher::DisappearAnimationRunnable::Run()
 {
     IView::Probe(mHost->mUserSwitcher)->SetVisibility(IView::GONE);
     IView::Probe(mHost->mUserSwitcher)->SetAlpha(1.f);
     return NOERROR;
 }
 
+KeyguardUserSwitcher::AppearAnimationRunnable::AppearAnimationRunnable(
+    /* [in] */ KeyguardUserSwitcher* host)
+    : mHost(host)
+{}
+
+
+ECode KeyguardUserSwitcher::AppearAnimationRunnable::Run()
+{
+    IViewGroup::Probe(mHost->mUserSwitcher)->SetClipChildren(TRUE);
+    IViewGroup::Probe(mHost->mUserSwitcher)->SetClipToPadding(TRUE);
+    return NOERROR;
+}
 
 CAR_INTERFACE_IMPL(KeyguardUserSwitcher, Object, IKeyguardUserSwitcher)
 KeyguardUserSwitcher::KeyguardUserSwitcher(
@@ -153,17 +169,18 @@ KeyguardUserSwitcher::KeyguardUserSwitcher(
         mAdapter = new Adapter(context, userSwitcherController, this);
         mAdapter->RegisterDataSetObserver(mDataSetObserver);
         mUserSwitcherController = userSwitcherController;
-        Logger::D("KeyguardUserSwitcher", "TODO: Need keyguard");
-        // mAppearAnimationUtils = new AppearAnimationUtils(context, 400, -0.5f, 0.5f,
-        //         AnimationUtils.loadInterpolator(
-        //                 context, Elastos::Droid::R::interpolator::fast_out_slow_in));
+
+        AutoPtr<IInterpolator> interpolator;
+        AnimationUtils::LoadInterpolator(context,
+            Elastos::Droid::R::interpolator::fast_out_slow_in, (IInterpolator**)&interpolator);
+        mAppearAnimationUtils = new AppearAnimationUtils();
+        mAppearAnimationUtils->constructor(context, 400, -0.5f, 0.5f, interpolator);
     }
     else {
         mUserSwitcher = NULL;
         mStatusBarView = NULL;
         mAdapter = NULL;
-        Logger::D("KeyguardUserSwitcher", "TODO: Need keyguard");
-        // mAppearAnimationUtils = NULL;
+        mAppearAnimationUtils = NULL;
         mBackground = NULL;
     }
 }
@@ -245,7 +262,7 @@ void KeyguardUserSwitcher::StartAppearAnimation()
 {
     Int32 count = 0;
     mUserSwitcher->GetChildCount(&count);
-    AutoPtr<ArrayOf<IView*> > objects = ArrayOf<IView*>::Alloc(count);
+    AutoPtr<ArrayOf<IInterface*> > objects = ArrayOf<IInterface*>::Alloc(count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> view;
         mUserSwitcher->GetChildAt(i, (IView**)&view);
@@ -253,17 +270,9 @@ void KeyguardUserSwitcher::StartAppearAnimation()
     }
     mUserSwitcher->SetClipChildren(FALSE);
     mUserSwitcher->SetClipToPadding(FALSE);
-    Logger::D("KeyguardUserSwitcher", "TODO [StartAppearAnimation] : Need keyguard");
-    assert(0 && "TODO");
-    // mAppearAnimationUtils->StartAppearAnimation(objects, new Runnable() {
-    //     // @Override
-    //     ECode KeyguardUserSwitcher::Run()
-    //     {
-    //         mHost->mUserSwitcher->SetClipChildren(TRUE);
-    //         mHost->mUserSwitcher->SetClipToPadding(TRUE);
-    //         return NOERROR;
-    //     }
-    // });
+
+    AutoPtr<IRunnable> runnable = new AppearAnimationRunnable(this);
+    mAppearAnimationUtils->StartAppearAnimation(objects, runnable);
 
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
@@ -273,10 +282,11 @@ void KeyguardUserSwitcher::StartAppearAnimation()
     (*ivs)[1] = 255;
     helper->OfInt32(mBackground, String("alpha"), ivs, (IObjectAnimator**)&mBgAnimator);
     IValueAnimator::Probe(mBgAnimator)->SetDuration(400);
-    IAnimator::Probe(mBgAnimator)->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
-    AutoPtr<AnimatorListenerAdapter1> listener = new AnimatorListenerAdapter1(this);
-    IAnimator::Probe(mBgAnimator)->AddListener(listener);
-    IAnimator::Probe(mBgAnimator)->Start();
+    IAnimator* animator = IAnimator::Probe(mBgAnimator);
+    animator->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
+    AutoPtr<BgAnimatorListenerAdapter> listener = new BgAnimatorListenerAdapter(this);
+    animator->AddListener(listener);
+    animator->Start();
 }
 
 void KeyguardUserSwitcher::StartDisappearAnimation()
@@ -286,7 +296,7 @@ void KeyguardUserSwitcher::StartDisappearAnimation()
     vp->Alpha(0.f);
     vp->SetDuration(300);
     vp->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
-    AutoPtr<Runnable1> run = new Runnable1(this);
+    AutoPtr<DisappearAnimationRunnable> run = new DisappearAnimationRunnable(this);
     vp->WithEndAction(run);
 }
 

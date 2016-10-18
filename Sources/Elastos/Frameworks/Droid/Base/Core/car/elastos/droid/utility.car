@@ -213,6 +213,7 @@ module
 
     class CRange {
         constructor(
+            [in] InterfaceID typeID,
             [in] IInterface* lower,
             [in] IInterface* upper);
 

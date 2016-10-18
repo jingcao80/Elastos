@@ -19,99 +19,97 @@ namespace Droid {
 namespace Hardware {
 namespace Camera2 {
 
+class CaptureResultKey
+    : public Object
+    , public ICaptureResultKey
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    CaptureResultKey();
+
+    virtual ~CaptureResultKey() {}
+
+    /**
+     * Visible for testing and vendor extensions only.
+     *
+     * @hide
+     */
+    CARAPI constructor(
+        /* [in] */ const String& name,
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId);
+
+    CARAPI constructor(
+        /* [in] */ const String& name,
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId,
+        /* [in] */ const ClassID& componentClassId,
+        /* [in] */ const InterfaceID& componentInterfaceId);
+
+    /**
+     * Visible for testing and vendor extensions only.
+     *
+     * @hide
+     */
+    CARAPI constructor(
+        /* [in] */ const String& name,
+        /* [in] */ ITypeReference* typeReference);
+
+    //@SuppressWarnings({ "unchecked" })
+    CARAPI constructor(
+        /* [in] */ ICameraMetadataNativeKey* nativeKey);
+
+    /**
+     * Return a camelCase, period separated name formatted like:
+     * {@code "root.section[.subsections].name"}.
+     *
+     * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
+     * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
+     *
+     * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
+     * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
+     * specific key might look like {@code "com.google.nexus.data.private"}.</p>
+     *
+     * @return String representation of the key name
+     */
+    CARAPI GetName(
+        /* [out] */ String* name);
+
+    /**
+     * {@inheritDoc}
+     */
+    //@Override
+    CARAPI GetHashCode(
+        /* [out] */ Int32* code);
+
+    /**
+     * {@inheritDoc}
+     */
+    // @SuppressWarnings("unchecked")
+    // @Override
+    CARAPI Equals(
+        /* [in] */ IInterface* obj,
+        /* [out] */ Boolean* e);
+
+    /**
+     * Visible for CameraMetadataNative implementation only; do not use.
+     *
+     * TODO: Make this private or remove it altogether.
+     *
+     * @hide
+     */
+    CARAPI GetNativeKey(
+        /* [out] */ ICameraMetadataNativeKey** key);
+
+private:
+    AutoPtr<ICameraMetadataNativeKey> mKey;
+};
+
 class CaptureResult
     : public CameraMetadata
     , public ICaptureResult
 {
-public:
-    class Key
-        : public Object
-        , public ICaptureResultKey
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        Key();
-
-        virtual ~Key() {}
-
-        constructor();
-
-        /**
-         * Visible for testing and vendor extensions only.
-         *
-         * @hide
-         */
-        CARAPI constructor(
-            /* [in] */ const String& name,
-            /* [in] */ ClassID type);
-
-        /**
-         * Visible for testing and vendor extensions only.
-         *
-         * @hide
-         */
-        CARAPI constructor(
-            /* [in] */ const String& name,
-            /* [in] */ ITypeReference* typeReference);
-
-        //@SuppressWarnings({ "unchecked" })
-        CARAPI constructor(
-            /* [in] */ ICameraMetadataNativeKey* nativeKey);
-
-        /**
-         * Return a camelCase, period separated name formatted like:
-         * {@code "root.section[.subsections].name"}.
-         *
-         * <p>Built-in keys exposed by the Android SDK are always prefixed with {@code "android."};
-         * keys that are device/platform-specific are prefixed with {@code "com."}.</p>
-         *
-         * <p>For example, {@code CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP} would
-         * have a name of {@code "android.scaler.streamConfigurationMap"}; whereas a device
-         * specific key might look like {@code "com.google.nexus.data.private"}.</p>
-         *
-         * @return String representation of the key name
-         */
-        CARAPI GetName(
-            /* [out] */ String* name);
-
-        /**
-         * {@inheritDoc}
-         */
-        //@Override
-        CARAPI GetHashCode(
-            /* [out] */ Int32* code);
-
-        /**
-         * {@inheritDoc}
-         */
-        // @SuppressWarnings("unchecked")
-        // @Override
-        CARAPI Equals(
-            /* [in] */ IInterface* obj,
-            /* [out] */ Boolean* e);
-
-        /**
-         * Visible for CameraMetadataNative implementation only; do not use.
-         *
-         * TODO: Make this private or remove it altogether.
-         *
-         * @hide
-         */
-        CARAPI GetNativeKey(
-            /* [out] */ ICameraMetadataNativeKey** key);
-
-    private:
-        friend class CaptureResult;
-
-        Key(
-            /* [in] */ const String& name,
-            /* [in] */ ClassID type);
-
-    private:
-        AutoPtr<ICameraMetadataNativeKey> mKey;
-    };
-
 public:
     CAR_INTERFACE_DECL()
 
@@ -633,7 +631,7 @@ public:
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      */
     //@PublicKey
-    //static const AutoPtr<ICaptureResultKey> CONTROL_AE_TARGET_FPS_RANGE;
+    static const AutoPtr<ICaptureResultKey> CONTROL_AE_TARGET_FPS_RANGE;
 
     /**
      * <p>Whether the camera device will trigger a precapture
@@ -2249,7 +2247,7 @@ public:
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      */
     //@PublicKey
-    //static const AutoPtr<ICaptureResultKey> LENS_FOCUS_RANGE;
+    static const AutoPtr<ICaptureResultKey> LENS_FOCUS_RANGE;
 
     /**
      * <p>Sets whether the camera device uses optical image stabilization (OIS)
@@ -2687,7 +2685,7 @@ public:
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      */
     //@PublicKey
-    //static const AutoPtr<ICaptureResultKey> SENSOR_NOISE_PROFILE;
+    static const AutoPtr<ICaptureResultKey> SENSOR_NOISE_PROFILE;
 
     /**
      * <p>The worst-case divergence between Bayer green channels.</p>

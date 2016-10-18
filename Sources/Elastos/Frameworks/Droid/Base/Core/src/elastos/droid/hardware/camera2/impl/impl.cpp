@@ -8,6 +8,7 @@
 #include "elastos/droid/hardware/camera2/impl/CCameraDeviceImplFrameNumberTracker.h"
 #include "elastos/droid/hardware/camera2/impl/CCameraDeviceImplCameraDeviceCallbacks.h"
 #include "elastos/droid/hardware/camera2/impl/CCameraCaptureSessionImpl.h"
+#include "elastos/droid/hardware/camera2/impl/CCaptureResultExtras.h"
 
 namespace Elastos {
 namespace Droid {
@@ -24,6 +25,8 @@ CAR_OBJECT_IMPL(CCameraDeviceImplCaptureCallbackHolder)
 CAR_OBJECT_IMPL(CCameraDeviceImplFrameNumberTracker)
 CAR_OBJECT_IMPL(CCameraDeviceImplCameraDeviceCallbacks)
 CAR_OBJECT_IMPL(CCameraCaptureSessionImpl)
+CAR_OBJECT_IMPL(CCaptureResultExtras)
+
 
 } // namespace Impl
 } // namespace Camera2

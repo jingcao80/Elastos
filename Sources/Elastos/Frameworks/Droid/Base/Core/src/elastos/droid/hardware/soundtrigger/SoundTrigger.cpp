@@ -3,11 +3,11 @@
 #include "elastos/droid/hardware/soundtrigger/SoundTrigger.h"
 #include "elastos/droid/hardware/soundtrigger/SoundTriggerModule.h"
 #include "elastos/droid/hardware/soundtrigger/CSoundTriggerModuleProperties.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <soundtrigger/SoundTrigger.h>
 
 using Elastos::Droid::Hardware::Soundtrigger::CSoundTriggerModuleProperties;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -33,7 +33,7 @@ ECode SoundTrigger::NativeListModules(
 //     ALOGV("listModules");
 
     if (modules == NULL) {
-        Slogger::E(String("SoundTrigger"), String("listModules NULL AudioPatch ArrayList"));
+        Logger::E(String("SoundTrigger"), String("listModules NULL AudioPatch ArrayList"));
         return SOUNDTRIGGER_STATUS_BAD_VALUE;
     }
 //     if (!env->IsInstanceOf(jModules, gArrayListClass)) {

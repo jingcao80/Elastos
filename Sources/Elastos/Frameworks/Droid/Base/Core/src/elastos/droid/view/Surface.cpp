@@ -762,14 +762,8 @@ ECode Surface::GetNativeSurface(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = 0;
-
-    {
-        AutoLock lock(this);
-        if (mNativeObject != 0) {
-            *result = mNativeObject;
-        }
-    }
+    AutoLock lock(this);
+    *result = mNativeObject;
     return NOERROR;
 }
 

@@ -1100,6 +1100,7 @@ public:
     class ReverseComparator
         : public Object
         , public IComparator
+        , public IReverseComparator
         , public ISerializable
     {
     public:
@@ -1120,6 +1121,7 @@ public:
     class ReverseComparator2
         : public Object
         , public IComparator
+        , public IReverseComparator2
         , public ISerializable
     {
     public:

@@ -5,6 +5,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IRggbChannelVector;
 using Elastos::Droid::Hardware::Camera2::Params::CRggbChannelVector;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CRggbChannelVector;
 
 namespace Elastos {
 namespace Droid {
@@ -93,8 +94,14 @@ ECode MarshalQueryableRggbChannelVector::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    //return nativeType == ICameraMetadataNative::TYPE_FLOAT && (RggbChannelVector.class.equals(managedType.getType()));
+    if (nativeType == ICameraMetadataNative::TYPE_FLOAT) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CRggbChannelVector) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

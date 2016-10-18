@@ -5,6 +5,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IMeteringRectangle;
 using Elastos::Droid::Hardware::Camera2::Params::CMeteringRectangle;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CMeteringRectangle;
 
 namespace Elastos {
 namespace Droid {
@@ -114,9 +115,15 @@ ECode MarshalQueryableMeteringRectangle::IsTypeMappingSupported(
 {
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
+    if (nativeType == ICameraMetadataNative::TYPE_INT32) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CMeteringRectangle) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
 
-    assert(0);
-    //return nativeType == ICameraMetadataNative::TYPE_INT32 && MeteringRectangle.class.equals(managedType.getType());
     return NOERROR;
 }
 

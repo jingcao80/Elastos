@@ -1,15 +1,16 @@
 
 #include "elastos/droid/hardware/camera2/marshal/impl/MarshalQueryableString.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::ECLSID_CString;
 using Elastos::IO::IBuffer;
 using Elastos::IO::Charset::ICharset;
 using Elastos::IO::Charset::CCharsetHelper;
 using Elastos::IO::Charset::ICharsetHelper;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -78,12 +79,11 @@ ECode MarshalQueryableString::MarshalerString::Unmarshal(
     }
 
     if (VERBOSE) {
-        Slogger::V(TAG, "unmarshal - scanned %d characters; found null? %d", stringLength, foundNull);
+        Logger::V(TAG, "unmarshal - scanned %d characters; found null? %d", stringLength, foundNull);
     }
 
     if (!foundNull) {
-        //throw new UnsupportedOperationException("Strings must be null-terminated");
-        Slogger::E(TAG, "Strings must be null-terminated");
+        Logger::E(TAG, "Strings must be null-terminated");
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
@@ -148,8 +148,14 @@ ECode MarshalQueryableString::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    //return nativeType == ICameraMetadataNative::TYPE_BYTE && String.class.equals(managedType.getType());
+    if (nativeType == ICameraMetadataNative::TYPE_BYTE) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CString) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

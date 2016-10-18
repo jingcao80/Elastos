@@ -13,6 +13,7 @@ using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger32;
+using Elastos::Core::EIID_IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
 
@@ -87,8 +88,8 @@ ECode CMediaCodecInfoEncoderCapabilities::Init(
     CInteger32::New(0, (IInteger32**)&begin);
     AutoPtr<IInteger32> end;
     CInteger32::New(0, (IInteger32**)&end);
-    CRange::Create(begin, end, (IRange**)&mComplexityRange);
-    CRange::Create(begin, end, (IRange**)&mQualityRange);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&mComplexityRange);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&mQualityRange);
     mBitControl = (1 << IMediaCodecInfoEncoderCapabilities::BITRATE_MODE_VBR);
 
     ApplyLevelLimits();
@@ -250,7 +251,7 @@ void CMediaCodecInfoEncoderCapabilities::ApplyLevelLimits()
         CInteger32::New(0, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(8, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&mComplexityRange);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&mComplexityRange);
 
         mBitControl = (1 << IMediaCodecInfoEncoderCapabilities::BITRATE_MODE_CQ);
     }

@@ -566,8 +566,6 @@ public:
 
     virtual ~CameraDeviceImpl();
 
-    CARAPI constructor();
-
     CARAPI constructor(
         /* [in] */ const String& cameraId,
         /* [in] */ ICameraDeviceStateCallback* _callback,

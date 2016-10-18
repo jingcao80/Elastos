@@ -13,7 +13,7 @@
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
@@ -28,7 +28,7 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -61,14 +61,14 @@ ECode LegacyFaceDetectMapper::MyListener::OnFaceDetection(
         }
         else if (lengthFaces > 0) {
             // stopFaceDetectMode could race against the requests, print a debug log
-            Slogger::D(TAG,
+            Logger::D(TAG,
                     "onFaceDetection - Ignored some incoming faces since"
                     "face detection was disabled");
         }
     }
 
     if (mHost->VERBOSE) {
-        Slogger::V(TAG, "onFaceDetection - read %d faces", lengthFaces);
+        Logger::V(TAG, "onFaceDetection - read %d faces", lengthFaces);
     }
     return NOERROR;
 }
@@ -128,7 +128,7 @@ ECode LegacyFaceDetectMapper::ProcessFaceDetectMode(
     modeObj->GetValue(&fdMode);
 
     if (fdMode != ICameraMetadata::STATISTICS_FACE_DETECT_MODE_OFF && !mFaceDetectSupported) {
-        Slogger::W(TAG,
+        Logger::W(TAG,
                 "processFaceDetectMode - Ignoring statistics.faceDetectMode;"
                 "face detection is not available");
         return NOERROR;
@@ -146,7 +146,7 @@ ECode LegacyFaceDetectMapper::ProcessFaceDetectMode(
     Int32 sceneMode;
     modeObj->GetValue(&sceneMode);
     if (sceneMode == ICameraMetadata::CONTROL_SCENE_MODE_FACE_PRIORITY && !mFaceDetectSupported) {
-        Slogger::W(TAG, "processFaceDetectMode - ignoring control.sceneMode == FACE_PRIORITY;"
+        Logger::W(TAG, "processFaceDetectMode - ignoring control.sceneMode == FACE_PRIORITY;"
                 "face detection is not available");
         return NOERROR;
     }
@@ -157,12 +157,12 @@ ECode LegacyFaceDetectMapper::ProcessFaceDetectMode(
         case ICameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE:
             break;
         case ICameraMetadata::STATISTICS_FACE_DETECT_MODE_FULL:
-            Slogger::W(TAG,
+            Logger::W(TAG,
                     "processFaceDetectMode - statistics.faceDetectMode == FULL unsupported,"
                     "downgrading to SIMPLE");
             break;
         default:
-            Slogger::W(TAG, "processFaceDetectMode - ignoring unknown statistics.faceDetectMode = %d"
+            Logger::W(TAG, "processFaceDetectMode - ignoring unknown statistics.faceDetectMode = %d"
                     ,fdMode);
             return NOERROR;
     }
@@ -176,14 +176,14 @@ ECode LegacyFaceDetectMapper::ProcessFaceDetectMode(
                 mCamera->StartFaceDetection();
 
                 if (VERBOSE) {
-                    Slogger::V(TAG, "processFaceDetectMode - start face detection");
+                    Logger::V(TAG, "processFaceDetectMode - start face detection");
                 }
             }
             else {
                 mCamera->StopFaceDetection();
 
                 if (VERBOSE) {
-                    Slogger::V(TAG, "processFaceDetectMode - stop face detection");
+                    Logger::V(TAG, "processFaceDetectMode - stop face detection");
                 }
 
                 mFaces = NULL;
@@ -255,7 +255,7 @@ ECode LegacyFaceDetectMapper::MapResultFaces(
                 convertedFaces->Add(TO_IINTERFACE(tmp));
             }
             else {
-                Slogger::W(TAG, "mapResultFaces - read NULL face from camera1 device");
+                Logger::W(TAG, "mapResultFaces - read NULL face from camera1 device");
             }
         }
     }
@@ -263,7 +263,7 @@ ECode LegacyFaceDetectMapper::MapResultFaces(
     if (VERBOSE && previousFaces != faces) { // Log only in verbose and IF the faces changed
         String str;
         ListUtils::ListToString(convertedFaces, &str);
-        Slogger::V(TAG, "mapResultFaces - changed to %s", str.string());
+        Logger::V(TAG, "mapResultFaces - changed to %s", str.string());
     }
 
     AutoPtr<IInterface> res;

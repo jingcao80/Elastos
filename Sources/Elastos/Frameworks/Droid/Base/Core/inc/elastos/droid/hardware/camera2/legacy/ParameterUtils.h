@@ -255,11 +255,21 @@ public:
         /* [in] */ IList* sizeList,
         /* [out, callee] */ ArrayOf<ISize*>** outarr);
 
+    static CARAPI ConvertSizeArrayToArray(
+        /* [in] */ ArrayOf<ICameraSize*>* sizeList,
+        /* [out, callee] */ ArrayOf<ISize*>** outarr);
+
     /**
      * Check if the camera API1 list of sizes contains a size with the given dimens.
      */
     static CARAPI ContainsSize(
         /* [in] */ IList* sizeList,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height,
+        /* [out] */ Boolean* value);
+
+    static CARAPI ContainsSize(
+        /* [in] */ ArrayOf<ICameraSize*>* sizeList,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height,
         /* [out] */ Boolean* value);

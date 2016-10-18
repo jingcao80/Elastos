@@ -2,12 +2,12 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/hardware/camera2/legacy/CameraDeviceState.h"
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraDeviceImplCameraDeviceCallbacks;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -184,7 +184,7 @@ CARAPI CameraDeviceState::SetCaptureResult(
 
     {    AutoLock syncLock(this);
         if (mCurrentState != STATE_CAPTURING) {
-            Slogger::E(TAG, "Cannot receive result while in state: %d", mCurrentState);
+            Logger::E(TAG, "Cannot receive result while in state: %d", mCurrentState);
             mCurrentError = ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE;
             DoStateTransition(STATE_ERROR);
             *value = mCurrentError == NO_CAPTURE_ERROR;
@@ -236,7 +236,7 @@ CARAPI CameraDeviceState::DoStateTransition(
         if (newState >= 0 && newState < sStateNames->GetLength()) {
             stateName = (*sStateNames)[newState];
         }
-        Slogger::I(TAG, "Legacy camera service transitioning to state %s", stateName.string());
+        Logger::I(TAG, "Legacy camera service transitioning to state %s", stateName.string());
     }
 
     // If we transitioned into a non-IDLE/non-ERROR state then mark the device as busy
@@ -264,7 +264,7 @@ CARAPI CameraDeviceState::DoStateTransition(
         case STATE_CONFIGURING:
         {
             if (mCurrentState != STATE_UNCONFIGURED && mCurrentState != STATE_IDLE) {
-                Slogger::E(TAG, "Cannot call configure while in state: %d", mCurrentState);
+                Logger::E(TAG, "Cannot call configure while in state: %d", mCurrentState);
                 mCurrentError = ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE;
                 DoStateTransition(STATE_ERROR);
                 break;
@@ -285,7 +285,7 @@ CARAPI CameraDeviceState::DoStateTransition(
             }
 
             if (mCurrentState != STATE_CONFIGURING && mCurrentState != STATE_CAPTURING) {
-                Slogger::E(TAG, "Cannot call idle while in state: %d", mCurrentState);
+                Logger::E(TAG, "Cannot call idle while in state: %d", mCurrentState);
                 mCurrentError = ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE;
                 DoStateTransition(STATE_ERROR);
                 break;
@@ -303,7 +303,7 @@ CARAPI CameraDeviceState::DoStateTransition(
         case STATE_CAPTURING:
         {
             if (mCurrentState != STATE_IDLE && mCurrentState != STATE_CAPTURING) {
-                Slogger::E(TAG, "Cannot call capture while in state: %d", mCurrentState);
+                Logger::E(TAG, "Cannot call capture while in state: %d", mCurrentState);
                 mCurrentError = ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE;
                 DoStateTransition(STATE_ERROR);
                 break;
@@ -327,7 +327,7 @@ CARAPI CameraDeviceState::DoStateTransition(
         }
         default:
             //throw new IllegalStateException("Transition to unknown state: " + newState);
-            Slogger::E(TAG, "Transition to unknown state: %d", newState);
+            Logger::E(TAG, "Transition to unknown state: %d", newState);
             return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;

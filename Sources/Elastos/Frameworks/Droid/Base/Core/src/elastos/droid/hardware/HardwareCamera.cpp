@@ -10,6 +10,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/CSimpleStringSplitter.h"
 #include "elastos/droid/graphics/CRect.h"
+#include "elastos/droid/os/Debug.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -17,18 +18,17 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/etl/List.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <gui/BufferQueue.h>
 //#include <gui/SurfaceTexture.h>
 #include <gui/Surface.h>
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include <utils/Errors.h>
-#include <elastos/core/CoreUtils.h>
+#include <cutils/properties.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityThread;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::CRect;
@@ -40,6 +40,7 @@ using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Media::IIAudioService;
 using Elastos::Droid::Privacy::IIPrivacySettingsManager;
 using Elastos::Droid::Privacy::IPrivacySettings;
+using Elastos::Droid::Os::Debug;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::ILooper;
@@ -48,10 +49,11 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::ISimpleStringSplitter;
 using Elastos::Droid::Text::CSimpleStringSplitter;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CInteger32;
-using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IInteger32;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
@@ -67,13 +69,13 @@ using Elastos::Utility::ISet;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CHashMap;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Hardware {
 
-String HardwareCamera::TAG("Camera");
+String HardwareCamera::TAG("HardwareCamera");
 const Int32 HardwareCamera::CAMERA_MSG_ERROR            = 0x001;
 const Int32 HardwareCamera::CAMERA_MSG_SHUTTER          = 0x002;
 const Int32 HardwareCamera::CAMERA_MSG_FOCUS            = 0x004;
@@ -177,7 +179,7 @@ android::sp<android::Camera> HardwareCamera::get_native_camera(
         // ALOGV("get_native_camera: context=%p, camera=%p", context, camera.get());
         if (camera == 0) {
             assert(0);
-            // jniThrowRuntimeException(env, "Method called after release()");
+            Logger::E(TAG, "Method called after release()");
         }
 
         if (pContext != NULL) *pContext = context;
@@ -214,13 +216,14 @@ ECode HardwareCamera::EventHandler::HandleMessage(
             if (mCamera->mRawImageCallback != NULL) {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
+                IArrayOf* array = IArrayOf::Probe(obj);
+                Byte value;
                 Int32 length;
-                IArrayOf::Probe(obj)->GetLength(&length);
+                array->GetLength(&length);
                 AutoPtr<ArrayOf<Byte> > values = ArrayOf<Byte>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
                     AutoPtr<IInterface> bObj;
-                    IArrayOf::Probe(obj)->Get(i, (IInterface**)&bObj);
-                    Byte value;
+                    array->Get(i, (IInterface**)&bObj);
                     IByte::Probe(bObj)->GetValue(&value);
                     values->Set(i, value);
                 }
@@ -232,13 +235,14 @@ ECode HardwareCamera::EventHandler::HandleMessage(
             if (mCamera->mJpegCallback != NULL) {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
+                IArrayOf* array = IArrayOf::Probe(obj);
+                Byte value;
                 Int32 length;
-                IArrayOf::Probe(obj)->GetLength(&length);
+                array->GetLength(&length);
                 AutoPtr<ArrayOf<Byte> > values = ArrayOf<Byte>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
                     AutoPtr<IInterface> bObj;
-                    IArrayOf::Probe(obj)->Get(i, (IInterface**)&bObj);
-                    Byte value;
+                    array->Get(i, (IInterface**)&bObj);
                     IByte::Probe(bObj)->GetValue(&value);
                     values->Set(i, value);
                 }
@@ -263,13 +267,14 @@ ECode HardwareCamera::EventHandler::HandleMessage(
 
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
+                IArrayOf* array = IArrayOf::Probe(obj);
+                Byte value;
                 Int32 length;
-                IArrayOf::Probe(obj)->GetLength(&length);
+                array->GetLength(&length);
                 AutoPtr<ArrayOf<Byte> > values = ArrayOf<Byte>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
                     AutoPtr<IInterface> bObj;
-                    IArrayOf::Probe(obj)->Get(i, (IInterface**)&bObj);
-                    Byte value;
+                    array->Get(i, (IInterface**)&bObj);
                     IByte::Probe(bObj)->GetValue(&value);
                     values->Set(i, value);
                 }
@@ -281,13 +286,14 @@ ECode HardwareCamera::EventHandler::HandleMessage(
             if (mCamera->mPostviewCallback != NULL) {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
+                IArrayOf* array = IArrayOf::Probe(obj);
+                Byte value;
                 Int32 length;
-                IArrayOf::Probe(obj)->GetLength(&length);
+                array->GetLength(&length);
                 AutoPtr<ArrayOf<Byte> > values = ArrayOf<Byte>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
                     AutoPtr<IInterface> bObj;
-                    IArrayOf::Probe(obj)->Get(i, (IInterface**)&bObj);
-                    Byte value;
+                    array->Get(i, (IInterface**)&bObj);
                     IByte::Probe(bObj)->GetValue(&value);
                     values->Set(i, value);
                 }
@@ -322,16 +328,16 @@ ECode HardwareCamera::EventHandler::HandleMessage(
             if (mCamera->mFaceListener != NULL) {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
+                IArrayOf* array = IArrayOf::Probe(obj);
                 Int32 length;
-                IArrayOf::Probe(obj)->GetLength(&length);
+                array->GetLength(&length);
                 AutoPtr<ArrayOf<ICameraFace*> > faces = ArrayOf<ICameraFace*>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
                     AutoPtr<IInterface> faceObj;
-                    IArrayOf::Probe(obj)->Get(i, (IInterface**)&faceObj);
+                    array->Get(i, (IInterface**)&faceObj);
                     faces->Set(i, ICameraFace::Probe(faceObj));
                 }
-                assert(0 && "TODO: OnFaceDetection");
-                //mCamera->mFaceListener->OnFaceDetection(faces, mCamera);
+                mCamera->mFaceListener->OnFaceDetection(faces, mCamera);
             }
             return NOERROR;
 
@@ -352,8 +358,25 @@ ECode HardwareCamera::EventHandler::HandleMessage(
             }
             return NOERROR;
 
+        // /* ### QC ADD-ONS: START */
+        // case CAMERA_MSG_STATS_DATA:
+        //     int statsdata[] = new int[257];
+        //     for(int i =0; i<257; i++ ) {
+        //        statsdata[i] = byteToInt( (byte[])msg.obj, i*4);
+        //     }
+        //     if (mCameraDataCallback != null) {
+        //          mCameraDataCallback.onCameraData(statsdata, mCamera);
+        //     }
+        //     return;
+
+        // case CAMERA_MSG_META_DATA:
+        //     if (mCameraMetaDataCallback != null) {
+        //         mCameraMetaDataCallback.onCameraMetaData((byte[])msg.obj, mCamera);
+        //     }
+        //     return;
+            /* ### QC ADD-ONS: END */
         default:
-            //Log.e(TAG, "Unknown message type " + msg.what);
+            Logger::E(TAG, "Unknown message type %d", what);
             return NOERROR;
         }
 }
@@ -368,16 +391,8 @@ HardwareCamera::JNICameraContext::JNICameraContext(
     /* [in] */ /*jclass*/HardwareCamera* clazz,
     /* [in] */ const android::sp<android::Camera>& camera)
 {
-    mCameraJObjectWeak = weak_this;
-    // mCameraJClass = clazz/*(jclass)env->NewGlobalRef(clazz)*/;
+    weak_this->GetWeakReference((IWeakReference**)&mCameraJObjectWeak);
     mCamera = camera;
-
-    // jclass faceClazz = env->FindClass("android/hardware/Camera$Face");
-    // mFaceClass = (jclass) env->NewGlobalRef(faceClazz);
-
-    // jclass rectClazz = env->FindClass("android/graphics/Rect");
-    // mRectClass = (jclass) env->NewGlobalRef(rectClazz);
-
     mManualBufferMode = false;
     mManualCameraCallbackSet = false;
 }
@@ -391,24 +406,6 @@ void HardwareCamera::JNICameraContext::release()
 {
     // ALOGV("release");
     AutoLock _l(mLock);
-    // JNIEnv *env = AndroidRuntime::getJNIEnv();
-
-    // if (mCameraJObjectWeak != NULL) {
-    //     env->DeleteGlobalRef(mCameraJObjectWeak);
-    //     mCameraJObjectWeak = NULL;
-    // }
-    // if (mCameraJClass != NULL) {
-    //     env->DeleteGlobalRef(mCameraJClass);
-    //     mCameraJClass = NULL;
-    // }
-    // if (mFaceClass != NULL) {
-    //     env->DeleteGlobalRef(mFaceClass);
-    //     mFaceClass = NULL;
-    // }
-    // if (mRectClass != NULL) {
-    //     env->DeleteGlobalRef(mRectClass);
-    //     mRectClass = NULL;
-    // }
     clearCallbackBuffers_l();
     mCamera.clear();
 }
@@ -422,12 +419,12 @@ void HardwareCamera::JNICameraContext::notify(
 
     // VM pointer will be NULL if object is released
     AutoLock _l(mLock);
-    if (mCameraJObjectWeak == NULL) {
-        // ALOGW("callback on dead camera object");
+    AutoPtr<IHardwareCamera> camera;
+    mCameraJObjectWeak->Resolve(EIID_IHardwareCamera, (IInterface**)&camera);
+    if (camera == NULL) {
+        ALOGW("callback on dead camera object");
         return;
     }
-
-    // JNIEnv *env = AndroidRuntime::getJNIEnv();
 
     /*
      * If the notification or msgType is CAMERA_MSG_RAW_IMAGE_NOTIFY, change it
@@ -438,14 +435,12 @@ void HardwareCamera::JNICameraContext::notify(
         msgType = CAMERA_MSG_RAW_IMAGE;
     }
 
-    PostEventFromNative(mCameraJObjectWeak, msgType, ext1, ext2, NULL);
-
-    // env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-    //         mCameraJObjectWeak, msgType, ext1, ext2, NULL);
+    AutoPtr<IInterface> obj;
+    PostEventFromNative(mCameraJObjectWeak, msgType, ext1, ext2, obj);
 }
 
 AutoPtr<ArrayOf<Byte> > HardwareCamera::JNICameraContext::getCallbackBuffer(
-    /* [in] */ android::Vector<ArrayOf<Byte>*>* buffers,
+    /* [in] */ android::Vector< AutoPtr<ArrayOf<Byte> > >* buffers,
     /* [in] */ size_t bufferSize)
 {
     AutoPtr<ArrayOf<Byte> > obj;
@@ -453,18 +448,14 @@ AutoPtr<ArrayOf<Byte> > HardwareCamera::JNICameraContext::getCallbackBuffer(
     // Vector access should be protected by lock in postData()
     if (!buffers->isEmpty()) {
         // ALOGV("Using callback buffer from queue of length %d", buffers->size());
-        AutoPtr<ArrayOf<Byte> > globalBuffer = buffers->itemAt(0);
+        obj = buffers->itemAt(0);
         buffers->removeAt(0);
-
-        obj = globalBuffer/*(jbyteArray)env->NewLocalRef(globalBuffer)*/;
-        // env->DeleteGlobalRef(globalBuffer);
 
         if (obj != NULL) {
             Int32 bufferLength = obj->GetLength();
             if ((int)bufferLength < (int)bufferSize) {
-                // ALOGE("Callback buffer was too small! Expected %d bytes, but got %d bytes!",
-                //     bufferSize, bufferLength);
-                // env->DeleteLocalRef(obj);
+                ALOGE("Callback buffer was too small! Expected %d bytes, but got %d bytes!",
+                    bufferSize, bufferLength);
                 return NULL;
             }
         }
@@ -484,7 +475,7 @@ void HardwareCamera::JNICameraContext::copyAndPost(
         ssize_t offset;
         size_t size;
         android::sp<android::IMemoryHeap> heap = dataPtr->getMemory(&offset, &size);
-        // ALOGV("copyAndPost: off=%zd, size=%zu", offset, size);
+        ALOGV("copyAndPost: off=%zd, size=%zu", offset, size);
         uint8_t *heapBase = (uint8_t*)heap->base();
 
         if (heapBase != NULL) {
@@ -496,7 +487,7 @@ void HardwareCamera::JNICameraContext::copyAndPost(
                 obj = getCallbackBuffer(&mCallbackBuffers, size);
 
                 if (mCallbackBuffers.isEmpty()) {
-                    // ALOGV("Out of buffers, clearing callback!");
+                    ALOGV("Out of buffers, clearing callback!");
                     mCamera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_NOOP);
                     mManualCameraCallbackSet = false;
 
@@ -505,31 +496,23 @@ void HardwareCamera::JNICameraContext::copyAndPost(
                     }
                 }
             } else {
-                // ALOGV("Allocating callback buffer");
-                // obj = env->NewByteArray(size);
+                ALOGV("Allocating callback buffer");
                 obj = ArrayOf<Byte>::Alloc(size);
             }
 
             if (obj == NULL) {
-                // ALOGE("Couldn't allocate byte array for JPEG data");
-                // env->ExceptionClear();
+                ALOGE("Couldn't allocate byte array for JPEG data");
             } else {
-                //TODO
-                // env->SetByteArrayRegion(obj, 0, size, data);
                 obj->Copy(data, size);
             }
         } else {
-            // ALOGE("image heap is NULL");
+            ALOGE("image heap is NULL");
         }
     }
 
     // post image data to Java
-    // env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-    //         mCameraJObjectWeak, msgType, 0, 0, obj);
-    PostEventFromNative(mCameraJObjectWeak, msgType, 0, 0, obj);
-    // if (obj) {
-    //     env->DeleteLocalRef(obj);
-    // }
+    AutoPtr<IArrayOf> arrayObj = CoreUtils::ConvertByteArray(obj.Get());
+    PostEventFromNative(mCameraJObjectWeak, msgType, 0, 0, arrayObj);
 }
 
 void HardwareCamera::JNICameraContext::postData(
@@ -541,7 +524,7 @@ void HardwareCamera::JNICameraContext::postData(
     AutoLock _l(mLock);
     // JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (mCameraJObjectWeak == NULL) {
-        // ALOGW("callback on dead camera object");
+        ALOGW("callback on dead camera object");
         return;
     }
 
@@ -558,9 +541,8 @@ void HardwareCamera::JNICameraContext::postData(
         case CAMERA_MSG_RAW_IMAGE:
             // ALOGV("rawCallback");
             if (mRawImageCallbackBuffers.isEmpty()) {
-                // env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-                //         mCameraJObjectWeak, dataMsgType, 0, 0, NULL);
-                PostEventFromNative(mCameraJObjectWeak, dataMsgType, 0, 0, NULL);
+                AutoPtr<IInterface> obj;
+                PostEventFromNative(mCameraJObjectWeak, dataMsgType, 0, 0, obj);
             } else {
                 copyAndPost(dataPtr, dataMsgType);
             }
@@ -600,46 +582,27 @@ void HardwareCamera::JNICameraContext::postMetadata(
     //                                          mFaceClass, NULL);
     AutoPtr<ArrayOf<Face*> > obj = ArrayOf<Face*>::Alloc(metadata->number_of_faces);
     if (obj == NULL) {
-        // ALOGE("Couldn't allocate face metadata array");
+        ALOGE("Couldn't allocate face metadata array");
         return;
     }
 
     for (int i = 0; i < metadata->number_of_faces; i++) {
-        // jobject face = env->NewObject(mFaceClass, fields.face_constructor);
-        AutoPtr<Face> face = new Face();
-
-        // env->SetObjectArrayElement(obj, i, face);
-        (*obj)[i] = face;
-
-        // jobject rect = env->NewObject(mRectClass, fields.rect_constructor);
         AutoPtr<IRect> rect;
         CRect::New((IRect**)&rect);
-        assert(rect != NULL);
-
-        // env->SetIntField(rect, fields.rect_left, metadata->faces[i].rect[0]);
-        // env->SetIntField(rect, fields.rect_top, metadata->faces[i].rect[1]);
-        // env->SetIntField(rect, fields.rect_right, metadata->faces[i].rect[2]);
-        // env->SetIntField(rect, fields.rect_bottom, metadata->faces[i].rect[3]);
         rect->SetLeft(metadata->faces[i].rect[0]);
         rect->SetTop(metadata->faces[i].rect[1]);
         rect->SetRight(metadata->faces[i].rect[2]);
         rect->SetBottom(metadata->faces[i].rect[3]);
 
-
-        // env->SetObjectField(face, fields.face_rect, rect);
+        AutoPtr<Face> face = new Face();
         face->mRect = rect;
-
-        // env->SetIntField(face, fields.face_score, metadata->faces[i].score);
         face->mScore = metadata->faces[i].score;
 
-        // env->DeleteLocalRef(face);
-        // env->DeleteLocalRef(rect);
+        obj->Set(i, face);
     }
 
-    // env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-    //         mCameraJObjectWeak, msgType, 0, 0, obj);
-    PostEventFromNative(mCameraJObjectWeak, msgType, 0, 0, obj);
-    // env->DeleteLocalRef(obj);
+    AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(obj.Get());
+    PostEventFromNative(mCameraJObjectWeak, msgType, 0, 0, arrayObj);
 }
 
 void HardwareCamera::JNICameraContext::setCallbackMode(
@@ -686,9 +649,8 @@ void HardwareCamera::JNICameraContext::addCallbackBuffer(
         AutoLock _l(mLock);
         switch (msgType) {
             case CAMERA_MSG_PREVIEW_FRAME: {
-                // jbyteArray callbackBuffer = (jbyteArray)env->NewGlobalRef(cbb);
-                cbb->AddRef();
-                mCallbackBuffers.push(cbb);
+                AutoPtr<ArrayOf<Byte> > cbbObj;
+                mCallbackBuffers.push(cbbObj);
 
                 // ALOGV("Adding callback buffer to queue, %d total",
                 //         mCallbackBuffers.size());
@@ -703,21 +665,17 @@ void HardwareCamera::JNICameraContext::addCallbackBuffer(
                 break;
             }
             case CAMERA_MSG_RAW_IMAGE: {
-                // jbyteArray callbackBuffer = (jbyteArray)env->NewGlobalRef(cbb);
-                cbb->AddRef();
-                mRawImageCallbackBuffers.push(cbb);
+                AutoPtr<ArrayOf<Byte> > cbbObj;
+                mRawImageCallbackBuffers.push(cbbObj);
                 break;
             }
             default: {
-                assert(0);
-                // jniThrowException(env,
-                //         "java/lang/IllegalArgumentException",
-                //         "Unsupported message type");
+                Logger::E(TAG, "Unsupported message type: %d", msgType);
                 return;
             }
         }
     } else {
-       // ALOGE("Null byte array!");
+        ALOGE("Null byte array!");
     }
 }
 
@@ -729,16 +687,10 @@ void HardwareCamera::JNICameraContext::clearCallbackBuffers_l()
 }
 
 void HardwareCamera::JNICameraContext::clearCallbackBuffers_l(
-    /* [in] */ android::Vector<ArrayOf<Byte>*>* buffers)
+    /* [in] */ android::Vector< AutoPtr<ArrayOf<Byte> > >* buffers)
 {
     // ALOGV("Clearing callback buffers, %d remained", buffers->size());
-    while (!buffers->isEmpty()) {
-        // env->DeleteGlobalRef(buffers->top());
-        //TODO :need to release?
-        //buffers->top()->Release();
-
-        buffers->pop();
-    }
+    buffers->clear();
 }
 
 CAR_INTERFACE_IMPL(HardwareCamera::CameraInfo, Object, IHardwareCameraInfo)
@@ -795,6 +747,23 @@ ECode HardwareCamera::CameraInfo::GetCanDisableShutterSound(
     VALIDATE_NOT_NULL(can);
 
     *can = mCanDisableShutterSound;
+    return NOERROR;
+}
+
+ECode HardwareCamera::CameraInfo::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CameraInfo:");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += "{facing:";
+    sb += mFacing;
+    sb += ", orientation:";
+    sb += mOrientation;
+    sb += ", canDisableShutterSound:";
+    sb += mCanDisableShutterSound;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 
@@ -1120,12 +1089,9 @@ ECode HardwareCamera::Parameters::Unflatten(
     splitter->SetString(flattened);
 
     Boolean has = FALSE;
+    String kv;
     while (splitter->HasNext(&has), has) {
-        AutoPtr<IInterface> cs;
-        IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
-        String kv;
-        ICharSequence::Probe(cs)->ToString(&kv);
-
+        splitter->GetNext(&kv);
         Int32 pos = kv.IndexOf('=');
         if (pos == -1) {
             continue;
@@ -1764,7 +1730,6 @@ ECode HardwareCamera::Parameters::GetSupportedAntibanding(
     /* [out, callee] */ ArrayOf<String>** values)
 {
     VALIDATE_NOT_NULL(values);
-
     String str;
     Get(KEY_ANTIBANDING + SUPPORTED_VALUES_SUFFIX, &str);
     AutoPtr<ArrayOf<String> > array = Split(str);
@@ -2186,30 +2151,20 @@ AutoPtr<ArrayOf<String> > HardwareCamera::Parameters::Split(
     CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
     splitter->SetString(str);
 
-    Boolean has = FALSE;
-    Int32 count = 0;
-    while(splitter->HasNext(&has), has) {
-        count ++;
+    List<String> list;
+    String sub;
+    Boolean hasNext = FALSE;
+    while(splitter->HasNext(&hasNext), hasNext) {
+        splitter->GetNext(&sub);
+        list.PushBack(sub);
     }
 
-    if (count > 0) {
-        AutoPtr<ArrayOf<String> > substrings = ArrayOf<String>::Alloc(count);
-        has = FALSE;
-        Int32 index = 0;
-        while(splitter->HasNext(&has), has) {
-            AutoPtr<IInterface> cs;
-            IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
-            String s;
-            ICharSequence::Probe(cs)->ToString(&s);
-
-            (*substrings)[index++] = s;
-            assert(index > count);
-        }
-
-        return substrings;
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(list.GetSize());
+    List<String>::Iterator it = list.Begin();
+    for (Int32 i = 0; it != list.End(); ++it) {
+        array->Set(i++, *it);
     }
-
-    return NULL;
+    return array;
 }
 
 AutoPtr<ArrayOf<IInteger32*> > HardwareCamera::Parameters::SplitInt(
@@ -2221,32 +2176,23 @@ AutoPtr<ArrayOf<IInteger32*> > HardwareCamera::Parameters::SplitInt(
     CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
     splitter->SetString(str);
 
-    Boolean has = FALSE;
-    Int32 count = 0;
-    while(splitter->HasNext(&has), has) {
-        count ++;
+    List<String> list;
+    String sub;
+    Boolean hasNext = FALSE;
+    while(splitter->HasNext(&hasNext), hasNext) {
+        splitter->GetNext(&sub);
+        list.PushBack(sub);
     }
 
-    if (count > 0) {
-        AutoPtr<ArrayOf<IInteger32*> > substrings = ArrayOf<IInteger32*>::Alloc(count);
-        has = FALSE;
-        Int32 index = 0;
-        while(splitter->HasNext(&has), has) {
-            AutoPtr<IInterface> cs;
-            IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
-            String s;
-            ICharSequence::Probe(cs)->ToString(&s);
-
-            AutoPtr<IInteger32> obj;
-            CInteger32::New(StringUtils::ParseInt32(s), (IInteger32**)&obj);
-            substrings->Set(index++, obj);
-            assert(index > count);
-        }
-
-        return substrings;
+    AutoPtr<ArrayOf<IInteger32*> > array = ArrayOf<IInteger32*>::Alloc(list.GetSize());
+    List<String>::Iterator it = list.Begin();
+    for (Int32 i = 0; it != list.End(); ++it) {
+        Int32 ival = StringUtils::ParseInt32(*it);
+        AutoPtr<IInteger32> obj = CoreUtils::Convert(ival);
+        array->Set(i++, obj);
     }
 
-    return NULL;
+    return array;
 }
 
 void HardwareCamera::Parameters::SplitInt(
@@ -2262,11 +2208,8 @@ void HardwareCamera::Parameters::SplitInt(
     Int32 index = 0;
     Boolean has = FALSE;
     while(splitter->HasNext(&has), has) {
-        AutoPtr<IInterface> cs;
-        IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
         String s;
-        ICharSequence::Probe(cs)->ToString(&s);
-
+        splitter->GetNext(&s);
         (*output)[index++] = StringUtils::ParseInt32(s);
     }
 }
@@ -2284,11 +2227,8 @@ void HardwareCamera::Parameters::SplitFloat(
     Boolean has = FALSE;
     Int32 index = 0;
     while(splitter->HasNext(&has), has) {
-        AutoPtr<IInterface> cs;
-        IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
         String s;
-        ICharSequence::Probe(cs)->ToString(&s);
-
+        splitter->GetNext(&s);
         (*output)[index++] = StringUtils::ParseFloat(s);
     }
 }
@@ -2330,31 +2270,24 @@ AutoPtr<ArrayOf<ICameraSize*> > HardwareCamera::Parameters::SplitSize(
     CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
     splitter->SetString(str);
 
+    List< AutoPtr<ICameraSize> > list;
+    String sub;
     Boolean has = FALSE;
-    Int32 count = 0;
     while(splitter->HasNext(&has), has) {
-        count ++;
-    }
-
-    if (count > 0) {
-        AutoPtr<ArrayOf<ICameraSize*> > sizeList = ArrayOf<ICameraSize*>::Alloc(count);
-
-        has = FALSE;
-        Int32 index = 0;
-        while(splitter->HasNext(&has), has) {
-            AutoPtr<IInterface> cs;
-            IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
-            String s;
-            ICharSequence::Probe(cs)->ToString(&s);
-
-            AutoPtr<ICameraSize> size = StrToSize(s);
-            if (size != NULL) {
-                sizeList->Set(index++, size);
-            }
+        splitter->GetNext(&sub);
+        AutoPtr<ICameraSize> size = StrToSize(sub);
+        if (size != NULL) {
+            list.PushBack(size);
         }
     }
 
-    return NULL;
+    AutoPtr<ArrayOf<ICameraSize*> > array = ArrayOf<ICameraSize*>::Alloc(list.GetSize());
+    List< AutoPtr<ICameraSize> >::Iterator it = list.Begin();
+    for (Int32 index = 0; it != list.End(); ++it) {
+        array->Set(index++, *it);
+    }
+
+    return array;
 }
 
 AutoPtr<ICameraSize> HardwareCamera::Parameters::StrToSize(
@@ -2368,11 +2301,13 @@ AutoPtr<ICameraSize> HardwareCamera::Parameters::StrToSize(
         String height = str.Substring(pos + 1);
 
         AutoPtr<ICameraSize> result;
-        CHardwareCameraSize::New(StringUtils::ParseInt32(width), StringUtils::ParseInt32(height), (ICameraSize**)&result);
+        CHardwareCameraSize::New(
+            StringUtils::ParseInt32(width),
+            StringUtils::ParseInt32(height), (ICameraSize**)&result);
         return result;
     }
 
-    // Log.e(TAG, "Invalid size parameter string=" + str);
+    Logger::E(TAG, "Invalid size parameter string=%s", str.string());
     return NULL;
 }
 
@@ -2381,7 +2316,7 @@ AutoPtr<IList> HardwareCamera::Parameters::SplitRange(
 {
     if (str.IsNullOrEmpty() || str.GetChar(0) != '('
             || str.GetChar(str.GetLength() - 1) != ')') {
-        // Log.e(TAG, "Invalid range list string=" + str);
+        Logger::E(TAG, "Invalid range list string=%s", str.string());
         return NULL;
     }
 
@@ -2417,7 +2352,7 @@ AutoPtr<ArrayOf<ICameraArea*> > HardwareCamera::Parameters::SplitArea(
 {
     if (str.IsNullOrEmpty() || str.GetChar(0) != '('
             || str.GetChar(str.GetLength() - 1) != ')') {
-        // Log.e(TAG, "Invalid area string=" + str);
+        Logger::E(TAG, "Invalid area string=", str.string());
         return NULL;
     }
 
@@ -2480,11 +2415,14 @@ HardwareCamera::HardwareCamera()
 
 HardwareCamera::~HardwareCamera()
 {
+    Logger::D(TAG, "%s: %d", __FUNCTION__, __LINE__);
+    Debug::DumpBacktrace();
     ReleaseResources();
 }
 
 ECode HardwareCamera::ReleaseResources()
 {
+    Logger::D(TAG, "%s: %d", __FUNCTION__, __LINE__);
     native_release();
     mFaceDetectionRunning = FALSE;
     return NOERROR;
@@ -2503,34 +2441,34 @@ ECode HardwareCamera::constructor(
     if (CheckInitErrors(err)) {
         switch(err) {
             case HardwareCamera_EACCESS:
-                //throw new RuntimeException("Fail to connect to camera service");
+                Logger::E(TAG, "RuntimeException Fail to connect to camera service");
                 return E_RUNTIME_EXCEPTION;
             case HardwareCamera_ENODEV:
-                //throw new RuntimeException("Camera initialization failed");
+                Logger::E(TAG, "RuntimeException Camera initialization failed");
                 return E_RUNTIME_EXCEPTION;
             case HardwareCamera_ENOSYS:
-                //throw new RuntimeException("Camera initialization failed because some methods"
-                //        + " are not implemented");
+                Logger::E(TAG, "RuntimeException Camera initialization failed because some methods"
+                    " are not implemented");
                 return E_RUNTIME_EXCEPTION;
             case HardwareCamera_EOPNOTSUPP:
-                //throw new RuntimeException("Camera initialization failed because the hal"
-                //        + " version is not supported by this device");
+                Logger::E(TAG, "RuntimeException Camera initialization failed because the hal"
+                    " version is not supported by this device");
                 return E_RUNTIME_EXCEPTION;
             case HardwareCamera_EINVAL:
-                //throw new RuntimeException("Camera initialization failed because the input"
-                //        + " arugments are invalid");
+                Logger::E(TAG, "RuntimeException Camera initialization failed because the input"
+                    " arugments are invalid");
                 return E_RUNTIME_EXCEPTION;
             case HardwareCamera_EBUSY:
-                //throw new RuntimeException("Camera initialization failed because the camera"
-                //        + " device was already opened");
+                Logger::E(TAG, "RuntimeException Camera initialization failed because the camera"
+                    " device was already opened");
                 return E_RUNTIME_EXCEPTION;
             case HardwareCamera_EUSERS:
-                //throw new RuntimeException("Camera initialization failed because the max"
-                //        + " number of camera devices were already opened");
+                Logger::E(TAG, "RuntimeException Camera initialization failed because the max"
+                    " number of camera devices were already opened");
                 return E_RUNTIME_EXCEPTION;
             default:
                 // Should never hit this.
-                //throw new RuntimeException("Unknown camera error");
+                Logger::E(TAG, "RuntimeException Unknown camera error");
                 return E_RUNTIME_EXCEPTION;
         }
     }
@@ -2544,14 +2482,14 @@ ECode HardwareCamera::constructor(
     if (CheckInitErrors(err)) {
         switch(err) {
             case HardwareCamera_EACCESS:
-                //throw new RuntimeException("Fail to connect to camera service");
+                Logger::E(TAG, "RuntimeException Fail to connect to camera service");
                 return E_RUNTIME_EXCEPTION;
             case HardwareCamera_ENODEV:
-                //throw new RuntimeException("Camera initialization failed");
+                Logger::E(TAG, "RuntimeException Camera initialization failed");
                 return E_RUNTIME_EXCEPTION;
             default:
                 // Should never hit this.
-                //throw new RuntimeException("Unknown camera error");
+                Logger::E(TAG, "RuntimeException Unknown camera error");
                 return E_RUNTIME_EXCEPTION;
         }
     }
@@ -2602,7 +2540,7 @@ ECode HardwareCamera::OpenLegacy(
     /* [out] */ IHardwareCamera** camera)
 {
     if (halVersion < IHardwareCamera::CAMERA_HAL_API_VERSION_1_0) {
-        //throw new IllegalArgumentException("Invalid HAL version " + halVersion);
+        Logger::E(TAG, "Invalid HAL version %d", halVersion);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2707,22 +2645,17 @@ ECode HardwareCamera::_getCameraInfo(
     android::CameraInfo cameraInfo;
     android::status_t rc = android::Camera::getCameraInfo(cameraId, &cameraInfo);
     if (rc != HardwareCamera_NO_ERROR) {
-        // jniThrowRuntimeException(env, "Fail to get camera info");
+        Logger::E(TAG, "Fail to get camera info");
         return E_RUNTIME_EXCEPTION;
     }
 
-    // env->SetIntField(info_obj, fields.facing, cameraInfo.facing);
-    // env->SetIntField(info_obj, fields.orientation, cameraInfo.orientation);
     ((HardwareCamera::CameraInfo*)info_obj)->mFacing = cameraInfo.facing;
     ((HardwareCamera::CameraInfo*)info_obj)->mOrientation = cameraInfo.orientation;
 
-    assert(0 && "TODO: PROPERTY_VALUE_MAX");
-    // char value[PROPERTY_VALUE_MAX];
-    // property_get("ro.camera.sound.forced", value, "0");
-    // Boolean canDisableShutterSound = (strncmp(value, "0", 2) == 0);
-    // env->SetBooleanField(info_obj, fields.canDisableShutterSound,
-    //         canDisableShutterSound);
-    // ((HardwareCamera::CameraInfo*)info_obj)->mCanDisableShutterSound = canDisableShutterSound;
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.camera.sound.forced", value, "0");
+    Boolean canDisableShutterSound = (strncmp(value, "0", 2) == 0);
+    ((HardwareCamera::CameraInfo*)info_obj)->mCanDisableShutterSound = canDisableShutterSound;
     return NOERROR;
 }
 
@@ -2741,22 +2674,26 @@ ECode HardwareCamera::SetPreviewDisplay(
 }
 
 ECode HardwareCamera::SetPreviewSurface(
-    /* [in] */ ISurface* _surface)
+    /* [in] */ ISurface* s)
 {
-    Slogger::V(TAG, "setPreviewSurface");
+    Logger::V(TAG, "setPreviewSurface");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     android::sp<android::IGraphicBufferProducer> gbp;
     android::sp<android::Surface> surface;
-    assert(0 && "TODO: android_view_Surface_getSurface");
-    //surface = android_view_Surface_getSurface(env, _surface);
-    // if (surface != NULL) {
-    //     gbp = surface->getIGraphicBufferProducer();
-    // }
+
+    if (s) {
+        Int64 nativeSurf = 0;
+        s->GetNativeSurface(&nativeSurf);
+        surface = reinterpret_cast<android::Surface*>(nativeSurf);
+        if (surface != NULL) {
+            gbp = surface->getIGraphicBufferProducer();
+        }
+    }
 
     if (camera->setPreviewTarget(gbp) != HardwareCamera_NO_ERROR) {
-        // jniThrowException(env, "java/io/IOException", "setPreviewDisplay failed");
+        Logger::E(TAG, "IOException: setPreviewDisplay failed");
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -2841,8 +2778,7 @@ ECode HardwareCamera::AddCallbackBuffer(
     // CAMERA_MSG_VIDEO_FRAME may be allowed in the future.
     if (msgType != CAMERA_MSG_PREVIEW_FRAME &&
         msgType != CAMERA_MSG_RAW_IMAGE) {
-        // throw new IllegalArgumentException(
-                        // "Unsupported message type: " + msgType);
+        Logger::E(TAG, "Unsupported message type: %d", msgType);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2851,20 +2787,21 @@ ECode HardwareCamera::AddCallbackBuffer(
 }
 
 void HardwareCamera::PostEventFromNative(
-    /* [in] */ HardwareCamera* camera_ref,
+    /* [in] */ IWeakReference* camera_ref,
     /* [in] */ Int32 what,
     /* [in] */ Int32 arg1,
     /* [in] */ Int32 arg2,
-    /* [in] */ const void* obj)
+    /* [in] */ IInterface* obj)
 {
-    HardwareCamera* c = camera_ref;
-    if (c == NULL)
+    AutoPtr<IHardwareCamera> hc;
+    camera_ref->Resolve(EIID_IHardwareCamera, (IInterface**)&hc);
+    if (hc == NULL)
         return;
 
+    HardwareCamera* c = (HardwareCamera*)hc.Get();
     if (c->mEventHandler != NULL) {
         AutoPtr<IMessage> m;
-        assert(0 && "TODO : (IInterface*)obj");
-        //c->mEventHandler->ObtainMessage(what, arg1, arg2, (IInterface*)obj, (IMessage**)&m);
+        c->mEventHandler->ObtainMessage(what, arg1, arg2, obj, (IMessage**)&m);
         Boolean result;
         c->mEventHandler->SendMessage(m, &result);
     }
@@ -3035,8 +2972,8 @@ ECode HardwareCamera::SetParameters(
         FAIL_RETURN(para->GetPreviewSize((ICameraSize**)&currentPreviewSize))
         if (((Size*)newPreviewSize.Get())->mWidth != ((Size*)currentPreviewSize.Get())->mWidth ||
                 ((Size*)newPreviewSize.Get())->mHeight != ((Size*)currentPreviewSize.Get())->mHeight) {
-            //throw new IllegalStateException("Cannot change preview size" +
-            //        " while a preview allocation is configured.");
+            Logger::E(TAG, "Cannot change preview size"
+                " while a preview allocation is configured.");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
@@ -3080,7 +3017,7 @@ ECode HardwareCamera::GetParametersCopy(
     VALIDATE_NOT_NULL(para);
 
     if (parameters == NULL) {
-        //throw new NullPointerException("parameters must not be null");
+        Logger::E(TAG, "parameters must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -3096,12 +3033,12 @@ ECode HardwareCamera::GetParametersCopy(
 //Native method.
 ECode HardwareCamera::Unlock()
 {
-    Slogger::V(TAG, "unlock");
+    Logger::V(TAG, "unlock");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     if (camera->unlock() != NOERROR) {
-        // jniThrowRuntimeException(env, "unlock failed");
+        Logger::E(TAG, "unlock failed");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3110,12 +3047,12 @@ ECode HardwareCamera::Unlock()
 
 ECode HardwareCamera::Lock()
 {
-    Slogger::V(TAG, "lock");
+    Logger::V(TAG, "lock");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     if (camera->lock() != NOERROR) {
-        // jniThrowRuntimeException(env, "lock failed");
+        Logger::E(TAG, "lock failed");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3124,12 +3061,12 @@ ECode HardwareCamera::Lock()
 
 ECode HardwareCamera::Reconnect()
 {
-    Slogger::V(TAG, "reconnect");
+    Logger::V(TAG, "reconnect");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     if (camera->reconnect() != NOERROR) {
-        // jniThrowException(env, "java/io/IOException", "reconnect failed");
+        Logger::E(TAG, "reconnect failed");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3139,7 +3076,7 @@ ECode HardwareCamera::Reconnect()
 ECode HardwareCamera::SetPreviewTexture(
     /* [in] */ ISurfaceTexture* _surfaceTexture)
 {
-    Slogger::V(TAG, "setPreviewTexture");
+    Logger::V(TAG, "setPreviewTexture");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
@@ -3148,15 +3085,13 @@ ECode HardwareCamera::SetPreviewTexture(
     if (surfaceImpl != NULL) {
         producer = (android::IGraphicBufferProducer*)surfaceImpl->mProducer;
         if (producer == NULL) {
-            //jniThrowException(env, "java/lang/IllegalArgumentException",
-            //        "SurfaceTexture already released in setPreviewTexture");
+            Logger::E(TAG, "SurfaceTexture already released in setPreviewTexture");
             return E_RUNTIME_EXCEPTION;
         }
     }
 
     if (camera->setPreviewTarget(producer) != HardwareCamera_NO_ERROR) {
-        //jniThrowException(env, "java/io/IOException",
-        //        "setPreviewTexture failed");
+        Logger::E(TAG, "setPreviewTexture failed");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3165,12 +3100,12 @@ ECode HardwareCamera::SetPreviewTexture(
 
 ECode HardwareCamera::StartPreview()
 {
-    Slogger::V(TAG, "startPreview");
+    Logger::V(TAG, "startPreview");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     if (camera->startPreview() != NOERROR) {
-        // jniThrowRuntimeException(env, "startPreview failed");
+        Logger::E(TAG, "startPreview failed");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3183,7 +3118,7 @@ ECode HardwareCamera::PreviewEnabled(
     VALIDATE_NOT_NULL(enabled);
 
     *enabled = FALSE;
-    Slogger::V(TAG, "previewEnabled");
+    Logger::V(TAG, "previewEnabled");
     android::sp<android::Camera> c = get_native_camera(this, NULL);
     if (c == 0) return NOERROR;
 
@@ -3194,19 +3129,17 @@ ECode HardwareCamera::PreviewEnabled(
 ECode HardwareCamera::StartSmoothZoom(
     /* [in] */ Int32 value)
 {
-    Slogger::V(TAG, "startSmoothZoom");
+    Logger::V(TAG, "startSmoothZoom");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     ECode rc = camera->sendCommand(CAMERA_CMD_START_SMOOTH_ZOOM, value, 0);
     if (rc == android::BAD_VALUE) {
-        char msg[64];
-        sprintf(msg, "invalid zoom value=%d", value);
-        // jniThrowException(env, "java/lang/IllegalArgumentException", msg);
+        Logger::E(TAG, "invalid zoom value=%d", value);
         return E_RUNTIME_EXCEPTION;
     }
     else if (rc != NOERROR) {
-        // jniThrowRuntimeException(env, "start smooth zoom failed");
+        Logger::E(TAG, "start smooth zoom failed");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3215,12 +3148,12 @@ ECode HardwareCamera::StartSmoothZoom(
 
 ECode HardwareCamera::StopSmoothZoom()
 {
-    Slogger::V(TAG, "stopSmoothZoom");
+    Logger::V(TAG, "stopSmoothZoom");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     if (camera->sendCommand(CAMERA_CMD_STOP_SMOOTH_ZOOM, 0, 0) != NOERROR) {
-        // jniThrowRuntimeException(env, "stop smooth zoom failed");
+        Logger::E(TAG, "stop smooth zoom failed");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3230,12 +3163,12 @@ ECode HardwareCamera::StopSmoothZoom()
 ECode HardwareCamera::SetDisplayOrientation(
     /* [in] */ Int32 degrees)
 {
-    Slogger::V(TAG, "setDisplayOrientation");
+    Logger::V(TAG, "setDisplayOrientation");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     if (camera->sendCommand(CAMERA_CMD_SET_DISPLAY_ORIENTATION, degrees, 0) != NOERROR) {
-        // jniThrowRuntimeException(env, "set display orientation failed");
+        Logger::E(TAG, "set display orientation failed");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3249,12 +3182,14 @@ ECode HardwareCamera::native_setup(
     /* [in] */ const String& packageName,
     /* [out] */ Int32* result)
 {
-    // // Convert jstring to String16
-    // const char16_t *rawClientName = env->GetStringChars(clientPackageName, NULL);
-    // jsize rawClientNameLen = env->GetStringLength(clientPackageName);
-    // String16 clientName(rawClientName, rawClientNameLen);
-    // env->ReleaseStringChars(clientPackageName, rawClientName);
-    android::String16 clientName = android::String16(packageName);
+    VALIDATE_NOT_NULL(result)
+    *result = HardwareCamera_NO_ERROR;
+
+    Logger::V(TAG, "HardwareCamera native_setup camera %d, halVersion %d, packageName: %s",
+        cameraId, halVersion, packageName.string());
+
+    // Convert String to String16
+    android::String16 clientName = TextUtils::StringToString16(packageName);
 
     android::sp<android::Camera> camera;
     if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
@@ -3265,51 +3200,46 @@ ECode HardwareCamera::native_setup(
         int status = android::Camera::connectLegacy(cameraId, halVersion, clientName,
                 android::Camera::USE_CALLING_UID, camera);
         if (status != HardwareCamera_NO_ERROR) {
+            Logger::E(TAG, "Failed to connectLegacy camera %d, halVersion %d, packageName: %s",
+                cameraId, halVersion, packageName.string());
             *result = status;
             return NOERROR;
         }
     }
 
     if (camera == NULL) {
-        *result = -HardwareCamera_EACCESS;
+        *result = HardwareCamera_EACCESS;
+        Logger::E(TAG, "Failed to access camera %d, halVersion %d, packageName: %s",
+            cameraId, halVersion, packageName.string());
         return NOERROR;
     }
 
     // make sure camera hardware is alive
     if (camera->getStatus() != HardwareCamera_NO_ERROR) {
         *result = android::NO_INIT;
+        Logger::E(TAG, "Failed to access camera %d, halVersion %d, packageName: %s."
+            "make sure camera hardware is alive",
+            cameraId, halVersion, packageName.string());
         return NOERROR;
     }
-
-    // jclass clazz = env->GetObjectClass(thiz);
-    // if (clazz == NULL) {
-    //     // This should never happen
-    //     //jniThrowRuntimeException(env, "Can't find android/hardware/Camera");
-    //     *result = INVALID_OPERATION;
-    //     return E_RUNTIME_EXCEPTION
-    // }
 
     // We use a weak reference so the Camera object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     JNICameraContext* context = new JNICameraContext(this, this, camera);
-    assert(0 && "TODO: incStrong");
-    //context->incStrong((void*)native_setup);
+    context->incStrong((void*)this);
     camera->setListener(context);
-
-    // save context in opaque field
-    //env->SetIntField(thiz, fields.context, (int)context.get());
     mNativeContext = reinterpret_cast<Int64>(context);
     return NOERROR;
 }
 
 void HardwareCamera::native_release()
 {
-    Slogger::V(TAG, "release camera");
+    Logger::V(TAG, "release camera");
     JNICameraContext* context = NULL;
     android::sp<android::Camera> camera;
     {
         AutoLock _l(sLock);
-        context = reinterpret_cast<JNICameraContext*>(mNativeContext/*env->GetIntField(thiz, fields.context)*/);
+        context = reinterpret_cast<JNICameraContext*>(mNativeContext);
 
         // Make sure we do not attempt to callback on a deleted Java object.
         //env->SetIntField(thiz, fields.context, 0);
@@ -3320,7 +3250,7 @@ void HardwareCamera::native_release()
     if (context != NULL) {
         camera = context->getCamera();
         context->release();
-        Slogger::V(TAG, "native_release: context=%p camera=%p", context, camera.get());
+        Logger::V(TAG, "native_release: context=%p camera=%p", context, camera.get());
 
         // clear callbacks
         if (camera != NULL) {
@@ -3329,14 +3259,13 @@ void HardwareCamera::native_release()
         }
 
         // remove context to prevent further Java access
-        assert(0 && "TODO: decStrong");
-        //context->decStrong((void*)native_setup);
+        context->decStrong((void*)this);
     }
 }
 
 void HardwareCamera::_stopPreview()
 {
-    Slogger::V(TAG, "stopPreview");
+    Logger::V(TAG, "stopPreview");
     android::sp<android::Camera> c = get_native_camera(this, NULL);
     if (c == 0) return;
 
@@ -3347,7 +3276,7 @@ void HardwareCamera::setHasPreviewCallback(
     /* [in] */ Boolean installed,
     /* [in] */ Boolean manualBuffer)
 {
-    Slogger::V(TAG, "setHasPreviewCallback: installed:%d, manualBuffer:%d", (int)installed, (int)manualBuffer);
+    Logger::V(TAG, "setHasPreviewCallback: installed:%d, manualBuffer:%d", (int)installed, (int)manualBuffer);
     // Important: Only install preview_callback if the Java code has called
     // setPreviewCallback() with a non-NULL value, otherwise we'd pay to memcpy
     // each preview frame for nothing.
@@ -3364,7 +3293,7 @@ void HardwareCamera::_addCallbackBuffer(
     /* [in] */ ArrayOf<Byte>* callbackBuffer,
     /* [in] */ Int32 msgType)
 {
-    Slogger::V(TAG, "addCallbackBuffer: 0x%x", msgType);
+    Logger::V(TAG, "addCallbackBuffer: 0x%x", msgType);
 
     JNICameraContext* context = reinterpret_cast<JNICameraContext*>(mNativeContext/*env->GetIntField(thiz, fields.context)*/);
 
@@ -3435,25 +3364,28 @@ void HardwareCamera::_addCallbackBuffer(
 ECode HardwareCamera::setPreviewCallbackSurface(
     /* [in] */ ISurface* s)
 {
-    Slogger::V(TAG, "setPreviewCallbackSurface");
+    Logger::V(TAG, "setPreviewCallbackSurface");
     JNICameraContext* context;
     android::sp<android::Camera> camera = get_native_camera(this, &context);
     if (camera == 0) return NOERROR;
 
     android::sp<android::IGraphicBufferProducer> gbp;
     android::sp<android::Surface> surface;
-    assert(0 && "TODO: android_view_Surface_getSurface");
-    // if (jSurface) {
-    //     surface = android_view_Surface_getSurface(env, jSurface);
-    //     if (surface != NULL) {
-    //         gbp = surface->getIGraphicBufferProducer();
-    //     }
-    // }
+
+    if (s) {
+        Int64 nativeSurf = 0;
+        s->GetNativeSurface(&nativeSurf);
+        surface = reinterpret_cast<android::Surface*>(nativeSurf);
+        if (surface != NULL) {
+            gbp = surface->getIGraphicBufferProducer();
+        }
+    }
+
     // Clear out normal preview callbacks
     context->setCallbackMode(FALSE, FALSE);
     // Then set up callback surface
     if (camera->setPreviewCallbackTarget(gbp) != HardwareCamera_NO_ERROR) {
-        //jniThrowException(env, "java/io/IOException", "setPreviewCallbackTarget failed");
+        Logger::E(TAG, "IOException:setPreviewCallbackTarget failed");
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -3461,13 +3393,13 @@ ECode HardwareCamera::setPreviewCallbackSurface(
 
 ECode HardwareCamera::native_autoFocus()
 {
-    Slogger::V(TAG, "autoFocus");
+    Logger::V(TAG, "autoFocus");
     JNICameraContext* context;
     android::sp<android::Camera> c = get_native_camera(this, &context);
     if (c == 0) return NOERROR;
 
     if (c->autoFocus() != NOERROR) {
-        // jniThrowRuntimeException(env, "autoFocus failed");
+        Logger::E(TAG, "autoFocus failed");
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -3475,13 +3407,13 @@ ECode HardwareCamera::native_autoFocus()
 
 ECode HardwareCamera::native_cancelAutoFocus()
 {
-    Slogger::V(TAG, "cancelAutoFocus");
+    Logger::V(TAG, "cancelAutoFocus");
     JNICameraContext* context;
     android::sp<android::Camera> c = get_native_camera(this, &context);
     if (c == 0) return NOERROR;
 
     if (c->cancelAutoFocus() != NOERROR) {
-        // jniThrowRuntimeException(env, "cancelAutoFocus failed");
+        Logger::E(TAG, "cancelAutoFocus failed");
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -3490,12 +3422,12 @@ ECode HardwareCamera::native_cancelAutoFocus()
 ECode HardwareCamera::enableFocusMoveCallback(
     /* [in] */ Int32 enable)
 {
-    Slogger::V(TAG, "enableFocusMoveCallback");
+    Logger::V(TAG, "enableFocusMoveCallback");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     if (camera->sendCommand(CAMERA_CMD_ENABLE_FOCUS_MOVE_MSG, enable, 0) != NOERROR) {
-        // jniThrowRuntimeException(env, "enable focus move callback failed");
+        Logger::E(TAG, "enable focus move callback failed");
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -3504,7 +3436,7 @@ ECode HardwareCamera::enableFocusMoveCallback(
 ECode HardwareCamera::native_takePicture(
     /* [in] */ Int32 msgType)
 {
-    Slogger::V(TAG, "takePicture");
+    Logger::V(TAG, "takePicture");
     JNICameraContext* context;
     android::sp<android::Camera> camera = get_native_camera(this, &context);
     if (camera == 0) return NOERROR;
@@ -3519,7 +3451,7 @@ ECode HardwareCamera::native_takePicture(
      * Java application.
      */
     if (msgType & CAMERA_MSG_RAW_IMAGE) {
-        Slogger::V(TAG, "Enable raw image callback buffer");
+        Logger::V(TAG, "Enable raw image callback buffer");
         if (!context->isRawImageCallbackBufferAvailable()) {
             // ALOGV("Enable raw image notification, since no callback buffer exists");
             msgType &= ~CAMERA_MSG_RAW_IMAGE;
@@ -3528,7 +3460,7 @@ ECode HardwareCamera::native_takePicture(
     }
 
     if (camera->takePicture(msgType) != NOERROR) {
-        // jniThrowRuntimeException(env, "takePicture failed");
+        Logger::E(TAG, "takePicture failed");
         return E_RUNTIME_EXCEPTION;;
     }
     return NOERROR;
@@ -3540,7 +3472,7 @@ ECode HardwareCamera::_enableShutterSound(
 {
     VALIDATE_NOT_NULL(result);
 
-    Slogger::V(TAG, "enableShutterSound");
+    Logger::V(TAG, "enableShutterSound");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) {
         *result = FALSE;
@@ -3556,7 +3488,7 @@ ECode HardwareCamera::_enableShutterSound(
         *result = FALSE;
         return NOERROR;
     } else {
-        // jniThrowRuntimeException(env, "enable shutter sound failed");
+        Logger::E(TAG, "enable shutter sound failed");
         *result = FALSE;
         return E_RUNTIME_EXCEPTION;
     }
@@ -3567,19 +3499,17 @@ ECode HardwareCamera::_enableShutterSound(
 ECode HardwareCamera::_startFaceDetection(
     /* [in] */ Int32 type)
 {
-    Slogger::V(TAG, "startFaceDetection");
+    Logger::V(TAG, "startFaceDetection");
     JNICameraContext* context;
     android::sp<android::Camera> camera = get_native_camera(this, &context);
     if (camera == 0) return NOERROR;
 
     ECode rc = camera->sendCommand(CAMERA_CMD_START_FACE_DETECTION, type, 0);
     if (rc == android::BAD_VALUE) {
-        char msg[64];
-        snprintf(msg, sizeof(msg), "invalid face detection type=%d", type);
-        // jniThrowException(env, "java/lang/IllegalArgumentException", msg);
+        Logger::E(TAG, "invalid face detection type=%d", type);
         return E_RUNTIME_EXCEPTION;
     } else if (rc != NOERROR) {
-        // jniThrowRuntimeException(env, "start face detection failed");
+        Logger::E(TAG, "start face detection failed");
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -3587,12 +3517,12 @@ ECode HardwareCamera::_startFaceDetection(
 
 ECode HardwareCamera::_stopFaceDetection()
 {
-    Slogger::V(TAG, "stopFaceDetection");
+    Logger::V(TAG, "stopFaceDetection");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     if (camera->sendCommand(CAMERA_CMD_STOP_FACE_DETECTION, 0, 0) != NOERROR) {
-        // jniThrowRuntimeException(env, "stop face detection failed");
+        Logger::E(TAG, "stop face detection failed");
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -3601,18 +3531,18 @@ ECode HardwareCamera::_stopFaceDetection()
 ECode HardwareCamera::native_setParameters(
     /* [in] */ const String& params)
 {
-    Slogger::V(TAG, "setParameters");
+    Logger::V(TAG, "setParameters");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
-    const char* str = (const char*)params/*env->GetStringCritical(params, 0)*/;
+    const char* str = (const char*)params.string()/*env->GetStringCritical(params, 0)*/;
     android::String8 params8;
     if (params) {
         params8 = android::String8(str, params.GetByteLength()/*env->GetStringLength(params)*/);
         // env->ReleaseStringCritical(params, str);
     }
     if (camera->setParameters(params8) != NOERROR) {
-        // jniThrowRuntimeException(env, "setParameters failed");
+        Logger::E(TAG, "setParameters failed");
         return E_RUNTIME_EXCEPTION;;
     }
     return NOERROR;
@@ -3623,17 +3553,16 @@ ECode HardwareCamera::native_getParameters(
 {
     VALIDATE_NOT_NULL(para);
 
-    Slogger::V(TAG, "getParameters");
+    Logger::V(TAG, "getParameters");
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
     android::String8 params8 = camera->getParameters();
     if (params8.isEmpty()) {
-        // jniThrowRuntimeException(env, "getParameters failed (empty parameters)");
+        Logger::E(TAG, "getParameters failed (empty parameters)");
         return E_RUNTIME_EXCEPTION;;
     }
 
-    // return env->NewStringUTF(params8.string());
     *para = String(params8.string());
     return NOERROR;
 }

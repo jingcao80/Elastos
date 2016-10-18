@@ -3,10 +3,10 @@
 #include "elastos/droid/hardware/camera2/legacy/RequestHolder.h"
 #include "elastos/droid/hardware/camera2/legacy/LegacyCameraDevice.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
 
@@ -100,7 +100,7 @@ ECode RequestHolder::Builder::NumJpegTargets(
         }
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
-            Slogger::D(TAG, "Surface abandoned, skipping...%d", ec);
+            Logger::D(TAG, "Surface abandoned, skipping...%d", ec);
         }
         //}
     }
@@ -135,7 +135,7 @@ ECode RequestHolder::Builder::NumPreviewTargets(
         }
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
-            Slogger::D(TAG, "Surface abandoned, skipping...%d", ec);
+            Logger::D(TAG, "Surface abandoned, skipping...%d", ec);
         }
         //}
     }
@@ -276,7 +276,7 @@ ECode RequestHolder::FailRequest()
 {
     Int32 id;
     GetRequestId(&id);
-    Slogger::W(TAG, "Capture failed for request: %d" + id);
+    Logger::W(TAG, "Capture failed for request: %d" + id);
     mFailed = TRUE;
     return NOERROR;
 }

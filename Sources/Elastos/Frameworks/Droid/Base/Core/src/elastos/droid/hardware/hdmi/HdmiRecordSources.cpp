@@ -1,8 +1,8 @@
 
 #include "elastos/droid/hardware/hdmi/HdmiRecordSources.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -383,7 +383,7 @@ ECode HdmiRecordSources::OfDigitalChannelId(
 
     if (data == NULL) {
         //throw new IllegalArgumentException("data should not be null.");
-        Slogger::E(TAG, "data should not be null.");
+        Logger::E(TAG, "data should not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     switch (broadcastSystem) {
@@ -410,10 +410,10 @@ ECode HdmiRecordSources::OfDigitalChannelId(
         }
         default:
         {
-            Slogger::W(TAG, "Invalid broadcast type:%d", broadcastSystem);
+            Logger::W(TAG, "Invalid broadcast type:%d", broadcastSystem);
             // throw new IllegalArgumentException(
             //         "Invalid broadcast system value:%d", broadcastSystem);
-            Slogger::E(TAG, "Invalid broadcast system value:%d", broadcastSystem);
+            Logger::E(TAG, "Invalid broadcast system value:%d", broadcastSystem);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -430,7 +430,7 @@ ECode HdmiRecordSources::OfArib(
 
     if (data == NULL) {
         //throw new IllegalArgumentException("data should not be null.");
-        Slogger::E(TAG, "data should not be null.");
+        Logger::E(TAG, "data should not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     switch (aribType) {
@@ -448,9 +448,9 @@ ECode HdmiRecordSources::OfArib(
         }
         default:
         {
-            Slogger::W(TAG, "Invalid ARIB type:%d", aribType);
+            Logger::W(TAG, "Invalid ARIB type:%d", aribType);
             //throw new IllegalArgumentException("type should not be null.");
-            Slogger::E(TAG, "type should not be null.");
+            Logger::E(TAG, "type should not be null.");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -467,7 +467,7 @@ ECode HdmiRecordSources::OfAtsc(
 
     if (data == NULL) {
         //throw new IllegalArgumentException("data should not be null.");
-        Slogger::E(TAG, "data should not be null.");
+        Logger::E(TAG, "data should not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     switch (atscType) {
@@ -485,9 +485,9 @@ ECode HdmiRecordSources::OfAtsc(
         }
         default:
         {
-            Slogger::W(TAG, "Invalid ATSC type:%d", atscType);
+            Logger::W(TAG, "Invalid ATSC type:%d", atscType);
             //throw new IllegalArgumentException("Invalid ATSC type:" + atscType);
-            Slogger::E(TAG, "Invalid ATSC type:%d", atscType);
+            Logger::E(TAG, "Invalid ATSC type:%d", atscType);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -504,7 +504,7 @@ ECode HdmiRecordSources::OfDvb(
 
     if (data == NULL) {
         //throw new IllegalArgumentException("data should not be null.");
-        Slogger::E(TAG, "data should not be null.");
+        Logger::E(TAG, "data should not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     switch (dvbType) {
@@ -523,9 +523,9 @@ ECode HdmiRecordSources::OfDvb(
         }
         default:
         {
-            Slogger::W(TAG, "Invalid DVB type:%d", dvbType);
+            Logger::W(TAG, "Invalid DVB type:%d", dvbType);
             //throw new IllegalArgumentException("Invalid DVB type:" + dvbType);
-            Slogger::E(TAG, "Invalid ATSC type:%d", dvbType);
+            Logger::E(TAG, "Invalid ATSC type:%d", dvbType);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -543,25 +543,25 @@ ECode HdmiRecordSources::OfAnalogue(
 
     if (broadcastType < ANALOGUE_BROADCAST_TYPE_CABLE
             || broadcastType > ANALOGUE_BROADCAST_TYPE_TERRESTRIAL) {
-        Slogger::W(TAG, "Invalid Broadcast type:%d", broadcastType);
+        Logger::W(TAG, "Invalid Broadcast type:%d", broadcastType);
         //throw new IllegalArgumentException("Invalid Broadcast type:" + broadcastType);
-        Slogger::E(TAG, "Invalid Broadcast type:%d",broadcastType);
+        Logger::E(TAG, "Invalid Broadcast type:%d",broadcastType);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (frequency < 0 || frequency > 0xFFFF) {
-        Slogger::W(TAG, "Invalid frequency value[0x0000-0xFFFF]:%d", frequency);
+        Logger::W(TAG, "Invalid frequency value[0x0000-0xFFFF]:%d", frequency);
         // throw new IllegalArgumentException(
         //         "Invalid frequency value[0x0000-0xFFFF]:" + frequency);
-        Slogger::E(TAG, "Invalid frequency value[0x0000-0xFFFF]:%d" + frequency);
+        Logger::E(TAG, "Invalid frequency value[0x0000-0xFFFF]:%d" + frequency);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (broadcastSystem < BROADCAST_SYSTEM_PAL_BG
             || broadcastSystem > BROADCAST_SYSTEM_PAL_OTHER_SYSTEM) {
 
-        Slogger::W(TAG, "Invalid Broadcast system:%d", broadcastSystem);
+        Logger::W(TAG, "Invalid Broadcast system:%d", broadcastSystem);
         // throw new IllegalArgumentException(
         //         "Invalid Broadcast system:" + broadcastSystem);
-        Slogger::E(TAG, "Invalid Broadcast system:%d", broadcastSystem);
+        Logger::E(TAG, "Invalid Broadcast system:%d", broadcastSystem);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -580,9 +580,9 @@ ECode HdmiRecordSources::OfExternalPlug(
     *data = NULL;
 
     if (plugNumber < 1 || plugNumber > 255) {
-        Slogger::W(TAG, "Invalid plug number[1-255] %d", plugNumber);
+        Logger::W(TAG, "Invalid plug number[1-255] %d", plugNumber);
         //throw new IllegalArgumentException("Invalid plug number[1-255]" + plugNumber);
-        Slogger::E(TAG, "Invalid plug number[1-255] %d" + plugNumber);
+        Logger::E(TAG, "Invalid plug number[1-255] %d" + plugNumber);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -600,9 +600,9 @@ ECode HdmiRecordSources::OfExternalPhysicalAddress(
     *address = NULL;
 
     if ((physicalAddress & ~0xFFFF) != 0) {
-        Slogger::W(TAG, "Invalid physical address: %d" + physicalAddress);
+        Logger::W(TAG, "Invalid physical address: %d" + physicalAddress);
         //throw new IllegalArgumentException("Invalid physical address:" + physicalAddress);
-        Slogger::E(TAG, "Invalid physical address: %d" + physicalAddress);
+        Logger::E(TAG, "Invalid physical address: %d" + physicalAddress);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

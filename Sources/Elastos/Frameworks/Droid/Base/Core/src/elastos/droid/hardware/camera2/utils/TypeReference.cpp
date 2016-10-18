@@ -20,26 +20,47 @@ TypeReference::TypeReference()
 }
 
 ECode TypeReference::constructor(
-        /* [in] */ const ClassID& clsID)
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId)
 {
-    mType = clsID;
+    mClassId = classId;
+    mInterfaceId = interfaceId;
 
     String clsid;
     clsid.AppendFormat("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }",
-        mType.mClsid.mData1, mType.mClsid.mData2, mType.mClsid.mData3,
-        mType.mClsid.mData4[0], mType.mClsid.mData4[1],
-        mType.mClsid.mData4[2], mType.mClsid.mData4[3],
-        mType.mClsid.mData4[4], mType.mClsid.mData4[5],
-        mType.mClsid.mData4[6], mType.mClsid.mData4[7]);
+        mClassId.mClsid.mData1, mClassId.mClsid.mData2, mClassId.mClsid.mData3,
+        mClassId.mClsid.mData4[0], mClassId.mClsid.mData4[1],
+        mClassId.mClsid.mData4[2], mClassId.mClsid.mData4[3],
+        mClassId.mClsid.mData4[4], mClassId.mClsid.mData4[5],
+        mClassId.mClsid.mData4[6], mClassId.mClsid.mData4[7]);
     mHash = clsid.GetHashCode();
     return NOERROR;
 }
 
-ECode TypeReference::GetType(
-    /* [out] */ ClassID* clsID)
+ECode TypeReference::constructor(
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId,
+    /* [in] */ ITypeReference* component)
 {
-    VALIDATE_NOT_NULL(clsID)
-    *clsID = mType;
+    constructor(classId, interfaceId);
+    mComponent = component;
+    mHash = mHash ^ Object::GetHashCode(mComponent);
+    return NOERROR;
+}
+
+ECode TypeReference::GetClassType(
+    /* [out] */ ClassID* classId)
+{
+    VALIDATE_NOT_NULL(classId)
+    *classId = mClassId;
+    return NOERROR;
+}
+
+ECode TypeReference::GetInterfaceType(
+    /* [out] */ InterfaceID* interfaceId)
+{
+    VALIDATE_NOT_NULL(interfaceId)
+    *interfaceId = mInterfaceId;
     return NOERROR;
 }
 
@@ -59,7 +80,12 @@ ECode TypeReference::Equals(
         return NOERROR;
     }
 
-    *result = other->mType == mType;
+    *result = other->mClassId == mClassId && other->mInterfaceId == mInterfaceId;
+    if (*result) {
+        AutoPtr<ITypeReference> otherComp;
+        other->GetComponent((ITypeReference**)&otherComp);
+        *result = Object::Equals(mComponent, otherComp);
+    }
     return NOERROR;
 }
 
@@ -80,39 +106,62 @@ ECode TypeReference::ToString(
     sb += "{clsid:";
     String clsid;
     clsid.AppendFormat("{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
-        mType.mClsid.mData1, mType.mClsid.mData2, mType.mClsid.mData3,
-        mType.mClsid.mData4[0], mType.mClsid.mData4[1],
-        mType.mClsid.mData4[2], mType.mClsid.mData4[3],
-        mType.mClsid.mData4[4], mType.mClsid.mData4[5],
-        mType.mClsid.mData4[6], mType.mClsid.mData4[7]);
+        mClassId.mClsid.mData1, mClassId.mClsid.mData2, mClassId.mClsid.mData3,
+        mClassId.mClsid.mData4[0], mClassId.mClsid.mData4[1],
+        mClassId.mClsid.mData4[2], mClassId.mClsid.mData4[3],
+        mClassId.mClsid.mData4[4], mClassId.mClsid.mData4[5],
+        mClassId.mClsid.mData4[6], mClassId.mClsid.mData4[7]);
     sb += clsid;
     sb += ", module:";
-    sb += mType.mUunm;
+    sb += mClassId.mUunm;
+    if (mComponent != NULL) {
+        sb += ", component:";
+        sb += TO_CSTR(mComponent);
+    }
     sb += "}";
     *str = sb.ToString();
     return NOERROR;
 }
 
 AutoPtr<ITypeReference> TypeReference::CreateSpecializedTypeReference(
-    /* [in] */ const ClassID& clsID)
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId)
 {
     AutoPtr<TypeReference> ref = new TypeReference();
-    ref->constructor(clsID);
+    ref->constructor(classId, interfaceId);
     return (ITypeReference*)ref.Get();
 }
 
-ECode TypeReference::GetRawType(
-    /* [out] */ IClassInfo** classInfo)
+AutoPtr<ITypeReference> TypeReference::CreateSpecializedTypeReference(
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId,
+    /* [in] */ const ClassID& componentClassId,
+    /* [in] */ const InterfaceID& componentInterfaceId)
 {
-    assert(0 && "E_NOT_IMPLEMENTED");
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<TypeReference> component = new TypeReference();
+    component->constructor(componentClassId, componentInterfaceId);
+    AutoPtr<TypeReference> ref = new TypeReference();
+    ref->constructor(classId, interfaceId, component);
+    return (ITypeReference*)ref.Get();
 }
 
-ECode TypeReference::GetComponentType(
-    /* [out] */ ITypeReference** reference)
+AutoPtr<ITypeReference> TypeReference::CreateSpecializedTypeReference(
+    /* [in] */ const ClassID& classId,
+    /* [in] */ const InterfaceID& interfaceId,
+    /* [in] */ ITypeReference* component)
 {
-    assert(0 && "E_NOT_IMPLEMENTED");
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<TypeReference> ref = new TypeReference();
+    ref->constructor(classId, interfaceId, component);
+    return (ITypeReference*)ref.Get();
+}
+
+ECode TypeReference::GetComponent(
+    /* [out] */ ITypeReference** component)
+{
+    VALIDATE_NOT_NULL(component)
+    *component = mComponent;
+    REFCOUNT_ADD(*component);
+    return NOERROR;
 }
 
 } // namespace Utils

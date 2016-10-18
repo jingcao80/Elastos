@@ -1,15 +1,17 @@
 
 #include "elastos/droid/hardware/camera2/params/CHighSpeedVideoConfiguration.h"
+#include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/utility/CSize.h"
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Utility::CSize;
 using Elastos::Droid::Internal::Utility::Preconditions;
+using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 using Elastos::Core::CInteger32;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -45,8 +47,7 @@ ECode CHighSpeedVideoConfiguration::constructor(
     /* [in] */ Int32 fpsMax)
 {
     if (fpsMax < 60) {
-        //throw new IllegalArgumentException("fpsMax must be at least 60");
-        Slogger::E("CHighSpeedVideoConfiguration", "fpsMax must be at least 60");
+        Logger::E("CHighSpeedVideoConfiguration", "fpsMax must be at least 60");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mFpsMax = fpsMax;
@@ -127,35 +128,25 @@ ECode CHighSpeedVideoConfiguration::Equals(
     /* [out] */ Boolean *equal)
 {
     VALIDATE_NOT_NULL(equal);
-
-    if (obj == NULL) {
-        *equal = FALSE;
-        return NOERROR;
-    }
-    else if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
-        *equal = TRUE;
-        return NOERROR;
-    }
-    else if (IHighSpeedVideoConfiguration::Probe(obj) != NULL) {
-        const AutoPtr<CHighSpeedVideoConfiguration> other = (CHighSpeedVideoConfiguration*)IHighSpeedVideoConfiguration::Probe(obj);
-        *equal = mWidth == other->mWidth &&
-                mHeight == other->mHeight &&
-                mFpsMin == other->mFpsMin &&
-                mFpsMax == other->mFpsMax;
-        return NOERROR;
-    }
     *equal = FALSE;
+
+    IHighSpeedVideoConfiguration* hsvc = IHighSpeedVideoConfiguration::Probe(obj);
+    if (hsvc == NULL) {
+        return NOERROR;
+    }
+
+    CHighSpeedVideoConfiguration* other = (CHighSpeedVideoConfiguration*)hsvc;
+    *equal = mWidth == other->mWidth &&
+            mHeight == other->mHeight &&
+            mFpsMin == other->mFpsMin &&
+            mFpsMax == other->mFpsMax;
     return NOERROR;
 }
 
 ECode CHighSpeedVideoConfiguration::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
-    VALIDATE_NOT_NULL(hashCode);
-
-    assert(0 && "TODO: weit Hardware/Camera2/Utils/HashCodeHelpers");
-    //*hashCode = HashCodeHelpers::GetHashCode(mWidth, mHeight, mFpsMin, mFpsMax);
-    return NOERROR;
+    return HashCodeHelpers::GetHashCode(mWidth, mHeight, mFpsMin, mFpsMax, hashCode);
 }
 
 } // namespace Params

@@ -539,6 +539,7 @@ private:
     Object mLock;
 
     AutoPtr<CameraServiceListener> mServiceListener;
+    AutoPtr<ICameraDevice> mCameraDevice;
 };
 
 } // namespace Camera2

@@ -2,9 +2,9 @@
 #include "elastos/droid/hardware/camera2/utils/TaskSingleDrainer.h"
 #include "elastos/droid/hardware/camera2/utils/CTaskDrainer.h"
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {

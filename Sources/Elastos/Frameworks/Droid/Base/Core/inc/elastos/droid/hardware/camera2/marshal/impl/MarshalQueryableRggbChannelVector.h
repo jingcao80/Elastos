@@ -25,6 +25,8 @@ private:
         : public Marshaler
     {
     public:
+        TO_STRING_IMPL("MarshalerRggbChannelVector")
+
         //@Override
         CARAPI Marshal(
             /* [in] */ IInterface* value,

@@ -7,6 +7,12 @@ module
     namespace Elastos {
     namespace Utility {
 
+    interface IReverseComparator {
+    }
+
+    interface IReverseComparator2 {
+    }
+
     [deprecated]
     interface ICollections {
     /**

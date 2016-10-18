@@ -15,7 +15,7 @@
 #include "elastos/droid/opengl/CMatrix.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Legacy::CPerfMeasurement;
 using Elastos::Droid::Hardware::Camera2::ICameraCharacteristics;
@@ -57,7 +57,7 @@ using Elastos::IO::IByteBuffer;
 using Elastos::IO::IByteBufferHelper;
 using Elastos::IO::CByteBufferHelper;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -261,14 +261,14 @@ ECode SurfaceTextureRenderer::LoadShader(
     AutoPtr<ArrayOf<Int32> > compiled = ArrayOf<Int32>::Alloc(1);
     gles20->GlGetShaderiv(shader, IGLES20::_GL_COMPILE_STATUS, compiled, 0);
     if ((*compiled)[0] == 0) {
-        Slogger::E(TAG, "Could not compile shader %d:", shaderType);
+        Logger::E(TAG, "Could not compile shader %d:", shaderType);
         String str;
         gles20->GlGetShaderInfoLog(shader, &str);
-        Slogger::E(TAG, " %s", str.string());
+        Logger::E(TAG, " %s", str.string());
         gles20->GlDeleteShader(shader);
         // TODO: handle this more gracefully
         //throw new IllegalStateException("Could not compile shader " + shaderType);
-        Slogger::E(TAG, "Could not compile shader %d", shaderType);
+        Logger::E(TAG, "Could not compile shader %d", shaderType);
         return E_ILLEGAL_STATE_EXCEPTION;;
     }
     *result = shader;
@@ -302,7 +302,7 @@ ECode SurfaceTextureRenderer::CreateProgram(
     gles20->GlCreateProgram(&program);
     FAIL_RETURN(CheckGlError(String("glCreateProgram")))
     if (program == 0) {
-        Slogger::E(TAG, "Could not create program");
+        Logger::E(TAG, "Could not create program");
     }
     gles20->GlAttachShader(program, vertexShader);
     FAIL_RETURN(CheckGlError(String("glAttachShader")))
@@ -312,14 +312,14 @@ ECode SurfaceTextureRenderer::CreateProgram(
     AutoPtr<ArrayOf<Int32> > linkStatus = ArrayOf<Int32>::Alloc(1);
     gles20->GlGetProgramiv(program, IGLES20::_GL_LINK_STATUS, linkStatus, 0);
     if ((*linkStatus)[0] != IGLES20::_GL_TRUE) {
-        Slogger::E(TAG, "Could not link program: ");
+        Logger::E(TAG, "Could not link program: ");
         String str;
         gles20->GlGetProgramInfoLog(program, &str);
-        Slogger::E(TAG, str);
+        Logger::E(TAG, str);
         gles20->GlDeleteProgram(program);
         // TODO: handle this more gracefully
         //throw new IllegalStateException("Could not link program");
-        Slogger::E(TAG, "Could not link program");
+        Logger::E(TAG, "Could not link program");
         return E_ILLEGAL_STATE_EXCEPTION;;
     }
     *result = program;
@@ -346,7 +346,7 @@ ECode SurfaceTextureRenderer::DrawFrame(
     if (FAILED(ec)) {
         // Should never hit this.
         //throw new IllegalStateException("Surface abandoned, skipping drawFrame...", e);
-        Slogger::E(TAG, "Surface abandoned, skipping drawFrame... %d", ec);
+        Logger::E(TAG, "Surface abandoned, skipping drawFrame... %d", ec);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     //}
@@ -357,7 +357,7 @@ ECode SurfaceTextureRenderer::DrawFrame(
 
     if (texWidth <= 0 || texHeight <= 0) {
         //throw new IllegalStateException("Illegal intermediate texture with dimension of 0");
-        Slogger::E(TAG, "Illegal intermediate texture with dimension of 0");
+        Logger::E(TAG, "Illegal intermediate texture with dimension of 0");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -391,7 +391,7 @@ ECode SurfaceTextureRenderer::DrawFrame(
     matrix->ScaleM(mMVPMatrix, /*offset*/0, /*x*/scaleY, /*y*/scaleX, /*z*/1);
 
     if (DEBUG) {
-        Slogger::D(TAG, "Scaling factors (S_x = %f,S_y = %f) used for %fx%f surface,"
+        Logger::D(TAG, "Scaling factors (S_x = %f,S_y = %f) used for %fx%f surface,"
                 "intermediate buffer size is %fx%f", scaleX, scaleY, width,
                 height, texWidth, texHeight);
     }
@@ -441,7 +441,7 @@ ECode SurfaceTextureRenderer::InitializeGLState()
     FAIL_RETURN(CreateProgram(VERTEX_SHADER, FRAGMENT_SHADER, &mProgram))
     if (mProgram == 0) {
         //throw new IllegalStateException("failed creating program");
-        Slogger::E(TAG, "failed creating program");
+        Logger::E(TAG, "failed creating program");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<IGLES20> gles20;
@@ -450,14 +450,14 @@ ECode SurfaceTextureRenderer::InitializeGLState()
     FAIL_RETURN(CheckGlError(String("glGetAttribLocation aPosition")))
     if (maPositionHandle == -1) {
         //throw new IllegalStateException("Could not get attrib location for aPosition");
-        Slogger::E(TAG, "Could not get attrib location for aPosition");
+        Logger::E(TAG, "Could not get attrib location for aPosition");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     gles20->GlGetAttribLocation(mProgram, String("aTextureCoord"), &maTextureHandle);
     FAIL_RETURN(CheckGlError(String("glGetAttribLocation aTextureCoord")))
     if (maTextureHandle == -1) {
         //throw new IllegalStateException("Could not get attrib location for aTextureCoord");
-        Slogger::E(TAG, "Could not get attrib location for aTextureCoord");
+        Logger::E(TAG, "Could not get attrib location for aTextureCoord");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -465,7 +465,7 @@ ECode SurfaceTextureRenderer::InitializeGLState()
     FAIL_RETURN(CheckGlError(String("glGetUniformLocation uMVPMatrix")))
     if (muMVPMatrixHandle == -1) {
         //throw new IllegalStateException("Could not get attrib location for uMVPMatrix");
-        Slogger::E(TAG, "Could not get attrib location for uMVPMatrix");
+        Logger::E(TAG, "Could not get attrib location for uMVPMatrix");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -473,7 +473,7 @@ ECode SurfaceTextureRenderer::InitializeGLState()
     FAIL_RETURN(CheckGlError(String("glGetUniformLocation uSTMatrix")))
     if (muSTMatrixHandle == -1) {
         //throw new IllegalStateException("Could not get attrib location for uSTMatrix");
-        Slogger::E(TAG, "Could not get attrib location for uSTMatrix");
+        Logger::E(TAG, "Could not get attrib location for uSTMatrix");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -523,7 +523,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
     helper->GetNoDisplay((IEGLDisplay**)&display);
     if (mEGLDisplay == display) {
         //throw new IllegalStateException("No EGL14 display");
-        Slogger::E(TAG, "No EGL14 display");
+        Logger::E(TAG, "No EGL14 display");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -532,7 +532,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
     egl14->EglInitialize(mEGLDisplay, version, /*offset*/ 0, version, /*offset*/ 1, &result);
     if (!result) {
         //throw new IllegalStateException("Cannot initialize EGL14");
-        Slogger::E(TAG, "Cannot initialize EGL14");
+        Logger::E(TAG, "Cannot initialize EGL14");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -558,7 +558,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
            configs->GetLength(), numConfigs, /*offset*/ 0, &res);
     FAIL_RETURN(CheckEglError(String("eglCreateContext RGB888+recordable ES2")))
     if ((*numConfigs)[0] == 0) {
-        Slogger::W(TAG, "eglChooseConfig returned no configs, retrying without EGL_RECORDABLE_ANDROID");
+        Logger::W(TAG, "eglChooseConfig returned no configs, retrying without EGL_RECORDABLE_ANDROID");
         Int32 _attribList2[] = {
             EGL_RED_SIZE, EGL_COLOR_BITLENGTH,
             EGL_GREEN_SIZE, EGL_COLOR_BITLENGTH,
@@ -587,7 +587,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
     helper->GetNoContext((IEGLContext**)&context);
     if(mEGLContext == context) {
         //throw new IllegalStateException("No EGLContext could be made");
-        Slogger::E(TAG, "No EGLContext could be made");
+        Logger::E(TAG, "No EGLContext could be made");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
@@ -599,7 +599,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLOutputSurfaces(
 
     if (surfaces == NULL) {
         //throw new IllegalStateException("No Surfaces were provided to draw to");
-        Slogger::E(TAG, "No Surfaces were provided to draw to");
+        Logger::E(TAG, "No Surfaces were provided to draw to");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     else {
@@ -607,7 +607,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLOutputSurfaces(
         surfaces->GetSize(&size);
         if (size == 0) {
             //throw new IllegalStateException("No Surfaces were provided to draw to");
-            Slogger::E(TAG, "No Surfaces were provided to draw to");
+            Logger::E(TAG, "No Surfaces were provided to draw to");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
@@ -639,7 +639,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLOutputSurfaces(
         FAIL_RETURN(CheckEglError(String("eglCreateWindowSurface")))
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
-            Slogger::W(TAG, "Surface abandoned, skipping...%d", ec);
+            Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
         }
         //}
     }
@@ -651,7 +651,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
 {
     if (surfaces == NULL) {
         //throw new IllegalStateException("No Surfaces were provided to draw to");
-        Slogger::E(TAG, "No Surfaces were provided to draw to");
+        Logger::E(TAG, "No Surfaces were provided to draw to");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     else {
@@ -659,7 +659,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
         surfaces->GetSize(&size);
         if (size == 0) {
             //throw new IllegalStateException("No Surfaces were provided to draw to");
-            Slogger::E(TAG, "No Surfaces were provided to draw to");
+            Logger::E(TAG, "No Surfaces were provided to draw to");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
@@ -701,7 +701,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
         FAIL_RETURN(CheckEglError(String("eglCreatePbufferSurface")))
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
-            Slogger::W(TAG, "Surface abandoned, skipping...%d", ec);
+            Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
         }
         //}
     }
@@ -807,7 +807,7 @@ ECode SurfaceTextureRenderer::CheckEglError(
     egl14->EglGetError(&error);
     if (error != EGL_SUCCESS) {
         //throw new IllegalStateException(msg + ": EGL error: 0x" + Integer.toHexString(error));
-        Slogger::E(TAG, "%s: EGL error: 0x%x", msg.string(), StringUtils::ToHexString(error).string());
+        Logger::E(TAG, "%s: EGL error: 0x%x", msg.string(), StringUtils::ToHexString(error).string());
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
@@ -822,7 +822,7 @@ ECode SurfaceTextureRenderer::CheckGlError(
     gles20->GlGetError(&error);
     if (error != IGLES20::_GL_NO_ERROR) {
         //throw new IllegalStateException(msg + ": GLES20 error: 0x" + Integer.toHexString(error));
-        Slogger::E(TAG, "%s: GLES20 error: 0x%x", msg.string(), StringUtils::ToHexString(error).string());
+        Logger::E(TAG, "%s: GLES20 error: 0x%x", msg.string(), StringUtils::ToHexString(error).string());
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
@@ -840,7 +840,7 @@ void SurfaceTextureRenderer::DumpGlTiming()
     if (!result){
         legacyStorageDir->Mkdirs(&result);
         if (!result){
-            Slogger::E(TAG, "Failed to create directory for data dump");
+            Logger::E(TAG, "Failed to create directory for data dump");
             return;
         }
     }
@@ -906,11 +906,11 @@ void SurfaceTextureRenderer::SetupGlTiming()
     Boolean result;
     PerfMeasurement::IsGlTimingSupported(&result);
     if (result) {
-        Slogger::D(TAG, "Enabling GL performance measurement");
+        Logger::D(TAG, "Enabling GL performance measurement");
         CPerfMeasurement::New((IPerfMeasurement**)&mPerfMeasurer);
     }
     else {
-        Slogger::D(TAG, "GL performance measurement not supported on this device");
+        Logger::D(TAG, "GL performance measurement not supported on this device");
         mPerfMeasurer = NULL;
     }
     return;
@@ -956,14 +956,14 @@ ECode SurfaceTextureRenderer::ConfigureSurfaces(
     ReleaseEGLContext();
 
     if (surfaces == NULL) {
-        Slogger::W(TAG, "No output surfaces configured for GL drawing.");
+        Logger::W(TAG, "No output surfaces configured for GL drawing.");
         return NOERROR;
     }
     else {
         Int32 size;
         surfaces->GetSize(&size);
         if (size == 0) {
-            Slogger::W(TAG, "No output surfaces configured for GL drawing.");
+            Logger::W(TAG, "No output surfaces configured for GL drawing.");
             return NOERROR;
         }
     }
@@ -992,7 +992,7 @@ ECode SurfaceTextureRenderer::ConfigureSurfaces(
         }
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
-            Slogger::W(TAG, "Surface abandoned, skipping configuration... %d", ec);
+            Logger::W(TAG, "Surface abandoned, skipping configuration... %d", ec);
         }
         //}
     }
@@ -1066,7 +1066,7 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
     // No preview request queued, drop frame.
     if (captureHolder == NULL) {
         if (DEBUG) {
-            Slogger::D(TAG, "Dropping preview frame.");
+            Logger::D(TAG, "Dropping preview frame.");
         }
         if (doTiming) {
             EndGlTiming();
@@ -1110,7 +1110,7 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
             SwapBuffers(holder->mEglSurface, &res);
             //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
+                Logger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
             }
             //}
         }
@@ -1138,7 +1138,7 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
             Int32 format;
             ECode ec = LegacyCameraDevice::DetectSurfaceType(holder->mSurface, &format);
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
+                Logger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
             }
             AutoPtr<IInterface> obj;
             captureHolder->GetSecond((IInterface**)&obj);
@@ -1147,20 +1147,20 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
             num->GetValue(&second);
             ec = LegacyCameraDevice::SetNextTimestamp(holder->mSurface, second);
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
+                Logger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
             }
             AutoPtr<ArrayOf<Byte> > array;
             mPBufferPixels->GetArray((ArrayOf<Byte>**)&array);
             ec = LegacyCameraDevice::ProduceFrame(holder->mSurface, array,
                     holder->mWidth, holder->mHeight, format);
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
+                Logger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
             }
             Boolean res;
             SwapBuffers(holder->mEglSurface, &res);
             //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
+                Logger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
             }
             //}
         }
@@ -1184,7 +1184,7 @@ ECode SurfaceTextureRenderer::CleanupEGLContext()
 ECode SurfaceTextureRenderer::Flush()
 {
     // TODO: implement flush
-    Slogger::E(TAG, "Flush not yet implemented.");
+    Logger::E(TAG, "Flush not yet implemented.");
     return NOERROR;
 }
 

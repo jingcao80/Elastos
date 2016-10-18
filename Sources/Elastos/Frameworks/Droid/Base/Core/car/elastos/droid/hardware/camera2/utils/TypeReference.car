@@ -31,34 +31,19 @@ module
         /**
          * Return the dynamic {@link Type} corresponding to the captured type {@code T}.
          */
-        GetType(
+        GetClassType(
             [out] ClassID* clsID);
 
-        /**
-         * Returns the raw type of T.
-         *
-         * <p><ul>
-         * <li>If T is a Class itself, T itself is returned.
-         * <li>If T is a ParameterizedType, the raw type of the parameterized type is returned.
-         * <li>If T is a GenericArrayType, the returned type is the corresponding array class.
-         * For example: {@code List<Integer>[]} => {@code List[]}.
-         * <li>If T is a type variable or a wildcard type, the raw type of the first upper bound is
-         * returned. For example: {@code <X extends Foo>} => {@code Foo}.
-         * </ul>
-         *
-         * @return the raw type of {@code T}
-         */
-        //@SuppressWarnings("unchecked")
-        GetRawType(
-            [out] IClassInfo** classInfo);
+        GetInterfaceType(
+            [out] InterfaceID* interfaceID);
 
         /**
          * Get the component type, e.g. {@code T} from {@code T[]}.
          *
          * @return component type, or {@code null} if {@code T} is not an array
          */
-        GetComponentType(
-            [out] ITypeReference** reference);
+        GetComponent(
+            [out] ITypeReference** clsID);
     }
 
     [local]
@@ -77,43 +62,9 @@ module
          * @throws IllegalArgumentException if {@code T} had any type variables
          */
         CreateSpecializedTypeReference(
-            [in] IClassInfo* klass,
+            [in] ClassID classId,
+            [in] InterfaceID interfaceId,
             [out] ITypeReference** reference);
-
-        /**
-         * Create a specialized type reference from a dynamic {@link Type} instance,
-         * bypassing the standard compile-time checks.
-         *
-         * <p>As with a regular type reference, the {@code type} must not contain
-         * any type variables.</p>
-         *
-         * @param type a non-{@code null} {@link Type} instance
-         *
-         * @return a type reference which captures {@code T} at runtime
-         *
-         * @throws IllegalArgumentException if {@code type} had any type variables
-         */
-        //CreateSpecializedTypeReference(
-        //    [in] Type type,
-        //    [out] ITypeReference** reference);
-
-        /**
-         * Check if the {@code type} contains a {@link TypeVariable} recursively.
-         *
-         * <p>Intuitively, a type variable is a type in a type expression that refers to a generic
-         * type which is not known at the definition of the expression (commonly seen when
-         * type parameters are used, e.g. {@code class Foo<T>}).</p>
-         *
-         * <p>See <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-4.html#jls-4.4">
-         * http://docs.oracle.com/javase/specs/jls/se7/html/jls-4.html#jls-4.4</a>
-         * for a more formal definition of a type variable</p>.
-         *
-         * @param type a type object ({@code null} is allowed)
-         * @return {@code true} if there were nested type variables; {@code false} otherwise
-         */
-        //ContainsTypeVariable(
-        //    [in] Type type,
-        //    [out] Boolean* result);
     }
 
     } // namespace Utils

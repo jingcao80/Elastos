@@ -11,7 +11,7 @@ namespace Hardware {
 namespace Camera2 {
 
 CarClass(CCaptureResultKey)
-    , public CaptureResult::Key
+    , public CaptureResultKey
 {
 public:
     CAR_OBJECT_DECL()

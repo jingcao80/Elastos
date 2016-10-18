@@ -9,7 +9,7 @@
 #include "elastos/droid/Manifest.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
@@ -20,7 +20,7 @@ using Elastos::Droid::Hardware::Location::IGeofenceHardware;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -186,7 +186,7 @@ ECode GeofenceHardwareImpl::GeofenceHandler::HandleMessage(
                 ECode ec = _callback->OnGeofenceAdd(geofenceId, arg2);
                 //} catch (RemoteException e) {
                 if (FAILED(ec)) {
-                    Slogger::I(TAG, "Remote Exception:"/* + e*/);
+                    Logger::I(TAG, "Remote Exception:"/* + e*/);
                 }
                 //}
             }
@@ -266,7 +266,7 @@ ECode GeofenceHardwareImpl::GeofenceHandler::HandleMessage(
                     sb += ":";
                     assert(0 && "HashMap ToString");
                     //sb += mGeofences;
-                    Slogger::D(TAG, sb.ToString());
+                    Logger::D(TAG, sb.ToString());
                 }
             }
 
@@ -291,7 +291,7 @@ ECode GeofenceHardwareImpl::GeofenceHandler::HandleMessage(
                 StringBuilder sb;
                 sb += "Geofence callback reaped:";
                 sb += Object::ToString(_callback);
-                Slogger::D(TAG, sb.ToString());
+                Logger::D(TAG, sb.ToString());
             }
             Int32 monitoringType;
             msg->GetArg1(&monitoringType);
@@ -343,7 +343,7 @@ ECode GeofenceHardwareImpl::CallbacksHandler::HandleMessage(
                     String str;
                     IObject::Probe(event)->ToString(&str);
                     sb += str;
-                    Slogger::D(TAG, sb.ToString());
+                    Logger::D(TAG, sb.ToString());
                 }
 
                 Int32 size;
@@ -356,7 +356,7 @@ ECode GeofenceHardwareImpl::CallbacksHandler::HandleMessage(
                     ECode ec = c->OnMonitoringSystemChange(event);
                     //} catch (RemoteException e) {
                     if (FAILED(ec)) {
-                        Slogger::D(TAG, "Error reporting onMonitoringSystemChange."/*, e*/);
+                        Logger::D(TAG, "Error reporting onMonitoringSystemChange."/*, e*/);
                     }
                     //}
                 }
@@ -406,7 +406,7 @@ ECode GeofenceHardwareImpl::CallbacksHandler::HandleMessage(
                 String str;
                 IObject::Probe(_callback)->ToString(&str);
                 sb += str;
-                Slogger::D(TAG, sb.ToString());
+                Logger::D(TAG, sb.ToString());
             }
 
             Int32 arg1;
@@ -577,7 +577,7 @@ void GeofenceHardwareImpl::UpdateGpsHardwareAvailability()
     ECode ec = mGpsService->IsHardwareGeofenceSupported(&gpsSupported);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Remote Exception calling LocationManagerService");
+        Logger::E(TAG, "Remote Exception calling LocationManagerService");
         gpsSupported = FALSE;
     }
     //}
@@ -604,7 +604,7 @@ void GeofenceHardwareImpl::UpdateFusedHardwareAvailability()
     }
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "RemoteException calling LocationManagerService");
+        Logger::E(TAG, "RemoteException calling LocationManagerService");
         fusedSupported = FALSE;
     }
     //}
@@ -626,10 +626,10 @@ ECode GeofenceHardwareImpl::SetGpsHardwareGeofence(
     }
     else if (service == NULL) {
         mGpsService = NULL;
-        Slogger::W(TAG, "GPS Geofence Hardware service seems to have crashed");
+        Logger::W(TAG, "GPS Geofence Hardware service seems to have crashed");
     }
     else {
-        Slogger::E(TAG, "Error: GpsService being set again.");
+        Logger::E(TAG, "Error: GpsService being set again.");
     }
     return NOERROR;
 }
@@ -643,10 +643,10 @@ ECode GeofenceHardwareImpl::SetFusedGeofenceHardware(
     }
     else if (service == NULL) {
         mFusedService = NULL;
-        Slogger::W(TAG, "Fused Geofence Hardware service seems to have crashed");
+        Logger::W(TAG, "Fused Geofence Hardware service seems to have crashed");
     }
     else {
-        Slogger::E(TAG, "Error: FusedService being set again");
+        Logger::E(TAG, "Error: FusedService being set again");
     }
     return NOERROR;
 }
@@ -733,7 +733,7 @@ ECode GeofenceHardwareImpl::AddCircularFence(
         sb += monitoringType;
         sb += ", ";
         sb += TO_STR(request);
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     Boolean _result;
 
@@ -775,7 +775,7 @@ ECode GeofenceHardwareImpl::AddCircularFence(
                     transitions, responsiveness, timer, &_result);
             //} catch (RemoteException e) {
             if (FAILED(ec)) {
-                Slogger::E(TAG, "AddGeofence: Remote Exception calling LocationManagerService");
+                Logger::E(TAG, "AddGeofence: Remote Exception calling LocationManagerService");
                 _result = FALSE;
             }
             //}
@@ -794,7 +794,7 @@ ECode GeofenceHardwareImpl::AddCircularFence(
             _result = TRUE;
             //} catch(RemoteException e) {
             if (FAILED(ec)) {
-                Slogger::E(TAG, "AddGeofence: RemoteException calling LocationManagerService");
+                Logger::E(TAG, "AddGeofence: RemoteException calling LocationManagerService");
                 _result = FALSE;
             }
             //}
@@ -820,7 +820,7 @@ ECode GeofenceHardwareImpl::AddCircularFence(
         StringBuilder sb;
         sb += "addCircularFence: Result is: ";
         sb += _result;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     *result = _result;
     return NOERROR;
@@ -839,7 +839,7 @@ ECode GeofenceHardwareImpl::RemoveGeofence(
         StringBuilder sb;
         sb += "Remove Geofence: GeofenceId: ";
         sb += geofenceId;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
 
     Boolean _result = FALSE;
@@ -862,7 +862,7 @@ ECode GeofenceHardwareImpl::RemoveGeofence(
             ECode ec = mGpsService->RemoveHardwareGeofence(geofenceId, &_result);
             //} catch (RemoteException e) {
             if (FAILED(ec)) {
-                Slogger::E(TAG, "RemoveGeofence: Remote Exception calling LocationManagerService");
+                Logger::E(TAG, "RemoveGeofence: Remote Exception calling LocationManagerService");
                 _result = FALSE;
             }
             //}
@@ -881,7 +881,7 @@ ECode GeofenceHardwareImpl::RemoveGeofence(
             _result = TRUE;
             //} catch(RemoteException e) {
             if (FAILED(ec)) {
-                Slogger::E(TAG, "RemoveGeofence: RemoteException calling LocationManagerService");
+                Logger::E(TAG, "RemoveGeofence: RemoteException calling LocationManagerService");
                 _result = FALSE;
             }
             //}
@@ -894,7 +894,7 @@ ECode GeofenceHardwareImpl::RemoveGeofence(
         StringBuilder sb;
         sb += "removeGeofence: Result is: ";
         sb += _result;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     *result = _result;
     return NOERROR;
@@ -913,7 +913,7 @@ ECode GeofenceHardwareImpl::PauseGeofence(
         StringBuilder sb;
         sb += "Pause Geofence: GeofenceId: ";
         sb += geofenceId;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     Boolean _result;
     {    AutoLock syncLock(mGeofencesLock);
@@ -934,7 +934,7 @@ ECode GeofenceHardwareImpl::PauseGeofence(
             ECode ec = mGpsService->PauseHardwareGeofence(geofenceId, &_result);
             //} catch (RemoteException e) {
             if (FAILED(ec)) {
-                Slogger::E(TAG, "PauseGeofence: Remote Exception calling LocationManagerService");
+                Logger::E(TAG, "PauseGeofence: Remote Exception calling LocationManagerService");
                 _result = FALSE;
             }
             //}
@@ -951,7 +951,7 @@ ECode GeofenceHardwareImpl::PauseGeofence(
             _result = TRUE;
             //} catch(RemoteException e) {
             if (FAILED(ec)) {
-                Slogger::E(TAG, "PauseGeofence: RemoteException calling LocationManagerService");
+                Logger::E(TAG, "PauseGeofence: RemoteException calling LocationManagerService");
                 _result = FALSE;
             }
             //}
@@ -964,7 +964,7 @@ ECode GeofenceHardwareImpl::PauseGeofence(
         StringBuilder sb;
         sb += "pauseGeofence: Result is: ";
         sb += _result;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     *result = _result;
     return NOERROR;
@@ -984,7 +984,7 @@ ECode GeofenceHardwareImpl::ResumeGeofence(
         StringBuilder sb;
         sb += "Resume Geofence: GeofenceId: ";
         sb += geofenceId;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     Boolean _result;
     {    AutoLock syncLock(mGeofencesLock);
@@ -1005,7 +1005,7 @@ ECode GeofenceHardwareImpl::ResumeGeofence(
             ECode ec = mGpsService->ResumeHardwareGeofence(geofenceId, monitorTransition, &_result);
             //} catch (RemoteException e) {
             if (FAILED(ec)) {
-                Slogger::E(TAG, "ResumeGeofence: Remote Exception calling LocationManagerService");
+                Logger::E(TAG, "ResumeGeofence: Remote Exception calling LocationManagerService");
                 _result = FALSE;
             }
             //}
@@ -1022,7 +1022,7 @@ ECode GeofenceHardwareImpl::ResumeGeofence(
             _result = TRUE;
             //} catch(RemoteException e) {
             if (FAILED(ec)) {
-                Slogger::E(TAG, "ResumeGeofence: RemoteException calling LocationManagerService");
+                Logger::E(TAG, "ResumeGeofence: RemoteException calling LocationManagerService");
                 _result = FALSE;
             }
             //}
@@ -1035,7 +1035,7 @@ ECode GeofenceHardwareImpl::ResumeGeofence(
         StringBuilder sb;
         sb += "resumeGeofence: Result is: ";
         sb += _result;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     *result = _result;
     return NOERROR;
@@ -1091,7 +1091,7 @@ ECode GeofenceHardwareImpl::ReportGeofenceTransition(
         StringBuilder sb;
         sb += "Invalid Geofence Transition: location=";
         sb += location;
-        Slogger::E(TAG, sb.ToString());
+        Logger::E(TAG, sb.ToString());
         return NOERROR;
     }
     if (DEBUG) {
@@ -1106,7 +1106,7 @@ ECode GeofenceHardwareImpl::ReportGeofenceTransition(
         sb += monitoringType;
         sb += ", sourcesUsed:";
         sb += sourcesUsed;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
 
     AutoPtr<GeofenceTransition> geofenceTransition = new GeofenceTransition(
@@ -1166,7 +1166,7 @@ ECode GeofenceHardwareImpl::ReportGeofenceAddStatus(
         sb += geofenceId;
         sb += ", status:";
         sb += status;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     return ReportGeofenceOperationStatus(ADD_GEOFENCE_CALLBACK, geofenceId, status);
 }
@@ -1181,7 +1181,7 @@ ECode GeofenceHardwareImpl::ReportGeofenceRemoveStatus(
         sb += geofenceId;
         sb += ", status:";
         sb += status;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     return ReportGeofenceOperationStatus(REMOVE_GEOFENCE_CALLBACK, geofenceId, status);
 }
@@ -1196,7 +1196,7 @@ ECode GeofenceHardwareImpl::ReportGeofencePauseStatus(
         sb += geofenceId;
         sb += ", status:";
         sb += status;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     return ReportGeofenceOperationStatus(PAUSE_GEOFENCE_CALLBACK, geofenceId, status);
 }
@@ -1211,7 +1211,7 @@ ECode GeofenceHardwareImpl::ReportGeofenceResumeStatus(
         sb += geofenceId;
         sb += ", status:";
         sb += status;
-        Slogger::D(TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
     return ReportGeofenceOperationStatus(RESUME_GEOFENCE_CALLBACK, geofenceId, status);
 }

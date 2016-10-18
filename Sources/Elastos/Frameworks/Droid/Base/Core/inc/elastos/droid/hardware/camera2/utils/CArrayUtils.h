@@ -1,12 +1,13 @@
 
-#ifndef __ELASTOS_DROID_HARDWARE_CARRAYUTILS_H__
-#define __ELASTOS_DROID_HARDWARE_CARRAYUTILS_H__
+#ifndef __ELASTOS_DROID_HARDWARE_CAMERA2_UTILS_CARRAYUTILS_H__
+#define __ELASTOS_DROID_HARDWARE_CAMERA2_UTILS_CARRAYUTILS_H__
 
 #include "_Elastos_Droid_Hardware_Camera2_Utils_CArrayUtils.h"
-#include "elastos/droid/hardware/camera2/utils/ArrayUtils.h"
 #include <elastos/core/Singleton.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
 using Elastos::Core::Singleton;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -121,4 +122,4 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
-#endif  // __ELASTOS_DROID_HARDWARE_CARRAYUTILS_H__
+#endif  // __ELASTOS_DROID_HARDWARE_CAMERA2_UTILS_CARRAYUTILS_H__

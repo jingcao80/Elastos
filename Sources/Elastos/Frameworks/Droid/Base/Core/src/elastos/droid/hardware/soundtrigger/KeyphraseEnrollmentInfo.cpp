@@ -12,7 +12,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
@@ -30,7 +30,7 @@ using Elastos::Core::StringUtils;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::IList;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Org::Xmlpull::V1::IXmlPullParser;
@@ -92,7 +92,7 @@ ECode KeyphraseEnrollmentInfo::constructor(
             // The enrollment application needs to be a privileged system app.
             String packageName;
             IPackageItemInfo::Probe(ai)->GetPackageName(&packageName);
-            Slogger::W(TAG, packageName + String("is not a privileged system app"));
+            Logger::W(TAG, packageName + String("is not a privileged system app"));
             continue;
         }
         assert(0 && "TODO: MANAGE_VOICE_KEYPHRASES");
@@ -181,15 +181,15 @@ ECode KeyphraseEnrollmentInfo::constructor(
 EXIT1:
     if (ec == (ECode)E_XML_PULL_PARSER_EXCEPTION) {
         mParseError = String("Error parsing keyphrase enrollment meta-data: ") + StringUtils::ToString(ec);
-        Slogger::W(TAG, String("error parsing keyphrase enrollment meta-data") + StringUtils::ToString(ec));
+        Logger::W(TAG, String("error parsing keyphrase enrollment meta-data") + StringUtils::ToString(ec));
     }
     if (ec == (ECode)E_IO_EXCEPTION) {
         mParseError = String("Error parsing keyphrase enrollment meta-data: ") + StringUtils::ToString(ec);
-        Slogger::W(TAG, String("error parsing keyphrase enrollment meta-data") + StringUtils::ToString(ec));
+        Logger::W(TAG, String("error parsing keyphrase enrollment meta-data") + StringUtils::ToString(ec));
     }
     if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         mParseError = String("Error parsing keyphrase enrollment meta-data: ") + StringUtils::ToString(ec);
-        Slogger::W(TAG, String("error parsing keyphrase enrollment meta-data") + StringUtils::ToString(ec));
+        Logger::W(TAG, String("error parsing keyphrase enrollment meta-data") + StringUtils::ToString(ec));
     }
 
 EXIT:
@@ -208,7 +208,7 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
             R::styleable::VoiceEnrollmentApplication_searchKeyphraseId, -1, &searchKeyphraseId))
     if (searchKeyphraseId <= 0) {
         mParseError = String("No valid searchKeyphraseId specified in meta-data");
-        Slogger::W(TAG, mParseError);
+        Logger::W(TAG, mParseError);
         return NOERROR;
     }
 
@@ -218,7 +218,7 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
             R::styleable::VoiceEnrollmentApplication_searchKeyphrase, &searchKeyphrase))
     if (searchKeyphrase.IsNull()) {
         mParseError = String("No valid searchKeyphrase specified in meta-data");
-        Slogger::W(TAG, mParseError);
+        Logger::W(TAG, mParseError);
         return NOERROR;
     }
 
@@ -228,7 +228,7 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
             R::styleable::VoiceEnrollmentApplication_searchKeyphraseSupportedLocales, &searchKeyphraseSupportedLocales))
     if (searchKeyphraseSupportedLocales.IsNull()) {
         mParseError = String("No valid searchKeyphraseSupportedLocales specified in meta-data");
-        Slogger::W(TAG, mParseError);
+        Logger::W(TAG, mParseError);
         return NOERROR;
     }
 
@@ -244,7 +244,7 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
                 (ArrayOf<String>**)&supportedLocalesDelimited);
         if (FAILED(ec)) {
             mParseError = String("Error reading searchKeyphraseSupportedLocales from meta-data");
-            Slogger::W(TAG, mParseError + StringUtils::ToString(ec));
+            Logger::W(TAG, mParseError + StringUtils::ToString(ec));
             return ec;
         }
         for (Int32 i = 0; i < supportedLocalesDelimited->GetLength(); i++) {
@@ -254,13 +254,13 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
             ec = helper->ForLanguageTag((*supportedLocalesDelimited)[i], (ILocale**)&locale);
             if (FAILED(ec)) {
                 mParseError = String("Error reading searchKeyphraseSupportedLocales from meta-data");
-                Slogger::W(TAG, mParseError + StringUtils::ToString(ec));
+                Logger::W(TAG, mParseError + StringUtils::ToString(ec));
                 return ec;
             }
             ec = set->Add(TO_IINTERFACE(locale));
             if (FAILED(ec)) {
                 mParseError = String("Error reading searchKeyphraseSupportedLocales from meta-data");
-                Slogger::W(TAG, mParseError + StringUtils::ToString(ec));
+                Logger::W(TAG, mParseError + StringUtils::ToString(ec));
                 return ec;
             }
         }
@@ -269,7 +269,7 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
         // to be affected by a malformed metadata because invalid locales were specified
         // by the system application.
         // mParseError = String("Error reading searchKeyphraseSupportedLocales from meta-data");
-        // Slogger::W(TAG, mParseError, ex);
+        // Logger::W(TAG, mParseError, ex);
         // return ec;
         //}
     }
@@ -280,7 +280,7 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
             R::styleable::VoiceEnrollmentApplication_searchKeyphraseRecognitionFlags, -1, &recognitionModes))
     if (recognitionModes < 0) {
         mParseError = String("No valid searchKeyphraseRecognitionFlags specified in meta-data");
-        Slogger::W(TAG, mParseError);
+        Logger::W(TAG, mParseError);
         return NOERROR;
     }
     mKeyphrases = ArrayOf<IKeyphraseMetadata*>::Alloc(1);

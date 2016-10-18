@@ -1,5 +1,6 @@
 
 #include "elastos/droid/hardware/camera2/utils/CArrayUtils.h"
+#include "elastos/droid/hardware/camera2/utils/ArrayUtils.h"
 
 namespace Elastos {
 namespace Droid {

@@ -1,9 +1,9 @@
 
 #include "elastos/droid/hardware/camera2/utils/CameraServiceBinderDecorator.h"
 #include <elastos/core/StringBuffer.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -33,7 +33,7 @@ ECode CameraServiceBinderDecorator::CameraServiceBinderDecoratorListener::OnCatc
         // Some other kind of remote exception - this is not normal, so let's at least
         // note it before moving on
         //Log.e(TAG, "Unexpected RemoteException from camera service call.", t);
-        Slogger::E("CameraServiceBinderDecorator", "Unexpected RemoteException from camera service call. %d", t);
+        Logger::E("CameraServiceBinderDecorator", "Unexpected RemoteException from camera service call. %d", t);
     }
 
     // All other exceptions also get sent onward

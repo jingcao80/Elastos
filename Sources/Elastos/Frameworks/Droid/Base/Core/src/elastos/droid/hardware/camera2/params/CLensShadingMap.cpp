@@ -1,16 +1,18 @@
 
 #include "elastos/droid/hardware/camera2/params/CLensShadingMap.h"
 #include "elastos/droid/hardware/camera2/params/CRggbChannelVector.h"
+#include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Droid::Hardware::Camera2::Params::CRggbChannelVector;
+using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 using Elastos::Core::Math;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -38,15 +40,14 @@ ECode CLensShadingMap::constructor()
 }
 
 ECode CLensShadingMap::constructor(
-        /* [in] */ ArrayOf<Float>* elements,
-        /* [in] */ Int32 rows,
-        /* [in] */ Int32 columns)
+    /* [in] */ ArrayOf<Float>* elements,
+    /* [in] */ Int32 rows,
+    /* [in] */ Int32 columns)
 {
     FAIL_RETURN(Preconditions::CheckArgumentPositive(rows, String("rows must be positive")))
     FAIL_RETURN(Preconditions::CheckArgumentPositive(columns, String("columns must be positive")))
-    //FAIL_RETURN(Preconditions::CheckNotNull(elements, "elements must not be null"))
     if (elements == NULL) {
-        Slogger::E("CLensShadingMap", "elements must not be null");
+        Logger::E("CLensShadingMap", "elements must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -57,9 +58,7 @@ ECode CLensShadingMap::constructor(
     Int32 value;
     GetGainFactorCount(&value);
     if (elements->GetLength() != value) {
-        // throw new IllegalArgumentException("elements must be " + getGainFactorCount() +
-        //         " length, received " + elements.length);
-        Slogger::E("CLensShadingMap", "elements must be %d length, received %d", value, elements->GetLength());
+        Logger::E("CLensShadingMap", "elements must be %d length, received %d", value, elements->GetLength());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -104,18 +103,15 @@ ECode CLensShadingMap::GetGainFactor(
     VALIDATE_NOT_NULL(value);
 
     if (colorChannel < 0 || colorChannel > IRggbChannelVector::COUNT) {
-        //throw new IllegalArgumentException("colorChannel out of range");
-        Slogger::E("CLensShadingMap", "colorChannel out of range");
+        Logger::E("CLensShadingMap", "colorChannel out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (column < 0 || column >= mColumns) {
-        //throw new IllegalArgumentException("column out of range");
-        Slogger::E("CLensShadingMap", "column out of range");
+        Logger::E("CLensShadingMap", "column out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (row < 0 || row >= mRows) {
-        //throw new IllegalArgumentException("row out of range");
-        Slogger::E("CLensShadingMap", "row out of range");
+        Logger::E("CLensShadingMap", "row out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -131,13 +127,11 @@ ECode CLensShadingMap::GetGainFactorVector(
     VALIDATE_NOT_NULL(outrggb);
 
     if (column < 0 || column >= mColumns) {
-        //throw new IllegalArgumentException("column out of range");
-        Slogger::E("CLensShadingMap", "column out of range");
+        Logger::E("CLensShadingMap", "column out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (row < 0 || row >= mRows) {
-        //throw new IllegalArgumentException("row out of range");
-        Slogger::E("CLensShadingMap", "row out of range");
+        Logger::E("CLensShadingMap", "row out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -160,17 +154,16 @@ ECode CLensShadingMap::CopyGainFactors(
     /* [in] */ Int32 offset)
 {
     FAIL_RETURN(Preconditions::CheckArgumentNonnegative(offset, String("offset must not be negative")))
-    //FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
     if (destination == NULL) {
-        Slogger::E("CLensShadingMap", "destination must not be null");
+        Logger::E("CLensShadingMap", "destination must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
 
     Int32 count;
     GetGainFactorCount(&count);
     if (destination->GetLength() + offset < count) {
-        //throw new ArrayIndexOutOfBoundsException("destination too small to fit elements");
-        Slogger::E("CLensShadingMap", "destination too small to fit elements");
+        Logger::E("CLensShadingMap", "destination too small to fit elements");
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
@@ -207,10 +200,9 @@ ECode CLensShadingMap::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode);
 
-    assert(0 && "TODO: weit Hardware/Camera2/Utils/HashCodeHelpers");
-    //Int32 elemsHash = HashCodeHelpers::GetHashCode(mElements);
-    //*hashCode = HashCodeHelpers.GetHashCode(mRows, mColumns, elemsHash);
-    return NOERROR;
+    Int32 elemsHash;
+    HashCodeHelpers::GetHashCode(mElements, &elemsHash);
+    return HashCodeHelpers::GetHashCode(mRows, mColumns, elemsHash, hashCode);
 }
 
 } // namespace Params

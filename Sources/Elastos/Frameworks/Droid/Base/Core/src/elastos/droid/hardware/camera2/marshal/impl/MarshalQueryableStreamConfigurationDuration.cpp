@@ -5,6 +5,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IStreamConfigurationDuration;
 using Elastos::Droid::Hardware::Camera2::Params::CStreamConfigurationDuration;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CStreamConfigurationDuration;
 
 namespace Elastos {
 namespace Droid {
@@ -27,13 +28,11 @@ ECode MarshalQueryableStreamConfigurationDuration::MarshalerStreamConfigurationD
 {
     AutoPtr<IStreamConfigurationDuration> configurationDuration = IStreamConfigurationDuration::Probe(value);
 
-    Int32 format;
+    Int32 format, width, height;
     configurationDuration->GetFormat(&format);
     buffer->PutInt32(format & MASK_UNSIGNED_INT); // unsigned int -> long
-    Int32 width;
     configurationDuration->GetWidth(&width);
     buffer->PutInt32(width);
-    Int32 height;
     configurationDuration->GetHeight(&height);
     buffer->PutInt32(height);
     Int64 duration;
@@ -102,9 +101,14 @@ ECode MarshalQueryableStreamConfigurationDuration::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    // return nativeType == ICameraMetadataNative::TYPE_INT64 &&
-    //         (StreamConfigurationDuration.class.equals(managedType.getType()));
+    if (nativeType == ICameraMetadataNative::TYPE_INT64) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CStreamConfigurationDuration) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

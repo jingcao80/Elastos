@@ -1,8 +1,8 @@
 
 #include "elastos/droid/hardware/camera2/CameraMetadata.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -41,7 +41,7 @@ ECode CameraMetadata::GetKeysStatic(
     VALIDATE_NOT_NULL(list);
     *list = NULL;
 
-    if (VERBOSE) Slogger::V(TAG, "getKeysStatic for %d", type);
+    if (VERBOSE) Logger::V(TAG, "getKeysStatic for %d", type);
 
     assert(0);
     // TotalCaptureResult does not have any of the keys on it, use CaptureResult instead

@@ -61,6 +61,7 @@ FlashlightController::CameraListener::CameraListener(
 ECode FlashlightController::CameraListener::OnOpened(
     /* [in] */ ICameraDevice* camera)
 {
+    Logger::I(TAG, " >> CameraListener::OnOpened %s", TO_CSTR(camera));
     mHost->mCameraDevice = camera;
     mHost->PostUpdateFlashlight();
     return NOERROR;
@@ -69,6 +70,7 @@ ECode FlashlightController::CameraListener::OnOpened(
 ECode FlashlightController::CameraListener::OnDisconnected(
     /* [in] */ ICameraDevice* camera)
 {
+    Logger::I(TAG, " >> CameraListener::OnDisconnected %s", TO_CSTR(camera));
     if (mHost->mCameraDevice.Get() == camera) {
         mHost->DispatchOff();
         mHost->Teardown();
@@ -95,6 +97,7 @@ FlashlightController::SessionListener::SessionListener(
 ECode FlashlightController::SessionListener::OnConfigured(
     /* [in] */ ICameraCaptureSession* session)
 {
+    Logger::I(TAG, " >> SessionListener::OnConfigured %s", TO_CSTR(session));
     mHost->mSession = session;
     mHost->PostUpdateFlashlight();
     return NOERROR;
@@ -103,7 +106,7 @@ ECode FlashlightController::SessionListener::OnConfigured(
 ECode FlashlightController::SessionListener::OnConfigureFailed(
     /* [in] */ ICameraCaptureSession* session)
 {
-    Logger::E(TAG, "Configure failed.");
+    Logger::I(TAG, " >> SessionListener::OnConfigureFailed %s", TO_CSTR(session));
     if (mHost->mSession == NULL || mHost->mSession.Get() == session) {
         mHost->HandleError();
     }
@@ -128,7 +131,8 @@ FlashlightController::KillFlashlightRunnable::KillFlashlightRunnable(
 
 ECode FlashlightController::KillFlashlightRunnable::Run()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mHost->mFlashlightEnabled = FALSE;
     }
     mHost->UpdateFlashlight(TRUE /* forceDisable */);
@@ -212,7 +216,6 @@ ECode FlashlightController::constructor(
 ECode FlashlightController::SetFlashlight(
     /* [in] */ Boolean enabled)
 {
-    Logger::I(TAG, " >> SetFlashlight: %d, mFlashlightEnabled: %d", enabled,  mFlashlightEnabled);
     AutoLock lock(this);
     if (mFlashlightEnabled != enabled) {
         mFlashlightEnabled = enabled;
@@ -224,7 +227,8 @@ ECode FlashlightController::SetFlashlight(
 ECode FlashlightController::KillFlashlight()
 {
     Boolean enabled;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         enabled = mFlashlightEnabled;
     }
     if (enabled) {
@@ -281,8 +285,8 @@ void FlashlightController::EnsureHandler()
 ECode FlashlightController::StartDevice() /*throws CameraAccessException*/
 {
     String id;
-    GetCameraId(&id);
-    return mCameraManager->OpenCamera(id, ICameraDeviceStateCallback::Probe(mCameraListener), mHandler);
+    FAIL_RETURN(GetCameraId(&id));
+    return mCameraManager->OpenCamera(id, mCameraListener, mHandler);
 }
 
 ECode FlashlightController::StartSession() /*throws CameraAccessException*/
@@ -310,6 +314,8 @@ ECode FlashlightController::GetSmallestSize(
     /* [out] */ ISize** result) /*throws CameraAccessException*/
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     AutoPtr<ICameraCharacteristics> outcc;
     FAIL_RETURN(mCameraManager->GetCameraCharacteristics(cameraId, (ICameraCharacteristics**)&outcc));
     AutoPtr<IInterface> values;
@@ -324,13 +330,12 @@ ECode FlashlightController::GetSmallestSize(
     FAIL_RETURN(IStreamConfigurationMap::Probe(values)->GetOutputSizes(classInfo, (ArrayOf<ISize*>**)&outputSizes))
     if (outputSizes == NULL || outputSizes->GetLength() == 0) {
         Logger::E(TAG, "Camera %s doesn't support any outputSize.", cameraId.string());
-        *result = NULL;
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     AutoPtr<ISize> chosen = (*outputSizes)[0];
     for (Int32 i = 0; i < outputSizes->GetLength(); i++) {
-        AutoPtr<ISize> s = (*outputSizes)[i];
+        ISize* s = (*outputSizes)[i];
         Int32 w = 0, h = 0, cw = 0, ch = 0;
         chosen->GetWidth(&cw);
         chosen->GetHeight(&ch);
@@ -356,34 +361,50 @@ ECode FlashlightController::GetCameraId(
     /* [out] */ String* result) /*throws CameraAccessException*/
 {
     VALIDATE_NOT_NULL(result);
+    *result = String(NULL);
+
     AutoPtr<ArrayOf<String> > ids;
-    FAIL_RETURN(mCameraManager->GetCameraIdList((ArrayOf<String>**)&ids));
+    ECode ec = mCameraManager->GetCameraIdList((ArrayOf<String>**)&ids);
+    if (FAILED(ec)) {
+        Logger::W(TAG, "Failed to get camera id list.");
+        return ec;
+    }
+
     for (Int32 i = 0; i < ids->GetLength(); i++) {
         String id = (*ids)[i];
         AutoPtr<ICameraCharacteristics> c;
         mCameraManager->GetCameraCharacteristics(id, (ICameraCharacteristics**)&c);
-        AutoPtr<IInterface> bObj;
-        c->Get(CameraCharacteristics::FLASH_INFO_AVAILABLE, (IInterface**)&bObj);
-        Boolean flashAvailable = FALSE;
-
         AutoPtr<IInterface> obj;
-        c->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&obj);
-        Int32 lensFacing = 0;
-        if (bObj != NULL && (IBoolean::Probe(bObj)->GetValue(&flashAvailable), flashAvailable)
-            && obj.Get() != NULL
-            && (IInteger32::Probe(obj)->GetValue(&lensFacing), lensFacing) == ICameraMetadata::LENS_FACING_BACK)
-        {
-            *result = id;
-            return NOERROR;
+        c->Get(CameraCharacteristics::FLASH_INFO_AVAILABLE, (IInterface**)&obj);
+        Boolean flashAvailable = FALSE;
+        IBoolean* bobj = IBoolean::Probe(obj);
+        if (bobj) {
+            bobj->GetValue(&flashAvailable);
+        }
+
+        if (flashAvailable) {
+            obj = NULL;
+            c->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&obj);
+            Int32 lensFacing = 0;
+            IInteger32* iobj = IInteger32::Probe(obj);
+            if (iobj) {
+                iobj->GetValue(&lensFacing);
+                if (lensFacing == ICameraMetadata::LENS_FACING_BACK) {
+                    *result = id;
+                    return NOERROR;
+                }
+            }
         }
     }
-    *result = String(NULL);
-    return NOERROR;
+
+    Logger::I(TAG, "Flash camera is not available.");
+    return E_CAMERA_ACCESS_EXCEPTION;
 }
 
 void FlashlightController::UpdateFlashlight(
     /* [in] */ Boolean forceDisable)
 {
+    Logger::I(TAG, " >> UpdateFlashlight: forceDisable: %d", forceDisable);
     ECode ec = NOERROR;
     do {
         Boolean enabled = FALSE;
@@ -396,18 +417,23 @@ void FlashlightController::UpdateFlashlight(
             if (mCameraDevice == NULL) {
                 ec = StartDevice();
                 if (FAILED(ec)) {
-                    Logger::I(TAG, " >> failed to StartDevice");
+                    Logger::E(TAG, " >> failed to StartDevice");
                     break;
                 }
+                Logger::I(TAG, " >> Started Camera device. %s", TO_CSTR(mCameraDevice));
+                assert(mCameraDevice != NULL);
             }
             if (mSession == NULL) {
                 ec = StartSession();
                 if (FAILED(ec)) {
-                    Logger::I(TAG, " >> failed to StartSession");
+                    Logger::E(TAG, " >> failed to StartSession");
                     break;
                 }
+                Logger::I(TAG, " >> Started session. %s", TO_CSTR(mSession));
             }
             if (mFlashlightRequest == NULL) {
+                Logger::I(TAG, " >> CreateCaptureRequest.");
+
                 AutoPtr<ICaptureRequestBuilder> builder;
                 ec = mCameraDevice->CreateCaptureRequest(
                         ICameraDevice::TEMPLATE_PREVIEW, (ICaptureRequestBuilder**)&builder);
@@ -421,6 +447,8 @@ void FlashlightController::UpdateFlashlight(
                     Logger::I(TAG, " >> failed to Build request");
                     break;
                 }
+
+                Logger::I(TAG, " >> Capture Request. %s", TO_CSTR(request));
                 Int32 v = 0;
                 ec = mSession->Capture(request, NULL, mHandler, &v);
                 if (FAILED(ec)) {
@@ -461,7 +489,8 @@ void FlashlightController::Teardown()
 
 void FlashlightController::HandleError()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mFlashlightEnabled = FALSE;
     }
     DispatchError();

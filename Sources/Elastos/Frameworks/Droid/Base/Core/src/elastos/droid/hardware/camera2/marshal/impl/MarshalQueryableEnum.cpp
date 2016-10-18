@@ -4,14 +4,14 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Core::IInteger32;
 using Elastos::Core::Math;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CHashMap;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -44,14 +44,14 @@ ECode MarshalQueryableEnum::MarshalerEnum::Marshal(
         if (enumValue < MARSHALQUERYABLEENUM_UINT8_MIN || enumValue > MARSHALQUERYABLEENUM_UINT8_MAX) {
             // throw new UnsupportedOperationException(String.format(
             //         "Enum value %x too large to fit into unsigned byte", enumValue));
-            Slogger::E(TAG, "Enum value %x too large to fit into unsigned byte", enumValue);
+            Logger::E(TAG, "Enum value %x too large to fit into unsigned byte", enumValue);
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         }
         buffer->Put((Byte)enumValue);
     }
     else {
         //throw new AssertionError();
-        Slogger::E(TAG, "AssertionError");
+        Logger::E(TAG, "AssertionError");
         return E_ASSERTION_ERROR;
     }
     return NOERROR;
@@ -81,7 +81,7 @@ ECode MarshalQueryableEnum::MarshalerEnum::Unmarshal(
         default:
             // throw new AssertionError(
             //         "Unexpected native type; impossible since its not supported");
-            Slogger::E(TAG, "Unexpected native type; impossible since its not supported");
+            Logger::E(TAG, "Unexpected native type; impossible since its not supported");
             return E_ASSERTION_ERROR;
     }
 
@@ -136,8 +136,11 @@ ECode MarshalQueryableEnum::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    if (nativeType == ICameraMetadataNative::TYPE_INT32 || nativeType == ICameraMetadataNative::TYPE_BYTE) {
+    if (nativeType == ICameraMetadataNative::TYPE_INT32
+        || nativeType == ICameraMetadataNative::TYPE_BYTE) {
+        *value = FALSE;
+        // TODO
+        //
     //     if (managedType.getType() instanceof Class<?>) {
     //         Class<?> typeClass = (Class<?>)managedType.getType();
 
@@ -162,7 +165,6 @@ ECode MarshalQueryableEnum::IsTypeMappingSupported(
     //     }
     }
 
-    // return false;
     return NOERROR;
 }
 
@@ -177,7 +179,7 @@ ECode MarshalQueryableEnum::RegisterEnumValues(
     //                     + values.length + " for type " + enumType);
     // }
     if (VERBOSE) {
-        Slogger::V(TAG, "Registered enum values for type %d values", enumType);
+        Logger::V(TAG, "Registered enum values for type %d values", enumType);
     }
 
     assert(0);

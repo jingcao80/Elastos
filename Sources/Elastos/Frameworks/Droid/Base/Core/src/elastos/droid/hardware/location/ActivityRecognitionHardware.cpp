@@ -10,7 +10,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Thread.h>
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include "hardware/activity_recognition.h"
 #include "hardware/hardware.h"
 
@@ -21,7 +21,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IThread;
 using Elastos::Core::Thread;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -185,7 +185,7 @@ ECode ActivityRecognitionHardware::OnActivityChanged(
     /* [in] */ ArrayOf<Event*>* events)
 {
     if (events == NULL || events->GetLength() == 0) {
-        Slogger::D(TAG, String("No events to broadcast for onActivityChanged."));
+        Logger::D(TAG, String("No events to broadcast for onActivityChanged."));
         return NOERROR;
     }
 
@@ -214,7 +214,7 @@ ECode ActivityRecognitionHardware::OnActivityChanged(
         ec = sink->OnActivityChanged(activityChangedEvent.Get());
         //} catch (RemoteException e) {
         if (FAILED(ec)) {
-            Slogger::E(TAG, String("Error delivering activity changed event.")/*, e*/);
+            Logger::E(TAG, String("Error delivering activity changed event.")/*, e*/);
         }
         //}
     }
@@ -231,7 +231,7 @@ String ActivityRecognitionHardware::GetActivityName(
         sb += activityType;
         sb += ", SupportedActivities: ";
         sb += mSupportedActivities->GetLength();
-        Slogger::E(TAG, sb.ToString());
+        Logger::E(TAG, sb.ToString());
         return String(NULL);
     }
 
@@ -336,13 +336,13 @@ ECode ActivityRecognitionHardware::NativeClassInit()
             ACTIVITY_RECOGNITION_HARDWARE_MODULE_ID,
             (const hw_module_t**) &sModule);
     if (error != 0) {
-        Slogger::E(TAG, "Error hw_get_module: %d", error);
+        Logger::E(TAG, "Error hw_get_module: %d", error);
         return NOERROR;
     }
 
     error = activity_recognition_open(&sModule->common, &sDevice);
     if (error != 0) {
-        Slogger::E(TAG, "Error opening device: %d", error);
+        Logger::E(TAG, "Error opening device: %d", error);
         return NOERROR;
     }
 
@@ -365,14 +365,14 @@ void ActivityRecognitionHardware::NativeInitialize()
         sCallbacksObject = this;
     }
     else {
-        Slogger::D(TAG, "Callbacks Object was already initialized.");
+        Logger::D(TAG, "Callbacks Object was already initialized.");
     }
 
     if (sDevice != NULL) {
         sDevice->register_activity_callback(sDevice, &sCallbacks);
     }
     else {
-        Slogger::D(TAG, "ActivityRecognition device not found during initialization.");
+        Logger::D(TAG, "ActivityRecognition device not found during initialization.");
     }
     return;
 }
@@ -385,7 +385,7 @@ void ActivityRecognitionHardware::NativeRelease()
 
     int error = activity_recognition_close(sDevice);
     if (error != 0) {
-        Slogger::E(TAG, "Error closing device: %d", error);
+        Logger::E(TAG, "Error closing device: %d", error);
         return;
     }
     return;
@@ -405,7 +405,7 @@ AutoPtr<ArrayOf<String> > ActivityRecognitionHardware::NativeGetSupportedActivit
 
     AutoPtr<ArrayOf<String> > string_array = ArrayOf<String>::Alloc(list_size);
     if (string_array == NULL) {
-        Slogger::E(TAG, "Unable to create string array for supported activities.");
+        Logger::E(TAG, "Unable to create string array for supported activities.");
         return NULL;
     }
 

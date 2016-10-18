@@ -5,6 +5,7 @@
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Core::IInteger32;
+using Elastos::Core::ECLSID_CInteger32;
 using Elastos::Core::Math;
 using Elastos::Core::CoreUtils;
 
@@ -84,9 +85,14 @@ ECode MarshalQueryableNativeByteToInteger::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    // return (Integer.class.equals(managedType.getType())
-    //         || int.class.equals(managedType.getType())) && nativeType == ICameraMetadataNative::TYPE_BYTE;
+    if (nativeType == ICameraMetadataNative::TYPE_BYTE) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CInteger32) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

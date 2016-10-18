@@ -1,12 +1,15 @@
 
-#ifndef __ELASTOS_DROID_HARDWARE_CAMERA2_PARAMS_ARRAYUTILS_H__
-#define __ELASTOS_DROID_HARDWARE_CAMERA2_PARAMS_ARRAYUTILS_H__
+#ifndef __ELASTOS_DROID_HARDWARE_CAMERA2_UTILS_ARRAYUTILS_H__
+#define __ELASTOS_DROID_HARDWARE_CAMERA2_UTILS_ARRAYUTILS_H__
 
 #include "Elastos.Droid.Hardware.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
+#include <elastos/core/CoreUtils.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IArrayOf;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -19,15 +22,16 @@ class ArrayUtils
 {
 public:
     /** Return the index of {@code needle} in the {@code array}, or else {@code -1} */
+    template<typename T>
     static CARAPI GetArrayIndex(
-        /* [in] */ ArrayOf<IInterface*>* array,
-        /* [in] */ IInterface* needle,
+        /* [in] */ ArrayOf<T>* array,
+        /* [in] */ T needle,
         /* [out] */ Int32* value);
 
-    /** Return the index of {@code needle} in the {@code array}, or else {@code -1} */
+    template<typename T>
     static CARAPI GetArrayIndex(
-        /* [in] */ ArrayOf<Int32>* array,
-        /* [in] */ Int32 needle,
+        /* [in] */ IArrayOf* array,
+        /* [in] */ T needle,
         /* [out] */ Int32* value);
 
     /**
@@ -50,6 +54,12 @@ public:
         /* [in] */ ArrayOf<Int32>* convertTo,
         /* [out, callee] */ ArrayOf<Int32>** outarr);
 
+    static CARAPI ConvertStringArrayToIntArray(
+        /* [in] */ ArrayOf<String>* list,
+        /* [in] */ ArrayOf<String>* convertFrom,
+        /* [in] */ ArrayOf<Int32>* convertTo,
+        /* [out, callee] */ ArrayOf<Int32>** outarr);
+
     /**
      * Create an {@code List<Integer>} from the {@code List<>} by using {@code convertFrom} and
      * {@code convertTo} as a one-to-one map (via the index).
@@ -66,6 +76,12 @@ public:
      */
     static CARAPI ConvertStringListToIntList(
         /* [in] */ IList* list,
+        /* [in] */ ArrayOf<String>* convertFrom,
+        /* [in] */ ArrayOf<Int32>* convertTo,
+        /* [out] */ IList** outlist);
+
+    static CARAPI ConvertStringArrayToIntList(
+        /* [in] */ ArrayOf<String>* list,
         /* [in] */ ArrayOf<String>* convertFrom,
         /* [in] */ ArrayOf<Int32>* convertTo,
         /* [out] */ IList** outlist);
@@ -92,21 +108,25 @@ public:
      * @param elem {@code elem} to test for
      * @return {@code true} if the given element is contained
      */
+    template<typename T>
     static CARAPI Contains(
-        /* [in] */ ArrayOf<Int32>* array,
-        /* [in] */ Int32 elem,
+        /* [in] */ ArrayOf<T>* array,
+        /* [in] */ T elem,
+        /* [out] */ Boolean* value);
+
+    template<typename T>
+    static CARAPI Contains(
+        /* [in] */ IArrayOf* array,
+        /* [in] */ T elem,
         /* [out] */ Boolean* value);
 
     /**
-     * Returns true if the given {@code array} contains the given element.
-     *
-     * @param array {@code array} to check for {@code elem}
-     * @param elem {@code elem} to test for
-     * @return {@code true} if the given element is contained
+     * Return {@code true} if the {@code list} is only a single element equal to
+     * {@code single}.
      */
-    static CARAPI Contains(
-        /* [in] */ ArrayOf<IInterface*>* array,
-        /* [in] */ IInterface* elem,
+    static CARAPI ArrayElementsEqualTo(
+        /* [in] */ ArrayOf<String>* array,
+        /* [in] */ const String& single,
         /* [out] */ Boolean* value);
 
 private:
@@ -119,10 +139,138 @@ private:
     static const Boolean VERBOSE;
 };
 
+template<typename T>
+ECode ArrayUtils::GetArrayIndex(
+    /* [in] */ ArrayOf<T>* array,
+    /* [in] */ T needle,
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value);
+    *value = -1;
+
+    if (array == NULL) {
+        return NOERROR;
+    }
+
+    for (Int32 i = 0; i < array->GetLength(); i++) {
+        if ((*array)[i] == needle) {
+            *value = i;
+            return NOERROR;
+        };
+    }
+
+    return NOERROR;
+}
+
+static ECode GetArrayIndex(
+    /* [in] */ ArrayOf<IInterface*>* array,
+    /* [in] */ IInterface* needle,
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value);
+    *value = -1;
+
+    if (array == NULL) {
+        return NOERROR;
+    }
+
+    for (Int32 i = 0; i < array->GetLength(); i++) {
+        if (Object::Equals((*array)[i], needle)) {
+            *value = i;
+            return NOERROR;
+        };
+    }
+
+    return NOERROR;
+}
+
+template<typename T>
+ECode ArrayUtils::GetArrayIndex(
+    /* [in] */ IArrayOf* array,
+    /* [in] */ T needle,
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value);
+    *value = -1;
+
+    if (array == NULL) {
+        return NOERROR;
+    }
+
+    AutoPtr<IInterface> needleObj = (IInterface*)CoreUtils::Convert(needle);
+    Int32 size;
+    array->GetLength(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        array->Get(i, (IInterface**)&obj);
+        if (Object::Equals(obj, needleObj)) {
+            *value = i;
+            return NOERROR;
+        };
+    }
+
+    return NOERROR;
+}
+
+static ECode GetArrayIndex(
+    /* [in] */ IArrayOf* array,
+    /* [in] */ IInterface* needle,
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value);
+    *value = -1;
+
+    if (array == NULL) {
+        return NOERROR;
+    }
+
+    Int32 size;
+    array->GetLength(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        array->Get(i, (IInterface**)&obj);
+        if (Object::Equals(obj, needle)) {
+            *value = i;
+            return NOERROR;
+        };
+    }
+
+    return NOERROR;
+}
+
+template<typename T>
+ECode ArrayUtils::Contains(
+    /* [in] */ ArrayOf<T>* array,
+    /* [in] */ T elem,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    Int32 value;
+    GetArrayIndex(array, elem, &value);
+    *result = (value != -1);
+    return NOERROR;
+}
+
+template<typename T>
+ECode ArrayUtils::Contains(
+    /* [in] */ IArrayOf* array,
+    /* [in] */ T elem,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    Int32 value;
+    GetArrayIndex(array, elem, &value);
+    *result = (value != -1);
+    return NOERROR;
+}
+
+
 } // namespace Utils
 } // namespace Camera2
 } // namespace Hardware
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_HARDWARE_CAMERA2_PARAMS_ARRAYUTILS_H__
+#endif //__ELASTOS_DROID_HARDWARE_CAMERA2_UTILS_ARRAYUTILS_H__

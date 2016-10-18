@@ -8,7 +8,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/Objects.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
@@ -17,7 +17,7 @@ using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Objects;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -51,13 +51,13 @@ LegacyFocusStateMapper::MyMoveCallback::OnAutoFocusMoving(
         Int32 latestAfRun = mHost->mAfRun;
 
         if (mHost->VERBOSE) {
-            Slogger::V(TAG,
+            Logger::V(TAG,
                     "onAutoFocusMoving - start %d latest AF run %d, last AF run %d",
                     start, latestAfRun, mCurrentAfRun);
         }
 
         if (mCurrentAfRun != latestAfRun) {
-            Slogger::D(TAG,
+            Logger::D(TAG,
                     "onAutoFocusMoving - ignoring move callbacks from old af run %d"
                             ,mCurrentAfRun);
             return NOERROR;
@@ -73,7 +73,7 @@ LegacyFocusStateMapper::MyMoveCallback::OnAutoFocusMoving(
             // This callback should never be sent in any other AF mode
         }
         else {
-            Slogger::W(TAG, "onAutoFocus - got unexpected onAutoFocus in mode %s"
+            Logger::W(TAG, "onAutoFocus - got unexpected onAutoFocus in mode %s"
                     ,mAfMode.string());
         }
 
@@ -103,13 +103,13 @@ ECode LegacyFocusStateMapper::MyFocusCallback::OnAutoFocus(
         Int32 latestAfRun = mHost->mAfRun;
 
         if (mHost->VERBOSE) {
-            Slogger::V(TAG, "onAutoFocus - success %d latest AF run %d, last AF run %d",
+            Logger::V(TAG, "onAutoFocus - success %d latest AF run %d, last AF run %d",
                     success, latestAfRun, mCurrentAfRun);
         }
 
         // Ignore old auto-focus results, since another trigger was requested
         if (latestAfRun != mCurrentAfRun) {
-            Slogger::D(TAG, "onAutoFocus - ignoring AF callback (old run %d, new run %d)",
+            Logger::D(TAG, "onAutoFocus - ignoring AF callback (old run %d, new run %d)",
                     mCurrentAfRun, latestAfRun);
 
             return NOERROR;
@@ -126,7 +126,7 @@ ECode LegacyFocusStateMapper::MyFocusCallback::OnAutoFocus(
             // This callback should never be sent in any other AF mode
         }
         else {
-            Slogger::W(TAG, "onAutoFocus - got unexpected onAutoFocus in mode %s"
+            Logger::W(TAG, "onAutoFocus - got unexpected onAutoFocus in mode %s"
                     ,mAfMode.string());
         }
 
@@ -177,7 +177,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
     parameters->GetFocusMode(&afMode);
     if (mAfModePrevious != afMode) {
         if (VERBOSE) {
-            Slogger::V(TAG, "processRequestTriggers - AF mode switched from %s to %s",
+            Logger::V(TAG, "processRequestTriggers - AF mode switched from %s to %s",
                     mAfModePrevious.string(), afMode.string());
         }
 
@@ -238,7 +238,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
             }
 
             if (VERBOSE) {
-                Slogger::V(TAG, "processRequestTriggers - got AF_TRIGGER_START, "
+                Logger::V(TAG, "processRequestTriggers - got AF_TRIGGER_START, "
                         "new AF run is %d", currentAfRun);
             }
 
@@ -264,7 +264,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
                 mCamera->CancelAutoFocus();
 
                 if (VERBOSE) {
-                    Slogger::V(TAG, "processRequestTriggers - got AF_TRIGGER_CANCEL, %dnew AF run is ",
+                    Logger::V(TAG, "processRequestTriggers - got AF_TRIGGER_CANCEL, %dnew AF run is ",
                             updatedAfRun);
                 }
             }
@@ -275,7 +275,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
             // No action necessary. The callbacks will handle transitions.
             break;
         default:
-            Slogger::W(TAG, "processRequestTriggers - ignoring unknown control.afTrigger = %d"
+            Logger::W(TAG, "processRequestTriggers - ignoring unknown control.afTrigger = %d"
                     ,afTrigger);
     }
     return NOERROR;
@@ -292,7 +292,7 @@ ECode LegacyFocusStateMapper::MapResultTriggers(
     }
 
     if (VERBOSE && newAfState != mAfStatePrevious) {
-        Slogger::V(TAG, "mapResultTriggers - afState changed from %s to %s",
+        Logger::V(TAG, "mapResultTriggers - afState changed from %s to %s",
                 AfStateToString(mAfStatePrevious).string(), AfStateToString(newAfState).string());
     }
 

@@ -246,8 +246,15 @@ public:
      */
     CameraMetadataNativeKey(
         /* [in] */ const String& name,
-        /* [in] */ ClassID type);
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId);
 
+    CameraMetadataNativeKey(
+        /* [in] */ const String& name,
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId,
+        /* [in] */ const ClassID& componentClassId,
+        /* [in] */ const InterfaceID& componentInterfaceId);
 
     /**
      * Visible for testing only.
@@ -317,7 +324,7 @@ public:
      * <p>The distinction is only important if {@code T} is a generic, e.g.
      * {@code Range<Integer>} since the nested type will be erased.</p>
      */
-    CARAPI GetType(
+    CARAPI GetClassType(
         /* [out] */ ClassID* type);
 
     /**
@@ -372,21 +379,6 @@ public:
     static CARAPI Move(
         /* [in] */ ICameraMetadataNative* other,
         /* [out] */ ICameraMetadataNative** result);
-
-    // public static final Parcelable.Creator<CameraMetadataNative> CREATOR =
-    //         new Parcelable.Creator<CameraMetadataNative>() {
-    //     @Override
-    //     public CameraMetadataNative createFromParcel(Parcel in) {
-    //         CameraMetadataNative metadata = new CameraMetadataNative();
-    //         metadata.readFromParcel(in);
-    //         return metadata;
-    //     }
-
-    //     @Override
-    //     public CameraMetadataNative[] newArray(int size) {
-    //         return new CameraMetadataNative[size];
-    //     }
-    // };
 
     //@Override
     CARAPI WriteToParcel(

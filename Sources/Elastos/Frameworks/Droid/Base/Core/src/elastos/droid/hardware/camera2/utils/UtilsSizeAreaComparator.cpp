@@ -4,7 +4,7 @@
 #include "elastos/droid/hardware/camera2/utils/UtilsSizeAreaComparator.h"
 #include "elastos/droid/hardware/camera2/utils/CUtilsSizeAreaComparator.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Droid::Hardware::Camera2::Utils::IUtilsSizeAreaComparator;
@@ -12,7 +12,7 @@ using Elastos::Droid::Hardware::Camera2::Utils::CUtilsSizeAreaComparator;
 using Elastos::Core::EIID_IComparator;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -33,8 +33,8 @@ ECode UtilsSizeAreaComparator::Compare(
     AutoPtr<ISize> size = ISize::Probe(lhs);
     AutoPtr<ISize> size2 = ISize::Probe(rhs);
 
-    FAIL_RETURN(Preconditions::CheckNotNull(size, String("size must not be null")))
-    FAIL_RETURN(Preconditions::CheckNotNull(size2, String("size2 must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(size.Get(), String("size must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(size2.Get(), String("size2 must not be null")))
 
     Boolean _result;
     size->Equals(size2, &_result);
@@ -43,19 +43,16 @@ ECode UtilsSizeAreaComparator::Compare(
         return NOERROR;
     }
 
-    Int32 width;
-    size->GetWidth(&width);
-    Int32 width2;
+    Int32 width1, width2, height1, height2;
+    size->GetWidth(&width1);
     size2->GetWidth(&width2);
-    Int32 height1;
     size->GetHeight(&height1);
-    Int64 area = width * height1;
-    Int32 height2;
+    Int64 area = width1 * height1;
     size2->GetHeight(&height2);
     Int64 area2 = width2 * height2;
 
     if (area == area2) {
-        *result = (width > width2) ? 1 : -1;
+        *result = (width1 > width2) ? 1 : -1;
         return NOERROR;
     }
 

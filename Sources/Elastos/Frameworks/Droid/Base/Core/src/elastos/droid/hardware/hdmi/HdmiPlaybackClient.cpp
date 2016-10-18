@@ -1,9 +1,9 @@
 
 #include "elastos/droid/hardware/hdmi/HdmiPlaybackClient.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::EIID_IBinder;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -85,7 +85,7 @@ ECode HdmiPlaybackClient::OneTouchPlay(
     ECode ec = mService->OneTouchPlay(GetCallbackWrapper(_callback));
     //} catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        Slogger::E(TAG, "oneTouchPlay threw exception %d", ec);
+        Logger::E(TAG, "oneTouchPlay threw exception %d", ec);
     }
     //}
     return NOERROR;
@@ -107,7 +107,7 @@ ECode HdmiPlaybackClient::QueryDisplayStatus(
     ECode ec = mService->QueryDisplayStatus(GetCallbackWrapper(_callback));
     //} catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        Slogger::E(TAG, "queryDisplayStatus threw exception %d", ec);
+        Logger::E(TAG, "queryDisplayStatus threw exception %d", ec);
     }
     //}
     return NOERROR;

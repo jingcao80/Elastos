@@ -1,11 +1,16 @@
-
 #include "elastos/droid/hardware/camera2/marshal/impl/MarshalQueryableRange.h"
-#include "elastos/droid/graphics/CRect.h"
-#include <elastos/utility/logging/Slogger.h>
+#include "elastos/droid/hardware/camera2/marshal/MarshalRegistry.h"
+#include "Elastos.Droid.Utility.h"
+#include "elastos/droid/utility/CRange.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Hardware::Camera2::Marshal::MarshalRegistry;
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
-using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Utility::IRange;
+using Elastos::Droid::Utility::CRange;
+using Elastos::Droid::Utility::ECLSID_CRange;
+using Elastos::Droid::Utility::EIID_IRange;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -21,40 +26,23 @@ MarshalQueryableRange::MarshalerRange::MarshalerRange(
 {
     Marshaler::constructor(host, typeReference, nativeType);
 
-    // mClass = typeReference.getRawType();
+    AutoPtr<ITypeReference> actualTypeArgToken;
+    typeReference->GetComponent((ITypeReference**)&actualTypeArgToken);
 
-    // /*
-    //  * Lookup the actual type argument, e.g. Range<Integer> --> Integer
-    //  * and then get the marshaler for that managed type.
-    //  */
-    // ParameterizedType paramType;
-    // try {
-    //     paramType = (ParameterizedType) typeReference.getType();
-    // } catch (ClassCastException e) {
-    //     throw new AssertionError("Raw use of Range is not supported", e);
-    // }
-    // Type actualTypeArgument = paramType.getActualTypeArguments()[0];
-
-    // TypeReference<?> actualTypeArgToken =
-    //         TypeReference.createSpecializedTypeReference(actualTypeArgument);
-
-    // mNestedTypeMarshaler = (Marshaler<T>)MarshalRegistry.getMarshaler(
-    //         actualTypeArgToken, mNativeType);
-    // try {
-    //     mConstructor = (Constructor<Range<T>>)mClass.getConstructor(
-    //             Comparable.class, Comparable.class);
-    // } catch (NoSuchMethodException e) {
-    //     throw new AssertionError(e);
-    // }
+    MarshalRegistry::GetMarshaler(actualTypeArgToken, mNativeType, (IMarshaler**)&mNestedTypeMarshaler);
 }
 
 ECode MarshalQueryableRange::MarshalerRange::Marshal(
     /* [in] */ IInterface* value,
     /* [in] */ IByteBuffer* buffer)
 {
-    // mNestedTypeMarshaler.marshal(value.getLower(), buffer);
-    // mNestedTypeMarshaler.marshal(value.getUpper(), buffer);
+    IRange* range = IRange::Probe(value);
+    AutoPtr<IInterface> lower, upper;
+    range->GetLower((IInterface**)&lower);
+    range->GetUpper((IInterface**)&upper);
 
+    mNestedTypeMarshaler->Marshal(lower, buffer);
+    mNestedTypeMarshaler->Marshal(upper, buffer);
     return NOERROR;
 }
 
@@ -63,26 +51,20 @@ ECode MarshalQueryableRange::MarshalerRange::Unmarshal(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface);
-    *outface = NULL;
 
-    AutoPtr<IInterface> lower;
+    AutoPtr<IInterface> lower, upper;
     mNestedTypeMarshaler->Unmarshal(buffer, (IInterface**)&lower);
-    AutoPtr<IInterface> upper;
     mNestedTypeMarshaler->Unmarshal(buffer, (IInterface**)&upper);
 
-    assert(0);
-    // try {
-    //     return mConstructor.newInstance(lower, upper);
-    // } catch (InstantiationException e) {
-    //     throw new AssertionError(e);
-    // } catch (IllegalAccessException e) {
-    //     throw new AssertionError(e);
-    // } catch (IllegalArgumentException e) {
-    //     throw new AssertionError(e);
-    // } catch (InvocationTargetException e) {
-    //     throw new AssertionError(e);
-    // }
+    AutoPtr<ITypeReference> component;
+    mTypeReference->GetComponent((ITypeReference**)&component);
+    InterfaceID componentType;
+    component->GetInterfaceType(&componentType);
+    AutoPtr<IRange> range;
+    CRange::New(componentType, lower, upper, (IRange**)&range);
 
+    *outface = range;
+    REFCOUNT_ADD(*outface)
     return NOERROR;
 }
 
@@ -119,15 +101,17 @@ ECode MarshalQueryableRange::MarshalerRange::CalculateMarshalSize(
 
     if (nativeSize != IMarshaler::NATIVE_SIZE_DYNAMIC) {
         *outvalue = nativeSize;
-        return NOERROR;
     }
     else {
-        assert(0);
-        Int32 lowerSize;// = mNestedTypeMarshaler.calculateMarshalSize(value.getLower());
-        Int32 upperSize;// = mNestedTypeMarshaler.calculateMarshalSize(value.getUpper());
+        IRange* range = IRange::Probe(value);
+        AutoPtr<IInterface> lower, upper;
+        range->GetLower((IInterface**)&lower);
+        range->GetUpper((IInterface**)&upper);
 
+        Int32 lowerSize, upperSize;
+        mNestedTypeMarshaler->CalculateMarshalSize(lower, &lowerSize);
+        mNestedTypeMarshaler->CalculateMarshalSize(upper, &upperSize);
         *outvalue = lowerSize + upperSize;
-        return NOERROR;
     }
     return NOERROR;
 }
@@ -158,8 +142,12 @@ ECode MarshalQueryableRange::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    //return (Range.class.equals(managedType.getRawType()));
+    ClassID cls;
+    managedType->GetClassType(&cls);
+    if (cls == ECLSID_CRange) {
+        *value = TRUE;
+        return NOERROR;
+    }
     return NOERROR;
 }
 

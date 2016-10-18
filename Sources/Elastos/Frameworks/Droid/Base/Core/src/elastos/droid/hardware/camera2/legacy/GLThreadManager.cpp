@@ -6,7 +6,7 @@
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/os/ConditionVariable.h"
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Legacy::CRequestHandlerThread;
 using Elastos::Droid::Hardware::Camera2::Legacy::CSurfaceTextureRenderer;
@@ -18,7 +18,7 @@ using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::ConditionVariable;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IThread;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -68,26 +68,26 @@ ECode GLThreadManager::MyHandlerCallback::HandleMessage(
             AutoPtr<ConfigureHolder> configure = (ConfigureHolder*)IObject::Probe(obj);
             ec = mHost->mTextureRenderer->CleanupEGLContext();
             if (FAILED(ec)) {
-                Slogger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
+                Logger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
                 mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                 break;
             }
             ec = mHost->mTextureRenderer->ConfigureSurfaces(configure->mSurfaces);
             if (FAILED(ec)) {
-                Slogger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
+                Logger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
                 mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                 break;
             }
-            ec = Preconditions::CheckNotNull(configure->mCollector);
+            ec = Preconditions::CheckNotNull(configure->mCollector.Get());
             if (FAILED(ec)) {
-                Slogger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
+                Logger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
                 mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                 break;
             }
             mHost->mCaptureCollector = configure->mCollector;
             ec = configure->mCondition->Open();
             if (FAILED(ec)) {
-                Slogger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
+                Logger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
                 mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                 break;
             }
@@ -97,18 +97,18 @@ ECode GLThreadManager::MyHandlerCallback::HandleMessage(
         case GLThreadManager::MSG_NEW_FRAME:
         {
             if (mDroppingFrames) {
-                Slogger::W(mHost->TAG, "Ignoring frame.");
+                Logger::W(mHost->TAG, "Ignoring frame.");
                 break;
             }
             if (DEBUG) {
                 mHost->mPrevCounter->CountAndLog();
             }
             if (!mConfigured) {
-                Slogger::E(mHost->TAG, "Dropping frame, EGL context not configured!");
+                Logger::E(mHost->TAG, "Dropping frame, EGL context not configured!");
             }
             ec = mHost->mTextureRenderer->DrawIntoSurfaces(mHost->mCaptureCollector);
             if (FAILED(ec)) {
-                Slogger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
+                Logger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
                 mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                 break;
             }
@@ -117,7 +117,7 @@ ECode GLThreadManager::MyHandlerCallback::HandleMessage(
         case GLThreadManager::MSG_CLEANUP:
             ec = mHost->mTextureRenderer->CleanupEGLContext();
             if (FAILED(ec)) {
-                Slogger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
+                Logger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
                 mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                 break;
             }
@@ -134,12 +134,12 @@ ECode GLThreadManager::MyHandlerCallback::HandleMessage(
             // OK: Ignore message.
             break;
         default:
-            Slogger::E(mHost->TAG, "Unhandled message %d on GLThread.", what);
+            Logger::E(mHost->TAG, "Unhandled message %d on GLThread.", what);
             break;
     }
     //} catch (Exception e) {
     if (FAILED(ec)) {
-        Slogger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
+        Logger::E(mHost->TAG, "Received exception on GL render thread: %d", ec);
         mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
     }
     //}
@@ -213,7 +213,7 @@ ECode GLThreadManager::Quit()
         IThread::Probe(mGLHandlerThread)->GetName(&name);
         Int64 id;
         IThread::Probe(mGLHandlerThread)->GetId(&id);
-        Slogger::E(TAG, "Thread %s (%d) interrupted while quitting.",
+        Logger::E(TAG, "Thread %s (%d) interrupted while quitting.",
                 name.string(), id);
     }
     //}
@@ -238,7 +238,7 @@ ECode GLThreadManager::QueueNewFrame()
         handler->SendMessage(message, &result);
     }
     else {
-        Slogger::E(TAG, "GLThread dropping frame.  Not consuming frames quickly enough!");
+        Logger::E(TAG, "GLThread dropping frame.  Not consuming frames quickly enough!");
     }
     return NOERROR;
 }

@@ -2,15 +2,17 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/hardware/camera2/params/StreamConfigurationMap.h"
+#include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/graphics/PixelFormat.h"
 #include "elastos/droid/graphics/CImageFormat.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/Objects.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
+using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 // using Elastos::Droid::Media::ECLSID_CImageReader;
 // using Elastos::Droid::Media::ECLSID_CMediaRecorder;
 // using Elastos::Droid::Media::ECLSID_CMediaCodec;
@@ -25,7 +27,7 @@ using Elastos::Utility::IIterator;
 using Elastos::Utility::Objects;
 using Elastos::Utility::ISet;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -114,7 +116,7 @@ ECode StreamConfigurationMap::constructor(
     if (!hasKey) {
         // throw new AssertionError(
         //         "At least one stream configuration for IMPLEMENTATION_DEFINED must exist");
-        Slogger::E(TAG, "At least one stream configuration for IMPLEMENTATION_DEFINED must exist");
+        Logger::E(TAG, "At least one stream configuration for IMPLEMENTATION_DEFINED must exist");
         return E_ASSERTION_ERROR;;
     }
 
@@ -312,7 +314,7 @@ ECode StreamConfigurationMap::GetHighSpeedVideoFpsRangesFor(
         //         "Size %s does not support high speed video recording", size));
         String str;
         IObject::Probe(size)->ToString(&str);
-        Slogger::E(TAG, "Size %s does not support high speed video recording", str.string());
+        Logger::E(TAG, "Size %s does not support high speed video recording", str.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else {
@@ -370,9 +372,7 @@ ECode StreamConfigurationMap::GetHighSpeedVideoSizesFor(
     AutoPtr<Range<IInteger32> > range = (Range<IInteger32>*)IObject::Probe(fpsRange);
     HashMap<AutoPtr<Range<IInteger32> >, Int32>::Iterator it = mHighSpeedVideoFpsRangeMap.Find(range);
     if (it == mHighSpeedVideoFpsRangeMap.End() || it->mSecond == 0) {
-        // throw new IllegalArgumentException(String.format(
-        //         "FpsRange %s does not support high speed video recording", fpsRange));
-        //Slogger::E(TAG, "FpsRange %s does not support high speed video recording", fpsRange);
+        Logger::E(TAG, "FpsRange %s does not support high speed video recording", TO_CSTR(fpsRange));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else {
@@ -426,8 +426,7 @@ ECode StreamConfigurationMap::GetOutputMinFrameDuration(
     Boolean result;
     FAIL_RETURN(IsOutputSupportedFor(klass, &result))
     if (!result) {
-        //throw new IllegalArgumentException("klass was not supported");
-        Slogger::E(TAG, "klass was not supported");
+        Logger::E(TAG, "klass was not supported");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -463,8 +462,7 @@ ECode StreamConfigurationMap::GetOutputStallDuration(
     Boolean result;
     FAIL_RETURN(IsOutputSupportedFor(klass, &result))
     if (!result) {
-        //throw new IllegalArgumentException("klass was not supported");
-        Slogger::E(TAG, "klass was not supported");
+        Logger::E(TAG, "klass was not supported");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -505,11 +503,12 @@ ECode StreamConfigurationMap::GetHashCode(
     VALIDATE_NOT_NULL(value);
 
     // XX: do we care about order?
-    assert(0 && "TODO: need HashCodeHelpers");
-    // *value = HashCodeHelpers::GethashCode(
-    //         mConfigurations, mMinFrameDurations,
-    //         mStallDurations, mHighSpeedVideoConfigurations);
-    return NOERROR;
+    Int32 h1, h2, h3, h4;
+    HashCodeHelpers::GetHashCode(mConfigurations.Get(), &h1);
+    HashCodeHelpers::GetHashCode(mMinFrameDurations.Get(), &h2);
+    HashCodeHelpers::GetHashCode(mStallDurations.Get(), &h3);
+    HashCodeHelpers::GetHashCode(mHighSpeedVideoConfigurations.Get(), &h4);
+    return HashCodeHelpers::GetHashCode(h1, h2, h3, h4, value);
 }
 
 ECode StreamConfigurationMap::CheckArgumentFormatSupported(
@@ -538,9 +537,7 @@ ECode StreamConfigurationMap::CheckArgumentFormatSupported(
         }
     }
 
-    // throw new IllegalArgumentException(String.format(
-    //         "format %x is not supported by this stream configuration map", format));
-    Slogger::E(TAG, "format %x is not supported by this stream configuration map", format);
+    Logger::E(TAG, "format %08x is not supported by this stream configuration map", format);
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
@@ -558,9 +555,7 @@ ECode StreamConfigurationMap::CheckArgumentFormatInternal(
             *result = format;
             return NOERROR;
         case IImageFormat::JPEG:
-            // throw new IllegalArgumentException(
-            //         "ImageFormat.JPEG is an unknown internal format");
-            Slogger::E(TAG, "ImageFormat.JPEG is an unknown internal format");
+            Logger::E(TAG, "ImageFormat.JPEG is an unknown internal format");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         default:
             return CheckArgumentFormat(format, result);
@@ -580,9 +575,7 @@ ECode StreamConfigurationMap::CheckArgumentFormat(
     Boolean res1;
     helper->IsPublicFormat(format, &res1);
     if (!res1 && !(PixelFormat::IsPublicFormat(format))) {
-        // throw new IllegalArgumentException(String.format(
-        //         "format 0x%x was not defined in either ImageFormat or PixelFormat", format));
-        Slogger::E(TAG, "format 0x%x was not defined in either ImageFormat or PixelFormat", format);
+        Logger::E(TAG, "format 0x%x was not defined in either ImageFormat or PixelFormat", format);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -602,14 +595,10 @@ ECode StreamConfigurationMap::ImageFormatToPublic(
             *result = IImageFormat::JPEG;
             return NOERROR;
         case IImageFormat::JPEG:
-            // throw new IllegalArgumentException(
-            //         "ImageFormat.JPEG is an unknown internal format");
-            Slogger::E(TAG, "ImageFormat.JPEG is an unknown internal format");
+            Logger::E(TAG, "ImageFormat.JPEG is an unknown internal format");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
-            // throw new IllegalArgumentException(
-            //         "IMPLEMENTATION_DEFINED must not leak to public API");
-            Slogger::E(TAG, "IMPLEMENTATION_DEFINED must not leak to public API");
+            Logger::E(TAG, "IMPLEMENTATION_DEFINED must not leak to public API");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         default:
             *result = format;
@@ -643,9 +632,7 @@ ECode StreamConfigurationMap::ImageFormatToInternal(
             *result = HAL_PIXEL_FORMAT_BLOB;
             return NOERROR;
         case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
-            // throw new IllegalArgumentException(
-            //         "IMPLEMENTATION_DEFINED is not allowed via public API");
-            Slogger::E(TAG, "IMPLEMENTATION_DEFINED is not allowed via public API");
+            Logger::E(TAG, "IMPLEMENTATION_DEFINED is not allowed via public API");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         default:
             *result = format;
@@ -704,8 +691,7 @@ ECode StreamConfigurationMap::GetInternalFormatSizes(
     Int32 sizesCount;
     HashMap<Int32, Int32>::Iterator it = formatsMap.Find(format);
     if (it == formatsMap.End()) {
-        //throw new IllegalArgumentException("format not available");
-        Slogger::E(TAG, "format not available");
+        Logger::E(TAG, "format not available");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else {
@@ -729,9 +715,7 @@ ECode StreamConfigurationMap::GetInternalFormatSizes(
     }
 
     if (sizeIndex != len) {
-        // throw new AssertionError(
-        //         "Too few sizes (expected " + len + ", actual " + sizeIndex + ")");
-        Slogger::E(TAG, "Too few sizes (expected %d, actual %d)", len, sizeIndex);
+        Logger::E(TAG, "Too few sizes (expected %d, actual %d)", len, sizeIndex);
         return E_ASSERTION_ERROR;
     }
 
@@ -764,8 +748,7 @@ ECode StreamConfigurationMap::GetPublicFormats(
     }
 
     if (formats->GetLength() != i) {
-        // throw new AssertionError("Too few formats " + i + ", expected " + formats.length);
-        Slogger::E(TAG, "Too few formats %d, expected %d", i, formats->GetLength());
+        Logger::E(TAG, "Too few formats %d, expected %d", i, formats->GetLength());
         return E_ASSERTION_ERROR;
     }
 
@@ -795,24 +778,20 @@ ECode StreamConfigurationMap::GetInternalFormatDuration(
     GetInternalFormatSizes(format, /*output*/TRUE, (ArrayOf<ISize*>**)&sizes);
 
     if (!ArrayContains((ArrayOf<IInterface*>*)sizes.Get(), TO_IINTERFACE(size))) {
-        //throw new IllegalArgumentException("size was not supported");
-        Slogger::E(TAG, "size was not supported");
+        Logger::E(TAG, "size was not supported");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     AutoPtr<ArrayOf<IStreamConfigurationDuration*> > durations;
     GetDurations(duration, (ArrayOf<IStreamConfigurationDuration*>**)&durations);
+    Int32 cFormat, cWidth, cHeight, sWidth, sHeight;
+    IStreamConfigurationDuration* configurationDuration;
     for (Int32 i = 0; i < durations->GetLength(); i++) {
-        AutoPtr<IStreamConfigurationDuration> configurationDuration = (*durations)[i];
-        Int32 cFormat;
+        configurationDuration = (*durations)[i];
         configurationDuration->GetFormat(&cFormat);
-        Int32 cWidth;
         configurationDuration->GetWidth(&cWidth);
-        Int32 cHeight;
         configurationDuration->GetHeight(&cHeight);
-        Int32 sWidth;
         size->GetWidth(&sWidth);
-        Int32 sHeight;
         size->GetHeight(&sHeight);
         if (cFormat == format && cWidth == sWidth &&  cHeight == sHeight) {
             return configurationDuration->GetDuration(result);
@@ -841,8 +820,7 @@ ECode StreamConfigurationMap::GetDurations(
             REFCOUNT_ADD(*durations);
             return NOERROR;
         default:
-            //throw new IllegalArgumentException("duration was invalid");
-            Slogger::E(TAG, "duration was invalid");
+            Logger::E(TAG, "duration was invalid");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;

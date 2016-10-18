@@ -13,7 +13,7 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <img_utils/DngUtils.h>
 #include <img_utils/TiffEntry.h>
@@ -43,7 +43,7 @@ using Elastos::Text::CSimpleDateFormat;
 using Elastos::Utility::ITimeZone;
 using Elastos::Utility::ITimeZoneHelper;
 using Elastos::Utility::CTimeZoneHelper;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::ICalendarHelper;
 using Elastos::Utility::CCalendarHelper;
 
@@ -57,13 +57,13 @@ namespace Camera2 {
 
 #define BAIL_IF_INVALID(expr, tagId, writer) \
     if ((expr) != android::OK) { \
-        Slogger::E("DngCreator", "Invalid metadata for tag %s (%x)", (writer)->getTagName(tagId), (tagId)); \
+        Logger::E("DngCreator", "Invalid metadata for tag %s (%x)", (writer)->getTagName(tagId), (tagId)); \
         return E_ILLEGAL_ARGUMENT_EXCEPTION; \
     }
 
 #define BAIL_IF_EMPTY(entry, tagId, writer) \
     if (entry.count == 0) { \
-        Slogger::E("DngCreator", "Missing metadata fields for tag %s (%x)", (writer)->getTagName(tagId), (tagId)); \
+        Logger::E("DngCreator", "Missing metadata fields for tag %s (%x)", (writer)->getTagName(tagId), (tagId)); \
         return E_ILLEGAL_ARGUMENT_EXCEPTION; \
     }
 
@@ -136,7 +136,7 @@ DngCreator::JniOutputStream::JniOutputStream(
     mByteArray = ArrayOf<Byte>::Alloc(BYTE_ARRAY_LENGTH);
     if (mByteArray == NULL) {
         //jniThrowException(env, "java/lang/OutOfMemoryError", "Could not allocate byte array.");
-        Slogger::E("DngCreator::JniOutputStream", "java/lang/OutOfMemoryError : Could not allocate byte array.");
+        Logger::E("DngCreator::JniOutputStream", "java/lang/OutOfMemoryError : Could not allocate byte array.");
         //return E_OUT_OF_MEMORY_ERROR;
     }
 }
@@ -191,7 +191,7 @@ DngCreator::JniInputStream::JniInputStream(
     mByteArray = ArrayOf<Byte>::Alloc(BYTE_ARRAY_LENGTH);
     if (mByteArray == NULL) {
         //jniThrowException(env, "java/lang/OutOfMemoryError", "Could not allocate byte array.");
-        Slogger::E("DngCreator::JniInputStream", "java/lang/OutOfMemoryError : Could not allocate byte array.");
+        Logger::E("DngCreator::JniInputStream", "java/lang/OutOfMemoryError : Could not allocate byte array.");
         //return E_OUT_OF_MEMORY_ERROR;
     }
 }
@@ -260,7 +260,7 @@ DngCreator::JniInputByteBuffer::JniInputByteBuffer(
     mByteArray = ArrayOf<Byte>::Alloc(BYTE_ARRAY_LENGTH);
     if (mByteArray == NULL) {
         //jniThrowException(env, "java/lang/OutOfMemoryError", "Could not allocate byte array.");
-        Slogger::E("DngCreator::JniInputByteBuffer", "java/lang/OutOfMemoryError : Could not allocate byte array.");
+        Logger::E("DngCreator::JniInputByteBuffer", "java/lang/OutOfMemoryError : Could not allocate byte array.");
         //return E_OUT_OF_MEMORY_ERROR;
     }
 }
@@ -341,7 +341,7 @@ status_t DngCreator::InputStripSource::writeToStream(
         ALOGE("%s: Amount to write %u doesn't match image size %u", __FUNCTION__, count,
                 fullSize);
         //jniThrowException(mEnv, "java/lang/IllegalStateException", "Not enough data to write");
-        Slogger::E("DngCreator::InputStripSource", "java/lang/IllegalStateException : Not enough data to write");
+        Logger::E("DngCreator::InputStripSource", "java/lang/IllegalStateException : Not enough data to write");
         return android::BAD_VALUE;
     }
 
@@ -353,7 +353,7 @@ status_t DngCreator::InputStripSource::writeToStream(
                 // jniThrowExceptionFmt(mEnv, "java/io/IOException",
                 //         "Early EOF encountered in skip, not enough pixel data for image of size %u",
                 //         fullSize);
-                Slogger::E("DngCreator::InputStripSource", "java/io/IOException "
+                Logger::E("DngCreator::InputStripSource", "java/io/IOException "
                         "Early EOF encountered in skip, not enough pixel data for image of size %u",
                         fullSize);
                 skipped = android::NOT_ENOUGH_DATA;
@@ -374,7 +374,7 @@ status_t DngCreator::InputStripSource::writeToStream(
     android::Vector<uint8_t> row;
     if (row.resize(mRowStride) < 0) {
         //jniThrowException(mEnv, "java/lang/OutOfMemoryError", "Could not allocate row vector.");
-        Slogger::E("DngCreator::InputStripSource", "java/lang/OutOfMemoryError : Could not allocate row vector.");
+        Logger::E("DngCreator::InputStripSource", "java/lang/OutOfMemoryError : Could not allocate row vector.");
         return android::BAD_VALUE;
     }
 
@@ -391,7 +391,7 @@ status_t DngCreator::InputStripSource::writeToStream(
                     // jniThrowExceptionFmt(mEnv, "java/io/IOException",
                     //         "Early EOF encountered, not enough pixel data for image of size %u",
                     //         fullSize);
-                    Slogger::E("DngCreator::InputStripSource", "java/io/IOException :"
+                    Logger::E("DngCreator::InputStripSource", "java/io/IOException :"
                             "Early EOF encountered, not enough pixel data for image of size %u",
                             fullSize);
                     bytesRead = android::NOT_ENOUGH_DATA;
@@ -424,7 +424,7 @@ status_t DngCreator::InputStripSource::writeToStream(
             ALOGV("%s: Using stream per-pixel write for strip.", __FUNCTION__);
             // jniThrowException(mEnv, "java/lang/IllegalStateException",
             //         "Per-pixel strides are not supported for RAW16 -- pixels must be contiguous");
-            Slogger::E("DngCreator::InputStripSource", "java/lang/IllegalStateException :"
+            Logger::E("DngCreator::InputStripSource", "java/lang/IllegalStateException :"
                     "Per-pixel strides are not supported for RAW16 -- pixels must be contiguous");
             return android::BAD_VALUE;
 
@@ -475,7 +475,7 @@ status_t DngCreator::DirectStripSource::writeToStream(
         ALOGE("%s: Amount to write %u doesn't match image size %u", __FUNCTION__, count,
                 fullSize);
         //jniThrowException(mEnv, "java/lang/IllegalStateException", "Not enough data to write");
-        Slogger::E("DngCreator::InputStripSource", "java/lang/IllegalStateException :Not enough data to write");
+        Logger::E("DngCreator::InputStripSource", "java/lang/IllegalStateException :Not enough data to write");
         return android::BAD_VALUE;
     }
 
@@ -508,7 +508,7 @@ status_t DngCreator::DirectStripSource::writeToStream(
 
         // jniThrowException(mEnv, "java/lang/IllegalStateException",
         //         "Per-pixel strides are not supported for RAW16 -- pixels must be contiguous");
-        Slogger::E("DngCreator::InputStripSource", "java/lang/IllegalStateException :"
+        Logger::E("DngCreator::InputStripSource", "java/lang/IllegalStateException :"
                 "Per-pixel strides are not supported for RAW16 -- pixels must be contiguous");
         return android::BAD_VALUE;
 
@@ -542,7 +542,7 @@ static ECode validateDngHeader(
         // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
         //                 "Metadata width %d doesn't match image width %d", metadataWidth, width);
         *result = FALSE;
-        Slogger::E("DngCreator::validateDngHeader", "java/lang/IllegalArgumentException :"
+        Logger::E("DngCreator::validateDngHeader", "java/lang/IllegalArgumentException :"
                 "Metadata width %d doesn't match image width %d", metadataWidth, width);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -551,7 +551,7 @@ static ECode validateDngHeader(
         // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
         //                 "Metadata height %d doesn't match image height %d", metadataHeight, height);
         *result = FALSE;
-        Slogger::E("DngCreator::validateDngHeader", "java/lang/IllegalArgumentException :"
+        Logger::E("DngCreator::validateDngHeader", "java/lang/IllegalArgumentException :"
                 "Metadata height %d doesn't match image height %d", metadataHeight, height);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -791,7 +791,7 @@ ECode DngCreator::constructor(
 {
     if (characteristics == NULL || metadata == NULL) {
         //throw new IllegalArgumentException("Null argument to DngCreator constructor");
-        Slogger::E(TAG, "Null argument to DngCreator constructor");
+        Logger::E(TAG, "Null argument to DngCreator constructor");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -835,7 +835,7 @@ ECode DngCreator::SetOrientation(
             orientation > IExifInterface::ORIENTATION_ROTATE_270) {
         // throw new IllegalArgumentException("Orientation " + orientation +
         //         " is not a valid EXIF orientation value");
-        Slogger::E(TAG, "Orientation %d is not a valid EXIF orientation "
+        Logger::E(TAG, "Orientation %d is not a valid EXIF orientation "
                 "value", orientation);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -848,7 +848,7 @@ ECode DngCreator::SetThumbnail(
 {
     if (pixels == NULL) {
         //throw new IllegalArgumentException("Null argument to setThumbnail");
-        Slogger::E(TAG, "Null argument to setThumbnail");
+        Logger::E(TAG, "Null argument to setThumbnail");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -861,7 +861,7 @@ ECode DngCreator::SetThumbnail(
         // throw new IllegalArgumentException("Thumbnail dimensions width,height (" + width +
         //         "," + height + ") too large, dimensions must be smaller than " +
         //         MAX_THUMBNAIL_DIMENSION);
-        Slogger::E(TAG, "Thumbnail dimensions width,height (%d,%d) too large, "
+        Logger::E(TAG, "Thumbnail dimensions width,height (%d,%d) too large, "
                 "dimensions must be smaller than %d", width, height, MAX_THUMBNAIL_DIMENSION);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -876,7 +876,7 @@ ECode DngCreator::SetThumbnail(
 {
     if (pixels == NULL) {
         //throw new IllegalArgumentException("Null argument to setThumbnail");
-        Slogger::E(TAG, "Null argument to setThumbnail");
+        Logger::E(TAG, "Null argument to setThumbnail");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -884,7 +884,7 @@ ECode DngCreator::SetThumbnail(
     pixels->GetFormat(&format);
     if (format != IImageFormat::YUV_420_888) {
         //throw new IllegalArgumentException("Unsupported Image format " + format);
-        Slogger::E(TAG, "Unsupported Image format %d", format);
+        Logger::E(TAG, "Unsupported Image format %d", format);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -897,7 +897,7 @@ ECode DngCreator::SetThumbnail(
         // throw new IllegalArgumentException("Thumbnail dimensions width,height (" + width +
         //         "," + height + ") too large, dimensions must be smaller than " +
         //         MAX_THUMBNAIL_DIMENSION);
-        Slogger::E(TAG, "Thumbnail dimensions width,height (%d,%d) too large, dimensions "
+        Logger::E(TAG, "Thumbnail dimensions width,height (%d,%d) too large, dimensions "
                 "must be smaller than %d", width, height, MAX_THUMBNAIL_DIMENSION);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -912,7 +912,7 @@ ECode DngCreator::SetLocation(
 {
     if (location == NULL) {
         //throw new IllegalArgumentException("Null location passed to setLocation");
-        Slogger::E(TAG, "Null location passed to setLocation");
+        Logger::E(TAG, "Null location passed to setLocation");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Double latitude;
@@ -955,7 +955,7 @@ ECode DngCreator::SetDescription(
 {
     if (description == NULL) {
         //throw new IllegalArgumentException("Null description passed to setDescription.");
-        Slogger::E(TAG, "Null description passed to setDescription.");
+        Logger::E(TAG, "Null description passed to setDescription.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     NativeSetDescription(description);
@@ -970,22 +970,22 @@ ECode DngCreator::WriteInputStream(
 {
     if (dngOutput == NULL) {
         //throw new IllegalArgumentException("Null dngOutput passed to writeInputStream");
-        Slogger::E(TAG, "Null dngOutput passed to writeInputStream");
+        Logger::E(TAG, "Null dngOutput passed to writeInputStream");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (size == NULL) {
         //throw new IllegalArgumentException("Null size passed to writeInputStream");
-        Slogger::E(TAG, "Null size passed to writeInputStream");
+        Logger::E(TAG, "Null size passed to writeInputStream");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (pixels == NULL) {
         //throw new IllegalArgumentException("Null pixels passed to writeInputStream");
-        Slogger::E(TAG, "Null pixels passed to writeInputStream");
+        Logger::E(TAG, "Null pixels passed to writeInputStream");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (offset < 0) {
         //throw new IllegalArgumentException("Negative offset passed to writeInputStream");
-        Slogger::E(TAG, "Negative offset passed to writeInputStream");
+        Logger::E(TAG, "Negative offset passed to writeInputStream");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -997,7 +997,7 @@ ECode DngCreator::WriteInputStream(
     if (width <= 0 || height <= 0) {
         // throw new IllegalArgumentException("Size with invalid width, height: (" + width + "," +
         //         height + ") passed to writeInputStream");
-        Slogger::E(TAG, "Size with invalid width, height: (%d,%d) passed to "
+        Logger::E(TAG, "Size with invalid width, height: (%d,%d) passed to "
                 "writeInputStream", width, height);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1013,22 +1013,22 @@ ECode DngCreator::WriteByteBuffer(
 {
     if (dngOutput == NULL) {
         //throw new IllegalArgumentException("Null dngOutput passed to writeByteBuffer");
-        Slogger::E(TAG, "Null dngOutput passed to writeByteBuffer");
+        Logger::E(TAG, "Null dngOutput passed to writeByteBuffer");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (size == NULL) {
         //throw new IllegalArgumentException("Null size passed to writeByteBuffer");
-        Slogger::E(TAG, "Null size passed to writeByteBuffer");
+        Logger::E(TAG, "Null size passed to writeByteBuffer");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (pixels == NULL) {
         //throw new IllegalArgumentException("Null pixels passed to writeByteBuffer");
-        Slogger::E(TAG, "Null pixels passed to writeByteBuffer");
+        Logger::E(TAG, "Null pixels passed to writeByteBuffer");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (offset < 0) {
         //throw new IllegalArgumentException("Negative offset passed to writeByteBuffer");
-        Slogger::E(TAG, "Negative offset passed to writeByteBuffer");
+        Logger::E(TAG, "Negative offset passed to writeByteBuffer");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1048,12 +1048,12 @@ ECode DngCreator::WriteImage(
 {
     if (dngOutput == NULL) {
         //throw new IllegalArgumentException("Null dngOutput to writeImage");
-        Slogger::E(TAG, "Null dngOutput to writeImage");
+        Logger::E(TAG, "Null dngOutput to writeImage");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (pixels == NULL) {
         //throw new IllegalArgumentException("Null pixels to writeImage");
-        Slogger::E(TAG, "Null pixels to writeImage");
+        Logger::E(TAG, "Null pixels to writeImage");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1061,7 +1061,7 @@ ECode DngCreator::WriteImage(
     pixels->GetFormat(&format);
     if (format != IImageFormat::RAW_SENSOR) {
         //throw new IllegalArgumentException("Unsupported image format " + format);
-        Slogger::E(TAG, "Unsupported image format %d", format);
+        Logger::E(TAG, "Unsupported image format %d", format);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1069,12 +1069,12 @@ ECode DngCreator::WriteImage(
     pixels->GetPlanes((ArrayOf<IImagePlane*>**)&planes);
     if (planes == NULL) {
         //throw new IllegalArgumentException("Image with no planes passed to writeImage");
-        Slogger::E(TAG, "Image with no planes passed to writeImage");
+        Logger::E(TAG, "Image with no planes passed to writeImage");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (planes->GetLength() <= 0) {
             //throw new IllegalArgumentException("Image with no planes passed to writeImage");
-            Slogger::E(TAG, "Image with no planes passed to writeImage");
+            Logger::E(TAG, "Image with no planes passed to writeImage");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1109,7 +1109,7 @@ ECode DngCreator::WriteByteBuffer(
     if (width <= 0 || height <= 0) {
         // throw new IllegalArgumentException("Image with invalid width, height: (" + width + "," +
         //         height + ") passed to write");
-        Slogger::E(TAG, "Image with invalid width, height: (%d,%d) passed to"
+        Logger::E(TAG, "Image with invalid width, height: (%d,%d) passed to"
                 "write", width, height);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1119,7 +1119,7 @@ ECode DngCreator::WriteByteBuffer(
     if (capacity < totalSize) {
         // throw new IllegalArgumentException("Image size " + capacity +
         //         " is too small (must be larger than " + totalSize + ")");
-        Slogger::E(TAG, "Image size %d is too small (must be larger than %d)",
+        Logger::E(TAG, "Image size %d is too small (must be larger than %d)",
                 capacity, totalSize);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1127,7 +1127,7 @@ ECode DngCreator::WriteByteBuffer(
     if (minRowStride > rowStride) {
         // throw new IllegalArgumentException("Invalid image pixel stride, row byte width " +
         //         minRowStride + " is too large, expecting " + rowStride);
-        Slogger::E(TAG, "Invalid image pixel stride, row byte width %d is too large,"
+        Logger::E(TAG, "Invalid image pixel stride, row byte width %d is too large,"
                 "expecting %d", minRowStride, rowStride);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1378,13 +1378,13 @@ ECode DngCreator::NativeInit(
         // if (CameraMetadata_getNativeMetadata(env, characteristicsPtr, &characteristics) != android::OK) {
         //     // jniThrowException(env, "java/lang/AssertionError",
         //     //         "No native metadata defined for camera characteristics.");
-        //     Slogger::E(TAG, "No native metadata defined for camera characteristics.");
+        //     Logger::E(TAG, "No native metadata defined for camera characteristics.");
         //     return E_ASSERTION_ERROR;
         // }
         // if (CameraMetadata_getNativeMetadata(env, resultsPtr, &results) != android::OK) {
         //     // jniThrowException(env, "java/lang/AssertionError",
         //     //         "No native metadata defined for capture results.");
-        //     Slogger::E(TAG, "No native metadata defined for capture results.");
+        //     Logger::E(TAG, "No native metadata defined for capture results.");
         //     return E_ASSERTION_ERROR;
         // }
 
@@ -1507,7 +1507,7 @@ ECode DngCreator::NativeInit(
             if ((err = convertCFA(cfaEnum, /*out*/cfa)) != android::OK) {
                 // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                 //             "Invalid metadata for tag %d", TAG_CFAPATTERN);
-                Slogger::E(TAG, "Invalid metadata for tag %d", android::img_utils::TAG_CFAPATTERN);
+                Logger::E(TAG, "Invalid metadata for tag %d", android::img_utils::TAG_CFAPATTERN);
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -1595,7 +1595,7 @@ ECode DngCreator::NativeInit(
             if (len != DATETIME_COUNT) {
                 // jniThrowException(env, "java/lang/IllegalArgumentException",
                 //         "Timestamp string length is not required 20 characters");
-                Slogger::E(TAG, "Timestamp string length is not required 20 characters");
+                Logger::E(TAG, "Timestamp string length is not required 20 characters");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -1603,7 +1603,7 @@ ECode DngCreator::NativeInit(
                     reinterpret_cast<const uint8_t*>(captureTime), TIFF_IFD_0) != android::OK) {
                 // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                 //         "Invalid metadata for tag %x", TAG_DATETIME);
-                Slogger::E(TAG, "Invalid metadata for tag %x", android::img_utils::TAG_DATETIME);
+                Logger::E(TAG, "Invalid metadata for tag %x", android::img_utils::TAG_DATETIME);
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -1612,7 +1612,7 @@ ECode DngCreator::NativeInit(
                     reinterpret_cast<const uint8_t*>(captureTime), TIFF_IFD_0) != android::OK) {
                 // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                 //         "Invalid metadata for tag %x", TAG_DATETIMEORIGINAL);
-                Slogger::E(TAG, "Invalid metadata for tag %x", android::img_utils::TAG_DATETIMEORIGINAL);
+                Logger::E(TAG, "Invalid metadata for tag %x", android::img_utils::TAG_DATETIMEORIGINAL);
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -1643,7 +1643,7 @@ ECode DngCreator::NativeInit(
                 // Should be unreachable
                 // jniThrowException(env, "java/lang/IllegalArgumentException",
                 //         "Negative exposure time in metadata");
-                Slogger::E(TAG, "Negative exposure time in metadata");
+                Logger::E(TAG, "Negative exposure time in metadata");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -1656,7 +1656,7 @@ ECode DngCreator::NativeInit(
                     // Should be unreachable
                     // jniThrowException(env, "java/lang/IllegalArgumentException",
                     //         "Exposure time too long");
-                    Slogger::E(TAG, "Exposure time too long");
+                    Logger::E(TAG, "Exposure time too long");
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
                 }
             }
@@ -1677,7 +1677,7 @@ ECode DngCreator::NativeInit(
             if (tempIso < 0) {
                 // jniThrowException(env, "java/lang/IllegalArgumentException",
                 //                         "Negative ISO value");
-                Slogger::E(TAG, "Negative ISO value");
+                Logger::E(TAG, "Negative ISO value");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -1891,7 +1891,7 @@ ECode DngCreator::NativeInit(
                 ALOGE("%s: Could not setup strip tags.", __FUNCTION__);
                 // jniThrowException(env, "java/lang/IllegalStateException",
                 //         "Failed to setup strip tags.");
-                Slogger::E(TAG, "Failed to setup strip tags.");
+                Logger::E(TAG, "Failed to setup strip tags.");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -1944,7 +1944,7 @@ ECode DngCreator::NativeInit(
             if ((err = convertCFA(cfaEnum, /*out*/cfaOut)) != android::OK) {
                 // jniThrowException(env, "java/lang/IllegalArgumentException",
                 //         "Invalid CFA from camera characteristics");
-                Slogger::E(TAG, "Invalid CFA from camera characteristics");
+                Logger::E(TAG, "Invalid CFA from camera characteristics");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -2012,14 +2012,14 @@ ECode DngCreator::NativeInit(
                     else {
                         ALOGE("%s: Could not build Lens shading map opcode.", __FUNCTION__);
                         //jniThrowRuntimeException(env, "failed to construct lens shading map opcode.");
-                        Slogger::E(TAG, "failed to construct lens shading map opcode.");
+                        Logger::E(TAG, "failed to construct lens shading map opcode.");
                         return E_RUNTIME_EXCEPTION;
                     }
                 }
                 else {
                     ALOGE("%s: Could not add Lens shading map.", __FUNCTION__);
                     //jniThrowRuntimeException(env, "failed to add lens shading map.");
-                    Slogger::E(TAG, "failed to add lens shading map.");
+                    Logger::E(TAG, "failed to add lens shading map.");
                     return E_RUNTIME_EXCEPTION;
                 }
             }
@@ -2053,7 +2053,7 @@ ECode DngCreator::NativeSetOrientation(
             ALOGE("%s: Failed to initialize DngCreator", __FUNCTION__);
             // jniThrowException(env, "java/lang/AssertionError",
             //         "setOrientation called with uninitialized DngCreator");
-            Slogger::E(TAG, "setOrientation called with uninitialized DngCreator");
+            Logger::E(TAG, "setOrientation called with uninitialized DngCreator");
             return E_ASSERTION_ERROR;
         }
 
@@ -2081,7 +2081,7 @@ ECode DngCreator::NativeSetDescription(
             ALOGE("%s: Failed to initialize DngCreator", __FUNCTION__);
             // jniThrowException(env, "java/lang/AssertionError",
             //         "setDescription called with uninitialized DngCreator");
-            Slogger::E(TAG, "setDescription called with uninitialized DngCreator");
+            Logger::E(TAG, "setDescription called with uninitialized DngCreator");
             return E_ASSERTION_ERROR;
         }
 
@@ -2092,7 +2092,7 @@ ECode DngCreator::NativeSetDescription(
                 reinterpret_cast<const uint8_t*>(desc), TIFF_IFD_0) != android::OK) {
             // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
             //         "Invalid metadata for tag %x", TAG_IMAGEDESCRIPTION);
-            Slogger::E(TAG, "Invalid metadata for tag %x", android::img_utils::TAG_IMAGEDESCRIPTION);
+            Logger::E(TAG, "Invalid metadata for tag %x", android::img_utils::TAG_IMAGEDESCRIPTION);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -2115,7 +2115,7 @@ ECode DngCreator::NativeSetGpsTags(
             ALOGE("%s: Failed to initialize DngCreator", __FUNCTION__);
             // jniThrowException(env, "java/lang/AssertionError",
             //         "setGpsTags called with uninitialized DngCreator");
-            Slogger::E(TAG, "setGpsTags called with uninitialized DngCreator");
+            Logger::E(TAG, "setGpsTags called with uninitialized DngCreator");
             return E_ASSERTION_ERROR;
         }
 
@@ -2124,7 +2124,7 @@ ECode DngCreator::NativeSetGpsTags(
                 ALOGE("%s: Failed to add GpsInfo IFD %u to IFD %u", __FUNCTION__, TIFF_IFD_GPSINFO,
                         TIFF_IFD_0);
                 //jniThrowException(env, "java/lang/IllegalStateException", "Failed to add GPSINFO");
-                Slogger::E(TAG, "Failed to add GPSINFO");
+                Logger::E(TAG, "Failed to add GPSINFO");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -2136,19 +2136,19 @@ ECode DngCreator::NativeSetGpsTags(
         if (latLen != GPS_VALUE_LENGTH) {
             // jniThrowException(env, "java/lang/IllegalArgumentException",
             //         "invalid latitude tag length");
-            Slogger::E(TAG, "invalid latitude tag length");
+            Logger::E(TAG, "invalid latitude tag length");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         else if (longLen != GPS_VALUE_LENGTH) {
             // jniThrowException(env, "java/lang/IllegalArgumentException",
             //         "invalid longitude tag length");
-            Slogger::E(TAG, "invalid longitude tag length");
+            Logger::E(TAG, "invalid longitude tag length");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         else if (timeLen != GPS_VALUE_LENGTH) {
             // jniThrowException(env, "java/lang/IllegalArgumentException",
             //         "invalid time tag length");
-            Slogger::E(TAG, "invalid time tag length");
+            Logger::E(TAG, "invalid time tag length");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -2237,7 +2237,7 @@ ECode DngCreator::NativeSetThumbnail(
             ALOGE("%s: Failed to initialize DngCreator", __FUNCTION__);
             // jniThrowException(env, "java/lang/AssertionError",
             //         "setThumbnail called with uninitialized DngCreator");
-            Slogger::E(TAG, "setThumbnail called with uninitialized DngCreator");
+            Logger::E(TAG, "setThumbnail called with uninitialized DngCreator");
             return E_ASSERTION_ERROR;
         }
 
@@ -2249,7 +2249,7 @@ ECode DngCreator::NativeSetThumbnail(
             // jniThrowExceptionFmt(env, "java/lang/AssertionError",
             //         "Invalid size %d for thumbnail, expected size was %d",
             //         capacity, fullSize);
-            Slogger::E(TAG, "Invalid size %d for thumbnail, expected size was %d",
+            Logger::E(TAG, "Invalid size %d for thumbnail, expected size was %d",
                     capacity, fullSize);
             return E_ASSERTION_ERROR;
         }
@@ -2258,7 +2258,7 @@ ECode DngCreator::NativeSetThumbnail(
         if (pixelBytes == NULL) {
             ALOGE("%s: Could not get native ByteBuffer", __FUNCTION__);
             //jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid ByteBuffer");
-            Slogger::E(TAG, "Invalid ByteBuffer");
+            Logger::E(TAG, "Invalid ByteBuffer");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -2267,7 +2267,7 @@ ECode DngCreator::NativeSetThumbnail(
                 ALOGE("%s: Failed to add SubIFD %u to IFD %u", __FUNCTION__, TIFF_IFD_SUB1,
                         TIFF_IFD_0);
                 //jniThrowException(env, "java/lang/IllegalStateException", "Failed to add SubIFD");
-                Slogger::E(TAG, "Failed to add SubIFD");
+                Logger::E(TAG, "Failed to add SubIFD");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -2301,7 +2301,7 @@ ECode DngCreator::NativeSetThumbnail(
 
             if (moveEntries(writer, TIFF_IFD_0, TIFF_IFD_SUB1, tagsToMove) != android::OK) {
                 //jniThrowException(env, "java/lang/IllegalStateException", "Failed to move entries");
-                Slogger::E(TAG, "Failed to move entries");
+                Logger::E(TAG, "Failed to move entries");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -2388,14 +2388,14 @@ ECode DngCreator::NativeSetThumbnail(
                 ALOGE("%s: Could not setup thumbnail strip tags.", __FUNCTION__);
                 // jniThrowException(env, "java/lang/IllegalStateException",
                 //         "Failed to setup thumbnail strip tags.");
-                Slogger::E(TAG, "Failed to setup thumbnail strip tags.");
+                Logger::E(TAG, "Failed to setup thumbnail strip tags.");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             if (writer->addStrip(TIFF_IFD_SUB1) != android::OK) {
                 ALOGE("%s: Could not main image strip tags.", __FUNCTION__);
                 // jniThrowException(env, "java/lang/IllegalStateException",
                 //         "Failed to setup main image strip tags.");
-                Slogger::E(TAG, "Failed to setup main image strip tags.");
+                Logger::E(TAG, "Failed to setup main image strip tags.");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -2403,7 +2403,7 @@ ECode DngCreator::NativeSetThumbnail(
         if (!context->setThumbnail(pixelBytes, width, height)) {
             // jniThrowException(env, "java/lang/IllegalStateException",
             //         "Failed to set thumbnail.");
-            Slogger::E(TAG, "Failed to set thumbnail.");
+            Logger::E(TAG, "Failed to set thumbnail.");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -2442,7 +2442,7 @@ ECode DngCreator::NativeWriteImage(
             ALOGE("%s: Failed to initialize DngCreator", __FUNCTION__);
             // jniThrowException(env, "java/lang/AssertionError",
             //         "Write called with uninitialized DngCreator");
-            Slogger::E(TAG, "Write called with uninitialized DngCreator");
+            Logger::E(TAG, "Write called with uninitialized DngCreator");
             return E_ASSERTION_ERROR;
         }
 
@@ -2481,7 +2481,7 @@ ECode DngCreator::NativeWriteImage(
                 // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                 //         "Invalid size %d for Image, size given in metadata is %d at current stride",
                 //         capacity, fullSize);
-                Slogger::E(TAG, "Invalid size %d for Image, size given in metadata "
+                Logger::E(TAG, "Invalid size %d for Image, size given in metadata "
                         "is %d at current stride", capacity, fullSize);
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
@@ -2490,7 +2490,7 @@ ECode DngCreator::NativeWriteImage(
             if (pixelBytes == NULL) {
                 ALOGE("%s: Could not get native ByteBuffer", __FUNCTION__);
                 //jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid ByteBuffer");
-                Slogger::E(TAG, "Invalid ByteBuffer");
+                Logger::E(TAG, "Invalid ByteBuffer");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -2553,7 +2553,7 @@ ECode DngCreator::NativeWriteInputStream(
 
         android::sp<JniOutputStream> out = new JniOutputStream(outStream);
         // if(env->ExceptionCheck()) {
-        //     Slogger::E(TAG,"%s: Could not allocate buffers for output stream", __FUNCTION__);
+        //     Logger::E(TAG,"%s: Could not allocate buffers for output stream", __FUNCTION__);
         //     return;
         // }
 
@@ -2563,7 +2563,7 @@ ECode DngCreator::NativeWriteInputStream(
             ALOGE("%s: Failed to initialize DngCreator", __FUNCTION__);
             // jniThrowException(env, "java/lang/AssertionError",
             //         "Write called with uninitialized DngCreator");
-            Slogger::E(TAG, "Write called with uninitialized DngCreator");
+            Logger::E(TAG, "Write called with uninitialized DngCreator");
             return E_ASSERTION_ERROR;
         }
 
@@ -2604,7 +2604,7 @@ ECode DngCreator::NativeWriteInputStream(
             // if (!env->ExceptionCheck()) {
             //     // jniThrowExceptionFmt(env, "java/io/IOException",
             //     //         "Encountered error %d while writing file.", ret);
-            //     Slogger::E(TAG, "Encountered error %d while writing file.", ret);
+            //     Logger::E(TAG, "Encountered error %d while writing file.", ret);
             //     return E_IO_EXCEPTION;
             // }
             return NOERROR;

@@ -19,7 +19,10 @@ module
 
      * @param <T> the type of the array (e.g. T = int[], or T = Rational[])
      *
-     * @invoke interface IMarshalQueryable
+     */
+    /**
+     * @Involve
+     * interface IMarshalQueryable
      */
     interface IMarshalQueryableArray {
     }

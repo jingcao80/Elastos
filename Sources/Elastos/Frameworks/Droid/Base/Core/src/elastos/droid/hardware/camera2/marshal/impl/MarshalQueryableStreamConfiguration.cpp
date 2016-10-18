@@ -5,6 +5,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IStreamConfiguration;
 using Elastos::Droid::Hardware::Camera2::Params::CStreamConfiguration;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CStreamConfiguration;
 
 namespace Elastos {
 namespace Droid {
@@ -106,8 +107,14 @@ ECode MarshalQueryableStreamConfiguration::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    //return nativeType == ICameraMetadataNative::TYPE_INT32 && managedType.getType().equals(StreamConfiguration.class);
+    if (nativeType == ICameraMetadataNative::TYPE_INT32) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CStreamConfiguration) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

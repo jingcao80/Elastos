@@ -12,7 +12,7 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/Objects.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Legacy::ParameterUtils;
 using Elastos::Droid::Hardware::Camera2::Utils::ParamsUtils;
@@ -25,7 +25,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Objects;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -74,7 +74,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             params->SetZoom(index);
         }
         else if (VERBOSE) {
-            Slogger::V(TAG, "convertRequestToMetadata - zoom is not supported");
+            Logger::V(TAG, "convertRequestToMetadata - zoom is not supported");
         }
     }
 
@@ -93,7 +93,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         intObj->GetValue(&aberrationMode);
 
         if (aberrationMode != ICameraMetadata::COLOR_CORRECTION_ABERRATION_MODE_FAST) {
-            Slogger::W(TAG, "convertRequestToMetadata - Ignoring unsupported "
+            Logger::W(TAG, "convertRequestToMetadata - Ignoring unsupported "
                     "colorCorrection.aberrationMode = %d", aberrationMode);
         }
     }
@@ -150,7 +150,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             AutoPtr<IInterface> obj2;
             request->Get(CaptureRequest::CONTROL_AWB_REGIONS, (IInterface**)&obj2);
             if (obj2 != NULL) {
-                Slogger::W(TAG, "convertRequestMetadata - control.awbRegions setting is not"
+                Logger::W(TAG, "convertRequestMetadata - control.awbRegions setting is not"
                         "supported, ignoring value");
             }
             Int32 maxNumMeteringAreas;
@@ -233,7 +233,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
                     (*legacyFps)[IParameters::PREVIEW_FPS_MAX_INDEX]);
         }
         else {
-            Slogger::W(TAG, "Unsupported FPS range set [%d,%d]", (*legacyFps)[0], (*legacyFps)[1]);
+            Logger::W(TAG, "Unsupported FPS range set [%d,%d]", (*legacyFps)[0], (*legacyFps)[1]);
         }
     }
 
@@ -259,7 +259,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
 
         Boolean result = compensationRange->Contains(obj3);
         if (!result) {
-            Slogger::W(TAG,
+            Logger::W(TAG,
                     "convertRequestMetadata - control.aeExposureCompensation"
                     "is out of range, ignoring value");
             compensation = 0;
@@ -283,7 +283,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         }
 
         if (VERBOSE) {
-            Slogger::V(TAG, "convertRequestToMetadata - control.aeLock set to %d", aeLock);
+            Logger::V(TAG, "convertRequestToMetadata - control.aeLock set to %d", aeLock);
         }
 
         // TODO: Don't add control.aeLock to availableRequestKeys if it's not supported
@@ -312,7 +312,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         }
 
         if (VERBOSE) {
-            Slogger::V(TAG, "convertRequestToMetadata - control.afMode %d mapped to %d",
+            Logger::V(TAG, "convertRequestToMetadata - control.afMode %d mapped to %d",
                     afMode, focusMode.string());
         }
     }
@@ -338,7 +338,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         if (VERBOSE) {
             Int32 tmp;
             awbMode->GetValue(&tmp);
-            Slogger::V(TAG, "convertRequestToMetadata - control.awbMode %d mapped to %s",
+            Logger::V(TAG, "convertRequestToMetadata - control.awbMode %d mapped to %s",
                     tmp , whiteBalanceMode.string());
         }
     }
@@ -409,14 +409,14 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         AutoPtr<IFloat> obj2 = IFloat::Probe(obj);
         Float focusDistance = 0.0f;
         if (obj2 == NULL) {
-            Slogger::W(TAG,
+            Logger::W(TAG,
                     "convertRequestToMetadata - Ignoring android.lens.focusDistance %d,"
                     "only 0.0f is supported", infinityFocusSupported);
         }
         else {
             obj2->GetValue(&focusDistance);
             if (focusDistance != 0.0f) {
-                Slogger::W(TAG,
+                Logger::W(TAG,
                     "convertRequestToMetadata - Ignoring android.lens.focusDistance %d,"
                     "only 0.0f is supported", infinityFocusSupported);
             }
@@ -455,7 +455,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
                     }
                     else {
                         modeToSet = IParameters::SCENE_MODE_AUTO;
-                        Slogger::W(TAG, "Skipping unknown requested scene mode: %d", sceneMode);
+                        Logger::W(TAG, "Skipping unknown requested scene mode: %d", sceneMode);
                     }
                     break;
                 }
@@ -465,7 +465,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
                     break;
                 }
                 default: {
-                    Slogger::W(TAG, "Control mode %d is unsupported, defaulting to AUTO", controlMode);
+                    Logger::W(TAG, "Control mode %d is unsupported, defaulting to AUTO", controlMode);
                     modeToSet = IParameters::SCENE_MODE_AUTO;
                 }
             }
@@ -492,7 +492,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             }
             else {
                 params->SetColorEffect(IParameters::EFFECT_NONE);
-                Slogger::W(TAG, "Skipping unknown requested effect mode: %d", effectMode);
+                Logger::W(TAG, "Skipping unknown requested effect mode: %d", effectMode);
             }
         }
     }
@@ -512,7 +512,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         intObj->GetValue(&testPatternMode);
 
         if (testPatternMode != ICameraMetadata::SENSOR_TEST_PATTERN_MODE_OFF) {
-            Slogger::W(TAG, "convertRequestToMetadata - ignoring sensor.testPatternMode %d;"
+            Logger::W(TAG, "convertRequestToMetadata - ignoring sensor.testPatternMode %d;"
                     "only OFF is supported", testPatternMode);
         }
     }
@@ -548,7 +548,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             else {
                 String str;
                 IObject::Probe(location)->ToString(&str);
-                Slogger::W(TAG, "Incomplete GPS parameters provided in location %s", str.string());
+                Logger::W(TAG, "Incomplete GPS parameters provided in location %s", str.string());
             }
         }
         else {
@@ -629,7 +629,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
                 if (invalidSize) {
                     String str;
                     IObject::Probe(s)->ToString(&str);
-                    Slogger::W(TAG, "Invalid JPEG thumbnail size set %s, skipping thumbnail...", str.string());
+                    Logger::W(TAG, "Invalid JPEG thumbnail size set %s, skipping thumbnail...", str.string());
                 }
                 if (s == NULL || invalidSize) {
                     // (0,0) = "no thumbnail" in Camera API 1
@@ -660,7 +660,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         orientation->GetValue(&mode);
 
         if (mode != ICameraMetadata::NOISE_REDUCTION_MODE_FAST) {
-            Slogger::W(TAG, "convertRequestToMetadata - Ignoring unsupported "
+            Logger::W(TAG, "convertRequestToMetadata - Ignoring unsupported "
                     "noiseReduction.mode = %d", mode);
         }
     }
@@ -698,10 +698,10 @@ Int32 LegacyRequestMapper::FilterSupportedCaptureIntent(
         case ICameraMetadata::CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG:
         case ICameraMetadata::CONTROL_CAPTURE_INTENT_MANUAL:
             res = ICameraMetadata::CONTROL_CAPTURE_INTENT_PREVIEW;
-            Slogger::W(TAG, "Unsupported control.captureIntent value %s; default to PREVIEW", res);
+            Logger::W(TAG, "Unsupported control.captureIntent value %s; default to PREVIEW", res);
         default:
             res = ICameraMetadata::CONTROL_CAPTURE_INTENT_PREVIEW;
-            Slogger::W(TAG, "Unknown control.captureIntent value %d; default to PREVIEW", res);
+            Logger::W(TAG, "Unknown control.captureIntent value %d; default to PREVIEW", res);
     }
 
     return res;
@@ -745,7 +745,7 @@ AutoPtr<IList> LegacyRequestMapper::ConvertMeteringRegionsToLegacy(
     Int32 size;
     meteringRectangleList->GetSize(&size);
     if (size == 0) {
-        Slogger::W(TAG, "Only received metering rectangles with weight 0.");
+        Logger::W(TAG, "Only received metering rectangles with weight 0.");
         AutoPtr<IList> res;
         assert(0);
         //Arrays::AsList(ParameterUtils::CAMERA_AREA_DEFAULT, (IList**)&res);
@@ -771,7 +771,7 @@ AutoPtr<IList> LegacyRequestMapper::ConvertMeteringRegionsToLegacy(
     }
 
     if (maxNumMeteringAreas < size) {
-        Slogger::W(TAG,
+        Logger::W(TAG,
                 "convertMeteringRegionsToLegacy - Too many requested %s regions,"
                 "ignoring all beyond the first %d", regionName.string(), maxNumMeteringAreas);
     }
@@ -779,7 +779,7 @@ AutoPtr<IList> LegacyRequestMapper::ConvertMeteringRegionsToLegacy(
     if (VERBOSE) {
         String str;
         ParameterUtils::StringFromAreaList(meteringAreaList, &str);
-        Slogger::V(TAG, "convertMeteringRegionsToLegacy - %s areas = %s",
+        Logger::V(TAG, "convertMeteringRegionsToLegacy - %s areas = %s",
                 regionName.string(), str.string());
     }
 
@@ -832,7 +832,7 @@ void LegacyRequestMapper::MapAeAndFlashMode(
                     flashModeSetting = IParameters::FLASH_MODE_TORCH;
                 }
                 else {
-                    Slogger::W(TAG, "mapAeAndFlashMode - Ignore flash.mode == TORCH;"
+                    Logger::W(TAG, "mapAeAndFlashMode - Ignore flash.mode == TORCH;"
                             "camera does not support it");
                 }
         }
@@ -844,7 +844,7 @@ void LegacyRequestMapper::MapAeAndFlashMode(
                 flashModeSetting = IParameters::FLASH_MODE_ON;
             }
             else {
-                Slogger::W(TAG, "mapAeAndFlashMode - Ignore flash.mode == SINGLE;"
+                Logger::W(TAG, "mapAeAndFlashMode - Ignore flash.mode == SINGLE;"
                         "camera does not support it");
             }
         }
@@ -860,7 +860,7 @@ void LegacyRequestMapper::MapAeAndFlashMode(
             flashModeSetting = IParameters::FLASH_MODE_ON;
         }
         else {
-            Slogger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_ALWAYS_FLASH;"
+            Logger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_ALWAYS_FLASH;"
                     "camera does not support it");
         }
     }
@@ -872,7 +872,7 @@ void LegacyRequestMapper::MapAeAndFlashMode(
             flashModeSetting = IParameters::FLASH_MODE_AUTO;
         }
         else {
-            Slogger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_AUTO_FLASH;"
+            Logger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_AUTO_FLASH;"
                     "camera does not support it");
         }
     }
@@ -884,7 +884,7 @@ void LegacyRequestMapper::MapAeAndFlashMode(
             flashModeSetting = IParameters::FLASH_MODE_RED_EYE;
         }
         else {
-            Slogger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_AUTO_FLASH_REDEYE;"
+            Logger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_AUTO_FLASH_REDEYE;"
                     "camera does not support it");
         }
     }
@@ -899,7 +899,7 @@ void LegacyRequestMapper::MapAeAndFlashMode(
     if (VERBOSE) {
         String str;
         ListUtils::ListToString(supportedFlashModes, &str);
-        Slogger::V(TAG,
+        Logger::V(TAG,
                 "mapAeAndFlashMode - set flash.mode (api1) to %s, requested (api2) %d,"
                 "supported (api1) %s",flashModeSetting.string(), flashMode, str.string());
     }
@@ -966,7 +966,7 @@ String LegacyRequestMapper::ConvertAwbModeToLegacy(
         case ICameraMetadata::CONTROL_AWB_MODE_SHADE:
             return IParameters::WHITE_BALANCE_SHADE;
         default:
-            Slogger::W(TAG, "convertAwbModeToLegacy - unrecognized control.awbMode %d", mode);
+            Logger::W(TAG, "convertAwbModeToLegacy - unrecognized control.awbMode %d", mode);
             return IParameters::WHITE_BALANCE_AUTO;
     }
 }
@@ -987,7 +987,7 @@ AutoPtr<IInterface> LegacyRequestMapper::GetIfSupported(
             key->GetName(&name);
             String valStr;
             IObject::Probe(val)->ToString(&valStr);
-            Slogger::W(TAG, "%s is not supported; ignoring requested value %s",
+            Logger::W(TAG, "%s is not supported; ignoring requested value %s",
                     name.string(), valStr.string());
         }
         return NULL;

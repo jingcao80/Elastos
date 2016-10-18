@@ -29,24 +29,19 @@ ECode LegacySizeAreaComparator::Compare(
     FAIL_RETURN(Preconditions::CheckNotNull(lhs, String("lhs must not be null")))
     FAIL_RETURN(Preconditions::CheckNotNull(rhs, String("rhs must not be null")))
 
-    AutoPtr<ICameraSize> size = ICameraSize::Probe(size);
-    AutoPtr<ICameraSize> size2 = ICameraSize::Probe(size);
-    Boolean res;
-    size->Equals(size2, &res);
-    if (res) {
+    ICameraSize* size = ICameraSize::Probe(lhs);
+    ICameraSize* size2 = ICameraSize::Probe(rhs);
+    if (Object::Equals(size, size2)) {
         *result = 0;
         return NOERROR;
     }
 
-    Int32 width;
+    Int32 width, width2, height, height2;
     size->GetWidth(&width);
-    Int32 width2;
-    size2->GetWidth(&width2);
-    Int32 height;
     size->GetHeight(&height);
-    Int64 area = width * height;
-    Int32 height2;
+    size2->GetWidth(&width2);
     size2->GetHeight(&height2);
+    Int64 area = width * height;
     Int64 area2 = width2 * height2;
 
     if (area == area2) {

@@ -5,7 +5,7 @@
 #include "elastos/droid/hardware/camera2/legacy/CaptureCollector.h"
 #include "elastos/droid/utility/CPair.h"
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Utility::CPair;
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraDeviceImplCameraDeviceCallbacks;
@@ -14,7 +14,7 @@ using Elastos::Core::EIID_IComparable;
 using Elastos::Utility::CTreeSet;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CArrayDeque;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Concurrent::Locks::CReentrantLock;
 using Elastos::Utility::Concurrent::Locks::ILock;
 
@@ -83,7 +83,7 @@ void CaptureCollector::CaptureHolder::TryComplete()
                 if (mFailedPreview) {
                     Int32 id;
                     mRequest->GetRequestId(&id);
-                    Slogger::W(TAG, "Preview buffers dropped for request: %d",
+                    Logger::W(TAG, "Preview buffers dropped for request: %d",
                             id);
                     Int32 num;
                     mRequest->NumPreviewTargets(&num);
@@ -96,7 +96,7 @@ void CaptureCollector::CaptureHolder::TryComplete()
                 if (mFailedJpeg) {
                     Int32 id;
                     mRequest->GetRequestId(&id);
-                    Slogger::W(TAG, "Jpeg buffers dropped for request: %d",
+                    Logger::W(TAG, "Jpeg buffers dropped for request: %d",
                             id);
                     Int32 num;
                     mRequest->NumJpegTargets(&num);
@@ -120,18 +120,18 @@ ECode CaptureCollector::CaptureHolder::SetJpegTimestamp(
     if (DEBUG) {
         Int32 id;
         mRequest->GetRequestId(&id);
-        Slogger::D(TAG, "setJpegTimestamp - called for request %d", id);
+        Logger::D(TAG, "setJpegTimestamp - called for request %d", id);
     }
     if (!mNeedsJpeg) {
         // throw new IllegalStateException(
         //         "setJpegTimestamp called for capture with no jpeg targets.");
-        Slogger::E(TAG, "setJpegTimestamp called for capture with no jpeg targets.");
+        Logger::E(TAG, "setJpegTimestamp called for capture with no jpeg targets.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (IsCompleted()) {
         // throw new IllegalStateException(
         //         "setJpegTimestamp called on already completed request.");
-        Slogger::E(TAG, "setJpegTimestamp called on already completed request.");
+        Logger::E(TAG, "setJpegTimestamp called on already completed request.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -157,18 +157,18 @@ ECode CaptureCollector::CaptureHolder::SetJpegProduced()
     if (DEBUG) {
         Int32 id;
         mRequest->GetRequestId(&id);
-        Slogger::D(TAG, "setJpegProduced - called for request %d", id);
+        Logger::D(TAG, "setJpegProduced - called for request %d", id);
     }
     if (!mNeedsJpeg) {
         // throw new IllegalStateException(
         //         "setJpegProduced called for capture with no jpeg targets.");
-        Slogger::E(TAG, "setJpegProduced called for capture with no jpeg targets.");
+        Logger::E(TAG, "setJpegProduced called for capture with no jpeg targets.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (IsCompleted()) {
         // throw new IllegalStateException(
         //         "setJpegProduced called on already completed request.");
-        Slogger::E(TAG, "setJpegProduced called on already completed request.");
+        Logger::E(TAG, "setJpegProduced called on already completed request.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -182,7 +182,7 @@ void CaptureCollector::CaptureHolder::SetJpegFailed()
     if (DEBUG) {
         Int32 id;
         mRequest->GetRequestId(&id);
-        Slogger::D(TAG, "setJpegFailed - called for request %d", id);
+        Logger::D(TAG, "setJpegFailed - called for request %d", id);
     }
     if (!mNeedsJpeg || IsJpegCompleted()) {
         return;
@@ -201,18 +201,18 @@ ECode CaptureCollector::CaptureHolder::SetPreviewTimestamp(
     if (DEBUG) {
         Int32 id;
         mRequest->GetRequestId(&id);
-        Slogger::D(TAG, "setPreviewTimestamp - called for request %d", id);
+        Logger::D(TAG, "setPreviewTimestamp - called for request %d", id);
     }
     if (!mNeedsPreview) {
         // throw new IllegalStateException(
         //         "setPreviewTimestamp called for capture with no preview targets.");
-        Slogger::E(TAG, "setPreviewTimestamp called for capture with no preview targets.");
+        Logger::E(TAG, "setPreviewTimestamp called for capture with no preview targets.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (IsCompleted()) {
         // throw new IllegalStateException(
         //         "setPreviewTimestamp called on already completed request.");
-        Slogger::E(TAG, "setPreviewTimestamp called on already completed request.");
+        Logger::E(TAG, "setPreviewTimestamp called on already completed request.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -240,18 +240,18 @@ ECode CaptureCollector::CaptureHolder::SetPreviewProduced()
     if (DEBUG) {
         Int32 id;
         mRequest->GetRequestId(&id);
-        Slogger::D(TAG, "setPreviewProduced - called for request %d", id);
+        Logger::D(TAG, "setPreviewProduced - called for request %d", id);
     }
     if (!mNeedsPreview) {
         // throw new IllegalStateException(
         //         "setPreviewProduced called for capture with no preview targets.");
-        Slogger::E(TAG, "setPreviewProduced called for capture with no preview targets.");
+        Logger::E(TAG, "setPreviewProduced called for capture with no preview targets.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (IsCompleted()) {
         // throw new IllegalStateException(
         //         "setPreviewProduced called on already completed request.");
-        Slogger::E(TAG, "setPreviewProduced called on already completed request.");
+        Logger::E(TAG, "setPreviewProduced called on already completed request.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -265,7 +265,7 @@ void CaptureCollector::CaptureHolder::SetPreviewFailed()
     if (DEBUG) {
         Int32 id;
         mRequest->GetRequestId(&id);
-        Slogger::D(TAG, "setPreviewFailed - called for request %d", id);
+        Logger::D(TAG, "setPreviewFailed - called for request %d", id);
     }
     if (!mNeedsPreview || IsPreviewCompleted()) {
         return;
@@ -391,12 +391,12 @@ ECode CaptureCollector::QueueRequest(
     if (DEBUG) {
         Int32 id;
         holder->GetRequestId(&id);
-        Slogger::D(TAG, "queueRequest  for request %d - %d requests remain in flight.", id, mInFlight);
+        Logger::D(TAG, "queueRequest  for request %d - %d requests remain in flight.", id, mInFlight);
     }
 
     if (!(h->mNeedsJpeg || h->mNeedsPreview)) {
         //throw new IllegalStateException("Request must target at least one output surface!");
-        Slogger::E(TAG, "Request must target at least one output surface!");
+        Logger::E(TAG, "Request must target at least one output surface!");
         ILock::Probe(lock)->UnLock();
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -582,7 +582,7 @@ ECode CaptureCollector::JpegCaptured(
     //mJpegCaptureQueue->Poll((IInterface**)&obj);
     AutoPtr<CaptureHolder> h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     if (h == NULL) {
-        Slogger::W(TAG, "jpegCaptured called with no jpeg request on queue!");
+        Logger::W(TAG, "jpegCaptured called with no jpeg request on queue!");
         *outrh = NULL;
         ILock::Probe(lock)->UnLock();
         return NOERROR;
@@ -614,7 +614,7 @@ ECode CaptureCollector::JpegProduced(
     //mJpegProduceQueue->Poll((IInterface**)&obj);
     AutoPtr<CaptureHolder> h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     if (h == NULL) {
-        Slogger::W(TAG, "jpegProduced called with no jpeg request on queue!");
+        Logger::W(TAG, "jpegProduced called with no jpeg request on queue!");
         *outpair = NULL;
         ILock::Probe(lock)->UnLock();
         return NOERROR;
@@ -673,7 +673,7 @@ ECode CaptureCollector::PreviewCaptured(
     AutoPtr<CaptureHolder> h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     if (h == NULL) {
         if (DEBUG) {
-            Slogger::D(TAG, "previewCaptured called with no preview request on queue!");
+            Logger::D(TAG, "previewCaptured called with no preview request on queue!");
         }
         *outpair = NULL;
         ILock::Probe(lock)->UnLock();
@@ -709,7 +709,7 @@ ECode CaptureCollector::PreviewProduced(
     //mPreviewProduceQueue->Poll((IInterface**)&obj);
     AutoPtr<CaptureHolder> h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     if (h == NULL) {
-        Slogger::W(TAG, "previewProduced called with no preview request on queue!");
+        Logger::W(TAG, "previewProduced called with no preview request on queue!");
         *outrh = NULL;
         ILock::Probe(lock)->UnLock();
         return NOERROR;
@@ -851,7 +851,7 @@ ECode CaptureCollector::OnPreviewCompleted()
     if (mInFlightPreviews < 0) {
         // throw new IllegalStateException(
         //         "More preview captures completed than requests queued.");
-        Slogger::E(TAG, "More preview captures completed than requests queued.");
+        Logger::E(TAG, "More preview captures completed than requests queued.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (mInFlightPreviews == 0) {
@@ -869,12 +869,12 @@ ECode CaptureCollector::OnRequestCompleted(
     if (DEBUG) {
         Int32 id;
         request->GetRequestId(&id);
-        Slogger::D(TAG, "Completed request %d, %d requests remain in flight.", id, mInFlight);
+        Logger::D(TAG, "Completed request %d, %d requests remain in flight.", id, mInFlight);
     }
     if (mInFlight < 0) {
         // throw new IllegalStateException(
         //         "More captures completed than requests queued.");
-        Slogger::E(TAG, "More captures completed than requests queued.");
+        Logger::E(TAG, "More captures completed than requests queued.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 

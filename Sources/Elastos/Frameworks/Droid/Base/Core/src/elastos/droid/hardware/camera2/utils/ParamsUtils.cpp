@@ -7,7 +7,7 @@
 #include "elastos/droid/graphics/CRectF.h"
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/Math.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Utility::CSize;
 using Elastos::Droid::Utility::CRational;
@@ -16,7 +16,7 @@ using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::StringBuffer;
 using Elastos::Core::Math;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -97,19 +97,27 @@ ECode ParamsUtils::CreateRational(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    assert(0 && "TODO");
-    // if (Float.isNaN(value)) {
-    //     return Rational.NaN;
-    // }
-    // else if (value == Float.POSITIVE_INFINITY) {
-    //     return Rational.POSITIVE_INFINITY;
-    // }
-    // else if (value == Float.NEGATIVE_INFINITY) {
-    //     return Rational.NEGATIVE_INFINITY;
-    // }
-    // else if (value == 0.0f) {
-    //     return Rational.ZERO;
-    // }
+    using Elastos::Core::Math;
+    if (Math::IsNaN(value)) {
+        *result = CRational::NaN;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+    else if (value == Math::FLOAT_POSITIVE_INFINITY) {
+        *result = CRational::POSITIVE_INFINITY;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+    else if (value == Math::FLOAT_NEGATIVE_INFINITY) {
+        *result = CRational::NEGATIVE_INFINITY;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+    else if (value == 0.0f) {
+        *result = CRational::ZERO;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
 
     // normal finite value: approximate it
 
@@ -146,20 +154,15 @@ ECode ParamsUtils::ConvertRectF(
     FAIL_RETURN(Preconditions::CheckNotNull(source, String("source must not be null")))
     FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
 
-    Int32 left;
+    Int32 left, right, top, bottom;
     source->GetLeft(&left);
-    destination->SetLeft(left);
-
-    Int32 right;
     source->GetRight(&right);
-    destination->SetRight(right);
-
-    Int32 bottom;
     source->GetBottom(&bottom);
-    destination->SetBottom(bottom);
-
-    Int32 top;
     source->GetTop(&top);
+
+    destination->SetLeft(left);
+    destination->SetRight(right);
+    destination->SetBottom(bottom);
     destination->SetTop(top);
 
     return NOERROR;
@@ -178,8 +181,7 @@ ECode ParamsUtils::GetOrDefault(
     FAIL_RETURN(Preconditions::CheckNotNull(key, String("key must not be null")))
     FAIL_RETURN(Preconditions::CheckNotNull(defaultValue, String("defaultValue must not be null")))
     AutoPtr<IInterface> value;
-    assert(0 && "weit get");
-    //r->Get(key, (IInterface**)&value);
+    r->Get(key, (IInterface**)&value);
     if (value == NULL) {
         *result = defaultValue;
         REFCOUNT_ADD(*result);

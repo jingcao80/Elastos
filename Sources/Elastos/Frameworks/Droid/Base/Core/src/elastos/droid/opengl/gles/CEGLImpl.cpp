@@ -746,12 +746,10 @@ android::sp<ANativeWindow> CEGLImpl::SurfaceGetNativeWindow(
         Logger::E("CEGLImpl", "CEGLImpl::SurfaceGetNativeWindow");
         return NULL;
     }
-    android::sp<android::Surface> sur;
-    Elastos::Droid::View::Surface* surfaceImpl = (Elastos::Droid::View::Surface*)surface;
-    {
-        AutoLock lock(*surfaceImpl);
-        sur = reinterpret_cast<android::Surface *>(surfaceImpl->mNativeObject);
-    }
+
+    Int64 nativeSurf;
+    surface->GetNativeSurface(&nativeSurf);
+    android::sp<android::Surface> sur = reinterpret_cast<android::Surface*>(nativeSurf);
     return sur;
 }
 

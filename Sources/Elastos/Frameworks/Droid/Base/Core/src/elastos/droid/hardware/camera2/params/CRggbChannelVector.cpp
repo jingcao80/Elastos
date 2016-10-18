@@ -3,11 +3,11 @@
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -98,8 +98,7 @@ ECode CRggbChannelVector::GetComponent(
     *value = 0;
 
     if (colorChannel < 0 || colorChannel >= COUNT) {
-        //throw new IllegalArgumentException("Color channel out of range");
-        Slogger::E("CRggbChannelVector", "Color channel out of range");
+        Logger::E("CRggbChannelVector", "Color channel out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -117,8 +116,7 @@ ECode CRggbChannelVector::GetComponent(
             *value = mBlue;
             return NOERROR;
         default:
-            //throw new AssertionError("Unhandled case " + colorChannel);
-            Slogger::E("CRggbChannelVector", "Unhandled case %d", colorChannel);
+            Logger::E("CRggbChannelVector", "Unhandled case %d", colorChannel);
             return E_ASSERTION_ERROR;;
     }
     return NOERROR;
@@ -128,15 +126,14 @@ ECode CRggbChannelVector::CopyTo(
     /* [in] */ ArrayOf<Float>* destination,
     /* [in] */ Int32 offset)
 {
-    //FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
     if (destination == NULL) {
-        Slogger::E("CRggbChannelVector", "destination must not be null");
+        Logger::E("CRggbChannelVector", "destination must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
 
     if (destination->GetLength() - offset < COUNT) {
-        //throw new ArrayIndexOutOfBoundsException("destination too small to fit elements");
-        Slogger::E("CRggbChannelVector", "destination too small to fit elements");
+        Logger::E("CRggbChannelVector", "destination too small to fit elements");
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;;
     }
 
@@ -152,24 +149,18 @@ ECode CRggbChannelVector::Equals(
     /* [out] */ Boolean* equal)
 {
     VALIDATE_NOT_NULL(equal);
-
-    if (obj == NULL) {
-        *equal = FALSE;
-        return NOERROR;
-    }
-    else if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
-        *equal = TRUE;
-        return NOERROR;
-    }
-    else if (IRggbChannelVector::Probe(obj) != NULL) {
-        const AutoPtr<CRggbChannelVector> other = (CRggbChannelVector*)IRggbChannelVector::Probe(obj);
-        *equal = mRed == other->mRed &&
-                mGreenEven == other->mGreenEven &&
-                mGreenOdd == other->mGreenOdd &&
-                mBlue == other->mBlue;
-        return NOERROR;
-    }
     *equal = FALSE;
+
+    IRggbChannelVector* rcv = IRggbChannelVector::Probe(obj);
+    if (rcv == NULL) {
+        return NOERROR;
+    }
+
+    CRggbChannelVector* other = (CRggbChannelVector*)rcv;
+    *equal = mRed == other->mRed &&
+        mGreenEven == other->mGreenEven &&
+        mGreenOdd == other->mGreenOdd &&
+        mBlue == other->mBlue;
     return NOERROR;
 }
 
@@ -178,11 +169,11 @@ ECode CRggbChannelVector::GetHashCode(
 {
     VALIDATE_NOT_NULL(value);
 
-    assert(0 && "TODO: need floatToIntBits");
-    // *value = Float.floatToIntBits(mRed) ^
-    //         Float.floatToIntBits(mGreenEven) ^
-    //         Float.floatToIntBits(mGreenOdd) ^
-    //         Float.floatToIntBits(mBlue);
+    using Elastos::Core::Math;
+    *value = Math::FloatToInt32Bits(mRed) ^
+        Math::FloatToInt32Bits(mGreenEven) ^
+        Math::FloatToInt32Bits(mGreenOdd) ^
+        Math::FloatToInt32Bits(mBlue);
     return NOERROR;
 }
 

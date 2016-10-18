@@ -5,6 +5,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IHighSpeedVideoConfiguration;
 using Elastos::Droid::Hardware::Camera2::Params::CHighSpeedVideoConfiguration;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CHighSpeedVideoConfiguration;
 
 namespace Elastos {
 namespace Droid {
@@ -107,9 +108,14 @@ ECode MarshalQueryableHighSpeedVideoConfiguration::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    // return nativeType == ICameraMetadataNative::TYPE_INT32 &&
-    //         managedType.getType().equals(HighSpeedVideoConfiguration.class);
+    if (nativeType == ICameraMetadataNative::TYPE_INT32) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CHighSpeedVideoConfiguration) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

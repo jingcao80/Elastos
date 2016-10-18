@@ -96,7 +96,7 @@ ECode SensorManager::GetSensorList(
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IInterface> sensor;
             list->Get(i, (IInterface**)&sensor);
-            (*sensors)->Set(i++, ISensor::Probe(sensor));
+            (*sensors)->Set(i, ISensor::Probe(sensor));
         }
     }
 

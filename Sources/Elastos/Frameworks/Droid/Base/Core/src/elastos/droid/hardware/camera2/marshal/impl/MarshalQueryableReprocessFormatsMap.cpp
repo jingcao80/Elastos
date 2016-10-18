@@ -2,15 +2,16 @@
 #include "elastos/droid/hardware/camera2/marshal/impl/MarshalQueryableReprocessFormatsMap.h"
 #include "elastos/droid/hardware/camera2/params/CReprocessFormatsMap.h"
 #include "elastos/droid/hardware/camera2/params/StreamConfigurationMap.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IReprocessFormatsMap;
 using Elastos::Droid::Hardware::Camera2::Params::CReprocessFormatsMap;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CReprocessFormatsMap;
 using Elastos::Droid::Hardware::Camera2::Params::StreamConfigurationMap;
 using Elastos::IO::IBuffer;
 using Elastos::IO::IInt32Buffer;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -76,7 +77,7 @@ ECode MarshalQueryableReprocessFormatsMap::MarshalerReprocessFormatsMap::Unmarsh
     Int32 len = remaining / IMarshalHelpers::SIZEOF_INT32;
     if (remaining % IMarshalHelpers::SIZEOF_INT32 != 0) {
         //throw new AssertionError("ReprocessFormatsMap was not TYPE_INT32");
-        Slogger::E("MarshalQueryableReprocessFormatsMap", "ReprocessFormatsMap was not TYPE_INT32");
+        Logger::E("MarshalQueryableReprocessFormatsMap", "ReprocessFormatsMap was not TYPE_INT32");
         return E_ASSERTION_ERROR;
     }
 
@@ -162,8 +163,14 @@ ECode MarshalQueryableReprocessFormatsMap::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    //return nativeType == ICameraMetadataNative::TYPE_INT32 && managedType.getType().equals(ReprocessFormatsMap.class);
+    if (nativeType == ICameraMetadataNative::TYPE_INT32) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CReprocessFormatsMap) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

@@ -1,10 +1,10 @@
 
 #include "elastos/droid/hardware/hdmi/HdmiTvClient.h"
 #include "elastos/droid/hardware/hdmi/HdmiRecordListener.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::EIID_IBinder;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -192,7 +192,7 @@ ECode HdmiTvClient::DeviceSelect(
 {
     if (_callback == NULL) {
         // throw new IllegalArgumentException("callback must not be null.");
-        Slogger::E(TAG, "callback must not be null.");
+        Logger::E(TAG, "callback must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     //try {
@@ -200,7 +200,7 @@ ECode HdmiTvClient::DeviceSelect(
     ECode ec = mService->DeviceSelect(logicalAddress, tmp);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to select device: %d", ec);
+        Logger::E(TAG, "failed to select device: %d", ec);
     }
     //}
     return NOERROR;
@@ -219,7 +219,7 @@ ECode HdmiTvClient::PortSelect(
 {
     if (_callback == NULL) {
         //throw new IllegalArgumentException("Callback must not be null");
-        Slogger::E(TAG, "Callback must not be null.");
+        Logger::E(TAG, "Callback must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     //try {
@@ -227,7 +227,7 @@ ECode HdmiTvClient::PortSelect(
     ECode ec = mService->PortSelect(portId, tmp);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to select port: %d", ec);
+        Logger::E(TAG, "failed to select port: %d", ec);
     }
     //}
     return NOERROR;
@@ -238,7 +238,7 @@ ECode HdmiTvClient::SetInputChangeListener(
 {
     if (listener == NULL) {
         //throw new IllegalArgumentException("listener must not be null.");
-        Slogger::E(TAG, "listener must not be null.");
+        Logger::E(TAG, "listener must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     //try {
@@ -246,7 +246,7 @@ ECode HdmiTvClient::SetInputChangeListener(
     ECode ec = mService->SetInputChangeListener(tmp);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E("TAG", "Failed to set InputChangeListener:%d", ec);
+        Logger::E("TAG", "Failed to set InputChangeListener:%d", ec);
     }
     //}
     return NOERROR;
@@ -268,7 +268,7 @@ ECode HdmiTvClient::SetSystemAudioVolume(
     ECode ec = mService->SetSystemAudioVolume(oldIndex, newIndex, maxIndex);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to set volume: %d", ec);
+        Logger::E(TAG, "failed to set volume: %d", ec);
     }
     //}
     return NOERROR;
@@ -281,7 +281,7 @@ ECode HdmiTvClient::SetSystemAudioMute(
     ECode ec = mService->SetSystemAudioMute(mute);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to set mute: %d", ec);
+        Logger::E(TAG, "failed to set mute: %d", ec);
     }
     //}
     return NOERROR;
@@ -292,7 +292,7 @@ ECode HdmiTvClient::SetRecordListener(
 {
     if (listener == NULL) {
         //throw new IllegalArgumentException("listener must not be null.");
-        Slogger::E(TAG, "listener must not be null.");
+        Logger::E(TAG, "listener must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     //try {
@@ -300,7 +300,7 @@ ECode HdmiTvClient::SetRecordListener(
     ECode ec = mService->SetHdmiRecordListener(tmp);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to set record listener.%d", ec);
+        Logger::E(TAG, "failed to set record listener.%d", ec);
     }
     //}
     return NOERROR;
@@ -319,7 +319,7 @@ ECode HdmiTvClient::StartOneTouchRecord(
 {
     if (source == NULL) {
         //throw new IllegalArgumentException("source must not be null.");
-        Slogger::E(TAG, "source must not be null.");
+        Logger::E(TAG, "source must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -332,7 +332,7 @@ ECode HdmiTvClient::StartOneTouchRecord(
     ECode ec = mService->StartOneTouchRecord(recorderAddress, data);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to start record: %d", ec);
+        Logger::E(TAG, "failed to start record: %d", ec);
     }
     //}
     return NOERROR;
@@ -345,7 +345,7 @@ ECode HdmiTvClient::StopOneTouchRecord(
     ECode ec = mService->StopOneTouchRecord(recorderAddress);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to stop record: %d", ec);
+        Logger::E(TAG, "failed to stop record: %d", ec);
     }
     //}
     return NOERROR;
@@ -358,7 +358,7 @@ ECode HdmiTvClient::StartTimerRecording(
 {
     if (source == NULL) {
         //throw new IllegalArgumentException("source must not be null.");
-        Slogger::E(TAG, "source must not be null.");
+        Logger::E(TAG, "source must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -373,7 +373,7 @@ ECode HdmiTvClient::StartTimerRecording(
     ECode ec = mService->StartTimerRecording(recorderAddress, sourceType, data);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to start record: %d", ec);
+        Logger::E(TAG, "failed to start record: %d", ec);
     }
     //}
     return NOERROR;
@@ -389,7 +389,7 @@ ECode HdmiTvClient::CheckTimerRecordingSourceType(
             break;
         default:
             //throw new IllegalArgumentException("Invalid source type:" + sourceType);
-            Slogger::E(TAG, "Invalid source type:%d", sourceType);
+            Logger::E(TAG, "Invalid source type:%d", sourceType);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -402,7 +402,7 @@ ECode HdmiTvClient::ClearTimerRecording(
 {
     if (source == NULL) {
         //throw new IllegalArgumentException("source must not be null.");
-        Slogger::E(TAG, "source must not be null.");
+        Logger::E(TAG, "source must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -416,7 +416,7 @@ ECode HdmiTvClient::ClearTimerRecording(
     ECode ec = mService->ClearTimerRecording(recorderAddress, sourceType, data);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to start record: %d", ec);
+        Logger::E(TAG, "failed to start record: %d", ec);
     }
     //}
     return NOERROR;
@@ -427,7 +427,7 @@ ECode HdmiTvClient::SetHdmiMhlVendorCommandListener(
 {
     if (listener == NULL) {
         //throw new IllegalArgumentException("listener must not be null.");
-        Slogger::E(TAG, "listener must not be null.");
+        Logger::E(TAG, "listener must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     //try {
@@ -435,7 +435,7 @@ ECode HdmiTvClient::SetHdmiMhlVendorCommandListener(
     ECode ec = mService->AddHdmiMhlVendorCommandListener(tmp);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to set hdmi mhl vendor command listener: %d", ec);
+        Logger::E(TAG, "failed to set hdmi mhl vendor command listener: %d", ec);
     }
     //}
     return NOERROR;
@@ -456,17 +456,17 @@ ECode HdmiTvClient::SendMhlVendorCommand(
 {
     if (data == NULL || data->GetLength() != VENDOR_DATA_SIZE) {
         //throw new IllegalArgumentException("Invalid vendor command data.");
-        Slogger::E(TAG, "Invalid vendor command data.");
+        Logger::E(TAG, "Invalid vendor command data.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (offset < 0 || offset >= VENDOR_DATA_SIZE) {
         //throw new IllegalArgumentException("Invalid offset:" + offset);
-        Slogger::E(TAG, "Invalid offset:%d" , offset);
+        Logger::E(TAG, "Invalid offset:%d" , offset);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (length < 0 || offset + length > VENDOR_DATA_SIZE) {
         //throw new IllegalArgumentException("Invalid length:" + length);
-        Slogger::E(TAG, "Invalid length:%d" , length);
+        Logger::E(TAG, "Invalid length:%d" , length);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -474,7 +474,7 @@ ECode HdmiTvClient::SendMhlVendorCommand(
     ECode ec = mService->SendMhlVendorCommand(portId, offset, length, data);
     //} catch (RemoteException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "failed to send vendor command: %d", ec);
+        Logger::E(TAG, "failed to send vendor command: %d", ec);
     }
     //}
     return NOERROR;

@@ -19,6 +19,7 @@
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/graphics/CSurfaceTexture.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/Debug.h"
 #include "elastos/droid/os/ConditionVariable.h"
 #include "elastos/droid/utility/CSize.h"
 #include "elastos/droid/view/CSurface.h"
@@ -27,10 +28,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Legacy::LegacyCameraDevice;
 using Elastos::Droid::Hardware::Camera2::Legacy::CLegacyResultMapper;
 using Elastos::Droid::Hardware::Camera2::Legacy::CGLThreadManager;
@@ -49,6 +48,7 @@ using Elastos::Droid::Hardware::Camera2::Utils::CUtilsSizeAreaComparator;
 using Elastos::Droid::Hardware::IHardwareCamera;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::Debug;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::ConditionVariable;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
@@ -70,7 +70,7 @@ using Elastos::Utility::Arrays;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Concurrent::ITimeUnit;
 using Elastos::Utility::Concurrent::ITimeUnitHelper;
 using Elastos::Utility::Concurrent::CTimeUnitHelper;
@@ -150,7 +150,7 @@ ECode RequestThreadManager::RequestThreadManagerFpsCounter::StaggeredLog()
             sb += mStreamType;
             sb += " stream: ";
             sb += mLastFps;
-            Slogger::D(TAG, sb.ToString());
+            Logger::D(TAG, sb.ToString());
         }
     }
     return NOERROR;
@@ -185,7 +185,7 @@ ECode RequestThreadManager::CameraErrorCallback::OnError(
     /* [in] */ Int32 error,
     /* [in] */ IHardwareCamera* camera)
 {
-    Slogger::E(mHost->TAG, "Received error %d from the Camera1 ErrorCallback", error);
+    Logger::E(mHost->TAG, "Received error %d from the Camera1 ErrorCallback", error);
     return mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
 }
 
@@ -201,18 +201,18 @@ ECode RequestThreadManager::CameraPictureCallback::OnPictureTaken(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ IHardwareCamera* camera)
 {
-    Slogger::I(mHost->TAG, String("Received jpeg."));
+    Logger::I(mHost->TAG, String("Received jpeg."));
     AutoPtr<IPair> captureInfo;
     mHost->mCaptureCollector->JpegProduced((IPair**)&captureInfo);
     if (captureInfo == NULL) {
-        Slogger::E(mHost->TAG, "Dropping jpeg frame.");
+        Logger::E(mHost->TAG, "Dropping jpeg frame.");
         return NOERROR;
     }
     else {
         AutoPtr<IInterface> obj;
         captureInfo->GetFirst((IInterface**)&obj);
         if (obj != NULL) {
-            Slogger::E(mHost->TAG, "Dropping jpeg frame.");
+            Logger::E(mHost->TAG, "Dropping jpeg frame.");
             return NOERROR;
         }
     }
@@ -238,14 +238,14 @@ ECode RequestThreadManager::CameraPictureCallback::OnPictureTaken(
                 ICollection::Probe(mHost->mJpegSurfaceIds));
         ECode ec = NOERROR;
         if (result) {
-            Slogger::I(mHost->TAG, String("Producing jpeg buffer..."));
+            Logger::I(mHost->TAG, String("Producing jpeg buffer..."));
 
             Int32 size = LegacyCameraDevice::NativeGetJpegFooterSize();
             Int32 totalSize = data->GetLength() + size;
             totalSize = (totalSize + 3) & ~0x3; // round up to nearest octonibble
             ec = LegacyCameraDevice::SetNextTimestamp(s, timestamp);
             if (FAILED(ec)) {
-                Slogger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
+                Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
                 continue;
             }
 
@@ -260,20 +260,20 @@ ECode RequestThreadManager::CameraPictureCallback::OnPictureTaken(
                 ec = LegacyCameraDevice::ProduceFrame(s, data, dimen, dimen,
                         ICameraMetadataNative::NATIVE_JPEG_FORMAT);
                 if (FAILED(ec)) {
-                    Slogger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
+                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
                     continue;
                 }
             }
             else {
                 ec = LegacyCameraDevice::SetSurfaceDimens(s, totalSize, /*height*/1);
                 if (FAILED(ec)) {
-                    Slogger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
+                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
                     continue;
                 }
                 ec = LegacyCameraDevice::ProduceFrame(s, data, totalSize, /*height*/1,
                         ICameraMetadataNative::NATIVE_JPEG_FORMAT);
                 if (FAILED(ec)) {
-                    Slogger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
+                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
                     continue;
                 }
             }
@@ -344,7 +344,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     if (DEBUG) {
-        Slogger::D(mHost->TAG, "Request thread handling message:%d", what);
+        Logger::D(mHost->TAG, "Request thread handling message:%d", what);
     }
     Int64 startTime = 0;
     if (DEBUG) {
@@ -364,7 +364,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             else {
                 sizes = 0;
             }
-            Slogger::I(mHost->TAG, "Configure outputs: %d surfaces configured.", sizes);
+            Logger::I(mHost->TAG, "Configure outputs: %d surfaces configured.", sizes);
 
             //try {
             Boolean success;
@@ -375,13 +375,13 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             ECode ec = mHost->mCaptureCollector->WaitForEmpty(JPEG_FRAME_TIMEOUT,
                     milliSeconds, &success);
             if (FAILED(ec)) {
-                Slogger::E(mHost->TAG, "Interrupted while waiting for requests to complete.");
+                Logger::E(mHost->TAG, "Interrupted while waiting for requests to complete.");
                 mHost->mDeviceState->SetError(
                         ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                 break;
             }
             if (!success) {
-                Slogger::E(mHost->TAG, "Timed out while queueing configure request.");
+                Logger::E(mHost->TAG, "Timed out while queueing configure request.");
                 mHost->mCaptureCollector->FailAll();
             }
             //} catch (InterruptedException e) {
@@ -395,7 +395,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             config->mCondition->Open();
             if (DEBUG) {
                 Int64 totalTime = SystemClock::GetElapsedRealtimeNanos() - startTime;
-                Slogger::D(mHost->TAG, "Configure took %d ns",totalTime);
+                Logger::D(mHost->TAG, "Configure took %d ns",totalTime);
             }
             break;
         }
@@ -420,13 +420,13 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 ECode ec = mHost->mCaptureCollector->WaitForEmpty(JPEG_FRAME_TIMEOUT,
                         milliSeconds, &success);
                 if (FAILED(ec)) {
-                    Slogger::E(mHost->TAG, "Interrupted while waiting for requests to complete: %d", ec);
+                    Logger::E(mHost->TAG, "Interrupted while waiting for requests to complete: %d", ec);
                     mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                     break;
                 }
                 if (!success) {
-                    Slogger::E(mHost->TAG,
+                    Logger::E(mHost->TAG,
                             "Timed out while waiting for prior requests to complete.");
                     mHost->mCaptureCollector->FailAll();
                 }
@@ -515,7 +515,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                         // If setting the parameters failed, report a request error to
                         // the camera client, and skip any further work for this request
                         if (FAILED(ec)) {
-                            Slogger::E(mHost->TAG, "Exception while setting camera parameters: %d", ec);
+                            Logger::E(mHost->TAG, "Exception while setting camera parameters: %d", ec);
                             holder->FailRequest();
                             Boolean result;
                             mHost->mDeviceState->SetCaptureStart(holder, /*timestamp*/0,
@@ -542,7 +542,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
                 if (!success) {
                     // Report a request error if we timed out while queuing this.
-                    Slogger::E(mHost->TAG, "Timed out while queueing capture request.");
+                    Logger::E(mHost->TAG, "Timed out while queueing capture request.");
                     ec = holder->FailRequest();
                     FAIL_GOTO(ec, error);
                     Boolean result;
@@ -572,7 +572,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                     while((mHost->mCaptureCollector->WaitForPreviewsEmpty(PREVIEW_FRAME_TIMEOUT,
                             milliSeconds, &res), !res)) {
                         // Fail preview requests until the queue is empty.
-                        Slogger::E(mHost->TAG, "Timed out while waiting for preview requests to complete.");
+                        Logger::E(mHost->TAG, "Timed out while waiting for preview requests to complete.");
                         ec = mHost->mCaptureCollector->FailNextPreview();
                         FAIL_GOTO(ec, error);
                     }
@@ -603,7 +603,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                     ec = mHost->mReceivedJpeg->Block(JPEG_FRAME_TIMEOUT, &res);
                     FAIL_GOTO(ec, error);
                     if (!res) {
-                        Slogger::E(mHost->TAG, "Hit timeout for jpeg callback!");
+                        Logger::E(mHost->TAG, "Hit timeout for jpeg callback!");
                         ec = mHost->mCaptureCollector->FailNextJpeg();
                         FAIL_GOTO(ec, error);
                     }
@@ -611,14 +611,14 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
         error:
                 //} catch (IOException e) {
                 if (ec == (ECode)E_IO_EXCEPTION) {
-                    Slogger::E(mHost->TAG, "Received device exception: %d", ec);
+                    Logger::E(mHost->TAG, "Received device exception: %d", ec);
                     mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                     break;
                 }
                 //} catch (InterruptedException e) {
                 if (ec == (ECode)E_INTERRUPTED_EXCEPTION) {
-                    Slogger::E(mHost->TAG, "Interrupted during capture: %d", ec);
+                    Logger::E(mHost->TAG, "Interrupted during capture: %d", ec);
                     mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                     break;
@@ -627,13 +627,13 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
                 if (paramsChanged) {
                     if (DEBUG) {
-                        Slogger::D(mHost->TAG, "Params changed -- getting new Parameters from HAL.");
+                        Logger::D(mHost->TAG, "Params changed -- getting new Parameters from HAL.");
                     }
                     //try {
                     ECode ec = mHost->mCamera->GetParameters((IParameters**)&(mHost->mParams));
                     //} catch (RuntimeException e) {
                     if (FAILED(ec)) {
-                        Slogger::E(mHost->TAG, "Received device exception: %d", ec);
+                        Logger::E(mHost->TAG, "Received device exception: %d", ec);
                         mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                         break;
@@ -656,12 +656,12 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                         /*out*/timestampMutable, &tmp);
 
                 if (!success) {
-                    Slogger::E(mHost->TAG, "Timed out while waiting for request to complete.");
+                    Logger::E(mHost->TAG, "Timed out while waiting for request to complete.");
                     mHost->mCaptureCollector->FailAll();
                 }
                 //} catch (InterruptedException e) {
                 if (FAILED(ec)) {
-                    Slogger::E(mHost->TAG, "Interrupted waiting for request completion: %d", ec);
+                    Logger::E(mHost->TAG, "Interrupted waiting for request completion: %d", ec);
                     mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                     break;
@@ -695,7 +695,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
             if (DEBUG) {
                 Int64 totalTime = SystemClock::GetElapsedRealtimeNanos() - startTime;
-                Slogger::D(mHost->TAG, "Capture request took %d ns", totalTime);
+                Logger::D(mHost->TAG, "Capture request took %d ns", totalTime);
                 mHost->mRequestCounter->CountAndLog();
             }
             break;
@@ -711,11 +711,11 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds);
             ECode ec = mHost->mCaptureCollector->WaitForEmpty(JPEG_FRAME_TIMEOUT, milliSeconds, &success);
             if (FAILED(ec)) {
-                Slogger::E(mHost->TAG, "Interrupted while waiting for requests to complete: %d", ec);
+                Logger::E(mHost->TAG, "Interrupted while waiting for requests to complete: %d", ec);
                 mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
             }
             if (!success) {
-                Slogger::E(mHost->TAG, "Timed out while queueing cleanup request.");
+                Logger::E(mHost->TAG, "Timed out while queueing cleanup request.");
                 mHost->mCaptureCollector->FailAll();
             }
             //} catch (InterruptedException e) {
@@ -738,7 +738,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
         default:
             // throw new AssertionError("Unhandled message " + msg.what +
             //         " on RequestThread.");
-            Slogger::E(mHost->TAG, "Unhandled message %d on RequestThread.", what);
+            Logger::E(mHost->TAG, "Unhandled message %d on RequestThread.", what);
             return E_ASSERTION_ERROR;
     }
     *result = TRUE;
@@ -747,8 +747,8 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
 CAR_INTERFACE_IMPL(RequestThreadManager, Object, IRequestThreadManager)
 
-const Boolean RequestThreadManager::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
-const Boolean RequestThreadManager::VERBOSE = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
+const Boolean RequestThreadManager::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean RequestThreadManager::VERBOSE = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
 
 const Int32 RequestThreadManager::MSG_CONFIGURE_OUTPUTS;
 const Int32 RequestThreadManager::MSG_SUBMIT_CAPTURE_REQUEST;
@@ -832,7 +832,7 @@ void RequestThreadManager::CreateDummySurface()
 void RequestThreadManager::StopPreview()
 {
     if (VERBOSE) {
-        Slogger::V(TAG, "stopPreview - preview running? %d" + mPreviewRunning);
+        Logger::V(TAG, "stopPreview - preview running? %d" + mPreviewRunning);
     }
     if (mPreviewRunning) {
         mCamera->StopPreview();
@@ -844,7 +844,7 @@ void RequestThreadManager::StopPreview()
 void RequestThreadManager::StartPreview()
 {
     if (VERBOSE) {
-        Slogger::V(TAG, "startPreview - preview running? %d" + mPreviewRunning);
+        Logger::V(TAG, "startPreview - preview running? %d" + mPreviewRunning);
     }
     if (!mPreviewRunning) {
         // XX: CameraClient:;startPreview is not getting called after a stop
@@ -858,12 +858,12 @@ ECode RequestThreadManager::DoJpegCapturePrepare(
     /* [in] */ IRequestHolder* request)
 {
     if (DEBUG) {
-        Slogger::D(TAG, "doJpegCapturePrepare - preview running? %d" + mPreviewRunning);
+        Logger::D(TAG, "doJpegCapturePrepare - preview running? %d" + mPreviewRunning);
     }
 
     if (!mPreviewRunning) {
         if (DEBUG) {
-            Slogger::D(TAG, "doJpegCapture - create fake surface");
+            Logger::D(TAG, "doJpegCapture - create fake surface");
         }
 
         CreateDummySurface();
@@ -877,7 +877,7 @@ void RequestThreadManager::DoJpegCapture(
     /* [in] */ IRequestHolder* request)
 {
     if (DEBUG) {
-        Slogger::D(TAG, "doJpegCapturePrepare");
+        Logger::D(TAG, "doJpegCapturePrepare");
     }
 
     mCamera->TakePicture(mJpegShutterCallback, /*raw*/NULL, mJpegCallback);
@@ -889,7 +889,7 @@ ECode RequestThreadManager::DoPreviewCapture(
     /* [in] */ IRequestHolder* request)
 {
     if (VERBOSE) {
-        Slogger::V(TAG, "doPreviewCapture - preview running? %d" + mPreviewRunning);
+        Logger::V(TAG, "doPreviewCapture - preview running? %d" + mPreviewRunning);
     }
 
     if (mPreviewRunning) {
@@ -899,7 +899,7 @@ ECode RequestThreadManager::DoPreviewCapture(
     if (mPreviewTexture == NULL) {
         // throw new IllegalStateException(
         //         "Preview capture called with no preview surfaces configured.");
-        Slogger::E(TAG, "Preview capture called with no preview surfaces configured.");
+        Logger::E(TAG, "Preview capture called with no preview surfaces configured.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -930,7 +930,7 @@ ECode RequestThreadManager::ConfigureOutputs(
             sb += " surfaces";
             outputsStr = sb.ToString();
         }
-        Slogger::D(TAG, "configureOutputs with %s", outputsStr.string());
+        Logger::D(TAG, "configureOutputs with %s", outputsStr.string());
     }
 
     StopPreview();
@@ -943,7 +943,7 @@ ECode RequestThreadManager::ConfigureOutputs(
     ECode ec = mCamera->SetPreviewTexture(/*surfaceTexture*/NULL);
     //} catch (IOException e) {
     if (FAILED(ec)) {
-        Slogger::W(TAG, "Failed to clear prior SurfaceTexture, may cause GL deadlock: %d", ec);
+        Logger::W(TAG, "Failed to clear prior SurfaceTexture, may cause GL deadlock: %d", ec);
     }
     //}
 
@@ -981,7 +981,7 @@ ECode RequestThreadManager::ConfigureOutputs(
             Int32 format;
             ECode ec = LegacyCameraDevice::DetectSurfaceType(s, &format);
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Surface abandoned, skipping...%d", ec);
+                Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
                 continue;
             }
             LegacyCameraDevice::SetSurfaceOrientation(s, facing, orientation);
@@ -1014,7 +1014,7 @@ ECode RequestThreadManager::ConfigureOutputs(
     ec = mCamera->GetParameters((IParameters**)&mParams);
     //} catch (RuntimeException e) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Received device exception: %d", ec);
+        Logger::E(TAG, "Received device exception: %d", ec);
         mDeviceState->SetError(
             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
         return ec;
@@ -1025,7 +1025,7 @@ ECode RequestThreadManager::ConfigureOutputs(
     mParams->GetSupportedPreviewFpsRange((IList**)&supportedFpsRanges);
     AutoPtr<ArrayOf<Int32> > bestRange = GetPhotoPreviewFpsRange(supportedFpsRanges);
     if (DEBUG) {
-        Slogger::D(TAG, "doPreviewCapture - Selected range [%d,%d]",
+        Logger::D(TAG, "doPreviewCapture - Selected range [%d,%d]",
                 (*bestRange)[IParameters::PREVIEW_FPS_MIN_INDEX],
                 (*bestRange)[IParameters::PREVIEW_FPS_MAX_INDEX]);
     }
@@ -1050,7 +1050,7 @@ ECode RequestThreadManager::ConfigureOutputs(
             outputSizes->Add(TO_IINTERFACE(_size));
             //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Surface abandoned, skipping...%d", ec);
+                Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
             }
             //}
         }
@@ -1112,13 +1112,13 @@ ECode RequestThreadManager::ConfigureOutputs(
         if (DEBUG) {
             String str;
             IObject::Probe(bestPreviewDimen)->ToString(&str);
-            Slogger::D(TAG, "Intermediate buffer selected with dimens: %s", str.string());
+            Logger::D(TAG, "Intermediate buffer selected with dimens: %s", str.string());
         }
     }
     else {
         mIntermediateBufferSize = NULL;
         if (DEBUG) {
-            Slogger::D(TAG, "No Intermediate buffer selected, no preview outputs were configured");
+            Logger::D(TAG, "No Intermediate buffer selected, no preview outputs were configured");
         }
     }
 
@@ -1132,7 +1132,7 @@ ECode RequestThreadManager::ConfigureOutputs(
          */
         String str;
         IObject::Probe(smallestSupportedJpegSize)->ToString(&str);
-        Slogger::I(TAG, "configureOutputs - set take picture size to %s", str.string());
+        Logger::I(TAG, "configureOutputs - set take picture size to %s", str.string());
         Int32 width;
         smallestSupportedJpegSize->GetWidth(&width);
         Int32 height;
@@ -1172,7 +1172,7 @@ void RequestThreadManager::ResetJpegSurfaceFormats(
         ECode ec = LegacyCameraDevice::SetSurfaceFormat(s, ILegacyMetadataMapper::HAL_PIXEL_FORMAT_BLOB);
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
-            Slogger::W(TAG, "Surface abandoned, skipping...%d", ec);
+            Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
         }
         //}
     }
@@ -1210,7 +1210,7 @@ ECode RequestThreadManager::CalculatePictureSize(
         AutoPtr<ISize> jpegSize;
         ECode ec = LegacyCameraDevice::GetSurfaceSize(callbackSurface, (ISize**)&jpegSize);
         if (FAILED(ec)) {
-            Slogger::W(TAG, "Surface abandoned, skipping...%d", ec);
+            Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
         }
         configuredJpegSizes->Add(TO_IINTERFACE(jpegSize));
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
@@ -1288,7 +1288,7 @@ ECode RequestThreadManager::CalculatePictureSize(
             //         smallestBoundJpegSize);
             String str;
             IObject::Probe(smallestBoundJpegSize)->ToString(&str);
-            Slogger::E(TAG, "Could not find any supported JPEG sizes large enough to fit %s", str.string());
+            Logger::E(TAG, "Could not find any supported JPEG sizes large enough to fit %s", str.string());
             return E_ASSERTION_ERROR;
         }
 
@@ -1307,7 +1307,7 @@ ECode RequestThreadManager::CalculatePictureSize(
             IObject::Probe(smallestSupportedJpegSize)->ToString(&str);
             String str2;
             IObject::Probe(smallestBoundJpegSize)->ToString(&str2);
-            Slogger::W(TAG, "configureOutputs - Will need to crop picture %s into "
+            Logger::W(TAG, "configureOutputs - Will need to crop picture %s into "
                             "smallest bound size %s",
                             str.string(), str2.string());
         }
@@ -1343,7 +1343,7 @@ AutoPtr<ArrayOf<Int32> > RequestThreadManager::GetPhotoPreviewFpsRange(
     Int32 size;
     frameRates->GetSize(&size);
     if (size == 0) {
-        Slogger::E(TAG, "No supported frame rates returned!");
+        Logger::E(TAG, "No supported frame rates returned!");
         return NULL;
     }
 
@@ -1406,7 +1406,7 @@ ECode RequestThreadManager::Flush(
 {
     VALIDATE_NOT_NULL(value);
 
-    Slogger::I(TAG, "Flushing all pending requests.");
+    Logger::I(TAG, "Flushing all pending requests.");
     Int64 lastFrame;
     mRequestQueue->StopRepeating(&lastFrame);
     mCaptureCollector->FailAll();
@@ -1431,7 +1431,7 @@ ECode RequestThreadManager::Quit()
         IThread::Probe(mRequestThread)->GetName(&name);
         Int64 id;
         IThread::Probe(mRequestThread)->GetId(&id);
-        Slogger::E(TAG, "Thread %s (%d) interrupted while quitting.",
+        Logger::E(TAG, "Thread %s (%d) interrupted while quitting.",
                 name.string(), id);
     }
     //}

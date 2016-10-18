@@ -41,10 +41,9 @@ ECode ListUtils::ListElementsEqualTo(
     }
 
     Boolean result;
-    list->Contains(single, &result);
     Int32 size;
     list->GetSize(&size);
-    *value = (size== 1 && result);
+    *value = (size == 1 && (list->Contains(single, &result), result));
     return NOERROR;
 }
 

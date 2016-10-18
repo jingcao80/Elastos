@@ -13,6 +13,7 @@ using Elastos::Droid::Utility::CPair;
 using Elastos::Droid::Utility::CSize;
 using Elastos::Droid::Utility::CRange;
 using Elastos::Droid::Utility::CRational;
+using Elastos::Droid::Utility::EIID_IRational;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Utility::ISize;
 using Elastos::Utility::Arrays;
@@ -20,6 +21,8 @@ using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::IVector;
 using Elastos::Core::IComparable;
 using Elastos::Core::StringUtils;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::EIID_IInteger64;
 using Elastos::Core::EIID_IComparator;
 
 namespace Elastos{
@@ -207,7 +210,7 @@ AutoPtr<IRange> Utils::FactorRange(
     Int32 rv = upper / factor;
 
     AutoPtr<IRange> r;
-    CRange::Create(CoreUtils::Convert(lv).Get(), CoreUtils::Convert(rv).Get(),
+    CRange::Create(EIID_IInteger32, CoreUtils::Convert(lv).Get(), CoreUtils::Convert(rv).Get(),
             (IRange**)&r);
     return r;
 }
@@ -256,7 +259,7 @@ AutoPtr<IRange> Utils::FactorRange(
     Int64 rv = upper / factor;
 
     AutoPtr<IRange> r;
-    CRange::Create(
+    CRange::Create(EIID_IInteger64,
             CoreUtils::Convert(lv).Get(),
             CoreUtils::Convert(rv).Get(),
             (IRange**)&r);
@@ -295,7 +298,7 @@ AutoPtr<IRange> Utils::ScaleRange(
     AutoPtr<IRational> upper = IRational::Probe(obj);
 
     AutoPtr<IRange> r;
-    CRange::Create(
+    CRange::Create(EIID_IRational,
             ScaleRatio(lower.Get(), num, den).Get(),
             ScaleRatio(upper.Get(), num, den).Get(),
             (IRange**)&r);
@@ -366,9 +369,10 @@ ECode Utils::IntRangeFor(
     /* [out] */ IRange** result)
 {
     AutoPtr<IRange> range;
-    return CRange::Create(CoreUtils::Convert((Int32)v).Get(),
-            CoreUtils::Convert((Int32)Elastos::Core::Math::Ceil(v)).Get(),
-            result);
+    return CRange::Create(EIID_IInteger32,
+        CoreUtils::Convert((Int32)v).Get(),
+        CoreUtils::Convert((Int32)Elastos::Core::Math::Ceil(v)).Get(),
+        result);
 }
 
 AutoPtr<Range<IInteger64> > Utils::Int64RangeFor(
@@ -382,9 +386,10 @@ ECode Utils::Int64RangeFor(
     /* [out] */ IRange** result)
 {
     AutoPtr<IRange> range;
-    return CRange::Create(CoreUtils::Convert((Int64)v).Get(),
-            CoreUtils::Convert((Int64)Elastos::Core::Math::Ceil(v)).Get(),
-            result);
+    return CRange::Create(EIID_IInteger64,
+        CoreUtils::Convert((Int64)v).Get(),
+        CoreUtils::Convert((Int64)Elastos::Core::Math::Ceil(v)).Get(),
+        result);
 }
 
 AutoPtr<ISize> Utils::ParseSize(
@@ -474,14 +479,14 @@ AutoPtr<IRange> Utils::ParseIntRange(
     Int32 ix = s.IndexOf('-');
     AutoPtr<IRange> range;
     if (ix >= 0) {
-        CRange::Create(
-                CoreUtils::Convert(StringUtils::ParseInt32(s.Substring(0, ix), 10)).Get(),
-                CoreUtils::Convert(StringUtils::ParseInt32(s.Substring(ix + 1), 10)).Get(),
-                (IRange**)&range);
+        CRange::Create(EIID_IInteger32,
+            CoreUtils::Convert(StringUtils::ParseInt32(s.Substring(0, ix), 10)).Get(),
+            CoreUtils::Convert(StringUtils::ParseInt32(s.Substring(ix + 1), 10)).Get(),
+            (IRange**)&range);
         return range;
     }
     AutoPtr<IInteger32> value = CoreUtils::Convert(StringUtils::ParseInt32(s));
-    CRange::Create(value, value, (IRange**)&range);
+    CRange::Create(EIID_IInteger32, value, value, (IRange**)&range);
     return range;
     // } catch (ClassCastException e) {
     // } catch (NumberFormatException e) {
@@ -534,14 +539,14 @@ AutoPtr<IRange> Utils::ParseInt64Range(
     Int32 ix = s.IndexOf('-');
     AutoPtr<IRange> range;
     if (ix >= 0) {
-        CRange::Create(
-                CoreUtils::Convert(StringUtils::ParseInt64(s.Substring(0, ix), 10)).Get(),
-                CoreUtils::Convert(StringUtils::ParseInt64(s.Substring(ix + 1), 10)).Get(),
-                (IRange**)&range);
+        CRange::Create(EIID_IInteger64,
+            CoreUtils::Convert(StringUtils::ParseInt64(s.Substring(0, ix), 10)).Get(),
+            CoreUtils::Convert(StringUtils::ParseInt64(s.Substring(ix + 1), 10)).Get(),
+            (IRange**)&range);
         return range;
     }
     AutoPtr<IInteger64> value = CoreUtils::Convert(StringUtils::ParseInt64(s));
-    CRange::Create(value, value, (IRange**)&range);
+    CRange::Create(EIID_IInteger64, value, value, (IRange**)&range);
     return range;
     // } catch (ClassCastException e) {
     // } catch (NumberFormatException e) {
@@ -597,12 +602,12 @@ AutoPtr<IRange> Utils::ParseRationalRange(
         CRational::ParseRational(s.Substring(0, ix), (IRational**)&r1);
         AutoPtr<IRational> r2;
         CRational::ParseRational(s.Substring(0, ix), (IRational**)&r2);
-        CRange::Create(r1, r2, (IRange**)&range);
+        CRange::Create(EIID_IRational, r1, r2, (IRange**)&range);
         return range;
     }
     AutoPtr<IRational> value;
     CRational::ParseRational(s, (IRational**)&value);
-    CRange::Create(value, value, (IRange**)&range);
+    CRange::Create(EIID_IRational, value, value, (IRange**)&range);
     return range;
     // } catch (ClassCastException e) {
     // } catch (NumberFormatException e) {

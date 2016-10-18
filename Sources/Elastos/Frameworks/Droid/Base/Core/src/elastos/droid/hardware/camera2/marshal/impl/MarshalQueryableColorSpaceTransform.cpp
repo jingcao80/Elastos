@@ -5,6 +5,7 @@
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::IColorSpaceTransform;
 using Elastos::Droid::Hardware::Camera2::Params::CColorSpaceTransform;
+using Elastos::Droid::Hardware::Camera2::Params::ECLSID_CColorSpaceTransform;
 
 namespace Elastos {
 namespace Droid {
@@ -96,9 +97,14 @@ ECode MarshalQueryableColorSpaceTransform::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    // return nativeType == TYPE_RATIONAL &&
-    //         ColorSpaceTransform.class.equals(managedType.getType());
+    if (nativeType == ICameraMetadataNative::TYPE_RATIONAL) {
+        ClassID cls;
+        managedType->GetClassType(&cls);
+        if (cls == ECLSID_CColorSpaceTransform) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

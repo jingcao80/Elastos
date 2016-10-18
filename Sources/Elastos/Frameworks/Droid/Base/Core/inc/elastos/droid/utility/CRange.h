@@ -22,8 +22,12 @@ public:
     CRange();
 
     CARAPI constructor(
+        /* [in] */ const InterfaceID& typeId,
         /* [in] */ IInterface* lower,
         /* [in] */ IInterface* upper);
+
+    CARAPI GetTypeId(
+        /* [out] */ InterfaceID* typeId);
 
     /**
      * Get the lower endpoint.
@@ -200,12 +204,14 @@ public:
      * @throws NullPointerException if {@code lower} or {@code upper} is {@code null}
      */
     static CARAPI Create(
+        /* [in] */ const InterfaceID& typeId,
         /* [in] */ IInterface* lower,
         /* [in] */ IInterface* upper,
         /* [out] */ IRange** result);
 
 private:
     AutoPtr<Range<IInterface> > mRange;
+    InterfaceID mTypeId;
 };
 
 }

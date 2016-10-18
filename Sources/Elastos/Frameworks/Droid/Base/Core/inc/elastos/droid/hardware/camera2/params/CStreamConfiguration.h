@@ -28,8 +28,7 @@ public:
 
     virtual ~CStreamConfiguration();
 
-    CARAPI constructor();
-
+    CARAPI constructor() { return NOERROR; }
     /**
      * Create a new {@link StreamConfiguration}.
      *

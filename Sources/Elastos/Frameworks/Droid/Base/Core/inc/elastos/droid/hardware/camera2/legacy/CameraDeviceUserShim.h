@@ -65,7 +65,9 @@ private:
          *
          * @see #waitForOpen
          */
-        CameraLooper(
+        CameraLooper();
+
+        CARAPI constructor(
             /* [in] */ Int32 cameraId);
 
         CARAPI GetCamera(
@@ -96,7 +98,7 @@ private:
     private:
         Int32 mCameraId;
         AutoPtr<ILooper> mLooper;
-        /*volatile*/ Int32 mInitErrors;
+        /*volatile*/ ECode mInitErrors;
         AutoPtr<IHardwareCamera> mCamera;
         AutoPtr<IConditionVariable> mStartDone;
         AutoPtr<IThread> mThread;
@@ -183,7 +185,7 @@ public:
 
     CameraDeviceUserShim();
 
-    virtual ~CameraDeviceUserShim() {}
+    virtual ~CameraDeviceUserShim();
 
     CARAPI constructor();
 

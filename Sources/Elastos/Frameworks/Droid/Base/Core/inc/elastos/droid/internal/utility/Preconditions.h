@@ -2,7 +2,12 @@
 #define __ELASTOS_DROID_INTERNAL_UTILITY_PRECONDITIONS_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/core/Object.h>
+#include <utils/CallStack.h>
 
+using Elastos::Core::Object;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::ICollection;
 
 namespace Elastos {
@@ -24,8 +29,9 @@ public:
      * @return the non-NULL reference that was validated
      * @throws NullPointerException if {@code reference} is NULL
      */
+    template<typename T>
     static CARAPI CheckNotNull(
-        /* [in] */ IInterface* reference);
+        /* [in] */ T* reference);
 
     static CARAPI CheckNotNull(
         /* [in] */ const String& reference);
@@ -44,8 +50,9 @@ public:
         /* [in] */ IInterface* reference,
         /* [in] */ IObject* errorMessage);
 
+    template<typename T>
     static CARAPI CheckNotNull(
-        /* [in] */ IInterface* reference,
+        /* [in] */ T* reference,
         /* [in] */ const String& errorMessage);
 
     /**
@@ -230,6 +237,35 @@ private:
 private:
     static const String TAG;
 };
+
+template<typename T>
+ECode Preconditions::CheckNotNull(
+    /* [in] */ T* reference)
+{
+    if (reference == NULL) {
+        android::CallStack stack;
+        stack.update();
+        Logger::E(TAG, "%s, E_NULL_POINTER_EXCEPTION, backtrace:\n%s",
+            __FUNCTION__, stack.toString("").string());
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+template<typename T>
+ECode Preconditions::CheckNotNull(
+    /* [in] */ T* reference,
+    /* [in] */ const String& errorMessage)
+{
+    if (reference == NULL) {
+        android::CallStack stack;
+        stack.update();
+        Logger::E(TAG, "%s, E_NULL_POINTER_EXCEPTION, msg:%s, backtrace:\n%s",
+            __FUNCTION__, errorMessage.string(), stack.toString("").string());
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    return NOERROR;
+}
 
 } // namespace Utility
 } // namespace Internal

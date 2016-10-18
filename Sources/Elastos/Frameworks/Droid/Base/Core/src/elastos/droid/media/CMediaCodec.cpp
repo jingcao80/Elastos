@@ -684,6 +684,7 @@ ECode JMediaCodec::handleCallback(const sp<AMessage> &msg)
     }
 
     mObject->PostEventFromNative(CMediaCodec::EVENT_CALLBACK, arg1, arg2, obj);
+    return NOERROR;
 }
 
 void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {

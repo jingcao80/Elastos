@@ -22,6 +22,10 @@ module
      * effectively becomes mutable. </p>
      */
     interface IRange {
+
+        GetTypeId(
+            [out] InterfaceID* id);
+            
         /**
          * Get the lower endpoint.
          *

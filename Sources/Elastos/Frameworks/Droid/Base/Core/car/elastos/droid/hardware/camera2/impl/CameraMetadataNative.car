@@ -49,7 +49,7 @@ module
          * <p>The distinction is only important if {@code T} is a generic, e.g.
          * {@code Range<Integer>} since the nested type will be erased.</p>
          */
-        GetType(
+        GetClassType(
             [out] ClassID* type);
 
         /**

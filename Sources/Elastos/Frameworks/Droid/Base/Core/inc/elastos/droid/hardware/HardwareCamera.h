@@ -70,6 +70,9 @@ public:
         CARAPI GetCanDisableShutterSound(
             /* [out] */ Boolean* can);
 
+        CARAPI ToString(
+            /* [out] */ String* str);
+
     public:
         /**
          * The direction that the camera faces. It should be
@@ -989,19 +992,16 @@ public:
             /* [in] */ int msgType);
 
         void clearCallbackBuffers_l(
-            /* [in] */ android::Vector<ArrayOf<Byte>*>* buffers);
+            /* [in] */ android::Vector<AutoPtr<ArrayOf<Byte> > >* buffers);
 
         void clearCallbackBuffers_l();
 
         CARAPI_(AutoPtr<ArrayOf<Byte> >) getCallbackBuffer(
-            /* [in] */ android::Vector<ArrayOf<Byte>*> *buffers,
+            /* [in] */ android::Vector<AutoPtr<ArrayOf<Byte> > > *buffers,
             /* [in] */ size_t bufferSize);
 
-        HardwareCamera*     mCameraJObjectWeak;     // weak reference to java object
-        // HardwareCamera*      mCameraJClass;          // strong reference to java class
-        android::sp<android::Camera>  mCamera;                // strong reference to native object
-        // /*jclass*/AutoPtr<Face>      mFaceClass;  // strong reference to Face class
-        // jclass      mRectClass;  // strong reference to Rect class
+        AutoPtr<IWeakReference>         mCameraJObjectWeak;     // weak reference to HardwareCamera
+        android::sp<android::Camera>    mCamera;                // strong reference to native object
         Object       mLock;
 
         /*
@@ -1012,13 +1012,13 @@ public:
          * CAMERA_MSG_RAW_IMAGE is called; otherwise, null is returned
          * with raw image callbacks.
          */
-        android::Vector<ArrayOf<Byte>*> mRawImageCallbackBuffers;
+        android::Vector< AutoPtr<ArrayOf<Byte> > > mRawImageCallbackBuffers;
 
         /*
          * Application-managed preview buffer queue and the flags
          * associated with the usage of the preview buffer callback.
          */
-        android::Vector<ArrayOf<Byte>*> mCallbackBuffers; // Global reference application managed byte[]
+        android::Vector< AutoPtr<ArrayOf<Byte> > > mCallbackBuffers; // Global reference application managed byte[]
         bool mManualBufferMode;              // Whether to use application managed buffers.
         bool mManualCameraCallbackSet;       // Whether the callback has been set, used to
                                              // reduce unnecessary calls to set the callback.
@@ -1976,11 +1976,21 @@ private:
         /* [in] */ Int32 msgType);
 
     static void PostEventFromNative(
-        /* [in] */ HardwareCamera* camera_ref,
+        /* [in] */ IWeakReference* camera_ref,
         /* [in] */ Int32 what,
         /* [in] */ Int32 arg1,
         /* [in] */ Int32 arg2,
-        /* [in] */ const void* data);
+        /* [in] */ IInterface* data);
+
+public:
+    static const Int32 HardwareCamera_NO_ERROR;
+    static const Int32 HardwareCamera_EACCESS;
+    static const Int32 HardwareCamera_ENODEV;
+    static const Int32 HardwareCamera_EBUSY;
+    static const Int32 HardwareCamera_EINVAL;
+    static const Int32 HardwareCamera_ENOSYS;
+    static const Int32 HardwareCamera_EUSERS;
+    static const Int32 HardwareCamera_EOPNOTSUPP;
 
 private:
     static String TAG;
@@ -2038,14 +2048,6 @@ private:
     Boolean mFaceDetectionRunning;
     Object mAutoFocusCallbackLock;
 
-    static const Int32 HardwareCamera_NO_ERROR;
-    static const Int32 HardwareCamera_EACCESS;
-    static const Int32 HardwareCamera_ENODEV;
-    static const Int32 HardwareCamera_EBUSY;
-    static const Int32 HardwareCamera_EINVAL;
-    static const Int32 HardwareCamera_ENOSYS;
-    static const Int32 HardwareCamera_EUSERS;
-    static const Int32 HardwareCamera_EOPNOTSUPP;
 };
 
 } // namespace Hardware

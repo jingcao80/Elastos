@@ -1,16 +1,18 @@
 
 #include "elastos/droid/hardware/camera2/params/CStreamConfigurationDuration.h"
-// #include "elastos/droid/hardware/camera2/params/StreamConfigurationMap.h"
+#include "elastos/droid/hardware/camera2/params/StreamConfigurationMap.h"
+#include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/utility/CSize.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/core/Math.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Utility::CSize;
 using Elastos::Droid::Internal::Utility::Preconditions;
+using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -45,12 +47,11 @@ ECode CStreamConfigurationDuration::constructor(
     /* [in] */ Int32 height,
     /* [in] */ Int64 durationNs)
 {
-    assert(0);
-    //FAIL_RETURN(StreamConfigurationMap::CheckArgumentFormatInternal(format))
+    FAIL_RETURN(StreamConfigurationMap::CheckArgumentFormatInternal(format, &mFormat))
     FAIL_RETURN(Preconditions::CheckArgumentPositive(width, String("width must be positive")))
     FAIL_RETURN(Preconditions::CheckArgumentPositive(height, String("height must be positive")))
     FAIL_RETURN(Preconditions::CheckArgumentNonnegative(durationNs, String("durationNs must be non-negative")))
-    mFormat = format;
+
     mWidth = width;
     mHeight = height;
     mDurationNs = durationNs;
@@ -106,24 +107,18 @@ ECode CStreamConfigurationDuration::Equals(
     /* [out] */ Boolean* equal)
 {
     VALIDATE_NOT_NULL(equal);
-
-    if (obj == NULL) {
-        *equal = FALSE;
-        return NOERROR;
-    }
-    else if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
-        *equal = TRUE;
-        return NOERROR;
-    }
-    else if (IStreamConfigurationDuration::Probe(obj) != NULL) {
-        const AutoPtr<CStreamConfigurationDuration> other = (CStreamConfigurationDuration*)IStreamConfigurationDuration::Probe(obj);
-        *equal = mFormat == other->mFormat &&
-                    mWidth == other->mWidth &&
-                    mHeight == other->mHeight &&
-                    mDurationNs == other->mDurationNs;
-        return NOERROR;
-    }
     *equal = FALSE;
+
+    IStreamConfigurationDuration* scd = IStreamConfigurationDuration::Probe(obj);
+    if (scd == NULL) {
+        return NOERROR;
+    }
+
+    CStreamConfigurationDuration* other = (CStreamConfigurationDuration*)scd;
+    *equal = mFormat == other->mFormat &&
+                mWidth == other->mWidth &&
+                mHeight == other->mHeight &&
+                mDurationNs == other->mDurationNs;
     return NOERROR;
 }
 
@@ -131,11 +126,8 @@ ECode CStreamConfigurationDuration::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);
-
-    assert(0 && "TODO: weit Hardware/Camera2/Utils/HashCodeHelpers");
-    // *hashCode = HashCodeHelpers::GetHashCode(mFormat, mWidth, mHeight,
-    //             (Int32) mDurationNs, (Int32)((0xFFFFFFFF & mDurationNs) >>> Integer.SIZE));
-    return NOERROR;
+    return HashCodeHelpers::GetHashCode(mFormat, mWidth, mHeight,
+        (Int32) mDurationNs, (Int32)((0xFFFFFFFF & mDurationNs) >> 4), hashCode);
 }
 
 } // namespace Params

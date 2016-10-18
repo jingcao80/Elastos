@@ -1,9 +1,9 @@
 
 #include "elastos/droid/hardware/camera2/legacy/LegacyExceptionUtils.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Utils::ICameraBinderDecorator;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -29,14 +29,14 @@ ECode LegacyExceptionUtils::ThrowOnError(
         }
         case ICameraBinderDecorator::ICameraBinderDecorator_ENODEV: {
             //throw new BufferQueueAbandonedException();
-            Slogger::E(TAG, "BufferQueueAbandonedException");
+            Logger::E(TAG, "BufferQueueAbandonedException");
             return E_BUFFER_QUEUE_ABANDONED_EXCEPTION;
         }
     }
 
     if (errorFlag < 0) {
         //throw new UnsupportedOperationException("Unknown error " + errorFlag);
-        Slogger::E(TAG, "Unknown error %d" + errorFlag);
+        Logger::E(TAG, "Unknown error %d" + errorFlag);
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     *result = errorFlag;

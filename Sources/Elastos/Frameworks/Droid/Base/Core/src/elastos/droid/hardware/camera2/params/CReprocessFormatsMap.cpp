@@ -1,13 +1,15 @@
 
 #include "elastos/droid/hardware/camera2/params/CReprocessFormatsMap.h"
 #include "elastos/droid/hardware/camera2/params/StreamConfigurationMap.h"
+#include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 
 namespace Elastos {
 namespace Droid {
@@ -35,9 +37,8 @@ ECode CReprocessFormatsMap::constructor()
 ECode CReprocessFormatsMap::constructor(
     /* [in] */ ArrayOf<Int32>* entry)
 {
-    //FAIL_RETURN(Preconditions::CheckNotNull(entry, String("entry must not be null")))
     if (entry == NULL) {
-        Slogger::E("CMeteringRectangle", "entry must not be null");
+        Logger::E("CMeteringRectangle", "entry must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -51,9 +52,7 @@ ECode CReprocessFormatsMap::constructor(
         i++;
 
         if (left < 1) {
-            // throw new IllegalArgumentException(
-            //         String.format("Input %x had no output format length listed", inputFormat));
-            Slogger::E("CReprocessFormatsMap", "Input %x had no output format length listed", inputFormat);
+            Logger::E("CReprocessFormatsMap", "Input %x had no output format length listed", inputFormat);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -69,11 +68,7 @@ ECode CReprocessFormatsMap::constructor(
 
         if (length > 0) {
             if (left < length) {
-                // throw new IllegalArgumentException(
-                //         String.format(
-                //                 "Input %x had too few output formats listed (actual: %d, " +
-                //                 "expected: %d)", inputFormat, left, length));
-                Slogger::E("CReprocessFormatsMap", "Input %x had too few output formats listed (actual: %d, expected: %d)", inputFormat, left, length);
+                Logger::E("CReprocessFormatsMap", "Input %x had too few output formats listed (actual: %d, expected: %d)", inputFormat, left, length);
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -105,9 +100,7 @@ ECode CReprocessFormatsMap::GetInputs(
         i++;
 
         if (left < 1) {
-            // throw new AssertionError(
-            //         String.format("Input %x had no output format length listed", format));
-            Slogger::E("CReprocessFormatsMap", "Input %x had no output format length listed", format);
+            Logger::E("CReprocessFormatsMap", "Input %x had no output format length listed", format);
             return E_ASSERTION_ERROR;
         }
 
@@ -117,11 +110,7 @@ ECode CReprocessFormatsMap::GetInputs(
 
         if (length > 0) {
             if (left < length) {
-                // throw new AssertionError(
-                //         String.format(
-                //                 "Input %x had too few output formats listed (actual: %d, " +
-                //                 "expected: %d)", format, left, length));
-                Slogger::E("CReprocessFormatsMap", "Input %x had too few output formats listed (actual: %d, expected: %d)", format, left, length);
+                Logger::E("CReprocessFormatsMap", "Input %x had too few output formats listed (actual: %d, expected: %d)", format, left, length);
                 return E_ASSERTION_ERROR;
             }
 
@@ -131,8 +120,7 @@ ECode CReprocessFormatsMap::GetInputs(
 
         (*_inputs)[j] = format;
     }
-    assert(0);
-    //FAIL_RETURN(StreamConfigurationMap::ImageFormatToPublic(_inputs))
+    FAIL_RETURN(StreamConfigurationMap::ImageFormatToPublic(_inputs))
     *inputs = _inputs;
     REFCOUNT_ADD(*inputs);
     return NOERROR;
@@ -153,9 +141,7 @@ ECode CReprocessFormatsMap::GetOutputs(
         i++;
 
         if (left < 1) {
-            // throw new AssertionError(
-            //         String.format("Input %x had no output format length listed", format));
-            Slogger::E("CReprocessFormatsMap", "Input %x had no output format length listed", format);
+            Logger::E("CReprocessFormatsMap", "Input %x had no output format length listed", format);
             return E_ASSERTION_ERROR;
         }
 
@@ -165,11 +151,7 @@ ECode CReprocessFormatsMap::GetOutputs(
 
         if (length > 0) {
             if (left < length) {
-                // throw new AssertionError(
-                //         String.format(
-                //                 "Input %x had too few output formats listed (actual: %d, " +
-                //                 "expected: %d)", format, left, length));
-                Slogger::E("CReprocessFormatsMap", "Input %x had too few output formats listed (actual: %d, expected: %d)", format, left, length);
+                Logger::E("CReprocessFormatsMap", "Input %x had too few output formats listed (actual: %d, expected: %d)", format, left, length);
                 return E_ASSERTION_ERROR;
             }
         }
@@ -181,8 +163,7 @@ ECode CReprocessFormatsMap::GetOutputs(
             for (Int32 k = 0; k < length; ++k) {
                 (*_outputs)[k] = (*mEntry)[i + k];
             }
-            assert(0);
-            //FAIL_RETURN(StreamConfigurationMap::ImageFormatToPublic(_outputs))
+            FAIL_RETURN(StreamConfigurationMap::ImageFormatToPublic(_outputs))
             *outputs = _outputs;
             REFCOUNT_ADD(*outputs);
             return NOERROR;
@@ -192,9 +173,7 @@ ECode CReprocessFormatsMap::GetOutputs(
         left -= length;
     }
 
-    // throw new IllegalArgumentException(
-    //         String.format("Input format %x was not one in #getInputs", format));
-    Slogger::E("CReprocessFormatsMap", "Input format %x was not one in #getInputs", format);
+    Logger::E("CReprocessFormatsMap", "Input format %x was not one in #getInputs", format);
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
@@ -203,22 +182,16 @@ ECode CReprocessFormatsMap::Equals(
     /* [out] */ Boolean *equal)
 {
     VALIDATE_NOT_NULL(equal);
-
-    if (obj == NULL) {
-        *equal = FALSE;
-        return NOERROR;
-    }
-    else if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
-        *equal = TRUE;
-        return NOERROR;
-    }
-    else if (IReprocessFormatsMap::Probe(obj) != NULL) {
-        const AutoPtr<CReprocessFormatsMap> other = (CReprocessFormatsMap*)IReprocessFormatsMap::Probe(obj);
-        // Do not compare anything besides mEntry, since the rest of the values are derived
-        *equal = Arrays::Equals(mEntry, other->mEntry);
-        return NOERROR;
-    }
     *equal = FALSE;
+
+    IReprocessFormatsMap* rfm = IReprocessFormatsMap::Probe(obj);
+    if (rfm == NULL) {
+        return NOERROR;
+    }
+
+    CReprocessFormatsMap* other = (CReprocessFormatsMap*)rfm;
+    // Do not compare anything besides mEntry, since the rest of the values are derived
+    *equal = Arrays::Equals(mEntry, other->mEntry);
     return NOERROR;
 }
 
@@ -227,10 +200,7 @@ ECode CReprocessFormatsMap::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode);
 
-    // Do not hash anything besides mEntry since the rest of the values are derived
-    assert(0 && "TODO: weit Hardware/Camera2/Utils/HashCodeHelpers");
-    //*hashCode = HashCodeHelpers::GetHashCode(mEntry);
-    return NOERROR;
+    return HashCodeHelpers::GetHashCode(mEntry, hashCode);
 }
 
 } // namespace Params

@@ -587,6 +587,8 @@ public:
 
     static String String16ToString(const android::String16& str16);
 
+    static android::String16 StringToString16(const String& str);
+
 public:
 //    /**
 //     * Capitalization mode for {@link #getCapsMode}: capitalize all

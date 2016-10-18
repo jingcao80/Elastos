@@ -36,7 +36,15 @@ public:
      */
     CARAPI constructor(
         /* [in] */ const String& name,
-        /* [in] */ ClassID type);
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId);
+
+    CARAPI constructor(
+        /* [in] */ const String& name,
+        /* [in] */ const ClassID& classId,
+        /* [in] */ const InterfaceID& interfaceId,
+        /* [in] */ const ClassID& componentClassId,
+        /* [in] */ const InterfaceID& componentInterfaceId);
 
     /**
      * Visible for testing and vendor extensions only.
@@ -97,23 +105,6 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
-
-private:
-    friend class CameraCharacteristics;
-    /**
-     * Visible for testing and vendor extensions only.
-     *
-     * @hide
-     */
-    CameraCharacteristicsKey(
-        /* [in] */ const String& name,
-        /* [in] */ ClassID type);
-
-    // @SuppressWarnings({
-    //         "unused", "unchecked"
-    // })
-    CameraCharacteristicsKey(
-        /* [in] */ ICameraMetadataNativeKey* nativeKey);
 
 private:
     AutoPtr<ICameraMetadataNativeKey> mKey;
@@ -322,7 +313,7 @@ public:
      * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
      */
     //@PublicKey
-    //static const AutoPtr<ICameraCharacteristicsKey> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
+    static const AutoPtr<ICameraCharacteristicsKey> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
 
     /**
      * <p>Maximum and minimum exposure compensation values for
@@ -337,7 +328,7 @@ public:
      * @see CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION
      */
     //@PublicKey
-    //static const AutoPtr<ICameraCharacteristicsKey> CONTROL_AE_COMPENSATION_RANGE;
+    static const AutoPtr<ICameraCharacteristicsKey> CONTROL_AE_COMPENSATION_RANGE;
 
     /**
      * <p>Smallest step by which the exposure compensation
@@ -1624,7 +1615,7 @@ public:
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     //@PublicKey
-    //static const AutoPtr<ICameraCharacteristicsKey> SENSOR_INFO_SENSITIVITY_RANGE;
+    static const AutoPtr<ICameraCharacteristicsKey> SENSOR_INFO_SENSITIVITY_RANGE;
 
     /**
      * <p>The arrangement of color filters on sensor;
@@ -1670,7 +1661,7 @@ public:
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
     //@PublicKey
-    //static const AutoPtr<ICameraCharacteristicsKey> SENSOR_INFO_EXPOSURE_TIME_RANGE;
+    static const AutoPtr<ICameraCharacteristicsKey> SENSOR_INFO_EXPOSURE_TIME_RANGE;
 
     /**
      * <p>The maximum possible frame duration (minimum frame rate) for

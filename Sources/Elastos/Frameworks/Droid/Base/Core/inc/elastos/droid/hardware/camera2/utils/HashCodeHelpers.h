@@ -52,8 +52,9 @@ public:
      *
      * @return the numeric hash code
      */
+    template<typename T>
     static CARAPI GetHashCode(
-        /* [in] */ ArrayOf<IInterface*>* array,
+        /* [in] */ ArrayOf<T*>* array,
         /* [out] */ Int32* value);
 
     static CARAPI GetHashCode(
@@ -108,6 +109,37 @@ public:
         /* [in] */ Int32 t,
         /* [out] */ Int32* value);
 };
+
+template<typename T>
+HashCodeHelpers::GetHashCode(
+    /* [in] */ ArrayOf<T*>* array,
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value);
+    *value = 0;
+
+    if (array == NULL) {
+        return NOERROR;
+    }
+
+    Int32 h = 1;
+    for (Int32 i = 0; i < array->GetLength(); i++) {
+        T* o = (*array)[i];
+        Int32 x;
+        if (o == NULL) {
+            x = 0;
+        }
+        else {
+            x = Object::GetHashCode(o);
+
+        }
+        h = ((h << 5) - h) ^ x; // (h * 31) XOR x
+    }
+
+    *value = h;
+    return NOERROR;
+}
+
 
 } // namespace Utils
 } // namespace Camera2

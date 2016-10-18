@@ -57,6 +57,8 @@ public:
     CARAPI SetInfo(
        /* [in] */ IHardwareCameraInfo* info);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 public:
 // Can't parcel nested classes, so make this a top level class that composes
     // CameraInfo.

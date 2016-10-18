@@ -19,26 +19,26 @@ CaptureResultExtras::CaptureResultExtras()
 {
 }
 
-CaptureResultExtras::CaptureResultExtras(
-        /* [in] */ IParcel* source)
+ECode CaptureResultExtras::constructor()
 {
-    ReadFromParcel(source);
+    return NOERROR;
 }
 
-CaptureResultExtras::CaptureResultExtras(
+ECode CaptureResultExtras::constructor(
     /* [in] */ Int32 requestId,
     /* [in] */ Int32 subsequenceId,
     /* [in] */ Int32 afTriggerId,
     /* [in] */ Int32 precaptureTriggerId,
     /* [in] */ Int64 frameNumber,
     /* [in] */ Int32 partialResultCount)
-    : mRequestId(requestId)
-    , mSubsequenceId(subsequenceId)
-    , mAfTriggerId(afTriggerId)
-    , mPrecaptureTriggerId(precaptureTriggerId)
-    , mFrameNumber(frameNumber)
-    , mPartialResultCount(partialResultCount)
 {
+    mRequestId = requestId;
+    mSubsequenceId = subsequenceId;
+    mAfTriggerId = afTriggerId;
+    mPrecaptureTriggerId = precaptureTriggerId;
+    mFrameNumber = frameNumber;
+    mPartialResultCount = partialResultCount;
+    return NOERROR;
 }
 
 ECode CaptureResultExtras::WriteToParcel(

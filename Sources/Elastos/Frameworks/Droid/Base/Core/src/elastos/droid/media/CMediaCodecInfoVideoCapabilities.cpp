@@ -11,6 +11,7 @@
 
 using Elastos::Droid::Utility::CRange;
 using Elastos::Droid::Utility::CRational;
+using Elastos::Droid::Utility::EIID_IRational;
 using Elastos::Droid::Utility::CSize;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Core::CDouble;
@@ -20,6 +21,9 @@ using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IDouble;
 using Elastos::Core::IInteger64;
+using Elastos::Core::EIID_IDouble;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::EIID_IInteger64;
 using Elastos::Core::Math;
 using Elastos::Utility::Logging::Logger;
 
@@ -315,7 +319,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedFrameRatesFor(
     CDouble::New(Elastos::Core::Math::Min(bpsUpperVal / (Double)blockCount,
             (Double)frUpperVal), (IDouble**)&end);
 
-    return CRange::Create(begin, end, result);
+    return CRange::Create(EIID_IDouble, begin, end, result);
 }
 
 ECode CMediaCodecInfoVideoCapabilities::AreSizeAndRateSupported(
@@ -506,7 +510,7 @@ void CMediaCodecInfoVideoCapabilities::InitWithPlatformLimits()
     CInteger32::New(0, (IInteger32**)&begin);
     AutoPtr<IInteger32> end;
     CInteger32::New(Elastos::Core::Math::INT32_MAX_VALUE, (IInteger32**)&end);
-    CRange::Create(begin, end, (IRange**)&mBitrateRange);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&mBitrateRange);
 
     mWidthRange  = CMediaCodecInfo::SIZE_RANGE;
     mHeightRange = CMediaCodecInfo::SIZE_RANGE;
@@ -594,13 +598,13 @@ void CMediaCodecInfoVideoCapabilities::ParseFromInfo(
             CInteger32::New(firstWidth, (IInteger32**)&begin);
             AutoPtr<IInteger32> end;
             CInteger32::New(secondWidth, (IInteger32**)&end);
-            CRange::Create(begin, end, (IRange**)&widths);
+            CRange::Create(EIID_IInteger32, begin, end, (IRange**)&widths);
 
             begin = NULL;
             CInteger32::New(firstHeight, (IInteger32**)&begin);
             end = NULL;
             CInteger32::New(secondHeight, (IInteger32**)&end);
-            CRange::Create(begin, end, (IRange**)&heights);
+            CRange::Create(EIID_IInteger32, begin, end, (IRange**)&heights);
             // } catch (IllegalArgumentException e) {
             //     Log.w(TAG, "could not parse size range '" + o + "'");
             //     widths = NULL;
@@ -891,7 +895,7 @@ void CMediaCodecInfoVideoCapabilities::UpdateLimits()
     AutoPtr<IInteger32> end;
     CInteger32::New(bcUpperVal / vbLowerVal, (IInteger32**)&end);
     range = NULL;
-    CRange::Create(begin, end, (IRange**)&range);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&range);
     mHorizontalBlockRange->Intersect(range, (IRange**)&mHorizontalBlockRange);
 
     range = NULL;
@@ -912,7 +916,7 @@ void CMediaCodecInfoVideoCapabilities::UpdateLimits()
     end = NULL;
     CInteger32::New(bcUpperVal / hbLowerVal, (IInteger32**)&end);
     range = NULL;
-    CRange::Create(begin, end, (IRange**)&range);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&range);
     mVerticalBlockRange->Intersect(range, (IRange**)&mVerticalBlockRange);
 
     begin = NULL;
@@ -920,7 +924,7 @@ void CMediaCodecInfoVideoCapabilities::UpdateLimits()
     end = NULL;
     CInteger32::New(hbUpperVal * vbUpperVal, (IInteger32**)&end);
     range = NULL;
-    CRange::Create(begin, end, (IRange**)&range);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&range);
     mBlockCountRange->Intersect(range, (IRange**)&mBlockCountRange);
 
     AutoPtr<IRational> lower;
@@ -1017,21 +1021,21 @@ void CMediaCodecInfoVideoCapabilities::ApplyMacroBlockLimits(
     AutoPtr<IInteger32> end;
     CInteger32::New(maxBlocks, (IInteger32**)&end);
     AutoPtr<IRange> counts;
-    CRange::Create(begin, end, (IRange**)&counts);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&counts);
 
     AutoPtr<IInteger64> begin64;
     CInteger64::New(1L, (IInteger64**)&begin64);
     AutoPtr<IInteger64> end64;
     CInteger64::New(maxBlocksPerSecond, (IInteger64**)&end64);
     AutoPtr<IRange> rates;
-    CRange::Create(begin64, end64, (IRange**)&rates);
+    CRange::Create(EIID_IInteger64, begin64, end64, (IRange**)&rates);
 
     AutoPtr<IRational> lower;
     CRational::New(1, maxVerticalBlocks, (IRational**)&lower);
     AutoPtr<IRational> upper;
     CRational::New(maxHorizontalBlocks, 1, (IRational**)&upper);
     AutoPtr<IRange> ratios;
-    CRange::Create(lower, upper, (IRange**)&ratios);
+    CRange::Create(EIID_IRational, lower, upper, (IRange**)&ratios);
     ApplyBlockLimits(
             blockWidth, blockHeight, counts, rates, ratios);
 
@@ -1333,7 +1337,7 @@ void CMediaCodecInfoVideoCapabilities::ApplyLevelLimits()
         CInteger32::New(1, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(maxRate, (IInteger32**)&end);
-        CRange::Create(begin, end, (IRange**)&mFrameRateRange);
+        CRange::Create(EIID_IInteger32, begin, end, (IRange**)&mFrameRateRange);
     }
     else if (mime.EqualsIgnoreCase(IMediaFormat::MIMETYPE_VIDEO_VP8) ||
             mime.EqualsIgnoreCase(IMediaFormat::MIMETYPE_VIDEO_VP9)) {
@@ -1485,7 +1489,7 @@ void CMediaCodecInfoVideoCapabilities::ApplyLevelLimits()
     CInteger32::New(1, (IInteger32**)&begin);
     AutoPtr<IInteger32> end;
     CInteger32::New(maxBps, (IInteger32**)&end);
-    CRange::Create(begin, end, (IRange**)&mBitrateRange);
+    CRange::Create(EIID_IInteger32, begin, end, (IRange**)&mBitrateRange);
     ((CMediaCodecInfoCodecCapabilities*)mParent.Get())->mError |= errors;
 }
 

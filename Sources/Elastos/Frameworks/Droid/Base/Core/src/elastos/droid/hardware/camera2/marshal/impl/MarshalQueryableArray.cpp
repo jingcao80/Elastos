@@ -1,21 +1,24 @@
 
 #include "elastos/droid/hardware/camera2/marshal/impl/MarshalQueryableArray.h"
+#include "elastos/droid/hardware/camera2/marshal/MarshalRegistry.h"
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
+using Elastos::Droid::Hardware::Camera2::Marshal::MarshalRegistry;
 using Elastos::Core::IInteger32;
 using Elastos::Core::Math;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::ECLSID_CArrayOf;
 using Elastos::IO::IBuffer;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -30,25 +33,24 @@ MarshalQueryableArray::MarshalerArray::MarshalerArray(
     /* [in] */ MarshalQueryableArray* host)
 {
     Marshaler::constructor(host, typeReference, nativeType);
+    typeReference->GetClassType(&mClass);
+    typeReference->GetComponent((ITypeReference**)&mComponent);
 
-    assert(0);
-    // mClass = (Class<T>)typeReference.getRawType();
-
-    // TypeReference<?> componentToken = typeReference.getComponentType();
-    // mComponentMarshaler = MarshalRegistry.getMarshaler(componentToken, mNativeType);
-    // mComponentClass = componentToken.getRawType();
+    MarshalRegistry::GetMarshaler(mComponent, mNativeType, (IMarshaler**)&mComponentMarshaler);
 }
 
 ECode MarshalQueryableArray::MarshalerArray::Marshal(
     /* [in] */ IInterface* value,
     /* [in] */ IByteBuffer* buffer)
 {
-    AutoPtr<IArrayOf> obj = IArrayOf::Probe(value);
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(value);
 
     Int32 length;
-    obj->GetLength(&length);
+    array->GetLength(&length);
     for (Int32 i = 0; i < length; ++i) {
-        MarshalArrayElement(mComponentMarshaler, buffer, value, i);
+        AutoPtr<IInterface> element;
+        array->Get(i, (IInterface**)&element);
+        MarshalArrayElement(mComponentMarshaler, buffer, element);
     }
     return NOERROR;
 }
@@ -60,6 +62,7 @@ ECode MarshalQueryableArray::MarshalerArray::Unmarshal(
     VALIDATE_NOT_NULL(outface);
     *outface = NULL;
 
+    IBuffer* buf = IBuffer::Probe(buffer);
     AutoPtr<IInterface> array;
 
     Int32 elementSize;
@@ -67,34 +70,31 @@ ECode MarshalQueryableArray::MarshalerArray::Unmarshal(
 
     if (elementSize != IMarshaler::NATIVE_SIZE_DYNAMIC) {
         Int32 remaining;
-        IBuffer::Probe(buffer)->GetRemaining(&remaining);
+        buf->GetRemaining(&remaining);
         Int32 arraySize = remaining / elementSize;
 
         if (remaining % elementSize != 0) {
-            // throw new UnsupportedOperationException("Arrays for " + mTypeReference
-            //         + " must be packed tighly into a multiple of " + elementSize
-            //         + "; but there are " + (remaining % elementSize) + " left over bytes");
-            String str;
-            IObject::Probe(mTypeReference)->ToString(&str);
-            Slogger::E(TAG, "Arrays for %s "
-                    "must be packed tighly into a multiple of %d; "
-                    "but there are %d left over bytes",str.string(), elementSize,  (remaining % elementSize));
+            Logger::E(TAG, "Arrays for %s must be packed tighly into a multiple of %d; "
+                "but there are %d left over bytes",
+                TO_CSTR(mTypeReference), elementSize,  (remaining % elementSize));
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         }
 
         if (VERBOSE) {
-            Slogger::V(TAG, "Attempting to unpack array (count = %d, element size = %d, bytes "
-                    "remaining = %d) for type %s",arraySize, elementSize, remaining, mClass);
+            Logger::V(TAG, "Attempting to unpack array (count = %d, element size = %d, bytes "
+                "remaining = %d) for type %s", arraySize, elementSize, remaining, mClass);
         }
 
-        AutoPtr<IArrayOf> _array;
-        CArrayOf::New(mComponentClass, arraySize, (IArrayOf**)&_array);
+        InterfaceID interfaceId;
+        mComponent->GetInterfaceType(&interfaceId);
+        AutoPtr<IArrayOf> arrayOf;
+        CArrayOf::New(interfaceId, arraySize, (IArrayOf**)&arrayOf);
         for (Int32 i = 0; i < arraySize; ++i) {
             AutoPtr<IInterface> elem;
             mComponentMarshaler->Unmarshal(buffer, (IInterface**)&elem);
-            _array->Set(i, elem);
+            arrayOf->Set(i, elem);
         }
-        array = _array;
+        array = arrayOf.Get();
     }
     else {
         // Dynamic size, use an array list.
@@ -103,7 +103,7 @@ ECode MarshalQueryableArray::MarshalerArray::Unmarshal(
 
         // Assumes array is packed tightly; no unused bytes allowed
         Boolean res;
-        while (IBuffer::Probe(buffer)->HasRemaining(&res), res) {
+        while (buf->HasRemaining(&res), res) {
             AutoPtr<IInterface> elem;
             mComponentMarshaler->Unmarshal(buffer, (IInterface**)&elem);
             arrayList->Add(elem);
@@ -115,7 +115,7 @@ ECode MarshalQueryableArray::MarshalerArray::Unmarshal(
     Int32 res;
     IBuffer::Probe(buffer)->GetRemaining(&res);
     if (res != 0) {
-        Slogger::E(TAG, "Trailing bytes ( %d ) left over after unpacking %d", res, mClass);
+        Logger::E(TAG, "Trailing bytes ( %d ) left over after unpacking %d", res, mClass);
     }
 
     *outface = array;
@@ -142,9 +142,9 @@ ECode MarshalQueryableArray::MarshalerArray::CalculateMarshalSize(
     Int32 elementSize;
     mComponentMarshaler->GetNativeSize(&elementSize);
 
-    AutoPtr<IArrayOf> obj = IArrayOf::Probe(value);
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(value);
     Int32 arrayLength;
-    obj->GetLength(&arrayLength);
+    array->GetLength(&arrayLength);
 
     if (elementSize != IMarshaler::NATIVE_SIZE_DYNAMIC) {
         // The fast way. Every element size is uniform.
@@ -155,7 +155,9 @@ ECode MarshalQueryableArray::MarshalerArray::CalculateMarshalSize(
         // The slow way. Accumulate size for each element.
         Int32 size = 0;
         for (Int32 i = 0; i < arrayLength; ++i) {
-            size += CalculateElementMarshalSize(mComponentMarshaler, value, i);
+            AutoPtr<IInterface> element;
+            array->Get(i, (IInterface**)&element);
+            size += CalculateElementMarshalSize(mComponentMarshaler, element);
         }
 
         *outvalue = size;
@@ -167,35 +169,36 @@ ECode MarshalQueryableArray::MarshalerArray::CalculateMarshalSize(
 ECode MarshalQueryableArray::MarshalerArray::MarshalArrayElement(
     /* [in] */ IMarshaler* marshaler,
     /* [in] */ IByteBuffer* buffer,
-    /* [in] */ IInterface* array,
-    /* [in] */ Int32 index)
+    /* [in] */ IInterface* element)
 {
-    AutoPtr<IArrayOf> _array = IArrayOf::Probe(array);
-    AutoPtr<IInterface> elem;
-    _array->Get(index, (IInterface**)&elem);
-    return marshaler->Marshal(elem, buffer);
+    return marshaler->Marshal(element, buffer);
 }
 
 AutoPtr<IInterface> MarshalQueryableArray::MarshalerArray::CopyListToArray(
     /* [in] */ IArrayList* arrayList)
 {
-    AutoPtr<ArrayOf<IInterface*> > arrayDest;
-    arrayList->ToArray((ArrayOf<IInterface*>**)&arrayDest);
-    AutoPtr<IArrayOf> res = CoreUtils::Convert(arrayDest.Get());
-    return TO_IINTERFACE(res);
+    InterfaceID interfaceId;
+    mComponent->GetInterfaceType(&interfaceId);
+    Int32 size;
+    arrayList->GetSize(&size);
+
+    AutoPtr<IArrayOf> array;
+    CArrayOf::New(interfaceId, size, (IArrayOf**)&array);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        arrayList->Get(i, (IInterface**)&obj);
+        array->Set(i, obj);
+    }
+
+    return array;
 }
 
 Int32 MarshalQueryableArray::MarshalerArray::CalculateElementMarshalSize(
     /* [in] */ IMarshaler* marshaler,
-    /* [in] */ IInterface* array,
-    /* [in] */ Int32 index)
+    /* [in] */ IInterface* element)
 {
-    AutoPtr<IArrayOf> _array = IArrayOf::Probe(array);
-    AutoPtr<IInterface> elem;
-    _array->Get(index, (IInterface**)&elem);
-
     Int32 outvalue;
-    marshaler->CalculateMarshalSize(elem, &outvalue);
+    marshaler->CalculateMarshalSize(element, &outvalue);
     return outvalue;
 }
 
@@ -213,8 +216,8 @@ ECode MarshalQueryableArray::CreateMarshaler(
 {
     VALIDATE_NOT_NULL(outmar);
 
-    AutoPtr<IMarshaler> _outmar = new MarshalerArray(managedType, nativeType, this);
-    *outmar = _outmar;
+    AutoPtr<IMarshaler> marshaler = new MarshalerArray(managedType, nativeType, this);
+    *outmar = marshaler;
     REFCOUNT_ADD(*outmar);
     return NOERROR;
 }
@@ -227,14 +230,18 @@ ECode MarshalQueryableArray::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
     // support both ConcreteType[] and GenericType<ConcreteType>[]
-    //return managedType.getRawType().isArray();
-    return NOERROR;
+    ClassID cls;
+    managedType->GetClassType(&cls);
+    if (cls == ECLSID_CArrayOf) {
+        *value = TRUE;
+    }
 
     // TODO: Should this recurse deeper and check that there is
     // a valid marshaler for the ConcreteType as well?
+    return NOERROR;
 }
+
 
 } // namespace Impl
 } // namespace Marshal

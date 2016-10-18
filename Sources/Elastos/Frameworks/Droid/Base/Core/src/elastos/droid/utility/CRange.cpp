@@ -14,10 +14,20 @@ CRange::CRange()
 }
 
 ECode CRange::constructor(
+    /* [in] */ const InterfaceID& typeId,
     /* [in] */ IInterface* lower,
     /* [in] */ IInterface* upper)
 {
+    mTypeId = typeId;
     mRange = new Range<IInterface>(lower, upper);
+    return NOERROR;
+}
+
+ECode CRange::GetTypeId(
+    /* [out] */ InterfaceID* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mTypeId;
     return NOERROR;
 }
 
@@ -114,7 +124,7 @@ ECode CRange::Intersect(
     }
     else {
         AutoPtr<IRange> newRangeObj;
-        CRange::New(cmpLower <= 0 ? mRange->mLower : range->mLower,
+        CRange::New(mTypeId, cmpLower <= 0 ? mRange->mLower : range->mLower,
                 cmpUpper >= 0 ? mRange->mUpper : range->mUpper,
                 (IRange**)&newRangeObj);
         *result = newRangeObj;
@@ -143,7 +153,7 @@ ECode CRange::Intersect(
     }
     else {
         AutoPtr<IRange> newRangeObj;
-        CRange::New(cmpLower <= 0 ? mRange->mLower.Get() : lower,
+        CRange::New(mTypeId, cmpLower <= 0 ? mRange->mLower.Get() : lower,
                 cmpUpper >= 0 ? mRange->mUpper.Get() : upper,
                 (IRange**)&newRangeObj);
         *result = newRangeObj;
@@ -181,7 +191,7 @@ ECode CRange::Extend(
     }
     else {
         AutoPtr<IRange> newRangeObj;
-        CRange::New(cmpLower >= 0 ? mRange->mLower : range->mLower,
+        CRange::New(mTypeId, cmpLower >= 0 ? mRange->mLower : range->mLower,
                 cmpUpper <= 0 ? mRange->mUpper : range->mUpper,
                 (IRange**)&newRangeObj);
         *result = newRangeObj;
@@ -210,7 +220,7 @@ ECode CRange::Extend(
     }
     else {
         AutoPtr<IRange> newRangeObj;
-        CRange::New(cmpLower >= 0 ? mRange->mLower.Get() : lower,
+        CRange::New(mTypeId, cmpLower >= 0 ? mRange->mLower.Get() : lower,
                 cmpUpper <= 0 ? mRange->mUpper.Get() : upper,
                 (IRange**)&newRangeObj);
         *result = newRangeObj;
@@ -228,12 +238,12 @@ ECode CRange::Extend(
 }
 
 ECode CRange::Create(
+    /* [in] */ const InterfaceID& typeId,
     /* [in] */ IInterface *lower,
     /* [in] */ IInterface *upper,
     /* [out] */ IRange **result)
 {
-    VALIDATE_NOT_NULL(result)
-    return CRange::New(lower,upper,result);
+    return CRange::New(typeId, lower, upper, result);
 }
 
 } // namespace Utility

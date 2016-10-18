@@ -18,7 +18,7 @@
 #include "elastos/droid/utility/CSizeF.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Legacy::CZoomData;
 using Elastos::Droid::Hardware::Camera2::Legacy::CMeteringData;
@@ -40,7 +40,7 @@ using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::Math;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -344,13 +344,13 @@ Int32 ParameterUtils::WeightedRectangle::Clip(
     if (value < lo) {
         String str;
         IObject::Probe(rect)->ToString(&str);
-        Slogger::W(TAG, "toMetering - Rectangle %s %s too small, clip to %d", str.string(), name.string(), lo);
+        Logger::W(TAG, "toMetering - Rectangle %s %s too small, clip to %d", str.string(), name.string(), lo);
         value = lo;
     }
     else if (value > hi) {
         String str;
         IObject::Probe(rect)->ToString(&str);
-        Slogger::W(TAG, "toMetering - Rectangle %s %s too small, clip to %d",str.string(), name.string(), hi);
+        Logger::W(TAG, "toMetering - Rectangle %s %s too small, clip to %d",str.string(), name.string(), hi);
         value = hi;
     }
 
@@ -412,6 +412,7 @@ ECode ParameterUtils::ConvertSizeListToArray(
     /* [out, callee] */ ArrayOf<ISize*>** outarr)
 {
     VALIDATE_NOT_NULL(outarr)
+    *outarr = NULL;
     FAIL_RETURN(Preconditions::CheckNotNull(sizeList, String("sizeList must not be null")))
 
     Int32 size;
@@ -423,10 +424,35 @@ ECode ParameterUtils::ConvertSizeListToArray(
         sizeList->Get(i, (IInterface**)&obj);
         AutoPtr<ICameraSize> s = ICameraSize::Probe(obj);
 
-        Int32 width;
+        Int32 width, height;
         s->GetWidth(&width);
-        Int32 height;
         s->GetHeight(&height);
+        AutoPtr<ISize> tmp;
+        CSize::New(width, height, (ISize**)&tmp);
+
+        array->Set(i, tmp);
+    }
+    *outarr = array;
+    REFCOUNT_ADD(*outarr);
+    return NOERROR;
+}
+
+ECode ParameterUtils::ConvertSizeArrayToArray(
+    /* [in] */ ArrayOf<ICameraSize*>* sizeList,
+    /* [out, callee] */ ArrayOf<ISize*>** outarr)
+{
+    VALIDATE_NOT_NULL(outarr)
+    *outarr = NULL;
+
+    FAIL_RETURN(Preconditions::CheckNotNull(sizeList, String("sizeList must not be null")))
+
+    Int32 size = sizeList->GetLength();
+    AutoPtr<ArrayOf<ISize*> > array = ArrayOf<ISize*>::Alloc(size);
+
+    for (Int32 i = 0; i < size; i++) {
+        Int32 width, height;
+        (*sizeList)[i]->GetWidth(&width);
+        (*sizeList)[i]->GetHeight(&height);
         AutoPtr<ISize> tmp;
         CSize::New(width, height, (ISize**)&tmp);
 
@@ -444,6 +470,7 @@ ECode ParameterUtils::ContainsSize(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = FALSE;
     FAIL_RETURN(Preconditions::CheckNotNull(sizeList, String("sizeList must not be null")))
 
     Int32 size;
@@ -453,17 +480,37 @@ ECode ParameterUtils::ContainsSize(
         sizeList->Get(i, (IInterface**)&obj);
         AutoPtr<ICameraSize> s = ICameraSize::Probe(obj);
 
-        Int32 _width;
+        Int32 _width, _height;
         s->GetWidth(&_width);
-        Int32 _height;
         s->GetHeight(&_height);
-
         if (_height == height && _width == width) {
             *value = TRUE;
+            return NOERROR;
         }
-
     }
+    return NOERROR;
+}
+
+ECode ParameterUtils::ContainsSize(
+    /* [in] */ ArrayOf<ICameraSize*>* sizeList,
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 height,
+    /* [out] */ Boolean* value)
+{
+    VALIDATE_NOT_NULL(value)
     *value = FALSE;
+    FAIL_RETURN(Preconditions::CheckNotNull(sizeList, String("sizeList must not be null")))
+
+    Int32 _width, _height;
+    Int32 size = sizeList->GetLength();
+    for (Int32 i = 0; i < size; i++) {
+        (*sizeList)[i]->GetWidth(&_width);
+        (*sizeList)[i]->GetHeight(&_height);
+        if (_height == height && _width == width) {
+            *value = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 
@@ -592,7 +639,7 @@ ECode ParameterUtils::GetClosestAvailableZoomCrop(
     Boolean result;
     actualCrop->Intersect(activeArray, &result);
     if (!result) {
-        Slogger::W(TAG, "getClosestAvailableZoomCrop - Crop region out of range;"
+        Logger::W(TAG, "getClosestAvailableZoomCrop - Crop region out of range;"
             "setting to active array size");
         actualCrop->Set(activeArray);
     }
@@ -607,14 +654,14 @@ ECode ParameterUtils::GetClosestAvailableZoomCrop(
     if (VERBOSE) {
         String str;
         IObject::Probe(actualCrop)->ToString(&str);
-        Slogger::V(TAG, "getClosestAvailableZoomCrop - actualCrop = %s", str.string());
+        Logger::V(TAG, "getClosestAvailableZoomCrop - actualCrop = %s", str.string());
         String str2;
         IObject::Probe(previewCrop)->ToString(&str2);
-        Slogger::V(TAG,
+        Logger::V(TAG,
                 "getClosestAvailableZoomCrop - previewCrop = %s", str2.string());
         String str3;
         IObject::Probe(previewCrop)->ToString(&str3);
-        Slogger::V(TAG,
+        Logger::V(TAG,
                 "getClosestAvailableZoomCrop - cropRegionAsPreview = %s", str3.string());
     }
 
@@ -633,11 +680,11 @@ ECode ParameterUtils::GetClosestAvailableZoomCrop(
     if (VERBOSE) {
         String str;
         ListUtils::ListToString(availableReportedCropRegions, &str);
-        Slogger::V(TAG,
+        Logger::V(TAG,
                 "getClosestAvailableZoomCrop - availableReportedCropRegions = %s", str.string());
         String str2;
         ListUtils::ListToString(availablePreviewCropRegions, &str2);
-        Slogger::V(TAG,
+        Logger::V(TAG,
                 "getClosestAvailableZoomCrop - availablePreviewCropRegions = %s", str2.string());
     }
 
@@ -647,7 +694,7 @@ ECode ParameterUtils::GetClosestAvailableZoomCrop(
     availablePreviewCropRegions->GetSize(&size2);
     if (size != size2) {
         //throw new AssertionError("available reported/preview crop region size mismatch");
-        Slogger::E(TAG, "available reported/preview crop region size mismatch");
+        Logger::E(TAG, "available reported/preview crop region size mismatch");
         return E_ASSERTION_ERROR;
     }
 
@@ -696,7 +743,7 @@ ECode ParameterUtils::GetClosestAvailableZoomCrop(
     if (bestZoomIndex == -1) {
         // Even in the worst case, we should always at least return 0 here
         //throw new AssertionError("Should've found at least one valid zoom index");
-        Slogger::E(TAG, "Should've found at least one valid zoom index");
+        Logger::E(TAG, "Should've found at least one valid zoom index");
         return E_ASSERTION_ERROR;
     }
 
@@ -726,13 +773,13 @@ ECode ParameterUtils::GetPreviewCropRectangleUnzoomed(
     activeArray->GetHeight(&height2);
     if (width > width2) {
         //throw new IllegalArgumentException("previewSize must not be wider than activeArray");
-        Slogger::E(TAG, "previewSize must not be wider than activeArray");
+        Logger::E(TAG, "previewSize must not be wider than activeArray");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 
     }
     else if (height > height2) {
         //throw new IllegalArgumentException("previewSize must not be taller than activeArray");
-        Slogger::E(TAG, "previewSize must not be taller than activeArray");
+        Logger::E(TAG, "previewSize must not be taller than activeArray");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1009,7 +1056,7 @@ ECode ParameterUtils::ConvertScalerCropRegion(
     if (VERBOSE) {
         String str;
         IObject::Probe(userCropRegion)->ToString(&str);
-        Slogger::V(TAG, "convertScalerCropRegion - user crop region was %s", str.string());
+        Logger::V(TAG, "convertScalerCropRegion - user crop region was %s", str.string());
     }
 
     AutoPtr<IRect> reportedCropRegion;
@@ -1026,7 +1073,7 @@ ECode ParameterUtils::ConvertScalerCropRegion(
         IObject::Probe(reportedCropRegion)->ToString(&str);
         String str2;
         IObject::Probe(previewCropRegion)->ToString(&str2);
-        Slogger::V(TAG, "convertScalerCropRegion - zoom calculated to:"
+        Logger::V(TAG, "convertScalerCropRegion - zoom calculated to:"
                 "zoomIndex = %d, reported crop region = %s, preview crop region"
                 "= %s", zoomIdx, str.string(), str2.string());
     }
@@ -1090,7 +1137,7 @@ ECode ParameterUtils::ConvertMeteringRectangleToLegacy(
     AutoPtr<ICameraArea> meteringArea;
     normalizedIntersected->Intersect(NORMALIZED_RECTANGLE_DEFAULT, &result);
     if (!result) {
-        Slogger::W(TAG,
+        Logger::W(TAG,
                 "convertMeteringRectangleToLegacy - metering rectangle too small, "
                 "no metering will be done");
         normalizedIntersected->Set(RECTANGLE_EMPTY);
@@ -1145,7 +1192,7 @@ ECode ParameterUtils::ConvertMeteringRectangleToLegacy(
         IObject::Probe(normalizedRegionUnbounded)->ToString(&str6);
         String tmp;
         StringFromArea(meteringArea, &tmp);
-        Slogger::V(TAG,
+        Logger::V(TAG,
                 "convertMeteringRectangleToLegacy - activeArray = %s, meteringRect = %s, "
                 "previewCrop = %s, meteringArea = %s, previewMetering = %s, "
                 "reportedMetering = %s, normalizedRegionUnbounded = %s",
@@ -1311,7 +1358,7 @@ ECode ParameterUtils::ConvertCameraAreaToActiveArrayRectangle(
     if (weight < IMeteringRectangle::METERING_WEIGHT_MIN) {
         String str;
         StringFromArea(area, &str);
-        Slogger::W(TAG,
+        Logger::W(TAG,
                 "convertCameraAreaToMeteringRectangle - rectangle %s has"
                 "too small weight, clip to 0", str.string());
         weight = 0; //do not use, why set 0?

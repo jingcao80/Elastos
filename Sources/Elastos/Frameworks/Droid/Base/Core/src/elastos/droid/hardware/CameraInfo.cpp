@@ -53,6 +53,14 @@ ECode CameraInfo::SetInfo(
     return NOERROR;
 }
 
+ECode CameraInfo::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = TO_STR(mInfo);
+    return NOERROR;
+}
+
 } // namespace Hardware
 } // namespace Droid
 } // namespace Elastos

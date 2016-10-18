@@ -1,8 +1,8 @@
 
 #include "elastos/droid/hardware/camera2/utils/CameraBinderDecorator.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -47,13 +47,13 @@ ECode CameraBinderDecorator::CameraBinderDecoratorListener::OnCatchException(
         // throw new CameraRuntimeException(CAMERA_DISCONNECTED,
         //         "Process hosting the camera service has died unexpectedly",
         //         t);
-        Slogger::E("CameraBinderDecorator", "CAMERA_DISCONNECTED , Process hosting the camera service has died unexpectedly");
+        Logger::E("CameraBinderDecorator", "CAMERA_DISCONNECTED , Process hosting the camera service has died unexpectedly");
         return E_CAMERA_RUNTIME_EXCEPTION;
     }
     else if (t == (ECode)E_REMOTE_EXCEPTION) {
         // throw new UnsupportedOperationException("An unknown RemoteException was thrown" +
         //         " which should never happen.", t);
-        Slogger::E("CameraBinderDecorator", "An unknown RemoteException was thrown which should never happen. %d", t);
+        Logger::E("CameraBinderDecorator", "An unknown RemoteException was thrown which should never happen. %d", t);
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
@@ -75,50 +75,38 @@ ECode CameraBinderDecorator::ThrowOnError(
         case ICameraBinderDecorator::ICameraBinderDecorator_NO_ERROR:
             return NOERROR;
         case ICameraBinderDecorator::ICameraBinderDecorator_PERMISSION_DENIED:
-            //throw new SecurityException("Lacking privileges to access camera service");
-            Slogger::E("CameraBinderDecorator", "Lacking privileges to access camera service");
+            Logger::E("CameraBinderDecorator", "Lacking privileges to access camera service");
             return E_SECURITY_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_ALREADY_EXISTS:
             // This should be handled at the call site. Typically this isn't bad,
             // just means we tried to do an operation that already completed.
             return NOERROR;
         case ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE:
-            //throw new IllegalArgumentException("Bad argument passed to camera service");
-            Slogger::E("CameraBinderDecorator", "Bad argument passed to camera service");
+            Logger::E("CameraBinderDecorator", "Bad argument passed to camera service");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_DEAD_OBJECT:
-            //throw new CameraRuntimeException(CAMERA_DISCONNECTED);
-            Slogger::E("CameraBinderDecorator", "E_CAMERA_RUNTIME_EXCEPTION");
+            Logger::E("CameraBinderDecorator", "E_CAMERA_RUNTIME_EXCEPTION");
             return E_CAMERA_RUNTIME_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_TIMED_OUT:
-            // throw new CameraRuntimeException(CAMERA_ERROR,
-            //         "Operation timed out in camera service");
-            Slogger::E("CameraBinderDecorator", "CAMERA_ERROR, Operation timed out in camera service");
+            Logger::E("CameraBinderDecorator", "CAMERA_ERROR, Operation timed out in camera service");
             return E_CAMERA_RUNTIME_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_EACCES:
-            //throw new CameraRuntimeException(CAMERA_DISABLED);
-            Slogger::E("CameraBinderDecorator", "CAMERA_DISABLED");
+            Logger::E("CameraBinderDecorator", "CAMERA_DISABLED");
             return E_CAMERA_RUNTIME_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_EBUSY:
-            //throw new CameraRuntimeException(CAMERA_IN_USE);
-            Slogger::E("CameraBinderDecorator", "CAMERA_IN_USE");
+            Logger::E("CameraBinderDecorator", "CAMERA_IN_USE");
             return E_CAMERA_RUNTIME_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_EUSERS:
-            //throw new CameraRuntimeException(MAX_CAMERAS_IN_USE);
-            Slogger::E("CameraBinderDecorator", "MAX_CAMERAS_IN_USE");
+            Logger::E("CameraBinderDecorator", "MAX_CAMERAS_IN_USE");
             return E_CAMERA_RUNTIME_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_ENODEV:
-            //throw new CameraRuntimeException(CAMERA_DISCONNECTED);
-            Slogger::E("CameraBinderDecorator", "CAMERA_DISCONNECTED");
+            Logger::E("CameraBinderDecorator", "CAMERA_DISCONNECTED");
             return E_CAMERA_RUNTIME_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_EOPNOTSUPP:
-            //throw new CameraRuntimeException(CAMERA_DEPRECATED_HAL);
-            Slogger::E("CameraBinderDecorator", "CAMERA_DEPRECATED_HAL");
+            Logger::E("CameraBinderDecorator", "CAMERA_DEPRECATED_HAL");
             return E_CAMERA_RUNTIME_EXCEPTION;
         case ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION:
-            // throw new CameraRuntimeException(CAMERA_ERROR,
-            //         "Illegal state encountered in camera service.");
-            Slogger::E("CameraBinderDecorator", "CAMERA_ERROR , Illegal state encountered in camera service.");
+            Logger::E("CameraBinderDecorator", "CAMERA_ERROR , Illegal state encountered in camera service.");
             return E_CAMERA_RUNTIME_EXCEPTION;
     }
 
@@ -128,9 +116,7 @@ ECode CameraBinderDecorator::ThrowOnError(
      * errors, then add them to the top switch statement
      */
     if (errorFlag < 0) {
-        // throw new UnsupportedOperationException(String.format("Unknown error %d",
-        //         errorFlag));
-        Slogger::E("CameraBinderDecorator", "Unknown error %d", errorFlag);
+        Logger::E("CameraBinderDecorator", "Unknown error %d(%08x)", errorFlag, errorFlag);
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     return NOERROR;

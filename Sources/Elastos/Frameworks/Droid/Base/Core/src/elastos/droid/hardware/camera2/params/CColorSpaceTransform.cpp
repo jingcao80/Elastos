@@ -1,14 +1,16 @@
 
 #include "elastos/droid/hardware/camera2/params/CColorSpaceTransform.h"
+#include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/utility/CRational.h"
 #include <elastos/utility/Arrays.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Utility::CRational;
 using Elastos::Droid::Internal::Utility::Preconditions;
+using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
 using Elastos::Utility::Arrays;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -44,14 +46,13 @@ ECode CColorSpaceTransform::constructor()
 ECode CColorSpaceTransform::constructor(
     /* [in] */ ArrayOf<IRational*>* elements)
 {
-    //FAIL_RETURN(Preconditions::CheckNotNull(elements))
+    FAIL_RETURN(Preconditions::CheckNotNull(elements))
     if (elements == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
 
     if (elements->GetLength() != COUNT) {
-        //throw new IllegalArgumentException("elements must be " + COUNT + " length");
-        Slogger::E("CColorSpaceTransform", "elements must be  %d length", COUNT);
+        Logger::E("CColorSpaceTransform", "elements must be  %d length", COUNT);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -77,14 +78,13 @@ ECode CColorSpaceTransform::constructor(
 ECode CColorSpaceTransform::constructor(
     /* [in] */ ArrayOf<Int32>* elements)
 {
-    //FAIL_RETURN(Preconditions::CheckNotNull(elements))
+    FAIL_RETURN(Preconditions::CheckNotNull(elements))
     if (elements == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
 
     if (elements->GetLength() != COUNT_INT) {
-        //throw new IllegalArgumentException("elements must be " + COUNT_INT + " length");
-        Slogger::E("CColorSpaceTransform", "elements must be  %d length", COUNT_INT);
+        Logger::E("CColorSpaceTransform", "elements must be  %d length", COUNT_INT);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -99,13 +99,11 @@ ECode CColorSpaceTransform::GetElement(
     VALIDATE_NOT_NULL(outrat)
 
     if (column < 0 || column >= COLUMNS) {
-        //throw new IllegalArgumentException("column out of range");
-        Slogger::E("CColorSpaceTransform", "column out of range");
+        Logger::E("CColorSpaceTransform", "column out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (row < 0 || row >= ROWS) {
-        //throw new IllegalArgumentException("row out of range");
-        Slogger::E("CColorSpaceTransform", "row out of range");
+        Logger::E("CColorSpaceTransform", "row out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -120,15 +118,15 @@ ECode CColorSpaceTransform::CopyElements(
     /* [in] */ Int32 offset)
 {
     FAIL_RETURN(Preconditions::CheckArgumentNonnegative(offset, String("offset must not be negative")))
-    //FAIL_RETURN(Preconditions::CheckNotNull(destination, Strinfg("destination must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
     if (destination == NULL) {
-        Slogger::E("CColorSpaceTransform", "destination must not be null");
+        Logger::E("CColorSpaceTransform", "destination must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
 
     if (destination->GetLength() - offset < COUNT) {
         //throw new ArrayIndexOutOfBoundsException("destination too small to fit elements");
-        Slogger::E("CColorSpaceTransform", "destination too small to fit elements");
+        Logger::E("CColorSpaceTransform", "destination too small to fit elements");
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
@@ -148,15 +146,14 @@ ECode CColorSpaceTransform::CopyElements(
     /* [in] */ Int32 offset)
 {
     FAIL_RETURN(Preconditions::CheckArgumentNonnegative(offset, String("offset must not be negative")))
-    //FAIL_RETURN(Preconditions::CheckNotNull(destination, Strinfg("destination must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(destination, String("destination must not be null")))
     if (destination == NULL) {
-        Slogger::E("CColorSpaceTransform", "destination must not be null");
+        Logger::E("CColorSpaceTransform", "destination must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
 
     if (destination->GetLength() - offset < COUNT_INT) {
-        //throw new ArrayIndexOutOfBoundsException("destination too small to fit elements");
-        Slogger::E("CColorSpaceTransform", "destination too small to fit elements");
+        Logger::E("CColorSpaceTransform", "destination too small to fit elements");
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
@@ -173,48 +170,40 @@ ECode CColorSpaceTransform::Equals(
     /* [out] */ Boolean *equal)
 {
     VALIDATE_NOT_NULL(equal)
-
-    if (obj == NULL) {
-        *equal = FALSE;
-        return NOERROR;
-    }
-    else if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
-        *equal = TRUE;
-        return NOERROR;
-    }
-    else if (IColorSpaceTransform::Probe(obj) != NULL) {
-        const AutoPtr<CColorSpaceTransform> other = (CColorSpaceTransform*)IColorSpaceTransform::Probe(obj);
-        for (Int32 i = 0, j = 0; i < COUNT; ++i, j += RATIONAL_SIZE) {
-            Int32 numerator = (*mElements)[j + OFFSET_NUMERATOR];
-            Int32 denominator = (*mElements)[j + OFFSET_DENOMINATOR];
-            Int32 numeratorOther = (*(other->mElements))[j + OFFSET_NUMERATOR];
-            Int32 denominatorOther = (*(other->mElements))[j + OFFSET_DENOMINATOR];
-            AutoPtr<IRational> r;
-            CRational::New(numerator, denominator, (IRational**)&r);
-            AutoPtr<IRational> rOther;
-            CRational::New(numeratorOther, denominatorOther, (IRational**)&rOther);
-            Boolean result;
-            r->Equals(rOther, &result);
-            if (!result) {
-                *equal = FALSE;
-                return NOERROR;
-            }
-        }
-        *equal = TRUE;
-        return NOERROR;
-    }
     *equal = FALSE;
+
+    IColorSpaceTransform* cst = IColorSpaceTransform::Probe(obj);
+    if (cst == NULL) {
+        return NOERROR;
+    }
+
+    CColorSpaceTransform* other = (CColorSpaceTransform*)cst;
+    for (Int32 i = 0, j = 0; i < COUNT; ++i, j += RATIONAL_SIZE) {
+        Int32 numerator = (*mElements)[j + OFFSET_NUMERATOR];
+        Int32 denominator = (*mElements)[j + OFFSET_DENOMINATOR];
+        Int32 numeratorOther = (*(other->mElements))[j + OFFSET_NUMERATOR];
+        Int32 denominatorOther = (*(other->mElements))[j + OFFSET_DENOMINATOR];
+        AutoPtr<IRational> r;
+        CRational::New(numerator, denominator, (IRational**)&r);
+        AutoPtr<IRational> rOther;
+        CRational::New(numeratorOther, denominatorOther, (IRational**)&rOther);
+        Boolean result;
+        r->Equals(rOther, &result);
+        if (!result) {
+            *equal = FALSE;
+            return NOERROR;
+        }
+    }
+    *equal = TRUE;
     return NOERROR;
+
 }
 
 ECode CColorSpaceTransform::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);
-
-    assert(0 && "TODO: weit Hardware/Camera2/Utils/HashCodeHelpers");
-    //*hashCode = HashCodeHelpers::GetHashCode(mElements);
-    return NOERROR;
+    return  HashCodeHelpers::GetHashCode(mElements, hashCode);
 }
 
 ECode CColorSpaceTransform::ToString(

@@ -260,6 +260,7 @@ ECode CameraManager::CameraServiceWrapper::GetLegacyParameters(
             array->Set(0, str);
             *parameters = array;
             REFCOUNT_ADD(*parameters)
+            Logger::I(TAG, " >> GetLegacyParameters for Camera %d: \n%s", cameraId, str.string());
             return NOERROR;
         }
     }
@@ -275,14 +276,15 @@ ECode CameraManager::CameraServiceWrapper::SupportsCameraApi(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = -EPROTO;
+    *result = android::BAD_VALUE;
 
     if (mCameraService.get() != NULL) {
         *result = mCameraService->supportsCameraApi(cameraId, apiVersion);
+        Logger::I(TAG, " >> camera %d SupportsCameraApi %d, result: %d", cameraId, apiVersion, *result);
         return NOERROR;
     }
 
-    Logger::E("CameraManager", "Failed to SupportsCameraApi for cameraId: %d", cameraId);
+    Logger::E("CameraManager", "Failed to SupportsCameraApi %d for cameraId: %d", apiVersion, cameraId);
     return E_CAMERA_RUNTIME_EXCEPTION;
 }
 
@@ -688,6 +690,7 @@ ECode CameraManager::GetCameraCharacteristics(
             AutoPtr<ICameraInfo> info = new CameraInfo();
             cameraService->GetCameraInfo(id, /*out*/info, &tmp);
 
+            // Logger::I(TAG, " >> parameters: [%s], CameraInfo: %s", parameters.string(), TO_CSTR(info));
             LegacyMetadataMapper::CreateCharacteristics(parameters, info, (ICameraCharacteristics**)&characteristics);
         }
         else {
@@ -715,19 +718,20 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
     VALIDATE_NOT_NULL(_device);
     *_device = NULL;
 
+    Logger::I(TAG, " >> OpenCameraDeviceUserAsync: %s", cameraId.string());
+    Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
     AutoPtr<ICameraCharacteristics> characteristics;
     GetCameraCharacteristics(cameraId, (ICameraCharacteristics**)&characteristics);
     AutoPtr<ICameraDevice> device;
     //try {
 
+    Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
     {
         AutoLock syncLock(mLock);
 
         AutoPtr<IICameraDeviceUser> cameraUser;
         AutoPtr<ICameraDeviceImpl> deviceImpl;
         CCameraDeviceImpl::New(cameraId, ccallback, handler, characteristics, (ICameraDeviceImpl**)&deviceImpl);
-
-        AutoPtr<IBinderHolder> holder = new BinderHolder();
 
         AutoPtr<ICameraDeviceImplCameraDeviceCallbacks> _callbacks;
         deviceImpl->GetCallbacks((ICameraDeviceImplCameraDeviceCallbacks**)&_callbacks);
@@ -737,7 +741,9 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
         //try {
         Boolean result;
         SupportsCamera2ApiLocked(cameraId, &result);
+
         if (result) {
+            Logger::I(TAG, "Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices.");
             // Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices
             AutoPtr<IICameraService> cameraService;
             GetCameraServiceLocked((IICameraService**)&cameraService);
@@ -748,8 +754,8 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
             String name;
             mContext->GetPackageName(&name);
             Int32 tmp;
-            cameraService->ConnectDevice(callbacks, id,
-                    name, USE_CALLING_UID, holder, &tmp);
+            AutoPtr<IBinderHolder> holder = new BinderHolder();
+            cameraService->ConnectDevice(callbacks, id, name, USE_CALLING_UID, holder, &tmp);
             AutoPtr<IBinder> binder;
             holder->GetBinder((IBinder**)&binder);
             cameraUser = IICameraDeviceUser::Probe(binder);
@@ -758,11 +764,9 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
             // Use legacy camera implementation for HAL1 devices
             Logger::I(TAG, "Using legacy camera HAL.");
             AutoPtr<ICameraDeviceUserShim> shim;
-            CameraDeviceUserShim::ConnectBinderShim(callbacks, id,
-                    (ICameraDeviceUserShim**)&shim);
+            CameraDeviceUserShim::ConnectBinderShim(callbacks, id, (ICameraDeviceUserShim**)&shim);
             cameraUser = IICameraDeviceUser::Probe(shim);
         }
-        assert(0);
         // } catch (CameraRuntimeException e) {
         //     if (e.getReason() == CameraAccessException.CAMERA_DEPRECATED_HAL) {
         //         throw new AssertionError("Should've gone down the shim path");
@@ -799,11 +803,12 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
         // TODO: factor out callback to be non-nested, then move setter to constructor
         // For now, calling setRemoteDevice will fire initial
         // onOpened/onUnconfigured callbacks.
-        deviceImpl->SetRemoteDevice(cameraUser);
+    Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
+        FAIL_RETURN(deviceImpl->SetRemoteDevice(cameraUser))
+    Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
         device = ICameraDevice::Probe(deviceImpl);
     }
 
-    assert(0);
     // } catch (NumberFormatException e) {
     //     throw new IllegalArgumentException("Expected cameraId to be numeric, but it was: "
     //             + cameraId);
@@ -812,6 +817,8 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
     // }
     *_device = device;
     REFCOUNT_ADD(*_device);
+
+    Logger::I(TAG, " << OpenCameraDeviceUserAsync: %s, device: %s", cameraId.string(), TO_CSTR(device));
     return NOERROR;
 }
 
@@ -839,8 +846,8 @@ ECode CameraManager::OpenCamera(
         }
     }
 
-    AutoPtr<ICameraDevice> device;
-    return OpenCameraDeviceUserAsync(cameraId, ccallback, handler, (ICameraDevice**)&device);
+    mCameraDevice = NULL;
+    return OpenCameraDeviceUserAsync(cameraId, ccallback, handler, (ICameraDevice**)&mCameraDevice);
 }
 
 ECode CameraManager::GetOrCreateDeviceIdListLocked(
@@ -986,14 +993,9 @@ ECode CameraManager::SupportsCameraApiLocked(
         return E_CAMERA_ACCESS_EXCEPTION;
     }
 
-    Int32 res;
+    Int32 res = android::BAD_VALUE;
     cameraService->SupportsCameraApi(id, apiVersion, &res);
-    if (res != ICameraBinderDecorator::ICameraBinderDecorator_NO_ERROR) {
-        Logger::E(TAG, "Unexpected value %d", res);
-        return E_ASSERTION_ERROR;
-    }
-
-    *result = TRUE;
+    *result = res == android::OK;
     return NOERROR;
 }
 

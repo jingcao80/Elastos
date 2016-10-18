@@ -1,9 +1,9 @@
 
 #include "elastos/droid/hardware/hdmi/HdmiClient.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::EIID_IBinder;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -65,7 +65,7 @@ ECode HdmiClient::GetActiveSource(
     ECode ec = mService->GetActiveSource(source);
     //} catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        Slogger::E(TAG, "getActiveSource threw exception %d", ec);
+        Logger::E(TAG, "getActiveSource threw exception %d", ec);
         *source = NULL;
     }
     //}
@@ -82,7 +82,7 @@ ECode HdmiClient::SendKeyEvent(
     ECode ec = mService->SendKeyEvent(type, keyCode, isPressed);
     //} catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        Slogger::E(TAG, "sendKeyEvent threw exception %d", ec);
+        Logger::E(TAG, "sendKeyEvent threw exception %d", ec);
     }
     //}
     return NOERROR;
@@ -99,7 +99,7 @@ ECode HdmiClient::SendVendorCommand(
     ECode ec = mService->SendVendorCommand(type, targetAddress, params, hasVendorId);
     //} catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        Slogger::E(TAG, "failed to send vendor command: %d", ec);
+        Logger::E(TAG, "failed to send vendor command: %d", ec);
     }
     //}
     return NOERROR;
@@ -110,7 +110,7 @@ ECode HdmiClient::AddVendorCommandListener(
 {
     if (listener == NULL) {
         //throw new IllegalArgumentException("listener cannot be null");
-        Slogger::E(TAG, "listener cannot be null");
+        Logger::E(TAG, "listener cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     //try {
@@ -119,7 +119,7 @@ ECode HdmiClient::AddVendorCommandListener(
     ECode ec = mService->AddVendorCommandListener(GetListenerWrapper(listener), type);
     //} catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        Slogger::E(TAG, "failed to add vendor command listener: %d", ec);
+        Logger::E(TAG, "failed to add vendor command listener: %d", ec);
     }
     //}
     return NOERROR;

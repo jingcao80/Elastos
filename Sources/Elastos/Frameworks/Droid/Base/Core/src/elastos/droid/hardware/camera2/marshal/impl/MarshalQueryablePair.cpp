@@ -4,13 +4,14 @@
 #include "elastos/droid/hardware/camera2/marshal/MarshalHelpers.h"
 #include "elastos/droid/utility/CPairHelper.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Utility::IPair;
+using Elastos::Droid::Utility::ECLSID_CPair;
 using Elastos::Droid::Utility::IPairHelper;
 using Elastos::Droid::Utility::CPairHelper;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -78,14 +79,14 @@ ECode MarshalQueryablePair::MarshalerPair::Marshal(
     pair->GetFirst((IInterface**)&firstObj);
     if (firstObj == NULL) {
         //throw new UnsupportedOperationException("Pair#first must not be null");
-        Slogger::E("MarshalQueryablePair", "Pair#first must not be null");
+        Logger::E("MarshalQueryablePair", "Pair#first must not be null");
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     else {
         pair->GetSecond((IInterface**)&secondObj);
         if (secondObj == NULL) {
             //throw new UnsupportedOperationException("Pair#second must not be null");
-            Slogger::E("MarshalQueryablePair", "Pair#second must not be null");
+            Logger::E("MarshalQueryablePair", "Pair#second must not be null");
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         }
     }
@@ -112,7 +113,7 @@ ECode MarshalQueryablePair::MarshalerPair::Unmarshal(
     AutoPtr<IPair> pair;
     ECode ec = helper->Create(first, second, (IPair**)&pair);
     if (FAILED(ec)) {
-        Slogger::E("MarshalQueryablePair", "AssertionError");
+        Logger::E("MarshalQueryablePair", "AssertionError");
         return E_ASSERTION_ERROR;
     }
     *outface = TO_IINTERFACE(pair);
@@ -207,8 +208,13 @@ ECode MarshalQueryablePair::IsTypeMappingSupported(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    assert(0);
-    //return (Pair.class.equals(managedType.getRawType()));
+    ClassID cls;
+    managedType->GetClassType(&cls);
+    if (cls == ECLSID_CPair) {
+        *value = TRUE;
+        return NOERROR;
+    }
+
     return NOERROR;
 }
 

@@ -740,7 +740,8 @@ INIT_PROI_1 const AutoPtr<IMap> Collections::EMPTY_MAP = new Collections::EmptyM
 //====================================================================
 // Collections::ReverseComparator::
 //====================================================================
-CAR_INTERFACE_IMPL_2(Collections::ReverseComparator, Object, IComparator, ISerializable)
+CAR_INTERFACE_IMPL_3(Collections::ReverseComparator, Object,
+    IComparator, IReverseComparator, ISerializable)
 
 const AutoPtr<Collections::ReverseComparator> Collections::ReverseComparator::INSTANCE = new Collections::ReverseComparator();
 
@@ -766,7 +767,8 @@ AutoPtr<IInterface> Collections::ReverseComparator::ReadResolve()
 //====================================================================
 // Collections::ReverseComparator2::
 //====================================================================
-CAR_INTERFACE_IMPL_2(Collections::ReverseComparator2, Object, IComparator, ISerializable)
+CAR_INTERFACE_IMPL_3(Collections::ReverseComparator2, Object,
+    IComparator, IReverseComparator2, ISerializable)
 
 Collections::ReverseComparator2::ReverseComparator2(
     /* [in] */ IComparator* comparator)
@@ -4766,11 +4768,11 @@ ECode Collections::NCopies(
 ECode Collections::Reverse(
     /* [in] */ IList* list)
 {
-    Int32 size;
     if (list == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    (ICollection::Probe(list))->GetSize(&size);
+    Int32 size;
+    list->GetSize(&size);
     AutoPtr<IListIterator> front;
     list->GetListIterator((IListIterator**)&front);
     IIterator* frontIt = IIterator::Probe(front);
@@ -4804,12 +4806,13 @@ ECode Collections::ReverseOrder(
     if (c == NULL) {
         return ReverseOrder(result);
     }
-    AutoPtr<IComparator> p = IComparator::Probe(c);
-    if (p != NULL) { // ???
+    AutoPtr<IReverseComparator2> p = IReverseComparator2::Probe(c);
+    if (p != NULL) {
         *result = ((ReverseComparator2*)p.Get())->mCmp;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
+
     AutoPtr<ReverseComparator2> res = new ReverseComparator2(c);
     *result = res;
     REFCOUNT_ADD(*result)
@@ -4835,7 +4838,7 @@ ECode Collections::Shuffle(
 
     if (IRandomAccess::Probe(list) != NULL) {
         Int32 i;
-        (ICollection::Probe(objectList))->GetSize(&i);
+        objectList->GetSize(&i);
         for (i = i - 1; i > 0; i--) {
             Int32 index;
             random->NextInt32(i + 1, &index);
@@ -4848,7 +4851,7 @@ ECode Collections::Shuffle(
     }
     else {
         AutoPtr<ArrayOf<IInterface*> > array;
-        (ICollection::Probe(objectList))->ToArray((ArrayOf<IInterface*>**)&array);
+        objectList->ToArray((ArrayOf<IInterface*>**)&array);
         for (Int32 i = array->GetLength() - 1; i > 0; i--) {
             Int32 index;
             random->NextInt32(i + 1, &index);
@@ -4912,7 +4915,7 @@ ECode Collections::Sort(
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ArrayOf<IInterface*> > array;
-    (ICollection::Probe(list))->ToArray((ArrayOf<IInterface*>**)&array);
+    list->ToArray((ArrayOf<IInterface*>**)&array);
     Arrays::Sort(array.Get());
     Int32 i = 0;
     AutoPtr<IListIterator> lit;
@@ -4935,10 +4938,10 @@ ECode Collections::Sort(
     if (list == NULL || comparator == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    (ICollection::Probe(list))->GetSize(&num);
+    list->GetSize(&num);
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(num);
     AutoPtr<ArrayOf<IInterface*> > array;
-    (ICollection::Probe(list))->ToArray(arr, (ArrayOf<IInterface*>**)&array);
+    list->ToArray(arr, (ArrayOf<IInterface*>**)&array);
     Arrays::Sort(array, comparator);
     AutoPtr<IListIterator> lit;
     list->GetListIterator((IListIterator**)&lit);
@@ -4962,7 +4965,7 @@ ECode Collections::Swap(
         return E_NULL_POINTER_EXCEPTION;
     }
     Int32 size;
-    (ICollection::Probe(list))->GetSize(&size);
+    list->GetSize(&size);
     if (index1 < 0 || index1 >= size || index2 < 0 || index2 >= size) {
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
@@ -5008,7 +5011,7 @@ ECode Collections::Rotate(
     }
     AutoPtr<IList> list = lst;
     Int32 size;
-    (ICollection::Probe(list))->GetSize(&size);
+    list->GetSize(&size);
 
     // Can't sensibly rotate an empty collection
     if (size == 0) {
@@ -5069,7 +5072,7 @@ ECode Collections::IndexOfSubList(
         return E_NULL_POINTER_EXCEPTION;
     }
     Int32 size, sublistSize;
-    (ICollection::Probe(list))->GetSize(&size);
+    list->GetSize(&size);
     (ICollection::Probe(sublist))->GetSize(&sublistSize);
 
     if (sublistSize > size) {
@@ -5148,7 +5151,7 @@ ECode Collections::LastIndexOfSubList(
     }
     Int32 sublistSize, size;
     (ICollection::Probe(sublist))->GetSize(&sublistSize);
-    (ICollection::Probe(list))->GetSize(&size);
+    list->GetSize(&size);
 
     if (sublistSize > size) {
         *result = -1;
@@ -6416,13 +6419,17 @@ ECode Collections::_CheckedList::Equals(
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* result)
 {
-    return (ICollection::Probe(mL))->Equals(object, result);
+    VALIDATE_NOT_NULL(result)
+    *result = Object::Equals(mL, IList::Probe(object));
+    return NOERROR;;
 }
 
 ECode Collections::_CheckedList::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
-    return (ICollection::Probe(mL))->GetHashCode(hashCode);
+    VALIDATE_NOT_NULL(hashCode)
+    *hashCode = Object::GetHashCode(mL);
+    return NOERROR;
 }
 
 ECode Collections::_CheckedList::Contains(
@@ -6786,7 +6793,7 @@ ECode Collections::_CheckedMap::CheckedEntrySet::CheckedEntryIterator::GetNext(
     VALIDATE_NOT_NULL(object);
     AutoPtr<IMapEntry> res;
     GetNext((IMapEntry**)&res);
-    *object = res->Probe(EIID_IInterface);
+    *object = res.Get();
     REFCOUNT_ADD(*object)
     return NOERROR;
 }
