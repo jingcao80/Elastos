@@ -3,6 +3,9 @@
 #include "OpenSSLRSAKeyFactory.h"
 #include "NativeCrypto.h"
 // #include "OpenSSLRSAPrivateCrtKey.h"
+#include "COpenSSLRSAPublicKey.h"
+#include "COpenSSLRSAPrivateCrtKey.h"
+#include "COpenSSLRSAPrivateKey.h"
 
 using Elastos::Security::EIID_IKeyFactorySpi;
 using Elastos::Security::Interfaces::IRSAPrivateKey;
@@ -47,7 +50,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePublic(
     if (IRSAPublicKeySpec::Probe(keySpec) != NULL) {
         AutoPtr<IOpenSSLRSAPublicKey> result;
         assert(0 && "TODO");
-        // COpenSSLRSAPublicKey::New(IRSAPublicKeySpec::Probe(keySpec), (IOpenSSLRSAPublicKey**)&result);
+        COpenSSLRSAPublicKey::New(IRSAPublicKeySpec::Probe(keySpec), (IOpenSSLRSAPublicKey**)&result);
         *pubKey = IPublicKey::Probe(result);
         REFCOUNT_ADD(*pubKey)
         return NOERROR;
@@ -75,16 +78,14 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(
 
     if (IRSAPrivateCrtKeySpec::Probe(keySpec) != NULL) {
         AutoPtr<IOpenSSLRSAPrivateCrtKey> result;
-        assert(0 && "TODO");
-        // = new OpenSSLRSAPrivateCrtKey(IRSAPrivateCrtKeySpec::Probe(keySpec));
+        COpenSSLRSAPrivateCrtKey::New(IRSAPrivateCrtKeySpec::Probe(keySpec), (IOpenSSLRSAPrivateCrtKey**)&result);
         *priKey = IPrivateKey::Probe(result);
         REFCOUNT_ADD(*priKey)
         return NOERROR;
     }
     else if (IRSAPrivateKeySpec::Probe(keySpec) != NULL) {
         AutoPtr<IOpenSSLRSAPrivateKey> result;
-        assert(0 && "TODO");
-        // COpenSSLRSAPrivateKey::New(IRSAPrivateKeySpec::Probe(keySpec), (IOpenSSLRSAPrivateKey**)&result);
+        COpenSSLRSAPrivateKey::New(IRSAPrivateKeySpec::Probe(keySpec), (IOpenSSLRSAPrivateKey**)&result);
         *priKey = IPrivateKey::Probe(result);
         REFCOUNT_ADD(*priKey)
         return NOERROR;

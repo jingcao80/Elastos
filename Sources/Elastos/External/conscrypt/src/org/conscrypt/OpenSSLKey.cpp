@@ -5,6 +5,11 @@
 // #include "OpenSSLDSAPrivateKey.h"
 // #include "OpenSSLECPrivateKey.h"
 #include "NativeCrypto.h"
+#include "COpenSSLKey.h"
+#include "COpenSSLRSAPublicKey.h"
+#include "COpenSSLECPublicKey.h"
+#include "COpenSSLRSAPrivateKey.h"
+#include "COpenSSLECPrivateKey.h"
 
 using Elastos::Security::IKey;
 using Elastos::Security::Spec::IEncodedKeySpec;
@@ -99,8 +104,7 @@ AutoPtr<IOpenSSLKey> OpenSSLKey::FromPrivateKey(
     Int64 key_info = 0;
     NativeCrypto::D2i_PKCS8_PRIV_KEY_INFO(encoded, &key_info);
     AutoPtr<IOpenSSLKey> res;
-    assert(0 && "TODO");
-    // = new OpenSSLKey(key_info);
+    COpenSSLKey::New(key_info, (IOpenSSLKey**)&res);
     return res;
 }
 
@@ -150,8 +154,7 @@ AutoPtr<IOpenSSLKey> OpenSSLKey::FromPublicKey(
     Int64 pubkey = 0;
     NativeCrypto::D2i_PUBKEY(encoded, &pubkey);
     AutoPtr<IOpenSSLKey> res;
-    assert(0 && "TODO");
-    // = new OpenSSLKey(pubkey);
+    COpenSSLKey::New(pubkey, (IOpenSSLKey**)&res);
     return res;
 }
 
@@ -164,8 +167,7 @@ ECode OpenSSLKey::GetPublicKey(
     switch (type) {
         case INativeCrypto::EVP_PKEY_RSA: {
             AutoPtr<IOpenSSLRSAPublicKey> p;
-            assert(0 && "TODO");
-            // = new OpenSSLRSAPublicKey(this);
+            COpenSSLRSAPublicKey::New(this, (IOpenSSLRSAPublicKey**)&p);
             *result = IPublicKey::Probe(p);
             REFCOUNT_ADD(*result)
             return NOERROR;
@@ -188,8 +190,7 @@ ECode OpenSSLKey::GetPublicKey(
         }
         case INativeCrypto::EVP_PKEY_EC: {
             AutoPtr<IOpenSSLECPublicKey> p;
-            assert(0 && "TODO");
-            // = new OpenSSLECPublicKey(this);
+            COpenSSLECPublicKey::New(this, (IOpenSSLECPublicKey**)&p);
             *result = IPublicKey::Probe(p);
             REFCOUNT_ADD(*result)
             return NOERROR;
@@ -213,8 +214,7 @@ AutoPtr<IPublicKey> OpenSSLKey::GetPublicKey(
     IEncodedKeySpec::Probe(x509KeySpec)->GetEncoded((ArrayOf<Byte>**)&encoded);
     Int64 pubKey = 0;
     NativeCrypto::D2i_PUBKEY(encoded, &pubKey);
-    assert(0 && "TODO");
-    // key = new OpenSSLKey(pubKey);
+    COpenSSLKey::New(pubKey, (IOpenSSLKey**)&key);
     Int64 keyContext = 0;
     key->GetPkeyContext(&keyContext);
     Int32 keyType = 0;
@@ -238,8 +238,7 @@ ECode OpenSSLKey::GetPrivateKey(
     switch (type) {
         case INativeCrypto::EVP_PKEY_RSA: {
             AutoPtr<IOpenSSLRSAPrivateKey> p;
-            assert(0 && "TODO");
-            // = new OpenSSLRSAPrivateKey(this);
+            COpenSSLRSAPrivateKey::New(this, (IOpenSSLRSAPrivateKey**)&p);
             *result = IPrivateKey::Probe(p);
             REFCOUNT_ADD(*result)
             return NOERROR;
@@ -262,8 +261,7 @@ ECode OpenSSLKey::GetPrivateKey(
         }
         case INativeCrypto::EVP_PKEY_EC: {
             AutoPtr<IOpenSSLECPrivateKey> p;
-            assert(0 && "TODO");
-            // = new OpenSSLECPrivateKey(this);
+            COpenSSLECPrivateKey::New(this, (IOpenSSLECPrivateKey**)&p);
             *result = IPrivateKey::Probe(p);
             REFCOUNT_ADD(*result)
             return NOERROR;
@@ -287,8 +285,7 @@ AutoPtr<IPrivateKey> OpenSSLKey::GetPrivateKey(
     IEncodedKeySpec::Probe(pkcs8KeySpec)->GetEncoded((ArrayOf<Byte>**)&encoded);
     Int64 key_info = 0;
     NativeCrypto::D2i_PKCS8_PRIV_KEY_INFO(encoded, &key_info);
-    assert(0 && "TODO");
-    // key = new OpenSSLKey(key_info);
+    COpenSSLKey::New(key_info, (IOpenSSLKey**)&key);
     Int64 keyContext = 0;
     key->GetPkeyContext(&keyContext);
     Int32 keyType = 0;

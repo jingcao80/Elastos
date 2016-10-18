@@ -4,6 +4,7 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "OpenSSLSecretKey.h"
 #include "NativeCrypto.h"
+#include "COpenSSLKey.h"
 #include <elastos/utility/Arrays.h>
 
 using Elastosx::Crypto::EIID_ISecretKey;
@@ -30,8 +31,7 @@ ECode OpenSSLSecretKey::constructor(
     mType = INativeCrypto::EVP_PKEY_HMAC;
     Int64 key = 0;
     NativeCrypto::EVP_PKEY_new_mac_key(mType, encoded, &key);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(key);
+    COpenSSLKey::New(key, (IOpenSSLKey**)&mKey);
     return NOERROR;
 }
 
@@ -60,8 +60,7 @@ ECode OpenSSLSecretKey::GetInstance(
     NativeCrypto::EVP_PKEY_new_mac_key(INativeCrypto::EVP_PKEY_HMAC,
             encoded, &mac_key);
     AutoPtr<IOpenSSLKey> res;
-    assert(0 && "TODO");
-    // new OpenSSLKey(mac_key);
+    COpenSSLKey::New(mac_key, (IOpenSSLKey**)&res);
     *result = res;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -177,8 +176,7 @@ void OpenSSLSecretKey::ReadObject(
 
     Int64 mac_key = 0;
     NativeCrypto::EVP_PKEY_new_mac_key(mType, mEncoded, &mac_key);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(mac_key);
+    COpenSSLKey::New(mac_key, (IOpenSSLKey**)&mKey);
 }
 
 void OpenSSLSecretKey::WriteObject(

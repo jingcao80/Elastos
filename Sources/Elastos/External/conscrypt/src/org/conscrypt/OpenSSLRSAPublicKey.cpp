@@ -3,6 +3,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "OpenSSLRSAPublicKey.h"
 #include "NativeCrypto.h"
+#include "COpenSSLKey.h"
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringBuilder;
@@ -58,8 +59,7 @@ ECode OpenSSLRSAPublicKey::constructor(
             NULL,
             NULL,
             &rsa);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(rsa);
+    COpenSSLKey::New(rsa, (IOpenSSLKey**)&mKey);
     return NOERROR;
 }
 
@@ -87,9 +87,10 @@ ECode OpenSSLRSAPublicKey::GetInstance(
             NULL,
             NULL,
             &rsa);
-    assert(0 && "TODO");
-    // *result = new OpenSSLKey(rsa);
-    // REFCOUNT_ADD(*result)
+    AutoPtr<IOpenSSLKey> res;
+    COpenSSLKey::New(rsa, (IOpenSSLKey**)&res);
+    *result = res;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -259,8 +260,7 @@ void OpenSSLRSAPublicKey::ReadObject(
             NULL,
             NULL,
             &rsa);
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(rsa);
+    COpenSSLKey::New(rsa, (IOpenSSLKey**)&mKey);
     mFetchedParams = TRUE;
 }
 

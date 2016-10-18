@@ -496,13 +496,14 @@ module
         interface IOpenSSLRSAKeyPairGenerator;
     }
 
+    [deprecated]
     class COpenSSLRSAPrivateCrtKey {
         constructor(
             [in] IOpenSSLKey* key);
 
-        // constructor(
-        //     [in] IOpenSSLKey* key,
-        //     [in] ArrayOf<AutoPtr<ArrayOf<Byte> > >* params);
+        constructor(
+            [in] IOpenSSLKey* key,
+            [in] ArrayOf<Handle32>* params);
 
         constructor(
             [in] IRSAPrivateCrtKeySpec* rsaKeySpec);

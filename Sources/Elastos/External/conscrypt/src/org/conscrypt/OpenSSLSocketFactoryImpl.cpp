@@ -3,6 +3,8 @@
 #include "OpenSSLSocketFactoryImpl.h"
 #include "SSLParametersImpl.h"
 #include "NativeCrypto.h"
+#include "COpenSSLSocketImpl.h"
+#include "COpenSSLSocketImplWrapper.h"
 
 namespace Org {
 namespace Conscrypt {
@@ -59,8 +61,9 @@ ECode OpenSSLSocketFactoryImpl::CreateSocket(
     //     // throw instantiationException;
     // }
     AutoPtr<IOpenSSLSocketImpl> res;
-    assert(0 && "TODO");
-    // new OpenSSLSocketImpl((SSLParametersImpl) sslParameters->Clone());
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(mSslParameters)->Clone((IInterface**)&p);
+    COpenSSLSocketImpl::New(ISSLParametersImpl::Probe(p), (IOpenSSLSocketImpl**)&res);
     *result = ISocket::Probe(res);
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -72,9 +75,10 @@ ECode OpenSSLSocketFactoryImpl::CreateSocket(
     /* [out] */ ISocket** result)
 {
     VALIDATE_NOT_NULL(result)
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(mSslParameters)->Clone((IInterface**)&p);
     AutoPtr<IOpenSSLSocketImpl> res;
-    assert(0 && "TODO");
-    // new OpenSSLSocketImpl(host, port, (SSLParametersImpl) sslParameters->Clone());
+    COpenSSLSocketImpl::New(host, port, ISSLParametersImpl::Probe(p), (IOpenSSLSocketImpl**)&res);
     *result = ISocket::Probe(res);
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -88,13 +92,15 @@ ECode OpenSSLSocketFactoryImpl::CreateSocket(
     /* [out] */ ISocket** result)
 {
     VALIDATE_NOT_NULL(result)
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(mSslParameters)->Clone((IInterface**)&p);
     AutoPtr<IOpenSSLSocketImpl> res;
-    assert(0 && "TODO");
-    // new OpenSSLSocketImpl(host,
-    //                      port,
-    //                      localHost,
-    //                      localPort,
-    //                      (SSLParametersImpl) sslParameters.clone());
+    COpenSSLSocketImpl::New(host,
+                        port,
+                        localHost,
+                        localPort,
+                        ISSLParametersImpl::Probe(p),
+                        (IOpenSSLSocketImpl**)&res);
     *result = ISocket::Probe(res);
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -106,9 +112,10 @@ ECode OpenSSLSocketFactoryImpl::CreateSocket(
     /* [out] */ ISocket** result)
 {
     VALIDATE_NOT_NULL(result)
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(mSslParameters)->Clone((IInterface**)&p);
     AutoPtr<IOpenSSLSocketImpl> res;
-    assert(0 && "TODO");
-    // new OpenSSLSocketImpl(host, port, (SSLParametersImpl) sslParameters.clone());
+    COpenSSLSocketImpl::New(host, port, ISSLParametersImpl::Probe(p), (IOpenSSLSocketImpl**)&res);
     *result = ISocket::Probe(res);
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -122,13 +129,15 @@ ECode OpenSSLSocketFactoryImpl::CreateSocket(
     /* [out] */ ISocket** result)
 {
     VALIDATE_NOT_NULL(result)
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(mSslParameters)->Clone((IInterface**)&p);
     AutoPtr<IOpenSSLSocketImpl> res;
-    assert(0 && "TODO");
-    // new OpenSSLSocketImpl(address,
-    //                      port,
-    //                      localAddress,
-    //                      localPort,
-    //                      (SSLParametersImpl) sslParameters.clone());
+    COpenSSLSocketImpl::New(address,
+                        port,
+                        localAddress,
+                        localPort,
+                        ISSLParametersImpl::Probe(p),
+                        (IOpenSSLSocketImpl**)&res);
     *result = ISocket::Probe(res);
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -142,13 +151,15 @@ ECode OpenSSLSocketFactoryImpl::CreateSocket(
     /* [out] */ ISocket** result)
 {
     VALIDATE_NOT_NULL(result)
+    AutoPtr<IInterface> p;
+    ICloneable::Probe(mSslParameters)->Clone((IInterface**)&p);
     AutoPtr<IOpenSSLSocketImpl> res;
-    assert(0 && "TODO");
-    // new OpenSSLSocketImplWrapper(s,
-    //                             host,
-    //                             port,
-    //                             autoClose,
-    //                             (SSLParametersImpl) sslParameters.clone());
+    COpenSSLSocketImplWrapper::New(s,
+                                host,
+                                port,
+                                autoClose,
+                                ISSLParametersImpl::Probe(p),
+                                (IOpenSSLSocketImpl**)&res);
     *result = ISocket::Probe(res);
     REFCOUNT_ADD(*result)
     return NOERROR;

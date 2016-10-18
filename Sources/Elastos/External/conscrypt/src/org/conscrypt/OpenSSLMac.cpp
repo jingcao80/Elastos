@@ -3,7 +3,7 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "OpenSSLMac.h"
 #include "NativeCrypto.h"
-// #include "OpenSSLKey.h"
+#include "COpenSSLKey.h"
 #include "Elastos.CoreLibrary.Extensions.h"
 
 using Elastosx::Crypto::ISecretKey;
@@ -208,8 +208,7 @@ ECode OpenSSLMac::EngineInit(
 
         Int64 new_mac_key = 0;
         NativeCrypto::EVP_PKEY_new_mac_key(mEvp_pkey_type, keyBytes, &new_mac_key);
-        assert(0 && "TODO");
-        // mMacKey = new OpenSSLKey(new_mac_key);
+        COpenSSLKey::New(new_mac_key, (IOpenSSLKey**)&mMacKey);
     }
 
     ResetContext();

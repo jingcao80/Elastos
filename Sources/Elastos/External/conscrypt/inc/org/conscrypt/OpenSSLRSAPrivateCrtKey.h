@@ -28,7 +28,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IOpenSSLKey* key,
-        /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > >* params);
+        /* [in] */ ArrayOf<Handle32>* params);
 
     CARAPI constructor(
         /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec);

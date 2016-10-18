@@ -1,6 +1,7 @@
 
 #include "Elastos.CoreLibrary.Security.h"
 #include "OpenSSLRSAPrivateCrtKey.h"
+#include "OpenSSLRSAPrivateKey.h"
 
 using Elastos::Security::Interfaces::IRSAPrivateKey;
 using Elastos::Security::Interfaces::EIID_IRSAPrivateCrtKey;
@@ -18,25 +19,22 @@ CAR_INTERFACE_IMPL_2(OpenSSLRSAPrivateCrtKey, OpenSSLRSAPrivateKey, IRSAPrivateC
 ECode OpenSSLRSAPrivateCrtKey::constructor(
     /* [in] */ IOpenSSLKey* key)
 {
-    assert(0 && "TODO");
-    // OpenSSLRSAPrivateKey(key);
+    OpenSSLRSAPrivateKey::constructor(key);
     return NOERROR;
 }
 
 ECode OpenSSLRSAPrivateCrtKey::constructor(
     /* [in] */ IOpenSSLKey* key,
-    /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > >* params)
+    /* [in] */ ArrayOf<Handle32>* params)
 {
-    assert(0 && "TODO");
-    // OpenSSLRSAPrivateKey(key, params);
+    OpenSSLRSAPrivateKey::constructor(key, params);
     return NOERROR;
 }
 
 ECode OpenSSLRSAPrivateCrtKey::constructor(
     /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec)
 {
-    assert(0 && "TODO");
-    // OpenSSLRSAPrivateKey(Init(rsaKeySpec));
+    OpenSSLRSAPrivateKey::constructor(Init(rsaKeySpec));
     return NOERROR;
 }
 

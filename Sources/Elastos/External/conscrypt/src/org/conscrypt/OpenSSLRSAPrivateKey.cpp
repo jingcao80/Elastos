@@ -4,6 +4,9 @@
 #include "OpenSSLRSAPrivateKey.h"
 #include "NativeCrypto.h"
 #include "Platform.h"
+#include "COpenSSLKey.h"
+#include "COpenSSLRSAPrivateCrtKey.h"
+#include "COpenSSLRSAPrivateKey.h"
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringBuilder;
@@ -74,17 +77,23 @@ AutoPtr<IOpenSSLKey> OpenSSLRSAPrivateKey::Init(
         return NULL;
     }
 
+    AutoPtr<ArrayOf<Byte> > mArr;
+    modulus->ToByteArray((ArrayOf<Byte>**)&mArr);
+    AutoPtr<ArrayOf<Byte> > pArr;
+    privateExponent->ToByteArray((ArrayOf<Byte>**)&pArr);
+    Int64 rsa = 0;
+    NativeCrypto::EVP_PKEY_new_RSA(
+           mArr,
+           NULL,
+           pArr,
+           NULL,
+           NULL,
+           NULL,
+           NULL,
+           NULL,
+           &rsa);
     AutoPtr<IOpenSSLKey> res;
-    assert(0 && "TODO");
-    // new OpenSSLKey(NativeCrypto::EVP_PKEY_new_RSA(
-    //        modulus->ToByteArray(),
-    //        NULL,
-    //        privateExponent->ToByteArray(),
-    //        NULL,
-    //        NULL,
-    //        NULL,
-    //        NULL,
-    //        NULL));
+    COpenSSLKey::New(rsa, (IOpenSSLKey**)&res);
     return res;
 }
 
@@ -107,12 +116,12 @@ AutoPtr<IOpenSSLRSAPrivateKey> OpenSSLRSAPrivateKey::GetInstance(
     if ((*params)[1] != NULL) {
         AutoPtr<IOpenSSLRSAPrivateKey> res;
         assert(0 && "TODO");
-        // new OpenSSLRSAPrivateCrtKey(key, params);
+        // COpenSSLRSAPrivateCrtKey::New(key, params, (IOpenSSLRSAPrivateKey**)&res);
         return res;
     }
     AutoPtr<IOpenSSLRSAPrivateKey> res;
     assert(0 && "TODO");
-    // new OpenSSLRSAPrivateKey(key, params);
+    // COpenSSLRSAPrivateKey::New(key, params, (IOpenSSLRSAPrivateKey**)&res);
     return res;
 }
 
@@ -124,10 +133,14 @@ AutoPtr<IOpenSSLKey> OpenSSLRSAPrivateKey::WrapPlatformKey(
     if (wrapper != NULL) {
         return wrapper;
     }
+    AutoPtr<IBigInteger> modulus;
+    IRSAKey::Probe(rsaPrivateKey)->GetModulus((IBigInteger**)&modulus);
+    AutoPtr<ArrayOf<Byte> > arr;
+    modulus->ToByteArray((ArrayOf<Byte>**)&arr);
+    Int64 keywrapper = 0;
+    NativeCrypto::GetRSAPrivateKeyWrapper(rsaPrivateKey, arr, &keywrapper);
     AutoPtr<IOpenSSLKey> res;
-    assert(0 && "TODO");
-    // new OpenSSLKey(NativeCrypto::GetRSAPrivateKeyWrapper(rsaPrivateKey, rsaPrivateKey
-    //        .getModulus().toByteArray()));
+    COpenSSLKey::New(keywrapper, (IOpenSSLKey**)&res);
     return res;
 }
 
@@ -158,17 +171,23 @@ AutoPtr<IOpenSSLKey> OpenSSLRSAPrivateKey::GetInstance(
         return NULL;
     }
 
+    AutoPtr<ArrayOf<Byte> > mArr;
+    modulus->ToByteArray((ArrayOf<Byte>**)&mArr);
+    AutoPtr<ArrayOf<Byte> > pArr;
+    privateExponent->ToByteArray((ArrayOf<Byte>**)&pArr);
+    Int64 rsa = 0;
+    NativeCrypto::EVP_PKEY_new_RSA(
+           mArr,
+           NULL,
+           pArr,
+           NULL,
+           NULL,
+           NULL,
+           NULL,
+           NULL,
+           &rsa);
     AutoPtr<IOpenSSLKey> res;
-    assert(0 && "TODO");
-    // new OpenSSLKey(NativeCrypto::EVP_PKEY_new_RSA(
-    //        modulus->ToByteArray(),
-    //        NULL,
-    //        privateExponent->ToByteArray(),
-    //        NULL,
-    //        NULL,
-    //        NULL,
-    //        NULL,
-    //        NULL));
+    COpenSSLKey::New(rsa, (IOpenSSLKey**)&res);
     return res;
 }
 
@@ -387,16 +406,22 @@ void OpenSSLRSAPrivateKey::ReadObject(
 {
     stream->DefaultReadObject();
 
-    assert(0 && "TODO");
-    // mKey = new OpenSSLKey(NativeCrypto::EVP_PKEY_new_RSA(
-    //         mModulus->ToByteArray(),
-    //         NULL,
-    //         mPrivateExponent->ToByteArray(),
-    //         NULL,
-    //         NULL,
-    //         NULL,
-    //         NULL,
-    //         NULL));
+    AutoPtr<ArrayOf<Byte> > mArr;
+    mModulus->ToByteArray((ArrayOf<Byte>**)&mArr);
+    AutoPtr<ArrayOf<Byte> > pArr;
+    mPrivateExponent->ToByteArray((ArrayOf<Byte>**)&pArr);
+    Int64 rsa = 0;
+    NativeCrypto::EVP_PKEY_new_RSA(
+            mArr,
+            NULL,
+            pArr,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            &rsa);
+    COpenSSLKey::New(rsa, (IOpenSSLKey**)&mKey);
     mFetchedParams = TRUE;
 }
 

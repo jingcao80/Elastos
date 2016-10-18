@@ -220,6 +220,7 @@ void OpenSSLSessionImpl::CheckPeerCertificatesPresent()
 {
     if (mPeerCertificates == NULL || mPeerCertificates->GetLength() == 0) {
         // throw new SSLPeerUnverifiedException("No peer certificates");
+        return;
     }
 }
 
