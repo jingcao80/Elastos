@@ -2,8 +2,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Security::CSecurity;
-// TODO: Need CSignatureHelper
-// using Elastos::Security::CSignatureHelper;
+using Elastos::Security::CSignatureHelper;
 using Elastos::Security::IKey;
 using Elastos::Security::ISecurity;
 using Elastos::Security::ISignature;
@@ -89,9 +88,8 @@ ECode CryptoUpcalls::RawSignDigestWithPrivateKey(
     AutoPtr<ISignature> signature;
     // try {
     AutoPtr<ISignatureHelper> sigHelper;
-// TODO: Need CSignatureHelper
-    // CSignatureHelper::AcquireSingleton((ISignatureHelper**)&sigHelper);
-    // sigHelper->GetInstance(algorithm, p, (ISignature**)&signature);
+    CSignatureHelper::AcquireSingleton((ISignatureHelper**)&sigHelper);
+    sigHelper->GetInstance(algorithm, p, (ISignature**)&signature);
     // } catch (NoSuchAlgorithmException e) {
     //     ;
     // }

@@ -43,6 +43,7 @@ SOURCES += AlgorithmParameterGeneratorSpi.cpp
 SOURCES += CAccessControlContext.cpp
 SOURCES += CAccessController.cpp
 SOURCES += AlgorithmParameters.cpp
+SOURCES += CAlgorithmParametersHelper.cpp
 SOURCES += CAllPermission.cpp
 SOURCES += AuthProvider.cpp
 SOURCES += CCodeSigner.cpp

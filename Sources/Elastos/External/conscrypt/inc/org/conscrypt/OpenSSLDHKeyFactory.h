@@ -5,16 +5,13 @@
 #include <elastos/coredef.h>
 #include <Elastos.CoreLibrary.Security.h>
 #include <Elastos.CoreLibrary.Extensions.h>
-// TODO: Need KeyFactorySpi
-// #include <elastos/security/KeyFactorySpi.h>
 #include <elastos/core/Object.h>
 #include "_Org.Conscrypt.h"
 
 using Elastos::Security::IKey;
+using Elastos::Security::IKeyFactorySpi;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
-// TODO: Need KeyFactorySpi
-// using Elastos::Security::KeyFactorySpi;
 using Elastos::Security::Spec::IKeySpec;
 
 namespace Org {
@@ -22,9 +19,8 @@ namespace Conscrypt {
 
 class OpenSSLDHKeyFactory
     : public IOpenSSLDHKeyFactory
+    , public IKeyFactorySpi
     , public Object
-// TODO: Need KeyFactorySpi
-    // , public KeyFactorySpi
 {
 public:
     CAR_INTERFACE_DECL()
@@ -41,7 +37,7 @@ public:
 
     CARAPI EngineGetKeySpec(
         /* [in] */ IKey* key,
-        /* [in] */ ClassID keySpec,
+        /* [in] */ const ClassID& keySpec,
         /* [out] */ IKeySpec** result);
 
     CARAPI EngineTranslateKey(

@@ -4,6 +4,7 @@
 #include "org/conscrypt/OpenSSLDSAPublicKey.h"
 #include "org/conscrypt/OpenSSLKey.h"
 
+using Elastos::Security::EIID_IKeyFactorySpi;
 using Elastos::Security::Interfaces::IDSAKey;
 using Elastos::Security::Spec::CDSAPrivateKeySpec;
 using Elastos::Security::Spec::CDSAPublicKeySpec;
@@ -13,9 +14,7 @@ using Elastos::Security::Spec::CX509EncodedKeySpec;
 namespace Org {
 namespace Conscrypt {
 
-CAR_INTERFACE_IMPL(OpenSSLDSAKeyFactory, Object, IOpenSSLDSAKeyFactory)
-// TODO: Need KeyFactorySpi
-// CAR_INTERFACE_IMPL(OpenSSLDSAKeyFactory, KeyFactorySpi, IOpenSSLDSAKeyFactory)
+CAR_INTERFACE_IMPL_2(OpenSSLDSAKeyFactory, Object, IOpenSSLDSAKeyFactory, IKeyFactorySpi)
 
 ECode OpenSSLDSAKeyFactory::constructor()
 {
@@ -82,7 +81,7 @@ ECode OpenSSLDSAKeyFactory::EngineGeneratePrivate(
 
 ECode OpenSSLDSAKeyFactory::EngineGetKeySpec(
     /* [in] */ IKey* key,
-    /* [in] */ ClassID keySpec,
+    /* [in] */ const ClassID& keySpec,
     /* [out] */ IKeySpec** result)
 {
     VALIDATE_NOT_NULL(result)

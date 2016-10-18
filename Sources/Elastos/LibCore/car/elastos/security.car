@@ -225,6 +225,10 @@ module
         interface IAccessController;
     }
 
+    singleton class CAlgorithmParametersHelper {
+        interface IAlgorithmParametersHelper;
+    }
+
     class CAlgorithmParameterGenerator {
         constructor(
             [in] IAlgorithmParameterGeneratorSpi* paramGenSpi,
