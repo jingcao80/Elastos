@@ -15,6 +15,7 @@
 #include "elastos/droid/dialerbind/ObjectFactory.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/core/StringUtils.h"
+#include "elastos/core/Math.h"
 
 using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
 using Elastos::Droid::Contacts::Common::Util::UriUtils;
@@ -77,7 +78,10 @@ AutoPtr<ContactInfo> ContactInfoHelper::LookupNumber(
             // Check whether the "username" part of the SIP address is
             // actually the phone number of a contact.
             String username = PhoneNumberHelper::GetUsernameFromUriNumber(number);
-            if (PhoneNumberUtils::IsGlobalPhoneNumber(username)) {
+            AutoPtr<IPhoneNumberUtils> utils;
+            CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
+            Boolean isGlobalPhoneNumber;
+            if (utils->IsGlobalPhoneNumber(username, &isGlobalPhoneNumber), isGlobalPhoneNumber) {
                 sipInfo = QueryContactInfoForPhoneNumber(username, countryIso);
             }
         }
@@ -106,8 +110,10 @@ AutoPtr<ContactInfo> ContactInfoHelper::LookupNumber(
             updatedInfo = new ContactInfo();
             updatedInfo->mNumber = number;
             updatedInfo->mFormattedNumber = FormatPhoneNumber(number, String(NULL), countryIso);
-            updatedInfo->mNormalizedNumber = PhoneNumberUtils::FormatNumberToE164(
-                    number, countryIso);
+            AutoPtr<IPhoneNumberUtils> utils;
+            CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
+            utils->FormatNumberToE164(
+                    number, countryIso, &updatedInfo->mNormalizedNumber);
             updatedInfo->mLookupUri = CreateTemporaryContactUri(updatedInfo->mFormattedNumber);
         }
         else {
@@ -200,7 +206,7 @@ AutoPtr<ContactInfo> ContactInfoHelper::LookupContactFromUri(
             phonesCursor->GetInt64(PhoneQuery::PHOTO_ID, &info->mPhotoId);
             String photoUri;
             phonesCursor->GetString(PhoneQuery::PHOTO_URI, &photoUri);
-            info->mPhotoUri = UriUtils::ParseUriOrNull();
+            info->mPhotoUri = UriUtils::ParseUriOrNull(photoUri);
             info->mFormattedNumber = NULL;
         }
         else {

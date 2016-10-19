@@ -49,8 +49,7 @@ AutoPtr<ICharSequence> PhoneNumberDisplayHelper::GetDisplayName(
         return CoreUtils::Convert(str);
     }
 
-    Boolean result;
-    if (mPhoneNumberUtils->IsVoicemailNumber(number, &result), result) {
+    if (mPhoneNumberUtils->IsVoicemailNumber(number)) {
         String str;
         mResources->GetString(Elastos::Droid::Dialer::R::string::voicemail, &str);
         return CoreUtils::Convert(str);

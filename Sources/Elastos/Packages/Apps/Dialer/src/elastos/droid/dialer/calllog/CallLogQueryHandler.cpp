@@ -1,13 +1,14 @@
 
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/dialer/calllog/CallLogQueryHandler.h"
 #include "elastos/droid/dialer/calllog/CallLogQuery.h"
 #include "elastos/droid/dialer/voicemail/VoicemailStatusHelperImpl.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentValues;
@@ -39,6 +40,7 @@ const Int32 CallLogQueryHandler::CALL_TYPE_ALL;
 static AutoPtr<ArrayOf<String> > InitEmptyArray()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(0);
+    return array;
 }
 const AutoPtr<ArrayOf<String> > CallLogQueryHandler::EMPTY_STRING_ARRAY = InitEmptyArray();
 const String CallLogQueryHandler::TAG("CallLogQueryHandler");
@@ -90,10 +92,6 @@ ECode CallLogQueryHandler::CatchingWorkerHandler::HandleMessage(
 //=================================================================
 // CallLogQueryHandler
 //=================================================================
-CAR_INTERFACE_IMPL(CallLogQueryHandler, AsyncQueryHandler, ICallLogQueryHandler);
-
-CAR_OBJECT_IMPL(CallLogQueryHandler);
-
 CallLogQueryHandler::CallLogQueryHandler()
     : mLogLimit(0)
 {}
@@ -105,7 +103,7 @@ ECode CallLogQueryHandler::CreateHandler(
     VALIDATE_NOT_NULL(handler)
     // Provide our special handler that catches exceptions
     AutoPtr<CatchingWorkerHandler> cwHandler = new CatchingWorkerHandler(looper);
-    *handler = IHandler::Probe(cwHandler);
+    *handler = (IHandler*)cwHandler;
     REFCOUNT_ADD(*handler)
     return NOERROR;
 }
@@ -163,7 +161,7 @@ void CallLogQueryHandler::FetchCalls(
     // may not match either the query or its negation.
     // We consider the calls that are not yet consumed (i.e. IS_READ = 0) as "new".
     AutoPtr<StringBuilder> where = new StringBuilder();
-    List<String> selectionArgs;
+    Elastos::Utility::Etl::List<String> selectionArgs;
 
     if (newOnly) {
         where->Append(ICalls::NEW);
@@ -209,7 +207,7 @@ void CallLogQueryHandler::FetchCalls(
     builder->Build((IUri**)&uri);
 
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(selectionArgs.GetSize());
-    List<String>::Iterator it = selectionArgs.Begin();
+    Elastos::Utility::Etl::List<String>::Iterator it = selectionArgs.Begin();
     for (Int32 i = 0; it != selectionArgs.End(); ++it, ++i) {
         (*array)[i] = *it;
     }

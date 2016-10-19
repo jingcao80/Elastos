@@ -2,13 +2,13 @@
 #define __ELASTOS_DROID_DIALER_CCALLTYPEICONSVIEW_H__
 
 #include "_Elastos_Droid_Dialer_CallLog_CCallTypeIconsView.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/view/View.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Utility::IAttributeSet;
-using Elastos::Droid::View::View;
 using Elastos::Utility::IList;
 
 namespace Elastos{
@@ -20,7 +20,7 @@ namespace CallLog {
  * Helper class to perform operations related to call types.
  */
 CarClass(CCallTypeIconsView)
-    , public View
+    , public Elastos::Droid::View::View
     , public ICallTypeIconsView
 {
 private:

@@ -3,7 +3,6 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/contacts/common/ContactPhotoManager.h"
 #include "elastos/droid/contacts/common/CallUtil.h"
-#include "elastos/droid/contacts/common/util/ExpirableCache.h"
 #include "elastos/droid/contacts/common/util/UriUtils.h"
 #include "elastos/droid/dialer/calllog/CallLogAdapter.h"
 #include "elastos/droid/dialer/calllog/CallTypeHelper.h"
@@ -15,6 +14,7 @@
 #include "elastos/droid/dialer/calllog/CallLogListItemViews.h"
 #include "elastos/droid/dialer/calllog/CallLogGroupBuilder.h"
 #include "elastos/droid/dialer/util/DialerUtils.h"
+#include "elastos/droid/dialer/util/ExpirableCache.h"
 #include "elastos/droid/dialer/DialtactsActivity.h"
 #include "elastos/droid/dialer/PhoneCallDetailsHelper.h"
 #include "elastos/droid/dialer/PhoneCallDetailsViews.h"
@@ -28,7 +28,6 @@
 using Elastos::Droid::Contacts::Common::IContactPhotoManagerDefaultImageProvider;
 using Elastos::Droid::Contacts::Common::ContactPhotoManager;
 using Elastos::Droid::Contacts::Common::CallUtil;
-using Elastos::Droid::Contacts::Common::Util::ExpirableCache;
 using Elastos::Droid::Contacts::Common::Util::UriUtils;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContentValues;
@@ -38,8 +37,10 @@ using Elastos::Droid::Dialer::DialtactsActivity;
 using Elastos::Droid::Dialer::PhoneCallDetailsHelper;
 using Elastos::Droid::Dialer::PhoneCallDetailsViews;
 using Elastos::Droid::Dialer::CallLog::EIID_INumberWithCountryIso;
-using Elastos::Droid::Dialer::CallLog::EIID_ContactInfoRequest;
+using Elastos::Droid::Dialer::CallLog::EIID_IContactInfoRequest;
 using Elastos::Droid::Dialer::Util::DialerUtils;
+using Elastos::Droid::Dialer::Util::ExpirableCache;
+using Elastos::Droid::Dialer::Util::IExpirableCacheCachedValue;
 using Elastos::Droid::Provider::ICalls;
 using Elastos::Droid::Provider::CCalls;
 using Elastos::Droid::Provider::IContactsContractPhoneLookup;
@@ -113,7 +114,7 @@ ECode CallLogAdapter::NumberWithCountryIso::GetHashCode(
 //=================================================================
 // CallLogAdapter::ContactInfoRequest
 //=================================================================
-CAR_INTERFACE_IMPL(CallLogAdapter::ContactInfoRequest, Object, ContactInfoRequest)
+CAR_INTERFACE_IMPL(CallLogAdapter::ContactInfoRequest, Object, IContactInfoRequest)
 
 ECode CallLogAdapter::ContactInfoRequest::Equals(
     /* [in] */ IInterface* obj,
@@ -121,7 +122,7 @@ ECode CallLogAdapter::ContactInfoRequest::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (this == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *result = TRUE;
         return NOERROR;
     }
@@ -129,7 +130,7 @@ ECode CallLogAdapter::ContactInfoRequest::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    AutoPtr<ContactInfoRequest>* request = ContactInfoRequest::Probe(obj);
+    AutoPtr<IContactInfoRequest> request = IContactInfoRequest::Probe(obj);
     if (request == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -145,7 +146,7 @@ ECode CallLogAdapter::ContactInfoRequest::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    if (!Objects::Equal(mCallLogInfo, other->mCallLogInfo)) {
+    if (!Objects::Equals(mCallLogInfo, other->mCallLogInfo)) {
         *result = FALSE;
         return NOERROR;
     }
@@ -163,7 +164,7 @@ ECode CallLogAdapter::ContactInfoRequest::GetHashCode(
     Int32 result = 1;
     Int32 calllogInfoHash;
     result = prime * result + ((mCallLogInfo == NULL)
-            ? 0 : (IObject::Probe(mCallLogInfo))->GetHashCode(&calllogInfoHash), calllogInfoHash);
+            ? 0 : ((IObject*)mCallLogInfo->Probe(EIID_IObject))->GetHashCode(&calllogInfoHash), calllogInfoHash);
     result = prime * result + (mCountryIso.IsNull() ? 0 : mCountryIso.GetHashCode());
     result = prime * result + (mCountryIso.IsNull() ? 0 : mNumber.GetHashCode());
     *hashCode = result;
@@ -220,7 +221,7 @@ ECode CallLogAdapter::AccessibilityDelegate::OnRequestSendAccessibilityEvent(
                 FALSE /* animate */, TRUE /* forceExpand */);
     }
 
-    return View::AccessibilityDelegate::OnRequestSendAccessibilityEvent(host, child, event, res);
+    return Elastos::Droid::View::View::AccessibilityDelegate::OnRequestSendAccessibilityEvent(host, child, event, res);
 }
 
 
@@ -579,7 +580,7 @@ Boolean CallLogAdapter::QueryContactInfo(
     // cache, so we have to force a redraw for these contacts regardless.
     Boolean equals;
     Boolean updated = (existingInfo != ContactInfo::EMPTY || isRemoteSource) &&
-            (info->Equals(existingInfo, &equals), !equals);
+            (info->Equals(TO_IINTERFACE(existingInfo), &equals), !equals);
 
     // Store the data in the cache so that the UI thread can use to display it. Store it
     mContactInfoCache->Put((IObject*)numberCountryIso, (IObject*)info);
@@ -669,7 +670,7 @@ void CallLogAdapter::BindView(
     AutoPtr<ICallLogListItemView> callLogItemView = ICallLogListItemView::Probe(view);
     AutoPtr<IInterface> temp;
     view->GetTag((IInterface**)&temp);
-    AutoPtr<CallLogListItemViews> views = (CallLogListItemViews)(IObject*)temp.Get();
+    AutoPtr<CallLogListItemViews> views = (CallLogListItemViews*)(IObject*)temp.Get();
 
     // Default case: an item in the call log.
     views->mPrimaryActionView->SetVisibility(IView::VISIBLE);
@@ -785,7 +786,8 @@ void CallLogAdapter::BindView(
         // We will format the phone number when we make the background request.
     }
     else {
-        if (cachedInfo->IsExpired()) {
+        Boolean isExpired;
+        if (cachedInfo->IsExpired(&isExpired), isExpired) {
             // The contact info is no longer up to date, we should request it. However, we
             // do not need to request them immediately.
             EnqueueRequest(number, countryIso, cachedContactInfo, FALSE);
@@ -811,7 +813,7 @@ void CallLogAdapter::BindView(
     Int64 photoId = info->mPhotoId;
     AutoPtr<IUri> photoUri = info->mPhotoUri;
     AutoPtr<ICharSequence> formattedNumber;
-    CString::New(Info->mFormattedNumber, (ICharSequence**)&formattedNumber);
+    CString::New(info->mFormattedNumber, (ICharSequence**)&formattedNumber);
     AutoPtr<ArrayOf<Int32> > callTypes = GetCallTypes(c, count);
     String geocode;
     c->GetString(CallLogQuery::GEOCODED_LOCATION, &geocode);
@@ -855,13 +857,13 @@ void CallLogAdapter::BindView(
 
     mCallLogViewsHelper->SetPhoneCallDetails(mContext, views, details);
 
-    Int32 contactType = IContactPhotoManager::TYPE_DEFAULT;
+    Int32 contactType = ContactPhotoManager::TYPE_DEFAULT;
 
     if (isVoicemailNumber) {
-        contactType = IContactPhotoManager::TYPE_VOICEMAIL;
+        contactType = ContactPhotoManager::TYPE_VOICEMAIL;
     }
-    else if (mContactInfoHelper->IsBusiness(cInfo->mSourceType)) {
-        contactType = IContactPhotoManager::TYPE_BUSINESS;
+    else if (mContactInfoHelper->IsBusiness(info->mSourceType)) {
+        contactType = ContactPhotoManager::TYPE_BUSINESS;
     }
 
     String lookupKey = lookupUri == NULL ? String(NULL)
@@ -1050,7 +1052,7 @@ void CallLogAdapter::InflateActionViewStub(
         IView::Probe(views->mReportButtonView)->SetOnClickListener((IViewOnClickListener*)listener);
     }
 
-    BindActionButtons(iviews);
+    BindActionButtons(views);
 }
 
 void CallLogAdapter::BindActionButtons(
@@ -1071,8 +1073,8 @@ void CallLogAdapter::BindActionButtons(
     }
     else {
         // Number is not callable, so hide button.
-        v->SetTag(NULL);
-        v->SetVisibility(IView::GONE);
+        callBackButtonView->SetTag(NULL);
+        callBackButtonView->SetVisibility(IView::GONE);
     }
 
     // If one of the calls had video capabilities, show the video call button.
@@ -1186,7 +1188,7 @@ void CallLogAdapter::UpdateCallLogContactInfoCache(
 
     if (callLogInfo != NULL) {
         if (!TextUtils::Equals(updatedInfo->mName, callLogInfo->mName)) {
-            values->Put(ICalls::CACHED_NAME, cupdatedInfo->mName);
+            values->Put(ICalls::CACHED_NAME, updatedInfo->mName);
             needsUpdate = TRUE;
         }
 
@@ -1206,15 +1208,15 @@ void CallLogAdapter::UpdateCallLogContactInfoCache(
         // Only replace the normalized number if the new updated normalized number isn't empty.
         if (!TextUtils::IsEmpty(updatedInfo->mNormalizedNumber) &&
                 !TextUtils::Equals(updatedInfo->mNormalizedNumber, callLogInfo->mNormalizedNumber)) {
-            values->Put(ICalls::CACHED_NORMALIZED_NUMBER, cupdatedInfo->mNormalizedNumber);
+            values->Put(ICalls::CACHED_NORMALIZED_NUMBER, updatedInfo->mNormalizedNumber);
             needsUpdate = TRUE;
         }
         if (!TextUtils::Equals(updatedInfo->mNumber, callLogInfo->mNumber)) {
             values->Put(ICalls::CACHED_MATCHED_NUMBER, updatedInfo->mNumber);
             needsUpdate = TRUE;
         }
-        if (updatedInfo->mPhotoId != ccallLogInfo->mPhotoId) {
-            values->Put(ICalls::CACHED_PHOTO_ID, cupdatedInfo->mPhotoId);
+        if (updatedInfo->mPhotoId != callLogInfo->mPhotoId) {
+            values->Put(ICalls::CACHED_PHOTO_ID, updatedInfo->mPhotoId);
             needsUpdate = TRUE;
         }
         if (!TextUtils::Equals(updatedInfo->mFormattedNumber, callLogInfo->mFormattedNumber)) {
@@ -1242,7 +1244,6 @@ void CallLogAdapter::UpdateCallLogContactInfoCache(
     Int32 rowsAffected;
     AutoPtr<ArrayOf<String> > selectionArgs;
     if (countryIso.IsNull()) {
-        String str[] = { number };
         selectionArgs = ArrayOf<String>::Alloc(1);
         (*selectionArgs)[0] = number;
 
@@ -1391,7 +1392,8 @@ ECode CallLogAdapter::AddGroup(
     /* [in] */ Int32 size,
     /* [in] */ Boolean expanded)
 {
-    return GroupingListAdapter::AddGroup(cursorPosition, size, expanded);
+    GroupingListAdapter::AddGroup(cursorPosition, size, expanded);
+    return NOERROR;
 }
 
 ECode CallLogAdapter::SetDayGroup(
@@ -1498,7 +1500,7 @@ AutoPtr<ICharSequence> CallLogAdapter::GetGroupDescription(
     if (group == CallLogGroupBuilder::DAY_GROUP_TODAY) {
         resources->GetString(Elastos::Droid::Dialer::R::string::call_log_header_today, &str);
     }
-    else if (group == ICallLogGroupBuilder::DAY_GROUP_YESTERDAY) {
+    else if (group == CallLogGroupBuilder::DAY_GROUP_YESTERDAY) {
         resources->GetString(Elastos::Droid::Dialer::R::string::call_log_header_yesterday, &str);
     }
     else {

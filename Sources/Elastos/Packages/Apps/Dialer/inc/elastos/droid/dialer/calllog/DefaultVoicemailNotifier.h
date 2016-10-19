@@ -3,17 +3,12 @@
 #define __ELASTOS_DROID_DIALER_CALLLOG_DEFAULTVOICEMAILNOTIFIER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Database.h"
-#include "Elastos.Droid.Net.h"
+#include "elastos/droid/dialer/calllog/PhoneNumberDisplayHelper.h"
 
 using Elastos::Droid::App::INotificationManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
-
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Net::IUri;
 
@@ -28,7 +23,6 @@ namespace CallLog {
  */
 class DefaultVoicemailNotifier
     : public Object
-    , public IDefaultVoicemailNotifier
     , public IVoicemailNotifier
 {
 private:
@@ -38,13 +32,18 @@ private:
         , public IDefaultVoicemailNotifierNewCall
     {
     public:
-        CAR_INTERFACE_DECL();
-
         NewCall(
             /* [in] */ IUri* callsUri,
             /* [in] */ IUri* voicemailUri,
             /* [in] */ const String& number,
-            /* [in] */ Int32 numberPresentation);
+            /* [in] */ Int32 numberPresentation)
+            : mCallsUri(callsUri)
+            , mVoicemailUri(voicemailUri)
+            , mNumber(number)
+            , mNumberPresentation(numberPresentation)
+        {}
+
+        CAR_INTERFACE_DECL()
 
     public:
         AutoPtr<IUri> mCallsUri;
@@ -62,27 +61,31 @@ private:
         , public IDefaultVoicemailNotifierNewCallsQuery
     {
     public:
-        CAR_INTERFACE_DECL();
-
-        DefaultNewCallsQuery(
-            /* [in] */ IContentResolver* contentResolver);
+        CAR_INTERFACE_DECL()
 
         CARAPI Query(
             /* [out, callee] */ ArrayOf<IDefaultVoicemailNotifierNewCall*>** newCalls);
 
     private:
+        DefaultNewCallsQuery(
+            /* [in] */ IContentResolver* contentResolver)
+            : mContentResolver(contentResolver)
+        {}
+
          /** Returns an instance of {@link NewCall} created by using the values of the cursor. */
-        AutoPtr<IDefaultVoicemailNotifierNewCall> CreateNewCallsFromCursor(
+        CARAPI_(AutoPtr<NewCall>) CreateNewCallsFromCursor(
             /* [in] */ ICursor* cursor);
 
     private:
-        static const String PROJECTION[];
-        static const Int32 ID_COLUMN_INDEX; // = 0;
-        static const Int32 NUMBER_COLUMN_INDEX; // = 1;
-        static const Int32 VOICEMAIL_URI_COLUMN_INDEX; // = 2;
-        static const Int32 NUMBER_PRESENTATION_COLUMN_INDEX; // = 3;
+        static const AutoPtr<ArrayOf<String> > PROJECTION;
+        static const Int32 ID_COLUMN_INDEX = 0;
+        static const Int32 NUMBER_COLUMN_INDEX = 1;
+        static const Int32 VOICEMAIL_URI_COLUMN_INDEX = 2;
+        static const Int32 NUMBER_PRESENTATION_COLUMN_INDEX = 3;
 
         AutoPtr<IContentResolver> mContentResolver;
+
+        friend class DefaultVoicemailNotifier;
     };
 
     /**
@@ -94,27 +97,32 @@ private:
         , public IDefaultVoicemailNotifierNameLookupQuery
     {
     public:
-        CAR_INTERFACE_DECL();
-
-        DefaultNameLookupQuery(
-            /* [in] */ IContentResolver* contentResolver);
+        CAR_INTERFACE_DECL()
 
         CARAPI Query(
             /* [in] */ const String& number,
             /* [out] */ String* NewCalls);
 
     private:
-        static const String PROJECTION[]; // = { PhoneLookup.DISPLAY_NAME };
-        static const Int32 DISPLAY_NAME_COLUMN_INDEX; // = 0;
+        DefaultNameLookupQuery(
+            /* [in] */ IContentResolver* contentResolver)
+            : mContentResolver(contentResolver)
+        {}
+
+    private:
+        static const AutoPtr<ArrayOf<String> > PROJECTION;
+        static const Int32 DISPLAY_NAME_COLUMN_INDEX = 0;
 
         AutoPtr<IContentResolver> mContentResolver;
+
+        friend class DefaultVoicemailNotifier;
     };
 
 public:
     CAR_INTERFACE_DECL();
 
     /** Returns the singleton instance of the {@link DefaultVoicemailNotifier}. */
-    static CARAPI_(AutoPtr<IDefaultVoicemailNotifier>) GetInstance(
+    static CARAPI_(AutoPtr<DefaultVoicemailNotifier>) GetInstance(
         /* [in] */ IContext* context);
 
     /** Updates the notification and notifies of the call with the given URI. */
@@ -139,7 +147,7 @@ public:
      * This will cause some Disk I/O, at least the first time it is created, so it should not be
      * called from the main thread.
      */
-    static CARAPI_(AutoPtr<IPhoneNumberDisplayHelper>) CreatePhoneNumberHelper(
+    static CARAPI_(AutoPtr<PhoneNumberDisplayHelper>) CreatePhoneNumberHelper(
         /* [in] */ IContext* context);
 
 private:
@@ -148,30 +156,28 @@ private:
         /* [in] */ INotificationManager* notificationManager,
         /* [in] */ IDefaultVoicemailNotifierNewCallsQuery* newCallsQuery,
         /* [in] */ IDefaultVoicemailNotifierNameLookupQuery* nameLookupQuery,
-        /* [in] */ IPhoneNumberDisplayHelper* phoneNumberHelper);
+        /* [in] */ PhoneNumberDisplayHelper* phoneNumberHelper);
 
     /** Creates a pending intent that marks all new voicemails as old. */
-    AutoPtr<IPendingIntent> CreateMarkNewVoicemailsAsOldIntent();
+    CARAPI_(AutoPtr<IPendingIntent>) CreateMarkNewVoicemailsAsOldIntent();
 
 public:
-    static const String TAG; // = "DefaultVoicemailNotifier";
+    static const String TAG;
 
 private:
-    static Object sLock;
-
     /** The tag used to identify notifications from this class. */
-    static const String NOTIFICATION_TAG; // = "DefaultVoicemailNotifier";
+    static const String NOTIFICATION_TAG;
     /** The identifier of the notification of new voicemails. */
-    static const Int32 NOTIFICATION_ID; // = 1;
+    static const Int32 NOTIFICATION_ID = 1;
 
     /** The singleton instance of {@link DefaultVoicemailNotifier}. */
-    static AutoPtr<IDefaultVoicemailNotifier> sInstance;
+    static AutoPtr<DefaultVoicemailNotifier> sInstance;
 
     AutoPtr<IContext> mContext;
     AutoPtr<INotificationManager> mNotificationManager;
     AutoPtr<IDefaultVoicemailNotifierNewCallsQuery> mNewCallsQuery;
     AutoPtr<IDefaultVoicemailNotifierNameLookupQuery> mNameLookupQuery;
-    AutoPtr<IPhoneNumberDisplayHelper> mPhoneNumberHelper;
+    AutoPtr<PhoneNumberDisplayHelper> mPhoneNumberHelper;
 };
 
 } // CallLog

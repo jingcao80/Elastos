@@ -1,6 +1,6 @@
 
 DIRS += activity
-#DIRS += calllog
+DIRS += calllog
 #DIRS += contact
 DIRS += database
 DIRS += dialpad
@@ -8,5 +8,5 @@ DIRS += dialpad
 DIRS += list
 #DIRS += settings
 DIRS += util
-#DIRS += voicemail
+DIRS += voicemail
 DIRS += widget

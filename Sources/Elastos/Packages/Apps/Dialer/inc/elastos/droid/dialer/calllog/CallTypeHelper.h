@@ -26,8 +26,7 @@ public:
     /** Returns the text used to represent the given call type. */
     CARAPI_(AutoPtr<ICharSequence>) GetCallTypeText(
         /* [in] */ Int32 callType,
-        /* [in] */ Boolean isVideoCall,
-        /* [out] */ ICharSequence** text);
+        /* [in] */ Boolean isVideoCall);
 
     /** Returns the color used to highlight the given call type, null if not highlight is needed. */
     CARAPI_(AutoPtr<IInteger32>) GetHighlightedColor(

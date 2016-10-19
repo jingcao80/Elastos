@@ -3,6 +3,8 @@
 #define __ELASTOS_DROID_DIALER_PHONECALLDETAILS_H__
 
 #include "_Elastos.Droid.Dialer.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Net.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::Drawable::IDrawable;

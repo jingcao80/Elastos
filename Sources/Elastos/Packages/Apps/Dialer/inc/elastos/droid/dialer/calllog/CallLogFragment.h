@@ -21,6 +21,7 @@ using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsListFragment;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::ILayoutInflater;
@@ -71,6 +72,7 @@ private:
             /* [in] */ CallLogFragment* host)
             : mListView(listView)
             , mHost(host)
+        {}
 
         CARAPI Run();
 

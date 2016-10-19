@@ -1,6 +1,7 @@
 
 #include "elastos/droid/dialer/calllog/CallTypeHelper.h"
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Content.h"
 #include "elastos/core/CoreUtils.h"
 #include "R.h"
 
@@ -11,8 +12,6 @@ namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace CallLog {
-
-CAR_INTERFACE_IMPL(CallTypeHelper, Object, ICallTypeHelper);
 
 CallTypeHelper::CallTypeHelper(
     /* [in] */ IResources* resources)

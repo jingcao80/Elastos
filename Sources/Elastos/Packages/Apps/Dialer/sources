@@ -34,6 +34,7 @@ SOURCES += MotionEventCompat.cpp
 SOURCES += CViewPagerSavedState.cpp
 SOURCES += FragmentPagerAdapter.cpp
 SOURCES += CompositeCursorAdapter.cpp
+SOURCES += GroupingListAdapter.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
 

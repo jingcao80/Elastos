@@ -32,7 +32,8 @@ ECode CCallLogNotificationsService::OnCreate()
 
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
-    mCallLogQueryHandler = new CallLogQueryHandler(resolver, NULL /*listener*/);
+    mCallLogQueryHandler = new CallLogQueryHandler();
+    mCallLogQueryHandler->constructor(resolver, NULL /*listener*/);
     return NOERROR;
 }
 

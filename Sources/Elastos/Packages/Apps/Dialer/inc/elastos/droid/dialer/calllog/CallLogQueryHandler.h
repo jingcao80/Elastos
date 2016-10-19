@@ -25,7 +25,7 @@ protected:
      * Simple handler that wraps background calls to catch
      * {@link SQLiteException}, such as when the disk is full.
      */
-    class CatchingWorkerHandler : AsyncQueryHandler::WorkerHandler
+    class CatchingWorkerHandler : public AsyncQueryHandler::WorkerHandler
     {
     public:
         CatchingWorkerHandler(

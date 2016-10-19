@@ -15,16 +15,7 @@ namespace CallLog {
 class PhoneQuery
 {
 public:
-    static const AutoPtr<ArrayOf<String> > _PROJECTION = new String[] {
-            PhoneLookup._ID,
-            PhoneLookup.DISPLAY_NAME,
-            PhoneLookup.TYPE,
-            PhoneLookup.LABEL,
-            PhoneLookup.NUMBER,
-            PhoneLookup.NORMALIZED_NUMBER,
-            PhoneLookup.PHOTO_ID,
-            PhoneLookup.LOOKUP_KEY,
-            PhoneLookup.PHOTO_URI};
+    static const AutoPtr<ArrayOf<String> > _PROJECTION;
 
     static const Int32 PERSON_ID = 0;
     static const Int32 NAME = 1;

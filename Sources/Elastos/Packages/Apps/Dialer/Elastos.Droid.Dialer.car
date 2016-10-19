@@ -5,9 +5,11 @@ module
     merge("../PhoneCommon/Elastos.Droid.Phone.Common.car");
 
     merge("../../../Frameworks/Droid/Ex/Common/car/elastos/droid/common/widget/CompositeCursorAdapter.car");
+    merge("../../../Frameworks/Droid/Ex/Common/car/elastos/droid/common/widget/GroupingListAdapter.car");
 
     merge("car/elastos/droid/contacts/common/ContactsUtils.car");
     merge("car/elastos/droid/contacts/common/ContactPhotoManager.car");
+    merge("car/elastos/droid/contacts/common/database/NoNullCursorAsyncQueryHandler.car");
     merge("car/elastos/droid/contacts/common/interactions/TouchPointManager.car");
     merge("car/elastos/droid/contacts/common/list/OnPhoneNumberPickerActionListener.car");
     merge("car/elastos/droid/contacts/common/list/ContactEntryListAdapter.car");
@@ -44,23 +46,16 @@ module
 //    merge("car/elastos/droid/dialer/calllog/CallLogActivity.car");
     merge("car/elastos/droid/dialer/calllog/CallLogAdapter.car");
     merge("car/elastos/droid/dialer/calllog/CallLogFragment.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogGroupBuilder.car");
+    merge("car/elastos/droid/dialer/calllog/CallLogGroupBuilder.car");
     merge("car/elastos/droid/dialer/calllog/CallLogListItemView.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogListItemViews.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogNotificationsHelper.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogNotificationsService.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogQuery.car");
+    merge("car/elastos/droid/dialer/calllog/CallLogNotificationsService.car");
     merge("car/elastos/droid/dialer/calllog/CallLogQueryHandler.car");
-//    merge("car/elastos/droid/dialer/calllog/CallTypeHelper.car");
-//    merge("car/elastos/droid/dialer/calllog/CallTypeIconsView.car");
+    merge("car/elastos/droid/dialer/calllog/CallTypeIconsView.car");
 //    merge("car/elastos/droid/dialer/calllog/ClearCallLogDialog.car");
     merge("car/elastos/droid/dialer/calllog/ContactInfo.car");
-//    merge("car/elastos/droid/dialer/calllog/DefaultVoicemailNotifier.car");
-//    merge("car/elastos/droid/dialer/calllog/IntentProvider.car");
-//    merge("car/elastos/droid/dialer/calllog/PhoneAccountUtils.car");
-//    merge("car/elastos/droid/dialer/calllog/PhoneNumberDisplayHelper.car");
-//    merge("car/elastos/droid/dialer/calllog/PhoneNumberUtilsWrapper.car");
-//    merge("car/elastos/droid/dialer/calllog/VoicemailNotifier.car");
+    merge("car/elastos/droid/dialer/calllog/DefaultVoicemailNotifier.car");
+    merge("car/elastos/droid/dialer/calllog/IntentProvider.car");
+    merge("car/elastos/droid/dialer/calllog/VoicemailNotifier.car");
 //    merge("car/elastos/droid/dialer/contact/ContactUpdateService.car");
     merge("car/elastos/droid/dialer/database/DialerDatabaseHelper.car");
     merge("car/elastos/droid/dialer/dialpad/DialpadFragment.car");
@@ -96,23 +91,19 @@ module
 //    merge("car/elastos/droid/dialer/settings/GeneralSettingsFragment.car");
 //    merge("car/elastos/droid/dialer/util/AsyncTaskExecutor.car");
 //    merge("car/elastos/droid/dialer/util/AsyncTaskExecutors.car");
-//    merge("car/elastos/droid/dialer/util/EmptyLoader.car");
-//    merge("car/elastos/droid/dialer/util/ExpirableCache.car");
+    merge("car/elastos/droid/dialer/util/ExpirableCache.car");
 //    merge("car/elastos/droid/dialer/util/OrientationUtil.car");
 //    merge("car/elastos/droid/dialer/voicemail/VoicemailPlaybackFragment.car");
 //    merge("car/elastos/droid/dialer/voicemail/VoicemailPlaybackPresenter.car");
     merge("car/elastos/droid/dialer/voicemail/VoicemailStatusHelper.car");
-//    merge("car/elastos/droid/dialer/voicemail/VoicemailStatusHelperImpl.car");
     merge("car/elastos/droid/dialer/widget/ActionBarController.car");
     merge("car/elastos/droid/dialer/widget/OverlappingPaneLayout.car");
     merge("car/elastos/droid/dialer/widget/SearchEditTextLayout.car");
     merge("car/elastos/droid/dialer/widget/ViewDragHelper.car");
-//    merge("car/elastos/droid/dialer/CallDetailActivity.car");
+    merge("car/elastos/droid/dialer/CallDetailActivity.car");
 //    merge("car/elastos/droid/dialer/CallDetailActivityQueryHandler.car");
 //    merge("car/elastos/droid/dialer/DialerBackupAgent.car");
     merge("car/elastos/droid/dialer/DialtactsActivity.car");
-//    merge("car/elastos/droid/dialer/PhoneCallDetails.car");
-//    merge("car/elastos/droid/dialer/PhoneCallDetailsHelper.car");
 //    merge("car/elastos/droid/dialer/ProximitySensorAware.car");
 //    merge("car/elastos/droid/dialer/ProximitySensorManager.car");
 //    merge("car/elastos/droid/dialer/SpecialCharSequenceMgr.car");
@@ -159,7 +150,7 @@ module
     using interface Elastos.Droid.App.IApplication;
 //    using interface Elastos.Droid.App.IDialogFragment;
     using interface Elastos.Droid.App.IService;
-//    using interface Elastos.Droid.App.IIntentService;
+    using interface Elastos.Droid.App.IIntentService;
 //    using interface Elastos.Droid.App.IListActivity;
 //    using interface Elastos.Droid.App.Backup.IBackupAgent;
 //    using interface Elastos.Droid.App.Backup.IBackupAgentHelper;
@@ -261,29 +252,15 @@ module
 
     interface Elastos.Droid.Dialer.Activity.ITransactionSafeActivity;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogActivity;
-//    interface Elastos.Droid.Dialer.CallLog.ICallTypeHelper;
 //    interface Elastos.Droid.Dialer.CallLog.ICallDetailHistoryAdapter;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogGroupBuilder;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogGroupBuilderGroupCreator;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapter;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterHelper;
     interface Elastos.Droid.Dialer.CallLog.ICallFetcher;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogQuery;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandler;
     interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandlerListener;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogListItemView;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogNotificationsHelper;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogNotificationsService;
 //    interface Elastos.Droid.Dialer.CallLog.ICallTypeIconsView;
 //    interface Elastos.Droid.Dialer.CallLog.IClearCallLogDialog;
 //    interface Elastos.Droid.Dialer.CallLog.IClearCallLogDialogHelper;
 //    interface Elastos.Droid.Dialer.CallLog.IContactInfo;
-//    interface Elastos.Droid.Dialer.CallLog.IDefaultVoicemailNotifierHelper;
-//    interface Elastos.Droid.Dialer.CallLog.IIntentProviderHelper;
-//    interface Elastos.Droid.Dialer.CallLog.IPhoneAccountUtils;
-//    interface Elastos.Droid.Dialer.CallLog.IPhoneNumberUtilsWrapper;
-//    interface Elastos.Droid.Dialer.CallLog.IPhoneNumberUtilsWrapperHelper;
-//    interface Elastos.Droid.Dialer.CallLog.IPhoneNumberDisplayHelper;
 //    interface Elastos.Droid.Dialer.Contact.IContactUpdateService;
 //    interface Elastos.Droid.Dialer.Contact.IContactUpdateServiceHelper;
     interface Elastos.Droid.Dialer.Dialpad.IDialpadFragment;
@@ -326,19 +303,15 @@ module
 //    interface Elastos.Droid.Dialer.Settings.IGeneralSettingsFragment;
 //    interface Elastos.Droid.Dialer.Util.IAsyncTaskExecutors;
 //    interface Elastos.Droid.Dialer.Util.IDialerUtils;
-//    interface Elastos.Droid.Dialer.Util.IEmptyLoader;
-//    interface Elastos.Droid.Dialer.Util.IExpirableCacheHelper;
 //    interface Elastos.Droid.Dialer.Util.IOrientationUtil;
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailPlaybackFragment;
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailPlaybackPresenterPlaybackView;
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailPlaybackPresenter;
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailStatusHelper;
-//    interface Elastos.Droid.Dialer.Voicemail.IVoicemailStatusHelperImpl;
     interface Elastos.Droid.Dialer.Widget.IActionBarControllerActivityUi;
     interface Elastos.Droid.Dialer.Widget.ISearchEditTextLayout;
 //    interface Elastos.Droid.Dialer.Widget.IOverlappingPaneLayout;
 //    interface Elastos.Droid.Dialer.Widget.IViewDragHelperHelper;
-//    interface Elastos.Droid.Dialer.IPhoneCallDetails;
 //    interface Elastos.Droid.Dialer.IProximitySensorAware;
 //    interface Elastos.Droid.Dialer.ICallDetailActivity;
 //    interface Elastos.Droid.Dialer.ICallDetailActivityQueryHandler;
@@ -346,7 +319,6 @@ module
 //    interface Elastos.Droid.Dialer.IDialerBackupAgent;
     interface Elastos.Droid.Dialer.IDialtactsActivity;
 //    interface Elastos.Droid.Dialer.IDialtactsActivityHelper;
-//    interface Elastos.Droid.Dialer.IPhoneCallDetailsHelper;
 //    interface Elastos.Droid.Dialer.IProximitySensorManager;
 //    interface Elastos.Droid.Dialer.IProximitySensorManagerListener;
 //    interface Elastos.Droid.Dialer.ISpecialCharSequenceMgr;
@@ -354,10 +326,10 @@ module
 //    interface Elastos.Droid.DialerBind.IObjectFactory;
     interface Elastos.Droid.InCallUI.Widget.MultiwaveView.IGlowPadViewOnTriggerListener;
 
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace Dialer {
-//    namespace CallLog {
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace CallLog {
 
 //    [deprecated, local]
 //    class CCallDetailHistoryAdapter {
@@ -392,116 +364,55 @@ module
 //        // interface IAnalyticsInterface;
 //        interface ICallLogActivity;
 //    }
-//
-//    [local]
-//    class CCallLogAdapter {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] ICallFetcher* callFetcher,
-//            [in] IContactInfoHelper* contactInfoHelper,
-//            [in] ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
-//            [in] ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
-//            [in] Boolean isCallLog);
-//
-//        // TODO:
-//        // interface IGroupingListAdapter;
-//        interface ICallLogAdapter;
-//        interface IOnPreDrawListener;
-//        interface ICallLogGroupBuilderGroupCreator;
-//    }
-//
-//    singleton class CCallLogAdapterHelper {
-//        interface ICallLogAdapterHelper;
-//    }
-//
-//    class CCallLogGroupBuilder {
-//        constructor(
-//            [in] ICallLogGroupBuilderGroupCreator* groupCreator);
-//
-//        interface ICallLogGroupBuilder;
-//    }
-//
-//    [local]
-//    class CCallLogListItemView {
-//        constructor(
-//            [in] IContext* ctx);
-//
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs);
-//
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs,
-//            [in] Int32 defStyle);
-//
-//        interface IView;
-//        interface IViewGroup;
-//        interface IViewParent;
-//        interface IViewManager;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface IDrawableCallback;
-//        interface ILinearLayout;
-//        interface ICallLogListItemView;
-//    }
-//
-//    singleton class CCallLogNotificationsHelper {
-//        interface ICallLogNotificationsHelper;
-//    }
-//
-//    class CCallLogNotificationsService {
-//        constructor();
-//
-//        interface IService;
-//        interface IIntentService;
-//        interface ICallLogNotificationsService;
-//    }
-//
-//    singleton class CCallLogQuery {
-//        interface ICallLogQuery;
-//    }
-//
-//    class CCallLogQueryHandler {
-//        constructor(
-//            [in] IContentResolver* contentResolver,
-//            [in] ICallLogQueryHandlerListener* listener);
-//
-//        constructor(
-//            [in] IContentResolver* contentResolver,
-//            [in] ICallLogQueryHandlerListener* listener,
-//            [in] Int32 limit);
-//
-//        interface IHandler;
-//        interface IAsyncQueryHandler;
-//        // TODO:
-//        // interface INoNullCursorAsyncQueryHandler;
-//        interface ICallLogQueryHandler;
-//    }
-//
-//    class CCallTypeHelper {
-//        constructor(
-//            [in] IResources* resources);
-//
-//        interface ICallTypeHelper;
-//    }
-//
-//    [local]
-//    class CCallTypeIconsView {
-//        constructor(
-//            [in] IContext* ctx);
-//
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs);
-//
-//        interface IView;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface IDrawableCallback;
-//        interface ICallTypeIconsView;
-//    }
-//
+    [local]
+    class CCallLogListItemView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ILinearLayout;
+        interface ICallLogListItemView;
+    }
+
+    class CCallLogNotificationsService {
+        constructor();
+
+        interface IService;
+        interface IIntentService;
+        interface ICallLogNotificationsService;
+    }
+
+    [local]
+    class CCallTypeIconsView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ICallTypeIconsView;
+    }
+
 //    class CClearCallLogDialog {
 //        interface IFragment;
 //        interface IDialogInterfaceOnCancelListener;
@@ -513,45 +424,11 @@ module
 //    singleton class CClearCallLogDialogHelper {
 //        interface IClearCallLogDialogHelper;
 //    }
-//
-//    class CContactInfo {
-//        interface IContactInfo;
-//    }
-//
-//    singleton class CDefaultVoicemailNotifierHelper {
-//        interface IDefaultVoicemailNotifierHelper;
-//    }
-//
-//    singleton class CIntentProviderHelper {
-//        interface IIntentProviderHelper;
-//    }
-//
-//    singleton class CPhoneAccountUtils {
-//        interface IPhoneAccountUtils;
-//    }
-//
-//    class CPhoneNumberDisplayHelper {
-//        constructor(
-//            [in] IResources* resources);
-//
-//        constructor(
-//            [in] IPhoneNumberUtilsWrapper* phoneNumberUtils,
-//            [in] IResources* resources);
-//
-//        interface IPhoneNumberDisplayHelper;
-//    }
-//
-//    class CPhoneNumberUtilsWrapper {
-//        interface IPhoneNumberUtilsWrapper;
-//    }
-//
-//    singleton class CPhoneNumberUtilsWrapperHelper {
-//        interface IPhoneNumberUtilsWrapperHelper;
-//    }
-//    } // CallLog
-//    } // Dialer
-//    } // Droid
-//    } // Elastos
+
+    } // CallLog
+    } // Dialer
+    } // Droid
+    } // Elastos
 
 //    namespace Elastos {
 //    namespace Droid {
@@ -1017,19 +894,6 @@ module
 //        interface IDialerUtils;
 //    }
 //
-//    [local]
-//    class CEmptyLoader {
-//        constructor(
-//            [in] IContext* ctx);
-//
-//        interface ILoader;
-//        interface IEmptyLoader;
-//    }
-//
-//    singleton class CExpirableCacheHelper {
-//        interface IExpirableCacheHelper;
-//    }
-//
 //    singleton class COrientationUtil {
 //        interface IOrientationUtil;
 //    }
@@ -1067,11 +931,6 @@ module
 //        //     [in] IPowerManagerWakeLock* wakeLock);
 //
 //        interface IVoicemailPlaybackPresenter;
-//    }
-//
-//    class CVoicemailStatusHelperImpl {
-//        interface IVoicemailStatusHelper;
-//        interface IVoicemailStatusHelperImpl;
 //    }
 //
 //    } // Voicemail
@@ -1220,66 +1079,6 @@ module
 
 //    singleton class CDialtactsActivityHelper {
 //        interface IDialtactsActivityHelper;
-//    }
-//
-//    [deprecated]
-//    class CPhoneCallDetails {
-//        constructor(
-//            [in] ICharSequence* number,
-//            [in] Int32 numberPresentation,
-//            [in] ICharSequence* formattedNumber,
-//            [in] String countryIso,
-//            [in] String geocode,
-//            [in] ArrayOf<Int32>* callTypes,
-//            [in] Int64 date,
-//            [in] Int64 duration);
-//
-//        constructor(
-//            [in] ICharSequence* number,
-//            [in] Int32 numberPresentation,
-//            [in] ICharSequence* formattedNumber,
-//            [in] String countryIso,
-//            [in] String geocode,
-//            [in] ArrayOf<Int32>* callTypes,
-//            [in] Int64 date,
-//            [in] Int64 duration,
-//            [in] String accountLabel,
-//            [in] IDrawable* accountIcon,
-//            [in] Int32 features,
-//            [in] Int64 dataUsage,
-//            [in] String transcription);
-//
-//        constructor(
-//            [in] ICharSequence* number,
-//            [in] Int32 numberPresentation,
-//            [in] ICharSequence* formattedNumber,
-//            [in] String countryIso,
-//            [in] String geocode,
-//            [in] ArrayOf<Int32>* callTypes,
-//            [in] Int64 date,
-//            [in] Int64 duration,
-//            [in] ICharSequence* name,
-//            [in] Int32 numberType,
-//            [in] ICharSequence* numberLabel,
-//            [in] IUri* contactUri,
-//            [in] IUri* photoUri,
-//            [in] Int32 sourceType,
-//            [in] String accountLabel,
-//            [in] IDrawable* accountIcon,
-//            [in] Int32 features,
-//            [in] Int64 dataUsage,
-//            [in] String transcription);
-//
-//        interface IPhoneCallDetails;
-//    }
-//
-//    class CPhoneCallDetailsHelper {
-//        constructor(
-//            [in] IResources* resources,
-//            [in] ICallTypeHelper* callTypeHelper,
-//            [in] IPhoneNumberUtilsWrapper* phoneUtils);
-//
-//        interface IPhoneCallDetailsHelper;
 //    }
 //
 //    [local]

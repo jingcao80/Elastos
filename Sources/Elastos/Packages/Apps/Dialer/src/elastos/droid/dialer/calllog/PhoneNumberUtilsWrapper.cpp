@@ -25,9 +25,9 @@ const AutoPtr<PhoneNumberUtilsWrapper> PhoneNumberUtilsWrapper::INSTANCE = Creat
 static Set<String>& CreateLEGACY_UNKNOWN_NUMBERS()
 {
     Set<String> numbers;
-    number.Insert(String("-1"));
-    number.Insert(String("-2"));
-    number.Insert(String("-3"));
+    numbers.Insert(String("-1"));
+    numbers.Insert(String("-2"));
+    numbers.Insert(String("-3"));
     return numbers;
 }
 const Set<String> PhoneNumberUtilsWrapper::LEGACY_UNKNOWN_NUMBERS = CreateLEGACY_UNKNOWN_NUMBERS();

@@ -8,3 +8,4 @@ DIRS += extensions
 DIRS += lettertiles
 DIRS += model
 DIRS += list
+DIRS += database

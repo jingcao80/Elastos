@@ -320,6 +320,16 @@ private:
     static CARAPI_(AutoPtr<IUri>) InitDefaultImageUri();
 
 public:
+    /** Contact type constants used for default letter images */
+    static const Int32 TYPE_PERSON;
+    static const Int32 TYPE_BUSINESS;
+    static const Int32 TYPE_VOICEMAIL;
+    static const Int32 TYPE_DEFAULT;
+
+    /** Scale and offset default constants used for default letter images */
+    static const Float SCALE_DEFAULT = 1.0f;
+    static const Float OFFSET_DEFAULT = 0.0f;
+
     static const Boolean IS_CIRCULAR_DEFAULT = FALSE;
     static const String CONTACT_PHOTO_SERVICE;
 
@@ -333,16 +343,6 @@ protected:
     static const Boolean DEBUG_SIZES = FALSE; // Don't submit with true
 
 private:
-    /** Contact type constants used for default letter images */
-    static const Int32 TYPE_PERSON;
-    static const Int32 TYPE_BUSINESS;
-    static const Int32 TYPE_VOICEMAIL;
-    static const Int32 TYPE_DEFAULT;
-
-    /** Scale and offset default constants used for default letter images */
-    static const Float SCALE_DEFAULT = 1.0f;
-    static const Float OFFSET_DEFAULT = 0.0f;
-
     /** Uri-related constants used for default letter images */
     static const String DISPLAY_NAME_PARAM_KEY;
     static const String IDENTIFIER_PARAM_KEY;

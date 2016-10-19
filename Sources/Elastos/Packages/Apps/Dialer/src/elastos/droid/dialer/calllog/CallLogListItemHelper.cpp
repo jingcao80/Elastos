@@ -12,7 +12,6 @@ using Elastos::Droid::Provider::ICalls;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
-using Elastos::Apps::Dialer::CPhoneCallDetails;
 
 namespace Elastos {
 namespace Droid {
@@ -56,7 +55,7 @@ void CallLogListItemHelper::SetActionContentDescriptions(
     formatArgs->Set(0, views->mNameOrNumber);
     mResources->GetString(
             Elastos::Droid::Dialer::R::string::description_call_back_action, formatArgs, &str);
-    IView::Probe(cviews->mCallBackButtonView)->SetContentDescription(CoreUtils::Convert(str));
+    IView::Probe(views->mCallBackButtonView)->SetContentDescription(CoreUtils::Convert(str));
 
     mResources->GetString(
             Elastos::Droid::Dialer::R::string::description_video_call_action, formatArgs, &str);
@@ -111,7 +110,7 @@ AutoPtr<ICharSequence> CallLogListItemHelper::GetCallDescription(
     if (details->mCallTypes->GetLength() > 1) {
         String str;
         AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
-        formatArgs->Set(0, CoreUtils::Convert(cdetails->mCallTypes->GetLength()));
+        formatArgs->Set(0, CoreUtils::Convert(details->mCallTypes->GetLength()));
         mResources->GetString(
                 Elastos::Droid::Dialer::R::string::description_num_calls, formatArgs, &str);
         callDescription->Append(str);
@@ -185,9 +184,9 @@ AutoPtr<ICharSequence> CallLogListItemHelper::GetNameOrNumber(
         recipient = details->mName;
     }
     else {
-         mPhoneNumberHelper->GetDisplayNumber(
+        return mPhoneNumberHelper->GetDisplayNumber(
                 details->mNumber, details->mNumberPresentation,
-                details->mFormattedNumber, (ICharSequence**)&recipient);
+                details->mFormattedNumber);
     }
     return recipient;
 }

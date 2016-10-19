@@ -18,7 +18,7 @@ namespace CallLog {
 class CallLogGroupBuilder : public Object
 {
 public:
-    CCallLogGroupBuilder(
+    CallLogGroupBuilder(
         /* [in] */ ICallLogGroupBuilderGroupCreator* groupCreator);
 
     /**
@@ -88,7 +88,7 @@ private:
     static AutoPtr<ITime> TIME;
 
     /** The object on which the groups are created. */
-    AutoPtr<ICallLogGroupBuilderGroupCreator> mGroupCreator;
+    ICallLogGroupBuilderGroupCreator* mGroupCreator;
 };
 
 } // CallLog

@@ -1,5 +1,6 @@
 
 #include "elastos/droid/dialer/util/ExpirableCache.h"
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 
 using Elastos::Droid::Dialer::Util::EIID_IExpirableCacheCachedValue;
 using Elastos::Droid::Dialer::Util::EIID_IExpirableCache;
@@ -12,11 +13,11 @@ namespace Dialer {
 namespace Util {
 
 //=================================================================
-// ExpirableCache::GenerationalCachedValues
+// ExpirableCache::GenerationalCachedValue
 //=================================================================
-CAR_INTERFACE_IMPL(ExpirableCache::GenerationalCachedValues, Object, IExpirableCacheCachedValue)
+CAR_INTERFACE_IMPL(ExpirableCache::GenerationalCachedValue, Object, IExpirableCacheCachedValue)
 
-ExpirableCache::GenerationalCachedValues::GenerationalCachedValue(
+ExpirableCache::GenerationalCachedValue::GenerationalCachedValue(
     /* [in] */ IInterface* value,
     /* [in] */ IAtomicInteger32* cacheGeneration)
     : mValue(value)
@@ -26,7 +27,7 @@ ExpirableCache::GenerationalCachedValues::GenerationalCachedValue(
     mCacheGeneration->Get(&mGeneration);
 }
 
-ECode ExpirableCache::GenerationalCachedValues::GetValue(
+ECode ExpirableCache::GenerationalCachedValue::GetValue(
     /* [out] */ IInterface** value)
 {
     VALIDATE_NOT_NULL(value)
@@ -35,7 +36,7 @@ ECode ExpirableCache::GenerationalCachedValues::GetValue(
     return NOERROR;
 }
 
-ECode ExpirableCache::GenerationalCachedValues::IsExpired(
+ECode ExpirableCache::GenerationalCachedValue::IsExpired(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -62,7 +63,11 @@ ECode ExpirableCache::GetCachedValue(
     /* [out] */ IExpirableCacheCachedValue** value)
 {
     VALIDATE_NOT_NULL(value)
-    return mCache->Get(key, value);
+    AutoPtr<IInterface> v;
+    mCache->Get(key, (IInterface**)&v);
+    *value = IExpirableCacheCachedValue::Probe(v);
+    REFCOUNT_ADD(*value)
+    return NOERROR;
 }
 
 ECode ExpirableCache::GetPossiblyExpired(
@@ -104,15 +109,17 @@ ECode ExpirableCache::Put(
     /* [in] */ IInterface* value)
 {
     AutoPtr<IExpirableCacheCachedValue> cached;
-    NewCachedValue(value, &cached);
-    mCache->Put(key, cached);
+    NewCachedValue(value, (IExpirableCacheCachedValue**)&cached);
+    AutoPtr<IInterface> outValue;
+    mCache->Put(key, cached, (IInterface**)&outValue);
 
     return NOERROR;
 }
 
 ECode ExpirableCache::ExpireAll()
 {
-    mGeneration->IncrementAndGet();
+    Int32 value;
+    mGeneration->IncrementAndGet(&value);
     return NOERROR;
 }
 
@@ -131,7 +138,7 @@ ECode ExpirableCache::NewCachedValue(
 AutoPtr<IExpirableCache> ExpirableCache::Create(
     /* [in] */ IInterface* cache)
 {
-    AutoPtr<ExpirableCache> expireableCache = new ExpirableCache(cache);
+    AutoPtr<ExpirableCache> expireableCache = new ExpirableCache(ILruCache::Probe(cache));
     return (IExpirableCache*)expireableCache;
 }
 

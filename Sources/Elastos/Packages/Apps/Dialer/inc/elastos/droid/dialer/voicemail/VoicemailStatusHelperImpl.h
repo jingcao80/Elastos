@@ -102,23 +102,6 @@ private:
         Int32 mCallDetailsMessageId;
     };
 
-
-    /** A wrapper on {@link StatusMessage} which additionally stores the priority of the message. */
-    class MessageStatusWithPriority : public Object
-    {
-    public:
-        MessageStatusWithPriority(
-            /* [in] */ VoicemailStatusHelperStatusMessage* message,
-            /* [in] */ Int32 priority)
-            : mMessage(message)
-            , mPriority(priority)
-        {}
-
-    private:
-        AutoPtr<VoicemailStatusHelperStatusMessage> mMessage;
-        Int32 mPriority;
-    };
-
     class MyComparator
         : public Object
         , public IComparator
@@ -141,6 +124,25 @@ private:
         VoicemailStatusHelperImpl* mHost;
     };
 
+    /** A wrapper on {@link StatusMessage} which additionally stores the priority of the message. */
+    class MessageStatusWithPriority : public Object
+    {
+    public:
+        MessageStatusWithPriority(
+            /* [in] */ VoicemailStatusHelperStatusMessage* message,
+            /* [in] */ Int32 priority)
+            : mMessage(message)
+            , mPriority(priority)
+        {}
+
+    private:
+        AutoPtr<VoicemailStatusHelperStatusMessage> mMessage;
+        Int32 mPriority;
+
+        friend class MyComparator;
+        friend class VoicemailStatusHelperImpl;
+    };
+
 public:
     CAR_INTERFACE_DECL();
 
@@ -155,6 +157,8 @@ public:
         /* [out] */ Int32* number);
 
 private:
+    static CARAPI_(AutoPtr<ArrayOf<String> >) CreatePROJECTION();
+
     /** Returns whether the source status in the cursor corresponds to an active source. */
     CARAPI_(Boolean) IsVoicemailSourceActive(
         /* [in] */ ICursor* cursor);

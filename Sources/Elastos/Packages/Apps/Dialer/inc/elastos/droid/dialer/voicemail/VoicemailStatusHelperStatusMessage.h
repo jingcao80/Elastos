@@ -16,7 +16,7 @@ namespace Voicemail {
 class VoicemailStatusHelperStatusMessage : public Object
 {
 public:
-    CARAPI constructor(
+    VoicemailStatusHelperStatusMessage(
         /* [in] */ const String& sourcePackage,
         /* [in] */ Int32 callLogMessageId,
         /* [in] */ Int32 callDetailsMessageId,

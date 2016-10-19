@@ -167,7 +167,7 @@ private:
     };
 
     class AccessibilityDelegate
-        : public View::AccessibilityDelegate
+        : public Elastos::Droid::View::View::AccessibilityDelegate
     {
     public:
         AccessibilityDelegate(
@@ -194,6 +194,8 @@ private:
             /* [in] */ CallLogAdapter* host)
             : mHost(host)
         {}
+
+        TO_STRING_IMPL("CallLogAdapter::CallLogAdapterHandler")
 
         // @Override
         CARAPI HandleMessage(
@@ -729,7 +731,7 @@ private:
     /** Can be set to true by tests to disable processing of requests. */
     /*volatile*/ Boolean mRequestProcessingDisabled;
 
-    Boolean mIsCallLog = true;
+    Boolean mIsCallLog;
 
     AutoPtr<IView> mBadgeContainer;
     AutoPtr<IImageView> mBadgeImageView;

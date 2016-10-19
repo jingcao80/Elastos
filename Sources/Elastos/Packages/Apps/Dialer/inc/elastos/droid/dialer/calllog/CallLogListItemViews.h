@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGLISTITEMVIEWS_H__
 #define __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGLISTITEMVIEWS_H__
 
-#include "elastos/droid/dialer/calllog/PhoneCallDetailsViews.h"
+#include "elastos/droid/dialer/PhoneCallDetailsViews.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Telecom.h"
@@ -9,6 +9,7 @@
 #include "elastos/core/Object.h"
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Dialer::PhoneCallDetailsViews;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IQuickContactBadge;
 using Elastos::Droid::Widget::ITextView;

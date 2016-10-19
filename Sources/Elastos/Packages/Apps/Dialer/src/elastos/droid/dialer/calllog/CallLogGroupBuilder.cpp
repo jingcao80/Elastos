@@ -1,5 +1,6 @@
 
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/dialer/calllog/CallLogGroupBuilder.h"
 #include "elastos/droid/dialer/calllog/CallLogQuery.h"
 #include "elastos/droid/contacts/common/util/PhoneNumberHelper.h"
@@ -9,6 +10,8 @@
 using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
 using Elastos::Droid::Contacts::Common::Util::DateUtils;
 using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Text::Format::CTime;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -96,7 +99,7 @@ void CallLogGroupBuilder::AddGroups(
         Boolean sameAccountComponentName = firstAccountComponentName.IsNull()
                 ? currentAccountComponentName.IsNull()
                 : firstAccountComponentName.Equals(currentAccountComponentName);
-        Boolean sameAccountId = Objects::Equals(&firstAccountId, &currentAccountId);
+        Boolean sameAccountId = firstAccountId.Equals(currentAccountId);
         Boolean sameAccount = sameAccountComponentName && sameAccountId;
 
         Boolean shouldGroup;
@@ -169,7 +172,11 @@ Boolean CallLogGroupBuilder::EqualNumbers(
         return CompareSipAddresses(number1, number2);
     }
     else {
-        return PhoneNumberUtils::Compare(number1, number2);
+        AutoPtr<IPhoneNumberUtils> utils;
+        CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
+        Boolean result;
+        utils->Compare(number1, number2, &result);
+        return result;
     }
 }
 

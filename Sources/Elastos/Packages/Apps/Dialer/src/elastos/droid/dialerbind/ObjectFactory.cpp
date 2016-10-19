@@ -14,20 +14,19 @@ AutoPtr<ICachedNumberLookupService> ObjectFactory::NewCachedNumberLookupService(
     return NULL;
 }
 
-// AutoPtr<CallLogAdapter> ObjectFactory::NewCallLogAdapter(
-//     /* [in] */ IContext* context,
-//     /* [in] */ ICallFetcher* callFetcher,
-//     /* [in] */ IContactInfoHelper* contactInfoHelper,
-//     /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
-//     /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
-//     /* [in] */ Boolean isCallLog)
-// {
-//     AutoPtr<ICallLogAdapter> adapter;
-//     CCallLogAdapter::New(context, callFetcher, contactInfoHelper,
-//             callItemExpandedListener, onReportButtonClickListener,
-//             isCallLog, (ICallLogAdapter**)&adapter);
-//     return adapter;
-// }
+AutoPtr<CallLogAdapter> ObjectFactory::NewCallLogAdapter(
+    /* [in] */ IContext* context,
+    /* [in] */ ICallFetcher* callFetcher,
+    /* [in] */ ContactInfoHelper* contactInfoHelper,
+    /* [in] */ ICallItemExpandedListener* callItemExpandedListener,
+    /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
+    /* [in] */ Boolean isCallLog)
+{
+    AutoPtr<CallLogAdapter> adapter = new CallLogAdapter();
+    adapter->constructor(context, callFetcher, contactInfoHelper,
+            callItemExpandedListener, onReportButtonClickListener, isCallLog);
+    return adapter;
+}
 
 AutoPtr<IDialogFragment> ObjectFactory::GetReportDialogFragment(
     /* [in] */ const String& name)

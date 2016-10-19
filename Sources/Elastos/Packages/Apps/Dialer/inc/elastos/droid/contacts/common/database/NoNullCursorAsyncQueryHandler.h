@@ -8,8 +8,8 @@
 
 using Elastos::Droid::Content::AsyncQueryHandler;
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Net::ICursor;
 
 namespace Elastos {
 namespace Droid {

@@ -1,4 +1,5 @@
 
+#include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/contacts/common/util/UriUtils.h"
@@ -23,9 +24,9 @@ namespace Voicemail {
 //================================================================
 // VoicemailStatusHelperImpl::Action
 //================================================================
-Action VoicemailStatusHelperImpl::Action::NONE(-1);
-Action VoicemailStatusHelperImpl::Action::CALL_VOICEMAIL(Elastos::Droid::Dialer::R::string::voicemail_status_action_call_server);
-Action VoicemailStatusHelperImpl::Action::CONFIGURE_VOICEMAIL(Elastos::Droid::Dialer::R::string::voicemail_status_action_configure);
+VoicemailStatusHelperImpl::Action VoicemailStatusHelperImpl::Action::NONE(-1);
+VoicemailStatusHelperImpl::Action VoicemailStatusHelperImpl::Action::CALL_VOICEMAIL(Elastos::Droid::Dialer::R::string::voicemail_status_action_call_server);
+VoicemailStatusHelperImpl::Action VoicemailStatusHelperImpl::Action::CONFIGURE_VOICEMAIL(Elastos::Droid::Dialer::R::string::voicemail_status_action_configure);
 
 Int32 VoicemailStatusHelperImpl::Action::GetMessageId()
 {
@@ -36,26 +37,26 @@ Int32 VoicemailStatusHelperImpl::Action::GetMessageId()
 //================================================================
 // VoicemailStatusHelperImpl::OverallState
 //================================================================
-OverallState VoicemailStatusHelperImpl::OverallState::NO_CONNECTION(0,
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::NO_CONNECTION(0,
         &Action::CALL_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_voicemail_not_available,
         Elastos::Droid::Dialer::R::string::voicemail_status_audio_not_available);
-OverallState VoicemailStatusHelperImpl::OverallState::NO_DATA(1,
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::NO_DATA(1,
         &Action::CALL_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_voicemail_not_available,
         Elastos::Droid::Dialer::R::string::voicemail_status_audio_not_available);
-OverallState VoicemailStatusHelperImpl::OverallState::MESSAGE_WAITING(2,
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::MESSAGE_WAITING(2,
         &Action::CALL_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_messages_waiting,
         Elastos::Droid::Dialer::R::string::voicemail_status_audio_not_available);
-OverallState VoicemailStatusHelperImpl::OverallState::NO_NOTIFICATIONS(3,
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::NO_NOTIFICATIONS(3,
         &Action::CALL_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_voicemail_not_available);
-OverallState VoicemailStatusHelperImpl::OverallState::INVITE_FOR_CONFIGURATION(4,
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::INVITE_FOR_CONFIGURATION(4,
         &Action::CONFIGURE_VOICEMAIL, Elastos::Droid::Dialer::R::string::voicemail_status_configure_voicemail);
-OverallState VoicemailStatusHelperImpl::OverallState::NO_DETAILED_NOTIFICATION(
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::NO_DETAILED_NOTIFICATION(
         5, &Action::NONE, -1);
-OverallState VoicemailStatusHelperImpl::OverallState::NOT_CONFIGURED(
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::NOT_CONFIGURED(
         6, &Action::NONE, -1);
-OverallState VoicemailStatusHelperImpl::OverallState::OK(
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::OK(
         7, &Action::NONE, -1);
-OverallState VoicemailStatusHelperImpl::OverallState::INVALID(
+VoicemailStatusHelperImpl::OverallState VoicemailStatusHelperImpl::OverallState::INVALID(
         8, &Action::NONE, -1);
 
 VoicemailStatusHelperImpl::OverallState::OverallState(
@@ -79,7 +80,7 @@ VoicemailStatusHelperImpl::OverallState::OverallState(
     , mCallDetailsMessageId(callDetailsMessageId)
 {}
 
-AutoPtr<Action> VoicemailStatusHelperImpl::OverallState::GetAction()
+AutoPtr<VoicemailStatusHelperImpl::Action> VoicemailStatusHelperImpl::OverallState::GetAction()
 {
     return mAction;
 }
@@ -112,8 +113,8 @@ ECode VoicemailStatusHelperImpl::MyComparator::Compare(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = ((MessageStatusWithPriority*)msg1)->mPriority
-            - ((MessageStatusWithPriority*)msg2)->mPriority;
+    *result = ((MessageStatusWithPriority*)(IObject*)msg1)->mPriority
+            - ((MessageStatusWithPriority*)(IObject*)msg2)->mPriority;
     return NOERROR;
 }
 
@@ -122,7 +123,7 @@ ECode VoicemailStatusHelperImpl::MyComparator::Compare(
 // VoicemailStatusHelperImpl
 //================================================================
 
-static AutoPtr<ArrayOf<String> > CreatePROJECTION()
+AutoPtr<ArrayOf<String> > VoicemailStatusHelperImpl::CreatePROJECTION()
 {
     AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(NUM_COLUMNS);
     (*projection)[SOURCE_PACKAGE_INDEX] = IVoicemailContractStatus::SOURCE_PACKAGE;
@@ -133,7 +134,7 @@ static AutoPtr<ArrayOf<String> > CreatePROJECTION()
     (*projection)[VOICEMAIL_ACCESS_URI_INDEX] = IVoicemailContractStatus::VOICEMAIL_ACCESS_URI;
     return projection;
 }
-const AutoPtr<ArrayOf<String> > VoicemailStatusHelperImpl::PROJECTION = CreatePROJECTION();
+const AutoPtr<ArrayOf<String> > VoicemailStatusHelperImpl::PROJECTION = VoicemailStatusHelperImpl::CreatePROJECTION();
 
 const Int32 VoicemailStatusHelperImpl::SOURCE_PACKAGE_INDEX;
 const Int32 VoicemailStatusHelperImpl::CONFIGURATION_STATE_INDEX;
@@ -143,7 +144,7 @@ const Int32 VoicemailStatusHelperImpl::SETTINGS_URI_INDEX;
 const Int32 VoicemailStatusHelperImpl::VOICEMAIL_ACCESS_URI_INDEX;
 const Int32 VoicemailStatusHelperImpl::NUM_COLUMNS;
 
-CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl, Object, IVoicemailStatusHelperImpl);
+CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl, Object, IVoicemailStatusHelper);
 
 ECode VoicemailStatusHelperImpl::GetStatusMessages(
     /* [in] */ ICursor* cursor,
@@ -205,7 +206,7 @@ AutoPtr<IList> VoicemailStatusHelperImpl::ReorderMessages(
     CArrayList::New((IList**)&reorderMessages);
     // Copy the ordered message objects into the final list.
     AutoPtr<IIterator> it;
-    messageWrappers->GetIteratro((IIterator**)&it);
+    messageWrappers->GetIterator((IIterator**)&it);
     Boolean result;
     while (it->HasNext(&result), result) {
         AutoPtr<IInterface> messageWrapper;
@@ -216,7 +217,7 @@ AutoPtr<IList> VoicemailStatusHelperImpl::ReorderMessages(
     return reorderMessages;
 }
 
-AutoPtr<MessageStatusWithPriority> VoicemailStatusHelperImpl::GetMessageForStatusEntry(
+AutoPtr<VoicemailStatusHelperImpl::MessageStatusWithPriority> VoicemailStatusHelperImpl::GetMessageForStatusEntry(
     /* [in] */ ICursor* cursor)
 {
     String sourcePackage;
@@ -227,24 +228,24 @@ AutoPtr<MessageStatusWithPriority> VoicemailStatusHelperImpl::GetMessageForStatu
     Int32 configuration, dataChannel, notificationChannel;
     cursor->GetInt32(CONFIGURATION_STATE_INDEX, &configuration);
     cursor->GetInt32(DATA_CHANNEL_STATE_INDEX, &dataChannel);
-    cursor->GetInt32(NOTIFICATION_CHANNEL_STATE_INDEX, &);
-    AutoPtr<OverallState> overallState = GetOverallState(index,
+    cursor->GetInt32(NOTIFICATION_CHANNEL_STATE_INDEX, &notificationChannel);
+    AutoPtr<OverallState> overallState = GetOverallState(configuration,
             dataChannel, notificationChannel);
     AutoPtr<Action> action = overallState->GetAction();
 
     // No source package or no action, means no message shown.
-    if (action == &Action::NONE) {
+    if (action.Get() == &Action::NONE) {
         return NULL;
     }
 
     AutoPtr<IUri> actionUri;
-    if (action == &Action::CALL_VOICEMAIL) {
+    if (action.Get() == &Action::CALL_VOICEMAIL) {
         String str;
         cursor->GetString(VOICEMAIL_ACCESS_URI_INDEX, &str);
         actionUri = UriUtils::ParseUriOrNull(str);
         // Even if actionUri is null, it is still be useful to show the notification.
     }
-    else if (action == &Action::CONFIGURE_VOICEMAIL) {
+    else if (action.Get() == &Action::CONFIGURE_VOICEMAIL) {
         String str;
         cursor->GetString(SETTINGS_URI_INDEX, &str);
         actionUri = UriUtils::ParseUriOrNull(str);
@@ -255,52 +256,49 @@ AutoPtr<MessageStatusWithPriority> VoicemailStatusHelperImpl::GetMessageForStatu
     }
 
     AutoPtr<VoicemailStatusHelperStatusMessage> statusMessage
-            = new VoicemailStatusHelperStatusMessage(sourcePackage,
-                    overallState->GetCallLogMessageId(),
-                    overallState->GetCallDetailsMessageId(), action->GetMessageId(),
-                    actionUri);
+            = new VoicemailStatusHelperStatusMessage(sourcePackage, overallState->GetCallLogMessageId(), overallState->GetCallDetailsMessageId(), action->GetMessageId(), actionUri);
     return new MessageStatusWithPriority(statusMessage, overallState->GetPriority());
 }
 
-AutoPtr<OverallState> VoicemailStatusHelperImpl::GetOverallState(
+AutoPtr<VoicemailStatusHelperImpl::OverallState> VoicemailStatusHelperImpl::GetOverallState(
     /* [in] */ Int32 configurationState,
     /* [in] */ Int32 dataChannelState,
     /* [in] */ Int32 notificationChannelState)
 {
-    if (configurationState == CONFIGURATION_STATE_OK) {
+    if (configurationState == IVoicemailContractStatus::CONFIGURATION_STATE_OK) {
         // Voicemail is configured. Let's see how is the data channel.
-        if (dataChannelState == DATA_CHANNEL_STATE_OK) {
+        if (dataChannelState == IVoicemailContractStatus::DATA_CHANNEL_STATE_OK) {
             // Data channel is fine. What about notification channel?
-            if (notificationChannelState == NOTIFICATION_CHANNEL_STATE_OK) {
+            if (notificationChannelState == IVoicemailContractStatus::NOTIFICATION_CHANNEL_STATE_OK) {
                 return &OverallState::OK;
             }
-            else if (notificationChannelState == NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING) {
+            else if (notificationChannelState == IVoicemailContractStatus::NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING) {
                 return &OverallState::NO_DETAILED_NOTIFICATION;
             }
-            else if (notificationChannelState == NOTIFICATION_CHANNEL_STATE_NO_CONNECTION) {
+            else if (notificationChannelState == IVoicemailContractStatus::NOTIFICATION_CHANNEL_STATE_NO_CONNECTION) {
                 return &OverallState::NO_NOTIFICATIONS;
             }
         }
-        else if (dataChannelState == DATA_CHANNEL_STATE_NO_CONNECTION) {
+        else if (dataChannelState == IVoicemailContractStatus::DATA_CHANNEL_STATE_NO_CONNECTION) {
             // Data channel is not working. What about notification channel?
-            if (notificationChannelState == NOTIFICATION_CHANNEL_STATE_OK) {
+            if (notificationChannelState == IVoicemailContractStatus::NOTIFICATION_CHANNEL_STATE_OK) {
                 return &OverallState::NO_DATA;
             }
-            else if (notificationChannelState == NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING) {
+            else if (notificationChannelState == IVoicemailContractStatus::NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING) {
                 return &OverallState::MESSAGE_WAITING;
             }
-            else if (notificationChannelState == NOTIFICATION_CHANNEL_STATE_NO_CONNECTION) {
+            else if (notificationChannelState == IVoicemailContractStatus::NOTIFICATION_CHANNEL_STATE_NO_CONNECTION) {
                 return &OverallState::NO_CONNECTION;
             }
         }
     }
-    else if (configurationState == CONFIGURATION_STATE_CAN_BE_CONFIGURED) {
+    else if (configurationState == IVoicemailContractStatus::CONFIGURATION_STATE_CAN_BE_CONFIGURED) {
         // Voicemail not configured. data/notification channel states are irrelevant.
         return &OverallState::INVITE_FOR_CONFIGURATION;
     }
     else if (configurationState == IVoicemailContractStatus::CONFIGURATION_STATE_NOT_CONFIGURED) {
         // Voicemail not configured. data/notification channel states are irrelevant.
-        return &OverallStat::NOT_CONFIGURED;
+        return &OverallState::NOT_CONFIGURED;
     }
     // Will reach here only if the source has set an invalid value.
     return &OverallState::INVALID;

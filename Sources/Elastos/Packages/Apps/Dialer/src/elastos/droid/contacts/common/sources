@@ -24,3 +24,4 @@ ELASTOS_LIBS += format/format.lib
 ELASTOS_LIBS += extensions/extensions.lib
 ELASTOS_LIBS += lettertiles/lettertiles.lib
 ELASTOS_LIBS += model/model.lib
+ELASTOS_LIBS += database/database_common.lib

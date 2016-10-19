@@ -1,13 +1,15 @@
 
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Text.h"
+#include "elastos/droid/contacts/common/util/PhoneNumberHelper.h"
 #include "elastos/droid/dialer/PhoneCallDetailsHelper.h"
 #include "elastos/droid/dialer/calllog/ContactInfo.h"
 #include "elastos/droid/dialer/util/DialerUtils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "R.h"
 
-using Elastos::Droid::Dialer::Calllog::ContactInfo;
+using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
+using Elastos::Droid::Dialer::CallLog::ContactInfo;
 using Elastos::Droid::Dialer::Util::DialerUtils;
 using Elastos::Droid::Provider::ICalls;
 using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
@@ -34,7 +36,7 @@ PhoneCallDetailsHelper::PhoneCallDetailsHelper(
     /* [in] */ PhoneNumberUtilsWrapper* phoneUtils)
     : mCurrentTimeMillisForTest(0)
 {
-    CArrayList::New((ArrayList**)&mDescriptionItems);
+    CArrayList::New((IArrayList**)&mDescriptionItems);
     mResources = resources;
     mPhoneNumberUtilsWrapper = phoneUtils;
     mPhoneNumberHelper = new PhoneNumberDisplayHelper(mPhoneNumberUtilsWrapper, resources);
@@ -58,8 +60,9 @@ void PhoneCallDetailsHelper::SetPhoneCallDetails(
     // Show the video icon if the call had video enabled.
     views->mCallTypeIcons->SetShowVideo(
             (details->mFeatures & ICalls::FEATURES_VIDEO) == ICalls::FEATURES_VIDEO);
-    views->mCallTypeIcons->RequestLayout();
-    views->mCallTypeIcons->SetVisibility(IView::VISIBLE);
+    AutoPtr<IView> icons = IView::Probe(views->mCallTypeIcons);
+    icons->RequestLayout();
+    icons->SetVisibility(IView::VISIBLE);
 
     // Show the total call count only if there are more than the maximum number of icons.
     AutoPtr<IInteger32> callCount;
@@ -76,7 +79,7 @@ void PhoneCallDetailsHelper::SetPhoneCallDetails(
     AutoPtr<IView> callAccountIcon = IView::Probe(views->mCallAccountIcon);
     if (details->mAccountIcon != NULL) {
         callAccountIcon->SetVisibility(IView::VISIBLE);
-        callAccountIcon->SetImageDrawable(details->mAccountIcon);
+        views->mCallAccountIcon->SetImageDrawable(details->mAccountIcon);
     }
     else {
         callAccountIcon->SetVisibility(IView::GONE);
@@ -88,24 +91,24 @@ void PhoneCallDetailsHelper::SetPhoneCallDetails(
     if (TextUtils::IsEmpty(details->mName)) {
         nameText = displayNumber;
         // We have a real phone number as "nameView" so make it always LTR
-        views->mNameView->SetTextDirection(IView::TEXT_DIRECTION_LTR);
+        IView::Probe(views->mNameView)->SetTextDirection(IView::TEXT_DIRECTION_LTR);
     }
     else {
         nameText = details->mName;
     }
 
-    viewsviews->mNameView->SetText(nameText);
+    views->mNameView->SetText(nameText);
 
-    if (isVoicemail && !TextUtils::isEmpty(details->mTranscription)) {
-        views->mVoicemailTranscriptionView->SetText(details->mTranscription);
+    if (isVoicemail && !TextUtils::IsEmpty(details->mTranscription)) {
+        AutoPtr<ICharSequence> cs;
+        CString::New(details->mTranscription, (ICharSequence**)&cs);
+        views->mVoicemailTranscriptionView->SetText(cs);
         IView::Probe(views->mVoicemailTranscriptionView)->SetVisibility(IView::VISIBLE);
     }
     else {
         views->mVoicemailTranscriptionView->SetText(NULL);
         IView::Probe(views->mVoicemailTranscriptionView)->SetVisibility(IView::GONE);
     }
-
-    return NOERROR;
 }
 
 AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallLocationAndDate(
@@ -126,7 +129,7 @@ AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallLocationAndDate(
     mDescriptionItems->Add(callDate);
 
     // Create a comma separated list from the call type or location, and call date.
-    return DialerUtils::Join(mResources, mDescriptionItems);
+    return DialerUtils::Join(mResources, IIterable::Probe(mDescriptionItems));
 }
 
 AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallTypeOrLocation(
@@ -136,11 +139,13 @@ AutoPtr<ICharSequence> PhoneCallDetailsHelper::GetCallTypeOrLocation(
     // Only show a label if the number is shown and it is not a SIP address.
     String number;
     if (!TextUtils::IsEmpty(details->mNumber)
-            && !PhoneNumberHelper::IsUriNumber(details->mNumber->ToString(&number), number)
+            && !PhoneNumberHelper::IsUriNumber((details->mNumber->ToString(&number), number))
             && mPhoneNumberUtilsWrapper->IsVoicemailNumber(details->mNumber)) {
 
-        if (details->mNumberLabel == ContactInfo::GEOCODE_AS_LABEL) {
-            numberFormattedLabel = details->mGeocode;
+        String label;
+        details->mNumberLabel->ToString(&label);
+        if (label.Equals(ContactInfo::GEOCODE_AS_LABEL)) {
+            CString::New(details->mGeocode, (ICharSequence**)&numberFormattedLabel);
         }
         else {
             AutoPtr<IContactsContractCommonDataKindsPhone> phone;
@@ -175,9 +180,11 @@ void PhoneCallDetailsHelper::SetCallDetailsHeader(
 {
     AutoPtr<ICharSequence> nameText;
     String str;
-    mResources->GetString(Elastos::Droid::Dialer::R::string::recentCalls_addToContact, &str)
+    mResources->GetString(Elastos::Droid::Dialer::R::string::recentCalls_addToContact, &str);
+    AutoPtr<ICharSequence> cs;
+    CString::New(str, (ICharSequence**)&cs);
     AutoPtr<ICharSequence> displayNumber = mPhoneNumberHelper->GetDisplayNumber(
-            details->mNumber, details->mNumberPresentation, str);
+            details->mNumber, details->mNumberPresentation, cs);
     if (TextUtils::IsEmpty(details->mName)) {
         nameText = displayNumber;
     }
@@ -186,7 +193,6 @@ void PhoneCallDetailsHelper::SetCallDetailsHeader(
     }
 
     nameView->SetText(nameText);
-    return NOERROR;
 }
 
 void PhoneCallDetailsHelper::SetCurrentTimeForTest(

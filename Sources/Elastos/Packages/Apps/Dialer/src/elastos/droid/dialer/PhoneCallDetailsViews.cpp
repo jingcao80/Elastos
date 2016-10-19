@@ -3,7 +3,7 @@
 #include "elastos/droid/dialer/calllog/CCallTypeIconsView.h"
 #include "R.h"
 
-using Elastos::Droid::Dialer::Calllog::CCallTypeIconsView;
+using Elastos::Droid::Dialer::CallLog::CCallTypeIconsView;
 using Elastos::Droid::View::CView;
 using Elastos::Droid::Widget::CTextView;
 using Elastos::Droid::Widget::CImageView;
@@ -27,7 +27,7 @@ PhoneCallDetailsViews::PhoneCallDetailsViews(
     , mVoicemailTranscriptionView(voicemailTranscriptionView)
 {}
 
-AutoPtr<IPhoneCallDetailsViews> PhoneCallDetailsViews::FromView(
+AutoPtr<PhoneCallDetailsViews> PhoneCallDetailsViews::FromView(
     /* [in] */ IView* view)
 {
     AutoPtr<IView> nameView;
@@ -69,7 +69,7 @@ AutoPtr<PhoneCallDetailsViews> PhoneCallDetailsViews::CreateForTest(
     AutoPtr<ITextView> voicemailTranscriptionView;
     CTextView::New(context, (ITextView**)&voicemailTranscriptionView);
 
-    AutoPtr<PhoneCallDetailsViews> views = PhoneCallDetailsViews(
+    AutoPtr<PhoneCallDetailsViews> views = new PhoneCallDetailsViews(
                 nameView, callTypeView, callTypeIcons, callAccountIcon,
                 callLocationAndDate, voicemailTranscriptionView);
     return views;

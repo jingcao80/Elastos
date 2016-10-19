@@ -7,7 +7,6 @@
 #include "elastos/droid/contacts/common/util/ViewUtil.h"
 #include "elastos/droid/dialer/calllog/CallLogFragment.h"
 #include "elastos/droid/dialer/calllog/CallLogNotificationsHelper.h"
-#include "elastos/droid/dialer/calllog/CContactInfoHelper.h"
 #include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
 #include "elastos/droid/dialer/voicemail/VoicemailStatusHelperImpl.h"
 #include "elastos/droid/dialer/voicemail/VoicemailStatusHelperStatusMessage.h"
@@ -223,7 +222,7 @@ ECode CallLogFragment::ItemExpandedOnPreDrawListener::OnPreDraw(
     view->GetLayoutParams((IViewGroupLayoutParams**)&params);
     params->SetHeight(mStartingHeight);
     if (!isExpand) {
-        viewHolder->mActionsView->SetVisibility(IView::VISIBLE);
+        mViewHolder->mActionsView->SetVisibility(IView::VISIBLE);
     }
     CallLogAdapter::ExpandVoicemailTranscriptionView(mViewHolder, !isExpand);
 
@@ -231,7 +230,7 @@ ECode CallLogFragment::ItemExpandedOnPreDrawListener::OnPreDraw(
     if (isExpand) {
         // Start the fade in after the expansion has partly completed, otherwise it
         // will be mostly over before the expansion completes.
-        viewHolder->mActionsView->SetAlpha(0.0);
+        mViewHolder->mActionsView->SetAlpha(0.0);
         AutoPtr<IViewPropertyAnimator> animator;
         mViewHolder->mActionsView->Animate((IViewPropertyAnimator**)&animator);
         animator->Alpha(1.0);
@@ -240,7 +239,7 @@ ECode CallLogFragment::ItemExpandedOnPreDrawListener::OnPreDraw(
         animator->Start();
     }
     else {
-        viewHolder->mActionsView->SetAlpha(1.0);
+        mViewHolder->mActionsView->SetAlpha(1.0);
         AutoPtr<IViewPropertyAnimator> animator;
         mViewHolder->mActionsView->Animate((IViewPropertyAnimator**)&animator);
         animator->Alpha(0.0);
@@ -398,18 +397,18 @@ ECode CallLogFragment::OnCreate(
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    String currentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
-    AutoPtr<ContactInfoHelper> ciHelper  = new ContactInfoHelper(activity, currentCountryIso);
-    mAdapter = ObjectFactory::NewCallLogAdapter(activity, ICallFetcher::Probe(this),
+    AutoPtr<IContext> context = IContext::Probe(activity);
+    String currentCountryIso = GeoUtil::GetCurrentCountryIso(context);
+    AutoPtr<ContactInfoHelper> ciHelper  = new ContactInfoHelper(context, currentCountryIso);
+    mAdapter = ObjectFactory::NewCallLogAdapter(context, ICallFetcher::Probe(this),
             ciHelper, ICallItemExpandedListener::Probe(this),
             ICallLogAdapterOnReportButtonClickListener::Probe(this), TRUE);
     SetListAdapter(IListAdapter::Probe(mAdapter));
 
-    AutoPtr<IContext> context = IContext::Probe(activity);
-
     AutoPtr<IContentResolver> resolver;
     context->GetContentResolver((IContentResolver**)&resolver);
-    mCallLogQueryHandler = new CallLogQueryHandler(resolver, ICallLogQueryHandler::Probe(this), mLogLimit);
+    mCallLogQueryHandler = new CallLogQueryHandler();
+    mCallLogQueryHandler->constructor(resolver, ICallLogQueryHandlerListener::Probe(this), mLogLimit);
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::KEYGUARD_SERVICE, (IInterface**)&service);
     mKeyguardManager = IKeyguardManager::Probe(service);
@@ -749,7 +748,7 @@ ECode CallLogFragment::UpdateEmptyMessage(
         case ICalls::VOICEMAIL_TYPE:
             messageId = Elastos::Droid::Dialer::R::string::recentVoicemails_empty;
             break;
-        case ICallLogQueryHandler::CALL_TYPE_ALL:
+        case CallLogQueryHandler::CALL_TYPE_ALL:
             messageId = Elastos::Droid::Dialer::R::string::recentCalls_empty;
             break;
         default:
@@ -871,7 +870,8 @@ void CallLogFragment::MaybeAddFooterView()
 
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
-    listView->RemoveFooterView(mFooterView);
+    Boolean result;
+    listView->RemoveFooterView(mFooterView, &result);
     listView->AddFooterView(mFooterView);
 
     AutoPtr<IResources> resources;
@@ -894,7 +894,7 @@ ECode CallLogFragment::OnItemExpanded(
     AutoPtr<IViewTreeObserver> observer;
     IView::Probe(listView)->GetViewTreeObserver((IViewTreeObserver**)&observer);
 
-    AutoPtr<IOnPreDrawListener> listener = (IOnPreDrawListener*)new ItemExPandedOnPreDrawListener(
+    AutoPtr<IOnPreDrawListener> listener = (IOnPreDrawListener*)new ItemExpandedOnPreDrawListener(
             view, viewHolder, observer, startingHeight, this);
     observer->AddOnPreDrawListener(listener);
 

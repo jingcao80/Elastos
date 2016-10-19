@@ -42,8 +42,9 @@ ECode NoNullCursorAsyncQueryHandler::OnQueryComplete(
     AsyncQueryHandler::OnQueryComplete(token, projectionCookie->mOriginalCookie, cursor);
 
     if (cursor == NULL) {
-        cursor = new EmptyCursor();
-        cursor->constructor(projectionCookie->mProjection)
+        AutoPtr<EmptyCursor> emptyCursor = new EmptyCursor();
+        emptyCursor->constructor(projectionCookie->mProjection);
+        cursor = (ICursor*)emptyCursor;
     }
     return OnNotNullableQueryComplete(token, projectionCookie->mOriginalCookie, cursor);
 }

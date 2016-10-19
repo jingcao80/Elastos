@@ -2,7 +2,6 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Provider.h"
-#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/dialer/calllog/CCallTypeIconsView.h"
 #include "elastos/droid/contacts/common/util/BitmapUtil.h"
 #include "elastos/core/CoreUtils.h"
@@ -10,7 +9,7 @@
 #include "R.h"
 
 using Elastos::Droid::Contacts::Common::Util::BitmapUtil;
-using Elastos::Droid::Dialer::CallLog::EIID_ICallTypeIconsView
+using Elastos::Droid::Dialer::CallLog::EIID_ICallTypeIconsView;
 using Elastos::Droid::Graphics::IBitmapHelper;
 using Elastos::Droid::Graphics::CBitmapHelper;
 using Elastos::Droid::Graphics::IBitmapFactory;
