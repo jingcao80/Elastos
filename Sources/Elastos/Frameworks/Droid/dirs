@@ -14,4 +14,4 @@ DIRS += Base/Packages/
 #DIRS += Lib
 DIRS += JavaProxy
 DIRS += DevSamples
-#DIRS += Commands
+DIRS += Commands

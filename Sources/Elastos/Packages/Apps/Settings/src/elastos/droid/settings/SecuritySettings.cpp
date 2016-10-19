@@ -35,7 +35,7 @@ using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Internal::Widget::CLockPatternUtils;
 using Elastos::Droid::Internal::Widget::CLockPatternUtilsHelper;
 using Elastos::Droid::Internal::Widget::ILockPatternUtilsHelper;
-// using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
 using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
@@ -270,26 +270,24 @@ ECode SecuritySettings::SecuritySearchIndexProvider::GetRawDataToIndex(
     context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
     IUserManager* um = IUserManager::Probe(obj);
 
-    Logger::I(TAG, " >> TODO wait for CKeyStoreHelper");
-    // if (um->HasUserRestriction(IUserManager::DISALLOW_CONFIG_CREDENTIALS, &res), !res) {
-    //     assert(0 && "TODO");
-    //     AutoPtr<IKeyStoreHelper> helper;
-    //     // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
-    //     AutoPtr<IKeyStore> keyStore;
-    //     // helper->GetInstance((IKeyStore**)&keyStore);
+    if (um->HasUserRestriction(IUserManager::DISALLOW_CONFIG_CREDENTIALS, &res), !res) {
+        AutoPtr<IKeyStoreHelper> helper;
+        CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+        AutoPtr<IKeyStore> keyStore;
+        helper->GetInstance((IKeyStore**)&keyStore);
 
-    //     Int32 storageSummaryRes = R::string::credential_storage_type_software;
-    //     if (keyStore->IsHardwareBacked(&res), res) {
-    //         storageSummaryRes = R::string::credential_storage_type_hardware;
-    //     }
+        Int32 storageSummaryRes = R::string::credential_storage_type_software;
+        if (keyStore->IsHardwareBacked(&res), res) {
+            storageSummaryRes = R::string::credential_storage_type_hardware;
+        }
 
-    //     data = NULL;
-    //     data = new SearchIndexableRaw();
-    //     data->constructor(context);
-    //     resource->GetString(storageSummaryRes, &data->mTitle);
-    //     data->mScreenTitle = screenTitle;
-    //     result->Add((ISearchIndexableRaw*)data);
-    // }
+        data = NULL;
+        data = new SearchIndexableRaw();
+        data->constructor(context);
+        resource->GetString(storageSummaryRes, &data->mTitle);
+        data->mScreenTitle = screenTitle;
+        result->Add((ISearchIndexableRaw*)data);
+    }
 
     // Advanced
     AutoPtr<ILockPatternUtils> lockPatternUtils;
@@ -644,42 +642,40 @@ AutoPtr<IPreferenceScreen> SecuritySettings::CreatePreferenceHierarchy()
     _root->FindPreference(CoreUtils::Convert(KEY_SHOW_PASSWORD), (IPreference**)&pref);
     mShowPassword = ISwitchPreference::Probe(pref);
 
-    Logger::I(TAG, " >> TODO wait for CKeyStoreHelper");
-    // _root->FindPreference(CoreUtils::Convert(KEY_RESET_CREDENTIALS), (IPreference**)&mResetCredentials);
+    _root->FindPreference(CoreUtils::Convert(KEY_RESET_CREDENTIALS), (IPreference**)&mResetCredentials);
 
     // Credential storage
     AutoPtr<IInterface> tmp;
     IContext::Probe(activity)->GetSystemService(IContext::USER_SERVICE, (IInterface**)&tmp);
     IUserManager* um = IUserManager::Probe(tmp);
 
-    // AutoPtr<IKeyStoreHelper> helper;
-    // assert(0 && "TODO");
-    // // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
-    // helper->GetInstance((IKeyStore**)&mKeyStore); // needs to be initialized for OnResume()
-    // if (um->HasUserRestriction(IUserManager::DISALLOW_CONFIG_CREDENTIALS, &res), !res) {
-    //     AutoPtr<IPreference> credentialStorageType;
-    //     _root->FindPreference(CoreUtils::Convert(KEY_CREDENTIAL_STORAGE_TYPE), (IPreference**)&credentialStorageType);
+    AutoPtr<IKeyStoreHelper> helper;
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    helper->GetInstance((IKeyStore**)&mKeyStore); // needs to be initialized for OnResume()
+    if (um->HasUserRestriction(IUserManager::DISALLOW_CONFIG_CREDENTIALS, &res), !res) {
+        AutoPtr<IPreference> credentialStorageType;
+        _root->FindPreference(CoreUtils::Convert(KEY_CREDENTIAL_STORAGE_TYPE), (IPreference**)&credentialStorageType);
 
-    //     Int32 storageSummaryRes = R::string::credential_storage_type_software;
-    //     if (mKeyStore->IsHardwareBacked(&res), res) {
-    //         storageSummaryRes = R::string::credential_storage_type_hardware;
-    //     }
-    //     credentialStorageType->SetSummary(storageSummaryRes);
-    // }
-    // else {
-    //     pref = NULL;
-    //     _root->FindPreference(CoreUtils::Convert(KEY_CREDENTIALS_MANAGER), (IPreference**)&pref);
-    //     AutoPtr<IPreferenceGroup> credentialsManager = IPreferenceGroup::Probe(pref);
-    //     pref = NULL;
-    //     _root->FindPreference(CoreUtils::Convert(KEY_RESET_CREDENTIALS), (IPreference**)&pref);
-    //     credentialsManager->RemovePreference(pref, &res);
-    //     pref = NULL;
-    //     _root->FindPreference(CoreUtils::Convert(KEY_CREDENTIALS_INSTALL), (IPreference**)&pref);
-    //     credentialsManager->RemovePreference(pref, &res);
-    //     pref = NULL;
-    //     _root->FindPreference(CoreUtils::Convert(KEY_CREDENTIAL_STORAGE_TYPE), (IPreference**)&pref);
-    //     credentialsManager->RemovePreference(pref, &res);
-    // }
+        Int32 storageSummaryRes = R::string::credential_storage_type_software;
+        if (mKeyStore->IsHardwareBacked(&res), res) {
+            storageSummaryRes = R::string::credential_storage_type_hardware;
+        }
+        credentialStorageType->SetSummary(storageSummaryRes);
+    }
+    else {
+        pref = NULL;
+        _root->FindPreference(CoreUtils::Convert(KEY_CREDENTIALS_MANAGER), (IPreference**)&pref);
+        AutoPtr<IPreferenceGroup> credentialsManager = IPreferenceGroup::Probe(pref);
+        pref = NULL;
+        _root->FindPreference(CoreUtils::Convert(KEY_RESET_CREDENTIALS), (IPreference**)&pref);
+        credentialsManager->RemovePreference(pref, &res);
+        pref = NULL;
+        _root->FindPreference(CoreUtils::Convert(KEY_CREDENTIALS_INSTALL), (IPreference**)&pref);
+        credentialsManager->RemovePreference(pref, &res);
+        pref = NULL;
+        _root->FindPreference(CoreUtils::Convert(KEY_CREDENTIAL_STORAGE_TYPE), (IPreference**)&pref);
+        credentialsManager->RemovePreference(pref, &res);
+    }
 
     // Application install
     pref = NULL;

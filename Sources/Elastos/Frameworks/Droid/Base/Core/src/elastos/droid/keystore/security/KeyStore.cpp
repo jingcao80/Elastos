@@ -1,22 +1,444 @@
+
 #include "elastos/droid/keystore/security/KeyStore.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/text/TextUtils.h"
+#include <binder/Parcel.h>
+#include <binder/IServiceManager.h>
 
-
-//import com.android.org.conscrypt.NativeCrypto;
-//
-//import android.os.RemoteException;
-//import android.os.ServiceManager;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::ServiceManager;
-//import android.util.Log;
-//
-//import java.util.Locale;
+using Elastos::Droid::Security::EIID_IIKeystoreService;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::IByte;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace KeyStore {
 namespace Security {
+
+CAR_INTERFACE_IMPL_2(KeyStore::KeystoreServiceWrapper, Object, IBinder, IIKeystoreService);
+ECode KeyStore::KeystoreServiceWrapper::Init()
+{
+    android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+    android::sp<android::IBinder> binder = sm->getService(android::String16("android.security.keystore"));
+
+    if (binder == NULL) {
+        // Camera service is now down, leave mCameraService as null
+        Logger::W(TAG, "Camera service is now down");
+        return NOERROR;
+    }
+
+    mKeystoreService = android::IKeystoreService::asInterface(binder);
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Test(
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->test();
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Get(
+    /* [in] */ const String& name,
+    /* [out, callee] */ ArrayOf<Byte>** bytes)
+{
+    VALIDATE_NOT_NULL(bytes);
+    *bytes = NULL;
+    if (mKeystoreService.get() != NULL) {
+        uint8_t* data = NULL;
+        size_t len = 0;
+        int32_t ret = mKeystoreService->get(android::String16(name), &data, &len);
+        if (ret == 1) {
+            *bytes = ArrayOf<Byte>::Alloc(data, len);
+            REFCOUNT_ADD(*bytes);
+            free(data);
+        }
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Insert(
+    /* [in] */ const String& name,
+    /* [in] */ ArrayOf<Byte>* item,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 flags,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->insert(android::String16(name), item->GetPayload(),
+                item->GetLength(), uid, flags);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Del(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->del(android::String16(name), uid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Exist(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->exist(android::String16(name), uid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Saw(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid,
+    /* [out, callee] */ ArrayOf<String>** ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = NULL;
+    if (mKeystoreService.get() != NULL) {
+        android::Vector<android::String16> matches;
+        mKeystoreService->saw(android::String16(name), uid, &matches);
+        Int32 size = matches.size();
+        if (size > 0) {
+            *ret = ArrayOf<String>::Alloc(size);
+            android::Vector<android::String16>::const_iterator it = matches.begin();
+            Int32 i = 0;
+            for (; it != matches.end(); ++it) {
+                (*ret)->Set(i++, TextUtils::String16ToString(*it));
+            }
+        }
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Reset(
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->reset();
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Password(
+    /* [in] */ const String& password,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->password(android::String16(password));
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Lock(
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->lock();
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Unlock(
+    /* [in] */ const String& password,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->unlock(android::String16(password));
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Zero(
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->zero();
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Generate(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 keyType,
+    /* [in] */ Int32 keySize,
+    /* [in] */ Int32 flags,
+    /* [in] */ ArrayOf<IArrayOf*>* _args,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        android::Vector<android::sp<android::KeystoreArg> > args;
+        Int32 len = 0;
+        if (_args != NULL && (len = _args->GetLength(), len > 0)) {
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                AutoPtr<IArrayOf> item = (*_args)[i];
+                Int32 size = 0;
+                item->GetLength(&size);
+                if (size > 0) {
+                    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(size);
+                    for (Int32 j = 0; j < size; j++) {
+                        AutoPtr<IInterface> o;
+                        item->Get(j, (IInterface**)&o);
+                        Byte v;
+                        IByte::Probe(o)->GetValue(&v);
+                        (*bytes)[j] = v;
+                    }
+                    android::sp<android::KeystoreArg> arg = new android::KeystoreArg(
+                            bytes->GetPayload(), size);
+                    args.push_back(arg);
+                }
+                else {
+                    args.push_back(NULL);
+                }
+
+            }
+        }
+        *ret = mKeystoreService->generate(android::String16(name), uid, keyType, keySize
+            , flags, &args);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Import_key(
+    /* [in] */ const String& name,
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 flags,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->import(android::String16(name), data->GetPayload()
+                , data->GetLength(), uid, flags);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Sign(
+    /* [in] */ const String& name,
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [out, callee] */ ArrayOf<Byte>** ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = NULL;
+    if (mKeystoreService.get() != NULL) {
+        void* out = NULL;
+        size_t outSize = 0;
+        mKeystoreService->sign(android::String16(name), data->GetPayload(), data->GetLength()
+                , (uint8_t**) &out, &outSize);
+        if (outSize > 0 && out != NULL) {
+            *ret = ArrayOf<Byte>::Alloc(outSize);
+            memcpy((*ret)->GetPayload(), out, outSize);
+            REFCOUNT_ADD(*ret);
+            free(out);
+        }
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Verify(
+    /* [in] */ const String& name,
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ ArrayOf<Byte>* signature,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->verify(android::String16(name), data->GetPayload(), data->GetLength()
+                , signature->GetPayload(), signature->GetLength());
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Get_pubkey(
+    /* [in] */ const String& name,
+    /* [out, callee] */ ArrayOf<Byte>** ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = NULL;
+    if (mKeystoreService.get() != NULL) {
+        void* out = NULL;
+        size_t outSize = 0;
+        mKeystoreService->get_pubkey(android::String16(name), (unsigned char**) &out, &outSize);
+        if (outSize > 0 && out != NULL) {
+            *ret = ArrayOf<Byte>::Alloc(outSize);
+            memcpy((*ret)->GetPayload(), out, outSize);
+            REFCOUNT_ADD(*ret);
+            free(out);
+        }
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Del_key(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 uid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->del_key(android::String16(name), uid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Grant(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 granteeUid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->grant(android::String16(name), granteeUid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Ungrant(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 granteeUid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->ungrant(android::String16(name), granteeUid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Getmtime(
+    /* [in] */ const String& name,
+    /* [out] */ Int64* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->getmtime(android::String16(name));
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Duplicate(
+    /* [in] */ const String& srcKey,
+    /* [in] */ Int32 srcUid,
+    /* [in] */ const String& destKey,
+    /* [in] */ Int32 destUid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->duplicate(android::String16(srcKey), srcUid
+                , android::String16(destKey), destUid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Is_hardware_backed(
+    /* [in] */ const String& keyType,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->is_hardware_backed(android::String16(keyType));
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Clear_uid(
+    /* [in] */ Int64 uid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->clear_uid(uid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Reset_uid(
+    /* [in] */ Int32 uid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->reset_uid(uid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Sync_uid(
+    /* [in] */ Int32 srcUid,
+    /* [in] */ Int32 dstUid,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = 0;
+    if (mKeystoreService.get() != NULL) {
+        *result = mKeystoreService->sync_uid(srcUid, dstUid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::Password_uid(
+    /* [in] */ const String& password,
+    /* [in] */ Int32 uid,
+    /* [out] */ Int32* ret)
+{
+    VALIDATE_NOT_NULL(ret);
+    *ret = 0;
+    if (mKeystoreService.get() != NULL) {
+        *ret = mKeystoreService->password_uid(android::String16(password), uid);
+    }
+    return NOERROR;
+}
+
+ECode KeyStore::KeystoreServiceWrapper::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = String("KeyStore::KeystoreServiceWrapper");
+    return NOERROR;
+}
 
 const String KeyStore::TAG("KeyStore");
 
@@ -46,8 +468,8 @@ ECode KeyStore::constructor(
 
 AutoPtr<KeyStore> KeyStore::GetInstance()
 {
-    AutoPtr<IInterface> obj = ServiceManager::GetService(String("android.security.keystore"));
-    AutoPtr<IIKeystoreService> keystore = IIKeystoreService::Probe(obj);
+    AutoPtr<KeystoreServiceWrapper> keystore = new KeystoreServiceWrapper();
+    keystore->Init();
 
     AutoPtr<KeyStore> ks = new KeyStore();
     ks->constructor(keystore);

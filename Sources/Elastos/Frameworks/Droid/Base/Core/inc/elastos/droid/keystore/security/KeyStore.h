@@ -3,8 +3,11 @@
 
 #include "Elastos.Droid.Security.h"
 #include "Elastos.Droid.KeyStore.h"
+#include "Elastos.Droid.Os.h"
 #include <elastos/core/Object.h>
+#include <keystore/IKeystoreService.h>
 
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Security::IIKeystoreService;
 using Elastos::Core::IArrayOf;
 
@@ -22,6 +25,230 @@ class KeyStore
     : public Object
     , public IKeyStore
 {
+private:
+    class KeystoreServiceWrapper
+        : public Object
+        , public IBinder
+        , public IIKeystoreService
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        CARAPI Init();
+
+        CARAPI Test(
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Get(
+            /* [in] */ const String& name,
+            /* [out, callee] */ ArrayOf<Byte>** bytes);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Insert(
+            /* [in] */ const String& name,
+            /* [in] */ ArrayOf<Byte>* item,
+            /* [in] */ Int32 uid,
+            /* [in] */ Int32 flags,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Del(
+            /* [in] */ const String& name,
+            /* [in] */ Int32 uid,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Exist(
+            /* [in] */ const String& name,
+            /* [in] */ Int32 uid,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Saw(
+            /* [in] */ const String& name,
+            /* [in] */ Int32 uid,
+            /* [out, callee] */ ArrayOf<String>** ret);
+
+        /**
+         * throws RemoteException
+         * @Override
+         */
+        CARAPI Reset(
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Password(
+            /* [in] */ const String& password,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Lock(
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Unlock(
+            /* [in] */ const String& password,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         * @Override
+         */
+        CARAPI Zero(
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Generate(
+            /* [in] */ const String& name,
+            /* [in] */ Int32 uid,
+            /* [in] */ Int32 keyType,
+            /* [in] */ Int32 keySize,
+            /* [in] */ Int32 flags,
+            /* [in] */ ArrayOf<IArrayOf*>* args,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Import_key(
+            /* [in] */ const String& name,
+            /* [in] */ ArrayOf<Byte>* data,
+            /* [in] */ Int32 uid,
+            /* [in] */ Int32 flags,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Sign(
+            /* [in] */ const String& name,
+            /* [in] */ ArrayOf<Byte>* data,
+            /* [out, callee] */ ArrayOf<Byte>** ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Verify(
+            /* [in] */ const String& name,
+            /* [in] */ ArrayOf<Byte>* data,
+            /* [in] */ ArrayOf<Byte>* signature,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Get_pubkey(
+            /* [in] */ const String& name,
+            /* [out, callee] */ ArrayOf<Byte>** ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Del_key(
+            /* [in] */ const String& name,
+            /* [in] */ Int32 uid,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Grant(
+            /* [in] */ const String& name,
+            /* [in] */ Int32 granteeUid,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Ungrant(
+            /* [in] */ const String& name,
+            /* [in] */ Int32 granteeUid,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         * @Override
+         */
+        CARAPI Getmtime(
+            /* [in] */ const String& name,
+            /* [out] */ Int64* ret);
+
+        /**
+         * throws RemoteException
+         * @Override
+         */
+        CARAPI Duplicate(
+            /* [in] */ const String& srcKey,
+            /* [in] */ Int32 srcUid,
+            /* [in] */ const String& destKey,
+            /* [in] */ Int32 destUid,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         * @Override
+         */
+        CARAPI Is_hardware_backed(
+            /* [in] */ const String& keyType,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         * @Override
+         */
+        CARAPI Clear_uid(
+            /* [in] */ Int64 uid,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Reset_uid(
+            /* [in] */ Int32 uid,
+            /* [out] */ Int32* ret);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Sync_uid(
+            /* [in] */ Int32 srcUid,
+            /* [in] */ Int32 dstUid,
+            /* [out] */ Int32* result);
+
+        /**
+         * throws RemoteException
+         */
+        CARAPI Password_uid(
+            /* [in] */ const String& password,
+            /* [in] */ Int32 uid,
+            /* [out] */ Int32* ret);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        android::sp<android::IKeystoreService> mKeystoreService;
+    };
+
 public:
     // States
     //enum KeyStore_State { UNLOCKED, LOCKED, UNINITIALIZED };
@@ -218,7 +445,6 @@ private:
     Int32 mError;// = NO_ERROR;
 
     AutoPtr<IIKeystoreService> mBinder;
-
 };
 
 }// namespace Elastos
