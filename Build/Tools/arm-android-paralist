@@ -537,6 +537,7 @@
   Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/lettertiles
   Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/model
   Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/extensions
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/database
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/activity
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/database
@@ -544,6 +545,8 @@
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/list
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/util
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/widget
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/calllog
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/voicemail
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialerbind/analytics
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/dialerbind
