@@ -122,6 +122,7 @@ EXPORT_HEADERS += elastos/droid/system/Os.h
 EXPORT_HEADERS += elastos/droid/system/OsConstants.h
 
 EXPORT_HEADERS += elastosx/crypto/CipherSpi.h
+EXPORT_HEADERS += elastosx/crypto/MacSpi.h
 EXPORT_HEADERS += elastosx/crypto/KeyAgreementSpi.h
 
 EXPORT_HEADERS += elastosx/net/SocketFactory.h
@@ -133,3 +134,4 @@ EXPORT_HEADERS += elastosx/net/ssl/X509ExtendedKeyManager.h
 EXPORT_HEADERS += org/apache/http/entity/AbstractHttpEntity.h
 EXPORT_HEADERS += org/apache/http/impl/client/DefaultHttpClient.h
 EXPORT_HEADERS += org/apache/http/utility/EncodingUtils.h
+EXPORT_HEADERS += org/apache/harmony/security/fortress/Services.h

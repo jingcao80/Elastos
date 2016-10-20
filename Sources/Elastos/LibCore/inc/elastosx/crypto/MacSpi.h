@@ -16,7 +16,7 @@ namespace Crypto {
 
 class CMac;
 
-class MacSpi
+class ECO_PUBLIC MacSpi
     : public Object
     , public IMacSpi
 {
@@ -38,7 +38,7 @@ public:
      * @return the length of this MAC (in bytes).
      */
     virtual CARAPI EngineGetMacLength(
-        /* [out] */ Int32 ** result) = 0;
+        /* [out] */ Int32 * result) = 0;
 
     /**
      * Initializes this {@code MacSpi} instance with the specified key and

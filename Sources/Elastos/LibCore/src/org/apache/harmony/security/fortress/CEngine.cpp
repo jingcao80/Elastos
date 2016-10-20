@@ -56,7 +56,7 @@ ECode CEngine::SpiAndProvider::GetProvider(
 //---------------------------------------------------
 // CEngine
 //---------------------------------------------------
-AutoPtr<ISecurityAccess> CEngine::sDoor;
+INIT_PROI_4 AutoPtr<ISecurityAccess> CEngine::sDoor;
 
 CAR_INTERFACE_IMPL(CEngine, Object, IEngine)
 
@@ -140,6 +140,7 @@ ECode CEngine::GetServices(
     }
     String name = mServiceName + "." + algoUC;
     AutoPtr<IArrayList> allServices;
+    Logger::E("leliang", "CEngine::GetServices, name:%s", name.string());
     Services::GetServices(name, (IArrayList**)&allServices);
     mServiceCache = new ServiceCacheEntry(algoUC, newCacheVersion, allServices);
     *services = allServices;

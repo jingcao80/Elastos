@@ -4,16 +4,20 @@
 #include "core/CString.h"
 #include "core/ClassLoader.h"
 #include "core/AutoLock.h"
+#include "core/CPathClassLoader.h"
 #include "security/CSecurity.h"
 #include "utility/CArrayList.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Core::IClassLoader;
 using Elastos::Core::ClassLoader;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Core::AutoLock;
 using Elastos::Security::CSecurity;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Apache {
@@ -24,11 +28,11 @@ namespace Fortress {
 INIT_PROI_5 HashMap< String, AutoPtr<IArrayList> > Services::sServices;
 INIT_PROI_5 Mutex Services::sServicesLock;
 INIT_PROI_5 AutoPtr<IProviderService> Services::sCachedSecureRandomService;
-Boolean Services::sNeedRefresh;
+Boolean Services::sNeedRefresh = FALSE;
 Int32 Services::sCacheVersion = 1;
 INIT_PROI_5 const AutoPtr<IArrayList> Services::sProviders = Init_sProviders();
 INIT_PROI_5 HashMap< String, AutoPtr<IProvider> > Services::sProvidersNames;
-INIT_PROI_6 AutoPtr<Object> Services::sIsInitialized = Initialize();
+INIT_PROI_6 AutoPtr<Object> Services::sIsInitialized;// = Initialize();
 INIT_PROI_5 Object Services::LOCK;
 
 Services::Services()
@@ -43,16 +47,30 @@ AutoPtr<IArrayList> Services::Init_sProviders()
 
 AutoPtr<Object> Services::Initialize()
 {
+    static Boolean initialized = FALSE;
+    if (initialized) {
+        return NULL;
+    } else {
+        initialized = TRUE;
+    }
+
     String providerClassName;
     Int32 i = 1;
     AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
+    //begin leliang
+    //String classPath("/system/lib/Org.Conscrypt.eco");
+    //AutoPtr<IClassLoader> cl;
+    //CPathClassLoader::New(classPath, NULL, (IClassLoader**)&cl);
+    //end leliang
     AutoPtr<CSecurity> security;
     CSecurity::AcquireSingletonByFriend((CSecurity**)&security);
     String key("");
     key.AppendFormat("security.provider.%d", i);
     while (security->GetProperty(key, &providerClassName), !providerClassName.IsNull()) {
+        Logger::E("leliang", "line:%d, func:%s\n, className:%s, key:%s", __LINE__, "Services::Initialize", providerClassName.string(), key.string());
         AutoPtr<IClassInfo> providerClass;
         ECode ec = cl->LoadClass(providerClassName, (IClassInfo**)&providerClass);
+        //Logger::E("leliang", "LoadClass ec:0x%x", ec);
         if (SUCCEEDED(ec)) {
             AutoPtr<IInterface> obj;
             ec = providerClass->CreateObject((IInterface**)&obj);
@@ -144,6 +162,11 @@ ECode Services::InitServiceInfo(
     AutoLock lock(LOCK);
     AutoPtr<ISet> set;
     p->GetServices((ISet**)&set);
+    //leliang begin debug log
+    String pName;
+    p->GetName(&pName);
+    Logger::E("leliang", "===Services::InitServiceInfo for provider: %s===", pName.string());
+    //leliang end debug log
     AutoPtr<IIterator> it;
     set->GetIterator((IIterator**)&it);
     Boolean hasNext;
@@ -159,6 +182,7 @@ ECode Services::InitServiceInfo(
         String algo;
         service->GetAlgorithm(&algo);
         String key = type + "." + algo.ToUpperCase();
+        Logger::E("leliang", "===Services::InitServiceInfo service: key:%s, service:%p===", key.string(), service);
         AppendServiceLocked(key, service);
         AutoPtr<IList> aliases;
         CEngine::sDoor->GetAliases(service, (IList**)&aliases);
@@ -171,6 +195,7 @@ ECode Services::InitServiceInfo(
             aliasIt->GetNext((IInterface**)&aliasObj);
             ICharSequence::Probe(aliasObj)->ToString(&alias);
             key = type + "." + alias.ToUpperCase();
+            //Logger::E("leliang", "===Services::InitServiceInfo alias: %s===", key.string());
             AppendServiceLocked(key, service);
         }
     }
@@ -207,6 +232,11 @@ ECode Services::GetServices(
     HashMap< String, AutoPtr<IArrayList> >::Iterator it = sServices.Find(key);
     if (it != sServices.End()) {
         *services = it->mSecond;
+        //test begin leling
+        //Int32 size;
+        //(*services)->GetSize(&size);
+        //Logger::E("leliang", "Services::GetServices, find key:%s, size:%d", key.string(), size);
+        //test begin end
         REFCOUNT_ADD(*services);
     }
     return NOERROR;

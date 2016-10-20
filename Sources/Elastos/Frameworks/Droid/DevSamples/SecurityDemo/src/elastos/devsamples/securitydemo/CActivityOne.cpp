@@ -1,9 +1,14 @@
 
 #include "elastos/devsamples/securitydemo/CActivityOne.h"
+#include "org/apache/harmony/security/fortress/Services.h"
 #include "R.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Security.h>
+#include "Elastos.CoreLibrary.Extensions.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.KeyStore.h"
+#include "elastos/security/KeyPairGenerator.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::EIID_IViewOnClickListener;
@@ -23,6 +28,31 @@ using Elastos::Security::IPublicKey;
 using Elastos::Security::ISignature;
 using Elastos::Security::ISignatureHelper;
 using Elastos::Utility::Logging::Logger;
+using Org::Apache::Harmony::Security::Fortress::Services;
+
+using Elastosx::Crypto::IKeyGeneratorHelper;
+using Elastosx::Crypto::CKeyGeneratorHelper;
+using Elastosx::Crypto::IKeyGenerator;
+using Elastosx::Crypto::ISecretKey;
+using Elastosx::Crypto::IMacHelper;
+using Elastosx::Crypto::CMacHelper;
+using Elastosx::Crypto::IMac;
+
+using Elastos::Droid::KeyStore::Security::IKeyPairGeneratorSpecBuilder;
+using Elastos::Droid::KeyStore::Security::CKeyPairGeneratorSpecBuilder;
+using Elastosx::Security::Auth::X500::IX500Principal;
+using Elastosx::Security::Auth::X500::CX500Principal;
+using Elastos::Math::IBigIntegerHelper;
+using Elastos::Math::CBigIntegerHelper;
+using Elastos::Math::IBigInteger;
+using Elastos::Utility::IDate;
+using Elastos::Utility::CDate;
+using Elastos::Droid::KeyStore::Security::IKeyPairGeneratorSpec;
+using Elastos::Security::IKeyPairGenerator;
+using Elastos::Security::KeyPairGenerator;
+using Elastos::Security::IKeyPair;
+
+
 
 namespace Elastos {
 namespace DevSamples {
@@ -45,7 +75,14 @@ CActivityOne::MyListener::MyListener(
 ECode CActivityOne::MyListener::OnClick(
     /* [in] */ IView* v)
 {
-    Logger::I(TAG, "SecurityDemo::MyListener::OnClick");
+    Int32 id;
+    v->GetId(&id);
+
+    Logger::I(TAG, "SecurityDemo::MyListener::OnClick on viewID:%d", id);
+
+    if (id == R::id::Button2) {
+        return mHost->Button2Function();
+    }
 
     String data = String("testtesttest");
     AutoPtr<ArrayOf<Byte> > signatureData;
@@ -198,6 +235,9 @@ ECode CActivityOne::OnCreate(
     AutoPtr<MyListener> l = new MyListener(this);
     view->SetOnClickListener(l.Get());
 
+    view = FindViewById(R::id::Button2);
+    view->SetOnClickListener(l.Get());
+
     return NOERROR;
 }
 
@@ -238,6 +278,80 @@ ECode CActivityOne::OnActivityResult(
 {
     Logger::I(TAG, " >> OnActivityResult()");
     return Activity::OnActivityResult(requestCode, resultCode, data);
+}
+
+ECode CActivityOne::Button2Function()
+{
+    Logger::E(TAG, "leliang begin Button2Function");
+    Services::Initialize();
+    /*
+    //test keypairgenerator
+    AutoPtr<IKeyPairGeneratorSpecBuilder> kpgSpecBuilder;
+    CKeyPairGeneratorSpecBuilder::New(IContext::Probe(this), (IKeyPairGeneratorSpecBuilder**)&kpgSpecBuilder);
+    // You'll use the alias later to retrieve the key.  It's a key for the key!
+    kpgSpecBuilder->SetAlias(String("leliang"));
+    AutoPtr<IX500Principal> x500Principal;
+    CX500Principal::New(String("CN=leliang"), (IX500Principal**)&x500Principal);
+    // The subject used for the self-signed certificate of the generated pair
+    kpgSpecBuilder->SetSubject(x500Principal);
+    AutoPtr<IBigIntegerHelper> biHelper;
+    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&biHelper);
+    AutoPtr<IBigInteger> bigInt;
+    biHelper->ValueOf(1337, (IBigInteger**)&bigInt);
+    // The serial number used for the self-signed certificate of the
+    // generated pair.
+    kpgSpecBuilder->SetSerialNumber(bigInt);
+    // Date range of validity for the generated pair.
+    AutoPtr<IDate> startDate;
+    CDate::New(116, 0, 1, (IDate**)&startDate);
+    kpgSpecBuilder->SetStartDate(startDate);
+    AutoPtr<IDate> endDate;
+    CDate::New(126, 0, 1, (IDate**)&endDate);
+    kpgSpecBuilder->SetEndDate(endDate);
+    AutoPtr<IKeyPairGeneratorSpec> spec;
+    kpgSpecBuilder->Build((IKeyPairGeneratorSpec**)&spec);
+    // END_INCLUDE(create_spec)
+
+    // BEGIN_INCLUDE(create_keypair)
+    // Initialize a KeyPair generator using the the intended algorithm (in this example, RSA
+    // and the KeyStore.  This example uses the AndroidKeyStore.
+    AutoPtr<IKeyPairGenerator> kpGenerator;
+    KeyPairGenerator::GetInstance(String("RSA")//, String("AndroidKeyStore")
+                                    , (IKeyPairGenerator**)&kpGenerator);
+    kpGenerator->Initialize(IAlgorithmParameterSpec::Probe(spec));
+    AutoPtr<IKeyPair> kp;
+    kpGenerator->GenerateKeyPair((IKeyPair**)&kp);
+    */
+    // test mac
+    // Generate secret key for HMAC-MD5
+    AutoPtr<IKeyGeneratorHelper> kgHelper;
+    CKeyGeneratorHelper::AcquireSingleton((IKeyGeneratorHelper**)&kgHelper);
+    AutoPtr<IKeyGenerator> kg;
+    kgHelper->GetInstance(String("HMACMD5"), (IKeyGenerator**)&kg);
+    AutoPtr<ISecretKey> sk;
+    kg->GenerateKey((ISecretKey**)&sk);
+
+    // Get instance of Mac object implementing HMAC-MD5, and
+    // initialize it with the above secret key
+    AutoPtr<IMacHelper> macHelper;
+    CMacHelper::AcquireSingleton((IMacHelper**)&macHelper);
+    AutoPtr<IMac> mac;
+    macHelper->GetInstance(String("HMACMD5"), (IMac**)&mac);
+    mac->Init(IKey::Probe(sk));
+    String test("Hi There");
+    AutoPtr<ArrayOf<Byte> > input = test.GetBytes();
+    AutoPtr<ArrayOf<Byte> > result;
+    mac->DoFinal(input, (ArrayOf<Byte>**)&result);
+
+    if (result != NULL) {
+        for (Int32 i = 0; i < result->GetLength(); ++i) {
+            Logger::E(TAG, "result[%d]: 0x%x", i, (*result)[i]);
+        }
+    } else {
+        Logger::E(TAG, "leliang result is NULL");
+    }
+    Logger::E(TAG, "leliang end Button2Function");
+    return NOERROR;
 }
 
 } // namespace SecurityDemo

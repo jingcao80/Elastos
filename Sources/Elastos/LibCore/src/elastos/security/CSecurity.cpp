@@ -35,24 +35,24 @@ namespace Security {
 //----------------------------------------------------
 CAR_INTERFACE_IMPL(CSecurity::SecurityDoor, Object, ISecurityAccess)
 
-ECode CSecurity::SecurityDoor::Aggregate(
-    /* [in] */ AggregateType type,
-    /* [in] */ IInterface* object)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSecurity::SecurityDoor::GetDomain(
-    /* [out] */ IInterface** object)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CSecurity::SecurityDoor::GetClassID(
-    /* [out] */ ClassID* clsid)
-{
-    return E_NOT_IMPLEMENTED;
-}
+//ECode CSecurity::SecurityDoor::Aggregate(
+//    /* [in] */ AggregateType type,
+//    /* [in] */ IInterface* object)
+//{
+//    return E_NOT_IMPLEMENTED;
+//}
+//
+//ECode CSecurity::SecurityDoor::GetDomain(
+//    /* [out] */ IInterface** object)
+//{
+//    return E_NOT_IMPLEMENTED;
+//}
+//
+//ECode CSecurity::SecurityDoor::GetClassID(
+//    /* [out] */ ClassID* clsid)
+//{
+//    return E_NOT_IMPLEMENTED;
+//}
 
 ECode CSecurity::SecurityDoor::RenumProviders()
 {
@@ -85,6 +85,7 @@ CSecurity::StaticInitializer::StaticInitializer()
     // - load statically registered providers
     // - if no provider description file found then load default providers
 
+    Logger::E("CSecurity", "TODO leliang file:%s", __FILE__);
     Boolean loaded = FALSE;
     // try {
     // TODO:
@@ -124,10 +125,11 @@ AutoPtr<IProperties> CSecurity::Init_sSecprops()
 void CSecurity::RegisterDefaultProviders()
 {
     String old;
-    sSecprops->SetProperty(String("security.provider.1"), String("com.android.org.conscrypt.OpenSSLProvider"), &old);
-    sSecprops->SetProperty(String("security.provider.2"), String("com.android.org.bouncycastle.jce.provider.BouncyCastleProvider"), &old);
-    sSecprops->SetProperty(String("security.provider.3"), String("Org.Apache.Harmony.Security.Provider.Crypto.CCryptoProvider"), &old);
-    sSecprops->SetProperty(String("security.provider.4"), String("com.android.org.conscrypt.JSSEProvider"), &old);
+    sSecprops->SetProperty(String("security.provider.1"), String("Org.Conscrypt.COpenSSLProvider"), &old);
+    //sSecprops->SetProperty(String("security.provider.1"), String("com.android.org.conscrypt.OpenSSLProvider"), &old);
+    //sSecprops->SetProperty(String("security.provider.2"), String("com.android.org.bouncycastle.jce.provider.BouncyCastleProvider"), &old);
+    //sSecprops->SetProperty(String("security.provider.3"), String("org.apache.harmony.security.provider.crypto.CryptoProvider"), &old);
+    //sSecprops->SetProperty(String("security.provider.4"), String("com.android.org.conscrypt.JSSEProvider"), &old);
 }
 
 /**

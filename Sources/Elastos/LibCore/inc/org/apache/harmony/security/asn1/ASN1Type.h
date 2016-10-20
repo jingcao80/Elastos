@@ -3,7 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_ASN1TYPE_H__
 
 #include "Elastos.CoreLibrary.Apache.h"
-#include "core/Object.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::IO::IInputStream;

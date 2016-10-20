@@ -3,10 +3,10 @@
 #define __ORG_APACHE_HARMONY_SECURITY_FORTRESS_SERVICES_H__
 
 #include "Elastos.CoreLibrary.Apache.h"
-#include "core/Mutex.h"
+#include "elastos/core/Mutex.h"
 #include "elastos/coredef.h"
-#include "Object.h"
-#include "utility/etl/HashMap.h"
+#include "elastos/core/Object.h"
+#include "elastos/utility/etl/HashMap.h"
 
 using Elastos::Core::Mutex;
 using Elastos::Security::IProvider;
@@ -21,7 +21,7 @@ namespace Harmony {
 namespace Security {
 namespace Fortress {
 
-class Services
+class ECO_PUBLIC Services
 {
 public:
     static CARAPI GetProviders(
@@ -57,6 +57,7 @@ public:
     static CARAPI GetCacheVersion(
         /* [out] */ Int32* cacheVersion);
 
+    static CARAPI_(AutoPtr<Object>) Initialize();
 private:
     Services();
 
@@ -69,7 +70,6 @@ private:
 
     static CARAPI_(AutoPtr<IArrayList>) Init_sProviders();
 
-    static CARAPI_(AutoPtr<Object>) Initialize();
 
 private:
     /**

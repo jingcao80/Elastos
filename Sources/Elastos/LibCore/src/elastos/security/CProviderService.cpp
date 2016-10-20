@@ -8,6 +8,7 @@
 #include "utility/CArrayList.h"
 #include "utility/CCollections.h"
 #include "utility/CHashMap.h"
+#include "elastos/core/CPathClassLoader.h"
 #include "utility/logging/Logger.h"
 
 using Elastos::Core::ClassLoader;
@@ -16,6 +17,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::IClassLoader;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::ICollections;
@@ -64,20 +66,20 @@ ECode CProviderService::Initialize(
     sSupportsParameterTypes[String("Mac")] = TRUE;
     sSupportsParameterTypes[String("Signature")] = TRUE;
 
-    assert(0 && "TODO: java.security.cert.CertStoreParameters");
-    //TODO
-//    // Types that take a parameter to newInstance
-//    AutoPtr<IClassInfo> clsInfo;
-//    CObject::ReflectClassInfo(service->Probe(EIID_IInterface), (IClassInfo**)&clsInfo);
-//    AutoPtr<IInterfaceInfo> itfInfo;
-//    ECode ec = LoadClassOrThrow(String("Elastos.Security.Cert.CCertStoreParameters"),
-//            String("Elastos.Security.Cert.ICertStoreParameters"),
-//            clsInfo, (IInterfaceInfo**)&itfInfo);
-//    if (FAILED(ec)) {
-//        assert(SUCCEEDED(ec));
-//        return ec;
-//    }
-//    sConstructorParameterClasses[String("CertStore")] = itfInfo;
+    //assert(0 && "TODO: java.security.cert.CertStoreParameters");
+    // Types that take a parameter to newInstance
+    AutoPtr<IClassInfo> clsInfo;
+    CObject::ReflectClassInfo(service->Probe(EIID_IInterface), (IClassInfo**)&clsInfo);
+    AutoPtr<IInterfaceInfo> itfInfo;
+    ECode ec = LoadClassOrThrow(String("Elastos.Security.Cert.CLDAPCertStoreParameters"),//TODO
+            String("Elastos.Security.Cert.ICertStoreParameters"),
+            clsInfo, (IInterfaceInfo**)&itfInfo);
+    if (FAILED(ec)) {
+        Logger::E("leliang", "====== failed === ec:0x%x", ec);
+        assert(SUCCEEDED(ec));
+        return ec;
+    }
+    sConstructorParameterClasses[String("CertStore")] = itfInfo;
 
     // Types that do not take any kind of parameter
     sConstructorParameterClasses[String("AlgorithmParameterGenerator")] = NULL;
@@ -170,9 +172,21 @@ ECode CProviderService::LoadClassOrThrow(
     /* [in] */ IClassInfo* clsInfo,
     /* [out] */ IInterfaceInfo** itfInfo)
 {
-    AutoPtr<IClassLoader> loader = ClassLoader::GetClassLoader(clsInfo);
+    //TODO AutoPtr<IClassLoader> loader = ClassLoader::GetClassLoader(clsInfo);
+    //begin leliang
+    String classPath("/system/lib/Elastos.CoreLibrary.eco");
+    AutoPtr<IClassLoader> loader;
+    CPathClassLoader::New(classPath, NULL, (IClassLoader**)&loader);
+    //end leliang
+    Logger::E("leliang", "CProviderService::LoadClassOrThrow loader:%p", loader.Get());
     AutoPtr<IClassInfo> theClsInfo;
-    FAIL_RETURN(loader->LoadClass(className, (IClassInfo**)&theClsInfo));
+    ECode ec = loader->LoadClass(className, (IClassInfo**)&theClsInfo);
+    if (FAILED(ec)) {
+        Logger::E("leliang", "CProviderService::LoadClassOrThrow ec:0x%x, className:%s", ec, className.string());
+        return ec;
+    }
+
+    //FAIL_RETURN(loader->LoadClass(className, (IClassInfo**)&theClsInfo));
     return theClsInfo->GetInterfaceInfo(interfaceName, itfInfo);
 }
 
@@ -288,6 +302,8 @@ ECode CProviderService::NewInstance(
         ECode ec = cl->LoadClass(mClassName, (IClassInfo**)&mImplementation);
         if (FAILED(ec)) {
             Logger::E("CProviderService", "%s %s implementation not found", mType.string(), mAlgorithm.string());
+            Logger::E("CProviderService", "mClassName: %s", mClassName.string());
+            assert(0);
             return E_NO_SUCH_ALGORITHM_EXCEPTION;
         }
         mLastClassName = mClassName;

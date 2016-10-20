@@ -5,9 +5,11 @@
 #include "NativeCrypto.h"
 #include "COpenSSLKey.h"
 #include "Elastos.CoreLibrary.Extensions.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastosx::Crypto::ISecretKey;
 using Org::Conscrypt::NativeCrypto;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -159,7 +161,7 @@ HmacSHA512::HmacSHA512()
 //=========================================
 // OpenSSLMac::
 //=========================================
-CAR_INTERFACE_IMPL(OpenSSLMac, Object, IOpenSSLMac)
+CAR_INTERFACE_IMPL(OpenSSLMac, MacSpi, IOpenSSLMac)
 
 ECode OpenSSLMac::constructor(
     /* [in] */ Int64 evp_md,
@@ -187,11 +189,13 @@ ECode OpenSSLMac::EngineInit(
 {
     if (ISecretKey::Probe(key) == NULL) {
         // throw new InvalidKeyException("key must be a SecretKey");
+        Logger::E("OpenSSLMac", "EngineInit key must be a SecretKey");
         return E_INVALID_KEY_EXCEPTION;
     }
 
     if (params != NULL) {
         // throw new InvalidAlgorithmParameterException("unknown parameter type");
+        Logger::E("OpenSSLMac", "EngineInit unknown parameter type");
         return E_INVALID_KEY_EXCEPTION;
     }
 
@@ -203,6 +207,7 @@ ECode OpenSSLMac::EngineInit(
         key->GetEncoded((ArrayOf<Byte>**)&keyBytes);
         if (keyBytes == NULL) {
             // throw new InvalidKeyException("key cannot be encoded");
+            Logger::E("OpenSSLMac", "EngineInit key cannot be encoded");
             return E_INVALID_KEY_EXCEPTION;
         }
 
@@ -257,6 +262,7 @@ ECode OpenSSLMac::EngineDoFinal(
     AutoPtr<IOpenSSLDigestContext> ctxLocal = mCtx;
     AutoPtr<ArrayOf<Byte> > output;
     NativeCrypto::EVP_DigestSignFinal(ctxLocal, (ArrayOf<Byte>**)&output);
+    Logger::E("leliang", "OpenSSLMac::EngineDoFinal, output:%p", output.Get());
     ResetContext();
     *input = output;
     return NOERROR;

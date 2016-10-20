@@ -131,6 +131,9 @@ SOURCES += X509PublicKey.cpp
 SOURCES += CX509PublicKey.cpp
 SOURCES += Platform.cpp
 SOURCES += CPlatform.cpp
+SOURCES += COpenSSLMacHmacMD5.cpp
+SOURCES += OpenSSLKeyGeneratorTest.cpp
+SOURCES += COpenSSLKeyGeneratorTest.cpp
 
 SOURCES += Elastos.CoreLibrary.cpp
 

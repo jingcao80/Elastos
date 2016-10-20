@@ -1,11 +1,14 @@
 
 #include "Elastos.CoreLibrary.Utility.h"
+#include "org/apache/harmony/security/x501/CName.h"
 #include "CX500Principal.h"
 #include "CString.h"
 #include "StringBuilder.h"
 #include "AutoLock.h"
 #include "org/apache/harmony/security/x501/CName.h"
 
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::X501::CName;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;

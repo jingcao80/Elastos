@@ -2,6 +2,7 @@
 #ifndef __ELASTOSX_SECURITY_AUTH_X500_CX500PRINCIPAL_H__
 #define __ELASTOSX_SECURITY_AUTH_X500_CX500PRINCIPAL_H__
 
+#include "Elastos.CoreLibrary.Apache.h"
 #include "_Elastosx_Security_Auth_X500_CX500Principal.h"
 #include "Elastos.CoreLibrary.Apache.h"
 #include "Object.h"

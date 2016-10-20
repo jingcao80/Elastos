@@ -59,6 +59,7 @@ private:
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
 
+    CARAPI Button2Function();
 private:
 };
 

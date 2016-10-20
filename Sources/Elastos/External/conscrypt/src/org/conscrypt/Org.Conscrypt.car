@@ -97,6 +97,7 @@ module
     using interface Elastos.Security.IKeyFactorySpi;
     using interface Elastos.Security.IKeyPairGeneratorSpi;
     using interface Elastos.Security.ISecureRandomSpi;
+    using interface Elastosx.Crypto.IKeyGeneratorSpi;
     using interface Elastos.Security.Cert.IX509Certificate;
     using interface Elastos.Security.Cert.IX509CRLEntry;
     using interface Elastos.Security.Cert.IX509Extension;
@@ -117,6 +118,7 @@ module
     using interface Elastos.Security.Interfaces.IRSAKey;
     using interface Elastos.Utility.IList;
 
+    using interface Elastosx.Crypto.IMacSpi;
     using interface Elastosx.Crypto.IKeyAgreementSpi;
     using interface Elastosx.Crypto.Interfaces.IDHKey;
     using interface Elastosx.Crypto.Interfaces.IDHPrivateKey;
@@ -472,6 +474,11 @@ module
         interface IOpenSSLKey;
     }
 
+    class COpenSSLMacHmacMD5 {
+        interface IMacSpi;
+        interface IOpenSSLMac;
+    }
+
     class COpenSSLMessageDigestJDK {
         constructor(
             [in] Int64 evp_md,
@@ -555,6 +562,10 @@ module
         interface ISecureRandomSpi;
         interface IOpenSSLRandom;
         interface ISerializable;
+    }
+
+    class COpenSSLKeyGeneratorTest {
+        interface IKeyGeneratorSpi;
     }
 
     [deprecated]

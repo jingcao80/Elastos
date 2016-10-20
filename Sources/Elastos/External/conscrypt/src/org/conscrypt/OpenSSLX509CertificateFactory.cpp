@@ -347,7 +347,7 @@ static AutoPtr<ArrayOf<Byte> > InitPKCS7_MARKER()
     (*res)[13] = 'C';
     (*res)[14] = 'S';
     (*res)[15] = '7';
-    (*res)[16] = '-';
+    //(*res)[16] = '-';
     return res;
 }
 AutoPtr<ArrayOf<Byte> > OpenSSLX509CertificateFactory::PKCS7_MARKER = InitPKCS7_MARKER();
