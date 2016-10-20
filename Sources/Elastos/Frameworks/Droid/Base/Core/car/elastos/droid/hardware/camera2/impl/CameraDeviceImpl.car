@@ -141,6 +141,19 @@ module
          */
         OnIdle(
             [in] ICameraDevice* camera);
+
+        OnOpened(
+            [in] ICameraDevice* camera);
+
+        OnClosed(
+            [in] ICameraDevice* camera);
+
+        OnDisconnected(
+            [in] ICameraDevice* camera);
+
+        OnError(
+            [in] ICameraDevice* camera,
+            [in] Int32 error);
     }
 
     interface ICameraDeviceImplCaptureCallbackHolder {

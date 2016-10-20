@@ -37,23 +37,24 @@ ECode BroadcastDispatcher::constructor(
 
 ECode BroadcastDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ IArgumentList* args)
 {
     Boolean gotResult = FALSE;
 
-    Int32 size;
-    mDispatchTargets->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IInterface> obj;
-        mDispatchTargets->Get(i, (IInterface**)&obj);
-        AutoPtr<IDispatchable> dispatchTarget = IDispatchable::Probe(obj);
+    assert(0);
+    // Int32 size;
+    // mDispatchTargets->GetSize(&size);
+    // for (Int32 i = 0; i < size; i++) {
+    //     AutoPtr<IInterface> obj;
+    //     mDispatchTargets->Get(i, (IInterface**)&obj);
+    //     AutoPtr<IDispatchable> dispatchTarget = IDispatchable::Probe(obj);
 
-        dispatchTarget->Dispatch(method, args);
+    //     dispatchTarget->Dispatch(method, args);
 
-        if (!gotResult) {
-            gotResult = TRUE;
-        }
-    }
+    //     if (!gotResult) {
+    //         gotResult = TRUE;
+    //     }
+    // }
     return NOERROR;
 }
 

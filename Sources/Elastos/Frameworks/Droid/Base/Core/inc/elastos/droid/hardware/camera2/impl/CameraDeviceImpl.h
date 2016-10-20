@@ -149,6 +149,9 @@ public:
          */
         CARAPI OnIdle(
             /* [in] */ ICameraDevice* camera);
+
+        CARAPI OnClosed(
+            /* [in] */ ICameraDevice* camera);
     };
 
     class CaptureCallbackHolder
@@ -161,8 +164,6 @@ public:
         CaptureCallbackHolder();
 
         virtual ~CaptureCallbackHolder() {}
-
-        CARAPI constructor();
 
         CARAPI constructor(
             /* [in] */ ICameraDeviceImplCaptureCallback* _callback,
@@ -203,8 +204,6 @@ public:
         FrameNumberTracker();
 
         virtual ~FrameNumberTracker() {}
-
-        CARAPI constructor();
 
         CARAPI constructor(
             /* [in] */ ICameraDeviceImpl* host);
@@ -274,8 +273,6 @@ public:
         CameraDeviceCallbacks();
 
         virtual ~CameraDeviceCallbacks() {}
-
-        CARAPI constructor();
 
         CARAPI constructor(
             /* [in] */ ICameraDeviceImpl* host);

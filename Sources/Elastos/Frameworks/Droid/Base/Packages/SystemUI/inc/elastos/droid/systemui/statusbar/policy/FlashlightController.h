@@ -47,6 +47,8 @@ private:
     class CameraListener: public CameraDevice::StateListener
     {
     public:
+        TO_STRING_IMPL("FlashlightController::CameraListener")
+
         CameraListener(
             /* [in] */ FlashlightController* host);
 
@@ -70,6 +72,8 @@ private:
     class SessionListener: public CameraCaptureSession::StateListener
     {
     public:
+        TO_STRING_IMPL("FlashlightController::SessionListener")
+
         SessionListener(
             /* [in] */ FlashlightController* host);
 
@@ -114,6 +118,8 @@ private:
     class AvailabilityCallback: public CameraManager::AvailabilityCallback
     {
     public:
+        TO_STRING_IMPL("FlashlightController::AvailabilityCallback")
+
         AvailabilityCallback(
             /* [in] */ FlashlightController* host);
 
@@ -217,8 +223,8 @@ private:
     AutoPtr<ICameraCaptureSession> mSession;
     AutoPtr<ISurfaceTexture> mSurfaceTexture;
     AutoPtr<ISurface> mSurface;
-    AutoPtr<ICameraDeviceStateCallback> mCameraListener;
-    AutoPtr<ICameraCaptureSessionStateListener> mSessionListener;
+    AutoPtr<CameraListener> mCameraListener;
+    AutoPtr<SessionListener> mSessionListener;
 
     AutoPtr<IRunnable> mUpdateFlashlightRunnable;
     AutoPtr<IRunnable> mKillFlashlightRunnable;

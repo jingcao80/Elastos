@@ -6,23 +6,23 @@
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/graphics/PixelFormat.h"
 #include "elastos/droid/graphics/CImageFormat.h"
+#include "elastos/droid/os/Debug.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/ClassLoader.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/Objects.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Droid::Hardware::Camera2::Utils::HashCodeHelpers;
-// using Elastos::Droid::Media::ECLSID_CImageReader;
-// using Elastos::Droid::Media::ECLSID_CMediaRecorder;
-// using Elastos::Droid::Media::ECLSID_CMediaCodec;
-// using Elastos::Droid::View::ECLSID_CSurfaceHolder;
-// using Elastos::Droid::Graphics::ECLSID_CSurfaceTexture;
 using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Graphics::CImageFormat;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::PixelFormat;
+using Elastos::Droid::Os::Debug;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::ClassLoader;
+using Elastos::Core::IClassLoader;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Objects;
 using Elastos::Utility::ISet;
@@ -43,6 +43,8 @@ const Int32 StreamConfigurationMap::HAL_PIXEL_FORMAT_RAW_OPAQUE = 0x24;
 
 const Int32 StreamConfigurationMap::DURATION_MIN_FRAME = 0;
 const Int32 StreamConfigurationMap::DURATION_STALL = 1;
+
+List< AutoPtr<IClassInfo> > StreamConfigurationMap::sOutputSupportedClasses;
 
 CAR_INTERFACE_IMPL(StreamConfigurationMap, Object, IStreamConfigurationMap)
 
@@ -209,30 +211,31 @@ ECode StreamConfigurationMap::IsOutputSupportedFor(
 
     FAIL_RETURN(Preconditions::CheckNotNull(klass, String("klass must not be null")))
 
-    assert(0 && "TODO: need ECLSID_C*");
-    ClassID cls;
-    klass->GetId(&cls);
-    // if (cls == ECLSID_CImageReader) {
-    //     *value = TRUE;
-    //     return NOERROR;
-    // } else if (klass == ECLSID_CMediaRecorder) {
-    //     *value = TRUE;
-    //     return NOERROR;
-    // } else if (klass == ECLSID_CMediaCodec) {
-    //     *value = TRUE;
-    //     return NOERROR;
-    // } else if (klass == ECLSID_CAllocation) {
-    //     *value = TRUE;
-    //     return NOERROR;
-    // } else if (klass == ECLSID_CSurfaceHolder) {
-    //     *value = TRUE;
-    //     return NOERROR;
-    // } else if (klass == ECLSID_CSurfaceTexture) {
-    //     *value = TRUE;
-    //     return NOERROR;
-    // }
+    if (sOutputSupportedClasses.IsEmpty()) {
+        AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
+        AutoPtr<IClassInfo> irClass;
+        String classes[6];
+        classes[0] = String("Elastos.Droid.Media.CImageReader");
+        classes[1] = String("Elastos.Droid.Media.CMediaRecorder");
+        classes[2] = String("Elastos.Droid.Media.CMediaCodec");
+        classes[3] = String("Elastos.Droid.Renderscript.CAllocation");
+        classes[4] = String("Elastos.Droid.View.CSurfaceHolder");
+        classes[5] = String("Elastos.Droid.Graphics.CSurfaceTexture");
 
-    *value = FALSE;
+        for (Int32 i = 0; i < 6; ++i) {
+            AutoPtr<IClassInfo> info;
+            cl->LoadClass(classes[i], (IClassInfo**)&info);
+            sOutputSupportedClasses.PushBack(info);
+        }
+    }
+
+    AutoPtr<IClassInfo> temp = klass;
+    List< AutoPtr<IClassInfo> >::Iterator it = Find(
+        sOutputSupportedClasses.Begin(), sOutputSupportedClasses.End(), temp);
+    if (it != sOutputSupportedClasses.End()) {
+        *value = TRUE;
+    }
+
     return NOERROR;
 }
 
@@ -258,10 +261,27 @@ ECode StreamConfigurationMap::GetOutputSizes(
     *outarr = NULL;
 
     // Image reader is "supported", but never for implementation-defined formats; return empty
-    assert(0 && "TODO: need isAssignableFrom");
-    // if (android.media.ImageReader.class.isAssignableFrom(klass)) {
-    //     return new Size[0];
-    // }
+    Boolean isAssignable = FALSE;
+    Int32 itfCount;
+    klass->GetInterfaceCount(&itfCount);
+    AutoPtr< ArrayOf<IInterfaceInfo *> > itfes = ArrayOf<IInterfaceInfo *>::Alloc(itfCount);
+    klass->GetAllInterfaceInfos(itfes.Get());
+    String name, ns;
+    for (Int32 i = 0; i < itfCount; ++i) {
+        (*itfes)[i]->GetName(&name);
+        (*itfes)[i]->GetNamespace(&ns);
+        if (name.Equals("IImageReader") && ns.Equals("Elastos.Droid.Media")) {
+            isAssignable = TRUE;
+            break;
+        }
+    }
+
+    if (isAssignable) {
+        AutoPtr< ArrayOf<ISize*> > array = ArrayOf<ISize*>::Alloc(0);
+        *outarr = array;
+        REFCOUNT_ADD(*outarr)
+        return NOERROR;
+    }
 
     Boolean result;
     FAIL_RETURN(IsOutputSupportedFor(klass, &result))
@@ -537,7 +557,9 @@ ECode StreamConfigurationMap::CheckArgumentFormatSupported(
         }
     }
 
-    Logger::E(TAG, "format %08x is not supported by this stream configuration map", format);
+    Logger::E(TAG, "format %08x is not supported by this %s stream configuration map %s",
+        format, output ? "output" : "input", Arrays::ToString(formats.Get()).string());
+    Debug::DumpBacktrace();
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
@@ -667,7 +689,6 @@ ECode StreamConfigurationMap::GetPublicFormatSizes(
     ECode ec = CheckArgumentFormatSupported(format, output, &result);
     //} catch (IllegalArgumentException e) {
     if (FAILED(ec)) {
-        *sizes = NULL;
         return ec;
     }
     //}

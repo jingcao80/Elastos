@@ -6,6 +6,7 @@
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/hardware/CHardwareCameraSize.h"
 #include "elastos/droid/hardware/HardwareCamera.h"
+#include "elastos/droid/hardware/CHardwareCamera.h"
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/CSimpleStringSplitter.h"
@@ -2411,12 +2412,12 @@ HardwareCamera::HardwareCamera()
     , mWithBuffer(FALSE)
     , mFaceDetectionRunning(FALSE)
 {
+    Logger::D(TAG, "create %s: %p, %d", __FUNCTION__, this, __LINE__);
 }
 
 HardwareCamera::~HardwareCamera()
 {
-    Logger::D(TAG, "%s: %d", __FUNCTION__, __LINE__);
-    Debug::DumpBacktrace();
+    Logger::D(TAG, "destory %s: %p, %d", __FUNCTION__, this, __LINE__);
     ReleaseResources();
 }
 
@@ -2544,11 +2545,7 @@ ECode HardwareCamera::OpenLegacy(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<IHardwareCamera> _camera = new HardwareCamera();
-    ((HardwareCamera*)_camera.Get())->constructor(cameraId, halVersion);
-    *camera = _camera;
-    REFCOUNT_ADD(*camera);
-    return NOERROR;
+    return CHardwareCamera::New(cameraId, halVersion, camera);
 }
 
 ECode HardwareCamera::CameraInitUnspecified(
@@ -2569,7 +2566,8 @@ Boolean HardwareCamera::CheckInitErrors(
 
 AutoPtr<IHardwareCamera> HardwareCamera::OpenUninitialized()
 {
-    AutoPtr<IHardwareCamera> camera = new HardwareCamera();
+    AutoPtr<IHardwareCamera> camera;
+    CHardwareCamera::New((IHardwareCamera**)&camera);
     return camera;
 }
 
@@ -2586,11 +2584,7 @@ ECode HardwareCamera::Open(
     /* [in] */ Int32 cameraId,
     /* [out] */ IHardwareCamera** camera)
 {
-    AutoPtr<IHardwareCamera> _camera = new HardwareCamera();
-    ((HardwareCamera*)_camera.Get())->constructor(cameraId);
-    *camera = _camera;
-    REFCOUNT_ADD(*camera);
-    return NOERROR;
+    return CHardwareCamera::New(cameraId, (IHardwareCamera**)&camera);
 }
 
 ECode HardwareCamera::Open(
@@ -2604,12 +2598,9 @@ ECode HardwareCamera::Open(
     AutoPtr<IHardwareCameraInfo> cameraInfo = new HardwareCamera::CameraInfo();
     for (Int32 i = 0; i < numberOfCameras; i++) {
         GetCameraInfo(i, cameraInfo);
-        if (((HardwareCamera::CameraInfo*)cameraInfo.Get())->mFacing == IHardwareCameraInfo::CAMERA_FACING_BACK) {
-            AutoPtr<IHardwareCamera> _camera = new HardwareCamera();
-            ((HardwareCamera*)_camera.Get())->constructor(i);
-            *camera = _camera;
-            REFCOUNT_ADD(*camera);
-            return NOERROR;
+        if (((HardwareCamera::CameraInfo*)cameraInfo.Get())->mFacing
+            == IHardwareCameraInfo::CAMERA_FACING_BACK) {
+            return CHardwareCamera::New(i, (IHardwareCamera**)&camera);;
         }
     }
 
@@ -3003,7 +2994,8 @@ ECode HardwareCamera::GetEmptyParameters(
 {
     VALIDATE_NOT_NULL(para);
 
-    AutoPtr<IHardwareCamera> camera = new HardwareCamera();
+    AutoPtr<IHardwareCamera> camera;
+    CHardwareCamera::New((IHardwareCamera**)&camera);
     AutoPtr<IParameters> p = new HardwareCamera::Parameters(camera);
     *para = p;
     REFCOUNT_ADD(*para);
@@ -3189,7 +3181,7 @@ ECode HardwareCamera::native_setup(
         cameraId, halVersion, packageName.string());
 
     // Convert String to String16
-    android::String16 clientName = TextUtils::StringToString16(packageName);
+    android::String16 clientName(packageName.string());
 
     android::sp<android::Camera> camera;
     if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {

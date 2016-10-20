@@ -19,111 +19,197 @@ namespace Hardware {
 namespace Camera2 {
 namespace Impl {
 
+static const String TAG("CallbackProxies");
+
+static AutoPtr<IInterfaceInfo> GetInterfaceInfo(
+    /* [in] */ const String& itfcName)
+{
+    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
+    AutoPtr<IInterfaceInfo> itfInfo;
+    cl->LoadInterface(itfcName, (IInterfaceInfo**)&itfInfo);
+    if (itfInfo == NULL) {
+        Logger::E("CallbackProxies", "failed to load [%s] from %s", itfcName.string(), TO_CSTR(cl));
+    }
+
+    return itfInfo;
+}
+
+//==============================================================================================
+// CallbackProxies::DeviceStateCallbackProxy
+//==============================================================================================
 CAR_INTERFACE_IMPL(CallbackProxies::DeviceStateCallbackProxy, CameraDeviceImpl::StateCallbackKK,
         ICallbackProxiesDeviceStateCallbackProxy)
-
-ECode CallbackProxies::DeviceStateCallbackProxy::constructor()
-{
-    return NOERROR;
-}
 
 ECode CallbackProxies::DeviceStateCallbackProxy::constructor(
     /* [in] */ IDispatchable* dispatchTarget)
 {
     FAIL_RETURN(Preconditions::CheckNotNull(dispatchTarget, String("dispatchTarget must not be null")))
-    assert(0);
-    const String klassName("Elastos.Droid.XXXX.CCameraDeviceImplStateCallbackKK;");
-    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
-    AutoPtr<IClassInfo> classInfo;
-    ASSERT_SUCCEEDED(cl->LoadClass(klassName, (IClassInfo**)&classInfo))
-    return CMethodNameInvoker::New(dispatchTarget, classInfo, (IMethodNameInvoker**)&mProxy);
+
+    const String itfcName("Elastos.Droid.Hardware.Camera2.Impl.ICameraDeviceImplStateCallbackKK");
+    AutoPtr<IInterfaceInfo> itfInfo = GetInterfaceInfo(itfcName);
+    if (itfInfo == NULL) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    return CMethodNameInvoker::New(dispatchTarget, itfInfo, (IMethodNameInvoker**)&mProxy);
 }
 
 ECode CallbackProxies::DeviceStateCallbackProxy::OnOpened(
     /* [in] */ ICameraDevice* camera)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(camera));
-    return mProxy->Invoke(String("onOpened"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnOpened"),
+        String("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*)E"), (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceStateCallbackProxy::OnDisconnected(
     /* [in] */ ICameraDevice* camera)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(camera));
-    return mProxy->Invoke(String("onDisconnected"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnDisconnected"),
+        String("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*)E"), (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceStateCallbackProxy::OnError(
     /* [in] */ ICameraDevice* camera,
     /* [in] */ Int32 error)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, TO_IINTERFACE(camera));
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(error);
-    args->Set(1, TO_IINTERFACE(obj));
-    return mProxy->Invoke(String("onError"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnError"),
+        String("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*I32)E"), (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+    args->SetInputArgumentOfInt32(1, error);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceStateCallbackProxy::OnUnconfigured(
     /* [in] */ ICameraDevice* camera)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(camera));
-    return mProxy->Invoke(String("onUnconfigured"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnUnconfigured"),
+        String("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*)E"), (IMethodInfo**)&methodInfo));
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceStateCallbackProxy::OnActive(
     /* [in] */ ICameraDevice* camera)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(camera));
-    return mProxy->Invoke(String("onActive"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnActive"),
+        String("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*)E"), (IMethodInfo**)&methodInfo));
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceStateCallbackProxy::OnBusy(
     /* [in] */ ICameraDevice* camera)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(camera));
-    return mProxy->Invoke(String("onBusy"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnBusy"),
+        String("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*)E"), (IMethodInfo**)&methodInfo));
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceStateCallbackProxy::OnClosed(
     /* [in] */ ICameraDevice* camera)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(camera));
-    return mProxy->Invoke(String("onClosed"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnClosed"),
+        String("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*)E"), (IMethodInfo**)&methodInfo));
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceStateCallbackProxy::OnIdle(
     /* [in] */ ICameraDevice* camera)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(camera));
-    return mProxy->Invoke(String("onIdle"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnIdle"),
+        String("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*)E"), (IMethodInfo**)&methodInfo));
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
+//==============================================================================================
+// CallbackProxies::DeviceCaptureCallbackProxy
+//==============================================================================================
 CAR_INTERFACE_IMPL(CallbackProxies::DeviceCaptureCallbackProxy, CameraDeviceImpl::CaptureCallback,
         ICallbackProxiesDeviceCaptureCallbackProxy)
-
-ECode CallbackProxies::DeviceCaptureCallbackProxy::constructor()
-{
-    return NOERROR;
-}
 
 ECode CallbackProxies::DeviceCaptureCallbackProxy::constructor(
     /* [in] */ IDispatchable* dispatchTarget)
 {
     FAIL_RETURN(Preconditions::CheckNotNull(dispatchTarget, String("dispatchTarget must not be null")))
-    assert(0);
-    const String klassName(".............../CCameraDeviceImplCaptureCallback;");
-    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
-    AutoPtr<IClassInfo> classInfo;
-    ASSERT_SUCCEEDED(cl->LoadClass(klassName, (IClassInfo**)&classInfo))
-    return CMethodNameInvoker::New(dispatchTarget, classInfo, (IMethodNameInvoker**)&mProxy);
+
+    const String itfcName("Elastos.Droid.Hardware.Camera2.Impl.ICameraDeviceImplCaptureCallback");
+    AutoPtr<IInterfaceInfo> itfInfo = GetInterfaceInfo(itfcName);
+    if (itfInfo == NULL) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    return CMethodNameInvoker::New(dispatchTarget, itfInfo, (IMethodNameInvoker**)&mProxy);
 }
 
 ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureStarted(
@@ -132,14 +218,23 @@ ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureStarted(
     /* [in] */ Int64 timestamp,
     /* [in] */ Int64 frameNumber)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-    args->Set(0, TO_IINTERFACE(camera));
-    args->Set(1, TO_IINTERFACE(request));
-    AutoPtr<IInteger64> obj = CoreUtils::Convert(timestamp);
-    args->Set(2, TO_IINTERFACE(obj));
-    AutoPtr<IInteger64> obj2 = CoreUtils::Convert(frameNumber);
-    args->Set(3, TO_IINTERFACE(obj2));
-    return mProxy->Invoke(String("onCaptureStarted"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*"
+        "LElastos/Droid/Hardware/Camera2/ICaptureRequest;*"
+        "I64I64)E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnCaptureStarted"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+    args->SetInputArgumentOfObjectPtr(1, request);
+    args->SetInputArgumentOfInt64(2, timestamp);
+    args->SetInputArgumentOfInt64(3, frameNumber);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCapturePartial(
@@ -147,11 +242,23 @@ ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCapturePartial(
     /* [in] */ ICaptureRequest* request,
     /* [in] */ ICaptureResult* result)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, TO_IINTERFACE(camera));
-    args->Set(1, TO_IINTERFACE(request));
-    args->Set(2, TO_IINTERFACE(result));
-    return mProxy->Invoke(String("onCapturePartial"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*"
+        "LElastos/Droid/Hardware/Camera2/ICaptureRequest;*"
+        "LElastos/Droid/Hardware/Camera2/ICaptureResult;*"
+        ")E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnCapturePartial"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+    args->SetInputArgumentOfObjectPtr(1, request);
+    args->SetInputArgumentOfObjectPtr(2, result);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureProgressed(
@@ -159,11 +266,23 @@ ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureProgressed(
     /* [in] */ ICaptureRequest* request,
     /* [in] */ ICaptureResult* partialResult)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, TO_IINTERFACE(camera));
-    args->Set(1, TO_IINTERFACE(request));
-    args->Set(2, TO_IINTERFACE(partialResult));
-    return mProxy->Invoke(String("onCaptureProgressed"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*"
+        "LElastos/Droid/Hardware/Camera2/ICaptureRequest;*"
+        "LElastos/Droid/Hardware/Camera2/ICaptureResult;*"
+        ")E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnCaptureProgressed"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+    args->SetInputArgumentOfObjectPtr(1, request);
+    args->SetInputArgumentOfObjectPtr(2, partialResult);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureCompleted(
@@ -171,11 +290,23 @@ ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureCompleted(
     /* [in] */ ICaptureRequest* request,
     /* [in] */ ITotalCaptureResult* result)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, TO_IINTERFACE(camera));
-    args->Set(1, TO_IINTERFACE(request));
-    args->Set(2, TO_IINTERFACE(result));
-    return mProxy->Invoke(String("onCaptureCompleted"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*"
+        "LElastos/Droid/Hardware/Camera2/ICaptureRequest;*"
+        "LElastos/Droid/Hardware/Camera2/ITotalCaptureResult;*"
+        ")E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnCaptureCompleted"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+    args->SetInputArgumentOfObjectPtr(1, request);
+    args->SetInputArgumentOfObjectPtr(2, result);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureFailed(
@@ -183,11 +314,23 @@ ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureFailed(
     /* [in] */ ICaptureRequest* request,
     /* [in] */ ICaptureFailure* failure)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, TO_IINTERFACE(camera));
-    args->Set(1, TO_IINTERFACE(request));
-    args->Set(2, TO_IINTERFACE(failure));
-    return mProxy->Invoke(String("onCaptureFailed"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*"
+        "LElastos/Droid/Hardware/Camera2/ICaptureRequest;*"
+        "LElastos/Droid/Hardware/Camera2/ICaptureFailure;*"
+        ")E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnCaptureFailed"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+    args->SetInputArgumentOfObjectPtr(1, request);
+    args->SetInputArgumentOfObjectPtr(2, failure);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureSequenceCompleted(
@@ -195,86 +338,151 @@ ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureSequenceCompleted(
     /* [in] */ Int32 sequenceId,
     /* [in] */ Int64 frameNumber)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, TO_IINTERFACE(camera));
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(sequenceId);
-    args->Set(1, TO_IINTERFACE(obj));
-    AutoPtr<IInteger64> obj2 = CoreUtils::Convert(frameNumber);
-    args->Set(2, TO_IINTERFACE(obj2));
-    return mProxy->Invoke(String("onCaptureSequenceCompleted"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*I32I64)E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnCaptureSequenceCompleted"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+    args->SetInputArgumentOfInt32(1, sequenceId);
+    args->SetInputArgumentOfInt64(2, frameNumber);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::DeviceCaptureCallbackProxy::OnCaptureSequenceAborted(
     /* [in] */ ICameraDevice* camera,
     /* [in] */ Int32 sequenceId)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, TO_IINTERFACE(camera));
-    AutoPtr<IInteger32> obj = CoreUtils::Convert(sequenceId);
-    args->Set(1, TO_IINTERFACE(obj));
-    return mProxy->Invoke(String("onCaptureSequenceAborted"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraDevice;*I32)E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnCaptureSequenceAborted"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, camera);
+    args->SetInputArgumentOfInt32(1, sequenceId);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
+//==============================================================================================
+// CallbackProxies::SessionStateCallbackProxy
+//==============================================================================================
 CAR_INTERFACE_IMPL(CallbackProxies::SessionStateCallbackProxy, CameraCaptureSession::StateCallback,
         ICallbackProxiesSessionStateCallbackProxy)
-
-ECode CallbackProxies::SessionStateCallbackProxy::constructor()
-{
-    return NOERROR;
-}
 
 ECode CallbackProxies::SessionStateCallbackProxy::constructor(
     /* [in] */ IDispatchable* dispatchTarget)
 {
-    FAIL_RETURN(Preconditions::CheckNotNull(dispatchTarget, String("dispatchTarget must not be null")))
-    assert(0);
-    const String klassName(".............../CCameraCaptureSessionStateCallback;");
-    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
-    AutoPtr<IClassInfo> classInfo;
-    ASSERT_SUCCEEDED(cl->LoadClass(klassName, (IClassInfo**)&classInfo))
-    return CMethodNameInvoker::New(dispatchTarget, classInfo, (IMethodNameInvoker**)&mProxy);
+   FAIL_RETURN(Preconditions::CheckNotNull(dispatchTarget, String("dispatchTarget must not be null")))
+
+    const String itfcName("Elastos.Droid.Hardware.Camera2.ICameraCaptureSessionStateCallback");
+    AutoPtr<IInterfaceInfo> itfInfo = GetInterfaceInfo(itfcName);
+    assert(itfInfo != NULL);
+    Logger::I(TAG, " >> create SessionStateCallbackProxy: %p", itfInfo.Get());
+    if (itfInfo == NULL) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    return CMethodNameInvoker::New(dispatchTarget, itfInfo, (IMethodNameInvoker**)&mProxy);
 }
 
 ECode CallbackProxies::SessionStateCallbackProxy::OnConfigured(
     /* [in] */ ICameraCaptureSession* session)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(session));
-    return mProxy->Invoke(String("onConfigured"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnConfigured"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, session);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::SessionStateCallbackProxy::OnConfigureFailed(
     /* [in] */ ICameraCaptureSession* session)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(session));
-    return mProxy->Invoke(String("onConfigureFailed"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnConfigureFailed"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, session);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::SessionStateCallbackProxy::OnReady(
     /* [in] */ ICameraCaptureSession* session)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(session));
-    return mProxy->Invoke(String("onReady"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnReady"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, session);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::SessionStateCallbackProxy::OnActive(
     /* [in] */ ICameraCaptureSession* session)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(session));
-    return mProxy->Invoke(String("onActive"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnActive"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, session);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
 ECode CallbackProxies::SessionStateCallbackProxy::OnClosed(
     /* [in] */ ICameraCaptureSession* session)
 {
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, TO_IINTERFACE(session));
-    return mProxy->Invoke(String("onClosed"), args);
+    AutoPtr<IMethodInfo> methodInfo;
+    const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
+    FAIL_RETURN(mProxy->GetMethodInfo(String("OnClosed"),signature, (IMethodInfo**)&methodInfo))
+    AutoPtr<IArgumentList> args;
+    ECode ec = methodInfo->CreateArgumentList((IArgumentList**)&args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to create argument list at %s", __FUNCTION__);
+        return ec;
+    }
+    args->SetInputArgumentOfObjectPtr(0, session);
+
+    return mProxy->Invoke(methodInfo, args);
 }
 
+//==============================================================================================
+// CallbackProxies
+//==============================================================================================
 CAR_INTERFACE_IMPL(CallbackProxies, Object, ICallbackProxies)
 
 } // namespace Impl

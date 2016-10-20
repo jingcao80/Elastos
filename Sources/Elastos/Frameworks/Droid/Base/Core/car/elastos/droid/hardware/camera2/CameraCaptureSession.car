@@ -14,7 +14,7 @@ module
     namespace Hardware {
     namespace Camera2 {
 
-    interface ICameraCaptureSessionStateCallback{
+    interface ICameraCaptureSessionStateCallback {
         /**
          * This method is called when the camera device has finished configuring itself, and the
          * session can start processing capture requests.

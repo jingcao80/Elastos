@@ -250,12 +250,12 @@ ECode CameraManager::CameraServiceWrapper::GetLegacyParameters(
     *result = android::BAD_VALUE;
     *parameters = NULL;
 
-
     if (mCameraService.get() != NULL) {
         android::String16 str16;
         *result = mCameraService->getLegacyParameters(cameraId, &str16);
         if (*result == android::OK) {
-            String str = TextUtils::String16ToString(str16);
+            android::String8 str8(str16);
+            String str(str8.string());
             AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
             array->Set(0, str);
             *parameters = array;
@@ -718,7 +718,7 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
     VALIDATE_NOT_NULL(_device);
     *_device = NULL;
 
-    Logger::I(TAG, " >> OpenCameraDeviceUserAsync: %s", cameraId.string());
+    Logger::I(TAG, " >> OpenCameraDeviceUserAsync: %s, callback: %s", cameraId.string(), TO_CSTR(ccallback));
     Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
     AutoPtr<ICameraCharacteristics> characteristics;
     GetCameraCharacteristics(cameraId, (ICameraCharacteristics**)&characteristics);

@@ -1062,10 +1062,10 @@ ECode RequestThreadManager::ConfigureOutputs(
         AutoPtr<ISize> largestJpegDimen;
         ParameterUtils::GetLargestSupportedJpegSizeByArea(mParams, (ISize**)&largestJpegDimen);
 
-        AutoPtr<IList> cSize;
+        AutoPtr<ArrayOf<ICameraSize*> > cSize;
         mParams->GetSupportedPreviewSizes((ArrayOf<ICameraSize*>**)&cSize);
         AutoPtr<IList> supportedPreviewSizes;
-        ParameterUtils::ConvertSizeList(cSize, (IList**)&supportedPreviewSizes);
+        ParameterUtils::ConvertSizeArrayToList(cSize, (IList**)&supportedPreviewSizes);
 
         // Use smallest preview dimension with same aspect ratio as sensor that is >= than all
         // of the configured output dimensions.  If none exists, fall back to using the largest

@@ -62,6 +62,10 @@ public:
         /* [in] */ const String& className,
         /* [out] */ IClassInfo** klass);
 
+    CARAPI LoadInterface(
+        /* [in] */ const String& className,
+        /* [out] */ IInterfaceInfo** klass);
+
     CARAPI ToString(
         /* [out] */ String* str);
 
@@ -92,6 +96,10 @@ protected:
     virtual CARAPI FindClass(
         /* [in] */ const String& className,
         /* [out] */ IClassInfo** klass);
+
+    virtual CARAPI FindInterface(
+        /* [in] */ const String& itfcName,
+        /* [out] */ IInterfaceInfo** itfc);
 
     /**
      * Returns the class with the specified name if it has already been loaded

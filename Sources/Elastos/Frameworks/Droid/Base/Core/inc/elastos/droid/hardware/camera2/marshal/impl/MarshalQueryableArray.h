@@ -77,7 +77,6 @@ private:
             /* [in] */ IInterface* element);
 
     private:
-        ClassID mClass;
         AutoPtr<IMarshaler> mComponentMarshaler;
         AutoPtr<ITypeReference> mComponent;
     };

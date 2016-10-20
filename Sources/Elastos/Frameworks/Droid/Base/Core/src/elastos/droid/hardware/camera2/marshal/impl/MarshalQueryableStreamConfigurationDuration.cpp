@@ -30,13 +30,14 @@ ECode MarshalQueryableStreamConfigurationDuration::MarshalerStreamConfigurationD
 
     Int32 format, width, height;
     configurationDuration->GetFormat(&format);
-    buffer->PutInt32(format & MASK_UNSIGNED_INT); // unsigned int -> long
     configurationDuration->GetWidth(&width);
-    buffer->PutInt32(width);
     configurationDuration->GetHeight(&height);
-    buffer->PutInt32(height);
     Int64 duration;
     configurationDuration->GetDuration(&duration);
+
+    buffer->PutInt64(format & MASK_UNSIGNED_INT); // unsigned int -> long
+    buffer->PutInt64(width);
+    buffer->PutInt64(height);
     return buffer->PutInt64(duration);
 }
 
@@ -47,18 +48,16 @@ ECode MarshalQueryableStreamConfigurationDuration::MarshalerStreamConfigurationD
     VALIDATE_NOT_NULL(outface);
     *outface = NULL;
 
-    Int32 format;
-    buffer->GetInt32(&format);
-    Int32 width;
-    buffer->GetInt32(&width);
-    Int32 height;
-    buffer->GetInt32(&height);
+    Int64 format, width, height;
+    buffer->GetInt64(&format);
+    buffer->GetInt64(&width);
+    buffer->GetInt64(&height);
     Int64 durationNs;
     buffer->GetInt64(&durationNs);
 
     AutoPtr<IStreamConfigurationDuration> configurationDuration;
-    CStreamConfigurationDuration::New(format, width, height,
-            durationNs, (IStreamConfigurationDuration**)&configurationDuration);
+    CStreamConfigurationDuration::New(format, width, height, durationNs,
+        (IStreamConfigurationDuration**)&configurationDuration);
     *outface = TO_IINTERFACE(configurationDuration);
     REFCOUNT_ADD(*outface);
     return NOERROR;

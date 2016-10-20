@@ -20,7 +20,7 @@ ECode NullDispatcher::constructor()
 
 ECode NullDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ IArgumentList* args)
 {
     return NOERROR;
 }

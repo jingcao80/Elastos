@@ -8,6 +8,7 @@
 #include "elastos/droid/utility/Range.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Utility::ISize;
 using Elastos::Droid::Utility::Range;
@@ -15,6 +16,7 @@ using Elastos::Droid::View::ISurface;
 using Elastos::Core::Object;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::List;
 
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Utility::ISize);
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Utility::Range<IInteger32>);
@@ -827,6 +829,7 @@ private:
 
     /** High speed video FPS range -> Size count mapping*/
     HashMap</*HighSpeedVideoFpsRange*/AutoPtr<Range<IInteger32> >, /*Count*/Int32> mHighSpeedVideoFpsRangeMap;
+    static List< AutoPtr<IClassInfo> > sOutputSupportedClasses;
 };
 
 } // namespace Params

@@ -211,6 +211,68 @@ ECode ClassLoader::FindClass(
     return E_CLASS_NOT_FOUND_EXCEPTION;
 }
 
+ECode ClassLoader::LoadInterface(
+    /* [in] */ const String& name,
+    /* [out] */ IInterfaceInfo** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
+    AutoPtr<IInterfaceInfo> itfc;
+    // not cache now
+    if (mParent != NULL) {
+        mParent->LoadInterface(name, (IInterfaceInfo**)&itfc);
+    }
+
+    if (itfc == NULL) {
+        FAIL_RETURN(FindInterface(name, (IInterfaceInfo**)&itfc));
+    }
+
+    *result = itfc;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode ClassLoader::FindInterface(
+    /* [in] */ const String& name,
+    /* [out] */ IInterfaceInfo** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
+    if (name.IsNullOrEmpty()) {
+        ALOGE("ClassLoader::FindClass: interface name is null or empty");
+        return E_INVALID_ARGUMENT;
+    }
+
+    ECode ec = NOERROR;
+    HashMap<String, AutoPtr<IModuleInfo> >::Iterator it;
+    for (Int32 i = 0; i < mClassPaths->GetLength(); i++) {
+        String path = (*mClassPaths)[i];
+        AutoPtr<IModuleInfo> moduleInfo;
+        it = mModuleTable.Find(path);
+        if (it == mModuleTable.End()) {
+            ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
+            if (FAILED(ec) || moduleInfo == NULL) {
+                ALOGE("ClassLoader::FindInterface %s, failed to AcquireModuleInfo at path %d/%d: %s",
+                    name.string(), i +1, mClassPaths->GetLength(), path.string());
+                continue;
+            }
+            mModuleTable[path] = moduleInfo;
+        }
+        else {
+            moduleInfo = it->mSecond;
+        }
+
+        ec = moduleInfo->GetInterfaceInfo(name, result);
+        if (SUCCEEDED(ec)) {
+            return NOERROR;
+        }
+    }
+
+    return E_CLASS_NOT_FOUND_EXCEPTION;
+}
+
 //-------------------------------------------------------
 //  BootClassLoader
 //-------------------------------------------------------

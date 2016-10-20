@@ -1619,70 +1619,64 @@ Boolean CameraMetadataNative::SetGpsLocation(
 
 AutoPtr<IStreamConfigurationMap> CameraMetadataNative::GetStreamConfigurationMap()
 {
-    AutoPtr<IInterface> obj = GetBase(
-            CameraCharacteristics::SCALER_AVAILABLE_STREAM_CONFIGURATIONS);
+    Int32 length = 0;
+    AutoPtr<IInterface> obj = GetBase(CameraCharacteristics::SCALER_AVAILABLE_STREAM_CONFIGURATIONS);
     AutoPtr<IArrayOf> array = IArrayOf::Probe(obj);
-    Int32 length;
-    array->GetLength(&length);
+    if (array) {
+        array->GetLength(&length);
+    }
     AutoPtr<ArrayOf<IStreamConfiguration*> > configurations = ArrayOf<IStreamConfiguration*>::Alloc(length);
-    for (Int32 i = 0; i < length; ++i)
-    {
+    for (Int32 i = 0; i < length; ++i) {
         AutoPtr<IInterface> tmp;
         array->Get(i, (IInterface**)&tmp);
-        AutoPtr<IStreamConfiguration> obj = IStreamConfiguration::Probe(tmp);
-        configurations->Set(i, obj);
+        configurations->Set(i, IStreamConfiguration::Probe(tmp));
     }
 
-
-    AutoPtr<IInterface> obj2 = GetBase(
-            CameraCharacteristics::SCALER_AVAILABLE_MIN_FRAME_DURATIONS);
-    AutoPtr<IArrayOf> array2 = IArrayOf::Probe(obj2);
-    Int32 length2;
-    array2->GetLength(&length2);
+    length = 0;
+    obj = GetBase(CameraCharacteristics::SCALER_AVAILABLE_MIN_FRAME_DURATIONS);
+    array = IArrayOf::Probe(obj);
+    if (array) {
+        array->GetLength(&length);
+    }
     AutoPtr<ArrayOf<IStreamConfigurationDuration*> > minFrameDurations =
-            ArrayOf<IStreamConfigurationDuration*>::Alloc(length2);
-    for (Int32 i = 0; i < length2; ++i)
-    {
+        ArrayOf<IStreamConfigurationDuration*>::Alloc(length);
+    for (Int32 i = 0; i < length; ++i) {
         AutoPtr<IInterface> tmp;
-        array2->Get(i, (IInterface**)&tmp);
-        AutoPtr<IStreamConfigurationDuration> obj = IStreamConfigurationDuration::Probe(tmp);
-        minFrameDurations->Set(i, obj);
+        array->Get(i, (IInterface**)&tmp);
+        minFrameDurations->Set(i, IStreamConfigurationDuration::Probe(tmp));
     }
 
-    AutoPtr<IInterface> obj3 = GetBase(
-            CameraCharacteristics::SCALER_AVAILABLE_STALL_DURATIONS);
-    AutoPtr<IArrayOf> array3 = IArrayOf::Probe(obj3);
-    Int32 length3;
-    array3->GetLength(&length3);
+    length = 0;
+    obj = GetBase(CameraCharacteristics::SCALER_AVAILABLE_STALL_DURATIONS);
+    array = IArrayOf::Probe(obj);
+    if (array) {
+        array->GetLength(&length);
+    }
     AutoPtr<ArrayOf<IStreamConfigurationDuration*> > stallDurations =
-            ArrayOf<IStreamConfigurationDuration*>::Alloc(length3);
-    for (Int32 i = 0; i < length3; ++i)
-    {
+        ArrayOf<IStreamConfigurationDuration*>::Alloc(length);
+    for (Int32 i = 0; i < length; ++i) {
         AutoPtr<IInterface> tmp;
-        array3->Get(i, (IInterface**)&tmp);
-        AutoPtr<IStreamConfigurationDuration> obj = IStreamConfigurationDuration::Probe(tmp);
-        stallDurations->Set(i, obj);
+        array->Get(i, (IInterface**)&tmp);
+        stallDurations->Set(i, IStreamConfigurationDuration::Probe(tmp));
     }
 
-    AutoPtr<IInterface> obj4 = GetBase(
-            CameraCharacteristics::CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS);
-    AutoPtr<IArrayOf> array4 = IArrayOf::Probe(obj4);
-    Int32 length4;
-    array4->GetLength(&length4);
+    length = 0;
+    obj = GetBase(CameraCharacteristics::CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS);
+    array = IArrayOf::Probe(obj);
+    if (array) {
+        array->GetLength(&length);
+    }
     AutoPtr<ArrayOf<IHighSpeedVideoConfiguration*> > highSpeedVideoConfigurations =
-            ArrayOf<IHighSpeedVideoConfiguration*>::Alloc(length4);
-    for (Int32 i = 0; i < length4; ++i)
-    {
+            ArrayOf<IHighSpeedVideoConfiguration*>::Alloc(length);
+    for (Int32 i = 0; i < length; ++i) {
         AutoPtr<IInterface> tmp;
-        array4->Get(i, (IInterface**)&tmp);
-        AutoPtr<IHighSpeedVideoConfiguration> obj = IHighSpeedVideoConfiguration::Probe(tmp);
-        highSpeedVideoConfigurations->Set(i, obj);
+        array->Get(i, (IInterface**)&tmp);
+        highSpeedVideoConfigurations->Set(i, IHighSpeedVideoConfiguration::Probe(tmp));
     }
 
     AutoPtr<IStreamConfigurationMap> map;
-    CStreamConfigurationMap::New(
-            configurations, minFrameDurations, stallDurations,
-            highSpeedVideoConfigurations, (IStreamConfigurationMap**)&map);
+    CStreamConfigurationMap::New(configurations, minFrameDurations, stallDurations,
+        highSpeedVideoConfigurations, (IStreamConfigurationMap**)&map);
     return map;
 }
 
@@ -1725,10 +1719,7 @@ ECode CameraMetadataNative::GetMaxRegions(
         return valueObj->GetValue(regions);
     }
     else {
-        //throw new AssertionError("Invalid key " + key);
-        String str;
-        IObject::Probe(key)->ToString(&str);
-        Logger::E(TAG, "Invalid key %s", str.string());
+        Logger::E(TAG, "Invalid key %s", TO_CSTR(key));
         return E_ASSERTION_ERROR;
     }
     return NOERROR;
@@ -1773,10 +1764,7 @@ ECode CameraMetadataNative::GetMaxNumOutputs(
         return valueObj->GetValue(num);
     }
     else {
-        //throw new AssertionError("Invalid key " + key);
-        String str;
-        IObject::Probe(key)->ToString(&str);
-        Logger::E(TAG, "Invalid key %s", str.string());
+        Logger::E(TAG, "Invalid key %s", TO_CSTR(key));
         return E_ASSERTION_ERROR;
     }
     return NOERROR;
@@ -1793,57 +1781,57 @@ AutoPtr<ITonemapCurve> CameraMetadataNative::GetTonemapCurve()
     AutoPtr<IInterface> obj3 = GetBase( CaptureRequest::TONEMAP_CURVE_BLUE);
     AutoPtr<IArrayOf> array3 = IArrayOf::Probe(obj3);
 
-    AutoPtr<ArrayOf<IInterface*> > tmp = ArrayOf<IInterface*>::Alloc(3);
-    tmp->Set(0, array);
-    tmp->Set(1, array2);
-    tmp->Set(2, array3);
-    if (AreValuesAllNull(tmp)) {
-        return NULL;
-    }
-
-    Int32 length;
-    array->GetLength(&length);
-    AutoPtr<ArrayOf<Float> > red = ArrayOf<Float>::Alloc(length);
-    for (Int32 i = 0; i < length; ++i)
-    {
-        AutoPtr<IInterface> tmp;
-        array->Get(i, (IInterface**)&tmp);
-        AutoPtr<IFloat> obj = IFloat::Probe(tmp);
-        Float value;
-        obj->GetValue(&value);
-        (*red)[i] = value;
-    }
-
-    Int32 length2;
-    array->GetLength(&length2);
-    AutoPtr<ArrayOf<Float> > green = ArrayOf<Float>::Alloc(length2);
-    for (Int32 i = 0; i < length2; ++i)
-    {
-        AutoPtr<IInterface> tmp;
-        array2->Get(i, (IInterface**)&tmp);
-        AutoPtr<IFloat> obj = IFloat::Probe(tmp);
-        Float value;
-        obj->GetValue(&value);
-        (*green)[i] = value;
-    }
-
-    Int32 length3;
-    array->GetLength(&length3);
-    AutoPtr<ArrayOf<Float> > blue = ArrayOf<Float>::Alloc(length3);
-    for (Int32 i = 0; i < length3; ++i)
-    {
-        AutoPtr<IInterface> tmp;
-        array3->Get(i, (IInterface**)&tmp);
-        AutoPtr<IFloat> obj = IFloat::Probe(tmp);
-        Float value;
-        obj->GetValue(&value);
-        (*blue)[i] = value;
-    }
-
     if (array == NULL || array2 == NULL || array3 == NULL) {
         Logger::W(TAG, "getTonemapCurve - missing tone curve components");
         return NULL;
     }
+
+    AutoPtr<ArrayOf<IInterface*> > tmp = ArrayOf<IInterface*>::Alloc(3);
+    tmp->Set(0, obj);
+    tmp->Set(1, obj2);
+    tmp->Set(2, obj3);
+    if (AreValuesAllNull(tmp)) {
+        return NULL;
+    }
+
+    Float value;
+    Int32 length = 0;
+    if (array != NULL) {
+        array->GetLength(&length);
+    }
+    AutoPtr<ArrayOf<Float> > red = ArrayOf<Float>::Alloc(length);
+    for (Int32 i = 0; i < length; ++i) {
+        AutoPtr<IInterface> tmp;
+        array->Get(i, (IInterface**)&tmp);
+        IFloat::Probe(tmp)->GetValue(&value);
+        (*red)[i] = value;
+    }
+
+    length = 0;
+    if (array2 != NULL) {
+        array2->GetLength(&length);
+    }
+    AutoPtr<ArrayOf<Float> > green = ArrayOf<Float>::Alloc(length);
+    for (Int32 i = 0; i < length; ++i) {
+        AutoPtr<IInterface> tmp;
+        array2->Get(i, (IInterface**)&tmp);
+        IFloat::Probe(tmp)->GetValue(&value);
+        (*green)[i] = value;
+    }
+
+    length = 0;
+    if (array3 != NULL) {
+        array3->GetLength(&length);
+    }
+    AutoPtr<ArrayOf<Float> > blue = ArrayOf<Float>::Alloc(length);
+    for (Int32 i = 0; i < length; ++i) {
+        AutoPtr<IInterface> tmp;
+        array3->Get(i, (IInterface**)&tmp);
+        IFloat::Probe(tmp)->GetValue(&value);
+        (*blue)[i] = value;
+    }
+
+
     AutoPtr<ITonemapCurve> tc;
     CTonemapCurve::New(red, green, blue, (ITonemapCurve**)&tc);
     return tc;

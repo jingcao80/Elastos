@@ -589,8 +589,6 @@ module
         }
 
         class CInvokeDispatcher {
-            constructor();
-
             constructor(
                 [in] IInterface* target);
 
@@ -600,8 +598,6 @@ module
 
         [local]
         class CHandlerDispatcher {
-            constructor();
-
             /**
              * Create a dispatcher that forwards it's dispatch calls by posting
              * them onto the {@code handler} as a {@code Runnable}.
@@ -621,8 +617,6 @@ module
 
         [local]
         class CArgumentReplacingDispatcher {
-            constructor();
-
             /**
              * Create a new argument replacing dispatcher; dispatches are forwarded to {@code target}
              * after the argument is replaced.
@@ -649,8 +643,6 @@ module
 
         [local]
         class CDuckTypingDispatcher {
-            constructor();
-
             /**
              * Create a new duck typing dispatcher.
              *
@@ -659,7 +651,7 @@ module
              */
             constructor(
                 [in] IDispatchable* target,
-                [in] IClassInfo* targetClass);
+                [in] IInterfaceInfo* targetClass);
 
             interface IDuckTypingDispatcher;
             interface IDispatchable;
@@ -667,8 +659,6 @@ module
 
         [deprecated, local]
         class CBroadcastDispatcher {
-            constructor();
-
             /**
              * Create a broadcast dispatcher from the supplied dispatch targets.
              *
@@ -684,8 +674,6 @@ module
 
         [local]
         class CMethodNameInvoker {
-            constructor();
-
             /**
              * Create a new method name invoker.
              *
@@ -694,7 +682,7 @@ module
              */
             constructor(
                 [in] IDispatchable* target,
-                [in] IClassInfo* targetClass);
+                [in] IInterfaceInfo* targetClass);
 
             interface IMethodNameInvoker;
         }
@@ -731,6 +719,7 @@ module
                 [in] IDispatchable* dispatchTarget);
 
             interface ICallbackProxiesDeviceCaptureCallbackProxy;
+            interface ICameraDeviceImplCaptureCallback;
         }
 
         [local]
@@ -739,6 +728,7 @@ module
                 [in] IDispatchable* dispatchTarget);
 
             interface ICallbackProxiesSessionStateCallbackProxy;
+            interface ICameraCaptureSessionStateCallback;
         }
 
         class CCameraCaptureSessionImpl {

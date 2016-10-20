@@ -30,8 +30,6 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        CARAPI constructor();
-
         CARAPI constructor(
             /* [in] */ IDispatchable* dispatchTarget);
 
@@ -78,8 +76,6 @@ public:
     {
     public:
         CAR_INTERFACE_DECL()
-
-        CARAPI constructor();
 
         CARAPI constructor(
             /* [in] */ IDispatchable* dispatchTarget);
@@ -136,8 +132,6 @@ public:
     {
     public:
         CAR_INTERFACE_DECL()
-
-        CARAPI constructor();
 
         CARAPI constructor(
             /* [in] */ IDispatchable* dispatchTarget);

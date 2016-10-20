@@ -26,15 +26,13 @@ public:
 
     virtual ~InvokeDispatcher() {}
 
-    CARAPI constructor();
-
     CARAPI constructor(
         /* [in] */ IInterface* target);
 
     //@Override
     CARAPI Dispatch(
         /* [in] */ IMethodInfo* method,
-        /* [in] */ ArrayOf<IInterface*>* args);
+        /* [in] */ IArgumentList* args);
 
 private:
     static const String TAG;

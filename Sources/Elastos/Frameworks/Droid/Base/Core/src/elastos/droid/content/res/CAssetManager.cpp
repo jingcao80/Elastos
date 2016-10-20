@@ -2580,10 +2580,10 @@ ECode CAssetManager::GetAssignedPackageIdentifiers(
     const size_t N = res.getBasePackageCount();
     for (size_t i = 0; i < N; i++) {
         Int32 id = res.getBasePackageId(i);
-        const android::String16 name = res.getBasePackageName(i);
-        String str = TextUtils::String16ToString(name);
+        android::String8 str8(res.getBasePackageName(i));
+        String str(str8.string());
         AutoPtr<ICharSequence> csq = CoreUtils::Convert(str);
-        sa->Put(id, csq.Get());
+        sa->Put(id, csq);
     }
 
     *sparseArray = sa;

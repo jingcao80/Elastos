@@ -4,14 +4,13 @@
 #include <binder/IServiceManager.h>
 #include <binder/Binder.h>
 #include <utils/Log.h>
+#include <utils/String8.h>
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/Process.h"
-#include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/etl/List.h>
 
-using Elastos::Droid::Text::TextUtils;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Slogger;
 
@@ -222,8 +221,9 @@ ECode CServiceManager::ListServices(
     Int32 size = reply.readInt32();
     array = ArrayOf<String>::Alloc(size);
     for (Int32 i = 0; i < size; ++i) {
-        android::String16 str16 = reply.readString16();
-        array->Set(i, TextUtils::String16ToString(str16));
+        android::String8 str8(reply.readString16());
+        String str(str8.string());
+        array->Set(i, str);
     }
 
     *services = array;

@@ -490,7 +490,7 @@ ECode CameraDeviceUserShim::ConnectBinderShim(
     AutoPtr<ICameraCharacteristics> characteristics;
     LegacyMetadataMapper::CreateCharacteristics(
         legacyParameters, info, (ICameraCharacteristics**)&characteristics);
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
+    Logger::I(TAG, "%s, line %d, %s", __FUNCTION__, __LINE__, TO_CSTR(legacyCamera));
     AutoPtr<ILegacyCameraDevice> device;
     CLegacyCameraDevice::New(cameraId, legacyCamera, characteristics,
         threadCallbacks, (ILegacyCameraDevice**)&device);
@@ -633,7 +633,8 @@ ECode CameraDeviceUserShim::BeginConfigure(
         return NOERROR;
     }
 
-    {    AutoLock syncLock(mConfigureLock);
+    {
+        AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
             Logger::E(TAG, "Cannot begin configure, configuration change already in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -663,8 +664,9 @@ ECode CameraDeviceUserShim::EndConfigure(
         return NOERROR;
     }
 
-    AutoPtr<IArrayList> surfaces;
-    {    AutoLock syncLock(mConfigureLock);
+    AutoPtr<IList> surfaces;
+    {
+        AutoLock syncLock(mConfigureLock);
         if (!mConfiguring) {
             Logger::E(TAG, "Cannot end configure, no configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -673,7 +675,7 @@ ECode CameraDeviceUserShim::EndConfigure(
         Int32 numSurfaces;
         mSurfaces->GetSize(&numSurfaces);
         if (numSurfaces > 0) {
-            CArrayList::New((IArrayList**)&surfaces);
+            CArrayList::New((IList**)&surfaces);
             for (Int32 i = 0; i < numSurfaces; ++i) {
                 AutoPtr<IInterface> obj;
                 mSurfaces->ValueAt(i, (IInterface**)&obj);
@@ -682,7 +684,7 @@ ECode CameraDeviceUserShim::EndConfigure(
         }
         mConfiguring = FALSE;
     }
-    return mLegacyDevice->ConfigureOutputs(IList::Probe(surfaces), result);
+    return mLegacyDevice->ConfigureOutputs(surfaces, result);
 }
 
 ECode CameraDeviceUserShim::DeleteStream(
@@ -745,7 +747,8 @@ ECode CameraDeviceUserShim::CreateStream(
         return NOERROR;
     }
 
-    {    AutoLock syncLock(mConfigureLock);
+    {
+        AutoLock syncLock(mConfigureLock);
         if (!mConfiguring) {
             Logger::E(TAG, "Cannot create stream, beginConfigure hasn't been called yet.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -754,6 +757,11 @@ ECode CameraDeviceUserShim::CreateStream(
         Int32 id = ++mSurfaceIdCounter;
         mSurfaces->Put(id, TO_IINTERFACE(surface));
         *result = id;
+
+        if (DEBUG) {
+            Logger::I(TAG, " >> CreateStream: (%d, %d), format: %08x, surface: %s",
+                width, height, format, TO_CSTR(surface));
+        }
         return NOERROR;
     }
     return NOERROR;

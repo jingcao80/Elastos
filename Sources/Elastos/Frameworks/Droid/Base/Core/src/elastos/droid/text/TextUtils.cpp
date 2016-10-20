@@ -43,6 +43,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include <utils/String8.h>
 
 using namespace Elastos::Droid::Text::Style;
 using Elastos::Droid::Text::TextUtilsTruncateAt_START;
@@ -2030,20 +2031,13 @@ Int32 TextUtils::GetLayoutDirectionFromFirstChar(
 String TextUtils::String16ToString(
     /* [in] */ const android::String16& str16)
 {
-    Int32 size = str16.size();
-    const char16_t* p = str16.string();
-    AutoPtr<ArrayOf<Char32> > buf = ArrayOf<Char32>::Alloc(size);
-    for (Int32 i = 0; i < size; ++i) {
-        buf->Set(i, (Char32)(*(p + i)));
-    }
-    return String(*buf);
+    android::String8 str8(str16);
+    return String(str8.string());
 }
 
 android::String16 TextUtils::StringToString16(const String& str)
 {
-    AutoPtr<ArrayOf<Char16> > chars = str.GetChar16s();
-    android::String16 str16((char16_t *)(chars->GetPayload()), chars->GetLength());
-    return str16;
+    return android::String16(str.string());
 }
 
 } // namespace Text

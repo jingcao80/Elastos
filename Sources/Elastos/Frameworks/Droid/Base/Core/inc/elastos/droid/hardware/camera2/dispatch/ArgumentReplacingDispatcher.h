@@ -51,7 +51,7 @@ public:
     //@Override
     CARAPI Dispatch(
         /* [in] */ IMethodInfo* method,
-        /* [in] */ ArrayOf<IInterface*>* args);
+        /* [in] */ IArgumentList* args);
 
 private:
     static CARAPI_(AutoPtr<ArrayOf<IInterface*> >) ArrayCopy(

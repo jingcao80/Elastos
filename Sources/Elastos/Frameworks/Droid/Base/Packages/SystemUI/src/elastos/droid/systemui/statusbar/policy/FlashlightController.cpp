@@ -300,13 +300,13 @@ ECode FlashlightController::StartSession() /*throws CameraAccessException*/
     Int32 w = 0, h = 0;
     size->GetWidth(&w);
     size->GetHeight(&h);
-    mSurfaceTexture->SetDefaultBufferSize(w, w);
+    Logger::I(TAG, " >> StartSession: SetDefaultBufferSize(%d, %d)", w, h);
+    mSurfaceTexture->SetDefaultBufferSize(w, h);
     CSurface::New(mSurfaceTexture, (ISurface**)&mSurface);
-    AutoPtr<IArrayList> outputs;  /*<Surface*/
-    CArrayList::New(1, (IArrayList**)&outputs);
+    AutoPtr<IList> outputs;  /*<Surface*/
+    CArrayList::New(1, (IList**)&outputs);
     outputs->Add(mSurface);
-    return mCameraDevice->CreateCaptureSession(IList::Probe(outputs),
-        ICameraCaptureSessionStateCallback::Probe(mSessionListener), mHandler);
+    return mCameraDevice->CreateCaptureSession(outputs, mSessionListener.Get(), mHandler);
 }
 
 ECode FlashlightController::GetSmallestSize(
@@ -333,10 +333,10 @@ ECode FlashlightController::GetSmallestSize(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
+    Int32 w = 0, h = 0, cw = 0, ch = 0;
     AutoPtr<ISize> chosen = (*outputSizes)[0];
     for (Int32 i = 0; i < outputSizes->GetLength(); i++) {
         ISize* s = (*outputSizes)[i];
-        Int32 w = 0, h = 0, cw = 0, ch = 0;
         chosen->GetWidth(&cw);
         chosen->GetHeight(&ch);
         s->GetWidth(&w);
@@ -420,17 +420,18 @@ void FlashlightController::UpdateFlashlight(
                     Logger::E(TAG, " >> failed to StartDevice");
                     break;
                 }
-                Logger::I(TAG, " >> Started Camera device. %s", TO_CSTR(mCameraDevice));
-                assert(mCameraDevice != NULL);
+                return;
             }
+
             if (mSession == NULL) {
                 ec = StartSession();
                 if (FAILED(ec)) {
                     Logger::E(TAG, " >> failed to StartSession");
                     break;
                 }
-                Logger::I(TAG, " >> Started session. %s", TO_CSTR(mSession));
+                return;
             }
+
             if (mFlashlightRequest == NULL) {
                 Logger::I(TAG, " >> CreateCaptureRequest.");
 

@@ -39,16 +39,18 @@ ECode ArgumentReplacingDispatcher::constructor(
 
 ECode ArgumentReplacingDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ IArgumentList* args)
 {
-    AutoPtr<ArrayOf<IInterface*> > _args;
-    if (args->GetLength() > mArgumentIndex) {
-        // don't change in-place since it can affect upstream dispatches
-        _args = ArrayCopy(args);
-        _args->Set(mArgumentIndex ,mReplaceWith);
-    }
+    assert(0);
+    // AutoPtr<ArrayOf<IInterface*> > _args;
+    // if (args->GetLength() > mArgumentIndex) {
+    //     // don't change in-place since it can affect upstream dispatches
+    //     _args = ArrayCopy(args);
+    //     _args->Set(mArgumentIndex ,mReplaceWith);
+    // }
 
-    return mTarget->Dispatch(method, _args);
+    // return mTarget->Dispatch(method, _args);
+    return NOERROR;
 }
 
 AutoPtr<ArrayOf<IInterface*> > ArgumentReplacingDispatcher::ArrayCopy(

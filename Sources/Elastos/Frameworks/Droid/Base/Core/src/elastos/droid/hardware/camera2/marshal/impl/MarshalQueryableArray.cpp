@@ -33,7 +33,6 @@ MarshalQueryableArray::MarshalerArray::MarshalerArray(
     /* [in] */ MarshalQueryableArray* host)
 {
     Marshaler::constructor(host, typeReference, nativeType);
-    typeReference->GetClassType(&mClass);
     typeReference->GetComponent((ITypeReference**)&mComponent);
 
     MarshalRegistry::GetMarshaler(mComponent, mNativeType, (IMarshaler**)&mComponentMarshaler);
@@ -82,7 +81,7 @@ ECode MarshalQueryableArray::MarshalerArray::Unmarshal(
 
         if (VERBOSE) {
             Logger::V(TAG, "Attempting to unpack array (count = %d, element size = %d, bytes "
-                "remaining = %d) for type %s", arraySize, elementSize, remaining, mClass);
+                "remaining = %d) for type %s", arraySize, elementSize, remaining, TO_CSTR(mTypeReference));
         }
 
         InterfaceID interfaceId;
@@ -115,7 +114,8 @@ ECode MarshalQueryableArray::MarshalerArray::Unmarshal(
     Int32 res;
     IBuffer::Probe(buffer)->GetRemaining(&res);
     if (res != 0) {
-        Logger::E(TAG, "Trailing bytes ( %d ) left over after unpacking %d", res, mClass);
+        Logger::E(TAG, "Trailing bytes ( %d ) left over after unpacking %s, mComponentMarshaler:%s",
+            res, TO_CSTR(mTypeReference), TO_CSTR(mComponentMarshaler));
     }
 
     *outface = array;

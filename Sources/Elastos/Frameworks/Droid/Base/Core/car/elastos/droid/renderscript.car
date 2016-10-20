@@ -33,6 +33,11 @@ module
         interface IMatrix4f;
     }
 
+    //class CAllocation {
+    //    IAlloction;
+    //    IBaseObj;
+    //}
+
     } // RenderScript
     } // Droid
     } // Elastos

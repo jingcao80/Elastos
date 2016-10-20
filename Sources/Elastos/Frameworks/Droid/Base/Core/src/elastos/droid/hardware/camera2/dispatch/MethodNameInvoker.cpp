@@ -20,6 +20,8 @@ namespace Hardware {
 namespace Camera2 {
 namespace Dispatch {
 
+const String TAG("MethodNameInvoker");
+
 CAR_INTERFACE_IMPL(MethodNameInvoker, Object, IMethodNameInvoker)
 
 MethodNameInvoker::MethodNameInvoker()
@@ -27,68 +29,76 @@ MethodNameInvoker::MethodNameInvoker()
     CConcurrentHashMap::New((IConcurrentHashMap**)&mMethods);
 }
 
-ECode MethodNameInvoker::constructor()
-{
-    return NOERROR;
-}
-
 ECode MethodNameInvoker::constructor(
     /* [in] */ IDispatchable* target,
-    /* [in] */ IClassInfo* targetClass)
+    /* [in] */ IInterfaceInfo* targetClass)
 {
+    assert(targetClass != NULL);
     mTargetClass = targetClass;
     mTarget = target;
     return NOERROR;
 }
 
-ECode MethodNameInvoker::Invoke(
+ECode MethodNameInvoker::GetMethodInfo(
     /* [in] */ const String& methodName,
-    /* [in] */ ArrayOf<IInterface*>* params)
+    /* [in] */ const String& signature,
+    /* [out] */ IMethodInfo** methodInfo)
 {
-    FAIL_RETURN(Preconditions::CheckNotNull(methodName))
+    VALIDATE_NOT_NULL(methodInfo)
+    *methodInfo = NULL;
 
-    AutoPtr<ICharSequence> charObj = CoreUtils::Convert(methodName);
+    AutoPtr<ICharSequence> csq = CoreUtils::Convert(methodName);
     AutoPtr<IInterface> obj;
-    mMethods->Get(TO_IINTERFACE(charObj), (IInterface**)&obj);
+    mMethods->Get(csq.Get(), (IInterface**)&obj);
     AutoPtr<IMethodInfo> targetMethod = IMethodInfo::Probe(obj);
     if (targetMethod == NULL) {
-        AutoPtr<ArrayOf<IMethodInfo*> > methodInfos;
+        // mTargetClass->GetMethodInfo(methodName, signature, (IMethodInfo**)&targetMethod);
+
+        String className;
+        mTargetClass->GetName(&className);
+
+        String name;
+        Int32 methodCount, paramCount;
+        mTargetClass->GetMethodCount(&methodCount);
+        AutoPtr<ArrayOf<IMethodInfo*> > methodInfos = ArrayOf<IMethodInfo*>::Alloc(methodCount);
         mTargetClass->GetAllMethodInfos(methodInfos);
         for (Int32 i = 0; i < methodInfos->GetLength(); i++) {
             AutoPtr<IMethodInfo> method = (*methodInfos)[i];
 
             // TODO future: match types of params if possible
-            String name;
             method->GetName(&name);
-            AutoPtr<ArrayOf<IParamInfo*> > paramInfo;
-            method->GetAllParamInfos(paramInfo);
-            if (name.Equals(methodName) &&
-                    (params->GetLength() == paramInfo->GetLength()) ) {
+            method->GetParamCount(&paramCount);
+            Logger::I(TAG, " %s method %d : [%s]", className.string(), i, name.string());
+            if (name.Equals(methodName)) {
                 targetMethod = method;
-                mMethods->Put(TO_IINTERFACE(charObj), targetMethod);
+                mMethods->Put(csq, targetMethod);
                 break;
             }
         }
 
         if (targetMethod == NULL) {
-            // throw new IllegalArgumentException(
-            //         "Method " + methodName + " does not exist on class " + mTargetClass);
-            String name;
+            String ns;
             mTargetClass->GetName(&name);
-            Logger::E("MethodNameInvoker", "Method %s does not exist on class %s",
-                    methodName.string(), name.string());
+            mTargetClass->GetNamespace(&ns);
+            Logger::E(TAG, "Method %s does not exist on class %s.%s",
+                methodName.string(), ns.string(), name.string());
+            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
 
-    // try {
-    return mTarget->Dispatch(targetMethod, params);
-    // } catch (Throwable e) {
-    //     UncheckedThrow.throwAnyException(e);
-    //     // unreachable
-    //     return null;
-    // }
+    *methodInfo = targetMethod;
+    REFCOUNT_ADD(*methodInfo)
+    return NOERROR;
 }
+
+ECode MethodNameInvoker::Invoke(
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* params)
+{
+    return mTarget->Dispatch(method, params);
+}
+
 
 } // namespace Dispatch
 } // namespace Camera2

@@ -16,14 +16,18 @@ module
          * </p>
          *
          * @return the {@code Class} object.
-         * @param className
+         * @param fullname
          *            the name of the class to look for.
          * @throws ClassNotFoundException
          *             if the class can not be found.
          */
         LoadClass(
-            [in] String className,
+            [in] String fullname,
             [out] IClassInfo** klass);
+
+        LoadInterface(
+            [in] String fullname,
+            [out] IInterfaceInfo** klass);
     }
 
     } // namespace Core

@@ -30,8 +30,6 @@ public:
 
     virtual ~MethodNameInvoker() {}
 
-    CARAPI constructor();
-
     /**
      * Create a new method name invoker.
      *
@@ -40,7 +38,12 @@ public:
      */
     CARAPI constructor(
         /* [in] */ IDispatchable* target,
-        /* [in] */ IClassInfo* targetClass);
+        /* [in] */ IInterfaceInfo* targetClass);
+
+    CARAPI GetMethodInfo(
+        /* [in] */ const String& name,
+        /* [in] */ const String& signature,
+        /* [out] */ IMethodInfo** methodInfo);
 
     /**
      * Invoke a method by its name.
@@ -61,12 +64,12 @@ public:
      */
     //@SuppressWarnings("unchecked")
     CARAPI Invoke(
-        /* [in] */ const String& methodName,
-        /* [in] */ ArrayOf<IInterface*>* params);
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* params);
 
 private:
     AutoPtr<IDispatchable> mTarget;
-    AutoPtr<IClassInfo> mTargetClass;
+    AutoPtr<IInterfaceInfo> mTargetClass;
     AutoPtr<IConcurrentHashMap> mMethods;
 };
 

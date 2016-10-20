@@ -255,6 +255,10 @@ public:
         /* [in] */ IList* sizeList,
         /* [out, callee] */ ArrayOf<ISize*>** outarr);
 
+    static CARAPI ConvertSizeArrayToList(
+        /* [in] */ ArrayOf<ICameraSize*>* sizeList,
+        /* [out] */ IList** outlist);
+
     static CARAPI ConvertSizeArrayToArray(
         /* [in] */ ArrayOf<ICameraSize*>* sizeList,
         /* [out, callee] */ ArrayOf<ISize*>** outarr);

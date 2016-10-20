@@ -31,14 +31,14 @@ private:
         MyRunnable(
             /* [in] */ HandlerDispatcher* host,
             /* [in] */ IMethodInfo* method,
-            /* [in] */ ArrayOf<IInterface*>* args);
+            /* [in] */ IArgumentList* args);
 
         CARAPI Run();
 
     private:
         HandlerDispatcher* mHost;
         AutoPtr<IMethodInfo> mMethod;
-        AutoPtr<ArrayOf<IInterface*> > mArgs;
+        AutoPtr<IArgumentList> mArgs;
     };
 
 public:
@@ -47,8 +47,6 @@ public:
     HandlerDispatcher();
 
     virtual ~HandlerDispatcher() {}
-
-    CARAPI constructor();
 
     /**
      * Create a dispatcher that forwards it's dispatch calls by posting
@@ -66,7 +64,7 @@ public:
     //@Override
     CARAPI Dispatch(
         /* [in] */ IMethodInfo* method,
-        /* [in] */ ArrayOf<IInterface*>* args);
+        /* [in] */ IArgumentList* args);
 
 private:
     static const String TAG;

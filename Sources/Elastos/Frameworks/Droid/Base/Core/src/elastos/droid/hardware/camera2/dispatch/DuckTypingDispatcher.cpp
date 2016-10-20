@@ -26,7 +26,7 @@ ECode DuckTypingDispatcher::constructor()
 
 ECode DuckTypingDispatcher::constructor(
     /* [in] */ IDispatchable* target,
-    /* [in] */ IClassInfo* targetClass)
+    /* [in] */ IInterfaceInfo* targetClass)
 {
     FAIL_RETURN(Preconditions::CheckNotNull(targetClass, String("targetClass must not be null")))
     FAIL_RETURN(Preconditions::CheckNotNull(target, String("target must not be null")))
@@ -36,11 +36,9 @@ ECode DuckTypingDispatcher::constructor(
 
 ECode DuckTypingDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ IArgumentList* args)
 {
-    String name;
-    method->GetName(&name);
-    return mDuck->Invoke(name, args);
+    return mDuck->Invoke(method, args);
 }
 
 } // namespace Dispatch

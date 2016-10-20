@@ -16,8 +16,6 @@
 #include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Impl::CCallbackProxiesSessionStateCallbackProxy;
 using Elastos::Droid::Hardware::Camera2::Impl::CCallbackProxiesDeviceCaptureCallbackProxy;
 using Elastos::Droid::Hardware::Camera2::Utils::CTaskDrainer;
@@ -35,6 +33,7 @@ using Elastos::Droid::Hardware::Camera2::Dispatch::IArgumentReplacingDispatcher;
 using Elastos::Droid::Hardware::Camera2::Dispatch::CBroadcastDispatcher;
 using Elastos::Droid::Hardware::Camera2::Dispatch::IBroadcastDispatcher;
 using Elastos::Droid::Internal::Utility::Preconditions;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
@@ -100,6 +99,7 @@ ECode CameraCaptureSessionImpl::AbortDrainListener::OnDrained()
     return NOERROR;
 }
 
+
 CAR_INTERFACE_IMPL(CameraCaptureSessionImpl::IdleDrainListener, Object, ITaskDrainerDrainListener)
 
 CameraCaptureSessionImpl::IdleDrainListener::IdleDrainListener(
@@ -108,6 +108,9 @@ CameraCaptureSessionImpl::IdleDrainListener::IdleDrainListener(
 {
 }
 
+//==============================================================================================
+// CameraCaptureSessionImpl::IdleDrainListener
+//==============================================================================================
 ECode CameraCaptureSessionImpl::IdleDrainListener::OnDrained()
 {
     if (mHost->VERBOSE) {
@@ -117,9 +120,10 @@ ECode CameraCaptureSessionImpl::IdleDrainListener::OnDrained()
     // Take device lock before session lock so that we can call back into device
     // without causing a deadlock
     CameraDeviceImpl* impl = (CameraDeviceImpl*)(mHost->mDeviceImpl.Get());
-    Object& lock = impl->mInterfaceLock;
-    {    AutoLock syncLock(lock);
-        {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(impl->mInterfaceLock);
+        {
+            AutoLock syncLock(mHost);
             /*
              * The device is now IDLE, and has settled. It will not transition to
              * ACTIVE or BUSY again by itself.
@@ -165,6 +169,9 @@ ECode CameraCaptureSessionImpl::IdleDrainListener::OnDrained()
     return NOERROR;
 }
 
+//==============================================================================================
+// CameraCaptureSessionImpl::UnconfigureDrainListener
+//==============================================================================================
 CAR_INTERFACE_IMPL(CameraCaptureSessionImpl::UnconfigureDrainListener, Object, ITaskDrainerDrainListener)
 
 CameraCaptureSessionImpl::UnconfigureDrainListener::UnconfigureDrainListener(
@@ -178,13 +185,17 @@ ECode CameraCaptureSessionImpl::UnconfigureDrainListener::OnDrained()
     if (mHost->VERBOSE) {
         Logger::V(TAG, "%s onUnconfigureDrained", mHost->mIdString.string());
     }
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         // The device has finished unconfiguring. It's now fully closed.
         return mHost->mStateCallback->OnClosed(mHost);
     }
     return NOERROR;
 }
 
+//==============================================================================================
+// CameraCaptureSessionImpl::MyStateCallbackKK
+//==============================================================================================
 CameraCaptureSessionImpl::MyStateCallbackKK::MyStateCallbackKK(
     /* [in] */ CameraCaptureSessionImpl* host,
     /* [in] */ ICameraCaptureSession* session)
@@ -192,14 +203,12 @@ CameraCaptureSessionImpl::MyStateCallbackKK::MyStateCallbackKK(
     , mActive(FALSE)
     , mHost(host)
     , mSession(session)
-
 {
 }
 
 ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnOpened(
     /* [in] */ ICameraDevice* camera)
 {
-    //throw new AssertionError("Camera must already be open before creating a session");
     Logger::E(mHost->TAG, "Camera must already be open before creating a session");
     return E_ASSERTION_ERROR;
 }
@@ -246,7 +255,8 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnIdle(
         Logger::V(TAG, "%s onIdle", mHost->mIdString.string());
     }
 
-    {    AutoLock syncLock(mSession);
+    {
+        AutoLock syncLock(mSession);
         isAborting = mHost->mAborting;
     }
 
@@ -301,7 +311,8 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnUnconfigured(
     if (mHost->VERBOSE) {
         Logger::V(mHost->TAG, "%d onUnconfigured", mHost->mIdString.string());
     }
-    {    AutoLock syncLock(mSession);
+    {
+        AutoLock syncLock(mSession);
         // Ignore #onUnconfigured before #close is called.
         //
         // Normally, this is reached when this session is closed and no immediate other
@@ -324,6 +335,9 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnUnconfigured(
     return NOERROR;
 }
 
+//==============================================================================================
+// CameraCaptureSessionImpl::MyCaptureCallback
+//==============================================================================================
 CameraCaptureSessionImpl::MyCaptureCallback::MyCaptureCallback(
     /* [in] */ CameraCaptureSessionImpl* host)
     : mHost(host)
@@ -345,8 +359,11 @@ CameraCaptureSessionImpl::MyCaptureCallback::OnCaptureSequenceAborted(
     return mHost->FinishPendingSequence(sequenceId);
 }
 
+//==============================================================================================
+// CameraCaptureSessionImpl
+//==============================================================================================
 const String CameraCaptureSessionImpl::TAG("CameraCaptureSession");
-const Boolean CameraCaptureSessionImpl::VERBOSE = FALSE;//Log.isLoggable(TAG, Log.VERBOSE);
+const Boolean CameraCaptureSessionImpl::VERBOSE = TRUE;//Log.isLoggable(TAG, Log.VERBOSE);
 
 CAR_INTERFACE_IMPL(CameraCaptureSessionImpl, CameraCaptureSession, ICameraCaptureSessionImpl)
 
@@ -377,7 +394,7 @@ ECode CameraCaptureSessionImpl::constructor()
 ECode CameraCaptureSessionImpl::constructor(
     /* [in] */ Int32 id,
     /* [in] */ IList* outputs,
-    /* [in] */ ICameraCaptureSessionStateCallback* _callback,
+    /* [in] */ ICameraCaptureSessionStateCallback* incallback,
     /* [in] */ IHandler* stateHandler,
     /* [in] */ ICameraDeviceImpl* deviceImpl,
     /* [in] */ IHandler* deviceStateHandler,
@@ -385,26 +402,28 @@ ECode CameraCaptureSessionImpl::constructor(
 {
     Boolean res;
     if (outputs == NULL || (outputs->IsEmpty(&res), res)) {
-        //throw new IllegalArgumentException("outputs must be a non-null, non-empty list");
         Logger::E(TAG, "outputs must be a non-null, non-empty list");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    else if (_callback == NULL) {
-        //throw new IllegalArgumentException("callback must not be null");
+    else if (incallback == NULL) {
         Logger::E(TAG, "callback must not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     mId = id;
     StringBuilder sb;
-    sb += "Session ";
+    sb += "CameraCaptureSession ";
     sb += mId;
     sb.ToString(&mIdString);
 
     // TODO: extra verification of outputs
     mOutputs = outputs;
     CameraDeviceImpl::CheckHandler(stateHandler, (IHandler**)&mStateHandler);
-    CreateUserStateCallbackProxy(mStateHandler, _callback, (ICameraCaptureSessionStateCallback**)&mStateCallback);
+    CreateUserStateCallbackProxy(mStateHandler, incallback,
+        (ICameraCaptureSessionStateCallback**)&mStateCallback);
+
+    Logger::I(TAG, " >> %s, mStateCallback: %s", __FUNCTION__, TO_CSTR(mStateCallback));
+    assert(mStateCallback != NULL);
 
     FAIL_RETURN(Preconditions::CheckNotNull(deviceStateHandler, String("deviceStateHandler must not be null")))
     FAIL_RETURN(Preconditions::CheckNotNull(deviceImpl, String("deviceImpl must not be null")))
@@ -419,19 +438,19 @@ ECode CameraCaptureSessionImpl::constructor(
      */
     AutoPtr<SequenceDrainListener> sequenceDrainListener = new SequenceDrainListener(this);
     CTaskDrainer::New(mDeviceHandler, sequenceDrainListener,
-            /*name*/String("seq"), (ITaskDrainer**)&mSequenceDrainer);
+        /*name*/String("seq"), (ITaskDrainer**)&mSequenceDrainer);
 
     AutoPtr<IdleDrainListener> idleDrainListener = new IdleDrainListener(this);
     CTaskSingleDrainer::New(mDeviceHandler, idleDrainListener,
-            /*name*/String("idle"), (ITaskSingleDrainer**)&mIdleDrainer);
+        /*name*/String("idle"), (ITaskSingleDrainer**)&mIdleDrainer);
 
     AutoPtr<AbortDrainListener> abortDrainListener = new AbortDrainListener(this);
     CTaskSingleDrainer::New(mDeviceHandler, abortDrainListener,
-            /*name*/String("abort"), (ITaskSingleDrainer**)&mAbortDrainer);
+        /*name*/String("abort"), (ITaskSingleDrainer**)&mAbortDrainer);
 
     AutoPtr<UnconfigureDrainListener> unconfigureDrainListener = new UnconfigureDrainListener(this);
     CTaskSingleDrainer::New(mDeviceHandler, unconfigureDrainListener,
-            /*name*/String("unconf"), (ITaskSingleDrainer**)&mUnconfigureDrainer);
+        /*name*/String("unconf"), (ITaskSingleDrainer**)&mUnconfigureDrainer);
 
     // CameraDevice should call configureOutputs and have it finish before constructing us
 
@@ -468,9 +487,9 @@ ECode CameraCaptureSessionImpl::Capture(
     VALIDATE_NOT_NULL(value)
     *value = 0;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (request == NULL) {
-            //throw new IllegalArgumentException("request must not be null");
             Logger::E(TAG, "request must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
@@ -481,8 +500,8 @@ ECode CameraCaptureSessionImpl::Capture(
         CameraDeviceImpl::CheckHandler(handler, TO_IINTERFACE(_callback), (IHandler**)&newHandler);
 
         if (VERBOSE) {
-            // Logger::V(TAG, mIdString + "capture - request " + request + ", callback " + _callback +
-            //         " newHandler " + newHandler);
+            Logger::V(TAG, "%s capture - request %s, callback %s newHandler %s",
+                mIdString.string(), TO_CSTR(request), TO_CSTR(_callback), TO_CSTR(newHandler));
         }
 
         AutoPtr<ICameraDeviceImplCaptureCallback> back;
@@ -503,15 +522,14 @@ ECode CameraCaptureSessionImpl::CaptureBurst(
     VALIDATE_NOT_NULL(value)
     *value = 0;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         Boolean res;
         if (requests == NULL) {
-            //throw new IllegalArgumentException("requests must not be null");
             Logger::E(TAG, "requests must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         else if (requests->IsEmpty(&res), res) {
-            //throw new IllegalArgumentException("requests must have at least one element");
             Logger::E(TAG, "requests must have at least one element");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
@@ -522,9 +540,8 @@ ECode CameraCaptureSessionImpl::CaptureBurst(
         CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)&newHandler);
 
         if (VERBOSE) {
-            // CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
-            // Log.v(TAG, mIdString + "captureBurst - requests " + Arrays.toString(requestArray) +
-            //         ", callback " + _callback + " newHandler " + newHandler);
+            Logger::V(TAG, "%s captureBurst - requests %s, callback %s newHandler %s",
+                mIdString.string(), TO_CSTR(requests), TO_CSTR(_callback), TO_CSTR(newHandler));
         }
 
         AutoPtr<ICameraDeviceImplCaptureCallback> back;
@@ -545,9 +562,9 @@ ECode CameraCaptureSessionImpl::SetRepeatingRequest(
     VALIDATE_NOT_NULL(value)
     *value = 0;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (request == NULL) {
-            //throw new IllegalArgumentException("request must not be null");
             Logger::E(TAG, "request must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
@@ -558,8 +575,8 @@ ECode CameraCaptureSessionImpl::SetRepeatingRequest(
         CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)&newHandler);
 
         if (VERBOSE) {
-            // Log.v(TAG, mIdString + "setRepeatingRequest - request " + request + ", callback " +
-            //         _callback + " newHandler" + " " + newHandler);
+            Logger::V(TAG, "%s setRepeatingRequest - requests %s, callback %s newHandler %s",
+                mIdString.string(), TO_CSTR(request), TO_CSTR(_callback), TO_CSTR(newHandler));
         }
 
         AutoPtr<ICameraDeviceImplCaptureCallback> back;
@@ -580,15 +597,14 @@ ECode CameraCaptureSessionImpl::SetRepeatingBurst(
     VALIDATE_NOT_NULL(value)
     *value = 0;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         Boolean res;
         if (requests == NULL) {
-            //throw new IllegalArgumentException("requests must not be null");
             Logger::E(TAG, "requests must not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         else if (requests->IsEmpty(&res), res) {
-            //throw new IllegalArgumentException("requests must have at least one element");
             Logger::E(TAG, "requests must have at least one element");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
@@ -599,9 +615,8 @@ ECode CameraCaptureSessionImpl::SetRepeatingBurst(
         CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)&newHandler);
 
         if (VERBOSE) {
-            // CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
-            // Log.v(TAG, mIdString + "setRepeatingBurst - requests " + Arrays.toString(requestArray) +
-            //         ", callback " + _callback + " newHandler" + "" + newHandler);
+            Logger::V(TAG, "%s SetRepeatingBurst - requests %s, callback %s newHandler %s",
+                mIdString.string(), TO_CSTR(requests), TO_CSTR(_callback), TO_CSTR(newHandler));
         }
 
         AutoPtr<ICameraDeviceImplCaptureCallback> back;
@@ -615,7 +630,8 @@ ECode CameraCaptureSessionImpl::SetRepeatingBurst(
 
 ECode CameraCaptureSessionImpl::StopRepeating()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         FAIL_RETURN(CheckNotClosed())
 
         if (VERBOSE) {
@@ -629,7 +645,8 @@ ECode CameraCaptureSessionImpl::StopRepeating()
 
 ECode CameraCaptureSessionImpl::AbortCaptures()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         FAIL_RETURN(CheckNotClosed())
 
         if (VERBOSE) {
@@ -652,7 +669,8 @@ ECode CameraCaptureSessionImpl::AbortCaptures()
 
 ECode CameraCaptureSessionImpl::ReplaceSessionClose()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         /*
          * In order for creating new sessions to be fast, the new session should be created
          * before the old session is closed.
@@ -687,7 +705,8 @@ ECode CameraCaptureSessionImpl::ReplaceSessionClose()
 
 ECode CameraCaptureSessionImpl::Close()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mClosed) {
             if (VERBOSE) {
                 Logger::V(TAG, "%s close - reentering", mIdString.string());
@@ -757,17 +776,11 @@ ECode CameraCaptureSessionImpl::CreateUserStateCallbackProxy(
     VALIDATE_NOT_NULL(back);
     *back = NULL;
 
-    AutoPtr<IInvokeDispatcher> userCallbackSink;
-    CInvokeDispatcher::New(TO_IINTERFACE(_callback), (IInvokeDispatcher**)&userCallbackSink);
-    AutoPtr<IHandlerDispatcher> handlerPassthrough;
-    CHandlerDispatcher::New(IDispatchable::Probe(userCallbackSink), handler, (IHandlerDispatcher**)&handlerPassthrough);
+    AutoPtr<IDispatchable> userCallbackSink, handlerPassthrough;
+    CInvokeDispatcher::New(TO_IINTERFACE(_callback), (IDispatchable**)&userCallbackSink);
+    CHandlerDispatcher::New(userCallbackSink, handler, (IDispatchable**)&handlerPassthrough);
 
-    AutoPtr<ICallbackProxiesSessionStateCallbackProxy> proxy;
-    CCallbackProxiesSessionStateCallbackProxy::New(IDispatchable::Probe(handlerPassthrough),
-            (ICallbackProxiesSessionStateCallbackProxy**)&proxy);
-    *back = ICameraCaptureSessionStateCallback::Probe(proxy);
-    REFCOUNT_ADD(*back);
-    return NOERROR;
+    return CCallbackProxiesSessionStateCallbackProxy::New(handlerPassthrough, back);
 }
 
 ECode CameraCaptureSessionImpl::CreateCaptureCallbackProxy(
@@ -796,41 +809,33 @@ ECode CameraCaptureSessionImpl::CreateCaptureCallbackProxy(
         return NOERROR;
     }
 
-    AutoPtr<IInvokeDispatcher> localSink;
-    CInvokeDispatcher::New(localCallback, (IInvokeDispatcher**)&localSink);
+    AutoPtr<IDispatchable> localSink;
+    CInvokeDispatcher::New(localCallback, (IDispatchable**)&localSink);
 
-    AutoPtr<IInvokeDispatcher> userCallbackSink;
-    CInvokeDispatcher::New(_callback, (IInvokeDispatcher**)&userCallbackSink);
+    AutoPtr<IDispatchable> userCallbackSink;
+    CInvokeDispatcher::New(_callback, (IDispatchable**)&userCallbackSink);
 
-    AutoPtr<IHandlerDispatcher> handlerPassthrough;
-    CHandlerDispatcher::New(IDispatchable::Probe(userCallbackSink), handler,
-            (IHandlerDispatcher**)&handlerPassthrough);
+    AutoPtr<IDispatchable> handlerPassthrough;
+    CHandlerDispatcher::New(userCallbackSink, handler, (IDispatchable**)&handlerPassthrough);
 
-    AutoPtr<IDuckTypingDispatcher> duckToSession;
-    assert(0);
-    const String klassName(".............../CCameraDeviceImplCaptureCallback;");
+    const String itfcName("Elastos.Droid.Hardware.Camera2.Impl.ICameraDeviceImplCaptureCallback");
     AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
-    AutoPtr<IClassInfo> classInfo;
-    ASSERT_SUCCEEDED(cl->LoadClass(klassName, (IClassInfo**)&classInfo))
-    CDuckTypingDispatcher::New(IDispatchable::Probe(handlerPassthrough),
-            classInfo, (IDuckTypingDispatcher**)&duckToSession);
+    AutoPtr<IInterfaceInfo> classInfo;
+    ASSERT_SUCCEEDED(cl->LoadInterface(itfcName, (IInterfaceInfo**)&classInfo))
+    AutoPtr<IDispatchable> duckToSession;
+    CDuckTypingDispatcher::New(handlerPassthrough, classInfo, (IDispatchable**)&duckToSession);
 
-    AutoPtr<IArgumentReplacingDispatcher> replaceDeviceWithSession;
-    CArgumentReplacingDispatcher::New(IDispatchable::Probe(duckToSession), /*argumentIndex*/0,
-            TO_IINTERFACE(this), (IArgumentReplacingDispatcher**)&replaceDeviceWithSession);
+    AutoPtr<IDispatchable> replaceDeviceWithSession;
+    CArgumentReplacingDispatcher::New(duckToSession, /*argumentIndex*/0,
+        TO_IINTERFACE(this), (IDispatchable**)&replaceDeviceWithSession);
 
     AutoPtr<ArrayOf<IDispatchable*> > array = ArrayOf<IDispatchable*>::Alloc(2);
-    array->Set(0, IDispatchable::Probe(replaceDeviceWithSession));
-    array->Set(1, IDispatchable::Probe(localSink));
-    AutoPtr<IBroadcastDispatcher> broadcaster;
-    CBroadcastDispatcher::New(array, (IBroadcastDispatcher**)&broadcaster);
+    array->Set(0, replaceDeviceWithSession);
+    array->Set(1, localSink);
+    AutoPtr<IDispatchable> broadcaster;
+    CBroadcastDispatcher::New(array, (IDispatchable**)&broadcaster);
 
-    AutoPtr<ICallbackProxiesDeviceCaptureCallbackProxy> proxy;
-    CCallbackProxiesDeviceCaptureCallbackProxy::New(IDispatchable::Probe(broadcaster),
-            (ICallbackProxiesDeviceCaptureCallbackProxy**)&proxy);
-    *back = ICameraDeviceImplCaptureCallback::Probe(proxy);
-    REFCOUNT_ADD(*back);
-    return NOERROR;
+    return CCallbackProxiesDeviceCaptureCallbackProxy::New(broadcaster, back);
 }
 
 ECode CameraCaptureSessionImpl::GetDeviceStateCallback(
@@ -841,7 +846,7 @@ ECode CameraCaptureSessionImpl::GetDeviceStateCallback(
 
     AutoPtr<ICameraCaptureSession> session = this;
     AutoPtr<MyStateCallbackKK> backKK = new MyStateCallbackKK(this, session);
-    *back = ICameraDeviceImplStateCallbackKK::Probe(backKK);
+    *back = backKK.Get();
     REFCOUNT_ADD(*back);
     return NOERROR;
 }
@@ -849,8 +854,6 @@ ECode CameraCaptureSessionImpl::GetDeviceStateCallback(
 ECode CameraCaptureSessionImpl::CheckNotClosed()
 {
     if (mClosed) {
-        // throw new IllegalStateException(
-        //         "Session has been closed; further changes are illegal.");
         Logger::E(TAG, "Session has been closed; further changes are illegal.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -864,7 +867,7 @@ ECode CameraCaptureSessionImpl::AddPendingSequence(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<IInteger32> obj = CoreUtils::Convert(sequenceId);
-    mSequenceDrainer->TaskStarted(TO_IINTERFACE(obj));
+    mSequenceDrainer->TaskStarted(obj);
     *result = sequenceId;
     return NOERROR;
 }
@@ -873,7 +876,7 @@ ECode CameraCaptureSessionImpl::FinishPendingSequence(
     /* [in] */ Int32 sequenceId)
 {
     AutoPtr<IInteger32> obj = CoreUtils::Convert(sequenceId);
-    return mSequenceDrainer->TaskFinished(TO_IINTERFACE(obj));
+    return mSequenceDrainer->TaskFinished(obj);
 }
 
 } // namespace Impl

@@ -278,7 +278,7 @@ ECode LegacyCameraDevice::MyListener::OnCaptureResult(
 CAR_INTERFACE_IMPL_2(LegacyCameraDevice, Object, ILegacyCameraDevice, ICloseable)
 
 const String LegacyCameraDevice::DEBUG_PROP("HAL1ShimLogging");
-const Boolean LegacyCameraDevice::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean LegacyCameraDevice::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
 const Int32 LegacyCameraDevice::ILLEGAL_VALUE = -1;
 
 LegacyCameraDevice::LegacyCameraDevice()
@@ -315,7 +315,7 @@ ECode LegacyCameraDevice::constructor(
     mCameraId = cameraId;
     mDeviceCallbacks = _callbacks;
     StringBuilder sb;
-    sb += "CameraDevice-";
+    sb += "LegacyCameraDevice-";
     sb += mCameraId;
     sb += "-LE";
     TAG = sb.ToString();
@@ -395,8 +395,8 @@ ECode LegacyCameraDevice::ConfigureOutputs(
             }
 
             AutoPtr<IInterface> tmp;
-            mStaticCharacteristics->Get(CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP,
-                    (IInterface**)&tmp);
+            mStaticCharacteristics->Get(
+                CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP, (IInterface**)&tmp);
             AutoPtr<IStreamConfigurationMap> streamConfigurations = IStreamConfigurationMap::Probe(tmp);
 
             // Validate surface size and format.
@@ -433,27 +433,30 @@ ECode LegacyCameraDevice::ConfigureOutputs(
                 }
             }
 
-            AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(sizes->GetLength());
-            for (Int32 i = 0; i < array->GetLength(); i++) {
-                array->Set(i, TO_IINTERFACE((*sizes)[i]));
+            Boolean contains = FALSE;
+            if (sizes) {
+                for (Int32 i = 0; i < sizes->GetLength(); i++) {
+                    if (Object::Equals((*sizes)[i], s)) {
+                        contains = TRUE;
+                        break;
+                    }
+                }
             }
-            Boolean result;
-            ArrayUtils::Contains(array.Get(), (IInterface*)s.Get(), &result);
-            if (!result) {
-                String reason;
+
+            if (!contains) {
+                Int32 width, height;
+                s->GetWidth(&width);
+                s->GetHeight(&height);
                 if (sizes == NULL) {
-                    reason = String("format is invalid.");
+                    Logger::E(TAG, "Surface with size (w=%d, h=%d) and format 0x%x is not valid, "
+                        "format is invalid.", width, height, surfaceType);
                 }
                 else {
-                    String str = Arrays::ToString(sizes);
-                    reason = String("size not in valid set: ") + str;
+                    Logger::E(TAG, "Surface with size (w=%d, h=%d) and format 0x%x is not valid, "
+                        "size not in valid set: %s",
+                        width, height, surfaceType, Arrays::ToString(sizes).string());
+
                 }
-                Int32 width;
-                s->GetWidth(&width);
-                Int32 height;
-                s->GetHeight(&height);
-                Logger::E(TAG, "Surface with size (w=%d, h=%d) and format 0x%x is"
-                        " not valid, %s", width, height, surfaceType, reason.string());
                 *value =  ICameraBinderDecorator::ICameraBinderDecorator_BAD_VALUE;
                 return NOERROR;
             }
@@ -561,9 +564,8 @@ ECode LegacyCameraDevice::SubmitRequestList(
     }
 
     // TODO: further validation of request here
-    ICloseable::Probe(mIdle)->Close();
-    return mRequestThreadManager->SubmitCaptureRequests(requestList, repeating,
-            frameNumber, value);
+    mIdle->Close();
+    return mRequestThreadManager->SubmitCaptureRequests(requestList, repeating, frameNumber, value);
 }
 
 ECode LegacyCameraDevice::SubmitRequest(
@@ -874,35 +876,35 @@ Int32 LegacyCameraDevice::NativeDetectSurfaceDimens(
 
     if (dimens == NULL) {
         Logger::E("LegacyCameraDevice", "%s: Null dimens argument passed"
-                " to nativeDetectSurfaceDimens", __FUNCTION__);
+            " to nativeDetectSurfaceDimens", __FUNCTION__);
         return android::BAD_VALUE;
     }
 
     if (dimens->GetLength() < 2) {
         Logger::E("LegacyCameraDevice", "%s: Invalid length of dimens "
-                "argument in nativeDetectSurfaceDimens", __FUNCTION__);
+            "argument in nativeDetectSurfaceDimens", __FUNCTION__);
         return android::BAD_VALUE;
     }
 
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
         Logger::E("LegacyCameraDevice", "%s: Could not retrieve native "
-                "window from surface.", __FUNCTION__);
+            "window from surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
     int32_t dimenBuf[2];
     android::status_t err = anw->query(anw.get(), NATIVE_WINDOW_WIDTH, dimenBuf);
     if(err != android::NO_ERROR) {
         Logger::E("LegacyCameraDevice", "%s: Error while querying "
-                "surface width %s (%d).", __FUNCTION__, strerror(-err),
-                err);
+            "surface width %s (%d).", __FUNCTION__, strerror(-err),
+            err);
         return err;
     }
     err = anw->query(anw.get(), NATIVE_WINDOW_HEIGHT, dimenBuf + 1);
     if(err != android::NO_ERROR) {
         Logger::E("LegacyCameraDevice", "%s: Error while querying surface "
-                "height %s (%d).", __FUNCTION__, strerror(-err),
-                err);
+            "height %s (%d).", __FUNCTION__, strerror(-err),
+            err);
         return err;
     }
     //Arrays::CopyOfRange(dimens, /*start*/0, /*length*/ARRAY_SIZE(dimenBuf), dimenBuf);
@@ -1400,26 +1402,20 @@ static android::sp<android::Surface> getSurface(
 {
     android::sp<android::Surface> s;
     if (surface) {
-        assert(0);
-        // s = android_view_Surface_getSurface(env, surface);
-        // if (env->ExceptionCheck()) {
-        //     return NULL;
-        // }
+        Int64 nativeSurf;
+        surface->GetNativeSurface(&nativeSurf);
+        s = reinterpret_cast<android::Surface*>(nativeSurf);
     }
     else {
-        // jniThrowNullPointerException(env, "surface");
-        Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: surface");
-        //return E_NULL_POINTER_EXCEPTION;
+        Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: surface is null");
         return NULL;
     }
     if (s == NULL) {
-        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-        //         "Surface had no valid native Surface.");
         Logger::E("LegacyCameraDevice", "java/lang/IllegalArgumentException"
                 " Surface had no valid native Surface.");
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
         return NULL;
     }
+
     return s;
 }
 

@@ -37,7 +37,7 @@ public:
     //@Override
     CARAPI Dispatch(
         /* [in] */ IMethodInfo* method,
-        /* [in] */ ArrayOf<IInterface*>* args);
+        /* [in] */ IArgumentList* args);
 };
 
 } // namespace Dispatch

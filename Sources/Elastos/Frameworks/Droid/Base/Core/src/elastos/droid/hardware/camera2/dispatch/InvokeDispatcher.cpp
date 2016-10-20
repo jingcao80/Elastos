@@ -20,11 +20,6 @@ InvokeDispatcher::InvokeDispatcher()
 {
 }
 
-ECode InvokeDispatcher::constructor()
-{
-    return NOERROR;
-}
-
 ECode InvokeDispatcher::constructor(
     /* [in] */ IInterface* target)
 {
@@ -36,19 +31,10 @@ ECode InvokeDispatcher::constructor(
 
 ECode InvokeDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ IArgumentList* args)
 {
     //try {
-    AutoPtr<IArgumentList> argumentList;
-    ECode ec = method->CreateArgumentList((IArgumentList**)&argumentList);
-    if (FAILED(ec)) {
-        Logger::E(TAG, "Create method argument list failed!");
-        return ec;
-    }
-
-    argumentList->SetInputArgumentOfCarArray(0, args);
-
-    ec = method->Invoke(mTarget, argumentList);
+    ECode ec = method->Invoke(mTarget, args);
     if (FAILED(ec)) {
         Logger::E(TAG, "Invoke method failed!");
         return ec;

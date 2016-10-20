@@ -12,8 +12,14 @@ module
      *
      * @param <T> destination dispatch type, methods will be looked up in the class of {@code T}
      */
-    [deprecated]
+    [deprecated, local]
     interface IMethodNameInvoker {
+    
+        GetMethodInfo(
+            [in] String name,
+            [in] String signature,
+            [out] IMethodInfo** methodInfo);
+
         /**
          * Invoke a method by its name.
          *
@@ -33,8 +39,8 @@ module
          */
         // @SuppressWarnings("unchecked")
         Invoke(
-            [in] String methodName,
-            [in] ArrayOf<IInterface*>* params);
+            [in] IMethodInfo* methodInfo,
+            [in] IArgumentList* params);
     }
 
     } // namespace Dispatch

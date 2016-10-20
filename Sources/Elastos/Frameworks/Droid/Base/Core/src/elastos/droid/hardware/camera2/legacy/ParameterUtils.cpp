@@ -389,18 +389,41 @@ ECode ParameterUtils::ConvertSizeList(
     AutoPtr<IList> sizes;
     CArrayList::New(size, (IList**)&sizes);
 
+    Int32 width, height;
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         sizeList->Get(i, (IInterface**)&obj);
         AutoPtr<ICameraSize> s = ICameraSize::Probe(obj);
 
-        Int32 width;
         s->GetWidth(&width);
-        Int32 height;
         s->GetHeight(&height);
         AutoPtr<ISize> tmp;
         CSize::New(width, height, (ISize**)&tmp);
-        sizes->Add(TO_IINTERFACE(tmp));
+        sizes->Add(tmp);
+    }
+    *outlist = sizes;
+    REFCOUNT_ADD(*outlist);
+    return NOERROR;
+}
+
+ECode ParameterUtils::ConvertSizeArrayToList(
+    /* [in] */ ArrayOf<ICameraSize*>* sizeList,
+    /* [out] */ IList** outlist)
+{
+    VALIDATE_NOT_NULL(outlist)
+    *outlist = NULL;
+    FAIL_RETURN(Preconditions::CheckNotNull(sizeList, String("sizeList must not be null")))
+
+    AutoPtr<IList> sizes;
+    CArrayList::New(sizeList->GetLength(), (IList**)&sizes);
+
+    Int32 width, height;
+    for (Int32 i = 0; i < sizeList->GetLength(); i++) {
+        (*sizeList)[i]->GetWidth(&width);
+        (*sizeList)[i]->GetHeight(&height);
+        AutoPtr<ISize> tmp;
+        CSize::New(width, height, (ISize**)&tmp);
+        sizes->Add(tmp);
     }
     *outlist = sizes;
     REFCOUNT_ADD(*outlist);
@@ -419,17 +442,16 @@ ECode ParameterUtils::ConvertSizeListToArray(
     sizeList->GetSize(&size);
     AutoPtr<ArrayOf<ISize*> > array = ArrayOf<ISize*>::Alloc(size);
 
+    Int32 width, height;
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         sizeList->Get(i, (IInterface**)&obj);
         AutoPtr<ICameraSize> s = ICameraSize::Probe(obj);
 
-        Int32 width, height;
         s->GetWidth(&width);
         s->GetHeight(&height);
         AutoPtr<ISize> tmp;
         CSize::New(width, height, (ISize**)&tmp);
-
         array->Set(i, tmp);
     }
     *outarr = array;
@@ -449,13 +471,12 @@ ECode ParameterUtils::ConvertSizeArrayToArray(
     Int32 size = sizeList->GetLength();
     AutoPtr<ArrayOf<ISize*> > array = ArrayOf<ISize*>::Alloc(size);
 
+    Int32 width, height;
     for (Int32 i = 0; i < size; i++) {
-        Int32 width, height;
         (*sizeList)[i]->GetWidth(&width);
         (*sizeList)[i]->GetHeight(&height);
         AutoPtr<ISize> tmp;
         CSize::New(width, height, (ISize**)&tmp);
-
         array->Set(i, tmp);
     }
     *outarr = array;

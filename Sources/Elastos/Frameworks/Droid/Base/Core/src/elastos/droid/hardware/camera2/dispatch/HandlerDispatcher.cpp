@@ -13,7 +13,7 @@ namespace Dispatch {
 HandlerDispatcher::MyRunnable::MyRunnable(
     /* [in] */ HandlerDispatcher* host,
     /* [in] */ IMethodInfo* method,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ IArgumentList* args)
     : mHost(host)
     , mMethod(method)
     , mArgs(args)
@@ -22,8 +22,7 @@ HandlerDispatcher::MyRunnable::MyRunnable(
 
 ECode HandlerDispatcher::MyRunnable::Run()
 {
-    // try {
-    return  mHost->mDispatchTarget->Dispatch(mMethod, mArgs);
+    return mHost->mDispatchTarget->Dispatch(mMethod, mArgs);
     // } catch (InvocationTargetException e) {
     //     Throwable t = e.getTargetException();
     //     // Potential UB. Hopefully 't' is a runtime exception.
@@ -47,11 +46,6 @@ HandlerDispatcher::HandlerDispatcher()
 {
 }
 
-ECode HandlerDispatcher::constructor()
-{
-    return NOERROR;
-}
-
 ECode HandlerDispatcher::constructor(
     /* [in] */ IDispatchable* dispatchTarget,
     /* [in] */ IHandler* handler)
@@ -65,11 +59,11 @@ ECode HandlerDispatcher::constructor(
 
 ECode HandlerDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ IArgumentList* args)
 {
     AutoPtr<MyRunnable> myRun = new MyRunnable(this, method, args);
     Boolean result;
-    return mHandler->Post(IRunnable::Probe(myRun), &result);
+    return mHandler->Post(myRun, &result);
 }
 
 } // namespace Dispatch

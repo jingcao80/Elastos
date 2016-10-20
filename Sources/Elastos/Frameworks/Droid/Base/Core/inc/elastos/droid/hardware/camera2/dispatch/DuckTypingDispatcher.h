@@ -36,12 +36,12 @@ public:
      */
     CARAPI constructor(
         /* [in] */ IDispatchable* target,
-        /* [in] */ IClassInfo* targetClass);
+        /* [in] */ IInterfaceInfo* targetClass);
 
     //@Override
     CARAPI Dispatch(
         /* [in] */ IMethodInfo* method,
-        /* [in] */ ArrayOf<IInterface*>* args);
+        /* [in] */ IArgumentList* args);
 
 private:
     AutoPtr<IMethodNameInvoker> mDuck;
