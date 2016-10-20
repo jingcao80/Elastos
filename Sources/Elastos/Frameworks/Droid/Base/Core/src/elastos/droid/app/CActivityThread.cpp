@@ -1,5 +1,6 @@
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.CoreLibrary.Security.h"
 #include <Elastos.CoreLibrary.Text.h>
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Internal.h>
@@ -22,6 +23,7 @@
 #include "elastos/droid/graphics/CCanvas.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/Typeface.h"
+#include "elastos/droid/keystore/security/CElastosKeyStoreProvider.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/HardwareRenderer.h"
 #include "elastos/droid/view/ViewRootImpl.h"
@@ -109,6 +111,8 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::CPersistableBundle;
 using Elastos::Droid::Os::CMessage;
 using Elastos::Droid::Os::Environment;
+using Elastos::Droid::KeyStore::Security::CElastosKeyStoreProvider;
+using Elastos::Droid::KeyStore::Security::IElastosKeyStoreProvider;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Internal::Os::IRuntimeInit;
 using Elastos::Droid::Internal::Os::CRuntimeInit;
@@ -127,6 +131,9 @@ using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
 using Elastos::IO::ICloseable;
+using Elastos::Security::CSecurity;
+using Elastos::Security::IProvider;
+using Elastos::Security::ISecurity;
 using Elastos::Text::IDateFormatHelper;
 using Elastos::Text::CDateFormatHelper;
 using Elastos::Utility::CArrayList;
@@ -6264,7 +6271,12 @@ ECode CActivityThread::Main(
     // Set the reporter for event logging in libcore
 //    EventLogger.setReporter(new EventLoggingReporter());
 
-    // Security.addProvider(new AndroidKeyStoreProvider());
+    AutoPtr<IElastosKeyStoreProvider> eksp;
+    CElastosKeyStoreProvider::New((IElastosKeyStoreProvider**)&eksp);
+    Int32 pos = 0;
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    security->AddProvider(IProvider::Probe(eksp), &pos);
 
     // // Make sure TrustedCertificateStore looks in the right place for CA certificates
     // final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());

@@ -126,7 +126,7 @@ void CSecurity::RegisterDefaultProviders()
     String old;
     sSecprops->SetProperty(String("security.provider.1"), String("com.android.org.conscrypt.OpenSSLProvider"), &old);
     sSecprops->SetProperty(String("security.provider.2"), String("com.android.org.bouncycastle.jce.provider.BouncyCastleProvider"), &old);
-    sSecprops->SetProperty(String("security.provider.3"), String("org.apache.harmony.security.provider.crypto.CryptoProvider"), &old);
+    sSecprops->SetProperty(String("security.provider.3"), String("Org.Apache.Harmony.Security.Provider.Crypto.CCryptoProvider"), &old);
     sSecprops->SetProperty(String("security.provider.4"), String("com.android.org.conscrypt.JSSEProvider"), &old);
 }
 

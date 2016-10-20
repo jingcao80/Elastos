@@ -18,7 +18,7 @@ ECode CCryptoProvider::constructor()
         String("HARMONY (SHA1 digest; SecureRandom; SHA1withDSA signature)"));
 
     Put(CoreUtils::Convert(String("SecureRandom.SHA1PRNG")),
-            CoreUtils::Convert(String("org.apache.harmony.security.provider.crypto.SHA1PRNG_SecureRandomImpl")));
+            CoreUtils::Convert(String("Org.Apache.Harmony.Security.Provider.Crypto.CSHA1PRNG_SecureRandomImpl")));
     Put(CoreUtils::Convert(String("SecureRandom.SHA1PRNG ImplementedIn")), CoreUtils::Convert(String("Software")));
     return NOERROR;
 }

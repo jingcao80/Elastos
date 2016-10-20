@@ -11,8 +11,10 @@ namespace Security {
 
 CAR_INTERFACE_IMPL(ElastosKeyStoreProvider, Elastos::Security::Provider, IElastosKeyStoreProvider);
 const String ElastosKeyStoreProvider::PROVIDER_NAME("ElastosKeyStore");
-
 ElastosKeyStoreProvider::ElastosKeyStoreProvider()
+{}
+
+ECode ElastosKeyStoreProvider::constructor()
 {
     Elastos::Security::Provider::constructor(PROVIDER_NAME, 1.0, String("Elastos KeyStore security provider"));
 
@@ -27,10 +29,6 @@ ElastosKeyStoreProvider::ElastosKeyStoreProvider()
     String value2 = String("Elastos.Droid.KeyStore.Security.ElastosKeyPairGenerator");
     // java.security.KeyPairGenerator
     Put(CoreUtils::Convert(key2), CoreUtils::Convert(value2), (IInterface**)&tmp);
-}
-
-ECode ElastosKeyStoreProvider::constructor()
-{
     return NOERROR;
 }
 

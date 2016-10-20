@@ -20,9 +20,9 @@ using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Internal::Widget::CLockPatternUtils;
 using Elastos::Droid::Internal::Widget::CLockPatternUtilsHelper;
 using Elastos::Droid::Internal::Widget::ILockPatternUtilsHelper;
+using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
 using Elastos::Droid::KeyStore::Security::IKeyStore;
 using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
-// using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserManager;
@@ -92,11 +92,9 @@ ECode ChooseLockGeneric::ChooseLockGenericFragment::OnCreate(
 
     mDPM = IDevicePolicyManager::Probe(GetSystemService(IContext::DEVICE_POLICY_SERVICE));
 
-    Slogger::I("ChooseLockGeneric", " >> TODO wait for CKeyStoreHelper");
-    // AutoPtr<IKeyStoreHelper> helper;
-    // assert(0 && "TODO");
-    // // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
-    // helper->GetInstance((IKeyStore**)&mKeyStore);
+    AutoPtr<IKeyStoreHelper> helper;
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    helper->GetInstance((IKeyStore**)&mKeyStore);
     AutoPtr<IActivity> thisActivity;
     this->GetActivity((IActivity**)&thisActivity);
     mChooseLockSettingsHelper = new ChooseLockSettingsHelper();
@@ -362,13 +360,12 @@ Int32 ChooseLockGeneric::ChooseLockGenericFragment::UpgradeQualityForKeyStore(
     /* [in] */ Int32 quality)
 {
     Boolean res;
-    Slogger::I("ChooseLockGeneric", " >> TODO wait for CKeyStoreHelper");
-    //mKeyStore->IsEmpty(&res);
-    //if (!res) {
-    //    if (quality < IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING/*CredentialStorage::MIN_PASSWORD_QUALITY*/) {
-    //        quality = IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING/*CredentialStorage::MIN_PASSWORD_QUALITY*/;
-    //    }
-    //}
+    mKeyStore->IsEmpty(&res);
+    if (!res) {
+       if (quality < IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING/*CredentialStorage::MIN_PASSWORD_QUALITY*/) {
+           quality = IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING/*CredentialStorage::MIN_PASSWORD_QUALITY*/;
+       }
+    }
     return quality;
 }
 
