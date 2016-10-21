@@ -74,66 +74,84 @@ private:
     AutoPtr<ArrayOf<Byte> > mSingleByte;
 };
 
-class MD5
+class OpenSSLMessageDigestJDKMD5
     : public OpenSSLMessageDigestJDK
+    , public IOpenSSLMessageDigestJDKMD5
 {
 public:
-    MD5();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 public:
     static Int64 EVP_MD;
     static Int32 SIZE;
 };
 
-class SHA1
+class OpenSSLMessageDigestJDKSHA1
     : public OpenSSLMessageDigestJDK
+    , public IOpenSSLMessageDigestJDKSHA1
 {
 public:
-    SHA1();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 public:
     static Int64 EVP_MD;
     static Int32 SIZE;
 };
 
-class SHA224
+class OpenSSLMessageDigestJDKSHA224
     : public OpenSSLMessageDigestJDK
+    , public IOpenSSLMessageDigestJDKSHA224
 {
 public:
-    SHA224();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 public:
     static Int64 EVP_MD;
     static Int32 SIZE;
 };
 
-class SHA256
+class OpenSSLMessageDigestJDKSHA256
     : public OpenSSLMessageDigestJDK
+    , public IOpenSSLMessageDigestJDKSHA256
 {
 public:
-    SHA256();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 public:
     static Int64 EVP_MD;
     static Int32 SIZE;
 };
 
-class SHA384
+class OpenSSLMessageDigestJDKSHA384
     : public OpenSSLMessageDigestJDK
+    , public IOpenSSLMessageDigestJDKSHA384
 {
 public:
-    SHA384();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 public:
     static Int64 EVP_MD;
     static Int32 SIZE;
 };
 
-class SHA512
+class OpenSSLMessageDigestJDKSHA512
     : public OpenSSLMessageDigestJDK
+    , public IOpenSSLMessageDigestJDKSHA512
 {
 public:
-    SHA512();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 public:
     static Int64 EVP_MD;

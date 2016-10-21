@@ -89,23 +89,26 @@ ECode KeyStore::GetInstance(
 {
     // check parameters
     if (provider == NULL) {
+        // throw new IllegalArgumentException("provider == NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (type.IsNull()) {
+        // throw new NULLPointerException("type == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
-    //Apache...Todo later
-    /*
+
     // return KeyStore instance
-    try {
-        Object spi = ENGINE.getInstance(type, provider, null);
-        return new KeyStore((KeyStoreSpi) spi, provider, type);
-    } catch (Exception e) {
-        // override exception
-        throw new KeyStoreException(e);
-    }
-    */
-    return E_NOT_IMPLEMENTED;
+    // try {
+    AutoPtr<IInterface> spi;
+    ENGINE->GetInstance(type, provider, NULL, (IInterface**)&spi);
+    AutoPtr<KeyStore> ks = new KeyStore(IKeyStoreSpi::Probe(spi), provider, type);
+    *instance = IKeyStore::Probe(ks);
+    REFCOUNT_ADD(*instance)
+    // } catch (Exception e) {
+    //     // override exception
+    //     throw new KeyStoreException(e);
+    // }
+    return NOERROR;
 }
 
 ECode KeyStore::GetDefaultType(
@@ -357,18 +360,17 @@ ECode KeyStore::EntryInstanceOf(
     if (alias.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    //Todo later
-    /*
-    if (entryClas == null) {
-        throw new NullPointerException("entryClass == null");
-    }
 
-    if (!isInit) {
-        throwNotInitialized();
+    // TODO:
+    // if (entryClass == NULL) {
+    //     // throw new NullPointerException("entryClass == null");
+    //     return E_NULL_POINTER_EXCEPTION;
+    // }
+
+    if (!mIsInit) {
+        ThrowNotInitialized();
     }
-    return implSpi.engineEntryInstanceOf(alias, entryClass);
-    */
-    return E_NOT_IMPLEMENTED;
+    return mImplSpi->EngineEntryInstanceOf(alias, entryClass, result);
 }
 
 Boolean KeyStore::IsInit()

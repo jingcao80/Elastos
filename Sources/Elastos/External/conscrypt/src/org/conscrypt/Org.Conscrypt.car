@@ -493,6 +493,42 @@ module
         interface ICloneable;
     }
 
+    class COpenSSLMessageDigestJDKMD5 {
+        constructor();
+
+        interface IOpenSSLMessageDigestJDKMD5;
+    }
+
+    class COpenSSLMessageDigestJDKSHA1 {
+        constructor();
+
+        interface IOpenSSLMessageDigestJDKSHA1;
+    }
+
+    class COpenSSLMessageDigestJDKSHA224 {
+        constructor();
+
+        interface IOpenSSLMessageDigestJDKSHA224;
+    }
+
+    class COpenSSLMessageDigestJDKSHA256 {
+        constructor();
+
+        interface IOpenSSLMessageDigestJDKSHA256;
+    }
+
+    class COpenSSLMessageDigestJDKSHA384 {
+        constructor();
+
+        interface IOpenSSLMessageDigestJDKSHA384;
+    }
+
+    class COpenSSLMessageDigestJDKSHA512 {
+        constructor();
+
+        interface IOpenSSLMessageDigestJDKSHA512;
+    }
+
     class COpenSSLRSAKeyFactory {
         interface IKeyFactorySpi;
         interface IOpenSSLRSAKeyFactory;
@@ -617,6 +653,54 @@ module
 
     class COpenSSLSignature {
         interface IOpenSSLSignature;
+    }
+
+    class COpenSSLSignatureMD5RSA {
+        interface IOpenSSLSignatureMD5RSA;
+    }
+
+    class COpenSSLSignatureSHA1RSA {
+        interface IOpenSSLSignatureSHA1RSA;
+    }
+
+    class COpenSSLSignatureSHA224RSA {
+        interface IOpenSSLSignatureSHA224RSA;
+    }
+
+    class COpenSSLSignatureSHA256RSA {
+        interface IOpenSSLSignatureSHA256RSA;
+    }
+
+    class COpenSSLSignatureSHA384RSA {
+        interface IOpenSSLSignatureSHA384RSA;
+    }
+
+    class COpenSSLSignatureSHA512RSA {
+        interface IOpenSSLSignatureSHA512RSA;
+    }
+
+    class COpenSSLSignatureSHA1DSA {
+        interface IOpenSSLSignatureSHA1DSA;
+    }
+
+    class COpenSSLSignatureSHA1ECDSA {
+        interface IOpenSSLSignatureSHA1ECDSA;
+    }
+
+    class COpenSSLSignatureSHA224ECDSA {
+        interface IOpenSSLSignatureSHA224ECDSA;
+    }
+
+    class COpenSSLSignatureSHA256ECDSA {
+        interface IOpenSSLSignatureSHA256ECDSA;
+    }
+
+    class COpenSSLSignatureSHA384ECDSA {
+        interface IOpenSSLSignatureSHA384ECDSA;
+    }
+
+    class COpenSSLSignatureSHA512ECDSA {
+        interface IOpenSSLSignatureSHA512ECDSA;
     }
 
     class COpenSSLSignatureRawRSA {

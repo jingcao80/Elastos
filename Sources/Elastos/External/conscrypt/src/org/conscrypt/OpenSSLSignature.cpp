@@ -7,195 +7,231 @@ namespace Org {
 namespace Conscrypt {
 
 //=========================================
-// MD5RSA::
+// OpenSSLSignatureMD5RSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureMD5RSA, OpenSSLSignature,
+        IOpenSSLSignatureMD5RSA)
+
 static Int64 Init_MD5RSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("RSA-MD5"), &res);
     return res;
 }
-Int64 MD5RSA::EVP_MD = Init_MD5RSA_EVP_MD();
+Int64 OpenSSLSignatureMD5RSA::EVP_MD = Init_MD5RSA_EVP_MD();
 
-MD5RSA::MD5RSA()
+ECode OpenSSLSignatureMD5RSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
 }
 
 //=========================================
-// SHA1RSA::
+// OpenSSLSignatureSHA1RSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA1RSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA1RSA)
+
 static Int64 Init_SHA1RSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("RSA-SHA1"), &res);
     return res;
 }
-Int64 SHA1RSA::EVP_MD = Init_SHA1RSA_EVP_MD();
+Int64 OpenSSLSignatureSHA1RSA::EVP_MD = Init_SHA1RSA_EVP_MD();
 
-SHA1RSA::SHA1RSA()
+ECode OpenSSLSignatureSHA1RSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
 }
 
 //=========================================
-// SHA224RSA::
+// OpenSSLSignatureSHA224RSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA224RSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA224RSA)
+
 static Int64 Init_SHA224RSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("RSA-SHA224"), &res);
     return res;
 }
-Int64 SHA224RSA::EVP_MD = Init_SHA224RSA_EVP_MD();
+Int64 OpenSSLSignatureSHA224RSA::EVP_MD = Init_SHA224RSA_EVP_MD();
 
-SHA224RSA::SHA224RSA()
+ECode OpenSSLSignatureSHA224RSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
 }
 
 //=========================================
-// SHA256RSA::
+// OpenSSLSignatureSHA256RSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA256RSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA256RSA)
+
 static Int64 Init_SHA256RSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("RSA-SHA256"), &res);
     return res;
 }
-Int64 SHA256RSA::EVP_MD = Init_SHA256RSA_EVP_MD();
+Int64 OpenSSLSignatureSHA256RSA::EVP_MD = Init_SHA256RSA_EVP_MD();
 
-SHA256RSA::SHA256RSA()
+ECode OpenSSLSignatureSHA256RSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
 }
 
 //=========================================
-// SHA384RSA::
+// OpenSSLSignatureSHA384RSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA384RSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA384RSA)
+
 static Int64 Init_SHA384RSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("RSA-SHA384"), &res);
     return res;
 }
-Int64 SHA384RSA::EVP_MD = Init_SHA384RSA_EVP_MD();
+Int64 OpenSSLSignatureSHA384RSA::EVP_MD = Init_SHA384RSA_EVP_MD();
 
-SHA384RSA::SHA384RSA()
+ECode OpenSSLSignatureSHA384RSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
 }
 
 //=========================================
-// SHA512RSA::
+// OpenSSLSignatureSHA512RSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA512RSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA512RSA)
+
 static Int64 Init_SHA512RSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("RSA-SHA512"), &res);
     return res;
 }
-Int64 SHA512RSA::EVP_MD = Init_SHA512RSA_EVP_MD();
+Int64 OpenSSLSignatureSHA512RSA::EVP_MD = Init_SHA512RSA_EVP_MD();
 
-SHA512RSA::SHA512RSA()
+ECode OpenSSLSignatureSHA512RSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_RSA);
 }
 
 //=========================================
-// SHA1DSA::
+// OpenSSLSignatureSHA1DSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA1DSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA1DSA)
+
 static Int64 Init_SHA1DSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("DSA-SHA1"), &res);
     return res;
 }
-Int64 SHA1DSA::EVP_MD = Init_SHA1DSA_EVP_MD();
+Int64 OpenSSLSignatureSHA1DSA::EVP_MD = Init_SHA1DSA_EVP_MD();
 
-SHA1DSA::SHA1DSA()
+ECode OpenSSLSignatureSHA1DSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_DSA);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_DSA);
 }
 
 //=========================================
-// SHA1ECDSA::
+// OpenSSLSignatureSHA1ECDSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA1ECDSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA1ECDSA)
+
 static Int64 Init_SHA1ECDSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("SHA1"), &res);
     return res;
 }
-Int64 SHA1ECDSA::EVP_MD = Init_SHA1ECDSA_EVP_MD();
+Int64 OpenSSLSignatureSHA1ECDSA::EVP_MD = Init_SHA1ECDSA_EVP_MD();
 
-SHA1ECDSA::SHA1ECDSA()
+ECode OpenSSLSignatureSHA1ECDSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
 }
 
 //=========================================
-// SHA224ECDSA::
+// OpenSSLSignatureSHA224ECDSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA224ECDSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA224ECDSA)
+
 static Int64 Init_SHA224ECDSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("SHA224"), &res);
     return res;
 }
-Int64 SHA224ECDSA::EVP_MD = Init_SHA224ECDSA_EVP_MD();
+Int64 OpenSSLSignatureSHA224ECDSA::EVP_MD = Init_SHA224ECDSA_EVP_MD();
 
-SHA224ECDSA::SHA224ECDSA()
+ECode OpenSSLSignatureSHA224ECDSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
 }
 
 //=========================================
-// SHA256ECDSA::
+// OpenSSLSignatureSHA256ECDSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA256ECDSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA256ECDSA)
+
 static Int64 Init_SHA256ECDSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("SHA256"), &res);
     return res;
 }
-Int64 SHA256ECDSA::EVP_MD = Init_SHA256ECDSA_EVP_MD();
+Int64 OpenSSLSignatureSHA256ECDSA::EVP_MD = Init_SHA256ECDSA_EVP_MD();
 
-SHA256ECDSA::SHA256ECDSA()
+ECode OpenSSLSignatureSHA256ECDSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
 }
 
 //=========================================
-// SHA384ECDSA::
+// OpenSSLSignatureSHA384ECDSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA384ECDSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA384ECDSA)
+
 static Int64 Init_SHA384ECDSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("SHA384"), &res);
     return res;
 }
-Int64 SHA384ECDSA::EVP_MD = Init_SHA384ECDSA_EVP_MD();
+Int64 OpenSSLSignatureSHA384ECDSA::EVP_MD = Init_SHA384ECDSA_EVP_MD();
 
-SHA384ECDSA::SHA384ECDSA()
+ECode OpenSSLSignatureSHA384ECDSA::constructor()
 {
-    OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
 }
 
 //=========================================
-// SHA512ECDSA::
+// OpenSSLSignatureSHA512ECDSA::
 //=========================================
+CAR_INTERFACE_IMPL(OpenSSLSignatureSHA512ECDSA, OpenSSLSignature,
+        IOpenSSLSignatureSHA512ECDSA)
+
 static Int64 Init_SHA512ECDSA_EVP_MD()
 {
     Int64 res = 0;
     NativeCrypto::EVP_get_digestbyname(String("SHA512"), &res);
     return res;
 }
-Int64 SHA512ECDSA::EVP_MD = Init_SHA512ECDSA_EVP_MD();
+Int64 OpenSSLSignatureSHA512ECDSA::EVP_MD = Init_SHA512ECDSA_EVP_MD();
 
-SHA512ECDSA::SHA512ECDSA()
+ECode OpenSSLSignatureSHA512ECDSA::constructor()
 {
-    SHA512ECDSA::constructor(EVP_MD, EngineType_EC);
+    return OpenSSLSignature::constructor(EVP_MD, EngineType_EC);
 }
 
 //=========================================

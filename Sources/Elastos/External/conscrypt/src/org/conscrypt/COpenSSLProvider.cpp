@@ -90,7 +90,7 @@ ECode COpenSSLProvider::constructor(
     Put("KeyFactory.EC", prefix + "COpenSSLECKeyFactory");
 
     /* == KeyAgreement == */
-    Put("KeyAgreement.ECDH", prefix + "OpenSSLECDHKeyAgreement");
+    Put("KeyAgreement.ECDH", prefix + "COpenSSLECDHKeyAgreement");
 
     /* == Signatures == */
     Put("Signature.MD5WithRSA", prefix + "COpenSSLSignature$MD5RSA");

@@ -12,6 +12,48 @@ module
     interface IOpenSSLMessageDigestJDK {
     }
 
+    /*
+     * @Involve
+     * interface IOpenSSLMessageDigestJDK
+     */
+    interface IOpenSSLMessageDigestJDKMD5 {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLMessageDigestJDK
+     */
+    interface IOpenSSLMessageDigestJDKSHA1 {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLMessageDigestJDK
+     */
+    interface IOpenSSLMessageDigestJDKSHA224 {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLMessageDigestJDK
+     */
+    interface IOpenSSLMessageDigestJDKSHA256 {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLMessageDigestJDK
+     */
+    interface IOpenSSLMessageDigestJDKSHA384 {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLMessageDigestJDK
+     */
+    interface IOpenSSLMessageDigestJDKSHA512 {
+    }
+
     } // namespace Conscrypt
     } // namespace Org
 }

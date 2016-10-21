@@ -17,6 +17,90 @@ module
     interface IOpenSSLSignature {
     }
 
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureMD5RSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA1RSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA224RSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA256RSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA384RSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA512RSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA1DSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA1ECDSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA224ECDSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA256ECDSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA384ECDSA {
+    }
+
+    /*
+     * @Involve
+     * interface IOpenSSLSignature
+     */
+    interface IOpenSSLSignatureSHA512ECDSA {
+    }
+
     } // namespace Conscrypt
     } // namespace Org
 }

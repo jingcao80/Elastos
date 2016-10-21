@@ -19,9 +19,8 @@ namespace Conscrypt {
  * signature verification using OpenSSL.
  */
 class OpenSSLSignature
-    : public Object
+    : public Object/*SignatureSpi*/
     , public IOpenSSLSignature
-//    : public SignatureSpi
 {
 public:
     CAR_INTERFACE_DECL()
@@ -112,121 +111,157 @@ private:
     Boolean mSigning;
 };
 
-class MD5RSA
+class OpenSSLSignatureMD5RSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureMD5RSA
 {
 public:
-    MD5RSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA1RSA
+class OpenSSLSignatureSHA1RSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA1RSA
 {
 public:
-    SHA1RSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA224RSA
+class OpenSSLSignatureSHA224RSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA224RSA
 {
 public:
-    SHA224RSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA256RSA
+class OpenSSLSignatureSHA256RSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA256RSA
 {
 public:
-    SHA256RSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA384RSA
+class OpenSSLSignatureSHA384RSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA384RSA
 {
 public:
-    SHA384RSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA512RSA
+class OpenSSLSignatureSHA512RSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA512RSA
 {
 public:
-    SHA512RSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA1DSA
+class OpenSSLSignatureSHA1DSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA1DSA
 {
 public:
-    SHA1DSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA1ECDSA
+class OpenSSLSignatureSHA1ECDSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA1ECDSA
 {
 public:
-    SHA1ECDSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA224ECDSA
+class OpenSSLSignatureSHA224ECDSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA224ECDSA
 {
 public:
-    SHA224ECDSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA256ECDSA
+class OpenSSLSignatureSHA256ECDSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA256ECDSA
 {
 public:
-    SHA256ECDSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA384ECDSA
+class OpenSSLSignatureSHA384ECDSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA384ECDSA
 {
 public:
-    SHA384ECDSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
 };
 
-class SHA512ECDSA
+class OpenSSLSignatureSHA512ECDSA
     : public OpenSSLSignature
+    , public IOpenSSLSignatureSHA512ECDSA
 {
 public:
-    SHA512ECDSA();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
 private:
     static Int64 EVP_MD;
