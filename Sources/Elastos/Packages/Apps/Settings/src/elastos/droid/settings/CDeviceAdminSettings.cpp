@@ -655,10 +655,10 @@ AutoPtr<IDeviceAdminInfo> CDeviceAdminSettings::CreateDeviceAdminInfo(
     resolved->GetActivityInfo((IActivityInfo**)&activityInfo);
 
     if (ec == (ECode) E_XML_PULL_PARSER_EXCEPTION) {
-        Logger::W(TAG, "Skipping %s, %0x08x", TO_CSTR(activityInfo), ec);
+        Logger::W(TAG, "Skipping %s, 0x%08x", TO_CSTR(activityInfo), ec);
     }
     else if (ec == (ECode)E_IO_EXCEPTION) {
-        Logger::W(TAG, "Skipping %s, %0x08x", TO_CSTR(activityInfo), ec);
+        Logger::W(TAG, "Skipping %s, 0x%08x", TO_CSTR(activityInfo), ec);
     }
     return NULL;
 }

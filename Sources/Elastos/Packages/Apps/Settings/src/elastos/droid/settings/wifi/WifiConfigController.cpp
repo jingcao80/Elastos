@@ -24,7 +24,7 @@ using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::KeyStore::Security::ICredentials;
 using Elastos::Droid::KeyStore::Security::IKeyStore;
-// using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
 using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
 using Elastos::Droid::Net::NetworkUtils;
 using Elastos::Droid::Net::UNASSIGNED_IpAssignment;
@@ -1336,11 +1336,10 @@ void WifiConfigController::LoadCertificates(
     AutoPtr<IContext> context;
     mConfigUi->GetContext((IContext**)&context);
 
-    assert(0 && "TODO");
-    // AutoPtr<IKeyStoreHelper> helper;
-    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    AutoPtr<IKeyStoreHelper> helper;
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
     AutoPtr<IKeyStore> keyStore;
-    // helper->GetInstance((IKeyStore**)&keyStore);
+    helper->GetInstance((IKeyStore**)&keyStore);
     AutoPtr< ArrayOf<String> > certs;
     keyStore->Saw(prefix, IProcess::WIFI_UID, (ArrayOf<String>**)&certs);
     if (certs == NULL || certs->GetLength() == 0) {

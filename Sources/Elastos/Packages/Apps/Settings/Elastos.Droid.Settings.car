@@ -7,6 +7,7 @@ module
     merge("car/elastos/droid/DialogCreatable.car");
     merge("car/elastos/droid/SettingsActivity.car");
     merge("car/elastos/droid/SettingsPreferenceFragment.car");
+    merge("car/elastos/droid/TrustedCredentialsSettings.car");
     merge("car/elastos/droid/ZonePicker.car");
     merge("car/elastos/droid/applications/ApplicationsState.car");
     merge("car/elastos/droid/applications/LinearColorBar.car");
@@ -3139,6 +3140,15 @@ module
         interface IOnWindowDismissedCallback;
 
         interface IButtonBarHandler;
+    }
+
+    class CTrustedCredentialsSettings {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
     }
 
     class CUsageAccessSettings {

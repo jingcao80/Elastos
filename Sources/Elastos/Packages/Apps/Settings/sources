@@ -45,6 +45,7 @@ SOURCES += CDevelopmentSettings.cpp
 SOURCES += HomeSettings.cpp
 SOURCES += Utils.cpp
 SOURCES += UserSpinnerAdapter.cpp
+SOURCES += CTrustedCredentialsSettings.cpp
 SOURCES += CUserSpinnerAdapter.cpp
 SOURCES += CUsageAccessSettings.cpp
 SOURCES += CUserDictionarySettings.cpp
