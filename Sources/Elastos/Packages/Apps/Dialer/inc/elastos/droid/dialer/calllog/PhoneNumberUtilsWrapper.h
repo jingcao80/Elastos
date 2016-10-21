@@ -52,10 +52,10 @@ public:
         /* [in] */ ICharSequence* number);
 
 public:
-    static const AutoPtr<PhoneNumberUtilsWrapper> INSTANCE; // = new PhoneNumberUtilsWrapper();
+    static const AutoPtr<PhoneNumberUtilsWrapper> INSTANCE;
 
 private:
-    static const Set<String> LEGACY_UNKNOWN_NUMBERS; // = Sets.newHashSet("-1", "-2", "-3");
+    static const AutoPtr< Set<String> > LEGACY_UNKNOWN_NUMBERS;
 };
 
 } // CallLog

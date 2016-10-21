@@ -16,21 +16,18 @@ namespace Droid {
 namespace Dialer {
 namespace CallLog {
 
-static AutoPtr<PhoneNumberUtilsWrapper> CreateINSTANCE()
-{
-    return new PhoneNumberUtilsWrapper();
-}
-const AutoPtr<PhoneNumberUtilsWrapper> PhoneNumberUtilsWrapper::INSTANCE = CreateINSTANCE();
+const AutoPtr<PhoneNumberUtilsWrapper> PhoneNumberUtilsWrapper::INSTANCE = new PhoneNumberUtilsWrapper();
 
-static Set<String>& CreateLEGACY_UNKNOWN_NUMBERS()
+static AutoPtr< Set<String> > CreateLEGACY_UNKNOWN_NUMBERS()
 {
-    Set<String> numbers;
-    numbers.Insert(String("-1"));
-    numbers.Insert(String("-2"));
-    numbers.Insert(String("-3"));
+    AutoPtr< Set<String> > numbers = new Set<String>();
+    numbers->Insert(String("-1"));
+    numbers->Insert(String("-2"));
+    numbers->Insert(String("-3"));
     return numbers;
 }
-const Set<String> PhoneNumberUtilsWrapper::LEGACY_UNKNOWN_NUMBERS = CreateLEGACY_UNKNOWN_NUMBERS();
+
+const AutoPtr< Set<String> > PhoneNumberUtilsWrapper::LEGACY_UNKNOWN_NUMBERS = CreateLEGACY_UNKNOWN_NUMBERS();
 
 Boolean PhoneNumberUtilsWrapper::CanPlaceCallsTo(
     /* [in] */ ICharSequence* number,
@@ -108,7 +105,7 @@ Boolean PhoneNumberUtilsWrapper::IsLegacyUnknownNumbers(
 {
     String str;
     number->ToString(&str);
-    return number != NULL && (LEGACY_UNKNOWN_NUMBERS.Find(str) != LEGACY_UNKNOWN_NUMBERS.End());
+    return number != NULL && (LEGACY_UNKNOWN_NUMBERS->Find(str) != LEGACY_UNKNOWN_NUMBERS->End());
 }
 
 } // CallLog
