@@ -28,3 +28,4 @@ SOURCES += ContactListItemView.cpp
 SOURCES += ContactListFilterController.cpp
 SOURCES += CViewPagerTabs.cpp
 SOURCES += ViewPagerTabStrip.cpp
+SOURCES += ContactEntry.cpp

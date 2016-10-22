@@ -3,7 +3,7 @@
 
 #include "_Elastos.Droid.Dialer.h"
 #include <elastos/droid/os/Runnable>
-#include <elastos/droid/widget/AbsListView>
+#include <elastos/droid/widget/GridView>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
@@ -33,9 +33,7 @@ namespace List {
  * Viewgroup that presents the user's speed dial contacts in a grid.
  */
 class PhoneFavoriteListView
-    // TODO:
-    /*: public GridView*/
-    : public AbsListView
+    : public GridView
     , public IPhoneFavoriteListView
     , public IOnDragDropListener
     , public IDragItemContainer
@@ -46,7 +44,9 @@ private:
     {
     public:
         DragScroller(
-            /* [in] */ PhoneFavoriteListView* host);
+            /* [in] */ PhoneFavoriteListView* host)
+            : mHost(host)
+        {}
 
         // @Override
         CARAPI Run();

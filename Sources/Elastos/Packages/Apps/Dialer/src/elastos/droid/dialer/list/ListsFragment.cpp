@@ -1,7 +1,7 @@
 
 #include "elastos/droid/dialer/list/ListsFragment.h"
 // #include "elastos/droid/dialer/list/CAllContactsFragment.h"
-// #include "elastos/droid/dialer/list/CSpeedDialFragment.h"
+#include "elastos/droid/dialer/list/SpeedDialFragment.h"
 // #include "elastos/droid/dialer/list/ShortcutCardsAdapter.h"
 // #include "elastos/droid/dialer/list/CShortcutCardsAdapter.h"
 // #include "elastos/droid/dialer/calllog/CCallLogFragment.h"
@@ -15,6 +15,7 @@
 #include "R.h"
 
 using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IListFragment;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
@@ -104,11 +105,9 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
     mHost->GetRtlPosition(position, &rtl);
     switch (rtl) {
         case TAB_INDEX_SPEED_DIAL:
-            // assert(0);
-            // TODO
-            // CSpeedDialFragment::New((ISpeedDialFragment**)&(mHost->mSpeedDialFragment));
+            mHost->mSpeedDialFragment = (ISpeedDialFragment*)new SpeedDialFragment();
             *item = IFragment::Probe(mHost->mSpeedDialFragment);
-            REFCOUNT_ADD(*item);
+            REFCOUNT_ADD(*item)
             return NOERROR;
         case TAB_INDEX_RECENTS:
         {
@@ -143,15 +142,14 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
 {
     VALIDATE_NOT_NULL(item)
     *item = NULL;
-// TODO
-    // // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
-    // // Copy the fragments that the FragmentManager finds so that we can store them in
-    // // instance variables for later.
-    // AutoPtr<IInterface> fragment;
-    // FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
-    // if (ISpeedDialFragment::Probe(fragment) != NULL) {
-    //     mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
-    // }
+    // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
+    // Copy the fragments that the FragmentManager finds so that we can store them in
+    // instance variables for later.
+    AutoPtr<IInterface> fragment;
+    FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
+    if (ISpeedDialFragment::Probe(fragment) != NULL) {
+        mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
+    }
     // else if (ICallLogFragment::Probe(fragment) != NULL) {
     //     mHost->mRecentsFragment = ICallLogFragment::Probe(fragment);
     // }
@@ -202,7 +200,7 @@ ECode ListsFragment::PanelSlideCallbacks::OnPanelSlide(
     // edge of the shortcut card, to achieve the animated effect of the shortcut card
     // being pushed out of view when the panel is slid upwards. slideOffset is 1 when
     // the shortcut card is fully exposed, and 0 when completely hidden.
-    Float ratioCardHidden = (1 - slideOffset);
+    Float ratioCardHidden = (1.0 - slideOffset);
     Int32 count;
     if (IViewGroup::Probe(mHost->mShortcutCardsListView)->GetChildCount(&count), count > 0) {
         AutoPtr<IView> v;
@@ -320,22 +318,35 @@ ECode ListsFragment::constructor()
 ECode ListsFragment::GetCurrentListView(
     /* [out] */ IAbsListView** listView)
 {
+    VALIDATE_NOT_NULL(listView)
+    *listView = NULL;
     Int32 position;
-    assert(0 && "TODO");
-    // mViewPager->GetCurrentItem(&position);
-    // Int32 rtl;
-    // GetRtlPosition(position, &rtl);
-    // switch (rtl) {
-    //     case TAB_INDEX_SPEED_DIAL:
-    //         mSpeedDialFragment == NULL ? *listView = NULL : mSpeedDialFragment->GetListView(listView);
-    //         return NOERROR;
-    //     case TAB_INDEX_RECENTS:
-    //         mRecentsFragment == NULL ? *listView = NULL : mRecentsFragment->GetListView(listView);
-    //         return NOERROR;
-    //     case TAB_INDEX_ALL_CONTACTS:
-    //         mAllContactsFragment == NULL ? *listView = NULL : mAllContactsFragment->GetListView(listView);
-    //         return NOERROR;
-    // }
+    mViewPager->GetCurrentItem(&position);
+    Int32 rtl;
+    GetRtlPosition(position, &rtl);
+    switch (rtl) {
+        case TAB_INDEX_SPEED_DIAL:
+            if (mSpeedDialFragment != NULL) {
+                mSpeedDialFragment->GetListView(listView);
+            }
+            return NOERROR;
+        case TAB_INDEX_RECENTS:
+            if (mRecentsFragment != NULL) {
+                AutoPtr<IListView> lv;
+                IListFragment::Probe(mRecentsFragment)->GetListView((IListView**)&lv);
+                *listView = IAbsListView::Probe(lv);
+                REFCOUNT_ADD(*listView)
+            }
+            return NOERROR;
+        case TAB_INDEX_ALL_CONTACTS:
+            if (mAllContactsFragment != NULL) {
+                AutoPtr<IListView> lv;
+                IListFragment::Probe(mAllContactsFragment)->GetListView((IListView**)&lv);
+                *listView = IAbsListView::Probe(lv);
+                REFCOUNT_ADD(*listView)
+            }
+            return NOERROR;
+    }
     // throw new IllegalStateException("No fragment at position " + position);
     Logger::E(TAG, "No fragment at position %d", position);
     return E_ILLEGAL_STATE_EXCEPTION;
@@ -648,8 +659,7 @@ ECode ListsFragment::GetSpeedDialFragment(
     /* [out] */ ISpeedDialFragment** fragment)
 {
     VALIDATE_NOT_NULL(fragment);
-    assert(0 && "TODO");
-    // *fragment = mSpeedDialFragment;
+    *fragment = mSpeedDialFragment;
     REFCOUNT_ADD(*fragment);
     return NOERROR;
 }

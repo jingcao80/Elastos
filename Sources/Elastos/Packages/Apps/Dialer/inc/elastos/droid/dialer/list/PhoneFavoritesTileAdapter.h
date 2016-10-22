@@ -2,16 +2,16 @@
 #define __ELASTOS_DROID_DIALER_LIST_PHONEFAVORITESTILEADAPTER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/droid/widget/BaseAdapter.h>
-#include <elastos/core/Object.h>
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.View.h"
-#include "Elastos.CoreLibrary.Core.h"
-#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/widget/BaseAdapter.h"
+#include "elastos/droid/contacts/common/list/ContactEntry.h"
 
+using Elastos::Droid::Contacts::Common::IContactPhotoManager;
+using Elastos::Droid::Contacts::Common::List::IContactTileViewListener;
+using Elastos::Droid::Contacts::Common::List::ContactEntry;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::BaseAdapter;
@@ -28,7 +28,6 @@ namespace List {
  */
 class PhoneFavoritesTileAdapter
     : public BaseAdapter
-    , public IPhoneFavoritesTileAdapter
     , public IOnDragDropListener
 {
 private:
@@ -37,17 +36,18 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ContactEntryComparator(
-            /* [in] */ PhoneFavoritesTileAdapter* host);
+            /* [in] */ PhoneFavoritesTileAdapter* host)
+            : mHost(host)
+        {}
 
-        // TODO:
         // @Override
-        // CARAPI Compare(
-        //     /* [in] */ IContactEntry* lhs,
-        //     /* [in] */ IContactEntry* rhs,
-        //     /* [out] */ Int32* result);
+        CARAPI Compare(
+            /* [in] */ IInterface* lhs,
+            /* [in] */ IInterface* rhs,
+            /* [out] */ Int32* result);
 
     private:
         PhoneFavoritesTileAdapter* mHost;
@@ -55,53 +55,46 @@ private:
 
 protected:
     class ViewTypes
-        : public Object
     {
     public:
-        static const Int32 TILE; // = 0;
-        static const Int32 COUNT; // = 1;
+        static const Int32 TILE = 0;
+        static const Int32 COUNT = 1;
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    PhoneFavoritesTileAdapter();
+    PhoneFavoritesTileAdapter(
+        /* [in] */ IContext* context,
+        /* [in] */ IContactTileViewListener* listener,
+        /* [in] */ IOnDataSetChangedForAnimationListener* dataSetChangedListener);
 
-    // TODO:
-    // CARAPI constructor(
-    //     /* [in] */ IContext* context,
-    //     /* [in] */ IContactTileViewListener* listener,
-    //     /* [in] */ IOnDataSetChangedForAnimationListener* dataSetChangedListener);
-
-    // TODO:
-    // CARAPI SetPhotoLoader(
-    //     /* [in] */ IContactPhotoManager* photoLoader);
+    CARAPI_(void) SetPhotoLoader(
+        /* [in] */ IContactPhotoManager* photoLoader);
 
     /**
      * Indicates whether a drag is in process.
      *
      * @param inDragging Boolean variable indicating whether there is a drag in process.
      */
-    CARAPI SetInDragging(
+    CARAPI_(void) SetInDragging(
         /* [in] */ Boolean inDragging);
 
     /** Gets whether the drag is in process. */
-    CARAPI GetInDragging(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) GetInDragging();
 
     /**
      * Creates {@link ContactTileView}s for each item in {@link Cursor}.
      *
      * Else use {@link ContactTileLoaderFactory}
      */
-    CARAPI SetContactCursor(
+    CARAPI_(void) SetContactCursor(
         /* [in] */ ICursor* cursor);
 
     /**
      * Returns the number of frequents that will be displayed in the list.
      */
-    CARAPI GetNumFrequents(
-        /* [out] */ Int32* result);
+    CARAPI_(Int32) GetNumFrequents();
 
     // @Override
     CARAPI GetCount(
@@ -111,11 +104,10 @@ public:
      * Returns an ArrayList of the {@link ContactEntry}s that are to appear
      * on the row for the given position.
      */
-    // TODO:
-    // // @Override
-    // CARAPI GetItem(
-    //     /* [in] */ Int32 position,
-    //     /* [out] */ IContactEntry** item);
+    // @Override
+    CARAPI GetItem(
+        /* [in] */ Int32 position,
+        /* [out] */ IInterface** item);
 
     /**
      * For the top row of tiled contacts, the item id is the position of the row of
@@ -167,24 +159,24 @@ public:
      *
      * @param index Position of the contact to be removed.
      */
-    CARAPI PopContactEntry(
+    CARAPI_(void) PopContactEntry(
         /* [in] */ Int32 index);
 
     /**
      * Drops the temporarily removed contact to the desired location in the list.
      */
-    CARAPI HandleDrop();
+    CARAPI_(void) HandleDrop();
 
     /**
      * Invoked when the dragged item is dropped to unsupported location. We will then move the
      * contact back to where it was dragged from.
      */
-    CARAPI DropToUnsupportedView();
+    CARAPI_(void) DropToUnsupportedView();
 
     /**
      * Clears all temporary variables at a new interaction.
      */
-    CARAPI CleanTempVariables();
+    CARAPI_(void) CleanTempVariables();
 
     /**
      * Given a list of contacts that each have pinned positions, rearrange the list (destructive)
@@ -198,7 +190,8 @@ public:
      * overlapping pin positions due to sync or modifications by third party apps.
      */
     // @VisibleForTesting
-    /* package */ CARAPI_(void) ArrangeContactsByPinnedPosition(
+    /* package */
+     CARAPI_(void) ArrangeContactsByPinnedPosition(
         /* [in] */ IArrayList* toArrange);
 
     /**
@@ -212,7 +205,8 @@ public:
      * positions(within {@link #PIN_LIMIT} are unique positive integers.
      */
     // @VisibleForTesting
-    /* package */ CARAPI_(AutoPtr<IArrayList>) GetReflowedPinningOperations(
+    /* package */
+    CARAPI_(AutoPtr<IArrayList>) GetReflowedPinningOperations(
         /* [in] */ IArrayList* list,
         /* [in] */ Int32 oldPos,
         /* [in] */ Int32 newPinPos);
@@ -294,9 +288,13 @@ private:
     CARAPI_(void) UnstarAndUnpinContact(
         /* [in] */ IUri* contactUri);
 
+public:
+    // Pinned positions start from 1, so there are a total of 20 maximum pinned contacts
+    static const Int32 PIN_LIMIT = 21;
+
 protected:
     /** Contact data stored in cache. This is used to populate the associated view. */
-    AutoPtr<IArrayList> mContactEntries; // = null;
+    AutoPtr<IArrayList> mContactEntries;
 
     Int32 mNumFrequents;
     Int32 mNumStarred;
@@ -309,32 +307,37 @@ protected:
     Int32 mStatusIndex;
 
 private:
-    static const String TAG; // = PhoneFavoritesTileAdapter.class.getSimpleName();
-    static const Boolean DEBUG; // = false;
+    static const String TAG;
+    static const Boolean DEBUG = FALSE;
 
-    // TODO:
-    // AutoPtr<IContactTileViewListener> mListener;
+    /**
+     * The soft limit on how many contact tiles to show.
+     * NOTE This soft limit would not restrict the number of starred contacts to show, rather
+     * 1. If the count of starred contacts is less than this limit, show 20 tiles total.
+     * 2. If the count of starred contacts is more than or equal to this limit,
+     * show all starred tiles and no frequents.
+     */
+    static const Int32 TILES_SOFT_LIMIT = 20;
+
+    AutoPtr<IContactTileViewListener> mListener;
     AutoPtr<IOnDataSetChangedForAnimationListener> mDataSetChangedListener;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IResources> mResources;
 
-
     /** Back up of the temporarily removed Contact during dragging. */
-    // TODO:
-    // AutoPtr<IContactEntry> mDraggedEntry;
+    AutoPtr<ContactEntry> mDraggedEntry;
     /** Position of the temporarily removed contact in the cache. */
-    Int32 mDraggedEntryIndex; // = -1;
+    Int32 mDraggedEntryIndex;
     /** New position of the temporarily removed contact in the cache. */
-    Int32 mDropEntryIndex; // = -1;
+    Int32 mDropEntryIndex;
     /** New position of the temporarily entered contact in the cache. */
-    Int32 mDragEnteredEntryIndex; // = -1;
+    Int32 mDragEnteredEntryIndex;
 
-    Boolean mAwaitingRemove; // = false;
-    Boolean mDelayCursorUpdates; // = false;
+    Boolean mAwaitingRemove;
+    Boolean mDelayCursorUpdates;
 
-    // TODO:
-    // AutoPtr<IContactPhotoManager> mPhotoManager;
+    AutoPtr<IContactPhotoManager> mPhotoManager;
 
     Int32 mPhoneNumberIndex;
     Int32 mPhoneNumberTypeIndex;
@@ -345,16 +348,7 @@ private:
     Int32 mContactIdIndex;
 
     /** Indicates whether a drag is in process. */
-    Boolean mInDragging; // = false;
-
-    /**
-     * The soft limit on how many contact tiles to show.
-     * NOTE This soft limit would not restrict the number of starred contacts to show, rather
-     * 1. If the count of starred contacts is less than this limit, show 20 tiles total.
-     * 2. If the count of starred contacts is more than or equal to this limit,
-     * show all starred tiles and no frequents.
-     */
-    static const Int32 TILES_SOFT_LIMIT; // = 20;
+    Boolean mInDragging;
 
     AutoPtr<IComparator> mContactEntryComparator;
 };

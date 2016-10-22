@@ -32,7 +32,6 @@ module
     merge("car/elastos/droid/contacts/common/list/CustomContactListFilterActivity.car");
     merge("car/elastos/droid/contacts/common/list/ViewPagerTabs.car");
     merge("car/elastos/droid/contacts/common/list/ContactTileView.car");
-    merge("car/elastos/droid/contacts/common/list/ContactEntry.car");
     merge("car/elastos/droid/contacts/common/model/AccountTypeManager.car");
     merge("car/elastos/droid/contacts/common/model/ValuesDelta.car");
     merge("car/elastos/droid/contacts/common/model/account/AccountTypeWithDataSet.car");
@@ -74,17 +73,17 @@ module
     merge("car/elastos/droid/dialer/list/PhoneFavoriteListView.car");
     merge("car/elastos/droid/dialer/list/PhoneFavoriteSquareTileView.car");
     merge("car/elastos/droid/dialer/list/PhoneFavoritesTileAdapter.car");
-//    merge("car/elastos/droid/dialer/list/PhoneFavoriteTileView.car");
+    merge("car/elastos/droid/dialer/list/PhoneFavoriteTileView.car");
     merge("car/elastos/droid/dialer/list/RegularSearchFragment.car");
     merge("car/elastos/droid/dialer/list/RegularSearchListAdapter.car");
     merge("car/elastos/droid/dialer/list/RemoveView.car");
     merge("car/elastos/droid/dialer/list/SearchFragment.car");
-//    merge("car/elastos/droid/dialer/list/ShortcutCardsAdapter.car");
+    merge("car/elastos/droid/dialer/list/ShortcutCardsAdapter.car");
     merge("car/elastos/droid/dialer/list/SmartDialNumberListAdapter.car");
     merge("car/elastos/droid/dialer/list/SmartDialSearchFragment.car");
     merge("car/elastos/droid/dialer/list/SpeedDialFragment.car");
 //    merge("car/elastos/droid/dialer/list/SwipeHelper.car");
-//    merge("car/elastos/droid/dialer/list/TileInteractionTeaserView.car");
+    merge("car/elastos/droid/dialer/list/TileInteractionTeaserView.car");
     merge("car/elastos/droid/dialer/service/CachedNumberLookupService.car");
 //    merge("car/elastos/droid/dialer/settings/DefaultRingtonePreference.car");
 //    merge("car/elastos/droid/dialer/settings/DialerSettingsActivity.car");
@@ -280,16 +279,13 @@ module
     interface Elastos.Droid.Dialer.List.IListsFragment;
     interface Elastos.Droid.Dialer.List.IListsFragmentHostInterface;
     interface Elastos.Droid.Dialer.List.IOnDragDropListener;
-//    interface Elastos.Droid.Dialer.List.IPhoneFavoriteListView;
 //    interface Elastos.Droid.Dialer.List.IPhoneFavoriteTileView;
 //    interface Elastos.Droid.Dialer.List.IPhoneFavoriteSquareTileView;
-//    interface Elastos.Droid.Dialer.List.IPhoneFavoritesTileAdapter;
 //    interface Elastos.Droid.Dialer.List.ISearchFragment;
     interface Elastos.Droid.Dialer.List.ISearchFragmentHostInterface;
 //    interface Elastos.Droid.Dialer.List.IRegularSearchFragment;
 //    interface Elastos.Droid.Dialer.List.IRegularSearchListAdapter;
     interface Elastos.Droid.Dialer.List.IRemoveView;
-//    interface Elastos.Droid.Dialer.List.IShortcutCardsAdapter;
 //    interface Elastos.Droid.Dialer.List.ISmartDialNumberListAdapter;
 //    interface Elastos.Droid.Dialer.List.ISmartDialSearchFragment;
     interface Elastos.Droid.Dialer.List.ISpeedDialFragment;
@@ -298,7 +294,6 @@ module
 //    interface Elastos.Droid.Dialer.List.ISwipeHelperCallback;
 //    interface Elastos.Droid.Dialer.List.ISwipeHelperHelper;
 //    interface Elastos.Droid.Dialer.List.IOnDataSetChangedForAnimationListener;
-//    interface Elastos.Droid.Dialer.List.ITileInteractionTeaserView;
 //    interface Elastos.Droid.Dialer.Settings.IDefaultRingtonePreference;
 //    interface Elastos.Droid.Dialer.Settings.IGeneralSettingsFragment;
 //    interface Elastos.Droid.Dialer.Util.IAsyncTaskExecutors;
@@ -639,8 +634,7 @@ module
 //        interface IKeyEventCallback;
 //        interface IAccessibilityEventSource;
 //        interface IDrawableCallback;
-//        // TODO:
-//        // interface IContactTileView;
+//        interface IContactTileView;
 //        interface IPhoneFavoriteSquareTileView;
 //    }
 //
@@ -660,22 +654,6 @@ module
 //        interface IAccessibilityEventSource;
 //        interface IDrawableCallback;
 //        interface IPhoneFavoriteTileView;
-//    }
-//
-//    [local]
-//    class CPhoneFavoritesTileAdapter {
-//        // TODO:
-//        // constructor(
-//        //     [in] IContext* ctx,
-//        //     [in] IContactTileViewListener* listener,
-//        //     [in] IOnDataSetChangedForAnimationListener* dataSetChangedListener);
-//
-//        interface IListAdapter;
-//        interface ISpinnerAdapter;
-//        interface IAdapter;
-//        interface IBaseAdapter;
-//        interface IOnDragDropListener;
-//        interface IPhoneFavoritesTileAdapter;
 //    }
 //
 //    class CRegularSearchFragment {

@@ -264,3 +264,4 @@ EXPORT_HEADERS += elastos/droid/widget/GridLayout.h
 EXPORT_HEADERS += elastos/droid/widget/TabHost.h
 EXPORT_HEADERS += elastos/droid/widget/PopupWindow.h
 EXPORT_HEADERS += elastos/droid/widget/ViewFlipper.h
+EXPORT_HEADERS += elastos/droid/widget/GridView.h

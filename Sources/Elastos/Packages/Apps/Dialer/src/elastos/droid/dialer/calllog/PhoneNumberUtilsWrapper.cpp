@@ -20,7 +20,7 @@ const AutoPtr<PhoneNumberUtilsWrapper> PhoneNumberUtilsWrapper::INSTANCE = new P
 
 static AutoPtr< Set<String> > CreateLEGACY_UNKNOWN_NUMBERS()
 {
-    AutoPtr< Set<String> > numbers = new Set<String>();
+    AutoPtr< Set<String> > numbers = new Set<String>();\
     numbers->Insert(String("-1"));
     numbers->Insert(String("-2"));
     numbers->Insert(String("-3"));

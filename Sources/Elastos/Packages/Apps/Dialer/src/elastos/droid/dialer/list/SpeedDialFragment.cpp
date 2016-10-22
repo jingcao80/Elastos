@@ -16,7 +16,6 @@ using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
-using Elastos::Droid::App::ILoader;
 using Elastos::Droid::App::ILoaderManager;
 using Elastos::Droid::Contacts::Common::ContactTileLoaderFactory;
 using Elastos::Droid::Contacts::Common::ContactPhotoManager;
@@ -24,16 +23,19 @@ using Elastos::Droid::Contacts::Common::List::EIID_IContactTileViewListener;
 using Elastos::Droid::Dialer::List::EIID_ISpeedDialFragment;
 using Elastos::Droid::Dialer::List::EIID_IOnDataSetChangedForAnimationListener;
 using Elastos::Droid::Dialer::Util::DialerUtils;
+using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::Animation::IAnimationUtils;
 using Elastos::Droid::View::Animation::CAnimationUtils;
 using Elastos::Droid::View::Animation::ILayoutAnimationController;
 using Elastos::Droid::View::Animation::CLayoutAnimationController;
-// using Elastos::Droid::View::Animation::IViewGroupLayoutParams;
 using Elastos::Droid::View::EIID_IOnPreDrawListener;
-// using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::View::Animation::IAnimation;
+using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::EIID_IAbsListViewOnScrollListener;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Core::CInteger32;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Logger;
 
@@ -43,17 +45,11 @@ namespace Dialer {
 namespace List {
 
 //=================================================================
-// SpeedDialFragment::InnerListener
+// SpeedDialFragment::InnerOnItemClickListener
 //=================================================================
-CAR_INTERFACE_IMPL(SpeedDialFragment::InnerListener, Object, IAdapterViewOnItemClickListener);
+CAR_INTERFACE_IMPL(SpeedDialFragment::InnerOnItemClickListener, Object, IAdapterViewOnItemClickListener);
 
-SpeedDialFragment::InnerListener::InnerListener(
-    /* [in] */ SpeedDialFragment* host)
-    : mHost(host)
-{}
-
-
-ECode SpeedDialFragment::InnerListener::OnItemClick(
+ECode SpeedDialFragment::InnerOnItemClickListener::OnItemClick(
     /* [in] */ IAdapterView* parent,
     /* [in] */ IView* view,
     /* [in] */ Int32 position,
@@ -61,6 +57,24 @@ ECode SpeedDialFragment::InnerListener::OnItemClick(
 {
     return mHost->OnItemClick(parent, view, position, id);
 }
+
+
+//=================================================================
+// SpeedDialFragment::InnerOnDataSetChangedListener
+//=================================================================
+CAR_INTERFACE_IMPL(SpeedDialFragment::InnerOnDataSetChangedListener, Object, IOnDataSetChangedForAnimationListener);
+
+ECode SpeedDialFragment::InnerOnDataSetChangedListener::OnDataSetChangedForAnimation(
+    /* [in] */ ArrayOf<Int64>* idsInPlace)
+{
+    return mHost->OnDataSetChangedForAnimation(idsInPlace);
+}
+
+ECode SpeedDialFragment::InnerOnDataSetChangedListener::CacheOffsetsForDatasetChange()
+{
+    return mHost->CacheOffsetsForDatasetChange();
+}
+
 
 //=================================================================
 // SpeedDialFragment::ContactTileLoaderListener
@@ -70,25 +84,25 @@ CAR_INTERFACE_IMPL(SpeedDialFragment::ContactTileLoaderListener, Object, ILoader
 ECode SpeedDialFragment::ContactTileLoaderListener::OnCreateLoader(
     /* [in] */ Int32 id,
     /* [in] */ IBundle* args,
-    /* [out] */ ICursorLoader** loader)
+    /* [out] */ ILoader** loader)
 {
     VALIDATE_NOT_NULL(loader)
     if (DEBUG) Logger::D(TAG, "ContactTileLoaderListener#onCreateLoader.");
     AutoPtr<IActivity> a;
     mHost->GetActivity((IActivity**)&a);
-    *loader = ContactTileLoaderFactory::CreateStrequentPhoneOnlyLoader(a);
+    *loader = ILoader::Probe(ContactTileLoaderFactory::CreateStrequentPhoneOnlyLoader(IContext::Probe(a)));
     REFCOUNT_ADD(*loader)
     return NOERROR;
 }
 
 ECode SpeedDialFragment::ContactTileLoaderListener::OnLoadFinished(
     /* [in] */ ILoader* loader,
-    /* [in] */ ICursor* data)
+    /* [in] */ IInterface* data)
 {
     if (DEBUG) {
         Logger::D(TAG, "ContactTileLoaderListener#onLoadFinished");
     }
-    mHost->mContactTileAdapter->SetContactCursor(data);
+    mHost->mContactTileAdapter->SetContactCursor(ICursor::Probe(data));
     Int32 count;
     mHost->mContactTileAdapter->GetCount(&count);
     mHost->SetEmptyViewVisibility(count == 0);
@@ -175,23 +189,23 @@ ECode SpeedDialFragment::MyViewTreeObserverOnPreDrawListener::OnPreDraw(
 
     mObserver->RemoveOnPreDrawListener(this);
     Int32 firstVisiblePosition;
-    mHost->mListView->GetFirstVisiblePosition(&firstVisiblePosition);
+    IAdapterView::Probe(mHost->mListView)->GetFirstVisiblePosition(&firstVisiblePosition);
 
     AutoPtr<IAnimatorSet> animSet;
     CAnimatorSet::New((IAnimatorSet**)&animSet);
-    List<AutoPtr<IAnimator> > animators;
+    Elastos::Utility::Etl::List<AutoPtr<IAnimator> > animators;
     Int32 childCount;
     AutoPtr<IViewGroup> listView = IViewGroup::Probe(mHost->mListView);
     listView->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        listView->GetChildAt(i, (IView*)&child);
+        listView->GetChildAt(i, (IView**)&child);
         Int32 position = firstVisiblePosition + i;
 
         Int64 itemId;
         IAdapter::Probe(mHost->mContactTileAdapter)->GetItemId(position, &itemId);
 
-        if (mHost->ContainsId(idsInPlace, itemId)) {
+        if (mHost->ContainsId(mIdsInPlace, itemId)) {
             AutoPtr<IObjectAnimatorHelper> helper;
             CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
             AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
@@ -260,9 +274,9 @@ ECode SpeedDialFragment::MyViewTreeObserverOnPreDrawListener::OnPreDraw(
     }
 
     if (animators.Begin() != animators.End()) {
-        IAnimator::Probe(animSet)->SetDuration(mAnimationDuration);
+        IAnimator::Probe(animSet)->SetDuration(mHost->mAnimationDuration);
         AutoPtr<ArrayOf<IAnimator*> > attrs = ArrayOf<IAnimator*>::Alloc(animators.GetSize());
-        List<AutoPtr<IAnimator> >::Iterator it = animators.Begin();
+        Elastos::Utility::Etl::List<AutoPtr<IAnimator> >::Iterator it = animators.Begin();
         for (Int32 i = 0; it != animators.End(); ++it, ++i) {
             attrs->Set(i, *it);
         }
@@ -284,9 +298,7 @@ const String SpeedDialFragment::TAG("SpeedDialFragment");
 const Boolean SpeedDialFragment::DEBUG;
 const Int32 SpeedDialFragment::LOADER_ID_CONTACT_TILE;
 
-CAR_INTERFACE_IMPL_2(SpeedDialFragment, AnalyticsFragment
-        , ISpeedDialFragment
-        , IOnDataSetChangedForAnimationListener)
+CAR_INTERFACE_IMPL(SpeedDialFragment, AnalyticsFragment, ISpeedDialFragment)
 
 SpeedDialFragment::SpeedDialFragment()
 {
@@ -306,9 +318,10 @@ ECode SpeedDialFragment::OnAttach(
     // Construct two base adapters which will become part of PhoneFavoriteMergedAdapter.
     // We don't construct the resultant adapter at this moment since it requires LayoutInflater
     // that will be available on onCreateView().
-    mContactTileAdapter = new PhoneFavoritesTileAdapter(activity, mContactTileAdapterListener,
-            IOnDataSetChangedForAnimationListener::Probe(this));
-    AutoPtr<IContactPhotoManager> cpm = ContactPhotoManager::GetInstance(activity);
+    AutoPtr<IOnDataSetChangedForAnimationListener> listener = new InnerOnDataSetChangedListener(this);
+    mContactTileAdapter = new PhoneFavoritesTileAdapter(IContext::Probe(activity), mContactTileAdapterListener,
+            listener);
+    AutoPtr<IContactPhotoManager> cpm = ContactPhotoManager::GetInstance(IContext::Probe(activity));
     mContactTileAdapter->SetPhotoLoader(cpm);
     return NOERROR;
 }
@@ -324,8 +337,6 @@ ECode SpeedDialFragment::OnCreate(
     CHashMap::New((IHashMap**)&mItemIdTopMap);
     CHashMap::New((IHashMap**)&mItemIdLeftMap);
 
-    assert(0 && "TODO");
-    // mContactTileAdapterListener = (IContactTileViewListener*)new ContactTileAdapterListener(this);
     mContactTileLoaderListener = (ILoaderManagerLoaderCallbacks*)new ContactTileLoaderListener(this);
     mScrollListener = new ScrollListener(this);
 
@@ -359,17 +370,17 @@ ECode SpeedDialFragment::OnCreateView(
     inflater->Inflate(Elastos::Droid::Dialer::R::layout::speed_dial_fragment,
             container, FALSE, (IView**)&mParentView);
 
-    AutoPtr<InnerListener> listener = new InnerListener(this);
+    AutoPtr<InnerOnItemClickListener> listener = new InnerOnItemClickListener(this);
 
     AutoPtr<IView> listView;
     mParentView->FindViewById(Elastos::Droid::Dialer::R::id::contact_tile_list, (IView**)&listView);
     mListView = IPhoneFavoriteListView::Probe(listView);
     AutoPtr<IAdapterView> av = IAdapterView::Probe(mListView);
     av->SetOnItemClickListener(listener);
-    mListView->SetVerticalScrollBarEnabled(FALSE);
     AutoPtr<IView> lv = IView::Probe(mListView);
+    lv->SetVerticalScrollBarEnabled(FALSE);
     lv->SetVerticalScrollbarPosition(IView::SCROLLBAR_POSITION_RIGHT);
-    lv->SetScrollBarStyle(IListView::SCROLLBARS_OUTSIDE_OVERLAY);
+    lv->SetScrollBarStyle(IView::SCROLLBARS_OUTSIDE_OVERLAY);
     AutoPtr<IDragDropController> controller;
     mListView->GetDragDropController((IDragDropController**)&controller);
     controller->AddOnDragDropListener(mContactTileAdapter);
@@ -387,7 +398,7 @@ ECode SpeedDialFragment::OnCreateView(
     DialerUtils::ConfigureEmptyListView(mEmptyView, Elastos::Droid::Dialer::R::drawable::empty_speed_dial,
             Elastos::Droid::Dialer::R::string::speed_dial_empty, resources);
 
-    mContactTileFrame = NULL
+    mContactTileFrame = NULL;
     mParentView->FindViewById(Elastos::Droid::Dialer::R::id::contact_tile_frame, (IView**)&mContactTileFrame);
 
     AutoPtr<IView> teaserView;
@@ -400,14 +411,14 @@ ECode SpeedDialFragment::OnCreateView(
     AutoPtr<IAnimation> animation;
     utils->LoadAnimation(IContext::Probe(activity),
             Elastos::Droid::R::anim::fade_in, (IAnimation**)&animation);
-    AutoPtr<ILayoutAnimationController> controller;
-    CLayoutAnimationController::New(animation, (ILayoutAnimationController**)&controller);
-    controller->SetDelay(0);
-    IViewGroup::Probe(mListView)->SetLayoutAnimation(controller);
-    av->SetAdapter(IAdapter::ProbemContactTileAdapter));
+    AutoPtr<ILayoutAnimationController> animationController;
+    CLayoutAnimationController::New(animation, (ILayoutAnimationController**)&animationController);
+    animationController->SetDelay(0);
+    IViewGroup::Probe(mListView)->SetLayoutAnimation(animationController);
+    av->SetAdapter(IAdapter::Probe(mContactTileAdapter));
 
-    mListView->SetOnScrollListener(mScrollListener);
     AutoPtr<IAbsListView> absLV = IAbsListView::Probe(mListView);
+    absLV->SetOnScrollListener(mScrollListener);
     absLV->SetFastScrollEnabled(FALSE);
     absLV->SetFastScrollAlwaysVisible(FALSE);
 
@@ -425,9 +436,7 @@ ECode SpeedDialFragment::HasFrequents(
         return NOERROR;
     }
 
-    Int32 num;
-    mContactTileAdapter->GetNumFrequents(&num);
-    *result = num > 0;
+    *result = mContactTileAdapter->GetNumFrequents() > 0;
     return NOERROR;
 }
 
@@ -475,7 +484,7 @@ ECode SpeedDialFragment::OnStart()
     AutoPtr<IDragDropController> controller;
     mListView->GetDragDropController((IDragDropController**)&controller);
     controller->AddOnDragDropListener(listener);
-    AutoPtr<IHostInterface> hostInterface = IHostInterface::Probe(activity);
+    AutoPtr<ISpeedDialFragmentHostInterface> hostInterface = ISpeedDialFragmentHostInterface::Probe(activity);
     if (hostInterface == NULL) {
         Logger::E(TAG, "%s must implement HostInterface", TO_CSTR(activity));
         return E_CLASS_CAST_EXCEPTION;
@@ -502,7 +511,8 @@ ECode SpeedDialFragment::OnStart()
     // be called, on which we'll check if "all" contacts should be reloaded again or not.
     AutoPtr<ILoaderManager> manager;
     GetLoaderManager((ILoaderManager**)&manager);
-    manager->InitLoader(LOADER_ID_CONTACT_TILE, NULL, mContactTileLoaderListener);
+    AutoPtr<ILoader> l;
+    manager->InitLoader(LOADER_ID_CONTACT_TILE, NULL, mContactTileLoaderListener, (ILoader**)&l);
 
     return NOERROR;
 }
@@ -535,7 +545,7 @@ void SpeedDialFragment::SaveOffsets(
     }
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        listView->GetChildAt(i, &child);
+        listView->GetChildAt(i, (IView**)&child);
         Int32 position = firstVisiblePosition + i;
         Int64 itemId;
         mContactTileAdapter->GetItemId(position, &itemId);
@@ -561,8 +571,7 @@ void SpeedDialFragment::SaveOffsets(
 void SpeedDialFragment::AnimateGridView(
     /* [in] */ ArrayOf<Int64>* idsInPlace)
 {
-    Boolean result;
-    if (mItemIdTopMap->IsEmpty(&result), result) {
+    if (mItemIdTopMap.Begin() == mItemIdTopMap.End()) {
         // Don't do animations if the database is being queried for the first time and
         // the previous item offsets have not been cached, or the user hasn't done anything
         // (dragging, swiping etc) that requires an animation.
@@ -570,7 +579,7 @@ void SpeedDialFragment::AnimateGridView(
     }
 
     AutoPtr<IViewTreeObserver> observer;
-    mListView->GetViewTreeObserver((IViewTreeObserver**)observer);
+    IView::Probe(mListView)->GetViewTreeObserver((IViewTreeObserver**)&observer);
     AutoPtr<IOnPreDrawListener> listener =
             (IOnPreDrawListener*)new MyViewTreeObserverOnPreDrawListener(this, observer, idsInPlace);
     observer->AddOnPreDrawListener(listener);
@@ -605,7 +614,7 @@ ECode SpeedDialFragment::CacheOffsetsForDatasetChange()
 ECode SpeedDialFragment::GetListView(
     /* [out] */ IAbsListView** listView)
 {
-    VALIDATE_NOT_NULL(listview)
+    VALIDATE_NOT_NULL(listView)
     *listView = IAbsListView::Probe(mListView);
     REFCOUNT_ADD(*listView)
     return NOERROR;

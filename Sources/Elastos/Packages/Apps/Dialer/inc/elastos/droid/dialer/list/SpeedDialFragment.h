@@ -20,7 +20,7 @@ using Elastos::Droid::Contacts::Common::List::IOnPhoneNumberPickerActionListener
 using Elastos::Droid::Content::ICursorLoader;
 using Elastos::Droid::Content::ILoader;
 using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Dialerbind::Analytics::AnalyticsFragment;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
@@ -47,18 +47,19 @@ namespace List {
 class SpeedDialFragment
     : public AnalyticsFragment
     , public ISpeedDialFragment
-    , public IOnDataSetChangedForAnimationListener
 {
 private:
-    class InnerListener
+    class InnerOnItemClickListener
         : public Object
         , public IAdapterViewOnItemClickListener
     {
     public:
         CAR_INTERFACE_DECL();
 
-        InnerListener(
-            /* [in] */ SpeedDialFragment* host);
+        InnerOnItemClickListener(
+            /* [in] */ SpeedDialFragment* host)
+            : mHost(host)
+        {}
 
         CARAPI OnItemClick(
                 /* [in] */ IAdapterView* parent,
@@ -69,31 +70,51 @@ private:
         SpeedDialFragment* mHost;
     };
 
+    class InnerOnDataSetChangedListener
+        : public Object
+        , public IOnDataSetChangedForAnimationListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerOnDataSetChangedListener(
+            /* [in] */ SpeedDialFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnDataSetChangedForAnimation(
+            /* [in] */ ArrayOf<Int64>* idsInPlace);
+
+        // @Override
+        CARAPI CacheOffsetsForDatasetChange();
+
+    private:
+        SpeedDialFragment* mHost;
+    };
+
     class ContactTileLoaderListener
         : public Object
         , public ILoaderManagerLoaderCallbacks
     {
     public:
         ContactTileLoaderListener(
-            /* [in] */ ContactTileLoaderListener* host)
+            /* [in] */ SpeedDialFragment* host)
             : mHost(host)
         {}
 
         CAR_INTERFACE_DECL()
 
-        ContactTileLoaderListener(
-            /* [in] */ SpeedDialFragment* host);
-
         // @Override
         CARAPI OnCreateLoader(
             /* [in] */ Int32 id,
             /* [in] */ IBundle* args,
-            /* [out] */ ICursorLoader** loader);
+            /* [out] */ ILoader** loader);
 
         // @Override
         CARAPI OnLoadFinished(
             /* [in] */ ILoader* loader,
-            /* [in] */ ICursor* data);
+            /* [in] */ IInterface* data);
 
         // @Override
         CARAPI OnLoaderReset(

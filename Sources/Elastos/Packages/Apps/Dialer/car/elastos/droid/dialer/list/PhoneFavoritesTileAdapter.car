@@ -11,82 +11,12 @@ module
 
     [deprecated]
     interface IOnDataSetChangedForAnimationListener {
+
         OnDataSetChangedForAnimation(
             [in] ArrayOf<Int64>* idsInPlace);
 
         CacheOffsetsForDatasetChange();
-    }
 
-    /**
-     * @Involve
-     * interface Elastos.Droid.Widget.IListAdapter
-     * interface Elastos.Droid.Widget.ISpinnerAdapter
-     * interface Elastos.Droid.Widget.IAdapter
-     * interface Elastos.Droid.Widget.IBaseAdapter
-     * interface IOnDragDropListener
-     */
-    interface IPhoneFavoritesTileAdapter {
-        const Int32 NO_ROW_LIMIT = -1;
-
-        const Int32 ROW_LIMIT_DEFAULT = NO_ROW_LIMIT;
-
-        // Pinned positions start from 1, so there are a total of 20 maximum pinned contacts
-        const Int32 PIN_LIMIT = 21;
-
-        // TODO:
-        // SetPhotoLoader(
-        //     [in] IContactPhotoManager* photoLoader);
-
-        /**
-         * Indicates whether a drag is in process.
-         *
-         * @param inDragging Boolean variable indicating whether there is a drag in process.
-         */
-        SetInDragging(
-            [in] Boolean inDragging);
-
-        /** Gets whether the drag is in process. */
-        GetInDragging(
-            [out] Boolean* result);
-
-        /**
-         * Creates {@link ContactTileView}s for each item in {@link Cursor}.
-         *
-         * Else use {@link ContactTileLoaderFactory}
-         */
-        SetContactCursor(
-            [in] ICursor* cursor);
-
-        /**
-         * Returns the number of frequents that will be displayed in the list.
-         */
-        GetNumFrequents(
-            [out] Int32* result);
-
-        /**
-         * Temporarily removes a contact from the list for UI refresh. Stores data for this contact
-         * in the back-up variable.
-         *
-         * @param index Position of the contact to be removed.
-         */
-        PopContactEntry(
-            [in] Int32 index);
-
-        /**
-         * Drops the temporarily removed contact to the desired location in the list.
-         */
-        HandleDrop();
-
-        /**
-         * Invoked when the dragged item is dropped to unsupported location. We will then move the
-         * contact back to where it was dragged from.
-         */
-        DropToUnsupportedView();
-
-        /**
-         * Clears all temporary variables at a new interaction.
-         */
-        CleanTempVariables();
     }
 
     } //List

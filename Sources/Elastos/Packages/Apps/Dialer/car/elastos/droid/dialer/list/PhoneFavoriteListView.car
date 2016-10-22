@@ -2,7 +2,6 @@
 module
 {
     using interface Elastos.Droid.Widget.IImageView;
-    using interface Elastos.Droid.Dialer.List.IView;
 
     namespace Elastos {
     namespace Droid {

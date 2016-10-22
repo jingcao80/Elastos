@@ -5,7 +5,6 @@ module
     using interface Elastos.Droid.Net.IUri;
 
     interface Elastos.Droid.Contacts.Common.IContactPhotoManager;
-    interface Elastos.Droid.Contacts.Common.List.IContactEntry;
 
     namespace Elastos{
     namespace Droid {
@@ -60,7 +59,7 @@ module
          * fields in {@link com.android.contacts.common.list.ContactEntry}
          */
         LoadFromContact(
-            [in] IContactEntry* entry);
+            [in] IInterface* entry);
 
         SetListener(
             [in] IContactTileViewListener* listener);

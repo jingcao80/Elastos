@@ -17,7 +17,7 @@ namespace Widget {
  * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-gridview.html">Grid
  * View tutorial</a>.</p>
  */
-class GridView
+class ECO_PUBLIC GridView
     : public AbsListView
     , public IGridView
 {
@@ -149,85 +149,85 @@ public:
 
 
 private:
-    CARAPI_(AutoPtr<IView>) FillDown(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillDown(
         /* [in] */ Int32 pos,
         /* [in] */ Int32 nextTop);
 
-    CARAPI_(AutoPtr<IView>) MakeRow(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) MakeRow(
         /* [in] */ Int32 startPos,
         /* [in] */ Int32 y,
         /* [in] */ Boolean flow);
 
-    CARAPI_(AutoPtr<IView>) FillUp(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillUp(
         /* [in] */ Int32 pos,
         /* [in] */ Int32 nextBottom);
 
-    CARAPI_(AutoPtr<IView>) FillFromTop(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillFromTop(
         /* [in] */ Int32 nextTop);
 
-    CARAPI_(AutoPtr<IView>) FillFromBottom(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillFromBottom(
         /* [in] */ Int32 lastPosition,
         /* [in] */ Int32 nextBottom);
 
-    CARAPI_(AutoPtr<IView>) FillSelection(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillSelection(
         /* [in] */ Int32 childrenTop,
         /* [in] */ Int32 childrenBottom);
 
-    CARAPI_(void) PinToTop(
+    ECO_LOCAL CARAPI_(void) PinToTop(
         /* [in] */ Int32 childrenTop);
 
-    CARAPI_(void) PinToBottom(
+    ECO_LOCAL CARAPI_(void) PinToBottom(
         /* [in] */ Int32 childrenBottom);
 
-    CARAPI_(AutoPtr<IView>) FillSpecific(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillSpecific(
         /* [in] */ Int32 position,
         /* [in] */ Int32 top);
 
-    CARAPI_(void) CorrectTooHigh(
+    ECO_LOCAL CARAPI_(void) CorrectTooHigh(
         /* [in] */ Int32 numColumns,
         /* [in] */ Int32 verticalSpacing,
         /* [in] */ Int32 childCount);
 
-    CARAPI_(void) CorrectTooLow(
+    ECO_LOCAL CARAPI_(void) CorrectTooLow(
         /* [in] */ Int32 numColumns,
         /* [in] */ Int32 verticalSpacing,
         /* [in] */ Int32 childCount);
 
-    CARAPI_(AutoPtr<IView>) FillFromSelection(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillFromSelection(
         /* [in] */ Int32 selectedTop,
         /* [in] */ Int32 childrenTop,
         /* [in] */ Int32 childrenBottom);
 
-    CARAPI_(Int32) GetBottomSelectionPixel(
+    ECO_LOCAL CARAPI_(Int32) GetBottomSelectionPixel(
         /* [in] */ Int32 childrenBottom,
         /* [in] */ Int32 fadingEdgeLength,
         /* [in] */ Int32 numColumns,
         /* [in] */ Int32 rowStart);
 
-    CARAPI_(Int32) GetTopSelectionPixel(
+    ECO_LOCAL CARAPI_(Int32) GetTopSelectionPixel(
         /* [in] */ Int32 childrenTop,
         /* [in] */ Int32 fadingEdgeLength,
         /* [in] */ Int32 rowStart);
 
-    CARAPI_(void) AdjustForBottomFadingEdge(
+    ECO_LOCAL CARAPI_(void) AdjustForBottomFadingEdge(
         /* [in] */ IView* childInSelectedRow,
         /* [in] */ Int32 topSelectionPixel,
         /* [in] */ Int32 bottomSelectionPixel);
 
-    CARAPI_(void) AdjustForTopFadingEdge(
+    ECO_LOCAL CARAPI_(void) AdjustForTopFadingEdge(
         /* [in] */ IView* childInSelectedRow,
         /* [in] */ Int32 topSelectionPixel,
         /* [in] */ Int32 bottomSelectionPixel);
 
-    CARAPI_(AutoPtr<IView>) MoveSelection(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) MoveSelection(
         /* [in] */ Int32 delta,
         /* [in] */ Int32 childrenTop,
         /* [in] */ Int32 childrenBottom);
 
-    CARAPI_(Boolean) DetermineColumns(
+    ECO_LOCAL CARAPI_(Boolean) DetermineColumns(
         /* [in] */ Int32 availableSpace);
 
-    CARAPI_(AutoPtr<IView>) MakeAndAddView(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) MakeAndAddView(
         /* [in] */ Int32 position,
         /* [in] */ Int32 y,
         /* [in] */ Boolean flow,
@@ -235,7 +235,7 @@ private:
         /* [in] */ Boolean selected,
         /* [in] */ Int32 where);
 
-    CARAPI_(void) SetupChild(
+    ECO_LOCAL CARAPI_(void) SetupChild(
         /* [in] */ IView* child,
         /* [in] */ Int32 position,
         /* [in] */ Int32 y,
@@ -245,19 +245,19 @@ private:
         /* [in] */ Boolean recycled,
         /* [in] */ Int32 where);
 
-    CARAPI_(Boolean) SequenceScroll(
+    ECO_LOCAL CARAPI_(Boolean) SequenceScroll(
         /* [in] */ Int32 direction);
 
-    CARAPI_(Boolean) CommonKey(
+    ECO_LOCAL CARAPI_(Boolean) CommonKey(
         /* [in] */ Int32 keyCode,
         /* [in] */ Int32 count,
         /* [in] */ IKeyEvent* event);
 
-    CARAPI_(Boolean) IsCandidateSelection(
+    ECO_LOCAL CARAPI_(Boolean) IsCandidateSelection(
         /* [in] */ Int32 childIndex,
         /* [in] */ Int32 direction);
 
-    CARAPI AdjustViewsUpOrDown();
+    ECO_LOCAL CARAPI AdjustViewsUpOrDown();
 
 protected:
     CARAPI OnMeasure(
