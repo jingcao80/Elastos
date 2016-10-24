@@ -20,37 +20,16 @@ using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::CIntent;
-//import android.app.Activity;
-//import android.app.PendingIntent;
-//import android.content.ComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
-//import android.content.ServiceConnection;
-//import android.os.IBinder;
-//import android.os.RemoteException;
-//import android.os.UserHandle;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::CByteArrayInputStream;
-//import java.io.Closeable;
-//import java.security.InvalidKeyException;
-//import java.security.Principal;
-//import java.security.PrivateKey;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::Cert::ICertificateFactoryHelper;
 using Elastos::Security::Cert::CCertificateFactoryHelper;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::ICertificate;
-//import java.security.cert.Certificate;
-//import java.security.cert.CertificateException;
-//import java.security.cert.X509Certificate;
-//import java.util.List;
-//import java.util.Locale;
-//import java.util.concurrent.BlockingQueue;
-//import java.util.concurrent.LinkedBlockingQueue;
-//
-//import com.android.org.conscrypt.OpenSSLEngine;
-//import com.android.org.conscrypt.TrustedCertificateStore;
 using Elastos::Utility::IList;
 using Elastos::Utility::Concurrent::CLinkedBlockingQueue;
 using Elastos::Utility::Logging::Logger;
@@ -60,46 +39,63 @@ namespace Droid {
 namespace KeyStore {
 namespace Security {
 
+//=========================================================================
+//  KeyChain::AliasResponse
+//=========================================================================
 CAR_INTERFACE_IMPL_2(KeyChain::AliasResponse, Object, IIKeyChainAliasCallback, IBinder);
 
 KeyChain::AliasResponse::AliasResponse(
     /* [in] */ IKeyChainAliasCallback* keyChainAliasResponse)
-{
-    this->keyChainAliasResponse = keyChainAliasResponse;
-}
+    : mKeyChainAliasResponse(keyChainAliasResponse)
+{}
 
 ECode KeyChain::AliasResponse::Alias(
     /* [in] */ const String& alias)
 {
-    return keyChainAliasResponse->Alias(alias);
+    return mKeyChainAliasResponse->Alias(alias);
 }
 
+ECode KeyChain::AliasResponse::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = "KeyChain::AliasResponse";
+    return NOERROR;
+}
+
+
+//=========================================================================
+//  KeyChain::KeyChainConnection
+//=========================================================================
 CAR_INTERFACE_IMPL_2(KeyChain::KeyChainConnection, Object, IKeyChainConnection, ICloseable);
 
 KeyChain::KeyChainConnection::KeyChainConnection(
-   /* [in] */ IContext* context,
-   /* [in] */ IServiceConnection* serviceConnection,
-   /* [in] */ IIKeyChainService* service)
-{
-    this->context = context;
-    this->serviceConnection = serviceConnection;
-    this->service = service;
-}
+    /* [in] */ IContext* context,
+    /* [in] */ IServiceConnection* serviceConnection,
+    /* [in] */ IIKeyChainService* service)
+    : mContext(context)
+    , mServiceConnection(serviceConnection)
+    , mService(service)
+{}
 
 ECode KeyChain::KeyChainConnection::Close()
 {
-    return context->UnbindService(serviceConnection);
+    return mContext->UnbindService(mServiceConnection);
 }
 
 ECode KeyChain::KeyChainConnection::GetService(
     /* [out] */ IIKeyChainService** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = service;
+    *result = mService;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
+
+//=========================================================================
+//  KeyChain::ServiceConnection
+//=========================================================================
 CAR_INTERFACE_IMPL(KeyChain::ServiceConnection, Object, IServiceConnection);
 
 KeyChain::ServiceConnection::ServiceConnection(
@@ -132,6 +128,10 @@ ECode KeyChain::ServiceConnection::OnServiceDisconnected(
     return NOERROR;
 }
 
+
+//=========================================================================
+//  KeyChain
+//=========================================================================
 //CAR_INTERFACE_IMPL(KeyChain, Object, IKeyChain);
 const String KeyChain::TAG("KeyChain");
 const String KeyChain::ACTION_INSTALL("android.credentials.INSTALL");
@@ -163,13 +163,11 @@ ECode KeyChain::ChoosePrivateKeyAlias(
     if (activity == NULL) {
         //throw new NullPointerException("activity == null");
         Logger::E("KeyChain", "ChoosePrivateKeyAlias activity == NULL");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
     if (response == NULL) {
         //throw new NullPointerException("response == null");
         Logger::E("KeyChain", "ChoosePrivateKeyAlias response == NULL");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<IIntent> intent;
@@ -201,7 +199,6 @@ ECode KeyChain::GetPrivateKey(
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
         Logger::E("KeyChain", "GetPrivateKey alias == null");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<IKeyChainConnection> keyChainConnection;
@@ -214,8 +211,7 @@ ECode KeyChain::GetPrivateKey(
     if (keyId.IsNull()) {
         //throw new KeyChainException("keystore had a problem");
         Logger::E("KeyChain", "GetPrivateKey keystore had a problem");
-        assert(0);
-        return E_ILLEGAL_STATE_EXCEPTION;
+        return E_KEY_CHAIN_EXCEPTION;
     }
 
     //TODO AutoPtr<IOpenSSLEngineHelper> oeHelper;
@@ -246,7 +242,6 @@ ECode KeyChain::GetCertificateChain(
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
         Logger::E("KeyChain", "GetCertificateChain alias == null");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<IKeyChainConnection> keyChainConnection;
@@ -257,31 +252,31 @@ ECode KeyChain::GetCertificateChain(
 
     AutoPtr<ArrayOf<Byte> > certificateBytes;
     keyChainService->GetCertificate(alias, (ArrayOf<Byte>**)&certificateBytes);
-        if (certificateBytes == NULL) {
-            return NOERROR;
-        }
+    if (certificateBytes == NULL) {
+        return NOERROR;
+    }
 
-        //TODO AutoPtr<ITrustedCertificateStore> store;
-        //TODO CTrustedCertificateStore::New((ITrustedCertificateStore**)&store);
-        //List<X509Certificate> chain = store.getCertificateChain(ToCertificate(certificateBytes));
-        AutoPtr<IX509Certificate> x509;
-        ToCertificate(certificateBytes, (IX509Certificate**)&x509);
-        AutoPtr<IList> chain;
-        //TODO store->GetCertificateChain(x509, (IList**)&chain);
-        Int32 size;
-        chain->GetSize(&size);
-        AutoPtr<ArrayOf<IInterface*> > inArray = ArrayOf<IInterface*>::Alloc(size);
-        AutoPtr<ArrayOf<IInterface* > > outArray;
-        chain->ToArray(inArray, (ArrayOf<IInterface*>**)&outArray);
-        size = outArray->GetLength();
-        AutoPtr<ArrayOf<IX509Certificate*> > x509s = ArrayOf<IX509Certificate*>::Alloc(size);
-        for (Int32 i = 0; i < size; ++i) {
-            IInterface* obj = (*outArray)[i];
-            IX509Certificate* x509 = IX509Certificate::Probe(obj);
-            x509s->Set(i, x509);
-        }
-        *result = x509s;
-        REFCOUNT_ADD(*result);
+    //TODO AutoPtr<ITrustedCertificateStore> store;
+    //TODO CTrustedCertificateStore::New((ITrustedCertificateStore**)&store);
+    //List<X509Certificate> chain = store.getCertificateChain(ToCertificate(certificateBytes));
+    AutoPtr<IX509Certificate> x509;
+    ToCertificate(certificateBytes, (IX509Certificate**)&x509);
+    AutoPtr<IList> chain;
+    //TODO store->GetCertificateChain(x509, (IList**)&chain);
+    Int32 size;
+    chain->GetSize(&size);
+    AutoPtr<ArrayOf<IInterface*> > inArray = ArrayOf<IInterface*>::Alloc(size);
+    AutoPtr<ArrayOf<IInterface* > > outArray;
+    chain->ToArray(inArray, (ArrayOf<IInterface*>**)&outArray);
+    size = outArray->GetLength();
+    AutoPtr<ArrayOf<IX509Certificate*> > x509s = ArrayOf<IX509Certificate*>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        IInterface* obj = (*outArray)[i];
+        IX509Certificate* x509 = IX509Certificate::Probe(obj);
+        x509s->Set(i, x509);
+    }
+    *result = x509s;
+    REFCOUNT_ADD(*result);
     //} catch (CertificateException e) {
     //    throw new KeyChainException(e);
     //} catch (RemoteException e) {
@@ -329,7 +324,6 @@ ECode KeyChain::ToCertificate(
     if (bytes == NULL) {
         //throw new IllegalArgumentException("bytes == null");
         Logger::E("KeyChain", "ToCertificate, bytes == NULL");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     //try {
@@ -367,7 +361,6 @@ ECode KeyChain::BindAsUser(
     if (context == NULL) {
         //throw new NullPointerException("context == null");
         Logger::E("KeyChain", "BindAsUser, context == NULL");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
     EnsureNotOnMainThread(context);
@@ -391,7 +384,6 @@ ECode KeyChain::BindAsUser(
     if (!isBound) {
         //throw new AssertionError("could not bind to KeyChainService");
         Logger::E("KeyChain", "BindAsUser, could not bind to KeyChainService");
-        assert(0);
         return E_ASSERTION_ERROR;
     }
 
@@ -412,7 +404,6 @@ ECode KeyChain::EnsureNotOnMainThread(
     if (looper != NULL && looper == mainLooper) {
         //throw new IllegalStateException("calling this from your main thread can lead to deadlock");
         Logger::E("KeyChain", "EnsureNotOnMainThread, calling this from your main thread can lead to deadlock");
-        assert(0);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;

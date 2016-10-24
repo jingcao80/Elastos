@@ -32,6 +32,7 @@ com.qualcomm.location   /system/app          dir
 com.qualcomm.services.location  /system/app  dir
 com.example.Location    /system/app          dir
 CMFileManager           /system/app          dir
+KeyChain                /system/app          dir
 WeChat_840.apk          /data/app
 vlc.apk                 /data/app
 OfflineCalendar.apk     /data/app

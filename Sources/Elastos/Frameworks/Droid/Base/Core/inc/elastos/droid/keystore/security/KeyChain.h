@@ -84,13 +84,10 @@ public:
             /* [in] */ const String& alias);
 
         CARAPI ToString(
-            /* [out] */ String* result)
-        {
-            *result = String("KeyChain::AliasResponse");
-            return NOERROR;
-        }
+            /* [out] */ String* result);
+
     private:
-        AutoPtr<IKeyChainAliasCallback> keyChainAliasResponse;
+        AutoPtr<IKeyChainAliasCallback> mKeyChainAliasResponse;
     };
 
     /**
@@ -117,15 +114,14 @@ public:
             /* [out] */ IIKeyChainService** result);
 
     private:
-        AutoPtr<IContext> context;
-        AutoPtr<IServiceConnection> serviceConnection;
-        AutoPtr<IIKeyChainService> service;
+        AutoPtr<IContext> mContext;
+        AutoPtr<IServiceConnection> mServiceConnection;
+        AutoPtr<IIKeyChainService> mService;
     };
 
     class ServiceConnection
         : public Object
         , public IServiceConnection
-
     {
     public:
         ServiceConnection(
@@ -284,11 +280,11 @@ private:
         /* [in] */ IContext* context);
 
 private:
-    static const String TAG;// = "KeyChain";
-    static const String ACTION_INSTALL;// = "android.credentials.INSTALL"
-    static const String CERT_INSTALLER_PACKAGE;// = "com.android.certinstaller"
-    static const String KEYCHAIN_PACKAGE;// = "com.android.keychain";
-    static const String ACTION_CHOOSER;// = "com.android.keychain.CHOOSER";
+    static const String TAG;
+    static const String ACTION_INSTALL;
+    static const String CERT_INSTALLER_PACKAGE;
+    static const String KEYCHAIN_PACKAGE;
+    static const String ACTION_CHOOSER;
 
 };
 
