@@ -25,6 +25,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Objects;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -147,9 +148,9 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             AutoPtr<IInterface> obj;
             request->Get(CaptureRequest::CONTROL_AE_REGIONS, (IInterface**)&obj);
             AutoPtr<IArrayOf> aeRegions = IArrayOf::Probe(obj);
-            AutoPtr<IInterface> obj2;
-            request->Get(CaptureRequest::CONTROL_AWB_REGIONS, (IInterface**)&obj2);
-            if (obj2 != NULL) {
+            obj = NULL;
+            request->Get(CaptureRequest::CONTROL_AWB_REGIONS, (IInterface**)&obj);
+            if (obj != NULL) {
                 Logger::W(TAG, "convertRequestMetadata - control.awbRegions setting is not"
                         "supported, ignoring value");
             }
@@ -160,12 +161,20 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
                 maxNumMeteringAreas, /*regionName*/String("AE"));
 
             // WAR: for b/17252693, some devices can't handle params.setFocusAreas(null).
-            assert(0);
-            // AutoPtr<ArrayOf<IInterface*> > array;
-            // meteringAreaList->ToArray((ArrayOf<IInterface*>**)&array);
-            // if (maxNumMeteringAreas > 0) {
-            //     params->SetMeteringAreas(array);
-            // }
+            if (maxNumMeteringAreas > 0) {
+                Int32 size = 0;
+                meteringAreaList->GetSize(&size);
+                AutoPtr< ArrayOf<ICameraArea*> > array = ArrayOf<ICameraArea*>::Alloc(size);
+                for (Int32 i = 0; i < size; ++i) {
+                    AutoPtr<IInterface> obj;
+                    meteringAreaList->Get(i, (IInterface**)&obj);
+                    assert(obj != NULL);
+                    ICameraArea* ca = ICameraArea::Probe(obj);
+                    assert(ca != NULL);
+                    array->Set(i, ca);
+                }
+                params->SetMeteringAreas(array);
+            }
         }
 
         // afRegions
@@ -175,33 +184,39 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             AutoPtr<IArrayOf> afRegions = IArrayOf::Probe(obj);
             Int32 maxNumFocusAreas;
             params->GetMaxNumFocusAreas(&maxNumFocusAreas);
-            AutoPtr<IList> focusAreaList;
-            focusAreaList = ConvertMeteringRegionsToLegacy(activeArray, zoomData,
+            AutoPtr<IList> focusAreaList = ConvertMeteringRegionsToLegacy(activeArray, zoomData,
                 afRegions, maxNumFocusAreas, /*regionName*/String("AF"));
 
             // WAR: for b/17252693, some devices can't handle params.setFocusAreas(null).
             if (maxNumFocusAreas > 0) {
-                assert(0);
-                // /params->SetFocusAreas(focusAreaList);
+                Int32 size = 0, i = 0;
+                focusAreaList->GetSize(&size);
+                AutoPtr< ArrayOf<ICameraArea*> > array = ArrayOf<ICameraArea*>::Alloc(size);
+                for (Int32 i = 0; i < size; ++i) {
+                    AutoPtr<IInterface> obj;
+                    focusAreaList->Get(i, (IInterface**)&obj);
+                    assert(obj != NULL);
+                    ICameraArea* ca = ICameraArea::Probe(obj);
+                    assert(ca != NULL);
+                    array->Set(i, ca);
+                }
+                params->SetFocusAreas(array);
             }
         }
     }
 
     // control.aeTargetFpsRange
-    AutoPtr<Range<IInteger32> > aeFpsRange;
+    AutoPtr<IRange> aeFpsRange; // Range<IInteger32>
     AutoPtr<IInterface> tmp;
-    assert(0);
-    //request->Get(CaptureRequest::CONTROL_AE_TARGET_FPS_RANGE, (IInterface**)&tmp);
+    request->Get(CaptureRequest::CONTROL_AE_TARGET_FPS_RANGE, (IInterface**)&tmp);
     if (tmp != NULL) {
-        aeFpsRange = (Range<IInteger32>*)IObject::Probe(tmp);
+        aeFpsRange = IRange::Probe(tmp);
         AutoPtr<ArrayOf<Int32> > legacyFps = ConvertAeFpsRangeToLegacy(aeFpsRange);
 
         // TODO - Should we enforce that all HAL1 devices must include (30, 30) FPS range?
         Boolean supported = FALSE;
-
         AutoPtr<IList> rangeList;
         params->GetSupportedPreviewFpsRange((IList**)&rangeList);
-
 
         Int32 size;
         rangeList->GetSize(&size);
@@ -210,17 +225,13 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             rangeList->Get(i, (IInterface**)&tmp);
             AutoPtr<IArrayOf> range = IArrayOf::Probe(tmp);
 
-            AutoPtr<IInterface> tmp2;
-            range->Get(0, (IInterface**)&tmp2);
-            AutoPtr<IInteger32> obj = IInteger32::Probe(tmp2);
-            Int32 num;
-            obj->GetValue(&num);
-            tmp2 = NULL;
-            obj = NULL;
-            range->Get(1, (IInterface**)&tmp2);
-            obj = IInteger32::Probe(tmp2);
-            Int32 num2;
-            obj->GetValue(&num2);
+            Int32 num, num2;
+            tmp = NULL;
+            range->Get(0, (IInterface**)&tmp);
+            IInteger32::Probe(tmp)->GetValue(&num);
+            tmp = NULL;
+            range->Get(1, (IInterface**)&tmp);
+            IInteger32::Probe(tmp)->GetValue(&num2);
 
             if ((*legacyFps)[0] == num && (*legacyFps)[1] == num2) {
                 supported = TRUE;
@@ -244,24 +255,24 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
     // control.aeExposureCompensation
     {
         AutoPtr<IInterface> obj;
-        assert(0);
-        //characteristics->Get(CameraCharacteristics::CONTROL_AE_COMPENSATION_RANGE, (IInterface**)&obj);
-        AutoPtr<Range<IInteger32> > compensationRange = (Range<IInteger32>*)IObject::Probe(obj);
+        characteristics->Get(CameraCharacteristics::CONTROL_AE_COMPENSATION_RANGE, (IInterface**)&obj);
+        AutoPtr<IRange> compensationRange = IRange::Probe(obj); // Range<<IInteger32>
 
-        AutoPtr<IInterface> obj2;
+        obj = NULL;
         AutoPtr<IInteger32> res = CoreUtils::Convert(0);
         ParamsUtils::GetOrDefault(request,
                 CaptureRequest::CONTROL_AE_EXPOSURE_COMPENSATION,
-                /*defaultValue*/TO_IINTERFACE(res), (IInterface**)&obj2);
-        AutoPtr<IInteger32> obj3 = IInteger32::Probe(obj2);
+                /*defaultValue*/TO_IINTERFACE(res), (IInterface**)&obj);
+        AutoPtr<IInteger32> iobj = IInteger32::Probe(obj);
         Int32 compensation;
-        obj3->GetValue(&compensation);
+        iobj->GetValue(&compensation);
 
-        Boolean result = compensationRange->Contains(obj3);
+        Boolean result;
+        compensationRange->Contains(iobj, &result);
         if (!result) {
             Logger::W(TAG,
-                    "convertRequestMetadata - control.aeExposureCompensation"
-                    "is out of range, ignoring value");
+                "convertRequestMetadata - control.aeExposureCompensation"
+                "is out of range, ignoring value");
             compensation = 0;
         }
 
@@ -304,8 +315,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
 
         AutoPtr<ArrayOf<String> > modes;
         params->GetSupportedFocusModes((ArrayOf<String>**)&modes);
-        assert(0);
-        String focusMode;// = LegacyMetadataMapper::ConvertAfModeToLegacy(afMode, modes);
+        String focusMode = LegacyMetadataMapper::ConvertAfModeToLegacy(afMode, modes);
 
         if (!focusMode.IsNull()) {
             params->SetFocusMode(focusMode);
@@ -396,12 +406,12 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
 
     // lens.focusDistance
     {
-        Boolean infinityFocusSupported;
         AutoPtr<ArrayOf<String> > modes;
         params->GetSupportedFocusModes((ArrayOf<String>**)&modes);
-        assert(0);
-        // ListUtils::ListContains(modes,
-        //         IParameters::FOCUS_MODE_INFINITY, &infinityFocusSupported);
+        Boolean infinityFocusSupported = FALSE;
+        if (modes) {
+            modes->Contains(IParameters::FOCUS_MODE_INFINITY);
+        }
 
         AutoPtr<IFloat> res = CoreUtils::Convert(0.0f);
         AutoPtr<IInterface> obj = GetIfSupported(request, CaptureRequest::LENS_FOCUS_DISTANCE,
@@ -410,8 +420,8 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         Float focusDistance = 0.0f;
         if (obj2 == NULL) {
             Logger::W(TAG,
-                    "convertRequestToMetadata - Ignoring android.lens.focusDistance %d,"
-                    "only 0.0f is supported", infinityFocusSupported);
+                "convertRequestToMetadata - Ignoring android.lens.focusDistance %d,"
+                "only 0.0f is supported", infinityFocusSupported);
         }
         else {
             obj2->GetValue(&focusDistance);
@@ -529,26 +539,23 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
 
         if (location != NULL) {
             if (CheckForCompleteGpsData(location)) {
-                Double altitude;
+                Double altitude, latitude, longitude;
                 location->GetAltitude(&altitude);
-                params->SetGpsAltitude(altitude);
-                Double latitude;
                 location->GetLatitude(&latitude);
-                params->SetGpsLatitude(latitude);
-                Double longitude;
                 location->GetLongitude(&longitude);
-                params->SetGpsLongitude(longitude);
                 String provider;
                 location->GetProvider(&provider);
-                params->SetGpsProcessingMethod(provider.ToUpperCase());
                 Int64 _time;
                 location->GetTime(&_time);
+
+                params->SetGpsAltitude(altitude);
+                params->SetGpsLatitude(latitude);
+                params->SetGpsLongitude(longitude);
+                params->SetGpsProcessingMethod(provider.ToUpperCase());
                 params->SetGpsTimestamp(_time);
             }
             else {
-                String str;
-                IObject::Probe(location)->ToString(&str);
-                Logger::W(TAG, "Incomplete GPS parameters provided in location %s", str.string());
+                Logger::W(TAG, "Incomplete GPS parameters provided in location %s", TO_CSTR(location));
             }
         }
         else {
@@ -572,9 +579,8 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         AutoPtr<IInterface> obj2;
         ParamsUtils::GetOrDefault(request, CaptureRequest::JPEG_ORIENTATION,
                 TO_IINTERFACE(res), (IInterface**)&obj2);
-        AutoPtr<IInteger32> obj3 = IInteger32::Probe(obj2);
         Int32 rotation;
-        obj3->GetValue(&rotation);
+        IInteger32::Probe(obj2)->GetValue(&rotation);
         params->SetRotation(rotation);
     }
 
@@ -584,9 +590,8 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         AutoPtr<IInterface> obj;
         ParamsUtils::GetOrDefault(request, CaptureRequest::JPEG_QUALITY,
                 TO_IINTERFACE(res), (IInterface**)&obj);
-        AutoPtr<IInteger32> orientation = IInteger32::Probe(obj);
-        Int32 value;
-        orientation->GetValue(&value);
+        Byte value;
+        IByte::Probe(obj)->GetValue(&value);
         params->SetJpegQuality(0xFF & value);
     }
 
@@ -596,9 +601,8 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         AutoPtr<IInterface> obj;
         ParamsUtils::GetOrDefault(request, CaptureRequest::JPEG_THUMBNAIL_QUALITY,
                 TO_IINTERFACE(res), (IInterface**)&obj);
-        AutoPtr<IInteger32> orientation = IInteger32::Probe(obj);
-        Int32 value;
-        orientation->GetValue(&value);
+        Byte value;
+        IByte::Probe(obj)->GetValue(&value);
         params->SetJpegThumbnailQuality(0xFF & value);
     }
 
@@ -618,27 +622,22 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
                 }
                 else {
                     Boolean result;
-                    Int32 width;
+                    Int32 width, height;
                     s->GetWidth(&width);
-                    Int32 height;
                     s->GetHeight(&height);
-                    assert(0);
-                    //ParameterUtils::ContainsSize(sizes, width, height, &result);
+                    ParameterUtils::ContainsSize(sizes, width, height, &result);
                     invalidSize = !result;
                 }
                 if (invalidSize) {
-                    String str;
-                    IObject::Probe(s)->ToString(&str);
-                    Logger::W(TAG, "Invalid JPEG thumbnail size set %s, skipping thumbnail...", str.string());
+                    Logger::W(TAG, "Invalid JPEG thumbnail size set %s, skipping thumbnail...", TO_CSTR(s));
                 }
                 if (s == NULL || invalidSize) {
                     // (0,0) = "no thumbnail" in Camera API 1
                     params->SetJpegThumbnailSize(/*width*/0, /*height*/0);
                 }
                 else {
-                    Int32 width;
+                    Int32 width, height;
                     s->GetWidth(&width);
-                    Int32 height;
                     s->GetHeight(&height);
                     params->SetJpegThumbnailSize(width, height);
                 }
@@ -655,9 +654,8 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         AutoPtr<IInterface> obj;
         ParamsUtils::GetOrDefault(request, CaptureRequest::NOISE_REDUCTION_MODE,
                 /*defaultValue*/TO_IINTERFACE(res), (IInterface**)&obj);
-        AutoPtr<IInteger32> orientation = IInteger32::Probe(obj);
         Int32 mode;
-        orientation->GetValue(&mode);
+        IInteger32::Probe(obj)->GetValue(&mode);
 
         if (mode != ICameraMetadata::NOISE_REDUCTION_MODE_FAST) {
             Logger::W(TAG, "convertRequestToMetadata - Ignoring unsupported "
@@ -717,8 +715,8 @@ AutoPtr<IList> LegacyRequestMapper::ConvertMeteringRegionsToLegacy(
     if (meteringRegions == NULL || maxNumMeteringAreas <= 0) {
         if (maxNumMeteringAreas > 0) {
             AutoPtr<IList> res;
-            assert(0);
-            //Arrays::AsList(IParameterUtils::CAMERA_AREA_DEFAULT, (IList**)&res);
+            CArrayList::New((IList**)&res);
+            res->Add(ParameterUtils::CAMERA_AREA_DEFAULT);
             return res;
         }
         else {
@@ -729,16 +727,15 @@ AutoPtr<IList> LegacyRequestMapper::ConvertMeteringRegionsToLegacy(
     // Add all non-zero weight regions to the list
     AutoPtr<IList> meteringRectangleList;
     CArrayList::New((IList**)&meteringRectangleList);
-    Int32 len;
+    Int32 len, value;
     meteringRegions->GetLength(&len);
     for (Int32 i = 0; i< len; i++) {
         AutoPtr<IInterface> obj;
         meteringRegions->Get(i, (IInterface**)&obj);
-        AutoPtr<IMeteringRectangle> rect = IMeteringRectangle::Probe(obj);
-        Int32 value;
+        IMeteringRectangle* rect = IMeteringRectangle::Probe(obj);
         rect->GetMeteringWeight(&value);
         if (value != IMeteringRectangle::METERING_WEIGHT_DONT_CARE) {
-            meteringRectangleList->Add(TO_IINTERFACE(rect));
+            meteringRectangleList->Add(obj);
         }
     }
 
@@ -747,8 +744,8 @@ AutoPtr<IList> LegacyRequestMapper::ConvertMeteringRegionsToLegacy(
     if (size == 0) {
         Logger::W(TAG, "Only received metering rectangles with weight 0.");
         AutoPtr<IList> res;
-        assert(0);
-        //Arrays::AsList(ParameterUtils::CAMERA_AREA_DEFAULT, (IList**)&res);
+        CArrayList::New((IList**)&res);
+        res->Add(ParameterUtils::CAMERA_AREA_DEFAULT);
         return res;
     }
 
@@ -760,20 +757,21 @@ AutoPtr<IList> LegacyRequestMapper::ConvertMeteringRegionsToLegacy(
     for (Int32 i = 0; i < countMeteringAreas; ++i) {
         AutoPtr<IInterface> obj;
         meteringRectangleList->Get(i, (IInterface**)&obj);
-        AutoPtr<IMeteringRectangle> rect = IMeteringRectangle::Probe(obj);
+        IMeteringRectangle* rect = IMeteringRectangle::Probe(obj);
 
         AutoPtr<IParameterUtilsMeteringData> meteringData;
         ParameterUtils::ConvertMeteringRectangleToLegacy(activeArray, rect,
                 zoomData, (IParameterUtilsMeteringData**)&meteringData);
         AutoPtr<ICameraArea> area;
         meteringData->GetMeteringArea((ICameraArea**)&area);
-        meteringAreaList->Add(TO_IINTERFACE(area));
+        assert(area != NULL);
+        meteringAreaList->Add(area);
     }
 
     if (maxNumMeteringAreas < size) {
         Logger::W(TAG,
-                "convertMeteringRegionsToLegacy - Too many requested %s regions,"
-                "ignoring all beyond the first %d", regionName.string(), maxNumMeteringAreas);
+            "convertMeteringRegionsToLegacy - Too many requested %s regions,"
+            "ignoring all beyond the first %d", regionName.string(), maxNumMeteringAreas);
     }
 
     if (VERBOSE) {
@@ -790,30 +788,25 @@ void LegacyRequestMapper::MapAeAndFlashMode(
     /* [in] */ ICaptureRequest* r,
     /* [in] */ IParameters* p)
 {
+    Int32 flashMode;
     AutoPtr<IInteger32> res = CoreUtils::Convert(ICameraMetadata::FLASH_MODE_OFF);
     AutoPtr<IInterface> obj;
     ParamsUtils::GetOrDefault(r, CaptureRequest::FLASH_MODE, TO_IINTERFACE(res), (IInterface**)&obj);
-    AutoPtr<IInteger32> orientation = IInteger32::Probe(obj);
-    Int32 flashMode;
-    orientation->GetValue(&flashMode);
+    IInteger32::Probe(obj)->GetValue(&flashMode);
 
-    AutoPtr<IInteger32> res2 = CoreUtils::Convert(ICameraMetadata::CONTROL_AE_MODE_ON);
-    AutoPtr<IInterface> obj2;
-    ParamsUtils::GetOrDefault(r, CaptureRequest::CONTROL_AE_MODE, TO_IINTERFACE(res2), (IInterface**)&obj);
-    AutoPtr<IInteger32> orientation2 = IInteger32::Probe(obj);
     Int32 aeMode;
-    orientation2->GetValue(&aeMode);
+    res = CoreUtils::Convert(ICameraMetadata::CONTROL_AE_MODE_ON);
+    obj = NULL;
+    ParamsUtils::GetOrDefault(r, CaptureRequest::CONTROL_AE_MODE, TO_IINTERFACE(res), (IInterface**)&obj);
+    IInteger32::Probe(obj)->GetValue(&aeMode);
 
-    AutoPtr<IList> supportedFlashModes;
-    assert(0);
-    //p->GetSupportedFlashModes((IList**)&supportedFlashModes);
+    AutoPtr<ArrayOf<String> > supportedFlashModes;
+    p->GetSupportedFlashModes((ArrayOf<String>**)&supportedFlashModes);
 
     String flashModeSetting;
 
     // Flash is OFF by default, on cameras that support flash
-    Boolean result;
-    AutoPtr<ICharSequence> obj3 = CoreUtils::Convert(IParameters::FLASH_MODE_OFF);
-    ListUtils::ListContains(supportedFlashModes, TO_IINTERFACE(obj3), &result);
+    Boolean result = supportedFlashModes->Contains(IParameters::FLASH_MODE_OFF);
     if (result) {
         flashModeSetting = IParameters::FLASH_MODE_OFF;
     }
@@ -825,27 +818,23 @@ void LegacyRequestMapper::MapAeAndFlashMode(
     // Ignore flash.mode controls unless aeMode == ON
     if (aeMode == ICameraMetadata::CONTROL_AE_MODE_ON) {
         if (flashMode == ICameraMetadata::FLASH_MODE_TORCH) {
-                Boolean res;
-                AutoPtr<ICharSequence> obj = CoreUtils::Convert(IParameters::FLASH_MODE_TORCH);
-                ListUtils::ListContains(supportedFlashModes, TO_IINTERFACE(obj), &res);
-                if (res) {
+                result = supportedFlashModes->Contains(IParameters::FLASH_MODE_TORCH);
+                if (result) {
                     flashModeSetting = IParameters::FLASH_MODE_TORCH;
                 }
                 else {
                     Logger::W(TAG, "mapAeAndFlashMode - Ignore flash.mode == TORCH;"
-                            "camera does not support it");
+                        "camera does not support it");
                 }
         }
         else if (flashMode == ICameraMetadata::FLASH_MODE_SINGLE) {
-            Boolean res;
-            AutoPtr<ICharSequence> obj = CoreUtils::Convert(IParameters::FLASH_MODE_ON);
-            ListUtils::ListContains(supportedFlashModes, TO_IINTERFACE(obj), &res);
-            if (res) {
+            result = supportedFlashModes->Contains(IParameters::FLASH_MODE_ON);
+            if (result) {
                 flashModeSetting = IParameters::FLASH_MODE_ON;
             }
             else {
                 Logger::W(TAG, "mapAeAndFlashMode - Ignore flash.mode == SINGLE;"
-                        "camera does not support it");
+                    "camera does not support it");
             }
         }
         else {
@@ -853,39 +842,33 @@ void LegacyRequestMapper::MapAeAndFlashMode(
         }
     }
     else if (aeMode == ICameraMetadata::CONTROL_AE_MODE_ON_ALWAYS_FLASH) {
-        Boolean res;
-        AutoPtr<ICharSequence> obj = CoreUtils::Convert(IParameters::FLASH_MODE_ON);
-        ListUtils::ListContains(supportedFlashModes, TO_IINTERFACE(obj), &res);
-        if (res) {
+        result = supportedFlashModes->Contains(IParameters::FLASH_MODE_ON);
+        if (result) {
             flashModeSetting = IParameters::FLASH_MODE_ON;
         }
         else {
             Logger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_ALWAYS_FLASH;"
-                    "camera does not support it");
+                "camera does not support it");
         }
     }
     else if (aeMode == ICameraMetadata::CONTROL_AE_MODE_ON_AUTO_FLASH) {
-        Boolean res;
-        AutoPtr<ICharSequence> obj = CoreUtils::Convert(IParameters::FLASH_MODE_AUTO);
-        ListUtils::ListContains(supportedFlashModes, TO_IINTERFACE(obj), &res);
-        if (res) {
+        result = supportedFlashModes->Contains(IParameters::FLASH_MODE_AUTO);
+        if (result) {
             flashModeSetting = IParameters::FLASH_MODE_AUTO;
         }
         else {
             Logger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_AUTO_FLASH;"
-                    "camera does not support it");
+                "camera does not support it");
         }
     }
     else if (aeMode == ICameraMetadata::CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE) {
-        Boolean res;
-        AutoPtr<ICharSequence> obj = CoreUtils::Convert(IParameters::FLASH_MODE_RED_EYE);
-        ListUtils::ListContains(supportedFlashModes, TO_IINTERFACE(obj), &res);
-        if (res) {
+        result = supportedFlashModes->Contains(IParameters::FLASH_MODE_RED_EYE);
+        if (result) {
             flashModeSetting = IParameters::FLASH_MODE_RED_EYE;
         }
         else {
             Logger::W(TAG, "mapAeAndFlashMode - Ignore control.aeMode == ON_AUTO_FLASH_REDEYE;"
-                    "camera does not support it");
+                "camera does not support it");
         }
     }
     else {
@@ -897,11 +880,10 @@ void LegacyRequestMapper::MapAeAndFlashMode(
     }
 
     if (VERBOSE) {
-        String str;
-        ListUtils::ListToString(supportedFlashModes, &str);
+        String str = Arrays::ToString(supportedFlashModes.Get());
         Logger::V(TAG,
-                "mapAeAndFlashMode - set flash.mode (api1) to %s, requested (api2) %d,"
-                "supported (api1) %s",flashModeSetting.string(), flashMode, str.string());
+            "mapAeAndFlashMode - set flash.mode (api1) to %s, requested (api2) %d,"
+            "supported (api1) %s",flashModeSetting.string(), flashMode, str.string());
     }
     return;
 }
@@ -929,19 +911,18 @@ String LegacyRequestMapper::ConvertAeAntiBandingModeToLegacy(
 }
 
 AutoPtr<ArrayOf<Int32> > LegacyRequestMapper::ConvertAeFpsRangeToLegacy(
-    /* [in] */ Range<IInteger32>* fpsRange)
+    /* [in] */ IRange* fpsRange)
 {
-    AutoPtr<ArrayOf<Int32> > legacyFps = ArrayOf<Int32>::Alloc(2);
+    AutoPtr<IInterface> lower, upper;
+    fpsRange->GetLower((IInterface**)&lower);
+    fpsRange->GetUpper((IInterface**)&upper);
 
-    AutoPtr<IInteger32> obj = fpsRange->GetLower();
-    Int32 low;
-    obj->GetValue(&low);
-    obj = NULL;
-    obj = fpsRange->GetUpper();
-    Int32 up;
-    obj->GetValue(&up);
-    (*legacyFps)[IParameters::PREVIEW_FPS_MIN_INDEX] = low;
-    (*legacyFps)[IParameters::PREVIEW_FPS_MAX_INDEX] = up;
+    AutoPtr<ArrayOf<Int32> > legacyFps = ArrayOf<Int32>::Alloc(2);
+    Int32 l, u;
+    IInteger32::Probe(lower)->GetValue(&l);
+    IInteger32::Probe(upper)->GetValue(&u);
+    (*legacyFps)[IParameters::PREVIEW_FPS_MIN_INDEX] = l;
+    (*legacyFps)[IParameters::PREVIEW_FPS_MAX_INDEX] = u;
     return legacyFps;
 }
 

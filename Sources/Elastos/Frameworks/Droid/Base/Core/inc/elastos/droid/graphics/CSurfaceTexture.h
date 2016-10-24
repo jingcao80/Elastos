@@ -284,7 +284,10 @@ public:
             /* [in] */ IWeakReference/*<SurfaceTexture>*/* weakSelf);
 
     CARAPI GetSurfaceTexture(
-        /* [out] */ Int32* texture);
+        /* [out] */ Int64* texture);
+
+    CARAPI GetProducer(
+        /* [out] */ Int64* producer);
 
 private:
     CARAPI NativeInit(

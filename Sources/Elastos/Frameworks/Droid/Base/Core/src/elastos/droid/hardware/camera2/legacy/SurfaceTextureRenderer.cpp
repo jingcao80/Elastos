@@ -69,7 +69,7 @@ namespace Legacy {
 CAR_INTERFACE_IMPL(SurfaceTextureRenderer, Object, ISurfaceTextureRenderer)
 
 const String SurfaceTextureRenderer::TAG("SurfaceTextureRenderer");// = SurfaceTextureRenderer.class.getSimpleName();
-const Boolean SurfaceTextureRenderer::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean SurfaceTextureRenderer::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
 const Int32 SurfaceTextureRenderer::GL_MATRIX_SIZE = 16;
 const Int32 SurfaceTextureRenderer::VERTEX_POS_SIZE = 3;
 const Int32 SurfaceTextureRenderer::VERTEX_UV_SIZE = 2;
@@ -188,26 +188,21 @@ SurfaceTextureRenderer::SurfaceTextureRenderer()
     mSTMatrix = ArrayOf<Float>::Alloc(GL_MATRIX_SIZE);
 }
 
-
-ECode SurfaceTextureRenderer::constructor()
-{
-    return NOERROR;
-}
-
 ECode SurfaceTextureRenderer::constructor(
     /* [in] */Int32 facing)
 {
+    AutoPtr<IByteBufferHelper> helper;
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+
+    AutoPtr<IByteOrderHelper> helper2;
+    CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&helper2);
+    ByteOrder bOrder;
+    helper2->GetNativeOrder(&bOrder);
+
     if (facing == ICameraMetadata::LENS_FACING_BACK) {
-        AutoPtr<IByteBufferHelper> helper;
-        CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
         AutoPtr<IByteBuffer> bBuffer;
         helper->AllocateDirect(sBackCameraTriangleVertices->GetLength() *
                 FLOAT_SIZE_BYTES, (IByteBuffer**)&bBuffer);
-
-        AutoPtr<IByteOrderHelper> helper2;
-        CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&helper2);
-        ByteOrder bOrder;
-        helper2->GetNativeOrder(&bOrder);
 
         bBuffer->SetOrder(bOrder);
         bBuffer->AsFloatBuffer((IFloatBuffer**)&mTriangleVertices);
@@ -216,17 +211,9 @@ ECode SurfaceTextureRenderer::constructor(
         IBuffer::Probe(mTriangleVertices)->SetPosition(0);
     }
     else {
-        AutoPtr<IByteBufferHelper> helper;
-        CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
-
         AutoPtr<IByteBuffer> bBuffer;
         helper->AllocateDirect(sFrontCameraTriangleVertices->GetLength() *
                 FLOAT_SIZE_BYTES, (IByteBuffer**)&bBuffer);
-
-        AutoPtr<IByteOrderHelper> helper2;
-        CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&helper2);
-        ByteOrder bOrder;
-        helper2->GetNativeOrder(&bOrder);
 
         bBuffer->SetOrder(bOrder);
         bBuffer->AsFloatBuffer((IFloatBuffer**)&mTriangleVertices);

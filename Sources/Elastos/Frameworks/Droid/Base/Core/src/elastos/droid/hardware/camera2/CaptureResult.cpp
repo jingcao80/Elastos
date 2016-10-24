@@ -343,7 +343,8 @@ INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::SENSOR_TIMESTAMP =
 
 //Rational[].class
 INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::SENSOR_NEUTRAL_COLOR_POINT =
-    CreateKey("android.sensor.neutralColorPoint", ECLSID_CArrayOf, EIID_IArrayOf);
+    CreateKey("android.sensor.neutralColorPoint", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CRational, EIID_IRational);
 
 INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::SENSOR_NOISE_PROFILE =
     CreateKey("android.sensor.noiseProfile", ECLSID_CPair, EIID_IPair,
@@ -354,7 +355,8 @@ INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::SENSOR_GREEN_SPLIT =
 
 //int[].class
 INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::SENSOR_TEST_PATTERN_DATA =
-    CreateKey("android.sensor.testPatternData", ECLSID_CArrayOf, EIID_IArrayOf);
+    CreateKey("android.sensor.testPatternData", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CInteger32, EIID_IInteger32);
 
 INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::SENSOR_TEST_PATTERN_MODE =
     CreateKey("android.sensor.testPatternMode", ECLSID_CInteger32, EIID_IInteger32);
@@ -370,7 +372,8 @@ INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::STATISTICS_FACE_DETE
 
 //int[].class
 INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::STATISTICS_FACE_IDS =
-    CreateKey("android.statistics.faceIds", ECLSID_CArrayOf, EIID_IArrayOf);
+    CreateKey("android.statistics.faceIds", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CInteger32, EIID_IInteger32);
 
 //int[].class
 INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::STATISTICS_FACE_LANDMARKS =
@@ -426,7 +429,8 @@ INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::STATISTICS_LENS_SHAD
 
 //float[].class
 INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::TONEMAP_CURVE_BLUE =
-    CreateKey("android.tonemap.curveBlue", ECLSID_CArrayOf, EIID_IArrayOf);
+    CreateKey("android.tonemap.curveBlue", ECLSID_CArrayOf, EIID_IArrayOf,
+        ECLSID_CFloat, EIID_IFloat);
 
 //float[].class
 INIT_PROI_3 const AutoPtr<ICaptureResultKey> CaptureResult::TONEMAP_CURVE_GREEN =

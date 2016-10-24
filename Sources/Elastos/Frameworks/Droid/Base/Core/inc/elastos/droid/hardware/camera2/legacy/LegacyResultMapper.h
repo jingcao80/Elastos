@@ -14,6 +14,7 @@ using Elastos::Droid::Hardware::Camera2::Legacy::ILegacyRequest;
 using Elastos::Droid::Hardware::Camera2::Params::IMeteringRectangle;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Core::Object;
+using Elastos::Core::IArrayOf;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -78,10 +79,10 @@ private:
         /* [in] */ ICameraMetadataNative* m,
         /* [in] */ IParameters* p);
 
-    static CARAPI_(AutoPtr<ArrayOf<IMeteringRectangle*> >) GetMeteringRectangles(
+    static CARAPI_(AutoPtr<IArrayOf> /* IMeteringRectangle */) GetMeteringRectangles(
         /* [in] */ IRect* activeArray,
         /* [in] */ IParameterUtilsZoomData* zoomData,
-        /* [in] */ IList* meteringAreaList,
+        /* [in] */ ArrayOf<ICameraArea*>* meteringAreaList,
         /* [in] */ const String& regionName);
 
      /** Map results for control.aeMode, flash.mode, flash.state */

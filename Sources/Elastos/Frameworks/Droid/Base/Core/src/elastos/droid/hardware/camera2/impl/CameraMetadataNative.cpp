@@ -122,7 +122,7 @@ namespace Camera2 {
 namespace Impl {
 
 const String TAG("CameraMetadataNative");
-const Boolean VERBOSE = TRUE;
+const Boolean VERBOSE = FALSE;
 
 //==============================================================================
 // GetCommand
@@ -1158,12 +1158,15 @@ Boolean CameraMetadataNative::SetFaces(
 
     AutoPtr<ArrayOf<IRect*> > faceRectangles = ArrayOf<IRect*>::Alloc(numFaces);
     AutoPtr<ArrayOf<Byte> > faceScores = ArrayOf<Byte>::Alloc(numFaces);
-    AutoPtr<ArrayOf<Int32> > faceIds;
-    AutoPtr<ArrayOf<Int32> > faceLandmarks;
+    AutoPtr<ArrayOf<Int32> > faceIds, faceLandmarks;
 
     if (fullMode) {
         faceIds = ArrayOf<Int32>::Alloc(numFaces);
         faceLandmarks = ArrayOf<Int32>::Alloc(numFaces * FACE_LANDMARK_SIZE);
+    }
+    else {
+        faceIds = ArrayOf<Int32>::Alloc(0);
+        faceLandmarks = ArrayOf<Int32>::Alloc(0);
     }
 
     for (Int32 i = 0; i < numFaces; i++) {
@@ -1224,10 +1227,10 @@ Boolean CameraMetadataNative::SetFaces(
     AutoPtr<IArrayOf> array = CoreUtils::Convert(faceRectangles.Get());
     Set(CaptureResult::STATISTICS_FACE_RECTANGLES, array);
 
-    AutoPtr<IArrayOf> array2 = CoreUtils::Convert(faceIds);
+    AutoPtr<IArrayOf> array2 = CoreUtils::Convert(faceIds.Get());
     Set(CaptureResult::STATISTICS_FACE_IDS, array2);
 
-    AutoPtr<IArrayOf> array3 = CoreUtils::Convert(faceLandmarks);
+    AutoPtr<IArrayOf> array3 = CoreUtils::Convert(faceLandmarks.Get());
     Set(CaptureResult::STATISTICS_FACE_LANDMARKS, array3);
 
     AutoPtr<IArrayOf> array4 = CoreUtils::ConvertByteArray(faceScores);
@@ -1242,7 +1245,6 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
     Get(CaptureResult::STATISTICS_FACE_DETECT_MODE, (IInterface**)&obj);
     AutoPtr<IInteger32> intObj = IInteger32::Probe(obj);
 
-
     AutoPtr<IInterface> obj2;
     Get(CaptureResult::STATISTICS_FACE_SCORES, (IInterface**)&obj2);
     AutoPtr<IArrayOf> faceScoresArrray = IArrayOf::Probe(obj2);
@@ -1250,7 +1252,6 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
     AutoPtr<IInterface> obj3;
     Get(CaptureResult::STATISTICS_FACE_RECTANGLES, (IInterface**)&obj3);
     AutoPtr<IArrayOf> faceRectanglesArrray = IArrayOf::Probe(obj3);
-
 
     AutoPtr<IInterface> obj4;
     Get(CaptureResult::STATISTICS_FACE_IDS, (IInterface**)&obj4);
@@ -1356,58 +1357,50 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
         for (Int32 i = 0; i < numFaces; i++) {
             AutoPtr<IInterface> tmp;
             faceScoresArrray->Get(i, (IInterface**)&tmp);
-            AutoPtr<IByte> byteObj = IByte::Probe(tmp);
             Byte value;
-            byteObj->GetValue(&value);
+            IByte::Probe(tmp)->GetValue(&value);
 
             AutoPtr<IInterface> tmp2;
             faceIdsArrray->Get(i, (IInterface**)&tmp2);
-            AutoPtr<IInteger32> intObj = IInteger32::Probe(tmp);
             Int32 value2;
-            intObj->GetValue(&value2);
+            IInteger32::Probe(tmp)->GetValue(&value2);
 
             if (value <= IFace::SCORE_MAX && value >= IFace::SCORE_MIN && value2 >= 0) {
                 AutoPtr<IInterface> tmp3;
                 faceLandmarksArrray->Get(i*FACE_LANDMARK_SIZE, (IInterface**)&tmp3);
-                AutoPtr<IInteger32> intObj3 = IInteger32::Probe(tmp3);
                 Int32 value3;
-                intObj3->GetValue(&value3);
+                IInteger32::Probe(tmp3)->GetValue(&value3);
 
                 AutoPtr<IInterface> tmp4;
                 faceLandmarksArrray->Get(i*FACE_LANDMARK_SIZE + 1, (IInterface**)&tmp4);
-                AutoPtr<IInteger32> intObj4 = IInteger32::Probe(tmp4);
                 Int32 value4;
-                intObj4->GetValue(&value4);
+                IInteger32::Probe(tmp4)->GetValue(&value4);
 
                 AutoPtr<IPoint> leftEye;
                 CPoint::New(value3, value4, (IPoint**)&leftEye);
 
                 AutoPtr<IInterface> tmp5;
                 faceLandmarksArrray->Get(i*FACE_LANDMARK_SIZE + 2, (IInterface**)&tmp5);
-                AutoPtr<IInteger32> intObj5 = IInteger32::Probe(tmp5);
                 Int32 value5;
-                intObj5->GetValue(&value5);
+                IInteger32::Probe(tmp5)->GetValue(&value5);
 
                 AutoPtr<IInterface> tmp6;
                 faceLandmarksArrray->Get(i*FACE_LANDMARK_SIZE + 3, (IInterface**)&tmp6);
-                AutoPtr<IInteger32> intObj6 = IInteger32::Probe(tmp6);
                 Int32 value6;
-                intObj6->GetValue(&value6);
+                IInteger32::Probe(tmp6)->GetValue(&value6);
 
                 AutoPtr<IPoint> rightEye;
                 CPoint::New(value5, value6, (IPoint**)&rightEye);
 
                 AutoPtr<IInterface> tmp7;
                 faceLandmarksArrray->Get(i*FACE_LANDMARK_SIZE + 4, (IInterface**)&tmp7);
-                AutoPtr<IInteger32> intObj7 = IInteger32::Probe(tmp7);
                 Int32 value7;
-                intObj7->GetValue(&value7);
+                IInteger32::Probe(tmp7)->GetValue(&value7);
 
                 AutoPtr<IInterface> tmp8;
                 faceLandmarksArrray->Get(i*FACE_LANDMARK_SIZE + 5, (IInterface**)&tmp8);
-                AutoPtr<IInteger32> intObj8 = IInteger32::Probe(tmp8);
                 Int32 value8;
-                intObj8->GetValue(&value8);
+                IInteger32::Probe(tmp8)->GetValue(&value8);
 
                 AutoPtr<IPoint> mouth;
                 CPoint::New(value7, value8, (IPoint**)&mouth);
@@ -1418,20 +1411,21 @@ AutoPtr<ArrayOf<IFace*> > CameraMetadataNative::GetFaces()
                 AutoPtr<IRect> rect = IRect::Probe(tmp9);
 
                 AutoPtr<IFace> face;
-                CFace::New(rect, value, value2,
-                        leftEye, rightEye, mouth, (IFace**)&face);
+                CFace::New(rect, value, value2, leftEye, rightEye, mouth, (IFace**)&face);
 
                 faceList->Add(TO_IINTERFACE(face));
             }
         }
     }
 
-    AutoPtr<ArrayOf<IInterface*> > faces;
-    faceList->ToArray((ArrayOf<IInterface*>**)&faces);
-    AutoPtr<ArrayOf<IFace*> > _faces = ArrayOf<IFace*>::Alloc(faces->GetLength());
-    for (Int32 i = 0; i < faces->GetLength(); i++) {
-        AutoPtr<IFace> res = IFace::Probe((*faces)[i]);
-        _faces->Set(i, res);
+    Int32 size;
+    faceList->GetSize(&size);
+
+    AutoPtr<ArrayOf<IFace*> > _faces = ArrayOf<IFace*>::Alloc(size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        faceList->Get(i, (IInterface**)&obj);
+        _faces->Set(i, IFace::Probe(obj));
     }
 
     return _faces;
@@ -1451,13 +1445,10 @@ AutoPtr<ArrayOf<IRect*> > CameraMetadataNative::GetFaceRectangles()
         AutoPtr<IInterface> tmp;
         faceRectangles->Get(i, (IInterface**)&tmp);
         AutoPtr<IRect> rect = IRect::Probe(tmp);
-        Int32 left;
+        Int32 left, top, right, bottom;
         rect->GetLeft(&left);
-        Int32 top;
         rect->GetTop(&top);
-        Int32 right;
         rect->GetRight(&right);
-        Int32 bottom;
         rect->GetBottom(&bottom);
 
         AutoPtr<IRect> res;
@@ -1489,13 +1480,11 @@ AutoPtr<ILensShadingMap> CameraMetadataNative::GetLensShadingMap()
     Int32 length;
     array->GetLength(&length);
     AutoPtr<ArrayOf<Float> > lsmArray = ArrayOf<Float>::Alloc(length);
-    for (Int32 i = 0; i < length; ++i)
-    {
+    for (Int32 i = 0; i < length; ++i) {
         AutoPtr<IInterface> tmp;
         array->Get(i, (IInterface**)&tmp);
-        AutoPtr<IFloat> fObj = IFloat::Probe(tmp);
         Float value;
-        fObj->GetValue(&value);
+        IFloat::Probe(tmp)->GetValue(&value);
         (*lsmArray)[i] = value;
     }
 
@@ -2049,6 +2038,7 @@ AutoPtr<IMarshaler> CameraMetadataNative::GetMarshalerForKey(
 {
     AutoPtr<ITypeReference> ref;
     key->GetTypeReference((ITypeReference**)&ref);
+    assert(ref != NULL);
     Int32 tag, type;
     key->GetTag(&tag);
     GetNativeType(tag, &type);

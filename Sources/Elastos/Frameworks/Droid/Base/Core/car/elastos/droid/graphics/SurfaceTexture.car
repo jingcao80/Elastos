@@ -234,7 +234,10 @@ module
         UpdateTexImage();
 
         GetSurfaceTexture(
-            [out] Int32* texture);
+            [out] Int64* texture);
+
+        GetProducer(
+            [out] Int64* producer);
     }
 
     } // namespace Graphics

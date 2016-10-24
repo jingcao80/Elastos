@@ -363,7 +363,7 @@ CameraCaptureSessionImpl::MyCaptureCallback::OnCaptureSequenceAborted(
 // CameraCaptureSessionImpl
 //==============================================================================================
 const String CameraCaptureSessionImpl::TAG("CameraCaptureSession");
-const Boolean CameraCaptureSessionImpl::VERBOSE = TRUE;//Log.isLoggable(TAG, Log.VERBOSE);
+const Boolean CameraCaptureSessionImpl::VERBOSE = FALSE;//Log.isLoggable(TAG, Log.VERBOSE);
 
 CAR_INTERFACE_IMPL(CameraCaptureSessionImpl, CameraCaptureSession, ICameraCaptureSessionImpl)
 
@@ -421,8 +421,6 @@ ECode CameraCaptureSessionImpl::constructor(
     CameraDeviceImpl::CheckHandler(stateHandler, (IHandler**)&mStateHandler);
     CreateUserStateCallbackProxy(mStateHandler, incallback,
         (ICameraCaptureSessionStateCallback**)&mStateCallback);
-
-    Logger::I(TAG, " >> %s, mStateCallback: %s", __FUNCTION__, TO_CSTR(mStateCallback));
     assert(mStateCallback != NULL);
 
     FAIL_RETURN(Preconditions::CheckNotNull(deviceStateHandler, String("deviceStateHandler must not be null")))

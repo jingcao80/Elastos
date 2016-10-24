@@ -231,7 +231,7 @@ private:
      */
     static CARAPI_(String) ConvertAfModeToLegacy(
         /* [in] */ Int32 mode,
-        /* [in] */ IList* supportedFocusModes);
+        /* [in] */ ArrayOf<String>* supportedFocusModes);
 
 protected:
     friend class LegacyResultMapper;

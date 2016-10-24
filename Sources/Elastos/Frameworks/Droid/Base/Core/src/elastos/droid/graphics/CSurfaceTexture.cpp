@@ -182,9 +182,18 @@ void CSurfaceTexture::PostEventFromNative(
 }
 
 ECode CSurfaceTexture::GetSurfaceTexture(
-    /* [out] */ Int32* texture)
+    /* [out] */ Int64* texture)
 {
+    VALIDATE_NOT_NULL(texture)
     *texture = mSurfaceTexture;
+    return NOERROR;
+}
+
+ECode CSurfaceTexture::GetProducer(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mProducer;
     return NOERROR;
 }
 

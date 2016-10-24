@@ -260,7 +260,7 @@ ECode CameraManager::CameraServiceWrapper::GetLegacyParameters(
             array->Set(0, str);
             *parameters = array;
             REFCOUNT_ADD(*parameters)
-            Logger::I(TAG, " >> GetLegacyParameters for Camera %d: \n%s", cameraId, str.string());
+            // Logger::I(TAG, " >> GetLegacyParameters for Camera %d: \n%s", cameraId, str.string());
             return NOERROR;
         }
     }
@@ -280,7 +280,7 @@ ECode CameraManager::CameraServiceWrapper::SupportsCameraApi(
 
     if (mCameraService.get() != NULL) {
         *result = mCameraService->supportsCameraApi(cameraId, apiVersion);
-        Logger::I(TAG, " >> camera %d SupportsCameraApi %d, result: %d", cameraId, apiVersion, *result);
+        // Logger::I(TAG, " >> camera %d SupportsCameraApi %d, result: %d", cameraId, apiVersion, *result);
         return NOERROR;
     }
 
@@ -530,7 +530,7 @@ ECode CameraManager::CameraServiceListener::ToString(
 }
 
 const String CameraManager::TAG("CameraManager");
-const Boolean CameraManager::DEBUG = TRUE;
+const Boolean CameraManager::DEBUG = FALSE;
 
 const String CameraManager::CAMERA_SERVICE_BINDER_NAME("media.camera");
 const Int32 CameraManager::USE_CALLING_UID = -1;
@@ -718,14 +718,11 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
     VALIDATE_NOT_NULL(_device);
     *_device = NULL;
 
-    Logger::I(TAG, " >> OpenCameraDeviceUserAsync: %s, callback: %s", cameraId.string(), TO_CSTR(ccallback));
-    Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
     AutoPtr<ICameraCharacteristics> characteristics;
     GetCameraCharacteristics(cameraId, (ICameraCharacteristics**)&characteristics);
     AutoPtr<ICameraDevice> device;
     //try {
 
-    Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
     {
         AutoLock syncLock(mLock);
 
@@ -743,7 +740,7 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
         SupportsCamera2ApiLocked(cameraId, &result);
 
         if (result) {
-            Logger::I(TAG, "Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices.");
+            // Logger::I(TAG, "Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices.");
             // Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices
             AutoPtr<IICameraService> cameraService;
             GetCameraServiceLocked((IICameraService**)&cameraService);
@@ -762,7 +759,7 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
         }
         else {
             // Use legacy camera implementation for HAL1 devices
-            Logger::I(TAG, "Using legacy camera HAL.");
+            // Logger::I(TAG, "Using legacy camera HAL.");
             AutoPtr<ICameraDeviceUserShim> shim;
             CameraDeviceUserShim::ConnectBinderShim(callbacks, id, (ICameraDeviceUserShim**)&shim);
             cameraUser = IICameraDeviceUser::Probe(shim);
@@ -803,9 +800,7 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
         // TODO: factor out callback to be non-nested, then move setter to constructor
         // For now, calling setRemoteDevice will fire initial
         // onOpened/onUnconfigured callbacks.
-    Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
         FAIL_RETURN(deviceImpl->SetRemoteDevice(cameraUser))
-    Logger::I(TAG, "%s, line: %d", __FUNCTION__, __LINE__);
         device = ICameraDevice::Probe(deviceImpl);
     }
 
@@ -818,7 +813,7 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
     *_device = device;
     REFCOUNT_ADD(*_device);
 
-    Logger::I(TAG, " << OpenCameraDeviceUserAsync: %s, device: %s", cameraId.string(), TO_CSTR(device));
+    // Logger::I(TAG, " << OpenCameraDeviceUserAsync: %s, device: %s", cameraId.string(), TO_CSTR(device));
     return NOERROR;
 }
 

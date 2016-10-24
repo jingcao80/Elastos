@@ -110,15 +110,13 @@ public:
 private:
     template<typename T1, typename T2>
     ECO_LOCAL static CARAPI_(AutoPtr<IArrayOf>) ConvertImpl(
-        /* [in] */ ArrayOf<T1>* arr)
+        /* [in] */ ArrayOf<T1>* arr,
+        /* [in] */ const InterfaceID& itfc)
     {
         if (arr) {
             Int32 length = arr->GetLength();
-            AutoPtr<T2> obj = Convert((*arr)[0]);
-            InterfaceID iid;
-            obj->GetInterfaceID(obj.Get(), &iid);
             AutoPtr<IArrayOf> arrObj;
-            CArrayOf::New(iid, length, (IArrayOf**)&arrObj);
+            CArrayOf::New(itfc, length, (IArrayOf**)&arrObj);
             for (Int32 i = 0; i < length; ++i) {
                 AutoPtr<T2> item = Convert((*arr)[i]);
                 arrObj->Set(i, item.Get());

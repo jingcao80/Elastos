@@ -184,23 +184,29 @@ CameraDeviceImpl::CaptureCallbackHolder::CaptureCallbackHolder()
 {
 }
 
+CameraDeviceImpl::CaptureCallbackHolder::~CaptureCallbackHolder()
+{
+    Logger::I("CameraDeviceImpl", " >> %p destory", this);
+}
+
 ECode CameraDeviceImpl::CaptureCallbackHolder::constructor(
-    /* [in] */ ICameraDeviceImplCaptureCallback* _callback,
+    /* [in] */ ICameraDeviceImplCaptureCallback* callback,
     /* [in] */ IList* requestList,
     /* [in] */ IHandler* handler,
     /* [in] */ Boolean repeating)
 {
-    if (_callback == NULL || handler == NULL) {
+    if (callback == NULL || handler == NULL) {
         // throw new UnsupportedOperationException(
         //     "Must have a valid handler and a valid callback");
         Logger::E("CameraDeviceImpl::CaptureCallbackHolder::", "Must have a "
                 "valid handler and a valid callback");
-        //return E_UNSUPPORTED_OPERATION_EXCEPTION;
+        return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     mRepeating = repeating;
     mHandler = handler;
     CArrayList::New(ICollection::Probe(requestList), (IList**)&mRequestList);
-    mCallback = _callback;
+    mCallback = callback;
+    Logger::I("CameraDeviceImpl", " >> %p Create CaptureCallbackHolder: %s", this, TO_CSTR(mCallback));
     return NOERROR;
 }
 
@@ -214,12 +220,14 @@ ECode CameraDeviceImpl::CaptureCallbackHolder::IsRepeating(
 }
 
 ECode CameraDeviceImpl::CaptureCallbackHolder::GetCallback(
-    /* [out] */ ICameraDeviceImplCaptureCallback** _callback)
+    /* [out] */ ICameraDeviceImplCaptureCallback** callback)
 {
-    VALIDATE_NOT_NULL(_callback);
+    VALIDATE_NOT_NULL(callback);
 
-    *_callback = mCallback;
-    REFCOUNT_ADD(*_callback);
+    Logger::I("CameraDeviceImpl", " %p >> Get CaptureCallbackHolder", this);
+    Logger::I("CameraDeviceImpl", " %p >> Get CaptureCallbackHolder: %s", this, TO_CSTR(mCallback));
+    *callback = mCallback;
+    REFCOUNT_ADD(*callback);
     return NOERROR;
 }
 
@@ -233,16 +241,15 @@ ECode CameraDeviceImpl::CaptureCallbackHolder::GetRequest(
     Int32 size;
     mRequestList->GetSize(&size);
     if (subsequenceId >= size) {
-        Logger::E("CameraDeviceImpl::CaptureCallbackHolder::", "Requested subsequenceId %d is"
-                "larger than request list size %d.", subsequenceId, size);
+        Logger::E("CameraDeviceImpl::CaptureCallbackHolder::",
+            "Requested subsequenceId %d is larger than request list size %d.", subsequenceId, size);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else {
         if (subsequenceId < 0) {
-            Logger::E("CameraDeviceImpl::CaptureCallbackHolder::", "Requested"
-                    "subsequenceId %d is negative", subsequenceId);
+            Logger::E("CameraDeviceImpl::CaptureCallbackHolder::",
+                "Requested subsequenceId %d is negative", subsequenceId);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
-
         }
         else {
             AutoPtr<IInterface> obj;
@@ -610,7 +617,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnResultReceived(
                     partialResults, (ITotalCaptureResult**)&resultAsCapture);
 
             // Final capture result
-            resultDispatch = new OnResultReceivedRunnable2(mHost, holder, request, resultAsCapture);
+            resultDispatch = new FinalCaptureResultRunnable(mHost, holder, request, resultAsCapture);
             finalResult = ICaptureResult::Probe(resultAsCapture);
         }
 
@@ -708,7 +715,6 @@ CameraDeviceImpl::CallOnOpeneRunnable::CallOnOpeneRunnable(
 
 ECode CameraDeviceImpl::CallOnOpeneRunnable::Run()
 {
-    Logger::I(mHost->TAG, " >> CallOnOpeneRunnable: %s", TO_CSTR(mHost->mRemoteDevice));
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     {
         AutoLock syncLock(mHost->mInterfaceLock);
@@ -733,7 +739,6 @@ CameraDeviceImpl::CallOnUnconfiguredRunnable::CallOnUnconfiguredRunnable(
 
 ECode CameraDeviceImpl::CallOnUnconfiguredRunnable::Run()
 {
-    Logger::I(mHost->TAG, " >> CallOnUnconfiguredRunnable: %s", TO_CSTR(mHost->mRemoteDevice));
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     {
         AutoLock syncLock(mHost->mInterfaceLock);
@@ -915,6 +920,7 @@ CameraDeviceImpl::ResultDispatchRunnable::ResultDispatchRunnable(
 
 ECode CameraDeviceImpl::ResultDispatchRunnable::Run()
 {
+    ECode ec = NOERROR;
     if (!mHost->IsClosed()) {
         if (mHost->DEBUG) {
             Logger::D(mHost->TAG,
@@ -926,11 +932,13 @@ ECode CameraDeviceImpl::ResultDispatchRunnable::Run()
             Logger::E(mHost->TAG, "%d cannot be cast to int", mLastFrameNumber);
             return E_ASSERTION_ERROR;
         }
-        AutoPtr<ICameraDeviceImplCaptureCallback> _callback;
-        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&_callback);
-        return _callback->OnCaptureSequenceAborted(mHost, mRequestId);
+        AutoPtr<ICameraDeviceImplCaptureCallback> callback;
+        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
+        ec = callback->OnCaptureSequenceAborted(mHost, mRequestId);
     }
-    return NOERROR;
+
+    mHolder = NULL;
+    return ec;
 }
 
 //==============================================================================================
@@ -950,6 +958,7 @@ CameraDeviceImpl::ResultDispatchRunnable2::ResultDispatchRunnable2(
 
 ECode CameraDeviceImpl::ResultDispatchRunnable2::Run()
 {
+    ECode ec = NOERROR;
     if (!mHost->IsClosed()){
         if (mHost->DEBUG) {
             Logger::D(mHost->TAG, "fire sequence complete for request %d",mRequestId);
@@ -958,16 +967,16 @@ ECode CameraDeviceImpl::ResultDispatchRunnable2::Run()
         Int64 lastFrameNumber = mKeyValue;
         if (lastFrameNumber < Elastos::Core::Math::INT32_MIN_VALUE
                 || lastFrameNumber > Elastos::Core::Math::INT32_MAX_VALUE) {
-            // throw new AssertionError(lastFrameNumber
-            //         + " cannot be cast to int");
             Logger::E(mHost->TAG, "%d cannot be cast to int", lastFrameNumber);
             return E_ASSERTION_ERROR;
         }
-        AutoPtr<ICameraDeviceImplCaptureCallback> _callback;
-        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&_callback);
-        return _callback->OnCaptureSequenceCompleted(mHost, mRequestId, lastFrameNumber);
+        AutoPtr<ICameraDeviceImplCaptureCallback> callback;
+        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
+        ec = callback->OnCaptureSequenceCompleted(mHost, mRequestId, lastFrameNumber);
     }
-    return NOERROR;
+
+    mHolder = NULL;
+    return ec;
 }
 
 //==============================================================================================
@@ -1009,16 +1018,16 @@ CameraDeviceImpl::OnCaptureStartedRunnable::OnCaptureStartedRunnable(
 ECode CameraDeviceImpl::OnCaptureStartedRunnable::Run()
 {
     if (!mHost->IsClosed()) {
-        AutoPtr<ICameraDeviceImplCaptureCallback> _callback;
-        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&_callback);
+        AutoPtr<ICameraDeviceImplCaptureCallback> callback;
+        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
 
         Int32 id;
         mResultExtras->GetSubsequenceId(&id);
         AutoPtr<ICaptureRequest> request;
         mHolder->GetRequest(id, (ICaptureRequest**)&request);
-        return _callback->OnCaptureStarted(mHost, request,
-            mTimestamp, mFrameNumber);
+        callback->OnCaptureStarted(mHost, request, mTimestamp, mFrameNumber);
     }
+    mHolder = NULL;
     return NOERROR;
 }
 
@@ -1040,17 +1049,18 @@ CameraDeviceImpl::OnResultReceivedRunnable::OnResultReceivedRunnable(
 ECode CameraDeviceImpl::OnResultReceivedRunnable::Run()
 {
     if (!mHost->IsClosed()){
-        AutoPtr<ICameraDeviceImplCaptureCallback> _callback;
-        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&_callback);
-        return _callback->OnCaptureProgressed(mHost, mRequest, mResult);
+        AutoPtr<ICameraDeviceImplCaptureCallback> callback;
+        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
+        callback->OnCaptureProgressed(mHost, mRequest, mResult);
     }
+    mHolder = NULL;
     return NOERROR;
 }
 
 //==============================================================================================
-// CameraDeviceImpl::OnResultReceivedRunnable2
+// CameraDeviceImpl::FinalCaptureResultRunnable
 //==============================================================================================
-CameraDeviceImpl::OnResultReceivedRunnable2::OnResultReceivedRunnable2(
+CameraDeviceImpl::FinalCaptureResultRunnable::FinalCaptureResultRunnable(
     /* [in] */ CameraDeviceImpl* host,
     /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder,
     /* [in] */ ICaptureRequest* request,
@@ -1062,13 +1072,14 @@ CameraDeviceImpl::OnResultReceivedRunnable2::OnResultReceivedRunnable2(
 {
 }
 
-ECode CameraDeviceImpl::OnResultReceivedRunnable2::Run()
+ECode CameraDeviceImpl::FinalCaptureResultRunnable::Run()
 {
     if (!mHost->IsClosed()){
-        AutoPtr<ICameraDeviceImplCaptureCallback> _callback;
-        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&_callback);
-        return _callback->OnCaptureCompleted(mHost, mRequest, mResult);
+        AutoPtr<ICameraDeviceImplCaptureCallback> callback;
+        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
+        callback->OnCaptureCompleted(mHost, mRequest, mResult);
     }
+    mHolder = NULL;
     return NOERROR;
 }
 
@@ -1090,10 +1101,11 @@ CameraDeviceImpl::OnCaptureErrorLockedRunnable::OnCaptureErrorLockedRunnable(
 ECode CameraDeviceImpl::OnCaptureErrorLockedRunnable::Run()
 {
     if (!mHost->IsClosed()){
-        AutoPtr<ICameraDeviceImplCaptureCallback> _callback;
-        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&_callback);
-        return _callback->OnCaptureFailed(mHost, mRequest, mFailure);
+        AutoPtr<ICameraDeviceImplCaptureCallback> callback;
+        mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
+        callback->OnCaptureFailed(mHost, mRequest, mFailure);
     }
+    mHolder = NULL;
     return NOERROR;
 }
 
@@ -1119,7 +1131,6 @@ CameraDeviceImpl::CameraDeviceImpl()
 
 CameraDeviceImpl::~CameraDeviceImpl()
 {
-    Logger::I(TAG, " >> Destroy CameraDeviceImpl");
     // Debug::DumpBacktrace();
     //try {
     Close();
@@ -1131,11 +1142,11 @@ CameraDeviceImpl::~CameraDeviceImpl()
 
 ECode CameraDeviceImpl::constructor(
     /* [in] */ const String& cameraId,
-    /* [in] */ ICameraDeviceStateCallback* _callback,
+    /* [in] */ ICameraDeviceStateCallback* callback,
     /* [in] */ IHandler* handler,
     /* [in] */ ICameraCharacteristics* characteristics)
 {
-    if (cameraId == NULL || _callback == NULL || handler == NULL || characteristics == NULL) {
+    if (cameraId == NULL || callback == NULL || handler == NULL || characteristics == NULL) {
         Logger::E("CameraDeviceImpl", "Null argument given");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1156,7 +1167,7 @@ ECode CameraDeviceImpl::constructor(
     mCallOnDisconnected = new CallOnDisconnectedRunnable(this);
 
     mCameraId = cameraId;
-    mDeviceCallback = _callback;
+    mDeviceCallback = callback;
     mDeviceHandler = handler;
     mCharacteristics = characteristics;
 
@@ -1423,7 +1434,7 @@ error:
 
 ECode CameraDeviceImpl::CreateCaptureSession(
     /* [in] */ IList* outputs,
-    /* [in] */ ICameraCaptureSessionStateCallback* _callback,
+    /* [in] */ ICameraCaptureSessionStateCallback* callback,
     /* [in] */ IHandler* handler)
 {
     {    AutoLock syncLock(mInterfaceLock);
@@ -1457,7 +1468,7 @@ ECode CameraDeviceImpl::CreateCaptureSession(
         // Fire onConfigured if configureOutputs succeeded, fire onConfigureFailed otherwise.
         AutoPtr<ICameraCaptureSessionImpl> newSession;
         CCameraCaptureSessionImpl::New(mNextSessionId++,
-            outputs, _callback, handler, this, mDeviceHandler,
+            outputs, callback, handler, this, mDeviceHandler,
             configureSuccess, (ICameraCaptureSessionImpl**)&newSession);
 
         // TODO: wait until current session closes, then create the new session
@@ -1630,7 +1641,7 @@ ECode CameraDeviceImpl::CheckEarlyTriggerSequenceComplete(
 
 ECode CameraDeviceImpl::SubmitCaptureRequest(
     /* [in] */ IList* requestList,
-    /* [in] */ ICameraDeviceImplCaptureCallback* _callback,
+    /* [in] */ ICameraDeviceImplCaptureCallback* callback,
     /* [in] */ IHandler* handler,
     /* [in] */ Boolean repeating,
     /* [out] */ Int32* result)
@@ -1641,7 +1652,7 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
     // Need a valid handler, or current thread needs to have a looper, if
     // callback is valid
     AutoPtr<IHandler> newHandler;
-    FAIL_RETURN(CheckHandler(handler, _callback, (IHandler**)&newHandler))
+    FAIL_RETURN(CheckHandler(handler, callback, (IHandler**)&newHandler))
 
     // Make sure that there all requests have at least 1 surface; all surfaces are non-null
     Int32 size;
@@ -1701,10 +1712,10 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
         }
         //}
 
-        if (_callback != NULL) {
+        if (callback != NULL) {
             AutoPtr<ICameraDeviceImplCaptureCallbackHolder> holder;
-            CCameraDeviceImplCaptureCallbackHolder::New(_callback,
-                    requestList, newHandler, repeating, (ICameraDeviceImplCaptureCallbackHolder**)&holder);
+            CCameraDeviceImplCaptureCallbackHolder::New(callback,
+                requestList, newHandler, repeating, (ICameraDeviceImplCaptureCallbackHolder**)&holder);
             mCaptureCallbackMap->Put(requestId, TO_IINTERFACE(holder));
         }
         else {
@@ -1975,11 +1986,8 @@ ECode CameraDeviceImpl::CheckAndFireSequenceComplete()
                 if (holder != NULL) {
                     mCaptureCallbackMap->RemoveAt(index);
                     if (DEBUG) {
-                        Logger::V(TAG,
-                                "remove holder for requestId %d, "
-                                "because lastFrame %d is <= %d",
-                                requestId, keyValue,
-                                completedFrameNumber);
+                        Logger::V(TAG, "remove holder for requestId %d, because lastFrame %d is <= %d",
+                            requestId, keyValue, completedFrameNumber);
                     }
                 }
             }
@@ -2022,12 +2030,12 @@ ECode CameraDeviceImpl::CheckHandler(
 
 ECode CameraDeviceImpl::CheckHandler(
     /* [in] */ IHandler* handler,
-    /* [in] */ IInterface* _callback,
+    /* [in] */ IInterface* callback,
     /* [out] */ IHandler** result)
 {
     VALIDATE_NOT_NULL(result)
 
-    if (_callback != NULL) {
+    if (callback != NULL) {
         return CheckHandler(handler, result);
     }
     *result = handler;

@@ -52,36 +52,14 @@ ECode MethodNameInvoker::GetMethodInfo(
     mMethods->Get(csq.Get(), (IInterface**)&obj);
     AutoPtr<IMethodInfo> targetMethod = IMethodInfo::Probe(obj);
     if (targetMethod == NULL) {
-        // mTargetClass->GetMethodInfo(methodName, signature, (IMethodInfo**)&targetMethod);
-
-        String className;
-        mTargetClass->GetName(&className);
-
-        String name;
-        Int32 methodCount, paramCount;
-        mTargetClass->GetMethodCount(&methodCount);
-        AutoPtr<ArrayOf<IMethodInfo*> > methodInfos = ArrayOf<IMethodInfo*>::Alloc(methodCount);
-        mTargetClass->GetAllMethodInfos(methodInfos);
-        for (Int32 i = 0; i < methodInfos->GetLength(); i++) {
-            AutoPtr<IMethodInfo> method = (*methodInfos)[i];
-
-            // TODO future: match types of params if possible
-            method->GetName(&name);
-            method->GetParamCount(&paramCount);
-            Logger::I(TAG, " %s method %d : [%s]", className.string(), i, name.string());
-            if (name.Equals(methodName)) {
-                targetMethod = method;
-                mMethods->Put(csq, targetMethod);
-                break;
-            }
-        }
+        mTargetClass->GetMethodInfo(methodName, signature, (IMethodInfo**)&targetMethod);
 
         if (targetMethod == NULL) {
-            String ns;
+            String name, ns;
             mTargetClass->GetName(&name);
             mTargetClass->GetNamespace(&ns);
-            Logger::E(TAG, "Method %s does not exist on class %s.%s",
-                methodName.string(), ns.string(), name.string());
+            Logger::E(TAG, "Method [%s, %s] does not exist on class %s.%s",
+                methodName.string(), signature.string(), ns.string(), name.string());
             assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }

@@ -15,15 +15,15 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Utils::ListUtils;
 using Elastos::Droid::Hardware::Camera2::Utils::ParamsUtils;
 using Elastos::Droid::Hardware::Camera2::Params::IFace;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IFace;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Utility::ISize;
+using Elastos::Core::AutoLock;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::IArrayList;
@@ -62,8 +62,8 @@ ECode LegacyFaceDetectMapper::MyListener::OnFaceDetection(
         else if (lengthFaces > 0) {
             // stopFaceDetectMode could race against the requests, print a debug log
             Logger::D(TAG,
-                    "onFaceDetection - Ignored some incoming faces since"
-                    "face detection was disabled");
+                "onFaceDetection - Ignored some incoming faces since"
+                "face detection was disabled");
         }
     }
 
@@ -95,12 +95,22 @@ ECode LegacyFaceDetectMapper::constructor(
             String("characteristics must not be null")))
     mCamera = camera;
 
+    mFaceDetectSupported = FALSE;
+
     AutoPtr<IInterface> obj;
-    characteristics->Get(CameraCharacteristics::STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES,
-            (IInterface**)&obj);
-    AutoPtr<IArrayList> list = IArrayList::Probe(obj);
-    AutoPtr<IInteger32> intObj = CoreUtils::Convert(ICameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE);
-    mFaceDetectSupported = ArrayUtils::Contains(list, TO_IINTERFACE(intObj));
+    characteristics->Get(CameraCharacteristics::STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES, (IInterface**)&obj);
+    AutoPtr<IArrayOf> list = IArrayOf::Probe(obj);
+    Int32 length, value;
+    list->GetLength(&length);
+    for (Int32 i = 0; i < length; ++i) {
+        AutoPtr<IInterface> obj;
+        list->Get(i, (IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&value);
+        if (value == ICameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE) {
+            mFaceDetectSupported = TRUE;
+            break;
+        }
+    }
 
     if (!mFaceDetectSupported) {
         return NOERROR;
@@ -266,19 +276,23 @@ ECode LegacyFaceDetectMapper::MapResultFaces(
         Logger::V(TAG, "mapResultFaces - changed to %s", str.string());
     }
 
-    AutoPtr<IInterface> res;
-
-    AutoPtr<ArrayOf<IInterface*> > array;
-    convertedFaces->ToArray((ArrayOf<IInterface*>**)&array);
-    AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(array.Get());
-    result->Set(CaptureResult::STATISTICS_FACES, TO_IINTERFACE(arrayObj));
-    AutoPtr<IInteger32> objMode = CoreUtils::Convert(fdMode);
-    result->Set(CaptureResult::STATISTICS_FACE_DETECT_MODE, TO_IINTERFACE(objMode));
+    Int32 size;
+    convertedFaces->GetSize(&size);
+    AutoPtr<IArrayOf> array;
+    CArrayOf::New(EIID_IFace, size, (IArrayOf**)&array);
+    for (Int32  i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        convertedFaces->Get(i, (IInterface**)&obj);
+        array->Set(i, obj);
+    }
+    result->Set(CaptureResult::STATISTICS_FACES, array);
+    AutoPtr<IInteger32> intObj = CoreUtils::Convert(fdMode);
+    result->Set(CaptureResult::STATISTICS_FACE_DETECT_MODE, intObj);
 
     // Override scene mode with FACE_PRIORITY if the request was using FACE_PRIORITY
     if (fdScenePriority) {
-        AutoPtr<IInteger32> intObj = CoreUtils::Convert(ICameraMetadata::CONTROL_SCENE_MODE_FACE_PRIORITY);
-        result->Set(CaptureResult::CONTROL_SCENE_MODE, TO_IINTERFACE(intObj));
+        intObj = CoreUtils::Convert(ICameraMetadata::CONTROL_SCENE_MODE_FACE_PRIORITY);
+        result->Set(CaptureResult::CONTROL_SCENE_MODE, intObj);
     }
     return NOERROR;
 }

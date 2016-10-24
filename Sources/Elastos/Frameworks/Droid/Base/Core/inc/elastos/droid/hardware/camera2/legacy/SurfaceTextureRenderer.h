@@ -50,8 +50,6 @@ public:
 
     virtual ~SurfaceTextureRenderer() {}
 
-    CARAPI constructor();
-
     CARAPI constructor(
         /* [in] */ Int32 facing);
 

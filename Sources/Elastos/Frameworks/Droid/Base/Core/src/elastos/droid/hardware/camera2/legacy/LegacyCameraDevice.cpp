@@ -18,6 +18,7 @@
 #include <camera/CameraUtils.h>
 #include <camera/CameraMetadata.h>
 #include <gui/Surface.h>
+#include <gui/GLConsumer.h>
 #include <gui/IGraphicBufferProducer.h>
 #include <ui/GraphicBuffer.h>
 #include <system/window.h>
@@ -278,7 +279,7 @@ ECode LegacyCameraDevice::MyListener::OnCaptureResult(
 CAR_INTERFACE_IMPL_2(LegacyCameraDevice, Object, ILegacyCameraDevice, ICloseable)
 
 const String LegacyCameraDevice::DEBUG_PROP("HAL1ShimLogging");
-const Boolean LegacyCameraDevice::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean LegacyCameraDevice::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
 const Int32 LegacyCameraDevice::ILLEGAL_VALUE = -1;
 
 LegacyCameraDevice::LegacyCameraDevice()
@@ -1492,26 +1493,31 @@ Int32 LegacyCameraDevice::NativeSetSurfaceOrientation(
     return android::NO_ERROR;
 }
 
+static android::sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
+    /* [in] */ ISurfaceTexture* st)
+{
+    Int64 stptr, pptr;
+    st->GetSurfaceTexture(&stptr);
+    st->GetProducer(&pptr);
+    android::sp<android::GLConsumer> surfaceTexture((android::GLConsumer*)stptr);
+    android::sp<android::IGraphicBufferProducer> producer((android::IGraphicBufferProducer*)pptr);
+    android::sp<android::Surface> surfaceTextureClient(
+        surfaceTexture != NULL ? new android::Surface(producer) : NULL);
+    return surfaceTextureClient;
+}
+
 static android::sp<ANativeWindow> getNativeWindowFromTexture(
     /* [in] */ ISurfaceTexture* surfaceTexture)
 {
     android::sp<ANativeWindow> anw;
     if (surfaceTexture) {
-        assert(0);
-        // anw = android_SurfaceTexture_getNativeWindow(env, surfaceTexture);
-        // if (env->ExceptionCheck()) {
-        //     return NULL;
-        // }
+        anw = android_SurfaceTexture_getNativeWindow(surfaceTexture);
     }
     else {
-        //jniThrowNullPointerException(env, "surfaceTexture");
         Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: surfaceTexture");
-        //return E_NULL_POINTER_EXCEPTION;
         return NULL;
     }
     if (anw == NULL) {
-        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-        //         "SurfaceTexture had no valid native window.");
         Logger::E("LegacyCameraDevice", "java/lang/IllegalArgumentException"
                 "SurfaceTexture had no valid native window.");
         return NULL;

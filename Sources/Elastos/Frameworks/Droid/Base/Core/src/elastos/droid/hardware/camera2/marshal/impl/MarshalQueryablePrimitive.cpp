@@ -261,6 +261,7 @@ ECode MarshalQueryablePrimitive::IsTypeMappingSupported(
 {
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
+    assert(managedType != NULL);
 
     ClassID cls;
     managedType->GetClassType(&cls);

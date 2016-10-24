@@ -56,11 +56,6 @@ TaskDrainer::~TaskDrainer()
 {
 }
 
-ECode TaskDrainer::constructor()
-{
-    return NOERROR;
-}
-
 ECode TaskDrainer::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ ITaskDrainerDrainListener* listener)

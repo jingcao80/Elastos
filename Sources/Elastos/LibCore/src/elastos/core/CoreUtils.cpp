@@ -154,43 +154,43 @@ AutoPtr<IArrayOf> CoreUtils::ConvertChar32Array(
 AutoPtr<IArrayOf> CoreUtils::Convert(
     /* [in] */ ArrayOf<Boolean>* arr)
 {
-    return ConvertImpl<Boolean, IBoolean>(arr);
+    return ConvertImpl<Boolean, IBoolean>(arr, EIID_IBoolean);
 }
 
 AutoPtr<IArrayOf> CoreUtils::Convert(
     /* [in] */ ArrayOf<Int16>* arr)
 {
-    return ConvertImpl<Int16, IInteger16>(arr);
+    return ConvertImpl<Int16, IInteger16>(arr, EIID_IInteger16);
 }
 
 AutoPtr<IArrayOf> CoreUtils::Convert(
     /* [in] */ ArrayOf<Int32>* arr)
 {
-    return ConvertImpl<Int32, IInteger32>(arr);
+    return ConvertImpl<Int32, IInteger32>(arr, EIID_IInteger32);
 }
 
 AutoPtr<IArrayOf> CoreUtils::Convert(
     /* [in] */ ArrayOf<Int64>* arr)
 {
-    return ConvertImpl<Int64, IInteger64>(arr);
+    return ConvertImpl<Int64, IInteger64>(arr, EIID_IInteger64);
 }
 
 AutoPtr<IArrayOf> CoreUtils::Convert(
     /* [in] */ ArrayOf<Float>* arr)
 {
-    return ConvertImpl<Float, IFloat>(arr);
+    return ConvertImpl<Float, IFloat>(arr, EIID_IFloat);
 }
 
 AutoPtr<IArrayOf> CoreUtils::Convert(
     /* [in] */ ArrayOf<Double>* arr)
 {
-    return ConvertImpl<Double, IDouble>(arr);
+    return ConvertImpl<Double, IDouble>(arr, EIID_IDouble);
 }
 
 AutoPtr<IArrayOf> CoreUtils::Convert(
     /* [in] */ ArrayOf<String>* arr)
 {
-    return ConvertImpl<String, ICharSequence>(arr);
+    return ConvertImpl<String, ICharSequence>(arr, EIID_ICharSequence);
 }
 
 } // namespace Core

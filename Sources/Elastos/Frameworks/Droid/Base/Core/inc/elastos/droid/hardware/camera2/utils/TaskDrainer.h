@@ -42,8 +42,6 @@ public:
 
     virtual ~TaskDrainer();
 
-    CARAPI constructor();
-
     /**
      * Create a new task drainer; {@code onDrained} callbacks will be posted to the listener
      * via the {@code handler}.

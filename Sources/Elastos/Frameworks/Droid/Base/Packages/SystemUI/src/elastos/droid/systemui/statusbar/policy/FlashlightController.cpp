@@ -61,7 +61,6 @@ FlashlightController::CameraListener::CameraListener(
 ECode FlashlightController::CameraListener::OnOpened(
     /* [in] */ ICameraDevice* camera)
 {
-    Logger::I(TAG, " >> CameraListener::OnOpened %s", TO_CSTR(camera));
     mHost->mCameraDevice = camera;
     mHost->PostUpdateFlashlight();
     return NOERROR;
@@ -70,7 +69,6 @@ ECode FlashlightController::CameraListener::OnOpened(
 ECode FlashlightController::CameraListener::OnDisconnected(
     /* [in] */ ICameraDevice* camera)
 {
-    Logger::I(TAG, " >> CameraListener::OnDisconnected %s", TO_CSTR(camera));
     if (mHost->mCameraDevice.Get() == camera) {
         mHost->DispatchOff();
         mHost->Teardown();
@@ -82,7 +80,6 @@ ECode FlashlightController::CameraListener::OnError(
     /* [in] */ ICameraDevice* camera,
     /* [in] */ Int32 error)
 {
-    Logger::E(TAG, "Camera error: camera=%p error=%d", camera, error);
     if (camera == mHost->mCameraDevice.Get() || mHost->mCameraDevice == NULL) {
         mHost->HandleError();
     }
@@ -97,7 +94,6 @@ FlashlightController::SessionListener::SessionListener(
 ECode FlashlightController::SessionListener::OnConfigured(
     /* [in] */ ICameraCaptureSession* session)
 {
-    Logger::I(TAG, " >> SessionListener::OnConfigured %s", TO_CSTR(session));
     mHost->mSession = session;
     mHost->PostUpdateFlashlight();
     return NOERROR;
@@ -106,7 +102,6 @@ ECode FlashlightController::SessionListener::OnConfigured(
 ECode FlashlightController::SessionListener::OnConfigureFailed(
     /* [in] */ ICameraCaptureSession* session)
 {
-    Logger::I(TAG, " >> SessionListener::OnConfigureFailed %s", TO_CSTR(session));
     if (mHost->mSession == NULL || mHost->mSession.Get() == session) {
         mHost->HandleError();
     }
@@ -291,6 +286,7 @@ ECode FlashlightController::StartDevice() /*throws CameraAccessException*/
 
 ECode FlashlightController::StartSession() /*throws CameraAccessException*/
 {
+    mSurfaceTexture = NULL;
     CSurfaceTexture::New(FALSE, (ISurfaceTexture**)&mSurfaceTexture);
     AutoPtr<ISize> size;
     String id;
@@ -300,8 +296,8 @@ ECode FlashlightController::StartSession() /*throws CameraAccessException*/
     Int32 w = 0, h = 0;
     size->GetWidth(&w);
     size->GetHeight(&h);
-    Logger::I(TAG, " >> StartSession: SetDefaultBufferSize(%d, %d)", w, h);
     mSurfaceTexture->SetDefaultBufferSize(w, h);
+    mSurface = NULL;
     CSurface::New(mSurfaceTexture, (ISurface**)&mSurface);
     AutoPtr<IList> outputs;  /*<Surface*/
     CArrayList::New(1, (IList**)&outputs);
@@ -325,7 +321,7 @@ ECode FlashlightController::GetSmallestSize(
     AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
     AutoPtr<IClassInfo> classInfo;
     FAIL_RETURN(cl->LoadClass(String("Elastos.Droid.Graphics.CSurfaceTexture"), (IClassInfo**)&classInfo))
-
+    assert(classInfo != NULL);
     AutoPtr<ArrayOf<ISize*> > outputSizes;
     FAIL_RETURN(IStreamConfigurationMap::Probe(values)->GetOutputSizes(classInfo, (ArrayOf<ISize*>**)&outputSizes))
     if (outputSizes == NULL || outputSizes->GetLength() == 0) {
@@ -404,7 +400,6 @@ ECode FlashlightController::GetCameraId(
 void FlashlightController::UpdateFlashlight(
     /* [in] */ Boolean forceDisable)
 {
-    Logger::I(TAG, " >> UpdateFlashlight: forceDisable: %d", forceDisable);
     ECode ec = NOERROR;
     do {
         Boolean enabled = FALSE;
@@ -433,8 +428,6 @@ void FlashlightController::UpdateFlashlight(
             }
 
             if (mFlashlightRequest == NULL) {
-                Logger::I(TAG, " >> CreateCaptureRequest.");
-
                 AutoPtr<ICaptureRequestBuilder> builder;
                 ec = mCameraDevice->CreateCaptureRequest(
                         ICameraDevice::TEMPLATE_PREVIEW, (ICaptureRequestBuilder**)&builder);
@@ -449,7 +442,6 @@ void FlashlightController::UpdateFlashlight(
                     break;
                 }
 
-                Logger::I(TAG, " >> Capture Request. %s", TO_CSTR(request));
                 Int32 v = 0;
                 ec = mSession->Capture(request, NULL, mHandler, &v);
                 if (FAILED(ec)) {

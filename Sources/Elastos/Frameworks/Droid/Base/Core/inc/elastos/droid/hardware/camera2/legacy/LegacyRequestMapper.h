@@ -3,7 +3,6 @@
 #define __ELASTOS_DROID_HARDWARE_CAMERA2_LEGECY_LEGACYREQUESTMAPPER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/utility/Range.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Hardware::Camera2::Params::IMeteringRectangle;
@@ -11,7 +10,7 @@ using Elastos::Droid::Hardware::Camera2::Legacy::IParameterUtilsZoomData;
 using Elastos::Droid::Hardware::Camera2::Legacy::ILegacyRequest;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Location::ILocation;
-using Elastos::Droid::Utility::Range;
+using Elastos::Droid::Utility::IRange;
 using Elastos::Core::Object;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::IInteger32;
@@ -64,7 +63,7 @@ private:
         /* [in] */ Int32 mode);
 
     static CARAPI_(AutoPtr<ArrayOf<Int32> >) ConvertAeFpsRangeToLegacy(
-        /* [in] */ Range<IInteger32>* fpsRange);
+        /* [in] */ IRange* fpsRange);
 
     static CARAPI_(String) ConvertAwbModeToLegacy(
         /* [in] */ Int32 mode);

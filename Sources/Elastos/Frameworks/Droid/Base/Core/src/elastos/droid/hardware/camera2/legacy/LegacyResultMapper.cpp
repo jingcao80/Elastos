@@ -17,6 +17,7 @@
 using Elastos::Droid::Hardware::Camera2::Utils::ParamsUtils;
 using Elastos::Droid::Hardware::Camera2::Utils::ListUtils;
 using Elastos::Droid::Hardware::Camera2::Params::IMeteringRectangle;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IMeteringRectangle;
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Legacy::LegacyRequestMapper;
@@ -56,10 +57,12 @@ ECode LegacyResultMapper::CachedConvertResultMetadata(
      */
     AutoPtr<IParameters> para;
     legacyRequest->GetParameters((IParameters**)&para);
-    AutoPtr<IParameters> _para;
-    mCachedRequest->GetParameters((IParameters**)&_para);
-    Boolean res;
-    para->Same(_para, &res);
+    Boolean res = FALSE;
+    if (mCachedRequest != NULL) {
+        AutoPtr<IParameters> p;
+        mCachedRequest->GetParameters((IParameters**)&p);
+        para->Same(p, &res);
+    }
     if (mCachedRequest != NULL && res) {
         CCameraMetadataNative::New(mCachedResult, (ICameraMetadataNative**)&result);
         cached = TRUE;
@@ -71,6 +74,7 @@ ECode LegacyResultMapper::CachedConvertResultMetadata(
         // Always cache a *copy* of the metadata result,
         // since api2's client side takes ownership of it after it receives a result
         mCachedRequest = legacyRequest;
+        mCachedResult = NULL;
         CCameraMetadataNative::New(result, (ICameraMetadataNative**)&mCachedResult);
     }
 
@@ -427,14 +431,12 @@ void LegacyResultMapper::MapAe(
             Logger::V(TAG, "mapAe - parameter dump; metering-areas: %s", meteringAreas.string());
         }
 
-        AutoPtr<IList> list;
-        assert(0);
-        // p->GetMeteringAreas((IList**)&list);
-        AutoPtr<ArrayOf<IMeteringRectangle*> > meteringRectArray =
-                GetMeteringRectangles(activeArray, zoomData, list, String("AE"));
+        AutoPtr< ArrayOf<ICameraArea*> > list;
+        p->GetMeteringAreas((ArrayOf<ICameraArea*>**)&list);
+        AutoPtr<IArrayOf> meteringRectArray =
+            GetMeteringRectangles(activeArray, zoomData, list, String("AE"));
 
-        assert(0);
-        //m->Set(CaptureResult::CONTROL_AE_REGIONS, meteringRectArray);
+        m->Set(CaptureResult::CONTROL_AE_REGIONS, meteringRectArray);
     }
     return;
 }
@@ -461,15 +463,12 @@ void LegacyResultMapper::MapAf(
             Logger::V(TAG, "mapAe - parameter dump; focus-areas: %s", focusAreas.string());
         }
 
-        AutoPtr<IList> list;
-        assert(0);
-        //p->GetFocusAreas(&list);
-        AutoPtr<ArrayOf<IMeteringRectangle*> > meteringRectArray =
-                GetMeteringRectangles(activeArray, zoomData, list,
-                String("AF"));
-
-        assert(0);
-        //m->Set(CaptureResult::CONTROL_AF_REGIONS, meteringRectArray);
+        AutoPtr< ArrayOf<ICameraArea*> > list;
+        p->GetFocusAreas((ArrayOf<ICameraArea*>**)&list);
+        AutoPtr<IArrayOf> meteringRectArray =
+            GetMeteringRectangles(activeArray, zoomData, list,
+            String("AF"));
+        m->Set(CaptureResult::CONTROL_AF_REGIONS, meteringRectArray);
     }
     return;
 }
@@ -504,42 +503,35 @@ void LegacyResultMapper::MapAwb(
     return;
 }
 
-AutoPtr<ArrayOf<IMeteringRectangle*> > LegacyResultMapper::GetMeteringRectangles(
+AutoPtr<IArrayOf> LegacyResultMapper::GetMeteringRectangles(
     /* [in] */ IRect* activeArray,
     /* [in] */ IParameterUtilsZoomData* zoomData,
-    /* [in] */ IList* meteringAreaList,
+    /* [in] */ ArrayOf<ICameraArea*>* meteringAreaList,
     /* [in] */ const String& regionName)
 {
-    AutoPtr<IList> meteringRectList;
-    CArrayList::New((IList**)&meteringRectList);
-    if (meteringAreaList != NULL) {
-        Int32 size;
-        meteringAreaList->GetSize(&size);
-        for (Int32 i = 0; i < size; i++) {
-            AutoPtr<IInterface> obj;
-            meteringAreaList->Get(i, (IInterface**)&obj);
-            AutoPtr<ICameraArea> area = ICameraArea::Probe(obj);
+    Int32 size = meteringAreaList != NULL ? meteringAreaList->GetLength() : 0;
+    AutoPtr<IArrayOf> meteringRectList;
+    CArrayOf::New(EIID_IMeteringRectangle, size, (IArrayOf**)&meteringRectList);
 
-            AutoPtr<IParameterUtilsWeightedRectangle> rect;
-            ParameterUtils::ConvertCameraAreaToActiveArrayRectangle(
-                    activeArray, zoomData, area, (IParameterUtilsWeightedRectangle**)&rect);
+    for (Int32 i = 0; i < size; i++) {
+        ICameraArea* area = (*meteringAreaList)[i];
 
-            AutoPtr<IMeteringRectangle> tmp;
-            rect->ToMetering((IMeteringRectangle**)&tmp);
-            meteringRectList->Add(TO_IINTERFACE(tmp));
-        }
+        AutoPtr<IParameterUtilsWeightedRectangle> rect;
+        ParameterUtils::ConvertCameraAreaToActiveArrayRectangle(
+                activeArray, zoomData, area, (IParameterUtilsWeightedRectangle**)&rect);
+
+        AutoPtr<IMeteringRectangle> tmp;
+        rect->ToMetering((IMeteringRectangle**)&tmp);
+        meteringRectList->Set(i, tmp);
     }
+
 
     if (VERBOSE) {
-        String str;
-        ListUtils::ListToString(meteringRectList, &str);
-        Logger::V(TAG,
-                "Metering rectangles for %s: %s", regionName.string(), str.string());
+        Logger::V(TAG, "Metering rectangles for %s: %s",
+            regionName.string(), TO_CSTR(meteringRectList));
     }
 
-    AutoPtr<ArrayOf<IMeteringRectangle*> > tmp;
-    meteringRectList->ToArray((ArrayOf<IInterface*>**)&tmp);
-    return tmp;
+    return meteringRectList;
 }
 
 void LegacyResultMapper::MapAeAndFlashMode(

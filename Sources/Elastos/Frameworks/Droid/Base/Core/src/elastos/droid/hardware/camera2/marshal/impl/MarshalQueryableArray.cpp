@@ -34,7 +34,7 @@ MarshalQueryableArray::MarshalerArray::MarshalerArray(
 {
     Marshaler::constructor(host, typeReference, nativeType);
     typeReference->GetComponent((ITypeReference**)&mComponent);
-
+    assert(mComponent != NULL);
     MarshalRegistry::GetMarshaler(mComponent, mNativeType, (IMarshaler**)&mComponentMarshaler);
 }
 

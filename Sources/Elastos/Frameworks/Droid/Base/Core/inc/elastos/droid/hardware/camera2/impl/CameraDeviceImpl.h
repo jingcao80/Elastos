@@ -163,7 +163,7 @@ public:
 
         CaptureCallbackHolder();
 
-        virtual ~CaptureCallbackHolder() {}
+        virtual ~CaptureCallbackHolder();
 
         CARAPI constructor(
             /* [in] */ ICameraDeviceImplCaptureCallback* _callback,
@@ -441,7 +441,7 @@ private:
         CameraDeviceImpl* mHost;
         Int32 mRequestId;
         Int64 mLastFrameNumber;
-        ICameraDeviceImplCaptureCallbackHolder* mHolder;
+        AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
     };
 
     class ResultDispatchRunnable2
@@ -460,7 +460,7 @@ private:
         CameraDeviceImpl* mHost;
         Int32 mRequestId;
         Int64 mKeyValue;
-        ICameraDeviceImplCaptureCallbackHolder* mHolder;
+        AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
     };
 
     class OnDeviceErrorRunnable
@@ -493,10 +493,10 @@ private:
 
     private:
         CameraDeviceImpl* mHost;
-        ICaptureResultExtras* mResultExtras;
+        AutoPtr<ICaptureResultExtras> mResultExtras;
         Int64 mTimestamp;
         Int64 mFrameNumber;
-        ICameraDeviceImplCaptureCallbackHolder* mHolder;
+        AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
     };
 
     class OnResultReceivedRunnable
@@ -513,16 +513,16 @@ private:
 
     private:
         CameraDeviceImpl* mHost;
-        ICameraDeviceImplCaptureCallbackHolder* mHolder;
-        ICaptureRequest* mRequest;
-        ICaptureResult* mResult;
+        AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
+        AutoPtr<ICaptureRequest> mRequest;
+        AutoPtr<ICaptureResult> mResult;
     };
 
-    class OnResultReceivedRunnable2
+    class FinalCaptureResultRunnable
         : public Runnable
     {
     public:
-        OnResultReceivedRunnable2(
+        FinalCaptureResultRunnable(
             /* [in] */ CameraDeviceImpl* host,
             /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder,
             /* [in] */ ICaptureRequest* request,
@@ -532,9 +532,9 @@ private:
 
     private:
         CameraDeviceImpl* mHost;
-        ICameraDeviceImplCaptureCallbackHolder* mHolder;
-        ICaptureRequest* mRequest;
-        ITotalCaptureResult* mResult;
+        AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
+        AutoPtr<ICaptureRequest> mRequest;
+        AutoPtr<ITotalCaptureResult> mResult;
     };
 
     class OnCaptureErrorLockedRunnable
@@ -551,9 +551,9 @@ private:
 
     private:
         CameraDeviceImpl* mHost;
-        ICameraDeviceImplCaptureCallbackHolder* mHolder;
-        ICaptureRequest* mRequest;
-        ICaptureFailure* mFailure;
+        AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
+        AutoPtr<ICaptureRequest> mRequest;
+        AutoPtr<ICaptureFailure> mFailure;
     };
 
 public:

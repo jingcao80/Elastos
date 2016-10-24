@@ -15,7 +15,7 @@ using Elastos::Utility::ITreeSet;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IArrayDeque;
 using Elastos::Utility::Concurrent::ITimeUnit;
-using Elastos::Utility::Concurrent::Locks::IReentrantLock;
+using Elastos::Utility::Concurrent::Locks::ILock;
 using Elastos::Utility::Concurrent::Locks::ICondition;
 
 namespace Elastos {
@@ -277,7 +277,7 @@ private:
     AutoPtr<IArrayDeque> mPreviewProduceQueue;
     AutoPtr<IArrayList> mCompletedRequests;
 
-    AutoPtr<IReentrantLock> mLock;
+    AutoPtr<ILock> mLock;
     AutoPtr<ICondition> mIsEmpty;
     AutoPtr<ICondition> mPreviewsEmpty;
     AutoPtr<ICondition> mNotFull;

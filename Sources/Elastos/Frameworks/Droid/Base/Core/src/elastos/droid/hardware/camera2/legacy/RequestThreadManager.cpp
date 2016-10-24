@@ -245,7 +245,7 @@ ECode RequestThreadManager::CameraPictureCallback::OnPictureTaken(
             totalSize = (totalSize + 3) & ~0x3; // round up to nearest octonibble
             ec = LegacyCameraDevice::SetNextTimestamp(s, timestamp);
             if (FAILED(ec)) {
-                Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
+                Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %08x", ec);
                 continue;
             }
 
@@ -260,20 +260,20 @@ ECode RequestThreadManager::CameraPictureCallback::OnPictureTaken(
                 ec = LegacyCameraDevice::ProduceFrame(s, data, dimen, dimen,
                         ICameraMetadataNative::NATIVE_JPEG_FORMAT);
                 if (FAILED(ec)) {
-                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
+                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %08x", ec);
                     continue;
                 }
             }
             else {
                 ec = LegacyCameraDevice::SetSurfaceDimens(s, totalSize, /*height*/1);
                 if (FAILED(ec)) {
-                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
+                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %08x", ec);
                     continue;
                 }
                 ec = LegacyCameraDevice::ProduceFrame(s, data, totalSize, /*height*/1,
                         ICameraMetadataNative::NATIVE_JPEG_FORMAT);
                 if (FAILED(ec)) {
-                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %d", ec);
+                    Logger::W(mHost->TAG, "Surface abandoned, dropping frame. %08x", ec);
                     continue;
                 }
             }
@@ -420,7 +420,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 ECode ec = mHost->mCaptureCollector->WaitForEmpty(JPEG_FRAME_TIMEOUT,
                         milliSeconds, &success);
                 if (FAILED(ec)) {
-                    Logger::E(mHost->TAG, "Interrupted while waiting for requests to complete: %d", ec);
+                    Logger::E(mHost->TAG, "Interrupted while waiting for requests to complete: %08x", ec);
                     mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                     break;
@@ -497,7 +497,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
                     AutoPtr<ILegacyRequest> legacyRequest;
                     CLegacyRequest::New(mHost->mCharacteristics,
-                            request, previewSize, mHost->mParams, (ILegacyRequest**)&legacyRequest); // params are copied
+                        request, previewSize, mHost->mParams, (ILegacyRequest**)&legacyRequest); // params are copied
 
 
                     // Parameters are mutated as a side-effect
@@ -515,7 +515,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                         // If setting the parameters failed, report a request error to
                         // the camera client, and skip any further work for this request
                         if (FAILED(ec)) {
-                            Logger::E(mHost->TAG, "Exception while setting camera parameters: %d", ec);
+                            Logger::E(mHost->TAG, "Exception while setting camera parameters: %08x", ec);
                             holder->FailRequest();
                             Boolean result;
                             mHost->mDeviceState->SetCaptureStart(holder, /*timestamp*/0,
@@ -537,7 +537,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 AutoPtr<ITimeUnit> milliSeconds;
                 helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds);
                 ECode ec = mHost->mCaptureCollector->QueueRequest(holder,
-                        mHost->mLastRequest, JPEG_FRAME_TIMEOUT, milliSeconds, &success);
+                    mHost->mLastRequest, JPEG_FRAME_TIMEOUT, milliSeconds, &success);
                 FAIL_GOTO(ec, error);
 
                 if (!success) {
@@ -611,16 +611,20 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
         error:
                 //} catch (IOException e) {
                 if (ec == (ECode)E_IO_EXCEPTION) {
-                    Logger::E(mHost->TAG, "Received device exception: %d", ec);
+                    Logger::E(mHost->TAG, "Received device exception: %08x", ec);
                     mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                     break;
                 }
                 //} catch (InterruptedException e) {
-                if (ec == (ECode)E_INTERRUPTED_EXCEPTION) {
-                    Logger::E(mHost->TAG, "Interrupted during capture: %d", ec);
+                else if (ec == (ECode)E_INTERRUPTED_EXCEPTION) {
+                    Logger::E(mHost->TAG, "Interrupted during capture: %08x", ec);
                     mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
+                    break;
+                }
+                else if (FAILED(ec)) {
+                    Logger::E(mHost->TAG, "error during capture: %08x", ec);
                     break;
                 }
                 //}
@@ -633,7 +637,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                     ECode ec = mHost->mCamera->GetParameters((IParameters**)&(mHost->mParams));
                     //} catch (RuntimeException e) {
                     if (FAILED(ec)) {
-                        Logger::E(mHost->TAG, "Received device exception: %d", ec);
+                        Logger::E(mHost->TAG, "Received device exception: %08x", ec);
                         mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                         break;
@@ -661,7 +665,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 }
                 //} catch (InterruptedException e) {
                 if (FAILED(ec)) {
-                    Logger::E(mHost->TAG, "Interrupted waiting for request completion: %d", ec);
+                    Logger::E(mHost->TAG, "Interrupted waiting for request completion: %08x", ec);
                     mHost->mDeviceState->SetError(
                             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
                     break;
@@ -711,7 +715,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds);
             ECode ec = mHost->mCaptureCollector->WaitForEmpty(JPEG_FRAME_TIMEOUT, milliSeconds, &success);
             if (FAILED(ec)) {
-                Logger::E(mHost->TAG, "Interrupted while waiting for requests to complete: %d", ec);
+                Logger::E(mHost->TAG, "Interrupted while waiting for requests to complete: %08x", ec);
                 mHost->mDeviceState->SetError(ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
             }
             if (!success) {
@@ -747,8 +751,8 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
 CAR_INTERFACE_IMPL(RequestThreadManager, Object, IRequestThreadManager)
 
-const Boolean RequestThreadManager::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
-const Boolean RequestThreadManager::VERBOSE = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
+const Boolean RequestThreadManager::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean RequestThreadManager::VERBOSE = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
 
 const Int32 RequestThreadManager::MSG_CONFIGURE_OUTPUTS;
 const Int32 RequestThreadManager::MSG_SUBMIT_CAPTURE_REQUEST;
@@ -943,7 +947,7 @@ ECode RequestThreadManager::ConfigureOutputs(
     ECode ec = mCamera->SetPreviewTexture(/*surfaceTexture*/NULL);
     //} catch (IOException e) {
     if (FAILED(ec)) {
-        Logger::W(TAG, "Failed to clear prior SurfaceTexture, may cause GL deadlock: %d", ec);
+        Logger::W(TAG, "Failed to clear prior SurfaceTexture, may cause GL deadlock: %08x", ec);
     }
     //}
 
@@ -981,7 +985,7 @@ ECode RequestThreadManager::ConfigureOutputs(
             Int32 format;
             ECode ec = LegacyCameraDevice::DetectSurfaceType(s, &format);
             if (FAILED(ec)) {
-                Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
+                Logger::W(TAG, "Surface abandoned, skipping...%08x", ec);
                 continue;
             }
             LegacyCameraDevice::SetSurfaceOrientation(s, facing, orientation);
@@ -1014,7 +1018,7 @@ ECode RequestThreadManager::ConfigureOutputs(
     ec = mCamera->GetParameters((IParameters**)&mParams);
     //} catch (RuntimeException e) {
     if (FAILED(ec)) {
-        Logger::E(TAG, "Received device exception: %d", ec);
+        Logger::E(TAG, "Received device exception: %08x", ec);
         mDeviceState->SetError(
             ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE);
         return ec;
@@ -1050,7 +1054,7 @@ ECode RequestThreadManager::ConfigureOutputs(
             outputSizes->Add(TO_IINTERFACE(_size));
             //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
             if (FAILED(ec)) {
-                Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
+                Logger::W(TAG, "Surface abandoned, skipping...%08x", ec);
             }
             //}
         }
@@ -1172,7 +1176,7 @@ void RequestThreadManager::ResetJpegSurfaceFormats(
         ECode ec = LegacyCameraDevice::SetSurfaceFormat(s, ILegacyMetadataMapper::HAL_PIXEL_FORMAT_BLOB);
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
-            Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
+            Logger::W(TAG, "Surface abandoned, skipping...%08x", ec);
         }
         //}
     }
@@ -1210,7 +1214,7 @@ ECode RequestThreadManager::CalculatePictureSize(
         AutoPtr<ISize> jpegSize;
         ECode ec = LegacyCameraDevice::GetSurfaceSize(callbackSurface, (ISize**)&jpegSize);
         if (FAILED(ec)) {
-            Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
+            Logger::W(TAG, "Surface abandoned, skipping...%08x", ec);
         }
         configuredJpegSizes->Add(TO_IINTERFACE(jpegSize));
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {

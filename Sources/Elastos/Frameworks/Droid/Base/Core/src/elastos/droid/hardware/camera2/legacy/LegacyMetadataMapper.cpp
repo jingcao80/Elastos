@@ -80,7 +80,7 @@ const Boolean LegacyMetadataMapper::LIE_ABOUT_AWB_STATE = FALSE;
 const Boolean LegacyMetadataMapper::LIE_ABOUT_AWB = FALSE;
 
 const String LegacyMetadataMapper::TAG("LegacyMetadataMapper");
-const Boolean LegacyMetadataMapper::VERBOSE = TRUE;//Log.isLoggable(TAG, Log.VERBOSE);
+const Boolean LegacyMetadataMapper::VERBOSE = FALSE;//Log.isLoggable(TAG, Log.VERBOSE);
 
 const Int64 LegacyMetadataMapper::NS_PER_MS = 1000000;
 
@@ -1815,16 +1815,14 @@ AutoPtr<ArrayOf<Int32> > LegacyMetadataMapper::GetTagsForKeys(
 
 String LegacyMetadataMapper::ConvertAfModeToLegacy(
     /* [in] */ Int32 mode,
-    /* [in] */ IList* supportedFocusModes)
+    /* [in] */ ArrayOf<String>* supportedFocusModes)
 {
     if (supportedFocusModes == NULL) {
         Logger::W(TAG, "No focus modes supported; API1 bug");
         return String(NULL);
     }
 
-    Boolean result;
-    supportedFocusModes->IsEmpty(&result);
-    if (result) {
+    if (supportedFocusModes->GetLength() == 0) {
         Logger::W(TAG, "No focus modes supported; API1 bug");
         return String(NULL);
     }
@@ -1846,12 +1844,8 @@ String LegacyMetadataMapper::ConvertAfModeToLegacy(
         case ICameraMetadata::CONTROL_AF_MODE_MACRO:
             param = IParameters::FOCUS_MODE_MACRO;
             break;
-        case ICameraMetadata::CONTROL_AF_MODE_OFF:
-        {
-            Boolean result;
-            AutoPtr<ICharSequence> obj = CoreUtils::Convert(IParameters::FOCUS_MODE_FIXED);
-            supportedFocusModes->Contains(obj, &result);
-            if (result) {
+        case ICameraMetadata::CONTROL_AF_MODE_OFF: {
+            if (supportedFocusModes->Contains(IParameters::FOCUS_MODE_FIXED)) {
                 param = IParameters::FOCUS_MODE_FIXED;
             }
             else {
@@ -1860,17 +1854,11 @@ String LegacyMetadataMapper::ConvertAfModeToLegacy(
         }
     }
 
-    AutoPtr<ICharSequence> tmp = CoreUtils::Convert(param);
-    supportedFocusModes->Contains(tmp, &result);
-    if (!result) {
+    if (!!supportedFocusModes->Contains(param)) {
         // Weed out bad user input by setting to the first arbitrary focus mode
-        AutoPtr<IInterface> obj;
-        supportedFocusModes->Get(0, (IInterface**)&obj);
-        AutoPtr<ICharSequence> sque = ICharSequence::Probe(obj);
-        String defaultMode;
-        sque->ToString(&defaultMode);
-        Logger::W(TAG, "convertAfModeToLegacy - ignoring unsupported mode %d,"
-                "defaulting to %s", mode, defaultMode.string());
+        String defaultMode = (*supportedFocusModes)[0];
+        Logger::W(TAG, "convertAfModeToLegacy - ignoring unsupported mode %d defaulting to %s",
+            mode, defaultMode.string());
         param = defaultMode;
     }
 

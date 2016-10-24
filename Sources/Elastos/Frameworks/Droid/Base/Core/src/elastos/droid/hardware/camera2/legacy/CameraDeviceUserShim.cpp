@@ -339,7 +339,7 @@ AutoPtr<IHandler> CameraDeviceUserShim::CameraCallbackThread::GetHandler()
 CAR_INTERFACE_IMPL_2(CameraDeviceUserShim, Object, ICameraDeviceUserShim, IICameraDeviceUser)
 
 const String CameraDeviceUserShim::TAG("CameraDeviceUserShim");
-const Boolean CameraDeviceUserShim::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean CameraDeviceUserShim::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
 const Int32 CameraDeviceUserShim::OPEN_CAMERA_TIMEOUT_MS = 5000; // 5 sec (same as api1 cts timeout)
 
 CameraDeviceUserShim::CameraDeviceUserShim()
@@ -350,7 +350,6 @@ CameraDeviceUserShim::CameraDeviceUserShim()
 
 CameraDeviceUserShim::~CameraDeviceUserShim()
 {
-    Logger::I(TAG, " >> Destroy CameraDeviceUserShim %p", this);
 }
 
 ECode CameraDeviceUserShim::constructor()
@@ -443,14 +442,11 @@ ECode CameraDeviceUserShim::ConnectBinderShim(
      * (e.g. in CTS which run its own default looper only after tests)
      */
 
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<CameraLooper> init = new CameraLooper();
     init->constructor(cameraId);
 
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<CameraCallbackThread> threadCallbacks = new CameraCallbackThread(callbacks);
 
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     // TODO: Make this async instead of blocking
     ECode initErrors;
     init->WaitForOpen(OPEN_CAMERA_TIMEOUT_MS, &initErrors);
@@ -459,21 +455,16 @@ ECode CameraDeviceUserShim::ConnectBinderShim(
         return NOERROR;
     }
 
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<IHardwareCamera> legacyCamera;
     init->GetCamera((IHardwareCamera**)&legacyCamera);
-    Logger::I(TAG, " >> legacyCamera 1: %s", TO_CSTR(legacyCamera));
 
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     // Disable shutter sounds (this will work unconditionally) for api2 clients
     Boolean result;
     legacyCamera->DisableShutterSound(&result);
 
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<IHardwareCameraInfo> info = new HardwareCamera::CameraInfo();
     HardwareCamera::GetCameraInfo(cameraId, info);
 
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     AutoPtr<IParameters> legacyParameters;
     //try {
     ECode ec = legacyCamera->GetParameters((IParameters**)&legacyParameters);
@@ -484,17 +475,12 @@ ECode CameraDeviceUserShim::ConnectBinderShim(
     }
     //}
 
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
-    Logger::I(TAG, " >> legacyCamera 2: %s", TO_CSTR(legacyCamera));
-
     AutoPtr<ICameraCharacteristics> characteristics;
     LegacyMetadataMapper::CreateCharacteristics(
         legacyParameters, info, (ICameraCharacteristics**)&characteristics);
-    Logger::I(TAG, "%s, line %d, %s", __FUNCTION__, __LINE__, TO_CSTR(legacyCamera));
     AutoPtr<ILegacyCameraDevice> device;
     CLegacyCameraDevice::New(cameraId, legacyCamera, characteristics,
         threadCallbacks, (ILegacyCameraDevice**)&device);
-    Logger::I(TAG, "%s, line %d", __FUNCTION__, __LINE__);
     return CCameraDeviceUserShim::New(
         cameraId, device, characteristics, init, threadCallbacks, shim);
 }

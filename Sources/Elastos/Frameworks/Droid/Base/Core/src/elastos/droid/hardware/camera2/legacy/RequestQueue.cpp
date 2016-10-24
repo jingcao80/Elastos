@@ -34,7 +34,6 @@ RequestQueue::RequestQueue()
     , mCurrentRepeatingFrameNumber(INVALID_FRAME)
     , mCurrentRequestId(0)
 {
-    CArrayDeque::New((IArrayDeque**)&mRequestQueue);
 }
 
 ECode RequestQueue::constructor()
@@ -46,6 +45,7 @@ ECode RequestQueue::constructor(
     /* [in] */ IList* jpegSurfaceIds)
 {
     mJpegSurfaceIds = jpegSurfaceIds;
+    CArrayDeque::New((IArrayDeque**)&mRequestQueue);
     return NOERROR;
 }
 
@@ -55,10 +55,10 @@ ECode RequestQueue::GetNext(
     VALIDATE_NOT_NULL(outpair)
     *outpair = NULL;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
-        assert(0);
-        //mRequestQueue->Poll((IInterface**)&obj);
+        IDeque::Probe(mRequestQueue)->Poll((IInterface**)&obj);
         AutoPtr<IBurstHolder> next = IBurstHolder::Probe(obj);
         if (next == NULL && mRepeatingRequest != NULL) {
             next = mRepeatingRequest;

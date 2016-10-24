@@ -387,7 +387,6 @@ ECode CallbackProxies::SessionStateCallbackProxy::constructor(
     const String itfcName("Elastos.Droid.Hardware.Camera2.ICameraCaptureSessionStateCallback");
     AutoPtr<IInterfaceInfo> itfInfo = GetInterfaceInfo(itfcName);
     assert(itfInfo != NULL);
-    Logger::I(TAG, " >> create SessionStateCallbackProxy: %p", itfInfo.Get());
     if (itfInfo == NULL) {
         return E_INVALID_ARGUMENT;
     }

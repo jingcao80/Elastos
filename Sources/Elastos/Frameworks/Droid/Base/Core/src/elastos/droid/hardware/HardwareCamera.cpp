@@ -1148,13 +1148,15 @@ void HardwareCamera::Parameters::Set(
 {
     if (areas == NULL) {
         Set(key, String("(0,0,0,0,0)"));
-    } else {
+    }
+    else {
+        Int32 height;
         AutoPtr<StringBuilder> buffer = new StringBuilder();
         for (Int32 i = 0; i < areas->GetLength(); i++) {
-            AutoPtr<ICameraArea> _area = (*areas)[i];
-            Area* area = (Area*)_area.Get();
-
-            CRect* rect = (CRect*)area->mRect.Get();
+            AutoPtr<IRect> r;
+            (*areas)[i]->GetRect((IRect**)&r);
+            (*areas)[i]->GetWeight(&height);
+            CRect* rect = (CRect*)r.Get();
             buffer->AppendChar('(');
             buffer->Append(rect->mLeft);
             buffer->AppendChar(',');
@@ -1164,7 +1166,7 @@ void HardwareCamera::Parameters::Set(
             buffer->AppendChar(',');
             buffer->Append(rect->mBottom);
             buffer->AppendChar(',');
-            buffer->Append(area->mWeight);
+            buffer->Append(height);
             buffer->AppendChar(')');
             if (i != areas->GetLength() - 1) buffer->AppendChar(',');
         }

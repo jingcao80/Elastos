@@ -247,7 +247,6 @@ ECode StreamConfigurationMap::IsOutputSupportedFor(
     *value = FALSE;
 
     FAIL_RETURN(Preconditions::CheckNotNull(surface, String("surface must not be null")))
-    //throw new UnsupportedOperationException("Not implemented yet");
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 
     // TODO: JNI function that checks the Surface's IGraphicBufferProducer state
@@ -330,11 +329,7 @@ ECode StreamConfigurationMap::GetHighSpeedVideoFpsRangesFor(
     Int32 fpsRangeCount;
     HashMap<AutoPtr<ISize>, Int32>::Iterator it = mHighSpeedVideoSizeMap.Find(size);
     if (it == mHighSpeedVideoSizeMap.End() || it->mSecond == 0) {
-        // throw new IllegalArgumentException(String.format(
-        //         "Size %s does not support high speed video recording", size));
-        String str;
-        IObject::Probe(size)->ToString(&str);
-        Logger::E(TAG, "Size %s does not support high speed video recording", str.string());
+        Logger::E(TAG, "Size %s does not support high speed video recording", TO_CSTR(size));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else {

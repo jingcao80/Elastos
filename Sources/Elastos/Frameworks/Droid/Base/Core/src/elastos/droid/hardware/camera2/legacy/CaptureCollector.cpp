@@ -14,6 +14,7 @@ using Elastos::Core::EIID_IComparable;
 using Elastos::Utility::CTreeSet;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CArrayDeque;
+using Elastos::Utility::IDeque;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Concurrent::Locks::CReentrantLock;
 using Elastos::Utility::Concurrent::Locks::ILock;
@@ -83,8 +84,7 @@ void CaptureCollector::CaptureHolder::TryComplete()
                 if (mFailedPreview) {
                     Int32 id;
                     mRequest->GetRequestId(&id);
-                    Logger::W(TAG, "Preview buffers dropped for request: %d",
-                            id);
+                    Logger::W(TAG, "Preview buffers dropped for request: %d", id);
                     Int32 num;
                     mRequest->NumPreviewTargets(&num);
                     for (Int32 i = 0; i < num; i++) {
@@ -96,8 +96,7 @@ void CaptureCollector::CaptureHolder::TryComplete()
                 if (mFailedJpeg) {
                     Int32 id;
                     mRequest->GetRequestId(&id);
-                    Logger::W(TAG, "Jpeg buffers dropped for request: %d",
-                            id);
+                    Logger::W(TAG, "Jpeg buffers dropped for request: %d", id);
                     Int32 num;
                     mRequest->NumJpegTargets(&num);
                     for (Int32 i = 0; i < num; i++) {
@@ -123,14 +122,10 @@ ECode CaptureCollector::CaptureHolder::SetJpegTimestamp(
         Logger::D(TAG, "setJpegTimestamp - called for request %d", id);
     }
     if (!mNeedsJpeg) {
-        // throw new IllegalStateException(
-        //         "setJpegTimestamp called for capture with no jpeg targets.");
         Logger::E(TAG, "setJpegTimestamp called for capture with no jpeg targets.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (IsCompleted()) {
-        // throw new IllegalStateException(
-        //         "setJpegTimestamp called on already completed request.");
         Logger::E(TAG, "setJpegTimestamp called on already completed request.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -160,14 +155,10 @@ ECode CaptureCollector::CaptureHolder::SetJpegProduced()
         Logger::D(TAG, "setJpegProduced - called for request %d", id);
     }
     if (!mNeedsJpeg) {
-        // throw new IllegalStateException(
-        //         "setJpegProduced called for capture with no jpeg targets.");
         Logger::E(TAG, "setJpegProduced called for capture with no jpeg targets.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (IsCompleted()) {
-        // throw new IllegalStateException(
-        //         "setJpegProduced called on already completed request.");
         Logger::E(TAG, "setJpegProduced called on already completed request.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -204,14 +195,10 @@ ECode CaptureCollector::CaptureHolder::SetPreviewTimestamp(
         Logger::D(TAG, "setPreviewTimestamp - called for request %d", id);
     }
     if (!mNeedsPreview) {
-        // throw new IllegalStateException(
-        //         "setPreviewTimestamp called for capture with no preview targets.");
         Logger::E(TAG, "setPreviewTimestamp called for capture with no preview targets.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (IsCompleted()) {
-        // throw new IllegalStateException(
-        //         "setPreviewTimestamp called on already completed request.");
         Logger::E(TAG, "setPreviewTimestamp called on already completed request.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -243,14 +230,10 @@ ECode CaptureCollector::CaptureHolder::SetPreviewProduced()
         Logger::D(TAG, "setPreviewProduced - called for request %d", id);
     }
     if (!mNeedsPreview) {
-        // throw new IllegalStateException(
-        //         "setPreviewProduced called for capture with no preview targets.");
         Logger::E(TAG, "setPreviewProduced called for capture with no preview targets.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (IsCompleted()) {
-        // throw new IllegalStateException(
-        //         "setPreviewProduced called on already completed request.");
         Logger::E(TAG, "setPreviewProduced called on already completed request.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -288,8 +271,7 @@ CARAPI CaptureCollector::CaptureHolder::CompareTo(
     Int64 number;
     mRequest->GetFrameNumber(&number);
 
-    AutoPtr<ICaptureCollectorCaptureHolder> collector =
-            ICaptureCollectorCaptureHolder::Probe(another);
+    AutoPtr<ICaptureCollectorCaptureHolder> collector = ICaptureCollectorCaptureHolder::Probe(another);
     Int64 anotherNumber;
     ((CaptureCollector::CaptureHolder*)collector.Get())->mRequest->GetFrameNumber(&anotherNumber);
 
@@ -346,8 +328,6 @@ CaptureCollector::CaptureCollector()
     , mInFlightPreviews(0)
     , mMaxInFlight(0)
 {
-    CArrayList::New((IArrayList**)&mCompletedRequests);
-    CReentrantLock::New((IReentrantLock**)&mLock);
 }
 
 ECode CaptureCollector::constructor()
@@ -360,14 +340,18 @@ ECode CaptureCollector::constructor(
     /* [in] */ ICameraDeviceState* deviceState)
 {
     mMaxInFlight = maxInFlight;
+
+    CArrayList::New((IArrayList**)&mCompletedRequests);
+    CReentrantLock::New((ILock**)&mLock);
+
     CArrayDeque::New(MAX_JPEGS_IN_FLIGHT, (IArrayDeque**)&mJpegCaptureQueue);
     CArrayDeque::New(MAX_JPEGS_IN_FLIGHT, (IArrayDeque**)&mJpegProduceQueue);
     CArrayDeque::New(mMaxInFlight, (IArrayDeque**)&mPreviewCaptureQueue);
     CArrayDeque::New(mMaxInFlight, (IArrayDeque**)&mPreviewProduceQueue);
     CTreeSet::New((ITreeSet**)&mActiveRequests);
-    ILock::Probe(mLock)->NewCondition((ICondition**)&mIsEmpty);
-    ILock::Probe(mLock)->NewCondition((ICondition**)&mNotFull);
-    ILock::Probe(mLock)->NewCondition((ICondition**)&mPreviewsEmpty);
+    mLock->NewCondition((ICondition**)&mIsEmpty);
+    mLock->NewCondition((ICondition**)&mNotFull);
+    mLock->NewCondition((ICondition**)&mPreviewsEmpty);
     mDeviceState = deviceState;
     return NOERROR;
 }
@@ -385,8 +369,8 @@ ECode CaptureCollector::QueueRequest(
     AutoPtr<CaptureHolder> h = new CaptureHolder(holder, legacy, this);
     Int64 nanos;
     unit->ToNanos(timeout, &nanos);
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     if (DEBUG) {
         Int32 id;
@@ -395,9 +379,8 @@ ECode CaptureCollector::QueueRequest(
     }
 
     if (!(h->mNeedsJpeg || h->mNeedsPreview)) {
-        //throw new IllegalStateException("Request must target at least one output surface!");
         Logger::E(TAG, "Request must target at least one output surface!");
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -406,13 +389,13 @@ ECode CaptureCollector::QueueRequest(
         // Wait for all current requests to finish before queueing jpeg.
         while (mInFlight > 0) {
             if (nanos <= 0) {
-                ILock::Probe(lock)->UnLock();
+                lock->UnLock();
                 *value = FALSE;
                 return NOERROR;
             }
             ec = mIsEmpty->AwaitNanos(nanos, &nanos);
             if (FAILED(ec)) {
-                ILock::Probe(lock)->UnLock();
+                lock->UnLock();
                 return NOERROR;
             }
         }
@@ -422,13 +405,13 @@ ECode CaptureCollector::QueueRequest(
     if (h->mNeedsPreview) {
         while (mInFlight >= mMaxInFlight) {
             if (nanos <= 0) {
-                ILock::Probe(lock)->UnLock();
+                lock->UnLock();
                 *value = FALSE;
                 return NOERROR;
             }
             ec = mNotFull->AwaitNanos(nanos, &nanos);
             if (FAILED(ec)) {
-                ILock::Probe(lock)->UnLock();
+                lock->UnLock();
                 return NOERROR;
             }
         }
@@ -441,7 +424,7 @@ ECode CaptureCollector::QueueRequest(
     mInFlight++;
     *value = TRUE;
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
@@ -456,24 +439,24 @@ ECode CaptureCollector::WaitForEmpty(
 
     Int64 nanos;
     unit->ToNanos(timeout, &nanos);
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     while (mInFlight > 0) {
         if (nanos <= 0) {
             *value = FALSE;
-            ILock::Probe(lock)->UnLock();
+            lock->UnLock();
             return NOERROR;
         }
         ECode ec = mIsEmpty->AwaitNanos(nanos, &nanos);
         if (FAILED(ec)) {
-            ILock::Probe(lock)->UnLock();
+            lock->UnLock();
             return NOERROR;
         }
     }
     *value = TRUE;
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
@@ -488,24 +471,24 @@ ECode CaptureCollector::WaitForPreviewsEmpty(
 
     Int64 nanos;
     unit->ToNanos(timeout, &nanos);
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     while (mInFlightPreviews > 0) {
         if (nanos <= 0) {
             *value = FALSE;
-            ILock::Probe(lock)->UnLock();
+            lock->UnLock();
             return NOERROR;
         }
         ECode ec = mPreviewsEmpty->AwaitNanos(nanos, &nanos);
         if (FAILED(ec)) {
-            ILock::Probe(lock)->UnLock();
+            lock->UnLock();
             return NOERROR;
         }
     }
     *value = TRUE;
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
@@ -522,24 +505,24 @@ ECode CaptureCollector::WaitForRequestCompleted(
 
     Int64 nanos;
     unit->ToNanos(timeout, &nanos);
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     while (!RemoveRequestIfCompleted(holder, /*out*/timestamp)) {
         if (nanos <= 0) {
             *value = FALSE;
-            ILock::Probe(lock)->UnLock();
+            lock->UnLock();
             return NOERROR;
         }
         ECode ec = mNotFull->AwaitNanos(nanos, &nanos);
         if (FAILED(ec)) {
-            ILock::Probe(lock)->UnLock();
+            lock->UnLock();
             return NOERROR;
         }
     }
     *value = TRUE;
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
@@ -574,28 +557,27 @@ ECode CaptureCollector::JpegCaptured(
     VALIDATE_NOT_NULL(outrh);
     *outrh = NULL;
 
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     AutoPtr<IInterface> obj;
-    assert(0 && "IArrayDeque::Poll");
-    //mJpegCaptureQueue->Poll((IInterface**)&obj);
+    IDeque::Probe(mJpegCaptureQueue)->Poll((IInterface**)&obj);
     AutoPtr<CaptureHolder> h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     if (h == NULL) {
         Logger::W(TAG, "jpegCaptured called with no jpeg request on queue!");
         *outrh = NULL;
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     ECode ec = h->SetJpegTimestamp(timestamp);
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     *outrh = h->mRequest;
     REFCOUNT_ADD(*outrh);
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
@@ -606,22 +588,21 @@ ECode CaptureCollector::JpegProduced(
     VALIDATE_NOT_NULL(outpair);
     *outpair = NULL;
 
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     AutoPtr<IInterface> obj;
-    assert(0 && "IArrayDeque::Poll");
-    //mJpegProduceQueue->Poll((IInterface**)&obj);
+    IDeque::Probe(mJpegProduceQueue)->Poll((IInterface**)&obj);
     AutoPtr<CaptureHolder> h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     if (h == NULL) {
         Logger::W(TAG, "jpegProduced called with no jpeg request on queue!");
         *outpair = NULL;
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     ECode ec = h->SetJpegProduced();
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     AutoPtr<IPair> tmp;
@@ -630,7 +611,7 @@ ECode CaptureCollector::JpegProduced(
     *outpair = tmp;
     REFCOUNT_ADD(*outpair);
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}226.75
     return NOERROR;
 }
@@ -641,18 +622,18 @@ ECode CaptureCollector::HasPendingPreviewCaptures(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     Boolean result;
     ECode ec = mPreviewCaptureQueue->IsEmpty(&result);
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     *value = !result;
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
@@ -664,24 +645,23 @@ ECode CaptureCollector::PreviewCaptured(
     VALIDATE_NOT_NULL(outpair);
     *outpair = NULL;
 
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     AutoPtr<IInterface> obj;
-    assert(0 && "IArrayDeque::Poll");
-    //mPreviewCaptureQueue->Poll((IInterface**)&obj);
+    IDeque::Probe(mPreviewCaptureQueue)->Poll((IInterface**)&obj);
     AutoPtr<CaptureHolder> h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     if (h == NULL) {
         if (DEBUG) {
             Logger::D(TAG, "previewCaptured called with no preview request on queue!");
         }
         *outpair = NULL;
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     ECode ec = h->SetPreviewTimestamp(timestamp);
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     AutoPtr<IPair> tmp;
@@ -690,7 +670,7 @@ ECode CaptureCollector::PreviewCaptured(
     *outpair = tmp;
     REFCOUNT_ADD(*outpair);
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
@@ -701,52 +681,48 @@ ECode CaptureCollector::PreviewProduced(
     VALIDATE_NOT_NULL(outrh);
     *outrh = NULL;
 
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     AutoPtr<IInterface> obj;
-    assert(0 && "IArrayDeque::Poll");
-    //mPreviewProduceQueue->Poll((IInterface**)&obj);
+    IDeque::Probe(mPreviewProduceQueue)->Poll((IInterface**)&obj);
     AutoPtr<CaptureHolder> h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     if (h == NULL) {
         Logger::W(TAG, "previewProduced called with no preview request on queue!");
         *outrh = NULL;
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     ECode ec = h->SetPreviewProduced();
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     *outrh = h->mRequest;
     REFCOUNT_ADD(*outrh);
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
 
 ECode CaptureCollector::FailNextPreview()
 {
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
     //try {
     AutoPtr<IInterface> obj;
-    ECode ec = NOERROR;
-    assert(0 && "IArrayDeque::Peek");
-    //ec = mPreviewCaptureQueue->Peek((IInterface**)&obj);
+    ECode ec = IDeque::Probe(mPreviewCaptureQueue)->Peek((IInterface**)&obj);
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     AutoPtr<CaptureHolder> h1 = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
 
     AutoPtr<IInterface> obj2;
-    assert(0 && "IArrayDeque::Peek");
-    //ec = mPreviewProduceQueue->Peek((IInterface**)&obj2);
+    ec = IDeque::Probe(mPreviewProduceQueue)->Peek((IInterface**)&obj2);
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     AutoPtr<CaptureHolder> h2 = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj2);
@@ -765,31 +741,28 @@ ECode CaptureCollector::FailNextPreview()
         h->SetPreviewFailed();
     }
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
 
 ECode CaptureCollector::FailNextJpeg()
 {
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
 
     //try {
     AutoPtr<IInterface> obj;
-    ECode ec = NOERROR;
-    assert(0 && "IArrayDeque::Peek");
-    //ec = mJpegCaptureQueue->Peek((IInterface**)&obj);
+    ECode ec = IDeque::Probe(mJpegCaptureQueue)->Peek((IInterface**)&obj);
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     AutoPtr<CaptureHolder> h1 = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
     AutoPtr<IInterface> obj2;
-    assert(0 && "IArrayDeque::Peek");
-    //ec = mJpegProduceQueue->Peek((IInterface**)&obj2);
+    ec = IDeque::Probe(mJpegProduceQueue)->Peek((IInterface**)&obj2);
     if (FAILED(ec)) {
-        ILock::Probe(lock)->UnLock();
+        lock->UnLock();
         return NOERROR;
     }
     AutoPtr<CaptureHolder> h2 = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj2);
@@ -808,15 +781,15 @@ ECode CaptureCollector::FailNextJpeg()
         h->SetJpegFailed();
     }
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
 
 ECode CaptureCollector::FailAll()
 {
-    AutoPtr<IReentrantLock> lock = mLock;
-    ILock::Probe(lock)->Lock();
+    AutoPtr<ILock> lock = mLock;
+    lock->Lock();
 
     //try {
     AutoPtr<CaptureHolder> h;
@@ -824,7 +797,7 @@ ECode CaptureCollector::FailAll()
         AutoPtr<IInterface> obj;
         ECode ec = mActiveRequests->PollFirst((IInterface**)&obj);
         if (FAILED(ec)) {
-            ILock::Probe(lock)->UnLock();
+            lock->UnLock();
             return NOERROR;
         }
         h = (CaptureHolder*)ICaptureCollectorCaptureHolder::Probe(obj);
@@ -840,7 +813,7 @@ ECode CaptureCollector::FailAll()
     mJpegCaptureQueue->Clear();
     mJpegProduceQueue->Clear();
     //} finally {
-    ILock::Probe(lock)->UnLock();
+    lock->UnLock();
     //}
     return NOERROR;
 }
